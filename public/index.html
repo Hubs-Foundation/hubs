@@ -3,7 +3,6 @@
 <head>
   <title>A-Frame Social VR Demo</title>
   <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
-  <script src="https://rawgit.com/fernandojsg/aframe-teleport-controls/master/dist/aframe-teleport-controls.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
   <script src="easyrtc/easyrtc.js"></script>
   <script src="./app.bundle.js"></script>
@@ -32,8 +31,8 @@
     <a-entity id="player" networked="template:#player-template;showLocalTemplate:false;" wasd-controls>
       <a-entity camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
 
-      <a-entity hand-controls="left" networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
-      <a-entity hand-controls="right" networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
+      <a-entity hand-controls="left" teleport-controls="cameraRig: #player" networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
+      <a-entity hand-controls="right" teleport-controls="cameraRig: #player" networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
     </a-entity>
 
     <a-entity id="ground" position="0 0 0"
