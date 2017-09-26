@@ -1,0 +1,28 @@
+{
+  "name": "social-vr-demo",
+  "version": "0.0.1",
+  "main": "src/index.js",
+  "license": "MPL-2.0",
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node ./server/index.js",
+    "dev": "cross-env NGROK=true node ./server/index.js",
+    "build": "webpack"
+  },
+  "dependencies": {
+    "easyrtc": "^1.1.0",
+    "express": "^4.15.5",
+    "networked-aframe": "https://github.com/netpro2k/networked-aframe",
+    "socket.io": "^2.0.3"
+  },
+  "devDependencies": {
+    "cross-env": "^5.0.5",
+    "eslint-config-prettier": "^2.6.0",
+    "eslint-plugin-prettier": "^2.3.1",
+    "ngrok": "^2.2.22",
+    "prettier": "^1.7.0",
+    "qrcode-terminal": "^0.11.0",
+    "webpack": "^3.6.0",
+    "webpack-dev-middleware": "^1.12.0",
+    "webpack-hot-middleware": "^2.19.1"
+  }
+}
