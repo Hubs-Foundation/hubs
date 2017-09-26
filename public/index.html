@@ -3,6 +3,7 @@
 <head>
   <title>A-Frame Social VR Demo</title>
   <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
+  <script src="https://rawgit.com/fernandojsg/aframe-teleport-controls/master/dist/aframe-teleport-controls.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
   <script src="easyrtc/easyrtc.js"></script>
   <script src="./app.bundle.js"></script>
@@ -11,12 +12,27 @@
 <body>
   <a-scene networked-scene="webrtc: true; webrtcAudio: true;">
     <a-assets>
-      <script id="avatar-template" type="text/html">
+      <!-- Templates -->
+      <script id="player-template" type="text/html">
+        <a-entity></a-entity>
+      </script>
+
+      <script id="head-template" type="text/html">
         <a-sphere color="#EF2D5E" position="0 1 0"></a-sphere>
       </script>
+
+      <script id="hand-template" type="text/html">
+        <a-box scale="0.1 0.1 0.1"></a-box>
+      </script>
     </a-assets>
-    <a-entity id="player" position="0 1 0" networked="template:#avatar-template;showLocalTemplate:false;" camera wasd-controls
-      look-controls></a-entity>
+
+    <a-entity id="player" networked="template:#player-template;showLocalTemplate:false;" wasd-controls>
+      <a-entity camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
+
+      <a-entity hand-controls="left" networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
+      <a-entity hand-controls="right" networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
+    </a-entity>
+
     <a-plane src="#ground" color="#7BC8A4" height="100" width="100" rotation="-90 0 0"></a-plane>
     <a-sky color="#ECECEC"></a-sky>
   </a-scene>
