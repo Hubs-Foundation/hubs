@@ -12,6 +12,9 @@
 <body>
   <a-scene networked-scene="webrtc: true; webrtcAudio: true;">
     <a-assets>
+      <img id="grid" src="https://img.gs/bbdkhfbzkk/stretch/https://i.imgur.com/25P1geh.png" crossorigin="anonymous">
+      <img id="sky" src="http://i.imgur.com/WqlqEkq.jpg" crossorigin="anonymous" />
+
       <!-- Templates -->
       <script id="player-template" type="text/html">
         <a-entity></a-entity>
@@ -33,8 +36,10 @@
       <a-entity hand-controls="right" networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
     </a-entity>
 
-    <a-plane src="#ground" color="#7BC8A4" height="100" width="100" rotation="-90 0 0"></a-plane>
-    <a-sky color="#ECECEC"></a-sky>
+    <a-entity id="ground" position="0 0 0"
+        geometry="primitive: plane; width: 10000; height: 10000;" rotation="-90 0 0"
+        material="src: #grid; repeat: 10000 10000; transparent: true; metalness:0.6; roughness: 0.4; sphericalEnvMap: #sky;"></a-entity>
+    <a-sky src="#sky" rotation="0 -90 0"></a-sky>
   </a-scene>
 </body>
 
