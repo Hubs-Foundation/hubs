@@ -1,3 +1,2 @@
 require("networked-aframe");
-
-console.log("test2");
+require("./components/rig-selector");
