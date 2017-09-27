@@ -9,9 +9,10 @@
     "build": "webpack"
   },
   "dependencies": {
+    "aframe-teleport-controls": "^0.3.0",
     "easyrtc": "^1.1.0",
     "express": "^4.15.5",
-    "networked-aframe": "https://github.com/netpro2k/networked-aframe",
+    "networked-aframe": "https://github.com/netpro2k/networked-aframe#02cc9b7a154f861e3ff96272823de4a8133bc2e4",
     "socket.io": "^2.0.3"
   },
   "devDependencies": {

@@ -3,15 +3,17 @@
 <head>
   <title>A-Frame Social VR Demo</title>
   <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
-  <script src="https://rawgit.com/fernandojsg/aframe-teleport-controls/master/dist/aframe-teleport-controls.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
   <script src="easyrtc/easyrtc.js"></script>
   <script src="./app.bundle.js"></script>
 </head>
 
 <body>
-  <a-scene networked-scene="webrtc: true; webrtcAudio: true;">
+  <a-scene networked-scene="adapter: webrtc; audio: true;">
     <a-assets>
+      <img id="grid" src="https://img.gs/bbdkhfbzkk/stretch/https://i.imgur.com/25P1geh.png" crossorigin="anonymous">
+      <img id="sky" src="http://i.imgur.com/WqlqEkq.jpg" crossorigin="anonymous" />
+
       <!-- Templates -->
       <script id="player-template" type="text/html">
         <a-entity></a-entity>
@@ -68,8 +70,10 @@
 
     <a-entity rig-selector="vive:#vive-rig;oculus:oculus-rig;daydream:#daydream-rig;desktop:#dolly-rig;mobile:dolly-rig;"></a-entity>
 
-    <a-plane src="#ground" color="#7BC8A4" height="100" width="100" rotation="-90 0 0"></a-plane>
-    <a-sky color="#ECECEC"></a-sky>
+    <a-entity id="ground" position="0 0 0"
+        geometry="primitive: plane; width: 10000; height: 10000;" rotation="-90 0 0"
+        material="src: #grid; repeat: 10000 10000; transparent: true; metalness:0.6; roughness: 0.4; sphericalEnvMap: #sky;"></a-entity>
+    <a-sky src="#sky" rotation="0 -90 0"></a-sky>
   </a-scene>
 </body>
 

@@ -44,6 +44,10 @@ aframe-lerp-component@^1.1.0:
   dependencies:
     almost-equal "^1.1.0"
 
+aframe-teleport-controls@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/aframe-teleport-controls/-/aframe-teleport-controls-0.3.0.tgz#7c854941757703f06a5100e47abccfeeb427d7fc"
+
 aframe-template-component@3.2.1:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/aframe-template-component/-/aframe-template-component-3.2.1.tgz#37a7daaf0e4447ec2868e2fdd3b91cb78533d25f"
@@ -721,8 +725,8 @@ engine.io-client@~1.8.4:
     yeast "0.1.2"
 
 engine.io-client@~3.1.0:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/engine.io-client/-/engine.io-client-3.1.1.tgz#415a9852badb14fa008fa3ef1e31608db6761325"
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/engine.io-client/-/engine.io-client-3.1.2.tgz#62a0ef08ec83d16a06668ccc3a4f37916768a6b9"
   dependencies:
     component-emitter "1.2.1"
     component-inherit "0.0.3"
@@ -730,7 +734,6 @@ engine.io-client@~3.1.0:
     engine.io-parser "~2.1.1"
     has-cors "1.1.0"
     indexof "0.0.1"
-    parsejson "0.0.3"
     parseqs "0.0.5"
     parseuri "0.0.5"
     ws "~2.3.1"
@@ -770,8 +773,8 @@ engine.io@~1.8.4:
     ws "1.1.4"
 
 engine.io@~3.1.0:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/engine.io/-/engine.io-3.1.1.tgz#08051ffb951907a3267e72e0bcb3d0f377e4660b"
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/engine.io/-/engine.io-3.1.2.tgz#00a3f6a4054bb1a07958074b1058764deedb7d8a"
   dependencies:
     accepts "1.3.3"
     base64id "1.0.0"
@@ -1038,6 +1041,12 @@ find-up@^2.0.0:
   resolved "https://registry.yarnpkg.com/find-up/-/find-up-2.1.0.tgz#45d1b7e506c717ddd482775a2b77920a3c0c57a7"
   dependencies:
     locate-path "^2.0.0"
+
+firebase-key-encode@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/firebase-key-encode/-/firebase-key-encode-0.1.5.tgz#17bdd39922603c315771bf8b6be02f77a0167211"
+  dependencies:
+    lodash "~4.16.2"
 
 for-in@^1.0.1:
   version "1.0.2"
@@ -1453,8 +1462,8 @@ isstream@~0.1.2:
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
 
 jest-docblock@^21.0.0:
-  version "21.1.0"
-  resolved "https://registry.yarnpkg.com/jest-docblock/-/jest-docblock-21.1.0.tgz#43154be2441fb91403e36bb35cb791a5017cea81"
+  version "21.2.0"
+  resolved "https://registry.yarnpkg.com/jest-docblock/-/jest-docblock-21.2.0.tgz#51529c3b30d5fd159da60c27ceedc195faf8d414"
 
 jsbn@~0.1.0:
   version "0.1.1"
@@ -1561,6 +1570,10 @@ lodash@^4.14.0:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 
+lodash@~4.16.2:
+  version "4.16.6"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.16.6.tgz#d22c9ac660288f3843e16ba7d2b5d06cca27d777"
+
 longest@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/longest/-/longest-1.0.1.tgz#30a0b2da38f73770e8294a0d22e6625ed77d0097"
@@ -1623,8 +1636,8 @@ micromatch@^2.1.5:
     regex-cache "^0.4.2"
 
 miller-rabin@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/miller-rabin/-/miller-rabin-4.0.0.tgz#4a62fb1d42933c05583982f4c716f6fb9e6c6d3d"
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/miller-rabin/-/miller-rabin-4.0.1.tgz#f080351c865b0dc562a8462966daa53543c78a4d"
   dependencies:
     bn.js "^4.0.0"
     brorand "^1.0.1"
@@ -1703,17 +1716,19 @@ negotiator@0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"
 
-"networked-aframe@https://github.com/netpro2k/networked-aframe":
-  version "0.2.3"
-  resolved "https://github.com/netpro2k/networked-aframe#1eca79355cd695b87b5c5ff62eb53343b50cc118"
+"networked-aframe@https://github.com/netpro2k/networked-aframe#02cc9b7a154f861e3ff96272823de4a8133bc2e4":
+  version "0.3.0"
+  resolved "https://github.com/netpro2k/networked-aframe#02cc9b7a154f861e3ff96272823de4a8133bc2e4"
   dependencies:
     aframe-lerp-component "^1.1.0"
     aframe-template-component "3.2.1"
     easyrtc "1.1.0"
     express "^4.10.7"
+    firebase-key-encode "^0.1.5"
     serve-static "^1.8.0"
     socket.io "^1.4.5"
     socket.io-client "^1.4.5"
+    uws "^8.14.0"
 
 ngrok@^2.2.22:
   version "2.2.22"
@@ -2006,8 +2021,8 @@ preserve@^0.2.0:
   resolved "https://registry.yarnpkg.com/preserve/-/preserve-0.2.0.tgz#815ed1f6ebc65926f865b310c0713bcb3315ce4b"
 
 prettier@^1.7.0:
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.7.0.tgz#47481588f41f7c90f63938feb202ac82554e7150"
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.7.1.tgz#f674c52978e14ae7dffd7828e88cce07501d95dc"
 
 process-nextick-args@~1.0.6:
   version "1.0.7"
@@ -2195,8 +2210,8 @@ request@2.81.0:
     uuid "^3.0.0"
 
 request@^2.55.0:
-  version "2.82.0"
-  resolved "https://registry.yarnpkg.com/request/-/request-2.82.0.tgz#2ba8a92cd7ac45660ea2b10a53ae67cd247516ea"
+  version "2.83.0"
+  resolved "https://registry.yarnpkg.com/request/-/request-2.83.0.tgz#ca0b65da02ed62935887808e6f510381034e3356"
   dependencies:
     aws-sign2 "~0.7.0"
     aws4 "^1.6.0"
@@ -2217,7 +2232,7 @@ request@^2.55.0:
     qs "~6.5.1"
     safe-buffer "^5.1.1"
     stringstream "~0.0.5"
-    tough-cookie "~2.3.2"
+    tough-cookie "~2.3.3"
     tunnel-agent "^0.6.0"
     uuid "^3.1.0"
 
@@ -2587,7 +2602,7 @@ touch@0.0.3:
   dependencies:
     nopt "~1.0.10"
 
-tough-cookie@~2.3.0, tough-cookie@~2.3.2:
+tough-cookie@~2.3.0, tough-cookie@~2.3.3:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-2.3.3.tgz#0b618a5565b6dea90bf3425d04d55edc475a7561"
   dependencies:
@@ -2683,6 +2698,10 @@ utils-merge@1.0.0:
 uuid@^3.0.0, uuid@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.1.0.tgz#3dd3d3e790abc24d7b0d3a034ffababe28ebbc04"
+
+uws@^8.14.0:
+  version "8.14.1"
+  resolved "https://registry.yarnpkg.com/uws/-/uws-8.14.1.tgz#de09619f305f6174d5516a9c6942cb120904b20b"
 
 uws@~0.14.4:
   version "0.14.5"
