@@ -11,8 +11,10 @@
 <body>
   <a-scene networked-scene="adapter: easyrtc; audio: true; debug: true;">
     <a-assets>
-      <img id="grid" src="https://img.gs/bbdkhfbzkk/stretch/https://i.imgur.com/25P1geh.png" crossorigin="anonymous">
-      <img id="sky" src="http://i.imgur.com/WqlqEkq.jpg" crossorigin="anonymous" />
+      <img id="grid" src="assets/grid.png" crossorigin="anonymous">
+      <img id="sky" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg" crossorigin="anonymous" />
+
+      <a-asset-item id="dodec-avatar-head" src="assets/avatars/dodec/DodecAvatarGLTF/DodecAvatar_Head.gltf"></a-asset-item>
 
       <!-- Templates -->
       <script id="player-template" type="text/html">
@@ -20,7 +22,7 @@
       </script>
 
       <script id="head-template" type="text/html">
-        <a-sphere color="#EF2D5E" position="0 1 0" networked-audio-source></a-sphere>
+        <a-entity gltf-model="#dodec-avatar-head" position="0 0 0" networked-audio-source></a-sphere>
       </script>
 
       <script id="hand-template" type="text/html">
@@ -72,7 +74,7 @@
 
     <a-entity id="ground" position="0 0 0"
         geometry="primitive: plane; width: 10000; height: 10000;" rotation="-90 0 0"
-        material="src: #grid; repeat: 10000 10000; transparent: true; metalness:0.6; roughness: 0.4; sphericalEnvMap: #sky;"></a-entity>
+        material="shader: flat; src: #grid; repeat: 10000 10000;"></a-entity>
     <a-sky src="#sky" rotation="0 -90 0"></a-sky>
   </a-scene>
 </body>
