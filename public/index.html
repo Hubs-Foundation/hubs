@@ -9,7 +9,7 @@
 </head>
 
 <body>
-  <a-scene networked-scene="adapter: webrtc; audio: true;">
+  <a-scene networked-scene="adapter: easyrtc; audio: true; debug: true;">
     <a-assets>
       <img id="grid" src="https://img.gs/bbdkhfbzkk/stretch/https://i.imgur.com/25P1geh.png" crossorigin="anonymous">
       <img id="sky" src="http://i.imgur.com/WqlqEkq.jpg" crossorigin="anonymous" />
@@ -20,7 +20,7 @@
       </script>
 
       <script id="head-template" type="text/html">
-        <a-sphere color="#EF2D5E" position="0 1 0"></a-sphere>
+        <a-sphere color="#EF2D5E" position="0 1 0" networked-audio-source></a-sphere>
       </script>
 
       <script id="hand-template" type="text/html">

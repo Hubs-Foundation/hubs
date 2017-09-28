@@ -1716,9 +1716,9 @@ negotiator@0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"
 
-"networked-aframe@https://github.com/netpro2k/networked-aframe#02cc9b7a154f861e3ff96272823de4a8133bc2e4":
+"networked-aframe@https://github.com/netpro2k/networked-aframe#feature/positional-audio":
   version "0.3.0"
-  resolved "https://github.com/netpro2k/networked-aframe#02cc9b7a154f861e3ff96272823de4a8133bc2e4"
+  resolved "https://github.com/netpro2k/networked-aframe#48d4855b8b5043aaea3d67dfcb4ef8b79bfb82cd"
   dependencies:
     aframe-lerp-component "^1.1.0"
     aframe-template-component "3.2.1"
