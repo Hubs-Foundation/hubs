@@ -9,7 +9,7 @@
 </head>
 
 <body>
-  <a-scene networked-scene="adapter: easyrtc; audio: true; debug: true;">
+  <a-scene networked-scene="adapter: easyrtc; audio: false; debug: true;">
     <a-assets>
       <img id="grid" src="assets/grid.png" crossorigin="anonymous">
       <img id="sky" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg" crossorigin="anonymous" />
@@ -17,55 +17,51 @@
       <a-asset-item id="dodec-avatar-head" src="assets/avatars/dodec/DodecAvatarGLTF/DodecAvatar_Head.gltf"></a-asset-item>
 
       <!-- Templates -->
-      <script id="player-template" type="text/html">
-        <a-entity></a-entity>
-      </script>
-
       <script id="head-template" type="text/html">
-        <a-entity gltf-model="#dodec-avatar-head" position="0 0 0" networked-audio-source></a-sphere>
+        <a-entity class="head" gltf-model="#dodec-avatar-head" position="0 0 0" networked-audio-source></a-sphere>
       </script>
 
       <script id="hand-template" type="text/html">
-        <a-box scale="0.1 0.1 0.1"></a-box>
+        <a-box class="hand" scale="0.2 0.1 0.3"></a-box>
       </script>
 
       <script id="vive-rig" type="text/html">
-        <a-entity id="player" networked="template:#player-template;showLocalTemplate:false;" wasd-controls>
-          <a-entity camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
+        <a-entity id="player-rig" networked wasd-controls>
+          <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
 
-          <a-entity hand-controls="left" teleport-controls="cameraRig: #player" networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
-          <a-entity hand-controls="right" teleport-controls="cameraRig: #player" networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
+          <a-entity id="left-hand" vive-controls="hand: left" teleport-controls="cameraRig: #player-rig" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
+          <a-entity id="right-hand" vive-controls="hand: right" teleport-controls="cameraRig: #player-rig" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
         </a-entity>
       </script>
 
       <script id="oculus-rig" type="text/html">
-        <a-entity id="player" networked="template:#player-template;showLocalTemplate:false;" wasd-controls>
-          <a-entity camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
+        <a-entity id="player-rig" networked wasd-controls>
+          <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
 
-          <a-entity oculus-touch-controls="left" teleport-controls="cameraRig:#player;button:trigger;" networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
-          <a-entity oculus-touch-controls="right" teleport-controls="cameraRig:#player;button:trigger;" networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
+          <a-entity oculus-touch-controls="left" teleport-controls="cameraRig:#player-rig;button:trigger;" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
+          <a-entity oculus-touch-controls="right" teleport-controls="cameraRig:#player-rig;button:trigger;" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
         </a-entity>
       </script>
 
       <script id="daydream-rig" type="text/html">
-        <a-entity id="player" networked="template:#player-template;showLocalTemplate:false;" wasd-controls>
-          <a-entity camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
+        <a-entity id="player-rig" networked wasd-controls>
+          <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
 
           <a-entity daydream-controls networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
         </a-entity>
       </script>
 
       <script id="gearvr-rig" type="text/html">
-        <a-entity id="player" networked="template:#player-template;showLocalTemplate:false;" wasd-controls>
-          <a-entity camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
+        <a-entity id="player-rig" networked wasd-controls>
+          <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
 
           <a-entity gearvr-controls networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
         </a-entity>
       </script>
 
       <script id="dolly-rig" type="text/html">
-        <a-entity id="player" networked="template:#player-template;showLocalTemplate:false;" wasd-controls>
-          <a-entity camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
+        <a-entity id="player-rig" networked wasd-controls>
+          <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
         </a-entity>
       </script>
     </a-assets>
