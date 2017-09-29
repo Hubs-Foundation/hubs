@@ -9,7 +9,7 @@
 </head>
 
 <body>
-  <a-scene networked-scene="adapter: easyrtc; audio: false; debug: true;">
+  <a-scene networked-scene="adapter: easyrtc; audio: true; debug: true;">
     <a-assets>
       <img id="grid" src="assets/grid.png" crossorigin="anonymous">
       <img id="sky" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg" crossorigin="anonymous" />
@@ -26,7 +26,7 @@
       </script>
 
       <script id="vive-rig" type="text/html">
-        <a-entity id="player-rig" networked wasd-controls>
+        <a-entity id="player-rig" mute-mic="eventSrc:#player.hand;toggleEvent:menudown;" networked wasd-controls>
           <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
 
           <a-entity id="left-hand" vive-controls="hand: left" teleport-controls="cameraRig: #player-rig" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
@@ -38,8 +38,8 @@
         <a-entity id="player-rig" networked wasd-controls>
           <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
 
-          <a-entity oculus-touch-controls="left" teleport-controls="cameraRig:#player-rig;button:trigger;" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
-          <a-entity oculus-touch-controls="right" teleport-controls="cameraRig:#player-rig;button:trigger;" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
+          <a-entity id="left-hand" mute-mic="toggleEvent:xbuttondown;" oculus-touch-controls="left" teleport-controls="cameraRig:#player-rig;button:trigger;" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
+          <a-entity id="right-hand" mute-mic="toggleEvent:abuttondown;" oculus-touch-controls="right" teleport-controls="cameraRig:#player-rig;button:trigger;" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
         </a-entity>
       </script>
 
@@ -47,7 +47,8 @@
         <a-entity id="player-rig" networked wasd-controls>
           <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
 
-          <a-entity daydream-controls networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
+          <!-- TODO: Hook up mute-mic component for Daydream -->
+          <a-entity class="hand" daydream-controls networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
         </a-entity>
       </script>
 
@@ -55,22 +56,22 @@
         <a-entity id="player-rig" networked wasd-controls>
           <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
 
+          <!-- TODO: Hook up mute-mic component for GearVR -->
           <a-entity gearvr-controls networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
         </a-entity>
       </script>
 
       <script id="dolly-rig" type="text/html">
         <a-entity id="player-rig" networked wasd-controls>
+          <!-- TODO: Hook up mute-mic component for keyboard -->
           <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
         </a-entity>
       </script>
     </a-assets>
 
-    <a-entity rig-selector="vive:#vive-rig;oculus:oculus-rig;daydream:#daydream-rig;desktop:#dolly-rig;mobile:dolly-rig;"></a-entity>
+    <a-entity id="player" rig-selector="vive:#vive-rig;oculus:oculus-rig;daydream:#daydream-rig;desktop:#dolly-rig;mobile:dolly-rig;"></a-entity>
 
-    <a-entity id="ground" position="0 0 0"
-        geometry="primitive: plane; width: 10000; height: 10000;" rotation="-90 0 0"
-        material="shader: flat; src: #grid; repeat: 10000 10000;"></a-entity>
+    <a-entity id="ground" position="0 0 0" geometry="primitive: plane; width: 10000; height: 10000;" rotation="-90 0 0" material="shader: flat; src: #grid; repeat: 10000 10000;"></a-entity>
     <a-sky src="#sky" rotation="0 -90 0"></a-sky>
   </a-scene>
 </body>

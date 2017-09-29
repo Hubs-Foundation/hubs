@@ -1792,7 +1792,7 @@ negotiator@0.6.1:
 
 "networked-aframe@https://github.com/netpro2k/networked-aframe#dev":
   version "0.3.0"
-  resolved "https://github.com/netpro2k/networked-aframe#d442c03ee7bce9fc168c1396a234b91249986b6e"
+  resolved "https://github.com/netpro2k/networked-aframe#edff29bcbf1048807de2235605694e77d5086104"
   dependencies:
     aframe-lerp-component "^1.1.0"
     aframe-template-component "3.2.1"
