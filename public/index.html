@@ -24,53 +24,37 @@
       <script id="hand-template" type="text/html">
         <a-box class="hand" scale="0.2 0.1 0.3"></a-box>
       </script>
-
-      <script id="vive-rig" type="text/html">
-        <a-entity id="player-rig" networked wasd-controls>
-          <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
-
-          <a-entity id="left-hand" vive-controls="hand: left" teleport-controls="cameraRig: #player-rig" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
-          <a-entity id="right-hand" vive-controls="hand: right" teleport-controls="cameraRig: #player-rig" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
-        </a-entity>
-      </script>
-
-      <script id="oculus-rig" type="text/html">
-        <a-entity id="player-rig" networked wasd-controls>
-          <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
-
-          <a-entity oculus-touch-controls="left" teleport-controls="cameraRig:#player-rig;button:trigger;" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
-          <a-entity oculus-touch-controls="right" teleport-controls="cameraRig:#player-rig;button:trigger;" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
-        </a-entity>
-      </script>
-
-      <script id="daydream-rig" type="text/html">
-        <a-entity id="player-rig" networked wasd-controls>
-          <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
-
-          <a-entity daydream-controls networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
-        </a-entity>
-      </script>
-
-      <script id="gearvr-rig" type="text/html">
-        <a-entity id="player-rig" networked wasd-controls>
-          <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
-
-          <a-entity gearvr-controls networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
-        </a-entity>
-      </script>
-
-      <script id="dolly-rig" type="text/html">
-        <a-entity id="player-rig" networked wasd-controls>
-          <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
-        </a-entity>
-      </script>
     </a-assets>
 
-    <a-entity rig-selector="vive:#vive-rig;oculus:oculus-rig;daydream:#daydream-rig;desktop:#dolly-rig;mobile:dolly-rig;"></a-entity>
+    <a-entity id="player-rig" networked wasd-controls snap-rotation="leftEventSrc: #right-hand; rightEventSrc: #right-hand">
+        <a-entity
+            id="head"
+            camera="userHeight: 1.6"
+            look-controls
+            networked="template:#head-template;showLocalTemplate:false;"></a-entity>
+
+        <a-entity
+            id="left-hand"
+            vive-controls="hand: left"
+            oculus-touch-controls="left"
+            axis-dpad="centerZone: 1"
+            teleport-controls="cameraRig: #player-rig; button: dpadcenter"
+            networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
+
+        <a-entity
+            id="right-hand"
+            vive-controls="hand: right"
+            oculus-touch-controls="right"
+            daydream-controls
+            gearvr-controls
+            axis-dpad
+            teleport-controls="cameraRig: #player-rig; button: dpadcenter"
+            networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
+    </a-entity>
 
     <a-entity id="ground" position="0 0 0"
-        geometry="primitive: plane; width: 10000; height: 10000;" rotation="-90 0 0"
-        material="shader: flat; src: #grid; repeat: 10000 10000;"></a-entity>
+        geometry="primitive: plane; width: 100; height: 100;" rotation="-90 0 0"
+        material="shader: flat; src: #grid; repeat: 100 100;"></a-entity>
     <a-sky src="#sky" rotation="0 -90 0"></a-sky>
   </a-scene>
 </body>
