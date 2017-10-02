@@ -26,11 +26,11 @@
       </script>
 
       <script id="vive-rig" type="text/html">
-        <a-entity id="player-rig" mute-mic="eventSrc:#player.hand;toggleEvent:menudown;" networked wasd-controls>
+        <a-entity id="player-rig" mute-mic="eventSrc:.hand;toggleEvent:menudown;" networked wasd-controls>
           <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
 
-          <a-entity id="left-hand" vive-controls="hand: left" teleport-controls="cameraRig: #player-rig" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
-          <a-entity id="right-hand" vive-controls="hand: right" teleport-controls="cameraRig: #player-rig" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
+          <a-entity id="left-hand" class="hand" vive-controls="hand: left" teleport-controls="cameraRig: #player-rig" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
+          <a-entity id="right-hand" class="hand" vive-controls="hand: right" teleport-controls="cameraRig: #player-rig" networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
         </a-entity>
       </script>
 
