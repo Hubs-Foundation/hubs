@@ -9,7 +9,7 @@
 </head>
 
 <body>
-  <a-scene networked-scene="adapter: easyrtc; audio: true; debug: true;">
+  <a-scene networked-scene="adapter: easyrtc; audio: true; debug: true;" mute-mic="eventSrc: #right-hand; toggleEvents: menudown, xbuttondown">
     <a-assets>
       <img id="grid" src="assets/grid.png" crossorigin="anonymous">
       <img id="sky" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg" crossorigin="anonymous" />

@@ -1,53 +1,71 @@
+const bindAllEvents = function(elements, events, f) {
+  if (!elements || !elements.length) return;
+  for (var el of elements) {
+    events.length &&
+      events.forEach(e => {
+        el.addEventListener(e, f);
+      });
+  }
+};
+const unbindAllEvents = function(elements, events, f) {
+  if (!elements || !elements.length) return;
+  for (var el of elements) {
+    events.length &&
+      events.forEach(e => {
+        el.removeEventListener(e, f);
+      });
+  }
+};
+
 AFRAME.registerComponent("mute-mic", {
   schema: {
     eventSrc: { type: "selectorAll" },
-    toggleEvent: { type: "string" },
-    muteEvent: { type: "string" },
-    unmuteEvent: { type: "string" }
+    toggleEvents: { type: "array" },
+    muteEvents: { type: "array" },
+    unmuteEvents: { type: "array" }
   },
   init: function() {
-    var eventSrcElements = this.data.eventSrc || [this.el];
-
     this.onToggle = this.onToggle.bind(this);
     this.onMute = this.onMute.bind(this);
     this.onUnmute = this.onUnmute.bind(this);
-
-    for (var el of eventSrcElements) {
-      if (this.data.toggleEvent !== "") {
-        el.addEventListener(this.data.toggleEvent, this.onToggle, false);
-      }
-
-      if (this.data.muteEvent !== "") {
-        el.addEventListener(this.data.muteEvent, this.onMute, false);
-      }
-
-      if (this.data.unmuteEvent !== "") {
-        el.addEventListener(this.data.unmuteEvent, this.onUnmute, false);
-      }
-    }
   },
 
-  onToggle: function () {
-    if (this.el.is('muted')) {
+  play: function() {
+    const { eventSrc, toggleEvents, muteEvents, unmuteEvents } = this.data;
+    console.log(eventSrc);
+    bindAllEvents(eventSrc, toggleEvents, this.onToggle);
+    bindAllEvents(eventSrc, muteEvents, this.onMute);
+    bindAllEvents(eventSrc, unmuteEvents, this.onUnmute);
+  },
+
+  pause: function() {
+    const { eventSrc, toggleEvents, muteEvents, unmuteEvents } = this.data;
+    unbindAllEvents(eventSrc, toggleEvents, this.onToggle);
+    unbindAllEvents(eventSrc, muteEvents, this.onMute);
+    unbindAllEvents(eventSrc, unmuteEvents, this.onUnmute);
+  },
+
+  onToggle: function() {
+    if (this.el.is("muted")) {
       NAF.connection.adapter.enableMicrophone(true);
-      this.el.removeState('muted');
+      this.el.removeState("muted");
     } else {
       NAF.connection.adapter.enableMicrophone(false);
-      this.el.addState('muted');
+      this.el.addState("muted");
     }
   },
 
-  onMute: function () {
-    if (!this.el.is('muted')) {
+  onMute: function() {
+    if (!this.el.is("muted")) {
       NAF.connection.adapter.enableMicrophone(false);
-      this.el.addState('muted');
+      this.el.addState("muted");
     }
   },
 
-  onUnmute: function () {
-    if (this.el.is('muted')) {
+  onUnmute: function() {
+    if (this.el.is("muted")) {
       NAF.connection.adapter.enableMicrophone(true);
-      this.el.removeState('muted');
+      this.el.removeState("muted");
     }
   }
 });
