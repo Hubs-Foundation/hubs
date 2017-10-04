@@ -1791,8 +1791,8 @@ negotiator@0.6.1:
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"
 
 "networked-aframe@https://github.com/netpro2k/networked-aframe#dev":
-  version "0.3.0"
-  resolved "https://github.com/netpro2k/networked-aframe#0f092c7a21e1c77f1bb1b879febafad76b6fd26b"
+  version "0.3.1"
+  resolved "https://github.com/netpro2k/networked-aframe#036e7a528cc4382d2fd6dd112a9da41550ea9c52"
   dependencies:
     aframe-lerp-component "^1.1.0"
     aframe-template-component "3.2.1"
