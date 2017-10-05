@@ -9,16 +9,16 @@ AFRAME.registerComponent("audio-feedback", {
   init: function() {
     // @TODO using an arbitrary timeout here which is very bad. Needs to wait on model loading and audio source being connected
     setTimeout(() => {
-      this.mat = this.el.object3D.getObjectByName(
-        "DodecAvatar_Head_0"
-      ).material;
-
       const audioComponent = (this.data.audioSource || this.el).components[
         "networked-audio-source"
       ];
 
       const audioSource = audioComponent && audioComponent.sound;
       if (!audioSource) return;
+
+      this.mat = this.el.object3D.getObjectByName(
+        "DodecAvatar_Head_0"
+      ).material;
 
       this.analyser = audioSource.context.createAnalyser();
       this.levels = new Uint8Array(this.analyser.frequencyBinCount);
