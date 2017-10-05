@@ -5,3 +5,4 @@ require("aframe-teleport-controls");
 require("./components/axis-dpad");
 require("./components/snap-rotation");
 require("./components/mute-mic");
+require("./components/audio-feedback");
