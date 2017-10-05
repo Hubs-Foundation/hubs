@@ -58,5 +58,12 @@ AFRAME.registerComponent("snap-rotation", {
     } else if (e.type === rightEvent || (rightKey && e.key === rightKey)) {
       obj.rotateOnAxis(rotationAxis, -rotationDegres * THREE.Math.DEG2RAD);
     }
+
+    // @TODO this is really ugly, can't just set the rotation directly or it wont network
+    this.el.setAttribute("rotation", {
+      x: obj.rotation.x * THREE.Math.RAD2DEG,
+      y: obj.rotation.y * THREE.Math.RAD2DEG,
+      z: obj.rotation.z * THREE.Math.RAD2DEG
+    });
   }
 });
