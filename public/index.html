@@ -9,7 +9,12 @@
 </head>
 
 <body>
-  <a-scene networked-scene="adapter: easyrtc; audio: true; debug: true;" mute-mic="eventSrc: #right-hand; toggleEvents: menudown, xbuttondown">
+  <a-scene
+    networked-scene="adapter: easyrtc;
+                     audio: true;
+                     debug: true;
+                     connectOnLoad: false"
+    mute-mic="eventSrc: #right-hand; toggleEvents: menudown, xbuttondown">
     <a-assets>
       <img id="grid" src="assets/grid.png" crossorigin="anonymous">
       <img id="sky" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg" crossorigin="anonymous" />
@@ -24,6 +29,15 @@
       <script id="hand-template" type="text/html">
         <a-box class="hand" scale="0.2 0.1 0.3"></a-box>
       </script>
+
+      <script id="nametag-template" type="text/html">
+        <a-entity
+            class="nametag"
+            billboard
+            text="side:double;align:center;"
+            position="0 3 0"
+            scale="6 6 6"></a-entity>
+      </script>
     </a-assets>
 
     <a-entity id="player-rig" networked wasd-controls snap-rotation="leftEventSrc: #right-hand; rightEventSrc: #right-hand">
@@ -31,7 +45,11 @@
             id="head"
             camera="userHeight: 1.6"
             look-controls
-            networked="template:#head-template;showLocalTemplate:false;"></a-entity>
+            networked="template:#head-template;showLocalTemplate:false;"></a-entity> 
+
+        <a-entity
+            id="nametag"
+            networked="template:#nametag-template;showLocalTemplate:false;"></a-entity>
 
         <a-entity
             id="left-hand"
@@ -57,6 +75,9 @@
         material="shader: flat; src: #grid; repeat: 100 100;"></a-entity>
     <a-sky src="#sky" rotation="0 -90 0"></a-sky>
   </a-scene>
+  <script>
+   document.querySelector('a-scene').addEventListener('loaded', onSceneLoad)
+  </script>
 </body>
 
 </html>
