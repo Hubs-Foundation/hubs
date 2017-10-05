@@ -23,7 +23,7 @@
 
       <!-- Templates -->
       <script id="head-template" type="text/html">
-        <a-entity class="head" gltf-model="#dodec-avatar-head" position="0 0 0" networked-audio-source audio-feedback></a-sphere>
+        <a-entity class="head" gltf-model="#dodec-avatar-head" position="0 0 0" networked-audio-source audio-feedback></a-entity>
       </script>
 
       <script id="hand-template" type="text/html">
@@ -54,7 +54,7 @@
         <a-entity
             id="left-hand"
             vive-controls="hand: left"
-            oculus-touch-controls="left"
+            oculus-touch-controls="hand: left"
             axis-dpad="centerZone: 1"
             teleport-controls="cameraRig: #player-rig; button: dpadcenter"
             networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
@@ -62,7 +62,7 @@
         <a-entity
             id="right-hand"
             vive-controls="hand: right"
-            oculus-touch-controls="right"
+            oculus-touch-controls="hand: right"
             daydream-controls
             gearvr-controls
             axis-dpad
