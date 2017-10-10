@@ -1,12 +1,11 @@
-require("networked-aframe");
-require("aframe-teleport-controls");
+import "networked-aframe";
+import "aframe-teleport-controls";
 
-// require("./components/rig-selector");
-require("./components/axis-dpad");
-require("./components/snap-rotation");
-require("./components/mute-mic");
-require("./components/audio-feedback");
-require("./components/billboard");
+import "./components/axis-dpad";
+import "./components/snap-rotation";
+import "./components/mute-mic";
+import "./components/audio-feedback";
+import "./components/billboard";
 
 import { generateName } from "./utils";
 
