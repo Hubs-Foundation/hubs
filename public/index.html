@@ -21,6 +21,9 @@
 
       <a-asset-item id="dodec-avatar-head" src="assets/avatars/dodec/DodecAvatarGLTF/DodecAvatar_Head.gltf"></a-asset-item>
 
+
+      <a-asset-item id="rock-island" src="assets/environments/RockIslandTest/RockIsland.gltf"></a-asset-item>
+
       <!-- Templates -->
       <script id="head-template" type="text/html">
         <a-entity class="head" gltf-model="#dodec-avatar-head" position="0 0 0" networked-audio-source audio-feedback></a-entity>
@@ -70,10 +73,8 @@
             networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
     </a-entity>
 
-    <a-entity id="ground" position="0 0 0"
-        geometry="primitive: plane; width: 100; height: 100;" rotation="-90 0 0"
-        material="shader: flat; src: #grid; repeat: 100 100;"></a-entity>
-    <a-sky src="#sky" rotation="0 -90 0"></a-sky>
+    <a-entity class="head" gltf-model="#rock-island" position="0 0 0">
+    <a-sky color="#DDFFD9"></a-sky>
     <a-box></a-box>
   </a-scene>
   <script>
