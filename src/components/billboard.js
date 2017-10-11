@@ -1,16 +1,30 @@
-AFRAME.registerComponent("billboard", {
+AFRAME.registerComponent("nametag", {
+  schema: {
+    follow: {type: "string"}
+  },
   init: function() {
     this.vector = new THREE.Vector3();
+    // traverse up to the networked player rig and find the networked head.
+    var head = this._findParent(this.el, '[networked]').parentNode.querySelector(this.data.follow);
+    // traverse up to the head's networked parent and get its object3D
+    this.followObj = this._findParent(head, '[networked]').object3D;
   },
-
+  _findParent: function (el, selector) {
+    var parent = el.parentNode;
+    while(parent && !parent.matches(selector)) {
+      parent = parent.parentNode;
+    }
+    return parent;
+  },
   tick: function(t) {
-    var self = this;
-    var target = self.el.sceneEl.camera;
-    var object3D = self.el.object3D;
+    var target = this.el.sceneEl.camera;
+    var object3D = this.el.object3D;
 
-    // make sure camera is set
+    var followPosition = this.followObj.position;
+    object3D.position.x = followPosition.x;
+    object3D.position.z = followPosition.z;
+
     if (target) {
-      //target.updateMatrixWorld();
       this.vector.setFromMatrixPosition(target.matrixWorld);
       if (object3D.parent) {
         object3D.parent.updateMatrixWorld();

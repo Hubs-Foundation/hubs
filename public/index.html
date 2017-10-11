@@ -36,7 +36,7 @@
       <script id="nametag-template" type="text/html">
         <a-entity
             class="nametag"
-            billboard
+            nametag="follow: .head"
             text="side:double;align:center;"
             position="0 2.5 0"
             scale="6 6 6"></a-entity>
@@ -48,7 +48,7 @@
             id="head"
             camera="userHeight: 1.6"
             look-controls
-            networked="template:#head-template;showLocalTemplate:false;"></a-entity> 
+            networked="template:#head-template;showLocalTemplate:false;"></a-entity>
 
         <a-entity
             id="nametag"
