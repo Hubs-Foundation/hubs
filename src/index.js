@@ -5,7 +5,7 @@ import "./components/axis-dpad";
 import "./components/snap-rotation";
 import "./components/mute-mic";
 import "./components/audio-feedback";
-import "./components/billboard";
+import "./components/nametag-transform";
 
 import { generateName } from "./utils";
 
