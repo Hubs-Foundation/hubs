@@ -44,7 +44,7 @@
         <a-entity
             class="nametag"
             nametag-transform="follow: .head"
-            text="side:double;align:center;"
+            text="side:double;align:center;color:#555"
             position="0 2.5 0"
             scale="6 6 6"></a-entity>
       </script>
@@ -67,7 +67,7 @@
             oculus-touch-controls="hand: left"
             axis-dpad="centerZone: 1"
             teleport-controls="cameraRig: #player-rig; button: dpadcenter"
-            networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
+            networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
 
         <a-entity
             id="right-hand"
@@ -77,12 +77,11 @@
             gearvr-controls
             axis-dpad
             teleport-controls="cameraRig: #player-rig; button: dpadcenter"
-            networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
+            networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
     </a-entity>
 
     <a-entity class="head" gltf-model="#rock-island" position="0 0 0">
     <a-sky color="#DDFFD9"></a-sky>
-    <a-box></a-box>
   </a-scene>
   <script>
    document.querySelector('a-scene').addEventListener('loaded', onSceneLoad)
