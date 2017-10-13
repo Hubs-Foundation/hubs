@@ -4,6 +4,7 @@
   <title>A-Frame Social VR Demo</title>
   <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
+  
   <script src="easyrtc/easyrtc.js"></script>
   <script src="./app.bundle.js"></script>
 </head>
@@ -14,7 +15,7 @@
                      audio: true;
                      debug: true;
                      connectOnLoad: false"
-    mute-mic="eventSrc: #right-hand; toggleEvents: menudown, xbuttondown">
+    mute-mic="eventSrc: #right-hand; toggleEvents: action_mute">
     <a-assets>
       <img id="grid" src="assets/grid.png" crossorigin="anonymous">
       <img id="sky" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg" crossorigin="anonymous" />
@@ -50,7 +51,11 @@
       </script>
     </a-assets>
 
-    <a-entity id="player-rig" networked wasd-controls snap-rotation="leftEventSrc: #right-hand; rightEventSrc: #right-hand; pivotSrc: #head">
+    <a-entity
+        id="player-rig"
+        networked
+        wasd-controls
+        snap-rotation="pivotSrc: #head">
         <a-entity
             id="head"
             camera="userHeight: 1.6"
@@ -63,20 +68,26 @@
 
         <a-entity
             id="left-hand"
+
             vive-controls="hand: left"
             oculus-touch-controls="hand: left"
+            daydream-controls
+            gearvr-controls
+
             axis-dpad="centerZone: 1"
-            teleport-controls="cameraRig: #player-rig; button: dpadcenter"
+            teleport-controls="cameraRig: #player-rig; button: action_teleport_"
             networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
 
         <a-entity
             id="right-hand"
+
             vive-controls="hand: right"
             oculus-touch-controls="hand: right"
             daydream-controls
             gearvr-controls
+
             axis-dpad
-            teleport-controls="cameraRig: #player-rig; button: dpadcenter"
+            teleport-controls="cameraRig: #player-rig; button: action_teleport_"
             networked="template:#hand-template;showLocalTemplate:true;"></a-entity>
     </a-entity>
 

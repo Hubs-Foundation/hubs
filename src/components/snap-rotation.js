@@ -1,8 +1,7 @@
 /**
  * @fileOverview
- * Rotate an entity in fixed increments based on events or keyboard input
+ * Rotate an entity in fixed increments based on events
  * @name snap-rotation.js
- * @TODO pull keyboard input out into a component that just emits events
  * @TODO allow specifying multiple events and sources
  */
 
@@ -11,14 +10,12 @@ AFRAME.registerComponent("snap-rotation", {
     rotationAxis: { type: "vec3", default: { x: 0, y: 1, z: 0 } },
     rotationDegres: { default: 45 },
 
-    leftKey: { default: "q" },
-    leftEvent: { default: "dpadleftdown" },
-    leftEventSrc: { type: "selector" },
+    leftEvent: { default: "action_snap_rotate_left" },
+    leftEventSrc: { type: "selector", default: "a-scene" },
 
-    rightKey: { default: "e" },
-    rightEvent: { default: "dpadrightdown" },
-    rightEventSrc: { type: "selector" },
-    
+    rightEvent: { default: "action_snap_rotate_right" },
+    rightEventSrc: { type: "selector", default: "a-scene" },
+
     pivotSrc: { type: "selector" }
   },
 
@@ -27,7 +24,7 @@ AFRAME.registerComponent("snap-rotation", {
   },
 
   update: function() {
-    const {rotationAxis, rotationDegres} = this.data;
+    const { rotationAxis, rotationDegres } = this.data;
 
     const angle = rotationDegres * THREE.Math.DEG2RAD;
     this.lRotMat = new THREE.Matrix4().makeRotationAxis(rotationAxis, angle);
@@ -36,7 +33,6 @@ AFRAME.registerComponent("snap-rotation", {
 
   play: function() {
     const { leftEventSrc, leftEvent, rightEventSrc, rightEvent } = this.data;
-    window.addEventListener("keypress", this.onButtonPressed);
     rightEventSrc &&
       rightEventSrc.addEventListener(rightEvent, this.onButtonPressed);
     leftEventSrc &&
@@ -45,7 +41,6 @@ AFRAME.registerComponent("snap-rotation", {
 
   pause: function() {
     const { leftEventSrc, leftEvent, rightEventSrc, rightEvent } = this.data;
-    window.removeEventListener("keypress", this.onButtonPRessed);
     rightEventSrc &&
       rightEventSrc.removeEventListener(rightEvent, this.onButtonPressed);
     leftEventSrc &&
@@ -61,17 +56,15 @@ AFRAME.registerComponent("snap-rotation", {
       const {
         rotationAxis,
         rotationDegres,
-        leftKey,
         leftEvent,
-        rightKey,
         rightEvent,
         pivotSrc
       } = this.data;
 
       var rot;
-      if (e.type === leftEvent || (leftKey && e.key === leftKey)) {
+      if (e.type === leftEvent) {
         rot = this.lRotMat;
-      } else if (e.type === rightEvent || (rightKey && e.key === rightKey)) {
+      } else if (e.type === rightEvent) {
         rot = this.rRotMat;
       } else {
         return;

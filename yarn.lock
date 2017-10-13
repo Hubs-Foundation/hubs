@@ -38,6 +38,10 @@ acorn@^5.0.0:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.1.2.tgz#911cb53e036807cf0fa778dc5d370fbd864246d7"
 
+"aframe-input-mapping-component@https://github.com/fernandojsg/aframe-input-mapping-component":
+  version "1.0.0"
+  resolved "https://github.com/fernandojsg/aframe-input-mapping-component#577cadad5a42e7216843dfeca9770fa8be465e09"
+
 aframe-lerp-component@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/aframe-lerp-component/-/aframe-lerp-component-1.1.0.tgz#dc8c12c53698770c30f25eef8873e34a4e79c765"
