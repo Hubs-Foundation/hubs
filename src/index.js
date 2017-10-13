@@ -6,6 +6,7 @@ import "./components/snap-rotation";
 import "./components/mute-mic";
 import "./components/audio-feedback";
 import "./components/nametag-transform";
+import "./components/avatar-customization";
 
 import { generateName } from "./utils";
 

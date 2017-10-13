@@ -13,6 +13,7 @@
     "easyrtc": "^1.1.0",
     "express": "^4.15.5",
     "networked-aframe": "https://github.com/netpro2k/networked-aframe#dev",
+    "pleasejs": "^0.4.2",
     "socket.io": "^2.0.3"
   },
   "devDependencies": {
