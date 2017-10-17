@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "aframe-input-mapping-component": "https://github.com/fernandojsg/aframe-input-mapping-component",
-    "aframe-teleport-controls": "^0.3.0",
+    "aframe-teleport-controls": "https://github.com/netpro2k/aframe-teleport-controls#feature/teleport-origin",
     "easyrtc": "^1.1.0",
     "express": "^4.15.5",
     "networked-aframe": "https://github.com/netpro2k/networked-aframe#dev",

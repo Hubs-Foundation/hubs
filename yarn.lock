@@ -48,9 +48,9 @@ aframe-lerp-component@^1.1.0:
   dependencies:
     almost-equal "^1.1.0"
 
-aframe-teleport-controls@^0.3.0:
+"aframe-teleport-controls@https://github.com/netpro2k/aframe-teleport-controls#feature/teleport-origin":
   version "0.3.0"
-  resolved "https://registry.yarnpkg.com/aframe-teleport-controls/-/aframe-teleport-controls-0.3.0.tgz#7c854941757703f06a5100e47abccfeeb427d7fc"
+  resolved "https://github.com/netpro2k/aframe-teleport-controls#41fe311d3123503ba44761acce69d0f0634139cc"
 
 aframe-template-component@3.2.1:
   version "3.2.1"
