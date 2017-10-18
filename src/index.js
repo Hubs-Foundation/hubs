@@ -8,6 +8,7 @@ import "./components/mute-mic";
 import "./components/audio-feedback";
 import "./components/nametag-transform";
 import "./components/avatar-customization";
+import "./components/mute-state-indicator";
 
 import { generateName } from "./utils";
 
