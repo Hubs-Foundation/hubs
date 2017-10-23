@@ -3,7 +3,7 @@ var webpack = require("webpack");
 
 module.exports = {
   entry: {
-    app: ["webpack-hot-middleware/client", "./src/index.js"]
+    app: ["webpack-hot-middleware/client?reload=true", "./src/index.js"]
   },
   devtool: "inline-source-map",
   plugins: [new webpack.HotModuleReplacementPlugin()],
