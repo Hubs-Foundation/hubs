@@ -31,9 +31,10 @@
         <a-entity
             class="head"
             gltf-model="#dodec-avatar-head"
-            position="0 0 0"
             networked-audio-source
-            audio-feedback
+            networked-audio-analyser
+            matcolor-audio-feedback="objectName: DodecAvatar_Head_0"
+            scale-audio-feedback
             avatar-customization
         ></a-entity>
       </script>
@@ -77,7 +78,14 @@
             networked="template:#hand-template;showLocalTemplate:false;"
         >
             <a-entity id="watch" gltf-model="assets/hud/watch.gltf" position="0 0.0015 0.147" rotation="3.5 0 0">
-                <a-circle mute-state-indicator="" position="0 0.023 0" rotation="-90 0 0" scale="0.04 0.04 0.04" material="color:#d8eece;shader:flat"></a-circle>
+                <a-circle
+                    mute-state-indicator
+                    scale-audio-feedback="analyserSrc: #head; minScale: 0.035; maxScale: 0.08;"
+                    position="0 0.023 0"
+                    rotation="-90 0 0"
+                    scale="0.04 0.04 0.04"
+                    material="color:#d8eece;shader:flat">
+                </a-circle>
             </a-entity>
         </a-entity>
 

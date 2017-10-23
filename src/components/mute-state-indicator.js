@@ -12,8 +12,8 @@ AFRAME.registerComponent("mute-state-indicator", {
   },
 
   pause() {
-    this.el.sceneEl.addEventListener("stateadded", this.onStateToggled);
-    this.el.sceneEl.addEventListener("stateremoved", this.onStateToggled);
+    this.el.sceneEl.removeEventListener("stateadded", this.onStateToggled);
+    this.el.sceneEl.removeEventListener("stateremoved", this.onStateToggled);
   },
 
   onStateToggled(e) {
