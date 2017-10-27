@@ -5,8 +5,10 @@
   "license": "MPL-2.0",
   "scripts": {
     "dev": "webpack-dev-server --open --config webpack.dev.js",
-    "build": "webpack --config webpack.prod.js"
+    "build": "webpack --config webpack.prod.js",
+    "prettier": "prettier --write src/**/*.js"
   },
+  "pre-commit": ["prettier"],
   "dependencies": {
     "aframe-input-mapping-component": "https://github.com/fernandojsg/aframe-input-mapping-component",
     "aframe-teleport-controls": "https://github.com/netpro2k/aframe-teleport-controls#feature/teleport-origin",
@@ -21,6 +23,7 @@
     "babel-preset-env": "^1.6.1",
     "eslint-config-prettier": "^2.6.0",
     "eslint-plugin-prettier": "^2.3.1",
+    "pre-commit": "^1.2.2",
     "prettier": "^1.7.0",
     "webpack": "^3.6.0",
     "webpack-dev-server": "^2.9.3",

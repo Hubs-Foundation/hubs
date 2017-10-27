@@ -61,5 +61,3 @@ window.onSceneLoad = function() {
 
   document.querySelector("a-scene").components["networked-scene"].connect();
 };
-
-
