@@ -1,4 +1,5 @@
 import "networked-aframe";
+import "naf-janus-adapter";
 import "aframe-teleport-controls";
 import "aframe-input-mapping-component";
 
