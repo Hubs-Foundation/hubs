@@ -1,4 +1,5 @@
 import "networked-aframe";
+import "naf-janus-adapter";
 import "aframe-teleport-controls";
 import "aframe-input-mapping-component";
 
@@ -60,5 +61,3 @@ window.onSceneLoad = function() {
 
   document.querySelector("a-scene").components["networked-scene"].connect();
 };
-
-

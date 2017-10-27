@@ -1,19 +1,22 @@
 AFRAME.registerComponent("nametag-transform", {
   schema: {
-    follow: {type: "string"}
+    follow: { type: "string" }
   },
   init: function() {
     this.vector = new THREE.Vector3();
 
     // TODO this traversal kinda feels like a hack. Should probably change networked-aframe to support it properly.
     // traverse up to the networked player rig and find the networked head.
-    var head = this._findParent(this.el, '[networked]').parentNode.querySelector(this.data.follow);
+    var head = this._findParent(
+      this.el,
+      "[networked]"
+    ).parentNode.querySelector(this.data.follow);
     // traverse up to the head's networked parent and get its object3D
-    this.followObj = this._findParent(head, '[networked]').object3D;
+    this.followObj = this._findParent(head, "[networked]").object3D;
   },
-  _findParent: function (el, selector) {
+  _findParent: function(el, selector) {
     var parent = el.parentNode;
-    while(parent && !parent.matches(selector)) {
+    while (parent && !parent.matches(selector)) {
       parent = parent.parentNode;
     }
     return parent;
