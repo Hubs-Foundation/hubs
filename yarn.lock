@@ -2728,9 +2728,9 @@ multicast-dns@^6.0.1:
     dns-packet "^1.0.1"
     thunky "^0.1.0"
 
-naf-janus-adapter@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.1.1.tgz#9798e11196e38edb04862aebc8213e9345895f8c"
+naf-janus-adapter@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.1.2.tgz#afa18e60229d529c8d7e47a41237c92256a8ecf8"
   dependencies:
     minijanus "^0.1.4"
 
