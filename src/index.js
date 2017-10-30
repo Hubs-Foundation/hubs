@@ -10,6 +10,7 @@ import "./components/audio-feedback";
 import "./components/nametag-transform";
 import "./components/avatar-customization";
 import "./components/mute-state-indicator";
+import "./components/hand-controls-child-visibility";
 
 import { generateName } from "./utils";
 
@@ -22,6 +23,11 @@ NAF.schemas.add({
       property: "value"
     }
   ]
+});
+
+NAF.schemas.add({
+  template: "#hand-template",
+  components: ["position", "rotation", "visible"]
 });
 
 AFRAME.registerInputMappings({
