@@ -1,3 +1,3 @@
 # A-Frame Social VR Demo
 
-¯\\_(ツ)_/¯
+¯\\_(ツ)_/¯ 
