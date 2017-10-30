@@ -1,4 +1,4 @@
-AFRAME.registerComponent("hand-controls-child-visibility", {
+AFRAME.registerComponent("hand-controls-visibility", {
   init() {
     this.onControllerConnected = this.onControllerConnected.bind(this);
     this.onControllerDisconnected = this.onControllerDisconnected.bind(this);

@@ -10,7 +10,7 @@ import "./components/audio-feedback";
 import "./components/nametag-transform";
 import "./components/avatar-customization";
 import "./components/mute-state-indicator";
-import "./components/hand-controls-child-visibility";
+import "./components/hand-controls-visibility";
 
 import { generateName } from "./utils";
 
