@@ -13,6 +13,8 @@ import "./components/nametag-transform";
 import "./components/avatar-customization";
 import "./components/mute-state-indicator";
 
+import "./systems/personal-space-bubble";
+
 import { generateName } from "./utils";
 
 NAF.schemas.add({
