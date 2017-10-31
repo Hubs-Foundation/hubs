@@ -35,12 +35,12 @@
                     matcolor-audio-feedback="objectName: DodecAvatar_Head_0"
                     scale-audio-feedback
                     avatar-customization
-                    personal-space-bubble
+                    personal-space-invader
                 ></a-entity>
             </script>
 
             <script id="hand-template" type="text/html">
-                <a-box class="hand" personal-space-bubble scale="0.2 0.1 0.3"></a-box>
+                <a-box class="hand" personal-space-invader scale="0.2 0.1 0.3"></a-box>
             </script>
 
             <script id="nametag-template" type="text/html">
@@ -55,7 +55,7 @@
 
         <a-entity id="player-rig" networked wasd-controls snap-rotation="pivotSrc: #head">
             <a-sphere scale="0.1 0.1 0.1"></a-sphere>
-            <a-entity id="head" camera="userHeight: 1.6" look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
+            <a-entity id="head" camera="userHeight: 1.6" personal-space-bubble look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
 
             <a-entity id="nametag" networked="template:#nametag-template;showLocalTemplate:false;"></a-entity>
 

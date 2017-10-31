@@ -1,61 +1,81 @@
-var posA = new AFRAME.THREE.Vector3();
-var posB = new AFRAME.THREE.Vector3();
-
-function distance(entityA, entityB) {
-  entityA.object3D.getWorldPosition(posA);
-  entityB.object3D.getWorldPosition(posB);
-  return posA.distanceTo(posB);
-}
+var invaderPos = new AFRAME.THREE.Vector3();
+var bubblePos = new AFRAME.THREE.Vector3();
 
 AFRAME.registerSystem("personal-space-bubble", {
   init() {
-    this.myEntities = [];
-    this.entities = [];
+    this.invaders = [];
+    this.bubbles = [];
   },
 
-  registerEntity(el) {
-    var networkedEl = NAF.utils.getNetworkedEntity(el);
-    var owner = NAF.utils.getNetworkOwner(networkedEl);
+  registerBubble(el) {
+    this.bubbles.push(el);
+  },
 
-    if (owner !== NAF.clientId) {
-      this.entities.push(el);
-    } else {
-      this.myEntities.push(el);
+  unregisterBubble(el) {
+    var index = this.bubbles.indexOf(el);
+
+    if (index !== -1) {
+      this.bubbles.splice(index, 1);
     }
   },
 
-  unregisterEntity(el) {
+  registerInvader(el) {
     var networkedEl = NAF.utils.getNetworkedEntity(el);
     var owner = NAF.utils.getNetworkOwner(networkedEl);
 
     if (owner !== NAF.clientId) {
-      var index = this.entities.indexOf(el);
-      this.entities.splice(index, 1);
-    } else {
-      var index = this.myEntities.indexOf(el);
-      this.myEntities.splice(index, 1);
+      this.invaders.push(el);
+    }
+  },
+
+  unregisterInvader(el) {
+    var index = this.invaders.indexOf(el);
+
+    if (index !== -1) {
+      this.invaders.splice(index, 1);
     }
   },
 
   tick() {
-    for (var j = 0; j < this.entities.length; j++) {
-      var otherEntity = this.entities[j];
-
-      var visible = true;
-
-      for (var i = 0; i < this.myEntities.length; i++) {
-        var myEntity = this.myEntities[i];
-
-        var d = distance(myEntity, otherEntity);
-
-        if (d < myEntity.components["personal-space-bubble"].data.radius) {
-          visible = false;
-          break;
-        }
-      }
-
-      otherEntity.object3D.visible = visible;
+    // Update matrix positions once for each space bubble and space invader
+    for (var i = 0; i < this.bubbles.length; i++) {
+      this.bubbles[i].object3D.updateMatrixWorld(true);
     }
+
+    for (var i = 0; i < this.invaders.length; i++) {
+      this.invaders[i].object3D.updateMatrixWorld(true);
+    }
+
+    // Loop through all of the space bubbles (usually one)
+    for (var i = 0; i < this.bubbles.length; i++) {
+      var bubble = this.bubbles[i];
+
+      bubblePos.setFromMatrixPosition(bubble.object3D.matrixWorld);
+
+      var radius = bubble.components["personal-space-bubble"].data.radius;
+      var radiusSquared = radius * radius;
+
+      // Hide the invader if inside the bubble
+      for (var j = 0; j < this.invaders.length; j++) {
+        var invader = this.invaders[j];
+
+        invaderPos.setFromMatrixPosition(invader.object3D.matrixWorld);
+
+        var distanceSquared = bubblePos.distanceTo(invaderPos);
+
+        invader.object3D.visible = distanceSquared > radiusSquared;
+      }
+    }
+  }
+});
+
+AFRAME.registerComponent("personal-space-invader", {
+  init() {
+    this.el.sceneEl.systems["personal-space-bubble"].registerInvader(this.el);
+  },
+
+  remove() {
+    this.el.sceneEl.systems["personal-space-bubble"].unregisterInvader(this.el);
   }
 });
 
@@ -64,10 +84,10 @@ AFRAME.registerComponent("personal-space-bubble", {
     radius: { type: "number", default: 0.8 }
   },
   init() {
-    this.system.registerEntity(this.el);
+    this.system.registerBubble(this.el);
   },
 
   remove() {
-    this.system.unregisterEntity(this.el);
+    this.system.unregisterBubble(this.el);
   }
 });
