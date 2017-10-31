@@ -1,3 +1,5 @@
+import queryString from "query-string";
+
 import "networked-aframe";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
@@ -11,6 +13,8 @@ import "./components/nametag-transform";
 import "./components/avatar-customization";
 import "./components/mute-state-indicator";
 import "./components/hand-controls-visibility";
+
+import "./systems/personal-space-bubble";
 
 import { generateName } from "./utils";
 
@@ -55,15 +59,26 @@ AFRAME.registerInputMappings({
     }
   }
 });
-window.onSceneLoad = function() {
+
+const promptForName = function() {
   var username = generateName();
   do {
     username = prompt("Choose a username", username);
   } while (!(username && username.length));
+  return username;
+};
 
-  var player = document.getElementById("player-rig");
-  var myNametag = player.querySelector(".nametag");
+const qs = queryString.parse(location.search);
+window.onSceneLoad = function() {
+  const scene = document.querySelector("a-scene");
+
+  if (qs.room && !isNaN(parseInt(qs.room))) {
+    scene.setAttribute("networked-scene", "room", parseInt(qs.room));
+  }
+
+  const username = promptForName(); // promptForName is blocking
+  const myNametag = document.querySelector("#player-rig .nametag");
   myNametag.setAttribute("text", "value", username);
 
-  document.querySelector("a-scene").components["networked-scene"].connect();
+  scene.components["networked-scene"].connect();
 };

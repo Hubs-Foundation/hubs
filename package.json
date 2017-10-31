@@ -1,5 +1,5 @@
 {
-  "name": "social-vr-demo",
+  "name": "mr-social-client",
   "version": "0.0.1",
   "main": "src/index.js",
   "license": "MPL-2.0",
@@ -8,13 +8,16 @@
     "build": "webpack --config webpack.prod.js",
     "prettier": "prettier --write src/**/*.js"
   },
-  "pre-commit": ["prettier"],
+  "pre-commit": [
+    "prettier"
+  ],
   "dependencies": {
     "aframe-input-mapping-component": "https://github.com/fernandojsg/aframe-input-mapping-component",
     "aframe-teleport-controls": "https://github.com/netpro2k/aframe-teleport-controls#feature/teleport-origin",
-    "naf-janus-adapter": "^0.1.1",
+    "naf-janus-adapter": "^0.1.4",
     "networked-aframe": "https://github.com/netpro2k/networked-aframe#feature/register-adapter",
-    "pleasejs": "^0.4.2"
+    "pleasejs": "^0.4.2",
+    "query-string": "^5.0.1"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
