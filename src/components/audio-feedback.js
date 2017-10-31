@@ -22,12 +22,15 @@ AFRAME.registerComponent("networked-audio-analyser", {
         return NAF.connection.adapter.getMediaStream(ownerId);
       })
       .then(stream => {
+        if (!stream) {
+          return;
+        }
+
         const ctx = THREE.AudioContext.getContext();
         const source = ctx.createMediaStreamSource(stream);
         this.analyser = ctx.createAnalyser();
         this.levels = new Uint8Array(this.analyser.frequencyBinCount);
         source.connect(this.analyser);
-        console.log(source, this.analyser);
       });
   },
 
