@@ -31,6 +31,10 @@ window.onSceneLoad = function() {
     scene.setAttribute("networked-scene", "room", parseInt(qs.room));
   }
 
+  if (!qs.stats || !/off|false|0/.test(qs.stats)) {
+    scene.setAttribute('stats', true);
+  }
+
   const username = promptForName(); // promptForName is blocking
   const myNametag = document.querySelector("#player-rig .nametag");
   myNametag.setAttribute("text", "value", username);
