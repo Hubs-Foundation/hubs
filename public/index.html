@@ -7,14 +7,12 @@
 </head>
 
 <body>
-    <a-scene
-        networked-scene="adapter: janus;
-                         room: 2;
+    <a-scene networked-scene="adapter: janus;
+                         room: 3;
                          serverURL: wss://quander.me:8989;
                          audio: true;
                          debug: true;
-                         connectOnLoad: false;"
-        mute-mic="eventSrc: a-scene; toggleEvents: action_mute">
+                         connectOnLoad: false;" mute-mic="eventSrc: a-scene; toggleEvents: action_mute">
 
         <a-assets>
             <img id="grid" src="assets/grid.png" crossorigin="anonymous" />
@@ -54,7 +52,7 @@
             </script>
         </a-assets>
 
-        <a-entity id="player-rig" networked wasd-controls snap-rotation="pivotSrc: #head">
+        <a-entity id="player-rig" networked virtual-gamepad-controls wasd-controls snap-rotation="pivotSrc: #head">
             <a-sphere scale="0.1 0.1 0.1"></a-sphere>
             <a-entity id="head" camera="userHeight: 1.6" personal-space-bubble look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
 

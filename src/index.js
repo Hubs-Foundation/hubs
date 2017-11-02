@@ -13,6 +13,7 @@ import "./components/nametag-transform";
 import "./components/avatar-customization";
 import "./components/mute-state-indicator";
 import "./components/hand-controls-visibility";
+import "./components/virtual-gamepad-controls";
 
 import "./systems/personal-space-bubble";
 

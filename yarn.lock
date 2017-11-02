@@ -2758,6 +2758,10 @@ negotiator@0.6.1:
     socket.io "^1.4.5"
     socket.io-client "^1.4.5"
 
+nipplejs@^0.6.7:
+  version "0.6.7"
+  resolved "https://registry.yarnpkg.com/nipplejs/-/nipplejs-0.6.7.tgz#c634b63d0583868d033b5f34813e9388066cc9b6"
+
 node-forge@0.6.33:
   version "0.6.33"
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-0.6.33.tgz#463811879f573d45155ad6a9f43dc296e8e85ebc"
