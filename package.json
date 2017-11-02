@@ -4,7 +4,7 @@
   "main": "src/index.js",
   "license": "MPL-2.0",
   "scripts": {
-    "dev": "webpack-dev-server --open --config webpack.dev.js",
+    "dev": "webpack-dev-server --https --open --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
     "prettier": "prettier --write src/**/*.js",
     "deploy": "npm run build && now deploy --static ./public/"
