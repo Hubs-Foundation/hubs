@@ -55,7 +55,7 @@
         </a-assets>
 
         <a-entity id="player-rig" networked wasd-controls snap-rotation="pivotSrc: #head">
-            <a-sphere scale="0.1 0.1 0.1"></a-sphere>
+            <a-sphere scale="0.1 0.1 0.1" segments-height="6" segments-width="8"></a-sphere>
             <a-entity id="head" camera="userHeight: 1.6" personal-space-bubble look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
 
             <a-entity id="nametag" networked="template:#nametag-template;showLocalTemplate:false;"></a-entity>
