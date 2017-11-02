@@ -35,7 +35,10 @@ window.onSceneLoad = function() {
     scene.setAttribute('stats', true);
   }
 
-  const username = promptForName(); // promptForName is blocking
+  let username = qs.name;
+  if (!username) {
+    username = promptForName(username); // promptForName is blocking
+  }
   const myNametag = document.querySelector("#player-rig .nametag");
   myNametag.setAttribute("text", "value", username);
 
