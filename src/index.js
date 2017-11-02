@@ -1,5 +1,6 @@
 import queryString from "query-string";
 
+import "aframe";
 import "networked-aframe";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
