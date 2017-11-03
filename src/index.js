@@ -7,15 +7,15 @@ import "aframe-teleport-controls";
 import "aframe-input-mapping-component";
 
 import "./components/axis-dpad";
-import "./components/snap-rotation";
 import "./components/mute-mic";
 import "./components/audio-feedback";
 import "./components/nametag-transform";
 import "./components/avatar-customization";
 import "./components/mute-state-indicator";
 import "./components/hand-controls-visibility";
+import "./components/character-controller";
+import "./components/split-axis-events";
 import "./components/virtual-gamepad-controls";
-
 import "./systems/personal-space-bubble";
 
 import registerNetworkScheams from "./network-schemas";

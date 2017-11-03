@@ -2,7 +2,6 @@
 
 <head>
     <title>Mozilla Mixed Reality Social Client</title>
-    <!-- <script src="https://aframe.io/releases/0.7.0/aframe.js"></script> -->
     <script src="./app.bundle.js"></script>
     <style>
         .a-enter-vr {
@@ -15,12 +14,13 @@
 <body>
     <a-scene
         networked-scene="adapter: janus;
-                            room: 2;
-                            serverURL: wss://quander.me:8989;
-                            audio: true;
-                            debug: true;
-                            connectOnLoad: false;"
-        mute-mic="eventSrc: a-scene; toggleEvents: action_mute">
+                         room: 2;
+                         serverURL: wss://quander.me:8989;
+                         audio: true;
+                         debug: true;
+                         connectOnLoad: false;"
+        mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
+        virtual-gamepad-controls>
 
         <a-assets>
             <img id="grid" src="assets/grid.png" crossorigin="anonymous" />
@@ -59,15 +59,11 @@
                     scale="6 6 6"></a-entity>
             </script>
         </a-assets>
+        <a-entity id="player-rig" networked character-controller="pivot: #head">
+            <a-sphere scale="0.1 0.1 0.1"></a-sphere>
+            <a-entity id="head" camera="userHeight: 1.6" personal-space-bubble networked="template:#head-template;showLocalTemplate:false;"<script src="<a-entity id="nametag" networked="template:#nametag-template;showLocalTemplate:false;"></a-entity>
 
-        <a-entity id="player-rig" networked wasd-controls snap-rotation="pivotSrc: #head">
-            <a-sphere scale="0.1 0.1 0.1" segments-height="6" segments-width="8"></a-sphere>
-            <a-entity id="head" camera="userHeight: 1.6" personal-space-bubble look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
-
-            <a-entity id="nametag" networked="template:#nametag-template;showLocalTemplate:false;"></a-entity>
-
-            <a-entity id="left-hand" hand-controls="left" hand-controls-visibility axis-dpad="centerZone: 1" teleport-controls="cameraRig: #player-rig; teleportOrigin: #head; button: action_teleport_"
-                networked="template:#hand-template;showLocalTemplate:false;">
+            <a-entity id="left-hand" split-axis-events hand-controls="left" hand-controls-visibility axis-dpad="centerZone: 1" networked="template:#hand-template;showLocalTemplate:false;">
                 <a-entity id="watch" gltf-model="assets/hud/watch.gltf" position="0 0.0015 0.147" rotation="3.5 0 0">
                     <a-circle mute-state-indicator scale-audio-feedback="analyserSrc: #head; minScale: 0.035; maxScale: 0.08;" position="0 0.023 0"
                         rotation="-90 0 0" scale="0.04 0.04 0.04" material="color:#d8eece;shader:flat">

@@ -13,6 +13,7 @@
     "prettier"
   ],
   "dependencies": {
+    "aframe": "0.7.0",
     "aframe-input-mapping-component": "https://github.com/fernandojsg/aframe-input-mapping-component",
     "aframe-teleport-controls": "https://github.com/netpro2k/aframe-teleport-controls#feature/teleport-origin",
     "naf-janus-adapter": "^0.1.4",

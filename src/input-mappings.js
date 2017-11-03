@@ -6,7 +6,11 @@ export default function registerInputMappings() {
         dpadleftdown: "action_snap_rotate_left",
         dpadrightdown: "action_snap_rotate_right",
         dpadcenterdown: "action_teleport_down", // @TODO once once #30 lands in aframe-teleport controls this just maps to "action_teleport_aim"
-        dpadcenterup: "action_teleport_up" // @TODO once once #30 lands in aframe-teleport controls this just maps to "action_teleport_teleport"
+        dpadcenterup: "action_teleport_up", // @TODO once once #30 lands in aframe-teleport controls this just maps to "action_teleport_teleport"
+        trackpadtouchstart: "start_translating",
+        trackpadtouchend: "stop_translating",
+        touchpadpressedaxismovex: "translateX",
+        touchpadpressedaxismovey: "translateZ"
       },
       "vive-controls": {
         menudown: "action_mute"
@@ -20,7 +24,15 @@ export default function registerInputMappings() {
       keyboard: {
         m_press: "action_mute",
         q_press: "action_snap_rotate_left",
-        e_press: "action_snap_rotate_right"
+        e_press: "action_snap_rotate_right",
+        w_down: "action_move_forward",
+        w_up: "action_dont_move_forward",
+        a_down: "action_move_left",
+        a_up: "action_dont_move_left",
+        s_down: "action_move_backward",
+        s_up: "action_dont_move_backward",
+        d_down: "action_move_right",
+        d_up: "action_dont_move_right"
       }
     }
   });
