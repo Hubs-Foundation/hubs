@@ -36,7 +36,10 @@ window.onSceneLoad = function() {
     scene.setAttribute("stats", true);
   }
 
-  const username = promptForName(); // promptForName is blocking
+  if (AFRAME.utils.device.isMobile() || qs.gamepad) {
+    const playerRig = document.querySelector("#player-rig");
+    playerRig.setAttribute("virtual-gamepad-controls", {});
+  }
 
   let username = qs.name;
   if (!username) {
