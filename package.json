@@ -16,7 +16,7 @@
     "aframe-input-mapping-component": "https://github.com/fernandojsg/aframe-input-mapping-component",
     "aframe-teleport-controls": "https://github.com/netpro2k/aframe-teleport-controls#feature/teleport-origin",
     "naf-janus-adapter": "^0.1.4",
-    "networked-aframe": "https://github.com/netpro2k/networked-aframe#feature/register-adapter",
+    "networked-aframe": "https://github.com/netpro2k/networked-aframe#bugfix/chrome/audio",
     "nipplejs": "^0.6.7",
     "pleasejs": "^0.4.2",
     "query-string": "^5.0.1"

@@ -165,3 +165,11 @@ export function generateName() {
   const name = names[Math.floor(Math.random() * names.length)];
   return name.replace(/^./, name[0].toUpperCase());
 }
+
+export function promptForName() {
+  var username = generateName();
+  do {
+    username = prompt("Choose a username", username);
+  } while (!(username && username.length));
+  return username;
+}
