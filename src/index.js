@@ -18,7 +18,7 @@ import "./systems/personal-space-bubble";
 
 import registerNetworkScheams from "./network-schemas";
 import registerInputMappings from "./input-mappings";
-import { promptForName } from "./utils";
+import { promptForName, getCookie, parseJwt } from "./utils";
 
 registerNetworkScheams();
 registerInputMappings();
@@ -31,14 +31,19 @@ window.onSceneLoad = function() {
     scene.setAttribute("networked-scene", "room", parseInt(qs.room));
   }
 
-  if (!qs.stats || !/off|false|0/.test(qs.stats)) {
-    scene.setAttribute('stats', true);
+  let username;
+  const jwt = getCookie("jwt");
+  if (jwt) {
+    const data = parseJwt(jwt);
+    username = data.typ.email;
+    alert("You are signed in as: " + username);
+  } else {
+  	let username = qs.name;
+    if (!username) {
+      username = promptForName(username); // promptForName is blocking
+    }
   }
 
-  let username = qs.name;
-  if (!username) {
-    username = promptForName(username); // promptForName is blocking
-  }
   const myNametag = document.querySelector("#player-rig .nametag");
   myNametag.setAttribute("text", "value", username);
 
