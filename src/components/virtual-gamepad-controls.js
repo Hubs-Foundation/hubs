@@ -1,9 +1,9 @@
 import nipplejs from "nipplejs";
 import styles from "./virtual-gamepad-controls.css";
 
-var THREE = AFRAME.THREE;
-var DEGREES = Math.PI / 180;
-var HALF_PI = Math.PI / 2;
+const THREE = AFRAME.THREE;
+const DEGREES = Math.PI / 180;
+const HALF_PI = Math.PI / 2;
 
 AFRAME.registerComponent("virtual-gamepad-controls", {
   schema: {
@@ -13,21 +13,21 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
 
   init() {
     // Setup gamepad elements
-    var leftTouchZone = document.createElement("div");
+    const leftTouchZone = document.createElement("div");
     leftTouchZone.classList.add(styles.touchZone, styles.left);
     document.body.appendChild(leftTouchZone);
 
-    var rightTouchZone = document.createElement("div");
+    const rightTouchZone = document.createElement("div");
     rightTouchZone.classList.add(styles.touchZone, styles.right);
     document.body.appendChild(rightTouchZone);
 
-    var leftStick = nipplejs.create({
+    const leftStick = nipplejs.create({
       zone: leftTouchZone,
       mode: "static",
       color: "white"
     });
 
-    var rightStick = nipplejs.create({
+    const rightStick = nipplejs.create({
       zone: rightTouchZone,
       mode: "static",
       color: "white"
@@ -71,10 +71,10 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     if (event.target.id === this.leftStick.id) {
       if (event.type === "move") {
         // Set velocity vector on left stick move
-        var angle = data.angle.radian;
-        var force = data.force < 1 ? data.force : 1;
-        var x = Math.cos(angle) * force;
-        var z = Math.sin(angle) * -force;
+        const angle = data.angle.radian;
+        const force = data.force < 1 ? data.force : 1;
+        const x = Math.cos(angle) * force;
+        const z = Math.sin(angle) * -force;
         this.velocity.set(x, 0, z);
       } else {
         this.velocity.set(0, 0, 0);
@@ -82,8 +82,8 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     } else {
       if (event.type === "move") {
         // Set yaw angle on right stick move
-        var angle = data.angle.radian;
-        var force = data.force < 1 ? data.force : 1;
+        const angle = data.angle.radian;
+        const force = data.force < 1 ? data.force : 1;
         this.yaw = Math.cos(angle) * -force;
       } else {
         this.yaw = 0;
