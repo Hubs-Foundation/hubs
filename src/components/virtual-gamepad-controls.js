@@ -67,12 +67,12 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.el.sceneEl.addEventListener("exit-vr", this.onExitVr);
   },
 
-  onJoystickChanged(event, data) {
+  onJoystickChanged(event, joystick) {
     if (event.target.id === this.leftStick.id) {
       if (event.type === "move") {
         // Set velocity vector on left stick move
-        const angle = data.angle.radian;
-        const force = data.force < 1 ? data.force : 1;
+        const angle = joystick.angle.radian;
+        const force = joystick.force < 1 ? joystick.force : 1;
         const x = Math.cos(angle) * force;
         const z = Math.sin(angle) * -force;
         this.velocity.set(x, 0, z);
@@ -82,8 +82,8 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     } else {
       if (event.type === "move") {
         // Set yaw angle on right stick move
-        const angle = data.angle.radian;
-        const force = data.force < 1 ? data.force : 1;
+        const angle = joystick.angle.radian;
+        const force = joystick.force < 1 ? joystick.force : 1;
         this.yaw = Math.cos(angle) * -force;
       } else {
         this.yaw = 0;
