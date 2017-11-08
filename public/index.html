@@ -13,12 +13,14 @@
 </head>
 
 <body>
-    <a-scene networked-scene="adapter: janus;
-                         room: 3;
-                         serverURL: wss://quander.me:8989;
-                         audio: true;
-                         debug: true;
-                         connectOnLoad: false;" mute-mic="eventSrc: a-scene; toggleEvents: action_mute">
+    <a-scene
+        networked-scene="adapter: janus;
+                            room: 2;
+                            serverURL: wss://quander.me:8989;
+                            audio: true;
+                            debug: true;
+                            connectOnLoad: false;"
+        mute-mic="eventSrc: a-scene; toggleEvents: action_mute">
 
         <a-assets>
             <img id="grid" src="assets/grid.png" crossorigin="anonymous" />
