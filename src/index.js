@@ -35,9 +35,8 @@ window.onSceneLoad = function() {
   if (!qs.stats || !/off|false|0/.test(qs.stats)) {
     scene.setAttribute("stats", true);
   }
-  console.log(qs);
+
   if (AFRAME.utils.device.isMobile() || qs.gamepad) {
-    console.log("add gamepad");
     const playerRig = document.querySelector("#player-rig");
     playerRig.setAttribute("virtual-gamepad-controls", {});
   }

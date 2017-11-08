@@ -5,8 +5,6 @@ var THREE = AFRAME.THREE;
 var DEGREES = Math.PI / 180;
 var HALF_PI = Math.PI / 2;
 
-console.log(styles);
-
 AFRAME.registerComponent("virtual-gamepad-controls", {
   schema: {
     movementSpeed: { default: 2 },
@@ -47,7 +45,6 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
 
     // Define initial state
     this.velocity = new THREE.Vector3();
-    // this.pitch = 0;
     this.yaw = 0;
 
     // Allocate matrices and vectors
@@ -84,14 +81,12 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
       }
     } else {
       if (event.type === "move") {
-        // Set pitch and yaw angles on right stick move
+        // Set yaw angle on right stick move
         var angle = data.angle.radian;
         var force = data.force < 1 ? data.force : 1;
         this.yaw = Math.cos(angle) * -force;
-        // this.pitch = Math.sin(angle) * force;
       } else {
         this.yaw = 0;
-        // this.pitch = 0;
       }
     }
   },
@@ -146,7 +141,6 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     // Reapply playspace (player rig) translation
     obj.applyMatrix(this.trans);
 
-    // @TODO this is really ugly, can't just set the position/rotation directly or they wont network
     this.el.setAttribute("rotation", {
       x: obj.rotation.x * THREE.Math.RAD2DEG,
       y: obj.rotation.y * THREE.Math.RAD2DEG,
