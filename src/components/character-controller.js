@@ -7,17 +7,15 @@ var TAU = Math.PI * 2;
 AFRAME.registerComponent("character-controller", {
   schema: {
     groundAcc: { default: 10 },
-    verticalAcc: { default: 80 },
     easing: { default: 8 },
     pivot: { type: "selector" },
     snapRotationRadian: { default: TAU / 8 }
   },
 
   init: function() {
-    this.startTranslating = this.startTranslating.bind(this);
-    this.stopTranslating = this.stopTranslating.bind(this);
     this.velocity = new THREE.Vector3(0, 0, 0);
     this.accelerationInput = new THREE.Vector3(0, 0, 0);
+    this.onStopMoving = this.onStopMoving.bind(this);
     this.onTranslateX = this.onTranslateX.bind(this);
     this.onTranslateY = this.onTranslateY.bind(this);
     this.onTranslateZ = this.onTranslateZ.bind(this);
@@ -32,8 +30,6 @@ AFRAME.registerComponent("character-controller", {
     this.boost = 1.0;
     this.onBoost = this.onBoost.bind(this);
 
-    this.startRotating = this.startRotating.bind(this);
-    this.stopRotating = this.stopRotating.bind(this);
     this.pendingSnapRotationMatrix = new THREE.Matrix4();
     this.onSnapRotateLeft = this.onSnapRotateLeft.bind(this);
     this.onSnapRotateRight = this.onSnapRotateRight.bind(this);
@@ -52,11 +48,7 @@ AFRAME.registerComponent("character-controller", {
 
   play: function() {
     var eventSrc = this.el.sceneEl;
-    this.el.sceneEl.addEventListener(
-      "start_translating",
-      this.startTranslating
-    );
-    eventSrc.addEventListener("stop_translating", this.stopTranslating);
+    eventSrc.addEventListener("stop_moving", this.onStopMoving);
     eventSrc.addEventListener("translateX", this.onTranslateX);
     eventSrc.addEventListener("translateY", this.onTranslateY);
     eventSrc.addEventListener("translateZ", this.onTranslateZ);
@@ -85,69 +77,61 @@ AFRAME.registerComponent("character-controller", {
   },
 
   pause: function() {
-    this.el.removeEventListener("start_translating", this.startTranslating);
-    this.el.removeEventListener("stop_translating", this.stopTranslating);
-    this.el.removeEventListener("translateX", this.onTranslateX);
-    this.el.removeEventListener("translateY", this.onTranslateY);
-    this.el.removeEventListener("translateZ", this.onTranslateZ);
-    this.el.removeEventListener("action_move_forward", this.onMoveForward);
-    this.el.removeEventListener(
+    var eventSrc = this.el.sceneEl;
+    eventSrc.removeEventListener("stop_moving", this.onStopMoving);
+    eventSrc.removeEventListener("translateX", this.onTranslateX);
+    eventSrc.removeEventListener("translateY", this.onTranslateY);
+    eventSrc.removeEventListener("translateZ", this.onTranslateZ);
+    eventSrc.removeEventListener("action_move_forward", this.onMoveForward);
+    eventSrc.removeEventListener(
       "action_dont_move_forward",
       this.onDontMoveForward
     );
-    this.el.removeEventListener("action_move_backward", this.onMoveBackward);
-    this.el.removeEventListener(
+    eventSrc.removeEventListener("action_move_backward", this.onMoveBackward);
+    eventSrc.removeEventListener(
       "action_dont_move_backward",
       this.onDontMoveBackward
     );
-    this.el.removeEventListener("action_move_left", this.onMoveLeft);
-    this.el.removeEventListener("action_dont_move_left", this.onDontMoveLeft);
-    this.el.removeEventListener("action_move_right", this.onMoveRight);
-    this.el.removeEventListener("action_dont_move_right", this.onDontMoveRight);
-    this.el.removeEventListener("rotateY", this.onRotateY);
-    this.el.removeEventListener(
+    eventSrc.removeEventListener("action_move_left", this.onMoveLeft);
+    eventSrc.removeEventListener("action_dont_move_left", this.onDontMoveLeft);
+    eventSrc.removeEventListener("action_move_right", this.onMoveRight);
+    eventSrc.removeEventListener(
+      "action_dont_move_right",
+      this.onDontMoveRight
+    );
+    eventSrc.removeEventListener("rotateY", this.onRotateY);
+    eventSrc.removeEventListener(
       "action_snap_rotate_left",
       this.onSnapRotateLeft
     );
-    this.el.removeEventListener(
+    eventSrc.removeEventListener(
       "action_snap_rotate_right",
       this.onSnapRotateRight
     );
   },
 
-  startTranslating: function() {},
-
-  stopTranslating: function() {
+  onStopMoving: function(event) {
     this.accelerationInput.set(0, 0, 0);
   },
 
-  startRotating: function() {},
-
-  stopRotating: function() {},
-
   onTranslateX: function(event) {
-    // bug : the last trackpadaxismovex event.detail is the html el instead of a number.
-    // I don't know why this is...
-    // Is touch up considered an axismove to (0,0)?
-    if (typeof event.detail === "number") {
-      this.accelerationInput.setX(event.detail);
-    } else {
-      this.accelerationInput.setX(0);
-    }
+    // The type check here is because the last axismove event that is captured here sends
+    // the el as the event.detail. This should probably be caught earlier.
+    this.accelerationInput.setX(
+      typeof event.detail === "number" ? event.detail : 0
+    );
   },
+
   onTranslateY: function(event) {
-    if (typeof event.detail === "number") {
-      this.accelerationInput.setY(event.detail);
-    } else {
-      this.accelerationInput.setY(0);
-    }
+    this.accelerationInput.setY(
+      typeof event.detail === "number" ? event.detail : 0
+    );
   },
+
   onTranslateZ: function(event) {
-    if (typeof event.detail === "number") {
-      this.accelerationInput.setZ(event.detail);
-    } else {
-      this.accelerationInput.setZ(0);
-    }
+    this.accelerationInput.setZ(
+      typeof event.detail === "number" ? event.detail : 0
+    );
   },
 
   onMoveForward: function(event) {
@@ -307,6 +291,7 @@ AFRAME.registerComponent("character-controller", {
     if (Math.abs(velocity.z) < CLAMP_VELOCITY) {
       velocity.z = 0;
     }
+
     var dvx = data.groundAcc * dt * this.accelerationInput.x * this.boost;
     var dvz = data.groundAcc * dt * -this.accelerationInput.z * this.boost;
     velocity.x += dvx;

@@ -7,10 +7,9 @@ export default function registerInputMappings() {
         dpadrightdown: "action_snap_rotate_right",
         dpadcenterdown: "action_teleport_down", // @TODO once once #30 lands in aframe-teleport controls this just maps to "action_teleport_aim"
         dpadcenterup: "action_teleport_up", // @TODO once once #30 lands in aframe-teleport controls this just maps to "action_teleport_teleport"
-        trackpadtouchstart: "start_translating",
-        trackpadtouchend: "stop_translating",
         touchpadpressedaxismovex: "translateX",
-        touchpadpressedaxismovey: "translateZ"
+        touchpadpressedaxismovey: "translateZ",
+        touchpadbuttonup: "stop_moving"
       },
       "vive-controls": {
         menudown: "action_mute"

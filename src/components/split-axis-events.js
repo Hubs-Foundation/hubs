@@ -22,6 +22,9 @@ AFRAME.registerComponent("split-axis-events", {
   },
 
   onButtonChanged: function(event) {
+    if (this.pressed && !event.detail.state.pressed) {
+      this.el.emit("touchpadbuttonup");
+    }
     this.pressed = event.detail.state.pressed;
   }
 });
