@@ -14,16 +14,6 @@
   right: 0;
 }
 
-:local(.touchZone.left) .nipple {
-  left: 50px;
-  bottom: 50px;
-}
-
-:local(.touchZone.right) .nipple {
-  right: 50px;
-  bottom: 50px;
-}
-
 :local(.touchZone) .nipple {
   margin: 5vh 5vw;
 }
