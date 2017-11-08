@@ -1,8 +1,11 @@
 import nipplejs from "nipplejs";
+import styles from "./virtual-gamepad-controls.css";
 
 var THREE = AFRAME.THREE;
 var DEGREES = Math.PI / 180;
 var HALF_PI = Math.PI / 2;
+
+console.log(styles);
 
 AFRAME.registerComponent("virtual-gamepad-controls", {
   schema: {
@@ -13,39 +16,24 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   init() {
     // Setup gamepad elements
     var leftTouchZone = document.createElement("div");
-    leftTouchZone.style.position = "absolute";
-    leftTouchZone.style.left = 0;
-    leftTouchZone.style.top = 0;
-    leftTouchZone.style.bottom = 0;
-    leftTouchZone.style.right = "50%";
+    leftTouchZone.classList.add(styles.touchZone, styles.left);
+    document.body.appendChild(leftTouchZone);
 
     var rightTouchZone = document.createElement("div");
-    rightTouchZone.style.position = "absolute";
-    rightTouchZone.style.left = "50%";
-    rightTouchZone.style.top = 0;
-    rightTouchZone.style.bottom = 0;
-    rightTouchZone.style.right = 0;
-
-    document.body.appendChild(leftTouchZone);
+    rightTouchZone.classList.add(styles.touchZone, styles.right);
     document.body.appendChild(rightTouchZone);
 
     var leftStick = nipplejs.create({
       zone: leftTouchZone,
       mode: "static",
-      color: "white",
-      position: { left: "50px", bottom: "50px" }
+      color: "white"
     });
-
-    leftStick[0].el.style.margin = "5vh 5vw";
 
     var rightStick = nipplejs.create({
       zone: rightTouchZone,
       mode: "static",
-      color: "white",
-      position: { right: "50px", bottom: "50px" }
+      color: "white"
     });
-
-    rightStick[0].el.style.margin = "5vh 5vw";
 
     this.onJoystickChanged = this.onJoystickChanged.bind(this);
 
