@@ -13,6 +13,7 @@ import "./components/nametag-transform";
 import "./components/avatar-customization";
 import "./components/mute-state-indicator";
 import "./components/hand-controls-visibility";
+import "./components/virtual-gamepad-controls";
 
 import "./systems/personal-space-bubble";
 
@@ -32,7 +33,12 @@ window.onSceneLoad = function() {
   }
 
   if (!qs.stats || !/off|false|0/.test(qs.stats)) {
-    scene.setAttribute('stats', true);
+    scene.setAttribute("stats", true);
+  }
+
+  if (AFRAME.utils.device.isMobile() || qs.gamepad) {
+    const playerRig = document.querySelector("#player-rig");
+    playerRig.setAttribute("virtual-gamepad-controls", {});
   }
 
   let username = qs.name;

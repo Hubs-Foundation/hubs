@@ -1,0 +1,19 @@
+:local(.touchZone) {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+:local(.touchZone.left) {
+  left: 0;
+  right: 50%;
+}
+
+:local(.touchZone.right) {
+  left: 50%;
+  right: 0;
+}
+
+:local(.touchZone) .nipple {
+  margin: 5vh 5vw;
+}

@@ -4,16 +4,22 @@
     <title>Mozilla Mixed Reality Social Client</title>
     <script src="https://aframe.io/releases/0.7.0/aframe.js"></script>
     <script src="./app.bundle.js"></script>
+    <style>
+        .a-enter-vr {
+            top: 90px;
+            bottom: auto;
+        }
+    </style>
 </head>
 
 <body>
     <a-scene
         networked-scene="adapter: janus;
-                         room: 2;
-                         serverURL: wss://quander.me:8989;
-                         audio: true;
-                         debug: true;
-                         connectOnLoad: false;"
+                            room: 2;
+                            serverURL: wss://quander.me:8989;
+                            audio: true;
+                            debug: true;
+                            connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute">
 
         <a-assets>
