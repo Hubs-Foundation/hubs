@@ -60,18 +60,20 @@
         </a-assets>
         <a-entity id="player-rig" networked character-controller="pivot: #head">
             <a-sphere scale="0.1 0.1 0.1"></a-sphere>
-            <a-entity id="head" look-controls camera="userHeight: 1.6" personal-space-bubble networked="template:#head-template;showLocalTemplate:false;"<script src="<a-entity id="nametag" networked="template:#nametag-template;showLocalTemplate:false;"></a-entity>
+            <a-entity id="head" camera="userHeight: 1.6" personal-space-bubble look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
+            <a-entity id="nametag" networked="template:#nametag-template;showLocalTemplate:false;"></a-entity>
 
             <a-entity id="left-hand" split-axis-events hand-controls="left" hand-controls-visibility axis-dpad="centerZone: 1" networked="template:#hand-template;showLocalTemplate:false;">
                 <a-entity id="watch" gltf-model="assets/hud/watch.gltf" position="0 0.0015 0.147" rotation="3.5 0 0">
                     <a-circle mute-state-indicator scale-audio-feedback="analyserSrc: #head; minScale: 0.035; maxScale: 0.08;" position="0 0.023 0"
-                        rotation="-90 0 0" scale="0.04 0.04 0.04" material="color:#d8eece;shader:flat">
+                              rotation="-90 0 0" scale="0.04 0.04 0.04" material="color:#d8eece;shader:flat">
                     </a-circle>
                 </a-entity>
             </a-entity>
 
             <a-entity id="right-hand" hand-controls="right" hand-controls-child-visibility axis-dpad teleport-controls="cameraRig: #player-rig; teleportOrigin: #head; hitEntity: #telepor-indicator; button: action_teleport_;"
-                networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
+                      networked="template:#hand-template;showLocalTemplate:false;">
+            </a-entity>
         </a-entity>
 
         <a-entity class="head" gltf-model="#rock-island" position="0 0 0">
