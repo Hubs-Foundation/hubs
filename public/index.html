@@ -32,6 +32,9 @@
 
             <a-asset-item id="rock-island" src="assets/environments/RockIslandTest/RockIsland.gltf"></a-asset-item>
 
+            <a-asset-item id="avatar-bot-a" src="assets/avatars/Avatar_Bot_A.glb"></a-asset-item>
+            
+
             <!-- Templates -->
             <script id="head-template" type="text/html">
                 <a-entity
@@ -78,6 +81,8 @@
             <a-entity id="right-hand" hand-controls="right" hand-controls-child-visibility axis-dpad teleport-controls="cameraRig: #player-rig; teleportOrigin: #head; hitEntity: #telepor-indicator; button: action_teleport_;"
                 networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
         </a-entity>
+
+        <a-entity gltf-model="#avatar-bot-a" position="0 0 0"></a-entity>
 
         <a-entity class="head" gltf-model="#rock-island" position="0 0 0">
             <a-sky color="#DDFFD9"></a-sky>
