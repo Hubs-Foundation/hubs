@@ -82,7 +82,11 @@
                 networked="template:#hand-template;showLocalTemplate:false;"></a-entity>
         </a-entity>
 
-        <a-entity gltf-model="#avatar-bot-a" position="0 0 0"></a-entity>
+        <a-entity gltf-model="#avatar-bot-a" bind-gltf position="0 0 0">
+            <a-model-entity model-binding="Neck" rotation="20 0 0">
+                <!-- <a-box scale="0.1 0.1 0.1"></a-box> -->
+            </a-model-entity>
+        </a-entity>
 
         <a-entity class="head" gltf-model="#rock-island" position="0 0 0">
             <a-sky color="#DDFFD9"></a-sky>
