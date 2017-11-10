@@ -50,11 +50,11 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.el.sceneEl.addEventListener("exit-vr", this.onExitVr);
   },
 
-  onJoystickChanged(event, data) {
+  onJoystickChanged(event, joystick) {
     if (event.target.id === this.leftStick.id) {
       if (event.type === "move") {
-        var angle = data.angle.radian;
-        var force = data.force < 1 ? data.force : 1;
+        var angle = joystick.angle.radian;
+        var force = joystick.force < 1 ? joystick.force : 1;
         var x = Math.cos(angle) * force;
         var z = Math.sin(angle) * force;
         this.el.sceneEl.emit("translateX", x);
@@ -66,8 +66,8 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     } else {
       if (event.type === "move") {
         // Set pitch and yaw angles on right stick move
-        var angle = data.angle.radian;
-        var force = data.force < 1 ? data.force : 1;
+        var angle = joystick.angle.radian;
+        var force = joystick.force < 1 ? joystick.force : 1;
         this.yaw = Math.cos(angle) * force;
         this.el.sceneEl.emit("rotateY", this.yaw);
       } else {

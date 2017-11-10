@@ -1,7 +1,6 @@
 import AFRAME from "aframe";
 var CLAMP_VELOCITY = 0.01;
 var MAX_DELTA = 0.2;
-var TAU = Math.PI * 2;
 
 // Does not have any type of collisions yet.
 AFRAME.registerComponent("character-controller", {
@@ -9,7 +8,9 @@ AFRAME.registerComponent("character-controller", {
     groundAcc: { default: 10 },
     easing: { default: 8 },
     pivot: { type: "selector" },
-    snapRotationRadian: { default: TAU / 8 }
+    snapRotationRadian: { default: THREE.Math.DEG2RAD * 45 },
+    wasdSpeed: { default: 0.8 },
+    rotationSpeed: { default: -3 }
   },
 
   init: function() {
@@ -115,27 +116,19 @@ AFRAME.registerComponent("character-controller", {
   },
 
   onTranslateX: function(event) {
-    // The type check here is because the last axismove event that is captured here sends
-    // the el as the event.detail. This should probably be caught earlier.
-    this.accelerationInput.setX(
-      typeof event.detail === "number" ? event.detail : 0
-    );
+    this.accelerationInput.setX(event.detail);
   },
 
   onTranslateY: function(event) {
-    this.accelerationInput.setY(
-      typeof event.detail === "number" ? event.detail : 0
-    );
+    this.accelerationInput.setY(event.detail);
   },
 
   onTranslateZ: function(event) {
-    this.accelerationInput.setZ(
-      typeof event.detail === "number" ? event.detail : 0
-    );
+    this.accelerationInput.setZ(event.detail);
   },
 
   onMoveForward: function(event) {
-    this.accelerationInput.z = 0.8;
+    this.accelerationInput.z = this.data.wasdSpeed;
   },
 
   onDontMoveForward: function(event) {
@@ -143,7 +136,7 @@ AFRAME.registerComponent("character-controller", {
   },
 
   onMoveBackward: function(event) {
-    this.accelerationInput.z = -0.8;
+    this.accelerationInput.z = -this.data.wasdSpeed;
   },
 
   onDontMoveBackward: function(event) {
@@ -151,7 +144,7 @@ AFRAME.registerComponent("character-controller", {
   },
 
   onMoveLeft: function(event) {
-    this.accelerationInput.x = -0.8;
+    this.accelerationInput.x = -this.data.wasdSpeed;
   },
 
   onDontMoveLeft: function(event) {
@@ -159,7 +152,7 @@ AFRAME.registerComponent("character-controller", {
   },
 
   onMoveRight: function(event) {
-    this.accelerationInput.x = 0.8;
+    this.accelerationInput.x = this.data.wasdSpeed;
   },
 
   onDontMoveRight: function(event) {
@@ -167,11 +160,7 @@ AFRAME.registerComponent("character-controller", {
   },
 
   onRotateY: function(event) {
-    if (typeof event.detail === "number") {
-      this.angularVelocity = event.detail;
-    } else {
-      this.angularVelocity = 0;
-    }
+    this.angularVelocity = event.detail;
   },
 
   onSnapRotateLeft: function(event) {
@@ -203,10 +192,11 @@ AFRAME.registerComponent("character-controller", {
 
     return function(t, dt) {
       const deltaSeconds = dt / 1000;
-      const rotationSpeed = -3;
       const root = this.el.object3D;
       const pivot = this.data.pivot.object3D;
       const distance = this.data.groundAcc * deltaSeconds;
+      const rotationDelta =
+        this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
 
       pivotPos.copy(pivot.position);
       pivotPos.applyMatrix4(root.matrix);
@@ -222,11 +212,7 @@ AFRAME.registerComponent("character-controller", {
         this.velocity.y * distance,
         this.velocity.z * distance
       );
-
-      yawMatrix.makeRotationAxis(
-        rotationAxis,
-        rotationSpeed * this.angularVelocity * deltaSeconds
-      );
+      yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 
       // Translate to middle of playspace (player rig)
       root.applyMatrix(transInv);
