@@ -66,7 +66,9 @@
         <a-entity id="player-rig" networked wasd-controls snap-rotation="pivotSrc: #head">
             <a-sphere scale="0.1 0.1 0.1" segments-height="6" segments-width="8"></a-sphere>
             <a-entity id="head" camera="userHeight: 1.6" personal-space-bubble look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
-
+            
+            <a-box body-controller="head:#head;leftHand:#left-hand;rightHand:#right-hand" scale="1 1 1" position="0 -0.25 0"></a-box>
+            
             <a-entity id="nametag" networked="template:#nametag-template;showLocalTemplate:false;"></a-entity>
 
             <a-entity id="left-hand" hand-controls="left" hand-controls-visibility axis-dpad="centerZone: 1" teleport-controls="cameraRig: #player-rig; teleportOrigin: #head; button: action_teleport_"

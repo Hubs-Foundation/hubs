@@ -14,6 +14,7 @@ import "./components/avatar-customization";
 import "./components/mute-state-indicator";
 import "./components/hand-controls-visibility";
 import "./components/virtual-gamepad-controls";
+import "./components/body-controller";
 
 import "./systems/personal-space-bubble";
 
