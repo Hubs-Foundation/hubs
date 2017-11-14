@@ -17,7 +17,7 @@ import "./components/mute-state-indicator";
 import "./components/hand-controls-visibility";
 import "./components/virtual-gamepad-controls";
 import "./components/body-controller";
-import "./components/bind-gltf";
+import "./components/custom-hand-controls";
 
 import "./systems/personal-space-bubble";
 
