@@ -56,3 +56,7 @@ window.onSceneLoad = function() {
 
   scene.components["networked-scene"].connect();
 };
+
+window.onConnect = function() {
+  document.getElementById("loader").style.display = "none";
+};

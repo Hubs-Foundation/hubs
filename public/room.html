@@ -4,20 +4,30 @@
     <title>Mozilla Mixed Reality Social Client</title>
     <script src="./app.bundle.js"></script>
     <style>
-        .a-enter-vr {
-            top: 90px;
-            bottom: auto;
-        }
+     .a-enter-vr {
+         top: 90px;
+         bottom: auto;
+     }
+     #loader {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        z-index: 10001;
+        background: #eaeaea no-repeat url(assets/loading.gif) center center;
+        opacity: 0.9;
+     }
     </style>
 </head>
 
 <body>
+    <div id="loader"></div>
     <a-scene
         networked-scene="adapter: janus;
                          room: 2;
                          serverURL: wss://quander.me:8989;
                          audio: true;
                          debug: true;
+                         onConnect: onConnect;
                          connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute">
 
