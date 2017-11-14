@@ -35,7 +35,7 @@ window.onSceneLoad = function() {
       qs.room && !isNaN(parseInt(qs.room))
         ? parseInt(qs.room)
         : Config.default_room,
-    serverUrl: Config.janus_url
+    serverURL: Config.janus_server_url
   });
 
   if (!qs.stats || !/off|false|0/.test(qs.stats)) {
