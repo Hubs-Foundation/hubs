@@ -2,9 +2,9 @@ import React from "react";
 import ReactDOM from "react-dom";
 import mj from "minijanus";
 
-import "./lobby.css";
+import Config from "./config";
 
-const SERVER_URL = "wss://quander.me:8989";
+import "./lobby.css";
 
 class Lobby extends React.Component {
   constructor() {
@@ -17,7 +17,7 @@ class Lobby extends React.Component {
   }
 
   componentDidMount() {
-    this.ws = new WebSocket(SERVER_URL, "janus-protocol");
+    this.ws = new WebSocket(Config.janus_server_url, "janus-protocol");
     this.session = new mj.JanusSession(this.ws.send.bind(this.ws));
     this.ws.addEventListener("open", this.onWebsocketOpen);
     this.ws.addEventListener("message", this.onWebsocketMessage);
@@ -46,27 +46,20 @@ class Lobby extends React.Component {
   }
 
   fetchRooms() {
-    return this.handle
-      .sendMessage({
-        kind: "listrooms"
-      })
-      .then(signal => {
-        const roomIds = signal.plugindata.data.response.room_ids;
-        return Promise.all(
-          roomIds.map(room_id => {
-            return this.handle
-              .sendMessage({
-                kind: "listusers",
-                room_id
-              })
-              .then(signal => ({
-                id: room_id,
-                limit: 12,
-                users: signal.plugindata.data.response.user_ids
-              }));
+    return Promise.all(
+      Config.public_rooms.map(room_id => {
+        return this.handle
+          .sendMessage({
+            kind: "listusers",
+            room_id
           })
-        );
-      });
+          .then(signal => ({
+            id: room_id,
+            limit: 12,
+            users: signal.plugindata.data.response.user_ids
+          }));
+      })
+    );
   }
 
   onWebsocketMessage(event) {
@@ -85,6 +78,14 @@ class Lobby extends React.Component {
 
 const goToRoom = roomId => {
   window.open(`room.html?room=${roomId}`, "_blank");
+};
+
+const goToNewRoom = () => {
+  const publicRooms = Config.public_rooms.length + 1;
+  const roomId =
+    publicRooms +
+    Math.floor(Math.random() * (Number.MAX_SAFE_INTEGER - publicRooms));
+  goToRoom(roomId);
 };
 
 const RoomListItem = ({ room }) => {
@@ -107,8 +108,16 @@ const RoomListItem = ({ room }) => {
 const RoomList = ({ rooms }) => {
   return (
     <div className="mdl-card mdl-shadow--2dp panel">
-      <ul className="demo-list-icon mdl-list">
+      <ul className="mdl-list scroll">
         {rooms.map(room => <RoomListItem key={room.id} room={room} />)}
+      </ul>
+      <ul className="mdl-list">
+        <li className="mdl-list__item room-item" onClick={goToNewRoom}>
+          <span className="mdl-list__item-primary-content">
+            <i className="material-icons mdl-list__item-icon">add</i>
+            New Meeting Room
+          </span>
+        </li>
       </ul>
     </div>
   );

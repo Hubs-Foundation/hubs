@@ -5,7 +5,7 @@
 body {
   margin: 0;
   padding: 0;
-  background: black url(https://cdn.glitch.com/52bf1803-98d8-450b-83f4-f74024eb22e5%2Fwallpaper_HD_firefox.jpg?1510615261238) no-repeat right center;
+  background: black url(https://cdn.glitch.com/52bf1803-98d8-450b-83f4-f74024eb22e5%2Fwallpaper_HD_firefox.jpg?1510615261238) no-repeat left center;
   background-size: auto 100%;
 }
 
@@ -20,6 +20,16 @@ body {
 
 .panel {
   height: 100%;
+  display: flex;
+}
+
+.scroll {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.mdl-list {
+    margin: 0;
 }
 
 .room-item {

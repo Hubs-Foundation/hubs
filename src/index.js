@@ -21,6 +21,7 @@ import "./systems/personal-space-bubble";
 import registerNetworkScheams from "./network-schemas";
 import registerInputMappings from "./input-mappings";
 import { promptForName } from "./utils";
+import Config from "./config";
 
 registerNetworkScheams();
 registerInputMappings();
@@ -29,9 +30,13 @@ window.onSceneLoad = function() {
   const qs = queryString.parse(location.search);
   const scene = document.querySelector("a-scene");
 
-  if (qs.room && !isNaN(parseInt(qs.room))) {
-    scene.setAttribute("networked-scene", "room", parseInt(qs.room));
-  }
+  scene.setAttribute("networked-scene", {
+    room:
+      qs.room && !isNaN(parseInt(qs.room))
+        ? parseInt(qs.room)
+        : Config.default_room,
+    serverUrl: Config.janus_url
+  });
 
   if (!qs.stats || !/off|false|0/.test(qs.stats)) {
     scene.setAttribute("stats", true);
