@@ -44,7 +44,15 @@ body {
     text-decoration: none;
 }
 
-
 .room-item a:hover {
     background: #eaeaea;
+}
+
+@media only screen and (max-width : 320px) {
+    .overlay {
+        padding: 0;
+    }
+    .panel {
+        width: 100%;
+    }
 }
