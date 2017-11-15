@@ -1,0 +1,41 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: black url(https://cdn.glitch.com/52bf1803-98d8-450b-83f4-f74024eb22e5%2Fwallpaper_HD_firefox.jpg?1510615261238) no-repeat left center;
+  background-size: auto 100%;
+}
+
+.overlay {
+  display: flex;
+  background: rgba(0,0,0,0.4);
+  width: 100vw;
+  height: 100vh;
+  align-items: center;
+  padding: 100px 50px;
+}
+
+.panel {
+  height: 100%;
+  display: flex;
+}
+
+.scroll {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.mdl-list {
+    margin: 0;
+}
+
+.room-item {
+  cursor: pointer;
+}
+
+.room-item:hover {
+    background: #eaeaea;
+}

@@ -1,0 +1,96 @@
+<html>
+
+<head>
+    <title>Mozilla Mixed Reality Social Client</title>
+    <script src="./app.bundle.js"></script>
+    <style>
+     .a-enter-vr {
+         top: 90px;
+         bottom: auto;
+     }
+     #loader {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        z-index: 10001;
+        background: #eaeaea no-repeat url(assets/loading.gif) center center;
+        opacity: 0.9;
+     }
+    </style>
+</head>
+
+<body>
+    <div id="loader"></div>
+    <a-scene
+        networked-scene="adapter: janus;
+                         audio: true;
+                         debug: true;
+                         onConnect: App.onConnect;
+                         connectOnLoad: false;"
+        mute-mic="eventSrc: a-scene; toggleEvents: action_mute">
+
+        <a-assets>
+            <img id="grid" src="assets/grid.png" crossorigin="anonymous" />
+            <img id="sky" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg" crossorigin="anonymous" />
+
+            <a-asset-item id="dodec-avatar-head" src="assets/avatars/dodec/DodecAvatarGLTF/DodecAvatar_Head.gltf"></a-asset-item>
+
+            <a-asset-item id="watch-model" src="assets/hud/watch.gltf"></a-asset-item>
+
+            <a-asset-item id="rock-island" src="assets/environments/RockIslandTest/RockIsland.gltf"></a-asset-item>
+
+            <!-- Templates -->
+            <script id="head-template" type="text/html">
+                <a-entity
+                    class="head"
+                    gltf-model="#dodec-avatar-head"
+                    networked-audio-source
+                    networked-audio-analyser
+                    matcolor-audio-feedback="objectName: DodecAvatar_Head_0"
+                    scale-audio-feedback
+                    avatar-customization
+                    personal-space-invader
+                ></a-entity>
+            </script>
+
+            <script id="hand-template" type="text/html">
+                <a-box class="hand" personal-space-invader scale="0.2 0.1 0.3"></a-box>
+            </script>
+
+            <script id="nametag-template" type="text/html">
+                <a-entity
+                    class="nametag"
+                    nametag-transform="follow: .head"
+                    text="side:double;align:center;color:#555"
+                    position="0 2.5 0"
+                    scale="6 6 6"></a-entity>
+            </script>
+        </a-assets>
+        <a-entity id="player-rig" networked character-controller="pivot: #head">
+            <a-sphere scale="0.1 0.1 0.1"></a-sphere>
+            <a-entity id="head" camera="userHeight: 1.6" personal-space-bubble look-controls networked="template:#head-template;showLocalTemplate:false;"></a-entity>
+            <a-entity id="nametag" networked="template:#nametag-template;showLocalTemplate:false;"></a-entity>
+
+            <a-entity id="left-hand" split-axis-events hand-controls="left" hand-controls-visibility axis-dpad="centerZone: 1" networked="template:#hand-template;showLocalTemplate:false;">
+                <a-entity id="watch" gltf-model="assets/hud/watch.gltf" position="0 0.0015 0.147" rotation="3.5 0 0">
+                    <a-circle mute-state-indicator scale-audio-feedback="analyserSrc: #head; minScale: 0.035; maxScale: 0.08;" position="0 0.023 0"
+                              rotation="-90 0 0" scale="0.04 0.04 0.04" material="color:#d8eece;shader:flat">
+                    </a-circle>
+                </a-entity>
+            </a-entity>
+
+            <a-entity id="right-hand" hand-controls="right" hand-controls-child-visibility axis-dpad teleport-controls="cameraRig: #player-rig; teleportOrigin: #head; hitEntity: #telepor-indicator; button: action_teleport_;"
+                      networked="template:#hand-template;showLocalTemplate:false;">
+            </a-entity>
+        </a-entity>
+
+        <a-entity class="head" gltf-model="#rock-island" position="0 0 0">
+            <a-sky color="#DDFFD9"></a-sky>
+        </a-entity>
+    </a-scene>
+    <script>
+        document.querySelector('a-scene').addEventListener('loaded', App.onSceneLoad)
+    </script>
+</body>
+
+</html>

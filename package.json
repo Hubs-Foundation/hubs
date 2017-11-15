@@ -20,13 +20,16 @@
     "networked-aframe": "https://github.com/netpro2k/networked-aframe#bugfix/chrome/audio",
     "nipplejs": "^0.6.7",
     "pleasejs": "^0.4.2",
-    "query-string": "^5.0.1"
+    "query-string": "^5.0.1",
+    "react": "^16.1.1",
+    "react-dom": "^16.1.1"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-minify-webpack-plugin": "^0.2.0",
     "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
     "css-loader": "^0.28.7",
     "eslint": "^4.10.0",
     "eslint-config-prettier": "^2.6.0",
