@@ -76,47 +76,41 @@ class Lobby extends React.Component {
   }
 }
 
-const goToRoom = roomId => {
-  window.open(`room.html?room=${roomId}`, "_self");
-};
-
-const goToNewRoom = () => {
-  const publicRooms = Config.public_rooms.length + 1;
-  const roomId =
-    publicRooms +
-    Math.floor(Math.random() * (Number.MAX_SAFE_INTEGER - publicRooms));
-  goToRoom(roomId);
-};
-
 const RoomListItem = ({ room }) => {
   return (
-    <li
-      className="room-item mdl-list__item mdl-list__item--two-line"
-      onClick={() => goToRoom(room.id)}
-    >
-      <span className="mdl-list__item-primary-content">
-        <i className="material-icons mdl-list__item-icon">room</i>
-        <span>Meeting room {room.id}</span>
-        <span className="mdl-list__item-sub-title">
-          {room.users.length}/{room.limit}
+    <li className="room-item mdl-list__item mdl-list__item--two-line">
+      <a href={`room.html?room=${room.id}`}>
+        <span className="mdl-list__item-primary-content">
+          <i className="material-icons mdl-list__item-icon">room</i>
+          <span>Meeting room {room.id}</span>
+          <span className="mdl-list__item-sub-title">
+            {room.users.length}/{room.limit}
+          </span>
         </span>
-      </span>
+      </a>
     </li>
   );
 };
 
 const RoomList = ({ rooms }) => {
+  const publicRooms = Config.public_rooms.length + 1;
+  const roomId =
+    publicRooms +
+    Math.floor(Math.random() * (Number.MAX_SAFE_INTEGER - publicRooms));
+
   return (
     <div className="mdl-card mdl-shadow--2dp panel">
       <ul className="mdl-list scroll">
         {rooms.map(room => <RoomListItem key={room.id} room={room} />)}
       </ul>
       <ul className="mdl-list">
-        <li className="mdl-list__item room-item" onClick={goToNewRoom}>
-          <span className="mdl-list__item-primary-content">
-            <i className="material-icons mdl-list__item-icon">add</i>
-            New Meeting Room
-          </span>
+        <li className="mdl-list__item room-item">
+          <a href={`room.html?room=${roomId}`}>
+            <span className="mdl-list__item-primary-content">
+              <i className="material-icons mdl-list__item-icon">add</i>
+              New Meeting Room
+            </span>
+          </a>
         </li>
       </ul>
     </div>
