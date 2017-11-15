@@ -11,7 +11,12 @@ function registerNetworkSchemas() {
   });
 
   NAF.schemas.add({
-    template: "#hand-template",
+    template: "#right-hand-template",
+    components: ["position", "rotation", "visible"]
+  });
+
+  NAF.schemas.add({
+    template: "#left-hand-template",
     components: ["position", "rotation", "visible"]
   });
 }
