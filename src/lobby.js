@@ -77,7 +77,7 @@ class Lobby extends React.Component {
 }
 
 const goToRoom = roomId => {
-  window.open(`room.html?room=${roomId}`, "_blank");
+  window.open(`room.html?room=${roomId}`, "_self");
 };
 
 const goToNewRoom = () => {

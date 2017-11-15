@@ -25,7 +25,7 @@
         networked-scene="adapter: janus;
                          audio: true;
                          debug: true;
-                         onConnect: onConnect;
+                         onConnect: App.onConnect;
                          connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute">
 
@@ -89,7 +89,7 @@
         </a-entity>
     </a-scene>
     <script>
-        document.querySelector('a-scene').addEventListener('loaded', onSceneLoad)
+        document.querySelector('a-scene').addEventListener('loaded', App.onSceneLoad)
     </script>
 </body>
 
