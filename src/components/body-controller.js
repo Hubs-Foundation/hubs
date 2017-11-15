@@ -2,8 +2,8 @@ AFRAME.registerComponent("body-controller", {
   schema: {
     camera: { type: "selector", default: "[camera]" },
     rotationSpeed: { default: 0.07 },
-    eyeNeckOffset: { type: "vec3", default: { x: 0, y: -0.11, z: 0.09 } },
-    neckHeight: { default: 0.05 }
+    eyeNeckOffset: { type: "vec3" },
+    neckHeight: { type: "number" }
   },
   init() {
     this.targetAngle = new THREE.Quaternion();

@@ -9,10 +9,22 @@ export default function registerInputMappings() {
         dpadcenterup: "action_teleport_up" // @TODO once once #30 lands in aframe-teleport controls this just maps to "action_teleport_teleport"
       },
       "vive-controls": {
-        menudown: "action_mute"
+        menudown: "action_mute",
+        gripdown: "middle_ring_pinky_down",
+        gripup: "middle_ring_pinky_up",
+        trackpadtouchstart: "thumb_down",
+        trackpadtouchend: "thumb_up",
+        triggerdown: "index_down",
+        triggerup: "index_up"
       },
       "oculus-touch-controls": {
-        xbuttondown: "action_mute"
+        xbuttondown: "action_mute",
+        gripdown: "middle_ring_pinky_down",
+        gripup: "middle_ring_pinky_up",
+        thumbsticktouchstart: "thumb_down",
+        thumbsticktouchend: "thumb_up",
+        triggerdown: "index_down",
+        triggerup: "index_up"
       },
       daydream: {
         menudown: "action_mute"
