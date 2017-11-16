@@ -5,6 +5,9 @@ import "naf-janus-adapter";
 import "aframe-teleport-controls";
 import "aframe-input-mapping-component";
 
+import animationMixer from "aframe-extras/src/loaders/animation-mixer";
+AFRAME.registerComponent("animation-mixer", animationMixer);
+
 import "./components/axis-dpad";
 import "./components/snap-rotation";
 import "./components/mute-mic";

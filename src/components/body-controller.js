@@ -5,6 +5,7 @@ AFRAME.registerComponent("body-controller", {
     eyeNeckOffset: { type: "vec3" },
     neckHeight: { type: "number" }
   },
+
   init() {
     this.targetAngle = new THREE.Quaternion();
     this.cameraPositionMatrix = new THREE.Matrix4();
@@ -22,6 +23,7 @@ AFRAME.registerComponent("body-controller", {
     this.bodyPositionMatrix = new THREE.Matrix4();
     this.bodyPositionVector = new THREE.Vector3();
   },
+
   tick(time, dt) {
     const object3D = this.el.object3D;
     const cameraObject3D = this.data.camera.object3D;

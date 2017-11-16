@@ -48,6 +48,13 @@ acorn@^5.1.1:
   version "5.2.1"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.2.1.tgz#317ac7821826c22c702d66189ab8359675f135d7"
 
+aframe-extras@^3.12.4:
+  version "3.12.4"
+  resolved "https://registry.yarnpkg.com/aframe-extras/-/aframe-extras-3.12.4.tgz#9276bde8b51a07a9822bbce1fc55f2eb8e6810dc"
+  dependencies:
+    aframe-physics-system "^1.4.3"
+    three-pathfinding "^0.2.2"
+
 "aframe-input-mapping-component@https://github.com/fernandojsg/aframe-input-mapping-component":
   version "1.0.0"
   resolved "https://github.com/fernandojsg/aframe-input-mapping-component#577cadad5a42e7216843dfeca9770fa8be465e09"
@@ -57,6 +64,13 @@ aframe-lerp-component@^1.1.0:
   resolved "https://registry.yarnpkg.com/aframe-lerp-component/-/aframe-lerp-component-1.1.0.tgz#dc8c12c53698770c30f25eef8873e34a4e79c765"
   dependencies:
     almost-equal "^1.1.0"
+
+aframe-physics-system@^1.4.3:
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/aframe-physics-system/-/aframe-physics-system-1.4.3.tgz#c6927e847081bfe546658314aa4c04958ef27934"
+  dependencies:
+    cannon "github:donmccurdy/cannon.js#v0.6.2-dev1"
+    three-to-cannon "^1.1.1"
 
 "aframe-teleport-controls@https://github.com/netpro2k/aframe-teleport-controls#feature/teleport-origin":
   version "0.3.0"
@@ -1192,6 +1206,10 @@ caniuse-db@^1.0.30000529, caniuse-db@^1.0.30000634, caniuse-db@^1.0.30000639:
 caniuse-lite@^1.0.30000744:
   version "1.0.30000751"
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000751.tgz#298ad34182ca4359757b4a93afc681b7b917e358"
+
+"cannon@github:donmccurdy/cannon.js#v0.6.2-dev1":
+  version "0.6.2"
+  resolved "https://codeload.github.com/donmccurdy/cannon.js/tar.gz/022e8ba53fa83abf0ad8a0e4fd08623123838a17"
 
 caseless@~0.12.0:
   version "0.12.0"
@@ -3377,10 +3395,6 @@ normalize-url@^1.4.0:
     query-string "^4.1.0"
     sort-keys "^1.0.0"
 
-now@^8.3.11:
-  version "8.3.11"
-  resolved "https://registry.yarnpkg.com/now/-/now-8.3.11.tgz#bca2043bc4485b1b24ea656d652e448ae27fe0bb"
-
 npm-run-path@^2.0.0:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/npm-run-path/-/npm-run-path-2.0.2.tgz#35a9232dfa35d7067b4cb2ddf2357b1871536c5f"
@@ -3671,10 +3685,6 @@ pkg-dir@^2.0.0:
   resolved "https://registry.yarnpkg.com/pkg-dir/-/pkg-dir-2.0.0.tgz#f6d5d1109e19d63edf428e0bd57e12777615334b"
   dependencies:
     find-up "^2.1.0"
-
-pleasejs@^0.4.2:
-  version "0.4.2"
-  resolved "https://registry.yarnpkg.com/pleasejs/-/pleasejs-0.4.2.tgz#aaaa1a5fa6902518de7e51e3c63b5f537f823164"
 
 pluralize@^7.0.0:
   version "7.0.0"
@@ -4767,6 +4777,14 @@ tar@^2.2.1:
 text-table@~0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
+
+three-pathfinding@^0.2.2:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/three-pathfinding/-/three-pathfinding-0.2.3.tgz#469bb26fb6b331f536c9ec88fde78e9c9219f637"
+
+three-to-cannon@^1.1.1:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/three-to-cannon/-/three-to-cannon-1.1.2.tgz#b0040b893b2fa5f0e8a0aedf58bc90fc07f137aa"
 
 through@^2.3.6:
   version "2.3.8"
