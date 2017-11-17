@@ -46,20 +46,12 @@ class Lobby extends React.Component {
   }
 
   fetchRooms() {
-    return Promise.all(
-      Config.public_rooms.map(room_id => {
-        return this.handle
-          .sendMessage({
-            kind: "listusers",
-            room_id
-          })
-          .then(signal => ({
-            id: room_id,
-            limit: 12,
-            users: signal.plugindata.data.response.user_ids
-          }));
-      })
-    );
+    return this.handle
+      .sendMessage({ kind: "listusers" })
+      .then(signal => {
+        const usersByRoom = signal.plugindata.data.response.users;
+        return Config.public_rooms.map(id => ({id, limit: 12, users: usersByRoom[id] || []}));
+      });
   }
 
   onWebsocketMessage(event) {
