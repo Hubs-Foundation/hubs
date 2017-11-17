@@ -70,7 +70,8 @@ AFRAME.registerComponent("axis-dpad", {
           ? "center"
           : angleToDirection(Math.atan2(x, y));
 
-    this.el.emit(`dpad${direction}${state}`);
+    const hand = e.detail.target.id === "left-hand" ? "left" : "right";
+    this.el.emit(`${hand}dpad${direction}${state}`);
 
     if (state === "down") {
       this.lastDirection = direction;

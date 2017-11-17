@@ -16,6 +16,7 @@ AFRAME.registerComponent("character-controller", {
     this.velocity = new THREE.Vector3(0, 0, 0);
     this.accelerationInput = new THREE.Vector3(0, 0, 0);
     this.onStopMoving = this.onStopMoving.bind(this);
+    this.onMove = this.onMove.bind(this);
     this.onTranslateX = this.onTranslateX.bind(this);
     this.onTranslateY = this.onTranslateY.bind(this);
     this.onTranslateZ = this.onTranslateZ.bind(this);
@@ -48,6 +49,7 @@ AFRAME.registerComponent("character-controller", {
 
   play: function() {
     const eventSrc = this.el.sceneEl;
+    eventSrc.addEventListener("move", this.onMove);
     eventSrc.addEventListener("stop_moving", this.onStopMoving);
     eventSrc.addEventListener("translateX", this.onTranslateX);
     eventSrc.addEventListener("translateY", this.onTranslateY);
@@ -78,6 +80,7 @@ AFRAME.registerComponent("character-controller", {
 
   pause: function() {
     const eventSrc = this.el.sceneEl;
+    eventSrc.removeEventListener("move", this.onMove);
     eventSrc.removeEventListener("stop_moving", this.onStopMoving);
     eventSrc.removeEventListener("translateX", this.onTranslateX);
     eventSrc.removeEventListener("translateY", this.onTranslateY);
@@ -108,6 +111,11 @@ AFRAME.registerComponent("character-controller", {
       "action_snap_rotate_right",
       this.onSnapRotateRight
     );
+  },
+
+  onMove: function(event) {
+    const axes = event.detail.axis;
+    this.accelerationInput.set(axes[0], 0, axes[1]);
   },
 
   onStopMoving: function(event) {
@@ -282,5 +290,9 @@ AFRAME.registerComponent("character-controller", {
     const dvz = data.groundAcc * dt * -this.accelerationInput.z * this.boost;
     velocity.x += dvx;
     velocity.z += dvz;
+
+    const decay = 0.9;
+    this.accelerationInput.x = this.accelerationInput.x * decay;
+    this.accelerationInput.z = this.accelerationInput.z * decay;
   }
 });
