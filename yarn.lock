@@ -3704,9 +3704,9 @@ mute-stream@0.0.7:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
 
-"naf-janus-adapter@https://github.com/mozilla/naf-janus-adapter#new-janus-api":
-  version "0.1.4"
-  resolved "https://github.com/mozilla/naf-janus-adapter#258d37842f121130d1e279368b6ac601ac2c3f75"
+naf-janus-adapter@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.1.5.tgz#f10c8cf390e226ddd62a0058c19f072547bd783a"
   dependencies:
     minijanus "^0.1.6"
 
