@@ -7,6 +7,7 @@ AFRAME.registerComponent("body-controller", {
   },
 
   init() {
+    this.targetAngleEuler = new THREE.Euler();
     this.targetAngle = new THREE.Quaternion();
     this.cameraPositionMatrix = new THREE.Matrix4();
     const offset = this.data.eyeNeckOffset;
@@ -29,8 +30,8 @@ AFRAME.registerComponent("body-controller", {
     const cameraObject3D = this.data.camera.object3D;
 
     // Set Rotation
-    const cameraQuat = cameraObject3D.quaternion;
-    this.targetAngle.set(0, cameraQuat.y, 0, cameraQuat.w);
+    this.targetAngleEuler.set(0, cameraObject3D.rotation.y, 0);
+    this.targetAngle.setFromEuler(this.targetAngleEuler);
     object3D.quaternion.slerp(this.targetAngle, this.data.rotationSpeed);
     const object3DRotation = object3D.rotation;
     this.el.setAttribute("rotation", {
