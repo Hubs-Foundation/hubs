@@ -16,7 +16,13 @@ export default function registerInputMappings() {
           menudown: "action_mute"
         },
         "oculus-touch-controls": {
-          xbuttondown: "action_mute"
+          xbuttondown: "action_mute",
+          gripdown: "middle_ring_pinky_down",
+          gripup: "middle_ring_pinky_up",
+          thumbsticktouchstart: "thumb_down",
+          thumbsticktouchend: "thumb_up",
+          triggerdown: "index_down",
+          triggerup: "index_up"
         },
         daydream: {
           menudown: "action_mute"
