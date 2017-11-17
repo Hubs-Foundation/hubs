@@ -86,9 +86,9 @@ aframe-template-component@3.2.1:
   dependencies:
     es6-template-strings "^2.0.0"
 
-aframe@0.7.0:
+"aframe@https://github.com/robertlong/aframe#removeVREffect":
   version "0.7.0"
-  resolved "https://registry.yarnpkg.com/aframe/-/aframe-0.7.0.tgz#2c7b31466452d0060ad14426f8d660f97440e3b8"
+  resolved "https://github.com/robertlong/aframe#8d24aaa0a396ddd50f9d07670721102739992eed"
   dependencies:
     "@tweenjs/tween.js" "^16.8.0"
     browserify-css "^0.8.2"
@@ -103,7 +103,7 @@ aframe@0.7.0:
     style-attr "^1.0.2"
     three "^0.87.0"
     three-bmfont-text "^2.1.0"
-    webvr-polyfill "^0.9.36"
+    webvr-polyfill "^0.9.40"
 
 after@0.8.2:
   version "0.8.2"
@@ -5775,7 +5775,7 @@ websocket-extensions@>=0.1.1:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/websocket-extensions/-/websocket-extensions-0.1.2.tgz#0e18781de629a18308ce1481650f67ffa2693a5d"
 
-webvr-polyfill@^0.9.36:
+webvr-polyfill@^0.9.40:
   version "0.9.40"
   resolved "https://registry.yarnpkg.com/webvr-polyfill/-/webvr-polyfill-0.9.40.tgz#2cfa0ec0e0cc6ba7238c73a09cba4952fff59a63"
 
