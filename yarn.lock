@@ -59,9 +59,9 @@ aframe-extras@^3.12.4:
     aframe-physics-system "^1.4.3"
     three-pathfinding "^0.2.2"
 
-"aframe-input-mapping-component@https://github.com/fernandojsg/aframe-input-mapping-component":
-  version "1.0.0"
-  resolved "https://github.com/fernandojsg/aframe-input-mapping-component#577cadad5a42e7216843dfeca9770fa8be465e09"
+"aframe-input-mapping-component@https://github.com/fernandojsg/aframe-input-mapping-component#6ebc38f":
+  version "0.1.1"
+  resolved "https://github.com/fernandojsg/aframe-input-mapping-component#6ebc38f0e871e8ab66673aef5cd11f6ce052076c"
 
 aframe-lerp-component@^1.1.0:
   version "1.1.0"
@@ -1582,7 +1582,7 @@ concat-stream@1.4.x:
     readable-stream "~1.1.9"
     typedarray "~0.0.5"
 
-concat-stream@^1.4.7, concat-stream@^1.6.0:
+concat-stream@^1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/concat-stream/-/concat-stream-1.6.0.tgz#0aac662fd52be78964d5532f694784e70110acf7"
   dependencies:
@@ -3660,9 +3660,9 @@ min-document@^2.19.0:
   dependencies:
     dom-walk "^0.1.0"
 
-minijanus@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/minijanus/-/minijanus-0.1.4.tgz#1a8294fa0735ce6a6c58a10dcff9a9ab0cfe8132"
+minijanus@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/minijanus/-/minijanus-0.1.6.tgz#8aa08d5797239b3c54a998efa0ee25fa4a700689"
 
 minimalistic-assert@^1.0.0:
   version "1.0.0"
@@ -3722,11 +3722,11 @@ mute-stream@0.0.7:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
 
-naf-janus-adapter@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.1.4.tgz#3e6e2022e8f6d5b7f6221fcec8b36a1e1e13be44"
+naf-janus-adapter@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.1.5.tgz#f10c8cf390e226ddd62a0058c19f072547bd783a"
   dependencies:
-    minijanus "^0.1.4"
+    minijanus "^0.1.6"
 
 nan@^2.3.0:
   version "2.7.0"
@@ -4000,10 +4000,6 @@ os-locale@^2.0.0:
     execa "^0.7.0"
     lcid "^1.0.0"
     mem "^1.1.0"
-
-os-shim@^0.1.2:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/os-shim/-/os-shim-0.1.3.tgz#6b62c3791cf7909ea35ed46e17658bb417cb3917"
 
 os-tmpdir@^1.0.0, os-tmpdir@^1.0.1, os-tmpdir@~1.0.2:
   version "1.0.2"
@@ -4450,14 +4446,6 @@ postcss@^6.0.1:
     chalk "^2.3.0"
     source-map "^0.6.1"
     supports-color "^4.4.0"
-
-pre-commit@^1.2.2:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/pre-commit/-/pre-commit-1.2.2.tgz#dbcee0ee9de7235e57f79c56d7ce94641a69eec6"
-  dependencies:
-    cross-spawn "^5.0.1"
-    spawn-sync "^1.0.15"
-    which "1.2.x"
 
 prelude-ls@~1.1.2:
   version "1.1.2"
@@ -5174,13 +5162,6 @@ source-map@~0.1.31:
   dependencies:
     amdefine ">=0.0.4"
 
-spawn-sync@^1.0.15:
-  version "1.0.15"
-  resolved "https://registry.yarnpkg.com/spawn-sync/-/spawn-sync-1.0.15.tgz#b00799557eb7fb0c8376c29d44e8a1ea67e57476"
-  dependencies:
-    concat-stream "^1.4.7"
-    os-shim "^0.1.2"
-
 spdx-correct@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/spdx-correct/-/spdx-correct-1.0.2.tgz#4b3073d933ff51f3912f03ac5519498a4150db40"
@@ -5813,12 +5794,6 @@ which-module@^1.0.0:
 which-module@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/which-module/-/which-module-2.0.0.tgz#d9ef07dce77b9902b8a3a8fa4b31c3e3f7e6e87a"
-
-which@1.2.x:
-  version "1.2.14"
-  resolved "https://registry.yarnpkg.com/which/-/which-1.2.14.tgz#9a87c4378f03e827cecaf1acdf56c736c01c14e5"
-  dependencies:
-    isexe "^2.0.0"
 
 which@^1.2.12, which@^1.2.9:
   version "1.3.0"
