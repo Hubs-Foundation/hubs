@@ -1,6 +1,6 @@
 import AFRAME from "aframe";
-var CLAMP_VELOCITY = 0.01;
-var MAX_DELTA = 0.2;
+const CLAMP_VELOCITY = 0.01;
+const MAX_DELTA = 0.2;
 
 // Does not have any type of collisions yet.
 AFRAME.registerComponent("character-controller", {
@@ -48,7 +48,7 @@ AFRAME.registerComponent("character-controller", {
   },
 
   play: function() {
-    var eventSrc = this.el.sceneEl;
+    const eventSrc = this.el.sceneEl;
     eventSrc.addEventListener("stop_moving", this.onStopMoving);
     eventSrc.addEventListener("translateX", this.onTranslateX);
     eventSrc.addEventListener("translateY", this.onTranslateY);
@@ -78,7 +78,7 @@ AFRAME.registerComponent("character-controller", {
   },
 
   pause: function() {
-    var eventSrc = this.el.sceneEl;
+    const eventSrc = this.el.sceneEl;
     eventSrc.removeEventListener("stop_moving", this.onStopMoving);
     eventSrc.removeEventListener("translateX", this.onTranslateX);
     eventSrc.removeEventListener("translateY", this.onTranslateY);
@@ -116,15 +116,27 @@ AFRAME.registerComponent("character-controller", {
   },
 
   onTranslateX: function(event) {
-    this.accelerationInput.setX(event.detail);
+    if (typeof event.detail !== "object") {
+      this.accelerationInput.setX(event.detail);
+    } else {
+      this.accelerationInput.setX(0);
+    }
   },
 
   onTranslateY: function(event) {
-    this.accelerationInput.setY(event.detail);
+    if (typeof event.detail !== "object") {
+      this.accelerationInput.setY(event.detail);
+    } else {
+      this.accelerationInput.setY(0);
+    }
   },
 
   onTranslateZ: function(event) {
-    this.accelerationInput.setZ(event.detail);
+    if (typeof event.detail !== "object") {
+      this.accelerationInput.setZ(event.detail);
+    } else {
+      this.accelerationInput.setZ(0);
+    }
   },
 
   onMoveForward: function(event) {
@@ -160,7 +172,11 @@ AFRAME.registerComponent("character-controller", {
   },
 
   onRotateY: function(event) {
-    this.angularVelocity = event.detail;
+    if (typeof event.detail !== "object") {
+      this.angularVelocity = event.detail;
+    } else {
+      this.angularVelocity = 0;
+    }
   },
 
   onSnapRotateLeft: function(event) {
@@ -176,19 +192,19 @@ AFRAME.registerComponent("character-controller", {
   },
 
   tick: (function() {
-    var move = new THREE.Matrix4();
-    var trans = new THREE.Matrix4();
-    var transInv = new THREE.Matrix4();
-    var pivotPos = new THREE.Vector3();
-    var rotationAxis = new THREE.Vector3(0, 1, 0);
-    var yawMatrix = new THREE.Matrix4();
-    var rotationMatrix = new THREE.Matrix4();
-    var rotationInvMatrix = new THREE.Matrix4();
-    var pivotRotationMatrix = new THREE.Matrix4();
-    var pivotRotationInvMatrix = new THREE.Matrix4();
-    var position = new THREE.Vector3();
-    var currentPosition = new THREE.Vector3();
-    var movementVector = new THREE.Vector3();
+    const move = new THREE.Matrix4();
+    const trans = new THREE.Matrix4();
+    const transInv = new THREE.Matrix4();
+    const pivotPos = new THREE.Vector3();
+    const rotationAxis = new THREE.Vector3(0, 1, 0);
+    const yawMatrix = new THREE.Matrix4();
+    const rotationMatrix = new THREE.Matrix4();
+    const rotationInvMatrix = new THREE.Matrix4();
+    const pivotRotationMatrix = new THREE.Matrix4();
+    const pivotRotationInvMatrix = new THREE.Matrix4();
+    const position = new THREE.Vector3();
+    const currentPosition = new THREE.Vector3();
+    const movementVector = new THREE.Vector3();
 
     return function(t, dt) {
       const deltaSeconds = dt / 1000;
@@ -239,6 +255,7 @@ AFRAME.registerComponent("character-controller", {
         y: root.rotation.y * THREE.Math.RAD2DEG,
         z: root.rotation.z * THREE.Math.RAD2DEG
       });
+
       this.el.setAttribute("position", root.position);
 
       this.pendingSnapRotationMatrix.identity(); // Revert to identity
@@ -246,8 +263,8 @@ AFRAME.registerComponent("character-controller", {
   })(),
 
   updateVelocity: function(dt) {
-    var data = this.data;
-    var velocity = this.velocity;
+    const data = this.data;
+    const velocity = this.velocity;
 
     // If FPS too low, reset velocity.
     if (dt > MAX_DELTA) {
@@ -278,8 +295,8 @@ AFRAME.registerComponent("character-controller", {
       velocity.z = 0;
     }
 
-    var dvx = data.groundAcc * dt * this.accelerationInput.x * this.boost;
-    var dvz = data.groundAcc * dt * -this.accelerationInput.z * this.boost;
+    const dvx = data.groundAcc * dt * this.accelerationInput.x * this.boost;
+    const dvz = data.groundAcc * dt * -this.accelerationInput.z * this.boost;
     velocity.x += dvx;
     velocity.z += dvz;
   }

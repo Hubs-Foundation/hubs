@@ -58,9 +58,13 @@ window.App = {
     const myNametag = document.querySelector("#player-rig .nametag");
     myNametag.setAttribute("text", "value", username);
 
-    document.body.addEventListener("connected", App.onConnect);
+    if (qs.offline) {
+      App.onConnect();
+    } else {
+      document.body.addEventListener("connected", App.onConnect);
 
-    scene.components["networked-scene"].connect();
+      scene.components["networked-scene"].connect();
+    }
   },
 
   onConnect() {
