@@ -4,29 +4,29 @@
   "main": "src/index.js",
   "license": "MPL-2.0",
   "scripts": {
-    "dev": "webpack-dev-server --https --open --config webpack.dev.js",
+    "dev": "webpack-dev-server --https --host 0.0.0.0 --useLocalIp --open --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
-    "prettier": "prettier --write src/**/*.js",
-    "deploy": "npm run build && now deploy --static ./public/"
+    "prettier": "prettier --write src/**/*.js"
   },
-  "pre-commit": [
-    "prettier"
-  ],
   "dependencies": {
+    "aframe-extras": "^3.12.4",
     "aframe": "0.7.0",
-    "aframe-input-mapping-component": "https://github.com/fernandojsg/aframe-input-mapping-component",
+    "aframe-input-mapping-component": "https://github.com/fernandojsg/aframe-input-mapping-component#6ebc38f",
     "aframe-teleport-controls": "https://github.com/netpro2k/aframe-teleport-controls#feature/teleport-origin",
-    "naf-janus-adapter": "^0.1.4",
+    "minijanus": "^0.1.6",
+    "naf-janus-adapter": "^0.1.5",
     "networked-aframe": "https://github.com/netpro2k/networked-aframe#bugfix/chrome/audio",
     "nipplejs": "^0.6.7",
-    "pleasejs": "^0.4.2",
-    "query-string": "^5.0.1"
+    "query-string": "^5.0.1",
+    "react": "^16.1.1",
+    "react-dom": "^16.1.1"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-minify-webpack-plugin": "^0.2.0",
     "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
     "css-loader": "^0.28.7",
     "eslint": "^4.10.0",
     "eslint-config-prettier": "^2.6.0",
