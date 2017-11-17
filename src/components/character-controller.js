@@ -4,7 +4,7 @@ const MAX_DELTA = 0.2;
 // Does not have any type of collisions yet.
 AFRAME.registerComponent("character-controller", {
   schema: {
-    groundAcc: { default: 10 },
+    groundAcc: { default: 7 },
     easing: { default: 8 },
     pivot: { type: "selector" },
     snapRotationRadian: { default: THREE.Math.DEG2RAD * 45 },
@@ -115,30 +115,15 @@ AFRAME.registerComponent("character-controller", {
   },
 
   onTranslateX: function(event) {
-    // TODO: event.detail should't default to an object.
-    if (typeof event.detail !== "object") {
-      this.accelerationInput.setX(event.detail);
-    } else {
-      this.accelerationInput.setX(0);
-    }
+    this.accelerationInput.setX(event.detail.value);
   },
 
   onTranslateY: function(event) {
-    // TODO: event.detail should't default to an object.
-    if (typeof event.detail !== "object") {
-      this.accelerationInput.setY(event.detail);
-    } else {
-      this.accelerationInput.setY(0);
-    }
+    this.accelerationInput.setY(event.detail.value);
   },
 
   onTranslateZ: function(event) {
-    // TODO: event.detail should't default to an object.
-    if (typeof event.detail !== "object") {
-      this.accelerationInput.setZ(event.detail);
-    } else {
-      this.accelerationInput.setZ(0);
-    }
+    this.accelerationInput.setZ(event.detail.value);
   },
 
   onMoveForward: function(event) {
@@ -174,12 +159,7 @@ AFRAME.registerComponent("character-controller", {
   },
 
   onRotateY: function(event) {
-    // TODO: event.detail should't default to an object.
-    if (typeof event.detail !== "object") {
-      this.angularVelocity = event.detail;
-    } else {
-      this.angularVelocity = 0;
-    }
+    this.angularVelocity = event.detail.value;
   },
 
   onSnapRotateLeft: function(event) {

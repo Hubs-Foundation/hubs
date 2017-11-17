@@ -53,15 +53,15 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   onJoystickChanged(event, joystick) {
     if (event.target.id === this.leftStick.id) {
       if (event.type === "move") {
-        const angle = joystick.angle.radian;
-        const force = joystick.force < 1 ? joystick.force : 1;
-        const x = Math.cos(angle) * force;
-        const z = Math.sin(angle) * force;
-        this.el.sceneEl.emit("translateX", x);
-        this.el.sceneEl.emit("translateZ", z);
+        var angle = joystick.angle.radian;
+        var force = joystick.force < 1 ? joystick.force : 1;
+        var x = Math.cos(angle) * force;
+        var z = Math.sin(angle) * force;
+        this.el.sceneEl.emit("translateX", { value: x });
+        this.el.sceneEl.emit("translateZ", { value: z });
       } else {
-        this.el.sceneEl.emit("translateX", 0);
-        this.el.sceneEl.emit("translateZ", 0);
+        this.el.sceneEl.emit("translateX", { value: 0 });
+        this.el.sceneEl.emit("translateZ", { value: 0 });
       }
     } else {
       if (event.type === "move") {
@@ -69,10 +69,10 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
         const angle = joystick.angle.radian;
         const force = joystick.force < 1 ? joystick.force : 1;
         this.yaw = Math.cos(angle) * force;
-        this.el.sceneEl.emit("rotateY", this.yaw);
+        this.el.sceneEl.emit("rotateY", { value: this.yaw });
       } else {
         this.yaw = 0;
-        this.el.sceneEl.emit("rotateY", this.yaw);
+        this.el.sceneEl.emit("rotateY", { value: this.yaw });
       }
     }
   },

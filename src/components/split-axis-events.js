@@ -17,8 +17,8 @@ AFRAME.registerComponent("split-axis-events", {
 
   onAxisMove: function(event) {
     var name = "touchpad" + (this.pressed ? "pressed" : "") + "axismove";
-    this.el.emit(name + "x", event.detail.axis[0]);
-    this.el.emit(name + "y", event.detail.axis[1]);
+    this.el.emit(name + "x", { value: event.detail.axis[0] });
+    this.el.emit(name + "y", { value: event.detail.axis[1] });
   },
 
   onButtonChanged: function(event) {
