@@ -58,7 +58,7 @@ window.App = {
       username = data.typ.name;
       alert("Your username is: " + username);
     } else {
-      let username = qs.name;
+      username = qs.name;
       if (!username) {
         username = promptForName(username); // promptForName is blocking
       }
