@@ -1,3 +1,5 @@
+import styles from "./networked-video-player.css";
+
 const nafConnected = function() {
   return new Promise(resolve => {
     NAF.clientId
@@ -28,11 +30,8 @@ AFRAME.registerComponent("networked-video-player", {
     }
 
     const v = document.createElement("video");
+    v.classList.add(styles.video);
     v.srcObject = stream;
-    v.style.position = "absolute";
-    v.style.bottom = 0;
-    v.style.height = "100px";
-    v.style.background = "black";
     document.body.appendChild(v);
     v.play();
 
@@ -44,7 +43,6 @@ AFRAME.registerComponent("networked-video-player", {
         width: ratio * 1,
         height: 1
       });
-      //this.el.setAttribute("visible", true);
       this.el.setAttribute("material", "src", v);
     };
   },
