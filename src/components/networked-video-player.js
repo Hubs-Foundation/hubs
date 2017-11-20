@@ -20,11 +20,9 @@ AFRAME.registerComponent("networked-video-player", {
     }
 
     const ownerId = networkedEl.components.networked.data.owner;
-    console.log("video player for " + ownerId);
 
     const stream = await NAF.connection.adapter.getMediaStream(ownerId);
 
-    console.log("Stream", stream);
     if (!stream) {
       return;
     }
