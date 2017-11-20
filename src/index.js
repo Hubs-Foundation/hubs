@@ -20,6 +20,7 @@ import "./components/hand-controls2";
 import "./components/character-controller";
 import "./components/split-axis-events";
 import "./components/networked-video-player";
+import "./components/offset-relative-to";
 import "./systems/personal-space-bubble";
 
 import registerNetworkScheams from "./network-schemas";
@@ -30,21 +31,6 @@ import Config from "./config";
 registerNetworkScheams();
 registerInputMappings();
 
-function updateVideoElementPosition(entity) {
-  const headEl = document.querySelector("#head");
-
-  const offset = new THREE.Vector3(0, 0, -2);
-  headEl.object3D.localToWorld(offset);
-  entity.setAttribute("position", offset);
-
-  const headWorldRotation = headEl.object3D.getWorldRotation();
-  entity.setAttribute("rotation", {
-    x: headWorldRotation.x * THREE.Math.RAD2DEG,
-    y: headWorldRotation.y * THREE.Math.RAD2DEG,
-    z: headWorldRotation.z * THREE.Math.RAD2DEG
-  });
-}
-
 function shareScreen() {
   const track = NAF.connection.adapter.localMediaStream.getVideoTracks()[0];
 
@@ -54,15 +40,17 @@ function shareScreen() {
     const sceneEl = document.querySelector("a-scene");
     entity = document.createElement("a-entity");
     entity.id = id;
-    entity.setAttribute("networked", "template: #video-template");
+    entity.setAttribute("offset-relative-to", {
+      target: "#head",
+      offset: "0 0 -2",
+      on: "action_share_screen"
+    });
+    entity.setAttribute("networked", { template: "#video-template" });
     sceneEl.appendChild(entity);
   }
 
   track.enabled = !track.enabled;
   entity.setAttribute("visible", track.enabled);
-  if (track.enabled) {
-    updateVideoElementPosition(entity);
-  }
 }
 
 window.App = {
