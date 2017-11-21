@@ -3,7 +3,7 @@ export default function registerInputMappings() {
     mappings: {
       default: {
         common: {
-          dpad_axes: "move" // This won't get received by the character controller if it is in the "keyboard" section, but this dpad is powered by wasd.
+          keyboard_dpad_axes: "move" // This won't get received by the character controller if it is in the "keyboard" section, but this dpad is powered by wasd.
         },
         "vive-controls": {
           menudown: "action_mute",
