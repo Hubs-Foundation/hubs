@@ -31,6 +31,7 @@ export default function registerInputMappings() {
           m_press: "action_mute",
           q_press: "action_snap_rotate_left",
           e_press: "action_snap_rotate_right",
+          v_press: "action_share_screen",
           w_down: "action_move_forward",
           w_up: "action_dont_move_forward",
           a_down: "action_move_left",
