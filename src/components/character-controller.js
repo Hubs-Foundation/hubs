@@ -5,7 +5,7 @@ const MAX_DELTA = 0.2;
 AFRAME.registerComponent("character-controller", {
   schema: {
     groundAcc: { default: 7 },
-    easing: { default: 8 },
+    easing: { default: 10 },
     pivot: { type: "selector" },
     snapRotationRadian: { default: THREE.Math.DEG2RAD * 45 },
     wasdSpeed: { default: 0.8 },
@@ -291,7 +291,7 @@ AFRAME.registerComponent("character-controller", {
     velocity.x += dvx;
     velocity.z += dvz;
 
-    const decay = 0.9;
+    const decay = 0.7;
     this.accelerationInput.x = this.accelerationInput.x * decay;
     this.accelerationInput.z = this.accelerationInput.z * decay;
   }

@@ -32,7 +32,8 @@ const angleTo8Direction = function(angle) {
 AFRAME.registerComponent("dpad-as-axes", {
   schema: {
     inputName: { default: "dpad" },
-    name: { default: "dpad_axes" }
+    name: { default: "dpad_axes" },
+    emitter: { default: "#left-hand" }
   },
 
   init: function() {
@@ -97,9 +98,9 @@ AFRAME.registerComponent("dpad-as-axes", {
   emitAxes: function(axes) {
     const name = this.data.name;
     const inputName = this.data.inputName;
-    const el = this.el;
+    const emitter = document.querySelector(this.data.emitter);
     return function(event) {
-      event.target.emit(name, { axis: [axes[0], axes[1]] });
+      emitter.emit(name, { axis: [axes[0], axes[1]] });
     };
   }
 });
@@ -257,39 +258,103 @@ AFRAME.registerComponent("haptic-feedback", {
   }
 });
 
-AFRAME.registerComponent("split-axis-events", {
+AFRAME.registerComponent("vive-controls-extended", {
+  schema: {
+    hand: { default: "left" },
+    dpad: { default: false },
+    dpad_livezone: { default: 0.3 },
+    dpad_deadzone: { default: 0.8 },
+    dpad_directions: { default: 4 },
+    dpad_turbo: { default: true },
+    dpad_pressed_turbo: { default: false },
+    center_zone: { default: 0.3 }
+  },
+
   init: function() {
-    this.pressed = false;
+    this.dpadCanFire = true;
+    this.dpadPressedCanFire = true;
+    this.trackpadPressed = false;
     this.onAxisMove = this.onAxisMove.bind(this);
+    this.lastSeenAxes = [0, 0];
     this.onButtonChanged = this.onButtonChanged.bind(this);
   },
 
   play: function() {
     this.el.addEventListener("axismove", this.onAxisMove);
-    this.el.addEventListener("buttonchanged", this.onButtonChanged);
+    this.el.addEventListener("trackpadchanged", this.onButtonChanged);
   },
 
   pause: function() {
     this.el.removeEventListener("axismove", this.onAxisMove);
-    this.el.removeEventListener("buttonchanged", this.onButtonChanged);
+    this.el.removeEventListener("trackpadchanged", this.onButtonChanged);
   },
 
   onAxisMove: function(event) {
-    var hand = "right";
-    this.el.emit(
-      `${hand}_touchpad${this.pressed ? "_pressed" : ""}_axismove_x`,
-      { value: event.detail.axis[0] }
-    );
-    this.el.emit(
-      `${hand}_touchpad${this.pressed ? "_pressed" : ""}_axismove_y`,
-      { value: event.detail.axis[1] }
-    );
+    var x = event.detail.axis[0];
+    var y = event.detail.axis[1];
+    this.lastSeenAxes = [x, y];
+    var hand = this.data.hand;
+    const axisMoveEvent = `${hand}_trackpad${this.trackpadPressed
+      ? "_pressed"
+      : ""}_axismove`;
+    this.el.emit(axisMoveEvent, {
+      axis: [x, y]
+    });
+
+    var deadzone = this.data.dpad_deadzone;
+    var turbo = this.data.dpad_turbo;
+    var pressedTurbo = this.data.dpad_pressed_turbo;
+    var livezone = this.data.dpad_livezone;
+    var directions = this.data.dpad_directions;
+    var haptic_intensity = this.data.dpad_haptic_intensity;
+
+    if (!turbo && Math.abs(x) < livezone && Math.abs(y) < livezone) {
+      this.dpadCanFire = true;
+    }
+
+    x = Math.abs(x) < deadzone ? 0 : x;
+    y = Math.abs(y) < deadzone ? 0 : y;
+    if (x == 0 && y == 0) return;
+    var angle = Math.atan2(x, y);
+    var direction =
+      directions === 4 ? angleTo4Direction(angle) : angleTo8Direction(angle);
+
+    if (!this.dpadCanFire && !this.trackpadPressed) {
+      return;
+    }
+    if (this.trackpadPressed && !this.dpadPressedCanFire) {
+      return;
+    }
+    var dpadEvent = `${hand}_trackpad_dpad${this.trackpadPressed
+      ? "_pressed"
+      : ""}_${direction}`;
+    event.target.emit(dpadEvent);
+    event.target.emit(`${hand}_haptic_pulse`, { intensity: haptic_intensity }); // TODO: Catch these events an make the controller rumble.
+    if (!this.trackpadPressed && !turbo) {
+      this.dpadCanFire = false;
+    }
+    if (this.trackpadPressed && !pressedTurbo) {
+      this.dpadPressedCanFire = false;
+    }
   },
 
   onButtonChanged: function(event) {
-    if (this.pressed && !event.detail.state.pressed) {
-      this.el.emit("touchpadbuttonup");
+    const x = this.lastSeenAxes[0];
+    const y = this.lastSeenAxes[1];
+    const hand = this.data.hand;
+    const centerZone = this.data.center_zone;
+    const down = !this.trackpadPressed && event.detail.pressed;
+    const up = this.trackpadPressed && !event.detail.pressed;
+    const center =
+      Math.abs(x) < centerZone && Math.abs(y) < centerZone ? "_center" : "";
+    const eventName = `${hand}_trackpad${center}${up ? "_up" : ""}${down
+      ? "_down"
+      : ""}`;
+    this.el.emit(eventName);
+    if (up) {
+      this.dpadPressedCanFire = true;
     }
-    this.pressed = event.detail.state.pressed;
+
+    this.trackpadPressed = event.detail.pressed;
   }
 });
