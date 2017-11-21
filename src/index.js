@@ -77,17 +77,17 @@ window.App = {
     }
 
     let username;
-    const jwt = getCookie("jwt");
-    if (jwt) {
-      const data = parseJwt(jwt);
-      username = data.typ.name;
-      alert("Your username is: " + username);
-    } else {
+    // const jwt = getCookie("jwt");
+    // if (jwt) {
+    //   const data = parseJwt(jwt);
+    //   username = data.typ.name;
+    //   alert("Your username is: " + username);
+    // } else {
       username = qs.name;
       if (!username) {
         username = promptForName(username); // promptForName is blocking
       }
-    }
+    // }
 
     const myNametag = document.querySelector("#player-rig .nametag");
     myNametag.setAttribute("text", "value", username);
