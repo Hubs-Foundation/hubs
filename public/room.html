@@ -27,7 +27,8 @@
                          debug: true;
                          onConnect: App.onConnect;
                          connectOnLoad: false;"
-        mute-mic="eventSrc: a-scene; toggleEvents: action_mute">
+        mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
+        light="defaultLightsEnabled: false">
 
         <a-assets>
             <img id="grid" src="assets/grid.png" crossorigin="anonymous" />
@@ -40,7 +41,9 @@
 
             <a-asset-item id="watch-model" src="assets/hud/watch.gltf"></a-asset-item>
 
-            <a-asset-item id="rock-island" src="assets/environments/RockIslandTest/RockIsland.gltf"></a-asset-item>
+            <a-asset-item id="meeting-space1-mesh" src="assets/environments/MeetingSpace1_mesh.glb"></a-asset-item>
+            <a-asset-item id="outdoor-facade-mesh" src="assets/environments/OutdoorFacade_mesh.glb"></a-asset-item>
+            <a-asset-item id="floor-nav-mesh" src="assets/environments/FloorNav_mesh.glb"></a-asset-item>
 
             <!-- Templates -->
             <script id="head-template" type="text/html">
@@ -167,13 +170,26 @@
             ></a-entity>
         </a-entity>
 
+        <a-entity light="type: ambient; color: #FFF"></a-entity>
+
         <!-- Environment -->
         <a-entity
-            gltf-model="#rock-island"
+            gltf-model="#meeting-space1-mesh"
             position="0 0 0"
-        >
-            <a-sky color="#DDFFD9"></a-sky>
-        </a-entity>
+        ></a-entity>
+
+        <a-entity
+            gltf-model="#outdoor-facade-mesh"
+            position="0 0 0"
+        ></a-entity>
+
+        <a-entity
+            gltf-model="#floor-nav-mesh"
+            visible="false"
+            position="0 0 0"
+        ></a-entity>
+
+        <a-sky color="#DDFFD9"></a-sky>
     </a-scene>
 
     <script>
