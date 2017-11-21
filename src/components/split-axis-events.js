@@ -168,7 +168,7 @@ AFRAME.registerComponent("oculus-touch-controls-extended", {
     dpad_livezone: { default: 0.35 },
     dpad_directions: { default: 4 }, // one of [4, 8]
     dpad_turbo: { default: false },
-    dpad_haptic_intensity: { default: "low" } // one of ["none", "low", "mid", "high"]
+    dpad_haptic_intensity: { default: "none" } // one of ["none", "low", "mid", "high"]
   },
 
   init: function() {
@@ -234,23 +234,32 @@ AFRAME.registerComponent("haptic-feedback", {
     var trackedControls = this.el.components["tracked-controls"];
     if (trackedControls && trackedControls.controller) {
       this.actuator = trackedControls.controller.hapticActuators[0];
+      console.log(this.actuator);
     } else {
       setTimeout(this.tryGetActuator, 1000);
     }
   },
 
   play: function() {
-    this.el.addEventListener(`${this.data.hand}-haptic-pulse`, this.pulse);
+    this.el.addEventListener(`${this.data.hand}_haptic_pulse`, this.pulse);
   },
   pause: function() {
-    this.el.removeEventListener(`${this.data.hand}-haptic-pulse`, this.pulse);
+    this.el.removeEventListener(`${this.data.hand}_haptic_pulse`, this.pulse);
   },
 
   pulse: function(event) {
     let { strength, duration, intensity } = event.detail;
     if (intensity === "low") {
-      strength = 0.3;
-      duration = 30;
+      strength = 0.2;
+      duration = 20;
+    }
+    if (intensity === "medium") {
+      strength = 0.5;
+      duration = 20;
+    }
+    if (intensity === "high") {
+      strength = 1;
+      duration = 20;
     }
     if (intensity === "none") return;
 
@@ -267,7 +276,9 @@ AFRAME.registerComponent("vive-controls-extended", {
     dpad_directions: { default: 4 },
     dpad_turbo: { default: true },
     dpad_pressed_turbo: { default: false },
-    center_zone: { default: 0.3 }
+    center_zone: { default: 0.3 },
+    dpad_haptic_intensity: { default: "none" },
+    dpad_pressed_haptic_intensity: { default: "none" }
   },
 
   init: function() {
@@ -306,7 +317,8 @@ AFRAME.registerComponent("vive-controls-extended", {
     var pressedTurbo = this.data.dpad_pressed_turbo;
     var livezone = this.data.dpad_livezone;
     var directions = this.data.dpad_directions;
-    var haptic_intensity = this.data.dpad_haptic_intensity;
+    var hapticIntensity = this.data.dpad_haptic_intensity;
+    var pressedHapticIntensity = this.data.dpad_pressed_haptic_intensity;
 
     if (!turbo && Math.abs(x) < livezone && Math.abs(y) < livezone) {
       this.dpadCanFire = true;
@@ -329,7 +341,13 @@ AFRAME.registerComponent("vive-controls-extended", {
       ? "_pressed"
       : ""}_${direction}`;
     event.target.emit(dpadEvent);
-    event.target.emit(`${hand}_haptic_pulse`, { intensity: haptic_intensity }); // TODO: Catch these events an make the controller rumble.
+    if (this.trackpadPressed) {
+      event.target.emit(`${hand}_haptic_pulse`, {
+        intensity: pressedHapticIntensity
+      });
+    } else {
+      event.target.emit(`${hand}_haptic_pulse`, { intensity: hapticIntensity });
+    }
     if (!this.trackpadPressed && !turbo) {
       this.dpadCanFire = false;
     }
