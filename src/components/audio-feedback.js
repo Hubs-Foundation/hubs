@@ -18,7 +18,6 @@ AFRAME.registerComponent("networked-audio-analyser", {
           );
         }
         const ownerId = networkedEl.components.networked.data.owner;
-        console.log("audio Analyser for " + ownerId);
         return NAF.connection.adapter.getMediaStream(ownerId);
       })
       .then(stream => {
@@ -60,11 +59,9 @@ AFRAME.registerComponent("matcolor-audio-feedback", {
     this.onAudioFrequencyChange = this.onAudioFrequencyChange.bind(this);
 
     this.el.addEventListener("model-loaded", () => {
-      console.log(this.data.objectName);
       this.mat = this.el.object3D.getObjectByName(
         this.data.objectName
       ).material;
-      console.log("mat", this.mat);
     });
   },
 

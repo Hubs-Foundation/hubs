@@ -32,7 +32,6 @@ AFRAME.registerComponent("mute-mic", {
 
   play: function() {
     const { eventSrc, toggleEvents, muteEvents, unmuteEvents } = this.data;
-    console.log(eventSrc);
     bindAllEvents(eventSrc, toggleEvents, this.onToggle);
     bindAllEvents(eventSrc, muteEvents, this.onMute);
     bindAllEvents(eventSrc, unmuteEvents, this.onUnmute);
