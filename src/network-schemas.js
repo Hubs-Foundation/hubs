@@ -19,6 +19,11 @@ function registerNetworkSchemas() {
     template: "#left-hand-template",
     components: ["position", "rotation", "visible"]
   });
+
+  NAF.schemas.add({
+    template: "#video-template",
+    components: ["position", "rotation", "visible"]
+  });
 }
 
 export default registerNetworkSchemas;
