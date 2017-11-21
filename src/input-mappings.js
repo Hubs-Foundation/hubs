@@ -25,7 +25,9 @@ export default function registerInputMappings() {
           triggerup: "index_up",
           left_axismove: "move",
           right_dpad_east: "action_snap_rotate_right",
-          right_dpad_west: "action_snap_rotate_left"
+          right_dpad_west: "action_snap_rotate_left",
+          abuttondown: "action_teleport_down",
+          abuttonup: "action_teleport_up"
         },
         daydream: {
           menudown: "action_mute"
