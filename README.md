@@ -7,5 +7,5 @@ A prototype client demonstrating a multi-user experience in WebVR. Built with [A
 ```
 git clone https://github.com/mozilla/mr-social-client.git
 yarn install
-npm start
+npm run dev
 ```
