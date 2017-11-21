@@ -106,6 +106,7 @@ AFRAME.registerComponent("hand-controls2", {
       el.setAttribute("vive-controls", controlConfiguration);
       el.setAttribute("oculus-touch-controls", controlConfiguration);
       el.setAttribute("windows-motion-controls", controlConfiguration);
+      el.setAttribute("daydream-controls", controlConfiguration);
     }
   },
 

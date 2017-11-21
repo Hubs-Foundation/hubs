@@ -1,6 +1,7 @@
 import queryString from "query-string";
 
 import "aframe";
+import "./vendor/GLTFLoader";
 import "networked-aframe";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
@@ -91,8 +92,6 @@ window.App = {
     const myNametag = document.querySelector("#player-rig .nametag");
     myNametag.setAttribute("text", "value", username);
 
-    document.body.addEventListener("connected", App.onConnect);
-
     scene.addEventListener("action_share_screen", shareScreen);
 
     const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -109,9 +108,16 @@ window.App = {
       videoTracks[0].enabled = false;
     }
 
-    scene.components["networked-scene"].connect();
-    // @TODO ideally the adapter should exist before connect, but it currently doesnt so we have to do this after calling connect. This might be a race condition in other adapters.
-    NAF.connection.adapter.setLocalMediaStream(mediaStream);
+    if (qs.offline) {
+      App.onConnect();
+    } else {
+      scene.components["networked-scene"].connect();
+
+      // @TODO ideally the adapter should exist before connect, but it currently doesnt so we have to do this after calling connect. This might be a race condition in other adapters.
+      NAF.connection.adapter.setLocalMediaStream(mediaStream);
+
+      document.body.addEventListener("connected", App.onConnect);
+    }
   },
 
   onConnect() {
