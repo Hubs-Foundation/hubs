@@ -116,6 +116,7 @@ AFRAME.registerComponent("character-controller", {
   },
 
   onTranslateX: function(event) {
+    // TODO: event.detail should't default to an object.
     if (typeof event.detail !== "object") {
       this.accelerationInput.setX(event.detail);
     } else {
@@ -124,6 +125,7 @@ AFRAME.registerComponent("character-controller", {
   },
 
   onTranslateY: function(event) {
+    // TODO: event.detail should't default to an object.
     if (typeof event.detail !== "object") {
       this.accelerationInput.setY(event.detail);
     } else {
@@ -132,6 +134,7 @@ AFRAME.registerComponent("character-controller", {
   },
 
   onTranslateZ: function(event) {
+    // TODO: event.detail should't default to an object.
     if (typeof event.detail !== "object") {
       this.accelerationInput.setZ(event.detail);
     } else {
@@ -172,6 +175,7 @@ AFRAME.registerComponent("character-controller", {
   },
 
   onRotateY: function(event) {
+    // TODO: event.detail should't default to an object.
     if (typeof event.detail !== "object") {
       this.angularVelocity = event.detail;
     } else {
