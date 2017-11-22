@@ -57,11 +57,9 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
         var force = joystick.force < 1 ? joystick.force : 1;
         var x = Math.cos(angle) * force;
         var z = Math.sin(angle) * force;
-        this.el.sceneEl.emit("translateX", { value: x });
-        this.el.sceneEl.emit("translateZ", { value: z });
+        this.el.sceneEl.emit("move", { axis: [x, z] });
       } else {
-        this.el.sceneEl.emit("translateX", { value: 0 });
-        this.el.sceneEl.emit("translateZ", { value: 0 });
+        this.el.sceneEl.emit("move", { axis: [0, 0] });
       }
     } else {
       if (event.type === "move") {
