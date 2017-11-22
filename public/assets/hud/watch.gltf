@@ -77,7 +77,12 @@
     ], 
     "materials" : [
         {
-            "name" : "Material.001", 
+            "name" : "Material.001",
+            "emissiveFactor": [
+                0.6400000190734865,
+                0.6400000190734865,
+                0.6400000190734865
+            ],
             "pbrMetallicRoughness" : {
                 "baseColorFactor" : [
                     0.6400000190734865, 
@@ -85,7 +90,11 @@
                     0.6400000190734865, 
                     1.0
                 ], 
-                "metallicFactor" : 0.0
+                "metallicFactor" : 0.0,
+                "roughnessFactor": 0
+            },
+            "extensions": {
+                "KHR_materials_cmnConstant": {}
             }
         }
     ], 
@@ -123,5 +132,8 @@
                 0
             ]
         }
+    ],
+    "extensionsUsed": [
+        "KHR_materials_cmnConstant"
     ]
 }
