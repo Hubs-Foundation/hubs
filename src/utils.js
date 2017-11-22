@@ -166,8 +166,10 @@ export function generateName() {
   return name.replace(/^./, name[0].toUpperCase());
 }
 
-export function promptForName() {
-  var username = generateName();
+export function promptForName(username) {
+  if (!username)
+    username = generateName();
+  
   do {
     username = prompt("Choose a username", username);
   } while (!(username && username.length));
