@@ -78,12 +78,17 @@ window.App = {
 
     let username;
     const jwt = getCookie("jwt");
-    if (jwt) {
+    if (jwt) { //grab name from jwt
       const data = parseJwt(jwt);
       username = data.typ.name;
     }
-    
-    username = promptForName(username); // promptForName is blocking
+
+    if (qs.name) {
+      username = qs.name; //always override with name from querystring if available 
+    } 
+    else {
+      username = promptForName(username); // promptForName is blocking
+    }
 
     const myNametag = document.querySelector("#player-rig .nametag");
     myNametag.setAttribute("text", "value", username);
