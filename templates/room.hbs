@@ -145,21 +145,22 @@
                 networked="template: #nametag-template; showLocalTemplate: false;"
             ></a-entity>
 
+                <!-- oculus-touch-controls-extended="
+                     dpad: true;
+                     dpad_deadzone: 0.8;
+                     dpad_livezone: 0.3;
+                     dpad_directions: 8;
+                     dpad_turbo: true;
+                     dpad_haptic_intensity: none" -->
             <a-entity
                 id="left-hand"
                 hand-controls2="left"
                 tracked-controls
-                haptic-feedback
-                oculus-touch-controls-extended="
-                    dpad: true;
-                    dpad_deadzone: 0.8;
-                    dpad_livezone: 0.3;
-                    dpad_directions: 8;
-                    dpad_turbo: true;
-                    dpad_haptic_intensity: low"
+                haptic-feedback="hand:left;"
                 vive-controls-extended="
                     hand:left;
-                    dpad_haptic_intensity: low;
+                    dpad_haptic_intensity: none;
+                    dpad_deadzone: 0.6;
                     dpad_pressed_haptic_intensity: low"
                 dpad-as-axes="
                     inputName:left_dpad;
@@ -178,18 +179,18 @@
                 </a-entity>
             </a-entity>
 
+                <!-- oculus-touch-controls-extended="
+                     hand:right;
+                     dpad: true;
+                     dpad_livezone: 0.3;
+                     dpad_deadzone: 0.8;
+                     dpad_directions: 4;
+                     dpad_turbo: false;
+                     dpad_haptic_intensity: none" -->
             <a-entity
                 id="right-hand"
                 hand-controls2="right"
                 haptic-feedback="hand:right;"
-                oculus-touch-controls-extended="
-                    hand:right;
-                    dpad: true;
-                    dpad_livezone: 0.3;
-                    dpad_deadzone: 0.8;
-                    dpad_directions: 4;
-                    dpad_turbo: false;
-                    dpad_haptic_intensity: low"
                 vive-controls-extended="
                     hand:right;
                     dpad: true;

@@ -212,7 +212,7 @@ AFRAME.registerComponent("oculus-touch-controls-extended", {
       directions === 4 ? angleTo4Direction(angle) : angleTo8Direction(angle);
 
     event.target.emit(`${hand}_dpad_${direction}`);
-    event.target.emit(`${hand}_haptic_pulse`, { intensity: haptic_intensity }); // TODO: Catch these events an make the controller rumble.
+    event.target.emit(`${hand}_haptic_pulse`, { intensity: haptic_intensity });
     if (!turbo) {
       this.dpadCanFire = false;
     }
@@ -234,7 +234,6 @@ AFRAME.registerComponent("haptic-feedback", {
     var trackedControls = this.el.components["tracked-controls"];
     if (trackedControls && trackedControls.controller) {
       this.actuator = trackedControls.controller.hapticActuators[0];
-      console.log(this.actuator);
     } else {
       setTimeout(this.tryGetActuator, 1000);
     }
@@ -250,18 +249,20 @@ AFRAME.registerComponent("haptic-feedback", {
   pulse: function(event) {
     let { strength, duration, intensity } = event.detail;
     if (intensity === "low") {
-      strength = 0.2;
-      duration = 20;
+      strength = 0.07;
+      duration = 12;
     }
     if (intensity === "medium") {
-      strength = 0.5;
-      duration = 20;
+      strength = 0.2;
+      duration = 12;
     }
     if (intensity === "high") {
       strength = 1;
-      duration = 20;
+      duration = 12;
     }
-    if (intensity === "none") return;
+    if (intensity === "none") {
+      return;
+    }
 
     this.actuator.pulse(strength, duration);
   }
@@ -324,6 +325,10 @@ AFRAME.registerComponent("vive-controls-extended", {
       this.dpadCanFire = true;
     }
 
+    event.target.emit(`${hand}_haptic_pulse`, {
+      intensity: this.trackpadPressed ? pressedHapticIntensity : hapticIntensity
+    });
+
     x = Math.abs(x) < deadzone ? 0 : x;
     y = Math.abs(y) < deadzone ? 0 : y;
     if (x == 0 && y == 0) return;
@@ -331,7 +336,7 @@ AFRAME.registerComponent("vive-controls-extended", {
     var direction =
       directions === 4 ? angleTo4Direction(angle) : angleTo8Direction(angle);
 
-    if (!this.dpadCanFire && !this.trackpadPressed) {
+    if (!this.trackpadPressed && !this.dpadCanFire) {
       return;
     }
     if (this.trackpadPressed && !this.dpadPressedCanFire) {
@@ -341,17 +346,10 @@ AFRAME.registerComponent("vive-controls-extended", {
       ? "_pressed"
       : ""}_${direction}`;
     event.target.emit(dpadEvent);
-    if (this.trackpadPressed) {
-      event.target.emit(`${hand}_haptic_pulse`, {
-        intensity: pressedHapticIntensity
-      });
-    } else {
-      event.target.emit(`${hand}_haptic_pulse`, { intensity: hapticIntensity });
-    }
+
     if (!this.trackpadPressed && !turbo) {
       this.dpadCanFire = false;
-    }
-    if (this.trackpadPressed && !pressedTurbo) {
+    } else if (this.trackpadPressed && !pressedTurbo) {
       this.dpadPressedCanFire = false;
     }
   },

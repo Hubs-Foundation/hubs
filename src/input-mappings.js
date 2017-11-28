@@ -11,7 +11,8 @@ export default function registerInputMappings() {
           right_trackpad_dpad_pressed_west: "action_snap_rotate_left",
           right_trackpad_dpad_pressed_east: "action_snap_rotate_right",
           right_trackpad_center_down: "action_teleport_down", // @TODO once once #30 lands in aframe-teleport controls this just maps to "action_teleport_aim"
-          right_trackpad_center_up: "action_teleport_up" // @TODO once once #30 lands in aframe-teleport controls this just maps to "action_teleport_teleport"
+          right_trackpad_center_up: "action_teleport_up", // @TODO once once #30 lands in aframe-teleport controls this just maps to "action_teleport_teleport"
+          right_trackpad_up: "action_teleport_up"
         },
         "oculus-touch-controls": {
           xbuttondown: "action_mute",
