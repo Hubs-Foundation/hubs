@@ -47,6 +47,8 @@ const cloneGltf = gltf => {
       new THREE.Skeleton(orderedCloneBones, skeleton.boneInverses),
       cloneSkinnedMesh.matrixWorld
     );
+
+    cloneSkinnedMesh.material = skinnedMesh.material.clone();
   }
 
   return clone;
