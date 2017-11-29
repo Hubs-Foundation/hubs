@@ -2,6 +2,56 @@ import "../vendor/GLTFLoader";
 
 const GLTFCache = {};
 
+// From https://gist.github.com/cdata/f2d7a6ccdec071839bc1954c32595e87
+// Tracking glTF cloning here: https://github.com/mrdoob/three.js/issues/11573
+const cloneGltf = gltf => {
+  const clone = {
+    animations: gltf.animations,
+    scene: gltf.scene.clone(true)
+  };
+
+  const skinnedMeshes = {};
+
+  gltf.scene.traverse(node => {
+    if (node.isSkinnedMesh) {
+      skinnedMeshes[node.name] = node;
+    }
+  });
+
+  const cloneBones = {};
+  const cloneSkinnedMeshes = {};
+
+  clone.scene.traverse(node => {
+    if (node.isBone) {
+      cloneBones[node.name] = node;
+    }
+
+    if (node.isSkinnedMesh) {
+      cloneSkinnedMeshes[node.name] = node;
+    }
+  });
+
+  for (const name in skinnedMeshes) {
+    const skinnedMesh = skinnedMeshes[name];
+    const skeleton = skinnedMesh.skeleton;
+    const cloneSkinnedMesh = cloneSkinnedMeshes[name];
+
+    const orderedCloneBones = [];
+
+    for (let i = 0; i < skeleton.bones.length; ++i) {
+      const cloneBone = cloneBones[skeleton.bones[i].name];
+      orderedCloneBones.push(cloneBone);
+    }
+
+    cloneSkinnedMesh.bind(
+      new THREE.Skeleton(orderedCloneBones, skeleton.boneInverses),
+      cloneSkinnedMesh.matrixWorld
+    );
+  }
+
+  return clone;
+};
+
 /**
  * glTF model loader.
  */
@@ -10,7 +60,6 @@ AFRAME.registerComponent("gltf-model2", {
 
   init: function() {
     this.model = null;
-    this.loader = new THREE.GLTFLoader();
     this.onLoad = this.onLoad.bind(this);
     this.onError = this.onError.bind(this);
   },
@@ -24,19 +73,21 @@ AFRAME.registerComponent("gltf-model2", {
       return;
     }
 
-    const cachedModel = GLTFCache[src];
-
-    if (cachedModel) {
-      this.model = cachedModel.clone(true);
-      this.model.visible = true;
-      this.model.animations = cachedModel.animations;
-      this.el.setObject3D("mesh", this.model);
-      this.el.emit("model-loaded", { format: "gltf", model: this.model });
-    }
-
+    // Remove any existing model
     this.remove();
 
-    this.loader.load(
+    // Load the gltf model from the cache if it exists.
+    const gltf = GLTFCache[src];
+
+    if (gltf) {
+      // Use a cloned copy of the cached model.
+      const clonedGltf = cloneGltf(gltf);
+      this.onLoad(clonedGltf);
+      return;
+    }
+
+    // Otherwise load the new gltf model.
+    new THREE.GLTFLoader().load(
       src,
       this.onLoad,
       undefined /* onProgress */,
@@ -45,9 +96,14 @@ AFRAME.registerComponent("gltf-model2", {
   },
 
   onLoad(gltfModel) {
+    if (!GLTFCache[this.data]) {
+      // Store a cloned copy of the gltf model.
+      GLTFCache[this.data] = cloneGltf(gltfModel);
+    }
+
     this.model = gltfModel.scene || gltfModel.scenes[0];
     this.model.animations = gltfModel.animations;
-    GLTFCache[this.data] = this.model;
+
     this.el.setObject3D("mesh", this.model);
     this.el.emit("model-loaded", { format: "gltf", model: this.model });
   },
