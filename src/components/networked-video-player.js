@@ -28,7 +28,7 @@ AFRAME.registerComponent("networked-video-player", {
 
     const v = document.createElement("video");
     v.classList.add(styles.video);
-    v.srcObject = stream;
+    v.srcObject = new MediaStream(stream.getVideoTracks()); // We only want the video track so make a new MediaStream
     document.body.appendChild(v);
     v.play();
 
