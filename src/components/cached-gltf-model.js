@@ -4,7 +4,7 @@ const GLTFCache = {};
 
 // From https://gist.github.com/cdata/f2d7a6ccdec071839bc1954c32595e87
 // Tracking glTF cloning here: https://github.com/mrdoob/three.js/issues/11573
-const cloneGltf = gltf => {
+function cloneGltf(gltf) {
   const clone = {
     animations: gltf.animations,
     scene: gltf.scene.clone(true)
@@ -52,12 +52,12 @@ const cloneGltf = gltf => {
   }
 
   return clone;
-};
+}
 
 /**
  * glTF model loader.
  */
-AFRAME.registerComponent("gltf-model2", {
+AFRAME.registerComponent("cached-gltf-model", {
   schema: { type: "model" },
 
   init: function() {
