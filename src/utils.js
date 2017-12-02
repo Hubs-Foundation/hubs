@@ -167,9 +167,8 @@ export function generateName() {
 }
 
 export function promptForName(username) {
-  if (!username)
-    username = generateName();
-  
+  if (!username) username = generateName();
+
   do {
     username = prompt("Choose a username", username);
   } while (!(username && username.length));
@@ -179,11 +178,59 @@ export function promptForName(username) {
 export function getCookie(name) {
   var value = "; " + document.cookie;
   var parts = value.split("; " + name + "=");
-  if (parts.length == 2) return parts.pop().split(";").shift();
+  if (parts.length == 2)
+    return parts
+      .pop()
+      .split(";")
+      .shift();
 }
 
-export function parseJwt (token) {
-  var base64Url = token.split('.')[1];
-  var base64 = base64Url.replace('-', '+').replace('_', '/');
+export function parseJwt(token) {
+  var base64Url = token.split(".")[1];
+  var base64 = base64Url.replace("-", "+").replace("_", "/");
   return JSON.parse(window.atob(base64));
+}
+
+export function angleToDirection(angle) {
+  angle = (angle * THREE.Math.RAD2DEG + 180 + 45) % 360;
+  if (angle > 0 && angle < 90) {
+    return "down";
+  } else if (angle >= 90 && angle < 180) {
+    return "left";
+  } else if (angle >= 180 && angle < 270) {
+    return "up";
+  } else {
+    return "right";
+  }
+}
+
+export function angleTo4Direction(angle) {
+  angle = (angle * THREE.Math.RAD2DEG + 180 + 45) % 360;
+  if (angle > 0 && angle < 90) {
+    return "north";
+  } else if (angle >= 90 && angle < 180) {
+    return "west";
+  } else if (angle >= 180 && angle < 270) {
+    return "south";
+  } else {
+    return "east";
+  }
+}
+
+export function angleTo8Direction(angle) {
+  angle = (angle * THREE.Math.RAD2DEG + 180 + 45) % 360;
+  var direction = "";
+  if ((angle >= 0 && angle < 120) || angle >= 330) {
+    direction += "north";
+  }
+  if (angle >= 150 && angle < 300) {
+    direction += "south";
+  }
+  if (angle >= 60 && angle < 210) {
+    direction += "west";
+  }
+  if ((angle >= 240 && angle < 360) || angle < 30) {
+    direction += "east";
+  }
+  return direction;
 }

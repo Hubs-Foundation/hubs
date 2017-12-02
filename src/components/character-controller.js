@@ -17,7 +17,7 @@ AFRAME.registerComponent("character-controller", {
     this.boost = 1.0;
     this.pendingSnapRotationMatrix = new THREE.Matrix4();
     this.angularVelocity = 0; // Scalar value because we only allow rotation around Y
-    this.onMove = this.onMove.bind(this);
+    this.setAccelerationInput = this.setAccelerationInput.bind(this);
     this.onBoost = this.onBoost.bind(this);
     this.onSnapRotateLeft = this.onSnapRotateLeft.bind(this);
     this.onSnapRotateRight = this.onSnapRotateRight.bind(this);
@@ -35,7 +35,7 @@ AFRAME.registerComponent("character-controller", {
 
   play: function() {
     const eventSrc = this.el.sceneEl;
-    eventSrc.addEventListener("move", this.onMove);
+    eventSrc.addEventListener("move", this.setAccelerationInput);
     eventSrc.addEventListener("rotateY", this.onRotateY);
     eventSrc.addEventListener("action_snap_rotate_left", this.onSnapRotateLeft);
     eventSrc.addEventListener(
@@ -47,7 +47,7 @@ AFRAME.registerComponent("character-controller", {
 
   pause: function() {
     const eventSrc = this.el.sceneEl;
-    eventSrc.removeEventListener("move", this.onMove);
+    eventSrc.removeEventListener("move", this.setAccelerationInput);
     eventSrc.removeEventListener("rotateY", this.onRotateY);
     eventSrc.removeEventListener(
       "action_snap_rotate_left",
@@ -59,7 +59,7 @@ AFRAME.registerComponent("character-controller", {
     );
   },
 
-  onMove: function(event) {
+  setAccelerationInput: function(event) {
     const axes = event.detail.axis;
     this.accelerationInput.set(axes[0], 0, axes[1]);
   },

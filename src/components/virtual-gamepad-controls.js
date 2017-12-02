@@ -53,10 +53,10 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   onJoystickChanged(event, joystick) {
     if (event.target.id === this.leftStick.id) {
       if (event.type === "move") {
-        var angle = joystick.angle.radian;
-        var force = joystick.force < 1 ? joystick.force : 1;
-        var x = Math.cos(angle) * force;
-        var z = Math.sin(angle) * force;
+        const angle = joystick.angle.radian;
+        const force = joystick.force < 1 ? joystick.force : 1;
+        const x = Math.cos(angle) * force;
+        const z = Math.sin(angle) * force;
         this.el.sceneEl.emit("move", { axis: [x, z] });
       } else {
         this.el.sceneEl.emit("move", { axis: [0, 0] });
