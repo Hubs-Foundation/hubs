@@ -58,4 +58,7 @@ typings/
 .env
 
 # webpack bundle
-public/app.bundle.js*
+public/*.bundle.js*
+public/*.html
+
+.DS_Store
