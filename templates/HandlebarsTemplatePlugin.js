@@ -1,6 +1,7 @@
 const Handlebars = require("handlebars");
 const fs = require("fs-extra");
 const path = require("path");
+const chokidar = require("chokidar");
 
 class HandlebarsTemplatePlugin {
   constructor(options) {
@@ -16,6 +17,20 @@ class HandlebarsTemplatePlugin {
   }
 
   apply(compiler) {
+    compiler.plugin("watch-run", (compilation, callback) => {
+      chokidar
+        .watch(path.join(this.templatesPath, "*" + this.templateExtension))
+        .on("change", () => {
+          compiler.run(err => {
+            if (err) {
+              throw err;
+            }
+          });
+        });
+
+      callback();
+    });
+
     compiler.plugin("emit", (compilation, callback) => {
       this.compileTemplates(compiler, compilation).then(callback);
     });

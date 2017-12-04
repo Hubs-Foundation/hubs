@@ -31,6 +31,7 @@
     "babel-minify-webpack-plugin": "^0.2.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-react": "^6.24.1",
+    "chokidar": "^1.7.0",
     "css-loader": "^0.28.7",
     "eslint": "^4.10.0",
     "eslint-config-prettier": "^2.6.0",
