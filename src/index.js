@@ -27,7 +27,7 @@ import "./systems/personal-space-bubble";
 
 import registerNetworkScheams from "./network-schemas";
 import registerInputMappings from "./input-mappings";
-import { promptForName } from "./utils";
+import { promptForName, getCookie, parseJwt } from "./utils";
 import Config from "./config";
 
 registerNetworkScheams();
@@ -77,10 +77,20 @@ window.App = {
       playerRig.setAttribute("virtual-gamepad-controls", {});
     }
 
-    let username = qs.name;
-    if (!username) {
+    let username;
+    const jwt = getCookie("jwt");
+    if (jwt) { //grab name from jwt
+      const data = parseJwt(jwt);
+      username = data.typ.name;
+    }
+
+    if (qs.name) {
+      username = qs.name; //always override with name from querystring if available 
+    } 
+    else {
       username = promptForName(username); // promptForName is blocking
     }
+
     const myNametag = document.querySelector("#player-rig .nametag");
     myNametag.setAttribute("text", "value", username);
 
