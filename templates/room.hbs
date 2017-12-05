@@ -3,7 +3,7 @@
 <head>
     <title>Mozilla Mixed Reality Social Client</title>
     <script src="https://webrtc.github.io/adapter/adapter-6.0.2.js"></script>
-    <script src="./app.bundle.js"></script>
+    <script src="{{asset "app.bundle.js" }}"></script>
     <style>
         .a-enter-vr {
             top: 90px;
@@ -14,7 +14,7 @@
             width: 100vw;
             height: 100vh;
             z-index: 10001;
-            background: #eaeaea no-repeat url(assets/loading.gif) center center;
+            background: #eaeaea no-repeat url({{asset "assets/loading.gif" }}) center center;
             opacity: 0.9;
         }
     </style>
@@ -32,28 +32,26 @@
         light="defaultLightsEnabled: false">
 
         <a-assets>
-            <img id="grid" src="assets/grid.png" crossorigin="anonymous" />
-            <img id="sky" src="https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg" crossorigin="anonymous" />
+            <a-asset-item id="bot-head-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_Head_Mesh.glb" }}"></a-asset-item>
+            <a-asset-item id="bot-body-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_Body_Mesh.glb" }}"></a-asset-item>
+            <a-asset-item id="bot-left-hand-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_LeftHand_Mesh.glb" }}"></a-asset-item>
+            <a-asset-item id="bot-right-hand-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_RightHand_Mesh.glb"}}"></a-asset-item>
 
-            <a-asset-item id="bot-head-mesh" src="assets/avatars/Bot_Head_Mesh.glb"></a-asset-item>
-            <a-asset-item id="bot-body-mesh" src="assets/avatars/Bot_Body_Mesh.glb"></a-asset-item>
-            <a-asset-item id="bot-left-hand-mesh" src="assets/avatars/Bot_LeftHand_Mesh.glb"></a-asset-item>
-            <a-asset-item id="bot-right-hand-mesh" src="assets/avatars/Bot_RightHand_Mesh.glb"></a-asset-item>
+            <a-asset-item id="watch-model" response-type="arraybuffer" src="{{asset "assets/hud/watch.gltf"}}"></a-asset-item>
 
-            <a-asset-item id="watch-model" src="assets/hud/watch.gltf"></a-asset-item>
-
-            <a-asset-item id="meeting-space1-mesh" src="assets/environments/MeetingSpace1_mesh.glb"></a-asset-item>
-            <a-asset-item id="outdoor-facade-mesh" src="assets/environments/OutdoorFacade_mesh.glb"></a-asset-item>
-            <a-asset-item id="floor-nav-mesh" src="assets/environments/FloorNav_mesh.glb"></a-asset-item>
+            <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src="{{asset "assets/environments/MeetingSpace1_mesh.glb"}}"></a-asset-item>
+            <a-asset-item id="outdoor-facade-mesh" response-type="arraybuffer" src="{{asset "assets/environments/OutdoorFacade_mesh.glb"}}"></a-asset-item>
+            <a-asset-item id="floor-nav-mesh" response-type="arraybuffer" src="{{asset "assets/environments/FloorNav_mesh.glb"}}"></a-asset-item>
+            <a-asset-item id="cliff-vista-mesh" response-type="arraybuffer" src="{{asset "assets/environments/CliffVista_mesh.glb"}}"></a-asset-item>
 
             <!-- Templates -->
             <script id="head-template" type="text/html">
                 <a-entity
                     class="head"
-                    gltf-model="#bot-head-mesh"
                     networked-audio-source
                     networked-audio-analyser
                     matcolor-audio-feedback="objectName: Head_Mesh"
+                    cached-gltf-model="#bot-head-mesh"
                     scale-audio-feedback
                     personal-space-invader
                     rotation="0 180 0"
@@ -64,7 +62,7 @@
             <script id="body-template" type="text/html">
                 <a-entity
                     class="body"
-                    gltf-model="#bot-body-mesh"
+                    cached-gltf-model="#bot-body-mesh"
                     personal-space-invader
                     rotation="0 180 0"
                     position="0 -0.05 0"
@@ -74,7 +72,7 @@
             <script id="left-hand-template" type="text/html">
                 <a-entity
                     class="hand"
-                    gltf-model="#bot-left-hand-mesh"
+                    cached-gltf-model="#bot-left-hand-mesh"
                     animation-mixer
                     personal-space-invader
                     rotation="-90 90 0"
@@ -85,7 +83,7 @@
             <script id="right-hand-template" type="text/html">
                 <a-entity
                     class="hand"
-                    gltf-model="#bot-right-hand-mesh"
+                    cached-gltf-model="#bot-right-hand-mesh"
                     personal-space-invader
                     rotation="-90 -90 0"
                     position="0 0 0.075"
@@ -144,7 +142,7 @@
             >
                 <a-entity
                     id="watch"
-                    gltf-model="assets/hud/watch.gltf"
+                    cached-gltf-model="#watch-model"
                     position="0 0.0015 0.147"
                     rotation="3.5 0 0"
                 >
@@ -175,17 +173,17 @@
 
         <!-- Environment -->
         <a-entity
-            gltf-model="#meeting-space1-mesh"
+            cached-gltf-model="#meeting-space1-mesh"
             position="0 0 0"
         ></a-entity>
 
         <a-entity
-            gltf-model="#outdoor-facade-mesh"
+            cached-gltf-model="#outdoor-facade-mesh"
             position="0 0 0"
         ></a-entity>
 
         <a-entity
-            gltf-model="#floor-nav-mesh"
+            cached-gltf-model="#floor-nav-mesh"
             visible="false"
             position="0 0 0"
         ></a-entity>

@@ -59,5 +59,6 @@ typings/
 
 # webpack bundle
 public/*.bundle.js*
+public/*.html
 
 .DS_Store
