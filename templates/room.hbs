@@ -188,7 +188,14 @@
             position="0 0 0"
         ></a-entity>
 
-        <a-sky color="#DDFFD9"></a-sky>
+        <a-entity
+            cached-gltf-model="#cliff-vista-mesh"
+            position="0 0 0"
+        ></a-entity>
+
+        <a-entity id="skybox" scale="8000 8000 8000" skybox="azimuth:0.280; inclination:0.440" ></a-entity>
+
+        <a-entity water rotation="-90 0 0" position="0 -88.358 -332.424"></a-entity>
     </a-scene>
 
     <script>
