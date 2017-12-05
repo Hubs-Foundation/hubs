@@ -11,6 +11,14 @@ const nafConnected = function() {
 AFRAME.registerComponent("networked-video-player", {
   schema: {},
   async init() {
+    let container = document.getElementById("nvp-debug-container");
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "nvp-debug-container";
+      container.classList.add(styles.container);
+      document.body.appendChild(container);
+    }
+
     await nafConnected();
 
     const networkedEl = NAF.utils.getNetworkedEntity(this.el);
@@ -27,9 +35,10 @@ AFRAME.registerComponent("networked-video-player", {
     }
 
     const v = document.createElement("video");
+    v.id = `nvp-video-${ownerId}`;
     v.classList.add(styles.video);
     v.srcObject = new MediaStream(stream.getVideoTracks()); // We only want the video track so make a new MediaStream
-    document.body.appendChild(v);
+    container.appendChild(v);
     v.play();
 
     this.videoEl = v;
@@ -46,7 +55,7 @@ AFRAME.registerComponent("networked-video-player", {
 
   remove() {
     if (this.videoEl) {
-      this.videoEl.parent.removeChild(this.videoEl);
+      this.videoEl.parentNode.removeChild(this.videoEl);
     }
   }
 });
