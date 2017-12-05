@@ -7,7 +7,7 @@ AFRAME.registerComponent("character-controller", {
     groundAcc: { default: 7 },
     easing: { default: 10 },
     pivot: { type: "selector" },
-    snapRotationRadian: { default: THREE.Math.DEG2RAD * 45 },
+    snapRotationDegrees: { default: THREE.Math.DEG2RAD * 45 },
     rotationSpeed: { default: -3 }
   },
 
@@ -19,43 +19,40 @@ AFRAME.registerComponent("character-controller", {
     this.angularVelocity = 0; // Scalar value because we only allow rotation around Y
     this.setAccelerationInput = this.setAccelerationInput.bind(this);
     this.onBoost = this.onBoost.bind(this);
-    this.onSnapRotateLeft = this.onSnapRotateLeft.bind(this);
-    this.onSnapRotateRight = this.onSnapRotateRight.bind(this);
-    this.onRotateY = this.onRotateY.bind(this);
+    this.snapRotateLeft = this.snapRotateLeft.bind(this);
+    this.snapRotateRight = this.snapRotateRight.bind(this);
+    this.setAngularVelocity = this.setAngularVelocity.bind(this);
   },
 
   update: function() {
     this.leftRotationMatrix = new THREE.Matrix4().makeRotationY(
-      this.data.snapRotationRadian
+      this.data.snapRotationDegrees
     );
     this.rightRotationMatrix = new THREE.Matrix4().makeRotationY(
-      -this.data.snapRotationRadian
+      -this.data.snapRotationDegrees
     );
   },
 
   play: function() {
     const eventSrc = this.el.sceneEl;
     eventSrc.addEventListener("move", this.setAccelerationInput);
-    eventSrc.addEventListener("rotateY", this.onRotateY);
-    eventSrc.addEventListener("action_snap_rotate_left", this.onSnapRotateLeft);
-    eventSrc.addEventListener(
-      "action_snap_rotate_right",
-      this.onSnapRotateRight
-    );
+    eventSrc.addEventListener("rotateY", this.setAngularVelocity);
+    eventSrc.addEventListener("action_snap_rotate_left", this.snapRotateLeft);
+    eventSrc.addEventListener("action_snap_rotate_right", this.snapRotateRight);
     eventSrc.addEventListener("boost", this.onBoost);
   },
 
   pause: function() {
     const eventSrc = this.el.sceneEl;
     eventSrc.removeEventListener("move", this.setAccelerationInput);
-    eventSrc.removeEventListener("rotateY", this.onRotateY);
+    eventSrc.removeEventListener("rotateY", this.setAngularVelocity);
     eventSrc.removeEventListener(
       "action_snap_rotate_left",
-      this.onSnapRotateLeft
+      this.snapRotateLeft
     );
     eventSrc.removeEventListener(
       "action_snap_rotate_right",
-      this.onSnapRotateRight
+      this.snapRotateRight
     );
   },
 
@@ -64,15 +61,15 @@ AFRAME.registerComponent("character-controller", {
     this.accelerationInput.set(axes[0], 0, axes[1]);
   },
 
-  onRotateY: function(event) {
+  setAngularVelocity: function(event) {
     this.angularVelocity = event.detail.value;
   },
 
-  onSnapRotateLeft: function(event) {
+  snapRotateLeft: function(event) {
     this.pendingSnapRotationMatrix.copy(this.leftRotationMatrix);
   },
 
-  onSnapRotateRight: function(event) {
+  snapRotateRight: function(event) {
     this.pendingSnapRotationMatrix.copy(this.rightRotationMatrix);
   },
 
