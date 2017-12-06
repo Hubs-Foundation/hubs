@@ -8,6 +8,7 @@ AFRAME.registerComponent("character-controller", {
     groundAcc: { default: 10 },
     easing: { default: 8 },
     pivot: { type: "selector" },
+    navmesh: { type: "selector" },
     snapRotationRadian: { default: THREE.Math.DEG2RAD * 45 },
     wasdSpeed: { default: 0.8 },
     rotationSpeed: { default: -3 }
@@ -210,6 +211,11 @@ AFRAME.registerComponent("character-controller", {
     const currentPosition = new THREE.Vector3();
     const movementVector = new THREE.Vector3();
 
+    const raycaster = new THREE.Raycaster();
+    const raycastPos = new THREE.Vector3();
+    const lastGoodPos = new THREE.Vector3(0, 0, 4);
+    const downVector = new THREE.Vector3(0, -1, 0);
+
     return function(t, dt) {
       const deltaSeconds = dt / 1000;
       const root = this.el.object3D;
@@ -259,6 +265,19 @@ AFRAME.registerComponent("character-controller", {
         y: root.rotation.y * THREE.Math.RAD2DEG,
         z: root.rotation.z * THREE.Math.RAD2DEG
       });
+
+      // Dead simple collision handling
+      // If our new position is not over the navmesh, reset to the last position that was and clear velocity
+      // @TODO this can be much better, for starters we shoudln't be updating the object3D's position multiple times
+      raycastPos.copy(root.position).sub(downVector);
+      raycaster.set(raycastPos, downVector);
+      const hits = raycaster.intersectObject(this.data.navmesh.object3D, true);
+      if (hits.length) {
+        lastGoodPos.copy(root.position);
+      } else {
+        root.position.copy(lastGoodPos);
+        this.velocity.set(0, 0, 0);
+      }
 
       this.el.setAttribute("position", root.position);
 

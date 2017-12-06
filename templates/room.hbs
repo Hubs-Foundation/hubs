@@ -109,9 +109,10 @@
         <a-entity
             id="player-rig"
             networked
-            character-controller="pivot: #head"
+            position="0 0 4"
+            character-controller="pivot: #head; navmesh: #navmesh;"
         >
-            <a-sphere scale="0.1 0.1 0.1"></a-sphere>
+            <!-- <a-sphere scale="0.1 0.1 0.1"></a-sphere> -->
 
             <a-entity
                 id="head"
@@ -183,9 +184,9 @@
         ></a-entity>
 
         <a-entity
+            id="navmesh"
             cached-gltf-model="#floor-nav-mesh"
-            visible="false"
-            position="0 0 0"
+            position="0 -0.1 0"
         ></a-entity>
 
         <a-sky color="#DDFFD9"></a-sky>
