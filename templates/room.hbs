@@ -2,8 +2,16 @@
 
 <head>
     <title>Mozilla Mixed Reality Social Client</title>
+
+    {{#if config.originTrialToken }}
+    <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="{{ config.originTrialExpires }}" content="{{{ config.originTrialToken }}}">
+    {{/if}}
+
     <script src="https://webrtc.github.io/adapter/adapter-6.0.2.js"></script>
+
+    <script>window.CONFIG = {{toJSON config.global}};</script>
     <script src="{{asset "app.bundle.js" }}"></script>
+    
     <style>
         .a-enter-vr {
             top: 90px;

@@ -3,66 +3,68 @@ const fs = require("fs-extra");
 const path = require("path");
 const chokidar = require("chokidar");
 
+function filterUniqueTemplatePaths(pages) {
+  return pages
+    .map(page => page.templatePath)
+    .filter((fileName, index, arr) => arr.indexOf(fileName) === index);
+}
+
 class HandlebarsTemplatePlugin {
   constructor(options) {
-    this.templatesPath = options.templatesPath;
-    this.templateExtension = options.templateExtension || ".hbs";
-    this.templateOptions = options.templateOptions || {};
+    this.pages = options.pages;
 
     if (options.helpers) {
-      Object.keys(options.helpers).forEach(helperName => {
-        Handlebars.registerHelper(helperName, options.helpers[helperName]);
-      });
+      // Accepts an object where the key is the helper name and the value is the helper function
+      Handlebars.registerHelper(options.helpers);
     }
   }
 
   apply(compiler) {
+    // Trigger a webpack compilation whenerver the templates change
     compiler.plugin("watch-run", (compilation, callback) => {
-      chokidar
-        .watch(path.join(this.templatesPath, "*" + this.templateExtension))
-        .on("change", () => {
-          compiler.run(err => {
-            if (err) {
-              throw err;
-            }
-          });
+      const uniqueFiles = filterUniqueTemplatePaths(this.pages);
+
+      chokidar.watch(uniqueFiles).on("change", () => {
+        compiler.run(err => {
+          if (err) {
+            throw err;
+          }
         });
+      });
 
       callback();
     });
 
+    // Compile templates on each webpack compilation
     compiler.plugin("emit", (compilation, callback) => {
-      this.compileTemplates(compiler, compilation).then(callback);
+      this.compileTemplates(compiler).then(callback);
     });
   }
 
-  // Compile all handlebars templates in the template directory and place them in the output directory.
-  async compileTemplates(compiler, compilation) {
+  // Compile all handlebars templates in the template directory and place them in the output directory
+  async compileTemplates(compiler) {
     const outputPath = compiler.options.output.path;
-    const templateFiles = await fs.readdir(this.templatesPath);
+    const uniqueTemplatePaths = filterUniqueTemplatePaths(this.pages);
+    const templatePromises = {};
 
-    const templatePromises = templateFiles
-      .filter(filename => filename.indexOf(this.templateExtension) !== -1)
-      .map(fileName => {
-        const filePath = path.join(this.templatesPath, fileName);
-        const outputFileName = fileName.replace(
-          this.templateExtension,
-          ".html"
-        );
-        const outputFilePath = path.join(outputPath, outputFileName);
+    // Compile all unique handlebars templates
+    for (const templatePath of uniqueTemplatePaths) {
+      templatePromises[templatePath] = async () => {
+        const templateStr = await fs.readFile(templatePath);
+        return Handlebars.compile(templateStr.toString());
+      };
+    }
 
-        return this.compileTemplate(filePath, outputFilePath);
-      });
+    // Use the compiled templates to generate the pages
+    const outputPromises = this.pages.map(async page => {
+      const template = await templatePromises[page.templatePath]();
+      const compiledStr = template({ ...page.data, compiler });
+      const outputFilePath = path.join(outputPath, page.fileName);
+      return fs.writeFile(outputFilePath, compiledStr);
+    });
 
-    await Promise.all(templatePromises);
-  }
-
-  // Compile a single handlebars template given a file path and output file path.
-  async compileTemplate(filePath, outputFilePath) {
-    const templateStr = await fs.readFile(filePath);
-    const template = Handlebars.compile(templateStr.toString());
-    const compiledStr = template(this.templateOptions);
-    return fs.writeFile(outputFilePath, compiledStr);
+    // Compile templates in parallel
+    await Promise.all(outputPromises);
   }
 }
 
