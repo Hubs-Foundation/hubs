@@ -187,3 +187,24 @@ export function parseJwt (token) {
   var base64 = base64Url.replace('-', '+').replace('_', '/');
   return JSON.parse(window.atob(base64));
 }
+
+export function getSpawnPositionInCircle(originX, originZ, radius, rotation) {
+  let x = originX + radius * Math.cos(rotation);
+  let z = originZ + radius * Math.sin(rotation);
+
+  return {x: x, z: z};
+}
+
+export function getRotationToTarget(eye, target) {
+  let m4 = new THREE.Matrix4();
+  eye = new THREE.Vector3(eye.x, eye.y, eye.z);
+  target = new THREE.Vector3(target.x, target.y, target.z);
+  m4.lookAt(eye, target, new THREE.Vector3(0,1,0));
+  let euler = new THREE.Euler();
+  euler.setFromRotationMatrix(m4, "YXZ");
+  return {x: 0, y:(toDegrees(euler.y) + 360) % 360, z:0};
+}
+
+export function toDegrees(angle) {
+  return angle * (180 / Math.PI);
+}

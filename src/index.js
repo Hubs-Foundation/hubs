@@ -27,7 +27,7 @@ import "./systems/personal-space-bubble";
 
 import registerNetworkScheams from "./network-schemas";
 import registerInputMappings from "./input-mappings";
-import { promptForName, getCookie, parseJwt } from "./utils";
+import { promptForName, getCookie, parseJwt, getSpawnPositionInCircle, getRotationToTarget } from "./utils";
 import Config from "./config";
 
 registerNetworkScheams();
@@ -93,6 +93,15 @@ window.App = {
 
     const myNametag = document.querySelector("#player-rig .nametag");
     myNametag.setAttribute("text", "value", username);
+
+    //change spawn position & rotation
+    const myHead = document.querySelector("#player-rig #head");
+    let rotation = Math.random() * 2 * Math.PI;
+    let position = myHead.getAttribute("position");
+    let newPosition = getSpawnPositionInCircle(0, 0, 4, rotation);
+    newPosition.y = position.y;
+    myHead.setAttribute("position", newPosition);
+    myHead.setAttribute("rotation", getRotationToTarget(newPosition, {x:0, y:0, z:0}));
 
     scene.addEventListener("action_share_screen", shareScreen);
 
