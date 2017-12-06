@@ -13,7 +13,6 @@ module.exports = merge(common, {
     new CleanWebpackPlugin("public", {
       exclude: path.join(__dirname, "public", "assets")
     }),
-    new ExtractTextPlugin("[name].css"),
     new OptimizeCssAssetsPlugin(),
     new UglifyJsPlugin({
       parallel: true,

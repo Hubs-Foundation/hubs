@@ -91,6 +91,9 @@ module.exports = {
       name: "manifest",
       minChunks: Infinity
     }),
+    new ExtractTextPlugin("[name].css", {
+      disable: process.env.NODE_ENV !== "production"
+    }),
     new HandlebarsTemplatePlugin({
       pages,
       helpers
