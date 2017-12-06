@@ -34,7 +34,7 @@ module.exports = merge(common, {
           data: {
             baseAssetsPath: process.env.BASE_ASSETS_PATH.replace(
               "https://",
-              "https://smoke."
+              "https://smoke-"
             ),
             config: {
               ...config,
@@ -42,7 +42,7 @@ module.exports = merge(common, {
                 ...config.global,
                 janus_server_url: config.global.janus_server_url.replace(
                   "wss://",
-                  "wss://smoke."
+                  "wss://smoke-"
                 )
               }
             }
