@@ -1,4 +1,6 @@
 module.exports = {
+  // This origin trial token is used to enable WebVR and Gamepad Extensions on Chrome 62+
+  // You can find more information about getting your own origin trial token here: https://github.com/GoogleChrome/OriginTrials/blob/gh-pages/developer-guide.md
   originTrialToken:
     "AvIMoF4hyRZQVfSfksoqP+7qzwa4FSBzHRHvUyzC8rMATJVRbcOiLewBxbXtJVyV3N62gsZv7PoSNtDqqtjzYAcAAABkeyJvcmlnaW4iOiJodHRwczovL3JldGljdWx1bS5pbzo0NDMiLCJmZWF0dXJlIjoiV2ViVlIxLjFNNjIiLCJleHBpcnkiOjE1MTYxNDYyMDQsImlzU3ViZG9tYWluIjp0cnVlfQ==",
   originTrialExpires: "2018-01-16",
