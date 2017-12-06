@@ -2,6 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 import mj from "minijanus";
 
+import "material-design-lite";
+import "material-design-lite/material.css";
 import "./lobby.css";
 
 class Lobby extends React.Component {

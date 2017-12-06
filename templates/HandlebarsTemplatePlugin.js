@@ -36,13 +36,13 @@ class HandlebarsTemplatePlugin {
     });
 
     // Compile templates on each webpack compilation
-    compiler.plugin("emit", (compilation, callback) => {
-      this.compileTemplates(compiler).then(callback);
+    compiler.plugin("after-emit", (compilation, callback) => {
+      this.compileTemplates(compiler, compilation).then(callback);
     });
   }
 
   // Compile all handlebars templates in the template directory and place them in the output directory
-  async compileTemplates(compiler) {
+  async compileTemplates(compiler, compilation) {
     const outputPath = compiler.options.output.path;
     const uniqueTemplatePaths = filterUniqueTemplatePaths(this.pages);
     const templatePromises = {};
@@ -58,7 +58,7 @@ class HandlebarsTemplatePlugin {
     // Use the compiled templates to generate the pages
     const outputPromises = this.pages.map(async page => {
       const template = await templatePromises[page.templatePath]();
-      const compiledStr = template({ ...page.data, compiler });
+      const compiledStr = template({ ...page.data, compiler, compilation });
       const outputFilePath = path.join(outputPath, page.fileName);
       return fs.writeFile(outputFilePath, compiledStr);
     });

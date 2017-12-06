@@ -7,10 +7,12 @@
     <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="{{ config.originTrialExpires }}" content="{{{ config.originTrialToken }}}">
     {{/if}}
 
-    <script src="https://webrtc.github.io/adapter/adapter-6.0.2.js"></script>
+    <link rel="stylesheet" href="{{asset "room.css"}}">
 
     <script>window.CONFIG = {{toJSON config.global}};</script>
-    <script src="{{asset "app.bundle.js" }}"></script>
+    <script src="{{asset "manifest.js" }}"></script>
+    <script src="{{asset "room-vendor.js" }}"></script>
+    <script src="{{asset "room.js" }}"></script>
     
     <style>
         .a-enter-vr {

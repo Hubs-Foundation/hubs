@@ -1,5 +1,7 @@
 const path = require("path");
 const glob = require("glob");
+const webpack = require("webpack");
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const HandlebarsTemplatePlugin = require("./templates/HandlebarsTemplatePlugin");
 const helpers = require("./templates/helpers");
 const config = require("./config");
@@ -46,11 +48,11 @@ for (const templatePath of templatePaths) {
 
 module.exports = {
   entry: {
-    app: path.join(__dirname, "src", "index"),
+    room: path.join(__dirname, "src", "room"),
     lobby: path.join(__dirname, "src", "lobby")
   },
   output: {
-    filename: "[name].bundle.js",
+    filename: "[name].js",
     path: path.resolve(__dirname, "public")
   },
   module: {
@@ -63,11 +65,32 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ["style-loader", "css-loader"]
+        use: ExtractTextPlugin.extract({
+          fallback: "style-loader",
+          use: "css-loader"
+        })
       }
     ]
   },
   plugins: [
+    new webpack.optimize.CommonsChunkPlugin({
+      name: "lobby-vendor",
+      chunks: ["lobby"],
+      minChunks: function(module) {
+        return module.context && module.context.indexOf("node_modules") !== -1;
+      }
+    }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: "room-vendor",
+      chunks: ["room"],
+      minChunks: function(module) {
+        return module.context && module.context.indexOf("node_modules") !== -1;
+      }
+    }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: "manifest",
+      minChunks: Infinity
+    }),
     new HandlebarsTemplatePlugin({
       pages,
       helpers

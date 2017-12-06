@@ -57,8 +57,8 @@ typings/
 # dotenv environment variables file
 .env
 
-# webpack bundle
-public/*.bundle.js*
-public/*.html
+# Ignore everything in the root of the public folder
+# Place static assets in the public/assets directory or they will be deleted by webpack
+public/*.*
 
 .DS_Store
