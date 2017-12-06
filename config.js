@@ -5,7 +5,7 @@ module.exports = {
     "AvIMoF4hyRZQVfSfksoqP+7qzwa4FSBzHRHvUyzC8rMATJVRbcOiLewBxbXtJVyV3N62gsZv7PoSNtDqqtjzYAcAAABkeyJvcmlnaW4iOiJodHRwczovL3JldGljdWx1bS5pbzo0NDMiLCJmZWF0dXJlIjoiV2ViVlIxLjFNNjIiLCJleHBpcnkiOjE1MTYxNDYyMDQsImlzU3ViZG9tYWluIjp0cnVlfQ==",
   originTrialExpires: "2018-01-16",
 
-  // These variables are availible on the window.GLOBAL object
+  // These variables are availible on the window.CONFIG object
   // The exported object must be a valid argument to JSON.stringify()
   global: {
     janus_server_url:
