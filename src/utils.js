@@ -191,19 +191,6 @@ export function parseJwt(token) {
   return JSON.parse(window.atob(base64));
 }
 
-export function angleToDirection(angle) {
-  angle = (angle * THREE.Math.RAD2DEG + 180 + 45) % 360;
-  if (angle > 0 && angle < 90) {
-    return "down";
-  } else if (angle >= 90 && angle < 180) {
-    return "left";
-  } else if (angle >= 180 && angle < 270) {
-    return "up";
-  } else {
-    return "right";
-  }
-}
-
 export function angleTo4Direction(angle) {
   angle = (angle * THREE.Math.RAD2DEG + 180 + 45) % 360;
   if (angle > 0 && angle < 90) {
