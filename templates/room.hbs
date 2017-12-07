@@ -14,7 +14,7 @@
     <script src="{{asset "manifest.js" }}"></script>
     <script src="{{asset "room-vendor.js" }}"></script>
     <script src="{{asset "room.js" }}"></script>
-    
+    <meta charset="UTF-8">
     <style>
         .a-enter-vr {
             top: 90px;
@@ -121,6 +121,7 @@
             id="player-rig"
             networked
             spawn-controller="radius: 4;"
+            wasd-to-analog2d
             character-controller="pivot: #head"
         >
             <a-sphere scale="0.1 0.1 0.1"></a-sphere>
@@ -147,20 +148,7 @@
                 id="left-hand"
                 hand-controls2="left"
                 tracked-controls
-                haptic-feedback="hapticEventName: left_haptic_pulse;"
-                vive-controls-extended="
-                    hand: left;
-                    dpad_turbo: true;
-                    dpad_pressed_haptic_intensity: low"
-                oculus-touch-controls-extended="
-                    dpad_enabled: true;
-                    dpad_directions: 8;
-                    dpad_turbo: true;
-                    dpad_haptic_intensity: none"
-                dpad-as-axes="
-                    dpadActionPrefix:left_dpad;
-                    analog2dOutputAction:left_dpad_axes;
-                    emitter: #left-hand"
+                haptic-feedback
                 teleport-controls="cameraRig: #player-rig; teleportOrigin: #head; button: action_teleport_"
                 networked="template: #left-hand-template;"
             >
@@ -177,16 +165,7 @@
             <a-entity
                 id="right-hand"
                 hand-controls2="right"
-                haptic-feedback="hapticEventName: right_haptic_pulse;"
-                vive-controls-extended="
-                    hand:right;
-                    dpad_enabled: true;
-                    dpad_livezone: 1.0;
-                    dpad_deadzone: 0.6;
-                    dpad_pressed_haptic_intensity: low;"
-                oculus-touch-controls-extended="
-                    hand:right;
-                    dpad_enabled: true;"
+                haptic-feedback
                 teleport-controls="cameraRig: #player-rig;
                                     teleportOrigin: #head;
                                     hitEntity: #telepor-indicator;

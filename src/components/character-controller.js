@@ -14,11 +14,9 @@ AFRAME.registerComponent("character-controller", {
   init: function() {
     this.velocity = new THREE.Vector3(0, 0, 0);
     this.accelerationInput = new THREE.Vector3(0, 0, 0);
-    this.boost = 1.0;
     this.pendingSnapRotationMatrix = new THREE.Matrix4();
     this.angularVelocity = 0; // Scalar value because we only allow rotation around Y
     this.setAccelerationInput = this.setAccelerationInput.bind(this);
-    this.onBoost = this.onBoost.bind(this);
     this.snapRotateLeft = this.snapRotateLeft.bind(this);
     this.snapRotateRight = this.snapRotateRight.bind(this);
     this.setAngularVelocity = this.setAngularVelocity.bind(this);
@@ -37,23 +35,16 @@ AFRAME.registerComponent("character-controller", {
     const eventSrc = this.el.sceneEl;
     eventSrc.addEventListener("move", this.setAccelerationInput);
     eventSrc.addEventListener("rotateY", this.setAngularVelocity);
-    eventSrc.addEventListener("action_snap_rotate_left", this.snapRotateLeft);
-    eventSrc.addEventListener("action_snap_rotate_right", this.snapRotateRight);
-    eventSrc.addEventListener("boost", this.onBoost);
+    eventSrc.addEventListener("snap_rotate_left", this.snapRotateLeft);
+    eventSrc.addEventListener("snap_rotate_right", this.snapRotateRight);
   },
 
   pause: function() {
     const eventSrc = this.el.sceneEl;
     eventSrc.removeEventListener("move", this.setAccelerationInput);
     eventSrc.removeEventListener("rotateY", this.setAngularVelocity);
-    eventSrc.removeEventListener(
-      "action_snap_rotate_left",
-      this.snapRotateLeft
-    );
-    eventSrc.removeEventListener(
-      "action_snap_rotate_right",
-      this.snapRotateRight
-    );
+    eventSrc.removeEventListener("snap_rotate_left", this.snapRotateLeft);
+    eventSrc.removeEventListener("snap_rotate_right", this.snapRotateRight);
   },
 
   setAccelerationInput: function(event) {
@@ -71,10 +62,6 @@ AFRAME.registerComponent("character-controller", {
 
   snapRotateRight: function(event) {
     this.pendingSnapRotationMatrix.copy(this.rightRotationMatrix);
-  },
-
-  onBoost: function(event) {
-    this.boost = event.detail;
   },
 
   tick: (function() {
@@ -181,8 +168,8 @@ AFRAME.registerComponent("character-controller", {
       velocity.z = 0;
     }
 
-    const dvx = data.groundAcc * dt * this.accelerationInput.x * this.boost;
-    const dvz = data.groundAcc * dt * -this.accelerationInput.z * this.boost;
+    const dvx = data.groundAcc * dt * this.accelerationInput.x;
+    const dvz = data.groundAcc * dt * -this.accelerationInput.z;
     velocity.x += dvx;
     velocity.z += dvz;
 

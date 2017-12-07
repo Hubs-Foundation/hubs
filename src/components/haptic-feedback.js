@@ -11,7 +11,12 @@ AFRAME.registerComponent("haptic-feedback", {
 
   tryGetActuator() {
     var trackedControls = this.el.components["tracked-controls"];
-    if (trackedControls && trackedControls.controller) {
+    if (
+      trackedControls &&
+      trackedControls.controller &&
+      trackedControls.controller.hapticActuators &&
+      trackedControls.controller.hapticActuators.length > 0
+    ) {
       this.actuator = trackedControls.controller.hapticActuators[0];
     } else {
       setTimeout(this.tryGetActuator, 1000);
@@ -19,10 +24,10 @@ AFRAME.registerComponent("haptic-feedback", {
   },
 
   play: function() {
-    this.el.addEventListener(`${this.data.hand}_haptic_pulse`, this.pulse);
+    this.el.addEventListener(this.data.hapticEventName, this.pulse);
   },
   pause: function() {
-    this.el.removeEventListener(`${this.data.hand}_haptic_pulse`, this.pulse);
+    this.el.removeEventListener(this.data.hapticEventName, this.pulse);
   },
 
   pulse: function(event) {
@@ -31,14 +36,17 @@ AFRAME.registerComponent("haptic-feedback", {
       case "low": {
         strength = 0.07;
         duration = 12;
+        break;
       }
       case "medium": {
         strength = 0.2;
         duration = 12;
+        break;
       }
       case "high": {
         strength = 1;
         duration = 12;
+        break;
       }
       case "none": {
         return;

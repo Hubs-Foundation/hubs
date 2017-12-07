@@ -1,74 +1,41 @@
-AFRAME.registerComponent("dpad-as-axes", {
+/*
+function DPadAsAnalog2D (el, buttonName){
+  this.output = [0,0];
+  el.addEventListener("dpad")
+};
+
+ */
+
+AFRAME.registerComponent("wasd-to-analog2d", {
   schema: {
-    dpadActionPrefix: { default: "dpad" },
-    analog2dOutputAction: { default: "keyboard_dpad_axes" },
-    emitter: { default: "#left-hand" }
+    analog2dOutputAction: { default: "keyboard_dpad_axes" }
   },
 
   init: function() {
-    this.handlers = [];
-    this.directionsAndAxes = [
-      {
-        direction: "north",
-        axes: [0, 1]
-      },
-      {
-        direction: "northeast",
-        axes: [1, 1]
-      },
-      {
-        direction: "east",
-        axes: [1, 0]
-      },
-      {
-        direction: "southeast",
-        axes: [1, -1]
-      },
-      {
-        direction: "south",
-        axes: [0, -1]
-      },
-      {
-        direction: "southwest",
-        axes: [-1, -1]
-      },
-      {
-        direction: "west",
-        axes: [-1, 0]
-      },
-      {
-        direction: "northwest",
-        axes: [-1, 1]
-      }
-    ];
+    this.directionsAndAxes = {
+      north: [0, 1],
+      northeast: [1, 1],
+      east: [1, 0],
+      southeast: [1, -1],
+      south: [0, -1],
+      southwest: [-1, -1],
+      west: [-1, 0],
+      northwest: [-1, 1]
+    };
+    this.onWasd = this.onWasd.bind(this);
   },
 
   play: function() {
-    const inputAction = this.data.dpadActionPrefix;
-    for (var tuple of this.directionsAndAxes) {
-      this.handlers[tuple.direction] = this.emitAnalog2d(tuple.axes).bind(this);
-      this.el.addEventListener(
-        `${inputAction}_${tuple.direction}`,
-        this.handlers[tuple.direction]
-      );
-    }
+    this.addEventListener("wasd", onWasd);
   },
 
   pause: function() {
-    const inputAction = this.data.dpadActionPrefix;
-    for (var tuple of this.directionsAndAxes) {
-      this.el.removeEventListener(
-        `${inputAction}_${tuple.direction}`,
-        this.handlers[tuple.direction]
-      );
-    }
+    this.removeEventListener("wasd", onWasd);
   },
 
-  emitAnalog2d: function(axes) {
-    const outputAction = this.data.analog2dOutputAction;
-    const emitter = document.querySelector(this.data.emitter);
-    return function(event) {
-      emitter.emit(outputAction, { axis: [axes[0], axes[1]] });
-    };
-  }
+  onWasd: function(event) {
+    console.log(event);
+  },
+
+  emitAnalog2d: function(axes) {}
 });
