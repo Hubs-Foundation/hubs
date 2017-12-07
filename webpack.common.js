@@ -69,6 +69,23 @@ module.exports = {
           fallback: "style-loader",
           use: "css-loader"
         })
+      },
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: {
+          loader: "file-loader",
+          options: {
+            context: path.join(__dirname, "public"),
+            emitFile: false,
+            name(file) {
+              if (process.env.NODE_ENV === "production") {
+                return "[path][name].[ext]?md5=[hash]";
+              }
+
+              return "[path][name].[ext]";
+            }
+          }
+        }
       }
     ]
   },
