@@ -2,8 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 import mj from "minijanus";
 
-import Config from "./config";
-
+import "material-design-lite";
+import "material-design-lite/material.css";
 import "./lobby.css";
 
 class Lobby extends React.Component {
@@ -17,7 +17,7 @@ class Lobby extends React.Component {
   }
 
   componentDidMount() {
-    this.ws = new WebSocket(Config.janus_server_url, "janus-protocol");
+    this.ws = new WebSocket(window.CONFIG.janus_server_url, "janus-protocol");
     this.session = new mj.JanusSession(this.ws.send.bind(this.ws));
     this.ws.addEventListener("open", this.onWebsocketOpen);
     this.ws.addEventListener("message", this.onWebsocketMessage);
@@ -46,12 +46,14 @@ class Lobby extends React.Component {
   }
 
   fetchRooms() {
-    return this.handle
-      .sendMessage({ kind: "listusers" })
-      .then(signal => {
-        const usersByRoom = signal.plugindata.data.response.users;
-        return Config.public_rooms.map(id => ({id, limit: 12, users: usersByRoom[id] || []}));
-      });
+    return this.handle.sendMessage({ kind: "listusers" }).then(signal => {
+      const usersByRoom = signal.plugindata.data.response.users;
+      return window.CONFIG.public_rooms.map(id => ({
+        id,
+        limit: 12,
+        users: usersByRoom[id] || []
+      }));
+    });
   }
 
   onWebsocketMessage(event) {
@@ -85,7 +87,7 @@ const RoomListItem = ({ room }) => {
 };
 
 const RoomList = ({ rooms }) => {
-  const publicRooms = Config.public_rooms.length + 1;
+  const publicRooms = window.CONFIG.public_rooms.length + 1;
   const roomId =
     publicRooms +
     Math.floor(Math.random() * (Number.MAX_SAFE_INTEGER - publicRooms));

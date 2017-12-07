@@ -1,4 +1,3 @@
-import AFRAME from "aframe";
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 

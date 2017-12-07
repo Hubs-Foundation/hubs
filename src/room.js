@@ -25,12 +25,12 @@ import "./components/offset-relative-to";
 import "./components/cached-gltf-model";
 import "./components/water";
 import "./components/skybox";
+import "./components/spawn-controller";
 import "./systems/personal-space-bubble";
 
 import registerNetworkScheams from "./network-schemas";
 import registerInputMappings from "./input-mappings";
-import { promptForName } from "./utils";
-import Config from "./config";
+import { promptForName, getCookie, parseJwt } from "./utils";
 
 registerNetworkScheams();
 registerInputMappings();
@@ -66,8 +66,8 @@ window.App = {
       room:
         qs.room && !isNaN(parseInt(qs.room))
           ? parseInt(qs.room)
-          : Config.default_room,
-      serverURL: Config.janus_server_url
+          : window.CONFIG.default_room,
+      serverURL: window.CONFIG.janus_server_url
     });
 
     if (!qs.stats || !/off|false|0/.test(qs.stats)) {
@@ -79,10 +79,20 @@ window.App = {
       playerRig.setAttribute("virtual-gamepad-controls", {});
     }
 
-    let username = qs.name;
-    if (!username) {
+    let username;
+    const jwt = getCookie("jwt");
+    if (jwt) {
+      //grab name from jwt
+      const data = parseJwt(jwt);
+      username = data.typ.name;
+    }
+
+    if (qs.name) {
+      username = qs.name; //always override with name from querystring if available
+    } else {
       username = promptForName(username); // promptForName is blocking
     }
+
     const myNametag = document.querySelector("#player-rig .nametag");
     myNametag.setAttribute("text", "value", username);
 

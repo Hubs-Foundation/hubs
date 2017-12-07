@@ -57,8 +57,7 @@ typings/
 # dotenv environment variables file
 .env
 
-# webpack bundle
-public/*.bundle.js*
-public/*.html
+# Ignore public folder with webpack build output
+public/
 
 .DS_Store

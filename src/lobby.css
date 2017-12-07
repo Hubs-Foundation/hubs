@@ -5,13 +5,13 @@
 body {
   margin: 0;
   padding: 0;
-  background: black url(https://cdn.glitch.com/52bf1803-98d8-450b-83f4-f74024eb22e5%2Fwallpaper_HD_firefox.jpg?1510615261238) no-repeat left center;
+  background: black url(./assets/background.jpg) no-repeat left center;
   background-size: auto 100%;
 }
 
 .overlay {
   display: flex;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   width: 100vw;
   height: 100vh;
   align-items: center;
@@ -24,35 +24,35 @@ body {
 }
 
 .scroll {
-    flex: 1;
-    overflow-y: auto;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .mdl-list {
-    margin: 0;
+  margin: 0;
 }
 
 .room-item {
-    padding: 0;
+  padding: 0;
 }
 
 .room-item a {
-    width: 100%;
-    height: 100%;
-    padding: 16px;
-    color: inherit;
-    text-decoration: none;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  color: inherit;
+  text-decoration: none;
 }
 
 .room-item a:hover {
-    background: #eaeaea;
+  background: #eaeaea;
 }
 
-@media only screen and (max-width : 320px) {
-    .overlay {
-        padding: 0;
-    }
-    .panel {
-        width: 100%;
-    }
+@media only screen and (max-width: 320px) {
+  .overlay {
+    padding: 0;
+  }
+  .panel {
+    width: 100%;
+  }
 }

@@ -40,5 +40,5 @@ Ex.
 Will become:
 
 ```html
-<img src="https://cdn.mysite.com/assets/asseturl.png?c=1512428142413"/>
+<img src="https://cdn.mysite.com/assets/asseturl.png?crc=f37a775"/>
 ```
