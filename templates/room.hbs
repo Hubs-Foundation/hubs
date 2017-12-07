@@ -1,6 +1,7 @@
 <html>
 
 <head>
+    <meta charset="utf-8">
     <title>Mozilla Mixed Reality Social Client</title>
 
     {{#if config.originTrialToken }}
@@ -47,7 +48,7 @@
             <a-asset-item id="bot-left-hand-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_LeftHand_Mesh.glb" }}"></a-asset-item>
             <a-asset-item id="bot-right-hand-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_RightHand_Mesh.glb"}}"></a-asset-item>
 
-            <a-asset-item id="watch-model" response-type="arraybuffer" src="{{asset "assets/hud/watch.gltf"}}"></a-asset-item>
+            <a-asset-item id="watch-model" response-type="arraybuffer" src="{{asset "assets/hud/watch.glb"}}"></a-asset-item>
 
             <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src="{{asset "assets/environments/MeetingSpace1_mesh.glb"}}"></a-asset-item>
             <a-asset-item id="outdoor-facade-mesh" response-type="arraybuffer" src="{{asset "assets/environments/OutdoorFacade_mesh.glb"}}"></a-asset-item>
@@ -135,9 +136,9 @@
             <a-entity
                 id="body"
                 body-controller="eyeNeckOffset: 0 -0.11 0.09; neckHeight: 0.05"
-                networked="template: #body-template;" 
+                networked="template: #body-template;"
             ></a-entity>
-            
+             
             <a-entity
                 id="nametag"
                 networked="template: #nametag-template; showLocalTemplate: false;"
@@ -154,17 +155,10 @@
                 <a-entity
                     id="watch"
                     cached-gltf-model="#watch-model"
-                    position="0 0.0015 0.147"
-                    rotation="3.5 0 0"
-                >
-                    <a-circle
-                        mute-state-indicator
-                        scale-audio-feedback="analyserSrc: #head; minScale: 0.035; maxScale: 0.08;"
-                        position="0 0.023 0"
-                        rotation="-90 0 0"
-                        scale="0.04 0.04 0.04"
-                        material="color: #d8eece; shader: flat;"
-                    ></a-circle>
+                    bone-mute-state-indicator
+                    position="-0.003 0.009 0.085"
+                    rotation="-79.12547150756669 -160.1417037390651 -100.1530225888679"
+                    scale="1.5 1.5 1.5">
                 </a-entity>
             </a-entity>
 
