@@ -109,6 +109,7 @@
         <a-entity
             id="player-rig"
             networked
+            spawn-controller="radius: 4;"
             character-controller="pivot: #head"
         >
             <a-sphere scale="0.1 0.1 0.1"></a-sphere>
@@ -119,7 +120,6 @@
                 personal-space-bubble
                 look-controls
                 networked="template: #head-template; showLocalTemplate: false;" 
-                spawn-controller="radius: 4"
             ></a-entity>
 
             <a-entity
