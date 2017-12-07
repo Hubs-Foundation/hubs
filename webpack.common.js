@@ -75,8 +75,11 @@ module.exports = {
         use: {
           loader: "file-loader",
           options: {
-            context: path.join(__dirname, "public"),
             emitFile: false,
+            outputPath(url) {
+              // Rewrite the url to correctly reference the copied assets directory.
+              return url.replace("src/assets/", "assets/");
+            },
             name(file) {
               if (process.env.NODE_ENV === "production") {
                 return "[path][name].[ext]?md5=[hash]";

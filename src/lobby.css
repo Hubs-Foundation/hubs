@@ -5,7 +5,7 @@
 body {
   margin: 0;
   padding: 0;
-  background: black url(../public/assets/background.jpg) no-repeat left center;
+  background: black url(./assets/background.jpg) no-repeat left center;
   background-size: auto 100%;
 }
 

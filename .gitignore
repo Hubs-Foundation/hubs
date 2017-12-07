@@ -57,8 +57,7 @@ typings/
 # dotenv environment variables file
 .env
 
-# Ignore everything in the root of the public folder
-# Place static assets in the public/assets directory or they will be deleted by webpack
-public/*.*
+# Ignore public folder with webpack build output
+public/
 
 .DS_Store
