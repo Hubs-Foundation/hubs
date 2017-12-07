@@ -1,5 +1,3 @@
-import "../vendor/GLTFLoader";
-
 const GLTFCache = {};
 
 // From https://gist.github.com/cdata/f2d7a6ccdec071839bc1954c32595e87
