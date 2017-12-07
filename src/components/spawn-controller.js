@@ -19,6 +19,8 @@ AFRAME.registerComponent("spawn-controller", {
     const angleDeg = angleRad * THREE.Math.RAD2DEG;
     const angleToCenter = -1 * angleDeg + 90;
     el.setAttribute("rotation", { x: 0, y: angleToCenter, z: 0 });
+
+    el.object3D.updateMatrix();
   },
 
   getPointOnCircle(radius, angleRad) {
