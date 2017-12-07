@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npm run dev",
     "dev": "webpack-dev-server --https --host 0.0.0.0 --useLocalIp --open --config webpack.dev.js",
-    "build": "NODE_ENV='production' webpack --config webpack.prod.js",
+    "build": "cross-env NODE_ENV='production' webpack --config webpack.prod.js",
     "prettier": "prettier --write src/**/*.js"
   },
   "dependencies": {
@@ -37,6 +37,7 @@
     "clean-webpack-plugin": "^0.1.17",
     "copy-webpack-plugin": "^4.2.3",
     "crc": "^3.5.0",
+    "cross-env": "^5.1.1",
     "css-loader": "^0.28.7",
     "eslint": "^4.10.0",
     "eslint-config-prettier": "^2.6.0",
