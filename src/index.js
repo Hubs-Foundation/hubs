@@ -23,6 +23,7 @@ import "./components/split-axis-events";
 import "./components/networked-video-player";
 import "./components/offset-relative-to";
 import "./components/cached-gltf-model";
+import "./components/spawn-controller";
 import "./systems/personal-space-bubble";
 
 import registerNetworkScheams from "./network-schemas";
