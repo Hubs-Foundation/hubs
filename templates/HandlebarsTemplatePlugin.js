@@ -36,7 +36,7 @@ class HandlebarsTemplatePlugin {
     });
 
     // Compile templates on each webpack compilation
-    compiler.plugin("after-emit", (compilation, callback) => {
+    compiler.plugin("emit", (compilation, callback) => {
       this.compileTemplates(compiler, compilation).then(callback);
     });
   }
@@ -60,7 +60,15 @@ class HandlebarsTemplatePlugin {
       const template = await templatePromises[page.templatePath]();
       const compiledStr = template({ ...page.data, compiler, compilation });
       const outputFilePath = path.join(outputPath, page.fileName);
-      return fs.writeFile(outputFilePath, compiledStr);
+
+      compilation.assets[page.fileName] = {
+        source() {
+          return compiledStr;
+        },
+        size() {
+          return compiledStr.length;
+        }
+      };
     });
 
     // Compile templates in parallel

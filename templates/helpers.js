@@ -17,9 +17,16 @@ module.exports = {
       return new Handlebars.SafeString(assetPath);
     }
 
-    const outputPath = options.data.root.compiler.options.output.path;
-    const localPath = path.join(outputPath, assetPath);
-    const asset = fs.readFileSync(localPath);
+    const compilation = options.data.root.compilation;
+
+    let asset;
+    if (compilation.assets[assetPath]) {
+      asset = compilation.assets[assetPath].source();
+    } else {
+      const outputPath = options.data.root.compiler.options.output.path;
+      const localPath = path.join(outputPath, assetPath);
+      asset = fs.readFileSync(localPath);
+    }
 
     const hash = crc.crc32(asset).toString(16);
 
