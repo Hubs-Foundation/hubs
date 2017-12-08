@@ -157,20 +157,20 @@ AFRAME.registerComponent("water", {
     azimuth: { type: "number", default: 0 },
     distance: { type: "number", default: 1 },
     speed: { type: "number", default: 0.1 },
-    forceMobile: { type: "boolean", default: false }
+    forceMobile: { type: "boolean", default: false },
+    normalMap: { type: "asset" }
   },
   init() {
     const waterGeometry = new THREE.PlaneBufferGeometry(800, 800);
 
+    const waterNormals = new THREE.Texture(this.data.normalMap);
+    waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
+    waterNormals.needsUpdate = true;
+
     const waterConfig = {
       textureWidth: 512,
       textureHeight: 512,
-      waterNormals: new THREE.TextureLoader().load(
-        "assets/waternormals.jpg",
-        function(texture) {
-          texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-        }
-      ),
+      waterNormals: waterNormals,
       sunDirection: this.data.sunDirection,
       sunColor: new THREE.Color(this.data.sunColor),
       waterColor: new THREE.Color(this.data.waterColor),

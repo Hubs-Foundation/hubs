@@ -55,6 +55,8 @@
             <a-asset-item id="floor-nav-mesh" response-type="arraybuffer" src="{{asset "assets/environments/FloorNav_mesh.glb"}}"></a-asset-item>
             <a-asset-item id="cliff-vista-mesh" response-type="arraybuffer" src="{{asset "assets/environments/CliffVista_mesh.glb"}}"></a-asset-item>
 
+            <img id="water-normal-map" src="{{asset "assets/waternormals.jpg"}}"></a-asset-item>
+
             <!-- Templates -->
             <script id="head-template" type="text/html">
                 <a-entity
@@ -209,7 +211,7 @@
 
         <a-entity
             id="water"
-            water
+            water="normalMap:#water-normal-map"
             rotation="-90 0 0"
             position="0 -88.358 -332.424"
         ></a-entity>
