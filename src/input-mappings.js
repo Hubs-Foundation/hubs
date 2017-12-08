@@ -57,7 +57,7 @@ const config = {
         abuttondown: "action_teleport_down",
         abuttonup: "action_teleport_up"
       },
-      daydream: {
+      "daydream-controls": {
         menudown: "action_mute",
         trackpaddown: "action_teleport_down",
         trackpadup: "action_teleport_up"
