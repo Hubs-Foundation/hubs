@@ -10,7 +10,13 @@ import "aframe-input-mapping-component";
 import animationMixer from "aframe-extras/src/loaders/animation-mixer";
 AFRAME.registerComponent("animation-mixer", animationMixer);
 
-import "./components/axis-dpad";
+import { vive_trackpad_dpad4 } from "./behaviours/vive-trackpad-dpad4";
+import { oculus_touch_joystick_dpad4 } from "./behaviours/oculus-touch-joystick-dpad4";
+import { PressedMove } from "./activators/pressedmove";
+import { ReverseY } from "./activators/reversey";
+import "./activators/shortpress";
+import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
+
 import "./components/mute-mic";
 import "./components/audio-feedback";
 import "./components/nametag-transform";
@@ -19,7 +25,7 @@ import "./components/virtual-gamepad-controls";
 import "./components/body-controller";
 import "./components/hand-controls2";
 import "./components/character-controller";
-import "./components/split-axis-events";
+import "./components/haptic-feedback";
 import "./components/networked-video-player";
 import "./components/offset-relative-to";
 import "./components/cached-gltf-model";
@@ -29,12 +35,21 @@ import "./components/layers";
 import "./components/spawn-controller";
 import "./systems/personal-space-bubble";
 
-import registerNetworkScheams from "./network-schemas";
-import registerInputMappings from "./input-mappings";
 import { promptForName, getCookie, parseJwt } from "./utils";
+import registerNetworkSchemas from "./network-schemas";
+import { inGameActions, config } from "./input-mappings";
 
-registerNetworkScheams();
-registerInputMappings();
+AFRAME.registerInputBehaviour("vive_trackpad_dpad4", vive_trackpad_dpad4);
+AFRAME.registerInputBehaviour(
+  "oculus_touch_joystick_dpad4",
+  oculus_touch_joystick_dpad4
+);
+AFRAME.registerInputActivator("pressedmove", PressedMove);
+AFRAME.registerInputActivator("reverseY", ReverseY);
+AFRAME.registerInputActions(inGameActions, "default");
+AFRAME.registerInputMappings(config);
+
+registerNetworkSchemas();
 
 function shareScreen() {
   const track = NAF.connection.adapter.localMediaStream.getVideoTracks()[0];
