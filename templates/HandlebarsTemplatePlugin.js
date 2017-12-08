@@ -36,7 +36,7 @@ class HandlebarsTemplatePlugin {
     });
 
     // Compile templates on each webpack compilation
-    compiler.plugin("after-emit", (compilation, callback) => {
+    compiler.plugin("emit", (compilation, callback) => {
       this.compileTemplates(compiler, compilation)
         .then(callback)
         .catch(err => {

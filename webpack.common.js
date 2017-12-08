@@ -2,8 +2,7 @@ const path = require("path");
 const glob = require("glob");
 const webpack = require("webpack");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
-const CleanWebpackPlugin = require("clean-webpack-plugin");
+const FileManagerPlugin = require("filemanager-webpack-plugin");
 const HandlebarsTemplatePlugin = require("./templates/HandlebarsTemplatePlugin");
 const helpers = require("./templates/helpers");
 const config = require("./config");
@@ -95,13 +94,17 @@ module.exports = {
     ]
   },
   plugins: [
-    new CleanWebpackPlugin("public"),
-    new CopyWebpackPlugin([
-      {
-        from: path.join(__dirname, "src", "assets"),
-        to: "assets"
+    new FileManagerPlugin({
+      onStart: {
+        delete: [path.join(__dirname, "public")],
+        copy: [
+          {
+            source: path.join(__dirname, "src", "assets"),
+            destination: path.join(__dirname, "public", "assets")
+          }
+        ]
       }
-    ]),
+    }),
     new webpack.optimize.CommonsChunkPlugin({
       name: "lobby-vendor",
       chunks: ["lobby"],

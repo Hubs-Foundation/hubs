@@ -25,7 +25,16 @@ module.exports = {
     } else {
       const outputPath = options.data.root.compiler.options.output.path;
       const localPath = path.join(outputPath, assetPath);
-      asset = fs.readFileSync(localPath);
+
+      try {
+        asset = fs.readFileSync(localPath);
+      } catch (err) {
+        compilation.errors.push(
+          err.message +
+            " Availible assets: " +
+            Object.keys(compilation.assets).jojn(", ")
+        );
+      }
     }
 
     const hash = crc.crc32(asset).toString(16);
