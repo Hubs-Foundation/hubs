@@ -37,7 +37,11 @@ class HandlebarsTemplatePlugin {
 
     // Compile templates on each webpack compilation
     compiler.plugin("emit", (compilation, callback) => {
-      this.compileTemplates(compiler, compilation).then(callback);
+      this.compileTemplates(compiler, compilation)
+        .then(callback)
+        .catch(err => {
+          compilation.errors.push(err);
+        });
     });
   }
 

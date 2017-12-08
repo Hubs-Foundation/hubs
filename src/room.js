@@ -14,7 +14,7 @@ import "./components/axis-dpad";
 import "./components/mute-mic";
 import "./components/audio-feedback";
 import "./components/nametag-transform";
-import "./components/mute-state-indicator";
+import "./components/bone-mute-state-indicator";
 import "./components/virtual-gamepad-controls";
 import "./components/body-controller";
 import "./components/hand-controls2";
