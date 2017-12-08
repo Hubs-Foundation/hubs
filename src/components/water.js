@@ -150,15 +150,14 @@ MobileWater.prototype.constructor = THREE.Water;
 
 AFRAME.registerComponent("water", {
   schema: {
+    waterColor: { type: "color", default: "#001e0f" },
+    distortionScale: { type: "number", default: 3.7 },
+    sunColor: { type: "color", default: "#ffffff" },
+    inclination: { type: "number", default: 0 },
+    azimuth: { type: "number", default: 0 },
+    distance: { type: "number", default: 1 },
     speed: { type: "number", default: 0.1 },
-    sunPosition: {
-      type: "vec3",
-      default: {
-        x: 0.05,
-        y: -0.54,
-        z: -6.19
-      }
-    }
+    forceMobile: { type: "boolean", default: false }
   },
   init() {
     const waterGeometry = new THREE.PlaneBufferGeometry(800, 800);
@@ -172,14 +171,14 @@ AFRAME.registerComponent("water", {
           texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
         }
       ),
-      sunDirection: this.data.sunPosition,
-      sunColor: 0xffffff,
-      waterColor: 0x001e0f,
-      distortionScale: 3.7,
+      sunDirection: this.data.sunDirection,
+      sunColor: new THREE.Color(this.data.sunColor),
+      waterColor: new THREE.Color(this.data.waterColor),
+      distortionScale: this.data.distortionScale,
       fog: false
     };
 
-    if (AFRAME.utils.device.isMobile()) {
+    if (AFRAME.utils.device.isMobile() || this.data.forceMobile) {
       this.water = new MobileWater(waterGeometry, waterConfig);
     } else {
       this.water = new THREE.Water(waterGeometry, waterConfig);
@@ -189,8 +188,43 @@ AFRAME.registerComponent("water", {
     this.el.setObject3D("water", this.water);
   },
 
-  update() {
-    this.water.material.uniforms.sunDirection.value = this.data.sunPosition;
+  update(oldData) {
+    const uniforms = this.water.material.uniforms;
+
+    if (this.data.forceMobile !== oldData.forceMobile) {
+      this.el.removeObject3D("water");
+      this.init();
+      return;
+    }
+
+    if (this.data.waterColor !== oldData.waterColor) {
+      uniforms.waterColor.value.setStyle(this.data.waterColor);
+    }
+
+    if (this.data.distortionScale !== oldData.distortionScale) {
+      uniforms.distortionScale.value = this.data.distortionScale;
+    }
+
+    if (this.data.sunColor !== oldData.sunColor) {
+      uniforms.sunColor.value.setStyle(this.data.sunColor);
+    }
+
+    if (
+      this.data.inclination !== oldData.inclination ||
+      this.data.azimuth !== oldData.azimuth ||
+      this.data.distance !== oldData.distance
+    ) {
+      const theta = Math.PI * (this.data.inclination - 0.5);
+      const phi = 2 * Math.PI * (this.data.azimuth - 0.5);
+
+      const distance = this.data.distance;
+
+      const x = distance * Math.cos(phi);
+      const y = distance * Math.sin(phi) * Math.sin(theta);
+      const z = distance * Math.sin(phi) * Math.cos(theta);
+
+      uniforms.sunDirection.value.set(x, y, z);
+    }
   },
 
   tick(time) {

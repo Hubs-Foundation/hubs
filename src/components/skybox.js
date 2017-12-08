@@ -224,7 +224,8 @@ AFRAME.registerComponent("skybox", {
     mieCoefficient: { type: "number", default: 0.005 },
     mieDirectionalG: { type: "number", default: 0.8 },
     inclination: { type: "number", default: 0 },
-    azimuth: { type: "number", default: 0 }
+    azimuth: { type: "number", default: 0 },
+    distance: { type: "number", default: 8000 }
   },
 
   init() {
@@ -232,23 +233,45 @@ AFRAME.registerComponent("skybox", {
     this.el.setObject3D("mesh", this.sky);
   },
 
-  update() {
-    const theta = Math.PI * (this.data.inclination - 0.5);
-    const phi = 2 * Math.PI * (this.data.azimuth - 0.5);
-
-    const distance = 8000; //this.el.getAttribute("scale").data.x;
-
-    const x = distance * Math.cos(phi);
-    const y = distance * Math.sin(phi) * Math.sin(theta);
-    const z = distance * Math.sin(phi) * Math.cos(theta);
-
+  update(oldData) {
     const uniforms = this.sky.material.uniforms;
-    uniforms.turbidity.value = this.data.turbidity;
-    uniforms.rayleigh.value = this.data.rayleigh;
-    uniforms.luminance.value = this.data.luminance;
-    uniforms.mieCoefficient.value = this.data.mieCoefficient;
-    uniforms.mieDirectionalG.value = this.data.mieDirectionalG;
-    uniforms.sunPosition.value.set(x, y, z);
+
+    if (this.data.turbidity !== oldData.turbidity) {
+      uniforms.turbidity.value = this.data.turbidity;
+    }
+
+    if (this.data.rayleigh !== oldData.rayleigh) {
+      uniforms.rayleigh.value = this.data.rayleigh;
+    }
+
+    if (this.data.luminance !== oldData.luminance) {
+      uniforms.luminance.value = this.data.luminance;
+    }
+
+    if (this.data.mieCoefficient !== oldData.mieCoefficient) {
+      uniforms.mieCoefficient.value = this.data.mieCoefficient;
+    }
+
+    if (this.data.mieDirectionalG !== oldData.mieDirectionalG) {
+      uniforms.mieDirectionalG.value = this.data.mieDirectionalG;
+    }
+
+    if (
+      this.data.inclination !== oldData.inclination ||
+      this.data.azimuth !== oldData.azimuth ||
+      this.data.distance !== oldData.distance
+    ) {
+      const theta = Math.PI * (this.data.inclination - 0.5);
+      const phi = 2 * Math.PI * (this.data.azimuth - 0.5);
+
+      const distance = this.data.distance;
+
+      const x = distance * Math.cos(phi);
+      const y = distance * Math.sin(phi) * Math.sin(theta);
+      const z = distance * Math.sin(phi) * Math.cos(theta);
+
+      uniforms.sunPosition.value.set(x, y, z).normalize();
+    }
   },
 
   remove() {
