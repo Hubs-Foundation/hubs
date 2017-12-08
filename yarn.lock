@@ -48,6 +48,10 @@ acorn@^5.0.0, acorn@^5.2.1:
   version "5.2.1"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.2.1.tgz#317ac7821826c22c702d66189ab8359675f135d7"
 
+aframe-cubemap-component@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/aframe-cubemap-component/-/aframe-cubemap-component-0.1.2.tgz#8602179980ef4fe45b9e0d1e26740f3149f737c5"
+
 aframe-extras@^3.12.4:
   version "3.12.4"
   resolved "https://registry.yarnpkg.com/aframe-extras/-/aframe-extras-3.12.4.tgz#9276bde8b51a07a9822bbce1fc55f2eb8e6810dc"

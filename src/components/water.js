@@ -341,16 +341,10 @@ THREE.Water.prototype.constructor = THREE.Water;
 
 AFRAME.registerComponent("water", {
   schema: {
-    speed: { type: "number", default: 0.1 }
+    speed: { type: "number", default: 0.1 },
+    sunPosition: { type: "vec3", default: { x: 0, y: 0, z: 0 } }
   },
   init() {
-    const skyboxEl = document.querySelector("[skybox]");
-    const skybox = skyboxEl.getObject3D("mesh");
-
-    const sunDirection = new THREE.Vector3()
-      .copy(skybox.material.uniforms.sunPosition.value)
-      .normalize();
-
     const waterGeometry = new THREE.PlaneBufferGeometry(800, 800);
     this.water = new THREE.Water(waterGeometry, {
       textureWidth: 512,
@@ -362,7 +356,7 @@ AFRAME.registerComponent("water", {
         }
       ),
       alpha: 1,
-      sunDirection,
+      sunDirection: this.data.sunDirection,
       sunColor: 0xffffff,
       waterColor: 0x001e0f,
       distortionScale: 3.7,
