@@ -19,19 +19,20 @@ AFRAME.registerComponent("haptic-feedback", {
 
   getActuator() {
     return new Promise((resolve, reject) => {
-      setTimeout(() => {
+      const tryGetActivator = () => {
         var trackedControls = this.el.components["tracked-controls"];
         if (
           trackedControls &&
           trackedControls.controller &&
           trackedControls.controller.hapticActuators &&
-          trackedControls.controller.hapticActuators.length > 0
+          trackedControls.controller.hapticActuators.length
         ) {
           resolve(trackedControls.controller.hapticActuators[0]);
         } else {
-          return this.getActuator().then(x => resolve(x));
+          setTimeout(tryGetActivator, 1000);
         }
-      }, 1000);
+      };
+      setTimeout(tryGetActivator, 1000);
     });
   },
 

@@ -13,6 +13,8 @@ AFRAME.registerComponent("animation-mixer", animationMixer);
 import { vive_trackpad_dpad4 } from "./behaviours/vive-trackpad-dpad4";
 import { oculus_touch_joystick_dpad4 } from "./behaviours/oculus-touch-joystick-dpad4";
 import { PressedMove } from "./activators/pressedmove";
+import { ReverseY } from "./activators/reversey";
+import "./activators/shortpress";
 import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
 
 import "./components/mute-mic";
@@ -40,6 +42,7 @@ AFRAME.registerInputBehaviour(
   oculus_touch_joystick_dpad4
 );
 AFRAME.registerInputActivator("pressedmove", PressedMove);
+AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputActions(inGameActions, "default");
 AFRAME.registerInputMappings(config);
 

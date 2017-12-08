@@ -46,16 +46,21 @@ const config = {
         gripup: "middle_ring_pinky_up",
         thumbsticktouchstart: "thumb_down",
         thumbsticktouchend: "thumb_up",
-        triggerdown: "index_down",
-        triggerup: "index_up",
-        left_axismove: "move",
+        // @TODO: How do I map more than one action to triggerdown?
+        //        triggerdown: "index_down",
+        //        triggerup: "index_up",
+        triggerdown: "action_teleport_down",
+        triggerup: "action_teleport_up",
+        "axismove.reverseY": { left: "move" },
         right_dpad_east: "snap_rotate_right",
         right_dpad_west: "snap_rotate_left",
         abuttondown: "action_teleport_down",
         abuttonup: "action_teleport_up"
       },
       daydream: {
-        menudown: "action_mute"
+        menudown: "action_mute",
+        trackpaddown: "action_teleport_down",
+        trackpadup: "action_teleport_up"
       },
       keyboard: {
         m_press: "action_mute",
