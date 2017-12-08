@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "aframe": "https://github.com/robertlong/aframe#fix-increasing-offset",
-    "aframe-cubemap-component": "^0.1.2",
     "aframe-extras": "^3.12.4",
     "aframe-input-mapping-component": "https://github.com/fernandojsg/aframe-input-mapping-component#6ebc38f",
     "aframe-teleport-controls": "https://github.com/netpro2k/aframe-teleport-controls#feature/teleport-origin",
