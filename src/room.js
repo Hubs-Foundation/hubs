@@ -26,6 +26,7 @@ import "./components/offset-relative-to";
 import "./components/cached-gltf-model";
 import "./components/water";
 import "./components/skybox";
+import "./components/layers";
 import "./components/spawn-controller";
 import "./systems/personal-space-bubble";
 

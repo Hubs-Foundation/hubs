@@ -24,7 +24,7 @@ THREE.Sky = function() {
     side: THREE.BackSide
   });
 
-  THREE.Mesh.call(this, new THREE.SphereBufferGeometry(1, 32, 15), material);
+  THREE.Mesh.call(this, new THREE.BoxBufferGeometry(1, 1, 1), material);
 };
 
 THREE.Sky.prototype = Object.create(THREE.Mesh.prototype);
