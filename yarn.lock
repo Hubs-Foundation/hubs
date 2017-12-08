@@ -3791,9 +3791,9 @@ mv@^2.1.1:
     ncp "~2.0.0"
     rimraf "~2.4.0"
 
-"naf-janus-adapter@https://github.com/mozilla/naf-janus-adapter#fix/multiple-get-mediastreams":
-  version "0.1.9"
-  resolved "https://github.com/mozilla/naf-janus-adapter#ad4c8334d12ae3fded937c9a1f1f7f85447c5f3d"
+naf-janus-adapter@^0.1.10:
+  version "0.1.10"
+  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.1.10.tgz#322d5eeccefc5078da7e4355537d739bbb167794"
   dependencies:
     debug "^3.1.0"
     minijanus "^0.1.6"
