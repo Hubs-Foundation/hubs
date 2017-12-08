@@ -17,30 +17,31 @@ module.exports = {
       return new Handlebars.SafeString(assetPath);
     }
 
-    const compilation = options.data.root.compilation;
+    // const compilation = options.data.root.compilation;
 
-    let asset;
-    if (compilation.assets[assetPath]) {
-      asset = compilation.assets[assetPath].source();
-    } else {
-      const outputPath = options.data.root.compiler.options.output.path;
-      const localPath = path.join(outputPath, assetPath);
+    // let asset;
+    // if (compilation.assets[assetPath]) {
+    //   asset = compilation.assets[assetPath].source();
+    // } else {
+    //   const outputPath = options.data.root.compiler.options.output.path;
+    //   const localPath = path.join(outputPath, assetPath);
 
-      try {
-        asset = fs.readFileSync(localPath);
-      } catch (err) {
-        compilation.errors.push(
-          err.message +
-            " Availible assets: " +
-            Object.keys(compilation.assets).jojn(", ")
-        );
-      }
-    }
+    //   try {
+    //     asset = fs.readFileSync(localPath);
+    //   } catch (err) {
+    //     compilation.errors.push(
+    //       err.message +
+    //         " Availible assets: " +
+    //         Object.keys(compilation.assets).jojn(", ")
+    //     );
+    //   }
+    // }
 
-    const hash = crc.crc32(asset).toString(16);
+    // const hash = crc.crc32(asset).toString(16);
+    // const cacheBustQueryString = "?crc=" + hash;
+    const cacheBustQueryString = "?d=" + Date.now();
 
     const baseAssetsPath = options.data.root.baseAssetsPath || "";
-    const cacheBustQueryString = "?crc=" + hash;
 
     const url = baseAssetsPath + assetPath + cacheBustQueryString;
 
