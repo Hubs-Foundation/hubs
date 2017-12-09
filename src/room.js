@@ -39,6 +39,7 @@ import "./systems/personal-space-bubble";
 import { promptForName, getCookie, parseJwt } from "./utils";
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config } from "./input-mappings";
+import registerTelemetry from "./telemetry";
 
 AFRAME.registerInputBehaviour("vive_trackpad_dpad4", vive_trackpad_dpad4);
 AFRAME.registerInputBehaviour(
@@ -51,6 +52,7 @@ AFRAME.registerInputActions(inGameActions, "default");
 AFRAME.registerInputMappings(config);
 
 registerNetworkSchemas();
+registerTelemetry();
 
 function shareScreen() {
   const track = NAF.connection.adapter.localMediaStream.getVideoTracks()[0];
