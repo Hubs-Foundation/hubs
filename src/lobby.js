@@ -6,6 +6,10 @@ import "material-design-lite";
 import "material-design-lite/material.css";
 import "./lobby.css";
 
+import registerTelemetry from "./telemetry";
+
+registerTelemetry();
+
 class Lobby extends React.Component {
   constructor() {
     super();
