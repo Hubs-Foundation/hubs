@@ -21,6 +21,7 @@
     "networked-aframe": "https://github.com/netpro2k/networked-aframe#bugfix/chrome/audio",
     "nipplejs": "^0.6.7",
     "query-string": "^5.0.1",
+    "raven-js": "^3.20.1",
     "react": "^16.1.1",
     "react-dom": "^16.1.1",
     "webrtc-adapter": "^6.0.2"
