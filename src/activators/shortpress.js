@@ -16,16 +16,13 @@ function ShortPress(el, button, onActivate) {
 
 ShortPress.prototype = {
   onButtonDown(event) {
-    console.log("down");
     var self = this;
     this.pressTimer = window.setTimeout(function() {
-      console.log("activate");
       self.onActivate(event);
     }, this.timeOut);
   },
 
   onButtonUp(event) {
-    console.log("up");
     clearTimeout(this.pressTimer);
   },
 
@@ -35,5 +32,4 @@ ShortPress.prototype = {
   }
 };
 
-console.log("foo");
 AFRAME.registerInputActivator("shortpress", ShortPress);
