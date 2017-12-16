@@ -6,6 +6,7 @@
   "scripts": {
     "start": "npm run dev",
     "dev": "webpack-dev-server --https --host 0.0.0.0 --useLocalIp --open --config webpack.dev.js",
+    "dev:local": "webpack-dev-server --open --config webpack.dev.js",
     "build": "cross-env NODE_ENV='production' webpack --config webpack.prod.js",
     "prettier": "prettier --write src/**/*.js"
   },
@@ -18,12 +19,13 @@
     "material-design-lite": "^1.3.0",
     "minijanus": "^0.1.6",
     "naf-janus-adapter": "^0.1.10",
-    "networked-aframe": "https://github.com/netpro2k/networked-aframe#bugfix/chrome/audio",
+    "networked-aframe": "https://github.com/netpro2k/networked-aframe#feature/ownership-transfer",
     "nipplejs": "^0.6.7",
     "query-string": "^5.0.1",
     "raven-js": "^3.20.1",
     "react": "^16.1.1",
     "react-dom": "^16.1.1",
+    "react-infinite-scroller": "^1.1.2",
     "webrtc-adapter": "^6.0.2"
   },
   "resolutions": {

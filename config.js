@@ -11,6 +11,7 @@ module.exports = {
     janus_server_url:
       process.env.JANUS_SERVER || "wss://dev-janus.reticulum.io",
     public_rooms: [1, 2, 3, 4, 5],
-    default_room: 1
+    default_room: 1,
+    polyAPIKey: "AIzaSyD_tHvQQCRsttfGEjtF4SQa2Vj_Td3cak8"
   }
 };

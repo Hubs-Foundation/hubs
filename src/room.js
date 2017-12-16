@@ -36,6 +36,10 @@ import "./components/layers";
 import "./components/spawn-controller";
 import "./systems/personal-space-bubble";
 
+import React from "react";
+import ReactDOM from "react-dom";
+import Editor from "./editor";
+
 import { promptForName, getCookie, parseJwt } from "./utils";
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config } from "./input-mappings";
@@ -80,6 +84,22 @@ window.App = {
   async onSceneLoad() {
     const qs = queryString.parse(location.search);
     const scene = document.querySelector("a-scene");
+    const playerRig = document.querySelector("#player-rig");
+
+    function onSelectAsset(asset) {
+      const format = asset.formats.find(
+        ({ formatType }) => formatType === "GLTF2"
+      );
+      const el = document.createElement("a-entity");
+      el.setAttribute("cached-gltf-model", format.root.url);
+      el.setAttribute("position", playerRig.getAttribute("position"));
+      scene.appendChild(el);
+    }
+
+    ReactDOM.render(
+      <Editor onSelectAsset={onSelectAsset} />,
+      document.getElementById("editor")
+    );
 
     scene.setAttribute("networked-scene", {
       room:
@@ -94,7 +114,6 @@ window.App = {
     }
 
     if (AFRAME.utils.device.isMobile() || qs.gamepad) {
-      const playerRig = document.querySelector("#player-rig");
       playerRig.setAttribute("virtual-gamepad-controls", {});
     }
 

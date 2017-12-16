@@ -1,0 +1,48 @@
+#editor {
+  position: absolute;
+  left: 0;
+  width: 300;
+  top: 0;
+  bottom: 0;
+  background-color: #fff;
+  font-family: Helvetica, sans-serif;
+}
+
+:local(.assets) {
+}
+
+:local(.search) {
+  width: 100%;
+  height: 32px;
+  font-size: 14px;
+  border: 0;
+  padding: 0 6px;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+:local(.assetsList) {
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+:local(.asset) {
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1px solid #ccc;
+}
+
+:local(.asset) img {
+  width: 100px;
+  display: flex;
+}
+
+:local(.asset) .detail {
+  margin-left: 16px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+}
