@@ -7,17 +7,8 @@ function checkFloatTextureSupport() {
   const scene = new THREE.Scene();
   const size = 2;
   const data = new Float32Array(size * size * 4);
-  const dataTexture = new THREE.DataTexture(
-    data,
-    size,
-    size,
-    THREE.RGBAFormat,
-    THREE.FloatType
-  );
-  const box = new THREE.Mesh(
-    new THREE.PlaneBufferGeometry(1, 1),
-    new THREE.MeshBasicMaterial({ map: dataTexture })
-  );
+  const dataTexture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat, THREE.FloatType);
+  const box = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), new THREE.MeshBasicMaterial({ map: dataTexture }));
   box.material.map.needsUpdate = true;
   scene.add(box);
 
@@ -36,11 +27,7 @@ export function patchWebGLRenderingContext() {
     // for those devices.
     // See https://github.com/mozilla/mr-social-client/issues/32 and
     // https://bugzilla.mozilla.org/show_bug.cgi?id=1338656
-    if (
-      name === "OES_texture_float" &&
-      /Android.+Firefox/.test(navigator.userAgent) &&
-      !supportsFloatTextures
-    ) {
+    if (name === "OES_texture_float" && /Android.+Firefox/.test(navigator.userAgent) && !supportsFloatTextures) {
       return null;
     }
     return originalGetExtension.call(this, name);
