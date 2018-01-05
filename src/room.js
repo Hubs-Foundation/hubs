@@ -1,5 +1,8 @@
 import queryString from "query-string";
 
+import { patchWebGLRenderingContext } from "./utils/webgl";
+patchWebGLRenderingContext();
+
 import "aframe";
 import "./vendor/GLTFLoader";
 import "networked-aframe";
@@ -36,7 +39,7 @@ import "./components/layers";
 import "./components/spawn-controller";
 import "./systems/personal-space-bubble";
 
-import { promptForName, getCookie, parseJwt } from "./utils";
+import { promptForName, getCookie, parseJwt } from "./utils/identity";
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config } from "./input-mappings";
 import registerTelemetry from "./telemetry";
