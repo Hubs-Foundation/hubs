@@ -13,6 +13,8 @@
     "aframe": "https://github.com/robertlong/aframe#fix-increasing-offset",
     "aframe-extras": "^3.12.4",
     "aframe-input-mapping-component": "https://github.com/johnshaughnessy/aframe-input-mapping-component#23e2855",
+    "aframe-physics-extras": "^0.1.2",
+    "aframe-physics-system": "^2.1.0",
     "aframe-teleport-controls": "https://github.com/netpro2k/aframe-teleport-controls#feature/teleport-origin",
     "extract-text-webpack-plugin": "^3.0.2",
     "material-design-lite": "^1.3.0",
@@ -24,6 +26,7 @@
     "raven-js": "^3.20.1",
     "react": "^16.1.1",
     "react-dom": "^16.1.1",
+    "super-hands": "^2.1.0",
     "webrtc-adapter": "^6.0.2"
   },
   "resolutions": {

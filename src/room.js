@@ -9,6 +9,9 @@ import "networked-aframe";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
 import "aframe-input-mapping-component";
+import "aframe-physics-system";
+import "aframe-physics-extras";
+import "super-hands";
 
 import animationMixer from "aframe-extras/src/loaders/animation-mixer";
 AFRAME.registerComponent("animation-mixer", animationMixer);
@@ -45,10 +48,7 @@ import { inGameActions, config } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 
 AFRAME.registerInputBehaviour("vive_trackpad_dpad4", vive_trackpad_dpad4);
-AFRAME.registerInputBehaviour(
-  "oculus_touch_joystick_dpad4",
-  oculus_touch_joystick_dpad4
-);
+AFRAME.registerInputBehaviour("oculus_touch_joystick_dpad4", oculus_touch_joystick_dpad4);
 AFRAME.registerInputActivator("pressedmove", PressedMove);
 AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputActions(inGameActions, "default");
@@ -85,10 +85,7 @@ window.App = {
     const scene = document.querySelector("a-scene");
 
     scene.setAttribute("networked-scene", {
-      room:
-        qs.room && !isNaN(parseInt(qs.room))
-          ? parseInt(qs.room)
-          : window.CONFIG.default_room,
+      room: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : window.CONFIG.default_room,
       serverURL: window.CONFIG.janus_server_url
     });
 
@@ -122,10 +119,7 @@ window.App = {
 
     const mediaStream = await navigator.mediaDevices.getUserMedia({
       audio: true,
-      video:
-        qs.screen === "true"
-          ? { mediaSource: "screen", height: 720, frameRate: 30 }
-          : false
+      video: qs.screen === "true" ? { mediaSource: "screen", height: 720, frameRate: 30 } : false
     });
 
     // Don't send video by deafult

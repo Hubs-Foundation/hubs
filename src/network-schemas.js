@@ -24,6 +24,11 @@ function registerNetworkSchemas() {
     template: "#video-template",
     components: ["position", "rotation", "visible"]
   });
+
+  NAF.schemas.add({
+    template: "#physics-cube",
+    components: ["position", "quaternion", "scale"]
+  });
 }
 
 export default registerNetworkSchemas;
