@@ -179,9 +179,10 @@
             id="bot-skinned"
             cached-gltf-model="#bot-skinned-mesh"
             position="0 0 0"
-            spin
-            model-inflator="idPrefix: bot;"
-        ></a-entity>
+            model-inflator
+        >
+            <a-proxy-entity selector=".RightHand" spin ></a-proxy-entity>
+        </a-entity>
 
         <!-- Environment -->
         <a-entity

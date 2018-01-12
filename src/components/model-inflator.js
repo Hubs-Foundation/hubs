@@ -1,12 +1,15 @@
-const inflateEntities = function(idPrefix, componentMappings, parentEl, node) {
+const inflateEntities = function(classPrefix, parentEl, node) {
   // setObject3D mutates the node's parent, so we have to copy
   const children = node.children.slice(0);
 
   const el = document.createElement("a-entity");
-  el.id = idPrefix + node.name;
+
+  // Remove invalid CSS class name characters.
+  const className = node.name.replace(/[^\w-]/g, "");
+  el.classList.add(classPrefix + className);
   parentEl.appendChild(el);
 
-  // // Copy over transform to the THREE.Group and reset the actual transform of the Object3D
+  // Copy over transform to the THREE.Group and reset the actual transform of the Object3D
   el.setAttribute("position", {
     x: node.position.x,
     y: node.position.y,
@@ -29,36 +32,18 @@ const inflateEntities = function(idPrefix, componentMappings, parentEl, node) {
 
   el.setObject3D(node.type.toLowerCase(), node);
 
-  if (componentMappings && componentMappings[node.name]) {
-    const components = componentMappings[node.name];
-    for (const componentName of Object.keys(components)) {
-      el.setAttribute(componentName, components[componentName]);
-    }
-  }
-
   children.forEach(childNode => {
-    inflateEntities(idPrefix, componentMappings, el, childNode);
+    inflateEntities(classPrefix, el, childNode);
   });
 };
 
 AFRAME.registerComponent("model-inflator", {
   schema: {
-    idPrefix: { type: "string" }
+    classPrefix: { type: "string", default: "" }
   },
   init: function() {
-    const componentMappings = {
-      RightHand: {
-        spin: "speed: 1;"
-      }
-    };
-
     this.el.addEventListener("model-loaded", e => {
-      inflateEntities(
-        `${this.data.idPrefix}_`,
-        componentMappings,
-        this.el,
-        e.detail.model
-      );
+      inflateEntities(this.data.classPrefix, this.el, e.detail.model);
     });
   }
 });

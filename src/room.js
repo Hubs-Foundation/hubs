@@ -15,8 +15,8 @@ import { oculus_touch_joystick_dpad4 } from "./behaviours/oculus-touch-joystick-
 import { PressedMove } from "./activators/pressedmove";
 import { ReverseY } from "./activators/reversey";
 import "./activators/shortpress";
-import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
 
+import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
 import "./components/mute-mic";
 import "./components/audio-feedback";
 import "./components/nametag-transform";
@@ -35,7 +35,11 @@ import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
 import "./components/model-inflator";
+import "./components/spin";
+
 import "./systems/personal-space-bubble";
+
+import "./elements/a-proxy-entity";
 
 import { promptForName, getCookie, parseJwt } from "./utils";
 import registerNetworkSchemas from "./network-schemas";
