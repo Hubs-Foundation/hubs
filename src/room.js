@@ -34,6 +34,7 @@ import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
+import "./components/model-inflator";
 import "./systems/personal-space-bubble";
 
 import { promptForName, getCookie, parseJwt } from "./utils";

@@ -44,6 +44,7 @@
         light="defaultLightsEnabled: false">
 
         <a-assets>
+            <a-asset-item id="bot-skinned-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_Skinned.glb" }}"></a-asset-item>
             <a-asset-item id="bot-head-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_Head_Mesh.glb" }}"></a-asset-item>
             <a-asset-item id="bot-body-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_Body_Mesh.glb" }}"></a-asset-item>
             <a-asset-item id="bot-left-hand-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_LeftHand_Mesh.glb" }}"></a-asset-item>
@@ -173,6 +174,14 @@
                 networked="template: #right-hand-template;"
             ></a-entity>
         </a-entity>
+
+         <a-entity
+            id="bot-skinned"
+            cached-gltf-model="#bot-skinned-mesh"
+            position="0 0 0"
+            spin
+            model-inflator="idPrefix: bot;"
+        ></a-entity>
 
         <!-- Environment -->
         <a-entity
