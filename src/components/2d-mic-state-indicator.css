@@ -10,3 +10,7 @@
 :local(.indicator.muted) {
     background-image: url(../assets/hud/muted.png);
 }
+
+:local(.indicator.unmuted){
+    background-image: url(../assets/hud/unmuted.png);
+}

@@ -40,7 +40,7 @@
                          onConnect: App.onConnect;
                          connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
-        2d-mute-state-indicator
+        2d-mic-state-indicator="analyserSrc:#head"
         light="defaultLightsEnabled: false">
 
         <a-assets>
@@ -155,7 +155,7 @@
                 <a-entity
                     id="watch"
                     cached-gltf-model="#watch-model"
-                    bone-mute-state-indicator
+                    bone-mute-state-indicator="analyserSrc:#head"
                     position="-0.003 0.009 0.085"
                     rotation="-79.12547150756669 -160.1417037390651 -100.1530225888679"
                     scale="1.5 1.5 1.5">
