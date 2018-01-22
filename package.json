@@ -16,7 +16,7 @@
     "aframe-teleport-controls": "https://github.com/netpro2k/aframe-teleport-controls#feature/teleport-origin",
     "extract-text-webpack-plugin": "^3.0.2",
     "material-design-lite": "^1.3.0",
-    "minijanus": "^0.1.6",
+    "minijanus": "^0.4.0",
     "naf-janus-adapter": "^0.1.10",
     "networked-aframe": "https://github.com/netpro2k/networked-aframe#bugfix/chrome/audio",
     "nipplejs": "^0.6.7",
