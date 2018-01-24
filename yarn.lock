@@ -4142,9 +4142,9 @@ mv@^2.1.1:
     ncp "~2.0.0"
     rimraf "~2.4.0"
 
-naf-janus-adapter@^0.1.10:
-  version "0.1.10"
-  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.1.10.tgz#322d5eeccefc5078da7e4355537d739bbb167794"
+naf-janus-adapter@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.2.0.tgz#55219662cbd6440fdf0be8f70d5cf22fe937c278"
   dependencies:
     debug "^3.1.0"
     minijanus "^0.1.6"
@@ -4165,9 +4165,9 @@ negotiator@0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"
 
-"networked-aframe@https://github.com/netpro2k/networked-aframe#bugfix/chrome/audio":
-  version "0.3.2"
-  resolved "https://github.com/netpro2k/networked-aframe#29efff590bc2edded4424203831ecc4671b1be69"
+networked-aframe@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/networked-aframe/-/networked-aframe-0.5.0.tgz#7d80ff0668f2f7e745bf7dc0b67938a847f51c74"
   dependencies:
     aframe-lerp-component "^1.1.0"
     aframe-template-component "3.2.1"

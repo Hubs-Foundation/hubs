@@ -40,6 +40,7 @@ import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
+import "./components/remote-dynamic-body";
 import "./systems/personal-space-bubble";
 
 import { promptForName, getCookie, parseJwt } from "./utils/identity";
@@ -81,34 +82,18 @@ function shareScreen() {
 
 function spawnNetworkedCube(e) {
   const sceneEl = document.querySelector("a-scene");
-
   const entity = document.createElement("a-entity");
   entity.setAttribute("dynamic-body", "mass: 1;");
-  // entity.setAttribute("scale", "0.5 0.5 0.5");
   entity.setAttribute("grabbable", "");
-  entity.setAttribute("hoverable", "");
   entity.setAttribute("stretchable", "");
-  entity.setAttribute("draggable", "");
   if (e.target && e.target != sceneEl) {
     entity.setAttribute("position", e.target.object3D.getWorldPosition());
   } else {
     entity.setAttribute("position", "0 3 0");
   }
-
-  sceneEl.appendChild(entity);
-
   entity.setAttribute("networked", "template: #physics-cube;");
+  sceneEl.appendChild(entity);
 }
-
-AFRAME.registerComponent("remote-dynamic-body", {
-  init() {
-    const networkedEl = NAF.utils.getNetworkedEntity(this.el);
-    if (!networkedEl.components.networked.isMine()) {
-      this.el.setAttribute("static-body", "");
-      this.el.setAttribute("color", "white");
-    }
-  }
-});
 
 window.App = {
   async onSceneLoad() {

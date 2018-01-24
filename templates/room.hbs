@@ -34,7 +34,7 @@
 <body>
     <div id="loader"></div>
     <a-scene
-        physics="debug: true"
+        physics
         networked-scene="adapter: janus;
                          audio: true;
                          debug: true;
@@ -119,7 +119,7 @@
             </script>
 
             <script id="physics-cube" type="text/html">
-                <a-box class="box" remote-dynamic-body material="color: green"></a-box>
+                <a-box class="box" remote-dynamic-body physics-collider scale="0.25 0.25 0.25"  material="color: green"></a-box>
             </script>
         </a-assets>
 
