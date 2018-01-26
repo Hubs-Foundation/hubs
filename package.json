@@ -5,7 +5,7 @@
   "license": "MPL-2.0",
   "scripts": {
     "start": "npm run dev",
-    "dev": "webpack-dev-server --https --host 0.0.0.0 --useLocalIp --open --config webpack.dev.js",
+    "dev": "webpack-dev-server --port 8000 --host 0.0.0.0 --useLocalIp --open --config webpack.dev.js",
     "build": "cross-env NODE_ENV='production' webpack --config webpack.prod.js",
     "prettier": "prettier --write src/**/*.js"
   },
@@ -17,7 +17,7 @@
     "extract-text-webpack-plugin": "^3.0.2",
     "material-design-lite": "^1.3.0",
     "minijanus": "^0.1.6",
-    "naf-janus-adapter": "^0.1.10",
+    "naf-janus-adapter": "https://github.com/mozilla/naf-janus-adapter#codec-detect",
     "networked-aframe": "https://github.com/netpro2k/networked-aframe#bugfix/chrome/audio",
     "nipplejs": "^0.6.7",
     "query-string": "^5.0.1",
