@@ -41,6 +41,7 @@ import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
 import "./components/remote-dynamic-body";
+import "./components/networked-counter";
 import "./systems/personal-space-bubble";
 
 import { promptForName, getCookie, parseJwt } from "./utils/identity";
