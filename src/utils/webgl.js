@@ -1,4 +1,3 @@
-import AFRAME from "aframe";
 const THREE = AFRAME.THREE;
 
 function checkFloatTextureSupport() {

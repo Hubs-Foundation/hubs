@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{{asset "room.css"}}">
 
     <script>window.CONFIG = {{toJSON config.global}};</script>
+    <script src="{{asset "assets/aframe.js" }}"></script>
     <script src="{{asset "manifest.js" }}"></script>
     <script src="{{asset "room-vendor.js" }}"></script>
     <script src="{{asset "room.js" }}"></script>
@@ -179,12 +180,14 @@
             id="meeting-space"
             cached-gltf-model="#meeting-space1-mesh"
             position="0 0 0"
+	    xr="ar: false"
         ></a-entity>
 
         <a-entity
             id="outdoor-facade"
             cached-gltf-model="#outdoor-facade-mesh"
             position="0 0 0"
+	    xr="ar: false"
         ></a-entity>
 
         <a-entity
@@ -192,6 +195,7 @@
             cached-gltf-model="#floor-nav-mesh"
             visible="false"
             position="0 0 0"
+	    xr="ar: false"
         ></a-entity>
 
         <a-entity
@@ -199,6 +203,7 @@
             cached-gltf-model="#cliff-vista-mesh"
             layers="reflection:true"
             position="0 0 0"
+	    xr="ar: false"
         ></a-entity>
 
         <a-entity id="skybox"
@@ -207,6 +212,7 @@
             skybox="azimuth:0.280; inclination:0.440"
             light="type: ambient; color: #FFF"
             layers="reflection:true"
+	    xr="ar: false"
         ></a-entity>
 
         <a-entity
@@ -214,6 +220,7 @@
             water="normalMap:#water-normal-map"
             rotation="-90 0 0"
             position="0 -88.358 -332.424"
+	    xr="ar: false"
         ></a-entity>
     </a-scene>
 

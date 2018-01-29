@@ -82,6 +82,12 @@ aframe-template-component@3.2.1:
   dependencies:
     es6-template-strings "^2.0.0"
 
+aframe-xr@^0.0.8:
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/aframe-xr/-/aframe-xr-0.0.8.tgz#6ac0f03f723e7986cc9868eaf4c7c04d43ea025a"
+  dependencies:
+    three.xr.js "0.1.7"
+
 "aframe@https://github.com/robertlong/aframe#fix-increasing-offset":
   version "0.7.0"
   resolved "https://github.com/robertlong/aframe#7046bdec8539cde9eec261dd48b5d4e2bbd2b722"
@@ -5622,6 +5628,10 @@ three-pathfinding@^0.2.2:
 three-to-cannon@^1.1.1:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/three-to-cannon/-/three-to-cannon-1.1.2.tgz#b0040b893b2fa5f0e8a0aedf58bc90fc07f137aa"
+
+three.xr.js@0.1.7:
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/three.xr.js/-/three.xr.js-0.1.7.tgz#0180f50a12ece0b26fa839f7c08af67d8f52d5b7"
 
 three@^0.87.0:
   version "0.87.1"
