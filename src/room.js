@@ -42,6 +42,8 @@ import "./components/layers";
 import "./components/spawn-controller";
 import "./components/remote-dynamic-body";
 import "./components/networked-counter";
+import "./components/super-spawner";
+import "./components/cursor-hand";
 import "./systems/personal-space-bubble";
 
 import { promptForName, getCookie, parseJwt } from "./utils/identity";

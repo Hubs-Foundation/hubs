@@ -34,7 +34,7 @@
 <body>
     <div id="loader"></div>
     <a-scene
-        physics
+        physics="debug: true;"
         networked-scene="adapter: janus;
                          audio: true;
                          debug: true;
@@ -118,15 +118,30 @@
                 ></a-entity>
             </script>
             <script id="physics-cube" type="text/html">
-                <a-box class="box" remote-dynamic-body="counter: #counter" physics-collider scale="0.25 0.25 0.25"  material="color: green"></a-box>
+                <a-box class="collidable" remote-dynamic-body="counter: #counter" physics-collider scale="0.25 0.25 0.25"  material="color: green"></a-box>
             </script>
         </a-assets>
 
-        <a-entity
-            id="counter"
-            networked-counter="max: 3; ttl: 120"
-        >
+        <a-entity id="counter" networked-counter="max: 3; ttl: 120"></a-entity>
+
+        <a-entity id="cube-spawner" super-spawner="template: #physics-cube; spawn_position: 2.5 1.2 0;" position="2.5 1.2 0" >
+            <a-box material="color: blue" class="collidable" physics-collider scale="0.25 0.25 0.25"></a-box>
         </a-entity>
+
+        <a-sphere
+            id="3d-cursor"
+            material="color: #00EFFF"
+            radius=0.02
+            physics-collider
+            collision-filter="collisionForces: false"
+            static-body="shape: sphere;"
+            super-hands="colliderEvent: collisions; colliderEventProperty: els;
+                         colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
+                         grabStartButtons: action_grab; grabEndButtons: action_release;
+                         stretchStartButtons: action_grab; stretchEndButtons: action_release;
+                         dargDropStartButtons: action_grab; dragDropEndButtons: action_release;
+                         "
+        ></a-sphere>  
 
         <!-- Player Rig -->
         <a-entity
@@ -142,8 +157,13 @@
                 personal-space-bubble
                 look-controls
                 networked="template: #head-template; showLocalTemplate: false;"
+            >
+            <a-entity
+                cursor-hand="cursor: #3d-cursor"
+                position="0 -0.1 0"
+                raycaster="objects: .collidable; direction: 0 0 -1; recursive: false;"
             ></a-entity>
-
+            </a-entity>
             <a-entity
                 id="body"
                 body-controller="eyeNeckOffset: 0 -0.11 0.09; neckHeight: 0.05"
@@ -204,7 +224,9 @@
             ></a-entity>
         </a-entity>
 
-        <a-cylinder position="0 0.5 0" visible="false" height="1" radius="3" segments-radial="12" static-body ></a-cylinder>
+        <a-cylinder position="0 0.5 0" material="visible: false" height="1" radius="3.1" segments-radial="12" static-body class="collidable"></a-cylinder>
+
+        <a-plane material="visible: false" rotation="-90 0 0" height="35" width="35" static-body class="collidable"></a-plane> 
 
         <!-- Environment -->
         <a-entity
@@ -222,7 +244,6 @@
         <a-entity
             id="floor-nav"
             cached-gltf-model="#floor-nav-mesh"
-            static-body="shape: hull;"
             visible="false"
             position="0 0 0"
         ></a-entity>
