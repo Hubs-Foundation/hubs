@@ -6,7 +6,8 @@ AFRAME.registerComponent("bone-visibility", {
       if (visible) {
         this.el.object3D.scale.set(1, 1, 1);
       } else {
-        this.el.object3D.scale.set(0, 0, 0);
+        // Three.js doesn't like updating matrices with 0 scale, so we set it to a near zero number.
+        this.el.object3D.scale.set(0.00000001, 0.00000001, 0.00000001);
       }
 
       this.lastVisible = visible;
