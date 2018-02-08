@@ -41,10 +41,7 @@ function cloneGltf(gltf) {
       orderedCloneBones.push(cloneBone);
     }
 
-    cloneSkinnedMesh.bind(
-      new THREE.Skeleton(orderedCloneBones, skeleton.boneInverses),
-      cloneSkinnedMesh.matrixWorld
-    );
+    cloneSkinnedMesh.bind(new THREE.Skeleton(orderedCloneBones, skeleton.boneInverses), cloneSkinnedMesh.matrixWorld);
 
     cloneSkinnedMesh.material = skinnedMesh.material.clone();
   }
@@ -93,7 +90,7 @@ const inflateEntities = function(classPrefix, parentEl, node) {
 
 function attachTemplate(templateEl) {
   const selector = templateEl.getAttribute("data-selector");
-  const targetEls = document.querySelectorAll(selector);
+  const targetEls = templateEl.parentNode.querySelectorAll(selector);
   const clone = document.importNode(templateEl.content, true);
   const templateRoot = clone.firstElementChild;
   const templateRootAttrs = templateRoot.attributes;
@@ -103,10 +100,7 @@ function attachTemplate(templateEl) {
 
     // Merge root element attributes with the target element
     for (var i = 0; i < templateRootAttrs.length; i++) {
-      targetEl.setAttribute(
-        templateRootAttrs[i].name,
-        templateRootAttrs[i].value
-      );
+      targetEl.setAttribute(templateRootAttrs[i].name, templateRootAttrs[i].value);
     }
 
     // Append all child elements
@@ -183,21 +177,13 @@ AFRAME.registerElement("a-gltf-entity", {
         };
 
         const onError = error => {
-          const message =
-            error && error.message
-              ? error.message
-              : "Failed to load glTF model";
+          const message = error && error.message ? error.message : "Failed to load glTF model";
           console.warn(message);
           this.emit("model-error", { format: "gltf", src: this.data });
         };
 
         // Otherwise load the new gltf model.
-        new THREE.GLTFLoader().load(
-          src,
-          onLoad,
-          undefined /* onProgress */,
-          onError
-        );
+        new THREE.GLTFLoader().load(src, onLoad, undefined /* onProgress */, onError);
       }
     }
   })
