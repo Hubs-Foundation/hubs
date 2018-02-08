@@ -1,56 +1,57 @@
-function getParentModelInflatorEl(el) {
-  let cur = el;
-
-  while (cur && !cur.hasAttribute("model-inflator")) {
-    cur = cur.parentNode;
-  }
-
-  if (cur.hasAttribute("model-inflator")) {
-    return cur;
-  }
-
-  return undefined;
-}
-
 AFRAME.registerElement("a-proxy-entity", {
   prototype: Object.create(HTMLElement.prototype, {
     attachedCallback: {
       value() {
-        this.inflatorEl = getParentModelInflatorEl(this);
+        const waitForEvent = this.getAttribute("wait-for-event");
 
-        if (!this.inflatorEl) {
-          throw new Error(
-            "a-proxy-entity could not find parent element with model-inflator component."
-          );
-        }
+        const attachTemplate = () => {
+          const selector = this.getAttribute("selector");
+          const targetEls = this.parentNode.querySelectorAll(selector);
 
-        this.onModelLoad = () => {
-          setTimeout(() => {
-            const selector = this.getAttribute("selector");
-            const targetEls = this.inflatorEl.querySelectorAll(selector);
-            const attributeNames = this.getAttributeNames();
+          const template = this.firstElementChild;
+          const clone = document.importNode(template.content, true);
+          const templateRoot = clone.firstElementChild;
+          const templateRootAttrs = templateRoot.attributes;
 
-            for (const attributeName of attributeNames) {
-              const attributeValue = this.getAttribute(attributeName);
-              if (AFRAME.components[attributeName] !== undefined) {
-                for (const el of targetEls) {
-                  el.setAttribute(attributeName, attributeValue);
-                }
-              }
+          for (var i = 0; i < targetEls.length; i++) {
+            const targetEl = targetEls[i];
+
+            // Merge root element attributes with the target element
+            for (var i = 0; i < elAttrs.length; i++) {
+              targetEl.setAttribute(
+                templateRootAttrs[i].name,
+                templateRootAttrs[i].value
+              );
             }
 
-            this.parentNode.removeChild(this);
-          }, 0);
+            // Append all child elements
+            for (var i = 0; i < templateRoot.children.length; i++) {
+              targetEl.appendChild(
+                document.importNode(templateRoot.children[i], true)
+              );
+            }
+          }
         };
 
-        this.inflatorEl.addEventListener("model-loaded", this.onModelLoad, {
-          once: true
-        });
+        if (waitForEvent != null) {
+          this.parentNode.addEventListener(waitForEvent, attachTemplate, {
+            once: true
+          });
+        } else {
+          attachTemplate();
+        }
       }
     },
     detachedCallback: {
       value() {
-        this.inflatorEl.removeEventListener("model-loaded", this.onModelLoad);
+        const waitForEvent = this.getAttribute("wait-for-event");
+
+        if (waitForEvent != null) {
+          this.parentNode.removeEventListener(
+            waitForEvent,
+            this.attachTemplate
+          );
+        }
       }
     }
   })

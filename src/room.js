@@ -36,9 +36,11 @@ import "./components/layers";
 import "./components/spawn-controller";
 import "./components/model-inflator";
 import "./components/spin";
+import "./components/bone-visibility";
 
 import "./systems/personal-space-bubble";
 
+import "./elements/a-gltf-entity";
 import "./elements/a-proxy-entity";
 
 import { promptForName, getCookie, parseJwt } from "./utils";
@@ -98,8 +100,9 @@ window.App = {
       scene.setAttribute("stats", true);
     }
 
+    const playerRig = document.querySelector("#player-rig");
+
     if (AFRAME.utils.device.isMobile() || qs.gamepad) {
-      const playerRig = document.querySelector("#player-rig");
       playerRig.setAttribute("virtual-gamepad-controls", {});
     }
 
@@ -117,8 +120,15 @@ window.App = {
       username = promptForName(username); // promptForName is blocking
     }
 
-    const myNametag = document.querySelector("#player-rig .nametag");
-    myNametag.setAttribute("text", "value", username);
+    playerRig.addEventListener(
+      "model-loaded",
+      () => {
+        console.log(playerRig);
+        const myNametag = playerRig.querySelector(".nametag");
+        myNametag.setAttribute("text", "value", username);
+      },
+      { once: true }
+    );
 
     scene.addEventListener("action_share_screen", shareScreen);
 

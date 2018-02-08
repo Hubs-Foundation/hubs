@@ -3813,9 +3813,9 @@ negotiator@0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"
 
-"networked-aframe@https://github.com/netpro2k/networked-aframe#bugfix/chrome/audio":
-  version "0.3.2"
-  resolved "https://github.com/netpro2k/networked-aframe#29efff590bc2edded4424203831ecc4671b1be69"
+"networked-aframe@https://github.com/netpro2k/networked-aframe#feature/networked-templates-refactor":
+  version "0.5.1"
+  resolved "https://github.com/netpro2k/networked-aframe#32627650faa088593600045bdafb717ed5a07d51"
   dependencies:
     aframe-lerp-component "^1.1.0"
     aframe-template-component "3.2.1"
