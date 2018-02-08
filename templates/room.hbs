@@ -61,48 +61,38 @@
             </template>
 
             <template id="remote-avatar-template">
-                <a-entity
-                    cached-gltf-model="#bot-skinned-mesh"
-                >
-                    <a-proxy-entity selector=".Head" wait-for-event="model-loaded">
-                        <template>
+                <a-gltf-entity src="#bot-skinned-mesh" inflate="true">
+                    <template data-selector=".Head">
+                        <a-entity
+                            networked-audio-source
+                            networked-audio-analyser
+                            matcolor-audio-feedback="objectName: Head_Mesh"
+                            scale-audio-feedback
+                            personal-space-invader
+                            animation-mixer
+                        >
                             <a-entity
-                                networked-audio-source
-                                networked-audio-analyser
-                                matcolor-audio-feedback="objectName: Head_Mesh"
-                                scale-audio-feedback
-                                personal-space-invader
-                                animation-mixer
-                            >
-                                <a-entity
-                                    class="nametag"
-                                    nametag-transform="follow: .Head"
-                                    text="side: double; align: center; color: #ddd"
-                                    position="0 2.5 0"
-                                    scale="6 6 6"
-                                ></a-entity>
-                            </a-entity>
-                        </template>
-                    </a-proxy-entity>
+                                class="nametag"
+                                nametag-transform="follow: .Head"
+                                text="side: double; align: center; color: #ddd"
+                                position="0 2.5 0"
+                                scale="6 6 6"
+                            ></a-entity>
+                        </a-entity>
+                    </template>
 
-                    <a-proxy-entity selector=".Body" wait-for-event="model-loaded">
-                        <template>
-                            <a-entity body-controller="eyeNeckOffset: 0 -0.11 0.09; neckHeight: 0.05" ></a-entity>
-                        </template>
-                    </a-proxy-entity>
+                    <template data-selector=".Body">
+                        <a-entity body-controller="eyeNeckOffset: 0 -0.11 0.09; neckHeight: 0.05" ></a-entity>
+                    </template>
 
-                    <a-proxy-entity selector=".Lefthand" wait-for-event="model-loaded">
-                        <template>
-                            <a-entity personal-space-invader bone-visibility ></a-entity>
-                        </template>
-                    </a-proxy-entity>
+                    <template data-selector=".LeftHand">
+                        <a-entity personal-space-invader bone-visibility ></a-entity>
+                    </template>
 
-                    <a-proxy-entity selector=".RightHand" wait-for-event="model-loaded">
-                        <template>
-                            <a-entity personal-space-invader bone-visibility ></a-entity>
-                        </template>
-                    </a-proxy-entity>
-                </a-entity>
+                    <template data-selector=".RightHand">
+                        <a-entity personal-space-invader bone-visibility ></a-entity>
+                    </template>
+                </a-gltf-entity>
             </template>
         </a-assets>
 
