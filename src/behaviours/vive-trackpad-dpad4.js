@@ -1,4 +1,4 @@
-import { angleTo4Direction, angleTo8Direction } from "../utils";
+import { angleTo4Direction, angleTo8Direction } from "../utils/dpad";
 
 function vive_trackpad_dpad4(el, outputPrefix) {
   this.outputPrefix = outputPrefix;
