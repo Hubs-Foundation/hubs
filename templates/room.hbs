@@ -48,6 +48,7 @@
             <a-asset-item id="bot-body-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_Body_Mesh.glb" }}"></a-asset-item>
             <a-asset-item id="bot-left-hand-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_LeftHand_Mesh.glb" }}"></a-asset-item>
             <a-asset-item id="bot-right-hand-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_RightHand_Mesh.glb"}}"></a-asset-item>
+            <a-asset-item id="bot-whole-body-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_SkinnedWithAnim.glb"}}"></a-asset-item>
 
             <a-asset-item id="watch-model" response-type="arraybuffer" src="{{asset "assets/hud/watch.glb"}}"></a-asset-item>
 
@@ -78,6 +79,14 @@
                     class="body"
                     cached-gltf-model="#bot-body-mesh"
                     personal-space-invader
+                    rotation="0 180 0"
+                    position="0 -0.05 0"
+                ></a-entity>
+            </script>
+            <script id="body-template2" type="text/html">
+                <a-entity
+                    class="body"
+                    cached-gltf-model="#bot-whole-body-mesh"
                     rotation="0 180 0"
                     position="0 -0.05 0"
                 ></a-entity>
@@ -128,16 +137,29 @@
         >
             <a-entity
                 id="head"
-                camera="userHeight: 1.6"
                 personal-space-bubble
-                look-controls
                 networked="template: #head-template; showLocalTemplate: false;"
-            ></a-entity>
+                position ="0 1.6 0" 
+            >
+                <a-entity
+                    id="third-person-cam"
+                    camera=""
+                    look-controls
+                    position ="0 2 -1"
+                >
+                </a-entity>
+            </a-entity>
 
             <a-entity
                 id="body"
-                body-controller="eyeNeckOffset: 0 -0.11 0.09; neckHeight: 0.05"
+                body-controller="camera: #head; eyeNeckOffset: 0 -0.11 0.09; neckHeight: 0.05"
                 networked="template: #body-template;"
+            ></a-entity>
+            <a-entity
+                id="body2"
+                body-controller="camera: #head; eyeNeckOffset: 0 -0.11 0.09; neckHeight: 0.05"
+                networked="template: #body-template2;"
+                robot-hand-gestures="leftHand: #left-hand; rightHand: #right-hand"
             ></a-entity>
             <a-entity
                 id="nametag"

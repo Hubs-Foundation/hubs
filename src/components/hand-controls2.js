@@ -60,10 +60,7 @@ AFRAME.registerComponent("hand-controls2", {
     this.onControllerDisconnected = this.onControllerDisconnected.bind(this);
 
     el.addEventListener("controllerconnected", this.onControllerConnected);
-    el.addEventListener(
-      "controllerdisconnected",
-      this.onControllerDisconnected
-    );
+    el.addEventListener("controllerdisconnected", this.onControllerDisconnected);
 
     el.setAttribute("visible", false);
   },
@@ -80,10 +77,7 @@ AFRAME.registerComponent("hand-controls2", {
 
   pause() {
     const el = this.el;
-    el.removeEventListener(
-      "middle_ring_pinky_down",
-      this.onMiddleRingPinkyDown
-    );
+    el.removeEventListener("middle_ring_pinky_down", this.onMiddleRingPinkyDown);
     el.removeEventListener("middle_ring_pinky_up", this.onMiddleRingPinkyUp);
     el.removeEventListener("thumb_down", this.onThumbDown);
     el.removeEventListener("thumb_up", this.onThumbUp);
@@ -113,10 +107,7 @@ AFRAME.registerComponent("hand-controls2", {
   remove() {
     const el = this.el;
     el.removeEventListener("controllerconnected", this.onControllerConnected);
-    el.removeEventListener(
-      "controllerdisconnected",
-      this.onControllerDisconnected
-    );
+    el.removeEventListener("controllerdisconnected", this.onControllerDisconnected);
   },
 
   updateGesture(nextFingersDown) {
@@ -124,9 +115,9 @@ AFRAME.registerComponent("hand-controls2", {
     const gesture = this.determineGesture();
 
     if (gesture !== this.gesture) {
+      var previous = this.gesture;
       this.gesture = gesture;
-      this.el.emit(this.last + "end");
-      this.el.emit(this.gesture + "start");
+      this.el.emit("hand-gesture", { previous: previous, current: this.gesture });
     }
   },
 
