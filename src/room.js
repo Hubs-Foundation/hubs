@@ -40,6 +40,7 @@ import "./components/spawn-controller";
 import "./components/model-inflator";
 import "./components/spin";
 import "./components/bone-visibility";
+import "./components/camera-scale";
 
 import "./systems/personal-space-bubble";
 

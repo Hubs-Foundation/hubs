@@ -109,7 +109,8 @@
             <template data-selector=".Head">
                 <a-entity
                     id="head"
-                    camera="userHeight: 1.6; active: true;"
+                    camera="userHeight: 1.6"
+                    camera-scale
                     personal-space-bubble
                     look-controls
                     visible="false"
@@ -140,14 +141,14 @@
                     teleport-controls="cameraRig: #player-rig; teleportOrigin: #head; button: action_teleport_"
                     bone-visibility
                 >
-                    <a-entity
+                    <!--<a-entity
                         id="watch"
                         cached-gltf-model="#watch-model"
                         bone-mute-state-indicator
                         position="-0.003 0.009 0.085"
                         rotation="-79.12547150756669 -160.1417037390651 -100.1530225888679"
                         scale="1.5 1.5 1.5"
-                    >
+                    >-->
                     </a-entity>
                 </a-entity>
             </template>
