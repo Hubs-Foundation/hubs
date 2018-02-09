@@ -45,7 +45,6 @@ import "./components/camera-scale";
 import "./systems/personal-space-bubble";
 
 import "./elements/a-gltf-entity";
-import "./elements/a-proxy-entity";
 
 import { promptForName, getCookie, parseJwt } from "./utils/identity";
 import registerNetworkSchemas from "./network-schemas";
