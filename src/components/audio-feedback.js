@@ -1,26 +1,10 @@
-const waitForConnected = function() {
-  return new Promise(resolve => {
-    NAF.clientId
-      ? resolve()
-      : document.body.addEventListener("connected", resolve);
-  });
-};
-
 AFRAME.registerComponent("networked-audio-analyser", {
   schema: {},
   init() {
-    waitForConnected()
-      .then(() => {
-        const networkedEl = NAF.utils.getNetworkedEntity(this.el);
-        if (!networkedEl) {
-          return Promise.reject(
-            "Audio Analyzer must be added on a node, or a child of a node, with the `networked` component."
-          );
-        }
-        const ownerId = networkedEl.components.networked.data.owner;
-        return NAF.connection.adapter.getMediaStream(ownerId);
-      })
-      .then(stream => {
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      const ownerId = networkedEl.components.networked.data.owner;
+
+      NAF.connection.adapter.getMediaStream(ownerId).then(stream => {
         if (!stream) {
           return;
         }
@@ -31,6 +15,7 @@ AFRAME.registerComponent("networked-audio-analyser", {
         this.levels = new Uint8Array(this.analyser.frequencyBinCount);
         source.connect(this.analyser);
       });
+    });
   },
 
   tick: function() {
@@ -38,8 +23,8 @@ AFRAME.registerComponent("networked-audio-analyser", {
 
     this.analyser.getByteFrequencyData(this.levels);
 
-    var sum = 0;
-    for (var i = 0; i < this.levels.length; i++) {
+    let sum = 0;
+    for (let i = 0; i < this.levels.length; i++) {
       sum += this.levels[i];
     }
     this.volume = sum / this.levels.length;
@@ -59,24 +44,16 @@ AFRAME.registerComponent("matcolor-audio-feedback", {
     this.onAudioFrequencyChange = this.onAudioFrequencyChange.bind(this);
 
     this.el.addEventListener("model-loaded", () => {
-      this.mat = this.el.object3D.getObjectByName(
-        this.data.objectName
-      ).material;
+      this.mat = this.el.object3D.getObjectByName(this.data.objectName).material;
     });
   },
 
   play() {
-    (this.data.analyserSrc || this.el).addEventListener(
-      "audioFrequencyChange",
-      this.onAudioFrequencyChange
-    );
+    (this.data.analyserSrc || this.el).addEventListener("audioFrequencyChange", this.onAudioFrequencyChange);
   },
 
   pause() {
-    (this.data.analyserSrc || this.el).removeEventListener(
-      "audioFrequencyChange",
-      this.onAudioFrequencyChange
-    );
+    (this.data.analyserSrc || this.el).removeEventListener("audioFrequencyChange", this.onAudioFrequencyChange);
   },
 
   onAudioFrequencyChange(e) {
@@ -98,23 +75,15 @@ AFRAME.registerComponent("scale-audio-feedback", {
   },
 
   play() {
-    (this.data.analyserSrc || this.el).addEventListener(
-      "audioFrequencyChange",
-      this.onAudioFrequencyChange
-    );
+    (this.data.analyserSrc || this.el).addEventListener("audioFrequencyChange", this.onAudioFrequencyChange);
   },
 
   pause() {
-    (this.data.analyserSrc || this.el).removeEventListener(
-      "audioFrequencyChange",
-      this.onAudioFrequencyChange
-    );
+    (this.data.analyserSrc || this.el).removeEventListener("audioFrequencyChange", this.onAudioFrequencyChange);
   },
 
   onAudioFrequencyChange(e) {
     const { minScale, maxScale } = this.data;
-    this.el.object3D.scale.setScalar(
-      minScale + (maxScale - minScale) * e.detail.volume / 255
-    );
+    this.el.object3D.scale.setScalar(minScale + (maxScale - minScale) * e.detail.volume / 255);
   }
 });
