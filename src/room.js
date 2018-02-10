@@ -9,6 +9,7 @@ import "networked-aframe";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
 import "aframe-input-mapping-component";
+import "webrtc-adapter";
 
 import animationMixer from "aframe-extras/src/loaders/animation-mixer";
 AFRAME.registerComponent("animation-mixer", animationMixer);
