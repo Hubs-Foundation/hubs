@@ -62,8 +62,7 @@ class Lobby extends React.Component {
   }
 
   onWebsocketMessage(event) {
-    var message = JSON.parse(event.data);
-    this.session.receive(message);
+    this.session.receive(JSON.parse(event.data));
   }
 
   render() {
