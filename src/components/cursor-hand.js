@@ -1,10 +1,14 @@
 AFRAME.registerComponent("cursor-hand", {
   dependencies: ['raycaster'],
   schema: {
-    cursor: {type: "selector"}
+    cursor: {type: "selector"},
+    maxDistance: {type: "number", default: 3}
   },
 
   init: function() {
+    this.isGrabbing = false;
+    this.currentDistance = this.data.maxDistance;
+
     document.addEventListener("mousedown", (e) => {
       this.data.cursor.emit("action_grab");
     });
@@ -13,25 +17,30 @@ AFRAME.registerComponent("cursor-hand", {
       this.data.cursor.emit("action_release");
     });
   },
-  tick:  function() {
-    const intersections = this.el.components.raycaster.intersections;
+  tick: function() {
+    const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
+    let isIntersecting = false;
+
+    if (!isGrabbing) {
+      const intersections = this.el.components.raycaster.intersections;
       if(intersections.length > 0) {
+        isIntersecting = true;
         const point = intersections[0].point;
         this.data.cursor.setAttribute('position', point);
+        this.currentDistance = Math.min(intersections[0].distance, this.data.maxDistance);
+      } else {
+        this.currentDistance = this.data.maxDistance;
       }
-  //   let distance = this.data.maxDistance;
-  //   const intersection = this.data.raycaster.components.raycaster;
-  //   // console.log(intersection)
-  //   // if (intersection && intersection.distance < this.data.maxDistance) {
-  //   //   distance = intersection.distance;
-  //   // }
+    }
 
-  //   const head = this.data.raycaster.object3D;
-  //   const origin = head.getWorldPosition();
-  //   let direction = head.getWorldDirection();
-  //   direction.multiplyScalar(-distance);
-  //   let point = new THREE.Vector3();
-  //   point.addVectors(origin, direction);
-  //   this.el.setAttribute("position", {x: point.x, y: point.y, z: point.z});   
+    if (isGrabbing || !isIntersecting) {
+      const head = this.el.object3D;
+      const origin = head.getWorldPosition();
+      let direction = head.getWorldDirection();
+      direction.multiplyScalar(-this.currentDistance);
+      let point = new THREE.Vector3();
+      point.addVectors(origin, direction);
+      this.data.cursor.setAttribute("position", {x: point.x, y: point.y, z: point.z});
+    }
   }
 });

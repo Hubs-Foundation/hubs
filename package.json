@@ -10,7 +10,7 @@
     "prettier": "prettier --write src/**/*.js"
   },
   "dependencies": {
-    "aframe": "https://github.com/robertlong/aframe#fix-increasing-offset",
+    "aframe": "https://github.com/aframevr/aframe#ba2a2875ef7662a3bf4aec86f82d4f972684216a",
     "aframe-extras": "^3.12.4",
     "aframe-input-mapping-component": "https://github.com/johnshaughnessy/aframe-input-mapping-component#23e2855",
     "aframe-physics-extras": "^0.1.2",
