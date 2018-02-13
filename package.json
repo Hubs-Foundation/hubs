@@ -5,7 +5,7 @@
   "license": "MPL-2.0",
   "scripts": {
     "start": "npm run dev",
-    "dev": "webpack-dev-server --port 8000 --host 0.0.0.0 --useLocalIp --open --config webpack.dev.js",
+    "dev": "webpack-dev-server --https --host 0.0.0.0 --useLocalIp --open --config webpack.dev.js",
     "build": "cross-env NODE_ENV='production' webpack --config webpack.prod.js",
     "prettier": "prettier --write src/**/*.js"
   },
