@@ -12,6 +12,17 @@ module.exports = merge(common, {
     https: {
       cert: fs.readFileSync("/home/ubuntu/fullchain.pem"),
       key: fs.readFileSync("/home/ubuntu/privkey.pem")
+    },
+    before: function (app) {
+      // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
+      app.head('\*', function (req, res, next) {
+        if (req.method === 'HEAD') { 
+          res.send('');
+        }
+        else {
+          next();
+        }
+      });
     }
   },
   plugins: [new WriteFilePlugin()]
