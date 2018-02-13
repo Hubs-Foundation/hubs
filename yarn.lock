@@ -3462,9 +3462,9 @@ mv@^2.1.1:
     ncp "~2.0.0"
     rimraf "~2.4.0"
 
-"naf-janus-adapter@https://github.com/mozilla/naf-janus-adapter#25a8e80":
-  version "0.2.0"
-  resolved "https://github.com/mozilla/naf-janus-adapter#25a8e80a4a5036f1effce02e6c993ec7e21749c4"
+naf-janus-adapter@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.2.1.tgz#1e3ff77d14bc9a7e3c90fba999e9ce7e978701fb"
   dependencies:
     debug "^3.1.0"
     minijanus "^0.4.0"
