@@ -78,9 +78,9 @@ aframe-template-component@3.2.1:
   dependencies:
     es6-template-strings "^2.0.0"
 
-"aframe-xr@github:brianpeiris/aframe-xr#1d514f0":
+"aframe-xr@github:brianpeiris/aframe-xr#3162aed":
   version "0.0.9"
-  resolved "https://codeload.github.com/brianpeiris/aframe-xr/tar.gz/1d514f00d605f54e4e1fbe961d8e0cc0eee81518"
+  resolved "https://codeload.github.com/brianpeiris/aframe-xr/tar.gz/3162aed9f054b5a604e46a74a4f8599d4ac2ad58"
 
 after@0.8.2:
   version "0.8.2"
