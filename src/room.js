@@ -86,7 +86,7 @@ function shareScreen() {
 function spawnNetworkedCube(e) {
   const sceneEl = document.querySelector("a-scene");
   const entity = document.createElement("a-entity");
-  entity.setAttribute("dynamic-body", "mass: 1;");
+  entity.setAttribute("body", "mass: 1;");
   entity.setAttribute("grabbable", "");
   entity.setAttribute("stretchable", "");
   if (e.target && e.target != sceneEl) {

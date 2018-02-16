@@ -83,9 +83,9 @@ aframe-physics-system@^1.4.3:
     cannon "github:donmccurdy/cannon.js#v0.6.2-dev1"
     three-to-cannon "^1.1.1"
 
-"aframe-physics-system@https://github.com/infinitelee/aframe-physics-system#feature/dynamic-body-change-mass":
-  version "2.1.1"
-  resolved "https://github.com/infinitelee/aframe-physics-system#f8ed2e344e31d557a58819a99e60798277a1a17e"
+"aframe-physics-system@https://github.com/infinitelee/aframe-physics-system#fix/constraint-dependency":
+  version "3.0.0"
+  resolved "https://github.com/infinitelee/aframe-physics-system#d9e7894c4f826ec7326eec67bdfc3e27a14c8773"
   dependencies:
     browserify "^14.3.0"
     budo "^10.0.3"
@@ -6088,11 +6088,7 @@ three-pathfinding@^0.2.2:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/three-pathfinding/-/three-pathfinding-0.2.3.tgz#469bb26fb6b331f536c9ec88fde78e9c9219f637"
 
-three-to-cannon@^1.1.1:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/three-to-cannon/-/three-to-cannon-1.1.2.tgz#b0040b893b2fa5f0e8a0aedf58bc90fc07f137aa"
-
-three-to-cannon@^1.2.0:
+three-to-cannon@^1.1.1, three-to-cannon@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/three-to-cannon/-/three-to-cannon-1.2.0.tgz#92b9a756a270851aa98c3058c51ef15891507c01"
 

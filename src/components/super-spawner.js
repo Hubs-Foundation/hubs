@@ -8,7 +8,7 @@ AFRAME.registerComponent("super-spawner", {
   },
 
   init: function() {
-    this.el.setAttribute("dynamic-body", "mass: 0;");
+    this.el.setAttribute("body", "mass: 0; type: 'static';");
 
     this.el.addEventListener("grab-start", e => {
       this._onGrabStart(e);
@@ -19,7 +19,7 @@ AFRAME.registerComponent("super-spawner", {
     const sceneEl = document.querySelector("a-scene");
     const entity = document.createElement("a-entity");
 
-    entity.setAttribute("dynamic-body", `mass: ${this.data.mass};`);
+    entity.setAttribute("body", `mass: ${this.data.mass};`);
 
     if (this.data.grabbable) {
       entity.setAttribute("grabbable", "");
