@@ -1,10 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import mj from "minijanus";
+import { JanusSession, JanusPluginHandle } from "minijanus";
 
 import "material-design-lite";
 import "material-design-lite/material.css";
 import "./lobby.css";
+import "webrtc-adapter";
 
 import registerTelemetry from "./telemetry";
 
@@ -22,7 +23,7 @@ class Lobby extends React.Component {
 
   componentDidMount() {
     this.ws = new WebSocket(window.CONFIG.janus_server_url, "janus-protocol");
-    this.session = new mj.JanusSession(this.ws.send.bind(this.ws));
+    this.session = new JanusSession(this.ws.send.bind(this.ws));
     this.ws.addEventListener("open", this.onWebsocketOpen);
     this.ws.addEventListener("message", this.onWebsocketMessage);
   }
@@ -37,7 +38,7 @@ class Lobby extends React.Component {
     this.session
       .create()
       .then(() => {
-        this.handle = new mj.JanusPluginHandle(this.session);
+        this.handle = new JanusPluginHandle(this.session);
         return this.handle.attach("janus.plugin.sfu").then(this.updateRooms);
       })
       .then(() => {
@@ -61,8 +62,7 @@ class Lobby extends React.Component {
   }
 
   onWebsocketMessage(event) {
-    var message = JSON.parse(event.data);
-    this.session.receive(message);
+    this.session.receive(JSON.parse(event.data));
   }
 
   render() {
