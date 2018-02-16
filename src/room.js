@@ -12,6 +12,7 @@ import "aframe-input-mapping-component";
 import "aframe-physics-system";
 import "aframe-physics-extras";
 import "super-hands";
+import "webrtc-adapter";
 
 import animationMixer from "aframe-extras/src/loaders/animation-mixer";
 AFRAME.registerComponent("animation-mixer", animationMixer);
@@ -61,12 +62,19 @@ AFRAME.registerInputMappings(config);
 registerNetworkSchemas();
 registerTelemetry();
 
-function shareScreen() {
-  const track = NAF.connection.adapter.localMediaStream.getVideoTracks()[0];
+async function shareMedia(audio, video) {
+  const constraints = {
+    audio: !!audio,
+    video: video ? { mediaSource: "screen", height: 720, frameRate: 30 } : false
+  };
+  const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+  NAF.connection.adapter.setLocalMediaStream(mediaStream);
 
   const id = `${NAF.clientId}-screen`;
   let entity = document.getElementById(id);
-  if (!entity) {
+  if (entity) {
+    entity.setAttribute("visible", !!video);
+  } else if (video) {
     const sceneEl = document.querySelector("a-scene");
     entity = document.createElement("a-entity");
     entity.id = id;
@@ -78,9 +86,6 @@ function shareScreen() {
     entity.setAttribute("networked", { template: "#video-template" });
     sceneEl.appendChild(entity);
   }
-
-  track.enabled = !track.enabled;
-  entity.setAttribute("visible", track.enabled);
 }
 
 function spawnNetworkedCube(e) {
@@ -99,6 +104,7 @@ function spawnNetworkedCube(e) {
 }
 
 window.App = {
+
   async onSceneLoad() {
     const qs = queryString.parse(location.search);
     const scene = document.querySelector("a-scene");
@@ -134,29 +140,22 @@ window.App = {
     const myNametag = document.querySelector("#player-rig .nametag");
     myNametag.setAttribute("text", "value", username);
 
-    scene.addEventListener("action_share_screen", shareScreen);
-    scene.addEventListener("action_spawn_cube", spawnNetworkedCube);
-
-    const mediaStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: qs.screen === "true" ? { mediaSource: "screen", height: 720, frameRate: 30 } : false
+    var sharingScreen = false;
+    scene.addEventListener("action_share_screen", () => {
+      sharingScreen = !sharingScreen;
+      shareMedia(true, sharingScreen);
     });
 
-    // Don't send video by deafult
-    const videoTracks = mediaStream.getVideoTracks();
-    if (videoTracks.length) {
-      videoTracks[0].enabled = false;
-    }
+    scene.addEventListener("action_spawn_cube", spawnNetworkedCube);
 
     if (qs.offline) {
       App.onConnect();
     } else {
+      document.body.addEventListener("connected", App.onConnect);
+
       scene.components["networked-scene"].connect();
 
-      // @TODO ideally the adapter should exist before connect, but it currently doesnt so we have to do this after calling connect. This might be a race condition in other adapters.
-      NAF.connection.adapter.setLocalMediaStream(mediaStream);
-
-      document.body.addEventListener("connected", App.onConnect);
+      await shareMedia(true, sharingScreen);
     }
   },
 
