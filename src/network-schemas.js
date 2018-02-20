@@ -5,35 +5,35 @@ function registerNetworkSchemas() {
       "position",
       "rotation",
       {
-        selector: ".Head",
+        selector: ".camera",
         component: "position"
       },
       {
-        selector: ".Head",
+        selector: ".camera",
         component: "rotation"
       },
       {
-        selector: ".LeftHand",
+        selector: ".left-controller",
         component: "position"
       },
       {
-        selector: ".LeftHand",
+        selector: ".left-controller",
         component: "rotation"
       },
       {
-        selector: ".LeftHand",
+        selector: ".left-controller",
         component: "visible"
       },
       {
-        selector: ".RightHand",
+        selector: ".right-controller",
         component: "position"
       },
       {
-        selector: ".RightHand",
+        selector: ".right-controller",
         component: "rotation"
       },
       {
-        selector: ".RightHand",
+        selector: ".right-controller",
         component: "visible"
       },
       {
