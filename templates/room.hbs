@@ -44,6 +44,7 @@
         light="defaultLightsEnabled: false">
 
         <a-assets>
+            <a-asset-item id="lantern-mesh" response-type="arraybuffer" src="{{asset "assets/lantern/Lantern.gltf" }}"></a-asset-item>
             <a-asset-item id="bot-skinned-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_SkinnedWithAnim.glb" }}"></a-asset-item>
             <a-asset-item id="watch-model" response-type="arraybuffer" src="{{asset "assets/hud/watch.glb"}}"></a-asset-item>
 
@@ -211,6 +212,14 @@
             rotation="-90 0 0"
             position="0 -88.358 -332.424"
         ></a-entity>
+
+        <a-gltf-entity
+            id="lantern"
+            src="#lantern-mesh"
+            position="0 1 0"
+            scale="0.1 0.1 0.1"
+            inflate="true"
+        ></a-gltf-entity>
     </a-scene>
 
     <script>

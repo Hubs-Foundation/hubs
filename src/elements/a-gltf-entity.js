@@ -49,6 +49,111 @@ function cloneGltf(gltf) {
   return clone;
 }
 
+AFRAME.registerComponent("rotator", {
+  schema: {
+    speed: { type: "number" },
+    axis: { type: "vec3" }
+  },
+
+  init() {
+    console.log("Init rotator", this.data);
+  },
+
+  tick(t, dt) {
+    this.el.object3D.rotateOnAxis(this.data.axis, this.data.speed * THREE.Math.DEG2RAD * dt);
+  }
+});
+
+// parses (specific) component values from GLTF to aframe properties
+const parseComponent = function(mapping, data, el) {
+  const schema = AFRAME.components[mapping.aframeComponent].schema;
+  const props = {};
+
+  for (let i = 0; i < mapping.aframeProperties.length; i++) {
+    const property = mapping.aframeProperties[i];
+    const type = schema[property].type;
+    switch (type) {
+      case "array":
+      case "number":
+      case "boolean":
+      case "string":
+        props[property] = data[i];
+        break;
+      case "int":
+        props[property] = Math.floor(data[i]);
+      case "vec2":
+        props[property] = { x: data[i][0], y: data[i][1] };
+        break;
+      case "vec3":
+        props[property] = { x: data[i][0], y: data[i][1], z: data[i][2] };
+        break;
+      case "vec4":
+        props[property] = { x: data[i][0], y: data[i][1], z: data[i][2], w: data[i][2] };
+        break;
+      // TODO: handle colortypes
+      // case "color":
+      //   props[property] = rgbToHex(data[i])
+      //   break;
+      // TODO: handle noderef types
+      // case "selector":
+      //   break;
+      // case "selectorAll":
+      //   break;
+      default:
+        console.warn("Invalid property type:", type);
+    }
+  }
+  return props;
+};
+
+// serializes (specific) aframe properties to GLTF component values
+const serializeComponent = function(mapping, el) {
+  const schema = AFRAME.components[mapping.aframeComponent].schema;
+  const data = el.components[mapping.aframeComponent].data;
+  return mapping.aframeProperties.map(property => {
+    const type = schema[property].type;
+    const val = data[property];
+    switch (type) {
+      case "array":
+      case "number":
+      case "boolean":
+      case "string":
+      case "int":
+        return val;
+      case "vec2":
+        return [val.x, val.y];
+      case "vec3":
+        return [val.x, val.y, val.z];
+      case "vec4":
+        return [val.x, val.y, val.z, val.w];
+      // TODO: handle colortypes
+      // case "color":
+      //   return hexToRgb(val)
+      // TODO: handle noderef types
+      // case "selector":
+      //   return;
+      // case "selectorAll":
+      //   return;
+      default:
+        console.warn("Invalid property type:", type);
+    }
+  });
+};
+
+const componentMappings = {
+  rotator: {
+    aframeComponent: "rotator",
+    aframeProperties: ["speed", "axis"]
+  }
+};
+
+// AFRAME.registerGLTFComponentMapping("rotator", "aframe-rotator", ["spped", "axis"]);
+// AFRAME.registerGLTFComponentMapping("rotator", ["spped", "axis"]);
+// AFRAME.registerGLTFComponentMapping("aframe-rotator", {
+//   gltfName: "rotator", // optional, otherwise assume the same as aframe name
+//   properties: ["speed", "axis"] // determines which properties are encoded/decoded, and in what order
+// });
+
 const inflateEntities = function(classPrefix, parentEl, node) {
   // setObject3D mutates the node's parent, so we have to copy
   const children = node.children.slice(0);
@@ -57,7 +162,9 @@ const inflateEntities = function(classPrefix, parentEl, node) {
 
   // Remove invalid CSS class name characters.
   const className = node.name.replace(/[^\w-]/g, "");
-  el.classList.add(classPrefix + className);
+  if (className && className.length) {
+    el.classList.add(classPrefix + className);
+  }
   parentEl.appendChild(el);
 
   // Copy over transform to the THREE.Group and reset the actual transform of the Object3D
@@ -80,6 +187,17 @@ const inflateEntities = function(classPrefix, parentEl, node) {
   node.position.set(0, 0, 0);
   node.rotation.set(0, 0, 0);
   node.scale.set(1, 1, 1);
+
+  if (node.userData.components) {
+    console.log("Node with components", node.userData);
+    const components = node.userData.components;
+    for (let i = 0; i < components.length; i++) {
+      const { type, data } = components[i];
+      if (componentMappings[type]) {
+        el.setAttribute(componentMappings[type].aframeComponent, parseComponent(componentMappings[type], data, el));
+      }
+    }
+  }
 
   el.setObject3D(node.type.toLowerCase(), node);
 
