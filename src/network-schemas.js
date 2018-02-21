@@ -27,7 +27,7 @@ function registerNetworkSchemas() {
 
   NAF.schemas.add({
     template: "#physics-cube",
-    components: ["position", "quaternion", "scale"]
+    components: ["position", "rotation", "scale"]
   });
 }
 

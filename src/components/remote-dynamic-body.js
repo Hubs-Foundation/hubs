@@ -15,7 +15,7 @@ AFRAME.registerComponent("remote-dynamic-body", {
     this.networked = this.networkedEl.components.networked;
 
     if (!this._isMine()) {
-      this.networkedEl.setAttribute("body", "mass: 0;");
+      this.networkedEl.setAttribute("body", "type: dynamic; mass: 0");
       if (this.data.grabbable)
         this.networkedEl.setAttribute("grabbable", "");
       if (this.data.stretchable)
@@ -36,7 +36,7 @@ AFRAME.registerComponent("remote-dynamic-body", {
   tick: function(t) {
     if (this.wasMine && !this._isMine()) {
       this.wasMine = false;
-      this.networkedEl.setAttribute("body", "mass: 0;");
+      this.networkedEl.setAttribute("body", "mass: 0");
       this.networkedEl.emit("grab-end", {hand: this.hand})
       this.hand = null;
       this.counter.deregister(this.networkedEl);

@@ -83,9 +83,9 @@ aframe-physics-system@^1.4.3:
     cannon "github:donmccurdy/cannon.js#v0.6.2-dev1"
     three-to-cannon "^1.1.1"
 
-"aframe-physics-system@https://github.com/infinitelee/aframe-physics-system#fix/constraint-dependency":
+"aframe-physics-system@https://github.com/infinitelee/aframe-physics-system#fix/3.0.0_fixes":
   version "3.0.0"
-  resolved "https://github.com/infinitelee/aframe-physics-system#d9e7894c4f826ec7326eec67bdfc3e27a14c8773"
+  resolved "https://github.com/infinitelee/aframe-physics-system#2552d24277a18302968738b4f6a85fc1df6f6acc"
   dependencies:
     browserify "^14.3.0"
     budo "^10.0.3"
