@@ -3686,10 +3686,6 @@ min-document@^2.19.0:
   dependencies:
     dom-walk "^0.1.0"
 
-minijanus@^0.1.6:
-  version "0.1.7"
-  resolved "https://registry.yarnpkg.com/minijanus/-/minijanus-0.1.7.tgz#a4aba659e0fc46127450aa440b32de82c6cc46b9"
-
 minijanus@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/minijanus/-/minijanus-0.4.0.tgz#4d08529da795886b1aab6714ee7c9ff122c8c802"
@@ -3794,9 +3790,9 @@ mv@^2.1.1:
     ncp "~2.0.0"
     rimraf "~2.4.0"
 
-"naf-janus-adapter@https://github.com/mozilla/naf-janus-adapter.git":
-  version "0.2.0"
-  resolved "https://github.com/mozilla/naf-janus-adapter.git#161af7423bfd59d5042dfbaf3864bfe7a415b54b"
+naf-janus-adapter@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.3.0.tgz#fee55fe0f4724238da5f87fbb0e7f75cd522905e"
   dependencies:
     debug "^3.1.0"
     minijanus "^0.4.0"
