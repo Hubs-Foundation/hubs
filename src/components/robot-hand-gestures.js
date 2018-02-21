@@ -1,6 +1,6 @@
 // Global THREE, AFRAME
 const robotGestures = {
-  open: "pinch", //TODO
+  open: "grip", //TODO
   point: "point",
   pointThumb: "point",
   fist: "grip",
@@ -22,8 +22,10 @@ AFRAME.registerComponent("robot-hand-gestures", {
 
   onModelLoaded: function() {
     var root = this.el.object3D.children[0].children[0].children[0]; // The "Root Scene" in threejs land of type "Scene"
-    console.log(this.el);
-    this.mixer = new THREE.AnimationMixer(root);
+    this.leftMixer = new THREE.AnimationMixer(root);
+    this.rightMixer = new THREE.AnimationMixer(root);
+
+    window.root = root; //TODO delete
     this.loaded = true;
   },
 
@@ -39,48 +41,32 @@ AFRAME.registerComponent("robot-hand-gestures", {
 
   tick: function(_t, dt) {
     if (!this.loaded) return;
-    this.mixer.update(dt * 0.001);
+    this.leftMixer.update(dt);
+    this.rightMixer.update(dt);
   },
 
-  /**
-  * Play hand animation based on button state.
-  *
-  * @param {string} gesture - Name of the animation as specified by the model.
-  * @param {string} lastGesture - Previous pose.
-  */
   playAnimation: function(evt) {
+    if (!this.loaded) return;
     const { current, previous } = evt.detail;
-    var fromAction;
-    var toAction;
-    var mixer = this.mixer;
+    var mixer = this.data.leftHand ? this.leftMixer : this.rightMixer;
     const suffix = evt.target === this.data.leftHand ? "_L" : "_R";
-    const from = robotGestures[previous] + suffix;
-    const to = robotGestures[current] + suffix;
-
-    // Grab clip action.
-    toAction = mixer.clipAction(to);
-    toAction.clampWhenFinished = true;
-    //    toAction.loop = THREE.LoopRepeat;
-    toAction.repetitions = 0;
-    toAction.weight = 1;
-
-    // No gesture to gesture or gesture to no gesture.
-    if (!previous || current === previous) {
-      // Stop all current animations.
-      mixer.stopAllAction();
-
-      // Play animation.
-      toAction.play();
-      return;
-    }
+    const prevPose = robotGestures[previous] + suffix;
+    const currPose = robotGestures[current] + suffix;
 
     // Animate or crossfade from gesture to gesture.
+    //console.log(`Animate from ${prevPose} to ${currPose}`);
+    const duration = 300;
+    var from = mixer.clipAction(prevPose);
+    from.setDuration(duration);
+    var to = mixer.clipAction(currPose);
+    to.setDuration(duration);
+    to = to.crossFadeFrom(from, duration);
 
-    fromAction = mixer.clipAction(from);
     mixer.stopAllAction();
-    fromAction.weight = 0.15;
-    fromAction.play();
-    toAction.play();
-    fromAction.crossFadeTo(toAction, 0.15, true);
+    if (this["gesture" + suffix] !== undefined) {
+    }
+    to.play();
+
+    this["gesture" + suffix] = to;
   }
 });
