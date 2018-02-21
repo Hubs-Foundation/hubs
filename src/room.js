@@ -23,7 +23,7 @@ import "./activators/shortpress";
 import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
 import "./components/mute-mic";
 import "./components/audio-feedback";
-import "./components/nametag-transform";
+import "./components/billboard";
 import "./components/bone-mute-state-indicator";
 import "./components/2d-mute-state-indicator";
 import "./components/virtual-gamepad-controls";

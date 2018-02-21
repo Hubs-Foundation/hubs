@@ -61,8 +61,26 @@
             </template>
 
             <template id="remote-avatar-template">                
-                <a-entity>
+                <a-entity ik-root>
+                    <a-entity class="camera"></a-entity>
+                    
+                    <a-entity class="left-controller"></a-entity>
+
+                    <a-entity class="right-controller"></a-entity>
+
                     <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller >
+                        <template data-selector=".Neck">
+                             <a-entity>
+                                 <a-entity
+                                    class="nametag"
+                                    billboard
+                                    text="side: double; align: center; color: #ddd"
+                                    position="0 1 0"
+                                    scale="6 6 6"
+                                ></a-entity>
+                             </a-entity>
+                        </template>
+                        
                         <template data-selector=".Head">
                             <a-entity
                                 networked-audio-source
@@ -73,13 +91,6 @@
                                 animation-mixer
                             >
                                 <a-entity class="middle-eye"></a-entity>
-                                <a-entity
-                                    class="nametag"
-                                    nametag-transform="follow: .Head"
-                                    text="side: double; align: center; color: #ddd"
-                                    position="0 50 0"
-                                    scale="600 600 600"
-                                ></a-entity>
                             </a-entity>
                         </template>
 
@@ -132,9 +143,14 @@
             ></a-entity>
 
             <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller>
+                <template data-selector=".Neck">
+                    <a-entity>
+                        <a-entity class="nametag" visible="false" text ></a-entity>
+                    </a-entity>
+                </template>
+
                 <template data-selector=".Head">
                     <a-entity visible="false">
-                        <a-entity class="nametag" text ></a-entity>
                         <a-entity class="middle-eye"></a-entity>
                     </a-entity>
                 </template>
