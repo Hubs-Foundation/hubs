@@ -2,8 +2,9 @@ const { Vector3, Quaternion, Matrix4, Euler } = THREE;
 const RAD2DEG = THREE.Math.RAD2DEG;
 
 const degRotation = { x: 0, y: 0, z: 0 };
-function setEntityFromMatrix(entity, matrix) {
+function updateEntityFromMatrix(entity) {
   const object3D = entity.object3D;
+  const matrix = object3D.matrix;
   object3D.position.setFromMatrixPosition(matrix);
   object3D.rotation.setFromRotationMatrix(matrix);
   entity.setAttribute("position", object3D.position);
@@ -92,6 +93,15 @@ AFRAME.registerComponent("ik-controller", {
 
     this.hipsQuaternion = new Quaternion();
     this.headQuaternion = new Quaternion();
+
+    this.rootToChest = new Matrix4();
+    this.iRootToChest = new Matrix4();
+
+    this.headLastVisible = true;
+    this.leftHandLastVisible = true;
+    this.rightHandLastVisible = true;
+    this.visibleScale = new Vector3(1, 1, 1);
+    this.invisibleScale = new Vector3(0.0000001, 0.0000001, 0.0000001);
   },
 
   update(oldData) {
@@ -157,6 +167,7 @@ AFRAME.registerComponent("ik-controller", {
     const {
       hips,
       head,
+      chest,
       cameraForward,
       headTransform,
       iMiddleEyeToHead,
@@ -166,7 +177,13 @@ AFRAME.registerComponent("ik-controller", {
       cameraYRotation,
       cameraYQuaternion,
       hipsQuaternion,
-      headQuaternion
+      headQuaternion,
+      leftHand,
+      rightHand,
+      rootToChest,
+      iRootToChest,
+      invisibleScale,
+      visibleScale
     } = this;
 
     // Camera faces the -Z direction. Flip it along the Y axis so that it is +Z.
@@ -189,5 +206,46 @@ AFRAME.registerComponent("ik-controller", {
 
     head.object3D.quaternion.copy(headQuaternion);
     updateEntityRotation(head);
+
+    hips.object3D.updateMatrix();
+    rootToChest.multiplyMatrices(hips.object3D.matrix, chest.object3D.matrix);
+    iRootToChest.getInverse(rootToChest);
+
+    if (leftController.getAttribute("visible")) {
+      if (!this.leftHandLastVisible) {
+        leftHand.setAttribute("scale", visibleScale);
+        this.leftHandLastVisible = true;
+      }
+
+      leftHand.object3D.matrix.multiplyMatrices(leftController.object3D.matrix, iRootToChest);
+      updateEntityFromMatrix(leftHand);
+    } else {
+      if (this.leftHandLastVisible) {
+        leftHand.setAttribute("scale", invisibleScale);
+        this.leftHandLastVisible = false;
+      }
+    }
+
+    if (rightController.getAttribute("visible")) {
+      if (!this.rightHandLastVisible) {
+        rightHand.setAttribute("scale", visibleScale);
+        this.rightHandLastVisible = true;
+      }
+      rightHand.object3D.matrix.multiplyMatrices(rightController.object3D.matrix, iRootToChest);
+      updateEntityFromMatrix(rightHand);
+    } else {
+      if (this.rightHandLastVisible) {
+        rightHand.setAttribute("scale", invisibleScale);
+        this.rightHandLastVisible = false;
+      }
+    }
+
+    if (head.getAttribute("visible")) {
+      if (!this.headLastVisible) {
+        head.setAttribute("scale", visibleScale);
+      }
+    } else if (this.headLastVisible) {
+      head.setAttribute("scale", invisibleScale);
+    }
   }
 });
