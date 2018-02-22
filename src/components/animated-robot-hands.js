@@ -10,6 +10,8 @@ const POSES = {
   pinch: "pinch"
 };
 
+// TODO: When we have analog values of index-finger triggers or middle-finger grips,
+//       it would be nice to animate the hands proportionally to those analog values.
 AFRAME.registerComponent("animated-robot-hands", {
   schema: {
     leftHand: { type: "selector", default: "#left-hand" },
