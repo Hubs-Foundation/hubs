@@ -1,14 +1,9 @@
-const GESTURES = {
+const POSES = {
   open: "open",
-  // point: grip active, trackpad surface active, trigger inactive.
   point: "point",
-  // pointThumb: grip active, trigger inactive, trackpad surface inactive.
   pointThumb: "pointThumb",
-  // fist: grip active, trigger active, trackpad surface active.
   fist: "fist",
-  // hold: trigger active, grip inactive.
   hold: "hold",
-  // thumbUp: grip active, trigger active, trackpad surface inactive.
   thumbUp: "thumbUp"
 };
 
@@ -18,7 +13,7 @@ AFRAME.registerComponent("hand-controls2", {
   init() {
     const el = this.el;
 
-    this.gesture = GESTURES.open;
+    this.pose = POSES.open;
 
     this.fingersDown = {
       thumb: false,
@@ -28,31 +23,31 @@ AFRAME.registerComponent("hand-controls2", {
       pinky: false
     };
 
-    this.onMiddleRingPinkyDown = this.updateGesture.bind(this, {
+    this.onMiddleRingPinkyDown = this.updatePose.bind(this, {
       middle: true,
       ring: true,
       pinky: true
     });
 
-    this.onMiddleRingPinkyUp = this.updateGesture.bind(this, {
+    this.onMiddleRingPinkyUp = this.updatePose.bind(this, {
       middle: false,
       ring: false,
       pinky: false
     });
 
-    this.onIndexDown = this.updateGesture.bind(this, {
+    this.onIndexDown = this.updatePose.bind(this, {
       index: true
     });
 
-    this.onIndexUp = this.updateGesture.bind(this, {
+    this.onIndexUp = this.updatePose.bind(this, {
       index: false
     });
 
-    this.onThumbDown = this.updateGesture.bind(this, {
+    this.onThumbDown = this.updatePose.bind(this, {
       thumb: true
     });
 
-    this.onThumbUp = this.updateGesture.bind(this, {
+    this.onThumbUp = this.updatePose.bind(this, {
       thumb: false
     });
 
@@ -110,41 +105,41 @@ AFRAME.registerComponent("hand-controls2", {
     el.removeEventListener("controllerdisconnected", this.onControllerDisconnected);
   },
 
-  updateGesture(nextFingersDown) {
+  updatePose(nextFingersDown) {
     Object.assign(this.fingersDown, nextFingersDown);
-    const gesture = this.determineGesture();
+    const pose = this.determinePose();
 
-    if (gesture !== this.gesture) {
-      var previous = this.gesture;
-      this.gesture = gesture;
-      this.el.emit("hand-gesture", { previous: previous, current: this.gesture });
+    if (pose !== this.pose) {
+      const previous = this.pose;
+      this.pose = pose;
+      this.el.emit("hand-pose", { previous: previous, current: this.pose });
     }
   },
 
-  determineGesture() {
+  determinePose() {
     const { thumb, index, middle, ring, pinky } = this.fingersDown;
 
     if (!thumb && !index && !middle && !ring && !pinky) {
-      return GESTURES.open;
+      return POSES.open;
     } else if (thumb && index && middle && ring && pinky) {
-      return GESTURES.fist;
+      return POSES.fist;
     } else if (!thumb && index && middle && ring && pinky) {
-      return GESTURES.thumbUp;
+      return POSES.thumbUp;
     } else if (!thumb && !index && middle && ring && pinky) {
-      return GESTURES.pointThumb;
+      return POSES.pointThumb;
     } else if (!thumb && index && !middle && !ring && !pinky) {
-      return GESTURES.hold;
+      return POSES.hold;
     } else if (thumb && !index && !middle && !ring && !pinky) {
-      return GESTURES.hold;
+      return POSES.hold;
     } else if (thumb && index && !middle && !ring && !pinky) {
-      return GESTURES.hold;
+      return POSES.hold;
     } else if (thumb && !index && middle && ring && pinky) {
-      return GESTURES.point;
+      return POSES.point;
     }
 
-    console.warn("Did not find matching gesture for ", this.fingersDown);
+    console.warn("Did not find matching pose for ", this.fingersDown);
 
-    return GESTURES.open;
+    return POSES.open;
   },
 
   // Show controller when connected

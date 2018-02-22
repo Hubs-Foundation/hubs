@@ -48,7 +48,7 @@
             <a-asset-item id="bot-body-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_Body_Mesh.glb" }}"></a-asset-item>
             <a-asset-item id="bot-left-hand-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_LeftHand_Mesh.glb" }}"></a-asset-item>
             <a-asset-item id="bot-right-hand-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_RightHand_Mesh.glb"}}"></a-asset-item>
-            <a-asset-item id="bot-whole-body-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_SkinnedWithAnim.glb"}}"></a-asset-item>
+            <a-asset-item id="bot-whole-body-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_SkinnedWithAnimation.glb"}}"></a-asset-item>
 
             <a-asset-item id="watch-model" response-type="arraybuffer" src="{{asset "assets/hud/watch.glb"}}"></a-asset-item>
 
@@ -159,7 +159,7 @@
                 id="body2"
                 body-controller="camera: #head; eyeNeckOffset: 0 -0.11 0.09; neckHeight: 0.05"
                 networked="template: #body-template2;"
-                robot-hand-gestures="leftHand: #left-hand; rightHand: #right-hand"
+                animated-robot-hands="leftHand: #left-hand; rightHand: #right-hand"
             ></a-entity>
             <a-entity
                 id="nametag"

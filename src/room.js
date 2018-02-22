@@ -37,7 +37,7 @@ import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
-import "./components/robot-hand-gestures";
+import "./components/animated-robot-hands";
 import "./systems/personal-space-bubble";
 
 import { promptForName, getCookie, parseJwt } from "./utils/identity";
