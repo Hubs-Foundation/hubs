@@ -49,7 +49,7 @@ function cloneGltf(gltf) {
   return clone;
 }
 
-AFRAME.registerComponent("rotator", {
+AFRAME.registerComponent("aframe-rotator", {
   schema: {
     speed: { type: "number" },
     axis: { type: "vec3" }
@@ -66,29 +66,30 @@ AFRAME.registerComponent("rotator", {
 
 // parses (specific) component values from GLTF to aframe properties
 const parseComponent = function(mapping, data, el) {
-  const schema = AFRAME.components[mapping.aframeComponent].schema;
+  const schema = AFRAME.components[mapping.component].schema;
   const props = {};
 
-  for (let i = 0; i < mapping.aframeProperties.length; i++) {
-    const property = mapping.aframeProperties[i];
-    const type = schema[property].type;
-    switch (type) {
+  for (const gltfProp of Object.keys(mapping.properties)) {
+    const aframeProp = mapping.properties[gltfProp];
+    const val = data[gltfProp];
+    switch (schema[aframeProp].type) {
       case "array":
       case "number":
       case "boolean":
       case "string":
-        props[property] = data[i];
+        props[aframeProp] = val;
         break;
       case "int":
-        props[property] = Math.floor(data[i]);
+        props[aframeProp] = Math.floor(val);
+        break;
       case "vec2":
-        props[property] = { x: data[i][0], y: data[i][1] };
+        props[aframeProp] = { x: val[0], y: val[1] };
         break;
       case "vec3":
-        props[property] = { x: data[i][0], y: data[i][1], z: data[i][2] };
+        props[aframeProp] = { x: val[0], y: val[1], z: val[2] };
         break;
       case "vec4":
-        props[property] = { x: data[i][0], y: data[i][1], z: data[i][2], w: data[i][2] };
+        props[aframeProp] = { x: val[0], y: val[1], z: val[2], w: val[3] };
         break;
       // TODO: handle colortypes
       // case "color":
@@ -100,7 +101,7 @@ const parseComponent = function(mapping, data, el) {
       // case "selectorAll":
       //   break;
       default:
-        console.warn("Invalid property type:", type);
+        console.warn("Invalid property type:", aframeProp.type);
     }
   }
   return props;
@@ -108,24 +109,31 @@ const parseComponent = function(mapping, data, el) {
 
 // serializes (specific) aframe properties to GLTF component values
 const serializeComponent = function(mapping, el) {
-  const schema = AFRAME.components[mapping.aframeComponent].schema;
-  const data = el.components[mapping.aframeComponent].data;
-  return mapping.aframeProperties.map(property => {
-    const type = schema[property].type;
-    const val = data[property];
+  const schema = AFRAME.components[mapping.component].schema;
+  const data = el.components[mapping.component].data;
+
+  const props = {};
+  for (const gltfProp of Object.keys(mapping.properties)) {
+    const aframeProp = mapping.properties[gltfProp];
+    const type = schema[aframeProp].type;
+    const val = data[aframeProp];
     switch (type) {
       case "array":
       case "number":
       case "boolean":
       case "string":
       case "int":
-        return val;
+        props[gltfProp] = val;
+        break;
       case "vec2":
-        return [val.x, val.y];
+        props[gltfProp] = [val.x, val.y];
+        break;
       case "vec3":
-        return [val.x, val.y, val.z];
+        props[gltfProp] = [val.x, val.y, val.z];
+        break;
       case "vec4":
-        return [val.x, val.y, val.z, val.w];
+        props[gltfProp] = [val.x, val.y, val.z, val.w];
+        break;
       // TODO: handle colortypes
       // case "color":
       //   return hexToRgb(val)
@@ -137,21 +145,28 @@ const serializeComponent = function(mapping, el) {
       default:
         console.warn("Invalid property type:", type);
     }
-  });
+  }
+  return props;
 };
 
 const componentMappings = {
+  // gltf component name
   rotator: {
-    aframeComponent: "rotator",
-    aframeProperties: ["speed", "axis"]
+    component: "aframe-rotator", // aframe component name
+    // map from gltf componenet property name to aframe component property name
+    properties: {
+      speed: "speed",
+      axis: "axis"
+    }
   }
 };
 
-// AFRAME.registerGLTFComponentMapping("rotator", "aframe-rotator", ["spped", "axis"]);
-// AFRAME.registerGLTFComponentMapping("rotator", ["spped", "axis"]);
-// AFRAME.registerGLTFComponentMapping("aframe-rotator", {
-//   gltfName: "rotator", // optional, otherwise assume the same as aframe name
-//   properties: ["speed", "axis"] // determines which properties are encoded/decoded, and in what order
+// AFRAME.registerGLTFComponentMapping("rotator", { // gltf component name
+//   component: "aframe-rotator", // optional, otherwise assume the same as gltf component name
+//   properties: { // map from gltf componenet property name to aframe component property name
+//     speed: "speed",
+//     axis: "axis"
+//   }
 // });
 
 const inflateEntities = function(classPrefix, parentEl, node) {
@@ -191,10 +206,11 @@ const inflateEntities = function(classPrefix, parentEl, node) {
   if (node.userData.components) {
     console.log("Node with components", node.userData);
     const components = node.userData.components;
-    for (let i = 0; i < components.length; i++) {
-      const { type, data } = components[i];
-      if (componentMappings[type]) {
-        el.setAttribute(componentMappings[type].aframeComponent, parseComponent(componentMappings[type], data, el));
+    for (const type of Object.keys(components)) {
+      if (!componentMappings[type]) continue;
+      const instances = components[type];
+      for (let i = 0; i < instances.length; i++) {
+        el.setAttribute(componentMappings[type].component, parseComponent(componentMappings[type], instances[i], el));
       }
     }
   }

@@ -226,69 +226,19 @@ THREE.GLTFLoader = ( function () {
 
 		this.name = EXTENSIONS.MOZ_COMPONENTS;
 
-		var extension = ( json.extensions && json.extensions[ EXTENSIONS.MOZ_COMPONENTS ] ) || {};
+		this.components = ( json.extensions && json.extensions[ EXTENSIONS.MOZ_COMPONENTS ] ) || {};
 
-		this.definitions = extension.definitions || [];
-		this.components = extension.components || [];
-
-		const componentsByNode = {};
-		for(let compIdx = 0; compIdx < this.components.length; compIdx++) {
-			const component = this.components[compIdx];
-			for(let instanceIdx = 0; instanceIdx < component.nodes.length; instanceIdx++) {
-				const nodeIdx = component.nodes[instanceIdx];
-				const comps = componentsByNode[nodeIdx] || [];
-				comps.push({
-					type: component.type,
-					data: component.instances[instanceIdx]
-				});
-				componentsByNode[nodeIdx] = comps;
-			}
-		}
-
-		console.log("componentsByNode", componentsByNode);
-		this.componentsByNode = componentsByNode;
 	};
 
-  // GLTFComponentExtension.prototype.inflateComponents = function(componentIndexes) {
-  //   return componentIndexes.map((idx) => {
-  //     const instance = this.instances[idx];
-  //     const definition = this.definitions[instance.component];
-  //     return {
-  //       name: definition.name,
-  //       properties: definition.properties.reduce((propMap, prop, propIdx) => {
-  //         const val = instance.values[propIdx];
-  //         propMap[prop.name] = val === undefined ? prop.default : val;
-  //         return propMap;
-  //       }, {})
-  //     };
-  //   });
-  // };
-
-  // GLTFComponentExtension.prototype.getComponentData = function(type, ) {
-
-  // };
-
-  // ext.inflateComponents((object3d, components) => {
-  //   for(let component in components) {
-  //     const data = component.data; // TypedArray or Array
-  //     object3d.el.setAttribute(component.type, {})
-  //   }
-  // });
-
-  // const components = object3d.userData.components;
-  // for(let i=0; i<components.length; i++) {
-  //   const { type, data } = components[i]; // 
-  //   switch(type) {
-  //   case "rotatot":
-  //     const speed = data[0];
-  //     const axis = data[1];
-  //     object3d.el.setAttribute(component.type, {
-  //       speed,
-  //       axis: {x: axis[0], y: axis[1], z: axis[2]}
-  //     });
-  //     break;
-  //   }
-  // }
+	GLTFComponentExtension.prototype.inflateComponents = function(components) {
+		const inflated = {};
+		for (const componentName of Object.keys(components)) {
+			inflated[componentName] = components[componentName].map((instanceIdx) => {
+				return this.components[componentName].instances[instanceIdx];
+			})	
+		}
+		return inflated;
+	};
 
 	/**
 	 * Lights Extension
@@ -2515,16 +2465,15 @@ THREE.GLTFLoader = ( function () {
 
 					}
 
-			if(extensions[EXTENSIONS.MOZ_COMPONENTS] && extensions[EXTENSIONS.MOZ_COMPONENTS].componentsByNode[nodeIndex]) {
-				node.userData.components = extensions[EXTENSIONS.MOZ_COMPONENTS].componentsByNode[nodeIndex];
-				console.log(node.userData.components);
-			}
+					if ( nodeDef.extensions && nodeDef.extensions[ EXTENSIONS.MOZ_COMPONENTS ]) {
+						node.userData.components = extensions[EXTENSIONS.MOZ_COMPONENTS].inflateComponents(nodeDef.extensions[EXTENSIONS.MOZ_COMPONENTS]);
+					}
 
-            return node;
+					return node;
 
-          } );
+				} );
 
-      } );
+			} );
 
 		} );
 

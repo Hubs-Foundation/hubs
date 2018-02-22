@@ -318,7 +318,12 @@
         18.0091515,
         0.0
       ],
-      "name": "LanternPole_Lantern"
+      "name": "LanternPole_Lantern",
+      "extensions": {
+        "MOZ_components": {
+          "rotator": [0]
+        }
+      }
     },
     {
       "children": [
@@ -332,7 +337,12 @@
         0.0,
         0.0
       ],
-      "name": "Lantern"
+      "name": "Lantern",
+      "extensions": {
+        "MOZ_components": {
+          "rotator": [1]
+        }
+      }
     }
   ],
   "scene": 0,
@@ -360,43 +370,19 @@
   "extensionsUsed": ["MOZ_components"],
   "extensions": {
     "MOZ_components": {
-      "definitions": {
-        "rotator": {
-          "title": "rotator",
-          "properties": [{
-            "id": "speed",
-            "title": "Rotation speed",
-            "type": "Float32",
-            "default": 1.0
-          },{
-            "id": "axis",
-            "title": "Rotation axis",
-            "type": [{
-              "name": "x",
-              "type": "Flaot32",
-              "default": 0
-            },{
-              "name": "y",
-              "type": "Flaot32",
-              "default": 0
-            },{
-              "name": "z",
-              "type": "Flaot32",
-              "default": 0
-            }]
-          }]
-        }
-      },
-      "components": [{
-        "type": "rotator",
+      "rotator": {
+        "schema": "http://example.com/some/json/schema.json",
         "instances": [
-          [0.5, [0,1,0]], 5,
-          [0.05, [0,1,0]]
-        ],
-        "nodes": [
-          2, 3
+          {
+            "speed": 0.5,
+            "axis": [0,1,0]
+          },
+          {
+            "speed": 0.05,
+            "axis": [0,1,0]
+          }
         ]
-      }]
+      }
     }
   }
 }
