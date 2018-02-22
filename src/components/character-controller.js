@@ -1,3 +1,5 @@
+import queryString from "query-string";
+const qs = queryString.parse(location.search);
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 
@@ -8,7 +10,7 @@ AFRAME.registerComponent("character-controller", {
     easing: { default: 10 },
     pivot: { type: "selector" },
     snapRotationDegrees: { default: THREE.Math.DEG2RAD * 45 },
-    rotationSpeed: { default: -3 }
+    rotationSpeed: { default: -3 },
   },
 
   init: function() {
@@ -23,6 +25,10 @@ AFRAME.registerComponent("character-controller", {
   },
 
   update: function() {
+    const avatarScale = parseInt(qs.avatarScale, 10);
+    if (avatarScale) {
+      this.avatarScale = {x: avatarScale, y: avatarScale, z: avatarScale};
+    }
     this.leftRotationMatrix = new THREE.Matrix4().makeRotationY(
       this.data.snapRotationDegrees
     );
@@ -130,6 +136,11 @@ AFRAME.registerComponent("character-controller", {
       });
 
       this.el.setAttribute("position", root.position);
+
+      // Apply avatar scale
+      if (this.avatarScale) {
+          this.el.setAttribute('scale', this.avatarScale);
+      }
 
       this.pendingSnapRotationMatrix.identity(); // Revert to identity
     };

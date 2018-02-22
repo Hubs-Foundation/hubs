@@ -10,10 +10,10 @@
     "prettier": "prettier --write src/**/*.js"
   },
   "dependencies": {
-    "aframe": "https://github.com/robertlong/aframe#fix-increasing-offset",
     "aframe-extras": "^3.12.4",
     "aframe-input-mapping-component": "https://github.com/johnshaughnessy/aframe-input-mapping-component#23e2855",
     "aframe-teleport-controls": "https://github.com/netpro2k/aframe-teleport-controls#feature/teleport-origin",
+    "aframe-xr": "github:brianpeiris/aframe-xr#3162aed",
     "extract-text-webpack-plugin": "^3.0.2",
     "material-design-lite": "^1.3.0",
     "minijanus": "^0.4.0",
