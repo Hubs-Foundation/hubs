@@ -103,9 +103,9 @@ aframe-template-component@3.2.1:
   dependencies:
     es6-template-strings "^2.0.0"
 
-"aframe@https://github.com/aframevr/aframe":
+"aframe@https://github.com/aframevr/aframe#c2c97c2":
   version "0.7.0"
-  resolved "https://github.com/aframevr/aframe#7567b91e3210fbe078da5e1ea4ab12bc06d1574a"
+  resolved "https://github.com/aframevr/aframe#c2c97c2a6dd470f2c24271bbb94529d12b7d3fb9"
   dependencies:
     "@tweenjs/tween.js" "^16.8.0"
     browserify-css "^0.8.2"
@@ -118,7 +118,7 @@ aframe-template-component@3.2.1:
     present "0.0.6"
     promise-polyfill "^3.1.0"
     style-attr "^1.0.2"
-    three "github:dmarcos/three.js#r90fix"
+    three "github:dmarcos/three.js#r89fix"
     three-bmfont-text "^2.1.0"
     webvr-polyfill "^0.9.40"
 
@@ -6092,9 +6092,9 @@ three-to-cannon@^1.1.1, three-to-cannon@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/three-to-cannon/-/three-to-cannon-1.2.0.tgz#92b9a756a270851aa98c3058c51ef15891507c01"
 
-"three@github:dmarcos/three.js#r90fix":
-  version "0.90.0"
-  resolved "https://codeload.github.com/dmarcos/three.js/tar.gz/e569e5e65e43380717e9bc9b2d3a0dc5000ec1ac"
+"three@github:dmarcos/three.js#r89fix":
+  version "0.89.0"
+  resolved "https://codeload.github.com/dmarcos/three.js/tar.gz/d4d728e34d663558392988d826e9be41c89ff853"
 
 through2@0.6.x, through2@~0.6.1:
   version "0.6.5"
