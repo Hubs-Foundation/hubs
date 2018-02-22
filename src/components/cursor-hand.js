@@ -14,11 +14,11 @@ AFRAME.registerComponent("cursor-hand", {
     this.enabled = true;
 
     document.addEventListener("mousedown", (e) => {
-      this.data.cursor.emit("action_grab");
+      this.data.cursor.emit("action_grab", {});
     });
 
     document.addEventListener("mouseup", (e) => {
-      this.data.cursor.emit("action_release");
+      this.data.cursor.emit("action_release", {});
     });
 
     document.addEventListener("wheel", (e) => {
