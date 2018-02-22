@@ -11,7 +11,6 @@ AFRAME.registerComponent("character-controller", {
     pivot: { type: "selector" },
     snapRotationDegrees: { default: THREE.Math.DEG2RAD * 45 },
     rotationSpeed: { default: -3 },
-    arScale: { type: 'number' }
   },
 
   init: function() {
@@ -26,8 +25,10 @@ AFRAME.registerComponent("character-controller", {
   },
 
   update: function() {
-    const qsArScale = parseInt(qs.arScale, 10);
-    this.arScale = {x: qsArScale || this.data.arScale, y: qsArScale || this.data.arScale, z: qsArScale || this.data.arScale};
+    const avatarScale = parseInt(qs.avatarScale, 10);
+    if (avatarScale) {
+      this.avatarScale = {x: avatarScale, y: avatarScale, z: avatarScale};
+    }
     this.leftRotationMatrix = new THREE.Matrix4().makeRotationY(
       this.data.snapRotationDegrees
     );
@@ -136,9 +137,9 @@ AFRAME.registerComponent("character-controller", {
 
       this.el.setAttribute("position", root.position);
 
-      // Apply AR scale
-      if (this.data.arScale && qs.arScale) {
-          this.el.setAttribute('scale', this.arScale);
+      // Apply avatar scale
+      if (this.avatarScale) {
+          this.el.setAttribute('scale', this.avatarScale);
       }
 
       this.pendingSnapRotationMatrix.identity(); // Revert to identity
