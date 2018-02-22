@@ -1,10 +1,13 @@
 const POSES = {
   open: "open",
   point: "point",
-  pointThumb: "pointThumb",
   fist: "fist",
   hold: "hold",
-  thumbUp: "thumbUp"
+  thumbUp: "thumbUp",
+  thumbDown: "thumbDown",
+  indexDown: "indexDown",
+  pinch: "pinch",
+  mrpDown: "mrpDown"
 };
 
 AFRAME.registerComponent("hand-controls2", {
@@ -126,13 +129,13 @@ AFRAME.registerComponent("hand-controls2", {
     } else if (!thumb && index && middle && ring && pinky) {
       return POSES.thumbUp;
     } else if (!thumb && !index && middle && ring && pinky) {
-      return POSES.pointThumb;
+      return POSES.mrpDown;
     } else if (!thumb && index && !middle && !ring && !pinky) {
-      return POSES.hold;
+      return POSES.indexDown;
     } else if (thumb && !index && !middle && !ring && !pinky) {
-      return POSES.hold;
+      return POSES.thumbDown;
     } else if (thumb && index && !middle && !ring && !pinky) {
-      return POSES.hold;
+      return POSES.pinch;
     } else if (thumb && !index && middle && ring && pinky) {
       return POSES.point;
     }

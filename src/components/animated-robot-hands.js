@@ -1,11 +1,13 @@
 // Global THREE, AFRAME
 const POSES = {
-  open: "open",
+  open: "allOpen",
+  thumbDown: "thumbDown",
+  indexDown: "indexDown",
+  mrpDown: "mrpDown",
+  thumbUp: "thumbsUp",
   point: "point",
-  pointThumb: "point",
-  fist: "grip",
-  hold: "grip",
-  thumbUp: "thumbup"
+  fist: "allGrip",
+  pinch: "pinch"
 };
 
 AFRAME.registerComponent("animated-robot-hands", {
@@ -23,12 +25,13 @@ AFRAME.registerComponent("animated-robot-hands", {
   onModelLoaded: function() {
     // Get the three.js object in the scene graph that has the animation data
     const root = this.el.object3D.children[0].children[0].children[0];
+    window.root = root;
     this.mixer = new THREE.AnimationMixer(root);
 
     // Set hands to open pose because the bind pose is funky due
     // to the workaround for FBX2glTF animations.
-    this.openL = this.mixer.clipAction("open_L");
-    this.openR = this.mixer.clipAction("open_R");
+    this.openL = this.mixer.clipAction(POSES.open + "_L");
+    this.openR = this.mixer.clipAction(POSES.open + "_R");
     this.openL.play();
     this.openR.play();
 
@@ -55,9 +58,8 @@ AFRAME.registerComponent("animated-robot-hands", {
   //       to the target pose, rather than stopping previous actions altogether.
   playAnimation: function(evt) {
     if (!this.loaded) return;
-    const { current, previous } = evt.detail;
-    var mixer = this.mixer;
     const isLeft = evt.target === this.data.leftHand;
+    // Stop the initial animations we started when the model loaded.
     if (!this.openLStopped && isLeft) {
       this.openL.stop();
       this.openLStopped = true;
@@ -65,6 +67,9 @@ AFRAME.registerComponent("animated-robot-hands", {
       this.openR.stop();
       this.openRStopped = true;
     }
+
+    const { current, previous } = evt.detail;
+    const mixer = this.mixer;
     const suffix = isLeft ? "_L" : "_R";
     const prevPose = POSES[previous] + suffix;
     const currPose = POSES[current] + suffix;
@@ -78,6 +83,9 @@ AFRAME.registerComponent("animated-robot-hands", {
     }
 
     const duration = 0.065;
+    //    console.log(
+    //      `Animating ${isLeft ? "left" : "right"} hand from ${prevPose} to ${currPose} over ${duration} seconds.`
+    //    );
     var from = mixer.clipAction(prevPose);
     var to = mixer.clipAction(currPose);
     from.fadeOut(duration);
@@ -90,7 +98,5 @@ AFRAME.registerComponent("animated-robot-hands", {
 
     this["pose" + suffix + "_to"] = to;
     this["pose" + suffix + "_from"] = from;
-
-    // console.log(`Animating ${isLeft ? "left" : "right"} hand from ${prevPose} to ${currPose} over ${duration} seconds.`);
   }
 });
