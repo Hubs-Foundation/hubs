@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{{asset "room.css"}}">
 
     <script>window.CONFIG = {{toJSON config.global}};</script>
+    <script src="{{asset "assets/aframe.js" }}"></script>
     <script src="{{asset "manifest.js" }}"></script>
     <script src="{{asset "room-vendor.js" }}"></script>
     <script src="{{asset "room.js" }}"></script>
@@ -59,6 +60,10 @@
             <img id="water-normal-map" src="{{asset "assets/waternormals.jpg"}}"></a-asset-item>
 
             <!-- Templates -->
+            <script id="player-template" type="text/html">
+                <a-entity></a-entity>
+            </script>
+
             <script id="head-template" type="text/html">
                 <a-entity
                     class="head"
@@ -121,14 +126,15 @@
         <!-- Player Rig -->
         <a-entity
             id="player-rig"
-            networked
+            networked="template: #player-template;"
             spawn-controller="radius: 4;"
             wasd-to-analog2d
-            character-controller="pivot: #head"
+            character-controller="pivot: #head;"
         >
             <a-entity
                 id="head"
-                camera="userHeight: 1.6"
+                camera
+                position="0 1.6 0"
                 personal-space-bubble
                 look-controls
                 networked="template: #head-template; showLocalTemplate: false;"
@@ -137,6 +143,7 @@
             <a-entity
                 id="body"
                 body-controller="eyeNeckOffset: 0 -0.11 0.09; neckHeight: 0.05"
+                xr="ar: false"
                 networked="template: #body-template;"
             ></a-entity>
             <a-entity
@@ -185,6 +192,7 @@
             id="outdoor-facade"
             cached-gltf-model="#outdoor-facade-mesh"
             position="0 0 0"
+            xr="ar: false"
         ></a-entity>
 
         <a-entity
@@ -192,6 +200,7 @@
             cached-gltf-model="#floor-nav-mesh"
             visible="false"
             position="0 0 0"
+            xr="ar: false"
         ></a-entity>
 
         <a-entity
@@ -199,6 +208,7 @@
             cached-gltf-model="#cliff-vista-mesh"
             layers="reflection:true"
             position="0 0 0"
+            xr="ar: false"
         ></a-entity>
 
         <a-entity id="skybox"
@@ -207,13 +217,15 @@
             skybox="azimuth:0.280; inclination:0.440"
             light="type: ambient; color: #FFF"
             layers="reflection:true"
+            xr="ar: false"
         ></a-entity>
 
         <a-entity
             id="water"
-            water="normalMap:#water-normal-map"
+            water="forceMobile: true; normalMap:#water-normal-map"
             rotation="-90 0 0"
             position="0 -88.358 -332.424"
+            xr="ar: false"
         ></a-entity>
     </a-scene>
 
