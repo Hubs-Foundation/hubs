@@ -122,7 +122,7 @@
                 <a-box 
                     class="collidable" 
                     remote-dynamic-body="counter: #counter"
-                     scale="0.25 0.25 0.25"
+                    scale="0.25 0.25 0.25"
                     material="color: green"
                 ></a-box>
             </script>
@@ -218,6 +218,7 @@
                                     hitEntity: #telepor-indicator;
                                     button: action_teleport_;"
                 networked="template: #right-hand-template;"
+                static-body="shape: sphere; sphereRadius: 0.02"
                 mixin="super-hands"
             ></a-entity>
         </a-entity>
