@@ -72,9 +72,9 @@ aframe-lerp-component@^1.1.0:
   dependencies:
     almost-equal "^1.1.0"
 
-aframe-physics-extras@^0.1.2:
+"aframe-physics-extras@https://github.com/infinitelee/aframe-physics-extras#fix/physics-collider-crash":
   version "0.1.2"
-  resolved "https://registry.yarnpkg.com/aframe-physics-extras/-/aframe-physics-extras-0.1.2.tgz#41bd816d15dbd0e01e2a38a72b4c0399b25c9d5a"
+  resolved "https://github.com/infinitelee/aframe-physics-extras#eab4d478a41485688849e256ee2551f3c92ff6b4"
 
 aframe-physics-system@^1.4.3:
   version "1.4.3"
@@ -103,9 +103,9 @@ aframe-template-component@3.2.1:
   dependencies:
     es6-template-strings "^2.0.0"
 
-"aframe@https://github.com/aframevr/aframe#ba2a2875ef7662a3bf4aec86f82d4f972684216a":
+"aframe@https://github.com/aframevr/aframe":
   version "0.7.0"
-  resolved "https://github.com/aframevr/aframe#ba2a2875ef7662a3bf4aec86f82d4f972684216a"
+  resolved "https://github.com/aframevr/aframe#7567b91e3210fbe078da5e1ea4ab12bc06d1574a"
   dependencies:
     "@tweenjs/tween.js" "^16.8.0"
     browserify-css "^0.8.2"
@@ -118,7 +118,7 @@ aframe-template-component@3.2.1:
     present "0.0.6"
     promise-polyfill "^3.1.0"
     style-attr "^1.0.2"
-    three mrdoob/three.js#aa7557123d
+    three "github:dmarcos/three.js#r90fix"
     three-bmfont-text "^2.1.0"
     webvr-polyfill "^0.9.40"
 
@@ -6092,9 +6092,9 @@ three-to-cannon@^1.1.1, three-to-cannon@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/three-to-cannon/-/three-to-cannon-1.2.0.tgz#92b9a756a270851aa98c3058c51ef15891507c01"
 
-three@mrdoob/three.js#aa7557123d:
-  version "0.88.0"
-  resolved "https://codeload.github.com/mrdoob/three.js/tar.gz/aa7557123d38bac9168b32bffe4cb921bf25bbbf"
+"three@github:dmarcos/three.js#r90fix":
+  version "0.90.0"
+  resolved "https://codeload.github.com/dmarcos/three.js/tar.gz/e569e5e65e43380717e9bc9b2d3a0dc5000ec1ac"
 
 through2@0.6.x, through2@~0.6.1:
   version "0.6.5"
