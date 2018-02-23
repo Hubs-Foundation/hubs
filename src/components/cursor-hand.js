@@ -3,7 +3,7 @@ AFRAME.registerComponent("cursor-hand", {
   schema: {
     cursor: {type: "selector"},
     maxDistance: {type: "number", default: 3},
-    minDistance: {type: "number", default: 1}
+    minDistance: {type: "number", default: 0.5}
   },
 
   init: function() {
@@ -12,6 +12,7 @@ AFRAME.registerComponent("cursor-hand", {
     this.currentDistance = this.data.maxDistance;
     this.currentDistanceMod = 0;
     this.enabled = true;
+    this.isGrabbing = false;
 
     document.addEventListener("mousedown", (e) => {
       this.data.cursor.emit("action_grab", {});
@@ -22,8 +23,8 @@ AFRAME.registerComponent("cursor-hand", {
     });
 
     document.addEventListener("wheel", (e) => {
-      const updated = this.currentDistanceMod + e.deltaY/10;
-      this.currentDistanceMod = Math.min(Math.max(0, updated), this.data.maxDistance - this.data.minDistance);
+      if (this.isGrabbing)
+        this.currentDistanceMod += e.deltaY/10;
     });
 
     window.addEventListener('enter-vr', e => {
@@ -43,35 +44,38 @@ AFRAME.registerComponent("cursor-hand", {
       return;
     }
 
-    const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
+    this.isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
     let isIntersecting = false;
 
-    if (!isGrabbing) {
+    if (!this.isGrabbing) {
       const intersections = this.el.components.raycaster.intersections;
       if(intersections.length > 0 && intersections[0].distance <= this.data.maxDistance) {
         isIntersecting = true;
         const point = intersections[0].point;
         this.data.cursor.setAttribute('position', point);
         this.currentDistance = intersections[0].distance;
+        this.currentDistanceMod = 0;
       } else {
         this.currentDistance = this.data.maxDistance;
       }
     }
 
-    if (isGrabbing || !isIntersecting) {
+    if (this.isGrabbing || !isIntersecting) {
       const head = this.el.object3D;
       const origin = head.getWorldPosition();
       let direction = head.getWorldDirection();
-      direction.multiplyScalar(-(this.currentDistance - this.currentDistanceMod));
+      const distance = Math.min(Math.max(this.data.minDistance, this.currentDistance - this.currentDistanceMod), this.data.maxDistance);
+      this.currentDistanceMod = this.currentDistance - distance;
+      direction.multiplyScalar(-distance);
       let point = new THREE.Vector3();
       point.addVectors(origin, direction);
       this.data.cursor.setAttribute("position", {x: point.x, y: point.y, z: point.z});
     }
 
-    if ((isGrabbing || isIntersecting) && !this.wasIntersecting) {
+    if ((this.isGrabbing || isIntersecting) && !this.wasIntersecting) {
       this.wasIntersecting = true;
       this.data.cursor.setAttribute("material", "color: #00FF00");
-    } else if ((!isGrabbing && !isIntersecting) && this.wasIntersecting) {
+    } else if ((!this.isGrabbing && !isIntersecting) && this.wasIntersecting) {
       this.wasIntersecting = false;
       this.data.cursor.setAttribute("material", "color: #00EFFF");
     }
