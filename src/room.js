@@ -33,15 +33,11 @@ import "./components/character-controller";
 import "./components/haptic-feedback";
 import "./components/networked-video-player";
 import "./components/offset-relative-to";
-import "./components/cached-gltf-model";
 import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
-import "./components/model-inflator";
-import "./components/spin";
 import "./components/bone-visibility";
-import "./components/camera-scale";
 
 import "./systems/personal-space-bubble";
 
