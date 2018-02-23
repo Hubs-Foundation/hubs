@@ -26,6 +26,7 @@ import "./components/audio-feedback";
 import "./components/nametag-transform";
 import "./components/bone-mute-state-indicator";
 import "./components/2d-mute-state-indicator";
+import "./components/2d-hud";
 import "./components/virtual-gamepad-controls";
 import "./components/body-controller";
 import "./components/hand-controls2";
@@ -46,10 +47,7 @@ import { inGameActions, config } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 
 AFRAME.registerInputBehaviour("vive_trackpad_dpad4", vive_trackpad_dpad4);
-AFRAME.registerInputBehaviour(
-  "oculus_touch_joystick_dpad4",
-  oculus_touch_joystick_dpad4
-);
+AFRAME.registerInputBehaviour("oculus_touch_joystick_dpad4", oculus_touch_joystick_dpad4);
 AFRAME.registerInputActivator("pressedmove", PressedMove);
 AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputActions(inGameActions, "default");
@@ -85,16 +83,12 @@ async function shareMedia(audio, video) {
 }
 
 window.App = {
-
   async onSceneLoad() {
     const qs = queryString.parse(location.search);
     const scene = document.querySelector("a-scene");
 
     scene.setAttribute("networked-scene", {
-      room:
-        qs.room && !isNaN(parseInt(qs.room))
-          ? parseInt(qs.room)
-          : window.CONFIG.default_room,
+      room: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : window.CONFIG.default_room,
       serverURL: window.CONFIG.janus_server_url
     });
 
@@ -120,6 +114,10 @@ window.App = {
     } else {
       username = promptForName(username); // promptForName is blocking
     }
+
+    console.log("woo");
+    console.log(username);
+    scene.emit("username-changed", { username: username });
 
     const myNametag = document.querySelector("#player-rig .nametag");
     myNametag.setAttribute("text", "value", username);

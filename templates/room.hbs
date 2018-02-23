@@ -33,7 +33,7 @@
 </head>
 
 <body>
-    <div id="loader"></div>
+    <div id="bloader"></div>
     <a-scene
         networked-scene="adapter: janus;
                          audio: true;
@@ -42,6 +42,7 @@
                          connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         2d-mute-state-indicator
+        2d-hud
         light="defaultLightsEnabled: false">
 
         <a-assets>
@@ -58,7 +59,9 @@
             <a-asset-item id="cliff-vista-mesh" response-type="arraybuffer" src="{{asset "assets/environments/CliffVista_mesh.glb"}}"></a-asset-item>
 
             <img id="water-normal-map" src="{{asset "assets/waternormals.jpg"}}"></a-asset-item>
-
+            <!-- <img id="avatar" src="assets/hud/avatar.png">
+                 <a-mixin id="image" geometry="height: 0.01; width: 0.01"></a-mixin>
+               -->
             <!-- Templates -->
             <script id="player-template" type="text/html">
                 <a-entity></a-entity>
@@ -138,7 +141,10 @@
                 personal-space-bubble
                 look-controls
                 networked="template: #head-template; showLocalTemplate: false;"
-            ></a-entity>
+            >
+                <!-- Head-locked Menu for Monoscopic displays -->
+                <!-- <a-image mixin="image" src="#avatar" scale="1 1 1" position="-0.2 -0.1 -0.2"> </a-image> -->
+            </a-entity>
 
             <a-entity
                 id="body"
