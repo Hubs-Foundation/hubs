@@ -4,6 +4,7 @@ function registerNetworkSchemas() {
     components: [
       "position",
       "rotation",
+      "scale",
       {
         selector: ".camera",
         component: "position"

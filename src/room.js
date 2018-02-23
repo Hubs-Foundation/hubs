@@ -121,9 +121,14 @@ window.App = {
     playerRig.addEventListener(
       "model-loaded",
       () => {
-        console.log(playerRig);
         const myNametag = playerRig.querySelector(".nametag");
         myNametag.setAttribute("text", "value", username);
+
+        const avatarScale = parseInt(qs.avatarScale, 10);
+
+        if (avatarScale) {
+          playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
+        }
       },
       { once: true }
     );
