@@ -1,5 +1,9 @@
 function registerNetworkSchemas() {
   NAF.schemas.add({
+    template: "#player-template",
+    components: ["position", 'rotation', 'scale']
+  });
+  NAF.schemas.add({
     template: "#nametag-template",
     components: [
       {

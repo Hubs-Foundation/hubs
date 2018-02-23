@@ -3,7 +3,7 @@ import queryString from "query-string";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
-import "aframe";
+import "aframe-xr";
 import "./vendor/GLTFLoader";
 import "networked-aframe";
 import "naf-janus-adapter";
