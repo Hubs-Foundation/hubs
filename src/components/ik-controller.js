@@ -102,6 +102,9 @@ AFRAME.registerComponent("ik-controller", {
     this.rightHandLastVisible = true;
     this.visibleScale = new Vector3(1, 1, 1);
     this.invisibleScale = new Vector3(0.0000001, 0.0000001, 0.0000001);
+
+    this.leftHandRotation = new Matrix4().makeRotationFromEuler(new Euler(-Math.PI / 2, Math.PI / 2, 0));
+    this.rightHandRotation = new Matrix4().makeRotationFromEuler(new Euler(Math.PI / 2, Math.PI / 2, 0));
   },
 
   update(oldData) {
@@ -217,7 +220,10 @@ AFRAME.registerComponent("ik-controller", {
         this.leftHandLastVisible = true;
       }
 
-      leftHand.object3D.matrix.multiplyMatrices(leftController.object3D.matrix, iRootToChest);
+      leftHand.object3D.matrix
+        .multiplyMatrices(iRootToChest, leftController.object3D.matrix)
+        .multiply(this.leftHandRotation);
+
       updateEntityFromMatrix(leftHand);
     } else {
       if (this.leftHandLastVisible) {
@@ -231,7 +237,10 @@ AFRAME.registerComponent("ik-controller", {
         rightHand.setAttribute("scale", visibleScale);
         this.rightHandLastVisible = true;
       }
-      rightHand.object3D.matrix.multiplyMatrices(rightController.object3D.matrix, iRootToChest);
+      rightHand.object3D.matrix
+        .multiplyMatrices(iRootToChest, rightController.object3D.matrix)
+        .multiply(this.rightHandRotation);
+
       updateEntityFromMatrix(rightHand);
     } else {
       if (this.rightHandLastVisible) {
