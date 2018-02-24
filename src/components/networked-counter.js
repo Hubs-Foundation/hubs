@@ -77,6 +77,7 @@ AFRAME.registerComponent("networked-counter", {
   _onReleased: function(id, e) {
     this._removeTimeout(id);
     this._addTimeout(id);
+    this.queue[id].ts = Date.now();
   },
 
   _removeOldest: function() {
