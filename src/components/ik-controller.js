@@ -180,10 +180,15 @@ AFRAME.registerComponent("ik-controller", {
         this.leftHandLastVisible = true;
       }
 
-      leftHand.object3D.matrix
-        .multiplyMatrices(iRootToChest, leftController.object3D.matrix)
-        .multiply(leftController.components["hand-controls2"].getControllerOffset())
-        .multiply(this.leftHandRotation);
+      leftHand.object3D.matrix.multiplyMatrices(iRootToChest, leftController.object3D.matrix);
+
+      const leftHandControls = leftController.components["hand-controls2"];
+
+      if (leftHandControls) {
+        leftHand.object3D.matrix.multiply(leftHandControls.getControllerOffset());
+      }
+
+      leftHand.object3D.matrix.multiply(this.leftHandRotation);
 
       leftHand.object3D.position.setFromMatrixPosition(leftHand.object3D.matrix);
       leftHand.object3D.rotation.setFromRotationMatrix(leftHand.object3D.matrix);
@@ -199,10 +204,15 @@ AFRAME.registerComponent("ik-controller", {
         rightHand.object3D.scale.set(1, 1, 1);
         this.rightHandLastVisible = true;
       }
-      rightHand.object3D.matrix
-        .multiplyMatrices(iRootToChest, rightController.object3D.matrix)
-        .multiply(rightController.components["hand-controls2"].getControllerOffset())
-        .multiply(this.rightHandRotation);
+      rightHand.object3D.matrix.multiplyMatrices(iRootToChest, rightController.object3D.matrix);
+
+      const rightHandControls = rightController.components["hand-controls2"];
+
+      if (rightHandControls) {
+        rightHand.object3D.matrix.multiply(rightHandControls.getControllerOffset());
+      }
+
+      rightHand.object3D.matrix.multiply(this.rightHandRotation);
 
       rightHand.object3D.position.setFromMatrixPosition(rightHand.object3D.matrix);
       rightHand.object3D.rotation.setFromRotationMatrix(rightHand.object3D.matrix);
