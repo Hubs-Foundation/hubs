@@ -3,25 +3,23 @@
     top: 10px;
     display: flex;
     justify-content: center;
-    height: 48px;
+    height: 60px;
     width: 100%;
 }
 
 :local(.bgShown) {
     position: absolute;
-    top: 10px;
     display: flex;
-    justify-content: center;
-    align-content: flex-end;
+    justify-content: space-around;
+    align-items: center;
     height: 60px;
     width: 300px;
-    background-color:#030303;
+    background-color:rgba(0,0,0,.35);
 }
 
 :local(.nametagShown){
     display: flex;
     width: 192px;
-    align-self: center;
     justify-content: center;
     font-size: 32px;
     font-family: sans-serif;
@@ -34,25 +32,10 @@
 
 :local(.avatarImageShown) {
     display: flex;
-    /* position: absolute; */
-    /* top: 10px; */
-    /* left: calc(50vw + 48px); */
     width: 48px;
-    /* height: 32px; */
-    background-size: 100%;
-    background-image: url(../assets/hud/avatar.png);
-    background-repeat: no-repeat;
-}
-:local(.flipX) {
-    transform: scaleX(-1);
+    height: 48px;
 }
 
-:local(.avatarImageHidden) {
-    /* position: absolute; */
-    /* top: 10px; */
-    /* left: calc(50vw + 48px); */
-    /* width: 0px; */
-    /* height: 0px; */
-    background-size: 100%;
-    background-image: url(../assets/hud/avatar.png);
+:local(.flipX) {
+    transform: scaleX(-1);
 }

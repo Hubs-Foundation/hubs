@@ -11,7 +11,8 @@ AFRAME.registerComponent("2d-hud", {
     this.nametag = document.createElement("div");
     this.nametag.classList.add(styles.nametagShown);
 
-    this.avatar = document.createElement("div");
+    this.avatar = document.createElement("img");
+    this.avatar.src = "../assets/hud/avatar.png";
     this.avatar.classList.add(styles.avatarImageShown);
 
     this.bg = document.createElement("div");
@@ -53,8 +54,9 @@ AFRAME.registerComponent("2d-hud", {
   },
 
   onUsernameChanged(evt) {
-    console.log("changed!");
-    console.log("got username: ", evt.detail.username);
+    const pixelsPerChar = 15;
+    this.bg.style.width = 200 + pixelsPerChar * evt.detail.username.length;
+    this.nametag.style.width = 50 + pixelsPerChar * evt.detail.username.length;
     this.nametag.innerHTML = evt.detail.username;
   }
 });

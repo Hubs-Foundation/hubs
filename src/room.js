@@ -114,9 +114,6 @@ window.App = {
     } else {
       username = promptForName(username); // promptForName is blocking
     }
-
-    console.log("woo");
-    console.log(username);
     scene.emit("username-changed", { username: username });
 
     const myNametag = document.querySelector("#player-rig .nametag");
