@@ -12,8 +12,9 @@
     top: 10px;
     display: flex;
     justify-content: center;
+    align-content: flex-end;
     height: 60px;
-    width: 30%;
+    width: 300px;
     background-color:#030303;
 }
 
@@ -27,6 +28,10 @@
     color: white;
 }
 
+:local(.blueText){
+    color: cyan;
+}
+
 :local(.avatarImageShown) {
     display: flex;
     /* position: absolute; */
@@ -37,7 +42,9 @@
     background-size: 100%;
     background-image: url(../assets/hud/avatar.png);
     background-repeat: no-repeat;
-    align-self: center;
+}
+:local(.flipX) {
+    transform: scaleX(-1);
 }
 
 :local(.avatarImageHidden) {

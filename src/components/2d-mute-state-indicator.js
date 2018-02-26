@@ -17,16 +17,30 @@ AFRAME.registerComponent("2d-mute-state-indicator", {
     document.body.appendChild(this.muteIcon);
 
     this.updateMuteState();
+
+    this.onMouseOver = () => this.muteIcon.classList.toggle(styles.muted, !this.el.sceneEl.is("muted"));
+
+    this.onMouseOut = () => this.muteIcon.classList.toggle(styles.muted, this.el.sceneEl.is("muted"));
+
+    this.onClick = () => this.el.emit("action_mute");
   },
 
   play() {
     this.el.sceneEl.addEventListener("stateadded", this.onStateToggled);
     this.el.sceneEl.addEventListener("stateremoved", this.onStateToggled);
+
+    this.muteIcon.addEventListener("mouseover", this.onMouseOver);
+    this.muteIcon.addEventListener("mouseout", this.onMouseOut);
+    this.muteIcon.addEventListener("click", this.onClick);
   },
 
   pause() {
     this.el.sceneEl.removeEventListener("stateadded", this.onStateToggled);
     this.el.sceneEl.removeEventListener("stateremoved", this.onStateToggled);
+
+    this.muteIcon.removeEventListener("mouseover", this.onMouseOver);
+    this.muteIcon.removeEventListener("mouseout", this.onMouseOut);
+    this.muteIcon.removeEventListener("click", this.onClick);
   },
 
   onStateToggled(e) {
