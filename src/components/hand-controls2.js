@@ -12,6 +12,13 @@ const GESTURES = {
   thumbUp: "thumbUp"
 };
 
+const CONTROLLER_OFFSETS = {
+  default: new THREE.Matrix4(),
+  "oculus-touch-controls": new THREE.Matrix4().makeTranslation(0, -0.015, 0.04),
+  "vive-controls": new THREE.Matrix4().makeTranslation(0, -0.015, 0.04),
+  "daydream-controls": new THREE.Matrix4().makeTranslation(0, 0, -0.04)
+};
+
 AFRAME.registerComponent("hand-controls2", {
   schema: { default: "left" },
 
@@ -59,11 +66,10 @@ AFRAME.registerComponent("hand-controls2", {
     this.onControllerConnected = this.onControllerConnected.bind(this);
     this.onControllerDisconnected = this.onControllerDisconnected.bind(this);
 
+    this.connectedController = null;
+
     el.addEventListener("controllerconnected", this.onControllerConnected);
-    el.addEventListener(
-      "controllerdisconnected",
-      this.onControllerDisconnected
-    );
+    el.addEventListener("controllerdisconnected", this.onControllerDisconnected);
 
     el.setAttribute("visible", false);
   },
@@ -80,10 +86,7 @@ AFRAME.registerComponent("hand-controls2", {
 
   pause() {
     const el = this.el;
-    el.removeEventListener(
-      "middle_ring_pinky_down",
-      this.onMiddleRingPinkyDown
-    );
+    el.removeEventListener("middle_ring_pinky_down", this.onMiddleRingPinkyDown);
     el.removeEventListener("middle_ring_pinky_up", this.onMiddleRingPinkyUp);
     el.removeEventListener("thumb_down", this.onThumbDown);
     el.removeEventListener("thumb_up", this.onThumbUp);
@@ -113,10 +116,7 @@ AFRAME.registerComponent("hand-controls2", {
   remove() {
     const el = this.el;
     el.removeEventListener("controllerconnected", this.onControllerConnected);
-    el.removeEventListener(
-      "controllerdisconnected",
-      this.onControllerDisconnected
-    );
+    el.removeEventListener("controllerdisconnected", this.onControllerDisconnected);
   },
 
   updateGesture(nextFingersDown) {
@@ -157,12 +157,22 @@ AFRAME.registerComponent("hand-controls2", {
   },
 
   // Show controller when connected
-  onControllerConnected() {
+  onControllerConnected(e) {
+    this.connectedController = e.detail.name;
     this.el.setAttribute("visible", true);
   },
 
   // Hide controller on disconnect
   onControllerDisconnected() {
+    this.connectedController = null;
     this.el.setAttribute("visible", false);
+  },
+
+  getControllerOffset() {
+    if (CONTROLLER_OFFSETS[this.connectedController] === undefined) {
+      return CONTROLLER_OFFSETS.default;
+    }
+
+    return CONTROLLER_OFFSETS[this.connectedController];
   }
 });

@@ -222,6 +222,7 @@ AFRAME.registerComponent("ik-controller", {
 
       leftHand.object3D.matrix
         .multiplyMatrices(iRootToChest, leftController.object3D.matrix)
+        .multiply(leftController.components["hand-controls2"].getControllerOffset())
         .multiply(this.leftHandRotation);
 
       updateEntityFromMatrix(leftHand);
@@ -239,6 +240,7 @@ AFRAME.registerComponent("ik-controller", {
       }
       rightHand.object3D.matrix
         .multiplyMatrices(iRootToChest, rightController.object3D.matrix)
+        .multiply(rightController.components["hand-controls2"].getControllerOffset())
         .multiply(this.rightHandRotation);
 
       updateEntityFromMatrix(rightHand);
