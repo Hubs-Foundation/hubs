@@ -1,33 +1,4 @@
 const { Vector3, Quaternion, Matrix4, Euler } = THREE;
-const RAD2DEG = THREE.Math.RAD2DEG;
-
-const degRotation = { x: 0, y: 0, z: 0 };
-function updateEntityFromMatrix(entity) {
-  const object3D = entity.object3D;
-  const matrix = object3D.matrix;
-  object3D.position.setFromMatrixPosition(matrix);
-  object3D.rotation.setFromRotationMatrix(matrix);
-  entity.setAttribute("position", object3D.position);
-  const { x, y, z } = object3D.rotation;
-  degRotation.x = x * RAD2DEG;
-  degRotation.y = y * RAD2DEG;
-  degRotation.z = z * RAD2DEG;
-  entity.setAttribute("rotation", degRotation);
-}
-
-function updateEntityPosition(entity) {
-  const object3D = entity.object3D;
-  entity.setAttribute("position", object3D.position);
-}
-
-function updateEntityRotation(entity) {
-  const object3D = entity.object3D;
-  const { x, y, z } = object3D.rotation;
-  degRotation.x = x * RAD2DEG;
-  degRotation.y = y * RAD2DEG;
-  degRotation.z = z * RAD2DEG;
-  entity.setAttribute("rotation", degRotation);
-}
 
 AFRAME.registerComponent("ik-root", {
   schema: {
@@ -81,8 +52,6 @@ AFRAME.registerComponent("ik-controller", {
     this.headTransform = new Matrix4();
     this.hipsPosition = new Vector3();
 
-    this.curTransform = new Matrix4();
-
     this.iHipsToHeadVector = new Vector3();
 
     this.iMiddleEyeToHead = new Matrix4();
@@ -100,8 +69,6 @@ AFRAME.registerComponent("ik-controller", {
     this.headLastVisible = true;
     this.leftHandLastVisible = true;
     this.rightHandLastVisible = true;
-    this.visibleScale = new Vector3(1, 1, 1);
-    this.invisibleScale = new Vector3(0.0000001, 0.0000001, 0.0000001);
 
     this.leftHandRotation = new Matrix4().makeRotationFromEuler(new Euler(-Math.PI / 2, Math.PI / 2, 0));
     this.rightHandRotation = new Matrix4().makeRotationFromEuler(new Euler(Math.PI / 2, Math.PI / 2, 0));
@@ -176,7 +143,6 @@ AFRAME.registerComponent("ik-controller", {
       iMiddleEyeToHead,
       iHipsToHeadVector,
       flipY,
-      hipsPosition,
       cameraYRotation,
       cameraYQuaternion,
       hipsQuaternion,
@@ -184,9 +150,7 @@ AFRAME.registerComponent("ik-controller", {
       leftHand,
       rightHand,
       rootToChest,
-      iRootToChest,
-      invisibleScale,
-      visibleScale
+      iRootToChest
     } = this;
 
     // Camera faces the -Z direction. Flip it along the Y axis so that it is +Z.
@@ -194,8 +158,7 @@ AFRAME.registerComponent("ik-controller", {
     cameraForward.multiplyMatrices(camera.object3D.matrix, flipY);
 
     headTransform.multiplyMatrices(cameraForward, iMiddleEyeToHead);
-    hipsPosition.setFromMatrixPosition(headTransform).add(iHipsToHeadVector);
-    hips.setAttribute("position", hipsPosition);
+    hips.object3D.position.setFromMatrixPosition(headTransform).add(iHipsToHeadVector);
 
     cameraYRotation.setFromRotationMatrix(cameraForward, "YXZ");
     cameraYRotation.x = 0;
@@ -203,20 +166,17 @@ AFRAME.registerComponent("ik-controller", {
     cameraYQuaternion.setFromEuler(cameraYRotation);
     Quaternion.slerp(hips.object3D.quaternion, cameraYQuaternion, hipsQuaternion, this.data.rotationSpeed * dt / 1000);
     hips.object3D.quaternion.copy(hipsQuaternion);
-    updateEntityRotation(hips);
 
     headQuaternion.setFromRotationMatrix(headTransform).premultiply(hipsQuaternion.inverse());
 
     head.object3D.quaternion.copy(headQuaternion);
-    updateEntityRotation(head);
-
     hips.object3D.updateMatrix();
     rootToChest.multiplyMatrices(hips.object3D.matrix, chest.object3D.matrix);
     iRootToChest.getInverse(rootToChest);
 
-    if (leftController.getAttribute("visible")) {
+    if (leftController.object3D.visible) {
       if (!this.leftHandLastVisible) {
-        leftHand.setAttribute("scale", visibleScale);
+        leftHand.object3D.scale.set(1, 1, 1);
         this.leftHandLastVisible = true;
       }
 
@@ -225,17 +185,18 @@ AFRAME.registerComponent("ik-controller", {
         .multiply(leftController.components["hand-controls2"].getControllerOffset())
         .multiply(this.leftHandRotation);
 
-      updateEntityFromMatrix(leftHand);
+      leftHand.object3D.position.setFromMatrixPosition(leftHand.object3D.matrix);
+      leftHand.object3D.rotation.setFromRotationMatrix(leftHand.object3D.matrix);
     } else {
       if (this.leftHandLastVisible) {
-        leftHand.setAttribute("scale", invisibleScale);
+        leftHand.object3D.scale.set(0.0000001, 0.0000001, 0.0000001);
         this.leftHandLastVisible = false;
       }
     }
 
-    if (rightController.getAttribute("visible")) {
+    if (rightController.object3D.visible) {
       if (!this.rightHandLastVisible) {
-        rightHand.setAttribute("scale", visibleScale);
+        rightHand.object3D.scale.set(1, 1, 1);
         this.rightHandLastVisible = true;
       }
       rightHand.object3D.matrix
@@ -243,20 +204,21 @@ AFRAME.registerComponent("ik-controller", {
         .multiply(rightController.components["hand-controls2"].getControllerOffset())
         .multiply(this.rightHandRotation);
 
-      updateEntityFromMatrix(rightHand);
+      rightHand.object3D.position.setFromMatrixPosition(rightHand.object3D.matrix);
+      rightHand.object3D.rotation.setFromRotationMatrix(rightHand.object3D.matrix);
     } else {
       if (this.rightHandLastVisible) {
-        rightHand.setAttribute("scale", invisibleScale);
+        rightHand.object3D.scale.set(0.0000001, 0.0000001, 0.0000001);
         this.rightHandLastVisible = false;
       }
     }
 
-    if (head.getAttribute("visible")) {
+    if (head.object3D.visible) {
       if (!this.headLastVisible) {
-        head.setAttribute("scale", visibleScale);
+        head.object3D.scale.set(1, 1, 1);
       }
     } else if (this.headLastVisible) {
-      head.setAttribute("scale", invisibleScale);
+      head.object3D.scale.set(0.0000001, 0.0000001, 0.0000001);
     }
   }
 });
