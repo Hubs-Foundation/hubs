@@ -27,6 +27,7 @@ import "./components/nametag-transform";
 import "./components/bone-mute-state-indicator";
 import "./components/2d-mute-state-indicator";
 import "./components/2d-hud";
+import "./components/in-world-hud";
 import "./components/virtual-gamepad-controls";
 import "./components/body-controller";
 import "./components/hand-controls2";

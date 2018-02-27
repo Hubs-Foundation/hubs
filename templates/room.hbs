@@ -41,11 +41,17 @@
                          onConnect: App.onConnect;
                          connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
+        raycaster="objects:.menu;"
+        cursor="rayOrigin: mouse;"
         2d-mute-state-indicator
         2d-hud
+        in-world-hud
         light="defaultLightsEnabled: false">
 
         <a-assets>
+            <img id="unmuted"  src="assets/hud/unmuted.png" >
+            <img id="muted"  src="assets/hud/muted.png" >
+            <img id="avatar"  src="assets/hud/avatar.png" >
             <a-asset-item id="bot-head-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_Head_Mesh.glb" }}"></a-asset-item>
             <a-asset-item id="bot-body-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_Body_Mesh.glb" }}"></a-asset-item>
             <a-asset-item id="bot-left-hand-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_LeftHand_Mesh.glb" }}"></a-asset-item>
@@ -142,8 +148,6 @@
                 look-controls
                 networked="template: #head-template; showLocalTemplate: false;"
             >
-                <!-- Head-locked Menu for Monoscopic displays -->
-                <!-- <a-image mixin="image" src="#avatar" scale="1 1 1" position="-0.2 -0.1 -0.2"> </a-image> -->
             </a-entity>
 
             <a-entity

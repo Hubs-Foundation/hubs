@@ -12,8 +12,6 @@ AFRAME.registerComponent("2d-mute-state-indicator", {
     this.muteIcon = document.createElement("div");
     this.muteIcon.id = "mic-flat";
     this.muteIcon.classList.add(styles.indicator);
-    console.log("foobar");
-    console.log(this.muteIcon);
     document.body.appendChild(this.muteIcon);
 
     this.updateMuteState();
