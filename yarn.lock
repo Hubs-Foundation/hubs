@@ -79,9 +79,9 @@ aframe-physics-system@^1.4.3:
     cannon "github:donmccurdy/cannon.js#v0.6.2-dev1"
     three-to-cannon "^1.1.1"
 
-"aframe-physics-system@https://github.com/infinitelee/aframe-physics-system#fix/3.0.0_fixes":
-  version "3.0.0"
-  resolved "https://github.com/infinitelee/aframe-physics-system#2552d24277a18302968738b4f6a85fc1df6f6acc"
+"aframe-physics-system@https://github.com/infinitelee/aframe-physics-system#bug/3.0.1":
+  version "3.0.1"
+  resolved "https://github.com/infinitelee/aframe-physics-system#c7c33ec4b459689b953742911e337793d7da2994"
   dependencies:
     browserify "^14.3.0"
     budo "^10.0.3"
@@ -3839,9 +3839,9 @@ negotiator@0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"
 
-"networked-aframe@https://github.com/brianpeiris/networked-aframe#3d64f88":
+"networked-aframe@https://github.com/infinitelee/networked-aframe#feature/ownership-transfer-events":
   version "0.5.1"
-  resolved "https://github.com/brianpeiris/networked-aframe#3d64f888925a2936a6507f656079157cec1a94e9"
+  resolved "https://github.com/infinitelee/networked-aframe#3f72baf7eeda597568f2248b331243c82665506f"
   dependencies:
     aframe-lerp-component "^1.1.0"
     aframe-template-component "3.2.1"

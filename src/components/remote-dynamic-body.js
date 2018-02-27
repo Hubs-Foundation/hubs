@@ -26,23 +26,18 @@ AFRAME.registerComponent("remote-dynamic-body", {
       this.timer = Date.now();
     }
 
-    this.wasMine = this._isMine();
-
     this.networkedEl.addEventListener("grab-start", e => {
       this._onGrabStart(e);
     });
-  },
 
-  tick: function(t) {
-    if (this.wasMine && !this._isMine()) {
-      this.wasMine = false;
+    this.networkedEl.addEventListener("ownership-lost", e => {
       this.networkedEl.setAttribute("body", "mass: 0");
       this.networkedEl.emit("grab-end", {hand: this.hand})
       this.hand = null;
       this.counter.deregister(this.networkedEl);
       this.timer = 0;
       this.el.setAttribute("color", "white")
-    }
+    });
   },
 
   _onGrabStart: function(e) {
@@ -50,7 +45,6 @@ AFRAME.registerComponent("remote-dynamic-body", {
     if (!this._isMine()) {
       if (this.networked.takeOwnership()) {
         this.networkedEl.setAttribute("body", `mass: ${this.data.mass};`);
-        this.wasMine = true;
         this.counter.register(this.networkedEl);
         this.el.setAttribute("color", "green")
       } else {
