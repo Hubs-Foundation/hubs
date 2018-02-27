@@ -59,14 +59,19 @@ AFRAME.registerComponent("in-world-hud", {
       this.mic.setAttribute("src", muted ? "#unmuted" : "#muted");
     };
 
-    this.onStateChange = evt => {
-      if (evt.detail.state !== "muted") return;
-      this.showCorrectMuteState();
-    };
     this.showCorrectMuteState = () => {
-      this.hoveredOnMic = false;
       const muted = this.el.sceneEl.is("muted");
       this.mic.setAttribute("src", muted ? "#muted" : "#unmuted");
+    };
+
+    this.onStateChange = evt => {
+      if (evt.detail !== "muted") return;
+      this.showCorrectMuteState();
+    };
+
+    this.onMicHoverExit = () => {
+      this.hoveredOnMic = false;
+      this.showCorrectMuteState();
     };
 
     this.onSelect = evt => {
@@ -82,7 +87,7 @@ AFRAME.registerComponent("in-world-hud", {
 
   play() {
     this.mic.addEventListener("raycaster-intersected", this.onMicHover);
-    this.mic.addEventListener("raycaster-intersected-cleared", this.showCorrectMuteState);
+    this.mic.addEventListener("raycaster-intersected-cleared", this.onMicHoverExit);
 
     this.nametag.addEventListener("raycaster-intersected", this.addBlue);
     this.nametag.addEventListener("raycaster-intersected-cleared", this.removeBlue);
@@ -102,7 +107,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.nametag.removeEventListener("raycaster-intersected-cleared", this.removeBlue);
 
     this.mic.removeEventListener("raycaster-intersected", this.onMicHover);
-    this.mic.removeEventListener("raycaster-intersected-cleared", this.showCorrectMuteState);
+    this.mic.removeEventListener("raycaster-intersected-cleared", this.onMicHoverExit);
 
     this.avatar.removeEventListener("raycaster-intersected", this.flipX);
     this.avatar.removeEventListener("raycaster-intersected-cleared", this.unflipX);

@@ -42,7 +42,7 @@ AFRAME.registerComponent("2d-mute-state-indicator", {
   },
 
   onStateToggled(e) {
-    if (!e.detail.state === "muted") return;
+    if (e.detail !== "muted") return;
     this.updateMuteState();
   },
 
