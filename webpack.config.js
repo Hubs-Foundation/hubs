@@ -76,7 +76,8 @@ class LodashTemplatePlugin {
 module.exports = {
   entry: {
     lobby: path.join(__dirname, "src", "lobby.js"),
-    room: path.join(__dirname, "src", "room.js")
+    room: path.join(__dirname, "src", "room.js"),
+    onboarding: path.join(__dirname, "src", "onboarding.js")
   },
   output: {
     path: path.join(__dirname, "public"),
@@ -163,6 +164,11 @@ module.exports = {
       template: path.join(__dirname, "src", "room.html"),
       chunks: ["room"],
       inject: "head"
+    }),
+    new HTMLWebpackPlugin({
+      filename: "onboarding.html",
+      template: path.join(__dirname, "src", "onboarding.html"),
+      chunks: ["onboarding"]
     }),
     // Extract required css and add a content hash.
     new ExtractTextPlugin("[name]-[contenthash].css", {
