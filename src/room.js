@@ -40,6 +40,7 @@ import "./components/spawn-controller";
 import "./components/bone-visibility";
 
 import "./systems/personal-space-bubble";
+import "./systems/app-mode";
 
 import "./elements/a-gltf-entity";
 

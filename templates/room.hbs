@@ -115,8 +115,19 @@
             spawn-controller="radius: 4;"
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
+            mode-responder-toggle__character-controller="mode: hud; invert: true;"
             ik-root
         >
+            <a-plane
+                class="hud"
+                mode-responder-hudstate
+                position="0 0.7 -0.7"
+                rotation="-28.9 0 0"
+                scale="0.3 0.3 1"
+                material="side:double"
+            >
+            </a-plane>
+
             <a-entity
                 id="player-camera"
                 class="camera"
@@ -124,6 +135,8 @@
                 position="0 1.6 0"
                 personal-space-bubble
                 look-controls
+                raycaster="objects: .hud; interval: 100; showLine: true; direction: 0 0 -1; origin: 0 -0.05 0;"
+                hud-detector
             ></a-entity>
             
             <a-entity
