@@ -154,13 +154,15 @@ AFRAME.registerElement("a-gltf-entity", {
         const inflate = (model, callback) => {
           inflateEntities("", this, model);
           this.querySelectorAll(":scope > template").forEach(attachTemplate);
+
+          // Wait one tick for the appended custom elements to be connected before calling finalizeLoad
           setTimeout(callback, 0);
         };
 
         const onLoad = gltfModel => {
-          if (!GLTFCache[this.data]) {
+          if (!GLTFCache[src]) {
             // Store a cloned copy of the gltf model.
-            GLTFCache[this.data] = cloneGltf(gltfModel);
+            GLTFCache[src] = cloneGltf(gltfModel);
           }
 
           this.model = gltfModel.scene || gltfModel.scenes[0];
@@ -179,7 +181,7 @@ AFRAME.registerElement("a-gltf-entity", {
         const onError = error => {
           const message = error && error.message ? error.message : "Failed to load glTF model";
           console.warn(message);
-          this.emit("model-error", { format: "gltf", src: this.data });
+          this.emit("model-error", { format: "gltf", src });
         };
 
         // Otherwise load the new gltf model.
