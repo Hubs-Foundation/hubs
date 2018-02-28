@@ -9,6 +9,7 @@ import "networked-aframe";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
 import "aframe-input-mapping-component";
+import "aframe-billboard-component";
 import "webrtc-adapter";
 
 import animationMixer from "aframe-extras/src/loaders/animation-mixer";
@@ -23,7 +24,6 @@ import "./activators/shortpress";
 import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
 import "./components/mute-mic";
 import "./components/audio-feedback";
-import "./components/billboard";
 import "./components/bone-mute-state-indicator";
 import "./components/2d-mute-state-indicator";
 import "./components/virtual-gamepad-controls";
@@ -118,20 +118,14 @@ window.App = {
       username = promptForName(username); // promptForName is blocking
     }
 
-    playerRig.addEventListener(
-      "model-loaded",
-      () => {
-        const myNametag = playerRig.querySelector(".nametag");
-        myNametag.setAttribute("text", "value", username);
+    const myNametag = playerRig.querySelector(".nametag");
+    myNametag.setAttribute("text", "value", username);
 
-        const avatarScale = parseInt(qs.avatarScale, 10);
+    const avatarScale = parseInt(qs.avatarScale, 10);
 
-        if (avatarScale) {
-          playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
-        }
-      },
-      { once: true }
-    );
+    if (avatarScale) {
+      playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
+    }
 
     let sharingScreen = false;
     scene.addEventListener("action_share_screen", () => {

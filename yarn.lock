@@ -44,6 +44,10 @@ acorn@^5.0.0, acorn@^5.4.0:
   version "5.4.1"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.4.1.tgz#fdc58d9d17f4a4e98d102ded826a9b9759125102"
 
+aframe-billboard-component@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/aframe-billboard-component/-/aframe-billboard-component-1.0.0.tgz#10ce2482729eef7386c5844d65917581a62d3adc"
+
 aframe-extras@^3.12.4:
   version "3.13.1"
   resolved "https://registry.yarnpkg.com/aframe-extras/-/aframe-extras-3.13.1.tgz#f8b6ef18c29e92538d05d94913640942a307c46c"
