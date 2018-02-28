@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "main": "src/index.js",
   "license": "MPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mozilla/mr-social-client.git"
+  },
   "scripts": {
     "postinstall": "node ./scripts/postinstall.js",
     "start": "cross-env NODE_ENV=development webpack-dev-server",
