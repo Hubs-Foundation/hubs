@@ -1,0 +1,13 @@
+.a-enter-vr {
+  top: 90px;
+  bottom: auto;
+}
+
+#loader {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10001;
+  background: #eaeaea no-repeat url("./assets/loading.gif") center center;
+  opacity: 0.9;
+}

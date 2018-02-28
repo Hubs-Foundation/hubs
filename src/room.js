@@ -1,3 +1,4 @@
+import "./room.css";
 import queryString from "query-string";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
@@ -46,10 +47,7 @@ import { inGameActions, config } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 
 AFRAME.registerInputBehaviour("vive_trackpad_dpad4", vive_trackpad_dpad4);
-AFRAME.registerInputBehaviour(
-  "oculus_touch_joystick_dpad4",
-  oculus_touch_joystick_dpad4
-);
+AFRAME.registerInputBehaviour("oculus_touch_joystick_dpad4", oculus_touch_joystick_dpad4);
 AFRAME.registerInputActivator("pressedmove", PressedMove);
 AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputActions(inGameActions, "default");
@@ -84,64 +82,62 @@ async function shareMedia(audio, video) {
   }
 }
 
-window.App = {
+async function onSceneLoad() {
+  const qs = queryString.parse(location.search);
+  const scene = document.querySelector("a-scene");
 
-  async onSceneLoad() {
-    const qs = queryString.parse(location.search);
-    const scene = document.querySelector("a-scene");
+  scene.setAttribute("networked-scene", {
+    room: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1,
+    serverURL: process.env.JANUS_SERVER
+  });
 
-    scene.setAttribute("networked-scene", {
-      room:
-        qs.room && !isNaN(parseInt(qs.room))
-          ? parseInt(qs.room)
-          : window.CONFIG.default_room,
-      serverURL: window.CONFIG.janus_server_url
-    });
-
-    if (!qs.stats || !/off|false|0/.test(qs.stats)) {
-      scene.setAttribute("stats", true);
-    }
-
-    if (AFRAME.utils.device.isMobile() || qs.gamepad) {
-      const playerRig = document.querySelector("#player-rig");
-      playerRig.setAttribute("virtual-gamepad-controls", {});
-    }
-
-    let username;
-    const jwt = getCookie("jwt");
-    if (jwt) {
-      //grab name from jwt
-      const data = parseJwt(jwt);
-      username = data.typ.name;
-    }
-
-    if (qs.name) {
-      username = qs.name; //always override with name from querystring if available
-    } else {
-      username = promptForName(username); // promptForName is blocking
-    }
-
-    const myNametag = document.querySelector("#player-rig .nametag");
-    myNametag.setAttribute("text", "value", username);
-
-    var sharingScreen = false;
-    scene.addEventListener("action_share_screen", () => {
-      sharingScreen = !sharingScreen;
-      shareMedia(true, sharingScreen);
-    });
-
-    if (qs.offline) {
-      App.onConnect();
-    } else {
-      document.body.addEventListener("connected", App.onConnect);
-
-      scene.components["networked-scene"].connect();
-
-      await shareMedia(true, sharingScreen);
-    }
-  },
-
-  onConnect() {
-    document.getElementById("loader").style.display = "none";
+  if (!qs.stats || !/off|false|0/.test(qs.stats)) {
+    scene.setAttribute("stats", true);
   }
-};
+
+  if (AFRAME.utils.device.isMobile() || qs.gamepad) {
+    const playerRig = document.querySelector("#player-rig");
+    playerRig.setAttribute("virtual-gamepad-controls", {});
+  }
+
+  let username;
+  const jwt = getCookie("jwt");
+  if (jwt) {
+    //grab name from jwt
+    const data = parseJwt(jwt);
+    username = data.typ.name;
+  }
+
+  if (qs.name) {
+    username = qs.name; //always override with name from querystring if available
+  } else {
+    username = promptForName(username); // promptForName is blocking
+  }
+
+  const myNametag = document.querySelector("#player-rig .nametag");
+  myNametag.setAttribute("text", "value", username);
+
+  let sharingScreen = false;
+  scene.addEventListener("action_share_screen", () => {
+    sharingScreen = !sharingScreen;
+    shareMedia(true, sharingScreen);
+  });
+
+  if (qs.offline) {
+    onConnect();
+  } else {
+    document.body.addEventListener("connected", onConnect);
+
+    scene.components["networked-scene"].connect();
+
+    await shareMedia(true, sharingScreen);
+  }
+}
+
+function onConnect() {
+  document.getElementById("loader").style.display = "none";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelector("a-scene").addEventListener("loaded", onSceneLoad);
+});
