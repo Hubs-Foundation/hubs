@@ -159,33 +159,38 @@ AFRAME.registerElement("a-gltf-entity", {
           setTimeout(callback, 0);
         };
 
-        const onLoad = gltfModel => {
-          if (!GLTFCache[src]) {
-            // Store a cloned copy of the gltf model.
-            GLTFCache[src] = cloneGltf(gltfModel);
-          }
-
-          this.model = gltfModel.scene || gltfModel.scenes[0];
-          this.model.animations = gltfModel.animations;
-
-          this.setObject3D("mesh", this.model);
-          this.emit("model-loaded", { format: "gltf", model: this.model });
-
-          if (this.getAttribute("inflate")) {
-            inflate(this.model, finalizeLoad);
-          } else {
-            finalizeLoad();
-          }
-        };
-
-        const onError = error => {
-          const message = error && error.message ? error.message : "Failed to load glTF model";
-          console.warn(message);
-          this.emit("model-error", { format: "gltf", src });
-        };
-
         // Otherwise load the new gltf model.
-        new THREE.GLTFLoader().load(src, onLoad, undefined /* onProgress */, onError);
+        new THREE.GLTFLoader().load(
+          src,
+          gltfModel => {
+            // On load glTF model
+
+            if (!GLTFCache[src]) {
+              // Store a cloned copy of the gltf model.
+              GLTFCache[src] = cloneGltf(gltfModel);
+            }
+
+            this.model = gltfModel.scene || gltfModel.scenes[0];
+            this.model.animations = gltfModel.animations;
+
+            this.setObject3D("mesh", this.model);
+            this.emit("model-loaded", { format: "gltf", model: this.model });
+
+            if (this.getAttribute("inflate")) {
+              inflate(this.model, finalizeLoad);
+            } else {
+              finalizeLoad();
+            }
+          },
+          undefined /* onProgress */,
+          error => {
+            // On glTF load error
+
+            const message = error && error.message ? error.message : "Failed to load glTF model";
+            console.warn(message);
+            this.emit("model-error", { format: "gltf", src });
+          }
+        );
       }
     }
   })
