@@ -26,6 +26,8 @@ import "./components/audio-feedback";
 import "./components/billboard";
 import "./components/bone-mute-state-indicator";
 import "./components/2d-mute-state-indicator";
+import "./components/2d-hud";
+import "./components/in-world-hud";
 import "./components/virtual-gamepad-controls";
 import "./components/ik-controller";
 import "./components/hand-controls2";
@@ -118,6 +120,7 @@ window.App = {
     } else {
       username = promptForName(username); // promptForName is blocking
     }
+    scene.emit("username-changed", { username: username });
 
     playerRig.addEventListener(
       "model-loaded",

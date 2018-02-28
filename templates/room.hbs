@@ -33,7 +33,7 @@
 </head>
 
 <body>
-    <div id="loader"></div>
+    <div id="bloader"></div>
     <a-scene
         networked-scene="adapter: janus;
                          audio: true;
@@ -41,11 +41,18 @@
                          onConnect: App.onConnect;
                          connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
+        raycaster="objects:.menu;"
+        cursor="rayOrigin: mouse;"
         2d-mute-state-indicator
+        2d-hud
+        in-world-hud
         light="defaultLightsEnabled: false">
 
         <a-assets>
             <a-asset-item id="bot-skinned-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_SkinnedWithAnim.glb" }}"></a-asset-item>
+            <img id="unmuted"  src="assets/hud/unmuted.png" >
+            <img id="muted"  src="assets/hud/muted.png" >
+            <img id="avatar"  src="assets/hud/avatar.png" >
             <a-asset-item id="watch-model" response-type="arraybuffer" src="{{asset "assets/hud/watch.glb"}}"></a-asset-item>
 
             <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src="{{asset "assets/environments/MeetingSpace1_mesh.glb"}}"></a-asset-item>
@@ -54,7 +61,9 @@
             <a-asset-item id="cliff-vista-mesh" response-type="arraybuffer" src="{{asset "assets/environments/CliffVista_mesh.glb"}}"></a-asset-item>
 
             <img id="water-normal-map" src="{{asset "assets/waternormals.jpg"}}"></a-asset-item>
-
+            <!-- <img id="avatar" src="assets/hud/avatar.png">
+                 <a-mixin id="image" geometry="height: 0.01; width: 0.01"></a-mixin>
+               -->
             <!-- Templates -->
 
             <template id="video-template">

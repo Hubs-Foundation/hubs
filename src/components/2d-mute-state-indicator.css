@@ -1,10 +1,15 @@
 :local(.indicator) {
-    position: absolute;
-    top: 10px;
-    left: calc(50vw - 16px);
-    width: 32px;
-    height: 32px;
+    display:flex;
+    /* position: absolute; */
+    /* top: 10px; */
+    /* left: calc(50vw - 16px); */
+    /* width: 32px; */
+    /* height: 32px; */
+    width: 48px;
+    height: 48px;
     background-size: 100%;
+    background-image: url(../assets/hud/unmuted.png);
+    background-repeat: no-repeat;
 }
 
 :local(.indicator.muted) {
