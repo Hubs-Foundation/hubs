@@ -1,41 +1,40 @@
 :local(.horizontalRegion) {
-    position: absolute;
-    top: 10px;
-    display: flex;
-    justify-content: center;
-    height: 60px;
-    width: 100%;
+  position: absolute;
+  top: 10px;
+  display: flex;
+  justify-content: center;
+  height: 60px;
+  width: 100%;
 }
 
 :local(.bgShown) {
-    position: absolute;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    height: 60px;
-    width: 300px;
-    background-color:rgba(0,0,0,.35);
+  position: absolute;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.35);
 }
 
-:local(.nametagShown){
-    display: flex;
-    width: 192px;
-    justify-content: center;
-    font-size: 32px;
-    font-family: sans-serif;
-    color: white;
+:local(.nametagShown) {
+  display: flex;
+  justify-content: center;
+  font-size: 32px;
+  font-family: sans-serif;
+  color: white;
+  margin: 0 10px 0 0;
 }
 
-:local(.blueText){
-    color: cyan;
+:local(.blueText) {
+  color: cyan;
 }
 
 :local(.avatarImageShown) {
-    display: flex;
-    width: 48px;
-    height: 48px;
+  display: flex;
+  width: 48px;
+  height: 48px;
 }
 
 :local(.flipX) {
-    transform: scaleX(-1);
+  transform: scaleX(-1);
 }

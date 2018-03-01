@@ -54,9 +54,6 @@ AFRAME.registerComponent("2d-hud", {
   },
 
   onUsernameChanged(evt) {
-    const pixelsPerChar = 15;
-    this.bg.style.width = 200 + pixelsPerChar * evt.detail.username.length;
-    this.nametag.style.width = 50 + pixelsPerChar * evt.detail.username.length;
     this.nametag.innerHTML = evt.detail.username;
   }
 });
