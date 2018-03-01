@@ -206,7 +206,7 @@ AFRAME.registerComponent("ik-controller", {
         handObject3D.scale.set(1, 1, 1);
         handState.lastVisible = true;
       }
-      handMatrix.multiplyMatrices(invRootToChest, controllerObject3D.matrix);
+      handMatrix.multiplyMatrices(this.invRootToChest, controllerObject3D.matrix);
 
       const handControls = controller.components["hand-controls2"];
 
