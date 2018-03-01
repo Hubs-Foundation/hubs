@@ -34,7 +34,6 @@ AFRAME.registerComponent("ik-controller", {
   schema: {
     leftEye: { type: "string", default: ".LeftEye" },
     rightEye: { type: "string", default: ".RightEye" },
-    middleEye: { type: "string", default: ".middle-eye" },
     head: { type: "string", default: ".Head" },
     neck: { type: "string", default: ".Neck" },
     leftHand: { type: "string", default: ".LeftHand" },
@@ -53,6 +52,8 @@ AFRAME.registerComponent("ik-controller", {
 
     this.invHipsToHeadVector = new Vector3();
 
+    this.middleEyeMatrix = new Matrix4();
+    this.middleEyePosition = new Vector3();
     this.invMiddleEyeToHead = new Matrix4();
 
     this.cameraYRotation = new Euler();
@@ -87,10 +88,6 @@ AFRAME.registerComponent("ik-controller", {
       this.rightEye = this.el.querySelector(this.data.rightEye);
     }
 
-    if (this.data.middleEye !== oldData.middleEye) {
-      this.middleEye = this.el.querySelector(this.data.middleEye);
-    }
-
     if (this.data.head !== oldData.head) {
       this.head = this.el.querySelector(this.data.head);
     }
@@ -116,11 +113,10 @@ AFRAME.registerComponent("ik-controller", {
     }
 
     // Set middleEye's position to be right in the middle of the left and right eyes.
-    const middleEyePosition = this.middleEye.object3D.position;
-    middleEyePosition.addVectors(this.leftEye.object3D.position, this.rightEye.object3D.position);
-    middleEyePosition.divideScalar(2);
-    this.middleEye.object3D.updateMatrix();
-    this.invMiddleEyeToHead.getInverse(this.middleEye.object3D.matrix);
+    this.middleEyePosition.addVectors(this.leftEye.object3D.position, this.rightEye.object3D.position);
+    this.middleEyePosition.divideScalar(2);
+    this.middleEyeMatrix.makeTranslation(this.middleEyePosition.x, this.middleEyePosition.y, this.middleEyePosition.z);
+    this.invMiddleEyeToHead = this.middleEyeMatrix.getInverse(this.middleEyeMatrix);
 
     this.invHipsToHeadVector
       .addVectors(this.chest.object3D.position, this.neck.object3D.position)
