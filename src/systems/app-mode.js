@@ -42,11 +42,11 @@ AFRAME.registerComponent("mode-responder-hudstate", {
       switch (e.detail.mode) {
         case AppModes.HUD:
           this.el.setAttribute("material", "color", "green");
-          this.el.setAttribute("scale", "2 1 1");
+          this.el.setAttribute("scale", "2 2 2");
           break;
         case AppModes.DEFAULT:
           this.el.setAttribute("material", "color", "white");
-          this.el.setAttribute("scale", "0.3 0.3 1");
+          this.el.setAttribute("scale", "1 1 1");
           break;
       }
     });
@@ -54,20 +54,20 @@ AFRAME.registerComponent("mode-responder-hudstate", {
 });
 
 AFRAME.registerComponent("hud-detector", {
-  dependencies: ["raycaster"],
-
   init() {
     const AppModeSystem = this.el.sceneEl.systems["app-mode"];
 
     let hoverTimeout;
-    this.el.addEventListener("raycaster-intersection", e => {
-      console.log("raycast hit", e.detail.els, e.detail.intersections);
+    this.el.addEventListener("raycaster-intersected", e => {
+      if (e.target != this.el) return;
+      console.log("raycast hit", e);
       hoverTimeout = setTimeout(() => {
         AppModeSystem.setMode(AppModes.HUD);
       }, 500);
     });
-    this.el.addEventListener("raycaster-intersection-cleared", e => {
-      console.log("raycast clear", e.detail.clearedEls);
+    this.el.addEventListener("raycaster-intersected-cleared", e => {
+      if (e.target != this.el) return;
+      console.log("raycast clear", e);
       AppModeSystem.setMode(AppModes.DEFAULT);
       clearTimeout(hoverTimeout);
     });

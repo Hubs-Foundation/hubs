@@ -1,43 +1,17 @@
 AFRAME.registerComponent("in-world-hud", {
   init() {
-    this.bg = document.createElement("a-box");
-    this.mic = document.createElement("a-image");
-    this.nametag = document.createElement("a-text");
-    this.avatar = document.createElement("a-image");
-    this.el.appendChild(this.bg);
-    this.bg.appendChild(this.mic);
-    this.bg.appendChild(this.nametag);
-    this.bg.appendChild(this.avatar);
-
-    this.bg.setAttribute("position", "0 2.0 -1");
-    this.bg.setAttribute("geometry", {
-      height: 0.13,
-      width: 0.6,
-      depth: 0.001
-    });
-    this.bg.setAttribute("material", {
-      color: "#000000",
-      opacity: 0.35
-    });
+    this.bg = this.el.querySelector(".bg");
+    this.mic = this.el.querySelector(".mic");
+    this.nametag = this.el.querySelector(".nametag");
+    this.avatar = this.el.querySelector(".avatar");
 
     const muted = this.el.sceneEl.is("muted");
     this.mic.setAttribute("src", muted ? "#muted" : "#unmuted");
-    this.mic.setAttribute("scale", "-0.1 0.1 0.1");
-    this.mic.setAttribute("position", "-0.2 0.0 0.001");
-    this.mic.classList.add("menu");
 
-    this.avatar.setAttribute("src", "#avatar");
     const avatarScale = "0.1 0.1 0.1";
     const flipXAvatarScale = "-" + avatarScale;
-    this.avatar.setAttribute("scale", avatarScale);
-    this.avatar.setAttribute("position", "0.2 0 0.001");
-    this.avatar.classList.add("menu");
 
-    this.nametag.setAttribute("scale", "0.3 0.3 0.3");
-    this.nametag.setAttribute("position", "-0.12 0 0.0001");
-    this.nametag.classList.add("menu");
-
-    const scene = document.querySelector("a-scene");
+    const scene = this.el.sceneEl;
     this.onUsernameChanged = this.onUsernameChanged.bind(this);
     scene.addEventListener("username-changed", this.onUsernameChanged);
 
@@ -119,7 +93,7 @@ AFRAME.registerComponent("in-world-hud", {
   },
 
   onUsernameChanged(evt) {
-    var width;
+    let width;
     if (evt.detail.username.length == 0) {
       width = 1;
     } else {
