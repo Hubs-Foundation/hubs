@@ -37,7 +37,6 @@ import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
-import "./components/bone-visibility";
 
 import "./systems/personal-space-bubble";
 
