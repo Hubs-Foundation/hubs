@@ -126,16 +126,16 @@
             mode-responder-toggle__character-controller="mode: hud; invert: true;"
             ik-root
         >
-            <a-entity
-                mode-responder-hudstate=""
-                in-world-hud=""
-                position="0 1.002 -1.363"
-                rotation="-39.01000608674482 0 0">
-                <a-box hud-detector geometry="height:0.13;width:0.6;depth:0.001" material="color:#000000;opacity:0.35" class="hud bg">
-                    <a-image src="#unmuted" scale="-0.1 0.1 0.1" position="-0.2 0 0.001" class="hud mic" material="" geometry=""></a-image>
-                    <a-text scale="0.3 0.3 0.3" position="-0.12 0 0.0001" class="hud nametag" text="width:6;value:dom"></a-text>
-                    <a-image src="#avatar" scale="0.1 0.1 0.1" position="0.2 0 0.001" class="hud avatar" material="" geometry=""></a-image>
-                </a-box>
+            <a-entity id="player-hud">
+                <a-entity
+                    in-world-hud
+                    rotation="-39.01000608674482 0 0">
+                    <a-box geometry="height:0.13;width:0.6;depth:0.001" material="color:#000000;opacity:0.35" class="hud bg">
+                        <a-image src="#unmuted" scale="-0.1 0.1 0.1" position="-0.2 0 0.001" class="hud mic" material="" geometry=""></a-image>
+                        <a-text scale="0.3 0.3 0.3" position="-0.12 0 0.0001" class="hud nametag" text="width:6;value:dom"></a-text>
+                        <a-image src="#avatar" scale="0.1 0.1 0.1" position="0.2 0 0.001" class="hud avatar" material="" geometry=""></a-image>
+                    </a-box>
+                </a-entity>
             </a-entity>
 
             <a-entity
@@ -145,6 +145,7 @@
                 position="0 1.6 0"
                 personal-space-bubble
                 look-controls
+                hud-detector="hud: #player-hud;"
                 raycaster="objects: .hud; interval: 100; showLine: true; direction: 0 0 -1; origin: 0 -0.05 0;"
             ></a-entity>
             

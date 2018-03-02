@@ -54,22 +54,45 @@ AFRAME.registerComponent("mode-responder-hudstate", {
 });
 
 AFRAME.registerComponent("hud-detector", {
-  init() {
-    const AppModeSystem = this.el.sceneEl.systems["app-mode"];
+  schema: {
+    hud: { type: "selector" },
+    offset: { default: 1 }, // distance from hud bellow head,
+    lookCutoff: { default: -20 }, // angle at which the hud should be "on",
+    animRange: { default: 30 } // degres over wich to animate the hud into view
+  },
+  init() {},
 
-    let hoverTimeout;
-    this.el.addEventListener("raycaster-intersected", e => {
-      if (e.target != this.el) return;
-      console.log("raycast hit", e);
-      hoverTimeout = setTimeout(() => {
-        AppModeSystem.setMode(AppModes.HUD);
-      }, 500);
-    });
-    this.el.addEventListener("raycaster-intersected-cleared", e => {
-      if (e.target != this.el) return;
-      console.log("raycast clear", e);
+  tick() {
+    const hud = this.data.hud.object3D;
+    const head = this.el.object3D;
+
+    const { offset, lookCutoff, animRange } = this.data;
+
+    const headRot = head.rotation;
+    const pitch = headRot.x * THREE.Math.RAD2DEG;
+
+    // Reorient the hud only if the user is looking "up", for right now this arbitrarily means the hud is 1/3 way animated away
+    // TODO: come up with better huristics for this that maybe account for the user turning away from the hud "too far", also animate the position so that it doesnt just snap.
+    if (pitch > lookCutoff + animRange / 3) {
+      const lookDir = new THREE.Vector3(0, 0, -1);
+      lookDir.applyQuaternion(head.quaternion);
+      lookDir.add(head.position);
+      hud.position.x = lookDir.x;
+      hud.position.z = lookDir.z;
+      hud.setRotationFromEuler(new THREE.Euler(0, head.rotation.y, 0));
+    }
+
+    //animate the hud into place over animRange degres as the user aproaches the lookCutoff angle
+    const t = 1 - THREE.Math.clamp(pitch - lookCutoff, 0, animRange) / animRange;
+    hud.position.y = head.position.y - offset - offset * (1 - t);
+    hud.rotation.x = (1 - t) * THREE.Math.DEG2RAD * 90;
+
+    // update the app mode when the HUD locks on or off
+    const AppModeSystem = this.el.sceneEl.systems["app-mode"];
+    if (pitch < lookCutoff && AppModeSystem.mode !== AppModes.HUD) {
+      AppModeSystem.setMode(AppModes.HUD);
+    } else if (pitch > lookCutoff && AppModeSystem.mode === AppModes.HUD) {
       AppModeSystem.setMode(AppModes.DEFAULT);
-      clearTimeout(hoverTimeout);
-    });
+    }
   }
 });
