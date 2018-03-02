@@ -127,15 +127,32 @@ AFRAME.registerElement("a-gltf-entity", {
           src = assetEl.getAttribute("src");
         }
 
-        // Load the gltf model from the cache if it exists.
-        const gltf = GLTFCache[src];
+        const onLoad = gltfModel => {
+          if (!GLTFCache[src]) {
+            // Store a cloned copy of the gltf model.
+            GLTFCache[src] = cloneGltf(gltfModel);
+          }
 
-        if (gltf) {
-          // Use a cloned copy of the cached model.
-          const clonedGltf = cloneGltf(gltf);
-          this.onLoad(clonedGltf);
-          return;
-        }
+          this.model = gltfModel.scene || gltfModel.scenes[0];
+          this.model.animations = gltfModel.animations;
+
+          this.setObject3D("mesh", this.model);
+          this.emit("model-loaded", { format: "gltf", model: this.model });
+
+          if (this.getAttribute("inflate")) {
+            inflate(this.model, finalizeLoad);
+          } else {
+            finalizeLoad();
+          }
+        };
+
+        const inflate = (model, callback) => {
+          inflateEntities("", this, model);
+          this.querySelectorAll(":scope > template").forEach(attachTemplate);
+
+          // Wait one tick for the appended custom elements to be connected before calling finalizeLoad
+          setTimeout(callback, 0);
+        };
 
         const finalizeLoad = () => {
           AFRAME.ANode.prototype.load.call(this, () => {
@@ -151,46 +168,24 @@ AFRAME.registerElement("a-gltf-entity", {
           });
         };
 
-        const inflate = (model, callback) => {
-          inflateEntities("", this, model);
-          this.querySelectorAll(":scope > template").forEach(attachTemplate);
+        // Load the gltf model from the cache if it exists.
+        const gltf = GLTFCache[src];
 
-          // Wait one tick for the appended custom elements to be connected before calling finalizeLoad
-          setTimeout(callback, 0);
-        };
+        if (gltf) {
+          // Use a cloned copy of the cached model.
+          const clonedGltf = cloneGltf(gltf);
+          onLoad(clonedGltf);
+          return;
+        }
 
         // Otherwise load the new gltf model.
-        new THREE.GLTFLoader().load(
-          src,
-          gltfModel => {
-            // On load glTF model
+        new THREE.GLTFLoader().load(src, onLoad, undefined /* onProgress */, error => {
+          // On glTF load error
 
-            if (!GLTFCache[src]) {
-              // Store a cloned copy of the gltf model.
-              GLTFCache[src] = cloneGltf(gltfModel);
-            }
-
-            this.model = gltfModel.scene || gltfModel.scenes[0];
-            this.model.animations = gltfModel.animations;
-
-            this.setObject3D("mesh", this.model);
-            this.emit("model-loaded", { format: "gltf", model: this.model });
-
-            if (this.getAttribute("inflate")) {
-              inflate(this.model, finalizeLoad);
-            } else {
-              finalizeLoad();
-            }
-          },
-          undefined /* onProgress */,
-          error => {
-            // On glTF load error
-
-            const message = error && error.message ? error.message : "Failed to load glTF model";
-            console.warn(message);
-            this.emit("model-error", { format: "gltf", src });
-          }
-        );
+          const message = error && error.message ? error.message : "Failed to load glTF model";
+          console.warn(message);
+          this.emit("model-error", { format: "gltf", src });
+        });
       }
     }
   })
