@@ -45,11 +45,7 @@
         light="defaultLightsEnabled: false">
 
         <a-assets>
-            <a-asset-item id="bot-head-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_Head_Mesh.glb" }}"></a-asset-item>
-            <a-asset-item id="bot-body-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_Body_Mesh.glb" }}"></a-asset-item>
-            <a-asset-item id="bot-left-hand-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_LeftHand_Mesh.glb" }}"></a-asset-item>
-            <a-asset-item id="bot-right-hand-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_RightHand_Mesh.glb"}}"></a-asset-item>
-
+            <a-asset-item id="bot-skinned-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_SkinnedWithAnim.glb" }}"></a-asset-item>
             <a-asset-item id="watch-model" response-type="arraybuffer" src="{{asset "assets/hud/watch.glb"}}"></a-asset-item>
 
             <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src="{{asset "assets/environments/MeetingSpace1_mesh.glb"}}"></a-asset-item>
@@ -60,156 +56,147 @@
             <img id="water-normal-map" src="{{asset "assets/waternormals.jpg"}}"></a-asset-item>
 
             <!-- Templates -->
-            <script id="player-template" type="text/html">
-                <a-entity></a-entity>
-            </script>
 
-            <script id="head-template" type="text/html">
-                <a-entity
-                    class="head"
-                    networked-audio-source
-                    networked-audio-analyser
-                    matcolor-audio-feedback="objectName: Head_Mesh"
-                    cached-gltf-model="#bot-head-mesh"
-                    scale-audio-feedback
-                    personal-space-invader
-                    rotation="0 180 0"
-                    animation-mixer
-                ></a-entity>
-            </script>
-
-            <script id="body-template" type="text/html">
-                <a-entity
-                    class="body"
-                    cached-gltf-model="#bot-body-mesh"
-                    personal-space-invader
-                    rotation="0 180 0"
-                    position="0 -0.05 0"
-                ></a-entity>
-            </script>
-
-            <script id="left-hand-template" type="text/html">
-                <a-entity
-                    class="hand"
-                    cached-gltf-model="#bot-left-hand-mesh"
-                    personal-space-invader
-                    rotation="-90 90 0"
-                    position="0 0 0.075"
-                ></a-entity>
-            </script>
-
-            <script id="right-hand-template" type="text/html">
-                <a-entity
-                    class="hand"
-                    cached-gltf-model="#bot-right-hand-mesh"
-                    personal-space-invader
-                    rotation="-90 -90 0"
-                    position="0 0 0.075"
-                ></a-entity>
-            </script>
-
-            <script id="video-template" type="text/html">
+            <template id="video-template">
                 <a-entity class="video" geometry="primitive: plane;" material="side: double" networked-video-player></a-entity>
-            </script>
+            </template>
 
-            <script id="nametag-template" type="text/html">
-                <a-entity
-                    class="nametag"
-                    nametag-transform="follow: .head"
-                    text="side: double; align: center; color: #ddd"
-                    position="0 2.5 0"
-                    scale="6 6 6"
-                ></a-entity>
-            </script>
+            <template id="remote-avatar-template">                
+                <a-entity ik-root>
+                    <a-entity class="camera"></a-entity>
+                    
+                    <a-entity class="left-controller"></a-entity>
+
+                    <a-entity class="right-controller"></a-entity>
+
+                    <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller >
+                        <template data-selector=".Neck">
+                             <a-entity>
+                                 <a-entity
+                                    class="nametag"
+                                    billboard
+                                    text="side: double; align: center; color: #ddd"
+                                    position="0 1 0"
+                                    scale="6 6 6"
+                                ></a-entity>
+                             </a-entity>
+                        </template>
+                        
+                        <template data-selector=".Head">
+                            <a-entity
+                                networked-audio-source
+                                networked-audio-analyser
+                                scale-audio-feedback
+                                personal-space-invader
+                                animation-mixer
+                            >
+                            </a-entity>
+                        </template>
+
+                        <template selector=".LeftHand">
+                            <a-entity personal-space-invader ></a-entity>
+                        </template>
+
+                        <template data-selector=".RightHand">
+                            <a-entity personal-space-invader ></a-entity>
+                        </template>
+                    </a-gltf-entity>
+                </a-entity>
+            </template>
+
         </a-assets>
 
         <!-- Player Rig -->
         <a-entity
             id="player-rig"
-            networked="template: #player-template;"
+            networked="template: #remote-avatar-template; attachLocalTemplate: false;"
             spawn-controller="radius: 4;"
             wasd-to-analog2d
-            character-controller="pivot: #head;"
+            character-controller="pivot: #player-camera"
+            ik-root
         >
             <a-entity
-                id="head"
+                id="player-camera"
+                class="camera"
                 camera
                 position="0 1.6 0"
                 personal-space-bubble
                 look-controls
-                networked="template: #head-template; showLocalTemplate: false;"
             ></a-entity>
-
+            
             <a-entity
-                id="body"
-                body-controller="eyeNeckOffset: 0 -0.11 0.09; neckHeight: 0.05"
-                xr="ar: false"
-                networked="template: #body-template;"
-            ></a-entity>
-            <a-entity
-                id="nametag"
-                networked="template: #nametag-template; showLocalTemplate: false;"
-            ></a-entity>
-
-            <a-entity
-                id="left-hand"
+                id="player-left-controller"
+                class="left-controller"
                 hand-controls2="left"
                 tracked-controls
+                teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
                 haptic-feedback
-                teleport-controls="cameraRig: #player-rig; teleportOrigin: #head; button: action_teleport_"
-                networked="template: #left-hand-template;"
-            >
-                <a-entity
-                    id="watch"
-                    cached-gltf-model="#watch-model"
-                    bone-mute-state-indicator
-                    position="-0.003 0.009 0.085"
-                    rotation="-79.12547150756669 -160.1417037390651 -100.1530225888679"
-                    scale="1.5 1.5 1.5">
-                </a-entity>
-            </a-entity>
+            ></a-entity>
 
             <a-entity
-                id="right-hand"
+                id="player-right-controller"
+                class="right-controller"
                 hand-controls2="right"
+                tracked-controls
+                teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
                 haptic-feedback
-                teleport-controls="cameraRig: #player-rig;
-                                    teleportOrigin: #head;
-                                    hitEntity: #telepor-indicator;
-                                    button: action_teleport_;"
-                networked="template: #right-hand-template;"
             ></a-entity>
+
+            <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller>
+                <template data-selector=".Neck">
+                    <a-entity>
+                        <a-entity class="nametag" visible="false" text ></a-entity>
+                    </a-entity>
+                </template>
+
+                <template data-selector=".Head">
+                    <a-entity visible="false"></a-entity>
+                </template>
+
+                <template data-selector=".LeftHand">
+                    <a-entity>
+                        <a-gltf-entity
+                            id="watch"
+                            src="#watch-model"
+                            bone-mute-state-indicator
+                            scale="1.5 1.5 1.5"
+                            rotation="0 -90 90"
+                            position="0 -0.04 0"
+                        ></a-gltf-entity>
+                    </a-entity>
+                </template>
+            </a-gltf-entity>
         </a-entity>
 
         <!-- Environment -->
-        <a-entity
+        <a-gltf-entity
             id="meeting-space"
-            cached-gltf-model="#meeting-space1-mesh"
+            src="#meeting-space1-mesh"
             position="0 0 0"
-        ></a-entity>
+        ></a-gltf-entity>
 
-        <a-entity
+        <a-gltf-entity
             id="outdoor-facade"
-            cached-gltf-model="#outdoor-facade-mesh"
+            src="#outdoor-facade-mesh"
             position="0 0 0"
             xr="ar: false"
-        ></a-entity>
+        ></a-gltf-entity>
 
-        <a-entity
+        <a-gltf-entity
             id="floor-nav"
-            cached-gltf-model="#floor-nav-mesh"
+            src="#floor-nav-mesh"
             visible="false"
             position="0 0 0"
             xr="ar: false"
-        ></a-entity>
+        ></a-gltf-entity>
 
-        <a-entity
+        <a-gltf-entity
             id="cliff-vista"
-            cached-gltf-model="#cliff-vista-mesh"
+            src="#cliff-vista-mesh"
             layers="reflection:true"
             position="0 0 0"
             xr="ar: false"
-        ></a-entity>
+        ></a-gltf-entity>
 
         <a-entity id="skybox"
             id="skybox"
