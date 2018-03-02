@@ -60,14 +60,12 @@ AFRAME.registerComponent("hud-detector", {
     let hoverTimeout;
     this.el.addEventListener("raycaster-intersected", e => {
       if (e.target != this.el) return;
-      console.log("raycast hit", e);
       hoverTimeout = setTimeout(() => {
         AppModeSystem.setMode(AppModes.HUD);
       }, 500);
     });
     this.el.addEventListener("raycaster-intersected-cleared", e => {
       if (e.target != this.el) return;
-      console.log("raycast clear", e);
       AppModeSystem.setMode(AppModes.DEFAULT);
       clearTimeout(hoverTimeout);
     });

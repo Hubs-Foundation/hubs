@@ -16,16 +16,16 @@ AFRAME.registerComponent("in-world-hud", {
     this.onUsernameChanged = this.onUsernameChanged.bind(this);
     scene.addEventListener("username-changed", this.onUsernameChanged);
 
-    this.addBlue = () => {
+    this.onNametagHovered = () => {
       this.nametag.setAttribute("color", "cyan");
     };
-    this.removeBlue = () => {
+    this.onNametagUnhovered = () => {
       this.nametag.setAttribute("color", "white");
     };
-    this.flipX = () => {
+    this.onAvatarHovered = () => {
       this.avatar.setAttribute("scale", flipXAvatarScale);
     };
-    this.unflipX = () => {
+    this.onAvatarUnhovered = () => {
       this.avatar.setAttribute("scale", avatarScale);
     };
     this.onMicHover = () => {
@@ -58,39 +58,74 @@ AFRAME.registerComponent("in-world-hud", {
     this.onClick = () => {
       this.el.emit("action_select_hud_item");
     };
+
+    this.onAudioFrequencyChange = e => {
+      const red = 1.0 - e.detail.volume / 10.0;
+      this.mic.object3DMap.mesh.material.color = { r: red, g: 1, b: 1 };
+    };
+    this.el.sceneEl.addEventListener("mediaStream", evt => {
+      this.ms = evt.detail.ms;
+      const ctx = THREE.AudioContext.getContext();
+      const source = ctx.createMediaStreamSource(this.ms);
+      this.analyser = ctx.createAnalyser();
+      this.levels = new Uint8Array(this.analyser.frequencyBinCount);
+      console.log(source);
+      source.connect(this.analyser);
+    });
   },
 
   play() {
     this.mic.addEventListener("raycaster-intersected", this.onMicHover);
     this.mic.addEventListener("raycaster-intersected-cleared", this.onMicHoverExit);
 
-    this.nametag.addEventListener("raycaster-intersected", this.addBlue);
-    this.nametag.addEventListener("raycaster-intersected-cleared", this.removeBlue);
+    this.nametag.addEventListener("raycaster-intersected", this.onNametagHovered);
+    this.nametag.addEventListener("raycaster-intersected-cleared", this.onNametagUnhovered);
 
-    this.avatar.addEventListener("raycaster-intersected", this.flipX);
-    this.avatar.addEventListener("raycaster-intersected-cleared", this.unflipX);
+    this.avatar.addEventListener("raycaster-intersected", this.onAvatarHovered);
+    this.avatar.addEventListener("raycaster-intersected-cleared", this.onAvatarUnhovered);
 
     this.el.sceneEl.addEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.addEventListener("stateremoved", this.onStateChange);
 
     this.el.sceneEl.addEventListener("action_select_hud_item", this.onSelect);
     document.addEventListener("click", this.onClick);
+
+    this.el.sceneEl.addEventListener("micAudio", this.onAudioFrequencyChange);
   },
 
   pause() {
-    this.nametag.removeEventListener("raycaster-intersected", this.addBlue);
-    this.nametag.removeEventListener("raycaster-intersected-cleared", this.removeBlue);
+    this.nametag.removeEventListener("raycaster-intersected", this.onNametagHovered);
+    this.nametag.removeEventListener("raycaster-intersected-cleared", this.onNametagUnhovered);
 
     this.mic.removeEventListener("raycaster-intersected", this.onMicHover);
     this.mic.removeEventListener("raycaster-intersected-cleared", this.onMicHoverExit);
 
-    this.avatar.removeEventListener("raycaster-intersected", this.flipX);
-    this.avatar.removeEventListener("raycaster-intersected-cleared", this.unflipX);
+    this.avatar.removeEventListener("raycaster-intersected", this.onAvatarHovered);
+    this.avatar.removeEventListener("raycaster-intersected-cleared", this.onAvatarUnhovered);
 
     this.el.sceneEl.removeEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.removeEventListener("stateremoved", this.onStateChange);
+
     this.el.sceneEl.removeEventListener("action_select_hud_item", this.onSelect);
     document.removeEventListener("click", this.onClick);
+
+    this.el.sceneEl.removeEventListener("micAudio", this.onAudioFrequencyChange);
+  },
+
+  tick: function(t, dt) {
+    if (!this.analyser) return;
+
+    this.analyser.getByteFrequencyData(this.levels);
+
+    let sum = 0;
+    for (let i = 0; i < this.levels.length; i++) {
+      sum += this.levels[i];
+    }
+    this.volume = sum / this.levels.length;
+    this.el.emit("micAudio", {
+      volume: this.volume,
+      levels: this.levels
+    });
   },
 
   onUsernameChanged(evt) {
