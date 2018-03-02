@@ -10,6 +10,7 @@ import "networked-aframe";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
 import "aframe-input-mapping-component";
+import "aframe-billboard-component";
 import "webrtc-adapter";
 
 import animationMixer from "aframe-extras/src/loaders/animation-mixer";
@@ -20,26 +21,27 @@ import { oculus_touch_joystick_dpad4 } from "./behaviours/oculus-touch-joystick-
 import { PressedMove } from "./activators/pressedmove";
 import { ReverseY } from "./activators/reversey";
 import "./activators/shortpress";
-import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
 
+import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
 import "./components/mute-mic";
 import "./components/audio-feedback";
-import "./components/nametag-transform";
 import "./components/bone-mute-state-indicator";
 import "./components/2d-mute-state-indicator";
 import "./components/virtual-gamepad-controls";
-import "./components/body-controller";
+import "./components/ik-controller";
 import "./components/hand-controls2";
 import "./components/character-controller";
 import "./components/haptic-feedback";
 import "./components/networked-video-player";
 import "./components/offset-relative-to";
-import "./components/cached-gltf-model";
 import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
+
 import "./systems/personal-space-bubble";
+
+import "./elements/a-gltf-entity";
 
 import { promptForName, getCookie, parseJwt } from "./utils/identity";
 import registerNetworkSchemas from "./network-schemas";
@@ -116,6 +118,12 @@ async function onSceneLoad() {
 
   const myNametag = document.querySelector("#player-rig .nametag");
   myNametag.setAttribute("text", "value", username);
+
+  const avatarScale = parseInt(qs.avatarScale, 10);
+
+  if (avatarScale) {
+    playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
+  }
 
   let sharingScreen = false;
   scene.addEventListener("action_share_screen", () => {
