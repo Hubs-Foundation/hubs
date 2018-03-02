@@ -3,6 +3,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.bg = this.el.querySelector(".bg");
     this.mic = this.el.querySelector(".mic");
     this.nametag = this.el.querySelector(".nametag");
+    this.nametag.object3DMap.text.material.depthTest = false;
     this.avatar = this.el.querySelector(".avatar");
 
     const muted = this.el.sceneEl.is("muted");

@@ -131,11 +131,10 @@
                 in-world-hud=""
                 position="0 1.002 -1.363"
                 rotation="-39.01000608674482 0 0">
-                <a-box hud-detector geometry="height:0.13;width:0.6;depth:0.001" material="color:#000000;opacity:0.35" class="hud bg">
-                    <a-image src="#unmuted" scale="-0.1 0.1 0.1" position="-0.2 0 0.001" class="hud mic" material="" geometry=""></a-image>
-                    <a-text scale="0.3 0.3 0.3" position="-0.12 0 0.0001" class="hud nametag" text="width:6;value:dom"></a-text>
-                    <a-image src="#avatar" scale="0.1 0.1 0.1" position="0.2 0 0.001" class="hud avatar" material="" geometry=""></a-image>
-                </a-box>
+                <a-box hud-detector geometry="height:0.13;width:0.6;depth:0.001" material="depthTest:false; color:#000000;opacity:0.35" class="hud bg"></a-box>
+                <a-image src="#unmuted" scale="-0.1 0.1 0.1" position="-0.2 0 0.001" class="hud mic" material="alphaTest:0.1;depthTest:false;" geometry=""></a-image>
+                <a-text scale="0.3 0.3 0.3" position="-0.12 0 0.001" class="hud nametag" text="width:6;value:dom"></a-text>
+                <a-image src="#avatar" scale="0.1 0.1 0.1" position="0.2 0 0.001" class="hud avatar" material="depthTest:false;" geometry=""></a-image>
             </a-entity>
 
             <a-entity
@@ -145,7 +144,7 @@
                 position="0 1.6 0"
                 personal-space-bubble
                 look-controls
-                raycaster="objects: .hud; interval: 100; showLine: true; direction: 0 0 -1; origin: 0 -0.05 0;"
+                raycaster="objects: .hud; interval: 100; showLine: false; direction: 0 0 -1; origin: 0 -0.05 0;"
             ></a-entity>
             
             <a-entity
