@@ -1,3 +1,4 @@
+import "./room.css";
 import queryString from "query-string";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
@@ -83,67 +84,68 @@ async function shareMedia(audio, video) {
   }
 }
 
-window.App = {
-  async onSceneLoad() {
-    const qs = queryString.parse(location.search);
-    const scene = document.querySelector("a-scene");
+async function onSceneLoad() {
+  const qs = queryString.parse(location.search);
+  const scene = document.querySelector("a-scene");
 
-    scene.setAttribute("networked-scene", {
-      room: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : window.CONFIG.default_room,
-      serverURL: window.CONFIG.janus_server_url
-    });
+  scene.setAttribute("networked-scene", {
+    room: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1,
+    serverURL: process.env.JANUS_SERVER
+  });
 
-    if (!qs.stats || !/off|false|0/.test(qs.stats)) {
-      scene.setAttribute("stats", true);
-    }
-
-    const playerRig = document.querySelector("#player-rig");
-
-    if (AFRAME.utils.device.isMobile() || qs.gamepad) {
-      playerRig.setAttribute("virtual-gamepad-controls", {});
-    }
-
-    let username;
-    const jwt = getCookie("jwt");
-    if (jwt) {
-      //grab name from jwt
-      const data = parseJwt(jwt);
-      username = data.typ.name;
-    }
-
-    if (qs.name) {
-      username = qs.name; //always override with name from querystring if available
-    } else {
-      username = promptForName(username); // promptForName is blocking
-    }
-
-    const myNametag = playerRig.querySelector(".nametag");
-    myNametag.setAttribute("text", "value", username);
-
-    const avatarScale = parseInt(qs.avatarScale, 10);
-
-    if (avatarScale) {
-      playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
-    }
-
-    let sharingScreen = false;
-    scene.addEventListener("action_share_screen", () => {
-      sharingScreen = !sharingScreen;
-      shareMedia(true, sharingScreen);
-    });
-
-    if (qs.offline) {
-      App.onConnect();
-    } else {
-      document.body.addEventListener("connected", App.onConnect);
-
-      scene.components["networked-scene"].connect();
-
-      await shareMedia(true, sharingScreen);
-    }
-  },
-
-  onConnect() {
-    document.getElementById("loader").style.display = "none";
+  if (!qs.stats || !/off|false|0/.test(qs.stats)) {
+    scene.setAttribute("stats", true);
   }
-};
+
+  if (AFRAME.utils.device.isMobile() || qs.gamepad) {
+    const playerRig = document.querySelector("#player-rig");
+    playerRig.setAttribute("virtual-gamepad-controls", {});
+  }
+
+  let username;
+  const jwt = getCookie("jwt");
+  if (jwt) {
+    //grab name from jwt
+    const data = parseJwt(jwt);
+    username = data.typ.name;
+  }
+
+  if (qs.name) {
+    username = qs.name; //always override with name from querystring if available
+  } else {
+    username = promptForName(username); // promptForName is blocking
+  }
+
+  const myNametag = document.querySelector("#player-rig .nametag");
+  myNametag.setAttribute("text", "value", username);
+
+  const avatarScale = parseInt(qs.avatarScale, 10);
+
+  if (avatarScale) {
+    playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
+  }
+
+  let sharingScreen = false;
+  scene.addEventListener("action_share_screen", () => {
+    sharingScreen = !sharingScreen;
+    shareMedia(true, sharingScreen);
+  });
+
+  if (qs.offline) {
+    onConnect();
+  } else {
+    document.body.addEventListener("connected", onConnect);
+
+    scene.components["networked-scene"].connect();
+
+    await shareMedia(true, sharingScreen);
+  }
+}
+
+function onConnect() {
+  document.getElementById("loader").style.display = "none";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelector("a-scene").addEventListener("loaded", onSceneLoad);
+});

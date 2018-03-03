@@ -1,0 +1,15 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+:local(.onboarding) {
+  display: flex;
+  flex: 1;
+  margin: 20px;
+  flex-direction: column;
+}
