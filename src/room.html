@@ -1,39 +1,20 @@
+<!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="utf-8">
     <title>Mozilla Mixed Reality Social Client</title>
 
-    {{#if config.originTrialToken }}
-    <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="{{ config.originTrialExpires }}" content="{{{ config.originTrialToken }}}">
-    {{/if}}
-
-    <link rel="stylesheet" href="{{asset "room.css"}}">
-
-    <script>window.CONFIG = {{toJSON config.global}};</script>
-    <script src="{{asset "assets/aframe.js" }}"></script>
-    <script src="{{asset "manifest.js" }}"></script>
-    <script src="{{asset "room-vendor.js" }}"></script>
-    <script src="{{asset "room.js" }}"></script>
-    <meta charset="UTF-8">
-    <style>
-        .a-enter-vr {
-            top: 90px;
-            bottom: auto;
-        }
-        #loader {
-            position: fixed;
-            width: 100vw;
-            height: 100vh;
-            z-index: 10001;
-            background: #eaeaea no-repeat url({{asset "assets/loading.gif" }}) center center;
-            opacity: 0.9;
-        }
-    </style>
+    <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="<%= ORIGIN_TRIAL_EXPIRES %>" content="<%= ORIGIN_TRIAL_TOKEN %>">
+    <% if(NODE_ENV === "production") { %>
+        <script src="https://cdn.rawgit.com/brianpeiris/aframe/bba200440e3279753df85a1f52ba4c77a3b16e47/dist/aframe-master.min.js"></script>
+    <% } else { %>
+        <script src="https://cdn.rawgit.com/brianpeiris/aframe/bba200440e3279753df85a1f52ba4c77a3b16e47/dist/aframe-master.js"></script>
+    <% } %>
 </head>
 
 <body>
-    <div id="bloader"></div>
+    <div id="loader"></div>
     <a-scene
         networked-scene="adapter: janus;
                          audio: true;
@@ -48,21 +29,19 @@
         light="defaultLightsEnabled: false">
 
         <a-assets>
-            <a-asset-item id="bot-skinned-mesh" response-type="arraybuffer" src="{{asset "assets/avatars/Bot_SkinnedWithAnim.glb" }}"></a-asset-item>
-            <img id="unmuted"  src="assets/hud/unmuted.png" >
-            <img id="muted"  src="assets/hud/muted.png" >
-            <img id="avatar"  src="assets/hud/avatar.png" >
-            <a-asset-item id="watch-model" response-type="arraybuffer" src="{{asset "assets/hud/watch.glb"}}"></a-asset-item>
+            <a-asset-item id="bot-skinned-mesh" response-type="arraybuffer" src="./assets/avatars/Bot_SkinnedWithAnim.glb"></a-asset-item>
+            <img id="unmuted"  src="./assets/hud/unmuted.png" >
+            <img id="muted"  src="./assets/hud/muted.png" >
+            <img id="avatar"  src="./assets/hud/avatar.png" >
+            <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
 
-            <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src="{{asset "assets/environments/MeetingSpace1_mesh.glb"}}"></a-asset-item>
-            <a-asset-item id="outdoor-facade-mesh" response-type="arraybuffer" src="{{asset "assets/environments/OutdoorFacade_mesh.glb"}}"></a-asset-item>
-            <a-asset-item id="floor-nav-mesh" response-type="arraybuffer" src="{{asset "assets/environments/FloorNav_mesh.glb"}}"></a-asset-item>
-            <a-asset-item id="cliff-vista-mesh" response-type="arraybuffer" src="{{asset "assets/environments/CliffVista_mesh.glb"}}"></a-asset-item>
+            <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src="./assets/environments/MeetingSpace1_mesh.glb"></a-asset-item>
+            <a-asset-item id="outdoor-facade-mesh" response-type="arraybuffer" src="./assets/environments/OutdoorFacade_mesh.glb"></a-asset-item>
+            <a-asset-item id="floor-nav-mesh" response-type="arraybuffer" src="./assets/environments/FloorNav_mesh.glb"></a-asset-item>
+            <a-asset-item id="cliff-vista-mesh" response-type="arraybuffer" src="./assets/environments/CliffVista_mesh.glb"></a-asset-item>
 
-            <img id="water-normal-map" src="{{asset "assets/waternormals.jpg"}}"></a-asset-item>
-            <!-- <img id="avatar" src="assets/hud/avatar.png">
-                 <a-mixin id="image" geometry="height: 0.01; width: 0.01"></a-mixin>
-               -->
+            <img id="water-normal-map" src="./assets/waternormals.jpg"></a-asset-item>
+
             <!-- Templates -->
 
             <template id="video-template">
@@ -94,12 +73,10 @@
                             <a-entity
                                 networked-audio-source
                                 networked-audio-analyser
-                                matcolor-audio-feedback="objectName: Head_Mesh"
                                 scale-audio-feedback
                                 personal-space-invader
                                 animation-mixer
                             >
-                                <a-entity class="middle-eye"></a-entity>
                             </a-entity>
                         </template>
 
@@ -172,9 +149,7 @@
                 </template>
 
                 <template data-selector=".Head">
-                    <a-entity visible="false">
-                        <a-entity class="middle-eye"></a-entity>
-                    </a-entity>
+                    <a-entity visible="false"></a-entity>
                 </template>
 
                 <template data-selector=".LeftHand">
@@ -239,10 +214,6 @@
             xr="ar: false"
         ></a-entity>
     </a-scene>
-
-    <script>
-        document.querySelector('a-scene').addEventListener('loaded', App.onSceneLoad)
-    </script>
 </body>
 
 </html>

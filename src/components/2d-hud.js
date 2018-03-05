@@ -1,4 +1,5 @@
 import styles from "./2d-hud.css";
+import avatarImg from "../assets/hud/avatar.png";
 
 AFRAME.registerComponent("2d-hud", {
   schema: {
@@ -12,7 +13,7 @@ AFRAME.registerComponent("2d-hud", {
     this.nametag.classList.add(styles.nametagShown);
 
     this.avatar = document.createElement("img");
-    this.avatar.src = "../assets/hud/avatar.png";
+    this.avatar.src = avatarImg;
     this.avatar.classList.add(styles.avatarImageShown);
 
     this.bg = document.createElement("div");
