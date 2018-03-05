@@ -23,12 +23,8 @@ AFRAME.registerComponent("character-controller", {
   },
 
   update: function() {
-    this.leftRotationMatrix = new THREE.Matrix4().makeRotationY(
-      this.data.snapRotationDegrees
-    );
-    this.rightRotationMatrix = new THREE.Matrix4().makeRotationY(
-      -this.data.snapRotationDegrees
-    );
+    this.leftRotationMatrix = new THREE.Matrix4().makeRotationY(this.data.snapRotationDegrees);
+    this.rightRotationMatrix = new THREE.Matrix4().makeRotationY(-this.data.snapRotationDegrees);
   },
 
   play: function() {
@@ -84,8 +80,7 @@ AFRAME.registerComponent("character-controller", {
       const root = this.el.object3D;
       const pivot = this.data.pivot.object3D;
       const distance = this.data.groundAcc * deltaSeconds;
-      const rotationDelta =
-        this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
+      const rotationDelta = this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
 
       pivotPos.copy(pivot.position);
       pivotPos.applyMatrix4(root.matrix);
@@ -96,11 +91,7 @@ AFRAME.registerComponent("character-controller", {
       pivotRotationMatrix.makeRotationAxis(rotationAxis, pivot.rotation.y);
       pivotRotationInvMatrix.makeRotationAxis(rotationAxis, -pivot.rotation.y);
       this.updateVelocity(deltaSeconds);
-      move.makeTranslation(
-        this.velocity.x * distance,
-        this.velocity.y * distance,
-        this.velocity.z * distance
-      );
+      move.makeTranslation(this.velocity.x * distance, this.velocity.y * distance, this.velocity.z * distance);
       yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 
       // Translate to middle of playspace (player rig)

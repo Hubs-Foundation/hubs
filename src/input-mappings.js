@@ -68,7 +68,10 @@ const config = {
         abuttonup: "action_teleport_up"
       },
       "daydream-controls": {
-        menudown: "action_mute",
+        trackpaddown: "action_teleport_down",
+        trackpadup: "action_teleport_up"
+      },
+      "gearvr-controls": {
         trackpaddown: "action_teleport_down",
         trackpadup: "action_teleport_up"
       },

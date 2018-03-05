@@ -1,12 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import mj from "minijanus";
+import { JanusSession, JanusPluginHandle } from "minijanus";
 
 import "material-design-lite";
 import "material-design-lite/material.css";
 import "./lobby.css";
+import "webrtc-adapter";
 
 import registerTelemetry from "./telemetry";
+
+const publicRooms = [1, 2, 3, 4, 5];
 
 registerTelemetry();
 
@@ -21,8 +24,8 @@ class Lobby extends React.Component {
   }
 
   componentDidMount() {
-    this.ws = new WebSocket(window.CONFIG.janus_server_url, "janus-protocol");
-    this.session = new mj.JanusSession(this.ws.send.bind(this.ws));
+    this.ws = new WebSocket(process.env.JANUS_SERVER, "janus-protocol");
+    this.session = new JanusSession(this.ws.send.bind(this.ws));
     this.ws.addEventListener("open", this.onWebsocketOpen);
     this.ws.addEventListener("message", this.onWebsocketMessage);
   }
@@ -37,7 +40,7 @@ class Lobby extends React.Component {
     this.session
       .create()
       .then(() => {
-        this.handle = new mj.JanusPluginHandle(this.session);
+        this.handle = new JanusPluginHandle(this.session);
         return this.handle.attach("janus.plugin.sfu").then(this.updateRooms);
       })
       .then(() => {
@@ -52,7 +55,7 @@ class Lobby extends React.Component {
   fetchRooms() {
     return this.handle.sendMessage({ kind: "listusers" }).then(signal => {
       const usersByRoom = signal.plugindata.data.response.users;
-      return window.CONFIG.public_rooms.map(id => ({
+      return publicRooms.map(id => ({
         id,
         limit: 12,
         users: usersByRoom[id] || []
@@ -61,8 +64,7 @@ class Lobby extends React.Component {
   }
 
   onWebsocketMessage(event) {
-    var message = JSON.parse(event.data);
-    this.session.receive(message);
+    this.session.receive(JSON.parse(event.data));
   }
 
   render() {
@@ -91,16 +93,12 @@ const RoomListItem = ({ room }) => {
 };
 
 const RoomList = ({ rooms }) => {
-  const publicRooms = window.CONFIG.public_rooms.length + 1;
   const roomId =
-    publicRooms +
-    Math.floor(Math.random() * (Number.MAX_SAFE_INTEGER - publicRooms));
+    publicRooms.length + 1 + Math.floor(Math.random() * (Number.MAX_SAFE_INTEGER - publicRooms.length + 1));
 
   return (
     <div className="mdl-card mdl-shadow--2dp panel">
-      <ul className="mdl-list scroll">
-        {rooms.map(room => <RoomListItem key={room.id} room={room} />)}
-      </ul>
+      <ul className="mdl-list scroll">{rooms.map(room => <RoomListItem key={room.id} room={room} />)}</ul>
       <ul className="mdl-list">
         <li className="mdl-list__item room-item">
           <a href={`room.html?room=${roomId}`}>
