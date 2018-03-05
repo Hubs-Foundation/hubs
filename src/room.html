@@ -74,7 +74,9 @@
                             </a-entity>
                         </template>
 
-                        <template data-selector=".Body">
+                        <template data-selector=".Chest">
+                            <a-entity>
+                            </a-entity>
                         </template>
 
                         <template selector=".LeftHand">
@@ -98,7 +100,6 @@
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
-            animated-robot-hands="leftHand: #left-hand; rightHand: #right-hand"
         >
             <a-entity
                 id="player-camera"
