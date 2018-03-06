@@ -14,30 +14,25 @@ const POSES = {
 //       it would be nice to animate the hands proportionally to those analog values.
 AFRAME.registerComponent("animated-robot-hands", {
   schema: {
-    leftHand: { type: "selector", default: "#left-hand" },
-    rightHand: { type: "selector", default: "#right-hand" }
+    leftHand: { type: "selector", default: "#player-left-controller" },
+    rightHand: { type: "selector", default: "#player-right-controller" }
   },
 
   init: function() {
     this.playAnimation = this.playAnimation.bind(this);
     this.onModelLoaded = this.onModelLoaded.bind(this);
-    this.el.addEventListener("model-loaded", this.onModelLoaded);
-  },
 
-  onModelLoaded: function() {
     // Get the three.js object in the scene graph that has the animation data
-    const root = this.el.object3D.children[0].children[0].children[0];
-    window.root = root;
+    const root = this.el.querySelector("a-gltf-entity .RootScene").object3D.children[0];
     this.mixer = new THREE.AnimationMixer(root);
 
     // Set hands to open pose because the bind pose is funky due
     // to the workaround for FBX2glTF animations.
+
     this.openL = this.mixer.clipAction(POSES.open + "_L");
     this.openR = this.mixer.clipAction(POSES.open + "_R");
     this.openL.play();
     this.openR.play();
-
-    this.loaded = true;
   },
 
   play: function() {
@@ -51,7 +46,6 @@ AFRAME.registerComponent("animated-robot-hands", {
   },
 
   tick: function(t, dt) {
-    if (!this.loaded) return;
     this.mixer.update(dt / 1000);
   },
 
@@ -59,7 +53,6 @@ AFRAME.registerComponent("animated-robot-hands", {
   // TODO: Transition from current pose (which may be BETWEEN two other poses)
   //       to the target pose, rather than stopping previous actions altogether.
   playAnimation: function(evt) {
-    if (!this.loaded) return;
     const isLeft = evt.target === this.data.leftHand;
     // Stop the initial animations we started when the model loaded.
     if (!this.openLStopped && isLeft) {
