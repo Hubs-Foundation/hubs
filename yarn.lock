@@ -68,9 +68,9 @@ aframe-physics-system@^1.4.3:
     cannon "github:donmccurdy/cannon.js#v0.6.2-dev1"
     three-to-cannon "^1.1.1"
 
-"aframe-teleport-controls@https://github.com/netpro2k/aframe-teleport-controls#feature/teleport-origin":
-  version "0.3.0"
-  resolved "https://github.com/netpro2k/aframe-teleport-controls#41fe311d3123503ba44761acce69d0f0634139cc"
+"aframe-teleport-controls@https://github.com/netpro2k/aframe-teleport-controls#feature/pauseable":
+  version "0.3.2"
+  resolved "https://github.com/netpro2k/aframe-teleport-controls#7f67003dd3bd1348357fbf89aaeed916ef2d4016"
 
 "aframe-xr@github:brianpeiris/aframe-xr#3162aed":
   version "0.0.9"
