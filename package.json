@@ -10,6 +10,7 @@
   "scripts": {
     "postinstall": "node ./scripts/postinstall.js",
     "start": "cross-env NODE_ENV=development webpack-dev-server",
+    "mobile" : "cross-env NODE_ENV=development webpack-dev-server --useLocalIp --host 0.0.0.0",
     "build": "rimraf ./public && cross-env NODE_ENV=production webpack --mode=production",
     "prettier": "prettier --write src/**/*.js"
   },
