@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { getPreEntryMobileVRDeviceCaps } from "../utils/vr-caps-detect.js"
 
 class UIRoot extends Component {
   static propTypes = {
@@ -7,8 +8,7 @@ class UIRoot extends Component {
   };
 
   componentDidMount = () => {
-    if (navigator.getVRDisplays()) {
-    }
+    getPreEntryMobileVRDeviceCaps().then(x => console.log(x))
   }
 
   render() {
