@@ -39,6 +39,10 @@ import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
 
+import ReactDOM from "react-dom";
+import React from "react";
+import UIRoot from "./react-components/ui-root";
+
 import "./systems/personal-space-bubble";
 
 import "./elements/a-gltf-entity";
@@ -84,7 +88,7 @@ async function shareMedia(audio, video) {
   }
 }
 
-async function onSceneLoad() {
+async function enterScene() {
   const qs = queryString.parse(location.search);
   const scene = document.querySelector("a-scene");
 
@@ -147,5 +151,6 @@ function onConnect() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.querySelector("a-scene").addEventListener("loaded", onSceneLoad);
+  ReactDOM.render(<UIRoot enterScene={enterScene} />, document.getElementById("ui-root"));
+  document.getElementById("loader").style.display = "none";
 });

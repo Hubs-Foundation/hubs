@@ -88,6 +88,7 @@ module.exports = {
   devServer: {
     open: true,
     https: createHTTPSConfig(),
+    host: "0.0.0.0",
     port: 8080,
     before: function(app) {
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
@@ -123,7 +124,10 @@ module.exports = {
         include: [path.resolve(__dirname, "src")],
         // Exclude JS assets in node_modules because they are already transformed and often big.
         exclude: [path.resolve(__dirname, "node_modules")],
-        loader: "babel-loader"
+        loader: "babel-loader",
+        query: {
+          plugins: ["transform-class-properties", "transform-object-rest-spread"]
+        }
       },
       {
         test: /\.css$/,
