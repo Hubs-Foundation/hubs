@@ -93,17 +93,16 @@ function attachTemplate(templateEl) {
   const targetEls = templateEl.parentNode.querySelectorAll(selector);
   const clone = document.importNode(templateEl.content, true);
   const templateRoot = clone.firstElementChild;
-  const templateRootAttrs = templateRoot.attributes;
 
-  for (const targetEl of targetEls) {
+  for (const el of targetEls) {
     // Merge root element attributes with the target element
-    for (const { name, value } of templateRootAttrs) {
-      targetEl.setAttribute(name, value);
+    for (const { name, value } of templateRoot.attributes) {
+      el.setAttribute(name, value);
     }
 
     // Append all child elements
     for (const child of templateRoot.children) {
-      targetEl.appendChild(document.importNode(child, true));
+      el.appendChild(document.importNode(child, true));
     }
   }
 }
