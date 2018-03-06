@@ -26,7 +26,7 @@
         light="defaultLightsEnabled: false">
 
         <a-assets>
-            <a-asset-item id="bot-skinned-mesh" response-type="arraybuffer" src="./assets/avatars/Bot_SingleSkin_Rigged.glb"></a-asset-item>
+            <a-asset-item id="bot-skinned-mesh" response-type="arraybuffer" src="./assets/avatars/Bot_SkinnedWithAnimation.glb"></a-asset-item>
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
 
             <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src="./assets/environments/MeetingSpace1_mesh.glb"></a-asset-item>
@@ -100,6 +100,7 @@
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
+            animated-robot-hands
         >
             <a-entity
                 id="player-camera"
