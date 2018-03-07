@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { getPreEntryMobileVRDeviceCaps } from "../utils/vr-caps-detect.js"
 
 class UIRoot extends Component {
   static propTypes = {
-    enterScene: PropTypes.func
+    enterScene: PropTypes.func,
+    mobileVRDeviceCaps: PropTypes.object
   };
 
   componentDidMount = () => {
-    getPreEntryMobileVRDeviceCaps().then(x => console.log(x))
+    console.log(this.props.mobileVRDeviceCaps);
   }
 
   render() {

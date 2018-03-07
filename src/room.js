@@ -52,6 +52,8 @@ import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 
+import { getPreEntryMobileVRDeviceCaps } from "./utils/vr-caps-detect.js"
+
 AFRAME.registerInputBehaviour("vive_trackpad_dpad4", vive_trackpad_dpad4);
 AFRAME.registerInputBehaviour("oculus_touch_joystick_dpad4", oculus_touch_joystick_dpad4);
 AFRAME.registerInputActivator("pressedmove", PressedMove);
@@ -150,7 +152,11 @@ function onConnect() {
   document.getElementById("loader").style.display = "none";
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  ReactDOM.render(<UIRoot enterScene={enterScene} />, document.getElementById("ui-root"));
-  document.getElementById("loader").style.display = "none";
-});
+function mountUI() {
+  getPreEntryMobileVRDeviceCaps().then(mobileVRDeviceCaps => {
+    ReactDOM.render(<UIRoot {...{ mobileVRDeviceCaps, enterScene }} />, document.getElementById("ui-root"));
+    document.getElementById("loader").style.display = "none";
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => mountUI());
