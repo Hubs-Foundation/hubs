@@ -21,6 +21,11 @@ AFRAME.registerComponent("2d-mute-state-indicator", {
     this.onMouseOut = () => this.muteIcon.classList.toggle(styles.muted, this.el.sceneEl.is("muted"));
 
     this.onClick = () => this.el.emit("action_mute");
+
+    this.onMicAudio = e => {
+      const red = 1.0 - e.detail.volume / 10.0;
+      this.muteIcon.style["background-color"] = `rgb(${red * 255},255,255)`;
+    };
   },
 
   play() {
@@ -30,6 +35,8 @@ AFRAME.registerComponent("2d-mute-state-indicator", {
     this.muteIcon.addEventListener("mouseover", this.onMouseOver);
     this.muteIcon.addEventListener("mouseout", this.onMouseOut);
     this.muteIcon.addEventListener("click", this.onClick);
+
+    this.el.sceneEl.addEventListener("micAudio", this.onMicAudio);
   },
 
   pause() {
@@ -39,6 +46,8 @@ AFRAME.registerComponent("2d-mute-state-indicator", {
     this.muteIcon.removeEventListener("mouseover", this.onMouseOver);
     this.muteIcon.removeEventListener("mouseout", this.onMouseOut);
     this.muteIcon.removeEventListener("click", this.onClick);
+
+    this.el.sceneEl.removeEventListener("micAudio", this.onMicAudio);
   },
 
   onStateToggled(e) {
