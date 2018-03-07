@@ -69,7 +69,6 @@ AFRAME.registerComponent("in-world-hud", {
       const source = ctx.createMediaStreamSource(this.ms);
       this.analyser = ctx.createAnalyser();
       this.levels = new Uint8Array(this.analyser.frequencyBinCount);
-      console.log(source);
       source.connect(this.analyser);
     });
   },
