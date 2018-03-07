@@ -52,7 +52,7 @@ import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 
-import { getPreEntryMobileVRDeviceCaps } from "./utils/vr-caps-detect.js"
+import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 
 AFRAME.registerInputBehaviour("vive_trackpad_dpad4", vive_trackpad_dpad4);
 AFRAME.registerInputBehaviour("oculus_touch_joystick_dpad4", oculus_touch_joystick_dpad4);
@@ -64,33 +64,7 @@ AFRAME.registerInputMappings(config);
 registerNetworkSchemas();
 registerTelemetry();
 
-async function shareMedia(audio, video) {
-  const constraints = {
-    audio: !!audio,
-    video: video ? { mediaSource: "screen", height: 720, frameRate: 30 } : false
-  };
-  const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-  NAF.connection.adapter.setLocalMediaStream(mediaStream);
-
-  const id = `${NAF.clientId}-screen`;
-  let entity = document.getElementById(id);
-  if (entity) {
-    entity.setAttribute("visible", !!video);
-  } else if (video) {
-    const sceneEl = document.querySelector("a-scene");
-    entity = document.createElement("a-entity");
-    entity.id = id;
-    entity.setAttribute("offset-relative-to", {
-      target: "#head",
-      offset: "0 0 -2",
-      on: "action_share_screen"
-    });
-    entity.setAttribute("networked", { template: "#video-template" });
-    sceneEl.appendChild(entity);
-  }
-}
-
-async function enterScene() {
+async function enterScene(mediaStream) {
   const qs = queryString.parse(location.search);
   const scene = document.querySelector("a-scene");
 
@@ -132,6 +106,8 @@ async function enterScene() {
   }
 
   let sharingScreen = false;
+
+  // TODO remove
   scene.addEventListener("action_share_screen", () => {
     sharingScreen = !sharingScreen;
     shareMedia(true, sharingScreen);
@@ -144,7 +120,28 @@ async function enterScene() {
 
     scene.components["networked-scene"].connect();
 
-    await shareMedia(true, sharingScreen);
+    if (mediaStream) {
+      NAF.connection.adapter.setLocalMediaStream(mediaStream);
+
+      const hasVideo = !!(mediaStream.getVideoTracks().length > 0);
+
+      const id = `${NAF.clientId}-screen`;
+      let entity = document.getElementById(id);
+      if (entity) {
+        entity.setAttribute("visible", hasVideo);
+      } else if (hasVideo) {
+        const sceneEl = document.querySelector("a-scene");
+        entity = document.createElement("a-entity");
+        entity.id = id;
+        entity.setAttribute("offset-relative-to", {
+          target: "#head",
+          offset: "0 0 -2",
+          on: "action_share_screen"
+        });
+        entity.setAttribute("networked", { template: "#video-template" });
+        sceneEl.appendChild(entity);
+      }
+    }
   }
 }
 
@@ -153,8 +150,8 @@ function onConnect() {
 }
 
 function mountUI() {
-  getPreEntryMobileVRDeviceCaps().then(mobileVRDeviceCaps => {
-    ReactDOM.render(<UIRoot {...{ mobileVRDeviceCaps, enterScene }} />, document.getElementById("ui-root"));
+  getAvailableVREntryTypes().then(availableVREntryTypes => {
+    ReactDOM.render(<UIRoot {...{ availableVREntryTypes, enterScene }} />, document.getElementById("ui-root"));
     document.getElementById("loader").style.display = "none";
   });
 }
