@@ -96,11 +96,14 @@ AFRAME.registerComponent("mode-responder-input-mappings", {
 AFRAME.registerComponent("hud-detector", {
   schema: {
     hud: { type: "selector" },
-    offset: { default: 1 }, // distance from hud bellow head,
+    offset: { default: 1 }, // distance from hud below head,
     lookCutoff: { default: -20 }, // angle at which the hud should be "on",
-    animRange: { default: 30 } // degres over wich to animate the hud into view
+    animRange: { default: 30 } // degrees over which to animate the hud into view
   },
-  init() {},
+  init() {
+    this.isYLocked = false;
+    this.lockedHeadPositionY = 0;
+  },
 
   tick() {
     const hud = this.data.hud.object3D;
@@ -122,9 +125,18 @@ AFRAME.registerComponent("hud-detector", {
       hud.setRotationFromEuler(new THREE.Euler(0, head.rotation.y, 0));
     }
 
-    //animate the hud into place over animRange degres as the user aproaches the lookCutoff angle
+    //animate the hud into place over animRange degrees as the user aproaches the lookCutoff angle
     const t = 1 - THREE.Math.clamp(pitch - lookCutoff, 0, animRange) / animRange;
-    hud.position.y = head.position.y - offset - offset * (1 - t);
+
+    // Lock the hud in place relative to a known head position so it doesn't bob up and down
+    // with the user's head
+    if (!this.isYLocked && t === 1) {
+      this.lockedHeadPositionY = head.position.y;
+    }
+    const EPSILON = 0.001;
+    this.isYLocked = t > 1 - EPSILON;
+
+    hud.position.y = (this.isYLocked ? head.position.y : this.lockedHeadPositionY) - offset - offset * (1 - t);
     hud.rotation.x = (1 - t) * THREE.Math.DEG2RAD * 90;
 
     // update the app mode when the HUD locks on or off
