@@ -25,12 +25,13 @@ AFRAME.registerComponent("animated-robot-hands", {
     // Get the three.js object in the scene graph that has the animation data
     const root = this.el.querySelector("a-gltf-entity .RootScene").object3D.children[0];
     this.mixer = new THREE.AnimationMixer(root);
+    this.root = root;
 
     // Set hands to open pose because the bind pose is funky due
     // to the workaround for FBX2glTF animations.
 
-    this.openL = this.mixer.clipAction(POSES.open + "_L");
-    this.openR = this.mixer.clipAction(POSES.open + "_R");
+    this.openL = this.mixer.clipAction(POSES.open + "_L", root.parent);
+    this.openR = this.mixer.clipAction(POSES.open + "_R", root.parent);
     this.openL.play();
     this.openR.play();
   },
@@ -81,8 +82,8 @@ AFRAME.registerComponent("animated-robot-hands", {
     //    console.log(
     //      `Animating ${isLeft ? "left" : "right"} hand from ${prevPose} to ${currPose} over ${duration} seconds.`
     //    );
-    var from = mixer.clipAction(prevPose);
-    var to = mixer.clipAction(currPose);
+    var from = mixer.clipAction(prevPose, this.root.parent);
+    var to = mixer.clipAction(currPose, this.root.parent);
     from.fadeOut(duration);
     to.fadeIn(duration);
     to.play();
