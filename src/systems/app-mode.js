@@ -1,6 +1,10 @@
 /* global AFRAME, console, setTimeout, clearTimeout */
 
 const AppModes = Object.freeze({ DEFAULT: "default", HUD: "hud" });
+
+/**
+ * Simple system for keeping track of a modal app state
+ */
 AFRAME.registerSystem("app-mode", {
   init() {
     console.log("init app mode system");
@@ -15,6 +19,9 @@ AFRAME.registerSystem("app-mode", {
   }
 });
 
+/**
+ * Toggle the isPlaying state of a component based on app mode
+ */
 AFRAME.registerComponent("mode-responder-toggle", {
   multiple: true,
   schema: {
@@ -36,23 +43,56 @@ AFRAME.registerComponent("mode-responder-toggle", {
   }
 });
 
-AFRAME.registerComponent("mode-responder-hudstate", {
+/**
+ * Toggle a boolean property of a component based on app mode
+ */
+AFRAME.registerComponent("mode-responder-property-toggle", {
+  multiple: true,
+  schema: {
+    mode: { type: "string" },
+    invert: { type: "boolean", default: false },
+    property: { type: "string" }
+  },
+
+  init() {
+    const AppModeSystem = this.el.sceneEl.systems["app-mode"];
+    this.el.sceneEl.addEventListener("appmode-change", e => {
+      this.updateComponentState(e.detail.mode === this.data.mode);
+    });
+    this.updateComponentState(AppModeSystem.mode === this.data.mode);
+  },
+
+  updateComponentState(isModeActive) {
+    const componentName = this.id;
+    this.el.setAttribute(componentName, this.data.property, isModeActive !== this.data.invert);
+  }
+});
+
+/**
+ * Toggle aframe input mappings action set based on app mode
+ */
+AFRAME.registerComponent("mode-responder-input-mappings", {
+  schema: {
+    modes: { default: [] },
+    actionSets: { default: [] }
+  },
   init() {
     this.el.sceneEl.addEventListener("appmode-change", e => {
-      switch (e.detail.mode) {
-        case AppModes.HUD:
-          this.el.setAttribute("material", "color", "green");
-          this.el.setAttribute("scale", "2 2 2");
-          break;
-        case AppModes.DEFAULT:
-          this.el.setAttribute("material", "color", "white");
-          this.el.setAttribute("scale", "1 1 1");
-          break;
+      const { modes, actionSets } = this.data;
+      const idx = modes.indexOf(e.detail.mode);
+      if (idx != -1 && modes[idx] && actionSets[idx] && AFRAME.inputActions[actionSets[idx]]) {
+        // TODO: this assumes full control over current action set reguardless of what else might be manipulating it, this is obviously wrong
+        AFRAME.currentInputMapping = actionSets[idx];
+      } else {
+        console.error(`no valid action set for ${e.detail.mode}`);
       }
     });
   }
 });
 
+/**
+ * Positions the HUD and toggles app mode based on where the user is looking
+ */
 AFRAME.registerComponent("hud-detector", {
   schema: {
     hud: { type: "selector" },
@@ -88,6 +128,7 @@ AFRAME.registerComponent("hud-detector", {
     hud.rotation.x = (1 - t) * THREE.Math.DEG2RAD * 90;
 
     // update the app mode when the HUD locks on or off
+    // TODO: this assumes full control over current app mode reguardless of what else might be manipulating it, this is obviously wrong
     const AppModeSystem = this.el.sceneEl.systems["app-mode"];
     if (pitch < lookCutoff && AppModeSystem.mode !== AppModes.HUD) {
       AppModeSystem.setMode(AppModes.HUD);

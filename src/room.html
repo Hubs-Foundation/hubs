@@ -26,6 +26,7 @@
         cursor="rayOrigin: mouse;"
         2d-mute-state-indicator
         2d-hud
+        mode-responder-input-mappings="modes: default, hud; actionSets: default, hud;"
         light="defaultLightsEnabled: false">
 
         <a-assets>
@@ -139,8 +140,14 @@
                 hand-controls2="right"
                 tracked-controls
                 teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
-                mode-responder-toggle__teleport-controls="mode: hud; invert: true;"
                 haptic-feedback
+                raycaster="objects:.hud; showLine: true;"
+                cursor="fuse: false; downEvents: action_ui_select_down; upEvents: action_ui_select_up;"
+
+                mode-responder-toggle__teleport-controls="mode: hud; invert: true;"
+                mode-responder-toggle__raycaster="mode: hud;"
+                mode-responder-toggle__cursor="mode: hud;"
+                mode-responder-property-toggle__line="mode: hud; property: visible;"
             ></a-entity>
 
             <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller>
