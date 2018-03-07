@@ -10,6 +10,10 @@ const inGameActions = {
     action_teleport_down: { label: "Teleport Aim" },
     action_teleport_up: { label: "Teleport" },
     action_share_screen: { label: "Share Screen" }
+  },
+  hud: {
+    action_ui_select_down: { label: "Select UI item" },
+    action_ui_select_up: { label: "Select UI item" }
   }
 };
 
@@ -58,7 +62,10 @@ const config = {
         abuttonup: "action_teleport_up"
       },
       "daydream-controls": {
-        menudown: "action_mute",
+        trackpaddown: "action_teleport_down",
+        trackpadup: "action_teleport_up"
+      },
+      "gearvr-controls": {
         trackpaddown: "action_teleport_down",
         trackpadup: "action_teleport_up"
       },
@@ -87,6 +94,24 @@ const config = {
         S_up: "s_up",
         D_down: "d_down",
         D_up: "d_up"
+      }
+    },
+    hud: {
+      "vive-controls": {
+        triggerdown: { right: "action_ui_select_down" },
+        triggerup: { right: "action_ui_select_up" }
+      },
+      "oculus-touch-controls": {
+        triggerdown: { right: "action_ui_select_down" },
+        triggerup: { right: "action_ui_select_up" }
+      },
+      "daydream-controls": {
+        trackpaddown: { right: "action_ui_select_down" },
+        trackpadup: { right: "action_ui_select_up" }
+      },
+      "gearvr-controls": {
+        trackpaddown: { right: "action_ui_select_down" },
+        trackpadup: { right: "action_ui_select_up" }
       }
     }
   }

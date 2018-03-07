@@ -20,7 +20,8 @@ const CONTROLLER_OFFSETS = {
     new THREE.Quaternion().setFromEuler(new THREE.Euler(-40 * THREE.Math.DEG2RAD, 0, 0)),
     new THREE.Vector3(1, 1, 1)
   ),
-  "daydream-controls": new THREE.Matrix4().makeTranslation(0, 0, -0.04)
+  "daydream-controls": new THREE.Matrix4().makeTranslation(0, 0, -0.04),
+  "gearvr-controls": new THREE.Matrix4()
 };
 
 AFRAME.registerComponent("hand-controls2", {
@@ -114,6 +115,7 @@ AFRAME.registerComponent("hand-controls2", {
       el.setAttribute("oculus-touch-controls", controlConfiguration);
       el.setAttribute("windows-motion-controls", controlConfiguration);
       el.setAttribute("daydream-controls", controlConfiguration);
+      el.setAttribute("gearvr-controls", controlConfiguration);
     }
   },
 

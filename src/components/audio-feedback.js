@@ -1,21 +1,20 @@
 AFRAME.registerComponent("networked-audio-analyser", {
   schema: {},
-  init() {
-    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      const ownerId = networkedEl.components.networked.data.owner;
+  async init() {
+    const networkedEl = await NAF.utils.getNetworkedEntity(this.el);
+    const ownerId = networkedEl.components.networked.data.owner;
 
-      NAF.connection.adapter.getMediaStream(ownerId).then(stream => {
-        if (!stream) {
-          return;
-        }
+    const stream = await NAF.connection.adapter.getMediaStream(ownerId);
 
-        const ctx = THREE.AudioContext.getContext();
-        const source = ctx.createMediaStreamSource(stream);
-        this.analyser = ctx.createAnalyser();
-        this.levels = new Uint8Array(this.analyser.frequencyBinCount);
-        source.connect(this.analyser);
-      });
-    });
+    if (!stream) {
+      return;
+    }
+
+    const ctx = THREE.AudioContext.getContext();
+    const source = ctx.createMediaStreamSource(stream);
+    this.analyser = ctx.createAnalyser();
+    this.levels = new Uint8Array(this.analyser.frequencyBinCount);
+    source.connect(this.analyser);
   },
 
   tick: function() {
@@ -37,15 +36,10 @@ AFRAME.registerComponent("networked-audio-analyser", {
 
 AFRAME.registerComponent("matcolor-audio-feedback", {
   schema: {
-    analyserSrc: { type: "selector" },
-    objectName: { type: "string" }
+    analyserSrc: { type: "selector" }
   },
   init: function() {
     this.onAudioFrequencyChange = this.onAudioFrequencyChange.bind(this);
-
-    this.el.addEventListener("model-loaded", () => {
-      this.mat = this.el.object3D.getObjectByName(this.data.objectName).material;
-    });
   },
 
   play() {
@@ -58,7 +52,7 @@ AFRAME.registerComponent("matcolor-audio-feedback", {
 
   onAudioFrequencyChange(e) {
     if (!this.mat) return;
-    this.mat.color.setScalar(1 + e.detail.volume / 255 * 2);
+    this.object3D.mesh.color.setScalar(1 + e.detail.volume / 255 * 2);
   }
 });
 

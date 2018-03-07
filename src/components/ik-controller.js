@@ -34,15 +34,13 @@ AFRAME.registerComponent("ik-controller", {
   schema: {
     leftEye: { type: "string", default: ".LeftEye" },
     rightEye: { type: "string", default: ".RightEye" },
-    middleEye: { type: "string", default: ".middle-eye" },
     head: { type: "string", default: ".Head" },
     neck: { type: "string", default: ".Neck" },
     leftHand: { type: "string", default: ".LeftHand" },
     rightHand: { type: "string", default: ".RightHand" },
     chest: { type: "string", default: ".Chest" },
     hips: { type: "string", default: ".Hips" },
-    rotationSpeed: { default: 5 },
-    debug: { type: "boolean", default: true }
+    rotationSpeed: { default: 5 }
   },
 
   init() {
@@ -52,26 +50,33 @@ AFRAME.registerComponent("ik-controller", {
     this.headTransform = new Matrix4();
     this.hipsPosition = new Vector3();
 
-    this.iHipsToHeadVector = new Vector3();
+    this.invHipsToHeadVector = new Vector3();
 
-    this.iMiddleEyeToHead = new Matrix4();
-    this.iHeadToHip = new Matrix4();
+    this.middleEyeMatrix = new Matrix4();
+    this.middleEyePosition = new Vector3();
+    this.invMiddleEyeToHead = new Matrix4();
 
     this.cameraYRotation = new Euler();
     this.cameraYQuaternion = new Quaternion();
 
-    this.hipsQuaternion = new Quaternion();
+    this.invHipsQuaternion = new Quaternion();
     this.headQuaternion = new Quaternion();
 
     this.rootToChest = new Matrix4();
-    this.iRootToChest = new Matrix4();
+    this.invRootToChest = new Matrix4();
+
+    this.hands = {
+      left: {
+        lastVisible: true,
+        rotation: new Matrix4().makeRotationFromEuler(new Euler(-Math.PI / 2, Math.PI / 2, 0))
+      },
+      right: {
+        lastVisible: true,
+        rotation: new Matrix4().makeRotationFromEuler(new Euler(Math.PI / 2, Math.PI / 2, 0))
+      }
+    };
 
     this.headLastVisible = true;
-    this.leftHandLastVisible = true;
-    this.rightHandLastVisible = true;
-
-    this.leftHandRotation = new Matrix4().makeRotationFromEuler(new Euler(-Math.PI / 2, Math.PI / 2, 0));
-    this.rightHandRotation = new Matrix4().makeRotationFromEuler(new Euler(Math.PI / 2, Math.PI / 2, 0));
   },
 
   update(oldData) {
@@ -81,10 +86,6 @@ AFRAME.registerComponent("ik-controller", {
 
     if (this.data.rightEye !== oldData.rightEye) {
       this.rightEye = this.el.querySelector(this.data.rightEye);
-    }
-
-    if (this.data.middleEye !== oldData.middleEye) {
-      this.middleEye = this.el.querySelector(this.data.middleEye);
     }
 
     if (this.data.head !== oldData.head) {
@@ -112,13 +113,12 @@ AFRAME.registerComponent("ik-controller", {
     }
 
     // Set middleEye's position to be right in the middle of the left and right eyes.
-    const middleEyePosition = this.middleEye.object3D.position;
-    middleEyePosition.addVectors(this.leftEye.object3D.position, this.rightEye.object3D.position);
-    middleEyePosition.divideScalar(2);
-    this.middleEye.object3D.updateMatrix();
-    this.iMiddleEyeToHead.getInverse(this.middleEye.object3D.matrix);
+    this.middleEyePosition.addVectors(this.leftEye.object3D.position, this.rightEye.object3D.position);
+    this.middleEyePosition.divideScalar(2);
+    this.middleEyeMatrix.makeTranslation(this.middleEyePosition.x, this.middleEyePosition.y, this.middleEyePosition.z);
+    this.invMiddleEyeToHead = this.middleEyeMatrix.getInverse(this.middleEyeMatrix);
 
-    this.iHipsToHeadVector
+    this.invHipsToHeadVector
       .addVectors(this.chest.object3D.position, this.neck.object3D.position)
       .add(this.head.object3D.position)
       .negate();
@@ -140,88 +140,51 @@ AFRAME.registerComponent("ik-controller", {
       chest,
       cameraForward,
       headTransform,
-      iMiddleEyeToHead,
-      iHipsToHeadVector,
+      invMiddleEyeToHead,
+      invHipsToHeadVector,
       flipY,
       cameraYRotation,
       cameraYQuaternion,
-      hipsQuaternion,
+      invHipsQuaternion,
       headQuaternion,
       leftHand,
       rightHand,
       rootToChest,
-      iRootToChest
+      invRootToChest
     } = this;
 
     // Camera faces the -Z direction. Flip it along the Y axis so that it is +Z.
     camera.object3D.updateMatrix();
     cameraForward.multiplyMatrices(camera.object3D.matrix, flipY);
 
-    headTransform.multiplyMatrices(cameraForward, iMiddleEyeToHead);
-    hips.object3D.position.setFromMatrixPosition(headTransform).add(iHipsToHeadVector);
+    // Compute the head position such that the hmd position would be in line with the middleEye
+    headTransform.multiplyMatrices(cameraForward, invMiddleEyeToHead);
 
+    // Then position the hips such that the head is aligned with headTransform (which positions middleEye in line with the hmd)
+    hips.object3D.position.setFromMatrixPosition(headTransform).add(invHipsToHeadVector);
+
+    // Animate the hip rotation to follow the Y rotation of the camera with some damping.
     cameraYRotation.setFromRotationMatrix(cameraForward, "YXZ");
     cameraYRotation.x = 0;
     cameraYRotation.z = 0;
     cameraYQuaternion.setFromEuler(cameraYRotation);
-    Quaternion.slerp(hips.object3D.quaternion, cameraYQuaternion, hipsQuaternion, this.data.rotationSpeed * dt / 1000);
-    hips.object3D.quaternion.copy(hipsQuaternion);
+    Quaternion.slerp(
+      hips.object3D.quaternion,
+      cameraYQuaternion,
+      hips.object3D.quaternion,
+      this.data.rotationSpeed * dt / 1000
+    );
 
-    headQuaternion.setFromRotationMatrix(headTransform).premultiply(hipsQuaternion.inverse());
+    // Take the head orientation computed from the hmd, remove the Y rotation already applied to it by the hips, and apply it to the head
+    invHipsQuaternion.copy(hips.object3D.quaternion).inverse();
+    head.object3D.quaternion.setFromRotationMatrix(headTransform).premultiply(invHipsQuaternion);
 
-    head.object3D.quaternion.copy(headQuaternion);
     hips.object3D.updateMatrix();
     rootToChest.multiplyMatrices(hips.object3D.matrix, chest.object3D.matrix);
-    iRootToChest.getInverse(rootToChest);
+    invRootToChest.getInverse(rootToChest);
 
-    if (leftController.object3D.visible) {
-      if (!this.leftHandLastVisible) {
-        leftHand.object3D.scale.set(1, 1, 1);
-        this.leftHandLastVisible = true;
-      }
-
-      leftHand.object3D.matrix.multiplyMatrices(iRootToChest, leftController.object3D.matrix);
-
-      const leftHandControls = leftController.components["hand-controls2"];
-
-      if (leftHandControls) {
-        leftHand.object3D.matrix.multiply(leftHandControls.getControllerOffset());
-      }
-
-      leftHand.object3D.matrix.multiply(this.leftHandRotation);
-
-      leftHand.object3D.position.setFromMatrixPosition(leftHand.object3D.matrix);
-      leftHand.object3D.rotation.setFromRotationMatrix(leftHand.object3D.matrix);
-    } else {
-      if (this.leftHandLastVisible) {
-        leftHand.object3D.scale.set(0.0000001, 0.0000001, 0.0000001);
-        this.leftHandLastVisible = false;
-      }
-    }
-
-    if (rightController.object3D.visible) {
-      if (!this.rightHandLastVisible) {
-        rightHand.object3D.scale.set(1, 1, 1);
-        this.rightHandLastVisible = true;
-      }
-      rightHand.object3D.matrix.multiplyMatrices(iRootToChest, rightController.object3D.matrix);
-
-      const rightHandControls = rightController.components["hand-controls2"];
-
-      if (rightHandControls) {
-        rightHand.object3D.matrix.multiply(rightHandControls.getControllerOffset());
-      }
-
-      rightHand.object3D.matrix.multiply(this.rightHandRotation);
-
-      rightHand.object3D.position.setFromMatrixPosition(rightHand.object3D.matrix);
-      rightHand.object3D.rotation.setFromRotationMatrix(rightHand.object3D.matrix);
-    } else {
-      if (this.rightHandLastVisible) {
-        rightHand.object3D.scale.set(0.0000001, 0.0000001, 0.0000001);
-        this.rightHandLastVisible = false;
-      }
-    }
+    this.updateHand(this.hands.left, leftHand, leftController);
+    this.updateHand(this.hands.right, rightHand, rightController);
 
     if (head.object3D.visible) {
       if (!this.headLastVisible) {
@@ -229,6 +192,36 @@ AFRAME.registerComponent("ik-controller", {
       }
     } else if (this.headLastVisible) {
       head.object3D.scale.set(0.0000001, 0.0000001, 0.0000001);
+    }
+  },
+
+  updateHand(handState, hand, controller) {
+    const handObject3D = hand.object3D;
+    const handMatrix = handObject3D.matrix;
+    const controllerObject3D = controller.object3D;
+
+    if (controllerObject3D.visible) {
+      if (!handState.lastVisible) {
+        handObject3D.scale.set(1, 1, 1);
+        handState.lastVisible = true;
+      }
+      handMatrix.multiplyMatrices(this.invRootToChest, controllerObject3D.matrix);
+
+      const handControls = controller.components["hand-controls2"];
+
+      if (handControls) {
+        handMatrix.multiply(handControls.getControllerOffset());
+      }
+
+      handMatrix.multiply(handState.rotation);
+
+      handObject3D.position.setFromMatrixPosition(handMatrix);
+      handObject3D.rotation.setFromRotationMatrix(handMatrix);
+    } else {
+      if (handState.lastVisible) {
+        handObject3D.scale.set(0.0000001, 0.0000001, 0.0000001);
+        handState.lastVisible = false;
+      }
     }
   }
 });

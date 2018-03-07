@@ -82,6 +82,9 @@ AFRAME.registerComponent("character-controller", {
       const distance = this.data.groundAcc * deltaSeconds;
       const rotationDelta = this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
 
+      // Other aframe components like teleport-controls set position/rotation/scale, not the matrix, so we need to make sure to compose them back into the matrix
+      root.updateMatrix();
+
       pivotPos.copy(pivot.position);
       pivotPos.applyMatrix4(root.matrix);
       trans.setPosition(pivotPos);
