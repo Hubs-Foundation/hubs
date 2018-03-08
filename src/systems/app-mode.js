@@ -136,7 +136,7 @@ AFRAME.registerComponent("hud-detector", {
     const EPSILON = 0.001;
     this.isYLocked = t > 1 - EPSILON;
 
-    hud.position.y = (this.isYLocked ? head.position.y : this.lockedHeadPositionY) - offset - offset * (1 - t);
+    hud.position.y = (this.isYLocked ? this.lockedHeadPositionY : head.position.y) - offset - offset * (1 - t);
     hud.rotation.x = (1 - t) * THREE.Math.DEG2RAD * 90;
 
     // update the app mode when the HUD locks on or off
