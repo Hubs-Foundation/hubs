@@ -28,7 +28,7 @@
         cursor="rayOrigin: mouse;"
         2d-hud
 
-        mode-responder-input-mappings="modes: default, hud; actionSets: default, hud;"
+        app-mode-input-mappings="modes: default, hud; actionSets: default, hud;"
         vr-mode-toggle-playing__raycaster="invert: true;"
         vr-mode-toggle-playing__cursor="invert: true;"
         vr-mode-toggle-playing__2d-hud="invert: true;"
@@ -108,10 +108,10 @@
             character-controller="pivot: #player-camera"
             ik-root
 
-            mode-responder-toggle__character-controller="mode: hud; invert: true;"
-            mode-responder-toggle__wasd-to-analog2d="mode: hud; invert: true;"
+            app-mode-toggle-playing__character-controller="mode: hud; invert: true;"
+            app-mode-toggle-playing__wasd-to-analog2d="mode: hud; invert: true;"
         >
-            <a-entity id="player-hud" vr-mode-toggle-visibility="showInVR: true;">
+            <a-entity id="player-hud" vr-mode-toggle-visibility>
                 <a-entity in-world-hud rotation="-39.01000608674482 0 0">
                     <a-box geometry="height:0.13;width:0.6;depth:0.001" material="depthTest:false; color:#000000;opacity:0.35" class="hud bg"></a-box>
                     <a-image src="#unmuted" scale="-0.1 0.1 0.1" position="-0.2 0 0.001" class="hud mic" material="alphaTest:0.1;depthTest:false;" geometry=""></a-image>
@@ -139,7 +139,7 @@
                 hand-controls2="left"
                 tracked-controls
                 teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
-                mode-responder-toggle__teleport-controls="mode: hud; invert: true;"
+                app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;"
                 haptic-feedback
             ></a-entity>
 
@@ -153,10 +153,10 @@
                 raycaster="objects:.hud; showLine: true;"
                 cursor="fuse: false; downEvents: action_ui_select_down; upEvents: action_ui_select_up;"
 
-                mode-responder-toggle__teleport-controls="mode: hud; invert: true;"
-                mode-responder-toggle__raycaster="mode: hud;"
-                mode-responder-toggle__cursor="mode: hud;"
-                mode-responder-property-toggle__line="mode: hud; property: visible;"
+                app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;"
+                app-mode-toggle-playing__raycaster="mode: hud;"
+                app-mode-toggle-playing__cursor="mode: hud;"
+                app-mode-toggle-property__line="mode: hud; property: visible;"
             ></a-entity>
 
             <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller>

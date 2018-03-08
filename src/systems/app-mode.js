@@ -22,7 +22,7 @@ AFRAME.registerSystem("app-mode", {
 /**
  * Toggle the isPlaying state of a component based on app mode
  */
-AFRAME.registerComponent("mode-responder-toggle", {
+AFRAME.registerComponent("app-mode-toggle-playing", {
   multiple: true,
   schema: {
     mode: { type: "string" },
@@ -46,7 +46,7 @@ AFRAME.registerComponent("mode-responder-toggle", {
 /**
  * Toggle a boolean property of a component based on app mode
  */
-AFRAME.registerComponent("mode-responder-property-toggle", {
+AFRAME.registerComponent("app-mode-toggle-property", {
   multiple: true,
   schema: {
     mode: { type: "string" },
@@ -71,7 +71,7 @@ AFRAME.registerComponent("mode-responder-property-toggle", {
 /**
  * Toggle aframe input mappings action set based on app mode
  */
-AFRAME.registerComponent("mode-responder-input-mappings", {
+AFRAME.registerComponent("app-mode-input-mappings", {
   schema: {
     modes: { default: [] },
     actionSets: { default: [] }
