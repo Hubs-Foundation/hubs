@@ -4,7 +4,6 @@ import queryString from "query-string";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
-import "whatwg-fetch";
 import "aframe-xr";
 import "./vendor/GLTFLoader";
 import "networked-aframe";
