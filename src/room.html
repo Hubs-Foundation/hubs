@@ -16,17 +16,23 @@
 <body>
     <div id="loader"></div>
     <a-scene
+        light="defaultLightsEnabled: false"
         networked-scene="adapter: janus;
                          audio: true;
                          debug: true;
                          onConnect: App.onConnect;
                          connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
+
         raycaster="objects:.hud;"
         cursor="rayOrigin: mouse;"
         2d-hud
+
         mode-responder-input-mappings="modes: default, hud; actionSets: default, hud;"
-        light="defaultLightsEnabled: false">
+        vr-mode-toggle-playing__raycaster="invert: true;"
+        vr-mode-toggle-playing__cursor="invert: true;"
+        vr-mode-toggle-playing__2d-hud="invert: true;"
+        >
 
         <a-assets>
             <a-asset-item id="bot-skinned-mesh" response-type="arraybuffer" src="./assets/avatars/Bot_SkinnedWithAnim.glb"></a-asset-item>
@@ -105,7 +111,7 @@
             mode-responder-toggle__character-controller="mode: hud; invert: true;"
             mode-responder-toggle__wasd-to-analog2d="mode: hud; invert: true;"
         >
-            <a-entity id="player-hud">
+            <a-entity id="player-hud" vr-mode-toggle-visibility="showInVR: true;">
                 <a-entity in-world-hud rotation="-39.01000608674482 0 0">
                     <a-box geometry="height:0.13;width:0.6;depth:0.001" material="depthTest:false; color:#000000;opacity:0.35" class="hud bg"></a-box>
                     <a-image src="#unmuted" scale="-0.1 0.1 0.1" position="-0.2 0 0.001" class="hud mic" material="alphaTest:0.1;depthTest:false;" geometry=""></a-image>
@@ -123,6 +129,8 @@
                 look-controls
                 hud-detector="hud: #player-hud;"
                 raycaster="objects: .hud; interval: 100; showLine: false; direction: 0 0 -1; origin: 0 -0.05 0;"
+                
+                vr-mode-toggle-playing__hud-detector
             ></a-entity>
             
             <a-entity
