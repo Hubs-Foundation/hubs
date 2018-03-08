@@ -97,7 +97,7 @@ AFRAME.registerComponent("hud-detector", {
   schema: {
     hud: { type: "selector" },
     offset: { default: 1 }, // distance from hud below head,
-    lookCutoff: { default: -20 }, // angle at which the hud should be "on",
+    lookCutoff: { default: -25 }, // angle at which the hud should be "on",
     animRange: { default: 30 } // degrees over which to animate the hud into view
   },
   init() {
@@ -144,8 +144,10 @@ AFRAME.registerComponent("hud-detector", {
     const AppModeSystem = this.el.sceneEl.systems["app-mode"];
     if (pitch < lookCutoff && AppModeSystem.mode !== AppModes.HUD) {
       AppModeSystem.setMode(AppModes.HUD);
+      this.el.sceneEl.renderer.sortObjects = true;
     } else if (pitch > lookCutoff && AppModeSystem.mode === AppModes.HUD) {
       AppModeSystem.setMode(AppModes.DEFAULT);
+      this.el.sceneEl.renderer.sortObjects = false;
     }
   }
 });

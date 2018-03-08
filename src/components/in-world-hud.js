@@ -1,6 +1,7 @@
 AFRAME.registerComponent("in-world-hud", {
   schema: {
-    haptic: { type: "selector" }
+    haptic: { type: "selector" },
+    raycaster: { type: "selector" }
   },
   init() {
     this.bg = this.el.querySelector(".bg");
@@ -8,6 +9,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.nametag = this.el.querySelector(".nametag");
     this.nametag.object3DMap.text.material.depthTest = false;
     this.avatar = this.el.querySelector(".avatar");
+    this.data.raycaster.components.line.material.depthTest = false;
 
     const muted = this.el.sceneEl.is("muted");
     this.mic.setAttribute("src", muted ? "#muted" : "#unmuted");
