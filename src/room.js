@@ -26,7 +26,6 @@ import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in t
 import "./components/mute-mic";
 import "./components/audio-feedback";
 import "./components/bone-mute-state-indicator";
-import "./components/2d-mute-state-indicator";
 import "./components/2d-hud";
 import "./components/in-world-hud";
 import "./components/virtual-gamepad-controls";
