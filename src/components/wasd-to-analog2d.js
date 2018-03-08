@@ -17,17 +17,8 @@ AFRAME.registerComponent("wasd-to-analog2d", {
   },
 
   play: function() {
-    const eventNames = [
-      "w_down",
-      "w_up",
-      "a_down",
-      "a_up",
-      "s_down",
-      "s_up",
-      "d_down",
-      "d_up"
-    ];
-    for (var name of eventNames) {
+    const eventNames = ["w_down", "w_up", "a_down", "a_up", "s_down", "s_up", "d_down", "d_up"];
+    for (const name of eventNames) {
       this.el.sceneEl.addEventListener(name, this.onWasd);
     }
     // I listen to events that this component generates instead of emitting "move"
@@ -42,10 +33,8 @@ AFRAME.registerComponent("wasd-to-analog2d", {
 
   pause: function() {
     this.el.sceneEl.removeEventListener("wasd", this.onWasd);
-    this.el.sceneEl.removeEventListener(
-      this.data.analog2dOutputAction,
-      this.move
-    );
+    this.el.sceneEl.removeEventListener(this.data.analog2dOutputAction, this.move);
+    this.keys = {};
   },
 
   onWasd: function(event) {
@@ -58,18 +47,13 @@ AFRAME.registerComponent("wasd-to-analog2d", {
   tick: function(t, dt) {
     this.target = [0, 0];
 
-    for (var key in this.keys) {
+    for (const key in this.keys) {
       if (this.keys[key] && this.vectors[key]) {
-        this.target = [
-          this.target[0] + this.vectors[key][0],
-          this.target[1] + this.vectors[key][1]
-        ];
+        this.target = [this.target[0] + this.vectors[key][0], this.target[1] + this.vectors[key][1]];
       }
     }
 
-    const targetMagnitude = Math.sqrt(
-      this.target[0] * this.target[0] + this.target[1] * this.target[1]
-    );
+    const targetMagnitude = Math.sqrt(this.target[0] * this.target[0] + this.target[1] * this.target[1]);
     if (targetMagnitude !== 0) {
       this.target[0] = this.target[0] / targetMagnitude;
       this.target[1] = this.target[1] / targetMagnitude;

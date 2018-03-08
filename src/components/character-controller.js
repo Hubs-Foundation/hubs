@@ -41,6 +41,14 @@ AFRAME.registerComponent("character-controller", {
     eventSrc.removeEventListener("rotateY", this.setAngularVelocity);
     eventSrc.removeEventListener("snap_rotate_left", this.snapRotateLeft);
     eventSrc.removeEventListener("snap_rotate_right", this.snapRotateRight);
+    this.reset();
+  },
+
+  reset() {
+    this.accelerationInput.set(0, 0, 0);
+    this.velocity.set(0, 0, 0);
+    this.angularVelocity = 0;
+    this.pendingSnapRotationMatrix.identity();
   },
 
   setAccelerationInput: function(event) {

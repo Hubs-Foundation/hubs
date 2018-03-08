@@ -101,8 +101,10 @@
             spawn-controller="radius: 4;"
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
-            mode-responder-toggle__character-controller="mode: hud; invert: true;"
             ik-root
+
+            mode-responder-toggle__character-controller="mode: hud; invert: true;"
+            mode-responder-toggle__wasd-to-analog2d="mode: hud; invert: true;"
         >
             <a-entity id="player-hud">
                 <a-entity in-world-hud rotation="-39.01000608674482 0 0">
