@@ -1,5 +1,5 @@
 import styles from "./2d-hud.css";
-import avatarImg from "../assets/hud/avatar.png";
+import avatarImg from "../assets/hud/avatar.jpg";
 
 AFRAME.registerComponent("2d-hud", {
   schema: {
