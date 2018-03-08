@@ -24,7 +24,7 @@ AFRAME.registerComponent("2d-mute-state-indicator", {
 
     this.onMicAudio = e => {
       const red = 1.0 - e.detail.volume / 10.0;
-      this.muteIcon.style["background-color"] = `rgb(${red * 255},255,255)`;
+      this.muteIcon.style["background-color"] = `rgb(${red * 255},240,240)`;
     };
   },
 

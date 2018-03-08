@@ -22,7 +22,7 @@ AFRAME.registerComponent("in-world-hud", {
     scene.addEventListener("username-changed", this.onUsernameChanged);
 
     this.onNametagHovered = () => {
-      this.nametag.setAttribute("color", "cyan");
+      this.nametag.setAttribute("color", "#00eeee");
       this.data.haptic.emit("haptic_pulse", { intensity: "low" });
     };
     this.onNametagUnhovered = () => {
@@ -70,7 +70,7 @@ AFRAME.registerComponent("in-world-hud", {
 
     this.onAudioFrequencyChange = e => {
       const red = 1.0 - e.detail.volume / 10.0;
-      this.mic.object3DMap.mesh.material.color = { r: red, g: 1, b: 1 };
+      this.mic.object3DMap.mesh.material.color = { r: red, g: 9, b: 9 };
     };
     this.el.sceneEl.addEventListener("mediaStream", evt => {
       this.ms = evt.detail.ms;
