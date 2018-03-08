@@ -1,4 +1,7 @@
 AFRAME.registerComponent("in-world-hud", {
+  schema: {
+    haptic: { type: "selector" }
+  },
   init() {
     this.bg = this.el.querySelector(".bg");
     this.mic = this.el.querySelector(".mic");
@@ -18,12 +21,14 @@ AFRAME.registerComponent("in-world-hud", {
 
     this.onNametagHovered = () => {
       this.nametag.setAttribute("color", "cyan");
+      this.data.haptic.emit("haptic_pulse", { intensity: "low" });
     };
     this.onNametagUnhovered = () => {
       this.nametag.setAttribute("color", "white");
     };
     this.onAvatarHovered = () => {
       this.avatar.setAttribute("scale", flipXAvatarScale);
+      this.data.haptic.emit("haptic_pulse", { intensity: "low" });
     };
     this.onAvatarUnhovered = () => {
       this.avatar.setAttribute("scale", avatarScale);
@@ -32,6 +37,7 @@ AFRAME.registerComponent("in-world-hud", {
       this.hoveredOnMic = true;
       const muted = scene.is("muted");
       this.mic.setAttribute("src", muted ? "#unmuted" : "#muted");
+      this.data.haptic.emit("haptic_pulse", { intensity: "low" });
     };
 
     this.showCorrectMuteState = () => {
@@ -52,6 +58,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.onSelect = evt => {
       if (this.hoveredOnMic) {
         this.el.emit("action_mute");
+        this.data.haptic.emit("haptic_pulse", { intensity: "low" });
       }
     };
 
