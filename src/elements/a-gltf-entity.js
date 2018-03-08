@@ -1,11 +1,20 @@
 const GLTFCache = {};
 
 AFRAME.AGLTFEntity = {
-  defaultSerializer(el, componentName, componentData) {
-    el.setAttribute(componentName, componentData);
+  defaultDeserializer(el, componentName, componentData) {
+    if (AFRAME.components[componentName].multiple && Array.isArray(componentData)) {
+      for (let i = 0; i < componentData.length; i++) {
+        el.setAttribute(componentName + "__" + i, componentData[i]);
+      }
+    } else {
+      el.setAttribute(componentName, componentData);
+    }
   },
-  registerComponent(componentName, serializer) {
-    AFRAME.AGLTFEntity.components[componentName] = serializer || AFRAME.AGLTFEntity.defaultSerializer;
+  registerComponent(componentKey, componentName, deserializer) {
+    AFRAME.AGLTFEntity.components[componentKey] = {
+      deserializer: deserializer || AFRAME.AGLTFEntity.defaultDeserializer,
+      componentName
+    };
   },
   components: {}
 };
@@ -98,10 +107,10 @@ const inflateEntities = function(classPrefix, parentEl, node) {
   if (entityComponents) {
     for (const prop in entityComponents) {
       if (entityComponents.hasOwnProperty(prop)) {
-        const serializer = AFRAME.AGLTFEntity.components[prop];
+        const { deserializer, componentName } = AFRAME.AGLTFEntity.components[prop];
 
-        if (serializer) {
-          serializer(el, prop, entityComponents[prop]);
+        if (deserializer) {
+          deserializer(el, componentName, entityComponents[prop]);
         }
       }
     }
