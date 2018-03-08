@@ -28,13 +28,15 @@ async function getMediaStream(shareScreen, ...desiredMicRegexes) {
   let mediaStream = null;
   let desiredAudioDeviceIds;
 
-  const mediaStreamHasDesiredMic = () => {
+  const mediaStreamMeetsMicRequirements = () => {
     if (!mediaStream || mediaStream.getAudioTracks().length == 0) return false;
     if (desiredMicRegexes.length == 0) return true;
 
     return !!(desiredMicRegexes.find(r => mediaStream.getAudioTracks()[0].label.match(r)));
   };
 
+  // Keep looping until we have a desired microphone, if desired microphones are specified
+  // and the device has at least one of them listed.
   do {
     if (mediaStream) {
       stopAllTracks(mediaStream);
@@ -52,7 +54,7 @@ async function getMediaStream(shareScreen, ...desiredMicRegexes) {
     };
 
     mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-  } while (!mediaStreamHasDesiredMic() && desiredAudioDeviceIds.length > 0);
+  } while (!mediaStreamMeetsMicRequirements() && desiredAudioDeviceIds.length > 0);
 
   return mediaStream;
 }
@@ -81,6 +83,16 @@ const DaydreamEntryButton = (props) => (
   </button>
 );
 
+// This is a list of regexes that match the microphone labels of HMDs.
+//
+// If entering VR mode, and if any of these regexes match an audio device,
+// the user will be prevented from entering VR until one of those devices is
+// selected as the microphone.
+//
+// Note that this doesn't have to be exhaustive: if no devices match any regex
+// then we rely upon the user to select the proper mic.
+const VR_DEVICE_MIC_LABEL_REGEXES = [];
+
 class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
@@ -89,19 +101,22 @@ class UIRoot extends Component {
 
   state = {
     entryStep: ENTRY_STEPS.start,
-    shareScreen: false
+    shareScreen: false,
+    enterInVR: false
   }
 
   performDirectEntryFlow = async (enterInVR) => {
+    this.setState({ enterInVR })
+
     if (enterInVR) {
       // Have to do this
       document.querySelector("a-scene").enterVR();
     }
 
-    const hasMic = await hasGrantedMicPermissions();
+    const hasGrantedMic = await hasGrantedMicPermissions();
 
-    if (hasMic) {
-      await this.getMediaStreamAndEnterScene();
+    if (hasGrantedMic) {
+      await this.getMediaStreamForMicsAndEnterScene(enterInVR ? VR_DEVICE_MIC_LABEL_REGEXES : []);
     } else {
       this.setState({ entryStep: ENTRY_STEPS.mic_check });
     }
@@ -123,7 +138,7 @@ class UIRoot extends Component {
     console.log("daydream");
   }
 
-  getMediaStreamAndEnterScene = async (...desiredMicRegexes) => {
+  getMediaStreamForMicsAndEnterScene = async (desiredMicRegexes) => {
     const preStreamAcquisitionTime = new Date();
     const mediaStream = await getMediaStream(this.state.shareScreen, ...desiredMicRegexes);
 
@@ -142,7 +157,7 @@ class UIRoot extends Component {
   }
 
   onMicActivateButtonClicked = async () => {
-    await this.getMediaStreamAndEnterScene();
+    await this.getMediaStreamForMicsAndEnterScene(this.state.enterInVR ? VR_DEVICE_MIC_LABEL_REGEXES : []);
   }
 
   componentDidMount = () => {
