@@ -1,5 +1,15 @@
 const GLTFCache = {};
 
+AFRAME.AGLTFEntity = {
+  defaultSerializer(el, componentName, componentData) {
+    el.setAttribute(componentName, componentData);
+  },
+  registerComponent(componentName, serializer) {
+    AFRAME.AGLTFEntity.components[componentName] = serializer || AFRAME.AGLTFEntity.defaultSerializer;
+  },
+  components: {}
+};
+
 // From https://gist.github.com/cdata/f2d7a6ccdec071839bc1954c32595e87
 // Tracking glTF cloning here: https://github.com/mrdoob/three.js/issues/11573
 function cloneGltf(gltf) {
@@ -82,6 +92,20 @@ const inflateEntities = function(classPrefix, parentEl, node) {
   node.scale.set(1, 1, 1);
 
   el.setObject3D(node.type.toLowerCase(), node);
+
+  const entityComponents = node.userData;
+
+  if (entityComponents) {
+    for (const prop in entityComponents) {
+      if (entityComponents.hasOwnProperty(prop)) {
+        const serializer = AFRAME.AGLTFEntity.components[prop];
+
+        if (serializer) {
+          serializer(el, prop, entityComponents[prop]);
+        }
+      }
+    }
+  }
 
   children.forEach(childNode => {
     inflateEntities(classPrefix, el, childNode);

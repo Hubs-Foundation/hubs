@@ -4,6 +4,7 @@ import queryString from "query-string";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
+import "whatwg-fetch";
 import "aframe-xr";
 import "./vendor/GLTFLoader";
 import "networked-aframe";
@@ -38,10 +39,13 @@ import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
+import "./components/rotator";
 
 import "./systems/personal-space-bubble";
 
+import registerComponents from "./aentity-components";
 import "./elements/a-gltf-entity";
+registerComponents();
 
 import { promptForName, getCookie, parseJwt } from "./utils/identity";
 import registerNetworkSchemas from "./network-schemas";
