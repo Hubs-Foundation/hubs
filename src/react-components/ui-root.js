@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect.js";
 
 const ENTRY_STEPS = {
   start: "start",
@@ -18,11 +19,7 @@ async function hasGrantedMicPermissions() {
 }
 
 function stopAllTracks(mediaStream) {
-  for (const track of mediaStream.getAudioTracks()) {
-    track.stop();
-  }
-
-  for (const track of mediaStream.getVideoTracks()) {
+  for (const track of mediaStream.tracks) {
     track.stop();
   }
 }
@@ -60,6 +57,30 @@ async function getMediaStream(shareScreen, ...desiredMicRegexes) {
   return mediaStream;
 }
 
+const TwoDEntryButton = (props) => (
+  <button {...props}>
+    Enter on this Screen
+  </button>
+);
+
+const GenericEntryButton = (props) => (
+  <button {...props}>
+    Enter in VR
+  </button>
+);
+
+const GearVREntryButton = (props) => (
+  <button {...props}>
+    Enter on GearVR
+  </button>
+);
+
+const DaydreamEntryButton = (props) => (
+  <button {...props}>
+    Enter on Daydream
+  </button>
+);
+
 class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
@@ -94,6 +115,14 @@ class UIRoot extends Component {
     await this.performDirectEntryFlow(true);
   }
 
+  enterGearVR = async () => {
+    console.log("gear");
+  }
+
+  enterDaydream = async () => {
+    console.log("daydream");
+  }
+
   getMediaStreamAndEnterScene = async (...desiredMicRegexes) => {
     const preStreamAcquisitionTime = new Date();
     const mediaStream = await getMediaStream(this.state.shareScreen, ...desiredMicRegexes);
@@ -124,12 +153,10 @@ class UIRoot extends Component {
     const entryPanel = this.state.entryStep === ENTRY_STEPS.start 
     ? (
       <div>
-        <button onClick={this.enter2D}>
-          Enter on this Screen
-        </button>
-        <button onClick={this.enterVR}>
-          Enter in VR
-        </button>
+        <TwoDEntryButton onClick={this.enter2D}/>
+        { this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && <GenericEntryButton onClick={this.enterVR}/> }
+        { this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && <GearVREntryButton onClick={this.enterGearVR}/> }
+        { this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && <DaydreamEntryButton onClick={this.enterDaydream}/> }
       </div>
     ) : null;
 
