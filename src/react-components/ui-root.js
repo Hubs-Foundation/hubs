@@ -68,22 +68,18 @@ class UIRoot extends Component {
 
   state = {
     entryStep: ENTRY_STEPS.start,
-    shareScreen: false,
-    enterInVR: false
+    shareScreen: false
   }
 
   performDirectEntryFlow = async (enterInVR) => {
-    this.setState({ enterInVR });
-
     if (enterInVR) {
+      // Have to do this
       document.querySelector("a-scene").enterVR();
     }
 
     const hasMic = await hasGrantedMicPermissions();
 
-    console.log("A");
     if (hasMic) {
-      console.log("B");
       await this.getMediaStreamAndEnterScene();
     } else {
       this.setState({ entryStep: ENTRY_STEPS.mic_check });
