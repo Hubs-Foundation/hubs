@@ -12,9 +12,52 @@ async function grantedMicLabels() {
   return mediaDevices.filter(d => d.label && d.kind === "audioinput").map(d => d.label);
 }
 
-async function hasGrantedMicPermissionsFor2D() {
+async function hasGrantedMicPermissions() {
   const micLabels = await grantedMicLabels();
   return micLabels.length > 0;
+}
+
+function stopAllTracks(mediaStream) {
+  for (const track of mediaStream.getAudioTracks()) {
+    track.stop();
+  }
+
+  for (const track of mediaStream.getVideoTracks()) {
+    track.stop();
+  }
+}
+
+async function getMediaStream(shareScreen, ...desiredMicRegexes) {
+  let mediaStream = null;
+  let desiredAudioDeviceIds;
+
+  const mediaStreamHasDesiredMic = () => {
+    if (!mediaStream || mediaStream.getAudioTracks().length == 0) return false;
+    if (desiredMicRegexes.length == 0) return true;
+
+    return !!(desiredMicRegexes.find(r => mediaStream.getAudioTracks()[0].label.match(r)));
+  };
+
+  do {
+    if (mediaStream) {
+      stopAllTracks(mediaStream);
+    }
+
+    const mediaDevices = await navigator.mediaDevices.enumerateDevices();
+
+    desiredAudioDeviceIds = mediaDevices.filter(d => {
+      return desiredMicRegexes.find(r => d.label.match(r)) && d.kind === "audioinput";
+    }).map(d => d.deviceId);
+
+    const constraints = {
+      audio: desiredAudioDeviceIds.length > 0 ? { deviceId: { exact: desiredAudioDeviceIds } } : true,
+      video: shareScreen ? { mediaSource: "screen", height: 720, frameRate: 30 } : false
+    };
+
+    mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+  } while (!mediaStreamHasDesiredMic() && desiredAudioDeviceIds.length > 0);
+
+  return mediaStream;
 }
 
 class UIRoot extends Component {
@@ -29,41 +72,52 @@ class UIRoot extends Component {
     enterInVR: false
   }
 
-  promptForMedia = async () => {
-    console.log("HI");
-    const constraints = {
-      audio: true,
-      video: this.state.shareScreen ? { mediaSource: "screen", height: 720, frameRate: 30 } : false
-    };
+  performDirectEntryFlow = async (enterInVR) => {
+    this.setState({ enterInVR });
 
-    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-    const audioTracks = mediaStream.getAudioTracks();
-    console.log(audioTracks);
+    if (enterInVR) {
+      document.querySelector("a-scene").enterVR();
+    }
 
-    if (audioTracks.length > 0) {
-      const selectedMic = audioTracks[0].label;
-      console.log("Mic: " + selectedMic);
-      // TODO if VR mode is desired here, look at the VR displays to see if we have the right mic
-      // TODO: this.props.enterScene(mediaStream);
-      this.setState({ entryStep: ENTRY_STEPS.finished });
+    const hasMic = await hasGrantedMicPermissions();
+
+    console.log("A");
+    if (hasMic) {
+      console.log("B");
+      await this.getMediaStreamAndEnterScene();
     } else {
-      // TODO mic not granted
+      this.setState({ entryStep: ENTRY_STEPS.mic_check });
     }
   }
 
   enter2D = async () => {
-    const hasMic = await hasGrantedMicPermissionsFor2D();
-
-    if (hasMic) {
-      await this.promptForMedia();
-      this.setState({ entryStep: ENTRY_STEPS.finished, enter_in_vr: false });
-    } else {
-      this.setState({ entryStep: ENTRY_STEPS.mic_check, enter_in_vr: false });
-    }
+    await this.performDirectEntryFlow(false);
   }
 
-  enterVR = () => {
-    this.setState({ entryStep: ENTRY_STEPS.mic_check, enter_in_vr: true });
+  enterVR = async () => {
+    await this.performDirectEntryFlow(true);
+  }
+
+  getMediaStreamAndEnterScene = async (...desiredMicRegexes) => {
+    const preStreamAcquisitionTime = new Date();
+    const mediaStream = await getMediaStream(this.state.shareScreen, ...desiredMicRegexes);
+
+    if (mediaStream) {
+      if (mediaStream.getAudioTracks().length > 0) {
+        console.log(`Using microphone: ${mediaStream.getAudioTracks()[0].label}`)
+      }
+
+      if (mediaStream.getVideoTracks().length > 0) {
+        console.log('Screen sharing enabled.')
+      }
+    }
+
+    this.setState({ entryStep: ENTRY_STEPS.finished });
+    this.props.enterScene(mediaStream);
+  }
+
+  onMicActivateButtonClicked = async () => {
+    await this.getMediaStreamAndEnterScene();
   }
 
   componentDidMount = () => {
@@ -86,7 +140,7 @@ class UIRoot extends Component {
     const micPanel = this.state.entryStep === ENTRY_STEPS.mic_check
     ? (
         <div>
-          <button onClick={this.promptForMedia}>
+          <button onClick={this.onMicActivateButtonClicked}>
             Choose Mic
           </button>
         </div>
