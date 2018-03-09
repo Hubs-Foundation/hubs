@@ -142,9 +142,17 @@ class UIRoot extends Component {
       setTimeout(() => this.setState({ tonePlaying: false }), 2000);
     };
 
-    playTone();
-    const toneInterval = setInterval(playTone, 5000);
-    this.setState({ toneInterval, entryStep: ENTRY_STEPS.audio_setup });
+    // Delay initial tone slightly so we don't always hear it.
+    setTimeout(() => {
+      if (this.state.entryStep === ENTRY_STEPS.audio_setup) {
+        playTone();
+
+        const toneInterval = setInterval(playTone, 5000);
+        this.setState({ toneInterval });
+      }
+    }, 2500);
+
+    this.setState({ entryStep: ENTRY_STEPS.audio_setup });
   }
 
   fetchMicDevices = async () => {
