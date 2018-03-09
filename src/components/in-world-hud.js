@@ -96,7 +96,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.el.sceneEl.addEventListener("stateremoved", this.onStateChange);
 
     this.el.sceneEl.addEventListener("action_select_hud_item", this.onSelect);
-    document.addEventListener("click", this.onClick);
+    this.el.addEventListener("click", this.onClick);
 
     this.el.sceneEl.addEventListener("micAudio", this.onAudioFrequencyChange);
   },
@@ -115,7 +115,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.el.sceneEl.removeEventListener("stateremoved", this.onStateChange);
 
     this.el.sceneEl.removeEventListener("action_select_hud_item", this.onSelect);
-    document.removeEventListener("click", this.onClick);
+    this.el.removeEventListener("click", this.onClick);
 
     this.el.sceneEl.removeEventListener("micAudio", this.onAudioFrequencyChange);
   },
