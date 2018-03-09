@@ -75,6 +75,7 @@ class UIRoot extends Component {
     enterInVR: false,
     micDevices: [],
     mediaStream: null,
+    toneInterval: null
   }
 
   performDirectEntryFlow = async (enterInVR) => {
@@ -133,7 +134,10 @@ class UIRoot extends Component {
 
   beginAudioSetup = async () => {
     await this.fetchMicDevices();
-    this.setState({ entryStep: ENTRY_STEPS.audio_setup });
+    const playTone = () => document.querySelector("#test-tone").play();
+    playTone();
+    const toneInterval = setInterval(playTone, 5000);
+    this.setState({ toneInterval, entryStep: ENTRY_STEPS.audio_setup });
   }
 
   fetchMicDevices = async () => {
@@ -159,6 +163,7 @@ class UIRoot extends Component {
     }
 
     this.props.enterScene(mediaStream);
+    clearInterval(this.state.toneInterval);
     this.setState({ entryStep: ENTRY_STEPS.finished });
   }
 
