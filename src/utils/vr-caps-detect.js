@@ -78,7 +78,7 @@ export async function getAvailableVREntryTypes() {
 
     // Generic is supported for non-blacklisted devices and presentable HMDs.
     generic = displays.find(
-      d => d.capabilities.canPresent && !GENERIC_ENTRY_TYPE_DEVICE_BLACKLIST.find(r => d.match(r))
+      d => d.capabilities.canPresent && !GENERIC_ENTRY_TYPE_DEVICE_BLACKLIST.find(r => d.displayName.match(r))
     )
       ? VR_DEVICE_AVAILABILITY.yes
       : VR_DEVICE_AVAILABILITY.no;
