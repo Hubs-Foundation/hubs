@@ -75,7 +75,8 @@ class UIRoot extends Component {
     enterInVR: false,
     micDevices: [],
     mediaStream: null,
-    toneInterval: null
+    toneInterval: null,
+    tonePlaying: false
   }
 
   performDirectEntryFlow = async (enterInVR) => {
@@ -134,7 +135,13 @@ class UIRoot extends Component {
 
   beginAudioSetup = async () => {
     await this.fetchMicDevices();
-    const playTone = () => document.querySelector("#test-tone").play();
+
+    const playTone = () => {
+      document.querySelector("#test-tone").play();
+      this.setState({ tonePlaying: true });
+      setTimeout(() => this.setState({ tonePlaying: false }), 2000);
+    };
+
     playTone();
     const toneInterval = setInterval(playTone, 5000);
     this.setState({ toneInterval, entryStep: ENTRY_STEPS.audio_setup });
@@ -204,6 +211,7 @@ class UIRoot extends Component {
           <select value={selectedMicDeviceId} onChange={this.micDeviceChanged}>
             { this.state.micDevices.map(d => (<option key={ d.deviceId } value={ d.deviceId }>{d.label}</option>)) }
           </select>
+          { this.state.tonePlaying && (<div>Tone</div>) }
           <button onClick={this.onAudioReadyButton}>
             Audio Ready
           </button>
