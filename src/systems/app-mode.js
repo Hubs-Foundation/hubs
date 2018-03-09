@@ -22,7 +22,7 @@ AFRAME.registerSystem("app-mode", {
 /**
  * Toggle the isPlaying state of a component based on app mode
  */
-AFRAME.registerComponent("mode-responder-toggle", {
+AFRAME.registerComponent("app-mode-toggle-playing", {
   multiple: true,
   schema: {
     mode: { type: "string" },
@@ -46,7 +46,7 @@ AFRAME.registerComponent("mode-responder-toggle", {
 /**
  * Toggle a boolean property of a component based on app mode
  */
-AFRAME.registerComponent("mode-responder-property-toggle", {
+AFRAME.registerComponent("app-mode-toggle-property", {
   multiple: true,
   schema: {
     mode: { type: "string" },
@@ -71,7 +71,7 @@ AFRAME.registerComponent("mode-responder-property-toggle", {
 /**
  * Toggle aframe input mappings action set based on app mode
  */
-AFRAME.registerComponent("mode-responder-input-mappings", {
+AFRAME.registerComponent("app-mode-input-mappings", {
   schema: {
     modes: { default: [] },
     actionSets: { default: [] }
@@ -103,6 +103,12 @@ AFRAME.registerComponent("hud-detector", {
   init() {
     this.isYLocked = false;
     this.lockedHeadPositionY = 0;
+  },
+
+  pause() {
+    // TODO: this assumes full control over current app mode reguardless of what else might be manipulating it, this is obviously wrong
+    const AppModeSystem = this.el.sceneEl.systems["app-mode"];
+    AppModeSystem.setMode(AppModes.DEFAULT);
   },
 
   tick() {
@@ -149,5 +155,65 @@ AFRAME.registerComponent("hud-detector", {
       AppModeSystem.setMode(AppModes.DEFAULT);
       this.el.sceneEl.renderer.sortObjects = false;
     }
+  }
+});
+
+/**
+ * Toggle visibility of an entity based on if the user is in vr mode or not
+ */
+AFRAME.registerComponent("vr-mode-toggle-visibility", {
+  schema: {
+    invert: { type: "boolean", default: false }
+  },
+
+  init() {
+    this.updateComponentState = this.updateComponentState.bind(this);
+    this.updateComponentState();
+  },
+
+  play() {
+    this.el.sceneEl.addEventListener("enter-vr", this.updateComponentState);
+    this.el.sceneEl.addEventListener("exit-vr", this.updateComponentState);
+  },
+
+  pause() {
+    this.el.sceneEl.removeEventListener("enter-vr", this.updateComponentState);
+    this.el.sceneEl.removeEventListener("exit-vr", this.updateComponentState);
+  },
+
+  updateComponentState(i) {
+    const inVRMode = this.el.sceneEl.is("vr-mode");
+    this.el.setAttribute("visible", inVRMode !== this.data.invert);
+  }
+});
+
+/**
+ * Toggle the isPlaying state of a component based on app mode
+ */
+AFRAME.registerComponent("vr-mode-toggle-playing", {
+  multiple: true,
+  schema: {
+    invert: { type: "boolean", default: false }
+  },
+
+  init() {
+    this.updateComponentState = this.updateComponentState.bind(this);
+    this.updateComponentState();
+  },
+
+  play() {
+    this.el.sceneEl.addEventListener("enter-vr", this.updateComponentState);
+    this.el.sceneEl.addEventListener("exit-vr", this.updateComponentState);
+  },
+
+  pause() {
+    this.el.sceneEl.removeEventListener("enter-vr", this.updateComponentState);
+    this.el.sceneEl.removeEventListener("exit-vr", this.updateComponentState);
+  },
+
+  updateComponentState(i) {
+    const componentName = this.id;
+    const inVRMode = this.el.sceneEl.is("vr-mode");
+    this.el.components[componentName][inVRMode !== this.data.invert ? "play" : "pause"]();
   }
 });

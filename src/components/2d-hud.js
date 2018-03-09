@@ -7,54 +7,67 @@ AFRAME.registerComponent("2d-hud", {
   },
 
   init() {
-    this.mic = document.querySelector(this.data.mic);
-
-    this.nametag = document.createElement("div");
-    this.nametag.classList.add(styles.nametagShown);
-
-    this.avatar = document.createElement("img");
-    this.avatar.src = avatarImg;
-    this.avatar.classList.add(styles.avatarImageShown);
-
-    this.bg = document.createElement("div");
-    this.bg.classList.add(styles.bgShown);
-    this.horizontalRegion = document.createElement("div");
-    this.horizontalRegion.classList.add(styles.horizontalRegion);
-
-    const scene = document.querySelector("a-scene");
-
-    document.body.appendChild(this.horizontalRegion);
-    this.horizontalRegion.appendChild(this.bg);
-    this.bg.appendChild(this.mic);
-    this.bg.appendChild(this.nametag);
-    this.bg.appendChild(this.avatar);
-
     this.onUsernameChanged = this.onUsernameChanged.bind(this);
-    scene.addEventListener("username-changed", this.onUsernameChanged);
+    this.onStateToggled = this.onStateToggled.bind(this);
+    this.onMicClick = this.onMicClick.bind(this);
+    this.onMicAudio = this.onMicAudio.bind(this);
 
-    this.addBlue = () => this.nametag.classList.add(styles.blueText);
-    this.removeBlue = () => this.nametag.classList.remove(styles.blueText);
-    this.addFlipX = () => this.avatar.classList.add(styles.flipX);
-    this.removeFlipX = () => this.avatar.classList.remove(styles.flipX);
+    this.containerEl = document.createElement("div");
+    this.containerEl.classList.add(styles.container);
+    this.containerEl.innerHTML = `
+      <div class="${styles.bg}">
+        <div class="${styles.mic}"></div>
+        <div class="${styles.nametag}"></div>
+        <div class="${styles.avatar}"></div>
+      </div>
+    `;
+
+    this.nametagEl = this.containerEl.querySelector(`.${styles.nametag}`);
+    this.micEl = this.containerEl.querySelector(`.${styles.mic}`);
+
+    document.body.appendChild(this.containerEl);
   },
 
   play() {
-    this.nametag.addEventListener("mouseover", this.addBlue);
-    this.nametag.addEventListener("mouseout", this.removeBlue);
-
-    this.avatar.addEventListener("mouseover", this.addFlipX);
-    this.avatar.addEventListener("mouseout", this.removeFlipX);
+    this.el.sceneEl.addEventListener("username-changed", this.onUsernameChanged);
+    this.el.sceneEl.addEventListener("stateadded", this.onStateToggled);
+    this.el.sceneEl.addEventListener("stateremoved", this.onStateToggled);
+    this.el.sceneEl.addEventListener("micAudio", this.onMicAudio);
+    this.micEl.addEventListener("click", this.onMicClick);
   },
 
   pause() {
-    this.nametag.removeEventListener("mouseover", this.addBlue);
-    this.nametag.removeEventListener("mouseout", this.removeBlue);
+    this.el.sceneEl.removeEventListener("username-changed", this.onUsernameChanged);
+    this.el.sceneEl.removeEventListener("stateadded", this.onStateToggled);
+    this.el.sceneEl.removeEventListener("stateremoved", this.onStateToggled);
+    this.el.sceneEl.removeEventListener("micAudio", this.onMicAudio);
+    this.micEl.removeEventListener("click", this.onMicClick);
+  },
 
-    this.avatar.removeEventListener("mouseover", this.addFlipX);
-    this.avatar.removeEventListener("mouseout", this.removeFlipX);
+  remove() {
+    this.conntainerEl.parentNode.removeChild(this.containerEl);
   },
 
   onUsernameChanged(evt) {
-    this.nametag.innerHTML = evt.detail.username;
+    this.nametagEl.innerHTML = evt.detail.username;
+  },
+
+  onMicClick() {
+    this.el.emit("action_mute");
+  },
+
+  onMicAudio(e) {
+    const red = 1.0 - e.detail.volume / 10.0;
+    this.micEl.style["background-color"] = `rgb(${red * 255},240,240)`;
+  },
+
+  onStateToggled(e) {
+    if (e.detail !== "muted") return;
+    this.updateMuteState();
+  },
+
+  updateMuteState() {
+    const muted = this.el.sceneEl.is("muted");
+    this.micEl.classList.toggle(styles.muted, muted);
   }
 });
