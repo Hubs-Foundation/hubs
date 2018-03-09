@@ -20,16 +20,6 @@ async function hasGrantedMicPermissions() {
   return micLabels.length > 0;
 }
 
-function stopAllTracks(mediaStream) {
-  for (const track of mediaStream.getAudioTracks()) {
-    track.stop();
-  }
-
-  for (const track of mediaStream.getVideoTracks()) {
-    track.stop();
-  }
-}
-
 const TwoDEntryButton = (props) => (
   <button {...props}>
     Enter on this Screen
@@ -77,11 +67,12 @@ class UIRoot extends Component {
     micDevices: [],
     mediaStream: null,
     toneInterval: null,
-    tonePlaying: false
+    tonePlaying: false,
+    micLevel: 0,
+    micUpdateInterval: null
   }
 
   componentDidMount() {
-    console.log("HI");
     this.setupTestTone();
   }
 
@@ -105,6 +96,7 @@ class UIRoot extends Component {
 
   startTestTone = () => {
     const toneClip = document.querySelector("#test-tone");
+    toneClip.loop = true;
     toneClip.play();
   }
 
@@ -154,18 +146,49 @@ class UIRoot extends Component {
 
   micDeviceChanged = async (ev) => {
     const constraints = { audio: { deviceId: { exact: [ev.target.value] } }, video: this.mediaVideoConstraint() };
-    if (this.state.mediaStream) {
-      stopAllTracks(this.state.mediaStream);
-    }
-
-    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-    this.setState({ mediaStream });
+    this.setupNewMediaStream(await navigator.mediaDevices.getUserMedia(constraints));
   }
 
   setMediaStreamToDefault = async () => {
     const constraints = { audio: true, video: this.mediaVideoConstraint() };
-    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-    this.setState({ mediaStream });
+    this.setupNewMediaStream(await navigator.mediaDevices.getUserMedia(constraints));
+  }
+
+  setupNewMediaStream = (mediaStream) => {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioContext = new AudioContext();
+
+    if (this.state.mediaStream) {
+      clearInterval(this.state.micUpdateInterval);
+
+      const previousStream = this.state.mediaStream;
+
+      for (const tracks of [previousStream.getAudioTracks(), previousStream.getVideoTracks()]) {
+        for (const track of tracks) {
+          track.stop();
+        }
+      }
+    }
+
+    const source = audioContext.createMediaStreamSource(mediaStream);
+    const analyzer = audioContext.createAnalyser();
+    const levels = new Uint8Array(analyzer.fftSize);
+
+    source.connect(analyzer);
+
+    const micUpdateInterval = setInterval(() => {
+      analyzer.getByteTimeDomainData(levels);
+
+      let v = 0;
+
+      for (let x = 0; x < levels.length; x++) {
+        v = Math.max(levels[x] - 127, v);
+      }
+
+      this.setState({ micLevel: v / 128.0 })
+    }, 50);
+
+    this.setState({ mediaStream, micUpdateInterval });
   }
 
   onMicGrantButton = async () => {
@@ -244,6 +267,7 @@ class UIRoot extends Component {
             { this.state.micDevices.map(d => (<option key={ d.deviceId } value={ d.deviceId }>{d.label}</option>)) }
           </select>
           { this.state.tonePlaying && (<div>Tone</div>) }
+          { this.state.micLevel }
           <button onClick={this.onAudioReadyButton}>
             Audio Ready
           </button>
