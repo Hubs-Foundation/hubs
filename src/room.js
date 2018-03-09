@@ -43,6 +43,18 @@ import "./systems/personal-space-bubble";
 
 import "./elements/a-gltf-entity";
 
+const qs = queryString.parse(location.search);
+const isMobile = AFRAME.utils.device.isMobile();
+
+if (qs.quality) {
+  console.log(qs.quality);
+  AFRAME.quality = qs.quality;
+} else {
+  AFRAME.quality = isMobile ? "low" : "high";
+}
+
+import "./elements/a-progressive-asset";
+
 import { promptForName, getCookie, parseJwt } from "./utils/identity";
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config } from "./input-mappings";
@@ -85,7 +97,6 @@ async function shareMedia(audio, video) {
 }
 
 async function onSceneLoad() {
-  const qs = queryString.parse(location.search);
   const scene = document.querySelector("a-scene");
 
   scene.setAttribute("networked-scene", {
@@ -97,7 +108,7 @@ async function onSceneLoad() {
     scene.setAttribute("stats", true);
   }
 
-  if (AFRAME.utils.device.isMobile() || qs.gamepad) {
+  if (isMobile || qs.mobile) {
     const playerRig = document.querySelector("#player-rig");
     playerRig.setAttribute("virtual-gamepad-controls", {});
   }
