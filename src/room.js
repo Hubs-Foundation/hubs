@@ -47,7 +47,6 @@ const qs = queryString.parse(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 
 if (qs.quality) {
-  console.log(qs.quality);
   AFRAME.quality = qs.quality;
 } else {
   AFRAME.quality = isMobile ? "low" : "high";
