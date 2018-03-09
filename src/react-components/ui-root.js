@@ -5,6 +5,7 @@ import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect.js";
 const ENTRY_STEPS = {
   start: "start",
   mic_grant: "mic_grant",
+  mic_granted: "mic_granted",
   audio_setup: "audio_setup",
   finished: "finished"
 }
@@ -79,7 +80,45 @@ class UIRoot extends Component {
     tonePlaying: false
   }
 
+  componentDidMount() {
+    console.log("HI");
+    this.setupTestTone();
+  }
+
+  setupTestTone = () => { 
+    const toneClip = document.querySelector("#test-tone");
+    const toneLength = 1800;
+    const toneDelay = 5000;
+
+    const toneIndicatorLoop = () => {
+      this.setState({ tonePlaying: false });
+
+      setTimeout(() => {
+        this.setState({ tonePlaying: true });
+        setTimeout(() => { this.setState({ tonePlaying: false }); }, toneLength)
+      }, toneDelay);
+    };
+
+    toneClip.addEventListener("seeked", toneIndicatorLoop);
+    toneClip.addEventListener("playing", toneIndicatorLoop);
+  }
+
+  startTestTone = () => {
+    const toneClip = document.querySelector("#test-tone");
+    toneClip.play();
+  }
+
+  stopTestTone = () => {
+    const toneClip = document.querySelector("#test-tone")
+    toneClip.pause();
+    toneClip.currentTime = 0;
+
+    this.setState({ tonePlaying: false })
+  }
+
   performDirectEntryFlow = async (enterInVR) => {
+    this.startTestTone();
+
     this.setState({ enterInVR })
 
     const hasGrantedMic = await hasGrantedMicPermissions();
@@ -88,6 +127,7 @@ class UIRoot extends Component {
       await this.setMediaStreamToDefault();
       await this.beginAudioSetup();
     } else {
+      this.stopTestTone();
       this.setState({ entryStep: ENTRY_STEPS.mic_grant });
     }
   }
@@ -129,29 +169,17 @@ class UIRoot extends Component {
   }
 
   onMicGrantButton = async () => {
-    await this.setMediaStreamToDefault();
-    await this.beginAudioSetup();
+    if (this.state.entryStep == ENTRY_STEPS.mic_grant) {
+      await this.setMediaStreamToDefault();
+      this.setState({ entryStep: ENTRY_STEPS.mic_granted });
+    } else {
+      this.startTestTone();
+      await this.beginAudioSetup();
+    }
   }
 
   beginAudioSetup = async () => {
     await this.fetchMicDevices();
-
-    const playTone = () => {
-      document.querySelector("#test-tone").play();
-      this.setState({ tonePlaying: true });
-      setTimeout(() => this.setState({ tonePlaying: false }), 2000);
-    };
-
-    // Delay initial tone slightly so we don't always hear it.
-    setTimeout(() => {
-      if (this.state.entryStep === ENTRY_STEPS.audio_setup) {
-        playTone();
-
-        const toneInterval = setInterval(playTone, 5000);
-        this.setState({ toneInterval });
-      }
-    }, 2500);
-
     this.setState({ entryStep: ENTRY_STEPS.audio_setup });
   }
 
@@ -178,12 +206,8 @@ class UIRoot extends Component {
     }
 
     this.props.enterScene(mediaStream);
-    clearInterval(this.state.toneInterval);
+    this.stopTestTone();
     this.setState({ entryStep: ENTRY_STEPS.finished });
-  }
-
-  componentDidMount = () => {
-    console.log(this.props.availableVREntryTypes);
   }
 
   render() {
@@ -197,11 +221,11 @@ class UIRoot extends Component {
       </div>
     ) : null;
 
-    const micPanel = this.state.entryStep === ENTRY_STEPS.mic_grant
+    const micPanel = this.state.entryStep === ENTRY_STEPS.mic_grant || this.state.entryStep == ENTRY_STEPS.mic_granted
     ? (
         <div>
           <button onClick={this.onMicGrantButton}>
-            Grant Mic
+            { this.state.entryStep == ENTRY_STEPS.mic_grant ? "Grant Mic" : "Next" }
           </button>
         </div>
       ) : null;
