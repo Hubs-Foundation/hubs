@@ -1,3 +1,4 @@
+import "./room.css";
 import queryString from "query-string";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
@@ -9,9 +10,7 @@ import "networked-aframe";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
 import "aframe-input-mapping-component";
-import "aframe-physics-system";
-import "aframe-physics-extras";
-import "super-hands";
+import "aframe-billboard-component";
 import "webrtc-adapter";
 
 import animationMixer from "aframe-extras/src/loaders/animation-mixer";
@@ -22,30 +21,35 @@ import { oculus_touch_joystick_dpad4 } from "./behaviours/oculus-touch-joystick-
 import { PressedMove } from "./activators/pressedmove";
 import { ReverseY } from "./activators/reversey";
 import "./activators/shortpress";
-import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
 
+import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
 import "./components/mute-mic";
 import "./components/audio-feedback";
-import "./components/nametag-transform";
 import "./components/bone-mute-state-indicator";
 import "./components/2d-mute-state-indicator";
 import "./components/virtual-gamepad-controls";
-import "./components/body-controller";
+import "./components/ik-controller";
 import "./components/hand-controls2";
 import "./components/character-controller";
 import "./components/haptic-feedback";
 import "./components/networked-video-player";
 import "./components/offset-relative-to";
-import "./components/cached-gltf-model";
 import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
+
+import "./systems/personal-space-bubble";
+
+import "./elements/a-gltf-entity";
+
+import "aframe-physics-system";
+import "aframe-physics-extras";
+import "super-hands";
 import "./components/remote-dynamic-body";
 import "./components/networked-counter";
 import "./components/super-spawner";
 import "./components/cursor-hand";
-import "./systems/personal-space-bubble";
 
 import { promptForName, getCookie, parseJwt } from "./utils/identity";
 import registerNetworkSchemas from "./network-schemas";
@@ -88,78 +92,83 @@ async function shareMedia(audio, video) {
   }
 }
 
-function spawnNetworkedCube(e) {
-  const sceneEl = document.querySelector("a-scene");
-  const entity = document.createElement("a-entity");
-  entity.setAttribute("body", "mass: 1;");
-  entity.setAttribute("grabbable", "");
-  entity.setAttribute("stretchable", "");
-  if (e.target && e.target != sceneEl) {
-    entity.setAttribute("position", e.target.object3D.getWorldPosition());
-  } else {
-    entity.setAttribute("position", "0 3 0");
+async function onSceneLoad() {
+  const qs = queryString.parse(location.search);
+  const scene = document.querySelector("a-scene");
+
+  scene.setAttribute("networked-scene", {
+    room: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1,
+    serverURL: process.env.JANUS_SERVER
+  });
+
+  if (!qs.stats || !/off|false|0/.test(qs.stats)) {
+    scene.setAttribute("stats", true);
   }
-  entity.setAttribute("networked", "template: #physics-cube;");
-  sceneEl.appendChild(entity);
+
+  if (AFRAME.utils.device.isMobile() || qs.gamepad) {
+    const playerRig = document.querySelector("#player-rig");
+    playerRig.setAttribute("virtual-gamepad-controls", {});
+  }
+
+  let username;
+  const jwt = getCookie("jwt");
+  if (jwt) {
+    //grab name from jwt
+    const data = parseJwt(jwt);
+    username = data.typ.name;
+  }
+
+  if (qs.name) {
+    username = qs.name; //always override with name from querystring if available
+  } else {
+    username = promptForName(username); // promptForName is blocking
+  }
+
+  const myNametag = document.querySelector("#player-rig .nametag");
+  myNametag.setAttribute("text", "value", username);
+
+  const avatarScale = parseInt(qs.avatarScale, 10);
+
+  if (avatarScale) {
+    playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
+  }
+
+  let sharingScreen = false;
+  scene.addEventListener("action_share_screen", () => {
+    sharingScreen = !sharingScreen;
+    shareMedia(true, sharingScreen);
+  });
+
+  if (qs.offline) {
+    onConnect();
+  } else {
+    document.body.addEventListener("connected", onConnect);
+
+    scene.components["networked-scene"].connect();
+
+    await shareMedia(true, sharingScreen);
+  }
+
+  scene.addEventListener("action_spawn_cube", (e) => {
+    const sceneEl = document.querySelector("a-scene");
+    const entity = document.createElement("a-entity");
+    entity.setAttribute("body", "mass: 1;");
+    entity.setAttribute("grabbable", "");
+    entity.setAttribute("stretchable", "");
+    if (e.target && e.target != sceneEl) {
+      entity.setAttribute("position", e.target.object3D.getWorldPosition());
+    } else {
+      entity.setAttribute("position", "0 3 0");
+    }
+    entity.setAttribute("networked", "template: #physics-cube;");
+    sceneEl.appendChild(entity);
+  });
 }
 
-window.App = {
+function onConnect() {
+  document.getElementById("loader").style.display = "none";
+}
 
-  async onSceneLoad() {
-    const qs = queryString.parse(location.search);
-    const scene = document.querySelector("a-scene");
-
-    scene.setAttribute("networked-scene", {
-      room: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : window.CONFIG.default_room,
-      serverURL: window.CONFIG.janus_server_url
-    });
-
-    if (!qs.stats || !/off|false|0/.test(qs.stats)) {
-      scene.setAttribute("stats", true);
-    }
-
-    if (AFRAME.utils.device.isMobile() || qs.gamepad) {
-      const playerRig = document.querySelector("#player-rig");
-      playerRig.setAttribute("virtual-gamepad-controls", {});
-    }
-
-    let username;
-    const jwt = getCookie("jwt");
-    if (jwt) {
-      //grab name from jwt
-      const data = parseJwt(jwt);
-      username = data.typ.name;
-    }
-
-    if (qs.name) {
-      username = qs.name; //always override with name from querystring if available
-    } else {
-      username = promptForName(username); // promptForName is blocking
-    }
-
-    const myNametag = document.querySelector("#player-rig .nametag");
-    myNametag.setAttribute("text", "value", username);
-
-    var sharingScreen = false;
-    scene.addEventListener("action_share_screen", () => {
-      sharingScreen = !sharingScreen;
-      shareMedia(true, sharingScreen);
-    });
-
-    scene.addEventListener("action_spawn_cube", spawnNetworkedCube);
-
-    if (qs.offline) {
-      App.onConnect();
-    } else {
-      document.body.addEventListener("connected", App.onConnect);
-
-      scene.components["networked-scene"].connect();
-
-      await shareMedia(true, sharingScreen);
-    }
-  },
-
-  onConnect() {
-    document.getElementById("loader").style.display = "none";
-  }
-};
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelector("a-scene").addEventListener("loaded", onSceneLoad);
+});

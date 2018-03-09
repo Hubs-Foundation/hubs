@@ -27,7 +27,7 @@ AFRAME.registerComponent("networked-counter", {
       return;
     }
 
-    const id = this._getNetworkId(networkedEl);
+    const id = NAF.utils.getNetworkId(networkedEl);
     if (this.queue.hasOwnProperty(id)) {
       return;
     }
@@ -55,7 +55,7 @@ AFRAME.registerComponent("networked-counter", {
   },
 
   deregister: function(networkedEl) {
-    const id = this._getNetworkId(networkedEl);
+    const id = NAF.utils.getNetworkId(networkedEl);
     if (this.queue.hasOwnProperty(id)) {
       const item = this.queue[id];
       networkedEl.removeEventListener("grab-start", item.onGrabHandler);
@@ -120,9 +120,5 @@ AFRAME.registerComponent("networked-counter", {
 
   _destroy: function(networkedEl) {
     networkedEl.parentNode.removeChild(networkedEl);
-  },
-
-  _getNetworkId: function(networkedEl) {
-    return networkedEl.components.networked.data.networkId;
   }
 });

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Mozilla Mixed Reality Social Client</title>
+
+    <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="<%= ORIGIN_TRIAL_EXPIRES %>" content="<%= ORIGIN_TRIAL_TOKEN %>">
+    <% if(NODE_ENV === "production") { %>
+        <script src="https://cdn.rawgit.com/brianpeiris/aframe/bba200440e3279753df85a1f52ba4c77a3b16e47/dist/aframe-master.min.js"></script>
+    <% } else { %>
+        <script src="https://cdn.rawgit.com/brianpeiris/aframe/bba200440e3279753df85a1f52ba4c77a3b16e47/dist/aframe-master.js"></script>
+    <% } %>
+</head>
+
+<body>
+    <div id="loader"></div>
+    <a-scene
+        physics
+        networked-scene="adapter: janus;
+                         audio: true;
+                         debug: true;
+                         onConnect: App.onConnect;
+                         connectOnLoad: false;"
+        mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
+        2d-mute-state-indicator
+        light="defaultLightsEnabled: false">
+
+        <a-assets>
+            <a-asset-item id="bot-skinned-mesh" response-type="arraybuffer" src="./assets/avatars/Bot_SkinnedWithAnim.glb"></a-asset-item>
+            <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
+
+            <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src="./assets/environments/MeetingSpace1_mesh.glb"></a-asset-item>
+            <a-asset-item id="outdoor-facade-mesh" response-type="arraybuffer" src="./assets/environments/OutdoorFacade_mesh.glb"></a-asset-item>
+            <a-asset-item id="floor-nav-mesh" response-type="arraybuffer" src="./assets/environments/FloorNav_mesh.glb"></a-asset-item>
+            <a-asset-item id="cliff-vista-mesh" response-type="arraybuffer" src="./assets/environments/CliffVista_mesh.glb"></a-asset-item>
+
+            <img id="water-normal-map" src="./assets/waternormals.jpg"></a-asset-item>
+
+            <!-- Templates -->
+
+            <template id="video-template">
+                <a-entity class="video" geometry="primitive: plane;" material="side: double" networked-video-player></a-entity>
+            </template>
+
+            <template id="remote-avatar-template">                
+                <a-entity ik-root>
+                    <a-entity class="camera"></a-entity>
+                    
+                    <a-entity class="left-controller"></a-entity>
+
+                    <a-entity class="right-controller"></a-entity>
+
+                    <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller >
+                        <template data-selector=".Neck">
+                             <a-entity>
+                                 <a-entity
+                                    class="nametag"
+                                    billboard
+                                    text="side: double; align: center; color: #ddd"
+                                    position="0 1 0"
+                                    scale="6 6 6"
+                                ></a-entity>
+                             </a-entity>
+                        </template>
+                        
+                        <template data-selector=".Head">
+                            <a-entity
+                                networked-audio-source
+                                networked-audio-analyser
+                                scale-audio-feedback
+                                personal-space-invader
+                                animation-mixer
+                            >
+                            </a-entity>
+                        </template>
+
+                        <template selector=".LeftHand">
+                            <a-entity personal-space-invader ></a-entity>
+                        </template>
+
+                        <template data-selector=".RightHand">
+                            <a-entity personal-space-invader ></a-entity>
+                        </template>
+                    </a-gltf-entity>
+                </a-entity>
+            </template>
+
+            <template id="interactable-template">
+                <a-entity
+                    geometry="primitive: box"
+                    class="collidable" 
+                    remote-dynamic-body="counter: #counter; mass: 5;"
+                    scale="0.25 0.25 0.25"
+                    material="color: green"
+                ></a-entity>
+            </template>
+
+            <a-mixin id="super-hands"
+                super-hands="colliderEvent: collisions; colliderEventProperty: els;
+                    colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
+                    grabStartButtons: action_grab; grabEndButtons: action_release;
+                    stretchStartButtons: action_grab; stretchEndButtons: action_release;
+                    dargDropStartButtons: action_grab; dragDropEndButtons: action_release;
+                    "
+                collision-filter="collisionForces: false"
+                physics-collider
+            ></a-mixin>
+        </a-assets>
+
+        <!-- Interactables -->
+        <a-entity id="counter" networked-counter="max: 3; ttl: 120"></a-entity>
+
+        <a-entity 
+            id="cube-spawner" 
+            super-spawner="template: #interactable-template; spawn_position: 2.5 1.2 0;" 
+            position="2.5 1.2 0" 
+        >
+            <a-box 
+                material="color: blue" 
+                class="collidable" 
+                scale="0.25 0.25 0.25"
+                body="mass: 0; type: static;"
+            ></a-box>
+        </a-entity>
+
+        <a-sphere
+            id="3d-cursor"
+            material="color: #00EFFF"
+            radius=0.02
+            static-body="shape: sphere;"
+            mixin="super-hands"
+        ></a-sphere>  
+
+
+        <!-- Player Rig -->
+        <a-entity
+            id="player-rig"
+            networked="template: #remote-avatar-template; attachLocalTemplate: false;"
+            spawn-controller="radius: 4;"
+            wasd-to-analog2d
+            character-controller="pivot: #player-camera"
+            ik-root
+        >
+            <a-entity
+                id="player-camera"
+                class="camera"
+                camera
+                position="0 1.6 0"
+                personal-space-bubble
+                look-controls="pointerLockEnabled: true;"
+            >
+                <a-entity
+                    cursor-hand="cursor: #3d-cursor"
+                    position="0 0 0"
+                    raycaster="objects: .collidable; direction: 0 0 -1; recursive: false;"
+                ></a-entity>
+            </a-entity>
+
+            <a-entity
+                id="player-left-controller"
+                class="left-controller"
+                hand-controls2="left"
+                tracked-controls
+                teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
+                haptic-feedback
+                static-body="shape: sphere; sphereRadius: 0.02"
+                mixin="super-hands"
+            ></a-entity>
+
+            <a-entity
+                id="player-right-controller"
+                class="right-controller"
+                hand-controls2="right"
+                tracked-controls
+                teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
+                haptic-feedback
+                static-body="shape: sphere; sphereRadius: 0.02"
+                mixin="super-hands"
+            ></a-entity>
+
+            <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller>
+                <template data-selector=".Neck">
+                    <a-entity>
+                        <a-entity class="nametag" visible="false" text ></a-entity>
+                    </a-entity>
+                </template>
+
+                <template data-selector=".Head">
+                    <a-entity visible="false"></a-entity>
+                </template>
+
+                <template data-selector=".LeftHand">
+                    <a-entity>
+                        <a-gltf-entity
+                            id="watch"
+                            src="#watch-model"
+                            bone-mute-state-indicator
+                            scale="1.5 1.5 1.5"
+                            rotation="0 -90 90"
+                            position="0 -0.04 0"
+                        ></a-gltf-entity>
+                    </a-entity>
+                </template>
+            </a-gltf-entity>
+        </a-entity>
+
+        <!-- Environment -->
+        <a-gltf-entity
+            id="meeting-space"
+            src="#meeting-space1-mesh"
+            position="0 0 0"
+        ></a-gltf-entity>
+
+        <a-gltf-entity
+            id="outdoor-facade"
+            src="#outdoor-facade-mesh"
+            position="0 0 0"
+            xr="ar: false"
+        ></a-gltf-entity>
+
+        <a-gltf-entity
+            id="floor-nav"
+            src="#floor-nav-mesh"
+            visible="false"
+            position="0 0 0"
+            xr="ar: false"
+        ></a-gltf-entity>
+
+        <a-gltf-entity
+            id="cliff-vista"
+            src="#cliff-vista-mesh"
+            layers="reflection:true"
+            position="0 0 0"
+            xr="ar: false"
+        ></a-gltf-entity>
+
+        <a-entity id="skybox"
+            id="skybox"
+            scale="8000 8000 8000"
+            skybox="azimuth:0.280; inclination:0.440"
+            light="type: ambient; color: #FFF"
+            layers="reflection:true"
+            xr="ar: false"
+        ></a-entity>
+
+        <a-entity
+            id="water"
+            water="forceMobile: true; normalMap:#water-normal-map"
+            rotation="-90 0 0"
+            position="0 -88.358 -332.424"
+            xr="ar: false"
+        ></a-entity>
+
+        <a-cylinder 
+            position="0 0.5 0" 
+            material="visible: false" 
+            height="1" radius="3.1" 
+            segments-radial="12" 
+            static-body 
+            class="collidable"
+        ></a-cylinder>
+
+        <a-plane 
+            material="visible: false" 
+            rotation="-90 0 0" 
+            height="35" 
+            width="35" 
+            static-body 
+            class="collidable">
+        </a-plane> 
+    </a-scene>
+</body>
+
+</html>

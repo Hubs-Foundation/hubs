@@ -11,51 +11,50 @@ AFRAME.registerComponent("remote-dynamic-body", {
     this.timer = 0;
     this.hand = null;
 
-    this.networkedEl = NAF.utils.getNetworkedEntity(this.el);
-    this.networked = this.networkedEl.components.networked;
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      this.networkedEl = networkedEl;
+      if (!NAF.utils.isMine(networkedEl)) {
+        this.el.setAttribute("body", "type: dynamic; mass: 0");
+        this.el.setAttribute("material", "color: white")
+      } else {
+        this.el.setAttribute("body", `type: dynamic; mass: ${this.data.mass};`);
+        this.counter.register(networkedEl);
+        this.timer = Date.now();
+      }
 
-    if (!this._isMine()) {
-      this.networkedEl.setAttribute("body", "type: dynamic; mass: 0");
       if (this.data.grabbable)
-        this.networkedEl.setAttribute("grabbable", "");
-      if (this.data.stretchable)
-        this.networkedEl.setAttribute("stretchable", "");
-      this.el.setAttribute("color", "white")
-    } else {
-      this.counter.register(this.networkedEl);
-      this.timer = Date.now();
-    }
+        this.el.setAttribute("grabbable", "")
 
-    this.networkedEl.addEventListener("grab-start", e => {
+      if (this.data.stretchable)
+        this.el.setAttribute("stretchable", "")
+    });
+
+    this.el.addEventListener("grab-start", e => {
       this._onGrabStart(e);
     });
 
-    this.networkedEl.addEventListener("ownership-lost", e => {
-      this.networkedEl.setAttribute("body", "mass: 0");
-      this.networkedEl.emit("grab-end", {hand: this.hand})
+    this.el.addEventListener("ownership-lost", e => {
+      this.el.setAttribute("body", "mass: 0");
+      this.el.emit("grab-end", {hand: this.hand});
       this.hand = null;
-      this.counter.deregister(this.networkedEl);
+      this.counter.deregister(this.el);
       this.timer = 0;
-      this.el.setAttribute("color", "white")
+      this.el.setAttribute("material", "color: white")
     });
   },
 
   _onGrabStart: function(e) {
     this.hand = e.detail.hand;
-    if (!this._isMine()) {
-      if (this.networked.takeOwnership()) {
-        this.networkedEl.setAttribute("body", `mass: ${this.data.mass};`);
+    if (this.networkedEl && !NAF.utils.isMine(this.networkedEl)) {
+      if (NAF.utils.takeOwnership(this.networkedEl)) {
+        this.el.setAttribute("body", `mass: ${this.data.mass};`);
         this.counter.register(this.networkedEl);
-        this.el.setAttribute("color", "green")
+        this.el.setAttribute("material", "color: green")
       } else {
-        this.networkedEl.emit("grab-end", {hand: this.hand})
+        this.el.emit("grab-end", {hand: this.hand});
         this.hand = null;
-        this.el.setAttribute("color", "red")
+        this.el.setAttribute("material", "color: red")
       }
     }
-  },
-
-  _isMine: function() {
-    return this.networked.isMine();
   }
 });

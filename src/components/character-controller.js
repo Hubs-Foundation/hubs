@@ -1,5 +1,3 @@
-import queryString from "query-string";
-const qs = queryString.parse(location.search);
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 
@@ -10,7 +8,7 @@ AFRAME.registerComponent("character-controller", {
     easing: { default: 10 },
     pivot: { type: "selector" },
     snapRotationDegrees: { default: THREE.Math.DEG2RAD * 45 },
-    rotationSpeed: { default: -3 },
+    rotationSpeed: { default: -3 }
   },
 
   init: function() {
@@ -25,16 +23,8 @@ AFRAME.registerComponent("character-controller", {
   },
 
   update: function() {
-    const avatarScale = parseInt(qs.avatarScale, 10);
-    if (avatarScale) {
-      this.avatarScale = {x: avatarScale, y: avatarScale, z: avatarScale};
-    }
-    this.leftRotationMatrix = new THREE.Matrix4().makeRotationY(
-      this.data.snapRotationDegrees
-    );
-    this.rightRotationMatrix = new THREE.Matrix4().makeRotationY(
-      -this.data.snapRotationDegrees
-    );
+    this.leftRotationMatrix = new THREE.Matrix4().makeRotationY(this.data.snapRotationDegrees);
+    this.rightRotationMatrix = new THREE.Matrix4().makeRotationY(-this.data.snapRotationDegrees);
   },
 
   play: function() {
@@ -90,8 +80,7 @@ AFRAME.registerComponent("character-controller", {
       const root = this.el.object3D;
       const pivot = this.data.pivot.object3D;
       const distance = this.data.groundAcc * deltaSeconds;
-      const rotationDelta =
-        this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
+      const rotationDelta = this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
 
       pivotPos.copy(pivot.position);
       pivotPos.applyMatrix4(root.matrix);
@@ -102,11 +91,7 @@ AFRAME.registerComponent("character-controller", {
       pivotRotationMatrix.makeRotationAxis(rotationAxis, pivot.rotation.y);
       pivotRotationInvMatrix.makeRotationAxis(rotationAxis, -pivot.rotation.y);
       this.updateVelocity(deltaSeconds);
-      move.makeTranslation(
-        this.velocity.x * distance,
-        this.velocity.y * distance,
-        this.velocity.z * distance
-      );
+      move.makeTranslation(this.velocity.x * distance, this.velocity.y * distance, this.velocity.z * distance);
       yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 
       // Translate to middle of playspace (player rig)
@@ -136,11 +121,6 @@ AFRAME.registerComponent("character-controller", {
       });
 
       this.el.setAttribute("position", root.position);
-
-      // Apply avatar scale
-      if (this.avatarScale) {
-          this.el.setAttribute('scale', this.avatarScale);
-      }
 
       this.pendingSnapRotationMatrix.identity(); // Revert to identity
     };

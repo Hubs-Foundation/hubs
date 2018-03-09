@@ -1,43 +1,40 @@
 AFRAME.registerComponent("super-spawner", {
   schema: {
-    template: { type: "string" },
-    mass: {type: "number", default: 1},
-    grabbable: {type: "boolean", default: true},
-    stretchable: {type: "boolean", default: true},
+    template: { default: '' },
     spawn_position: {type: "vec3"}
   },
 
   init: function() {
-    this.el.setAttribute("body", "mass: 0; type: 'static';");
-
     this.el.addEventListener("grab-start", e => {
-      this._onGrabStart(e);
+      this._spawn(e.detail.hand);
     });
   },
 
   _spawn: function(hand) {
-    const sceneEl = document.querySelector("a-scene");
     const entity = document.createElement("a-entity");
 
-    entity.setAttribute("body", `mass: ${this.data.mass};`);
+    entity.setAttribute('networked', 'template:' + this.data.template);
 
-    if (this.data.grabbable) {
-      entity.setAttribute("grabbable", "");
-      entity.addEventListener("body-loaded", function(e) {
-        hand.emit("action_grab", {targetEntity: entity});
-        entity.emit('grab-start', {hand: hand});
+    const componentinitialized = new Promise((resolve, reject) => {
+        entity.addEventListener("componentinitialized", (e) => {
+        if(e.detail.name == "grabbable") {
+          resolve();
+        }
       });
-    }
+    });
 
-    if (this.data.stretchable)
-      entity.setAttribute("stretchable", "");
+    const bodyloaded = new Promise((resolve, reject) => {
+        entity.addEventListener("body-loaded", (e) => {
+          resolve();
+      });
+    });
+
+    Promise.all([componentinitialized, bodyloaded]).then(() => {
+      hand.emit("action_grab", {targetEntity: entity});
+      entity.emit('grab-start', {hand: hand});
+    });
 
     entity.setAttribute("position", this.data.spawn_position || this.el.getAttribute("position"));
-    entity.setAttribute("networked", `template: ${this.data.template};`);
-    sceneEl.appendChild(entity);
-  },
-
-  _onGrabStart: function(e) {
-    this._spawn(e.detail.hand);
+    this.el.sceneEl.appendChild(entity);
   }
 });

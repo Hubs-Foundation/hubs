@@ -61,7 +61,10 @@ const config = {
         abuttonup: "action_spawn_cube"
       },
       "daydream-controls": {
-        menudown: "action_mute",
+        trackpaddown: "action_teleport_down",
+        trackpadup: "action_teleport_up"
+      },
+      "gearvr-controls": {
         trackpaddown: "action_teleport_down",
         trackpadup: "action_teleport_up"
       },

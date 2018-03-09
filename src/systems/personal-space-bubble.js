@@ -1,5 +1,5 @@
-var invaderPos = new AFRAME.THREE.Vector3();
-var bubblePos = new AFRAME.THREE.Vector3();
+const invaderPos = new AFRAME.THREE.Vector3();
+const bubblePos = new AFRAME.THREE.Vector3();
 
 AFRAME.registerSystem("personal-space-bubble", {
   init() {
@@ -12,7 +12,7 @@ AFRAME.registerSystem("personal-space-bubble", {
   },
 
   unregisterBubble(el) {
-    var index = this.bubbles.indexOf(el);
+    const index = this.bubbles.indexOf(el);
 
     if (index !== -1) {
       this.bubbles.splice(index, 1);
@@ -20,16 +20,17 @@ AFRAME.registerSystem("personal-space-bubble", {
   },
 
   registerInvader(el) {
-    var networkedEl = NAF.utils.getNetworkedEntity(el);
-    var owner = NAF.utils.getNetworkOwner(networkedEl);
+    NAF.utils.getNetworkedEntity(el).then(networkedEl => {
+      const owner = NAF.utils.getNetworkOwner(networkedEl);
 
-    if (owner !== NAF.clientId) {
-      this.invaders.push(el);
-    }
+      if (owner !== NAF.clientId) {
+        this.invaders.push(el);
+      }
+    });
   },
 
   unregisterInvader(el) {
-    var index = this.invaders.indexOf(el);
+    const index = this.invaders.indexOf(el);
 
     if (index !== -1) {
       this.invaders.splice(index, 1);
@@ -48,20 +49,20 @@ AFRAME.registerSystem("personal-space-bubble", {
 
     // Loop through all of the space bubbles (usually one)
     for (var i = 0; i < this.bubbles.length; i++) {
-      var bubble = this.bubbles[i];
+      const bubble = this.bubbles[i];
 
       bubblePos.setFromMatrixPosition(bubble.object3D.matrixWorld);
 
-      var radius = bubble.components["personal-space-bubble"].data.radius;
-      var radiusSquared = radius * radius;
+      const radius = bubble.components["personal-space-bubble"].data.radius;
+      const radiusSquared = radius * radius;
 
       // Hide the invader if inside the bubble
-      for (var j = 0; j < this.invaders.length; j++) {
-        var invader = this.invaders[j];
+      for (let j = 0; j < this.invaders.length; j++) {
+        const invader = this.invaders[j];
 
         invaderPos.setFromMatrixPosition(invader.object3D.matrixWorld);
 
-        var distanceSquared = bubblePos.distanceTo(invaderPos);
+        const distanceSquared = bubblePos.distanceTo(invaderPos);
 
         invader.object3D.visible = distanceSquared > radiusSquared;
       }
