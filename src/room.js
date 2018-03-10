@@ -47,11 +47,12 @@ import "./systems/personal-space-bubble";
 
 import "./elements/a-gltf-entity";
 
-import { promptForName, getCookie, parseJwt } from "./utils/identity";
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config } from "./input-mappings";
 import registerTelemetry from "./telemetry";
+import Store from "./storage/store";
 
+import { generateDefaultProfile } from "./utils/identity.js";
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 
 AFRAME.registerInputBehaviour("vive_trackpad_dpad4", vive_trackpad_dpad4);
@@ -63,6 +64,11 @@ AFRAME.registerInputMappings(config);
 
 registerNetworkSchemas();
 registerTelemetry();
+
+const store = new Store();
+
+// Always layer in any new default profile bits
+store.update({ profile:  { ...generateDefaultProfile(), ...(store.state.profile || {}) }})
 
 async function enterScene(mediaStream) {
   const qs = queryString.parse(location.search);
@@ -82,22 +88,8 @@ async function enterScene(mediaStream) {
     playerRig.setAttribute("virtual-gamepad-controls", {});
   }
 
-  let username;
-  const jwt = getCookie("jwt");
-  if (jwt) {
-    //grab name from jwt
-    const data = parseJwt(jwt);
-    username = data.typ.name;
-  }
-
-  if (qs.name) {
-    username = qs.name; //always override with name from querystring if available
-  } else {
-    username = promptForName(username); // promptForName is blocking
-  }
-
   const myNametag = document.querySelector("#player-rig .nametag");
-  myNametag.setAttribute("text", "value", username);
+  myNametag.setAttribute("text", "value", store.state.profile.display_name);
 
   const avatarScale = parseInt(qs.avatarScale, 10);
 

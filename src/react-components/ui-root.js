@@ -69,7 +69,7 @@ class UIRoot extends Component {
     toneInterval: null,
     tonePlaying: false,
     micLevel: 0,
-    micUpdateInterval: null
+    micUpdateInterval: null,
   }
 
   componentDidMount() {
@@ -133,7 +133,7 @@ class UIRoot extends Component {
   }
 
   enterGearVR = async () => {
-    console.log("gear");
+    document.location = `ovrweb://${document.location.toString()}`;
   }
 
   enterDaydream = async () => {
@@ -211,7 +211,7 @@ class UIRoot extends Component {
     this.setState({ micDevices: mediaDevices.filter(d => d.kind === "audioinput").map(d => ({ deviceId: d.deviceId, label: d.label }))});
   }
 
-  onAudioReadyButton = async () => {
+  onAudioReadyButton = () => {
     if (this.state.enterInVR) {
       document.querySelector("a-scene").enterVR();
     }
