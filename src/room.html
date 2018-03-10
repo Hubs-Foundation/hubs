@@ -112,7 +112,12 @@
             app-mode-toggle-playing__wasd-to-analog2d="mode: hud; invert: true;"
         >
 
-            <a-entity id="player-hud" vr-mode-toggle-visibility>
+            <a-entity
+                id="player-hud"
+                hud-controller="head: #player-camera;"
+                vr-mode-toggle-visibility
+                vr-mode-toggle-playing__hud-controller
+            >
                 <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="-39.01000608674482 0 0">
                     <a-box geometry="height:0.13;width:0.6;depth:0.001" material="depthTest:false; color:#000000;opacity:0.35" class="hud bg"></a-box>
                     <a-image src="#unmuted" scale="-0.1 0.1 0.1" position="-0.2 0 0.001" class="hud mic" material="alphaTest:0.1;depthTest:false;" geometry=""></a-image>
@@ -128,9 +133,7 @@
                 position="0 1.6 0"
                 personal-space-bubble
                 look-controls
-                hud-detector="hud: #player-hud;"
                 raycaster="objects: .hud; interval: 100; showLine: false; direction: 0 0 -1; origin: 0 -0.05 0;"
-                vr-mode-toggle-playing__hud-detector
             ></a-entity>
 
             <a-entity

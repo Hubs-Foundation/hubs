@@ -90,15 +90,22 @@ AFRAME.registerComponent("app-mode-input-mappings", {
   }
 });
 
+const TWOPI = Math.PI * 2;
+function deltaAngle(a, b) {
+  const p = Math.abs(b - a) % TWOPI;
+  return p > Math.PI ? TWOPI - p : p;
+}
+
 /**
  * Positions the HUD and toggles app mode based on where the user is looking
  */
-AFRAME.registerComponent("hud-detector", {
+AFRAME.registerComponent("hud-controller", {
   schema: {
-    hud: { type: "selector" },
+    head: { type: "selector" },
     offset: { default: 1 }, // distance from hud below head,
     lookCutoff: { default: -25 }, // angle at which the hud should be "on",
-    animRange: { default: 30 } // degrees over which to animate the hud into view
+    animRange: { default: 30 }, // degrees over which to animate the hud into view
+    yawCutoff: { default: 100 } // yaw degrees at wich the hud should reoirent even if the user is looking down
   },
   init() {
     this.isYLocked = false;
@@ -112,17 +119,18 @@ AFRAME.registerComponent("hud-detector", {
   },
 
   tick() {
-    const hud = this.data.hud.object3D;
-    const head = this.el.object3D;
+    const hud = this.el.object3D;
+    const head = this.data.head.object3D;
+    const sceneEl = this.el.sceneEl;
 
-    const { offset, lookCutoff, animRange } = this.data;
+    const { offset, lookCutoff, animRange, yawCutoff } = this.data;
 
-    const headRot = head.rotation;
-    const pitch = headRot.x * THREE.Math.RAD2DEG;
+    const pitch = head.rotation.x * THREE.Math.RAD2DEG;
+    const yawDif = deltaAngle(head.rotation.y, hud.rotation.y) * THREE.Math.RAD2DEG;
 
     // Reorient the hud only if the user is looking "up", for right now this arbitrarily means the hud is 1/3 way animated away
     // TODO: come up with better huristics for this that maybe account for the user turning away from the hud "too far", also animate the position so that it doesnt just snap.
-    if (pitch > lookCutoff + animRange / 3) {
+    if (yawDif >= yawCutoff || pitch > lookCutoff + animRange / 3) {
       const lookDir = new THREE.Vector3(0, 0, -1);
       lookDir.applyQuaternion(head.quaternion);
       lookDir.add(head.position);
@@ -147,13 +155,13 @@ AFRAME.registerComponent("hud-detector", {
 
     // update the app mode when the HUD locks on or off
     // TODO: this assumes full control over current app mode reguardless of what else might be manipulating it, this is obviously wrong
-    const AppModeSystem = this.el.sceneEl.systems["app-mode"];
+    const AppModeSystem = sceneEl.systems["app-mode"];
     if (pitch < lookCutoff && AppModeSystem.mode !== AppModes.HUD) {
       AppModeSystem.setMode(AppModes.HUD);
-      this.el.sceneEl.renderer.sortObjects = true;
+      sceneEl.renderer.sortObjects = true;
     } else if (pitch > lookCutoff && AppModeSystem.mode === AppModes.HUD) {
       AppModeSystem.setMode(AppModes.DEFAULT);
-      this.el.sceneEl.renderer.sortObjects = false;
+      sceneEl.renderer.sortObjects = false;
     }
   }
 });
