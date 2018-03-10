@@ -1,14 +1,14 @@
 import uuid from "uuid/v4";
 import { Validator } from "jsonschema";
 
-const LOCAL_STORE_KEY = "___mozilla_hubs";
+const LOCAL_STORE_KEY = "___mozilla_duck";
 const STORE_STATE_CACHE_KEY = Symbol();
 const validator = new Validator();
 
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
 const SCHEMA = {
-  id: "/MozillaHubsStore",
+  id: "/MozillaDuckStore",
 
   definitions: {
     profile: {
