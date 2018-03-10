@@ -8,7 +8,6 @@ AFRAME.registerComponent("remote-dynamic-body", {
 
   init: function() {
     this.counter = this.data.counter.components["networked-counter"];
-    this.timer = 0;
     this.hand = null;
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
@@ -17,16 +16,8 @@ AFRAME.registerComponent("remote-dynamic-body", {
         this.el.setAttribute("body", "type: dynamic; mass: 0");
         this.el.setAttribute("material", "color: white")
       } else {
-        this.el.setAttribute("body", `type: dynamic; mass: ${this.data.mass};`);
         this.counter.register(networkedEl);
-        this.timer = Date.now();
       }
-
-      if (this.data.grabbable)
-        this.el.setAttribute("grabbable", "")
-
-      if (this.data.stretchable)
-        this.el.setAttribute("stretchable", "")
     });
 
     this.el.addEventListener("grab-start", e => {
@@ -38,7 +29,6 @@ AFRAME.registerComponent("remote-dynamic-body", {
       this.el.emit("grab-end", {hand: this.hand});
       this.hand = null;
       this.counter.deregister(this.el);
-      this.timer = 0;
       this.el.setAttribute("material", "color: white")
     });
   },

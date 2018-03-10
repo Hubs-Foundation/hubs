@@ -51,7 +51,7 @@ function registerNetworkSchemas() {
   });
 
   NAF.schemas.add({
-    template: "#physics-cube",
+    template: "#interactable-template",
     components: ["position", "rotation", "scale"]
   });
 }

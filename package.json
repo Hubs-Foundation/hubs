@@ -32,7 +32,6 @@
     "react-dom": "^16.1.1",
     "react-router-dom": "^4.2.2",
     "super-hands": "https://github.com/infinitelee/aframe-super-hands-component#feature/set-grab-target",
-    "react-router-dom": "^4.2.2",
     "webrtc-adapter": "^6.0.2"
   },
   "devDependencies": {

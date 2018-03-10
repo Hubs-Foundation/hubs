@@ -63,7 +63,6 @@ AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputActions(inGameActions, "default");
 AFRAME.registerInputMappings(config);
 
-registerNetworkSchemas();
 registerTelemetry();
 
 async function shareMedia(audio, video) {
@@ -170,5 +169,6 @@ function onConnect() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  registerNetworkSchemas();
   document.querySelector("a-scene").addEventListener("loaded", onSceneLoad);
 });
