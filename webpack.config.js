@@ -52,7 +52,7 @@ function createHTTPSConfig() {
     fs.writeFileSync(path.join(__dirname, "certs", "key.pem"), pems.private);
 
     return {
-      key: pems.public,
+      key: pems.private,
       cert: pems.cert
     };
   }
@@ -89,6 +89,8 @@ module.exports = {
   devServer: {
     open: true,
     https: createHTTPSConfig(),
+    host: "0.0.0.0",
+    useLocalIp: true,
     port: 8080,
     before: function(app) {
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.

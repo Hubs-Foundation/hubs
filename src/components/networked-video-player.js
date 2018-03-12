@@ -2,9 +2,7 @@ import styles from "./networked-video-player.css";
 
 const nafConnected = function() {
   return new Promise(resolve => {
-    NAF.clientId
-      ? resolve()
-      : document.body.addEventListener("connected", resolve);
+    NAF.clientId ? resolve() : document.body.addEventListener("connected", resolve);
   });
 };
 
@@ -21,15 +19,13 @@ AFRAME.registerComponent("networked-video-player", {
 
     await nafConnected();
 
-    const networkedEl = NAF.utils.getNetworkedEntity(this.el);
+    const networkedEl = await NAF.utils.getNetworkedEntity(this.el);
     if (!networkedEl) {
-      throw new Error(
-        "Video player must be added on a node, or a child of a node, with the `networked` component."
-      );
+      throw new Error("Video player must be added on a node, or a child of a node, with the `networked` component.");
     }
 
     const ownerId = networkedEl.components.networked.data.owner;
-    const stream = await NAF.connection.adapter.getMediaStream(ownerId);
+    const stream = await NAF.connection.adapter.getMediaStream(ownerId, "video");
     if (!stream) {
       return;
     }
