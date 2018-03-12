@@ -1,21 +1,7 @@
 {
   "components": {
     "Head": {
-      "rotator": {
-        "axis": { "x": 0, "y": 1, "z": 0 },
-        "speed": 0.2
-      },
-      "text": [
-        {
-          "value": "A"
-        },
-        {
-          "value": "B"
-        },
-        {
-          "value": "C"
-        }
-      ]
+      "scale-audio-feedback": ""
     }
   }
 }

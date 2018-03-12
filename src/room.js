@@ -38,7 +38,6 @@ import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
-import "./components/rotator";
 
 import "./systems/personal-space-bubble";
 

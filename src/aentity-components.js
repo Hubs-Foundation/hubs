@@ -1,4 +1,3 @@
 export default function registerComponents() {
-  AFRAME.AGLTFEntity.registerComponent("rotator", "rotator");
-  AFRAME.AGLTFEntity.registerComponent("text", "text");
+  AFRAME.AGLTFEntity.registerComponent("scale-audio-feedback", "scale-audio-feedback");
 }

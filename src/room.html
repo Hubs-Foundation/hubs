@@ -27,7 +27,6 @@
 
         <a-assets>
             <a-asset-item id="bot-skinned-mesh" response-type="arraybuffer" src="./assets/avatars/Bot_SkinnedWithAnim.glb"></a-asset-item>
-            <a-asset-item id="avatar-with-components" response-type="arraybuffer" src="./assets/avatars/Bot_With_Components.glb"></a-asset-item>
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
 
             <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src="./assets/environments/MeetingSpace1_mesh.glb"></a-asset-item>
@@ -68,9 +67,7 @@
                             <a-entity
                                 networked-audio-source
                                 networked-audio-analyser
-                                scale-audio-feedback
                                 personal-space-invader
-                                animation-mixer
                             >
                             </a-entity>
                         </template>
@@ -149,9 +146,6 @@
                 </template>
             </a-gltf-entity>
         </a-entity>
-
-
-        <a-gltf-entity src="#avatar-with-components" inflate="true" ></a-gltf-entity>
 
         <!-- Environment -->
         <a-gltf-entity
