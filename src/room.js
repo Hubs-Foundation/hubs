@@ -41,7 +41,7 @@ import "./components/spawn-controller";
 
 import "./systems/personal-space-bubble";
 
-import "./elements/a-gltf-entity";
+import "./gltf-component-mappings";
 
 const qs = queryString.parse(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
