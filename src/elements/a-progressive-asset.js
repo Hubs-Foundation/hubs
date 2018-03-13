@@ -22,9 +22,9 @@ AFRAME.registerElement("a-progressive-asset", {
 
         let src = fallbackSrc;
 
-        if (AFRAME.quality === "high") {
+        if (AFRAME.AGLTFEntity.quality === "high") {
           src = highSrc;
-        } else if (AFRAME.quality === "low") {
+        } else if (AFRAME.AGLTFEntity.quality === "low") {
           src = lowSrc;
         }
 

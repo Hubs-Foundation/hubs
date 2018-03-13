@@ -47,9 +47,9 @@ const qs = queryString.parse(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 
 if (qs.quality) {
-  AFRAME.quality = qs.quality;
+  AFRAME.AGLTFEntity.quality = qs.quality;
 } else {
-  AFRAME.quality = isMobile ? "low" : "high";
+  AFRAME.AGLTFEntity.quality = isMobile ? "low" : "high";
 }
 
 import "./elements/a-progressive-asset";
