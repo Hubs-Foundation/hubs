@@ -1,25 +1,15 @@
 AFRAME.registerComponent("networked-counter", {
   schema: {
     max: { default: 3 },
-    ttl: { default: 120 }
+    ttl: { default: 120 },
+    grab_event: { type: "string", default: "grab-start" },
+    release_event: { type: "string", default: "grab-end" }
   },
 
   init: function() {
     this.count = 0;
     this.queue = {};
     this.timeouts = {};
-  },
-
-  getCount: function() {
-    return queue.length;
-  },
-
-  getMax: function() {
-    return this.data.max;
-  },
-
-  getTtl: function() {
-    return this.data.ttl;
   },
 
   register: function(networkedEl) {
@@ -42,8 +32,8 @@ AFRAME.registerComponent("networked-counter", {
       onReleaseHandler: onReleaseHandler
     };
 
-    networkedEl.addEventListener("grab-start", onGrabHandler);
-    networkedEl.addEventListener("grab-end", onReleaseHandler);
+    networkedEl.addEventListener(this.data.grab_event, onGrabHandler);
+    networkedEl.addEventListener(this.data.release_event, onReleaseHandler);
 
     this.count++;
 
@@ -51,15 +41,15 @@ AFRAME.registerComponent("networked-counter", {
       this._addTimeout(id);
     }
 
-    this._removeOldest();
+    this._destroyOldest();
   },
 
   deregister: function(networkedEl) {
     const id = NAF.utils.getNetworkId(networkedEl);
     if (this.queue.hasOwnProperty(id)) {
       const item = this.queue[id];
-      networkedEl.removeEventListener("grab-start", item.onGrabHandler);
-      networkedEl.removeEventListener("grab-end", item.onReleaseHandler);
+      networkedEl.removeEventListener(this.data.grab_event, item.onGrabHandler);
+      networkedEl.removeEventListener(this.data.release_event, item.onReleaseHandler);
 
       delete this.queue[id];
 
@@ -80,9 +70,10 @@ AFRAME.registerComponent("networked-counter", {
     this.queue[id].ts = Date.now();
   },
 
-  _removeOldest: function() {
+  _destroyOldest: function() {
     if (this.count > this.data.max) {
-      let oldest = null, ts = Number.MAX_VALUE;
+      let oldest = null,
+        ts = Number.MAX_VALUE;
       Object.keys(this.queue).forEach(function(id) {
         const expiration = this.queue[id].ts + this.data.ttl * 1000;
         if (this.queue[id].ts < ts && !this._isCurrentlyGrabbed(id)) {
@@ -105,7 +96,6 @@ AFRAME.registerComponent("networked-counter", {
   _addTimeout: function(id) {
     const timeout = this.data.ttl * 1000;
     this.timeouts[id] = setTimeout(() => {
-
       const el = this.queue[id].el;
       this.deregister(el);
       this._destroy(el);

@@ -1,9 +1,9 @@
-AFRAME.registerComponent("cursor-hand", {
-  dependencies: ['raycaster'],
+AFRAME.registerComponent("super-cursor", {
+  dependencies: ["raycaster"],
   schema: {
-    cursor: {type: "selector"},
-    maxDistance: {type: "number", default: 3},
-    minDistance: {type: "number", default: 0.5}
+    cursor: { type: "selector" },
+    maxDistance: { type: "number", default: 3 },
+    minDistance: { type: "number", default: 0.5 }
   },
 
   init: function() {
@@ -14,27 +14,26 @@ AFRAME.registerComponent("cursor-hand", {
     this.enabled = true;
     this.isGrabbing = false;
 
-    document.addEventListener("mousedown", (e) => {
+    document.addEventListener("mousedown", e => {
       this.data.cursor.emit("action_grab", {});
     });
 
-    document.addEventListener("mouseup", (e) => {
+    document.addEventListener("mouseup", e => {
       this.data.cursor.emit("action_release", {});
     });
 
-    document.addEventListener("wheel", (e) => {
-      if (this.isGrabbing)
-        this.currentDistanceMod += e.deltaY/10;
+    document.addEventListener("wheel", e => {
+      if (this.isGrabbing) this.currentDistanceMod += e.deltaY / 10;
     });
 
-    window.addEventListener('enter-vr', e => {
+    window.addEventListener("enter-vr", e => {
       if (AFRAME.utils.device.checkHeadsetConnected() || AFRAME.utils.device.isMobile()) {
         this.enabled = false;
         this.data.cursor.setAttribute("visible", false);
       }
     });
 
-    window.addEventListener('exit-vr', e => {
+    window.addEventListener("exit-vr", e => {
       this.enabled = true;
       this.data.cursor.setAttribute("visible", true);
     });
@@ -49,10 +48,10 @@ AFRAME.registerComponent("cursor-hand", {
 
     if (!this.isGrabbing) {
       const intersections = this.el.components.raycaster.intersections;
-      if(intersections.length > 0 && intersections[0].distance <= this.data.maxDistance) {
+      if (intersections.length > 0 && intersections[0].distance <= this.data.maxDistance) {
         isIntersecting = true;
         const point = intersections[0].point;
-        this.data.cursor.setAttribute('position', point);
+        this.data.cursor.setAttribute("position", point);
         this.currentDistance = intersections[0].distance;
         this.currentDistanceMod = 0;
       } else {
@@ -63,19 +62,22 @@ AFRAME.registerComponent("cursor-hand", {
     if (this.isGrabbing || !isIntersecting) {
       const head = this.el.object3D;
       const origin = head.getWorldPosition();
-      let direction = head.getWorldDirection();
-      const distance = Math.min(Math.max(this.data.minDistance, this.currentDistance - this.currentDistanceMod), this.data.maxDistance);
+      const direction = head.getWorldDirection();
+      const distance = Math.min(
+        Math.max(this.data.minDistance, this.currentDistance - this.currentDistanceMod),
+        this.data.maxDistance
+      );
       this.currentDistanceMod = this.currentDistance - distance;
       direction.multiplyScalar(-distance);
-      let point = new THREE.Vector3();
+      const point = new THREE.Vector3();
       point.addVectors(origin, direction);
-      this.data.cursor.setAttribute("position", {x: point.x, y: point.y, z: point.z});
+      this.data.cursor.setAttribute("position", { x: point.x, y: point.y, z: point.z });
     }
 
     if ((this.isGrabbing || isIntersecting) && !this.wasIntersecting) {
       this.wasIntersecting = true;
       this.data.cursor.setAttribute("material", "color: #00FF00");
-    } else if ((!this.isGrabbing && !isIntersecting) && this.wasIntersecting) {
+    } else if (!this.isGrabbing && !isIntersecting && this.wasIntersecting) {
       this.wasIntersecting = false;
       this.data.cursor.setAttribute("material", "color: #00EFFF");
     }

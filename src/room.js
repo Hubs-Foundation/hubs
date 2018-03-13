@@ -46,10 +46,10 @@ import "./elements/a-gltf-entity";
 import "aframe-physics-system";
 import "aframe-physics-extras";
 import "super-hands";
-import "./components/remote-dynamic-body";
+import "./components/super-networked-interactable";
 import "./components/networked-counter";
 import "./components/super-spawner";
-import "./components/cursor-hand";
+import "./components/super-cursor";
 import "./components/event-repeater";
 
 import { promptForName, getCookie, parseJwt } from "./utils/identity";

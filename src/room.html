@@ -92,7 +92,7 @@
                     gltf-model="#interactable-duck"
                     scale="2 2 2"
                     class="collidable" 
-                    remote-dynamic-body="counter: #counter; mass: 5;"
+                    super-networked-interactable="counter: #counter; mass: 5;"
                     body="type: dynamic; mass: 5; shape: box;"
                     grabbable
                     stretchable
@@ -105,7 +105,7 @@
                     colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
                     grabStartButtons: action_grab; grabEndButtons: action_release;
                     stretchStartButtons: action_grab; stretchEndButtons: action_release;
-                    dargDropStartButtons: action_grab; dragDropEndButtons: action_release;
+                    dragDropStartButtons: action_grab; dragDropEndButtons: action_release;
                     "
                 collision-filter="collisionForces: false"
                 physics-collider
@@ -152,8 +152,8 @@
                 look-controls="pointerLockEnabled: true;"
             >
                 <a-entity
-                    id="cursor-hand"
-                    cursor-hand="cursor: #3d-cursor"
+                    id="super-cursor"
+                    super-cursor="cursor: #3d-cursor"
                     position="0 0 0"
                     raycaster="objects: .collidable; direction: 0 0 -1;"
                 ></a-entity>
