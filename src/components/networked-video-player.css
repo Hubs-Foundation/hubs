@@ -7,7 +7,5 @@
 :local(.container) {
     position: absolute;
     bottom: 0;
-    display: flex;
-    /* 1x1px so that Safari on iOS allows us to autoplay the video */
-    width: 1px; height: 1px; /* toggle to show debug video elements */
+    width: 10px; height: 10px; /* toggle to show debug video elements */
 }

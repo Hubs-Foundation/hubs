@@ -35,9 +35,11 @@ AFRAME.registerComponent("networked-video-player", {
     // muted and autoplay so that more restrictive browsers (e.g. Safari on iOS) will actually play the video.
     v.muted = true;
     v.autoplay = true;
+    v.playsInline = true;
     v.classList.add(styles.video);
     v.srcObject = new MediaStream(stream.getVideoTracks()); // We only want the video track so make a new MediaStream
     container.appendChild(v);
+    v.play();
 
     this.videoEl = v;
 
