@@ -1,12 +1,13 @@
 :local(.video) {
-  height: 100px;
+  /* 1x1px so that Safari on iOS allows us to autoplay the video */
+  width: 1px; height: 1px; /* toggle to show debug video elements */
   background: black;
-  margin: 5px;
 }
 
 :local(.container) {
     position: absolute;
     bottom: 0;
     display: flex;
-    visibility: hidden; /* toggle to show debug video elements */
+    /* 1x1px so that Safari on iOS allows us to autoplay the video */
+    width: 1px; height: 1px; /* toggle to show debug video elements */
 }
