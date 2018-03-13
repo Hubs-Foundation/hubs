@@ -29,7 +29,6 @@ AFRAME.registerComponent("animated-robot-hands", {
 
     // Set hands to open pose because the bind pose is funky due
     // to the workaround for FBX2glTF animations.
-
     this.openL = this.mixer.clipAction(POSES.open + "_L", root.parent);
     this.openR = this.mixer.clipAction(POSES.open + "_R", root.parent);
     this.openL.play();
