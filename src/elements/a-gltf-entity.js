@@ -154,7 +154,18 @@ AFRAME.registerElement("a-gltf-entity", {
         // If the src attribute is a selector, get the url from the asset item.
         if (src.charAt(0) === "#") {
           const assetEl = document.getElementById(src.substring(1));
-          src = assetEl.getAttribute("src");
+
+          const fallbackSrc = assetEl.getAttribute("src");
+          const highSrc = assetEl.getAttribute("high-src");
+          const lowSrc = assetEl.getAttribute("low-src");
+
+          if (highSrc && window.APP.quality === "high") {
+            src = highSrc;
+          } else if (lowSrc && window.APP.quality === "low") {
+            src = lowSrc;
+          } else {
+            src = fallbackSrc;
+          }
         }
 
         const onLoad = gltfModel => {
