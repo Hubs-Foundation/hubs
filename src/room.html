@@ -35,10 +35,11 @@
         >
 
         <a-assets>
-            <a-asset-item id="bot-skinned-mesh" response-type="arraybuffer" src="./assets/avatars/Bot_SkinnedWithAnim.glb"></a-asset-item>
             <img id="unmuted"  src="./assets/hud/unmuted.png" >
             <img id="muted"  src="./assets/hud/muted.png" >
             <img id="avatar"  src="./assets/hud/avatar.jpg" >
+
+            <a-asset-item id="bot-skinned-mesh" response-type="arraybuffer" src="./assets/avatars/BotDefault_Avatar_Unlit.glb"></a-asset-item>
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
 
             <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src="./assets/environments/MeetingSpace1_mesh.glb"></a-asset-item>
@@ -79,9 +80,7 @@
                             <a-entity
                                 networked-audio-source
                                 networked-audio-analyser
-                                scale-audio-feedback
                                 personal-space-invader
-                                animation-mixer
                             >
                             </a-entity>
                         </template>

@@ -45,7 +45,7 @@ import "./systems/app-mode";
 
 import "./elements/a-gltf-entity";
 
-import "./elements/a-gltf-entity";
+import "./gltf-component-mappings";
 
 import { promptForName, getCookie, parseJwt } from "./utils/identity";
 import registerNetworkSchemas from "./network-schemas";
