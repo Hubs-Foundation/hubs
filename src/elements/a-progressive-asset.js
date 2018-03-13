@@ -1,3 +1,8 @@
+/**
+ * Modified version of a-asset-item that adds high-src and low-src options
+ * Extracted from https://github.com/aframevr/aframe/blob/master/src/core/a-assets.js
+ */
+
 AFRAME.registerElement("a-progressive-asset", {
   prototype: Object.create(AFRAME.ANode.prototype, {
     createdCallback: {
