@@ -33,7 +33,6 @@ const config = {
         trackpad_dpad4_pressed_east_down: { right: "snap_rotate_right" },
         trackpad_dpad4_pressed_center_down: { right: "action_teleport_down" },
         trackpadup: { right: "action_teleport_up" },
-        triggerup: { right: "action_spawn_cube" },
         gripdown: "action_grab",
         gripup: "action_release"
       },
@@ -57,8 +56,8 @@ const config = {
         "axismove.reverseY": { left: "move" },
         right_dpad_east: "snap_rotate_right",
         right_dpad_west: "snap_rotate_left",
-        // abuttondown: "action_teleport_down",
-        abuttonup: "action_spawn_cube"
+        abuttondown: "action_teleport_down",
+        abuttonup: "action_teleport_up"
       },
       "daydream-controls": {
         trackpaddown: "action_teleport_down",
@@ -73,7 +72,6 @@ const config = {
         q_press: "snap_rotate_left",
         e_press: "snap_rotate_right",
         v_press: "action_share_screen",
-        c_press: "action_spawn_cube",
 
         // We can't create a keyboard behaviour with AFIM yet,
         // so these will get captured by wasd-to-analog2d
