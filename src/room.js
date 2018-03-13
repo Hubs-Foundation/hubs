@@ -38,10 +38,26 @@ import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
+import "./components/hide-when-quality";
 
 import "./systems/personal-space-bubble";
 
-import "./elements/a-gltf-entity";
+import "./gltf-component-mappings";
+
+import { App } from "./App";
+
+window.APP = new App();
+
+const qs = queryString.parse(location.search);
+const isMobile = AFRAME.utils.device.isMobile();
+
+if (qs.quality) {
+  window.APP.quality = qs.quality;
+} else {
+  window.APP.quality = isMobile ? "low" : "high";
+}
+
+import "./elements/a-progressive-asset";
 
 import "aframe-physics-system";
 import "aframe-physics-extras";
@@ -93,7 +109,6 @@ async function shareMedia(audio, video) {
 }
 
 async function onSceneLoad() {
-  const qs = queryString.parse(location.search);
   const scene = document.querySelector("a-scene");
 
   scene.setAttribute("networked-scene", {
@@ -105,7 +120,7 @@ async function onSceneLoad() {
     scene.setAttribute("stats", true);
   }
 
-  if (AFRAME.utils.device.isMobile() || qs.gamepad) {
+  if (isMobile || qs.mobile) {
     const playerRig = document.querySelector("#player-rig");
     playerRig.setAttribute("virtual-gamepad-controls", {});
   }
@@ -171,5 +186,10 @@ function onConnect() {
 
 document.addEventListener("DOMContentLoaded", () => {
   registerNetworkSchemas();
-  document.querySelector("a-scene").addEventListener("loaded", onSceneLoad);
+
+  const scene = document.querySelector("a-scene");
+
+  window.APP.scene = scene;
+
+  scene.addEventListener("loaded", onSceneLoad);
 });

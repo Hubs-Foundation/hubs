@@ -1,5 +1,24 @@
 const GLTFCache = {};
 
+AFRAME.AGLTFEntity = {
+  defaultInflator(el, componentName, componentData) {
+    if (AFRAME.components[componentName].multiple && Array.isArray(componentData)) {
+      for (let i = 0; i < componentData.length; i++) {
+        el.setAttribute(componentName + "__" + i, componentData[i]);
+      }
+    } else {
+      el.setAttribute(componentName, componentData);
+    }
+  },
+  registerComponent(componentKey, componentName, inflator) {
+    AFRAME.AGLTFEntity.components[componentKey] = {
+      inflator: inflator || AFRAME.AGLTFEntity.defaultInflator,
+      componentName
+    };
+  },
+  components: {}
+};
+
 // From https://gist.github.com/cdata/f2d7a6ccdec071839bc1954c32595e87
 // Tracking glTF cloning here: https://github.com/mrdoob/three.js/issues/11573
 function cloneGltf(gltf) {
@@ -83,6 +102,20 @@ const inflateEntities = function(classPrefix, parentEl, node) {
 
   el.setObject3D(node.type.toLowerCase(), node);
 
+  const entityComponents = node.userData.components;
+
+  if (entityComponents) {
+    for (const prop in entityComponents) {
+      if (entityComponents.hasOwnProperty(prop)) {
+        const { inflator, componentName } = AFRAME.AGLTFEntity.components[prop];
+
+        if (inflator) {
+          inflator(el, componentName, entityComponents[prop]);
+        }
+      }
+    }
+  }
+
   children.forEach(childNode => {
     inflateEntities(classPrefix, el, childNode);
   });
@@ -121,7 +154,18 @@ AFRAME.registerElement("a-gltf-entity", {
         // If the src attribute is a selector, get the url from the asset item.
         if (src.charAt(0) === "#") {
           const assetEl = document.getElementById(src.substring(1));
-          src = assetEl.getAttribute("src");
+
+          const fallbackSrc = assetEl.getAttribute("src");
+          const highSrc = assetEl.getAttribute("high-src");
+          const lowSrc = assetEl.getAttribute("low-src");
+
+          if (highSrc && window.APP.quality === "high") {
+            src = highSrc;
+          } else if (lowSrc && window.APP.quality === "low") {
+            src = lowSrc;
+          } else {
+            src = fallbackSrc;
+          }
         }
 
         const onLoad = gltfModel => {
