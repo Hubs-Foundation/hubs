@@ -34,6 +34,7 @@
             <a-asset-item id="outdoor-facade-mesh" response-type="arraybuffer" src="./assets/environments/OutdoorFacade_mesh.glb"></a-asset-item>
             <a-asset-item id="floor-nav-mesh" response-type="arraybuffer" src="./assets/environments/FloorNav_mesh.glb"></a-asset-item>
             <a-asset-item id="cliff-vista-mesh" response-type="arraybuffer" src="./assets/environments/CliffVista_mesh.glb"></a-asset-item>
+            <a-asset-item id="interactable-duck" response-type="arraybuffer" src="./assets/interactables/duck/DuckyMesh.glb"></a-asset-item>
 
             <img id="water-normal-map" src="./assets/waternormals.jpg"></a-asset-item>
 
@@ -88,15 +89,15 @@
 
             <template id="interactable-template">
                 <a-entity
-                    geometry="primitive: box"
+                    gltf-model="#interactable-duck"
+                    scale="2 2 2"
                     class="collidable" 
                     remote-dynamic-body="counter: #counter; mass: 5;"
-                    scale="0.25 0.25 0.25"
-                    material="color: green"
-                    body="type: dynamic; mass: 5;"
+                    body="type: dynamic; mass: 5; shape: box;"
                     grabbable
                     stretchable
-                ></a-entity>
+                >
+                </a-entity>
             </template>
 
             <a-mixin id="super-hands"
@@ -115,17 +116,14 @@
         <a-entity id="counter" networked-counter="max: 3; ttl: 120"></a-entity>
 
         <a-entity 
-            id="cube-spawner" 
+            gltf-model="#interactable-duck"
+            scale="2 2 2"
+            class="collidable" 
+            class="collidable" 
             super-spawner="template: #interactable-template; spawn_position: 2.5 1.2 0;" 
             position="2.5 1.2 0" 
-        >
-            <a-box 
-                material="color: blue" 
-                class="collidable" 
-                scale="0.25 0.25 0.25"
-                body="mass: 0; type: static;"
-            ></a-box>
-        </a-entity>
+            body="mass: 0; type: static; shape: box;"
+        ></a-entity>
 
         <a-sphere
             id="3d-cursor"
@@ -154,9 +152,10 @@
                 look-controls="pointerLockEnabled: true;"
             >
                 <a-entity
+                    id="cursor-hand"
                     cursor-hand="cursor: #3d-cursor"
                     position="0 0 0"
-                    raycaster="objects: .collidable; direction: 0 0 -1; recursive: false;"
+                    raycaster="objects: .collidable; direction: 0 0 -1;"
                 ></a-entity>
             </a-entity>
 
@@ -167,8 +166,6 @@
                 tracked-controls
                 teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
                 haptic-feedback
-                static-body="shape: sphere; sphereRadius: 0.02"
-                mixin="super-hands"
             ></a-entity>
 
             <a-entity
@@ -178,8 +175,6 @@
                 tracked-controls
                 teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
                 haptic-feedback
-                static-body="shape: sphere; sphereRadius: 0.02"
-                mixin="super-hands"
             ></a-entity>
 
             <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller>
@@ -203,8 +198,26 @@
                             rotation="0 -90 90"
                             position="0 -0.04 0"
                         ></a-gltf-entity>
+                        <a-entity
+                            event-repeater="events: action_grab, action_release; target: #player-left-controller"
+                            static-body="shape: sphere; sphereRadius: 0.02"
+                            mixin="super-hands"
+                            position="0 0.05 0"
+                        ></a-entity>
                     </a-entity>
                 </template>
+
+                <template data-selector=".RightHand">
+                    <a-entity>
+                        <a-entity
+                            event-repeater="events: action_grab, action_release; target: #player-right-controller"
+                            static-body="shape: sphere; sphereRadius: 0.02"
+                            mixin="super-hands"
+                            position="0 -0.05 0"
+                        ></a-entity>
+                    </a-entity>
+                </template>
+
             </a-gltf-entity>
         </a-entity>
 

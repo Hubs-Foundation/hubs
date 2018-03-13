@@ -50,6 +50,7 @@ import "./components/remote-dynamic-body";
 import "./components/networked-counter";
 import "./components/super-spawner";
 import "./components/cursor-hand";
+import "./components/event-repeater";
 
 import { promptForName, getCookie, parseJwt } from "./utils/identity";
 import registerNetworkSchemas from "./network-schemas";
