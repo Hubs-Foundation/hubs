@@ -9,7 +9,12 @@ AFRAME.registerElement("a-progressive-asset", {
       value() {
         this.data = null;
         this.isAssetItem = true;
-        this.fileLoader = document.querySelector("a-assets").fileLoader;
+
+        if (!this.parentNode.fileLoader) {
+          throw new Error("a-progressive-asset must be the child of an a-assets element.");
+        }
+
+        this.fileLoader = this.parentNode.fileLoader;
       }
     },
 
@@ -22,9 +27,9 @@ AFRAME.registerElement("a-progressive-asset", {
 
         let src = fallbackSrc;
 
-        if (AFRAME.AGLTFEntity.quality === "high") {
+        if (window.APP.quality === "high") {
           src = highSrc;
-        } else if (AFRAME.AGLTFEntity.quality === "low") {
+        } else if (window.APP.quality === "low") {
           src = lowSrc;
         }
 

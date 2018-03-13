@@ -1,7 +1,6 @@
 const GLTFCache = {};
 
 AFRAME.AGLTFEntity = {
-  quality: "low",
   defaultInflator(el, componentName, componentData) {
     if (AFRAME.components[componentName].multiple && Array.isArray(componentData)) {
       for (let i = 0; i < componentData.length; i++) {
@@ -160,9 +159,9 @@ AFRAME.registerElement("a-gltf-entity", {
           const highSrc = assetEl.getAttribute("high-src");
           const lowSrc = assetEl.getAttribute("low-src");
 
-          if (highSrc && AFRAME.AGLTFEntity.quality === "high") {
+          if (highSrc && window.APP.quality === "high") {
             src = highSrc;
-          } else if (lowSrc && AFRAME.AGLTFEntity.quality === "low") {
+          } else if (lowSrc && window.APP.quality === "low") {
             src = lowSrc;
           } else {
             src = fallbackSrc;

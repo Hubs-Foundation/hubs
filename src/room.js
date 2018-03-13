@@ -38,18 +38,23 @@ import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
+import "./components/hide-when-quality";
 
 import "./systems/personal-space-bubble";
 
 import "./gltf-component-mappings";
 
+import { App } from "./App";
+
+window.APP = new App();
+
 const qs = queryString.parse(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 
 if (qs.quality) {
-  AFRAME.AGLTFEntity.quality = qs.quality;
+  window.APP.quality = qs.quality;
 } else {
-  AFRAME.AGLTFEntity.quality = isMobile ? "low" : "high";
+  window.APP.quality = isMobile ? "low" : "high";
 }
 
 import "./elements/a-progressive-asset";
@@ -157,5 +162,9 @@ function onConnect() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.querySelector("a-scene").addEventListener("loaded", onSceneLoad);
+  const scene = document.querySelector("a-scene");
+
+  window.APP.scene = scene;
+
+  scene.addEventListener("loaded", onSceneLoad);
 });
