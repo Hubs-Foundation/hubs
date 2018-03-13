@@ -1,7 +1,7 @@
 const GLTFCache = {};
 
 AFRAME.AGLTFEntity = {
-  defaultDeserializer(el, componentName, componentData) {
+  defaultInflator(el, componentName, componentData) {
     if (AFRAME.components[componentName].multiple && Array.isArray(componentData)) {
       for (let i = 0; i < componentData.length; i++) {
         el.setAttribute(componentName + "__" + i, componentData[i]);
@@ -10,9 +10,9 @@ AFRAME.AGLTFEntity = {
       el.setAttribute(componentName, componentData);
     }
   },
-  registerComponent(componentKey, componentName, deserializer) {
+  registerComponent(componentKey, componentName, inflator) {
     AFRAME.AGLTFEntity.components[componentKey] = {
-      deserializer: deserializer || AFRAME.AGLTFEntity.defaultDeserializer,
+      inflator: inflator || AFRAME.AGLTFEntity.defaultInflator,
       componentName
     };
   },
@@ -102,15 +102,15 @@ const inflateEntities = function(classPrefix, parentEl, node) {
 
   el.setObject3D(node.type.toLowerCase(), node);
 
-  const entityComponents = node.userData;
+  const entityComponents = node.userData.components;
 
   if (entityComponents) {
     for (const prop in entityComponents) {
       if (entityComponents.hasOwnProperty(prop)) {
-        const { deserializer, componentName } = AFRAME.AGLTFEntity.components[prop];
+        const { inflator, componentName } = AFRAME.AGLTFEntity.components[prop];
 
-        if (deserializer) {
-          deserializer(el, componentName, entityComponents[prop]);
+        if (inflator) {
+          inflator(el, componentName, entityComponents[prop]);
         }
       }
     }

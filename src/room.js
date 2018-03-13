@@ -41,9 +41,7 @@ import "./components/spawn-controller";
 
 import "./systems/personal-space-bubble";
 
-import registerComponents from "./aentity-components";
-import "./elements/a-gltf-entity";
-registerComponents();
+import "./gltf-component-mappings";
 
 import { promptForName, getCookie, parseJwt } from "./utils/identity";
 import registerNetworkSchemas from "./network-schemas";
