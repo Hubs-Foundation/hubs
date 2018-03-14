@@ -99,7 +99,7 @@ async function shareMedia(audio, video) {
     entity = document.createElement("a-entity");
     entity.id = id;
     entity.setAttribute("offset-relative-to", {
-      target: "#head",
+      target: "#player-camera",
       offset: "0 0 -2",
       on: "action_share_screen"
     });
