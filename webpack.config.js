@@ -52,7 +52,7 @@ function createHTTPSConfig() {
     fs.writeFileSync(path.join(__dirname, "certs", "key.pem"), pems.private);
 
     return {
-      key: pems.public,
+      key: pems.private,
       cert: pems.cert
     };
   }
@@ -73,7 +73,7 @@ class LodashTemplatePlugin {
   }
 }
 
-module.exports = {
+const config = {
   entry: {
     lobby: path.join(__dirname, "src", "lobby.js"),
     room: path.join(__dirname, "src", "room.js"),
@@ -81,7 +81,8 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, "public"),
-    filename: "[name]-[chunkhash].js"
+    filename: "[name]-[chunkhash].js",
+    publicPath: process.env.BASE_ASSETS_PATH || ""
   },
   mode: "development",
   devtool: process.env.NODE_ENV === "production" ? "source-map" : "inline-source-map",
@@ -89,6 +90,7 @@ module.exports = {
     open: true,
     https: createHTTPSConfig(),
     host: "0.0.0.0",
+    useLocalIp: true,
     port: 8080,
     before: function(app) {
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
@@ -114,7 +116,14 @@ module.exports = {
         loader: "html-loader",
         options: {
           // <a-asset-item>'s src property is overwritten with the correct transformed asset url.
-          attrs: ["img:src", "a-asset-item:src", "audio:src"],
+          attrs: [
+            "img:src",
+            "a-asset-item:src",
+            "a-progressive-asset:src",
+            "a-progressive-asset:high-src",
+            "a-progressive-asset:low-src",
+            "audio:src"
+          ],
           // You can get transformed asset urls in an html template using ${require("pathToFile.ext")}
           interpolate: "require"
         }
@@ -197,4 +206,31 @@ module.exports = {
       })
     })
   ]
+};
+
+module.exports = () => {
+  if (process.env.GENERATE_SMOKE_TESTS && process.env.BASE_ASSETS_PATH) {
+    const smokeConfig = Object.assign({}, config, {
+      // Set the public path for to point to the correct assets on the smoke-test build.
+      output: Object.assign({}, config.output, {
+        publicPath: process.env.BASE_ASSETS_PATH.replace("://", "://smoke-")
+      }),
+      // For this config
+      plugins: config.plugins.map(plugin => {
+        if (plugin instanceof HTMLWebpackPlugin) {
+          return new HTMLWebpackPlugin(
+            Object.assign({}, plugin.options, {
+              filename: "smoke-" + plugin.options.filename
+            })
+          );
+        }
+
+        return plugin;
+      })
+    });
+
+    return [config, smokeConfig];
+  } else {
+    return config;
+  }
 };

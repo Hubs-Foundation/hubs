@@ -38,6 +38,7 @@ import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
+import "./components/hide-when-quality";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -45,7 +46,22 @@ import UIRoot from "./react-components/ui-root";
 
 import "./systems/personal-space-bubble";
 
-import "./elements/a-gltf-entity";
+import "./gltf-component-mappings";
+
+import { App } from "./App";
+
+window.APP = new App();
+
+const qs = queryString.parse(location.search);
+const isMobile = AFRAME.utils.device.isMobile();
+
+if (qs.quality) {
+  window.APP.quality = qs.quality;
+} else {
+  window.APP.quality = isMobile ? "low" : "high";
+}
+
+import "./elements/a-progressive-asset";
 
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config } from "./input-mappings";
@@ -70,6 +86,33 @@ const store = new Store();
 // Always layer in any new default profile bits
 store.update({ profile:  { ...generateDefaultProfile(), ...(store.state.profile || {}) }})
 
+async function shareMedia(audio, video) {
+  const constraints = {
+    audio: !!audio,
+    video: video ? { mediaSource: "screen", height: 720, frameRate: 30 } : false
+  };
+  const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+  NAF.connection.adapter.setLocalMediaStream(mediaStream);
+
+  const id = `${NAF.clientId}-screen`;
+  let entity = document.getElementById(id);
+  if (entity) {
+    entity.setAttribute("visible", !!video);
+  } else if (video) {
+    const sceneEl = document.querySelector("a-scene");
+    entity = document.createElement("a-entity");
+    entity.id = id;
+    entity.setAttribute("offset-relative-to", {
+      target: "#player-camera",
+      offset: "0 0 -2",
+      on: "action_share_screen"
+    });
+    entity.setAttribute("networked", { template: "#video-template" });
+    sceneEl.appendChild(entity);
+  }
+}
+
+
 async function enterScene(mediaStream) {
   const qs = queryString.parse(location.search);
   const scene = document.querySelector("a-scene");
@@ -83,7 +126,7 @@ async function enterScene(mediaStream) {
     scene.setAttribute("stats", true);
   }
 
-  if (AFRAME.utils.device.isMobile() || qs.gamepad) {
+  if (isMobile || qs.mobile) {
     const playerRig = document.querySelector("#player-rig");
     playerRig.setAttribute("virtual-gamepad-controls", {});
   }
@@ -148,4 +191,9 @@ function mountUI() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => mountUI());
+document.addEventListener("DOMContentLoaded", () => {
+  const scene = document.querySelector("a-scene");
+  window.APP.scene = scene;
+
+  mountUI();
+});
