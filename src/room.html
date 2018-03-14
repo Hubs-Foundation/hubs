@@ -7,9 +7,9 @@
 
     <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="<%= ORIGIN_TRIAL_EXPIRES %>" content="<%= ORIGIN_TRIAL_TOKEN %>">
     <% if(NODE_ENV === "production") { %>
-        <script src="https://cdn.rawgit.com/brianpeiris/aframe/bba200440e3279753df85a1f52ba4c77a3b16e47/dist/aframe-master.min.js"></script>
+        <script src="https://cdn.rawgit.com/brianpeiris/aframe/845825ae694449524c185c44a314d361eead4680/dist/aframe-master.min.js"></script>
     <% } else { %>
-        <script src="https://cdn.rawgit.com/brianpeiris/aframe/bba200440e3279753df85a1f52ba4c77a3b16e47/dist/aframe-master.js"></script>
+        <script src="https://cdn.rawgit.com/brianpeiris/aframe/845825ae694449524c185c44a314d361eead4680/dist/aframe-master.js"></script>
     <% } %>
 </head>
 
@@ -42,10 +42,10 @@
                 <a-entity class="video" geometry="primitive: plane;" material="side: double" networked-video-player></a-entity>
             </template>
 
-            <template id="remote-avatar-template">                
+            <template id="remote-avatar-template">
                 <a-entity ik-root>
                     <a-entity class="camera"></a-entity>
-                    
+
                     <a-entity class="left-controller"></a-entity>
 
                     <a-entity class="right-controller"></a-entity>
@@ -62,7 +62,7 @@
                                 ></a-entity>
                              </a-entity>
                         </template>
-                        
+
                         <template data-selector=".Head">
                             <a-entity
                                 networked-audio-source
@@ -104,7 +104,7 @@
                 personal-space-bubble
                 look-controls
             ></a-entity>
-            
+
             <a-entity
                 id="player-left-controller"
                 class="left-controller"
