@@ -38,6 +38,7 @@ import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
+import "./components/animated-robot-hands";
 import "./components/hide-when-quality";
 
 import "./systems/personal-space-bubble";
