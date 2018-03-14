@@ -73,7 +73,7 @@ class LodashTemplatePlugin {
   }
 }
 
-module.exports = {
+const config = {
   entry: {
     lobby: path.join(__dirname, "src", "lobby.js"),
     room: path.join(__dirname, "src", "room.js"),
@@ -114,7 +114,13 @@ module.exports = {
         loader: "html-loader",
         options: {
           // <a-asset-item>'s src property is overwritten with the correct transformed asset url.
-          attrs: ["img:src", "a-asset-item:src"],
+          attrs: [
+            "img:src",
+            "a-asset-item:src",
+            "a-progressive-asset:src",
+            "a-progressive-asset:high-src",
+            "a-progressive-asset:low-src"
+          ],
           // You can get transformed asset urls in an html template using ${require("pathToFile.ext")}
           interpolate: "require"
         }
@@ -194,4 +200,31 @@ module.exports = {
       })
     })
   ]
+};
+
+module.exports = () => {
+  if (process.env.GENERATE_SMOKE_TESTS && process.env.BASE_ASSETS_PATH) {
+    const smokeConfig = Object.assign({}, config, {
+      // Set the public path for to point to the correct assets on the smoke-test build.
+      output: Object.assign({}, config.output, {
+        publicPath: process.env.BASE_ASSETS_PATH.replace("://", "://smoke-")
+      }),
+      // For this config
+      plugins: config.plugins.map(plugin => {
+        if (plugin instanceof HTMLWebpackPlugin) {
+          return new HTMLWebpackPlugin(
+            Object.assign({}, plugin.options, {
+              filename: "smoke-" + plugin.options.filename
+            })
+          );
+        }
+
+        return plugin;
+      })
+    });
+
+    return [config, smokeConfig];
+  } else {
+    return config;
+  }
 };
