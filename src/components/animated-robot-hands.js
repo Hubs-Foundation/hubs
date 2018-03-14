@@ -81,8 +81,8 @@ AFRAME.registerComponent("animated-robot-hands", {
     //    console.log(
     //      `Animating ${isLeft ? "left" : "right"} hand from ${prevPose} to ${currPose} over ${duration} seconds.`
     //    );
-    var from = mixer.clipAction(prevPose, this.root.parent);
-    var to = mixer.clipAction(currPose, this.root.parent);
+    const from = mixer.clipAction(prevPose, this.root.parent);
+    const to = mixer.clipAction(currPose, this.root.parent);
     from.fadeOut(duration);
     to.fadeIn(duration);
     to.play();
