@@ -70,6 +70,7 @@ export async function getAvailableVREntryTypes() {
     if (hasDaydreamWebVRDevice) {
       // If we detected daydream via WebVR
       daydream = VR_DEVICE_AVAILABILITY.yes;
+      generic = VR_DEVICE_AVAILABILITY.no;
     } else if (isDaydreamCapableBrowser) {
       // If we didn't detect daydream in a daydream capable browser, we definitely can't run daydream at all.
       daydream = VR_DEVICE_AVAILABILITY.no;

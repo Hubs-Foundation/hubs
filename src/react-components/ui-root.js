@@ -328,9 +328,7 @@ class UIRoot extends Component {
   }
 
   onAudioReadyButton = () => {
-    if (this.state.enterInVR) {
-      document.querySelector("a-scene").enterVR();
-    }
+    this.props.enterScene(this.state.mediaStream, this.state.enterInVR);
 
     const mediaStream = this.state.mediaStream;
 
@@ -345,7 +343,6 @@ class UIRoot extends Component {
     }
 
     this.stopTestTone();
-    this.props.enterScene(this.state.mediaStream);
     this.setState({ entryStep: ENTRY_STEPS.finished });
   }
 

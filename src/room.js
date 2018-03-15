@@ -64,20 +64,13 @@ if (qs.quality) {
 import "./elements/a-progressive-asset";
 
 import registerNetworkSchemas from "./network-schemas";
-import { inGameActions, config } from "./input-mappings";
+import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 import Store from "./storage/store";
 
 import { generateDefaultProfile } from "./utils/identity.js";
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
-
-AFRAME.registerInputBehaviour("vive_trackpad_dpad4", vive_trackpad_dpad4);
-AFRAME.registerInputBehaviour("oculus_touch_joystick_dpad4", oculus_touch_joystick_dpad4);
-AFRAME.registerInputActivator("pressedmove", PressedMove);
-AFRAME.registerInputActivator("reverseY", ReverseY);
-AFRAME.registerInputActions(inGameActions, "default");
-AFRAME.registerInputMappings(config);
 
 registerNetworkSchemas();
 registerTelemetry();
@@ -126,9 +119,22 @@ function setNameTagFromStore() {
   myNametag.setAttribute("text", "value", store.state.profile.display_name);
 }
 
-async function enterScene(mediaStream) {
-  const qs = queryString.parse(location.search);
+async function enterScene(mediaStream, enterInVR) {
   const scene = document.querySelector("a-scene");
+
+  if (enterInVR) {
+    scene.enterVR();
+  }
+
+  AFRAME.registerInputBehaviour("vive_trackpad_dpad4", vive_trackpad_dpad4);
+  AFRAME.registerInputBehaviour("oculus_touch_joystick_dpad4", oculus_touch_joystick_dpad4);
+  AFRAME.registerInputActivator("pressedmove", PressedMove);
+  AFRAME.registerInputActivator("reverseY", ReverseY);
+  AFRAME.registerInputActions(inGameActions, "default");
+  AFRAME.registerInputMappings(inputConfig);
+  document.querySelector("#player-camera").setAttribute("look-controls", "");
+
+  const qs = queryString.parse(location.search);
 
   scene.setAttribute("networked-scene", {
     room: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1,
