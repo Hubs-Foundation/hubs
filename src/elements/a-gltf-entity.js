@@ -102,6 +102,19 @@ const inflateEntities = function(classPrefix, parentEl, node) {
 
   el.setObject3D(node.type.toLowerCase(), node);
 
+  // Set the name of the `THREE.Group` to match the name of the node,
+  // so that `THREE.PropertyBinding` will find (and later animate)
+  // the group. See `PropertyBinding.findNode`:
+  // https://github.com/mrdoob/three.js/blob/dev/src/animation/PropertyBinding.js#L211
+  el.object3D.name = node.name;
+  if (node.animations) {
+    // Pass animations up to the group object so that when we can pass the group as
+    // the optional root in `THREE.AnimationMixer.clipAction` and use the hierarchy
+    // preserved under the group (but not the node). Otherwise `clipArray` will be
+    // `null` in `THREE.AnimationClip.findByName`.
+    node.parent.animations = node.animations;
+  }
+
   const entityComponents = node.userData.components;
 
   if (entityComponents) {
@@ -154,7 +167,18 @@ AFRAME.registerElement("a-gltf-entity", {
         // If the src attribute is a selector, get the url from the asset item.
         if (src.charAt(0) === "#") {
           const assetEl = document.getElementById(src.substring(1));
-          src = assetEl.getAttribute("src");
+
+          const fallbackSrc = assetEl.getAttribute("src");
+          const highSrc = assetEl.getAttribute("high-src");
+          const lowSrc = assetEl.getAttribute("low-src");
+
+          if (highSrc && window.APP.quality === "high") {
+            src = highSrc;
+          } else if (lowSrc && window.APP.quality === "low") {
+            src = lowSrc;
+          } else {
+            src = fallbackSrc;
+          }
         }
 
         const onLoad = gltfModel => {

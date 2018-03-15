@@ -39,6 +39,8 @@ import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
+import "./components/animated-robot-hands";
+import "./components/hide-when-quality";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
@@ -46,6 +48,21 @@ import "./systems/app-mode";
 import "./elements/a-gltf-entity";
 
 import "./gltf-component-mappings";
+
+import { App } from "./App";
+
+window.APP = new App();
+
+const qs = queryString.parse(location.search);
+const isMobile = AFRAME.utils.device.isMobile();
+
+if (qs.quality) {
+  window.APP.quality = qs.quality;
+} else {
+  window.APP.quality = isMobile ? "low" : "high";
+}
+
+import "./elements/a-progressive-asset";
 
 import { promptForName, getCookie, parseJwt } from "./utils/identity";
 import registerNetworkSchemas from "./network-schemas";
@@ -81,7 +98,7 @@ async function shareMedia(audio, video) {
     entity = document.createElement("a-entity");
     entity.id = id;
     entity.setAttribute("offset-relative-to", {
-      target: "#head",
+      target: "#player-camera",
       offset: "0 0 -2",
       on: "action_share_screen"
     });
@@ -91,7 +108,6 @@ async function shareMedia(audio, video) {
 }
 
 async function onSceneLoad() {
-  const qs = queryString.parse(location.search);
   const scene = document.querySelector("a-scene");
 
   scene.setAttribute("networked-scene", {
@@ -103,7 +119,7 @@ async function onSceneLoad() {
     scene.setAttribute("stats", true);
   }
 
-  if (AFRAME.utils.device.isMobile() || qs.gamepad) {
+  if (isMobile || qs.mobile) {
     const playerRig = document.querySelector("#player-rig");
     playerRig.setAttribute("virtual-gamepad-controls", {});
   }
@@ -155,5 +171,9 @@ function onConnect() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.querySelector("a-scene").addEventListener("loaded", onSceneLoad);
+  const scene = document.querySelector("a-scene");
+
+  window.APP.scene = scene;
+
+  scene.addEventListener("loaded", onSceneLoad);
 });
