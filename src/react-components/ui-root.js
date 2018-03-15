@@ -66,6 +66,18 @@ class ProfileEntryPanel extends Component {
   }
 }
 
+const AutoExitWarning = (props) => (
+  <div>
+    <p>
+    Exit in <span>{props.secondsRemaining}</span>
+    </p>
+    
+    <button onClick={props.onCancel}>
+    Cancel
+    </button>
+  </div>
+);
+
 // This is a list of regexes that match the microphone labels of HMDs.
 //
 // If entering VR mode, and if any of these regexes match an audio device,
@@ -76,28 +88,43 @@ class ProfileEntryPanel extends Component {
 // then we rely upon the user to select the proper mic.
 const VR_DEVICE_MIC_LABEL_REGEXES = [];
 
+const AUTO_EXIT_TIMER_SECONDS = 10;
+
 class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
     availableVREntryTypes: PropTypes.object,
     store: PropTypes.object
+    concurrentLoadDetector: PropTypes.object,
+    disableAutoExitOnConcurrentLoad: PropTypes.bool
   };
 
   state = {
     entryStep: ENTRY_STEPS.start,
-    shareScreen: false,
     enterInVR: false,
-    micDevices: [],
+
+    shareScreen: false,
     mediaStream: null,
+
     toneInterval: null,
     tonePlaying: false,
+
     micLevel: 0,
+    micDevices: [],
     micUpdateInterval: null,
-    profileNamePending: "Hello"
+
+    profileNamePending: "Hello",
+
+    autoExitTimerStartedAt: null,
+    autoExitTimerInterval: null,
+    secondsRemainingBeforeAutoExit: Infinity,
+
+    exited: false
   }
 
   componentDidMount() {
     this.setupTestTone();
+    this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
   }
 
   setupTestTone = () => { 
@@ -130,6 +157,44 @@ class UIRoot extends Component {
     toneClip.currentTime = 0;
 
     this.setState({ tonePlaying: false })
+  }
+
+  onConcurrentLoad = () => {
+    if (this.props.disableAutoExitOnConcurrentLoad) return;
+
+    const autoExitTimerInterval = setInterval(() => {
+      let secondsRemainingBeforeAutoExit = Infinity;
+
+      if (this.state.autoExitTimerStartedAt) {
+        const secondsSinceStart = (new Date() - this.state.autoExitTimerStartedAt) / 1000;
+        secondsRemainingBeforeAutoExit = Math.max(0, Math.floor(AUTO_EXIT_TIMER_SECONDS - secondsSinceStart));
+      }
+
+      this.setState({ secondsRemainingBeforeAutoExit });
+      this.checkForAutoExit();
+    }, 500);
+
+    this.setState({ autoExitTimerStartedAt: new Date(), autoExitTimerInterval })
+  }
+
+  checkForAutoExit = () => {
+    if (this.state.secondsRemainingBeforeAutoExit !== 0) return;
+    this.endAutoExitTimer();
+    this.exit();
+  }
+
+  exit = () => {
+    this.props.exitScene();
+    this.setState({ exited: true });
+  }
+
+  isWaitingForAutoExit = () => {
+    return this.state.secondsRemainingBeforeAutoExit <= AUTO_EXIT_TIMER_SECONDS;
+  }
+
+  endAutoExitTimer = () => {
+    clearInterval(this.state.autoExitTimerInterval);
+    this.setState({ autoExitTimerStartedAt: null, autoExitTimerInterval: null, secondsRemainingBeforeAutoExit: Infinity });
   }
 
   performDirectEntryFlow = async (enterInVR) => {
@@ -299,14 +364,25 @@ class UIRoot extends Component {
         </div>
       ) : null;
 
-    return (
-      <div>
-        UI Here
+    const overlay = this.isWaitingForAutoExit() ?
+      (<AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />) :
+      (<div>
         {entryPanel}
         {micPanel}
         {audioSetupPanel}
-      </div>
-    );
+        </div>
+      );
+
+    return !this.state.exited ?
+      (
+        <div>
+          Base UI here
+          {overlay}
+        </div>
+      ) :
+      (
+        <div>Exited</div>
+      )
   }
 }
 
