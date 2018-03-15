@@ -196,13 +196,19 @@ function mountUI() {
   getAvailableVREntryTypes().then(availableVREntryTypes => {
     const qs = queryString.parse(location.search);
     const disableAutoExitOnConcurrentLoad = qs.allow_multi === "true"
+    let forcedVREntryType = null;
+
+    if (qs.vr_entry_type) {
+      forcedVREntryType = qs.vr_entry_type;
+    }
 
     ReactDOM.render(<UIRoot {...{
       availableVREntryTypes,
       enterScene,
       exitScene,
       concurrentLoadDetector,
-      disableAutoExitOnConcurrentLoad
+      disableAutoExitOnConcurrentLoad,
+      forcedVREntryType
     }} />, document.getElementById("ui-root"));
 
     document.getElementById("loader").style.display = "none";

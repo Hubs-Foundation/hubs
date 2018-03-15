@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect.js";
+import queryString from "query-string";
+
+const { detect } = require("detect-browser");
+const browser = detect();
 
 const ENTRY_STEPS = {
   start: "start",
@@ -96,7 +100,8 @@ class UIRoot extends Component {
     availableVREntryTypes: PropTypes.object,
     store: PropTypes.object,
     concurrentLoadDetector: PropTypes.object,
-    disableAutoExitOnConcurrentLoad: PropTypes.bool
+    disableAutoExitOnConcurrentLoad: PropTypes.bool,
+    forcedVREntryType: PropTypes.string
   };
 
   state = {
@@ -125,6 +130,17 @@ class UIRoot extends Component {
   componentDidMount() {
     this.setupTestTone();
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
+    this.handleForcedVREntryType();
+  }
+
+  handleForcedVREntryType = () => {
+    if (!this.props.forcedVREntryType) return;
+
+    if (this.props.forcedVREntryType === "daydream") {
+      this.enterDaydream();
+    } else if (this.props.forcedVREntryType === "gearvr") {
+      this.enterGearVR();
+    }
   }
 
   setupTestTone = () => { 
@@ -222,11 +238,32 @@ class UIRoot extends Component {
   }
 
   enterGearVR = async () => {
-    document.location = `ovrweb://${document.location.toString()}`;
+    this.exit();
+
+    // Launch via Oculus Browser
+    const qs = queryString.parse(document.location.search);
+    qs.vr_entry_type = "gearvr"; // Auto-choose 'gearvr' after landing in Oculus Browser
+
+    const ovrwebUrl = `ovrweb://${document.location.protocol || "http:"}//${document.location.host}${document.location.pathname || ""}?${queryString.stringify(qs)}#{document.location.hash || ""}`;
+
+    document.location = ovrwebUrl;
   }
 
   enterDaydream = async () => {
-    console.log("daydream");
+    const loc = document.location;
+
+    if (this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe) {
+      this.exit();
+
+      // We are not in mobile chrome, so launch into chrome via an Intent URL
+      const qs = queryString.parse(document.location.search);
+      qs.vr_entry_type = "daydream"; // Auto-choose 'daydream' after landing in chrome
+
+      const intentUrl = `intent://${document.location.host}${document.location.pathname || ""}?${queryString.stringify(qs)}#Intent;scheme=${(document.location.protocol || "http:").replace(":", "")};action=android.intent.action.VIEW;package=com.android.chrome;end;`;
+      document.location = intentUrl;
+    } else {
+      await this.performDirectEntryFlow(true);
+    }
   }
 
   mediaVideoConstraint = () => {

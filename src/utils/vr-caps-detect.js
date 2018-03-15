@@ -9,32 +9,12 @@ export const VR_DEVICE_AVAILABILITY = {
   maybe: "maybe" // Implies this device may support this VR platform, but may not be installed or in a compatible browser
 };
 
-function hasPhysicalScreenDimensions(w, h) {
-  const dpr = window.devicePixelRatio;
-  const width = screen.width * dpr;
-  const height = screen.height * dpr;
-
-  // Compensate for rounding error due to fractional pixel densities
-  return Math.abs(w - width) < 3 && Math.abs(h - height) < 3;
-}
-
-function matchesScreenSizesAndUserAgentRegexes(sizes, regexes) {
-  return !!(sizes.find(s => hasPhysicalScreenDimensions(...s)) && regexes.find(r => navigator.userAgent.match()));
-}
-
 function isMaybeGearVRCompatibleDevice() {
-  // Modern Samsung Galaxy devices have model numbers in the user agent of the form SX-XXXX or GT-XXXX for note 8
-  return matchesScreenSizesAndUserAgentRegexes([[1440, 2560], [1440, 2960]], [/\WS.-.....?\W/, /\WGT-.....?\W/]);
+  return navigator.userAgent.match(/\WAndroid\W/);
 }
 
 function isMaybeDaydreamCompatibleDevice() {
-  // If it might be a GearVR device, then we assume it might also be a Daydream device since S8 and higher
-  // support Daydream.
-  if (isMaybeGearVRCompatibleDevice()) return true;
-
-  // List of resolutions of Pixel line of phones as well as other announced Daydream compatible
-  // phones. This list may need to be updated as new phones roll out.
-  return matchesScreenSizesAndUserAgentRegexes([[1080, 1920], [1440, 2560], [1440, 2880]], [/\WAndroid\W/]);
+  return navigator.userAgent.match(/\WAndroid\W/);
 }
 
 // Blacklist of VR device name regex matchers that we do not want to consider as valid VR devices
@@ -60,7 +40,8 @@ const GENERIC_ENTRY_TYPE_DEVICE_BLACKLIST = [/cardboard/i];
 //
 export async function getAvailableVREntryTypes() {
   const isWebVRCapableBrowser = !!navigator.getVRDisplays;
-  const isDaydreamCapableBrowser = !!(isWebVRCapableBrowser && browser.name === "chrome");
+  const isSamsungBrowser = browser.name === "chrome" && navigator.userAgent.match(/SamsungBrowser/);
+  const isDaydreamCapableBrowser = !!(isWebVRCapableBrowser && browser.name === "chrome" && !isSamsungBrowser);
 
   let generic = VR_DEVICE_AVAILABILITY.no;
 
