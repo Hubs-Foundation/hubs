@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect.js";
-import { SCHEMA } from "../storage/store";
+import NameEntryPanel from './name-entry-panel';
+import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 
 const ENTRY_STEPS = {
   start: "start",
@@ -301,11 +301,6 @@ class UIRoot extends Component {
     this.setState({ entryStep: ENTRY_STEPS.finished });
   }
 
-  saveName = (e) => {
-    e.preventDefault();
-    this.props.store.update({ profile: { display_name: this.nameInput.value } });
-  }
-
   render() {
     const entryPanel = this.state.entryStep === ENTRY_STEPS.start
     ? (
@@ -347,22 +342,6 @@ class UIRoot extends Component {
         </div>
       ) : null;
 
-    const nameEntryPanel = (
-      <div>
-        Name Entry
-        <form onSubmit={this.saveName}>
-          <label>Name:
-            <input
-              defaultValue={this.props.store.state.profile.display_name}
-              required pattern={SCHEMA.definitions.profile.properties.display_name.pattern}
-              title="Alphanumerics and hyphens. At least 3 characters, no more than 32"
-              ref={inp => this.nameInput = inp}/>
-          </label>
-          <input type="submit" value="Save" />
-        </form>
-      </div>
-    );
-
     const overlay = this.isWaitingForAutoExit() ?
       (<AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />) :
       (
@@ -371,7 +350,7 @@ class UIRoot extends Component {
           {micPanel}
           {audioSetupPanel}
 
-          {nameEntryPanel}
+          <NameEntryPanel store={this.props.store}></NameEntryPanel>
         </div>
       );
 
