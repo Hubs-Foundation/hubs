@@ -194,7 +194,17 @@ function onConnect() {
 
 function mountUI() {
   getAvailableVREntryTypes().then(availableVREntryTypes => {
-    ReactDOM.render(<UIRoot {...{ availableVREntryTypes, enterScene, exitScene, concurrentLoadDetector }} />, document.getElementById("ui-root"));
+    const qs = queryString.parse(location.search);
+    const disableAutoExitOnConcurrentLoad = qs.allow_multi === "true"
+
+    ReactDOM.render(<UIRoot {...{
+      availableVREntryTypes,
+      enterScene,
+      exitScene,
+      concurrentLoadDetector,
+      disableAutoExitOnConcurrentLoad
+    }} />, document.getElementById("ui-root"));
+
     document.getElementById("loader").style.display = "none";
   });
 }

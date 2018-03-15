@@ -73,6 +73,7 @@ class UIRoot extends Component {
     enterScene: PropTypes.func,
     availableVREntryTypes: PropTypes.object,
     concurrentLoadDetector: PropTypes.object,
+    disableAutoExitOnConcurrentLoad: PropTypes.bool
   };
 
   state = {
@@ -134,6 +135,8 @@ class UIRoot extends Component {
   }
 
   onConcurrentLoad = () => {
+    if (this.props.disableAutoExitOnConcurrentLoad) return;
+
     const autoExitTimerInterval = setInterval(() => {
       let secondsRemainingBeforeAutoExit = Infinity;
 
