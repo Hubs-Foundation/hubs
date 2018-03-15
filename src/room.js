@@ -197,7 +197,7 @@ function onConnect() {
   document.getElementById("loader").style.display = "none";
 }
 
-function mountUI() {
+function mountUI(scene) {
   getAvailableVREntryTypes().then(availableVREntryTypes => {
     const qs = queryString.parse(location.search);
     const disableAutoExitOnConcurrentLoad = qs.allow_multi === "true"
@@ -209,6 +209,7 @@ function mountUI() {
 
     ReactDOM.render(<UIRoot {...{
       availableVREntryTypes,
+      scene,
       enterScene,
       exitScene,
       concurrentLoadDetector,
@@ -223,6 +224,5 @@ function mountUI() {
 document.addEventListener("DOMContentLoaded", () => {
   const scene = document.querySelector("a-scene");
   window.APP.scene = scene;
-
-  mountUI();
+  mountUI(scene);
 });

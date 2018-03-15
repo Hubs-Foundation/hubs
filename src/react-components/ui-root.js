@@ -81,6 +81,7 @@ class UIRoot extends Component {
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
     store: PropTypes.object,
+    scene: PropTypes.object
   }
 
   state = {
@@ -103,6 +104,7 @@ class UIRoot extends Component {
     autoExitTimerInterval: null,
     secondsRemainingBeforeAutoExit: Infinity,
 
+    sceneLoaded: false,
     exited: false
   }
 
@@ -110,6 +112,15 @@ class UIRoot extends Component {
     this.setupTestTone();
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
     this.handleForcedVREntryType();
+    this.props.scene.addEventListener("loaded", this.onSceneLoaded);
+  }
+
+  componentWillUnmount() {
+    this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
+  }
+
+  onSceneLoaded = () => {
+    this.setState({ sceneLoaded: true });
   }
 
   handleForcedVREntryType = () => {
@@ -344,6 +355,12 @@ class UIRoot extends Component {
   }
 
   render() {
+    if (!this.state.sceneLoaded) {
+      return (
+        <div>Loading scene</div>
+      );
+    }
+
     const entryPanel = this.state.entryStep === ENTRY_STEPS.start
     ? (
       <div>
