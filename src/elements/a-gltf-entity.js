@@ -81,6 +81,11 @@ const inflateEntities = function(classPrefix, parentEl, node) {
   el.classList.add(classPrefix + className);
   parentEl.appendChild(el);
 
+  // AFRAME rotation component expects rotations in YXZ, convert it
+  if (node.rotation.order !== "YXZ") {
+    node.rotation.setFromQuaternion(node.quaternion, "YXZ");
+  }
+
   // Copy over transform to the THREE.Group and reset the actual transform of the Object3D
   el.setAttribute("position", {
     x: node.position.x,
@@ -98,9 +103,8 @@ const inflateEntities = function(classPrefix, parentEl, node) {
     z: node.scale.z
   });
 
-  node.position.set(0, 0, 0);
-  node.rotation.set(0, 0, 0);
-  node.scale.set(1, 1, 1);
+  node.matrixAutoUpdate = false;
+  node.matrix.identity();
 
   el.setObject3D(node.type.toLowerCase(), node);
 
@@ -118,7 +122,6 @@ const inflateEntities = function(classPrefix, parentEl, node) {
   }
 
   const entityComponents = node.userData.components;
-
   if (entityComponents) {
     for (const prop in entityComponents) {
       if (entityComponents.hasOwnProperty(prop)) {
