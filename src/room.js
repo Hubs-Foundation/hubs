@@ -70,6 +70,7 @@ import Store from "./storage/store";
 
 import { generateDefaultProfile } from "./utils/identity.js";
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
+import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
 AFRAME.registerInputBehaviour("vive_trackpad_dpad4", vive_trackpad_dpad4);
 AFRAME.registerInputBehaviour("oculus_touch_joystick_dpad4", oculus_touch_joystick_dpad4);
@@ -82,6 +83,8 @@ registerNetworkSchemas();
 registerTelemetry();
 
 const store = new Store();
+const concurrentLoadDetector = new ConcurrentLoadDetector();
+concurrentLoadDetector.start();
 
 // Always layer in any new default profile bits
 store.update({ profile:  { ...generateDefaultProfile(), ...(store.state.profile || {}) }})
@@ -112,6 +115,11 @@ async function shareMedia(audio, video) {
   }
 }
 
+async function exitScene() {
+  if (NAF.connection && NAF.connection.adapter) {
+    NAF.connection.disconnect();
+  }
+}
 
 async function enterScene(mediaStream) {
   const qs = queryString.parse(location.search);
@@ -186,7 +194,7 @@ function onConnect() {
 
 function mountUI() {
   getAvailableVREntryTypes().then(availableVREntryTypes => {
-    ReactDOM.render(<UIRoot {...{ availableVREntryTypes, enterScene }} />, document.getElementById("ui-root"));
+    ReactDOM.render(<UIRoot {...{ availableVREntryTypes, enterScene, exitScene, concurrentLoadDetector }} />, document.getElementById("ui-root"));
     document.getElementById("loader").style.display = "none";
   });
 }
