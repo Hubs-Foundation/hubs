@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect.js";
+import Store, { SCHEMA } from "../storage/store";
 
 const ENTRY_STEPS = {
   start: "start",
   mic_grant: "mic_grant",
   mic_granted: "mic_granted",
   audio_setup: "audio_setup",
+  name_entry: "name_entry",
   finished: "finished"
 }
 
@@ -58,7 +60,9 @@ class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
     availableVREntryTypes: PropTypes.object
-  };
+  }
+
+  store = new Store()
 
   state = {
     entryStep: ENTRY_STEPS.start,
@@ -76,7 +80,7 @@ class UIRoot extends Component {
     this.setupTestTone();
   }
 
-  setupTestTone = () => { 
+  setupTestTone = () => {
     const toneClip = document.querySelector("#test-tone");
     const toneLength = 1800;
     const toneDelay = 5000;
@@ -228,13 +232,19 @@ class UIRoot extends Component {
       }
     }
 
-    this.props.enterScene(mediaStream);
     this.stopTestTone();
+    this.setState({ entryStep: ENTRY_STEPS.name_entry });
+  }
+
+  saveName = (e) => {
+    e.preventDefault();
+    this.store.update({ profile: { display_name: this.nameInput.value } });
+    this.props.enterScene(this.state.mediaStream);
     this.setState({ entryStep: ENTRY_STEPS.finished });
   }
 
   render() {
-    const entryPanel = this.state.entryStep === ENTRY_STEPS.start 
+    const entryPanel = this.state.entryStep === ENTRY_STEPS.start
     ? (
       <div>
         <TwoDEntryButton onClick={this.enter2D}/>
@@ -274,12 +284,30 @@ class UIRoot extends Component {
         </div>
       ) : null;
 
+    const nameEntryPanel = this.state.entryStep === ENTRY_STEPS.name_entry
+    ? (
+        <div>
+          Name Entry
+          <form onSubmit={this.saveName}>
+            <label>Name:
+              <input
+                defaultValue={this.store.state.profile.display_name}
+                required pattern={SCHEMA.definitions.profile.properties.display_name.pattern}
+                title="Alphanumerics and hyphens. At least 3 characters, no more than 32"
+                ref={inp => this.nameInput = inp}/>
+            </label>
+            <input type="submit" value="Save" />
+          </form>
+        </div>
+      ) : null;
+
     return (
       <div>
         UI Here
         {entryPanel}
         {micPanel}
         {audioSetupPanel}
+        {nameEntryPanel}
       </div>
     );
   }

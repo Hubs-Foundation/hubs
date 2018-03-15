@@ -186,7 +186,10 @@ function onConnect() {
 
 function mountUI() {
   getAvailableVREntryTypes().then(availableVREntryTypes => {
-    ReactDOM.render(<UIRoot {...{ availableVREntryTypes, enterScene }} />, document.getElementById("ui-root"));
+    ReactDOM.render(
+      <UIRoot {...{ availableVREntryTypes, enterScene }} />,
+      document.getElementById("ui-root")
+    );
     document.getElementById("loader").style.display = "none";
   });
 }

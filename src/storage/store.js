@@ -7,7 +7,7 @@ const validator = new Validator();
 
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
-const SCHEMA = {
+export const SCHEMA = {
   id: "/MozillaDuckStore",
 
   definitions: {
