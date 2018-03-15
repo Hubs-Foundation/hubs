@@ -77,7 +77,7 @@ const inflateEntities = function(classPrefix, parentEl, node) {
   const el = document.createElement("a-entity");
 
   // Remove invalid CSS class name characters.
-  const className = node.name.replace(/[^\w-]/g, "");
+  const className = (node.name || node.uuid).replace(/[^\w-]/g, "");
   el.classList.add(classPrefix + className);
   parentEl.appendChild(el);
 
