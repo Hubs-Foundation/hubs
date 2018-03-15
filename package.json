@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "aframe-billboard-component": "^1.0.0",
-    "aframe-extras": "^3.12.4",
     "aframe-input-mapping-component": "https://github.com/johnshaughnessy/aframe-input-mapping-component#23e2855",
     "aframe-teleport-controls": "https://github.com/netpro2k/aframe-teleport-controls#feature/teleport-origin",
     "aframe-xr": "github:brianpeiris/aframe-xr#3162aed",

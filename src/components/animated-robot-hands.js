@@ -14,46 +14,47 @@ const POSES = {
 //       it would be nice to animate the hands proportionally to those analog values.
 AFRAME.registerComponent("animated-robot-hands", {
   schema: {
-    leftHand: { type: "selector", default: "#player-left-controller" },
-    rightHand: { type: "selector", default: "#player-right-controller" }
+    mixer: { type: "string" },
+    leftHand: { type: "string", default: "#player-left-controller" },
+    rightHand: { type: "string", default: "#player-right-controller" }
   },
 
   init: function() {
-    window.hands = this;
     this.playAnimation = this.playAnimation.bind(this);
 
-    // Get the three.js object in the scene graph that has the animation data
-    const root = this.el.querySelector("a-gltf-entity .RootScene").object3D.children[0];
-    this.mixer = new THREE.AnimationMixer(root);
-    this.root = root;
+    const mixerEl = this.el.querySelector(this.data.mixer);
+    this.leftHand = this.el.querySelector(this.data.leftHand);
+    this.rightHand = this.el.querySelector(this.data.rightHand);
 
-    // Set hands to open pose because the bind pose is funky due
+    this.mixer = mixerEl.mixer;
+
+    const object3DMap = mixerEl.object3DMap;
+    const rootObj = object3DMap.mesh || object3DMap.scene;
+    this.clipActionObject = rootObj.parent;
+
+    // Set hands to open pose because the bind pose is funky dues
     // to the workaround for FBX2glTF animations.
-    this.openL = this.mixer.clipAction(POSES.open + "_L", root.parent);
-    this.openR = this.mixer.clipAction(POSES.open + "_R", root.parent);
+    this.openL = this.mixer.clipAction(POSES.open + "_L", this.clipActionObject);
+    this.openR = this.mixer.clipAction(POSES.open + "_R", this.clipActionObject);
     this.openL.play();
     this.openR.play();
   },
 
   play: function() {
-    this.data.leftHand.addEventListener("hand-pose", this.playAnimation);
-    this.data.rightHand.addEventListener("hand-pose", this.playAnimation);
+    this.leftHand.addEventListener("hand-pose", this.playAnimation);
+    this.rightHand.addEventListener("hand-pose", this.playAnimation);
   },
 
   pause: function() {
-    this.data.leftHand.removeEventListener("hand-pose", this.playAnimation);
-    this.data.rightHand.removeEventListener("hand-pose", this.playAnimation);
-  },
-
-  tick: function(t, dt) {
-    this.mixer.update(dt / 1000);
+    this.leftHand.removeEventListener("hand-pose", this.playAnimation);
+    this.rightHand.removeEventListener("hand-pose", this.playAnimation);
   },
 
   // Animate from pose to pose.
   // TODO: Transition from current pose (which may be BETWEEN two other poses)
   //       to the target pose, rather than stopping previous actions altogether.
   playAnimation: function(evt) {
-    const isLeft = evt.target === this.data.leftHand;
+    const isLeft = evt.target === this.leftHand;
     // Stop the initial animations we started when the model loaded.
     if (!this.openLStopped && isLeft) {
       this.openL.stop();
@@ -81,8 +82,8 @@ AFRAME.registerComponent("animated-robot-hands", {
     //    console.log(
     //      `Animating ${isLeft ? "left" : "right"} hand from ${prevPose} to ${currPose} over ${duration} seconds.`
     //    );
-    const from = mixer.clipAction(prevPose, this.root.parent);
-    const to = mixer.clipAction(currPose, this.root.parent);
+    const from = mixer.clipAction(prevPose, this.clipActionObject);
+    const to = mixer.clipAction(currPose, this.clipActionObject);
     from.fadeOut(duration);
     to.fadeIn(duration);
     to.play();
