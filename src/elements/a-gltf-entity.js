@@ -22,18 +22,20 @@ AFRAME.AGLTFEntity = {
 // From https://gist.github.com/cdata/f2d7a6ccdec071839bc1954c32595e87
 // Tracking glTF cloning here: https://github.com/mrdoob/three.js/issues/11573
 function cloneGltf(gltf) {
-  const clone = {
-    animations: gltf.animations,
-    scene: gltf.scene.clone(true)
-  };
-
   const skinnedMeshes = {};
-
   gltf.scene.traverse(node => {
+    if (!node.name) {
+      node.name = node.uuid;
+    }
     if (node.isSkinnedMesh) {
       skinnedMeshes[node.name] = node;
     }
   });
+
+  const clone = {
+    animations: gltf.animations,
+    scene: gltf.scene.clone(true)
+  };
 
   const cloneBones = {};
   const cloneSkinnedMeshes = {};
