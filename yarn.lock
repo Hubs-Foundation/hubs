@@ -73,9 +73,9 @@ aframe-extras@^3.12.4:
     aframe-physics-system "^1.4.3"
     three-pathfinding "^0.2.2"
 
-"aframe-input-mapping-component@https://github.com/johnshaughnessy/aframe-input-mapping-component#23e2855":
+"aframe-input-mapping-component@https://github.com/johnshaughnessy/aframe-input-mapping-component#c369fed":
   version "0.1.2"
-  resolved "https://github.com/johnshaughnessy/aframe-input-mapping-component#23e2855"
+  resolved "https://github.com/johnshaughnessy/aframe-input-mapping-component#c369fed313a708fd1e78179cfc9d0ea64433e5f9"
 
 aframe-lerp-component@^1.1.0:
   version "1.1.0"
