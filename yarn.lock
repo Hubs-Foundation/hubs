@@ -4400,6 +4400,10 @@ min-document@^2.19.0:
   dependencies:
     dom-walk "^0.1.0"
 
+minijanus@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/minijanus/-/minijanus-0.5.0.tgz#78e1429bb5d83cb3957a538335d2ae901bf614fa"
+
 "minijanus@https://github.com/mozilla/minijanus.js#master":
   version "0.5.0"
   resolved "https://github.com/mozilla/minijanus.js#497f4dd80fdb92e247238e638daed14ae6623575"

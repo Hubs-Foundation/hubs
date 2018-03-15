@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect.js";
-import Store, { SCHEMA } from "../storage/store";
+import { SCHEMA } from "../storage/store";
 
 const ENTRY_STEPS = {
   start: "start",
@@ -75,10 +75,9 @@ class UIRoot extends Component {
     enterScene: PropTypes.func,
     availableVREntryTypes: PropTypes.object,
     concurrentLoadDetector: PropTypes.object,
-    disableAutoExitOnConcurrentLoad: PropTypes.bool
+    disableAutoExitOnConcurrentLoad: PropTypes.bool,
+    store: PropTypes.object,
   }
-
-  store = new Store()
 
   state = {
     entryStep: ENTRY_STEPS.start,
@@ -304,7 +303,7 @@ class UIRoot extends Component {
 
   saveName = (e) => {
     e.preventDefault();
-    this.store.update({ profile: { display_name: this.nameInput.value } });
+    this.props.store.update({ profile: { display_name: this.nameInput.value } });
     this.props.enterScene(this.state.mediaStream);
     this.setState({ entryStep: ENTRY_STEPS.finished });
   }
@@ -357,7 +356,7 @@ class UIRoot extends Component {
           <form onSubmit={this.saveName}>
             <label>Name:
               <input
-                defaultValue={this.store.state.profile.display_name}
+                defaultValue={this.props.store.state.profile.display_name}
                 required pattern={SCHEMA.definitions.profile.properties.display_name.pattern}
                 title="Alphanumerics and hyphens. At least 3 characters, no more than 32"
                 ref={inp => this.nameInput = inp}/>
