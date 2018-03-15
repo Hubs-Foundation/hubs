@@ -8,7 +8,6 @@ const ENTRY_STEPS = {
   mic_grant: "mic_grant",
   mic_granted: "mic_granted",
   audio_setup: "audio_setup",
-  name_entry: "name_entry",
   finished: "finished"
 }
 
@@ -298,14 +297,13 @@ class UIRoot extends Component {
     }
 
     this.stopTestTone();
-    this.setState({ entryStep: ENTRY_STEPS.name_entry });
+    this.props.enterScene(this.state.mediaStream);
+    this.setState({ entryStep: ENTRY_STEPS.finished });
   }
 
   saveName = (e) => {
     e.preventDefault();
     this.props.store.update({ profile: { display_name: this.nameInput.value } });
-    this.props.enterScene(this.state.mediaStream);
-    this.setState({ entryStep: ENTRY_STEPS.finished });
   }
 
   render() {
@@ -349,30 +347,31 @@ class UIRoot extends Component {
         </div>
       ) : null;
 
-    const nameEntryPanel = this.state.entryStep === ENTRY_STEPS.name_entry
-    ? (
-        <div>
-          Name Entry
-          <form onSubmit={this.saveName}>
-            <label>Name:
-              <input
-                defaultValue={this.props.store.state.profile.display_name}
-                required pattern={SCHEMA.definitions.profile.properties.display_name.pattern}
-                title="Alphanumerics and hyphens. At least 3 characters, no more than 32"
-                ref={inp => this.nameInput = inp}/>
-            </label>
-            <input type="submit" value="Save" />
-          </form>
-        </div>
-      ) : null;
+    const nameEntryPanel = (
+      <div>
+        Name Entry
+        <form onSubmit={this.saveName}>
+          <label>Name:
+            <input
+              defaultValue={this.props.store.state.profile.display_name}
+              required pattern={SCHEMA.definitions.profile.properties.display_name.pattern}
+              title="Alphanumerics and hyphens. At least 3 characters, no more than 32"
+              ref={inp => this.nameInput = inp}/>
+          </label>
+          <input type="submit" value="Save" />
+        </form>
+      </div>
+    );
 
     const overlay = this.isWaitingForAutoExit() ?
       (<AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />) :
-      (<div>
-        {entryPanel}
-        {micPanel}
-        {audioSetupPanel}
-        {nameEntryPanel}
+      (
+        <div>
+          {entryPanel}
+          {micPanel}
+          {audioSetupPanel}
+
+          {nameEntryPanel}
         </div>
       );
 
