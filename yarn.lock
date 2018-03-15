@@ -2558,6 +2558,10 @@ etag@~1.8.1:
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
 
+event-target-shim@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/event-target-shim/-/event-target-shim-3.0.1.tgz#a4a62f0795e5b65363e86c6780413224d1eea688"
+
 eventemitter3@1.x.x:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-1.2.0.tgz#1c86991d816ad1e504750e73874224ecf3bec508"
@@ -4396,9 +4400,9 @@ min-document@^2.19.0:
   dependencies:
     dom-walk "^0.1.0"
 
-minijanus@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/minijanus/-/minijanus-0.4.0.tgz#4d08529da795886b1aab6714ee7c9ff122c8c802"
+"minijanus@https://github.com/mozilla/minijanus.js#master":
+  version "0.5.0"
+  resolved "https://github.com/mozilla/minijanus.js#497f4dd80fdb92e247238e638daed14ae6623575"
 
 minimalistic-assert@^1.0.0:
   version "1.0.0"
@@ -4505,12 +4509,12 @@ mute-stream@0.0.7:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
 
-naf-janus-adapter@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.4.0.tgz#22f14212a14d9e3d30c8d9441978704ff58392f4"
+"naf-janus-adapter@https://github.com/mozilla/naf-janus-adapter#feature/disconnect":
+  version "0.4.1"
+  resolved "https://github.com/mozilla/naf-janus-adapter#4a4532014d6489403cf7e451790925ce747f8e41"
   dependencies:
     debug "^3.1.0"
-    minijanus "^0.4.0"
+    minijanus "https://github.com/mozilla/minijanus.js#master"
 
 nan@^2.3.0:
   version "2.9.1"
