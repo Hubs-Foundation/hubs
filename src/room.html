@@ -100,7 +100,7 @@
                     super-networked-interactable="counter: #counter; mass: 5;"
                     body="type: dynamic; mass: 5; shape: box;"
                     grabbable
-                    stretchable
+                    stretchable="useWorldPosition: true;"
                 >
                 </a-entity>
             </template>
@@ -282,7 +282,7 @@
         ></a-entity>
 
         <a-cylinder 
-            position="0 0.5 0" 
+            position="0 0.45 0" 
             material="visible: false" 
             height="1" radius="3.1" 
             segments-radial="12" 
