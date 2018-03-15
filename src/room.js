@@ -116,10 +116,6 @@ async function shareMedia(audio, video) {
 }
 
 async function exitScene() {
-  if (NAF.connection && NAF.connection.adapter) {
-    NAF.connection.disconnect();
-  }
-
   const scene = document.querySelector("a-scene");
   scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
   document.body.removeChild(scene);

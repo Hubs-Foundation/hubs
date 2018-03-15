@@ -94,7 +94,7 @@ class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
     availableVREntryTypes: PropTypes.object,
-    store: PropTypes.object
+    store: PropTypes.object,
     concurrentLoadDetector: PropTypes.object,
     disableAutoExitOnConcurrentLoad: PropTypes.bool
   };
