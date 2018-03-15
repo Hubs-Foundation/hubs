@@ -19,3 +19,8 @@
   left: 0;
   position: absolute;
 }
+
+.rs-base {
+  top: auto;
+  bottom: 20px;
+}

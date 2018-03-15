@@ -121,6 +121,11 @@ async function exitScene() {
   document.body.removeChild(scene);
 }
 
+function setNameTagFromStore() {
+  const myNametag = document.querySelector("#player-rig .nametag");
+  myNametag.setAttribute("text", "value", store.state.profile.display_name);
+}
+
 async function enterScene(mediaStream) {
   const qs = queryString.parse(location.search);
   const scene = document.querySelector("a-scene");
@@ -139,8 +144,8 @@ async function enterScene(mediaStream) {
     playerRig.setAttribute("virtual-gamepad-controls", {});
   }
 
-  const myNametag = document.querySelector("#player-rig .nametag");
-  myNametag.setAttribute("text", "value", store.state.profile.display_name);
+  setNameTagFromStore();
+  store.subscribe(setNameTagFromStore);
 
   const avatarScale = parseInt(qs.avatarScale, 10);
 
@@ -202,9 +207,9 @@ function mountUI() {
       enterScene,
       exitScene,
       concurrentLoadDetector,
-      disableAutoExitOnConcurrentLoad
+      disableAutoExitOnConcurrentLoad,
+      store,
     }} />, document.getElementById("ui-root"));
-
     document.getElementById("loader").style.display = "none";
   });
 }

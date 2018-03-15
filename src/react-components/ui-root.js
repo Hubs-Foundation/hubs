@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect.js";
+import { SCHEMA } from "../storage/store";
 
 const ENTRY_STEPS = {
   start: "start",
@@ -44,34 +45,12 @@ const DaydreamEntryButton = (props) => (
   </button>
 );
 
-class ProfileEntryPanel extends Component {
-  static propTypes = {
-    store: PropTypes.object
-  };
-
-  state = {
-    name: "",
-  }
-
-  nameChanged = (ev) => {
-    this.setState({ name: ev.target.value });
-  }
-
-  render() {
-    return (
-      <div>
-        <input type="text" value={this.state.name} onChange={this.nameChanged}/>
-      </div>
-    );
-  }
-}
-
 const AutoExitWarning = (props) => (
   <div>
     <p>
     Exit in <span>{props.secondsRemaining}</span>
     </p>
-    
+
     <button onClick={props.onCancel}>
     Cancel
     </button>
@@ -94,10 +73,10 @@ class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
     availableVREntryTypes: PropTypes.object,
-    store: PropTypes.object,
     concurrentLoadDetector: PropTypes.object,
-    disableAutoExitOnConcurrentLoad: PropTypes.bool
-  };
+    disableAutoExitOnConcurrentLoad: PropTypes.bool,
+    store: PropTypes.object,
+  }
 
   state = {
     entryStep: ENTRY_STEPS.start,
@@ -127,7 +106,7 @@ class UIRoot extends Component {
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
   }
 
-  setupTestTone = () => { 
+  setupTestTone = () => {
     const toneClip = document.querySelector("#test-tone");
     const toneLength = 1800;
     const toneDelay = 5000;
@@ -317,20 +296,24 @@ class UIRoot extends Component {
       }
     }
 
-    this.props.enterScene(mediaStream);
     this.stopTestTone();
+    this.props.enterScene(this.state.mediaStream);
     this.setState({ entryStep: ENTRY_STEPS.finished });
   }
 
+  saveName = (e) => {
+    e.preventDefault();
+    this.props.store.update({ profile: { display_name: this.nameInput.value } });
+  }
+
   render() {
-    const entryPanel = this.state.entryStep === ENTRY_STEPS.start 
+    const entryPanel = this.state.entryStep === ENTRY_STEPS.start
     ? (
       <div>
         <TwoDEntryButton onClick={this.enter2D}/>
         { this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && <GenericEntryButton onClick={this.enterVR}/> }
         { this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && <GearVREntryButton onClick={this.enterGearVR}/> }
         { this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && <DaydreamEntryButton onClick={this.enterDaydream}/> }
-        <ProfileEntryPanel profileName={ this.state.profileNamePending }/>
       </div>
     ) : null;
 
@@ -364,12 +347,31 @@ class UIRoot extends Component {
         </div>
       ) : null;
 
+    const nameEntryPanel = (
+      <div>
+        Name Entry
+        <form onSubmit={this.saveName}>
+          <label>Name:
+            <input
+              defaultValue={this.props.store.state.profile.display_name}
+              required pattern={SCHEMA.definitions.profile.properties.display_name.pattern}
+              title="Alphanumerics and hyphens. At least 3 characters, no more than 32"
+              ref={inp => this.nameInput = inp}/>
+          </label>
+          <input type="submit" value="Save" />
+        </form>
+      </div>
+    );
+
     const overlay = this.isWaitingForAutoExit() ?
       (<AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />) :
-      (<div>
-        {entryPanel}
-        {micPanel}
-        {audioSetupPanel}
+      (
+        <div>
+          {entryPanel}
+          {micPanel}
+          {audioSetupPanel}
+
+          {nameEntryPanel}
         </div>
       );
 
