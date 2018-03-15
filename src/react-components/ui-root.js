@@ -44,6 +44,28 @@ const DaydreamEntryButton = (props) => (
   </button>
 );
 
+class ProfileEntryPanel extends Component {
+  static propTypes = {
+    store: PropTypes.object
+  };
+
+  state = {
+    name: "",
+  }
+
+  nameChanged = (ev) => {
+    this.setState({ name: ev.target.value });
+  }
+
+  render() {
+    return (
+      <div>
+        <input type="text" value={this.state.name} onChange={this.nameChanged}/>
+      </div>
+    );
+  }
+}
+
 // This is a list of regexes that match the microphone labels of HMDs.
 //
 // If entering VR mode, and if any of these regexes match an audio device,
@@ -57,7 +79,8 @@ const VR_DEVICE_MIC_LABEL_REGEXES = [];
 class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
-    availableVREntryTypes: PropTypes.object
+    availableVREntryTypes: PropTypes.object,
+    store: PropTypes.object
   };
 
   state = {
@@ -70,6 +93,7 @@ class UIRoot extends Component {
     tonePlaying: false,
     micLevel: 0,
     micUpdateInterval: null,
+    profileNamePending: "Hello"
   }
 
   componentDidMount() {
@@ -241,6 +265,7 @@ class UIRoot extends Component {
         { this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && <GenericEntryButton onClick={this.enterVR}/> }
         { this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && <GearVREntryButton onClick={this.enterGearVR}/> }
         { this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && <DaydreamEntryButton onClick={this.enterDaydream}/> }
+        <ProfileEntryPanel profileName={ this.state.profileNamePending }/>
       </div>
     ) : null;
 
