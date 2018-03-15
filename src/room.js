@@ -197,18 +197,25 @@ function onConnect() {
   document.getElementById("loader").style.display = "none";
 }
 
-function mountUI() {
+function mountUI(scene) {
   getAvailableVREntryTypes().then(availableVREntryTypes => {
     const qs = queryString.parse(location.search);
     const disableAutoExitOnConcurrentLoad = qs.allow_multi === "true"
+    let forcedVREntryType = null;
+
+    if (qs.vr_entry_type) {
+      forcedVREntryType = qs.vr_entry_type;
+    }
 
     ReactDOM.render(<UIRoot {...{
       availableVREntryTypes,
+      scene,
       enterScene,
       exitScene,
       concurrentLoadDetector,
       disableAutoExitOnConcurrentLoad,
-      store,
+      forcedVREntryType,
+      store
     }} />, document.getElementById("ui-root"));
     document.getElementById("loader").style.display = "none";
   });
@@ -217,6 +224,5 @@ function mountUI() {
 document.addEventListener("DOMContentLoaded", () => {
   const scene = document.querySelector("a-scene");
   window.APP.scene = scene;
-
-  mountUI();
+  mountUI(scene);
 });
