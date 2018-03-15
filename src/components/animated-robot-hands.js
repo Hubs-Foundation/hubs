@@ -13,22 +13,18 @@ const POSES = {
 // TODO: When we have analog values of index-finger triggers or middle-finger grips,
 //       it would be nice to animate the hands proportionally to those analog values.
 AFRAME.registerComponent("animated-robot-hands", {
+  dependencies: ["animation-mixer"],
   schema: {
-    mixer: { type: "string" },
-    leftHand: { type: "string", default: "#player-left-controller" },
-    rightHand: { type: "string", default: "#player-right-controller" }
+    leftHand: { type: "selector", default: "#player-left-controller" },
+    rightHand: { type: "selector", default: "#player-right-controller" }
   },
 
   init: function() {
     this.playAnimation = this.playAnimation.bind(this);
 
-    const mixerEl = this.el.querySelector(this.data.mixer);
-    this.leftHand = this.el.querySelector(this.data.leftHand);
-    this.rightHand = this.el.querySelector(this.data.rightHand);
+    this.mixer = this.el.components["animation-mixer"].mixer;
 
-    this.mixer = mixerEl.mixer;
-
-    const object3DMap = mixerEl.object3DMap;
+    const object3DMap = this.el.object3DMap;
     const rootObj = object3DMap.mesh || object3DMap.scene;
     this.clipActionObject = rootObj.parent;
 
@@ -41,20 +37,20 @@ AFRAME.registerComponent("animated-robot-hands", {
   },
 
   play: function() {
-    this.leftHand.addEventListener("hand-pose", this.playAnimation);
-    this.rightHand.addEventListener("hand-pose", this.playAnimation);
+    this.data.leftHand.addEventListener("hand-pose", this.playAnimation);
+    this.data.rightHand.addEventListener("hand-pose", this.playAnimation);
   },
 
   pause: function() {
-    this.leftHand.removeEventListener("hand-pose", this.playAnimation);
-    this.rightHand.removeEventListener("hand-pose", this.playAnimation);
+    this.data.leftHand.removeEventListener("hand-pose", this.playAnimation);
+    this.data.rightHand.removeEventListener("hand-pose", this.playAnimation);
   },
 
   // Animate from pose to pose.
   // TODO: Transition from current pose (which may be BETWEEN two other poses)
   //       to the target pose, rather than stopping previous actions altogether.
   playAnimation: function(evt) {
-    const isLeft = evt.target === this.leftHand;
+    const isLeft = evt.target === this.data.leftHand;
     // Stop the initial animations we started when the model loaded.
     if (!this.openLStopped && isLeft) {
       this.openL.stop();

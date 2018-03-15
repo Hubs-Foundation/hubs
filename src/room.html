@@ -104,7 +104,6 @@
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
-            animated-robot-hands="mixer: .RootScene"
         >
             <a-entity
                 id="player-camera"
@@ -135,7 +134,7 @@
 
             <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller >
                 <template data-selector=".RootScene">
-                    <a-entity animation-mixer ></a-entity>
+                    <a-entity animation-mixer animated-robot-hands ></a-entity>
                 </template>
 
                 <template data-selector=".Neck">
