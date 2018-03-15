@@ -70,7 +70,7 @@ function cloneGltf(gltf) {
   return clone;
 }
 
-const inflateEntities = function(classPrefix, parentEl, node) {
+const inflateEntities = function(parentEl, node) {
   // setObject3D mutates the node's parent, so we have to copy
   const children = node.children.slice(0);
 
@@ -78,7 +78,7 @@ const inflateEntities = function(classPrefix, parentEl, node) {
 
   // Remove invalid CSS class name characters.
   const className = (node.name || node.uuid).replace(/[^\w-]/g, "");
-  el.classList.add(classPrefix + className);
+  el.classList.add(className);
   parentEl.appendChild(el);
 
   // AFRAME rotation component expects rotations in YXZ, convert it
@@ -135,8 +135,10 @@ const inflateEntities = function(classPrefix, parentEl, node) {
   }
 
   children.forEach(childNode => {
-    inflateEntities(classPrefix, el, childNode);
+    inflateEntities( el, childNode);
   });
+
+  return el;
 };
 
 function attachTemplate(templateEl) {
@@ -158,93 +160,124 @@ function attachTemplate(templateEl) {
   }
 }
 
+function cachedLoadGLTF(src, onProgress) {
+  return new Promise((resolve, reject) => {
+    // Load the gltf model from the cache if it exists.
+    if (GLTFCache[src]) {
+      // Use a cloned copy of the cached model.
+      resolve(cloneGltf(GLTFCache[src]));
+    } else {
+      // Otherwise load the new gltf model.
+      new THREE.GLTFLoader().load(
+        src,
+        model => {
+          if (!GLTFCache[src]) {
+            // Store a cloned copy of the gltf model.
+            GLTFCache[src] = cloneGltf(model);
+          }
+          resolve(model);
+        },
+        onProgress,
+        reject
+      );
+    }
+  });
+}
+
 AFRAME.registerElement("a-gltf-entity", {
   prototype: Object.create(AFRAME.AEntity.prototype, {
     load: {
-      value() {
+      async value() {
         if (this.hasLoaded || !this.parentEl) {
           return;
         }
 
-        // Get the src url.
-        let src = this.getAttribute("src");
+        // The code above and below this are from AEntity.prototype.load, we need to monkeypatch in gltf loading mid function
+        await this.setSrc(this.getAttribute("src"));
 
-        // If the src attribute is a selector, get the url from the asset item.
-        if (src.charAt(0) === "#") {
-          const assetEl = document.getElementById(src.substring(1));
-
-          const fallbackSrc = assetEl.getAttribute("src");
-          const highSrc = assetEl.getAttribute("high-src");
-          const lowSrc = assetEl.getAttribute("low-src");
-
-          if (highSrc && window.APP.quality === "high") {
-            src = highSrc;
-          } else if (lowSrc && window.APP.quality === "low") {
-            src = lowSrc;
-          } else {
-            src = fallbackSrc;
-          }
-        }
-
-        const onLoad = gltfModel => {
-          if (!GLTFCache[src]) {
-            // Store a cloned copy of the gltf model.
-            GLTFCache[src] = cloneGltf(gltfModel);
+        AFRAME.ANode.prototype.load.call(this, () => {
+          // Check if entity was detached while it was waiting to load.
+          if (!this.parentEl) {
+            return;
           }
 
-          this.model = gltfModel.scene || gltfModel.scenes[0];
-          this.model.animations = gltfModel.animations;
+          this.updateComponents();
+          if (this.isScene || this.parentEl.isPlaying) {
+            this.play();
+          }
+        });
+      }
+    },
+
+    setSrc: {
+      async value(src) {
+        try {
+          // If the src attribute is a selector, get the url from the asset item.
+          if (src.charAt(0) === "#") {
+            const assetEl = document.getElementById(src.substring(1));
+
+            const fallbackSrc = assetEl.getAttribute("src");
+            const highSrc = assetEl.getAttribute("high-src");
+            const lowSrc = assetEl.getAttribute("low-src");
+
+            if (highSrc && window.APP.quality === "high") {
+              src = highSrc;
+            } else if (lowSrc && window.APP.quality === "low") {
+              src = lowSrc;
+            } else {
+              src = fallbackSrc;
+            }
+          }
+
+          if (src === this.lastSrc) return;
+          this.lastSrc = src;
+
+          const model = await cachedLoadGLTF(src);
+
+          // If we started loading something else already
+          // TODO: there should be a way to cancel loading instead
+          if (src != this.lastSrc) return;
+
+          // If we had inflated something already before, clean that up
+          if (this.inflatedEl) {
+            this.inflatedEl.parentNode.removeChild(this.inflatedEl);
+            delete this.inflatedEl;
+          }
+
+          this.model = model.scene || model.scenes[0];
+          this.model.animations = model.animations;
 
           this.setObject3D("mesh", this.model);
-          this.emit("model-loaded", { format: "gltf", model: this.model });
 
           if (this.getAttribute("inflate")) {
-            inflate(this.model, finalizeLoad);
-          } else {
-            finalizeLoad();
+            this.inflatedEl = inflateEntities(this, this.model);
+            this.querySelectorAll(":scope > template").forEach(attachTemplate);
           }
-        };
 
-        const inflate = (model, callback) => {
-          inflateEntities("", this, model);
-          this.querySelectorAll(":scope > template").forEach(attachTemplate);
-
-          // Wait one tick for the appended custom elements to be connected before calling finalizeLoad
-          setTimeout(callback, 0);
-        };
-
-        const finalizeLoad = () => {
-          AFRAME.ANode.prototype.load.call(this, () => {
-            // Check if entity was detached while it was waiting to load.
-            if (!this.parentEl) {
-              return;
-            }
-
-            this.updateComponents();
-            if (this.isScene || this.parentEl.isPlaying) {
-              this.play();
-            }
-          });
-        };
-
-        // Load the gltf model from the cache if it exists.
-        const gltf = GLTFCache[src];
-
-        if (gltf) {
-          // Use a cloned copy of the cached model.
-          const clonedGltf = cloneGltf(gltf);
-          onLoad(clonedGltf);
-          return;
-        }
-
-        // Otherwise load the new gltf model.
-        new THREE.GLTFLoader().load(src, onLoad, undefined /* onProgress */, error => {
-          // On glTF load error
-
-          const message = error && error.message ? error.message : "Failed to load glTF model";
-          console.warn(message);
+          this.emit("model-loaded", { format: "gltf", model: this.model });
+        } catch (e) {
+          const message = (e && e.message) || "Failed to load glTF model";
+          console.error(message);
           this.emit("model-error", { format: "gltf", src });
-        });
+        }
+      }
+    },
+
+    attributeChangedCallback: {
+      value(attr, oldVal, newVal) {
+        if (attr === "src") {
+          this.setSrc(newVal);
+        }
+        AFRAME.AEntity.prototype.attributeChangedCallback.call(this, attr, oldVal, newVal);
+      }
+    },
+
+    setAttribute: {
+      value(attr, arg1, arg2) {
+        if (attr === "src") {
+          this.setSrc(arg1);
+        }
+        AFRAME.AEntity.prototype.setAttribute.call(this, attr, arg1, arg2);
       }
     }
   })

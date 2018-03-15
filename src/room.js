@@ -40,6 +40,7 @@ import "./components/layers";
 import "./components/spawn-controller";
 import "./components/animated-robot-hands";
 import "./components/hide-when-quality";
+import "./components/debug";
 
 import "./systems/personal-space-bubble";
 
