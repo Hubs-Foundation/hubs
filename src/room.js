@@ -59,6 +59,15 @@ if (qs.quality) {
 
 import "./elements/a-progressive-asset";
 
+import "aframe-physics-system";
+import "aframe-physics-extras";
+import "super-hands";
+import "./components/super-networked-interactable";
+import "./components/networked-counter";
+import "./components/super-spawner";
+import "./components/super-cursor";
+import "./components/event-repeater";
+
 import { promptForName, getCookie, parseJwt } from "./utils/identity";
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config } from "./input-mappings";
@@ -71,7 +80,6 @@ AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputActions(inGameActions, "default");
 AFRAME.registerInputMappings(config);
 
-registerNetworkSchemas();
 registerTelemetry();
 
 async function shareMedia(audio, video) {
@@ -162,6 +170,8 @@ function onConnect() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  registerNetworkSchemas();
+
   const scene = document.querySelector("a-scene");
 
   window.APP.scene = scene;
