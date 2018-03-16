@@ -13,9 +13,6 @@ import "aframe-input-mapping-component";
 import "aframe-billboard-component";
 import "webrtc-adapter";
 
-import animationMixer from "aframe-extras/src/loaders/animation-mixer";
-AFRAME.registerComponent("animation-mixer", animationMixer);
-
 import { vive_trackpad_dpad4 } from "./behaviours/vive-trackpad-dpad4";
 import { oculus_touch_joystick_dpad4 } from "./behaviours/oculus-touch-joystick-dpad4";
 import { PressedMove } from "./activators/pressedmove";
@@ -42,6 +39,8 @@ import "./components/animated-robot-hands";
 import "./components/hide-when-quality";
 import "./components/player-info";
 import "./components/debug";
+import "./components/animation-mixer";
+import "./components/loop-animation";
 
 import "./systems/personal-space-bubble";
 
@@ -62,6 +61,15 @@ if (qs.quality) {
 
 import "./elements/a-progressive-asset";
 
+import "aframe-physics-system";
+import "aframe-physics-extras";
+import "super-hands";
+import "./components/super-networked-interactable";
+import "./components/networked-counter";
+import "./components/super-spawner";
+import "./components/super-cursor";
+import "./components/event-repeater";
+
 import { promptForName, getCookie, parseJwt } from "./utils/identity";
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config } from "./input-mappings";
@@ -74,7 +82,6 @@ AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputActions(inGameActions, "default");
 AFRAME.registerInputMappings(config);
 
-registerNetworkSchemas();
 registerTelemetry();
 
 async function shareMedia(audio, video) {
@@ -167,6 +174,8 @@ function onConnect() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  registerNetworkSchemas();
+
   const scene = document.querySelector("a-scene");
 
   window.APP.scene = scene;

@@ -13,24 +13,25 @@ const POSES = {
 // TODO: When we have analog values of index-finger triggers or middle-finger grips,
 //       it would be nice to animate the hands proportionally to those analog values.
 AFRAME.registerComponent("animated-robot-hands", {
+  dependencies: ["animation-mixer"],
   schema: {
     leftHand: { type: "selector", default: "#player-left-controller" },
     rightHand: { type: "selector", default: "#player-right-controller" }
   },
 
   init: function() {
-    window.hands = this;
     this.playAnimation = this.playAnimation.bind(this);
 
-    // Get the three.js object in the scene graph that has the animation data
-    const root = this.el.object3D.children[0];
-    this.mixer = new THREE.AnimationMixer(root);
-    this.root = root;
+    this.mixer = this.el.components["animation-mixer"].mixer;
 
-    // Set hands to open pose because the bind pose is funky due
+    const object3DMap = this.el.object3DMap;
+    const rootObj = object3DMap.mesh || object3DMap.scene;
+    this.clipActionObject = rootObj.parent;
+
+    // Set hands to open pose because the bind pose is funky dues
     // to the workaround for FBX2glTF animations.
-    this.openL = this.mixer.clipAction(POSES.open + "_L", root.parent);
-    this.openR = this.mixer.clipAction(POSES.open + "_R", root.parent);
+    this.openL = this.mixer.clipAction(POSES.open + "_L", this.clipActionObject);
+    this.openR = this.mixer.clipAction(POSES.open + "_R", this.clipActionObject);
     this.openL.play();
     this.openR.play();
   },
@@ -43,10 +44,6 @@ AFRAME.registerComponent("animated-robot-hands", {
   pause: function() {
     this.data.leftHand.removeEventListener("hand-pose", this.playAnimation);
     this.data.rightHand.removeEventListener("hand-pose", this.playAnimation);
-  },
-
-  tick: function(t, dt) {
-    this.mixer.update(dt / 1000);
   },
 
   // Animate from pose to pose.
@@ -81,8 +78,8 @@ AFRAME.registerComponent("animated-robot-hands", {
     //    console.log(
     //      `Animating ${isLeft ? "left" : "right"} hand from ${prevPose} to ${currPose} over ${duration} seconds.`
     //    );
-    const from = mixer.clipAction(prevPose, this.root.parent);
-    const to = mixer.clipAction(currPose, this.root.parent);
+    const from = mixer.clipAction(prevPose, this.clipActionObject);
+    const to = mixer.clipAction(currPose, this.clipActionObject);
     from.fadeOut(duration);
     to.fadeIn(duration);
     to.play();
