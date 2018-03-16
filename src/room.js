@@ -89,32 +89,6 @@ concurrentLoadDetector.start();
 // Always layer in any new default profile bits
 store.update({ profile:  { ...generateDefaultProfile(), ...(store.state.profile || {}) }})
 
-async function shareMedia(audio, video) {
-  const constraints = {
-    audio: !!audio,
-    video: video ? { mediaSource: "screen", height: 720, frameRate: 30 } : false
-  };
-  const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-  NAF.connection.adapter.setLocalMediaStream(mediaStream);
-
-  const id = `${NAF.clientId}-screen`;
-  let entity = document.getElementById(id);
-  if (entity) {
-    entity.setAttribute("visible", !!video);
-  } else if (video) {
-    const sceneEl = document.querySelector("a-scene");
-    entity = document.createElement("a-entity");
-    entity.id = id;
-    entity.setAttribute("offset-relative-to", {
-      target: "#player-camera",
-      offset: "0 0 -2",
-      on: "action_share_screen"
-    });
-    entity.setAttribute("networked", { template: "#video-template" });
-    sceneEl.appendChild(entity);
-  }
-}
-
 async function exitScene() {
   const scene = document.querySelector("a-scene");
   scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
@@ -153,12 +127,26 @@ async function enterScene(mediaStream) {
     playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
   }
 
-  let sharingScreen = false;
+  const videoTracks = mediaStream.getVideoTracks();
+  let sharingScreen = videoTracks.length > 0;
 
-  // TODO remove
+  const screenEntityId = `${NAF.clientId}-screen`;
+  let screenEntity = document.getElementById(screenEntityId);
+
   scene.addEventListener("action_share_screen", () => {
     sharingScreen = !sharingScreen;
-    shareMedia(true, sharingScreen);
+    if (sharingScreen) {
+      for (const track of videoTracks) {
+        mediaStream.addTrack(track);
+      }
+    }
+    else {
+      for (const track of mediaStream.getVideoTracks()) {
+        mediaStream.removeTrack(track);
+      }
+    }
+    NAF.connection.adapter.setLocalMediaStream(mediaStream);
+    screenEntity.setAttribute("visible", sharingScreen);
   });
 
   if (qs.offline) {
@@ -171,23 +159,19 @@ async function enterScene(mediaStream) {
     if (mediaStream) {
       NAF.connection.adapter.setLocalMediaStream(mediaStream);
 
-      const hasVideo = !!(mediaStream.getVideoTracks().length > 0);
-
-      const id = `${NAF.clientId}-screen`;
-      let entity = document.getElementById(id);
-      if (entity) {
-        entity.setAttribute("visible", hasVideo);
-      } else if (hasVideo) {
+      if (screenEntity) {
+        screenEntity.setAttribute("visible", sharingScreen);
+      } else if (sharingScreen) {
         const sceneEl = document.querySelector("a-scene");
-        entity = document.createElement("a-entity");
-        entity.id = id;
-        entity.setAttribute("offset-relative-to", {
-          target: "#head",
+        screenEntity = document.createElement("a-entity");
+        screenEntity.id = screenEntityId;
+        screenEntity.setAttribute("offset-relative-to", {
+          target: "#player-camera",
           offset: "0 0 -2",
           on: "action_share_screen"
         });
-        entity.setAttribute("networked", { template: "#video-template" });
-        sceneEl.appendChild(entity);
+        screenEntity.setAttribute("networked", { template: "#video-template" });
+        sceneEl.appendChild(screenEntity);
       }
     }
   }

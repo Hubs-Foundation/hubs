@@ -357,13 +357,21 @@ class UIRoot extends Component {
       );
     }
 
+    const entryTypes = this.props.availableVREntryTypes;
     const entryPanel = this.state.entryStep === ENTRY_STEPS.start
     ? (
       <div>
         <TwoDEntryButton onClick={this.enter2D}/>
-        { this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && <GenericEntryButton onClick={this.enterVR}/> }
-        { this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && <GearVREntryButton onClick={this.enterGearVR}/> }
-        { this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && <DaydreamEntryButton onClick={this.enterDaydream}/> }
+        { entryTypes.generic !== VR_DEVICE_AVAILABILITY.no && <GenericEntryButton onClick={this.enterVR}/> }
+        { entryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && <GearVREntryButton onClick={this.enterGearVR}/> }
+        { entryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && <DaydreamEntryButton onClick={this.enterDaydream}/> }
+        <label>
+          <input type="checkbox"
+            value={this.state.shareScreen}
+            onChange={e => this.setState({shareScreen: e.target.checked})}
+          />
+          Enable Screensharing
+        </label>
       </div>
     ) : null;
 
