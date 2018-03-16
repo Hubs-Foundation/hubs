@@ -135,27 +135,24 @@ const inflateEntities = function(parentEl, node) {
   }
 
   children.forEach(childNode => {
-    inflateEntities( el, childNode);
+    inflateEntities(el, childNode);
   });
 
   return el;
 };
 
-function attachTemplate(templateEl) {
-  const selector = templateEl.getAttribute("data-selector");
-  const targetEls = templateEl.parentNode.querySelectorAll(selector);
-  const clone = document.importNode(templateEl.content, true);
-  const templateRoot = clone.firstElementChild;
-
+function attachTemplate(root, { selector, templateRoot }) {
+  const targetEls = root.querySelectorAll(selector);
   for (const el of targetEls) {
+    const root = templateRoot.cloneNode(true);
     // Merge root element attributes with the target element
-    for (const { name, value } of templateRoot.attributes) {
+    for (const { name, value } of root.attributes) {
       el.setAttribute(name, value);
     }
 
     // Append all child elements
-    for (const child of templateRoot.children) {
-      el.appendChild(document.importNode(child, true));
+    for (const child of root.children) {
+      el.appendChild(child);
     }
   }
 }
@@ -193,7 +190,9 @@ AFRAME.registerElement("a-gltf-entity", {
         }
 
         // The code above and below this are from AEntity.prototype.load, we need to monkeypatch in gltf loading mid function
+        await this.loadTemplates();
         await this.setSrc(this.getAttribute("src"));
+        //
 
         AFRAME.ANode.prototype.load.call(this, () => {
           // Check if entity was detached while it was waiting to load.
@@ -205,6 +204,21 @@ AFRAME.registerElement("a-gltf-entity", {
           if (this.isScene || this.parentEl.isPlaying) {
             this.play();
           }
+        });
+      }
+    },
+
+    loadTemplates: {
+      value() {
+        return new Promise((resolve, reject) => {
+          this.templates = [];
+          this.querySelectorAll(":scope > template").forEach(templateEl =>
+            this.templates.push({
+              selector: templateEl.getAttribute("data-selector"),
+              templateRoot: document.importNode(templateEl.content.firstElementChild, true)
+            })
+          );
+          setTimeout(resolve, 0);
         });
       }
     },
@@ -251,7 +265,7 @@ AFRAME.registerElement("a-gltf-entity", {
 
           if (this.getAttribute("inflate")) {
             this.inflatedEl = inflateEntities(this, this.model);
-            this.querySelectorAll(":scope > template").forEach(attachTemplate);
+            this.templates.forEach(attachTemplate.bind(null, this));
           }
 
           this.emit("model-loaded", { format: "gltf", model: this.model });
