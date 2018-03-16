@@ -56,11 +56,8 @@ const config = {
         surfacetouchend: "thumb_up",
         thumbsticktouchstart: "thumb_down",
         thumbsticktouchend: "thumb_up",
-        triggerdown: "index_down",
-        triggerup: "index_up",
-        // @TODO: Patch AFIM to allow more than one action to be mapped to triggerdown
-        //triggerdown: "action_teleport_down",
-        //triggerup: "action_teleport_up",
+        triggerdown: ["action_teleport_down", "index_down"],
+        triggerup: ["action_teleport_up", "index_up"],
         "axismove.reverseY": { left: "move" },
         right_dpad_east: "snap_rotate_right",
         right_dpad_west: "snap_rotate_left",
