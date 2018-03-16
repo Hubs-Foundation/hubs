@@ -13,9 +13,6 @@ import "aframe-input-mapping-component";
 import "aframe-billboard-component";
 import "webrtc-adapter";
 
-import animationMixer from "aframe-extras/src/loaders/animation-mixer";
-AFRAME.registerComponent("animation-mixer", animationMixer);
-
 import { vive_trackpad_dpad4 } from "./behaviours/vive-trackpad-dpad4";
 import { oculus_touch_joystick_dpad4 } from "./behaviours/oculus-touch-joystick-dpad4";
 import { PressedMove } from "./activators/pressedmove";
@@ -40,6 +37,8 @@ import "./components/layers";
 import "./components/spawn-controller";
 import "./components/animated-robot-hands";
 import "./components/hide-when-quality";
+import "./components/animation-mixer";
+import "./components/loop-animation";
 
 import "./systems/personal-space-bubble";
 

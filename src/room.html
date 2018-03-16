@@ -60,6 +60,10 @@
                     <a-entity class="right-controller"></a-entity>
 
                     <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller >
+                        <template data-selector=".RootScene">
+                            <a-entity animation-mixer ></a-entity>
+                        </template>
+
                         <template data-selector=".Neck">
                              <a-entity>
                                  <a-entity
@@ -147,7 +151,6 @@
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
-            animated-robot-hands
         >
             <a-entity
                 id="player-camera"
@@ -183,7 +186,11 @@
                 haptic-feedback
             ></a-entity>
 
-            <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller>
+            <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller >
+                <template data-selector=".RootScene">
+                    <a-entity animation-mixer animated-robot-hands ></a-entity>
+                </template>
+
                 <template data-selector=".Neck">
                     <a-entity>
                         <a-entity class="nametag" visible="false" text ></a-entity>
