@@ -227,7 +227,7 @@ AFRAME.registerElement("a-gltf-entity", {
       async value(src) {
         try {
           // If the src attribute is a selector, get the url from the asset item.
-          if (src.charAt(0) === "#") {
+          if (src && src.charAt(0) === "#") {
             const assetEl = document.getElementById(src.substring(1));
 
             const fallbackSrc = assetEl.getAttribute("src");
@@ -245,6 +245,8 @@ AFRAME.registerElement("a-gltf-entity", {
 
           if (src === this.lastSrc) return;
           this.lastSrc = src;
+
+          if (!src) return;
 
           const model = await cachedLoadGLTF(src);
 
