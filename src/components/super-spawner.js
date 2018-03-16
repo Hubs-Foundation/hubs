@@ -1,40 +1,80 @@
 AFRAME.registerComponent("super-spawner", {
   schema: {
     template: { default: "" },
-    spawn_position: { type: "vec3" }
+    useCustomSpawnPosition: { default: false },
+    spawnPosition: { type: "vec3" }
   },
 
   init: function() {
-    this.el.addEventListener("grab-start", e => {
-      this._spawn(e.detail.hand);
-    });
+    this.entities = new Map();
   },
 
-  _spawn: function(hand) {
+  play: function() {
+    this.handleGrabStart = this._handleGrabStart.bind(this);
+    this.el.addEventListener("grab-start", this.handleGrabStart);
+  },
+
+  pause: function() {
+    this.el.removeEventListener("grab-start", this.handleGrabStart);
+  },
+
+  remove: function() {
+    for (let entity of this.entities.keys()) {
+      const data = this.entities.get(entity);
+      entity.removeEventListener("componentinitialized", data.componentinItializedListener);
+      entity.removeEventListener("bodyloaded", data.bodyLoadedListener);
+    }
+
+    this.entities.clear();
+  },
+
+  _handleGrabStart: function(e) {
+    const hand = e.detail.hand;
     const entity = document.createElement("a-entity");
 
     entity.setAttribute("networked", "template:" + this.data.template);
 
-    const componentinitialized = new Promise((resolve, reject) => {
-      entity.addEventListener("componentinitialized", e => {
-        if (e.detail.name == "grabbable") {
-          resolve();
-        }
-      });
-    });
+    const componentinItializedListener = this._handleComponentInitialzed.bind(this, entity);
+    const bodyLoadedListener = this._handleBodyLoaded.bind(this, entity);
 
-    const bodyloaded = new Promise((resolve, reject) => {
-      entity.addEventListener("body-loaded", e => {
-        resolve();
-      });
+    this.entities.set(entity, {
+      hand: hand,
+      componentInitialized: false, 
+      bodyLoaded: false, 
+      componentinItializedListener: componentinItializedListener, 
+      bodyLoadedListener: bodyLoadedListener
     });
+    
+    entity.addEventListener("componentinitialized", componentinItializedListener);
+    entity.addEventListener("body-loaded", bodyLoadedListener);
 
-    Promise.all([componentinitialized, bodyloaded]).then(() => {
-      hand.emit("action_grab", { targetEntity: entity });
-      entity.emit("grab-start", { hand: hand });
-    });
-
-    entity.setAttribute("position", this.data.spawn_position || this.el.getAttribute("position"));
+    const pos = this.data.useCustomSpawnPosition ? this.data.spawnPosition : this.el.getAttribute("position");
+    entity.setAttribute("position", pos);
     this.el.sceneEl.appendChild(entity);
+  },
+
+  _handleComponentInitialzed: function(entity, e) {
+    if (e.detail.name === "grabbable") {
+      this.entities.get(entity).componentInitialized = true;
+      this._emitEvents.call(this, entity);
+    }
+  },
+
+  _handleBodyLoaded: function(entity, e) {
+    this.entities.get(entity).bodyLoaded = true;
+    this._emitEvents.call(this, entity);
+  },
+
+  _emitEvents: function(entity) {
+    const data = this.entities.get(entity);
+    if (data.componentInitialized && data.bodyLoaded) {
+      data.hand.emit("action_grab", { targetEntity: entity });
+      entity.emit("grab-start", { hand: data.hand });
+
+      entity.removeEventListener("componentinitialized", data.componentinItializedListener);
+      entity.removeEventListener("body-loaded", data.bodyLoadedListener);
+
+      this.entities.delete(entity);
+    }
   }
 });

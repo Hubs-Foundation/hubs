@@ -164,21 +164,6 @@ async function onSceneLoad() {
 
     await shareMedia(true, sharingScreen);
   }
-
-  scene.addEventListener("action_spawn_cube", (e) => {
-    const sceneEl = document.querySelector("a-scene");
-    const entity = document.createElement("a-entity");
-    entity.setAttribute("body", "mass: 1;");
-    entity.setAttribute("grabbable", "");
-    entity.setAttribute("stretchable", "");
-    if (e.target && e.target != sceneEl) {
-      entity.setAttribute("position", e.target.object3D.getWorldPosition());
-    } else {
-      entity.setAttribute("position", "0 3 0");
-    }
-    entity.setAttribute("networked", "template: #physics-cube;");
-    sceneEl.appendChild(entity);
-  });
 }
 
 function onConnect() {

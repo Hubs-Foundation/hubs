@@ -12,6 +12,16 @@ AFRAME.registerComponent("networked-counter", {
     this.timeouts = {};
   },
 
+  remove: function() {
+    for (const id in this.queue) {
+      if (this.queue.hasOwnProperty(id)) {
+        const item = this.queue[id];
+        item.el.removeEventListener(this.data.grab_event, item.onGrabHandler);
+        item.el.removeEventListener(this.data.release_event, item.onReleaseHandler);
+      }
+    }
+  },
+
   register: function(networkedEl) {
     if (this.data.max <= 0) {
       return;
@@ -23,17 +33,18 @@ AFRAME.registerComponent("networked-counter", {
     }
 
     const now = Date.now();
-    const onGrabHandler = this._onGrabbed.bind(this, id);
-    const onReleaseHandler = this._onReleased.bind(this, id);
+    const grabEventListener = this._onGrabbed.bind(this, id);
+    const releaseEventListener = this._onReleased.bind(this, id);
+
     this.queue[id] = {
       ts: now,
       el: networkedEl,
-      onGrabHandler: onGrabHandler,
-      onReleaseHandler: onReleaseHandler
+      onGrabHandler: grabEventListener,
+      onReleaseHandler: releaseEventListener
     };
 
-    networkedEl.addEventListener(this.data.grab_event, onGrabHandler);
-    networkedEl.addEventListener(this.data.release_event, onReleaseHandler);
+    networkedEl.addEventListener(this.data.grab_event, grabEventListener);
+    networkedEl.addEventListener(this.data.release_event, releaseEventListener);
 
     this.count++;
 
@@ -74,13 +85,15 @@ AFRAME.registerComponent("networked-counter", {
     if (this.count > this.data.max) {
       let oldest = null,
         ts = Number.MAX_VALUE;
-      Object.keys(this.queue).forEach(function(id) {
-        const expiration = this.queue[id].ts + this.data.ttl * 1000;
-        if (this.queue[id].ts < ts && !this._isCurrentlyGrabbed(id)) {
-          oldest = this.queue[id];
-          ts = this.queue[id].ts;
+      for (const id in this.queue) {
+        if (this.queue.hasOwnProperty(id)) {
+          const expiration = this.queue[id].ts + this.data.ttl * 1000;
+          if (this.queue[id].ts < ts && !this._isCurrentlyGrabbed(id)) {
+            oldest = this.queue[id];
+            ts = this.queue[id].ts;
+          }
         }
-      }, this);
+      }
       if (ts > 0) {
         this.deregister(oldest.el);
         this._destroy(oldest.el);

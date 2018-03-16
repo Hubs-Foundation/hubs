@@ -125,7 +125,7 @@
             scale="2 2 2"
             class="collidable" 
             class="collidable" 
-            super-spawner="template: #interactable-template; spawn_position: 2.5 1.2 0;" 
+            super-spawner="template: #interactable-template;" 
             position="2.5 1.2 0" 
             body="mass: 0; type: static; shape: box;"
         ></a-entity>
@@ -205,7 +205,7 @@
                             position="0 -0.04 0"
                         ></a-gltf-entity>
                         <a-entity
-                            event-repeater="events: action_grab, action_release; target: #player-left-controller"
+                            event-repeater="events: action_grab, action_release; eventSource: #player-left-controller"
                             static-body="shape: sphere; sphereRadius: 0.02"
                             mixin="super-hands"
                             position="0 0.05 0"
@@ -216,7 +216,7 @@
                 <template data-selector=".RightHand">
                     <a-entity>
                         <a-entity
-                            event-repeater="events: action_grab, action_release; target: #player-right-controller"
+                            event-repeater="events: action_grab, action_release; eventSource: #player-right-controller"
                             static-body="shape: sphere; sphereRadius: 0.02"
                             mixin="super-hands"
                             position="0 -0.05 0"
