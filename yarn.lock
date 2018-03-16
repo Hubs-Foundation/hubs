@@ -44,9 +44,9 @@ aframe-billboard-component@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/aframe-billboard-component/-/aframe-billboard-component-1.0.0.tgz#10ce2482729eef7386c5844d65917581a62d3adc"
 
-"aframe-input-mapping-component@https://github.com/johnshaughnessy/aframe-input-mapping-component#23e2855":
+"aframe-input-mapping-component@https://github.com/johnshaughnessy/aframe-input-mapping-component#feature/map-to-array":
   version "0.1.2"
-  resolved "https://github.com/johnshaughnessy/aframe-input-mapping-component#23e2855"
+  resolved "https://github.com/johnshaughnessy/aframe-input-mapping-component#4c7e493ad6c4a25eef27d32551c94d8b78541191"
 
 aframe-lerp-component@^1.1.0:
   version "1.1.0"
