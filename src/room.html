@@ -16,7 +16,7 @@
 <body>
     <div id="loader"></div>
     <a-scene
-        light="defaultLightsEnabled: false"
+        physics
         networked-scene="adapter: janus;
                          audio: true;
                          debug: true;
@@ -53,6 +53,7 @@
             <a-asset-item id="outdoor-facade-mesh" response-type="arraybuffer" src="./assets/environments/OutdoorFacade_mesh.glb"></a-asset-item>
             <a-asset-item id="floor-nav-mesh" response-type="arraybuffer" src="./assets/environments/FloorNav_mesh.glb"></a-asset-item>
             <a-asset-item id="cliff-vista-mesh" response-type="arraybuffer" src="./assets/environments/CliffVista_mesh.glb"></a-asset-item>
+            <a-asset-item id="interactable-duck" response-type="arraybuffer" src="./assets/interactables/duck/DuckyMesh.glb"></a-asset-item>
 
             <img id="water-normal-map" src="./assets/waternormals.jpg"></a-asset-item>
 
@@ -71,6 +72,10 @@
                     <a-entity class="right-controller"></a-entity>
 
                     <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller >
+                        <template data-selector=".RootScene">
+                            <a-entity animation-mixer ></a-entity>
+                        </template>
+
                         <template data-selector=".Neck">
                              <a-entity>
                                  <a-entity
@@ -103,7 +108,52 @@
                 </a-entity>
             </template>
 
+            <template id="interactable-template">
+                <a-entity
+                    gltf-model="#interactable-duck"
+                    scale="2 2 2"
+                    class="collidable" 
+                    super-networked-interactable="counter: #counter; mass: 5;"
+                    body="type: dynamic; mass: 5; shape: box;"
+                    grabbable
+                    stretchable="useWorldPosition: true;"
+                >
+                </a-entity>
+            </template>
+
+            <a-mixin id="super-hands"
+                super-hands="colliderEvent: collisions; colliderEventProperty: els;
+                    colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
+                    grabStartButtons: action_grab; grabEndButtons: action_release;
+                    stretchStartButtons: action_grab; stretchEndButtons: action_release;
+                    dragDropStartButtons: action_grab; dragDropEndButtons: action_release;
+                    "
+                collision-filter="collisionForces: false"
+                physics-collider
+            ></a-mixin>
         </a-assets>
+
+        <!-- Interactables -->
+        <a-entity id="counter" networked-counter="max: 3; ttl: 120"></a-entity>
+
+        <a-entity 
+            gltf-model="#interactable-duck"
+            scale="2 2 2"
+            class="collidable" 
+            class="collidable" 
+            super-spawner="template: #interactable-template;" 
+            position="2.5 1.2 0" 
+            body="mass: 0; type: static; shape: box;"
+        ></a-entity>
+
+        <a-sphere
+            id="3d-cursor"
+            material="color: #00EFFF"
+            radius=0.02
+            static-body="shape: sphere;"
+            mixin="super-hands"
+        ></a-sphere>  
+
 
         <!-- Player Rig -->
         <a-entity
@@ -115,7 +165,6 @@
             ik-root
             app-mode-toggle-playing__character-controller="mode: hud; invert: true;"
             app-mode-toggle-playing__wasd-to-analog2d="mode: hud; invert: true;"
-            animated-robot-hands
         >
 
             <a-entity
@@ -138,9 +187,17 @@
                 camera
                 position="0 1.6 0"
                 personal-space-bubble
-                look-controls
-                raycaster="objects: .hud; interval: 100; showLine: false; direction: 0 0 -1; origin: 0 -0.05 0;"
-            ></a-entity>
+                look-controls="pointerLockEnabled: true;"
+            >
+                <a-entity
+                    id="super-cursor"
+                    super-cursor="cursor: #3d-cursor"
+                    position="0 0 0"
+                    raycaster="objects: .collidable; direction: 0 0 -1;"
+                    app-mode-toggle-playing__raycaster="mode: hud; invert: true;"
+                    app-mode-toggle-playing__super-cursor="mode: hud; invert: true;"
+                ></a-entity>
+            </a-entity>
 
             <a-entity
                 id="player-left-controller"
@@ -170,7 +227,11 @@
                 app-mode-toggle-property__line="mode: hud; property: visible;"
             ></a-entity>
 
-            <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller>
+            <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller >
+                <template data-selector=".RootScene">
+                    <a-entity animation-mixer animated-robot-hands ></a-entity>
+                </template>
+
                 <template data-selector=".Neck">
                     <a-entity>
                         <a-entity class="nametag" visible="false" text ></a-entity>
@@ -191,8 +252,26 @@
                             rotation="0 -90 90"
                             position="0 -0.04 0"
                         ></a-gltf-entity>
+                        <a-entity
+                            event-repeater="events: action_grab, action_release; eventSource: #player-left-controller"
+                            static-body="shape: sphere; sphereRadius: 0.02"
+                            mixin="super-hands"
+                            position="0 0.05 0"
+                        ></a-entity>
                     </a-entity>
                 </template>
+
+                <template data-selector=".RightHand">
+                    <a-entity>
+                        <a-entity
+                            event-repeater="events: action_grab, action_release; eventSource: #player-right-controller"
+                            static-body="shape: sphere; sphereRadius: 0.02"
+                            mixin="super-hands"
+                            position="0 -0.05 0"
+                        ></a-entity>
+                    </a-entity>
+                </template>
+
             </a-gltf-entity>
         </a-entity>
 
@@ -249,6 +328,24 @@
             position="0 -88.358 -332.424"
             xr="ar: false"
         ></a-entity>
+
+        <a-cylinder 
+            position="0 0.45 0" 
+            material="visible: false" 
+            height="1" radius="3.1" 
+            segments-radial="12" 
+            static-body 
+            class="collidable"
+        ></a-cylinder>
+
+        <a-plane 
+            material="visible: false" 
+            rotation="-90 0 0" 
+            height="35" 
+            width="35" 
+            static-body 
+            class="collidable">
+        </a-plane> 
     </a-scene>
 </body>
 
