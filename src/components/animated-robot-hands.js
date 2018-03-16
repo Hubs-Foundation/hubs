@@ -23,7 +23,7 @@ AFRAME.registerComponent("animated-robot-hands", {
     this.playAnimation = this.playAnimation.bind(this);
 
     // Get the three.js object in the scene graph that has the animation data
-    const root = this.el.querySelector("a-gltf-entity .RootScene").object3D.children[0];
+    const root = this.el.object3D.children[0];
     this.mixer = new THREE.AnimationMixer(root);
     this.root = root;
 

@@ -40,6 +40,7 @@ import "./components/layers";
 import "./components/spawn-controller";
 import "./components/animated-robot-hands";
 import "./components/hide-when-quality";
+import "./components/player-info";
 import "./components/debug";
 
 import "./systems/personal-space-bubble";
@@ -104,6 +105,7 @@ async function shareMedia(audio, video) {
 
 async function onSceneLoad() {
   const scene = document.querySelector("a-scene");
+  const playerRig = document.querySelector("#player-rig");
 
   scene.setAttribute("networked-scene", {
     room: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1,
@@ -115,7 +117,6 @@ async function onSceneLoad() {
   }
 
   if (isMobile || qs.mobile) {
-    const playerRig = document.querySelector("#player-rig");
     playerRig.setAttribute("virtual-gamepad-controls", {});
   }
 
@@ -133,8 +134,10 @@ async function onSceneLoad() {
     username = promptForName(username); // promptForName is blocking
   }
 
-  const myNametag = document.querySelector("#player-rig .nametag");
-  myNametag.setAttribute("text", "value", username);
+  playerRig.setAttribute("player-info", {
+    displayName: username,
+    avatar: qs.avatar || "#bot-skinned-mesh"
+  });
 
   const avatarScale = parseInt(qs.avatarScale, 10);
 

@@ -23,12 +23,15 @@ AFRAME.registerComponent("ik-root", {
       this.rightController = this.el.querySelector(this.data.rightController);
       updated = true;
     }
-
-    if (updated) {
-      this.el.querySelector("[ik-controller]").components["ik-controller"].updateIkRoot(this);
-    }
   }
 });
+
+function findIKRoot(entity) {
+  while (entity && !(entity.components && entity.components["ik-root"])) {
+    entity = entity.parentNode;
+  }
+  return entity && entity.components["ik-root"];
+}
 
 AFRAME.registerComponent("ik-controller", {
   schema: {
@@ -64,6 +67,8 @@ AFRAME.registerComponent("ik-controller", {
 
     this.rootToChest = new Matrix4();
     this.invRootToChest = new Matrix4();
+
+    this.ikRoot = findIKRoot(this.el);
 
     this.hands = {
       left: {
@@ -122,10 +127,6 @@ AFRAME.registerComponent("ik-controller", {
       .addVectors(this.chest.object3D.position, this.neck.object3D.position)
       .add(this.head.object3D.position)
       .negate();
-  },
-
-  updateIkRoot(ikRoot) {
-    this.ikRoot = ikRoot;
   },
 
   tick(time, dt) {
