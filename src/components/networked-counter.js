@@ -20,6 +20,10 @@ AFRAME.registerComponent("networked-counter", {
         item.el.removeEventListener(this.data.release_event, item.onReleaseHandler);
       }
     }
+    
+    for (const id in this.timeouts) {
+      this._removeTimeout(id);
+    }
   },
 
   register: function(networkedEl) {
