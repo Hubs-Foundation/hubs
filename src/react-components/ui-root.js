@@ -348,7 +348,7 @@ class UIRoot extends Component {
   }
 
   render() {
-    if (!this.state.sceneLoaded) {
+    if (!this.props.scene.hasLoaded) {
       return (
         <div>Loading scene</div>
       );

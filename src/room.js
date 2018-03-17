@@ -223,7 +223,6 @@ function mountUI(scene) {
       forcedVREntryType,
       store
     }} />, document.getElementById("ui-root"));
-    document.getElementById("loader").style.display = "none";
   });
 }
 
