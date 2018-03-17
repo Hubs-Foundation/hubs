@@ -418,7 +418,6 @@ class UIRoot extends Component {
     return !this.state.exited ?
       (
         <div className={dialogClassNames}>
-          Base UI Here
           {
             this.state.entryStep !== ENTRY_STEPS.finished &&
             (

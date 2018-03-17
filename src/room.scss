@@ -1,4 +1,5 @@
 $dark-transparent: rgba(0, 0, 0, 0.5);
+$darker-transparent: rgba(0, 0, 0, 0.7);
 
 .a-enter-vr {
   display: none;
@@ -33,9 +34,10 @@ $dark-transparent: rgba(0, 0, 0, 0.5);
 .ui-dialog-box {
   grid-column: 3;
   grid-row : 3;
-  background-color: black;
+  background-color: $darker-transparent;
   border-radius: 4px;
   pointer-events: auto;
+  padding: 10px;
 }
 
 .loading-panel {
