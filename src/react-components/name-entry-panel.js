@@ -9,7 +9,6 @@ export default class NameEntryPanel extends Component {
 
   constructor(props) {
     super(props);
-    window.store = this.props.store;
     this.state = {name: this.props.store.state.profile.display_name};
     this.props.store.subscribe(() => {
       this.setState({name: this.props.store.state.profile.display_name});
