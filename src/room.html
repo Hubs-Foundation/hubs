@@ -23,14 +23,9 @@
                          onConnect: App.onConnect;
                          connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
-
-        raycaster="objects:.hud;"
-        cursor="rayOrigin: mouse;"
         2d-hud
 
         app-mode-input-mappings="modes: default, hud; actionSets: default, hud;"
-        vr-mode-toggle-playing__raycaster="invert: true;"
-        vr-mode-toggle-playing__cursor="invert: true;"
         vr-mode-toggle-playing__2d-hud="invert: true;"
         >
 
@@ -187,7 +182,7 @@
                 camera
                 position="0 1.6 0"
                 personal-space-bubble
-                look-controls="pointerLockEnabled: true;"
+                look-controls
             >
                 <a-entity
                     id="super-cursor"
