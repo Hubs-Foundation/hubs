@@ -1,4 +1,4 @@
-import "./room.css";
+import "./room.scss";
 import queryString from "query-string";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
@@ -121,6 +121,7 @@ function setNameTagFromStore() {
 
 async function enterScene(mediaStream, enterInVR) {
   const scene = document.querySelector("a-scene");
+  document.querySelector("a-scene canvas").classList.remove("blurred")
 
   if (enterInVR) {
     scene.enterVR();
@@ -200,7 +201,6 @@ async function enterScene(mediaStream, enterInVR) {
 }
 
 function onConnect() {
-  document.getElementById("loader").style.display = "none";
 }
 
 function mountUI(scene) {
@@ -228,6 +228,7 @@ function mountUI(scene) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const scene = document.querySelector("a-scene");
+  document.querySelector("a-scene canvas").classList.add("blurred");
   window.APP.scene = scene;
   mountUI(scene);
 });

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import NameEntryPanel from './name-entry-panel';
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import queryString from "query-string";
@@ -267,7 +268,7 @@ class UIRoot extends Component {
   }
 
   setMediaStreamToDefault = async () => {
-    const constraints = { audio: true, video: this.mediaVideoConstraint() };
+    const constraints = { audio: true, video: false };
     this.setupNewMediaStream(await navigator.mediaDevices.getUserMedia(constraints));
   }
 
@@ -350,13 +351,13 @@ class UIRoot extends Component {
   render() {
     if (!this.props.scene.hasLoaded) {
       return (
-        <div>Loading scene</div>
+        <div className="loading-panel">Loading scene</div>
       );
     }
 
     const entryPanel = this.state.entryStep === ENTRY_STEPS.start
     ? (
-      <div>
+      <div className="entry-panel">
         <TwoDEntryButton onClick={this.enter2D}/>
         { this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && <GenericEntryButton onClick={this.enterVR}/> }
         { this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && <GearVREntryButton onClick={this.enterGearVR}/> }
@@ -386,15 +387,18 @@ class UIRoot extends Component {
           <select value={selectedMicDeviceId} onChange={this.micDeviceChanged}>
             { this.state.micDevices.map(d => (<option key={ d.deviceId } value={ d.deviceId }>{d.label}</option>)) }
           </select>
+          <br/>
           { this.state.tonePlaying && (<div>Tone</div>) }
+          <br/>
           { this.state.micLevel }
+          <br/>
           <button onClick={this.onAudioReadyButton}>
             Audio Ready
           </button>
         </div>
       ) : null;
 
-    const overlay = this.isWaitingForAutoExit() ?
+    const dialogContents = this.isWaitingForAutoExit() ?
       (<AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />) :
       (
         <div>
@@ -406,11 +410,23 @@ class UIRoot extends Component {
         </div>
       );
 
+    const dialogClassNames = classNames({
+      'ui-dialog': true,
+      'ui-dialog--darkened': this.state.entryStep !== ENTRY_STEPS.finished
+    });
+
     return !this.state.exited ?
       (
-        <div>
-          Base UI here
-          {overlay}
+        <div className={dialogClassNames}>
+          Base UI Here
+          {
+            this.state.entryStep !== ENTRY_STEPS.finished &&
+            (
+              <div className='ui-dialog-box'>
+                {dialogContents}
+              </div>
+            )
+          }
         </div>
       ) :
       (

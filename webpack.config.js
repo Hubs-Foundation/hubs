@@ -139,6 +139,21 @@ const config = {
         }
       },
       {
+        test: /\.scss$/,
+        loader: ExtractTextPlugin.extract({
+          fallback: "style-loader",
+          use: [
+            {
+              loader: "css-loader",
+              options: {
+                minimize: process.env.NODE_ENV === "production"
+              }
+            },
+            "sass-loader"
+          ]
+        })
+      },
+      {
         test: /\.css$/,
         use: ExtractTextPlugin.extract({
           fallback: "style-loader",
