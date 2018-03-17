@@ -20,6 +20,7 @@
   position: absolute;
 }
 
+/* move performance stats to the bottom of the screen */
 .rs-base {
   top: auto;
   bottom: 20px;
