@@ -13,9 +13,6 @@ import "aframe-input-mapping-component";
 import "aframe-billboard-component";
 import "webrtc-adapter";
 
-import animationMixer from "aframe-extras/src/loaders/animation-mixer";
-AFRAME.registerComponent("animation-mixer", animationMixer);
-
 import { vive_trackpad_dpad4 } from "./behaviours/vive-trackpad-dpad4";
 import { oculus_touch_joystick_dpad4 } from "./behaviours/oculus-touch-joystick-dpad4";
 import { PressedMove } from "./activators/pressedmove";
@@ -38,7 +35,10 @@ import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
+import "./components/animated-robot-hands";
 import "./components/hide-when-quality";
+import "./components/animation-mixer";
+import "./components/loop-animation";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -63,6 +63,15 @@ if (qs.quality) {
 
 import "./elements/a-progressive-asset";
 
+import "aframe-physics-system";
+import "aframe-physics-extras";
+import "super-hands";
+import "./components/super-networked-interactable";
+import "./components/networked-counter";
+import "./components/super-spawner";
+import "./components/super-cursor";
+import "./components/event-repeater";
+
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
@@ -72,7 +81,6 @@ import { generateDefaultProfile } from "./utils/identity.js";
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
-registerNetworkSchemas();
 registerTelemetry();
 
 const store = new Store();
@@ -227,6 +235,8 @@ function mountUI(scene) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  registerNetworkSchemas();
+
   const scene = document.querySelector("a-scene");
   window.APP.scene = scene;
   mountUI(scene);

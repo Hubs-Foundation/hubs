@@ -32,7 +32,9 @@ const config = {
         trackpad_dpad4_pressed_west_down: { right: "snap_rotate_left" },
         trackpad_dpad4_pressed_east_down: { right: "snap_rotate_right" },
         trackpad_dpad4_pressed_center_down: { right: "action_teleport_down" },
-        trackpadup: { right: "action_teleport_up" }
+        trackpadup: { right: "action_teleport_up" },
+        gripdown: "action_grab",
+        gripup: "action_release"
       },
       "oculus-touch-controls": {
         joystick_dpad4_west: {
@@ -42,15 +44,22 @@ const config = {
           right: "snap_rotate_right"
         },
         xbuttondown: "action_mute",
-        gripdown: "middle_ring_pinky_down",
-        gripup: "middle_ring_pinky_up",
+        gripdown: ["action_grab", "middle_ring_pinky_down"],
+        gripup: ["action_release", "middle_ring_pinky_up"],
+        abuttontouchstart: "thumb_down",
+        abuttontouchend: "thumb_up",
+        bbuttontouchstart: "thumb_down",
+        bbuttontouchend: "thumb_up",
+        xbuttontouchstart: "thumb_down",
+        xbuttontouchend: "thumb_up",
+        ybuttontouchstart: "thumb_down",
+        ybuttontouchend: "thumb_up",
+        surfacetouchstart: "thumb_down",
+        surfacetouchend: "thumb_up",
         thumbsticktouchstart: "thumb_down",
         thumbsticktouchend: "thumb_up",
-        // @TODO: How do I map more than one action to triggerdown?
-        //        triggerdown: "index_down",
-        //        triggerup: "index_up",
-        triggerdown: "action_teleport_down",
-        triggerup: "action_teleport_up",
+        triggerdown: ["action_teleport_down", "index_down"],
+        triggerup: ["action_teleport_up", "index_up"],
         "axismove.reverseY": { left: "move" },
         right_dpad_east: "snap_rotate_right",
         right_dpad_west: "snap_rotate_left",
