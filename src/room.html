@@ -14,7 +14,8 @@
 </head>
 
 <body>
-    <div id="loader"></div>
+    <audio id="test-tone" src="./assets/sfx/tone.ogg"></audio>
+
     <a-scene
         physics
         networked-scene="adapter: janus;
@@ -34,7 +35,7 @@
                 high-src="./assets/avatars/BotDefault_Avatar.glb"
                 low-src="./assets/avatars/BotDefault_Avatar_Unlit.glb"
             ></a-progressive-asset>
-            
+
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
 
             <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src="./assets/environments/MeetingSpace1_mesh.glb"></a-asset-item>
@@ -100,7 +101,7 @@
                 <a-entity
                     gltf-model="#interactable-duck"
                     scale="2 2 2"
-                    class="collidable" 
+                    class="collidable"
                     super-networked-interactable="counter: #counter; mass: 5;"
                     body="type: dynamic; mass: 5; shape: box;"
                     grabbable
@@ -124,13 +125,13 @@
         <!-- Interactables -->
         <a-entity id="counter" networked-counter="max: 3; ttl: 120"></a-entity>
 
-        <a-entity 
+        <a-entity
             gltf-model="#interactable-duck"
             scale="2 2 2"
-            class="collidable" 
-            class="collidable" 
-            super-spawner="template: #interactable-template;" 
-            position="2.5 1.2 0" 
+            class="collidable"
+            class="collidable"
+            super-spawner="template: #interactable-template;"
+            position="2.5 1.2 0"
             body="mass: 0; type: static; shape: box;"
         ></a-entity>
 
@@ -140,7 +141,7 @@
             radius=0.02
             static-body="shape: sphere;"
             mixin="super-hands"
-        ></a-sphere>  
+        ></a-sphere>
 
 
         <!-- Player Rig -->
@@ -158,7 +159,6 @@
                 camera
                 position="0 1.6 0"
                 personal-space-bubble
-                look-controls="pointerLockEnabled: true;"
             >
                 <a-entity
                     id="super-cursor"
@@ -288,24 +288,26 @@
             xr="ar: false"
         ></a-entity>
 
-        <a-cylinder 
-            position="0 0.45 0" 
-            material="visible: false" 
-            height="1" radius="3.1" 
-            segments-radial="12" 
-            static-body 
+        <a-cylinder
+            position="0 0.45 0"
+            material="visible: false"
+            height="1" radius="3.1"
+            segments-radial="12"
+            static-body
             class="collidable"
         ></a-cylinder>
 
-        <a-plane 
-            material="visible: false" 
-            rotation="-90 0 0" 
-            height="35" 
-            width="35" 
-            static-body 
+        <a-plane
+            material="visible: false"
+            rotation="-90 0 0"
+            height="35"
+            width="35"
+            static-body
             class="collidable">
-        </a-plane> 
+        </a-plane>
     </a-scene>
+
+    <div id="ui-root"></div>
 </body>
 
 </html>

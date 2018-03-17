@@ -122,7 +122,8 @@ const config = {
             "a-asset-item:src",
             "a-progressive-asset:src",
             "a-progressive-asset:high-src",
-            "a-progressive-asset:low-src"
+            "a-progressive-asset:low-src",
+            "audio:src"
           ],
           // You can get transformed asset urls in an html template using ${require("pathToFile.ext")}
           interpolate: "require"
@@ -133,7 +134,10 @@ const config = {
         include: [path.resolve(__dirname, "src")],
         // Exclude JS assets in node_modules because they are already transformed and often big.
         exclude: [path.resolve(__dirname, "node_modules")],
-        loader: "babel-loader"
+        loader: "babel-loader",
+        query: {
+          plugins: ["transform-class-properties", "transform-object-rest-spread"]
+        }
       },
       {
         test: /\.css$/,
@@ -148,7 +152,7 @@ const config = {
         })
       },
       {
-        test: /\.(png|jpg|gif|glb)$/,
+        test: /\.(png|jpg|gif|glb|ogg)$/,
         use: {
           loader: "file-loader",
           options: {
