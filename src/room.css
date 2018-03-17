@@ -11,3 +11,12 @@
   background: #eaeaea no-repeat url("./assets/loading.gif") center center;
   opacity: 0.9;
 }
+
+
+.a-canvas.a-grab-cursor:hover {
+	cursor: none;
+}
+
+.a-canvas.a-grab-cursor:active {
+	cursor: none;
+}
