@@ -35,11 +35,8 @@
     "react": "^16.1.1",
     "react-dom": "^16.1.1",
     "react-router-dom": "^4.2.2",
-<<<<<<< HEAD
     "uuid": "^3.2.1",
-=======
     "super-hands": "https://github.com/infinitelee/aframe-super-hands-component#mr-social-client/master",
->>>>>>> 4d9a358c4781cb3c98ae6a2d42e8b0ccbad12e47
     "webrtc-adapter": "^6.0.2"
   },
   "devDependencies": {

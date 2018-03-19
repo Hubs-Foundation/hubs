@@ -63,8 +63,6 @@ if (qs.quality) {
 
 import "./elements/a-progressive-asset";
 
-<<<<<<< HEAD
-=======
 import "aframe-physics-system";
 import "aframe-physics-extras";
 import "super-hands";
@@ -74,8 +72,6 @@ import "./components/super-spawner";
 import "./components/super-cursor";
 import "./components/event-repeater";
 
-import { promptForName, getCookie, parseJwt } from "./utils/identity";
->>>>>>> 4d9a358c4781cb3c98ae6a2d42e8b0ccbad12e47
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
@@ -145,7 +141,7 @@ async function enterScene(mediaStream, enterInVR) {
   AFRAME.registerInputActivator("reverseY", ReverseY);
   AFRAME.registerInputActions(inGameActions, "default");
   AFRAME.registerInputMappings(inputConfig);
-  document.querySelector("#player-camera").setAttribute("look-controls", "");
+  document.querySelector("#player-camera").setAttribute("look-controls", "pointerLockEnabled: true;");
 
   const qs = queryString.parse(location.search);
 
