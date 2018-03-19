@@ -107,7 +107,9 @@ class UIRoot extends Component {
     secondsRemainingBeforeAutoExit: Infinity,
 
     sceneLoaded: false,
-    exited: false
+    exited: false,
+
+    showingNameEntry: true
   }
 
   componentDidMount() {
@@ -401,12 +403,10 @@ class UIRoot extends Component {
     const dialogContents = this.isWaitingForAutoExit() ?
       (<AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />) :
       (
-        <div>
+        <div class="entry-dialog">
           {entryPanel}
           {micPanel}
           {audioSetupPanel}
-
-          <NameEntryPanel store={this.props.store}></NameEntryPanel>
         </div>
       );
 
@@ -415,13 +415,20 @@ class UIRoot extends Component {
       'ui-dialog--darkened': this.state.entryStep !== ENTRY_STEPS.finished
     });
 
+    const dialogBoxClassNames = classNames({
+      'ui-dialog-box': true,
+      'ui-dialog-box--lighter': this.state.showingNameEntry
+    });
+
     return !this.state.exited ?
       (
         <div className={dialogClassNames}>
           {
             this.state.entryStep !== ENTRY_STEPS.finished &&
             (
-              <div className='ui-dialog-box'>
+              <div className={dialogBoxClassNames}>
+                {this.state.showingNameEntry && (
+                  <NameEntryPanel store={this.props.store}></NameEntryPanel>)}
                 {dialogContents}
               </div>
             )

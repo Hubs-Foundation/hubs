@@ -166,7 +166,7 @@ const config = {
         })
       },
       {
-        test: /\.(png|jpg|gif|glb|ogg)$/,
+        test: /\.(png|jpg|gif|glb|ogg|woff2)$/,
         use: {
           loader: "file-loader",
           options: {

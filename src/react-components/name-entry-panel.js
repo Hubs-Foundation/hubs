@@ -30,18 +30,27 @@ export default class NameEntryPanel extends Component {
 
   render () {
     return (
-      <div>
-        Name Entry
-        <form onSubmit={this.saveName}>
-          <label>Name:
-            <input
-              value={this.state.name} onChange={(e) => this.setState({name: e.target.value})}
-              required pattern={SCHEMA.definitions.profile.properties.display_name.pattern}
-              title="Alphanumerics and hyphens. At least 3 characters, no more than 32"
-              ref={inp => this.nameInput = inp}/>
-          </label>
-          <input type="submit" value="Save" />
-        </form>
+      <div class="name-entry">
+        <div class="name-entry__box name-entry__box--darkened">
+          <div class="name-entry__subtitle">
+            Set your identity
+          </div>
+          <div class="name-entry__form">
+            <form onSubmit={this.saveName}>
+              <div class="name-entry__form-fields">
+                <input
+                  class="name-entry__form-field-text"
+                  value={this.state.name} onChange={(e) => this.setState({name: e.target.value})}
+                  required pattern={SCHEMA.definitions.profile.properties.display_name.pattern}
+                  title="Alphanumerics and hyphens. At least 3 characters, no more than 32"
+                  ref={inp => this.nameInput = inp}/>
+                <div class="name-entry__form-submit">
+                  <input type="submit" value="Save" />
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     );
   }

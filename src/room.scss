@@ -1,5 +1,11 @@
-$dark-transparent: rgba(0, 0, 0, 0.5);
-$darker-transparent: rgba(0, 0, 0, 0.7);
+@import 'src/fonts';
+
+$dark-transparent: rgba(0, 0, 0, 0.4);
+$darker-transparent: rgba(0, 0, 0, 0.6);
+$grey-text: rgba(192, 192, 192, 1.0);
+$light-text: rgba(240, 240, 240, 1.0);
+$dark-grey: rgba(128, 128, 128, 1.0);
+$darker-grey: rgba(64, 64, 64, 1.0);
 
 .a-enter-vr {
   display: none;
@@ -12,6 +18,7 @@ $darker-transparent: rgba(0, 0, 0, 0.7);
   left: 0;
   position: absolute;
   pointer-events: none;
+  font-family: 'Zilla Slab', sans-serif;
   color: white;
 }
 
@@ -38,6 +45,11 @@ $darker-transparent: rgba(0, 0, 0, 0.7);
   border-radius: 4px;
   pointer-events: auto;
   padding: 10px;
+  position: relative;
+}
+
+.ui-dialog-box--lighter {
+  background-color: $dark-transparent;
 }
 
 .loading-panel {
@@ -49,4 +61,60 @@ $darker-transparent: rgba(0, 0, 0, 0.7);
 .rs-base {
   top: auto;
   bottom: 20px;
+}
+
+.entry-dialog {
+  display: flex;
+}
+
+.name-entry {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+.name-entry__box {
+  width: 80%;
+  height: 20%;
+  border-radius: 4px;
+  max-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.name-entry__box--darkened {
+  background-color: $darker-transparent;
+}
+
+.name-entry__subtitle {
+  width: 100%;
+  text-align: center;
+  color: $grey-text;
+}
+
+.name-entry__form-fields {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.name-entry__form-field-text {
+  color: $light-text;
+  font-size: 0.8em;
+  background-color: $darker-grey;
+  border: 3px solid white;
+  box-sizing: border-box;
+  border-radius: 12px;
+  line-height: 2.0em;
+  padding-left: 1.25em;
+  padding-right: 1.25em;
+  font-family: 'Zilla Slab', sans-serif;
+}
+
+.name-entry__form-submit {
+  flex: 1 1 30%;
 }
