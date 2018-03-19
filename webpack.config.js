@@ -96,6 +96,7 @@ const config = {
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
       app.head("*", function(req, res, next) {
         if (req.method === "HEAD") {
+          res.append("Date", (new Date()).toGMTString());
           res.send("");
         } else {
           next();
