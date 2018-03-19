@@ -51,6 +51,10 @@ export default class Store {
     this.subscribers.add(subscriber);
   }
 
+  unsubscribe(subscriber) {
+    this.subscribers.delete(subscriber);
+  }
+
   update(newState) {
     if (newState.id) {
       console.error("Store id is immutable.");

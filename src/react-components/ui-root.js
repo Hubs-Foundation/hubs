@@ -63,6 +63,12 @@ const AutoExitWarning = (props) => (
   </div>
 );
 
+const ProfileInfoHeader = (props) => (
+  <div className="profile-info-header" onClick={props.onClick}>
+    {props.name}
+  </div>
+);
+
 // This is a list of regexes that match the microphone labels of HMDs.
 //
 // If entering VR mode, and if any of these regexes match an audio device,
@@ -109,7 +115,7 @@ class UIRoot extends Component {
     sceneLoaded: false,
     exited: false,
 
-    showingNameEntry: true
+    showProfileEntry: false
   }
 
   componentDidMount() {
@@ -321,6 +327,10 @@ class UIRoot extends Component {
     }
   }
 
+  onProfileFinished = () => {
+    this.setState({ showProfileEntry: false })
+  }
+
   beginAudioSetup = async () => {
     await this.fetchMicDevices();
     this.setState({ entryStep: ENTRY_STEPS.audio_setup });
@@ -403,7 +413,8 @@ class UIRoot extends Component {
     const dialogContents = this.isWaitingForAutoExit() ?
       (<AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />) :
       (
-        <div class="entry-dialog">
+        <div className="entry-dialog">
+          <ProfileInfoHeader name={this.props.store.state.profile.display_name} onClick={(() => this.setState({showProfileEntry: true })) }/>
           {entryPanel}
           {micPanel}
           {audioSetupPanel}
@@ -415,9 +426,11 @@ class UIRoot extends Component {
       'ui-dialog--darkened': this.state.entryStep !== ENTRY_STEPS.finished
     });
 
-    const dialogBoxClassNames = classNames({
-      'ui-dialog-box': true,
-      'ui-dialog-box--lighter': this.state.showingNameEntry
+    const dialogBoxClassNames = classNames({ 'ui-dialog-box': true });
+
+    const dialogBoxContentsClassNames = classNames({
+      'ui-dialog-box-contents': true,
+      'ui-dialog-box-contents--backgrounded': this.state.showProfileEntry
     });
 
     return !this.state.exited ?
@@ -427,9 +440,12 @@ class UIRoot extends Component {
             this.state.entryStep !== ENTRY_STEPS.finished &&
             (
               <div className={dialogBoxClassNames}>
-                {this.state.showingNameEntry && (
-                  <NameEntryPanel store={this.props.store}></NameEntryPanel>)}
-                {dialogContents}
+                <div className={dialogBoxContentsClassNames}>
+                  {dialogContents}
+                </div>
+
+                {this.state.showProfileEntry && (
+                  <NameEntryPanel finished={this.onProfileFinished} store={this.props.store}/>)}
               </div>
             )
           }

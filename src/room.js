@@ -82,6 +82,7 @@ import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
 registerTelemetry();
+AFRAME.registerInputMappings(inputConfig, true);
 
 const store = new Store();
 const concurrentLoadDetector = new ConcurrentLoadDetector();
@@ -140,7 +141,7 @@ async function enterScene(mediaStream, enterInVR) {
   AFRAME.registerInputActivator("pressedmove", PressedMove);
   AFRAME.registerInputActivator("reverseY", ReverseY);
   AFRAME.registerInputActions(inGameActions, "default");
-  AFRAME.registerInputMappings(inputConfig);
+
   document.querySelector("#player-camera").setAttribute("look-controls", "pointerLockEnabled: true;");
 
   const qs = queryString.parse(location.search);

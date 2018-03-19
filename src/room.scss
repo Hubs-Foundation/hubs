@@ -7,18 +7,29 @@ $light-text: rgba(240, 240, 240, 1.0);
 $dark-grey: rgba(128, 128, 128, 1.0);
 $darker-grey: rgba(64, 64, 64, 1.0);
 
+%default-font {
+  font-family: 'Zilla Slab', sans-serif;
+}
+
+%rounded-border {
+  border: 3px solid white;
+  box-sizing: border-box;
+  border-radius: 14px;
+}
+
 .a-enter-vr {
   display: none;
 }
 
 .ui {
+  @extend %default-font;
+
   width: 100%;
   height: 100%;
   top: 0;
   left: 0;
   position: absolute;
   pointer-events: none;
-  font-family: 'Zilla Slab', sans-serif;
   color: white;
 }
 
@@ -41,15 +52,24 @@ $darker-grey: rgba(64, 64, 64, 1.0);
 .ui-dialog-box {
   grid-column: 3;
   grid-row : 3;
-  background-color: $darker-transparent;
-  border-radius: 4px;
-  pointer-events: auto;
-  padding: 10px;
   position: relative;
 }
 
-.ui-dialog-box--lighter {
-  background-color: $dark-transparent;
+.ui-dialog-box-contents {
+  background-color: $darker-transparent;
+  border-radius: 8px;
+  pointer-events: auto;
+  width: 100%;
+  height: 100%;
+}
+
+.ui-dialog-box--backgrounded {
+}
+
+.ui-dialog-box-contents--backgrounded {
+  filter: blur(1px);
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 .loading-panel {
@@ -76,15 +96,18 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   justify-content: center;
   align-items: center;
   display: flex;
+  pointer-events: auto;
 }
 
 .name-entry__box {
-  width: 80%;
-  height: 20%;
-  border-radius: 4px;
-  max-height: 200px;
+  height: 150px;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px;
+  flex: 1 1 100%;
 }
 
 .name-entry__box--darkened {
@@ -94,27 +117,32 @@ $darker-grey: rgba(64, 64, 64, 1.0);
 .name-entry__subtitle {
   width: 100%;
   text-align: center;
+  font-size: 1.2em;
   color: $grey-text;
 }
 
-.name-entry__form-fields {
-  display: flex;
-  justify-content: flex-start;
-}
-
 .name-entry__form-field-text {
+  @extend %rounded-border;
+  @extend %default-font;
+
   color: $light-text;
-  font-size: 0.8em;
-  background-color: $darker-grey;
-  border: 3px solid white;
-  box-sizing: border-box;
-  border-radius: 12px;
+  font-size: 1.2em;
+  background-color: transparent;
   line-height: 2.0em;
   padding-left: 1.25em;
   padding-right: 1.25em;
-  font-family: 'Zilla Slab', sans-serif;
 }
 
 .name-entry__form-submit {
-  flex: 1 1 30%;
+  @extend %default-font;
+  border: none;
+
+  margin: 8px;
+  width: 100px;
+  line-height: 1.5em;
+  font-size: 1.0em;
+
+  background-color: transparent;
+  font-weight: bold;
+  color: white;
 }
