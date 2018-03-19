@@ -85,6 +85,7 @@ $darker-grey: rgba(64, 64, 64, 1.0);
 
 .entry-dialog {
   display: flex;
+  flex-direction: column;
 }
 
 .name-entry {
@@ -145,4 +146,31 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   background-color: transparent;
   font-weight: bold;
   color: white;
+  cursor: pointer;
+}
+
+.profile-info-header {
+  display: flex;
+  flex: 1 1 40px;
+  width: 100%;
+}
+
+.profile-info-header__icon {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  padding: 15px;
+}
+
+.profile-info-header__profile_display_name {
+  cursor: pointer;
+  flex: 6 1 auto;
+  font-size: 1.2em;
+  line-height: 50px;
+}
+
+.profile-info-header__app_name {
+  font-size: 1.8em;
+  padding-right: 18px;
+  line-height: 50px;
 }

@@ -64,8 +64,14 @@ const AutoExitWarning = (props) => (
 );
 
 const ProfileInfoHeader = (props) => (
-  <div className="profile-info-header" onClick={props.onClick}>
-    {props.name}
+  <div className="profile-info-header">
+    <img src="./src/assets/account.svg" onClick={props.onClick} className="profile-info-header__icon"/>
+    <div className="profile-info-header__profile_display_name" onClick={props.onClick}>
+      {props.name}
+    </div>
+    <div className="profile-info-header__app_name">
+      <b>moz://a</b> duck
+    </div>
   </div>
 );
 
