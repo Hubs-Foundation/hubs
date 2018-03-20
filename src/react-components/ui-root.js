@@ -5,9 +5,20 @@ import NameEntryPanel from './name-entry-panel';
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import queryString from "query-string";
 import { SCHEMA } from "../storage/store";
-const { detect } = require("detect-browser");
+import MobileDetect from 'mobile-detect';
+import { IntlProvider, FormattedMessage, addLocaleData } from 'react-intl';
+import en from 'react-intl/locale-data/en';
 
-const browser = detect();
+const mobiledetect = new MobileDetect(navigator.userAgent);
+
+const lang = ((navigator.languages && navigator.languages[0]) ||
+                   navigator.language || navigator.userLanguage).toLowerCase().split(/[_-]+/)[0];
+
+import localeData from '../assets/translations.data.json';
+console.log(localeData);
+addLocaleData([...en]);
+
+const messages = localeData[lang] || localeData.en;
 
 const ENTRY_STEPS = {
   start: "start",
@@ -27,11 +38,15 @@ async function hasGrantedMicPermissions() {
   return micLabels.length > 0;
 }
 
-const TwoDEntryButton = (props) => (
-  <button {...props}>
-    Enter on this Screen
-  </button>
-);
+const TwoDEntryButton = (props) => {
+  const iconSrc = mobiledetect.mobile() ? 
+    "./src/assets/images/mobile_screen_entry.svg" : "./src/assets/images/desktop_screen_entry.svg";
+
+  return (<div className="entry-button" {...props}>
+    <img src={iconSrc} className="entry-button__icon"/>
+    <FormattedMessage id="entry.screen"/>
+  </div>);
+}
 
 const GenericEntryButton = (props) => (
   <button {...props}>
@@ -65,7 +80,7 @@ const AutoExitWarning = (props) => (
 
 const ProfileInfoHeader = (props) => (
   <div className="profile-info-header">
-    <img src="./src/assets/account.svg" onClick={props.onClick} className="profile-info-header__icon"/>
+    <img src="./src/assets/images/account.svg" onClick={props.onClick} className="profile-info-header__icon"/>
     <div className="profile-info-header__profile_display_name" onClick={props.onClick}>
       {props.name}
     </div>
@@ -440,7 +455,7 @@ class UIRoot extends Component {
       'ui-dialog-box-contents--backgrounded': this.state.showProfileEntry
     });
 
-    return !this.state.exited ?
+    const content = !this.state.exited ?
       (
         <div className={dialogClassNames}>
           {
@@ -461,6 +476,12 @@ class UIRoot extends Component {
       (
         <div>Exited</div>
       )
+
+    return (
+      <IntlProvider locale={lang} messages={messages}>
+        {content}
+      </IntlProvider>
+    );
   }
 }
 

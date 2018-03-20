@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { injectIntl, FormattedMessage } from 'react-intl';
 import { SCHEMA } from "../storage/store";
 
-export default class NameEntryPanel extends Component {
+class NameEntryPanel extends Component {
   static propTypes = {
     store: PropTypes.object,
+    messages: PropTypes.object,
     finished: PropTypes.func
   }
 
@@ -37,23 +39,27 @@ export default class NameEntryPanel extends Component {
   }
 
   render () {
+    const { formatMessage } = this.props.intl;
+
     return (
       <div className="name-entry">
         <form onSubmit={this.saveName}>
         <div className="name-entry__box name-entry__box--darkened">
           <div className="name-entry__subtitle">
-            Your identity
+            <FormattedMessage id="profile.header"/>
           </div>
           <input
             className="name-entry__form-field-text"
             value={this.state.name} onChange={(e) => this.setState({name: e.target.value})}
             required pattern={SCHEMA.definitions.profile.properties.display_name.pattern}
-            title="Alphanumerics and hyphens. At least 3 characters, no more than 32"
+            title={formatMessage({ id: "profile.display_name.validation_warning" })}
             ref={inp => this.nameInput = inp}/>
-          <input className="name-entry__form-submit" type="submit" value="SAVE" />
+          <input className="name-entry__form-submit" type="submit" value={formatMessage({ id: "profile.save" }) }/>
           </div>
         </form>
       </div>
     );
   }
 }
+
+export default injectIntl(NameEntryPanel);

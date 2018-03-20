@@ -147,6 +147,7 @@ const config = {
             {
               loader: "css-loader",
               options: {
+                name: "[path][name]-[hash].[ext]",
                 minimize: process.env.NODE_ENV === "production"
               }
             },
@@ -161,6 +162,7 @@ const config = {
           use: {
             loader: "css-loader",
             options: {
+              name: "[path][name]-[hash].[ext]",
               minimize: process.env.NODE_ENV === "production"
             }
           }
