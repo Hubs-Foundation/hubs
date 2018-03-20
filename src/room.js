@@ -235,11 +235,13 @@ function mountUI(scene) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+const onReady = () => {
   registerNetworkSchemas();
 
   const scene = document.querySelector("a-scene");
   document.querySelector("a-scene canvas").classList.add("blurred");
   window.APP.scene = scene;
   mountUI(scene);
-});
+};
+
+document.addEventListener("DOMContentLoaded", onReady);

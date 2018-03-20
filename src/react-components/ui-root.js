@@ -15,7 +15,6 @@ const lang = ((navigator.languages && navigator.languages[0]) ||
                    navigator.language || navigator.userLanguage).toLowerCase().split(/[_-]+/)[0];
 
 import localeData from '../assets/translations.data.json';
-console.log(localeData);
 addLocaleData([...en]);
 
 const messages = localeData[lang] || localeData.en;
@@ -449,19 +448,29 @@ class UIRoot extends Component {
 
     const audioSetupPanel = this.state.entryStep === ENTRY_STEPS.audio_setup
     ? (
-        <div>
-          Audio setup
-          <select value={selectedMicDeviceId} onChange={this.micDeviceChanged}>
-            { this.state.micDevices.map(d => (<option key={ d.deviceId } value={ d.deviceId }>{d.label}</option>)) }
-          </select>
+        <div className="audio-setup-panel">
+          <div className="audio-setup-panel--title">
+            <FormattedMessage id="audio.title"/>
+          </div>
+          <div className="audio-setup-panel--subtitle">
+            { mobiledetect.mobile() || this.state.enterInVR  && (<FormattedMessage id={ mobiledetect.mobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop" }/>) }
+          </div>
+          <div className="audio-setup-panel--device-chooser">
+            <select className="audio-setup-panel--device-chooser--dropdown" value={selectedMicDeviceId} onChange={this.micDeviceChanged}>
+              { this.state.micDevices.map(d => (<option key={ d.deviceId } value={ d.deviceId }>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}</option>)) }
+            </select>
+            <div className="audio-setup-panel--device-chooser--mic-icon">
+              <img src="./src/assets/images/mic_small.png"/>
+            </div>
+          </div>
           <br/>
           { this.state.tonePlaying && (<div>Tone</div>) }
           <br/>
           { this.state.micLevel }
           <br/>
-          <button onClick={this.onAudioReadyButton}>
-            Audio Ready
-          </button>
+          <div className="audio-setup-panel--enter-button" onClick={this.onAudioReadyButton}>
+            <FormattedMessage id="audio.enter-now"/>
+          </div>
         </div>
       ) : null;
 

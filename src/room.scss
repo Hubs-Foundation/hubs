@@ -18,6 +18,14 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   border-radius: 14px;
 }
 
+%bottom-button {
+  font-size: 1em;
+  font-weight: bold;
+  margin-top: auto;
+  margin-bottom: 30px;
+  cursor: pointer;
+}
+
 .a-enter-vr {
   display: none;
 }
@@ -209,5 +217,48 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   justify-content: center;
 }
 
-.entry-button__label__contents {
+.audio-setup-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 10 1 auto;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.audio-setup-panel--title {
+  font-size: 1.3em;
+}
+
+.audio-setup-panel--subtitle {
+  font-size: 1.0em;
+  padding-top: 4px;
+}
+
+.audio-setup-panel--device-chooser {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.audio-setup-panel--enter-button {
+  @extend %bottom-button;
+}
+
+.audio-setup-panel--device-chooser--dropdown {
+  @extend %rounded-border;
+  @extend %default-font;
+
+  background-color: black;
+  padding: 6px;
+  color: white;
+  font-size: 1.1em;
+  width: 90%;
+}
+
+.audio-setup-panel--device-chooser--mic-icon {
+  position: absolute;
+  left: 7.5%;
+  top: 10px;
 }
