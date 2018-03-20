@@ -8,6 +8,7 @@ import { SCHEMA } from "../storage/store";
 import MobileDetect from 'mobile-detect';
 import { IntlProvider, FormattedMessage, addLocaleData } from 'react-intl';
 import en from 'react-intl/locale-data/en';
+import MovingAverage from 'moving-average';
 
 const mobiledetect = new MobileDetect(navigator.userAgent);
 
@@ -175,6 +176,7 @@ class UIRoot extends Component {
     this.setupTestTone();
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
     this.handleForcedVREntryType();
+    this.micLevelMovingAverage = MovingAverage(200);
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
   }
 
@@ -365,7 +367,9 @@ class UIRoot extends Component {
         v = Math.max(levels[x] - 127, v);
       }
 
-      this.setState({ micLevel: v / 128.0 })
+      const level = v / 128.0 ;
+      this.micLevelMovingAverage.push(Date.now(), level);
+      this.setState({ micLevel: this.micLevelMovingAverage.movingAverage() })
     }, 50);
 
     this.setState({ mediaStream, micUpdateInterval });
@@ -446,29 +450,38 @@ class UIRoot extends Component {
 
     const selectedMicDeviceId = this.state.micDevices.filter(d => d.label === selectedMicLabel).map(d => d.deviceId)[0];
 
+    const maxLevelHeight = 111;
+    const micClip = { clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)` };
+    const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
+
     const audioSetupPanel = this.state.entryStep === ENTRY_STEPS.audio_setup
     ? (
         <div className="audio-setup-panel">
-          <div className="audio-setup-panel--title">
+          <div className="audio-setup-panel__title">
             <FormattedMessage id="audio.title"/>
           </div>
-          <div className="audio-setup-panel--subtitle">
+          <div className="audio-setup-panel__subtitle">
             { mobiledetect.mobile() || this.state.enterInVR  && (<FormattedMessage id={ mobiledetect.mobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop" }/>) }
           </div>
-          <div className="audio-setup-panel--device-chooser">
-            <select className="audio-setup-panel--device-chooser--dropdown" value={selectedMicDeviceId} onChange={this.micDeviceChanged}>
-              { this.state.micDevices.map(d => (<option key={ d.deviceId } value={ d.deviceId }>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}</option>)) }
-            </select>
-            <div className="audio-setup-panel--device-chooser--mic-icon">
-              <img src="./src/assets/images/mic_small.png"/>
+          <div className="audio-setup-panel__levels">
+            <div className="audio-setup-panel__levels__mic">
+              <img src="./src/assets/images/mic_level.png" srcSet="mic_level@2x.png 2x" className="audio-setup-panel__levels__mic_icon"/>
+              <img src="./src/assets/images/level_fill.png" srcSet="level_fill@2x.png 2x" className="audio-setup-panel__levels__level" style={ micClip }/>
+            </div>
+            <div className="audio-setup-panel__levels__speaker">
+              <img src="./src/assets/images/speaker_level.png" srcSet="speaker_level@2x.png 2x" className="audio-setup-panel__levels__speaker_icon"/>
+              <img src="./src/assets/images/level_fill.png" srcSet="level_fill@2x.png 2x" className="audio-setup-panel__levels__level" style={ speakerClip }/>
             </div>
           </div>
-          <br/>
-          { this.state.tonePlaying && (<div>Tone</div>) }
-          <br/>
-          { this.state.micLevel }
-          <br/>
-          <div className="audio-setup-panel--enter-button" onClick={this.onAudioReadyButton}>
+          <div className="audio-setup-panel__device-chooser">
+            <select className="audio-setup-panel__device-chooser__dropdown" value={selectedMicDeviceId} onChange={this.micDeviceChanged}>
+              { this.state.micDevices.map(d => (<option key={ d.deviceId } value={ d.deviceId }>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}</option>)) }
+            </select>
+            <div className="audio-setup-panel__device-chooser__mic-icon">
+              <img src="./src/assets/images/mic_small.png" srcSet="mic_small@2x.png 2x"/>
+            </div>
+          </div>
+          <div className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
             <FormattedMessage id="audio.enter-now"/>
           </div>
         </div>

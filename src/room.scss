@@ -225,16 +225,16 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   align-items: center;
 }
 
-.audio-setup-panel--title {
+.audio-setup-panel__title {
   font-size: 1.3em;
 }
 
-.audio-setup-panel--subtitle {
+.audio-setup-panel__subtitle {
   font-size: 1.0em;
   padding-top: 4px;
 }
 
-.audio-setup-panel--device-chooser {
+.audio-setup-panel__device-chooser {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -242,11 +242,11 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   position: relative;
 }
 
-.audio-setup-panel--enter-button {
+.audio-setup-panel__enter-button {
   @extend %bottom-button;
 }
 
-.audio-setup-panel--device-chooser--dropdown {
+.audio-setup-panel__device-chooser__dropdown {
   @extend %rounded-border;
   @extend %default-font;
 
@@ -257,8 +257,52 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   width: 90%;
 }
 
-.audio-setup-panel--device-chooser--mic-icon {
+.audio-setup-panel__device-chooser__mic-icon {
   position: absolute;
   left: 7.5%;
   top: 10px;
 }
+
+.audio-setup-panel__levels {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 100%;
+}
+
+.audio-setup-panel__levels__mic {
+  position:relative;
+  width: 111px;
+  height: 111px;
+}
+
+.audio-setup-panel__levels__mic_icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+
+.audio-setup-panel__levels__speaker {
+  position:relative;
+  width: 111px;
+  height: 111px;
+}
+
+.audio-setup-panel__levels__speaker_icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+
+.audio-setup-panel__levels__level {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 1.0;
+  z-index: 1;
+}
+
