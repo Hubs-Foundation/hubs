@@ -278,15 +278,14 @@ class UIRoot extends Component {
 
   micDeviceChanged = async (ev) => {
     const constraints = { audio: { deviceId: { exact: [ev.target.value] } }, video: this.mediaVideoConstraint() };
-    this.setupNewMediaStream(await navigator.mediaDevices.getUserMedia(constraints));
+    await this.setupNewMediaStream(constraints);
   }
 
   setMediaStreamToDefault = async () => {
-    const constraints = { audio: true, video: false };
-    this.setupNewMediaStream(await navigator.mediaDevices.getUserMedia(constraints));
+    await this.setupNewMediaStream({ audio: true, video: false });
   }
 
-  setupNewMediaStream = (mediaStream) => {
+  setupNewMediaStream = async (constraints) => {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioContext = new AudioContext();
 
@@ -301,6 +300,8 @@ class UIRoot extends Component {
         }
       }
     }
+
+    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
 
     const source = audioContext.createMediaStreamSource(mediaStream);
     const analyzer = audioContext.createAnalyser();
