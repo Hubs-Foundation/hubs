@@ -1,7 +1,15 @@
 {
   "en":
   {
-    "entry.screen": "Enter on this screen",
+    "entry.screen-prefix": "Enter on ",
+    "entry.desktop-screen": "Screen",
+    "entry.mobile-screen": "Mobile",
+    "entry.generic-prefix": "Enter in ",
+    "entry.generic-medium": "VR",
+    "entry.gearvr-prefix": "Enter on ",
+    "entry.gearvr-medium": "GearVR",
+    "entry.daydream-prefix": "Enter on ",
+    "entry.daydream-medium": "Daydream",
     "profile.save": "SAVE",
     "profile.display_name.validation_warning": "Alphanumerics and hyphens. At least 3 characters, no more than 32",
     "profile.header": "Your identity"

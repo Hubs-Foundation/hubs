@@ -2,6 +2,7 @@
 
 $dark-transparent: rgba(0, 0, 0, 0.4);
 $darker-transparent: rgba(0, 0, 0, 0.6);
+$darkest-transparent: rgba(0, 0, 0, 0.95);
 $grey-text: rgba(192, 192, 192, 1.0);
 $light-text: rgba(240, 240, 240, 1.0);
 $dark-grey: rgba(128, 128, 128, 1.0);
@@ -86,6 +87,7 @@ $darker-grey: rgba(64, 64, 64, 1.0);
 .entry-dialog {
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .name-entry {
@@ -112,7 +114,7 @@ $darker-grey: rgba(64, 64, 64, 1.0);
 }
 
 .name-entry__box--darkened {
-  background-color: $darker-transparent;
+  background-color: $darkest-transparent;
 }
 
 .name-entry__subtitle {
@@ -173,4 +175,39 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   font-size: 1.8em;
   padding-right: 18px;
   line-height: 50px;
+}
+
+.entry-button--bolded {
+  font-weight: bold;
+}
+
+.entry-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 10 1 auto;
+  justify-content: center;
+}
+
+.entry-button {
+  display: flex;
+  margin-left: 40px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.entry-button__icon {
+  flex: 1 1 90px;
+}
+
+.entry-button__label {
+  flex: 10 1 auto;
+  margin-left: 20px;
+  font-size: 1.5em;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.entry-button__label__contents {
 }
