@@ -461,16 +461,16 @@ class UIRoot extends Component {
             <FormattedMessage id="audio.title"/>
           </div>
           <div className="audio-setup-panel__subtitle">
-            { mobiledetect.mobile() || this.state.enterInVR  && (<FormattedMessage id={ mobiledetect.mobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop" }/>) }
+            { (mobiledetect.mobile() || this.state.enterInVR) && (<FormattedMessage id={ mobiledetect.mobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop" }/>) }
           </div>
           <div className="audio-setup-panel__levels">
             <div className="audio-setup-panel__levels__mic">
-              <img src="./src/assets/images/mic_level.png" srcSet="mic_level@2x.png 2x" className="audio-setup-panel__levels__mic_icon"/>
-              <img src="./src/assets/images/level_fill.png" srcSet="level_fill@2x.png 2x" className="audio-setup-panel__levels__level" style={ micClip }/>
+              <img src="./src/assets/images/mic_level.png" srcSet="./src/assets/images/mic_level@2x.png 2x" className="audio-setup-panel__levels__mic_icon"/>
+              <img src="./src/assets/images/level_fill.png" srcSet="./src/assets/images/level_fill@2x.png 2x" className="audio-setup-panel__levels__level" style={ micClip }/>
             </div>
             <div className="audio-setup-panel__levels__speaker">
-              <img src="./src/assets/images/speaker_level.png" srcSet="speaker_level@2x.png 2x" className="audio-setup-panel__levels__speaker_icon"/>
-              <img src="./src/assets/images/level_fill.png" srcSet="level_fill@2x.png 2x" className="audio-setup-panel__levels__level" style={ speakerClip }/>
+              <img src="./src/assets/images/speaker_level.png" srcSet="./src/assets/images/speaker_level@2x.png 2x" className="audio-setup-panel__levels__speaker_icon"/>
+              <img src="./src/assets/images/level_fill.png" srcSet="./src/assets/images/level_fill@2x.png 2x" className="audio-setup-panel__levels__level" style={ speakerClip }/>
             </div>
           </div>
           <div className="audio-setup-panel__device-chooser">
@@ -478,7 +478,7 @@ class UIRoot extends Component {
               { this.state.micDevices.map(d => (<option key={ d.deviceId } value={ d.deviceId }>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}</option>)) }
             </select>
             <div className="audio-setup-panel__device-chooser__mic-icon">
-              <img src="./src/assets/images/mic_small.png" srcSet="mic_small@2x.png 2x"/>
+              <img src="./src/assets/images/mic_small.png" srcSet="./src/assets/images/mic_small@2x.png 2x"/>
             </div>
           </div>
           <div className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
