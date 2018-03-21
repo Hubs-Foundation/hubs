@@ -145,7 +145,6 @@ const AUTO_EXIT_TIMER_SECONDS = 10;
 class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
-    availableVREntryTypes: PropTypes.object,
     concurrentLoadDetector: PropTypes.object,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
@@ -154,6 +153,7 @@ class UIRoot extends Component {
   }
 
   state = {
+    availableVREntryTypes: null,
     entryStep: ENTRY_STEPS.start,
     enterInVR: false,
 
@@ -314,7 +314,7 @@ class UIRoot extends Component {
   enterDaydream = async () => {
     const loc = document.location;
 
-    if (this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe) {
+    if (this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe) {
       this.exit();
 
       // We are not in mobile chrome, so launch into chrome via an Intent URL
@@ -448,7 +448,7 @@ class UIRoot extends Component {
   }
 
   render() {
-    if (!this.props.scene.hasLoaded) {
+    if (!this.props.scene.hasLoaded || !this.state.availableVREntryTypes) {
       return (
         <div className="loading-panel">
           <div className="loader-wrap">
@@ -469,13 +469,13 @@ class UIRoot extends Component {
     ? (
       <div className="entry-panel">
         <TwoDEntryButton onClick={this.enter2D}/>
-        { this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && <GenericEntryButton onClick={this.enterVR}/> }
-        { this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && <GearVREntryButton onClick={this.enterGearVR}/> }
-        { this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && 
+        { this.state.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && <GenericEntryButton onClick={this.enterVR}/> }
+        { this.state.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && <GearVREntryButton onClick={this.enterGearVR}/> }
+        { this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && 
             <DaydreamEntryButton
               onClick={this.enterDaydream}
-              subtitle={this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : "" }/> }
-        { this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no &&
+              subtitle={this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : "" }/> }
+        { this.state.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no &&
           (<div className="entry-panel__secondary" onClick={this.enterVR}><FormattedMessage id="entry.cardboard"/></div>) }
       </div>
     ) : null;

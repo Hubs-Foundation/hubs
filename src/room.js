@@ -213,25 +213,26 @@ function onConnect() {
 }
 
 function mountUI(scene) {
+  const qs = queryString.parse(location.search);
+  const disableAutoExitOnConcurrentLoad = qs.allow_multi === "true"
+  let forcedVREntryType = null;
+
+  if (qs.vr_entry_type) {
+    forcedVREntryType = qs.vr_entry_type;
+  }
+
+  const uiRoot = ReactDOM.render(<UIRoot {...{
+    scene,
+    enterScene,
+    exitScene,
+    concurrentLoadDetector,
+    disableAutoExitOnConcurrentLoad,
+    forcedVREntryType,
+    store
+  }} />, document.getElementById("ui-root"));
+
   getAvailableVREntryTypes().then(availableVREntryTypes => {
-    const qs = queryString.parse(location.search);
-    const disableAutoExitOnConcurrentLoad = qs.allow_multi === "true"
-    let forcedVREntryType = null;
-
-    if (qs.vr_entry_type) {
-      forcedVREntryType = qs.vr_entry_type;
-    }
-
-    ReactDOM.render(<UIRoot {...{
-      availableVREntryTypes,
-      scene,
-      enterScene,
-      exitScene,
-      concurrentLoadDetector,
-      disableAutoExitOnConcurrentLoad,
-      forcedVREntryType,
-      store
-    }} />, document.getElementById("ui-root"));
+    uiRoot.setState({ availableVREntryTypes });
   });
 }
 
