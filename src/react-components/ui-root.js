@@ -97,7 +97,7 @@ class UIRoot extends Component {
     this.setupTestTone();
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
     this.handleForcedVREntryType();
-    this.micLevelMovingAverage = MovingAverage(200);
+    this.micLevelMovingAverage = MovingAverage(100);
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
   }
 
