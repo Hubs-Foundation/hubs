@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import NameEntryPanel from './name-entry-panel';
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import queryString from "query-string";
 import { SCHEMA } from "../storage/store";
@@ -12,6 +11,8 @@ import MovingAverage from 'moving-average';
 
 import AutoExitWarning from './auto-exit-warning';
 import { TwoDEntryButton, GenericEntryButton, GearVREntryButton, DaydreamEntryButton } from './entry-buttons.js';
+import { ProfileInfoHeader } from './profile-info-header.js';
+import ProfileEntryPanel from './profile-entry-panel';
 
 const mobiledetect = new MobileDetect(navigator.userAgent);
 
@@ -42,18 +43,6 @@ async function hasGrantedMicPermissions() {
   const micLabels = await grantedMicLabels();
   return micLabels.length > 0;
 }
-
-const ProfileInfoHeader = (props) => (
-  <div className="profile-info-header">
-    <img src="./src/assets/images/account.svg" onClick={props.onClick} className="profile-info-header__icon"/>
-    <div className="profile-info-header__profile_display_name" onClick={props.onClick}>
-      {props.name}
-    </div>
-    <div className="profile-info-header__app_name">
-      <b>moz://a</b> duck
-    </div>
-  </div>
-);
 
 // This is a list of regexes that match the microphone labels of HMDs.
 //
@@ -394,9 +383,9 @@ class UIRoot extends Component {
     ? (
       <div className="entry-panel">
         <TwoDEntryButton onClick={this.enter2D}/>
-        { this.state.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no || true && <GenericEntryButton onClick={this.enterVR}/> }
-        { this.state.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no || true && <GearVREntryButton onClick={this.enterGearVR}/> }
-        { this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no || true && 
+        { this.state.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && <GenericEntryButton onClick={this.enterVR}/> }
+        { this.state.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && <GearVREntryButton onClick={this.enterGearVR}/> }
+        { this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && 
             <DaydreamEntryButton
               onClick={this.enterDaydream}
               subtitle={this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : "" }/> }
@@ -497,7 +486,7 @@ class UIRoot extends Component {
       (
         <div className={dialogClassNames}>
           {
-            this.state.entryStep !== ENTRY_STEPS.finished &&
+            (this.state.entryStep !== ENTRY_STEPS.finished || this.isWaitingForAutoExit()) &&
             (
               <div className={dialogBoxClassNames}>
                 <div className={dialogBoxContentsClassNames}>
@@ -505,7 +494,7 @@ class UIRoot extends Component {
                 </div>
 
                 {this.state.showProfileEntry && (
-                  <NameEntryPanel finished={this.onProfileFinished} store={this.props.store}/>)}
+                  <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store}/>)}
               </div>
             )
           }

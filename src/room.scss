@@ -141,7 +141,7 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   height: 100%;
 }
 
-.name-entry {
+.profile-entry {
   position: absolute;
   top: 0;
   left: 0;
@@ -153,7 +153,7 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   pointer-events: auto;
 }
 
-.name-entry__box {
+.profile-entry__box {
   height: 150px;
   border-radius: 8px;
   display: flex;
@@ -164,18 +164,18 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   flex: 1 1 100%;
 }
 
-.name-entry__box--darkened {
+.profile-entry__box--darkened {
   background-color: $darkest-transparent;
 }
 
-.name-entry__subtitle {
+.profile-entry__subtitle {
   width: 100%;
   text-align: center;
   font-size: 1.2em;
   color: $grey-text;
 }
 
-.name-entry__form-field-text {
+.profile-entry__form-field-text {
   @extend %rounded-border;
   @extend %default-font;
 
@@ -187,7 +187,7 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   padding-right: 1.25em;
 }
 
-.name-entry__form-submit {
+.profile-entry__form-submit {
   @extend %default-font;
   border: none;
 

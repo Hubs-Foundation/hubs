@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import { SCHEMA } from "../storage/store";
 
-class NameEntryPanel extends Component {
+class ProfileEntryPanel extends Component {
   static propTypes = {
     store: PropTypes.object,
     messages: PropTypes.object,
@@ -42,19 +42,19 @@ class NameEntryPanel extends Component {
     const { formatMessage } = this.props.intl;
 
     return (
-      <div className="name-entry">
+      <div className="profile-entry">
         <form onSubmit={this.saveName}>
-        <div className="name-entry__box name-entry__box--darkened">
-          <div className="name-entry__subtitle">
+        <div className="profile-entry__box profile-entry__box--darkened">
+          <div className="profile-entry__subtitle">
             <FormattedMessage id="profile.header"/>
           </div>
           <input
-            className="name-entry__form-field-text"
+            className="profile-entry__form-field-text"
             value={this.state.name} onChange={(e) => this.setState({name: e.target.value})}
             required pattern={SCHEMA.definitions.profile.properties.display_name.pattern}
             title={formatMessage({ id: "profile.display_name.validation_warning" })}
             ref={inp => this.nameInput = inp}/>
-          <input className="name-entry__form-submit" type="submit" value={formatMessage({ id: "profile.save" }) }/>
+          <input className="profile-entry__form-submit" type="submit" value={formatMessage({ id: "profile.save" }) }/>
           </div>
         </form>
       </div>
@@ -62,4 +62,4 @@ class NameEntryPanel extends Component {
   }
 }
 
-export default injectIntl(NameEntryPanel);
+export default injectIntl(ProfileEntryPanel);
