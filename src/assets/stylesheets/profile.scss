@@ -1,0 +1,86 @@
+.profile-entry {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  pointer-events: auto;
+}
+
+.profile-entry__box {
+  height: 150px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px;
+  flex: 1 1 100%;
+}
+
+.profile-entry__box--darkened {
+  background-color: $darkest-transparent;
+}
+
+.profile-entry__subtitle {
+  width: 100%;
+  text-align: center;
+  font-size: 1.2em;
+  color: $grey-text;
+}
+
+.profile-entry__form-field-text {
+  @extend %rounded-border;
+  @extend %default-font;
+
+  color: $light-text;
+  font-size: 1.2em;
+  background-color: transparent;
+  line-height: 2.0em;
+  padding-left: 1.25em;
+  padding-right: 1.25em;
+}
+
+.profile-entry__form-submit {
+  @extend %default-font;
+  border: none;
+
+  margin: 8px;
+  width: 100px;
+  line-height: 1.5em;
+  font-size: 1.0em;
+
+  background-color: transparent;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+}
+
+.profile-info-header {
+  display: flex;
+  flex: 1 1 40px;
+  width: 100%;
+}
+
+.profile-info-header__icon {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  padding: 15px;
+}
+
+.profile-info-header__profile_display_name {
+  cursor: pointer;
+  flex: 6 1 auto;
+  font-size: 1.2em;
+  line-height: 50px;
+}
+
+.profile-info-header__app_name {
+  font-size: 1.8em;
+  padding-right: 18px;
+  line-height: 50px;
+}

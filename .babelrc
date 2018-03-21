@@ -5,5 +5,8 @@
       "exclude": ["transform-regenerator"],
       "useBuiltins": true
     }]
+  ],
+  "plugins": [
+    [ "react-intl", { "messagesDir": "./public/messages", "enforceDescriptions": false } ]
   ]
 }

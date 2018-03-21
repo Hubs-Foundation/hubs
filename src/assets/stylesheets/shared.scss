@@ -1,0 +1,35 @@
+$dark-transparent: rgba(0, 0, 0, 0.4);
+$darker-transparent: rgba(0, 0, 0, 0.6);
+$darkest-transparent: rgba(0, 0, 0, 0.95);
+$grey-text: rgba(192, 192, 192, 1.0);
+$light-text: rgba(240, 240, 240, 1.0);
+$dark-grey: rgba(128, 128, 128, 1.0);
+$darker-grey: rgba(64, 64, 64, 1.0);
+
+%default-font {
+  font-family: 'Zilla Slab', sans-serif;
+}
+
+%rounded-border {
+  border: 3px solid white;
+  box-sizing: border-box;
+  border-radius: 14px;
+}
+
+%bottom-button {
+  font-size: 1em;
+  font-weight: bold;
+  margin-top: auto;
+  margin-bottom: 30px;
+  cursor: pointer;
+}
+
+%top-title {
+  font-size: 1.3em;
+}
+
+%top-subtitle {
+  font-size: 1.0em;
+  padding-top: 4px;
+}
+
