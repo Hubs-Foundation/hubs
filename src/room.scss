@@ -1,4 +1,5 @@
 @import 'src/fonts';
+@import 'src/loader';
 
 $dark-transparent: rgba(0, 0, 0, 0.4);
 $darker-transparent: rgba(0, 0, 0, 0.6);
@@ -94,6 +95,20 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   background-color: black;
   width: 100%;
   height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.loading-panel__title {
+  font-size: 1.2em;
+}
+
+.loader-wrap {
+  position: relative;
+  width: 100px;
+  height: 80px;
 }
 
 .rs-base {

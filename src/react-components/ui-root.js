@@ -446,7 +446,14 @@ class UIRoot extends Component {
   render() {
     if (!this.props.scene.hasLoaded) {
       return (
-        <div className="loading-panel">Loading scene</div>
+        <div className="loading-panel">
+          <div className="loader-wrap">
+            <div className="loader"/>
+          </div>
+          <div className="loading-panel__title">
+            <b>moz://a</b> duck
+          </div>
+        </div>
       );
     }
 
