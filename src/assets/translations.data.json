@@ -16,6 +16,7 @@
     "audio.title": "Test your audio",
     "audio.subtitle-desktop": "Confirm HMD speaker output",
     "audio.subtitle-mobile": "Earphones are recommended",
-    "audio.enter-now": "ENTER NOW"
+    "audio.enter-now": "ENTER NOW",
+    "audio.hmd-mic-warning": "Your HMD mic is not chosen"
   }
 }

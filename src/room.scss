@@ -306,3 +306,15 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   z-index: 1;
 }
 
+.audio-setup-panel__hmd-mic-warning {
+  margin: 20px;
+}
+
+.audio-setup-panel__hmd-mic-warning__label {
+  vertical-align: middle;
+  margin-left: 5px;
+}
+
+.audio-setup-panel__hmd-mic-warning__icon {
+  vertical-align: middle;
+}

@@ -28,6 +28,8 @@ const ENTRY_STEPS = {
   finished: "finished"
 }
 
+const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
+
 async function grantedMicLabels() {
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
   return mediaDevices.filter(d => d.label && d.kind === "audioinput").map(d => d.label);
@@ -399,6 +401,28 @@ class UIRoot extends Component {
     this.setState({ micDevices: mediaDevices.filter(d => d.kind === "audioinput").map(d => ({ deviceId: d.deviceId, label: d.label }))});
   }
 
+  shouldShowHmdMicWarning = () => {
+    if (mobiledetect.mobile()) return false;
+    if (!this.state.enterInVR) return false;
+    if (!this.hasHmdMicrophone()) return false;
+
+    return !(HMD_MIC_REGEXES.find(r => this.selectedMicLabel().match(r)));
+  }
+
+  hasHmdMicrophone = () => {
+    return !!(this.state.micDevices.find(d => HMD_MIC_REGEXES.find(r => d.label.match(r))));
+  }
+
+  selectedMicLabel = () => {
+    return (this.state.mediaStream
+             && this.state.mediaStream.getAudioTracks().length > 0
+             && this.state.mediaStream.getAudioTracks()[0].label) || "";
+  }
+
+  selectedMicDeviceId = () => {
+    return this.state.micDevices.filter(d => d.label === this.selectedMicLabel).map(d => d.deviceId)[0];
+  }
+
   onAudioReadyButton = () => {
     this.props.enterScene(this.state.mediaStream, this.state.enterInVR);
 
@@ -444,12 +468,6 @@ class UIRoot extends Component {
         </div>
       ) : null;
 
-    const selectedMicLabel = (this.state.mediaStream
-                                 && this.state.mediaStream.getAudioTracks().length > 0
-                                 && this.state.mediaStream.getAudioTracks()[0].label) || "";
-
-    const selectedMicDeviceId = this.state.micDevices.filter(d => d.label === selectedMicLabel).map(d => d.deviceId)[0];
-
     const maxLevelHeight = 111;
     const micClip = { clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)` };
     const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
@@ -474,13 +492,21 @@ class UIRoot extends Component {
             </div>
           </div>
           <div className="audio-setup-panel__device-chooser">
-            <select className="audio-setup-panel__device-chooser__dropdown" value={selectedMicDeviceId} onChange={this.micDeviceChanged}>
+            <select className="audio-setup-panel__device-chooser__dropdown" value={this.selectedMicDeviceId()} onChange={this.micDeviceChanged}>
               { this.state.micDevices.map(d => (<option key={ d.deviceId } value={ d.deviceId }>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}</option>)) }
             </select>
             <div className="audio-setup-panel__device-chooser__mic-icon">
               <img src="./src/assets/images/mic_small.png" srcSet="./src/assets/images/mic_small@2x.png 2x"/>
             </div>
           </div>
+          { this.shouldShowHmdMicWarning() &&
+            (<div className="audio-setup-panel__hmd-mic-warning">
+              <img src="./src/assets/images/warning_icon.png" srcSet="./src/assets/images/warning_icon@2x.png 2x"
+                   className="audio-setup-panel__hmd-mic-warning__icon"/>
+              <span className="audio-setup-panel__hmd-mic-warning__label">
+                <FormattedMessage id="audio.hmd-mic-warning"/>
+              </span>
+            </div>) }
           <div className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
             <FormattedMessage id="audio.enter-now"/>
           </div>
