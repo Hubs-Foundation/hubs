@@ -1,0 +1,51 @@
+.ui {
+  @extend %default-font;
+
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  position: absolute;
+  pointer-events: none;
+  color: white;
+}
+
+.blurred {
+  filter: blur(5px);
+}
+
+.ui-dialog {
+  display: grid;
+  grid-template-columns: 1fr 20px minmax(200px, 400px) 20px 1fr;
+  grid-template-rows: 1fr 20px minmax(400px, 600px) 20px 1fr;
+  width: 100%;
+  height: 100%;
+}
+
+.ui-dialog--darkened {
+  background-color: $dark-transparent;
+}
+
+.ui-dialog-box {
+  grid-column: 3;
+  grid-row : 3;
+  position: relative;
+}
+
+.ui-dialog-box-contents {
+  background-color: $darker-transparent;
+  border-radius: 8px;
+  pointer-events: auto;
+  width: 100%;
+  height: 100%;
+}
+
+.ui-dialog-box--backgrounded {
+}
+
+.ui-dialog-box-contents--backgrounded {
+  filter: blur(1px);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
