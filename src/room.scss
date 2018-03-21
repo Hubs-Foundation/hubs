@@ -198,11 +198,24 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   font-weight: bold;
 }
 
+.entry-button__subtitle {
+  font-size: 0.7em;
+  color: $light-text;
+}
+
 .entry-panel {
   display: flex;
   flex-direction: column;
   flex: 10 1 auto;
   justify-content: center;
+}
+
+.entry-panel__secondary {
+  width: 100%;
+  text-align: center;
+  margin-top: 10px;
+  cursor: pointer;
+  color: $grey-text;
 }
 
 .entry-button {
