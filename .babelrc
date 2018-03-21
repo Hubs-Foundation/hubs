@@ -7,6 +7,7 @@
     }]
   ],
   "plugins": [
-    [ "react-intl", { "messagesDir": "./public/messages", "enforceDescriptions": false } ]
+    [ "react-intl", { "messagesDir": "./public/messages", "enforceDescriptions": false } ],
+    [ "transform-react-jsx-img-import" ]
   ]
 }

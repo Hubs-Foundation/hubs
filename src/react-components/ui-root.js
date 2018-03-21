@@ -422,8 +422,8 @@ class UIRoot extends Component {
           </div>
           <div className="mic-grant-panel__icon">
           { this.state.entryStep == ENTRY_STEPS.mic_grant ? 
-            (<img onClick={this.onMicGrantButton} src="./src/assets/images/mic_denied.png" srcSet="./src/assets/images/mic_denied@2x.png 2x" className="mic-grant-panel__icon"/>) :
-            (<img onClick={this.onMicGrantButton} src="./src/assets/images/mic_granted.png" srcSet="./src/assets/images/mic_granted@2x.png 2x" className="mic-grant-panel__icon"/>)}
+            (<img onClick={this.onMicGrantButton} src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" className="mic-grant-panel__icon"/>) :
+            (<img onClick={this.onMicGrantButton} src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" className="mic-grant-panel__icon"/>)}
           </div>
           <div className="mic-grant-panel__next" onClick={this.onMicGrantButton}>
             <FormattedMessage id={ this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-next" : "audio.granted-next" }/>
@@ -446,12 +446,12 @@ class UIRoot extends Component {
           </div>
           <div className="audio-setup-panel__levels">
             <div className="audio-setup-panel__levels__mic">
-              <img src="./src/assets/images/mic_level.png" srcSet="./src/assets/images/mic_level@2x.png 2x" className="audio-setup-panel__levels__mic_icon"/>
-              <img src="./src/assets/images/level_fill.png" srcSet="./src/assets/images/level_fill@2x.png 2x" className="audio-setup-panel__levels__level" style={ micClip }/>
+              <img src="../assets/images/mic_level.png" srcSet="../assets/images/mic_level@2x.png 2x" className="audio-setup-panel__levels__mic_icon"/>
+              <img src="../assets/images/level_fill.png" srcSet="../assets/images/level_fill@2x.png 2x" className="audio-setup-panel__levels__level" style={ micClip }/>
             </div>
             <div className="audio-setup-panel__levels__speaker">
-              <img src="./src/assets/images/speaker_level.png" srcSet="./src/assets/images/speaker_level@2x.png 2x" className="audio-setup-panel__levels__speaker_icon"/>
-              <img src="./src/assets/images/level_fill.png" srcSet="./src/assets/images/level_fill@2x.png 2x" className="audio-setup-panel__levels__level" style={ speakerClip }/>
+              <img src="../assets/images/speaker_level.png" srcSet="../assets/images/speaker_level@2x.png 2x" className="audio-setup-panel__levels__speaker_icon"/>
+              <img src="../assets/images/level_fill.png" srcSet="../assets/images/level_fill@2x.png 2x" className="audio-setup-panel__levels__level" style={ speakerClip }/>
             </div>
           </div>
           <div className="audio-setup-panel__device-chooser">
@@ -459,12 +459,12 @@ class UIRoot extends Component {
               { this.state.micDevices.map(d => (<option key={ d.deviceId } value={ d.deviceId }>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}</option>)) }
             </select>
             <div className="audio-setup-panel__device-chooser__mic-icon">
-              <img src="./src/assets/images/mic_small.png" srcSet="./src/assets/images/mic_small@2x.png 2x"/>
+              <img src="../assets/images/mic_small.png" srcSet="../assets/images/mic_small@2x.png 2x"/>
             </div>
           </div>
           { this.shouldShowHmdMicWarning() &&
             (<div className="audio-setup-panel__hmd-mic-warning">
-              <img src="./src/assets/images/warning_icon.png" srcSet="./src/assets/images/warning_icon@2x.png 2x"
+              <img src="../assets/images/warning_icon.png" srcSet="../assets/images/warning_icon@2x.png 2x"
                    className="audio-setup-panel__hmd-mic-warning__icon"/>
               <span className="audio-setup-panel__hmd-mic-warning__label">
                 <FormattedMessage id="audio.hmd-mic-warning"/>

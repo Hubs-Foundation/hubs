@@ -3,6 +3,12 @@ import { FormattedMessage } from "react-intl";
 import PropTypes from "prop-types";
 import MobileDetect from 'mobile-detect';
 
+import MobileScreenEntryImg from '../assets/images/mobile_screen_entry.svg';
+import DesktopScreenEntryImg from '../assets/images/desktop_screen_entry.svg';
+import GenericVREntryImg from '../assets/images/generic_vr_entry.svg';
+import GearVREntryImg from '../assets/images/gearvr_entry.svg';
+import DaydreamEntyImg from '../assets/images/daydream_entry.svg';
+
 const mobiledetect = new MobileDetect(navigator.userAgent);
 
 const EntryButton = (props) => (
@@ -33,8 +39,7 @@ EntryButton.propTypes = {
 export const TwoDEntryButton = (props) => {
   const entryButtonProps = {
     ...props,
-    iconSrc: mobiledetect.mobile() ? 
-      "./src/assets/images/mobile_screen_entry.svg" : "./src/assets/images/desktop_screen_entry.svg",
+    iconSrc: mobiledetect.mobile() ? MobileScreenEntryImg : DesktopScreenEntryImg,
     prefixMessageId: "entry.screen-prefix",
     mediumMessageId: mobiledetect.mobile() ? "entry.mobile-screen" : "entry.desktop-screen" 
   };
@@ -45,7 +50,7 @@ export const TwoDEntryButton = (props) => {
 export const GenericEntryButton = (props) => {
   const entryButtonProps = {
     ...props,
-    iconSrc: "./src/assets/images/generic_vr_entry.svg",
+    iconSrc: GenericVREntryImg,
     prefixMessageId: "entry.generic-prefix",
     mediumMessageId: "entry.generic-medium"
   };
@@ -56,7 +61,7 @@ export const GenericEntryButton = (props) => {
 export const GearVREntryButton = (props) => {
   const entryButtonProps = {
     ...props,
-    iconSrc: "./src/assets/images/gearvr_entry.svg",
+    iconSrc: GenericVREntryImg,
     prefixMessageId: "entry.gearvr-prefix",
     mediumMessageId: "entry.gearvr-medium"
   };
@@ -67,7 +72,7 @@ export const GearVREntryButton = (props) => {
 export const DaydreamEntryButton = (props) => {
   const entryButtonProps = {
     ...props,
-    iconSrc: "./src/assets/images/daydream_entry.svg",
+    iconSrc: DaydreamEntyImg,
     prefixMessageId: "entry.daydream-prefix",
     mediumMessageId: "entry.daydream-medium"
   };

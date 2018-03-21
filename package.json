@@ -22,6 +22,7 @@
     "aframe-teleport-controls": "https://github.com/netpro2k/aframe-teleport-controls#feature/teleport-origin",
     "aframe-xr": "github:brianpeiris/aframe-xr#3162aed",
     "babel-plugin-react-intl": "^2.4.0",
+    "babel-plugin-transform-react-jsx-img-import": "^0.1.4",
     "classnames": "^2.2.5",
     "detect-browser": "^2.1.0",
     "event-target-shim": "^3.0.1",
