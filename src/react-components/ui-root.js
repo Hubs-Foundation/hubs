@@ -452,7 +452,9 @@ class UIRoot extends Component {
       return (
         <div className="loading-panel">
           <div className="loader-wrap">
-            <div className="loader"/>
+            <div className="loader">
+              <div className="loader-center"/>
+            </div>
           </div>
           <div className="loading-panel__title">
             <b>moz://a</b> duck

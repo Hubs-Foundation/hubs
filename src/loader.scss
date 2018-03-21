@@ -1,4 +1,4 @@
-.loader,
+.loader-center,
 .loader:before,
 .loader:after {
   background: #555;
@@ -17,14 +17,17 @@
   -webkit-transform: translateZ(0);
   -ms-transform: translateZ(0);
   transform: translateZ(0);
-  -webkit-animation-delay: -0.16s;
-  animation-delay: -0.16s;
 }
+.loader-center,
 .loader:before,
 .loader:after {
   position: absolute;
   top: 0;
   content: '';
+}
+.loader-center {
+  -webkit-animation-delay: -0.16s;
+  animation-delay: -0.16s;
 }
 .loader:before {
   left: -1.2em;
@@ -38,23 +41,23 @@
   0%,
   80%,
   100% {
-    box-shadow: 0 0;
     height: 2em;
+    top: 0;
   }
   40% {
-    box-shadow: 0 -2em;
-    height: 2.5em;
+    height: 3.5em;
+    top: -0.75em;
   }
 }
 @keyframes load1 {
   0%,
   80%,
   100% {
-    box-shadow: 0 0;
     height: 2em;
+    top: 0;
   }
   40% {
-    box-shadow: 0 -2em;
-    height: 2.5em;
+    height: 3.5em;
+    top: -0.75em;
   }
 }
