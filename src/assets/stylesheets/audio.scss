@@ -63,6 +63,8 @@
   top: 0;
   left: 0;
   z-index: 2;
+  min-width: 111px;
+  min-height: 111px;
 }
 
 .audio-setup-panel__levels__speaker {
@@ -76,6 +78,8 @@
   top: 0;
   left: 0;
   z-index: 2;
+  min-width: 111px;
+  min-height: 111px;
 }
 
 .audio-setup-panel__levels__level {
