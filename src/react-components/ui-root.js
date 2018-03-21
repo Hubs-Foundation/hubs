@@ -10,6 +10,9 @@ import { IntlProvider, FormattedMessage, addLocaleData } from 'react-intl';
 import en from 'react-intl/locale-data/en';
 import MovingAverage from 'moving-average';
 
+import AutoExitWarning from './auto-exit-warning';
+import { TwoDEntryButton, GenericEntryButton, GearVREntryButton, DaydreamEntryButton } from './entry-buttons.js';
+
 const mobiledetect = new MobileDetect(navigator.userAgent);
 
 const lang = ((navigator.languages && navigator.languages[0]) ||
@@ -39,84 +42,6 @@ async function hasGrantedMicPermissions() {
   const micLabels = await grantedMicLabels();
   return micLabels.length > 0;
 }
-
-const EntryButton = (props) => (
-  <div className="entry-button" onClick={ props.onClick }>
-    <img src={props.iconSrc} className="entry-button__icon"/>
-    <div className="entry-button__label">
-      <div className="entry-button__label__contents">
-        <span>
-          <FormattedMessage id={ props.prefixMessageId }/>
-        </span>
-        <span className="entry-button--bolded">
-          <FormattedMessage id={ props.mediumMessageId }/>
-        </span>
-        { props.subtitle && (<div className="entry-button__subtitle">{props.subtitle}</div>) }
-      </div>
-    </div>
-  </div>
-);
-
-const TwoDEntryButton = (props) => {
-  const entryButtonProps = {
-    ...props,
-    iconSrc: mobiledetect.mobile() ? 
-      "./src/assets/images/mobile_screen_entry.svg" : "./src/assets/images/desktop_screen_entry.svg",
-    prefixMessageId: "entry.screen-prefix",
-    mediumMessageId: mobiledetect.mobile() ? "entry.mobile-screen" : "entry.desktop-screen" 
-  };
-
-  return (<EntryButton  {...entryButtonProps}/>);
-}
-
-const GenericEntryButton = (props) => {
-  const entryButtonProps = {
-    ...props,
-    iconSrc: "./src/assets/images/generic_vr_entry.svg",
-    prefixMessageId: "entry.generic-prefix",
-    mediumMessageId: "entry.generic-medium"
-  };
-
-  return (<EntryButton {...entryButtonProps}/>);
-};
-
-const GearVREntryButton = (props) => {
-  const entryButtonProps = {
-    ...props,
-    iconSrc: "./src/assets/images/gearvr_entry.svg",
-    prefixMessageId: "entry.gearvr-prefix",
-    mediumMessageId: "entry.gearvr-medium"
-  };
-
-  return (<EntryButton  {...entryButtonProps}/>);
-};
-
-const DaydreamEntryButton = (props) => {
-  const entryButtonProps = {
-    ...props,
-    iconSrc: "./src/assets/images/daydream_entry.svg",
-    prefixMessageId: "entry.daydream-prefix",
-    mediumMessageId: "entry.daydream-medium"
-  };
-
-  return (<EntryButton  {...entryButtonProps}/>);
-};
-
-const AutoExitWarning = (props) => (
-  <div className="autoexit-panel">
-    <div className="autoexit-panel__title">
-      <FormattedMessage id="autoexit.title"/>
-      <span>{props.secondsRemaining}</span>
-      <FormattedMessage id="autoexit.title_units"/>
-    </div>
-    <div className="autoexit-panel__subtitle">
-      <FormattedMessage id="autoexit.subtitle"/>
-    </div>
-    <div className="autoexit-panel__cancel-button" onClick={props.onCancel}>
-      <FormattedMessage id="autoexit.cancel"/>
-    </div>
-  </div>
-);
 
 const ProfileInfoHeader = (props) => (
   <div className="profile-info-header">
@@ -469,9 +394,9 @@ class UIRoot extends Component {
     ? (
       <div className="entry-panel">
         <TwoDEntryButton onClick={this.enter2D}/>
-        { this.state.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && <GenericEntryButton onClick={this.enterVR}/> }
-        { this.state.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && <GearVREntryButton onClick={this.enterGearVR}/> }
-        { this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && 
+        { this.state.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no || true && <GenericEntryButton onClick={this.enterVR}/> }
+        { this.state.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no || true && <GearVREntryButton onClick={this.enterGearVR}/> }
+        { this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no || true && 
             <DaydreamEntryButton
               onClick={this.enterDaydream}
               subtitle={this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : "" }/> }

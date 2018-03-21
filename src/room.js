@@ -131,6 +131,8 @@ function setNameTagFromStore() {
 async function enterScene(mediaStream, enterInVR) {
   const scene = document.querySelector("a-scene");
   document.querySelector("a-scene canvas").classList.remove("blurred")
+  scene.setAttribute("networked-scene", "adapter: janus; audio: true; debug: true; onConnect: App.onConnect; connectOnLoad: false;");
+  registerNetworkSchemas();
 
   if (enterInVR) {
     scene.enterVR();
@@ -237,8 +239,6 @@ function mountUI(scene) {
 }
 
 const onReady = () => {
-  registerNetworkSchemas();
-
   const scene = document.querySelector("a-scene");
   document.querySelector("a-scene canvas").classList.add("blurred");
   window.APP.scene = scene;
