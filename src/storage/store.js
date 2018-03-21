@@ -4,6 +4,7 @@ import { Validator } from "jsonschema";
 const LOCAL_STORE_KEY = "___mozilla_duck";
 const STORE_STATE_CACHE_KEY = Symbol();
 const validator = new Validator();
+import { EventTarget } from "event-target-shim"
 
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
@@ -30,10 +31,10 @@ export const SCHEMA = {
   additionalProperties: false
 }
 
-export default class Store {
-  subscribers = new Set();
-
+export default class Store extends EventTarget {
   constructor() {
+    super();
+
     if (localStorage.getItem(LOCAL_STORE_KEY) === null) {
       localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify({ id: uuid() }));
     }
@@ -47,34 +48,23 @@ export default class Store {
     return this[STORE_STATE_CACHE_KEY];
   }
 
-  subscribe(subscriber) {
-    this.subscribers.add(subscriber);
-  }
-
-  unsubscribe(subscriber) {
-    this.subscribers.delete(subscriber);
-  }
-
   update(newState) {
     if (newState.id) {
-      console.error("Store id is immutable.");
-      return;
+      throw "Store id is immutable.";
     }
 
     const finalState = { ...this.state, ...newState };
     const isValid = validator.validate(finalState, SCHEMA).valid;
 
     if (!isValid) {
-      console.warn(`Write of ${JSON.stringify(finalState)} to store failed schema validation.`)
+      throw `Write of ${JSON.stringify(finalState)} to store failed schema validation.`;
       return;
     }
 
     localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(finalState));
     delete this[STORE_STATE_CACHE_KEY];
 
-    for (const subscriber of this.subscribers) {
-      subscriber();
-    }
+    this.dispatchEvent(new CustomEvent("statechanged"));
 
     return finalState;
   }

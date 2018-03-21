@@ -14,7 +14,7 @@ class ProfileEntryPanel extends Component {
     super(props);
     window.store = this.props.store;
     this.state = {name: this.props.store.state.profile.display_name};
-    this.props.store.subscribe(this.storeUpdated);
+    this.props.store.addEventListener("statechanged", this.storeUpdated);
   }
 
   storeUpdated = () => {
@@ -35,7 +35,7 @@ class ProfileEntryPanel extends Component {
   }
   
   componentWillUnmount() {
-    this.props.store.unsubscribe(this.storeUpdated);
+    this.props.store.removeEventListener('statechanged', this.storeUpdated);
   }
 
   render () {
