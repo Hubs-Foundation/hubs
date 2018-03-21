@@ -235,6 +235,7 @@ function mountUI(scene) {
 
   getAvailableVREntryTypes().then(availableVREntryTypes => {
     uiRoot.setState({ availableVREntryTypes });
+    uiRoot.handleForcedVREntryType();
   });
 }
 

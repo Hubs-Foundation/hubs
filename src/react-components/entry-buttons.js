@@ -61,7 +61,7 @@ export const GenericEntryButton = (props) => {
 export const GearVREntryButton = (props) => {
   const entryButtonProps = {
     ...props,
-    iconSrc: GenericVREntryImg,
+    iconSrc: GearVREntryImg,
     prefixMessageId: "entry.gearvr-prefix",
     mediumMessageId: "entry.gearvr-medium"
   };
