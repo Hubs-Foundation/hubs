@@ -1,4 +1,4 @@
-import "./room.scss";
+import "./assets/stylesheets/room.scss";
 import queryString from "query-string";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
@@ -131,7 +131,7 @@ function setNameTagFromStore() {
 async function enterScene(mediaStream, enterInVR) {
   const scene = document.querySelector("a-scene");
   document.querySelector("a-scene canvas").classList.remove("blurred")
-  scene.setAttribute("networked-scene", "adapter: janus; audio: true; debug: true; onConnect: App.onConnect; connectOnLoad: false;");
+  scene.setAttribute("networked-scene", "adapter: janus; audio: true; debug: true; connectOnLoad: false;");
   registerNetworkSchemas();
 
   if (enterInVR) {
