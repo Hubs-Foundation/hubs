@@ -102,6 +102,7 @@ $darker-grey: rgba(64, 64, 64, 1.0);
 }
 
 .loading-panel__title {
+  @extend %default-font;
   font-size: 1.2em;
 }
 
