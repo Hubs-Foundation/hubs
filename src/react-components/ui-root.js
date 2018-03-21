@@ -364,16 +364,33 @@ class UIRoot extends Component {
   render() {
     if (!this.props.scene.hasLoaded || !this.state.availableVREntryTypes) {
       return (
-        <div className="loading-panel">
-          <div className="loader-wrap">
-            <div className="loader">
-              <div className="loader-center"/>
+        <IntlProvider locale={lang} messages={messages}>
+          <div className="loading-panel">
+            <div className="loader-wrap">
+              <div className="loader">
+                <div className="loader-center"/>
+              </div>
+            </div>
+            <div className="loading-panel__title">
+              <b>moz://a</b> duck
             </div>
           </div>
-          <div className="loading-panel__title">
-            <b>moz://a</b> duck
+        </IntlProvider>
+      );
+    }
+
+    if (this.state.exited) {
+      return (
+        <IntlProvider locale={lang} messages={messages}>
+          <div className="exited-panel">
+            <div className="loading-panel__title">
+              <b>moz://a</b> duck
+            </div>
+            <div className="loading-panel__subtitle">
+              <FormattedMessage id="exit.subtitle"/>
+            </div>
           </div>
-        </div>
+        </IntlProvider>
       );
     }
 
@@ -482,8 +499,8 @@ class UIRoot extends Component {
       'ui-dialog-box-contents--backgrounded': this.state.showProfileEntry
     });
 
-    const content = !this.state.exited ?
-      (
+    return (
+      <IntlProvider locale={lang} messages={messages}>
         <div className={dialogClassNames}>
           {
             (this.state.entryStep !== ENTRY_STEPS.finished || this.isWaitingForAutoExit()) &&
@@ -499,21 +516,6 @@ class UIRoot extends Component {
             )
           }
         </div>
-      ) :
-      (
-        <div className="exited-panel">
-          <div className="loading-panel__title">
-            <b>moz://a</b> duck
-          </div>
-          <div className="loading-panel__subtitle">
-            <FormattedMessage id="exit.subtitle"/>
-          </div>
-        </div>
-      )
-
-    return (
-      <IntlProvider locale={lang} messages={messages}>
-        {content}
       </IntlProvider>
     );
   }
