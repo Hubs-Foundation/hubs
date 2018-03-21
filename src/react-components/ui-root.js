@@ -103,14 +103,18 @@ const DaydreamEntryButton = (props) => {
 };
 
 const AutoExitWarning = (props) => (
-  <div>
-    <p>
-    Exit in <span>{props.secondsRemaining}</span>
-    </p>
-
-    <button onClick={props.onCancel}>
-    Cancel
-    </button>
+  <div className="autoexit-panel">
+    <div className="autoexit-panel__title">
+      <FormattedMessage id="autoexit.title"/>
+      <span>{props.secondsRemaining}</span>
+      <FormattedMessage id="autoexit.title_units"/>
+    </div>
+    <div className="autoexit-panel__subtitle">
+      <FormattedMessage id="autoexit.subtitle"/>
+    </div>
+    <div className="autoexit-panel__cancel-button" onClick={props.onCancel}>
+      <FormattedMessage id="autoexit.cancel"/>
+    </div>
   </div>
 );
 
@@ -581,7 +585,14 @@ class UIRoot extends Component {
         </div>
       ) :
       (
-        <div>Exited</div>
+        <div className="exited-panel">
+          <div className="loading-panel__title">
+            <b>moz://a</b> duck
+          </div>
+          <div className="loading-panel__subtitle">
+            <FormattedMessage id="exit.subtitle"/>
+          </div>
+        </div>
       )
 
     return (
