@@ -461,10 +461,21 @@ class UIRoot extends Component {
 
     const micPanel = this.state.entryStep === ENTRY_STEPS.mic_grant || this.state.entryStep == ENTRY_STEPS.mic_granted
     ? (
-        <div>
-          <button onClick={this.onMicGrantButton}>
-            { this.state.entryStep == ENTRY_STEPS.mic_grant ? "Grant Mic" : "Next" }
-          </button>
+        <div className="mic-grant-panel">
+          <div className="mic-grant-panel__title">
+            <FormattedMessage id={ this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-title" : "audio.granted-title" }/>
+          </div>
+          <div className="mic-grant-panel__subtitle">
+            <FormattedMessage id={ this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-subtitle" : "audio.granted-subtitle" }/>
+          </div>
+          <div className="mic-grant-panel__icon">
+          { this.state.entryStep == ENTRY_STEPS.mic_grant ? 
+            (<img onClick={this.onMicGrantButton} src="./src/assets/images/mic_denied.png" srcSet="./src/assets/images/mic_denied@2x.png 2x" className="mic-grant-panel__icon"/>) :
+            (<img onClick={this.onMicGrantButton} src="./src/assets/images/mic_granted.png" srcSet="./src/assets/images/mic_granted@2x.png 2x" className="mic-grant-panel__icon"/>)}
+          </div>
+          <div className="mic-grant-panel__next" onClick={this.onMicGrantButton}>
+            <FormattedMessage id={ this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-next" : "audio.granted-next" }/>
+          </div>
         </div>
       ) : null;
 

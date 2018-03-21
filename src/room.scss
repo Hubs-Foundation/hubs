@@ -26,6 +26,15 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   cursor: pointer;
 }
 
+%top-title {
+  font-size: 1.3em;
+}
+
+%top-subtitle {
+  font-size: 1.0em;
+  padding-top: 4px;
+}
+
 .a-enter-vr {
   display: none;
 }
@@ -226,12 +235,11 @@ $darker-grey: rgba(64, 64, 64, 1.0);
 }
 
 .audio-setup-panel__title {
-  font-size: 1.3em;
+  @extend %top-title;
 }
 
 .audio-setup-panel__subtitle {
-  font-size: 1.0em;
-  padding-top: 4px;
+  @extend %top-subtitle;
 }
 
 .audio-setup-panel__device-chooser {
@@ -317,4 +325,34 @@ $darker-grey: rgba(64, 64, 64, 1.0);
 
 .audio-setup-panel__hmd-mic-warning__icon {
   vertical-align: middle;
+}
+
+.mic-grant-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 10 1 auto;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.mic-grant-panel__title {
+  @extend %top-title;
+}
+
+.mic-grant-panel__subtitle {
+  @extend %top-subtitle;
+}
+
+.mic-grant-panel__icon {
+  flex: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.mic-grant-panel__next {
+  @extend %bottom-button;
+  margin: auto;
+  flex: 1 1 20px;
 }

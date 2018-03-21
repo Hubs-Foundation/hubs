@@ -17,6 +17,12 @@
     "audio.subtitle-desktop": "Confirm HMD speaker output",
     "audio.subtitle-mobile": "Earphones are recommended",
     "audio.enter-now": "ENTER NOW",
-    "audio.hmd-mic-warning": "Your HMD mic is not chosen"
+    "audio.hmd-mic-warning": "Your HMD mic is not chosen",
+    "audio.grant-title": "Mic permissions needed",
+    "audio.grant-subtitle": "Mic access needed to be heard by others",
+    "audio.granted-title": "Mic permissions granted",
+    "audio.granted-subtitle": "You can still mute yourself in-game",
+    "audio.grant-next": "  ",
+    "audio.granted-next": "NEXT"
   }
 }
