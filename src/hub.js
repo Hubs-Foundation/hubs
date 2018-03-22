@@ -163,7 +163,7 @@ async function enterScene(mediaStream, enterInVR) {
   }
 
   setNameTagFromStore();
-  store.subscribe(setNameTagFromStore);
+  store.addEventListener('statechanged', setNameTagFromStore);
 
   const avatarScale = parseInt(qs.avatarScale, 10);
 
