@@ -4,7 +4,7 @@ import { JanusSession, JanusPluginHandle } from "minijanus";
 
 import "material-design-lite";
 import "material-design-lite/material.css";
-import "./lobby.css";
+import "./assets/stylesheets/index.scss";
 import "webrtc-adapter";
 
 import registerTelemetry from "./telemetry";

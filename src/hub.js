@@ -1,4 +1,4 @@
-import "./assets/stylesheets/room.scss";
+import "./assets/stylesheets/hub.scss";
 import queryString from "query-string";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";

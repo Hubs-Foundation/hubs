@@ -75,13 +75,12 @@ class LodashTemplatePlugin {
 
 const config = {
   entry: {
-    lobby: path.join(__dirname, "src", "lobby.js"),
-    room: path.join(__dirname, "src", "room.js"),
-    onboarding: path.join(__dirname, "src", "onboarding.js")
+    index: path.join(__dirname, "src", "index.js"),
+    hub: path.join(__dirname, "src", "hub.js"),
   },
   output: {
     path: path.join(__dirname, "public"),
-    filename: "[name]-[chunkhash].js",
+    filename: "assets/js/[name]-[chunkhash].js",
     publicPath: process.env.BASE_ASSETS_PATH || ""
   },
   mode: "development",
@@ -186,23 +185,18 @@ const config = {
     // Each output page needs a HTMLWebpackPlugin entry
     new HTMLWebpackPlugin({
       filename: "index.html",
-      template: path.join(__dirname, "src", "lobby.html"),
+      template: path.join(__dirname, "src", "index.html"),
       // Chunks correspond with the entries you wish to include in your html template
-      chunks: ["lobby"]
+      chunks: ["index"]
     }),
     new HTMLWebpackPlugin({
-      filename: "room.html",
-      template: path.join(__dirname, "src", "room.html"),
-      chunks: ["room"],
+      filename: "hub.html",
+      template: path.join(__dirname, "src", "hub.html"),
+      chunks: ["hub"],
       inject: "head"
     }),
-    new HTMLWebpackPlugin({
-      filename: "onboarding.html",
-      template: path.join(__dirname, "src", "onboarding.html"),
-      chunks: ["onboarding"]
-    }),
     // Extract required css and add a content hash.
-    new ExtractTextPlugin("[name]-[contenthash].css", {
+    new ExtractTextPlugin("assets/stylesheets/[name]-[contenthash].css", {
       disable: process.env.NODE_ENV !== "production"
     }),
     // Transform the output of the html-loader using _.template
