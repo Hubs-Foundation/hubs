@@ -1,0 +1,35 @@
+{
+  "en":
+  {
+    "entry.screen-prefix": "Enter on ",
+    "entry.desktop-screen": "Screen",
+    "entry.mobile-screen": "Phone",
+    "entry.generic-prefix": "Enter in ",
+    "entry.generic-medium": "VR",
+    "entry.gearvr-prefix": "Enter on ",
+    "entry.gearvr-medium": "GearVR",
+    "entry.cardboard": "Enter on Google Cardboard",
+    "entry.daydream-prefix": "Enter on ",
+    "entry.daydream-medium": "Daydream",
+    "entry.daydream-via-chrome": "Using Google Chrome",
+    "profile.save": "SAVE",
+    "profile.display_name.validation_warning": "Alphanumerics and hyphens. At least 3 characters, no more than 32",
+    "profile.header": "Your identity",
+    "audio.title": "Test your audio",
+    "audio.subtitle-desktop": "Confirm HMD speaker output",
+    "audio.subtitle-mobile": "Earphones are recommended",
+    "audio.enter-now": "ENTER NOW",
+    "audio.hmd-mic-warning": "Your HMD mic is not chosen",
+    "audio.grant-title": "Grant mic permissions",
+    "audio.grant-subtitle": "Mic access needed to be heard by others",
+    "audio.granted-title": "Mic permissions granted",
+    "audio.granted-subtitle": "You can still mute yourself in-game",
+    "audio.grant-next": "  ",
+    "audio.granted-next": "NEXT",
+    "exit.subtitle": "Your session has ended.",
+    "autoexit.title": "Auto-ending session in ",
+    "autoexit.title_units": " seconds",
+    "autoexit.subtitle": "You have started another session.",
+    "autoexit.cancel": "CANCEL"
+  }
+}

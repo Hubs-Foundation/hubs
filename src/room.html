@@ -14,14 +14,10 @@
 </head>
 
 <body>
-    <div id="loader"></div>
+    <audio id="test-tone" src="./assets/sfx/tone.ogg"></audio>
+
     <a-scene
         physics
-        networked-scene="adapter: janus;
-                         audio: true;
-                         debug: true;
-                         onConnect: App.onConnect;
-                         connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         2d-hud
 
@@ -182,7 +178,6 @@
                 camera
                 position="0 1.6 0"
                 personal-space-bubble
-                look-controls
             >
                 <a-entity
                     id="super-cursor"
@@ -342,6 +337,8 @@
             class="collidable">
         </a-plane> 
     </a-scene>
+
+    <div id="ui-root" class="ui"></div>
 </body>
 
 </html>

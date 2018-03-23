@@ -1,0 +1,53 @@
+.entry-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.entry-button--bolded {
+  font-weight: bold;
+}
+
+.entry-button__subtitle {
+  font-size: 0.7em;
+  color: $light-text;
+}
+
+.entry-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 10 1 auto;
+  justify-content: center;
+}
+
+.entry-panel__secondary {
+  width: 100%;
+  text-align: center;
+  margin-top: 10px;
+  cursor: pointer;
+  color: $grey-text;
+}
+
+.entry-button {
+  display: flex;
+  margin-left: 40px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.entry-button__icon {
+  flex: 1 1 90px;
+  min-width: 90px;
+  min-height: 90px;
+}
+
+.entry-button__label {
+  flex: 10 1 auto;
+  margin-left: 20px;
+  font-size: 1.5em;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
