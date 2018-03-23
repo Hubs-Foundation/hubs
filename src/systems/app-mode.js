@@ -45,7 +45,7 @@ AFRAME.registerComponent("app-mode-toggle-playing", {
 /**
  * Toggle a boolean property of a component based on app mode
  */
-AFRAME.registerComponent("app-mode-toggle-property", {
+AFRAME.registerComponent("app-mode-toggle-attribute", {
   multiple: true,
   schema: {
     mode: { type: "string" },
