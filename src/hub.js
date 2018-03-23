@@ -39,6 +39,7 @@ import "./components/animated-robot-hands";
 import "./components/hide-when-quality";
 import "./components/animation-mixer";
 import "./components/loop-animation";
+import "./components/gltf-bundle";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -243,6 +244,13 @@ const onReady = () => {
   const scene = document.querySelector("a-scene");
   document.querySelector("a-scene canvas").classList.add("blurred");
   window.APP.scene = scene;
+
+  // If ?room is set, this is `yarn start`, so just use a default environment. Otherwise use Reticulum API.
+  if (qs.room) {
+    const environmentRoot = document.querySelector("#environment-root");
+    environmentRoot.setAttribute("gltf-bundle", "src: /assets/environments/cliff_meeting_space/bundle.json")
+  }
+
   mountUI(scene);
 };
 
