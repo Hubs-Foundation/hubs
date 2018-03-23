@@ -50,9 +50,16 @@
   background-color: white;
 }
 
-:local(.mic:hover) {
-  mask: url(../assets/hud/muted.png);
-  mask-size: 48px;
+:local(.mic:hover){
+    background-color: cyan;
+}
+
+:local(.mic.muted:hover){
+    background-color:cyan;
+}
+
+:local(.mic:active) {
+  background-color: red;
 }
 
 :local(.mic.muted) {
@@ -60,7 +67,6 @@
   mask-size: 48px;
 }
 
-:local(.mic.muted:hover) {
-  mask: url(../assets/hud/unmuted.png);
-  mask-size: 48px;
+:local(.mic.muted:active) {
+  background-color: green;
 }

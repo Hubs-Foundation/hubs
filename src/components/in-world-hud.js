@@ -35,13 +35,6 @@ AFRAME.registerComponent("in-world-hud", {
     this.onAvatarUnhovered = () => {
       this.avatar.setAttribute("scale", avatarScale);
     };
-    this.onMicHover = () => {
-      this.hoveredOnMic = true;
-      const muted = scene.is("muted");
-      this.mic.setAttribute("src", muted ? "#unmuted" : "#muted");
-      this.data.haptic.emit("haptic_pulse", { intensity: "low" });
-    };
-
     this.showCorrectMuteState = () => {
       const muted = this.el.sceneEl.is("muted");
       this.mic.setAttribute("src", muted ? "#muted" : "#unmuted");
@@ -52,26 +45,41 @@ AFRAME.registerComponent("in-world-hud", {
       this.showCorrectMuteState();
     };
 
+    this.onMicHover = () => {
+      this.hoveredOnMic = true;
+      this.data.haptic.emit("haptic_pulse", { intensity: "low" });
+      this.mic.setAttribute("material", "color", "#1DD");
+    };
+
     this.onMicHoverExit = () => {
       this.hoveredOnMic = false;
+      this.mic.setAttribute("material", "color", "#FFF");
       this.showCorrectMuteState();
     };
 
-    this.onSelect = evt => {
-      if (this.hoveredOnMic) {
-        this.el.emit("action_mute");
-        this.data.haptic.emit("haptic_pulse", { intensity: "low" });
-      }
+    this.onMicDown = () => {
+      this.data.haptic.emit("haptic_pulse", { intensity: "medium" });
+      this.el.sceneEl.removeEventListener("micAudio", this.onAudioFrequencyChange);
+      this.mic.setAttribute("material", "color", this.el.sceneEl.is("muted") ? "#0FA" : "#F33");
+      this.el.emit("action_mute");
+      window.setTimeout(() => {
+        this.mic.setAttribute("material", "color", "#FFF");
+        this.el.sceneEl.addEventListener("micAudio", this.onAudioFrequencyChange);
+      }, 150);
     };
 
     this.onClick = () => {
-      this.el.emit("action_select_hud_item");
+      if (this.hoveredOnMic) {
+        this.onMicDown();
+      }
     };
 
     this.onAudioFrequencyChange = e => {
+      if (this.hoveredOnMic) return;
       const red = 1.0 - e.detail.volume / 10.0;
       this.mic.object3DMap.mesh.material.color = { r: red, g: 9, b: 9 };
     };
+
     this.el.sceneEl.addEventListener("mediaStream", evt => {
       this.ms = evt.detail.ms;
       const ctx = THREE.AudioContext.getContext();
@@ -95,7 +103,6 @@ AFRAME.registerComponent("in-world-hud", {
     this.el.sceneEl.addEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.addEventListener("stateremoved", this.onStateChange);
 
-    this.el.sceneEl.addEventListener("action_select_hud_item", this.onSelect);
     this.el.addEventListener("click", this.onClick);
 
     this.el.sceneEl.addEventListener("micAudio", this.onAudioFrequencyChange);
@@ -114,7 +121,6 @@ AFRAME.registerComponent("in-world-hud", {
     this.el.sceneEl.removeEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.removeEventListener("stateremoved", this.onStateChange);
 
-    this.el.sceneEl.removeEventListener("action_select_hud_item", this.onSelect);
     this.el.removeEventListener("click", this.onClick);
 
     this.el.sceneEl.removeEventListener("micAudio", this.onAudioFrequencyChange);
