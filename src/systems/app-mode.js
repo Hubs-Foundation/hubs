@@ -7,7 +7,6 @@ const AppModes = Object.freeze({ DEFAULT: "default", HUD: "hud" });
  */
 AFRAME.registerSystem("app-mode", {
   init() {
-    console.log("init app mode system");
     this.setMode(AppModes.DEFAULT);
   },
 
