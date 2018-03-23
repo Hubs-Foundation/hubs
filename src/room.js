@@ -82,6 +82,11 @@ import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
 registerTelemetry();
+
+AFRAME.registerInputBehaviour("vive_trackpad_dpad4", vive_trackpad_dpad4);
+AFRAME.registerInputBehaviour("oculus_touch_joystick_dpad4", oculus_touch_joystick_dpad4);
+AFRAME.registerInputActivator("pressedmove", PressedMove);
+AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputMappings(inputConfig, true);
 
 const store = new Store();
@@ -138,10 +143,6 @@ async function enterScene(mediaStream, enterInVR) {
     scene.enterVR();
   }
 
-  AFRAME.registerInputBehaviour("vive_trackpad_dpad4", vive_trackpad_dpad4);
-  AFRAME.registerInputBehaviour("oculus_touch_joystick_dpad4", oculus_touch_joystick_dpad4);
-  AFRAME.registerInputActivator("pressedmove", PressedMove);
-  AFRAME.registerInputActivator("reverseY", ReverseY);
   AFRAME.registerInputActions(inGameActions, "default");
 
   document.querySelector("#player-camera").setAttribute("look-controls", "pointerLockEnabled: true;");
