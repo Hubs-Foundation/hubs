@@ -13,7 +13,7 @@ AFRAME.registerSystem("app-mode", {
   setMode(newMode) {
     if (Object.values(AppModes).includes(newMode) && newMode !== this.mode) {
       this.mode = newMode;
-      this.el.emit("appmode-change", { mode: this.mode });
+      this.el.emit("app-mode-change", { mode: this.mode });
     }
   }
 });
@@ -30,7 +30,7 @@ AFRAME.registerComponent("app-mode-toggle-playing", {
 
   init() {
     const AppModeSystem = this.el.sceneEl.systems["app-mode"];
-    this.el.sceneEl.addEventListener("appmode-change", e => {
+    this.el.sceneEl.addEventListener("app-mode-change", e => {
       this.updateComponentState(e.detail.mode === this.data.mode);
     });
     this.updateComponentState(AppModeSystem.mode === this.data.mode);
@@ -55,7 +55,7 @@ AFRAME.registerComponent("app-mode-toggle-attribute", {
 
   init() {
     const AppModeSystem = this.el.sceneEl.systems["app-mode"];
-    this.el.sceneEl.addEventListener("appmode-change", e => {
+    this.el.sceneEl.addEventListener("app-mode-change", e => {
       this.updateComponentState(e.detail.mode === this.data.mode);
     });
     this.updateComponentState(AppModeSystem.mode === this.data.mode);
@@ -76,7 +76,7 @@ AFRAME.registerComponent("app-mode-input-mappings", {
     actionSets: { default: [] }
   },
   init() {
-    this.el.sceneEl.addEventListener("appmode-change", e => {
+    this.el.sceneEl.addEventListener("app-mode-change", e => {
       const { modes, actionSets } = this.data;
       const idx = modes.indexOf(e.detail.mode);
       if (idx != -1 && modes[idx] && actionSets[idx] && AFRAME.inputActions[actionSets[idx]]) {
