@@ -252,20 +252,21 @@ const onReady = async () => {
   initialEnvironmentEl.addEventListener('bundleloaded', () => uiRoot.setState({initialEnvironmentLoaded: true}));
   environmentRoot.appendChild(initialEnvironmentEl);
 
-  if (!qs.room) {
-    const hubId = document.location.pathname.substring(1);
-    const res = await fetch(`/api/v1/hubs/${hubId}`);
-    const data = await res.json();
-    const hub = data.hubs[0];
-    const defaultSpaceChannel = hub.channels.find(c => c.attributes.find(a => a.length === 1 && a[0] === "default-space"));
-    const gltfBundleUrl = defaultSpaceChannel.assets.find(a => a.asset_type === "gltf_bundle").src;
-    uiRoot.setState({ janusRoomId: defaultSpaceChannel.janus_room_id });
-    initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`)
-  } else {
+  if (qs.room) {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
     uiRoot.setState({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
-    initialEnvironmentEl.setAttribute("gltf-bundle", "src: /assets/environments/cliff_meeting_space/bundle.json")
+    initialEnvironmentEl.setAttribute("gltf-bundle", "src: /assets/environments/cliff_meeting_space/bundle.json");
+    return;
   }
+
+  const hubId = document.location.pathname.substring(1);
+  const res = await fetch(`/api/v1/hubs/${hubId}`);
+  const data = await res.json();
+  const hub = data.hubs[0];
+  const defaultSpaceChannel = hub.channels.find(c => c.attributes.find(a => a.length === 1 && a[0] === "default-space"));
+  const gltfBundleUrl = defaultSpaceChannel.assets.find(a => a.asset_type === "gltf_bundle").src;
+  uiRoot.setState({ janusRoomId: defaultSpaceChannel.janus_room_id });
+  initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`)
 };
 
 document.addEventListener("DOMContentLoaded", onReady);
