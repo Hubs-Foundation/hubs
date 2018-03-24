@@ -234,7 +234,7 @@ function mountUI(scene) {
   return uiRoot;
 }
 
-const onReady = () => {
+const onReady = async () => {
   const scene = document.querySelector("a-scene");
   document.querySelector("a-scene canvas").classList.add("blurred");
   window.APP.scene = scene;
@@ -248,22 +248,22 @@ const onReady = () => {
 
   const environmentRoot = document.querySelector("#environment-root");
 
+  const initialEnvironmentEl = document.createElement("a-entity");
+  initialEnvironmentEl.addEventListener('bundleloaded', () => uiRoot.setState({initialEnvironmentLoaded: true}));
+  environmentRoot.appendChild(initialEnvironmentEl);
+
   if (!qs.room) {
     const hubId = document.location.pathname.substring(1);
-
-    const res = fetch(`/api/v1/hubs/${hubId}`).then((res) => {
-      return res.json();
-    }).then((data) => {
-      const hub = data.hubs[0];
-      const defaultSpaceChannel = hub.channels.find(c => c.attributes.find(a => a.length === 1 && a[0] === "default-space"));
-      const gltfBundleUrl = defaultSpaceChannel.assets.find(a => a.asset_type === "gltf_bundle").src;
-      uiRoot.setState({ janusRoomId: defaultSpaceChannel.janus_room_id });
-      environmentRoot.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`)
-    })
-  } else {
+    const res = await fetch(`/api/v1/hubs/${hubId}`);
+    const data = await res.json();
+    const hub = data.hubs[0];
+    const defaultSpaceChannel = hub.channels.find(c => c.attributes.find(a => a.length === 1 && a[0] === "default-space"));
+    const gltfBundleUrl = defaultSpaceChannel.assets.find(a => a.asset_type === "gltf_bundle").src;
+    uiRoot.setState({ janusRoomId: defaultSpaceChannel.janus_room_id });
+    initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`)
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
     uiRoot.setState({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
-    environmentRoot.setAttribute("gltf-bundle", "src: /assets/environments/cliff_meeting_space/bundle.json")
+    initialEnvironmentEl.setAttribute("gltf-bundle", "src: /assets/environments/cliff_meeting_space/bundle.json")
   }
 };
 

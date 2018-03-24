@@ -87,7 +87,7 @@ class UIRoot extends Component {
     autoExitTimerInterval: null,
     secondsRemainingBeforeAutoExit: Infinity,
 
-    sceneLoaded: false,
+    initialEnvironmentLoaded: false,
     exited: false,
 
     showProfileEntry: false,
@@ -99,15 +99,6 @@ class UIRoot extends Component {
     this.setupTestTone();
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
     this.micLevelMovingAverage = MovingAverage(100);
-    this.props.scene.addEventListener("loaded", this.onSceneLoaded);
-  }
-
-  componentWillUnmount() {
-    this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
-  }
-
-  onSceneLoaded = () => {
-    this.setState({ sceneLoaded: true });
   }
 
   handleForcedVREntryType = () => {
@@ -363,7 +354,7 @@ class UIRoot extends Component {
   }
 
   render() {
-    if (!this.props.scene.hasLoaded || !this.state.availableVREntryTypes || !this.state.janusRoomId) {
+    if (!this.state.initialEnvironmentLoaded || !this.state.availableVREntryTypes || !this.state.janusRoomId) {
       return (
         <IntlProvider locale={lang} messages={messages}>
           <div className="loading-panel">
