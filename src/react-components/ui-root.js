@@ -90,7 +90,9 @@ class UIRoot extends Component {
     sceneLoaded: false,
     exited: false,
 
-    showProfileEntry: false
+    showProfileEntry: false,
+
+    janusRoomId: null
   }
 
   componentDidMount() {
@@ -342,7 +344,7 @@ class UIRoot extends Component {
   }
 
   onAudioReadyButton = () => {
-    this.props.enterScene(this.state.mediaStream, this.state.enterInVR);
+    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.janusRoomId);
 
     const mediaStream = this.state.mediaStream;
 
@@ -361,7 +363,7 @@ class UIRoot extends Component {
   }
 
   render() {
-    if (!this.props.scene.hasLoaded || !this.state.availableVREntryTypes) {
+    if (!this.props.scene.hasLoaded || !this.state.availableVREntryTypes || !this.state.janusRoomId) {
       return (
         <IntlProvider locale={lang} messages={messages}>
           <div className="loading-panel">

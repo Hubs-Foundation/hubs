@@ -87,6 +87,7 @@ AFRAME.registerInputMappings(inputConfig, true);
 
 const store = new Store();
 const concurrentLoadDetector = new ConcurrentLoadDetector();
+
 concurrentLoadDetector.start();
 
 // Always layer in any new default profile bits
@@ -129,7 +130,7 @@ function setNameTagFromStore() {
   myNametag.setAttribute("text", "value", store.state.profile.display_name);
 }
 
-async function enterScene(mediaStream, enterInVR) {
+async function enterScene(mediaStream, enterInVR, janusRoomId) {
   const scene = document.querySelector("a-scene");
   document.querySelector("a-scene canvas").classList.remove("blurred")
   scene.setAttribute("networked-scene", "adapter: janus; audio: true; debug: true; connectOnLoad: false;");
@@ -149,10 +150,7 @@ async function enterScene(mediaStream, enterInVR) {
 
   const qs = queryString.parse(location.search);
 
-  scene.setAttribute("networked-scene", {
-    room: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1,
-    serverURL: process.env.JANUS_SERVER
-  });
+  scene.setAttribute("networked-scene", { room: janusRoomId, serverURL: process.env.JANUS_SERVER });
 
   if (!qs.stats || !/off|false|0/.test(qs.stats)) {
     scene.setAttribute("stats", true);
@@ -216,7 +214,6 @@ function onConnect() {
 }
 
 function mountUI(scene) {
-  const qs = queryString.parse(location.search);
   const disableAutoExitOnConcurrentLoad = qs.allow_multi === "true"
   let forcedVREntryType = null;
 
@@ -234,10 +231,7 @@ function mountUI(scene) {
     store
   }} />, document.getElementById("ui-root"));
 
-  getAvailableVREntryTypes().then(availableVREntryTypes => {
-    uiRoot.setState({ availableVREntryTypes });
-    uiRoot.handleForcedVREntryType();
-  });
+  return uiRoot;
 }
 
 const onReady = () => {
@@ -245,13 +239,32 @@ const onReady = () => {
   document.querySelector("a-scene canvas").classList.add("blurred");
   window.APP.scene = scene;
 
-  // If ?room is set, this is `yarn start`, so just use a default environment. Otherwise use Reticulum API.
-  if (qs.room) {
-    const environmentRoot = document.querySelector("#environment-root");
+  const uiRoot = mountUI(scene);
+
+  getAvailableVREntryTypes().then(availableVREntryTypes => {
+    uiRoot.setState({ availableVREntryTypes });
+    uiRoot.handleForcedVREntryType();
+  });
+
+  const environmentRoot = document.querySelector("#environment-root");
+
+  if (!qs.room) {
+    const hubId = document.location.pathname.substring(1);
+
+    const res = fetch(`/api/v1/hubs/${hubId}`).then((res) => {
+      return res.json();
+    }).then((data) => {
+      const hub = data.hubs[0];
+      const defaultSpaceChannel = hub.channels.find(c => c.attributes.find(a => a.length === 1 && a[0] === "default-space"));
+      const gltfBundleUrl = defaultSpaceChannel.assets.find(a => a.asset_type === "gltf_bundle").src;
+      uiRoot.setState({ janusRoomId: defaultSpaceChannel.janus_room_id });
+      environmentRoot.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`)
+    })
+  } else {
+    // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
+    uiRoot.setState({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
     environmentRoot.setAttribute("gltf-bundle", "src: /assets/environments/cliff_meeting_space/bundle.json")
   }
-
-  mountUI(scene);
 };
 
 document.addEventListener("DOMContentLoaded", onReady);
