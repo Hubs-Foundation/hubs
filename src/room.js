@@ -153,7 +153,6 @@ async function enterScene(mediaStream, enterInVR) {
   document.querySelector("#player-camera").setAttribute("look-controls", "pointerLockEnabled: true;");
 
   const qs = queryString.parse(location.search);
-  const playerRig = document.querySelector("#player-rig");
 
   scene.setAttribute("networked-scene", {
     room: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1,
