@@ -1,0 +1,32 @@
+AFRAME.registerComponent("player-info", {
+  schema: {
+    displayName: { type: "string" },
+    avatar: { type: "string" }
+  },
+  init() {
+    this.applyProperties = this.applyProperties.bind(this);
+  },
+  play() {
+    this.el.addEventListener("model-loaded", this.applyProperties);
+  },
+  pause() {
+    this.el.removeEventListener("model-loaded", this.applyProperties);
+  },
+  update(oldProps) {
+    this.applyProperties();
+  },
+  applyProperties() {
+    const nametagEl = this.el.querySelector(".nametag");
+    console.log("updating properties", this.data, nametagEl);
+    if (this.data.displayName && nametagEl) {
+      nametagEl.setAttribute("text", {
+        value: this.data.displayName
+      });
+    }
+
+    const modelEl = this.el.querySelector(".model");
+    if (this.data.avatar && modelEl) {
+      modelEl.setAttribute("src", this.data.avatar);
+    }
+  }
+});

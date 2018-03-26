@@ -37,6 +37,8 @@ import "./components/layers";
 import "./components/spawn-controller";
 import "./components/animated-robot-hands";
 import "./components/hide-when-quality";
+import "./components/player-info";
+import "./components/debug";
 import "./components/animation-mixer";
 import "./components/loop-animation";
 
@@ -128,9 +130,11 @@ async function exitScene() {
   document.body.removeChild(scene);
 }
 
-function setNameTagFromStore() {
-  const myNametag = document.querySelector("#player-rig .nametag");
-  myNametag.setAttribute("text", "value", store.state.profile.display_name);
+function applyProfile(playerRig) {
+  playerRig.setAttribute("player-info", {
+    displayName: store.state.profile.display_name,
+    avatar: store.state.profile.avatar || "#bot-skinned-mesh"
+  });
 }
 
 async function enterScene(mediaStream, enterInVR) {
@@ -148,6 +152,7 @@ async function enterScene(mediaStream, enterInVR) {
   document.querySelector("#player-camera").setAttribute("look-controls", "pointerLockEnabled: true;");
 
   const qs = queryString.parse(location.search);
+  const playerRig = document.querySelector("#player-rig");
 
   scene.setAttribute("networked-scene", {
     room: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1,
@@ -159,12 +164,12 @@ async function enterScene(mediaStream, enterInVR) {
   }
 
   if (isMobile || qs.mobile) {
-    const playerRig = document.querySelector("#player-rig");
     playerRig.setAttribute("virtual-gamepad-controls", {});
   }
 
-  setNameTagFromStore();
-  store.addEventListener('statechanged', setNameTagFromStore);
+  const applyProfileOnPlayerRig = applyProfile.bind(null, playerRig);
+  applyProfileOnPlayerRig();
+  store.addEventListener("statechanged", applyProfileOnPlayerRig);
 
   const avatarScale = parseInt(qs.avatarScale, 10);
 

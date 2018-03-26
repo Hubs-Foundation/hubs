@@ -1,0 +1,27 @@
+#selector-root {
+  height: 100%;
+}
+.avatar-selector {
+  overflow: hidden; 
+  height: 100%;
+  &__prev-button, &__next-button {
+    position: absolute; 
+    top: 50%;
+    margin-top: -4em;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    color: white;
+    border: none;
+  }
+  &__prev-button {
+    left: -2em;
+  }
+  &__next-button {
+    right: -2em;
+  }
+  &__button-icon {
+    font-size: 84pt;
+  }
+}

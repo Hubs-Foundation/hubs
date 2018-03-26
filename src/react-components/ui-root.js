@@ -90,7 +90,7 @@ class UIRoot extends Component {
     sceneLoaded: false,
     exited: false,
 
-    showProfileEntry: false
+    showProfileEntry: true
   }
 
   componentDidMount() {
