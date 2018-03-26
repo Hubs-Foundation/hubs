@@ -90,7 +90,7 @@ class UIRoot extends Component {
     sceneLoaded: false,
     exited: false,
 
-    showProfileEntry: true
+    showProfileEntry: false
   }
 
   componentDidMount() {
@@ -401,7 +401,7 @@ class UIRoot extends Component {
         <TwoDEntryButton onClick={this.enter2D}/>
         { this.state.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && <GenericEntryButton onClick={this.enterVR}/> }
         { this.state.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && <GearVREntryButton onClick={this.enterGearVR}/> }
-        { this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && 
+        { this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no &&
             <DaydreamEntryButton
               onClick={this.enterDaydream}
               subtitle={this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : "" }/> }
@@ -420,7 +420,7 @@ class UIRoot extends Component {
             <FormattedMessage id={ this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-subtitle" : "audio.granted-subtitle" }/>
           </div>
           <div className="mic-grant-panel__icon">
-          { this.state.entryStep == ENTRY_STEPS.mic_grant ? 
+          { this.state.entryStep == ENTRY_STEPS.mic_grant ?
             (<img onClick={this.onMicGrantButton} src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" className="mic-grant-panel__icon"/>) :
             (<img onClick={this.onMicGrantButton} src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" className="mic-grant-panel__icon"/>)}
           </div>
