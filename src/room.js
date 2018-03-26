@@ -139,6 +139,7 @@ function applyProfile(playerRig) {
 
 async function enterScene(mediaStream, enterInVR) {
   const scene = document.querySelector("a-scene");
+  const playerRig = document.querySelector("#player-rig");
   document.querySelector("a-scene canvas").classList.remove("blurred")
   scene.setAttribute("networked-scene", "adapter: janus; audio: true; debug: true; connectOnLoad: false;");
   registerNetworkSchemas();

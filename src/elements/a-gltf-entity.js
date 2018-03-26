@@ -215,12 +215,12 @@ AFRAME.registerElement("a-gltf-entity", {
       value() {
         return new Promise((resolve, reject) => {
           this.templates = [];
-          this.querySelectorAll(":scope > template").forEach(templateEl => {
+          this.querySelectorAll(":scope > template").forEach(templateEl => 
             this.templates.push({
               selector: templateEl.getAttribute("data-selector"),
               templateRoot: document.importNode(templateEl.firstElementChild || templateEl.content.firstElementChild, true)
             })
-          });
+          );
           setTimeout(resolve, 0);
         });
       }
