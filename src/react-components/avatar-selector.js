@@ -42,11 +42,11 @@ class AvatarSelector extends Component {
 
     const avatarEntities = this.props.avatars.map((avatar, i) => (
       <a-entity key={avatar.id} position="0 0 0" rotation={`0 ${360 * i / this.props.avatars.length} 0`}>
-        <a-gltf-entity position="0 0 5" rotation="0 180 0" src={'#' + avatar.id} inflate="true">
+        <a-gltf-entity position="0 0 5" rotation="0 0 0" src={'#' + avatar.id} inflate="true">
           <template data-selector=".RootScene">
             <a-entity animation-mixer></a-entity>
           </template>
-          <a-animation attribute="rotation" dur="2000" to="0 -180 0" fill="forwards" repeat="indefinite"></a-animation>
+          <a-animation attribute="rotation" dur="2000" to="0 360 0" fill="forwards" repeat="indefinite"></a-animation>
         </a-gltf-entity>
       </a-entity>
     ));
@@ -56,9 +56,9 @@ class AvatarSelector extends Component {
       <a-scene vr-mode-ui="enabled: false" debug>
         <a-assets>
           {avatarAssets}
-          <a-asset-item 
-            id="meeting-space1-mesh" 
-            response-type="arraybuffer" 
+          <a-asset-item
+            id="meeting-space1-mesh"
+            response-type="arraybuffer"
             src="./src/assets/environments/MeetingSpace1_mesh.glb"
           ></a-asset-item>
         </a-assets>
@@ -67,14 +67,14 @@ class AvatarSelector extends Component {
         {avatarEntities}
         </a-entity>
 
-        <a-entity position="0 1.5 -6.6" rotation="-10 180 0" camera></a-entity>
+        <a-entity position="0 1.5 -5.6" rotation="-10 180 0" camera></a-entity>
 
         <a-entity
           hide-when-quality="low"
           light="type: directional; color: #F9FFCE; intensity: 0.6"
           position="0 5 -15"
         ></a-entity>
-        <a-entity 
+        <a-entity
           hide-when-quality="low"
           light="type: ambient; color: #FFF"
         ></a-entity>

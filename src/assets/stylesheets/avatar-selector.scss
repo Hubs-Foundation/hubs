@@ -2,10 +2,16 @@
   height: 100%;
 }
 .avatar-selector {
-  overflow: hidden; 
+  overflow: hidden;
   height: 100%;
+  &__prev-button:focus, &__next-button:focus {
+    outline: none;
+  }
+  &__prev-button:active, &__next-button:active {
+    color: grey;
+  }
   &__prev-button, &__next-button {
-    position: absolute; 
+    position: absolute;
     top: 50%;
     margin-top: -4em;
     appearance: none;
