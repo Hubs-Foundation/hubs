@@ -96,6 +96,7 @@ const config = {
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
       app.head("*", function(req, res, next) {
         if (req.method === "HEAD") {
+          res.append("Date", (new Date()).toGMTString());
           res.send("");
         } else {
           next();
@@ -139,19 +140,36 @@ const config = {
         }
       },
       {
+        test: /\.scss$/,
+        loader: ExtractTextPlugin.extract({
+          fallback: "style-loader",
+          use: [
+            {
+              loader: "css-loader",
+              options: {
+                name: "[path][name]-[hash].[ext]",
+                minimize: process.env.NODE_ENV === "production"
+              }
+            },
+            "sass-loader"
+          ]
+        })
+      },
+      {
         test: /\.css$/,
         use: ExtractTextPlugin.extract({
           fallback: "style-loader",
           use: {
             loader: "css-loader",
             options: {
+              name: "[path][name]-[hash].[ext]",
               minimize: process.env.NODE_ENV === "production"
             }
           }
         })
       },
       {
-        test: /\.(png|jpg|gif|glb|ogg)$/,
+        test: /\.(png|jpg|gif|glb|ogg|woff2|svg)$/,
         use: {
           loader: "file-loader",
           options: {

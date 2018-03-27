@@ -1,0 +1,134 @@
+.audio-setup-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 10 1 auto;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.audio-setup-panel__title {
+  @extend %top-title;
+}
+
+.audio-setup-panel__subtitle {
+  @extend %top-subtitle;
+}
+
+.audio-setup-panel__device-chooser {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.audio-setup-panel__enter-button {
+  @extend %bottom-button;
+}
+
+.audio-setup-panel__device-chooser__dropdown {
+  @extend %rounded-border;
+  @extend %default-font;
+
+  background-color: black;
+  padding: 6px;
+  color: white;
+  font-size: 1.1em;
+  width: 90%;
+}
+
+.audio-setup-panel__device-chooser__mic-icon {
+  position: absolute;
+  left: 7.5%;
+  top: 10px;
+}
+
+.audio-setup-panel__levels {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 100%;
+}
+
+.audio-setup-panel__levels__mic {
+  position:relative;
+  width: 111px;
+  height: 111px;
+}
+
+.audio-setup-panel__levels__mic_icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  min-width: 111px;
+  min-height: 111px;
+}
+
+.audio-setup-panel__levels__speaker {
+  position:relative;
+  width: 111px;
+  height: 111px;
+}
+
+.audio-setup-panel__levels__speaker_icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  min-width: 111px;
+  min-height: 111px;
+}
+
+.audio-setup-panel__levels__level {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 1.0;
+  z-index: 1;
+}
+
+.audio-setup-panel__hmd-mic-warning {
+  margin: 20px;
+}
+
+.audio-setup-panel__hmd-mic-warning__label {
+  vertical-align: middle;
+  margin-left: 5px;
+}
+
+.audio-setup-panel__hmd-mic-warning__icon {
+  vertical-align: middle;
+}
+
+.mic-grant-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 10 1 auto;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.mic-grant-panel__title {
+  @extend %top-title;
+}
+
+.mic-grant-panel__subtitle {
+  @extend %top-subtitle;
+}
+
+.mic-grant-panel__icon {
+  flex: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.mic-grant-panel__next {
+  @extend %bottom-button;
+  margin: auto;
+  flex: 1 1 20px;
+}

@@ -1,12 +1,28 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import NameEntryPanel from './name-entry-panel';
+import classNames from 'classnames';
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import queryString from "query-string";
 import { SCHEMA } from "../storage/store";
-const { detect } = require("detect-browser");
+import MobileDetect from 'mobile-detect';
+import { IntlProvider, FormattedMessage, addLocaleData } from 'react-intl';
+import en from 'react-intl/locale-data/en';
+import MovingAverage from 'moving-average';
 
-const browser = detect();
+import AutoExitWarning from './auto-exit-warning';
+import { TwoDEntryButton, GenericEntryButton, GearVREntryButton, DaydreamEntryButton } from './entry-buttons.js';
+import { ProfileInfoHeader } from './profile-info-header.js';
+import ProfileEntryPanel from './profile-entry-panel';
+
+const mobiledetect = new MobileDetect(navigator.userAgent);
+
+const lang = ((navigator.languages && navigator.languages[0]) ||
+                   navigator.language || navigator.userLanguage).toLowerCase().split(/[_-]+/)[0];
+
+import localeData from '../assets/translations.data.json';
+addLocaleData([...en]);
+
+const messages = localeData[lang] || localeData.en;
 
 const ENTRY_STEPS = {
   start: "start",
@@ -15,6 +31,8 @@ const ENTRY_STEPS = {
   audio_setup: "audio_setup",
   finished: "finished"
 }
+
+const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
 
 async function grantedMicLabels() {
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
@@ -25,42 +43,6 @@ async function hasGrantedMicPermissions() {
   const micLabels = await grantedMicLabels();
   return micLabels.length > 0;
 }
-
-const TwoDEntryButton = (props) => (
-  <button {...props}>
-    Enter on this Screen
-  </button>
-);
-
-const GenericEntryButton = (props) => (
-  <button {...props}>
-    Enter in VR
-  </button>
-);
-
-const GearVREntryButton = (props) => (
-  <button {...props}>
-    Enter on GearVR
-  </button>
-);
-
-const DaydreamEntryButton = (props) => (
-  <button {...props}>
-    Enter on Daydream
-  </button>
-);
-
-const AutoExitWarning = (props) => (
-  <div>
-    <p>
-    Exit in <span>{props.secondsRemaining}</span>
-    </p>
-
-    <button onClick={props.onCancel}>
-    Cancel
-    </button>
-  </div>
-);
 
 // This is a list of regexes that match the microphone labels of HMDs.
 //
@@ -77,7 +59,6 @@ const AUTO_EXIT_TIMER_SECONDS = 10;
 class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
-    availableVREntryTypes: PropTypes.object,
     concurrentLoadDetector: PropTypes.object,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
@@ -86,6 +67,7 @@ class UIRoot extends Component {
   }
 
   state = {
+    availableVREntryTypes: null,
     entryStep: ENTRY_STEPS.start,
     enterInVR: false,
 
@@ -106,13 +88,15 @@ class UIRoot extends Component {
     secondsRemainingBeforeAutoExit: Infinity,
 
     sceneLoaded: false,
-    exited: false
+    exited: false,
+
+    showProfileEntry: false
   }
 
   componentDidMount() {
     this.setupTestTone();
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
-    this.handleForcedVREntryType();
+    this.micLevelMovingAverage = MovingAverage(100);
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
   }
 
@@ -243,7 +227,7 @@ class UIRoot extends Component {
   enterDaydream = async () => {
     const loc = document.location;
 
-    if (this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe) {
+    if (this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe) {
       this.exit();
 
       // We are not in mobile chrome, so launch into chrome via an Intent URL
@@ -263,15 +247,14 @@ class UIRoot extends Component {
 
   micDeviceChanged = async (ev) => {
     const constraints = { audio: { deviceId: { exact: [ev.target.value] } }, video: this.mediaVideoConstraint() };
-    this.setupNewMediaStream(await navigator.mediaDevices.getUserMedia(constraints));
+    await this.setupNewMediaStream(constraints);
   }
 
   setMediaStreamToDefault = async () => {
-    const constraints = { audio: true, video: this.mediaVideoConstraint() };
-    this.setupNewMediaStream(await navigator.mediaDevices.getUserMedia(constraints));
+    await this.setupNewMediaStream({ audio: true, video: false });
   }
 
-  setupNewMediaStream = (mediaStream) => {
+  setupNewMediaStream = async (constraints) => {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioContext = new AudioContext();
 
@@ -286,6 +269,8 @@ class UIRoot extends Component {
         }
       }
     }
+
+    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
 
     const source = audioContext.createMediaStreamSource(mediaStream);
     const analyzer = audioContext.createAnalyser();
@@ -302,7 +287,9 @@ class UIRoot extends Component {
         v = Math.max(levels[x] - 127, v);
       }
 
-      this.setState({ micLevel: v / 128.0 })
+      const level = v / 128.0 ;
+      this.micLevelMovingAverage.push(Date.now(), level);
+      this.setState({ micLevel: this.micLevelMovingAverage.movingAverage() })
     }, 50);
 
     this.setState({ mediaStream, micUpdateInterval });
@@ -318,6 +305,10 @@ class UIRoot extends Component {
     }
   }
 
+  onProfileFinished = () => {
+    this.setState({ showProfileEntry: false })
+  }
+
   beginAudioSetup = async () => {
     await this.fetchMicDevices();
     this.setState({ entryStep: ENTRY_STEPS.audio_setup });
@@ -328,10 +319,30 @@ class UIRoot extends Component {
     this.setState({ micDevices: mediaDevices.filter(d => d.kind === "audioinput").map(d => ({ deviceId: d.deviceId, label: d.label }))});
   }
 
+  shouldShowHmdMicWarning = () => {
+    if (mobiledetect.mobile()) return false;
+    if (!this.state.enterInVR) return false;
+    if (!this.hasHmdMicrophone()) return false;
+
+    return !(HMD_MIC_REGEXES.find(r => this.selectedMicLabel().match(r)));
+  }
+
+  hasHmdMicrophone = () => {
+    return !!(this.state.micDevices.find(d => HMD_MIC_REGEXES.find(r => d.label.match(r))));
+  }
+
+  selectedMicLabel = () => {
+    return (this.state.mediaStream
+             && this.state.mediaStream.getAudioTracks().length > 0
+             && this.state.mediaStream.getAudioTracks()[0].label) || "";
+  }
+
+  selectedMicDeviceId = () => {
+    return this.state.micDevices.filter(d => d.label === this.selectedMicLabel).map(d => d.deviceId)[0];
+  }
+
   onAudioReadyButton = () => {
-    if (this.state.enterInVR) {
-      document.querySelector("a-scene").enterVR();
-    }
+    this.props.enterScene(this.state.mediaStream, this.state.enterInVR);
 
     const mediaStream = this.state.mediaStream;
 
@@ -346,25 +357,56 @@ class UIRoot extends Component {
     }
 
     this.stopTestTone();
-    this.props.enterScene(this.state.mediaStream);
     this.setState({ entryStep: ENTRY_STEPS.finished });
   }
 
   render() {
-    if (!this.state.sceneLoaded) {
+    if (!this.props.scene.hasLoaded || !this.state.availableVREntryTypes) {
       return (
-        <div>Loading scene</div>
+        <IntlProvider locale={lang} messages={messages}>
+          <div className="loading-panel">
+            <div className="loader-wrap">
+              <div className="loader">
+                <div className="loader-center"/>
+              </div>
+            </div>
+            <div className="loading-panel__title">
+              <b>moz://a</b> duck
+            </div>
+          </div>
+        </IntlProvider>
       );
     }
 
-    const entryTypes = this.props.availableVREntryTypes;
+    if (this.state.exited) {
+      return (
+        <IntlProvider locale={lang} messages={messages}>
+          <div className="exited-panel">
+            <div className="loading-panel__title">
+              <b>moz://a</b> duck
+            </div>
+            <div className="loading-panel__subtitle">
+              <FormattedMessage id="exit.subtitle"/>
+            </div>
+          </div>
+        </IntlProvider>
+      );
+    }
+
+    const daydreamMaybeSubtitle = messages["entry.daydream-via-chrome"];
+
     const entryPanel = this.state.entryStep === ENTRY_STEPS.start
     ? (
-      <div>
+      <div className="entry-panel">
         <TwoDEntryButton onClick={this.enter2D}/>
-        { entryTypes.generic !== VR_DEVICE_AVAILABILITY.no && <GenericEntryButton onClick={this.enterVR}/> }
-        { entryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && <GearVREntryButton onClick={this.enterGearVR}/> }
-        { entryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && <DaydreamEntryButton onClick={this.enterDaydream}/> }
+        { this.state.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && <GenericEntryButton onClick={this.enterVR}/> }
+        { this.state.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && <GearVREntryButton onClick={this.enterGearVR}/> }
+        { this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && 
+            <DaydreamEntryButton
+              onClick={this.enterDaydream}
+              subtitle={this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : "" }/> }
+        { this.state.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no &&
+          (<div className="entry-panel__secondary" onClick={this.enterVR}><FormattedMessage id="entry.cardboard"/></div>) }
         <label>
           <input type="checkbox"
             value={this.state.shareScreen}
@@ -377,56 +419,111 @@ class UIRoot extends Component {
 
     const micPanel = this.state.entryStep === ENTRY_STEPS.mic_grant || this.state.entryStep == ENTRY_STEPS.mic_granted
     ? (
-        <div>
-          <button onClick={this.onMicGrantButton}>
-            { this.state.entryStep == ENTRY_STEPS.mic_grant ? "Grant Mic" : "Next" }
-          </button>
+        <div className="mic-grant-panel">
+          <div className="mic-grant-panel__title">
+            <FormattedMessage id={ this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-title" : "audio.granted-title" }/>
+          </div>
+          <div className="mic-grant-panel__subtitle">
+            <FormattedMessage id={ this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-subtitle" : "audio.granted-subtitle" }/>
+          </div>
+          <div className="mic-grant-panel__icon">
+          { this.state.entryStep == ENTRY_STEPS.mic_grant ? 
+            (<img onClick={this.onMicGrantButton} src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" className="mic-grant-panel__icon"/>) :
+            (<img onClick={this.onMicGrantButton} src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" className="mic-grant-panel__icon"/>)}
+          </div>
+          <div className="mic-grant-panel__next" onClick={this.onMicGrantButton}>
+            <FormattedMessage id={ this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-next" : "audio.granted-next" }/>
+          </div>
         </div>
       ) : null;
 
-    const selectedMicLabel = (this.state.mediaStream
-                                 && this.state.mediaStream.getAudioTracks().length > 0
-                                 && this.state.mediaStream.getAudioTracks()[0].label) || "";
-
-    const selectedMicDeviceId = this.state.micDevices.filter(d => d.label === selectedMicLabel).map(d => d.deviceId)[0];
+    const maxLevelHeight = 111;
+    const micClip = { clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)` };
+    const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
 
     const audioSetupPanel = this.state.entryStep === ENTRY_STEPS.audio_setup
     ? (
-        <div>
-          Audio setup
-          <select value={selectedMicDeviceId} onChange={this.micDeviceChanged}>
-            { this.state.micDevices.map(d => (<option key={ d.deviceId } value={ d.deviceId }>{d.label}</option>)) }
-          </select>
-          { this.state.tonePlaying && (<div>Tone</div>) }
-          { this.state.micLevel }
-          <button onClick={this.onAudioReadyButton}>
-            Audio Ready
-          </button>
+        <div className="audio-setup-panel">
+          <div className="audio-setup-panel__title">
+            <FormattedMessage id="audio.title"/>
+          </div>
+          <div className="audio-setup-panel__subtitle">
+            { (mobiledetect.mobile() || this.state.enterInVR) && (<FormattedMessage id={ mobiledetect.mobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop" }/>) }
+          </div>
+          <div className="audio-setup-panel__levels">
+            <div className="audio-setup-panel__levels__mic">
+              <img src="../assets/images/mic_level.png" srcSet="../assets/images/mic_level@2x.png 2x" className="audio-setup-panel__levels__mic_icon"/>
+              <img src="../assets/images/level_fill.png" srcSet="../assets/images/level_fill@2x.png 2x" className="audio-setup-panel__levels__level" style={ micClip }/>
+            </div>
+            <div className="audio-setup-panel__levels__speaker">
+              <img src="../assets/images/speaker_level.png" srcSet="../assets/images/speaker_level@2x.png 2x" className="audio-setup-panel__levels__speaker_icon"/>
+              <img src="../assets/images/level_fill.png" srcSet="../assets/images/level_fill@2x.png 2x" className="audio-setup-panel__levels__level" style={ speakerClip }/>
+            </div>
+          </div>
+          <div className="audio-setup-panel__device-chooser">
+            <select className="audio-setup-panel__device-chooser__dropdown" value={this.selectedMicDeviceId()} onChange={this.micDeviceChanged}>
+              { this.state.micDevices.map(d => (<option key={ d.deviceId } value={ d.deviceId }>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}</option>)) }
+            </select>
+            <div className="audio-setup-panel__device-chooser__mic-icon">
+              <img src="../assets/images/mic_small.png" srcSet="../assets/images/mic_small@2x.png 2x"/>
+            </div>
+          </div>
+          { this.shouldShowHmdMicWarning() &&
+            (<div className="audio-setup-panel__hmd-mic-warning">
+              <img src="../assets/images/warning_icon.png" srcSet="../assets/images/warning_icon@2x.png 2x"
+                   className="audio-setup-panel__hmd-mic-warning__icon"/>
+              <span className="audio-setup-panel__hmd-mic-warning__label">
+                <FormattedMessage id="audio.hmd-mic-warning"/>
+              </span>
+            </div>) }
+          <div className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
+            <FormattedMessage id="audio.enter-now"/>
+          </div>
         </div>
       ) : null;
 
-    const overlay = this.isWaitingForAutoExit() ?
+    const dialogContents = this.isWaitingForAutoExit() ?
       (<AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />) :
       (
-        <div>
+        <div className="entry-dialog">
+          <ProfileInfoHeader name={this.props.store.state.profile.display_name} onClick={(() => this.setState({showProfileEntry: true })) }/>
           {entryPanel}
           {micPanel}
           {audioSetupPanel}
-
-          <NameEntryPanel store={this.props.store}></NameEntryPanel>
         </div>
       );
 
-    return !this.state.exited ?
-      (
-        <div>
-          Base UI here
-          {overlay}
+    const dialogClassNames = classNames({
+      'ui-dialog': true,
+      'ui-dialog--darkened': this.state.entryStep !== ENTRY_STEPS.finished
+    });
+
+    const dialogBoxClassNames = classNames({ 'ui-dialog-box': true });
+
+    const dialogBoxContentsClassNames = classNames({
+      'ui-dialog-box-contents': true,
+      'ui-dialog-box-contents--backgrounded': this.state.showProfileEntry
+    });
+
+    return (
+      <IntlProvider locale={lang} messages={messages}>
+        <div className={dialogClassNames}>
+          {
+            (this.state.entryStep !== ENTRY_STEPS.finished || this.isWaitingForAutoExit()) &&
+            (
+              <div className={dialogBoxClassNames}>
+                <div className={dialogBoxContentsClassNames}>
+                  {dialogContents}
+                </div>
+
+                {this.state.showProfileEntry && (
+                  <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store}/>)}
+              </div>
+            )
+          }
         </div>
-      ) :
-      (
-        <div>Exited</div>
-      )
+      </IntlProvider>
+    );
   }
 }
 

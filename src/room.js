@@ -1,4 +1,4 @@
-import "./room.css";
+import "./assets/stylesheets/room.scss";
 import queryString from "query-string";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
@@ -12,9 +12,6 @@ import "aframe-teleport-controls";
 import "aframe-input-mapping-component";
 import "aframe-billboard-component";
 import "webrtc-adapter";
-
-import animationMixer from "aframe-extras/src/loaders/animation-mixer";
-AFRAME.registerComponent("animation-mixer", animationMixer);
 
 import { vive_trackpad_dpad4 } from "./behaviours/vive-trackpad-dpad4";
 import { oculus_touch_joystick_dpad4 } from "./behaviours/oculus-touch-joystick-dpad4";
@@ -38,7 +35,10 @@ import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
+import "./components/animated-robot-hands";
 import "./components/hide-when-quality";
+import "./components/animation-mixer";
+import "./components/loop-animation";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -63,8 +63,17 @@ if (qs.quality) {
 
 import "./elements/a-progressive-asset";
 
+import "aframe-physics-system";
+import "aframe-physics-extras";
+import "super-hands";
+import "./components/super-networked-interactable";
+import "./components/networked-counter";
+import "./components/super-spawner";
+import "./components/super-cursor";
+import "./components/event-repeater";
+
 import registerNetworkSchemas from "./network-schemas";
-import { inGameActions, config } from "./input-mappings";
+import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 import Store from "./storage/store";
 
@@ -72,15 +81,13 @@ import { generateDefaultProfile } from "./utils/identity.js";
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
+registerTelemetry();
+
 AFRAME.registerInputBehaviour("vive_trackpad_dpad4", vive_trackpad_dpad4);
 AFRAME.registerInputBehaviour("oculus_touch_joystick_dpad4", oculus_touch_joystick_dpad4);
 AFRAME.registerInputActivator("pressedmove", PressedMove);
 AFRAME.registerInputActivator("reverseY", ReverseY);
-AFRAME.registerInputActions(inGameActions, "default");
-AFRAME.registerInputMappings(config);
-
-registerNetworkSchemas();
-registerTelemetry();
+AFRAME.registerInputMappings(inputConfig, true);
 
 const store = new Store();
 const concurrentLoadDetector = new ConcurrentLoadDetector();
@@ -100,9 +107,21 @@ function setNameTagFromStore() {
   myNametag.setAttribute("text", "value", store.state.profile.display_name);
 }
 
-async function enterScene(mediaStream) {
-  const qs = queryString.parse(location.search);
+async function enterScene(mediaStream, enterInVR) {
   const scene = document.querySelector("a-scene");
+  document.querySelector("a-scene canvas").classList.remove("blurred")
+  scene.setAttribute("networked-scene", "adapter: janus; audio: true; debug: true; connectOnLoad: false;");
+  registerNetworkSchemas();
+
+  if (enterInVR) {
+    scene.enterVR();
+  }
+
+  AFRAME.registerInputActions(inGameActions, "default");
+
+  document.querySelector("#player-camera").setAttribute("look-controls", "pointerLockEnabled: true;");
+
+  const qs = queryString.parse(location.search);
 
   scene.setAttribute("networked-scene", {
     room: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1,
@@ -119,7 +138,7 @@ async function enterScene(mediaStream) {
   }
 
   setNameTagFromStore();
-  store.subscribe(setNameTagFromStore);
+  store.addEventListener('statechanged', setNameTagFromStore);
 
   const avatarScale = parseInt(qs.avatarScale, 10);
 
@@ -178,35 +197,38 @@ async function enterScene(mediaStream) {
 }
 
 function onConnect() {
-  document.getElementById("loader").style.display = "none";
 }
 
 function mountUI(scene) {
+  const qs = queryString.parse(location.search);
+  const disableAutoExitOnConcurrentLoad = qs.allow_multi === "true"
+  let forcedVREntryType = null;
+
+  if (qs.vr_entry_type) {
+    forcedVREntryType = qs.vr_entry_type;
+  }
+
+  const uiRoot = ReactDOM.render(<UIRoot {...{
+    scene,
+    enterScene,
+    exitScene,
+    concurrentLoadDetector,
+    disableAutoExitOnConcurrentLoad,
+    forcedVREntryType,
+    store
+  }} />, document.getElementById("ui-root"));
+
   getAvailableVREntryTypes().then(availableVREntryTypes => {
-    const qs = queryString.parse(location.search);
-    const disableAutoExitOnConcurrentLoad = qs.allow_multi === "true"
-    let forcedVREntryType = null;
-
-    if (qs.vr_entry_type) {
-      forcedVREntryType = qs.vr_entry_type;
-    }
-
-    ReactDOM.render(<UIRoot {...{
-      availableVREntryTypes,
-      scene,
-      enterScene,
-      exitScene,
-      concurrentLoadDetector,
-      disableAutoExitOnConcurrentLoad,
-      forcedVREntryType,
-      store
-    }} />, document.getElementById("ui-root"));
-    document.getElementById("loader").style.display = "none";
+    uiRoot.setState({ availableVREntryTypes });
+    uiRoot.handleForcedVREntryType();
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+const onReady = () => {
   const scene = document.querySelector("a-scene");
+  document.querySelector("a-scene canvas").classList.add("blurred");
   window.APP.scene = scene;
   mountUI(scene);
-});
+};
+
+document.addEventListener("DOMContentLoaded", onReady);
