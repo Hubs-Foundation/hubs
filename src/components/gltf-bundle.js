@@ -14,15 +14,9 @@ AFRAME.registerComponent("gltf-bundle", {
   _addGltfEntitiesForBundleJson: function(bundleJson) {
     const loaded = [];
 
-    for (let i = 0; i < bundleJson.layers.length; i++) {
-      const layer = bundleJson.layers[i];
-
-      // TODO choose a proper asset based upon quality settings, etc. For now just take the first.
-      if (layer.assets.length > 1) {
-        throw `Unable to inflate bundle ${this.data.src} because multiple assets defined for layer ${layer.name}`;
-      }
-
-      const src = layer.assets[0].src;
+    for (let i = 0; i < bundleJson.assets.length; i++) {
+      const asset = bundleJson.assets[i];
+      const src = asset.src;
       const gltfEl = document.createElement("a-gltf-entity");
       gltfEl.setAttribute("src", src);
       gltfEl.setAttribute("position", "0 0 0");
