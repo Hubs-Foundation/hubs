@@ -152,8 +152,6 @@ async function enterScene(mediaStream, enterInVR) {
 
   AFRAME.registerInputActions(inGameActions, "default");
 
-  document.querySelector("#player-camera").setAttribute("look-controls", "pointerLockEnabled: true;");
-
   const qs = queryString.parse(location.search);
 
   scene.setAttribute("networked-scene", {
