@@ -133,7 +133,7 @@ async function exitScene() {
 function applyProfile(playerRig) {
   playerRig.setAttribute("player-info", {
     displayName: store.state.profile.display_name,
-    avatar: store.state.profile.avatar || "#bot-skinned-mesh"
+    avatar: '#' + (store.state.profile.avatar || "botdefault")
   });
 }
 

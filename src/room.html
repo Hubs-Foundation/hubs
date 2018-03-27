@@ -24,13 +24,69 @@
 
         <a-assets>
             <a-progressive-asset
-                id="bot-skinned-mesh"
+                id="botdefault"
                 response-type="arraybuffer"
                 src="./assets/avatars/BotDefault_Avatar_Unlit.glb"
                 high-src="./assets/avatars/BotDefault_Avatar.glb"
                 low-src="./assets/avatars/BotDefault_Avatar_Unlit.glb"
             ></a-progressive-asset>
-            <a-asset-item id="bot-dom-mesh" response-type="arraybuffer" src="./assets/avatars/BotDom_Avatar.glb"></a-asset-item>
+            <a-progressive-asset
+                id="botbobo"
+                response-type="arraybuffer"
+                src="./assets/avatars/BotBobo_Avatar_Unlit.glb"
+                high-src="./assets/avatars/BotBobo_Avatar.glb"
+                low-src="./assets/avatars/BotBobo_Avatar_Unlit.glb"
+            ></a-progressive-asset>
+            <a-progressive-asset
+                id="botdom"
+                response-type="arraybuffer"
+                src="./assets/avatars/BotDom_Avatar_Unlit.glb"
+                high-src="./assets/avatars/BotDom_Avatar.glb"
+                low-src="./assets/avatars/BotDom_Avatar_Unlit.glb"
+            ></a-progressive-asset>
+            <a-progressive-asset
+                id="botgreg"
+                response-type="arraybuffer"
+                src="./assets/avatars/BotGreg_Avatar_Unlit.glb"
+                high-src="./assets/avatars/BotGreg_Avatar.glb"
+                low-src="./assets/avatars/BotGreg_Avatar_Unlit.glb"
+            ></a-progressive-asset>
+            <a-progressive-asset
+                id="botguest"
+                response-type="arraybuffer"
+                src="./assets/avatars/BotGuest_Avatar_Unlit.glb"
+                high-src="./assets/avatars/BotGuest_Avatar.glb"
+                low-src="./assets/avatars/BotGuest_Avatar_Unlit.glb"
+            ></a-progressive-asset>
+            <a-progressive-asset
+                id="botjim"
+                response-type="arraybuffer"
+                src="./assets/avatars/BotJim_Avatar_Unlit.glb"
+                high-src="./assets/avatars/BotJim_Avatar.glb"
+                low-src="./assets/avatars/BotJim_Avatar_Unlit.glb"
+            ></a-progressive-asset>
+            <a-progressive-asset
+                id="botpinky"
+                response-type="arraybuffer"
+                src="./assets/avatars/BotRobert_Avatar_Unlit.glb"
+                high-src="./assets/avatars/BotRobert_Avatar.glb"
+                low-src="./assets/avatars/BotRobert_Avatar_Unlit.glb"
+            ></a-progressive-asset>
+            <a-progressive-asset
+                id="botrobert"
+                response-type="arraybuffer"
+                src="./assets/avatars/BotRobert_Avatar_Unlit.glb"
+                high-src="./assets/avatars/BotRobert_Avatar.glb"
+                low-src="./assets/avatars/BotRobert_Avatar_Unlit.glb"
+            ></a-progressive-asset>
+            <a-progressive-asset
+                id="botwoody"
+                response-type="arraybuffer"
+                src="./assets/avatars/BotWoody_Avatar_Unlit.glb"
+                high-src="./assets/avatars/BotWoody_Avatar.glb"
+                low-src="./assets/avatars/BotWoody_Avatar_Unlit.glb"
+            ></a-progressive-asset>
+
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
 
             <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src="./assets/environments/MeetingSpace1_mesh.glb"></a-asset-item>
@@ -96,7 +152,7 @@
                 <a-entity
                     gltf-model="#interactable-duck"
                     scale="2 2 2"
-                    class="collidable" 
+                    class="collidable"
                     super-networked-interactable="counter: #counter; mass: 5;"
                     body="type: dynamic; mass: 5; shape: box;"
                     grabbable
@@ -120,13 +176,13 @@
         <!-- Interactables -->
         <a-entity id="counter" networked-counter="max: 3; ttl: 120"></a-entity>
 
-        <a-entity 
+        <a-entity
             gltf-model="#interactable-duck"
             scale="2 2 2"
-            class="collidable" 
-            class="collidable" 
-            super-spawner="template: #interactable-template;" 
-            position="2.5 1.2 0" 
+            class="collidable"
+            class="collidable"
+            super-spawner="template: #interactable-template;"
+            position="2.5 1.2 0"
             body="mass: 0; type: static; shape: box;"
         ></a-entity>
 
@@ -136,7 +192,7 @@
             radius=0.02
             static-body="shape: sphere;"
             mixin="super-hands"
-        ></a-sphere>  
+        ></a-sphere>
 
 
         <!-- Player Rig -->
@@ -185,7 +241,7 @@
             <a-gltf-entity class="model" inflate="true">
                 <template data-selector=".RootScene">
                     <a-entity
-                        ik-controller 
+                        ik-controller
                         animated-robot-hands
                         animation-mixer
                     ></a-entity>
@@ -288,23 +344,23 @@
             xr="ar: false"
         ></a-entity>
 
-        <a-cylinder 
-            position="0 0.45 0" 
-            material="visible: false" 
-            height="1" radius="3.1" 
-            segments-radial="12" 
-            static-body 
+        <a-cylinder
+            position="0 0.45 0"
+            material="visible: false"
+            height="1" radius="3.1"
+            segments-radial="12"
+            static-body
             class="collidable"
         ></a-cylinder>
 
-        <a-plane 
-            material="visible: false" 
-            rotation="-90 0 0" 
-            height="35" 
-            width="35" 
-            static-body 
+        <a-plane
+            material="visible: false"
+            rotation="-90 0 0"
+            height="35"
+            width="35"
+            static-body
             class="collidable">
-        </a-plane> 
+        </a-plane>
     </a-scene>
 
     <div id="ui-root" class="ui"></div>

@@ -8,6 +8,13 @@
       }
     },
     {
+      "id": "botbobo",
+      "models": {
+        "low": "BotBobo_Avatar_Unlit.glb",
+        "high": "BotBobo_Avatar.glb"
+      }
+    },
+    {
       "id": "botdom",
       "models": {
         "low": "BotDom_Avatar_Unlit.glb",
@@ -22,6 +29,20 @@
       }
     },
     {
+      "id": "botguest",
+      "models": {
+        "low": "BotGuest_Avatar_Unlit.glb",
+        "high": "BotGuest_Avatar.glb"
+      }
+    },
+    {
+      "id": "botjim",
+      "models": {
+        "low": "BotJim_Avatar_Unlit.glb",
+        "high": "BotJim_Avatar.glb"
+      }
+    },
+    {
       "id": "botpinky",
       "models": {
         "low": "BotPinky_Avatar_Unlit.glb",
@@ -33,6 +54,13 @@
       "models": {
         "low": "BotRobert_Avatar_Unlit.glb",
         "high": "BotRobert_Avatar.glb"
+      }
+    },
+    {
+      "id": "botwoody",
+      "models": {
+        "low": "BotWoody_Avatar_Unlit.glb",
+        "high": "BotWoody_Avatar.glb"
       }
     }
   ]

@@ -36,7 +36,6 @@ class AvatarSelector extends Component {
   }
 
   render () {
-    console.log(this.props.avatar);
     const avatarAssets = this.props.avatars.map(avatar => (
       <a-progressive-asset
         id={avatar.id}
