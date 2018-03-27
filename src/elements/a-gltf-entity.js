@@ -86,7 +86,8 @@ const inflateEntities = function(parentEl, node) {
     node.rotation.setFromQuaternion(node.quaternion, "YXZ");
   }
 
-  // Copy over transform to the THREE.Group and reset the actual transform of the Object3D
+  // Copy over the object's transform to the THREE.Group and reset the actual transform of the Object3D
+  // all updates to the object should be done through the THREE.Group wrapper
   el.setAttribute("position", {
     x: node.position.x,
     y: node.position.y,
@@ -102,7 +103,6 @@ const inflateEntities = function(parentEl, node) {
     y: node.scale.y,
     z: node.scale.z
   });
-
   node.matrixAutoUpdate = false;
   node.matrix.identity();
 
@@ -197,7 +197,7 @@ AFRAME.registerElement("a-gltf-entity", {
 
         // The code above and below this are from AEntity.prototype.load, we need to monkeypatch in gltf loading mid function
         this.loadTemplates();
-        await this.setSrc(this.getAttribute("src"));
+        await this.applySrc(this.getAttribute("src"));
         //
 
         AFRAME.ANode.prototype.load.call(this, () => {
@@ -226,7 +226,7 @@ AFRAME.registerElement("a-gltf-entity", {
       }
     },
 
-    setSrc: {
+    applySrc: {
       async value(src) {
         try {
           // If the src attribute is a selector, get the url from the asset item.
@@ -301,7 +301,7 @@ AFRAME.registerElement("a-gltf-entity", {
     attributeChangedCallback: {
       value(attr, oldVal, newVal) {
         if (attr === "src") {
-          this.setSrc(newVal);
+          this.applySrc(newVal);
         }
         AFRAME.AEntity.prototype.attributeChangedCallback.call(this, attr, oldVal, newVal);
       }
@@ -310,7 +310,7 @@ AFRAME.registerElement("a-gltf-entity", {
     setAttribute: {
       value(attr, arg1, arg2) {
         if (attr === "src") {
-          this.setSrc(arg1);
+          this.applySrc(arg1);
         }
         AFRAME.AEntity.prototype.setAttribute.call(this, attr, arg1, arg2);
       }

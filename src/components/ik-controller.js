@@ -7,21 +7,16 @@ AFRAME.registerComponent("ik-root", {
     rightController: { type: "string", default: ".right-controller" }
   },
   update(oldData) {
-    let updated = false;
-
     if (this.data.camera !== oldData.camera) {
       this.camera = this.el.querySelector(this.data.camera);
-      updated = true;
     }
 
     if (this.data.leftController !== oldData.leftController) {
       this.leftController = this.el.querySelector(this.data.leftController);
-      updated = true;
     }
 
     if (this.data.rightController !== oldData.rightController) {
       this.rightController = this.el.querySelector(this.data.rightController);
-      updated = true;
     }
   }
 });
