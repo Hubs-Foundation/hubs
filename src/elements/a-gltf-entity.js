@@ -157,6 +157,12 @@ function attachTemplate(root, { selector, templateRoot }) {
   }
 }
 
+function nextTick() {
+  return new Promise(resolve => {
+    setTimeout(resolve, 0);
+  });
+}
+
 function cachedLoadGLTF(src, onProgress) {
   return new Promise((resolve, reject) => {
     // Load the gltf model from the cache if it exists.
@@ -190,7 +196,7 @@ AFRAME.registerElement("a-gltf-entity", {
         }
 
         // The code above and below this are from AEntity.prototype.load, we need to monkeypatch in gltf loading mid function
-        await this.loadTemplates();
+        this.loadTemplates();
         await this.setSrc(this.getAttribute("src"));
         //
 
@@ -210,18 +216,13 @@ AFRAME.registerElement("a-gltf-entity", {
 
     loadTemplates: {
       value() {
-        return new Promise((resolve, reject) => {
-          this.templates = [];
-          this.querySelectorAll(":scope > template").forEach(templateEl =>
-            this.templates.push({
-              selector: templateEl.getAttribute("data-selector"),
-              templateRoot: document.importNode(templateEl.content.firstElementChild, true)
-            })
-          );
-          // Imported custom nodes don't immediatly set up their callbacks in Firefox, wait a tick before considering them "loaded"
-          // We do this all up front so that we don't have to wait every time we load a new GLTF model.
-          setTimeout(resolve, 0);
-        });
+        this.templates = [];
+        this.querySelectorAll(":scope > template").forEach(templateEl =>
+          this.templates.push({
+            selector: templateEl.getAttribute("data-selector"),
+            templateRoot: document.importNode(templateEl.content.firstElementChild, true)
+          })
+        );
       }
     },
 
@@ -249,8 +250,10 @@ AFRAME.registerElement("a-gltf-entity", {
           this.lastSrc = src;
 
           if (!src) {
-            console.warn("gltf-entity set to an empty source, unloading inflated model.");
-            this.removeInflatedEl();
+            if (this.inflatedEl) {
+              console.warn("gltf-entity set to an empty source, unloading inflated model.");
+              this.removeInflatedEl();
+            }
             return;
           }
 
@@ -270,6 +273,10 @@ AFRAME.registerElement("a-gltf-entity", {
 
           if (this.getAttribute("inflate")) {
             this.inflatedEl = inflateEntities(this, this.model);
+            // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
+            // Wait one tick for the appended custom elements to be connected before attaching templates
+            await nextTick();
+            if (src != this.lastSrc) return; // TODO: there must be a nicer pattern for this
             this.templates.forEach(attachTemplate.bind(null, this));
           }
 
