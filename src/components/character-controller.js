@@ -1,5 +1,6 @@
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
+const EPS = 10e-6;
 
 // Does not have any type of collisions yet.
 AFRAME.registerComponent("character-controller", {
@@ -74,6 +75,8 @@ AFRAME.registerComponent("character-controller", {
     const position = new THREE.Vector3();
     const currentPosition = new THREE.Vector3();
     const movementVector = new THREE.Vector3();
+    const end = new THREE.Vector3();
+    const clampedEnd = new THREE.Vector3();
 
     return function(t, dt) {
       const deltaSeconds = dt / 1000;
@@ -120,9 +123,23 @@ AFRAME.registerComponent("character-controller", {
         z: root.rotation.z * THREE.Math.RAD2DEG
       });
 
-      this.el.setAttribute("position", root.position);
-
       this.pendingSnapRotationMatrix.identity(); // Revert to identity
+
+      //copied from aframe-extras movement-controls
+      if (this.velocity.lengthSq() > EPS) {
+        let start = root.position;
+        end.copy(this.velocity).multiplyScalar(dt / 1000).add(start);
+        const nav = this.el.sceneEl.systems.nav;
+        this.navGroup = this.navGroup || nav.getGroup(start);
+        this.navNode = this.navNode || nav.getNode(start, this.navGroup);
+        this.navNode = nav.clampStep(start, end, this.navGroup, this.navNode, clampedEnd);
+        root.position.copy(clampedEnd);
+        root.position.x += this.velocity.x * dt / 1000;
+        root.position.y += this.velocity.y * dt / 1000;
+        root.z += this.velocity.z * dt / 1000;
+      } else {
+        this.el.setAttribute("position", root.position);
+      }
     };
   })(),
 

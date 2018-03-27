@@ -126,7 +126,7 @@
             class="collidable" 
             class="collidable" 
             super-spawner="template: #interactable-template;" 
-            position="2.5 1.2 0" 
+            position="2.9 1.2 0" 
             body="mass: 0; type: static; shape: box;"
         ></a-entity>
 
@@ -168,7 +168,7 @@
                 class="left-controller"
                 hand-controls2="left"
                 tracked-controls
-                teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
+                teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_; collisionEntities: #floor-nav"
                 haptic-feedback
             ></a-entity>
 
@@ -177,7 +177,7 @@
                 class="right-controller"
                 hand-controls2="right"
                 tracked-controls
-                teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
+                teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_; collisionEntities: #floor-nav"
                 haptic-feedback
             ></a-entity>
 
@@ -252,6 +252,7 @@
 
         <a-gltf-entity
             id="floor-nav"
+            nav-mesh
             src="#floor-nav-mesh"
             visible="false"
             position="0 0 0"

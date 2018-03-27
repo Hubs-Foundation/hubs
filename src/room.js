@@ -65,6 +65,7 @@ import "./elements/a-progressive-asset";
 
 import "aframe-physics-system";
 import "aframe-physics-extras";
+import "aframe-extras/src/pathfinding";
 import "super-hands";
 import "./components/super-networked-interactable";
 import "./components/networked-counter";
