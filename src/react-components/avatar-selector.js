@@ -25,14 +25,18 @@ class AvatarSelector extends Component {
     this.props.onChange(this.props.avatars[newAvatarIndex].id);
   }
 
-  componentDidMount() {
-    const start = performance.now();
-    this.scene.addEventListener('loaded', () => {
-      this.loading.style.display = 'none';
-    });
+  componentDidUpdate() {
+    // HACK - a-animation ought to restart the animation when the `to` attribute changes, but it doesn't
+    // so we need to force it here.
+    const currRot = this.animation.parentNode.getAttribute('rotation');
+    this.animation.setAttribute('from', `${currRot.x} ${currRot.y} ${currRot.z}`);
+    this.animation.stop();
+    this.animation.handleMixinUpdate();
+    this.animation.start();
   }
 
   render () {
+    console.log(this.props.avatar);
     const avatarAssets = this.props.avatars.map(avatar => (
       <a-progressive-asset
         id={avatar.id}
@@ -44,19 +48,24 @@ class AvatarSelector extends Component {
     ));
 
     const avatarEntities = this.props.avatars.map((avatar, i) => (
-      <a-entity key={avatar.id} position="0 0 0" rotation={`0 ${360 * i / this.props.avatars.length} 0`}>
+      <a-entity key={avatar.id} position="0 0 0" rotation={`0 ${360 * -i / this.props.avatars.length} 0`}>
         <a-gltf-entity position="0 0 5" rotation="0 0 0" src={'#' + avatar.id} inflate="true">
           <template data-selector=".RootScene">
             <a-entity animation-mixer></a-entity>
           </template>
-          <a-animation attribute="rotation" dur="2000" to="0 360 0" fill="forwards" repeat="indefinite"></a-animation>
+          <a-animation
+            attribute="rotation"
+            dur="2000"
+            to={`0 ${this.getAvatarIndex() === i ? 360 : 0} 0`}
+            repeat="indefinite">
+          </a-animation>
         </a-gltf-entity>
       </a-entity>
     ));
 
     return (
       <div className="avatar-selector">
-      <span className="avatar-selector__loading" ref={ldg => this.loading = ldg}>
+      <span className="avatar-selector__loading">
         <FormattedMessage id="profile.avatar-selector.loading"/>
       </span>
       <a-scene vr-mode-ui="enabled: false" ref={sce => this.scene = sce}>
@@ -69,7 +78,14 @@ class AvatarSelector extends Component {
           ></a-asset-item>
         </a-assets>
 
-        <a-entity rotation={`0 ${360 * -this.getAvatarIndex() / this.props.avatars.length + 180} 0`}>
+        <a-entity data-avatar={this.props.avatar}>
+          <a-animation
+            ref={anm => this.animation = anm}
+            attribute="rotation"
+            dur="1000"
+            easing="ease-out"
+            to={`0 ${360 * this.getAvatarIndex() / this.props.avatars.length + 180} 0`}>
+          </a-animation>
         {avatarEntities}
         </a-entity>
 

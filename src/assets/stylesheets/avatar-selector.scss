@@ -7,6 +7,9 @@
 .avatar-selector {
   overflow: hidden;
   height: 100%;
+  display: flex;
+  justify-content: center;
+
   &__prev-button:focus, &__next-button:focus {
     outline: none;
   }
@@ -36,6 +39,8 @@
   &__loading {
     @extend %default-font;
     display: block;
+    position: absolute;
+    top: 50%;
     text-align: center;
     color: white;
   }
