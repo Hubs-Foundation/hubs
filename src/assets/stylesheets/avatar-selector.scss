@@ -1,3 +1,6 @@
+@import 'fonts';
+@import 'shared';
+
 #selector-root {
   height: 100%;
 }
@@ -29,5 +32,11 @@
   }
   &__button-icon {
     font-size: 84pt;
+  }
+  &__loading {
+    @extend %default-font;
+    display: block;
+    text-align: center;
+    color: white;
   }
 }

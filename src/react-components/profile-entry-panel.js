@@ -13,7 +13,7 @@ class ProfileEntryPanel extends Component {
   constructor(props) {
     super(props);
     window.store = this.props.store;
-    this.state = { 
+    this.state = {
       display_name: this.props.store.state.profile.display_name,
       avatar: this.props.store.state.profile.avatar,
     };
@@ -21,7 +21,7 @@ class ProfileEntryPanel extends Component {
   }
 
   storeUpdated = () => {
-    this.setState({ 
+    this.setState({
       display_name: this.props.store.state.profile.display_name,
       avatar: this.props.store.state.profile.avatar,
     });
@@ -29,7 +29,7 @@ class ProfileEntryPanel extends Component {
 
   saveStateAndFinish = (e) => {
     e.preventDefault();
-    this.props.store.update({profile: { 
+    this.props.store.update({profile: {
       display_name: this.state.display_name,
       avatar: this.state.avatar
     }});
@@ -40,22 +40,25 @@ class ProfileEntryPanel extends Component {
     e.stopPropagation();
   }
 
+  setAvatarStateFromIframeMessage = (e) => {
+    if (e.source !== this.avatarSelector.contentWindow) { return; }
+    this.setState({avatar: e.data.avatar});
+  }
+
   componentDidMount() {
     // stop propagation so that avatar doesn't move when wasd'ing during text input.
     this.nameInput.addEventListener('keydown', this.stopPropagation);
     this.nameInput.addEventListener('keypress', this.stopPropagation);
     this.nameInput.addEventListener('keyup', this.stopPropagation);
-    window.addEventListener('message', (e) => {
-      if (e.source !== this.avatarSelector.contentWindow) { return; }
-      this.setState({avatar: e.data.avatar});
-    });
+    window.addEventListener('message', this.setAvatarStateFromIframeMessage);
   }
-  
+
   componentWillUnmount() {
     this.props.store.removeEventListener('statechanged', this.storeUpdated);
     this.nameInput.removeEventListener('keydown', this.stopPropagation);
     this.nameInput.removeEventListener('keypress', this.stopPropagation);
     this.nameInput.removeEventListener('keyup', this.stopPropagation);
+    window.removeEventListener('message', this.setAvatarStateFromIframeMessage);
   }
 
   render () {
@@ -74,10 +77,10 @@ class ProfileEntryPanel extends Component {
             required pattern={SCHEMA.definitions.profile.properties.display_name.pattern}
             title={formatMessage({ id: "profile.display_name.validation_warning" })}
             ref={inp => this.nameInput = inp}/>
-          <iframe 
-            className="profile-entry__avatar-selector" 
+          <iframe
+            className="profile-entry__avatar-selector"
             src={`avatar-selector.html#avatar=${this.state.avatar}`}
-            ref={ifr => this.avatarSelector = ifr}>loading...</iframe>
+            ref={ifr => this.avatarSelector = ifr}></iframe>
           <input className="profile-entry__form-submit" type="submit" value={formatMessage({ id: "profile.save" }) }/>
         </div>
         </form>

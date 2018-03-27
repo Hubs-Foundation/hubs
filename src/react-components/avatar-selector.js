@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { injectIntl, FormattedMessage } from 'react-intl';
 
 class AvatarSelector extends Component {
   static propTypes = {
@@ -8,13 +9,8 @@ class AvatarSelector extends Component {
     onChange: PropTypes.func,
   }
 
-  constructor(props) {
-    super(props);
-    this.state = { avatar: this.props.avatar };
-  }
-
   getAvatarIndex(direction=0) {
-    const currAvatarIndex = this.props.avatars.findIndex(avatar => avatar.id === this.state.avatar);
+    const currAvatarIndex = this.props.avatars.findIndex(avatar => avatar.id === this.props.avatar);
     const numAvatars = this.props.avatars.length;
     return ((currAvatarIndex + direction) % numAvatars + numAvatars) % numAvatars;
   }
@@ -27,6 +23,13 @@ class AvatarSelector extends Component {
   prevAvatar = () => {
     const newAvatarIndex = this.getAvatarIndex(-1);
     this.props.onChange(this.props.avatars[newAvatarIndex].id);
+  }
+
+  componentDidMount() {
+    const start = performance.now();
+    this.scene.addEventListener('loaded', () => {
+      this.loading.style.display = 'none';
+    });
   }
 
   render () {
@@ -53,7 +56,10 @@ class AvatarSelector extends Component {
 
     return (
       <div className="avatar-selector">
-      <a-scene vr-mode-ui="enabled: false" debug>
+      <span className="avatar-selector__loading" ref={ldg => this.loading = ldg}>
+        <FormattedMessage id="profile.avatar-selector.loading"/>
+      </span>
+      <a-scene vr-mode-ui="enabled: false" ref={sce => this.scene = sce}>
         <a-assets>
           {avatarAssets}
           <a-asset-item
@@ -63,7 +69,7 @@ class AvatarSelector extends Component {
           ></a-asset-item>
         </a-assets>
 
-        <a-entity rotation={`0 ${360 * this.getAvatarIndex() / this.props.avatars.length - 180} 0`}>
+        <a-entity rotation={`0 ${360 * -this.getAvatarIndex() / this.props.avatars.length + 180} 0`}>
         {avatarEntities}
         </a-entity>
 
@@ -84,10 +90,10 @@ class AvatarSelector extends Component {
           position="0 0 0"
         ></a-gltf-entity>
       </a-scene>
-      <button className="avatar-selector__prev-button" onClick={this.nextAvatar}>
+      <button className="avatar-selector__prev-button" onClick={this.prevAvatar}>
         <i className="avatar-selector__button-icon material-icons">keyboard_arrow_left</i>
       </button>
-      <button className="avatar-selector__next-button" onClick={this.prevAvatar}>
+      <button className="avatar-selector__next-button" onClick={this.nextAvatar}>
         <i className="avatar-selector__button-icon material-icons">keyboard_arrow_right</i>
       </button>
       </div>
@@ -95,4 +101,4 @@ class AvatarSelector extends Component {
   }
 }
 
-export default AvatarSelector;
+export default injectIntl(AvatarSelector);
