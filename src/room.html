@@ -14,14 +14,10 @@
 </head>
 
 <body>
-    <div id="loader"></div>
+    <audio id="test-tone" src="./assets/sfx/tone.ogg"></audio>
+
     <a-scene
         physics
-        networked-scene="adapter: janus;
-                         audio: true;
-                         debug: true;
-                         onConnect: App.onConnect;
-                         connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         2d-mute-state-indicator
         light="defaultLightsEnabled: false">
@@ -301,6 +297,8 @@
             class="collidable"
         ></a-plane> 
     </a-scene>
+
+    <div id="ui-root" class="ui"></div>
 </body>
 
 </html>
