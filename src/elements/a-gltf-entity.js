@@ -218,6 +218,8 @@ AFRAME.registerElement("a-gltf-entity", {
               templateRoot: document.importNode(templateEl.content.firstElementChild, true)
             })
           );
+          // Imported custom nodes don't immediatly set up their callbacks in Firefox, wait a tick before considering them "loaded"
+          // We do this all up front so that we don't have to wait every time we load a new GLTF model.
           setTimeout(resolve, 0);
         });
       }
@@ -246,7 +248,11 @@ AFRAME.registerElement("a-gltf-entity", {
           if (src === this.lastSrc) return;
           this.lastSrc = src;
 
-          if (!src) return;
+          if (!src) {
+            console.warn("gltf-entity set to an empty source, unloading inflated model.");
+            this.removeInflatedEl();
+            return;
+          }
 
           const model = await cachedLoadGLTF(src);
 
@@ -255,10 +261,7 @@ AFRAME.registerElement("a-gltf-entity", {
           if (src != this.lastSrc) return;
 
           // If we had inflated something already before, clean that up
-          if (this.inflatedEl) {
-            this.inflatedEl.parentNode.removeChild(this.inflatedEl);
-            delete this.inflatedEl;
-          }
+          this.removeInflatedEl();
 
           this.model = model.scene || model.scenes[0];
           this.model.animations = model.animations;
@@ -275,6 +278,15 @@ AFRAME.registerElement("a-gltf-entity", {
           const message = (e && e.message) || "Failed to load glTF model";
           console.error(message);
           this.emit("model-error", { format: "gltf", src });
+        }
+      }
+    },
+
+    removeInflatedEl: {
+      value() {
+        if (this.inflatedEl) {
+          this.inflatedEl.parentNode.removeChild(this.inflatedEl);
+          delete this.inflatedEl;
         }
       }
     },

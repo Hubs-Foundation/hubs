@@ -17,7 +17,6 @@ AFRAME.registerComponent("player-info", {
   },
   applyProperties() {
     const nametagEl = this.el.querySelector(".nametag");
-    console.log("updating properties", this.data, nametagEl);
     if (this.data.displayName && nametagEl) {
       nametagEl.setAttribute("text", {
         value: this.data.displayName
