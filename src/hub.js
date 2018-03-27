@@ -259,7 +259,8 @@ const onReady = async () => {
     return;
   }
 
-  const hubId = document.location.pathname.substring(1);
+  const hubId = document.location.pathname.substring(1).split("/")[0];
+  console.log(`Hub ID: ${hubId}`);
   const res = await fetch(`/api/v1/hubs/${hubId}`);
   const data = await res.json();
   const hub = data.hubs[0];
