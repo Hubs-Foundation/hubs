@@ -34,8 +34,6 @@ const lang = ((navigator.languages && navigator.languages[0]) || navigator.langu
 addLocaleData([...en]);
 const messages = localeData[lang] || localeData.en;
 
-let avatar = hash.avatar;
-
 function postAvatarToParent(newAvatar) {
   window.parent.postMessage({ avatar: newAvatar }, location.origin);
 }
