@@ -191,7 +191,7 @@ class UIRoot extends Component {
       return this.state.mediaStream && this.state.mediaStream.getAudioTracks().length > 0;
     }
     else {
-      // If we haven't requested the screen in this session, check if we've granted permissions in a previsou session.
+      // If we haven't requested the screen in this session, check if we've granted permissions in a previous session.
       return (await grantedMicLabels()).length > 0;
     }
   }
