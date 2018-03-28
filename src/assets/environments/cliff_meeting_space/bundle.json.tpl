@@ -4,6 +4,9 @@
   "meta": {
     "title": "Cliffside Meeting Space",
     "description": "Enjoy a beautiful vista view while collaborating in Mixed Reality",
+    "authors": [
+      { "name": "Jim Conrad", "github": "j-conrad" }
+    ],
     "images": [
       { "type": "preview-thumbnail", "srcset": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Big_Buck_Bunny_4K.webm/310px-seek%3D116-Big_Buck_Bunny_4K.webm.jpg" }
     ]
