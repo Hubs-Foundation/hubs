@@ -133,7 +133,6 @@ async function exitScene() {
 }
 
 function updatePlayerInfoFromStore() {
-  const qs = queryString.parse(location.search);
   const playerRig = document.querySelector("#player-rig");
   playerRig.setAttribute("player-info", {
     displayName: store.state.profile.display_name,
@@ -144,7 +143,6 @@ function updatePlayerInfoFromStore() {
 async function enterScene(mediaStream, enterInVR, janusRoomId) {
   const scene = document.querySelector("a-scene");
   const playerRig = document.querySelector("#player-rig");
-  const qs = queryString.parse(location.search);
 
   document.querySelector("a-scene canvas").classList.remove("blurred");
   registerNetworkSchemas();
@@ -155,9 +153,7 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
 
   AFRAME.registerInputActions(inGameActions, "default");
 
-  document.querySelector("#player-camera").setAttribute("look-controls", "pointerLockEnabled: true;");
-
-  const qs = queryString.parse(location.search);
+  document.querySelector("#player-camera").setAttribute("look-controls");
 
   scene.setAttribute("networked-scene", {
     adapter: "janus",
@@ -228,7 +224,6 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
 function onConnect() {}
 
 function mountUI(scene) {
-  const qs = queryString.parse(location.search);
   const disableAutoExitOnConcurrentLoad = qs.allow_multi === "true";
 
   let forcedVREntryType = null;
@@ -285,11 +280,9 @@ const onReady = async () => {
   const res = await fetch(`/api/v1/hubs/${hubId}`);
   const data = await res.json();
   const hub = data.hubs[0];
-  const defaultSpaceChannel = hub.channels.find(c =>
-    c.attributes.find(a => a.length === 1 && a[0] === "default-space")
-  );
-  const gltfBundleUrl = defaultSpaceChannel.assets.find(a => a.asset_type === "gltf_bundle").src;
-  uiRoot.setState({ janusRoomId: defaultSpaceChannel.janus_room_id });
+  const defaultSpaceTopic = hub.topics[0];
+  const gltfBundleUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
+  uiRoot.setState({ janusRoomId: defaultSpaceTopic.janus_room_id });
   initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`);
 };
 

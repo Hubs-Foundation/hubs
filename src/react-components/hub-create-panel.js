@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
-import { SCHEMA } from "../storage/store";
 import { generateHubName } from "../utils/name-generation";
 
 class HubCreatePanel extends Component {
@@ -15,7 +14,7 @@ class HubCreatePanel extends Component {
     environmentBundleUrl: ""
   };
 
-  componentDidMount() {
+  constructor() {
     this.setState({ environmentBundleUrl: this.props.environments[0].bundle_url });
   }
 
