@@ -20,16 +20,28 @@ AFRAME.registerComponent("hand-poses", {
   init() {
     this.animatePose = this.animatePose.bind(this);
     this.animatePoses = this.animatePoses.bind(this);
-    this.mixer = this.el.querySelector(this.data.mixer).components["animation-mixer"];
+    this.firstUpdate = this.firstUpdate.bind(this);
+    if (this.el.querySelector(this.data.mixer)) {
+      this.mixer = this.el.querySelector(this.data.mixer).components["animation-mixer"];
+    }
 
     let onLoad;
     onLoad = () => {
-      console.log("loaded!"); // TODO: This isn't getting called
-      this.mixer = this.el.querySelector(this.data.mixer).components["animation-mixer"];
-      //     this.animatePoses();
+      if (this.el.querySelector(this.data.mixer)) {
+        this.mixer = this.el.querySelector(this.data.mixer).components["animation-mixer"];
+      }
+      if (!this.mixer) {
+        // Can't find the mixer until spawned into the scene.
+        // TODO: Figure out the right event to listen to to get this done.
+        window.setTimeout(onLoad, 100);
+        return;
+      }
       this.el.querySelector(this.data.gltfEntity).removeEventListener("loaded", onLoad);
     };
     this.el.querySelector(this.data.gltfEntity).addEventListener("loaded", onLoad);
+
+    //TODO: the loaded event isn't being caught, so we do it in a timeout
+    window.setTimeout(onLoad, 10);
   },
 
   update(oldData) {
@@ -38,16 +50,17 @@ AFRAME.registerComponent("hand-poses", {
       const object3DMap = this.mixer.el.object3DMap;
       const rootObj = object3DMap.mesh || object3DMap.scene;
       this.clipActionObject = rootObj.parent;
-    }
-    if (!oldData.leftPose) {
-      // first update
-      this.leftClipFrom = this.leftClipTo = this.mixer.mixer.clipAction(POSES.open + "_L", this.clipActionObject);
-      this.rightClipFrom = this.rightClipTo = this.mixer.mixer.clipAction(POSES.open + "_R", this.clipActionObject);
-      this.leftClipTo.play();
-      this.rightClipTo.play();
+      this.firstUpdate();
     } else {
       this.animatePoses(oldData);
     }
+  },
+
+  firstUpdate() {
+    this.leftClipFrom = this.leftClipTo = this.mixer.mixer.clipAction(POSES.open + "_L", this.clipActionObject);
+    this.rightClipFrom = this.rightClipTo = this.mixer.mixer.clipAction(POSES.open + "_R", this.clipActionObject);
+    this.leftClipTo.play();
+    this.rightClipTo.play();
   },
 
   animatePose(hand, prev, curr) {
