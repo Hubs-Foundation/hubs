@@ -6,6 +6,14 @@ function registerNetworkSchemas() {
       "rotation",
       "scale",
       {
+        component: "hand-poses",
+        property: "leftPose"
+      },
+      {
+        component: "hand-poses",
+        property: "rightPose"
+      },
+      {
         selector: ".camera",
         component: "position"
       },

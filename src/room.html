@@ -48,7 +48,7 @@
             </template>
 
             <template id="remote-avatar-template">
-                <a-entity ik-root>
+                <a-entity ik-root hand-poses="mixer: .RootScene">
                     <a-entity class="camera"></a-entity>
 
                     <a-entity class="left-controller"></a-entity>
@@ -57,7 +57,7 @@
 
                     <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller >
                         <template data-selector=".RootScene">
-                            <a-entity animation-mixer ></a-entity>
+                            <a-entity animation-mixer></a-entity>
                         </template>
 
                         <template data-selector=".Neck">
@@ -146,6 +146,8 @@
             spawn-controller="radius: 4;"
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
+            hand-poses="mixer: .RootScene"
+            hand-poses-controller
             ik-root
         >
             <a-entity
@@ -183,7 +185,7 @@
 
             <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller >
                 <template data-selector=".RootScene">
-                    <a-entity animation-mixer animated-robot-hands ></a-entity>
+                    <a-entity animation-mixer ></a-entity>
                 </template>
 
                 <template data-selector=".Neck">

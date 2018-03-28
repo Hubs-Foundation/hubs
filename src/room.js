@@ -35,10 +35,10 @@ import "./components/water";
 import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
-import "./components/animated-robot-hands";
 import "./components/hide-when-quality";
 import "./components/animation-mixer";
 import "./components/loop-animation";
+import "./components/hand-poses";
 
 import ReactDOM from "react-dom";
 import React from "react";
