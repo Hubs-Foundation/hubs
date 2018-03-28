@@ -39,11 +39,6 @@ async function grantedMicLabels() {
   return mediaDevices.filter(d => d.label && d.kind === "audioinput").map(d => d.label);
 }
 
-async function hasGrantedMicPermissions() {
-  const micLabels = await grantedMicLabels();
-  return micLabels.length > 0;
-}
-
 // This is a list of regexes that match the microphone labels of HMDs.
 //
 // If entering VR mode, and if any of these regexes match an audio device,
@@ -72,6 +67,7 @@ class UIRoot extends Component {
     enterInVR: false,
 
     shareScreen: false,
+    requestedScreen: false,
     mediaStream: null,
 
     toneInterval: null,
@@ -188,12 +184,24 @@ class UIRoot extends Component {
     this.setState({ autoExitTimerStartedAt: null, autoExitTimerInterval: null, secondsRemainingBeforeAutoExit: Infinity });
   }
 
+  hasGrantedMicPermissions = async () => {
+    if (this.state.requestedScreen) {
+      // If we've already requested the screen in this session, then we can already enumerateDevices, so we need to 
+      // verify mic permissions by checking the mediaStream.
+      return this.state.mediaStream && this.state.mediaStream.getAudioTracks().length > 0;
+    }
+    else {
+      // If we haven't requested the screen in this session, check if we've granted permissions in a previsou session.
+      return (await grantedMicLabels()).length > 0;
+    }
+  }
+
   performDirectEntryFlow = async (enterInVR) => {
     this.startTestTone();
 
     this.setState({ enterInVR })
 
-    const hasGrantedMic = await hasGrantedMicPermissions();
+    const hasGrantedMic = await this.hasGrantedMicPermissions();
 
     if (hasGrantedMic) {
       await this.setMediaStreamToDefault();
@@ -251,7 +259,14 @@ class UIRoot extends Component {
   }
 
   setMediaStreamToDefault = async () => {
-    await this.setupNewMediaStream({ audio: true, video: false });
+    await this.setupNewMediaStream({ audio: true, video: this.mediaVideoConstraint() });
+  }
+
+  setStateAndRequestScreenIfEnabled = (e) => {
+    const checked = e.target.checked;
+    this.setState({requestedScreen: true, shareScreen: checked}, () => {
+      this.setupNewMediaStream({ video: this.mediaVideoConstraint() });
+    });
   }
 
   setupNewMediaStream = async (constraints) => {
@@ -407,13 +422,14 @@ class UIRoot extends Component {
               subtitle={this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : "" }/> }
         { this.state.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no &&
           (<div className="entry-panel__secondary" onClick={this.enterVR}><FormattedMessage id="entry.cardboard"/></div>) }
-        <label>
-          <input type="checkbox"
-            value={this.state.shareScreen}
-            onChange={e => this.setState({shareScreen: e.target.checked})}
-          />
-          Enable Screensharing
-        </label>
+        { !mobiledetect.mobile() && /firefox/i.test(navigator.userAgent) && (
+          <label className="entry-panel__screensharing">
+            <input className="entry-panel__screensharing-checkbox" type="checkbox"
+              value={this.state.shareScreen}
+              onChange={this.setStateAndRequestScreenIfEnabled}
+            />
+            <FormattedMessage id="entry.enable-screensharing" />
+          </label>) }
       </div>
     ) : null;
 

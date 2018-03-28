@@ -18,6 +18,29 @@
   flex-direction: column;
   flex: 10 1 auto;
   justify-content: center;
+
+  &__screensharing {
+	font-size: 1.4em;
+	margin-left: 2.95em;
+	margin-top: 0.6em;
+  }
+
+  &__screensharing-checkbox {
+	appearance: none;
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	width: 2em;
+	height: 2em;
+	border: 3px solid white;
+	border-radius: 9px;
+	vertical-align: sub;
+	margin: 0 0.6em
+  }
+  &__screensharing-checkbox:checked {
+	border: 9px double white;
+	outline: 9px solid white;
+	outline-offset: -18px;
+  }
 }
 
 .entry-panel__secondary {
