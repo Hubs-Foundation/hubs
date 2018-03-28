@@ -9,13 +9,13 @@ class HubCreatePanel extends Component {
     environments: PropTypes.array
   };
 
-  state = {
-    name: generateHubName(),
-    environmentBundleUrl: ""
-  };
+  constructor(props) {
+    super(props);
 
-  constructor() {
-    this.setState({ environmentBundleUrl: this.props.environments[0].bundle_url });
+    this.state = {
+      name: generateHubName(),
+      environmentBundleUrl: props.environments[0].bundle_url
+    };
   }
 
   createHub = async e => {
@@ -64,7 +64,12 @@ class HubCreatePanel extends Component {
               pattern={"^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$"}
               title={formatMessage({ id: "home.create_name.validation_warning" })}
             />
-            <select value={this.state.environmentBundleUrl}>{environmentChoices}</select>
+            <select
+              onChange={e => this.setState({ environmentBundleUrl: e.target.value })}
+              value={this.state.environmentBundleUrl}
+            >
+              {environmentChoices}
+            </select>
             <button
               onClick={e => {
                 e.preventDefault();
