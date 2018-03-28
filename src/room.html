@@ -30,7 +30,7 @@
                 high-src="./assets/avatars/BotDefault_Avatar.glb"
                 low-src="./assets/avatars/BotDefault_Avatar_Unlit.glb"
             ></a-progressive-asset>
-            
+            <a-asset-item id="bot-dom-mesh" response-type="arraybuffer" src="./assets/avatars/BotDom_Avatar.glb"></a-asset-item>
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
 
             <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src="./assets/environments/MeetingSpace1_mesh.glb"></a-asset-item>
@@ -48,16 +48,16 @@
             </template>
 
             <template id="remote-avatar-template">
-                <a-entity ik-root>
+                <a-entity ik-root player-info>
                     <a-entity class="camera"></a-entity>
 
                     <a-entity class="left-controller"></a-entity>
 
                     <a-entity class="right-controller"></a-entity>
 
-                    <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller >
+                    <a-gltf-entity class="model" inflate="true">
                         <template data-selector=".RootScene">
-                            <a-entity animation-mixer ></a-entity>
+                            <a-entity ik-controller animation-mixer></a-entity>
                         </template>
 
                         <template data-selector=".Neck">
@@ -81,7 +81,7 @@
                             </a-entity>
                         </template>
 
-                        <template selector=".LeftHand">
+                        <template data-selector=".LeftHand">
                             <a-entity personal-space-invader ></a-entity>
                         </template>
 
@@ -149,6 +149,7 @@
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
+            player-info
         >
             <a-entity
                 id="player-camera"
@@ -177,9 +178,13 @@
                 haptic-feedback
             ></a-entity>
 
-            <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller >
+            <a-gltf-entity class="model" inflate="true">
                 <template data-selector=".RootScene">
-                    <a-entity animation-mixer animated-robot-hands ></a-entity>
+                    <a-entity
+                        ik-controller 
+                        animated-robot-hands
+                        animation-mixer
+                    ></a-entity>
                 </template>
 
                 <template data-selector=".Neck">
