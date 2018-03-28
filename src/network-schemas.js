@@ -5,6 +5,7 @@ function registerNetworkSchemas() {
       "position",
       "rotation",
       "scale",
+      "player-info",
       {
         component: "hand-poses",
         property: "leftPose"
@@ -44,11 +45,6 @@ function registerNetworkSchemas() {
       {
         selector: ".right-controller",
         component: "visible"
-      },
-      {
-        selector: ".nametag",
-        component: "text",
-        property: "value"
       }
     ]
   });

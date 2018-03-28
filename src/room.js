@@ -36,6 +36,8 @@ import "./components/skybox";
 import "./components/layers";
 import "./components/spawn-controller";
 import "./components/hide-when-quality";
+import "./components/player-info";
+import "./components/debug";
 import "./components/animation-mixer";
 import "./components/loop-animation";
 import "./components/hand-poses";
@@ -94,7 +96,7 @@ const concurrentLoadDetector = new ConcurrentLoadDetector();
 concurrentLoadDetector.start();
 
 // Always layer in any new default profile bits
-store.update({ profile:  { ...generateDefaultProfile(), ...(store.state.profile || {}) }})
+store.update({ profile: { ...generateDefaultProfile(), ...(store.state.profile || {}) } });
 
 async function shareMedia(audio, video) {
   const constraints = {
@@ -128,15 +130,21 @@ async function exitScene() {
   document.body.removeChild(scene);
 }
 
-function setNameTagFromStore() {
-  const myNametag = document.querySelector("#player-rig .nametag");
-  myNametag.setAttribute("text", "value", store.state.profile.display_name);
+function updatePlayerInfoFromStore() {
+  const qs = queryString.parse(location.search);
+  const playerRig = document.querySelector("#player-rig");
+  playerRig.setAttribute("player-info", {
+    displayName: store.state.profile.display_name,
+    avatar: qs.avatar || "#bot-skinned-mesh"
+  });
 }
 
 async function enterScene(mediaStream, enterInVR) {
   const scene = document.querySelector("a-scene");
-  document.querySelector("a-scene canvas").classList.remove("blurred")
-  scene.setAttribute("networked-scene", "adapter: janus; audio: true; debug: true; connectOnLoad: false;");
+  const playerRig = document.querySelector("#player-rig");
+  const qs = queryString.parse(location.search);
+
+  document.querySelector("a-scene canvas").classList.remove("blurred");
   registerNetworkSchemas();
 
   if (enterInVR) {
@@ -145,11 +153,11 @@ async function enterScene(mediaStream, enterInVR) {
 
   AFRAME.registerInputActions(inGameActions, "default");
 
-  document.querySelector("#player-camera").setAttribute("look-controls", "pointerLockEnabled: true;");
-
-  const qs = queryString.parse(location.search);
-
   scene.setAttribute("networked-scene", {
+    adapter: "janus",
+    audio: true,
+    debug: true,
+    connectOnLoad: false,
     room: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1,
     serverURL: process.env.JANUS_SERVER
   });
@@ -159,12 +167,11 @@ async function enterScene(mediaStream, enterInVR) {
   }
 
   if (isMobile || qs.mobile) {
-    const playerRig = document.querySelector("#player-rig");
     playerRig.setAttribute("virtual-gamepad-controls", {});
   }
 
-  setNameTagFromStore();
-  store.addEventListener('statechanged', setNameTagFromStore);
+  updatePlayerInfoFromStore();
+  store.addEventListener("statechanged", updatePlayerInfoFromStore);
 
   const avatarScale = parseInt(qs.avatarScale, 10);
 
@@ -212,27 +219,31 @@ async function enterScene(mediaStream, enterInVR) {
   }
 }
 
-function onConnect() {
-}
+function onConnect() {}
 
 function mountUI(scene) {
   const qs = queryString.parse(location.search);
-  const disableAutoExitOnConcurrentLoad = qs.allow_multi === "true"
+  const disableAutoExitOnConcurrentLoad = qs.allow_multi === "true";
   let forcedVREntryType = null;
 
   if (qs.vr_entry_type) {
     forcedVREntryType = qs.vr_entry_type;
   }
 
-  const uiRoot = ReactDOM.render(<UIRoot {...{
-    scene,
-    enterScene,
-    exitScene,
-    concurrentLoadDetector,
-    disableAutoExitOnConcurrentLoad,
-    forcedVREntryType,
-    store
-  }} />, document.getElementById("ui-root"));
+  const uiRoot = ReactDOM.render(
+    <UIRoot
+      {...{
+        scene,
+        enterScene,
+        exitScene,
+        concurrentLoadDetector,
+        disableAutoExitOnConcurrentLoad,
+        forcedVREntryType,
+        store
+      }}
+    />,
+    document.getElementById("ui-root")
+  );
 
   getAvailableVREntryTypes().then(availableVREntryTypes => {
     uiRoot.setState({ availableVREntryTypes });

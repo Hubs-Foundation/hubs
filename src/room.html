@@ -30,7 +30,7 @@
                 high-src="./assets/avatars/BotDefault_Avatar.glb"
                 low-src="./assets/avatars/BotDefault_Avatar_Unlit.glb"
             ></a-progressive-asset>
-            
+            <a-asset-item id="bot-dom-mesh" response-type="arraybuffer" src="./assets/avatars/BotDom_Avatar.glb"></a-asset-item>
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
 
             <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src="./assets/environments/MeetingSpace1_mesh.glb"></a-asset-item>
@@ -48,16 +48,16 @@
             </template>
 
             <template id="remote-avatar-template">
-                <a-entity ik-root hand-poses="mixer: .RootScene">
+                <a-entity ik-root player-info hand-poses="mixer: .RootScene">
                     <a-entity class="camera"></a-entity>
 
                     <a-entity class="left-controller"></a-entity>
 
                     <a-entity class="right-controller"></a-entity>
 
-                    <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller >
+                    <a-gltf-entity class="model" inflate="true">
                         <template data-selector=".RootScene">
-                            <a-entity animation-mixer></a-entity>
+                            <a-entity ik-controller animation-mixer></a-entity>
                         </template>
 
                         <template data-selector=".Neck">
@@ -81,7 +81,7 @@
                             </a-entity>
                         </template>
 
-                        <template selector=".LeftHand">
+                        <template data-selector=".LeftHand">
                             <a-entity personal-space-invader ></a-entity>
                         </template>
 
@@ -96,13 +96,12 @@
                 <a-entity
                     gltf-model="#interactable-duck"
                     scale="2 2 2"
-                    class="collidable" 
+                    class="interactable" 
                     super-networked-interactable="counter: #counter; mass: 5;"
                     body="type: dynamic; mass: 5; shape: box;"
                     grabbable
                     stretchable="useWorldPosition: true;"
-                >
-                </a-entity>
+                ></a-entity>
             </template>
 
             <a-mixin id="super-hands"
@@ -123,21 +122,24 @@
         <a-entity 
             gltf-model="#interactable-duck"
             scale="2 2 2"
-            class="collidable" 
-            class="collidable" 
+            class="interactable" 
             super-spawner="template: #interactable-template;" 
             position="2.5 1.2 0" 
             body="mass: 0; type: static; shape: box;"
         ></a-entity>
 
-        <a-sphere
-            id="3d-cursor"
-            material="color: #00EFFF"
-            radius=0.02
-            static-body="shape: sphere;"
-            mixin="super-hands"
-        ></a-sphere>  
-
+        <a-entity
+            id="super-cursor"
+            super-cursor="cursor: #3d-cursor; camera: #player-camera;"
+            raycaster="objects: .collidable, .interactable; far: 10;"
+        >
+            <a-sphere
+                id="3d-cursor"
+                radius=0.02
+                static-body="shape: sphere;"
+                mixin="super-hands"
+            ></a-sphere>  
+        </a-entity>
 
         <!-- Player Rig -->
         <a-entity
@@ -149,6 +151,7 @@
             hand-poses="mixer: .RootScene"
             hand-poses-controller
             ik-root
+            player-info
         >
             <a-entity
                 id="player-camera"
@@ -156,14 +159,8 @@
                 camera
                 position="0 1.6 0"
                 personal-space-bubble
-            >
-                <a-entity
-                    id="super-cursor"
-                    super-cursor="cursor: #3d-cursor"
-                    position="0 0 0"
-                    raycaster="objects: .collidable; direction: 0 0 -1;"
-                ></a-entity>
-            </a-entity>
+                look-controls
+            ></a-entity>
 
             <a-entity
                 id="player-left-controller"
@@ -183,9 +180,12 @@
                 haptic-feedback
             ></a-entity>
 
-            <a-gltf-entity src="#bot-skinned-mesh" inflate="true" ik-controller >
+            <a-gltf-entity class="model" inflate="true">
                 <template data-selector=".RootScene">
-                    <a-entity animation-mixer ></a-entity>
+                    <a-entity
+                        ik-controller 
+                        animation-mixer
+                    ></a-entity>
                 </template>
 
                 <template data-selector=".Neck">
@@ -300,8 +300,8 @@
             height="35" 
             width="35" 
             static-body 
-            class="collidable">
-        </a-plane> 
+            class="collidable"
+        ></a-plane> 
     </a-scene>
 
     <div id="ui-root" class="ui"></div>
