@@ -37,6 +37,8 @@ import "./components/layers";
 import "./components/spawn-controller";
 import "./components/animated-robot-hands";
 import "./components/hide-when-quality";
+import "./components/player-info";
+import "./components/debug";
 import "./components/animation-mixer";
 import "./components/loop-animation";
 import "./components/gltf-bundle";
@@ -96,7 +98,7 @@ const concurrentLoadDetector = new ConcurrentLoadDetector();
 concurrentLoadDetector.start();
 
 // Always layer in any new default profile bits
-store.update({ profile:  { ...generateDefaultProfile(), ...(store.state.profile || {}) }})
+store.update({ profile: { ...generateDefaultProfile(), ...(store.state.profile || {}) } });
 
 async function shareMedia(audio, video) {
   const constraints = {
@@ -130,15 +132,21 @@ async function exitScene() {
   document.body.removeChild(scene);
 }
 
-function setNameTagFromStore() {
-  const myNametag = document.querySelector("#player-rig .nametag");
-  myNametag.setAttribute("text", "value", store.state.profile.display_name);
+function updatePlayerInfoFromStore() {
+  const qs = queryString.parse(location.search);
+  const playerRig = document.querySelector("#player-rig");
+  playerRig.setAttribute("player-info", {
+    displayName: store.state.profile.display_name,
+    avatar: qs.avatar || "#bot-skinned-mesh"
+  });
 }
 
 async function enterScene(mediaStream, enterInVR, janusRoomId) {
   const scene = document.querySelector("a-scene");
-  document.querySelector("a-scene canvas").classList.remove("blurred")
-  scene.setAttribute("networked-scene", "adapter: janus; audio: true; debug: true; connectOnLoad: false;");
+  const playerRig = document.querySelector("#player-rig");
+  const qs = queryString.parse(location.search);
+
+  document.querySelector("a-scene canvas").classList.remove("blurred");
   registerNetworkSchemas();
 
   if (enterInVR) {
@@ -151,19 +159,25 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
 
   const qs = queryString.parse(location.search);
 
-  scene.setAttribute("networked-scene", { room: janusRoomId, serverURL: process.env.JANUS_SERVER });
+  scene.setAttribute("networked-scene", {
+    adapter: "janus",
+    audio: true,
+    debug: true,
+    connectOnLoad: false,
+    room: janusRoomId,
+    serverURL: process.env.JANUS_SERVER
+  });
 
   if (!qs.stats || !/off|false|0/.test(qs.stats)) {
     scene.setAttribute("stats", true);
   }
 
   if (isMobile || qs.mobile) {
-    const playerRig = document.querySelector("#player-rig");
     playerRig.setAttribute("virtual-gamepad-controls", {});
   }
 
-  setNameTagFromStore();
-  store.addEventListener('statechanged', setNameTagFromStore);
+  updatePlayerInfoFromStore();
+  store.addEventListener("statechanged", updatePlayerInfoFromStore);
 
   const avatarScale = parseInt(qs.avatarScale, 10);
 
@@ -211,26 +225,32 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   }
 }
 
-function onConnect() {
-}
+function onConnect() {}
 
 function mountUI(scene) {
-  const disableAutoExitOnConcurrentLoad = qs.allow_multi === "true"
+  const qs = queryString.parse(location.search);
+  const disableAutoExitOnConcurrentLoad = qs.allow_multi === "true";
+
   let forcedVREntryType = null;
 
   if (qs.vr_entry_type) {
     forcedVREntryType = qs.vr_entry_type;
   }
 
-  const uiRoot = ReactDOM.render(<UIRoot {...{
-    scene,
-    enterScene,
-    exitScene,
-    concurrentLoadDetector,
-    disableAutoExitOnConcurrentLoad,
-    forcedVREntryType,
-    store
-  }} />, document.getElementById("ui-root"));
+  const uiRoot = ReactDOM.render(
+    <UIRoot
+      {...{
+        scene,
+        enterScene,
+        exitScene,
+        concurrentLoadDetector,
+        disableAutoExitOnConcurrentLoad,
+        forcedVREntryType,
+        store
+      }}
+    />,
+    document.getElementById("ui-root")
+  );
 
   return uiRoot;
 }
@@ -250,7 +270,7 @@ const onReady = async () => {
   const environmentRoot = document.querySelector("#environment-root");
 
   const initialEnvironmentEl = document.createElement("a-entity");
-  initialEnvironmentEl.addEventListener('bundleloaded', () => uiRoot.setState({initialEnvironmentLoaded: true}));
+  initialEnvironmentEl.addEventListener("bundleloaded", () => uiRoot.setState({ initialEnvironmentLoaded: true }));
   environmentRoot.appendChild(initialEnvironmentEl);
 
   if (qs.room) {
@@ -265,10 +285,12 @@ const onReady = async () => {
   const res = await fetch(`/api/v1/hubs/${hubId}`);
   const data = await res.json();
   const hub = data.hubs[0];
-  const defaultSpaceChannel = hub.channels.find(c => c.attributes.find(a => a.length === 1 && a[0] === "default-space"));
+  const defaultSpaceChannel = hub.channels.find(c =>
+    c.attributes.find(a => a.length === 1 && a[0] === "default-space")
+  );
   const gltfBundleUrl = defaultSpaceChannel.assets.find(a => a.asset_type === "gltf_bundle").src;
   uiRoot.setState({ janusRoomId: defaultSpaceChannel.janus_room_id });
-  initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`)
+  initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`);
 };
 
 document.addEventListener("DOMContentLoaded", onReady);
