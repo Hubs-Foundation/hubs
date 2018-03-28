@@ -38,15 +38,13 @@ class HomeRoot extends Component {
   loadEnvironments = () => {
     const environments = [];
 
-    const environmentLoads = ENVIRONMENT_URLS.map(
-      src =>
-        new Promise(async resolve => {
-          const res = await fetch(src);
-          const data = await res.json();
-          data.bundle_url = src;
-          environments.push(data);
-          resolve();
-        })
+    const environmentLoads = ENVIRONMENT_URLS.map(src =>
+      (async () => {
+        const res = await fetch(src);
+        const data = await res.json();
+        data.bundle_url = src;
+        environments.push(data);
+      })()
     );
 
     Promise.all(environmentLoads).then(() => this.setState({ environments }));
