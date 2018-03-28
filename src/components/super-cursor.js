@@ -20,7 +20,6 @@ AFRAME.registerComponent("super-cursor", {
     this.direction = new THREE.Vector3();
     this.point = new THREE.Vector3();
     this.mousePos = new THREE.Vector2();
-    this.mouseDown = false;
 
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
@@ -60,7 +59,6 @@ AFRAME.registerComponent("super-cursor", {
     }
 
     this.isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
-    let isIntersecting = false;
 
     const camera = this.data.camera.components.camera.camera;
     const raycaster = this.el.components.raycaster.raycaster;
@@ -69,15 +67,13 @@ AFRAME.registerComponent("super-cursor", {
     this.direction = raycaster.ray.direction;
     this.el.setAttribute("raycaster", { origin: this.origin, direction: this.direction });
 
-    let className = null;
+    let intersection = null;
 
     if (!this.isGrabbing) {
       const intersections = this.el.components.raycaster.intersections;
       if (intersections.length > 0 && intersections[0].distance <= this.data.maxDistance) {
-        isIntersecting = true;
-        className = intersections[0].object.el.className;
-        this.point = intersections[0].point;
-        this.data.cursor.object3D.position.copy(this.point);
+        intersection = intersections[0];
+        this.data.cursor.object3D.position.copy(intersection.point);
         this.currentDistance = intersections[0].distance;
         this.currentDistanceMod = 0;
       } else {
@@ -85,7 +81,7 @@ AFRAME.registerComponent("super-cursor", {
       }
     }
 
-    if (this.isGrabbing || !isIntersecting) {
+    if (this.isGrabbing || !intersection) {
       const distance = Math.min(
         Math.max(this.data.minDistance, this.currentDistance - this.currentDistanceMod),
         this.data.maxDistance
@@ -96,7 +92,7 @@ AFRAME.registerComponent("super-cursor", {
       this.data.cursor.object3D.position.copy(this.point);
     }
 
-    this.isInteractable = isIntersecting && className === "interactable";
+    this.isInteractable = intersection && intersection.object.el.className === "interactable";
 
     if ((this.isGrabbing || this.isInteractable) && !this.wasIntersecting) {
       this.wasIntersecting = true;
@@ -108,7 +104,6 @@ AFRAME.registerComponent("super-cursor", {
   },
 
   _handleMouseDown: function(e) {
-    this.mouseDown = true;
     if (this.isInteractable) {
       const lookControls = this.data.camera.components["look-controls"];
       lookControls.pause();
@@ -121,7 +116,6 @@ AFRAME.registerComponent("super-cursor", {
   },
 
   _handleMouseUp: function(e) {
-    this.mouseDown = false;
     const lookControls = this.data.camera.components["look-controls"];
     lookControls.play();
     this.data.cursor.emit("action_release", {});
