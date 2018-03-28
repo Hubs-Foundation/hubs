@@ -77,7 +77,7 @@ class LodashTemplatePlugin {
 const config = {
   entry: {
     index: path.join(__dirname, "src", "index.js"),
-    hub: path.join(__dirname, "src", "hub.js"),
+    hub: path.join(__dirname, "src", "hub.js")
   },
   output: {
     path: path.join(__dirname, "public"),
@@ -96,7 +96,7 @@ const config = {
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
       app.head("*", function(req, res, next) {
         if (req.method === "HEAD") {
-          res.append("Date", (new Date()).toGMTString());
+          res.append("Date", new Date().toGMTString());
           res.send("");
         } else {
           next();
@@ -107,7 +107,7 @@ const config = {
   performance: {
     // Ignore media and sourcemaps when warning about file size.
     assetFilter(assetFilename) {
-      return !/\.(map|png|jpg|gif|glb)$/.test(assetFilename);
+      return !/\.(map|png|jpg|gif|glb|webm)$/.test(assetFilename);
     }
   },
   module: {
@@ -169,7 +169,7 @@ const config = {
         })
       },
       {
-        test: /\.(png|jpg|gif|glb|ogg|woff2|svg)$/,
+        test: /\.(png|jpg|gif|glb|ogg|woff2|svg|webm)$/,
         use: {
           loader: "file-loader",
           options: {

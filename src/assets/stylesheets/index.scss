@@ -5,54 +5,22 @@
 body {
   margin: 0;
   padding: 0;
-  background: black url(../background.jpg) no-repeat left center;
-  background-size: cover;
+  background-color: black;
 }
 
-.overlay {
-  display: flex;
-  background: rgba(0, 0, 0, 0.4);
-  width: 100vw;
-  height: 100vh;
-  align-items: center;
-  padding: 100px 50px;
-}
-
-.panel {
-  height: 100%;
-  display: flex;
-}
-
-.scroll {
-  flex: 1;
-  overflow-y: auto;
-}
-
-.mdl-list {
+.main-content {
+  position: fixed;
+  top: 0;
+  width: 100%;
   margin: 0;
-}
-
-.room-item {
   padding: 0;
 }
 
-.room-item a {
-  width: 100%;
-  height: 100%;
-  padding: 16px;
-  color: inherit;
-  text-decoration: none;
-}
-
-.room-item a:hover {
-  background: #eaeaea;
-}
-
-@media only screen and (max-width: 320px) {
-  .overlay {
-    padding: 0;
-  }
-  .panel {
-    width: 100%;
-  }
+.background-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  opacity: 0.3;
+  min-width: 100%;
+  min-height: 100%;
 }

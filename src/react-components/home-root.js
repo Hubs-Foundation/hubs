@@ -4,6 +4,7 @@ import classNames from "classnames";
 import queryString from "query-string";
 import { IntlProvider, injectIntl, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
+import homeVideo from "../assets/video/home.webm";
 
 import HubCreatePanel from "./hub-create-panel.js";
 
@@ -31,6 +32,7 @@ class HomeRoot extends Component {
 
   componentDidMount() {
     this.loadEnvironments();
+    document.querySelector("#background-video").playbackRate = 0.5;
   }
 
   loadEnvironments = () => {
@@ -53,7 +55,14 @@ class HomeRoot extends Component {
   render() {
     return (
       <IntlProvider locale={lang} messages={messages}>
-        <div>{this.state.environments.length > 0 && <HubCreatePanel environments={this.state.environments} />}</div>
+        <div>
+          <video playsInline autoPlay muted loop className="background-video" id="background-video">
+            <source src={homeVideo} type="video/webm" />
+          </video>
+          <div className="main-content">
+            {this.state.environments.length > 0 && <HubCreatePanel environments={this.state.environments} />}
+          </div>
+        </div>
       </IntlProvider>
     );
   }
