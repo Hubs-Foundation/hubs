@@ -21,7 +21,7 @@ AFRAME.registerComponent("super-spawner", {
   remove: function() {
     for (let entity of this.entities.keys()) {
       const data = this.entities.get(entity);
-      entity.removeEventListener("componentinitialized", data.componentinItializedListener);
+      entity.removeEventListener("componentinitialized", data.componentinInitializedListener);
       entity.removeEventListener("bodyloaded", data.bodyLoadedListener);
     }
 
@@ -34,18 +34,18 @@ AFRAME.registerComponent("super-spawner", {
 
     entity.setAttribute("networked", "template:" + this.data.template);
 
-    const componentinItializedListener = this._handleComponentInitialzed.bind(this, entity);
+    const componentinInitializedListener = this._handleComponentInitialzed.bind(this, entity);
     const bodyLoadedListener = this._handleBodyLoaded.bind(this, entity);
 
     this.entities.set(entity, {
       hand: hand,
       componentInitialized: false, 
       bodyLoaded: false, 
-      componentinItializedListener: componentinItializedListener, 
+      componentinInitializedListener: componentinInitializedListener, 
       bodyLoadedListener: bodyLoadedListener
     });
     
-    entity.addEventListener("componentinitialized", componentinItializedListener);
+    entity.addEventListener("componentinitialized", componentinInitializedListener);
     entity.addEventListener("body-loaded", bodyLoadedListener);
 
     const pos = this.data.useCustomSpawnPosition ? this.data.spawnPosition : this.el.getAttribute("position");
@@ -71,7 +71,7 @@ AFRAME.registerComponent("super-spawner", {
       data.hand.emit("action_grab", { targetEntity: entity });
       entity.emit("grab-start", { hand: data.hand });
 
-      entity.removeEventListener("componentinitialized", data.componentinItializedListener);
+      entity.removeEventListener("componentinitialized", data.componentinInitializedListener);
       entity.removeEventListener("body-loaded", data.bodyLoadedListener);
 
       this.entities.delete(entity);

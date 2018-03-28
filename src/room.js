@@ -152,7 +152,6 @@ async function enterScene(mediaStream, enterInVR) {
   }
 
   AFRAME.registerInputActions(inGameActions, "default");
-  document.querySelector("#player-camera").setAttribute("look-controls", "pointerLockEnabled: true;");
 
   scene.setAttribute("networked-scene", {
     adapter: "janus",
