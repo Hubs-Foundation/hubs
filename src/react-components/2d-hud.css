@@ -25,20 +25,12 @@
   margin: 0 10px 0 0;
 }
 
-:local(.nametag:hover) {
-  color: #00eeee;
-}
-
 :local(.avatar) {
   display: flex;
   width: 48px;
   height: 48px;
   background-size: 100%;
   background-image: url(../assets/hud/avatar.jpg);
-}
-
-:local(.avatar:hover) {
-  transform: scaleX(-1);
 }
 
 :local(.mic) {
