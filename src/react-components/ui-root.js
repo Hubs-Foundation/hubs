@@ -262,9 +262,9 @@ class UIRoot extends Component {
     await this.setupNewMediaStream({ audio: true, video: this.mediaVideoConstraint() });
   }
 
-  setStateAndRequestScreenIfEnabled = (e) => {
+  setStateAndRequestScreen = (e) => {
     const checked = e.target.checked;
-    this.setState({requestedScreen: true, shareScreen: checked}, () => {
+    this.setState({ requestedScreen: true, shareScreen: checked }, () => {
       this.setupNewMediaStream({ video: this.mediaVideoConstraint() });
     });
   }
@@ -426,7 +426,7 @@ class UIRoot extends Component {
           <label className="entry-panel__screensharing">
             <input className="entry-panel__screensharing-checkbox" type="checkbox"
               value={this.state.shareScreen}
-              onChange={this.setStateAndRequestScreenIfEnabled}
+              onChange={this.setStateAndRequestScreen}
             />
             <FormattedMessage id="entry.enable-screensharing" />
           </label>) }
