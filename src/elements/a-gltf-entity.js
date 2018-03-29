@@ -89,7 +89,8 @@ const inflateEntities = function(parentEl, node) {
     node.rotation.setFromQuaternion(node.quaternion, "YXZ");
   }
 
-  // Copy over transform to the THREE.Group and reset the actual transform of the Object3D
+  // Copy over the object's transform to the THREE.Group and reset the actual transform of the Object3D
+  // all updates to the object should be done through the THREE.Group wrapper
   el.setAttribute("position", {
     x: node.position.x,
     y: node.position.y,
@@ -105,7 +106,6 @@ const inflateEntities = function(parentEl, node) {
     y: node.scale.y,
     z: node.scale.z
   });
-
   node.matrixAutoUpdate = false;
   node.matrix.identity();
 
@@ -160,6 +160,12 @@ function attachTemplate(root, { selector, templateRoot }) {
   }
 }
 
+function nextTick() {
+  return new Promise(resolve => {
+    setTimeout(resolve, 0);
+  });
+}
+
 function cachedLoadGLTF(src, onProgress) {
   return new Promise((resolve, reject) => {
     // Load the gltf model from the cache if it exists.
@@ -193,8 +199,8 @@ AFRAME.registerElement("a-gltf-entity", {
         }
 
         // The code above and below this are from AEntity.prototype.load, we need to monkeypatch in gltf loading mid function
-        await this.loadTemplates();
-        await this.setSrc(this.getAttribute("src"));
+        this.loadTemplates();
+        await this.applySrc(this.getAttribute("src"));
         //
 
         AFRAME.ANode.prototype.load.call(this, () => {
@@ -213,20 +219,20 @@ AFRAME.registerElement("a-gltf-entity", {
 
     loadTemplates: {
       value() {
-        return new Promise((resolve, reject) => {
-          this.templates = [];
-          this.querySelectorAll(":scope > template").forEach(templateEl => 
-            this.templates.push({
-              selector: templateEl.getAttribute("data-selector"),
-              templateRoot: document.importNode(templateEl.firstElementChild || templateEl.content.firstElementChild, true)
-            })
-          );
-          setTimeout(resolve, 0);
-        });
+        this.templates = [];
+        this.querySelectorAll(":scope > template").forEach(templateEl =>
+          this.templates.push({
+            selector: templateEl.getAttribute("data-selector"),
+            templateRoot: document.importNode(
+              templateEl.firstElementChild || templateEl.content.firstElementChild,
+              true
+            )
+          })
+        );
       }
     },
 
-    setSrc: {
+    applySrc: {
       async value(src) {
         try {
           // If the src attribute is a selector, get the url from the asset item.
@@ -250,7 +256,13 @@ AFRAME.registerElement("a-gltf-entity", {
           if (src === this.lastSrc) return;
           this.lastSrc = src;
 
-          if (!src) return;
+          if (!src) {
+            if (this.inflatedEl) {
+              console.warn("gltf-entity set to an empty source, unloading inflated model.");
+              this.removeInflatedEl();
+            }
+            return;
+          }
 
           const model = await cachedLoadGLTF(src);
 
@@ -259,10 +271,7 @@ AFRAME.registerElement("a-gltf-entity", {
           if (src != this.lastSrc) return;
 
           // If we had inflated something already before, clean that up
-          if (this.inflatedEl) {
-            this.inflatedEl.parentNode.removeChild(this.inflatedEl);
-            delete this.inflatedEl;
-          }
+          this.removeInflatedEl();
 
           this.model = model.scene || model.scenes[0];
           this.model.animations = model.animations;
@@ -271,6 +280,10 @@ AFRAME.registerElement("a-gltf-entity", {
 
           if (this.getAttribute("inflate")) {
             this.inflatedEl = inflateEntities(this, this.model);
+            // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
+            // Wait one tick for the appended custom elements to be connected before attaching templates
+            await nextTick();
+            if (src != this.lastSrc) return; // TODO: there must be a nicer pattern for this
             this.templates.forEach(attachTemplate.bind(null, this));
           }
 
@@ -282,10 +295,19 @@ AFRAME.registerElement("a-gltf-entity", {
       }
     },
 
+    removeInflatedEl: {
+      value() {
+        if (this.inflatedEl) {
+          this.inflatedEl.parentNode.removeChild(this.inflatedEl);
+          delete this.inflatedEl;
+        }
+      }
+    },
+
     attributeChangedCallback: {
       value(attr, oldVal, newVal) {
         if (attr === "src") {
-          this.setSrc(newVal);
+          this.applySrc(newVal);
         }
       }
     },
@@ -293,7 +315,7 @@ AFRAME.registerElement("a-gltf-entity", {
     setAttribute: {
       value(attr, arg1, arg2) {
         if (attr === "src") {
-          this.setSrc(arg1);
+          this.applySrc(arg1);
         }
         AFRAME.AEntity.prototype.setAttribute.call(this, attr, arg1, arg2);
       }
