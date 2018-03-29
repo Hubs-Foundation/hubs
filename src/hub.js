@@ -23,7 +23,7 @@ import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in t
 import "./components/mute-mic";
 import "./components/audio-feedback";
 import "./components/bone-mute-state-indicator";
-import "./components/2d-mute-state-indicator";
+import "./components/in-world-hud";
 import "./components/virtual-gamepad-controls";
 import "./components/ik-controller";
 import "./components/hand-controls2";
@@ -48,6 +48,9 @@ import React from "react";
 import UIRoot from "./react-components/ui-root";
 
 import "./systems/personal-space-bubble";
+import "./systems/app-mode";
+
+import "./elements/a-gltf-entity";
 
 import "./gltf-component-mappings";
 
@@ -133,11 +136,13 @@ async function exitScene() {
 }
 
 function updatePlayerInfoFromStore() {
+  const displayName = store.state.profile.display_name;
   const playerRig = document.querySelector("#player-rig");
   playerRig.setAttribute("player-info", {
-    displayName: store.state.profile.display_name,
+    displayName,
     avatar: qs.avatar || "#bot-skinned-mesh"
   });
+  document.querySelector("a-scene").emit("username-changed", { username: displayName });
 }
 
 async function enterScene(mediaStream, enterInVR, janusRoomId) {

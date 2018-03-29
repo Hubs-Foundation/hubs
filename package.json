@@ -19,7 +19,7 @@
     "aframe-input-mapping-component": "https://github.com/johnshaughnessy/aframe-input-mapping-component#feature/map-to-array",
     "aframe-physics-extras": "https://github.com/infinitelee/aframe-physics-extras#fix/physics-collider-crash",
     "aframe-physics-system": "https://github.com/donmccurdy/aframe-physics-system",
-    "aframe-teleport-controls": "https://github.com/netpro2k/aframe-teleport-controls#feature/teleport-origin",
+    "aframe-teleport-controls": "https://github.com/netpro2k/aframe-teleport-controls#feature/pauseable",
     "aframe-xr": "github:brianpeiris/aframe-xr#3162aed",
     "classnames": "^2.2.5",
     "detect-browser": "^2.1.0",
