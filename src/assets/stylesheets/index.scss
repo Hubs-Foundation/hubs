@@ -125,7 +125,7 @@ body {
   //  background-color: blue;
   flex: 10;
   text-shadow: 0px 0px 2px rgba(32, 32, 32, 1.0);
-  min-height: 400px;
+  min-height: 700px;
   display: flex;
   flex-direction: column;
 }
@@ -133,14 +133,21 @@ body {
 @media (max-width: 768px) {
   .hero-content {
     padding: 1em 1.5em 1em 1.5em;
+    justify-content: space-around;
   }
 }
 
 .hero-content__container {
-  flex: 10;
   padding-top: 2vw;
   padding-left: 2.1em;
   padding-right: 2.1em;
+  flex: 10;
+}
+
+@media (max-width: 768px) {
+  .hero-content__container {
+    flex: 0 0 auto;
+  }
 }
 
 .hero-content__container__title {
@@ -189,6 +196,7 @@ body {
 @media (max-width: 768px) {
   .hero-content__create {
     padding: 0.5em;
+    align-self: center;
   }
 }
 

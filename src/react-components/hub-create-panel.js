@@ -17,8 +17,8 @@ class HubCreatePanel extends Component {
 
     this.state = {
       name: generateHubName(),
-      environmentBundleIndex: Math.floor(Math.random() * props.environments[0].length),
-      expanded: false
+      environmentIndex: Math.floor(Math.random() * props.environments.length),
+      expanded: true
     };
   }
 
@@ -56,6 +56,9 @@ class HubCreatePanel extends Component {
         {e.meta.title}
       </option>
     ));
+
+    const environment = this.props.environments[this.state.environmentIndex];
+    const environmentImageSrcSet = environment.meta.images.find(i => i.type === "preview-thumbnail").srcset;
 
     const formNameClassNames = classNames("create-panel__form__name", {
       "create-panel__form__name--expanded": this.state.expanded
@@ -108,6 +111,13 @@ class HubCreatePanel extends Component {
               pattern={HUB_NAME_PATTERN}
               title={formatMessage({ id: "home.create_name.validation_warning" })}
             />
+            {this.state.expanded && (
+              <div className="create-panel__form__environment">
+                <div className="create-panel__form__environment__picker">
+                  <img className="create-panel__form__environment__picker__image" srcSet={environmentImageSrcSet} />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </form>
