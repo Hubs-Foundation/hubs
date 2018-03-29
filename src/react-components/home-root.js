@@ -58,7 +58,7 @@ class HomeRoot extends Component {
             <div className="header-content">
               <div className="header-content__title">
                 <div className="header-content__title__name">
-                  <span style={{ "font-weight": "900" }}>moz://a</span> duck
+                  <span style={{ fontWeight: "bold" }}>moz://a</span>&nbsp;duck
                 </div>
                 <div className="header-content__title__preview">preview</div>
               </div>
@@ -69,11 +69,11 @@ class HomeRoot extends Component {
                     <div className="header-content__experiment__info__header">
                       <span>
                         <FormattedMessage id="home.webvr_disclaimer_pre" />
-                      </span>&nbsp;
-                      <span style={{ "font-weight": "bold" }}>WebVR</span>&nbsp;
+                      </span>
+                      <span style={{ fontWeight: "bold" }}>WebVR</span>
                       <span>
                         <FormattedMessage id="home.webvr_disclaimer_post" />
-                      </span>&nbsp;
+                      </span>
                       <span>
                         <a rel="noopener noreferrer" target="_blank" href="https://blog.mozvr.com">
                           <FormattedMessage id="home.webvr_disclaimer_mr_team" />
@@ -88,26 +88,6 @@ class HomeRoot extends Component {
                       href="https://github.com/mozilla/mr-social-client"
                     >
                       <FormattedMessage id="home.view_source" />
-                    </a>
-
-                    <a
-                      className="header-content__experiment__info__link"
-                      rel="noopener noreferrer"
-                      target="_blank"
-                      href="#"
-                      onClick={this.showSlackInfo}
-                    >
-                      <FormattedMessage id="home.join_on_slack" />
-                    </a>
-
-                    <a
-                      className="header-content__experiment__info__link"
-                      rel="noopener noreferrer"
-                      target="_blank"
-                      onClick={this.showReportInfo}
-                      href="#"
-                    >
-                      <FormattedMessage id="home.report_issue" />
                     </a>
                   </div>
                 </div>
