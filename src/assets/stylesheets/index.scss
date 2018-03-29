@@ -89,6 +89,16 @@ body {
   font-weight: lighter;
 }
 
+.header-content__experiment__container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.header-content__experiment__icon {
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
 @media (max-width: 768px) {
   .header-content__experiment {
     display: none;
@@ -108,7 +118,6 @@ body {
 .header-content__experiment__info__link {
   color: $dark-grey;
   font-size: 0.8em;
-  padding-top: 4px;
 }
 
 .hero-content {
