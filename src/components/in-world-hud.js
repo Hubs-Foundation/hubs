@@ -6,35 +6,17 @@ AFRAME.registerComponent("in-world-hud", {
   init() {
     this.bg = this.el.querySelector(".bg");
     this.mic = this.el.querySelector(".mic");
-    this.nametag = this.el.querySelector(".nametag");
+    this.nametag = this.el.querySelector(".username");
     this.nametag.object3DMap.text.material.depthTest = false;
-    this.avatar = this.el.querySelector(".avatar");
     this.data.raycaster.components.line.material.depthTest = false;
 
     const muted = this.el.sceneEl.is("muted");
     this.mic.setAttribute("src", muted ? "#muted" : "#unmuted");
 
-    const avatarScale = "0.1 0.1 0.1";
-    const flipXAvatarScale = "-" + avatarScale;
-
     const scene = this.el.sceneEl;
     this.onUsernameChanged = this.onUsernameChanged.bind(this);
     scene.addEventListener("username-changed", this.onUsernameChanged);
 
-    this.onNametagHovered = () => {
-      this.nametag.setAttribute("color", "#00eeee");
-      this.data.haptic.emit("haptic_pulse", { intensity: "low" });
-    };
-    this.onNametagUnhovered = () => {
-      this.nametag.setAttribute("color", "white");
-    };
-    this.onAvatarHovered = () => {
-      this.avatar.setAttribute("scale", flipXAvatarScale);
-      this.data.haptic.emit("haptic_pulse", { intensity: "low" });
-    };
-    this.onAvatarUnhovered = () => {
-      this.avatar.setAttribute("scale", avatarScale);
-    };
     this.showCorrectMuteState = () => {
       const muted = this.el.sceneEl.is("muted");
       this.mic.setAttribute("src", muted ? "#muted" : "#unmuted");
@@ -94,12 +76,6 @@ AFRAME.registerComponent("in-world-hud", {
     this.mic.addEventListener("raycaster-intersected", this.onMicHover);
     this.mic.addEventListener("raycaster-intersected-cleared", this.onMicHoverExit);
 
-    this.nametag.addEventListener("raycaster-intersected", this.onNametagHovered);
-    this.nametag.addEventListener("raycaster-intersected-cleared", this.onNametagUnhovered);
-
-    this.avatar.addEventListener("raycaster-intersected", this.onAvatarHovered);
-    this.avatar.addEventListener("raycaster-intersected-cleared", this.onAvatarUnhovered);
-
     this.el.sceneEl.addEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.addEventListener("stateremoved", this.onStateChange);
 
@@ -111,12 +87,6 @@ AFRAME.registerComponent("in-world-hud", {
   pause() {
     this.nametag.removeEventListener("raycaster-intersected", this.onNametagHovered);
     this.nametag.removeEventListener("raycaster-intersected-cleared", this.onNametagUnhovered);
-
-    this.mic.removeEventListener("raycaster-intersected", this.onMicHover);
-    this.mic.removeEventListener("raycaster-intersected-cleared", this.onMicHoverExit);
-
-    this.avatar.removeEventListener("raycaster-intersected", this.onAvatarHovered);
-    this.avatar.removeEventListener("raycaster-intersected-cleared", this.onAvatarUnhovered);
 
     this.el.sceneEl.removeEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.removeEventListener("stateremoved", this.onStateChange);
@@ -143,19 +113,9 @@ AFRAME.registerComponent("in-world-hud", {
   },
 
   onUsernameChanged(evt) {
-    let width;
-    if (evt.detail.username.length == 0) {
-      width = 1;
-    } else {
-      width = 40 / evt.detail.username.length;
-    }
-    const maxWidth = 6;
-    if (width > maxWidth) {
-      width = maxWidth;
-    }
-
-    this.nametag.setAttribute("text", "width", width);
-    this.nametag.setAttribute("text", "value", evt.detail.username);
-    this.nametag.components["text"].updateFont();
+    const { username } = evt.detail;
+    const width = evt.detail.username.length == 0 ? 1 : 40 / username.length;
+    this.nametag.setAttribute("text", "width", Math.min(width, 6));
+    this.nametag.setAttribute("text", "value", username);
   }
 });

@@ -40,6 +40,7 @@
   mask: url(../assets/hud/unmuted.png);
   mask-size: 48px;
   background-color: white;
+  cursor: pointer;
 }
 
 :local(.mic:hover) {

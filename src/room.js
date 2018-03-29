@@ -136,12 +136,14 @@ async function exitScene() {
 }
 
 function updatePlayerInfoFromStore() {
+  const displayName = store.state.profile.display_name;
   const qs = queryString.parse(location.search);
   const playerRig = document.querySelector("#player-rig");
   playerRig.setAttribute("player-info", {
-    displayName: store.state.profile.display_name,
+    displayName,
     avatar: qs.avatar || "#bot-skinned-mesh"
   });
+  document.querySelector("a-scene").emit("username-changed", { username: displayName });
 }
 
 async function enterScene(mediaStream, enterInVR) {
