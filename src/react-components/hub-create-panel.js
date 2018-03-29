@@ -78,7 +78,7 @@ class HubCreatePanel extends Component {
             >
               Rotate
             </button>
-            <input type="submit" value={formatMessage({ id: "home.create_button" })} />
+            <input type="submit" value={"hi"} />
           </div>
         </div>
       </form>
