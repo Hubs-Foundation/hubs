@@ -14,15 +14,17 @@ class AvatarSelector extends Component {
     const numAvatars = this.props.avatars.length;
     return ((currAvatarIndex + direction) % numAvatars + numAvatars) % numAvatars;
   }
+  nextAvatarIndex = () => this.getAvatarIndex(1)
+  previousAvatarIndex = () => this.getAvatarIndex(-1)
 
-  nextAvatar = () => {
-    const newAvatarIndex = this.getAvatarIndex(1);
-    this.props.onChange(this.props.avatars[newAvatarIndex].id);
+  emitChangeToNext = () => {
+    const nextAvatarId = this.props.avatars[nextAvatarIndex()].id;
+    this.props.onChange(nextAvatarId);
   }
 
-  prevAvatar = () => {
-    const newAvatarIndex = this.getAvatarIndex(-1);
-    this.props.onChange(this.props.avatars[newAvatarIndex].id);
+  emitChangeToPrevious = () => {
+    const prevAvatarId = this.props.avatars[prevAvatarIndex()].id;
+    this.props.onChange(prevAvatarId);
   }
 
   componentDidUpdate() {
@@ -105,10 +107,10 @@ class AvatarSelector extends Component {
           position="0 0 0"
         ></a-gltf-entity>
       </a-scene>
-      <button className="avatar-selector__prev-button" onClick={this.prevAvatar}>
+      <button className="avatar-selector__prev-button" onClick={this.emitChangeToPrevious}>
         <i className="avatar-selector__button-icon material-icons">keyboard_arrow_left</i>
       </button>
-      <button className="avatar-selector__next-button" onClick={this.nextAvatar}>
+      <button className="avatar-selector__next-button" onClick={this.emitChangeToNext}>
         <i className="avatar-selector__button-icon material-icons">keyboard_arrow_right</i>
       </button>
       </div>
