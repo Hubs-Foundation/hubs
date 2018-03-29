@@ -23,7 +23,9 @@ AFRAME.registerComponent("networked-video-player", {
     const qs = queryString.parse(location.search);
     const rejectScreenShares = qs.accept_screen_shares === undefined;
     if (ownerId !== NAF.clientId && rejectScreenShares) {
-      this.el.setAttribute("visible", false);
+      // Toggle material visibility since object visibility is network-synced
+      // TODO: There ought to be a better way to disable network syncs on a remote entity
+      this.el.setAttribute("material", {visible: false});
       return;
     }
 
