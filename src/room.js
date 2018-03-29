@@ -107,8 +107,6 @@ async function shareMedia(audio, video) {
     video: video ? { mediaSource: "screen", height: 720, frameRate: 30 } : false
   };
   const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-  document.querySelector("a-scene").emit("mediaStream", { ms: mediaStream });
-
   NAF.connection.adapter.setLocalMediaStream(mediaStream);
 
   const id = `${NAF.clientId}-screen`;
