@@ -5,6 +5,7 @@ function registerNetworkSchemas() {
       "position",
       "rotation",
       "scale",
+      "player-info",
       {
         selector: ".camera",
         component: "position"
@@ -36,11 +37,6 @@ function registerNetworkSchemas() {
       {
         selector: ".right-controller",
         component: "visible"
-      },
-      {
-        selector: ".nametag",
-        component: "text",
-        property: "value"
       }
     ]
   });
