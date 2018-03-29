@@ -18,12 +18,12 @@ class AvatarSelector extends Component {
   previousAvatarIndex = () => this.getAvatarIndex(-1)
 
   emitChangeToNext = () => {
-    const nextAvatarId = this.props.avatars[nextAvatarIndex()].id;
+    const nextAvatarId = this.props.avatars[this.nextAvatarIndex()].id;
     this.props.onChange(nextAvatarId);
   }
 
   emitChangeToPrevious = () => {
-    const prevAvatarId = this.props.avatars[prevAvatarIndex()].id;
+    const prevAvatarId = this.props.avatars[this.prevAvatarIndex()].id;
     this.props.onChange(prevAvatarId);
   }
 
