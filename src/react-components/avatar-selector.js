@@ -23,8 +23,8 @@ class AvatarSelector extends Component {
   }
 
   emitChangeToPrevious = () => {
-    const prevAvatarId = this.props.avatars[this.prevAvatarIndex()].id;
-    this.props.onChange(prevAvatarId);
+    const previousAvatarId = this.props.avatars[this.previousAvatarIndex()].id;
+    this.props.onChange(previousAvatarId);
   }
 
   componentDidUpdate() {
@@ -107,7 +107,7 @@ class AvatarSelector extends Component {
           position="0 0 0"
         ></a-gltf-entity>
       </a-scene>
-      <button className="avatar-selector__prev-button" onClick={this.emitChangeToPrevious}>
+      <button className="avatar-selector__previous-button" onClick={this.emitChangeToPrevious}>
         <i className="avatar-selector__button-icon material-icons">keyboard_arrow_left</i>
       </button>
       <button className="avatar-selector__next-button" onClick={this.emitChangeToNext}>
