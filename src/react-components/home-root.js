@@ -102,9 +102,27 @@ class HomeRoot extends Component {
                   <FormattedMessage id="home.hero_subtitle" />
                 </div>
               </div>
+              <div className="hero-content__create">
+                {this.state.environments.length > 0 && <HubCreatePanel environments={this.state.environments} />}
+              </div>
             </div>
             <div className="footer-content">
-              {this.state.environments.length > 0 && <HubCreatePanel environments={this.state.environments} />}
+              <div className="footer-content__links">
+                <div className="footer-content__links__top">
+                  <a className="footer-content__links__link" rel="noopener noreferrer" target="_blank" href="#">
+                    <FormattedMessage id="home.join_on_slack" />
+                  </a>
+                  <a className="footer-content__links__link" rel="noopener noreferrer" target="_blank" href="#">
+                    <FormattedMessage id="home.get_updates" />
+                  </a>
+                  <a className="footer-content__links__link" rel="noopener noreferrer" target="_blank" href="#">
+                    <FormattedMessage id="home.report_issue" />
+                  </a>
+                </div>
+                <div className="footer-content__links__bottom">
+                  made with ❤️ by <span style={{ fontWeight: "bold", color: "white" }}>moz://a</span>
+                </div>
+              </div>
             </div>
           </div>
           <video playsInline autoPlay muted loop className="background-video" id="background-video">
