@@ -19,10 +19,15 @@
     <a-scene
         physics
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
-        2d-mute-state-indicator
-        light="defaultLightsEnabled: false">
+
+        app-mode-input-mappings="modes: default, hud; actionSets: default, hud;"
+        >
 
         <a-assets>
+            <img id="unmuted"  src="./assets/hud/unmuted.png" >
+            <img id="muted"  src="./assets/hud/muted.png" >
+            <img id="avatar"  src="./assets/hud/avatar.jpg" >
+
             <a-progressive-asset
                 id="bot-skinned-mesh"
                 response-type="arraybuffer"
@@ -133,6 +138,8 @@
                 radius=0.02
                 static-body="shape: sphere;"
                 mixin="super-hands"
+                segments-height="9"
+                segments-width="9"
             ></a-sphere>  
         </a-entity>
 
@@ -144,8 +151,25 @@
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
+            app-mode-toggle-playing__character-controller="mode: hud; invert: true;"
+            app-mode-toggle-playing__wasd-to-analog2d="mode: hud; invert: true;"
             player-info
         >
+
+            <a-entity
+                id="player-hud"
+                hud-controller="head: #player-camera;"
+                vr-mode-toggle-visibility
+                vr-mode-toggle-playing__hud-controller
+            >
+                <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="-39 0 0">
+                    <a-box geometry="height:0.13;width:0.6;depth:0.001" material="depthTest:false; color:#000000;opacity:0.35" class="hud bg"></a-box>
+                    <a-image src="#unmuted" scale="-0.1 0.1 0.1" position="-0.2 0 0.001" class="hud mic" material="alphaTest:0.1;depthTest:false;"></a-image>
+                    <a-text scale="0.3 0.3 0.3" position="0 0 0.001" class="hud username" text="width:6;alphaTest:0.1;align:center;"></a-text>
+                    <a-image src="#avatar" scale="0.1 0.1 0.1" position="0.2 0 0.001" class="hud avatar" material="depthTest:false;"></a-image>
+                </a-entity>
+            </a-entity>
+
             <a-entity
                 id="player-camera"
                 class="camera"
@@ -161,8 +185,11 @@
                 hand-controls2="left"
                 tracked-controls
                 teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
+                app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;"
                 haptic-feedback
             ></a-entity>
+
+
 
             <a-entity
                 id="player-right-controller"
@@ -171,6 +198,13 @@
                 tracked-controls
                 teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
                 haptic-feedback
+                raycaster="objects:.hud; showLine: true;"
+                cursor="fuse: false; downEvents: action_ui_select_down; upEvents: action_ui_select_up;"
+
+                app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;"
+                app-mode-toggle-playing__raycaster="mode: hud;"
+                app-mode-toggle-playing__cursor="mode: hud;"
+                app-mode-toggle-attribute__line="mode: hud; property: visible;"
             ></a-entity>
 
             <a-gltf-entity class="model" inflate="true">
@@ -271,7 +305,7 @@
         ></a-plane> 
     </a-scene>
 
-    <div id="ui-root" class="ui"></div>
+    <div id="ui-root"></div>
 </body>
 
 </html>

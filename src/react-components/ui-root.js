@@ -1,25 +1,27 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import classNames from 'classnames';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import classNames from "classnames";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import queryString from "query-string";
 import { SCHEMA } from "../storage/store";
-import MobileDetect from 'mobile-detect';
-import { IntlProvider, FormattedMessage, addLocaleData } from 'react-intl';
-import en from 'react-intl/locale-data/en';
-import MovingAverage from 'moving-average';
+import MobileDetect from "mobile-detect";
+import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
+import en from "react-intl/locale-data/en";
+import MovingAverage from "moving-average";
 
-import AutoExitWarning from './auto-exit-warning';
-import { TwoDEntryButton, GenericEntryButton, GearVREntryButton, DaydreamEntryButton } from './entry-buttons.js';
-import { ProfileInfoHeader } from './profile-info-header.js';
-import ProfileEntryPanel from './profile-entry-panel';
+import AutoExitWarning from "./auto-exit-warning";
+import { TwoDEntryButton, GenericEntryButton, GearVREntryButton, DaydreamEntryButton } from "./entry-buttons.js";
+import { ProfileInfoHeader } from "./profile-info-header.js";
+import ProfileEntryPanel from "./profile-entry-panel";
+import TwoDHUD from "./2d-hud";
 
 const mobiledetect = new MobileDetect(navigator.userAgent);
 
-const lang = ((navigator.languages && navigator.languages[0]) ||
-                   navigator.language || navigator.userLanguage).toLowerCase().split(/[_-]+/)[0];
+const lang = ((navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage)
+  .toLowerCase()
+  .split(/[_-]+/)[0];
 
-import localeData from '../assets/translations.data.json';
+import localeData from "../assets/translations.data.json";
 addLocaleData([...en]);
 
 const messages = localeData[lang] || localeData.en;
@@ -30,7 +32,7 @@ const ENTRY_STEPS = {
   mic_granted: "mic_granted",
   audio_setup: "audio_setup",
   finished: "finished"
-}
+};
 
 const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
 
@@ -64,7 +66,7 @@ class UIRoot extends Component {
     forcedVREntryType: PropTypes.string,
     store: PropTypes.object,
     scene: PropTypes.object
-  }
+  };
 
   state = {
     availableVREntryTypes: null,
@@ -99,7 +101,30 @@ class UIRoot extends Component {
     this.setupTestTone();
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
     this.micLevelMovingAverage = MovingAverage(100);
+    this.props.scene.addEventListener("loaded", this.onSceneLoaded);
+    this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
+    this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
   }
+
+  componentWillUnmount() {
+    this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
+  }
+
+  onSceneLoaded = () => {
+    this.setState({ sceneLoaded: true });
+  };
+
+  // TODO: mute state should probably actually just live in react land
+  onAframeStateChanged = e => {
+    if (e.detail !== "muted") return;
+    this.setState({
+      muted: this.props.scene.is("muted")
+    });
+  };
+
+  toggleMute = () => {
+    this.props.scene.emit("action_mute");
+  };
 
   handleForcedVREntryType = () => {
     if (!this.props.forcedVREntryType) return;
@@ -109,7 +134,7 @@ class UIRoot extends Component {
     } else if (this.props.forcedVREntryType === "gearvr") {
       this.enterGearVR();
     }
-  }
+  };
 
   setupTestTone = () => {
     const toneClip = document.querySelector("#test-tone");
@@ -121,27 +146,29 @@ class UIRoot extends Component {
 
       setTimeout(() => {
         this.setState({ tonePlaying: true });
-        setTimeout(() => { this.setState({ tonePlaying: false }); }, toneLength)
+        setTimeout(() => {
+          this.setState({ tonePlaying: false });
+        }, toneLength);
       }, toneDelay);
     };
 
     toneClip.addEventListener("seeked", toneIndicatorLoop);
     toneClip.addEventListener("playing", toneIndicatorLoop);
-  }
+  };
 
   startTestTone = () => {
     const toneClip = document.querySelector("#test-tone");
     toneClip.loop = true;
     toneClip.play();
-  }
+  };
 
   stopTestTone = () => {
-    const toneClip = document.querySelector("#test-tone")
+    const toneClip = document.querySelector("#test-tone");
     toneClip.pause();
     toneClip.currentTime = 0;
 
-    this.setState({ tonePlaying: false })
-  }
+    this.setState({ tonePlaying: false });
+  };
 
   onConcurrentLoad = () => {
     if (this.props.disableAutoExitOnConcurrentLoad) return;
@@ -158,33 +185,37 @@ class UIRoot extends Component {
       this.checkForAutoExit();
     }, 500);
 
-    this.setState({ autoExitTimerStartedAt: new Date(), autoExitTimerInterval })
-  }
+    this.setState({ autoExitTimerStartedAt: new Date(), autoExitTimerInterval });
+  };
 
   checkForAutoExit = () => {
     if (this.state.secondsRemainingBeforeAutoExit !== 0) return;
     this.endAutoExitTimer();
     this.exit();
-  }
+  };
 
   exit = () => {
     this.props.exitScene();
     this.setState({ exited: true });
-  }
+  };
 
   isWaitingForAutoExit = () => {
     return this.state.secondsRemainingBeforeAutoExit <= AUTO_EXIT_TIMER_SECONDS;
-  }
+  };
 
   endAutoExitTimer = () => {
     clearInterval(this.state.autoExitTimerInterval);
-    this.setState({ autoExitTimerStartedAt: null, autoExitTimerInterval: null, secondsRemainingBeforeAutoExit: Infinity });
-  }
+    this.setState({
+      autoExitTimerStartedAt: null,
+      autoExitTimerInterval: null,
+      secondsRemainingBeforeAutoExit: Infinity
+    });
+  };
 
-  performDirectEntryFlow = async (enterInVR) => {
+  performDirectEntryFlow = async enterInVR => {
     this.startTestTone();
 
-    this.setState({ enterInVR })
+    this.setState({ enterInVR });
 
     const hasGrantedMic = await hasGrantedMicPermissions();
 
@@ -195,15 +226,15 @@ class UIRoot extends Component {
       this.stopTestTone();
       this.setState({ entryStep: ENTRY_STEPS.mic_grant });
     }
-  }
+  };
 
   enter2D = async () => {
     await this.performDirectEntryFlow(false);
-  }
+  };
 
   enterVR = async () => {
     await this.performDirectEntryFlow(true);
-  }
+  };
 
   enterGearVR = async () => {
     this.exit();
@@ -212,10 +243,11 @@ class UIRoot extends Component {
     const qs = queryString.parse(document.location.search);
     qs.vr_entry_type = "gearvr"; // Auto-choose 'gearvr' after landing in Oculus Browser
 
-    const ovrwebUrl = `ovrweb://${document.location.protocol || "http:"}//${document.location.host}${document.location.pathname || ""}?${queryString.stringify(qs)}#{document.location.hash || ""}`;
+    const ovrwebUrl = `ovrweb://${document.location.protocol || "http:"}//${document.location.host}${document.location
+      .pathname || ""}?${queryString.stringify(qs)}#{document.location.hash || ""}`;
 
     document.location = ovrwebUrl;
-  }
+  };
 
   enterDaydream = async () => {
     const loc = document.location;
@@ -227,27 +259,32 @@ class UIRoot extends Component {
       const qs = queryString.parse(document.location.search);
       qs.vr_entry_type = "daydream"; // Auto-choose 'daydream' after landing in chrome
 
-      const intentUrl = `intent://${document.location.host}${document.location.pathname || ""}?${queryString.stringify(qs)}#Intent;scheme=${(document.location.protocol || "http:").replace(":", "")};action=android.intent.action.VIEW;package=com.android.chrome;end;`;
+      const intentUrl = `intent://${document.location.host}${document.location.pathname || ""}?${queryString.stringify(
+        qs
+      )}#Intent;scheme=${(document.location.protocol || "http:").replace(
+        ":",
+        ""
+      )};action=android.intent.action.VIEW;package=com.android.chrome;end;`;
       document.location = intentUrl;
     } else {
       await this.performDirectEntryFlow(true);
     }
-  }
+  };
 
   mediaVideoConstraint = () => {
     return this.state.shareScreen ? { mediaSource: "screen", height: 720, frameRate: 30 } : false;
-  }
+  };
 
-  micDeviceChanged = async (ev) => {
+  micDeviceChanged = async ev => {
     const constraints = { audio: { deviceId: { exact: [ev.target.value] } }, video: this.mediaVideoConstraint() };
     await this.setupNewMediaStream(constraints);
-  }
+  };
 
   setMediaStreamToDefault = async () => {
     await this.setupNewMediaStream({ audio: true, video: false });
-  }
+  };
 
-  setupNewMediaStream = async (constraints) => {
+  setupNewMediaStream = async constraints => {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioContext = new AudioContext();
 
@@ -280,13 +317,13 @@ class UIRoot extends Component {
         v = Math.max(levels[x] - 127, v);
       }
 
-      const level = v / 128.0 ;
+      const level = v / 128.0;
       this.micLevelMovingAverage.push(Date.now(), level);
-      this.setState({ micLevel: this.micLevelMovingAverage.movingAverage() })
+      this.setState({ micLevel: this.micLevelMovingAverage.movingAverage() });
     }, 50);
 
     this.setState({ mediaStream, micUpdateInterval });
-  }
+  };
 
   onMicGrantButton = async () => {
     if (this.state.entryStep == ENTRY_STEPS.mic_grant) {
@@ -296,43 +333,48 @@ class UIRoot extends Component {
       this.startTestTone();
       await this.beginAudioSetup();
     }
-  }
+  };
 
   onProfileFinished = () => {
-    this.setState({ showProfileEntry: false })
-  }
+    this.setState({ showProfileEntry: false });
+  };
 
   beginAudioSetup = async () => {
     await this.fetchMicDevices();
     this.setState({ entryStep: ENTRY_STEPS.audio_setup });
-  }
+  };
 
   fetchMicDevices = async () => {
     const mediaDevices = await navigator.mediaDevices.enumerateDevices();
-    this.setState({ micDevices: mediaDevices.filter(d => d.kind === "audioinput").map(d => ({ deviceId: d.deviceId, label: d.label }))});
-  }
+    this.setState({
+      micDevices: mediaDevices.filter(d => d.kind === "audioinput").map(d => ({ deviceId: d.deviceId, label: d.label }))
+    });
+  };
 
   shouldShowHmdMicWarning = () => {
     if (mobiledetect.mobile()) return false;
     if (!this.state.enterInVR) return false;
     if (!this.hasHmdMicrophone()) return false;
 
-    return !(HMD_MIC_REGEXES.find(r => this.selectedMicLabel().match(r)));
-  }
+    return !HMD_MIC_REGEXES.find(r => this.selectedMicLabel().match(r));
+  };
 
   hasHmdMicrophone = () => {
-    return !!(this.state.micDevices.find(d => HMD_MIC_REGEXES.find(r => d.label.match(r))));
-  }
+    return !!this.state.micDevices.find(d => HMD_MIC_REGEXES.find(r => d.label.match(r)));
+  };
 
   selectedMicLabel = () => {
-    return (this.state.mediaStream
-             && this.state.mediaStream.getAudioTracks().length > 0
-             && this.state.mediaStream.getAudioTracks()[0].label) || "";
-  }
+    return (
+      (this.state.mediaStream &&
+        this.state.mediaStream.getAudioTracks().length > 0 &&
+        this.state.mediaStream.getAudioTracks()[0].label) ||
+      ""
+    );
+  };
 
   selectedMicDeviceId = () => {
     return this.state.micDevices.filter(d => d.label === this.selectedMicLabel).map(d => d.deviceId)[0];
-  }
+  };
 
   onAudioReadyButton = () => {
     this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.janusRoomId);
@@ -341,17 +383,17 @@ class UIRoot extends Component {
 
     if (mediaStream) {
       if (mediaStream.getAudioTracks().length > 0) {
-        console.log(`Using microphone: ${mediaStream.getAudioTracks()[0].label}`)
+        console.log(`Using microphone: ${mediaStream.getAudioTracks()[0].label}`);
       }
 
       if (mediaStream.getVideoTracks().length > 0) {
-        console.log('Screen sharing enabled.')
+        console.log("Screen sharing enabled.");
       }
     }
 
     this.stopTestTone();
     this.setState({ entryStep: ENTRY_STEPS.finished });
-  }
+  };
 
   render() {
     if (!this.state.initialEnvironmentLoaded || !this.state.availableVREntryTypes || !this.state.janusRoomId) {
@@ -360,7 +402,7 @@ class UIRoot extends Component {
           <div className="loading-panel">
             <div className="loader-wrap">
               <div className="loader">
-                <div className="loader-center"/>
+                <div className="loader-center" />
               </div>
             </div>
             <div className="loading-panel__title">
@@ -379,7 +421,7 @@ class UIRoot extends Component {
               <b>moz://a</b> duck
             </div>
             <div className="loading-panel__subtitle">
-              <FormattedMessage id="exit.subtitle"/>
+              <FormattedMessage id="exit.subtitle" />
             </div>
           </div>
         </IntlProvider>
@@ -388,125 +430,195 @@ class UIRoot extends Component {
 
     const daydreamMaybeSubtitle = messages["entry.daydream-via-chrome"];
 
-    const entryPanel = this.state.entryStep === ENTRY_STEPS.start
-    ? (
-      <div className="entry-panel">
-        <TwoDEntryButton onClick={this.enter2D}/>
-        { this.state.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && <GenericEntryButton onClick={this.enterVR}/> }
-        { this.state.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && <GearVREntryButton onClick={this.enterGearVR}/> }
-        { this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && 
+    const entryPanel =
+      this.state.entryStep === ENTRY_STEPS.start ? (
+        <div className="entry-panel">
+          <TwoDEntryButton onClick={this.enter2D} />
+          {this.state.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
+            <GenericEntryButton onClick={this.enterVR} />
+          )}
+          {this.state.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
+            <GearVREntryButton onClick={this.enterGearVR} />
+          )}
+          {this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
             <DaydreamEntryButton
               onClick={this.enterDaydream}
-              subtitle={this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : "" }/> }
-        { this.state.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no &&
-          (<div className="entry-panel__secondary" onClick={this.enterVR}><FormattedMessage id="entry.cardboard"/></div>) }
-      </div>
-    ) : null;
+              subtitle={
+                this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : ""
+              }
+            />
+          )}
+          {this.state.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
+            <div className="entry-panel__secondary" onClick={this.enterVR}>
+              <FormattedMessage id="entry.cardboard" />
+            </div>
+          )}
+        </div>
+      ) : null;
 
-    const micPanel = this.state.entryStep === ENTRY_STEPS.mic_grant || this.state.entryStep == ENTRY_STEPS.mic_granted
-    ? (
+    const micPanel =
+      this.state.entryStep === ENTRY_STEPS.mic_grant || this.state.entryStep == ENTRY_STEPS.mic_granted ? (
         <div className="mic-grant-panel">
           <div className="mic-grant-panel__title">
-            <FormattedMessage id={ this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-title" : "audio.granted-title" }/>
+            <FormattedMessage
+              id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-title" : "audio.granted-title"}
+            />
           </div>
           <div className="mic-grant-panel__subtitle">
-            <FormattedMessage id={ this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-subtitle" : "audio.granted-subtitle" }/>
+            <FormattedMessage
+              id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-subtitle" : "audio.granted-subtitle"}
+            />
           </div>
           <div className="mic-grant-panel__icon">
-          { this.state.entryStep == ENTRY_STEPS.mic_grant ? 
-            (<img onClick={this.onMicGrantButton} src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" className="mic-grant-panel__icon"/>) :
-            (<img onClick={this.onMicGrantButton} src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" className="mic-grant-panel__icon"/>)}
+            {this.state.entryStep == ENTRY_STEPS.mic_grant ? (
+              <img
+                onClick={this.onMicGrantButton}
+                src="../assets/images/mic_denied.png"
+                srcSet="../assets/images/mic_denied@2x.png 2x"
+                className="mic-grant-panel__icon"
+              />
+            ) : (
+              <img
+                onClick={this.onMicGrantButton}
+                src="../assets/images/mic_granted.png"
+                srcSet="../assets/images/mic_granted@2x.png 2x"
+                className="mic-grant-panel__icon"
+              />
+            )}
           </div>
           <div className="mic-grant-panel__next" onClick={this.onMicGrantButton}>
-            <FormattedMessage id={ this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-next" : "audio.granted-next" }/>
+            <FormattedMessage
+              id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-next" : "audio.granted-next"}
+            />
           </div>
         </div>
       ) : null;
 
     const maxLevelHeight = 111;
-    const micClip = { clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)` };
+    const micClip = {
+      clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)`
+    };
     const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
 
-    const audioSetupPanel = this.state.entryStep === ENTRY_STEPS.audio_setup
-    ? (
+    const audioSetupPanel =
+      this.state.entryStep === ENTRY_STEPS.audio_setup ? (
         <div className="audio-setup-panel">
           <div className="audio-setup-panel__title">
-            <FormattedMessage id="audio.title"/>
+            <FormattedMessage id="audio.title" />
           </div>
           <div className="audio-setup-panel__subtitle">
-            { (mobiledetect.mobile() || this.state.enterInVR) && (<FormattedMessage id={ mobiledetect.mobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop" }/>) }
+            {(mobiledetect.mobile() || this.state.enterInVR) && (
+              <FormattedMessage id={mobiledetect.mobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop"} />
+            )}
           </div>
           <div className="audio-setup-panel__levels">
             <div className="audio-setup-panel__levels__mic">
-              <img src="../assets/images/mic_level.png" srcSet="../assets/images/mic_level@2x.png 2x" className="audio-setup-panel__levels__mic_icon"/>
-              <img src="../assets/images/level_fill.png" srcSet="../assets/images/level_fill@2x.png 2x" className="audio-setup-panel__levels__level" style={ micClip }/>
+              <img
+                src="../assets/images/mic_level.png"
+                srcSet="../assets/images/mic_level@2x.png 2x"
+                className="audio-setup-panel__levels__mic_icon"
+              />
+              <img
+                src="../assets/images/level_fill.png"
+                srcSet="../assets/images/level_fill@2x.png 2x"
+                className="audio-setup-panel__levels__level"
+                style={micClip}
+              />
             </div>
             <div className="audio-setup-panel__levels__speaker">
-              <img src="../assets/images/speaker_level.png" srcSet="../assets/images/speaker_level@2x.png 2x" className="audio-setup-panel__levels__speaker_icon"/>
-              <img src="../assets/images/level_fill.png" srcSet="../assets/images/level_fill@2x.png 2x" className="audio-setup-panel__levels__level" style={ speakerClip }/>
+              <img
+                src="../assets/images/speaker_level.png"
+                srcSet="../assets/images/speaker_level@2x.png 2x"
+                className="audio-setup-panel__levels__speaker_icon"
+              />
+              <img
+                src="../assets/images/level_fill.png"
+                srcSet="../assets/images/level_fill@2x.png 2x"
+                className="audio-setup-panel__levels__level"
+                style={speakerClip}
+              />
             </div>
           </div>
           <div className="audio-setup-panel__device-chooser">
-            <select className="audio-setup-panel__device-chooser__dropdown" value={this.selectedMicDeviceId()} onChange={this.micDeviceChanged}>
-              { this.state.micDevices.map(d => (<option key={ d.deviceId } value={ d.deviceId }>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}</option>)) }
+            <select
+              className="audio-setup-panel__device-chooser__dropdown"
+              value={this.selectedMicDeviceId()}
+              onChange={this.micDeviceChanged}
+            >
+              {this.state.micDevices.map(d => (
+                <option key={d.deviceId} value={d.deviceId}>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}
+                </option>
+              ))}
             </select>
             <div className="audio-setup-panel__device-chooser__mic-icon">
-              <img src="../assets/images/mic_small.png" srcSet="../assets/images/mic_small@2x.png 2x"/>
+              <img src="../assets/images/mic_small.png" srcSet="../assets/images/mic_small@2x.png 2x" />
             </div>
           </div>
-          { this.shouldShowHmdMicWarning() &&
-            (<div className="audio-setup-panel__hmd-mic-warning">
-              <img src="../assets/images/warning_icon.png" srcSet="../assets/images/warning_icon@2x.png 2x"
-                   className="audio-setup-panel__hmd-mic-warning__icon"/>
+          {this.shouldShowHmdMicWarning() && (
+            <div className="audio-setup-panel__hmd-mic-warning">
+              <img
+                src="../assets/images/warning_icon.png"
+                srcSet="../assets/images/warning_icon@2x.png 2x"
+                className="audio-setup-panel__hmd-mic-warning__icon"
+              />
               <span className="audio-setup-panel__hmd-mic-warning__label">
-                <FormattedMessage id="audio.hmd-mic-warning"/>
+                <FormattedMessage id="audio.hmd-mic-warning" />
               </span>
-            </div>) }
+            </div>
+          )}
           <div className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
-            <FormattedMessage id="audio.enter-now"/>
+            <FormattedMessage id="audio.enter-now" />
           </div>
         </div>
       ) : null;
 
-    const dialogContents = this.isWaitingForAutoExit() ?
-      (<AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />) :
-      (
-        <div className="entry-dialog">
-          <ProfileInfoHeader name={this.props.store.state.profile.display_name} onClick={(() => this.setState({showProfileEntry: true })) }/>
-          {entryPanel}
-          {micPanel}
-          {audioSetupPanel}
-        </div>
-      );
+    const dialogContents = this.isWaitingForAutoExit() ? (
+      <AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />
+    ) : (
+      <div className="entry-dialog">
+        <ProfileInfoHeader
+          name={this.props.store.state.profile.display_name}
+          onClick={() => this.setState({ showProfileEntry: true })}
+        />
+        {entryPanel}
+        {micPanel}
+        {audioSetupPanel}
+      </div>
+    );
 
-    const dialogClassNames = classNames({
-      'ui-dialog': true,
-      'ui-dialog--darkened': this.state.entryStep !== ENTRY_STEPS.finished
+    const dialogClassNames = classNames("ui-dialog", {
+      "ui-dialog--darkened": this.state.entryStep !== ENTRY_STEPS.finished
     });
 
-    const dialogBoxClassNames = classNames({ 'ui-dialog-box': true });
+    const dialogBoxClassNames = classNames("ui-interactive", "ui-dialog-box");
 
     const dialogBoxContentsClassNames = classNames({
-      'ui-dialog-box-contents': true,
-      'ui-dialog-box-contents--backgrounded': this.state.showProfileEntry
+      "ui-dialog-box-contents": true,
+      "ui-dialog-box-contents--backgrounded": this.state.showProfileEntry
     });
 
     return (
       <IntlProvider locale={lang} messages={messages}>
-        <div className={dialogClassNames}>
-          {
-            (this.state.entryStep !== ENTRY_STEPS.finished || this.isWaitingForAutoExit()) &&
-            (
+        <div className="ui">
+          <div className={dialogClassNames}>
+            {(this.state.entryStep !== ENTRY_STEPS.finished || this.isWaitingForAutoExit()) && (
               <div className={dialogBoxClassNames}>
-                <div className={dialogBoxContentsClassNames}>
-                  {dialogContents}
-                </div>
+                <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
 
                 {this.state.showProfileEntry && (
-                  <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store}/>)}
+                  <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store} />
+                )}
               </div>
-            )
-          }
+            )}
+          </div>
+          {this.state.entryStep === ENTRY_STEPS.finished ? (
+            <TwoDHUD
+              name={this.props.store.state.profile.display_name}
+              muted={this.state.muted}
+              onToggleMute={this.toggleMute}
+            />
+          ) : null}
         </div>
       </IntlProvider>
     );
