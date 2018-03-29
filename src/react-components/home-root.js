@@ -64,10 +64,7 @@ class HomeRoot extends Component {
               </div>
               <div className="header-content__experiment">
                 <div className="header-content__experiment__container">
-                  <img
-                    src="../assets/images/webvr_cube.svg"
-                    className="header-content__experiment__icon"
-                  />
+                  <img src="../assets/images/webvr_cube.svg" className="header-content__experiment__icon" />
                   <div className="header-content__experiment__info">
                     <div className="header-content__experiment__info__header">
                       <span>

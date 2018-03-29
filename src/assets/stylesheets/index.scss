@@ -1,4 +1,5 @@
 @import 'shared';
+@import 'hub-create';
 
 * {
   box-sizing: border-box;
@@ -39,7 +40,7 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  opacity: 0.5;
+  opacity: 0.66;
   min-width: 100%;
   min-height: 100%;
   z-index: 1;
@@ -54,11 +55,11 @@ body {
 
 
 .header-content {
-  padding: 1.35em 2.5em 1.35em 2.5em;
-  background-color: black;
+  padding: 1.5em 2.5em 1.5em 2.5em;
+  background-color: rgba(0, 0, 0, 0.85);
   min-height: 75px;
   display: flex;
-  border-bottom: 1px solid #242424;
+  border-bottom: 2px solid #242424;
 }
 
 .header-content__title {
@@ -105,10 +106,10 @@ body {
   }
 }
 
-
 .header-content__experiment__info {
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 .header-content__experiment__info__header a {
@@ -124,8 +125,9 @@ body {
   //  background-color: blue;
   flex: 10;
   text-shadow: 0px 0px 2px rgba(32, 32, 32, 1.0);
-  padding: 3vw 3.5vw 3vw 3.5vw;
   min-height: 400px;
+  display: flex;
+  flex-direction: column;
 }
 
 @media (max-width: 768px) {
@@ -135,8 +137,10 @@ body {
 }
 
 .hero-content__container {
-  display: flex;
-  flex-direction: column;
+  flex: 10;
+  padding-top: 2vw;
+  padding-left: 2.1em;
+  padding-right: 2.1em;
 }
 
 .hero-content__container__title {
@@ -161,14 +165,13 @@ body {
   font-size: 2.5vw;
   font-weight: lighter;
   color: $light-text;
-  margin-top: 0.2em;
 }
 
 @media (max-width: 768px) {
   .hero-content__container__subtitle {
     font-size: 1.1em;
     text-align: center;
-    margin-top: 0.5em;
+    margin-top: 0.2em;
   }
 }
 
@@ -178,12 +181,23 @@ body {
   }
 }
 
+.hero-content__create {
+  padding: 2.1em;
+  padding-bottom: 3.5vw;
+}
+
+@media (max-width: 768px) {
+  .hero-content__create {
+    padding: 0.5em;
+  }
+}
+
 .footer-content {
   padding: 1em 2.25em 1em 2.25em;
-  background-color: black;
+  background-color: rgba(0, 0, 0, 0.85);
   min-height: 75px;
   display: flex;
-  border-top: 1px solid #242424;
+  border-top: 2px solid #242424;
   align-items: center;
   justify-content: center;
 }
@@ -209,3 +223,4 @@ body {
 .footer-content__links__bottom {
   margin-top: 4px;
 }
+

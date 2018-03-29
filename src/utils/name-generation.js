@@ -659,7 +659,8 @@ const nouns = [
   "congregation",
   "rendezvous",
   "huddle",
-  "meet"
+  "meet",
+  "soiree"
 ];
 
 export function generateHubName() {

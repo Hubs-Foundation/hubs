@@ -31,7 +31,7 @@
     "autoexit.title_units": " seconds",
     "autoexit.subtitle": "You have started another session.",
     "autoexit.cancel": "CANCEL",
-    "home.create_header": "Choose a room name",
+    "home.create_header": "Name your room:",
     "home.create_name.validation_warning": "Invalid name, limited to 4 to 64 characters and limited symbols.",
     "home.webvr_disclaimer_pre": "A ",
     "home.webvr_disclaimer_post": " experiment by ",
@@ -40,7 +40,6 @@
     "home.join_on_slack": "Join us on Slack",
     "home.report_issue": "Report an Issue",
     "home.get_updates": "Get Updates",
-    "home.release_notes": "Release Notes",
     "home.hero_title": "A new way to get together online.",
     "home.hero_subtitle": "Laugh, play, get stuff done, or just hang out."
   }

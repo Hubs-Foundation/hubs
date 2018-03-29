@@ -1,0 +1,91 @@
+.create-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .create-panel {
+    align-items: center;
+  }
+}
+
+.create-panel__header {
+  color: $grey-text;
+  font-size: 1.2em;
+  margin-bottom: 14px;
+  margin-left: 12px;
+  text-shadow: 0px 0px 2px rgba(32, 32, 32, 1.0);
+}
+
+@media (max-width: 768px) {
+  .create-panel__header {
+    text-align: center;
+  }
+}
+
+.create-panel__form {
+  position: relative;
+  width: 600px;
+}
+
+@media (max-width: 768px) {
+  .create-panel__form {
+    width: auto;
+    max-width: 500px;
+  }
+}
+
+.create-panel__form__name {
+  @extend %rounded-border;
+  @extend %default-font;
+
+  color: white;
+  font-size: 2em;
+  background: black;
+  padding: 20px;
+  padding-left: 90px;
+  padding-right: 90px;
+  width: 100%;
+  line-height: 40px;
+}
+
+@media (max-width: 768px) {
+  .create-panel__form__name {
+    min-width: auto;
+    font-size: 1.5em;
+    width: 100%;
+    text-align: center;
+  }
+}
+
+.create-panel__form__name::selection {
+  background-color: #2F80ED;
+  color: white;
+}
+
+.create-panel__form__name::-moz-selection {
+  background-color: #2F80ED;
+  color: white;
+}
+
+.create-panel__form__left_button {
+  position: absolute;
+  height: 100%;
+  width: 90px;
+  left: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.create-panel__form__right_button {
+  position: absolute;
+  height: 100%;
+  width: 90px;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
