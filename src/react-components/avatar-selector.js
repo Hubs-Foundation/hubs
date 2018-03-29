@@ -9,7 +9,7 @@ class AvatarSelector extends Component {
     onChange: PropTypes.func,
   }
 
-  getAvatarIndex(direction=0) {
+  getAvatarIndex = (direction=0) => {
     const currAvatarIndex = this.props.avatars.findIndex(avatar => avatar.id === this.props.avatar);
     const numAvatars = this.props.avatars.length;
     return ((currAvatarIndex + direction) % numAvatars + numAvatars) % numAvatars;
