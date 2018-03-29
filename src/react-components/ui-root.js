@@ -57,6 +57,7 @@ class UIRoot extends Component {
     concurrentLoadDetector: PropTypes.object,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
+    enableScreenSharing: PropTypes.bool,
     store: PropTypes.object,
     scene: PropTypes.object
   }
@@ -69,6 +70,8 @@ class UIRoot extends Component {
     shareScreen: false,
     requestedScreen: false,
     mediaStream: null,
+    videoTrack: null,
+    audioTrack: null,
 
     toneInterval: null,
     tonePlaying: false,
@@ -186,9 +189,12 @@ class UIRoot extends Component {
 
   hasGrantedMicPermissions = async () => {
     if (this.state.requestedScreen) {
-      // If we've already requested the screen in this session, then we can already enumerateDevices, so we need to 
-      // verify mic permissions by checking the mediaStream.
-      return this.state.mediaStream && this.state.mediaStream.getAudioTracks().length > 0;
+      // There is no way to tell if you've granted mic permissions in a previous session if we've 
+      // already prompted for screen sharing permissions, so we have to assume that we've never granted permissions.
+      // Fortunately, if you *have* granted permissions permanently, there won't be a second browser prompt, but we 
+      // can't determine that before hand.
+      // See https://bugzilla.mozilla.org/show_bug.cgi?id=1449783 for a potential solution in the future.
+      return false;
     }
     else {
       // If we haven't requested the screen in this session, check if we've granted permissions in a previous session.
@@ -249,44 +255,60 @@ class UIRoot extends Component {
     }
   }
 
-  mediaVideoConstraint = () => {
-    return this.state.shareScreen ? { mediaSource: "screen", height: 720, frameRate: 30 } : false;
-  }
-
   micDeviceChanged = async (ev) => {
-    const constraints = { audio: { deviceId: { exact: [ev.target.value] } }, video: this.mediaVideoConstraint() };
-    await this.setupNewMediaStream(constraints);
+    const constraints = { audio: { deviceId: { exact: [ev.target.value] } } };
+    await this.fetchAudioTrack(constraints);
+    await this.setupNewMediaStream();
   }
 
   setMediaStreamToDefault = async () => {
-    await this.setupNewMediaStream({ audio: true, video: this.mediaVideoConstraint() });
+    await this.fetchAudioTrack({ audio: true });
+    await this.setupNewMediaStream();
   }
 
-  setStateAndRequestScreen = (e) => {
+  setStateAndRequestScreen = async (e) => {
     const checked = e.target.checked;
-    this.setState({ requestedScreen: true, shareScreen: checked }, () => {
-      this.setupNewMediaStream({ video: this.mediaVideoConstraint() });
-    });
+    await this.setState({ requestedScreen: true, shareScreen: checked });
+    if (checked) {
+      this.fetchVideoTrack({ video: {
+        mediaSource: "screen", 
+        // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
+        // other than your current monitor that has a different aspect ratio.
+        width: screen.width / screen.height * 720, 
+        height: 720,
+        frameRate: 30 
+      } });
+    }
+    else {
+      this.setState({ videoTrack: null });
+    }
+  }
+
+  fetchVideoTrack = async (constraints) => {
+    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+    this.setState({ videoTrack: mediaStream.getVideoTracks()[0] });
+  }
+
+  fetchAudioTrack = async (constraints) => {
+    if (this.state.audioTrack) {
+      this.state.audioTrack.stop();
+    }
+    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+    this.setState({ audioTrack: mediaStream.getAudioTracks()[0] });
   }
 
   setupNewMediaStream = async (constraints) => {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const audioContext = new AudioContext();
+    const mediaStream = new MediaStream();
 
-    if (this.state.mediaStream) {
-      clearInterval(this.state.micUpdateInterval);
+    // we should definitely have an audioTrack at this point. 
+    mediaStream.addTrack(this.state.audioTrack);
 
-      const previousStream = this.state.mediaStream;
-
-      for (const tracks of [previousStream.getAudioTracks(), previousStream.getVideoTracks()]) {
-        for (const track of tracks) {
-          track.stop();
-        }
-      }
+    if (this.state.videoTrack) {
+      mediaStream.addTrack(this.state.videoTrack);
     }
 
-    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioContext = new AudioContext();
     const source = audioContext.createMediaStreamSource(mediaStream);
     const analyzer = audioContext.createAnalyser();
     const levels = new Uint8Array(analyzer.fftSize);
@@ -331,7 +353,11 @@ class UIRoot extends Component {
 
   fetchMicDevices = async () => {
     const mediaDevices = await navigator.mediaDevices.enumerateDevices();
-    this.setState({ micDevices: mediaDevices.filter(d => d.kind === "audioinput").map(d => ({ deviceId: d.deviceId, label: d.label }))});
+    this.setState({ 
+      micDevices: mediaDevices.
+        filter(d => d.kind === "audioinput").
+        map(d => ({ deviceId: d.deviceId, label: d.label }))
+    });
   }
 
   shouldShowHmdMicWarning = () => {
@@ -410,6 +436,23 @@ class UIRoot extends Component {
 
     const daydreamMaybeSubtitle = messages["entry.daydream-via-chrome"];
 
+    // Only show this in desktop firefox since other browsers/platforms will ignore the "screen" media constraint and
+    // will attempt to share your webcam instead!
+    const screenSharingCheckbox = ( 
+      this.props.enableScreenSharing &&
+      !mobiledetect.mobile() && 
+      /firefox/i.test(navigator.userAgent) &&
+      (
+        <label className="entry-panel__screen-sharing">
+          <input className="entry-panel__screen-sharing-checkbox" type="checkbox"
+            value={this.state.shareScreen}
+            onChange={this.setStateAndRequestScreen}
+          />
+          <FormattedMessage id="entry.enable-screen-sharing" />
+        </label>
+      ) 
+    );
+
     const entryPanel = this.state.entryStep === ENTRY_STEPS.start
     ? (
       <div className="entry-panel">
@@ -422,14 +465,7 @@ class UIRoot extends Component {
               subtitle={this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : "" }/> }
         { this.state.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no &&
           (<div className="entry-panel__secondary" onClick={this.enterVR}><FormattedMessage id="entry.cardboard"/></div>) }
-        { !mobiledetect.mobile() && /firefox/i.test(navigator.userAgent) && (
-          <label className="entry-panel__screensharing">
-            <input className="entry-panel__screensharing-checkbox" type="checkbox"
-              value={this.state.shareScreen}
-              onChange={this.setStateAndRequestScreen}
-            />
-            <FormattedMessage id="entry.enable-screensharing" />
-          </label>) }
+        { screenSharingCheckbox }
       </div>
     ) : null;
 

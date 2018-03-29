@@ -19,13 +19,13 @@
   flex: 10 1 auto;
   justify-content: center;
 
-  &__screensharing {
+  &__screen-sharing {
 	font-size: 1.4em;
 	margin-left: 2.95em;
 	margin-top: 0.6em;
   }
 
-  &__screensharing-checkbox {
+  &__screen-sharing-checkbox {
 	appearance: none;
 	-moz-appearance: none;
 	-webkit-appearance: none;
@@ -36,7 +36,7 @@
 	vertical-align: sub;
 	margin: 0 0.6em
   }
-  &__screensharing-checkbox:checked {
+  &__screen-sharing-checkbox:checked {
 	border: 9px double white;
 	outline: 9px solid white;
 	outline-offset: -18px;

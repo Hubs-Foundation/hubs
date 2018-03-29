@@ -81,6 +81,12 @@ import { generateDefaultProfile } from "./utils/identity.js";
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
+function qsTruthy(param) {
+  const val = qs[param];
+  // if the param exists but is not set (e.g. "?foo&bar"), its value is null.
+  return val === null || /1|on|true/i.test(val);
+}
+
 registerTelemetry();
 
 AFRAME.registerInputBehaviour("vive_trackpad_dpad4", vive_trackpad_dpad4);
@@ -121,18 +127,16 @@ async function enterScene(mediaStream, enterInVR) {
 
   document.querySelector("#player-camera").setAttribute("look-controls", "pointerLockEnabled: true;");
 
-  const qs = queryString.parse(location.search);
-
   scene.setAttribute("networked-scene", {
-    room: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1,
+    room: qs.room && !isNaN(parseInt(qs.room, 10)) ? parseInt(qs.room, 10) : 1,
     serverURL: process.env.JANUS_SERVER
   });
 
-  if (!qs.stats || !/off|false|0/.test(qs.stats)) {
+  if (!qsTruthy("no_stats")) {
     scene.setAttribute("stats", true);
   }
 
-  if (isMobile || qs.mobile) {
+  if (isMobile || qsTruthy("mobile")) {
     const playerRig = document.querySelector("#player-rig");
     playerRig.setAttribute("virtual-gamepad-controls", {});
   }
@@ -140,7 +144,7 @@ async function enterScene(mediaStream, enterInVR) {
   setNameTagFromStore();
   store.addEventListener('statechanged', setNameTagFromStore);
 
-  const avatarScale = parseInt(qs.avatarScale, 10);
+  const avatarScale = parseInt(qs.avatar_scale, 10);
 
   if (avatarScale) {
     playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
@@ -168,7 +172,7 @@ async function enterScene(mediaStream, enterInVR) {
     screenEntity.setAttribute("visible", sharingScreen);
   });
 
-  if (qs.offline) {
+  if (qsTruthy("offline")) {
     onConnect();
   } else {
     document.body.addEventListener("connected", onConnect);
@@ -201,12 +205,9 @@ function onConnect() {
 
 function mountUI(scene) {
   const qs = queryString.parse(location.search);
-  const disableAutoExitOnConcurrentLoad = qs.allow_multi === "true"
-  let forcedVREntryType = null;
-
-  if (qs.vr_entry_type) {
-    forcedVREntryType = qs.vr_entry_type;
-  }
+  const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
+  const forcedVREntryType = qs.vr_entry_type || null;
+  const enableScreenSharing = qsTruthy("enable_screen_sharing");
 
   const uiRoot = ReactDOM.render(<UIRoot {...{
     scene,
@@ -215,6 +216,7 @@ function mountUI(scene) {
     concurrentLoadDetector,
     disableAutoExitOnConcurrentLoad,
     forcedVREntryType,
+    enableScreenSharing,
     store
   }} />, document.getElementById("ui-root"));
 
