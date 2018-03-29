@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
 import { generateHubName } from "../utils/name-generation";
+import classNames from "classnames";
 
 const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
 
@@ -16,7 +17,8 @@ class HubCreatePanel extends Component {
 
     this.state = {
       name: generateHubName(),
-      environmentBundleUrl: props.environments[0].bundle_url
+      environmentBundleIndex: Math.floor(Math.random() * props.environments[0].length),
+      expanded: false
     };
   }
 
@@ -55,21 +57,34 @@ class HubCreatePanel extends Component {
       </option>
     ));
 
+    const formNameClassNames = classNames("create-panel__form__name", {
+      "create-panel__form__name--expanded": this.state.expanded
+    });
+
     return (
       <form onSubmit={this.createHub}>
         <div className="create-panel">
           <div className="create-panel__header">
-            <FormattedMessage id="home.create_header" />
+            <FormattedMessage id={this.state.expanded ? "home.create_header_expanded" : "home.create_header"} />
           </div>
           <div className="create-panel__form">
             <div
               className="create-panel__form__left_button"
               onClick={e => {
                 e.preventDefault();
-                this.setState({ name: generateHubName() });
+
+                if (this.state.expanded) {
+                  this.setState({ name: generateHubName() });
+                } else {
+                  this.setState({ expanded: true });
+                }
               }}
             >
-              <img className="create-panel__form__rotate_button" src="../assets/images/expand_dots_icon.svg" />
+              {this.state.expanded ? (
+                <img className="create-panel__form__rotate_button" src="../assets/images/dice_icon.svg" />
+              ) : (
+                <img className="create-panel__form__rotate_button" src="../assets/images/expand_dots_icon.svg" />
+              )}
             </div>
             <div className="create-panel__form__right_button" onClick={this.createHub}>
               {this.isHubNameValid() ? (
@@ -85,7 +100,7 @@ class HubCreatePanel extends Component {
               )}
             </div>
             <input
-              className="create-panel__form__name"
+              className={formNameClassNames}
               value={this.state.name}
               onChange={e => this.setState({ name: e.target.value })}
               onFocus={e => e.target.select()}
