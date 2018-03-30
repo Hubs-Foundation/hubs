@@ -77,8 +77,10 @@ class ProfileEntryPanel extends Component {
             ref={inp => this.nameInput = inp}/>
           <iframe
             className="profile-entry__avatar-selector"
-            {/* HACK: Have to account for the smoke test server like this. Feels wrong though. */}
-            src={`${/smoke/i.test(location.hostname) ? 'smoke-' : ''}avatar-selector.html#avatar_id=${this.state.avatar_id}`}
+            src={
+              /* HACK: Have to account for the smoke test server like this. Feels wrong though. */
+              `${/smoke/i.test(location.hostname) ? 'smoke-' : ''}avatar-selector.html#avatar_id=${this.state.avatar_id}`
+            }
             ref={ifr => this.avatarSelector = ifr}></iframe>
           <input className="profile-entry__form-submit" type="submit" value={formatMessage({ id: "profile.save" }) }/>
         </div>
