@@ -21,15 +21,16 @@ class HubCreatePanel extends Component {
     this.state = {
       name: generateHubName(),
       environmentIndex: Math.floor(Math.random() * props.environments.length),
-      expanded: true
+      expanded: false
     };
   }
 
   createHub = async e => {
     e.preventDefault();
+    const environment = this.props.environments[this.state.environmentIndex];
 
     const payload = {
-      hub: { name: this.state.name, default_environment_gltf_bundle_url: this.state.environmentBundleUrl }
+      hub: { name: this.state.name, default_environment_gltf_bundle_url: environment.bundle_url }
     };
 
     const res = await fetch("/api/v1/hubs", {
@@ -47,18 +48,37 @@ class HubCreatePanel extends Component {
     return new RegExp(HUB_NAME_PATTERN).test(this.state.name) && new RegExp(hubAlphaPattern).test(this.state.name);
   };
 
+  setToEnvironmentOffset = offset => {
+    const numEnvs = this.props.environments.length;
+
+    this.setState(state => ({
+      environmentIndex: ((state.environmentIndex + offset) % this.props.environments.length + numEnvs) % numEnvs
+    }));
+  };
+
+  setToNextEnvironment = e => {
+    e.preventDefault();
+    this.setToEnvironmentOffset(1);
+  };
+
+  setToPreviousEnvironment = e => {
+    e.preventDefault();
+    this.setToEnvironmentOffset(-1);
+  };
+
+  shuffle = () => {
+    this.setState({
+      name: generateHubName(),
+      environmentIndex: Math.floor(Math.random() * this.props.environments.length)
+    });
+  };
+
   render() {
     const { formatMessage } = this.props.intl;
 
     if (this.props.environments.length == 0) {
       return <div />;
     }
-
-    const environmentChoices = this.props.environments.map(e => (
-      <option key={e.bundle_url} value={e.bundle_url}>
-        {e.meta.title}
-      </option>
-    ));
 
     const environment = this.props.environments[this.state.environmentIndex];
     const environmentImageSrcSet = environment.meta.images.find(i => i.type === "preview-thumbnail").srcset;
@@ -85,7 +105,7 @@ class HubCreatePanel extends Component {
                 e.preventDefault();
 
                 if (this.state.expanded) {
-                  this.setState({ name: generateHubName() });
+                  this.shuffle();
                 } else {
                   this.setState({ expanded: true });
                 }
