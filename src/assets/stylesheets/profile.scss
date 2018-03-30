@@ -8,17 +8,27 @@
   align-items: center;
   display: flex;
   pointer-events: auto;
+
+  &__avatar-selector {
+    border: none;
+    width: 95%;
+    height: 100%;
+    margin: 1em 0;
+  }
 }
 
 .profile-entry__box {
-  height: 150px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: 25px;
+  padding: 15px;
   flex: 1 1 100%;
+  width: 60vw;
+  min-width: 300px;
+  max-width: 700px;
+  height: 500px
 }
 
 .profile-entry__box--darkened {
@@ -42,6 +52,7 @@
   line-height: 2.0em;
   padding-left: 1.25em;
   padding-right: 1.25em;
+  margin: 0.5em 0;
 }
 
 .profile-entry__form-submit {

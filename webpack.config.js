@@ -77,7 +77,8 @@ class LodashTemplatePlugin {
 const config = {
   entry: {
     index: path.join(__dirname, "src", "index.js"),
-    hub: path.join(__dirname, "src", "hub.js")
+    hub: path.join(__dirname, "src", "hub.js"),
+    "avatar-selector": path.join(__dirname, "src", "avatar-selector.js")
   },
   output: {
     path: path.join(__dirname, "public"),
@@ -205,6 +206,12 @@ const config = {
           chunks: []
         })
     ),
+    new HTMLWebpackPlugin({
+      filename: "avatar-selector.html",
+      template: path.join(__dirname, "src", "avatar-selector.html"),
+      chunks: ["avatar-selector"],
+      inject: "head"
+    }),
     // Extract required css and add a content hash.
     new ExtractTextPlugin("assets/stylesheets/[name]-[contenthash].css", {
       disable: process.env.NODE_ENV !== "production"
