@@ -96,7 +96,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.el.sceneEl.removeEventListener("micAudio", this.onAudioFrequencyChange);
   },
 
-  tick: function(t, dt) {
+  tick: function() {
     if (!this.analyser) return;
 
     this.analyser.getByteFrequencyData(this.levels);

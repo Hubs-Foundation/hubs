@@ -14,8 +14,6 @@ function createHTTPSConfig() {
     return false;
   }
 
-  let https;
-
   // Generate certs for the local webpack-dev-server.
   if (fs.existsSync(path.join(__dirname, "certs"))) {
     const key = fs.readFileSync(path.join(__dirname, "certs", "key.pem"));
@@ -77,7 +75,7 @@ const config = {
   entry: {
     lobby: path.join(__dirname, "src", "lobby.js"),
     room: path.join(__dirname, "src", "room.js"),
-    'avatar-selector': path.join(__dirname, "src", "avatar-selector.js"),
+    "avatar-selector": path.join(__dirname, "src", "avatar-selector.js"),
     onboarding: path.join(__dirname, "src", "onboarding.js")
   },
   output: {
@@ -97,7 +95,7 @@ const config = {
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
       app.head("*", function(req, res, next) {
         if (req.method === "HEAD") {
-          res.append("Date", (new Date()).toGMTString());
+          res.append("Date", new Date().toGMTString());
           res.send("");
         } else {
           next();

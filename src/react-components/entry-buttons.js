@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import { FormattedMessage } from "react-intl";
 import PropTypes from "prop-types";
 import MobileDetect from "mobile-detect";

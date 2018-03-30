@@ -1,4 +1,4 @@
-import { angleTo4Direction, angleTo8Direction } from "../utils/dpad";
+import { angleTo4Direction } from "../utils/dpad";
 
 // @TODO specify 4 or 8 direction
 function oculus_touch_joystick_dpad4(el, outputPrefix) {

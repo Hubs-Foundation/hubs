@@ -33,7 +33,7 @@ AFRAME.registerElement("a-progressive-asset", {
           src = lowSrc;
         }
 
-        this.fileLoader.setResponseType(this.getAttribute("response-type") || inferResponseType(src));
+        this.fileLoader.setResponseType(this.getAttribute("response-type"));
         this.fileLoader.load(
           src,
           function handleOnLoad(response) {

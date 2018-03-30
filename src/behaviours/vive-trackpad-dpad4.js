@@ -1,4 +1,4 @@
-import { angleTo4Direction, angleTo8Direction } from "../utils/dpad";
+import { angleTo4Direction } from "../utils/dpad";
 
 function vive_trackpad_dpad4(el, outputPrefix) {
   this.outputPrefix = outputPrefix;
@@ -16,10 +16,10 @@ function vive_trackpad_dpad4(el, outputPrefix) {
 }
 
 vive_trackpad_dpad4.prototype = {
-  press: function(_) {
+  press: function() {
     this.pressed = true;
   },
-  unpress: function(_) {
+  unpress: function() {
     this.pressed = false;
   },
   emitDPad4: function(event) {

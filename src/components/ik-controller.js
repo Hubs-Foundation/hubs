@@ -142,7 +142,6 @@ AFRAME.registerComponent("ik-controller", {
       cameraYRotation,
       cameraYQuaternion,
       invHipsQuaternion,
-      headQuaternion,
       leftHand,
       rightHand,
       rootToChest,

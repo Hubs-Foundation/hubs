@@ -12,7 +12,7 @@ AFRAME.registerComponent("player-info", {
   pause() {
     this.el.removeEventListener("model-loaded", this.applyProperties);
   },
-  update(oldProps) {
+  update() {
     this.applyProperties();
   },
   applyProperties() {

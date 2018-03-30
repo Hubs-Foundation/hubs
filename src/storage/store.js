@@ -51,15 +51,14 @@ export default class Store extends EventTarget {
 
   update(newState) {
     if (newState.id) {
-      throw "Store id is immutable.";
+      throw new Error("Store id is immutable.");
     }
 
     const finalState = { ...this.state, ...newState };
     const isValid = validator.validate(finalState, SCHEMA).valid;
 
     if (!isValid) {
-      throw `Write of ${JSON.stringify(finalState)} to store failed schema validation.`;
-      return;
+      throw new Error(`Write of ${JSON.stringify(finalState)} to store failed schema validation.`);
     }
 
     localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(finalState));
