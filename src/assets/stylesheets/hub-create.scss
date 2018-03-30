@@ -150,6 +150,7 @@
   height: 390px;
   border-bottom: 3px solid white;
   overflow: hidden;
+  position: relative;
 }
 
 @media (max-width: 768px) {
@@ -166,4 +167,7 @@
 
 .create-panel__form__environment__picker__image {
   width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
