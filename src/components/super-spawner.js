@@ -39,12 +39,12 @@ AFRAME.registerComponent("super-spawner", {
 
     this.entities.set(entity, {
       hand: hand,
-      componentInitialized: false, 
-      bodyLoaded: false, 
-      componentinInitializedListener: componentinInitializedListener, 
+      componentInitialized: false,
+      bodyLoaded: false,
+      componentinInitializedListener: componentinInitializedListener,
       bodyLoadedListener: bodyLoadedListener
     });
-    
+
     entity.addEventListener("componentinitialized", componentinInitializedListener);
     entity.addEventListener("body-loaded", bodyLoadedListener);
 

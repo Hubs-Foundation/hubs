@@ -25,11 +25,8 @@ vive_trackpad_dpad4.prototype = {
   emitDPad4: function(event) {
     const x = event.detail.axis[0];
     const y = event.detail.axis[1];
-    const inCenter =
-      Math.abs(x) < this.centerRadius && Math.abs(y) < this.centerRadius;
-    const direction = inCenter
-      ? "center"
-      : angleTo4Direction(Math.atan2(x, -y));
+    const inCenter = Math.abs(x) < this.centerRadius && Math.abs(y) < this.centerRadius;
+    const direction = inCenter ? "center" : angleTo4Direction(Math.atan2(x, -y));
     const pressed = this.pressed ? "pressed_" : "";
     const current = `${pressed + direction}`; // e.g. "pressed_north"
 

@@ -15,11 +15,8 @@ oculus_touch_joystick_dpad4.prototype = {
   emitDPad4: function(event) {
     const x = event.detail.axis[0];
     const y = event.detail.axis[1];
-    const inCenter =
-      Math.abs(x) < this.centerRadius && Math.abs(y) < this.centerRadius;
-    const current = inCenter
-      ? "center"
-      : this.angleToDirection(Math.atan2(x, -y));
+    const inCenter = Math.abs(x) < this.centerRadius && Math.abs(y) < this.centerRadius;
+    const current = inCenter ? "center" : this.angleToDirection(Math.atan2(x, -y));
     if (current !== this.previous) {
       this.previous = current;
       event.target.emit(`${this.outputPrefix}_dpad4_${current}`);

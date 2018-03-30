@@ -19,22 +19,13 @@ function MobileWater(geometry, options) {
 
   const clipBias = options.clipBias !== undefined ? options.clipBias : 0.0;
   const time = options.time !== undefined ? options.time : 0.0;
-  const normalSampler =
-    options.waterNormals !== undefined ? options.waterNormals : null;
+  const normalSampler = options.waterNormals !== undefined ? options.waterNormals : null;
   const sunDirection =
-    options.sunDirection !== undefined
-      ? options.sunDirection
-      : new THREE.Vector3(0.70707, 0.70707, 0.0);
-  const sunColor = new THREE.Color(
-    options.sunColor !== undefined ? options.sunColor : 0xffffff
-  );
-  const waterColor = new THREE.Color(
-    options.waterColor !== undefined ? options.waterColor : 0x7f7f7f
-  );
-  const eye =
-    options.eye !== undefined ? options.eye : new THREE.Vector3(0, 0, 0);
-  const distortionScale =
-    options.distortionScale !== undefined ? options.distortionScale : 20.0;
+    options.sunDirection !== undefined ? options.sunDirection : new THREE.Vector3(0.70707, 0.70707, 0.0);
+  const sunColor = new THREE.Color(options.sunColor !== undefined ? options.sunColor : 0xffffff);
+  const waterColor = new THREE.Color(options.waterColor !== undefined ? options.waterColor : 0x7f7f7f);
+  const eye = options.eye !== undefined ? options.eye : new THREE.Vector3(0, 0, 0);
+  const distortionScale = options.distortionScale !== undefined ? options.distortionScale : 20.0;
   const side = options.side !== undefined ? options.side : THREE.FrontSide;
   const fog = options.fog !== undefined ? options.fog : false;
 

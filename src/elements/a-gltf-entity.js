@@ -238,7 +238,7 @@ AFRAME.registerElement("a-gltf-entity", {
           // If the src attribute is a selector, get the url from the asset item.
           if (src && src.charAt(0) === "#") {
             const assetEl = document.getElementById(src.substring(1));
-            if (!assetEl) { 
+            if (!assetEl) {
               console.warn(`Attempted to use non-existent asset ${src} as src for`, this);
               return;
             }
