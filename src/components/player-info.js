@@ -1,7 +1,7 @@
 AFRAME.registerComponent("player-info", {
   schema: {
     displayName: { type: "string" },
-    avatar: { type: "string" }
+    avatarSrc: { type: "string" }
   },
   init() {
     this.applyProperties = this.applyProperties.bind(this);
@@ -24,8 +24,8 @@ AFRAME.registerComponent("player-info", {
     }
 
     const modelEl = this.el.querySelector(".model");
-    if (this.data.avatar && modelEl) {
-      modelEl.setAttribute("src", this.data.avatar);
+    if (this.data.avatarSrc && modelEl) {
+      modelEl.setAttribute("src", this.data.avatarSrc);
     }
   }
 });

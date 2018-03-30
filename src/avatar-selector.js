@@ -34,16 +34,16 @@ const lang = ((navigator.languages && navigator.languages[0]) || navigator.langu
 addLocaleData([...en]);
 const messages = localeData[lang] || localeData.en;
 
-function postAvatarToParent(newAvatar) {
-  window.parent.postMessage({ avatar: newAvatar }, location.origin);
+function postAvatarIdToParent(newAvatarId) {
+  window.parent.postMessage({ avatarId: newAvatarId }, location.origin);
 }
 
 function mountUI() {
   const hash = queryString.parse(location.hash);
-  const avatar = hash.avatar;
+  const avatarId = hash.avatar_id;
   ReactDOM.render(
     <IntlProvider locale={lang} messages={messages}>
-      <AvatarSelector {...{ avatars, avatar, onChange: postAvatarToParent }} />
+      <AvatarSelector {...{ avatars, avatarId, onChange: postAvatarIdToParent }} />
     </IntlProvider>,
     document.getElementById("selector-root")
   );

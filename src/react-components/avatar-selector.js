@@ -8,12 +8,12 @@ import faAngleRight from '@fortawesome/fontawesome-free-solid/faAngleRight';
 class AvatarSelector extends Component {
   static propTypes = {
     avatars: PropTypes.array,
-    avatar: PropTypes.string,
+    avatarId: PropTypes.string,
     onChange: PropTypes.func,
   }
 
   getAvatarIndex = (direction=0) => {
-    const currAvatarIndex = this.props.avatars.findIndex(avatar => avatar.id === this.props.avatar);
+    const currAvatarIndex = this.props.avatars.findIndex(avatar => avatar.id === this.props.avatarId);
     const numAvatars = this.props.avatars.length;
     return ((currAvatarIndex + direction) % numAvatars + numAvatars) % numAvatars;
   }
@@ -82,7 +82,7 @@ class AvatarSelector extends Component {
           ></a-asset-item>
         </a-assets>
 
-        <a-entity data-avatar={this.props.avatar}>
+        <a-entity data-avatar={this.props.avatarId}>
           <a-animation
             ref={anm => this.animation = anm}
             attribute="rotation"

@@ -15,7 +15,7 @@ class ProfileEntryPanel extends Component {
     window.store = this.props.store;
     this.state = {
       display_name: this.props.store.state.profile.display_name,
-      avatar: this.props.store.state.profile.avatar,
+      avatar_id: this.props.store.state.profile.avatar_id,
     };
     this.props.store.addEventListener("statechanged", this.storeUpdated);
   }
@@ -23,7 +23,7 @@ class ProfileEntryPanel extends Component {
   storeUpdated = () => {
     this.setState({
       display_name: this.props.store.state.profile.display_name,
-      avatar: this.props.store.state.profile.avatar,
+      avatar_id: this.props.store.state.profile.avatar_id,
     });
   }
 
@@ -31,7 +31,7 @@ class ProfileEntryPanel extends Component {
     e.preventDefault();
     this.props.store.update({profile: {
       display_name: this.state.display_name,
-      avatar: this.state.avatar
+      avatar_id: this.state.avatar_id
     }});
     this.props.finished();
   }
@@ -42,7 +42,7 @@ class ProfileEntryPanel extends Component {
 
   setAvatarStateFromIframeMessage = (e) => {
     if (e.source !== this.avatarSelector.contentWindow) { return; }
-    this.setState({avatar: e.data.avatar});
+    this.setState({avatar_id: e.data.avatarId});
   }
 
   componentDidMount() {
@@ -79,7 +79,7 @@ class ProfileEntryPanel extends Component {
             ref={inp => this.nameInput = inp}/>
           <iframe
             className="profile-entry__avatar-selector"
-            src={`avatar-selector.html#avatar=${this.state.avatar}`}
+            src={`avatar-selector.html#avatar_id=${this.state.avatar_id}`}
             ref={ifr => this.avatarSelector = ifr}></iframe>
           <input className="profile-entry__form-submit" type="submit" value={formatMessage({ id: "profile.save" }) }/>
         </div>

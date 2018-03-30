@@ -114,9 +114,10 @@ async function exitScene() {
 }
 
 function applyProfileFromStore(playerRig) {
+  const displayName = store.state.profile.display_name;
   playerRig.setAttribute("player-info", {
-    displayName: store.state.profile.display_name,
-    avatar: '#' + (store.state.profile.avatar || "botdefault")
+    displayName,
+    avatarSrc: '#' + (store.state.profile.avatar_id || "botdefault")
   });
   document.querySelector("a-scene").emit("username-changed", { username: displayName });
 }

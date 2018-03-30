@@ -173,6 +173,6 @@ export function generateDefaultProfile() {
   const name = selectRandom(names);
   return {
     display_name: name.replace(/^./, name[0].toUpperCase()) ,
-    avatar: selectRandom(avatarIds)
+    avatar_id: selectRandom(avatarIds)
   };
 }
