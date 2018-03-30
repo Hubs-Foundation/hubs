@@ -90,16 +90,6 @@ AFRAME.registerComponent("hand-poses", {
   }
 });
 
-//TODO: Should I use the previous pose?
-//      Argument against: The previous pose should already be given to
-//                        hand-poses update function, except in cases where
-//                        a remote user has updated their poses locally at
-//                        a faster rate than the network tick. In this case,
-//                        I don't know whether knowing the most-recent previous
-//                        pose is better than using the most-recently known pose.
-//                        In either case, the resulting animation seems fine, and
-//                        passing around only the most recent pose info saves
-//                        bandwidth and makes the code shorter.
 AFRAME.registerComponent("hand-poses-controller", {
   schema: {
     left: { type: "selector", default: "#player-left-controller" },
