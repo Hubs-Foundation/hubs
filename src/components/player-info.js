@@ -25,7 +25,7 @@ AFRAME.registerComponent("player-info", {
 
     const modelEl = this.el.querySelector(".model");
     if (this.data.avatar && modelEl) {
-      modelEl.setAttribute("src", this.data.avatar);
+      modelEl.setAttribute("gltf-model-plus", "src", this.data.avatar);
     }
   }
 });

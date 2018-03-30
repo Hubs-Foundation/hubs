@@ -41,6 +41,7 @@ import "./components/player-info";
 import "./components/debug";
 import "./components/animation-mixer";
 import "./components/loop-animation";
+import "./components/gltf-model-plus";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -48,8 +49,6 @@ import UIRoot from "./react-components/ui-root";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
-
-import "./elements/a-gltf-entity";
 
 import "./gltf-component-mappings";
 
@@ -176,8 +175,7 @@ async function enterScene(mediaStream, enterInVR) {
       for (const track of videoTracks) {
         mediaStream.addTrack(track);
       }
-    }
-    else {
+    } else {
       for (const track of mediaStream.getVideoTracks()) {
         mediaStream.removeTrack(track);
       }
