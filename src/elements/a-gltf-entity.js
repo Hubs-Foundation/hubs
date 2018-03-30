@@ -2,6 +2,9 @@ const GLTFCache = {};
 
 AFRAME.AGLTFEntity = {
   defaultInflator(el, componentName, componentData) {
+    if (!AFRAME.components[componentName]) {
+      throw new Error(`Inflator failed. "${componentName}" component does not exist.`);
+    }
     if (AFRAME.components[componentName].multiple && Array.isArray(componentData)) {
       for (let i = 0; i < componentData.length; i++) {
         el.setAttribute(componentName + "__" + i, componentData[i]);
@@ -220,7 +223,10 @@ AFRAME.registerElement("a-gltf-entity", {
         this.querySelectorAll(":scope > template").forEach(templateEl =>
           this.templates.push({
             selector: templateEl.getAttribute("data-selector"),
-            templateRoot: document.importNode(templateEl.content.firstElementChild, true)
+            templateRoot: document.importNode(
+              templateEl.firstElementChild || templateEl.content.firstElementChild,
+              true
+            )
           })
         );
       }
@@ -232,6 +238,10 @@ AFRAME.registerElement("a-gltf-entity", {
           // If the src attribute is a selector, get the url from the asset item.
           if (src && src.charAt(0) === "#") {
             const assetEl = document.getElementById(src.substring(1));
+            if (!assetEl) { 
+              console.warn(`Attempted to use non-existent asset ${src} as src for`, this);
+              return;
+            }
 
             const fallbackSrc = assetEl.getAttribute("src");
             const highSrc = assetEl.getAttribute("high-src");
@@ -282,8 +292,7 @@ AFRAME.registerElement("a-gltf-entity", {
 
           this.emit("model-loaded", { format: "gltf", model: this.model });
         } catch (e) {
-          const message = (e && e.message) || "Failed to load glTF model";
-          console.error(message);
+          console.error("Failed to load glTF model", e.message, this);
           this.emit("model-error", { format: "gltf", src });
         }
       }
@@ -303,7 +312,6 @@ AFRAME.registerElement("a-gltf-entity", {
         if (attr === "src") {
           this.applySrc(newVal);
         }
-        AFRAME.AEntity.prototype.attributeChangedCallback.call(this, attr, oldVal, newVal);
       }
     },
 

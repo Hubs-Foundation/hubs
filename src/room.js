@@ -113,13 +113,11 @@ async function exitScene() {
   document.body.removeChild(scene);
 }
 
-function updatePlayerInfoFromStore() {
+function applyProfileFromStore(playerRig) {
   const displayName = store.state.profile.display_name;
-  const qs = queryString.parse(location.search);
-  const playerRig = document.querySelector("#player-rig");
   playerRig.setAttribute("player-info", {
     displayName,
-    avatar: qs.avatar || "#bot-skinned-mesh"
+    avatarSrc: '#' + (store.state.profile.avatar_id || "botdefault")
   });
   document.querySelector("a-scene").emit("username-changed", { username: displayName });
 }
@@ -127,8 +125,6 @@ function updatePlayerInfoFromStore() {
 async function enterScene(mediaStream, enterInVR) {
   const scene = document.querySelector("a-scene");
   const playerRig = document.querySelector("#player-rig");
-  const qs = queryString.parse(location.search);
-
   document.querySelector("a-scene canvas").classList.remove("blurred");
   registerNetworkSchemas();
 
@@ -155,8 +151,9 @@ async function enterScene(mediaStream, enterInVR) {
     playerRig.setAttribute("virtual-gamepad-controls", {});
   }
 
-  updatePlayerInfoFromStore();
-  store.addEventListener("statechanged", updatePlayerInfoFromStore);
+  const applyProfileOnPlayerRig = applyProfileFromStore.bind(null, playerRig);
+  applyProfileOnPlayerRig();
+  store.addEventListener("statechanged", applyProfileOnPlayerRig);
 
   const avatarScale = parseInt(qs.avatar_scale, 10);
 

@@ -14,6 +14,9 @@
     "prettier": "prettier --write src/**/*.js"
   },
   "dependencies": {
+    "@fortawesome/fontawesome": "^1.1.5",
+    "@fortawesome/fontawesome-free-solid": "^5.0.9",
+    "@fortawesome/react-fontawesome": "^0.0.18",
     "aframe-billboard-component": "^1.0.0",
     "aframe-extras": "^3.12.4",
     "aframe-input-mapping-component": "https://github.com/johnshaughnessy/aframe-input-mapping-component#feature/map-to-array",

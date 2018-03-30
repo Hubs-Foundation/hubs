@@ -16,6 +16,7 @@
     "profile.save": "SAVE",
     "profile.display_name.validation_warning": "Alphanumerics and hyphens. At least 3 characters, no more than 32",
     "profile.header": "Your identity",
+    "profile.avatar-selector.loading": "Loading Avatars...",
     "audio.title": "Test your audio",
     "audio.subtitle-desktop": "Confirm HMD speaker output",
     "audio.subtitle-mobile": "Earphones are recommended",
