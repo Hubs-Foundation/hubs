@@ -43,6 +43,7 @@
       padding-right: 90px;
       width: 100%;
       line-height: 40px;
+      z-index: 1;
 
       &::selection {
 	background-color: #2F80ED;
@@ -120,6 +121,7 @@
       border-radius: 14px;
       overflow: hidden;
       pointer-events: none;
+      z-index: 2;
 
       @media (max-width: 768px) , (max-height: 715px) {
 	width: 100%;
@@ -153,6 +155,39 @@
 	  height: 100%;
 	  top: 0;
 	  left: 0;
+
+	  &__footer {
+	    position: absolute;
+	    bottom: 14px;
+	    left: 12px;
+	    font-size: 1.2em;
+	    text-shadow: 0px 0px 6px #202020;
+	    color: $light-text;
+	  }
+
+	  &__header {
+	    position: absolute;
+	    top: 14px;
+	    left: 18px;
+	    display: flex;
+	    flex-direction: column;
+	    text-shadow: 0px 0px 3px #404040;
+
+	    &__title {
+	      font-size: 1.6em;
+	      font-weight: bold;
+	      color: white;
+	    }
+
+	    &__author {
+	      color: $light-text;
+	      font-size: 1.4em;
+
+	      @media (max-width: 520px) {
+		display: none;
+	      }
+	    }
+	  }
 	}
 
 	&__controls {
@@ -161,6 +196,24 @@
 	  height: 100%;
 	  top: 0;
 	  left: 0;
+
+	  &__next, &__prev {
+	    @extend %big-icon-button;
+
+	    position: absolute;
+	    top: 50%;
+	    margin-top: -0.5em;
+	    pointer-events: auto;
+	    cursor: pointer;
+	  }
+
+	  &__prev {
+	    left: 0.2em;
+	  }
+
+	  &__next {
+	    right: 0.2em;
+	  }
 	}
       }
     }

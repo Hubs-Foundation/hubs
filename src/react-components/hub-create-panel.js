@@ -21,7 +21,7 @@ class HubCreatePanel extends Component {
     this.state = {
       name: generateHubName(),
       environmentIndex: Math.floor(Math.random() * props.environments.length),
-      expanded: false
+      expanded: true
     };
   }
 
@@ -62,6 +62,9 @@ class HubCreatePanel extends Component {
 
     const environment = this.props.environments[this.state.environmentIndex];
     const environmentImageSrcSet = environment.meta.images.find(i => i.type === "preview-thumbnail").srcset;
+
+    const environmentTitle = environment.meta.title;
+    const environmentAuthor = (environment.meta.authors || [])[0];
 
     const formNameClassNames = classNames("create-panel__form__name", {
       "create-panel__form__name--expanded": this.state.expanded
@@ -107,6 +110,45 @@ class HubCreatePanel extends Component {
                 />
               )}
             </div>
+            {this.state.expanded && (
+              <div className="create-panel__form__environment">
+                <div className="create-panel__form__environment__picker">
+                  <img className="create-panel__form__environment__picker__image" srcSet={environmentImageSrcSet} />
+                  <div className="create-panel__form__environment__picker__labels">
+                    <div className="create-panel__form__environment__picker__labels__header">
+                      <span className="create-panel__form__environment__picker__labels__header__title">
+                        {environmentTitle}
+                      </span>
+                      {environmentAuthor &&
+                        environmentAuthor.name && (
+                          <span className="create-panel__form__environment__picker__labels__header__author">
+                            <FormattedMessage id="home.environment_author_by" />
+                            <span>{environmentAuthor.name}</span>
+                          </span>
+                        )}
+                    </div>
+                    <div className="create-panel__form__environment__picker__labels__footer">
+                      <FormattedMessage id="home.environment_picker_footer" />
+                    </div>
+                  </div>
+                  <div className="create-panel__form__environment__picker__controls">
+                    <button
+                      className="create-panel__form__environment__picker__controls__prev"
+                      onClick={this.setToPreviousEnvironment}
+                    >
+                      <FontAwesomeIcon icon={faAngleLeft} />
+                    </button>
+
+                    <button
+                      className="create-panel__form__environment__picker__controls__next"
+                      onClick={this.setToNextEnvironment}
+                    >
+                      <FontAwesomeIcon icon={faAngleRight} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             <input
               className={formNameClassNames}
               value={this.state.name}
@@ -116,22 +158,6 @@ class HubCreatePanel extends Component {
               pattern={HUB_NAME_PATTERN}
               title={formatMessage({ id: "home.create_name.validation_warning" })}
             />
-            {this.state.expanded && (
-              <div className="create-panel__form__environment">
-                <div className="create-panel__form__environment__picker">
-                  <img className="create-panel__form__environment__picker__image" srcSet={environmentImageSrcSet} />
-                  <div className="create-panel__form__environment__picker__labels">labels</div>
-                  <div className="create-panel__form__environment__picker__controls">
-                    <button
-                      className="create-panel__form__environment__picker__controls__prev"
-                      onClick={this.setToPreviousEnvironment}
-                    >
-                      <FontAwesomeIcon icon={faAngleLeft} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </form>
