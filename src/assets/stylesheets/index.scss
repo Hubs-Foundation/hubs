@@ -137,7 +137,7 @@ body {
   flex: 10;
 }
 
-@media (max-height: 812px) {
+@media (max-height: 812px) , (max-width: 768px) {
   .hero-content__container {
     flex: 0 0 auto;
   }
