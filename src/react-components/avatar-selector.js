@@ -30,14 +30,16 @@ class AvatarSelector extends Component {
     this.props.onChange(previousAvatarId);
   }
 
-  componentDidUpdate() {
-    // HACK - a-animation ought to restart the animation when the `to` attribute changes, but it doesn't
-    // so we need to force it here.
-    const currRot = this.animation.parentNode.getAttribute('rotation');
-    this.animation.setAttribute('from', `${currRot.x} ${currRot.y} ${currRot.z}`);
-    this.animation.stop();
-    this.animation.handleMixinUpdate();
-    this.animation.start();
+  componentDidUpdate(prevProps) {
+    if (this.props.avatarId !== prevProps.avatarId) { 
+      // HACK - a-animation ought to restart the animation when the `to` attribute changes, but it doesn't
+      // so we need to force it here.
+      const currRot = this.animation.parentNode.getAttribute('rotation');
+      this.animation.setAttribute('from', `${currRot.x} ${currRot.y} ${currRot.z}`);
+      this.animation.stop();
+      this.animation.handleMixinUpdate();
+      this.animation.start();
+    }
   }
 
   render () {
