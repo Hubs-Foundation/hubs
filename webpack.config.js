@@ -108,7 +108,7 @@ const config = {
   performance: {
     // Ignore media and sourcemaps when warning about file size.
     assetFilter(assetFilename) {
-      return !/\.(map|png|jpg|gif|glb)$/.test(assetFilename);
+      return !/\.(map|png|jpg|gif|glb|webm)$/.test(assetFilename);
     }
   },
   module: {
@@ -170,7 +170,7 @@ const config = {
         })
       },
       {
-        test: /\.(png|jpg|gif|glb|ogg|woff2|svg)$/,
+        test: /\.(png|jpg|gif|glb|ogg|woff2|svg|webm)$/,
         use: {
           loader: "file-loader",
           options: {

@@ -20,7 +20,7 @@ AFRAME.registerComponent("gltf-bundle", {
       const gltfEl = document.createElement("a-gltf-entity");
       gltfEl.setAttribute("src", src);
       gltfEl.setAttribute("position", "0 0 0");
-      loaded.push(new Promise(resolve => gltfEl.addEventListener("loaded", resolve)));
+      loaded.push(new Promise(resolve => gltfEl.addEventListener("model-loaded", resolve)));
       this.el.appendChild(gltfEl);
     }
 

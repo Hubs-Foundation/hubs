@@ -1,0 +1,229 @@
+.create-panel {
+  display: flex;
+  flex-direction: column;
+
+  @media (max-width: 768px) {
+    align-items: center;
+  }
+
+  &__header {
+    color: $grey-text;
+    font-size: 1.2em;
+    margin-bottom: 14px;
+    margin-left: 12px;
+    text-shadow: 0px 0px 2px rgba(32, 32, 32, 1.0);
+
+    @media (max-width: 768px) {
+      text-align: center;
+    }
+  }
+
+  &__form {
+    position: relative;
+    width: 700px;
+
+    @media (max-width: 768px) , (max-height: 715px) {
+      width: auto;
+      width: 500px;
+    }
+
+    @media (max-width: 520px) {
+      width: 300px;
+    }
+
+    &__name {
+      @extend %rounded-border;
+      @extend %default-font;
+
+      color: white;
+      font-size: 2em;
+      background: black;
+      padding: 25px;
+      padding-left: 90px;
+      padding-right: 90px;
+      width: 100%;
+      line-height: 40px;
+
+      &::selection {
+	background-color: #2F80ED;
+	color: white;
+      }
+
+      &::-moz-selection {
+	background-color: #2F80ED;
+	color: white;
+      }
+
+      @media (max-width: 768px) , (max-height: 715px) {
+	min-width: auto;
+	font-size: 1.5em;
+	width: 100%;
+	text-align: center;
+      }
+
+      @media (max-width: 520px) {
+	padding-left: 15px;
+	font-size: 1.2em;
+      }
+      
+      &--expanded {
+	margin-top: 340px;
+	border-radius: 0px 0px 14px 14px;
+
+	@media (max-width: 768px) , (max-height: 715px) {
+	  margin-top: 275px;
+	}
+
+	@media (max-width: 520px) {
+	  margin-top: 165px;
+	}
+      }
+    }
+
+    &__submit-button , &__rotate-button {
+      appearance: none;
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    &__left-container {
+      position: absolute;
+      height: 100%;
+      width: 90px;
+      height: 95px;
+      left: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      bottom: 0;
+
+      @media (max-width: 520px) {
+	display: none;
+      }
+    }
+
+    &__right-container {
+      position: absolute;
+      height: 95px;
+      width: 90px;
+      right: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      bottom: 0;
+    }
+
+    &__environment {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      width: 700px;
+      height: 100%;
+      box-sizing: border-box;
+      border-radius: 14px;
+      border: 3px solid white;
+      border-radius: 14px;
+      overflow: hidden;
+      pointer-events: none;
+
+      @media (max-width: 768px) , (max-height: 715px) {
+	width: 100%;
+      }
+
+      &__picker {
+	width: 100%;
+	height: 340px;
+	border-bottom: 3px solid white;
+	overflow: hidden;
+	position: relative;
+
+	@media (max-width: 768px) , (max-height: 715px) {
+	  height: 280px;
+	}
+
+	@media (max-width: 520px) {
+	  height: 165px;
+	}
+
+	&__image {
+	  width: 112%;
+	  position: absolute;
+	  top: -3%;
+	  left: -3%;
+	}
+
+	&__labels {
+	  position: absolute;
+	  width: 100%;
+	  height: 100%;
+	  top: 0;
+	  left: 0;
+
+	  &__footer {
+	    position: absolute;
+	    bottom: 14px;
+	    left: 12px;
+	    font-size: 1.2em;
+	    text-shadow: 0px 0px 6px #202020;
+	    color: $light-text;
+	  }
+
+	  &__header {
+	    position: absolute;
+	    top: 14px;
+	    left: 18px;
+	    display: flex;
+	    flex-direction: column;
+	    text-shadow: 0px 0px 3px #404040;
+
+	    &__title {
+	      font-size: 1.6em;
+	      font-weight: bold;
+	      color: white;
+	    }
+
+	    &__author {
+	      color: $light-text;
+	      font-size: 1.4em;
+
+	      @media (max-width: 520px) {
+		display: none;
+	      }
+	    }
+	  }
+	}
+
+	&__controls {
+	  position: absolute;
+	  width: 100%;
+	  height: 100%;
+	  top: 0;
+	  left: 0;
+
+	  &__next, &__prev {
+	    @extend %big-icon-button;
+
+	    position: absolute;
+	    top: 50%;
+	    margin-top: -0.5em;
+	    pointer-events: auto;
+	    cursor: pointer;
+	  }
+
+	  &__prev {
+	    left: 0.2em;
+	  }
+
+	  &__next {
+	    right: 0.2em;
+	  }
+	}
+      }
+    }
+  }
+}
