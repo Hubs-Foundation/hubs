@@ -21,10 +21,8 @@ class ProfileEntryPanel extends Component {
   }
 
   storeUpdated = () => {
-    this.setState({
-      display_name: this.props.store.state.profile.display_name,
-      avatar_id: this.props.store.state.profile.avatar_id,
-    });
+    const { avatar_id, display_name } = this.props.store.state.profile;
+    this.setState({ avatar_id, display_name });
   }
 
   saveStateAndFinish = (e) => {
