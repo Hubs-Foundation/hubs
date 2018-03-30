@@ -3,6 +3,9 @@ import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
 import { generateHubName } from "../utils/name-generation";
 import classNames from "classnames";
+import faAngleLeft from "@fortawesome/fontawesome-free-solid/faAngleLeft";
+import faAngleRight from "@fortawesome/fontawesome-free-solid/faAngleRight";
+import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 
 const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
 
@@ -18,7 +21,7 @@ class HubCreatePanel extends Component {
     this.state = {
       name: generateHubName(),
       environmentIndex: Math.floor(Math.random() * props.environments.length),
-      expanded: true
+      expanded: false
     };
   }
 
@@ -118,7 +121,14 @@ class HubCreatePanel extends Component {
                 <div className="create-panel__form__environment__picker">
                   <img className="create-panel__form__environment__picker__image" srcSet={environmentImageSrcSet} />
                   <div className="create-panel__form__environment__picker__labels">labels</div>
-                  <div className="create-panel__form__environment__picker__controls">controls</div>
+                  <div className="create-panel__form__environment__picker__controls">
+                    <button
+                      className="create-panel__form__environment__picker__controls__prev"
+                      onClick={this.setToPreviousEnvironment}
+                    >
+                      <FontAwesomeIcon icon={faAngleLeft} />
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

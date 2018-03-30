@@ -1,188 +1,168 @@
 .create-panel {
   display: flex;
   flex-direction: column;
-}
 
-@media (max-width: 768px) {
-  .create-panel {
+  @media (max-width: 768px) {
     align-items: center;
   }
-}
 
-.create-panel__header {
-  color: $grey-text;
-  font-size: 1.2em;
-  margin-bottom: 14px;
-  margin-left: 12px;
-  text-shadow: 0px 0px 2px rgba(32, 32, 32, 1.0);
-}
-
-@media (max-width: 768px) {
-  .create-panel__header {
-    text-align: center;
-  }
-}
-
-.create-panel__form {
-  position: relative;
-  width: 700px;
-}
-
-@media (max-width: 768px) , (max-height: 715px) {
-  .create-panel__form {
-    width: auto;
-    width: 500px;
-  }
-}
-
-@media (max-width: 520px) {
-  .create-panel__form {
-    width: 300px;
-  }
-}
-
-.create-panel__form__name {
-  @extend %rounded-border;
-  @extend %default-font;
-
-  color: white;
-  font-size: 2em;
-  background: black;
-  padding: 25px;
-  padding-left: 90px;
-  padding-right: 90px;
-  width: 100%;
-  line-height: 40px;
-}
-
-.create-panel__form__name--expanded {
-  padding-top: 365px;
-}
-
-@media (max-width: 768px) , (max-height: 715px) {
-  .create-panel__form__name {
-    min-width: auto;
-    font-size: 1.5em;
-    width: 100%;
-    text-align: center;
-  }
-
-  .create-panel__form__name--expanded {
-    padding-top: 300px;
-  }
-}
-
-@media (max-width: 520px) {
-  .create-panel__form__name {
-    padding-left: 15px;
+  &__header {
+    color: $grey-text;
     font-size: 1.2em;
+    margin-bottom: 14px;
+    margin-left: 12px;
+    text-shadow: 0px 0px 2px rgba(32, 32, 32, 1.0);
+
+    @media (max-width: 768px) {
+      text-align: center;
+    }
   }
 
-  .create-panel__form__name--expanded {
-    padding-top: 190px;
+  &__form {
+    position: relative;
+    width: 700px;
+
+    @media (max-width: 768px) , (max-height: 715px) {
+      width: auto;
+      width: 500px;
+    }
+
+    @media (max-width: 520px) {
+      width: 300px;
+    }
+
+    &__name {
+      @extend %rounded-border;
+      @extend %default-font;
+
+      color: white;
+      font-size: 2em;
+      background: black;
+      padding: 25px;
+      padding-left: 90px;
+      padding-right: 90px;
+      width: 100%;
+      line-height: 40px;
+
+      &::selection {
+	background-color: #2F80ED;
+	color: white;
+      }
+
+      &::-moz-selection {
+	background-color: #2F80ED;
+	color: white;
+      }
+
+      @media (max-width: 768px) , (max-height: 715px) {
+	min-width: auto;
+	font-size: 1.5em;
+	width: 100%;
+	text-align: center;
+      }
+
+      @media (max-width: 520px) {
+	padding-left: 15px;
+	font-size: 1.2em;
+      }
+      
+      &--expanded {
+	padding-top: 365px;
+
+	@media (max-width: 768px) , (max-height: 715px) {
+	  padding-top: 300px;
+	}
+
+	@media (max-width: 520px) {
+	  padding-top: 190px;
+	}
+      }
+    }
+
+    &__left_button {
+      position: absolute;
+      height: 100%;
+      width: 90px;
+      height: 95px;
+      left: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      bottom: 0;
+
+      @media (max-width: 520px) {
+	display: none;
+      }
+    }
+
+    &__right_button {
+      position: absolute;
+      height: 95px;
+      width: 90px;
+      right: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      bottom: 0;
+    }
+
+    &__environment {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      width: 700px;
+      height: 100%;
+      box-sizing: border-box;
+      border-radius: 14px;
+      border: 3px solid white;
+      border-radius: 14px;
+      overflow: hidden;
+      pointer-events: none;
+
+      @media (max-width: 768px) , (max-height: 715px) {
+	width: 100%;
+      }
+
+      &__picker {
+	width: 100%;
+	height: 340px;
+	border-bottom: 3px solid white;
+	overflow: hidden;
+	position: relative;
+
+	@media (max-width: 768px) , (max-height: 715px) {
+	  height: 280px;
+	}
+
+	@media (max-width: 520px) {
+	  height: 165px;
+	}
+
+	&__image {
+	  width: 112%;
+	  position: absolute;
+	  top: -3%;
+	  left: -3%;
+	}
+
+	&__labels {
+	  position: absolute;
+	  width: 100%;
+	  height: 100%;
+	  top: 0;
+	  left: 0;
+	}
+
+	&__controls {
+	  position: absolute;
+	  width: 100%;
+	  height: 100%;
+	  top: 0;
+	  left: 0;
+	}
+      }
+    }
   }
-}
-
-.create-panel__form__name::selection {
-  background-color: #2F80ED;
-  color: white;
-}
-
-.create-panel__form__name::-moz-selection {
-  background-color: #2F80ED;
-  color: white;
-}
-
-.create-panel__form__left_button {
-  position: absolute;
-  height: 100%;
-  width: 90px;
-  height: 95px;
-  left: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  bottom: 0;
-}
-
-@media (max-width: 520px) {
-  .create-panel__form__left_button {
-    display: none;
-  }
-}
-
-.create-panel__form__right_button {
-  position: absolute;
-  height: 95px;
-  width: 90px;
-  right: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  bottom: 0;
-}
-
-.create-panel__form__environment {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 700px;
-  height: 100%;
-  box-sizing: border-box;
-  border-radius: 14px;
-  border: 3px solid white;
-  border-radius: 14px;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-@media (max-width: 768px) , (max-height: 715px) {
-  .create-panel__form__environment {
-    width: 100%;
-  }
-}
-
-.create-panel__form__environment__picker {
-  width: 100%;
-  height: 340px;
-  border-bottom: 3px solid white;
-  overflow: hidden;
-  position: relative;
-}
-
-@media (max-width: 768px) , (max-height: 715px) {
-  .create-panel__form__environment__picker {
-    height: 280px;
-  }
-}
-
-@media (max-width: 520px) {
-  .create-panel__form__environment__picker {
-    height: 165px;
-  }
-}
-
-.create-panel__form__environment__picker__image {
-  width: 112%;
-  position: absolute;
-  top: -3%;
-  left: -3%;
-}
-
-.create-panel__form__environment__picker__labels {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-}
-
-.create-panel__form__environment__picker__controls {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
 }
