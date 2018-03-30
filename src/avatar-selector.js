@@ -12,7 +12,7 @@ import "./components/audio-feedback";
 import "./components/loop-animation";
 import "./elements/a-progressive-asset";
 import "./gltf-component-mappings";
-import { avatars } from "./assets/avatars/avatars.json";
+import { avatars } from "./assets/avatars/avatars.js";
 import { avatarIds } from "./utils/identity";
 
 import { App } from "./App";

@@ -1,4 +1,4 @@
-import { avatars } from "../assets/avatars/avatars.json";
+import { avatars } from "../assets/avatars/avatars.js";
 
 const names = [
   "albattani",
