@@ -18,7 +18,7 @@ class HubCreatePanel extends Component {
     this.state = {
       name: generateHubName(),
       environmentIndex: Math.floor(Math.random() * props.environments.length),
-      expanded: true
+      expanded: false
     };
   }
 
@@ -67,9 +67,11 @@ class HubCreatePanel extends Component {
     return (
       <form onSubmit={this.createHub}>
         <div className="create-panel">
-          <div className="create-panel__header">
-            <FormattedMessage id={this.state.expanded ? "home.create_header_expanded" : "home.create_header"} />
-          </div>
+          {!this.state.expanded && (
+            <div className="create-panel__header">
+              <FormattedMessage id="home.create_header" />
+            </div>
+          )}
           <div className="create-panel__form">
             <div
               className="create-panel__form__left_button"
