@@ -1,6 +1,6 @@
 const GLTFCache = {};
 
-AFRAME.AGLTFEntity = {
+AFRAME.GLTFModelPlus = {
   defaultInflator(el, componentName, componentData) {
     if (AFRAME.components[componentName].multiple && Array.isArray(componentData)) {
       for (let i = 0; i < componentData.length; i++) {
@@ -11,8 +11,8 @@ AFRAME.AGLTFEntity = {
     }
   },
   registerComponent(componentKey, componentName, inflator) {
-    AFRAME.AGLTFEntity.components[componentKey] = {
-      inflator: inflator || AFRAME.AGLTFEntity.defaultInflator,
+    AFRAME.GLTFModelPlus.components[componentKey] = {
+      inflator: inflator || AFRAME.GLTFModelPlus.defaultInflator,
       componentName
     };
   },
@@ -125,7 +125,7 @@ const inflateEntities = function(parentEl, node) {
   if (entityComponents) {
     for (const prop in entityComponents) {
       if (entityComponents.hasOwnProperty(prop)) {
-        const { inflator, componentName } = AFRAME.AGLTFEntity.components[prop];
+        const { inflator, componentName } = AFRAME.GLTFModelPlus.components[prop];
 
         if (inflator) {
           inflator(el, componentName, entityComponents[prop]);
