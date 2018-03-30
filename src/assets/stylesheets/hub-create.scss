@@ -41,7 +41,6 @@
   }
 }
 
-
 .create-panel__form__name {
   @extend %rounded-border;
   @extend %default-font;
@@ -170,4 +169,20 @@
   position: absolute;
   top: -3%;
   left: -3%;
+}
+
+.create-panel__form__environment__picker__labels {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+.create-panel__form__environment__picker__controls {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
 }

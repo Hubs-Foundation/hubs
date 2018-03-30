@@ -18,7 +18,7 @@ class HubCreatePanel extends Component {
     this.state = {
       name: generateHubName(),
       environmentIndex: Math.floor(Math.random() * props.environments.length),
-      expanded: false
+      expanded: true
     };
   }
 
@@ -117,6 +117,8 @@ class HubCreatePanel extends Component {
               <div className="create-panel__form__environment">
                 <div className="create-panel__form__environment__picker">
                   <img className="create-panel__form__environment__picker__image" srcSet={environmentImageSrcSet} />
+                  <div className="create-panel__form__environment__picker__labels">labels</div>
+                  <div className="create-panel__form__environment__picker__controls">controls</div>
                 </div>
               </div>
             )}
