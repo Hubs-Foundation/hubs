@@ -120,7 +120,8 @@ class HomeRoot extends Component {
                   </a>
                 </div>
                 <div className="footer-content__links__bottom">
-                  made with ❤️ by <span style={{ fontWeight: "bold", color: "white" }}>moz://a</span>
+                  <FormattedMessage id="home.made_with_love" />
+                  <span style={{ fontWeight: "bold", color: "white" }}>moz://a</span>
                 </div>
               </div>
             </div>
