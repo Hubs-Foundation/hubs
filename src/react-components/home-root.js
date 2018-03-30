@@ -57,9 +57,7 @@ class HomeRoot extends Component {
           <div className="main-content">
             <div className="header-content">
               <div className="header-content__title">
-                <div className="header-content__title__name">
-                  <span style={{ fontWeight: "bold" }}>moz://a</span>&nbsp;duck
-                </div>
+                <img className="header-content__title__name" src="../assets/images/logo.svg" />
                 <div className="header-content__title__preview">preview</div>
               </div>
               <div className="header-content__experiment">
