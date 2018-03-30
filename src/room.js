@@ -218,6 +218,7 @@ function mountUI(scene) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.vr_entry_type || null;
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
+  const htmlPrefix = document.body.dataset.htmlPrefix || "";
 
   const uiRoot = ReactDOM.render(
     <UIRoot
@@ -229,7 +230,8 @@ function mountUI(scene) {
         disableAutoExitOnConcurrentLoad,
         forcedVREntryType,
         enableScreenSharing,
-        store
+        store,
+        htmlPrefix
       }}
     />,
     document.getElementById("ui-root")

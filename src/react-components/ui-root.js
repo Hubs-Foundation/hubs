@@ -61,7 +61,8 @@ class UIRoot extends Component {
     forcedVREntryType: PropTypes.string,
     enableScreenSharing: PropTypes.bool,
     store: PropTypes.object,
-    scene: PropTypes.object
+    scene: PropTypes.object,
+    htmlPrefix: PropTypes.object
   };
 
   state = {
@@ -661,7 +662,11 @@ class UIRoot extends Component {
                 <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
 
                 {this.state.showProfileEntry && (
-                  <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store} />
+                  <ProfileEntryPanel 
+                    finished={this.onProfileFinished} 
+                    store={this.props.store} 
+                    htmlPrefix={this.props.htmlPrefix}
+                  />
                 )}
               </div>
             )}
