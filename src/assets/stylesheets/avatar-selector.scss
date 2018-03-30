@@ -19,22 +19,20 @@
   &__previous-button, &__next-button {
     position: absolute;
     top: 50%;
-    margin-top: -4em;
+    margin-top: -0.5em;
     appearance: none;
     -moz-appearance: none;
     -webkit-appearance: none;
     background: transparent;
     color: white;
     border: none;
+    font-size: 64pt;
   }
   &__previous-button {
-    left: -2em;
+    left: 0.2em;
   }
   &__next-button {
-    right: -2em;
-  }
-  &__button-icon {
-    font-size: 84pt;
+    right: 0.2em;
   }
   &__loading {
     @extend %default-font;

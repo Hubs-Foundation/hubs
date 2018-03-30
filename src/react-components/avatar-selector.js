@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, FormattedMessage } from 'react-intl';
+import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import faAngleLeft from '@fortawesome/fontawesome-free-solid/faAngleLeft';
+import faAngleRight from '@fortawesome/fontawesome-free-solid/faAngleRight';
 
 class AvatarSelector extends Component {
   static propTypes = {
@@ -108,10 +111,10 @@ class AvatarSelector extends Component {
         ></a-gltf-entity>
       </a-scene>
       <button className="avatar-selector__previous-button" onClick={this.emitChangeToPrevious}>
-        <i className="avatar-selector__button-icon material-icons">keyboard_arrow_left</i>
+        <FontAwesomeIcon icon={faAngleLeft} />
       </button>
       <button className="avatar-selector__next-button" onClick={this.emitChangeToNext}>
-        <i className="avatar-selector__button-icon material-icons">keyboard_arrow_right</i>
+        <FontAwesomeIcon icon={faAngleRight} />
       </button>
       </div>
     );
