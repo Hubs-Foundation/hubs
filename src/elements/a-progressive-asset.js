@@ -9,17 +9,17 @@ AFRAME.registerElement("a-progressive-asset", {
       value() {
         this.data = null;
         this.isAssetItem = true;
-
-        if (!this.parentNode.fileLoader) {
-          throw new Error("a-progressive-asset must be the child of an a-assets element.");
-        }
-
-        this.fileLoader = this.parentNode.fileLoader;
       }
     },
 
     attachedCallback: {
       value() {
+        if (!this.parentNode.fileLoader) {
+          throw new Error("a-progressive-asset must be the child of an a-assets element.");
+        }
+
+        this.fileLoader = this.parentNode.fileLoader;
+
         const self = this;
         const fallbackSrc = this.getAttribute("src");
         const highSrc = this.getAttribute("high-src");
