@@ -81,14 +81,16 @@ class HomeRoot extends Component {
                       </span>
                     </div>
 
-                    <a
-                      className="header-content__experiment__info__link"
-                      rel="noopener noreferrer"
-                      target="_blank"
-                      href="https://github.com/mozilla/mr-social-client"
-                    >
-                      <FormattedMessage id="home.view_source" />
-                    </a>
+                    <div>
+                      <a
+                        className="header-content__experiment__info__link"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                        href="https://github.com/mozilla/mr-social-client"
+                      >
+                        <FormattedMessage id="home.view_source" />
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>

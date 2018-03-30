@@ -43,7 +43,6 @@
       padding-right: 90px;
       width: 100%;
       line-height: 40px;
-      z-index: 1;
 
       &::selection {
 	background-color: #2F80ED;
@@ -68,19 +67,29 @@
       }
       
       &--expanded {
-	padding-top: 365px;
+	margin-top: 340px;
+	border-radius: 0px 0px 14px 14px;
 
 	@media (max-width: 768px) , (max-height: 715px) {
-	  padding-top: 300px;
+	  margin-top: 275px;
 	}
 
 	@media (max-width: 520px) {
-	  padding-top: 190px;
+	  margin-top: 165px;
 	}
       }
     }
 
-    &__left_button {
+    &__submit-button , &__rotate-button {
+      appearance: none;
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    &__left-container {
       position: absolute;
       height: 100%;
       width: 90px;
@@ -97,7 +106,7 @@
       }
     }
 
-    &__right_button {
+    &__right-container {
       position: absolute;
       height: 95px;
       width: 90px;
@@ -121,7 +130,6 @@
       border-radius: 14px;
       overflow: hidden;
       pointer-events: none;
-      z-index: 2;
 
       @media (max-width: 768px) , (max-height: 715px) {
 	width: 100%;

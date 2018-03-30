@@ -21,7 +21,7 @@ class HubCreatePanel extends Component {
     this.state = {
       name: generateHubName(),
       environmentIndex: Math.floor(Math.random() * props.environments.length),
-      expanded: false
+      expanded: true
     };
   }
 
@@ -100,7 +100,7 @@ class HubCreatePanel extends Component {
           )}
           <div className="create-panel__form">
             <div
-              className="create-panel__form__left_button"
+              className="create-panel__form__left-container"
               onClick={e => {
                 e.preventDefault();
 
@@ -111,24 +111,22 @@ class HubCreatePanel extends Component {
                 }
               }}
             >
-              {this.state.expanded ? (
-                <img className="create-panel__form__rotate_button" src="../assets/images/dice_icon.svg" />
-              ) : (
-                <img className="create-panel__form__rotate_button" src="../assets/images/expand_dots_icon.svg" />
-              )}
+              <button className="create-panel__form__rotate-button">
+                {this.state.expanded ? (
+                  <img src="../assets/images/dice_icon.svg" />
+                ) : (
+                  <img src="../assets/images/expand_dots_icon.svg" />
+                )}
+              </button>
             </div>
-            <div className="create-panel__form__right_button" onClick={this.createHub}>
-              {this.isHubNameValid() ? (
-                <img
-                  className="create-panel__form__submit_button"
-                  src="../assets/images/hub_create_button_enabled.svg"
-                />
-              ) : (
-                <img
-                  className="create-panel__form__submit_button"
-                  src="../assets/images/hub_create_button_disabled.svg"
-                />
-              )}
+            <div className="create-panel__form__right-container" onClick={this.createHub}>
+              <button className="create-panel__form__submit-button">
+                {this.isHubNameValid() ? (
+                  <img src="../assets/images/hub_create_button_enabled.svg" />
+                ) : (
+                  <img src="../assets/images/hub_create_button_disabled.svg" />
+                )}
+              </button>
             </div>
             {this.state.expanded && (
               <div className="create-panel__form__environment">
