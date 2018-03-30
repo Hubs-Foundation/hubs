@@ -11,7 +11,8 @@
     "postinstall": "node ./scripts/postinstall.js",
     "start": "cross-env NODE_ENV=development webpack-dev-server",
     "build": "rimraf ./public && cross-env NODE_ENV=production webpack --mode=production",
-    "prettier": "prettier --write src/**/*.js"
+    "prettier": "prettier --write src/**/*.js",
+    "lint": "eslint *.js src/**/*.js"
   },
   "dependencies": {
     "aframe-billboard-component": "^1.0.0",
