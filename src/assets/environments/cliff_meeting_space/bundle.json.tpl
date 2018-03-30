@@ -8,7 +8,7 @@
       { "name": "Jim Conrad", "github": "j-conrad" }
     ],
     "images": [
-      { "type": "preview-thumbnail", "srcset": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Big_Buck_Bunny_4K.webm/310px-seek%3D116-Big_Buck_Bunny_4K.webm.jpg" }
+      { "type": "preview-thumbnail", "srcset": "<%= require("./preview-thumbnail.png") %>" }
     ]
   },
   "assets": [
