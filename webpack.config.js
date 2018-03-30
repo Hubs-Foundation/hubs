@@ -77,6 +77,7 @@ const config = {
   entry: {
     lobby: path.join(__dirname, "src", "lobby.js"),
     room: path.join(__dirname, "src", "room.js"),
+    'avatar-selector': path.join(__dirname, "src", "avatar-selector.js"),
     onboarding: path.join(__dirname, "src", "onboarding.js")
   },
   output: {
@@ -194,6 +195,12 @@ const config = {
       filename: "room.html",
       template: path.join(__dirname, "src", "room.html"),
       chunks: ["room"],
+      inject: "head"
+    }),
+    new HTMLWebpackPlugin({
+      filename: "avatar-selector.html",
+      template: path.join(__dirname, "src", "avatar-selector.html"),
+      chunks: ["avatar-selector"],
       inject: "head"
     }),
     new HTMLWebpackPlugin({
