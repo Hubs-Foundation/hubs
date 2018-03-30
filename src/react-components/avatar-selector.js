@@ -49,8 +49,8 @@ class AvatarSelector extends Component {
         id={avatar.id}
         key={avatar.id}
         response-type="arraybuffer"
-        high-src={`/${avatar.models.high}`}
-        low-src={`/${avatar.models.low}`}
+        high-src={`${avatar.models.high}`}
+        low-src={`${avatar.models.low}`}
       ></a-progressive-asset>
     ));
 
