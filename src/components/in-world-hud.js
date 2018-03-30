@@ -12,7 +12,13 @@ AFRAME.registerComponent("in-world-hud", {
     this.nametag.object3DMap.text.renderOrder = 1;
     this.mic.object3DMap.mesh.renderOrder = 1;
     this.avatar.object3DMap.mesh.renderOrder = 1;
-    this.data.raycaster.components.line.material.depthTest = false;
+    const lineMaterial = new THREE.MeshBasicMaterial();
+    lineMaterial.transparent = true;
+    lineMaterial.color = { b: 0.76, g: 0.75, r: 0.45 };
+    lineMaterial.depthTest = false;
+    const line = this.data.raycaster.object3DMap.line;
+    line.renderOrder = 2;
+    line.material = lineMaterial;
 
     const muted = this.el.sceneEl.is("muted");
     this.mic.setAttribute("src", muted ? "#muted" : "#unmuted");
