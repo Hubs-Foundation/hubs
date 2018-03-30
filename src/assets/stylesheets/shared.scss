@@ -33,3 +33,12 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   padding-top: 4px;
 }
 
+%big-icon-button {
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  color: white;
+  border: none;
+  font-size: 64pt;
+}

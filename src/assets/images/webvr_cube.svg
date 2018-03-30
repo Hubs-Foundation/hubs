@@ -1,0 +1,22 @@
+<svg width="30" height="35" viewBox="0 0 30 35" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<title>webvr_cube</title>
+<desc>Created using Figma</desc>
+<g id="Canvas" transform="translate(-269 391)">
+<g id="webvr_cube">
+<g id="Vector">
+<use xlink:href="#path0_fill" transform="translate(269.099 -382.765)" fill="#2F80ED"/>
+</g>
+<g id="Vector 4">
+<use xlink:href="#path1_fill" transform="translate(269 -391)" fill="#B8D5FC"/>
+</g>
+<g id="Vector 3">
+<use xlink:href="#path2_fill" transform="translate(283.882 -382.5)" fill="#6DA4ED"/>
+</g>
+</g>
+</g>
+<defs>
+<path id="path0_fill" d="M 14.7831 8.69853L 0 0L 0 17.9118L 14.8325 26.7647L 14.7831 8.69853Z"/>
+<path id="path1_fill" d="M 14.882 0L 30 8.5L 14.882 16.9338L 0 8.33823L 14.882 0Z"/>
+<path id="path2_fill" d="M 15.1181 17.5L 0.0494418 26.5L 0.0494418 25.9338L 0 8.43381L 15.1181 0L 15.1181 17.5Z"/>
+</defs>
+</svg>

@@ -3,8 +3,9 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Mozilla Mixed Reality Social Client</title>
+    <title>moz://a duck</title>
 
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="<%= ORIGIN_TRIAL_EXPIRES %>" content="<%= ORIGIN_TRIAL_TOKEN %>">
     <% if(NODE_ENV === "production") { %>
         <script src="https://cdn.rawgit.com/brianpeiris/aframe/845825ae694449524c185c44a314d361eead4680/dist/aframe-master.min.js"></script>
@@ -93,11 +94,6 @@
             ></a-progressive-asset>
 
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
-
-            <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src="./assets/environments/MeetingSpace1_mesh.glb"></a-asset-item>
-            <a-asset-item id="outdoor-facade-mesh" response-type="arraybuffer" src="./assets/environments/OutdoorFacade_mesh.glb"></a-asset-item>
-            <a-asset-item id="floor-nav-mesh" response-type="arraybuffer" src="./assets/environments/FloorNav_mesh.glb"></a-asset-item>
-            <a-asset-item id="cliff-vista-mesh" response-type="arraybuffer" src="./assets/environments/CliffVista_mesh.glb"></a-asset-item>
             <a-asset-item id="interactable-duck" response-type="arraybuffer" src="./assets/interactables/duck/DuckyMesh.glb"></a-asset-item>
 
             <img id="water-normal-map" src="./assets/waternormals.jpg"></a-asset-item>
@@ -328,34 +324,7 @@
         ></a-entity>
 
         <!-- Environment -->
-        <a-gltf-entity
-            id="meeting-space"
-            src="#meeting-space1-mesh"
-            position="0 0 0"
-        ></a-gltf-entity>
-
-        <a-gltf-entity
-            id="outdoor-facade"
-            src="#outdoor-facade-mesh"
-            position="0 0 0"
-            xr="ar: false"
-        ></a-gltf-entity>
-
-        <a-gltf-entity
-            id="floor-nav"
-            src="#floor-nav-mesh"
-            visible="false"
-            position="0 0 0"
-            xr="ar: false"
-        ></a-gltf-entity>
-
-        <a-gltf-entity
-            id="cliff-vista"
-            src="#cliff-vista-mesh"
-            layers="reflection:true"
-            position="0 0 0"
-            xr="ar: false"
-        ></a-gltf-entity>
+        <a-entity id="environment-root" position="0 0 0"/>
 
         <a-entity id="skybox"
             id="skybox"
