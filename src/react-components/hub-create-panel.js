@@ -21,7 +21,10 @@ class HubCreatePanel extends Component {
     this.state = {
       name: generateHubName(),
       environmentIndex: Math.floor(Math.random() * props.environments.length),
-      expanded: true
+
+      // HACK: expand on small screens by default to ensure scene selection possible.
+      // Eventually this could/should be done via media queries.
+      expanded: window.innerWidth < 420
     };
   }
 
