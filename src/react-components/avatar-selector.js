@@ -4,6 +4,7 @@ import { injectIntl, FormattedMessage } from 'react-intl';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import faAngleLeft from '@fortawesome/fontawesome-free-solid/faAngleLeft';
 import faAngleRight from '@fortawesome/fontawesome-free-solid/faAngleRight';
+import meetingSpace from '../assets/environments/MeetingSpace1_mesh.glb';
 
 class AvatarSelector extends Component {
   static propTypes = {
@@ -48,8 +49,8 @@ class AvatarSelector extends Component {
         id={avatar.id}
         key={avatar.id}
         response-type="arraybuffer"
-        high-src={`./src/assets/avatars/${avatar.models.high}`}
-        low-src={`./src/assets/avatars/${avatar.models.low}`}
+        high-src={`/${avatar.models.high}`}
+        low-src={`/${avatar.models.low}`}
       ></a-progressive-asset>
     ));
 
@@ -80,11 +81,11 @@ class AvatarSelector extends Component {
           <a-asset-item
             id="meeting-space1-mesh"
             response-type="arraybuffer"
-            src="./src/assets/environments/MeetingSpace1_mesh.glb"
+            src={meetingSpace}
           ></a-asset-item>
         </a-assets>
 
-        <a-entity data-avatar={this.props.avatarId}>
+        <a-entity>
           <a-animation
             ref={anm => this.animation = anm}
             attribute="rotation"
@@ -92,7 +93,7 @@ class AvatarSelector extends Component {
             easing="ease-out"
             to={`0 ${360 * this.getAvatarIndex() / this.props.avatars.length + 180} 0`}>
           </a-animation>
-        {avatarEntities}
+          {avatarEntities}
         </a-entity>
 
         <a-entity position="0 1.5 -5.6" rotation="-10 180 0" camera></a-entity>
