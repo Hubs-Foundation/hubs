@@ -1,3 +1,5 @@
+import queryString from "query-string";
+
 import styles from "./networked-video-player.css";
 
 const nafConnected = function() {
@@ -9,14 +11,6 @@ const nafConnected = function() {
 AFRAME.registerComponent("networked-video-player", {
   schema: {},
   async init() {
-    let container = document.getElementById("nvp-debug-container");
-    if (!container) {
-      container = document.createElement("div");
-      container.id = "nvp-debug-container";
-      container.classList.add(styles.container);
-      document.body.appendChild(container);
-    }
-
     await nafConnected();
 
     const networkedEl = await NAF.utils.getNetworkedEntity(this.el);
@@ -25,6 +19,24 @@ AFRAME.registerComponent("networked-video-player", {
     }
 
     const ownerId = networkedEl.components.networked.data.owner;
+
+    const qs = queryString.parse(location.search);
+    const rejectScreenShares = qs.accept_screen_shares === undefined;
+    if (ownerId !== NAF.clientId && rejectScreenShares) {
+      // Toggle material visibility since object visibility is network-synced
+      // TODO: There ought to be a better way to disable network syncs on a remote entity
+      this.el.setAttribute("material", {visible: false});
+      return;
+    }
+
+    let container = document.getElementById("nvp-debug-container");
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "nvp-debug-container";
+      container.classList.add(styles.container);
+      document.body.appendChild(container);
+    }
+
     const stream = await NAF.connection.adapter.getMediaStream(ownerId, "video");
     if (!stream) {
       return;
