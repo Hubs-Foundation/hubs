@@ -46,14 +46,6 @@ body {
   z-index: 1;
 }
 
-@media (max-width: 768px) {
-  .background-video video {
-    width: 50%;
-    height: 50%;
-  }
-}
-
-
 .header-content {
   padding: 1.5em 2.5em 1.5em 2.5em;
   background-color: rgba(0, 0, 0, 0.85);
@@ -162,9 +154,14 @@ body {
   font-weight: bold;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px) , (max-height: 715px) {
   .hero-content__container__title {
     font-size: 1.9em;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-content__container__title {
     text-align: center;
   }
 }
@@ -181,11 +178,16 @@ body {
   color: $light-text;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px) , (max-height: 715px) {
   .hero-content__container__subtitle {
     font-size: 1.1em;
-    text-align: center;
     margin-top: 0.2em;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-content__container__subtitle {
+    text-align: center;
   }
 }
 
