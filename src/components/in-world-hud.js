@@ -7,9 +7,11 @@ AFRAME.registerComponent("in-world-hud", {
     this.bg = this.el.querySelector(".bg");
     this.mic = this.el.querySelector(".mic");
     this.nametag = this.el.querySelector(".username");
+    this.avatar = this.el.querySelector(".avatar");
     this.nametag.object3DMap.text.material.depthTest = false;
     this.nametag.object3DMap.text.renderOrder = 1;
     this.mic.object3DMap.mesh.renderOrder = 1;
+    this.avatar.object3DMap.mesh.renderOrder = 1;
     this.data.raycaster.components.line.material.depthTest = false;
 
     const muted = this.el.sceneEl.is("muted");
