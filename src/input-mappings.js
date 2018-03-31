@@ -10,6 +10,10 @@ const inGameActions = {
     action_teleport_down: { label: "Teleport Aim" },
     action_teleport_up: { label: "Teleport" },
     action_share_screen: { label: "Share Screen" }
+  },
+  hud: {
+    action_ui_select_down: { label: "Select UI item" },
+    action_ui_select_up: { label: "Select UI item" }
   }
 };
 
@@ -79,6 +83,7 @@ const config = {
         q_press: "snap_rotate_left",
         e_press: "snap_rotate_right",
         v_press: "action_share_screen",
+        b_press: "action_select_hud_item",
 
         // We can't create a keyboard behaviour with AFIM yet,
         // so these will get captured by wasd-to-analog2d
@@ -98,6 +103,40 @@ const config = {
         S_up: "s_up",
         D_down: "d_down",
         D_up: "d_up"
+      }
+    },
+    hud: {
+      "vive-controls": {
+        triggerdown: { right: "action_ui_select_down" },
+        triggerup: { right: "action_ui_select_up" }
+      },
+      "oculus-touch-controls": {
+        triggerdown: { right: "action_ui_select_down" },
+        triggerup: { right: "action_ui_select_up" },
+        gripdown: "middle_ring_pinky_down",
+        gripup: "middle_ring_pinky_up",
+        abuttontouchstart: "thumb_down",
+        abuttontouchend: "thumb_up",
+        bbuttontouchstart: "thumb_down",
+        bbuttontouchend: "thumb_up",
+        xbuttontouchstart: "thumb_down",
+        xbuttontouchend: "thumb_up",
+        ybuttontouchstart: "thumb_down",
+        ybuttontouchend: "thumb_up",
+        surfacetouchstart: "thumb_down",
+        surfacetouchend: "thumb_up",
+        thumbsticktouchstart: "thumb_down",
+        thumbsticktouchend: "thumb_up",
+        triggertouchstart: "index_down",
+        triggertouchend: "index_up"
+      },
+      "daydream-controls": {
+        trackpaddown: { right: "action_ui_select_down" },
+        trackpadup: { right: "action_ui_select_up" }
+      },
+      "gearvr-controls": {
+        trackpaddown: { right: "action_ui_select_down" },
+        trackpadup: { right: "action_ui_select_up" }
       }
     }
   }
