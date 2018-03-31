@@ -112,7 +112,7 @@
 
                     <a-entity class="right-controller"></a-entity>
 
-                    <a-gltf-entity class="model" inflate="true">
+                    <a-entity class="model" gltf-model-plus="inflate: true">
                         <template data-selector=".RootScene">
                             <a-entity ik-controller animation-mixer></a-entity>
                         </template>
@@ -145,13 +145,13 @@
                         <template data-selector=".RightHand">
                             <a-entity personal-space-invader ></a-entity>
                         </template>
-                    </a-gltf-entity>
+                    </a-entity>
                 </a-entity>
             </template>
 
             <template id="interactable-template">
                 <a-entity
-                    gltf-model="#interactable-duck"
+                    gltf-model-plus="src: #interactable-duck"
                     scale="2 2 2"
                     class="interactable" 
                     super-networked-interactable="counter: #counter; mass: 5;"
@@ -176,8 +176,8 @@
         <!-- Interactables -->
         <a-entity id="counter" networked-counter="max: 3; ttl: 120"></a-entity>
 
-        <a-entity
-            gltf-model="#interactable-duck"
+        <a-entity 
+            gltf-model-plus="src: #interactable-duck"
             scale="2 2 2"
             class="interactable" 
             super-spawner="template: #interactable-template;" 
@@ -264,7 +264,7 @@
                 app-mode-toggle-attribute__line="mode: hud; property: visible;"
             ></a-entity>
 
-            <a-gltf-entity class="model" inflate="true">
+            <a-entity gltf-model-plus="inflate: true;" class="model">
                 <template data-selector=".RootScene">
                     <a-entity
                         ik-controller
@@ -285,14 +285,14 @@
 
                 <template data-selector=".LeftHand">
                     <a-entity>
-                        <a-gltf-entity
+                        <a-entity
                             id="watch"
-                            src="#watch-model"
+                            gltf-model-plus="src: #watch-model"
                             bone-mute-state-indicator
                             scale="1.5 1.5 1.5"
                             rotation="0 -90 90"
                             position="0 -0.04 0"
-                        ></a-gltf-entity>
+                        ></a--entity>
                         <a-entity
                             event-repeater="events: action_grab, action_release; eventSource: #player-left-controller"
                             static-body="shape: sphere; sphereRadius: 0.02"
@@ -313,7 +313,7 @@
                     </a-entity>
                 </template>
 
-            </a-gltf-entity>
+            </a-entity>
         </a-entity>
 
         <!-- Lights -->
