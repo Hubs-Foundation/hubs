@@ -21,14 +21,15 @@ AFRAME.registerComponent("hand-poses", {
     this.animatePose = this.animatePose.bind(this);
     this.animatePoses = this.animatePoses.bind(this);
     this.firstUpdate = this.firstUpdate.bind(this);
-    if (this.el.querySelector(this.data.mixer)) {
-      this.mixer = this.el.querySelector(this.data.mixer).components["animation-mixer"];
+    const mixerEl = this.el.querySelector(this.data.mixer);
+    if (mixerEl) {
+      this.mixer = mixerEl.components["animation-mixer"];
     }
 
-    let onLoad;
-    onLoad = () => {
-      if (this.el.querySelector(this.data.mixer)) {
-        this.mixer = this.el.querySelector(this.data.mixer).components["animation-mixer"];
+    const onLoad = () => {
+      const mixerEl = this.el.querySelector(this.data.mixer);
+      if (mixerEl) {
+        this.mixer = mixerEl.components["animation-mixer"];
       }
       if (!this.mixer) {
         // Can't find the mixer until spawned into the scene.
