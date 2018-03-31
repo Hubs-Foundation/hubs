@@ -2,6 +2,9 @@ const GLTFCache = {};
 
 AFRAME.GLTFModelPlus = {
   defaultInflator(el, componentName, componentData) {
+    if (!AFRAME.components[componentName]) {
+      throw new Error(`Inflator failed. "${componentName}" component does not exist.`);
+    }
     if (AFRAME.components[componentName].multiple && Array.isArray(componentData)) {
       for (let i = 0; i < componentData.length; i++) {
         el.setAttribute(componentName + "__" + i, componentData[i]);
@@ -206,7 +209,7 @@ AFRAME.registerComponent("gltf-model-plus", {
     this.el.querySelectorAll(":scope > template").forEach(templateEl =>
       this.templates.push({
         selector: templateEl.getAttribute("data-selector"),
-        templateRoot: document.importNode(templateEl.content.firstElementChild, true)
+        templateRoot: document.importNode(templateEl.firstElementChild || templateEl.content.firstElementChild, true)
       })
     );
   },
@@ -266,9 +269,8 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
-      const message = (e && e.message) || "Failed to load glTF model";
-      console.error(message);
-      this.el.emit("model-error", { format: "gltf", src });
+      console.error("Failed to load glTF model", e.message, this);
+      this.emit("model-error", { format: "gltf", src });
     }
   },
 

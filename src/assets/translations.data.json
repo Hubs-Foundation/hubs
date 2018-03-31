@@ -16,6 +16,7 @@
     "profile.save": "SAVE",
     "profile.display_name.validation_warning": "Alphanumerics and hyphens. At least 3 characters, no more than 32",
     "profile.header": "Your identity",
+    "profile.avatar-selector.loading": "Loading Avatars...",
     "audio.title": "Test your audio",
     "audio.subtitle-desktop": "Confirm HMD speaker output",
     "audio.subtitle-mobile": "Earphones are recommended",
@@ -31,6 +32,20 @@
     "autoexit.title": "Auto-ending session in ",
     "autoexit.title_units": " seconds",
     "autoexit.subtitle": "You have started another session.",
-    "autoexit.cancel": "CANCEL"
+    "autoexit.cancel": "CANCEL",
+    "home.create_header": "Name your room:",
+    "home.environment_picker_footer": "Choose a scene",
+    "home.create_name.validation_warning": "Invalid name, limited to 4 to 64 characters and limited symbols.",
+    "home.webvr_disclaimer_pre": "A ",
+    "home.webvr_disclaimer_post": " experiment by ",
+    "home.webvr_disclaimer_mr_team": "Mozilla Mixed Reality",
+    "home.view_source": "View Source",
+    "home.join_on_slack": "Join us on Slack",
+    "home.report_issue": "Report an Issue",
+    "home.get_updates": "Get Updates",
+    "home.hero_title": "A new way to get together online.",
+    "home.hero_subtitle": "Laugh, play, get stuff done, or just hang out.",
+    "home.made_with_love": "made with ❤️ by ",
+    "home.environment_author_by": " by "
   }
 }

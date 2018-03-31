@@ -1,4 +1,4 @@
-import "./assets/stylesheets/room.scss";
+import "./assets/stylesheets/hub.scss";
 import queryString from "query-string";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
@@ -42,6 +42,7 @@ import "./components/debug";
 import "./components/animation-mixer";
 import "./components/loop-animation";
 import "./components/gltf-model-plus";
+import "./components/gltf-bundle";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -101,6 +102,7 @@ AFRAME.registerInputMappings(inputConfig, true);
 
 const store = new Store();
 const concurrentLoadDetector = new ConcurrentLoadDetector();
+
 concurrentLoadDetector.start();
 
 // Always layer in any new default profile bits
@@ -112,22 +114,18 @@ async function exitScene() {
   document.body.removeChild(scene);
 }
 
-function updatePlayerInfoFromStore() {
+function applyProfileFromStore(playerRig) {
   const displayName = store.state.profile.display_name;
-  const qs = queryString.parse(location.search);
-  const playerRig = document.querySelector("#player-rig");
   playerRig.setAttribute("player-info", {
     displayName,
-    avatar: qs.avatar || "#bot-skinned-mesh"
+    avatarSrc: "#" + (store.state.profile.avatar_id || "botdefault")
   });
   document.querySelector("a-scene").emit("username-changed", { username: displayName });
 }
 
-async function enterScene(mediaStream, enterInVR) {
+async function enterScene(mediaStream, enterInVR, janusRoomId) {
   const scene = document.querySelector("a-scene");
   const playerRig = document.querySelector("#player-rig");
-  const qs = queryString.parse(location.search);
-
   document.querySelector("a-scene canvas").classList.remove("blurred");
   registerNetworkSchemas();
 
@@ -137,12 +135,14 @@ async function enterScene(mediaStream, enterInVR) {
 
   AFRAME.registerInputActions(inGameActions, "default");
 
+  document.querySelector("#player-camera").setAttribute("look-controls");
+
   scene.setAttribute("networked-scene", {
     adapter: "janus",
     audio: true,
     debug: true,
     connectOnLoad: false,
-    room: qs.room && !isNaN(parseInt(qs.room, 10)) ? parseInt(qs.room, 10) : 1,
+    room: janusRoomId,
     serverURL: process.env.JANUS_SERVER
   });
 
@@ -154,8 +154,9 @@ async function enterScene(mediaStream, enterInVR) {
     playerRig.setAttribute("virtual-gamepad-controls", {});
   }
 
-  updatePlayerInfoFromStore();
-  store.addEventListener("statechanged", updatePlayerInfoFromStore);
+  const applyProfileOnPlayerRig = applyProfileFromStore.bind(null, playerRig);
+  applyProfileOnPlayerRig();
+  store.addEventListener("statechanged", applyProfileOnPlayerRig);
 
   const avatarScale = parseInt(qs.avatar_scale, 10);
 
@@ -215,7 +216,6 @@ async function enterScene(mediaStream, enterInVR) {
 function onConnect() {}
 
 function mountUI(scene) {
-  const qs = queryString.parse(location.search);
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.vr_entry_type || null;
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
@@ -236,17 +236,43 @@ function mountUI(scene) {
     document.getElementById("ui-root")
   );
 
+  return uiRoot;
+}
+
+const onReady = async () => {
+  const scene = document.querySelector("a-scene");
+  document.querySelector("a-scene canvas").classList.add("blurred");
+  window.APP.scene = scene;
+
+  const uiRoot = mountUI(scene);
+
   getAvailableVREntryTypes().then(availableVREntryTypes => {
     uiRoot.setState({ availableVREntryTypes });
     uiRoot.handleForcedVREntryType();
   });
-}
 
-const onReady = () => {
-  const scene = document.querySelector("a-scene");
-  document.querySelector("a-scene canvas").classList.add("blurred");
-  window.APP.scene = scene;
-  mountUI(scene);
+  const environmentRoot = document.querySelector("#environment-root");
+
+  const initialEnvironmentEl = document.createElement("a-entity");
+  initialEnvironmentEl.addEventListener("bundleloaded", () => uiRoot.setState({ initialEnvironmentLoaded: true }));
+  environmentRoot.appendChild(initialEnvironmentEl);
+
+  if (qs.room) {
+    // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
+    uiRoot.setState({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
+    initialEnvironmentEl.setAttribute("gltf-bundle", "src: /assets/environments/cliff_meeting_space/bundle.json");
+    return;
+  }
+
+  const hubId = document.location.pathname.substring(1).split("/")[0];
+  console.log(`Hub ID: ${hubId}`);
+  const res = await fetch(`/api/v1/hubs/${hubId}`);
+  const data = await res.json();
+  const hub = data.hubs[0];
+  const defaultSpaceTopic = hub.topics[0];
+  const gltfBundleUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
+  uiRoot.setState({ janusRoomId: defaultSpaceTopic.janus_room_id });
+  initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`);
 };
 
 document.addEventListener("DOMContentLoaded", onReady);
