@@ -8,12 +8,12 @@ class ProfileEntryPanel extends Component {
     store: PropTypes.object,
     messages: PropTypes.object,
     finished: PropTypes.func,
+    htmlPrefix: PropTypes.string,
     intl: PropTypes.object
   };
 
   constructor(props) {
     super(props);
-    window.store = this.props.store;
     this.state = {
       display_name: this.props.store.state.profile.display_name,
       avatar_id: this.props.store.state.profile.avatar_id
@@ -85,12 +85,7 @@ class ProfileEntryPanel extends Component {
             />
             <iframe
               className="profile-entry__avatar-selector"
-              src={
-                /* HACK: Have to account for the smoke test server like this. Feels wrong though. */
-                `/${/smoke/i.test(location.hostname) ? "smoke-" : ""}avatar-selector.html#avatar_id=${
-                  this.state.avatar_id
-                }`
-              }
+              src={`${this.props.htmlPrefix}avatar-selector.html#avatar_id=${this.state.avatar_id}`}
               ref={ifr => (this.avatarSelector = ifr)}
             />
             <input className="profile-entry__form-submit" type="submit" value={formatMessage({ id: "profile.save" })} />
