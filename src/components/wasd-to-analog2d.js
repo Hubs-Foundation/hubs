@@ -44,7 +44,7 @@ AFRAME.registerComponent("wasd-to-analog2d", {
     this.keys[key] = down;
   },
 
-  tick: function(t, dt) {
+  tick: function() {
     this.target = [0, 0];
 
     for (const key in this.keys) {

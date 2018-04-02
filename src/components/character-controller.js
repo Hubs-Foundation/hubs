@@ -60,11 +60,11 @@ AFRAME.registerComponent("character-controller", {
     this.angularVelocity = event.detail.value;
   },
 
-  snapRotateLeft: function(event) {
+  snapRotateLeft: function() {
     this.pendingSnapRotationMatrix.copy(this.leftRotationMatrix);
   },
 
-  snapRotateRight: function(event) {
+  snapRotateRight: function() {
     this.pendingSnapRotationMatrix.copy(this.rightRotationMatrix);
   },
 
@@ -79,9 +79,6 @@ AFRAME.registerComponent("character-controller", {
     const rotationInvMatrix = new THREE.Matrix4();
     const pivotRotationMatrix = new THREE.Matrix4();
     const pivotRotationInvMatrix = new THREE.Matrix4();
-    const position = new THREE.Vector3();
-    const currentPosition = new THREE.Vector3();
-    const movementVector = new THREE.Vector3();
 
     return function(t, dt) {
       const deltaSeconds = dt / 1000;

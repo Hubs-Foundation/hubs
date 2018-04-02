@@ -1,6 +1,6 @@
 const bindAllEvents = function(elements, events, f) {
   if (!elements || !elements.length) return;
-  for (var el of elements) {
+  for (const el of elements) {
     events.length &&
       events.forEach(e => {
         el.addEventListener(e, f);
@@ -9,7 +9,7 @@ const bindAllEvents = function(elements, events, f) {
 };
 const unbindAllEvents = function(elements, events, f) {
   if (!elements || !elements.length) return;
-  for (var el of elements) {
+  for (const el of elements) {
     events.length &&
       events.forEach(e => {
         el.removeEventListener(e, f);
