@@ -18,10 +18,10 @@ PressedMove.prototype = {
       this.onActivate(event);
     }
   },
-  onButtonDown: function(event) {
+  onButtonDown: function() {
     this.pressed = true;
   },
-  onButtonUp: function(event) {
+  onButtonUp: function() {
     this.pressed = false;
   },
 

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if [ ! -e ../reticulum ]; then
+  echo "This script assumes reticulum is checked out in a sibling to this folder."
+fi
+
+rm -rf ../reticulum/priv/static ; BASE_ASSETS_PATH=http://localhost:4000/ yarn build -- --output-path ../reticulum/priv/static 

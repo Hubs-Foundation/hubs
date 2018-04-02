@@ -1,25 +1,30 @@
 AFRAME.registerComponent("lifecycle-checker", {
   schema: {
+    name: { type: "string" },
     tick: { default: false }
   },
   init: function() {
-    console.log("init", this.el);
+    this.log("init");
   },
   update: function() {
-    console.log("update", this.el);
+    this.log("update");
   },
   tick: function() {
     if (this.data.tick) {
-      console.log("tick", this.el);
+      this.log("tick");
     }
   },
   remove: function() {
-    console.log("remove", this.el);
+    this.log("remove");
   },
   pause: function() {
-    console.log("pause", this.el);
+    this.log("pause");
   },
   play: function() {
-    console.log("play", this.el);
+    this.log("play");
+  },
+
+  log: function(method) {
+    console.info(`lifecycle-checker:${this.data.name} ${method}`);
   }
 });

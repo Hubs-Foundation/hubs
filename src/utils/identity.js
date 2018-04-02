@@ -164,7 +164,7 @@ const names = [
 ];
 
 function selectRandom(arr) {
-   return arr[Math.floor(Math.random() * arr.length)]
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
 export const avatarIds = avatars.map(av => av.id);
@@ -172,7 +172,7 @@ export const avatarIds = avatars.map(av => av.id);
 export function generateDefaultProfile() {
   const name = selectRandom(names);
   return {
-    display_name: name.replace(/^./, name[0].toUpperCase()) ,
+    display_name: name.replace(/^./, name[0].toUpperCase()),
     avatar_id: selectRandom(avatarIds)
   };
 }

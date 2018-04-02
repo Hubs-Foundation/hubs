@@ -18,9 +18,9 @@ AFRAME.registerComponent("haptic-feedback", {
   },
 
   getActuator() {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       const tryGetActivator = () => {
-        var trackedControls = this.el.components["tracked-controls"];
+        const trackedControls = this.el.components["tracked-controls"];
         if (
           trackedControls &&
           trackedControls.controller &&
@@ -44,7 +44,7 @@ AFRAME.registerComponent("haptic-feedback", {
   },
 
   pulse: function(event) {
-    let { intensity } = event.detail;
+    const { intensity } = event.detail;
     if (!strengthForIntensity[intensity]) {
       console.warn(`Invalid intensity : ${intensity}`);
       return;
