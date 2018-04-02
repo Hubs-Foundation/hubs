@@ -7,7 +7,8 @@ class ProfileEntryPanel extends Component {
   static propTypes = {
     store: PropTypes.object,
     messages: PropTypes.object,
-    finished: PropTypes.func
+    finished: PropTypes.func,
+    intl: PropTypes.object
   };
 
   constructor(props) {

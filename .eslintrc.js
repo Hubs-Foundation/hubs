@@ -15,6 +15,7 @@ module.exports = {
     "prettier/prettier": "error",
     "prefer-const": "error",
     "no-var": "error",
+    "no-throw-literal": "error",
     // Light console usage is useful but remove debug logs before merging to master.
     "no-console": "off"
   },

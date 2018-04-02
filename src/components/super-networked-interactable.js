@@ -42,7 +42,7 @@ AFRAME.registerComponent("super-networked-interactable", {
     }
   },
 
-  _onOwnershipLost: function(e) {
+  _onOwnershipLost: function() {
     this.el.setAttribute("body", { mass: 0 });
     this.el.emit("grab-end", { hand: this.hand });
     this.hand = null;

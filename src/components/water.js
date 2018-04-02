@@ -17,7 +17,6 @@ function MobileWater(geometry, options) {
 
   options = options || {};
 
-  const clipBias = options.clipBias !== undefined ? options.clipBias : 0.0;
   const time = options.time !== undefined ? options.time : 0.0;
   const normalSampler = options.waterNormals !== undefined ? options.waterNormals : null;
   const sunDirection =

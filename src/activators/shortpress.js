@@ -16,13 +16,12 @@ function ShortPress(el, button, onActivate) {
 
 ShortPress.prototype = {
   onButtonDown(event) {
-    var self = this;
-    this.pressTimer = window.setTimeout(function() {
-      self.onActivate(event);
+    this.pressTimer = window.setTimeout(() => {
+      this.onActivate(event);
     }, this.timeOut);
   },
 
-  onButtonUp(event) {
+  onButtonUp() {
     clearTimeout(this.pressTimer);
   },
 

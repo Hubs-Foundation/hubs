@@ -19,7 +19,7 @@ AFRAME.registerComponent("super-spawner", {
   },
 
   remove: function() {
-    for (let entity of this.entities.keys()) {
+    for (const entity of this.entities.keys()) {
       const data = this.entities.get(entity);
       entity.removeEventListener("componentinitialized", data.componentinInitializedListener);
       entity.removeEventListener("bodyloaded", data.bodyLoadedListener);
@@ -60,7 +60,7 @@ AFRAME.registerComponent("super-spawner", {
     }
   },
 
-  _handleBodyLoaded: function(entity, e) {
+  _handleBodyLoaded: function(entity) {
     this.entities.get(entity).bodyLoaded = true;
     this._emitEvents.call(this, entity);
   },
