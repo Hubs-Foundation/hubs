@@ -11,8 +11,8 @@
     "postinstall": "node ./scripts/postinstall.js",
     "start": "cross-env NODE_ENV=development webpack-dev-server",
     "build": "rimraf ./public && cross-env NODE_ENV=production webpack --mode=production",
-    "prettier": "prettier --write src/**/*.js",
-    "lint": "eslint *.js src/**/*.js"
+    "prettier": "prettier --write '*.js' 'src/**/*.js'",
+    "lint": "eslint '*.js' 'src/**/*.js'"
   },
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.5",
