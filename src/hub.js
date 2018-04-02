@@ -127,7 +127,6 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   const scene = document.querySelector("a-scene");
   const playerRig = document.querySelector("#player-rig");
   document.querySelector("a-scene canvas").classList.remove("blurred");
-  registerNetworkSchemas();
 
   if (enterInVR) {
     scene.enterVR();
@@ -138,10 +137,6 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   document.querySelector("#player-camera").setAttribute("look-controls");
 
   scene.setAttribute("networked-scene", {
-    adapter: "janus",
-    audio: true,
-    debug: true,
-    connectOnLoad: false,
     room: janusRoomId,
     serverURL: process.env.JANUS_SERVER
   });
@@ -246,6 +241,8 @@ const onReady = async () => {
   const scene = document.querySelector("a-scene");
   document.querySelector("a-scene canvas").classList.add("blurred");
   window.APP.scene = scene;
+
+  registerNetworkSchemas();
 
   const uiRoot = mountUI(scene);
 
