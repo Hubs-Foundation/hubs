@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 
-import styles from "./2d-hud.css";
+import styles from "../assets/stylesheets/2d-hud.css";
 
 const TwoDHUD = ({ name, muted, onToggleMute }) => (
   <div className={styles.container}>

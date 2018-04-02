@@ -95,6 +95,26 @@ class ProfileEntryPanel extends Component {
             />
             <input className="profile-entry__form-submit" type="submit" value={formatMessage({ id: "profile.save" })} />
           </div>
+          <input
+            className="profile-entry__form-field-text"
+            value={this.state.display_name}
+            onChange={e => this.setState({ display_name: e.target.value })}
+            required
+            pattern={SCHEMA.definitions.profile.properties.display_name.pattern}
+            title={formatMessage({ id: "profile.display_name.validation_warning" })}
+            ref={inp => (this.nameInput = inp)}
+          />
+          <iframe
+            className="profile-entry__avatar-selector"
+            src={
+              /* HACK: Have to account for the smoke test server like this. Feels wrong though. */
+              `/${/smoke/i.test(location.hostname) ? "smoke-" : ""}avatar-selector.html#avatar_id=${
+                this.state.avatar_id
+              }`
+            }
+            ref={ifr => (this.avatarSelector = ifr)}
+          />
+          <input className="profile-entry__form-submit" type="submit" value={formatMessage({ id: "profile.save" })} />
         </form>
       </div>
     );
