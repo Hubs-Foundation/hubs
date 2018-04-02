@@ -87,7 +87,7 @@ class ProfileEntryPanel extends Component {
               className="profile-entry__avatar-selector"
               src={
                 /* HACK: Have to account for the smoke test server like this. Feels wrong though. */
-                `$/{/smoke/i.test(location.hostname) ? "smoke-" : ""}avatar-selector.html#avatar_id=${
+                `/${/smoke/i.test(location.hostname) ? "smoke-" : ""}avatar-selector.html#avatar_id=${
                   this.state.avatar_id
                 }`
               }
