@@ -1,3 +1,5 @@
+import { avatars } from "../assets/avatars/avatars.js";
+
 const names = [
   "albattani",
   "allen",
@@ -161,7 +163,16 @@ const names = [
   "yonath"
 ];
 
+function selectRandom(arr) {
+   return arr[Math.floor(Math.random() * arr.length)]
+}
+
+export const avatarIds = avatars.map(av => av.id);
+
 export function generateDefaultProfile() {
-  const name = names[Math.floor(Math.random() * names.length)];
-  return { display_name: name.replace(/^./, name[0].toUpperCase()) };
+  const name = selectRandom(names);
+  return {
+    display_name: name.replace(/^./, name[0].toUpperCase()) ,
+    avatar_id: selectRandom(avatarIds)
+  };
 }
