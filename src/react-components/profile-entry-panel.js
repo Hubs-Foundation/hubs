@@ -85,7 +85,7 @@ class ProfileEntryPanel extends Component {
             />
             <iframe
               className="profile-entry__avatar-selector"
-              src={`${this.props.htmlPrefix}avatar-selector.html#avatar_id=${this.state.avatar_id}`}
+              src={`/${this.props.htmlPrefix}avatar-selector.html#avatar_id=${this.state.avatar_id}`}
               ref={ifr => (this.avatarSelector = ifr)}
             />
             <input className="profile-entry__form-submit" type="submit" value={formatMessage({ id: "profile.save" })} />
