@@ -15,8 +15,6 @@ function createHTTPSConfig() {
     return false;
   }
 
-  let https;
-
   // Generate certs for the local webpack-dev-server.
   if (fs.existsSync(path.join(__dirname, "certs"))) {
     const key = fs.readFileSync(path.join(__dirname, "certs", "key.pem"));
