@@ -220,6 +220,8 @@ function mountUI(scene) {
   const forcedVREntryType = qs.vr_entry_type || null;
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
 
+  // TODO: Refactor to avoid using return value
+  /* eslint-disable react/no-render-return-value */
   const uiRoot = ReactDOM.render(
     <UIRoot
       {...{
@@ -235,6 +237,7 @@ function mountUI(scene) {
     />,
     document.getElementById("ui-root")
   );
+  /* eslint-enable react/no-render-return-value */
 
   return uiRoot;
 }
