@@ -1,10 +1,6 @@
 import nipplejs from "nipplejs";
 import styles from "./virtual-gamepad-controls.css";
 
-const THREE = AFRAME.THREE;
-const DEGREES = Math.PI / 180;
-const HALF_PI = Math.PI / 2;
-
 AFRAME.registerComponent("virtual-gamepad-controls", {
   schema: {},
 

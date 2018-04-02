@@ -41,6 +41,7 @@ import "./components/player-info";
 import "./components/debug";
 import "./components/animation-mixer";
 import "./components/loop-animation";
+import "./components/gltf-model-plus";
 import "./components/gltf-bundle";
 
 import ReactDOM from "react-dom";
@@ -49,8 +50,6 @@ import UIRoot from "./react-components/ui-root";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
-
-import "./elements/a-gltf-entity";
 
 import "./gltf-component-mappings";
 
@@ -222,6 +221,8 @@ function mountUI(scene) {
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
   const htmlPrefix = document.body.dataset.htmlPrefix || "";
 
+  // TODO: Refactor to avoid using return value
+  /* eslint-disable react/no-render-return-value */
   const uiRoot = ReactDOM.render(
     <UIRoot
       {...{
@@ -238,6 +239,7 @@ function mountUI(scene) {
     />,
     document.getElementById("ui-root")
   );
+  /* eslint-enable react/no-render-return-value */
 
   return uiRoot;
 }

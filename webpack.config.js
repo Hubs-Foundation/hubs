@@ -17,8 +17,6 @@ function createHTTPSConfig() {
     return false;
   }
 
-  let https;
-
   // Generate certs for the local webpack-dev-server.
   if (fs.existsSync(path.join(__dirname, "certs"))) {
     const key = fs.readFileSync(path.join(__dirname, "certs", "key.pem"));
@@ -215,7 +213,8 @@ const config = {
       inject: "head"
     }),
     // Extract required css and add a content hash.
-    new ExtractTextPlugin("assets/stylesheets/[name]-[contenthash].css", {
+    new ExtractTextPlugin({
+      filename: "assets/stylesheets/[name]-[contenthash].css",
       disable: process.env.NODE_ENV !== "production"
     }),
     // Transform the output of the html-loader using _.template

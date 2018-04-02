@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import queryString from "query-string";
-import { SCHEMA } from "../storage/store";
 import MobileDetect from "mobile-detect";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
@@ -34,13 +33,6 @@ const ENTRY_STEPS = {
   finished: "finished"
 };
 
-const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
-
-async function grantedMicLabels() {
-  const mediaDevices = await navigator.mediaDevices.enumerateDevices();
-  return mediaDevices.filter(d => d.label && d.kind === "audioinput").map(d => d.label);
-}
-
 // This is a list of regexes that match the microphone labels of HMDs.
 //
 // If entering VR mode, and if any of these regexes match an audio device,
@@ -49,13 +41,19 @@ async function grantedMicLabels() {
 //
 // Note that this doesn't have to be exhaustive: if no devices match any regex
 // then we rely upon the user to select the proper mic.
-const VR_DEVICE_MIC_LABEL_REGEXES = [];
+const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
+
+async function grantedMicLabels() {
+  const mediaDevices = await navigator.mediaDevices.enumerateDevices();
+  return mediaDevices.filter(d => d.label && d.kind === "audioinput").map(d => d.label);
+}
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
 class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
+    exitScene: PropTypes.func,
     concurrentLoadDetector: PropTypes.object,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
@@ -254,32 +252,32 @@ class UIRoot extends Component {
     this.exit();
 
     // Launch via Oculus Browser
-    const qs = queryString.parse(document.location.search);
+    const location = window.location;
+    const qs = queryString.parse(location.search);
     qs.vr_entry_type = "gearvr"; // Auto-choose 'gearvr' after landing in Oculus Browser
 
-    const ovrwebUrl = `ovrweb://${document.location.protocol || "http:"}//${document.location.host}${document.location
-      .pathname || ""}?${queryString.stringify(qs)}#{document.location.hash || ""}`;
+    const ovrwebUrl =
+      `ovrweb://${location.protocol || "http:"}//${location.host}` +
+      `${location.pathname || ""}?${queryString.stringify(qs)}#${location.hash || ""}`;
 
-    document.location = ovrwebUrl;
+    window.location = ovrwebUrl;
   };
 
   enterDaydream = async () => {
-    const loc = document.location;
-
     if (this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe) {
       this.exit();
 
       // We are not in mobile chrome, so launch into chrome via an Intent URL
-      const qs = queryString.parse(document.location.search);
+      const location = window.location;
+      const qs = queryString.parse(location.search);
       qs.vr_entry_type = "daydream"; // Auto-choose 'daydream' after landing in chrome
 
-      const intentUrl = `intent://${document.location.host}${document.location.pathname || ""}?${queryString.stringify(
-        qs
-      )}#Intent;scheme=${(document.location.protocol || "http:").replace(
-        ":",
-        ""
-      )};action=android.intent.action.VIEW;package=com.android.chrome;end;`;
-      document.location = intentUrl;
+      const intentUrl =
+        `intent://${location.host}${location.pathname || ""}?` +
+        `${queryString.stringify(qs)}#Intent;scheme=${(location.protocol || "http:").replace(":", "")};` +
+        `action=android.intent.action.VIEW;package=com.android.chrome;end;`;
+
+      window.location = intentUrl;
     } else {
       await this.performDirectEntryFlow(true);
     }
@@ -328,7 +326,7 @@ class UIRoot extends Component {
     this.setState({ audioTrack: mediaStream.getAudioTracks()[0] });
   };
 
-  setupNewMediaStream = async constraints => {
+  setupNewMediaStream = async () => {
     const mediaStream = new MediaStream();
 
     // we should definitely have an audioTrack at this point.
