@@ -225,8 +225,6 @@ class UIRoot extends Component {
   };
 
   performDirectEntryFlow = async enterInVR => {
-    this.startTestTone();
-
     this.setState({ enterInVR });
 
     const hasGrantedMic = await this.hasGrantedMicPermissions();
@@ -235,7 +233,6 @@ class UIRoot extends Component {
       await this.setMediaStreamToDefault();
       await this.beginAudioSetup();
     } else {
-      this.stopTestTone();
       this.setState({ entryStep: ENTRY_STEPS.mic_grant });
     }
   };
@@ -290,8 +287,24 @@ class UIRoot extends Component {
   };
 
   setMediaStreamToDefault = async () => {
-    await this.fetchAudioTrack({ audio: true });
+    let hasAudio = false;
+    console.log(this.props.store.state);
+    const { lastUsedMicDeviceId } = this.props.store.state;
+
+    // Try to fetch last used mic, and if we don't get it then fall back to default.
+    if (lastUsedMicDeviceId) {
+      console.log("Check for " + lastUsedMicDeviceId);
+      hasAudio = await this.fetchAudioTrack({ audio: { deviceId: { exact: lastUsedMicDeviceId } } });
+    }
+
+    if (!hasAudio) {
+      console.log("Use defualt");
+      hasAudio = await this.fetchAudioTrack({ audio: true });
+    }
+
     await this.setupNewMediaStream();
+
+    return { hasAudio };
   };
 
   setStateAndRequestScreen = async e => {
@@ -322,51 +335,79 @@ class UIRoot extends Component {
     if (this.state.audioTrack) {
       this.state.audioTrack.stop();
     }
-    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-    this.setState({ audioTrack: mediaStream.getAudioTracks()[0] });
+
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      this.setState({ audioTrack: mediaStream.getAudioTracks()[0] });
+      return true;
+    } catch (e) {
+      // Error fetching audio track, most likely a permission denial.
+      this.setState({ audioTrack: null });
+      return false;
+    }
   };
 
   setupNewMediaStream = async () => {
     const mediaStream = new MediaStream();
 
-    // we should definitely have an audioTrack at this point.
-    mediaStream.addTrack(this.state.audioTrack);
-
     if (this.state.videoTrack) {
       mediaStream.addTrack(this.state.videoTrack);
     }
 
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const audioContext = new AudioContext();
-    const source = audioContext.createMediaStreamSource(mediaStream);
-    const analyzer = audioContext.createAnalyser();
-    const levels = new Uint8Array(analyzer.fftSize);
+    // we should definitely have an audioTrack at this point unless they denied mic access
+    if (this.state.audioTrack) {
+      mediaStream.addTrack(this.state.audioTrack);
 
-    source.connect(analyzer);
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const audioContext = new AudioContext();
+      const source = audioContext.createMediaStreamSource(mediaStream);
+      const analyzer = audioContext.createAnalyser();
+      const levels = new Uint8Array(analyzer.fftSize);
 
-    const micUpdateInterval = setInterval(() => {
-      analyzer.getByteTimeDomainData(levels);
+      source.connect(analyzer);
 
-      let v = 0;
+      const micUpdateInterval = setInterval(() => {
+        analyzer.getByteTimeDomainData(levels);
 
-      for (let x = 0; x < levels.length; x++) {
-        v = Math.max(levels[x] - 127, v);
-      }
+        let v = 0;
 
-      const level = v / 128.0;
-      this.micLevelMovingAverage.push(Date.now(), level);
-      this.setState({ micLevel: this.micLevelMovingAverage.movingAverage() });
-    }, 50);
+        for (let x = 0; x < levels.length; x++) {
+          v = Math.max(levels[x] - 127, v);
+        }
 
-    this.setState({ mediaStream, micUpdateInterval });
+        const level = v / 128.0;
+        this.micLevelMovingAverage.push(Date.now(), level);
+        this.setState({ micLevel: this.micLevelMovingAverage.movingAverage() });
+      }, 50);
+
+      setTimeout(() => {
+        // TODO DEAL WITH BY REFACTORING THESE METHODS TO PASS IN mediaStream;
+        const selectedMicDeviceId = this.selectedMicDeviceId();
+
+        console.log(this.selectedMicLabel());
+        console.log("Save " + selectedMicDeviceId);
+
+        if (selectedMicDeviceId) {
+          this.props.store.update({ lastUsedMicDeviceId: this.selectedMicDeviceId() });
+        }
+      }, 100);
+
+      this.setState({ micUpdateInterval });
+    }
+
+    this.setState({ mediaStream });
   };
 
   onMicGrantButton = async () => {
     if (this.state.entryStep == ENTRY_STEPS.mic_grant) {
-      await this.setMediaStreamToDefault();
-      this.setState({ entryStep: ENTRY_STEPS.mic_granted });
+      const { hasAudio } = await this.setMediaStreamToDefault();
+
+      if (hasAudio) {
+        this.setState({ entryStep: ENTRY_STEPS.mic_granted });
+      } else {
+        await this.beginAudioSetup();
+      }
     } else {
-      this.startTestTone();
       await this.beginAudioSetup();
     }
   };
@@ -376,6 +417,7 @@ class UIRoot extends Component {
   };
 
   beginAudioSetup = async () => {
+    this.startTestTone();
     await this.fetchMicDevices();
     this.setState({ entryStep: ENTRY_STEPS.audio_setup });
   };
@@ -409,7 +451,7 @@ class UIRoot extends Component {
   };
 
   selectedMicDeviceId = () => {
-    return this.state.micDevices.filter(d => d.label === this.selectedMicLabel).map(d => d.deviceId)[0];
+    return this.state.micDevices.filter(d => d.label === this.selectedMicLabel()).map(d => d.deviceId)[0];
   };
 
   onAudioReadyButton = () => {
@@ -566,11 +608,19 @@ class UIRoot extends Component {
           </div>
           <div className="audio-setup-panel__levels">
             <div className="audio-setup-panel__levels__mic">
-              <img
-                src="../assets/images/mic_level.png"
-                srcSet="../assets/images/mic_level@2x.png 2x"
-                className="audio-setup-panel__levels__mic_icon"
-              />
+              {this.state.audioTrack ? (
+                <img
+                  src="../assets/images/mic_level.png"
+                  srcSet="../assets/images/mic_level@2x.png 2x"
+                  className="audio-setup-panel__levels__mic_icon"
+                />
+              ) : (
+                <img
+                  src="../assets/images/mic_denied.png"
+                  srcSet="../assets/images/mic_denied@2x.png 2x"
+                  className="audio-setup-panel__levels__mic_icon"
+                />
+              )}
               <img
                 src="../assets/images/level_fill.png"
                 srcSet="../assets/images/level_fill@2x.png 2x"
@@ -592,22 +642,24 @@ class UIRoot extends Component {
               />
             </div>
           </div>
-          <div className="audio-setup-panel__device-chooser">
-            <select
-              className="audio-setup-panel__device-chooser__dropdown"
-              value={this.selectedMicDeviceId()}
-              onChange={this.micDeviceChanged}
-            >
-              {this.state.micDevices.map(d => (
-                <option key={d.deviceId} value={d.deviceId}>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}
-                </option>
-              ))}
-            </select>
-            <div className="audio-setup-panel__device-chooser__mic-icon">
-              <img src="../assets/images/mic_small.png" srcSet="../assets/images/mic_small@2x.png 2x" />
+          {this.state.audioTrack && (
+            <div className="audio-setup-panel__device-chooser">
+              <select
+                className="audio-setup-panel__device-chooser__dropdown"
+                value={this.selectedMicDeviceId()}
+                onChange={this.micDeviceChanged}
+              >
+                {this.state.micDevices.map(d => (
+                  <option key={d.deviceId} value={d.deviceId}>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}
+                  </option>
+                ))}
+              </select>
+              <div className="audio-setup-panel__device-chooser__mic-icon">
+                <img src="../assets/images/mic_small.png" srcSet="../assets/images/mic_small@2x.png 2x" />
+              </div>
             </div>
-          </div>
+          )}
           {this.shouldShowHmdMicWarning() && (
             <div className="audio-setup-panel__hmd-mic-warning">
               <img
