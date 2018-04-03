@@ -77,6 +77,7 @@ AFRAME.registerComponent("scale-audio-feedback", {
   },
 
   onAudioFrequencyChange(e) {
+    if (!this.el.object3D.visible) return;
     const { minScale, maxScale } = this.data;
     this.el.object3D.scale.setScalar(minScale + (maxScale - minScale) * e.detail.volume / 255);
   }

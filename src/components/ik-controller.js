@@ -1,5 +1,4 @@
 const { Vector3, Quaternion, Matrix4, Euler } = THREE;
-
 AFRAME.registerComponent("ik-root", {
   schema: {
     camera: { type: "string", default: ".camera" },
@@ -67,16 +66,12 @@ AFRAME.registerComponent("ik-controller", {
 
     this.hands = {
       left: {
-        lastVisible: true,
         rotation: new Matrix4().makeRotationFromEuler(new Euler(-Math.PI / 2, Math.PI / 2, 0))
       },
       right: {
-        lastVisible: true,
         rotation: new Matrix4().makeRotationFromEuler(new Euler(Math.PI / 2, Math.PI / 2, 0))
       }
     };
-
-    this.headLastVisible = true;
   },
 
   update(oldData) {
@@ -180,14 +175,6 @@ AFRAME.registerComponent("ik-controller", {
 
     this.updateHand(this.hands.left, leftHand, leftController);
     this.updateHand(this.hands.right, rightHand, rightController);
-
-    if (head.object3D.visible) {
-      if (!this.headLastVisible) {
-        head.object3D.scale.set(1, 1, 1);
-      }
-    } else if (this.headLastVisible) {
-      head.object3D.scale.set(0.0000001, 0.0000001, 0.0000001);
-    }
   },
 
   updateHand(handState, hand, controller) {
@@ -195,11 +182,8 @@ AFRAME.registerComponent("ik-controller", {
     const handMatrix = handObject3D.matrix;
     const controllerObject3D = controller.object3D;
 
+    handObject3D.visible = controllerObject3D.visible;
     if (controllerObject3D.visible) {
-      if (!handState.lastVisible) {
-        handObject3D.scale.set(1, 1, 1);
-        handState.lastVisible = true;
-      }
       handMatrix.multiplyMatrices(this.invRootToChest, controllerObject3D.matrix);
 
       const handControls = controller.components["hand-controls2"];
@@ -212,11 +196,6 @@ AFRAME.registerComponent("ik-controller", {
 
       handObject3D.position.setFromMatrixPosition(handMatrix);
       handObject3D.rotation.setFromRotationMatrix(handMatrix);
-    } else {
-      if (handState.lastVisible) {
-        handObject3D.scale.set(0.0000001, 0.0000001, 0.0000001);
-        handState.lastVisible = false;
-      }
     }
   }
 });

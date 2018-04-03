@@ -21,6 +21,7 @@
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         physics
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
+        personal-space-bubble="debug: false;"
 
         app-mode-input-mappings="modes: default, hud; actionSets: default, hud;"
         >
@@ -130,21 +131,26 @@
                              </a-entity>
                         </template>
 
+                        <template data-selector=".Chest">
+                            <a-entity personal-space-invader="radius: 0.2" bone-visibility></a-entity>
+                        </template>
+
                         <template data-selector=".Head">
                             <a-entity
                                 networked-audio-source
                                 networked-audio-analyser
-                                personal-space-invader
+                                personal-space-invader="radius: 0.15"
+                                bone-visibility
                             >
                             </a-entity>
                         </template>
 
                         <template data-selector=".LeftHand">
-                            <a-entity personal-space-invader ></a-entity>
+                            <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
                         </template>
 
                         <template data-selector=".RightHand">
-                            <a-entity personal-space-invader ></a-entity>
+                            <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
                         </template>
                     </a-entity>
                 </a-entity>
@@ -233,7 +239,7 @@
                 class="camera"
                 camera
                 position="0 1.6 0"
-                personal-space-bubble
+                personal-space-bubble="radius: 0.4"
                 look-controls
             ></a-entity>
 
@@ -281,11 +287,11 @@
                 </template>
 
                 <template data-selector=".Head">
-                    <a-entity visible="false"></a-entity>
+                    <a-entity visible="false" bone-visibility></a-entity>
                 </template>
 
                 <template data-selector=".LeftHand">
-                    <a-entity>
+                    <a-entity bone-visibility>
                         <a-entity
                             id="watch"
                             gltf-model-plus="src: #watch-model"
@@ -304,7 +310,7 @@
                 </template>
 
                 <template data-selector=".RightHand">
-                    <a-entity>
+                    <a-entity bone-visibility>
                         <a-entity
                             event-repeater="events: action_grab, action_release; eventSource: #player-right-controller"
                             static-body="shape: sphere; sphereRadius: 0.02"
