@@ -18,6 +18,7 @@
     <audio id="test-tone" src="./assets/sfx/tone.ogg"></audio>
 
     <a-scene
+        networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         physics
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
 
