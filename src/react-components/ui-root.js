@@ -292,7 +292,7 @@ class UIRoot extends Component {
 
     // Try to fetch last used mic, and if we don't get it then fall back to default.
     if (lastUsedMicDeviceId) {
-      hasAudio = await this.fetchAudioTrack({ audio: { deviceId: { exact: lastUsedMicDeviceId } } });
+      hasAudio = await this.fetchAudioTrack({ audio: { deviceId: { ideal: lastUsedMicDeviceId } } });
     }
 
     if (!hasAudio) {
@@ -417,7 +417,6 @@ class UIRoot extends Component {
   fetchMicDevices = () => {
     return new Promise(resolve => {
       navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
-        console.log(resolve);
         this.setState(
           {
             micDevices: mediaDevices
