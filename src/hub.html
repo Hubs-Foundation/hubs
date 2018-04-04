@@ -21,7 +21,7 @@
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         physics
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
-        personal-space-bubble="debug: false;"
+        personal-space-bubble="debug: true;"
 
         app-mode-input-mappings="modes: default, hud; actionSets: default, hud;"
         >
@@ -116,7 +116,7 @@
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
                         <template data-selector=".RootScene">
-                            <a-entity ik-controller animation-mixer></a-entity>
+                            <a-entity ik-controller animation-mixer space-invader-mesh="meshSelector: .Bot_Skinned"></a-entity>
                         </template>
 
                         <template data-selector=".Neck">
@@ -132,14 +132,14 @@
                         </template>
 
                         <template data-selector=".Chest">
-                            <a-entity personal-space-invader="radius: 0.2" bone-visibility></a-entity>
+                            <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility></a-entity>
                         </template>
 
                         <template data-selector=".Head">
                             <a-entity
                                 networked-audio-source
                                 networked-audio-analyser
-                                personal-space-invader="radius: 0.15"
+                                personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
                             >
                             </a-entity>
