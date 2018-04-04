@@ -11,12 +11,12 @@ AFRAME.registerSystem("personal-space-bubble", {
     this.bubbles = [];
   },
 
-  registerBubble(el) {
-    this.bubbles.push(el);
+  registerBubble(bubble) {
+    this.bubbles.push(bubble);
   },
 
-  unregisterBubble(el) {
-    const index = this.bubbles.indexOf(el);
+  unregisterBubble(bubble) {
+    const index = this.bubbles.indexOf(bubble);
 
     if (index !== -1) {
       this.bubbles.splice(index, 1);
@@ -44,7 +44,7 @@ AFRAME.registerSystem("personal-space-bubble", {
   tick() {
     // Update matrix positions once for each space bubble and space invader
     for (let i = 0; i < this.bubbles.length; i++) {
-      this.bubbles[i].object3D.updateMatrixWorld(true);
+      this.bubbles[i].el.object3D.updateMatrixWorld(true);
     }
 
     for (let i = 0; i < this.invaders.length; i++) {
@@ -56,9 +56,7 @@ AFRAME.registerSystem("personal-space-bubble", {
     for (let i = 0; i < this.bubbles.length; i++) {
       const bubble = this.bubbles[i];
 
-      bubblePos.setFromMatrixPosition(bubble.object3D.matrixWorld);
-
-      const bubbleRadius = bubble.components["personal-space-bubble"].data.radius;
+      bubblePos.setFromMatrixPosition(bubble.el.object3D.matrixWorld);
 
       // Hide the invader if inside the bubble
       for (let j = 0; j < this.invaders.length; j++) {
@@ -67,8 +65,8 @@ AFRAME.registerSystem("personal-space-bubble", {
         invaderPos.setFromMatrixPosition(invader.el.object3D.matrixWorld);
 
         const distanceSquared = bubblePos.distanceToSquared(invaderPos);
-        const radius = bubbleRadius + invader.data.radius;
-        if (distanceSquared < radius * radius) {
+        const radiusSum = bubble.data.radius + invader.data.radius;
+        if (distanceSquared < radiusSum * radiusSum) {
           invader.setInvading(true);
         }
       }
@@ -149,7 +147,7 @@ AFRAME.registerComponent("personal-space-bubble", {
     debug: { default: false }
   },
   init() {
-    this.system.registerBubble(this.el);
+    this.system.registerBubble(this);
     if (this.system.data.debug || this.data.debug) {
       this.el.object3D.add(createSphereGizmo(this.data.radius));
     }
@@ -160,6 +158,6 @@ AFRAME.registerComponent("personal-space-bubble", {
   },
 
   remove() {
-    this.system.unregisterBubble(this.el);
+    this.system.unregisterBubble(this);
   }
 });
