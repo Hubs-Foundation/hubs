@@ -290,12 +290,10 @@ class UIRoot extends Component {
     let hasAudio = false;
     const { lastUsedMicDeviceId } = this.props.store.state;
 
-    // Try to fetch last used mic, and if we don't get it then fall back to default.
+    // Try to fetch last used mic, if there was one.
     if (lastUsedMicDeviceId) {
       hasAudio = await this.fetchAudioTrack({ audio: { deviceId: { ideal: lastUsedMicDeviceId } } });
-    }
-
-    if (!hasAudio) {
+    } else {
       hasAudio = await this.fetchAudioTrack({ audio: true });
     }
 
