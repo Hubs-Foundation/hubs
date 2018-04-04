@@ -92,7 +92,7 @@ AFRAME.registerComponent("super-cursor", {
       this.data.cursor.object3D.position.copy(this.point);
     }
 
-    this.isInteractable = intersection && intersection.object.el.className === "interactable";
+    this.isInteractable = intersection && this._isInteractable(intersection.object.el);
 
     if ((this.isGrabbing || this.isInteractable) && !this.wasIntersecting) {
       this.wasIntersecting = true;
@@ -101,6 +101,18 @@ AFRAME.registerComponent("super-cursor", {
       this.wasIntersecting = false;
       this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
     }
+  },
+
+  _isInteractable: function(el) {
+    if (el.className === "interactable") {
+      return true;
+    }
+
+    if(el.parentNode && el.parentNode != el.sceneEl) {
+      return this._isInteractable(el.parentNode);
+    }
+
+    return false;
   },
 
   _handleMouseDown: function(e) {

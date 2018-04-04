@@ -99,11 +99,11 @@
 
             <template id="interactable-template">
                 <a-entity
-                    gltf-model-plus="src: #interactable-duck"
+                    gltf-model-plus="src: #interactable-duck; inflate: true;"
                     scale="2 2 2"
                     class="interactable" 
                     super-networked-interactable="counter: #counter; mass: 5;"
-                    body="type: dynamic; mass: 5; shape: box;"
+                    body="type: dynamic; shape: none; mass: 5;"
                     grabbable
                     stretchable="useWorldPosition: true;"
                 ></a-entity>
@@ -193,8 +193,6 @@
                 app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;"
                 haptic-feedback
             ></a-entity>
-
-
 
             <a-entity
                 id="player-right-controller"

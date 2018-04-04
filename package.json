@@ -18,7 +18,7 @@
     "aframe-extras": "^3.12.4",
     "aframe-input-mapping-component": "https://github.com/johnshaughnessy/aframe-input-mapping-component#feature/map-to-array",
     "aframe-physics-extras": "https://github.com/infinitelee/aframe-physics-extras#fix/physics-collider-crash",
-    "aframe-physics-system": "https://github.com/donmccurdy/aframe-physics-system",
+    "aframe-physics-system": "https://github.com/infinitelee/aframe-physics-system#feature/shape-component",
     "aframe-teleport-controls": "https://github.com/netpro2k/aframe-teleport-controls#feature/pauseable",
     "aframe-xr": "github:brianpeiris/aframe-xr#3162aed",
     "babel-plugin-react-intl": "^2.4.0",
