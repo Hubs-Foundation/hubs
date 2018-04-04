@@ -414,10 +414,19 @@ class UIRoot extends Component {
     this.setState({ entryStep: ENTRY_STEPS.audio_setup });
   };
 
-  fetchMicDevices = async () => {
-    const mediaDevices = await navigator.mediaDevices.enumerateDevices();
-    this.setState({
-      micDevices: mediaDevices.filter(d => d.kind === "audioinput").map(d => ({ deviceId: d.deviceId, label: d.label }))
+  fetchMicDevices = () => {
+    return new Promise(resolve => {
+      navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
+        console.log(resolve);
+        this.setState(
+          {
+            micDevices: mediaDevices
+              .filter(d => d.kind === "audioinput")
+              .map(d => ({ deviceId: d.deviceId, label: d.label }))
+          },
+          resolve
+        );
+      });
     });
   };
 
