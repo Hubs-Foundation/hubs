@@ -288,17 +288,14 @@ class UIRoot extends Component {
 
   setMediaStreamToDefault = async () => {
     let hasAudio = false;
-    console.log(this.props.store.state);
     const { lastUsedMicDeviceId } = this.props.store.state;
 
     // Try to fetch last used mic, and if we don't get it then fall back to default.
     if (lastUsedMicDeviceId) {
-      console.log("Check for " + lastUsedMicDeviceId);
       hasAudio = await this.fetchAudioTrack({ audio: { deviceId: { exact: lastUsedMicDeviceId } } });
     }
 
     if (!hasAudio) {
-      console.log("Use defualt");
       hasAudio = await this.fetchAudioTrack({ audio: true });
     }
 
@@ -350,6 +347,8 @@ class UIRoot extends Component {
   setupNewMediaStream = async () => {
     const mediaStream = new MediaStream();
 
+    await this.fetchMicDevices();
+
     if (this.state.videoTrack) {
       mediaStream.addTrack(this.state.videoTrack);
     }
@@ -380,17 +379,11 @@ class UIRoot extends Component {
         this.setState({ micLevel: this.micLevelMovingAverage.movingAverage() });
       }, 50);
 
-      setTimeout(() => {
-        // TODO DEAL WITH BY REFACTORING THESE METHODS TO PASS IN mediaStream;
-        const selectedMicDeviceId = this.selectedMicDeviceId();
+      const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForMediaStream(mediaStream));
 
-        console.log(this.selectedMicLabel());
-        console.log("Save " + selectedMicDeviceId);
-
-        if (selectedMicDeviceId) {
-          this.props.store.update({ lastUsedMicDeviceId: this.selectedMicDeviceId() });
-        }
-      }, 100);
+      if (micDeviceId) {
+        this.props.store.update({ lastUsedMicDeviceId: micDeviceId });
+      }
 
       this.setState({ micUpdateInterval });
     }
@@ -418,7 +411,6 @@ class UIRoot extends Component {
 
   beginAudioSetup = async () => {
     this.startTestTone();
-    await this.fetchMicDevices();
     this.setState({ entryStep: ENTRY_STEPS.audio_setup });
   };
 
@@ -441,17 +433,20 @@ class UIRoot extends Component {
     return !!this.state.micDevices.find(d => HMD_MIC_REGEXES.find(r => d.label.match(r)));
   };
 
+  micLabelForMediaStream = mediaStream => {
+    return (mediaStream && mediaStream.getAudioTracks().length > 0 && mediaStream.getAudioTracks()[0].label) || "";
+  };
+
   selectedMicLabel = () => {
-    return (
-      (this.state.mediaStream &&
-        this.state.mediaStream.getAudioTracks().length > 0 &&
-        this.state.mediaStream.getAudioTracks()[0].label) ||
-      ""
-    );
+    return this.micLabelForMediaStream(this.state.mediaStream);
+  };
+
+  micDeviceIdForMicLabel = label => {
+    return this.state.micDevices.filter(d => d.label === label).map(d => d.deviceId)[0];
   };
 
   selectedMicDeviceId = () => {
-    return this.state.micDevices.filter(d => d.label === this.selectedMicLabel()).map(d => d.deviceId)[0];
+    return this.micDeviceIdForMicLabel(this.selectedMicLabel());
   };
 
   onAudioReadyButton = () => {
