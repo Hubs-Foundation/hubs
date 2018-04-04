@@ -182,7 +182,12 @@ AFRAME.registerComponent("ik-controller", {
     const handMatrix = handObject3D.matrix;
     const controllerObject3D = controller.object3D;
 
-    handObject3D.visible = controllerObject3D.visible;
+    // TODO: This coupling with personal-space-invader is not ideal.
+    // There should be some intermediate thing managing multiple opinions about object visibility
+    const spaceInvader = hand.components["personal-space-invader"];
+    const handHiddenByPersonalSpace = spaceInvader && spaceInvader.invading;
+
+    handObject3D.visible = !handHiddenByPersonalSpace && controllerObject3D.visible;
     if (controllerObject3D.visible) {
       handMatrix.multiplyMatrices(this.invRootToChest, controllerObject3D.matrix);
 

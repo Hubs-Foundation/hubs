@@ -49,7 +49,7 @@ AFRAME.registerSystem("personal-space-bubble", {
 
     for (let i = 0; i < this.invaders.length; i++) {
       this.invaders[i].el.object3D.updateMatrixWorld(true);
-      this.invaders[i].setVisibility(true);
+      this.invaders[i].setInvading(false);
     }
 
     // Loop through all of the space bubbles (usually one)
@@ -69,7 +69,7 @@ AFRAME.registerSystem("personal-space-bubble", {
         const distanceSquared = bubblePos.distanceToSquared(invaderPos);
         const radius = bubbleRadius + invader.data.radius;
         if (distanceSquared < radius * radius) {
-          invader.setVisibility(false);
+          invader.setInvading(true);
         }
       }
     }
@@ -120,8 +120,8 @@ AFRAME.registerComponent("personal-space-invader", {
       if (mesh) {
         this.targetMaterial = mesh.material;
       }
-      console.log("invader mesh", this.targetMesh);
     }
+    this.invading = false;
   },
 
   update() {
@@ -132,13 +132,14 @@ AFRAME.registerComponent("personal-space-invader", {
     this.el.sceneEl.systems["personal-space-bubble"].unregisterInvader(this);
   },
 
-  setVisibility(visible) {
+  setInvading(invading) {
     if (this.targetMaterial) {
-      this.targetMaterial.opacity = visible ? 1 : 0.3;
-      this.targetMaterial.transparent = !visible;
+      this.targetMaterial.opacity = invading ? 0.3 : 1;
+      this.targetMaterial.transparent = invading;
     } else {
-      this.el.object3D.visible = visible;
+      this.el.object3D.visible = !invading;
     }
+    this.invading = invading;
   }
 });
 
