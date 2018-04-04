@@ -5249,9 +5249,9 @@ neo-async@^2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.5.0.tgz#76b1c823130cca26acfbaccc8fbaf0a2fa33b18f"
 
-"networked-aframe@https://github.com/mozillareality/networked-aframe#mr-social-client/master":
-  version "0.5.1"
-  resolved "https://github.com/mozillareality/networked-aframe#5d2f50ddf65140f0ae671b2b53c1c667de18dca5"
+"networked-aframe@https://github.com/networked-aframe/networked-aframe":
+  version "0.6.0"
+  resolved "https://github.com/networked-aframe/networked-aframe#be5b2e949ec63fc44a1c6ab40b627cee5fda057e"
   dependencies:
     aframe-lerp-component "^1.1.0"
     easyrtc "1.1.0"

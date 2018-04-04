@@ -1,4 +1,4 @@
-# Mozilla Social Mixed Reality Client
+# Mozilla Social Mixed Reality Client [![Build Status](https://travis-ci.org/mozilla/mr-social-client.svg?branch=master)](https://travis-ci.org/mozilla/mr-social-client)
 
 A prototype client demonstrating a multi-user experience in WebVR. Built with
 [A-Frame](https://github.com/aframevr/aframe/)

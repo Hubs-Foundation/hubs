@@ -270,7 +270,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
       console.error("Failed to load glTF model", e.message, this);
-      this.emit("model-error", { format: "gltf", src });
+      this.el.emit("model-error", { format: "gltf", src });
     }
   },
 
