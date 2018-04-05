@@ -94,7 +94,7 @@ AFRAME.registerComponent("space-invader-mesh", {
   }
 });
 
-function findInvderMesh(entity) {
+function findInvaderMesh(entity) {
   while (entity && !(entity.components && entity.components["space-invader-mesh"])) {
     entity = entity.parentNode;
   }
@@ -114,7 +114,7 @@ AFRAME.registerComponent("personal-space-invader", {
       this.el.object3D.add(createSphereGizmo(this.data.radius));
     }
     if (this.data.useMaterial) {
-      const mesh = findInvderMesh(this.el);
+      const mesh = findInvaderMesh(this.el);
       if (mesh) {
         this.targetMaterial = mesh.material;
       }
