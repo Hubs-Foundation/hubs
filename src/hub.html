@@ -9,95 +9,37 @@
     <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="<%= ORIGIN_TRIAL_EXPIRES %>" content="<%= ORIGIN_TRIAL_TOKEN %>">
     <% if(NODE_ENV === "production") { %>
         <script src="https://cdn.rawgit.com/brianpeiris/aframe/845825ae694449524c185c44a314d361eead4680/dist/aframe-master.min.js"></script>
-    <% } else { %>
-        <script src="https://cdn.rawgit.com/brianpeiris/aframe/845825ae694449524c185c44a314d361eead4680/dist/aframe-master.js"></script>
-    <% } %>
+        <% } else { %>
+            <script src="https://cdn.rawgit.com/brianpeiris/aframe/845825ae694449524c185c44a314d361eead4680/dist/aframe-master.js"></script>
+            <% } %>
 </head>
 
 <body data-html-prefix="<%= HTML_PREFIX %>">
     <audio id="test-tone" src="./assets/sfx/tone.ogg"></audio>
 
-    <a-scene
-        networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
-        physics
-        mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
-
-        app-mode-input-mappings="modes: default, hud; actionSets: default, hud;"
-        >
+    <a-scene networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;" physics mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
+        app-mode-input-mappings="modes: default, hud; actionSets: default, hud;">
 
         <a-assets>
-            <img id="unmuted"  src="./assets/hud/unmuted.png" >
-            <img id="muted"  src="./assets/hud/muted.png" >
-            <img id="avatar"  src="./assets/hud/avatar.jpg" >
+            <img id="unmuted" src="./assets/hud/unmuted.png">
+            <img id="muted" src="./assets/hud/muted.png">
+            <img id="avatar" src="./assets/hud/avatar.jpg">
 
-            <a-progressive-asset
-                id="botdefault"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotDefault_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotDefault_Avatar.glb"
-                low-src="./assets/avatars/BotDefault_Avatar_Unlit.glb"
-            ></a-progressive-asset>
-            <a-progressive-asset
-                id="botbobo"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotBobo_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotBobo_Avatar.glb"
-                low-src="./assets/avatars/BotBobo_Avatar_Unlit.glb"
-            ></a-progressive-asset>
-            <a-progressive-asset
-                id="botdom"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotDom_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotDom_Avatar.glb"
-                low-src="./assets/avatars/BotDom_Avatar_Unlit.glb"
-            ></a-progressive-asset>
-            <a-progressive-asset
-                id="botgreg"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotGreg_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotGreg_Avatar.glb"
-                low-src="./assets/avatars/BotGreg_Avatar_Unlit.glb"
-            ></a-progressive-asset>
-            <a-progressive-asset
-                id="botguest"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotGuest_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotGuest_Avatar.glb"
-                low-src="./assets/avatars/BotGuest_Avatar_Unlit.glb"
-            ></a-progressive-asset>
-            <a-progressive-asset
-                id="botjim"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotJim_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotJim_Avatar.glb"
-                low-src="./assets/avatars/BotJim_Avatar_Unlit.glb"
-            ></a-progressive-asset>
-            <a-progressive-asset
-                id="botpinky"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotPinky_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotPinky_Avatar.glb"
-                low-src="./assets/avatars/BotPinky_Avatar_Unlit.glb"
-            ></a-progressive-asset>
-            <a-progressive-asset
-                id="botrobert"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotRobert_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotRobert_Avatar.glb"
-                low-src="./assets/avatars/BotRobert_Avatar_Unlit.glb"
-            ></a-progressive-asset>
-            <a-progressive-asset
-                id="botwoody"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotWoody_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotWoody_Avatar.glb"
-                low-src="./assets/avatars/BotWoody_Avatar_Unlit.glb"
-            ></a-progressive-asset>
+            <a-asset-item id="botdefault" response-type="arraybuffer" src="https://asset-bundles-dev.reticulum.io/bots/BotDefault_Avatar-9f71f8ff22.gltf"></a-asset-item>
+            <a-asset-item id="botbobo" response-type="arraybuffer" src="https://asset-bundles-dev.reticulum.io/bots/BotBobo_Avatar-f9740a010b.gltf"></a-asset-item>
+            <a-asset-item id="botdom" response-type="arraybuffer" src="https://asset-bundles-dev.reticulum.io/bots/BotDom_Avatar-6aa1b5d781.gltf"></a-asset-item>
+            <a-asset-item id="botgreg" response-type="arraybuffer" src="https://asset-bundles-dev.reticulum.io/bots/BotGreg_Avatar-98d39797bb.gltf"></a-asset-item>
+            <a-asset-item id="botguest" response-type="arraybuffer" src="https://asset-bundles-dev.reticulum.io/bots/BotGuest_Avatar-78cd857332.gltf"></a-asset-item>
+            <a-asset-item id="botjim" response-type="arraybuffer" src="https://asset-bundles-dev.reticulum.io/bots/BotJim_Avatar-d28005a687.gltf"></a-asset-item>
+            <a-asset-item id="botpinky" response-type="arraybuffer" src="https://asset-bundles-dev.reticulum.io/bots/BotPinky_Avatar-b0b93f8675.gltf"></a-asset-item>
+            <a-asset-item id="botrobert" response-type="arraybuffer" src="https://asset-bundles-dev.reticulum.io/bots/BotRobert_Avatar-e9554880f3.gltf"></a-asset-item>
+            <a-asset-item id="botwoody" response-type="arraybuffer" src="https://asset-bundles-dev.reticulum.io/bots/BotWoody_Avatar-0140485a23.gltf"></a-asset-item>
 
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
             <a-asset-item id="interactable-duck" response-type="arraybuffer" src="./assets/interactables/duck/DuckyMesh.glb"></a-asset-item>
 
-            <img id="water-normal-map" src="./assets/waternormals.jpg"></a-asset-item>
+            <img id="water-normal-map" src="./assets/waternormals.jpg">
+            </a-asset-item>
 
             <!-- Templates -->
 
@@ -119,107 +61,56 @@
                         </template>
 
                         <template data-selector=".Neck">
-                             <a-entity>
-                                 <a-entity
-                                    class="nametag"
-                                    billboard
-                                    text="side: double; align: center; color: #ddd"
-                                    position="0 1 0"
-                                    scale="6 6 6"
-                                ></a-entity>
-                             </a-entity>
+                            <a-entity>
+                                <a-entity class="nametag" billboard text="side: double; align: center; color: #ddd" position="0 1 0" scale="6 6 6"></a-entity>
+                            </a-entity>
                         </template>
 
                         <template data-selector=".Head">
-                            <a-entity
-                                networked-audio-source
-                                networked-audio-analyser
-                                personal-space-invader
-                            >
+                            <a-entity networked-audio-source networked-audio-analyser personal-space-invader>
                             </a-entity>
                         </template>
 
                         <template data-selector=".LeftHand">
-                            <a-entity personal-space-invader ></a-entity>
+                            <a-entity personal-space-invader></a-entity>
                         </template>
 
                         <template data-selector=".RightHand">
-                            <a-entity personal-space-invader ></a-entity>
+                            <a-entity personal-space-invader></a-entity>
                         </template>
                     </a-entity>
                 </a-entity>
             </template>
 
             <template id="interactable-template">
-                <a-entity
-                    gltf-model-plus="src: #interactable-duck"
-                    scale="2 2 2"
-                    class="interactable" 
-                    super-networked-interactable="counter: #counter; mass: 5;"
-                    body="type: dynamic; mass: 5; shape: box;"
-                    grabbable
-                    stretchable="useWorldPosition: true;"
-                ></a-entity>
+                <a-entity gltf-model-plus="src: #interactable-duck" scale="2 2 2" class="interactable" super-networked-interactable="counter: #counter; mass: 5;"
+                    body="type: dynamic; mass: 5; shape: box;" grabbable stretchable="useWorldPosition: true;"></a-entity>
             </template>
 
-            <a-mixin id="super-hands"
-                super-hands="colliderEvent: collisions; colliderEventProperty: els;
+            <a-mixin id="super-hands" super-hands="colliderEvent: collisions; colliderEventProperty: els;
                     colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
                     grabStartButtons: action_grab; grabEndButtons: action_release;
                     stretchStartButtons: action_grab; stretchEndButtons: action_release;
                     dragDropStartButtons: action_grab; dragDropEndButtons: action_release;
-                    "
-                collision-filter="collisionForces: false"
-                physics-collider
-            ></a-mixin>
+                    " collision-filter="collisionForces: false" physics-collider></a-mixin>
         </a-assets>
 
         <!-- Interactables -->
         <a-entity id="counter" networked-counter="max: 3; ttl: 120"></a-entity>
 
-        <a-entity 
-            gltf-model-plus="src: #interactable-duck"
-            scale="2 2 2"
-            class="interactable" 
-            super-spawner="template: #interactable-template;" 
-            position="2.5 1.2 0" 
-            body="mass: 0; type: static; shape: box;"
-        ></a-entity>
+        <a-entity gltf-model-plus="src: #interactable-duck" scale="2 2 2" class="interactable" super-spawner="template: #interactable-template;"
+            position="2.5 1.2 0" body="mass: 0; type: static; shape: box;"></a-entity>
 
-        <a-entity
-            id="super-cursor"
-            super-cursor="cursor: #3d-cursor; camera: #player-camera;"
-            raycaster="objects: .collidable, .interactable; far: 10;"
-        >
-            <a-sphere
-                id="3d-cursor"
-                radius=0.02
-                static-body="shape: sphere;"
-                mixin="super-hands"
-                segments-height="9"
-                segments-width="9"
-            ></a-sphere>  
+        <a-entity id="super-cursor" super-cursor="cursor: #3d-cursor; camera: #player-camera;" raycaster="objects: .collidable, .interactable; far: 10;">
+            <a-sphere id="3d-cursor" radius=0.02 static-body="shape: sphere;" mixin="super-hands" segments-height="9" segments-width="9"></a-sphere>
         </a-entity>
 
         <!-- Player Rig -->
-        <a-entity
-            id="player-rig"
-            networked="template: #remote-avatar-template; attachLocalTemplate: false;"
-            spawn-controller="radius: 4;"
-            wasd-to-analog2d
-            character-controller="pivot: #player-camera"
-            ik-root
-            app-mode-toggle-playing__character-controller="mode: hud; invert: true;"
-            app-mode-toggle-playing__wasd-to-analog2d="mode: hud; invert: true;"
-            player-info
-        >
+        <a-entity id="player-rig" networked="template: #remote-avatar-template; attachLocalTemplate: false;" spawn-controller="radius: 4;"
+            wasd-to-analog2d character-controller="pivot: #player-camera" ik-root app-mode-toggle-playing__character-controller="mode: hud; invert: true;"
+            app-mode-toggle-playing__wasd-to-analog2d="mode: hud; invert: true;" player-info>
 
-            <a-entity
-                id="player-hud"
-                hud-controller="head: #player-camera;"
-                vr-mode-toggle-visibility
-                vr-mode-toggle-playing__hud-controller
-            >
+            <a-entity id="player-hud" hud-controller="head: #player-camera;" vr-mode-toggle-visibility vr-mode-toggle-playing__hud-controller>
                 <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="-39 0 0">
                     <a-box geometry="height:0.13;width:0.6;depth:0.001" material="depthTest:false; color:#000000;opacity:0.35" class="hud bg"></a-box>
                     <a-image src="#unmuted" scale="-0.1 0.1 0.1" position="-0.2 0 0.001" class="hud mic" material="alphaTest:0.1;depthTest:false;"></a-image>
@@ -228,55 +119,26 @@
                 </a-entity>
             </a-entity>
 
-            <a-entity
-                id="player-camera"
-                class="camera"
-                camera
-                position="0 1.6 0"
-                personal-space-bubble
-                look-controls
-            ></a-entity>
+            <a-entity id="player-camera" class="camera" camera position="0 1.6 0" personal-space-bubble look-controls></a-entity>
 
-            <a-entity
-                id="player-left-controller"
-                class="left-controller"
-                hand-controls2="left"
-                tracked-controls
-                teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
-                app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;"
-                haptic-feedback
-            ></a-entity>
+            <a-entity id="player-left-controller" class="left-controller" hand-controls2="left" tracked-controls teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
+                app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;" haptic-feedback></a-entity>
 
 
 
-            <a-entity
-                id="player-right-controller"
-                class="right-controller"
-                hand-controls2="right"
-                tracked-controls
-                teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
-                haptic-feedback
-                raycaster="objects:.hud; showLine: true;"
-                cursor="fuse: false; downEvents: action_ui_select_down; upEvents: action_ui_select_up;"
-
-                app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;"
-                app-mode-toggle-playing__raycaster="mode: hud;"
-                app-mode-toggle-playing__cursor="mode: hud;"
-                app-mode-toggle-attribute__line="mode: hud; property: visible;"
-            ></a-entity>
+            <a-entity id="player-right-controller" class="right-controller" hand-controls2="right" tracked-controls teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
+                haptic-feedback raycaster="objects:.hud; showLine: true;" cursor="fuse: false; downEvents: action_ui_select_down; upEvents: action_ui_select_up;"
+                app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;" app-mode-toggle-playing__raycaster="mode: hud;"
+                app-mode-toggle-playing__cursor="mode: hud;" app-mode-toggle-attribute__line="mode: hud; property: visible;"></a-entity>
 
             <a-entity gltf-model-plus="inflate: true;" class="model">
                 <template data-selector=".RootScene">
-                    <a-entity
-                        ik-controller
-                        animated-robot-hands
-                        animation-mixer
-                    ></a-entity>
+                    <a-entity ik-controller animated-robot-hands animation-mixer></a-entity>
                 </template>
 
                 <template data-selector=".Neck">
                     <a-entity>
-                        <a-entity class="nametag" visible="false" text ></a-entity>
+                        <a-entity class="nametag" visible="false" text></a-entity>
                     </a-entity>
                 </template>
 
@@ -286,81 +148,38 @@
 
                 <template data-selector=".LeftHand">
                     <a-entity>
-                        <a-entity
-                            id="watch"
-                            gltf-model-plus="src: #watch-model"
-                            bone-mute-state-indicator
-                            scale="1.5 1.5 1.5"
-                            rotation="0 -90 90"
-                            position="0 -0.04 0"
-                        ></a--entity>
-                        <a-entity
-                            event-repeater="events: action_grab, action_release; eventSource: #player-left-controller"
-                            static-body="shape: sphere; sphereRadius: 0.02"
-                            mixin="super-hands"
-                            position="0 0.05 0"
-                        ></a-entity>
-                    </a-entity>
+                        <a-entity id="watch" gltf-model-plus="src: #watch-model" bone-mute-state-indicator scale="1.5 1.5 1.5" rotation="0 -90 90"
+                            position="0 -0.04 0"></a--entity>
+                            <a-entity event-repeater="events: action_grab, action_release; eventSource: #player-left-controller" static-body="shape: sphere; sphereRadius: 0.02"
+                                mixin="super-hands" position="0 0.05 0"></a-entity>
+                        </a-entity>
                 </template>
 
                 <template data-selector=".RightHand">
                     <a-entity>
-                        <a-entity
-                            event-repeater="events: action_grab, action_release; eventSource: #player-right-controller"
-                            static-body="shape: sphere; sphereRadius: 0.02"
-                            mixin="super-hands"
-                            position="0 -0.05 0"
-                        ></a-entity>
+                        <a-entity event-repeater="events: action_grab, action_release; eventSource: #player-right-controller" static-body="shape: sphere; sphereRadius: 0.02"
+                            mixin="super-hands" position="0 -0.05 0"></a-entity>
                     </a-entity>
                 </template>
 
+                </a-entity>
             </a-entity>
-        </a-entity>
 
-        <!-- Lights -->
-        <a-entity
-            hide-when-quality="low"
-            light="type: directional; color: #F9FFCE; intensity: 0.6"
-            position="0.002 5.231 -15.3"
-        ></a-entity>
+            <!-- Lights -->
+            <a-entity hide-when-quality="low" light="type: directional; color: #F9FFCE; intensity: 0.6" position="0.002 5.231 -15.3"></a-entity>
 
-        <!-- Environment -->
-        <a-entity id="environment-root" position="0 0 0"/>
+            <!-- Environment -->
+            <a-entity id="environment-root" position="0 0 0" />
 
-        <a-entity id="skybox"
-            id="skybox"
-            scale="8000 8000 8000"
-            skybox="azimuth:0.280; inclination:0.440"
-            light="type: ambient; color: #FFF"
-            layers="reflection:true"
-            xr="ar: false"
-        ></a-entity>
+            <a-entity id="skybox" id="skybox" scale="8000 8000 8000" skybox="azimuth:0.280; inclination:0.440" light="type: ambient; color: #FFF"
+                layers="reflection:true" xr="ar: false"></a-entity>
 
-        <a-entity
-            id="water"
-            water="forceMobile: true; normalMap:#water-normal-map"
-            rotation="-90 0 0"
-            position="0 -88.358 -332.424"
-            xr="ar: false"
-        ></a-entity>
+            <a-entity id="water" water="forceMobile: true; normalMap:#water-normal-map" rotation="-90 0 0" position="0 -88.358 -332.424"
+                xr="ar: false"></a-entity>
 
-        <a-cylinder
-            position="0 0.45 0"
-            material="visible: false"
-            height="1" radius="3.1"
-            segments-radial="12"
-            static-body
-            class="collidable"
-        ></a-cylinder>
+            <a-cylinder position="0 0.45 0" material="visible: false" height="1" radius="3.1" segments-radial="12" static-body class="collidable"></a-cylinder>
 
-        <a-plane 
-            material="visible: false" 
-            rotation="-90 0 0" 
-            height="35" 
-            width="35" 
-            static-body 
-            class="collidable"
-        ></a-plane> 
+            <a-plane material="visible: false" rotation="-90 0 0" height="35" width="35" static-body class="collidable"></a-plane>
     </a-scene>
 
     <div id="ui-root"></div>

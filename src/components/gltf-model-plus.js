@@ -166,7 +166,7 @@ function nextTick() {
   });
 }
 
-function cachedLoadGLTF(src, onProgress) {
+function cachedLoadGLTF(src, preferredTechnique, onProgress) {
   return new Promise((resolve, reject) => {
     // Load the gltf model from the cache if it exists.
     if (GLTFCache[src]) {
@@ -174,7 +174,10 @@ function cachedLoadGLTF(src, onProgress) {
       resolve(cloneGltf(GLTFCache[src]));
     } else {
       // Otherwise load the new gltf model.
-      new THREE.GLTFLoader().load(
+      const gltfLoader = new THREE.GLTFLoader();
+      gltfLoader.preferredTechnique = preferredTechnique;
+
+      gltfLoader.load(
         src,
         model => {
           if (!GLTFCache[src]) {
@@ -193,7 +196,8 @@ function cachedLoadGLTF(src, onProgress) {
 AFRAME.registerComponent("gltf-model-plus", {
   schema: {
     src: { type: "string" },
-    inflate: { default: false }
+    inflate: { default: false },
+    preferredTechnique: { type: "string" }
   },
 
   init() {
@@ -212,6 +216,15 @@ AFRAME.registerComponent("gltf-model-plus", {
         templateRoot: document.importNode(templateEl.firstElementChild || templateEl.content.firstElementChild, true)
       })
     );
+  },
+
+  getPreferredTechnique() {
+    if (this.data.preferredTechnique) {
+      return this.data.preferredTechnique;
+    } else if (AFRAME.utils.device.isMobile()) {
+      return "KHR_materials_unlit";
+    }
+    return "pbrMetallicRoughness";
   },
 
   async applySrc(src) {
@@ -244,7 +257,8 @@ AFRAME.registerComponent("gltf-model-plus", {
         return;
       }
 
-      const model = await cachedLoadGLTF(src);
+      const preferredTechnique = this.getPreferredTechnique();
+      const model = await cachedLoadGLTF(src, preferredTechnique);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
