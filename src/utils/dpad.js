@@ -13,7 +13,7 @@ export function angleTo4Direction(angle) {
 
 export function angleTo8Direction(angle) {
   angle = (angle * THREE.Math.RAD2DEG + 180 + 45) % 360;
-  var direction = "";
+  let direction = "";
   if ((angle >= 0 && angle < 120) || angle >= 330) {
     direction += "north";
   }

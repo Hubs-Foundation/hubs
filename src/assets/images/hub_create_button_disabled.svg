@@ -1,0 +1,20 @@
+<svg width="55" height="55" viewBox="0 0 55 55" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<title>hub_create_button_disabled</title>
+<desc>Created using Figma</desc>
+<g id="Canvas" transform="translate(-92 -236)">
+<g id="hub_create_button_disabled">
+<g id="Oval Copy">
+<use xlink:href="#path0_stroke" transform="translate(94 238)" fill="#C0C0C0"/>
+</g>
+<g id="Group 7">
+<g id="Union">
+<use xlink:href="#path1_fill" transform="translate(112.7 255.567)" fill="#C0C0C0"/>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<path id="path0_stroke" d="M 25.5 52.5C 40.4117 52.5 52.5 40.4117 52.5 25.5L 49.5 25.5C 49.5 38.7548 38.7548 49.5 25.5 49.5L 25.5 52.5ZM 52.5 25.5C 52.5 10.5883 40.4117 -1.5 25.5 -1.5L 25.5 1.5C 38.7548 1.5 49.5 12.2452 49.5 25.5L 52.5 25.5ZM 25.5 -1.5C 10.5883 -1.5 -1.5 10.5883 -1.5 25.5L 1.5 25.5C 1.5 12.2452 12.2452 1.5 25.5 1.5L 25.5 -1.5ZM -1.5 25.5C -1.5 40.4117 10.5883 52.5 25.5 52.5L 25.5 49.5C 12.2452 49.5 1.5 38.7548 1.5 25.5L -1.5 25.5Z"/>
+<path id="path1_fill" fill-rule="evenodd" d="M 6.8 1.52588e-05L 15.3 7.65001L 6.8 15.3L 6.80001 10.2L 7.62939e-06 10.2L 7.62939e-06 5.10002L 6.80001 5.10002L 6.8 1.52588e-05Z"/>
+</defs>
+</svg>

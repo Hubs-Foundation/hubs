@@ -39,16 +39,16 @@ AFRAME.registerSystem("personal-space-bubble", {
 
   tick() {
     // Update matrix positions once for each space bubble and space invader
-    for (var i = 0; i < this.bubbles.length; i++) {
+    for (let i = 0; i < this.bubbles.length; i++) {
       this.bubbles[i].object3D.updateMatrixWorld(true);
     }
 
-    for (var i = 0; i < this.invaders.length; i++) {
+    for (let i = 0; i < this.invaders.length; i++) {
       this.invaders[i].object3D.updateMatrixWorld(true);
     }
 
     // Loop through all of the space bubbles (usually one)
-    for (var i = 0; i < this.bubbles.length; i++) {
+    for (let i = 0; i < this.bubbles.length; i++) {
       const bubble = this.bubbles[i];
 
       bubblePos.setFromMatrixPosition(bubble.object3D.matrixWorld);

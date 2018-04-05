@@ -4,7 +4,7 @@ import { Validator } from "jsonschema";
 const LOCAL_STORE_KEY = "___mozilla_duck";
 const STORE_STATE_CACHE_KEY = Symbol();
 const validator = new Validator();
-import { EventTarget } from "event-target-shim"
+import { EventTarget } from "event-target-shim";
 
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
@@ -17,7 +17,7 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         display_name: { type: "string", pattern: "^[A-Za-z0-9-]{3,32}$" },
-        avatar_id: { type: "string" },
+        avatar_id: { type: "string" }
       }
     }
   },
@@ -26,11 +26,11 @@ export const SCHEMA = {
 
   properties: {
     id: { type: "string", pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
-    profile: { "$ref": "#/definitions/profile" },
+    profile: { $ref: "#/definitions/profile" }
   },
 
   additionalProperties: false
-}
+};
 
 export default class Store extends EventTarget {
   constructor() {
@@ -51,15 +51,14 @@ export default class Store extends EventTarget {
 
   update(newState) {
     if (newState.id) {
-      throw "Store id is immutable.";
+      throw new Error("Store id is immutable.");
     }
 
     const finalState = { ...this.state, ...newState };
     const isValid = validator.validate(finalState, SCHEMA).valid;
 
     if (!isValid) {
-      throw `Write of ${JSON.stringify(finalState)} to store failed schema validation.`;
-      return;
+      throw new Error(`Write of ${JSON.stringify(finalState)} to store failed schema validation.`);
     }
 
     localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(finalState));
