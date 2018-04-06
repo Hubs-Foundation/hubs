@@ -77,6 +77,8 @@ AFRAME.registerComponent("scale-audio-feedback", {
   },
 
   onAudioFrequencyChange(e) {
+    // TODO: come up with a cleaner way to handle this.
+    // bone's are "hidden" by scaling them with bone-visibility, without this we would overwrite that.
     if (!this.el.object3D.visible) return;
     const { minScale, maxScale } = this.data;
     this.el.object3D.scale.setScalar(minScale + (maxScale - minScale) * e.detail.volume / 255);
