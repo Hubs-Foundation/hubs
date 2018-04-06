@@ -31,14 +31,19 @@ const config = {
   mappings: {
     default: {
       "vive-controls": {
-        menudown: "action_mute",
+        menudown: ["action_mute", "thumb_down"],
+        menuup: "thumb_up",
         "trackpad.pressedmove": { left: "move" },
         trackpad_dpad4_pressed_west_down: { right: "snap_rotate_left" },
         trackpad_dpad4_pressed_east_down: { right: "snap_rotate_right" },
         trackpad_dpad4_pressed_center_down: { right: "action_teleport_down" },
         trackpadup: { right: "action_teleport_up" },
-        gripdown: "action_grab",
-        gripup: "action_release"
+        gripdown: ["action_grab", "middle_ring_pinky_down", "index_down"],
+        gripup: ["action_release", "middle_ring_pinky_up", "index_up"],
+        trackpadtouchstart: "thumb_down",
+        trackpadtouchend: "thumb_up",
+        triggerdown: "index_down",
+        triggerup: "index_up"
       },
       "oculus-touch-controls": {
         joystick_dpad4_west: {

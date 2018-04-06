@@ -19,9 +19,6 @@
       "name": "outdoor-geometry", "src": "<%= require("./OutdoorFacade_mesh.glb") %>"
     },
     {
-      "name": "collision", "src": "<%= require("./FloorNav_mesh.glb") %>"
-    },
-    {
       "name": "cliff-geometry", "src": "<%= require("./CliffVista_mesh.glb") %>"
     }
   ]

@@ -17,8 +17,14 @@
 <body data-html-prefix="<%= HTML_PREFIX %>">
     <audio id="test-tone" src="./assets/sfx/tone.ogg"></audio>
 
-    <a-scene networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;" physics mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
-        app-mode-input-mappings="modes: default, hud; actionSets: default, hud;">
+    <a-scene
+        networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
+        physics
+        mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
+        personal-space-bubble="debug: false;"
+
+        app-mode-input-mappings="modes: default, hud; actionSets: default, hud;"
+        >
 
         <a-assets>
             <img id="unmuted" src="./assets/hud/unmuted.png">
@@ -57,7 +63,7 @@
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
                         <template data-selector=".RootScene">
-                            <a-entity ik-controller animation-mixer></a-entity>
+                            <a-entity ik-controller animation-mixer space-invader-mesh="meshSelector: .Bot_Skinned"></a-entity>
                         </template>
 
                         <template data-selector=".Neck">
@@ -66,17 +72,26 @@
                             </a-entity>
                         </template>
 
+                        <template data-selector=".Chest">
+                            <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility></a-entity>
+                        </template>
+
                         <template data-selector=".Head">
-                            <a-entity networked-audio-source networked-audio-analyser personal-space-invader>
+                            <a-entity
+                                networked-audio-source
+                                networked-audio-analyser
+                                personal-space-invader="radius: 0.15; useMaterial: true;"
+                                bone-visibility
+                            >
                             </a-entity>
                         </template>
 
                         <template data-selector=".LeftHand">
-                            <a-entity personal-space-invader></a-entity>
+                            <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
                         </template>
 
                         <template data-selector=".RightHand">
-                            <a-entity personal-space-invader></a-entity>
+                            <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
                         </template>
                     </a-entity>
                 </a-entity>
@@ -119,17 +134,42 @@
                 </a-entity>
             </a-entity>
 
-            <a-entity id="player-camera" class="camera" camera position="0 1.6 0" personal-space-bubble look-controls></a-entity>
+            <a-entity
+                id="player-camera"
+                class="camera"
+                camera
+                position="0 1.6 0"
+                personal-space-bubble="radius: 0.4"
+                look-controls
+            ></a-entity>
 
-            <a-entity id="player-left-controller" class="left-controller" hand-controls2="left" tracked-controls teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
-                app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;" haptic-feedback></a-entity>
+            <a-entity
+                id="player-left-controller"
+                class="left-controller"
+                hand-controls2="left"
+                tracked-controls
+                teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
+                app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;"
+                haptic-feedback
+            ></a-entity>
 
 
 
-            <a-entity id="player-right-controller" class="right-controller" hand-controls2="right" tracked-controls teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
-                haptic-feedback raycaster="objects:.hud; showLine: true; far: 2;" cursor="fuse: false; downEvents: action_ui_select_down; upEvents: action_ui_select_up;"
-                app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;" app-mode-toggle-playing__raycaster="mode: hud;"
-                app-mode-toggle-playing__cursor="mode: hud;" app-mode-toggle-attribute__line="mode: hud; property: visible;"></a-entity>
+            <a-entity
+                id="player-right-controller"
+                class="right-controller"
+                hand-controls2="right"
+                tracked-controls
+                teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
+                haptic-feedback
+                raycaster="objects:.hud; showLine: true; far: 2;"
+                cursor="fuse: false; downEvents: action_ui_select_down; upEvents: action_ui_select_up;"
+
+                app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;"
+                app-mode-toggle-playing__raycaster="mode: hud;"
+                app-mode-toggle-playing__cursor="mode: hud;"
+                app-mode-toggle-attribute__line="mode: hud; property: visible;"
+            ></a-entity>
 
             <a-entity gltf-model-plus="inflate: true;" class="model">
                 <template data-selector=".RootScene">
@@ -143,22 +183,36 @@
                 </template>
 
                 <template data-selector=".Head">
-                    <a-entity visible="false"></a-entity>
+                    <a-entity visible="false" bone-visibility></a-entity>
                 </template>
 
                 <template data-selector=".LeftHand">
-                    <a-entity>
-                        <a-entity id="watch" gltf-model-plus="src: #watch-model" bone-mute-state-indicator scale="1.5 1.5 1.5" rotation="0 -90 90"
-                            position="0 -0.04 0"></a--entity>
-                            <a-entity event-repeater="events: action_grab, action_release; eventSource: #player-left-controller" static-body="shape: sphere; sphereRadius: 0.02"
-                                mixin="super-hands" position="0 0.05 0"></a-entity>
-                        </a-entity>
+                    <a-entity bone-visibility>
+                        <a-entity
+                            id="watch"
+                            gltf-model-plus="src: #watch-model"
+                            bone-mute-state-indicator
+                            scale="1.5 1.5 1.5"
+                            rotation="0 -90 90"
+                            position="0 -0.04 0"
+                        ></a--entity>
+                        <a-entity
+                            event-repeater="events: action_grab, action_release; eventSource: #player-left-controller"
+                            static-body="shape: sphere; sphereRadius: 0.02"
+                            mixin="super-hands"
+                            position="0 0.05 0"
+                        ></a-entity>
+                    </a-entity>
                 </template>
 
                 <template data-selector=".RightHand">
-                    <a-entity>
-                        <a-entity event-repeater="events: action_grab, action_release; eventSource: #player-right-controller" static-body="shape: sphere; sphereRadius: 0.02"
-                            mixin="super-hands" position="0 -0.05 0"></a-entity>
+                    <a-entity bone-visibility>
+                        <a-entity
+                            event-repeater="events: action_grab, action_release; eventSource: #player-right-controller"
+                            static-body="shape: sphere; sphereRadius: 0.02"
+                            mixin="super-hands"
+                            position="0 -0.05 0"
+                        ></a-entity>
                     </a-entity>
                 </template>
 
