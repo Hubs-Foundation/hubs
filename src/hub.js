@@ -66,8 +66,6 @@ if (qs.quality) {
   window.APP.quality = isMobile ? "low" : "high";
 }
 
-import "./elements/a-progressive-asset";
-
 import "aframe-physics-system";
 import "aframe-physics-extras";
 import "super-hands";
