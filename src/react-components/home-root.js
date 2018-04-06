@@ -16,7 +16,7 @@ addLocaleData([...en]);
 const messages = localeData[lang] || localeData.en;
 
 const ENVIRONMENT_URLS = [
-  // "https://asset-bundles-dev.reticulum.io/rooms/cliff_meeting_space/CliffMeetingSpaceMeshes.bundle.json",
+  "https://asset-bundles-dev.reticulum.io/rooms/meetingroom/MeetingRoom.bundle.json",
   "https://asset-bundles-dev.reticulum.io/rooms/theater/TheaterMeshes.bundle.json",
   "https://asset-bundles-dev.reticulum.io/rooms/atrium/AtriumMeshes.bundle.json",
   "https://asset-bundles-dev.reticulum.io/rooms/courtyard/CourtyardMeshes.bundle.json"
