@@ -32,7 +32,7 @@ AFRAME.registerComponent("networked-counter", {
     }
 
     const id = NAF.utils.getNetworkId(networkedEl);
-    if (this.queue.hasOwnProperty(id)) {
+    if (id && this.queue.hasOwnProperty(id)) {
       return;
     }
 
@@ -61,7 +61,7 @@ AFRAME.registerComponent("networked-counter", {
 
   deregister: function(networkedEl) {
     const id = NAF.utils.getNetworkId(networkedEl);
-    if (this.queue.hasOwnProperty(id)) {
+    if (id && this.queue.hasOwnProperty(id)) {
       const item = this.queue[id];
       networkedEl.removeEventListener(this.data.grab_event, item.onGrabHandler);
       networkedEl.removeEventListener(this.data.release_event, item.onReleaseHandler);
