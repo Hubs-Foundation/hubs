@@ -892,9 +892,9 @@ THREE.GLTFLoader = ( function () {
 
 	MOZAltMaterialsExtension.prototype.getAltMaterial = function ( materialDef, materials ) {
 
-		if ( materialDef.extensions && materialDef.extensions[ EXTENSIONS.MOZ_ALT_MATERIALS ]) {
+		var mamExtension = materialDef.extensions && materialDef.extensions[ EXTENSIONS.MOZ_ALT_MATERIALS ];
 
-			var mamExtension = materialDef.extensions[ EXTENSIONS.MOZ_ALT_MATERIALS ];
+		if ( mamExtension ) {
 
 			if ( this.preferredTechnique && mamExtension[ this.preferredTechnique ] !== undefined ) {
 
@@ -902,7 +902,6 @@ THREE.GLTFLoader = ( function () {
 				return materials[ altMaterialIndex ];
 
 			}
-
 
 			return materialDef;
 

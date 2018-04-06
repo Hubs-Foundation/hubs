@@ -197,7 +197,7 @@ AFRAME.registerComponent("gltf-model-plus", {
   schema: {
     src: { type: "string" },
     inflate: { default: false },
-    preferredTechnique: { type: "string" }
+    preferredTechnique: { default: AFRAME.utils.device.isMobile() ? "KHR_materials_unlit" : "pbrMetallicRoughness" }
   },
 
   init() {
@@ -216,15 +216,6 @@ AFRAME.registerComponent("gltf-model-plus", {
         templateRoot: document.importNode(templateEl.firstElementChild || templateEl.content.firstElementChild, true)
       })
     );
-  },
-
-  getPreferredTechnique() {
-    if (this.data.preferredTechnique) {
-      return this.data.preferredTechnique;
-    } else if (AFRAME.utils.device.isMobile()) {
-      return "KHR_materials_unlit";
-    }
-    return "pbrMetallicRoughness";
   },
 
   async applySrc(src) {
@@ -257,8 +248,7 @@ AFRAME.registerComponent("gltf-model-plus", {
         return;
       }
 
-      const preferredTechnique = this.getPreferredTechnique();
-      const model = await cachedLoadGLTF(src, preferredTechnique);
+      const model = await cachedLoadGLTF(src, this.data.preferredTechnique);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
