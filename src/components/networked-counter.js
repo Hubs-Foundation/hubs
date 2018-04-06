@@ -126,5 +126,5 @@ AFRAME.registerComponent("networked-counter", {
 
   _destroy: function(networkedEl) {
     networkedEl.parentNode.removeChild(networkedEl);
-  } 
+  }
 });
