@@ -7,6 +7,8 @@ import faAngleLeft from "@fortawesome/fontawesome-free-solid/faAngleLeft";
 import faAngleRight from "@fortawesome/fontawesome-free-solid/faAngleRight";
 import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 
+import defaultThumbnail from "../assets/images/default_thumbnail.png";
+
 const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
 
 class HubCreatePanel extends Component {
@@ -84,10 +86,13 @@ class HubCreatePanel extends Component {
     }
 
     const environment = this.props.environments[this.state.environmentIndex];
-    const environmentImageSrcSet = environment.meta.images.find(i => i.type === "preview-thumbnail").srcset;
+    const meta = environment.meta || {};
 
-    const environmentTitle = environment.meta.title;
-    const environmentAuthor = (environment.meta.authors || [])[0];
+    const environmentTitle = meta.title || environment.name;
+    const environmentAuthor = (meta.authors || [])[0];
+    const environmentThumbnail = (meta.images || []).find(i => i.type === "preview-thumbnail") || {
+      srcset: defaultThumbnail
+    };
 
     const formNameClassNames = classNames("create-panel__form__name", {
       "create-panel__form__name--expanded": this.state.expanded
@@ -134,7 +139,10 @@ class HubCreatePanel extends Component {
             {this.state.expanded && (
               <div className="create-panel__form__environment">
                 <div className="create-panel__form__environment__picker">
-                  <img className="create-panel__form__environment__picker__image" srcSet={environmentImageSrcSet} />
+                  <img
+                    className="create-panel__form__environment__picker__image"
+                    srcSet={environmentThumbnail.srcset}
+                  />
                   <div className="create-panel__form__environment__picker__labels">
                     <div className="create-panel__form__environment__picker__labels__header">
                       <span className="create-panel__form__environment__picker__labels__header__title">
