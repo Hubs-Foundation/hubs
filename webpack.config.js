@@ -3,7 +3,6 @@ require("dotenv").config();
 
 const fs = require("fs");
 const path = require("path");
-const glob = require("glob");
 const selfsigned = require("selfsigned");
 const webpack = require("webpack");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
