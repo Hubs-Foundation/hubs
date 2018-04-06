@@ -100,7 +100,6 @@ AFRAME.registerComponent("space-invader-mesh", {
   },
   init() {
     this.targetMesh = this.el.querySelector(this.data.meshSelector).object3DMap.skinnedmesh;
-    console.log("target", this.targetMesh);
   }
 });
 
