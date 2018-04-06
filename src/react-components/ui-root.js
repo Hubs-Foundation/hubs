@@ -131,6 +131,10 @@ class UIRoot extends Component {
       this.enterDaydream();
     } else if (this.props.forcedVREntryType === "gearvr") {
       this.enterGearVR();
+    } else if (this.props.forcedVREntryType === "vr") {
+      this.enterVR();
+    } else if (this.props.forcedVREntryType === "2d") {
+      this.enter2D();
     }
   };
 
@@ -246,18 +250,22 @@ class UIRoot extends Component {
   };
 
   enterGearVR = async () => {
-    this.exit();
+    if (true || this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.yes) {
+      await this.performDirectEntryFlow(true);
+    } else {
+      this.exit();
 
-    // Launch via Oculus Browser
-    const location = window.location;
-    const qs = queryString.parse(location.search);
-    qs.vr_entry_type = "gearvr"; // Auto-choose 'gearvr' after landing in Oculus Browser
+      // Launch via Oculus Browser
+      const location = window.location;
+      const qs = queryString.parse(location.search);
+      qs.vr_entry_type = "gearvr"; // Auto-choose 'gearvr' after landing in Oculus Browser
 
-    const ovrwebUrl =
-      `ovrweb://${location.protocol || "http:"}//${location.host}` +
-      `${location.pathname || ""}?${queryString.stringify(qs)}#${location.hash || ""}`;
+      const ovrwebUrl =
+        `ovrweb://${location.protocol || "http:"}//${location.host}` +
+        `${location.pathname || ""}?${queryString.stringify(qs)}#${location.hash || ""}`;
 
-    window.location = ovrwebUrl;
+      window.location = ovrwebUrl;
+    }
   };
 
   enterDaydream = async () => {
