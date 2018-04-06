@@ -12,10 +12,7 @@ AFRAME.registerComponent("offset-relative-to", {
   },
   init() {
     this.updateOffset();
-    this.el.sceneEl.addEventListener(
-      this.data.on,
-      this.updateOffset.bind(this)
-    );
+    this.el.sceneEl.addEventListener(this.data.on, this.updateOffset.bind(this));
   },
   updateOffset() {
     const offsetVector = new THREE.Vector3().copy(this.data.offset);

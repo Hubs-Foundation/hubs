@@ -3,18 +3,19 @@ require("dotenv").config();
 
 const fs = require("fs");
 const path = require("path");
+const glob = require("glob");
 const selfsigned = require("selfsigned");
 const webpack = require("webpack");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const _ = require("lodash");
 
+const SMOKE_PREFIX = "smoke-";
+
 function createHTTPSConfig() {
   if (process.env.NODE_ENV === "production") {
     return false;
   }
-
-  let https;
 
   // Generate certs for the local webpack-dev-server.
   if (fs.existsSync(path.join(__dirname, "certs"))) {
@@ -75,14 +76,13 @@ class LodashTemplatePlugin {
 
 const config = {
   entry: {
-    lobby: path.join(__dirname, "src", "lobby.js"),
-    room: path.join(__dirname, "src", "room.js"),
-    'avatar-selector': path.join(__dirname, "src", "avatar-selector.js"),
-    onboarding: path.join(__dirname, "src", "onboarding.js")
+    index: path.join(__dirname, "src", "index.js"),
+    hub: path.join(__dirname, "src", "hub.js"),
+    "avatar-selector": path.join(__dirname, "src", "avatar-selector.js")
   },
   output: {
     path: path.join(__dirname, "public"),
-    filename: "[name]-[chunkhash].js",
+    filename: "assets/js/[name]-[chunkhash].js",
     publicPath: process.env.BASE_ASSETS_PATH || ""
   },
   mode: "development",
@@ -97,7 +97,7 @@ const config = {
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
       app.head("*", function(req, res, next) {
         if (req.method === "HEAD") {
-          res.append("Date", (new Date()).toGMTString());
+          res.append("Date", new Date().toGMTString());
           res.send("");
         } else {
           next();
@@ -108,7 +108,7 @@ const config = {
   performance: {
     // Ignore media and sourcemaps when warning about file size.
     assetFilter(assetFilename) {
-      return !/\.(map|png|jpg|gif|glb)$/.test(assetFilename);
+      return !/\.(map|png|jpg|gif|glb|webm)$/.test(assetFilename);
     }
   },
   module: {
@@ -118,14 +118,7 @@ const config = {
         loader: "html-loader",
         options: {
           // <a-asset-item>'s src property is overwritten with the correct transformed asset url.
-          attrs: [
-            "img:src",
-            "a-asset-item:src",
-            "a-progressive-asset:src",
-            "a-progressive-asset:high-src",
-            "a-progressive-asset:low-src",
-            "audio:src"
-          ],
+          attrs: ["img:src", "a-asset-item:src", "audio:src"],
           // You can get transformed asset urls in an html template using ${require("pathToFile.ext")}
           interpolate: "require"
         }
@@ -170,7 +163,7 @@ const config = {
         })
       },
       {
-        test: /\.(png|jpg|gif|glb|ogg|woff2|svg)$/,
+        test: /\.(png|jpg|gif|glb|ogg|woff2|svg|webm)$/,
         use: {
           loader: "file-loader",
           options: {
@@ -187,29 +180,34 @@ const config = {
     // Each output page needs a HTMLWebpackPlugin entry
     new HTMLWebpackPlugin({
       filename: "index.html",
-      template: path.join(__dirname, "src", "lobby.html"),
+      template: path.join(__dirname, "src", "index.html"),
       // Chunks correspond with the entries you wish to include in your html template
-      chunks: ["lobby"]
+      chunks: ["index"]
     }),
     new HTMLWebpackPlugin({
-      filename: "room.html",
-      template: path.join(__dirname, "src", "room.html"),
-      chunks: ["room"],
+      filename: "hub.html",
+      template: path.join(__dirname, "src", "hub.html"),
+      chunks: ["hub"],
       inject: "head"
     }),
+    // Build the GLTF asset bundle json files
+    ...glob.sync("src/assets/**/*.tpl").map(
+      f =>
+        new HTMLWebpackPlugin({
+          filename: f.replace(".tpl", "").replace("src/", ""),
+          template: path.join(...[__dirname, ...f.split("/")]),
+          chunks: []
+        })
+    ),
     new HTMLWebpackPlugin({
       filename: "avatar-selector.html",
       template: path.join(__dirname, "src", "avatar-selector.html"),
       chunks: ["avatar-selector"],
       inject: "head"
     }),
-    new HTMLWebpackPlugin({
-      filename: "onboarding.html",
-      template: path.join(__dirname, "src", "onboarding.html"),
-      chunks: ["onboarding"]
-    }),
     // Extract required css and add a content hash.
-    new ExtractTextPlugin("[name]-[contenthash].css", {
+    new ExtractTextPlugin({
+      filename: "assets/stylesheets/[name]-[contenthash].css",
       disable: process.env.NODE_ENV !== "production"
     }),
     // Transform the output of the html-loader using _.template
@@ -218,6 +216,7 @@ const config = {
       // expose these variables to the lodash template
       // ex: <%= ORIGIN_TRIAL_TOKEN %>
       imports: {
+        HTML_PREFIX: process.env.GENERATE_SMOKE_TESTS ? SMOKE_PREFIX : "",
         NODE_ENV: process.env.NODE_ENV,
         ORIGIN_TRIAL_EXPIRES: process.env.ORIGIN_TRIAL_EXPIRES,
         ORIGIN_TRIAL_TOKEN: process.env.ORIGIN_TRIAL_TOKEN
@@ -238,14 +237,14 @@ module.exports = () => {
     const smokeConfig = Object.assign({}, config, {
       // Set the public path for to point to the correct assets on the smoke-test build.
       output: Object.assign({}, config.output, {
-        publicPath: process.env.BASE_ASSETS_PATH.replace("://", "://smoke-")
+        publicPath: process.env.BASE_ASSETS_PATH.replace("://", `://${SMOKE_PREFIX}`)
       }),
       // For this config
       plugins: config.plugins.map(plugin => {
         if (plugin instanceof HTMLWebpackPlugin) {
           return new HTMLWebpackPlugin(
             Object.assign({}, plugin.options, {
-              filename: "smoke-" + plugin.options.filename
+              filename: SMOKE_PREFIX + plugin.options.filename
             })
           );
         }

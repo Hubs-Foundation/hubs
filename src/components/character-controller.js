@@ -61,11 +61,11 @@ AFRAME.registerComponent("character-controller", {
     this.angularVelocity = event.detail.value;
   },
 
-  snapRotateLeft: function(event) {
+  snapRotateLeft: function() {
     this.pendingSnapRotationMatrix.copy(this.leftRotationMatrix);
   },
 
-  snapRotateRight: function(event) {
+  snapRotateRight: function() {
     this.pendingSnapRotationMatrix.copy(this.rightRotationMatrix);
   },
 

@@ -1,4 +1,3 @@
-@import 'fonts';
 @import 'shared';
 
 #selector-root {
@@ -17,16 +16,10 @@
     color: grey;
   }
   &__previous-button, &__next-button {
+    @extend %big-icon-button;
     position: absolute;
     top: 50%;
     margin-top: -0.5em;
-    appearance: none;
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    background: transparent;
-    color: white;
-    border: none;
-    font-size: 64pt;
   }
   &__previous-button {
     left: 0.2em;

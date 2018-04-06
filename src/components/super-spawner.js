@@ -19,7 +19,7 @@ AFRAME.registerComponent("super-spawner", {
   },
 
   remove: function() {
-    for (let entity of this.entities.keys()) {
+    for (const entity of this.entities.keys()) {
       const data = this.entities.get(entity);
       entity.removeEventListener("componentinitialized", data.componentinInitializedListener);
       entity.removeEventListener("bodyloaded", data.bodyLoadedListener);
@@ -39,12 +39,12 @@ AFRAME.registerComponent("super-spawner", {
 
     this.entities.set(entity, {
       hand: hand,
-      componentInitialized: false, 
-      bodyLoaded: false, 
-      componentinInitializedListener: componentinInitializedListener, 
+      componentInitialized: false,
+      bodyLoaded: false,
+      componentinInitializedListener: componentinInitializedListener,
       bodyLoadedListener: bodyLoadedListener
     });
-    
+
     entity.addEventListener("componentinitialized", componentinInitializedListener);
     entity.addEventListener("body-loaded", bodyLoadedListener);
 
@@ -60,7 +60,7 @@ AFRAME.registerComponent("super-spawner", {
     }
   },
 
-  _handleBodyLoaded: function(entity, e) {
+  _handleBodyLoaded: function(entity) {
     this.entities.get(entity).bodyLoaded = true;
     this._emitEvents.call(this, entity);
   },

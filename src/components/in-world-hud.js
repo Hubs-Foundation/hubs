@@ -7,8 +7,18 @@ AFRAME.registerComponent("in-world-hud", {
     this.bg = this.el.querySelector(".bg");
     this.mic = this.el.querySelector(".mic");
     this.nametag = this.el.querySelector(".username");
+    this.avatar = this.el.querySelector(".avatar");
     this.nametag.object3DMap.text.material.depthTest = false;
-    this.data.raycaster.components.line.material.depthTest = false;
+    this.nametag.object3DMap.text.renderOrder = 1;
+    this.mic.object3DMap.mesh.renderOrder = 1;
+    this.avatar.object3DMap.mesh.renderOrder = 1;
+
+    const line = this.data.raycaster.object3DMap.line;
+    line.renderOrder = 2;
+    line.material.depthTest = false;
+    // Set opacity to 0.99 to force the line to render in the
+    // transparent pass, so that it renders on top of the HUD
+    this.data.raycaster.setAttribute("line", "opacity", 0.99);
 
     const muted = this.el.sceneEl.is("muted");
     this.mic.setAttribute("src", muted ? "#muted" : "#unmuted");
@@ -96,7 +106,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.el.sceneEl.removeEventListener("micAudio", this.onAudioFrequencyChange);
   },
 
-  tick: function(t, dt) {
+  tick: function() {
     if (!this.analyser) return;
 
     this.analyser.getByteFrequencyData(this.levels);
