@@ -5,10 +5,7 @@ AFRAME.registerComponent("gltf-bundle", {
 
   init: async function() {
     this._addGltfEntitiesForBundleJson = this._addGltfEntitiesForBundleJson.bind(this);
-    this.baseURL = new URL(this.data.src, window.location.href);
-    const pathParts = this.baseURL.pathname.split("/");
-    pathParts.pop();
-    this.baseURL.pathname = pathParts.join("/") + "/";
+    this.baseURL = new URL(THREE.LoaderUtils.extractUrlBase(this.data.src), window.location.href);
 
     const res = await fetch(this.data.src);
     const data = await res.json();
