@@ -33,7 +33,7 @@
     "mobile-detect": "^1.4.1",
     "moving-average": "^1.0.0",
     "naf-janus-adapter": "https://github.com/mozilla/naf-janus-adapter#feature/disconnect",
-    "networked-aframe": "https://github.com/networked-aframe/networked-aframe",
+    "networked-aframe": "https://github.com/mozillareality/networked-aframe#mr-social-client/master",
     "nipplejs": "^0.6.7",
     "query-string": "^5.0.1",
     "raven-js": "^3.20.1",

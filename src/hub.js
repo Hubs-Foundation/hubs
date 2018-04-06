@@ -23,6 +23,7 @@ import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in t
 import "./components/mute-mic";
 import "./components/audio-feedback";
 import "./components/bone-mute-state-indicator";
+import "./components/bone-visibility";
 import "./components/in-world-hud";
 import "./components/virtual-gamepad-controls";
 import "./components/ik-controller";
@@ -65,8 +66,6 @@ if (qs.quality) {
 } else {
   window.APP.quality = isMobile ? "low" : "high";
 }
-
-import "./elements/a-progressive-asset";
 
 import "aframe-physics-system";
 import "aframe-physics-extras";

@@ -46,13 +46,7 @@ class AvatarSelector extends Component {
 
   render() {
     const avatarAssets = this.props.avatars.map(avatar => (
-      <a-progressive-asset
-        id={avatar.id}
-        key={avatar.id}
-        response-type="arraybuffer"
-        high-src={`${avatar.models.high}`}
-        low-src={`${avatar.models.low}`}
-      />
+      <a-asset-item id={avatar.id} key={avatar.id} response-type="arraybuffer" src={`${avatar.model}`} />
     ));
 
     const avatarEntities = this.props.avatars.map((avatar, i) => (
