@@ -127,7 +127,7 @@
 
 
             <a-entity id="player-right-controller" class="right-controller" hand-controls2="right" tracked-controls teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
-                haptic-feedback raycaster="objects:.hud; showLine: true;" cursor="fuse: false; downEvents: action_ui_select_down; upEvents: action_ui_select_up;"
+                haptic-feedback raycaster="objects:.hud; showLine: true; far: 2;" cursor="fuse: false; downEvents: action_ui_select_down; upEvents: action_ui_select_up;"
                 app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;" app-mode-toggle-playing__raycaster="mode: hud;"
                 app-mode-toggle-playing__cursor="mode: hud;" app-mode-toggle-attribute__line="mode: hud; property: visible;"></a-entity>
 
