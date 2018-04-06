@@ -41,6 +41,16 @@ AFRAME.registerSystem("personal-space-bubble", {
     }
   },
 
+  update() {
+    for (let i = 0; i < this.bubbles.length; i++) {
+      this.bubbles[i].updateDebug();
+    }
+
+    for (let i = 0; i < this.invaders.length; i++) {
+      this.invaders[i].updateDebug();
+    }
+  },
+
   tick() {
     // Update matrix positions once for each space bubble and space invader
     for (let i = 0; i < this.bubbles.length; i++) {
@@ -101,18 +111,19 @@ function findInvaderMesh(entity) {
   return entity && entity.components["space-invader-mesh"].targetMesh;
 }
 
+const DEBUG_OBJ = "psb-debug";
+
 AFRAME.registerComponent("personal-space-invader", {
   schema: {
     radius: { type: "number", default: 0.1 },
     useMaterial: { default: false },
-    debug: { default: false }
+    debug: { default: false },
+    invadingOpacity: { default: 0.3 }
   },
+
   init() {
     const system = this.el.sceneEl.systems["personal-space-bubble"];
     system.registerInvader(this);
-    if (system.data.debug || this.data.debug) {
-      this.el.object3D.add(createSphereGizmo(this.data.radius));
-    }
     if (this.data.useMaterial) {
       const mesh = findInvaderMesh(this.el);
       if (mesh) {
@@ -124,6 +135,16 @@ AFRAME.registerComponent("personal-space-invader", {
 
   update() {
     this.radiusSquared = this.data.radius * this.data.radius;
+    this.updateDebug();
+  },
+
+  updateDebug() {
+    const system = this.el.sceneEl.systems["personal-space-bubble"];
+    if (system.data.debug || this.data.debug) {
+      !this.el.object3DMap[DEBUG_OBJ] && this.el.setObject3D(DEBUG_OBJ, createSphereGizmo(this.data.radius));
+    } else if (this.el.object3DMap[DEBUG_OBJ]) {
+      this.el.removeObject3D(DEBUG_OBJ);
+    }
   },
 
   remove() {
@@ -148,13 +169,19 @@ AFRAME.registerComponent("personal-space-bubble", {
   },
   init() {
     this.system.registerBubble(this);
-    if (this.system.data.debug || this.data.debug) {
-      this.el.object3D.add(createSphereGizmo(this.data.radius));
-    }
   },
 
   update() {
     this.radiusSquared = this.data.radius * this.data.radius;
+    this.updateDebug();
+  },
+
+  updateDebug() {
+    if (this.system.data.debug || this.data.debug) {
+      !this.el.object3DMap[DEBUG_OBJ] && this.el.setObject3D(DEBUG_OBJ, createSphereGizmo(this.data.radius));
+    } else if (this.el.object3DMap[DEBUG_OBJ]) {
+      this.el.removeObject3D(DEBUG_OBJ);
+    }
   },
 
   remove() {
