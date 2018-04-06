@@ -24,6 +24,10 @@ export const avatars = [
     model: "https://asset-bundles-dev.reticulum.io/bots/BotJim_Avatar-d28005a687.gltf"
   },
   {
+    id: "botkev",
+    model: "https://asset-bundles-dev.reticulum.io/bots/BotKev_Avatar-a95787bb51.gltf"
+  },
+  {
     id: "botpinky",
     model: "https://asset-bundles-dev.reticulum.io/bots/BotPinky_Avatar-b0b93f8675.gltf"
   },
