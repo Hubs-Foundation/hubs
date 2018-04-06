@@ -183,15 +183,6 @@
         <!-- Interactables -->
         <a-entity id="counter" networked-counter="max: 3; ttl: 120"></a-entity>
 
-        <a-entity 
-            gltf-model-plus="src: #interactable-duck"
-            scale="2 2 2"
-            class="interactable" 
-            super-spawner="template: #interactable-template;" 
-            position="2.5 1.2 0" 
-            body="mass: 0; type: static; shape: box;"
-        ></a-entity>
-
         <a-entity
             id="super-cursor"
             super-cursor="cursor: #3d-cursor; camera: #player-camera;"
