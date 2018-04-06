@@ -250,7 +250,7 @@ class UIRoot extends Component {
   };
 
   enterGearVR = async () => {
-    if (true || this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.yes) {
+    if (this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.yes) {
       await this.performDirectEntryFlow(true);
     } else {
       this.exit();
