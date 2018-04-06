@@ -5,6 +5,7 @@ import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 import faAngleLeft from "@fortawesome/fontawesome-free-solid/faAngleLeft";
 import faAngleRight from "@fortawesome/fontawesome-free-solid/faAngleRight";
 
+// TODO: we should make a bundle for avatar picker with it's own geometry, for now just use the indoor part of the meting room
 const meetingSpace = "https://asset-bundles-dev.reticulum.io/rooms/meetingroom/MeetingSpace1_mesh-d48250ebc6.gltf";
 
 class AvatarSelector extends Component {
