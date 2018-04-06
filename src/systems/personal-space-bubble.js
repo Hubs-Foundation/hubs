@@ -153,7 +153,7 @@ AFRAME.registerComponent("personal-space-invader", {
 
   setInvading(invading) {
     if (this.targetMaterial) {
-      this.targetMaterial.opacity = invading ? 0.3 : 1;
+      this.targetMaterial.opacity = invading ? this.data.invadingOpacity : 1;
       this.targetMaterial.transparent = invading;
     } else {
       this.el.object3D.visible = !invading;
