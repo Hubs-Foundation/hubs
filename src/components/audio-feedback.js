@@ -1,20 +1,14 @@
 AFRAME.registerComponent("networked-audio-analyser", {
   schema: {},
   async init() {
-    const networkedEl = await NAF.utils.getNetworkedEntity(this.el);
-    const ownerId = networkedEl.components.networked.data.owner;
-
-    const stream = await NAF.connection.adapter.getMediaStream(ownerId);
-
-    if (!stream) {
-      return;
-    }
-
-    const ctx = THREE.AudioContext.getContext();
-    const source = ctx.createMediaStreamSource(stream);
-    this.analyser = ctx.createAnalyser();
-    this.levels = new Uint8Array(this.analyser.frequencyBinCount);
-    source.connect(this.analyser);
+    this.connected = false;
+    this.el.addEventListener("sound-source-set", event => {
+      const ctx = THREE.AudioContext.getContext();
+      this.analyser = ctx.createAnalyser();
+      this.analyser.fftSize = 32;
+      this.levels = new Uint8Array(this.analyser.frequencyBinCount);
+      event.detail.soundSource.connect(this.analyser);
+    });
   },
 
   tick: function() {
