@@ -31,8 +31,8 @@ AFRAME.registerComponent("networked-counter", {
       return;
     }
 
-    const id = NAF.utils.getNetworkId(networkedEl);
-    if (this.queue.hasOwnProperty(id)) {
+    const id = this._getNetworkId(networkedEl);
+    if (id && this.queue.hasOwnProperty(id)) {
       return;
     }
 
@@ -60,8 +60,8 @@ AFRAME.registerComponent("networked-counter", {
   },
 
   deregister: function(networkedEl) {
-    const id = NAF.utils.getNetworkId(networkedEl);
-    if (this.queue.hasOwnProperty(id)) {
+    const id = this._getNetworkId(networkedEl);
+    if (id && this.queue.hasOwnProperty(id)) {
       const item = this.queue[id];
       networkedEl.removeEventListener(this.data.grab_event, item.onGrabHandler);
       networkedEl.removeEventListener(this.data.release_event, item.onReleaseHandler);
@@ -126,5 +126,12 @@ AFRAME.registerComponent("networked-counter", {
 
   _destroy: function(networkedEl) {
     networkedEl.parentNode.removeChild(networkedEl);
+  },
+
+  _getNetworkId: function(networkedEl) {
+    if (networkedEl.components.hasOwnProperty("networked")) {
+      return networkedEl.components["networked"].data.networkId;
+    }
+    return null;
   }
 });
