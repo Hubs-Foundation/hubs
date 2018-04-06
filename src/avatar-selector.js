@@ -10,7 +10,6 @@ import "./vendor/GLTFLoader";
 import "./components/animation-mixer";
 import "./components/audio-feedback";
 import "./components/loop-animation";
-import "./elements/a-progressive-asset";
 import "./gltf-component-mappings";
 import { avatars } from "./assets/avatars/avatars";
 

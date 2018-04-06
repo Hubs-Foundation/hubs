@@ -118,14 +118,7 @@ const config = {
         loader: "html-loader",
         options: {
           // <a-asset-item>'s src property is overwritten with the correct transformed asset url.
-          attrs: [
-            "img:src",
-            "a-asset-item:src",
-            "a-progressive-asset:src",
-            "a-progressive-asset:high-src",
-            "a-progressive-asset:low-src",
-            "audio:src"
-          ],
+          attrs: ["img:src", "a-asset-item:src", "audio:src"],
           // You can get transformed asset urls in an html template using ${require("pathToFile.ext")}
           interpolate: "require"
         }

@@ -1,4 +1,5 @@
 // https://github.com/mrdoob/three.js/blob/1e943ba79196737bc8505522e928595687c09425/examples/js/loaders/GLTFLoader.js
+// + MOZ_alt_materials draft extension
 
 /**
  * @author Rich Tibbett / https://github.com/richtr
@@ -14,6 +15,7 @@ THREE.GLTFLoader = ( function () {
 
 		this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
 		this.dracoLoader = null;
+		this.preferredTechnique = null;
 
 	}
 
@@ -125,6 +127,12 @@ THREE.GLTFLoader = ( function () {
 
 			if ( json.extensionsUsed ) {
 
+				if ( json.extensionsUsed.indexOf( EXTENSIONS.MOZ_ALT_MATERIALS ) >= 0 ) {
+
+					extensions[ EXTENSIONS.MOZ_ALT_MATERIALS ] = new MOZAltMaterialsExtension( this.preferredTechnique );
+
+				}
+
 				if ( json.extensionsUsed.indexOf( EXTENSIONS.KHR_LIGHTS ) >= 0 ) {
 
 					extensions[ EXTENSIONS.KHR_LIGHTS ] = new GLTFLightsExtension( json );
@@ -226,7 +234,8 @@ THREE.GLTFLoader = ( function () {
 		KHR_DRACO_MESH_COMPRESSION: 'KHR_draco_mesh_compression',
 		KHR_LIGHTS: 'KHR_lights',
 		KHR_MATERIALS_PBR_SPECULAR_GLOSSINESS: 'KHR_materials_pbrSpecularGlossiness',
-		KHR_MATERIALS_UNLIT: 'KHR_materials_unlit'
+		KHR_MATERIALS_UNLIT: 'KHR_materials_unlit',
+		MOZ_ALT_MATERIALS: "MOZ_alt_materials"
 	};
 
 	/**
@@ -873,6 +882,32 @@ THREE.GLTFLoader = ( function () {
 		};
 
 	}
+
+	function MOZAltMaterialsExtension ( preferredTechnique ) {
+
+		this.name = EXTENSIONS.MOZ_ALT_MATERIALS;
+		this.preferredTechnique = preferredTechnique;
+
+	}
+
+	MOZAltMaterialsExtension.prototype.getAltMaterial = function ( materialDef, materials ) {
+
+		var mamExtension = materialDef.extensions && materialDef.extensions[ EXTENSIONS.MOZ_ALT_MATERIALS ];
+
+		if ( mamExtension ) {
+
+			if ( this.preferredTechnique && mamExtension[ this.preferredTechnique ] !== undefined ) {
+
+				var altMaterialIndex = mamExtension[ this.preferredTechnique ];
+				return materials[ altMaterialIndex ];
+
+			}
+
+			return materialDef;
+
+		}
+
+	};
 
 	/*********************************/
 	/********** INTERPOLATION ********/
@@ -1854,6 +1889,13 @@ THREE.GLTFLoader = ( function () {
 		var json = this.json;
 		var extensions = this.extensions;
 		var materialDef = this.json.materials[ materialIndex ];
+
+		if ( materialDef.extensions && materialDef.extensions[ EXTENSIONS.MOZ_ALT_MATERIALS ] ) {
+
+			var mamExtension = extensions[ EXTENSIONS.MOZ_ALT_MATERIALS ];
+			materialDef = mamExtension.getAltMaterial( materialDef, this.json.materials );
+
+		}
 
 		var materialType;
 		var materialParams = {};
