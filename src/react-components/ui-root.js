@@ -364,12 +364,12 @@ class UIRoot extends Component {
       mediaStream.addTrack(this.state.audioTrack);
 
       const AudioContext = window.AudioContext || window.webkitAudioContext;
-      const audioContext = new AudioContext();
-      const source = audioContext.createMediaStreamSource(mediaStream);
-      const analyzer = audioContext.createAnalyser();
+      const micLevelAudioContext = new AudioContext();
+      const micSource = micLevelAudioContext.createMediaStreamSource(mediaStream);
+      const analyzer = micLevelAudioContext.createAnalyser();
       const levels = new Uint8Array(analyzer.fftSize);
 
-      source.connect(analyzer);
+      micSource.connect(analyzer);
 
       const micUpdateInterval = setInterval(() => {
         analyzer.getByteTimeDomainData(levels);
@@ -391,7 +391,7 @@ class UIRoot extends Component {
         this.props.store.update({ lastUsedMicDeviceId: micDeviceId });
       }
 
-      this.setState({ micUpdateInterval });
+      this.setState({ micLevelAudioContext, micUpdateInterval });
     }
 
     this.setState({ mediaStream });
@@ -479,6 +479,12 @@ class UIRoot extends Component {
     }
 
     this.stopTestTone();
+
+    if (this.state.micLevelAudioContext) {
+      this.state.micLevelAudioContext.close();
+      clearInterval(this.state.micUpdateInterval);
+    }
+
     this.setState({ entryStep: ENTRY_STEPS.finished });
   };
 
