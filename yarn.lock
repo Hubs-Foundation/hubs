@@ -190,9 +190,9 @@ aframe-lerp-component@^1.1.0:
     three-to-cannon "^1.2.0"
     webworkify "^1.4.0"
 
-"aframe-teleport-controls@https://github.com/netpro2k/aframe-teleport-controls#feature/pauseable":
-  version "0.3.2"
-  resolved "https://github.com/netpro2k/aframe-teleport-controls#7f67003dd3bd1348357fbf89aaeed916ef2d4016"
+aframe-teleport-controls@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/aframe-teleport-controls/-/aframe-teleport-controls-0.3.1.tgz#7d7ef206f483ea92425a6333b0f8fb26c9596d1c"
 
 "aframe-xr@github:brianpeiris/aframe-xr#3162aed":
   version "0.0.9"
