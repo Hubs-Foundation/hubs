@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import queryString from "query-string";
-import { SCHEMA } from "../storage/store";
 import MobileDetect from "mobile-detect";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
@@ -34,13 +33,6 @@ const ENTRY_STEPS = {
   finished: "finished"
 };
 
-const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
-
-async function grantedMicLabels() {
-  const mediaDevices = await navigator.mediaDevices.enumerateDevices();
-  return mediaDevices.filter(d => d.label && d.kind === "audioinput").map(d => d.label);
-}
-
 // This is a list of regexes that match the microphone labels of HMDs.
 //
 // If entering VR mode, and if any of these regexes match an audio device,
@@ -49,19 +41,26 @@ async function grantedMicLabels() {
 //
 // Note that this doesn't have to be exhaustive: if no devices match any regex
 // then we rely upon the user to select the proper mic.
-const VR_DEVICE_MIC_LABEL_REGEXES = [];
+const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
+
+async function grantedMicLabels() {
+  const mediaDevices = await navigator.mediaDevices.enumerateDevices();
+  return mediaDevices.filter(d => d.label && d.kind === "audioinput").map(d => d.label);
+}
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
 class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
+    exitScene: PropTypes.func,
     concurrentLoadDetector: PropTypes.object,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
     enableScreenSharing: PropTypes.bool,
     store: PropTypes.object,
-    scene: PropTypes.object
+    scene: PropTypes.object,
+    htmlPrefix: PropTypes.string
   };
 
   state = {
@@ -88,10 +87,12 @@ class UIRoot extends Component {
     autoExitTimerInterval: null,
     secondsRemainingBeforeAutoExit: Infinity,
 
-    sceneLoaded: false,
+    initialEnvironmentLoaded: false,
     exited: false,
 
-    showProfileEntry: false
+    showProfileEntry: false,
+
+    janusRoomId: null
   };
 
   componentDidMount() {
@@ -118,6 +119,7 @@ class UIRoot extends Component {
       muted: this.props.scene.is("muted")
     });
   };
+
   toggleMute = () => {
     this.props.scene.emit("action_mute");
   };
@@ -129,6 +131,10 @@ class UIRoot extends Component {
       this.enterDaydream();
     } else if (this.props.forcedVREntryType === "gearvr") {
       this.enterGearVR();
+    } else if (this.props.forcedVREntryType === "vr") {
+      this.enterVR();
+    } else if (this.props.forcedVREntryType === "2d") {
+      this.enter2D();
     }
   };
 
@@ -210,22 +216,19 @@ class UIRoot extends Component {
 
   hasGrantedMicPermissions = async () => {
     if (this.state.requestedScreen) {
-      // There is no way to tell if you've granted mic permissions in a previous session if we've 
+      // There is no way to tell if you've granted mic permissions in a previous session if we've
       // already prompted for screen sharing permissions, so we have to assume that we've never granted permissions.
-      // Fortunately, if you *have* granted permissions permanently, there won't be a second browser prompt, but we 
+      // Fortunately, if you *have* granted permissions permanently, there won't be a second browser prompt, but we
       // can't determine that before hand.
       // See https://bugzilla.mozilla.org/show_bug.cgi?id=1449783 for a potential solution in the future.
       return false;
-    }
-    else {
+    } else {
       // If we haven't requested the screen in this session, check if we've granted permissions in a previous session.
       return (await grantedMicLabels()).length > 0;
     }
-  }
+  };
 
   performDirectEntryFlow = async enterInVR => {
-    this.startTestTone();
-
     this.setState({ enterInVR });
 
     const hasGrantedMic = await this.hasGrantedMicPermissions();
@@ -234,7 +237,6 @@ class UIRoot extends Component {
       await this.setMediaStreamToDefault();
       await this.beginAudioSetup();
     } else {
-      this.stopTestTone();
       this.setState({ entryStep: ENTRY_STEPS.mic_grant });
     }
   };
@@ -248,35 +250,39 @@ class UIRoot extends Component {
   };
 
   enterGearVR = async () => {
-    this.exit();
+    if (this.state.availableVREntryTypes.gearvr === VR_DEVICE_AVAILABILITY.yes) {
+      await this.performDirectEntryFlow(true);
+    } else {
+      this.exit();
 
-    // Launch via Oculus Browser
-    const qs = queryString.parse(document.location.search);
-    qs.vr_entry_type = "gearvr"; // Auto-choose 'gearvr' after landing in Oculus Browser
+      // Launch via Oculus Browser
+      const location = window.location;
+      const qs = queryString.parse(location.search);
+      qs.vr_entry_type = "gearvr"; // Auto-choose 'gearvr' after landing in Oculus Browser
 
-    const ovrwebUrl = `ovrweb://${document.location.protocol || "http:"}//${document.location.host}${document.location
-      .pathname || ""}?${queryString.stringify(qs)}#{document.location.hash || ""}`;
+      const ovrwebUrl =
+        `ovrweb://${location.protocol || "http:"}//${location.host}` +
+        `${location.pathname || ""}?${queryString.stringify(qs)}#${location.hash || ""}`;
 
-    document.location = ovrwebUrl;
+      window.location = ovrwebUrl;
+    }
   };
 
   enterDaydream = async () => {
-    const loc = document.location;
-
     if (this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe) {
       this.exit();
 
       // We are not in mobile chrome, so launch into chrome via an Intent URL
-      const qs = queryString.parse(document.location.search);
+      const location = window.location;
+      const qs = queryString.parse(location.search);
       qs.vr_entry_type = "daydream"; // Auto-choose 'daydream' after landing in chrome
 
-      const intentUrl = `intent://${document.location.host}${document.location.pathname || ""}?${queryString.stringify(
-        qs
-      )}#Intent;scheme=${(document.location.protocol || "http:").replace(
-        ":",
-        ""
-      )};action=android.intent.action.VIEW;package=com.android.chrome;end;`;
-      document.location = intentUrl;
+      const intentUrl =
+        `intent://${location.host}${location.pathname || ""}?` +
+        `${queryString.stringify(qs)}#Intent;scheme=${(location.protocol || "http:").replace(":", "")};` +
+        `action=android.intent.action.VIEW;package=com.android.chrome;end;`;
+
+      window.location = intentUrl;
     } else {
       await this.performDirectEntryFlow(true);
     }
@@ -286,85 +292,121 @@ class UIRoot extends Component {
     const constraints = { audio: { deviceId: { exact: [ev.target.value] } } };
     await this.fetchAudioTrack(constraints);
     await this.setupNewMediaStream();
-  }
+  };
 
   setMediaStreamToDefault = async () => {
-    await this.fetchAudioTrack({ audio: true });
+    let hasAudio = false;
+    const { lastUsedMicDeviceId } = this.props.store.state;
+
+    // Try to fetch last used mic, if there was one.
+    if (lastUsedMicDeviceId) {
+      hasAudio = await this.fetchAudioTrack({ audio: { deviceId: { ideal: lastUsedMicDeviceId } } });
+    } else {
+      hasAudio = await this.fetchAudioTrack({ audio: true });
+    }
+
     await this.setupNewMediaStream();
-  }
+
+    return { hasAudio };
+  };
 
   setStateAndRequestScreen = async e => {
     const checked = e.target.checked;
     await this.setState({ requestedScreen: true, shareScreen: checked });
     if (checked) {
-      this.fetchVideoTrack({ video: {
-        mediaSource: "screen", 
-        // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
-        // other than your current monitor that has a different aspect ratio.
-        width: screen.width / screen.height * 720, 
-        height: 720,
-        frameRate: 30 
-      } });
-    }
-    else {
+      this.fetchVideoTrack({
+        video: {
+          mediaSource: "screen",
+          // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
+          // other than your current monitor that has a different aspect ratio.
+          width: screen.width / screen.height * 720,
+          height: 720,
+          frameRate: 30
+        }
+      });
+    } else {
       this.setState({ videoTrack: null });
     }
-  }
+  };
 
   fetchVideoTrack = async constraints => {
     const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
     this.setState({ videoTrack: mediaStream.getVideoTracks()[0] });
-  }
+  };
 
   fetchAudioTrack = async constraints => {
     if (this.state.audioTrack) {
       this.state.audioTrack.stop();
     }
-    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-    this.setState({ audioTrack: mediaStream.getAudioTracks()[0] });
-  }
 
-  setupNewMediaStream = async constraints => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      this.setState({ audioTrack: mediaStream.getAudioTracks()[0] });
+      return true;
+    } catch (e) {
+      // Error fetching audio track, most likely a permission denial.
+      this.setState({ audioTrack: null });
+      return false;
+    }
+  };
+
+  setupNewMediaStream = async () => {
     const mediaStream = new MediaStream();
 
-    // we should definitely have an audioTrack at this point. 
-    mediaStream.addTrack(this.state.audioTrack);
+    await this.fetchMicDevices();
 
     if (this.state.videoTrack) {
       mediaStream.addTrack(this.state.videoTrack);
     }
 
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const audioContext = new AudioContext();
-    const source = audioContext.createMediaStreamSource(mediaStream);
-    const analyzer = audioContext.createAnalyser();
-    const levels = new Uint8Array(analyzer.fftSize);
+    // we should definitely have an audioTrack at this point unless they denied mic access
+    if (this.state.audioTrack) {
+      mediaStream.addTrack(this.state.audioTrack);
 
-    source.connect(analyzer);
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const micLevelAudioContext = new AudioContext();
+      const micSource = micLevelAudioContext.createMediaStreamSource(mediaStream);
+      const analyzer = micLevelAudioContext.createAnalyser();
+      const levels = new Uint8Array(analyzer.fftSize);
 
-    const micUpdateInterval = setInterval(() => {
-      analyzer.getByteTimeDomainData(levels);
+      micSource.connect(analyzer);
 
-      let v = 0;
+      const micUpdateInterval = setInterval(() => {
+        analyzer.getByteTimeDomainData(levels);
 
-      for (let x = 0; x < levels.length; x++) {
-        v = Math.max(levels[x] - 127, v);
+        let v = 0;
+
+        for (let x = 0; x < levels.length; x++) {
+          v = Math.max(levels[x] - 127, v);
+        }
+
+        const level = v / 128.0;
+        this.micLevelMovingAverage.push(Date.now(), level);
+        this.setState({ micLevel: this.micLevelMovingAverage.movingAverage() });
+      }, 50);
+
+      const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForMediaStream(mediaStream));
+
+      if (micDeviceId) {
+        this.props.store.update({ lastUsedMicDeviceId: micDeviceId });
       }
 
-      const level = v / 128.0;
-      this.micLevelMovingAverage.push(Date.now(), level);
-      this.setState({ micLevel: this.micLevelMovingAverage.movingAverage() });
-    }, 50);
+      this.setState({ micLevelAudioContext, micUpdateInterval });
+    }
 
-    this.setState({ mediaStream, micUpdateInterval });
+    this.setState({ mediaStream });
   };
 
   onMicGrantButton = async () => {
     if (this.state.entryStep == ENTRY_STEPS.mic_grant) {
-      await this.setMediaStreamToDefault();
-      this.setState({ entryStep: ENTRY_STEPS.mic_granted });
+      const { hasAudio } = await this.setMediaStreamToDefault();
+
+      if (hasAudio) {
+        this.setState({ entryStep: ENTRY_STEPS.mic_granted });
+      } else {
+        await this.beginAudioSetup();
+      }
     } else {
-      this.startTestTone();
       await this.beginAudioSetup();
     }
   };
@@ -374,16 +416,22 @@ class UIRoot extends Component {
   };
 
   beginAudioSetup = async () => {
-    await this.fetchMicDevices();
+    this.startTestTone();
     this.setState({ entryStep: ENTRY_STEPS.audio_setup });
   };
 
-  fetchMicDevices = async () => {
-    const mediaDevices = await navigator.mediaDevices.enumerateDevices();
-    this.setState({ 
-      micDevices: mediaDevices.
-        filter(d => d.kind === "audioinput").
-        map(d => ({ deviceId: d.deviceId, label: d.label }))
+  fetchMicDevices = () => {
+    return new Promise(resolve => {
+      navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
+        this.setState(
+          {
+            micDevices: mediaDevices
+              .filter(d => d.kind === "audioinput")
+              .map(d => ({ deviceId: d.deviceId, label: d.label }))
+          },
+          resolve
+        );
+      });
     });
   };
 
@@ -399,21 +447,24 @@ class UIRoot extends Component {
     return !!this.state.micDevices.find(d => HMD_MIC_REGEXES.find(r => d.label.match(r)));
   };
 
+  micLabelForMediaStream = mediaStream => {
+    return (mediaStream && mediaStream.getAudioTracks().length > 0 && mediaStream.getAudioTracks()[0].label) || "";
+  };
+
   selectedMicLabel = () => {
-    return (
-      (this.state.mediaStream &&
-        this.state.mediaStream.getAudioTracks().length > 0 &&
-        this.state.mediaStream.getAudioTracks()[0].label) ||
-      ""
-    );
+    return this.micLabelForMediaStream(this.state.mediaStream);
+  };
+
+  micDeviceIdForMicLabel = label => {
+    return this.state.micDevices.filter(d => d.label === label).map(d => d.deviceId)[0];
   };
 
   selectedMicDeviceId = () => {
-    return this.state.micDevices.filter(d => d.label === this.selectedMicLabel).map(d => d.deviceId)[0];
+    return this.micDeviceIdForMicLabel(this.selectedMicLabel());
   };
 
   onAudioReadyButton = () => {
-    this.props.enterScene(this.state.mediaStream, this.state.enterInVR);
+    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.janusRoomId);
 
     const mediaStream = this.state.mediaStream;
 
@@ -428,11 +479,17 @@ class UIRoot extends Component {
     }
 
     this.stopTestTone();
+
+    if (this.state.micLevelAudioContext) {
+      this.state.micLevelAudioContext.close();
+      clearInterval(this.state.micUpdateInterval);
+    }
+
     this.setState({ entryStep: ENTRY_STEPS.finished });
   };
 
   render() {
-    if (!this.props.scene.hasLoaded || !this.state.availableVREntryTypes) {
+    if (!this.state.initialEnvironmentLoaded || !this.state.availableVREntryTypes || !this.state.janusRoomId) {
       return (
         <IntlProvider locale={lang} messages={messages}>
           <div className="loading-panel">
@@ -468,45 +525,44 @@ class UIRoot extends Component {
 
     // Only show this in desktop firefox since other browsers/platforms will ignore the "screen" media constraint and
     // will attempt to share your webcam instead!
-    const screenSharingCheckbox = ( 
-      this.props.enableScreenSharing &&
-      !mobiledetect.mobile() && 
-      /firefox/i.test(navigator.userAgent) &&
-      (
+    const screenSharingCheckbox = this.props.enableScreenSharing &&
+      !mobiledetect.mobile() &&
+      /firefox/i.test(navigator.userAgent) && (
         <label className="entry-panel__screen-sharing">
-          <input className="entry-panel__screen-sharing-checkbox" type="checkbox"
+          <input
+            className="entry-panel__screen-sharing-checkbox"
+            type="checkbox"
             value={this.state.shareScreen}
             onChange={this.setStateAndRequestScreen}
           />
           <FormattedMessage id="entry.enable-screen-sharing" />
         </label>
-      ) 
-    );
+      );
 
-    const entryPanel = 
+    const entryPanel =
       this.state.entryStep === ENTRY_STEPS.start ? (
         <div className="entry-panel">
           <TwoDEntryButton onClick={this.enter2D} />
-          { this.state.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
-            <GenericEntryButton onClick={this.enterVR} /> 
+          {this.state.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
+            <GenericEntryButton onClick={this.enterVR} />
           )}
-          { this.state.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
-            <GearVREntryButton onClick={this.enterGearVR} /> 
+          {this.state.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
+            <GearVREntryButton onClick={this.enterGearVR} />
           )}
-          { this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
+          {this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
             <DaydreamEntryButton
               onClick={this.enterDaydream}
               subtitle={
-                this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : "" 
+                this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : ""
               }
-            /> 
+            />
           )}
           {this.state.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
             <div className="entry-panel__secondary" onClick={this.enterVR}>
               <FormattedMessage id="entry.cardboard" />
             </div>
           )}
-          { screenSharingCheckbox }
+          {screenSharingCheckbox}
         </div>
       ) : null;
 
@@ -567,11 +623,19 @@ class UIRoot extends Component {
           </div>
           <div className="audio-setup-panel__levels">
             <div className="audio-setup-panel__levels__mic">
-              <img
-                src="../assets/images/mic_level.png"
-                srcSet="../assets/images/mic_level@2x.png 2x"
-                className="audio-setup-panel__levels__mic_icon"
-              />
+              {this.state.audioTrack ? (
+                <img
+                  src="../assets/images/mic_level.png"
+                  srcSet="../assets/images/mic_level@2x.png 2x"
+                  className="audio-setup-panel__levels__mic_icon"
+                />
+              ) : (
+                <img
+                  src="../assets/images/mic_denied.png"
+                  srcSet="../assets/images/mic_denied@2x.png 2x"
+                  className="audio-setup-panel__levels__mic_icon"
+                />
+              )}
               <img
                 src="../assets/images/level_fill.png"
                 srcSet="../assets/images/level_fill@2x.png 2x"
@@ -593,22 +657,24 @@ class UIRoot extends Component {
               />
             </div>
           </div>
-          <div className="audio-setup-panel__device-chooser">
-            <select
-              className="audio-setup-panel__device-chooser__dropdown"
-              value={this.selectedMicDeviceId()}
-              onChange={this.micDeviceChanged}
-            >
-              {this.state.micDevices.map(d => (
-                <option key={d.deviceId} value={d.deviceId}>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}
-                </option>
-              ))}
-            </select>
-            <div className="audio-setup-panel__device-chooser__mic-icon">
-              <img src="../assets/images/mic_small.png" srcSet="../assets/images/mic_small@2x.png 2x" />
+          {this.state.audioTrack && (
+            <div className="audio-setup-panel__device-chooser">
+              <select
+                className="audio-setup-panel__device-chooser__dropdown"
+                value={this.selectedMicDeviceId()}
+                onChange={this.micDeviceChanged}
+              >
+                {this.state.micDevices.map(d => (
+                  <option key={d.deviceId} value={d.deviceId}>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}
+                  </option>
+                ))}
+              </select>
+              <div className="audio-setup-panel__device-chooser__mic-icon">
+                <img src="../assets/images/mic_small.png" srcSet="../assets/images/mic_small@2x.png 2x" />
+              </div>
             </div>
-          </div>
+          )}
           {this.shouldShowHmdMicWarning() && (
             <div className="audio-setup-panel__hmd-mic-warning">
               <img
@@ -661,7 +727,11 @@ class UIRoot extends Component {
                 <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
 
                 {this.state.showProfileEntry && (
-                  <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store} />
+                  <ProfileEntryPanel
+                    finished={this.onProfileFinished}
+                    store={this.props.store}
+                    htmlPrefix={this.props.htmlPrefix}
+                  />
                 )}
               </div>
             )}

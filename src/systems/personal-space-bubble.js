@@ -2,93 +2,188 @@ const invaderPos = new AFRAME.THREE.Vector3();
 const bubblePos = new AFRAME.THREE.Vector3();
 
 AFRAME.registerSystem("personal-space-bubble", {
+  schema: {
+    debug: { default: false }
+  },
+
   init() {
     this.invaders = [];
     this.bubbles = [];
   },
 
-  registerBubble(el) {
-    this.bubbles.push(el);
+  registerBubble(bubble) {
+    this.bubbles.push(bubble);
   },
 
-  unregisterBubble(el) {
-    const index = this.bubbles.indexOf(el);
+  unregisterBubble(bubble) {
+    const index = this.bubbles.indexOf(bubble);
 
     if (index !== -1) {
       this.bubbles.splice(index, 1);
     }
   },
 
-  registerInvader(el) {
-    NAF.utils.getNetworkedEntity(el).then(networkedEl => {
+  registerInvader(invader) {
+    NAF.utils.getNetworkedEntity(invader.el).then(networkedEl => {
       const owner = NAF.utils.getNetworkOwner(networkedEl);
 
       if (owner !== NAF.clientId) {
-        this.invaders.push(el);
+        this.invaders.push(invader);
       }
     });
   },
 
-  unregisterInvader(el) {
-    const index = this.invaders.indexOf(el);
+  unregisterInvader(invader) {
+    const index = this.invaders.indexOf(invader);
 
     if (index !== -1) {
       this.invaders.splice(index, 1);
     }
   },
 
-  tick() {
-    // Update matrix positions once for each space bubble and space invader
-    for (var i = 0; i < this.bubbles.length; i++) {
-      this.bubbles[i].object3D.updateMatrixWorld(true);
+  update() {
+    for (let i = 0; i < this.bubbles.length; i++) {
+      this.bubbles[i].updateDebug();
     }
 
-    for (var i = 0; i < this.invaders.length; i++) {
-      this.invaders[i].object3D.updateMatrixWorld(true);
+    for (let i = 0; i < this.invaders.length; i++) {
+      this.invaders[i].updateDebug();
+    }
+  },
+
+  tick() {
+    // Update matrix positions once for each space bubble and space invader
+    for (let i = 0; i < this.bubbles.length; i++) {
+      this.bubbles[i].el.object3D.updateMatrixWorld(true);
+    }
+
+    for (let i = 0; i < this.invaders.length; i++) {
+      this.invaders[i].el.object3D.updateMatrixWorld(true);
+      this.invaders[i].setInvading(false);
     }
 
     // Loop through all of the space bubbles (usually one)
-    for (var i = 0; i < this.bubbles.length; i++) {
+    for (let i = 0; i < this.bubbles.length; i++) {
       const bubble = this.bubbles[i];
 
-      bubblePos.setFromMatrixPosition(bubble.object3D.matrixWorld);
-
-      const radius = bubble.components["personal-space-bubble"].data.radius;
-      const radiusSquared = radius * radius;
+      bubblePos.setFromMatrixPosition(bubble.el.object3D.matrixWorld);
 
       // Hide the invader if inside the bubble
       for (let j = 0; j < this.invaders.length; j++) {
         const invader = this.invaders[j];
 
-        invaderPos.setFromMatrixPosition(invader.object3D.matrixWorld);
+        invaderPos.setFromMatrixPosition(invader.el.object3D.matrixWorld);
 
-        const distanceSquared = bubblePos.distanceTo(invaderPos);
-
-        invader.object3D.visible = distanceSquared > radiusSquared;
+        const distanceSquared = bubblePos.distanceToSquared(invaderPos);
+        const radiusSum = bubble.data.radius + invader.data.radius;
+        if (distanceSquared < radiusSum * radiusSum) {
+          invader.setInvading(true);
+        }
       }
     }
   }
 });
 
-AFRAME.registerComponent("personal-space-invader", {
+function createSphereGizmo(radius) {
+  const geometry = new THREE.SphereBufferGeometry(radius, 10, 10);
+  const wireframe = new THREE.WireframeGeometry(geometry);
+  const line = new THREE.LineSegments(wireframe);
+  line.material.opacity = 0.5;
+  line.material.transparent = true;
+  return line;
+}
+
+// TODO: we need to come up with a more generic way of doing this as this is very specific to our avatars.
+AFRAME.registerComponent("space-invader-mesh", {
+  schema: {
+    meshSelector: { type: "string" }
+  },
   init() {
-    this.el.sceneEl.systems["personal-space-bubble"].registerInvader(this.el);
+    this.targetMesh = this.el.querySelector(this.data.meshSelector).object3DMap.skinnedmesh;
+  }
+});
+
+function findInvaderMesh(entity) {
+  while (entity && !(entity.components && entity.components["space-invader-mesh"])) {
+    entity = entity.parentNode;
+  }
+  return entity && entity.components["space-invader-mesh"].targetMesh;
+}
+
+const DEBUG_OBJ = "psb-debug";
+
+AFRAME.registerComponent("personal-space-invader", {
+  schema: {
+    radius: { type: "number", default: 0.1 },
+    useMaterial: { default: false },
+    debug: { default: false },
+    invadingOpacity: { default: 0.3 }
+  },
+
+  init() {
+    const system = this.el.sceneEl.systems["personal-space-bubble"];
+    system.registerInvader(this);
+    if (this.data.useMaterial) {
+      const mesh = findInvaderMesh(this.el);
+      if (mesh) {
+        this.targetMaterial = mesh.material;
+      }
+    }
+    this.invading = false;
+  },
+
+  update() {
+    this.radiusSquared = this.data.radius * this.data.radius;
+    this.updateDebug();
+  },
+
+  updateDebug() {
+    const system = this.el.sceneEl.systems["personal-space-bubble"];
+    if (system.data.debug || this.data.debug) {
+      !this.el.object3DMap[DEBUG_OBJ] && this.el.setObject3D(DEBUG_OBJ, createSphereGizmo(this.data.radius));
+    } else if (this.el.object3DMap[DEBUG_OBJ]) {
+      this.el.removeObject3D(DEBUG_OBJ);
+    }
   },
 
   remove() {
-    this.el.sceneEl.systems["personal-space-bubble"].unregisterInvader(this.el);
+    this.el.sceneEl.systems["personal-space-bubble"].unregisterInvader(this);
+  },
+
+  setInvading(invading) {
+    if (this.targetMaterial) {
+      this.targetMaterial.opacity = invading ? this.data.invadingOpacity : 1;
+      this.targetMaterial.transparent = invading;
+    } else {
+      this.el.object3D.visible = !invading;
+    }
+    this.invading = invading;
   }
 });
 
 AFRAME.registerComponent("personal-space-bubble", {
   schema: {
-    radius: { type: "number", default: 0.8 }
+    radius: { type: "number", default: 0.8 },
+    debug: { default: false }
   },
   init() {
-    this.system.registerBubble(this.el);
+    this.system.registerBubble(this);
+  },
+
+  update() {
+    this.radiusSquared = this.data.radius * this.data.radius;
+    this.updateDebug();
+  },
+
+  updateDebug() {
+    if (this.system.data.debug || this.data.debug) {
+      !this.el.object3DMap[DEBUG_OBJ] && this.el.setObject3D(DEBUG_OBJ, createSphereGizmo(this.data.radius));
+    } else if (this.el.object3DMap[DEBUG_OBJ]) {
+      this.el.removeObject3D(DEBUG_OBJ);
+    }
   },
 
   remove() {
-    this.system.unregisterBubble(this.el);
+    this.system.unregisterBubble(this);
   }
 });

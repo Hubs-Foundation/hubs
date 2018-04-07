@@ -108,14 +108,14 @@ AFRAME.registerComponent("super-cursor", {
       return true;
     }
 
-    if(el.parentNode && el.parentNode != el.sceneEl) {
+    if (el.parentNode && el.parentNode != el.sceneEl) {
       return this._isInteractable(el.parentNode);
     }
 
     return false;
   },
 
-  _handleMouseDown: function(e) {
+  _handleMouseDown: function() {
     if (this.isInteractable) {
       const lookControls = this.data.camera.components["look-controls"];
       lookControls.pause();
@@ -127,7 +127,7 @@ AFRAME.registerComponent("super-cursor", {
     this.mousePos.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
   },
 
-  _handleMouseUp: function(e) {
+  _handleMouseUp: function() {
     const lookControls = this.data.camera.components["look-controls"];
     lookControls.play();
     this.data.cursor.emit("action_release", {});
@@ -137,13 +137,13 @@ AFRAME.registerComponent("super-cursor", {
     if (this.isGrabbing) this.currentDistanceMod += e.deltaY / 10;
   },
 
-  _handleEnterVR: function(e) {
+  _handleEnterVR: function() {
     if (AFRAME.utils.device.checkHeadsetConnected() || AFRAME.utils.device.isMobile()) {
       this._disable();
     }
   },
 
-  _handleExitVR: function(e) {
+  _handleExitVR: function() {
     this._enable();
   },
 

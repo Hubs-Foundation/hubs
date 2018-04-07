@@ -2,6 +2,9 @@ const GLTFCache = {};
 
 AFRAME.GLTFModelPlus = {
   defaultInflator(el, componentName, componentData) {
+    if (!AFRAME.components[componentName]) {
+      throw new Error(`Inflator failed. "${componentName}" component does not exist.`);
+    }
     if (AFRAME.components[componentName].multiple && Array.isArray(componentData)) {
       for (let i = 0; i < componentData.length; i++) {
         el.setAttribute(componentName + "__" + i, componentData[i]);
@@ -163,7 +166,7 @@ function nextTick() {
   });
 }
 
-function cachedLoadGLTF(src, onProgress) {
+function cachedLoadGLTF(src, preferredTechnique, onProgress) {
   return new Promise((resolve, reject) => {
     // Load the gltf model from the cache if it exists.
     if (GLTFCache[src]) {
@@ -171,7 +174,10 @@ function cachedLoadGLTF(src, onProgress) {
       resolve(cloneGltf(GLTFCache[src]));
     } else {
       // Otherwise load the new gltf model.
-      new THREE.GLTFLoader().load(
+      const gltfLoader = new THREE.GLTFLoader();
+      gltfLoader.preferredTechnique = preferredTechnique;
+
+      gltfLoader.load(
         src,
         model => {
           if (!GLTFCache[src]) {
@@ -190,7 +196,8 @@ function cachedLoadGLTF(src, onProgress) {
 AFRAME.registerComponent("gltf-model-plus", {
   schema: {
     src: { type: "string" },
-    inflate: { default: false }
+    inflate: { default: false },
+    preferredTechnique: { default: AFRAME.utils.device.isMobile() ? "KHR_materials_unlit" : "pbrMetallicRoughness" }
   },
 
   init() {
@@ -206,7 +213,7 @@ AFRAME.registerComponent("gltf-model-plus", {
     this.el.querySelectorAll(":scope > template").forEach(templateEl =>
       this.templates.push({
         selector: templateEl.getAttribute("data-selector"),
-        templateRoot: document.importNode(templateEl.content.firstElementChild, true)
+        templateRoot: document.importNode(templateEl.firstElementChild || templateEl.content.firstElementChild, true)
       })
     );
   },
@@ -241,7 +248,7 @@ AFRAME.registerComponent("gltf-model-plus", {
         return;
       }
 
-      const model = await cachedLoadGLTF(src);
+      const model = await cachedLoadGLTF(src, this.data.preferredTechnique);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
@@ -266,8 +273,7 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
-      const message = (e && e.message) || "Failed to load glTF model";
-      console.error(message);
+      console.error("Failed to load glTF model", e.message, this);
       this.el.emit("model-error", { format: "gltf", src });
     }
   },

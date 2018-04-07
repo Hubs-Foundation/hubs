@@ -20,7 +20,7 @@ AFRAME.registerComponent("networked-counter", {
         item.el.removeEventListener(this.data.release_event, item.onReleaseHandler);
       }
     }
-    
+
     for (const id in this.timeouts) {
       this._removeTimeout(id);
     }
@@ -32,7 +32,7 @@ AFRAME.registerComponent("networked-counter", {
     }
 
     const id = NAF.utils.getNetworkId(networkedEl);
-    if (this.queue.hasOwnProperty(id)) {
+    if (id && this.queue.hasOwnProperty(id)) {
       return;
     }
 
@@ -61,7 +61,7 @@ AFRAME.registerComponent("networked-counter", {
 
   deregister: function(networkedEl) {
     const id = NAF.utils.getNetworkId(networkedEl);
-    if (this.queue.hasOwnProperty(id)) {
+    if (id && this.queue.hasOwnProperty(id)) {
       const item = this.queue[id];
       networkedEl.removeEventListener(this.data.grab_event, item.onGrabHandler);
       networkedEl.removeEventListener(this.data.release_event, item.onReleaseHandler);
@@ -75,11 +75,11 @@ AFRAME.registerComponent("networked-counter", {
     }
   },
 
-  _onGrabbed: function(id, e) {
+  _onGrabbed: function(id) {
     this._removeTimeout(id);
   },
 
-  _onReleased: function(id, e) {
+  _onReleased: function(id) {
     this._removeTimeout(id);
     this._addTimeout(id);
     this.queue[id].ts = Date.now();
@@ -91,7 +91,6 @@ AFRAME.registerComponent("networked-counter", {
         ts = Number.MAX_VALUE;
       for (const id in this.queue) {
         if (this.queue.hasOwnProperty(id)) {
-          const expiration = this.queue[id].ts + this.data.ttl * 1000;
           if (this.queue[id].ts < ts && !this._isCurrentlyGrabbed(id)) {
             oldest = this.queue[id];
             ts = this.queue[id].ts;
