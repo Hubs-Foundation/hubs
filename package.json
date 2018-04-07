@@ -13,7 +13,7 @@
     "build": "rimraf ./public && cross-env NODE_ENV=production webpack --mode=production",
     "prettier": "prettier --write '*.js' 'src/**/*.js'",
     "lint:js": "eslint '*.js' 'scripts/**/*.js' 'src/**/*.js'",
-    "lint:html": "./scripts/lint-html.js 'src/**/*.html'",
+    "lint:html": "node ./scripts/lint-html.js 'src/**/*.html'",
     "lint": "yarn run lint:js && yarn run lint:html"
   },
   "dependencies": {
