@@ -1,6 +1,5 @@
 import "./assets/stylesheets/hub.scss";
 import queryString from "query-string";
-import { debounce } from "lodash";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
