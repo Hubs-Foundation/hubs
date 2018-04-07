@@ -1,5 +1,6 @@
 import "./assets/stylesheets/hub.scss";
 import queryString from "query-string";
+import { debounce } from "lodash";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
@@ -126,6 +127,7 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   const scene = document.querySelector("a-scene");
   const playerRig = document.querySelector("#player-rig");
   document.querySelector("a-scene canvas").classList.remove("blurred");
+  scene.render();
 
   if (enterInVR) {
     scene.enterVR();
@@ -179,11 +181,7 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
     screenEntity.setAttribute("visible", sharingScreen);
   });
 
-  if (qsTruthy("offline")) {
-    onConnect();
-  } else {
-    document.body.addEventListener("connected", onConnect);
-
+  if (!qsTruthy("offline")) {
     scene.components["networked-scene"].connect();
 
     if (mediaStream) {
@@ -206,8 +204,6 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
     }
   }
 }
-
-function onConnect() {}
 
 function mountUI(scene) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
@@ -255,7 +251,10 @@ const onReady = async () => {
   const environmentRoot = document.querySelector("#environment-root");
 
   const initialEnvironmentEl = document.createElement("a-entity");
-  initialEnvironmentEl.addEventListener("bundleloaded", () => uiRoot.setState({ initialEnvironmentLoaded: true }));
+  initialEnvironmentEl.addEventListener("bundleloaded", () => {
+    uiRoot.setState({ initialEnvironmentLoaded: true });
+    setTimeout(() => scene.renderer.animate(null), 100);
+  });
   environmentRoot.appendChild(initialEnvironmentEl);
 
   if (qs.room) {
