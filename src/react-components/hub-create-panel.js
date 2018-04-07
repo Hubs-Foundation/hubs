@@ -7,7 +7,7 @@ import faAngleLeft from "@fortawesome/fontawesome-free-solid/faAngleLeft";
 import faAngleRight from "@fortawesome/fontawesome-free-solid/faAngleRight";
 import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 
-import defaultThumbnail from "../assets/images/default_thumbnail.png";
+import deafault_scene_preview_thumbnail from "../assets/images/default_thumbnail.png";
 
 const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
 
@@ -91,7 +91,7 @@ class HubCreatePanel extends Component {
     const environmentTitle = meta.title || environment.name;
     const environmentAuthor = (meta.authors || [])[0];
     const environmentThumbnail = (meta.images || []).find(i => i.type === "preview-thumbnail") || {
-      srcset: defaultThumbnail
+      srcset: deafault_scene_preview_thumbnail
     };
 
     const formNameClassNames = classNames("create-panel__form__name", {
