@@ -262,10 +262,10 @@ const onReady = async () => {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
     uiRoot.setState({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
     initialEnvironmentEl.setAttribute("gltf-bundle", {
-      src: "https://asset-bundles-dev.reticulum.io/rooms/meetingroom/MeetingRoom.bundle.json"
-      // src: "https://asset-bundles-dev.reticulum.io/rooms/theater/TheaterMeshes.bundle.json"
-      // src: "https://asset-bundles-dev.reticulum.io/rooms/atrium/AtriumMeshes.bundle.json"
-      // src: "https://asset-bundles-dev.reticulum.io/rooms/courtyard/CourtyardMeshes.bundle.json"
+      src: "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingRoom.bundle.json"
+      // src: "https://asset-bundles-prod.reticulum.io/rooms/theater/TheaterMeshes.bundle.json"
+      // src: "https://asset-bundles-prod.reticulum.io/rooms/atrium/AtriumMeshes.bundle.json"
+      // src: "https://asset-bundles-prod.reticulum.io/rooms/courtyard/CourtyardMeshes.bundle.json"
     });
     return;
   }
