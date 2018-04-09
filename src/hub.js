@@ -1,4 +1,5 @@
 import "./assets/stylesheets/hub.scss";
+import moment from "moment-timezone";
 import uuid from "uuid/v4";
 import queryString from "query-string";
 import { Socket } from "phoenix";
@@ -214,8 +215,9 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
 }
 
 function onConnect() {
-  hubChannel.sendEntryEvent();
-  store.update({ lastEnteredAt: new Date().toString() });
+  hubChannel.sendEntryEvent().then(() => {
+    store.update({ lastEnteredAt: moment().format() });
+  });
 }
 
 function mountUI(scene) {
