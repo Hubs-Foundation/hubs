@@ -1,4 +1,4 @@
-import moment from "moment";
+import moment from "moment-timezone";
 
 export default class HubChannel {
   constructor(store) {
@@ -46,15 +46,26 @@ export default class HubChannel {
   };
 
   getEntryTimingFlags = () => {
-    const entryTimingFlags = { isNewDaily: true, isNewMonthly: true, isNewDayHourWindow: true, isNewMonthWindow: true };
+    const entryTimingFlags = { isNewDaily: true, isNewMonthly: true, isNewDayWindow: true, isNewMonthWindow: true };
 
     if (!this.store.state.lastEnteredAt) {
       return entryTimingFlags;
     }
 
     const lastEntered = moment(this.store.state.lastEnteredAt);
+    const lastEnteredPst = moment(lastEntered).tz("America/Los_Angeles");
+    const nowPst = moment().tz("America/Los_Angeles");
     const dayWindowAgo = moment().subtract(1, "day");
     const monthWindowAgo = moment().subtract(1, "month");
+
+    entryTimingFlags.isNewDaily =
+      lastEnteredPst.dayOfYear() !== nowPst.dayOfYear() || lastEnteredPst.year() !== nowPst.year();
+    entryTimingFlags.isNewMonthly =
+      lastEnteredPst.month() !== nowPst.month() || lastEnteredPst.year() !== nowPst.year();
+    entryTimingFlags.isNewDayWindow = lastEntered.isBefore(dayWindowAgo);
+    entryTimingFlags.isNewMonthWindow = lastEntered.isBefore(monthWindowAgo);
+
+    return entryTimingFlags;
   };
 
   disconnect = () => {
