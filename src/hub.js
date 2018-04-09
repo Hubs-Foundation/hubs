@@ -135,6 +135,7 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   const scene = document.querySelector("a-scene");
   const playerRig = document.querySelector("#player-rig");
   document.querySelector("a-scene canvas").classList.remove("blurred");
+  scene.render();
 
   if (enterInVR) {
     scene.enterVR();
@@ -142,7 +143,7 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
 
   AFRAME.registerInputActions(inGameActions, "default");
 
-  document.querySelector("#player-camera").setAttribute("look-controls");
+  document.querySelector("#player-camera").setAttribute("look-controls", "");
 
   scene.setAttribute("networked-scene", {
     room: janusRoomId,
@@ -189,7 +190,11 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   });
 
   if (!qsTruthy("offline")) {
-    document.body.addEventListener("connected", onConnect);
+    document.body.addEventListener("connected", () => {
+      hubChannel.sendEntryEvent().then(() => {
+        store.update({ lastEnteredAt: moment().format() });
+      });
+    });
 
     scene.components["networked-scene"].connect();
 
@@ -212,12 +217,6 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
       }
     }
   }
-}
-
-function onConnect() {
-  hubChannel.sendEntryEvent().then(() => {
-    store.update({ lastEnteredAt: moment().format() });
-  });
 }
 
 function mountUI(scene) {
@@ -266,7 +265,11 @@ const onReady = async () => {
   const environmentRoot = document.querySelector("#environment-root");
 
   const initialEnvironmentEl = document.createElement("a-entity");
-  initialEnvironmentEl.addEventListener("bundleloaded", () => uiRoot.setState({ initialEnvironmentLoaded: true }));
+  initialEnvironmentEl.addEventListener("bundleloaded", () => {
+    uiRoot.setState({ initialEnvironmentLoaded: true });
+    // Wait a tick so that the environments actually render.
+    setTimeout(() => scene.renderer.animate(null));
+  });
   environmentRoot.appendChild(initialEnvironmentEl);
 
   if (qs.room) {
