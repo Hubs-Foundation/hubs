@@ -33,7 +33,6 @@ export default class HubChannel {
     }
 
     const entryTimingFlags = this.getEntryTimingFlags();
-    console.log(entryTimingFlags);
 
     const entryEvent = {
       ...entryTimingFlags,
