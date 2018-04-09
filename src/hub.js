@@ -134,7 +134,7 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
 
   AFRAME.registerInputActions(inGameActions, "default");
 
-  document.querySelector("#player-camera").setAttribute("look-controls");
+  document.querySelector("#player-camera").setAttribute("look-controls", "");
 
   scene.setAttribute("networked-scene", {
     room: janusRoomId,
