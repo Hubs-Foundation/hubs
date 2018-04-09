@@ -39,7 +39,7 @@ export default class HubChannel {
       userAgent: navigator.userAgent
     };
 
-    this.channel.push("events:entered", { body: entryEvent });
+    this.channel.push("events:entered", entryEvent);
   };
 
   disconnect = () => {
