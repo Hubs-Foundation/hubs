@@ -83,8 +83,8 @@ AFRAME.registerComponent("character-controller", {
     const position = new THREE.Vector3();
     const currentPosition = new THREE.Vector3();
     const movementVector = new THREE.Vector3();
-    const end = new THREE.Vector3();
-    const clampedEnd = new THREE.Vector3();
+    const start = new THREE.Vector3();
+    let navGroup, navNode;
 
     return function(t, dt) {
       const deltaSeconds = dt / 1000;
@@ -92,6 +92,8 @@ AFRAME.registerComponent("character-controller", {
       const pivot = this.data.pivot.object3D;
       const distance = this.data.groundAcc * deltaSeconds;
       const rotationDelta = this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
+
+      start.copy(root.position);
 
       // Other aframe components like teleport-controls set position/rotation/scale, not the matrix, so we need to make sure to compose them back into the matrix
       root.updateMatrix();
@@ -137,17 +139,13 @@ AFRAME.registerComponent("character-controller", {
       this.pendingSnapRotationMatrix.identity(); // Revert to identity
 
       //copied from aframe-extras movement-controls
-      if (this.velocity.lengthSq() > EPS) {
-        let start = root.position;
-        end.copy(this.velocity).multiplyScalar(dt / 1000).add(start);
-        const nav = this.el.sceneEl.systems.nav;
-        this.navGroup = this.navGroup || nav.getGroup(start);
-        this.navNode = this.navNode || nav.getNode(start, this.navGroup);
-        this.navNode = nav.clampStep(start, end, this.navGroup, this.navNode, clampedEnd);
-        root.position.copy(clampedEnd);
-        root.position.x += this.velocity.x * dt / 1000;
-        root.position.y += this.velocity.y * dt / 1000;
-        root.z += this.velocity.z * dt / 1000;
+      const nav = this.el.sceneEl.systems.nav;
+      if (nav.navMesh && this.velocity.lengthSq() > EPS) {
+        if (!navGroup) {
+          navGroup = nav.getGroup(start);
+        }
+        navNode = navNode || nav.getNode(start, navGroup);
+        navNode = nav.clampStep(start, root.position, navGroup, navNode, root.position);
       } else {
         this.el.setAttribute("position", root.position);
       }
