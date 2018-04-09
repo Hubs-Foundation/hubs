@@ -29,6 +29,8 @@ THREE.GLTFLoader = ( function () {
 
 			var scope = this;
 
+			scope.url = url;
+
 			var path = this.path !== undefined ? this.path : THREE.LoaderUtils.extractUrlBase( url );
 
 			var loader = new THREE.FileLoader( scope.manager );
@@ -39,7 +41,7 @@ THREE.GLTFLoader = ( function () {
 
 				try {
 
-					scope.parse( url, data, path, onLoad, onError );
+					scope.parse( data, path, onLoad, onError );
 
 				} catch ( e ) {
 
@@ -80,8 +82,9 @@ THREE.GLTFLoader = ( function () {
 
 		},
 
-		parse: function ( url, data, path, onLoad, onError ) {
+		parse: function ( data, path, onLoad, onError ) {
 
+			var scope = this;
 			var content;
 			var extensions = {};
 
@@ -159,7 +162,7 @@ THREE.GLTFLoader = ( function () {
 
 			}
 
-			console.time( `GLTFLoader - ${url}` );
+			console.time( `GLTFLoader - ${scope.url}` );
 
 			var parser = new GLTFParser( json, extensions, {
 
@@ -171,7 +174,7 @@ THREE.GLTFLoader = ( function () {
 
 			parser.parse( function ( scene, scenes, cameras, animations, asset ) {
 
-				console.timeEnd( `GLTFLoader - ${url}` );
+				console.timeEnd( `GLTFLoader - ${scope.url}` );
 
 				var glTF = {
 					scene: scene,
