@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export default class HubChannel {
   constructor(store) {
     this.store = store;
@@ -30,7 +32,8 @@ export default class HubChannel {
       initialOccupantCount = NAF.connection.adapter.publisher.initialOccupants.length;
     }
 
-    const entryTimingFlags = { isNewDay: true, isNewMonth: false };
+    const entryTimingFlags = this.getEntryTimingFlags();
+    console.log(entryTimingFlags);
 
     const entryEvent = {
       ...entryTimingFlags,
@@ -40,6 +43,18 @@ export default class HubChannel {
     };
 
     this.channel.push("events:entered", entryEvent);
+  };
+
+  getEntryTimingFlags = () => {
+    const entryTimingFlags = { isNewDaily: true, isNewMonthly: true, isNewDayHourWindow: true, isNewMonthWindow: true };
+
+    if (!this.store.state.lastEnteredAt) {
+      return entryTimingFlags;
+    }
+
+    const lastEntered = moment(this.store.state.lastEnteredAt);
+    const dayWindowAgo = moment().subtract(1, "day");
+    const monthWindowAgo = moment().subtract(1, "month");
   };
 
   disconnect = () => {
