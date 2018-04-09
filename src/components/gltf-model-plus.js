@@ -127,7 +127,7 @@ const inflateEntities = function(parentEl, node) {
   const entityComponents = node.userData.components;
   if (entityComponents) {
     for (const prop in entityComponents) {
-      if (entityComponents.hasOwnProperty(prop)) {
+      if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
         const { inflator, componentName } = AFRAME.GLTFModelPlus.components[prop];
 
         if (inflator) {
