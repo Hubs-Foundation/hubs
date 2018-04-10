@@ -80,9 +80,6 @@ AFRAME.registerComponent("character-controller", {
     const rotationInvMatrix = new THREE.Matrix4();
     const pivotRotationMatrix = new THREE.Matrix4();
     const pivotRotationInvMatrix = new THREE.Matrix4();
-    const position = new THREE.Vector3();
-    const currentPosition = new THREE.Vector3();
-    const movementVector = new THREE.Vector3();
     const start = new THREE.Vector3();
     let navGroup, navNode;
 
