@@ -628,38 +628,48 @@ class UIRoot extends Component {
             )}
           </div>
           <div className="audio-setup-panel__levels">
-            <div className="audio-setup-panel__levels__mic">
+            <div className="audio-setup-panel__levels__icon">
+              <img
+                src="../assets/images/level_background.png"
+                srcSet="../assets/images/level_background@2x.png 2x"
+                className="audio-setup-panel__levels__icon-part"
+              />
+              <img
+                src="../assets/images/level_fill.png"
+                srcSet="../assets/images/level_fill@2x.png 2x"
+                className="audio-setup-panel__levels__icon-part"
+                style={micClip}
+              />
               {this.state.audioTrack ? (
                 <img
                   src="../assets/images/mic_level.png"
                   srcSet="../assets/images/mic_level@2x.png 2x"
-                  className="audio-setup-panel__levels__mic_icon"
+                  className="audio-setup-panel__levels__icon-part"
                 />
               ) : (
                 <img
                   src="../assets/images/mic_denied.png"
                   srcSet="../assets/images/mic_denied@2x.png 2x"
-                  className="audio-setup-panel__levels__mic_icon"
+                  className="audio-setup-panel__levels__icon-part"
                 />
               )}
+            </div>
+            <div className="audio-setup-panel__levels__icon">
+              <img
+                src="../assets/images/level_background.png"
+                srcSet="../assets/images/level_background@2x.png 2x"
+                className="audio-setup-panel__levels__icon-part"
+              />
               <img
                 src="../assets/images/level_fill.png"
                 srcSet="../assets/images/level_fill@2x.png 2x"
-                className="audio-setup-panel__levels__level"
-                style={micClip}
+                className="audio-setup-panel__levels__icon-part"
+                style={speakerClip}
               />
-            </div>
-            <div className="audio-setup-panel__levels__speaker">
               <img
                 src="../assets/images/speaker_level.png"
                 srcSet="../assets/images/speaker_level@2x.png 2x"
-                className="audio-setup-panel__levels__speaker_icon"
-              />
-              <img
-                src="../assets/images/level_fill.png"
-                srcSet="../assets/images/level_fill@2x.png 2x"
-                className="audio-setup-panel__levels__level"
-                style={speakerClip}
+                className="audio-setup-panel__levels__icon-part"
               />
             </div>
           </div>
@@ -676,9 +686,16 @@ class UIRoot extends Component {
                   </option>
                 ))}
               </select>
-              <div className="audio-setup-panel__device-chooser__mic-icon">
-                <img src="../assets/images/mic_small.png" srcSet="../assets/images/mic_small@2x.png 2x" />
-              </div>
+              <img
+                className="audio-setup-panel__device-chooser__mic-icon"
+                src="../assets/images/mic_small.png"
+                srcSet="../assets/images/mic_small@2x.png 2x"
+              />
+              <img
+                className="audio-setup-panel__device-chooser__dropdown-arrow"
+                src="../assets/images/dropdown_arrow.png"
+                srcSet="../assets/images/dropdown_arrow@2x.png 2x"
+              />
             </div>
           )}
           {this.shouldShowHmdMicWarning() && (
