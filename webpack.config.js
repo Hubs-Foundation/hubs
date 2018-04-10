@@ -3,7 +3,6 @@ require("dotenv").config();
 
 const fs = require("fs");
 const path = require("path");
-const glob = require("glob");
 const selfsigned = require("selfsigned");
 const webpack = require("webpack");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
@@ -118,14 +117,7 @@ const config = {
         loader: "html-loader",
         options: {
           // <a-asset-item>'s src property is overwritten with the correct transformed asset url.
-          attrs: [
-            "img:src",
-            "a-asset-item:src",
-            "a-progressive-asset:src",
-            "a-progressive-asset:high-src",
-            "a-progressive-asset:low-src",
-            "audio:src"
-          ],
+          attrs: ["img:src", "a-asset-item:src", "audio:src"],
           // You can get transformed asset urls in an html template using ${require("pathToFile.ext")}
           interpolate: "require"
         }
@@ -197,15 +189,6 @@ const config = {
       chunks: ["hub"],
       inject: "head"
     }),
-    // Build the GLTF asset bundle json files
-    ...glob.sync("src/assets/**/*.tpl").map(
-      f =>
-        new HTMLWebpackPlugin({
-          filename: f.replace(".tpl", "").replace("src/", ""),
-          template: path.join(...[__dirname, ...f.split("/")]),
-          chunks: []
-        })
-    ),
     new HTMLWebpackPlugin({
       filename: "avatar-selector.html",
       template: path.join(__dirname, "src", "avatar-selector.html"),

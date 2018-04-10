@@ -31,69 +31,16 @@
             <img id="muted"  src="./assets/hud/muted.png" >
             <img id="avatar"  src="./assets/hud/avatar.jpg" >
 
-            <a-progressive-asset
-                id="botdefault"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotDefault_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotDefault_Avatar.glb"
-                low-src="./assets/avatars/BotDefault_Avatar_Unlit.glb"
-            ></a-progressive-asset>
-            <a-progressive-asset
-                id="botbobo"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotBobo_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotBobo_Avatar.glb"
-                low-src="./assets/avatars/BotBobo_Avatar_Unlit.glb"
-            ></a-progressive-asset>
-            <a-progressive-asset
-                id="botdom"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotDom_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotDom_Avatar.glb"
-                low-src="./assets/avatars/BotDom_Avatar_Unlit.glb"
-            ></a-progressive-asset>
-            <a-progressive-asset
-                id="botgreg"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotGreg_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotGreg_Avatar.glb"
-                low-src="./assets/avatars/BotGreg_Avatar_Unlit.glb"
-            ></a-progressive-asset>
-            <a-progressive-asset
-                id="botguest"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotGuest_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotGuest_Avatar.glb"
-                low-src="./assets/avatars/BotGuest_Avatar_Unlit.glb"
-            ></a-progressive-asset>
-            <a-progressive-asset
-                id="botjim"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotJim_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotJim_Avatar.glb"
-                low-src="./assets/avatars/BotJim_Avatar_Unlit.glb"
-            ></a-progressive-asset>
-            <a-progressive-asset
-                id="botpinky"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotPinky_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotPinky_Avatar.glb"
-                low-src="./assets/avatars/BotPinky_Avatar_Unlit.glb"
-            ></a-progressive-asset>
-            <a-progressive-asset
-                id="botrobert"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotRobert_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotRobert_Avatar.glb"
-                low-src="./assets/avatars/BotRobert_Avatar_Unlit.glb"
-            ></a-progressive-asset>
-            <a-progressive-asset
-                id="botwoody"
-                response-type="arraybuffer"
-                src="./assets/avatars/BotWoody_Avatar_Unlit.glb"
-                high-src="./assets/avatars/BotWoody_Avatar.glb"
-                low-src="./assets/avatars/BotWoody_Avatar_Unlit.glb"
-            ></a-progressive-asset>
+            <a-asset-item id="botdefault" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDefault_Avatar-9f71f8ff22.gltf"></a-asset-item>
+            <a-asset-item id="botbobo" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotBobo_Avatar-f9740a010b.gltf"></a-asset-item>
+            <a-asset-item id="botdom" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDom_Avatar-6aa1b5d781.gltf"></a-asset-item>
+            <a-asset-item id="botgreg" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotGreg_Avatar-98d39797bb.gltf"></a-asset-item>
+            <a-asset-item id="botguest" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotGuest_Avatar-78cd857332.gltf"></a-asset-item>
+            <a-asset-item id="botjim" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotJim_Avatar-d28005a687.gltf"></a-asset-item>
+            <a-asset-item id="botkev" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotKev_Avatar-a95787bb51.gltf"></a-asset-item>
+            <a-asset-item id="botpinky" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotPinky_Avatar-b0b93f8675.gltf"></a-asset-item>
+            <a-asset-item id="botrobert" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotRobert_Avatar-e9554880f3.gltf"></a-asset-item>
+            <a-asset-item id="botwoody" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotWoody_Avatar-0140485a23.gltf"></a-asset-item>
 
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
             <a-asset-item id="interactable-duck" response-type="arraybuffer" src="./assets/interactables/duck/DuckyMesh.glb"></a-asset-item>
@@ -188,7 +135,7 @@
             scale="2 2 2"
             class="interactable" 
             super-spawner="template: #interactable-template;" 
-            position="2.5 1.2 0" 
+            position="2.9 1.2 0" 
             body="mass: 0; type: static; shape: box;"
         ></a-entity>
 
@@ -240,7 +187,6 @@
                 camera
                 position="0 1.6 0"
                 personal-space-bubble="radius: 0.4"
-                look-controls
             ></a-entity>
 
             <a-entity
@@ -248,7 +194,11 @@
                 class="left-controller"
                 hand-controls2="left"
                 tracked-controls
-                teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
+                teleport-controls="
+                    cameraRig: #player-rig; 
+                    teleportOrigin: #player-camera; 
+                    button: action_teleport_; 
+                    collisionEntities: #nav-mesh"
                 app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;"
                 haptic-feedback
             ></a-entity>
@@ -260,7 +210,11 @@
                 class="right-controller"
                 hand-controls2="right"
                 tracked-controls
-                teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
+                teleport-controls="
+                    cameraRig: #player-rig; 
+                    teleportOrigin: #player-camera; 
+                    button: action_teleport_; 
+                    collisionEntities: #nav-mesh"
                 haptic-feedback
                 raycaster="objects:.hud; showLine: true; far: 2;"
                 cursor="fuse: false; downEvents: action_ui_select_down; upEvents: action_ui_select_up;"
@@ -331,7 +285,7 @@
         ></a-entity>
 
         <!-- Environment -->
-        <a-entity id="environment-root" position="0 0 0"/>
+        <a-entity id="environment-root" position="0 0 0"></a-entity>
 
         <a-entity id="skybox"
             id="skybox"

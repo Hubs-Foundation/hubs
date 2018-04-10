@@ -4,7 +4,9 @@ import { injectIntl, FormattedMessage } from "react-intl";
 import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 import faAngleLeft from "@fortawesome/fontawesome-free-solid/faAngleLeft";
 import faAngleRight from "@fortawesome/fontawesome-free-solid/faAngleRight";
-import meetingSpace from "../assets/environments/cliff_meeting_space/MeetingSpace1_mesh.glb";
+
+// TODO: we should make a bundle for avatar picker with it's own geometry, for now just use the indoor part of the meting room
+const meetingSpace = "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingSpace1_mesh-d48250ebc6.gltf";
 
 class AvatarSelector extends Component {
   static propTypes = {
@@ -45,13 +47,7 @@ class AvatarSelector extends Component {
 
   render() {
     const avatarAssets = this.props.avatars.map(avatar => (
-      <a-progressive-asset
-        id={avatar.id}
-        key={avatar.id}
-        response-type="arraybuffer"
-        high-src={`${avatar.models.high}`}
-        low-src={`${avatar.models.low}`}
-      />
+      <a-asset-item id={avatar.id} key={avatar.id} response-type="arraybuffer" src={`${avatar.model}`} />
     ));
 
     const avatarEntities = this.props.avatars.map((avatar, i) => (
