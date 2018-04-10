@@ -4,7 +4,7 @@ import cx from "classnames";
 
 import styles from "../assets/stylesheets/2d-hud.css";
 
-const TwoDHUD = ({ name, muted, onToggleMute }) => (
+const TwoDHUD = ({ muted, onToggleMute }) => (
   <div className={styles.container}>
     <div className={cx("ui-interactive", styles.panel, styles.left)}>
       <div className={cx(styles.mic, { [styles.muted]: muted })} onClick={onToggleMute} />
@@ -19,7 +19,6 @@ const TwoDHUD = ({ name, muted, onToggleMute }) => (
 );
 
 TwoDHUD.propTypes = {
-  name: PropTypes.string,
   muted: PropTypes.bool,
   onToggleMute: PropTypes.func
 };
