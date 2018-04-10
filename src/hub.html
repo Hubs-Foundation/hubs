@@ -198,7 +198,7 @@
                     cameraRig: #player-rig; 
                     teleportOrigin: #player-camera; 
                     button: action_teleport_; 
-                    collisionEntities: #nav-mesh"
+                    collisionEntities: [nav-mesh]"
                 app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;"
                 haptic-feedback
             ></a-entity>
@@ -214,7 +214,7 @@
                     cameraRig: #player-rig; 
                     teleportOrigin: #player-camera; 
                     button: action_teleport_; 
-                    collisionEntities: #nav-mesh"
+                    collisionEntities: [nav-mesh]"
                 haptic-feedback
                 raycaster="objects:.hud; showLine: true; far: 2;"
                 cursor="fuse: false; downEvents: action_ui_select_down; upEvents: action_ui_select_up;"
