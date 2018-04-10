@@ -591,14 +591,12 @@ class UIRoot extends Component {
                 onClick={this.onMicGrantButton}
                 src="../assets/images/mic_denied.png"
                 srcSet="../assets/images/mic_denied@2x.png 2x"
-                className="mic-grant-panel__icon"
               />
             ) : (
               <img
                 onClick={this.onMicGrantButton}
                 src="../assets/images/mic_granted.png"
                 srcSet="../assets/images/mic_granted@2x.png 2x"
-                className="mic-grant-panel__icon"
               />
             )}
           </div>
