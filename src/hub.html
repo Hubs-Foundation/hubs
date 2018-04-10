@@ -135,7 +135,7 @@
             scale="2 2 2"
             class="interactable" 
             super-spawner="template: #interactable-template;" 
-            position="2.5 1.2 0" 
+            position="2.9 1.2 0" 
             body="mass: 0; type: static; shape: box;"
         ></a-entity>
 
@@ -194,7 +194,11 @@
                 class="left-controller"
                 hand-controls2="left"
                 tracked-controls
-                teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
+                teleport-controls="
+                    cameraRig: #player-rig; 
+                    teleportOrigin: #player-camera; 
+                    button: action_teleport_; 
+                    collisionEntities: #nav-mesh"
                 app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;"
                 haptic-feedback
             ></a-entity>
@@ -206,7 +210,11 @@
                 class="right-controller"
                 hand-controls2="right"
                 tracked-controls
-                teleport-controls="cameraRig: #player-rig; teleportOrigin: #player-camera; button: action_teleport_"
+                teleport-controls="
+                    cameraRig: #player-rig; 
+                    teleportOrigin: #player-camera; 
+                    button: action_teleport_; 
+                    collisionEntities: #nav-mesh"
                 haptic-feedback
                 raycaster="objects:.hud; showLine: true; far: 2;"
                 cursor="fuse: false; downEvents: action_ui_select_down; upEvents: action_ui_select_up;"

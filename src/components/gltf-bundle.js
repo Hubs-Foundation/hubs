@@ -23,7 +23,7 @@ AFRAME.registerComponent("gltf-bundle", {
 
       const src = new URL(asset.src, this.baseURL).href;
       const gltfEl = document.createElement("a-entity");
-      gltfEl.setAttribute("gltf-model-plus", { src });
+      gltfEl.setAttribute("gltf-model-plus", { src, inflate: true });
       loaded.push(new Promise(resolve => gltfEl.addEventListener("model-loaded", resolve)));
       this.el.appendChild(gltfEl);
     }
