@@ -372,23 +372,24 @@ class UIRoot extends Component {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       const micLevelAudioContext = new AudioContext();
       const micSource = micLevelAudioContext.createMediaStreamSource(mediaStream);
-      const analyzer = micLevelAudioContext.createAnalyser();
-      const levels = new Uint8Array(analyzer.fftSize);
+      const analyser = micLevelAudioContext.createAnalyser();
+      analyser.fftSize = 32;
+      const levels = new Uint8Array(analyser.frequencyBinCount);
 
-      micSource.connect(analyzer);
+      micSource.connect(analyser);
 
       const micUpdateInterval = setInterval(() => {
-        analyzer.getByteTimeDomainData(levels);
-
+        analyser.getByteTimeDomainData(levels);
         let v = 0;
-
         for (let x = 0; x < levels.length; x++) {
-          v = Math.max(levels[x] - 127, v);
+          v = Math.max(levels[x] - 128, v);
         }
-
         const level = v / 128.0;
-        this.micLevelMovingAverage.push(Date.now(), level);
-        this.setState({ micLevel: this.micLevelMovingAverage.movingAverage() });
+        // multiplier to increase visual indicator
+        const multiplier = 6;
+        this.micLevelMovingAverage.push(Date.now(), level * multiplier);
+        const average = this.micLevelMovingAverage.movingAverage();
+        this.setState({ micLevel: average });
       }, 50);
 
       const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForMediaStream(mediaStream));
