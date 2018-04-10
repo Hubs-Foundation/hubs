@@ -385,8 +385,10 @@ class UIRoot extends Component {
           v = Math.max(levels[x] - 128, v);
         }
         const level = v / 128.0;
-        // multiplier to increase visual indicator
+        // Multiplier to increase visual indicator.
         const multiplier = 6;
+        // We use a moving average to smooth out the visual animation or else it would twitch too fast for
+        // the css renderer to keep up.
         this.micLevelMovingAverage.push(Date.now(), level * multiplier);
         const average = this.micLevelMovingAverage.movingAverage();
         this.setState({ micLevel: average });
