@@ -1,7 +1,6 @@
 AFRAME.registerComponent("networked-audio-analyser", {
   schema: {},
   async init() {
-    this.connected = false;
     this.el.addEventListener("sound-source-set", event => {
       const ctx = THREE.AudioContext.getContext();
       this.analyser = ctx.createAnalyser();
