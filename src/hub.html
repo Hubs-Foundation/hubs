@@ -19,7 +19,7 @@
 
     <a-scene
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
-        physics="debug: true"
+        physics
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         personal-space-bubble="debug: false;"
 
@@ -138,7 +138,7 @@
             position="2.9 1.2 0" 
             body="mass: 0; type: static; shape: box;"
         ></a-entity>
-        
+
         <a-entity
             id="super-cursor"
             super-cursor="cursor: #3d-cursor; camera: #player-camera;"

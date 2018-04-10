@@ -182,7 +182,7 @@ aframe-lerp-component@^1.1.0:
 
 "aframe-physics-system@https://github.com/infinitelee/aframe-physics-system#feature/shape-component":
   version "3.0.2"
-  resolved "https://github.com/infinitelee/aframe-physics-system#c8add507adcb6d67ecb7613924662e413a811454"
+  resolved "https://github.com/infinitelee/aframe-physics-system#be3e43f1af5b995952e1b3d27dce216ab2e79f05"
   dependencies:
     browserify "^14.3.0"
     budo "^10.0.3"
