@@ -190,6 +190,10 @@ aframe-lerp-component@^1.1.0:
     three-to-cannon "^1.2.0"
     webworkify "^1.4.0"
 
+aframe-rounded@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/aframe-rounded/-/aframe-rounded-1.0.3.tgz#72c7d9c0ff02e94ee138bf217c284e187efa3cfb"
+
 aframe-teleport-controls@^0.3.1:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/aframe-teleport-controls/-/aframe-teleport-controls-0.3.1.tgz#7d7ef206f483ea92425a6333b0f8fb26c9596d1c"

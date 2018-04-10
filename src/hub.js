@@ -11,6 +11,7 @@ import "naf-janus-adapter";
 import "aframe-teleport-controls";
 import "aframe-input-mapping-component";
 import "aframe-billboard-component";
+import "aframe-rounded";
 import "webrtc-adapter";
 
 import { vive_trackpad_dpad4 } from "./behaviours/vive-trackpad-dpad4";

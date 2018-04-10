@@ -6,10 +6,14 @@ import styles from "../assets/stylesheets/2d-hud.css";
 
 const TwoDHUD = ({ name, muted, onToggleMute }) => (
   <div className={styles.container}>
-    <div className={cx("ui-interactive", styles.bg)}>
+    <div className={cx("ui-interactive", styles.panel, styles.left)}>
       <div className={cx(styles.mic, { [styles.muted]: muted })} onClick={onToggleMute} />
-      <div className={styles.nametag}>{name}</div>
+    </div>
+    <div className={cx("ui-interactive", styles.modeButton)}>
       <div className={styles.avatar} />
+    </div>
+    <div className={cx("ui-interactive", styles.panel, styles.right)}>
+      <div className={cx(styles.mic, { [styles.muted]: muted })} onClick={onToggleMute} />
     </div>
   </div>
 );
