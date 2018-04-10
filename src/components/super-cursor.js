@@ -118,7 +118,7 @@ AFRAME.registerComponent("super-cursor", {
   _handleMouseDown: function() {
     if (this.isInteractable) {
       const lookControls = this.data.camera.components["look-controls"];
-      lookControls.pause();
+      if (lookControls) lookControls.pause();
     }
     this.data.cursor.emit("action_grab", {});
   },
@@ -129,7 +129,7 @@ AFRAME.registerComponent("super-cursor", {
 
   _handleMouseUp: function() {
     const lookControls = this.data.camera.components["look-controls"];
-    lookControls.play();
+    if (lookControls) lookControls.play();
     this.data.cursor.emit("action_release", {});
   },
 

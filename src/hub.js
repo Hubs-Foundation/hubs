@@ -69,6 +69,7 @@ if (qs.quality) {
 
 import "aframe-physics-system";
 import "aframe-physics-extras";
+import "aframe-extras/src/pathfinding";
 import "super-hands";
 import "./components/super-networked-interactable";
 import "./components/networked-counter";
@@ -126,6 +127,7 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   const scene = document.querySelector("a-scene");
   const playerRig = document.querySelector("#player-rig");
   document.querySelector("a-scene canvas").classList.remove("blurred");
+  scene.render();
 
   if (enterInVR) {
     scene.enterVR();
@@ -133,7 +135,7 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
 
   AFRAME.registerInputActions(inGameActions, "default");
 
-  document.querySelector("#player-camera").setAttribute("look-controls");
+  document.querySelector("#player-camera").setAttribute("look-controls", "");
 
   scene.setAttribute("networked-scene", {
     room: janusRoomId,
@@ -179,11 +181,7 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
     screenEntity.setAttribute("visible", sharingScreen);
   });
 
-  if (qsTruthy("offline")) {
-    onConnect();
-  } else {
-    document.body.addEventListener("connected", onConnect);
-
+  if (!qsTruthy("offline")) {
     scene.components["networked-scene"].connect();
 
     if (mediaStream) {
@@ -206,8 +204,6 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
     }
   }
 }
-
-function onConnect() {}
 
 function mountUI(scene) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
@@ -255,7 +251,11 @@ const onReady = async () => {
   const environmentRoot = document.querySelector("#environment-root");
 
   const initialEnvironmentEl = document.createElement("a-entity");
-  initialEnvironmentEl.addEventListener("bundleloaded", () => uiRoot.setState({ initialEnvironmentLoaded: true }));
+  initialEnvironmentEl.addEventListener("bundleloaded", () => {
+    uiRoot.setState({ initialEnvironmentLoaded: true });
+    // Wait a tick so that the environments actually render.
+    setTimeout(() => scene.renderer.animate(null));
+  });
   environmentRoot.appendChild(initialEnvironmentEl);
 
   if (qs.room) {
