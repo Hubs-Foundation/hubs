@@ -210,6 +210,7 @@ function mountUI(scene) {
   const forcedVREntryType = qs.vr_entry_type || null;
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
   const htmlPrefix = document.body.dataset.htmlPrefix || "";
+  const showProfileEntry = !store.state.profile.has_saved_profile;
 
   // TODO: Refactor to avoid using return value
   /* eslint-disable react/no-render-return-value */
@@ -224,7 +225,8 @@ function mountUI(scene) {
         forcedVREntryType,
         enableScreenSharing,
         store,
-        htmlPrefix
+        htmlPrefix,
+        showProfileEntry
       }}
     />,
     document.getElementById("ui-root")

@@ -30,6 +30,7 @@ class ProfileEntryPanel extends Component {
     e.preventDefault();
     this.props.store.update({
       profile: {
+        has_saved_profile: true,
         display_name: this.state.display_name,
         avatar_id: this.state.avatar_id
       }

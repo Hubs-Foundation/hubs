@@ -60,7 +60,8 @@ class UIRoot extends Component {
     enableScreenSharing: PropTypes.bool,
     store: PropTypes.object,
     scene: PropTypes.object,
-    htmlPrefix: PropTypes.string
+    htmlPrefix: PropTypes.string,
+    showProfileEntry: PropTypes.bool
   };
 
   state = {
@@ -94,6 +95,11 @@ class UIRoot extends Component {
 
     janusRoomId: null
   };
+
+  constructor(props) {
+    super(props);
+    this.state.showProfileEntry = this.props.showProfileEntry;
+  }
 
   componentDidMount() {
     this.setupTestTone();

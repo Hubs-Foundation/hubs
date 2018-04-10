@@ -16,6 +16,7 @@ export const SCHEMA = {
       type: "object",
       additionalProperties: false,
       properties: {
+        has_saved_profile: { type: "boolean" },
         display_name: { type: "string", pattern: "^[A-Za-z0-9-]{3,32}$" },
         avatar_id: { type: "string" }
       }
