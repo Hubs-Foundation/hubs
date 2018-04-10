@@ -255,8 +255,8 @@ const onReady = async () => {
   const initialEnvironmentEl = document.createElement("a-entity");
   initialEnvironmentEl.addEventListener("bundleloaded", () => {
     uiRoot.setState({ initialEnvironmentLoaded: true });
-    // Wait a tick so that the environments actually render.
-    setTimeout(() => scene.renderer.animate(null));
+    // Wait a tick plus some margin so that the environments actually render.
+    setTimeout(() => scene.renderer.animate(null), 100);
   });
   environmentRoot.appendChild(initialEnvironmentEl);
 
