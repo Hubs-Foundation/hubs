@@ -45,6 +45,7 @@ import "./components/animation-mixer";
 import "./components/loop-animation";
 import "./components/gltf-model-plus";
 import "./components/gltf-bundle";
+import "./components/hud-controller";
 
 import ReactDOM from "react-dom";
 import React from "react";
