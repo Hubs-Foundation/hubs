@@ -104,7 +104,7 @@ AFRAME.registerComponent("hud-controller", {
     offset: { default: 0.7 }, // distance from hud above head,
     lookCutoff: { default: 20 }, // angle at which the hud should be "on",
     animRange: { default: 30 }, // degrees over which to animate the hud into view
-    yawCutoff: { default: 50 } // yaw degrees at wich the hud should reoirent even if the user is looking down
+    yawCutoff: { default: 50 } // yaw degrees at wich the hud should reoirent even if the user is looking up
   },
   init() {
     this.isYLocked = false;
