@@ -5,7 +5,7 @@ AFRAME.registerComponent("nav-mesh-helper", {
 
   init: function() {
     const teleportControls = this.data.teleportControls;
-    this.el.addEventListener("model-loaded", () => {
+    this.el.addEventListener("bundleloaded", () => {
       if (!teleportControls) return;
 
       for (let i = 0; i < teleportControls.length; i++) {
