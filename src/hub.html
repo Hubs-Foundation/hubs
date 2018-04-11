@@ -105,7 +105,7 @@
             </template>
 
             <template id="remote-avatar-template">
-                <a-entity ik-root player-info hand-poses="mixer: .RootScene">
+                <a-entity ik-root player-info>
                     <a-entity class="camera"></a-entity>
 
                     <a-entity class="left-controller"></a-entity>
@@ -114,7 +114,7 @@
 
                     <a-gltf-entity class="model" inflate="true">
                         <template data-selector=".RootScene">
-                            <a-entity ik-controller animation-mixer></a-entity>
+                            <a-entity ik-controller animation-mixer hand-poses></a-entity>
                         </template>
 
                         <template data-selector=".Neck">
@@ -207,8 +207,6 @@
             spawn-controller="radius: 4;"
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
-            hand-poses="mixer: .RootScene"
-            hand-poses-controller
             ik-root
             app-mode-toggle-playing__character-controller="mode: hud; invert: true;"
             app-mode-toggle-playing__wasd-to-analog2d="mode: hud; invert: true;"
@@ -271,6 +269,8 @@
                     <a-entity
                         ik-controller
                         animation-mixer
+            hand-poses
+            hand-poses-controller
                     ></a-entity>
                 </template>
 

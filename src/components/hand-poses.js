@@ -13,7 +13,6 @@ AFRAME.registerComponent("hand-poses", {
   schema: {
     leftPose: { type: "string", default: "allOpen" },
     rightPose: { type: "string", default: "allOpen" },
-    mixer: { type: "string" },
     gltfEntity: { type: "string", default: "a-gltf-entity" }
   },
 
@@ -21,28 +20,11 @@ AFRAME.registerComponent("hand-poses", {
     this.animatePose = this.animatePose.bind(this);
     this.animatePoses = this.animatePoses.bind(this);
     this.firstUpdate = this.firstUpdate.bind(this);
-    const mixerEl = this.el.querySelector(this.data.mixer);
-    if (mixerEl) {
-      this.mixer = mixerEl.components["animation-mixer"];
-    }
-
-    const onLoad = () => {
-      const mixerEl = this.el.querySelector(this.data.mixer);
-      if (mixerEl) {
-        this.mixer = mixerEl.components["animation-mixer"];
-      }
-      if (!this.mixer) {
-        // Can't find the mixer until spawned into the scene.
-        // TODO: Figure out the right event to listen to to get this done.
-        window.setTimeout(onLoad, 100);
-        return;
-      }
-      this.el.querySelector(this.data.gltfEntity).removeEventListener("loaded", onLoad);
-    };
-    this.el.querySelector(this.data.gltfEntity).addEventListener("loaded", onLoad);
-
-    //TODO: the loaded event isn't being caught, so we do it in a timeout
-    window.setTimeout(onLoad, 10);
+    this.mixer = this.el.components["animation-mixer"];
+    this.leftClipFrom = this.leftClipTo = this.mixer.mixer.clipAction(POSES.open + "_L", this.clipActionObject);
+    this.rightClipFrom = this.rightClipTo = this.mixer.mixer.clipAction(POSES.open + "_R", this.clipActionObject);
+    this.leftClipTo.play();
+    this.rightClipTo.play();
   },
 
   update(oldData) {
@@ -55,13 +37,6 @@ AFRAME.registerComponent("hand-poses", {
     } else {
       this.animatePoses(oldData);
     }
-  },
-
-  firstUpdate() {
-    this.leftClipFrom = this.leftClipTo = this.mixer.mixer.clipAction(POSES.open + "_L", this.clipActionObject);
-    this.rightClipFrom = this.rightClipTo = this.mixer.mixer.clipAction(POSES.open + "_R", this.clipActionObject);
-    this.leftClipTo.play();
-    this.rightClipTo.play();
   },
 
   animatePose(hand, prev, curr) {
@@ -78,7 +53,7 @@ AFRAME.registerComponent("hand-poses", {
     to.play();
     from.play();
 
-    this.mixer.update(0.001);
+    this.mixer.mixer.update(0.001);
   },
 
   animatePoses(oldData) {
