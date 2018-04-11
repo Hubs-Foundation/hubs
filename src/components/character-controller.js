@@ -1,5 +1,6 @@
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
+const EPS = 10e-6;
 
 // Does not have any type of collisions yet.
 AFRAME.registerComponent("character-controller", {
@@ -79,6 +80,8 @@ AFRAME.registerComponent("character-controller", {
     const rotationInvMatrix = new THREE.Matrix4();
     const pivotRotationMatrix = new THREE.Matrix4();
     const pivotRotationInvMatrix = new THREE.Matrix4();
+    const start = new THREE.Vector3();
+    let navGroup, navNode;
 
     return function(t, dt) {
       const deltaSeconds = dt / 1000;
@@ -86,6 +89,8 @@ AFRAME.registerComponent("character-controller", {
       const pivot = this.data.pivot.object3D;
       const distance = this.data.groundAcc * deltaSeconds;
       const rotationDelta = this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
+
+      start.copy(root.position);
 
       // Other aframe components like teleport-controls set position/rotation/scale, not the matrix, so we need to make sure to compose them back into the matrix
       root.updateMatrix();
@@ -128,9 +133,19 @@ AFRAME.registerComponent("character-controller", {
         z: root.rotation.z * THREE.Math.RAD2DEG
       });
 
-      this.el.setAttribute("position", root.position);
-
       this.pendingSnapRotationMatrix.identity(); // Revert to identity
+
+      //copied from aframe-extras movement-controls
+      const nav = this.el.sceneEl.systems.nav;
+      if (nav.navMesh && this.velocity.lengthSq() > EPS) {
+        if (!navGroup) {
+          navGroup = nav.getGroup(start);
+        }
+        navNode = navNode || nav.getNode(start, navGroup);
+        navNode = nav.clampStep(start, root.position, navGroup, navNode, root.position);
+      } else {
+        this.el.setAttribute("position", root.position);
+      }
     };
   })(),
 

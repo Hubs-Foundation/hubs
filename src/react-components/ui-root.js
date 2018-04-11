@@ -60,7 +60,7 @@ class UIRoot extends Component {
     enableScreenSharing: PropTypes.bool,
     store: PropTypes.object,
     scene: PropTypes.object,
-    htmlPrefix: PropTypes.object
+    htmlPrefix: PropTypes.string
   };
 
   state = {

@@ -3,7 +3,6 @@ require("dotenv").config();
 
 const fs = require("fs");
 const path = require("path");
-const glob = require("glob");
 const selfsigned = require("selfsigned");
 const webpack = require("webpack");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
@@ -190,15 +189,6 @@ const config = {
       chunks: ["hub"],
       inject: "head"
     }),
-    // Build the GLTF asset bundle json files
-    ...glob.sync("src/assets/**/*.tpl").map(
-      f =>
-        new HTMLWebpackPlugin({
-          filename: f.replace(".tpl", "").replace("src/", ""),
-          template: path.join(...[__dirname, ...f.split("/")]),
-          chunks: []
-        })
-    ),
     new HTMLWebpackPlugin({
       filename: "avatar-selector.html",
       template: path.join(__dirname, "src", "avatar-selector.html"),
