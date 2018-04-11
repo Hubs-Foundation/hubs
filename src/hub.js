@@ -146,7 +146,7 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
     scene.setAttribute("stats", true);
   }
 
-  if (isMobile || qsTruthy(qs.mobile)) {
+  if (isMobile || qsTruthy("mobile")) {
     playerRig.setAttribute("virtual-gamepad-controls", {});
   }
 
