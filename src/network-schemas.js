@@ -3,7 +3,10 @@ function registerNetworkSchemas() {
     template: "#remote-avatar-template",
     components: [
       "position",
-      "rotation",
+      {
+        component: "rotation",
+        lerp: false
+      },
       "scale",
       "player-info",
       {
