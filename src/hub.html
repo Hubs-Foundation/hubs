@@ -63,7 +63,7 @@
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
                         <template data-selector=".RootScene">
-                            <a-entity ik-controller hand-poses animation-mixer space-invader-mesh="meshSelector: .Bot_Skinned"></a-entity>
+                            <a-entity ik-controller hand-pose__left hand-pose__right animation-mixer space-invader-mesh="meshSelector: .Bot_Skinned"></a-entity>
                         </template>
 
                         <template data-selector=".Neck">
@@ -230,8 +230,10 @@
                     <a-entity
                         ik-controller
                         animation-mixer
-                        hand-poses
-                        hand-poses-controller
+                        hand-pose__left
+                        hand-pose__right
+                        hand-pose-controller__left="eventSrc:#player-left-controller"
+                        hand-pose-controller__right="eventSrc:#player-right-controller"
                     ></a-entity>
                 </template>
 

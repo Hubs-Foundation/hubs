@@ -8,13 +8,13 @@ function registerNetworkSchemas() {
       "player-info",
       {
         selector: ".RootScene",
-        component: "hand-poses",
-        property: "leftPose"
+        component: "hand-pose__left",
+        property: "pose"
       },
       {
         selector: ".RootScene",
-        component: "hand-poses",
-        property: "rightPose"
+        component: "hand-pose__right",
+        property: "pose"
       },
       {
         selector: ".camera",

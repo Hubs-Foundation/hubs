@@ -9,90 +9,67 @@ const POSES = {
   pinch: "pinch"
 };
 
-AFRAME.registerComponent("hand-poses", {
+const NETWORK_POSES = ["allOpen", "thumbDown", "indexDown", "mrpDown", "thumbsUp", "point", "allGrip", "pinch"];
+
+AFRAME.registerComponent("hand-pose", {
+  multiple: true,
   schema: {
-    leftPose: { type: "string", default: "allOpen" },
-    rightPose: { type: "string", default: "allOpen" },
-    gltfEntity: { type: "string", default: "a-gltf-entity" }
+    pose: { default: 0 }
   },
 
   init() {
     this.animatePose = this.animatePose.bind(this);
-    this.animatePoses = this.animatePoses.bind(this);
     this.mixer = this.el.components["animation-mixer"];
-    this.leftClipFrom = this.leftClipTo = this.mixer.mixer.clipAction(POSES.open + "_L", this.clipActionObject);
-    this.rightClipFrom = this.rightClipTo = this.mixer.mixer.clipAction(POSES.open + "_R", this.clipActionObject);
-    this.leftClipTo.play();
-    this.rightClipTo.play();
+    const object3DMap = this.mixer.el.object3DMap;
+    const rootObj = object3DMap.mesh || object3DMap.scene;
+    this.clipActionObject = rootObj.parent;
+    const suffix = this.id == "left" ? "_L" : "_R";
+    this.from = this.to = this.mixer.mixer.clipAction(POSES.open + suffix, this.clipActionObject);
+    this.from.play();
   },
 
   update(oldData) {
-    if (!this.mixer) return;
-    if (!this.clipActionObject) {
-      const object3DMap = this.mixer.el.object3DMap;
-      const rootObj = object3DMap.mesh || object3DMap.scene;
-      this.clipActionObject = rootObj.parent;
-    } else {
-      this.animatePoses(oldData);
+    if (oldData.pose != this.data.pose) {
+      this.animatePose(NETWORK_POSES[oldData.pose || 0], NETWORK_POSES[this.data.pose]);
     }
   },
 
-  animatePose(hand, prev, curr) {
-    this[`${hand}ClipFrom`].stop();
-    this[`${hand}ClipTo`].stop();
+  animatePose(prev, curr) {
+    this.from.stop();
+    this.to.stop();
 
     const duration = 0.065;
-    const suffix = hand == "left" ? "_L" : "_R";
-    const from = (this[`${hand}ClipFrom`] = this.mixer.mixer.clipAction(prev + suffix, this.clipActionObject));
-    const to = (this[`${hand}ClipTo`] = this.mixer.mixer.clipAction(curr + suffix, this.clipActionObject));
+    const suffix = this.id == "left" ? "_L" : "_R";
+    this.from = this.mixer.mixer.clipAction(prev + suffix, this.clipActionObject);
+    this.to = this.mixer.mixer.clipAction(curr + suffix, this.clipActionObject);
 
-    from.fadeOut(duration);
-    to.fadeIn(duration);
-    to.play();
-    from.play();
+    this.from.fadeOut(duration);
+    this.to.fadeIn(duration);
+    this.to.play();
+    this.from.play();
 
     this.mixer.mixer.update(0.001);
-  },
-
-  animatePoses(oldData) {
-    if (oldData.leftPose != this.data.leftPose) {
-      this.animatePose("left", oldData.leftPose, this.data.leftPose);
-    }
-    if (oldData.rightPose != this.data.rightPose) {
-      this.animatePose("right", oldData.rightPose, this.data.rightPose);
-    }
   }
 });
 
-AFRAME.registerComponent("hand-poses-controller", {
+AFRAME.registerComponent("hand-pose-controller", {
+  multiple: true,
   schema: {
-    left: { type: "selector", default: "#player-left-controller" },
-    right: { type: "selector", default: "#player-right-controller" }
+    eventSrc: { type: "selector" }
   },
-
   init: function() {
     this.setHandPose = this.setHandPose.bind(this);
-
-    this.el.setAttribute("hand-poses", {
-      leftPose: POSES.open,
-      rightPose: POSES.open
-    });
   },
 
   play: function() {
-    this.data.left.addEventListener("hand-pose", this.setHandPose);
-    this.data.right.addEventListener("hand-pose", this.setHandPose);
+    this.data.eventSrc.addEventListener("hand-pose", this.setHandPose);
   },
 
   pause: function() {
-    this.data.left.removeEventListener("hand-pose", this.setHandPose);
-    this.data.right.removeEventListener("hand-pose", this.setHandPose);
+    this.data.eventSrc.removeEventListener("hand-pose", this.setHandPose);
   },
 
   setHandPose: function(evt) {
-    const { current, previous } = evt.detail;
-    const isLeft = evt.target === this.data.left;
-    const pose = POSES[current];
-    this.el.setAttribute("hand-poses", `${isLeft ? "left" : "right"}Pose`, pose);
+    this.el.setAttribute(`hand-pose__${this.id}`, "pose", NETWORK_POSES.indexOf(POSES[evt.detail.current]));
   }
 });
