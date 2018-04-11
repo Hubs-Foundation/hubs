@@ -104,15 +104,10 @@ AFRAME.registerComponent("super-cursor", {
   },
 
   _isInteractable: function(el) {
-    if (el.className === "interactable") {
-      return true;
-    }
-
-    if (el.parentNode && el.parentNode != el.sceneEl) {
-      return this._isInteractable(el.parentNode);
-    }
-
-    return false;
+    return (
+      el.className === "interactable" ||
+      (el.parentNode && el.parentNode != el.sceneEl && this._isInteractable(el.parentNode))
+    );
   },
 
   _handleMouseDown: function() {
@@ -134,7 +129,19 @@ AFRAME.registerComponent("super-cursor", {
   },
 
   _handleWheel: function(e) {
-    if (this.isGrabbing) this.currentDistanceMod += e.deltaY / 10;
+    if (this.isGrabbing) {
+      switch (e.deltaMode) {
+        case e.DOM_DELTA_PIXEL:
+          this.currentDistanceMod += e.deltaY / 500;
+          break;
+        case e.DOM_DELTA_LINE:
+          this.currentDistanceMod += e.deltaY / 10;
+          break;
+        case e.DOM_DELTA_PAGE:
+          this.currentDistanceMod += e.deltaY / 2;
+          break;
+      }
+    }
   },
 
   _handleEnterVR: function() {
