@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import classNames from "classnames";
-import queryString from "query-string";
-import { IntlProvider, injectIntl, FormattedMessage, addLocaleData } from "react-intl";
+import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import homeVideo from "../assets/video/home.webm";
 
@@ -18,7 +16,10 @@ addLocaleData([...en]);
 const messages = localeData[lang] || localeData.en;
 
 const ENVIRONMENT_URLS = [
-  `${document.location.protocol}//${document.location.host}/assets/environments/cliff_meeting_space/bundle.json`
+  "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingRoom.bundle.json",
+  "https://asset-bundles-prod.reticulum.io/rooms/theater/TheaterMeshes.bundle.json",
+  "https://asset-bundles-prod.reticulum.io/rooms/atrium/AtriumMeshes.bundle.json",
+  "https://asset-bundles-prod.reticulum.io/rooms/courtyard/CourtyardMeshes.bundle.json"
 ];
 
 class HomeRoot extends Component {

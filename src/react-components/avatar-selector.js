@@ -4,7 +4,9 @@ import { injectIntl, FormattedMessage } from "react-intl";
 import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 import faAngleLeft from "@fortawesome/fontawesome-free-solid/faAngleLeft";
 import faAngleRight from "@fortawesome/fontawesome-free-solid/faAngleRight";
-import meetingSpace from "../assets/environments/cliff_meeting_space/MeetingSpace1_mesh.glb";
+
+// TODO: we should make a bundle for avatar picker with it's own geometry, for now just use the indoor part of the meting room
+const meetingSpace = "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingSpace1_mesh-d48250ebc6.gltf";
 
 class AvatarSelector extends Component {
   static propTypes = {
@@ -45,18 +47,12 @@ class AvatarSelector extends Component {
 
   render() {
     const avatarAssets = this.props.avatars.map(avatar => (
-      <a-progressive-asset
-        id={avatar.id}
-        key={avatar.id}
-        response-type="arraybuffer"
-        high-src={`${avatar.models.high}`}
-        low-src={`${avatar.models.low}`}
-      />
+      <a-asset-item id={avatar.id} key={avatar.id} response-type="arraybuffer" src={`${avatar.model}`} />
     ));
 
     const avatarEntities = this.props.avatars.map((avatar, i) => (
       <a-entity key={avatar.id} position="0 0 0" rotation={`0 ${360 * -i / this.props.avatars.length} 0`}>
-        <a-gltf-entity position="0 0 5" rotation="0 0 0" src={"#" + avatar.id} inflate="true">
+        <a-entity position="0 0 5" rotation="0 0 0" gltf-model-plus={`src: #${avatar.id}`} inflate="true">
           <template data-selector=".RootScene">
             <a-entity animation-mixer />
           </template>
@@ -66,7 +62,7 @@ class AvatarSelector extends Component {
             to={`0 ${this.getAvatarIndex() === i ? 360 : 0} 0`}
             repeat="indefinite"
           />
-        </a-gltf-entity>
+        </a-entity>
       </a-entity>
     ));
 
@@ -100,7 +96,7 @@ class AvatarSelector extends Component {
             position="0 5 -15"
           />
           <a-entity hide-when-quality="low" light="type: ambient; color: #FFF" />
-          <a-gltf-entity id="meeting-space" src="#meeting-space1-mesh" position="0 0 0" />
+          <a-entity id="meeting-space" gltf-model-plus="src: #meeting-space1-mesh" position="0 0 0" />
         </a-scene>
         <button className="avatar-selector__previous-button" onClick={this.emitChangeToPrevious}>
           <FontAwesomeIcon icon={faAngleLeft} />

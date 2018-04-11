@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom";
 import React from "react";
 import queryString from "query-string";
-import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
+import { IntlProvider, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 
 import "./assets/stylesheets/avatar-selector.scss";
@@ -10,14 +10,15 @@ import "./vendor/GLTFLoader";
 import "./components/animation-mixer";
 import "./components/audio-feedback";
 import "./components/loop-animation";
-import "./elements/a-progressive-asset";
 import "./gltf-component-mappings";
-import { avatars } from "./assets/avatars/avatars.js";
-import { avatarIds } from "./utils/identity";
+import { avatars } from "./assets/avatars/avatars";
 
+import registerTelemetry from "./telemetry";
 import { App } from "./App";
 import AvatarSelector from "./react-components/avatar-selector";
 import localeData from "./assets/translations.data.json";
+
+registerTelemetry();
 
 window.APP = new App();
 const hash = queryString.parse(location.hash);

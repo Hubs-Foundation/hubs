@@ -23,6 +23,7 @@ import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in t
 import "./components/mute-mic";
 import "./components/audio-feedback";
 import "./components/bone-mute-state-indicator";
+import "./components/bone-visibility";
 import "./components/in-world-hud";
 import "./components/virtual-gamepad-controls";
 import "./components/ik-controller";
@@ -41,6 +42,7 @@ import "./components/debug";
 import "./components/animation-mixer";
 import "./components/loop-animation";
 import "./components/hand-poses";
+import "./components/gltf-model-plus";
 import "./components/gltf-bundle";
 
 import ReactDOM from "react-dom";
@@ -49,8 +51,6 @@ import UIRoot from "./react-components/ui-root";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
-
-import "./elements/a-gltf-entity";
 
 import "./gltf-component-mappings";
 
@@ -67,10 +67,9 @@ if (qs.quality) {
   window.APP.quality = isMobile ? "low" : "high";
 }
 
-import "./elements/a-progressive-asset";
-
 import "aframe-physics-system";
 import "aframe-physics-extras";
+import "aframe-extras/src/pathfinding";
 import "super-hands";
 import "./components/super-networked-interactable";
 import "./components/networked-counter";
@@ -128,7 +127,7 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   const scene = document.querySelector("a-scene");
   const playerRig = document.querySelector("#player-rig");
   document.querySelector("a-scene canvas").classList.remove("blurred");
-  registerNetworkSchemas();
+  scene.render();
 
   if (enterInVR) {
     scene.enterVR();
@@ -136,13 +135,9 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
 
   AFRAME.registerInputActions(inGameActions, "default");
 
-  document.querySelector("#player-camera").setAttribute("look-controls");
+  document.querySelector("#player-camera").setAttribute("look-controls", "");
 
   scene.setAttribute("networked-scene", {
-    adapter: "janus",
-    audio: true,
-    debug: true,
-    connectOnLoad: false,
     room: janusRoomId,
     serverURL: process.env.JANUS_SERVER
   });
@@ -186,11 +181,7 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
     screenEntity.setAttribute("visible", sharingScreen);
   });
 
-  if (qsTruthy("offline")) {
-    onConnect();
-  } else {
-    document.body.addEventListener("connected", onConnect);
-
+  if (!qsTruthy("offline")) {
     scene.components["networked-scene"].connect();
 
     if (mediaStream) {
@@ -214,13 +205,14 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   }
 }
 
-function onConnect() {}
-
 function mountUI(scene) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.vr_entry_type || null;
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
+  const htmlPrefix = document.body.dataset.htmlPrefix || "";
 
+  // TODO: Refactor to avoid using return value
+  /* eslint-disable react/no-render-return-value */
   const uiRoot = ReactDOM.render(
     <UIRoot
       {...{
@@ -231,11 +223,13 @@ function mountUI(scene) {
         disableAutoExitOnConcurrentLoad,
         forcedVREntryType,
         enableScreenSharing,
-        store
+        store,
+        htmlPrefix
       }}
     />,
     document.getElementById("ui-root")
   );
+  /* eslint-enable react/no-render-return-value */
 
   return uiRoot;
 }
@@ -244,6 +238,8 @@ const onReady = async () => {
   const scene = document.querySelector("a-scene");
   document.querySelector("a-scene canvas").classList.add("blurred");
   window.APP.scene = scene;
+
+  registerNetworkSchemas();
 
   const uiRoot = mountUI(scene);
 
@@ -255,13 +251,22 @@ const onReady = async () => {
   const environmentRoot = document.querySelector("#environment-root");
 
   const initialEnvironmentEl = document.createElement("a-entity");
-  initialEnvironmentEl.addEventListener("bundleloaded", () => uiRoot.setState({ initialEnvironmentLoaded: true }));
+  initialEnvironmentEl.addEventListener("bundleloaded", () => {
+    uiRoot.setState({ initialEnvironmentLoaded: true });
+    // Wait a tick so that the environments actually render.
+    setTimeout(() => scene.renderer.animate(null));
+  });
   environmentRoot.appendChild(initialEnvironmentEl);
 
   if (qs.room) {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
     uiRoot.setState({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
-    initialEnvironmentEl.setAttribute("gltf-bundle", "src: /assets/environments/cliff_meeting_space/bundle.json");
+    initialEnvironmentEl.setAttribute("gltf-bundle", {
+      src: "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingRoom.bundle.json"
+      // src: "https://asset-bundles-prod.reticulum.io/rooms/theater/TheaterMeshes.bundle.json"
+      // src: "https://asset-bundles-prod.reticulum.io/rooms/atrium/AtriumMeshes.bundle.json"
+      // src: "https://asset-bundles-prod.reticulum.io/rooms/courtyard/CourtyardMeshes.bundle.json"
+    });
     return;
   }
 

@@ -19,7 +19,6 @@ AFRAME.registerComponent("hand-poses", {
   init() {
     this.animatePose = this.animatePose.bind(this);
     this.animatePoses = this.animatePoses.bind(this);
-    this.firstUpdate = this.firstUpdate.bind(this);
     this.mixer = this.el.components["animation-mixer"];
     this.leftClipFrom = this.leftClipTo = this.mixer.mixer.clipAction(POSES.open + "_L", this.clipActionObject);
     this.rightClipFrom = this.rightClipTo = this.mixer.mixer.clipAction(POSES.open + "_R", this.clipActionObject);
@@ -33,7 +32,6 @@ AFRAME.registerComponent("hand-poses", {
       const object3DMap = this.mixer.el.object3DMap;
       const rootObj = object3DMap.mesh || object3DMap.scene;
       this.clipActionObject = rootObj.parent;
-      this.firstUpdate();
     } else {
       this.animatePoses(oldData);
     }

@@ -1,6 +1,6 @@
 const GLTFCache = {};
 
-AFRAME.AGLTFEntity = {
+AFRAME.GLTFModelPlus = {
   defaultInflator(el, componentName, componentData) {
     if (!AFRAME.components[componentName]) {
       throw new Error(`Inflator failed. "${componentName}" component does not exist.`);
@@ -14,8 +14,8 @@ AFRAME.AGLTFEntity = {
     }
   },
   registerComponent(componentKey, componentName, inflator) {
-    AFRAME.AGLTFEntity.components[componentKey] = {
-      inflator: inflator || AFRAME.AGLTFEntity.defaultInflator,
+    AFRAME.GLTFModelPlus.components[componentKey] = {
+      inflator: inflator || AFRAME.GLTFModelPlus.defaultInflator,
       componentName
     };
   },
@@ -127,8 +127,8 @@ const inflateEntities = function(parentEl, node) {
   const entityComponents = node.userData.components;
   if (entityComponents) {
     for (const prop in entityComponents) {
-      if (entityComponents.hasOwnProperty(prop)) {
-        const { inflator, componentName } = AFRAME.AGLTFEntity.components[prop];
+      if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
+        const { inflator, componentName } = AFRAME.GLTFModelPlus.components[prop];
 
         if (inflator) {
           inflator(el, componentName, entityComponents[prop]);
@@ -166,7 +166,7 @@ function nextTick() {
   });
 }
 
-function cachedLoadGLTF(src, onProgress) {
+function cachedLoadGLTF(src, preferredTechnique, onProgress) {
   return new Promise((resolve, reject) => {
     // Load the gltf model from the cache if it exists.
     if (GLTFCache[src]) {
@@ -174,7 +174,10 @@ function cachedLoadGLTF(src, onProgress) {
       resolve(cloneGltf(GLTFCache[src]));
     } else {
       // Otherwise load the new gltf model.
-      new THREE.GLTFLoader().load(
+      const gltfLoader = new THREE.GLTFLoader();
+      gltfLoader.preferredTechnique = preferredTechnique;
+
+      gltfLoader.load(
         src,
         model => {
           if (!GLTFCache[src]) {
@@ -190,138 +193,95 @@ function cachedLoadGLTF(src, onProgress) {
   });
 }
 
-AFRAME.registerElement("a-gltf-entity", {
-  prototype: Object.create(AFRAME.AEntity.prototype, {
-    load: {
-      async value() {
-        if (this.hasLoaded || !this.parentEl) {
-          return;
-        }
+AFRAME.registerComponent("gltf-model-plus", {
+  schema: {
+    src: { type: "string" },
+    inflate: { default: false },
+    preferredTechnique: { default: AFRAME.utils.device.isMobile() ? "KHR_materials_unlit" : "pbrMetallicRoughness" }
+  },
 
-        // The code above and below this are from AEntity.prototype.load, we need to monkeypatch in gltf loading mid function
-        this.loadTemplates();
-        await this.applySrc(this.getAttribute("src"));
-        //
+  init() {
+    this.loadTemplates();
+  },
 
-        AFRAME.ANode.prototype.load.call(this, () => {
-          // Check if entity was detached while it was waiting to load.
-          if (!this.parentEl) {
-            return;
-          }
+  update() {
+    this.applySrc(this.data.src);
+  },
 
-          this.updateComponents();
-          if (this.isScene || this.parentEl.isPlaying) {
-            this.play();
-          }
-        });
-      }
-    },
+  loadTemplates() {
+    this.templates = [];
+    this.el.querySelectorAll(":scope > template").forEach(templateEl =>
+      this.templates.push({
+        selector: templateEl.getAttribute("data-selector"),
+        templateRoot: document.importNode(templateEl.firstElementChild || templateEl.content.firstElementChild, true)
+      })
+    );
+  },
 
-    loadTemplates: {
-      value() {
-        this.templates = [];
-        this.querySelectorAll(":scope > template").forEach(templateEl =>
-          this.templates.push({
-            selector: templateEl.getAttribute("data-selector"),
-            templateRoot: document.importNode(
-              templateEl.firstElementChild || templateEl.content.firstElementChild,
-              true
-            )
-          })
-        );
-      }
-    },
+  async applySrc(src) {
+    try {
+      // If the src attribute is a selector, get the url from the asset item.
+      if (src && src.charAt(0) === "#") {
+        const assetEl = document.getElementById(src.substring(1));
 
-    applySrc: {
-      async value(src) {
-        try {
-          // If the src attribute is a selector, get the url from the asset item.
-          if (src && src.charAt(0) === "#") {
-            const assetEl = document.getElementById(src.substring(1));
-            if (!assetEl) { 
-              console.warn(`Attempted to use non-existent asset ${src} as src for`, this);
-              return;
-            }
+        const fallbackSrc = assetEl.getAttribute("src");
+        const highSrc = assetEl.getAttribute("high-src");
+        const lowSrc = assetEl.getAttribute("low-src");
 
-            const fallbackSrc = assetEl.getAttribute("src");
-            const highSrc = assetEl.getAttribute("high-src");
-            const lowSrc = assetEl.getAttribute("low-src");
-
-            if (highSrc && window.APP.quality === "high") {
-              src = highSrc;
-            } else if (lowSrc && window.APP.quality === "low") {
-              src = lowSrc;
-            } else {
-              src = fallbackSrc;
-            }
-          }
-
-          if (src === this.lastSrc) return;
-          this.lastSrc = src;
-
-          if (!src) {
-            if (this.inflatedEl) {
-              console.warn("gltf-entity set to an empty source, unloading inflated model.");
-              this.removeInflatedEl();
-            }
-            return;
-          }
-
-          const model = await cachedLoadGLTF(src);
-
-          // If we started loading something else already
-          // TODO: there should be a way to cancel loading instead
-          if (src != this.lastSrc) return;
-
-          // If we had inflated something already before, clean that up
-          this.removeInflatedEl();
-
-          this.model = model.scene || model.scenes[0];
-          this.model.animations = model.animations;
-
-          this.setObject3D("mesh", this.model);
-
-          if (this.getAttribute("inflate")) {
-            this.inflatedEl = inflateEntities(this, this.model);
-            // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
-            // Wait one tick for the appended custom elements to be connected before attaching templates
-            await nextTick();
-            if (src != this.lastSrc) return; // TODO: there must be a nicer pattern for this
-            this.templates.forEach(attachTemplate.bind(null, this));
-          }
-
-          this.emit("model-loaded", { format: "gltf", model: this.model });
-        } catch (e) {
-          console.error("Failed to load glTF model", e.message, this);
-          this.emit("model-error", { format: "gltf", src });
+        if (highSrc && window.APP.quality === "high") {
+          src = highSrc;
+        } else if (lowSrc && window.APP.quality === "low") {
+          src = lowSrc;
+        } else {
+          src = fallbackSrc;
         }
       }
-    },
 
-    removeInflatedEl: {
-      value() {
+      if (src === this.lastSrc) return;
+      this.lastSrc = src;
+
+      if (!src) {
         if (this.inflatedEl) {
-          this.inflatedEl.parentNode.removeChild(this.inflatedEl);
-          delete this.inflatedEl;
+          console.warn("gltf-model-plus set to an empty source, unloading inflated model.");
+          this.removeInflatedEl();
         }
+        return;
       }
-    },
 
-    attributeChangedCallback: {
-      value(attr, oldVal, newVal) {
-        if (attr === "src") {
-          this.applySrc(newVal);
-        }
-      }
-    },
+      const model = await cachedLoadGLTF(src, this.data.preferredTechnique);
 
-    setAttribute: {
-      value(attr, arg1, arg2) {
-        if (attr === "src") {
-          this.applySrc(arg1);
-        }
-        AFRAME.AEntity.prototype.setAttribute.call(this, attr, arg1, arg2);
+      // If we started loading something else already
+      // TODO: there should be a way to cancel loading instead
+      if (src != this.lastSrc) return;
+
+      // If we had inflated something already before, clean that up
+      this.removeInflatedEl();
+
+      this.model = model.scene || model.scenes[0];
+      this.model.animations = model.animations;
+
+      this.el.setObject3D("mesh", this.model);
+
+      if (this.data.inflate) {
+        this.inflatedEl = inflateEntities(this.el, this.model);
+        // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
+        // Wait one tick for the appended custom elements to be connected before attaching templates
+        await nextTick();
+        if (src != this.lastSrc) return; // TODO: there must be a nicer pattern for this
+        this.templates.forEach(attachTemplate.bind(null, this.el));
       }
+
+      this.el.emit("model-loaded", { format: "gltf", model: this.model });
+    } catch (e) {
+      console.error("Failed to load glTF model", e.message, this);
+      this.el.emit("model-error", { format: "gltf", src });
     }
-  })
+  },
+
+  removeInflatedEl() {
+    if (this.inflatedEl) {
+      this.inflatedEl.parentNode.removeChild(this.inflatedEl);
+      delete this.inflatedEl;
+    }
+  }
 });

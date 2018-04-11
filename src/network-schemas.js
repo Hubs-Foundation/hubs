@@ -7,10 +7,12 @@ function registerNetworkSchemas() {
       "scale",
       "player-info",
       {
+        selector: ".RootScene",
         component: "hand-poses",
         property: "leftPose"
       },
       {
+        selector: ".RootScene",
         component: "hand-poses",
         property: "rightPose"
       },

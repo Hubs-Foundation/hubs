@@ -188,7 +188,7 @@ AFRAME.registerComponent("vr-mode-toggle-visibility", {
     this.el.sceneEl.removeEventListener("exit-vr", this.updateComponentState);
   },
 
-  updateComponentState(i) {
+  updateComponentState() {
     const inVRMode = this.el.sceneEl.is("vr-mode");
     this.el.setAttribute("visible", inVRMode !== this.data.invert);
   }
@@ -218,7 +218,7 @@ AFRAME.registerComponent("vr-mode-toggle-playing", {
     this.el.sceneEl.removeEventListener("exit-vr", this.updateComponentState);
   },
 
-  updateComponentState(i) {
+  updateComponentState() {
     const componentName = this.id;
     const inVRMode = this.el.sceneEl.is("vr-mode");
     this.el.components[componentName][inVRMode !== this.data.invert ? "play" : "pause"]();
