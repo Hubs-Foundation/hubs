@@ -172,6 +172,7 @@ export const avatarIds = avatars.map(av => av.id);
 export function generateDefaultProfile() {
   const name = selectRandom(names);
   return {
+    has_agreed_to_terms: false,
     has_saved_profile: false,
     display_name: name.replace(/^./, name[0].toUpperCase()),
     avatar_id: selectRandom(avatarIds)

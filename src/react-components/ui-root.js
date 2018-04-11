@@ -539,7 +539,7 @@ class UIRoot extends Component {
       /firefox/i.test(navigator.userAgent) && (
         <label className="entry-panel__screen-sharing">
           <input
-            className="entry-panel__screen-sharing-checkbox"
+            className="entry-panel__screen-sharing__checkbox"
             type="checkbox"
             value={this.state.shareScreen}
             onChange={this.setStateAndRequestScreen}

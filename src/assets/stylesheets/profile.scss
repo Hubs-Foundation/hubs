@@ -41,6 +41,10 @@
     color: $grey-text;
   }
 
+  &__display-name-label {
+    font-size: 1.2em;
+    margin-right: 0.5em;
+  }
   &__form-field-text {
     @extend %rounded-border;
     @extend %default-font;
@@ -52,6 +56,31 @@
     padding-left: 1.25em;
     padding-right: 1.25em;
     margin: 0.5em 0;
+  }
+
+  &__terms {
+    margin-bottom: 16px;
+
+    &__checkbox {
+      @extend %checkbox;
+      vertical-align: unset;
+    }
+    &__checkbox:checked {
+      @extend %checkbox-checked;
+    }
+
+    &__text {
+      display: inline-block;
+      max-width: 20em;
+    }
+
+    &__link {
+      color: white;
+    }
+
+    &__link:visited {
+      color: grey;
+    }
   }
 
   &__form-submit {
