@@ -41,6 +41,8 @@ const config = {
         trackpad_dpad4_pressed_west_down: { right: "snap_rotate_left" },
         trackpad_dpad4_pressed_east_down: { right: "snap_rotate_right" },
         trackpad_dpad4_pressed_center_down: { right: "action_teleport_down" },
+        trackpad_dpad4_pressed_north_down: { right: "action_teleport_down" },
+        trackpad_dpad4_pressed_south_down: { right: "action_teleport_down" },
         trackpadup: { right: "action_teleport_up" },
         menudown: "thumb_down",
         menuup: "thumb_up",
@@ -82,12 +84,16 @@ const config = {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",
         trackpad_dpad4_pressed_east_down: "snap_rotate_right",
         trackpad_dpad4_pressed_center_down: "action_teleport_down",
+        trackpad_dpad4_pressed_north_down: "action_teleport_down",
+        trackpad_dpad4_pressed_south_down: "action_teleport_down",
         trackpadup: "action_teleport_up"
       },
       "gearvr-controls": {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",
         trackpad_dpad4_pressed_east_down: "snap_rotate_right",
         trackpad_dpad4_pressed_center_down: "action_teleport_down",
+        trackpad_dpad4_pressed_north_down: "action_teleport_down",
+        trackpad_dpad4_pressed_south_down: "action_teleport_down",
         trackpadup: "action_teleport_up"
       },
       keyboard: {
