@@ -26,7 +26,6 @@
     "audio.grant-subtitle": "Mic access needed to be heard by others",
     "audio.granted-title": "Mic permissions granted",
     "audio.granted-subtitle": "You can still mute yourself in-game",
-    "audio.grant-next": "  ",
     "audio.granted-next": "NEXT",
     "exit.subtitle": "Your session has ended.",
     "autoexit.title": "Auto-ending session in ",

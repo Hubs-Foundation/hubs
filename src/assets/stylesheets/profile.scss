@@ -55,18 +55,8 @@
   }
 
   &__form-submit {
-    @extend %default-font;
-    border: none;
-
-    margin: 8px;
-    width: 100px;
-    line-height: 1.5em;
-    font-size: 1.0em;
-
-    background-color: transparent;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
+    @extend %bottom-button;
+    margin: 0;
   }
 }
 

@@ -3,10 +3,11 @@
 
 <head>
     <meta charset="utf-8">
-    <title>moz://a duck</title>
-
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="<%= ORIGIN_TRIAL_EXPIRES %>" content="<%= ORIGIN_TRIAL_TOKEN %>">
+    <title>moz://a duck</title>
+    <link href="https://fonts.googleapis.com/css?family=Zilla+Slab:300,300i,400,400i,700" rel="stylesheet">
+
     <% if(NODE_ENV === "production") { %>
         <script src="https://cdn.rawgit.com/brianpeiris/aframe/845825ae694449524c185c44a314d361eead4680/dist/aframe-master.min.js"></script>
     <% } else { %>

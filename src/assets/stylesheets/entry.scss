@@ -58,6 +58,10 @@
   margin-top: 10px;
   margin-bottom: 10px;
   cursor: pointer;
+  background: none;
+  color: white;
+  border: none;
+  @extend %default-font;
 
   &__icon {
     flex: 1 1 90px;

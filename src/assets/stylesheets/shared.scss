@@ -17,11 +17,17 @@ $darker-grey: rgba(64, 64, 64, 1.0);
 }
 
 %bottom-button {
+  @extend %default-font;
   font-size: 1em;
   font-weight: bold;
   margin-top: auto;
   margin-bottom: 30px;
   cursor: pointer;
+  border: 4px solid white;
+  border-radius: 16px;
+  padding: 12px;
+  background: none;
+  color: white;
 }
 
 %top-title {

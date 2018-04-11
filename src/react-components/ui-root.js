@@ -588,26 +588,22 @@ class UIRoot extends Component {
               id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-subtitle" : "audio.granted-subtitle"}
             />
           </div>
-          <div className="mic-grant-panel__icon">
+          <div className="mic-grant-panel__button-container">
             {this.state.entryStep == ENTRY_STEPS.mic_grant ? (
-              <img
-                onClick={this.onMicGrantButton}
-                src="../assets/images/mic_denied.png"
-                srcSet="../assets/images/mic_denied@2x.png 2x"
-              />
+              <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
+                <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
+              </button>
             ) : (
-              <img
-                onClick={this.onMicGrantButton}
-                src="../assets/images/mic_granted.png"
-                srcSet="../assets/images/mic_granted@2x.png 2x"
-              />
+              <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
+                <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
+              </button>
             )}
           </div>
-          <div className="mic-grant-panel__next" onClick={this.onMicGrantButton}>
-            <FormattedMessage
-              id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-next" : "audio.granted-next"}
-            />
-          </div>
+          {this.state.entryStep == ENTRY_STEPS.mic_granted && (
+            <button className="mic-grant-panel__next" onClick={this.onMicGrantButton}>
+              <FormattedMessage id="audio.granted-next" />
+            </button>
+          )}
         </div>
       ) : null;
 
@@ -711,9 +707,9 @@ class UIRoot extends Component {
               </span>
             </div>
           )}
-          <div className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
+          <button className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
             <FormattedMessage id="audio.enter-now" />
-          </div>
+          </button>
         </div>
       ) : null;
 
