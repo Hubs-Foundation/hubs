@@ -14,8 +14,8 @@ import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
 
-import { vive_trackpad_dpad4 } from "./behaviours/vive-trackpad-dpad4";
-import { oculus_touch_joystick_dpad4 } from "./behaviours/oculus-touch-joystick-dpad4";
+import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
+import { joystick_dpad4 } from "./behaviours/joystick-dpad4";
 import { PressedMove } from "./activators/pressedmove";
 import { ReverseY } from "./activators/reversey";
 import "./activators/shortpress";
@@ -96,8 +96,8 @@ function qsTruthy(param) {
 
 registerTelemetry();
 
-AFRAME.registerInputBehaviour("vive_trackpad_dpad4", vive_trackpad_dpad4);
-AFRAME.registerInputBehaviour("oculus_touch_joystick_dpad4", oculus_touch_joystick_dpad4);
+AFRAME.registerInputBehaviour("trackpad_dpad4", trackpad_dpad4);
+AFRAME.registerInputBehaviour("joystick_dpad4", joystick_dpad4);
 AFRAME.registerInputActivator("pressedmove", PressedMove);
 AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputMappings(inputConfig, true);
