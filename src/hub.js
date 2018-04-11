@@ -11,6 +11,7 @@ import "naf-janus-adapter";
 import "aframe-teleport-controls";
 import "aframe-input-mapping-component";
 import "aframe-billboard-component";
+import "aframe-rounded";
 import "webrtc-adapter";
 
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
@@ -44,6 +45,7 @@ import "./components/animation-mixer";
 import "./components/loop-animation";
 import "./components/gltf-model-plus";
 import "./components/gltf-bundle";
+import "./components/hud-controller";
 
 import ReactDOM from "react-dom";
 import React from "react";

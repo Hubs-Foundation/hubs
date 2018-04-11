@@ -29,7 +29,7 @@
         <a-assets>
             <img id="unmuted"  src="./assets/hud/unmuted.png" >
             <img id="muted"  src="./assets/hud/muted.png" >
-            <img id="avatar"  src="./assets/hud/avatar.jpg" >
+            <img id="avatar"  src="./assets/hud/avatar.png" >
 
             <a-asset-item id="botdefault" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDefault_Avatar-9f71f8ff22.gltf"></a-asset-item>
             <a-asset-item id="botbobo" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotBobo_Avatar-f9740a010b.gltf"></a-asset-item>
@@ -45,7 +45,7 @@
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
             <a-asset-item id="interactable-duck" response-type="arraybuffer" src="./assets/interactables/duck/DuckyMesh.glb"></a-asset-item>
 
-            <img id="water-normal-map" src="./assets/waternormals.jpg"></a-asset-item>
+            <img id="water-normal-map" src="./assets/waternormals.jpg">
 
             <!-- Templates -->
 
@@ -67,15 +67,15 @@
                         </template>
 
                         <template data-selector=".Neck">
-                             <a-entity>
-                                 <a-entity
-                                    class="nametag"
-                                    billboard
-                                    text="side: double; align: center; color: #ddd"
-                                    position="0 1 0"
-                                    scale="6 6 6"
-                                ></a-entity>
-                             </a-entity>
+                            <a-entity>
+                                <a-entity
+                                   class="nametag"
+                                   billboard
+                                   text="side: double; align: center; color: #ddd"
+                                   position="0 1 0"
+                                   scale="6 6 6"
+                               ></a-entity>
+                            </a-entity>
                         </template>
 
                         <template data-selector=".Chest">
@@ -146,7 +146,7 @@
         >
             <a-sphere
                 id="3d-cursor"
-                radius=0.02
+                radius="0.02"
                 static-body="shape: sphere;"
                 mixin="super-hands"
                 segments-height="9"
@@ -173,11 +173,11 @@
                 vr-mode-toggle-visibility
                 vr-mode-toggle-playing__hud-controller
             >
-                <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="-39 0 0">
-                    <a-box geometry="height:0.13;width:0.6;depth:0.001" material="depthTest:false; color:#000000;opacity:0.35" class="hud bg"></a-box>
-                    <a-image src="#unmuted" scale="-0.1 0.1 0.1" position="-0.2 0 0.001" class="hud mic" material="alphaTest:0.1;depthTest:false;"></a-image>
-                    <a-text scale="0.3 0.3 0.3" position="0 0 0.001" class="hud username" text="width:6;alphaTest:0.1;align:center;"></a-text>
-                    <a-image src="#avatar" scale="0.1 0.1 0.1" position="0.2 0 0.001" class="hud avatar" material="depthTest:false;"></a-image>
+                <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="30 0 0">
+                    <a-rounded height="0.13" width="0.6" color="#000000" position="-0.3 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
+                    <a-image src="#unmuted" scale="0.1 0.1 0.1" position="-0.2 0 0.001" class="hud mic" material="alphaTest:0.1;"></a-image>
+                    <a-image src="#avatar" scale="0.2 0.2 0.2" position="0 0 0.001" class="hud avatar"></a-image>
+                    <a-image src="#unmuted" scale="0.1 0.1 0.1" position="0.2 0 0.001" class="hud mic" material="alphaTest:0.1;"></a-image>
                 </a-entity>
             </a-entity>
 
@@ -279,7 +279,7 @@
         <!-- Environment -->
         <a-entity id="environment-root" position="0 0 0"></a-entity>
 
-        <a-entity id="skybox"
+        <a-entity
             id="skybox"
             scale="8000 8000 8000"
             skybox="azimuth:0.280; inclination:0.440"
