@@ -26,6 +26,7 @@
     "aframe-physics-extras": "https://github.com/infinitelee/aframe-physics-extras#fix/physics-collider-crash",
     "aframe-physics-system": "https://github.com/donmccurdy/aframe-physics-system",
     "aframe-teleport-controls": "^0.3.1",
+    "aframe-rounded": "^1.0.3",
     "aframe-xr": "github:brianpeiris/aframe-xr#3162aed",
     "classnames": "^2.2.5",
     "detect-browser": "^2.1.0",
