@@ -92,7 +92,7 @@ AFRAME.registerComponent("super-cursor", {
       this.data.cursor.object3D.position.copy(this.point);
     }
 
-    this.isInteractable = intersection && intersection.object.el.className === "interactable";
+    this.isInteractable = intersection && this._isInteractable(intersection.object.el);
 
     if ((this.isGrabbing || this.isInteractable) && !this.wasIntersecting) {
       this.wasIntersecting = true;
@@ -101,6 +101,13 @@ AFRAME.registerComponent("super-cursor", {
       this.wasIntersecting = false;
       this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
     }
+  },
+
+  _isInteractable: function(el) {
+    return (
+      el.className === "interactable" ||
+      (el.parentNode && el.parentNode != el.sceneEl && this._isInteractable(el.parentNode))
+    );
   },
 
   _handleMouseDown: function() {
@@ -122,7 +129,19 @@ AFRAME.registerComponent("super-cursor", {
   },
 
   _handleWheel: function(e) {
-    if (this.isGrabbing) this.currentDistanceMod += e.deltaY / 10;
+    if (this.isGrabbing) {
+      switch (e.deltaMode) {
+        case e.DOM_DELTA_PIXEL:
+          this.currentDistanceMod += e.deltaY / 500;
+          break;
+        case e.DOM_DELTA_LINE:
+          this.currentDistanceMod += e.deltaY / 10;
+          break;
+        case e.DOM_DELTA_PAGE:
+          this.currentDistanceMod += e.deltaY / 2;
+          break;
+      }
+    }
   },
 
   _handleEnterVR: function() {
