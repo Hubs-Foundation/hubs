@@ -28,7 +28,8 @@ class ProfileEntryPanel extends Component {
 
   saveStateAndFinish = e => {
     e.preventDefault();
-    if (!this.state.has_agreed_to_terms) return;
+    const has_agreed_to_terms = this.props.store.state.profile.has_agreed_to_terms || this.state.has_agreed_to_terms;
+    if (!has_agreed_to_terms) return;
     this.props.store.update({
       profile: {
         has_saved_profile: true,
