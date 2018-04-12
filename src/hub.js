@@ -79,6 +79,8 @@ import "./components/super-spawner";
 import "./components/super-cursor";
 import "./components/event-repeater";
 
+import "./components/nav-mesh-helper";
+
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
