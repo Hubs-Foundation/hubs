@@ -190,6 +190,10 @@ aframe-lerp-component@^1.1.0:
     three-to-cannon "^1.2.0"
     webworkify "^1.4.0"
 
+aframe-rounded@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/aframe-rounded/-/aframe-rounded-1.0.3.tgz#72c7d9c0ff02e94ee138bf217c284e187efa3cfb"
+
 aframe-teleport-controls@^0.3.1:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/aframe-teleport-controls/-/aframe-teleport-controls-0.3.1.tgz#7d7ef206f483ea92425a6333b0f8fb26c9596d1c"
@@ -2865,10 +2869,6 @@ es-to-primitive@^1.1.1:
     is-callable "^1.1.1"
     is-date-object "^1.0.1"
     is-symbol "^1.0.1"
-
-es6-object-assign@^1.0.3:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/es6-object-assign/-/es6-object-assign-1.1.0.tgz#c2c3582656247c39ea107cb1e6652b6f9f24523c"
 
 es6-templates@^0.2.3:
   version "0.2.3"
@@ -7198,21 +7198,13 @@ shelljs@0.3.x:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/shelljs/-/shelljs-0.3.0.tgz#3596e6307a781544f591f37da618360f31db57b1"
 
-shelljs@^0.7.0, shelljs@^0.7.3:
+shelljs@^0.7.0:
   version "0.7.8"
   resolved "https://registry.yarnpkg.com/shelljs/-/shelljs-0.7.8.tgz#decbcf874b0d1e5fb72e14b164a9683048e9acb3"
   dependencies:
     glob "^7.0.0"
     interpret "^1.0.0"
     rechoir "^0.6.2"
-
-shx@^0.2.2:
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/shx/-/shx-0.2.2.tgz#0a304d020b0edf1306ad81570e80f0346df58a39"
-  dependencies:
-    es6-object-assign "^1.0.3"
-    minimist "^1.2.0"
-    shelljs "^0.7.3"
 
 sigmund@~1.0.0:
   version "1.0.1"
