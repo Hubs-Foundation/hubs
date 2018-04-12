@@ -5355,11 +5355,10 @@ neo-async@^2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.5.0.tgz#76b1c823130cca26acfbaccc8fbaf0a2fa33b18f"
 
-"networked-aframe@github:mozillareality/networked-aframe#feature/sound-source-set":
-  version "0.6.0"
-  resolved "https://codeload.github.com/mozillareality/networked-aframe/tar.gz/978b7c25aff26a0c1db47beb35d8a6556f717d36"
+"networked-aframe@github:mozillareality/networked-aframe#mr-social-client/master":
+  version "0.6.1"
+  resolved "https://codeload.github.com/mozillareality/networked-aframe/tar.gz/69be0e7e5f66070526c8240cb795b9e88da971a9"
   dependencies:
-    aframe-lerp-component "^1.1.0"
     easyrtc "1.1.0"
     express "^4.10.7"
     serve-static "^1.8.0"
