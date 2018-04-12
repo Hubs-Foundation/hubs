@@ -4,28 +4,10 @@ AFRAME.registerComponent("in-world-hud", {
     raycaster: { type: "selector" }
   },
   init() {
-    this.bg = this.el.querySelector(".bg");
     this.mic = this.el.querySelector(".mic");
-    this.nametag = this.el.querySelector(".username");
-    this.avatar = this.el.querySelector(".avatar");
-    this.nametag.object3DMap.text.material.depthTest = false;
-    this.nametag.object3DMap.text.renderOrder = 1;
-    this.mic.object3DMap.mesh.renderOrder = 1;
-    this.avatar.object3DMap.mesh.renderOrder = 1;
-
-    const line = this.data.raycaster.object3DMap.line;
-    line.renderOrder = 2;
-    line.material.depthTest = false;
-    // Set opacity to 0.99 to force the line to render in the
-    // transparent pass, so that it renders on top of the HUD
-    this.data.raycaster.setAttribute("line", "opacity", 0.99);
 
     const muted = this.el.sceneEl.is("muted");
     this.mic.setAttribute("src", muted ? "#muted" : "#unmuted");
-
-    const scene = this.el.sceneEl;
-    this.onUsernameChanged = this.onUsernameChanged.bind(this);
-    scene.addEventListener("username-changed", this.onUsernameChanged);
 
     this.showCorrectMuteState = () => {
       const muted = this.el.sceneEl.is("muted");
@@ -95,9 +77,6 @@ AFRAME.registerComponent("in-world-hud", {
   },
 
   pause() {
-    this.nametag.removeEventListener("raycaster-intersected", this.onNametagHovered);
-    this.nametag.removeEventListener("raycaster-intersected-cleared", this.onNametagUnhovered);
-
     this.el.sceneEl.removeEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.removeEventListener("stateremoved", this.onStateChange);
 
@@ -120,12 +99,5 @@ AFRAME.registerComponent("in-world-hud", {
       volume: this.volume,
       levels: this.levels
     });
-  },
-
-  onUsernameChanged(evt) {
-    const { username } = evt.detail;
-    const width = evt.detail.username.length == 0 ? 1 : 40 / username.length;
-    this.nametag.setAttribute("text", "width", Math.min(width, 6));
-    this.nametag.setAttribute("text", "value", username);
   }
 });
