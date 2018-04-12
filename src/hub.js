@@ -247,7 +247,6 @@ const onReady = async () => {
   };
 
   getAvailableVREntryTypes().then(availableVREntryTypes => {
-    console.log('BPDEBUG availableVREntryTypes', availableVREntryTypes);
     uiRootProps.availableVREntryTypes = availableVREntryTypes;
     remountUI();
   });
