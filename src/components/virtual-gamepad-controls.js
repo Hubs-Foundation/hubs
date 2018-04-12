@@ -69,7 +69,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.moveEvent.axis[1] = z;
   },
 
-  onMoveJoystickEnd(event, joystick) {
+  onMoveJoystickEnd() {
     this.moving = false;
     this.moveEvent.axis[0] = 0;
     this.moveEvent.axis[1] = 0;
@@ -84,7 +84,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.rotateYEvent.value = Math.cos(angle) * force;
   },
 
-  onLookJoystickEnd(event, joystick) {
+  onLookJoystickEnd() {
     this.rotating = false;
     this.rotateYEvent.value = 0;
     this.el.sceneEl.emit("rotateY", this.rotateYEvent);
