@@ -61,11 +61,13 @@ class UIRoot extends Component {
     store: PropTypes.object,
     scene: PropTypes.object,
     htmlPrefix: PropTypes.string,
-    showProfileEntry: PropTypes.bool
+    showProfileEntry: PropTypes.bool,
+    availableVREntryTypes: PropTypes.object,
+    initialEnvironmentLoaded: PropTypes.bool,
+    janusRoomId: PropTypes.number
   };
 
   state = {
-    availableVREntryTypes: null,
     entryStep: ENTRY_STEPS.start,
     enterInVR: false,
 
@@ -88,12 +90,9 @@ class UIRoot extends Component {
     autoExitTimerInterval: null,
     secondsRemainingBeforeAutoExit: Infinity,
 
-    initialEnvironmentLoaded: false,
     exited: false,
 
-    showProfileEntry: false,
-
-    janusRoomId: null
+    showProfileEntry: false
   };
 
   constructor(props) {
@@ -110,8 +109,10 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
   }
 
-  componentWillUnmount() {
-    this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
+  componentDidUpdate(prevProps) {
+    if (this.props.availableVREntryTypes && prevProps.availableVREntryTypes !== this.props.availableVREntryTypes) {
+      this.handleForcedVREntryType();
+    }
   }
 
   onSceneLoaded = () => {
@@ -256,7 +257,7 @@ class UIRoot extends Component {
   };
 
   enterGearVR = async () => {
-    if (this.state.availableVREntryTypes.gearvr === VR_DEVICE_AVAILABILITY.yes) {
+    if (this.props.availableVREntryTypes.gearvr === VR_DEVICE_AVAILABILITY.yes) {
       await this.performDirectEntryFlow(true);
     } else {
       this.exit();
@@ -275,7 +276,7 @@ class UIRoot extends Component {
   };
 
   enterDaydream = async () => {
-    if (this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe) {
+    if (this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe) {
       this.exit();
 
       // We are not in mobile chrome, so launch into chrome via an Intent URL
@@ -473,7 +474,7 @@ class UIRoot extends Component {
   };
 
   onAudioReadyButton = () => {
-    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.janusRoomId);
+    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.props.janusRoomId);
 
     const mediaStream = this.state.mediaStream;
 
@@ -498,7 +499,7 @@ class UIRoot extends Component {
   };
 
   render() {
-    if (!this.state.initialEnvironmentLoaded || !this.state.availableVREntryTypes || !this.state.janusRoomId) {
+    if (!this.props.initialEnvironmentLoaded || !this.props.availableVREntryTypes || !this.props.janusRoomId) {
       return (
         <IntlProvider locale={lang} messages={messages}>
           <div className="loading-panel">
@@ -552,21 +553,21 @@ class UIRoot extends Component {
       this.state.entryStep === ENTRY_STEPS.start ? (
         <div className="entry-panel">
           <TwoDEntryButton onClick={this.enter2D} />
-          {this.state.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
+          {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
             <GenericEntryButton onClick={this.enterVR} />
           )}
-          {this.state.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
+          {this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
             <GearVREntryButton onClick={this.enterGearVR} />
           )}
-          {this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
+          {this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
             <DaydreamEntryButton
               onClick={this.enterDaydream}
               subtitle={
-                this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : ""
+                this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : ""
               }
             />
           )}
-          {this.state.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
+          {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
             <div className="entry-panel__secondary" onClick={this.enterVR}>
               <FormattedMessage id="entry.cardboard" />
             </div>

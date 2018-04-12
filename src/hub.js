@@ -102,6 +102,7 @@ AFRAME.registerInputMappings(inputConfig, true);
 
 const store = new Store();
 const concurrentLoadDetector = new ConcurrentLoadDetector();
+const uiRootProps = {};
 
 concurrentLoadDetector.start();
 
@@ -212,9 +213,7 @@ function mountUI(scene) {
   const htmlPrefix = document.body.dataset.htmlPrefix || "";
   const showProfileEntry = !store.state.profile.has_saved_profile;
 
-  // TODO: Refactor to avoid using return value
-  /* eslint-disable react/no-render-return-value */
-  const uiRoot = ReactDOM.render(
+  ReactDOM.render(
     <UIRoot
       {...{
         scene,
@@ -226,14 +225,12 @@ function mountUI(scene) {
         enableScreenSharing,
         store,
         htmlPrefix,
-        showProfileEntry
+        showProfileEntry,
+        ...uiRootProps
       }}
     />,
     document.getElementById("ui-root")
   );
-  /* eslint-enable react/no-render-return-value */
-
-  return uiRoot;
 }
 
 const onReady = async () => {
@@ -243,18 +240,24 @@ const onReady = async () => {
 
   registerNetworkSchemas();
 
-  const uiRoot = mountUI(scene);
+  mountUI(scene);
+
+  const remountUI = () => {
+    mountUI(scene);
+  };
 
   getAvailableVREntryTypes().then(availableVREntryTypes => {
-    uiRoot.setState({ availableVREntryTypes });
-    uiRoot.handleForcedVREntryType();
+    console.log('BPDEBUG availableVREntryTypes', availableVREntryTypes);
+    uiRootProps.availableVREntryTypes = availableVREntryTypes;
+    remountUI();
   });
 
   const environmentRoot = document.querySelector("#environment-root");
 
   const initialEnvironmentEl = document.createElement("a-entity");
   initialEnvironmentEl.addEventListener("bundleloaded", () => {
-    uiRoot.setState({ initialEnvironmentLoaded: true });
+    uiRootProps.initialEnvironmentLoaded = true;
+    remountUI();
     // Wait a tick plus some margin so that the environments actually render.
     setTimeout(() => scene.renderer.animate(null), 100);
   });
@@ -262,7 +265,8 @@ const onReady = async () => {
 
   if (qs.room) {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
-    uiRoot.setState({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
+    uiRootProps.janusRoomId = qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1;
+    remountUI();
     initialEnvironmentEl.setAttribute("gltf-bundle", {
       src: "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingRoom.bundle.json"
       // src: "https://asset-bundles-prod.reticulum.io/rooms/theater/TheaterMeshes.bundle.json"
@@ -279,7 +283,8 @@ const onReady = async () => {
   const hub = data.hubs[0];
   const defaultSpaceTopic = hub.topics[0];
   const gltfBundleUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
-  uiRoot.setState({ janusRoomId: defaultSpaceTopic.janus_room_id });
+  uiRootProps.janusRoomId = defaultSpaceTopic.janus_room_id;
+  remountUI();
   initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`);
 };
 
