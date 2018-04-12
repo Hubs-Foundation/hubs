@@ -275,7 +275,13 @@
         ></a-entity>
 
         <!-- Environment -->
-        <a-entity id="environment-root" position="0 0 0" nav-mesh-helper></a-entity>
+        <a-entity 
+            id="environment-root" 
+            position="0 0 0" 
+            nav-mesh-helper
+            static-body="shape: none;"
+            class="collidable"
+        ></a-entity>
 
         <a-entity
             id="skybox"
@@ -294,23 +300,6 @@
             xr="ar: false"
         ></a-entity>
 
-        <a-cylinder
-            position="0 0.45 0"
-            material="visible: false"
-            height="1" radius="3.1"
-            segments-radial="12"
-            static-body
-            class="collidable"
-        ></a-cylinder>
-
-        <a-plane 
-            material="visible: false" 
-            rotation="-90 0 0" 
-            height="35" 
-            width="35" 
-            static-body 
-            class="collidable"
-        ></a-plane> 
     </a-scene>
 
     <div id="ui-root"></div>
