@@ -16,12 +16,14 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
 
     const leftStick = nipplejs.create({
       zone: leftTouchZone,
-      color: "white"
+      color: "white",
+      fadeTime: 0
     });
 
     const rightStick = nipplejs.create({
       zone: rightTouchZone,
-      color: "white"
+      color: "white",
+      fadeTime: 0
     });
 
     this.onMoveJoystickChanged = this.onMoveJoystickChanged.bind(this);
