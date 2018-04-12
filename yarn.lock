@@ -170,12 +170,6 @@ aframe-extras@^4.0.0:
   version "0.1.2"
   resolved "https://github.com/johnshaughnessy/aframe-input-mapping-component#4c7e493ad6c4a25eef27d32551c94d8b78541191"
 
-aframe-lerp-component@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/aframe-lerp-component/-/aframe-lerp-component-1.1.0.tgz#dc8c12c53698770c30f25eef8873e34a4e79c765"
-  dependencies:
-    almost-equal "^1.1.0"
-
 "aframe-physics-extras@https://github.com/infinitelee/aframe-physics-extras#fix/physics-collider-crash":
   version "0.1.2"
   resolved "https://github.com/infinitelee/aframe-physics-extras#49b2d5d3c0caac905783aee51d9e89dbdf7199b8"
@@ -233,10 +227,6 @@ ajv@^6.0.1, ajv@^6.1.0:
     fast-deep-equal "^1.0.0"
     fast-json-stable-stringify "^2.0.0"
     json-schema-traverse "^0.3.0"
-
-almost-equal@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/almost-equal/-/almost-equal-1.1.0.tgz#f851c631138757994276aa2efbe8dfa3066cccdd"
 
 alphanum-sort@^1.0.1, alphanum-sort@^1.0.2:
   version "1.0.2"
