@@ -20,8 +20,8 @@ class AvatarSelector extends Component {
     const numAvatars = this.props.avatars.length;
     return ((currAvatarIndex + direction) % numAvatars + numAvatars) % numAvatars;
   };
-  nextAvatarIndex = () => this.getAvatarIndex(1);
-  previousAvatarIndex = () => this.getAvatarIndex(-1);
+  nextAvatarIndex = () => this.getAvatarIndex(-1);
+  previousAvatarIndex = () => this.getAvatarIndex(1);
 
   emitChangeToNext = () => {
     const nextAvatarId = this.props.avatars[this.nextAvatarIndex()].id;
