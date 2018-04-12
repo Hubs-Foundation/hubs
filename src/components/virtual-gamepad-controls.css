@@ -7,11 +7,9 @@
 :local(.touchZone.left) {
   left: 0;
   right: 50%;
-  background-color: rgba(255, 0, 0, 0.5);
 }
 
 :local(.touchZone.right) {
   left: 50%;
   right: 0;
-  background-color: rgba(0, 0, 255, 0.5);
 }
