@@ -758,11 +758,7 @@ class UIRoot extends Component {
             )}
           </div>
           {this.state.entryStep === ENTRY_STEPS.finished ? (
-            <TwoDHUD
-              name={this.props.store.state.profile.display_name}
-              muted={this.state.muted}
-              onToggleMute={this.toggleMute}
-            />
+            <TwoDHUD muted={this.state.muted} onToggleMute={this.toggleMute} />
           ) : null}
         </div>
       </IntlProvider>

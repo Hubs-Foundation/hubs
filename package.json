@@ -12,7 +12,9 @@
     "start": "cross-env NODE_ENV=development webpack-dev-server",
     "build": "rimraf ./public && cross-env NODE_ENV=production webpack --mode=production",
     "prettier": "prettier --write '*.js' 'src/**/*.js'",
-    "lint": "eslint '*.js' 'src/**/*.js'"
+    "lint:js": "eslint '*.js' 'scripts/**/*.js' 'src/**/*.js'",
+    "lint:html": "node ./scripts/lint-html.js 'src/**/*.html'",
+    "lint": "yarn run lint:js && yarn run lint:html"
   },
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.5",
@@ -22,8 +24,9 @@
     "aframe-extras": "^4.0.0",
     "aframe-input-mapping-component": "https://github.com/johnshaughnessy/aframe-input-mapping-component#feature/map-to-array",
     "aframe-physics-extras": "https://github.com/infinitelee/aframe-physics-extras#fix/physics-collider-crash",
-    "aframe-physics-system": "https://github.com/donmccurdy/aframe-physics-system",
+    "aframe-physics-system": "https://github.com/infinitelee/aframe-physics-system#feature/shape-component",
     "aframe-teleport-controls": "^0.3.1",
+    "aframe-rounded": "^1.0.3",
     "aframe-xr": "github:brianpeiris/aframe-xr#3162aed",
     "classnames": "^2.2.5",
     "detect-browser": "^2.1.0",
@@ -33,7 +36,7 @@
     "mobile-detect": "^1.4.1",
     "moving-average": "^1.0.0",
     "naf-janus-adapter": "https://github.com/mozilla/naf-janus-adapter#feature/disconnect",
-    "networked-aframe": "https://github.com/mozillareality/networked-aframe#mr-social-client/master",
+    "networked-aframe": "github:mozillareality/networked-aframe#mr-social-client/master",
     "nipplejs": "^0.6.7",
     "query-string": "^5.0.1",
     "raven-js": "^3.20.1",
@@ -65,6 +68,7 @@
     "file-loader": "^1.1.10",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.1.0",
+    "htmlhint": "^0.9.13",
     "lodash": "^4.17.5",
     "node-sass": "^4.7.2",
     "prettier": "^1.7.0",
