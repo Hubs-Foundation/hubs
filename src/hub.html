@@ -30,7 +30,7 @@
             <img id="unmuted"  src="./assets/hud/unmuted.png" >
             <img id="muted"  src="./assets/hud/muted.png" >
             <img id="avatar"  src="./assets/hud/avatar.png" >
-            <img id="block"  src="./assets/hud/button_block.png" >
+            <img id="tooltip"  src="./assets/hud/tooltip.png" >
 
             <a-asset-item id="botdefault" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDefault_Avatar-9f71f8ff22.gltf"></a-asset-item>
             <a-asset-item id="botbobo" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotBobo_Avatar-f9740a010b.gltf"></a-asset-item>
@@ -83,7 +83,9 @@
                             <a-entity>
                               <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility> </a-entity>
                               <a-entity billboard>
-                    <a-image src="#block" scale="0.56 0.22 0.1" position="0 0 0.35" material="alphaTest:0.5;"></a-image>
+                                  <a-entity slice9="width: 0.45; height: 0.2; left: 53; top: 53; right: 10; bottom: 10; opacity: 1.3; src: #tooltip" position="0 0 .35">
+                                      <a-entity text="value:Block;width:3;align:center;" position="0 0 0.01"></a-entity>
+                                  </a-entity>
                               </a-entity>
                             </a-entity>
                         </template>

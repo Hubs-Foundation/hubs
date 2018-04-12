@@ -13,6 +13,7 @@ import "aframe-input-mapping-component";
 import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
+import "aframe-slice9-component";
 
 import { vive_trackpad_dpad4 } from "./behaviours/vive-trackpad-dpad4";
 import { oculus_touch_joystick_dpad4 } from "./behaviours/oculus-touch-joystick-dpad4";
