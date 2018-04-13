@@ -13,6 +13,7 @@ import { TwoDEntryButton, GenericEntryButton, GearVREntryButton, DaydreamEntryBu
 import { ProfileInfoHeader } from "./profile-info-header.js";
 import ProfileEntryPanel from "./profile-entry-panel";
 import TwoDHUD from "./2d-hud";
+import Footer from "./footer";
 
 const mobiledetect = new MobileDetect(navigator.userAgent);
 
@@ -758,7 +759,10 @@ class UIRoot extends Component {
             )}
           </div>
           {this.state.entryStep === ENTRY_STEPS.finished ? (
-            <TwoDHUD muted={this.state.muted} onToggleMute={this.toggleMute} />
+            <div>
+              <TwoDHUD muted={this.state.muted} onToggleMute={this.toggleMute} />
+              <Footer />
+            </div>
           ) : null}
         </div>
       </IntlProvider>
