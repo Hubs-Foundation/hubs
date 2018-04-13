@@ -190,7 +190,7 @@ aframe-rounded@^1.0.3:
 
 "aframe-teleport-controls@https://github.com/johnshaughnessy/aframe-teleport-controls#feature/incremental-parabolic-cursor":
   version "0.3.2"
-  resolved "https://github.com/johnshaughnessy/aframe-teleport-controls#ee5f07467a9492bdc0c6d912e489c0aec1f6886b"
+  resolved "https://github.com/johnshaughnessy/aframe-teleport-controls#cf931af6f11fab856c5526e6083ea00b08d52356"
 
 "aframe-xr@github:brianpeiris/aframe-xr#3162aed":
   version "0.0.9"
