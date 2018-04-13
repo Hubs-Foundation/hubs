@@ -53,6 +53,7 @@ import UIRoot from "./react-components/ui-root";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
+import "./systems/exit-on-blur";
 
 import "./gltf-component-mappings";
 
@@ -113,6 +114,13 @@ concurrentLoadDetector.start();
 store.update({ profile: { ...generateDefaultProfile(), ...(store.state.profile || {}) } });
 
 async function exitScene() {
+  if (NAF.connection.adapter && NAF.connection.adapter.localMediaStream) {
+    const tracks = NAF.connection.adapter.localMediaStream.getTracks();
+
+    for (const track of tracks) {
+      track.stop();
+    }
+  }
   const scene = document.querySelector("a-scene");
   scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
   document.body.removeChild(scene);
