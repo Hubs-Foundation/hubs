@@ -39,3 +39,26 @@
   }
 }
 
+.fatal-error-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 10 1 auto;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 15px;
+
+  &__title {
+    @extend %top-title;
+  }
+  
+  &__subtitle {
+    @extend %top-subtitle;
+  }
+
+  &__cancel-button {
+    @extend %bottom-button;
+    margin-top: 20px;
+    cursor: pointer;
+  }
+}
+

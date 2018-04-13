@@ -186,7 +186,7 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   });
 
   if (!qsTruthy("offline")) {
-    scene.components["networked-scene"].connect();
+    const connectPromise = scene.components["networked-scene"].connect();
 
     if (mediaStream) {
       NAF.connection.adapter.setLocalMediaStream(mediaStream);
@@ -206,6 +206,9 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
         sceneEl.appendChild(screenEntity);
       }
     }
+    return connectPromise;
+  } else {
+    return Promise.resolve();
   }
 }
 

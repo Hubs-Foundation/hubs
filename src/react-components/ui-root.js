@@ -464,7 +464,10 @@ class UIRoot extends Component {
   };
 
   onAudioReadyButton = () => {
-    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.janusRoomId);
+    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.janusRoomId).catch(e => {
+      this.setState({ fatalError: e });
+      this.exit();
+    });
 
     const mediaStream = this.state.mediaStream;
 
@@ -489,6 +492,23 @@ class UIRoot extends Component {
   };
 
   render() {
+    if (this.state.fatalError) {
+      return (
+        <IntlProvider locale={lang} messages={messages}>
+          <div className="ui">
+            <div className="ui-alert-container">
+              <div className="ui-interactive ui-alert-box">
+                <div className="fatal-error-panel">
+                  <div className="fatal-error__title">Error Joining Room</div>
+                  <div className="fatal-error__subtitle">{this.state.fatalError}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </IntlProvider>
+      );
+    }
+
     if (!this.state.initialEnvironmentLoaded || !this.state.availableVREntryTypes || !this.state.janusRoomId) {
       return (
         <IntlProvider locale={lang} messages={messages}>

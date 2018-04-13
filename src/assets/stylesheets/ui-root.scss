@@ -48,3 +48,18 @@
 .ui-interactive {
   pointer-events: auto;
 }
+
+.ui-alert-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.ui-alert-box {
+  background-color: $darker-transparent;
+  border-radius: 8px;
+  min-width: 200px;
+  max-width: 400px;
+}

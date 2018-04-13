@@ -35,7 +35,7 @@
     "minijanus": "^0.5.0",
     "mobile-detect": "^1.4.1",
     "moving-average": "^1.0.0",
-    "naf-janus-adapter": "https://github.com/mozilla/naf-janus-adapter#feature/disconnect",
+    "naf-janus-adapter": "https://github.com/mozilla/naf-janus-adapter",
     "networked-aframe": "https://github.com/mozillareality/networked-aframe#mr-social-client/master",
     "nipplejs": "^0.6.7",
     "query-string": "^5.0.1",
