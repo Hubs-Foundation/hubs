@@ -115,11 +115,7 @@ store.update({ profile: { ...generateDefaultProfile(), ...(store.state.profile |
 
 async function exitScene() {
   if (NAF.connection.adapter && NAF.connection.adapter.localMediaStream) {
-    const tracks = NAF.connection.adapter.localMediaStream.getTracks();
-
-    for (const track of tracks) {
-      track.stop();
-    }
+    NAF.connection.adapter.localMediaStream.getTracks().forEach(t => t.stop());
   }
   const scene = document.querySelector("a-scene");
   scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
