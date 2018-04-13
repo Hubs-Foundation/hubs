@@ -1,7 +1,7 @@
 import { angleTo4Direction } from "../utils/dpad";
 
 // @TODO specify 4 or 8 direction
-function oculus_touch_joystick_dpad4(el, outputPrefix) {
+function joystick_dpad4(el, outputPrefix) {
   this.angleToDirection = angleTo4Direction;
   this.outputPrefix = outputPrefix;
   this.centerRadius = 0.6;
@@ -11,7 +11,7 @@ function oculus_touch_joystick_dpad4(el, outputPrefix) {
   el.addEventListener("axismove", this.emitDPad4);
 }
 
-oculus_touch_joystick_dpad4.prototype = {
+joystick_dpad4.prototype = {
   emitDPad4: function(event) {
     const x = event.detail.axis[0];
     const y = event.detail.axis[1];
@@ -25,4 +25,4 @@ oculus_touch_joystick_dpad4.prototype = {
   }
 };
 
-export { oculus_touch_joystick_dpad4 };
+export default joystick_dpad4;
