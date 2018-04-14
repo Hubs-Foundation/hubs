@@ -113,10 +113,7 @@ concurrentLoadDetector.start();
 store.update({ profile: { ...generateDefaultProfile(), ...(store.state.profile || {}) } });
 
 async function exitScene() {
-  if (hubChannel) {
-    hubChannel.disconnect();
-  }
-
+  hubChannel.disconnect();
   const scene = document.querySelector("a-scene");
   scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
   document.body.removeChild(scene);
@@ -192,7 +189,7 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   if (!qsTruthy("offline")) {
     document.body.addEventListener("connected", () => {
       hubChannel.sendEntryEvent().then(() => {
-        store.update({ lastEnteredAt: moment().format() });
+        store.update({ lastEnteredAt: moment().toJSON() });
       });
     });
 
