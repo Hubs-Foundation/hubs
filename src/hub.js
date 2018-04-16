@@ -196,6 +196,29 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
     screenEntity.setAttribute("visible", sharingScreen);
   });
 
+  window.blockUser = function(id) {
+    NAF.connection.adapter.publisher.handle.sendMessage({ kind: "block", whom: id });
+    NAF.connection.entities.removeEntitiesOfClient(id);
+  };
+
+  window.unblockUser = function(id) {
+    NAF.connection.adapter.publisher.handle.sendMessage({ kind: "unblock", whom: id });
+    window.setTimeout(() => {
+      // Wait enough time for the unblock to be processed
+      NAF.connection.entities.completeSync(id);
+    }, 1000);
+  };
+
+  document.body.addEventListener("blocked", ev => {
+    console.log("blocked");
+    NAF.connection.entities.removeEntitiesOfClient(ev.detail.by);
+  });
+
+  document.body.addEventListener("unblocked", ev => {
+    console.log("unblocked");
+    NAF.connection.entities.completeSync(ev.detail.by);
+  });
+
   if (!qsTruthy("offline")) {
     document.body.addEventListener("connected", () => {
       hubChannel.sendEntryEvent().then(() => {
