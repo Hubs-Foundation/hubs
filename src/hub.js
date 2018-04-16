@@ -110,7 +110,6 @@ AFRAME.registerInputMappings(inputConfig, true);
 
 const store = new Store();
 const concurrentLoadDetector = new ConcurrentLoadDetector();
-const uiRootProps = {};
 const hubChannel = new HubChannel(store);
 
 concurrentLoadDetector.start();
@@ -227,7 +226,7 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   }
 }
 
-function mountUI(scene) {
+function mountUI(scene, props = {}) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.vr_entry_type || null;
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
@@ -247,7 +246,7 @@ function mountUI(scene) {
         store,
         htmlPrefix,
         showProfileEntry,
-        ...uiRootProps
+        ...props
       }}
     />,
     document.getElementById("ui-root")
@@ -263,21 +262,21 @@ const onReady = async () => {
 
   mountUI(scene);
 
-  const remountUI = () => {
-    mountUI(scene);
+  let modifiedProps = {};
+  const remountUI = props => {
+    modifiedProps = { ...modifiedProps, ...props };
+    mountUI(scene, modifiedProps);
   };
 
   getAvailableVREntryTypes().then(availableVREntryTypes => {
-    uiRootProps.availableVREntryTypes = availableVREntryTypes;
-    remountUI();
+    remountUI({ availableVREntryTypes });
   });
 
   const environmentRoot = document.querySelector("#environment-root");
 
   const initialEnvironmentEl = document.createElement("a-entity");
   initialEnvironmentEl.addEventListener("bundleloaded", () => {
-    uiRootProps.initialEnvironmentLoaded = true;
-    remountUI();
+    remountUI({ initialEnvironmentLoaded: true });
     // Wait a tick plus some margin so that the environments actually render.
     setTimeout(() => scene.renderer.animate(null), 100);
   });
@@ -285,8 +284,7 @@ const onReady = async () => {
 
   if (qs.room) {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
-    uiRootProps.janusRoomId = qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1;
-    remountUI();
+    remountUI({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
     initialEnvironmentEl.setAttribute("gltf-bundle", {
       src: "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingRoom.bundle.json"
       // src: "https://asset-bundles-prod.reticulum.io/rooms/theater/TheaterMeshes.bundle.json"
@@ -317,8 +315,7 @@ const onReady = async () => {
       const hub = data.hubs[0];
       const defaultSpaceTopic = hub.topics[0];
       const gltfBundleUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
-      uiRootProps.janusRoomId = defaultSpaceTopic.janus_room_id;
-      remountUI();
+      remountUI({ janusRoomId: defaultSpaceTopic.janus_room_id });
       initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`);
       hubChannel.setPhoenixChannel(channel);
     })
