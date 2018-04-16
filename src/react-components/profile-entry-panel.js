@@ -103,7 +103,7 @@ class ProfileEntryPanel extends Component {
                   type="checkbox"
                   required
                   value={this.state.has_agreed_to_terms}
-                  onChange={e => this.setState({ has_agreed_to_terms: e.target.value })}
+                  onChange={e => this.setState({ has_agreed_to_terms: e.target.checked })}
                 />
                 <span className="profile-entry__terms__text">
                   <FormattedMessage id="profile.terms.prefix" />{" "}
