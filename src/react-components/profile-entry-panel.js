@@ -27,7 +27,7 @@ class ProfileEntryPanel extends Component {
   saveStateAndFinish = e => {
     e.preventDefault();
     const { has_changed_name, display_name } = this.props.store.state.profile;
-    const hasChangedName = !has_changed_name && this.state.display_name !== display_name;
+    const hasChangedName = has_changed_name || this.state.display_name !== display_name;
     this.props.store.update({
       profile: {
         has_changed_name: hasChangedName,
