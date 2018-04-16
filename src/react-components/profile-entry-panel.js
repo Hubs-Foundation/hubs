@@ -14,10 +14,8 @@ class ProfileEntryPanel extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      display_name: this.props.store.state.profile.display_name,
-      avatar_id: this.props.store.state.profile.avatar_id
-    };
+    const { display_name, avatar_id } = this.props.store.state.profile;
+    this.state = { display_name, avatar_id };
     this.props.store.addEventListener("statechanged", this.storeUpdated);
   }
 
@@ -28,11 +26,12 @@ class ProfileEntryPanel extends Component {
 
   saveStateAndFinish = e => {
     e.preventDefault();
+    const { has_changed_name, display_name } = this.props.store.state.profile;
+    const hasChangedName = !has_changed_name && this.state.display_name !== display_name;
     this.props.store.update({
       profile: {
-        has_saved_profile: true,
-        display_name: this.state.display_name,
-        avatar_id: this.state.avatar_id
+        has_changed_name: hasChangedName,
+        ...this.state
       }
     });
     this.props.finished();

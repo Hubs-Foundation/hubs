@@ -167,13 +167,15 @@ function selectRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+export function generateRandomName() {
+  return `${selectRandom(names)}-${Math.floor(10000 + Math.random() * 10000)}`;
+}
+
 export const avatarIds = avatars.map(av => av.id);
 
 export function generateDefaultProfile() {
-  const name = selectRandom(names);
   return {
-    has_saved_profile: false,
-    display_name: name.replace(/^./, name[0].toUpperCase()),
+    has_changed_name: false,
     avatar_id: selectRandom(avatarIds)
   };
 }

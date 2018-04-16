@@ -90,7 +90,7 @@ import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 import Store from "./storage/store";
 
-import { generateDefaultProfile } from "./utils/identity.js";
+import { generateDefaultProfile, generateRandomName } from "./utils/identity.js";
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
@@ -116,6 +116,11 @@ concurrentLoadDetector.start();
 
 // Always layer in any new default profile bits
 store.update({ profile: { ...generateDefaultProfile(), ...(store.state.profile || {}) } });
+
+// Regenerate name to encourage users to change it.
+if (!store.state.profile.has_changed_name) {
+  store.update({ profile: { display_name: generateRandomName() } });
+}
 
 async function exitScene() {
   hubChannel.disconnect();
@@ -226,7 +231,7 @@ function mountUI(scene) {
   const forcedVREntryType = qs.vr_entry_type || null;
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
   const htmlPrefix = document.body.dataset.htmlPrefix || "";
-  const showProfileEntry = !store.state.profile.has_saved_profile;
+  const showProfileEntry = !store.state.profile.has_changed_name;
 
   // TODO: Refactor to avoid using return value
   /* eslint-disable react/no-render-return-value */
