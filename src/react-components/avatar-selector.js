@@ -39,7 +39,7 @@ class AvatarSelector extends Component {
       // so we need to force it here.
       const currRot = this.animation.parentNode.getAttribute("rotation");
       const currY = currRot.y;
-      const toRot = String.split(this.animation.attributes.to.value, " ");
+      const toRot = this.animation.getAttribute("to").split(" ");
       const toY = toRot[1];
       const step = 360.0 / this.props.avatars.length;
       const brokenlyBigRotation = Math.abs(toY - currY) > 3 * step;
