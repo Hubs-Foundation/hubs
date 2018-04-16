@@ -3,9 +3,22 @@ function registerNetworkSchemas() {
     template: "#remote-avatar-template",
     components: [
       "position",
-      "rotation",
+      {
+        component: "rotation",
+        lerp: false
+      },
       "scale",
       "player-info",
+      {
+        selector: ".RootScene",
+        component: "hand-pose__left",
+        property: "pose"
+      },
+      {
+        selector: ".RootScene",
+        component: "hand-pose__right",
+        property: "pose"
+      },
       {
         selector: ".camera",
         component: "position"

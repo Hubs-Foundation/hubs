@@ -1,5 +1,6 @@
 import uuid from "uuid/v4";
 import { Validator } from "jsonschema";
+import { merge } from "lodash";
 
 const LOCAL_STORE_KEY = "___mozilla_duck";
 const STORE_STATE_CACHE_KEY = Symbol();
@@ -16,8 +17,8 @@ export const SCHEMA = {
       type: "object",
       additionalProperties: false,
       properties: {
-        has_saved_profile: { type: "boolean" },
         has_agreed_to_terms: { type: "boolean" },
+        has_changed_name: { type: "boolean" },
         display_name: { type: "string", pattern: "^[A-Za-z0-9-]{3,32}$" },
         avatar_id: { type: "string" }
       }
@@ -29,7 +30,8 @@ export const SCHEMA = {
   properties: {
     id: { type: "string", pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
     profile: { $ref: "#/definitions/profile" },
-    lastUsedMicDeviceId: { type: "string" }
+    lastUsedMicDeviceId: { type: "string" },
+    lastEnteredAt: { type: "string" }
   },
 
   additionalProperties: false
@@ -57,7 +59,7 @@ export default class Store extends EventTarget {
       throw new Error("Store id is immutable.");
     }
 
-    const finalState = { ...this.state, ...newState };
+    const finalState = merge(this.state, newState);
     const isValid = validator.validate(finalState, SCHEMA).valid;
 
     if (!isValid) {
