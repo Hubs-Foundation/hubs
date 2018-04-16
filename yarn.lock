@@ -5182,9 +5182,9 @@ minijanus@^0.5.0:
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/minijanus/-/minijanus-0.5.0.tgz#78e1429bb5d83cb3957a538335d2ae901bf614fa"
 
-"minijanus@https://github.com/mozilla/minijanus.js#master":
+"minijanus@https://github.com/mozilla/minijanus.js#fix/destroy-session":
   version "0.5.0"
-  resolved "https://github.com/mozilla/minijanus.js#497f4dd80fdb92e247238e638daed14ae6623575"
+  resolved "https://github.com/mozilla/minijanus.js#60a4f41345f579a3023bd7e0f9fa645dc23e074b"
 
 minimalistic-assert@^1.0.0:
   version "1.0.0"
@@ -5369,12 +5369,12 @@ mute-stream@0.0.7:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
 
-"naf-janus-adapter@https://github.com/mozilla/naf-janus-adapter#feature/disconnect":
-  version "0.4.1"
-  resolved "https://github.com/mozilla/naf-janus-adapter#4a4532014d6489403cf7e451790925ce747f8e41"
+"naf-janus-adapter@https://github.com/mozilla/naf-janus-adapter#feature/reconnect":
+  version "0.5.1"
+  resolved "https://github.com/mozilla/naf-janus-adapter#7ae9fcdac021292ccb5efb23648f989939d9cc38"
   dependencies:
     debug "^3.1.0"
-    minijanus "https://github.com/mozilla/minijanus.js#master"
+    minijanus "https://github.com/mozilla/minijanus.js#fix/destroy-session"
 
 nan@^2.3.0, nan@^2.3.2:
   version "2.9.1"
