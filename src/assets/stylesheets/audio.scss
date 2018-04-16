@@ -28,17 +28,29 @@
       @extend %rounded-border;
       @extend %default-font;
 
+      appearance: none;
+      -moz-appearance: none;
+      -webkit-appearance: none;
       background-color: black;
       padding: 6px;
+      padding-right: 30px;
       color: white;
       font-size: 1.1em;
       width: 90%;
     }
 
     &__mic-icon {
+      pointer-events: none;
       position: absolute;
-      left: 7.5%;
-      top: 10px;
+      left: 8%;
+      top: 9px;
+    }
+
+    &__dropdown-arrow {
+      pointer-events: none;
+      position: absolute;
+      right: 7.5%;
+      top: 16px;
     }
   }
 
@@ -50,42 +62,16 @@
     align-items: center;
     width: 100%;
 
-    &__mic {
+    &__icon {
       position:relative;
       width: 111px;
       height: 111px;
     }
 
-    &__mic_icon {
-      position: absolute;
+    &__icon-part {
+      position:absolute;
       top: 0;
       left: 0;
-      z-index: 2;
-      min-width: 111px;
-      min-height: 111px;
-    }
-
-    &__speaker {
-      position:relative;
-      width: 111px;
-      height: 111px;
-    }
-
-    &__speaker_icon {
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 2;
-      min-width: 111px;
-      min-height: 111px;
-    }
-
-    &__level {
-      position: absolute;
-      top: 0;
-      left: 0;
-      opacity: 1.0;
-      z-index: 1;
     }
   }
 
@@ -118,17 +104,26 @@
     @extend %top-subtitle;
   }
 
-  &__icon {
+  &__button-container {
     flex: 10;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    width: 111px;
+    height: 111px;
+  }
+
+  &__button {
+    background: none;
+    border: none;
+    cursor: pointer;
   }
 
   &__next {
     @extend %bottom-button;
-    margin: auto;
-    flex: 1 1 20px;
+    padding-top: 0;
+    padding-bottom: 0;
+    flex: 1 1;
   }
 }

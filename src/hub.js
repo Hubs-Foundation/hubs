@@ -90,7 +90,7 @@ import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 import Store from "./storage/store";
 
-import { generateDefaultProfile } from "./utils/identity.js";
+import { generateDefaultProfile, generateRandomName } from "./utils/identity.js";
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
@@ -116,6 +116,11 @@ concurrentLoadDetector.start();
 
 // Always layer in any new default profile bits
 store.update({ profile: { ...generateDefaultProfile(), ...(store.state.profile || {}) } });
+
+// Regenerate name to encourage users to change it.
+if (!store.state.profile.has_changed_name) {
+  store.update({ profile: { display_name: generateRandomName() } });
+}
 
 async function exitScene() {
   hubChannel.disconnect();
@@ -221,15 +226,14 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   }
 }
 
-function mountUI(scene) {
+function mountUI(scene, props = {}) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.vr_entry_type || null;
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
   const htmlPrefix = document.body.dataset.htmlPrefix || "";
+  const showProfileEntry = !store.state.profile.has_changed_name;
 
-  // TODO: Refactor to avoid using return value
-  /* eslint-disable react/no-render-return-value */
-  const uiRoot = ReactDOM.render(
+  ReactDOM.render(
     <UIRoot
       {...{
         scene,
@@ -240,14 +244,13 @@ function mountUI(scene) {
         forcedVREntryType,
         enableScreenSharing,
         store,
-        htmlPrefix
+        htmlPrefix,
+        showProfileEntry,
+        ...props
       }}
     />,
     document.getElementById("ui-root")
   );
-  /* eslint-enable react/no-render-return-value */
-
-  return uiRoot;
 }
 
 const onReady = async () => {
@@ -257,26 +260,31 @@ const onReady = async () => {
 
   registerNetworkSchemas();
 
-  const uiRoot = mountUI(scene);
+  mountUI(scene);
+
+  let modifiedProps = {};
+  const remountUI = props => {
+    modifiedProps = { ...modifiedProps, ...props };
+    mountUI(scene, modifiedProps);
+  };
 
   getAvailableVREntryTypes().then(availableVREntryTypes => {
-    uiRoot.setState({ availableVREntryTypes });
-    uiRoot.handleForcedVREntryType();
+    remountUI({ availableVREntryTypes });
   });
 
   const environmentRoot = document.querySelector("#environment-root");
 
   const initialEnvironmentEl = document.createElement("a-entity");
   initialEnvironmentEl.addEventListener("bundleloaded", () => {
-    uiRoot.setState({ initialEnvironmentLoaded: true });
-    // Wait a tick so that the environments actually render.
-    setTimeout(() => scene.renderer.animate(null));
+    remountUI({ initialEnvironmentLoaded: true });
+    // Wait a tick plus some margin so that the environments actually render.
+    setTimeout(() => scene.renderer.animate(null), 100);
   });
   environmentRoot.appendChild(initialEnvironmentEl);
 
   if (qs.room) {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
-    uiRoot.setState({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
+    remountUI({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
     initialEnvironmentEl.setAttribute("gltf-bundle", {
       src: "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingRoom.bundle.json"
       // src: "https://asset-bundles-prod.reticulum.io/rooms/theater/TheaterMeshes.bundle.json"
@@ -307,7 +315,7 @@ const onReady = async () => {
       const hub = data.hubs[0];
       const defaultSpaceTopic = hub.topics[0];
       const gltfBundleUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
-      uiRoot.setState({ janusRoomId: defaultSpaceTopic.janus_room_id });
+      remountUI({ janusRoomId: defaultSpaceTopic.janus_room_id });
       initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`);
       hubChannel.setPhoenixChannel(channel);
     })
