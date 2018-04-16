@@ -41,6 +41,10 @@
     color: $grey-text;
   }
 
+  &__display-name-label {
+    font-size: 1.2em;
+    margin-right: 0.5em;
+  }
   &__form-field-text {
     @extend %rounded-border;
     @extend %default-font;
@@ -54,19 +58,34 @@
     margin: 0.5em 0;
   }
 
+  &__terms {
+    margin-bottom: 16px;
+
+    &__checkbox {
+      @extend %checkbox;
+      vertical-align: unset;
+    }
+    &__checkbox:checked {
+      @extend %checkbox-checked;
+    }
+
+    &__text {
+      display: inline-block;
+      max-width: 20em;
+    }
+
+    &__link {
+      color: white;
+    }
+
+    &__link:visited {
+      color: grey;
+    }
+  }
+
   &__form-submit {
-    @extend %default-font;
-    border: none;
-
-    margin: 8px;
-    width: 100px;
-    line-height: 1.5em;
-    font-size: 1.0em;
-
-    background-color: transparent;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
+    @extend %bottom-button;
+    margin: 0;
   }
 }
 

@@ -101,6 +101,7 @@ export const avatarIds = avatars.map(av => av.id);
 
 export function generateDefaultProfile() {
   return {
+    has_agreed_to_terms: false,
     has_changed_name: false,
     avatar_id: selectRandom(avatarIds)
   };

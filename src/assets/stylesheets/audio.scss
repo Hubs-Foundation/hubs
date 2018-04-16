@@ -104,7 +104,7 @@
     @extend %top-subtitle;
   }
 
-  &__icon {
+  &__button-container {
     flex: 10;
     display: flex;
     justify-content: center;
@@ -114,9 +114,16 @@
     height: 111px;
   }
 
+  &__button {
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
   &__next {
     @extend %bottom-button;
-    margin: auto;
-    flex: 1 1 20px;
+    padding-top: 0;
+    padding-bottom: 0;
+    flex: 1 1;
   }
 }
