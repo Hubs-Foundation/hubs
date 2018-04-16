@@ -28,7 +28,8 @@ export const SCHEMA = {
   properties: {
     id: { type: "string", pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
     profile: { $ref: "#/definitions/profile" },
-    lastUsedMicDeviceId: { type: "string" }
+    lastUsedMicDeviceId: { type: "string" },
+    lastEnteredAt: { type: "string" }
   },
 
   additionalProperties: false
