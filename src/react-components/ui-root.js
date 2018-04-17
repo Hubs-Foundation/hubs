@@ -499,7 +499,9 @@ class UIRoot extends Component {
             <div className="ui-alert-container">
               <div className="ui-interactive ui-alert-box">
                 <div className="fatal-error-panel">
-                  <div className="fatal-error__title">Error Joining Room</div>
+                  <div className="fatal-error__title">
+                    <FormattedMessage id="entry.error-joining-room" />
+                  </div>
                   <div className="fatal-error__subtitle">{this.state.fatalError}</div>
                 </div>
               </div>

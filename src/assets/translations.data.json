@@ -13,6 +13,7 @@
     "entry.daydream-medium": "Daydream",
     "entry.daydream-via-chrome": "Using Google Chrome",
     "entry.enable-screen-sharing": "Share my desktop",
+    "entry.error-joining-room": "Error Joining Room",
     "profile.save": "SAVE",
     "profile.display_name.validation_warning": "Alphanumerics and hyphens. At least 3 characters, no more than 32",
     "profile.header": "Your identity",
