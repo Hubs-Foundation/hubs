@@ -173,6 +173,13 @@ const onReady = async () => {
     document.querySelector("a-scene").emit("username-changed", { username: displayName });
   };
 
+  const exitScene = () => {
+    hubChannel.disconnect();
+    const scene = document.querySelector("a-scene");
+    scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
+    document.body.removeChild(scene);
+  };
+
   const enterScene = async (mediaStream, enterInVR, janusRoomId) => {
     const scene = document.querySelector("a-scene");
     const playerRig = document.querySelector("#player-rig");
@@ -266,13 +273,6 @@ const onReady = async () => {
         }
       }
     }
-  };
-
-  const exitScene = () => {
-    hubChannel.disconnect();
-    const scene = document.querySelector("a-scene");
-    scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
-    document.body.removeChild(scene);
   };
 
   remountUI({ enterScene, exitScene });
