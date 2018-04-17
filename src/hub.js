@@ -1,5 +1,8 @@
 import "./assets/stylesheets/hub.scss";
+import moment from "moment-timezone";
+import uuid from "uuid/v4";
 import queryString from "query-string";
+import { Socket } from "phoenix";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
@@ -50,6 +53,7 @@ import "./components/hud-controller";
 import ReactDOM from "react-dom";
 import React from "react";
 import UIRoot from "./react-components/ui-root";
+import HubChannel from "./utils/hub-channel";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
@@ -87,7 +91,7 @@ import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 import Store from "./storage/store";
 
-import { generateDefaultProfile } from "./utils/identity.js";
+import { generateDefaultProfile, generateRandomName } from "./utils/identity.js";
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
@@ -107,16 +111,23 @@ AFRAME.registerInputMappings(inputConfig, true);
 
 const store = new Store();
 const concurrentLoadDetector = new ConcurrentLoadDetector();
+const hubChannel = new HubChannel(store);
 
 concurrentLoadDetector.start();
 
 // Always layer in any new default profile bits
 store.update({ profile: { ...generateDefaultProfile(), ...(store.state.profile || {}) } });
 
+// Regenerate name to encourage users to change it.
+if (!store.state.profile.has_changed_name) {
+  store.update({ profile: { display_name: generateRandomName() } });
+}
+
 async function exitScene() {
   if (NAF.connection.adapter && NAF.connection.adapter.localMediaStream) {
     NAF.connection.adapter.localMediaStream.getTracks().forEach(t => t.stop());
   }
+  hubChannel.disconnect();
   const scene = document.querySelector("a-scene");
   scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
   document.body.removeChild(scene);
@@ -190,6 +201,12 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   });
 
   if (!qsTruthy("offline")) {
+    document.body.addEventListener("connected", () => {
+      hubChannel.sendEntryEvent().then(() => {
+        store.update({ lastEnteredAt: moment().toJSON() });
+      });
+    });
+
     scene.components["networked-scene"].connect();
 
     if (mediaStream) {
@@ -213,15 +230,14 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   }
 }
 
-function mountUI(scene) {
+function mountUI(scene, props = {}) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.vr_entry_type || null;
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
   const htmlPrefix = document.body.dataset.htmlPrefix || "";
+  const showProfileEntry = !store.state.profile.has_changed_name;
 
-  // TODO: Refactor to avoid using return value
-  /* eslint-disable react/no-render-return-value */
-  const uiRoot = ReactDOM.render(
+  ReactDOM.render(
     <UIRoot
       {...{
         scene,
@@ -232,14 +248,13 @@ function mountUI(scene) {
         forcedVREntryType,
         enableScreenSharing,
         store,
-        htmlPrefix
+        htmlPrefix,
+        showProfileEntry,
+        ...props
       }}
     />,
     document.getElementById("ui-root")
   );
-  /* eslint-enable react/no-render-return-value */
-
-  return uiRoot;
 }
 
 const onReady = async () => {
@@ -249,26 +264,31 @@ const onReady = async () => {
 
   registerNetworkSchemas();
 
-  const uiRoot = mountUI(scene);
+  mountUI(scene);
+
+  let modifiedProps = {};
+  const remountUI = props => {
+    modifiedProps = { ...modifiedProps, ...props };
+    mountUI(scene, modifiedProps);
+  };
 
   getAvailableVREntryTypes().then(availableVREntryTypes => {
-    uiRoot.setState({ availableVREntryTypes });
-    uiRoot.handleForcedVREntryType();
+    remountUI({ availableVREntryTypes });
   });
 
   const environmentRoot = document.querySelector("#environment-root");
 
   const initialEnvironmentEl = document.createElement("a-entity");
   initialEnvironmentEl.addEventListener("bundleloaded", () => {
-    uiRoot.setState({ initialEnvironmentLoaded: true });
-    // Wait a tick so that the environments actually render.
-    setTimeout(() => scene.renderer.animate(null));
+    remountUI({ initialEnvironmentLoaded: true });
+    // Wait a tick plus some margin so that the environments actually render.
+    setTimeout(() => scene.renderer.animate(null), 100);
   });
   environmentRoot.appendChild(initialEnvironmentEl);
 
   if (qs.room) {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
-    uiRoot.setState({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
+    remountUI({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
     initialEnvironmentEl.setAttribute("gltf-bundle", {
       src: "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingRoom.bundle.json"
       // src: "https://asset-bundles-prod.reticulum.io/rooms/theater/TheaterMeshes.bundle.json"
@@ -278,15 +298,32 @@ const onReady = async () => {
     return;
   }
 
-  const hubId = document.location.pathname.substring(1).split("/")[0];
+  // Connect to reticulum over phoenix channels to get hub info.
+  const hubId = qs.hub_id || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
-  const res = await fetch(`/api/v1/hubs/${hubId}`);
-  const data = await res.json();
-  const hub = data.hubs[0];
-  const defaultSpaceTopic = hub.topics[0];
-  const gltfBundleUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
-  uiRoot.setState({ janusRoomId: defaultSpaceTopic.janus_room_id });
-  initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`);
+
+  const socketProtocol = document.location.protocol === "https:" ? "wss:" : "ws:";
+  const socketPort = qs.phx_port || document.location.port;
+  const socketHost = qs.phx_host || document.location.hostname;
+  const socketUrl = `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}/socket`;
+  console.log(`Phoenix Channel URL: ${socketUrl}`);
+
+  const socket = new Socket(socketUrl, { params: { session_id: uuid() } });
+  socket.connect();
+
+  const channel = socket.channel(`hub:${hubId}`, {});
+
+  channel
+    .join()
+    .receive("ok", data => {
+      const hub = data.hubs[0];
+      const defaultSpaceTopic = hub.topics[0];
+      const gltfBundleUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
+      remountUI({ janusRoomId: defaultSpaceTopic.janus_room_id });
+      initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`);
+      hubChannel.setPhoenixChannel(channel);
+    })
+    .receive("error", res => console.error(res));
 };
 
 document.addEventListener("DOMContentLoaded", onReady);
