@@ -78,7 +78,7 @@ class HomeRoot extends Component {
             Want to join the conversation?
             <p />
             Join us on the{" "}
-            <a href="http://webvr-slack.herokuapp.com/" target="_blank">
+            <a href="http://webvr-slack.herokuapp.com/" target="_blank" rel="noopener noreferrer">
               WebVR Slack
             </a>{" "}
             in the #social channel.
@@ -89,7 +89,7 @@ class HomeRoot extends Component {
         dialogTitle = "Get Updates";
         dialogBody = (
           <span>
-            We're adding more features to Hubs every week.
+            We&apos;re adding more features to Hubs every week.
             <p />
             To receive regular release notes, join our{" "}
             <a href="#" target="_blank">
@@ -97,11 +97,11 @@ class HomeRoot extends Component {
             </a>.
             <p />
             You can also follow us on Twitter{" "}
-            <a href="https://twitter.com/mozillareality" target="_blank">
+            <a href="https://twitter.com/mozillareality" target="_blank" rel="noopener noreferrer">
               @mozillareality
             </a>{" "}
             or on the{" "}
-            <a href="https://blog.mozvr.com/" target="_blank">
+            <a href="https://blog.mozvr.com/" target="_blank" rel="noopener noreferrer">
               Mozilla Mixed Reality Blog
             </a>.
           </span>
@@ -114,13 +114,13 @@ class HomeRoot extends Component {
             Need to report a problem?
             <p />
             You can file a{" "}
-            <a href="https://github.com/mozilla/mr-social-client/issues" target="_blank">
+            <a href="https://github.com/mozilla/mr-social-client/issues" target="_blank" rel="noopener noreferrer">
               Github Issue
             </a>{" "}
             or e-mail us for support at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>.
             <p />
             You can also find us in #social on the{" "}
-            <a href="http://webvr-slack.herokuapp.com/" target="_blank">
+            <a href="http://webvr-slack.herokuapp.com/" target="_blank" rel="noopener noreferrer">
               WebVR Slack
             </a>.
           </span>
