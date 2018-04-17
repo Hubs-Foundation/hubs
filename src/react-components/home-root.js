@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import homeVideo from "../assets/video/home.webm";
+import classNames from "classnames";
 
 import HubCreatePanel from "./hub-create-panel.js";
 
@@ -28,13 +29,26 @@ class HomeRoot extends Component {
   };
 
   state = {
-    environments: []
+    environments: [],
+    dialogType: null
   };
 
   componentDidMount() {
     this.loadEnvironments();
     document.querySelector("#background-video").playbackRate = 0.5;
   }
+
+  showDialog = dialogType => {
+    return e => {
+      e.preventDefault();
+      this.setState({ dialogType });
+      return false;
+    };
+  };
+
+  closeDialog = () => {
+    this.setState({ dialogType: null });
+  };
 
   loadEnvironments = () => {
     const environments = [];
@@ -52,10 +66,74 @@ class HomeRoot extends Component {
   };
 
   render() {
+    let dialogTitle = null;
+    let dialogBody = null;
+
+    switch (this.state.dialogType) {
+      // TODO i18n, FormattedMessage doesn't play nicely with links
+      case "slack":
+        dialogTitle = "Join us on Slack";
+        dialogBody = (
+          <span>
+            Want to join the conversation?
+            <p />
+            Join us on the{" "}
+            <a href="http://webvr-slack.herokuapp.com/" target="_blank">
+              WebVR Slack
+            </a>{" "}
+            in the #social channel.
+          </span>
+        );
+        break;
+      case "updates":
+        dialogTitle = "Get Updates";
+        dialogBody = (
+          <span>
+            We're adding more features to Hubs every week.
+            <p />
+            To receive regular release notes, join our{" "}
+            <a href="#" target="_blank">
+              mailing list
+            </a>.
+            <p />
+            You can also follow us on Twitter{" "}
+            <a href="https://twitter.com/mozillareality" target="_blank">
+              @mozillareality
+            </a>{" "}
+            or on the{" "}
+            <a href="https://blog.mozvr.com/" target="_blank">
+              Mozilla Mixed Reality Blog
+            </a>.
+          </span>
+        );
+        break;
+      case "report":
+        dialogTitle = "Report an Issue";
+        dialogBody = (
+          <span>
+            Need to report a problem?
+            <p />
+            You can file a{" "}
+            <a href="https://github.com/mozilla/mr-social-client/issues" target="_blank">
+              Github Issue
+            </a>{" "}
+            or e-mail us for support at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>.
+            <p />
+            You can also find us in #social on the{" "}
+            <a href="http://webvr-slack.herokuapp.com/" target="_blank">
+              WebVR Slack
+            </a>.
+          </span>
+        );
+        break;
+    }
+
+    const mainContentClassNames = classNames({ "main-content": true, "main-content--noninteractive": !!dialogTitle });
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className="home">
-          <div className="main-content">
+          <div className={mainContentClassNames}>
             <div className="header-content">
               <div className="header-content__title">
                 <img className="header-content__title__name" src="../assets/images/logo.svg" />
@@ -110,13 +188,28 @@ class HomeRoot extends Component {
             <div className="footer-content">
               <div className="footer-content__links">
                 <div className="footer-content__links__top">
-                  <a className="footer-content__links__link" rel="noopener noreferrer" target="_blank" href="#">
+                  <a
+                    className="footer-content__links__link"
+                    rel="noopener noreferrer"
+                    href="#"
+                    onClick={this.showDialog("slack")}
+                  >
                     <FormattedMessage id="home.join_on_slack" />
                   </a>
-                  <a className="footer-content__links__link" rel="noopener noreferrer" target="_blank" href="#">
+                  <a
+                    className="footer-content__links__link"
+                    rel="noopener noreferrer"
+                    href="#"
+                    onClick={this.showDialog("updates")}
+                  >
                     <FormattedMessage id="home.get_updates" />
                   </a>
-                  <a className="footer-content__links__link" rel="noopener noreferrer" target="_blank" href="#">
+                  <a
+                    className="footer-content__links__link"
+                    rel="noopener noreferrer"
+                    href="#"
+                    onClick={this.showDialog("report")}
+                  >
                     <FormattedMessage id="home.report_issue" />
                   </a>
                 </div>
@@ -130,6 +223,25 @@ class HomeRoot extends Component {
           <video playsInline autoPlay muted loop className="background-video" id="background-video">
             <source src={homeVideo} type="video/webm" />
           </video>
+          {dialogTitle && (
+            <div className="overlay">
+              <div className="dialog">
+                <div className="dialog__box">
+                  <div className="dialog__box__contents">
+                    <div className="dialog__box__contents__title">{dialogTitle}</div>
+                    <div className="dialog__box__contents__body">{dialogBody}</div>
+                    <div className="dialog__box__contents__button-container">
+                      <button className="dialog__box__contents__button-container__button" onClick={this.closeDialog}>
+                        <span>
+                          <FormattedMessage id="home.dialog.close" />
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </IntlProvider>
     );

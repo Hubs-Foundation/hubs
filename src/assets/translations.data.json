@@ -50,7 +50,8 @@
     "home.get_updates": "Get Updates",
     "home.hero_title": "A new way to get together online.",
     "home.hero_subtitle": "Laugh, play, get stuff done, or just hang out.",
-    "home.made_with_love": "made with ❤️ by ",
-    "home.environment_author_by": " by "
+    "home.made_with_love": "made with 🦆 by ",
+    "home.environment_author_by": " by ",
+    "home.dialog.close": "CLOSE"
   }
 }
