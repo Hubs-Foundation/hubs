@@ -103,7 +103,7 @@ class HomeRoot extends Component {
             Want to join the conversation?
             <p />
             Join us on the{" "}
-            <a href="http://webvr-slack.herokuapp.com/" target="_blank" rel="noopener noreferrer">
+            <a href="https://webvr-slack.herokuapp.com/" target="_blank" rel="noopener noreferrer">
               WebVR Slack
             </a>{" "}
             in the #social channel.<br />VR meetups every Friday at noon PST!
