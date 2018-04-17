@@ -68,7 +68,7 @@ class HomeRoot extends Component {
       source_url: document.location.href
     };
 
-    const res = await fetch(url, {
+    await fetch(url, {
       body: formurlencoded(payload),
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" }
