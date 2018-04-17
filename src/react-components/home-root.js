@@ -97,7 +97,7 @@ class HomeRoot extends Component {
     switch (this.state.dialogType) {
       // TODO i18n, FormattedMessage doesn't play nicely with links
       case "slack":
-        dialogTitle = "Join us on Slack";
+        dialogTitle = "Get in Touch";
         dialogBody = (
           <span>
             Want to join the conversation?
@@ -106,7 +106,12 @@ class HomeRoot extends Component {
             <a href="http://webvr-slack.herokuapp.com/" target="_blank" rel="noopener noreferrer">
               WebVR Slack
             </a>{" "}
-            in the #social channel.
+            in the #social channel.<br />VR meetups every Friday at noon PST!
+            <p /> Or, tweet at{" "}
+            <a href="https://twitter.com/mozillareality" target="_blank" rel="noopener noreferrer">
+              @mozillareality
+            </a>{" "}
+            on Twitter.
           </span>
         );
         break;
@@ -238,7 +243,7 @@ class HomeRoot extends Component {
                     href="#"
                     onClick={this.showDialog("slack")}
                   >
-                    <FormattedMessage id="home.join_on_slack" />
+                    <FormattedMessage id="home.join_us" />
                   </a>
                   <a
                     className="footer-content__links__link"
