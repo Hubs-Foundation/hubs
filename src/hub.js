@@ -58,6 +58,7 @@ import HubChannel from "./utils/hub-channel";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
+import "./systems/exit-on-blur";
 
 import "./gltf-component-mappings";
 
@@ -124,6 +125,9 @@ if (!store.state.profile.has_changed_name) {
 }
 
 async function exitScene() {
+  if (NAF.connection.adapter && NAF.connection.adapter.localMediaStream) {
+    NAF.connection.adapter.localMediaStream.getTracks().forEach(t => t.stop());
+  }
   hubChannel.disconnect();
   const scene = document.querySelector("a-scene");
   scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this

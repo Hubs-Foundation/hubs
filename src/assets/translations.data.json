@@ -1,6 +1,5 @@
 {
-  "en":
-  {
+  "en": {
     "entry.screen-prefix": "Enter on ",
     "entry.desktop-screen": "Screen",
     "entry.mobile-screen": "Phone",
@@ -33,7 +32,7 @@
     "audio.granted-title": "Mic permissions granted",
     "audio.granted-subtitle": "You can still mute yourself in-game",
     "audio.granted-next": "NEXT",
-    "exit.subtitle": "Your session has ended.",
+    "exit.subtitle": "Your session has ended. Refresh your browser to start a new one.",
     "autoexit.title": "Auto-ending session in ",
     "autoexit.title_units": " seconds",
     "autoexit.subtitle": "You have started another session.",
