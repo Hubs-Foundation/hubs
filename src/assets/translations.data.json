@@ -52,6 +52,8 @@
     "home.hero_subtitle": "Laugh, play, get stuff done, or just hang out.",
     "home.made_with_love": "made with 🦆 by ",
     "home.environment_author_by": " by ",
-    "home.dialog.close": "CLOSE"
+    "home.dialog.close": "CLOSE",
+    "mailing_list.privacy_label": "I'm okay with Mozilla handling my info as explained in",
+    "mailing_list.privacy_link": "this Privacy Notice"
   }
 }
