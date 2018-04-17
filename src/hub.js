@@ -49,6 +49,7 @@ import "./components/hand-poses";
 import "./components/gltf-model-plus";
 import "./components/gltf-bundle";
 import "./components/hud-controller";
+import "./components/stats-plus";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -144,6 +145,8 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   document.querySelector("a-scene canvas").classList.remove("blurred");
   scene.render();
 
+  scene.setAttribute("stats-plus", false);
+
   if (enterInVR) {
     scene.enterVR();
   }
@@ -156,10 +159,6 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
     room: janusRoomId,
     serverURL: process.env.JANUS_SERVER
   });
-
-  if (!qsTruthy("no_stats")) {
-    scene.setAttribute("stats", true);
-  }
 
   if (isMobile || qsTruthy("mobile")) {
     playerRig.setAttribute("virtual-gamepad-controls", {});
