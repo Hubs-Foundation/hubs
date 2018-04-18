@@ -60,11 +60,14 @@ class UIRoot extends Component {
     enableScreenSharing: PropTypes.bool,
     store: PropTypes.object,
     scene: PropTypes.object,
-    htmlPrefix: PropTypes.string
+    htmlPrefix: PropTypes.string,
+    showProfileEntry: PropTypes.bool,
+    availableVREntryTypes: PropTypes.object,
+    initialEnvironmentLoaded: PropTypes.bool,
+    janusRoomId: PropTypes.number
   };
 
   state = {
-    availableVREntryTypes: null,
     entryStep: ENTRY_STEPS.start,
     enterInVR: false,
 
@@ -87,13 +90,15 @@ class UIRoot extends Component {
     autoExitTimerInterval: null,
     secondsRemainingBeforeAutoExit: Infinity,
 
-    initialEnvironmentLoaded: false,
     exited: false,
 
-    showProfileEntry: false,
-
-    janusRoomId: null
+    showProfileEntry: false
   };
+
+  constructor(props) {
+    super(props);
+    this.state.showProfileEntry = this.props.showProfileEntry;
+  }
 
   componentDidMount() {
     this.setupTestTone();
@@ -104,8 +109,10 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
   }
 
-  componentWillUnmount() {
-    this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
+  componentDidUpdate(prevProps) {
+    if (this.props.availableVREntryTypes && prevProps.availableVREntryTypes !== this.props.availableVREntryTypes) {
+      this.handleForcedVREntryType();
+    }
   }
 
   onSceneLoaded = () => {
@@ -250,7 +257,7 @@ class UIRoot extends Component {
   };
 
   enterGearVR = async () => {
-    if (this.state.availableVREntryTypes.gearvr === VR_DEVICE_AVAILABILITY.yes) {
+    if (this.props.availableVREntryTypes.gearvr === VR_DEVICE_AVAILABILITY.yes) {
       await this.performDirectEntryFlow(true);
     } else {
       this.exit();
@@ -269,7 +276,7 @@ class UIRoot extends Component {
   };
 
   enterDaydream = async () => {
-    if (this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe) {
+    if (this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe) {
       this.exit();
 
       // We are not in mobile chrome, so launch into chrome via an Intent URL
@@ -366,23 +373,26 @@ class UIRoot extends Component {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       const micLevelAudioContext = new AudioContext();
       const micSource = micLevelAudioContext.createMediaStreamSource(mediaStream);
-      const analyzer = micLevelAudioContext.createAnalyser();
-      const levels = new Uint8Array(analyzer.fftSize);
+      const analyser = micLevelAudioContext.createAnalyser();
+      analyser.fftSize = 32;
+      const levels = new Uint8Array(analyser.frequencyBinCount);
 
-      micSource.connect(analyzer);
+      micSource.connect(analyser);
 
       const micUpdateInterval = setInterval(() => {
-        analyzer.getByteTimeDomainData(levels);
-
+        analyser.getByteTimeDomainData(levels);
         let v = 0;
-
         for (let x = 0; x < levels.length; x++) {
-          v = Math.max(levels[x] - 127, v);
+          v = Math.max(levels[x] - 128, v);
         }
-
         const level = v / 128.0;
-        this.micLevelMovingAverage.push(Date.now(), level);
-        this.setState({ micLevel: this.micLevelMovingAverage.movingAverage() });
+        // Multiplier to increase visual indicator.
+        const multiplier = 6;
+        // We use a moving average to smooth out the visual animation or else it would twitch too fast for
+        // the css renderer to keep up.
+        this.micLevelMovingAverage.push(Date.now(), level * multiplier);
+        const average = this.micLevelMovingAverage.movingAverage();
+        this.setState({ micLevel: average });
       }, 50);
 
       const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForMediaStream(mediaStream));
@@ -464,7 +474,7 @@ class UIRoot extends Component {
   };
 
   onAudioReadyButton = () => {
-    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.state.janusRoomId);
+    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.props.janusRoomId);
 
     const mediaStream = this.state.mediaStream;
 
@@ -489,7 +499,7 @@ class UIRoot extends Component {
   };
 
   render() {
-    if (!this.state.initialEnvironmentLoaded || !this.state.availableVREntryTypes || !this.state.janusRoomId) {
+    if (!this.props.initialEnvironmentLoaded || !this.props.availableVREntryTypes || !this.props.janusRoomId) {
       return (
         <IntlProvider locale={lang} messages={messages}>
           <div className="loading-panel">
@@ -530,7 +540,7 @@ class UIRoot extends Component {
       /firefox/i.test(navigator.userAgent) && (
         <label className="entry-panel__screen-sharing">
           <input
-            className="entry-panel__screen-sharing-checkbox"
+            className="entry-panel__screen-sharing__checkbox"
             type="checkbox"
             value={this.state.shareScreen}
             onChange={this.setStateAndRequestScreen}
@@ -543,21 +553,21 @@ class UIRoot extends Component {
       this.state.entryStep === ENTRY_STEPS.start ? (
         <div className="entry-panel">
           <TwoDEntryButton onClick={this.enter2D} />
-          {this.state.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
+          {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
             <GenericEntryButton onClick={this.enterVR} />
           )}
-          {this.state.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
+          {this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
             <GearVREntryButton onClick={this.enterGearVR} />
           )}
-          {this.state.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
+          {this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
             <DaydreamEntryButton
               onClick={this.enterDaydream}
               subtitle={
-                this.state.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : ""
+                this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : ""
               }
             />
           )}
-          {this.state.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
+          {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
             <div className="entry-panel__secondary" onClick={this.enterVR}>
               <FormattedMessage id="entry.cardboard" />
             </div>
@@ -579,28 +589,22 @@ class UIRoot extends Component {
               id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-subtitle" : "audio.granted-subtitle"}
             />
           </div>
-          <div className="mic-grant-panel__icon">
+          <div className="mic-grant-panel__button-container">
             {this.state.entryStep == ENTRY_STEPS.mic_grant ? (
-              <img
-                onClick={this.onMicGrantButton}
-                src="../assets/images/mic_denied.png"
-                srcSet="../assets/images/mic_denied@2x.png 2x"
-                className="mic-grant-panel__icon"
-              />
+              <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
+                <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
+              </button>
             ) : (
-              <img
-                onClick={this.onMicGrantButton}
-                src="../assets/images/mic_granted.png"
-                srcSet="../assets/images/mic_granted@2x.png 2x"
-                className="mic-grant-panel__icon"
-              />
+              <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
+                <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
+              </button>
             )}
           </div>
-          <div className="mic-grant-panel__next" onClick={this.onMicGrantButton}>
-            <FormattedMessage
-              id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-next" : "audio.granted-next"}
-            />
-          </div>
+          {this.state.entryStep == ENTRY_STEPS.mic_granted && (
+            <button className="mic-grant-panel__next" onClick={this.onMicGrantButton}>
+              <FormattedMessage id="audio.granted-next" />
+            </button>
+          )}
         </div>
       ) : null;
 
@@ -622,38 +626,48 @@ class UIRoot extends Component {
             )}
           </div>
           <div className="audio-setup-panel__levels">
-            <div className="audio-setup-panel__levels__mic">
+            <div className="audio-setup-panel__levels__icon">
+              <img
+                src="../assets/images/level_background.png"
+                srcSet="../assets/images/level_background@2x.png 2x"
+                className="audio-setup-panel__levels__icon-part"
+              />
+              <img
+                src="../assets/images/level_fill.png"
+                srcSet="../assets/images/level_fill@2x.png 2x"
+                className="audio-setup-panel__levels__icon-part"
+                style={micClip}
+              />
               {this.state.audioTrack ? (
                 <img
                   src="../assets/images/mic_level.png"
                   srcSet="../assets/images/mic_level@2x.png 2x"
-                  className="audio-setup-panel__levels__mic_icon"
+                  className="audio-setup-panel__levels__icon-part"
                 />
               ) : (
                 <img
                   src="../assets/images/mic_denied.png"
                   srcSet="../assets/images/mic_denied@2x.png 2x"
-                  className="audio-setup-panel__levels__mic_icon"
+                  className="audio-setup-panel__levels__icon-part"
                 />
               )}
+            </div>
+            <div className="audio-setup-panel__levels__icon">
+              <img
+                src="../assets/images/level_background.png"
+                srcSet="../assets/images/level_background@2x.png 2x"
+                className="audio-setup-panel__levels__icon-part"
+              />
               <img
                 src="../assets/images/level_fill.png"
                 srcSet="../assets/images/level_fill@2x.png 2x"
-                className="audio-setup-panel__levels__level"
-                style={micClip}
+                className="audio-setup-panel__levels__icon-part"
+                style={speakerClip}
               />
-            </div>
-            <div className="audio-setup-panel__levels__speaker">
               <img
                 src="../assets/images/speaker_level.png"
                 srcSet="../assets/images/speaker_level@2x.png 2x"
-                className="audio-setup-panel__levels__speaker_icon"
-              />
-              <img
-                src="../assets/images/level_fill.png"
-                srcSet="../assets/images/level_fill@2x.png 2x"
-                className="audio-setup-panel__levels__level"
-                style={speakerClip}
+                className="audio-setup-panel__levels__icon-part"
               />
             </div>
           </div>
@@ -670,9 +684,16 @@ class UIRoot extends Component {
                   </option>
                 ))}
               </select>
-              <div className="audio-setup-panel__device-chooser__mic-icon">
-                <img src="../assets/images/mic_small.png" srcSet="../assets/images/mic_small@2x.png 2x" />
-              </div>
+              <img
+                className="audio-setup-panel__device-chooser__mic-icon"
+                src="../assets/images/mic_small.png"
+                srcSet="../assets/images/mic_small@2x.png 2x"
+              />
+              <img
+                className="audio-setup-panel__device-chooser__dropdown-arrow"
+                src="../assets/images/dropdown_arrow.png"
+                srcSet="../assets/images/dropdown_arrow@2x.png 2x"
+              />
             </div>
           )}
           {this.shouldShowHmdMicWarning() && (
@@ -687,9 +708,9 @@ class UIRoot extends Component {
               </span>
             </div>
           )}
-          <div className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
+          <button className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
             <FormattedMessage id="audio.enter-now" />
-          </div>
+          </button>
         </div>
       ) : null;
 

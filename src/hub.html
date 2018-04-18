@@ -3,10 +3,11 @@
 
 <head>
     <meta charset="utf-8">
-    <title>moz://a duck</title>
-
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="<%= ORIGIN_TRIAL_EXPIRES %>" content="<%= ORIGIN_TRIAL_TOKEN %>">
+    <title>moz://a duck</title>
+    <link href="https://fonts.googleapis.com/css?family=Zilla+Slab:300,300i,400,400i,700" rel="stylesheet">
+
     <% if(NODE_ENV === "production") { %>
         <script src="https://cdn.rawgit.com/brianpeiris/aframe/845825ae694449524c185c44a314d361eead4680/dist/aframe-master.min.js"></script>
     <% } else { %>
@@ -46,7 +47,7 @@
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
             <a-asset-item id="interactable-duck" response-type="arraybuffer" src="./assets/interactables/duck/DuckyMesh.glb"></a-asset-item>
 
-            <img id="water-normal-map" src="./assets/waternormals.jpg"></a-asset-item>
+            <img id="water-normal-map" src="./assets/waternormals.jpg">
 
             <!-- Templates -->
 
@@ -64,19 +65,19 @@
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
                         <template data-selector=".RootScene">
-                            <a-entity ik-controller animation-mixer space-invader-mesh="meshSelector: .Bot_Skinned"></a-entity>
+                            <a-entity ik-controller hand-pose__left hand-pose__right animation-mixer space-invader-mesh="meshSelector: .Bot_Skinned"></a-entity>
                         </template>
 
                         <template data-selector=".Neck">
-                             <a-entity>
-                                 <a-entity
-                                    class="nametag"
-                                    billboard
-                                    text="side: double; align: center; color: #ddd"
-                                    position="0 1 0"
-                                    scale="6 6 6"
-                                ></a-entity>
-                             </a-entity>
+                            <a-entity>
+                                <a-entity
+                                   class="nametag"
+                                   billboard
+                                   text="side: double; align: center; color: #ddd"
+                                   position="0 1 0"
+                                   scale="6 6 6"
+                               ></a-entity>
+                            </a-entity>
                         </template>
 
                         <template data-selector=".Chest">
@@ -113,11 +114,11 @@
 
             <template id="interactable-template">
                 <a-entity
-                    gltf-model-plus="src: #interactable-duck"
+                    gltf-model-plus="src: #interactable-duck; inflate: true;"
                     scale="2 2 2"
                     class="interactable" 
                     super-networked-interactable="counter: #counter; mass: 5;"
-                    body="type: dynamic; mass: 5; shape: box;"
+                    body="type: dynamic; shape: none; mass: 5;"
                     grabbable
                     stretchable="useWorldPosition: true;"
                 ></a-entity>
@@ -154,7 +155,7 @@
         >
             <a-sphere
                 id="3d-cursor"
-                radius=0.02
+                radius="0.02"
                 static-body="shape: sphere;"
                 mixin="super-hands"
                 segments-height="9"
@@ -165,7 +166,7 @@
         <!-- Player Rig -->
         <a-entity
             id="player-rig"
-            networked="template: #remote-avatar-template; attachLocalTemplate: false;"
+            networked="template: #remote-avatar-template; attachTemplateToLocal: false;"
             spawn-controller="radius: 4;"
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
@@ -211,8 +212,6 @@
                 haptic-feedback
             ></a-entity>
 
-
-
             <a-entity
                 id="player-right-controller"
                 class="right-controller"
@@ -237,8 +236,11 @@
                 <template data-selector=".RootScene">
                     <a-entity
                         ik-controller
-                        animated-robot-hands
                         animation-mixer
+                        hand-pose__left
+                        hand-pose__right
+                        hand-pose-controller__left="eventSrc:#player-left-controller"
+                        hand-pose-controller__right="eventSrc:#player-right-controller"
                     ></a-entity>
                 </template>
 
@@ -285,9 +287,14 @@
         ></a-entity>
 
         <!-- Environment -->
-        <a-entity id="environment-root" position="0 0 0"></a-entity>
+        <a-entity 
+            id="environment-root" 
+            nav-mesh-helper
+            static-body="shape: none;"
+            class="collidable"
+        ></a-entity>
 
-        <a-entity id="skybox"
+        <a-entity
             id="skybox"
             scale="8000 8000 8000"
             skybox="azimuth:0.280; inclination:0.440"
@@ -304,23 +311,6 @@
             xr="ar: false"
         ></a-entity>
 
-        <a-cylinder
-            position="0 0.45 0"
-            material="visible: false"
-            height="1" radius="3.1"
-            segments-radial="12"
-            static-body
-            class="collidable"
-        ></a-cylinder>
-
-        <a-plane 
-            material="visible: false" 
-            rotation="-90 0 0" 
-            height="35" 
-            width="35" 
-            static-body 
-            class="collidable"
-        ></a-plane> 
     </a-scene>
 
     <div id="ui-root"></div>
