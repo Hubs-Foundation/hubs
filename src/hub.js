@@ -53,6 +53,7 @@ import "./components/hud-controller";
 import "./components/freeze-controller";
 import "./components/icon-button";
 import "./components/text-button";
+import "./components/block-button";
 import "./components/visible-while-frozen";
 import "./components/stats-plus";
 
