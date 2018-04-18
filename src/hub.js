@@ -50,6 +50,9 @@ import "./components/hand-poses";
 import "./components/gltf-model-plus";
 import "./components/gltf-bundle";
 import "./components/hud-controller";
+import "./components/freeze-controller";
+import "./components/icon-button";
+import "./components/stats-plus";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -58,12 +61,14 @@ import HubChannel from "./utils/hub-channel";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
+import "./systems/exit-on-blur";
 
 import "./gltf-component-mappings";
 
 import { App } from "./App";
 
 window.APP = new App();
+const store = window.APP.store;
 
 const qs = queryString.parse(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
@@ -89,7 +94,6 @@ import "./components/nav-mesh-helper";
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
-import Store from "./storage/store";
 
 import { generateDefaultProfile, generateRandomName } from "./utils/identity.js";
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
@@ -109,7 +113,6 @@ AFRAME.registerInputActivator("pressedmove", PressedMove);
 AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputMappings(inputConfig, true);
 
-const store = new Store();
 const concurrentLoadDetector = new ConcurrentLoadDetector();
 const hubChannel = new HubChannel(store);
 
@@ -124,6 +127,9 @@ if (!store.state.profile.has_changed_name) {
 }
 
 async function exitScene() {
+  if (NAF.connection.adapter && NAF.connection.adapter.localMediaStream) {
+    NAF.connection.adapter.localMediaStream.getTracks().forEach(t => t.stop());
+  }
   hubChannel.disconnect();
   const scene = document.querySelector("a-scene");
   scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
@@ -136,6 +142,8 @@ function applyProfileFromStore(playerRig) {
     displayName,
     avatarSrc: "#" + (store.state.profile.avatar_id || "botdefault")
   });
+  const hudController = playerRig.querySelector("[hud-controller]");
+  hudController.setAttribute("hud-controller", { showTip: !store.state.profile.has_found_freeze });
   document.querySelector("a-scene").emit("username-changed", { username: displayName });
 }
 
@@ -144,6 +152,8 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   const playerRig = document.querySelector("#player-rig");
   document.querySelector("a-scene canvas").classList.remove("blurred");
   scene.render();
+
+  scene.setAttribute("stats-plus", false);
 
   if (enterInVR) {
     scene.enterVR();
@@ -157,10 +167,6 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
     room: janusRoomId,
     serverURL: process.env.JANUS_SERVER
   });
-
-  if (!qsTruthy("no_stats")) {
-    scene.setAttribute("stats", true);
-  }
 
   if (isMobile || qsTruthy("mobile")) {
     playerRig.setAttribute("virtual-gamepad-controls", {});

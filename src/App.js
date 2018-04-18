@@ -1,7 +1,10 @@
+import Store from "./storage/store";
+
 export class App {
   constructor() {
     this.scene = null;
     this.quality = "low";
+    this.store = new Store();
   }
 
   setQuality(quality) {

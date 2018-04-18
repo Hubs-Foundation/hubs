@@ -90,6 +90,9 @@ class UIRoot extends Component {
     autoExitTimerInterval: null,
     secondsRemainingBeforeAutoExit: Infinity,
 
+    muted: false,
+    frozen: false,
+
     exited: false,
 
     showProfileEntry: false
@@ -107,6 +110,12 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
     this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
+    this.props.scene.addEventListener("exit", this.exit);
+  }
+
+  componentWillUnmount() {
+    this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
+    this.props.scene.removeEventListener("exit", this.exit);
   }
 
   componentDidUpdate(prevProps) {
@@ -121,14 +130,18 @@ class UIRoot extends Component {
 
   // TODO: mute state should probably actually just live in react land
   onAframeStateChanged = e => {
-    if (e.detail !== "muted") return;
+    if (!(e.detail === "muted" || e.detail === "frozen")) return;
     this.setState({
-      muted: this.props.scene.is("muted")
+      [e.detail]: this.props.scene.is(e.detail)
     });
   };
 
   toggleMute = () => {
     this.props.scene.emit("action_mute");
+  };
+
+  toggleFreeze = () => {
+    this.props.scene.emit("action_freeze");
   };
 
   handleForcedVREntryType = () => {
@@ -758,7 +771,12 @@ class UIRoot extends Component {
             )}
           </div>
           {this.state.entryStep === ENTRY_STEPS.finished ? (
-            <TwoDHUD muted={this.state.muted} onToggleMute={this.toggleMute} />
+            <TwoDHUD
+              muted={this.state.muted}
+              frozen={this.state.frozen}
+              onToggleMute={this.toggleMute}
+              onToggleFreeze={this.toggleFreeze}
+            />
           ) : null}
         </div>
       </IntlProvider>
