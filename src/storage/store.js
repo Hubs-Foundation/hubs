@@ -19,6 +19,7 @@ export const SCHEMA = {
       properties: {
         has_agreed_to_terms: { type: "boolean" },
         has_changed_name: { type: "boolean" },
+        has_found_freeze: { type: "boolean" },
         display_name: { type: "string", pattern: "^[A-Za-z0-9-]{3,32}$" },
         avatar_id: { type: "string" }
       }

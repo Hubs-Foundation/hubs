@@ -49,6 +49,7 @@ import "./components/hand-poses";
 import "./components/gltf-model-plus";
 import "./components/gltf-bundle";
 import "./components/hud-controller";
+import "./components/freeze-controller";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -63,6 +64,7 @@ import "./gltf-component-mappings";
 import { App } from "./App";
 
 window.APP = new App();
+const store = window.APP.store;
 
 const qs = queryString.parse(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
@@ -88,7 +90,6 @@ import "./components/nav-mesh-helper";
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
-import Store from "./storage/store";
 
 import { generateDefaultProfile, generateRandomName } from "./utils/identity.js";
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
@@ -108,7 +109,6 @@ AFRAME.registerInputActivator("pressedmove", PressedMove);
 AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputMappings(inputConfig, true);
 
-const store = new Store();
 const concurrentLoadDetector = new ConcurrentLoadDetector();
 const hubChannel = new HubChannel(store);
 
@@ -135,6 +135,8 @@ function applyProfileFromStore(playerRig) {
     displayName,
     avatarSrc: "#" + (store.state.profile.avatar_id || "botdefault")
   });
+  const hudController = playerRig.querySelector("[hud-controller]");
+  hudController.setAttribute("hud-controller", { showTip: !store.state.profile.has_found_freeze });
   document.querySelector("a-scene").emit("username-changed", { username: displayName });
 }
 
