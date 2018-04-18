@@ -50,6 +50,7 @@ import "./components/gltf-model-plus";
 import "./components/gltf-bundle";
 import "./components/hud-controller";
 import "./components/freeze-controller";
+import "./components/icon-button";
 
 import ReactDOM from "react-dom";
 import React from "react";
