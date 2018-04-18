@@ -5312,9 +5312,9 @@ mute-stream@0.0.7:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
 
-naf-janus-adapter@^0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.5.2.tgz#f4a9522c4e0b38fcbfe7c71b668afed67d5e133e"
+"naf-janus-adapter@https://github.com/mozilla/naf-janus-adapter#feature/blocking":
+  version "0.5.1"
+  resolved "https://github.com/mozilla/naf-janus-adapter#a16d36b131c09b535098d732ccd310dc050d1add"
   dependencies:
     debug "^3.1.0"
     minijanus "^0.5.0"

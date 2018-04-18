@@ -206,6 +206,14 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
     screenEntity.setAttribute("visible", sharingScreen);
   });
 
+  document.body.addEventListener("blocked", ev => {
+    NAF.connection.entities.removeEntitiesOfClient(ev.detail.by);
+  });
+
+  document.body.addEventListener("unblocked", ev => {
+    NAF.connection.entities.completeSync(ev.detail.by);
+  });
+
   if (!qsTruthy("offline")) {
     document.body.addEventListener("connected", () => {
       hubChannel.sendEntryEvent().then(() => {
