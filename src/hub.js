@@ -51,6 +51,7 @@ import "./components/gltf-bundle";
 import "./components/hud-controller";
 import "./components/freeze-controller";
 import "./components/icon-button";
+import "./components/stats-plus";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -59,6 +60,7 @@ import HubChannel from "./utils/hub-channel";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
+import "./systems/exit-on-blur";
 
 import "./gltf-component-mappings";
 
@@ -124,6 +126,9 @@ if (!store.state.profile.has_changed_name) {
 }
 
 async function exitScene() {
+  if (NAF.connection.adapter && NAF.connection.adapter.localMediaStream) {
+    NAF.connection.adapter.localMediaStream.getTracks().forEach(t => t.stop());
+  }
   hubChannel.disconnect();
   const scene = document.querySelector("a-scene");
   scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
@@ -147,6 +152,8 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   document.querySelector("a-scene canvas").classList.remove("blurred");
   scene.render();
 
+  scene.setAttribute("stats-plus", false);
+
   if (enterInVR) {
     scene.enterVR();
   }
@@ -159,10 +166,6 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
     room: janusRoomId,
     serverURL: process.env.JANUS_SERVER
   });
-
-  if (!qsTruthy("no_stats")) {
-    scene.setAttribute("stats", true);
-  }
 
   if (isMobile || qsTruthy("mobile")) {
     playerRig.setAttribute("virtual-gamepad-controls", {});

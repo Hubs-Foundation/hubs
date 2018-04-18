@@ -1,0 +1,26 @@
+:global(.rs-header) {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px rgba(255,255,255,0.1) solid;
+  margin-bottom: 8px;
+}
+
+:global(.rs-collapse-btn) {
+  cursor: pointer;
+  font-size: 12px;
+}
+
+:global(.rs-fps-counter) {
+  cursor: pointer;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: 8px;
+  color: #aaa;
+  font-size: 10px;
+}
+
+:global(.rs-mobile) {
+  bottom: auto;
+  top: 0;
+}
