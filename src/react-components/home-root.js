@@ -4,6 +4,7 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import homeVideo from "../assets/video/home.webm";
 import classNames from "classnames";
+import formurlencoded from "form-urlencoded";
 
 import HubCreatePanel from "./hub-create-panel.js";
 
@@ -30,7 +31,9 @@ class HomeRoot extends Component {
 
   state = {
     environments: [],
-    dialogType: null
+    dialogType: null,
+    mailingListEmail: "",
+    mailingListPrivacy: false
   };
 
   componentDidMount() {
@@ -41,13 +44,35 @@ class HomeRoot extends Component {
   showDialog = dialogType => {
     return e => {
       e.preventDefault();
+      e.stopPropagation();
       this.setState({ dialogType });
-      return false;
     };
   };
 
   closeDialog = () => {
     this.setState({ dialogType: null });
+  };
+
+  signUpForMailingList = async e => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!this.state.mailingListPrivacy) return;
+
+    const url = "https://www.mozilla.org/en-US/newsletter/";
+
+    const payload = {
+      email: this.state.mailingListEmail,
+      newsletters: "mixed-reality",
+      privacy: true,
+      fmt: "H",
+      source_url: document.location.href
+    };
+
+    await fetch(url, {
+      body: formurlencoded(payload),
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" }
+    }).then(() => this.setState({ dialogType: "email_submitted" }));
   };
 
   loadEnvironments = () => {
@@ -72,38 +97,62 @@ class HomeRoot extends Component {
     switch (this.state.dialogType) {
       // TODO i18n, FormattedMessage doesn't play nicely with links
       case "slack":
-        dialogTitle = "Join us on Slack";
+        dialogTitle = "Get in Touch";
         dialogBody = (
           <span>
             Want to join the conversation?
             <p />
             Join us on the{" "}
-            <a href="http://webvr-slack.herokuapp.com/" target="_blank" rel="noopener noreferrer">
+            <a href="https://webvr-slack.herokuapp.com/" target="_blank" rel="noopener noreferrer">
               WebVR Slack
             </a>{" "}
-            in the #social channel.
-          </span>
-        );
-        break;
-      case "updates":
-        dialogTitle = "Get Updates";
-        dialogBody = (
-          <span>
-            We&apos;re adding more features to Hubs every week.
-            <p />
-            To receive regular release notes, join our{" "}
-            <a href="#" target="_blank">
-              mailing list
-            </a>.
-            <p />
-            You can also follow us on Twitter{" "}
+            in the #social channel.<br />VR meetups every Friday at noon PST!
+            <p /> Or, tweet at{" "}
             <a href="https://twitter.com/mozillareality" target="_blank" rel="noopener noreferrer">
               @mozillareality
             </a>{" "}
-            or on the{" "}
-            <a href="https://blog.mozvr.com/" target="_blank" rel="noopener noreferrer">
-              Mozilla Mixed Reality Blog
-            </a>.
+            on Twitter.
+          </span>
+        );
+        break;
+      case "email_submitted":
+        dialogTitle = "";
+        dialogBody = "Great! Please check your e-mail to confirm your subscription.";
+        break;
+      case "updates":
+        dialogTitle = "";
+        dialogBody = (
+          <span>
+            Sign up to get release notes about new features.
+            <p />
+            <form onSubmit={this.signUpForMailingList}>
+              <div className="mailing-list-form">
+                <input
+                  type="email"
+                  value={this.state.mailingListEmail}
+                  onChange={e => this.setState({ mailingListEmail: e.target.value })}
+                  className="mailing-list-form__email_field"
+                  required
+                  placeholder="Your email here"
+                />
+                <label className="mailing-list-form__privacy">
+                  <input
+                    className="mailing-list-form__privacy_checkbox"
+                    type="checkbox"
+                    required
+                    value={this.state.mailingListPrivacy}
+                    onChange={e => this.setState({ mailingListPrivacy: e.target.checked })}
+                  />
+                  <span className="mailing-list-form__privacy_label">
+                    <FormattedMessage id="mailing_list.privacy_label" />{" "}
+                    <a target="_blank" rel="noopener noreferrer" href="https://www.mozilla.org/en-US/privacy/">
+                      <FormattedMessage id="mailing_list.privacy_link" />
+                    </a>
+                  </span>
+                </label>
+                <input className="mailing-list-form__submit" type="submit" value="Sign Up Now" />
+              </div>
+            </form>
           </span>
         );
         break;
@@ -194,7 +243,7 @@ class HomeRoot extends Component {
                     href="#"
                     onClick={this.showDialog("slack")}
                   >
-                    <FormattedMessage id="home.join_on_slack" />
+                    <FormattedMessage id="home.join_us" />
                   </a>
                   <a
                     className="footer-content__links__link"
@@ -223,20 +272,17 @@ class HomeRoot extends Component {
           <video playsInline autoPlay muted loop className="background-video" id="background-video">
             <source src={homeVideo} type="video/webm" />
           </video>
-          {dialogTitle && (
+          {this.state.dialogType && (
             <div className="overlay">
               <div className="dialog">
                 <div className="dialog__box">
                   <div className="dialog__box__contents">
+                    <button className="dialog__box__contents__close" onClick={this.closeDialog}>
+                      <span>🗙</span>
+                    </button>
                     <div className="dialog__box__contents__title">{dialogTitle}</div>
                     <div className="dialog__box__contents__body">{dialogBody}</div>
-                    <div className="dialog__box__contents__button-container">
-                      <button className="dialog__box__contents__button-container__button" onClick={this.closeDialog}>
-                        <span>
-                          <FormattedMessage id="home.dialog.close" />
-                        </span>
-                      </button>
-                    </div>
+                    <div className="dialog__box__contents__button-container" />
                   </div>
                 </div>
               </div>
