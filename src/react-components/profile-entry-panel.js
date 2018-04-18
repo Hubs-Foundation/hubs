@@ -14,10 +14,8 @@ class ProfileEntryPanel extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      display_name: this.props.store.state.profile.display_name,
-      avatar_id: this.props.store.state.profile.avatar_id
-    };
+    const { display_name, avatar_id } = this.props.store.state.profile;
+    this.state = { display_name, avatar_id };
     this.props.store.addEventListener("statechanged", this.storeUpdated);
   }
 
@@ -30,12 +28,13 @@ class ProfileEntryPanel extends Component {
     e.preventDefault();
     const has_agreed_to_terms = this.props.store.state.profile.has_agreed_to_terms || this.state.has_agreed_to_terms;
     if (!has_agreed_to_terms) return;
+    const { has_changed_name, display_name } = this.props.store.state.profile;
+    const hasChangedName = has_changed_name || this.state.display_name !== display_name;
     this.props.store.update({
       profile: {
-        has_saved_profile: true,
         has_agreed_to_terms: true,
-        display_name: this.state.display_name,
-        avatar_id: this.state.avatar_id
+        has_changed_name: hasChangedName,
+        ...this.state
       }
     });
     this.props.finished();
@@ -104,7 +103,7 @@ class ProfileEntryPanel extends Component {
                   type="checkbox"
                   required
                   value={this.state.has_agreed_to_terms}
-                  onChange={e => this.setState({ has_agreed_to_terms: e.target.value })}
+                  onChange={e => this.setState({ has_agreed_to_terms: e.target.checked })}
                 />
                 <span className="profile-entry__terms__text">
                   <FormattedMessage id="profile.terms.prefix" />{" "}

@@ -108,6 +108,12 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
     this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
+    this.props.scene.addEventListener("exit", this.exit);
+  }
+
+  componentWillUnmount() {
+    this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
+    this.props.scene.removeEventListener("exit", this.exit);
   }
 
   componentDidUpdate(prevProps) {

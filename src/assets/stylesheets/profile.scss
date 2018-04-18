@@ -106,12 +106,16 @@
     flex: 6 1 auto;
     font-size: 1.2em;
     line-height: 50px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
 
   &__app_name {
     font-size: 1.8em;
     padding-right: 18px;
     line-height: 50px;
+    white-space: nowrap;
   }
 }
 

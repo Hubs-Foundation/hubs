@@ -51,6 +51,7 @@
   background: none;
   color: white;
   border: none;
+  align-items: center;
   @extend %default-font;
 
   &__icon {

@@ -154,8 +154,8 @@ function attachTemplate(root, { selector, templateRoot }) {
     }
 
     // Append all child elements
-    for (const child of root.children) {
-      el.appendChild(child);
+    while (root.children.length > 0) {
+      el.appendChild(root.children[0]);
     }
   }
 }

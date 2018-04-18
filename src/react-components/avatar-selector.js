@@ -20,8 +20,8 @@ class AvatarSelector extends Component {
     const numAvatars = this.props.avatars.length;
     return ((currAvatarIndex + direction) % numAvatars + numAvatars) % numAvatars;
   };
-  nextAvatarIndex = () => this.getAvatarIndex(1);
-  previousAvatarIndex = () => this.getAvatarIndex(-1);
+  nextAvatarIndex = () => this.getAvatarIndex(-1);
+  previousAvatarIndex = () => this.getAvatarIndex(1);
 
   emitChangeToNext = () => {
     const nextAvatarId = this.props.avatars[this.nextAvatarIndex()].id;
@@ -38,7 +38,17 @@ class AvatarSelector extends Component {
       // HACK - a-animation ought to restart the animation when the `to` attribute changes, but it doesn't
       // so we need to force it here.
       const currRot = this.animation.parentNode.getAttribute("rotation");
-      this.animation.setAttribute("from", `${currRot.x} ${currRot.y} ${currRot.z}`);
+      const currY = currRot.y;
+      const toRot = this.animation.getAttribute("to").split(" ");
+      const toY = toRot[1];
+      const step = 360.0 / this.props.avatars.length;
+      const brokenlyBigRotation = Math.abs(toY - currY) > 3 * step;
+      let fromY = currY;
+      if (brokenlyBigRotation) {
+        // Rotation in Y wrapped around 360. Adjust the "from" to prevent a dramatic rotation
+        fromY = currY < toY ? currY + 360 : currY - 360;
+      }
+      this.animation.setAttribute("from", `${currRot.x} ${fromY} ${currRot.z}`);
       this.animation.stop();
       this.animation.handleMixinUpdate();
       this.animation.start();
@@ -83,7 +93,7 @@ class AvatarSelector extends Component {
               attribute="rotation"
               dur="1000"
               easing="ease-out"
-              to={`0 ${360 * this.getAvatarIndex() / this.props.avatars.length + 180} 0`}
+              to={`0 ${(360 * this.getAvatarIndex() / this.props.avatars.length + 180) % 360} 0`}
             />
             {avatarEntities}
           </a-entity>
