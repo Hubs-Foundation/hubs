@@ -53,7 +53,7 @@
   justify-content: space-around;
   align-items: center;
   padding: 10px;
-  background-color: rgba(0, 0, 0, 0.35);
+  background-color: rgba(#4F4F4F, 0.45);
 }
 
 
@@ -105,4 +105,56 @@
 
 :local(.mic.muted:active) {
   background-color: green;
+}
+
+:local(.iconButton) {
+  width: 32px;
+  height: 32px;
+  background-size: 100%;
+  cursor: pointer;
+}
+
+:local(.iconButton.large) {
+  width: 80px;
+  height: 80px;
+  z-index: 10;
+}
+
+:local(.iconButton.mute) {
+  background-image: url(../hud/mute_off.png);
+}
+:local(.iconButton.mute:hover) {
+  background-image: url(../hud/mute_off-hover.png);
+}
+:local(.iconButton.mute.active) {
+  background-image: url(../hud/mute_on.png);
+}
+:local(.iconButton.mute.active:hover) {
+  background-image: url(../hud/mute_on-hover.png);
+}
+
+:local(.iconButton.bubble) {
+  background-image: url(../hud/bubble_off.png);
+}
+:local(.iconButton.bubble:hover) {
+  background-image: url(../hud/bubble_off-hover.png);
+}
+:local(.iconButton.bubble.active) {
+  background-image: url(../hud/bubble_on.png);
+}
+:local(.iconButton.bubble.active:hover) {
+  background-image: url(../hud/bubble_on-hover.png);
+}
+
+:local(.iconButton.freeze) {
+  background-image: url(../hud/freeze_off.png);
+}
+:local(.iconButton.freeze:hover) {
+  background-image: url(../hud/freeze_off-hover.png);
+}
+:local(.iconButton.freeze.active) {
+  background-image: url(../hud/freeze_on.png);
+}
+:local(.iconButton.freeze.active:hover) {
+  background-image: url(../hud/freeze_on-hover.png);
 }
