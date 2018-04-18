@@ -94,8 +94,29 @@
                             <a-entity>
                               <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility> </a-entity>
                               <a-entity billboard>
-                                  <a-entity slice9="width: 0.45; height: 0.2; left: 53; top: 53; right: 10; bottom: 10; opacity: 1.3; src: #tooltip" position="0 0 .35">
-                                      <a-entity text="value:Block;width:3;align:center;" position="0 0 0.01"></a-entity>
+                                  <a-entity
+                                      visible-while-frozen
+                                      text-button="haptic:#player-right-controller;
+                                                   textEl:.text;
+                                                   textHoverColor: #f00;
+                                                   textColor: #fff;
+                                                   backgroundHoverColor: #f00;
+                                                   backgroundColor: #fff;
+                                                   "
+                                      slice9="width: 0.45;
+                                                   height: 0.2;
+                                                   left: 53;
+                                                   top: 53;
+                                                   right: 10;
+                                                   bottom: 10;
+                                                   opacity: 1.3;
+                                                   src: #tooltip"
+                                      position="0 0 .35">
+                                      <a-entity class="text"
+                                                text="value:Block;
+                                                       width:3;
+                                                       align:center;"
+                                                position="0 0 0.01"></a-entity>
                                   </a-entity>
                               </a-entity>
                             </a-entity>

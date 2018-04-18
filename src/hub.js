@@ -52,6 +52,8 @@ import "./components/gltf-bundle";
 import "./components/hud-controller";
 import "./components/freeze-controller";
 import "./components/icon-button";
+import "./components/text-button";
+import "./components/visible-while-frozen";
 import "./components/stats-plus";
 
 import ReactDOM from "react-dom";
