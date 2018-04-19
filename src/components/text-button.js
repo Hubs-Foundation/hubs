@@ -1,7 +1,6 @@
 AFRAME.registerComponent("text-button", {
   schema: {
     haptic: { type: "selector" },
-    textEl: { type: "string" },
     textHoverColor: { type: "string" },
     textColor: { type: "string" },
     backgroundHoverColor: { type: "string" },
@@ -21,7 +20,7 @@ AFRAME.registerComponent("text-button", {
     this.onClick = () => {
       this.emitHapticPulse();
     };
-    this.textEl = this.el.querySelector(this.data.textEl);
+    this.textEl = this.el.querySelector("[text]");
   },
 
   emitHapticPulse() {

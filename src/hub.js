@@ -207,11 +207,11 @@ async function enterScene(mediaStream, enterInVR, janusRoomId) {
   });
 
   document.body.addEventListener("blocked", ev => {
-    NAF.connection.entities.removeEntitiesOfClient(ev.detail.by);
+    NAF.connection.entities.removeEntitiesOfClient(ev.detail.clientId);
   });
 
   document.body.addEventListener("unblocked", ev => {
-    NAF.connection.entities.completeSync(ev.detail.by);
+    NAF.connection.entities.completeSync(ev.detail.clientId);
   });
 
   if (!qsTruthy("offline")) {
