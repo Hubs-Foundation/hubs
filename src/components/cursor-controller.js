@@ -1,7 +1,6 @@
 const TARGET_TYPE_NONE = 1;
 const TARGET_TYPE_INTERACTABLE = 2;
 const TARGET_TYPE_UI = 4;
-const TARGET_TYPE_OTHER = 8;
 const TARGET_TYPE_INTERACTABLE_OR_UI = TARGET_TYPE_INTERACTABLE | TARGET_TYPE_UI;
 
 AFRAME.registerComponent("cursor-controller", {
@@ -180,10 +179,8 @@ AFRAME.registerComponent("cursor-controller", {
     }
 
     if (this.isGrabbing || !intersection) {
-      const distance = Math.min(
-        Math.max(this.data.minDistance, this.currentDistance - this.currentDistanceMod),
-        this.data.maxDistance
-      );
+      const max = Math.max(this.data.minDistance, this.currentDistance - this.currentDistanceMod);
+      const distance = Math.min(max, this.data.maxDistance);
       this.currentDistanceMod = this.currentDistance - distance;
       this.direction.multiplyScalar(distance);
       this.point.addVectors(this.origin, this.direction);
@@ -312,17 +309,11 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleControllerEvent: function(e) {
-    switch (this.currentTargetType) {
-      case TARGET_TYPE_INTERACTABLE:
-        if (!this._isInteractableAllowed()) {
-          break;
-        }
-      case TARGET_TYPE_UI:
-        this.data.cursor.emit(this.data.controllerEvent, e.detail);
-        break;
-      default:
-        this._startTeleport();
-        break;
+    const isInteractable = this._isTargetOfType(TARGET_TYPE_INTERACTABLE) && this._isInteractableAllowed();
+    if (isInteractable || this._isTargetOfType(TARGET_TYPE_UI)) {
+      this.data.cursor.emit(this.data.controllerEvent, e.detail);
+    } else {
+      this._startTeleport();
     }
   },
 
