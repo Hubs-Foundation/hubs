@@ -66,7 +66,8 @@ class UIRoot extends Component {
     availableVREntryTypes: PropTypes.object,
     initialEnvironmentLoaded: PropTypes.bool,
     janusRoomId: PropTypes.number,
-    hubName: PropTypes.string
+    hubName: PropTypes.string,
+    roomUnavailableReason: PropTypes.string
   };
 
   state = {
@@ -507,6 +508,23 @@ class UIRoot extends Component {
   };
 
   render() {
+    if (this.state.exited || this.props.roomUnavailableReason) {
+      const exitSubtitleId = `exit.subtitle.${this.state.exited ? "exited" : this.props.roomUnavailableReason}`;
+
+      return (
+        <IntlProvider locale={lang} messages={messages}>
+          <div className="exited-panel">
+            <div className="loading-panel__title">
+              <b>moz://a</b> duck
+            </div>
+            <div className="loading-panel__subtitle">
+              <FormattedMessage id={exitSubtitleId} />
+            </div>
+          </div>
+        </IntlProvider>
+      );
+    }
+
     if (!this.props.initialEnvironmentLoaded || !this.props.availableVREntryTypes || !this.props.janusRoomId) {
       return (
         <IntlProvider locale={lang} messages={messages}>
@@ -518,21 +536,6 @@ class UIRoot extends Component {
             </div>
             <div className="loading-panel__title">
               <b>moz://a</b> duck
-            </div>
-          </div>
-        </IntlProvider>
-      );
-    }
-
-    if (this.state.exited) {
-      return (
-        <IntlProvider locale={lang} messages={messages}>
-          <div className="exited-panel">
-            <div className="loading-panel__title">
-              <b>moz://a</b> duck
-            </div>
-            <div className="loading-panel__subtitle">
-              <FormattedMessage id="exit.subtitle" />
             </div>
           </div>
         </IntlProvider>
