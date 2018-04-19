@@ -248,6 +248,19 @@ const onReady = async () => {
         hubChannel.sendEntryEvent().then(() => {
           store.update({ lastEnteredAt: moment().toJSON() });
         });
+        remountUI({ participantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
+      });
+
+      document.body.addEventListener("clientConnected", () => {
+        remountUI({
+          participantCount: Object.values(NAF.connection.activeDataChannels).filter(active => active).length + 1
+        });
+      });
+
+      document.body.addEventListener("clientDisconnected", () => {
+        remountUI({
+          participantCount: Object.values(NAF.connection.activeDataChannels).filter(active => active).length + 1
+        });
       });
 
       scene.components["networked-scene"].connect().catch(connectError => {

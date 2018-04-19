@@ -66,8 +66,9 @@ class UIRoot extends Component {
     availableVREntryTypes: PropTypes.object,
     initialEnvironmentLoaded: PropTypes.bool,
     janusRoomId: PropTypes.number,
+    roomUnavailableReason: PropTypes.string,
     hubName: PropTypes.string,
-    roomUnavailableReason: PropTypes.string
+    participantCount: PropTypes.number
   };
 
   state = {
@@ -771,7 +772,7 @@ class UIRoot extends Component {
           {this.state.entryStep === ENTRY_STEPS.finished ? (
             <div>
               <TwoDHUD muted={this.state.muted} onToggleMute={this.toggleMute} />
-              <Footer hubName={this.props.hubName} />
+              <Footer hubName={this.props.hubName} participantCount={this.props.participantCount} />
             </div>
           ) : null}
         </div>
