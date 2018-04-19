@@ -12,7 +12,7 @@ AFRAME.registerComponent("cursor-controller", {
     playerRig: { type: "selector" },
     otherHand: { type: "string" },
     hand: { default: "right" },
-    trackedControls: { type: "selectorAll", default: "[tracked-controls]" },
+    trackedControls: { type: "string", default: "[tracked-controls]" },
     maxDistance: { default: 3 },
     minDistance: { default: 0.5 },
     cursorColorHovered: { default: "#FF0000" },
@@ -80,6 +80,10 @@ AFRAME.registerComponent("cursor-controller", {
 
     if (oldData.otherHand && this.data.otherHand !== oldData.otherHand) {
       this._handleModelLoaded();
+    }
+
+    if (this.data.trackedControls !== oldData.trackedControls) {
+      this.trackedControls = document.querySelectorAll(this.data.trackedControls) || [];
     }
   },
 
@@ -236,8 +240,8 @@ AFRAME.registerComponent("cursor-controller", {
 
   _getController: function() {
     //TODO: prefer initial hand set in data.hand
-    for (let i = this.data.trackedControls.length - 1; i >= 0; i--) {
-      const trackedControlsComponent = this.data.trackedControls[i].components["tracked-controls"];
+    for (let i = this.trackedControls.length - 1; i >= 0; i--) {
+      const trackedControlsComponent = this.trackedControls[i].components["tracked-controls"];
       if (trackedControlsComponent && trackedControlsComponent.controller) {
         return trackedControlsComponent.controller;
       }
