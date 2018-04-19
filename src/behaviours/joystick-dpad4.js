@@ -8,10 +8,16 @@ function joystick_dpad4(el, outputPrefix) {
   this.previous = "none";
   this.hapticIntensity = "low";
   this.emitDPad4 = this.emitDPad4.bind(this);
-  el.addEventListener("axismove", this.emitDPad4);
+  this.el = el;
 }
 
 joystick_dpad4.prototype = {
+  addEventListeners: function() {
+    this.el.addEventListener("axismove", this.emitDPad4);
+  },
+  removeEventListeners: function() {
+    this.el.removeEventListener("axismove", this.emitDPad4);
+  },
   emitDPad4: function(event) {
     const x = event.detail.axis[0];
     const y = event.detail.axis[1];
