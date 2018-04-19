@@ -38,14 +38,25 @@ class HubCreatePanel extends Component {
       hub: { name: this.state.name, default_environment_gltf_bundle_url: environment.bundle_url }
     };
 
-    const res = await fetch("/api/v1/hubs", {
+    let createUrl = "/api/v1/hubs";
+
+    if (process.env.NODE_ENV === "development") {
+      createUrl = `https://dev.reticulum.io${createUrl}`;
+    }
+
+    const res = await fetch(createUrl, {
       body: JSON.stringify(payload),
       headers: { "content-type": "application/json" },
       method: "POST"
     });
 
     const hub = await res.json();
-    document.location = hub.url;
+
+    if (process.env.NODE_ENV === "production") {
+      document.location = hub.url;
+    } else {
+      document.location = `/hub.html?hub_id=${hub.hub_id}`;
+    }
   };
 
   isHubNameValid = () => {
