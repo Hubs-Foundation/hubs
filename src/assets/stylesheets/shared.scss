@@ -58,11 +58,24 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   border: 3px solid white;
   border-radius: 9px;
   vertical-align: sub;
-  margin: 0 0.6em
+  margin: 0 0.6em;
+  position: relative;
 }
 
 %checkbox-checked {
-  border: 9px double white;
-  outline: 9px solid white;
-  outline-offset: -18px;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+
+%checkbox-checked::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  bottom: 2px;
+  left: 2px;
+  background-color: white;
+  border-radius: 3px;
 }
