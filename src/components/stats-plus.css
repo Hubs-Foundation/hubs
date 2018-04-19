@@ -11,9 +11,10 @@
 }
 
 :global(.rs-fps-counter) {
+  font-family: monospace;
   cursor: pointer;
   position: absolute;
-  bottom: 0;
+  bottom: 50px;
   left: 0;
   padding: 8px;
   color: #aaa;
