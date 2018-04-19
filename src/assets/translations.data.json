@@ -1,6 +1,5 @@
 {
-  "en":
-  {
+  "en": {
     "entry.screen-prefix": "Enter on ",
     "entry.desktop-screen": "Screen",
     "entry.mobile-screen": "Phone",
@@ -14,8 +13,14 @@
     "entry.daydream-via-chrome": "Using Google Chrome",
     "entry.enable-screen-sharing": "Share my desktop",
     "profile.save": "SAVE",
+    "profile.display_name.label": "Display name:",
     "profile.display_name.validation_warning": "Alphanumerics and hyphens. At least 3 characters, no more than 32",
     "profile.header": "Your identity",
+    "profile.terms.prefix": "I confirm that I am over the age of 13 and agree to the",
+    "profile.terms.privacy": "privacy policy",
+    "profile.terms.conjunction": "and",
+    "profile.terms.tou": "terms of use",
+    "profile.terms.suffix": ".",
     "profile.avatar-selector.loading": "Loading Avatars...",
     "audio.title": "Test your audio",
     "audio.subtitle-desktop": "Confirm HMD speaker output",
@@ -26,9 +31,8 @@
     "audio.grant-subtitle": "Mic access needed to be heard by others",
     "audio.granted-title": "Mic permissions granted",
     "audio.granted-subtitle": "You can still mute yourself in-game",
-    "audio.grant-next": "  ",
     "audio.granted-next": "NEXT",
-    "exit.subtitle": "Your session has ended.",
+    "exit.subtitle": "Your session has ended. Refresh your browser to start a new one.",
     "autoexit.title": "Auto-ending session in ",
     "autoexit.title_units": " seconds",
     "autoexit.subtitle": "You have started another session.",
@@ -40,12 +44,15 @@
     "home.webvr_disclaimer_post": " experiment by ",
     "home.webvr_disclaimer_mr_team": "Mozilla Mixed Reality",
     "home.view_source": "View Source",
-    "home.join_on_slack": "Join us on Slack",
+    "home.join_us": "Join the Conversation",
     "home.report_issue": "Report an Issue",
     "home.get_updates": "Get Updates",
     "home.hero_title": "A new way to get together online.",
     "home.hero_subtitle": "Laugh, play, get stuff done, or just hang out.",
-    "home.made_with_love": "made with ❤️ by ",
-    "home.environment_author_by": " by "
+    "home.made_with_love": "made with 🦆 by ",
+    "home.environment_author_by": " by ",
+    "home.dialog.close": "CLOSE",
+    "mailing_list.privacy_label": "I'm okay with Mozilla handling my info as explained in",
+    "mailing_list.privacy_link": "this Privacy Notice"
   }
 }

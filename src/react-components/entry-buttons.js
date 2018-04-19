@@ -12,7 +12,7 @@ import DaydreamEntyImg from "../assets/images/daydream_entry.svg";
 const mobiledetect = new MobileDetect(navigator.userAgent);
 
 const EntryButton = props => (
-  <div className="entry-button" onClick={props.onClick}>
+  <button className="entry-button" onClick={props.onClick}>
     <img src={props.iconSrc} className="entry-button__icon" />
     <div className="entry-button__label">
       <div className="entry-button__label__contents">
@@ -25,7 +25,7 @@ const EntryButton = props => (
         {props.subtitle && <div className="entry-button__subtitle">{props.subtitle}</div>}
       </div>
     </div>
-  </div>
+  </button>
 );
 
 EntryButton.propTypes = {

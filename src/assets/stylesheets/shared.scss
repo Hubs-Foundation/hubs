@@ -17,11 +17,17 @@ $darker-grey: rgba(64, 64, 64, 1.0);
 }
 
 %bottom-button {
+  @extend %default-font;
   font-size: 1em;
   font-weight: bold;
   margin-top: auto;
   margin-bottom: 30px;
   cursor: pointer;
+  border: 3px solid white;
+  border-radius: 14px;
+  padding: 12px;
+  background: none;
+  color: white;
 }
 
 %top-title {
@@ -41,4 +47,22 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   color: white;
   border: none;
   font-size: 64pt;
+}
+
+%checkbox {
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  width: 2em;
+  height: 2em;
+  border: 3px solid white;
+  border-radius: 9px;
+  vertical-align: sub;
+  margin: 0 0.6em
+}
+
+%checkbox-checked {
+  border: 9px double white;
+  outline: 9px solid white;
+  outline-offset: -18px;
 }
