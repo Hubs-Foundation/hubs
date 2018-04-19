@@ -36,7 +36,6 @@ AFRAME.registerComponent("super-spawner", {
 
     const componentinInitializedListener = this._handleComponentInitialzed.bind(this, entity);
     const bodyLoadedListener = this._handleBodyLoaded.bind(this, entity);
-
     this.entities.set(entity, {
       hand: hand,
       componentInitialized: false,
@@ -68,8 +67,10 @@ AFRAME.registerComponent("super-spawner", {
   _emitEvents: function(entity) {
     const data = this.entities.get(entity);
     if (data.componentInitialized && data.bodyLoaded) {
-      data.hand.emit("action_grab", { targetEntity: entity });
-      entity.emit("grab-start", { hand: data.hand });
+      data.hand.emit("action_primary_down", { targetEntity: entity });
+      const eventData = { bubbles: true, cancelable: true, detail: { hand: data.hand, target: entity } };
+      const event = new CustomEvent("grab-start", eventData);
+      entity.dispatchEvent(event);
 
       entity.removeEventListener("componentinitialized", data.componentinInitializedListener);
       entity.removeEventListener("body-loaded", data.bodyLoadedListener);
