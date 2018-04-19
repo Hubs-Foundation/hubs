@@ -41,7 +41,7 @@ class HubCreatePanel extends Component {
     let createUrl = "/api/v1/hubs";
 
     if (process.env.NODE_ENV === "development") {
-      createUrl = `https://dev.reticulum.io${createUrl}`;
+      createUrl = `https://${process.env.DEV_RETICULUM_SERVER}${createUrl}`;
     }
 
     const res = await fetch(createUrl, {

@@ -304,7 +304,8 @@ const onReady = async () => {
   const socketProtocol = document.location.protocol === "https:" ? "wss:" : "ws:";
   const socketPort = qs.phx_port || (process.env.NODE_ENV === "production" ? document.location.port : 443);
   const socketHost =
-    qs.phx_host || (process.env.NODE_ENV === "production" ? document.location.hostname : "dev.reticulum.io");
+    qs.phx_host ||
+    (process.env.NODE_ENV === "production" ? document.location.hostname : process.env.DEV_RETICULUM_SERVER);
   const socketUrl = `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}/socket`;
   console.log(`Phoenix Channel URL: ${socketUrl}`);
 
