@@ -44,7 +44,7 @@ class HubCreatePanel extends Component {
       createUrl = `https://dev.reticulum.io${createUrl}`;
     }
 
-    const res = await fetch("https://dev.reticulum.io/api/v1/hubs", {
+    const res = await fetch(createUrl, {
       body: JSON.stringify(payload),
       headers: { "content-type": "application/json" },
       method: "POST"
