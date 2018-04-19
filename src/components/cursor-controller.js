@@ -17,7 +17,7 @@ AFRAME.registerComponent("cursor-controller", {
     maxDistance: { default: 3 },
     minDistance: { default: 0.5 },
     cursorColorHovered: { default: "#FF0000" },
-    cursorColorUnhovered: { efault: "#FFFFFF" },
+    cursorColorUnhovered: { default: "#FFFFFF" },
     controllerEvent: { type: "string", default: "action_primary_down" },
     controllerEndEvent: { type: "string", default: "action_primary_up" },
     teleportEvent: { type: "string", default: "action_teleport_down" },
@@ -93,10 +93,11 @@ AFRAME.registerComponent("cursor-controller", {
     //TODO: separate this into its own component? Or find an existing component that does this better.
     this.checkForPointingDeviceInterval = setInterval(() => {
       const controller = this._getController();
-      if (this.hasPointingDevice != !!controller) {
-        this.el.setAttribute("line", { visible: !!controller });
+      const hasPointingDevice = controller && this.inVR;
+      if (this.hasPointingDevice != hasPointingDevice) {
+        this.el.setAttribute("line", { visible: controller });
       }
-      this.hasPointingDevice = !!controller;
+      this.hasPointingDevice = hasPointingDevice;
       if (controller && this.data.hand != controller.hand) {
         this.el.setAttribute("cursor-controller", {
           hand: controller.hand,
@@ -221,7 +222,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _isInteractableAllowed: function() {
-    return !(this.inVR && this.hasPointingDevice) || this.isMobile;
+    return !this.hasPointingDevice || this.isMobile;
   },
 
   _isTargetOfType: function(mask) {
@@ -240,15 +241,19 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _startTeleport: function() {
-    this.data.controller.emit(this.data.teleportEvent, {});
-    this.el.setAttribute("line", { visible: false });
-    this.data.cursor.setAttribute("visible", false);
+    if (this.hasPointingDevice) {
+      this.data.controller.emit(this.data.teleportEvent, {});
+      this.el.setAttribute("line", { visible: false });
+      this.data.cursor.setAttribute("visible", false);
+    }
   },
 
   _endTeleport: function() {
-    this.data.controller.emit(this.data.teleportEndEvent, {});
-    this.el.setAttribute("line", { visible: true });
-    this.data.cursor.setAttribute("visible", true);
+    if (this.hasPointingDevice) {
+      this.data.controller.emit(this.data.teleportEndEvent, {});
+      this.el.setAttribute("line", { visible: true });
+      this.data.cursor.setAttribute("visible", true);
+    }
   },
 
   _handleMouseDown: function() {
@@ -256,7 +261,7 @@ AFRAME.registerComponent("cursor-controller", {
       const lookControls = this.data.camera.components["look-controls"];
       if (lookControls) lookControls.pause();
       this.data.cursor.emit(this.data.controllerEvent, {});
-    } else if (this.inVR && this.hasPointingDevice) {
+    } else {
       this._startTeleport();
     }
   },
@@ -269,9 +274,7 @@ AFRAME.registerComponent("cursor-controller", {
     const lookControls = this.data.camera.components["look-controls"];
     if (lookControls) lookControls.play();
     this.data.cursor.emit(this.data.controllerEndEvent, {});
-    if (this.inVR && this.hasPointingDevice) {
-      this._endTeleport();
-    }
+    this._endTeleport();
   },
 
   _handleWheel: function(e) {
