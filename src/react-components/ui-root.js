@@ -65,7 +65,8 @@ class UIRoot extends Component {
     showProfileEntry: PropTypes.bool,
     availableVREntryTypes: PropTypes.object,
     initialEnvironmentLoaded: PropTypes.bool,
-    janusRoomId: PropTypes.number
+    janusRoomId: PropTypes.number,
+    hubName: PropTypes.string
   };
 
   state = {
@@ -767,7 +768,7 @@ class UIRoot extends Component {
           {this.state.entryStep === ENTRY_STEPS.finished ? (
             <div>
               <TwoDHUD muted={this.state.muted} onToggleMute={this.toggleMute} />
-              <Footer />
+              <Footer hubName={this.props.hubName} />
             </div>
           ) : null}
         </div>

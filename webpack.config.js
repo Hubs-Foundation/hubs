@@ -141,7 +141,8 @@ const config = {
               loader: "css-loader",
               options: {
                 name: "[path][name]-[hash].[ext]",
-                minimize: process.env.NODE_ENV === "production"
+                minimize: process.env.NODE_ENV === "production",
+                camelCase: true
               }
             },
             "sass-loader"
@@ -156,7 +157,8 @@ const config = {
             loader: "css-loader",
             options: {
               name: "[path][name]-[hash].[ext]",
-              minimize: process.env.NODE_ENV === "production"
+              minimize: process.env.NODE_ENV === "production",
+              camelCase: true
             }
           }
         })
