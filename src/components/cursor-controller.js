@@ -17,7 +17,7 @@ AFRAME.registerComponent("cursor-controller", {
     maxDistance: { default: 3 },
     minDistance: { default: 0.5 },
     cursorColorHovered: { default: "#FF0000" },
-    cursorColorUnhovered: { efault: "#FFFFFF" },
+    cursorColorUnhovered: { default: "#FFFFFF" },
     controllerEvent: { type: "string", default: "action_primary_down" },
     controllerEndEvent: { type: "string", default: "action_primary_up" },
     teleportEvent: { type: "string", default: "action_teleport_down" },
@@ -94,7 +94,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.checkForPointingDeviceInterval = setInterval(() => {
       const controller = this._getController();
       if (this.hasPointingDevice != !!controller) {
-        this.el.setAttribute("line", { visible: !!controller });
+        this.el.setAttribute("line", { visible: !!controller && !this._isLineAlwaysHidden });
       }
       this.hasPointingDevice = !!controller;
       if (controller && this.data.hand != controller.hand) {
@@ -134,7 +134,7 @@ AFRAME.registerComponent("cursor-controller", {
       const state = this.otherHand.components["super-hands"].state;
       const isOtherHandGrabbing = state.has("grab-start") || state.has("hover-start");
       if (this.wasOtherHandGrabbing != isOtherHandGrabbing) {
-        this.data.cursor.setAttribute("visible", !isOtherHandGrabbing);
+        this.data.cursor.setAttribute("visible", !isOtherHandGrabbing && !this._isLineAlwaysHidden);
       }
       this.wasOtherHandGrabbing = isOtherHandGrabbing;
     }
@@ -228,6 +228,10 @@ AFRAME.registerComponent("cursor-controller", {
     return (this.currentTargetType & mask) === this.currentTargetType;
   },
 
+  _isLineAlwaysHidden: function() {
+    return !this.inVR && !this.isMobile;
+  },
+
   _getController: function() {
     //TODO: prefer initial hand set in data.hand
     for (let i = this.data.trackedControls.length - 1; i >= 0; i--) {
@@ -247,7 +251,7 @@ AFRAME.registerComponent("cursor-controller", {
 
   _endTeleport: function() {
     this.data.controller.emit(this.data.teleportEndEvent, {});
-    this.el.setAttribute("line", { visible: true });
+    this.el.setAttribute("line", { visible: !this._isLineAlwaysHidden });
     this.data.cursor.setAttribute("visible", true);
   },
 
