@@ -17,7 +17,7 @@ AFRAME.registerComponent("cursor-controller", {
     maxDistance: { default: 3 },
     minDistance: { default: 0.5 },
     cursorColorHovered: { default: "#FF0000" },
-    cursorColorUnhovered: { efault: "#FFFFFF" },
+    cursorColorUnhovered: { default: "#FFFFFF" },
     controllerEvent: { type: "string", default: "action_primary_down" },
     controllerEndEvent: { type: "string", default: "action_primary_up" },
     teleportEvent: { type: "string", default: "action_teleport_down" },
