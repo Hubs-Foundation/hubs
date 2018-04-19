@@ -153,6 +153,7 @@
 
         <a-sphere
             id="cursor"
+            material="depthTest: false;"
             radius="0.02"
             static-body="shape: sphere;"
             collision-filter="collisionForces: false"
@@ -286,7 +287,6 @@
             id="environment-root" 
             nav-mesh-helper
             static-body="shape: none;"
-            class="collidable"
         ></a-entity>
 
         <a-entity
