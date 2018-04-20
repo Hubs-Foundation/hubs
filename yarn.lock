@@ -5121,6 +5121,10 @@ min-document@^2.19.0:
   dependencies:
     dom-walk "^0.1.0"
 
+minijanus@0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/minijanus/-/minijanus-0.6.0.tgz#70d068b4e943a5e2724d0ef5703c9099a1c99bbc"
+
 minijanus@^0.5.0:
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/minijanus/-/minijanus-0.5.0.tgz#78e1429bb5d83cb3957a538335d2ae901bf614fa"
@@ -5308,12 +5312,12 @@ mute-stream@0.0.7:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
 
-naf-janus-adapter@^0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.5.2.tgz#f4a9522c4e0b38fcbfe7c71b668afed67d5e133e"
+naf-janus-adapter@^0.7.0:
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.7.0.tgz#00ced989bac9e073e32b74a5bbc1f41cc61db6ea"
   dependencies:
     debug "^3.1.0"
-    minijanus "^0.5.0"
+    minijanus "0.6.0"
 
 nan@^2.3.0, nan@^2.3.2:
   version "2.9.1"
