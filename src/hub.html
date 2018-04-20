@@ -146,14 +146,15 @@
                 camera: #player-camera; 
                 controller: #player-right-controller;
                 playerRig: #player-rig;
-                otherHand: #right-super-hand;"
+                otherHand: #right-super-hand;
+                gazeTeleportControls: #gaze-teleport;"
             raycaster="objects: .collidable, .interactable, .ui; far: 3;"
             line="visible: false; color: white; opacity: 0.2;"
         ></a-entity>
 
         <a-sphere
             id="cursor"
-            material="depthTest: false;"
+            material="depthTest: false; opacity:0.9;"
             radius="0.02"
             static-body="shape: sphere;"
             collision-filter="collisionForces: false"
@@ -198,7 +199,17 @@
                 camera
                 position="0 1.6 0"
                 personal-space-bubble="radius: 0.4"
-            ></a-entity>
+            >
+                <a-entity
+                    id="gaze-teleport"
+                    position = "0.15 0 0"
+                    teleport-controls="
+                    cameraRig: #player-rig; 
+                    teleportOrigin: #player-camera; 
+                    button: action_teleport_; 
+                    collisionEntities: [nav-mesh]"
+                ></a-entity>
+            </a-entity>
 
             <a-entity
                 id="player-left-controller"

@@ -8,8 +8,9 @@ AFRAME.registerComponent("cursor-controller", {
   schema: {
     cursor: { type: "selector" },
     camera: { type: "selector" },
-    controller: { type: "selector" },
     playerRig: { type: "selector" },
+    gazeTeleportControls: { type: "selector" },
+    controller: { type: "string" },
     otherHand: { type: "string" },
     hand: { default: "right" },
     trackedControls: { type: "string", default: "[tracked-controls]" },
@@ -39,6 +40,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.point = new THREE.Vector3();
     this.mousePos = new THREE.Vector2();
     this.controllerQuaternion = new THREE.Quaternion();
+    this.controller = null;
 
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
@@ -69,13 +71,17 @@ AFRAME.registerComponent("cursor-controller", {
 
   update: function(oldData) {
     if (this.data.controller !== oldData.controller) {
-      if (oldData.controller) {
-        oldData.controller.removeEventListener(this.data.controllerEvent, this.controllerEventListener);
-        oldData.controller.removeEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
+      if (this.controller) {
+        this.controller.removeEventListener(this.data.controllerEvent, this.controllerEventListener);
+        this.controller.removeEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
       }
 
-      this.data.controller.addEventListener(this.data.controllerEvent, this.controllerEventListener);
-      this.data.controller.addEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
+      this.controller = document.querySelector(this.data.controller);
+
+      if (this.controller) {
+        this.controller.addEventListener(this.data.controllerEvent, this.controllerEventListener);
+        this.controller.addEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
+      }
     }
 
     if (oldData.otherHand && this.data.otherHand !== oldData.otherHand) {
@@ -131,8 +137,10 @@ AFRAME.registerComponent("cursor-controller", {
     this.el.removeEventListener("raycaster-intersection", this.raycasterIntersectionListener);
     this.el.removeEventListener("raycaster-intersection-cleared", this.raycasterIntersectionClearedListener);
 
-    this.data.controller.removeEventListener(this.data.controllerEvent, this.controllerEventListener);
-    this.data.controller.removeEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
+    if (this.controller) {
+      this.controller.removeEventListener(this.data.controllerEvent, this.controllerEventListener);
+      this.controller.removeEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
+    }
 
     this.data.playerRig.removeEventListener("model-loaded", this.modelLoadedListener);
 
@@ -153,21 +161,22 @@ AFRAME.registerComponent("cursor-controller", {
 
     if (this.wasOtherHandGrabbing) return;
 
+    //set raycaster origin/direction
     const camera = this.data.camera.components.camera.camera;
     if (!this.inVR && !this.isMobile) {
-      //mouse
+      //mouse cursor mode
       const raycaster = this.el.components.raycaster.raycaster;
       raycaster.setFromCamera(this.mousePos, camera);
       this.origin = raycaster.ray.origin;
       this.direction = raycaster.ray.direction;
     } else if ((this.inVR || this.isMobile) && !this.hasPointingDevice) {
-      //gaze
+      //gaze cursor mode
       camera.getWorldPosition(this.origin);
       camera.getWorldDirection(this.direction);
     } else {
-      //3d
-      this.data.controller.object3D.getWorldPosition(this.origin);
-      this.data.controller.object3D.getWorldQuaternion(this.controllerQuaternion);
+      //3d cursor mode
+      this.controller.object3D.getWorldPosition(this.origin);
+      this.controller.object3D.getWorldQuaternion(this.controllerQuaternion);
       this.direction
         .set(0, 0, -1)
         .applyQuaternion(this.controllerQuaternion)
@@ -178,6 +187,7 @@ AFRAME.registerComponent("cursor-controller", {
 
     let intersection = null;
 
+    //update cursor position
     if (!this.isGrabbing) {
       const intersections = this.el.components.raycaster.intersections;
       if (intersections.length > 0 && intersections[0].distance <= this.data.maxDistance) {
@@ -199,7 +209,10 @@ AFRAME.registerComponent("cursor-controller", {
       this.data.cursor.object3D.position.copy(this.point);
     }
 
-    if (intersection) {
+    //update currentTargetType
+    if (this.isGrabbing && !intersection) {
+      this.currentTargetType = TARGET_TYPE_INTERACTABLE;
+    } else if (intersection) {
       if (this._isInteractableAllowed() && this._isClass("interactable", intersection.object.el)) {
         this.currentTargetType = TARGET_TYPE_INTERACTABLE;
       } else if (this._isClass("ui", intersection.object.el)) {
@@ -209,6 +222,7 @@ AFRAME.registerComponent("cursor-controller", {
       this.currentTargetType = TARGET_TYPE_NONE;
     }
 
+    //update cursor material
     const isTarget = this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI);
     if ((this.isGrabbing || isTarget) && !this.wasIntersecting) {
       this.wasIntersecting = true;
@@ -218,6 +232,7 @@ AFRAME.registerComponent("cursor-controller", {
       this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
     }
 
+    //update line
     if (this.hasPointingDevice) {
       this.el.setAttribute("line", { start: this.origin.clone(), end: this.data.cursor.object3D.position.clone() });
     }
@@ -250,23 +265,29 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _startTeleport: function() {
+    const hideCursor = !(this.hasPointingDevice || this.inVR);
     if (this.hasPointingDevice) {
-      this.data.controller.emit(this.data.teleportEvent, {});
-      this.el.setAttribute("line", { visible: false });
-      this.data.cursor.setAttribute("visible", false);
+      this.controller.emit(this.data.teleportEvent, {});
+    } else if (this.inVR) {
+      this.data.gazeTeleportControls.emit(this.data.teleportEvent, {});
     }
+    this.el.setAttribute("line", { visible: hideCursor });
+    this.data.cursor.setAttribute("visible", hideCursor);
   },
 
   _endTeleport: function() {
+    const showCursor = this.hasPointingDevice || this.inVR;
     if (this.hasPointingDevice) {
-      this.data.controller.emit(this.data.teleportEndEvent, {});
-      this.el.setAttribute("line", { visible: true });
-      this.data.cursor.setAttribute("visible", true);
+      this.controller.emit(this.data.teleportEndEvent, {});
+    } else if (this.inVR) {
+      this.data.gazeTeleportControls.emit(this.data.teleportEndEvent, {});
     }
+    this.el.setAttribute("line", { visible: showCursor });
+    this.data.cursor.setAttribute("visible", showCursor);
   },
 
   _handleMouseDown: function() {
-    if (this._isTargetOfType(TARGET_TYPE_INTERACTABLE)) {
+    if (this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI)) {
       const lookControls = this.data.camera.components["look-controls"];
       if (lookControls) lookControls.pause();
       this.data.cursor.emit(this.data.controllerEvent, {});
@@ -343,5 +364,6 @@ AFRAME.registerComponent("cursor-controller", {
 
   _handleCursorLoaded: function() {
     this.data.cursor.object3DMap.mesh.renderOrder = 1;
+    this.el.quer;
   }
 });

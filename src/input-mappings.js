@@ -94,7 +94,9 @@ const config = {
         trackpad_dpad4_pressed_center_down: ["action_primary_down"],
         trackpad_dpad4_pressed_north_down: ["action_primary_down"],
         trackpad_dpad4_pressed_south_down: ["action_primary_down"],
-        trackpadup: ["action_primary_up"]
+        trackpadup: ["action_primary_up"],
+        triggerdown: ["action_primary_down"],
+        triggerup: ["action_primary_up"]
       },
       keyboard: {
         m_press: "action_mute",
