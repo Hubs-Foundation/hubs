@@ -160,12 +160,22 @@ class HubCreatePanel extends Component {
                         {environmentTitle}
                       </span>
                       {environmentAuthor &&
-                        environmentAuthor.name && (
+                        environmentAuthor.name &&
+                        (environmentAuthor.url ? (
+                          <a
+                            href={environmentAuthor.url}
+                            target="_blank"
+                            className="create-panel__form__environment__picker__labels__header__author"
+                          >
+                            <FormattedMessage id="home.environment_author_by" />
+                            <span>{environmentAuthor.name}</span>
+                          </a>
+                        ) : (
                           <span className="create-panel__form__environment__picker__labels__header__author">
                             <FormattedMessage id="home.environment_author_by" />
                             <span>{environmentAuthor.name}</span>
                           </span>
-                        )}
+                        ))}
                     </div>
                     <div className="create-panel__form__environment__picker__labels__footer">
                       <FormattedMessage id="home.environment_picker_footer" />
