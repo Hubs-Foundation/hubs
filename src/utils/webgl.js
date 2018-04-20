@@ -33,3 +33,15 @@ export function patchWebGLRenderingContext() {
   }
   WebGLRenderingContext.prototype.getExtension = patchedGetExtension;
 }
+
+// HACK: THIS SHOULD NOT GET MERGED TO MASTER
+export function monkeyPatchPannerNode() {
+  const setPosition = PannerNode.prototype.setPosition;
+  PannerNode.prototype.setPosition = function(x, y, z) {
+    if (isNaN(x) || isNaN(y) || isNaN(z)) {
+      console.error("PannerNode.setPosition caled with invalid position", x, y, z);
+    } else {
+      setPosition.call(this, x, y, z);
+    }
+  };
+}
