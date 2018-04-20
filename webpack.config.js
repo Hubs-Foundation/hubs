@@ -218,7 +218,8 @@ const config = {
     new webpack.DefinePlugin({
       "process.env": JSON.stringify({
         NODE_ENV: process.env.NODE_ENV,
-        JANUS_SERVER: process.env.JANUS_SERVER
+        JANUS_SERVER: process.env.JANUS_SERVER,
+        DEV_RETICULUM_SERVER: process.env.DEV_RETICULUM_SERVER
       })
     })
   ]
