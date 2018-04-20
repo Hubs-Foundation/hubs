@@ -329,10 +329,10 @@ const onReady = async () => {
   console.log(`Hub ID: ${hubId}`);
 
   const socketProtocol = document.location.protocol === "https:" ? "wss:" : "ws:";
-  const socketPort = qs.phx_port || (process.env.NODE_ENV === "production" ? document.location.port : 443);
-  const socketHost =
-    qs.phx_host ||
-    (process.env.NODE_ENV === "production" ? document.location.hostname : process.env.DEV_RETICULUM_SERVER);
+  const [retHost, retPort] = (process.env.DEV_RETICULUM_SERVER || "").split(":");
+  const isProd = process.env.NODE_ENV === "production";
+  const socketPort = qs.phx_port || (isProd ? document.location.port : retPort) || "443";
+  const socketHost = qs.phx_host || (isProd ? document.location.hostname : retHost) || "";
   const socketUrl = `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}/socket`;
   console.log(`Phoenix Channel URL: ${socketUrl}`);
 
