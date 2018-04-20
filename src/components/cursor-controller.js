@@ -71,14 +71,14 @@ AFRAME.registerComponent("cursor-controller", {
 
   update: function(oldData) {
     if (this.data.controller !== oldData.controller) {
-      if (this.controller) {
+      if (!!this.controller) {
         this.controller.removeEventListener(this.data.controllerEvent, this.controllerEventListener);
         this.controller.removeEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
       }
 
       this.controller = document.querySelector(this.data.controller);
 
-      if (this.controller) {
+      if (!!this.controller) {
         this.controller.addEventListener(this.data.controllerEvent, this.controllerEventListener);
         this.controller.addEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
       }
@@ -110,18 +110,21 @@ AFRAME.registerComponent("cursor-controller", {
     //TODO: separate this into its own component? Or find an existing component that does this better.
     this.checkForPointingDeviceInterval = setInterval(() => {
       const controller = this._getController();
-      const hasPointingDevice = controller && this.inVR;
+      const hasPointingDevice = this.inVR && !!controller && !!controller.hand;
       if (this.hasPointingDevice != hasPointingDevice) {
-        this.el.setAttribute("line", { visible: controller });
+        this.el.setAttribute("line", { visible: hasPointingDevice });
+      }
+
+      if (hasPointingDevice && (this.data.hand != controller.hand || this.hasPointingDevice != hasPointingDevice)) {
+        const hand = controller.hand;
+        const update = {
+          hand: hand,
+          controller: `#player-${hand}-controller`,
+          otherHand: `#${hand}-super-hand`
+        };
+        this.el.setAttribute("cursor-controller", update);
       }
       this.hasPointingDevice = hasPointingDevice;
-      if (controller && this.data.hand != controller.hand) {
-        this.el.setAttribute("cursor-controller", {
-          hand: controller.hand,
-          controller: `#player-${controller.hand}-controller`,
-          otherHand: `#${controller.hand}-super-hand`
-        });
-      }
     }, 1000);
   },
 
@@ -137,7 +140,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.el.removeEventListener("raycaster-intersection", this.raycasterIntersectionListener);
     this.el.removeEventListener("raycaster-intersection-cleared", this.raycasterIntersectionClearedListener);
 
-    if (this.controller) {
+    if (!!this.controller) {
       this.controller.removeEventListener(this.data.controllerEvent, this.controllerEventListener);
       this.controller.removeEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
     }
@@ -173,7 +176,7 @@ AFRAME.registerComponent("cursor-controller", {
       //gaze cursor mode
       camera.getWorldPosition(this.origin);
       camera.getWorldDirection(this.direction);
-    } else {
+    } else if (!!this.controller) {
       //3d cursor mode
       this.controller.object3D.getWorldPosition(this.origin);
       this.controller.object3D.getWorldQuaternion(this.controllerQuaternion);
@@ -266,7 +269,7 @@ AFRAME.registerComponent("cursor-controller", {
 
   _startTeleport: function() {
     const hideCursor = !(this.hasPointingDevice || this.inVR);
-    if (this.hasPointingDevice) {
+    if (!!this.controller) {
       this.controller.emit(this.data.teleportEvent, {});
     } else if (this.inVR) {
       this.data.gazeTeleportControls.emit(this.data.teleportEvent, {});
@@ -277,7 +280,7 @@ AFRAME.registerComponent("cursor-controller", {
 
   _endTeleport: function() {
     const showCursor = this.hasPointingDevice || this.inVR;
-    if (this.hasPointingDevice) {
+    if (!!this.controller) {
       this.controller.emit(this.data.teleportEndEvent, {});
     } else if (this.inVR) {
       this.data.gazeTeleportControls.emit(this.data.teleportEndEvent, {});
