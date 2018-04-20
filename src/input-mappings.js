@@ -46,12 +46,12 @@ const config = {
         trackpadup: { right: "action_primary_up" },
         menudown: "thumb_down",
         menuup: "thumb_up",
-        gripdown: ["action_primary_down", "middle_ring_pinky_down", "index_down"],
-        gripup: ["action_primary_up", "middle_ring_pinky_up", "index_up"],
+        gripdown: ["action_grab", "middle_ring_pinky_down", "index_down"],
+        gripup: ["action_release", "middle_ring_pinky_up", "index_up"],
         trackpadtouchstart: "thumb_down",
         trackpadtouchend: "thumb_up",
-        triggerdown: ["action_primary_down", "index_down"],
-        triggerup: ["action_primary_up", "index_up"]
+        triggerdown: ["action_primary_down", "action_grab", "index_down"],
+        triggerup: ["action_primary_up", "action_release", "index_up"]
       },
       "oculus-touch-controls": {
         joystick_dpad4_west: {
@@ -60,8 +60,8 @@ const config = {
         joystick_dpad4_east: {
           right: "snap_rotate_right"
         },
-        gripdown: ["action_primary_down", "middle_ring_pinky_down"],
-        gripup: ["action_primary_up", "middle_ring_pinky_up"],
+        gripdown: ["action_grab", "middle_ring_pinky_down"],
+        gripup: ["action_release", "middle_ring_pinky_up"],
         abuttontouchstart: "thumb_down",
         abuttontouchend: "thumb_up",
         bbuttontouchstart: "thumb_down",

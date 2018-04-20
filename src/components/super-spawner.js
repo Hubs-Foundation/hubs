@@ -68,6 +68,7 @@ AFRAME.registerComponent("super-spawner", {
     const data = this.entities.get(entity);
     if (data.componentInitialized && data.bodyLoaded) {
       data.hand.emit("action_primary_down", { targetEntity: entity });
+      data.hand.emit("action_grab", { targetEntity: entity });
       const eventData = { bubbles: true, cancelable: true, detail: { hand: data.hand, target: entity } };
       const event = new CustomEvent("grab-start", eventData);
       entity.dispatchEvent(event);
