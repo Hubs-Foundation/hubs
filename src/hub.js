@@ -4,8 +4,9 @@ import uuid from "uuid/v4";
 import queryString from "query-string";
 import { Socket } from "phoenix";
 
-import { patchWebGLRenderingContext } from "./utils/webgl";
+import { patchWebGLRenderingContext, monkeyPatchPannerNode } from "./utils/webgl";
 patchWebGLRenderingContext();
+monkeyPatchPannerNode();
 
 import "aframe-xr";
 import "./vendor/GLTFLoader";
