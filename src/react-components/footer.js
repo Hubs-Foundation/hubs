@@ -17,10 +17,6 @@ export default class Footer extends Component {
     hubName: PropTypes.string,
     participantCount: PropTypes.number
   };
-  static defaultProps = {
-    hubName: "Bobo's Super Test House",
-    participantCount: 10
-  };
   state = {
     menuVisible: false
   };
@@ -39,7 +35,7 @@ export default class Footer extends Component {
         ) : (
           <div className={styles.header}>
             <div className={styles.hubInfo}>
-              <span className={styles.hubName}>{this.props.hubName}</span>
+              <span>{this.props.hubName}</span>
             </div>
             <button className={styles.menuButton} onClick={() => this.setState({ menuVisible: !menuVisible })}>
               <i className={styles.menuButtonIcon}>
@@ -48,7 +44,7 @@ export default class Footer extends Component {
             </button>
             <div className={styles.hubStats}>
               <FontAwesomeIcon icon={faUsers} />
-              <span className={styles.hubParticipantCount}>{this.props.participantCount}</span>
+              <span className={styles.hubParticipantCount}>{this.props.participantCount || "-"}</span>
             </div>
           </div>
         )}
@@ -57,11 +53,11 @@ export default class Footer extends Component {
             {mobiledetect.mobile() && (
               <div className={styles.header}>
                 <div className={styles.hubInfo}>
-                  <span className={styles.hubName}>{this.props.hubName}</span>
+                  <span>{this.props.hubName}</span>
                 </div>
                 <div className={styles.hubStats}>
                   <FontAwesomeIcon icon={faUsers} />
-                  <span className={styles.hubParticipantCount}>{this.props.participantCount}</span>
+                  <span className={styles.hubParticipantCount}>{this.props.participantCount || "-"}</span>
                 </div>
               </div>
             )}
