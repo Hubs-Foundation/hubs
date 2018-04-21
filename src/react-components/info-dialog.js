@@ -7,8 +7,15 @@ import formurlencoded from "form-urlencoded";
 // TODO i18n
 
 class InfoDialog extends Component {
+  static dialogTypes = {
+    slack: Symbol("slack"),
+    email_submitted: Symbol("email_submitted"),
+    invite: Symbol("invite"),
+    updates: Symbol("updates"),
+    report: Symbol("report")
+  };
   static propTypes = {
-    dialogType: PropTypes.string,
+    dialogType: PropTypes.oneOf(Object.values(InfoDialog.dialogTypes)),
     onCloseDialog: PropTypes.func,
     onSubmittedEmail: PropTypes.func
   };
@@ -70,7 +77,7 @@ class InfoDialog extends Component {
 
     switch (this.props.dialogType) {
       // TODO i18n, FormattedMessage doesn't play nicely with links
-      case "slack":
+      case InfoDialog.dialogTypes.slack:
         dialogTitle = "Get in Touch";
         dialogBody = (
           <span>
@@ -89,11 +96,11 @@ class InfoDialog extends Component {
           </span>
         );
         break;
-      case "email_submitted":
+      case InfoDialog.dialogTypes.email_submitted:
         dialogTitle = "";
         dialogBody = "Great! Please check your e-mail to confirm your subscription.";
         break;
-      case "invite":
+      case InfoDialog.dialogTypes.invite:
         dialogTitle = "Invite Others";
         dialogBody = (
           <div>
@@ -120,7 +127,7 @@ class InfoDialog extends Component {
           </div>
         );
         break;
-      case "updates":
+      case InfoDialog.dialogTypes.updates:
         dialogTitle = "";
         dialogBody = (
           <span>
@@ -157,7 +164,7 @@ class InfoDialog extends Component {
           </span>
         );
         break;
-      case "report":
+      case InfoDialog.dialogTypes.report:
         dialogTitle = "Report an Issue";
         dialogBody = (
           <span>
