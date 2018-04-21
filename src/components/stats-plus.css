@@ -14,14 +14,9 @@
   font-family: monospace;
   cursor: pointer;
   position: absolute;
-  bottom: 50px;
-  left: 0;
-  padding: 8px;
+  top: 0;
+  right: 0;
+  padding: 8px 12px;
   color: #aaa;
   font-size: 10px;
-}
-
-:global(.rs-mobile) {
-  bottom: auto;
-  top: 0;
 }
