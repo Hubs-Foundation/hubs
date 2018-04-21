@@ -518,7 +518,7 @@ class UIRoot extends Component {
             Sorry, this room is no longer available.
             <p />
             A room may be closed if we receive reports that it violates our{" "}
-            <a target="_blank" ref="noreferrer noopener" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
+            <a target="_blank" rel="noreferrer noopener" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
               Terms of Use
             </a>.
             <br />
