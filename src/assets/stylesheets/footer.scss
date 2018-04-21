@@ -15,9 +15,11 @@
   display: flex;
   justify-content: center;
 }
-:local(.header) {
+:local(.header), :local(.menu-header) {
   display: flex;
   border-bottom: 2px solid #333;
+}
+:local(.header) {
   background-color: rgba(0, 0, 0, 0.65);
 }
 :local(.hub-info) {

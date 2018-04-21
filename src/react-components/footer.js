@@ -51,7 +51,7 @@ export default class Footer extends Component {
         {menuVisible && (
           <div className={styles.menu}>
             {mobiledetect.mobile() && (
-              <div className={styles.header}>
+              <div className={styles.menuHeader}>
                 <div className={styles.hubInfo}>
                   <span>{this.props.hubName}</span>
                 </div>
