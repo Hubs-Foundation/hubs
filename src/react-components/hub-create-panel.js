@@ -83,10 +83,10 @@ class HubCreatePanel extends Component {
     return new RegExp(HUB_NAME_PATTERN).test(this.state.name) && new RegExp(hubAlphaPattern).test(this.state.name);
   };
 
-  _preloadImage = async src => {
+  _preloadImage = async srcset => {
     const img = new Image();
     const imgLoad = new Promise(resolve => img.addEventListener("load", resolve));
-    img.srcset = src;
+    img.srcset = srcset;
     await imgLoad;
   };
 
