@@ -37,11 +37,11 @@
 
       &__title {
 	@extend %top-title;
-	margin-top: 20px;
       }
 
       &__body {
 	margin: 40px;
+	margin-bottom: 0px;
 	font-size: 1.1em;
 	margin-top: 20px;
 	color: $grey-text;
