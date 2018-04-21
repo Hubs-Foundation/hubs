@@ -205,7 +205,7 @@ const onReady = async () => {
     });
 
     if (!qsTruthy("no_stats")) {
-      scene.setAttribute("stats", true);
+      scene.setAttribute("stats-plus", false);
     }
 
     if (isMobile || qsTruthy("mobile")) {
