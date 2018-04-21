@@ -266,6 +266,16 @@ class HomeRoot extends Component {
                 <div className="footer-content__links__bottom">
                   <FormattedMessage id="home.made_with_love" />
                   <span style={{ fontWeight: "bold", color: "white" }}>moz://a</span>
+                  <span>
+                    &nbsp;&nbsp;|&nbsp;&nbsp;Medieval Fantasy Book by{" "}
+                    <a
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      href="https://sketchfab.com/models/06d5a80a04fc4c5ab552759e9a97d91a?utm_campaign=06d5a80a04fc4c5ab552759e9a97d91a&utm_medium=embed&utm_source=oembed"
+                    >
+                      Pixel
+                    </a>
+                  </span>
                 </div>
               </div>
             </div>

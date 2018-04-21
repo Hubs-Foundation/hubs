@@ -218,6 +218,10 @@ body {
 
     &__bottom {
       margin-top: 4px;
+
+      a {
+	color: $grey-text;
+      }
     }
   }
 }
