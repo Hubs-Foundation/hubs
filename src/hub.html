@@ -129,9 +129,9 @@
                 super-hands="
                     colliderEvent: collisions; colliderEventProperty: els;
                     colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
-                    grabStartButtons: action_primary_down; grabEndButtons: action_primary_up;
-                    stretchStartButtons: action_primary_down; stretchEndButtons: action_primary_up;
-                    dragDropStartButtons: action_primary_down; dragDropEndButtons: action_primary_up;"
+                    grabStartButtons: action_grab; grabEndButtons: action_release;
+                    stretchStartButtons: action_grab; stretchEndButtons: action_release;
+                    dragDropStartButtons: action_grab; dragDropEndButtons: action_release;"
                 collision-filter="collisionForces: false"
                 physics-collider
             ></a-mixin>
@@ -273,7 +273,9 @@
                     <a-entity bone-visibility>
                         <a-entity
                             id="left-super-hand"
-                            event-repeater="events: action_primary_down, action_primary_up; eventSource: #player-left-controller"
+                            event-repeater="
+                            events: action_grab, action_release, action_primary_down, action_primary_up; 
+                            eventSource: #player-left-controller"
                             static-body="shape: sphere; sphereRadius: 0.02"
                             mixin="super-hands"
                             position="0 0.05 0"
@@ -285,7 +287,9 @@
                     <a-entity bone-visibility>
                         <a-entity
                             id="right-super-hand"
-                            event-repeater="events: action_primary_down, action_primary_up; eventSource: #player-right-controller"
+                            event-repeater="
+                            events: action_grab, action_release, action_primary_down, action_primary_up; 
+                            eventSource: #player-right-controller"
                             static-body="shape: sphere; sphereRadius: 0.02"
                             mixin="super-hands"
                             position="0 -0.05 0"

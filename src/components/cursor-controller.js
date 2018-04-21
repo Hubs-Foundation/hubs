@@ -20,6 +20,8 @@ AFRAME.registerComponent("cursor-controller", {
     cursorColorUnhovered: { default: "#FFFFFF" },
     controllerEvent: { type: "string", default: "action_primary_down" },
     controllerEndEvent: { type: "string", default: "action_primary_up" },
+    grabEvent: { type: "string", default: "action_grab" },
+    releaseEvent: { type: "string", default: "action_release" },
     teleportEvent: { type: "string", default: "action_teleport_down" },
     teleportEndEvent: { type: "string", default: "action_teleport_up" }
   },
@@ -31,6 +33,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.hasPointingDevice = false;
     this.currentTargetType = TARGET_TYPE_NONE;
     this.isGrabbing = false;
+    this.grabStarting = false;
     this.wasOtherHandGrabbing = false;
     this.wasIntersecting = false;
     this.currentDistance = this.data.maxDistance;
@@ -71,16 +74,20 @@ AFRAME.registerComponent("cursor-controller", {
 
   update: function(oldData) {
     if (this.data.controller !== oldData.controller) {
-      if (this.controller) {
+      if (!!this.controller) {
         this.controller.removeEventListener(this.data.controllerEvent, this.controllerEventListener);
         this.controller.removeEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
+        this.controller.removeEventListener(this.data.grabEvent, this.controllerEventListener);
+        this.controller.removeEventListener(this.data.releaseEvent, this.controllerEndEventListener);
       }
 
       this.controller = document.querySelector(this.data.controller);
 
-      if (this.controller) {
+      if (!!this.controller) {
         this.controller.addEventListener(this.data.controllerEvent, this.controllerEventListener);
         this.controller.addEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
+        this.controller.addEventListener(this.data.grabEvent, this.controllerEventListener);
+        this.controller.addEventListener(this.data.releaseEvent, this.controllerEndEventListener);
       }
     }
 
@@ -110,18 +117,22 @@ AFRAME.registerComponent("cursor-controller", {
     //TODO: separate this into its own component? Or find an existing component that does this better.
     this.checkForPointingDeviceInterval = setInterval(() => {
       const controller = this._getController();
-      const hasPointingDevice = controller && this.inVR;
+      const hasPointingDevice = this.inVR && !!controller && !!controller.hand;
       if (this.hasPointingDevice != hasPointingDevice) {
-        this.el.setAttribute("line", { visible: controller });
+        this.el.setAttribute("line", { visible: hasPointingDevice });
+        this.data.cursor.setAttribute("visible", hasPointingDevice);
+      }
+
+      if (hasPointingDevice && (this.data.hand != controller.hand || this.hasPointingDevice != hasPointingDevice)) {
+        const hand = controller.hand;
+        const update = {
+          hand: hand,
+          controller: `#player-${hand}-controller`,
+          otherHand: `#${hand}-super-hand`
+        };
+        this.el.setAttribute("cursor-controller", update);
       }
       this.hasPointingDevice = hasPointingDevice;
-      if (controller && this.data.hand != controller.hand) {
-        this.el.setAttribute("cursor-controller", {
-          hand: controller.hand,
-          controller: `#player-${controller.hand}-controller`,
-          otherHand: `#${controller.hand}-super-hand`
-        });
-      }
     }, 1000);
   },
 
@@ -137,9 +148,11 @@ AFRAME.registerComponent("cursor-controller", {
     this.el.removeEventListener("raycaster-intersection", this.raycasterIntersectionListener);
     this.el.removeEventListener("raycaster-intersection-cleared", this.raycasterIntersectionClearedListener);
 
-    if (this.controller) {
+    if (!!this.controller) {
       this.controller.removeEventListener(this.data.controllerEvent, this.controllerEventListener);
       this.controller.removeEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
+      this.controller.removeEventListener(this.data.grabEvent, this.controllerEventListener);
+      this.controller.removeEventListener(this.data.releaseEvent, this.controllerEndEventListener);
     }
 
     this.data.playerRig.removeEventListener("model-loaded", this.modelLoadedListener);
@@ -150,11 +163,14 @@ AFRAME.registerComponent("cursor-controller", {
   tick: function() {
     this.isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
 
+    //handle physical hand
     if (this.otherHand) {
       const state = this.otherHand.components["super-hands"].state;
       const isOtherHandGrabbing = state.has("grab-start") || state.has("hover-start");
       if (this.wasOtherHandGrabbing != isOtherHandGrabbing) {
         this.data.cursor.setAttribute("visible", !isOtherHandGrabbing);
+        this.el.setAttribute("line", { visible: !isOtherHandGrabbing });
+        this.currentTargetType = TARGET_TYPE_NONE;
       }
       this.wasOtherHandGrabbing = isOtherHandGrabbing;
     }
@@ -173,7 +189,7 @@ AFRAME.registerComponent("cursor-controller", {
       //gaze cursor mode
       camera.getWorldPosition(this.origin);
       camera.getWorldDirection(this.direction);
-    } else {
+    } else if (!!this.controller) {
       //3d cursor mode
       this.controller.object3D.getWorldPosition(this.origin);
       this.controller.object3D.getWorldQuaternion(this.controllerQuaternion);
@@ -213,7 +229,7 @@ AFRAME.registerComponent("cursor-controller", {
     if (this.isGrabbing && !intersection) {
       this.currentTargetType = TARGET_TYPE_INTERACTABLE;
     } else if (intersection) {
-      if (this._isInteractableAllowed() && this._isClass("interactable", intersection.object.el)) {
+      if (this._isClass("interactable", intersection.object.el)) {
         this.currentTargetType = TARGET_TYPE_INTERACTABLE;
       } else if (this._isClass("ui", intersection.object.el)) {
         this.currentTargetType = TARGET_TYPE_UI;
@@ -245,10 +261,6 @@ AFRAME.registerComponent("cursor-controller", {
     );
   },
 
-  _isInteractableAllowed: function() {
-    return !this.hasPointingDevice || this.isMobile;
-  },
-
   _isTargetOfType: function(mask) {
     return (this.currentTargetType & mask) === this.currentTargetType;
   },
@@ -266,7 +278,7 @@ AFRAME.registerComponent("cursor-controller", {
 
   _startTeleport: function() {
     const hideCursor = !(this.hasPointingDevice || this.inVR);
-    if (this.hasPointingDevice) {
+    if (!!this.controller) {
       this.controller.emit(this.data.teleportEvent, {});
     } else if (this.inVR) {
       this.data.gazeTeleportControls.emit(this.data.teleportEvent, {});
@@ -277,7 +289,7 @@ AFRAME.registerComponent("cursor-controller", {
 
   _endTeleport: function() {
     const showCursor = this.hasPointingDevice || this.inVR;
-    if (this.hasPointingDevice) {
+    if (!!this.controller) {
       this.controller.emit(this.data.teleportEndEvent, {});
     } else if (this.inVR) {
       this.data.gazeTeleportControls.emit(this.data.teleportEndEvent, {});
@@ -342,18 +354,20 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleControllerEvent: function(e) {
-    const isInteractable = this._isTargetOfType(TARGET_TYPE_INTERACTABLE) && this._isInteractableAllowed();
+    const isInteractable = this._isTargetOfType(TARGET_TYPE_INTERACTABLE) && !this.grabStarting;
     if (isInteractable || this._isTargetOfType(TARGET_TYPE_UI)) {
+      this.grabStarting = true;
       this.data.cursor.emit(this.data.controllerEvent, e.detail);
-    } else {
+    } else if (e.type !== this.data.grabEvent) {
       this._startTeleport();
     }
   },
 
   _handleControllerEndEvent: function(e) {
     if (this.isGrabbing || this._isTargetOfType(TARGET_TYPE_UI)) {
+      this.grabStarting = false;
       this.data.cursor.emit(this.data.controllerEndEvent, e.detail);
-    } else {
+    } else if (e.type !== this.data.releaseEvent) {
       this._endTeleport();
     }
   },
