@@ -176,6 +176,9 @@ const onReady = async () => {
   };
 
   const exitScene = () => {
+    if (NAF.connection.adapter && NAF.connection.adapter.localMediaStream) {
+      NAF.connection.adapter.localMediaStream.getTracks().forEach(t => t.stop());
+    }
     hubChannel.disconnect();
     const scene = document.querySelector("a-scene");
     scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
@@ -202,7 +205,7 @@ const onReady = async () => {
     });
 
     if (!qsTruthy("no_stats")) {
-      scene.setAttribute("stats", true);
+      scene.setAttribute("stats-plus", false);
     }
 
     if (isMobile || qsTruthy("mobile")) {
