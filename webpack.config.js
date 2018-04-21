@@ -142,6 +142,7 @@ const config = {
               options: {
                 name: "[path][name]-[hash].[ext]",
                 minimize: process.env.NODE_ENV === "production",
+                localIdentName: "[name]__[local]__[hash:base64:5]",
                 camelCase: true
               }
             },
@@ -158,6 +159,7 @@ const config = {
             options: {
               name: "[path][name]-[hash].[ext]",
               minimize: process.env.NODE_ENV === "production",
+              localIdentName: "[name]__[local]__[hash:base64:5]",
               camelCase: true
             }
           }

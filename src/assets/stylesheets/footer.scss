@@ -1,39 +1,80 @@
+@import 'shared';
+
 :local(.container) {
   position: absolute;
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.35);
   bottom: 0;
-  display: flex;
   font-size: 1.3em;
-  height: 48px;
+  display: flex;
+  flex-direction: column;
+  // Position above virtual gamepad controls on mobile
+  z-index: 1;
+
+}
+:local(.floatingButton) {
+  display: flex;
+  justify-content: center;
+}
+:local(.header) {
+  display: flex;
+  border-bottom: 2px solid #333;
+  background-color: rgba(0, 0, 0, 0.65);
 }
 :local(.hub-info) {
   flex: 1;
   margin: 8px;
+  display: flex;
+  align-items: center;
 }
 :local(.menu) {
-  margin: 8px;
+  padding: 5px 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+  border-top: 3px solid white;
+}
+:local(.menu-buttons) {
+  margin: 0 auto;
 }
 :local(.menu-button) {
+  @extend %default-font;
+  margin: 8px 0;
+  padding: 0;
+  display: block;
   background: none;
-  border: 3px solid white;
-  border-radius: 16px;
+  border: none;
   color: white;
-  margin: 0 8px;
   pointer-events: auto;
   cursor: pointer;
-  width: 33px;
-  height: 33px;
+  font-size: 0.8em;
 }
 :local(.menu-button__icon) {
-  margin-left: -1px;
-  margin-bottom: 1px;
+  background: black;
+  width: 39px !important;
+  height: 39px;
+  border: 3px solid white;
+  border-radius: 39px;
+  display: inline-block;
+  font-size: 1.5em;
+  vertical-align: sub;
+  svg {
+    margin-top: 7px;
+    margin-left: 0px;
+  }
+}
+:local(.menu-button__text) {
+  margin-left: 16px;
 }
 :local(.hub-stats) {
-  flex: 1;
   text-align: right;
   margin: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  @media (min-width: 768px) {
+    flex: 1;
+  }
 }
 :local(.hub-participant-count) {
-  margin: 0 8px;
+  margin: 0 5px;
 }
