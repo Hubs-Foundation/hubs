@@ -49,6 +49,7 @@ import "./components/hand-poses";
 import "./components/gltf-model-plus";
 import "./components/gltf-bundle";
 import "./components/hud-controller";
+import "./components/stats-plus";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -57,6 +58,7 @@ import HubChannel from "./utils/hub-channel";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
+import "./systems/exit-on-blur";
 
 import "./gltf-component-mappings";
 
@@ -174,6 +176,9 @@ const onReady = async () => {
   };
 
   const exitScene = () => {
+    if (NAF.connection.adapter && NAF.connection.adapter.localMediaStream) {
+      NAF.connection.adapter.localMediaStream.getTracks().forEach(t => t.stop());
+    }
     hubChannel.disconnect();
     const scene = document.querySelector("a-scene");
     scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
@@ -199,9 +204,7 @@ const onReady = async () => {
       serverURL: process.env.JANUS_SERVER
     });
 
-    if (!qsTruthy("no_stats")) {
-      scene.setAttribute("stats", true);
-    }
+    scene.setAttribute("stats-plus", false);
 
     if (isMobile || qsTruthy("mobile")) {
       playerRig.setAttribute("virtual-gamepad-controls", {});
@@ -308,8 +311,10 @@ const onReady = async () => {
   console.log(`Hub ID: ${hubId}`);
 
   const socketProtocol = document.location.protocol === "https:" ? "wss:" : "ws:";
-  const socketPort = qs.phx_port || document.location.port;
-  const socketHost = qs.phx_host || document.location.hostname;
+  const socketPort = qs.phx_port || (process.env.NODE_ENV === "production" ? document.location.port : 443);
+  const socketHost =
+    qs.phx_host ||
+    (process.env.NODE_ENV === "production" ? document.location.hostname : process.env.DEV_RETICULUM_SERVER);
   const socketUrl = `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}/socket`;
   console.log(`Phoenix Channel URL: ${socketUrl}`);
 
