@@ -7,7 +7,7 @@ import faAngleLeft from "@fortawesome/fontawesome-free-solid/faAngleLeft";
 import faAngleRight from "@fortawesome/fontawesome-free-solid/faAngleRight";
 import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 
-import deafault_scene_preview_thumbnail from "../assets/images/default_thumbnail.png";
+import default_scene_preview_thumbnail from "../assets/images/default_thumbnail.png";
 
 const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
 
@@ -21,14 +21,33 @@ class HubCreatePanel extends Component {
     super(props);
 
     this.state = {
+      ready: false,
       name: generateHubName(),
-      environmentIndex: Math.floor(Math.random() * props.environments.length),
-
-      // HACK: expand on small screens by default to ensure scene selection possible.
-      // Eventually this could/should be done via media queries.
-      expanded: window.innerWidth < 420
+      environmentIndex: Math.floor(Math.random() * props.environments.length)
     };
+
+    // HACK: expand on small screens by default to ensure scene selection possible.
+    // Eventually this could/should be done via media queries.
+    if (window.innerWidth < 420) {
+      (async () => {
+        const environmentThumbnail = this._getEnvironmentThumbnail(this.state.environmentIndex);
+        await this._preloadImage(environmentThumbnail.srcset);
+        this.setState({ ready: true, expanded: true });
+      })();
+    } else {
+      this.state.ready = true;
+    }
   }
+
+  _getEnvironmentThumbnail = environmentIndex => {
+    const environment = this.props.environments[environmentIndex];
+    const meta = environment.meta || {};
+    return (
+      (meta.images || []).find(i => i.type === "preview-thumbnail") || {
+        srcset: default_scene_preview_thumbnail
+      }
+    );
+  };
 
   createHub = async e => {
     e.preventDefault();
@@ -64,12 +83,21 @@ class HubCreatePanel extends Component {
     return new RegExp(HUB_NAME_PATTERN).test(this.state.name) && new RegExp(hubAlphaPattern).test(this.state.name);
   };
 
-  setToEnvironmentOffset = offset => {
+  _preloadImage = async src => {
+    const img = new Image();
+    const imgLoad = new Promise(resolve => img.addEventListener("load", resolve));
+    img.srcset = src;
+    await imgLoad;
+  };
+
+  setToEnvironmentOffset = async offset => {
     const numEnvs = this.props.environments.length;
 
-    this.setState(state => ({
-      environmentIndex: ((state.environmentIndex + offset) % this.props.environments.length + numEnvs) % numEnvs
-    }));
+    const environmentIndex = ((this.state.environmentIndex + offset) % numEnvs + numEnvs) % numEnvs;
+    const environmentThumbnail = this._getEnvironmentThumbnail(environmentIndex);
+    await this._preloadImage(environmentThumbnail.srcset);
+
+    this.setState({ environmentIndex });
   };
 
   setToNextEnvironment = () => {
@@ -88,6 +116,7 @@ class HubCreatePanel extends Component {
   };
 
   render() {
+    if (!this.state.ready) return null;
     const { formatMessage } = this.props.intl;
 
     if (this.props.environments.length == 0) {
@@ -99,9 +128,7 @@ class HubCreatePanel extends Component {
 
     const environmentTitle = meta.title || environment.name;
     const environmentAuthor = (meta.authors || [])[0];
-    const environmentThumbnail = (meta.images || []).find(i => i.type === "preview-thumbnail") || {
-      srcset: deafault_scene_preview_thumbnail
-    };
+    const environmentThumbnail = this._getEnvironmentThumbnail(this.state.environmentIndex);
 
     const formNameClassNames = classNames("create-panel__form__name", {
       "create-panel__form__name--expanded": this.state.expanded
@@ -118,10 +145,11 @@ class HubCreatePanel extends Component {
           <div className="create-panel__form">
             <div
               className="create-panel__form__left-container"
-              onClick={() => {
+              onClick={async () => {
                 if (this.state.expanded) {
                   this.shuffle();
                 } else {
+                  await this._preloadImage(this._getEnvironmentThumbnail(this.state.environmentIndex).srcset);
                   this.setState({ expanded: true });
                 }
               }}
