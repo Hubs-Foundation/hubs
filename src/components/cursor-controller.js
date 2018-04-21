@@ -75,11 +75,11 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   update: function(oldData) {
-    if (this.oldData.otherHand !== this.data.otherHand) {
+    if (oldData.otherHand !== this.data.otherHand) {
       this._handleModelLoaded();
     }
 
-    if (this.oldData.hand !== this.data.hand) {
+    if (oldData.hand !== this.data.hand) {
       //TODO
     }
   },
