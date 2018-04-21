@@ -10,10 +10,8 @@ AFRAME.registerComponent("cursor-controller", {
     camera: { type: "selector" },
     playerRig: { type: "selector" },
     gazeTeleportControls: { type: "selector" },
-    controller: { type: "string" },
     otherHand: { type: "string" },
     hand: { default: "right" },
-    trackedControls: { type: "string", default: "[tracked-controls]" },
     maxDistance: { default: 3 },
     minDistance: { default: 0.5 },
     cursorColorHovered: { default: "#FF0000" },
@@ -44,6 +42,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.mousePos = new THREE.Vector2();
     this.controllerQuaternion = new THREE.Quaternion();
     this.controller = null;
+    this.controllerQueue = [];
 
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
@@ -66,38 +65,13 @@ AFRAME.registerComponent("cursor-controller", {
     this.el.sceneEl.renderer.sortObjects = true;
     this.cursorLoadedListener = this._handleCursorLoaded.bind(this);
     this.data.cursor.addEventListener("loaded", this.cursorLoadedListener);
+
+    this.controllerConnectedListener = this._handleControllerConnected.bind(this);
+    this.controllerDisconnectedListener = this._handleControllerDisconnected.bind(this);
   },
 
   remove: function() {
     this.data.cursor.removeEventListener("loaded", this.cursorLoadedListener);
-  },
-
-  update: function(oldData) {
-    if (this.data.controller !== oldData.controller) {
-      if (!!this.controller) {
-        this.controller.removeEventListener(this.data.controllerEvent, this.controllerEventListener);
-        this.controller.removeEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
-        this.controller.removeEventListener(this.data.grabEvent, this.controllerEventListener);
-        this.controller.removeEventListener(this.data.releaseEvent, this.controllerEndEventListener);
-      }
-
-      this.controller = document.querySelector(this.data.controller);
-
-      if (!!this.controller) {
-        this.controller.addEventListener(this.data.controllerEvent, this.controllerEventListener);
-        this.controller.addEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
-        this.controller.addEventListener(this.data.grabEvent, this.controllerEventListener);
-        this.controller.addEventListener(this.data.releaseEvent, this.controllerEndEventListener);
-      }
-    }
-
-    if (oldData.otherHand && this.data.otherHand !== oldData.otherHand) {
-      this._handleModelLoaded();
-    }
-
-    if (this.data.trackedControls !== oldData.trackedControls) {
-      this.trackedControls = document.querySelectorAll(this.data.trackedControls) || [];
-    }
   },
 
   play: function() {
@@ -114,26 +88,8 @@ AFRAME.registerComponent("cursor-controller", {
 
     this.data.playerRig.addEventListener("model-loaded", this.modelLoadedListener);
 
-    //TODO: separate this into its own component? Or find an existing component that does this better.
-    this.checkForPointingDeviceInterval = setInterval(() => {
-      const controller = this._getController();
-      const hasPointingDevice = this.inVR && !!controller && !!controller.hand;
-      if (this.hasPointingDevice != hasPointingDevice) {
-        this.el.setAttribute("line", { visible: hasPointingDevice });
-        this.data.cursor.setAttribute("visible", hasPointingDevice);
-      }
-
-      if (hasPointingDevice && (this.data.hand != controller.hand || this.hasPointingDevice != hasPointingDevice)) {
-        const hand = controller.hand;
-        const update = {
-          hand: hand,
-          controller: `#player-${hand}-controller`,
-          otherHand: `#${hand}-super-hand`
-        };
-        this.el.setAttribute("cursor-controller", update);
-      }
-      this.hasPointingDevice = hasPointingDevice;
-    }, 1000);
+    this.el.sceneEl.addEventListener("controllerconnected", this.controllerConnectedListener);
+    this.el.sceneEl.addEventListener("controllerdisconnected", this.controllerDisconnectedListener);
   },
 
   pause: function() {
@@ -157,7 +113,8 @@ AFRAME.registerComponent("cursor-controller", {
 
     this.data.playerRig.removeEventListener("model-loaded", this.modelLoadedListener);
 
-    clearInterval(this.checkForPointingDeviceInterval);
+    this.el.sceneEl.removeEventListener("controllerconnected", this.controllerConnectedListener);
+    this.el.sceneEl.removeEventListener("controllerdisconnected", this.controllerDisconnectedListener);
   },
 
   tick: function() {
@@ -168,7 +125,7 @@ AFRAME.registerComponent("cursor-controller", {
       const state = this.otherHand.components["super-hands"].state;
       const isOtherHandGrabbing = state.has("grab-start") || state.has("hover-start");
       if (this.wasOtherHandGrabbing != isOtherHandGrabbing) {
-        this.data.cursor.setAttribute("visible", !isOtherHandGrabbing);
+        // this.data.cursor.setAttribute("visible", !isOtherHandGrabbing);
         this.el.setAttribute("line", { visible: !isOtherHandGrabbing });
         this.currentTargetType = TARGET_TYPE_NONE;
       }
@@ -265,17 +222,6 @@ AFRAME.registerComponent("cursor-controller", {
     return (this.currentTargetType & mask) === this.currentTargetType;
   },
 
-  _getController: function() {
-    //TODO: prefer initial hand set in data.hand
-    for (let i = this.trackedControls.length - 1; i >= 0; i--) {
-      const trackedControlsComponent = this.trackedControls[i].components["tracked-controls"];
-      if (trackedControlsComponent && trackedControlsComponent.controller) {
-        return trackedControlsComponent.controller;
-      }
-    }
-    return null;
-  },
-
   _startTeleport: function() {
     const hideCursor = !(this.hasPointingDevice || this.inVR);
     if (!!this.controller) {
@@ -303,7 +249,7 @@ AFRAME.registerComponent("cursor-controller", {
       const lookControls = this.data.camera.components["look-controls"];
       if (lookControls) lookControls.pause();
       this.data.cursor.emit(this.data.controllerEvent, {});
-    } else {
+    } else if (this.inVR || this.isMobile) {
       this._startTeleport();
     }
   },
@@ -338,11 +284,13 @@ AFRAME.registerComponent("cursor-controller", {
   _handleEnterVR: function() {
     if (AFRAME.utils.device.checkHeadsetConnected()) {
       this.inVR = true;
+      this._updateController();
     }
   },
 
   _handleExitVR: function() {
     this.inVR = false;
+    this._updateController();
   },
 
   _handleRaycasterIntersection: function(e) {
@@ -378,6 +326,54 @@ AFRAME.registerComponent("cursor-controller", {
 
   _handleCursorLoaded: function() {
     this.data.cursor.object3DMap.mesh.renderOrder = 1;
-    this.el.quer;
+  },
+
+  _handleControllerConnected: function(e) {
+    const data = {
+      controller: e.target,
+      hand: e.detail.component.data.hand
+    };
+
+    if (data.hand === this.data.hand) {
+      this.controllerQueue.unshift(data);
+    } else {
+      this.controllerQueue.push(data);
+    }
+
+    this._updateController();
+  },
+
+  _handleControllerDisconnected: function(e) {
+    for (let i = 0; i < this.controllerQueue.length; i++) {
+      if (e.target === this.controllerQueue[i].controller) {
+        this.controllerQueue.splice(i, 1);
+        this._updateController();
+        return;
+      }
+    }
+  },
+
+  _updateController: function() {
+    this.hasPointingDevice = this.controllerQueue.length > 0 && this.inVR;
+
+    this.el.setAttribute("line", { visible: this.hasPointingDevice });
+
+    if (this.hasPointingDevice) {
+      const controllerData = this.controllerQueue[0];
+      if (!!this.controller) {
+        this.controller.removeEventListener(this.data.controllerEvent, this.controllerEventListener);
+        this.controller.removeEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
+        this.controller.removeEventListener(this.data.grabEvent, this.controllerEventListener);
+        this.controller.removeEventListener(this.data.releaseEvent, this.controllerEndEventListener);
+      }
+
+      this.controller = controllerData.controller;
+      this.controller.addEventListener(this.data.controllerEvent, this.controllerEventListener);
+      this.controller.addEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
+      this.controller.addEventListener(this.data.grabEvent, this.controllerEventListener);
+      this.controller.addEventListener(this.data.releaseEvent, this.controllerEndEventListener);
+    } else {
+      this.controller = null;
+    }
   }
 });
