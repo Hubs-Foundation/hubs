@@ -10,11 +10,18 @@
   flex-direction: column;
 
   &__title {
+    @extend %default-font;
     font-size: 1.2em;
   }
 
   &__subtitle {
-    font-size: 0.8em;
+    @extend %default-font;
+    padding: 12px;
+    text-align: center;
+    
+    a {
+      color: $light-text;
+    }
   }
 }
 
