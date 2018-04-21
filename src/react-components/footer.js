@@ -15,7 +15,9 @@ const mobiledetect = new MobileDetect(navigator.userAgent);
 export default class Footer extends Component {
   static propTypes = {
     hubName: PropTypes.string,
-    participantCount: PropTypes.number
+    participantCount: PropTypes.number,
+    onClickInvite: PropTypes.func,
+    onClickReport: PropTypes.func
   };
   state = {
     menuVisible: false
@@ -62,7 +64,7 @@ export default class Footer extends Component {
               </div>
             )}
             <div className={styles.menuButtons}>
-              <button className={styles.menuButton}>
+              <button className={styles.menuButton} onClick={this.props.onClickInvite}>
                 <i className={styles.menuButtonIcon}>
                   <FontAwesomeIcon icon={faShareAlt} />
                 </i>
@@ -70,7 +72,7 @@ export default class Footer extends Component {
                   <strong>Invite</strong> Others
                 </span>
               </button>
-              <button className={styles.menuButton}>
+              <button className={styles.menuButton} onClick={this.props.onClickReport}>
                 <i className={styles.menuButtonIcon}>
                   <FontAwesomeIcon icon={faExclamation} />
                 </i>

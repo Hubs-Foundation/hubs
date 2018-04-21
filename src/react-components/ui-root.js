@@ -779,7 +779,12 @@ class UIRoot extends Component {
           {this.state.entryStep === ENTRY_STEPS.finished ? (
             <div>
               <TwoDHUD muted={this.state.muted} onToggleMute={this.toggleMute} />
-              <Footer hubName={this.props.hubName} participantCount={this.props.participantCount} />
+              <Footer
+                hubName={this.props.hubName}
+                participantCount={this.props.participantCount}
+                onClickInvite={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
+                onClickReport={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.report })}
+              />
             </div>
           ) : null}
         </div>

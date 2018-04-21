@@ -70,6 +70,7 @@ class HomeRoot extends Component {
       "main-content": true,
       "main-content--noninteractive": !!this.state.dialogType
     });
+    const dialogTypes = InfoDialog.dialogTypes;
 
     return (
       <IntlProvider locale={lang} messages={messages}>
@@ -133,7 +134,7 @@ class HomeRoot extends Component {
                     className="footer-content__links__link"
                     rel="noopener noreferrer"
                     href="#"
-                    onClick={this.showDialog("slack")}
+                    onClick={this.showDialog(dialogTypes.slack)}
                   >
                     <FormattedMessage id="home.join_us" />
                   </a>
@@ -141,7 +142,7 @@ class HomeRoot extends Component {
                     className="footer-content__links__link"
                     rel="noopener noreferrer"
                     href="#"
-                    onClick={this.showDialog("updates")}
+                    onClick={this.showDialog(dialogTypes.updates)}
                   >
                     <FormattedMessage id="home.get_updates" />
                   </a>
@@ -149,7 +150,7 @@ class HomeRoot extends Component {
                     className="footer-content__links__link"
                     rel="noopener noreferrer"
                     href="#"
-                    onClick={this.showDialog("report")}
+                    onClick={this.showDialog(dialogTypes.report)}
                   >
                     <FormattedMessage id="home.report_issue" />
                   </a>
@@ -168,7 +169,7 @@ class HomeRoot extends Component {
             <InfoDialog
               dialogType={this.state.dialogType}
               onCloseDialog={() => this.setState({ dialogType: null })}
-              onSubmittedEmail={() => this.setState({ dialogType: "email_submitted" })}
+              onSubmittedEmail={() => this.setState({ dialogType: dialogTypes.email_submitted })}
             />
           )}
         </div>
