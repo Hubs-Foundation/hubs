@@ -39,7 +39,7 @@ class HomeRoot extends Component {
 
   componentDidMount() {
     this.loadEnvironments();
-    document.querySelector("#background-video").playbackRate = 0.5;
+    document.querySelector("#background-video").playbackRate = 0.75;
   }
 
   showDialog = dialogType => {
