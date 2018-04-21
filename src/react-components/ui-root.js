@@ -69,7 +69,7 @@ class UIRoot extends Component {
     janusRoomId: PropTypes.number,
     roomUnavailableReason: PropTypes.string,
     hubName: PropTypes.string,
-    participantCount: PropTypes.number
+    occupantCount: PropTypes.number
   };
 
   state = {
@@ -800,7 +800,7 @@ class UIRoot extends Component {
               <TwoDHUD muted={this.state.muted} onToggleMute={this.toggleMute} />
               <Footer
                 hubName={this.props.hubName}
-                participantCount={this.props.participantCount}
+                occupantCount={this.props.occupantCount}
                 onClickInvite={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
                 onClickReport={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.report })}
               />

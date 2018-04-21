@@ -246,18 +246,18 @@ const onReady = async () => {
         hubChannel.sendEntryEvent().then(() => {
           store.update({ lastEnteredAt: moment().toJSON() });
         });
-        remountUI({ participantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
+        remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
       });
 
       document.body.addEventListener("clientConnected", () => {
         remountUI({
-          participantCount: Object.values(NAF.connection.activeDataChannels).filter(active => active).length + 1
+          occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
         });
       });
 
       document.body.addEventListener("clientDisconnected", () => {
         remountUI({
-          participantCount: Object.values(NAF.connection.activeDataChannels).filter(active => active).length + 1
+          occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
         });
       });
 

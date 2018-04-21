@@ -12,7 +12,7 @@ import styles from "../assets/stylesheets/footer.scss";
 export default class Footer extends Component {
   static propTypes = {
     hubName: PropTypes.string,
-    participantCount: PropTypes.number,
+    occupantCount: PropTypes.number,
     onClickInvite: PropTypes.func,
     onClickReport: PropTypes.func
   };
@@ -34,7 +34,7 @@ export default class Footer extends Component {
           </button>
           <div className={styles.hubStats}>
             <FontAwesomeIcon icon={faUsers} />
-            <span className={styles.hubParticipantCount}>{this.props.participantCount || "-"}</span>
+            <span className={styles.hubParticipantCount}>{this.props.occupantCount || "-"}</span>
           </div>
         </div>
         {menuVisible && (
@@ -45,7 +45,7 @@ export default class Footer extends Component {
               </div>
               <div className={styles.hubStats}>
                 <FontAwesomeIcon icon={faUsers} />
-                <span className={styles.hubParticipantCount}>{this.props.participantCount || "-"}</span>
+                <span className={styles.hubParticipantCount}>{this.props.occupantCount || "-"}</span>
               </div>
             </div>
             <div className={styles.menuButtons}>
