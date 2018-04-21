@@ -87,7 +87,7 @@ const config = {
   mode: "development",
   devtool: process.env.NODE_ENV === "production" ? "source-map" : "inline-source-map",
   devServer: {
-    open: true,
+    open: false,
     https: createHTTPSConfig(),
     host: "0.0.0.0",
     useLocalIp: true,
@@ -216,7 +216,8 @@ const config = {
     new webpack.DefinePlugin({
       "process.env": JSON.stringify({
         NODE_ENV: process.env.NODE_ENV,
-        JANUS_SERVER: process.env.JANUS_SERVER
+        JANUS_SERVER: process.env.JANUS_SERVER,
+        DEV_RETICULUM_SERVER: process.env.DEV_RETICULUM_SERVER
       })
     })
   ]

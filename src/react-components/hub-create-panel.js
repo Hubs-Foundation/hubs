@@ -38,14 +38,25 @@ class HubCreatePanel extends Component {
       hub: { name: this.state.name, default_environment_gltf_bundle_url: environment.bundle_url }
     };
 
-    const res = await fetch("/api/v1/hubs", {
+    let createUrl = "/api/v1/hubs";
+
+    if (process.env.NODE_ENV === "development") {
+      createUrl = `https://${process.env.DEV_RETICULUM_SERVER}${createUrl}`;
+    }
+
+    const res = await fetch(createUrl, {
       body: JSON.stringify(payload),
       headers: { "content-type": "application/json" },
       method: "POST"
     });
 
     const hub = await res.json();
-    document.location = hub.url;
+
+    if (process.env.NODE_ENV === "production") {
+      document.location = hub.url;
+    } else {
+      document.location = `/hub.html?hub_id=${hub.hub_id}`;
+    }
   };
 
   isHubNameValid = () => {
@@ -149,12 +160,22 @@ class HubCreatePanel extends Component {
                         {environmentTitle}
                       </span>
                       {environmentAuthor &&
-                        environmentAuthor.name && (
+                        environmentAuthor.name &&
+                        (environmentAuthor.url ? (
+                          <a
+                            href={environmentAuthor.url}
+                            target="_blank"
+                            className="create-panel__form__environment__picker__labels__header__author"
+                          >
+                            <FormattedMessage id="home.environment_author_by" />
+                            <span>{environmentAuthor.name}</span>
+                          </a>
+                        ) : (
                           <span className="create-panel__form__environment__picker__labels__header__author">
                             <FormattedMessage id="home.environment_author_by" />
                             <span>{environmentAuthor.name}</span>
                           </span>
-                        )}
+                        ))}
                     </div>
                     <div className="create-panel__form__environment__picker__labels__footer">
                       <FormattedMessage id="home.environment_picker_footer" />

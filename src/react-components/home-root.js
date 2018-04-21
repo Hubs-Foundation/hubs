@@ -19,9 +19,10 @@ const messages = localeData[lang] || localeData.en;
 
 const ENVIRONMENT_URLS = [
   "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingRoom.bundle.json",
-  "https://asset-bundles-prod.reticulum.io/rooms/theater/TheaterMeshes.bundle.json",
-  "https://asset-bundles-prod.reticulum.io/rooms/atrium/AtriumMeshes.bundle.json",
-  "https://asset-bundles-prod.reticulum.io/rooms/courtyard/CourtyardMeshes.bundle.json"
+  "https://asset-bundles-prod.reticulum.io/rooms/theater/Theater.bundle.json",
+  "https://asset-bundles-prod.reticulum.io/rooms/atrium/Atrium.bundle.json",
+  "https://asset-bundles-prod.reticulum.io/rooms/courtyard/Courtyard.bundle.json",
+  "https://asset-bundles-prod.reticulum.io/rooms/MedievalFantasyBook/MedievalFantasyBook.bundle.json"
 ];
 
 class HomeRoot extends Component {
@@ -38,7 +39,7 @@ class HomeRoot extends Component {
 
   componentDidMount() {
     this.loadEnvironments();
-    document.querySelector("#background-video").playbackRate = 0.5;
+    document.querySelector("#background-video").playbackRate = 0.75;
   }
 
   showDialog = dialogType => {
@@ -265,6 +266,16 @@ class HomeRoot extends Component {
                 <div className="footer-content__links__bottom">
                   <FormattedMessage id="home.made_with_love" />
                   <span style={{ fontWeight: "bold", color: "white" }}>moz://a</span>
+                  <span>
+                    &nbsp;&nbsp;|&nbsp;&nbsp;Medieval Fantasy Book by{" "}
+                    <a
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      href="https://sketchfab.com/models/06d5a80a04fc4c5ab552759e9a97d91a?utm_campaign=06d5a80a04fc4c5ab552759e9a97d91a&utm_medium=embed&utm_source=oembed"
+                    >
+                      Pixel
+                    </a>
+                  </span>
                 </div>
               </div>
             </div>

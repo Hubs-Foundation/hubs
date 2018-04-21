@@ -64,7 +64,8 @@ class UIRoot extends Component {
     showProfileEntry: PropTypes.bool,
     availableVREntryTypes: PropTypes.object,
     initialEnvironmentLoaded: PropTypes.bool,
-    janusRoomId: PropTypes.number
+    janusRoomId: PropTypes.number,
+    roomUnavailableReason: PropTypes.string
   };
 
   state = {
@@ -505,6 +506,42 @@ class UIRoot extends Component {
   };
 
   render() {
+    if (this.state.exited || this.props.roomUnavailableReason) {
+      let subtitle = null;
+      if (this.props.roomUnavailableReason !== "closed") {
+        const exitSubtitleId = `exit.subtitle.${this.state.exited ? "exited" : this.props.roomUnavailableReason}`;
+        subtitle = <FormattedMessage id={exitSubtitleId} />;
+      } else {
+        // TODO i18n, due to links and markup
+        subtitle = (
+          <div>
+            Sorry, this room is no longer available.
+            <p />
+            A room may be closed if we receive reports that it violates our{" "}
+            <a target="_blank" rel="noreferrer noopener" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
+              Terms of Use
+            </a>.
+            <br />
+            If you have questions, contact us at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>.
+            <p />
+            If you&apos;d like to run your own server, Hubs&apos;s source code is available on{" "}
+            <a href="https://github.com/mozilla/hubs">Github</a>.
+          </div>
+        );
+      }
+
+      return (
+        <IntlProvider locale={lang} messages={messages}>
+          <div className="exited-panel">
+            <div className="exited-panel__title">
+              <b>moz://a</b> duck
+            </div>
+            <div className="exited-panel__subtitle">{subtitle}</div>
+          </div>
+        </IntlProvider>
+      );
+    }
+
     if (!this.props.initialEnvironmentLoaded || !this.props.availableVREntryTypes || !this.props.janusRoomId) {
       return (
         <IntlProvider locale={lang} messages={messages}>
@@ -516,21 +553,6 @@ class UIRoot extends Component {
             </div>
             <div className="loading-panel__title">
               <b>moz://a</b> duck
-            </div>
-          </div>
-        </IntlProvider>
-      );
-    }
-
-    if (this.state.exited) {
-      return (
-        <IntlProvider locale={lang} messages={messages}>
-          <div className="exited-panel">
-            <div className="loading-panel__title">
-              <b>moz://a</b> duck
-            </div>
-            <div className="loading-panel__subtitle">
-              <FormattedMessage id="exit.subtitle" />
             </div>
           </div>
         </IntlProvider>
