@@ -204,9 +204,7 @@ const onReady = async () => {
       serverURL: process.env.JANUS_SERVER
     });
 
-    if (!qsTruthy("no_stats")) {
-      scene.setAttribute("stats-plus", false);
-    }
+    scene.setAttribute("stats-plus", false);
 
     if (isMobile || qsTruthy("mobile")) {
       playerRig.setAttribute("virtual-gamepad-controls", {});
