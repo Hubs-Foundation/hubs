@@ -3,16 +3,18 @@
   width: 100%;
   background-color: rgba(0, 0, 0, 0.35);
   bottom: 0;
-  display: grid;
+  display: flex;
   font-size: 1.3em;
   height: 48px;
 }
 :local(.hub-info) {
-  grid-column: 1;
-  grid-row: 1;
+  flex: 1;
   margin: 8px;
 }
-:local(.share-button) {
+:local(.menu) {
+  margin: 8px;
+}
+:local(.menu-button) {
   background: none;
   border: 3px solid white;
   border-radius: 16px;
@@ -20,16 +22,15 @@
   margin: 0 8px;
   pointer-events: auto;
   cursor: pointer;
-  width: 32px;
-  height: 32px;
+  width: 33px;
+  height: 33px;
 }
-:local(.share-button__icon) {
-  margin-bottom: 1px;
+:local(.menu-button__icon) {
   margin-left: -1px;
+  margin-bottom: 1px;
 }
 :local(.hub-stats) {
-  grid-column: 3;
-  grid-row: 1;
+  flex: 1;
   text-align: right;
   margin: 8px;
 }
