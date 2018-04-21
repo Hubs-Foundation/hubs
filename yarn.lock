@@ -5182,10 +5182,6 @@ minijanus@0.6.0:
   version "0.6.0"
   resolved "https://registry.yarnpkg.com/minijanus/-/minijanus-0.6.0.tgz#70d068b4e943a5e2724d0ef5703c9099a1c99bbc"
 
-minijanus@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/minijanus/-/minijanus-0.5.0.tgz#78e1429bb5d83cb3957a538335d2ae901bf614fa"
-
 minimalistic-assert@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/minimalistic-assert/-/minimalistic-assert-1.0.0.tgz#702be2dda6b37f4836bcb3f5db56641b64a1d3d3"
