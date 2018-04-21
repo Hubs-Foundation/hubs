@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import MobileDetect from "mobile-detect";
 import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 import faUsers from "@fortawesome/fontawesome-free-solid/faUsers";
 import faEllipsisH from "@fortawesome/fontawesome-free-solid/faEllipsisH";
@@ -9,8 +8,6 @@ import faExclamation from "@fortawesome/fontawesome-free-solid/faExclamation";
 import faTimes from "@fortawesome/fontawesome-free-solid/faTimes";
 
 import styles from "../assets/stylesheets/footer.scss";
-
-const mobiledetect = new MobileDetect(navigator.userAgent);
 
 export default class Footer extends Component {
   static propTypes = {
@@ -26,43 +23,31 @@ export default class Footer extends Component {
     const menuVisible = this.state.menuVisible;
     return (
       <div className={styles.container}>
-        {mobiledetect.mobile() ? (
-          <div className={styles.floatingButton}>
-            <button className={styles.menuButton} onClick={() => this.setState({ menuVisible: !menuVisible })}>
-              <i className={styles.menuButtonIcon}>
-                <FontAwesomeIcon icon={menuVisible ? faTimes : faEllipsisH} />
-              </i>
-            </button>
+        <div className={styles.header}>
+          <div className={styles.hubInfo}>
+            <span>{this.props.hubName}</span>
           </div>
-        ) : (
-          <div className={styles.header}>
-            <div className={styles.hubInfo}>
-              <span>{this.props.hubName}</span>
-            </div>
-            <button className={styles.menuButton} onClick={() => this.setState({ menuVisible: !menuVisible })}>
-              <i className={styles.menuButtonIcon}>
-                <FontAwesomeIcon icon={menuVisible ? faTimes : faEllipsisH} />
-              </i>
-            </button>
-            <div className={styles.hubStats}>
-              <FontAwesomeIcon icon={faUsers} />
-              <span className={styles.hubParticipantCount}>{this.props.participantCount || "-"}</span>
-            </div>
+          <button className={styles.menuButton} onClick={() => this.setState({ menuVisible: !menuVisible })}>
+            <i className={styles.menuButtonIcon}>
+              <FontAwesomeIcon icon={menuVisible ? faTimes : faEllipsisH} />
+            </i>
+          </button>
+          <div className={styles.hubStats}>
+            <FontAwesomeIcon icon={faUsers} />
+            <span className={styles.hubParticipantCount}>{this.props.participantCount || "-"}</span>
           </div>
-        )}
+        </div>
         {menuVisible && (
           <div className={styles.menu}>
-            {mobiledetect.mobile() && (
-              <div className={styles.menuHeader}>
-                <div className={styles.hubInfo}>
-                  <span>{this.props.hubName}</span>
-                </div>
-                <div className={styles.hubStats}>
-                  <FontAwesomeIcon icon={faUsers} />
-                  <span className={styles.hubParticipantCount}>{this.props.participantCount || "-"}</span>
-                </div>
+            <div className={styles.menuHeader}>
+              <div className={styles.hubInfo}>
+                <span>{this.props.hubName}</span>
               </div>
-            )}
+              <div className={styles.hubStats}>
+                <FontAwesomeIcon icon={faUsers} />
+                <span className={styles.hubParticipantCount}>{this.props.participantCount || "-"}</span>
+              </div>
+            </div>
             <div className={styles.menuButtons}>
               <button className={styles.menuButton} onClick={this.props.onClickInvite}>
                 <i className={styles.menuButtonIcon}>
