@@ -125,7 +125,7 @@ AFRAME.registerComponent("cursor-controller", {
       const state = this.otherHand.components["super-hands"].state;
       const isOtherHandGrabbing = state.has("grab-start") || state.has("hover-start");
       if (this.wasOtherHandGrabbing != isOtherHandGrabbing) {
-        // this.data.cursor.setAttribute("visible", !isOtherHandGrabbing);
+        this.data.cursor.setAttribute("visible", !isOtherHandGrabbing);
         this.el.setAttribute("line", { visible: !isOtherHandGrabbing });
         this.currentTargetType = TARGET_TYPE_NONE;
       }
@@ -234,14 +234,14 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _endTeleport: function() {
-    const showCursor = this.hasPointingDevice || this.inVR;
+    const showLine = this.hasPointingDevice || this.inVR;
     if (!!this.controller) {
       this.controller.emit(this.data.teleportEndEvent, {});
     } else if (this.inVR) {
       this.data.gazeTeleportControls.emit(this.data.teleportEndEvent, {});
     }
-    this.el.setAttribute("line", { visible: showCursor });
-    this.data.cursor.setAttribute("visible", showCursor);
+    this.el.setAttribute("line", { visible: showLine });
+    this.data.cursor.setAttribute("visible", true);
   },
 
   _handleMouseDown: function() {
