@@ -21,7 +21,8 @@ const ENVIRONMENT_URLS = [
   "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingRoom.bundle.json",
   "https://asset-bundles-prod.reticulum.io/rooms/theater/Theater.bundle.json",
   "https://asset-bundles-prod.reticulum.io/rooms/atrium/Atrium.bundle.json",
-  "https://asset-bundles-prod.reticulum.io/rooms/courtyard/Courtyard.bundle.json"
+  "https://asset-bundles-prod.reticulum.io/rooms/courtyard/Courtyard.bundle.json",
+  "https://asset-bundles-prod.reticulum.io/rooms/MedievalFantasyBook/MedievalFantasyBook.bundle.json"
 ];
 
 class HomeRoot extends Component {
@@ -38,7 +39,7 @@ class HomeRoot extends Component {
 
   componentDidMount() {
     this.loadEnvironments();
-    document.querySelector("#background-video").playbackRate = 0.5;
+    document.querySelector("#background-video").playbackRate = 0.75;
   }
 
   showDialog = dialogType => {
