@@ -309,10 +309,7 @@ const onReady = async () => {
 
   if (qs.room) {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
-    remountUI({
-      janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1,
-      hubName: "My Super Test Hub"
-    });
+    remountUI({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
     initialEnvironmentEl.setAttribute("gltf-bundle", {
       src: "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingRoom.bundle.json"
       // src: "https://asset-bundles-prod.reticulum.io/rooms/theater/TheaterMeshes.bundle.json"
