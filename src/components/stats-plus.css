@@ -20,3 +20,9 @@
   color: #aaa;
   font-size: 10px;
 }
+
+:global(.rs-base) {
+  right: 10px;
+  left: auto;
+  top: 10px;
+}
