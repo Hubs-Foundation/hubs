@@ -72,13 +72,11 @@ class HubCreatePanel extends Component {
     }));
   };
 
-  setToNextEnvironment = e => {
-    e.preventDefault();
+  setToNextEnvironment = () => {
     this.setToEnvironmentOffset(1);
   };
 
-  setToPreviousEnvironment = e => {
-    e.preventDefault();
+  setToPreviousEnvironment = () => {
     this.setToEnvironmentOffset(-1);
   };
 
@@ -120,9 +118,7 @@ class HubCreatePanel extends Component {
           <div className="create-panel__form">
             <div
               className="create-panel__form__left-container"
-              onClick={e => {
-                e.preventDefault();
-
+              onClick={() => {
                 if (this.state.expanded) {
                   this.shuffle();
                 } else {
@@ -130,7 +126,7 @@ class HubCreatePanel extends Component {
                 }
               }}
             >
-              <button className="create-panel__form__rotate-button">
+              <button type="button" tabIndex="3" className="create-panel__form__rotate-button">
                 {this.state.expanded ? (
                   <img src="../assets/images/dice_icon.svg" />
                 ) : (
@@ -138,8 +134,8 @@ class HubCreatePanel extends Component {
                 )}
               </button>
             </div>
-            <div className="create-panel__form__right-container" onClick={this.createHub}>
-              <button className="create-panel__form__submit-button">
+            <div className="create-panel__form__right-container">
+              <button type="submit" tabIndex="5" className="create-panel__form__submit-button">
                 {this.isHubNameValid() ? (
                   <img src="../assets/images/hub_create_button_enabled.svg" />
                 ) : (
@@ -184,6 +180,8 @@ class HubCreatePanel extends Component {
                   <div className="create-panel__form__environment__picker__controls">
                     <button
                       className="create-panel__form__environment__picker__controls__prev"
+                      type="button"
+                      tabIndex="1"
                       onClick={this.setToPreviousEnvironment}
                     >
                       <FontAwesomeIcon icon={faAngleLeft} />
@@ -191,6 +189,8 @@ class HubCreatePanel extends Component {
 
                     <button
                       className="create-panel__form__environment__picker__controls__next"
+                      type="button"
+                      tabIndex="2"
                       onClick={this.setToNextEnvironment}
                     >
                       <FontAwesomeIcon icon={faAngleRight} />
@@ -200,6 +200,7 @@ class HubCreatePanel extends Component {
               </div>
             )}
             <input
+              tabIndex="4"
               className={formNameClassNames}
               value={this.state.name}
               onChange={e => this.setState({ name: e.target.value })}
