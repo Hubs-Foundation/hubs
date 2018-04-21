@@ -104,7 +104,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.el.removeEventListener("raycaster-intersection", this.raycasterIntersectionListener);
     this.el.removeEventListener("raycaster-intersection-cleared", this.raycasterIntersectionClearedListener);
 
-    if (!!this.controller) {
+    if (this.controller != null) {
       this.controller.removeEventListener(this.data.controllerEvent, this.controllerEventListener);
       this.controller.removeEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
       this.controller.removeEventListener(this.data.grabEvent, this.controllerEventListener);
@@ -146,7 +146,7 @@ AFRAME.registerComponent("cursor-controller", {
       //gaze cursor mode
       camera.getWorldPosition(this.origin);
       camera.getWorldDirection(this.direction);
-    } else if (!!this.controller) {
+    } else if (this.controller != null) {
       //3d cursor mode
       this.controller.object3D.getWorldPosition(this.origin);
       this.controller.object3D.getWorldQuaternion(this.controllerQuaternion);
@@ -224,7 +224,7 @@ AFRAME.registerComponent("cursor-controller", {
 
   _startTeleport: function() {
     const hideCursor = !(this.hasPointingDevice || this.inVR);
-    if (!!this.controller) {
+    if (this.controller != null) {
       this.controller.emit(this.data.teleportEvent, {});
     } else if (this.inVR) {
       this.data.gazeTeleportControls.emit(this.data.teleportEvent, {});
@@ -235,7 +235,7 @@ AFRAME.registerComponent("cursor-controller", {
 
   _endTeleport: function() {
     const showLine = this.hasPointingDevice || this.inVR;
-    if (!!this.controller) {
+    if (this.controller != null) {
       this.controller.emit(this.data.teleportEndEvent, {});
     } else if (this.inVR) {
       this.data.gazeTeleportControls.emit(this.data.teleportEndEvent, {});
@@ -360,7 +360,7 @@ AFRAME.registerComponent("cursor-controller", {
 
     if (this.hasPointingDevice) {
       const controllerData = this.controllerQueue[0];
-      if (!!this.controller) {
+      if (this.controller != null) {
         this.controller.removeEventListener(this.data.controllerEvent, this.controllerEventListener);
         this.controller.removeEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
         this.controller.removeEventListener(this.data.grabEvent, this.controllerEventListener);
