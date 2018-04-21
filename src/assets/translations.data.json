@@ -32,6 +32,7 @@
     "audio.granted-subtitle": "You can still mute yourself in-game",
     "audio.granted-next": "NEXT",
     "exit.subtitle.exited": "Your session has ended. Refresh your browser to start a new one.",
+    "exit.subtitle.closed": "This room is no longer available.",
     "exit.subtitle.full": "This room is full, please try again later.",
     "exit.subtitle.connect_error": "Unable to connect to this room, please try again later.",
     "autoexit.title": "Auto-ending session in ",

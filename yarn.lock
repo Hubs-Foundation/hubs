@@ -5178,6 +5178,10 @@ min-document@^2.19.0:
   dependencies:
     dom-walk "^0.1.0"
 
+minijanus@0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/minijanus/-/minijanus-0.6.0.tgz#70d068b4e943a5e2724d0ef5703c9099a1c99bbc"
+
 minijanus@^0.5.0:
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/minijanus/-/minijanus-0.5.0.tgz#78e1429bb5d83cb3957a538335d2ae901bf614fa"
@@ -5365,12 +5369,12 @@ mute-stream@0.0.7:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
 
-"naf-janus-adapter@github:mozilla/naf-janus-adapter#69d179badde1c6a888ccb3718579eae9a7c5ffca":
-  version "0.5.1"
-  resolved "https://codeload.github.com/mozilla/naf-janus-adapter/tar.gz/69d179badde1c6a888ccb3718579eae9a7c5ffca"
+naf-janus-adapter@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.6.0.tgz#6ca6f3765f5941b8bfa72eb5370f9b51bc314e1d"
   dependencies:
     debug "^3.1.0"
-    minijanus "^0.5.0"
+    minijanus "0.6.0"
 
 nan@^2.3.0, nan@^2.3.2:
   version "2.9.1"
@@ -5411,9 +5415,9 @@ neo-async@^2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.5.0.tgz#76b1c823130cca26acfbaccc8fbaf0a2fa33b18f"
 
-"networked-aframe@https://github.com/mozillareality/networked-aframe#bp-built":
+"networked-aframe@https://github.com/mozillareality/networked-aframe#mr-social-client/master":
   version "0.6.1"
-  resolved "https://github.com/mozillareality/networked-aframe#a97379a3e33f6b08e3784b9057daec0c4c47c157"
+  resolved "https://github.com/mozillareality/networked-aframe#2b91c905ae5c9b21f98131485eb9207001a942ab"
   dependencies:
     easyrtc "1.1.0"
     express "^4.10.7"
