@@ -74,6 +74,16 @@ AFRAME.registerComponent("cursor-controller", {
     this.data.cursor.removeEventListener("loaded", this.cursorLoadedListener);
   },
 
+  update: function(oldData) {
+    if (this.oldData.otherHand !== this.data.otherHand) {
+      this._handleModelLoaded();
+    }
+
+    if (this.oldData.hand !== this.data.hand) {
+      //TODO
+    }
+  },
+
   play: function() {
     document.addEventListener("mousedown", this.mouseDownListener);
     document.addEventListener("mousemove", this.mouseMoveListener);
@@ -366,6 +376,9 @@ AFRAME.registerComponent("cursor-controller", {
         this.controller.removeEventListener(this.data.grabEvent, this.controllerEventListener);
         this.controller.removeEventListener(this.data.releaseEvent, this.controllerEndEventListener);
       }
+
+      const hand = controllerData.hand;
+      this.el.setAttribute("cursor-controller", { otherHand: `#${hand}-super-hand` });
 
       this.controller = controllerData.controller;
       this.controller.addEventListener(this.data.controllerEvent, this.controllerEventListener);
