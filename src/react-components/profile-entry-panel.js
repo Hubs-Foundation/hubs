@@ -84,6 +84,7 @@ class ProfileEntryPanel extends Component {
                 id="profile-entry-display-name"
                 className="profile-entry__form-field-text"
                 value={this.state.displayName}
+                onFocus={e => e.target.select()}
                 onChange={e => this.setState({ displayName: e.target.value })}
                 required
                 pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
@@ -97,6 +98,18 @@ class ProfileEntryPanel extends Component {
               ref={ifr => (this.avatarSelector = ifr)}
             />
             <input className="profile-entry__form-submit" type="submit" value={formatMessage({ id: "profile.save" })} />
+            <div className="profile-entry__box__links">
+              <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
+                <FormattedMessage id="profile.terms_of_use" />
+              </a>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+              >
+                <FormattedMessage id="profile.privacy_notice" />
+              </a>
+            </div>
           </div>
         </form>
       </div>
