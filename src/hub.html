@@ -62,7 +62,7 @@
 
                     <a-entity class="right-controller"></a-entity>
 
-                    <a-entity class="model" gltf-model-plus="inflate: true">
+                    <a-entity class="model" hand-pose-state__left hand-pose-state__right gltf-model-plus="inflate: true">
                         <template data-selector=".RootScene">
                             <a-entity ik-controller hand-pose__left hand-pose__right animation-mixer space-invader-mesh="meshSelector: .Bot_Skinned"></a-entity>
                         </template>
@@ -224,15 +224,18 @@
                 app-mode-toggle-attribute__line="mode: hud; property: visible;"
             ></a-entity>
 
-            <a-entity gltf-model-plus="inflate: true;" class="model">
+            <a-entity gltf-model-plus="inflate: true;"
+                      hand-pose-state__left
+                      hand-pose-state__right
+                      class="model">
                 <template data-selector=".RootScene">
                     <a-entity
                         ik-controller
                         animation-mixer
                         hand-pose__left
                         hand-pose__right
-                        hand-pose-controller__left="eventSrc:#player-left-controller"
-                        hand-pose-controller__right="eventSrc:#player-right-controller"
+                        hand-pose-controller__left="store:#player-rig [hand-pose-state__left];eventSrc:#player-left-controller"
+                        hand-pose-controller__right="store:#player-rig [hand-pose-state__right];eventSrc:#player-right-controller"
                     ></a-entity>
                 </template>
 

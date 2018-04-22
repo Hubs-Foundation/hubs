@@ -10,13 +10,13 @@ function registerNetworkSchemas() {
       "scale",
       "player-info",
       {
-        selector: ".RootScene",
-        component: "hand-pose__left",
+        selector: ".model",
+        component: "hand-pose-state__left",
         property: "pose"
       },
       {
-        selector: ".RootScene",
-        component: "hand-pose__right",
+        selector: ".model",
+        component: "hand-pose-state__right",
         property: "pose"
       },
       {

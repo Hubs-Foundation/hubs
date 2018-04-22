@@ -11,13 +11,32 @@ const POSES = {
 
 const NETWORK_POSES = ["allOpen", "thumbDown", "indexDown", "mrpDown", "thumbsUp", "point", "allGrip", "pinch"];
 
-AFRAME.registerComponent("hand-pose", {
+AFRAME.registerComponent("hand-pose-state", {
   multiple: true,
   schema: {
     pose: { default: 0 }
   },
+  init() {
+    this.setSelfAsStore = this.setSelfAsStore.bind(this);
+    this.setSelfAsStore();
+  },
+  setSelfAsStore() {
+    let poseEl = this.el.querySelector(`[hand-pose__${this.id}]`);
+    if (!poseEl) {
+      window.setTimeout(() => {
+        this.setSelfAsStore();
+      }, 3000);
+      return;
+    }
+    poseEl.components[`hand-pose__${this.id}`].store = this;
+  }
+});
+
+AFRAME.registerComponent("hand-pose", {
+  multiple: true,
 
   init() {
+    this.pose = 0;
     this.animatePose = this.animatePose.bind(this);
     this.mixer = this.el.components["animation-mixer"];
     const object3DMap = this.mixer.el.object3DMap;
@@ -28,9 +47,11 @@ AFRAME.registerComponent("hand-pose", {
     this.from.play();
   },
 
-  update(oldData) {
-    if (oldData.pose != this.data.pose) {
-      this.animatePose(NETWORK_POSES[oldData.pose || 0], NETWORK_POSES[this.data.pose]);
+  tick() {
+    if (!this.store) return;
+    if (this.store.data.pose != this.pose) {
+      this.animatePose(NETWORK_POSES[this.pose], NETWORK_POSES[this.store.data.pose]);
+      this.pose = this.store.data.pose;
     }
   },
 
@@ -55,7 +76,8 @@ AFRAME.registerComponent("hand-pose", {
 AFRAME.registerComponent("hand-pose-controller", {
   multiple: true,
   schema: {
-    eventSrc: { type: "selector" }
+    eventSrc: { type: "selector" },
+    store: { type: "selector" }
   },
   init: function() {
     this.setHandPose = this.setHandPose.bind(this);
@@ -70,6 +92,10 @@ AFRAME.registerComponent("hand-pose-controller", {
   },
 
   setHandPose: function(evt) {
-    this.el.setAttribute(`hand-pose__${this.id}`, "pose", NETWORK_POSES.indexOf(POSES[evt.detail.current]));
+    this.data.store.setAttribute(
+      `hand-pose-state__${this.id}`,
+      "pose",
+      NETWORK_POSES.indexOf(POSES[evt.detail.current])
+    );
   }
 });
