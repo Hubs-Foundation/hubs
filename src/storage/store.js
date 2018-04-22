@@ -26,7 +26,8 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         hasChangedName: { type: "boolean" },
-        lastEnteredAt: { type: "string" }
+        lastEnteredAt: { type: "string" },
+        showedMailingListInterstitial: { type: "boolean" }
       }
     },
 

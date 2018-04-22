@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import copy from "copy-to-clipboard";
 import PropTypes from "prop-types";
+import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
 import formurlencoded from "form-urlencoded";
 
@@ -16,6 +17,8 @@ class InfoDialog extends Component {
   };
   static propTypes = {
     dialogType: PropTypes.oneOf(Object.values(InfoDialog.dialogTypes)),
+    allowEmailSkip: PropTypes.bool,
+    darkendBackground: PropTypes.bool,
     onCloseDialog: PropTypes.func,
     onSubmittedEmail: PropTypes.func
   };
@@ -48,6 +51,12 @@ class InfoDialog extends Component {
   signUpForMailingList = async e => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (this.state.mailingListEmail.length == 0 && this.props.allowEmailSkip) {
+      this.props.onCloseDialog();
+      return;
+    }
+
     if (!this.state.mailingListPrivacy) return;
 
     const url = "https://www.mozilla.org/en-US/newsletter/";
@@ -98,7 +107,14 @@ class InfoDialog extends Component {
         break;
       case InfoDialog.dialogTypes.email_submitted:
         dialogTitle = "";
-        dialogBody = "Great! Please check your e-mail to confirm your subscription.";
+        dialogBody = (
+          <div>
+            <div>Great! Please check your e-mail to confirm your subscription.</div>
+            <button className="email-submitted__close-button" onClick={this.props.onCloseDialog}>
+              Close
+            </button>
+          </div>
+        );
         break;
       case InfoDialog.dialogTypes.invite:
         dialogTitle = "Invite Others";
@@ -131,7 +147,7 @@ class InfoDialog extends Component {
         dialogTitle = "";
         dialogBody = (
           <span>
-            Sign up to get release notes about new features.
+            Sign up to get updates about Hubs.
             <p />
             <form onSubmit={this.signUpForMailingList}>
               <div className="mailing-list-form">
@@ -140,14 +156,20 @@ class InfoDialog extends Component {
                   value={this.state.mailingListEmail}
                   onChange={e => this.setState({ mailingListEmail: e.target.value })}
                   className="mailing-list-form__email_field"
-                  required
+                  required={!this.props.allowEmailSkip}
                   placeholder="Your email here"
                 />
-                <label className="mailing-list-form__privacy">
+                <label
+                  className={classNames({
+                    "mailing-list-form__privacy": true,
+                    "mailing-list-form__privacy--hidden":
+                      this.state.mailingListEmail.length === 0 && this.props.allowEmailSkip
+                  })}
+                >
                   <input
                     className="mailing-list-form__privacy_checkbox"
                     type="checkbox"
-                    required
+                    required={this.state.mailingListEmail.length > 0}
                     value={this.state.mailingListPrivacy}
                     onChange={e => this.setState({ mailingListPrivacy: e.target.checked })}
                   />
@@ -158,7 +180,11 @@ class InfoDialog extends Component {
                     </a>
                   </span>
                 </label>
-                <input className="mailing-list-form__submit" type="submit" value="Sign Up Now" />
+                <input
+                  className="mailing-list-form__submit"
+                  type="submit"
+                  value={!this.props.allowEmailSkip || this.state.mailingListEmail.length > 0 ? "Sign Up Now" : "Skip"}
+                />
               </div>
             </form>
           </span>
@@ -185,9 +211,11 @@ class InfoDialog extends Component {
         break;
     }
 
+    const dialogClassNames = classNames({ dialog: true, "dialog--darkened-background": this.props.darkendBackground });
+
     return (
       <div className="dialog-overlay">
-        <div className="dialog">
+        <div className={dialogClassNames}>
           <div className="dialog__box">
             <div className="dialog__box__contents">
               <button className="dialog__box__contents__close" onClick={this.props.onCloseDialog}>
@@ -195,7 +223,6 @@ class InfoDialog extends Component {
               </button>
               <div className="dialog__box__contents__title">{dialogTitle}</div>
               <div className="dialog__box__contents__body">{dialogBody}</div>
-              <div className="dialog__box__contents__button-container" />
             </div>
           </div>
         </div>

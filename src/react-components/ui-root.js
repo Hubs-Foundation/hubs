@@ -66,6 +66,7 @@ class UIRoot extends Component {
     showProfileEntry: PropTypes.bool,
     availableVREntryTypes: PropTypes.object,
     initialEnvironmentLoaded: PropTypes.bool,
+    showInterstitial: PropTypes.bool,
     janusRoomId: PropTypes.number,
     roomUnavailableReason: PropTypes.string,
     hubName: PropTypes.string,
@@ -104,6 +105,10 @@ class UIRoot extends Component {
   constructor(props) {
     super(props);
     this.state.showProfileEntry = this.props.showProfileEntry;
+
+    if (props.showInterstitial) {
+      this.state.infoDialogType = InfoDialog.dialogTypes.updates;
+    }
   }
 
   componentDidMount() {
@@ -772,12 +777,36 @@ class UIRoot extends Component {
       "ui-dialog-box-contents--backgrounded": this.state.showProfileEntry
     });
 
+    const showingInterstitial =
+      this.state.infoDialogType === InfoDialog.dialogTypes.updates ||
+      this.state.infoDialogType === InfoDialog.dialogTypes.email_submitted;
+
+    const markInterstitialAsViewed = () => {
+      this.props.store.update({ activity: { showedMailingListInterstitial: true } });
+    };
+
+    const onCloseDialog = () => {
+      if (this.state.infoDialogType === InfoDialog.dialogTypes.updates) {
+        markInterstitialAsViewed();
+      }
+
+      this.setState({ infoDialogType: null });
+    };
+
+    const onSubmittedEmail = () => {
+      markInterstitialAsViewed();
+      this.setState({ infoDialogType: InfoDialog.dialogTypes.email_submitted });
+    };
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className="ui">
           <InfoDialog
             dialogType={this.state.infoDialogType}
-            onCloseDialog={() => this.setState({ infoDialogType: null })}
+            allowEmailSkip={true}
+            darkendBackground={showingInterstitial}
+            onSubmittedEmail={onSubmittedEmail}
+            onCloseDialog={onCloseDialog}
           />
 
           <div className={dialogClassNames}>

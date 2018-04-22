@@ -129,6 +129,7 @@ function mountUI(scene, props = {}) {
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
   const htmlPrefix = document.body.dataset.htmlPrefix || "";
   const showProfileEntry = !store.state.activity.hasChangedName;
+  const showInterstitial = !store.state.activity.showedMailingListInterstitial;
 
   ReactDOM.render(
     <UIRoot
@@ -141,6 +142,7 @@ function mountUI(scene, props = {}) {
         store,
         htmlPrefix,
         showProfileEntry,
+        showInterstitial,
         ...props
       }}
     />,
