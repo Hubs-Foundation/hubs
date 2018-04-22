@@ -1,7 +1,7 @@
 import { Validator } from "jsonschema";
 import { merge } from "lodash";
 
-const LOCAL_STORE_KEY = "___mozilla_hubs";
+const LOCAL_STORE_KEY = "___hubs_store";
 const STORE_STATE_CACHE_KEY = Symbol();
 const validator = new Validator();
 import { EventTarget } from "event-target-shim";
@@ -9,7 +9,7 @@ import { EventTarget } from "event-target-shim";
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
 export const SCHEMA = {
-  id: "/MozillaHubsStore",
+  id: "/HubsStore",
 
   definitions: {
     profile: {
@@ -68,10 +68,6 @@ export default class Store extends EventTarget {
   }
 
   update(newState) {
-    if (newState.id) {
-      throw new Error("Store id is immutable.");
-    }
-
     const finalState = merge(this.state, newState);
     const isValid = validator.validate(finalState, SCHEMA).valid;
 
