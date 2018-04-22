@@ -189,10 +189,10 @@ class InfoDialog extends Component {
         dialogTitle = "How to Play";
         dialogBody = (
           <div className="info-dialog__help">
-            When using Hubs, other avatars can see and hear you too.
+            When in a room, other avatars can see and hear you.
             <p />
-            Use the action button on your controller to teleport from place to place. If your controller has a trigger,
-            use it to pick up and hold objects.
+            Use your controller&apos;s action button to teleport from place to place. If it has a trigger, use it to
+            pick up objects.
             <p style={{ textAlign: "center" }}>
               In VR, <b>look up</b> to find your menu:
               <img
@@ -202,14 +202,14 @@ class InfoDialog extends Component {
               />
             </p>
             <p>
-              The <b>Mic Toggle</b> will mute and unmute your mic.
+              The <b>Mic Toggle</b> mutes your mic.
             </p>
             <p>
-              The <b>Pause/Resume Toggle</b> will let you pause all avatars. Once paused, you can choose to block
-              individual avatars from further interactions with you.
+              The <b>Pause/Resume Toggle</b> pauses all other avatars. You can then block them from having further
+              interactions with you.
             </p>
             <p>
-              The <b>Bubble Toggle</b> will toggle the hiding of other avatars when they enter your personal space.
+              The <b>Bubble Toggle</b> hides avatars that enter your personal space.
             </p>
           </div>
         );
