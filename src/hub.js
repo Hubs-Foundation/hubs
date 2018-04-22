@@ -50,6 +50,7 @@ import "./components/gltf-model-plus";
 import "./components/gltf-bundle";
 import "./components/hud-controller";
 import "./components/stats-plus";
+import "./components/networked-avatar";
 
 import ReactDOM from "react-dom";
 import React from "react";

@@ -11,26 +11,6 @@ const POSES = {
 
 const NETWORK_POSES = ["allOpen", "thumbDown", "indexDown", "mrpDown", "thumbsUp", "point", "allGrip", "pinch"];
 
-AFRAME.registerComponent("hand-pose-state", {
-  multiple: true,
-  schema: {
-    pose: { default: 0 }
-  },
-  init() {
-    this.setSelfAsStore = this.setSelfAsStore.bind(this);
-  },
-  play() {
-    this.el.addEventListener("model-loaded", this.setSelfAsStore);
-  },
-  pause() {
-    this.el.removeEventListener("model-loaded", this.setSelfAsStore);
-  },
-  setSelfAsStore(e) {
-    const poseEl = e.target.querySelector(`[hand-pose__${this.id}]`);
-    poseEl.components[`hand-pose__${this.id}`].store = this;
-  }
-});
-
 AFRAME.registerComponent("hand-pose", {
   multiple: true,
 
@@ -44,14 +24,27 @@ AFRAME.registerComponent("hand-pose", {
     const suffix = this.id == "left" ? "_L" : "_R";
     this.from = this.to = this.mixer.mixer.clipAction(POSES.open + suffix, this.clipActionObject);
     this.from.play();
+
+    const getNetworkedAvatar = el => {
+      let networkedAvatar = el.components["networked-avatar"];
+      if (networkedAvatar) {
+        return networkedAvatar;
+      }
+      return getNetworkedAvatar(el.parentEl);
+    };
+    this.networkedAvatar = getNetworkedAvatar(this.el);
   },
 
   tick() {
-    if (!this.store) return;
-    if (this.store.data.pose != this.pose) {
-      this.animatePose(NETWORK_POSES[this.pose], NETWORK_POSES[this.store.data.pose]);
-      this.pose = this.store.data.pose;
-    }
+    if (
+      !this.networkedAvatar ||
+      !this.networkedAvatar.data ||
+      !this.networkedAvatar.data[`${this.id}_hand_pose`] !== this.pose
+    )
+      return;
+
+    this.animatePose(NETWORK_POSES[this.pose], NETWORK_POSES[this.networkedAvatar.data[`${this.id}_hand_pose`]]);
+    this.pose = this.networkedAvatar.data[`${this.id}_hand_pose`];
   },
 
   animatePose(prev, curr) {
@@ -76,7 +69,7 @@ AFRAME.registerComponent("hand-pose-controller", {
   multiple: true,
   schema: {
     eventSrc: { type: "selector" },
-    store: { type: "selector" }
+    networkedAvatar: { type: "selector" }
   },
   init: function() {
     this.setHandPose = this.setHandPose.bind(this);
@@ -91,9 +84,9 @@ AFRAME.registerComponent("hand-pose-controller", {
   },
 
   setHandPose: function(evt) {
-    this.data.store.setAttribute(
-      `hand-pose-state__${this.id}`,
-      "pose",
+    this.data.networkedAvatar.setAttribute(
+      "networked-avatar",
+      `${this.id}_hand_pose`,
       NETWORK_POSES.indexOf(POSES[evt.detail.current])
     );
   }

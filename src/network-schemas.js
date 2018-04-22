@@ -9,16 +9,7 @@ function registerNetworkSchemas() {
       },
       "scale",
       "player-info",
-      {
-        selector: ".model",
-        component: "hand-pose-state__left",
-        property: "pose"
-      },
-      {
-        selector: ".model",
-        component: "hand-pose-state__right",
-        property: "pose"
-      },
+      "networked-avatar",
       {
         selector: ".camera",
         component: "position"
