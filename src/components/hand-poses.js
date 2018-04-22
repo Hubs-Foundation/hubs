@@ -18,16 +18,15 @@ AFRAME.registerComponent("hand-pose-state", {
   },
   init() {
     this.setSelfAsStore = this.setSelfAsStore.bind(this);
-    this.setSelfAsStore();
   },
-  setSelfAsStore() {
-    let poseEl = this.el.querySelector(`[hand-pose__${this.id}]`);
-    if (!poseEl) {
-      window.setTimeout(() => {
-        this.setSelfAsStore();
-      }, 3000);
-      return;
-    }
+  play() {
+    this.el.addEventListener("model-loaded", this.setSelfAsStore);
+  },
+  pause() {
+    this.el.removeEventListener("model-loaded", this.setSelfAsStore);
+  },
+  setSelfAsStore(e) {
+    let poseEl = e.target.querySelector(`[hand-pose__${this.id}]`);
     poseEl.components[`hand-pose__${this.id}`].store = this;
   }
 });
