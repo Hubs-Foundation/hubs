@@ -116,11 +116,11 @@ const concurrentLoadDetector = new ConcurrentLoadDetector();
 concurrentLoadDetector.start();
 
 // Always layer in any new default profile bits
-store.update({ profile: { ...generateDefaultProfile(), ...(store.state.profile || {}) } });
+store.update({ activity: {}, settings: {}, profile: { ...generateDefaultProfile(), ...(store.state.profile || {}) } });
 
 // Regenerate name to encourage users to change it.
-if (!store.state.profile.has_changed_name) {
-  store.update({ profile: { display_name: generateRandomName() } });
+if (!store.state.activity.hasChangedName) {
+  store.update({ profile: { displayName: generateRandomName() } });
 }
 
 function mountUI(scene, props = {}) {
@@ -128,7 +128,7 @@ function mountUI(scene, props = {}) {
   const forcedVREntryType = qs.vr_entry_type || null;
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
   const htmlPrefix = document.body.dataset.htmlPrefix || "";
-  const showProfileEntry = !store.state.profile.has_changed_name;
+  const showProfileEntry = !store.state.activity.hasChangedName;
 
   ReactDOM.render(
     <UIRoot
@@ -167,10 +167,10 @@ const onReady = async () => {
   };
 
   const applyProfileFromStore = playerRig => {
-    const displayName = store.state.profile.display_name;
+    const displayName = store.state.profile.displayName;
     playerRig.setAttribute("player-info", {
       displayName,
-      avatarSrc: "#" + (store.state.profile.avatar_id || "botdefault")
+      avatarSrc: "#" + (store.state.profile.avatarId || "botdefault")
     });
     document.querySelector("a-scene").emit("username-changed", { username: displayName });
   };
@@ -244,7 +244,7 @@ const onReady = async () => {
     if (!qsTruthy("offline")) {
       document.body.addEventListener("connected", () => {
         hubChannel.sendEntryEvent().then(() => {
-          store.update({ lastEnteredAt: moment().toJSON() });
+          store.update({ activity: { lastEnteredAt: moment().toJSON() } });
         });
         remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
       });

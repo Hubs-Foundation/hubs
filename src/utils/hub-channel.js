@@ -46,12 +46,13 @@ export default class HubChannel {
 
   getEntryTimingFlags = () => {
     const entryTimingFlags = { isNewDaily: true, isNewMonthly: true, isNewDayWindow: true, isNewMonthWindow: true };
+    const storedLastEnteredAt = this.store.state.activity.lastEnteredAt;
 
-    if (!this.store.state.lastEnteredAt) {
+    if (!storedLastEnteredAt) {
       return entryTimingFlags;
     }
 
-    const lastEntered = moment(this.store.state.lastEnteredAt);
+    const lastEntered = moment(storedLastEnteredAt);
     const lastEnteredPst = moment(lastEntered).tz("America/Los_Angeles");
     const nowPst = moment().tz("America/Los_Angeles");
     const dayWindowAgo = moment().subtract(1, "day");
