@@ -89,7 +89,7 @@ AFRAME.registerComponent("character-controller", {
     const rotationInvMatrix = new THREE.Matrix4();
     const pivotRotationMatrix = new THREE.Matrix4();
     const pivotRotationInvMatrix = new THREE.Matrix4();
-    let start = new THREE.Vector3();
+    const start = new THREE.Vector3();
 
     return function(t, dt) {
       const deltaSeconds = dt / 1000;
