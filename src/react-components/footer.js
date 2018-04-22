@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 import faUsers from "@fortawesome/fontawesome-free-solid/faUsers";
-import faEllipsisH from "@fortawesome/fontawesome-free-solid/faEllipsisH";
+import faBars from "@fortawesome/fontawesome-free-solid/faBars";
 import faShareAlt from "@fortawesome/fontawesome-free-solid/faShareAlt";
 import faExclamation from "@fortawesome/fontawesome-free-solid/faExclamation";
 import faTimes from "@fortawesome/fontawesome-free-solid/faTimes";
@@ -34,7 +34,8 @@ export default class Footer extends Component {
           </div>
           <button className={styles.menuButton} onClick={() => this.setState({ menuVisible: !menuVisible })}>
             <i className={styles.menuButtonIcon}>
-              <FontAwesomeIcon icon={menuVisible ? (window.innerWidth < 768 ? faTimes : faArrowDown) : faEllipsisH} />
+              <FontAwesomeIcon className={styles.menuButtonNarrowCloseIcon} icon={menuVisible ? faArrowDown : faBars} />
+              <FontAwesomeIcon className={styles.menuButtonWideCloseIcon} icon={menuVisible ? faTimes : faBars} />
             </i>
           </button>
           <div className={styles.hubStats}>
@@ -59,7 +60,7 @@ export default class Footer extends Component {
                   <FontAwesomeIcon icon={faShareAlt} />
                 </i>
                 <span className={styles.menuButtonText}>
-                  <strong>Invite</strong> Others
+                  <strong>Invite</strong> Friends
                 </span>
               </button>
               <button className={styles.menuButton} onClick={this.props.onClickHelp}>
@@ -67,7 +68,7 @@ export default class Footer extends Component {
                   <FontAwesomeIcon icon={faQuestion} />
                 </i>
                 <span className={styles.menuButtonText}>
-                  <strong>Learn</strong> How to Play
+                  <strong>Learn</strong> the Basics
                 </span>
               </button>
               <button className={styles.menuButton} onClick={this.props.onClickUpdates}>

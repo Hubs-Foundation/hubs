@@ -30,7 +30,7 @@
   background-color: transparent;
   border-bottom: 1px solid rgba(32, 32, 32, 0.65);
 
-  @media (min-width: 768px) {
+  @media (min-width: 768px) , (max-height: 380px) {
     display: none;
   }
 }
@@ -104,5 +104,17 @@
 
   :local(.menu-button__text) {
     @extend %fa-icon-button-text;
+  }
+
+  :local(.menu-button__narrow-close-icon) {
+    @media (max-width: 767px) {
+      display: none;
+    }
+  }
+
+  :local(.menu-button__wide-close-icon) {
+    @media (min-width: 768px) {
+      display: none;
+    }
   }
 }

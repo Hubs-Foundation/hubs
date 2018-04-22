@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { injectIntl, FormattedMessage } from "react-intl";
+import { injectIntl } from "react-intl";
 import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 import faAngleLeft from "@fortawesome/fontawesome-free-solid/faAngleLeft";
 import faAngleRight from "@fortawesome/fontawesome-free-solid/faAngleRight";

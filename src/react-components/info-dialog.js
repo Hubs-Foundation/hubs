@@ -103,7 +103,7 @@ class InfoDialog extends Component {
         dialogBody = "Great! Please check your e-mail to confirm your subscription.";
         break;
       case InfoDialog.dialogTypes.invite:
-        dialogTitle = "Invite Others";
+        dialogTitle = "Invite Friends";
         dialogBody = (
           <div>
             <div>Just share the link to have others join you.</div>
@@ -186,7 +186,7 @@ class InfoDialog extends Component {
         );
         break;
       case InfoDialog.dialogTypes.help:
-        dialogTitle = "How to Play";
+        dialogTitle = "Getting Started";
         dialogBody = (
           <div className="info-dialog__help">
             When in a room, other avatars can see and hear you.
