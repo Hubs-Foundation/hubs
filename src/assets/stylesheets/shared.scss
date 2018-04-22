@@ -18,6 +18,7 @@ $darker-grey: rgba(64, 64, 64, 1.0);
 
 %bottom-button {
   @extend %default-font;
+  outline-style: none;
   font-size: 1em;
   font-weight: bold;
   margin-top: auto;
@@ -51,6 +52,7 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   color: white;
   border: none;
   font-size: 64pt;
+  outline-style: none;
 }
 
 %checkbox {
@@ -81,6 +83,7 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   color: white;
   cursor: pointer;
   font-size: 0.8em;
+  outline-style: none;
 }
 
 %fa-icon-button-icon {
