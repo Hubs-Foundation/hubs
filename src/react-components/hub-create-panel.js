@@ -23,20 +23,20 @@ class HubCreatePanel extends Component {
     this.state = {
       ready: false,
       name: generateHubName(),
-      environmentIndex: Math.floor(Math.random() * props.environments.length)
+      environmentIndex: Math.floor(Math.random() * props.environments.length),
+      // HACK: expand on small screens by default to ensure scene selection possible.
+      // Eventually this could/should be done via media queries.
+      expanded: window.innerWidth < 420
     };
 
-    // HACK: expand on small screens by default to ensure scene selection possible.
-    // Eventually this could/should be done via media queries.
-    if (window.innerWidth < 420) {
-      (async () => {
-        const environmentThumbnail = this._getEnvironmentThumbnail(this.state.environmentIndex);
-        await this._preloadImage(environmentThumbnail.srcset);
-        this.setState({ ready: true, expanded: true });
-      })();
-    } else {
-      this.state.ready = true;
-    }
+    // Optimisticly preload all environment thumbnails
+    (async () => {
+      const environmentThumbnails = props.environments.map((_, i) => this._getEnvironmentThumbnail(i));
+      await Promise.all(
+        environmentThumbnails.map(environmentThumbnail => this._preloadImage(environmentThumbnail.srcset))
+      );
+      this.setState({ ready: true });
+    })();
   }
 
   _getEnvironmentThumbnail = environmentIndex => {
@@ -83,10 +83,10 @@ class HubCreatePanel extends Component {
     return new RegExp(HUB_NAME_PATTERN).test(this.state.name) && new RegExp(hubAlphaPattern).test(this.state.name);
   };
 
-  _preloadImage = async src => {
+  _preloadImage = async srcset => {
     const img = new Image();
     const imgLoad = new Promise(resolve => img.addEventListener("load", resolve));
-    img.srcset = src;
+    img.srcset = srcset;
     await imgLoad;
   };
 
