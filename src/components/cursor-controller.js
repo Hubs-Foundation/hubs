@@ -10,37 +10,30 @@ AFRAME.registerComponent("cursor-controller", {
     camera: { type: "selector" },
     playerRig: { type: "selector" },
     gazeTeleportControls: { type: "selector" },
-    otherHand: { type: "string" },
-    hand: { default: "right" },
+    physicalHand: { type: "string" },
+    handedness: { default: "right", oneOf: ["right", "left"] },
     maxDistance: { default: 3 },
     minDistance: { default: 0.5 },
     cursorColorHovered: { default: "#FF0000" },
     cursorColorUnhovered: { default: "#FFFFFF" },
-    controllerEvent: { type: "string", default: "action_primary_down" },
-    controllerEndEvent: { type: "string", default: "action_primary_up" },
-    grabEvent: { type: "string", default: "action_grab" },
-    releaseEvent: { type: "string", default: "action_release" },
-    teleportEvent: { type: "string", default: "action_teleport_down" },
-    teleportEndEvent: { type: "string", default: "action_teleport_up" }
+    controllerEvent: { default: "action_primary_down" },
+    controllerEndEvent: { default: "action_primary_up" },
+    grabEvent: { default: "action_grab" },
+    releaseEvent: { default: "action_release" },
+    teleportEvent: { default: "action_teleport_down" },
+    teleportEndEvent: { default: "action_teleport_up" }
   },
 
   init: function() {
     this.inVR = false;
     this.isMobile = AFRAME.utils.device.isMobile();
-    this.trackedControls = [];
     this.hasPointingDevice = false;
     this.currentTargetType = TARGET_TYPE_NONE;
     this.isGrabbing = false;
     this.grabStarting = false;
-    this.wasOtherHandGrabbing = false;
-    this.wasIntersecting = false;
     this.currentDistance = this.data.maxDistance;
     this.currentDistanceMod = 0;
-    this.origin = new THREE.Vector3();
-    this.direction = new THREE.Vector3();
-    this.point = new THREE.Vector3();
     this.mousePos = new THREE.Vector2();
-    this.controllerQuaternion = new THREE.Quaternion();
     this.controller = null;
     this.controllerQueue = [];
 
@@ -75,11 +68,11 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   update: function(oldData) {
-    if (oldData.otherHand !== this.data.otherHand) {
+    if (oldData.physicalHand !== this.data.physicalHand) {
       this._handleModelLoaded();
     }
 
-    if (oldData.hand !== this.data.hand) {
+    if (oldData.handedness !== this.data.handedness) {
       //TODO
     }
   },
@@ -127,99 +120,107 @@ AFRAME.registerComponent("cursor-controller", {
     this.el.sceneEl.removeEventListener("controllerdisconnected", this.controllerDisconnectedListener);
   },
 
-  tick: function() {
-    this.isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
+  tick: (function() {
+    let wasIntersecting = false;
+    let wasPhysicalHandGrabbing = false;
+    const origin = new THREE.Vector3();
+    const direction = new THREE.Vector3();
+    const point = new THREE.Vector3();
+    const controllerQuaternion = new THREE.Quaternion();
 
-    //handle physical hand
-    if (this.otherHand) {
-      const state = this.otherHand.components["super-hands"].state;
-      const isOtherHandGrabbing = state.has("grab-start") || state.has("hover-start");
-      if (this.wasOtherHandGrabbing != isOtherHandGrabbing) {
-        this.data.cursor.setAttribute("visible", !isOtherHandGrabbing);
-        this.el.setAttribute("line", { visible: !isOtherHandGrabbing });
+    return function() {
+      this.isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
+
+      //handle physical hand
+      if (this.physicalHand) {
+        const state = this.physicalHand.components["super-hands"].state;
+        const isPhysicalHandGrabbing = state.has("grab-start") || state.has("hover-start");
+        if (wasPhysicalHandGrabbing != isPhysicalHandGrabbing) {
+          this.data.cursor.setAttribute("visible", !isPhysicalHandGrabbing);
+          this.el.setAttribute("line", { visible: !isPhysicalHandGrabbing });
+          this.currentTargetType = TARGET_TYPE_NONE;
+        }
+        wasPhysicalHandGrabbing = isPhysicalHandGrabbing;
+        if (isPhysicalHandGrabbing) return;
+      }
+
+      //set raycaster origin/direction
+      const camera = this.data.camera.components.camera.camera;
+      if (!this.inVR && !this.isMobile) {
+        //mouse cursor mode
+        const raycaster = this.el.components.raycaster.raycaster;
+        raycaster.setFromCamera(this.mousePos, camera);
+        origin.copy(raycaster.ray.origin);
+        direction.copy(raycaster.ray.direction);
+      } else if ((this.inVR || this.isMobile) && !this.hasPointingDevice) {
+        //gaze cursor mode
+        camera.getWorldPosition(origin);
+        camera.getWorldDirection(direction);
+      } else if (this.controller != null) {
+        //3d cursor mode
+        this.controller.object3D.getWorldPosition(origin);
+        this.controller.object3D.getWorldQuaternion(controllerQuaternion);
+        direction
+          .set(0, 0, -1)
+          .applyQuaternion(controllerQuaternion)
+          .normalize();
+      }
+
+      this.el.setAttribute("raycaster", { origin: origin, direction: direction });
+
+      let intersection = null;
+
+      //update cursor position
+      if (!this.isGrabbing) {
+        const intersections = this.el.components.raycaster.intersections;
+        if (intersections.length > 0 && intersections[0].distance <= this.data.maxDistance) {
+          intersection = intersections[0];
+          this.data.cursor.object3D.position.copy(intersection.point);
+          this.currentDistance = intersections[0].distance;
+          this.currentDistanceMod = 0;
+        } else {
+          this.currentDistance = this.data.maxDistance;
+        }
+      }
+
+      if (this.isGrabbing || !intersection) {
+        const max = Math.max(this.data.minDistance, this.currentDistance - this.currentDistanceMod);
+        const distance = Math.min(max, this.data.maxDistance);
+        this.currentDistanceMod = this.currentDistance - distance;
+        direction.multiplyScalar(distance);
+        point.addVectors(origin, direction);
+        this.data.cursor.object3D.position.copy(point);
+      }
+
+      //update currentTargetType
+      if (this.isGrabbing && !intersection) {
+        this.currentTargetType = TARGET_TYPE_INTERACTABLE;
+      } else if (intersection) {
+        if (this._isClass("interactable", intersection.object.el)) {
+          this.currentTargetType = TARGET_TYPE_INTERACTABLE;
+        } else if (this._isClass("ui", intersection.object.el)) {
+          this.currentTargetType = TARGET_TYPE_UI;
+        }
+      } else {
         this.currentTargetType = TARGET_TYPE_NONE;
       }
-      this.wasOtherHandGrabbing = isOtherHandGrabbing;
-    }
 
-    if (this.wasOtherHandGrabbing) return;
-
-    //set raycaster origin/direction
-    const camera = this.data.camera.components.camera.camera;
-    if (!this.inVR && !this.isMobile) {
-      //mouse cursor mode
-      const raycaster = this.el.components.raycaster.raycaster;
-      raycaster.setFromCamera(this.mousePos, camera);
-      this.origin = raycaster.ray.origin;
-      this.direction = raycaster.ray.direction;
-    } else if ((this.inVR || this.isMobile) && !this.hasPointingDevice) {
-      //gaze cursor mode
-      camera.getWorldPosition(this.origin);
-      camera.getWorldDirection(this.direction);
-    } else if (this.controller != null) {
-      //3d cursor mode
-      this.controller.object3D.getWorldPosition(this.origin);
-      this.controller.object3D.getWorldQuaternion(this.controllerQuaternion);
-      this.direction
-        .set(0, 0, -1)
-        .applyQuaternion(this.controllerQuaternion)
-        .normalize();
-    }
-
-    this.el.setAttribute("raycaster", { origin: this.origin, direction: this.direction });
-
-    let intersection = null;
-
-    //update cursor position
-    if (!this.isGrabbing) {
-      const intersections = this.el.components.raycaster.intersections;
-      if (intersections.length > 0 && intersections[0].distance <= this.data.maxDistance) {
-        intersection = intersections[0];
-        this.data.cursor.object3D.position.copy(intersection.point);
-        this.currentDistance = intersections[0].distance;
-        this.currentDistanceMod = 0;
-      } else {
-        this.currentDistance = this.data.maxDistance;
+      //update cursor material
+      const isTarget = this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI);
+      if ((this.isGrabbing || isTarget) && !wasIntersecting) {
+        wasIntersecting = true;
+        this.data.cursor.setAttribute("material", { color: this.data.cursorColorHovered });
+      } else if (!this.isGrabbing && !isTarget && wasIntersecting) {
+        wasIntersecting = false;
+        this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
       }
-    }
 
-    if (this.isGrabbing || !intersection) {
-      const max = Math.max(this.data.minDistance, this.currentDistance - this.currentDistanceMod);
-      const distance = Math.min(max, this.data.maxDistance);
-      this.currentDistanceMod = this.currentDistance - distance;
-      this.direction.multiplyScalar(distance);
-      this.point.addVectors(this.origin, this.direction);
-      this.data.cursor.object3D.position.copy(this.point);
-    }
-
-    //update currentTargetType
-    if (this.isGrabbing && !intersection) {
-      this.currentTargetType = TARGET_TYPE_INTERACTABLE;
-    } else if (intersection) {
-      if (this._isClass("interactable", intersection.object.el)) {
-        this.currentTargetType = TARGET_TYPE_INTERACTABLE;
-      } else if (this._isClass("ui", intersection.object.el)) {
-        this.currentTargetType = TARGET_TYPE_UI;
+      //update line
+      if (this.hasPointingDevice) {
+        this.el.setAttribute("line", { start: origin.clone(), end: this.data.cursor.object3D.position.clone() });
       }
-    } else {
-      this.currentTargetType = TARGET_TYPE_NONE;
-    }
-
-    //update cursor material
-    const isTarget = this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI);
-    if ((this.isGrabbing || isTarget) && !this.wasIntersecting) {
-      this.wasIntersecting = true;
-      this.data.cursor.setAttribute("material", { color: this.data.cursorColorHovered });
-    } else if (!this.isGrabbing && !isTarget && this.wasIntersecting) {
-      this.wasIntersecting = false;
-      this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
-    }
-
-    //update line
-    if (this.hasPointingDevice) {
-      this.el.setAttribute("line", { start: this.origin.clone(), end: this.data.cursor.object3D.position.clone() });
-    }
-  },
+    };
+  })(),
 
   _isClass: function(className, el) {
     return (
@@ -331,7 +332,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleModelLoaded: function() {
-    this.otherHand = this.data.playerRig.querySelector(this.data.otherHand);
+    this.physicalHand = this.data.playerRig.querySelector(this.data.physicalHand);
   },
 
   _handleCursorLoaded: function() {
@@ -341,10 +342,10 @@ AFRAME.registerComponent("cursor-controller", {
   _handleControllerConnected: function(e) {
     const data = {
       controller: e.target,
-      hand: e.detail.component.data.hand
+      handedness: e.detail.component.data.hand
     };
 
-    if (data.hand === this.data.hand) {
+    if (data.handedness === this.data.handedness) {
       this.controllerQueue.unshift(data);
     } else {
       this.controllerQueue.push(data);
@@ -377,8 +378,8 @@ AFRAME.registerComponent("cursor-controller", {
         this.controller.removeEventListener(this.data.releaseEvent, this.controllerEndEventListener);
       }
 
-      const hand = controllerData.hand;
-      this.el.setAttribute("cursor-controller", { otherHand: `#${hand}-super-hand` });
+      const hand = controllerData.handedness;
+      this.el.setAttribute("cursor-controller", { physicalHand: `#${hand}-super-hand` });
 
       this.controller = controllerData.controller;
       this.controller.addEventListener(this.data.controllerEvent, this.controllerEventListener);
