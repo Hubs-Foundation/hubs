@@ -84,6 +84,7 @@ class ProfileEntryPanel extends Component {
                 id="profile-entry-display-name"
                 className="profile-entry__form-field-text"
                 value={this.state.displayName}
+                onFocus={e => e.target.select()}
                 onChange={e => this.setState({ displayName: e.target.value })}
                 required
                 pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
