@@ -103,6 +103,7 @@ class UIRoot extends Component {
 
   componentDidMount() {
     this.setupTestTone();
+    this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
     this.micLevelMovingAverage = MovingAverage(100);
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
     this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
