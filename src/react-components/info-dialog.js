@@ -209,7 +209,7 @@ class InfoDialog extends Component {
               individual avatars from further interactions with you.
             </p>
             <p>
-              <b>Bubble Toggle</b> will toggle the hiding of other avatars when they enter your personal space.
+              The <b>Bubble Toggle</b> will toggle the hiding of other avatars when they enter your personal space.
             </p>
           </div>
         );
