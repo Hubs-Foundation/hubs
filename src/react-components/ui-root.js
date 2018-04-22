@@ -12,7 +12,9 @@ import AutoExitWarning from "./auto-exit-warning";
 import { TwoDEntryButton, GenericEntryButton, GearVREntryButton, DaydreamEntryButton } from "./entry-buttons.js";
 import { ProfileInfoHeader } from "./profile-info-header.js";
 import ProfileEntryPanel from "./profile-entry-panel";
+import InfoDialog from "./info-dialog.js";
 import TwoDHUD from "./2d-hud";
+import Footer from "./footer";
 
 const mobiledetect = new MobileDetect(navigator.userAgent);
 
@@ -65,12 +67,15 @@ class UIRoot extends Component {
     availableVREntryTypes: PropTypes.object,
     initialEnvironmentLoaded: PropTypes.bool,
     janusRoomId: PropTypes.number,
-    roomUnavailableReason: PropTypes.string
+    roomUnavailableReason: PropTypes.string,
+    hubName: PropTypes.string,
+    occupantCount: PropTypes.number
   };
 
   state = {
     entryStep: ENTRY_STEPS.start,
     enterInVR: false,
+    infoDialogType: null,
 
     shareScreen: false,
     requestedScreen: false,
@@ -760,7 +765,7 @@ class UIRoot extends Component {
       "ui-dialog--darkened": this.state.entryStep !== ENTRY_STEPS.finished
     });
 
-    const dialogBoxClassNames = classNames("ui-interactive", "ui-dialog-box");
+    const dialogBoxClassNames = classNames({ "ui-interactive": !this.state.infoDialogType, "ui-dialog-box": true });
 
     const dialogBoxContentsClassNames = classNames({
       "ui-dialog-box-contents": true,
@@ -770,6 +775,11 @@ class UIRoot extends Component {
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className="ui">
+          <InfoDialog
+            dialogType={this.state.infoDialogType}
+            onCloseDialog={() => this.setState({ infoDialogType: null })}
+          />
+
           <div className={dialogClassNames}>
             {(this.state.entryStep !== ENTRY_STEPS.finished || this.isWaitingForAutoExit()) && (
               <div className={dialogBoxClassNames}>
@@ -786,7 +796,15 @@ class UIRoot extends Component {
             )}
           </div>
           {this.state.entryStep === ENTRY_STEPS.finished ? (
-            <TwoDHUD muted={this.state.muted} onToggleMute={this.toggleMute} />
+            <div>
+              <TwoDHUD muted={this.state.muted} onToggleMute={this.toggleMute} />
+              <Footer
+                hubName={this.props.hubName}
+                occupantCount={this.props.occupantCount}
+                onClickInvite={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
+                onClickReport={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.report })}
+              />
+            </div>
           ) : null}
         </div>
       </IntlProvider>

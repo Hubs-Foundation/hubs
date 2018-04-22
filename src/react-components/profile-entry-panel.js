@@ -72,16 +72,14 @@ class ProfileEntryPanel extends Component {
 
     return (
       <div className="profile-entry">
-        <form onSubmit={this.saveStateAndFinish}>
+        <form onSubmit={this.saveStateAndFinish} className="profile-entry__form">
           <div className="profile-entry__box profile-entry__box--darkened">
-            <div className="profile-entry__subtitle">
+            <label htmlFor="#profile-entry-display-name" className="profile-entry__subtitle">
               <FormattedMessage id="profile.header" />
-            </div>
+            </label>
             <label>
-              <span className="profile-entry__display-name-label">
-                <FormattedMessage id="profile.display_name.label" />
-              </span>
               <input
+                id="profile-entry-display-name"
                 className="profile-entry__form-field-text"
                 value={this.state.display_name}
                 onChange={e => this.setState({ display_name: e.target.value })}

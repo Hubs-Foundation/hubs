@@ -16,6 +16,10 @@
     margin: 1em 0;
   }
 
+  &__form {
+    height: 100%;
+  }
+
   &__box {
     border-radius: 8px;
     display: flex;
@@ -27,7 +31,9 @@
     width: 60vw;
     min-width: 300px;
     max-width: 700px;
-    height: 500px;
+    min-height: 300px;
+    max-height: 1000px;
+    height: 90%;
 
     &--darkened {
       background-color: $darkest-transparent;

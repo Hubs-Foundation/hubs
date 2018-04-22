@@ -1,0 +1,125 @@
+@import 'shared';
+
+:local(.container) {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  font-size: 1.3em;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  // Position above virtual gamepad controls on mobile
+  z-index: 1;
+
+}
+:local(.floatingButton) {
+  display: flex;
+  justify-content: center;
+}
+:local(.header), :local(.menu-header) {
+  display: flex;
+}
+:local(.header) {
+  border-bottom: 1px solid rgba(32, 32, 32, 0.65);
+
+  @media (max-width: 768px) {
+    border-bottom: none;
+  }
+}
+:local(.menu-header) {
+  background-color: transparent;
+  border-bottom: 1px solid rgba(32, 32, 32, 0.65);
+
+  @media (min-width: 768px) {
+    display: none;
+  }
+}
+:local(.header) {
+  background-color: rgba(0, 0, 0, 0.65);
+
+  @media (max-width: 768px) {
+    background-color: transparent;
+  }
+
+  :local(.hub-info) {
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  :local(.hub-stats) {
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+}
+
+:local(.hub-info) {
+  flex: 1;
+  margin: 16px 24px;
+  display: flex;
+  align-items: center;
+  @media (max-width: 768px) {
+    margin: 16px 8px;
+    font-size: 0.9em;
+  }
+}
+:local(.hub-stats) {
+  text-align: right;
+  margin: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  @media (min-width: 768px) {
+    flex: 1;
+  }
+  @media (max-width: 768px) {
+    margin: 16px 8px;
+  }
+  :local(.hub-participant-count) {
+    margin: 0 12px;
+  }
+}
+
+:local(.menu) {
+  padding: 5px 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+}
+:local(.menu-buttons) {
+  margin: 0 auto;
+}
+:local(.menu-button) {
+  @extend %default-font;
+  margin: 16px 0;
+  padding: 0;
+  display: block;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 0.8em;
+
+  @media (max-width: 768px) {
+    flex: 1;
+    align-self: center;
+  }
+  :local(.menu-button__icon) {
+    background: black;
+    width: 40px !important;
+    height: 40px;
+    border: 3px solid white;
+    border-radius: 40px;
+    display: inline-block;
+    font-size: 22px;
+    vertical-align: sub;
+    line-height: 42px;
+    svg {
+      margin-left: 0px;
+    }
+  }
+  :local(.menu-button__text) {
+    margin-left: 16px;
+  }
+}

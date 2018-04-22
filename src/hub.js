@@ -204,9 +204,7 @@ const onReady = async () => {
       serverURL: process.env.JANUS_SERVER
     });
 
-    if (!qsTruthy("no_stats")) {
-      scene.setAttribute("stats-plus", false);
-    }
+    scene.setAttribute("stats-plus", false);
 
     if (isMobile || qsTruthy("mobile")) {
       playerRig.setAttribute("virtual-gamepad-controls", {});
@@ -247,6 +245,19 @@ const onReady = async () => {
       document.body.addEventListener("connected", () => {
         hubChannel.sendEntryEvent().then(() => {
           store.update({ lastEnteredAt: moment().toJSON() });
+        });
+        remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
+      });
+
+      document.body.addEventListener("clientConnected", () => {
+        remountUI({
+          occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
+        });
+      });
+
+      document.body.addEventListener("clientDisconnected", () => {
+        remountUI({
+          occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
         });
       });
 
@@ -313,10 +324,10 @@ const onReady = async () => {
   console.log(`Hub ID: ${hubId}`);
 
   const socketProtocol = document.location.protocol === "https:" ? "wss:" : "ws:";
-  const socketPort = qs.phx_port || (process.env.NODE_ENV === "production" ? document.location.port : 443);
-  const socketHost =
-    qs.phx_host ||
-    (process.env.NODE_ENV === "production" ? document.location.hostname : process.env.DEV_RETICULUM_SERVER);
+  const [retHost, retPort] = (process.env.DEV_RETICULUM_SERVER || "").split(":");
+  const isProd = process.env.NODE_ENV === "production";
+  const socketPort = qs.phx_port || (isProd ? document.location.port : retPort) || "443";
+  const socketHost = qs.phx_host || (isProd ? document.location.hostname : retHost) || "";
   const socketUrl = `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}/socket`;
   console.log(`Phoenix Channel URL: ${socketUrl}`);
 
@@ -331,7 +342,7 @@ const onReady = async () => {
       const hub = data.hubs[0];
       const defaultSpaceTopic = hub.topics[0];
       const gltfBundleUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
-      remountUI({ janusRoomId: defaultSpaceTopic.janus_room_id });
+      remountUI({ janusRoomId: defaultSpaceTopic.janus_room_id, hubName: hub.name });
       initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`);
       hubChannel.setPhoenixChannel(channel);
     })
