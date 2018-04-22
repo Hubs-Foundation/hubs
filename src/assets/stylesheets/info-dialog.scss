@@ -17,6 +17,10 @@
   height: 100%;
   background-color: rgba(0,0,0,.6);
 
+  &--tall {
+    grid-template-rows: 1fr 20px 700px 20px 1fr;
+  }
+
   &__box {
     grid-column: 3;
     grid-row: 3;
@@ -157,4 +161,12 @@
 }
 
 
+.info-dialog {
+  &__help {
+    text-align: left;
 
+    &__hud {
+      margin: 12px;
+    }
+  }
+}

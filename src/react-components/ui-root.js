@@ -753,7 +753,8 @@ class UIRoot extends Component {
       <div className="entry-dialog">
         <ProfileInfoHeader
           name={this.props.store.state.profile.displayName}
-          onClick={() => this.setState({ showProfileEntry: true })}
+          onNameClick={() => this.setState({ showProfileEntry: true })}
+          onHelpClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
         />
         {entryPanel}
         {micPanel}
@@ -803,6 +804,8 @@ class UIRoot extends Component {
                 occupantCount={this.props.occupantCount}
                 onClickInvite={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
                 onClickReport={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.report })}
+                onClickHelp={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
+                onClickUpdates={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.updates })}
               />
             </div>
           ) : null}

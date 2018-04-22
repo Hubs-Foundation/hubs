@@ -86,6 +86,18 @@
   display: flex;
   flex: 1 1 40px;
   width: 100%;
+  justify-content: space-between;
+  min-height: 80px;
+
+  &__menu-button {
+    @extend %fa-icon-button;
+    margin: 0 20px;
+
+    &__icon {
+      @extend %fa-icon-button-icon;
+      background: transparent;
+    }
+  }
 
   &__icon {
     cursor: pointer;
@@ -95,13 +107,16 @@
   }
 
   &__profile_display_name {
+    margin-left: 16px;
     cursor: pointer;
-    flex: 6 1 auto;
     font-size: 1.2em;
     line-height: 50px;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
   }
 
   &__app_name {

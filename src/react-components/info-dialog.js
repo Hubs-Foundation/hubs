@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import copy from "copy-to-clipboard";
+import classNames from "classnames";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import formurlencoded from "form-urlencoded";
@@ -12,7 +13,8 @@ class InfoDialog extends Component {
     email_submitted: Symbol("email_submitted"),
     invite: Symbol("invite"),
     updates: Symbol("updates"),
-    report: Symbol("report")
+    report: Symbol("report"),
+    help: Symbol("help")
   };
   static propTypes = {
     dialogType: PropTypes.oneOf(Object.values(InfoDialog.dialogTypes)),
@@ -183,11 +185,45 @@ class InfoDialog extends Component {
           </span>
         );
         break;
+      case InfoDialog.dialogTypes.help:
+        dialogTitle = "How to Play";
+        dialogBody = (
+          <div className="info-dialog__help">
+            When using Hubs, other avatars can see and hear you too.
+            <p />
+            Use the action button on your controller to teleport from place to place. If your controller has a trigger,
+            use it to pick up and hold objects.
+            <p style={{ textAlign: "center" }}>
+              In VR, <b>look up</b> to find your menu:
+              <img
+                className="info-dialog__help__hud"
+                src="../assets/images/help-hud.png"
+                srcSet="../assets/images/help-hud@2x.png 2x"
+              />
+            </p>
+            <p>
+              The <b>Mic Toggle</b> will mute and unmute your mic.
+            </p>
+            <p>
+              The <b>Pause/Resume Toggle</b> will let you pause all avatars. Once paused, you can choose to block
+              individual avatars from further interactions with you.
+            </p>
+            <p>
+              <b>Bubble Toggle</b> will toggle the hiding of other avatars when they enter your personal space.
+            </p>
+          </div>
+        );
+        break;
     }
+
+    const dialogClasses = classNames({
+      dialog: true,
+      "dialog--tall": this.props.dialogType === InfoDialog.dialogTypes.help
+    });
 
     return (
       <div className="dialog-overlay">
-        <div className="dialog">
+        <div className={dialogClasses}>
           <div className="dialog__box">
             <div className="dialog__box__contents">
               <button className="dialog__box__contents__close" onClick={this.props.onCloseDialog}>

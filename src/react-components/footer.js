@@ -6,6 +6,9 @@ import faEllipsisH from "@fortawesome/fontawesome-free-solid/faEllipsisH";
 import faShareAlt from "@fortawesome/fontawesome-free-solid/faShareAlt";
 import faExclamation from "@fortawesome/fontawesome-free-solid/faExclamation";
 import faTimes from "@fortawesome/fontawesome-free-solid/faTimes";
+import faArrowDown from "@fortawesome/fontawesome-free-solid/faArrowDown";
+import faQuestion from "@fortawesome/fontawesome-free-solid/faQuestion";
+import faNewspaper from "@fortawesome/fontawesome-free-solid/faNewspaper";
 
 import styles from "../assets/stylesheets/footer.scss";
 
@@ -14,7 +17,9 @@ export default class Footer extends Component {
     hubName: PropTypes.string,
     occupantCount: PropTypes.number,
     onClickInvite: PropTypes.func,
-    onClickReport: PropTypes.func
+    onClickReport: PropTypes.func,
+    onClickUpdates: PropTypes.func,
+    onClickHelp: PropTypes.func
   };
   state = {
     menuVisible: false
@@ -29,7 +34,7 @@ export default class Footer extends Component {
           </div>
           <button className={styles.menuButton} onClick={() => this.setState({ menuVisible: !menuVisible })}>
             <i className={styles.menuButtonIcon}>
-              <FontAwesomeIcon icon={menuVisible ? faTimes : faEllipsisH} />
+              <FontAwesomeIcon icon={menuVisible ? (window.innerWidth < 768 ? faTimes : faArrowDown) : faEllipsisH} />
             </i>
           </button>
           <div className={styles.hubStats}>
@@ -55,6 +60,22 @@ export default class Footer extends Component {
                 </i>
                 <span className={styles.menuButtonText}>
                   <strong>Invite</strong> Others
+                </span>
+              </button>
+              <button className={styles.menuButton} onClick={this.props.onClickHelp}>
+                <i className={styles.menuButtonIcon}>
+                  <FontAwesomeIcon icon={faQuestion} />
+                </i>
+                <span className={styles.menuButtonText}>
+                  <strong>Learn</strong> How to Play
+                </span>
+              </button>
+              <button className={styles.menuButton} onClick={this.props.onClickUpdates}>
+                <i className={styles.menuButtonIcon}>
+                  <FontAwesomeIcon icon={faNewspaper} />
+                </i>
+                <span className={styles.menuButtonText}>
+                  <strong>Sign Up</strong> for Updates
                 </span>
               </button>
               <button className={styles.menuButton} onClick={this.props.onClickReport}>

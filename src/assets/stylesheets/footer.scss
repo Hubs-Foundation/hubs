@@ -91,35 +91,18 @@
   margin: 0 auto;
 }
 :local(.menu-button) {
-  @extend %default-font;
-  margin: 16px 0;
-  padding: 0;
-  display: block;
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  font-size: 0.8em;
+  @extend %fa-icon-button;
 
   @media (max-width: 768px) {
     flex: 1;
     align-self: center;
   }
+
   :local(.menu-button__icon) {
-    background: black;
-    width: 40px !important;
-    height: 40px;
-    border: 3px solid white;
-    border-radius: 40px;
-    display: inline-block;
-    font-size: 22px;
-    vertical-align: sub;
-    line-height: 42px;
-    svg {
-      margin-left: 0px;
-    }
+    @extend %fa-icon-button-icon;
   }
+
   :local(.menu-button__text) {
-    margin-left: 16px;
+    @extend %fa-icon-button-text;
   }
 }

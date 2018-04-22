@@ -28,6 +28,10 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   padding: 12px;
   background: none;
   color: white;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
 }
 
 %top-title {
@@ -65,4 +69,35 @@ $darker-grey: rgba(64, 64, 64, 1.0);
   border: 9px double white;
   outline: 9px solid white;
   outline-offset: -18px;
+}
+
+%fa-icon-button {
+  @extend %default-font;
+  margin: 16px 0;
+  padding: 0;
+  display: block;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 0.8em;
+}
+
+%fa-icon-button-icon {
+  background: black;
+  width: 40px !important;
+  height: 40px;
+  border: 3px solid white;
+  border-radius: 40px;
+  display: inline-block;
+  font-size: 22px;
+  vertical-align: sub;
+  line-height: 42px;
+  svg {
+    margin-left: 0px;
+  }
+}
+
+%fa-icon-button-text {
+  margin-left: 16px;
 }
