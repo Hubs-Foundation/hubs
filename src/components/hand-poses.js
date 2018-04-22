@@ -26,7 +26,7 @@ AFRAME.registerComponent("hand-pose-state", {
     this.el.removeEventListener("model-loaded", this.setSelfAsStore);
   },
   setSelfAsStore(e) {
-    let poseEl = e.target.querySelector(`[hand-pose__${this.id}]`);
+    const poseEl = e.target.querySelector(`[hand-pose__${this.id}]`);
     poseEl.components[`hand-pose__${this.id}`].store = this;
   }
 });
