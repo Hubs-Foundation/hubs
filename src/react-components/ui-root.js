@@ -753,8 +753,9 @@ class UIRoot extends Component {
       <div className="entry-dialog">
         <ProfileInfoHeader
           name={this.props.store.state.profile.displayName}
-          onNameClick={() => this.setState({ showProfileEntry: true })}
-          onHelpClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
+          onClickName={() => this.setState({ showProfileEntry: true })}
+          onClickInvite={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
+          onClickHelp={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
         />
         {entryPanel}
         {micPanel}
@@ -778,6 +779,7 @@ class UIRoot extends Component {
         <div className="ui">
           <InfoDialog
             dialogType={this.state.infoDialogType}
+            onSubmittedEmail={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.email_submitted })}
             onCloseDialog={() => this.setState({ infoDialogType: null })}
           />
 

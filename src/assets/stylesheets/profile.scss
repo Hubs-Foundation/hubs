@@ -89,13 +89,18 @@
   justify-content: space-between;
   min-height: 80px;
 
-  &__menu-button {
-    @extend %fa-icon-button;
+  &__menu-buttons {
+    display: flex;
     margin: 0 20px;
 
-    &__icon {
-      @extend %fa-icon-button-icon;
-      background: transparent;
+    &__menu-button {
+      @extend %fa-icon-button;
+      margin-left: 16px;
+
+      &__icon {
+	@extend %fa-icon-button-icon;
+	background: transparent;
+      }
     }
   }
 
