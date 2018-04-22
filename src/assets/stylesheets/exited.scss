@@ -9,9 +9,8 @@
   align-items: center;
   flex-direction: column;
 
-  &__title {
-    @extend %default-font;
-    font-size: 1.2em;
+  &__logo {
+    width: 150px;
   }
 
   &__subtitle {

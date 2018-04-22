@@ -538,9 +538,7 @@ class UIRoot extends Component {
       return (
         <IntlProvider locale={lang} messages={messages}>
           <div className="exited-panel">
-            <div className="exited-panel__title">
-              <b>moz://a</b> duck
-            </div>
+            <img className="exited-panel__logo" src="../assets/images/logo.svg" />
             <div className="exited-panel__subtitle">{subtitle}</div>
           </div>
         </IntlProvider>
@@ -556,9 +554,8 @@ class UIRoot extends Component {
                 <div className="loader-center" />
               </div>
             </div>
-            <div className="loading-panel__title">
-              <b>moz://a</b> duck
-            </div>
+
+            <img className="loading-panel__logo" src="../assets/images/logo-narrow.svg" />
           </div>
         </IntlProvider>
       );
