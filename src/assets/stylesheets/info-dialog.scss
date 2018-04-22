@@ -17,6 +17,10 @@
   height: 100%;
   background-color: rgba(0,0,0,.6);
 
+  &--darkened-background {
+    background-color: rgba(0,0,0,.9);
+  }
+
   &__box {
     grid-column: 3;
     grid-row: 3;
@@ -109,6 +113,18 @@
   }
 }
 
+.email-submitted__close-button {
+  @extend %bottom-button;
+  margin-left: 6px;
+  margin-right: 6px;
+  appearance: none;
+  width: 128px;
+  text-align: center;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+}
+
 .mailing-list-form {
   display: flex;
   height: 100%;
@@ -143,6 +159,10 @@
   &__privacy {
     margin-top: 10px;
     font-size: 0.7em;
+
+    &--hidden {
+      visibility: hidden;
+    }
   }
 }
 
