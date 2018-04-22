@@ -315,7 +315,7 @@ class UIRoot extends Component {
 
   setMediaStreamToDefault = async () => {
     let hasAudio = false;
-    const { lastUsedMicDeviceId } = this.props.store.state;
+    const { lastUsedMicDeviceId } = this.props.store.state.settings;
 
     // Try to fetch last used mic, if there was one.
     if (lastUsedMicDeviceId) {
@@ -410,7 +410,7 @@ class UIRoot extends Component {
       const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForMediaStream(mediaStream));
 
       if (micDeviceId) {
-        this.props.store.update({ lastUsedMicDeviceId: micDeviceId });
+        this.props.store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
       }
 
       this.setState({ micLevelAudioContext, micUpdateInterval });
@@ -752,7 +752,7 @@ class UIRoot extends Component {
     ) : (
       <div className="entry-dialog">
         <ProfileInfoHeader
-          name={this.props.store.state.profile.display_name}
+          name={this.props.store.state.profile.displayName}
           onClick={() => this.setState({ showProfileEntry: true })}
         />
         {entryPanel}

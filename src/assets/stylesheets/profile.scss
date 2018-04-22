@@ -64,31 +64,6 @@
     margin: 0.5em 0;
   }
 
-  &__terms {
-    margin-bottom: 16px;
-
-    &__checkbox {
-      @extend %checkbox;
-      vertical-align: unset;
-    }
-    &__checkbox:checked {
-      @extend %checkbox-checked;
-    }
-
-    &__text {
-      display: inline-block;
-      max-width: 20em;
-    }
-
-    &__link {
-      color: white;
-    }
-
-    &__link:visited {
-      color: grey;
-    }
-  }
-
   &__form-submit {
     @extend %bottom-button;
     margin: 0;

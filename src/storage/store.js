@@ -1,8 +1,7 @@
-import uuid from "uuid/v4";
 import { Validator } from "jsonschema";
 import { merge } from "lodash";
 
-const LOCAL_STORE_KEY = "___mozilla_duck";
+const LOCAL_STORE_KEY = "___mozilla_hubs";
 const STORE_STATE_CACHE_KEY = Symbol();
 const validator = new Validator();
 import { EventTarget } from "event-target-shim";
@@ -10,17 +9,32 @@ import { EventTarget } from "event-target-shim";
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
 export const SCHEMA = {
-  id: "/MozillaDuckStore",
+  id: "/MozillaHubsStore",
 
   definitions: {
     profile: {
       type: "object",
       additionalProperties: false,
       properties: {
-        has_agreed_to_terms: { type: "boolean" },
-        has_changed_name: { type: "boolean" },
-        display_name: { type: "string", pattern: "^[A-Za-z0-9-]{3,32}$" },
-        avatar_id: { type: "string" }
+        displayName: { type: "string", pattern: "^[A-Za-z0-9-]{3,32}$" },
+        avatarId: { type: "string" }
+      }
+    },
+
+    activity: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        hasChangedName: { type: "boolean" },
+        lastEnteredAt: { type: "string" }
+      }
+    },
+
+    settings: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        lastUsedMicDeviceId: { type: "string" }
       }
     }
   },
@@ -28,10 +42,9 @@ export const SCHEMA = {
   type: "object",
 
   properties: {
-    id: { type: "string", pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
     profile: { $ref: "#/definitions/profile" },
-    lastUsedMicDeviceId: { type: "string" },
-    lastEnteredAt: { type: "string" }
+    activity: { $ref: "#/definitions/activity" },
+    settings: { $ref: "#/definitions/settings" }
   },
 
   additionalProperties: false
@@ -42,7 +55,7 @@ export default class Store extends EventTarget {
     super();
 
     if (localStorage.getItem(LOCAL_STORE_KEY) === null) {
-      localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify({ id: uuid() }));
+      localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify({}));
     }
   }
 
