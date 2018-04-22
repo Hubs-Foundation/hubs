@@ -154,6 +154,22 @@ class HomeRoot extends Component {
                   >
                     <FormattedMessage id="home.report_issue" />
                   </a>
+                  <a
+                    className="footer-content__links__link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
+                  >
+                    <FormattedMessage id="home.terms_of_use" />
+                  </a>
+                  <a
+                    className="footer-content__links__link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+                  >
+                    <FormattedMessage id="home.privacy_notice" />
+                  </a>
                 </div>
                 <div className="footer-content__links__bottom">
                   <FormattedMessage id="home.made_with_love" />
