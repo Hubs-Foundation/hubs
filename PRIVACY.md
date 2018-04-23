@@ -10,7 +10,7 @@ In this Privacy Notice, we explain what data may be accessible to Mozilla or oth
 
 <details>
   <summary>
-    <strong>Your presence and communications are sent to Mozilla and other Room participants.</strong>
+    <h3>Your presence and communications are sent to Mozilla and other Room participants.</h3>
   </summary>
 
 - **Avatar data**: We receive and send to others in the Room the name of your Avatar, its position in the Room, and your interactions with objects in the Room.  Mozilla does not record or store this data. You can optionally store information about your Avatar in your browser’s local storage.  
@@ -23,7 +23,7 @@ In this Privacy Notice, we explain what data may be accessible to Mozilla or oth
 
 <details>
   <summary>
-    <strong>Mozilla receives technical and interaction data to improve performance and stability.</strong>
+    <h3>Mozilla receives technical and interaction data to improve performance and stability.</h3>
   </summary>
 
 - **Technical data**: We receive and store data about Room URLs and names; the type of device you use to interact with Hubs, as well as its operating system, language, the name and version of browser; and other data to load and operate the Room. 
