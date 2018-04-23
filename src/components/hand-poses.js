@@ -26,7 +26,7 @@ AFRAME.registerComponent("hand-pose", {
     this.from.play();
 
     const getNetworkedAvatar = el => {
-      let networkedAvatar = el.components["networked-avatar"];
+      const networkedAvatar = el.components["networked-avatar"];
       if (networkedAvatar) {
         return networkedAvatar;
       }
