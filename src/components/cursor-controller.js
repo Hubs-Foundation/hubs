@@ -257,7 +257,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleTouchStart: function(e) {
-    let touch = e.touches[0];
+    const touch = e.touches[0];
     if (touch.clientY / window.innerHeight >= 0.8) return true;
     this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
     this._updateRaycasterIntersections();
@@ -266,7 +266,7 @@ AFRAME.registerComponent("cursor-controller", {
     if (!this.isGrabbing) {
       const intersections = this.el.components.raycaster.intersections;
       if (intersections.length > 0 && intersections[0].distance <= this.data.maxDistance) {
-        let intersection = intersections[0];
+        const intersection = intersections[0];
         this.data.cursor.object3D.position.copy(intersection.point);
         this.currentDistance = intersections[0].distance;
         this.currentDistanceMod = 0;
@@ -302,8 +302,8 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleTouchMove: function(e) {
-    for (var i = 0; i < e.touches.length; i++) {
-      let touch = e.touches[i];
+    for (let i = 0; i < e.touches.length; i++) {
+      const touch = e.touches[i];
       if (touch.clientY / window.innerHeight >= 0.8) return true;
       this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
       this.lastTouch = touch;
@@ -311,12 +311,12 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleTouchEnd: function(e) {
-    for (var i = 0; i < e.changedTouches.length; i++) {
-      let touch = e.changedTouches[i];
-      let touchWasNotDrivingCursor =
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+      const thisTouchDidNotDriveMousePos =
         Math.abs(touch.clientX - this.lastTouch.clientX) > 0.1 &&
         Math.abs(touch.clientY - this.lastTouch.clientY) > 0.1;
-      if (touchWasNotDrivingCursor) {
+      if (thisTouchDidNotDriveMousePos) {
         return;
       }
     }
