@@ -13,7 +13,7 @@ AFRAME.registerSystem("exit-on-blur", {
     if (this.el.isMobile) {
       this.exitTimeout = setTimeout(() => {
         this.el.dispatchEvent(new CustomEvent("exit"));
-      }, 60 * 1000);
+      }, 30 * 1000);
     }
   },
 
