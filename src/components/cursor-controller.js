@@ -33,7 +33,6 @@ AFRAME.registerComponent("cursor-controller", {
     this.mousePos = new THREE.Vector2();
     this.controller = null;
     this.controllerQueue = [];
-    this.controllerEventListenersSet = false;
     this.wasCursorHovered = false;
     this.wasPhysicalHandGrabbing = false;
     this.origin = new THREE.Vector3();
@@ -57,10 +56,10 @@ AFRAME.registerComponent("cursor-controller", {
     this._handleControllerConnected = this._handleControllerConnected.bind(this);
     this._handleControllerDisconnected = this._handleControllerDisconnected.bind(this);
 
-    this.touchStartListener = this._handleTouchStart.bind(this);
+    this._handleTouchStart = this._handleTouchStart.bind(this);
     this._updateRaycasterIntersections = this._updateRaycasterIntersections.bind(this);
-    this.touchMoveListener = this._handleTouchMove.bind(this);
-    this.touchEndListener = this._handleTouchEnd.bind(this);
+    this._handleTouchMove = this._handleTouchMove.bind(this);
+    this._handleTouchEnd = this._handleTouchEnd.bind(this);
 
     this.el.sceneEl.renderer.sortObjects = true;
     this.data.cursor.addEventListener("loaded", this.cursorLoadedListener);
@@ -82,9 +81,9 @@ AFRAME.registerComponent("cursor-controller", {
 
   play: function() {
     if (!this.inVR && this.isMobile && !this.hasPointingDevice) {
-      document.addEventListener("touchstart", this.touchStartListener);
-      document.addEventListener("touchmove", this.touchMoveListener);
-      document.addEventListener("touchend", this.touchEndListener);
+      document.addEventListener("touchstart", this._handleTouchStart);
+      document.addEventListener("touchmove", this._handleTouchMove);
+      document.addEventListener("touchend", this._handleTouchEnd);
     } else {
       document.addEventListener("mousedown", this._handleMouseDown);
       document.addEventListener("mousemove", this._handleMouseMove);
@@ -110,9 +109,11 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   pause: function() {
-    document.removeEventListener("touchstart", this.touchStartListener);
-    document.removeEventListener("touchmove", this.touchMoveListener);
-    document.removeEventListener("touchend", this.touchEndListener);
+    if (!this.inVR && this.isMobile && !this.hasPointingDevice) {
+      document.removeEventListener("touchstart", this._handleTouchStart);
+      document.removeEventListener("touchmove", this._handleTouchMove);
+      document.removeEventListener("touchend", this._handleTouchEnd);
+    }
     document.removeEventListener("mousedown", this._handleMouseDown);
     document.removeEventListener("mousemove", this._handleMouseMove);
     document.removeEventListener("mouseup", this._handleMouseUp);
