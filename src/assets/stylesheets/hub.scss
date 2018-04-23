@@ -6,20 +6,16 @@
 @import 'profile';
 @import 'entry';
 @import 'audio';
+@import 'info-dialog';
 
 .a-enter-vr {
   display: none;
 }
 
-.rs-base {
-  top: auto;
-  bottom: 20px;
-}
-
 .a-canvas.a-grab-cursor:hover {
-	cursor: none;
+  cursor: none;
 }
 
 .a-canvas.a-grab-cursor:active {
-	cursor: none;
+  cursor: none;
 }

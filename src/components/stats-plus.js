@@ -53,6 +53,7 @@ AFRAME.registerComponent("stats-plus", {
     this.fpsEl.classList.add("rs-fps-counter");
     document.body.appendChild(this.fpsEl);
     this.lastFpsUpdate = performance.now();
+    this.lastFps = 0;
     this.frameCount = 0;
 
     if (scene.isMobile) {
@@ -88,8 +89,11 @@ AFRAME.registerComponent("stats-plus", {
 
       // Update the fps counter text once a second
       if (now >= this.lastFpsUpdate + 1000) {
-        const fps = this.frameCount / ((now - this.lastFpsUpdate) / 1000);
-        this.fpsEl.innerHTML = Math.round(fps) + " FPS";
+        const fps = Math.round(this.frameCount / ((now - this.lastFpsUpdate) / 1000));
+        if (fps !== this.lastFps) {
+          this.fpsEl.innerHTML = Math.round(fps) + " FPS";
+          this.lastFps = fps;
+        }
         this.lastFpsUpdate = now;
         this.frameCount = 0;
       }

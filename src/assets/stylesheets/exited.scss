@@ -9,12 +9,18 @@
   align-items: center;
   flex-direction: column;
 
-  &__title {
-    font-size: 1.2em;
+  &__logo {
+    width: 150px;
   }
 
   &__subtitle {
-    font-size: 0.8em;
+    @extend %default-font;
+    padding: 12px;
+    text-align: center;
+    
+    a {
+      color: $light-text;
+    }
   }
 }
 
