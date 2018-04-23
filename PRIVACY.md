@@ -8,7 +8,7 @@ In this Privacy Notice, we explain what data may be accessible to Mozilla or oth
 
 ## Things you should know:
 
-<details>
+<details open>
   <summary>
     <strong>Your presence and communications are sent to Mozilla and other Room participants.</strong>
   </summary>
@@ -21,7 +21,7 @@ In this Privacy Notice, we explain what data may be accessible to Mozilla or oth
 
 <p/>
 
-<details>
+<details open>
   <summary>
     <strong>Mozilla receives technical and interaction data to improve performance and stability.</strong>
   </summary>
