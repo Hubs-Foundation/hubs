@@ -48,8 +48,6 @@ AFRAME.registerComponent("cursor-controller", {
     this._handleWheel = this._handleWheel.bind(this);
     this._handleEnterVR = this._handleEnterVR.bind(this);
     this._handleExitVR = this._handleExitVR.bind(this);
-    this._handleRaycasterIntersection = this._handleRaycasterIntersection.bind(this);
-    this._handleRaycasterIntersectionCleared = this._handleRaycasterIntersectionCleared.bind(this);
     this._handlePrimaryDown = this._handlePrimaryDown.bind(this);
     this._handlePrimaryUp = this._handlePrimaryUp.bind(this);
     this._handleModelLoaded = this._handleModelLoaded.bind(this);
@@ -84,9 +82,6 @@ AFRAME.registerComponent("cursor-controller", {
     window.addEventListener("enter-vr", this._handleEnterVR);
     window.addEventListener("exit-vr", this._handleExitVR);
 
-    this.el.addEventListener("raycaster-intersection", this._handleRaycasterIntersection);
-    this.el.addEventListener("raycaster-intersection-cleared", this._handleRaycasterIntersectionCleared);
-
     this.data.playerRig.addEventListener(this.data.primaryDown, this._handlePrimaryDown);
     this.data.playerRig.addEventListener(this.data.primaryUp, this._handlePrimaryUp);
     this.data.playerRig.addEventListener(this.data.grabEvent, this._handlePrimaryDown);
@@ -106,9 +101,6 @@ AFRAME.registerComponent("cursor-controller", {
 
     window.removeEventListener("enter-vr", this._handleEnterVR);
     window.removeEventListener("exit-vr", this._handleExitVR);
-
-    this.el.removeEventListener("raycaster-intersection", this._handleRaycasterIntersection);
-    this.el.removeEventListener("raycaster-intersection-cleared", this._handleRaycasterIntersectionCleared);
 
     this.data.playerRig.removeEventListener(this.data.primaryDown, this._handlePrimaryDown);
     this.data.playerRig.removeEventListener(this.data.primaryUp, this._handlePrimaryUp);
@@ -288,14 +280,6 @@ AFRAME.registerComponent("cursor-controller", {
   _handleExitVR: function() {
     this.inVR = false;
     this._updateController();
-  },
-
-  _handleRaycasterIntersection: function(e) {
-    this.data.cursor.emit("raycaster-intersection", e.detail);
-  },
-
-  _handleRaycasterIntersectionCleared: function(e) {
-    this.data.cursor.emit("raycaster-intersection-cleared", e.detail);
   },
 
   _handlePrimaryDown: function(e) {

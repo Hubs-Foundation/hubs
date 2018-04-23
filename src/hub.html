@@ -139,6 +139,7 @@
         ></a-entity>
 
         <a-entity
+            id="cursor-controller"
             cursor-controller="
                 cursor: #cursor; 
                 camera: #player-camera; 
@@ -163,6 +164,7 @@
                 dragDropStartButtons: cursor-grab; dragDropEndButtons: cursor-release;"
             segments-height="9"
             segments-width="9"
+            event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"
         ></a-sphere> 
 
         <!-- Player Rig -->
