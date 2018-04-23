@@ -520,7 +520,13 @@ class UIRoot extends Component {
       let subtitle = null;
       if (this.props.roomUnavailableReason !== "closed") {
         const exitSubtitleId = `exit.subtitle.${this.state.exited ? "exited" : this.props.roomUnavailableReason}`;
-        subtitle = <FormattedMessage id={exitSubtitleId} />;
+        subtitle = (
+          <div>
+            <FormattedMessage id={exitSubtitleId} />
+            <p />
+            You can also <a href="/">create a new room</a>.
+          </div>
+        );
       } else {
         // TODO i18n, due to links and markup
         subtitle = (
