@@ -5,7 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="<%= ORIGIN_TRIAL_EXPIRES %>" content="<%= ORIGIN_TRIAL_TOKEN %>">
-    <title>moz://a duck</title>
+    <link rel="shortcut icon" type="image/png" href="/favicon.ico"/>
+    <title>Hubs | A new way to get together online</title>
     <link href="https://fonts.googleapis.com/css?family=Zilla+Slab:300,300i,400,400i,700" rel="stylesheet">
 
     <% if(NODE_ENV === "production") { %>
@@ -121,7 +122,6 @@
                     body="type: dynamic; shape: none; mass: 5;"
                     grabbable
                     stretchable="useWorldPosition: true;"
-                    hoverable
                 ></a-entity>
             </template>
 
@@ -147,16 +147,15 @@
             super-spawner="template: #interactable-template;" 
             position="2.9 1.2 0" 
             body="mass: 0; type: static; shape: box;"
-            hoverable
         ></a-entity>
 
         <a-entity
+            id="cursor-controller"
             cursor-controller="
                 cursor: #cursor; 
                 camera: #player-camera; 
-                controller: #player-right-controller;
                 playerRig: #player-rig;
-                otherHand: #right-super-hand;
+                physicalHandSelector: #right-super-hand;
                 gazeTeleportControls: #gaze-teleport;"
             raycaster="objects: .collidable, .interactable, .ui; far: 3;"
             line="visible: false; color: white; opacity: 0.2;"
@@ -171,11 +170,12 @@
             super-hands="
                 colliderEvent: raycaster-intersection; colliderEventProperty: els;
                 colliderEndEvent: raycaster-intersection-cleared; colliderEndEventProperty: clearedEls;
-                grabStartButtons: action_primary_down; grabEndButtons: action_primary_up;
-                stretchStartButtons: action_primary_down; stretchEndButtons: action_primary_up;
-                dragDropStartButtons: action_primary_down; dragDropEndButtons: action_primary_up;"
+                grabStartButtons: cursor-grab; grabEndButtons: cursor-release;
+                stretchStartButtons: cursor-grab; stretchEndButtons: cursor-release;
+                dragDropStartButtons: cursor-grab; dragDropEndButtons: cursor-release;"
             segments-height="9"
             segments-width="9"
+            event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"
         ></a-sphere> 
 
         <!-- Player Rig -->
@@ -216,8 +216,12 @@
                     teleport-controls="
                     cameraRig: #player-rig; 
                     teleportOrigin: #player-camera; 
-                    button: action_teleport_; 
-                    collisionEntities: [nav-mesh]"
+                    button: cursor-teleport_; 
+                    collisionEntities: [nav-mesh];
+                    drawIncrementally: true;
+                    incrementalDrawMs: 600;
+                    hitOpacity: 0.3;
+                    missOpacity: 0.2;"
                 ></a-entity>
             </a-entity>
 
@@ -229,8 +233,12 @@
                 teleport-controls="
                     cameraRig: #player-rig; 
                     teleportOrigin: #player-camera; 
-                    button: action_teleport_; 
-                    collisionEntities: [nav-mesh]"
+                    button: cursor-teleport_; 
+                    collisionEntities: [nav-mesh];
+                    drawIncrementally: true;
+                    incrementalDrawMs: 600;
+                    hitOpacity: 0.3;
+                    missOpacity: 0.2;"
                 haptic-feedback
             ></a-entity>
 
@@ -242,8 +250,12 @@
                 teleport-controls="
                     cameraRig: #player-rig; 
                     teleportOrigin: #player-camera; 
-                    button: action_teleport_; 
-                    collisionEntities: [nav-mesh]"
+                    button: cursor-teleport_; 
+                    collisionEntities: [nav-mesh];
+                    drawIncrementally: true;
+                    incrementalDrawMs: 600;
+                    hitOpacity: 0.3;
+                    missOpacity: 0.2;"
                 haptic-feedback
             ></a-entity>
 

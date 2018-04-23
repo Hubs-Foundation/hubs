@@ -2,7 +2,8 @@ AFRAME.registerComponent("super-spawner", {
   schema: {
     template: { default: "" },
     useCustomSpawnPosition: { default: false },
-    spawnPosition: { type: "vec3" }
+    spawnPosition: { type: "vec3" },
+    events: { default: ["cursor-grab", "action_grab"] }
   },
 
   init: function() {
@@ -67,11 +68,9 @@ AFRAME.registerComponent("super-spawner", {
   _emitEvents: function(entity) {
     const data = this.entities.get(entity);
     if (data.componentInitialized && data.bodyLoaded) {
-      data.hand.emit("action_primary_down", { targetEntity: entity });
-      data.hand.emit("action_grab", { targetEntity: entity });
-      const eventData = { bubbles: true, cancelable: true, detail: { hand: data.hand, target: entity } };
-      const event = new CustomEvent("grab-start", eventData);
-      entity.dispatchEvent(event);
+      for (let i = 0; i < this.data.events.length; i++) {
+        data.hand.emit(this.data.events[i], { targetEntity: entity });
+      }
 
       entity.removeEventListener("componentinitialized", data.componentinInitializedListener);
       entity.removeEventListener("body-loaded", data.bodyLoadedListener);

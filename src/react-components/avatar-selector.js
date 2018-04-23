@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { injectIntl, FormattedMessage } from "react-intl";
+import { injectIntl } from "react-intl";
 import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 import faAngleLeft from "@fortawesome/fontawesome-free-solid/faAngleLeft";
 import faAngleRight from "@fortawesome/fontawesome-free-solid/faAngleRight";
@@ -66,9 +66,10 @@ class AvatarSelector extends Component {
           <template data-selector=".RootScene">
             <a-entity animation-mixer />
           </template>
+
           <a-animation
             attribute="rotation"
-            dur="2000"
+            dur="12000"
             to={`0 ${this.getAvatarIndex() === i ? 360 : 0} 0`}
             repeat="indefinite"
           />
@@ -78,9 +79,13 @@ class AvatarSelector extends Component {
 
     return (
       <div className="avatar-selector">
-        <span className="avatar-selector__loading">
-          <FormattedMessage id="profile.avatar-selector.loading" />
-        </span>
+        <div className="loading-panel">
+          <div className="loader-wrap">
+            <div className="loader">
+              <div className="loader-center" />
+            </div>
+          </div>
+        </div>
         <a-scene vr-mode-ui="enabled: false" ref={sce => (this.scene = sce)}>
           <a-assets>
             {avatarAssets}
@@ -91,7 +96,7 @@ class AvatarSelector extends Component {
             <a-animation
               ref={anm => (this.animation = anm)}
               attribute="rotation"
-              dur="1000"
+              dur="2000"
               easing="ease-out"
               to={`0 ${(360 * this.getAvatarIndex() / this.props.avatars.length + 180) % 360} 0`}
             />

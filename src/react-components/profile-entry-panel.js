@@ -14,26 +14,28 @@ class ProfileEntryPanel extends Component {
 
   constructor(props) {
     super(props);
-    const { display_name, avatar_id } = this.props.store.state.profile;
-    this.state = { display_name, avatar_id };
+    const { displayName, avatarId } = this.props.store.state.profile;
+    this.state = { displayName, avatarId };
     this.props.store.addEventListener("statechanged", this.storeUpdated);
   }
 
   storeUpdated = () => {
-    const { avatar_id, display_name } = this.props.store.state.profile;
-    this.setState({ avatar_id, display_name });
+    const { avatarId, displayName } = this.props.store.state.profile;
+    this.setState({ avatarId, displayName });
   };
 
   saveStateAndFinish = e => {
     e.preventDefault();
-    const has_agreed_to_terms = this.props.store.state.profile.has_agreed_to_terms || this.state.has_agreed_to_terms;
-    if (!has_agreed_to_terms) return;
-    const { has_changed_name, display_name } = this.props.store.state.profile;
-    const hasChangedName = has_changed_name || this.state.display_name !== display_name;
+
+    const { displayName } = this.props.store.state.profile;
+    const { hasChangedName } = this.props.store.state.activity;
+
+    const hasChangedNowOrPreviously = hasChangedName || this.state.displayName !== displayName;
     this.props.store.update({
+      activity: {
+        hasChangedName: hasChangedNowOrPreviously
+      },
       profile: {
-        has_agreed_to_terms: true,
-        has_changed_name: hasChangedName,
         ...this.state
       }
     });
@@ -48,7 +50,7 @@ class ProfileEntryPanel extends Component {
     if (e.source !== this.avatarSelector.contentWindow) {
       return;
     }
-    this.setState({ avatar_id: e.data.avatarId });
+    this.setState({ avatarId: e.data.avatarId });
   };
 
   componentDidMount() {
@@ -72,53 +74,42 @@ class ProfileEntryPanel extends Component {
 
     return (
       <div className="profile-entry">
-        <form onSubmit={this.saveStateAndFinish}>
+        <form onSubmit={this.saveStateAndFinish} className="profile-entry__form">
           <div className="profile-entry__box profile-entry__box--darkened">
-            <div className="profile-entry__subtitle">
+            <label htmlFor="#profile-entry-display-name" className="profile-entry__subtitle">
               <FormattedMessage id="profile.header" />
-            </div>
+            </label>
             <label>
-              <span className="profile-entry__display-name-label">
-                <FormattedMessage id="profile.display_name.label" />
-              </span>
               <input
+                id="profile-entry-display-name"
                 className="profile-entry__form-field-text"
-                value={this.state.display_name}
-                onChange={e => this.setState({ display_name: e.target.value })}
+                value={this.state.displayName}
+                onFocus={e => e.target.select()}
+                onChange={e => this.setState({ displayName: e.target.value })}
                 required
-                pattern={SCHEMA.definitions.profile.properties.display_name.pattern}
+                pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
                 title={formatMessage({ id: "profile.display_name.validation_warning" })}
                 ref={inp => (this.nameInput = inp)}
               />
             </label>
             <iframe
               className="profile-entry__avatar-selector"
-              src={`/${this.props.htmlPrefix}avatar-selector.html#avatar_id=${this.state.avatar_id}`}
+              src={`/${this.props.htmlPrefix}avatar-selector.html#avatar_id=${this.state.avatarId}`}
               ref={ifr => (this.avatarSelector = ifr)}
             />
-            {!this.props.store.state.profile.has_agreed_to_terms && (
-              <label className="profile-entry__terms">
-                <input
-                  className="profile-entry__terms__checkbox"
-                  type="checkbox"
-                  required
-                  value={this.state.has_agreed_to_terms}
-                  onChange={e => this.setState({ has_agreed_to_terms: e.target.checked })}
-                />
-                <span className="profile-entry__terms__text">
-                  <FormattedMessage id="profile.terms.prefix" />{" "}
-                  <a className="profile-entry__terms__link" target="_blank" href="/privacy">
-                    <FormattedMessage id="profile.terms.privacy" />
-                  </a>{" "}
-                  <FormattedMessage id="profile.terms.conjunction" />{" "}
-                  <a className="profile-entry__terms__link" target="_blank" href="/terms">
-                    <FormattedMessage id="profile.terms.tou" />
-                  </a>
-                  <FormattedMessage id="profile.terms.suffix" />
-                </span>
-              </label>
-            )}
             <input className="profile-entry__form-submit" type="submit" value={formatMessage({ id: "profile.save" })} />
+            <div className="profile-entry__box__links">
+              <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
+                <FormattedMessage id="profile.terms_of_use" />
+              </a>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+              >
+                <FormattedMessage id="profile.privacy_notice" />
+              </a>
+            </div>
           </div>
         </form>
       </div>

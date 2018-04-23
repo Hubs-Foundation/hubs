@@ -1,8 +1,14 @@
 @import 'shared';
+@import 'loader';
 
 #selector-root {
   height: 100%;
 }
+
+canvas {
+  border-radius: 8px;
+}
+
 .avatar-selector {
   overflow: hidden;
   height: 100%;

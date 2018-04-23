@@ -24,6 +24,6 @@ AFRAME.registerComponent("event-repeater", {
   },
 
   _handleEvent: function(event, e) {
-    this.el.emit(event, e.detail ? e.detail : {});
+    this.el.emit(event, e.detail);
   }
 });

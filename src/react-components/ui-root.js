@@ -12,7 +12,9 @@ import AutoExitWarning from "./auto-exit-warning";
 import { TwoDEntryButton, GenericEntryButton, GearVREntryButton, DaydreamEntryButton } from "./entry-buttons.js";
 import { ProfileInfoHeader } from "./profile-info-header.js";
 import ProfileEntryPanel from "./profile-entry-panel";
+import InfoDialog from "./info-dialog.js";
 import TwoDHUD from "./2d-hud";
+import Footer from "./footer";
 
 const mobiledetect = new MobileDetect(navigator.userAgent);
 
@@ -64,12 +66,16 @@ class UIRoot extends Component {
     showProfileEntry: PropTypes.bool,
     availableVREntryTypes: PropTypes.object,
     initialEnvironmentLoaded: PropTypes.bool,
-    janusRoomId: PropTypes.number
+    janusRoomId: PropTypes.number,
+    roomUnavailableReason: PropTypes.string,
+    hubName: PropTypes.string,
+    occupantCount: PropTypes.number
   };
 
   state = {
     entryStep: ENTRY_STEPS.start,
     enterInVR: false,
+    infoDialogType: null,
 
     shareScreen: false,
     requestedScreen: false,
@@ -321,7 +327,7 @@ class UIRoot extends Component {
 
   setMediaStreamToDefault = async () => {
     let hasAudio = false;
-    const { lastUsedMicDeviceId } = this.props.store.state;
+    const { lastUsedMicDeviceId } = this.props.store.state.settings;
 
     // Try to fetch last used mic, if there was one.
     if (lastUsedMicDeviceId) {
@@ -416,7 +422,7 @@ class UIRoot extends Component {
       const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForMediaStream(mediaStream));
 
       if (micDeviceId) {
-        this.props.store.update({ lastUsedMicDeviceId: micDeviceId });
+        this.props.store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
       }
 
       this.setState({ micLevelAudioContext, micUpdateInterval });
@@ -517,6 +523,40 @@ class UIRoot extends Component {
   };
 
   render() {
+    if (this.state.exited || this.props.roomUnavailableReason) {
+      let subtitle = null;
+      if (this.props.roomUnavailableReason !== "closed") {
+        const exitSubtitleId = `exit.subtitle.${this.state.exited ? "exited" : this.props.roomUnavailableReason}`;
+        subtitle = <FormattedMessage id={exitSubtitleId} />;
+      } else {
+        // TODO i18n, due to links and markup
+        subtitle = (
+          <div>
+            Sorry, this room is no longer available.
+            <p />
+            A room may be closed if we receive reports that it violates our{" "}
+            <a target="_blank" rel="noreferrer noopener" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
+              Terms of Use
+            </a>.
+            <br />
+            If you have questions, contact us at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>.
+            <p />
+            If you&apos;d like to run your own server, Hubs&apos;s source code is available on{" "}
+            <a href="https://github.com/mozilla/hubs">Github</a>.
+          </div>
+        );
+      }
+
+      return (
+        <IntlProvider locale={lang} messages={messages}>
+          <div className="exited-panel">
+            <img className="exited-panel__logo" src="../assets/images/logo.svg" />
+            <div className="exited-panel__subtitle">{subtitle}</div>
+          </div>
+        </IntlProvider>
+      );
+    }
+
     if (!this.props.initialEnvironmentLoaded || !this.props.availableVREntryTypes || !this.props.janusRoomId) {
       return (
         <IntlProvider locale={lang} messages={messages}>
@@ -526,24 +566,8 @@ class UIRoot extends Component {
                 <div className="loader-center" />
               </div>
             </div>
-            <div className="loading-panel__title">
-              <b>moz://a</b> duck
-            </div>
-          </div>
-        </IntlProvider>
-      );
-    }
 
-    if (this.state.exited) {
-      return (
-        <IntlProvider locale={lang} messages={messages}>
-          <div className="exited-panel">
-            <div className="loading-panel__title">
-              <b>moz://a</b> duck
-            </div>
-            <div className="loading-panel__subtitle">
-              <FormattedMessage id="exit.subtitle" />
-            </div>
+            <img className="loading-panel__logo" src="../assets/images/logo-narrow.svg" />
           </div>
         </IntlProvider>
       );
@@ -737,8 +761,10 @@ class UIRoot extends Component {
     ) : (
       <div className="entry-dialog">
         <ProfileInfoHeader
-          name={this.props.store.state.profile.display_name}
-          onClick={() => this.setState({ showProfileEntry: true })}
+          name={this.props.store.state.profile.displayName}
+          onClickName={() => this.setState({ showProfileEntry: true })}
+          onClickInvite={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
+          onClickHelp={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
         />
         {entryPanel}
         {micPanel}
@@ -750,7 +776,7 @@ class UIRoot extends Component {
       "ui-dialog--darkened": this.state.entryStep !== ENTRY_STEPS.finished
     });
 
-    const dialogBoxClassNames = classNames("ui-interactive", "ui-dialog-box");
+    const dialogBoxClassNames = classNames({ "ui-interactive": !this.state.infoDialogType, "ui-dialog-box": true });
 
     const dialogBoxContentsClassNames = classNames({
       "ui-dialog-box-contents": true,
@@ -760,6 +786,12 @@ class UIRoot extends Component {
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className="ui">
+          <InfoDialog
+            dialogType={this.state.infoDialogType}
+            onSubmittedEmail={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.email_submitted })}
+            onCloseDialog={() => this.setState({ infoDialogType: null })}
+          />
+
           <div className={dialogClassNames}>
             {(this.state.entryStep !== ENTRY_STEPS.finished || this.isWaitingForAutoExit()) && (
               <div className={dialogBoxClassNames}>
@@ -776,14 +808,24 @@ class UIRoot extends Component {
             )}
           </div>
           {this.state.entryStep === ENTRY_STEPS.finished ? (
-            <TwoDHUD
-              muted={this.state.muted}
-              frozen={this.state.frozen}
-              spacebubble={this.state.spacebubble}
-              onToggleMute={this.toggleMute}
-              onToggleFreeze={this.toggleFreeze}
-              onToggleSpaceBubble={this.toggleSpaceBubble}
-            />
+            <div>
+              <TwoDHUD
+                muted={this.state.muted}
+                frozen={this.state.frozen}
+                spacebubble={this.state.spacebubble}
+                onToggleMute={this.toggleMute}
+                onToggleFreeze={this.toggleFreeze}
+                onToggleSpaceBubble={this.toggleSpaceBubble}
+              />
+              <Footer
+                hubName={this.props.hubName}
+                occupantCount={this.props.occupantCount}
+                onClickInvite={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
+                onClickReport={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.report })}
+                onClickHelp={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
+                onClickUpdates={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.updates })}
+              />
+            </div>
           ) : null}
         </div>
       </IntlProvider>
