@@ -106,7 +106,7 @@ class InfoDialog extends Component {
         dialogTitle = "Invite Friends";
         dialogBody = (
           <div>
-            <div>Just share the link to have others join you.</div>
+            <div>Just share the link to invite others.</div>
             <div className="invite-form">
               <input
                 type="text"

@@ -7,23 +7,28 @@
   font-size: 1.3em;
   display: flex;
   flex-direction: column;
-  pointer-events: auto;
   // Position above virtual gamepad controls on mobile
   z-index: 1;
 
+  @media (min-width: 768px) {
+    pointer-events: auto;
+  }
 }
+
 :local(.floatingButton) {
   display: flex;
   justify-content: center;
 }
 :local(.header), :local(.menu-header) {
   display: flex;
+  justify-content: center;
 }
 :local(.header) {
   border-bottom: 1px solid rgba(32, 32, 32, 0.65);
 
   @media (max-width: 768px) {
     border-bottom: none;
+    pointer-events: none;
   }
 }
 :local(.menu-header) {
@@ -93,11 +98,7 @@
 }
 :local(.menu-button) {
   @extend %fa-icon-button;
-
-  @media (max-width: 768px) {
-    flex: 1;
-    align-self: center;
-  }
+  pointer-events: auto;
 
   :local(.menu-button__icon) {
     @extend %fa-icon-button-icon;
