@@ -534,7 +534,7 @@ class UIRoot extends Component {
             <br />
             If you have questions, contact us at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>.
             <p />
-            If you&apos;d like to run your own server, Hubs&apos;s source code is available on{" "}
+            If you&apos;d like to run your own server, hubs&apos;s source code is available on{" "}
             <a href="https://github.com/mozilla/hubs">Github</a>.
           </div>
         );
