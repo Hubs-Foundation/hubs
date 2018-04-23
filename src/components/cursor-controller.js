@@ -255,23 +255,13 @@ AFRAME.registerComponent("cursor-controller", {
     this._setCursorVisibility(true);
   },
 
-  _updateRaycasterIntersections: function() {
-    const raycaster = this.el.components.raycaster.raycaster;
-    const camera = this.data.camera.components.camera.camera;
-    raycaster.setFromCamera(this.mousePos, camera);
-    this.origin = raycaster.ray.origin;
-    this.direction = raycaster.ray.direction;
-    this.el.setAttribute("raycaster", { origin: this.origin, direction: this.direction });
-    this.el.components.raycaster.checkIntersections();
-  },
-
   _handleTouchStart: function(e) {
     let touch = e.touches[0];
     if (touch.clientY / window.innerHeight >= 0.8) return true;
     this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
     this._updateRaycasterIntersections();
 
-    //update cursor position
+    // update cursor position
     if (!this.isGrabbing) {
       const intersections = this.el.components.raycaster.intersections;
       if (intersections.length > 0 && intersections[0].distance <= this.data.maxDistance) {
@@ -286,11 +276,28 @@ AFRAME.registerComponent("cursor-controller", {
 
     const lookControls = this.data.camera.components["look-controls"];
     if (lookControls) lookControls.pause();
+    // Set timeout because if I don't, the duck moves is picked up at the
+    // the wrong offset from the cursor: If the cursor started below and
+    // to the left, the duck lifts above and to the right by the same amount.
+    // I don't understand exactly why this is, since I am setting the
+    // cursor object's position manually in this function, but something else
+    // must happen before cursor-grab ends up doing the right thing.
+    // TODO : Figure this out.
     window.setTimeout(() => {
-      this.data.cursor.emit(this.data.controllerEvent, {});
-    }, 50);
+      this.data.cursor.emit("cursor-grab", {});
+    }, 40);
 
     this.lastTouch = touch;
+  },
+
+  _updateRaycasterIntersections: function() {
+    const raycaster = this.el.components.raycaster.raycaster;
+    const camera = this.data.camera.components.camera.camera;
+    raycaster.setFromCamera(this.mousePos, camera);
+    this.origin = raycaster.ray.origin;
+    this.direction = raycaster.ray.direction;
+    this.el.setAttribute("raycaster", { origin: this.origin, direction: this.direction });
+    this.el.components.raycaster.checkIntersections();
   },
 
   _handleTouchMove: function(e) {
@@ -305,16 +312,16 @@ AFRAME.registerComponent("cursor-controller", {
   _handleTouchEnd: function(e) {
     for (var i = 0; i < e.changedTouches.length; i++) {
       let touch = e.changedTouches[i];
-      if (
+      let touchWasNotDrivingCursor =
         Math.abs(touch.clientX - this.lastTouch.clientX) > 0.1 &&
-        Math.abs(touch.clientY - this.lastTouch.clientY) > 0.1
-      ) {
-        console.log("why do i want to end here");
+        Math.abs(touch.clientY - this.lastTouch.clientY) > 0.1;
+      if (touchWasNotDrivingCursor) {
+        return;
       }
     }
     const lookControls = this.data.camera.components["look-controls"];
     if (lookControls) lookControls.play();
-    this.data.cursor.emit(this.data.controllerEndEvent, {});
+    this.data.cursor.emit("cursor-release", {});
   },
 
   _handleMouseDown: function() {
