@@ -50,8 +50,8 @@ const config = {
         gripup: ["action_release", "middle_ring_pinky_up"],
         trackpadtouchstart: "thumb_down",
         trackpadtouchend: "thumb_up",
-        triggerdown: ["action_primary_down", "action_grab", "index_down"],
-        triggerup: ["action_primary_up", "action_release", "index_up"]
+        triggerdown: ["action_grab", "index_down"],
+        triggerup: ["action_release", "index_up"]
       },
       "oculus-touch-controls": {
         joystick_dpad4_west: {
@@ -127,8 +127,8 @@ const config = {
     },
     hud: {
       "vive-controls": {
-        triggerdown: { right: "action_ui_select_down" },
-        triggerup: { right: "action_ui_select_up" }
+        triggerdown: ["action_grab", "index_down"],
+        triggerup: ["action_release", "index_up"]
       },
       "oculus-touch-controls": {
         abuttondown: "action_ui_select_down",
