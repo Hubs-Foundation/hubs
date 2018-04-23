@@ -7,6 +7,7 @@ import MobileDetect from "mobile-detect";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import MovingAverage from "moving-average";
+import screenfull from "screenfull";
 
 import AutoExitWarning from "./auto-exit-warning";
 import { TwoDEntryButton, GenericEntryButton, GearVREntryButton, DaydreamEntryButton } from "./entry-buttons.js";
@@ -248,6 +249,10 @@ class UIRoot extends Component {
   };
 
   performDirectEntryFlow = async enterInVR => {
+    if (mobiledetect.mobile() && !enterInVR && screenfull.enabled) {
+      screenfull.request();
+    }
+
     this.setState({ enterInVR });
 
     const hasGrantedMic = await this.hasGrantedMicPermissions();
