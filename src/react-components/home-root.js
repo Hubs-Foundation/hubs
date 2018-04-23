@@ -172,10 +172,8 @@ class HomeRoot extends Component {
                   </a>
                 </div>
                 <div className="footer-content__links__bottom">
-                  <FormattedMessage id="home.made_with_love" />
-                  <span style={{ fontWeight: "bold", color: "white" }}>moz://a</span>
-                  <span>
-                    &nbsp;&nbsp;|&nbsp;&nbsp;Medieval Fantasy Book by{" "}
+                  <div>
+                    Medieval Fantasy Book by{" "}
                     <a
                       target="_blank"
                       rel="noreferrer noopener"
@@ -183,7 +181,11 @@ class HomeRoot extends Component {
                     >
                       Pixel
                     </a>
-                  </span>
+                  </div>
+                  <div>
+                    <FormattedMessage id="home.made_with_love" />
+                    <span style={{ fontWeight: "bold", color: "white" }}>moz://a</span>
+                  </div>
                 </div>
               </div>
             </div>
