@@ -7,6 +7,7 @@ const selfsigned = require("selfsigned");
 const webpack = require("webpack");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const _ = require("lodash");
 
 const SMOKE_PREFIX = "smoke-";
@@ -199,6 +200,12 @@ const config = {
       chunks: ["avatar-selector"],
       inject: "head"
     }),
+    new CopyWebpackPlugin([
+      {
+        from: "src/assets/images/favicon.ico",
+        to: "favicon.ico"
+      }
+    ]),
     // Extract required css and add a content hash.
     new ExtractTextPlugin({
       filename: "assets/stylesheets/[name]-[contenthash].css",

@@ -20,9 +20,10 @@
   flex-direction: column;
 }
 
-.loading-panel__title {
-  @extend %default-font;
-  font-size: 1.2em;
+.loading-panel__logo {
+  width: 150px;
+  height: 86px;
+  margin-top: 40px;
 }
 
 .loader-center,

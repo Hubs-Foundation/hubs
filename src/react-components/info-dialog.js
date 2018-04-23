@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import copy from "copy-to-clipboard";
+import classNames from "classnames";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import formurlencoded from "form-urlencoded";
@@ -12,7 +13,8 @@ class InfoDialog extends Component {
     email_submitted: Symbol("email_submitted"),
     invite: Symbol("invite"),
     updates: Symbol("updates"),
-    report: Symbol("report")
+    report: Symbol("report"),
+    help: Symbol("help")
   };
   static propTypes = {
     dialogType: PropTypes.oneOf(Object.values(InfoDialog.dialogTypes)),
@@ -101,7 +103,7 @@ class InfoDialog extends Component {
         dialogBody = "Great! Please check your e-mail to confirm your subscription.";
         break;
       case InfoDialog.dialogTypes.invite:
-        dialogTitle = "Invite Others";
+        dialogTitle = "Invite Friends";
         dialogBody = (
           <div>
             <div>Just share the link to have others join you.</div>
@@ -131,7 +133,7 @@ class InfoDialog extends Component {
         dialogTitle = "";
         dialogBody = (
           <span>
-            Sign up to get release notes about new features.
+            Sign up to get updates about new features in Hubs.
             <p />
             <form onSubmit={this.signUpForMailingList}>
               <div className="mailing-list-form">
@@ -183,11 +185,45 @@ class InfoDialog extends Component {
           </span>
         );
         break;
+      case InfoDialog.dialogTypes.help:
+        dialogTitle = "Getting Started";
+        dialogBody = (
+          <div className="info-dialog__help">
+            When in a room, other avatars can see and hear you.
+            <p />
+            Use your controller&apos;s action button to teleport from place to place. If it has a trigger, use it to
+            pick up objects.
+            <p style={{ textAlign: "center" }}>
+              In VR, <b>look up</b> to find your menu:
+              <img
+                className="info-dialog__help__hud"
+                src="../assets/images/help-hud.png"
+                srcSet="../assets/images/help-hud@2x.png 2x"
+              />
+            </p>
+            <p>
+              The <b>Mic Toggle</b> mutes your mic.
+            </p>
+            <p>
+              The <b>Pause/Resume Toggle</b> pauses all other avatars. You can then block them from having further
+              interactions with you.
+            </p>
+            <p>
+              The <b>Bubble Toggle</b> hides avatars that enter your personal space.
+            </p>
+          </div>
+        );
+        break;
     }
+
+    const dialogClasses = classNames({
+      dialog: true,
+      "dialog--tall": this.props.dialogType === InfoDialog.dialogTypes.help
+    });
 
     return (
       <div className="dialog-overlay">
-        <div className="dialog">
+        <div className={dialogClasses}>
           <div className="dialog__box">
             <div className="dialog__box__contents">
               <button className="dialog__box__contents__close" onClick={this.props.onCloseDialog}>

@@ -315,7 +315,7 @@ class UIRoot extends Component {
 
   setMediaStreamToDefault = async () => {
     let hasAudio = false;
-    const { lastUsedMicDeviceId } = this.props.store.state;
+    const { lastUsedMicDeviceId } = this.props.store.state.settings;
 
     // Try to fetch last used mic, if there was one.
     if (lastUsedMicDeviceId) {
@@ -410,7 +410,7 @@ class UIRoot extends Component {
       const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForMediaStream(mediaStream));
 
       if (micDeviceId) {
-        this.props.store.update({ lastUsedMicDeviceId: micDeviceId });
+        this.props.store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
       }
 
       this.setState({ micLevelAudioContext, micUpdateInterval });
@@ -538,9 +538,7 @@ class UIRoot extends Component {
       return (
         <IntlProvider locale={lang} messages={messages}>
           <div className="exited-panel">
-            <div className="exited-panel__title">
-              <b>moz://a</b> duck
-            </div>
+            <img className="exited-panel__logo" src="../assets/images/logo.svg" />
             <div className="exited-panel__subtitle">{subtitle}</div>
           </div>
         </IntlProvider>
@@ -556,9 +554,8 @@ class UIRoot extends Component {
                 <div className="loader-center" />
               </div>
             </div>
-            <div className="loading-panel__title">
-              <b>moz://a</b> duck
-            </div>
+
+            <img className="loading-panel__logo" src="../assets/images/logo-narrow.svg" />
           </div>
         </IntlProvider>
       );
@@ -752,8 +749,10 @@ class UIRoot extends Component {
     ) : (
       <div className="entry-dialog">
         <ProfileInfoHeader
-          name={this.props.store.state.profile.display_name}
-          onClick={() => this.setState({ showProfileEntry: true })}
+          name={this.props.store.state.profile.displayName}
+          onClickName={() => this.setState({ showProfileEntry: true })}
+          onClickInvite={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
+          onClickHelp={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
         />
         {entryPanel}
         {micPanel}
@@ -777,6 +776,7 @@ class UIRoot extends Component {
         <div className="ui">
           <InfoDialog
             dialogType={this.state.infoDialogType}
+            onSubmittedEmail={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.email_submitted })}
             onCloseDialog={() => this.setState({ infoDialogType: null })}
           />
 
@@ -803,6 +803,8 @@ class UIRoot extends Component {
                 occupantCount={this.props.occupantCount}
                 onClickInvite={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
                 onClickReport={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.report })}
+                onClickHelp={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
+                onClickUpdates={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.updates })}
               />
             </div>
           ) : null}
