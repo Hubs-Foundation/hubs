@@ -188,9 +188,9 @@ aframe-rounded@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/aframe-rounded/-/aframe-rounded-1.0.3.tgz#72c7d9c0ff02e94ee138bf217c284e187efa3cfb"
 
-"aframe-teleport-controls@https://github.com/johnshaughnessy/aframe-teleport-controls#feature/incremental-parabolic-cursor":
+"aframe-teleport-controls@https://github.com/mozillareality/aframe-teleport-controls#hubs/master":
   version "0.3.2"
-  resolved "https://github.com/johnshaughnessy/aframe-teleport-controls#cf931af6f11fab856c5526e6083ea00b08d52356"
+  resolved "https://github.com/mozillareality/aframe-teleport-controls#9e2ef7da57144c4a615eba40a945d4cfa105a092"
 
 "aframe-xr@github:brianpeiris/aframe-xr#3162aed":
   version "0.0.9"
