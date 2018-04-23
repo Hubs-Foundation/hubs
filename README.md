@@ -34,4 +34,3 @@ yarn build
 - `vr_entry_type` - Either "gearvr" or "daydream". Used internally to force a VR entry type
 
 [![Waffle.io - Columns and their card count](https://badge.waffle.io/mozilla/socialmr.svg?columns=all)](http://waffle.io/mozilla/socialmr)
-
