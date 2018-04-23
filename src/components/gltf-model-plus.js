@@ -1,7 +1,8 @@
 const GLTFCache = {};
 
 AFRAME.GLTFModelPlus = {
-  defaultInflator(el, componentName, componentData, gltfPath) {
+  // eslint-disable-next-line no-unused-vars
+  defaultInflator(el, componentName, componentData, _gltfPath) {
     if (!AFRAME.components[componentName]) {
       throw new Error(`Inflator failed. "${componentName}" component does not exist.`);
     }
