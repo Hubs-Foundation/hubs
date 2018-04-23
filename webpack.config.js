@@ -117,7 +117,7 @@ const config = {
         loader: "html-loader",
         options: {
           // <a-asset-item>'s src property is overwritten with the correct transformed asset url.
-          attrs: ["img:src", "a-asset-item:src", "audio:src"],
+          attrs: ["img:src", "a-asset-item:src", "audio:src", "source:src"],
           // You can get transformed asset urls in an html template using ${require("pathToFile.ext")}
           interpolate: "require"
         }
@@ -162,7 +162,7 @@ const config = {
         })
       },
       {
-        test: /\.(png|jpg|gif|glb|ogg|woff2|svg|webm)$/,
+        test: /\.(png|jpg|gif|glb|ogg|mp3|wav|woff2|svg|webm)$/,
         use: {
           loader: "file-loader",
           options: {

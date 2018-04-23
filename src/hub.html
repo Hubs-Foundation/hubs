@@ -16,7 +16,12 @@
 </head>
 
 <body data-html-prefix="<%= HTML_PREFIX %>">
-    <audio id="test-tone" src="./assets/sfx/tone.ogg"></audio>
+    <audio id="test-tone">
+        <source src="./assets/sfx/tone.webm" type="audio/webm"/>
+        <source src="./assets/sfx/tone.mp3" type="audio/mpeg"/>
+        <source src="./assets/sfx/tone.ogg" type="audio/ogg"/>
+        <source src="./assets/sfx/tone.wav" type="audio/wav"/>
+    </audio>
 
     <a-scene
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
