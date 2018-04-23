@@ -7651,7 +7651,7 @@ subarg@^1.0.0:
 
 "super-hands@https://github.com/infinitelee/aframe-super-hands-component#mr-social-client/master":
   version "2.1.0"
-  resolved "https://github.com/infinitelee/aframe-super-hands-component#0df9e947d652d9b8918e9bfd4db39169ed610ce2"
+  resolved "https://github.com/infinitelee/aframe-super-hands-component#e4d91f4b9bc91a57f35aa9d43f3e797ebfc5477d"
 
 supports-color@1.3.1:
   version "1.3.1"
