@@ -10,7 +10,7 @@
   // Position above virtual gamepad controls on mobile
   z-index: 1;
 
-  @media (min-width: 768px) {
+  @media (min-width: 769px) and (min-height: 401px) {
     pointer-events: auto;
   }
 }
@@ -26,7 +26,7 @@
 :local(.header) {
   border-bottom: 1px solid rgba(32, 32, 32, 0.65);
 
-  @media (max-width: 768px) {
+  @media (max-width: 768px) , (max-height: 340px) {
     border-bottom: none;
     pointer-events: none;
   }
@@ -35,25 +35,25 @@
   background-color: transparent;
   border-bottom: 1px solid rgba(32, 32, 32, 0.65);
 
-  @media (min-width: 768px) , (max-height: 380px) {
+  @media (min-width: 769px) , (max-height: 401px) {
     display: none;
   }
 }
 :local(.header) {
   background-color: rgba(0, 0, 0, 0.65);
 
-  @media (max-width: 768px) {
+  @media (max-width: 768px) , (max-height: 400px) {
     background-color: transparent;
   }
 
   :local(.hub-info) {
-    @media (max-width: 768px) {
+    @media (max-width: 768px) , (max-height: 400px) {
       display: none;
     }
   }
 
   :local(.hub-stats) {
-    @media (max-width: 768px) {
+    @media (max-width: 768px) , (max-height: 400px) {
       display: none;
     }
   }
@@ -64,7 +64,7 @@
   margin: 16px 24px;
   display: flex;
   align-items: center;
-  @media (max-width: 768px) {
+  @media (max-width: 768px) , (max-height: 400px) {
     margin: 16px 8px;
     margin-left: 24px;
     font-size: 0.9em;
@@ -76,10 +76,10 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  @media (min-width: 768px) {
+  @media (min-width: 769px) and (min-height: 401px) {
     flex: 1;
   }
-  @media (max-width: 768px) {
+  @media (max-width: 768px) , (max-height: 400px) {
     margin: 16px 8px;
   }
   :local(.hub-participant-count) {
@@ -109,13 +109,13 @@
   }
 
   :local(.menu-button__narrow-close-icon) {
-    @media (max-width: 767px) {
+    @media (max-width: 768px) , (max-height: 400px) {
       display: none;
     }
   }
 
   :local(.menu-button__wide-close-icon) {
-    @media (min-width: 768px) {
+    @media (min-width: 769px) and (min-height: 401px) {
       display: none;
     }
   }
