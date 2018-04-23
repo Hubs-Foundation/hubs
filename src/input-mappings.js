@@ -40,18 +40,18 @@ const config = {
         "trackpad.pressedmove": { left: "move" },
         trackpad_dpad4_pressed_west_down: { right: "snap_rotate_left" },
         trackpad_dpad4_pressed_east_down: { right: "snap_rotate_right" },
-        trackpad_dpad4_pressed_center_down: { right: "action_teleport_down" },
-        trackpad_dpad4_pressed_north_down: { right: "action_teleport_down" },
-        trackpad_dpad4_pressed_south_down: { right: "action_teleport_down" },
-        trackpadup: { right: "action_teleport_up" },
+        trackpad_dpad4_pressed_center_down: { right: "action_primary_down" },
+        trackpad_dpad4_pressed_north_down: { right: "action_primary_down" },
+        trackpad_dpad4_pressed_south_down: { right: "action_primary_down" },
+        trackpadup: { right: "action_primary_up" },
         menudown: "thumb_down",
         menuup: "thumb_up",
         gripdown: ["action_grab", "middle_ring_pinky_down"],
         gripup: ["action_release", "middle_ring_pinky_up"],
         trackpadtouchstart: "thumb_down",
         trackpadtouchend: "thumb_up",
-        triggerdown: ["action_grab", "index_down"],
-        triggerup: ["action_release", "index_up"]
+        triggerdown: ["action_primary_down", "action_grab", "index_down"],
+        triggerup: ["action_primary_up", "action_release", "index_up"]
       },
       "oculus-touch-controls": {
         joystick_dpad4_west: {
@@ -74,27 +74,29 @@ const config = {
         surfacetouchend: "thumb_up",
         thumbsticktouchstart: "thumb_down",
         thumbsticktouchend: "thumb_up",
-        triggerdown: "index_down",
-        triggerup: "index_up",
+        triggerdown: ["action_primary_down", "action_grab", "index_down"],
+        triggerup: ["action_primary_up", "action_release", "index_up"],
         "axismove.reverseY": { left: "move" },
-        abuttondown: "action_teleport_down",
-        abuttonup: "action_teleport_up"
+        abuttondown: "action_primary_down",
+        abuttonup: "action_primary_up"
       },
       "daydream-controls": {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",
         trackpad_dpad4_pressed_east_down: "snap_rotate_right",
-        trackpad_dpad4_pressed_center_down: "action_teleport_down",
-        trackpad_dpad4_pressed_north_down: "action_teleport_down",
-        trackpad_dpad4_pressed_south_down: "action_teleport_down",
-        trackpadup: "action_teleport_up"
+        trackpad_dpad4_pressed_center_down: ["action_primary_down"],
+        trackpad_dpad4_pressed_north_down: ["action_primary_down"],
+        trackpad_dpad4_pressed_south_down: ["action_primary_down"],
+        trackpadup: ["action_primary_up"]
       },
       "gearvr-controls": {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",
         trackpad_dpad4_pressed_east_down: "snap_rotate_right",
-        trackpad_dpad4_pressed_center_down: "action_teleport_down",
-        trackpad_dpad4_pressed_north_down: "action_teleport_down",
-        trackpad_dpad4_pressed_south_down: "action_teleport_down",
-        trackpadup: "action_teleport_up"
+        trackpad_dpad4_pressed_center_down: ["action_primary_down"],
+        trackpad_dpad4_pressed_north_down: ["action_primary_down"],
+        trackpad_dpad4_pressed_south_down: ["action_primary_down"],
+        trackpadup: ["action_primary_up"],
+        triggerdown: ["action_primary_down"],
+        triggerup: ["action_primary_up"]
       },
       keyboard: {
         m_press: "action_mute",

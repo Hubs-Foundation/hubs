@@ -82,8 +82,9 @@ import "super-hands";
 import "./components/super-networked-interactable";
 import "./components/networked-counter";
 import "./components/super-spawner";
-import "./components/super-cursor";
 import "./components/event-repeater";
+
+import "./components/cursor-controller";
 
 import "./components/nav-mesh-helper";
 
