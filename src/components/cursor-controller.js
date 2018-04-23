@@ -228,6 +228,17 @@ AFRAME.registerComponent("cursor-controller", {
     this.el.setAttribute("line", { visible: visible && this.hasPointingDevice });
   },
 
+  _setLookControlsEnabled(enabled) {
+    const lookControls = this.data.camera.components["look-controls"];
+    if (lookControls) {
+      if (enabled) {
+        lookControls.play();
+      } else {
+        lookControls.pause();
+      }
+    }
+  },
+
   _startTeleport: function() {
     if (this.controller != null) {
       this.controller.emit("cursor-teleport_down", {});
@@ -265,8 +276,8 @@ AFRAME.registerComponent("cursor-controller", {
       }
     }
 
-    const lookControls = this.data.camera.components["look-controls"];
-    if (lookControls) lookControls.pause();
+    this._setLookControlsEnabled(false);
+
     // Set timeout because if I don't, the duck moves is picked up at the
     // the wrong offset from the cursor: If the cursor started below and
     // to the left, the duck lifts above and to the right by the same amount.
@@ -310,15 +321,13 @@ AFRAME.registerComponent("cursor-controller", {
         return;
       }
     }
-    const lookControls = this.data.camera.components["look-controls"];
-    if (lookControls) lookControls.play();
+    this._setLookControlsEnabled(true);
     this.data.cursor.emit("cursor-release", {});
   },
 
   _handleMouseDown: function() {
     if (this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI)) {
-      const lookControls = this.data.camera.components["look-controls"];
-      if (lookControls) lookControls.pause();
+      this._setLookControlsEnabled(false);
       this.data.cursor.emit("cursor-grab", {});
     } else if (this.inVR || this.isMobile) {
       this._startTeleport();
@@ -330,8 +339,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleMouseUp: function() {
-    const lookControls = this.data.camera.components["look-controls"];
-    if (lookControls) lookControls.play();
+    this._setLookControlsEnabled(true);
     this.data.cursor.emit("cursor-release", {});
     this._endTeleport();
   },
