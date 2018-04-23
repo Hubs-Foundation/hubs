@@ -158,9 +158,9 @@
             super-hands="
                 colliderEvent: raycaster-intersection; colliderEventProperty: els;
                 colliderEndEvent: raycaster-intersection-cleared; colliderEndEventProperty: clearedEls;
-                grabStartButtons: action_primary_down; grabEndButtons: action_primary_up;
-                stretchStartButtons: action_primary_down; stretchEndButtons: action_primary_up;
-                dragDropStartButtons: action_primary_down; dragDropEndButtons: action_primary_up;"
+                grabStartButtons: cursor-grab; grabEndButtons: cursor-release;
+                stretchStartButtons: cursor-grab; stretchEndButtons: cursor-release;
+                dragDropStartButtons: cursor-grab; dragDropEndButtons: cursor-release;"
             segments-height="9"
             segments-width="9"
         ></a-sphere> 
@@ -203,7 +203,7 @@
                     teleport-controls="
                     cameraRig: #player-rig; 
                     teleportOrigin: #player-camera; 
-                    button: action_teleport_; 
+                    button: cursor-teleport_; 
                     collisionEntities: [nav-mesh]"
                 ></a-entity>
             </a-entity>
@@ -216,7 +216,7 @@
                 teleport-controls="
                     cameraRig: #player-rig; 
                     teleportOrigin: #player-camera; 
-                    button: action_teleport_; 
+                    button: cursor-teleport_; 
                     collisionEntities: [nav-mesh]"
                 haptic-feedback
             ></a-entity>
@@ -229,7 +229,7 @@
                 teleport-controls="
                     cameraRig: #player-rig; 
                     teleportOrigin: #player-camera; 
-                    button: action_teleport_; 
+                    button: cursor-teleport_; 
                     collisionEntities: [nav-mesh]"
                 haptic-feedback
             ></a-entity>

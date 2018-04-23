@@ -16,12 +16,10 @@ AFRAME.registerComponent("cursor-controller", {
     minDistance: { default: 0.5 },
     cursorColorHovered: { default: "#2F80ED" },
     cursorColorUnhovered: { default: "#FFFFFF" },
-    controllerEvent: { default: "action_primary_down" },
-    controllerEndEvent: { default: "action_primary_up" },
+    primaryDown: { default: "action_primary_down" },
+    primaryUp: { default: "action_primary_up" },
     grabEvent: { default: "action_grab" },
-    releaseEvent: { default: "action_release" },
-    teleportEvent: { default: "action_teleport_down" },
-    teleportEndEvent: { default: "action_teleport_up" }
+    releaseEvent: { default: "action_release" }
   },
 
   init: function() {
@@ -52,8 +50,8 @@ AFRAME.registerComponent("cursor-controller", {
     this._handleExitVR = this._handleExitVR.bind(this);
     this._handleRaycasterIntersection = this._handleRaycasterIntersection.bind(this);
     this._handleRaycasterIntersectionCleared = this._handleRaycasterIntersectionCleared.bind(this);
-    this._handleControllerEvent = this._handleControllerEvent.bind(this);
-    this._handleControllerEndEvent = this._handleControllerEndEvent.bind(this);
+    this._handlePrimaryDown = this._handlePrimaryDown.bind(this);
+    this._handlePrimaryUp = this._handlePrimaryUp.bind(this);
     this._handleModelLoaded = this._handleModelLoaded.bind(this);
     this._handleCursorLoaded = this._handleCursorLoaded.bind(this);
     this._handleControllerConnected = this._handleControllerConnected.bind(this);
@@ -89,10 +87,10 @@ AFRAME.registerComponent("cursor-controller", {
     this.el.addEventListener("raycaster-intersection", this._handleRaycasterIntersection);
     this.el.addEventListener("raycaster-intersection-cleared", this._handleRaycasterIntersectionCleared);
 
-    this.data.playerRig.addEventListener(this.data.controllerEvent, this._handleControllerEvent);
-    this.data.playerRig.addEventListener(this.data.controllerEndEvent, this._handleControllerEndEvent);
-    this.data.playerRig.addEventListener(this.data.grabEvent, this._handleControllerEvent);
-    this.data.playerRig.addEventListener(this.data.releaseEvent, this._handleControllerEndEvent);
+    this.data.playerRig.addEventListener(this.data.primaryDown, this._handlePrimaryDown);
+    this.data.playerRig.addEventListener(this.data.primaryUp, this._handlePrimaryUp);
+    this.data.playerRig.addEventListener(this.data.grabEvent, this._handlePrimaryDown);
+    this.data.playerRig.addEventListener(this.data.releaseEvent, this._handlePrimaryUp);
 
     this.data.playerRig.addEventListener("model-loaded", this._handleModelLoaded);
 
@@ -112,10 +110,10 @@ AFRAME.registerComponent("cursor-controller", {
     this.el.removeEventListener("raycaster-intersection", this._handleRaycasterIntersection);
     this.el.removeEventListener("raycaster-intersection-cleared", this._handleRaycasterIntersectionCleared);
 
-    this.data.playerRig.removeEventListener(this.data.controllerEvent, this._handleControllerEvent);
-    this.data.playerRig.removeEventListener(this.data.controllerEndEvent, this._handleControllerEndEvent);
-    this.data.playerRig.removeEventListener(this.data.grabEvent, this._handleControllerEvent);
-    this.data.playerRig.removeEventListener(this.data.releaseEvent, this._handleControllerEndEvent);
+    this.data.playerRig.removeEventListener(this.data.primaryDown, this._handlePrimaryDown);
+    this.data.playerRig.removeEventListener(this.data.primaryUp, this._handlePrimaryUp);
+    this.data.playerRig.removeEventListener(this.data.grabEvent, this._handlePrimaryDown);
+    this.data.playerRig.removeEventListener(this.data.releaseEvent, this._handlePrimaryUp);
 
     this.data.playerRig.removeEventListener("model-loaded", this._handleModelLoaded);
 
@@ -150,7 +148,7 @@ AFRAME.registerComponent("cursor-controller", {
       camera.getWorldDirection(this.direction);
     } else if (this.controller != null) {
       //3d cursor mode
-      this.controller.object3D.getWorldPosition(origin);
+      this.controller.object3D.getWorldPosition(this.origin);
       this.controller.object3D.getWorldQuaternion(this.controllerQuaternion);
       this.direction
         .set(0, 0, -1)
@@ -227,18 +225,18 @@ AFRAME.registerComponent("cursor-controller", {
 
   _startTeleport: function() {
     if (this.controller != null) {
-      this.controller.emit(this.data.teleportEvent, {});
+      this.controller.emit("cursor-teleport_down", {});
     } else if (this.inVR) {
-      this.data.gazeTeleportControls.emit(this.data.teleportEvent, {});
+      this.data.gazeTeleportControls.emit("cursor-teleport_down", {});
     }
     this._setCursorVisibility(false);
   },
 
   _endTeleport: function() {
     if (this.controller != null) {
-      this.controller.emit(this.data.teleportEndEvent, {});
+      this.controller.emit("cursor-teleport_up", {});
     } else if (this.inVR) {
-      this.data.gazeTeleportControls.emit(this.data.teleportEndEvent, {});
+      this.data.gazeTeleportControls.emit("cursor-teleport_up", {});
     }
     this._setCursorVisibility(true);
   },
@@ -247,7 +245,7 @@ AFRAME.registerComponent("cursor-controller", {
     if (this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI)) {
       const lookControls = this.data.camera.components["look-controls"];
       if (lookControls) lookControls.pause();
-      this.data.cursor.emit(this.data.controllerEvent, {});
+      this.data.cursor.emit("cursor-grab", {});
     } else if (this.inVR || this.isMobile) {
       this._startTeleport();
     }
@@ -260,7 +258,7 @@ AFRAME.registerComponent("cursor-controller", {
   _handleMouseUp: function() {
     const lookControls = this.data.camera.components["look-controls"];
     if (lookControls) lookControls.play();
-    this.data.cursor.emit(this.data.controllerEndEvent, {});
+    this.data.cursor.emit("cursor-release", {});
     this._endTeleport();
   },
 
@@ -300,23 +298,23 @@ AFRAME.registerComponent("cursor-controller", {
     this.data.cursor.emit("raycaster-intersection-cleared", e.detail);
   },
 
-  _handleControllerEvent: function(e) {
+  _handlePrimaryDown: function(e) {
     if (e.target === this.controller) {
       const isInteractable = this._isTargetOfType(TARGET_TYPE_INTERACTABLE) && !this.grabStarting;
       if (isInteractable || this._isTargetOfType(TARGET_TYPE_UI)) {
         this.grabStarting = true;
-        this.data.cursor.emit(this.data.controllerEvent, e.detail);
+        this.data.cursor.emit("cursor-grab", e.detail);
       } else if (e.type !== this.data.grabEvent) {
         this._startTeleport();
       }
     }
   },
 
-  _handleControllerEndEvent: function(e) {
+  _handlePrimaryUp: function(e) {
     if (e.target === this.controller) {
       if (this._isGrabbing() || this._isTargetOfType(TARGET_TYPE_UI)) {
         this.grabStarting = false;
-        this.data.cursor.emit(this.data.controllerEndEvent, e.detail);
+        this.data.cursor.emit("cursor-release", e.detail);
       } else if (e.type !== this.data.releaseEvent) {
         this._endTeleport();
       }

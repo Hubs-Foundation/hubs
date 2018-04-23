@@ -3,7 +3,7 @@ AFRAME.registerComponent("super-spawner", {
     template: { default: "" },
     useCustomSpawnPosition: { default: false },
     spawnPosition: { type: "vec3" },
-    events: { default: ["action_primary_down", "action_grab"] }
+    events: { default: ["cursor-grab", "action_grab"] }
   },
 
   init: function() {
