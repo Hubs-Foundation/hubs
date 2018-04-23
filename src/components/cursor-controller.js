@@ -33,7 +33,6 @@ AFRAME.registerComponent("cursor-controller", {
     this.mousePos = new THREE.Vector2();
     this.controller = null;
     this.controllerQueue = [];
-    this.controllerEventListenersSet = false;
     this.wasCursorHovered = false;
     this.wasPhysicalHandGrabbing = false;
     this.origin = new THREE.Vector3();
@@ -55,6 +54,11 @@ AFRAME.registerComponent("cursor-controller", {
     this._handleControllerConnected = this._handleControllerConnected.bind(this);
     this._handleControllerDisconnected = this._handleControllerDisconnected.bind(this);
 
+    this._handleTouchStart = this._handleTouchStart.bind(this);
+    this._updateRaycasterIntersections = this._updateRaycasterIntersections.bind(this);
+    this._handleTouchMove = this._handleTouchMove.bind(this);
+    this._handleTouchEnd = this._handleTouchEnd.bind(this);
+
     this.el.sceneEl.renderer.sortObjects = true;
     this.data.cursor.addEventListener("loaded", this.cursorLoadedListener);
   },
@@ -74,10 +78,16 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   play: function() {
-    document.addEventListener("mousedown", this._handleMouseDown);
-    document.addEventListener("mousemove", this._handleMouseMove);
-    document.addEventListener("mouseup", this._handleMouseUp);
-    document.addEventListener("wheel", this._handleWheel);
+    if (!this.inVR && this.isMobile && !this.hasPointingDevice) {
+      document.addEventListener("touchstart", this._handleTouchStart);
+      document.addEventListener("touchmove", this._handleTouchMove);
+      document.addEventListener("touchend", this._handleTouchEnd);
+    } else {
+      document.addEventListener("mousedown", this._handleMouseDown);
+      document.addEventListener("mousemove", this._handleMouseMove);
+      document.addEventListener("mouseup", this._handleMouseUp);
+      document.addEventListener("wheel", this._handleWheel);
+    }
 
     window.addEventListener("enter-vr", this._handleEnterVR);
     window.addEventListener("exit-vr", this._handleExitVR);
@@ -94,6 +104,9 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   pause: function() {
+    document.removeEventListener("touchstart", this._handleTouchStart);
+    document.removeEventListener("touchmove", this._handleTouchMove);
+    document.removeEventListener("touchend", this._handleTouchEnd);
     document.removeEventListener("mousedown", this._handleMouseDown);
     document.removeEventListener("mousemove", this._handleMouseMove);
     document.removeEventListener("mouseup", this._handleMouseUp);
@@ -128,7 +141,7 @@ AFRAME.registerComponent("cursor-controller", {
 
     //set raycaster origin/direction
     const camera = this.data.camera.components.camera.camera;
-    if (!this.inVR && !this.isMobile) {
+    if (!this.inVR) {
       //mouse cursor mode
       const raycaster = this.el.components.raycaster.raycaster;
       raycaster.setFromCamera(this.mousePos, camera);
@@ -231,6 +244,75 @@ AFRAME.registerComponent("cursor-controller", {
       this.data.gazeTeleportControls.emit("cursor-teleport_up", {});
     }
     this._setCursorVisibility(true);
+  },
+
+  _handleTouchStart: function(e) {
+    const touch = e.touches[0];
+    if (touch.clientY / window.innerHeight >= 0.8) return true;
+    this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
+    this._updateRaycasterIntersections();
+
+    // update cursor position
+    if (!this.isGrabbing) {
+      const intersections = this.el.components.raycaster.intersections;
+      if (intersections.length > 0 && intersections[0].distance <= this.data.maxDistance) {
+        const intersection = intersections[0];
+        this.data.cursor.object3D.position.copy(intersection.point);
+        this.currentDistance = intersections[0].distance;
+        this.currentDistanceMod = 0;
+      } else {
+        this.currentDistance = this.data.maxDistance;
+      }
+    }
+
+    const lookControls = this.data.camera.components["look-controls"];
+    if (lookControls) lookControls.pause();
+    // Set timeout because if I don't, the duck moves is picked up at the
+    // the wrong offset from the cursor: If the cursor started below and
+    // to the left, the duck lifts above and to the right by the same amount.
+    // I don't understand exactly why this is, since I am setting the
+    // cursor object's position manually in this function, but something else
+    // must happen before cursor-grab ends up doing the right thing.
+    // TODO : Figure this out.
+    window.setTimeout(() => {
+      this.data.cursor.emit("cursor-grab", {});
+    }, 40);
+
+    this.lastTouch = touch;
+  },
+
+  _updateRaycasterIntersections: function() {
+    const raycaster = this.el.components.raycaster.raycaster;
+    const camera = this.data.camera.components.camera.camera;
+    raycaster.setFromCamera(this.mousePos, camera);
+    this.origin = raycaster.ray.origin;
+    this.direction = raycaster.ray.direction;
+    this.el.setAttribute("raycaster", { origin: this.origin, direction: this.direction });
+    this.el.components.raycaster.checkIntersections();
+  },
+
+  _handleTouchMove: function(e) {
+    for (let i = 0; i < e.touches.length; i++) {
+      const touch = e.touches[i];
+      if (touch.clientY / window.innerHeight >= 0.8) return true;
+      this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
+      this.lastTouch = touch;
+    }
+  },
+
+  _handleTouchEnd: function(e) {
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+      const thisTouchDidNotDriveMousePos =
+        Math.abs(touch.clientX - this.lastTouch.clientX) > 0.1 &&
+        Math.abs(touch.clientY - this.lastTouch.clientY) > 0.1;
+      if (thisTouchDidNotDriveMousePos) {
+        return;
+      }
+    }
+    const lookControls = this.data.camera.components["look-controls"];
+    if (lookControls) lookControls.play();
+    this.data.cursor.emit("cursor-release", {});
   },
 
   _handleMouseDown: function() {
