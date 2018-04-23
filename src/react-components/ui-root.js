@@ -555,7 +555,7 @@ class UIRoot extends Component {
               </div>
             </div>
 
-            <img className="loading-panel__logo" src="../assets/images/logo-narrow.svg" />
+            <img className="loading-panel__logo" src="../assets/images/logo.svg" />
           </div>
         </IntlProvider>
       );

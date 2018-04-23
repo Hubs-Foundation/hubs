@@ -105,7 +105,7 @@ class HomeRoot extends Component {
                         className="header-content__experiment__info__link"
                         rel="noopener noreferrer"
                         target="_blank"
-                        href="https://github.com/mozilla/mr-social-client"
+                        href="https://github.com/mozilla/hubs"
                       >
                         <FormattedMessage id="home.view_source" />
                       </a>
