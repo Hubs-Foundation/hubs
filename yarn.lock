@@ -160,9 +160,9 @@ aframe-billboard-component@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/aframe-billboard-component/-/aframe-billboard-component-1.0.0.tgz#10ce2482729eef7386c5844d65917581a62d3adc"
 
-aframe-extras@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/aframe-extras/-/aframe-extras-4.0.0.tgz#fc851e2a1312c30a4d4addc3e0fa2dbf3e723ead"
+"aframe-extras@https://github.com/MozillaReality/aframe-extras#feature/precompute-nav-mesh":
+  version "4.0.2"
+  resolved "https://github.com/MozillaReality/aframe-extras#c4451b03ca0fe39a5517f81b153b3f801ccaa711"
   dependencies:
     three-pathfinding "^0.5.5"
 
