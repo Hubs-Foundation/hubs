@@ -5,7 +5,7 @@ const EPS = 10e-6;
 // Does not have any type of collisions yet.
 AFRAME.registerComponent("character-controller", {
   schema: {
-    groundAcc: { default: 7 },
+    groundAcc: { default: 5.5 },
     easing: { default: 10 },
     pivot: { type: "selector" },
     snapRotationDegrees: { default: THREE.Math.DEG2RAD * 45 },

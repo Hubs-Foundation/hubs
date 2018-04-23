@@ -197,10 +197,14 @@
                 hand-controls2="left"
                 tracked-controls
                 teleport-controls="
-                    cameraRig: #player-rig; 
-                    teleportOrigin: #player-camera; 
-                    button: action_teleport_; 
-                    collisionEntities: [nav-mesh]"
+                    drawIncrementally: true;
+                    incrementalDrawMs: 600;
+                    hitOpacity: 0.3;
+                    missOpacity: 0.2;
+                    cameraRig: #player-rig;
+                    teleportOrigin: #player-camera;
+                    button: action_teleport_;
+                    collisionEntities: [nav-mesh];"
                 app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;"
                 haptic-feedback
             ></a-entity>
@@ -211,10 +215,14 @@
                 hand-controls2="right"
                 tracked-controls
                 teleport-controls="
-                    cameraRig: #player-rig; 
-                    teleportOrigin: #player-camera; 
-                    button: action_teleport_; 
-                    collisionEntities: [nav-mesh]"
+                    drawIncrementally: true;
+                    incrementalDrawMs: 600;
+                    hitOpacity: 0.3;
+                    missOpacity: 0.2;
+                    cameraRig: #player-rig;
+                    teleportOrigin: #player-camera;
+                    button: action_teleport_;
+                    collisionEntities: [nav-mesh];"
                 haptic-feedback
                 raycaster="objects:.hud; showLine: true; far: 2;"
                 cursor="fuse: false; downEvents: action_ui_select_down; upEvents: action_ui_select_up;"
