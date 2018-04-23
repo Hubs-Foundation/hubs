@@ -109,11 +109,9 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   pause: function() {
-    if (!this.inVR && this.isMobile && !this.hasPointingDevice) {
-      document.removeEventListener("touchstart", this._handleTouchStart);
-      document.removeEventListener("touchmove", this._handleTouchMove);
-      document.removeEventListener("touchend", this._handleTouchEnd);
-    }
+    document.removeEventListener("touchstart", this._handleTouchStart);
+    document.removeEventListener("touchmove", this._handleTouchMove);
+    document.removeEventListener("touchend", this._handleTouchEnd);
     document.removeEventListener("mousedown", this._handleMouseDown);
     document.removeEventListener("mousemove", this._handleMouseMove);
     document.removeEventListener("mouseup", this._handleMouseUp);
