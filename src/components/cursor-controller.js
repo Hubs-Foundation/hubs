@@ -36,35 +36,31 @@ AFRAME.registerComponent("cursor-controller", {
     this.mousePos = new THREE.Vector2();
     this.controller = null;
     this.controllerQueue = [];
+    this.controllerEventListenersSet = false;
 
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
-    this.mouseDownListener = this._handleMouseDown.bind(this);
-    this.mouseMoveListener = this._handleMouseMove.bind(this);
-    this.mouseUpListener = this._handleMouseUp.bind(this);
-    this.wheelListener = this._handleWheel.bind(this);
-
-    this.enterVRListener = this._handleEnterVR.bind(this);
-    this.exitVRListener = this._handleExitVR.bind(this);
-
-    this.raycasterIntersectionListener = this._handleRaycasterIntersection.bind(this);
-    this.raycasterIntersectionClearedListener = this._handleRaycasterIntersectionCleared.bind(this);
-
-    this.controllerEventListener = this._handleControllerEvent.bind(this);
-    this.controllerEndEventListener = this._handleControllerEndEvent.bind(this);
-
-    this.modelLoadedListener = this._handleModelLoaded.bind(this);
+    this._handleMouseDown = this._handleMouseDown.bind(this);
+    this._handleMouseMove = this._handleMouseMove.bind(this);
+    this._handleMouseUp = this._handleMouseUp.bind(this);
+    this._handleWheel = this._handleWheel.bind(this);
+    this._handleEnterVR = this._handleEnterVR.bind(this);
+    this._handleExitVR = this._handleExitVR.bind(this);
+    this._handleRaycasterIntersection = this._handleRaycasterIntersection.bind(this);
+    this._handleRaycasterIntersectionCleared = this._handleRaycasterIntersectionCleared.bind(this);
+    this._handleControllerEvent = this._handleControllerEvent.bind(this);
+    this._handleControllerEndEvent = this._handleControllerEndEvent.bind(this);
+    this._handleModelLoaded = this._handleModelLoaded.bind(this);
+    this._handleCursorLoaded = this._handleCursorLoaded.bind(this);
+    this._handleControllerConnected = this._handleControllerConnected.bind(this);
+    this._handleControllerDisconnected = this._handleControllerDisconnected.bind(this);
 
     this.el.sceneEl.renderer.sortObjects = true;
-    this.cursorLoadedListener = this._handleCursorLoaded.bind(this);
     this.data.cursor.addEventListener("loaded", this.cursorLoadedListener);
-
-    this.controllerConnectedListener = this._handleControllerConnected.bind(this);
-    this.controllerDisconnectedListener = this._handleControllerDisconnected.bind(this);
   },
 
   remove: function() {
-    this.data.cursor.removeEventListener("loaded", this.cursorLoadedListener);
+    this.data.cursor.removeEventListener("loaded", this._cursorLoadedListener);
   },
 
   update: function(oldData) {
@@ -78,46 +74,49 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   play: function() {
-    document.addEventListener("mousedown", this.mouseDownListener);
-    document.addEventListener("mousemove", this.mouseMoveListener);
-    document.addEventListener("mouseup", this.mouseUpListener);
-    document.addEventListener("wheel", this.wheelListener);
+    document.addEventListener("mousedown", this._handleMouseDown);
+    document.addEventListener("mousemove", this._handleMouseMove);
+    document.addEventListener("mouseup", this._handleMouseUp);
+    document.addEventListener("wheel", this._handleWheel);
 
-    window.addEventListener("enter-vr", this.enterVRListener);
-    window.addEventListener("exit-vr", this.exitVRListener);
+    window.addEventListener("enter-vr", this._handleEnterVR);
+    window.addEventListener("exit-vr", this._handleExitVR);
 
-    this.el.addEventListener("raycaster-intersection", this.raycasterIntersectionListener);
-    this.el.addEventListener("raycaster-intersection-cleared", this.raycasterIntersectionClearedListener);
+    this.el.addEventListener("raycaster-intersection", this._handleRaycasterIntersection);
+    this.el.addEventListener("raycaster-intersection-cleared", this._handleRaycasterIntersectionCleared);
 
-    this.data.playerRig.addEventListener("model-loaded", this.modelLoadedListener);
+    this.data.playerRig.addEventListener(this.data.controllerEvent, this._handleControllerEvent);
+    this.data.playerRig.addEventListener(this.data.controllerEndEvent, this._handleControllerEndEvent);
+    this.data.playerRig.addEventListener(this.data.grabEvent, this._handleControllerEvent);
+    this.data.playerRig.addEventListener(this.data.releaseEvent, this._handleControllerEndEvent);
 
-    this.el.sceneEl.addEventListener("controllerconnected", this.controllerConnectedListener);
-    this.el.sceneEl.addEventListener("controllerdisconnected", this.controllerDisconnectedListener);
+    this.data.playerRig.addEventListener("model-loaded", this._handleModelLoaded);
+
+    this.el.sceneEl.addEventListener("controllerconnected", this._handleControllerConnected);
+    this.el.sceneEl.addEventListener("controllerdisconnected", this._handleControllerDisconnected);
   },
 
   pause: function() {
-    document.removeEventListener("mousedown", this.mouseDownListener);
-    document.removeEventListener("mousemove", this.mouseMoveListener);
-    document.removeEventListener("mouseup", this.mouseUpListener);
-    document.removeEventListener("wheel", this.wheelListener);
+    document.removeEventListener("mousedown", this._handleMouseDown);
+    document.removeEventListener("mousemove", this._handleMouseMove);
+    document.removeEventListener("mouseup", this._handleMouseUp);
+    document.removeEventListener("wheel", this._handleWheel);
 
-    window.removeEventListener("enter-vr", this.enterVRListener);
-    window.removeEventListener("exit-vr", this.exitVRListener);
+    window.removeEventListener("enter-vr", this._handleEnterVR);
+    window.removeEventListener("exit-vr", this._handleExitVR);
 
-    this.el.removeEventListener("raycaster-intersection", this.raycasterIntersectionListener);
-    this.el.removeEventListener("raycaster-intersection-cleared", this.raycasterIntersectionClearedListener);
+    this.el.removeEventListener("raycaster-intersection", this._handleRaycasterIntersection);
+    this.el.removeEventListener("raycaster-intersection-cleared", this._handleRaycasterIntersectionCleared);
 
-    if (this.controller != null) {
-      this.controller.removeEventListener(this.data.controllerEvent, this.controllerEventListener);
-      this.controller.removeEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
-      this.controller.removeEventListener(this.data.grabEvent, this.controllerEventListener);
-      this.controller.removeEventListener(this.data.releaseEvent, this.controllerEndEventListener);
-    }
+    this.data.playerRig.removeEventListener(this.data.controllerEvent, this._handleControllerEvent);
+    this.data.playerRig.removeEventListener(this.data.controllerEndEvent, this._handleControllerEndEvent);
+    this.data.playerRig.removeEventListener(this.data.grabEvent, this._handleControllerEvent);
+    this.data.playerRig.removeEventListener(this.data.releaseEvent, this._handleControllerEndEvent);
 
-    this.data.playerRig.removeEventListener("model-loaded", this.modelLoadedListener);
+    this.data.playerRig.removeEventListener("model-loaded", this._handleModelLoaded);
 
-    this.el.sceneEl.removeEventListener("controllerconnected", this.controllerConnectedListener);
-    this.el.sceneEl.removeEventListener("controllerdisconnected", this.controllerDisconnectedListener);
+    this.el.sceneEl.removeEventListener("controllerconnected", this._handleControllerConnected);
+    this.el.sceneEl.removeEventListener("controllerdisconnected", this._handleControllerDisconnected);
   },
 
   tick: (function() {
@@ -313,21 +312,25 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleControllerEvent: function(e) {
-    const isInteractable = this._isTargetOfType(TARGET_TYPE_INTERACTABLE) && !this.grabStarting;
-    if (isInteractable || this._isTargetOfType(TARGET_TYPE_UI)) {
-      this.grabStarting = true;
-      this.data.cursor.emit(this.data.controllerEvent, e.detail);
-    } else if (e.type !== this.data.grabEvent) {
-      this._startTeleport();
+    if (e.target === this.controller) {
+      const isInteractable = this._isTargetOfType(TARGET_TYPE_INTERACTABLE) && !this.grabStarting;
+      if (isInteractable || this._isTargetOfType(TARGET_TYPE_UI)) {
+        this.grabStarting = true;
+        this.data.cursor.emit(this.data.controllerEvent, e.detail);
+      } else if (e.type !== this.data.grabEvent) {
+        this._startTeleport();
+      }
     }
   },
 
   _handleControllerEndEvent: function(e) {
-    if (this.isGrabbing || this._isTargetOfType(TARGET_TYPE_UI)) {
-      this.grabStarting = false;
-      this.data.cursor.emit(this.data.controllerEndEvent, e.detail);
-    } else if (e.type !== this.data.releaseEvent) {
-      this._endTeleport();
+    if (e.target === this.controller) {
+      if (this.isGrabbing || this._isTargetOfType(TARGET_TYPE_UI)) {
+        this.grabStarting = false;
+        this.data.cursor.emit(this.data.controllerEndEvent, e.detail);
+      } else if (e.type !== this.data.releaseEvent) {
+        this._endTeleport();
+      }
     }
   },
 
@@ -371,21 +374,9 @@ AFRAME.registerComponent("cursor-controller", {
 
     if (this.hasPointingDevice) {
       const controllerData = this.controllerQueue[0];
-      if (this.controller != null) {
-        this.controller.removeEventListener(this.data.controllerEvent, this.controllerEventListener);
-        this.controller.removeEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
-        this.controller.removeEventListener(this.data.grabEvent, this.controllerEventListener);
-        this.controller.removeEventListener(this.data.releaseEvent, this.controllerEndEventListener);
-      }
-
       const hand = controllerData.handedness;
       this.el.setAttribute("cursor-controller", { physicalHand: `#${hand}-super-hand` });
-
       this.controller = controllerData.controller;
-      this.controller.addEventListener(this.data.controllerEvent, this.controllerEventListener);
-      this.controller.addEventListener(this.data.controllerEndEvent, this.controllerEndEventListener);
-      this.controller.addEventListener(this.data.grabEvent, this.controllerEventListener);
-      this.controller.addEventListener(this.data.releaseEvent, this.controllerEndEventListener);
     } else {
       this.controller = null;
     }
