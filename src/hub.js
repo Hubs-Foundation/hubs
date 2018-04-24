@@ -52,6 +52,7 @@ import "./components/hud-controller";
 import "./components/freeze-controller";
 import "./components/icon-button";
 import "./components/stats-plus";
+import "./components/networked-avatar";
 
 import ReactDOM from "react-dom";
 import React from "react";

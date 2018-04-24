@@ -64,7 +64,7 @@
             </template>
 
             <template id="remote-avatar-template">
-                <a-entity ik-root player-info>
+                <a-entity networked-avatar ik-root player-info>
                     <a-entity class="camera"></a-entity>
 
                     <a-entity class="left-controller"></a-entity>
@@ -187,6 +187,7 @@
             character-controller="pivot: #player-camera"
             ik-root
             player-info
+            networked-avatar
         >
             <a-entity
                 id="player-hud"
@@ -259,15 +260,16 @@
                 haptic-feedback
             ></a-entity>
 
-            <a-entity gltf-model-plus="inflate: true;" class="model">
+            <a-entity gltf-model-plus="inflate: true;"
+                      class="model">
                 <template data-selector=".RootScene">
                     <a-entity
                         ik-controller
                         animation-mixer
                         hand-pose__left
                         hand-pose__right
-                        hand-pose-controller__left="eventSrc:#player-left-controller"
-                        hand-pose-controller__right="eventSrc:#player-right-controller"
+                        hand-pose-controller__left="networkedAvatar:#player-rig;eventSrc:#player-left-controller"
+                        hand-pose-controller__right="networkedAvatar:#player-rig;eventSrc:#player-right-controller"
                     ></a-entity>
                 </template>
 
