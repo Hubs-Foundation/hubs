@@ -10,7 +10,7 @@ AFRAME.registerComponent("haptic-feedback", {
   },
 
   init: function() {
-    this.pulse = this.pulse.bind(this);
+    this.handlePulse = this.handlePulse.bind(this);
     this.getActuator = this.getActuator.bind(this);
     this.getActuator().then(actuator => {
       this.actuator = actuator;
@@ -37,21 +37,28 @@ AFRAME.registerComponent("haptic-feedback", {
   },
 
   play: function() {
-    this.el.addEventListener(this.data.hapticEventName, this.pulse);
+    this.el.addEventListener(this.data.hapticEventName, this.handlePulse);
   },
   pause: function() {
-    this.el.removeEventListener(this.data.hapticEventName, this.pulse);
+    this.el.removeEventListener(this.data.hapticEventName, this.handlePulse);
   },
 
-  pulse: function(event) {
+  handlePulse: function(event) {
     const { intensity } = event.detail;
-    if (!strengthForIntensity[intensity]) {
-      console.warn(`Invalid intensity : ${intensity}`);
-      return;
-    }
+    let strength;
 
+    if (strengthForIntensity[intensity]) {
+      this.pulse(strengthForIntensity[intensity]);
+    } else if (Number(intensity) === intensity) {
+      this.pulse(intensity);
+    } else {
+      console.warn(`Invalid intensity : ${intensity}`);
+    }
+  },
+
+  pulse: function(intensity) {
     if (this.actuator) {
-      this.actuator.pulse(strengthForIntensity[intensity], 15);
+      this.actuator.pulse(intensity, 15);
     }
   }
 });

@@ -3,11 +3,13 @@ AFRAME.registerComponent("super-spawner", {
     template: { default: "" },
     useCustomSpawnPosition: { default: false },
     spawnPosition: { type: "vec3" },
-    events: { default: ["cursor-grab", "action_grab"] }
+    events: { default: ["cursor-grab", "action_grab"] },
+    spawnCooldown: { default: 1 }
   },
 
   init: function() {
     this.entities = new Map();
+    this.timeout = null;
   },
 
   play: function() {
@@ -17,19 +19,26 @@ AFRAME.registerComponent("super-spawner", {
 
   pause: function() {
     this.el.removeEventListener("grab-start", this.handleGrabStart);
+
+    clearTimeout(this.timeout);
+    this.timeout = null;
+    this.el.setAttribute("visible", true);
   },
 
   remove: function() {
     for (const entity of this.entities.keys()) {
       const data = this.entities.get(entity);
       entity.removeEventListener("componentinitialized", data.componentinInitializedListener);
-      entity.removeEventListener("bodyloaded", data.bodyLoadedListener);
+      entity.removeEventListener("body-loaded", data.bodyLoadedListener);
     }
 
     this.entities.clear();
   },
 
   _handleGrabStart: function(e) {
+    if (this.timeout) {
+      return;
+    }
     const hand = e.detail.hand;
     const entity = document.createElement("a-entity");
 
@@ -51,6 +60,14 @@ AFRAME.registerComponent("super-spawner", {
     const pos = this.data.useCustomSpawnPosition ? this.data.spawnPosition : this.el.getAttribute("position");
     entity.setAttribute("position", pos);
     this.el.sceneEl.appendChild(entity);
+
+    if (this.data.spawnCooldown > 0) {
+      this.el.setAttribute("visible", false);
+      this.timeout = setTimeout(() => {
+        this.el.setAttribute("visible", true);
+        this.timeout = null;
+      }, this.data.spawnCooldown * 1000);
+    }
   },
 
   _handleComponentInitialzed: function(entity, e) {

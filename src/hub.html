@@ -21,7 +21,7 @@
 
     <a-scene
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
-        physics
+        physics="gravity: -6;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         personal-space-bubble="debug: false;"
         >
@@ -89,6 +89,13 @@
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
                             >
+                            <a-cylinder
+                                static-body
+                                radius="0.13"
+                                height="0.2"
+                                position="0 0.07 0.05"
+                                visible="false"
+                            ></a-cylinder>
                             </a-entity>
                         </template>
 
@@ -108,10 +115,11 @@
                     gltf-model-plus="src: #interactable-duck; inflate: true;"
                     scale="2 2 2"
                     class="interactable" 
-                    super-networked-interactable="counter: #counter; mass: 5;"
-                    body="type: dynamic; shape: none; mass: 5;"
+                    super-networked-interactable="counter: #counter; mass: 1;"
+                    body="type: dynamic; shape: none; mass: 1;"
                     grabbable
                     stretchable="useWorldPosition: true;"
+                    duck
                 ></a-entity>
             </template>
 
@@ -137,6 +145,7 @@
             super-spawner="template: #interactable-template;" 
             position="2.9 1.2 0" 
             body="mass: 0; type: static; shape: box;"
+            collision-filter="collisionForces: false;"
         ></a-entity>
 
         <a-entity
@@ -230,7 +239,11 @@
                     hitOpacity: 0.3;
                     missOpacity: 0.2;"
                 haptic-feedback
-            ></a-entity>
+                body="type: static; shape: none;"
+                mixin="super-hands"
+                controls-shape-offset
+            >
+            </a-entity>
 
             <a-entity
                 id="player-right-controller"
@@ -247,6 +260,9 @@
                     hitOpacity: 0.3;
                     missOpacity: 0.2;"
                 haptic-feedback
+                body="type: static; shape: none;"
+                mixin="super-hands"
+                controls-shape-offset
             ></a-entity>
 
             <a-entity gltf-model-plus="inflate: true;" class="model">
@@ -273,7 +289,7 @@
 
                 <template data-selector=".LeftHand">
                     <a-entity bone-visibility>
-                        <a-entity
+                        <!-- <a-entity
                             id="left-super-hand"
                             event-repeater="
                             events: action_grab, action_release, action_primary_down, action_primary_up; 
@@ -281,13 +297,13 @@
                             static-body="shape: sphere; sphereRadius: 0.02"
                             mixin="super-hands"
                             position="0 0.05 0"
-                        ></a-entity>
+                        ></a-entity> -->
                     </a-entity>
                 </template>
 
                 <template data-selector=".RightHand">
                     <a-entity bone-visibility>
-                        <a-entity
+<!--                         <a-entity
                             id="right-super-hand"
                             event-repeater="
                             events: action_grab, action_release, action_primary_down, action_primary_up; 
@@ -295,7 +311,7 @@
                             static-body="shape: sphere; sphereRadius: 0.02"
                             mixin="super-hands"
                             position="0 -0.05 0"
-                        ></a-entity>
+                        ></a-entity> -->
                     </a-entity>
                 </template>
 
