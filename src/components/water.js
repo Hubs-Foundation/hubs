@@ -148,7 +148,7 @@ AFRAME.registerComponent("water", {
     distance: { type: "number", default: 1 },
     speed: { type: "number", default: 0.1 },
     forceMobile: { type: "boolean", default: false },
-    normalMap: { type: "asset" }
+    normalMap: { type: "asset", default: "#water-normal-map" }
   },
   init() {
     const waterGeometry = new THREE.PlaneBufferGeometry(800, 800);

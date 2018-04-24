@@ -57,6 +57,8 @@ import "./components/block-button";
 import "./components/visible-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
+import "./components/css-class";
+import "./components/scene-shadow";
 
 import ReactDOM from "react-dom";
 import React from "react";

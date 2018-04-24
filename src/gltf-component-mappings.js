@@ -1,6 +1,17 @@
 import "./components/gltf-model-plus";
 import { resolveURL } from "./utils/resolveURL";
 
+AFRAME.GLTFModelPlus.registerComponent("css-class", "css-class");
+AFRAME.GLTFModelPlus.registerComponent("scene-shadow", "scene-shadow");
+AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner");
+AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
+AFRAME.GLTFModelPlus.registerComponent("body", "body");
+AFRAME.GLTFModelPlus.registerComponent("hide-when-quality", "hide-when-quality");
+AFRAME.GLTFModelPlus.registerComponent("light", "light");
+AFRAME.GLTFModelPlus.registerComponent("skybox", "skybox");
+AFRAME.GLTFModelPlus.registerComponent("layers", "layers");
+AFRAME.GLTFModelPlus.registerComponent("xr", "xr");
+AFRAME.GLTFModelPlus.registerComponent("water", "water");
 AFRAME.GLTFModelPlus.registerComponent("scale-audio-feedback", "scale-audio-feedback");
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
 AFRAME.GLTFModelPlus.registerComponent("shape", "shape");
