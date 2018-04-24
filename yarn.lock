@@ -160,9 +160,9 @@ aframe-billboard-component@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/aframe-billboard-component/-/aframe-billboard-component-1.0.0.tgz#10ce2482729eef7386c5844d65917581a62d3adc"
 
-aframe-extras@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/aframe-extras/-/aframe-extras-4.0.0.tgz#fc851e2a1312c30a4d4addc3e0fa2dbf3e723ead"
+"aframe-extras@https://github.com/MozillaReality/aframe-extras#feature/precompute-nav-mesh":
+  version "4.0.2"
+  resolved "https://github.com/MozillaReality/aframe-extras#c4451b03ca0fe39a5517f81b153b3f801ccaa711"
   dependencies:
     three-pathfinding "^0.5.5"
 
@@ -187,6 +187,10 @@ aframe-extras@^4.0.0:
 aframe-rounded@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/aframe-rounded/-/aframe-rounded-1.0.3.tgz#72c7d9c0ff02e94ee138bf217c284e187efa3cfb"
+
+aframe-slice9-component@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/aframe-slice9-component/-/aframe-slice9-component-1.0.0.tgz#fb0f8441dadd1e8b11cc24512ba7aa692d622be1"
 
 "aframe-teleport-controls@https://github.com/mozillareality/aframe-teleport-controls#hubs/master":
   version "0.3.2"
@@ -5396,9 +5400,9 @@ mute-stream@0.0.7:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
 
-naf-janus-adapter@^0.6.0:
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.6.0.tgz#6ca6f3765f5941b8bfa72eb5370f9b51bc314e1d"
+naf-janus-adapter@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.8.0.tgz#61fa7185c17437f9a33b9b97b1508eb9293b4f22"
   dependencies:
     debug "^3.1.0"
     minijanus "0.6.0"
@@ -7105,6 +7109,10 @@ schema-utils@^0.4.2, schema-utils@^0.4.3, schema-utils@^0.4.5:
 scoped-regex@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/scoped-regex/-/scoped-regex-1.0.0.tgz#a346bb1acd4207ae70bd7c0c7ca9e566b6baddb8"
+
+screenfull@^3.3.2:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/screenfull/-/screenfull-3.3.2.tgz#a6adf3b3f5556da812725385880600f5b39fbf25"
 
 scss-tokenizer@^0.2.3:
   version "0.2.3"

@@ -5,8 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="<%= ORIGIN_TRIAL_EXPIRES %>" content="<%= ORIGIN_TRIAL_TOKEN %>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
     <link rel="shortcut icon" type="image/png" href="/favicon.ico"/>
-    <title>Hubs | A new way to get together online</title>
+    <title>Get together | Hubs by Mozilla</title>
     <link href="https://fonts.googleapis.com/css?family=Zilla+Slab:300,300i,400,400i,700" rel="stylesheet">
 
     <% if(NODE_ENV === "production") { %>
@@ -17,19 +19,35 @@
 </head>
 
 <body data-html-prefix="<%= HTML_PREFIX %>">
-    <audio id="test-tone" src="./assets/sfx/tone.ogg"></audio>
+    <audio id="test-tone">
+        <source src="./assets/sfx/tone.webm" type="audio/webm"/>
+        <source src="./assets/sfx/tone.mp3" type="audio/mpeg"/>
+        <source src="./assets/sfx/tone.ogg" type="audio/ogg"/>
+        <source src="./assets/sfx/tone.wav" type="audio/wav"/>
+    </audio>
 
     <a-scene
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         physics="gravity: -6;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
+        freeze-controller="toggleEvent: action_freeze"
         personal-space-bubble="debug: false;"
         >
 
         <a-assets>
-            <img id="unmuted"  src="./assets/hud/unmuted.png" >
-            <img id="muted"  src="./assets/hud/muted.png" >
-            <img id="avatar"  src="./assets/hud/avatar.png" >
+            <img id="tooltip"  src="./assets/hud/tooltip.9.png" >
+            <img id="mute-off"  src="./assets/hud/mute_off.png" >
+            <img id="mute-off-hover"  src="./assets/hud/mute_off-hover.png" >
+            <img id="mute-on"  src="./assets/hud/mute_on.png" >
+            <img id="mute-on-hover"  src="./assets/hud/mute_on-hover.png" >
+            <img id="bubble-off"  src="./assets/hud/bubble_off.png" >
+            <img id="bubble-off-hover"  src="./assets/hud/bubble_off-hover.png" >
+            <img id="bubble-on"  src="./assets/hud/bubble_on.png" >
+            <img id="bubble-on-hover"  src="./assets/hud/bubble_on-hover.png" >
+            <img id="freeze-off"  src="./assets/hud/freeze_off.png" >
+            <img id="freeze-off-hover"  src="./assets/hud/freeze_off-hover.png" >
+            <img id="freeze-on"  src="./assets/hud/freeze_on.png" >
+            <img id="freeze-on-hover"  src="./assets/hud/freeze_on-hover.png" >
 
             <a-asset-item id="botdefault" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDefault_Avatar-9f71f8ff22.gltf"></a-asset-item>
             <a-asset-item id="botbobo" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotBobo_Avatar-f9740a010b.gltf"></a-asset-item>
@@ -54,7 +72,7 @@
             </template>
 
             <template id="remote-avatar-template">
-                <a-entity ik-root player-info>
+                <a-entity networked-avatar ik-root player-info>
                     <a-entity class="camera"></a-entity>
 
                     <a-entity class="left-controller"></a-entity>
@@ -79,7 +97,36 @@
                         </template>
 
                         <template data-selector=".Chest">
-                            <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility></a-entity>
+                            <a-entity>
+                              <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility> </a-entity>
+                              <a-entity billboard>
+                                  <a-entity
+                                      block-button
+                                      visible-while-frozen
+                                      ui-class-while-frozen
+                                      text-button="haptic:#player-right-controller;
+                                                   textHoverColor: #fff;
+                                                   textColor: #fff;
+                                                   backgroundHoverColor: #ea4b54;
+                                                   backgroundColor: #fff;"
+                                      slice9="width: 0.45;
+                                                   height: 0.2;
+                                                   left: 53;
+                                                   top: 53;
+                                                   right: 10;
+                                                   bottom: 10;
+                                                   opacity: 1.3;
+                                                   src: #tooltip"
+                                      position="0 0 .35">
+                                  </a-entity>
+                                  <a-entity
+                                      visible-while-frozen
+                                      text="value:Block;
+                                            width:2.5;
+                                            align:center;"
+                                      position="0 0 0.36"></a-entity>
+                              </a-entity>
+                            </a-entity>
                         </template>
 
                         <template data-selector=".Head">
@@ -186,6 +233,7 @@
             character-controller="pivot: #player-camera"
             ik-root
             player-info
+            networked-avatar
         >
             <a-entity
                 id="player-hud"
@@ -195,10 +243,10 @@
                 vr-mode-toggle-playing__hud-controller
             >
                 <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="30 0 0">
-                    <a-rounded height="0.13" width="0.6" color="#000000" position="-0.3 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
-                    <a-image src="#unmuted" scale="0.1 0.1 0.1" position="-0.2 0 0.001" class="hud mic" material="alphaTest:0.1;"></a-image>
-                    <a-image src="#avatar" scale="0.2 0.2 0.2" position="0 0 0.001" class="hud avatar"></a-image>
-                    <a-image src="#unmuted" scale="0.1 0.1 0.1" position="0.2 0 0.001" class="hud mic" material="alphaTest:0.1;"></a-image>
+                    <a-rounded height="0.13" width="0.48" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
+                    <a-image icon-button="image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover" scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="hud mic" material="alphaTest:0.1;"></a-image>
+                    <a-image icon-button="image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover" scale="0.2 0.2 0.2" position="0 0 0.001" class="hud freeze"></a-image>
+                    <a-image icon-button="image: #bubble-off; hoverImage: #bubble-off-hover; activeImage: #bubble-on; activeHoverImage: #bubble-on-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="hud bubble" material="alphaTest:0.1;"></a-image>
                 </a-entity>
             </a-entity>
 
@@ -265,15 +313,16 @@
                 controls-shape-offset
             ></a-entity>
 
-            <a-entity gltf-model-plus="inflate: true;" class="model">
+            <a-entity gltf-model-plus="inflate: true;"
+                      class="model">
                 <template data-selector=".RootScene">
                     <a-entity
                         ik-controller
                         animation-mixer
                         hand-pose__left
                         hand-pose__right
-                        hand-pose-controller__left="eventSrc:#player-left-controller"
-                        hand-pose-controller__right="eventSrc:#player-right-controller"
+                        hand-pose-controller__left="networkedAvatar:#player-rig;eventSrc:#player-left-controller"
+                        hand-pose-controller__right="networkedAvatar:#player-rig;eventSrc:#player-right-controller"
                     ></a-entity>
                 </template>
 

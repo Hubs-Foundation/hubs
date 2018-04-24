@@ -7,6 +7,7 @@ import MobileDetect from "mobile-detect";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import MovingAverage from "moving-average";
+import screenfull from "screenfull";
 
 import AutoExitWarning from "./auto-exit-warning";
 import { TwoDEntryButton, GenericEntryButton, GearVREntryButton, DaydreamEntryButton } from "./entry-buttons.js";
@@ -96,6 +97,10 @@ class UIRoot extends Component {
     autoExitTimerInterval: null,
     secondsRemainingBeforeAutoExit: Infinity,
 
+    muted: false,
+    frozen: false,
+    spacebubble: true,
+
     exited: false,
 
     showProfileEntry: false
@@ -107,7 +112,6 @@ class UIRoot extends Component {
   }
 
   componentDidMount() {
-    this.setupTestTone();
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
     this.micLevelMovingAverage = MovingAverage(100);
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
@@ -131,16 +135,24 @@ class UIRoot extends Component {
     this.setState({ sceneLoaded: true });
   };
 
-  // TODO: mute state should probably actually just live in react land
+  // TODO: we need to come up with a cleaner way to handle the shared state between aframe and react than emmitting events and setting state on the scene
   onAframeStateChanged = e => {
-    if (e.detail !== "muted") return;
+    if (!(e.detail === "muted" || e.detail === "frozen" || e.detail === "spacebubble")) return;
     this.setState({
-      muted: this.props.scene.is("muted")
+      [e.detail]: this.props.scene.is(e.detail)
     });
   };
 
   toggleMute = () => {
     this.props.scene.emit("action_mute");
+  };
+
+  toggleFreeze = () => {
+    this.props.scene.emit("action_freeze");
+  };
+
+  toggleSpaceBubble = () => {
+    this.props.scene.emit("action_space_bubble");
   };
 
   handleForcedVREntryType = () => {
@@ -157,37 +169,22 @@ class UIRoot extends Component {
     }
   };
 
-  setupTestTone = () => {
+  playTestTone = () => {
     const toneClip = document.querySelector("#test-tone");
-    const toneLength = 1800;
-    const toneDelay = 5000;
-
-    const toneIndicatorLoop = () => {
-      this.setState({ tonePlaying: false });
-
-      setTimeout(() => {
-        this.setState({ tonePlaying: true });
-        setTimeout(() => {
-          this.setState({ tonePlaying: false });
-        }, toneLength);
-      }, toneDelay);
-    };
-
-    toneClip.addEventListener("seeked", toneIndicatorLoop);
-    toneClip.addEventListener("playing", toneIndicatorLoop);
-  };
-
-  startTestTone = () => {
-    const toneClip = document.querySelector("#test-tone");
-    toneClip.loop = true;
+    toneClip.currentTime = 0;
     toneClip.play();
+    clearTimeout(this.testToneTimeout);
+    this.setState({ tonePlaying: true });
+    const toneLength = 1393;
+    this.testToneTimeout = setTimeout(() => {
+      this.setState({ tonePlaying: false });
+    }, toneLength);
   };
 
   stopTestTone = () => {
     const toneClip = document.querySelector("#test-tone");
     toneClip.pause();
     toneClip.currentTime = 0;
-
     this.setState({ tonePlaying: false });
   };
 
@@ -248,13 +245,17 @@ class UIRoot extends Component {
   };
 
   performDirectEntryFlow = async enterInVR => {
+    if (mobiledetect.mobile() && !enterInVR && screenfull.enabled) {
+      screenfull.request();
+    }
+
     this.setState({ enterInVR });
 
     const hasGrantedMic = await this.hasGrantedMicPermissions();
 
     if (hasGrantedMic) {
+      this.beginAudioSetup();
       await this.setMediaStreamToDefault();
-      await this.beginAudioSetup();
     } else {
       this.setState({ entryStep: ENTRY_STEPS.mic_grant });
     }
@@ -426,10 +427,10 @@ class UIRoot extends Component {
       if (hasAudio) {
         this.setState({ entryStep: ENTRY_STEPS.mic_granted });
       } else {
-        await this.beginAudioSetup();
+        this.beginAudioSetup();
       }
     } else {
-      await this.beginAudioSetup();
+      this.beginAudioSetup();
     }
   };
 
@@ -437,8 +438,7 @@ class UIRoot extends Component {
     this.setState({ showProfileEntry: false });
   };
 
-  beginAudioSetup = async () => {
-    this.startTestTone();
+  beginAudioSetup = () => {
     this.setState({ entryStep: ENTRY_STEPS.audio_setup });
   };
 
@@ -501,6 +501,7 @@ class UIRoot extends Component {
     }
 
     this.stopTestTone();
+    clearTimeout(this.testToneTimeout);
 
     if (this.state.micLevelAudioContext) {
       this.state.micLevelAudioContext.close();
@@ -515,7 +516,13 @@ class UIRoot extends Component {
       let subtitle = null;
       if (this.props.roomUnavailableReason !== "closed") {
         const exitSubtitleId = `exit.subtitle.${this.state.exited ? "exited" : this.props.roomUnavailableReason}`;
-        subtitle = <FormattedMessage id={exitSubtitleId} />;
+        subtitle = (
+          <div>
+            <FormattedMessage id={exitSubtitleId} />
+            <p />
+            You can also <a href="/">create a new room</a>.
+          </div>
+        );
       } else {
         // TODO i18n, due to links and markup
         subtitle = (
@@ -529,7 +536,7 @@ class UIRoot extends Component {
             <br />
             If you have questions, contact us at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>.
             <p />
-            If you&apos;d like to run your own server, Hubs&apos;s source code is available on{" "}
+            If you&apos;d like to run your own server, hubs&apos;s source code is available on{" "}
             <a href="https://github.com/mozilla/hubs">Github</a>.
           </div>
         );
@@ -555,7 +562,7 @@ class UIRoot extends Component {
               </div>
             </div>
 
-            <img className="loading-panel__logo" src="../assets/images/logo-narrow.svg" />
+            <img className="loading-panel__logo" src="../assets/images/logo.svg" />
           </div>
         </IntlProvider>
       );
@@ -582,27 +589,29 @@ class UIRoot extends Component {
     const entryPanel =
       this.state.entryStep === ENTRY_STEPS.start ? (
         <div className="entry-panel">
-          <TwoDEntryButton onClick={this.enter2D} />
-          {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
-            <GenericEntryButton onClick={this.enterVR} />
-          )}
-          {this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
-            <GearVREntryButton onClick={this.enterGearVR} />
-          )}
-          {this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
-            <DaydreamEntryButton
-              onClick={this.enterDaydream}
-              subtitle={
-                this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : ""
-              }
-            />
-          )}
-          {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
-            <div className="entry-panel__secondary" onClick={this.enterVR}>
-              <FormattedMessage id="entry.cardboard" />
-            </div>
-          )}
-          {screenSharingCheckbox}
+          <div className="entry-panel__button-container">
+            <TwoDEntryButton onClick={this.enter2D} />
+            {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
+              <GenericEntryButton onClick={this.enterVR} />
+            )}
+            {this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
+              <GearVREntryButton onClick={this.enterGearVR} />
+            )}
+            {this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
+              <DaydreamEntryButton
+                onClick={this.enterDaydream}
+                subtitle={
+                  this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : ""
+                }
+              />
+            )}
+            {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
+              <div className="entry-panel__secondary" onClick={this.enterVR}>
+                <FormattedMessage id="entry.cardboard" />
+              </div>
+            )}
+            {screenSharingCheckbox}
+          </div>
         </div>
       ) : null;
 
@@ -682,7 +691,7 @@ class UIRoot extends Component {
                 />
               )}
             </div>
-            <div className="audio-setup-panel__levels__icon">
+            <div className="audio-setup-panel__levels__icon" onClick={this.playTestTone}>
               <img
                 src="../assets/images/level_background.png"
                 srcSet="../assets/images/level_background@2x.png 2x"
@@ -797,7 +806,14 @@ class UIRoot extends Component {
           </div>
           {this.state.entryStep === ENTRY_STEPS.finished ? (
             <div>
-              <TwoDHUD muted={this.state.muted} onToggleMute={this.toggleMute} />
+              <TwoDHUD
+                muted={this.state.muted}
+                frozen={this.state.frozen}
+                spacebubble={this.state.spacebubble}
+                onToggleMute={this.toggleMute}
+                onToggleFreeze={this.toggleFreeze}
+                onToggleSpaceBubble={this.toggleSpaceBubble}
+              />
               <Footer
                 hubName={this.props.hubName}
                 occupantCount={this.props.occupantCount}

@@ -56,7 +56,7 @@ class InfoDialog extends Component {
 
     const payload = {
       email: this.state.mailingListEmail,
-      newsletters: "mixed-reality",
+      newsletters: "hubs",
       privacy: true,
       fmt: "H",
       source_url: document.location.href
@@ -106,7 +106,7 @@ class InfoDialog extends Component {
         dialogTitle = "Invite Friends";
         dialogBody = (
           <div>
-            <div>Just share the link to have others join you.</div>
+            <div>Just share the link to invite others.</div>
             <div className="invite-form">
               <input
                 type="text"
@@ -173,7 +173,7 @@ class InfoDialog extends Component {
             Need to report a problem?
             <p />
             You can file a{" "}
-            <a href="https://github.com/mozilla/mr-social-client/issues" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/mozilla/hubs/issues" target="_blank" rel="noopener noreferrer">
               Github Issue
             </a>{" "}
             or e-mail us for support at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>.

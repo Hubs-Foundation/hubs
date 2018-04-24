@@ -1,12 +1,10 @@
 .audio-setup-panel {
-  display: flex;
-  flex-direction: column;
-  flex: 10 1 auto;
-  justify-content: flex-start;
-  align-items: center;
+  text-align: center;
+  overflow-y: auto;
   
   &__enter-button {
     @extend %bottom-button;
+    margin: 32px auto;
   }
 
   &__title {
@@ -23,6 +21,7 @@
     justify-content: center;
     align-items: center;
     position: relative;
+    margin: 8px 0;
 
     &__dropdown {
       @extend %rounded-border;
@@ -33,24 +32,24 @@
       -webkit-appearance: none;
       background-color: black;
       padding: 6px;
+      padding-left: 15px;
       padding-right: 30px;
       color: white;
       font-size: 1.1em;
       width: 90%;
+      height: 50px;
     }
 
     &__mic-icon {
       pointer-events: none;
       position: absolute;
       left: 8%;
-      top: 9px;
     }
 
     &__dropdown-arrow {
       pointer-events: none;
       position: absolute;
       right: 7.5%;
-      top: 16px;
     }
   }
 
@@ -66,6 +65,7 @@
       position:relative;
       width: 111px;
       height: 111px;
+      cursor: pointer;
     }
 
     &__icon-part {

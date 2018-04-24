@@ -1,7 +1,8 @@
 const GLTFCache = {};
 
 AFRAME.GLTFModelPlus = {
-  defaultInflator(el, componentName, componentData) {
+  // eslint-disable-next-line no-unused-vars
+  defaultInflator(el, componentName, componentData, _gltfPath) {
     if (!AFRAME.components[componentName]) {
       throw new Error(`Inflator failed. "${componentName}" component does not exist.`);
     }
@@ -73,7 +74,7 @@ function cloneGltf(gltf) {
   return clone;
 }
 
-const inflateEntities = function(parentEl, node) {
+const inflateEntities = function(parentEl, node, gltfPath) {
   // setObject3D mutates the node's parent, so we have to copy
   const children = node.children.slice(0);
 
@@ -131,14 +132,14 @@ const inflateEntities = function(parentEl, node) {
         const { inflator, componentName } = AFRAME.GLTFModelPlus.components[prop];
 
         if (inflator) {
-          inflator(el, componentName, entityComponents[prop]);
+          inflator(el, componentName, entityComponents[prop], gltfPath);
         }
       }
     }
   }
 
   children.forEach(childNode => {
-    inflateEntities(el, childNode);
+    inflateEntities(el, childNode, gltfPath);
   });
 
   return el;
@@ -223,18 +224,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       // If the src attribute is a selector, get the url from the asset item.
       if (src && src.charAt(0) === "#") {
         const assetEl = document.getElementById(src.substring(1));
-
-        const fallbackSrc = assetEl.getAttribute("src");
-        const highSrc = assetEl.getAttribute("high-src");
-        const lowSrc = assetEl.getAttribute("low-src");
-
-        if (highSrc && window.APP.quality === "high") {
-          src = highSrc;
-        } else if (lowSrc && window.APP.quality === "low") {
-          src = lowSrc;
-        } else {
-          src = fallbackSrc;
-        }
+        src = assetEl.getAttribute("src");
       }
 
       if (src === this.lastSrc) return;
@@ -248,6 +238,7 @@ AFRAME.registerComponent("gltf-model-plus", {
         return;
       }
 
+      const gltfPath = THREE.LoaderUtils.extractUrlBase(src);
       const model = await cachedLoadGLTF(src, this.data.preferredTechnique);
 
       // If we started loading something else already
@@ -263,7 +254,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.el.setObject3D("mesh", this.model);
 
       if (this.data.inflate) {
-        this.inflatedEl = inflateEntities(this.el, this.model);
+        this.inflatedEl = inflateEntities(this.el, this.model, gltfPath);
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
         // Wait one tick for the appended custom elements to be connected before attaching templates
         await nextTick();

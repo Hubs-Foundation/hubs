@@ -13,11 +13,9 @@ const NETWORK_POSES = ["allOpen", "thumbDown", "indexDown", "mrpDown", "thumbsUp
 
 AFRAME.registerComponent("hand-pose", {
   multiple: true,
-  schema: {
-    pose: { default: 0 }
-  },
 
   init() {
+    this.pose = 0;
     this.animatePose = this.animatePose.bind(this);
     this.mixer = this.el.components["animation-mixer"];
     const object3DMap = this.mixer.el.object3DMap;
@@ -26,12 +24,28 @@ AFRAME.registerComponent("hand-pose", {
     const suffix = this.id == "left" ? "_L" : "_R";
     this.from = this.to = this.mixer.mixer.clipAction(POSES.open + suffix, this.clipActionObject);
     this.from.play();
+
+    const getNetworkedAvatar = el => {
+      const networkedAvatar = el.components["networked-avatar"];
+      if (networkedAvatar) {
+        return networkedAvatar;
+      }
+      return getNetworkedAvatar(el.parentEl);
+    };
+    this.networkedAvatar = getNetworkedAvatar(this.el);
   },
 
-  update(oldData) {
-    if (oldData.pose != this.data.pose) {
-      this.animatePose(NETWORK_POSES[oldData.pose || 0], NETWORK_POSES[this.data.pose]);
+  tick() {
+    if (
+      !this.networkedAvatar ||
+      !this.networkedAvatar.data ||
+      this.networkedAvatar.data[`${this.id}_hand_pose`] === this.pose
+    ) {
+      return;
     }
+
+    this.animatePose(NETWORK_POSES[this.pose], NETWORK_POSES[this.networkedAvatar.data[`${this.id}_hand_pose`]]);
+    this.pose = this.networkedAvatar.data[`${this.id}_hand_pose`];
   },
 
   animatePose(prev, curr) {
@@ -55,7 +69,8 @@ AFRAME.registerComponent("hand-pose", {
 AFRAME.registerComponent("hand-pose-controller", {
   multiple: true,
   schema: {
-    eventSrc: { type: "selector" }
+    eventSrc: { type: "selector" },
+    networkedAvatar: { type: "selector" }
   },
   init: function() {
     this.setHandPose = this.setHandPose.bind(this);
@@ -70,6 +85,10 @@ AFRAME.registerComponent("hand-pose-controller", {
   },
 
   setHandPose: function(evt) {
-    this.el.setAttribute(`hand-pose__${this.id}`, "pose", NETWORK_POSES.indexOf(POSES[evt.detail.current]));
+    this.data.networkedAvatar.setAttribute(
+      "networked-avatar",
+      `${this.id}_hand_pose`,
+      NETWORK_POSES.indexOf(POSES[evt.detail.current])
+    );
   }
 });

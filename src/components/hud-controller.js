@@ -15,7 +15,8 @@ AFRAME.registerComponent("hud-controller", {
     offset: { default: 0.7 }, // distance from hud above head,
     lookCutoff: { default: 20 }, // angle at which the hud should be "on",
     animRange: { default: 30 }, // degrees over which to animate the hud into view
-    yawCutoff: { default: 50 } // yaw degrees at wich the hud should reoirent even if the user is looking up
+    yawCutoff: { default: 50 }, // yaw degrees at wich the hud should reoirent even if the user is looking up
+    showTip: { type: "bool" }
   },
   init() {
     this.isYLocked = false;
@@ -33,14 +34,34 @@ AFRAME.registerComponent("hud-controller", {
     const head = this.data.head.object3D;
     const sceneEl = this.el.sceneEl;
 
-    const { offset, lookCutoff, animRange, yawCutoff } = this.data;
+    const { offset, lookCutoff, animRange, yawCutoff, showTip } = this.data;
 
     const pitch = head.rotation.x * THREE.Math.RAD2DEG;
     const yawDif = deltaAngle(head.rotation.y, hud.rotation.y) * THREE.Math.RAD2DEG;
 
-    // Reorient the hud only if the user is looking away from the hud, for right now this arbitrarily means the hud is 1/3 way animated away
+    // animate the hud into place over animRange degrees as the user aproaches the lookCutoff angle
+    let t = 1 - THREE.Math.clamp(lookCutoff - pitch, 0, animRange) / animRange;
+
+    // HUD is locked down while showing tooltip
+    if (showTip) {
+      t = 1;
+    }
+
+    // Once the HUD is in place it should stay in place until you look sufficiently far down
+    if (t === 1) {
+      this.lockedHeadPositionY = head.position.y;
+      this.hudLocked = true;
+    } else if (this.hudLocked && pitch < lookCutoff - animRange / 2) {
+      this.hudLocked = false;
+    }
+
+    if (this.hudLocked) {
+      t = 1;
+    }
+
+    // Reorient the hud only if the user is looking away from the hud, for right now this arbitrarily means the hud is 1/2 way animated away
     // TODO: come up with better huristics for this that maybe account for the user turning away from the hud "too far", also animate the position so that it doesnt just snap.
-    if (yawDif >= yawCutoff || pitch < lookCutoff - animRange / 3) {
+    if (yawDif >= yawCutoff || pitch < lookCutoff - animRange / 2) {
       const lookDir = new THREE.Vector3(0, 0, -1);
       lookDir.applyQuaternion(head.quaternion);
       lookDir.add(head.position);
@@ -48,18 +69,6 @@ AFRAME.registerComponent("hud-controller", {
       hud.position.z = lookDir.z;
       hud.setRotationFromEuler(new THREE.Euler(0, head.rotation.y, 0));
     }
-
-    // animate the hud into place over animRange degrees as the user aproaches the lookCutoff angle
-    const t = 1 - THREE.Math.clamp(lookCutoff - pitch, 0, animRange) / animRange;
-
-    // Lock the hud in place relative to a known head position so it doesn't bob up and down
-    // with the user's head
-    if (!this.isYLocked && t === 1) {
-      this.lockedHeadPositionY = head.position.y;
-    }
-    const EPSILON = 0.001;
-    this.isYLocked = t > 1 - EPSILON;
-
     hud.position.y = (this.isYLocked ? this.lockedHeadPositionY : head.position.y) + offset + (1 - t) * offset;
     hud.rotation.x = (1 - t) * THREE.Math.DEG2RAD * 90;
 
