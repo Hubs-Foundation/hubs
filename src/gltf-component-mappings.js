@@ -14,6 +14,7 @@ AFRAME.GLTFModelPlus.registerComponent("shadow", "shadow");
 AFRAME.GLTFModelPlus.registerComponent("xr", "xr");
 AFRAME.GLTFModelPlus.registerComponent("water", "water");
 AFRAME.GLTFModelPlus.registerComponent("scale-audio-feedback", "scale-audio-feedback");
+AFRAME.GLTFModelPlus.registerComponent("animation-mixer", "animation-mixer");
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
 AFRAME.GLTFModelPlus.registerComponent("shape", "shape");
 AFRAME.GLTFModelPlus.registerComponent("visible", "visible");
