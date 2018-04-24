@@ -23,5 +23,6 @@ AFRAME.registerComponent("block-button", {
   // Currently unused
   unblock(clientId) {
     NAF.connection.adapter.unblock(clientId);
+    NAF.connection.entities.completeSync(clientId);
   }
 });

@@ -94,13 +94,13 @@
                               <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility> </a-entity>
                               <a-entity billboard>
                                   <a-entity
-                                      class="ui"
                                       block-button
                                       visible-while-frozen
+                                      ui-class-while-frozen
                                       text-button="haptic:#player-right-controller;
-                                                   textHoverColor: #f00;
+                                                   textHoverColor: #ea4b54;
                                                    textColor: #fff;
-                                                   backgroundHoverColor: #f00;
+                                                   backgroundHoverColor: #ea4b54;
                                                    backgroundColor: #fff;"
                                       slice9="width: 0.45;
                                                    height: 0.2;
@@ -111,11 +111,13 @@
                                                    opacity: 1.3;
                                                    src: #tooltip"
                                       position="0 0 .35">
-                                      <a-entity text="value:Block;
-                                                       width:3;
-                                                       align:center;"
-                                                position="0 0 0.01"></a-entity>
                                   </a-entity>
+                                  <a-entity
+                                      visible-while-frozen
+                                      text="value:Block;
+                                            width:3;
+                                            align:center;"
+                                      position="0 0 0.36"></a-entity>
                               </a-entity>
                             </a-entity>
                         </template>

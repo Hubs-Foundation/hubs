@@ -20,7 +20,7 @@ AFRAME.registerComponent("text-button", {
     this.onClick = () => {
       this.emitHapticPulse();
     };
-    this.textEl = this.el.querySelector("[text]");
+    this.textEl = this.el.parentEl.querySelector("[text]");
   },
 
   emitHapticPulse() {
