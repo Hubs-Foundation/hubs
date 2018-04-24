@@ -97,6 +97,10 @@ class UIRoot extends Component {
     autoExitTimerInterval: null,
     secondsRemainingBeforeAutoExit: Infinity,
 
+    muted: false,
+    frozen: false,
+    spacebubble: true,
+
     exited: false,
 
     showProfileEntry: false
@@ -132,16 +136,24 @@ class UIRoot extends Component {
     this.setState({ sceneLoaded: true });
   };
 
-  // TODO: mute state should probably actually just live in react land
+  // TODO: we need to come up with a cleaner way to handle the shared state between aframe and react than emmitting events and setting state on the scene
   onAframeStateChanged = e => {
-    if (e.detail !== "muted") return;
+    if (!(e.detail === "muted" || e.detail === "frozen" || e.detail === "spacebubble")) return;
     this.setState({
-      muted: this.props.scene.is("muted")
+      [e.detail]: this.props.scene.is(e.detail)
     });
   };
 
   toggleMute = () => {
     this.props.scene.emit("action_mute");
+  };
+
+  toggleFreeze = () => {
+    this.props.scene.emit("action_freeze");
+  };
+
+  toggleSpaceBubble = () => {
+    this.props.scene.emit("action_space_bubble");
   };
 
   handleForcedVREntryType = () => {
@@ -810,7 +822,14 @@ class UIRoot extends Component {
           </div>
           {this.state.entryStep === ENTRY_STEPS.finished ? (
             <div>
-              <TwoDHUD muted={this.state.muted} onToggleMute={this.toggleMute} />
+              <TwoDHUD
+                muted={this.state.muted}
+                frozen={this.state.frozen}
+                spacebubble={this.state.spacebubble}
+                onToggleMute={this.toggleMute}
+                onToggleFreeze={this.toggleFreeze}
+                onToggleSpaceBubble={this.toggleSpaceBubble}
+              />
               <Footer
                 hubName={this.props.hubName}
                 occupantCount={this.props.occupantCount}
