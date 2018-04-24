@@ -4,6 +4,9 @@ import queryString from "query-string";
 import { IntlProvider, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 
+import { patchWebGLRenderingContext } from "./utils/webgl";
+patchWebGLRenderingContext();
+
 import "./assets/stylesheets/avatar-selector.scss";
 import "./vendor/GLTFLoader";
 

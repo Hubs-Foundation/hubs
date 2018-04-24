@@ -1,4 +1,4 @@
-# Mozilla Social Mixed Reality Client [![Build Status](https://travis-ci.org/mozilla/mr-social-client.svg?branch=master)](https://travis-ci.org/mozilla/mr-social-client)
+# Mozilla Social Mixed Reality Client [![Build Status](https://travis-ci.org/mozilla/hubs.svg?branch=master)](https://travis-ci.org/mozilla/hubs)
 
 A prototype client demonstrating a multi-user experience in WebVR. Built with
 [A-Frame](https://github.com/aframevr/aframe/)
@@ -8,7 +8,7 @@ A prototype client demonstrating a multi-user experience in WebVR. Built with
 To run the social client, run:
 
 ```sh
-git clone https://github.com/mozilla/mr-social-client.git
+git clone https://github.com/mozilla/hubs.git
 yarn install
 yarn start
 ```

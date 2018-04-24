@@ -106,7 +106,7 @@ class InfoDialog extends Component {
         dialogTitle = "Invite Friends";
         dialogBody = (
           <div>
-            <div>Just share the link to have others join you.</div>
+            <div>Just share the link to invite others.</div>
             <div className="invite-form">
               <input
                 type="text"
@@ -133,7 +133,7 @@ class InfoDialog extends Component {
         dialogTitle = "";
         dialogBody = (
           <span>
-            Sign up to get updates about new features in Hubs.
+            Sign up to get updates about new features in hubs.
             <p />
             <form onSubmit={this.signUpForMailingList}>
               <div className="mailing-list-form">
@@ -173,7 +173,7 @@ class InfoDialog extends Component {
             Need to report a problem?
             <p />
             You can file a{" "}
-            <a href="https://github.com/mozilla/mr-social-client/issues" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/mozilla/hubs/issues" target="_blank" rel="noopener noreferrer">
               Github Issue
             </a>{" "}
             or e-mail us for support at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>.

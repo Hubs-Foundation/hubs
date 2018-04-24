@@ -7,6 +7,7 @@ import MobileDetect from "mobile-detect";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import MovingAverage from "moving-average";
+import screenfull from "screenfull";
 
 import AutoExitWarning from "./auto-exit-warning";
 import { TwoDEntryButton, GenericEntryButton, GearVREntryButton, DaydreamEntryButton } from "./entry-buttons.js";
@@ -260,6 +261,10 @@ class UIRoot extends Component {
   };
 
   performDirectEntryFlow = async enterInVR => {
+    if (mobiledetect.mobile() && !enterInVR && screenfull.enabled) {
+      screenfull.request();
+    }
+
     this.setState({ enterInVR });
 
     const hasGrantedMic = await this.hasGrantedMicPermissions();
@@ -527,7 +532,13 @@ class UIRoot extends Component {
       let subtitle = null;
       if (this.props.roomUnavailableReason !== "closed") {
         const exitSubtitleId = `exit.subtitle.${this.state.exited ? "exited" : this.props.roomUnavailableReason}`;
-        subtitle = <FormattedMessage id={exitSubtitleId} />;
+        subtitle = (
+          <div>
+            <FormattedMessage id={exitSubtitleId} />
+            <p />
+            You can also <a href="/">create a new room</a>.
+          </div>
+        );
       } else {
         // TODO i18n, due to links and markup
         subtitle = (
@@ -541,7 +552,7 @@ class UIRoot extends Component {
             <br />
             If you have questions, contact us at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>.
             <p />
-            If you&apos;d like to run your own server, Hubs&apos;s source code is available on{" "}
+            If you&apos;d like to run your own server, hubs&apos;s source code is available on{" "}
             <a href="https://github.com/mozilla/hubs">Github</a>.
           </div>
         );
@@ -567,7 +578,7 @@ class UIRoot extends Component {
               </div>
             </div>
 
-            <img className="loading-panel__logo" src="../assets/images/logo-narrow.svg" />
+            <img className="loading-panel__logo" src="../assets/images/logo.svg" />
           </div>
         </IntlProvider>
       );
@@ -594,27 +605,29 @@ class UIRoot extends Component {
     const entryPanel =
       this.state.entryStep === ENTRY_STEPS.start ? (
         <div className="entry-panel">
-          <TwoDEntryButton onClick={this.enter2D} />
-          {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
-            <GenericEntryButton onClick={this.enterVR} />
-          )}
-          {this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
-            <GearVREntryButton onClick={this.enterGearVR} />
-          )}
-          {this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
-            <DaydreamEntryButton
-              onClick={this.enterDaydream}
-              subtitle={
-                this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : ""
-              }
-            />
-          )}
-          {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
-            <div className="entry-panel__secondary" onClick={this.enterVR}>
-              <FormattedMessage id="entry.cardboard" />
-            </div>
-          )}
-          {screenSharingCheckbox}
+          <div className="entry-panel__button-container">
+            <TwoDEntryButton onClick={this.enter2D} />
+            {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
+              <GenericEntryButton onClick={this.enterVR} />
+            )}
+            {this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
+              <GearVREntryButton onClick={this.enterGearVR} />
+            )}
+            {this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
+              <DaydreamEntryButton
+                onClick={this.enterDaydream}
+                subtitle={
+                  this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : ""
+                }
+              />
+            )}
+            {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
+              <div className="entry-panel__secondary" onClick={this.enterVR}>
+                <FormattedMessage id="entry.cardboard" />
+              </div>
+            )}
+            {screenSharingCheckbox}
+          </div>
         </div>
       ) : null;
 

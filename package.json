@@ -50,6 +50,7 @@
     "react-dom": "^16.1.1",
     "react-intl": "^2.4.0",
     "react-router-dom": "^4.2.2",
+    "screenfull": "^3.3.2",
     "super-hands": "https://github.com/infinitelee/aframe-super-hands-component#mr-social-client/master",
     "uuid": "^3.2.1",
     "webrtc-adapter": "^6.0.2"
