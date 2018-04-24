@@ -16,6 +16,7 @@ import "aframe-input-mapping-component";
 import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
+import "aframe-slice9-component";
 
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
@@ -51,6 +52,9 @@ import "./components/gltf-bundle";
 import "./components/hud-controller";
 import "./components/freeze-controller";
 import "./components/icon-button";
+import "./components/text-button";
+import "./components/block-button";
+import "./components/visible-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
 
@@ -244,6 +248,14 @@ const onReady = async () => {
       }
       NAF.connection.adapter.setLocalMediaStream(mediaStream);
       screenEntity.setAttribute("visible", sharingScreen);
+    });
+
+    document.body.addEventListener("blocked", ev => {
+      NAF.connection.entities.removeEntitiesOfClient(ev.detail.clientId);
+    });
+
+    document.body.addEventListener("unblocked", ev => {
+      NAF.connection.entities.completeSync(ev.detail.clientId);
     });
 
     if (!qsTruthy("offline")) {
