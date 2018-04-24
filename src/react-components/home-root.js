@@ -18,11 +18,11 @@ addLocaleData([...en]);
 const messages = localeData[lang] || localeData.en;
 
 const ENVIRONMENT_URLS = [
-  "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingRoom.bundle.json",
-  "https://asset-bundles-prod.reticulum.io/rooms/theater/Theater.bundle.json",
-  "https://asset-bundles-prod.reticulum.io/rooms/atrium/Atrium.bundle.json",
-  "https://asset-bundles-prod.reticulum.io/rooms/courtyard/Courtyard.bundle.json",
-  "https://asset-bundles-prod.reticulum.io/rooms/MedievalFantasyBook/MedievalFantasyBook.bundle.json"
+  process.env.ASSET_SERVER + "/rooms/meetingroom/MeetingRoom.bundle.json",
+  process.env.ASSET_SERVER + "/rooms/theater/Theater.bundle.json",
+  process.env.ASSET_SERVER + "/rooms/atrium/Atrium.bundle.json",
+  process.env.ASSET_SERVER + "/rooms/courtyard/Courtyard.bundle.json",
+  process.env.ASSET_SERVER + "/rooms/MedievalFantasyBook/MedievalFantasyBook.bundle.json"
 ];
 
 class HomeRoot extends Component {
