@@ -3,12 +3,17 @@ const bubblePos = new AFRAME.THREE.Vector3();
 
 AFRAME.registerSystem("personal-space-bubble", {
   schema: {
-    debug: { default: false }
+    debug: { default: false },
+    enabled: { default: true }
   },
 
   init() {
     this.invaders = [];
     this.bubbles = [];
+
+    this.el.addEventListener("action_space_bubble", () => {
+      this.el.setAttribute("personal-space-bubble", { enabled: !this.data.enabled });
+    });
   },
 
   registerBubble(bubble) {
@@ -48,10 +53,21 @@ AFRAME.registerSystem("personal-space-bubble", {
 
     for (let i = 0; i < this.invaders.length; i++) {
       this.invaders[i].updateDebug();
+      if (!this.data.enabled) {
+        this.invaders[i].setInvading(false);
+      }
+    }
+
+    if (this.data.enabled) {
+      this.el.addState("spacebubble");
+    } else {
+      this.el.removeState("spacebubble");
     }
   },
 
   tick() {
+    if (!this.data.enabled) return;
+
     // Update matrix positions once for each space bubble and space invader
     for (let i = 0; i < this.bubbles.length; i++) {
       this.bubbles[i].el.object3D.updateMatrixWorld(true);

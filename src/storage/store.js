@@ -25,6 +25,7 @@ export const SCHEMA = {
       type: "object",
       additionalProperties: false,
       properties: {
+        hasFoundFreeze: { type: "boolean" },
         hasChangedName: { type: "boolean" },
         lastEnteredAt: { type: "string" }
       }
