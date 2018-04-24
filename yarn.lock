@@ -188,6 +188,10 @@ aframe-rounded@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/aframe-rounded/-/aframe-rounded-1.0.3.tgz#72c7d9c0ff02e94ee138bf217c284e187efa3cfb"
 
+aframe-slice9-component@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/aframe-slice9-component/-/aframe-slice9-component-1.0.0.tgz#fb0f8441dadd1e8b11cc24512ba7aa692d622be1"
+
 "aframe-teleport-controls@https://github.com/mozillareality/aframe-teleport-controls#hubs/master":
   version "0.3.2"
   resolved "https://github.com/mozillareality/aframe-teleport-controls#9e2ef7da57144c4a615eba40a945d4cfa105a092"
@@ -5396,9 +5400,9 @@ mute-stream@0.0.7:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
 
-naf-janus-adapter@^0.7.0:
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.7.0.tgz#00ced989bac9e073e32b74a5bbc1f41cc61db6ea"
+naf-janus-adapter@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/naf-janus-adapter/-/naf-janus-adapter-0.8.0.tgz#61fa7185c17437f9a33b9b97b1508eb9293b4f22"
   dependencies:
     debug "^3.1.0"
     minijanus "0.6.0"
