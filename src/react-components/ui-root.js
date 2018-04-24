@@ -112,7 +112,6 @@ class UIRoot extends Component {
   }
 
   componentDidMount() {
-    this.setupTestTone();
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
     this.micLevelMovingAverage = MovingAverage(100);
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
@@ -170,37 +169,22 @@ class UIRoot extends Component {
     }
   };
 
-  setupTestTone = () => {
+  playTestTone = () => {
     const toneClip = document.querySelector("#test-tone");
-    const toneLength = 1800;
-    const toneDelay = 5000;
-
-    const toneIndicatorLoop = () => {
-      this.setState({ tonePlaying: false });
-
-      setTimeout(() => {
-        this.setState({ tonePlaying: true });
-        setTimeout(() => {
-          this.setState({ tonePlaying: false });
-        }, toneLength);
-      }, toneDelay);
-    };
-
-    toneClip.addEventListener("seeked", toneIndicatorLoop);
-    toneClip.addEventListener("playing", toneIndicatorLoop);
-  };
-
-  startTestTone = () => {
-    const toneClip = document.querySelector("#test-tone");
-    toneClip.loop = true;
+    toneClip.currentTime = 0;
     toneClip.play();
+    clearTimeout(this.testToneTimeout);
+    this.setState({ tonePlaying: true });
+    const toneLength = 1393;
+    this.testToneTimeout = setTimeout(() => {
+      this.setState({ tonePlaying: false });
+    }, toneLength);
   };
 
   stopTestTone = () => {
     const toneClip = document.querySelector("#test-tone");
     toneClip.pause();
     toneClip.currentTime = 0;
-
     this.setState({ tonePlaying: false });
   };
 
@@ -270,8 +254,8 @@ class UIRoot extends Component {
     const hasGrantedMic = await this.hasGrantedMicPermissions();
 
     if (hasGrantedMic) {
+      this.beginAudioSetup();
       await this.setMediaStreamToDefault();
-      await this.beginAudioSetup();
     } else {
       this.setState({ entryStep: ENTRY_STEPS.mic_grant });
     }
@@ -443,10 +427,10 @@ class UIRoot extends Component {
       if (hasAudio) {
         this.setState({ entryStep: ENTRY_STEPS.mic_granted });
       } else {
-        await this.beginAudioSetup();
+        this.beginAudioSetup();
       }
     } else {
-      await this.beginAudioSetup();
+      this.beginAudioSetup();
     }
   };
 
@@ -454,8 +438,7 @@ class UIRoot extends Component {
     this.setState({ showProfileEntry: false });
   };
 
-  beginAudioSetup = async () => {
-    this.startTestTone();
+  beginAudioSetup = () => {
     this.setState({ entryStep: ENTRY_STEPS.audio_setup });
   };
 
@@ -518,6 +501,7 @@ class UIRoot extends Component {
     }
 
     this.stopTestTone();
+    clearTimeout(this.testToneTimeout);
 
     if (this.state.micLevelAudioContext) {
       this.state.micLevelAudioContext.close();
@@ -707,7 +691,7 @@ class UIRoot extends Component {
                 />
               )}
             </div>
-            <div className="audio-setup-panel__levels__icon">
+            <div className="audio-setup-panel__levels__icon" onClick={this.playTestTone}>
               <img
                 src="../assets/images/level_background.png"
                 srcSet="../assets/images/level_background@2x.png 2x"
