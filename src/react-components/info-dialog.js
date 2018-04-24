@@ -133,7 +133,7 @@ class InfoDialog extends Component {
         dialogTitle = "";
         dialogBody = (
           <span>
-            Sign up to get updates about new features in hubs.
+            Sign up to get updates about new features in Hubs.
             <p />
             <form onSubmit={this.signUpForMailingList}>
               <div className="mailing-list-form">
