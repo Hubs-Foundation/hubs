@@ -1,31 +1,18 @@
 AFRAME.registerComponent("spawn-controller", {
-  schema: {
-    radius: { type: "number", default: 1 }
-  },
-
   init() {
-    const el = this.el;
-    const center = el.getAttribute("position");
+    const spawnPoints = document.querySelectorAll("[spawn-point]");
 
-    const angleRad = Math.random() * 2 * Math.PI;
-    const circlePoint = this.getPointOnCircle(this.data.radius, angleRad);
-    const worldPoint = {
-      x: circlePoint.x + center.x,
-      y: center.y,
-      z: circlePoint.z + center.z
-    };
-    el.setAttribute("position", worldPoint);
+    if (spawnPoints.length === 0) {
+      // Keep default position
+      return;
+    }
 
-    const angleDeg = angleRad * THREE.Math.RAD2DEG;
-    const angleToCenter = -1 * angleDeg + 90;
-    el.setAttribute("rotation", { x: 0, y: angleToCenter, z: 0 });
+    const spawnPointIndex = Math.round(spawnPoints.length * Math.random());
+    const spawnPoint = spawnPoints[spawnPointIndex];
 
-    el.object3D.updateMatrix();
-  },
-
-  getPointOnCircle(radius, angleRad) {
-    const x = Math.cos(angleRad) * radius;
-    const z = Math.sin(angleRad) * radius;
-    return { x: x, z: z };
+    this.el.object3D.position.copy(spawnPoint.object3D.position);
+    this.el.object3D.rotation.copy(spawnPoint.object3D.rotation);
   }
 });
+
+AFRAME.registerComponent("spawn-point", {});

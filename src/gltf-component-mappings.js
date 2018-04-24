@@ -16,6 +16,7 @@ AFRAME.GLTFModelPlus.registerComponent("scale-audio-feedback", "scale-audio-feed
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
 AFRAME.GLTFModelPlus.registerComponent("shape", "shape");
 AFRAME.GLTFModelPlus.registerComponent("visible", "visible");
+AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point");
 AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, componentName, componentData, gltfPath) => {
   if (componentData.src) {
     componentData.src = resolveURL(componentData.src, gltfPath);
