@@ -14,10 +14,7 @@
 }
 
 .entry-panel {
-  display: flex;
-  flex-direction: column;
-  flex: 10 1 auto;
-  justify-content: center;
+  overflow-y: scroll;
 
   &__screen-sharing {
     font-size: 1.4em;

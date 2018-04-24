@@ -587,27 +587,29 @@ class UIRoot extends Component {
     const entryPanel =
       this.state.entryStep === ENTRY_STEPS.start ? (
         <div className="entry-panel">
-          <TwoDEntryButton onClick={this.enter2D} />
-          {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
-            <GenericEntryButton onClick={this.enterVR} />
-          )}
-          {this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
-            <GearVREntryButton onClick={this.enterGearVR} />
-          )}
-          {this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
-            <DaydreamEntryButton
-              onClick={this.enterDaydream}
-              subtitle={
-                this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : ""
-              }
-            />
-          )}
-          {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
-            <div className="entry-panel__secondary" onClick={this.enterVR}>
-              <FormattedMessage id="entry.cardboard" />
-            </div>
-          )}
-          {screenSharingCheckbox}
+          <div>
+            <TwoDEntryButton onClick={this.enter2D} />
+            {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
+              <GenericEntryButton onClick={this.enterVR} />
+            )}
+            {this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
+              <GearVREntryButton onClick={this.enterGearVR} />
+            )}
+            {this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
+              <DaydreamEntryButton
+                onClick={this.enterDaydream}
+                subtitle={
+                  this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : ""
+                }
+              />
+            )}
+            {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
+              <div className="entry-panel__secondary" onClick={this.enterVR}>
+                <FormattedMessage id="entry.cardboard" />
+              </div>
+            )}
+            {screenSharingCheckbox}
+          </div>
         </div>
       ) : null;
 
