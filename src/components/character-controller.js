@@ -89,7 +89,8 @@ AFRAME.registerComponent("character-controller", {
     const rotationInvMatrix = new THREE.Matrix4();
     const pivotRotationMatrix = new THREE.Matrix4();
     const pivotRotationInvMatrix = new THREE.Matrix4();
-    const start = new THREE.Vector3();
+    const startPos = new THREE.Vector3();
+    const startScale = new THREE.Vector3();
 
     return function(t, dt) {
       const deltaSeconds = dt / 1000;
@@ -98,7 +99,8 @@ AFRAME.registerComponent("character-controller", {
       const distance = this.data.groundAcc * deltaSeconds;
       const rotationDelta = this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
 
-      start.copy(root.position);
+      startScale.copy(root.scale);
+      startPos.copy(root.position);
 
       // Other aframe components like teleport-controls set position/rotation/scale, not the matrix, so we need to make sure to compose them back into the matrix
       root.updateMatrix();
@@ -134,19 +136,13 @@ AFRAME.registerComponent("character-controller", {
       // Reapply playspace (player rig) translation
       root.applyMatrix(trans);
 
-      // @TODO this is really ugly, can't just set the position/rotation directly or they wont network
-      this.el.setAttribute("rotation", {
-        x: root.rotation.x * THREE.Math.RAD2DEG,
-        y: root.rotation.y * THREE.Math.RAD2DEG,
-        z: root.rotation.z * THREE.Math.RAD2DEG
-      });
+      // TODO: the above matrix trnsfomraitons introduce some floating point erros in scale, this reverts them to avoid spamming network with fake scale updates
+      root.scale.copy(startScale);
 
       this.pendingSnapRotationMatrix.identity(); // Revert to identity
 
       if (this.velocity.lengthSq() > EPS) {
-        this.setPositionOnNavMesh(start, root);
-      } else {
-        this.el.setAttribute("position", root.position);
+        this.setPositionOnNavMesh(startPos, root);
       }
     };
   })(),
