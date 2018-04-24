@@ -229,7 +229,7 @@ const config = {
         NODE_ENV: process.env.NODE_ENV,
         JANUS_SERVER: process.env.JANUS_SERVER,
         DEV_RETICULUM_SERVER: process.env.DEV_RETICULUM_SERVER,
-        ASSETS_SERVER: process.env.ASSETS_SERVER
+        ASSET_SERVER: process.env.ASSET_SERVER
       })
     })
   ]
