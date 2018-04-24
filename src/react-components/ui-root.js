@@ -69,6 +69,7 @@ class UIRoot extends Component {
     initialEnvironmentLoaded: PropTypes.bool,
     janusRoomId: PropTypes.number,
     roomUnavailableReason: PropTypes.string,
+    platformUnsupportedReason: PropTypes.string,
     hubName: PropTypes.string,
     occupantCount: PropTypes.number
   };
@@ -512,18 +513,9 @@ class UIRoot extends Component {
   };
 
   render() {
-    if (this.state.exited || this.props.roomUnavailableReason) {
+    if (this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason) {
       let subtitle = null;
-      if (this.props.roomUnavailableReason !== "closed") {
-        const exitSubtitleId = `exit.subtitle.${this.state.exited ? "exited" : this.props.roomUnavailableReason}`;
-        subtitle = (
-          <div>
-            <FormattedMessage id={exitSubtitleId} />
-            <p />
-            You can also <a href="/">create a new room</a>.
-          </div>
-        );
-      } else {
+      if (this.props.roomUnavailableReason === "closed") {
         // TODO i18n, due to links and markup
         subtitle = (
           <div>
@@ -538,6 +530,33 @@ class UIRoot extends Component {
             <p />
             If you&apos;d like to run your own server, hubs&apos;s source code is available on{" "}
             <a href="https://github.com/mozilla/hubs">Github</a>.
+          </div>
+        );
+      } else if (this.props.platformUnsupportedReason === "no_data_channels") {
+        // TODO i18n, due to links and markup
+        subtitle = (
+          <div>
+            Your browser does not support{" "}
+            <a href="https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel" rel="noreferrer noopener">
+              WebRTC Data Channels
+            </a>, which is required to use Hubs.
+            <p />
+            You can <a href="https://firefox.com">Download Firefox</a>, a browser that protects your privacy and works
+            great with Hubs.
+          </div>
+        );
+      } else {
+        const reason = this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
+        const exitSubtitleId = `exit.subtitle.${this.state.exited ? "exited" : reason}`;
+        subtitle = (
+          <div>
+            <FormattedMessage id={exitSubtitleId} />
+            <p />
+            {this.props.roomUnavailableReason && (
+              <div>
+                You can also <a href="/">create a new room</a>.
+              </div>
+            )}
           </div>
         );
       }
