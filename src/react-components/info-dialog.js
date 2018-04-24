@@ -56,7 +56,7 @@ class InfoDialog extends Component {
 
     const payload = {
       email: this.state.mailingListEmail,
-      newsletters: "mixed-reality",
+      newsletters: "hubs",
       privacy: true,
       fmt: "H",
       source_url: document.location.href
