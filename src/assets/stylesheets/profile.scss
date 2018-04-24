@@ -35,7 +35,7 @@
     min-height: 300px;
     max-height: 1000px;
     height: 90%;
-    overflow-y: scroll;
+    overflow-y: auto;
 
     &__links {
       display: flex;

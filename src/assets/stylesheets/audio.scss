@@ -1,6 +1,6 @@
 .audio-setup-panel {
   text-align: center;
-  overflow-y: scroll;
+  overflow-y: auto;
   
   &__enter-button {
     @extend %bottom-button;
