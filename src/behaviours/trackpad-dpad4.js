@@ -10,12 +10,20 @@ function trackpad_dpad4(el, outputPrefix) {
   this.unpress = this.unpress.bind(this);
   this.hapticIntensity = "low";
   this.centerRadius = 0.6;
-  el.addEventListener("axismove", this.emitDPad4);
-  el.addEventListener("trackpaddown", this.press);
-  el.addEventListener("trackpadup", this.unpress);
+  this.el = el;
 }
 
 trackpad_dpad4.prototype = {
+  addEventListeners: function() {
+    this.el.addEventListener("axismove", this.emitDPad4);
+    this.el.addEventListener("trackpaddown", this.press);
+    this.el.addEventListener("trackpadup", this.unpress);
+  },
+  removeEventListeners: function() {
+    this.el.removeEventListener("axismove", this.emitDPad4);
+    this.el.removeEventListener("trackpaddown", this.press);
+    this.el.removeEventListener("trackpadup", this.unpress);
+  },
   press: function() {
     this.pressed = true;
   },

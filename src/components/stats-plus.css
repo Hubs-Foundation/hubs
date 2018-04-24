@@ -11,16 +11,18 @@
 }
 
 :global(.rs-fps-counter) {
+  font-family: monospace;
   cursor: pointer;
   position: absolute;
-  bottom: 0;
-  left: 0;
-  padding: 8px;
+  top: 0;
+  right: 0;
+  padding: 8px 12px;
   color: #aaa;
   font-size: 10px;
 }
 
-:global(.rs-mobile) {
-  bottom: auto;
-  top: 0;
+:global(.rs-base) {
+  right: 10px;
+  left: auto;
+  top: 10px;
 }

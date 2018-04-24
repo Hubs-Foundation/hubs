@@ -5,7 +5,7 @@ const EPS = 10e-6;
 // Does not have any type of collisions yet.
 AFRAME.registerComponent("character-controller", {
   schema: {
-    groundAcc: { default: 7 },
+    groundAcc: { default: 5.5 },
     easing: { default: 10 },
     pivot: { type: "selector" },
     snapRotationDegrees: { default: THREE.Math.DEG2RAD * 45 },
@@ -13,6 +13,8 @@ AFRAME.registerComponent("character-controller", {
   },
 
   init: function() {
+    this.navGroup;
+    this.navNode;
     this.velocity = new THREE.Vector3(0, 0, 0);
     this.accelerationInput = new THREE.Vector3(0, 0, 0);
     this.pendingSnapRotationMatrix = new THREE.Matrix4();
@@ -21,6 +23,7 @@ AFRAME.registerComponent("character-controller", {
     this.snapRotateLeft = this.snapRotateLeft.bind(this);
     this.snapRotateRight = this.snapRotateRight.bind(this);
     this.setAngularVelocity = this.setAngularVelocity.bind(this);
+    this.handleTeleport = this.handleTeleport.bind(this);
   },
 
   update: function() {
@@ -34,6 +37,7 @@ AFRAME.registerComponent("character-controller", {
     eventSrc.addEventListener("rotateY", this.setAngularVelocity);
     eventSrc.addEventListener("snap_rotate_left", this.snapRotateLeft);
     eventSrc.addEventListener("snap_rotate_right", this.snapRotateRight);
+    eventSrc.addEventListener("teleported", this.handleTeleport);
   },
 
   pause: function() {
@@ -42,6 +46,7 @@ AFRAME.registerComponent("character-controller", {
     eventSrc.removeEventListener("rotateY", this.setAngularVelocity);
     eventSrc.removeEventListener("snap_rotate_left", this.snapRotateLeft);
     eventSrc.removeEventListener("snap_rotate_right", this.snapRotateRight);
+    eventSrc.removeEventListener("teleported", this.handleTeleport);
     this.reset();
   },
 
@@ -69,6 +74,10 @@ AFRAME.registerComponent("character-controller", {
     this.pendingSnapRotationMatrix.copy(this.rightRotationMatrix);
   },
 
+  handleTeleport: function(event) {
+    this.setPositionOnNavMesh(event.detail.oldPosition, this.el.object3D);
+  },
+
   tick: (function() {
     const move = new THREE.Matrix4();
     const trans = new THREE.Matrix4();
@@ -81,7 +90,6 @@ AFRAME.registerComponent("character-controller", {
     const pivotRotationMatrix = new THREE.Matrix4();
     const pivotRotationInvMatrix = new THREE.Matrix4();
     const start = new THREE.Vector3();
-    let navGroup, navNode;
 
     return function(t, dt) {
       const deltaSeconds = dt / 1000;
@@ -135,19 +143,24 @@ AFRAME.registerComponent("character-controller", {
 
       this.pendingSnapRotationMatrix.identity(); // Revert to identity
 
-      //copied from aframe-extras movement-controls
-      const nav = this.el.sceneEl.systems.nav;
-      if (nav.navMesh && this.velocity.lengthSq() > EPS) {
-        if (!navGroup) {
-          navGroup = nav.getGroup(start);
-        }
-        navNode = navNode || nav.getNode(start, navGroup);
-        navNode = nav.clampStep(start, root.position, navGroup, navNode, root.position);
+      if (this.velocity.lengthSq() > EPS) {
+        this.setPositionOnNavMesh(start, root);
       } else {
         this.el.setAttribute("position", root.position);
       }
     };
   })(),
+
+  setPositionOnNavMesh: function(position, object3D) {
+    const nav = this.el.sceneEl.systems.nav;
+    if (nav.navMesh) {
+      if (!this.navGroup) {
+        this.navGroup = nav.getGroup(position);
+      }
+      this.navNode = this.navNode || nav.getNode(position, this.navGroup);
+      this.navNode = nav.clampStep(position, object3D.position, this.navGroup, this.navNode, object3D.position);
+    }
+  },
 
   updateVelocity: function(dt) {
     const data = this.data;

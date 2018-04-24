@@ -16,6 +16,10 @@
     margin: 1em 0;
   }
 
+  &__form {
+    height: 100%;
+  }
+
   &__box {
     border-radius: 8px;
     display: flex;
@@ -27,7 +31,21 @@
     width: 60vw;
     min-width: 300px;
     max-width: 700px;
-    height: 500px;
+    min-height: 300px;
+    max-height: 1000px;
+    height: 90%;
+
+    &__links {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin: 16px;
+
+      a {
+	margin: 0px 12px;
+	color: $light-text;
+      }
+    }
 
     &--darkened {
       background-color: $darkest-transparent;
@@ -58,31 +76,6 @@
     margin: 0.5em 0;
   }
 
-  &__terms {
-    margin-bottom: 16px;
-
-    &__checkbox {
-      @extend %checkbox;
-      vertical-align: unset;
-    }
-    &__checkbox:checked {
-      @extend %checkbox-checked;
-    }
-
-    &__text {
-      display: inline-block;
-      max-width: 20em;
-    }
-
-    &__link {
-      color: white;
-    }
-
-    &__link:visited {
-      color: grey;
-    }
-  }
-
   &__form-submit {
     @extend %bottom-button;
     margin: 0;
@@ -93,6 +86,23 @@
   display: flex;
   flex: 1 1 40px;
   width: 100%;
+  justify-content: space-between;
+  min-height: 80px;
+
+  &__menu-buttons {
+    display: flex;
+    margin: 0 20px;
+
+    &__menu-button {
+      @extend %fa-icon-button;
+      margin-left: 16px;
+
+      &__icon {
+	@extend %fa-icon-button-icon;
+	background: transparent;
+      }
+    }
+  }
 
   &__icon {
     cursor: pointer;
@@ -102,13 +112,15 @@
   }
 
   &__profile_display_name {
+    margin-left: 16px;
     cursor: pointer;
-    flex: 6 1 auto;
     font-size: 1.2em;
     line-height: 50px;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
   }
 
   &__app_name {

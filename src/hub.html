@@ -5,7 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="<%= ORIGIN_TRIAL_EXPIRES %>" content="<%= ORIGIN_TRIAL_TOKEN %>">
-    <title>moz://a duck</title>
+    <link rel="shortcut icon" type="image/png" href="/favicon.ico"/>
+    <title>Hubs | A new way to get together online</title>
     <link href="https://fonts.googleapis.com/css?family=Zilla+Slab:300,300i,400,400i,700" rel="stylesheet">
 
     <% if(NODE_ENV === "production") { %>
@@ -24,8 +25,6 @@
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         freeze-controller="toggleEvent: action_freeze"
         personal-space-bubble="debug: false;"
-
-        app-mode-input-mappings="modes: default, hud; actionSets: default, hud;"
         >
 
         <a-assets>
@@ -95,6 +94,7 @@
                               <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility> </a-entity>
                               <a-entity billboard>
                                   <a-entity
+                                      class="ui"
                                       block-button
                                       visible-while-frozen
                                       text-button="haptic:#player-right-controller;
@@ -154,12 +154,12 @@
             </template>
 
             <a-mixin id="super-hands"
-                super-hands="colliderEvent: collisions; colliderEventProperty: els;
+                super-hands="
+                    colliderEvent: collisions; colliderEventProperty: els;
                     colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
                     grabStartButtons: action_grab; grabEndButtons: action_release;
                     stretchStartButtons: action_grab; stretchEndButtons: action_release;
-                    dragDropStartButtons: action_grab; dragDropEndButtons: action_release;
-                    "
+                    dragDropStartButtons: action_grab; dragDropEndButtons: action_release;"
                 collision-filter="collisionForces: false"
                 physics-collider
             ></a-mixin>
@@ -178,19 +178,33 @@
         ></a-entity>
 
         <a-entity
-            id="super-cursor"
-            super-cursor="cursor: #3d-cursor; camera: #player-camera;"
-            raycaster="objects: .collidable, .interactable; far: 10;"
-        >
-            <a-sphere
-                id="3d-cursor"
-                radius="0.02"
-                static-body="shape: sphere;"
-                mixin="super-hands"
-                segments-height="9"
-                segments-width="9"
-            ></a-sphere>  
-        </a-entity>
+            id="cursor-controller"
+            cursor-controller="
+                cursor: #cursor; 
+                camera: #player-camera; 
+                playerRig: #player-rig;
+                physicalHandSelector: #right-super-hand;
+                gazeTeleportControls: #gaze-teleport;"
+            raycaster="objects: .collidable, .interactable, .ui; far: 3;"
+            line="visible: false; color: white; opacity: 0.2;"
+        ></a-entity>
+
+        <a-sphere
+            id="cursor"
+            material="depthTest: false; opacity:0.9;"
+            radius="0.02"
+            static-body="shape: sphere;"
+            collision-filter="collisionForces: false"
+            super-hands="
+                colliderEvent: raycaster-intersection; colliderEventProperty: els;
+                colliderEndEvent: raycaster-intersection-cleared; colliderEndEventProperty: clearedEls;
+                grabStartButtons: cursor-grab; grabEndButtons: cursor-release;
+                stretchStartButtons: cursor-grab; stretchEndButtons: cursor-release;
+                dragDropStartButtons: cursor-grab; dragDropEndButtons: cursor-release;"
+            segments-height="9"
+            segments-width="9"
+            event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"
+        ></a-sphere> 
 
         <!-- Player Rig -->
         <a-entity
@@ -200,13 +214,11 @@
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
-            app-mode-toggle-playing__character-controller="mode: hud; invert: true;"
-            app-mode-toggle-playing__wasd-to-analog2d="mode: hud; invert: true;"
             player-info
         >
-
             <a-entity
                 id="player-hud"
+                class="ui"
                 hud-controller="head: #player-camera;"
                 vr-mode-toggle-visibility
                 vr-mode-toggle-playing__hud-controller
@@ -215,7 +227,7 @@
                     <a-rounded height="0.13" width="0.48" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
                     <a-image icon-button="image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover" scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="hud mic" material="alphaTest:0.1;"></a-image>
                     <a-image icon-button="image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover" scale="0.2 0.2 0.2" position="0 0 0.001" class="hud freeze"></a-image>
-                    <a-image icon-button="image: #bubble-off; hoverImage: #bubble-off-hover; activeImage: #bubble-on; activeHoverImage: #bubble-on-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="hud mic" material="alphaTest:0.1;"></a-image>
+                    <a-image icon-button="image: #bubble-off; hoverImage: #bubble-off-hover; activeImage: #bubble-on; activeHoverImage: #bubble-on-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="hud bubble" material="alphaTest:0.1;"></a-image>
                 </a-entity>
             </a-entity>
 
@@ -225,7 +237,21 @@
                 camera
                 position="0 1.6 0"
                 personal-space-bubble="radius: 0.4"
-            ></a-entity>
+            >
+                <a-entity
+                    id="gaze-teleport"
+                    position = "0.15 0 0"
+                    teleport-controls="
+                    cameraRig: #player-rig; 
+                    teleportOrigin: #player-camera; 
+                    button: cursor-teleport_; 
+                    collisionEntities: [nav-mesh];
+                    drawIncrementally: true;
+                    incrementalDrawMs: 600;
+                    hitOpacity: 0.3;
+                    missOpacity: 0.2;"
+                ></a-entity>
+            </a-entity>
 
             <a-entity
                 id="player-left-controller"
@@ -235,9 +261,12 @@
                 teleport-controls="
                     cameraRig: #player-rig; 
                     teleportOrigin: #player-camera; 
-                    button: action_teleport_; 
-                    collisionEntities: [nav-mesh]"
-                app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;"
+                    button: cursor-teleport_; 
+                    collisionEntities: [nav-mesh];
+                    drawIncrementally: true;
+                    incrementalDrawMs: 600;
+                    hitOpacity: 0.3;
+                    missOpacity: 0.2;"
                 haptic-feedback
             ></a-entity>
 
@@ -249,16 +278,13 @@
                 teleport-controls="
                     cameraRig: #player-rig; 
                     teleportOrigin: #player-camera; 
-                    button: action_teleport_; 
-                    collisionEntities: [nav-mesh]"
+                    button: cursor-teleport_; 
+                    collisionEntities: [nav-mesh];
+                    drawIncrementally: true;
+                    incrementalDrawMs: 600;
+                    hitOpacity: 0.3;
+                    missOpacity: 0.2;"
                 haptic-feedback
-                raycaster="objects:.hud; showLine: true; far: 2;"
-                cursor="fuse: false; downEvents: action_ui_select_down; upEvents: action_ui_select_up;"
-
-                app-mode-toggle-playing__teleport-controls="mode: hud; invert: true;"
-                app-mode-toggle-playing__raycaster="mode: hud;"
-                app-mode-toggle-playing__cursor="mode: hud;"
-                app-mode-toggle-attribute__line="mode: hud; property: visible;"
             ></a-entity>
 
             <a-entity gltf-model-plus="inflate: true;" class="model">
@@ -286,7 +312,10 @@
                 <template data-selector=".LeftHand">
                     <a-entity bone-visibility>
                         <a-entity
-                            event-repeater="events: action_grab, action_release; eventSource: #player-left-controller"
+                            id="left-super-hand"
+                            event-repeater="
+                            events: action_grab, action_release, action_primary_down, action_primary_up; 
+                            eventSource: #player-left-controller"
                             static-body="shape: sphere; sphereRadius: 0.02"
                             mixin="super-hands"
                             position="0 0.05 0"
@@ -297,7 +326,10 @@
                 <template data-selector=".RightHand">
                     <a-entity bone-visibility>
                         <a-entity
-                            event-repeater="events: action_grab, action_release; eventSource: #player-right-controller"
+                            id="right-super-hand"
+                            event-repeater="
+                            events: action_grab, action_release, action_primary_down, action_primary_up; 
+                            eventSource: #player-right-controller"
                             static-body="shape: sphere; sphereRadius: 0.02"
                             mixin="super-hands"
                             position="0 -0.05 0"
@@ -320,7 +352,6 @@
             id="environment-root" 
             nav-mesh-helper
             static-body="shape: none;"
-            class="collidable"
         ></a-entity>
 
         <a-entity
