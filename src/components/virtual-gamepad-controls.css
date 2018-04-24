@@ -9,6 +9,18 @@
   right: 50%;
 }
 
+:local(.touchZone.tutorial) {
+  display: flex;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.9);
+  align-items: center;
+  justify-content: center;
+}
+
+:local(.touchZone.left.tutorial) {
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 :local(.touchZone.right) {
   left: 50%;
   right: 0;
