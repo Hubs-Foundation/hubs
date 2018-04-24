@@ -39,9 +39,10 @@ AFRAME.registerComponent("hand-pose", {
     if (
       !this.networkedAvatar ||
       !this.networkedAvatar.data ||
-      !this.networkedAvatar.data[`${this.id}_hand_pose`] !== this.pose
-    )
+      this.networkedAvatar.data[`${this.id}_hand_pose`] === this.pose
+    ) {
       return;
+    }
 
     this.animatePose(NETWORK_POSES[this.pose], NETWORK_POSES[this.networkedAvatar.data[`${this.id}_hand_pose`]]);
     this.pose = this.networkedAvatar.data[`${this.id}_hand_pose`];
