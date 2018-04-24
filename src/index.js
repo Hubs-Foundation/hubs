@@ -1,8 +1,17 @@
 import "./assets/stylesheets/index.scss";
 import React from "react";
 import ReactDOM from "react-dom";
-import HomeRoot from "./react-components/home-root";
 import registerTelemetry from "./telemetry";
+import HomeRoot from "./react-components/home-root";
+import InfoDialog from "./react-components/info-dialog.js";
+import queryString from "query-string";
 
+const qs = queryString.parse(location.search);
+
+console.log(qs.list_signup);
 registerTelemetry();
-ReactDOM.render(<HomeRoot />, document.getElementById("home-root"));
+
+ReactDOM.render(
+  <HomeRoot dialogType={qs.list_signup ? InfoDialog.dialogTypes.updates : null} />,
+  document.getElementById("home-root")
+);
