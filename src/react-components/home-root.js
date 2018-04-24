@@ -184,7 +184,7 @@ class HomeRoot extends Component {
                   </div>
                   <div>
                     <FormattedMessage id="home.made_with_love" />
-                    <span style={{ fontWeight: "bold", color: "white" }}>moz://a</span>
+                    <span style={{ fontWeight: "bold", color: "white" }}>Mozilla</span>
                   </div>
                 </div>
               </div>
