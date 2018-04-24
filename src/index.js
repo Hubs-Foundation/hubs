@@ -8,7 +8,6 @@ import queryString from "query-string";
 
 const qs = queryString.parse(location.search);
 
-console.log(qs.list_signup);
 registerTelemetry();
 
 ReactDOM.render(
