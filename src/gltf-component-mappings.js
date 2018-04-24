@@ -10,6 +10,7 @@ AFRAME.GLTFModelPlus.registerComponent("hide-when-quality", "hide-when-quality")
 AFRAME.GLTFModelPlus.registerComponent("light", "light");
 AFRAME.GLTFModelPlus.registerComponent("skybox", "skybox");
 AFRAME.GLTFModelPlus.registerComponent("layers", "layers");
+AFRAME.GLTFModelPlus.registerComponent("shadow", "shadow");
 AFRAME.GLTFModelPlus.registerComponent("xr", "xr");
 AFRAME.GLTFModelPlus.registerComponent("water", "water");
 AFRAME.GLTFModelPlus.registerComponent("scale-audio-feedback", "scale-audio-feedback");
