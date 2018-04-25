@@ -94,7 +94,7 @@ const config = {
         joystick_dpad4_pressed_west_down: { right: "snap_rotate_left" },
         joystick_dpad4_pressed_east_down: { right: "snap_rotate_right" },
         trackpaddown: {right: "action_primary_down"},
-        trackpadup: { right: "action_primary_up" },
+        trackpadup: { right: "action_primary_up"},
         menudown: "thumb_down",
         menuup: "thumb_up",
         gripdown: ["action_grab", "middle_ring_pinky_down"],
@@ -103,7 +103,7 @@ const config = {
         trackpadtouchend: "thumb_up",
         triggerdown: ["action_grab", "index_down"],
         triggerup: ["action_release", "index_up"],
-        "axismove.reverseY": { left: "move" },
+        "axismove.reverseY": { left: "move" }
       },
       "daydream-controls": {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",
