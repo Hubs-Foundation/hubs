@@ -194,9 +194,20 @@ class HubCreatePanel extends Component {
                   />
                   <div className="create-panel__form__environment__picker__labels">
                     <div className="create-panel__form__environment__picker__labels__header">
-                      <span className="create-panel__form__environment__picker__labels__header__title">
-                        {environmentTitle}
-                      </span>
+                      {meta.url ? (
+                        <a
+                          href={meta.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="create-panel__form__environment__picker__labels__header__title"
+                        >
+                          {environmentTitle}
+                        </a>
+                      ) : (
+                        <span className="create-panel__form__environment__picker__labels__header__title">
+                          environmentTitle
+                        </span>
+                      )}
                       {environmentAuthor &&
                         environmentAuthor.name &&
                         (environmentAuthor.url ? (

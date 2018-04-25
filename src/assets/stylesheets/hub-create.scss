@@ -162,7 +162,9 @@
 	  width: 100%;
 	  height: 100%;
 	  top: 0;
-	  left: 0;
+    left: 0;
+    background: rgb(2,0,36);
+    background: linear-gradient(0deg, rgba(2,0,36,0) 0%, rgba(1,0,11,0.2189076314119398) 60%, rgba(0,0,0,0.5242297602634804) 100%); 
 
 	  &__footer {
 	    position: absolute;
