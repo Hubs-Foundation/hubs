@@ -11,6 +11,7 @@
 
   &__help-icon {
     @extend %fa-icon-button;
+    pointer-events: auto;
     position: absolute;
     top: 0px;
     left: 14px;
@@ -18,7 +19,6 @@
     &__icon {
       @extend %fa-icon-button-icon;
       background: rgba(33, 33, 33, 0.5);
-      pointer-events: auto;
       border-radius: 36px;
       display: inline-block;
       font-size: 22px;
