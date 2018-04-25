@@ -151,7 +151,11 @@ AFRAME.registerComponent("water", {
     normalMap: { type: "asset", default: "#water-normal-map" }
   },
   init() {
-    const waterGeometry = new THREE.PlaneBufferGeometry(800, 800);
+    const waterMesh = this.el.getObject3D("mesh");
+    const waterGeometry = waterMesh.geometry;
+
+    // Render THREE.Water shader instead of THREE.Mesh
+    waterMesh.visible = false;
 
     const waterNormals = new THREE.Texture(this.data.normalMap);
     waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
@@ -223,5 +227,7 @@ AFRAME.registerComponent("water", {
 
   remove() {
     this.el.removeObject3D("water");
+    const waterMesh = this.el.getObject3D("mesh");
+    waterMesh.visible = true;
   }
 });
