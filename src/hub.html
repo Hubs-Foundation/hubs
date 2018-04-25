@@ -2,6 +2,8 @@
 <html>
 
 <head>
+    <!-- DO NOT REMOVE/EDIT THIS COMMENT - HUB_META_TAGS -->
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="<%= ORIGIN_TRIAL_EXPIRES %>" content="<%= ORIGIN_TRIAL_TOKEN %>">
@@ -28,7 +30,7 @@
 
     <a-scene
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
-        physics
+        physics="gravity: -6;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         freeze-controller="toggleEvent: action_freeze"
         personal-space-bubble="debug: false;"
@@ -62,6 +64,9 @@
 
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
             <a-asset-item id="interactable-duck" response-type="arraybuffer" src="./assets/interactables/duck/DuckyMesh.glb"></a-asset-item>
+
+            <a-asset-item id="quack" src="./assets/sfx/quack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="specialquack" src="./assets/sfx/specialquack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
 
             <img id="water-normal-map" src="./assets/waternormals.jpg">
 
@@ -136,6 +141,13 @@
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
                             >
+                            <a-cylinder
+                                static-body
+                                radius="0.13"
+                                height="0.2"
+                                position="0 0.07 0.05"
+                                visible="false"
+                            ></a-cylinder>
                             </a-entity>
                         </template>
 
@@ -155,10 +167,11 @@
                     gltf-model-plus="src: #interactable-duck; inflate: true;"
                     scale="2 2 2"
                     class="interactable" 
-                    super-networked-interactable="counter: #counter; mass: 5;"
-                    body="type: dynamic; shape: none; mass: 5;"
+                    super-networked-interactable="counter: #counter; mass: 1;"
+                    body="type: dynamic; shape: none; mass: 1;"
                     grabbable
                     stretchable="useWorldPosition: true;"
+                    duck
                 ></a-entity>
             </template>
 
@@ -176,15 +189,6 @@
 
         <!-- Interactables -->
         <a-entity id="counter" networked-counter="max: 3; ttl: 120"></a-entity>
-
-        <a-entity 
-            gltf-model-plus="src: #interactable-duck"
-            scale="2 2 2"
-            class="interactable" 
-            super-spawner="template: #interactable-template;" 
-            position="2.9 1.2 0" 
-            body="mass: 0; type: static; shape: box;"
-        ></a-entity>
 
         <a-entity
             id="cursor-controller"
@@ -219,7 +223,7 @@
         <a-entity
             id="player-rig"
             networked="template: #remote-avatar-template; attachTemplateToLocal: false;"
-            spawn-controller="radius: 4;"
+            spawn-controller="loadedEvent: bundleloaded; target: #environment-root"
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
@@ -228,16 +232,18 @@
         >
             <a-entity
                 id="player-hud"
-                class="ui"
                 hud-controller="head: #player-camera;"
                 vr-mode-toggle-visibility
                 vr-mode-toggle-playing__hud-controller
             >
                 <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="30 0 0">
                     <a-rounded height="0.13" width="0.48" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
-                    <a-image icon-button="image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover" scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="hud mic" material="alphaTest:0.1;"></a-image>
-                    <a-image icon-button="image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover" scale="0.2 0.2 0.2" position="0 0 0.001" class="hud freeze"></a-image>
-                    <a-image icon-button="image: #bubble-off; hoverImage: #bubble-off-hover; activeImage: #bubble-on; activeHoverImage: #bubble-on-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="hud bubble" material="alphaTest:0.1;"></a-image>
+                    <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover" scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="ui hud mic" material="alphaTest:0.1;"></a-image>
+                    <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover" scale="0.2 0.2 0.2" position="0 0 0.005" class="ui hud freeze"></a-image>
+                    <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Enable Bubble; activeTooltipText: Disable Bubble; image: #bubble-off; hoverImage: #bubble-off-hover; activeImage: #bubble-on; activeHoverImage: #bubble-on-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="ui hud bubble" material="alphaTest:0.1;"></a-image>
+                    <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
+                        <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" ></a-entity>
+                    </a-rounded>
                 </a-entity>
             </a-entity>
 
@@ -278,7 +284,11 @@
                     hitOpacity: 0.3;
                     missOpacity: 0.2;"
                 haptic-feedback
-            ></a-entity>
+                body="type: static; shape: none;"
+                mixin="super-hands"
+                controls-shape-offset
+            >
+            </a-entity>
 
             <a-entity
                 id="player-right-controller"
@@ -295,6 +305,9 @@
                     hitOpacity: 0.3;
                     missOpacity: 0.2;"
                 haptic-feedback
+                body="type: static; shape: none;"
+                mixin="super-hands"
+                controls-shape-offset
             ></a-entity>
 
             <a-entity gltf-model-plus="inflate: true;"
@@ -321,42 +334,15 @@
                 </template>
 
                 <template data-selector=".LeftHand">
-                    <a-entity bone-visibility>
-                        <a-entity
-                            id="left-super-hand"
-                            event-repeater="
-                            events: action_grab, action_release, action_primary_down, action_primary_up; 
-                            eventSource: #player-left-controller"
-                            static-body="shape: sphere; sphereRadius: 0.02"
-                            mixin="super-hands"
-                            position="0 0.05 0"
-                        ></a-entity>
-                    </a-entity>
+                    <a-entity bone-visibility></a-entity>
                 </template>
 
                 <template data-selector=".RightHand">
-                    <a-entity bone-visibility>
-                        <a-entity
-                            id="right-super-hand"
-                            event-repeater="
-                            events: action_grab, action_release, action_primary_down, action_primary_up; 
-                            eventSource: #player-right-controller"
-                            static-body="shape: sphere; sphereRadius: 0.02"
-                            mixin="super-hands"
-                            position="0 -0.05 0"
-                        ></a-entity>
-                    </a-entity>
+                    <a-entity bone-visibility></a-entity>
                 </template>
 
             </a-entity>
         </a-entity>
-
-        <!-- Lights -->
-        <a-entity
-            hide-when-quality="low"
-            light="type: directional; color: #F9FFCE; intensity: 0.6"
-            position="0.002 5.231 -15.3"
-        ></a-entity>
 
         <!-- Environment -->
         <a-entity 
@@ -364,24 +350,6 @@
             nav-mesh-helper
             static-body="shape: none;"
         ></a-entity>
-
-        <a-entity
-            id="skybox"
-            scale="8000 8000 8000"
-            skybox="azimuth:0.280; inclination:0.440"
-            light="type: ambient; color: #FFF"
-            layers="reflection:true"
-            xr="ar: false"
-        ></a-entity>
-
-        <a-entity
-            id="water"
-            water="forceMobile: true; normalMap:#water-normal-map"
-            rotation="-90 0 0"
-            position="0 -88.358 -332.424"
-            xr="ar: false"
-        ></a-entity>
-
     </a-scene>
 
     <div id="ui-root"></div>

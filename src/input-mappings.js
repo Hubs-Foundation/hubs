@@ -26,6 +26,9 @@ const config = {
       "vive-controls": {
         trackpad: "trackpad_dpad4"
       },
+      "windows-motion-controls": {
+        joystick: "joystick_dpad4"
+      },
       "daydream-controls": {
         trackpad: "trackpad_dpad4"
       },
@@ -79,6 +82,28 @@ const config = {
         "axismove.reverseY": { left: "move" },
         abuttondown: "action_primary_down",
         abuttonup: "action_primary_up"
+      },
+      "windows-motion-controls": {
+        joystick_dpad4_west: {
+          right: "snap_rotate_left"
+        },
+        joystick_dpad4_east: {
+          right: "snap_rotate_right"
+        },
+        "trackpad.pressedmove": { left: "move" },
+        joystick_dpad4_pressed_west_down: { right: "snap_rotate_left" },
+        joystick_dpad4_pressed_east_down: { right: "snap_rotate_right" },
+        trackpaddown: { right: "action_primary_down" },
+        trackpadup: { right: "action_primary_up" },
+        menudown: "thumb_down",
+        menuup: "thumb_up",
+        gripdown: ["action_grab", "middle_ring_pinky_down"],
+        gripup: ["action_release", "middle_ring_pinky_up"],
+        trackpadtouchstart: "thumb_down",
+        trackpadtouchend: "thumb_up",
+        triggerdown: ["action_grab", "index_down"],
+        triggerup: ["action_release", "index_up"],
+        "axismove.reverseY": { left: "move" }
       },
       "daydream-controls": {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",
