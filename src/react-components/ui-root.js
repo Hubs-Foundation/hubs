@@ -249,17 +249,13 @@ class UIRoot extends Component {
   };
 
   performDirectEntryFlow = async enterInVR => {
-    if (mobiledetect.mobile() && !enterInVR && screenfull.enabled) {
-      screenfull.request();
-    }
-
     this.setState({ enterInVR });
 
     const hasGrantedMic = await this.hasGrantedMicPermissions();
 
     if (hasGrantedMic) {
-      this.beginAudioSetup();
       await this.setMediaStreamToDefault();
+      this.beginAudioSetup();
     } else {
       this.setState({ entryStep: ENTRY_STEPS.mic_grant });
     }
@@ -409,7 +405,11 @@ class UIRoot extends Component {
         // the css renderer to keep up.
         this.micLevelMovingAverage.push(Date.now(), level * multiplier);
         const average = this.micLevelMovingAverage.movingAverage();
-        this.setState({ micLevel: average });
+        this.setState(state => {
+          if (Math.abs(average - state.micLevel) > 0.0001) {
+            return { micLevel: average };
+          }
+        });
       }, 50);
 
       const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForMediaStream(mediaStream));
@@ -490,6 +490,10 @@ class UIRoot extends Component {
   };
 
   onAudioReadyButton = () => {
+    if (mobiledetect.mobile() && !this.state.enterInVR && screenfull.enabled) {
+      screenfull.request();
+    }
+
     this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.props.janusRoomId);
 
     const mediaStream = this.state.mediaStream;
@@ -638,34 +642,41 @@ class UIRoot extends Component {
       ) : null;
 
     const micPanel =
-      this.state.entryStep === ENTRY_STEPS.mic_grant || this.state.entryStep == ENTRY_STEPS.mic_granted ? (
+      this.state.entryStep === ENTRY_STEPS.mic_grant || this.state.entryStep === ENTRY_STEPS.mic_granted ? (
         <div className="mic-grant-panel">
-          <div className="mic-grant-panel__title">
-            <FormattedMessage
-              id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-title" : "audio.granted-title"}
-            />
+          <div className="mic-grant-panel__grant-container">
+            <div className="mic-grant-panel__title">
+              <FormattedMessage
+                id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-title" : "audio.granted-title"}
+              />
+            </div>
+            <div className="mic-grant-panel__subtitle">
+              <FormattedMessage
+                id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-subtitle" : "audio.granted-subtitle"}
+              />
+            </div>
+            <div className="mic-grant-panel__button-container">
+              {this.state.entryStep == ENTRY_STEPS.mic_grant ? (
+                <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
+                  <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
+                </button>
+              ) : (
+                <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
+                  <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
+                </button>
+              )}
+            </div>
           </div>
-          <div className="mic-grant-panel__subtitle">
-            <FormattedMessage
-              id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-subtitle" : "audio.granted-subtitle"}
-            />
-          </div>
-          <div className="mic-grant-panel__button-container">
-            {this.state.entryStep == ENTRY_STEPS.mic_grant ? (
-              <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
-                <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
-              </button>
-            ) : (
-              <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
-                <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
-              </button>
-            )}
-          </div>
-          {this.state.entryStep == ENTRY_STEPS.mic_granted && (
-            <button className="mic-grant-panel__next" onClick={this.onMicGrantButton}>
+          <div className="mic-grant-panel__next-container">
+            <button
+              className={classNames("mic-grant-panel__next", {
+                invisible: this.state.entryStep === ENTRY_STEPS.mic_grant
+              })}
+              onClick={this.onMicGrantButton}
+            >
               <FormattedMessage id="audio.granted-next" />
             </button>
-          )}
+          </div>
         </div>
       ) : null;
 
@@ -678,100 +689,104 @@ class UIRoot extends Component {
     const audioSetupPanel =
       this.state.entryStep === ENTRY_STEPS.audio_setup ? (
         <div className="audio-setup-panel">
-          <div className="audio-setup-panel__title">
-            <FormattedMessage id="audio.title" />
-          </div>
-          <div className="audio-setup-panel__subtitle">
-            {(mobiledetect.mobile() || this.state.enterInVR) && (
-              <FormattedMessage id={mobiledetect.mobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop"} />
-            )}
-          </div>
-          <div className="audio-setup-panel__levels">
-            <div className="audio-setup-panel__levels__icon">
-              <img
-                src="../assets/images/level_background.png"
-                srcSet="../assets/images/level_background@2x.png 2x"
-                className="audio-setup-panel__levels__icon-part"
-              />
-              <img
-                src="../assets/images/level_fill.png"
-                srcSet="../assets/images/level_fill@2x.png 2x"
-                className="audio-setup-panel__levels__icon-part"
-                style={micClip}
-              />
-              {this.state.audioTrack ? (
-                <img
-                  src="../assets/images/mic_level.png"
-                  srcSet="../assets/images/mic_level@2x.png 2x"
-                  className="audio-setup-panel__levels__icon-part"
-                />
-              ) : (
-                <img
-                  src="../assets/images/mic_denied.png"
-                  srcSet="../assets/images/mic_denied@2x.png 2x"
-                  className="audio-setup-panel__levels__icon-part"
-                />
+          <div>
+            <div className="audio-setup-panel__title">
+              <FormattedMessage id="audio.title" />
+            </div>
+            <div className="audio-setup-panel__subtitle">
+              {(mobiledetect.mobile() || this.state.enterInVR) && (
+                <FormattedMessage id={mobiledetect.mobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop"} />
               )}
             </div>
-            <div className="audio-setup-panel__levels__icon" onClick={this.playTestTone}>
-              <img
-                src="../assets/images/level_background.png"
-                srcSet="../assets/images/level_background@2x.png 2x"
-                className="audio-setup-panel__levels__icon-part"
-              />
-              <img
-                src="../assets/images/level_fill.png"
-                srcSet="../assets/images/level_fill@2x.png 2x"
-                className="audio-setup-panel__levels__icon-part"
-                style={speakerClip}
-              />
-              <img
-                src="../assets/images/speaker_level.png"
-                srcSet="../assets/images/speaker_level@2x.png 2x"
-                className="audio-setup-panel__levels__icon-part"
-              />
+            <div className="audio-setup-panel__levels">
+              <div className="audio-setup-panel__levels__icon">
+                <img
+                  src="../assets/images/level_background.png"
+                  srcSet="../assets/images/level_background@2x.png 2x"
+                  className="audio-setup-panel__levels__icon-part"
+                />
+                <img
+                  src="../assets/images/level_fill.png"
+                  srcSet="../assets/images/level_fill@2x.png 2x"
+                  className="audio-setup-panel__levels__icon-part"
+                  style={micClip}
+                />
+                {this.state.audioTrack ? (
+                  <img
+                    src="../assets/images/mic_level.png"
+                    srcSet="../assets/images/mic_level@2x.png 2x"
+                    className="audio-setup-panel__levels__icon-part"
+                  />
+                ) : (
+                  <img
+                    src="../assets/images/mic_denied.png"
+                    srcSet="../assets/images/mic_denied@2x.png 2x"
+                    className="audio-setup-panel__levels__icon-part"
+                  />
+                )}
+              </div>
+              <div className="audio-setup-panel__levels__icon" onClick={this.playTestTone}>
+                <img
+                  src="../assets/images/level_background.png"
+                  srcSet="../assets/images/level_background@2x.png 2x"
+                  className="audio-setup-panel__levels__icon-part"
+                />
+                <img
+                  src="../assets/images/level_fill.png"
+                  srcSet="../assets/images/level_fill@2x.png 2x"
+                  className="audio-setup-panel__levels__icon-part"
+                  style={speakerClip}
+                />
+                <img
+                  src="../assets/images/speaker_level.png"
+                  srcSet="../assets/images/speaker_level@2x.png 2x"
+                  className="audio-setup-panel__levels__icon-part"
+                />
+              </div>
             </div>
+            {this.state.audioTrack && (
+              <div className="audio-setup-panel__device-chooser">
+                <select
+                  className="audio-setup-panel__device-chooser__dropdown"
+                  value={this.selectedMicDeviceId()}
+                  onChange={this.micDeviceChanged}
+                >
+                  {this.state.micDevices.map(d => (
+                    <option key={d.deviceId} value={d.deviceId}>
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}
+                    </option>
+                  ))}
+                </select>
+                <img
+                  className="audio-setup-panel__device-chooser__mic-icon"
+                  src="../assets/images/mic_small.png"
+                  srcSet="../assets/images/mic_small@2x.png 2x"
+                />
+                <img
+                  className="audio-setup-panel__device-chooser__dropdown-arrow"
+                  src="../assets/images/dropdown_arrow.png"
+                  srcSet="../assets/images/dropdown_arrow@2x.png 2x"
+                />
+              </div>
+            )}
+            {this.shouldShowHmdMicWarning() && (
+              <div className="audio-setup-panel__hmd-mic-warning">
+                <img
+                  src="../assets/images/warning_icon.png"
+                  srcSet="../assets/images/warning_icon@2x.png 2x"
+                  className="audio-setup-panel__hmd-mic-warning__icon"
+                />
+                <span className="audio-setup-panel__hmd-mic-warning__label">
+                  <FormattedMessage id="audio.hmd-mic-warning" />
+                </span>
+              </div>
+            )}
           </div>
-          {this.state.audioTrack && (
-            <div className="audio-setup-panel__device-chooser">
-              <select
-                className="audio-setup-panel__device-chooser__dropdown"
-                value={this.selectedMicDeviceId()}
-                onChange={this.micDeviceChanged}
-              >
-                {this.state.micDevices.map(d => (
-                  <option key={d.deviceId} value={d.deviceId}>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}
-                  </option>
-                ))}
-              </select>
-              <img
-                className="audio-setup-panel__device-chooser__mic-icon"
-                src="../assets/images/mic_small.png"
-                srcSet="../assets/images/mic_small@2x.png 2x"
-              />
-              <img
-                className="audio-setup-panel__device-chooser__dropdown-arrow"
-                src="../assets/images/dropdown_arrow.png"
-                srcSet="../assets/images/dropdown_arrow@2x.png 2x"
-              />
-            </div>
-          )}
-          {this.shouldShowHmdMicWarning() && (
-            <div className="audio-setup-panel__hmd-mic-warning">
-              <img
-                src="../assets/images/warning_icon.png"
-                srcSet="../assets/images/warning_icon@2x.png 2x"
-                className="audio-setup-panel__hmd-mic-warning__icon"
-              />
-              <span className="audio-setup-panel__hmd-mic-warning__label">
-                <FormattedMessage id="audio.hmd-mic-warning" />
-              </span>
-            </div>
-          )}
-          <button className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
-            <FormattedMessage id="audio.enter-now" />
-          </button>
+          <div className="audio-setup-panel__enter-button-container">
+            <button className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
+              <FormattedMessage id="audio.enter-now" />
+            </button>
+          </div>
         </div>
       ) : null;
 

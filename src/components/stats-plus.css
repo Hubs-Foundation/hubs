@@ -19,10 +19,12 @@
   padding: 8px 12px;
   color: #aaa;
   font-size: 10px;
+  user-select: none;
 }
 
 :global(.rs-base) {
   right: 10px;
   left: auto;
   top: 10px;
+  user-select: none;
 }
