@@ -15,3 +15,11 @@ export function resolveURL(url, path) {
   // Relative URL
   return path + url;
 }
+
+export function extractUrlBase(url) {
+  const index = url.lastIndexOf("/");
+
+  if (index === -1) return "./";
+
+  return url.substr(0, index + 1);
+}

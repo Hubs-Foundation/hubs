@@ -4,6 +4,7 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import homeVideo from "../assets/video/home.webm";
 import classNames from "classnames";
+import { ENVIRONMENT_URLS } from "../assets/environments/environments";
 
 import HubCreatePanel from "./hub-create-panel.js";
 import InfoDialog from "./info-dialog.js";
@@ -17,17 +18,10 @@ addLocaleData([...en]);
 
 const messages = localeData[lang] || localeData.en;
 
-const ENVIRONMENT_URLS = [
-  "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingRoom.bundle.json",
-  "https://asset-bundles-prod.reticulum.io/rooms/theater/Theater.bundle.json",
-  "https://asset-bundles-prod.reticulum.io/rooms/atrium/Atrium.bundle.json",
-  "https://asset-bundles-prod.reticulum.io/rooms/courtyard/Courtyard.bundle.json",
-  "https://asset-bundles-prod.reticulum.io/rooms/MedievalFantasyBook/MedievalFantasyBook.bundle.json"
-];
-
 class HomeRoot extends Component {
   static propTypes = {
-    intl: PropTypes.object
+    intl: PropTypes.object,
+    dialogType: PropTypes.symbol
   };
 
   state = {
@@ -39,6 +33,7 @@ class HomeRoot extends Component {
 
   componentDidMount() {
     this.loadEnvironments();
+    this.setState({ dialogType: this.props.dialogType });
     document.querySelector("#background-video").playbackRate = 0.75;
   }
 
@@ -115,6 +110,16 @@ class HomeRoot extends Component {
               </div>
             </div>
             <div className="hero-content">
+              <div className="hero-content__attribution">
+                Medieval Fantasy Book by{" "}
+                <a
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  href="https://sketchfab.com/models/06d5a80a04fc4c5ab552759e9a97d91a?utm_campaign=06d5a80a04fc4c5ab552759e9a97d91a&utm_medium=embed&utm_source=oembed"
+                >
+                  Pixel
+                </a>
+              </div>
               <div className="hero-content__container">
                 <div className="hero-content__container__title">
                   <FormattedMessage id="home.hero_title" />
@@ -172,16 +177,6 @@ class HomeRoot extends Component {
                   </a>
                 </div>
                 <div className="footer-content__links__bottom">
-                  <div>
-                    Medieval Fantasy Book by{" "}
-                    <a
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      href="https://sketchfab.com/models/06d5a80a04fc4c5ab552759e9a97d91a?utm_campaign=06d5a80a04fc4c5ab552759e9a97d91a&utm_medium=embed&utm_source=oembed"
-                    >
-                      Pixel
-                    </a>
-                  </div>
                   <div>
                     <FormattedMessage id="home.made_with_love" />
                     <span style={{ fontWeight: "bold", color: "white" }}>Mozilla</span>

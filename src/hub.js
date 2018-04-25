@@ -57,6 +57,8 @@ import "./components/block-button";
 import "./components/visible-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
+import "./components/css-class";
+import "./components/scene-shadow";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -68,6 +70,7 @@ import "./systems/app-mode";
 import "./systems/exit-on-blur";
 
 import "./gltf-component-mappings";
+import { DEFAULT_ENVIRONMENT_URL } from "./assets/environments/environments";
 
 import { App } from "./App";
 
@@ -91,6 +94,9 @@ import "./components/super-networked-interactable";
 import "./components/networked-counter";
 import "./components/super-spawner";
 import "./components/event-repeater";
+import "./components/controls-shape-offset";
+import "./components/duck";
+import "./components/quack";
 
 import "./components/cursor-controller";
 
@@ -308,7 +314,23 @@ const onReady = async () => {
     }
   };
 
+  const getPlatformUnsupportedReason = () => {
+    if (typeof RTCDataChannelEvent === "undefined") {
+      return "no_data_channels";
+    }
+
+    return null;
+  };
+
   remountUI({ enterScene, exitScene });
+
+  const platformUnsupportedReason = getPlatformUnsupportedReason();
+
+  if (platformUnsupportedReason) {
+    remountUI({ platformUnsupportedReason: platformUnsupportedReason });
+    exitScene();
+    return;
+  }
 
   getAvailableVREntryTypes().then(availableVREntryTypes => {
     remountUI({ availableVREntryTypes });
@@ -328,10 +350,7 @@ const onReady = async () => {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
     remountUI({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
     initialEnvironmentEl.setAttribute("gltf-bundle", {
-      src: "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingRoom.bundle.json"
-      // src: "https://asset-bundles-prod.reticulum.io/rooms/theater/TheaterMeshes.bundle.json"
-      // src: "https://asset-bundles-prod.reticulum.io/rooms/atrium/AtriumMeshes.bundle.json"
-      // src: "https://asset-bundles-prod.reticulum.io/rooms/courtyard/CourtyardMeshes.bundle.json"
+      src: DEFAULT_ENVIRONMENT_URL
     });
     return;
   }

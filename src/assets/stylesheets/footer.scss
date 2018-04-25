@@ -9,8 +9,9 @@
   flex-direction: column;
   // Position above virtual gamepad controls on mobile
   z-index: 1;
+  user-select: none;
 
-  @media (min-width: 769px) and (min-height: 401px) {
+  @media (min-width: 769px) and (min-height: 421px) {
     pointer-events: auto;
   }
 }
@@ -35,25 +36,25 @@
   background-color: transparent;
   border-bottom: 1px solid rgba(32, 32, 32, 0.65);
 
-  @media (min-width: 769px) , (max-height: 401px) {
+  @media (min-width: 769px) , (max-height: 421px) {
     display: none;
   }
 }
 :local(.header) {
   background-color: rgba(0, 0, 0, 0.65);
 
-  @media (max-width: 768px) , (max-height: 400px) {
+  @media (max-width: 768px) , (max-height: 420px) {
     background-color: transparent;
   }
 
   :local(.hub-info) {
-    @media (max-width: 768px) , (max-height: 400px) {
+    @media (max-width: 768px) , (max-height: 420px) {
       display: none;
     }
   }
 
   :local(.hub-stats) {
-    @media (max-width: 768px) , (max-height: 400px) {
+    @media (max-width: 768px) , (max-height: 420px) {
       display: none;
     }
   }
@@ -64,7 +65,7 @@
   margin: 16px 24px;
   display: flex;
   align-items: center;
-  @media (max-width: 768px) , (max-height: 400px) {
+  @media (max-width: 768px) , (max-height: 420px) {
     margin: 16px 8px;
     margin-left: 24px;
     font-size: 0.9em;
@@ -76,10 +77,10 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  @media (min-width: 769px) and (min-height: 401px) {
+  @media (min-width: 769px) and (min-height: 421px) {
     flex: 1;
   }
-  @media (max-width: 768px) , (max-height: 400px) {
+  @media (max-width: 768px) , (max-height: 420px) {
     margin: 16px 8px;
   }
   :local(.hub-participant-count) {
@@ -109,13 +110,13 @@
   }
 
   :local(.menu-button__narrow-close-icon) {
-    @media (max-width: 768px) , (max-height: 400px) {
+    @media (max-width: 768px) , (max-height: 420px) {
       display: none;
     }
   }
 
   :local(.menu-button__wide-close-icon) {
-    @media (min-width: 769px) and (min-height: 401px) {
+    @media (min-width: 769px) and (min-height: 421px) {
       display: none;
     }
   }

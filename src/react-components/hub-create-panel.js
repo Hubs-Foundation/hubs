@@ -6,6 +6,7 @@ import classNames from "classnames";
 import faAngleLeft from "@fortawesome/fontawesome-free-solid/faAngleLeft";
 import faAngleRight from "@fortawesome/fontawesome-free-solid/faAngleRight";
 import FontAwesomeIcon from "@fortawesome/react-fontawesome";
+import { resolveURL, extractUrlBase } from "../utils/resolveURL";
 
 import default_scene_preview_thumbnail from "../assets/images/default_thumbnail.png";
 
@@ -42,11 +43,24 @@ class HubCreatePanel extends Component {
   _getEnvironmentThumbnail = environmentIndex => {
     const environment = this.props.environments[environmentIndex];
     const meta = environment.meta || {};
-    return (
-      (meta.images || []).find(i => i.type === "preview-thumbnail") || {
-        srcset: default_scene_preview_thumbnail
+
+    let environmentThumbnail = {
+      srcset: default_scene_preview_thumbnail
+    };
+
+    if (meta.images) {
+      const thumbnailImage = meta.images.find(i => i.type === "preview-thumbnail");
+
+      if (thumbnailImage) {
+        const baseURL = new URL(extractUrlBase(environment.bundle_url), window.location.href);
+
+        environmentThumbnail = {
+          srcset: resolveURL(thumbnailImage.srcset, baseURL)
+        };
       }
-    );
+    }
+
+    return environmentThumbnail;
   };
 
   createHub = async e => {

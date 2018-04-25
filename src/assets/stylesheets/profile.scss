@@ -32,7 +32,7 @@
     width: 60vw;
     min-width: 300px;
     max-width: 700px;
-    min-height: 300px;
+    min-height: 200px;
     max-height: 1000px;
     height: 90%;
     overflow-y: auto;
@@ -81,6 +81,7 @@
   &__form-submit {
     @extend %bottom-button;
     margin: 0;
+    min-height: max-content;
   }
 }
 
@@ -101,6 +102,8 @@
       &__icon {
 	@extend %fa-icon-button-icon;
 	background: transparent;
+	border-color: $darker-grey;
+	color: $light-grey;
       }
     }
   }
@@ -109,7 +112,7 @@
     cursor: pointer;
     width: 20px;
     height: 20px;
-    padding: 15px;
+    margin: 15px;
   }
 
   &__profile_display_name {

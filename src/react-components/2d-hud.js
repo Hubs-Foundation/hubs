@@ -7,15 +7,21 @@ import styles from "../assets/stylesheets/2d-hud.scss";
 const TwoDHUD = ({ muted, frozen, spacebubble, onToggleMute, onToggleFreeze, onToggleSpaceBubble }) => (
   <div className={styles.container}>
     <div className={cx("ui-interactive", styles.panel, styles.left)}>
-      <div className={cx(styles.iconButton, styles.mute, { [styles.active]: muted })} onClick={onToggleMute} />
+      <div
+        className={cx(styles.iconButton, styles.mute, { [styles.active]: muted })}
+        title={muted ? "Unmute Mic" : "Mute Mic"}
+        onClick={onToggleMute}
+      />
     </div>
     <div
       className={cx("ui-interactive", styles.iconButton, styles.large, styles.freeze, { [styles.active]: frozen })}
+      title={frozen ? "Resume" : "Pause"}
       onClick={onToggleFreeze}
     />
     <div className={cx("ui-interactive", styles.panel, styles.right)}>
       <div
         className={cx(styles.iconButton, styles.bubble, { [styles.active]: spacebubble })}
+        title={spacebubble ? "Disable Bubble" : "Enable Bubble"}
         onClick={onToggleSpaceBubble}
       />
     </div>
