@@ -142,6 +142,7 @@ class HubCreatePanel extends Component {
 
     const environmentTitle = meta.title || environment.name;
     const environmentAuthor = (meta.authors || [])[0];
+    const environmentOrganization = (meta.organizations || [])[0];
     const environmentThumbnail = this._getEnvironmentThumbnail(this.state.environmentIndex);
 
     const formNameClassNames = classNames("create-panel__form__name", {
@@ -212,6 +213,21 @@ class HubCreatePanel extends Component {
                           <span className="create-panel__form__environment__picker__labels__header__author">
                             <FormattedMessage id="home.environment_author_by" />
                             <span>{environmentAuthor.name}</span>
+                          </span>
+                        ))}
+                      {environmentOrganization &&
+                        environmentOrganization.name &&
+                        (environmentOrganization.url ? (
+                          <a
+                            href={environmentOrganization.url}
+                            target="_blank"
+                            className="create-panel__form__environment__picker__labels__header__org"
+                          >
+                            <span>{environmentOrganization.name}</span>
+                          </a>
+                        ) : (
+                          <span className="create-panel__form__environment__picker__labels__header__org">
+                            <span>{environmentOrganization.name}</span>
                           </span>
                         ))}
                     </div>

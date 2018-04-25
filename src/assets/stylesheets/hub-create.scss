@@ -194,7 +194,17 @@
 	      @media (max-width: 520px) {
 		      display: none;
 	      }
-      }
+	}
+
+	    &__org {
+	      color: $light-text;
+	      font-size: 1.0em;
+	      display: inline;
+
+	      @media (max-width: 520px) {
+		      display: none;
+	      }
+	}
 
       a {
         pointer-events: all;
