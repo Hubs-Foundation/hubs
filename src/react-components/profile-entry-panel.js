@@ -87,6 +87,7 @@ class ProfileEntryPanel extends Component {
                 onFocus={e => e.target.select()}
                 onChange={e => this.setState({ displayName: e.target.value })}
                 required
+                spellCheck="false"
                 pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
                 title={formatMessage({ id: "profile.display_name.validation_warning" })}
                 ref={inp => (this.nameInput = inp)}
