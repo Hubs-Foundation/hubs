@@ -1,6 +1,9 @@
 import "./components/gltf-model-plus";
 import { resolveURL } from "./utils/resolveURL";
 
+AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
+AFRAME.GLTFModelPlus.registerComponent("sound", "sound");
+AFRAME.GLTFModelPlus.registerComponent("collision-filter", "collision-filter");
 AFRAME.GLTFModelPlus.registerComponent("css-class", "css-class");
 AFRAME.GLTFModelPlus.registerComponent("scene-shadow", "scene-shadow");
 AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner");
