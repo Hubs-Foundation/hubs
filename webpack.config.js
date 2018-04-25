@@ -206,6 +206,12 @@ const config = {
         to: "favicon.ico"
       }
     ]),
+    new CopyWebpackPlugin([
+      {
+        from: "src/assets/images/hub-preview.png",
+        to: "hub-preview.png"
+      }
+    ]),
     // Extract required css and add a content hash.
     new ExtractTextPlugin({
       filename: "assets/stylesheets/[name]-[contenthash].css",
