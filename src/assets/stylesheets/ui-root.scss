@@ -8,6 +8,26 @@
   position: absolute;
   pointer-events: none;
   color: white;
+
+  &__help-icon {
+    @extend %fa-icon-button;
+    pointer-events: auto;
+    position: absolute;
+    top: 0px;
+    left: 14px;
+
+    &__icon {
+      background: rgba(33, 33, 33, 0.5);
+      border-radius: 36px;
+      display: inline-block;
+      font-size: 22px;
+      vertical-align: sub;
+      line-height: 38px;
+      border: 0;
+      width: 36px;
+      height: 36px;
+    }
+  }
 }
 
 .blurred {

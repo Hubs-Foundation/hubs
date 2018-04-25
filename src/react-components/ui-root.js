@@ -17,6 +17,9 @@ import InfoDialog from "./info-dialog.js";
 import TwoDHUD from "./2d-hud";
 import Footer from "./footer";
 
+import FontAwesomeIcon from "@fortawesome/react-fontawesome";
+import faQuestion from "@fortawesome/fontawesome-free-solid/faQuestion";
+
 const mobiledetect = new MobileDetect(navigator.userAgent);
 
 const lang = ((navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage)
@@ -822,6 +825,17 @@ class UIRoot extends Component {
             onSubmittedEmail={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.email_submitted })}
             onCloseDialog={() => this.setState({ infoDialogType: null })}
           />
+
+          {this.state.entryStep === ENTRY_STEPS.finished && (
+            <button
+              onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
+              className="ui__help-icon"
+            >
+              <i className="ui__help-icon__icon">
+                <FontAwesomeIcon icon={faQuestion} />
+              </i>
+            </button>
+          )}
 
           <div className={dialogClassNames}>
             {(this.state.entryStep !== ENTRY_STEPS.finished || this.isWaitingForAutoExit()) && (
