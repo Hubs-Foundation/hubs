@@ -14,7 +14,8 @@ class InfoDialog extends Component {
     invite: Symbol("invite"),
     updates: Symbol("updates"),
     report: Symbol("report"),
-    help: Symbol("help")
+    help: Symbol("help"),
+    gearvr_audio: Symbol("gearvr_audio")
   };
   static propTypes = {
     dialogType: PropTypes.oneOf(Object.values(InfoDialog.dialogTypes)),
@@ -78,6 +79,17 @@ class InfoDialog extends Component {
     let dialogBody = null;
 
     switch (this.props.dialogType) {
+      case InfoDialog.dialogTypes.gearvr_audio:
+        dialogTitle = "Enter on GearVR";
+        dialogBody = (
+          <span>
+            Due to an issue in the latest version of Oculus Browser, audio is currently not working with Hubs. So, you
+            will not be able to hear other avatars.
+            <p />
+            We expect this issue to be resolved soon!
+          </span>
+        );
+        break;
       // TODO i18n, FormattedMessage doesn't play nicely with links
       case InfoDialog.dialogTypes.slack:
         dialogTitle = "Get in Touch";
