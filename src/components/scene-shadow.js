@@ -21,7 +21,7 @@ AFRAME.registerComponent("scene-shadow", {
   init() {
     this.originalShadowProperties = this.el.sceneEl.getAttribute("shadow");
   },
-  update(oldData) {
+  update() {
     this.el.sceneEl.setAttribute("shadow", this.data);
   },
   remove() {
