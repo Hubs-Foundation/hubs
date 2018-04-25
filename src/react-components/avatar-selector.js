@@ -15,11 +15,20 @@ class AvatarSelector extends Component {
     onChange: PropTypes.func
   };
 
-  getAvatarIndex = (direction = 0) => {
-    const currAvatarIndex = this.props.avatars.findIndex(avatar => avatar.id === this.props.avatarId);
-    const numAvatars = this.props.avatars.length;
-    return ((currAvatarIndex + direction) % numAvatars + numAvatars) % numAvatars;
+  static getAvatarIndex = (props, offset = 0) => {
+    const currAvatarIndex = props.avatars.findIndex(avatar => avatar.id === props.avatarId);
+    const numAvatars = props.avatars.length;
+    return ((currAvatarIndex + offset) % numAvatars + numAvatars) % numAvatars;
   };
+  static nextAvatarIndex = props => AvatarSelector.getAvatarIndex(props, -1);
+  static previousAvatarIndex = props => AvatarSelector.getAvatarIndex(props, 1);
+
+  state = {
+    initialAvatarIndex: 0,
+    avatarIndices: []
+  };
+
+  getAvatarIndex = (offset = 0) => AvatarSelector.getAvatarIndex(this.props, offset);
   nextAvatarIndex = () => this.getAvatarIndex(-1);
   previousAvatarIndex = () => this.getAvatarIndex(1);
 
@@ -32,6 +41,37 @@ class AvatarSelector extends Component {
     const previousAvatarId = this.props.avatars[this.previousAvatarIndex()].id;
     this.props.onChange(previousAvatarId);
   };
+
+  constructor(props) {
+    super(props);
+    this.state.initialAvatarIndex = AvatarSelector.getAvatarIndex(props);
+    this.state.avatarIndices = [
+      AvatarSelector.nextAvatarIndex(props),
+      this.state.initialAvatarIndex,
+      AvatarSelector.previousAvatarIndex(props)
+    ];
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // Push new avatar indices onto the array if necessary.
+    this.setState(state => {
+      if (this.state.avatarIndices.length === nextProps.avatars.length) return;
+      const nextAvatarIndex = AvatarSelector.getAvatarIndex(nextProps);
+      if (
+        nextAvatarIndex === nextProps.avatars.length - 1 ||
+        nextAvatarIndex < AvatarSelector.getAvatarIndex(this.props)
+      ) {
+        const addIndex = AvatarSelector.nextAvatarIndex(nextProps);
+        if (state.avatarIndices.includes(addIndex)) return;
+        state.avatarIndices.unshift(addIndex);
+      } else {
+        const addIndex = AvatarSelector.previousAvatarIndex(nextProps);
+        if (state.avatarIndices.includes(addIndex)) return;
+        state.avatarIndices.push(addIndex);
+      }
+      return state;
+    });
+  }
 
   componentDidUpdate(prevProps) {
     if (this.props.avatarId !== prevProps.avatarId) {
@@ -59,10 +99,10 @@ class AvatarSelector extends Component {
     const avatarAssets = this.props.avatars.map(avatar => (
       <a-asset-item id={avatar.id} key={avatar.id} response-type="arraybuffer" src={`${avatar.model}`} />
     ));
-
-    const avatarEntities = this.props.avatars.map((avatar, i) => (
-      <a-entity key={avatar.id} position="0 0 0" rotation={`0 ${360 * -i / this.props.avatars.length} 0`}>
-        <a-entity position="0 0 5" rotation="0 0 0" gltf-model-plus={`src: #${avatar.id}`} inflate="true">
+    const avatarData = this.state.avatarIndices.map(i => [this.props.avatars[i], i]);
+    const avatarEntities = avatarData.map(([avatar, i]) => (
+      <a-entity key={avatar.id} rotation={`0 ${360 * -i / this.props.avatars.length} 0`}>
+        <a-entity position="0 0 5" gltf-model-plus={`src: #${avatar.id}`} inflate="true">
           <template data-selector=".RootScene">
             <a-entity animation-mixer />
           </template>
@@ -77,33 +117,32 @@ class AvatarSelector extends Component {
       </a-entity>
     ));
 
+    const rotationFromIndex = index => (360 * index / this.props.avatars.length + 180) % 360;
+    const initialRotation = rotationFromIndex(this.state.initialAvatarIndex);
+    const toRotation = rotationFromIndex(this.getAvatarIndex());
+
     return (
       <div className="avatar-selector">
-        <div className="loading-panel">
-          <div className="loader-wrap">
-            <div className="loader">
-              <div className="loader-center" />
-            </div>
-          </div>
-        </div>
         <a-scene vr-mode-ui="enabled: false" ref={sce => (this.scene = sce)}>
           <a-assets>
             {avatarAssets}
             <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src={meetingSpace} />
           </a-assets>
 
-          <a-entity>
+          <a-entity rotation={`0 ${initialRotation} 0`}>
             <a-animation
               ref={anm => (this.animation = anm)}
               attribute="rotation"
               dur="2000"
               easing="ease-out"
-              to={`0 ${(360 * this.getAvatarIndex() / this.props.avatars.length + 180) % 360} 0`}
+              to={`0 ${toRotation} 0`}
             />
             {avatarEntities}
           </a-entity>
 
-          <a-entity position="0 1.5 -5.6" rotation="-10 180 0" camera />
+          <a-entity position="0 1.5 -5.6" rotation="-10 180 0">
+            <a-entity camera />
+          </a-entity>
 
           <a-entity
             hide-when-quality="low"
