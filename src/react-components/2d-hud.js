@@ -21,7 +21,7 @@ const TwoDHUD = ({ muted, frozen, spacebubble, onToggleMute, onToggleFreeze, onT
     <div className={cx("ui-interactive", styles.panel, styles.right)}>
       <div
         className={cx(styles.iconButton, styles.bubble, { [styles.active]: spacebubble })}
-        title={spacebubble ? "Bubble Off" : "Bubble On"}
+        title={spacebubble ? "Disable Bubble" : "Enable Bubble"}
         onClick={onToggleSpaceBubble}
       />
     </div>
