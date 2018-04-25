@@ -18,11 +18,11 @@ addLocaleData([...en]);
 const messages = localeData[lang] || localeData.en;
 
 const ENVIRONMENT_URLS = [
-  process.env.ASSET_SERVER + "/rooms/meetingroom/MeetingRoom.bundle.json",
-  process.env.ASSET_SERVER + "/rooms/theater/Theater.bundle.json",
-  process.env.ASSET_SERVER + "/rooms/atrium/Atrium.bundle.json",
-  process.env.ASSET_SERVER + "/rooms/courtyard/Courtyard.bundle.json",
-  process.env.ASSET_SERVER + "/rooms/MedievalFantasyBook/MedievalFantasyBook.bundle.json"
+  process.env.ASSET_BUNDLE_SERVER + "/rooms/meetingroom/MeetingRoom.bundle.json",
+  process.env.ASSET_BUNDLE_SERVER + "/rooms/theater/Theater.bundle.json",
+  process.env.ASSET_BUNDLE_SERVER + "/rooms/atrium/Atrium.bundle.json",
+  process.env.ASSET_BUNDLE_SERVER + "/rooms/courtyard/Courtyard.bundle.json",
+  process.env.ASSET_BUNDLE_SERVER + "/rooms/MedievalFantasyBook/MedievalFantasyBook.bundle.json"
 ];
 
 class HomeRoot extends Component {
