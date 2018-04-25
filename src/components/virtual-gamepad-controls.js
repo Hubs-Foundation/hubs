@@ -5,18 +5,54 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   schema: {},
 
   init() {
+    this.onEnterVr = this.onEnterVr.bind(this);
+    this.onExitVr = this.onExitVr.bind(this);
+    this.onFirstInteraction = this.onFirstInteraction.bind(this);
+    this.onMoveJoystickChanged = this.onMoveJoystickChanged.bind(this);
+    this.onMoveJoystickEnd = this.onMoveJoystickEnd.bind(this);
+    this.onLookJoystickChanged = this.onLookJoystickChanged.bind(this);
+    this.onLookJoystickEnd = this.onLookJoystickEnd.bind(this);
+
     // Setup gamepad elements
     const leftTouchZone = document.createElement("div");
     leftTouchZone.classList.add(styles.touchZone, styles.left, styles.tutorial);
-    leftTouchZone.innerHTML = "Move";
+    const leftTutorialEl = document.createElement("div");
+    leftTutorialEl.innerHTML = "Move";
+    leftTouchZone.appendChild(leftTutorialEl);
     document.body.appendChild(leftTouchZone);
+
     this.leftTouchZone = leftTouchZone;
+    this.leftTutorialEl = leftTutorialEl;
+
+    this.leftStick = nipplejs.create({
+      zone: this.leftTouchZone,
+      color: "white",
+      fadeTime: 0
+    });
+
+    this.leftStick.on("start", this.onFirstInteraction);
+    this.leftStick.on("move", this.onMoveJoystickChanged);
+    this.leftStick.on("end", this.onMoveJoystickEnd);
 
     const rightTouchZone = document.createElement("div");
     rightTouchZone.classList.add(styles.touchZone, styles.right, styles.tutorial);
-    rightTouchZone.innerHTML = "Look";
+    const rightTutorialEl = document.createElement("div");
+    rightTutorialEl.innerHTML = "Look";
+    rightTouchZone.appendChild(rightTutorialEl);
     document.body.appendChild(rightTouchZone);
+
     this.rightTouchZone = rightTouchZone;
+    this.rightTutorialEl = rightTutorialEl;
+
+    this.rightStick = nipplejs.create({
+      zone: this.rightTouchZone,
+      color: "white",
+      fadeTime: 0
+    });
+
+    this.rightStick.on("start", this.onFirstInteraction);
+    this.rightStick.on("move", this.onLookJoystickChanged);
+    this.rightStick.on("end", this.onLookJoystickEnd);
 
     this.inVr = false;
     this.moving = false;
@@ -29,47 +65,19 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
       value: 0
     };
 
-    this.onEnterVr = this.onEnterVr.bind(this);
-    this.onExitVr = this.onExitVr.bind(this);
-    this.onFirstInteraction = this.onFirstInteraction.bind(this);
-    this.onMoveJoystickChanged = this.onMoveJoystickChanged.bind(this);
-    this.onMoveJoystickEnd = this.onMoveJoystickEnd.bind(this);
-    this.onLookJoystickChanged = this.onLookJoystickChanged.bind(this);
-    this.onLookJoystickEnd = this.onLookJoystickEnd.bind(this);
-
-    this.leftTouchZone.addEventListener("click", this.onFirstInteraction);
-    this.rightTouchZone.addEventListener("click", this.onFirstInteraction);
     this.el.sceneEl.addEventListener("enter-vr", this.onEnterVr);
     this.el.sceneEl.addEventListener("exit-vr", this.onExitVr);
   },
 
   onFirstInteraction() {
-    this.leftTouchZone.removeEventListener("click", this.onFirstInteraction);
-    this.rightTouchZone.removeEventListener("click", this.onFirstInteraction);
+    this.leftStick.off("start", this.onFirstInteraction);
+    this.rightStick.off("start", this.onFirstInteraction);
 
     this.leftTouchZone.classList.remove(styles.tutorial);
     this.rightTouchZone.classList.remove(styles.tutorial);
 
-    this.leftTouchZone.innerHTML = null;
-    this.rightTouchZone.innerHTML = null;
-
-    this.leftStick = nipplejs.create({
-      zone: this.leftTouchZone,
-      color: "white",
-      fadeTime: 0
-    });
-
-    this.rightStick = nipplejs.create({
-      zone: this.rightTouchZone,
-      color: "white",
-      fadeTime: 0
-    });
-
-    this.leftStick.on("move", this.onMoveJoystickChanged);
-    this.leftStick.on("end", this.onMoveJoystickEnd);
-
-    this.rightStick.on("move", this.onLookJoystickChanged);
-    this.rightStick.on("end", this.onLookJoystickEnd);
+    this.leftTouchZone.removeChild(this.leftTutorialEl);
+    this.rightTouchZone.removeChild(this.rightTutorialEl);
   },
 
   onMoveJoystickChanged(event, joystick) {
