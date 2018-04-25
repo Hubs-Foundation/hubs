@@ -246,10 +246,6 @@ class UIRoot extends Component {
   };
 
   performDirectEntryFlow = async enterInVR => {
-    if (mobiledetect.mobile() && !enterInVR && screenfull.enabled) {
-      screenfull.request();
-    }
-
     this.setState({ enterInVR });
 
     const hasGrantedMic = await this.hasGrantedMicPermissions();
@@ -487,6 +483,10 @@ class UIRoot extends Component {
   };
 
   onAudioReadyButton = () => {
+    if (mobiledetect.mobile() && !this.state.enterInVR && screenfull.enabled) {
+      screenfull.request();
+    }
+
     this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.props.janusRoomId);
 
     const mediaStream = this.state.mediaStream;
