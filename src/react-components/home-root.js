@@ -4,6 +4,7 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import homeVideo from "../assets/video/home.webm";
 import classNames from "classnames";
+import { ENVIRONMENT_URLS } from "../assets/environments/environments";
 
 import HubCreatePanel from "./hub-create-panel.js";
 import InfoDialog from "./info-dialog.js";
@@ -16,14 +17,6 @@ import localeData from "../assets/translations.data.json";
 addLocaleData([...en]);
 
 const messages = localeData[lang] || localeData.en;
-
-const ENVIRONMENT_URLS = [
-  "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingRoom.bundle.json",
-  "https://asset-bundles-prod.reticulum.io/rooms/theater/Theater.bundle.json",
-  "https://asset-bundles-prod.reticulum.io/rooms/atrium/Atrium.bundle.json",
-  "https://asset-bundles-prod.reticulum.io/rooms/courtyard/Courtyard.bundle.json",
-  "https://asset-bundles-prod.reticulum.io/rooms/MedievalFantasyBook/MedievalFantasyBook.bundle.json"
-];
 
 class HomeRoot extends Component {
   static propTypes = {

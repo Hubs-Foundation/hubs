@@ -1,0 +1,17 @@
+AFRAME.registerComponent("css-class", {
+  schema: {
+    type: "string"
+  },
+  init() {
+    this.el.classList.add(this.data);
+  },
+  update(oldData) {
+    if (this.data !== oldData) {
+      this.el.classList.remove(oldData);
+      this.el.classList.add(this.data);
+    }
+  },
+  remove() {
+    this.el.classList.remove(this.data);
+  }
+});

@@ -190,19 +190,6 @@
         <!-- Interactables -->
         <a-entity id="counter" networked-counter="max: 3; ttl: 120"></a-entity>
 
-        <a-entity 
-            gltf-model-plus="src: #interactable-duck"
-            scale="2 2 2"
-            class="interactable" 
-            super-spawner="template: #interactable-template;" 
-            position="2.9 1.2 0" 
-            body="mass: 0; type: static; shape: box;"
-            collision-filter="collisionForces: false;"
-            quack
-            sound__quack="src: #quack; on: quack; poolSize: 2;"
-            sound__specialquack="src: #specialquack; on: specialquack;"
-        ></a-entity>
-
         <a-entity
             id="cursor-controller"
             cursor-controller="
@@ -236,7 +223,7 @@
         <a-entity
             id="player-rig"
             networked="template: #remote-avatar-template; attachTemplateToLocal: false;"
-            spawn-controller="radius: 4;"
+            spawn-controller="loadedEvent: bundleloaded; target: #environment-root"
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
@@ -357,37 +344,12 @@
             </a-entity>
         </a-entity>
 
-        <!-- Lights -->
-        <a-entity
-            hide-when-quality="low"
-            light="type: directional; color: #F9FFCE; intensity: 0.6"
-            position="0.002 5.231 -15.3"
-        ></a-entity>
-
         <!-- Environment -->
         <a-entity 
             id="environment-root" 
             nav-mesh-helper
             static-body="shape: none;"
         ></a-entity>
-
-        <a-entity
-            id="skybox"
-            scale="8000 8000 8000"
-            skybox="azimuth:0.280; inclination:0.440"
-            light="type: ambient; color: #FFF"
-            layers="reflection:true"
-            xr="ar: false"
-        ></a-entity>
-
-        <a-entity
-            id="water"
-            water="forceMobile: true; normalMap:#water-normal-map"
-            rotation="-90 0 0"
-            position="0 -88.358 -332.424"
-            xr="ar: false"
-        ></a-entity>
-
     </a-scene>
 
     <div id="ui-root"></div>
