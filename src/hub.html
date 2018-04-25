@@ -63,6 +63,9 @@
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
             <a-asset-item id="interactable-duck" response-type="arraybuffer" src="./assets/interactables/duck/DuckyMesh.glb"></a-asset-item>
 
+            <a-asset-item id="quack" src="./assets/sfx/quack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="specialquack" src="./assets/sfx/specialquack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
+
             <img id="water-normal-map" src="./assets/waternormals.jpg">
 
             <!-- Templates -->
@@ -193,6 +196,9 @@
             position="2.9 1.2 0" 
             body="mass: 0; type: static; shape: box;"
             collision-filter="collisionForces: false;"
+            quack
+            sound__quack="src: #quack; on: quack; poolSize: 2;"
+            sound__specialquack="src: #specialquack; on: specialquack;"
         ></a-entity>
 
         <a-entity
@@ -337,31 +343,11 @@
                 </template>
 
                 <template data-selector=".LeftHand">
-                    <a-entity bone-visibility>
-                        <!-- <a-entity
-                            id="left-super-hand"
-                            event-repeater="
-                            events: action_grab, action_release, action_primary_down, action_primary_up; 
-                            eventSource: #player-left-controller"
-                            static-body="shape: sphere; sphereRadius: 0.02"
-                            mixin="super-hands"
-                            position="0 0.05 0"
-                        ></a-entity> -->
-                    </a-entity>
+                    <a-entity bone-visibility></a-entity>
                 </template>
 
                 <template data-selector=".RightHand">
-                    <a-entity bone-visibility>
-<!--                         <a-entity
-                            id="right-super-hand"
-                            event-repeater="
-                            events: action_grab, action_release, action_primary_down, action_primary_up; 
-                            eventSource: #player-right-controller"
-                            static-body="shape: sphere; sphereRadius: 0.02"
-                            mixin="super-hands"
-                            position="0 -0.05 0"
-                        ></a-entity> -->
-                    </a-entity>
+                    <a-entity bone-visibility></a-entity>
                 </template>
 
             </a-entity>

@@ -12,14 +12,18 @@ AFRAME.registerComponent("duck", {
     this.force = new CANNON.Vec3(0, this.data.initialForce, 0);
     this.initialScale = this.el.object3D.scale.x;
     this.maxScale = this.data.maxScale * this.initialScale;
+
+    this._handleGrabStart = this._handleGrabStart.bind(this);
   },
 
   play: function() {
     this.system.addComponent(this);
+    this.el.addEventListener("grab-start", this._handleGrabStart);
   },
 
   pause: function() {
     this.system.removeComponent(this);
+    this.el.removeEventListener("grab-start", this._handleGrabStart);
   },
 
   beforeStep: function() {
@@ -35,6 +39,15 @@ AFRAME.registerComponent("duck", {
         this.position.set(x * 0.01, 0, z * 0.01);
         this.el.body.applyForce(this.force, this.position);
       }
+    }
+  },
+
+  _handleGrabStart: function() {
+    const rand = Math.floor(Math.random() * Math.floor(100));
+    if (rand < 1) {
+      this.el.emit("specialquack");
+    } else if (rand < 20) {
+      this.el.emit("quack");
     }
   }
 });

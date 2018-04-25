@@ -10,6 +10,7 @@ AFRAME.registerComponent("super-spawner", {
   init: function() {
     this.entities = new Map();
     this.timeout = null;
+    this.defaultScale = this.el.getAttribute("scale").clone();
   },
 
   play: function() {
@@ -23,6 +24,7 @@ AFRAME.registerComponent("super-spawner", {
     clearTimeout(this.timeout);
     this.timeout = null;
     this.el.setAttribute("visible", true);
+    this.el.setAttribute("scale", this.defaultScale);
   },
 
   remove: function() {
@@ -63,8 +65,10 @@ AFRAME.registerComponent("super-spawner", {
 
     if (this.data.spawnCooldown > 0) {
       this.el.setAttribute("visible", false);
+      this.el.setAttribute("scale", { x: 0.0001, y: 0.0001, z: 0.0001 });
       this.timeout = setTimeout(() => {
         this.el.setAttribute("visible", true);
+        this.el.setAttribute("scale", this.defaultScale);
         this.timeout = null;
       }, this.data.spawnCooldown * 1000);
     }
