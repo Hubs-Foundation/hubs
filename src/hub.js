@@ -310,7 +310,23 @@ const onReady = async () => {
     }
   };
 
+  const getPlatformUnsupportedReason = () => {
+    if (typeof RTCDataChannelEvent === "undefined") {
+      return "no_data_channels";
+    }
+
+    return null;
+  };
+
   remountUI({ enterScene, exitScene });
+
+  const platformUnsupportedReason = getPlatformUnsupportedReason();
+
+  if (platformUnsupportedReason) {
+    remountUI({ platformUnsupportedReason: platformUnsupportedReason });
+    exitScene();
+    return;
+  }
 
   getAvailableVREntryTypes().then(availableVREntryTypes => {
     remountUI({ availableVREntryTypes });

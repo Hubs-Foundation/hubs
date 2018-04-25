@@ -27,7 +27,8 @@ const ENVIRONMENT_URLS = [
 
 class HomeRoot extends Component {
   static propTypes = {
-    intl: PropTypes.object
+    intl: PropTypes.object,
+    dialogType: PropTypes.symbol
   };
 
   state = {
@@ -39,6 +40,7 @@ class HomeRoot extends Component {
 
   componentDidMount() {
     this.loadEnvironments();
+    this.setState({ dialogType: this.props.dialogType });
     document.querySelector("#background-video").playbackRate = 0.75;
   }
 
