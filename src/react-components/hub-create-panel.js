@@ -203,6 +203,7 @@ class HubCreatePanel extends Component {
                           <a
                             href={environmentAuthor.url}
                             target="_blank"
+                            rel="noopener noreferrer"
                             className="create-panel__form__environment__picker__labels__header__author"
                           >
                             <FormattedMessage id="home.environment_author_by" />
@@ -220,6 +221,7 @@ class HubCreatePanel extends Component {
                           <a
                             href={environmentAuthor.organization.url}
                             target="_blank"
+                            rel="noopener noreferrer"
                             className="create-panel__form__environment__picker__labels__header__org"
                           >
                             <span>{environmentAuthor.organization.name}</span>
