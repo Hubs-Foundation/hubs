@@ -309,7 +309,7 @@ const onReady = async () => {
   };
 
   const getPlatformUnsupportedReason = () => {
-    if (typeof RTCPeerConnection.prototype.createDataChannel === "undefined") {
+    if (typeof RTCDataChannelEvent === "undefined") {
       return "no_data_channels";
     }
 
