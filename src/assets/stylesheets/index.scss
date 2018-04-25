@@ -122,11 +122,25 @@ body {
   min-height: 740px;
   display: flex;
   flex-direction: column;
+  position: relative;
 
   @media (max-width: 768px) {
     padding: 1em 1.5em 1em 1.5em;
     justify-content: space-around;
     min-height: 490px;
+  }
+
+  &__attribution {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    color: $grey-text;
+    text-shadow: 0px 0px 2px rgba(32, 32, 32, 1.0);
+    opacity: 0.5;
+
+    a {
+      color: $grey-text;
+    }
   }
 
   &__container {
@@ -195,7 +209,7 @@ body {
 .footer-content {
   padding: 1em 2.25em 1em 2.25em;
   background-color: rgba(0, 0, 0, 0.85);
-  min-height: 100px;
+  min-height: 80px;
   display: flex;
   border-top: 2px solid #242424;
   align-items: center;
