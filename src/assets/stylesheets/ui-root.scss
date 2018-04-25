@@ -10,6 +10,7 @@
   color: white;
 
   &__help-icon {
+    @extend %fa-icon-button;
     position: absolute;
     top: 0px;
     left: 14px;
