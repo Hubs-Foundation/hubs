@@ -210,7 +210,7 @@
         <a-entity
             id="player-rig"
             networked="template: #remote-avatar-template; attachTemplateToLocal: false;"
-            spawn-controller="radius: 4;"
+            spawn-controller="loadedEvent: bundleloaded; target: #environment-root"
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
