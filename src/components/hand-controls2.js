@@ -18,6 +18,11 @@ const CONTROLLER_OFFSETS = {
     new THREE.Quaternion().setFromEuler(new THREE.Euler(-40 * THREE.Math.DEG2RAD, 0, 0)),
     new THREE.Vector3(1, 1, 1)
   ),
+  "windows-motion-controls": new THREE.Matrix4().compose(
+    new THREE.Vector3(0, -0.017, 0.13),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler(-40 * THREE.Math.DEG2RAD, 0, 0)),
+    new THREE.Vector3(1, 1, 1)
+  ),
   "daydream-controls": new THREE.Matrix4().makeTranslation(0, 0, -0.04),
   "gearvr-controls": new THREE.Matrix4()
 };
