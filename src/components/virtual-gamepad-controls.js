@@ -13,16 +13,28 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.onLookJoystickChanged = this.onLookJoystickChanged.bind(this);
     this.onLookJoystickEnd = this.onLookJoystickEnd.bind(this);
 
+    this.mockJoystickContainer = document.createElement("div");
+    this.mockJoystickContainer.classList.add(styles.mockJoystickContainer);
+    const leftMock = document.createElement("div");
+    leftMock.classList.add(styles.mockJoystick);
+    const leftMockSmall = document.createElement("div");
+    leftMockSmall.classList.add(styles.mockJoystick, styles.inner);
+    leftMock.appendChild(leftMockSmall);
+    this.mockJoystickContainer.appendChild(leftMock);
+    const rightMock = document.createElement("div");
+    rightMock.classList.add(styles.mockJoystick);
+    const rightMockSmall = document.createElement("div");
+    rightMockSmall.classList.add(styles.mockJoystick, styles.inner);
+    rightMock.appendChild(rightMockSmall);
+    this.mockJoystickContainer.appendChild(rightMock);
+    document.body.appendChild(this.mockJoystickContainer);
+
     // Setup gamepad elements
     const leftTouchZone = document.createElement("div");
-    leftTouchZone.classList.add(styles.touchZone, styles.left, styles.tutorial);
-    const leftTutorialEl = document.createElement("div");
-    leftTutorialEl.innerHTML = "Move";
-    leftTouchZone.appendChild(leftTutorialEl);
+    leftTouchZone.classList.add(styles.touchZone, styles.left);
     document.body.appendChild(leftTouchZone);
 
     this.leftTouchZone = leftTouchZone;
-    this.leftTutorialEl = leftTutorialEl;
 
     this.leftStick = nipplejs.create({
       zone: this.leftTouchZone,
@@ -35,14 +47,10 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.leftStick.on("end", this.onMoveJoystickEnd);
 
     const rightTouchZone = document.createElement("div");
-    rightTouchZone.classList.add(styles.touchZone, styles.right, styles.tutorial);
-    const rightTutorialEl = document.createElement("div");
-    rightTutorialEl.innerHTML = "Look";
-    rightTouchZone.appendChild(rightTutorialEl);
+    rightTouchZone.classList.add(styles.touchZone, styles.right);
     document.body.appendChild(rightTouchZone);
 
     this.rightTouchZone = rightTouchZone;
-    this.rightTutorialEl = rightTutorialEl;
 
     this.rightStick = nipplejs.create({
       zone: this.rightTouchZone,
@@ -72,12 +80,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   onFirstInteraction() {
     this.leftStick.off("start", this.onFirstInteraction);
     this.rightStick.off("start", this.onFirstInteraction);
-
-    this.leftTouchZone.classList.remove(styles.tutorial);
-    this.rightTouchZone.classList.remove(styles.tutorial);
-
-    this.leftTouchZone.removeChild(this.leftTutorialEl);
-    this.rightTouchZone.removeChild(this.rightTutorialEl);
+    document.body.removeChild(this.mockJoystickContainer);
   },
 
   onMoveJoystickChanged(event, joystick) {

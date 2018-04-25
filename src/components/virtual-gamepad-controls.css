@@ -9,19 +9,36 @@
   right: 50%;
 }
 
-:local(.touchZone.tutorial) {
-  display: flex;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: rgba(255, 255, 255, 0.9);
-  align-items: center;
-  justify-content: center;
-}
-
-:local(.touchZone.left.tutorial) {
-  border-right: 1px solid rgba(255, 255, 255, 0.2);
-}
-
 :local(.touchZone.right) {
   left: 50%;
   right: 0;
+}
+
+:local(.mockJoystickContainer) {
+  position: absolute;
+  height: 20vh;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+:local(.mockJoystick) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  background-color: rgba(255,255,255,0.5);
+  border-top-left-radius: 50%;
+  border-top-right-radius: 50%;
+  border-bottom-right-radius: 50%;
+  border-bottom-left-radius: 50%;
+}
+
+:local(.mockJoystick.inner) {
+  width: 50px;
+  height: 50px;
 }
