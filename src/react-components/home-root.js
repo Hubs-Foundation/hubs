@@ -117,6 +117,16 @@ class HomeRoot extends Component {
               </div>
             </div>
             <div className="hero-content">
+              <div className="hero-content__attribution">
+                Medieval Fantasy Book by{" "}
+                <a
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  href="https://sketchfab.com/models/06d5a80a04fc4c5ab552759e9a97d91a?utm_campaign=06d5a80a04fc4c5ab552759e9a97d91a&utm_medium=embed&utm_source=oembed"
+                >
+                  Pixel
+                </a>
+              </div>
               <div className="hero-content__container">
                 <div className="hero-content__container__title">
                   <FormattedMessage id="home.hero_title" />
@@ -174,16 +184,6 @@ class HomeRoot extends Component {
                   </a>
                 </div>
                 <div className="footer-content__links__bottom">
-                  <div>
-                    Medieval Fantasy Book by{" "}
-                    <a
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      href="https://sketchfab.com/models/06d5a80a04fc4c5ab552759e9a97d91a?utm_campaign=06d5a80a04fc4c5ab552759e9a97d91a&utm_medium=embed&utm_source=oembed"
-                    >
-                      Pixel
-                    </a>
-                  </div>
                   <div>
                     <FormattedMessage id="home.made_with_love" />
                     <span style={{ fontWeight: "bold", color: "white" }}>Mozilla</span>
