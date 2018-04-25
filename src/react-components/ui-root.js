@@ -107,7 +107,9 @@ class UIRoot extends Component {
 
     exited: false,
 
-    showProfileEntry: false
+    showProfileEntry: false,
+
+    showGearVRAudioWarning: false
   };
 
   constructor(props) {
@@ -621,7 +623,7 @@ class UIRoot extends Component {
               <GenericEntryButton onClick={this.enterVR} />
             )}
             {this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
-              <GearVREntryButton onClick={this.enterGearVR} />
+              <GearVREntryButton onClick={() => this.setState({ showGearVRAudioWarning: true })} />
             )}
             {this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
               <DaydreamEntryButton
@@ -820,6 +822,10 @@ class UIRoot extends Component {
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className="ui">
+          {this.state.showGearVRAudioWarning && (
+            <InfoDialog dialogType={InfoDialog.dialogTypes.gearvr_audio} onCloseDialog={() => this.enterGearVR()} />
+          )}
+
           <InfoDialog
             dialogType={this.state.infoDialogType}
             onSubmittedEmail={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.email_submitted })}
