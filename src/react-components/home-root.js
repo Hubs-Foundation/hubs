@@ -4,6 +4,7 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import homeVideo from "../assets/video/home.webm";
 import classNames from "classnames";
+import { ENVIRONMENT_URLS } from "../assets/environments/environments";
 
 import HubCreatePanel from "./hub-create-panel.js";
 import InfoDialog from "./info-dialog.js";
@@ -16,14 +17,6 @@ import localeData from "../assets/translations.data.json";
 addLocaleData([...en]);
 
 const messages = localeData[lang] || localeData.en;
-
-const ENVIRONMENT_URLS = [
-  process.env.ASSET_BUNDLE_SERVER + "/rooms/meetingroom/MeetingRoom.bundle.json",
-  process.env.ASSET_BUNDLE_SERVER + "/rooms/theater/Theater.bundle.json",
-  process.env.ASSET_BUNDLE_SERVER + "/rooms/atrium/Atrium.bundle.json",
-  process.env.ASSET_BUNDLE_SERVER + "/rooms/courtyard/Courtyard.bundle.json",
-  process.env.ASSET_BUNDLE_SERVER + "/rooms/MedievalFantasyBook/MedievalFantasyBook.bundle.json"
-];
 
 class HomeRoot extends Component {
   static propTypes = {

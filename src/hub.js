@@ -70,6 +70,7 @@ import "./systems/app-mode";
 import "./systems/exit-on-blur";
 
 import "./gltf-component-mappings";
+import { DEFAULT_ENVIRONMENT_URL } from "./assets/environments/environments";
 
 import { App } from "./App";
 
@@ -346,10 +347,7 @@ const onReady = async () => {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
     remountUI({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
     initialEnvironmentEl.setAttribute("gltf-bundle", {
-      src: process.env.ASSET_BUNDLE_SERVER + "/rooms/meetingroom/MeetingRoom.bundle.json"
-      // src: process.env.ASSET_BUNDLE_SERVER + "/rooms/theater/TheaterMeshes.bundle.json"
-      // src: process.env.ASSET_BUNDLE_SERVER + "/rooms/atrium/AtriumMeshes.bundle.json"
-      // src: process.env.ASSET_BUNDLE_SERVER + "/rooms/courtyard/CourtyardMeshes.bundle.json"
+      src: DEFAULT_ENVIRONMENT_URL
     });
     return;
   }
