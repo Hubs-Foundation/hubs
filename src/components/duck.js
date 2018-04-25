@@ -8,8 +8,8 @@ AFRAME.registerComponent("duck", {
   init: function() {
     this.system = this.el.sceneEl.systems.physics;
     this.hasBody = false;
-    this.position = new CANNON.Vec3();
-    this.force = new CANNON.Vec3(0, this.data.initialForce, 0);
+    this.position = new THREE.Vector3();
+    this.force = new THREE.Vector3(0, this.data.initialForce, 0);
     this.initialScale = this.el.object3D.scale.x;
     this.maxScale = this.data.maxScale * this.initialScale;
 

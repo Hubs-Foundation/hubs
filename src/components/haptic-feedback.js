@@ -45,7 +45,6 @@ AFRAME.registerComponent("haptic-feedback", {
 
   handlePulse: function(event) {
     const { intensity } = event.detail;
-    let strength;
 
     if (strengthForIntensity[intensity]) {
       this.pulse(strengthForIntensity[intensity]);
