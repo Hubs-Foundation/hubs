@@ -22,7 +22,7 @@
     "@fortawesome/react-fontawesome": "^0.0.18",
     "aframe-billboard-component": "^1.0.0",
     "aframe-extras": "https://github.com/MozillaReality/aframe-extras#feature/precompute-nav-mesh",
-    "aframe-input-mapping-component": "https://github.com/johnshaughnessy/aframe-input-mapping-component#feature/map-to-array",
+    "aframe-input-mapping-component": "https://github.com/mozillareality/aframe-input-mapping-component#hubs/master",
     "aframe-physics-extras": "https://github.com/infinitelee/aframe-physics-extras#fix/physics-collider-crash",
     "aframe-physics-system": "https://github.com/infinitelee/aframe-physics-system#feature/shape-component",
     "aframe-rounded": "^1.0.3",

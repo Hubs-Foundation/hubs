@@ -166,9 +166,9 @@ aframe-billboard-component@^1.0.0:
   dependencies:
     three-pathfinding "^0.5.5"
 
-"aframe-input-mapping-component@https://github.com/johnshaughnessy/aframe-input-mapping-component#feature/map-to-array":
+"aframe-input-mapping-component@https://github.com/mozillareality/aframe-input-mapping-component#hubs/master":
   version "0.1.2"
-  resolved "https://github.com/johnshaughnessy/aframe-input-mapping-component#33d7ad4c82a5e2b74defca39c7fa5ef15aab493e"
+  resolved "https://github.com/mozillareality/aframe-input-mapping-component#03932457c5318db243e811d2767fe0c5a8c7e9e0"
 
 "aframe-physics-extras@https://github.com/infinitelee/aframe-physics-extras#fix/physics-collider-crash":
   version "0.1.2"
