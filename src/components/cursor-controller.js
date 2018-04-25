@@ -10,7 +10,6 @@ AFRAME.registerComponent("cursor-controller", {
     camera: { type: "selector" },
     playerRig: { type: "selector" },
     gazeTeleportControls: { type: "selector" },
-    haptic: { type: "selector" },
     physicalHandSelector: { type: "string" },
     handedness: { default: "right", oneOf: ["right", "left"] },
     maxDistance: { default: 3 },
@@ -330,7 +329,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleMouseDown: function() {
-    if (this.isMobile && !this.hasPointingDevice) return;
+    if (this.isMobile && !this.inVR && !this.hasPointingDevice) return;
 
     if (this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI)) {
       this._setLookControlsEnabled(false);
@@ -341,13 +340,13 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleMouseMove: function(e) {
-    if (this.isMobile && !this.hasPointingDevice) return;
+    if (this.isMobile && !this.inVR && !this.hasPointingDevice) return;
 
     this.mousePos.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
   },
 
   _handleMouseUp: function() {
-    if (this.isMobile && !this.hasPointingDevice) return;
+    if (this.isMobile && !this.inVR && !this.hasPointingDevice) return;
 
     this._setLookControlsEnabled(true);
     this.data.cursor.emit("cursor-release", {});
