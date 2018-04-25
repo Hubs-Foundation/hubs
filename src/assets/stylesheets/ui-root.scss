@@ -17,7 +17,6 @@
     left: 14px;
 
     &__icon {
-      @extend %fa-icon-button-icon;
       background: rgba(33, 33, 33, 0.5);
       border-radius: 36px;
       display: inline-block;
