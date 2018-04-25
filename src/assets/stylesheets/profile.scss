@@ -9,11 +9,18 @@
   display: flex;
   pointer-events: auto;
 
+  &__avatar-selector-container {
+    flex: 1;
+    position: relative;
+    margin-bottom: 0.5em;
+  }
+
   &__avatar-selector {
     border: none;
     width: 95%;
     height: 100%;
-    margin: 1em 0;
+    z-index: 1;
+    position: relative;
   }
 
   &__form {

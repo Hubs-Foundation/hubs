@@ -92,11 +92,20 @@ class ProfileEntryPanel extends Component {
                 ref={inp => (this.nameInput = inp)}
               />
             </label>
-            <iframe
-              className="profile-entry__avatar-selector"
-              src={`/${this.props.htmlPrefix}avatar-selector.html#avatar_id=${this.state.avatarId}`}
-              ref={ifr => (this.avatarSelector = ifr)}
-            />
+            <div className="profile-entry__avatar-selector-container">
+              <div className="loading-panel">
+                <div className="loader-wrap">
+                  <div className="loader">
+                    <div className="loader-center" />
+                  </div>
+                </div>
+              </div>
+              <iframe
+                className="profile-entry__avatar-selector"
+                src={`/${this.props.htmlPrefix}avatar-selector.html#avatar_id=${this.state.avatarId}`}
+                ref={ifr => (this.avatarSelector = ifr)}
+              />
+            </div>
             <input className="profile-entry__form-submit" type="submit" value={formatMessage({ id: "profile.save" })} />
             <div className="profile-entry__box__links">
               <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
