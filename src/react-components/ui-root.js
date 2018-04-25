@@ -529,7 +529,7 @@ class UIRoot extends Component {
             If you have questions, contact us at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>.
             <p />
             If you&apos;d like to run your own server, hubs&apos;s source code is available on{" "}
-            <a href="https://github.com/mozilla/hubs">Github</a>.
+            <a href="https://github.com/mozilla/hubs">GitHub</a>.
           </div>
         );
       } else if (this.props.platformUnsupportedReason === "no_data_channels") {
@@ -537,12 +537,12 @@ class UIRoot extends Component {
         subtitle = (
           <div>
             Your browser does not support{" "}
-            <a href="https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel" rel="noreferrer noopener">
+            <a
+              href="https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createDataChannel#Browser_compatibility"
+              rel="noreferrer noopener"
+            >
               WebRTC Data Channels
             </a>, which is required to use Hubs.
-            <p />
-            You can <a href="https://firefox.com">Download Firefox</a>, a browser that protects your privacy and works
-            great with Hubs.
           </div>
         );
       } else {
