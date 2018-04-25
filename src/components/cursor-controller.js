@@ -78,16 +78,13 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   play: function() {
-    if (!this.inVR && this.isMobile && !this.hasPointingDevice) {
-      document.addEventListener("touchstart", this._handleTouchStart);
-      document.addEventListener("touchmove", this._handleTouchMove);
-      document.addEventListener("touchend", this._handleTouchEnd);
-    } else {
-      document.addEventListener("mousedown", this._handleMouseDown);
-      document.addEventListener("mousemove", this._handleMouseMove);
-      document.addEventListener("mouseup", this._handleMouseUp);
-      document.addEventListener("wheel", this._handleWheel);
-    }
+    document.addEventListener("touchstart", this._handleTouchStart);
+    document.addEventListener("touchmove", this._handleTouchMove);
+    document.addEventListener("touchend", this._handleTouchEnd);
+    document.addEventListener("mousedown", this._handleMouseDown);
+    document.addEventListener("mousemove", this._handleMouseMove);
+    document.addEventListener("mouseup", this._handleMouseUp);
+    document.addEventListener("wheel", this._handleWheel);
 
     window.addEventListener("enter-vr", this._handleEnterVR);
     window.addEventListener("exit-vr", this._handleExitVR);
@@ -258,6 +255,8 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleTouchStart: function(e) {
+    if (!this.isMobile || this.hasPointingDevice) return;
+
     const touch = e.touches[0];
     if (touch.clientY / window.innerHeight >= 0.8) return true;
     this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
@@ -303,6 +302,8 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleTouchMove: function(e) {
+    if (!this.isMobile || this.hasPointingDevice) return;
+
     for (let i = 0; i < e.touches.length; i++) {
       const touch = e.touches[i];
       if (touch.clientY / window.innerHeight >= 0.8) return true;
@@ -312,6 +313,8 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleTouchEnd: function(e) {
+    if (!this.isMobile || this.hasPointingDevice) return;
+
     for (let i = 0; i < e.changedTouches.length; i++) {
       const touch = e.changedTouches[i];
       const thisTouchDidNotDriveMousePos =
@@ -326,6 +329,8 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleMouseDown: function() {
+    if (this.isMobile && !this.inVR && !this.hasPointingDevice) return;
+
     if (this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI)) {
       this._setLookControlsEnabled(false);
       this.data.cursor.emit("cursor-grab", {});
@@ -335,10 +340,14 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleMouseMove: function(e) {
+    if (this.isMobile && !this.inVR && !this.hasPointingDevice) return;
+
     this.mousePos.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
   },
 
   _handleMouseUp: function() {
+    if (this.isMobile && !this.inVR && !this.hasPointingDevice) return;
+
     this._setLookControlsEnabled(true);
     this.data.cursor.emit("cursor-release", {});
     this._endTeleport();

@@ -10,7 +10,7 @@ const POSES = {
   mrpDown: "mrpDown"
 };
 
-const CONTROLLER_OFFSETS = {
+export const CONTROLLER_OFFSETS = {
   default: new THREE.Matrix4(),
   "oculus-touch-controls": new THREE.Matrix4().makeTranslation(0, -0.015, 0.04),
   "vive-controls": new THREE.Matrix4().compose(
