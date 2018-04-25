@@ -5,7 +5,10 @@ AFRAME.registerComponent("icon-button", {
     activeImage: { type: "string" },
     activeHoverImage: { type: "string" },
     active: { type: "boolean" },
-    haptic: { type: "selector" }
+    haptic: { type: "selector" },
+    tooltip: { type: "selector" },
+    tooltipText: { type: "string" },
+    activeTooltipText: { type: "string" }
   },
 
   init() {
@@ -53,5 +56,12 @@ AFRAME.registerComponent("icon-button", {
     const image = active ? (hovering ? "activeHoverImage" : "activeImage") : hovering ? "hoverImage" : "image";
 
     this.el.setAttribute("src", this.data[image]);
+
+    if (this.data.tooltip) {
+      this.data.tooltip.setAttribute("visible", this.hovering);
+      this.data.tooltip
+        .querySelector("[text]")
+        .setAttribute("text", "value", this.data.active ? this.data.activeTooltipText : this.data.tooltipText);
+    }
   }
 });
