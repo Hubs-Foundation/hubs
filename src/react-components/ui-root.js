@@ -402,7 +402,11 @@ class UIRoot extends Component {
         // the css renderer to keep up.
         this.micLevelMovingAverage.push(Date.now(), level * multiplier);
         const average = this.micLevelMovingAverage.movingAverage();
-        this.setState({ micLevel: average });
+        this.setState(state => {
+          if (Math.abs(average - state.micLevel) > 0.0001) {
+            return { micLevel: average };
+          }
+        });
       }, 50);
 
       const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForMediaStream(mediaStream));
