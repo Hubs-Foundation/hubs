@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
-import homeVideo from "../assets/video/home.webm";
+import homeVideoWebM from "../assets/video/home.webm";
+import homeVideoMp4 from "../assets/video/home.mp4";
 import classNames from "classnames";
 import { ENVIRONMENT_URLS } from "../assets/environments/environments";
 
@@ -186,7 +187,8 @@ class HomeRoot extends Component {
             </div>
           </div>
           <video playsInline autoPlay muted loop className="background-video" id="background-video">
-            <source src={homeVideo} type="video/webm" />
+            <source src={homeVideoWebM} type="video/webm" />
+            <source src={homeVideoMp4} type="video/mp4" />
           </video>
           {this.state.dialogType && (
             <InfoDialog
