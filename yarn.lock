@@ -5458,7 +5458,7 @@ neo-async@^2.5.0:
 
 "nipplejs@https://github.com/mozillareality/nipplejs#mr-social-client/master":
   version "0.6.8"
-  resolved "https://github.com/mozillareality/nipplejs#2ee0f479b66182aec2f338f2961f1eaeeccaeb1c"
+  resolved "https://github.com/mozillareality/nipplejs#7b5f953f75df28d42689e96c6a8342ab0a3cb595"
 
 no-case@^2.2.0:
   version "2.3.2"
