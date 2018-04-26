@@ -9,6 +9,7 @@ import en from "react-intl/locale-data/en";
 import MovingAverage from "moving-average";
 import screenfull from "screenfull";
 
+import { lang, messages } from "../utils/i18n";
 import AutoExitWarning from "./auto-exit-warning";
 import { TwoDEntryButton, GenericEntryButton, GearVREntryButton, DaydreamEntryButton } from "./entry-buttons.js";
 import { ProfileInfoHeader } from "./profile-info-header.js";
@@ -22,14 +23,7 @@ import faQuestion from "@fortawesome/fontawesome-free-solid/faQuestion";
 
 const mobiledetect = new MobileDetect(navigator.userAgent);
 
-const lang = ((navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage)
-  .toLowerCase()
-  .split(/[_-]+/)[0];
-
-import localeData from "../assets/translations.data.json";
 addLocaleData([...en]);
-
-const messages = localeData[lang] || localeData.en;
 
 const ENTRY_STEPS = {
   start: "start",
@@ -638,6 +632,19 @@ class UIRoot extends Component {
             )}
             {screenSharingCheckbox}
           </div>
+          {!mobiledetect.mobile() && (
+            <div className="entry-panel__webvr-link-container">
+              <FormattedMessage id="entry.webvr-link-preamble" />{" "}
+              <a
+                className="entry-panel__webvr-link"
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://webvr.rocks/"
+              >
+                <FormattedMessage id="entry.webvr-link" />
+              </a>
+            </div>
+          )}
         </div>
       ) : null;
 

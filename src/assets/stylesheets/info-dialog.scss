@@ -140,7 +140,8 @@
   &__submit {
     @extend %bottom-button;
     border: 0;
-    margin-top: 16px;
+    margin-top: 0;
+    margin-bottom: 0;
   }
 
   &__privacy {
