@@ -115,7 +115,8 @@ class InfoDialog extends Component {
             <a href="https://webvr-slack.herokuapp.com/" target="_blank" rel="noopener noreferrer">
               WebVR Slack
             </a>{" "}
-            in the #social channel.<br />VR meetups every Friday at noon PST!
+            in the <a href="https://webvr.slack.com/messages/social" target="_blank" rel="noopener noreferrer">#social</a> channel.<br />
+            VR meetups every Friday at noon PST!
             <p /> Or, tweet at{" "}
             <a href="https://twitter.com/mozillareality" target="_blank" rel="noopener noreferrer">
               @mozillareality
@@ -200,12 +201,12 @@ class InfoDialog extends Component {
             <p />
             You can file a{" "}
             <a href="https://github.com/mozilla/hubs/issues" target="_blank" rel="noopener noreferrer">
-              Github Issue
+              GitHub Issue
             </a>{" "}
             or e-mail us for support at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>.
             <p />
-            You can also find us in #social on the{" "}
-            <a href="http://webvr-slack.herokuapp.com/" target="_blank" rel="noopener noreferrer">
+            You can also find us in <a href="https://webvr.slack.com/messages/social" target="_blank" rel="noopener noreferrer">#social</a> on the{" "}
+            <a href="https://webvr-slack.herokuapp.com/" target="_blank" rel="noopener noreferrer">
               WebVR Slack
             </a>.
           </span>
