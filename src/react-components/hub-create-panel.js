@@ -197,7 +197,6 @@ class HubCreatePanel extends Component {
                       {meta.url ? (
                         <a
                           href={meta.url}
-                          target="_blank"
                           rel="noopener noreferrer"
                           className="create-panel__form__environment__picker__labels__header__title"
                         >
@@ -213,7 +212,6 @@ class HubCreatePanel extends Component {
                         (environmentAuthor.url ? (
                           <a
                             href={environmentAuthor.url}
-                            target="_blank"
                             rel="noopener noreferrer"
                             className="create-panel__form__environment__picker__labels__header__author"
                           >
@@ -231,7 +229,6 @@ class HubCreatePanel extends Component {
                         (environmentAuthor.organization.url ? (
                           <a
                             href={environmentAuthor.organization.url}
-                            target="_blank"
                             rel="noopener noreferrer"
                             className="create-panel__form__environment__picker__labels__header__org"
                           >
