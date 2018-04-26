@@ -22,10 +22,12 @@ AFRAME.registerComponent("super-spawner", {
   pause: function() {
     this.el.removeEventListener("grab-start", this.handleGrabStart);
 
-    clearTimeout(this.timeout);
-    this.timeout = null;
-    this.el.setAttribute("visible", true);
-    this.el.classList.add("interactable");
+    if (!this.timeout) {
+      clearTimeout(this.timeout);
+      this.timeout = null;
+      this.el.setAttribute("visible", true);
+      this.el.classList.add("interactable");
+    }
   },
 
   remove: function() {
