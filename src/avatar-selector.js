@@ -4,6 +4,8 @@ import queryString from "query-string";
 import { IntlProvider, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 
+import { lang, messages } from "./utils/i18n";
+
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
@@ -19,7 +21,8 @@ import { avatars } from "./assets/avatars/avatars";
 import registerTelemetry from "./telemetry";
 import { App } from "./App";
 import AvatarSelector from "./react-components/avatar-selector";
-import localeData from "./assets/translations.data.json";
+
+addLocaleData([...en]);
 
 registerTelemetry();
 
@@ -31,12 +34,6 @@ if (hash.quality) {
 } else {
   window.APP.quality = isMobile ? "low" : "high";
 }
-
-const lang = ((navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage)
-  .toLowerCase()
-  .split(/[_-]+/)[0];
-addLocaleData([...en]);
-const messages = localeData[lang] || localeData.en;
 
 function postAvatarIdToParent(newAvatarId) {
   window.parent.postMessage({ avatarId: newAvatarId }, location.origin);

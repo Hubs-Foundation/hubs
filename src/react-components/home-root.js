@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
+
+import { lang, messages } from "../utils/i18n";
 import homeVideoWebM from "../assets/video/home.webm";
 import homeVideoMp4 from "../assets/video/home.mp4";
 import classNames from "classnames";
@@ -10,15 +12,7 @@ import { ENVIRONMENT_URLS } from "../assets/environments/environments";
 import HubCreatePanel from "./hub-create-panel.js";
 import InfoDialog from "./info-dialog.js";
 
-const navigatorLang = ((navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage)
-  .toLowerCase()
-  .split(/[_-]+/)[0];
-
-import localeData from "../assets/translations.data.json";
 addLocaleData([...en]);
-
-const lang = (navigatorLang && localeData[navigatorLang]) || "en";
-const messages = localeData[lang] || localeData.en;
 
 class HomeRoot extends Component {
   static propTypes = {
