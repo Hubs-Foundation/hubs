@@ -64,7 +64,7 @@ class HomeRoot extends Component {
     const dialogTypes = InfoDialog.dialogTypes;
 
     return (
-      <IntlProvider defaultLocale="en" locale={lang} messages={messages}>
+      <IntlProvider locale={lang} messages={messages}>
         <div className="home">
           <div className={mainContentClassNames}>
             <div className="header-content">
