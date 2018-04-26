@@ -10,13 +10,14 @@ import { ENVIRONMENT_URLS } from "../assets/environments/environments";
 import HubCreatePanel from "./hub-create-panel.js";
 import InfoDialog from "./info-dialog.js";
 
-const navigatorLang = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
-
-const lang = navigatorLang.toLowerCase().split(/[_-]+/)[0];
+const navigatorLang = ((navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage)
+  .toLowerCase()
+  .split(/[_-]+/)[0];
 
 import localeData from "../assets/translations.data.json";
 addLocaleData([...en]);
 
+const lang = (navigatorLang && localeData[navigatorLang]) || "en";
 const messages = localeData[lang] || localeData.en;
 
 class HomeRoot extends Component {
@@ -69,7 +70,7 @@ class HomeRoot extends Component {
     const dialogTypes = InfoDialog.dialogTypes;
 
     return (
-      <IntlProvider locale={lang} messages={messages}>
+      <IntlProvider defaultLocale="en" locale={lang} messages={messages}>
         <div className="home">
           <div className={mainContentClassNames}>
             <div className="header-content">
