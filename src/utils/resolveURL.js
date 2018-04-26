@@ -16,7 +16,7 @@ export function resolveURL(url, path) {
   return path + url;
 }
 
-export function resolveGLTFSrc(url, gltfPath) {
+export function resolveGLTFComponentUrl(url, gltfPath) {
   // Let AFrame parse the URL
   if (url.match(/\url\((.+)\)/) || url.charAt(0) === "#") {
     return url;
