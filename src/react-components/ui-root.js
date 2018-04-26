@@ -632,6 +632,19 @@ class UIRoot extends Component {
             )}
             {screenSharingCheckbox}
           </div>
+          {!mobiledetect.mobile() && (
+            <div className="entry-panel__webvr-link-container">
+              <FormattedMessage id="entry.webvr-link-preamble" />{" "}
+              <a
+                className="entry-panel__webvr-link"
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://webvr.rocks/"
+              >
+                <FormattedMessage id="entry.webvr-link" />
+              </a>
+            </div>
+          )}
         </div>
       ) : null;
 
