@@ -14,6 +14,7 @@
     position: relative;
     margin-bottom: 0.5em;
     width: 95%;
+    text-align: center;
   }
 
   &__avatar-selector {
@@ -43,7 +44,6 @@
     min-height: 200px;
     max-height: 1000px;
     height: 90%;
-    overflow-y: auto;
 
     &__links {
       display: flex;
