@@ -8,6 +8,7 @@ const webpack = require("webpack");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const WebpackPwaManifest = require("webpack-pwa-manifest");
 const _ = require("lodash");
 
 const SMOKE_PREFIX = "smoke-";
@@ -83,7 +84,10 @@ const config = {
   output: {
     path: path.join(__dirname, "public"),
     filename: "assets/js/[name]-[chunkhash].js",
-    publicPath: process.env.BASE_ASSETS_PATH || ""
+    publicPath:
+      process.env.GENERATE_SMOKE_TESTS && process.env.BASE_ASSETS_PATH
+        ? process.env.BASE_ASSETS_PATH.replace("://", `://${SMOKE_PREFIX}`)
+        : process.env.BASE_ASSETS_PATH || ""
   },
   mode: "development",
   devtool: process.env.NODE_ENV === "production" ? "source-map" : "inline-source-map",
@@ -206,6 +210,47 @@ const config = {
         to: "favicon.ico"
       }
     ]),
+    new WebpackPwaManifest({
+      filename: "[path][name]-[hash].webmanifest",
+      inject: true,
+      dir: "ltr",
+      lang: "en",
+      name: "Mozilla Hubs",
+      short_name: "Hubs",
+      description: "Join others in VR in Hubs by Mozilla, right in your browser.",
+      display: "standalone",
+      orientation: "landscape-primary",
+      start_url: "./?src=manifest",
+      background_color: "#000",
+      theme_color: "#000",
+      serviceworker: {
+        "src": "/sw.js",
+        "scope": "/",
+        "update_via_cache": 'none'
+      }
+      icons: [
+        {
+          src: path.resolve("src", "assets", "images", "icon.png"),
+          sizes: [
+            64
+          ],
+          purpose: "badge"
+        }
+      ],
+      ios: {
+        "apple-touch-icon": path.resolve("src", "assets", "images", "icon.png"),
+        "apple-touch-startup-image": path.resolve("src", "assets", "images", "icon.png"),
+        "apple-mobile-web-app-capable": "yes",
+        "apple-mobile-web-app-title": "Mozilla Hubs",
+        "apple-mobile-web-app-status-bar-style": "black"
+      }
+    }),
+    new CopyWebpackPlugin([
+      {
+        from: "src/assets/sw.js",
+        to: "sw.js"
+      }
+    ]),
     new CopyWebpackPlugin([
       {
         from: "src/assets/images/hub-preview.png",
@@ -245,10 +290,8 @@ module.exports = () => {
   if (process.env.GENERATE_SMOKE_TESTS && process.env.BASE_ASSETS_PATH) {
     const smokeConfig = Object.assign({}, config, {
       // Set the public path for to point to the correct assets on the smoke-test build.
-      output: Object.assign({}, config.output, {
-        publicPath: process.env.BASE_ASSETS_PATH.replace("://", `://${SMOKE_PREFIX}`)
-      }),
-      // For this config
+      output: config.output,
+      // For this config.
       plugins: config.plugins.map(plugin => {
         if (plugin instanceof HTMLWebpackPlugin) {
           return new HTMLWebpackPlugin(

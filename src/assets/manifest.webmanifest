@@ -1,0 +1,25 @@
+{
+  "lang": "en",
+  "dir": "ltr",
+  "name": "Mozilla Hubs",
+  "description": "A new way to get together online. Laugh, play, get stuff done, or just hang out. A WebVR experiment by Mozilla Mixed Reality.",
+  "short_name": "Hubs",
+  "icons": [
+    {
+      "src": "https://assets-prod.reticulum.io/assets/images/icon.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    }
+  ],
+  "scope": "/",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "theme_color": "#000",
+  "background_color": "#000",
+  "serviceworker": {
+    "src": "sw.js",
+    "scope": "/",
+    "update_via_cache": "none"
+  }
+}

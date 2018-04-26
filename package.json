@@ -87,6 +87,7 @@
     "style-loader": "^0.20.2",
     "webpack": "^4.0.1",
     "webpack-cli": "^2.0.9",
-    "webpack-dev-server": "^3.0.0"
+    "webpack-dev-server": "^3.0.0",
+    "webpack-pwa-manifest": "^3.6.2"
   }
 }
