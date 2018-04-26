@@ -44,7 +44,7 @@ THIS LIMITATION WILL APPLY NOTWITHSTANDING THE FAILURE OF ESSENTIAL PURPOSE OF A
 EXCEPT AS REQUIRED BY LAW, THE INDEMNIFIED PARTIES, WILL NOT BE LIABLE FOR ANY INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL, OR EXEMPLARY DAMAGES ARISING OUT OF OR IN ANY WAY RELATING TO THESE TERMS OR THE USE OF OR INABILITY TO USE THE SERVICES, INCLUDING WITHOUT LIMITATION DIRECT AND INDIRECT DAMAGES FOR LOSS OF GOODWILL, WORK STOPPAGE, LOST PROFITS, LOSS OF DATA, AND COMPUTER FAILURE OR MALFUNCTION, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE THEORY (CONTRACT, TORT, OR OTHERWISE) UPON WHICH SUCH CLAIM IS BASED. THE COLLECTIVE LIABILITY OF THE INDEMNIFIED PARTIES, UNDER THIS AGREEMENT WILL NOT EXCEED $500 (FIVE HUNDRED DOLLARS). SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF INCIDENTAL, CONSEQUENTIAL, OR SPECIAL DAMAGES, SO THIS EXCLUSION AND LIMITATION MAY NOT APPLY TO YOU.
 
 ### 8. Modifications to These Terms
-Mozilla may update these Terms from time to time. We will post the update Terms online. If the changes are substantive, we will announce the update through Mozilla's usual channels for such announcements such as blog posts, forums, or in the particular service itself, in this case: Hubs by Mozilla. 
+Mozilla may update these Terms from time to time. We will post the updated Terms online. If the changes are substantive, we will announce the update through Mozilla's usual channels for such announcements such as blog posts, forums, or in the particular service itself, in this case: Hubs by Mozilla. 
 
 Your continued use of Hubs after we post the new Terms constitutes your acceptance of the new Terms. To make your review more convenient, we will post an effective date at the top of this page.
 
