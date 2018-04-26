@@ -16,6 +16,15 @@ export function resolveURL(url, path) {
   return path + url;
 }
 
+export function resolveGLTFSrc(url, gltfPath) {
+  // Let AFrame parse the URL
+  if (url.match(/\url\((.+)\)/) || url.charAt(0) === "#") {
+    return url;
+  }
+
+  return resolveURL(gltfPath);
+}
+
 export function extractUrlBase(url) {
   const index = url.lastIndexOf("/");
 
