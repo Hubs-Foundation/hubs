@@ -350,7 +350,7 @@ const onReady = async () => {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
     remountUI({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
     initialEnvironmentEl.setAttribute("gltf-bundle", {
-      src: DEFAULT_ENVIRONMENT_URL
+      src: qs.environment || DEFAULT_ENVIRONMENT_URL
     });
     return;
   }
