@@ -22,7 +22,7 @@ AFRAME.registerComponent("super-spawner", {
   pause: function() {
     this.el.removeEventListener("grab-start", this.handleGrabStart);
 
-    if (!this.timeout) {
+    if (this.timeout) {
       clearTimeout(this.timeout);
       this.timeout = null;
       this.el.setAttribute("visible", true);
