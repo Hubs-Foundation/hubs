@@ -55,21 +55,48 @@ class AvatarSelector extends Component {
   componentWillReceiveProps(nextProps) {
     // Push new avatar indices onto the array if necessary.
     this.setState(state => {
-      if (this.state.avatarIndices.length === nextProps.avatars.length) return;
+      const numAvatars = nextProps.avatars.length;
+      if (state.avatarIndices.length === numAvatars) return;
+
+      const lastIndex = numAvatars - 1;
+      const currAvatarIndex = this.getAvatarIndex();
       const nextAvatarIndex = AvatarSelector.getAvatarIndex(nextProps);
-      if (
-        nextAvatarIndex === nextProps.avatars.length - 1 ||
-        nextAvatarIndex < AvatarSelector.getAvatarIndex(this.props)
-      ) {
-        const addIndex = AvatarSelector.nextAvatarIndex(nextProps);
-        if (state.avatarIndices.includes(addIndex)) return;
-        state.avatarIndices.unshift(addIndex);
+      const avatarIndices = Array.from(state.avatarIndices);
+      const increasing = currAvatarIndex - nextAvatarIndex < 0;
+
+      let direction = -1;
+      let push = false;
+
+      if (nextAvatarIndex === 0) {
+        if (currAvatarIndex === lastIndex) {
+          direction = 1;
+          push = avatarIndices.indexOf(lastIndex) !== 0;
+        } else {
+          direction = -1;
+          push = avatarIndices.indexOf(1) !== 0;
+        }
+      } else if (nextAvatarIndex === lastIndex) {
+        if (currAvatarIndex === 0) {
+          direction = -1;
+          push = avatarIndices.indexOf(0) === 0;
+        } else {
+          direction = 1;
+          push = avatarIndices.indexOf(lastIndex - 1) !== 0;
+        }
       } else {
-        const addIndex = AvatarSelector.previousAvatarIndex(nextProps);
-        if (state.avatarIndices.includes(addIndex)) return;
-        state.avatarIndices.push(addIndex);
+        direction = increasing ? 1 : -1;
+        push = increasing;
       }
-      return state;
+
+      const addIndex = AvatarSelector.getAvatarIndex(nextProps, direction);
+      if (avatarIndices.includes(addIndex)) return;
+
+      if (push) {
+        avatarIndices.push(addIndex);
+      } else {
+        avatarIndices.unshift(addIndex);
+      }
+      return { avatarIndices };
     });
   }
 
