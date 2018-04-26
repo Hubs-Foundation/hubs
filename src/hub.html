@@ -62,7 +62,7 @@
             <a-asset-item id="botwoody" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotWoody_Avatar-0140485a23.gltf"></a-asset-item>
 
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
-            <a-asset-item id="interactable-duck" response-type="arraybuffer" src="./assets/interactables/duck/DuckyMesh.glb"></a-asset-item>
+            <a-asset-item id="interactable-duck" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf"></a-asset-item>
 
             <a-asset-item id="quack" src="./assets/sfx/quack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="specialquack" src="./assets/sfx/specialquack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -164,7 +164,6 @@
             <template id="interactable-template">
                 <a-entity
                     gltf-model-plus="src: #interactable-duck; inflate: true;"
-                    scale="2 2 2"
                     class="interactable" 
                     super-networked-interactable="counter: #counter; mass: 1;"
                     body="type: dynamic; shape: none; mass: 1;"
