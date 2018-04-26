@@ -216,7 +216,8 @@
 	    top: 50%;
 	    margin-top: -0.5em;
 	    pointer-events: auto;
-	    cursor: pointer;
+      cursor: pointer;
+      padding: 0;
 	  }
 
 	  &__prev {
