@@ -68,7 +68,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   update: function(oldData) {
-    if (oldData.physicalHand !== this.data.physicalHandSelector) {
+    if (oldData.physicalHandSelector !== this.data.physicalHandSelector) {
       this._handleModelLoaded();
     }
 
@@ -445,7 +445,7 @@ AFRAME.registerComponent("cursor-controller", {
     if (this.hasPointingDevice) {
       const controllerData = this.controllerQueue[0];
       const hand = controllerData.handedness;
-      this.el.setAttribute("cursor-controller", { physicalHand: `#${hand}-super-hand` });
+      this.el.setAttribute("cursor-controller", { physicalHandSelector: `#player-${hand}-controller` });
       this.controller = controllerData.controller;
     } else {
       this.controller = null;
