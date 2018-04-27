@@ -5448,7 +5448,7 @@ neo-async@^2.5.0:
 
 "networked-aframe@https://github.com/mozillareality/networked-aframe#mr-social-client/master":
   version "0.6.1"
-  resolved "https://github.com/mozillareality/networked-aframe#74c00c8c4568c8ac5ffa6ef93f342ce0138684ce"
+  resolved "https://github.com/mozillareality/networked-aframe#3e690e113052a7ebf8e2b0a89785843690ba7c7b"
   dependencies:
     easyrtc "1.1.0"
     express "^4.10.7"
