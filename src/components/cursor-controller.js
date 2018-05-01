@@ -317,12 +317,15 @@ AFRAME.registerComponent("cursor-controller", {
 
     for (let i = 0; i < e.changedTouches.length; i++) {
       const touch = e.changedTouches[i];
-      const thisTouchDidNotDriveMousePos =
-        Math.abs(touch.clientX - this.lastTouch.clientX) > 0.1 &&
-        Math.abs(touch.clientY - this.lastTouch.clientY) > 0.1;
-      if (thisTouchDidNotDriveMousePos) {
-        return;
+      if (this.lastTouch) {
+        const thisTouchDidNotDriveMousePos =
+          Math.abs(touch.clientX - this.lastTouch.clientX) > 0.1 &&
+          Math.abs(touch.clientY - this.lastTouch.clientY) > 0.1;
+        if (thisTouchDidNotDriveMousePos) {
+          return;
+        }
       }
+
     }
     this._setLookControlsEnabled(true);
     this.data.cursor.emit("cursor-release", {});
@@ -370,10 +373,8 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleEnterVR: function() {
-    if (AFRAME.utils.device.checkHeadsetConnected()) {
-      this.inVR = true;
-      this._updateController();
-    }
+    this.inVR = true;
+    this._updateController();
   },
 
   _handleExitVR: function() {
@@ -440,7 +441,7 @@ AFRAME.registerComponent("cursor-controller", {
   _updateController: function() {
     this.hasPointingDevice = this.controllerQueue.length > 0 && this.inVR;
 
-    this._setCursorVisibility(this.hasPointingDevice);
+    this._setCursorVisibility(this.hasPointingDevice || this.isMobile);
 
     if (this.hasPointingDevice) {
       const controllerData = this.controllerQueue[0];
