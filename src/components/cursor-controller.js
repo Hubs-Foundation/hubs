@@ -325,7 +325,6 @@ AFRAME.registerComponent("cursor-controller", {
           return;
         }
       }
-
     }
     this._setLookControlsEnabled(true);
     this.data.cursor.emit("cursor-release", {});
