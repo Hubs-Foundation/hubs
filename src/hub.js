@@ -9,7 +9,7 @@ patchWebGLRenderingContext();
 
 import "aframe-xr";
 import "./vendor/GLTFLoader";
-import "networked-aframe";
+import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
 import "aframe-input-mapping-component";
