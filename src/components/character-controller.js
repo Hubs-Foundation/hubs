@@ -75,7 +75,9 @@ AFRAME.registerComponent("character-controller", {
   },
 
   handleTeleport: function(event) {
-    this.setPositionOnNavMesh(event.detail.oldPosition, this.el.object3D);
+    this.navGroup = null;
+    this.navNode = null;
+    this.setPositionOnNavMesh(event.detail.newPosition, this.el.object3D);
   },
 
   tick: (function() {
