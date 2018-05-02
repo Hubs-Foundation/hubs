@@ -194,7 +194,7 @@ aframe-slice9-component@^1.0.0:
 
 "aframe-teleport-controls@https://github.com/mozillareality/aframe-teleport-controls#hubs/master":
   version "0.3.2"
-  resolved "https://github.com/mozillareality/aframe-teleport-controls#9e2ef7da57144c4a615eba40a945d4cfa105a092"
+  resolved "https://github.com/mozillareality/aframe-teleport-controls#b241e71b256450cdd7a2331d0ab02cf401029493"
 
 "aframe-xr@github:brianpeiris/aframe-xr#3162aed":
   version "0.0.9"
