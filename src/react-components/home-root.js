@@ -38,10 +38,12 @@ class HomeRoot extends Component {
     function initVideo() {
       videoEl.playbackRate = 0.75;
       videoEl.play();
-      let inIframe = !!window.frameElement;
       function toggleVideo() {
-        // Play the video if the window/tab is visible (or is within an `<iframe>`).
-        if (document.hasFocus() || inIframe) {
+        // Play the video if the window/tab is visible.
+        if (!("hasFocus" in document)) {
+          return;
+        }
+        if (document.hasFocus()) {
           videoEl.play();
         } else {
           videoEl.pause();
