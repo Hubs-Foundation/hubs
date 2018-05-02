@@ -13,9 +13,19 @@ const querystring = require("query-string");
 
   const url = "https://localhost:8080/hub.html?" + querystring.stringify(params);
 
-  console.log("spawning squawkers...");
+  console.log("spawning bots...");
+
   page.on("console", msg => console.log("PAGE: ", msg.text()));
-  await page.goto(url);
+  const navigate = async () => {
+    try {
+      await page.goto(url);
+      console.log("BPDEBUG navigated");
+    } catch (e) {
+      setTimeout(navigate, 1000);
+    }
+  };
+  navigate();
+
   // Interact with the page so that audio can play.
   page.mouse.click(100, 100);
 })();
