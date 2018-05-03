@@ -2,7 +2,7 @@ import { CONTROLLER_OFFSETS } from "./hand-controls2.js";
 
 AFRAME.registerComponent("controls-shape-offset", {
   schema: {
-    additionalOffset: { default: { x: 0, y: -0.03, z: -0.04 } }
+    additionalOffset: { type: "vec3", default: { x: 0, y: -0.03, z: -0.04 } }
   },
   init: function() {
     this.controller = null;
