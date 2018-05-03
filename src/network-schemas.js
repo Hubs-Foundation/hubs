@@ -2,9 +2,19 @@ function registerNetworkSchemas() {
   NAF.schemas.add({
     template: "#remote-avatar-template",
     components: [
-      "position",
+      {
+        component: "position",
+        dirtyPredicate: {
+          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
+          epsilon: 0.01
+        }
+      },
       {
         component: "rotation",
+        dirtyPredicate: {
+          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
+          epsilon: 1
+        },
         lerp: false
       },
       "scale",
@@ -12,19 +22,35 @@ function registerNetworkSchemas() {
       "networked-avatar",
       {
         selector: ".camera",
-        component: "position"
+        component: "position",
+        dirtyPredicate: {
+          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
+          epsilon: 0.01
+        }
       },
       {
         selector: ".camera",
-        component: "rotation"
+        component: "rotation",
+        dirtyPredicate: {
+          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
+          epsilon: 1
+        }
       },
       {
         selector: ".left-controller",
-        component: "position"
+        component: "position",
+        dirtyPredicate: {
+          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
+          epsilon: 0.01
+        }
       },
       {
         selector: ".left-controller",
-        component: "rotation"
+        component: "rotation",
+        dirtyPredicate: {
+          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
+          epsilon: 1
+        }
       },
       {
         selector: ".left-controller",
@@ -32,11 +58,19 @@ function registerNetworkSchemas() {
       },
       {
         selector: ".right-controller",
-        component: "position"
+        component: "position",
+        dirtyPredicate: {
+          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
+          epsilon: 0.01
+        }
       },
       {
         selector: ".right-controller",
-        component: "rotation"
+        component: "rotation",
+        dirtyPredicate: {
+          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
+          epsilon: 1
+        }
       },
       {
         selector: ".right-controller",
@@ -47,12 +81,44 @@ function registerNetworkSchemas() {
 
   NAF.schemas.add({
     template: "#video-template",
-    components: ["position", "rotation", "visible"]
+    components: [
+      {
+        component: "position",
+        dirtyPredicate: {
+          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
+          epsilon: 0.01
+        }
+      },
+      {
+        component: "rotation",
+        dirtyPredicate: {
+          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
+          epsilon: 1
+        }
+      },
+      "visible"
+    ]
   });
 
   NAF.schemas.add({
     template: "#interactable-template",
-    components: ["position", "rotation", "scale"]
+    components: [
+      {
+        component: "position",
+        dirtyPredicate: {
+          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
+          epsilon: 0.01
+        }
+      },
+      {
+        component: "rotation",
+        dirtyPredicate: {
+          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
+          epsilon: 1
+        }
+      },
+      "scale"
+    ]
   });
 }
 

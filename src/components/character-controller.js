@@ -114,9 +114,6 @@ AFRAME.registerComponent("character-controller", {
       pivotRotationMatrix.makeRotationAxis(rotationAxis, pivot.rotation.y);
       pivotRotationInvMatrix.makeRotationAxis(rotationAxis, -pivot.rotation.y);
       this.updateVelocity(deltaSeconds);
-      if (this.velocity.x === 0 && this.velocity.y === 0 && this.velocity.z === 0) {
-        return;
-      }
       move.makeTranslation(this.velocity.x * distance, this.velocity.y * distance, this.velocity.z * distance);
       yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 
