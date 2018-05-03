@@ -298,6 +298,13 @@ const onReady = async () => {
         playerRig.setAttribute("avatar-replay", "");
         const audio = document.getElementById("bot-recording");
         mediaStream.addTrack(audio.captureStream().getAudioTracks()[0]);
+        // wait for runner script to confirm interaction so that we can play audio.
+        const interacted = new Promise(resolve => {
+          window.interacted = resolve;
+        });
+        console.log("BPDEBUG waiting for interaction");
+        await interacted;
+        console.log("BPDEBUG playing audio");
         audio.play().catch(e => console.log(e.toString()));
         NAF.connection.adapter.setLocalMediaStream(mediaStream);
       }

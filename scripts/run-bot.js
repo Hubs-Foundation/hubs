@@ -19,13 +19,19 @@ const querystring = require("query-string");
   const navigate = async () => {
     try {
       await page.goto(url);
+      await page.evaluate(() => {
+        console.log(navigator.userAgent);
+      });
       console.log("BPDEBUG navigated");
+      // Interact with the page so that audio can play.
+      page.mouse.click(100, 100);
+      await page.evaluate(() => {
+        window.interacted();
+      });
     } catch (e) {
+      console.log("Navigation error", e);
       setTimeout(navigate, 1000);
     }
   };
   navigate();
-
-  // Interact with the page so that audio can play.
-  page.mouse.click(100, 100);
 })();
