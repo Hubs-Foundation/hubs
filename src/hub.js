@@ -201,7 +201,7 @@ const onReady = async () => {
     document.body.removeChild(scene);
   };
 
-  const enterScene = async (mediaStream, enterInVR, janusRoomId) => {
+  const enterScene = async (mediaStream, enterInVR, hubId) => {
     const scene = document.querySelector("a-scene");
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("a-scene canvas").classList.remove("blurred");
@@ -216,7 +216,7 @@ const onReady = async () => {
     document.querySelector("#player-camera").setAttribute("look-controls", "");
 
     scene.setAttribute("networked-scene", {
-      room: janusRoomId,
+      room: hubId,
       serverURL: process.env.JANUS_SERVER
     });
 
@@ -349,7 +349,7 @@ const onReady = async () => {
 
   if (qs.room) {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
-    remountUI({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
+    remountUI({ hubId: qs.room || "default" });
     initialEnvironmentEl.setAttribute("gltf-bundle", {
       src: DEFAULT_ENVIRONMENT_URL
     });
@@ -379,7 +379,7 @@ const onReady = async () => {
       const hub = data.hubs[0];
       const defaultSpaceTopic = hub.topics[0];
       const gltfBundleUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
-      remountUI({ janusRoomId: defaultSpaceTopic.janus_room_id, hubName: hub.name });
+      remountUI({ hubId: hub.hub_id, hubName: hub.name });
       initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`);
       hubChannel.setPhoenixChannel(channel);
     })
