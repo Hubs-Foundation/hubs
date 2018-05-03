@@ -5,42 +5,62 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   schema: {},
 
   init() {
-    // Setup gamepad elements
-    const leftTouchZone = document.createElement("div");
-    leftTouchZone.classList.add(styles.touchZone, styles.left);
-    document.body.appendChild(leftTouchZone);
-
-    const rightTouchZone = document.createElement("div");
-    rightTouchZone.classList.add(styles.touchZone, styles.right);
-    document.body.appendChild(rightTouchZone);
-
-    const leftStick = nipplejs.create({
-      zone: leftTouchZone,
-      color: "white",
-      fadeTime: 0
-    });
-
-    const rightStick = nipplejs.create({
-      zone: rightTouchZone,
-      color: "white",
-      fadeTime: 0
-    });
-
+    this.onEnterVr = this.onEnterVr.bind(this);
+    this.onExitVr = this.onExitVr.bind(this);
+    this.onFirstInteraction = this.onFirstInteraction.bind(this);
     this.onMoveJoystickChanged = this.onMoveJoystickChanged.bind(this);
     this.onMoveJoystickEnd = this.onMoveJoystickEnd.bind(this);
     this.onLookJoystickChanged = this.onLookJoystickChanged.bind(this);
     this.onLookJoystickEnd = this.onLookJoystickEnd.bind(this);
 
-    leftStick.on("move", this.onMoveJoystickChanged);
-    leftStick.on("end", this.onMoveJoystickEnd);
+    this.mockJoystickContainer = document.createElement("div");
+    this.mockJoystickContainer.classList.add(styles.mockJoystickContainer);
+    const leftMock = document.createElement("div");
+    leftMock.classList.add(styles.mockJoystick);
+    const leftMockSmall = document.createElement("div");
+    leftMockSmall.classList.add(styles.mockJoystick, styles.inner);
+    leftMock.appendChild(leftMockSmall);
+    this.mockJoystickContainer.appendChild(leftMock);
+    const rightMock = document.createElement("div");
+    rightMock.classList.add(styles.mockJoystick);
+    const rightMockSmall = document.createElement("div");
+    rightMockSmall.classList.add(styles.mockJoystick, styles.inner);
+    rightMock.appendChild(rightMockSmall);
+    this.mockJoystickContainer.appendChild(rightMock);
+    document.body.appendChild(this.mockJoystickContainer);
 
-    rightStick.on("move", this.onLookJoystickChanged);
-    rightStick.on("end", this.onLookJoystickEnd);
+    // Setup gamepad elements
+    const leftTouchZone = document.createElement("div");
+    leftTouchZone.classList.add(styles.touchZone, styles.left);
+    document.body.appendChild(leftTouchZone);
 
     this.leftTouchZone = leftTouchZone;
+
+    this.leftStick = nipplejs.create({
+      zone: this.leftTouchZone,
+      color: "white",
+      fadeTime: 0
+    });
+
+    this.leftStick.on("start", this.onFirstInteraction);
+    this.leftStick.on("move", this.onMoveJoystickChanged);
+    this.leftStick.on("end", this.onMoveJoystickEnd);
+
+    const rightTouchZone = document.createElement("div");
+    rightTouchZone.classList.add(styles.touchZone, styles.right);
+    document.body.appendChild(rightTouchZone);
+
     this.rightTouchZone = rightTouchZone;
-    this.leftStick = leftStick;
-    this.rightStick = rightStick;
+
+    this.rightStick = nipplejs.create({
+      zone: this.rightTouchZone,
+      color: "white",
+      fadeTime: 0
+    });
+
+    this.rightStick.on("start", this.onFirstInteraction);
+    this.rightStick.on("move", this.onLookJoystickChanged);
+    this.rightStick.on("end", this.onLookJoystickEnd);
 
     this.inVr = false;
     this.moving = false;
@@ -53,10 +73,14 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
       value: 0
     };
 
-    this.onEnterVr = this.onEnterVr.bind(this);
-    this.onExitVr = this.onExitVr.bind(this);
     this.el.sceneEl.addEventListener("enter-vr", this.onEnterVr);
     this.el.sceneEl.addEventListener("exit-vr", this.onExitVr);
+  },
+
+  onFirstInteraction() {
+    this.leftStick.off("start", this.onFirstInteraction);
+    this.rightStick.off("start", this.onFirstInteraction);
+    document.body.removeChild(this.mockJoystickContainer);
   },
 
   onMoveJoystickChanged(event, joystick) {

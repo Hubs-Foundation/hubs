@@ -19,3 +19,7 @@
 .a-canvas.a-grab-cursor:active {
   cursor: none;
 }
+
+.webxr-realities, .webxr-sessions {
+  user-select: none;
+}

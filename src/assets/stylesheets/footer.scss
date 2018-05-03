@@ -9,6 +9,7 @@
   flex-direction: column;
   // Position above virtual gamepad controls on mobile
   z-index: 1;
+  user-select: none;
 
   @media (min-width: 769px) and (min-height: 421px) {
     pointer-events: auto;

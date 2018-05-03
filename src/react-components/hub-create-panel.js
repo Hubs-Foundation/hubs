@@ -194,15 +194,25 @@ class HubCreatePanel extends Component {
                   />
                   <div className="create-panel__form__environment__picker__labels">
                     <div className="create-panel__form__environment__picker__labels__header">
-                      <span className="create-panel__form__environment__picker__labels__header__title">
-                        {environmentTitle}
-                      </span>
+                      {meta.url ? (
+                        <a
+                          href={meta.url}
+                          rel="noopener noreferrer"
+                          className="create-panel__form__environment__picker__labels__header__title"
+                        >
+                          {environmentTitle}
+                        </a>
+                      ) : (
+                        <span className="create-panel__form__environment__picker__labels__header__title">
+                          environmentTitle
+                        </span>
+                      )}
                       {environmentAuthor &&
                         environmentAuthor.name &&
                         (environmentAuthor.url ? (
                           <a
                             href={environmentAuthor.url}
-                            target="_blank"
+                            rel="noopener noreferrer"
                             className="create-panel__form__environment__picker__labels__header__author"
                           >
                             <FormattedMessage id="home.environment_author_by" />
@@ -212,6 +222,21 @@ class HubCreatePanel extends Component {
                           <span className="create-panel__form__environment__picker__labels__header__author">
                             <FormattedMessage id="home.environment_author_by" />
                             <span>{environmentAuthor.name}</span>
+                          </span>
+                        ))}
+                      {environmentAuthor &&
+                        environmentAuthor.organization &&
+                        (environmentAuthor.organization.url ? (
+                          <a
+                            href={environmentAuthor.organization.url}
+                            rel="noopener noreferrer"
+                            className="create-panel__form__environment__picker__labels__header__org"
+                          >
+                            <span>{environmentAuthor.organization.name}</span>
+                          </a>
+                        ) : (
+                          <span className="create-panel__form__environment__picker__labels__header__org">
+                            <span>{environmentAuthor.organization.name}</span>
                           </span>
                         ))}
                     </div>

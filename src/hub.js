@@ -17,6 +17,7 @@ import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
+import "./utils/ios-audio-context-fix";
 
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";

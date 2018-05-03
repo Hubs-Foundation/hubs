@@ -28,7 +28,7 @@
     pointer-events: auto;
 
     &__contents {
-      padding: 10px;
+      padding: 30px;
       background-color: rgba(0,0,0,0.8);
       box-shadow: 0px 0px 30px 1px #202020;
       border-radius: 8px;
@@ -140,7 +140,8 @@
   &__submit {
     @extend %bottom-button;
     border: 0;
-    margin-top: 16px;
+    margin-top: 0;
+    margin-bottom: 0;
   }
 
   &__privacy {

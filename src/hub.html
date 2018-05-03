@@ -5,11 +5,10 @@
     <!-- DO NOT REMOVE/EDIT THIS COMMENT - HUB_META_TAGS -->
 
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="<%= ORIGIN_TRIAL_EXPIRES %>" content="<%= ORIGIN_TRIAL_TOKEN %>">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <link rel="shortcut icon" type="image/png" href="/favicon.ico"/>
+    <link rel="shortcut icon" type="image/png" href="/favicon.ico">
     <title>Get together | Hubs by Mozilla</title>
     <link href="https://fonts.googleapis.com/css?family=Zilla+Slab:300,300i,400,400i,700" rel="stylesheet">
 
@@ -63,7 +62,7 @@
             <a-asset-item id="botwoody" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotWoody_Avatar-0140485a23.gltf"></a-asset-item>
 
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
-            <a-asset-item id="interactable-duck" response-type="arraybuffer" src="./assets/interactables/duck/DuckyMesh.glb"></a-asset-item>
+            <a-asset-item id="interactable-duck" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf"></a-asset-item>
 
             <a-asset-item id="quack" src="./assets/sfx/quack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="specialquack" src="./assets/sfx/specialquack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -165,12 +164,12 @@
             <template id="interactable-template">
                 <a-entity
                     gltf-model-plus="src: #interactable-duck; inflate: true;"
-                    scale="2 2 2"
                     class="interactable" 
                     super-networked-interactable="counter: #counter; mass: 1;"
                     body="type: dynamic; shape: none; mass: 1;"
                     grabbable
                     stretchable="useWorldPosition: true;"
+                    hoverable
                     duck
                 ></a-entity>
             </template>
@@ -196,7 +195,7 @@
                 cursor: #cursor; 
                 camera: #player-camera; 
                 playerRig: #player-rig;
-                physicalHandSelector: #right-super-hand;
+                physicalHandSelector: #player-right-controller;
                 gazeTeleportControls: #gaze-teleport;"
             raycaster="objects: .collidable, .interactable, .ui; far: 3;"
             line="visible: false; color: white; opacity: 0.2;"

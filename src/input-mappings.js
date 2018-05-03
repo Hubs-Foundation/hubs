@@ -77,8 +77,8 @@ const config = {
         surfacetouchend: "thumb_up",
         thumbsticktouchstart: "thumb_down",
         thumbsticktouchend: "thumb_up",
-        triggerdown: ["action_primary_down", "action_grab", "index_down"],
-        triggerup: ["action_primary_up", "action_release", "index_up"],
+        triggerdown: ["action_grab", "index_down"],
+        triggerup: ["action_release", "index_up"],
         "axismove.reverseY": { left: "move" },
         abuttondown: "action_primary_down",
         abuttonup: "action_primary_up"

@@ -1,10 +1,17 @@
 .audio-setup-panel {
   text-align: center;
   overflow-y: auto;
+  display: flex; 
+  flex-direction: column;
+  height: 100%;
   
+  &__enter-button-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
   &__enter-button {
     @extend %bottom-button;
-    margin: 32px auto;
   }
 
   &__title {
@@ -95,6 +102,16 @@
   flex: 10 1 auto;
   justify-content: flex-start;
   align-items: center;
+  overflow-y: auto;
+
+  &__grant-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: max-content;
+  }
 
   &__title {
     @extend %top-title;
@@ -105,13 +122,14 @@
   }
 
   &__button-container {
-    flex: 10;
+    flex: 5;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     width: 111px;
     height: 111px;
+    margin: 1em;
   }
 
   &__button {
@@ -120,10 +138,16 @@
     cursor: pointer;
   }
 
+  &__next-container {
+    display: flex;
+  }
+
   &__next {
     @extend %bottom-button;
-    padding-top: 0;
-    padding-bottom: 0;
     flex: 1 1;
+  }
+
+  .invisible {
+    visibility: hidden;
   }
 }

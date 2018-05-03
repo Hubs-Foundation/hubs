@@ -3,6 +3,8 @@ AFRAME.registerComponent("super-spawner", {
     template: { default: "" },
     useCustomSpawnPosition: { default: false },
     spawnPosition: { type: "vec3" },
+    useCustomSpawnRotation: { default: false },
+    spawnRotation: { type: "vec4" },
     events: { default: ["cursor-grab", "action_grab"] },
     spawnCooldown: { default: 1 }
   },
@@ -10,7 +12,6 @@ AFRAME.registerComponent("super-spawner", {
   init: function() {
     this.entities = new Map();
     this.timeout = null;
-    this.defaultScale = this.el.getAttribute("scale").clone();
   },
 
   play: function() {
@@ -21,10 +22,12 @@ AFRAME.registerComponent("super-spawner", {
   pause: function() {
     this.el.removeEventListener("grab-start", this.handleGrabStart);
 
-    clearTimeout(this.timeout);
-    this.timeout = null;
-    this.el.setAttribute("visible", true);
-    this.el.setAttribute("scale", this.defaultScale);
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+      this.timeout = null;
+      this.el.setAttribute("visible", true);
+      this.el.classList.add("interactable");
+    }
   },
 
   remove: function() {
@@ -61,14 +64,16 @@ AFRAME.registerComponent("super-spawner", {
 
     const pos = this.data.useCustomSpawnPosition ? this.data.spawnPosition : this.el.getAttribute("position");
     entity.setAttribute("position", pos);
+    const rot = this.data.useCustomSpawnRotation ? this.data.spawnRotation : this.el.getAttribute("rotation");
+    entity.setAttribute("rotation", rot);
     this.el.sceneEl.appendChild(entity);
 
     if (this.data.spawnCooldown > 0) {
       this.el.setAttribute("visible", false);
-      this.el.setAttribute("scale", { x: 0.0001, y: 0.0001, z: 0.0001 });
+      this.el.classList.remove("interactable");
       this.timeout = setTimeout(() => {
         this.el.setAttribute("visible", true);
-        this.el.setAttribute("scale", this.defaultScale);
+        this.el.classList.add("interactable");
         this.timeout = null;
       }, this.data.spawnCooldown * 1000);
     }
