@@ -93,6 +93,8 @@ AFRAME.registerComponent("cursor-controller", {
     this.data.playerRig.addEventListener(this.data.primaryUp, this._handlePrimaryUp);
     this.data.playerRig.addEventListener(this.data.grabEvent, this._handlePrimaryDown);
     this.data.playerRig.addEventListener(this.data.releaseEvent, this._handlePrimaryUp);
+    this.data.playerRig.addEventListener("gamepadbuttondown", this._handlePrimaryDown);
+    this.data.playerRig.addEventListener("gamepadbuttonup", this._handlePrimaryUp);
 
     this.data.playerRig.addEventListener("model-loaded", this._handleModelLoaded);
 
@@ -116,6 +118,8 @@ AFRAME.registerComponent("cursor-controller", {
     this.data.playerRig.removeEventListener(this.data.primaryUp, this._handlePrimaryUp);
     this.data.playerRig.removeEventListener(this.data.grabEvent, this._handlePrimaryDown);
     this.data.playerRig.removeEventListener(this.data.releaseEvent, this._handlePrimaryUp);
+    this.data.playerRig.removeEventListener("gamepadbuttondown", this._handlePrimaryDown);
+    this.data.playerRig.removeEventListener("gamepadbuttonup", this._handlePrimaryUp);
 
     this.data.playerRig.removeEventListener("model-loaded", this._handleModelLoaded);
 
@@ -382,7 +386,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handlePrimaryDown: function(e) {
-    if (e.target === this.controller) {
+    if (e.target === this.controller || e.type === "gamepadbuttondown") {
       const isInteractable = this._isTargetOfType(TARGET_TYPE_INTERACTABLE) && !this.grabStarting;
       if (isInteractable || this._isTargetOfType(TARGET_TYPE_UI)) {
         this.grabStarting = true;
@@ -394,7 +398,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handlePrimaryUp: function(e) {
-    if (e.target === this.controller) {
+    if (e.target === this.controller || e.type === "gamepadbuttonup") {
       if (this._isGrabbing() || this._isTargetOfType(TARGET_TYPE_UI)) {
         this.grabStarting = false;
         this.data.cursor.emit("cursor-release", e.detail);

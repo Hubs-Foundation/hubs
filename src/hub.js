@@ -90,6 +90,7 @@ if (qs.quality) {
 import "aframe-physics-system";
 import "aframe-physics-extras";
 import "aframe-extras/src/pathfinding";
+import "aframe-extras/src/controls/gamepad-controls";
 import "super-hands";
 import "./components/super-networked-interactable";
 import "./components/networked-counter";
