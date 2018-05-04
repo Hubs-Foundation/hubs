@@ -27,6 +27,21 @@ class InfoDialog extends Component {
 
     const loc = document.location;
     this.shareLink = `${loc.protocol}//${loc.host}${loc.pathname}`;
+    this.onKeyPress = this.onKeyPress.bind(this);
+  }
+
+  componentDidMount() {
+    window.addEventListener("keypress", this.onKeyPress);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("keypress", this.onKeyPress);
+  }
+
+  onKeyPress(e) {
+    if (e.key === "Escape") {
+      this.props.onCloseDialog();
+    }
   }
 
   shareLinkClicked = () => {
