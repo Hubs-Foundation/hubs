@@ -1,19 +1,32 @@
 function registerNetworkSchemas() {
+  const xyzNotAlmostEqual = "xyzNotAlmostEqual";
+  const positionEpsilon = 0.01;
+  const rotationEpsilon = 1;
+
+  NAF.schemas.registerDirtyPredicate(xyzNotAlmostEqual, (v, w, options) => {
+    const epsilon = options.epsilon;
+    return Math.abs(v.x - w.x) > epsilon || Math.abs(v.z - w.z) > epsilon || Math.abs(v.y - w.y) > epsilon;
+  });
+
   NAF.schemas.add({
     template: "#remote-avatar-template",
     components: [
       {
         component: "position",
         dirtyPredicate: {
-          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
-          epsilon: 0.01
+          name: xyzNotAlmostEqual,
+          options: {
+            epsilon: positionEpsilon
+          }
         }
       },
       {
         component: "rotation",
         dirtyPredicate: {
-          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
-          epsilon: 1
+          name: xyzNotAlmostEqual,
+          options: {
+            epsilon: rotationEpsilon
+          }
         },
         lerp: false
       },
@@ -24,32 +37,40 @@ function registerNetworkSchemas() {
         selector: ".camera",
         component: "position",
         dirtyPredicate: {
-          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
-          epsilon: 0.01
+          name: xyzNotAlmostEqual,
+          options: {
+            epsilon: positionEpsilon
+          }
         }
       },
       {
         selector: ".camera",
         component: "rotation",
         dirtyPredicate: {
-          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
-          epsilon: 1
+          name: xyzNotAlmostEqual,
+          options: {
+            epsilon: rotationEpsilon
+          }
         }
       },
       {
         selector: ".left-controller",
         component: "position",
         dirtyPredicate: {
-          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
-          epsilon: 0.01
+          name: xyzNotAlmostEqual,
+          options: {
+            epsilon: positionEpsilon
+          }
         }
       },
       {
         selector: ".left-controller",
         component: "rotation",
         dirtyPredicate: {
-          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
-          epsilon: 1
+          name: xyzNotAlmostEqual,
+          options: {
+            epsilon: rotationEpsilon
+          }
         }
       },
       {
@@ -60,16 +81,20 @@ function registerNetworkSchemas() {
         selector: ".right-controller",
         component: "position",
         dirtyPredicate: {
-          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
-          epsilon: 0.01
+          name: xyzNotAlmostEqual,
+          options: {
+            epsilon: positionEpsilon
+          }
         }
       },
       {
         selector: ".right-controller",
         component: "rotation",
         dirtyPredicate: {
-          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
-          epsilon: 1
+          name: xyzNotAlmostEqual,
+          options: {
+            epsilon: rotationEpsilon
+          }
         }
       },
       {
@@ -85,15 +110,19 @@ function registerNetworkSchemas() {
       {
         component: "position",
         dirtyPredicate: {
-          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
-          epsilon: 0.01
+          name: xyzNotAlmostEqual,
+          options: {
+            epsilon: positionEpsilon
+          }
         }
       },
       {
         component: "rotation",
         dirtyPredicate: {
-          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
-          epsilon: 1
+          name: xyzNotAlmostEqual,
+          options: {
+            epsilon: rotationEpsilon
+          }
         }
       },
       "visible"
@@ -106,15 +135,19 @@ function registerNetworkSchemas() {
       {
         component: "position",
         dirtyPredicate: {
-          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
-          epsilon: 0.01
+          name: xyzNotAlmostEqual,
+          options: {
+            epsilon: positionEpsilon
+          }
         }
       },
       {
         component: "rotation",
         dirtyPredicate: {
-          type: NAF.PREDICATE_XYZ_ALMOST_EQUALS,
-          epsilon: 1
+          name: xyzNotAlmostEqual,
+          options: {
+            epsilon: rotationEpsilon
+          }
         }
       },
       "scale"
