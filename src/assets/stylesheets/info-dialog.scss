@@ -54,6 +54,17 @@
 	a { color: white }
       }
 
+      &__links {
+        display: flex;
+        justify-content: center;
+        margin: 16px 0;
+        a {
+          margin: 0px 12px;
+          color: $light-text;
+        }
+      }
+
+
       &__close {
 	position: absolute;
 	left: 12px;

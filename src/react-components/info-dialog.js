@@ -226,6 +226,18 @@ class InfoDialog extends Component {
             <p>
               The <b>Bubble Toggle</b> hides avatars that enter your personal space.
             </p>
+            <div className="dialog__box__contents__links">
+              <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
+                <FormattedMessage id="profile.terms_of_use" />
+              </a>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+              >
+                <FormattedMessage id="profile.privacy_notice" />
+              </a>
+            </div>
           </div>
         );
         break;
