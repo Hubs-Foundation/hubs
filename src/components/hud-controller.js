@@ -21,6 +21,8 @@ AFRAME.registerComponent("hud-controller", {
   init() {
     this.isYLocked = false;
     this.lockedHeadPositionY = 0;
+    this.lookDir = new THREE.Vector3();
+    this.lookEuler = new THREE.Euler();
   },
 
   pause() {
@@ -62,12 +64,13 @@ AFRAME.registerComponent("hud-controller", {
     // Reorient the hud only if the user is looking away from the hud, for right now this arbitrarily means the hud is 1/2 way animated away
     // TODO: come up with better huristics for this that maybe account for the user turning away from the hud "too far", also animate the position so that it doesnt just snap.
     if (yawDif >= yawCutoff || pitch < lookCutoff - animRange / 2) {
-      const lookDir = new THREE.Vector3(0, 0, -1);
-      lookDir.applyQuaternion(head.quaternion);
-      lookDir.add(head.position);
-      hud.position.x = lookDir.x;
-      hud.position.z = lookDir.z;
-      hud.setRotationFromEuler(new THREE.Euler(0, head.rotation.y, 0));
+      this.lookDir.set(0, 0, -1);
+      this.lookDir.applyQuaternion(head.quaternion);
+      this.lookDir.add(head.position);
+      hud.position.x = this.lookDir.x;
+      hud.position.z = this.lookDir.z;
+      this.lookEuler.set(0, head.rotation.y, 0);
+      hud.setRotationFromEuler(this.lookEuler);
     }
     hud.position.y = (this.isYLocked ? this.lockedHeadPositionY : head.position.y) + offset + (1 - t) * offset;
     hud.rotation.x = (1 - t) * THREE.Math.DEG2RAD * 90;
