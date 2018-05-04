@@ -69,8 +69,9 @@ AFRAME.registerComponent("hud-controller", {
       this.lookDir.add(head.position);
       hud.position.x = this.lookDir.x;
       hud.position.z = this.lookDir.z;
-      this.lookEuler.set(0, head.rotation.y, 0);
-      hud.setRotationFromEuler(this.lookEuler);
+      hud.rotation.copy(head.rotation);
+      hud.rotation.x = 0;
+      hud.rotation.z = 0;
     }
     hud.position.y = (this.isYLocked ? this.lockedHeadPositionY : head.position.y) + offset + (1 - t) * offset;
     hud.rotation.x = (1 - t) * THREE.Math.DEG2RAD * 90;
