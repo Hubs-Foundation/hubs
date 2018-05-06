@@ -360,7 +360,7 @@ const onReady = async () => {
   const hubId = qs.hub_id || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
 
-  const socketProtocol = document.location.protocol === "https:" ? "wss:" : "ws:";
+  const socketProtocol = qs.phx_protocol || (document.location.protocol === "https:" ? "wss:" : "ws:");
   const [retHost, retPort] = (process.env.DEV_RETICULUM_SERVER || "").split(":");
   const isProd = process.env.NODE_ENV === "production";
   const socketPort = qs.phx_port || (isProd ? document.location.port : retPort) || "443";
