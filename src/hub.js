@@ -63,6 +63,7 @@ import ReactDOM from "react-dom";
 import React from "react";
 import UIRoot from "./react-components/ui-root";
 import HubChannel from "./utils/hub-channel";
+import XferChannel from "./utils/xfer-channel";
 import { connectToPhoenix } from "./utils/phoenix-utils";
 
 import "./systems/personal-space-bubble";
@@ -164,6 +165,7 @@ function mountUI(scene, props = {}) {
 const onReady = async () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
+  const xferChannel = new XferChannel(store);
 
   document.querySelector("a-scene canvas").classList.add("blurred");
   window.APP.scene = scene;
@@ -381,30 +383,10 @@ const onReady = async () => {
       console.error(res);
     });
 
-  //const xferCode = Math.floor(Math.random() * 9999)
-  //  .toString()
-  //  .padStart(4, "0");
-  const xferCode = "1234";
-
-  const xferChannel = socket.channel(`xfer:${xferCode}`, { timeout: 10000 });
-
-  xferChannel.onClose(() => console.log("closed"));
-  xferChannel.on("expired", () => console.log("expired"));
-
-  xferChannel.on("presence_state", state => {
-    console.log(state);
-  });
-
-  xferChannel
-    .join()
-    .receive("ok", data => {
-      console.log(data);
-      console.log("OK");
-    })
-    .receive("error", res => {
-      console.log("ERR");
-      console.log(res);
-    });
+  xferChannel.setSocket(socket);
+  const code = await xferChannel.generateCode();
+  code.onFinished.then(reason => console.log(reason));
+  console.log(code);
 };
 
 document.addEventListener("DOMContentLoaded", onReady);
