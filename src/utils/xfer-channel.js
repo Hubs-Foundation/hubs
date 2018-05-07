@@ -33,6 +33,8 @@ export default class XferChannel {
           channel.on("xfer_expired", () => finished("expired"));
 
           channel.on("presence_state", state => {
+            if (readyToSend) return;
+
             if (Object.keys(state).length > 0) {
               // Code is in use by someone else, try a new one
               step();
@@ -42,9 +44,9 @@ export default class XferChannel {
             }
           });
 
-          channel.on("xfer_request", () => {
+          channel.on("xfer_request", incoming => {
             if (readyToSend) {
-              const payload = { path: location.pathname };
+              const payload = { path: location.pathname, target_session_id: incoming.reply_to_session_id };
 
               // Copy profile data to xfer'ed device if it's been set.
               if (this.store.state.activity.hasChangedName) {
@@ -80,7 +82,7 @@ export default class XferChannel {
 
         if (numOccupants === 1) {
           // Great, only sender is in topic, request xfer
-          channel.push("xfer_request", {});
+          channel.push("xfer_request", { reply_to_session_id: this.socket.params.session_id });
 
           setTimeout(() => {
             if (finished) return;
