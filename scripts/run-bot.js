@@ -24,7 +24,7 @@ const querystring = require("query-string");
       });
       console.log("BPDEBUG navigated");
       // Interact with the page so that audio can play.
-      page.mouse.click(100, 100);
+      await page.mouse.click(100, 100);
       await page.evaluate(() => {
         window.interacted();
       });

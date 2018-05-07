@@ -4,7 +4,7 @@
  */
 const iDevices = /\biPhone.*Mobile|\biPod|\biPad|AppleCoreMedia/;
 
-if (iDevices.test(navigator.userAgent)) {
+if (iDevices.test(navigator.userAgent) || /Chrome/.test(navigator.userAgent)) {
   document.addEventListener("DOMContentLoaded", () => {
     const ctx = THREE.AudioContext.getContext();
 
@@ -14,10 +14,12 @@ if (iDevices.test(navigator.userAgent)) {
       setTimeout(function() {
         if (ctx.state === "running") {
           document.body.removeEventListener("touchend", resume, false);
+          document.body.removeEventListener("mouseup", resume, false);
         }
       }, 0);
     }
 
     document.body.addEventListener("touchend", resume, false);
+    document.body.addEventListener("mouseup", resume, false);
   });
 }

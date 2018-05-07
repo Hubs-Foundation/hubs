@@ -306,7 +306,6 @@ const onReady = async () => {
         await interacted;
         console.log("BPDEBUG playing audio");
         audio.play().catch(e => console.log(e.toString()));
-        NAF.connection.adapter.setLocalMediaStream(mediaStream);
       }
 
       if (mediaStream) {
