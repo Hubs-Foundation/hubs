@@ -29,7 +29,7 @@ export default class XferChannel {
           const channel = this.socket.channel(`xfer:${code}`, { timeout: 10000 });
           const cancel = () => channel.leave();
 
-          channel.on("expired", () => finished("expired"));
+          channel.on("xfer_expired", () => finished("expired"));
 
           channel.on("presence_state", state => {
             if (Object.keys(state).length > 0) {
@@ -43,12 +43,9 @@ export default class XferChannel {
 
           channel.on("xfer_request", () => {
             if (readyToSend) {
-              const payload = {
-                location: [location.protocol, "//", location.host, location.pathname].join("")
-              };
+              const payload = { path: location.pathname };
 
-              // Copy profile data to xfer'ed device, and apply it on the other side
-              // if hasChangedName is false.
+              // Copy profile data to xfer'ed device if it's been set.
               if (this.store.state.activity.hasChangedName) {
                 payload.profile = { ...this.store.state.profile };
               }
