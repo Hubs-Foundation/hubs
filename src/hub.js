@@ -384,9 +384,6 @@ const onReady = async () => {
     });
 
   xferChannel.setSocket(socket);
-  const code = await xferChannel.generateCode();
-  code.onFinished.then(reason => console.log(reason));
-  console.log(code);
 };
 
 document.addEventListener("DOMContentLoaded", onReady);

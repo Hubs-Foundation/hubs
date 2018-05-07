@@ -13,8 +13,9 @@ export default class XferChannel {
   //
   // cancel: A function that the caller can call to cancel the use of the code.
   //
-  // onFinished: A promise that, when resolved, indicates the code was used or expired.
-  // If expired, the string "expired" will be passed forward.
+  // onFinished: A promise that, when resolved, indicates the code is no longer usable,
+  // because it was either successfully used by the remote device or it has expired
+  // ("used" or "expired" is passed to the callback.)
   generateCode = () => {
     return new Promise(resolve => {
       const onFinished = new Promise(finished => {
@@ -57,11 +58,51 @@ export default class XferChannel {
             }
           });
 
-          channel.join();
+          channel.join().receive("error", r => console.error(r));
         };
 
         step();
       });
+    });
+  };
+
+  // Attempts to receive an xfer payload from a remote device using the given code.
+  //
+  // Promise rejects if the code is invalid or there is a problem with the channel.
+  // Promise resolves and passes payload of xfer source on successful xfer.
+  attemptXfer = code => {
+    return new Promise((resolve, reject) => {
+      const channel = this.socket.channel(`xfer:${code}`, { timeout: 10000 });
+      let finished = false;
+
+      channel.on("presence_state", state => {
+        const numOccupants = Object.keys(state).length;
+
+        if (numOccupants === 1) {
+          // Great, only sender is in topic, request xfer
+          channel.push("xfer_request", {});
+
+          setTimeout(() => {
+            if (finished) return;
+            channel.leave();
+            reject("no_response");
+          }, 10000);
+        } else if (numOccupants === 0) {
+          // Nobody in this channel, probably a bad code.
+          reject("failed");
+        } else {
+          console.warn("xfer code channel already has 2 or more occupants, something fishy is going on.");
+          reject("in_use");
+        }
+      });
+
+      channel.on("xfer_response", payload => {
+        finished = true;
+        channel.leave();
+        resolve(payload);
+      });
+
+      channel.join().receive("error", r => console.error(r));
     });
   };
 }
