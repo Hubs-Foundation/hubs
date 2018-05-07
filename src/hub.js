@@ -1,8 +1,6 @@
 import "./assets/stylesheets/hub.scss";
 import moment from "moment-timezone";
-import uuid from "uuid/v4";
 import queryString from "query-string";
-import { Socket } from "phoenix";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
@@ -65,6 +63,7 @@ import ReactDOM from "react-dom";
 import React from "react";
 import UIRoot from "./react-components/ui-root";
 import HubChannel from "./utils/hub-channel";
+import { connectToPhoenix } from "./utils/phoenix-utils";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
@@ -360,17 +359,7 @@ const onReady = async () => {
   const hubId = qs.hub_id || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
 
-  const socketProtocol = qs.phx_protocol || (document.location.protocol === "https:" ? "wss:" : "ws:");
-  const [retHost, retPort] = (process.env.DEV_RETICULUM_SERVER || "").split(":");
-  const isProd = process.env.NODE_ENV === "production";
-  const socketPort = qs.phx_port || (isProd ? document.location.port : retPort) || "443";
-  const socketHost = qs.phx_host || (isProd ? document.location.hostname : retHost) || "";
-  const socketUrl = `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}/socket`;
-  console.log(`Phoenix Channel URL: ${socketUrl}`);
-
-  const socket = new Socket(socketUrl, { params: { session_id: uuid() } });
-  socket.connect();
-
+  const socket = connectToPhoenix();
   const channel = socket.channel(`hub:${hubId}`, {});
 
   channel
@@ -390,6 +379,31 @@ const onReady = async () => {
       }
 
       console.error(res);
+    });
+
+  //const xferCode = Math.floor(Math.random() * 9999)
+  //  .toString()
+  //  .padStart(4, "0");
+  const xferCode = "1234";
+
+  const xferChannel = socket.channel(`xfer:${xferCode}`, { timeout: 10000 });
+
+  xferChannel.onClose(() => console.log("closed"));
+  xferChannel.on("expired", () => console.log("expired"));
+
+  xferChannel.on("presence_state", state => {
+    console.log(state);
+  });
+
+  xferChannel
+    .join()
+    .receive("ok", data => {
+      console.log(data);
+      console.log("OK");
+    })
+    .receive("error", res => {
+      console.log("ERR");
+      console.log(res);
     });
 };
 
