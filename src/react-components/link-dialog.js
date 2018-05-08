@@ -38,7 +38,7 @@ class LinkDialog extends Component {
         </div>
         <div className={styles.code}>
           {this.props.linkCode.split("").map((d, i) => (
-            <span className={styles.digit} key={i}>
+            <span className={styles.digit} key={`link_code_${i}`}>
               {d}
             </span>
           ))}

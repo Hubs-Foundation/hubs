@@ -198,8 +198,7 @@ const config = {
     new HTMLWebpackPlugin({
       filename: "link.html",
       template: path.join(__dirname, "src", "link.html"),
-      chunks: ["link"],
-      inject: "head"
+      chunks: ["link"]
     }),
     new HTMLWebpackPlugin({
       filename: "avatar-selector.html",

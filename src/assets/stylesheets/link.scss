@@ -20,3 +20,7 @@ body {
   margin: 0;
   padding: 0;
 }
+
+:local(.code-loading-panel) {
+  background: rgba(0.4, 0.4, 0.4, 0.7);
+}

@@ -107,7 +107,6 @@ import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 
-import { generateDefaultProfile, generateRandomName } from "./utils/identity.js";
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
@@ -129,13 +128,7 @@ const concurrentLoadDetector = new ConcurrentLoadDetector();
 
 concurrentLoadDetector.start();
 
-// Always layer in any new default profile bits
-store.update({ activity: {}, settings: {}, profile: { ...generateDefaultProfile(), ...(store.state.profile || {}) } });
-
-// Regenerate name to encourage users to change it.
-if (!store.state.activity.hasChangedName) {
-  store.update({ profile: { displayName: generateRandomName() } });
-}
+store.init();
 
 function mountUI(scene, props = {}) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
