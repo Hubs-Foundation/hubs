@@ -1,3 +1,5 @@
+import { generatePublicKeyAndEncryptedObject, generateKeys, decryptObject } from "./crypto";
+
 export default class XferChannel {
   constructor(store) {
     this.store = store;
@@ -46,17 +48,27 @@ export default class XferChannel {
 
           channel.on("xfer_request", incoming => {
             if (readyToSend) {
-              const payload = { path: location.pathname, target_session_id: incoming.reply_to_session_id };
+              const data = { path: location.pathname };
 
               // Copy profile data to xfer'ed device if it's been set.
               if (this.store.state.activity.hasChangedName) {
-                payload.profile = { ...this.store.state.profile };
+                data.profile = { ...this.store.state.profile };
               }
 
-              channel.push("xfer_response", payload);
-              channel.leave();
-              finished("used");
-              readyToSend = false;
+              this.generatePublicKeyAndEncryptedObject(incoming.public_key).then(
+                ({ publicKeyString, encryptedData }) => {
+                  const payload = {
+                    target_session_id: incoming.reply_to_session_id,
+                    public_key: publicKeyString,
+                    data: encryptedData
+                  };
+
+                  channel.push("xfer_response", payload);
+                  channel.leave();
+                  finished("used");
+                  readyToSend = false;
+                }
+              );
             }
           });
 
@@ -77,34 +89,40 @@ export default class XferChannel {
       const channel = this.socket.channel(`xfer:${code}`, { timeout: 10000 });
       let finished = false;
 
-      channel.on("presence_state", state => {
-        const numOccupants = Object.keys(state).length;
+      generateKeys().then(({ publicKeyString, privateKey }) => {
+        channel.on("presence_state", state => {
+          const numOccupants = Object.keys(state).length;
 
-        if (numOccupants === 1) {
-          // Great, only sender is in topic, request xfer
-          channel.push("xfer_request", { reply_to_session_id: this.socket.params.session_id });
+          if (numOccupants === 1) {
+            // Great, only sender is in topic, request xfer
+            channel.push("xfer_request", {
+              reply_to_session_id: this.socket.params.session_id,
+              public_key: publicKeyString
+            });
 
-          setTimeout(() => {
-            if (finished) return;
-            channel.leave();
-            reject("no_response");
-          }, 10000);
-        } else if (numOccupants === 0) {
-          // Nobody in this channel, probably a bad code.
-          reject("failed");
-        } else {
-          console.warn("xfer code channel already has 2 or more occupants, something fishy is going on.");
-          reject("in_use");
-        }
+            setTimeout(() => {
+              if (finished) return;
+              channel.leave();
+              reject("no_response");
+            }, 10000);
+          } else if (numOccupants === 0) {
+            // Nobody in this channel, probably a bad code.
+            reject("failed");
+          } else {
+            console.warn("xfer code channel already has 2 or more occupants, something fishy is going on.");
+            reject("in_use");
+          }
+        });
+
+        channel.on("xfer_response", payload => {
+          finished = true;
+          channel.leave();
+
+          this.decryptObject(payload.public_key, privateKey, payload.data).then(resolve);
+        });
+
+        channel.join().receive("error", r => console.error(r));
       });
-
-      channel.on("xfer_response", payload => {
-        finished = true;
-        channel.leave();
-        resolve(payload);
-      });
-
-      channel.join().receive("error", r => console.error(r));
     });
   };
 }
