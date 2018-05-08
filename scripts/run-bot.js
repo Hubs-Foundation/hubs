@@ -13,7 +13,7 @@ const querystring = require("query-string");
 
   const url = "https://localhost:8080/hub.html?" + querystring.stringify(params);
 
-  console.log("spawning bots...");
+  console.log("Spawning bot...");
 
   page.on("console", msg => console.log("PAGE: ", msg.text()));
   const navigate = async () => {
@@ -22,10 +22,10 @@ const querystring = require("query-string");
       await page.evaluate(() => {
         console.log(navigator.userAgent);
       });
-      console.log("BPDEBUG navigated");
       // Interact with the page so that audio can play.
       await page.mouse.click(100, 100);
       await page.evaluate(() => {
+        // Let the setup process continue in the app.
         window.interacted();
       });
     } catch (e) {

@@ -6,9 +6,7 @@ cd $script_directory/..
 
 yarn 
 
-# yarn build
-# yarn serve --ssl --port 8080 public &
-
-yarn start &
+yarn build
+yarn serve --ssl --port 8080 public &
 
 node scripts/run-bot.js
