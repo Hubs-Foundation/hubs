@@ -41,7 +41,7 @@ AFRAME.registerComponent("cursor-controller", {
 
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
-    [
+    const functionNames = [
       "_handleTouchStart",
       "_handleTouchMove",
       "_handleTouchEnd",
@@ -56,8 +56,9 @@ AFRAME.registerComponent("cursor-controller", {
       "_handleModelLoaded",
       "_handleControllerConnected",
       "_handleControllerDisconnected"
-    ].map(fn => {
-      this[fn] = this[fn].bind(this);
+    ];
+    functionNames.forEach(name => {
+      this[name] = this[name].bind(this);
     });
   },
 
