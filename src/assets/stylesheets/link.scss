@@ -1,0 +1,22 @@
+@import 'shared';
+@import 'loader';
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: black;
+  color: white;
+}
+
+.link-root {
+  @extend %default-font;
+
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
