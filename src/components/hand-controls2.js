@@ -110,7 +110,7 @@ AFRAME.registerComponent("hand-controls2", {
     const controlConfiguration = {
       hand: hand,
       model: false,
-      rotationOffset: 0
+      orientationOffset: { x: 0, y: 0, z: 0 }
     };
 
     if (hand !== prevData) {
