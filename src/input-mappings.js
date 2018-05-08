@@ -34,6 +34,9 @@ const config = {
       },
       "gearvr-controls": {
         trackpad: "trackpad_dpad4"
+      },
+      "oculus-go-controls": {
+        trackpad: "trackpad_dpad4"
       }
     }
   },
@@ -77,8 +80,8 @@ const config = {
         surfacetouchend: "thumb_up",
         thumbsticktouchstart: "thumb_down",
         thumbsticktouchend: "thumb_up",
-        triggerdown: ["action_primary_down", "action_grab", "index_down"],
-        triggerup: ["action_primary_up", "action_release", "index_up"],
+        triggerdown: ["action_grab", "index_down"],
+        triggerup: ["action_release", "index_up"],
         "axismove.reverseY": { left: "move" },
         abuttondown: "action_primary_down",
         abuttonup: "action_primary_up"
@@ -114,6 +117,16 @@ const config = {
         trackpadup: ["action_primary_up"]
       },
       "gearvr-controls": {
+        trackpad_dpad4_pressed_west_down: "snap_rotate_left",
+        trackpad_dpad4_pressed_east_down: "snap_rotate_right",
+        trackpad_dpad4_pressed_center_down: ["action_primary_down"],
+        trackpad_dpad4_pressed_north_down: ["action_primary_down"],
+        trackpad_dpad4_pressed_south_down: ["action_primary_down"],
+        trackpadup: ["action_primary_up"],
+        triggerdown: ["action_primary_down"],
+        triggerup: ["action_primary_up"]
+      },
+      "oculus-go-controls": {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",
         trackpad_dpad4_pressed_east_down: "snap_rotate_right",
         trackpad_dpad4_pressed_center_down: ["action_primary_down"],
@@ -180,6 +193,10 @@ const config = {
         trackpadup: { right: "action_ui_select_up" }
       },
       "gearvr-controls": {
+        trackpaddown: { right: "action_ui_select_down" },
+        trackpadup: { right: "action_ui_select_up" }
+      },
+      "oculus-go-controls": {
         trackpaddown: { right: "action_ui_select_down" },
         trackpadup: { right: "action_ui_select_up" }
       }
