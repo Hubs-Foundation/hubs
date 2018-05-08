@@ -81,10 +81,8 @@ AFRAME.registerComponent("hud-controller", {
     const AppModeSystem = sceneEl.systems["app-mode"];
     if (pitch > lookCutoff && AppModeSystem.mode !== AppModes.HUD) {
       AppModeSystem.setMode(AppModes.HUD);
-      sceneEl.renderer.sortObjects = true;
     } else if (pitch < lookCutoff && AppModeSystem.mode === AppModes.HUD) {
       AppModeSystem.setMode(AppModes.DEFAULT);
-      sceneEl.renderer.sortObjects = false;
     }
   }
 });
