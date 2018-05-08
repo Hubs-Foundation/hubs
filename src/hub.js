@@ -19,7 +19,7 @@ import "webrtc-adapter";
 import "aframe-slice9-component";
 import "aframe-motion-capture-components";
 
-import "./utils/ios-audio-context-fix";
+import "./utils/autoplay-audio-context-fix";
 
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
@@ -218,7 +218,10 @@ const onReady = async () => {
 
     document.querySelector("#player-camera").setAttribute("look-controls", "");
 
-    scene.setAttribute("networked-scene", { room: janusRoomId, serverURL: process.env.JANUS_SERVER });
+    scene.setAttribute("networked-scene", {
+      room: janusRoomId,
+      serverURL: process.env.JANUS_SERVER
+    });
 
     scene.setAttribute("stats-plus", false);
 
@@ -302,10 +305,8 @@ const onReady = async () => {
         const interacted = new Promise(resolve => {
           window.interacted = resolve;
         });
-        console.log("BPDEBUG waiting for interaction");
         await interacted;
-        console.log("BPDEBUG playing audio");
-        audio.play().catch(e => console.log(e.toString()));
+        audio.play();
       }
 
       if (mediaStream) {
@@ -360,9 +361,10 @@ const onReady = async () => {
   const initialEnvironmentEl = document.createElement("a-entity");
   initialEnvironmentEl.addEventListener("bundleloaded", () => {
     remountUI({ initialEnvironmentLoaded: true });
-    // Stop rendering while the UI is up. We restart the render loop in enterScene.
-    // Wait a tick plus some margin so that the environments actually render.
+    // We never want to stop the render loop when were running in "bot" mode.
     if (!qsTruthy("bot")) {
+      // Stop rendering while the UI is up. We restart the render loop in enterScene.
+      // Wait a tick plus some margin so that the environments actually render.
       setTimeout(() => scene.renderer.animate(null), 100);
     }
   });

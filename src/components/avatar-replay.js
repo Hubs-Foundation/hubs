@@ -11,7 +11,6 @@ AFRAME.registerComponent("avatar-replay", {
     this._setupController(rightController);
 
     this.el.addEventListener("model-loaded", () => {
-      console.log("BPDEBUG avatar replay model loaded", );
       const cameraReplayer = camera.components["motion-capture-replayer"];
       cameraReplayer.startReplaying(botRecording.camera);
       const leftControllerReplayer = leftController.components["motion-capture-replayer"];
