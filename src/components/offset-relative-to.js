@@ -18,12 +18,6 @@ AFRAME.registerComponent("offset-relative-to", {
     const offsetVector = new THREE.Vector3().copy(this.data.offset);
     this.data.target.object3D.localToWorld(offsetVector);
     this.el.setAttribute("position", offsetVector);
-
-    const headWorldRotation = this.data.target.object3D.getWorldRotation();
-    this.el.setAttribute("rotation", {
-      x: headWorldRotation.x * THREE.Math.RAD2DEG,
-      y: headWorldRotation.y * THREE.Math.RAD2DEG,
-      z: headWorldRotation.z * THREE.Math.RAD2DEG
-    });
+    this.data.target.object3D.getWorldQuaternion(this.el.object3D.quaternion);
   }
 });
