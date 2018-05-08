@@ -60,6 +60,10 @@
     "home.environment_author_by": " by ",
     "home.dialog.close": "CLOSE",
     "mailing_list.privacy_label": "I'm okay with Mozilla handling my info as explained in",
-    "mailing_list.privacy_link": "this Privacy Notice"
+    "mailing_list.privacy_link": "this Privacy Notice",
+    "link.in_your_browser": "In your device's browser, go to:",
+    "link.link_domain": "hub.link",
+    "link.enter_code": "Then, enter code:",
+    "link.do_not_close": "Keep this dialog open to use this code."
   }
 }

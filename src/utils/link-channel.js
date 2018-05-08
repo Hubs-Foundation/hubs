@@ -28,9 +28,16 @@ export default class LinkChannel {
 
           // Only respond to one link_request in this channel.
           let readyToSend = false;
+          let leftChannel = false;
 
           const channel = this.socket.channel(`link:${code}`, { timeout: 10000 });
-          const cancel = () => channel.leave();
+
+          const leave = () => {
+            if (!leftChannel) channel.leave();
+            leftChannel = true;
+          };
+
+          const cancel = () => leave();
 
           channel.on("link_expired", () => finished("expired"));
 
@@ -63,8 +70,12 @@ export default class LinkChannel {
                     data: encryptedData
                   };
 
-                  channel.push("link_response", payload);
-                  channel.leave();
+                  if (!leftChannel) {
+                    channel.push("link_response", payload);
+                  }
+
+                  leave();
+
                   finished("used");
                   readyToSend = false;
                 }

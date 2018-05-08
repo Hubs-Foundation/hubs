@@ -172,7 +172,7 @@ const onReady = async () => {
 
   registerNetworkSchemas();
 
-  let uiProps = {};
+  let uiProps = { linkChannel };
 
   mountUI(scene);
 

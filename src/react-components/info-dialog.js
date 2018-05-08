@@ -22,8 +22,7 @@ class InfoDialog extends Component {
     dialogType: PropTypes.oneOf(Object.values(InfoDialog.dialogTypes)),
     onCloseDialog: PropTypes.func,
     onSubmittedEmail: PropTypes.func,
-    linkChannel: PropTypes.object,
-    onLinkCodeUsed: PropTypes.func
+    linkCode: PropTypes.string
   };
 
   constructor(props) {
@@ -219,8 +218,8 @@ class InfoDialog extends Component {
         );
         break;
       case InfoDialog.dialogTypes.link:
-        dialogTitle = "Enter on Device";
-        dialogBody = <LinkDialog linkChannel={this.props.linkChannel} onLinkCodeUsed={this.props.onLinkCodeUseds} />;
+        dialogTitle = "Link to Device";
+        dialogBody = <LinkDialog linkCode={this.props.linkCode} />;
         break;
     }
 

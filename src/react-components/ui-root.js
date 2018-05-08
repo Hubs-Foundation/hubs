@@ -66,6 +66,7 @@ class UIRoot extends Component {
     enableScreenSharing: PropTypes.bool,
     store: PropTypes.object,
     scene: PropTypes.object,
+    linkChannel: PropTypes.object,
     htmlPrefix: PropTypes.string,
     showProfileEntry: PropTypes.bool,
     availableVREntryTypes: PropTypes.object,
@@ -81,6 +82,8 @@ class UIRoot extends Component {
     entryStep: ENTRY_STEPS.start,
     enterInVR: false,
     infoDialogType: null,
+    linkCode: null,
+    linkCodeCancel: null,
 
     shareScreen: false,
     requestedScreen: false,
@@ -519,6 +522,21 @@ class UIRoot extends Component {
     this.setState({ entryStep: ENTRY_STEPS.finished });
   };
 
+  attemptLink = async () => {
+    this.setState({ infoDialogType: InfoDialog.dialogTypes.link });
+    const { code, cancel, onFinished } = await this.props.linkChannel.generateCode();
+    this.setState({ linkCode: code, linkCodeCancel: cancel });
+    onFinished.then(this.handleCloseDialog);
+  };
+
+  handleCloseDialog = async () => {
+    if (this.state.linkCodeCancel) {
+      this.state.linkCodeCancel();
+    }
+
+    this.setState({ infoDialogType: null, linkCode: null, linkCodeCancel: null });
+  };
+
   render() {
     if (this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason) {
       let subtitle = null;
@@ -618,7 +636,7 @@ class UIRoot extends Component {
             {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
               <GenericEntryButton onClick={this.enterVR} />
             )}
-            <DeviceEntryButton onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.link })} />
+            <DeviceEntryButton onClick={this.attemptLink} />
             {this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
               <GearVREntryButton onClick={this.enterGearVR} />
             )}
@@ -836,8 +854,9 @@ class UIRoot extends Component {
         <div className="ui">
           <InfoDialog
             dialogType={this.state.infoDialogType}
+            linkCode={this.state.linkCode}
             onSubmittedEmail={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.email_submitted })}
-            onCloseDialog={() => this.setState({ infoDialogType: null })}
+            onCloseDialog={this.handleCloseDialog}
           />
 
           {this.state.entryStep === ENTRY_STEPS.finished && (

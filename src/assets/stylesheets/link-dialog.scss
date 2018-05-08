@@ -1,0 +1,27 @@
+:local(.domain) {
+  color: white;
+  font-size: 3.0em;
+  font-family: monospace;
+  font-weight: bold;
+  padding: 14px;
+}
+
+:local(.code) {
+  color: white;
+  font-size: 4.0em;
+  font-family: monospace;
+  font-weight: bold;
+  padding: 8px;
+}
+
+:local(.keep-open) {
+  font-size: 0.8em;
+}
+
+:local(.digit) {
+  padding: 0px 8px;
+}
+
+:local(.code-loading-panel) {
+  background: transparent;
+}
