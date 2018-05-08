@@ -60,11 +60,11 @@ AFRAME.registerComponent("cursor-controller", {
     this._handleTouchEnd = this._handleTouchEnd.bind(this);
 
     this.el.sceneEl.renderer.sortObjects = true;
-    this.data.cursor.addEventListener("loaded", this.cursorLoadedListener);
+    this.data.cursor.addEventListener("loaded", this._handleCursorLoaded);
   },
 
   remove: function() {
-    this.data.cursor.removeEventListener("loaded", this._cursorLoadedListener);
+    this.data.cursor.removeEventListener("loaded", this._handleCursorLoaded);
   },
 
   update: function(oldData) {
