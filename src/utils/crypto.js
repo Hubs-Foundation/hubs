@@ -15,9 +15,7 @@ async function publicKeyToString(key) {
 }
 
 async function stringToPublicKey(s) {
-  return await crypto.subtle.importKey("jwk", JSON.parse(s), { name: "ECDH", namedCurve: "P-256" }, true, [
-    "deriveKey"
-  ]);
+  return await crypto.subtle.importKey("jwk", JSON.parse(s), { name: "ECDH", namedCurve: "P-256" }, true, []);
 }
 
 function stringToArrayBuffer(s) {
@@ -30,7 +28,8 @@ function stringToArrayBuffer(s) {
   return buf;
 }
 
-function arrayBufferToString(buf) {
+function arrayBufferToString(b) {
+  const buf = new Uint8Array(b);
   let s = "";
 
   for (let i = 0; i < buf.byteLength; i++) {
@@ -56,8 +55,11 @@ export async function generatePublicKeyAndEncryptedObject(incomingPublicKeyStrin
   const keyPair = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveKey"]);
   const publicKeyString = await publicKeyToString(keyPair.publicKey);
   const secret = await deriveKey(keyPair.privateKey, incomingPublicKey);
+
   const encryptedData = btoa(
-    await crypto.subtle.encrypt({ name: "AES-CBC", iv }, secret, stringToArrayBuffer(JSON.stringify(obj)))
+    arrayBufferToString(
+      await crypto.subtle.encrypt({ name: "AES-CBC", iv }, secret, stringToArrayBuffer(JSON.stringify(obj)))
+    )
   );
 
   return { publicKeyString, encryptedData };
@@ -66,14 +68,9 @@ export async function generatePublicKeyAndEncryptedObject(incomingPublicKeyStrin
 // Requestor then takes the receiver's public key, the private key (returned from generateKeys()), and the data from the receiver.
 export async function decryptObject(publicKeyString, privateKey, base64value) {
   const iv = new Uint8Array(16);
-  const publicKey = await publicKeyToString(publicKeyString);
+  const publicKey = await stringToPublicKey(publicKeyString);
   const secret = await deriveKey(privateKey, publicKey);
-
-  return JSON.parse(
-    arrayBufferToString(
-      new Uint8Array(
-        await crypto.subtle.decrypt({ name: "AES-CBC", iv }, secret, stringToArrayBuffer(atob(base64value)))
-      )
-    )
-  );
+  const ciphertext = stringToArrayBuffer(atob(base64value));
+  const data = await crypto.subtle.decrypt({ name: "AES-CBC", iv }, secret, ciphertext);
+  return JSON.parse(arrayBufferToString(data));
 }

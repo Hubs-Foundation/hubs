@@ -55,7 +55,7 @@ export default class XferChannel {
                 data.profile = { ...this.store.state.profile };
               }
 
-              this.generatePublicKeyAndEncryptedObject(incoming.public_key).then(
+              generatePublicKeyAndEncryptedObject(incoming.public_key, data).then(
                 ({ publicKeyString, encryptedData }) => {
                   const payload = {
                     target_session_id: incoming.reply_to_session_id,
@@ -118,7 +118,7 @@ export default class XferChannel {
           finished = true;
           channel.leave();
 
-          this.decryptObject(payload.public_key, privateKey, payload.data).then(resolve);
+          decryptObject(payload.public_key, privateKey, payload.data).then(resolve);
         });
 
         channel.join().receive("error", r => console.error(r));
