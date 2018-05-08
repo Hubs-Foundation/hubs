@@ -89,7 +89,7 @@ function MobileWater(geometry, options) {
       ${THREE.ShaderChunk["common"]}
       ${THREE.ShaderChunk["packing"]}
       ${THREE.ShaderChunk["bsdfs"]}
-      ${THREE.ShaderChunk["lights_pars"]}
+      ${THREE.ShaderChunk["lights_pars_begin"]}
 
       void main() {
       	vec4 noise = getNoise( worldPosition.xz * size );

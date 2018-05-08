@@ -13,6 +13,7 @@ const POSES = {
 export const CONTROLLER_OFFSETS = {
   default: new THREE.Matrix4(),
   "oculus-touch-controls": new THREE.Matrix4().makeTranslation(0, -0.015, 0.04),
+  "oculus-go-controls": new THREE.Matrix4(),
   "vive-controls": new THREE.Matrix4().compose(
     new THREE.Vector3(0, -0.017, 0.13),
     new THREE.Quaternion().setFromEuler(new THREE.Euler(-40 * THREE.Math.DEG2RAD, 0, 0)),
@@ -110,12 +111,13 @@ AFRAME.registerComponent("hand-controls2", {
     const controlConfiguration = {
       hand: hand,
       model: false,
-      rotationOffset: 0
+      orientationOffset: { x: 0, y: 0, z: 0 }
     };
 
     if (hand !== prevData) {
       el.setAttribute("vive-controls", controlConfiguration);
       el.setAttribute("oculus-touch-controls", controlConfiguration);
+      el.setAttribute("oculus-go-controls", controlConfiguration);
       el.setAttribute("windows-motion-controls", controlConfiguration);
       el.setAttribute("daydream-controls", controlConfiguration);
       el.setAttribute("gearvr-controls", controlConfiguration);
