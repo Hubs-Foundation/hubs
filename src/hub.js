@@ -111,6 +111,12 @@ import { generateDefaultProfile, generateRandomName } from "./utils/identity.js"
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
+window.RENDER_ORDER = {
+  HUD_BACKGROUND: 1,
+  HUD: 2,
+  CURSOR: 3
+};
+
 function qsTruthy(param) {
   const val = qs[param];
   // if the param exists but is not set (e.g. "?foo&bar"), its value is null.
@@ -203,6 +209,7 @@ const onReady = async () => {
 
   const enterScene = async (mediaStream, enterInVR, janusRoomId) => {
     const scene = document.querySelector("a-scene");
+    scene.renderer.sortObjects = true;
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("a-scene canvas").classList.remove("blurred");
     scene.render();

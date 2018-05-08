@@ -62,7 +62,6 @@ AFRAME.registerComponent("cursor-controller", {
       this[name] = this[name].bind(this);
     });
 
-    this.el.sceneEl.renderer.sortObjects = true;
     this.data.cursor.addEventListener("loaded", this._handleCursorLoaded);
   },
 
@@ -406,7 +405,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleCursorLoaded: function() {
-    this.data.cursor.object3DMap.mesh.renderOrder = 1;
+    this.data.cursor.object3DMap.mesh.renderOrder = window.RENDER_ORDER.CURSOR;
   },
 
   _handleControllerConnected: function(e) {
