@@ -41,30 +41,24 @@ AFRAME.registerComponent("cursor-controller", {
 
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
-    this._handleMouseDown = this._handleMouseDown.bind(this);
-    this._handleMouseMove = this._handleMouseMove.bind(this);
-    this._handleMouseUp = this._handleMouseUp.bind(this);
-    this._handleWheel = this._handleWheel.bind(this);
-    this._handleEnterVR = this._handleEnterVR.bind(this);
-    this._handleExitVR = this._handleExitVR.bind(this);
-    this._handlePrimaryDown = this._handlePrimaryDown.bind(this);
-    this._handlePrimaryUp = this._handlePrimaryUp.bind(this);
-    this._handleModelLoaded = this._handleModelLoaded.bind(this);
-    this._handleCursorLoaded = this._handleCursorLoaded.bind(this);
-    this._handleControllerConnected = this._handleControllerConnected.bind(this);
-    this._handleControllerDisconnected = this._handleControllerDisconnected.bind(this);
-
-    this._handleTouchStart = this._handleTouchStart.bind(this);
-    this._updateRaycasterIntersections = this._updateRaycasterIntersections.bind(this);
-    this._handleTouchMove = this._handleTouchMove.bind(this);
-    this._handleTouchEnd = this._handleTouchEnd.bind(this);
-
-    this.el.sceneEl.renderer.sortObjects = true;
-    this.data.cursor.addEventListener("loaded", this.cursorLoadedListener);
-  },
-
-  remove: function() {
-    this.data.cursor.removeEventListener("loaded", this._cursorLoadedListener);
+    [
+      "_handleTouchStart",
+      "_handleTouchMove",
+      "_handleTouchEnd",
+      "_handleMouseDown",
+      "_handleMouseMove",
+      "_handleMouseUp",
+      "_handleWheel",
+      "_handleEnterVR",
+      "_handleExitVR",
+      "_handlePrimaryDown",
+      "_handlePrimaryUp",
+      "_handleModelLoaded",
+      "_handleControllerConnected",
+      "_handleControllerDisconnected"
+    ].map(fn => {
+      this[fn] = this[fn].bind(this);
+    });
   },
 
   update: function(oldData) {
@@ -81,6 +75,7 @@ AFRAME.registerComponent("cursor-controller", {
     document.addEventListener("touchstart", this._handleTouchStart);
     document.addEventListener("touchmove", this._handleTouchMove);
     document.addEventListener("touchend", this._handleTouchEnd);
+    document.addEventListener("touchcancel", this._handleTouchEnd);
     document.addEventListener("mousedown", this._handleMouseDown);
     document.addEventListener("mousemove", this._handleMouseMove);
     document.addEventListener("mouseup", this._handleMouseUp);
@@ -93,7 +88,6 @@ AFRAME.registerComponent("cursor-controller", {
     this.data.playerRig.addEventListener(this.data.primaryUp, this._handlePrimaryUp);
     this.data.playerRig.addEventListener(this.data.grabEvent, this._handlePrimaryDown);
     this.data.playerRig.addEventListener(this.data.releaseEvent, this._handlePrimaryUp);
-
     this.data.playerRig.addEventListener("model-loaded", this._handleModelLoaded);
 
     this.el.sceneEl.addEventListener("controllerconnected", this._handleControllerConnected);
@@ -104,6 +98,7 @@ AFRAME.registerComponent("cursor-controller", {
     document.removeEventListener("touchstart", this._handleTouchStart);
     document.removeEventListener("touchmove", this._handleTouchMove);
     document.removeEventListener("touchend", this._handleTouchEnd);
+    document.removeEventListener("touchcancel", this._handleTouchEnd);
     document.removeEventListener("mousedown", this._handleMouseDown);
     document.removeEventListener("mousemove", this._handleMouseMove);
     document.removeEventListener("mouseup", this._handleMouseUp);
@@ -116,7 +111,6 @@ AFRAME.registerComponent("cursor-controller", {
     this.data.playerRig.removeEventListener(this.data.primaryUp, this._handlePrimaryUp);
     this.data.playerRig.removeEventListener(this.data.grabEvent, this._handlePrimaryDown);
     this.data.playerRig.removeEventListener(this.data.releaseEvent, this._handlePrimaryUp);
-
     this.data.playerRig.removeEventListener("model-loaded", this._handleModelLoaded);
 
     this.el.sceneEl.removeEventListener("controllerconnected", this._handleControllerConnected);
@@ -255,50 +249,39 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleTouchStart: function(e) {
-    if (!this.isMobile || this.hasPointingDevice) return;
+    if (!this.isMobile || this.hasPointingDevice || this.activeTouch) return;
 
-    const touch = e.touches[0];
-    if (touch.clientY / window.innerHeight >= 0.8) return true;
-    this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
-    this._updateRaycasterIntersections();
-
-    // update cursor position
-    if (!this.isGrabbing) {
-      const intersections = this.el.components.raycaster.intersections;
-      if (intersections.length > 0 && intersections[0].distance <= this.data.maxDistance) {
-        const intersection = intersections[0];
-        this.data.cursor.object3D.position.copy(intersection.point);
-        this.currentDistance = intersections[0].distance;
-        this.currentDistanceMod = 0;
-      } else {
-        this.currentDistance = this.data.maxDistance;
+    for (let i = e.touches.length - 1; i >= 0; i--) {
+      const touch = e.touches[i];
+      if (touch.clientY / window.innerHeight < 0.8) {
+        this.activeTouch = touch;
+        break;
       }
     }
+    if (!this.activeTouch) return;
 
-    this._setLookControlsEnabled(false);
-
-    // Set timeout because if I don't, the duck moves is picked up at the
-    // the wrong offset from the cursor: If the cursor started below and
-    // to the left, the duck lifts above and to the right by the same amount.
-    // I don't understand exactly why this is, since I am setting the
-    // cursor object's position manually in this function, but something else
-    // must happen before cursor-grab ends up doing the right thing.
-    // TODO : Figure this out.
-    window.setTimeout(() => {
-      this.data.cursor.emit("cursor-grab", {});
-    }, 40);
-
-    this.lastTouch = touch;
-  },
-
-  _updateRaycasterIntersections: function() {
-    const raycaster = this.el.components.raycaster.raycaster;
+    // Update the ray and cursor positions
+    const raycasterComp = this.el.components.raycaster;
+    const raycaster = raycasterComp.raycaster;
     const camera = this.data.camera.components.camera.camera;
+    const cursor = this.data.cursor;
+    this.mousePos.set(
+      this.activeTouch.clientX / window.innerWidth * 2 - 1,
+      -(this.activeTouch.clientY / window.innerHeight) * 2 + 1
+    );
     raycaster.setFromCamera(this.mousePos, camera);
-    this.origin = raycaster.ray.origin;
-    this.direction = raycaster.ray.direction;
-    this.el.setAttribute("raycaster", { origin: this.origin, direction: this.direction });
-    this.el.components.raycaster.checkIntersections();
+    raycasterComp.data.origin = raycaster.ray.origin;
+    raycasterComp.data.direction = raycaster.ray.direction;
+    raycasterComp.checkIntersections();
+    const intersections = raycasterComp.intersections;
+    if (intersections.length == 0 || intersections[0].distance >= this.data.maxDistance) {
+      this.activeTouch = null;
+      return;
+    }
+    cursor.object3D.position.copy(intersections[0].point);
+    // Cursor position must be synced to physics before constraint is created
+    cursor.components["static-body"].syncToPhysics();
+    cursor.emit("cursor-grab", {});
   },
 
   _handleTouchMove: function(e) {
@@ -306,26 +289,31 @@ AFRAME.registerComponent("cursor-controller", {
 
     for (let i = 0; i < e.touches.length; i++) {
       const touch = e.touches[i];
-      if (touch.clientY / window.innerHeight >= 0.8) return true;
-      this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
-      this.lastTouch = touch;
+      if (
+        (!this.activeTouch && touch.clientY / window.innerHeight < 0.8) ||
+        touch.identifier === this.activeTouch.identifier
+      ) {
+        this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
+        return;
+      }
     }
   },
 
   _handleTouchEnd: function(e) {
-    if (!this.isMobile || this.hasPointingDevice) return;
+    if (!this.isMobile || this.hasPointingDevice || !this.activeTouch) return;
 
-    for (let i = 0; i < e.changedTouches.length; i++) {
-      const touch = e.changedTouches[i];
-      const thisTouchDidNotDriveMousePos =
-        Math.abs(touch.clientX - this.lastTouch.clientX) > 0.1 &&
-        Math.abs(touch.clientY - this.lastTouch.clientY) > 0.1;
-      if (thisTouchDidNotDriveMousePos) {
-        return;
+    if (e.touches) {
+      for (let i = 0; i < e.touches.length; i++) {
+        const touch = e.touches[i];
+        if (touch.identifier === this.activeTouch.identifier) {
+          // Touch is still active
+          return;
+        }
       }
     }
-    this._setLookControlsEnabled(true);
+
     this.data.cursor.emit("cursor-release", {});
+    this.activeTouch = null;
   },
 
   _handleMouseDown: function() {
@@ -406,10 +394,6 @@ AFRAME.registerComponent("cursor-controller", {
 
   _handleModelLoaded: function() {
     this.physicalHand = this.data.playerRig.querySelector(this.data.physicalHandSelector);
-  },
-
-  _handleCursorLoaded: function() {
-    this.data.cursor.object3DMap.mesh.renderOrder = 1;
   },
 
   _handleControllerConnected: function(e) {
