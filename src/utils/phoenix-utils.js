@@ -2,7 +2,7 @@ import queryString from "query-string";
 import uuid from "uuid/v4";
 import { Socket } from "phoenix";
 
-export function connectToPhoenix() {
+export function connectToReticulum() {
   const qs = queryString.parse(location.search);
 
   const socketProtocol = qs.phx_protocol || (document.location.protocol === "https:" ? "wss:" : "ws:");

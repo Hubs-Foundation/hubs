@@ -63,8 +63,8 @@ import ReactDOM from "react-dom";
 import React from "react";
 import UIRoot from "./react-components/ui-root";
 import HubChannel from "./utils/hub-channel";
-import XferChannel from "./utils/xfer-channel";
-import { connectToPhoenix } from "./utils/phoenix-utils";
+import LinkChannel from "./utils/link-channel";
+import { connectToReticulum } from "./utils/phoenix-utils";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
@@ -165,7 +165,7 @@ function mountUI(scene, props = {}) {
 const onReady = async () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
-  const xferChannel = new XferChannel(store);
+  const linkChannel = new LinkChannel(store);
 
   document.querySelector("a-scene canvas").classList.add("blurred");
   window.APP.scene = scene;
@@ -361,7 +361,7 @@ const onReady = async () => {
   const hubId = qs.hub_id || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
 
-  const socket = connectToPhoenix();
+  const socket = connectToReticulum();
   const channel = socket.channel(`hub:${hubId}`, {});
 
   channel
@@ -383,7 +383,7 @@ const onReady = async () => {
       console.error(res);
     });
 
-  xferChannel.setSocket(socket);
+  linkChannel.setSocket(socket);
 };
 
 document.addEventListener("DOMContentLoaded", onReady);

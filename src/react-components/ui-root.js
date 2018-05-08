@@ -11,7 +11,13 @@ import screenfull from "screenfull";
 
 import { lang, messages } from "../utils/i18n";
 import AutoExitWarning from "./auto-exit-warning";
-import { TwoDEntryButton, GenericEntryButton, GearVREntryButton, DaydreamEntryButton } from "./entry-buttons.js";
+import {
+  TwoDEntryButton,
+  DeviceEntryButton,
+  GenericEntryButton,
+  GearVREntryButton,
+  DaydreamEntryButton
+} from "./entry-buttons.js";
 import { ProfileInfoHeader } from "./profile-info-header.js";
 import ProfileEntryPanel from "./profile-entry-panel";
 import InfoDialog from "./info-dialog.js";
@@ -588,8 +594,6 @@ class UIRoot extends Component {
       );
     }
 
-    const daydreamMaybeSubtitle = messages["entry.daydream-via-chrome"];
-
     // Only show this in desktop firefox since other browsers/platforms will ignore the "screen" media constraint and
     // will attempt to share your webcam instead!
     const screenSharingCheckbox = this.props.enableScreenSharing &&
@@ -614,6 +618,7 @@ class UIRoot extends Component {
             {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
               <GenericEntryButton onClick={this.enterVR} />
             )}
+            <DeviceEntryButton onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.link })} />
             {this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
               <GearVREntryButton onClick={this.enterGearVR} />
             )}
@@ -621,7 +626,9 @@ class UIRoot extends Component {
               <DaydreamEntryButton
                 onClick={this.enterDaydream}
                 subtitle={
-                  this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe ? daydreamMaybeSubtitle : ""
+                  this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe
+                    ? "entry.daydream-via-chrome"
+                    : null
                 }
               />
             )}

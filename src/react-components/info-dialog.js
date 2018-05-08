@@ -4,6 +4,7 @@ import classNames from "classnames";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import formurlencoded from "form-urlencoded";
+import LinkDialog from "./link-dialog.js";
 
 // TODO i18n
 
@@ -14,12 +15,15 @@ class InfoDialog extends Component {
     invite: Symbol("invite"),
     updates: Symbol("updates"),
     report: Symbol("report"),
-    help: Symbol("help")
+    help: Symbol("help"),
+    link: Symbol("link")
   };
   static propTypes = {
     dialogType: PropTypes.oneOf(Object.values(InfoDialog.dialogTypes)),
     onCloseDialog: PropTypes.func,
-    onSubmittedEmail: PropTypes.func
+    onSubmittedEmail: PropTypes.func,
+    linkChannel: PropTypes.object,
+    onLinkCodeUsed: PropTypes.func
   };
 
   constructor(props) {
@@ -213,6 +217,10 @@ class InfoDialog extends Component {
             </p>
           </div>
         );
+        break;
+      case InfoDialog.dialogTypes.link:
+        dialogTitle = "Enter on Device";
+        dialogBody = <LinkDialog linkChannel={this.props.linkChannel} onLinkCodeUsed={this.props.onLinkCodeUseds} />;
         break;
     }
 

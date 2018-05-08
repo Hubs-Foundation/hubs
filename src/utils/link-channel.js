@@ -1,6 +1,6 @@
 import { generatePublicKeyAndEncryptedObject, generateKeys, decryptObject } from "./crypto";
 
-export default class XferChannel {
+export default class LinkChannel {
   constructor(store) {
     this.store = store;
   }
@@ -11,7 +11,7 @@ export default class XferChannel {
 
   // Returns a promise that, when resolved, will forward an object with three keys:
   //
-  // code: The code that was made available to use for xfer.
+  // code: The code that was made available to use for link.
   //
   // cancel: A function that the caller can call to cancel the use of the code.
   //
@@ -26,13 +26,13 @@ export default class XferChannel {
             .toString()
             .padStart(4, "0");
 
-          // Only respond to one xfer_request in this channel.
+          // Only respond to one link_request in this channel.
           let readyToSend = false;
 
-          const channel = this.socket.channel(`xfer:${code}`, { timeout: 10000 });
+          const channel = this.socket.channel(`link:${code}`, { timeout: 10000 });
           const cancel = () => channel.leave();
 
-          channel.on("xfer_expired", () => finished("expired"));
+          channel.on("link_expired", () => finished("expired"));
 
           channel.on("presence_state", state => {
             if (readyToSend) return;
@@ -46,11 +46,11 @@ export default class XferChannel {
             }
           });
 
-          channel.on("xfer_request", incoming => {
+          channel.on("link_request", incoming => {
             if (readyToSend) {
               const data = { path: location.pathname };
 
-              // Copy profile data to xfer'ed device if it's been set.
+              // Copy profile data to link'ed device if it's been set.
               if (this.store.state.activity.hasChangedName) {
                 data.profile = { ...this.store.state.profile };
               }
@@ -63,7 +63,7 @@ export default class XferChannel {
                     data: encryptedData
                   };
 
-                  channel.push("xfer_response", payload);
+                  channel.push("link_response", payload);
                   channel.leave();
                   finished("used");
                   readyToSend = false;
@@ -80,13 +80,13 @@ export default class XferChannel {
     });
   };
 
-  // Attempts to receive an xfer payload from a remote device using the given code.
+  // Attempts to receive an link payload from a remote device using the given code.
   //
   // Promise rejects if the code is invalid or there is a problem with the channel.
-  // Promise resolves and passes payload of xfer source on successful xfer.
-  attemptXfer = code => {
+  // Promise resolves and passes payload of link source on successful link.
+  attemptLink = code => {
     return new Promise((resolve, reject) => {
-      const channel = this.socket.channel(`xfer:${code}`, { timeout: 10000 });
+      const channel = this.socket.channel(`link:${code}`, { timeout: 10000 });
       let finished = false;
 
       generateKeys().then(({ publicKeyString, privateKey }) => {
@@ -94,8 +94,8 @@ export default class XferChannel {
           const numOccupants = Object.keys(state).length;
 
           if (numOccupants === 1) {
-            // Great, only sender is in topic, request xfer
-            channel.push("xfer_request", {
+            // Great, only sender is in topic, request link
+            channel.push("link_request", {
               reply_to_session_id: this.socket.params.session_id,
               public_key: publicKeyString
             });
@@ -109,12 +109,12 @@ export default class XferChannel {
             // Nobody in this channel, probably a bad code.
             reject("failed");
           } else {
-            console.warn("xfer code channel already has 2 or more occupants, something fishy is going on.");
+            console.warn("link code channel already has 2 or more occupants, something fishy is going on.");
             reject("in_use");
           }
         });
 
-        channel.on("xfer_response", payload => {
+        channel.on("link_response", payload => {
           finished = true;
           channel.leave();
 

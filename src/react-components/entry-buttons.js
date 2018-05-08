@@ -7,7 +7,8 @@ import MobileScreenEntryImg from "../assets/images/mobile_screen_entry.svg";
 import DesktopScreenEntryImg from "../assets/images/desktop_screen_entry.svg";
 import GenericVREntryImg from "../assets/images/generic_vr_entry.svg";
 import GearVREntryImg from "../assets/images/gearvr_entry.svg";
-import DaydreamEntyImg from "../assets/images/daydream_entry.svg";
+import DaydreamEntryImg from "../assets/images/daydream_entry.svg";
+import DeviceEntryImg from "../assets/images/device_entry.svg";
 
 const mobiledetect = new MobileDetect(navigator.userAgent);
 
@@ -22,7 +23,11 @@ const EntryButton = props => (
         <span className="entry-button--bolded">
           <FormattedMessage id={props.mediumMessageId} />
         </span>
-        {props.subtitle && <div className="entry-button__subtitle">{props.subtitle}</div>}
+        {props.subtitle && (
+          <div className="entry-button__subtitle">
+            <FormattedMessage id={props.subtitle} />
+          </div>
+        )}
       </div>
     </div>
   </button>
@@ -72,9 +77,21 @@ export const GearVREntryButton = props => {
 export const DaydreamEntryButton = props => {
   const entryButtonProps = {
     ...props,
-    iconSrc: DaydreamEntyImg,
+    iconSrc: DaydreamEntryImg,
     prefixMessageId: "entry.daydream-prefix",
     mediumMessageId: "entry.daydream-medium"
+  };
+
+  return <EntryButton {...entryButtonProps} />;
+};
+
+export const DeviceEntryButton = props => {
+  const entryButtonProps = {
+    ...props,
+    iconSrc: DeviceEntryImg,
+    prefixMessageId: "entry.device-prefix",
+    mediumMessageId: "entry.device-medium",
+    subtitle: mobiledetect.mobile() ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop"
   };
 
   return <EntryButton {...entryButtonProps} />;
