@@ -7,7 +7,7 @@ patchWebGLRenderingContext();
 
 import "aframe-xr";
 import "./vendor/GLTFLoader";
-import "networked-aframe";
+import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
 import "aframe-input-mapping-component";
@@ -107,7 +107,7 @@ import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 
-import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
+import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
 function qsTruthy(param) {
@@ -328,7 +328,11 @@ const onReady = async () => {
   }
 
   getAvailableVREntryTypes().then(availableVREntryTypes => {
-    remountUI({ availableVREntryTypes });
+    if (availableVREntryTypes.gearvr === VR_DEVICE_AVAILABILITY.yes) {
+      remountUI({ availableVREntryTypes, forcedVREntryType: "gearvr" });
+    } else {
+      remountUI({ availableVREntryTypes });
+    }
   });
 
   const environmentRoot = document.querySelector("#environment-root");

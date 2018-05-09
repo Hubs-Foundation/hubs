@@ -131,7 +131,7 @@ class AvatarSelector extends Component {
       <a-entity key={avatar.id} rotation={`0 ${360 * -i / this.props.avatars.length} 0`}>
         <a-entity position="0 0 5" gltf-model-plus={`src: #${avatar.id}`} inflate="true">
           <template data-selector=".RootScene">
-            <a-entity animation-mixer />
+            <a-entity animation-mixer="" />
           </template>
 
           <a-animation
@@ -168,7 +168,7 @@ class AvatarSelector extends Component {
           </a-entity>
 
           <a-entity position="0 1.5 -5.6" rotation="-10 180 0">
-            <a-entity camera />
+            <a-entity camera="" />
           </a-entity>
 
           <a-entity

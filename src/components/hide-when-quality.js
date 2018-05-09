@@ -17,7 +17,6 @@ AFRAME.registerComponent("hide-when-quality", {
   },
 
   updateComponentState(quality) {
-    console.log(quality);
     this.el.setAttribute("visible", quality !== this.data);
   }
 });

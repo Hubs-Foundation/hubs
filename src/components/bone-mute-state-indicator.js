@@ -14,7 +14,6 @@ AFRAME.registerComponent("bone-mute-state-indicator", {
     this.el.addEventListener("model-loaded", () => {
       this.unmutedBone = this.el.object3D.getObjectByName(this.data.unmutedBoneName);
       this.mutedBone = this.el.object3D.getObjectByName(this.data.mutedBoneName);
-      console.log(this.unmutedBone, this.mutedBone);
       this.modelLoaded = true;
 
       this.updateMuteState();

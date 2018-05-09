@@ -13,9 +13,9 @@
     <link href="https://fonts.googleapis.com/css?family=Zilla+Slab:300,300i,400,400i,700" rel="stylesheet">
 
     <% if(NODE_ENV === "production") { %>
-        <script src="https://cdn.rawgit.com/brianpeiris/aframe/845825ae694449524c185c44a314d361eead4680/dist/aframe-master.min.js"></script>
+        <script src="https://cdn.rawgit.com/aframevr/aframe/3e7a4b3/dist/aframe-master.min.js" integrity="sha384-LQXa4VjhYucs9sVd5yQ3OhBXRea0jrvbHJA8CYLgTnvzxF5uvyhabSo1mX4tT2c6" crossorigin="anonymous"></script>
     <% } else { %>
-        <script src="https://cdn.rawgit.com/brianpeiris/aframe/845825ae694449524c185c44a314d361eead4680/dist/aframe-master.js"></script>
+        <script src="https://cdn.rawgit.com/aframevr/aframe/3e7a4b3/dist/aframe-master.js" integrity="sha384-EaMOuyBOi9ERV/lVDwQgz/yFWBDWPsIju5Co6oCZZHXuvbLBO81yPWn80q0BbBn3" crossorigin="anonymous"></script>
     <% } %>
 </head>
 
@@ -28,12 +28,14 @@
     </audio>
 
     <a-scene
+        renderer="antialias: true"
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         physics="gravity: -6;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         freeze-controller="toggleEvent: action_freeze"
         personal-space-bubble="debug: false;"
-        >
+        vr-mode-ui="enabled: false"
+    >
 
         <a-assets>
             <img id="tooltip"  src="./assets/hud/tooltip.9.png" >
