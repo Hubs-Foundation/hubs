@@ -38,6 +38,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.origin = new THREE.Vector3();
     this.direction = new THREE.Vector3();
     this.controllerQuaternion = new THREE.Quaternion();
+    this.activeTouch = null;
 
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
@@ -298,7 +299,7 @@ AFRAME.registerComponent("cursor-controller", {
       const touch = e.touches[i];
       if (
         (!this.activeTouch && touch.clientY / window.innerHeight < 0.8) ||
-        touch.identifier === this.activeTouch.identifier
+        (this.activeTouch && touch.identifier === this.activeTouch.identifier)
       ) {
         this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
         return;
