@@ -301,11 +301,10 @@ const onReady = async () => {
         playerRig.setAttribute("avatar-replay", "");
         const audio = document.getElementById("bot-recording");
         mediaStream.addTrack(audio.captureStream().getAudioTracks()[0]);
-        // wait for runner script to confirm interaction so that we can play audio.
-        const interacted = new Promise(resolve => {
-          window.interacted = resolve;
+        // wait for runner script to click page so that we can play audio.
+        await new Promise(resolve => {
+          document.body.addEventListener("click", resolve, { once: true });
         });
-        await interacted;
         audio.play();
       }
 
