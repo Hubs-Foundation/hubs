@@ -118,9 +118,11 @@ export default class LinkChannel {
             }, 10000);
           } else if (numOccupants === 0) {
             // Nobody in this channel, probably a bad code.
+            channel.leave();
             reject("failed");
           } else {
             console.warn("link code channel already has 2 or more occupants, something fishy is going on.");
+            channel.leave();
             reject("in_use");
           }
         });
