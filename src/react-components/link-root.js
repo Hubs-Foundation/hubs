@@ -40,8 +40,6 @@ class LinkRoot extends Component {
   };
 
   attemptLink = code => {
-    console.log("link " + code);
-
     this.props.linkChannel
       .attemptLink(code)
       .then(response => {
