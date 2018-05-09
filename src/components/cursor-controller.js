@@ -93,6 +93,8 @@ AFRAME.registerComponent("cursor-controller", {
     this.data.playerRig.addEventListener(this.data.primaryUp, this._handlePrimaryUp);
     this.data.playerRig.addEventListener(this.data.grabEvent, this._handlePrimaryDown);
     this.data.playerRig.addEventListener(this.data.releaseEvent, this._handlePrimaryUp);
+    this.data.playerRig.addEventListener("gamepadbuttondown", this._handlePrimaryDown);
+    this.data.playerRig.addEventListener("gamepadbuttonup", this._handlePrimaryUp);
 
     this.data.playerRig.addEventListener("model-loaded", this._handleModelLoaded);
 
@@ -116,6 +118,8 @@ AFRAME.registerComponent("cursor-controller", {
     this.data.playerRig.removeEventListener(this.data.primaryUp, this._handlePrimaryUp);
     this.data.playerRig.removeEventListener(this.data.grabEvent, this._handlePrimaryDown);
     this.data.playerRig.removeEventListener(this.data.releaseEvent, this._handlePrimaryUp);
+    this.data.playerRig.removeEventListener("gamepadbuttondown", this._handlePrimaryDown);
+    this.data.playerRig.removeEventListener("gamepadbuttonup", this._handlePrimaryUp);
 
     this.data.playerRig.removeEventListener("model-loaded", this._handleModelLoaded);
 
@@ -317,11 +321,13 @@ AFRAME.registerComponent("cursor-controller", {
 
     for (let i = 0; i < e.changedTouches.length; i++) {
       const touch = e.changedTouches[i];
-      const thisTouchDidNotDriveMousePos =
-        Math.abs(touch.clientX - this.lastTouch.clientX) > 0.1 &&
-        Math.abs(touch.clientY - this.lastTouch.clientY) > 0.1;
-      if (thisTouchDidNotDriveMousePos) {
-        return;
+      if (this.lastTouch) {
+        const thisTouchDidNotDriveMousePos =
+          Math.abs(touch.clientX - this.lastTouch.clientX) > 0.1 &&
+          Math.abs(touch.clientY - this.lastTouch.clientY) > 0.1;
+        if (thisTouchDidNotDriveMousePos) {
+          return;
+        }
       }
     }
     this._setLookControlsEnabled(true);
@@ -370,10 +376,8 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleEnterVR: function() {
-    if (AFRAME.utils.device.checkHeadsetConnected()) {
-      this.inVR = true;
-      this._updateController();
-    }
+    this.inVR = true;
+    this._updateController();
   },
 
   _handleExitVR: function() {
@@ -382,7 +386,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handlePrimaryDown: function(e) {
-    if (e.target === this.controller) {
+    if (e.target === this.controller || e.type === "gamepadbuttondown") {
       const isInteractable = this._isTargetOfType(TARGET_TYPE_INTERACTABLE) && !this.grabStarting;
       if (isInteractable || this._isTargetOfType(TARGET_TYPE_UI)) {
         this.grabStarting = true;
@@ -394,7 +398,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handlePrimaryUp: function(e) {
-    if (e.target === this.controller) {
+    if (e.target === this.controller || e.type === "gamepadbuttonup") {
       if (this._isGrabbing() || this._isTargetOfType(TARGET_TYPE_UI)) {
         this.grabStarting = false;
         this.data.cursor.emit("cursor-release", e.detail);
@@ -440,7 +444,7 @@ AFRAME.registerComponent("cursor-controller", {
   _updateController: function() {
     this.hasPointingDevice = this.controllerQueue.length > 0 && this.inVR;
 
-    this._setCursorVisibility(this.hasPointingDevice);
+    this._setCursorVisibility(this.hasPointingDevice || this.isMobile);
 
     if (this.hasPointingDevice) {
       const controllerData = this.controllerQueue[0];
