@@ -116,7 +116,7 @@ class InfoDialog extends Component {
               WebVR Slack
             </a>{" "}
             in the <a href="https://webvr.slack.com/messages/social" target="_blank" rel="noopener noreferrer">#social</a> channel.<br />
-            VR meetups every Friday at noon PST!
+            VR meetups every Friday at noon PDT!
             <p /> Or, tweet at{" "}
             <a href="https://twitter.com/mozillareality" target="_blank" rel="noopener noreferrer">
               @mozillareality
