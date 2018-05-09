@@ -62,8 +62,6 @@ class LinkRoot extends Component {
       });
   };
 
-  componentDidMount() {}
-
   render() {
     return (
       <IntlProvider locale={lang} messages={messages}>

@@ -91,7 +91,7 @@ export default class LinkChannel {
     });
   };
 
-  // Attempts to receive an link payload from a remote device using the given code.
+  // Attempts to receive a link payload from a remote device using the given code.
   //
   // Promise rejects if the code is invalid or there is a problem with the channel.
   // Promise resolves and passes payload of link source on successful link.
