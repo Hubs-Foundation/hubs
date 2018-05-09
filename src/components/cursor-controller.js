@@ -41,25 +41,24 @@ AFRAME.registerComponent("cursor-controller", {
 
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
-    const functionNames = [
-      "_handleTouchStart",
-      "_handleTouchMove",
-      "_handleTouchEnd",
-      "_handleMouseDown",
-      "_handleMouseMove",
-      "_handleMouseUp",
-      "_handleWheel",
-      "_handleEnterVR",
-      "_handleExitVR",
-      "_handlePrimaryDown",
-      "_handlePrimaryUp",
-      "_handleModelLoaded",
-      "_handleCursorLoaded",
-      "_handleControllerConnected",
-      "_handleControllerDisconnected"
-    ];
-    functionNames.forEach(name => {
-      this[name] = this[name].bind(this);
+    [
+      this._handleTouchStart,
+      this._handleTouchMove,
+      this._handleTouchEnd,
+      this._handleMouseDown,
+      this._handleMouseMove,
+      this._handleMouseUp,
+      this._handleWheel,
+      this._handleEnterVR,
+      this._handleExitVR,
+      this._handlePrimaryDown,
+      this._handlePrimaryUp,
+      this._handleModelLoaded,
+      this._handleCursorLoaded,
+      this._handleControllerConnected,
+      this._handleControllerDisconnected
+    ].forEach(fn => {
+      fn = fn.bind(this);
     });
 
     this.data.cursor.addEventListener("loaded", this._handleCursorLoaded);
@@ -278,11 +277,10 @@ AFRAME.registerComponent("cursor-controller", {
       -(this.activeTouch.clientY / window.innerHeight) * 2 + 1
     );
     raycaster.setFromCamera(this.mousePos, camera);
-    raycasterComp.data.origin = raycaster.ray.origin;
-    raycasterComp.data.direction = raycaster.ray.direction;
+    this.el.setAttribute("raycaster", { origin: raycaster.ray.origin, direction: raycaster.ray.direction });
     raycasterComp.checkIntersections();
     const intersections = raycasterComp.intersections;
-    if (intersections.length == 0 || intersections[0].distance >= this.data.maxDistance) {
+    if (intersections.length === 0 || intersections[0].distance >= this.data.maxDistance) {
       this.activeTouch = null;
       return;
     }
@@ -308,16 +306,13 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleTouchEnd: function(e) {
-    if (!this.isMobile || this.hasPointingDevice || !this.activeTouch) return;
-
-    if (e.touches) {
-      for (let i = 0; i < e.touches.length; i++) {
-        const touch = e.touches[i];
-        if (touch.identifier === this.activeTouch.identifier) {
-          // Touch is still active
-          return;
-        }
-      }
+    if (
+      !this.isMobile ||
+      this.hasPointingDevice ||
+      !this.activeTouch ||
+      e.touches.some(touch => touch.identifier === this.activeTouch.identifier)
+    ) {
+      return;
     }
 
     this.data.cursor.emit("cursor-release", {});
