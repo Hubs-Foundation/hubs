@@ -41,24 +41,25 @@ AFRAME.registerComponent("cursor-controller", {
 
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
-    [
-      this._handleTouchStart,
-      this._handleTouchMove,
-      this._handleTouchEnd,
-      this._handleMouseDown,
-      this._handleMouseMove,
-      this._handleMouseUp,
-      this._handleWheel,
-      this._handleEnterVR,
-      this._handleExitVR,
-      this._handlePrimaryDown,
-      this._handlePrimaryUp,
-      this._handleModelLoaded,
-      this._handleCursorLoaded,
-      this._handleControllerConnected,
-      this._handleControllerDisconnected
-    ].forEach(fn => {
-      fn = fn.bind(this);
+    const functionNames = [
+      "_handleTouchStart",
+      "_handleTouchMove",
+      "_handleTouchEnd",
+      "_handleMouseDown",
+      "_handleMouseMove",
+      "_handleMouseUp",
+      "_handleWheel",
+      "_handleEnterVR",
+      "_handleExitVR",
+      "_handlePrimaryDown",
+      "_handlePrimaryUp",
+      "_handleModelLoaded",
+      "_handleCursorLoaded",
+      "_handleControllerConnected",
+      "_handleControllerDisconnected"
+    ];
+    functionNames.forEach(name => {
+      this[name] = this[name].bind(this);
     });
 
     this.data.cursor.addEventListener("loaded", this._handleCursorLoaded);
