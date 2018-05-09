@@ -386,7 +386,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handlePrimaryDown: function(e) {
-    if (e.target === this.controller || e.type === "gamepadbuttondown") {
+    if (e.target === this.controller) {
       const isInteractable = this._isTargetOfType(TARGET_TYPE_INTERACTABLE) && !this.grabStarting;
       if (isInteractable || this._isTargetOfType(TARGET_TYPE_UI)) {
         this.grabStarting = true;
@@ -398,7 +398,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handlePrimaryUp: function(e) {
-    if (e.target === this.controller || e.type === "gamepadbuttonup") {
+    if (e.target === this.controller) {
       if (this._isGrabbing() || this._isTargetOfType(TARGET_TYPE_UI)) {
         this.grabStarting = false;
         this.data.cursor.emit("cursor-release", e.detail);
