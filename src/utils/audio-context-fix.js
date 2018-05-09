@@ -1,5 +1,5 @@
 /**
- * Mobile Safari and Chrome will start Audio contexts in a "suspended" state.
+ * Chrome and Safari will start Audio contexts in a "suspended" state.
  * A user interaction (touch/mouse event) is needed in order to resume the AudioContext.
  */
 
