@@ -70,65 +70,68 @@ class LinkRoot extends Component {
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.link}>
-          {this.state.enteredDigits.length === MAX_DIGITS && (
-            <div className={classNames("loading-panel", styles.codeLoadingPanel)}>
-              <div className="loader-wrap">
-                <div className="loader">
-                  <div className="loader-center" />
+          <div className={styles.linkContents}>
+            {this.state.enteredDigits.length === MAX_DIGITS && (
+              <div className={classNames("loading-panel", styles.codeLoadingPanel)}>
+                <div className="loader-wrap">
+                  <div className="loader">
+                    <div className="loader-center" />
+                  </div>
                 </div>
               </div>
+            )}
+
+            <div className={styles.header}>
+              <FormattedMessage id={this.state.failedAtLeastOnce ? "link.try_again" : "link.link_page_header"} />
             </div>
-          )}
-          <img className={styles.headerImage} src="../assets/images/logo.svg" />
 
-          <div className={styles.header}>
-            <FormattedMessage id={this.state.failedAtLeastOnce ? "link.try_again" : "link.link_page_header"} />
-          </div>
+            <div className={styles.enteredDigits}>
+              {[0, 1, 2, 3].map(d => (
+                <span className={styles.digit} key={`digit_${d}`}>
+                  {this.state.enteredDigits.length > d ? this.state.enteredDigits[d] : "-"}
+                </span>
+              ))}
+            </div>
 
-          <div className={styles.enteredDigits}>
-            {this.state.enteredDigits.map((d, i) => (
-              <span className={styles.digit} key={i}>
-                {d}
-              </span>
-            ))}
-          </div>
-
-          <div className={styles.keypad}>
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d, i) => (
+            <div className={styles.keypad}>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d, i) => (
+                <button
+                  disabled={this.state.enteredDigits.length === MAX_DIGITS}
+                  key={`digit_${i}`}
+                  className={styles.keypadButton}
+                  onClick={() => this.addDigit(d)}
+                >
+                  {d}
+                </button>
+              ))}
               <button
                 disabled={this.state.enteredDigits.length === MAX_DIGITS}
-                key={`digit_${i}`}
-                className={styles.keypadButton}
-                onClick={() => this.addDigit(d)}
+                className={classNames(styles.keypadButton, styles.keypadZeroButton)}
+                onClick={() => this.addDigit(0)}
               >
-                {d}
+                0
               </button>
-            ))}
-            <button
-              disabled={this.state.enteredDigits.length === MAX_DIGITS}
-              className={styles.keypadZeroButton}
-              onClick={() => this.addDigit(0)}
-            >
-              0
-            </button>
-            <button
-              disabled={this.state.enteredDigits.length === 0 || this.state.enteredDigits.length === MAX_DIGITS}
-              className={styles.keypadBackspace}
-              onClick={() => this.removeDigit()}
-            >
-              ⌫
-            </button>
-          </div>
+              <button
+                disabled={this.state.enteredDigits.length === 0 || this.state.enteredDigits.length === MAX_DIGITS}
+                className={classNames(styles.keypadButton, styles.keypadBackspace)}
+                onClick={() => this.removeDigit()}
+              >
+                ⌫
+              </button>
+            </div>
 
-          <div className={styles.footer}>
-            <span>
-              <FormattedMessage id="link.dont_have_a_code" />
-            </span>{" "}
-            <span>
-              <a href="/">
-                <FormattedMessage id="link.create_a_room" />
-              </a>
-            </span>
+            <div className={styles.footer}>
+              <span>
+                <FormattedMessage id="link.dont_have_a_code" />
+              </span>{" "}
+              <span>
+                <a href="/">
+                  <FormattedMessage id="link.create_a_room" />
+                </a>
+              </span>
+            </div>
+
+            <img className={styles.footerImage} src="../assets/images/logo.svg" />
           </div>
         </div>
       </IntlProvider>

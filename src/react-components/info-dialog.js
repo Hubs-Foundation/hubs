@@ -218,7 +218,7 @@ class InfoDialog extends Component {
         );
         break;
       case InfoDialog.dialogTypes.link:
-        dialogTitle = "Link to Device";
+        dialogTitle = "Send Link to Device";
         dialogBody = <LinkDialog linkCode={this.props.linkCode} />;
         break;
     }

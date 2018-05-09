@@ -12,6 +12,10 @@ body {
   color: white;
 }
 
+a {
+  color: white;
+}
+
 .link-root {
   @extend %default-font;
 
@@ -19,8 +23,99 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
+
+  position: absolute;
+}
+
+:local(.link) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+:local(.link-contents) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: $grey-text;
+  font-size: 1.4em;
 }
 
 :local(.code-loading-panel) {
-  background: rgba(0.4, 0.4, 0.4, 0.7);
+  background: rgba(0.4, 0.4, 0.4, 0.85);
+}
+
+:local(.footer-image) {
+  width: 200px;
+  margin: 12px;
+}
+
+:local(.header) {
+  margin: 16px;
+}
+
+:local(.footer) {
+  margin: 16px;
+  font-size: 0.8em;
+}
+
+:local(.keypad) {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr;
+}
+
+:local(.keypad-button) {
+  @extend %big-icon-button;
+  font-size: 1.8em;
+  font-family: sans-serif;
+  border: 4px $light-grey solid;
+  border-radius: 128px;
+  min-width: 88px;
+  min-height: 88px;
+  cursor: pointer;
+  line-height: 68px;
+  margin: 8px;
+}
+
+:local(.keypad-button):active {
+  background-color: #333333;
+}
+
+:local(.keypad-zero-button) {
+  grid-column: 2;
+}
+
+:local(.keypad-button):disabled {
+  color: $light-grey;
+  border: 6px $dark-grey solid;
+}
+
+:local(.keypad-backspace) {
+  border: none;
+}
+
+:local(.keypad-backspace):disabled {
+  border: none;
+}
+
+:local(.keypad-backspace):active {
+  border: none;
+  background-color: transparent;
+  color: $light-grey;
+}
+
+:local(.entered-digits) {
+  font-face: monospace;
+  height: 100px;
+  width: 300px;
+  text-align: center;
+  font-size: 3.0em;
+  color: white;
+}
+
+:local(.digit) {
+  margin: 8px;
 }
