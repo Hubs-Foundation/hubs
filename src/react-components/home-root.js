@@ -30,8 +30,35 @@ class HomeRoot extends Component {
   componentDidMount() {
     this.loadEnvironments();
     this.setState({ dialogType: this.props.dialogType });
-    document.querySelector("#background-video").playbackRate = 0.75;
+    this.loadHomeVideo();
   }
+
+  loadHomeVideo = () => {
+    const videoEl = document.querySelector("#background-video");
+    function initVideo() {
+      videoEl.playbackRate = 0.75;
+      videoEl.play();
+      function toggleVideo() {
+        // Play the video if the window/tab is visible.
+        if (!("hasFocus" in document)) {
+          return;
+        }
+        if (document.hasFocus()) {
+          videoEl.play();
+        } else {
+          videoEl.pause();
+        }
+      }
+      document.addEventListener("visibilitychange", toggleVideo);
+      window.addEventListener("focus", toggleVideo);
+      window.addEventListener("blur", toggleVideo);
+    }
+    if (videoEl.readyState >= videoEl.HAVE_FUTURE_DATA) {
+      initVideo();
+    } else {
+      videoEl.addEventListener("canplay", initVideo);
+    }
+  };
 
   showDialog = dialogType => {
     return e => {
@@ -181,7 +208,7 @@ class HomeRoot extends Component {
               </div>
             </div>
           </div>
-          <video playsInline autoPlay muted loop className="background-video" id="background-video">
+          <video playsInline muted loop className="background-video" id="background-video">
             <source src={homeVideoWebM} type="video/webm" />
             <source src={homeVideoMp4} type="video/mp4" />
           </video>
