@@ -381,15 +381,15 @@ const onReady = async () => {
   environmentRoot.appendChild(initialEnvironmentEl);
 
   const setRoom = (janusRoomId, hubName) => {
-    if (isBotMode) {
+    if (!isBotMode) {
+      remountUI({ janusRoomId, hubName });
+    } else {
       const enterSceneImmediately = () => enterScene(new MediaStream(), false, janusRoomId);
       if (scene.hasLoaded) {
         enterSceneImmediately();
       } else {
         scene.addEventListener("loaded", enterSceneImmediately);
       }
-    } else {
-      remountUI({ janusRoomId, hubName });
     }
   };
 
