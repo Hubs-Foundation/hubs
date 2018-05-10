@@ -24,7 +24,7 @@
     "aframe-extras": "https://github.com/MozillaReality/aframe-extras#feature/precompute-nav-mesh",
     "aframe-input-mapping-component": "https://github.com/mozillareality/aframe-input-mapping-component#hubs/master",
     "aframe-physics-extras": "^0.1.3",
-    "aframe-physics-system": "^3.1.1",
+    "aframe-physics-system": "github:infinitelee/aframe-physics-system#hubs/master",
     "aframe-rounded": "^1.0.3",
     "aframe-slice9-component": "^1.0.0",
     "aframe-teleport-controls": "https://github.com/mozillareality/aframe-teleport-controls#hubs/master",
