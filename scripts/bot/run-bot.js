@@ -37,8 +37,12 @@ const querystring = require("query-string");
       });
       // Interact with the page so that audio can play.
       await page.mouse.click(100, 100);
+      // Signal that the page has been interacted with.
+      // If the interacted function has not been defined yet, this will error and restart the process with the
+      // setTimeout below.
+      await page.evaluate(() => window.interacted());
     } catch (e) {
-      console.log("Navigation error", e);
+      console.log("Navigation error", e.toString());
       setTimeout(navigate, 1000);
     }
   };

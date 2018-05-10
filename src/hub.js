@@ -301,9 +301,9 @@ const onReady = async () => {
         playerRig.setAttribute("avatar-replay", "");
         const audio = document.getElementById("bot-recording");
         mediaStream.addTrack(audio.captureStream().getAudioTracks()[0]);
-        // wait for runner script to click page so that we can play audio.
+        // wait for runner script to interact with the page so that we can play audio.
         await new Promise(resolve => {
-          document.body.addEventListener("click", resolve, { once: true });
+          window.interacted = resolve;
         });
         audio.play();
       }
