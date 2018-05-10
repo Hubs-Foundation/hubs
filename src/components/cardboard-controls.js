@@ -48,7 +48,7 @@ module.exports = AFRAME.registerComponent("cardboard-controls", {
 
     const gamepads = navigator.getGamepads();
     for (let i = 0; i < gamepads.length; i++) {
-      if (gamepads[i] && gamepads[i].id === CARDBOARD_BUTTON) {
+      if (gamepads[i] && gamepads[i].id === CARDBOARD_BUTTON_GAMEPAD_ID) {
         return gamepads[i];
       }
     }
