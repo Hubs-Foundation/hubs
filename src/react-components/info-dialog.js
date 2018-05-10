@@ -5,6 +5,9 @@ import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import formurlencoded from "form-urlencoded";
 import LinkDialog from "./link-dialog.js";
+const { detect } = require("detect-browser");
+
+const browser = detect();
 
 // TODO i18n
 
@@ -16,7 +19,8 @@ class InfoDialog extends Component {
     updates: Symbol("updates"),
     report: Symbol("report"),
     help: Symbol("help"),
-    link: Symbol("link")
+    link: Symbol("link"),
+    webvr_recommend: Symbol("webvr_recommend")
   };
   static propTypes = {
     dialogType: PropTypes.oneOf(Object.values(InfoDialog.dialogTypes)),
@@ -215,6 +219,29 @@ class InfoDialog extends Component {
               The <b>Bubble Toggle</b> hides avatars that enter your personal space.
             </p>
           </div>
+        );
+        break;
+      case InfoDialog.dialogTypes.webvr_recommend:
+        dialogTitle = "Enter in VR";
+        dialogBody = (
+          <span>
+            To enter Hubs with Oculus or SteamVR, you can use Firefox.
+            <p />
+            <button
+              className="info-dialog--action-button"
+              onClick={() => (document.location = "https://www.mozilla.org/firefox")}
+            >
+              Download Firefox
+            </button>
+            <p />
+            <span style={{ fontSize: "0.8em" }}>
+              For a full list of browsers with experimental support, visit{" "}
+              <a href="https://webvr.rocks" target="_blank" rel="noopener noreferrer">
+                WebVR Rocks
+              </a>.
+            </span>
+            <p />
+          </span>
         );
         break;
       case InfoDialog.dialogTypes.link:
