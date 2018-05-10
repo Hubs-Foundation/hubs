@@ -211,7 +211,7 @@ const onReady = async () => {
     }
   };
 
-  const enterScene = async (mediaStream, enterInVR, janusRoomId) => {
+  const enterScene = async (mediaStream, enterInVR, hubId) => {
     const scene = document.querySelector("a-scene");
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("a-scene canvas").classList.remove("blurred");
@@ -226,7 +226,7 @@ const onReady = async () => {
     document.querySelector("#player-camera").setAttribute("look-controls", "");
 
     scene.setAttribute("networked-scene", {
-      room: janusRoomId,
+      room: hubId,
       serverURL: process.env.JANUS_SERVER
     });
 
@@ -380,11 +380,11 @@ const onReady = async () => {
   });
   environmentRoot.appendChild(initialEnvironmentEl);
 
-  const setRoom = (janusRoomId, hubName) => {
+  const setRoom = (hubId, hubName) => {
     if (!isBotMode) {
-      remountUI({ janusRoomId, hubName });
+      remountUI({ hubId, hubName });
     } else {
-      const enterSceneImmediately = () => enterScene(new MediaStream(), false, janusRoomId);
+      const enterSceneImmediately = () => enterScene(new MediaStream(), false, hubId);
       if (scene.hasLoaded) {
         enterSceneImmediately();
       } else {
@@ -395,7 +395,7 @@ const onReady = async () => {
 
   if (qs.room) {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
-    setRoom(qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1);
+    setRoom(qs.room || "default");
     initialEnvironmentEl.setAttribute("gltf-bundle", {
       src: DEFAULT_ENVIRONMENT_URL
     });
@@ -425,7 +425,7 @@ const onReady = async () => {
       const hub = data.hubs[0];
       const defaultSpaceTopic = hub.topics[0];
       const gltfBundleUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
-      setRoom(defaultSpaceTopic.janus_room_id, hub.name);
+      setRoom(hub.hub_id, hub.name);
       initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`);
       hubChannel.setPhoenixChannel(channel);
     })
