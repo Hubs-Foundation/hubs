@@ -18,17 +18,17 @@ const querystring = require("query-string");
 (async () => {
   const browser = await puppeteer.launch({ ignoreHTTPSErrors: true });
   const page = await browser.newPage();
+  page.on("console", msg => console.log("PAGE: ", msg.text()));
+  page.on("error", err => console.error("ERROR: ", err));
+  page.on("pageerror", err => console.error("PAGE ERROR: ", err));
+
   const params = {
     room: options["--room"],
     bot: true
   };
   console.log(params);
-
   const url = `https://${options["--host"]}/hub.html?${querystring.stringify(params)}`;
 
-  console.log("Spawning bot...");
-
-  page.on("console", msg => console.log("PAGE: ", msg.text()));
   const navigate = async () => {
     try {
       await page.goto(url);
@@ -46,5 +46,7 @@ const querystring = require("query-string");
       setTimeout(navigate, 1000);
     }
   };
+
+  console.log("Spawning bot...");
   navigate();
 })();
