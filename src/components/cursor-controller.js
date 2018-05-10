@@ -42,26 +42,21 @@ AFRAME.registerComponent("cursor-controller", {
 
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
-    const functionNames = [
-      "_handleTouchStart",
-      "_handleTouchMove",
-      "_handleTouchEnd",
-      "_handleMouseDown",
-      "_handleMouseMove",
-      "_handleMouseUp",
-      "_handleWheel",
-      "_handleEnterVR",
-      "_handleExitVR",
-      "_handlePrimaryDown",
-      "_handlePrimaryUp",
-      "_handleModelLoaded",
-      "_handleCursorLoaded",
-      "_handleControllerConnected",
-      "_handleControllerDisconnected"
-    ];
-    functionNames.forEach(name => {
-      this[name] = this[name].bind(this);
-    });
+    this._handleTouchStart = this._handleTouchStart.bind(this);
+    this._handleTouchMove = this._handleTouchMove.bind(this);
+    this._handleTouchEnd = this._handleTouchEnd.bind(this);
+    this._handleMouseDown = this._handleMouseDown.bind(this);
+    this._handleMouseMove = this._handleMouseMove.bind(this);
+    this._handleMouseUp = this._handleMouseUp.bind(this);
+    this._handleWheel = this._handleWheel.bind(this);
+    this._handleEnterVR = this._handleEnterVR.bind(this);
+    this._handleExitVR = this._handleExitVR.bind(this);
+    this._handlePrimaryDown = this._handlePrimaryDown.bind(this);
+    this._handlePrimaryUp = this._handlePrimaryUp.bind(this);
+    this._handleModelLoaded = this._handleModelLoaded.bind(this);
+    this._handleCursorLoaded = this._handleCursorLoaded.bind(this);
+    this._handleControllerConnected = this._handleControllerConnected.bind(this);
+    this._handleControllerDisconnected = this._handleControllerDisconnected.bind(this);
 
     this.data.cursor.addEventListener("loaded", this._handleCursorLoaded);
   },
