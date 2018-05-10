@@ -1,34 +1,23 @@
 function registerNetworkSchemas() {
-  const xyzNotAlmostEqual = "xyzNotAlmostEqual";
-  const positionEpsilon = 0.01;
-  const rotationEpsilon = 1;
+  const positionRequiresUpdate = (oldData, newData) => {
+    return !NAF.utils.almostEqualVec3(oldData, newData, 0.001);
+  };
 
-  NAF.schemas.registerDirtyPredicate(xyzNotAlmostEqual, (v, w, options) => {
-    const epsilon = options.epsilon;
-    return Math.abs(v.x - w.x) > epsilon || Math.abs(v.z - w.z) > epsilon || Math.abs(v.y - w.y) > epsilon;
-  });
+  const rotationRequiresUpdate = (oldData, newData) => {
+    return !NAF.utils.almostEqualVec3(oldData, newData, 0.5);
+  };
 
   NAF.schemas.add({
     template: "#remote-avatar-template",
     components: [
       {
         component: "position",
-        dirtyPredicate: {
-          name: xyzNotAlmostEqual,
-          options: {
-            epsilon: positionEpsilon
-          }
-        }
+        requiresNetworkUpdate: positionRequiresUpdate
       },
       {
         component: "rotation",
-        dirtyPredicate: {
-          name: xyzNotAlmostEqual,
-          options: {
-            epsilon: rotationEpsilon
-          }
-        },
-        lerp: false
+        lerp: false,
+        requiresNetworkUpdate: rotationRequiresUpdate
       },
       "scale",
       "player-info",
@@ -36,42 +25,22 @@ function registerNetworkSchemas() {
       {
         selector: ".camera",
         component: "position",
-        dirtyPredicate: {
-          name: xyzNotAlmostEqual,
-          options: {
-            epsilon: positionEpsilon
-          }
-        }
+        requiresNetworkUpdate: positionRequiresUpdate
       },
       {
         selector: ".camera",
         component: "rotation",
-        dirtyPredicate: {
-          name: xyzNotAlmostEqual,
-          options: {
-            epsilon: rotationEpsilon
-          }
-        }
+        requiresNetworkUpdate: rotationRequiresUpdate
       },
       {
         selector: ".left-controller",
         component: "position",
-        dirtyPredicate: {
-          name: xyzNotAlmostEqual,
-          options: {
-            epsilon: positionEpsilon
-          }
-        }
+        requiresNetworkUpdate: positionRequiresUpdate
       },
       {
         selector: ".left-controller",
         component: "rotation",
-        dirtyPredicate: {
-          name: xyzNotAlmostEqual,
-          options: {
-            epsilon: rotationEpsilon
-          }
-        }
+        requiresNetworkUpdate: rotationRequiresUpdate
       },
       {
         selector: ".left-controller",
@@ -80,22 +49,12 @@ function registerNetworkSchemas() {
       {
         selector: ".right-controller",
         component: "position",
-        dirtyPredicate: {
-          name: xyzNotAlmostEqual,
-          options: {
-            epsilon: positionEpsilon
-          }
-        }
+        requiresNetworkUpdate: positionRequiresUpdate
       },
       {
         selector: ".right-controller",
         component: "rotation",
-        dirtyPredicate: {
-          name: xyzNotAlmostEqual,
-          options: {
-            epsilon: rotationEpsilon
-          }
-        }
+        requiresNetworkUpdate: rotationRequiresUpdate
       },
       {
         selector: ".right-controller",
@@ -108,22 +67,10 @@ function registerNetworkSchemas() {
     template: "#video-template",
     components: [
       {
-        component: "position",
-        dirtyPredicate: {
-          name: xyzNotAlmostEqual,
-          options: {
-            epsilon: positionEpsilon
-          }
-        }
+        component: "position"
       },
       {
-        component: "rotation",
-        dirtyPredicate: {
-          name: xyzNotAlmostEqual,
-          options: {
-            epsilon: rotationEpsilon
-          }
-        }
+        component: "rotation"
       },
       "visible"
     ]
@@ -134,21 +81,11 @@ function registerNetworkSchemas() {
     components: [
       {
         component: "position",
-        dirtyPredicate: {
-          name: xyzNotAlmostEqual,
-          options: {
-            epsilon: positionEpsilon
-          }
-        }
+        requiresNetworkUpdate: positionRequiresUpdate
       },
       {
         component: "rotation",
-        dirtyPredicate: {
-          name: xyzNotAlmostEqual,
-          options: {
-            epsilon: rotationEpsilon
-          }
-        }
+        requiresNetworkUpdate: rotationRequiresUpdate
       },
       "scale"
     ]
