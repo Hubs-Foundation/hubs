@@ -86,6 +86,11 @@ if (qs.quality) {
 } else {
   window.APP.quality = isMobile ? "low" : "high";
 }
+window.APP.RENDER_ORDER = {
+  HUD_BACKGROUND: 1,
+  HUD: 2,
+  CURSOR: 3
+};
 
 import "aframe-physics-system";
 import "aframe-physics-extras";
@@ -110,12 +115,6 @@ import registerTelemetry from "./telemetry";
 import { generateDefaultProfile, generateRandomName } from "./utils/identity.js";
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
-
-window.RENDER_ORDER = {
-  HUD_BACKGROUND: 1,
-  HUD: 2,
-  CURSOR: 3
-};
 
 function qsTruthy(param) {
   const val = qs[param];

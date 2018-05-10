@@ -399,7 +399,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleCursorLoaded: function() {
-    this.data.cursor.object3DMap.mesh.renderOrder = window.RENDER_ORDER.CURSOR;
+    this.data.cursor.object3DMap.mesh.renderOrder = window.APP.RENDER_ORDER.CURSOR;
   },
 
   _handleControllerConnected: function(e) {

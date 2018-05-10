@@ -8,10 +8,11 @@ AFRAME.registerComponent("in-world-hud", {
     this.freeze = this.el.querySelector(".freeze");
     this.bubble = this.el.querySelector(".bubble");
     this.background = this.el.querySelector(".bg");
-    this.mic.object3DMap.mesh.renderOrder = window.RENDER_ORDER.HUD;
-    this.freeze.object3DMap.mesh.renderOrder = window.RENDER_ORDER.HUD;
-    this.bubble.object3DMap.mesh.renderOrder = window.RENDER_ORDER.HUD;
-    this.background.object3DMap.mesh.renderORder = window.RENDER_ORDER.HUD_BACKGROUND;
+    const renderOrder = window.APP.RENDER_ORDER;
+    this.mic.object3DMap.mesh.renderOrder = renderOrder.HUD;
+    this.freeze.object3DMap.mesh.renderOrder = renderOrder.HUD;
+    this.bubble.object3DMap.mesh.renderOrder = renderOrder.HUD;
+    this.background.object3DMap.mesh.renderORder = renderOrder.HUD_BACKGROUND;
 
     this.updateButtonStates = () => {
       this.mic.setAttribute("icon-button", "active", this.el.sceneEl.is("muted"));
