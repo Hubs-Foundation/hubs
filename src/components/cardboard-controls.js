@@ -9,7 +9,7 @@ module.exports = AFRAME.registerComponent("cardboard-controls", {
   tick: function() {
     this.gamepad = this.gamepad || this._getGamepad();
     if (this.gamepad) {
-      for (var i = 0; i < this.gamepad.buttons.length; i++) {
+      for (let i = 0; i < this.gamepad.buttons.length; i++) {
         if (this.gamepad.buttons[i].pressed && !this.buttons[i]) {
           this.el.emit("cardboardbuttondown", {});
         } else if (!this.gamepad.buttons[i].pressed && this.buttons[i]) {
@@ -24,7 +24,7 @@ module.exports = AFRAME.registerComponent("cardboard-controls", {
 
   _getGamepad: function() {
     const gamepads = navigator.getGamepads && navigator.getGamepads();
-    for (var i = 0; i < gamepads.length; i++) {
+    for (let i = 0; i < gamepads.length; i++) {
       if (gamepads[i] && gamepads[i].id === CARDBOARD_BUTTON) {
         return gamepads[i];
       }
