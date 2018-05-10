@@ -1,10 +1,13 @@
 import botRecording from "../assets/avatars/bot-recording.json";
 
 AFRAME.registerComponent("avatar-replay", {
+  schema: {
+    camera: { type: "selector" },
+    leftController: { type: "selector" },
+    rightController: { type: "selector" }
+  },
   init: function() {
-    const camera = this.el.querySelector("#player-camera");
-    const leftController = this.el.querySelector("#player-left-controller");
-    const rightController = this.el.querySelector("#player-right-controller");
+    const { camera, leftController, rightController } = this.data;
 
     camera.setAttribute("motion-capture-replayer", { loop: true });
     this._setupController(leftController);

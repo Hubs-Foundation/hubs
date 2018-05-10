@@ -304,7 +304,11 @@ const onReady = async () => {
       });
 
       if (qsTruthy("bot")) {
-        playerRig.setAttribute("avatar-replay", "");
+        playerRig.setAttribute("avatar-replay", {
+          camera: "#player-camera",
+          leftController: "#player-left-controller",
+          rightController: "#player-right-controller"
+        });
         const audio = document.getElementById("bot-recording");
         mediaStream.addTrack(audio.captureStream().getAudioTracks()[0]);
         // wait for runner script to interact with the page so that we can play audio.
