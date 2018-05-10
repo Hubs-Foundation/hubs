@@ -312,7 +312,7 @@ AFRAME.registerComponent("cursor-controller", {
       !this.isMobile ||
       this.hasPointingDevice ||
       !this.activeTouch ||
-      this.some(e.touches, touch => touch.identifier === this.activeTouch.identifier)
+      Array.prototype.some.call(e.touches, touch => touch.identifier === this.activeTouch.identifier)
     ) {
       return;
     }
@@ -443,12 +443,5 @@ AFRAME.registerComponent("cursor-controller", {
     } else {
       this.controller = null;
     }
-  },
-
-  some: function(a, fn) {
-    for (let i = 0; i < a.length; a++) {
-      if (fn(a[i])) return true;
-    }
-    return false;
   }
 });
