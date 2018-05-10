@@ -7,6 +7,7 @@ Options:
     -h --host=<host>  Hubs host [default: localhost:8080]
     -r --room=<room>  Room id [default: 234234].
     -h --help         Show this screen.
+    -n --bots=<bots>  Number of bots to connect [default: 1].
 `;
 
 const docopt = require("docopt").docopt;
@@ -15,18 +16,22 @@ const options = docopt(doc);
 const puppeteer = require("puppeteer");
 const querystring = require("query-string");
 
-(async () => {
-  const browser = await puppeteer.launch({ ignoreHTTPSErrors: true });
+async function spawnBot(id) {
+  const browser = await puppeteer.launch({
+    headless: false,
+    ignoreHTTPSErrors: true,
+    args: ["--headless"]
+  });
   const page = await browser.newPage();
-  page.on("console", msg => console.log("PAGE: ", msg.text()));
-  page.on("error", err => console.error("ERROR: ", err));
-  page.on("pageerror", err => console.error("PAGE ERROR: ", err));
+  page.on("console", msg => console.log(`PAGE ${id}: `, msg.text()));
+  page.on("error", err => console.error(`ERROR ${id}: `, err));
+  page.on("pageerror", err => console.error(`PAGE ERROR: ${id}`, err));
 
   const params = {
     room: options["--room"],
-    bot: true
+    bot: true,
+    name: `Bot ${id}`
   };
-  console.log(params);
   const url = `https://${options["--host"]}/hub.html?${querystring.stringify(params)}`;
 
   const navigate = async () => {
@@ -47,6 +52,12 @@ const querystring = require("query-string");
     }
   };
 
+  await navigate();
   console.log("Spawning bot...");
-  navigate();
+}
+
+(async function() {
+  for (let i = 0; i < options["--bots"]; i++) {
+    await spawnBot(i + 1);
+  }
 })();
