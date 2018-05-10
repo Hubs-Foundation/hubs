@@ -30,7 +30,8 @@ async function spawnBot(id) {
   const params = {
     room: options["--room"],
     bot: true,
-    name: `Bot ${id}`
+    name: `Bot ${id}`,
+    allow_multi: true
   };
   const url = `https://${options["--host"]}/hub.html?${querystring.stringify(params)}`;
 
