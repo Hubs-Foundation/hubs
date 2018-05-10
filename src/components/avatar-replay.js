@@ -1,5 +1,16 @@
 import botRecording from "../assets/avatars/bot-recording.json";
 
+// These controls are removed from the controller entities so that motion-capture-replayer is in full control of them.
+const controlsBlacklist = [
+  "tracked-controls",
+  "hand-controls2",
+  "vive-controls",
+  "oculus-touch-controls",
+  "windows-motion-controls",
+  "daydream-controls",
+  "gearvr-controls"
+];
+
 AFRAME.registerComponent("avatar-replay", {
   schema: {
     camera: { type: "selector" },
@@ -23,13 +34,7 @@ AFRAME.registerComponent("avatar-replay", {
     });
   },
   _setupController: function(controller) {
-    controller.removeAttribute("tracked-controls");
-    controller.removeAttribute("hand-controls2");
-    controller.removeAttribute("vive-controls");
-    controller.removeAttribute("oculus-touch-controls");
-    controller.removeAttribute("windows-motion-controls");
-    controller.removeAttribute("daydream-controls");
-    controller.removeAttribute("gearvr-controls");
+    controlsBlacklist.forEach(controlsComponent => controller.removeAttribute(controlsComponent));
     controller.setAttribute("visible", true);
     controller.setAttribute("motion-capture-replayer", { loop: true });
   }
