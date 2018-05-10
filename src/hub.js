@@ -19,7 +19,7 @@ import "webrtc-adapter";
 import "aframe-slice9-component";
 import "aframe-motion-capture-components";
 
-import "./utils/autoplay-audio-context-fix";
+import "./utils/audio-context-fix";
 
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
@@ -198,10 +198,16 @@ const onReady = async () => {
     if (NAF.connection.adapter && NAF.connection.adapter.localMediaStream) {
       NAF.connection.adapter.localMediaStream.getTracks().forEach(t => t.stop());
     }
-    hubChannel.disconnect();
+    if (hubChannel) {
+      hubChannel.disconnect();
+    }
     const scene = document.querySelector("a-scene");
-    scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
-    document.body.removeChild(scene);
+    if (scene) {
+      if (scene.renderer) {
+        scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
+      }
+      document.body.removeChild(scene);
+    }
   };
 
   const enterScene = async (mediaStream, enterInVR, janusRoomId) => {

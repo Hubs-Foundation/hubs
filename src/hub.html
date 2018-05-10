@@ -40,19 +40,19 @@
     >
 
         <a-assets>
-            <img id="tooltip"  src="./assets/hud/tooltip.9.png" >
-            <img id="mute-off"  src="./assets/hud/mute_off.png" >
-            <img id="mute-off-hover"  src="./assets/hud/mute_off-hover.png" >
-            <img id="mute-on"  src="./assets/hud/mute_on.png" >
-            <img id="mute-on-hover"  src="./assets/hud/mute_on-hover.png" >
-            <img id="bubble-off"  src="./assets/hud/bubble_off.png" >
-            <img id="bubble-off-hover"  src="./assets/hud/bubble_off-hover.png" >
-            <img id="bubble-on"  src="./assets/hud/bubble_on.png" >
-            <img id="bubble-on-hover"  src="./assets/hud/bubble_on-hover.png" >
-            <img id="freeze-off"  src="./assets/hud/freeze_off.png" >
-            <img id="freeze-off-hover"  src="./assets/hud/freeze_off-hover.png" >
-            <img id="freeze-on"  src="./assets/hud/freeze_on.png" >
-            <img id="freeze-on-hover"  src="./assets/hud/freeze_on-hover.png" >
+            <img id="tooltip" crossorigin="anonymous" src="./assets/hud/tooltip.9.png">
+            <img id="mute-off" crossorigin="anonymous" src="./assets/hud/mute_off.png">
+            <img id="mute-off-hover" crossorigin="anonymous" src="./assets/hud/mute_off-hover.png">
+            <img id="mute-on" crossorigin="anonymous" src="./assets/hud/mute_on.png">
+            <img id="mute-on-hover" crossorigin="anonymous" src="./assets/hud/mute_on-hover.png">
+            <img id="bubble-off" crossorigin="anonymous" src="./assets/hud/bubble_off.png">
+            <img id="bubble-off-hover" crossorigin="anonymous" src="./assets/hud/bubble_off-hover.png">
+            <img id="bubble-on" crossorigin="anonymous" src="./assets/hud/bubble_on.png">
+            <img id="bubble-on-hover" crossorigin="anonymous" src="./assets/hud/bubble_on-hover.png">
+            <img id="freeze-off" crossorigin="anonymous" src="./assets/hud/freeze_off.png">
+            <img id="freeze-off-hover" crossorigin="anonymous" src="./assets/hud/freeze_off-hover.png">
+            <img id="freeze-on" crossorigin="anonymous" src="./assets/hud/freeze_on.png">
+            <img id="freeze-on-hover" crossorigin="anonymous" src="./assets/hud/freeze_on-hover.png">
 
             <a-asset-item id="botdefault" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDefault_Avatar-9f71f8ff22.gltf"></a-asset-item>
             <a-asset-item id="botbobo" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotBobo_Avatar-f9740a010b.gltf"></a-asset-item>
@@ -71,7 +71,7 @@
             <a-asset-item id="quack" src="./assets/sfx/quack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="specialquack" src="./assets/sfx/specialquack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
 
-            <img id="water-normal-map" src="./assets/waternormals.jpg">
+            <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
 
             <!-- Templates -->
 
@@ -168,7 +168,7 @@
             <template id="interactable-template">
                 <a-entity
                     gltf-model-plus="src: #interactable-duck; inflate: true;"
-                    class="interactable" 
+                    class="interactable"
                     super-networked-interactable="counter: #counter; mass: 1;"
                     body="type: dynamic; shape: none; mass: 1;"
                     grabbable
@@ -196,8 +196,8 @@
         <a-entity
             id="cursor-controller"
             cursor-controller="
-                cursor: #cursor; 
-                camera: #player-camera; 
+                cursor: #cursor;
+                camera: #player-camera;
                 playerRig: #player-rig;
                 physicalHandSelector: #player-right-controller;
                 gazeTeleportControls: #gaze-teleport;"
@@ -220,7 +220,7 @@
             segments-height="9"
             segments-width="9"
             event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"
-        ></a-sphere> 
+        ></a-sphere>
 
         <!-- Player Rig -->
         <a-entity
@@ -261,9 +261,9 @@
                     id="gaze-teleport"
                     position = "0.15 0 0"
                     teleport-controls="
-                    cameraRig: #player-rig; 
-                    teleportOrigin: #player-camera; 
-                    button: cursor-teleport_; 
+                    cameraRig: #player-rig;
+                    teleportOrigin: #player-camera;
+                    button: cursor-teleport_;
                     collisionEntities: [nav-mesh];
                     drawIncrementally: true;
                     incrementalDrawMs: 600;
@@ -278,9 +278,9 @@
                 hand-controls2="left"
                 tracked-controls
                 teleport-controls="
-                    cameraRig: #player-rig; 
-                    teleportOrigin: #player-camera; 
-                    button: cursor-teleport_; 
+                    cameraRig: #player-rig;
+                    teleportOrigin: #player-camera;
+                    button: cursor-teleport_;
                     collisionEntities: [nav-mesh];
                     drawIncrementally: true;
                     incrementalDrawMs: 600;
@@ -299,9 +299,9 @@
                 hand-controls2="right"
                 tracked-controls
                 teleport-controls="
-                    cameraRig: #player-rig; 
-                    teleportOrigin: #player-camera; 
-                    button: cursor-teleport_; 
+                    cameraRig: #player-rig;
+                    teleportOrigin: #player-camera;
+                    button: cursor-teleport_;
                     collisionEntities: [nav-mesh];
                     drawIncrementally: true;
                     incrementalDrawMs: 600;
@@ -348,8 +348,8 @@
         </a-entity>
 
         <!-- Environment -->
-        <a-entity 
-            id="environment-root" 
+        <a-entity
+            id="environment-root"
             nav-mesh-helper
             static-body="shape: none;"
         ></a-entity>
