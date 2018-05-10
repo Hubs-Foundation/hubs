@@ -16,6 +16,10 @@ yarn
 echo 'Running Hubs'
 yarn serve --ssl --port 8080 ../../public &
 echo 'Running bots'
-node run-bot.js
+if [ "$1" != "" ]; then
+  node run-bot.js --room $1
+else
+  node run-bot.js
+fi
 
 trap 'kill $(jobs -pr)' SIGINT SIGTERM EXIT
