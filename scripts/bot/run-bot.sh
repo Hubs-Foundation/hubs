@@ -8,13 +8,13 @@ cd $script_directory/../..
 yarn 
 echo 'Building Hubs'
 yarn build > /dev/null
-echo 'Running Hubs'
-yarn serve --ssl --port 8080 public &
 
 # install run-bot.js dependencies
 cd $script_directory
 echo 'Installing bot dependencies'
 yarn 
+echo 'Running Hubs'
+yarn serve --ssl --port 8080 ../../public &
 echo 'Running bots'
 node run-bot.js
 
