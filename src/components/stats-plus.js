@@ -123,8 +123,8 @@ AFRAME.registerComponent("stats-plus", {
     this.el.setAttribute(this.name, false);
   },
   remove() {
-    this.el.sceneEl.removeListener("enter-vr", this.hide);
-    this.el.sceneEl.removeListener("exit-vr", this.show);
+    this.el.sceneEl.removeEventListener("enter-vr", this.hide);
+    this.el.sceneEl.removeEventListener("exit-vr", this.show);
 
     if (this.statsEl) {
       this.statsEl.parentNode.removeChild(this.statsEl);

@@ -9,7 +9,7 @@ patchWebGLRenderingContext();
 
 import "aframe-xr";
 import "./vendor/GLTFLoader";
-import "networked-aframe";
+import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
 import "aframe-input-mapping-component";
@@ -17,7 +17,7 @@ import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
-import "./utils/ios-audio-context-fix";
+import "./utils/audio-context-fix";
 
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
@@ -108,7 +108,7 @@ import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 
 import { generateDefaultProfile, generateRandomName } from "./utils/identity.js";
-import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
+import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
 function qsTruthy(param) {
@@ -195,10 +195,16 @@ const onReady = async () => {
     if (NAF.connection.adapter && NAF.connection.adapter.localMediaStream) {
       NAF.connection.adapter.localMediaStream.getTracks().forEach(t => t.stop());
     }
-    hubChannel.disconnect();
+    if (hubChannel) {
+      hubChannel.disconnect();
+    }
     const scene = document.querySelector("a-scene");
-    scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
-    document.body.removeChild(scene);
+    if (scene) {
+      if (scene.renderer) {
+        scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
+      }
+      document.body.removeChild(scene);
+    }
   };
 
   const enterScene = async (mediaStream, enterInVR, janusRoomId) => {
@@ -334,7 +340,11 @@ const onReady = async () => {
   }
 
   getAvailableVREntryTypes().then(availableVREntryTypes => {
-    remountUI({ availableVREntryTypes });
+    if (availableVREntryTypes.gearvr === VR_DEVICE_AVAILABILITY.yes) {
+      remountUI({ availableVREntryTypes, forcedVREntryType: "gearvr" });
+    } else {
+      remountUI({ availableVREntryTypes });
+    }
   });
 
   const environmentRoot = document.querySelector("#environment-root");

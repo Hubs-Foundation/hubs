@@ -15,7 +15,6 @@ export class App {
     this.quality = quality;
 
     if (this.scene) {
-      console.log("quality-changed", quality);
       this.scene.dispatchEvent(new CustomEvent("quality-changed", { detail: quality }));
     }
 

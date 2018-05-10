@@ -143,6 +143,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   remove() {
     this.el.sceneEl.removeEventListener("entervr", this.onEnterVr);
     this.el.sceneEl.removeEventListener("exitvr", this.onExitVr);
+    document.body.removeChild(this.mockJoystickContainer);
     document.body.removeChild(this.leftTouchZone);
     document.body.removeChild(this.rightTouchZone);
   }
