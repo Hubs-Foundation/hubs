@@ -3,8 +3,7 @@
   height: 100%;
   top: 0;
   left: 0;
-  position: absolute;
-  pointer-events: none;
+  position: fixed;
   color: white;
   z-index: 2;
 }
@@ -53,6 +52,17 @@
 
 	a { color: white }
       }
+
+      &__links {
+        display: flex;
+        justify-content: center;
+        margin: 16px 0;
+        a {
+          margin: 0 12px;
+          color: $light-text;
+        }
+      }
+
 
       &__close {
 	position: absolute;

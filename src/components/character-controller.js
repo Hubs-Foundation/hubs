@@ -75,7 +75,7 @@ AFRAME.registerComponent("character-controller", {
   },
 
   handleTeleport: function(event) {
-    this.setPositionOnNavMesh(event.detail.oldPosition, this.el.object3D);
+    this.setPositionOnNavMesh(event.detail.oldPosition, event.detail.newPosition, this.el.object3D, true);
   },
 
   tick: (function() {
@@ -142,19 +142,23 @@ AFRAME.registerComponent("character-controller", {
       this.pendingSnapRotationMatrix.identity(); // Revert to identity
 
       if (this.velocity.lengthSq() > EPS) {
-        this.setPositionOnNavMesh(startPos, root);
+        this.setPositionOnNavMesh(startPos, root.position, root);
       }
     };
   })(),
 
-  setPositionOnNavMesh: function(position, object3D) {
+  setPositionOnNavMesh: function(startPosition, endPosition, object3D, resetPosition = false) {
     const nav = this.el.sceneEl.systems.nav;
     if (nav.navMesh) {
-      if (!this.navGroup) {
-        this.navGroup = nav.getGroup(position);
+      if (!this.navGroup || resetPosition) {
+        this.navGroup = nav.getGroup(endPosition);
       }
-      this.navNode = this.navNode || nav.getNode(position, this.navGroup);
-      this.navNode = nav.clampStep(position, object3D.position, this.navGroup, this.navNode, object3D.position);
+
+      if (!this.navNode || resetPosition) {
+        this.navNode = nav.getNode(endPosition, this.navGroup) || this.navNode;
+      }
+
+      this.navNode = nav.clampStep(startPosition, endPosition, this.navGroup, this.navNode, object3D.position);
     }
   },
 

@@ -97,6 +97,8 @@ AFRAME.registerComponent("cursor-controller", {
     this.data.playerRig.addEventListener(this.data.primaryUp, this._handlePrimaryUp);
     this.data.playerRig.addEventListener(this.data.grabEvent, this._handlePrimaryDown);
     this.data.playerRig.addEventListener(this.data.releaseEvent, this._handlePrimaryUp);
+    this.data.playerRig.addEventListener("gamepadbuttondown", this._handlePrimaryDown);
+    this.data.playerRig.addEventListener("gamepadbuttonup", this._handlePrimaryUp);
     this.data.playerRig.addEventListener("model-loaded", this._handleModelLoaded);
 
     this.el.sceneEl.addEventListener("controllerconnected", this._handleControllerConnected);
@@ -120,6 +122,8 @@ AFRAME.registerComponent("cursor-controller", {
     this.data.playerRig.removeEventListener(this.data.primaryUp, this._handlePrimaryUp);
     this.data.playerRig.removeEventListener(this.data.grabEvent, this._handlePrimaryDown);
     this.data.playerRig.removeEventListener(this.data.releaseEvent, this._handlePrimaryUp);
+    this.data.playerRig.removeEventListener("gamepadbuttondown", this._handlePrimaryDown);
+    this.data.playerRig.removeEventListener("gamepadbuttonup", this._handlePrimaryUp);
     this.data.playerRig.removeEventListener("model-loaded", this._handleModelLoaded);
 
     this.el.sceneEl.removeEventListener("controllerconnected", this._handleControllerConnected);
@@ -363,10 +367,8 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleEnterVR: function() {
-    if (AFRAME.utils.device.checkHeadsetConnected()) {
-      this.inVR = true;
-      this._updateController();
-    }
+    this.inVR = true;
+    this._updateController();
   },
 
   _handleExitVR: function() {
@@ -433,7 +435,7 @@ AFRAME.registerComponent("cursor-controller", {
   _updateController: function() {
     this.hasPointingDevice = this.controllerQueue.length > 0 && this.inVR;
 
-    this._setCursorVisibility(this.hasPointingDevice);
+    this._setCursorVisibility(this.hasPointingDevice || this.isMobile);
 
     if (this.hasPointingDevice) {
       const controllerData = this.controllerQueue[0];
