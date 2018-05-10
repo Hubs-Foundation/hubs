@@ -102,6 +102,8 @@ import "./components/controls-shape-offset";
 import "./components/duck";
 import "./components/quack";
 
+import "./components/cardboard-controls";
+
 import "./components/cursor-controller";
 
 import "./components/nav-mesh-helper";
