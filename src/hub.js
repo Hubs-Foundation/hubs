@@ -128,6 +128,7 @@ AFRAME.registerInputActivator("pressedmove", PressedMove);
 AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputMappings(inputConfig, true);
 
+const isBotMode = qsTruthy("bot");
 const concurrentLoadDetector = new ConcurrentLoadDetector();
 
 concurrentLoadDetector.start();
@@ -303,7 +304,7 @@ const onReady = async () => {
         return;
       });
 
-      if (qsTruthy("bot")) {
+      if (isBotMode) {
         playerRig.setAttribute("avatar-replay", {
           camera: "#player-camera",
           leftController: "#player-left-controller",
@@ -371,7 +372,7 @@ const onReady = async () => {
   initialEnvironmentEl.addEventListener("bundleloaded", () => {
     remountUI({ initialEnvironmentLoaded: true });
     // We never want to stop the render loop when were running in "bot" mode.
-    if (!qsTruthy("bot")) {
+    if (!isBotMode) {
       // Stop rendering while the UI is up. We restart the render loop in enterScene.
       // Wait a tick plus some margin so that the environments actually render.
       setTimeout(() => scene.renderer.animate(null), 100);
@@ -380,7 +381,7 @@ const onReady = async () => {
   environmentRoot.appendChild(initialEnvironmentEl);
 
   const setRoom = (janusRoomId, hubName) => {
-    if (qsTruthy("bot")) {
+    if (isBotMode) {
       const enterSceneImmediately = () => enterScene(new MediaStream(), false, janusRoomId);
       if (scene.hasLoaded) {
         enterSceneImmediately();
