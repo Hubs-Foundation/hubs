@@ -110,6 +110,10 @@ import registerTelemetry from "./telemetry";
 import { generateDefaultProfile, generateRandomName } from "./utils/identity.js";
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
+import Pinch from "./utils/pinch.js";
+import PinchToMove from "./utils/pinch-to-move.js";
+import LookControlsToggle from "./utils/look-controls-toggle.js";
+import PointerLookControls from "./utils/pointer-look-controls.js";
 
 window.RENDER_ORDER = {
   HUD_BACKGROUND: 1,
@@ -210,6 +214,9 @@ const onReady = async () => {
   const enterScene = async (mediaStream, enterInVR, janusRoomId) => {
     const scene = document.querySelector("a-scene");
     scene.renderer.sortObjects = true;
+    const pinch = new Pinch(scene);
+    const pinchToMove = new PinchToMove(scene);
+    window.p = pinchToMove;
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("a-scene canvas").classList.remove("blurred");
     scene.render();
@@ -220,7 +227,10 @@ const onReady = async () => {
 
     AFRAME.registerInputActions(inGameActions, "default");
 
-    document.querySelector("#player-camera").setAttribute("look-controls", "");
+    const camera = document.querySelector("#player-camera");
+    camera.setAttribute("look-controls", "touchEnabled", false);
+    window.PointerLookControls = new PointerLookControls(camera);
+    window.LookControlsToggle = new LookControlsToggle(camera, window.PointerLookControls);
 
     scene.setAttribute("networked-scene", {
       room: janusRoomId,
