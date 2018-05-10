@@ -109,19 +109,26 @@ class InfoDialog extends Component {
         dialogTitle = "Get in Touch";
         dialogBody = (
           <span>
-            Want to join the conversation?
-            <p />
-            Join us on the{" "}
-            <a href="https://webvr-slack.herokuapp.com/" target="_blank" rel="noopener noreferrer">
-              WebVR Slack
-            </a>{" "}
-            in the <a href="https://webvr.slack.com/messages/social" target="_blank" rel="noopener noreferrer">#social</a> channel.<br />
-            VR meetups every Friday at noon PDT!
-            <p /> Or, tweet at{" "}
-            <a href="https://twitter.com/mozillareality" target="_blank" rel="noopener noreferrer">
-              @mozillareality
-            </a>{" "}
-            on Twitter.
+            <p>Want to join the conversation?</p>
+            <p>
+              Join us on the{" "}
+              <a href="https://webvr-slack.herokuapp.com/" target="_blank" rel="noopener noreferrer">
+                WebVR Slack
+              </a>{" "}
+              in the{" "}
+              <a href="https://webvr.slack.com/messages/social" target="_blank" rel="noopener noreferrer">
+                #social
+              </a>{" "}
+              channel.<br />
+              VR meetups every Friday at noon PDT!
+            </p>
+            <p>
+              Or, tweet at{" "}
+              <a href="https://twitter.com/mozillareality" target="_blank" rel="noopener noreferrer">
+                @mozillareality
+              </a>{" "}
+              on Twitter.
+            </p>
           </span>
         );
         break;
@@ -160,8 +167,7 @@ class InfoDialog extends Component {
         dialogTitle = "";
         dialogBody = (
           <span>
-            Sign up to get updates about new features in Hubs.
-            <p />
+            <p>Sign up to get updates about new features in Hubs.</p>
             <form onSubmit={this.signUpForMailingList}>
               <div className="mailing-list-form">
                 <input
@@ -197,18 +203,24 @@ class InfoDialog extends Component {
         dialogTitle = "Report an Issue";
         dialogBody = (
           <span>
-            Need to report a problem?
-            <p />
-            You can file a{" "}
-            <a href="https://github.com/mozilla/hubs/issues" target="_blank" rel="noopener noreferrer">
-              GitHub Issue
-            </a>{" "}
-            or e-mail us for support at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>.
-            <p />
-            You can also find us in <a href="https://webvr.slack.com/messages/social" target="_blank" rel="noopener noreferrer">#social</a> on the{" "}
-            <a href="https://webvr-slack.herokuapp.com/" target="_blank" rel="noopener noreferrer">
-              WebVR Slack
-            </a>.
+            <p>Need to report a problem?</p>
+            <p>
+              You can file a{" "}
+              <a href="https://github.com/mozilla/hubs/issues" target="_blank" rel="noopener noreferrer">
+                GitHub Issue
+              </a>{" "}
+              or e-mail us for support at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>.
+            </p>
+            <p>
+              You can also find us in{" "}
+              <a href="https://webvr.slack.com/messages/social" target="_blank" rel="noopener noreferrer">
+                #social
+              </a>{" "}
+              on the{" "}
+              <a href="https://webvr-slack.herokuapp.com/" target="_blank" rel="noopener noreferrer">
+                WebVR Slack
+              </a>.
+            </p>
           </span>
         );
         break;
@@ -216,10 +228,11 @@ class InfoDialog extends Component {
         dialogTitle = "Getting Started";
         dialogBody = (
           <div className="info-dialog__help">
-            When in a room, other avatars can see and hear you.
-            <p />
-            Use your controller&apos;s action button to teleport from place to place. If it has a trigger, use it to
-            pick up objects.
+            <p>When in a room, other avatars can see and hear you.</p>
+            <p>
+              Use your controller&apos;s action button to teleport from place to place. If it has a trigger, use it to
+              pick up objects.
+            </p>
             <p style={{ textAlign: "center" }}>
               In VR, <b>look up</b> to find your menu:
               <img

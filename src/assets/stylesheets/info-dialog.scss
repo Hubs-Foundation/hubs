@@ -79,6 +79,10 @@
   }
 }
 
+.dialog__box__contents__body p:first-child {
+  margin-top: 0;
+}
+
 .invite-form {
   display: flex;
   flex-direction: column;
