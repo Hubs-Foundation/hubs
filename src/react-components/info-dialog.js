@@ -7,8 +7,6 @@ import formurlencoded from "form-urlencoded";
 import LinkDialog from "./link-dialog.js";
 const { detect } = require("detect-browser");
 
-const browser = detect();
-
 // TODO i18n
 
 class InfoDialog extends Component {
