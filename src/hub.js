@@ -371,7 +371,12 @@ const onReady = async () => {
 
   const setRoom = (janusRoomId, hubName) => {
     if (qsTruthy("bot")) {
-      scene.addEventListener("loaded", () => enterScene(new MediaStream(), false, janusRoomId));
+      const enterSceneImmediately = () => enterScene(new MediaStream(), false, janusRoomId);
+      if (scene.hasLoaded) {
+        enterSceneImmediately();
+      } else {
+        scene.addEventListener("loaded", enterSceneImmediately);
+      }
     } else {
       remountUI({ janusRoomId, hubName });
     }
