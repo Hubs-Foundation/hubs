@@ -224,12 +224,9 @@ class InfoDialog extends Component {
           <span>
             To enter Hubs with Oculus or SteamVR, you can use Firefox.
             <p />
-            <button
-              className="info-dialog--action-button"
-              onClick={() => (document.location = "https://www.mozilla.org/firefox")}
-            >
+            <a className="info-dialog--action-button" href="https://www.mozilla.org/firefox">
               Download Firefox
-            </button>
+            </a>
             <p />
             <span style={{ fontSize: "0.8em" }}>
               For a full list of browsers with experimental VR support, visit{" "}

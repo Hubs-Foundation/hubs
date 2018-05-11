@@ -546,7 +546,7 @@ class UIRoot extends Component {
               WebRTC Data Channels
             </a>, which is required to use Hubs.<br />If you&quot;d like to use Hubs with Oculus or SteamVR, you can{" "}
             <a href="https://www.mozilla.org/firefox" rel="noreferrer noopener">
-              Download Firefox.
+              Download Firefox
             </a>.
           </div>
         );

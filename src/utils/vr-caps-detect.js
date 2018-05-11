@@ -44,14 +44,10 @@ const GENERIC_ENTRY_TYPE_DEVICE_BLACKLIST = [/cardboard/i];
 export async function getAvailableVREntryTypes() {
   const isSamsungBrowser = browser.name === "chrome" && navigator.userAgent.match(/SamsungBrowser/);
   const isOculusBrowser = navigator.userAgent.match(/Oculus/);
-  const isChromium = navigator.userAgent.match(/Chromium/);
-  const isSupermedium = navigator.userAgent.match(/supermedium/i);
 
   // This needs to be kept up-to-date with the latest browsers that can support VR and Hubs.
   // Checking for navigator.getVRDisplays always passes b/c of polyfill.
-  const isWebVRCapableBrowser =
-    (mobiledetect.mobile() && (browser.name === "chrome" || isSamsungBrowser || isOculusBrowser)) || // Mobile
-    (!mobiledetect.mobile() && (browser.name === "firefox" || isChromium || isSupermedium)); // Desktop
+  const isWebVRCapableBrowser = window.hasNativeWebVRImplementation;
 
   const isDaydreamCapableBrowser = !!(isWebVRCapableBrowser && browser.name === "chrome" && !isSamsungBrowser);
 
