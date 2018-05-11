@@ -79,6 +79,11 @@ import { DEFAULT_ENVIRONMENT_URL } from "./assets/environments/environments";
 import { App } from "./App";
 
 window.APP = new App();
+window.APP.RENDER_ORDER = {
+  HUD_BACKGROUND: 1,
+  HUD_ICONS: 2,
+  CURSOR: 3
+};
 const store = window.APP.store;
 
 const qs = queryString.parse(location.search);
@@ -89,11 +94,6 @@ if (qs.quality) {
 } else {
   window.APP.quality = isMobile ? "low" : "high";
 }
-window.APP.RENDER_ORDER = {
-  HUD_BACKGROUND: 1,
-  HUD: 2,
-  CURSOR: 3
-};
 
 import "aframe-physics-system";
 import "aframe-physics-extras";
@@ -177,7 +177,7 @@ const onReady = async () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
 
-  document.querySelector("a-scene canvas").classList.add("blurred");
+  document.querySelector("canvas").classList.add("blurred");
   window.APP.scene = scene;
 
   registerNetworkSchemas();
@@ -222,7 +222,7 @@ const onReady = async () => {
     const scene = document.querySelector("a-scene");
     scene.renderer.sortObjects = true;
     const playerRig = document.querySelector("#player-rig");
-    document.querySelector("a-scene canvas").classList.remove("blurred");
+    document.querySelector("canvas").classList.remove("blurred");
     scene.render();
 
     if (enterInVR) {
