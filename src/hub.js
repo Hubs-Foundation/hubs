@@ -122,7 +122,11 @@ function qsTruthy(param) {
   return val === null || /1|on|true/i.test(val);
 }
 
-registerTelemetry();
+const isBotMode = qsTruthy("bot");
+
+if (!isBotMode) {
+  registerTelemetry();
+}
 
 AFRAME.registerInputBehaviour("trackpad_dpad4", trackpad_dpad4);
 AFRAME.registerInputBehaviour("joystick_dpad4", joystick_dpad4);
@@ -130,7 +134,6 @@ AFRAME.registerInputActivator("pressedmove", PressedMove);
 AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputMappings(inputConfig, true);
 
-const isBotMode = qsTruthy("bot");
 const concurrentLoadDetector = new ConcurrentLoadDetector();
 
 concurrentLoadDetector.start();
@@ -279,9 +282,11 @@ const onReady = async () => {
 
     if (!qsTruthy("offline")) {
       document.body.addEventListener("connected", () => {
-        hubChannel.sendEntryEvent().then(() => {
-          store.update({ activity: { lastEnteredAt: moment().toJSON() } });
-        });
+        if (!isBotMode) {
+          hubChannel.sendEntryEvent().then(() => {
+            store.update({ activity: { lastEnteredAt: moment().toJSON() } });
+          });
+        }
         remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
       });
 
