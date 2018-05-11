@@ -1,7 +1,7 @@
 function msft_mr_axis_with_deadzone(el, outputPrefix) {
   this.el = el;
   this.outputPrefix = outputPrefix;
-  this.deadzone = 0.01;
+  this.deadzone = 0.1;
   this.emitAxisMoveWithDeadzone = this.emitAxisMoveWithDeadzone.bind(this);
 }
 
