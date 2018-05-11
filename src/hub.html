@@ -20,6 +20,8 @@
 </head>
 
 <body data-html-prefix="<%= HTML_PREFIX %>">
+    <audio id="bot-recording" loop muted crossorigin="anonymous" src="./assets/avatars/bot-recording.mp3"></audio>
+
     <audio id="test-tone">
         <source src="./assets/sfx/tone.webm" type="audio/webm"/>
         <source src="./assets/sfx/tone.mp3" type="audio/mpeg"/>
@@ -230,6 +232,7 @@
             ik-root
             player-info
             networked-avatar
+            cardboard-controls
         >
             <a-entity
                 id="player-hud"

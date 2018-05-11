@@ -17,6 +17,7 @@ import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
+import "aframe-motion-capture-components";
 import "./utils/audio-context-fix";
 
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
@@ -60,6 +61,7 @@ import "./components/stats-plus";
 import "./components/networked-avatar";
 import "./components/css-class";
 import "./components/scene-shadow";
+import "./components/avatar-replay";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -104,6 +106,8 @@ import "./components/controls-shape-offset";
 import "./components/duck";
 import "./components/quack";
 
+import "./components/cardboard-controls";
+
 import "./components/cursor-controller";
 
 import "./components/nav-mesh-helper";
@@ -134,6 +138,7 @@ AFRAME.registerInputActivator("pressedmove", PressedMove);
 AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputMappings(inputConfig, true);
 
+const isBotMode = qsTruthy("bot");
 const concurrentLoadDetector = new ConcurrentLoadDetector();
 
 concurrentLoadDetector.start();
@@ -216,7 +221,7 @@ const onReady = async () => {
     }
   };
 
-  const enterScene = async (mediaStream, enterInVR, janusRoomId) => {
+  const enterScene = async (mediaStream, enterInVR, hubId) => {
     const scene = document.querySelector("a-scene");
     scene.renderer.sortObjects = true;
     const pinch = new Pinch(scene);
@@ -238,7 +243,7 @@ const onReady = async () => {
     window.LookControlsToggle = new LookControlsToggle(camera, window.PointerLookControls);
 
     scene.setAttribute("networked-scene", {
-      room: janusRoomId,
+      room: hubId,
       serverURL: process.env.JANUS_SERVER
     });
 
@@ -258,7 +263,7 @@ const onReady = async () => {
       playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
     }
 
-    const videoTracks = mediaStream.getVideoTracks();
+    const videoTracks = mediaStream ? mediaStream.getVideoTracks() : [];
     let sharingScreen = videoTracks.length > 0;
 
     const screenEntityId = `${NAF.clientId}-screen`;
@@ -316,6 +321,21 @@ const onReady = async () => {
         return;
       });
 
+      if (isBotMode) {
+        playerRig.setAttribute("avatar-replay", {
+          camera: "#player-camera",
+          leftController: "#player-left-controller",
+          rightController: "#player-right-controller"
+        });
+        const audio = document.getElementById("bot-recording");
+        mediaStream.addTrack(audio.captureStream().getAudioTracks()[0]);
+        // wait for runner script to interact with the page so that we can play audio.
+        await new Promise(resolve => {
+          window.interacted = resolve;
+        });
+        audio.play();
+      }
+
       if (mediaStream) {
         NAF.connection.adapter.setLocalMediaStream(mediaStream);
 
@@ -368,14 +388,31 @@ const onReady = async () => {
   const initialEnvironmentEl = document.createElement("a-entity");
   initialEnvironmentEl.addEventListener("bundleloaded", () => {
     remountUI({ initialEnvironmentLoaded: true });
-    // Wait a tick plus some margin so that the environments actually render.
-    setTimeout(() => scene.renderer.animate(null), 100);
+    // We never want to stop the render loop when were running in "bot" mode.
+    if (!isBotMode) {
+      // Stop rendering while the UI is up. We restart the render loop in enterScene.
+      // Wait a tick plus some margin so that the environments actually render.
+      setTimeout(() => scene.renderer.animate(null), 100);
+    }
   });
   environmentRoot.appendChild(initialEnvironmentEl);
 
+  const setRoom = (hubId, hubName) => {
+    if (!isBotMode) {
+      remountUI({ hubId, hubName });
+    } else {
+      const enterSceneImmediately = () => enterScene(new MediaStream(), false, hubId);
+      if (scene.hasLoaded) {
+        enterSceneImmediately();
+      } else {
+        scene.addEventListener("loaded", enterSceneImmediately);
+      }
+    }
+  };
+
   if (qs.room) {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
-    remountUI({ janusRoomId: qs.room && !isNaN(parseInt(qs.room)) ? parseInt(qs.room) : 1 });
+    setRoom(qs.room || "default");
     initialEnvironmentEl.setAttribute("gltf-bundle", {
       src: DEFAULT_ENVIRONMENT_URL
     });
@@ -405,7 +442,7 @@ const onReady = async () => {
       const hub = data.hubs[0];
       const defaultSpaceTopic = hub.topics[0];
       const gltfBundleUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
-      remountUI({ janusRoomId: defaultSpaceTopic.janus_room_id, hubName: hub.name });
+      setRoom(hub.hub_id, hub.name);
       initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`);
       hubChannel.setPhoenixChannel(channel);
     })
