@@ -72,7 +72,9 @@ export async function getAvailableVREntryTypes() {
       : VR_DEVICE_AVAILABILITY.no;
 
     cardboard =
-      displays.find(d => d.capabilities.canPresent && d.displayName.match(/cardboard/i)) && !isIPhone
+      !isIPhone &&
+      !isFirefoxBrowser &&
+      displays.find(d => d.capabilities.canPresent && d.displayName.match(/cardboard/i))
         ? VR_DEVICE_AVAILABILITY.yes
         : VR_DEVICE_AVAILABILITY.no;
 
