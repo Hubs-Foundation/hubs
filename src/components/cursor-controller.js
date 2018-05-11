@@ -388,6 +388,7 @@ AFRAME.registerComponent("cursor-controller", {
 
   _handlePrimaryUp: function(e) {
     if (e.target === this.controller || e.target === this.data.playerRig) {
+      this.grabStarting = false;
       if (this._isGrabbing() || this._isTargetOfType(TARGET_TYPE_UI)) {
         this.data.cursor.emit("cursor-release", e.detail);
       } else if (e.type !== this.data.releaseEvent) {
