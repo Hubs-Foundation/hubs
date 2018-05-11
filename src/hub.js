@@ -17,7 +17,7 @@ import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
-import "./utils/ios-audio-context-fix";
+import "./utils/audio-context-fix";
 
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
@@ -86,6 +86,11 @@ if (qs.quality) {
 } else {
   window.APP.quality = isMobile ? "low" : "high";
 }
+window.APP.RENDER_ORDER = {
+  HUD_BACKGROUND: 1,
+  HUD: 2,
+  CURSOR: 3
+};
 
 import "aframe-physics-system";
 import "aframe-physics-extras";
@@ -114,12 +119,6 @@ import Pinch from "./utils/pinch.js";
 import PinchToMove from "./utils/pinch-to-move.js";
 import LookControlsToggle from "./utils/look-controls-toggle.js";
 import PointerLookControls from "./utils/pointer-look-controls.js";
-
-window.RENDER_ORDER = {
-  HUD_BACKGROUND: 1,
-  HUD: 2,
-  CURSOR: 3
-};
 
 function qsTruthy(param) {
   const val = qs[param];
@@ -205,10 +204,16 @@ const onReady = async () => {
     if (NAF.connection.adapter && NAF.connection.adapter.localMediaStream) {
       NAF.connection.adapter.localMediaStream.getTracks().forEach(t => t.stop());
     }
-    hubChannel.disconnect();
+    if (hubChannel) {
+      hubChannel.disconnect();
+    }
     const scene = document.querySelector("a-scene");
-    scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
-    document.body.removeChild(scene);
+    if (scene) {
+      if (scene.renderer) {
+        scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
+      }
+      document.body.removeChild(scene);
+    }
   };
 
   const enterScene = async (mediaStream, enterInVR, janusRoomId) => {

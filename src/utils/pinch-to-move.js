@@ -20,26 +20,28 @@ export default class PinchToMove {
     }
 
     this.el.emit("move", { axis: [0, this.dir * this.decayingSpeed] });
-    this.decayingSpeed *= 0.93;
+    this.decayingSpeed *= 0.95;
   }
 
   onPinch(e) {
     const dist = e.detail.distance * this.speed;
     this.decayingSpeed = dist;
     this.dir = -1;
+    this.el.emit("move", { axis: [0, this.dir * dist] });
 
-    if (!this.interval) {
-      this.interval = window.setInterval(this.decay, 20);
-    }
+    //    if (!this.interval) {
+    //      this.interval = window.setInterval(this.decay, 20);
+    //    }
   }
 
   onSpread(e) {
     const dist = e.detail.distance * this.speed;
     this.decayingSpeed = dist;
     this.dir = 1;
+    this.el.emit("move", { axis: [0, this.dir * dist] });
 
-    if (!this.interval) {
-      this.interval = window.setInterval(this.decay, 20);
-    }
+    //   if (!this.interval) {
+    //     this.interval = window.setInterval(this.decay, 20);
+    //   }
   }
 }

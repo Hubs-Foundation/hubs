@@ -4,17 +4,28 @@ export default class PointerLookControls {
     this.xSpeed = 0.005;
     this.ySpeed = 0.003;
     this.lookControlsEl = lookControlsEl;
-    this.onPointerDown = this.onPointerDown.bind(this);
-    this.onPointerMove = this.onPointerMove.bind(this);
-    this.onPointerUp = this.onPointerUp.bind(this);
+    this.onTouchStart = this.onTouchStart.bind(this);
+    this.onTouchMove = this.onTouchMove.bind(this);
+    this.onTouchEnd = this.onTouchEnd.bind(this);
     this.getLookControls = this.getLookControls.bind(this);
-    this.removeEvent = this.removeEvent.bind(this);
-    document.addEventListener("touch-used-by-cursor", this.onPointerUp);
+    this.removeTouch = this.removeTouch.bind(this);
+    this.usedTouch = { identifier: -1 };
+    document.addEventListener("touch-used-by-cursor", ev => {
+      const touch = ev.detail;
+      this.removeTouch(touch);
+      this.usedTouch = touch;
+    });
+
     this.start = this.start.bind(this);
     this.stop = this.stop.bind(this);
 
     this.getLookControls();
     this.cache = [];
+
+    document.addEventListener("touchstart", this.onTouchStart);
+    document.addEventListener("touchmove", this.onTouchMove);
+    document.addEventListener("touchend", this.onTouchEnd);
+    document.addEventListener("touchcancel", this.onTouchEnd);
   }
 
   getLookControls() {
@@ -24,64 +35,74 @@ export default class PointerLookControls {
   }
 
   start() {
-    document.addEventListener("pointerdown", this.onPointerDown);
-    document.addEventListener("pointermove", this.onPointerMove);
-    document.addEventListener("pointerup", this.onPointerUp);
-    document.addEventListener("pointercancel", this.onPointerUp);
     if (!this.lookControls) {
       this.getLookControls();
     }
+    this.enabled = true;
   }
 
   stop() {
-    document.removeEventListener("pointerdown", this.onPointerDown);
-    document.removeEventListener("pointermove", this.onPointerMove);
-    document.removeEventListener("pointerup", this.onPointerUp);
-    document.removeEventListener("pointercancel", this.onPointerUp);
-    this.cache = [];
+    this.enabled = false;
   }
 
-  onPointerDown(ev) {
-    if (ev.isUsedByCursor || ev.clientY / window.innerHeight >= 0.8) {
-      return;
-    }
-    this.cache.push(ev);
-  }
-
-  onPointerMove(ev) {
-    const cache = this.cache;
-    if (ev.isUsedByCursor || ev.clientY / window.innerHeight >= 0.8) {
-      return;
-    }
-
-    let cachedEv = null;
-    for (var i = 0; i < cache.length; i++) {
-      if (ev.pointerId === cache[i].pointerId) {
-        cachedEv = cache[i];
-        cache[i] = ev;
-        break;
+  onTouchStart(ev) {
+    for (let i = 0; i < ev.touches.length; i++) {
+      let touch = ev.touches[i];
+      if (touch.identifier === this.usedTouch.identifier || touch.clientY / window.innerHeight >= 0.8) {
+        continue;
       }
     }
-    if (!cachedEv) {
-      return;
+  }
+
+  onTouchMove(ev) {
+    const cache = this.cache;
+    this.foo = !!this.foo ? this.foo + 1 : 1;
+    for (let i = 0; i < ev.touches.length; i++) {
+      let touch = ev.touches[i];
+
+      if (touch.identifier === this.usedTouch.identifier || touch.clientY / window.innerHeight >= 0.8) {
+        continue;
+      }
+
+      let cachedTouch = null;
+      for (var j = 0; j < cache.length; j++) {
+        if (touch.identifier === cache[j].identifier) {
+          cachedTouch = cache[j];
+          cache[j] = touch;
+          break;
+        }
+      }
+      if (!cachedTouch) {
+        this.cache.push(touch);
+        continue;
+      }
+
+      if (!this.enabled) {
+        continue;
+      }
+      const dX = touch.clientX - cachedTouch.clientX;
+      const dY = touch.clientY - cachedTouch.clientY;
+
+      this.yawObject.rotation.y -= dX * this.xSpeed;
+      this.pitchObject.rotation.x -= dY * this.ySpeed;
+      this.pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, this.pitchObject.rotation.x));
     }
-
-    const dX = ev.clientX - cachedEv.clientX;
-    const dY = ev.clientY - cachedEv.clientY;
-
-    this.yawObject.rotation.y -= dX * this.xSpeed;
-    this.pitchObject.rotation.x -= dY * this.ySpeed;
-    this.pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, this.pitchObject.rotation.x));
   }
 
-  onPointerUp(ev) {
-    this.removeEvent(ev);
+  onTouchEnd(ev) {
+    for (let i = 0; i < ev.changedTouches.length; i++) {
+      const touch = ev.changedTouches[i];
+      this.removeTouch(touch);
+      if (touch.identifier === this.usedTouch.identifier) {
+        this.usedTouch = { identifier: -1 };
+      }
+    }
   }
 
-  removeEvent(ev) {
+  removeTouch(touch) {
     const cache = this.cache;
     for (let i = 0; i < cache.length; i++) {
-      if (cache[i].pointerId == ev.pointerId) {
+      if (cache[i].identifier == touch.identifier) {
         cache.splice(i, 1);
         break;
       }

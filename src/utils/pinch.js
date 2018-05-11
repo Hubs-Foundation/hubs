@@ -2,49 +2,62 @@ export default class Pinch {
   constructor(el) {
     this.el = el;
     this.prevDiff = -1;
-    this.evCache = [];
+    this.touchCache = [];
+    this.usedTouch = { identifier: -1 };
 
-    this.onPointerMove = this.onPointerMove.bind(this);
-    this.onPointerDown = this.onPointerDown.bind(this);
-    this.onPointerUp = this.onPointerUp.bind(this);
-    this.removeEvent = this.removeEvent.bind(this);
+    this.onTouchMove = this.onTouchMove.bind(this);
+    this.onTouchStart = this.onTouchStart.bind(this);
+    this.onTouchEnd = this.onTouchEnd.bind(this);
+    this.removeTouch = this.removeTouch.bind(this);
+    this.addTouch = this.addTouch.bind(this);
 
-    document.addEventListener("pointermove", this.onPointerMove);
-    document.addEventListener("pointerdown", this.onPointerDown);
-    document.addEventListener("pointerup", this.onPointerUp);
-    document.addEventListener("pointercancel", this.onPointerUp);
-    document.addEventListener("touch-used-by-cursor", this.onPointerUp);
+    document.addEventListener("touchmove", this.onTouchMove);
+    document.addEventListener("touchstart", this.onTouchStart);
+    document.addEventListener("touchend", this.onTouchEnd);
+    document.addEventListener("touchcancel", this.onTouchEnd);
+    document.addEventListener("touch-used-by-cursor", ev => {
+      const touch = ev.detail;
+      this.removeTouch(touch);
+      this.usedTouch = touch;
+    });
   }
 
-  onPointerUp = ev => {
-    this.removeEvent(ev);
-    if (this.evCache.length < 2) {
-      window.LookControlsToggle.toggle(true, this);
-      this.prevDiff = -1;
+  onTouchEnd = ev => {
+    for (let i = 0; i < ev.changedTouches.length; i++) {
+      const touch = ev.changedTouches[i];
+      if (touch.identifier === this.usedTouch.identifier) {
+        this.usedTouch = { identifier: -1 };
+      }
+      this.removeTouch(touch);
     }
   };
 
-  onPointerDown = ev => {
-    if (ev.isUsedByCursor || ev.clientY / window.innerHeight >= 0.8) {
-      return;
+  onTouchStart = ev => {
+    for (let i = 0; i < ev.touches.length; i++) {
+      const touch = ev.touches[i];
+      if (touch.identifier === this.usedTouch.identifier || touch.clientY / window.innerHeight >= 0.8) {
+        continue;
+      }
+      this.addTouch(touch);
     }
-    this.evCache.push(ev);
   };
 
-  onPointerMove = ev => {
-    const cache = this.evCache;
-
-    for (var i = 0; i < cache.length; i++) {
-      if (ev.pointerId === cache[i].pointerId) {
-        cache[i] = ev;
-        break;
+  onTouchMove = ev => {
+    const cache = this.touchCache;
+    for (let i = 0; i < ev.touches.length; i++) {
+      const touch = ev.touches[i];
+      if (touch.identifier !== this.usedTouch.identifier) {
+        this.updateTouch(touch);
       }
     }
 
     if (cache.length !== 2) {
+      this.prevDiff = -1;
       return;
     }
-    window.LookControlsToggle.toggle(false, this);
+    if (window.LookControlsToggle) {
+      window.LookControlsToggle.toggle(false, this);
+    }
 
     const diff = Pinch.distance(cache[0].clientX, cache[0].clientY, cache[1].clientX, cache[1].clientY);
 
@@ -59,11 +72,36 @@ export default class Pinch {
     this.prevDiff = diff;
   };
 
-  removeEvent = ev => {
-    for (let i = 0; i < this.evCache.length; i++) {
-      if (this.evCache[i].pointerId == ev.pointerId) {
-        this.evCache.splice(i, 1);
+  removeTouch = touch => {
+    for (let i = 0; i < this.touchCache.length; i++) {
+      if (this.touchCache[i].identifier === touch.identifier) {
+        this.touchCache.splice(i, 1);
         break;
+      }
+    }
+    if (this.touchCache.length < 2) {
+      if (window.LookControlsToggle) {
+        window.LookControlsToggle.toggle(true, this);
+      }
+      this.prevDiff = -1;
+    }
+  };
+
+  addTouch = touch => {
+    for (let i = 0; i < this.touchCache.length; i++) {
+      if (this.touchCache[i].identifier === touch.identifier) {
+        return;
+      }
+    }
+
+    this.touchCache.push(touch);
+  };
+
+  updateTouch = touch => {
+    for (let i = 0; i < this.touchCache.length; i++) {
+      if (this.touchCache[i].identifier === touch.identifier) {
+        this.touchCache[i] = touch;
+        return;
       }
     }
   };

@@ -27,6 +27,28 @@ class InfoDialog extends Component {
 
     const loc = document.location;
     this.shareLink = `${loc.protocol}//${loc.host}${loc.pathname}`;
+    this.onKeyDown = this.onKeyDown.bind(this);
+    this.onContainerClicked = this.onContainerClicked.bind(this);
+  }
+
+  componentDidMount() {
+    window.addEventListener("keydown", this.onKeyDown);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("keydown", this.onKeyDown);
+  }
+
+  onKeyDown(e) {
+    if (e.key === "Escape") {
+      this.props.onCloseDialog();
+    }
+  }
+
+  onContainerClicked(e) {
+    if (e.currentTarget === e.target) {
+      this.props.onCloseDialog();
+    }
   }
 
   shareLinkClicked = () => {
@@ -211,6 +233,18 @@ class InfoDialog extends Component {
             <p>
               The <b>Bubble Toggle</b> hides avatars that enter your personal space.
             </p>
+            <p className="dialog__box__contents__links">
+              <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
+                <FormattedMessage id="profile.terms_of_use" />
+              </a>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+              >
+                <FormattedMessage id="profile.privacy_notice" />
+              </a>
+            </p>
           </div>
         );
         break;
@@ -223,7 +257,7 @@ class InfoDialog extends Component {
 
     return (
       <div className="dialog-overlay">
-        <div className={dialogClasses}>
+        <div className={dialogClasses} onClick={this.onContainerClicked}>
           <div className="dialog__box">
             <div className="dialog__box__contents">
               <button className="dialog__box__contents__close" onClick={this.props.onCloseDialog}>

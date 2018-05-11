@@ -19,8 +19,6 @@ In this Privacy Notice, we explain what data may be accessible to Mozilla or oth
 - You can learn more by looking at the code itself. [Janus SFU](https://github.com/mozilla/janus-plugin-sfu), [Reticulum](https://github.com/mozilla/reticulum), [Hubs](https://github.com/mozilla/hubs), [Hubs-Ops](https://github.com/mozilla/hubs-ops)
 </details>
 
-<p/>
-
 <details open>
   <summary>
     <strong>Mozilla receives technical and interaction data to improve performance and stability.</strong>
