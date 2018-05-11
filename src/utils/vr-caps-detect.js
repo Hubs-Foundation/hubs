@@ -72,12 +72,12 @@ export async function getAvailableVREntryTypes() {
       : VR_DEVICE_AVAILABILITY.no;
 
     cardboard =
-      displays.find(d => d.capabilities.canPresent && d.displayName.match(/\W*cardboard\W*/i)) && !isIPhone
+      displays.find(d => d.capabilities.canPresent && d.displayName.match(/cardboard/i)) && !isIPhone
         ? VR_DEVICE_AVAILABILITY.yes
         : VR_DEVICE_AVAILABILITY.no;
 
     // For daydream detection, in a WebVR browser we can increase confidence in daydream compatibility.
-    const hasDaydreamWebVRDevice = displays.find(d => d.displayName.match(/\W*daydream\W*/i));
+    const hasDaydreamWebVRDevice = displays.find(d => d.displayName.match(/daydream/i));
 
     if (hasDaydreamWebVRDevice) {
       // If we detected daydream via WebVR
