@@ -23,6 +23,7 @@ import "./utils/audio-context-fix";
 
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
+import msft_mr_axis_with_deadzone from "./behaviours/msft-mr-axis-with-deadzone";
 import { PressedMove } from "./activators/pressedmove";
 import { ReverseY } from "./activators/reversey";
 import "./activators/shortpress";
@@ -131,6 +132,7 @@ registerTelemetry();
 
 AFRAME.registerInputBehaviour("trackpad_dpad4", trackpad_dpad4);
 AFRAME.registerInputBehaviour("joystick_dpad4", joystick_dpad4);
+AFRAME.registerInputBehaviour("msft_mr_axis_with_deadzone", msft_mr_axis_with_deadzone);
 AFRAME.registerInputActivator("pressedmove", PressedMove);
 AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputMappings(inputConfig, true);
