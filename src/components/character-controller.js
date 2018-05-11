@@ -118,22 +118,22 @@ AFRAME.registerComponent("character-controller", {
       yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 
       // Translate to middle of playspace (player rig)
-      root.applyMatrix(transInv);
+      root.matrix.premultiply(transInv);
       // Zero playspace (player rig) rotation
-      root.applyMatrix(rotationInvMatrix);
+      root.matrix.premultiply(rotationInvMatrix);
       // Zero pivot (camera/head) rotation
-      root.applyMatrix(pivotRotationInvMatrix);
+      root.matrix.premultiply(pivotRotationInvMatrix);
       // Apply joystick translation
-      root.applyMatrix(move);
+      root.matrix.premultiply(move);
       // Apply joystick yaw rotation
-      root.applyMatrix(yawMatrix);
+      root.matrix.premultiply(yawMatrix);
       // Apply snap rotation if necessary
-      root.applyMatrix(this.pendingSnapRotationMatrix);
+      root.matrix.premultiply(this.pendingSnapRotationMatrix);
       // Reapply pivot (camera/head) rotation
-      root.applyMatrix(pivotRotationMatrix);
+      root.matrix.premultiply(pivotRotationMatrix);
       // Reapply playspace (player rig) rotation
-      root.applyMatrix(rotationMatrix);
-      // Reapply playspace (player rig) translation
+      root.matrix.premultiply(rotationMatrix);
+      // Reapply playspace (player rig) translation and update pos/rot/scale
       root.applyMatrix(trans);
 
       // TODO: the above matrix trnsfomraitons introduce some floating point erros in scale, this reverts them to avoid spamming network with fake scale updates
