@@ -1,30 +1,46 @@
 function registerNetworkSchemas() {
+  const positionRequiresUpdate = (oldData, newData) => {
+    return !NAF.utils.almostEqualVec3(oldData, newData, 0.001);
+  };
+
+  const rotationRequiresUpdate = (oldData, newData) => {
+    return !NAF.utils.almostEqualVec3(oldData, newData, 0.5);
+  };
+
   NAF.schemas.add({
     template: "#remote-avatar-template",
     components: [
-      "position",
+      {
+        component: "position",
+        requiresNetworkUpdate: positionRequiresUpdate
+      },
       {
         component: "rotation",
-        lerp: false
+        lerp: false,
+        requiresNetworkUpdate: rotationRequiresUpdate
       },
       "scale",
       "player-info",
       "networked-avatar",
       {
         selector: ".camera",
-        component: "position"
+        component: "position",
+        requiresNetworkUpdate: positionRequiresUpdate
       },
       {
         selector: ".camera",
-        component: "rotation"
+        component: "rotation",
+        requiresNetworkUpdate: rotationRequiresUpdate
       },
       {
         selector: ".left-controller",
-        component: "position"
+        component: "position",
+        requiresNetworkUpdate: positionRequiresUpdate
       },
       {
         selector: ".left-controller",
-        component: "rotation"
+        component: "rotation",
+        requiresNetworkUpdate: rotationRequiresUpdate
       },
       {
         selector: ".left-controller",
@@ -32,11 +48,13 @@ function registerNetworkSchemas() {
       },
       {
         selector: ".right-controller",
-        component: "position"
+        component: "position",
+        requiresNetworkUpdate: positionRequiresUpdate
       },
       {
         selector: ".right-controller",
-        component: "rotation"
+        component: "rotation",
+        requiresNetworkUpdate: rotationRequiresUpdate
       },
       {
         selector: ".right-controller",
@@ -47,12 +65,30 @@ function registerNetworkSchemas() {
 
   NAF.schemas.add({
     template: "#video-template",
-    components: ["position", "rotation", "visible"]
+    components: [
+      {
+        component: "position"
+      },
+      {
+        component: "rotation"
+      },
+      "visible"
+    ]
   });
 
   NAF.schemas.add({
     template: "#interactable-template",
-    components: ["position", "rotation", "scale"]
+    components: [
+      {
+        component: "position",
+        requiresNetworkUpdate: positionRequiresUpdate
+      },
+      {
+        component: "rotation",
+        requiresNetworkUpdate: rotationRequiresUpdate
+      },
+      "scale"
+    ]
   });
 }
 
