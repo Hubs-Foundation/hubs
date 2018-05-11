@@ -43,6 +43,7 @@ export async function getAvailableVREntryTypes() {
   const isSamsungBrowser = browser.name === "chrome" && navigator.userAgent.match(/SamsungBrowser/);
   const isOculusBrowser = navigator.userAgent.match(/Oculus/);
   const isDaydreamCapableBrowser = !!(isWebVRCapableBrowser && browser.name === "chrome" && !isSamsungBrowser);
+  const isIPhone = navigator.userAgent.match(/iPhone/);
 
   let generic = VR_DEVICE_AVAILABILITY.no;
   let cardboard = VR_DEVICE_AVAILABILITY.no;
@@ -70,9 +71,10 @@ export async function getAvailableVREntryTypes() {
       ? VR_DEVICE_AVAILABILITY.yes
       : VR_DEVICE_AVAILABILITY.no;
 
-    cardboard = displays.find(d => d.capabilities.canPresent && d.displayName.match(/\W*cardboard\W*/i))
-      ? VR_DEVICE_AVAILABILITY.yes
-      : VR_DEVICE_AVAILABILITY.no;
+    cardboard =
+      displays.find(d => d.capabilities.canPresent && d.displayName.match(/\W*cardboard\W*/i)) && !isIPhone
+        ? VR_DEVICE_AVAILABILITY.yes
+        : VR_DEVICE_AVAILABILITY.no;
 
     // For daydream detection, in a WebVR browser we can increase confidence in daydream compatibility.
     const hasDaydreamWebVRDevice = displays.find(d => d.displayName.match(/\W*daydream\W*/i));
