@@ -4,10 +4,11 @@ Usage:
     ./run-bot.js [options]
 
 Options:
-    -h --host=<host>  Hubs host [default: localhost:8080]
-    -r --room=<room>  Room id [default: 234234].
-    -h --help         Show this screen.
+    -u --url=<url>    URL
+    -o --host=<host>  Hubs host if URL is not specified [default: localhost:8080]
+    -r --room=<room>  Room id
     -n --bots=<bots>  Number of bots to connect [default: 1].
+    -h --help         Show this screen
 `;
 
 const docopt = require("docopt").docopt;
@@ -27,13 +28,19 @@ async function spawnBot(id) {
   page.on("error", err => console.error(`ERROR ${id}: `, err));
   page.on("pageerror", err => console.error(`PAGE ERROR: ${id}`, err));
 
+  const baseUrl = options["--url"] || `https://${options["--host"]}/hub.html`;
+
   const params = {
-    room: options["--room"],
     bot: true,
-    name: `Bot ${id}`,
     allow_multi: true
   };
-  const url = `https://${options["--host"]}/hub.html?${querystring.stringify(params)}`;
+  const roomOption = options["--room"];
+  if (roomOption) {
+    params.room = roomOption;
+  }
+
+  const url = `${baseUrl}?${querystring.stringify(params)}`;
+  console.log(url);
 
   const navigate = async () => {
     try {

@@ -23,6 +23,7 @@ import "./utils/audio-context-fix";
 
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
+import msft_mr_axis_with_deadzone from "./behaviours/msft-mr-axis-with-deadzone";
 import { PressedMove } from "./activators/pressedmove";
 import { ReverseY } from "./activators/reversey";
 import "./activators/shortpress";
@@ -79,6 +80,11 @@ import { DEFAULT_ENVIRONMENT_URL } from "./assets/environments/environments";
 import { App } from "./App";
 
 window.APP = new App();
+window.APP.RENDER_ORDER = {
+  HUD_BACKGROUND: 1,
+  HUD_ICONS: 2,
+  CURSOR: 3
+};
 const store = window.APP.store;
 
 const qs = queryString.parse(location.search);
@@ -122,15 +128,19 @@ function qsTruthy(param) {
   return val === null || /1|on|true/i.test(val);
 }
 
-registerTelemetry();
+const isBotMode = qsTruthy("bot");
+
+if (!isBotMode) {
+  registerTelemetry();
+}
 
 AFRAME.registerInputBehaviour("trackpad_dpad4", trackpad_dpad4);
 AFRAME.registerInputBehaviour("joystick_dpad4", joystick_dpad4);
+AFRAME.registerInputBehaviour("msft_mr_axis_with_deadzone", msft_mr_axis_with_deadzone);
 AFRAME.registerInputActivator("pressedmove", PressedMove);
 AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputMappings(inputConfig, true);
 
-const isBotMode = qsTruthy("bot");
 const concurrentLoadDetector = new ConcurrentLoadDetector();
 
 concurrentLoadDetector.start();
@@ -172,7 +182,7 @@ const onReady = async () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
 
-  document.querySelector("a-scene canvas").classList.add("blurred");
+  document.querySelector("canvas").classList.add("blurred");
   window.APP.scene = scene;
 
   registerNetworkSchemas();
@@ -215,8 +225,9 @@ const onReady = async () => {
 
   const enterScene = async (mediaStream, enterInVR, hubId) => {
     const scene = document.querySelector("a-scene");
+    scene.renderer.sortObjects = true;
     const playerRig = document.querySelector("#player-rig");
-    document.querySelector("a-scene canvas").classList.remove("blurred");
+    document.querySelector("canvas").classList.remove("blurred");
     scene.render();
 
     if (enterInVR) {
@@ -279,9 +290,11 @@ const onReady = async () => {
 
     if (!qsTruthy("offline")) {
       document.body.addEventListener("connected", () => {
-        hubChannel.sendEntryEvent().then(() => {
-          store.update({ activity: { lastEnteredAt: moment().toJSON() } });
-        });
+        if (!isBotMode) {
+          hubChannel.sendEntryEvent().then(() => {
+            store.update({ activity: { lastEnteredAt: moment().toJSON() } });
+          });
+        }
         remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
       });
 
