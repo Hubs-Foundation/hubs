@@ -8,7 +8,7 @@ export default class LookControlsToggle {
   }
 
   allAgreeToEnable() {
-    for (let i in this.requesters) {
+    for (const i in this.requesters) {
       if (!this.requesters[i]) {
         return false;
       }

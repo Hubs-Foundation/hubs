@@ -226,7 +226,6 @@ const onReady = async () => {
     scene.renderer.sortObjects = true;
     const pinch = new Pinch(scene);
     const pinchToMove = new PinchToMove(scene);
-    window.p = pinchToMove;
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("a-scene canvas").classList.remove("blurred");
     scene.render();

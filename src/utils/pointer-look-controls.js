@@ -1,4 +1,4 @@
-const PI_2 = Math.PI / 2;
+const PI_4 = Math.PI / 4;
 export default class PointerLookControls {
   constructor(lookControlsEl) {
     this.xSpeed = 0.005;
@@ -9,6 +9,7 @@ export default class PointerLookControls {
     this.onTouchEnd = this.onTouchEnd.bind(this);
     this.getLookControls = this.getLookControls.bind(this);
     this.removeTouch = this.removeTouch.bind(this);
+    this.onRotateX = this.onRotateX.bind(this);
     this.usedTouch = { identifier: -1 };
     document.addEventListener("touch-used-by-cursor", ev => {
       const touch = ev.detail;
@@ -26,6 +27,13 @@ export default class PointerLookControls {
     document.addEventListener("touchmove", this.onTouchMove);
     document.addEventListener("touchend", this.onTouchEnd);
     document.addEventListener("touchcancel", this.onTouchEnd);
+    AFRAME.scenes[0].sceneEl.addEventListener("rotateX", this.onRotateX);
+  }
+
+  onRotateX(e) {
+    const dY = e.detail.value;
+    this.pitchObject.rotation.x += dY * 0.02;
+    this.pitchObject.rotation.x = Math.max(-PI_4, Math.min(PI_4, this.pitchObject.rotation.x));
   }
 
   getLookControls() {
@@ -47,7 +55,7 @@ export default class PointerLookControls {
 
   onTouchStart(ev) {
     for (let i = 0; i < ev.touches.length; i++) {
-      let touch = ev.touches[i];
+      const touch = ev.touches[i];
       if (touch.identifier === this.usedTouch.identifier || touch.clientY / window.innerHeight >= 0.8) {
         continue;
       }
@@ -56,16 +64,15 @@ export default class PointerLookControls {
 
   onTouchMove(ev) {
     const cache = this.cache;
-    this.foo = !!this.foo ? this.foo + 1 : 1;
     for (let i = 0; i < ev.touches.length; i++) {
-      let touch = ev.touches[i];
+      const touch = ev.touches[i];
 
       if (touch.identifier === this.usedTouch.identifier || touch.clientY / window.innerHeight >= 0.8) {
         continue;
       }
 
       let cachedTouch = null;
-      for (var j = 0; j < cache.length; j++) {
+      for (let j = 0; j < cache.length; j++) {
         if (touch.identifier === cache[j].identifier) {
           cachedTouch = cache[j];
           cache[j] = touch;
@@ -85,7 +92,7 @@ export default class PointerLookControls {
 
       this.yawObject.rotation.y -= dX * this.xSpeed;
       this.pitchObject.rotation.x -= dY * this.ySpeed;
-      this.pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, this.pitchObject.rotation.x));
+      this.pitchObject.rotation.x = Math.max(-PI_4, Math.min(PI_4, this.pitchObject.rotation.x));
     }
   }
 
