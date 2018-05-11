@@ -5,7 +5,6 @@ import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import formurlencoded from "form-urlencoded";
 import LinkDialog from "./link-dialog.js";
-const { detect } = require("detect-browser");
 
 // TODO i18n
 
