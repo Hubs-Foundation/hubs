@@ -151,12 +151,18 @@ AFRAME.registerComponent("cursor-controller", {
       this.direction.copy(raycaster.ray.direction);
     } else if ((this.inVR || this.isMobile) && !this.hasPointingDevice) {
       //gaze cursor mode
-      camera.getWorldPosition(this.origin);
-      camera.getWorldDirection(this.direction);
+      camera.updateMatrixWorld(true);
+      this.origin.setFromMatrixPosition(camera.matrixWorld);
+      this.controllerQuaternion.setFromRotationMatrix(camera.matrixWorld);
+      this.direction
+        .set(0, 0, 1)
+        .applyQuaternion(this.controllerQuaternion)
+        .normalize();
     } else if (this.controller != null) {
       //3d cursor mode
-      this.controller.object3D.getWorldPosition(this.origin);
-      this.controller.object3D.getWorldQuaternion(this.controllerQuaternion);
+      this.controller.object3D.updateMatrixWorld(true);
+      this.origin.setFromMatrixPosition(this.controller.object3D.matrixWorld);
+      this.controllerQuaternion.setFromRotationMatrix(this.controller.object3D.matrixWorld);
       this.direction
         .set(0, 0, -1)
         .applyQuaternion(this.controllerQuaternion)
