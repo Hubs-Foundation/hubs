@@ -2,6 +2,7 @@ const TARGET_TYPE_NONE = 1;
 const TARGET_TYPE_INTERACTABLE = 2;
 const TARGET_TYPE_UI = 4;
 const TARGET_TYPE_INTERACTABLE_OR_UI = TARGET_TYPE_INTERACTABLE | TARGET_TYPE_UI;
+const virtualJoystickCutoff = 0.8;
 
 AFRAME.registerComponent("cursor-controller", {
   dependencies: ["raycaster", "line"],
@@ -264,7 +265,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handleSingleTouchStart: function(touch) {
-    if (this.activeTouch || touch.clientY / window.innerHeight >= 0.8) return;
+    if (this.activeTouch || touch.clientY / window.innerHeight >= virtualJoystickCutoff) return;
 
     // Update the ray and cursor positions
     const raycasterComp = this.el.components.raycaster;
@@ -294,7 +295,7 @@ AFRAME.registerComponent("cursor-controller", {
     for (let i = 0; i < e.touches.length; i++) {
       const touch = e.touches[i];
       if (
-        (!this.activeTouch && touch.clientY / window.innerHeight < 0.8) ||
+        (!this.activeTouch && touch.clientY / window.innerHeight < virtualJoystickCutoff) ||
         (this.activeTouch && touch.identifier === this.activeTouch.identifier)
       ) {
         this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
