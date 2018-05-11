@@ -4,10 +4,10 @@ Usage:
     ./run-bot.js [options]
 
 Options:
-    -u --url=<url>    Url [default: null].
-    -h --host=<host>  Hubs host if url is not specified [default: localhost:8080]
-    -r --room=<room>  Room id [default: null].
-    -h --help         Show this screen.
+    -u --url=<url>    URL
+    -o --host=<host>  Hubs host if URL is not specified [default: localhost:8080]
+    -r --room=<room>  Room id
+    -h --help         Show this screen
 `;
 
 const docopt = require("docopt").docopt;
