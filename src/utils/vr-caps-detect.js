@@ -44,6 +44,7 @@ export async function getAvailableVREntryTypes() {
   const isOculusBrowser = navigator.userAgent.match(/Oculus/);
   const isDaydreamCapableBrowser = !!(isWebVRCapableBrowser && browser.name === "chrome" && !isSamsungBrowser);
   const isIPhone = navigator.userAgent.match(/iPhone/);
+  const isFirefoxBrowser = navigator.userAgent.match(/Firefox/);
 
   let generic = VR_DEVICE_AVAILABILITY.no;
   let cardboard = VR_DEVICE_AVAILABILITY.no;
