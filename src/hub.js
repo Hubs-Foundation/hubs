@@ -22,6 +22,7 @@ import "./utils/audio-context-fix";
 
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
+import msft_mr_axis_with_deadzone from "./behaviours/msft-mr-axis-with-deadzone";
 import { PressedMove } from "./activators/pressedmove";
 import { ReverseY } from "./activators/reversey";
 import "./activators/shortpress";
@@ -130,15 +131,19 @@ function qsTruthy(param) {
   return val === null || /1|on|true/i.test(val);
 }
 
-registerTelemetry();
+const isBotMode = qsTruthy("bot");
+
+if (!isBotMode) {
+  registerTelemetry();
+}
 
 AFRAME.registerInputBehaviour("trackpad_dpad4", trackpad_dpad4);
 AFRAME.registerInputBehaviour("joystick_dpad4", joystick_dpad4);
+AFRAME.registerInputBehaviour("msft_mr_axis_with_deadzone", msft_mr_axis_with_deadzone);
 AFRAME.registerInputActivator("pressedmove", PressedMove);
 AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputMappings(inputConfig, true);
 
-const isBotMode = qsTruthy("bot");
 const concurrentLoadDetector = new ConcurrentLoadDetector();
 
 concurrentLoadDetector.start();
@@ -293,9 +298,11 @@ const onReady = async () => {
 
     if (!qsTruthy("offline")) {
       document.body.addEventListener("connected", () => {
-        hubChannel.sendEntryEvent().then(() => {
-          store.update({ activity: { lastEnteredAt: moment().toJSON() } });
-        });
+        if (!isBotMode) {
+          hubChannel.sendEntryEvent().then(() => {
+            store.update({ activity: { lastEnteredAt: moment().toJSON() } });
+          });
+        }
         remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
       });
 

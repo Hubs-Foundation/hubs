@@ -184,7 +184,15 @@ AFRAME.registerComponent("character-controller", {
       velocity.y -= velocity.y * data.easing * dt;
     }
 
-    // Clamp velocity easing.
+    const dvx = data.groundAcc * dt * this.accelerationInput.x;
+    const dvz = data.groundAcc * dt * -this.accelerationInput.z;
+    velocity.x += dvx;
+    velocity.z += dvz;
+
+    const decay = 0.7;
+    this.accelerationInput.x = this.accelerationInput.x * decay;
+    this.accelerationInput.z = this.accelerationInput.z * decay;
+
     if (Math.abs(velocity.x) < CLAMP_VELOCITY) {
       velocity.x = 0;
     }
@@ -194,14 +202,5 @@ AFRAME.registerComponent("character-controller", {
     if (Math.abs(velocity.z) < CLAMP_VELOCITY) {
       velocity.z = 0;
     }
-
-    const dvx = data.groundAcc * dt * this.accelerationInput.x;
-    const dvz = data.groundAcc * dt * -this.accelerationInput.z;
-    velocity.x += dvx;
-    velocity.z += dvz;
-
-    const decay = 0.7;
-    this.accelerationInput.x = this.accelerationInput.x * decay;
-    this.accelerationInput.z = this.accelerationInput.z * decay;
   }
 });
