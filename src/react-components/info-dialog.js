@@ -232,7 +232,7 @@ class InfoDialog extends Component {
             </button>
             <p />
             <span style={{ fontSize: "0.8em" }}>
-              For a full list of browsers with experimental support, visit{" "}
+              For a full list of browsers with experimental VR support, visit{" "}
               <a href="https://webvr.rocks" target="_blank" rel="noopener noreferrer">
                 WebVR Rocks
               </a>.
