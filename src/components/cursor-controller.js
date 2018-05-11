@@ -92,8 +92,9 @@ AFRAME.registerComponent("cursor-controller", {
     this.data.playerRig.addEventListener(this.data.primaryUp, this._handlePrimaryUp);
     this.data.playerRig.addEventListener(this.data.grabEvent, this._handlePrimaryDown);
     this.data.playerRig.addEventListener(this.data.releaseEvent, this._handlePrimaryUp);
-    this.data.playerRig.addEventListener("gamepadbuttondown", this._handlePrimaryDown);
-    this.data.playerRig.addEventListener("gamepadbuttonup", this._handlePrimaryUp);
+    this.data.playerRig.addEventListener("cardboardbuttondown", this._handlePrimaryDown);
+    this.data.playerRig.addEventListener("cardboardbuttonup", this._handlePrimaryUp);
+
     this.data.playerRig.addEventListener("model-loaded", this._handleModelLoaded);
 
     this.el.sceneEl.addEventListener("controllerconnected", this._handleControllerConnected);
@@ -117,8 +118,9 @@ AFRAME.registerComponent("cursor-controller", {
     this.data.playerRig.removeEventListener(this.data.primaryUp, this._handlePrimaryUp);
     this.data.playerRig.removeEventListener(this.data.grabEvent, this._handlePrimaryDown);
     this.data.playerRig.removeEventListener(this.data.releaseEvent, this._handlePrimaryUp);
-    this.data.playerRig.removeEventListener("gamepadbuttondown", this._handlePrimaryDown);
-    this.data.playerRig.removeEventListener("gamepadbuttonup", this._handlePrimaryUp);
+    this.data.playerRig.removeEventListener("cardboardbuttondown", this._handlePrimaryDown);
+    this.data.playerRig.removeEventListener("cardboardbuttonup", this._handlePrimaryUp);
+
     this.data.playerRig.removeEventListener("model-loaded", this._handleModelLoaded);
 
     this.el.sceneEl.removeEventListener("controllerconnected", this._handleControllerConnected);
@@ -372,7 +374,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handlePrimaryDown: function(e) {
-    if (e.target === this.controller) {
+    if (e.target === this.controller || e.target === this.data.playerRig) {
       const isInteractable = this._isTargetOfType(TARGET_TYPE_INTERACTABLE) && !this.grabStarting;
       if (isInteractable || this._isTargetOfType(TARGET_TYPE_UI)) {
         this.grabStarting = true;
@@ -384,8 +386,7 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _handlePrimaryUp: function(e) {
-    if (e.target === this.controller) {
-      this.grabStarting = false;
+    if (e.target === this.controller || e.target === this.data.playerRig) {
       if (this._isGrabbing() || this._isTargetOfType(TARGET_TYPE_UI)) {
         this.data.cursor.emit("cursor-release", e.detail);
       } else if (e.type !== this.data.releaseEvent) {

@@ -64,9 +64,9 @@ class UIRoot extends Component {
     showProfileEntry: PropTypes.bool,
     availableVREntryTypes: PropTypes.object,
     initialEnvironmentLoaded: PropTypes.bool,
-    janusRoomId: PropTypes.number,
     roomUnavailableReason: PropTypes.string,
     platformUnsupportedReason: PropTypes.string,
+    hubId: PropTypes.string,
     hubName: PropTypes.string,
     occupantCount: PropTypes.number
   };
@@ -488,7 +488,7 @@ class UIRoot extends Component {
       screenfull.request();
     }
 
-    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.props.janusRoomId);
+    this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.props.hubId);
 
     const mediaStream = this.state.mediaStream;
 
@@ -572,7 +572,7 @@ class UIRoot extends Component {
       );
     }
 
-    if (!this.props.initialEnvironmentLoaded || !this.props.availableVREntryTypes || !this.props.janusRoomId) {
+    if (!this.props.initialEnvironmentLoaded || !this.props.availableVREntryTypes || !this.props.hubId) {
       return (
         <IntlProvider locale={lang} messages={messages}>
           <div className="loading-panel">
