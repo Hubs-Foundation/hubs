@@ -664,12 +664,7 @@ class UIRoot extends Component {
             </div>
           </div>
           <div className="mic-grant-panel__next-container">
-            <button
-              className={classNames("mic-grant-panel__next", {
-                invisible: this.state.entryStep === ENTRY_STEPS.mic_grant
-              })}
-              onClick={this.onMicGrantButton}
-            >
+            <button className={classNames("mic-grant-panel__next")} onClick={this.onMicGrantButton}>
               <FormattedMessage id="audio.granted-next" />
             </button>
           </div>
