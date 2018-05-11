@@ -259,7 +259,7 @@ module.exports = () => {
         } else if (plugin instanceof LodashTemplatePlugin) {
           return new LodashTemplatePlugin({
             ...plugin.options,
-            imports: { ...plugin.options.imports, HTML_PREFIX: "smoke-" }
+            imports: { ...plugin.options.imports, HTML_PREFIX: SMOKE_PREFIX }
           });
         }
 
