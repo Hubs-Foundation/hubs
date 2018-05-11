@@ -2012,8 +2012,8 @@ colormin@^1.0.5:
     has "^1.0.1"
 
 colors@*:
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/colors/-/colors-1.2.3.tgz#1b152a9c4f6c9f74bc4bb96233ad0b7983b79744"
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/colors/-/colors-1.2.5.tgz#89c7ad9a374bc030df8013241f68136ed8835afc"
 
 colors@1.0.3:
   version "1.0.3"
@@ -5448,7 +5448,7 @@ neo-async@^2.5.0:
 
 "networked-aframe@https://github.com/mozillareality/networked-aframe#mr-social-client/master":
   version "0.6.1"
-  resolved "https://github.com/mozillareality/networked-aframe#641b5e44b8514d02925e3efb4289ca36a41c1006"
+  resolved "https://github.com/mozillareality/networked-aframe#424b41cfdf53db64033885da411c33685644db97"
   dependencies:
     easyrtc "1.1.0"
     express "^4.10.7"
