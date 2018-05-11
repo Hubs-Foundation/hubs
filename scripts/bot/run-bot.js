@@ -4,8 +4,9 @@ Usage:
     ./run-bot.js [options]
 
 Options:
-    -h --host=<host>  Hubs host [default: localhost:8080]
-    -r --room=<room>  Room id [default: 234234].
+    -u --url=<url>    Url [default: null].
+    -h --host=<host>  Hubs host if url is not specified [default: localhost:8080]
+    -r --room=<room>  Room id [default: null].
     -h --help         Show this screen.
 `;
 
@@ -22,12 +23,19 @@ const querystring = require("query-string");
   page.on("error", err => console.error("ERROR: ", err));
   page.on("pageerror", err => console.error("PAGE ERROR: ", err));
 
+  const baseUrl = options["--url"] || `https://${options["--host"]}/hub.html`;
+
   const params = {
-    room: options["--room"],
-    bot: true
+    bot: true,
+    allow_multi: true
   };
-  console.log(params);
-  const url = `https://${options["--host"]}/hub.html?${querystring.stringify(params)}`;
+  const roomOption = options["--room"];
+  if (roomOption) {
+    params.room = roomOption;
+  }
+
+  const url = `${baseUrl}?${querystring.stringify(params)}`;
+  console.log(url);
 
   const navigate = async () => {
     try {
