@@ -1,5 +1,6 @@
 const { detect } = require("detect-browser");
 const browser = detect();
+const deviceDetect = require("device-detect")();
 
 // Precision on device detection is fuzzy -- we can sometimes know if a device is definitely
 // available, or definitely *not* available, and assume it may be available otherwise.
@@ -43,8 +44,8 @@ export async function getAvailableVREntryTypes() {
   const isSamsungBrowser = browser.name === "chrome" && navigator.userAgent.match(/SamsungBrowser/);
   const isOculusBrowser = navigator.userAgent.match(/Oculus/);
   const isDaydreamCapableBrowser = !!(isWebVRCapableBrowser && browser.name === "chrome" && !isSamsungBrowser);
-  const isIPhone = navigator.userAgent.match(/iPhone/);
-  const isFirefoxBrowser = navigator.userAgent.match(/Firefox/);
+  const isIDevice = ["iPhone", "iPad", "iPod"].indexOf(deviceDetect.device) > -1;
+  const isFirefoxBrowser = browser.name === "firefox";
 
   let generic = VR_DEVICE_AVAILABILITY.no;
   let cardboard = VR_DEVICE_AVAILABILITY.no;
@@ -55,7 +56,9 @@ export async function getAvailableVREntryTypes() {
   //
   // If we are in Oculus Browser (ie, we are literally wearing a GearVR) then return 'yes'.
   const gearvr = isMaybeGearVRCompatibleDevice()
-    ? isOculusBrowser ? VR_DEVICE_AVAILABILITY.yes : VR_DEVICE_AVAILABILITY.maybe
+    ? isOculusBrowser
+      ? VR_DEVICE_AVAILABILITY.yes
+      : VR_DEVICE_AVAILABILITY.maybe
     : VR_DEVICE_AVAILABILITY.no;
 
   // For daydream detection, we first check if they are on an Android compatible device, and assume they
@@ -73,7 +76,7 @@ export async function getAvailableVREntryTypes() {
       : VR_DEVICE_AVAILABILITY.no;
 
     cardboard =
-      !isIPhone &&
+      !isIDevice &&
       !isFirefoxBrowser &&
       displays.find(d => d.capabilities.canPresent && d.displayName.match(/cardboard/i))
         ? VR_DEVICE_AVAILABILITY.yes
