@@ -1,6 +1,6 @@
 AFRAME.registerComponent("networked-audio-analyser", {
-  schema: {},
   async init() {
+    this.volume = 0;
     this.el.addEventListener("sound-source-set", event => {
       const ctx = THREE.AudioContext.getContext();
       this.analyser = ctx.createAnalyser();
@@ -20,60 +20,38 @@ AFRAME.registerComponent("networked-audio-analyser", {
       sum += this.levels[i];
     }
     this.volume = sum / this.levels.length;
-    this.el.emit("audioFrequencyChange", {
-      volume: this.volume,
-      levels: this.levels
-    });
   }
 });
 
 AFRAME.registerComponent("matcolor-audio-feedback", {
-  schema: {
-    analyserSrc: { type: "selector" }
-  },
-  init: function() {
-    this.onAudioFrequencyChange = this.onAudioFrequencyChange.bind(this);
-  },
-
-  play() {
-    (this.data.analyserSrc || this.el).addEventListener("audioFrequencyChange", this.onAudioFrequencyChange);
-  },
-
-  pause() {
-    (this.data.analyserSrc || this.el).removeEventListener("audioFrequencyChange", this.onAudioFrequencyChange);
-  },
-
-  onAudioFrequencyChange(e) {
+  tick() {
     if (!this.mat) return;
-    this.object3D.mesh.color.setScalar(1 + e.detail.volume / 255 * 2);
+
+    const audioAnalyser = this.el.components["networked-audio-analyser"];
+
+    if (!audioAnalyser) return;
+
+    this.object3D.mesh.color.setScalar(1 + audioAnalyser.volume / 255 * 2);
   }
 });
 
 AFRAME.registerComponent("scale-audio-feedback", {
   schema: {
-    analyserSrc: { type: "selector" },
-
     minScale: { default: 1 },
     maxScale: { default: 2 }
   },
 
-  init() {
-    this.onAudioFrequencyChange = this.onAudioFrequencyChange.bind(this);
-  },
-
-  play() {
-    (this.data.analyserSrc || this.el).addEventListener("audioFrequencyChange", this.onAudioFrequencyChange);
-  },
-
-  pause() {
-    (this.data.analyserSrc || this.el).removeEventListener("audioFrequencyChange", this.onAudioFrequencyChange);
-  },
-
-  onAudioFrequencyChange(e) {
+  tick() {
     // TODO: come up with a cleaner way to handle this.
     // bone's are "hidden" by scaling them with bone-visibility, without this we would overwrite that.
     if (!this.el.object3D.visible) return;
+
     const { minScale, maxScale } = this.data;
-    this.el.object3D.scale.setScalar(minScale + (maxScale - minScale) * e.detail.volume / 255);
+
+    const audioAnalyser = this.el.components["networked-audio-analyser"];
+
+    if (!audioAnalyser) return;
+
+    this.el.object3D.scale.setScalar(minScale + (maxScale - minScale) * audioAnalyser.volume / 255);
   }
 });
