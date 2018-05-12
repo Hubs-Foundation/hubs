@@ -4,8 +4,8 @@ const PI_4 = Math.PI / 4;
 AFRAME.registerComponent("look-on-mobile", {
   schema: {
     enabled: { default: false },
-    horizontalLookSpeedRatio: { default: 0.4 }, // motion of polyfill object / motion of camera
-    verticalLookSpeedRatio: { default: 0.4 } // motion of polyfill object / motion of camera
+    horizontalLookSpeedRatio: { default: 0.4 }, // motion applied to camera / motion of polyfill object
+    verticalLookSpeedRatio: { default: 0.4 } // motion applied to camera / motion of polyfill object
   },
 
   init() {
