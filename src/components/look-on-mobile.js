@@ -38,7 +38,6 @@ AFRAME.registerComponent("look-on-mobile", {
   tick(t, dt) {
     if (!this.data.enabled) return;
     const scene = this.el.sceneEl;
-    const rotation = this.rotation;
     const hmdEuler = this.hmdEuler;
     const pitchObject = this.lookControls.pitchObject;
     const yawObject = this.lookControls.yawObject;

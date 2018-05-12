@@ -2,7 +2,6 @@ const TARGET_TYPE_NONE = 1;
 const TARGET_TYPE_INTERACTABLE = 2;
 const TARGET_TYPE_UI = 4;
 const TARGET_TYPE_INTERACTABLE_OR_UI = TARGET_TYPE_INTERACTABLE | TARGET_TYPE_UI;
-const virtualJoystickCutoff = 0.8;
 
 AFRAME.registerComponent("cursor-controller", {
   dependencies: ["raycaster", "line"],
@@ -277,7 +276,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
   },
 
-  handleTouchEnd: function(touch) {
+  handleTouchEnd: function() {
     // TODO: Should we emit cursor-release just in case
     // hasPointingDevice changed just before this function call?
     if (!this.isMobile || this.hasPointingDevice) return;
