@@ -63,6 +63,7 @@ import "./components/networked-avatar";
 import "./components/css-class";
 import "./components/scene-shadow";
 import "./components/avatar-replay";
+import "./components/pinch-to-move";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -120,10 +121,8 @@ import registerTelemetry from "./telemetry";
 import { generateDefaultProfile, generateRandomName } from "./utils/identity.js";
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
-import Pinch from "./utils/pinch.js";
-import PinchToMove from "./utils/pinch-to-move.js";
-import LookControlsToggle from "./utils/look-controls-toggle.js";
-import PointerLookControls from "./utils/pointer-look-controls.js";
+import TouchEventsHandler from "./utils/touch-events-handler.js";
+window.APP.touchEventsHandler = new TouchEventsHandler();
 
 function qsTruthy(param) {
   const val = qs[param];
@@ -229,8 +228,6 @@ const onReady = async () => {
   const enterScene = async (mediaStream, enterInVR, hubId) => {
     const scene = document.querySelector("a-scene");
     scene.renderer.sortObjects = true;
-    const pinch = new Pinch(scene);
-    const pinchToMove = new PinchToMove(scene);
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("canvas").classList.remove("blurred");
     scene.render();
@@ -242,9 +239,13 @@ const onReady = async () => {
     AFRAME.registerInputActions(inGameActions, "default");
 
     const camera = document.querySelector("#player-camera");
+    const registerLookControls = e => {
+      if (e.detail.name !== "look-controls") return;
+      window.APP.touchEventsHandler.registerLookControls(camera.components["look-controls"]);
+      camera.removeEventListener("commponentinitialized", registerLookControls);
+    };
+    camera.addEventListener("componentinitialized", registerLookControls);
     camera.setAttribute("look-controls", "touchEnabled", false);
-    window.PointerLookControls = new PointerLookControls(camera);
-    window.LookControlsToggle = new LookControlsToggle(camera, window.PointerLookControls);
 
     scene.setAttribute("networked-scene", {
       room: hubId,

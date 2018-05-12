@@ -39,14 +39,14 @@ AFRAME.registerComponent("cursor-controller", {
     this.origin = new THREE.Vector3();
     this.direction = new THREE.Vector3();
     this.controllerQuaternion = new THREE.Quaternion();
-    this.activeTouch = null;
 
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
-    this._handleTouchStart = this._handleTouchStart.bind(this);
-    this._handleSingleTouchStart = this._handleSingleTouchStart.bind(this);
-    this._handleTouchMove = this._handleTouchMove.bind(this);
-    this._handleTouchEnd = this._handleTouchEnd.bind(this);
+    window.APP.touchEventsHandler.registerCursor(this);
+    window.APP.touchEventsHandler.registerPinchEmitter(this.el);
+    this.handleTouchStart = this.handleTouchStart.bind(this);
+    this.handleTouchMove = this.handleTouchMove.bind(this);
+    this.handleTouchEnd = this.handleTouchEnd.bind(this);
     this._handleMouseDown = this._handleMouseDown.bind(this);
     this._handleMouseMove = this._handleMouseMove.bind(this);
     this._handleMouseUp = this._handleMouseUp.bind(this);
@@ -78,10 +78,6 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   play: function() {
-    document.addEventListener("touchstart", this._handleTouchStart);
-    document.addEventListener("touchmove", this._handleTouchMove);
-    document.addEventListener("touchend", this._handleTouchEnd);
-    document.addEventListener("touchcancel", this._handleTouchEnd);
     document.addEventListener("mousedown", this._handleMouseDown);
     document.addEventListener("mousemove", this._handleMouseMove);
     document.addEventListener("mouseup", this._handleMouseUp);
@@ -103,10 +99,6 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   pause: function() {
-    document.removeEventListener("touchstart", this._handleTouchStart);
-    document.removeEventListener("touchmove", this._handleTouchMove);
-    document.removeEventListener("touchend", this._handleTouchEnd);
-    document.removeEventListener("touchcancel", this._handleTouchEnd);
     document.removeEventListener("mousedown", this._handleMouseDown);
     document.removeEventListener("mousemove", this._handleMouseMove);
     document.removeEventListener("mouseup", this._handleMouseUp);
@@ -231,8 +223,12 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   _setLookControlsEnabled(enabled) {
-    if (window.LookControlsToggle) {
-      window.LookControlsToggle.toggle(enabled, this);
+    const lookControls = this.data.camera.components["look-controls"];
+    if (!lookControls) return;
+    if (enabled) {
+      lookControls.play();
+    } else {
+      lookControls.pause();
     }
   },
 
@@ -254,19 +250,8 @@ AFRAME.registerComponent("cursor-controller", {
     this._setCursorVisibility(true);
   },
 
-  _handleTouchStart: function(e) {
-    if (!this.isMobile || this.hasPointingDevice) {
-      return;
-    }
-
-    for (let i = 0; i < e.touches.length; i++) {
-      this._handleSingleTouchStart(e.touches[i]);
-    }
-  },
-
-  _handleSingleTouchStart: function(touch) {
-    if (this.activeTouch || touch.clientY / window.innerHeight >= virtualJoystickCutoff) return;
-
+  handleTouchStart: function(touch) {
+    if (!this.isMobile || this.hasPointingDevice) return;
     // Update the ray and cursor positions
     const raycasterComp = this.el.components.raycaster;
     const raycaster = raycasterComp.raycaster;
@@ -280,42 +265,24 @@ AFRAME.registerComponent("cursor-controller", {
     if (intersections.length === 0 || intersections[0].distance >= this.data.maxDistance) {
       return;
     }
-    this.activeTouch = touch;
     cursor.object3D.position.copy(intersections[0].point);
     // Cursor position must be synced to physics before constraint is created
     cursor.components["static-body"].syncToPhysics();
-    this.activeTouch.isUsedByCursor = true;
-    cursor.emit("touch-used-by-cursor", this.activeTouch);
     cursor.emit("cursor-grab", {});
+    return true;
   },
 
-  _handleTouchMove: function(e) {
+  handleTouchMove: function(touch) {
+    if (!this.isMobile || this.hasPointingDevice) return;
+    this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
+  },
+
+  handleTouchEnd: function(touch) {
+    // TODO: Should we emit cursor-release just in case
+    // hasPointingDevice changed just before this function call?
     if (!this.isMobile || this.hasPointingDevice) return;
 
-    for (let i = 0; i < e.touches.length; i++) {
-      const touch = e.touches[i];
-      if (
-        (!this.activeTouch && touch.clientY / window.innerHeight < virtualJoystickCutoff) ||
-        (this.activeTouch && touch.identifier === this.activeTouch.identifier)
-      ) {
-        this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
-        return;
-      }
-    }
-  },
-
-  _handleTouchEnd: function(e) {
-    if (
-      !this.isMobile ||
-      this.hasPointingDevice ||
-      !this.activeTouch ||
-      Array.prototype.some.call(e.touches, touch => touch.identifier === this.activeTouch.identifier)
-    ) {
-      return;
-    }
-
     this.data.cursor.emit("cursor-release", {});
-    this.activeTouch = null;
   },
 
   _handleMouseDown: function() {
