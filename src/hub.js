@@ -64,6 +64,7 @@ import "./components/css-class";
 import "./components/scene-shadow";
 import "./components/avatar-replay";
 import "./components/pinch-to-move";
+import "./components/look-on-mobile";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -242,10 +243,15 @@ const onReady = async () => {
     const registerLookControls = e => {
       if (e.detail.name !== "look-controls") return;
       window.APP.touchEventsHandler.registerLookControls(camera.components["look-controls"]);
-      camera.removeEventListener("commponentinitialized", registerLookControls);
+      camera.removeEventListener("componentinitialized", registerLookControls);
+      scene.components["look-on-mobile"].registerLookControls(camera.components["look-controls"]);
+      scene.setAttribute("look-on-mobile", "enabled", true);
     };
     camera.addEventListener("componentinitialized", registerLookControls);
-    camera.setAttribute("look-controls", "touchEnabled", false);
+    camera.setAttribute("look-controls", {
+      touchEnabled: false,
+      hmdEnabled: false
+    });
 
     scene.setAttribute("networked-scene", {
       room: hubId,

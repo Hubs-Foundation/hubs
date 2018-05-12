@@ -70,7 +70,6 @@ export default class TouchEventsHandler {
     if (touch.clientY / window.innerHeight >= VIRTUAL_JOYSTICK_HEIGHT) return;
     if (!this.touchReservedForCursor && this.cursor.handleTouchStart(touch)) {
       this.touchReservedForCursor = touch;
-      return;
     }
     this.touches.push(touch);
   }
@@ -146,15 +145,15 @@ export default class TouchEventsHandler {
   }
 
   singleTouchEnd(touch) {
-    const touchIndex = this.touches.findIndex(t => touch.identifier === t.identifier);
-    if (touchIndex === -1) return;
-    this.touches.splice(touchIndex, 1);
-
     if (this.touchReservedForCursor && touch.identifier === this.touchReservedForCursor.identifier) {
       this.cursor.handleTouchEnd(touch);
       this.touchReservedForCursor = null;
       return;
     }
+
+    const touchIndex = this.touches.findIndex(t => touch.identifier === t.identifier);
+    if (touchIndex === -1) return;
+    this.touches.splice(touchIndex, 1);
 
     const pinchIndex = this.touchesReservedForPinch.findIndex(t => touch.identifier === t.identifier);
     if (pinchIndex !== -1) {
