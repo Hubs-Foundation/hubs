@@ -23,6 +23,25 @@ class LinkRoot extends Component {
     failedAtLeastOnce: false
   };
 
+  componentWillMount = () => {
+    document.addEventListener("keydown", this.handleKeyDown);
+  };
+
+  componentWillUnmount = () => {
+    document.removeEventListener("keydown", this.handleKeyDown);
+  };
+
+  handleKeyDown = e => {
+    if (e.keyCode < 48 || e.keyCode > 57) {
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    this.addDigit(e.keyCode - 48);
+  };
+
   addDigit = digit => {
     if (this.state.enteredDigits.length >= MAX_DIGITS) return;
     const newDigits = `${this.state.enteredDigits}${digit}`;
