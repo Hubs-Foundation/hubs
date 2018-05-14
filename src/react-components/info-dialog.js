@@ -221,21 +221,18 @@ class InfoDialog extends Component {
       case InfoDialog.dialogTypes.webvr_recommend:
         dialogTitle = "Enter in VR";
         dialogBody = (
-          <span>
-            To enter Hubs with Oculus or SteamVR, you can use Firefox.
-            <p />
+          <div>
+            <p>To enter Hubs with Oculus or SteamVR, you can use Firefox.</p>
             <a className="info-dialog--action-button" href="https://www.mozilla.org/firefox">
               Download Firefox
             </a>
-            <p />
-            <span style={{ fontSize: "0.8em" }}>
+            <p style={{ fontSize: "0.8em" }}>
               For a full list of browsers with experimental VR support, visit{" "}
               <a href="https://webvr.rocks" target="_blank" rel="noopener noreferrer">
                 WebVR Rocks
               </a>.
-            </span>
-            <p />
-          </span>
+            </p>
+          </div>
         );
         break;
       case InfoDialog.dialogTypes.link:
