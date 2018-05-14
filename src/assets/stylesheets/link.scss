@@ -114,8 +114,29 @@ a {
   text-align: center;
   font-size: 3.0em;
   color: white;
+  display: flex;
+  justify-content: center;
 }
 
 :local(.digit) {
   margin: 8px;
+}
+
+:local(.digit-input) {
+  outline-style: none;
+  appearance:textfield;
+  -moz-appearance:textfield;
+  -webkit-appearance:textfield;
+  background: transparent;
+  color: white;
+  margin: 0;
+  font-size: 64pt;
+  border: 0;
+  width: 225px;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+:local(.digit-input::placeholder) {
+  letter-spacing: 0;
 }

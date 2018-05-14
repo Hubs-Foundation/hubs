@@ -19,16 +19,16 @@ class LinkRoot extends Component {
   };
 
   state = {
-    enteredDigits: [],
+    enteredDigits: "",
     failedAtLeastOnce: false
   };
 
   addDigit = digit => {
     if (this.state.enteredDigits.length >= MAX_DIGITS) return;
-    const newDigits = [...this.state.enteredDigits, digit];
+    const newDigits = `${this.state.enteredDigits}${digit}`;
 
     if (newDigits.length === MAX_DIGITS) {
-      this.attemptLink(newDigits.join(""));
+      this.attemptLink(newDigits);
     }
 
     this.setState({ enteredDigits: newDigits });
@@ -36,7 +36,7 @@ class LinkRoot extends Component {
 
   removeDigit = () => {
     if (this.state.enteredDigits.length === 0) return;
-    this.setState({ enteredDigits: [...this.state.enteredDigits.slice(0, -1)] });
+    this.setState({ enteredDigits: this.state.enteredDigits.substring(0, -1) });
   };
 
   attemptLink = code => {
@@ -58,7 +58,7 @@ class LinkRoot extends Component {
       })
       .catch(e => {
         console.error(e);
-        this.setState({ failedAtLeastOnce: true, enteredDigits: [] });
+        this.setState({ failedAtLeastOnce: true, enteredDigits: "" });
       });
   };
 
@@ -82,11 +82,15 @@ class LinkRoot extends Component {
             </div>
 
             <div className={styles.enteredDigits}>
-              {[0, 1, 2, 3].map(d => (
-                <span className={styles.digit} key={`digit_${d}`}>
-                  {this.state.enteredDigits.length > d ? this.state.enteredDigits[d] : "-"}
-                </span>
-              ))}
+              <input
+                className={styles.digitInput}
+                type="number"
+                value={this.state.enteredDigits}
+                onChange={ev => {
+                  this.setState({ enteredDigits: ev.target.value });
+                }}
+                placeholder="- - - -"
+              />
             </div>
 
             <div className={styles.keypad}>
