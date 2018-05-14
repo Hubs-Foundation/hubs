@@ -36,11 +36,35 @@ a {
 
 :local(.link-contents) {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   color: $grey-text;
   font-size: 1.4em;
+
+  @media (max-width: 690px) {
+    flex-direction: column;
+  }
+}
+
+:local(.entered-footer) {
+  margin: 16px;
+  font-size: 0.8em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  @media (max-width: 690px) {
+    display: none;
+  }
+}
+
+:local(.entered-contents) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 :local(.code-loading-panel) {
@@ -63,6 +87,15 @@ a {
 :local(.footer) {
   margin: 16px;
   font-size: 0.8em;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  @media (min-width: 690px) , (max-height: 650px) {
+    display: none;
+  }
 }
 
 :local(.keypad) {
@@ -144,3 +177,4 @@ a {
 :local(.digit-input::placeholder) {
   letter-spacing: 0;
 }
+

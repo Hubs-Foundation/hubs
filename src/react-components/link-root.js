@@ -54,8 +54,9 @@ class LinkRoot extends Component {
   };
 
   removeDigit = () => {
-    if (this.state.enteredDigits.length === 0) return;
-    this.setState({ enteredDigits: this.state.enteredDigits.substring(0, -1) });
+    const enteredDigits = this.state.enteredDigits;
+    if (enteredDigits.length === 0) return;
+    this.setState({ enteredDigits: enteredDigits.substring(0, enteredDigits.length - 1) });
   };
 
   attemptLink = code => {
@@ -96,20 +97,34 @@ class LinkRoot extends Component {
               </div>
             )}
 
-            <div className={styles.header}>
-              <FormattedMessage id={this.state.failedAtLeastOnce ? "link.try_again" : "link.link_page_header"} />
-            </div>
+            <div className={styles.enteredContents}>
+              <div className={styles.header}>
+                <FormattedMessage id={this.state.failedAtLeastOnce ? "link.try_again" : "link.link_page_header"} />
+              </div>
 
-            <div className={styles.enteredDigits}>
-              <input
-                className={styles.digitInput}
-                type="number"
-                value={this.state.enteredDigits}
-                onChange={ev => {
-                  this.setState({ enteredDigits: ev.target.value });
-                }}
-                placeholder="- - - -"
-              />
+              <div className={styles.enteredDigits}>
+                <input
+                  className={styles.digitInput}
+                  type="number"
+                  value={this.state.enteredDigits}
+                  onChange={ev => {
+                    this.setState({ enteredDigits: ev.target.value });
+                  }}
+                  placeholder="- - - -"
+                />
+              </div>
+
+              <div className={styles.enteredFooter}>
+                <span>
+                  <FormattedMessage id="link.dont_have_a_code" />
+                </span>{" "}
+                <span>
+                  <a href="/">
+                    <FormattedMessage id="link.create_a_room" />
+                  </a>
+                </span>
+                <img className={styles.footerImage} src="../assets/images/logo.svg" />
+              </div>
             </div>
 
             <div className={styles.keypad}>
@@ -148,9 +163,8 @@ class LinkRoot extends Component {
                   <FormattedMessage id="link.create_a_room" />
                 </a>
               </span>
+              <img className={styles.footerImage} src="../assets/images/logo.svg" />
             </div>
-
-            <img className={styles.footerImage} src="../assets/images/logo.svg" />
           </div>
         </div>
       </IntlProvider>
