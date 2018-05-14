@@ -123,7 +123,7 @@ class LinkRoot extends Component {
                     <FormattedMessage id="link.create_a_room" />
                   </a>
                 </span>
-                <img className={styles.footerImage} src="../assets/images/logo.svg" />
+                <img className={styles.entryFooterImage} src="../assets/images/logo.svg" />
               </div>
             </div>
 
