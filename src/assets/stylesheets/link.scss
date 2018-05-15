@@ -124,7 +124,7 @@ a {
 }
 
 :local(.keypad-button):active {
-  background-color: #333333;
+  background-color: $darker-grey;
 }
 
 :local(.keypad-zero-button) {
@@ -136,16 +136,11 @@ a {
   border: 6px $dark-grey solid;
 }
 
-:local(.keypad-backspace) {
-  border: none;
-}
-
-:local(.keypad-backspace):disabled {
+:local(.keypad-backspace) , :local(.keypad-backspace):disabled , :local(.keypad-backspace):active {
   border: none;
 }
 
 :local(.keypad-backspace):active {
-  border: none;
   background-color: transparent;
   color: $light-grey;
 }

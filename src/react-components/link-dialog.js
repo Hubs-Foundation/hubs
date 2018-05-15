@@ -30,9 +30,9 @@ class LinkDialog extends Component {
         <div>
           <FormattedMessage id="link.in_your_browser" />
         </div>
-        <div className={styles.domain}>
-          <FormattedMessage id="link.link_domain" />
-        </div>
+        <a href="https://hub.link" className={styles.domain} target="_blank" rel="noopener noreferrer">
+          hub.link
+        </a>
         <div>
           <FormattedMessage id="link.enter_code" />
         </div>

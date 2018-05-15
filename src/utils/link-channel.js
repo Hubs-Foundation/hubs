@@ -1,5 +1,7 @@
 import { generatePublicKeyAndEncryptedObject, generateKeys, decryptObject } from "./crypto";
 
+const LINK_ACTION_TIMEOUT = 10000;
+
 export default class LinkChannel {
   constructor(store) {
     this.store = store;
@@ -17,7 +19,7 @@ export default class LinkChannel {
   //
   // onFinished: A promise that, when resolved, indicates the code is no longer usable,
   // because it was either successfully used by the remote device or it has expired
-  // ("used" or "expired" is passed to the callback.)
+  // ("used" or "expired" is passed to the callback).
   generateCode = () => {
     return new Promise(resolve => {
       const onFinished = new Promise(finished => {
@@ -30,7 +32,7 @@ export default class LinkChannel {
           let readyToSend = false;
           let leftChannel = false;
 
-          const channel = this.socket.channel(`link:${code}`, { timeout: 10000 });
+          const channel = this.socket.channel(`link:${code}`, { timeout: LINK_ACTION_TIMEOUT });
 
           const leave = () => {
             if (!leftChannel) channel.leave();
@@ -97,7 +99,7 @@ export default class LinkChannel {
   // Promise resolves and passes payload of link source on successful link.
   attemptLink = code => {
     return new Promise((resolve, reject) => {
-      const channel = this.socket.channel(`link:${code}`, { timeout: 10000 });
+      const channel = this.socket.channel(`link:${code}`, { timeout: LINK_ACTION_TIMEOUT });
       let finished = false;
 
       generateKeys().then(({ publicKeyString, privateKey }) => {
@@ -114,16 +116,16 @@ export default class LinkChannel {
             setTimeout(() => {
               if (finished) return;
               channel.leave();
-              reject("no_response");
-            }, 10000);
+              reject(new Error("no_response"));
+            }, LINK_ACTION_TIMEOUT);
           } else if (numOccupants === 0) {
             // Nobody in this channel, probably a bad code.
             channel.leave();
-            reject("failed");
+            reject(new Error("failed"));
           } else {
             console.warn("link code channel already has 2 or more occupants, something fishy is going on.");
             channel.leave();
-            reject("in_use");
+            reject(new Error("in_use"));
           }
         });
 

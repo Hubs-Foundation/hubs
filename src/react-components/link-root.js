@@ -32,6 +32,7 @@ class LinkRoot extends Component {
   };
 
   handleKeyDown = e => {
+    // Number keys 0-9
     if (e.keyCode < 48 || e.keyCode > 57) {
       return;
     }
@@ -163,7 +164,7 @@ class LinkRoot extends Component {
                   <FormattedMessage id="link.create_a_room" />
                 </a>
               </span>
-              <img className={styles.footerImage} src="../assets/images/logo.svg" />
+              <img className={styles.footerImage} src="../assets/images/logo.svg" alt="Logo" />
             </div>
           </div>
         </div>
