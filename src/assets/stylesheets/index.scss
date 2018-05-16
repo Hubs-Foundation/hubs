@@ -86,8 +86,6 @@ body {
     }
 
     flex: 10;
-    padding: 1.5em 2.5em 1.5em 2.5em;
-    background-color: rgba(0, 0, 0, 0.85);
     text-align: center;
     display: flex;
     flex-direction: row;
@@ -146,11 +144,9 @@ body {
     display: none;
   }
 
-  padding: 1.5em 2.5em 1.5em 2.5em;
+  padding: 0.5em;
   background-color: rgba(0, 0, 0, 0.85);
   text-align: center;
-  min-height: 15px;
-  height: 15px;
   display: flex;
   flex-direction: row;
   justify-content: center;
