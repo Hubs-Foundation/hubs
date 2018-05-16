@@ -628,7 +628,7 @@ class UIRoot extends Component {
                 }
               />
             )}
-            <DeviceEntryButton onClick={this.attemptLink} />
+            <DeviceEntryButton onClick={this.attemptLink} isInVR={this.props.availableVREntryTypes.isInVR} />
             {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
               <div className="entry-panel__secondary" onClick={this.enterVR}>
                 <FormattedMessage id="entry.cardboard" />

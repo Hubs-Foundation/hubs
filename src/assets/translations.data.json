@@ -13,6 +13,7 @@
     "entry.device-medium": "Device",
     "entry.device-subtitle-desktop": "Standalone Headset or Phone",
     "entry.device-subtitle-mobile": "Mobile Headset or PC",
+    "entry.device-subtitle-vr": "Phone or PC",
     "entry.cardboard": "Enter on Google Cardboard",
     "entry.daydream-prefix": "Enter on ",
     "entry.daydream-medium": "Daydream",
