@@ -612,7 +612,9 @@ class UIRoot extends Component {
       this.state.entryStep === ENTRY_STEPS.start ? (
         <div className="entry-panel">
           <div className="entry-panel__button-container">
-            <TwoDEntryButton onClick={this.enter2D} />
+            {this.props.availableVREntryTypes.screen !== VR_DEVICE_AVAILABILITY.no && (
+              <TwoDEntryButton onClick={this.enter2D} />
+            )}
             {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
               <GenericEntryButton onClick={this.enterVR} />
             )}
