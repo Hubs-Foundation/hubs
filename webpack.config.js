@@ -3,6 +3,7 @@ require("dotenv").config();
 
 const fs = require("fs");
 const path = require("path");
+const URL = require("url");
 const selfsigned = require("selfsigned");
 const webpack = require("webpack");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
@@ -12,6 +13,9 @@ const WebpackPwaManifest = require("webpack-pwa-manifest");
 const _ = require("lodash");
 
 const SMOKE_PREFIX = "smoke-";
+const PUBLIC_PATH = process.env.GENERATE_SMOKE_TESTS && process.env.BASE_ASSETS_PATH
+    ? process.env.BASE_ASSETS_PATH.replace("://", `://${SMOKE_PREFIX}`)
+    : process.env.BASE_ASSETS_PATH || "";
 
 function createHTTPSConfig() {
   if (process.env.NODE_ENV === "production") {
@@ -84,10 +88,7 @@ const config = {
   output: {
     path: path.join(__dirname, "public"),
     filename: "assets/js/[name]-[chunkhash].js",
-    publicPath:
-      process.env.GENERATE_SMOKE_TESTS && process.env.BASE_ASSETS_PATH
-        ? process.env.BASE_ASSETS_PATH.replace("://", `://${SMOKE_PREFIX}`)
-        : process.env.BASE_ASSETS_PATH || ""
+    publicPath: PUBLIC_PATH
   },
   mode: "development",
   devtool: process.env.NODE_ENV === "production" ? "source-map" : "inline-source-map",
@@ -211,11 +212,11 @@ const config = {
       }
     ]),
     new WebpackPwaManifest({
-      filename: "[path][name]-[hash].webmanifest",
+      filename: "/[name]-[hash].webmanifest",
       inject: true,
       dir: "ltr",
       lang: "en",
-      name: "Mozilla Hubs",
+      name: "Hubs by Mozilla",
       short_name: "Hubs",
       description: "Join others in VR in Hubs by Mozilla, right in your browser.",
       display: "standalone",
@@ -223,27 +224,26 @@ const config = {
       start_url: "./?src=manifest",
       background_color: "#000",
       theme_color: "#000",
-      serviceworker: {
-        "src": "/sw.js",
-        "scope": "/",
-        "update_via_cache": 'none'
-      }
-      icons: [
-        {
-          src: path.resolve("src", "assets", "images", "icon.png"),
-          sizes: [
-            64
-          ],
-          purpose: "badge"
-        }
-      ],
-      ios: {
-        "apple-touch-icon": path.resolve("src", "assets", "images", "icon.png"),
-        "apple-touch-startup-image": path.resolve("src", "assets", "images", "icon.png"),
-        "apple-mobile-web-app-capable": "yes",
-        "apple-mobile-web-app-title": "Mozilla Hubs",
-        "apple-mobile-web-app-status-bar-style": "black"
-      }
+      // serviceworker: {
+      //   src: "/sw.js",
+      //   scope: "/",
+      //   update_via_cache: "none"
+      // },
+      // icons: [
+      //   {
+      //     src: URL.resolve(PUBLIC_PATH, "src", "assets", "images", "icon.png"),
+      //     destination: path.join(__dirname, "src", "assets", "images", "icons")
+      //     sizes: [64],
+      //     purpose: "badge"
+      //   }
+      // ],
+      // ios: {
+      //   "apple-touch-icon": URL.resolve(PUBLIC_PATH, "src", "assets", "images", "icon.png"),
+      //   "apple-touch-startup-image": URL.resolve(PUBLIC_PATH, "src", "assets", "images", "icon.png"),
+      //   "apple-mobile-web-app-capable": "yes",
+      //   "apple-mobile-web-app-title": "Hubs by Mozilla",
+      //   "apple-mobile-web-app-status-bar-style": "black"
+      // }
     }),
     new CopyWebpackPlugin([
       {
