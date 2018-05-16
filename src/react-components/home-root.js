@@ -99,6 +99,13 @@ class HomeRoot extends Component {
                 <img className="header-content__title__name" src="../assets/images/logo.svg" />
                 <div className="header-content__title__preview">preview</div>
               </div>
+              <div className="header-content__entry-code">
+                <div>
+                  <a className="header-content__entry-code__link" href="/link">
+                    <FormattedMessage id="home.have_entry_code" />
+                  </a>
+                </div>
+              </div>
               <div className="header-content__experiment">
                 <div className="header-content__experiment__container">
                   <img src="../assets/images/webvr_cube.svg" className="header-content__experiment__icon" />
@@ -130,6 +137,13 @@ class HomeRoot extends Component {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+            <div className="header-subtitle">
+              <div>
+                <a className="header-subtitle__link" href="/link">
+                  <FormattedMessage id="home.have_entry_code" />
+                </a>
               </div>
             </div>
             <div className="hero-content">
