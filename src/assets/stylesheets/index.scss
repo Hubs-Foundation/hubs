@@ -61,7 +61,6 @@ body {
 
   &__title {
     display: flex;
-    flex: 10;
 
     @media (max-width: 768px) {
       justify-content: center;
