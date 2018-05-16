@@ -39,7 +39,7 @@ EntryButton.propTypes = {
   prefixMessageId: PropTypes.string,
   mediumMessageId: PropTypes.string,
   subtitle: PropTypes.string,
-  isInVR: PropTypes.bool
+  isInHMD: PropTypes.bool
 };
 
 export const TwoDEntryButton = props => {
@@ -95,7 +95,7 @@ export const DeviceEntryButton = props => {
     mediumMessageId: "entry.device-medium"
   };
 
-  entryButtonProps.subtitle = entryButtonProps.isInVR
+  entryButtonProps.subtitle = entryButtonProps.isInHMD
     ? "entry.device-subtitle-vr"
     : mobiledetect.mobile() ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop";
 
