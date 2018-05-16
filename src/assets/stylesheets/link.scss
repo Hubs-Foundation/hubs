@@ -1,0 +1,181 @@
+@import 'shared';
+@import 'loader';
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: black;
+  color: white;
+}
+
+a {
+  color: white;
+}
+
+.link-root {
+  @extend %default-font;
+
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+
+  position: absolute;
+}
+
+:local(.link) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+:local(.link-contents) {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  color: $grey-text;
+  font-size: 1.4em;
+
+  @media (max-width: 690px) {
+    flex-direction: column;
+  }
+}
+
+:local(.entered-footer) {
+  margin: 16px;
+  font-size: 0.8em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  @media (max-width: 690px) {
+    display: none;
+  }
+}
+
+:local(.entered-contents) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+:local(.code-loading-panel) {
+  background: rgba(0.4, 0.4, 0.4, 0.85);
+}
+
+:local(.entry-footer-image) {
+  width: 200px;
+  margin: 12px;
+}
+
+
+:local(.footer-image) {
+  width: 200px;
+  margin: 12px;
+
+  @media (max-height: 719px) {
+    display: none;
+  }
+}
+
+:local(.header) {
+  margin: 16px;
+}
+
+:local(.footer) {
+  margin: 16px;
+  font-size: 0.8em;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  @media (min-width: 690px) , (max-height: 650px) {
+    display: none;
+  }
+}
+
+:local(.keypad) {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr;
+}
+
+:local(.keypad-button) {
+  @extend %big-icon-button;
+  font-size: 1.8em;
+  font-family: sans-serif;
+  border: 4px $light-grey solid;
+  border-radius: 128px;
+  min-width: 88px;
+  min-height: 88px;
+  cursor: pointer;
+  line-height: 68px;
+  margin: 8px;
+}
+
+:local(.keypad-button):active {
+  background-color: $darker-grey;
+}
+
+:local(.keypad-zero-button) {
+  grid-column: 2;
+}
+
+:local(.keypad-button):disabled {
+  color: $light-grey;
+  border: 6px $dark-grey solid;
+}
+
+:local(.keypad-backspace) , :local(.keypad-backspace):disabled , :local(.keypad-backspace):active {
+  border: none;
+}
+
+:local(.keypad-backspace):active {
+  background-color: transparent;
+  color: $light-grey;
+}
+
+:local(.entered-digits) {
+  font-face: monospace;
+  height: 100px;
+  width: 300px;
+  text-align: center;
+  font-size: 3.0em;
+  color: white;
+  display: flex;
+  justify-content: center;
+}
+
+:local(.digit) {
+  margin: 8px;
+}
+
+:local(.digit-input) {
+  outline-style: none;
+  appearance:textfield;
+  -moz-appearance:textfield;
+  -webkit-appearance:textfield;
+  background: transparent;
+  color: white;
+  margin: 0;
+  font-size: 64pt;
+  border: 0;
+  width: 225px;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+:local(.digit-input::placeholder) {
+  letter-spacing: 0;
+}
+

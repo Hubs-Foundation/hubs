@@ -1,8 +1,6 @@
 import "./assets/stylesheets/hub.scss";
 import moment from "moment-timezone";
-import uuid from "uuid/v4";
 import queryString from "query-string";
-import { Socket } from "phoenix";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
@@ -69,6 +67,8 @@ import ReactDOM from "react-dom";
 import React from "react";
 import UIRoot from "./react-components/ui-root";
 import HubChannel from "./utils/hub-channel";
+import LinkChannel from "./utils/link-channel";
+import { connectToReticulum } from "./utils/phoenix-utils";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
@@ -118,7 +118,6 @@ import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 
-import { generateDefaultProfile, generateRandomName } from "./utils/identity.js";
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
@@ -145,13 +144,7 @@ const concurrentLoadDetector = new ConcurrentLoadDetector();
 
 concurrentLoadDetector.start();
 
-// Always layer in any new default profile bits
-store.update({ activity: {}, settings: {}, profile: { ...generateDefaultProfile(), ...(store.state.profile || {}) } });
-
-// Regenerate name to encourage users to change it.
-if (!store.state.activity.hasChangedName) {
-  store.update({ profile: { displayName: generateRandomName() } });
-}
+store.init();
 
 function mountUI(scene, props = {}) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
@@ -181,13 +174,14 @@ function mountUI(scene, props = {}) {
 const onReady = async () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
+  const linkChannel = new LinkChannel(store);
 
   document.querySelector("canvas").classList.add("blurred");
   window.APP.scene = scene;
 
   registerNetworkSchemas();
 
-  let uiProps = {};
+  let uiProps = { linkChannel };
 
   mountUI(scene);
 
@@ -421,17 +415,7 @@ const onReady = async () => {
   const hubId = qs.hub_id || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
 
-  const socketProtocol = document.location.protocol === "https:" ? "wss:" : "ws:";
-  const [retHost, retPort] = (process.env.DEV_RETICULUM_SERVER || "").split(":");
-  const isProd = process.env.NODE_ENV === "production";
-  const socketPort = qs.phx_port || (isProd ? document.location.port : retPort) || "443";
-  const socketHost = qs.phx_host || (isProd ? document.location.hostname : retHost) || "";
-  const socketUrl = `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}/socket`;
-  console.log(`Phoenix Channel URL: ${socketUrl}`);
-
-  const socket = new Socket(socketUrl, { params: { session_id: uuid() } });
-  socket.connect();
-
+  const socket = connectToReticulum();
   const channel = socket.channel(`hub:${hubId}`, {});
 
   channel
@@ -452,6 +436,8 @@ const onReady = async () => {
 
       console.error(res);
     });
+
+  linkChannel.setSocket(socket);
 };
 
 document.addEventListener("DOMContentLoaded", onReady);
