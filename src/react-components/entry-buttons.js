@@ -57,7 +57,8 @@ export const GenericEntryButton = props => {
     ...props,
     iconSrc: GenericVREntryImg,
     prefixMessageId: "entry.generic-prefix",
-    mediumMessageId: "entry.generic-medium"
+    mediumMessageId: "entry.generic-medium",
+    subtitle: mobiledetect.mobile() ? null : "entry.generic-subtitle-desktop"
   };
 
   return <EntryButton {...entryButtonProps} />;
@@ -89,7 +90,7 @@ export const DeviceEntryButton = props => {
   const entryButtonProps = {
     ...props,
     iconSrc: DeviceEntryImg,
-    prefixMessageId: "entry.device-prefix",
+    prefixMessageId: mobiledetect.mobile() ? "entry.device-prefix-mobile" : "entry.device-prefix-desktop",
     mediumMessageId: "entry.device-medium",
     subtitle: mobiledetect.mobile() ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop"
   };

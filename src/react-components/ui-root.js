@@ -11,13 +11,7 @@ import screenfull from "screenfull";
 
 import { lang, messages } from "../utils/i18n";
 import AutoExitWarning from "./auto-exit-warning";
-import {
-  TwoDEntryButton,
-  DeviceEntryButton,
-  GenericEntryButton,
-  GearVREntryButton,
-  DaydreamEntryButton
-} from "./entry-buttons.js";
+import { TwoDEntryButton, DeviceEntryButton, GenericEntryButton, DaydreamEntryButton } from "./entry-buttons.js";
 import { ProfileInfoHeader } from "./profile-info-header.js";
 import ProfileEntryPanel from "./profile-entry-panel";
 import InfoDialog from "./info-dialog.js";
@@ -167,8 +161,6 @@ class UIRoot extends Component {
 
     if (this.props.forcedVREntryType === "daydream") {
       this.enterDaydream();
-    } else if (this.props.forcedVREntryType === "gearvr") {
-      this.enterGearVR();
     } else if (this.props.forcedVREntryType === "vr") {
       this.enterVR();
     } else if (this.props.forcedVREntryType === "2d") {
@@ -269,25 +261,10 @@ class UIRoot extends Component {
   };
 
   enterVR = async () => {
-    await this.performDirectEntryFlow(true);
-  };
-
-  enterGearVR = async () => {
-    if (this.props.availableVREntryTypes.gearvr === VR_DEVICE_AVAILABILITY.yes) {
+    if (this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.maybe) {
       await this.performDirectEntryFlow(true);
     } else {
-      this.exit();
-
-      // Launch via Oculus Browser
-      const location = window.location;
-      const qs = queryString.parse(location.search);
-      qs.vr_entry_type = "gearvr"; // Auto-choose 'gearvr' after landing in Oculus Browser
-
-      const ovrwebUrl =
-        `ovrweb://${location.protocol || "http:"}//${location.host}` +
-        `${location.pathname || ""}?${queryString.stringify(qs)}#${location.hash || ""}`;
-
-      window.location = ovrwebUrl;
+      this.setState({ infoDialogType: InfoDialog.dialogTypes.webvr_recommend });
     }
   };
 
@@ -567,7 +544,10 @@ class UIRoot extends Component {
               rel="noreferrer noopener"
             >
               WebRTC Data Channels
-            </a>, which is required to use Hubs.
+            </a>, which is required to use Hubs.<br />If you&quot;d like to use Hubs with Oculus or SteamVR, you can{" "}
+            <a href="https://www.mozilla.org/firefox" rel="noreferrer noopener">
+              Download Firefox
+            </a>.
           </div>
         );
       } else {
@@ -636,10 +616,6 @@ class UIRoot extends Component {
             {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
               <GenericEntryButton onClick={this.enterVR} />
             )}
-            <DeviceEntryButton onClick={this.attemptLink} />
-            {this.props.availableVREntryTypes.gearvr !== VR_DEVICE_AVAILABILITY.no && (
-              <GearVREntryButton onClick={this.enterGearVR} />
-            )}
             {this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
               <DaydreamEntryButton
                 onClick={this.enterDaydream}
@@ -650,6 +626,7 @@ class UIRoot extends Component {
                 }
               />
             )}
+            <DeviceEntryButton onClick={this.attemptLink} />
             {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
               <div className="entry-panel__secondary" onClick={this.enterVR}>
                 <FormattedMessage id="entry.cardboard" />
@@ -657,19 +634,6 @@ class UIRoot extends Component {
             )}
             {screenSharingCheckbox}
           </div>
-          {!mobiledetect.mobile() && (
-            <div className="entry-panel__webvr-link-container">
-              <FormattedMessage id="entry.webvr-link-preamble" />{" "}
-              <a
-                className="entry-panel__webvr-link"
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://webvr.rocks/"
-              >
-                <FormattedMessage id="entry.webvr-link" />
-              </a>
-            </div>
-          )}
         </div>
       ) : null;
 
@@ -700,12 +664,7 @@ class UIRoot extends Component {
             </div>
           </div>
           <div className="mic-grant-panel__next-container">
-            <button
-              className={classNames("mic-grant-panel__next", {
-                invisible: this.state.entryStep === ENTRY_STEPS.mic_grant
-              })}
-              onClick={this.onMicGrantButton}
-            >
+            <button className={classNames("mic-grant-panel__next")} onClick={this.onMicGrantButton}>
               <FormattedMessage id="audio.granted-next" />
             </button>
           </div>

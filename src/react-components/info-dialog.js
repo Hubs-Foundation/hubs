@@ -16,7 +16,8 @@ class InfoDialog extends Component {
     updates: Symbol("updates"),
     report: Symbol("report"),
     help: Symbol("help"),
-    link: Symbol("link")
+    link: Symbol("link"),
+    webvr_recommend: Symbol("webvr_recommend")
   };
   static propTypes = {
     dialogType: PropTypes.oneOf(Object.values(InfoDialog.dialogTypes)),
@@ -213,6 +214,23 @@ class InfoDialog extends Component {
             </p>
             <p>
               The <b>Bubble Toggle</b> hides avatars that enter your personal space.
+            </p>
+          </div>
+        );
+        break;
+      case InfoDialog.dialogTypes.webvr_recommend:
+        dialogTitle = "Enter in VR";
+        dialogBody = (
+          <div>
+            <p>To enter Hubs with Oculus or SteamVR, you can use Firefox.</p>
+            <a className="info-dialog--action-button" href="https://www.mozilla.org/firefox">
+              Download Firefox
+            </a>
+            <p style={{ fontSize: "0.8em" }}>
+              For a full list of browsers with experimental VR support, visit{" "}
+              <a href="https://webvr.rocks" target="_blank" rel="noopener noreferrer">
+                WebVR Rocks
+              </a>.
             </p>
           </div>
         );
