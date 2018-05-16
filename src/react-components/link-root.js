@@ -80,9 +80,9 @@ class LinkRoot extends Component {
         }
       })
       .catch(e => {
-        if (e instanceof Error && (e.message === "in_use" || e.message === "failed")) {
-          this.setState({ failedAtLeastOnce: true, enteredDigits: "" });
-        } else {
+        this.setState({ failedAtLeastOnce: true, enteredDigits: "" });
+
+        if (!(e instanceof Error && (e.message === "in_use" || e.message === "failed"))) {
           throw e;
         }
       });
