@@ -108,6 +108,7 @@ a {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr 1fr;
+  text-align: center;
 }
 
 :local(.keypad-button) {
@@ -170,7 +171,7 @@ a {
   margin: 0;
   font-size: 64pt;
   border: 0;
-  width: 225px;
+  width: 295px;
   letter-spacing: 0.08em;
   text-align: center;
 }
