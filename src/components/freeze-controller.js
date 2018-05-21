@@ -17,7 +17,7 @@ AFRAME.registerComponent("freeze-controller", {
 
   onToggle: function() {
     window.APP.store.update({ activity: { hasFoundFreeze: true } });
-    if (NAF.connection && NAF.connection.adapter) {
+    if (NAF.connection.adapter) {
       NAF.connection.adapter.toggleFreeze();
       if (NAF.connection.adapter.frozen) {
         this.el.addState("frozen");
