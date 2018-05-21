@@ -89,6 +89,8 @@ class LinkRoot extends Component {
   };
 
   render() {
+    // Note we use type "tel" for the input due to https://bugzilla.mozilla.org/show_bug.cgi?id=1005603
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.link}>
