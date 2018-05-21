@@ -2,7 +2,7 @@
 @import 'hub-create';
 @import 'info-dialog';
 
-$title-width: 350px;
+$header-section-width: 350px;
 
 * {
   box-sizing: border-box;
@@ -63,14 +63,14 @@ body {
 
   &__title {
     display: flex;
-    width: $title-width;
+    width: $header-section-width;
 
     @media (max-width: 768px) {
       justify-content: center;
     }
 
     @media (max-width: 1024px) {
-      flex: 1 1 350px;
+      flex: 1 1 $header-section-width;
     }
 
     &__name {
@@ -103,8 +103,8 @@ body {
 
   &__experiment {
     text-align: right;
-    flex: 1 1 350px;
-    width: 350px;
+    flex: 1 1 $header-section-width;
+    width: $header-section-width;
     color: $grey-text;
     font-size: 1.0em;
     font-weight: lighter;
