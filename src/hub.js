@@ -280,15 +280,11 @@ const onReady = async () => {
     });
 
     document.body.addEventListener("blocked", ev => {
-      if (NAF.connection.entities) {
-        NAF.connection.entities.removeEntitiesOfClient(ev.detail.clientId);
-      }
+      NAF.connection.entities.removeEntitiesOfClient(ev.detail.clientId);
     });
 
     document.body.addEventListener("unblocked", ev => {
-      if (NAF.connection.entities) {
-        NAF.connection.entities.completeSync(ev.detail.clientId);
-      }
+      NAF.connection.entities.completeSync(ev.detail.clientId);
     });
 
     if (!qsTruthy("offline")) {
