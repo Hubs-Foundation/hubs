@@ -35,15 +35,19 @@ const GENERIC_ENTRY_TYPE_DEVICE_BLACKLIST = [/cardboard/i];
 // Once in a compatible browser, we should assume it will work (if it doesn't, it's because they don't have the headset,
 // haven't installed the software, our guess about their phone was wrong, etc.)
 //
-// At the time of this writing there are three VR "entry types" that will be validated by this method:
+// At the time of this writing there are the following VR "entry types" that will be validated by this method:
 //
+// - screen: Enter "on-screen" in 2D
 // - generic: Generic WebVR (platform/OS agnostic indicator if a general 'Enter VR' option should be presented.)
 // - daydream: Google Daydream
 // - gearvr: Oculus GearVR
+// - cardboard: Google Cardboard
 //
+// This function also detects if the user is already in a headset, and returns the isInHMD key to be `true` if so.
 export async function getAvailableVREntryTypes() {
   const isSamsungBrowser = browser.name === "chrome" && navigator.userAgent.match(/SamsungBrowser/);
   const isOculusBrowser = navigator.userAgent.match(/Oculus/);
+  const isInHMD = isOculusBrowser;
 
   // This needs to be kept up-to-date with the latest browsers that can support VR and Hubs.
   // Checking for navigator.getVRDisplays always passes b/c of polyfill.
@@ -51,6 +55,7 @@ export async function getAvailableVREntryTypes() {
 
   const isDaydreamCapableBrowser = !!(isWebVRCapableBrowser && browser.name === "chrome" && !isSamsungBrowser);
 
+  const screen = isInHMD ? VR_DEVICE_AVAILABILITY.no : VR_DEVICE_AVAILABILITY.yes;
   let generic = mobiledetect.mobile() ? VR_DEVICE_AVAILABILITY.no : VR_DEVICE_AVAILABILITY.maybe;
   let cardboard = VR_DEVICE_AVAILABILITY.no;
 
@@ -65,7 +70,8 @@ export async function getAvailableVREntryTypes() {
 
   // For daydream detection, we first check if they are on an Android compatible device, and assume they
   // may support daydream *unless* this browser has WebVR capabilities, in which case we can do better.
-  let daydream = isMaybeDaydreamCompatibleDevice() ? VR_DEVICE_AVAILABILITY.maybe : VR_DEVICE_AVAILABILITY.no;
+  let daydream =
+    isMaybeDaydreamCompatibleDevice() && !isInHMD ? VR_DEVICE_AVAILABILITY.maybe : VR_DEVICE_AVAILABILITY.no;
 
   if (isWebVRCapableBrowser) {
     const displays = await navigator.getVRDisplays();
@@ -94,5 +100,5 @@ export async function getAvailableVREntryTypes() {
     }
   }
 
-  return { generic, gearvr, daydream, cardboard };
+  return { screen, generic, gearvr, daydream, cardboard, isInHMD };
 }

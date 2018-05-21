@@ -2,6 +2,8 @@
 @import 'hub-create';
 @import 'info-dialog';
 
+$title-width: 350px;
+
 * {
   box-sizing: border-box;
 }
@@ -53,18 +55,22 @@ body {
 
 .header-content {
   padding: 1.5em 2.5em 1.5em 2.5em;
-  background-color: rgba(0, 0, 0, 0.85);
+  background-color: $darkest-transparent;
   min-height: 90px;
   height: 90px;
   display: flex;
-  border-bottom: 2px solid #242424;
+  border-bottom: 1px solid $darkest-grey;
 
   &__title {
-    flex: 10;
     display: flex;
+    width: $title-width;
 
     @media (max-width: 768px) {
       justify-content: center;
+    }
+
+    @media (max-width: 1024px) {
+      flex: 1 1 350px;
     }
 
     &__name {
@@ -77,12 +83,32 @@ body {
     }
   }
 
+  &__entry-code {
+    @media (max-width: 1024px) {
+      display: none;
+    }
+
+    flex: 10;
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    &__link {
+      color: white;
+      text-decoration-color: $light-grey;
+    }
+  }
+
   &__experiment {
     text-align: right;
     flex: 1 1 350px;
+    width: 350px;
     color: $grey-text;
     font-size: 1.0em;
     font-weight: lighter;
+    white-space: nowrap;
 
     @media (max-width: 768px) {
       display: none;
@@ -114,6 +140,26 @@ body {
 	font-size: 0.8em;
       }
     }
+  }
+}
+
+.header-subtitle {
+  @media (min-width: 1024px) {
+    display: none;
+  }
+
+  padding: 8px;
+  background-color: $darkest-transparent;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 2px solid $darkest-grey;
+
+  &__link {
+    color: white;
+    text-decoration-color: $light-grey;
   }
 }
 
@@ -208,7 +254,7 @@ body {
 
 .footer-content {
   padding: 1em 2.25em 1em 2.25em;
-  background-color: rgba(0, 0, 0, 0.85);
+  background-color: $darkest-transparent;
   min-height: 80px;
   display: flex;
   border-top: 2px solid #242424;

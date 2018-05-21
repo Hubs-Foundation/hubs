@@ -6,10 +6,12 @@ import en from "react-intl/locale-data/en";
 import { lang, messages } from "../utils/i18n";
 import classNames from "classnames";
 import styles from "../assets/stylesheets/link.scss";
+import { disableiOSZoom } from "../utils/disable-ios-zoom";
 
 const MAX_DIGITS = 4;
 
 addLocaleData([...en]);
+disableiOSZoom();
 
 class LinkRoot extends Component {
   static propTypes = {
@@ -78,12 +80,17 @@ class LinkRoot extends Component {
         }
       })
       .catch(e => {
-        console.error(e);
         this.setState({ failedAtLeastOnce: true, enteredDigits: "" });
+
+        if (!(e instanceof Error && (e.message === "in_use" || e.message === "failed"))) {
+          throw e;
+        }
       });
   };
 
   render() {
+    // Note we use type "tel" for the input due to https://bugzilla.mozilla.org/show_bug.cgi?id=1005603
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.link}>
@@ -106,7 +113,8 @@ class LinkRoot extends Component {
               <div className={styles.enteredDigits}>
                 <input
                   className={styles.digitInput}
-                  type="number"
+                  type="tel"
+                  pattern="[0-9]*"
                   value={this.state.enteredDigits}
                   onChange={ev => {
                     this.setState({ enteredDigits: ev.target.value });
