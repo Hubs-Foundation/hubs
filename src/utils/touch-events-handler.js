@@ -1,5 +1,5 @@
 const VIRTUAL_JOYSTICK_HEIGHT = 0.8;
-const HORIZONTAL_LOOK_SPEED = 0.005;
+const HORIZONTAL_LOOK_SPEED = 0.006;
 const VERTICAL_LOOK_SPEED = 0.003;
 const PI_4 = Math.PI / 4;
 
@@ -63,11 +63,13 @@ export default class TouchEventsHandler {
   }
 
   handleTouchStart(e) {
-    Array.prototype.forEach.call(e.touches, this.singleTouchStart);
+    Array.prototype.forEach.call(e.changedTouches, this.singleTouchStart);
   }
 
   singleTouchStart(touch) {
-    if (touch.clientY / window.innerHeight >= VIRTUAL_JOYSTICK_HEIGHT) return;
+    if (touch.clientY / window.innerHeight >= VIRTUAL_JOYSTICK_HEIGHT) {
+      return;
+    }
     if (!this.touchReservedForCursor && this.cursor.handleTouchStart(touch)) {
       this.touchReservedForCursor = touch;
     }
@@ -88,7 +90,9 @@ export default class TouchEventsHandler {
       return;
     }
     if (touch.clientY / window.innerHeight >= VIRTUAL_JOYSTICK_HEIGHT) return;
-    if (!this.touches.some(t => touch.identifier === t.identifier)) return;
+    if (!this.touches.some(t => touch.identifier === t.identifier)) {
+      return;
+    }
 
     let pinchIndex = this.touchesReservedForPinch.findIndex(t => touch.identifier === t.identifier);
     if (pinchIndex !== -1) {
@@ -132,8 +136,8 @@ export default class TouchEventsHandler {
     const dX = touch.clientX - prevTouch.clientX;
     const dY = touch.clientY - prevTouch.clientY;
 
-    this.lookControls.yawObject.rotation.y -= dX * HORIZONTAL_LOOK_SPEED;
-    this.lookControls.pitchObject.rotation.x -= dY * VERTICAL_LOOK_SPEED;
+    this.lookControls.yawObject.rotation.y += dX * HORIZONTAL_LOOK_SPEED;
+    this.lookControls.pitchObject.rotation.x += dY * VERTICAL_LOOK_SPEED;
     this.lookControls.pitchObject.rotation.x = Math.max(
       -PI_4,
       Math.min(PI_4, this.lookControls.pitchObject.rotation.x)
@@ -145,15 +149,17 @@ export default class TouchEventsHandler {
   }
 
   singleTouchEnd(touch) {
+    const touchIndex = this.touches.findIndex(t => touch.identifier === t.identifier);
+    if (touchIndex === -1) {
+      return;
+    }
+    this.touches.splice(touchIndex, 1);
+
     if (this.touchReservedForCursor && touch.identifier === this.touchReservedForCursor.identifier) {
       this.cursor.handleTouchEnd(touch);
       this.touchReservedForCursor = null;
       return;
     }
-
-    const touchIndex = this.touches.findIndex(t => touch.identifier === t.identifier);
-    if (touchIndex === -1) return;
-    this.touches.splice(touchIndex, 1);
 
     const pinchIndex = this.touchesReservedForPinch.findIndex(t => touch.identifier === t.identifier);
     if (pinchIndex !== -1) {

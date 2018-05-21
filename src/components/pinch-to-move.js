@@ -1,6 +1,6 @@
 AFRAME.registerComponent("pinch-to-move", {
   schema: {
-    speed: { default: 0.35 }
+    speed: { default: 0.25 }
   },
   init() {
     this.onPinch = this.onPinch.bind(this);

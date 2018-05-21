@@ -25,6 +25,9 @@ AFRAME.registerComponent("cursor-controller", {
   init: function() {
     this.inVR = false;
     this.isMobile = AFRAME.utils.device.isMobile();
+    if (this.isMobile) {
+      this._setCursorVisibility(false);
+    }
     this.hasPointingDevice = false;
     this.currentTargetType = TARGET_TYPE_NONE;
     this.grabStarting = false;
@@ -268,6 +271,7 @@ AFRAME.registerComponent("cursor-controller", {
     // Cursor position must be synced to physics before constraint is created
     cursor.components["static-body"].syncToPhysics();
     cursor.emit("cursor-grab", {});
+    this._setCursorVisibility(false);
     return true;
   },
 
@@ -282,6 +286,7 @@ AFRAME.registerComponent("cursor-controller", {
     if (!this.isMobile || this.hasPointingDevice) return;
 
     this.data.cursor.emit("cursor-release", {});
+    this._setCursorVisibility(false);
   },
 
   _handleMouseDown: function() {
