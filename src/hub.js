@@ -273,16 +273,22 @@ const onReady = async () => {
           mediaStream.removeTrack(track);
         }
       }
-      NAF.connection.adapter.setLocalMediaStream(mediaStream);
+      if (NAF.connection.adapter && NAF.connection.adapter.setLocalMediaStream) {
+        NAF.connection.adapter.setLocalMediaStream(mediaStream);
+      }
       screenEntity.setAttribute("visible", sharingScreen);
     });
 
     document.body.addEventListener("blocked", ev => {
-      NAF.connection.entities.removeEntitiesOfClient(ev.detail.clientId);
+      if (NAF.connection.entities) {
+        NAF.connection.entities.removeEntitiesOfClient(ev.detail.clientId);
+      }
     });
 
     document.body.addEventListener("unblocked", ev => {
-      NAF.connection.entities.completeSync(ev.detail.clientId);
+      if (NAF.connection.entities) {
+        NAF.connection.entities.completeSync(ev.detail.clientId);
+      }
     });
 
     if (!qsTruthy("offline")) {
@@ -292,19 +298,25 @@ const onReady = async () => {
             store.update({ activity: { lastEnteredAt: moment().toJSON() } });
           });
         }
-        remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
+        if (NAF.connection.adapter) {
+          remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
+        }
       });
 
       document.body.addEventListener("clientConnected", () => {
-        remountUI({
-          occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
-        });
+        if (NAF.connection.adapter) {
+          remountUI({
+            occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
+          });
+        }
       });
 
       document.body.addEventListener("clientDisconnected", () => {
-        remountUI({
-          occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
-        });
+        if (NAF.connection.adapter) {
+          remountUI({
+            occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
+          });
+        }
       });
 
       scene.components["networked-scene"].connect().catch(connectError => {
@@ -332,7 +344,9 @@ const onReady = async () => {
       }
 
       if (mediaStream) {
-        NAF.connection.adapter.setLocalMediaStream(mediaStream);
+        if (NAF.connection.adapter && NAF.connection.adapter.setLocalMediaStream) {
+          NAF.connection.adapter.setLocalMediaStream(mediaStream);
+        }
 
         if (screenEntity) {
           screenEntity.setAttribute("visible", sharingScreen);

@@ -17,11 +17,13 @@ AFRAME.registerComponent("freeze-controller", {
 
   onToggle: function() {
     window.APP.store.update({ activity: { hasFoundFreeze: true } });
-    NAF.connection.adapter.toggleFreeze();
-    if (NAF.connection.adapter.frozen) {
-      this.el.addState("frozen");
-    } else {
-      this.el.removeState("frozen");
+    if (NAF.connection && NAF.connection.adapter) {
+      NAF.connection.adapter.toggleFreeze();
+      if (NAF.connection.adapter.frozen) {
+        this.el.addState("frozen");
+      } else {
+        this.el.removeState("frozen");
+      }
     }
   }
 });

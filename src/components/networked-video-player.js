@@ -37,6 +37,10 @@ AFRAME.registerComponent("networked-video-player", {
       document.body.appendChild(container);
     }
 
+    if (!NAF.connection.adapter || !NAF.connection.adapter.getMediaStream) {
+      return;
+    }
+
     const stream = await NAF.connection.adapter.getMediaStream(ownerId, "video");
     if (!stream) {
       return;
