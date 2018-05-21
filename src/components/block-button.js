@@ -17,18 +17,12 @@ AFRAME.registerComponent("block-button", {
   },
 
   block(clientId) {
-    if (NAF.connection.adapter) {
-      NAF.connection.adapter.block(clientId);
-    }
+    NAF.connection.adapter.block(clientId);
   },
 
   // Currently unused
   unblock(clientId) {
-    if (NAF.connection.adapter) {
-      NAF.connection.adapter.unblock(clientId);
-    }
-    if (NAF.connection.entities) {
-      NAF.connection.entities.completeSync(clientId);
-    }
+    NAF.connection.adapter.unblock(clientId);
+    NAF.connection.entities.completeSync(clientId);
   }
 });
