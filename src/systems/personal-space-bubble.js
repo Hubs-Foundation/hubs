@@ -1,3 +1,4 @@
+/* global TWEEN */
 const invaderPos = new AFRAME.THREE.Vector3();
 const bubblePos = new AFRAME.THREE.Vector3();
 
@@ -46,9 +47,12 @@ AFRAME.registerSystem("personal-space-bubble", {
     }
   },
 
-  update() {
+  update(oldData) {
     for (let i = 0; i < this.bubbles.length; i++) {
       this.bubbles[i].updateDebug();
+      if (oldData.enabled !== this.data.enabled) {
+        this.bubbles[i].showStateChange(this.data.enabled);
+      }
     }
 
     for (let i = 0; i < this.invaders.length; i++) {
@@ -81,6 +85,7 @@ AFRAME.registerSystem("personal-space-bubble", {
     // Loop through all of the space bubbles (usually one)
     for (let i = 0; i < this.bubbles.length; i++) {
       const bubble = this.bubbles[i];
+      let bubbleInvaded = false;
 
       bubblePos.setFromMatrixPosition(bubble.el.object3D.matrixWorld);
 
@@ -94,19 +99,21 @@ AFRAME.registerSystem("personal-space-bubble", {
         const radiusSum = bubble.data.radius + invader.data.radius;
         if (distanceSquared < radiusSum * radiusSum) {
           invader.setInvading(true);
+          bubbleInvaded = true;
         }
       }
+
+      bubble.setInvading(bubbleInvaded);
     }
   }
 });
 
 function createSphereGizmo(radius) {
-  const geometry = new THREE.SphereBufferGeometry(radius, 10, 10);
-  const wireframe = new THREE.WireframeGeometry(geometry);
-  const line = new THREE.LineSegments(wireframe);
-  line.material.opacity = 0.5;
-  line.material.transparent = true;
-  return line;
+  const geometry = new THREE.WireframeGeometry(new THREE.SphereBufferGeometry(radius, 10, 10));
+  const gizmo = new THREE.LineSegments(geometry);
+  gizmo.material.opacity = 0.5;
+  gizmo.material.transparent = true;
+  return gizmo;
 }
 
 // TODO: we need to come up with a more generic way of doing this as this is very specific to our avatars.
@@ -133,7 +140,7 @@ AFRAME.registerComponent("personal-space-invader", {
     radius: { type: "number", default: 0.1 },
     useMaterial: { default: false },
     debug: { default: false },
-    invadingOpacity: { default: 0.3 }
+    invadingOpacity: { default: 0.1 }
   },
 
   init() {
@@ -177,13 +184,76 @@ AFRAME.registerComponent("personal-space-invader", {
   }
 });
 
+// TODO come up with better visuals than a wireframe sphere
+function createBubbleObject(radius) {
+  const material = new THREE.LineBasicMaterial({ color: 0x2f80ed });
+  const geometry = new THREE.WireframeGeometry(new THREE.SphereBufferGeometry(radius, 20, 20));
+  const sphere = new THREE.LineSegments(geometry, material);
+  material.transparent = true;
+  return sphere;
+}
+
 AFRAME.registerComponent("personal-space-bubble", {
   schema: {
     radius: { type: "number", default: 0.8 },
+    invadeIndicatorCooldown: { type: "number", default: 5000 },
     debug: { default: false }
   },
   init() {
+    this.bubble = createBubbleObject(this.data.radius);
+    this.el.setObject3D("bubble", this.bubble);
+
+    // Only shown when state is toggled or personal space is invaded
+    this.setBubbleVisibility(false);
+
+    this.bubbleOffTween = new TWEEN.Tween(this.bubble.scale)
+      .to({ x: 0.001, y: 0.001, z: 0.001 }, 500)
+      .easing(TWEEN.Easing.Quadratic.In)
+      .onComplete(() => (this.bubble.visible = false));
+
+    this.fadeOutTween = new TWEEN.Tween(this.bubble.material)
+      .to({ opacity: 0 }, 250)
+      .delay(300)
+      .onComplete(() => (this.bubble.visible = false));
+
+    this.bubbleOnTween = new TWEEN.Tween(this.bubble.scale)
+      .to({ x: 1, y: 1, z: 1 }, 600)
+      .easing(TWEEN.Easing.Elastic.InOut)
+      .chain(this.fadeOutTween);
+
+    this.lastUninvadeTime = 0;
+
     this.system.registerBubble(this);
+  },
+
+  setBubbleVisibility(visible) {
+    this.bubble.visible = visible;
+    this.bubble.material.opacity = visible ? 0.5 : 0.0;
+  },
+
+  showStateChange(enabled) {
+    // Bubble will be hidden again at the end of on/off tweens
+    this.setBubbleVisibility(true);
+    if (enabled) {
+      this.bubbleOffTween.stop();
+      this.bubbleOnTween.start();
+    } else {
+      this.bubbleOnTween.stop();
+      this.bubbleOffTween.start();
+    }
+  },
+
+  setInvading(invading) {
+    const now = performance.now();
+    // Flash the bubble breifly on invading if it has been long enough since the last bubble invasion
+    if (invading && !this.wasInvading && now - this.lastUninvadeTime >= this.data.invadeIndicatorCooldown) {
+      this.fadeOutTween.stop();
+      this.setBubbleVisibility(true);
+      this.fadeOutTween.start();
+    } else if (!invading && this.wasInvading) {
+      this.lastUninvadeTime = now;
+    }
+    this.wasInvading = invading;
   },
 
   update() {

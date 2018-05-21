@@ -256,7 +256,6 @@
                 class="camera"
                 camera
                 position="0 1.6 0"
-                personal-space-bubble="radius: 0.4"
             >
                 <a-entity
                     id="gaze-teleport"
@@ -329,6 +328,7 @@
 
                 <template data-selector=".Neck">
                     <a-entity>
+                        <a-entity personal-space-bubble="radius: 1" position="0 -0.3 0"></a-entity>
                         <a-entity class="nametag" visible="false" text ></a-entity>
                     </a-entity>
                 </template>
