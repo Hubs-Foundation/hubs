@@ -69,6 +69,7 @@ import UIRoot from "./react-components/ui-root";
 import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
+import { disableiOSZoom } from "./utils/disable-ios-zoom";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
@@ -132,6 +133,8 @@ const isBotMode = qsTruthy("bot");
 if (!isBotMode) {
   registerTelemetry();
 }
+
+disableiOSZoom();
 
 AFRAME.registerInputBehaviour("trackpad_dpad4", trackpad_dpad4);
 AFRAME.registerInputBehaviour("joystick_dpad4", joystick_dpad4);

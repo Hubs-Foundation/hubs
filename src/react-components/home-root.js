@@ -35,28 +35,19 @@ class HomeRoot extends Component {
 
   loadHomeVideo = () => {
     const videoEl = document.querySelector("#background-video");
-    function initVideo() {
-      videoEl.playbackRate = 0.75;
-      videoEl.play();
-      function toggleVideo() {
-        // Play the video if the window/tab is visible.
-        if (!("hasFocus" in document)) {
-          return;
-        }
-        if (document.hasFocus()) {
-          videoEl.play();
-        } else {
-          videoEl.pause();
-        }
+    videoEl.playbackRate = 0.75;
+    function toggleVideo() {
+      // Play the video if the window/tab is visible.
+      if (document.hasFocus()) {
+        videoEl.play();
+      } else {
+        videoEl.pause();
       }
+    }
+    if ("hasFocus" in document) {
       document.addEventListener("visibilitychange", toggleVideo);
       window.addEventListener("focus", toggleVideo);
       window.addEventListener("blur", toggleVideo);
-    }
-    if (videoEl.readyState >= videoEl.HAVE_FUTURE_DATA) {
-      initVideo();
-    } else {
-      videoEl.addEventListener("canplay", initVideo);
     }
   };
 
@@ -99,6 +90,11 @@ class HomeRoot extends Component {
                 <img className="header-content__title__name" src="../assets/images/logo.svg" />
                 <div className="header-content__title__preview">preview</div>
               </div>
+              <div className="header-content__entry-code">
+                <a className="header-content__entry-code__link" href="/link" rel="nofollow">
+                  <FormattedMessage id="home.have_entry_code" />
+                </a>
+              </div>
               <div className="header-content__experiment">
                 <div className="header-content__experiment__container">
                   <img src="../assets/images/webvr_cube.svg" className="header-content__experiment__icon" />
@@ -130,6 +126,13 @@ class HomeRoot extends Component {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+            <div className="header-subtitle">
+              <div>
+                <a className="header-subtitle__link" href="/link" rel="nofollow">
+                  <FormattedMessage id="home.have_entry_code" />
+                </a>
               </div>
             </div>
             <div className="hero-content">
@@ -208,7 +211,7 @@ class HomeRoot extends Component {
               </div>
             </div>
           </div>
-          <video playsInline muted loop className="background-video" id="background-video">
+          <video playsInline muted loop autoPlay className="background-video" id="background-video">
             <source src={homeVideoWebM} type="video/webm" />
             <source src={homeVideoMp4} type="video/mp4" />
           </video>

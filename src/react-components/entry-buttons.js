@@ -38,7 +38,8 @@ EntryButton.propTypes = {
   iconSrc: PropTypes.string,
   prefixMessageId: PropTypes.string,
   mediumMessageId: PropTypes.string,
-  subtitle: PropTypes.string
+  subtitle: PropTypes.string,
+  isInHMD: PropTypes.bool
 };
 
 export const TwoDEntryButton = props => {
@@ -91,9 +92,12 @@ export const DeviceEntryButton = props => {
     ...props,
     iconSrc: DeviceEntryImg,
     prefixMessageId: mobiledetect.mobile() ? "entry.device-prefix-mobile" : "entry.device-prefix-desktop",
-    mediumMessageId: "entry.device-medium",
-    subtitle: mobiledetect.mobile() ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop"
+    mediumMessageId: "entry.device-medium"
   };
+
+  entryButtonProps.subtitle = entryButtonProps.isInHMD
+    ? "entry.device-subtitle-vr"
+    : mobiledetect.mobile() ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop";
 
   return <EntryButton {...entryButtonProps} />;
 };
