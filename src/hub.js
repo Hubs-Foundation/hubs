@@ -6,6 +6,7 @@ import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
 import "aframe-xr";
+import debug from "debug";
 import "./vendor/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
@@ -129,9 +130,17 @@ function qsTruthy(param) {
 }
 
 const isBotMode = qsTruthy("bot");
+const isTelemetryDisabled = qsTruthy("disable_telemetry");
+const isDebug = qsTruthy("debug");
+const logFilter = qs["log_filter"] || (isDebug && "naf-janus-adapter:*");
 
-if (!isBotMode) {
+if (!isBotMode && !isTelemetryDisabled) {
   registerTelemetry();
+}
+
+// NOTE: this needs to happen after a-frame's `utils/debug.js` file has been eval'ed because it overwrites any prior debug settings :/
+if (logFilter) {
+  debug.enable(logFilter);
 }
 
 disableiOSZoom();
@@ -240,6 +249,10 @@ const onReady = async () => {
       serverURL: process.env.JANUS_SERVER
     });
 
+    if (isDebug) {
+      scene.setAttribute("networked-scene", { debug: true });
+    }
+
     scene.setAttribute("stats-plus", false);
 
     if (isMobile || qsTruthy("mobile")) {
@@ -310,11 +323,16 @@ const onReady = async () => {
       scene.components["networked-scene"].connect().catch(connectError => {
         // hacky until we get return codes
         const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+        console.error(connectError);
         remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
         exitScene();
 
         return;
       });
+
+      if (isDebug) {
+        NAF.connection.adapter.session.options.verbose = true;
+      }
 
       if (isBotMode) {
         playerRig.setAttribute("avatar-replay", {
