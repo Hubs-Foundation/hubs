@@ -246,9 +246,12 @@ const onReady = async () => {
 
     scene.setAttribute("networked-scene", {
       room: hubId,
-      serverURL: process.env.JANUS_SERVER,
-      debug: isDebug
+      serverURL: process.env.JANUS_SERVER
     });
+
+    if (isDebug) {
+      scene.setAttribute("networked-scene", { debug: true });
+    }
 
     scene.setAttribute("stats-plus", false);
 
