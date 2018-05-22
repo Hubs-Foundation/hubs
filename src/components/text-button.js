@@ -1,3 +1,8 @@
+/**
+ * A button with text and haptics
+ * @namespace ui
+ * @component text-button
+ */
 AFRAME.registerComponent("text-button", {
   schema: {
     haptic: { type: "selector" },

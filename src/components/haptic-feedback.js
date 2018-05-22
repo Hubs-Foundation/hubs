@@ -4,6 +4,11 @@ const strengthForIntensity = {
   high: 1
 };
 
+/**
+ * Listens for haptic events and actuates hardware controllers accordingly
+ * @namespace user-input
+ * @component haptic-feedback
+ */
 AFRAME.registerComponent("haptic-feedback", {
   schema: {
     hapticEventName: { default: "haptic_pulse" }

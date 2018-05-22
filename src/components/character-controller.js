@@ -2,7 +2,12 @@ const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
 
-// Does not have any type of collisions yet.
+/**
+ * Avatar movement controller that listens to move, rotate and teleportation events and moves the avatar accordingly.
+ * The controller accounts for playspace offset and orientation and depends on the nav mesh system for translation.
+ * @namespace avatar
+ * @component character-controller
+ */
 AFRAME.registerComponent("character-controller", {
   schema: {
     groundAcc: { default: 5.5 },
@@ -136,7 +141,8 @@ AFRAME.registerComponent("character-controller", {
       // Reapply playspace (player rig) translation
       root.applyMatrix(trans);
 
-      // TODO: the above matrix trnsfomraitons introduce some floating point erros in scale, this reverts them to avoid spamming network with fake scale updates
+      // TODO: the above matrix trnsfomraitons introduce some floating point errors in scale, this reverts them to
+      // avoid spamming network with fake scale updates
       root.scale.copy(startScale);
 
       this.pendingSnapRotationMatrix.identity(); // Revert to identity

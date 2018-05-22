@@ -3,6 +3,10 @@ export const Layers = {
   reflection: 3
 };
 
+/**
+ * Sets layer flags on the underlying Object3D
+ * @component layers
+ */
 AFRAME.registerComponent("layers", {
   schema: {
     reflection: { type: "boolean", default: false }

@@ -1,3 +1,7 @@
+/**
+ * Hides entities based on the scene's quality mode
+ * @component hide-when-quality
+ */
 AFRAME.registerComponent("hide-when-quality", {
   schema: { type: "string", default: "low" },
 

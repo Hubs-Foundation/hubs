@@ -1,4 +1,7 @@
-// For use in environment gltf bundles to set scene shadow properties.
+/**
+ * For use in environment gltf bundles to set scene shadow properties.
+ * @component scene-shadow
+ */
 AFRAME.registerComponent("scene-shadow", {
   schema: {
     type: {

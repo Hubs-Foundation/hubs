@@ -1,3 +1,8 @@
+/**
+ * Instantiates GLTF models as specified in a bundle JSON.
+ * @namespace gltf
+ * @component gltf-bundle
+ */
 AFRAME.registerComponent("gltf-bundle", {
   schema: {
     src: { default: "" }
