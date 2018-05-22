@@ -1,6 +1,5 @@
 const PolyfillControls = AFRAME.utils.device.PolyfillControls;
 const PI_4 = Math.PI / 4;
-const PI_2 = Math.PI / 2;
 const TWOPI = Math.PI * 2;
 
 const abs = Math.abs;

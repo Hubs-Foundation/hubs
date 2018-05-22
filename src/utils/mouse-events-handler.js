@@ -109,7 +109,6 @@ export default class MouseEventsHandler {
       this.isMouseDown = false;
       this.dXBuffer = [];
       this.dYBuffer = [];
-    } else {
     }
   }
 }
