@@ -132,15 +132,9 @@ function qsTruthy(param) {
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
 const isDebug = qsTruthy("debug");
-const logFilter = qs["log_filter"] || (isDebug && "naf-janus-adapter:*");
 
 if (!isBotMode && !isTelemetryDisabled) {
   registerTelemetry();
-}
-
-// NOTE: this needs to happen after a-frame's `utils/debug.js` file has been eval'ed because it overwrites any prior debug settings :/
-if (logFilter) {
-  debug.enable(logFilter);
 }
 
 disableiOSZoom();
