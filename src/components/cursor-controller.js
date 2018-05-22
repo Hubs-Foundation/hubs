@@ -49,10 +49,13 @@ AFRAME.registerComponent("cursor-controller", {
     this.handleTouchStart = this.handleTouchStart.bind(this);
     this.handleTouchMove = this.handleTouchMove.bind(this);
     this.handleTouchEnd = this.handleTouchEnd.bind(this);
-    this._handleMouseDown = this._handleMouseDown.bind(this);
-    this._handleMouseMove = this._handleMouseMove.bind(this);
-    this._handleMouseUp = this._handleMouseUp.bind(this);
-    this._handleWheel = this._handleWheel.bind(this);
+
+    window.APP.mouseEventsHandler.registerCursor(this);
+    this.handleMouseDown = this.handleMouseDown.bind(this);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.handleMouseUp = this.handleMouseUp.bind(this);
+    this.handleMouseWheel = this.handleMouseWheel.bind(this);
+
     this._handleEnterVR = this._handleEnterVR.bind(this);
     this._handleExitVR = this._handleExitVR.bind(this);
     this._handlePrimaryDown = this._handlePrimaryDown.bind(this);
@@ -80,11 +83,6 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   play: function() {
-    document.addEventListener("mousedown", this._handleMouseDown);
-    document.addEventListener("mousemove", this._handleMouseMove);
-    document.addEventListener("mouseup", this._handleMouseUp);
-    document.addEventListener("wheel", this._handleWheel);
-
     window.addEventListener("enter-vr", this._handleEnterVR);
     window.addEventListener("exit-vr", this._handleExitVR);
 
@@ -101,11 +99,6 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   pause: function() {
-    document.removeEventListener("mousedown", this._handleMouseDown);
-    document.removeEventListener("mousemove", this._handleMouseMove);
-    document.removeEventListener("mouseup", this._handleMouseUp);
-    document.removeEventListener("wheel", this._handleWheel);
-
     window.removeEventListener("enter-vr", this._handleEnterVR);
     window.removeEventListener("exit-vr", this._handleExitVR);
 
@@ -226,11 +219,12 @@ AFRAME.registerComponent("cursor-controller", {
 
   _setLookControlsEnabled(enabled) {
     const lookControls = this.data.camera.components["look-controls"];
-    if (!lookControls) return;
-    if (enabled) {
-      lookControls.play();
-    } else {
-      lookControls.pause();
+    if (lookControls) {
+      if (enabled) {
+        lookControls.play();
+      } else {
+        lookControls.pause();
+      }
     }
   },
 
@@ -289,24 +283,27 @@ AFRAME.registerComponent("cursor-controller", {
     this._setCursorVisibility(false);
   },
 
-  _handleMouseDown: function() {
+  handleMouseDown: function() {
     if (this.isMobile && !this.inVR && !this.hasPointingDevice) return;
 
     if (this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI)) {
       this._setLookControlsEnabled(false);
       this.data.cursor.emit("cursor-grab", {});
+      return true;
     } else if (this.inVR || this.isMobile) {
       this._startTeleport();
+      return;
     }
+    return false;
   },
 
-  _handleMouseMove: function(e) {
+  handleMouseMove: function(e) {
     if (this.isMobile && !this.inVR && !this.hasPointingDevice) return;
 
     this.mousePos.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
   },
 
-  _handleMouseUp: function() {
+  handleMouseUp: function() {
     if (this.isMobile && !this.inVR && !this.hasPointingDevice) return;
 
     this._setLookControlsEnabled(true);
@@ -314,7 +311,7 @@ AFRAME.registerComponent("cursor-controller", {
     this._endTeleport();
   },
 
-  _handleWheel: function(e) {
+  handleMouseWheel: function(e) {
     if (this._isGrabbing()) {
       switch (e.deltaMode) {
         case e.DOM_DELTA_PIXEL:

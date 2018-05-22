@@ -89,8 +89,9 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   onMoveJoystickChanged(event, joystick) {
     const angle = joystick.angle.radian;
     const force = joystick.force < 1 ? joystick.force : 1;
-    const x = Math.cos(angle) * force * 0.85;
-    const z = Math.sin(angle) * force * 0.85;
+    const moveStrength = 0.85;
+    const x = Math.cos(angle) * force * moveStrength;
+    const z = Math.sin(angle) * force * moveStrength;
     this.moving = true;
     this.moveEvent.axis[0] = x;
     this.moveEvent.axis[1] = z;
@@ -107,9 +108,10 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     // Set pitch and yaw angles on right stick move
     const angle = joystick.angle.radian;
     const force = joystick.force < 1 ? joystick.force : 1;
+    const turnStrength = 0.5;
     this.rotating = true;
-    this.rotateYEvent.value = Math.cos(angle) * force * 0.5;
-    this.rotateXEvent.value = Math.sin(angle) * force * 0.5;
+    this.rotateYEvent.value = Math.cos(angle) * force * turnStrength;
+    this.rotateXEvent.value = Math.sin(angle) * force * turnStrength;
   },
 
   onLookJoystickEnd() {

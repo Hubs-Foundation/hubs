@@ -39,7 +39,6 @@ AFRAME.registerComponent("look-on-mobile", {
     this.hmdEuler = new THREE.Euler();
     this.prevX = this.hmdEuler.x;
     this.prevY = this.hmdEuler.y;
-    this.ticks = 0;
     this.pendingLookX = 0;
     this.onRotateX = this.onRotateX.bind(this);
     this.dXBuffer = [];

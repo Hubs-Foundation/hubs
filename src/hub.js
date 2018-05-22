@@ -123,7 +123,9 @@ import { generateDefaultProfile, generateRandomName } from "./utils/identity.js"
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 import TouchEventsHandler from "./utils/touch-events-handler.js";
+import MouseEventsHandler from "./utils/mouse-events-handler.js";
 window.APP.touchEventsHandler = new TouchEventsHandler();
+window.APP.mouseEventsHandler = new MouseEventsHandler();
 
 function qsTruthy(param) {
   const val = qs[param];
@@ -242,10 +244,14 @@ const onReady = async () => {
     const camera = document.querySelector("#player-camera");
     const registerLookControls = e => {
       if (e.detail.name !== "look-controls") return;
-      window.APP.touchEventsHandler.registerLookControls(camera.components["look-controls"]);
       camera.removeEventListener("componentinitialized", registerLookControls);
+
+      window.APP.touchEventsHandler.registerLookControls(camera.components["look-controls"]);
       scene.components["look-on-mobile"].registerLookControls(camera.components["look-controls"]);
       scene.setAttribute("look-on-mobile", "enabled", true);
+
+      window.APP.mouseEventsHandler.registerLookControls(camera.components["look-controls"]);
+      window.APP.mouseEventsHandler.setInverseMouseLook(qsTruthy("invertMouseLook"));
     };
     camera.addEventListener("componentinitialized", registerLookControls);
     camera.setAttribute("look-controls", {
