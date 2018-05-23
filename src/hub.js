@@ -6,7 +6,6 @@ import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
 import "aframe-xr";
-import debug from "debug";
 import "./vendor/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
