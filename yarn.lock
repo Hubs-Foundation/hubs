@@ -179,8 +179,8 @@ aframe-physics-extras@^0.1.3:
   resolved "https://registry.yarnpkg.com/aframe-physics-extras/-/aframe-physics-extras-0.1.3.tgz#803e2164fb96c0a80f2d1a81458f3277f262b130"
 
 "aframe-physics-system@github:infinitelee/aframe-physics-system#hubs/master":
-  version "3.1.1"
-  resolved "https://codeload.github.com/infinitelee/aframe-physics-system/tar.gz/80a722ddc9496e4fc867fb3662f61b389d0fd4ca"
+  version "3.1.2"
+  resolved "https://codeload.github.com/infinitelee/aframe-physics-system/tar.gz/db255b319ba3e51ef4f5ef3654a486bd1db3200a"
   dependencies:
     browserify "^14.3.0"
     budo "^10.0.3"
