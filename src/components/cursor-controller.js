@@ -25,9 +25,6 @@ AFRAME.registerComponent("cursor-controller", {
   init: function() {
     this.inVR = false;
     this.isMobile = AFRAME.utils.device.isMobile();
-    if (this.isMobile) {
-      this._setCursorVisibility(false);
-    }
     this.hasPointingDevice = false;
     this.currentTargetType = TARGET_TYPE_NONE;
     this.grabStarting = false;
@@ -217,17 +214,6 @@ AFRAME.registerComponent("cursor-controller", {
     this.el.setAttribute("line", { visible: visible && this.hasPointingDevice });
   },
 
-  _setLookControlsEnabled(enabled) {
-    const lookControls = this.data.camera.components["look-controls"];
-    if (lookControls) {
-      if (enabled) {
-        lookControls.play();
-      } else {
-        lookControls.pause();
-      }
-    }
-  },
-
   _startTeleport: function() {
     if (this.controller != null) {
       this.controller.emit("cursor-teleport_down", {});
@@ -247,7 +233,6 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   handleTouchStart: function(touch) {
-    if (!this.isMobile || this.hasPointingDevice) return;
     // Update the ray and cursor positions
     const raycasterComp = this.el.components.raycaster;
     const raycaster = raycasterComp.raycaster;
@@ -265,29 +250,19 @@ AFRAME.registerComponent("cursor-controller", {
     // Cursor position must be synced to physics before constraint is created
     cursor.components["static-body"].syncToPhysics();
     cursor.emit("cursor-grab", {});
-    this._setCursorVisibility(false);
     return true;
   },
 
   handleTouchMove: function(touch) {
-    if (!this.isMobile || this.hasPointingDevice) return;
     this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
   },
 
   handleTouchEnd: function() {
-    // TODO: Should we emit cursor-release just in case
-    // hasPointingDevice changed just before this function call?
-    if (!this.isMobile || this.hasPointingDevice) return;
-
     this.data.cursor.emit("cursor-release", {});
-    this._setCursorVisibility(false);
   },
 
   handleMouseDown: function() {
-    if (this.isMobile && !this.inVR && !this.hasPointingDevice) return;
-
     if (this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI)) {
-      this._setLookControlsEnabled(false);
       this.data.cursor.emit("cursor-grab", {});
       return true;
     } else if (this.inVR || this.isMobile) {
@@ -298,15 +273,10 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   handleMouseMove: function(e) {
-    if (this.isMobile && !this.inVR && !this.hasPointingDevice) return;
-
     this.mousePos.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
   },
 
   handleMouseUp: function() {
-    if (this.isMobile && !this.inVR && !this.hasPointingDevice) return;
-
-    this._setLookControlsEnabled(true);
     this.data.cursor.emit("cursor-release", {});
     this._endTeleport();
   },
