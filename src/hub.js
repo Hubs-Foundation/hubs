@@ -6,6 +6,12 @@ import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
 import "aframe-xr";
+
+// HACK: this has to run after A-Frame but before our bundle, since A-Frame blows away the local storage setting
+if (/[&?]debug=true/.test(window.location.search) && typeof localStorage !== "undefined") {
+  localStorage.debug = "naf-janus-adapter:*";
+}
+
 import "./vendor/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
