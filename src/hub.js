@@ -55,6 +55,7 @@ import "./components/gltf-bundle";
 import "./components/hud-controller";
 import "./components/freeze-controller";
 import "./components/icon-button";
+import "./components/ui-canvas-events";
 import "./components/text-button";
 import "./components/block-button";
 import "./components/visible-while-frozen";
@@ -370,8 +371,10 @@ const onReady = async () => {
       const c = document.createElement("a-image");
       c.id = "img-" + Date.now();
       c.setAttribute("src", "#ui-canvas");
+      c.setAttribute("class", "ui");
 
       c.setAttribute("position", { x: 0, y: 2, z: 2 });
+      c.setAttribute("ui-canvas-events", {});
       scene.appendChild(c);
     }
   };
