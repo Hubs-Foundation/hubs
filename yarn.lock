@@ -78,6 +78,13 @@
     lodash "^4.2.0"
     to-fast-properties "^2.0.0"
 
+"@craigmorton/linebreak@^0.4.5":
+  version "0.4.5"
+  resolved "https://registry.yarnpkg.com/@craigmorton/linebreak/-/linebreak-0.4.5.tgz#b3a9787844bc5ad954eed23c778ba56769e78d2f"
+  dependencies:
+    base64-js "0.0.8"
+    unicode-trie "^0.3.0"
+
 "@fortawesome/fontawesome-common-types@^0.1.3":
   version "0.1.3"
   resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-common-types/-/fontawesome-common-types-0.1.3.tgz#8475e0f2d1ad1f858c4ec2e76ed9a2456a09ad83"
@@ -99,6 +106,22 @@
   resolved "https://registry.yarnpkg.com/@fortawesome/react-fontawesome/-/react-fontawesome-0.0.18.tgz#4e0eb1cf9797715a67bb7705ae084fa0a410f185"
   dependencies:
     humps "^2.0.1"
+
+"@gfodor/react-canvas@https://github.com/gfodor/react-canvas":
+  version "1.5.0"
+  resolved "https://github.com/gfodor/react-canvas#e3f7ab6b31696cf269e172051561083ce0fe2291"
+  dependencies:
+    "@craigmorton/linebreak" "^0.4.5"
+    create-react-class "^15.6.0"
+    css-layout "^1.1.1"
+    fbjs "^0.8.16"
+    multi-key-cache "^1.0.2"
+    object-assign "^4.0.1"
+    prop-types "^15.6.1"
+    react "^16.3.2"
+    react-dom "^16.3.2"
+    react-reconciler "^0.10.0"
+    scroller "git://github.com/mjohnston/scroller"
 
 JSONStream@^1.0.3:
   version "1.3.2"
@@ -1239,6 +1262,10 @@ base64-arraybuffer@0.1.5:
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/base64-arraybuffer/-/base64-arraybuffer-0.1.5.tgz#73926771923b5a19747ad666aa5cd4bf9c6e9ce8"
 
+base64-js@0.0.8:
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-0.0.8.tgz#1101e9544f4a76b1bc3b26d452ca96d7a35e7978"
+
 base64-js@^1.0.2:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.2.3.tgz#fb13668233d9614cf5fb4bce95a9ba4096cdf801"
@@ -2236,6 +2263,14 @@ create-hmac@^1.1.0, create-hmac@^1.1.2, create-hmac@^1.1.4:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
+create-react-class@^15.6.0:
+  version "15.6.3"
+  resolved "https://registry.yarnpkg.com/create-react-class/-/create-react-class-15.6.3.tgz#2d73237fb3f970ae6ebe011a9e66f46dbca80036"
+  dependencies:
+    fbjs "^0.8.9"
+    loose-envify "^1.3.1"
+    object-assign "^4.1.1"
+
 cross-env@^5.1.3:
   version "5.1.3"
   resolved "https://registry.yarnpkg.com/cross-env/-/cross-env-5.1.3.tgz#f8ae18faac87692b0a8b4d2f7000d4ec3a85dfd7"
@@ -2287,6 +2322,10 @@ crypto-browserify@^3.0.0, crypto-browserify@^3.11.0:
 css-color-names@0.0.4:
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/css-color-names/-/css-color-names-0.0.4.tgz#808adc2e79cf84738069b646cb20ec27beb629e0"
+
+css-layout@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/css-layout/-/css-layout-1.1.1.tgz#ada5bb8c901e475d41043a88e034ade54d939392"
 
 css-loader@^0.28.10:
   version "0.28.10"
@@ -3267,7 +3306,7 @@ faye-websocket@~0.11.0:
   dependencies:
     websocket-driver ">=0.5.1"
 
-fbjs@^0.8.16:
+fbjs@^0.8.16, fbjs@^0.8.9:
   version "0.8.16"
   resolved "https://registry.yarnpkg.com/fbjs/-/fbjs-0.8.16.tgz#5e67432f550dc41b572bf55847b8aca64e5337db"
   dependencies:
@@ -5054,6 +5093,10 @@ map-obj@^1.0.0, map-obj@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/map-obj/-/map-obj-1.0.1.tgz#d933ceb9205d82bdcf4886f6742bdc2b4dea146d"
 
+map-or-similar@^1.1.3:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/map-or-similar/-/map-or-similar-1.5.0.tgz#6de2653174adfb5d9edc33c69d3e92a1b76faf08"
+
 map-visit@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/map-visit/-/map-visit-1.0.0.tgz#ecdca8f13144e660f1b5bd41f12f3479d98dfb8f"
@@ -5375,6 +5418,12 @@ ms@0.7.2:
 ms@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.0.0.tgz#5608aeadfc00be6c2901df5f9861788de0d597c8"
+
+multi-key-cache@^1.0.2:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/multi-key-cache/-/multi-key-cache-1.0.2.tgz#4107c5f2b58f335a01735099ad34652dbbde579e"
+  dependencies:
+    map-or-similar "^1.1.3"
 
 multicast-dns-service-types@^1.1.0:
   version "1.1.0"
@@ -5882,6 +5931,10 @@ pad-right@^0.2.2:
   resolved "https://registry.yarnpkg.com/pad-right/-/pad-right-0.2.2.tgz#6fbc924045d244f2a2a244503060d3bfc6009774"
   dependencies:
     repeat-string "^1.5.2"
+
+pako@^0.2.5:
+  version "0.2.9"
+  resolved "https://registry.yarnpkg.com/pako/-/pako-0.2.9.tgz#f3f7522f4ef782348da8161bad9ecfd51bf83a75"
 
 pako@~1.0.5:
   version "1.0.6"
@@ -6428,7 +6481,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prop-types@^15.5.4, prop-types@^15.6.0:
+prop-types@^15.5.4, prop-types@^15.6.0, prop-types@^15.6.1:
   version "15.6.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.1.tgz#36644453564255ddda391191fb3a125cbdf654ca"
   dependencies:
@@ -6586,6 +6639,15 @@ react-dom@^16.1.1:
     object-assign "^4.1.1"
     prop-types "^15.6.0"
 
+react-dom@^16.3.2:
+  version "16.3.2"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.3.2.tgz#cb90f107e09536d683d84ed5d4888e9640e0e4df"
+  dependencies:
+    fbjs "^0.8.16"
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+    prop-types "^15.6.0"
+
 react-intl@^2.4.0:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/react-intl/-/react-intl-2.4.0.tgz#66c14dc9df9a73b2fbbfbd6021726e80a613eb15"
@@ -6594,6 +6656,15 @@ react-intl@^2.4.0:
     intl-messageformat "^2.1.0"
     intl-relativeformat "^2.0.0"
     invariant "^2.1.1"
+
+react-reconciler@^0.10.0:
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/react-reconciler/-/react-reconciler-0.10.0.tgz#5dc75e73348de97b992deaba75ec72019918f71b"
+  dependencies:
+    fbjs "^0.8.16"
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+    prop-types "^15.6.0"
 
 react-router-dom@^4.2.2:
   version "4.2.2"
@@ -6621,6 +6692,15 @@ react-router@^4.2.0:
 react@^16.1.1:
   version "16.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-16.2.0.tgz#a31bd2dab89bff65d42134fa187f24d054c273ba"
+  dependencies:
+    fbjs "^0.8.16"
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+    prop-types "^15.6.0"
+
+react@^16.3.2:
+  version "16.3.2"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.3.2.tgz#fdc8420398533a1e58872f59091b272ce2f91ea9"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"
@@ -7117,6 +7197,10 @@ scoped-regex@^1.0.0:
 screenfull@^3.3.2:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/screenfull/-/screenfull-3.3.2.tgz#a6adf3b3f5556da812725385880600f5b39fbf25"
+
+"scroller@git://github.com/mjohnston/scroller":
+  version "0.0.1"
+  resolved "git://github.com/mjohnston/scroller#054c3349d5ff7474589eb7fbbb36708e5c48e435"
 
 scss-tokenizer@^0.2.3:
   version "0.2.3"
@@ -7919,6 +8003,10 @@ timers-browserify@^2.0.4:
   dependencies:
     setimmediate "^1.0.4"
 
+tiny-inflate@^1.0.0:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/tiny-inflate/-/tiny-inflate-1.0.2.tgz#93d9decffc8805bd57eae4310f0b745e9b6fb3a7"
+
 tmp@^0.0.29:
   version "0.0.29"
   resolved "https://registry.yarnpkg.com/tmp/-/tmp-0.0.29.tgz#f25125ff0dd9da3ccb0c2dd371ee1288bb9128c0"
@@ -8085,6 +8173,13 @@ underscore@1.5.x:
 underscore@~1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.6.0.tgz#8b38b10cacdef63337b8b24e4ff86d45aea529a8"
+
+unicode-trie@^0.3.0:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/unicode-trie/-/unicode-trie-0.3.1.tgz#d671dddd89101a08bac37b6a5161010602052085"
+  dependencies:
+    pako "^0.2.5"
+    tiny-inflate "^1.0.0"
 
 union-value@^1.0.0:
   version "1.0.0"

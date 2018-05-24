@@ -67,6 +67,7 @@ import "./components/avatar-replay";
 import ReactDOM from "react-dom";
 import React from "react";
 import UIRoot from "./react-components/ui-root";
+import UICanvas from "./react-components/ui-canvas";
 import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
@@ -158,6 +159,7 @@ function mountUI(scene, props = {}) {
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
   const htmlPrefix = document.body.dataset.htmlPrefix || "";
   const showProfileEntry = !store.state.activity.hasChangedName;
+  const uiCanvas = document.getElementById("ui-canvas");
 
   ReactDOM.render(
     <UIRoot
@@ -170,11 +172,14 @@ function mountUI(scene, props = {}) {
         store,
         htmlPrefix,
         showProfileEntry,
+        uiCanvas,
         ...props
       }}
     />,
     document.getElementById("ui-root")
   );
+
+  ReactDOM.render(<UICanvas />, document.getElementById("ui-canvas-root"));
 }
 
 const onReady = async () => {
@@ -361,6 +366,13 @@ const onReady = async () => {
           sceneEl.appendChild(screenEntity);
         }
       }
+
+      const c = document.createElement("a-image");
+      c.id = "img-" + Date.now();
+      c.setAttribute("src", "#ui-canvas");
+
+      c.setAttribute("position", { x: 0, y: 2, z: 2 });
+      scene.appendChild(c);
     }
   };
 

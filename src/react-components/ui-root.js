@@ -69,7 +69,8 @@ class UIRoot extends Component {
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
     hubName: PropTypes.string,
-    occupantCount: PropTypes.number
+    occupantCount: PropTypes.number,
+    uiCanvas: PropTypes.object
   };
 
   state = {
@@ -159,11 +160,11 @@ class UIRoot extends Component {
   handleForcedVREntryType = () => {
     if (!this.props.forcedVREntryType) return;
 
-    if (this.props.forcedVREntryType === "daydream") {
+    if (this.props.forcedVREntryType.startsWith("daydream")) {
       this.enterDaydream();
-    } else if (this.props.forcedVREntryType === "vr") {
+    } else if (this.props.forcedVREntryType.startsWith("vr")) {
       this.enterVR();
-    } else if (this.props.forcedVREntryType === "2d") {
+    } else if (this.props.forcedVREntryType.startsWith("2d")) {
       this.enter2D();
     }
   };
@@ -250,7 +251,7 @@ class UIRoot extends Component {
 
     if (hasGrantedMic) {
       await this.setMediaStreamToDefault();
-      this.beginAudioSetup();
+      this.beginOrSkipAudioSetup();
     } else {
       this.setState({ entryStep: ENTRY_STEPS.mic_grant });
     }
@@ -411,10 +412,10 @@ class UIRoot extends Component {
       if (hasAudio) {
         this.setState({ entryStep: ENTRY_STEPS.mic_granted });
       } else {
-        this.beginAudioSetup();
+        this.beginOrSkipAudioSetup();
       }
     } else {
-      this.beginAudioSetup();
+      this.beginOrSkipAudioSetup();
     }
   };
 
@@ -422,8 +423,12 @@ class UIRoot extends Component {
     this.setState({ showProfileEntry: false });
   };
 
-  beginAudioSetup = () => {
-    this.setState({ entryStep: ENTRY_STEPS.audio_setup });
+  beginOrSkipAudioSetup = () => {
+    if (!this.props.forcedVREntryType || !this.props.forcedVREntryType.endsWith("_now")) {
+      this.setState({ entryStep: ENTRY_STEPS.audio_setup });
+    } else {
+      setTimeout(this.onAudioReadyButton, 3000); // Need to wait otherwise input doesn't work :/
+    }
   };
 
   fetchMicDevices = () => {
