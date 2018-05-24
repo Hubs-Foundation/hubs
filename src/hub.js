@@ -125,6 +125,7 @@ import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-cap
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 import TouchEventsHandler from "./utils/touch-events-handler.js";
 import { MouseEventsHandler, GearVRMouseEventsHandler } from "./utils/mouse-events-handler.js";
+import PrimaryActionHandler from "./utils/primary-action-handler.js";
 window.APP.touchEventsHandler = new TouchEventsHandler(); // TODO: Do not create TouchEventsHandler unless on mobile
 window.APP.mouseEventsHandler = new MouseEventsHandler();
 
@@ -186,6 +187,7 @@ function mountUI(scene, props = {}) {
 
 const onReady = async () => {
   const scene = document.querySelector("a-scene");
+  window.APP.primaryActionHandler = new PrimaryActionHandler(scene);
   const hubChannel = new HubChannel(store);
 
   document.querySelector("canvas").classList.add("blurred");

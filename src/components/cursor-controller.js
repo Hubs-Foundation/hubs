@@ -41,9 +41,10 @@ AFRAME.registerComponent("cursor-controller", {
 
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
-    window.APP.touchEventsHandler.registerCursor(this);
     window.APP.touchEventsHandler.registerPinchEmitter(this.el);
+    window.APP.touchEventsHandler.registerCursor(this);
     window.APP.mouseEventsHandler.registerCursor(this);
+    window.APP.primaryActionHandler.registerCursor(this);
 
     this.startInteractionAndForceCursorUpdate = this.startInteractionAndForceCursorUpdate.bind(this);
     this.startInteraction = this.startInteraction.bind(this);
@@ -81,8 +82,8 @@ AFRAME.registerComponent("cursor-controller", {
     window.addEventListener("enter-vr", this._handleEnterVR);
     window.addEventListener("exit-vr", this._handleExitVR);
 
-    this.data.playerRig.addEventListener(this.data.primaryDown, this._handlePrimaryDown);
-    this.data.playerRig.addEventListener(this.data.primaryUp, this._handlePrimaryUp);
+    //    this.data.playerRig.addEventListener(this.data.primaryDown, this._handlePrimaryDown);
+    //    this.data.playerRig.addEventListener(this.data.primaryUp, this._handlePrimaryUp);
     this.data.playerRig.addEventListener(this.data.grabEvent, this._handlePrimaryDown);
     this.data.playerRig.addEventListener(this.data.releaseEvent, this._handlePrimaryUp);
     this.data.playerRig.addEventListener("cardboardbuttondown", this._handlePrimaryDown);

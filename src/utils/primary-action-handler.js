@@ -32,11 +32,11 @@ export default class PrimaryActionHandler {
   }
 
   onPrimaryDown(e) {
-    this.handledByCursor = this.cursor.beginInteraction();
+    this.handledByCursor = this.cursor.startInteraction();
     if (this.handledByCursor) return;
     // Do teleport things.
     console.log(e);
-    if (e.components["teleport-controls"]) {
+    if (e.target.components["teleport-controls"]) {
       console.log("yes");
     }
     console.log("no");
