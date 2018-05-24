@@ -56,5 +56,5 @@ function aframeDocs(doc) {
     .filter(x => x)
     .map(parseDocs)
     .filter(aframeDocs);
-  writeFile("doc/index.html", indexTemplate(parsedDocs));
+  writeFile("doc/index.md", indexTemplate(parsedDocs));
 })();
