@@ -195,7 +195,7 @@ function cachedLoadGLTF(src, preferredTechnique, onProgress) {
 }
 
 /**
- * Loads a GLTF model, optionally recursively "inflates" the child nodes of a model into a-entities and sets 
+ * Loads a GLTF model, optionally recursively "inflates" the child nodes of a model into a-entities and sets
  * whitelisted components on them if defined in the node's extras.
  * @namespace gltf
  * @component gltf-model-plus
