@@ -54,8 +54,6 @@ AFRAME.registerComponent("cursor-controller", {
 
     this._handleEnterVR = this._handleEnterVR.bind(this);
     this._handleExitVR = this._handleExitVR.bind(this);
-    this._handlePrimaryDown = this._handlePrimaryDown.bind(this);
-    this._handlePrimaryUp = this._handlePrimaryUp.bind(this);
     this._handleModelLoaded = this._handleModelLoaded.bind(this);
     this._handleCursorLoaded = this._handleCursorLoaded.bind(this);
     this._handleControllerConnected = this._handleControllerConnected.bind(this);
@@ -84,10 +82,10 @@ AFRAME.registerComponent("cursor-controller", {
 
     //    this.data.playerRig.addEventListener(this.data.primaryDown, this._handlePrimaryDown);
     //    this.data.playerRig.addEventListener(this.data.primaryUp, this._handlePrimaryUp);
-    this.data.playerRig.addEventListener(this.data.grabEvent, this._handlePrimaryDown);
-    this.data.playerRig.addEventListener(this.data.releaseEvent, this._handlePrimaryUp);
-    this.data.playerRig.addEventListener("cardboardbuttondown", this._handlePrimaryDown);
-    this.data.playerRig.addEventListener("cardboardbuttonup", this._handlePrimaryUp);
+    //this.data.playerRig.addEventListener(this.data.grabEvent, this._handlePrimaryDown);
+    //this.data.playerRig.addEventListener(this.data.releaseEvent, this._handlePrimaryUp);
+    //this.data.playerRig.addEventListener("cardboardbuttondown", this._handlePrimaryDown);
+    //this.data.playerRig.addEventListener("cardboardbuttonup", this._handlePrimaryUp);
     this.data.playerRig.addEventListener("model-loaded", this._handleModelLoaded);
 
     this.el.sceneEl.addEventListener("controllerconnected", this._handleControllerConnected);
@@ -98,10 +96,10 @@ AFRAME.registerComponent("cursor-controller", {
     window.removeEventListener("enter-vr", this._handleEnterVR);
     window.removeEventListener("exit-vr", this._handleExitVR);
 
-    this.data.playerRig.removeEventListener(this.data.primaryDown, this._handlePrimaryDown);
-    this.data.playerRig.removeEventListener(this.data.primaryUp, this._handlePrimaryUp);
-    this.data.playerRig.removeEventListener(this.data.grabEvent, this._handlePrimaryDown);
-    this.data.playerRig.removeEventListener(this.data.releaseEvent, this._handlePrimaryUp);
+    //this.data.playerRig.removeEventListener(this.data.primaryDown, this._handlePrimaryDown);
+    //this.data.playerRig.removeEventListener(this.data.primaryUp, this._handlePrimaryUp);
+    //this.data.playerRig.removeEventListener(this.data.grabEvent, this._handlePrimaryDown);
+    //this.data.playerRig.removeEventListener(this.data.releaseEvent, this._handlePrimaryUp);
     this.data.playerRig.removeEventListener("cardboardbuttondown", this._handlePrimaryDown);
     this.data.playerRig.removeEventListener("cardboardbuttonup", this._handlePrimaryUp);
 
@@ -117,7 +115,7 @@ AFRAME.registerComponent("cursor-controller", {
       const state = this.physicalHand.components["super-hands"].state;
       const isPhysicalHandGrabbing = state.has("grab-start") || state.has("hover-start");
       if (this.wasPhysicalHandGrabbing != isPhysicalHandGrabbing) {
-        this._setCursorVisibility(!isPhysicalHandGrabbing);
+        this.setCursorVisibility(!isPhysicalHandGrabbing);
         this.currentTargetType = TARGET_TYPE_NONE;
       }
       this.wasPhysicalHandGrabbing = isPhysicalHandGrabbing;
@@ -208,27 +206,9 @@ AFRAME.registerComponent("cursor-controller", {
     return (this.currentTargetType & mask) === this.currentTargetType;
   },
 
-  _setCursorVisibility(visible) {
+  setCursorVisibility(visible) {
     this.data.cursor.setAttribute("visible", visible);
     this.el.setAttribute("line", { visible: visible && this.hasPointingDevice });
-  },
-
-  _startTeleport: function() {
-    if (this.controller != null) {
-      this.controller.emit("cursor-teleport_down", {});
-    } else if (this.inVR) {
-      this.data.gazeTeleportControls.emit("cursor-teleport_down", {});
-    }
-    this._setCursorVisibility(false);
-  },
-
-  _endTeleport: function() {
-    if (this.controller != null) {
-      this.controller.emit("cursor-teleport_up", {});
-    } else if (this.inVR) {
-      this.data.gazeTeleportControls.emit("cursor-teleport_up", {});
-    }
-    this._setCursorVisibility(true);
   },
 
   startInteractionAndForceCursorUpdate: function(touch) {
@@ -294,29 +274,6 @@ AFRAME.registerComponent("cursor-controller", {
     this._updateController();
   },
 
-  _handlePrimaryDown: function(e) {
-    if (e.target === this.controller || e.target === this.data.playerRig) {
-      const isInteractable = this._isTargetOfType(TARGET_TYPE_INTERACTABLE) && !this.grabStarting;
-      if (isInteractable || this._isTargetOfType(TARGET_TYPE_UI)) {
-        this.grabStarting = true;
-        this.data.cursor.emit("cursor-grab", e.detail);
-      } else if (e.type !== this.data.grabEvent) {
-        this._startTeleport();
-      }
-    }
-  },
-
-  _handlePrimaryUp: function(e) {
-    if (e.target === this.controller || e.target === this.data.playerRig) {
-      this.grabStarting = false;
-      if (this._isGrabbing() || this._isTargetOfType(TARGET_TYPE_UI)) {
-        this.data.cursor.emit("cursor-release", e.detail);
-      } else if (e.type !== this.data.releaseEvent) {
-        this._endTeleport();
-      }
-    }
-  },
-
   _handleModelLoaded: function() {
     this.physicalHand = this.data.playerRig.querySelector(this.data.physicalHandSelector);
   },
@@ -353,7 +310,7 @@ AFRAME.registerComponent("cursor-controller", {
   _updateController: function() {
     this.hasPointingDevice = this.controllerQueue.length > 0 && this.inVR;
 
-    this._setCursorVisibility(this.hasPointingDevice || this.isMobile);
+    this.setCursorVisibility(this.hasPointingDevice || this.isMobile);
 
     if (this.hasPointingDevice) {
       const controllerData = this.controllerQueue[0];

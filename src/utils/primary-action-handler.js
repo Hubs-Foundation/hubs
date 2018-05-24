@@ -34,12 +34,14 @@ export default class PrimaryActionHandler {
   onPrimaryDown(e) {
     this.handledByCursor = this.cursor.startInteraction();
     if (this.handledByCursor) return;
+    this.cursor.setCursorVisibility(false);
+
     // Do teleport things.
-    console.log(e);
-    if (e.target.components["teleport-controls"]) {
-      console.log("yes");
+    if (!e.target.components["teleport-controls"]) {
+      console.error("no teleport controls");
     }
-    console.log("no");
+    const button = e.target.components["teleport-controls"].data.button;
+    e.target.emit(button + "down");
   }
 
   onPrimaryUp(e) {
@@ -47,5 +49,15 @@ export default class PrimaryActionHandler {
       this.cursor.endInteraction();
       return;
     }
+
+    // Do teleport things.
+    if (!e.target.components["teleport-controls"]) {
+      console.error("no teleport controls");
+    }
+    const button = e.target.components["teleport-controls"].data.button;
+    e.target.emit(button + "up");
+
+    // Show cursor
+    this.cursor.setCursorVisibility(true);
   }
 }
