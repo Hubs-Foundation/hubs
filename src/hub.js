@@ -65,6 +65,7 @@ import "./components/scene-shadow";
 import "./components/avatar-replay";
 import "./components/pinch-to-move";
 import "./components/look-on-mobile";
+import "./components/camera-controller";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -123,8 +124,8 @@ import { generateDefaultProfile, generateRandomName } from "./utils/identity.js"
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 import TouchEventsHandler from "./utils/touch-events-handler.js";
-import MouseEventsHandler from "./utils/mouse-events-handler.js";
-window.APP.touchEventsHandler = new TouchEventsHandler();
+import { MouseEventsHandler, GearVRMouseEventsHandler } from "./utils/mouse-events-handler.js";
+window.APP.touchEventsHandler = new TouchEventsHandler(); // TODO: Do not create TouchEventsHandler unless on mobile
 window.APP.mouseEventsHandler = new MouseEventsHandler();
 
 function qsTruthy(param) {
@@ -242,22 +243,19 @@ const onReady = async () => {
     AFRAME.registerInputActions(inGameActions, "default");
 
     const camera = document.querySelector("#player-camera");
-    const registerLookControls = e => {
-      if (e.detail.name !== "look-controls") return;
-      camera.removeEventListener("componentinitialized", registerLookControls);
+    const registerCameraController = e => {
+      if (e.detail.name !== "camera-controller") return;
+      camera.removeEventListener("componentinitialized", registerCameraController);
 
-      window.APP.touchEventsHandler.registerLookControls(camera.components["look-controls"]);
-      scene.components["look-on-mobile"].registerLookControls(camera.components["look-controls"]);
+      window.APP.touchEventsHandler.registerCameraController(camera.components["camera-controller"]);
+      scene.components["look-on-mobile"].registerCameraController(camera.components["camera-controller"]);
       scene.setAttribute("look-on-mobile", "enabled", true);
 
-      window.APP.mouseEventsHandler.registerLookControls(camera.components["look-controls"]);
+      window.APP.mouseEventsHandler.registerCameraController(camera.components["camera-controller"]);
       window.APP.mouseEventsHandler.setInverseMouseLook(qsTruthy("invertMouseLook"));
     };
-    camera.addEventListener("componentinitialized", registerLookControls);
-    camera.setAttribute("look-controls", {
-      touchEnabled: false,
-      hmdEnabled: false
-    });
+    camera.addEventListener("componentinitialized", registerCameraController);
+    camera.setAttribute("camera-controller", "foo", "bar");
 
     scene.setAttribute("networked-scene", {
       room: hubId,

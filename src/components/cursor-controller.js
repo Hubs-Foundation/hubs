@@ -43,14 +43,12 @@ AFRAME.registerComponent("cursor-controller", {
 
     window.APP.touchEventsHandler.registerCursor(this);
     window.APP.touchEventsHandler.registerPinchEmitter(this.el);
-    this.handleTouchStart = this.handleTouchStart.bind(this);
-    this.handleTouchMove = this.handleTouchMove.bind(this);
-    this.handleTouchEnd = this.handleTouchEnd.bind(this);
-
     window.APP.mouseEventsHandler.registerCursor(this);
-    this.handleMouseDown = this.handleMouseDown.bind(this);
-    this.handleMouseMove = this.handleMouseMove.bind(this);
-    this.handleMouseUp = this.handleMouseUp.bind(this);
+
+    this.startInteractionAndForceCursorUpdate = this.startInteractionAndForceCursorUpdate.bind(this);
+    this.startInteraction = this.startInteraction.bind(this);
+    this.moveCursor = this.moveCursor.bind(this);
+    this.endInteraction = this.endInteraction.bind(this);
     this.handleMouseWheel = this.handleMouseWheel.bind(this);
 
     this._handleEnterVR = this._handleEnterVR.bind(this);
@@ -232,7 +230,7 @@ AFRAME.registerComponent("cursor-controller", {
     this._setCursorVisibility(true);
   },
 
-  handleTouchStart: function(touch) {
+  startInteractionAndForceCursorUpdate: function(touch) {
     // Update the ray and cursor positions
     const raycasterComp = this.el.components.raycaster;
     const raycaster = raycasterComp.raycaster;
@@ -253,32 +251,20 @@ AFRAME.registerComponent("cursor-controller", {
     return true;
   },
 
-  handleTouchMove: function(touch) {
-    this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
-  },
-
-  handleTouchEnd: function() {
-    this.data.cursor.emit("cursor-release", {});
-  },
-
-  handleMouseDown: function() {
-    if (this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI)) {
-      this.data.cursor.emit("cursor-grab", {});
-      return true;
-    } else if (this.inVR || this.isMobile) {
-      this._startTeleport();
-      return;
-    }
-    return false;
-  },
-
-  handleMouseMove: function(e) {
+  moveCursor: function(e) {
     this.mousePos.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
   },
 
-  handleMouseUp: function() {
+  endInteraction: function() {
     this.data.cursor.emit("cursor-release", {});
-    this._endTeleport();
+  },
+
+  startInteraction: function() {
+    if (this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI)) {
+      this.data.cursor.emit("cursor-grab", {});
+      return true;
+    }
+    return false;
   },
 
   handleMouseWheel: function(e) {

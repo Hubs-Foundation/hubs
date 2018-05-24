@@ -49,35 +49,32 @@ AFRAME.registerComponent("look-on-mobile", {
     this.polyfillObject = new THREE.Object3D();
     this.polyfillControls = new PolyfillControls(this.polyfillObject);
   },
+
   pause() {
     this.el.removeEventListener("rotateX", this.onRotateX);
     this.polyfillControls = null;
     this.polyfillObject = null;
   },
+
   onRotateX(e) {
-    this.pendingLookX = e.detail.value * 0.8;
+    this.pendingLookX = e.detail.value;
   },
 
-  registerLookControls(lookControls) {
-    this.lookControls = lookControls;
-    this.lookControls.data.enabled = false;
-    this.lookControls.polyfillControls.update = () => {};
+  registerCameraController(cameraController) {
+    this.cameraController = cameraController;
   },
 
   tick(t, dt) {
     if (!this.data.enabled) return;
     const scene = this.el.sceneEl;
+    if (scene.is("vr-mode") && scene.checkHeadsetConnected()) return; // TODO: Why would this be ticking if we're in vr-mode?
     const hmdEuler = this.hmdEuler;
-    const pitchObject = this.lookControls.pitchObject;
-    const yawObject = this.lookControls.yawObject;
-    const joystick = this.pendingLookX * dt / 1000;
     const { horizontalLookSpeedRatio, verticalLookSpeedRatio } = this.data;
-    if (scene.is("vr-mode") && scene.checkHeadsetConnected()) return;
     this.polyfillControls.update();
     hmdEuler.setFromQuaternion(this.polyfillObject.quaternion, "YXZ");
 
-    const dX = difference(hmdEuler.x, this.prevX);
-    const dY = difference(hmdEuler.y, this.prevY);
+    const dX = THREE.Math.RAD2DEG * difference(hmdEuler.x, this.prevX);
+    const dY = THREE.Math.RAD2DEG * difference(hmdEuler.y, this.prevY);
 
     this.dXBuffer.push(Math.abs(dX) < 0.001 ? 0 : dX);
     this.dYBuffer.push(Math.abs(dY) < 0.001 ? 0 : dY);
@@ -89,11 +86,11 @@ AFRAME.registerComponent("look-on-mobile", {
       this.dYBuffer.splice(0, 1);
     }
 
-    yawObject.rotation.y += average(this.dYBuffer) * horizontalLookSpeedRatio;
-    pitchObject.rotation.x += average(this.dXBuffer) * verticalLookSpeedRatio + joystick;
-    pitchObject.rotation.x = Math.max(-PI_4, Math.min(PI_4, pitchObject.rotation.x));
+    const deltaYaw = average(this.dYBuffer) * horizontalLookSpeedRatio;
+    const deltaPitch = average(this.dXBuffer) * verticalLookSpeedRatio + this.pendingLookX;
 
-    this.lookControls.updateOrientation();
+    this.cameraController.look(deltaPitch, deltaYaw);
+
     this.prevX = hmdEuler.x;
     this.prevY = hmdEuler.y;
     this.pendingLookX = 0;

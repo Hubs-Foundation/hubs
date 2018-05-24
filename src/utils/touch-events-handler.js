@@ -1,12 +1,12 @@
 const VIRTUAL_JOYSTICK_HEIGHT = 0.8;
-const HORIZONTAL_LOOK_SPEED = 0.006;
-const VERTICAL_LOOK_SPEED = 0.003;
+const HORIZONTAL_LOOK_SPEED = 0.35;
+const VERTICAL_LOOK_SPEED = 0.18;
 const PI_4 = Math.PI / 4;
 
 export default class TouchEventsHandler {
   constructor() {
     this.cursor = null;
-    this.lookControls = null;
+    this.cameraController = null;
     this.pinchEmitter = null;
     this.touches = [];
     this.touchReservedForCursor = null;
@@ -17,7 +17,7 @@ export default class TouchEventsHandler {
     this.pinchTouchId2 = -1;
 
     this.registerCursor = this.registerCursor.bind(this);
-    this.registerLookControls = this.registerLookControls.bind(this);
+    this.registerCameraController = this.registerCameraController.bind(this);
     this.isReady = this.isReady.bind(this);
     this.addEventListeners = this.addEventListeners.bind(this);
     this.handleTouchStart = this.handleTouchStart.bind(this);
@@ -37,8 +37,8 @@ export default class TouchEventsHandler {
     }
   }
 
-  registerLookControls(lookControls) {
-    this.lookControls = lookControls;
+  registerCameraController(cameraController) {
+    this.cameraController = cameraController;
     if (this.isReady()) {
       this.addEventListeners();
     }
@@ -52,7 +52,7 @@ export default class TouchEventsHandler {
   }
 
   isReady() {
-    return this.cursor && this.lookControls && this.pinchEmitter;
+    return this.cursor && this.cameraController && this.pinchEmitter;
   }
 
   addEventListeners() {
@@ -70,7 +70,7 @@ export default class TouchEventsHandler {
     if (touch.clientY / window.innerHeight >= VIRTUAL_JOYSTICK_HEIGHT) {
       return;
     }
-    if (!this.touchReservedForCursor && this.cursor.handleTouchStart(touch)) {
+    if (!this.touchReservedForCursor && this.cursor.startInteractionAndForceCursorUpdate(touch)) {
       this.touchReservedForCursor = touch;
     }
     this.touches.push(touch);
@@ -86,7 +86,7 @@ export default class TouchEventsHandler {
 
   singleTouchMove(touch) {
     if (this.touchReservedForCursor && touch.identifier === this.touchReservedForCursor.identifier) {
-      this.cursor.handleTouchMove(touch);
+      this.cursor.moveCursor(touch);
       return;
     }
     if (touch.clientY / window.innerHeight >= VIRTUAL_JOYSTICK_HEIGHT) return;
@@ -114,7 +114,7 @@ export default class TouchEventsHandler {
     }
     if (touch.identifier === this.touchReservedForLookControls.identifier) {
       if (!this.touchReservedForCursor) {
-        this.cursor.handleTouchMove(touch);
+        this.cursor.moveCursor(touch);
       }
       this.look(this.touchReservedForLookControls, touch);
       this.touchReservedForLookControls = touch;
@@ -133,15 +133,9 @@ export default class TouchEventsHandler {
   }
 
   look(prevTouch, touch) {
-    const dX = touch.clientX - prevTouch.clientX;
-    const dY = touch.clientY - prevTouch.clientY;
-
-    this.lookControls.yawObject.rotation.y += dX * HORIZONTAL_LOOK_SPEED;
-    this.lookControls.pitchObject.rotation.x += dY * VERTICAL_LOOK_SPEED;
-    this.lookControls.pitchObject.rotation.x = Math.max(
-      -PI_4,
-      Math.min(PI_4, this.lookControls.pitchObject.rotation.x)
-    );
+    const deltaPitch = (touch.clientY - prevTouch.clientY) * VERTICAL_LOOK_SPEED;
+    const deltaYaw = (touch.clientX - prevTouch.clientX) * HORIZONTAL_LOOK_SPEED;
+    this.cameraController.look(deltaPitch, deltaYaw);
   }
 
   handleTouchEnd(e) {
@@ -156,7 +150,7 @@ export default class TouchEventsHandler {
     this.touches.splice(touchIndex, 1);
 
     if (this.touchReservedForCursor && touch.identifier === this.touchReservedForCursor.identifier) {
-      this.cursor.handleTouchEnd(touch);
+      this.cursor.endInteraction(touch);
       this.touchReservedForCursor = null;
       return;
     }
