@@ -379,7 +379,7 @@ const onReady = async () => {
 
       setTimeout(() => {
         const map = c.object3D.children[0].material.map;
-        map.magFilter = THREE.LinearFilter;
+        map.magFilter = THREE.NearestFilter;
         map.minFilter = THREE.LinearMipMapLinearFilter;
         map.generateMipmaps = true;
         console.log(map);
