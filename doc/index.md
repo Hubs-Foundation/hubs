@@ -81,6 +81,7 @@
 
 ## Systems
 
+<a name="systems/app-mode"></a>
 #### app-mode
 
 Simple system for keeping track of a modal app state
@@ -88,6 +89,7 @@ Simple system for keeping track of a modal app state
 src/systems/app-mode.js
     
 
+<a name="systems/exit-on-blur"></a>
 #### exit-on-blur
 
 Emits an "exit" event when a user has stopped using the app for a certain period of time
@@ -95,6 +97,7 @@ Emits an "exit" event when a user has stopped using the app for a certain period
 src/systems/exit-on-blur.js
     
 
+<a name="systems/personal-space-bubble"></a>
 #### personal-space-bubble
 
 Iterates through bubbles and invaders on every tick and sets invader state accordingly. testing multiline things
@@ -104,8 +107,10 @@ src/systems/personal-space-bubble.js
 
 # Components
 
+<a name="components/misc"></a>
 ### misc
       
+<a name="components/misc/animation-mixer"></a>
 #### animation-mixer
 
 Instantiates and updates a THREE.AnimationMixer on an entity.
@@ -113,6 +118,7 @@ Instantiates and updates a THREE.AnimationMixer on an entity.
 src/components/animation-mixer.js
           
 
+<a name="components/misc/matcolor-audio-feedback"></a>
 #### matcolor-audio-feedback
 
 Sets an entity's color base on audioFrequencyChange events.
@@ -120,6 +126,7 @@ Sets an entity's color base on audioFrequencyChange events.
 src/components/audio-feedback.js
           
 
+<a name="components/misc/css-class"></a>
 #### css-class
 
 Sets the CSS class on an entity.
@@ -127,6 +134,7 @@ Sets the CSS class on an entity.
 src/components/css-class.js
           
 
+<a name="components/misc/duck"></a>
 #### duck
 
 Floats a duck based on its scale.
@@ -134,6 +142,7 @@ Floats a duck based on its scale.
 src/components/duck.js
           
 
+<a name="components/misc/event-repeater"></a>
 #### event-repeater
 
 Listens to events from an event source and re-emits them on this entity
@@ -141,6 +150,7 @@ Listens to events from an event source and re-emits them on this entity
 src/components/event-repeater.js
           
 
+<a name="components/misc/hide-when-quality"></a>
 #### hide-when-quality
 
 Hides entities based on the scene's quality mode
@@ -148,6 +158,7 @@ Hides entities based on the scene's quality mode
 src/components/hide-when-quality.js
           
 
+<a name="components/misc/layers"></a>
 #### layers
 
 Sets layer flags on the underlying Object3D
@@ -155,6 +166,7 @@ Sets layer flags on the underlying Object3D
 src/components/layers.js
           
 
+<a name="components/misc/loop-animation"></a>
 #### loop-animation
 
 Loops the given clip using this entity's animation mixer
@@ -162,6 +174,7 @@ Loops the given clip using this entity's animation mixer
 src/components/loop-animation.js
           
 
+<a name="components/misc/nav-mesh-helper"></a>
 #### nav-mesh-helper
 
 Initializes teleport-controls when the environment bundle has loaded.
@@ -169,6 +182,7 @@ Initializes teleport-controls when the environment bundle has loaded.
 src/components/nav-mesh-helper.js
           
 
+<a name="components/misc/offset-relative-to"></a>
 #### offset-relative-to
 
 Positions an entity relative to a given target when the given event is fired.
@@ -176,6 +190,7 @@ Positions an entity relative to a given target when the given event is fired.
 src/components/offset-relative-to.js
           
 
+<a name="components/misc/scene-shadow"></a>
 #### scene-shadow
 
 For use in environment gltf bundles to set scene shadow properties.
@@ -183,6 +198,7 @@ For use in environment gltf bundles to set scene shadow properties.
 src/components/scene-shadow.js
           
 
+<a name="components/misc/spawn-point"></a>
 #### spawn-point
 
 Marks an entity as a potential spawn point.
@@ -191,8 +207,10 @@ src/components/spawn-controller.js
           
     
 
+<a name="components/avatar"></a>
 ### avatar
       
+<a name="components/avatar/networked-audio-analyser"></a>
 #### networked-audio-analyser
 
 Emits audioFrequencyChange events based on a networked audio source
@@ -200,6 +218,7 @@ Emits audioFrequencyChange events based on a networked audio source
 src/components/audio-feedback.js
           
 
+<a name="components/avatar/scale-audio-feedback"></a>
 #### scale-audio-feedback
 
 Sets an entity's scale base on audioFrequencyChange events.
@@ -207,6 +226,7 @@ Sets an entity's scale base on audioFrequencyChange events.
 src/components/audio-feedback.js
           
 
+<a name="components/avatar/avatar-replay"></a>
 #### avatar-replay
 
 Replays a recorded motion capture with the given avatar body parts
@@ -214,6 +234,7 @@ Replays a recorded motion capture with the given avatar body parts
 src/components/avatar-replay.js
           
 
+<a name="components/avatar/bone-mute-state-indicator"></a>
 #### bone-mute-state-indicator
 
 Toggles the position of 2 bones into "on" and "off" positions to indicate mute state.
@@ -221,6 +242,7 @@ Toggles the position of 2 bones into "on" and "off" positions to indicate mute s
 src/components/bone-mute-state-indicator.js
           
 
+<a name="components/avatar/bone-visibility"></a>
 #### bone-visibility
 
 Scales an object to near-zero if the object is invisible. Useful for bones representing avatar body parts.
@@ -228,6 +250,7 @@ Scales an object to near-zero if the object is invisible. Useful for bones repre
 src/components/bone-visibility.js
           
 
+<a name="components/avatar/character-controller"></a>
 #### character-controller
 
 Avatar movement controller that listens to move, rotate and teleportation events and moves the avatar accordingly. The controller accounts for playspace offset and orientation and depends on the nav mesh system for translation.
@@ -235,6 +258,7 @@ Avatar movement controller that listens to move, rotate and teleportation events
 src/components/character-controller.js
           
 
+<a name="components/avatar/hand-pose"></a>
 #### hand-pose
 
 Animates between poses based on networked pose state using an animation mixer.
@@ -242,6 +266,7 @@ Animates between poses based on networked pose state using an animation mixer.
 src/components/hand-poses.js
           
 
+<a name="components/avatar/hand-pose-controller"></a>
 #### hand-pose-controller
 
 Sets the networked hand pose state based on hand-pose events.
@@ -249,6 +274,7 @@ Sets the networked hand pose state based on hand-pose events.
 src/components/hand-poses.js
           
 
+<a name="components/avatar/ik-root"></a>
 #### ik-root
 
 Provides access to the end effectors for IK.
@@ -256,6 +282,7 @@ Provides access to the end effectors for IK.
 src/components/ik-controller.js
           
 
+<a name="components/avatar/ik-controller"></a>
 #### ik-controller
 
 Performs IK on a hip-rooted skeleton to align the hip, head and hands with camera and controller inputs.
@@ -263,6 +290,7 @@ Performs IK on a hip-rooted skeleton to align the hip, head and hands with camer
 src/components/ik-controller.js
           
 
+<a name="components/avatar/networked-avatar"></a>
 #### networked-avatar
 
 Stores networked avatar state.
@@ -270,6 +298,7 @@ Stores networked avatar state.
 src/components/networked-avatar.js
           
 
+<a name="components/avatar/player-info"></a>
 #### player-info
 
 Sets player info state, including avatar choice and display name.
@@ -277,6 +306,7 @@ Sets player info state, including avatar choice and display name.
 src/components/player-info.js
           
 
+<a name="components/avatar/spawn-controller"></a>
 #### spawn-controller
 
 Used on a player-rig to move the player to a random spawn point on entry.
@@ -285,8 +315,10 @@ src/components/spawn-controller.js
           
     
 
+<a name="components/network"></a>
 ### network
       
+<a name="components/network/block-button"></a>
 #### block-button
 
 Registers a click handler and invokes the block method on the NAF adapter for the owner associated with its entity.
@@ -294,6 +326,7 @@ Registers a click handler and invokes the block method on the NAF adapter for th
 src/components/block-button.js
           
 
+<a name="components/network/freeze-controller"></a>
 #### freeze-controller
 
 Toggles freezing of network traffic on the given event.
@@ -301,6 +334,7 @@ Toggles freezing of network traffic on the given event.
 src/components/freeze-controller.js
           
 
+<a name="components/network/mute-mic"></a>
 #### mute-mic
 
 Toggles the microphone on the current network connection based on the given events.
@@ -308,6 +342,7 @@ Toggles the microphone on the current network connection based on the given even
 src/components/mute-mic.js
           
 
+<a name="components/network/networked-counter"></a>
 #### networked-counter
 
 Limits networked interactables to a maximum number at any given time
@@ -315,6 +350,7 @@ Limits networked interactables to a maximum number at any given time
 src/components/networked-counter.js
           
 
+<a name="components/network/networked-video-player"></a>
 #### networked-video-player
 
 Instantiates and plays a network video stream, setting the video as the source material for this entity.
@@ -322,6 +358,7 @@ Instantiates and plays a network video stream, setting the video as the source m
 src/components/networked-video-player.js
           
 
+<a name="components/network/super-networked-interactable"></a>
 #### super-networked-interactable
 
 Manages ownership and haptics on an interatable
@@ -329,6 +366,7 @@ Manages ownership and haptics on an interatable
 src/components/super-networked-interactable.js
           
 
+<a name="components/network/super-spawner"></a>
 #### super-spawner
 
 Spawns networked objects when grabbed.
@@ -337,8 +375,10 @@ src/components/super-spawner.js
           
     
 
+<a name="components/user-input"></a>
 ### user-input
       
+<a name="components/user-input/cardboard-controls"></a>
 #### cardboard-controls
 
 Polls the Gamepad API for Cardboard Button input and emits cardboardbutton events.
@@ -346,6 +386,7 @@ Polls the Gamepad API for Cardboard Button input and emits cardboardbutton event
 src/components/cardboard-controls.js
           
 
+<a name="components/user-input/controls-shape-offset"></a>
 #### controls-shape-offset
 
 Sets the offset of the aframe-physics shape on this entity based on the current VR controller type
@@ -353,6 +394,7 @@ Sets the offset of the aframe-physics shape on this entity based on the current 
 src/components/controls-shape-offset.js
           
 
+<a name="components/user-input/cursor-controller"></a>
 #### cursor-controller
 
 Controls virtual cursor behavior in various modalities to affect teleportation, interatables and UI.
@@ -360,6 +402,7 @@ Controls virtual cursor behavior in various modalities to affect teleportation, 
 src/components/cursor-controller.js
           
 
+<a name="components/user-input/hand-controls2"></a>
 #### hand-controls2
 
 Converts events from various 6DoF and 3DoF controllers into hand-pose events.
@@ -367,6 +410,7 @@ Converts events from various 6DoF and 3DoF controllers into hand-pose events.
 src/components/hand-controls2.js
           
 
+<a name="components/user-input/haptic-feedback"></a>
 #### haptic-feedback
 
 Listens for haptic events and actuates hardware controllers accordingly
@@ -374,6 +418,7 @@ Listens for haptic events and actuates hardware controllers accordingly
 src/components/haptic-feedback.js
           
 
+<a name="components/user-input/virtual-gamepad-controls"></a>
 #### virtual-gamepad-controls
 
 Instantiates 2D virtual gamepads and emits associated events.
@@ -381,6 +426,7 @@ Instantiates 2D virtual gamepads and emits associated events.
 src/components/virtual-gamepad-controls.js
           
 
+<a name="components/user-input/wasd-to-analog2d"></a>
 #### wasd-to-analog2d
 
 Converts WASD keyboard inputs to simulated analog inputs.
@@ -389,8 +435,10 @@ src/components/wasd-to-analog2d.js
           
     
 
+<a name="components/gltf"></a>
 ### gltf
       
+<a name="components/gltf/gltf-bundle"></a>
 #### gltf-bundle
 
 Instantiates GLTF models as specified in a bundle JSON.
@@ -398,6 +446,7 @@ Instantiates GLTF models as specified in a bundle JSON.
 src/components/gltf-bundle.js
           
 
+<a name="components/gltf/gltf-model-plus"></a>
 #### gltf-model-plus
 
 Loads a GLTF model, optionally recursively "inflates" the child nodes of a model into a-entities and sets whitelisted components on them if defined in the node's extras.
@@ -406,8 +455,10 @@ src/components/gltf-model-plus.js
           
     
 
+<a name="components/ui"></a>
 ### ui
       
+<a name="components/ui/hud-controller"></a>
 #### hud-controller
 
 Positions the HUD and toggles app mode based on where the user is looking
@@ -415,6 +466,7 @@ Positions the HUD and toggles app mode based on where the user is looking
 src/components/hud-controller.js
           
 
+<a name="components/ui/icon-button"></a>
 #### icon-button
 
 A button with an image, tooltip, hover states and haptics.
@@ -422,6 +474,7 @@ A button with an image, tooltip, hover states and haptics.
 src/components/icon-button.js
           
 
+<a name="components/ui/in-world-hud"></a>
 #### in-world-hud
 
 HUD panel for muting, freezing, and space bubble controls.
@@ -429,6 +482,7 @@ HUD panel for muting, freezing, and space bubble controls.
 src/components/in-world-hud.js
           
 
+<a name="components/ui/text-button"></a>
 #### text-button
 
 A button with text and haptics
@@ -436,6 +490,7 @@ A button with text and haptics
 src/components/text-button.js
           
 
+<a name="components/ui/visible-while-frozen"></a>
 #### visible-while-frozen
 
 Toggles the visibility of this entity when the scene is frozen.
@@ -443,6 +498,7 @@ Toggles the visibility of this entity when the scene is frozen.
 src/components/visible-while-frozen.js
           
 
+<a name="components/ui/ui-class-while-frozen"></a>
 #### ui-class-while-frozen
 
 Toggles the interactivity of a UI entity while the scene is frozen.
@@ -451,8 +507,10 @@ src/components/visible-while-frozen.js
           
     
 
+<a name="components/app-mode"></a>
 ### app-mode
       
+<a name="components/app-mode/app-mode-toggle-playing"></a>
 #### app-mode-toggle-playing
 
 Toggle the isPlaying state of a component based on app mode
@@ -460,6 +518,7 @@ Toggle the isPlaying state of a component based on app mode
 src/systems/app-mode.js
           
 
+<a name="components/app-mode/app-mode-toggle-attribute"></a>
 #### app-mode-toggle-attribute
 
 Toggle a boolean property of a component based on app mode
@@ -467,6 +526,7 @@ Toggle a boolean property of a component based on app mode
 src/systems/app-mode.js
           
 
+<a name="components/app-mode/app-mode-input-mappings"></a>
 #### app-mode-input-mappings
 
 Toggle aframe input mappings action set based on app mode
@@ -475,8 +535,10 @@ src/systems/app-mode.js
           
     
 
+<a name="components/vr-mode"></a>
 ### vr-mode
       
+<a name="components/vr-mode/vr-mode-toggle-visibility"></a>
 #### vr-mode-toggle-visibility
 
 Toggle visibility of an entity based on if the user is in vr mode or not
@@ -484,6 +546,7 @@ Toggle visibility of an entity based on if the user is in vr mode or not
 src/systems/app-mode.js
           
 
+<a name="components/vr-mode/vr-mode-toggle-playing"></a>
 #### vr-mode-toggle-playing
 
 Toggle the isPlaying state of a component based on app mode
@@ -492,8 +555,10 @@ src/systems/app-mode.js
           
     
 
+<a name="components/avatar/personal-space-bubble"></a>
 ### avatar/personal-space-bubble
       
+<a name="components/avatar/personal-space-bubble/space-invader-mesh"></a>
 #### space-invader-mesh
 
 Specifies a mesh associated with an invader.
@@ -501,6 +566,7 @@ Specifies a mesh associated with an invader.
 src/systems/personal-space-bubble.js
           
 
+<a name="components/avatar/personal-space-bubble/personal-space-invader"></a>
 #### personal-space-invader
 
 Represents an entity that can invade a personal space bubble
@@ -508,6 +574,7 @@ Represents an entity that can invade a personal space bubble
 src/systems/personal-space-bubble.js
           
 
+<a name="components/avatar/personal-space-bubble/personal-space-bubble"></a>
 #### personal-space-bubble
 
 Represents a personal space bubble on an entity.

@@ -35,6 +35,7 @@ ${components
 ${systems
     .map(system => {
       return `
+<a name="systems/${system.doc.tags.system}"></a>
 #### ${system.doc.tags.system}
 
 ${system.doc.desc}
@@ -48,10 +49,12 @@ ${system.file}
 ${Object.entries(components)
     .map(([namespace, components]) => {
       return `
+<a name="components/${namespace}"></a>
 ### ${namespace}
       ${components
         .map(
           component => `
+<a name="components/${namespace}/${component.doc.tags.component}"></a>
 #### ${component.doc.tags.component}
 
 ${component.doc.desc}
