@@ -373,14 +373,15 @@ const onReady = async () => {
       c.setAttribute("src", "#ui-canvas");
       c.setAttribute("class", "ui");
 
-      c.setAttribute("position", { x: 0, y: 2, z: 2 });
+      c.setAttribute("position", { x: 0, y: 2, z: 3 });
       c.setAttribute("ui-canvas-events", {});
       scene.appendChild(c);
 
       setTimeout(() => {
         const map = c.object3D.children[0].material.map;
         map.magFilter = THREE.LinearFilter;
-        map.minFilter = THREE.LinearFilter;
+        map.minFilter = THREE.LinearMipMapLinearFilter;
+        map.generateMipmaps = true;
         console.log(map);
 
         //const cv = document.getElementById("ui-canvas");
