@@ -109,7 +109,7 @@
 
 "@gfodor/react-canvas@https://github.com/gfodor/react-canvas":
   version "1.5.0"
-  resolved "https://github.com/gfodor/react-canvas#3e3616e499617b1695e980cf108ab80ac7ea5381"
+  resolved "https://github.com/gfodor/react-canvas#fe32421cdd71b3f2dd21e94496efbba4656118dd"
   dependencies:
     "@craigmorton/linebreak" "^0.4.5"
     create-react-class "^15.6.0"

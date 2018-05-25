@@ -128,13 +128,16 @@ export default class UICanvas extends React.Component {
 
   constructor(props) {
     super(props);
-    this.canvas = document.getElementById("ui-canvas");
   }
+
+  getSurfaceRef = ref => {
+    ref.canvas.id = "ui-canvas";
+  };
 
   render() {
     const size = this.getSize();
     return (
-      <Surface top={0} left={0} width={size.width} height={size.height} canvas={this.canvas}>
+      <Surface top={0} left={0} width={size.width} height={size.height} ref={this.getSurfaceRef}>
         <ListView
           style={this.getListViewStyle()}
           numberOfItemsGetter={this.getNumberOfItems}
