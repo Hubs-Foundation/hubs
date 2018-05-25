@@ -9,7 +9,6 @@
     - [app-mode-toggle-playing](#components/app-mode/app-mode-toggle-playing)
     - [app-mode-toggle-attribute](#components/app-mode/app-mode-toggle-attribute)
     - [app-mode-input-mappings](#components/app-mode/app-mode-input-mappings)
-      
   - [avatar](#components/avatar)
     - [networked-audio-analyser](#components/avatar/networked-audio-analyser)
     - [scale-audio-feedback](#components/avatar/scale-audio-feedback)
@@ -24,23 +23,19 @@
     - [networked-avatar](#components/avatar/networked-avatar)
     - [player-info](#components/avatar/player-info)
     - [spawn-controller](#components/avatar/spawn-controller)
-      
   - [avatar/personal-space-bubble](#components/avatar/personal-space-bubble)
     - [space-invader-mesh](#components/avatar/personal-space-bubble/space-invader-mesh)
     - [personal-space-invader](#components/avatar/personal-space-bubble/personal-space-invader)
     - [personal-space-bubble](#components/avatar/personal-space-bubble/personal-space-bubble)
-      
   - [environment](#components/environment)
     - [hide-when-quality](#components/environment/hide-when-quality)
     - [layers](#components/environment/layers)
     - [nav-mesh-helper](#components/environment/nav-mesh-helper)
     - [scene-shadow](#components/environment/scene-shadow)
     - [spawn-point](#components/environment/spawn-point)
-      
   - [gltf](#components/gltf)
     - [gltf-bundle](#components/gltf/gltf-bundle)
     - [gltf-model-plus](#components/gltf/gltf-model-plus)
-      
   - [misc](#components/misc)
     - [animation-mixer](#components/misc/animation-mixer)
     - [matcolor-audio-feedback](#components/misc/matcolor-audio-feedback)
@@ -49,7 +44,6 @@
     - [event-repeater](#components/misc/event-repeater)
     - [loop-animation](#components/misc/loop-animation)
     - [offset-relative-to](#components/misc/offset-relative-to)
-      
   - [network](#components/network)
     - [block-button](#components/network/block-button)
     - [freeze-controller](#components/network/freeze-controller)
@@ -58,7 +52,6 @@
     - [networked-video-player](#components/network/networked-video-player)
     - [super-networked-interactable](#components/network/super-networked-interactable)
     - [super-spawner](#components/network/super-spawner)
-      
   - [ui](#components/ui)
     - [hud-controller](#components/ui/hud-controller)
     - [icon-button](#components/ui/icon-button)
@@ -66,7 +59,6 @@
     - [text-button](#components/ui/text-button)
     - [visible-while-frozen](#components/ui/visible-while-frozen)
     - [ui-class-while-frozen](#components/ui/ui-class-while-frozen)
-      
   - [user-input](#components/user-input)
     - [cardboard-controls](#components/user-input/cardboard-controls)
     - [controls-shape-offset](#components/user-input/controls-shape-offset)
@@ -75,11 +67,9 @@
     - [haptic-feedback](#components/user-input/haptic-feedback)
     - [virtual-gamepad-controls](#components/user-input/virtual-gamepad-controls)
     - [wasd-to-analog2d](#components/user-input/wasd-to-analog2d)
-      
   - [vr-mode](#components/vr-mode)
     - [vr-mode-toggle-visibility](#components/vr-mode/vr-mode-toggle-visibility)
     - [vr-mode-toggle-playing](#components/vr-mode/vr-mode-toggle-playing)
-      
 
 ## Systems
 
@@ -107,7 +97,7 @@ Iterates through bubbles and invaders on every tick and sets invader state accor
 `src/systems/personal-space-bubble.js`
     
 
-# Components
+## Components
 
 <a name="components/misc"></a>
 ### misc

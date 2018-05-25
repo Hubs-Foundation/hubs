@@ -26,8 +26,7 @@ ${components
           component =>
             `    - [${component.doc.tags.component}](#components/${namespace}/${component.doc.tags.component})`
         )
-        .join("\n")}
-      `;
+        .join("\n")}`;
     })
     .join("\n")}
 
@@ -45,7 +44,7 @@ ${system.doc.desc}
     })
     .join("\n")}
 
-# Components
+## Components
 ${Object.entries(components)
     .map(([namespace, components]) => {
       return `
