@@ -30,6 +30,7 @@ AFRAME.registerComponent("spawn-controller", {
 
 /**
  * Marks an entity as a potential spawn point.
+ * @namespace environment
  * @component spawn-point
  */
 AFRAME.registerComponent("spawn-point", {});

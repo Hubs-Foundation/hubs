@@ -1,5 +1,6 @@
 /**
  * Initializes teleport-controls when the environment bundle has loaded.
+ * @namespace environment
  * @component nav-mesh-helper
  */
 AFRAME.registerComponent("nav-mesh-helper", {

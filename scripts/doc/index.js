@@ -40,7 +40,7 @@ ${systems
 
 ${system.doc.desc}
 
-${system.file}
+\`${system.file}\`
     `;
     })
     .join("\n")}
@@ -59,7 +59,7 @@ ${Object.entries(components)
 
 ${component.doc.desc}
 
-${component.file}
+\`${component.file}\`
           `
         )
         .join("\n")}

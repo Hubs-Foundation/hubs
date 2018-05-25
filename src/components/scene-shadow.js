@@ -1,5 +1,6 @@
 /**
  * For use in environment gltf bundles to set scene shadow properties.
+ * @namespace environment
  * @component scene-shadow
  */
 AFRAME.registerComponent("scene-shadow", {

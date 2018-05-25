@@ -5,6 +5,7 @@ export const Layers = {
 
 /**
  * Sets layer flags on the underlying Object3D
+ * @namespace environment
  * @component layers
  */
 AFRAME.registerComponent("layers", {
