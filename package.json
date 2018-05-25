@@ -38,6 +38,7 @@
     "event-target-shim": "^3.0.1",
     "form-urlencoded": "^2.0.4",
     "jsonschema": "^1.2.2",
+    "memoizee": "^0.4.12",
     "mobile-detect": "^1.4.1",
     "moment": "^2.22.0",
     "moment-timezone": "^0.5.14",

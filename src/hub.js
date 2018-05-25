@@ -376,6 +376,16 @@ const onReady = async () => {
       c.setAttribute("position", { x: 0, y: 2, z: 2 });
       c.setAttribute("ui-canvas-events", {});
       scene.appendChild(c);
+
+      setTimeout(() => {
+        const map = c.object3D.children[0].material.map;
+        map.magFilter = THREE.LinearFilter;
+        map.minFilter = THREE.LinearFilter;
+        console.log(map);
+
+        //const cv = document.getElementById("ui-canvas");
+        //cv.readyState = 0; // This can be used to disable rendering, using hack from A-Frame
+      }, 1000);
     }
   };
 

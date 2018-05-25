@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import ReactCanvas from "@gfodor/react-canvas";
+import memoize from "memoizee";
 const { ListView, Surface, Group, Image, Text } = ReactCanvas;
 
 const articles = [
@@ -100,8 +101,8 @@ class Item extends React.Component {
     return {
       top: 10,
       left: 10,
-      width: 60,
-      height: 60,
+      width: 120,
+      height: 120,
       backgroundColor: "#ddd",
       borderColor: "#999",
       borderWidth: 1
@@ -113,9 +114,9 @@ class Item extends React.Component {
       top: 32,
       left: 80,
       width: this.props.width - 90,
-      height: 18,
-      fontSize: 14,
-      lineHeight: 18
+      height: 36,
+      fontSize: 28,
+      lineHeight: 36
     };
   };
 }
@@ -144,7 +145,7 @@ export default class UICanvas extends React.Component {
     );
   }
 
-  renderItem = itemIndex => {
+  getItem = itemIndex => {
     const article = articles[itemIndex % articles.length];
     return (
       <Item
@@ -157,10 +158,12 @@ export default class UICanvas extends React.Component {
     );
   };
 
+  renderItem = memoize(this.getItem);
+
   getSize = () => {
     return {
-      width: 512,
-      height: 512
+      width: 1024,
+      height: 1024
     };
   };
 
