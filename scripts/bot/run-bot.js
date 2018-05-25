@@ -6,7 +6,7 @@ Usage:
 Options:
     -u --url=<url>    URL
     -o --host=<host>  Hubs host if URL is not specified [default: localhost:8080]
-    -r --room=<room>  Room id [default: 234234]
+    -r --room=<room>  Room id
     -h --help         Show this screen
 `;
 
