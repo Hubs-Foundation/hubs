@@ -1,3 +1,8 @@
+/**
+ * Used on a player-rig to move the player to a random spawn point on entry.
+ * @namespace avatar
+ * @component spawn-controller
+ */
 AFRAME.registerComponent("spawn-controller", {
   schema: {
     target: { type: "selector" },
@@ -23,4 +28,9 @@ AFRAME.registerComponent("spawn-controller", {
   }
 });
 
+/**
+ * Marks an entity as a potential spawn point.
+ * @namespace environment
+ * @component spawn-point
+ */
 AFRAME.registerComponent("spawn-point", {});

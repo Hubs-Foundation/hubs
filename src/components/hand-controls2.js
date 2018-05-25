@@ -28,6 +28,11 @@ export const CONTROLLER_OFFSETS = {
   "gearvr-controls": new THREE.Matrix4()
 };
 
+/**
+ * Converts events from various 6DoF and 3DoF controllers into hand-pose events.
+ * @namespace user-input
+ * @component hand-controls2
+ */
 AFRAME.registerComponent("hand-controls2", {
   schema: { default: "left" },
 
