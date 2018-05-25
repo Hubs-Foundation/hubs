@@ -1,5 +1,10 @@
 const CARDBOARD_BUTTON_GAMEPAD_ID = "Cardboard Button";
 
+/**
+ * Polls the Gamepad API for Cardboard Button input and emits cardboardbutton events.
+ * @namespace user-input
+ * @component cardboard-controls
+ */
 module.exports = AFRAME.registerComponent("cardboard-controls", {
   init: function() {
     this.buttons = {};

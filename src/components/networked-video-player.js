@@ -8,6 +8,11 @@ const nafConnected = function() {
   });
 };
 
+/**
+ * Instantiates and plays a network video stream, setting the video as the source material for this entity.
+ * @namespace network
+ * @component networked-video-player
+ */
 AFRAME.registerComponent("networked-video-player", {
   schema: {},
   async init() {

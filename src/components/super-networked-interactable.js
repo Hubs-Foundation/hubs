@@ -1,3 +1,8 @@
+/**
+ * Manages ownership and haptics on an interatable
+ * @namespace network
+ * @component super-networked-interactable
+ */
 AFRAME.registerComponent("super-networked-interactable", {
   schema: {
     mass: { default: 1 },

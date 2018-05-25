@@ -1,4 +1,9 @@
 const { Vector3, Quaternion, Matrix4, Euler } = THREE;
+/**
+ * Provides access to the end effectors for IK.
+ * @namespace avatar
+ * @component ik-root
+ */
 AFRAME.registerComponent("ik-root", {
   schema: {
     camera: { type: "string", default: ".camera" },
@@ -27,6 +32,11 @@ function findIKRoot(entity) {
   return entity && entity.components["ik-root"];
 }
 
+/**
+ * Performs IK on a hip-rooted skeleton to align the hip, head and hands with camera and controller inputs.
+ * @namespace avatar
+ * @component ik-controller
+ */
 AFRAME.registerComponent("ik-controller", {
   schema: {
     leftEye: { type: "string", default: ".LeftEye" },
@@ -150,7 +160,8 @@ AFRAME.registerComponent("ik-controller", {
     // Compute the head position such that the hmd position would be in line with the middleEye
     headTransform.multiplyMatrices(cameraForward, invMiddleEyeToHead);
 
-    // Then position the hips such that the head is aligned with headTransform (which positions middleEye in line with the hmd)
+    // Then position the hips such that the head is aligned with headTransform
+    // (which positions middleEye in line with the hmd)
     hips.object3D.position.setFromMatrixPosition(headTransform).add(invHipsToHeadVector);
 
     // Animate the hip rotation to follow the Y rotation of the camera with some damping.
@@ -165,7 +176,8 @@ AFRAME.registerComponent("ik-controller", {
       this.data.rotationSpeed * dt / 1000
     );
 
-    // Take the head orientation computed from the hmd, remove the Y rotation already applied to it by the hips, and apply it to the head
+    // Take the head orientation computed from the hmd, remove the Y rotation already applied to it by the hips,
+    // and apply it to the head
     invHipsQuaternion.copy(hips.object3D.quaternion).inverse();
     head.object3D.quaternion.setFromRotationMatrix(headTransform).premultiply(invHipsQuaternion);
 

@@ -336,7 +336,7 @@ const onReady = async () => {
         });
         const audio = document.getElementById("bot-recording");
         mediaStream.addTrack(audio.captureStream().getAudioTracks()[0]);
-        // wait for runner script to interact with the page so that we can play audio.
+        // Wait for runner script to interact with the page so that we can play audio.
         await new Promise(resolve => {
           window.interacted = resolve;
         });
@@ -400,6 +400,11 @@ const onReady = async () => {
       // Stop rendering while the UI is up. We restart the render loop in enterScene.
       // Wait a tick plus some margin so that the environments actually render.
       setTimeout(() => scene.renderer.animate(null), 100);
+    } else {
+      const noop = () => {};
+      // Replace renderer with a noop renderer to reduce bot resource usage.
+      scene.renderer = { animate: noop, render: noop };
+      document.body.style.display = "none";
     }
   });
   environmentRoot.appendChild(initialEnvironmentEl);

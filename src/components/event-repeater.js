@@ -1,3 +1,7 @@
+/**
+ * Listens to events from an event source and re-emits them on this entity
+ * @component event-repeater
+ */
 AFRAME.registerComponent("event-repeater", {
   schema: {
     eventSource: { type: "selector" },

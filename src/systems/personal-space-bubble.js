@@ -1,6 +1,12 @@
 const invaderPos = new AFRAME.THREE.Vector3();
 const bubblePos = new AFRAME.THREE.Vector3();
 
+/**
+ * Iterates through bubbles and invaders on every tick and sets invader state accordingly.
+ * testing multiline things
+ * @namespace avatar/personal-space-bubble
+ * @system personal-space-bubble
+ */
 AFRAME.registerSystem("personal-space-bubble", {
   schema: {
     debug: { default: false },
@@ -110,6 +116,11 @@ function createSphereGizmo(radius) {
 }
 
 // TODO: we need to come up with a more generic way of doing this as this is very specific to our avatars.
+/**
+ * Specifies a mesh associated with an invader.
+ * @namespace avatar/personal-space-bubble
+ * @component space-invader-mesh
+ */
 AFRAME.registerComponent("space-invader-mesh", {
   schema: {
     meshSelector: { type: "string" }
@@ -128,6 +139,11 @@ function findInvaderMesh(entity) {
 
 const DEBUG_OBJ = "psb-debug";
 
+/**
+ * Represents an entity that can invade a personal space bubble
+ * @namespace avatar/personal-space-bubble
+ * @component personal-space-invader
+ */
 AFRAME.registerComponent("personal-space-invader", {
   schema: {
     radius: { type: "number", default: 0.1 },
@@ -177,6 +193,11 @@ AFRAME.registerComponent("personal-space-invader", {
   }
 });
 
+/**
+ * Represents a personal space bubble on an entity.
+ * @namespace avatar/personal-space-bubble
+ * @component personal-space-bubble
+ */
 AFRAME.registerComponent("personal-space-bubble", {
   schema: {
     radius: { type: "number", default: 0.8 },
