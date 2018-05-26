@@ -31,7 +31,7 @@ yarn build
 - `quality` - Either "low" or "high". Force assets to a certain quality level
 - `mobile` - Force mobile mode
 - `no_stats` - Disable performance stats
-- `vr_entry_type` - Either "gearvr" or "daydream". Used internally to force a VR entry type
+- `vr_entry_type` - Either "2d", "vr", or "daydream". Used internally to force a VR entry type. Add "_now" to the end of the value to skip the audio check.
 - `disable_telemetry` - If `true` disables Sentry telemetry.
 - `log_filter` - A `debug` style filter for setting the logging level.
 - `debug` - If `true` performs verbose logging of Janus and NAF traffic.
