@@ -1,3 +1,4 @@
+
 // TODO: Make look speed adjustable by the user
 const HORIZONTAL_LOOK_SPEED = 0.1;
 const VERTICAL_LOOK_SPEED = 0.06;
@@ -17,6 +18,7 @@ export default class MouseEventsHandler {
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onLeftButtonDown = this.onLeftButtonDown.bind(this);
     this.onRightButtonDown = this.onRightButtonDown.bind(this);
+
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
     this.onMouseWheel = this.onMouseWheel.bind(this);
@@ -43,6 +45,7 @@ export default class MouseEventsHandler {
 
   isReady() {
     return this.cursor && this.cameraController;
+
   }
 
   addEventListeners() {

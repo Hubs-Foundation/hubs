@@ -6,6 +6,7 @@ export default class TouchEventsHandler {
   constructor() {
     this.cursor = null;
     this.cameraController = null;
+
     this.pinchEmitter = null;
     this.touches = [];
     this.touchReservedForCursor = null;
@@ -17,6 +18,7 @@ export default class TouchEventsHandler {
 
     this.registerCursor = this.registerCursor.bind(this);
     this.registerCameraController = this.registerCameraController.bind(this);
+
     this.isReady = this.isReady.bind(this);
     this.addEventListeners = this.addEventListeners.bind(this);
     this.handleTouchStart = this.handleTouchStart.bind(this);
@@ -63,6 +65,7 @@ export default class TouchEventsHandler {
 
   handleTouchStart(e) {
     this.cursor.setCursorVisibility(false);
+
     Array.prototype.forEach.call(e.changedTouches, this.singleTouchStart);
   }
 
@@ -71,6 +74,7 @@ export default class TouchEventsHandler {
       return;
     }
     if (!this.touchReservedForCursor && this.cursor.startInteractionAndForceCursorUpdate(touch)) {
+
       this.touchReservedForCursor = touch;
     }
     this.touches.push(touch);

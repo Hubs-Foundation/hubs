@@ -129,6 +129,7 @@ import MouseEventsHandler from "./utils/mouse-events-handler.js";
 import GearVRMouseEventsHandler from "./utils/gearvr-mouse-events-handler.js";
 import PrimaryActionHandler from "./utils/primary-action-handler.js";
 
+
 function qsTruthy(param) {
   const val = qs[param];
   // if the param exists but is not set (e.g. "?foo&bar"), its value is null.

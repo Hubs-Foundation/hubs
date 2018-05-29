@@ -46,6 +46,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.moveCursor = this.moveCursor.bind(this);
     this.endInteraction = this.endInteraction.bind(this);
     this.handleMouseWheel = this.handleMouseWheel.bind(this);
+
     this._handleEnterVR = this._handleEnterVR.bind(this);
     this._handleExitVR = this._handleExitVR.bind(this);
     this._handleModelLoaded = this._handleModelLoaded.bind(this);
@@ -213,6 +214,7 @@ AFRAME.registerComponent("cursor-controller", {
     cursor.emit("cursor-grab", {});
     return true;
   },
+
 
   moveCursor: function(e) {
     this.mousePos.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
