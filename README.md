@@ -32,6 +32,9 @@ yarn build
 - `mobile` - Force mobile mode
 - `no_stats` - Disable performance stats
 - `vr_entry_type` - Either "gearvr" or "daydream". Used internally to force a VR entry type
+- `disable_telemetry` - If `true` disables Sentry telemetry.
+- `log_filter` - A `debug` style filter for setting the logging level.
+- `debug` - If `true` performs verbose logging of Janus and NAF traffic.
 
 ## Additional Resources
 

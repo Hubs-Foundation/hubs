@@ -11,6 +11,11 @@ const POSES = {
 
 const NETWORK_POSES = ["allOpen", "thumbDown", "indexDown", "mrpDown", "thumbsUp", "point", "allGrip", "pinch"];
 
+/**
+ * Animates between poses based on networked pose state using an animation mixer.
+ * @namespace avatar
+ * @component hand-pose
+ */
 AFRAME.registerComponent("hand-pose", {
   multiple: true,
 
@@ -66,6 +71,11 @@ AFRAME.registerComponent("hand-pose", {
   }
 });
 
+/**
+ * Sets the networked hand pose state based on hand-pose events.
+ * @namespace avatar
+ * @component hand-pose-controller
+ */
 AFRAME.registerComponent("hand-pose-controller", {
   multiple: true,
   schema: {

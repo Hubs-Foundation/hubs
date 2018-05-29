@@ -182,3 +182,17 @@
     }
   }
 }
+
+
+.info-dialog--action-button {
+  @extend %bottom-button;
+  margin-left: 6px;
+  margin-right: 6px;
+  appearance: none;
+  width: 168px;
+  text-align: center;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  margin: auto;
+  text-decoration: none;
+}

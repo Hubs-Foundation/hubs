@@ -3,6 +3,11 @@ const TARGET_TYPE_INTERACTABLE = 2;
 const TARGET_TYPE_UI = 4;
 const TARGET_TYPE_INTERACTABLE_OR_UI = TARGET_TYPE_INTERACTABLE | TARGET_TYPE_UI;
 
+/**
+ * Controls virtual cursor behavior in various modalities to affect teleportation, interatables and UI.
+ * @namespace user-input
+ * @component cursor-controller
+ */
 AFRAME.registerComponent("cursor-controller", {
   dependencies: ["raycaster", "line"],
   schema: {

@@ -1,3 +1,8 @@
+/**
+ * Converts WASD keyboard inputs to simulated analog inputs.
+ * @namespace user-input
+ * @component wasd-to-analog2d
+ */
 AFRAME.registerComponent("wasd-to-analog2d", {
   schema: {
     analog2dOutputAction: { default: "wasd_analog2d" }

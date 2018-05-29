@@ -8,6 +8,8 @@ function deltaAngle(a, b) {
 
 /**
  * Positions the HUD and toggles app mode based on where the user is looking
+ * @namespace ui
+ * @component hud-controller
  */
 AFRAME.registerComponent("hud-controller", {
   schema: {

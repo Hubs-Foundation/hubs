@@ -1,3 +1,8 @@
+/**
+ * HUD panel for muting, freezing, and space bubble controls.
+ * @namespace ui
+ * @component in-world-hud
+ */
 AFRAME.registerComponent("in-world-hud", {
   schema: {
     haptic: { type: "selector" },

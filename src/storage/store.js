@@ -5,6 +5,7 @@ const LOCAL_STORE_KEY = "___hubs_store";
 const STORE_STATE_CACHE_KEY = Symbol();
 const validator = new Validator();
 import { EventTarget } from "event-target-shim";
+import { generateDefaultProfile, generateRandomName } from "../utils/identity.js";
 
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
@@ -59,6 +60,20 @@ export default class Store extends EventTarget {
       localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify({}));
     }
   }
+
+  // Initializes store with any default bits
+  init = () => {
+    this.update({
+      activity: {},
+      settings: {},
+      profile: { ...generateDefaultProfile(), ...(this.state.profile || {}) }
+    });
+
+    // Regenerate name to encourage users to change it.
+    if (!this.state.activity.hasChangedName) {
+      this.update({ profile: { displayName: generateRandomName() } });
+    }
+  };
 
   get state() {
     if (!this.hasOwnProperty(STORE_STATE_CACHE_KEY)) {

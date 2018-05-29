@@ -1,5 +1,10 @@
 import { CONTROLLER_OFFSETS } from "./hand-controls2.js";
 
+/**
+ * Sets the offset of the aframe-physics shape on this entity based on the current VR controller type
+ * @namespace user-input
+ * @component controls-shape-offset
+ */
 AFRAME.registerComponent("controls-shape-offset", {
   schema: {
     additionalOffset: { type: "vec3", default: { x: 0, y: -0.03, z: -0.04 } }
