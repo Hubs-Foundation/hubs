@@ -109,7 +109,7 @@ export default class PrimaryActionHandler {
     gazeTeleport.emit(button + "down");
   }
 
-  onCardboardButtonUp() {
+  onCardboardButtonUp(e) {
     if (this.isCursorInteracting) {
       this.isCursorInteracting = false;
       this.cursor.endInteraction();
