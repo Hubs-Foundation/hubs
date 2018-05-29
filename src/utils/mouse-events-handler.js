@@ -2,7 +2,7 @@
 const HORIZONTAL_LOOK_SPEED = 0.1;
 const VERTICAL_LOOK_SPEED = 0.06;
 
-export class MouseEventsHandler {
+export default class MouseEventsHandler {
   constructor() {
     this.cursor = null;
     this.cameraController = null;
@@ -111,67 +111,5 @@ export class MouseEventsHandler {
     const deltaPitch = e.movementY * VERTICAL_LOOK_SPEED * sign;
     const deltaYaw = e.movementX * HORIZONTAL_LOOK_SPEED * sign;
     this.cameraController.look(deltaPitch, deltaYaw);
-  }
-}
-
-//TODO: Finish gearvr mouse events handler
-export class GearVRMouseEventsHandler {
-  constructor() {
-    this.cursor = null;
-    this.gazeTeleporter = null;
-    this.isMouseDownHandledByCursor = false;
-    this.isMouseDownHandledByGazeTeleporter = false;
-
-    this.registerCursor = this.registerCursor.bind(this);
-    this.registerGazeTeleporter = this.registerGazeTeleporter.bind(this);
-    this.isReady = this.isReady.bind(this);
-    this.addEventListeners = this.addEventListeners.bind(this);
-    this.onMouseDown = this.onMouseDown.bind(this);
-    this.onMouseUp = this.onMouseUp.bind(this);
-  }
-
-  registerCursor(cursor) {
-    this.cursor = cursor;
-    if (this.isReady()) {
-      this.addEventListeners();
-    }
-  }
-
-  registerGazeTeleporter(gazeTeleporter) {
-    this.gazeTeleporter = gazeTeleporter;
-    if (this.isReady()) {
-      this.addEventListeners();
-    }
-  }
-
-  isReady() {
-    return this.cursor && this.gazeTeleporter;
-  }
-
-  addEventListeners() {
-    document.addEventListener("mousedown", this.onMouseDown);
-    document.addEventListener("mouseup", this.onMouseUp);
-  }
-
-  onMouseDown() {
-    this.isMouseDownHandledByCursor = this.cursor.startInteraction();
-    if (this.isMouseDownHandledByCursor) {
-      return;
-    }
-
-    this.gazeTeleporter.startTeleport();
-    this.isMouseDownHandledByGazeTeleporter = true;
-  }
-
-  onMouseUp() {
-    if (this.isMouseDownHandledByCursor) {
-      this.cursor.endInteraction();
-      this.isMouseDownHandledByCursor = false;
-    }
-
-    if (this.isMouseDownHandledByGazeTeleporter) {
-      this.gazeTeleporter.endTeleport();
-      this.isMouseDownHandledByGazeTeleporter = false;
-    }
   }
 }

@@ -124,7 +124,8 @@ import { generateDefaultProfile, generateRandomName } from "./utils/identity.js"
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 import TouchEventsHandler from "./utils/touch-events-handler.js";
-import { MouseEventsHandler, GearVRMouseEventsHandler } from "./utils/mouse-events-handler.js";
+import MouseEventsHandler from "./utils/mouse-events-handler.js";
+import GearVRMouseEventsHandler from "./utils/gearvr-mouse-events-handler.js";
 import PrimaryActionHandler from "./utils/primary-action-handler.js";
 
 function qsTruthy(param) {
@@ -230,6 +231,7 @@ const onReady = async () => {
 
   const enterScene = async (mediaStream, enterInVR, hubId) => {
     const scene = document.querySelector("a-scene");
+    scene.style.cursor = "none";
     scene.renderer.sortObjects = true;
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("canvas").classList.remove("blurred");
@@ -237,6 +239,40 @@ const onReady = async () => {
 
     if (enterInVR) {
       scene.enterVR();
+      if (isMobile) {
+        // Set up GearVR event handling
+        // TODO: Only use this when using gearvr
+        window.APP.gearvrMouseEventsHandler = new GearVRMouseEventsHandler();
+        const teleportEl = document.querySelector("#gaze-teleport");
+        if (teleportEl && teleportEl.components && teleportEl.components["teleport-controls"]) {
+          const teleportControls = teleportEl.components["teleport-controls"];
+          window.APP.gearvrMouseEventsHandler.registerGazeTeleporter(teleportControls);
+        } else {
+          const registerTeleporter = e => {
+            if (e.detail.name !== "teleport-controls") return;
+            teleportEl.removeEventListener("componentinitialized", registerTeleporter);
+            const teleportControls = teleportEl.components["teleport-controls"];
+            window.APP.gearvrMouseEventsHandler.registerGazeTeleporter(teleportControls);
+          };
+          teleportEl.addEventListener("componentinitialized", registerTeleporter);
+        }
+
+        const cursorEl = document.querySelector("#cursor-controller");
+        if (cursorEl && cursorEl.components && cursorEl.components["cursor-controller"]) {
+          const cursor = cursorEl.components["cursor-controller"];
+          window.APP.gearvrMouseEventsHandler.registerCursor(cursor);
+        } else {
+          const registerCursor = e => {
+            if (e.detail.name !== "cursor-controller") return;
+            cursorEl.removeEventListener("componentinitialized", registerCursor);
+            const cursor = cursorEl.components["cursor-controller"];
+            window.APP.gearvrMouseEventsHandler.registerCursor(cursor);
+          };
+          cursorEl.addEventListener("componentinitialized", registerCursor);
+        }
+      }
+
+      // Set up event handling for anything emitting "action_primary_down/up" and "action_grab/release"
       window.APP.primaryActionHandler = new PrimaryActionHandler(scene);
 
       const cursorEl = document.querySelector("#cursor-controller");
@@ -246,27 +282,34 @@ const onReady = async () => {
       } else {
         const registerCursor = e => {
           if (e.detail.name !== "cursor-controller") return;
+          cursorEl.removeEventListener("componentinitialized", registerCursor);
           const cursor = cursorEl.components["cursor-controller"];
           window.APP.primaryActionHandler.registerCursor(cursor);
         };
         cursorEl.addEventListener("componentinitialized", registerCursor);
       }
     } else {
-      window.APP.touchEventsHandler = new TouchEventsHandler();
-      window.APP.mouseEventsHandler = new MouseEventsHandler();
-      window.APP.gearvrMouseEventsHandler = new GearVRMouseEventsHandler(); // TODO: Use when gearvr is detected
+      if (isMobile) {
+        window.APP.touchEventsHandler = new TouchEventsHandler();
+      } else {
+        window.APP.mouseEventsHandler = new MouseEventsHandler();
+      }
 
       const camera = document.querySelector("#player-camera");
       const registerCameraController = e => {
         if (e.detail.name !== "camera-controller") return;
         camera.removeEventListener("componentinitialized", registerCameraController);
 
-        window.APP.touchEventsHandler.registerCameraController(camera.components["camera-controller"]);
-        scene.components["look-on-mobile"].registerCameraController(camera.components["camera-controller"]);
-        scene.setAttribute("look-on-mobile", "enabled", true);
+        if (window.APP.touchEventsHandler) {
+          window.APP.touchEventsHandler.registerCameraController(camera.components["camera-controller"]);
+          scene.components["look-on-mobile"].registerCameraController(camera.components["camera-controller"]);
+          scene.setAttribute("look-on-mobile", "enabled", true);
+        }
 
-        window.APP.mouseEventsHandler.registerCameraController(camera.components["camera-controller"]);
-        window.APP.mouseEventsHandler.setInverseMouseLook(qsTruthy("invertMouseLook"));
+        if (window.APP.mouseEventsHandler) {
+          window.APP.mouseEventsHandler.registerCameraController(camera.components["camera-controller"]);
+          window.APP.mouseEventsHandler.setInverseMouseLook(qsTruthy("invertMouseLook"));
+        }
       };
       camera.addEventListener("componentinitialized", registerCameraController);
       camera.setAttribute("camera-controller", "foo", "bar");
@@ -274,16 +317,25 @@ const onReady = async () => {
       const cursorEl = document.querySelector("#cursor-controller");
       if (cursorEl && cursorEl.components && cursorEl.components["cursor-controller"]) {
         const cursor = cursorEl.components["cursor-controller"];
-        window.APP.touchEventsHandler.registerPinchEmitter(cursorEl);
-        window.APP.touchEventsHandler.registerCursor(cursor);
-        window.APP.mouseEventsHandler.registerCursor(cursor);
+        if (window.APP.touchEventsHandler) {
+          window.APP.touchEventsHandler.registerPinchEmitter(cursorEl);
+          window.APP.touchEventsHandler.registerCursor(cursor);
+        }
+        if (window.APP.mouseEventsHandler) {
+          window.APP.mouseEventsHandler.registerCursor(cursor);
+        }
       } else {
         const registerCursor = e => {
           if (e.detail.name !== "cursor-controller") return;
+          cursorEl.removeEventListener("componentinitialized", registerCursor);
           const cursor = cursorEl.components["cursor-controller"];
-          window.APP.touchEventsHandler.registerPinchEmitter(cursorEl);
-          window.APP.touchEventsHandler.registerCursor(cursor);
-          window.APP.mouseEventsHandler.registerCursor(cursor);
+          if (window.APP.touchEventsHandler) {
+            window.APP.touchEventsHandler.registerPinchEmitter(cursorEl);
+            window.APP.touchEventsHandler.registerCursor(cursor);
+          }
+          if (window.APP.mouseEventsHandler) {
+            window.APP.mouseEventsHandler.registerCursor(cursor);
+          }
         };
         cursorEl.addEventListener("componentinitialized", registerCursor);
       }

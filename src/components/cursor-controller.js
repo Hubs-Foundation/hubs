@@ -126,7 +126,6 @@ AFRAME.registerComponent("cursor-controller", {
         .applyQuaternion(this.controllerQuaternion)
         .normalize();
     }
-
     this.el.setAttribute("raycaster", { origin: this.origin, direction: this.direction });
 
     let intersection = null;
@@ -293,7 +292,7 @@ AFRAME.registerComponent("cursor-controller", {
   _updateController: function() {
     this.hasPointingDevice = this.controllerQueue.length > 0 && this.inVR;
 
-    this.setCursorVisibility(this.hasPointingDevice || this.isMobile);
+    this.setCursorVisibility(this.hasPointingDevice || this.isMobile || (!this.isMobile && !this.inVR));
 
     if (this.hasPointingDevice) {
       const controllerData = this.controllerQueue[0];
