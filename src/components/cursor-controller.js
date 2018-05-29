@@ -215,7 +215,6 @@ AFRAME.registerComponent("cursor-controller", {
     return true;
   },
 
-
   moveCursor: function(e) {
     this.mousePos.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
   },

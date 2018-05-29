@@ -1,4 +1,3 @@
-
 // TODO: Make look speed adjustable by the user
 const HORIZONTAL_LOOK_SPEED = 0.1;
 const VERTICAL_LOOK_SPEED = 0.06;
@@ -45,7 +44,6 @@ export default class MouseEventsHandler {
 
   isReady() {
     return this.cursor && this.cameraController;
-
   }
 
   addEventListeners() {

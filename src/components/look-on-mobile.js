@@ -75,7 +75,6 @@ AFRAME.registerComponent("look-on-mobile", {
     const dX = THREE.Math.RAD2DEG * difference(hmdEuler.x, this.prevX);
     const dY = THREE.Math.RAD2DEG * difference(hmdEuler.y, this.prevY);
 
-
     this.dXBuffer.push(Math.abs(dX) < 0.001 ? 0 : dX);
     this.dYBuffer.push(Math.abs(dY) < 0.001 ? 0 : dY);
 

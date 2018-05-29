@@ -74,7 +74,6 @@ export default class TouchEventsHandler {
       return;
     }
     if (!this.touchReservedForCursor && this.cursor.startInteractionAndForceCursorUpdate(touch)) {
-
       this.touchReservedForCursor = touch;
     }
     this.touches.push(touch);
