@@ -1,7 +1,6 @@
 const VIRTUAL_JOYSTICK_HEIGHT = 0.8;
 const HORIZONTAL_LOOK_SPEED = 0.35;
 const VERTICAL_LOOK_SPEED = 0.18;
-const PI_4 = Math.PI / 4;
 
 //TODO: Oculus Touch controls emit touch events (wat), so we have to filter those out.
 export default class TouchEventsHandler {

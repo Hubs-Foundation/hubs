@@ -1,5 +1,4 @@
 const PolyfillControls = AFRAME.utils.device.PolyfillControls;
-const PI_4 = Math.PI / 4;
 const TWOPI = Math.PI * 2;
 
 const abs = Math.abs;
@@ -64,7 +63,7 @@ AFRAME.registerComponent("look-on-mobile", {
     this.cameraController = cameraController;
   },
 
-  tick(t, dt) {
+  tick() {
     if (!this.data.enabled) return;
     const scene = this.el.sceneEl;
     if (scene.is("vr-mode") && scene.checkHeadsetConnected()) return; // TODO: Why would this be ticking if we're in vr-mode?

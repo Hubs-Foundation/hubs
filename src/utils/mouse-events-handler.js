@@ -114,6 +114,7 @@ export class MouseEventsHandler {
   }
 }
 
+//TODO: Finish gearvr mouse events handler
 export class GearVRMouseEventsHandler {
   constructor() {
     this.cursor = null;
@@ -152,7 +153,7 @@ export class GearVRMouseEventsHandler {
     document.addEventListener("mouseup", this.onMouseUp);
   }
 
-  onMouseDown(e) {
+  onMouseDown() {
     this.isMouseDownHandledByCursor = this.cursor.startInteraction();
     if (this.isMouseDownHandledByCursor) {
       return;
@@ -162,7 +163,7 @@ export class GearVRMouseEventsHandler {
     this.isMouseDownHandledByGazeTeleporter = true;
   }
 
-  onMouseUp(e) {
+  onMouseUp() {
     if (this.isMouseDownHandledByCursor) {
       this.cursor.endInteraction();
       this.isMouseDownHandledByCursor = false;

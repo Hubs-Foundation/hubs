@@ -252,8 +252,9 @@ const onReady = async () => {
         cursorEl.addEventListener("componentinitialized", registerCursor);
       }
     } else {
-      window.APP.touchEventsHandler = new TouchEventsHandler(); // TODO: Do not create TouchEventsHandler unless on mobile
+      window.APP.touchEventsHandler = new TouchEventsHandler();
       window.APP.mouseEventsHandler = new MouseEventsHandler();
+      window.APP.gearvrMouseEventsHandler = new GearVRMouseEventsHandler(); // TODO: Use when gearvr is detected
 
       const camera = document.querySelector("#player-camera");
       const registerCameraController = e => {
