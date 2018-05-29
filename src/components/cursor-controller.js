@@ -69,8 +69,6 @@ AFRAME.registerComponent("cursor-controller", {
     window.addEventListener("enter-vr", this._handleEnterVR);
     window.addEventListener("exit-vr", this._handleExitVR);
 
-    //this.data.playerRig.addEventListener("cardboardbuttondown", this._handlePrimaryDown);
-    //this.data.playerRig.addEventListener("cardboardbuttonup", this._handlePrimaryUp);
     this.data.playerRig.addEventListener("model-loaded", this._handleModelLoaded);
 
     this.el.sceneEl.addEventListener("controllerconnected", this._handleControllerConnected);
@@ -80,9 +78,6 @@ AFRAME.registerComponent("cursor-controller", {
   pause: function() {
     window.removeEventListener("enter-vr", this._handleEnterVR);
     window.removeEventListener("exit-vr", this._handleExitVR);
-
-    //this.data.playerRig.removeEventListener("cardboardbuttondown", this._handlePrimaryDown);
-    //this.data.playerRig.removeEventListener("cardboardbuttonup", this._handlePrimaryUp);
 
     this.data.playerRig.removeEventListener("model-loaded", this._handleModelLoaded);
 

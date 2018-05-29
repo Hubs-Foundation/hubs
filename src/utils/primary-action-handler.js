@@ -11,6 +11,8 @@ export default class PrimaryActionHandler {
     this.onPrimaryUp = this.onPrimaryUp.bind(this);
     this.onGrab = this.onGrab.bind(this);
     this.onRelease = this.onRelease.bind(this);
+    this.onCardboardButtonDown = this.onCardboardButtonDown.bind(this);
+    this.onCardboardButtonUp = this.onCardboardButtonUp.bind(this);
   }
 
   registerCursor(cursor) {
@@ -29,6 +31,8 @@ export default class PrimaryActionHandler {
     this.scene.addEventListener("action_primary_up", this.onPrimaryUp);
     this.scene.addEventListener("action_grab", this.onGrab);
     this.scene.addEventListener("action_release", this.onRelease);
+    this.scene.addEventListener("cardboardbuttondown", this.onCardboardButtonDown);
+    this.scene.addEventListener("cardboardbuttonup", this.onCardboardButtonUp);
   }
 
   onGrab(e) {
@@ -57,7 +61,6 @@ export default class PrimaryActionHandler {
     }
   }
 
-  // "Primary" buttons interact with super hands, the cursor, and teleport controls
   onPrimaryDown(e) {
     if (e.target.id.match(this.cursor.data.handedness)) {
       if (this.isCursorInteracting) {
@@ -91,5 +94,32 @@ export default class PrimaryActionHandler {
     this.cursor.setCursorVisibility(true);
     const button = e.target.components["teleport-controls"].data.button;
     e.target.emit(button + "up");
+  }
+
+  onCardboardButtonDown(e) {
+    this.isCursorInteracting = this.cursor.startInteraction();
+    if (this.isCursorInteracting) {
+      return;
+    }
+
+    this.cursor.setCursorVisibility(false);
+
+    const gazeTeleport = e.target.querySelector("#gaze-teleport");
+    const button = gazeTeleport.components["teleport-controls"].data.button;
+    gazeTeleport.emit(button + "down");
+  }
+
+  onCardboardButtonUp() {
+    if (this.isCursorInteracting) {
+      this.isCursorInteracting = false;
+      this.cursor.endInteraction();
+      return;
+    }
+
+    this.cursor.setCursorVisibility(true);
+
+    const gazeTeleport = e.target.querySelector("#gaze-teleport");
+    const button = gazeTeleport.components["teleport-controls"].data.button;
+    gazeTeleport.emit(button + "up");
   }
 }
