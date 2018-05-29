@@ -78,6 +78,7 @@ const config = {
   entry: {
     index: path.join(__dirname, "src", "index.js"),
     hub: path.join(__dirname, "src", "hub.js"),
+    link: path.join(__dirname, "src", "link.js"),
     "avatar-selector": path.join(__dirname, "src", "avatar-selector.js")
   },
   output: {
@@ -193,6 +194,11 @@ const config = {
       template: path.join(__dirname, "src", "hub.html"),
       chunks: ["hub"],
       inject: "head"
+    }),
+    new HTMLWebpackPlugin({
+      filename: "link.html",
+      template: path.join(__dirname, "src", "link.html"),
+      chunks: ["link"]
     }),
     new HTMLWebpackPlugin({
       filename: "avatar-selector.html",

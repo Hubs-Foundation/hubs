@@ -1,6 +1,11 @@
 import nipplejs from "nipplejs";
 import styles from "./virtual-gamepad-controls.css";
 
+/**
+ * Instantiates 2D virtual gamepads and emits associated events.
+ * @namespace user-input
+ * @component virtual-gamepad-controls
+ */
 AFRAME.registerComponent("virtual-gamepad-controls", {
   schema: {},
 

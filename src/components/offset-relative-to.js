@@ -1,3 +1,7 @@
+/**
+ * Positions an entity relative to a given target when the given event is fired.
+ * @component offset-relative-to
+ */
 AFRAME.registerComponent("offset-relative-to", {
   schema: {
     target: {

@@ -1,3 +1,8 @@
+/**
+ * Spawns networked objects when grabbed.
+ * @namespace network
+ * @component super-spawner
+ */
 AFRAME.registerComponent("super-spawner", {
   schema: {
     template: { default: "" },
