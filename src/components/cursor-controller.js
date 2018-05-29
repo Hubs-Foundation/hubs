@@ -15,11 +15,7 @@ AFRAME.registerComponent("cursor-controller", {
     maxDistance: { default: 3 },
     minDistance: { default: 0.5 },
     cursorColorHovered: { default: "#2F80ED" },
-    cursorColorUnhovered: { default: "#FFFFFF" },
-    primaryDown: { default: "action_primary_down" },
-    primaryUp: { default: "action_primary_up" },
-    grabEvent: { default: "action_grab" },
-    releaseEvent: { default: "action_release" }
+    cursorColorUnhovered: { default: "#FFFFFF" }
   },
 
   init: function() {
@@ -27,7 +23,6 @@ AFRAME.registerComponent("cursor-controller", {
     this.isMobile = AFRAME.utils.device.isMobile();
     this.hasPointingDevice = false;
     this.currentTargetType = TARGET_TYPE_NONE;
-    this.grabStarting = false;
     this.currentDistance = this.data.maxDistance;
     this.currentDistanceMod = 0;
     this.mousePos = new THREE.Vector2();
@@ -41,17 +36,11 @@ AFRAME.registerComponent("cursor-controller", {
 
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
-    window.APP.touchEventsHandler.registerPinchEmitter(this.el);
-    window.APP.touchEventsHandler.registerCursor(this);
-    window.APP.mouseEventsHandler.registerCursor(this);
-    window.APP.primaryActionHandler.registerCursor(this);
-
     this.startInteractionAndForceCursorUpdate = this.startInteractionAndForceCursorUpdate.bind(this);
     this.startInteraction = this.startInteraction.bind(this);
     this.moveCursor = this.moveCursor.bind(this);
     this.endInteraction = this.endInteraction.bind(this);
     this.handleMouseWheel = this.handleMouseWheel.bind(this);
-
     this._handleEnterVR = this._handleEnterVR.bind(this);
     this._handleExitVR = this._handleExitVR.bind(this);
     this._handleModelLoaded = this._handleModelLoaded.bind(this);
@@ -80,10 +69,6 @@ AFRAME.registerComponent("cursor-controller", {
     window.addEventListener("enter-vr", this._handleEnterVR);
     window.addEventListener("exit-vr", this._handleExitVR);
 
-    //    this.data.playerRig.addEventListener(this.data.primaryDown, this._handlePrimaryDown);
-    //    this.data.playerRig.addEventListener(this.data.primaryUp, this._handlePrimaryUp);
-    //this.data.playerRig.addEventListener(this.data.grabEvent, this._handlePrimaryDown);
-    //this.data.playerRig.addEventListener(this.data.releaseEvent, this._handlePrimaryUp);
     //this.data.playerRig.addEventListener("cardboardbuttondown", this._handlePrimaryDown);
     //this.data.playerRig.addEventListener("cardboardbuttonup", this._handlePrimaryUp);
     this.data.playerRig.addEventListener("model-loaded", this._handleModelLoaded);
@@ -96,12 +81,8 @@ AFRAME.registerComponent("cursor-controller", {
     window.removeEventListener("enter-vr", this._handleEnterVR);
     window.removeEventListener("exit-vr", this._handleExitVR);
 
-    //this.data.playerRig.removeEventListener(this.data.primaryDown, this._handlePrimaryDown);
-    //this.data.playerRig.removeEventListener(this.data.primaryUp, this._handlePrimaryUp);
-    //this.data.playerRig.removeEventListener(this.data.grabEvent, this._handlePrimaryDown);
-    //this.data.playerRig.removeEventListener(this.data.releaseEvent, this._handlePrimaryUp);
-    this.data.playerRig.removeEventListener("cardboardbuttondown", this._handlePrimaryDown);
-    this.data.playerRig.removeEventListener("cardboardbuttonup", this._handlePrimaryUp);
+    //this.data.playerRig.removeEventListener("cardboardbuttondown", this._handlePrimaryDown);
+    //this.data.playerRig.removeEventListener("cardboardbuttonup", this._handlePrimaryUp);
 
     this.data.playerRig.removeEventListener("model-loaded", this._handleModelLoaded);
 
@@ -119,7 +100,9 @@ AFRAME.registerComponent("cursor-controller", {
         this.currentTargetType = TARGET_TYPE_NONE;
       }
       this.wasPhysicalHandGrabbing = isPhysicalHandGrabbing;
-      if (isPhysicalHandGrabbing) return;
+      if (isPhysicalHandGrabbing) {
+        return;
+      }
     }
 
     //set raycaster origin/direction
@@ -223,7 +206,7 @@ AFRAME.registerComponent("cursor-controller", {
     raycasterComp.checkIntersections();
     const intersections = raycasterComp.intersections;
     if (intersections.length === 0 || intersections[0].distance >= this.data.maxDistance) {
-      return;
+      return false;
     }
     cursor.object3D.position.copy(intersections[0].point);
     // Cursor position must be synced to physics before constraint is created

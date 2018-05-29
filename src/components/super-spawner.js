@@ -5,7 +5,7 @@ AFRAME.registerComponent("super-spawner", {
     spawnPosition: { type: "vec3" },
     useCustomSpawnRotation: { default: false },
     spawnRotation: { type: "vec4" },
-    events: { default: ["cursor-grab", "action_grab"] },
+    events: { default: ["cursor-grab", "hand_grab"] },
     spawnCooldown: { default: 1 }
   },
 

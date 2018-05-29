@@ -184,9 +184,9 @@
                 super-hands="
                     colliderEvent: collisions; colliderEventProperty: els;
                     colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
-                    grabStartButtons: action_grab; grabEndButtons: action_release;
-                    stretchStartButtons: action_grab; stretchEndButtons: action_release;
-                    dragDropStartButtons: action_grab; dragDropEndButtons: action_release;"
+                    grabStartButtons: hand_grab; grabEndButtons: hand_release;
+                    stretchStartButtons: hand_grab; stretchEndButtons: hand_release;
+                    dragDropStartButtons: hand_grab; dragDropEndButtons: hand_release;"
                 collision-filter="collisionForces: false"
                 physics-collider
             ></a-mixin>
@@ -266,7 +266,7 @@
                     teleport-controls="
                     cameraRig: #player-rig;
                     teleportOrigin: #player-camera;
-                    button: cursor-teleport_;
+                    button: gaze-teleport_;
                     collisionEntities: [nav-mesh];
                     drawIncrementally: true;
                     incrementalDrawMs: 600;

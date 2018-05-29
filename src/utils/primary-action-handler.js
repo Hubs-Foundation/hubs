@@ -1,18 +1,16 @@
 export default class PrimaryActionHandler {
   constructor(scene) {
-    this.cursor = null;
-    this.handledByCursor = false;
-    this.handledByTeleport = false;
-
-    this.rightTeleporter = null;
-    this.leftTeleporter = null;
     this.scene = scene;
+    this.cursor = null;
+    this.isCursorInteracting = false;
 
     this.registerCursor = this.registerCursor.bind(this);
     this.isReady = this.isReady.bind(this);
     this.addEventListeners = this.addEventListeners.bind(this);
     this.onPrimaryDown = this.onPrimaryDown.bind(this);
     this.onPrimaryUp = this.onPrimaryUp.bind(this);
+    this.onGrab = this.onGrab.bind(this);
+    this.onRelease = this.onRelease.bind(this);
   }
 
   registerCursor(cursor) {
@@ -29,35 +27,69 @@ export default class PrimaryActionHandler {
   addEventListeners() {
     this.scene.addEventListener("action_primary_down", this.onPrimaryDown);
     this.scene.addEventListener("action_primary_up", this.onPrimaryUp);
+    this.scene.addEventListener("action_grab", this.onGrab);
+    this.scene.addEventListener("action_release", this.onRelease);
   }
 
-  onPrimaryDown(e) {
-    this.handledByCursor = this.cursor.startInteraction();
-    if (this.handledByCursor) return;
-    this.cursor.setCursorVisibility(false);
-
-    // Do teleport things.
-    if (!e.target.components["teleport-controls"]) {
-      console.error("no teleport controls");
+  onGrab(e) {
+    if (e.target.id.match(this.cursor.data.handedness)) {
+      if (this.isCursorInteracting) {
+        return;
+      } else if (e.target.components["super-hands"].state.has("hover-start")) {
+        e.target.emit("hand_grab");
+        return;
+      } else {
+        this.isCursorInteracting = this.cursor.startInteraction();
+        return;
+      }
+    } else {
+      e.target.emit("hand_grab");
+      return;
     }
+  }
+
+  onRelease(e) {
+    if (e.target.id.match(this.cursor.data.handedness) && this.isCursorInteracting) {
+      this.isCursorInteracting = false;
+      this.cursor.endInteraction();
+    } else {
+      e.target.emit("hand_release");
+    }
+  }
+
+  // "Primary" buttons interact with super hands, the cursor, and teleport controls
+  onPrimaryDown(e) {
+    if (e.target.id.match(this.cursor.data.handedness)) {
+      if (this.isCursorInteracting) {
+        return;
+      } else if (e.target.components["super-hands"].state.has("hover-start")) {
+        e.target.emit("hand_grab");
+        return;
+      } else {
+        this.isCursorInteracting = this.cursor.startInteraction();
+        if (this.isCursorInteracting) return;
+      }
+    }
+
+    this.cursor.setCursorVisibility(false);
     const button = e.target.components["teleport-controls"].data.button;
     e.target.emit(button + "down");
   }
 
   onPrimaryUp(e) {
-    if (this.handledByCursor) {
+    if (e.target.id.match(this.cursor.data.handedness) && this.isCursorInteracting) {
+      this.isCursorInteracting = false;
       this.cursor.endInteraction();
       return;
     }
 
-    // Do teleport things.
-    if (!e.target.components["teleport-controls"]) {
-      console.error("no teleport controls");
+    // TODO: Figure out if this event target is grabbing something, then decide whether to end the teleport or end the grab
+    if (e.target.components["super-hands"].state.has("grab-start")) {
+      e.target.emit("hand_release");
     }
+
+    this.cursor.setCursorVisibility(true);
     const button = e.target.components["teleport-controls"].data.button;
     e.target.emit(button + "up");
-
-    // Show cursor
-    this.cursor.setCursorVisibility(true);
   }
 }

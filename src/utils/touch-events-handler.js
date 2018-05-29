@@ -64,6 +64,8 @@ export default class TouchEventsHandler {
   }
 
   handleTouchStart(e) {
+    console.log(e);
+    this.cursor.setCursorVisibility(false);
     Array.prototype.forEach.call(e.changedTouches, this.singleTouchStart);
   }
 

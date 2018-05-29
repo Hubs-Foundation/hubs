@@ -126,8 +126,6 @@ import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 import TouchEventsHandler from "./utils/touch-events-handler.js";
 import { MouseEventsHandler, GearVRMouseEventsHandler } from "./utils/mouse-events-handler.js";
 import PrimaryActionHandler from "./utils/primary-action-handler.js";
-window.APP.touchEventsHandler = new TouchEventsHandler(); // TODO: Do not create TouchEventsHandler unless on mobile
-window.APP.mouseEventsHandler = new MouseEventsHandler();
 
 function qsTruthy(param) {
   const val = qs[param];
@@ -187,7 +185,6 @@ function mountUI(scene, props = {}) {
 
 const onReady = async () => {
   const scene = document.querySelector("a-scene");
-  window.APP.primaryActionHandler = new PrimaryActionHandler(scene);
   const hubChannel = new HubChannel(store);
 
   document.querySelector("canvas").classList.add("blurred");
@@ -240,24 +237,58 @@ const onReady = async () => {
 
     if (enterInVR) {
       scene.enterVR();
+      window.APP.primaryActionHandler = new PrimaryActionHandler(scene);
+
+      const cursorEl = document.querySelector("#cursor-controller");
+      if (cursorEl && cursorEl.components && cursorEl.components["cursor-controller"]) {
+        const cursor = cursorEl.components["cursor-controller"];
+        window.APP.primaryActionHandler.registerCursor(cursor);
+      } else {
+        const registerCursor = e => {
+          if (e.detail.name !== "cursor-controller") return;
+          const cursor = cursorEl.components["cursor-controller"];
+          window.APP.primaryActionHandler.registerCursor(cursor);
+        };
+        cursorEl.addEventListener("componentinitialized", registerCursor);
+      }
+    } else {
+      window.APP.touchEventsHandler = new TouchEventsHandler(); // TODO: Do not create TouchEventsHandler unless on mobile
+      window.APP.mouseEventsHandler = new MouseEventsHandler();
+
+      const camera = document.querySelector("#player-camera");
+      const registerCameraController = e => {
+        if (e.detail.name !== "camera-controller") return;
+        camera.removeEventListener("componentinitialized", registerCameraController);
+
+        window.APP.touchEventsHandler.registerCameraController(camera.components["camera-controller"]);
+        scene.components["look-on-mobile"].registerCameraController(camera.components["camera-controller"]);
+        scene.setAttribute("look-on-mobile", "enabled", true);
+
+        window.APP.mouseEventsHandler.registerCameraController(camera.components["camera-controller"]);
+        window.APP.mouseEventsHandler.setInverseMouseLook(qsTruthy("invertMouseLook"));
+      };
+      camera.addEventListener("componentinitialized", registerCameraController);
+      camera.setAttribute("camera-controller", "foo", "bar");
+
+      const cursorEl = document.querySelector("#cursor-controller");
+      if (cursorEl && cursorEl.components && cursorEl.components["cursor-controller"]) {
+        const cursor = cursorEl.components["cursor-controller"];
+        window.APP.touchEventsHandler.registerPinchEmitter(cursorEl);
+        window.APP.touchEventsHandler.registerCursor(cursor);
+        window.APP.mouseEventsHandler.registerCursor(cursor);
+      } else {
+        const registerCursor = e => {
+          if (e.detail.name !== "cursor-controller") return;
+          const cursor = cursorEl.components["cursor-controller"];
+          window.APP.touchEventsHandler.registerPinchEmitter(cursorEl);
+          window.APP.touchEventsHandler.registerCursor(cursor);
+          window.APP.mouseEventsHandler.registerCursor(cursor);
+        };
+        cursorEl.addEventListener("componentinitialized", registerCursor);
+      }
     }
 
     AFRAME.registerInputActions(inGameActions, "default");
-
-    const camera = document.querySelector("#player-camera");
-    const registerCameraController = e => {
-      if (e.detail.name !== "camera-controller") return;
-      camera.removeEventListener("componentinitialized", registerCameraController);
-
-      window.APP.touchEventsHandler.registerCameraController(camera.components["camera-controller"]);
-      scene.components["look-on-mobile"].registerCameraController(camera.components["camera-controller"]);
-      scene.setAttribute("look-on-mobile", "enabled", true);
-
-      window.APP.mouseEventsHandler.registerCameraController(camera.components["camera-controller"]);
-      window.APP.mouseEventsHandler.setInverseMouseLook(qsTruthy("invertMouseLook"));
-    };
-    camera.addEventListener("componentinitialized", registerCameraController);
-    camera.setAttribute("camera-controller", "foo", "bar");
 
     scene.setAttribute("networked-scene", {
       room: hubId,
