@@ -83,7 +83,7 @@ const config = {
         thumbsticktouchend: "thumb_up",
         triggerdown: ["action_grab", "index_down"],
         triggerup: ["action_release", "index_up"],
-        "axismove.reverseY": { left: "move" },
+        "axismove.reverseY": { left: "move", right: "move_duck" },
         abuttondown: "action_primary_down",
         abuttonup: "action_primary_up"
       },
@@ -107,7 +107,7 @@ const config = {
         trackpadtouchend: "thumb_up",
         triggerdown: ["action_grab", "index_down"],
         triggerup: ["action_release", "index_up"],
-        axisMoveWithDeadzone: { left: "move" }
+        axisMoveWithDeadzone: { left: "move", right: "move_duck" }
       },
       "daydream-controls": {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",

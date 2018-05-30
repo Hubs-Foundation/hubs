@@ -13,6 +13,7 @@ export default class PrimaryActionHandler {
     this.onRelease = this.onRelease.bind(this);
     this.onCardboardButtonDown = this.onCardboardButtonDown.bind(this);
     this.onCardboardButtonUp = this.onCardboardButtonUp.bind(this);
+    this.onMoveDuck = this.onMoveDuck.bind(this);
   }
 
   registerCursor(cursor) {
@@ -33,6 +34,13 @@ export default class PrimaryActionHandler {
     this.scene.addEventListener("action_release", this.onRelease);
     this.scene.addEventListener("cardboardbuttondown", this.onCardboardButtonDown);
     this.scene.addEventListener("cardboardbuttonup", this.onCardboardButtonUp);
+    this.scene.addEventListener("move_duck", this.onMoveDuck);
+  }
+
+  onMoveDuck(e) {
+    if (this.isCursorInteracting) {
+      this.cursor.changeDistanceMod(-e.detail.axis[1] / 8);
+    }
   }
 
   onGrab(e) {

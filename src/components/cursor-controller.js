@@ -46,6 +46,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.moveCursor = this.moveCursor.bind(this);
     this.endInteraction = this.endInteraction.bind(this);
     this.handleMouseWheel = this.handleMouseWheel.bind(this);
+    this.changeDistanceMod = this.changeDistanceMod.bind(this);
 
     this._handleEnterVR = this._handleEnterVR.bind(this);
     this._handleExitVR = this._handleExitVR.bind(this);
@@ -229,6 +230,10 @@ AFRAME.registerComponent("cursor-controller", {
       return true;
     }
     return false;
+  },
+
+  changeDistanceMod: function(delta) {
+    this.currentDistanceMod += delta;
   },
 
   handleMouseWheel: function(e) {
