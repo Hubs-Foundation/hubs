@@ -42,6 +42,8 @@ export default class GearVRMouseEventsHandler {
       return;
     }
 
+    this.cursor.setCursorVisibility(false);
+
     const button = this.gazeTeleporter.data.button;
     this.gazeTeleporter.el.emit(button + "down");
     this.isMouseDownHandledByGazeTeleporter = true;
@@ -52,6 +54,8 @@ export default class GearVRMouseEventsHandler {
       this.cursor.endInteraction();
       this.isMouseDownHandledByCursor = false;
     }
+
+    this.cursor.setCursorVisibility(true);
 
     if (this.isMouseDownHandledByGazeTeleporter) {
       const button = this.gazeTeleporter.data.button;
