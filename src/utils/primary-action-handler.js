@@ -23,7 +23,7 @@ export default class PrimaryActionHandler {
   }
 
   isReady() {
-    return this.cursor; // && this.rightTeleporter && this.leftTeleporter;
+    return this.cursor;
   }
 
   addEventListeners() {
@@ -86,7 +86,6 @@ export default class PrimaryActionHandler {
       return;
     }
 
-    // TODO: Figure out if this event target is grabbing something, then decide whether to end the teleport or end the grab
     if (e.target.components["super-hands"].state.has("grab-start")) {
       e.target.emit("hand_release");
     }
