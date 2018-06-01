@@ -184,7 +184,7 @@
                 ></a-entity>
             </template>
 
-            <a-mixin id="super-hands"
+            <a-mixin id="controller-super-hands"
                 super-hands="
                     colliderEvent: collisions; colliderEventProperty: els;
                     colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
@@ -295,7 +295,7 @@
                     missOpacity: 0.2;"
                 haptic-feedback
                 body="type: static; shape: none;"
-                mixin="super-hands"
+                mixin="controller-super-hands"
                 controls-shape-offset
             >
             </a-entity>
@@ -316,7 +316,7 @@
                     missOpacity: 0.2;"
                 haptic-feedback
                 body="type: static; shape: none;"
-                mixin="super-hands"
+                mixin="controller-super-hands"
                 controls-shape-offset
             ></a-entity>
 

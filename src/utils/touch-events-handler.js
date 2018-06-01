@@ -73,8 +73,12 @@ export default class TouchEventsHandler {
     if (touch.clientY / window.innerHeight >= VIRTUAL_JOYSTICK_HEIGHT) {
       return;
     }
-    if (!this.touchReservedForCursor && this.cursor.startInteractionAndForceCursorUpdate(touch)) {
-      this.touchReservedForCursor = touch;
+    if (!this.touchReservedForCursor) {
+      this.cursor.moveCursor(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
+      this.cursor.forceCursorUpdate();
+      if (this.cursor.startInteraction()) {
+        this.touchReservedForCursor = touch;
+      }
     }
     this.touches.push(touch);
   }
@@ -89,7 +93,7 @@ export default class TouchEventsHandler {
 
   singleTouchMove(touch) {
     if (this.touchReservedForCursor && touch.identifier === this.touchReservedForCursor.identifier) {
-      this.cursor.moveCursor(touch);
+      this.cursor.moveCursor(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
       return;
     }
     if (touch.clientY / window.innerHeight >= VIRTUAL_JOYSTICK_HEIGHT) return;
@@ -117,7 +121,10 @@ export default class TouchEventsHandler {
     }
     if (touch.identifier === this.touchReservedForLookControls.identifier) {
       if (!this.touchReservedForCursor) {
-        this.cursor.moveCursor(touch);
+        this.cursor.moveCursor(
+          touch.clientX / window.innerWidth * 2 - 1,
+          -(touch.clientY / window.innerHeight) * 2 + 1
+        );
       }
       this.look(this.touchReservedForLookControls, touch);
       this.touchReservedForLookControls = touch;

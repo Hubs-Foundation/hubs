@@ -41,11 +41,10 @@ AFRAME.registerComponent("cursor-controller", {
 
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
-    this.startInteractionAndForceCursorUpdate = this.startInteractionAndForceCursorUpdate.bind(this);
+    this.forceCursorUpdate = this.forceCursorUpdate.bind(this);
     this.startInteraction = this.startInteraction.bind(this);
     this.moveCursor = this.moveCursor.bind(this);
     this.endInteraction = this.endInteraction.bind(this);
-    this.handleMouseWheel = this.handleMouseWheel.bind(this);
     this.changeDistanceMod = this.changeDistanceMod.bind(this);
 
     this._handleEnterVR = this._handleEnterVR.bind(this);
@@ -195,33 +194,29 @@ AFRAME.registerComponent("cursor-controller", {
     this.el.setAttribute("line", { visible: visible && this.hasPointingDevice });
   },
 
-  startInteractionAndForceCursorUpdate: function(touch) {
+  forceCursorUpdate: function() {
     // Update the ray and cursor positions
     const raycasterComp = this.el.components.raycaster;
     const raycaster = raycasterComp.raycaster;
     const camera = this.data.camera.components.camera.camera;
     const cursor = this.data.cursor;
-    this.mousePos.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(this.mousePos, camera);
     this.el.setAttribute("raycaster", { origin: raycaster.ray.origin, direction: raycaster.ray.direction });
     raycasterComp.checkIntersections();
     const intersections = raycasterComp.intersections;
-    if (intersections.length === 0 || intersections[0].distance >= this.data.maxDistance) {
-      return false;
+    if (intersections.length === 0 || intersections[0].distance > this.data.maxDistance) {
+      this.currentTargetType = TARGET_TYPE_NONE;
+      return;
     }
-    cursor.object3D.position.copy(intersections[0].point);
+    const intersection = intersections[0];
+    if (intersection.object.el.matches(".interactable, .interactable *")) {
+      this.currentTargetType = TARGET_TYPE_INTERACTABLE;
+    } else if (intersection.object.el.matches(".ui, .ui *")) {
+      this.currentTargetType = TARGET_TYPE_UI;
+    }
+    cursor.object3D.position.copy(intersection.point);
     // Cursor position must be synced to physics before constraint is created
     cursor.components["static-body"].syncToPhysics();
-    cursor.emit("cursor-grab", {});
-    return true;
-  },
-
-  moveCursor: function(e) {
-    this.mousePos.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
-  },
-
-  endInteraction: function() {
-    this.data.cursor.emit("cursor-release", {});
   },
 
   startInteraction: function() {
@@ -232,24 +227,16 @@ AFRAME.registerComponent("cursor-controller", {
     return false;
   },
 
-  changeDistanceMod: function(delta) {
-    this.currentDistanceMod += delta;
+  moveCursor: function(x, y) {
+    this.mousePos.set(x, y);
   },
 
-  handleMouseWheel: function(e) {
-    if (this._isGrabbing()) {
-      switch (e.deltaMode) {
-        case e.DOM_DELTA_PIXEL:
-          this.currentDistanceMod += e.deltaY / 500;
-          break;
-        case e.DOM_DELTA_LINE:
-          this.currentDistanceMod += e.deltaY / 10;
-          break;
-        case e.DOM_DELTA_PAGE:
-          this.currentDistanceMod += e.deltaY / 2;
-          break;
-      }
-    }
+  endInteraction: function() {
+    this.data.cursor.emit("cursor-release", {});
+  },
+
+  changeDistanceMod: function(delta) {
+    this.currentDistanceMod += delta;
   },
 
   _handleEnterVR: function() {

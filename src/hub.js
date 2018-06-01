@@ -312,7 +312,7 @@ const onReady = async () => {
         }
       };
       camera.addEventListener("componentinitialized", registerCameraController);
-      camera.setAttribute("camera-controller", "foo", "bar");
+      camera.setAttribute("camera-controller", "");
 
       const cursorEl = document.querySelector("#cursor-controller");
       if (cursorEl && cursorEl.components && cursorEl.components["cursor-controller"]) {

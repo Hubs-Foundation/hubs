@@ -44,7 +44,7 @@ export default class PrimaryActionHandler {
   }
 
   onGrab(e) {
-    if (e.target.id.match(this.cursor.data.handedness)) {
+    if (this.cursor.controller && this.cursor.controller === e.target) {
       if (this.isCursorInteracting) {
         return;
       } else if (e.target.components["super-hands"].state.has("hover-start")) {
@@ -61,7 +61,7 @@ export default class PrimaryActionHandler {
   }
 
   onRelease(e) {
-    if (e.target.id.match(this.cursor.data.handedness) && this.isCursorInteracting) {
+    if (this.isCursorInteracting && this.cursor.controller && this.cursor.controller === e.target) {
       this.isCursorInteracting = false;
       this.cursor.endInteraction();
     } else {
@@ -70,7 +70,7 @@ export default class PrimaryActionHandler {
   }
 
   onPrimaryDown(e) {
-    if (e.target.id.match(this.cursor.data.handedness)) {
+    if (this.cursor.controller && this.cursor.controller === e.target) {
       if (this.isCursorInteracting) {
         return;
       } else if (e.target.components["super-hands"].state.has("hover-start")) {
@@ -88,7 +88,7 @@ export default class PrimaryActionHandler {
   }
 
   onPrimaryUp(e) {
-    if (e.target.id.match(this.cursor.data.handedness) && this.isCursorInteracting) {
+    if (this.isCursorInteracting && this.cursor.controller && this.cursor.controller === e.target) {
       this.isCursorInteracting = false;
       this.cursor.endInteraction();
       return;

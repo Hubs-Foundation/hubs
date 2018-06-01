@@ -84,7 +84,17 @@ export default class MouseEventsHandler {
   }
 
   onMouseWheel(e) {
-    this.cursor.handleMouseWheel(e);
+    switch (e.deltaMode) {
+      case e.DOM_DELTA_PIXEL:
+        this.cursor.changeDistanceMod(e.deltaY / 500);
+        break;
+      case e.DOM_DELTA_LINE:
+        this.cursor.changeDistanceMod(e.deltaY / 10);
+        break;
+      case e.DOM_DELTA_PAGE:
+        this.cursor.changeDistanceMod(e.deltaY / 2);
+        break;
+    }
   }
 
   onMouseMove(e) {
@@ -93,7 +103,7 @@ export default class MouseEventsHandler {
       this.look(e);
     }
 
-    this.cursor.moveCursor(e);
+    this.cursor.moveCursor(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
   }
 
   onMouseUp(e) {
