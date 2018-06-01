@@ -2,6 +2,7 @@ const { detect } = require("detect-browser");
 import MobileDetect from "mobile-detect";
 
 const browser = detect();
+const deviceDetect = require("device-detect")();
 const mobiledetect = new MobileDetect(navigator.userAgent);
 
 // Precision on device detection is fuzzy -- we can sometimes know if a device is definitely
@@ -54,6 +55,8 @@ export async function getAvailableVREntryTypes() {
   const isWebVRCapableBrowser = window.hasNativeWebVRImplementation;
 
   const isDaydreamCapableBrowser = !!(isWebVRCapableBrowser && browser.name === "chrome" && !isSamsungBrowser);
+  const isIDevice = ["iPhone", "iPad", "iPod"].indexOf(deviceDetect.device) > -1;
+  const isFirefoxBrowser = browser.name === "firefox";
 
   const screen = isInHMD ? VR_DEVICE_AVAILABILITY.no : VR_DEVICE_AVAILABILITY.yes;
   let generic = mobiledetect.mobile() ? VR_DEVICE_AVAILABILITY.no : VR_DEVICE_AVAILABILITY.maybe;
@@ -64,9 +67,10 @@ export async function getAvailableVREntryTypes() {
   // Browser for now since Samsung Internet requires an additional WebVR installation + flag, so return "maybe".
   //
   // If we are in Oculus Browser (ie, we are literally wearing a GearVR) then return 'yes'.
-  const gearvr = isMaybeGearVRCompatibleDevice()
-    ? isOculusBrowser ? VR_DEVICE_AVAILABILITY.yes : VR_DEVICE_AVAILABILITY.maybe
-    : VR_DEVICE_AVAILABILITY.no;
+  let gearvr = VR_DEVICE_AVAILABILITY.no;
+  if (isMaybeGearVRCompatibleDevice()) {
+    gearvr = isOculusBrowser ? VR_DEVICE_AVAILABILITY.yes : VR_DEVICE_AVAILABILITY.maybe;
+  }
 
   // For daydream detection, we first check if they are on an Android compatible device, and assume they
   // may support daydream *unless* this browser has WebVR capabilities, in which case we can do better.
@@ -83,12 +87,15 @@ export async function getAvailableVREntryTypes() {
       ? VR_DEVICE_AVAILABILITY.yes
       : VR_DEVICE_AVAILABILITY.no;
 
-    cardboard = displays.find(d => d.capabilities.canPresent && d.displayName.match(/\Wcardboard\W/i))
-      ? VR_DEVICE_AVAILABILITY.yes
-      : VR_DEVICE_AVAILABILITY.no;
+    cardboard =
+      !isIDevice &&
+      !isFirefoxBrowser &&
+      displays.find(d => d.capabilities.canPresent && d.displayName.match(/cardboard/i))
+        ? VR_DEVICE_AVAILABILITY.yes
+        : VR_DEVICE_AVAILABILITY.no;
 
     // For daydream detection, in a WebVR browser we can increase confidence in daydream compatibility.
-    const hasDaydreamWebVRDevice = displays.find(d => d.displayName.match(/\Wdaydream\W/i));
+    const hasDaydreamWebVRDevice = displays.find(d => d.displayName.match(/daydream/i));
 
     if (hasDaydreamWebVRDevice) {
       // If we detected daydream via WebVR
