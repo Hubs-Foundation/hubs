@@ -1,3 +1,8 @@
+/**
+ * A button with an image, tooltip, hover states and haptics.
+ * @namespace ui
+ * @component icon-button
+ */
 AFRAME.registerComponent("icon-button", {
   schema: {
     image: { type: "string" },

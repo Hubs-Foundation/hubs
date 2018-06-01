@@ -20,8 +20,8 @@ const querystring = require("query-string");
   const browser = await puppeteer.launch({ ignoreHTTPSErrors: true });
   const page = await browser.newPage();
   page.on("console", msg => console.log("PAGE: ", msg.text()));
-  page.on("error", err => console.error("ERROR: ", err));
-  page.on("pageerror", err => console.error("PAGE ERROR: ", err));
+  page.on("error", err => console.error("ERROR: ", err.toString().split("\n")[0]));
+  page.on("pageerror", err => console.error("PAGE ERROR: ", err.toString().split("\n")[0]));
 
   const baseUrl = options["--url"] || `https://${options["--host"]}/hub.html`;
 
@@ -39,22 +39,36 @@ const querystring = require("query-string");
 
   const navigate = async () => {
     try {
+      console.log("Spawning bot...");
       await page.goto(url);
-      await page.evaluate(() => {
-        console.log(navigator.userAgent);
-      });
-      // Interact with the page so that audio can play.
-      await page.mouse.click(100, 100);
-      // Signal that the page has been interacted with.
-      // If the interacted function has not been defined yet, this will error and restart the process with the
-      // setTimeout below.
-      await page.evaluate(() => window.interacted());
+      await page.evaluate(() => console.log(navigator.userAgent));
+      let retryCount = 5;
+      let backoff = 1000;
+      const interact = async () => {
+        try {
+          // Interact with the page so that audio can play.
+          await page.mouse.click(100, 100);
+          // Signal that the page has been interacted with.
+          await page.evaluate(() => window.interacted());
+          console.log("Interacted.");
+        } catch (e) {
+          console.log("Interaction error", e.message);
+          if (retryCount-- < 0) {
+            // If retries failed, throw and restart navigation.
+            throw new Error("Retries failed");
+          }
+          console.log("Retrying...");
+          backoff *= 2;
+          // Retry interaction to start audio playback
+          setTimeout(interact, backoff);
+        }
+      };
+      await interact();
     } catch (e) {
-      console.log("Navigation error", e.toString());
+      console.log("Navigation error", e.message);
       setTimeout(navigate, 1000);
     }
   };
 
-  console.log("Spawning bot...");
   navigate();
 })();
