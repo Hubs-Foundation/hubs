@@ -80,7 +80,9 @@ AFRAME.registerComponent("character-controller", {
   },
 
   handleTeleport: function(event) {
-    this.setPositionOnNavMesh(event.detail.oldPosition, event.detail.newPosition, this.el.object3D, true);
+    const position = event.detail.newPosition;
+    const navPosition = event.detail.hitPoint;
+    this.resetPositionOnNavMesh(position, navPosition, this.el.object3D);
   },
 
   tick: (function() {
@@ -153,18 +155,23 @@ AFRAME.registerComponent("character-controller", {
     };
   })(),
 
-  setPositionOnNavMesh: function(startPosition, endPosition, object3D, resetPosition = false) {
+  setPositionOnNavMesh: function(startPosition, endPosition, object3D) {
     const nav = this.el.sceneEl.systems.nav;
     if (nav.navMesh) {
-      if (!this.navGroup || resetPosition) {
+      if (!this.navGroup) {
         this.navGroup = nav.getGroup(endPosition);
       }
-
-      if (!this.navNode || resetPosition) {
-        this.navNode = nav.getNode(endPosition, this.navGroup) || this.navNode;
-      }
-
+      this.navNode = this.navNode || nav.getNode(endPosition, this.navGroup);
       this.navNode = nav.clampStep(startPosition, endPosition, this.navGroup, this.navNode, object3D.position);
+    }
+  },
+
+  resetPositionOnNavMesh: function(position, navPosition, object3D) {
+    const nav = this.el.sceneEl.systems.nav;
+    if (nav.navMesh) {
+      this.navGroup = nav.getGroup(position);
+      this.navNode = nav.getNode(navPosition, this.navGroup) || this.navNode;
+      this.navNode = nav.clampStep(position, position, this.navGroup, this.navNode, object3D.position);
     }
   },
 
