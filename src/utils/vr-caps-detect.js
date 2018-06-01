@@ -67,11 +67,10 @@ export async function getAvailableVREntryTypes() {
   // Browser for now since Samsung Internet requires an additional WebVR installation + flag, so return "maybe".
   //
   // If we are in Oculus Browser (ie, we are literally wearing a GearVR) then return 'yes'.
-  const gearvr = isMaybeGearVRCompatibleDevice()
-    ? isOculusBrowser
-      ? VR_DEVICE_AVAILABILITY.yes
-      : VR_DEVICE_AVAILABILITY.maybe
-    : VR_DEVICE_AVAILABILITY.no;
+  let gearvr = VR_DEVICE_AVAILABILITY.no;
+  if (isMaybeGearVRCompatibleDevice()) {
+    gearvr = isOculusBrowser ? VR_DEVICE_AVAILABILITY.yes : VR_DEVICE_AVAILABILITY.maybe;
+  }
 
   // For daydream detection, we first check if they are on an Android compatible device, and assume they
   // may support daydream *unless* this browser has WebVR capabilities, in which case we can do better.
