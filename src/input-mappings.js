@@ -27,7 +27,8 @@ const config = {
         trackpad: "trackpad_dpad4"
       },
       "windows-motion-controls": {
-        joystick: "joystick_dpad4"
+        joystick: "joystick_dpad4",
+        axisMoveWithDeadzone: "msft_mr_axis_with_deadzone"
       },
       "daydream-controls": {
         trackpad: "trackpad_dpad4"
@@ -106,7 +107,7 @@ const config = {
         trackpadtouchend: "thumb_up",
         triggerdown: ["action_grab", "index_down"],
         triggerup: ["action_release", "index_up"],
-        "axismove.reverseY": { left: "move" }
+        axisMoveWithDeadzone: { left: "move" }
       },
       "daydream-controls": {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",

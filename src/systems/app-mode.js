@@ -4,6 +4,7 @@ export const AppModes = Object.freeze({ DEFAULT: "default", HUD: "hud" });
 
 /**
  * Simple system for keeping track of a modal app state
+ * @system app-mode
  */
 AFRAME.registerSystem("app-mode", {
   init() {
@@ -20,6 +21,8 @@ AFRAME.registerSystem("app-mode", {
 
 /**
  * Toggle the isPlaying state of a component based on app mode
+ * @namespace app-mode
+ * @component app-mode-toggle-playing
  */
 AFRAME.registerComponent("app-mode-toggle-playing", {
   multiple: true,
@@ -44,6 +47,8 @@ AFRAME.registerComponent("app-mode-toggle-playing", {
 
 /**
  * Toggle a boolean property of a component based on app mode
+ * @namespace app-mode
+ * @component app-mode-toggle-attribute
  */
 AFRAME.registerComponent("app-mode-toggle-attribute", {
   multiple: true,
@@ -69,6 +74,8 @@ AFRAME.registerComponent("app-mode-toggle-attribute", {
 
 /**
  * Toggle aframe input mappings action set based on app mode
+ * @namespace app-mode
+ * @component app-mode-input-mappings
  */
 AFRAME.registerComponent("app-mode-input-mappings", {
   schema: {
@@ -91,6 +98,8 @@ AFRAME.registerComponent("app-mode-input-mappings", {
 
 /**
  * Toggle visibility of an entity based on if the user is in vr mode or not
+ * @namespace vr-mode
+ * @component vr-mode-toggle-visibility
  */
 AFRAME.registerComponent("vr-mode-toggle-visibility", {
   schema: {
@@ -120,6 +129,8 @@ AFRAME.registerComponent("vr-mode-toggle-visibility", {
 
 /**
  * Toggle the isPlaying state of a component based on app mode
+ * @namespace vr-mode
+ * @component vr-mode-toggle-playing
  */
 AFRAME.registerComponent("vr-mode-toggle-playing", {
   multiple: true,

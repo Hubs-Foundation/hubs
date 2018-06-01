@@ -1,11 +1,12 @@
 $dark-transparent: rgba(0, 0, 0, 0.4);
 $darker-transparent: rgba(0, 0, 0, 0.6);
-$darkest-transparent: rgba(0, 0, 0, 0.95);
+$darkest-transparent: rgba(0, 0, 0, 0.9);
 $grey-text: rgba(192, 192, 192, 1.0);
 $light-text: rgba(240, 240, 240, 1.0);
 $light-grey: lightgrey;
 $dark-grey: rgba(128, 128, 128, 1.0);
 $darker-grey: rgba(64, 64, 64, 1.0);
+$darkest-grey: rgba(32, 32, 32, 1.0);
 
 %default-font {
   font-family: 'Zilla Slab', sans-serif;

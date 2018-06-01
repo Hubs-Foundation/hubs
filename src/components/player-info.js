@@ -1,3 +1,8 @@
+/**
+ * Sets player info state, including avatar choice and display name.
+ * @namespace avatar
+ * @component player-info
+ */
 AFRAME.registerComponent("player-info", {
   schema: {
     displayName: { type: "string" },

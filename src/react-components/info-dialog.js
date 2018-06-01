@@ -4,6 +4,7 @@ import classNames from "classnames";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import formurlencoded from "form-urlencoded";
+import LinkDialog from "./link-dialog.js";
 
 // TODO i18n
 
@@ -14,12 +15,15 @@ class InfoDialog extends Component {
     invite: Symbol("invite"),
     updates: Symbol("updates"),
     report: Symbol("report"),
-    help: Symbol("help")
+    help: Symbol("help"),
+    link: Symbol("link"),
+    webvr_recommend: Symbol("webvr_recommend")
   };
   static propTypes = {
     dialogType: PropTypes.oneOf(Object.values(InfoDialog.dialogTypes)),
     onCloseDialog: PropTypes.func,
-    onSubmittedEmail: PropTypes.func
+    onSubmittedEmail: PropTypes.func,
+    linkCode: PropTypes.string
   };
 
   constructor(props) {
@@ -247,6 +251,27 @@ class InfoDialog extends Component {
             </p>
           </div>
         );
+        break;
+      case InfoDialog.dialogTypes.webvr_recommend:
+        dialogTitle = "Enter in VR";
+        dialogBody = (
+          <div>
+            <p>To enter Hubs with Oculus or SteamVR, you can use Firefox.</p>
+            <a className="info-dialog--action-button" href="https://www.mozilla.org/firefox">
+              Download Firefox
+            </a>
+            <p style={{ fontSize: "0.8em" }}>
+              For a full list of browsers with experimental VR support, visit{" "}
+              <a href="https://webvr.rocks" target="_blank" rel="noopener noreferrer">
+                WebVR Rocks
+              </a>.
+            </p>
+          </div>
+        );
+        break;
+      case InfoDialog.dialogTypes.link:
+        dialogTitle = "Send Link to Device";
+        dialogBody = <LinkDialog linkCode={this.props.linkCode} />;
         break;
     }
 

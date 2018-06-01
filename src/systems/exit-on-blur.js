@@ -1,3 +1,7 @@
+/**
+ * Emits an "exit" event when a user has stopped using the app for a certain period of time
+ * @system exit-on-blur
+ */
 AFRAME.registerSystem("exit-on-blur", {
   init() {
     this.onBlur = this.onBlur.bind(this);

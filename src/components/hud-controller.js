@@ -8,6 +8,8 @@ function deltaAngle(a, b) {
 
 /**
  * Positions the HUD and toggles app mode based on where the user is looking
+ * @namespace ui
+ * @component hud-controller
  */
 AFRAME.registerComponent("hud-controller", {
   schema: {
@@ -81,10 +83,8 @@ AFRAME.registerComponent("hud-controller", {
     const AppModeSystem = sceneEl.systems["app-mode"];
     if (pitch > lookCutoff && AppModeSystem.mode !== AppModes.HUD) {
       AppModeSystem.setMode(AppModes.HUD);
-      sceneEl.renderer.sortObjects = true;
     } else if (pitch < lookCutoff && AppModeSystem.mode === AppModes.HUD) {
       AppModeSystem.setMode(AppModes.DEFAULT);
-      sceneEl.renderer.sortObjects = false;
     }
   }
 });

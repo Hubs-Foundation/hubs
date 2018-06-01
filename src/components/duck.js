@@ -1,4 +1,8 @@
 /* global CANNON */
+/**
+ * Floats a duck based on its scale.
+ * @component duck
+ */
 AFRAME.registerComponent("duck", {
   schema: {
     initialForce: { default: 0 },

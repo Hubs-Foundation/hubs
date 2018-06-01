@@ -9,7 +9,6 @@ yarn
 echo 'Building Hubs'
 yarn build > /dev/null
 
-# install run-bot.js dependencies
 cd $script_directory
 echo 'Installing bot dependencies'
 yarn 

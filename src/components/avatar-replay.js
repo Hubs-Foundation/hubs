@@ -11,6 +11,11 @@ const controlsBlacklist = [
   "gearvr-controls"
 ];
 
+/**
+ * Replays a recorded motion capture with the given avatar body parts
+ * @namespace avatar
+ * @component avatar-replay
+ */
 AFRAME.registerComponent("avatar-replay", {
   schema: {
     camera: { type: "selector" },

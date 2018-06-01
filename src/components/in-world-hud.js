@@ -1,3 +1,8 @@
+/**
+ * HUD panel for muting, freezing, and space bubble controls.
+ * @namespace ui
+ * @component in-world-hud
+ */
 AFRAME.registerComponent("in-world-hud", {
   schema: {
     haptic: { type: "selector" },
@@ -7,6 +12,12 @@ AFRAME.registerComponent("in-world-hud", {
     this.mic = this.el.querySelector(".mic");
     this.freeze = this.el.querySelector(".freeze");
     this.bubble = this.el.querySelector(".bubble");
+    this.background = this.el.querySelector(".bg");
+    const renderOrder = window.APP.RENDER_ORDER;
+    this.mic.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
+    this.freeze.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
+    this.bubble.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
+    this.background.object3DMap.mesh.renderORder = renderOrder.HUD_BACKGROUND;
 
     this.updateButtonStates = () => {
       this.mic.setAttribute("icon-button", "active", this.el.sceneEl.is("muted"));

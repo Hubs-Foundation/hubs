@@ -1,3 +1,8 @@
+/**
+ * Limits networked interactables to a maximum number at any given time
+ * @namespace network
+ * @component networked-counter
+ */
 AFRAME.registerComponent("networked-counter", {
   schema: {
     max: { default: 3 },
