@@ -106,7 +106,7 @@ AFRAME.registerComponent("cursor-controller", {
       }
     }
 
-    if (this.hasPointingDevice) {
+    if (this.drawLine) {
       this.el.setAttribute("line", { start: this.origin.clone(), end: this.data.cursor.object3D.position.clone() });
     }
   },

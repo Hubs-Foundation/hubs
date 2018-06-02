@@ -143,6 +143,7 @@ AFRAME.registerComponent("input-configurator", {
 
   updateController: function() {
     this.hasPointingDevice = this.controllerQueue.length > 0 && this.inVR;
+    this.cursor.drawLine = this.hasPointingDevice;
 
     this.cursor.setCursorVisibility(this.hasPointingDevice || this.isMobile || (!this.isMobile && !this.inVR));
 
