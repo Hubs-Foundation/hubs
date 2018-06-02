@@ -63,7 +63,6 @@ AFRAME.registerComponent("look-on-mobile", {
   },
 
   tick() {
-    const scene = this.el.sceneEl;
     const hmdEuler = this.hmdEuler;
     const { horizontalLookSpeedRatio, verticalLookSpeedRatio } = this.data;
     this.polyfillControls.update();

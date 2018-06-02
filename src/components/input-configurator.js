@@ -86,7 +86,7 @@ AFRAME.registerComponent("input-configurator", {
       this.primaryActionHandler = new PrimaryActionHandler(this.el.sceneEl, this.cursor);
       this.eventHandlers.push(this.primaryActionHandler);
       if (this.isMobile) {
-        this.eventHandlers.push(new GearVRMouseEventHandler(this.cursor, this.gazeTeleporter));
+        this.eventHandlers.push(new GearVRMouseEventsHandler(this.cursor, this.gazeTeleporter));
       }
     } else {
       this.cameraController.play();
