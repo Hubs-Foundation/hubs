@@ -3,20 +3,11 @@ const TARGET_TYPE_INTERACTABLE = 2;
 const TARGET_TYPE_UI = 4;
 const TARGET_TYPE_INTERACTABLE_OR_UI = TARGET_TYPE_INTERACTABLE | TARGET_TYPE_UI;
 
-/**
- * Controls virtual cursor behavior in various modalities to affect teleportation, interatables and UI.
- * @namespace user-input
- * @component cursor-controller
- */
 AFRAME.registerComponent("cursor-controller", {
   dependencies: ["raycaster", "line"],
   schema: {
     cursor: { type: "selector" },
     camera: { type: "selector" },
-    playerRig: { type: "selector" },
-    gazeTeleportControls: { type: "selector" },
-    physicalHandSelector: { type: "string" },
-    handedness: { default: "right", oneOf: ["right", "left"] },
     maxDistance: { default: 3 },
     minDistance: { default: 0 },
     cursorColorHovered: { default: "#2F80ED" },
@@ -27,16 +18,12 @@ AFRAME.registerComponent("cursor-controller", {
     this.enabled = true;
     this.inVR = false;
     this.isMobile = AFRAME.utils.device.isMobile();
-    this.hasPointingDevice = false;
     this.currentTargetType = TARGET_TYPE_NONE;
     this.currentDistance = this.data.maxDistance;
     this.currentDistanceMod = 0;
     this.mousePos = new THREE.Vector2();
     this.useMousePos = true;
-    this.controller = null;
-    this.controllerQueue = [];
     this.wasCursorHovered = false;
-    this.wasPhysicalHandGrabbing = false;
     this.origin = new THREE.Vector3();
     this.direction = new THREE.Vector3();
     this.controllerQuaternion = new THREE.Quaternion();
@@ -49,48 +36,12 @@ AFRAME.registerComponent("cursor-controller", {
     this.endInteraction = this.endInteraction.bind(this);
     this.changeDistanceMod = this.changeDistanceMod.bind(this);
 
-    this._handleEnterVR = this._handleEnterVR.bind(this);
-    this._handleExitVR = this._handleExitVR.bind(this);
-    this._handleModelLoaded = this._handleModelLoaded.bind(this);
     this._handleCursorLoaded = this._handleCursorLoaded.bind(this);
-    this._handleControllerConnected = this._handleControllerConnected.bind(this);
-    this._handleControllerDisconnected = this._handleControllerDisconnected.bind(this);
-
     this.data.cursor.addEventListener("loaded", this._handleCursorLoaded);
   },
 
   remove: function() {
     this.data.cursor.removeEventListener("loaded", this._handleCursorLoaded);
-  },
-
-  update: function(oldData) {
-    if (oldData.physicalHandSelector !== this.data.physicalHandSelector) {
-      this._handleModelLoaded();
-    }
-
-    if (oldData.handedness !== this.data.handedness) {
-      //TODO
-    }
-  },
-
-  play: function() {
-    window.addEventListener("enter-vr", this._handleEnterVR);
-    window.addEventListener("exit-vr", this._handleExitVR);
-
-    this.data.playerRig.addEventListener("model-loaded", this._handleModelLoaded);
-
-    this.el.sceneEl.addEventListener("controllerconnected", this._handleControllerConnected);
-    this.el.sceneEl.addEventListener("controllerdisconnected", this._handleControllerDisconnected);
-  },
-
-  pause: function() {
-    window.removeEventListener("enter-vr", this._handleEnterVR);
-    window.removeEventListener("exit-vr", this._handleExitVR);
-
-    this.data.playerRig.removeEventListener("model-loaded", this._handleModelLoaded);
-
-    this.el.sceneEl.removeEventListener("controllerconnected", this._handleControllerConnected);
-    this.el.sceneEl.removeEventListener("controllerdisconnected", this._handleControllerDisconnected);
   },
 
   enable: function() {
@@ -221,70 +172,8 @@ AFRAME.registerComponent("cursor-controller", {
     this.currentDistanceMod += delta;
   },
 
-  _handleEnterVR: function() {
-    this.inVR = true;
-    this._updateController();
-  },
-
-  _handleExitVR: function() {
-    this.inVR = false;
-    this._updateController();
-  },
-
-  _handleModelLoaded: function() {
-    this.physicalHand = this.data.playerRig.querySelector(this.data.physicalHandSelector);
-  },
-
   _handleCursorLoaded: function() {
     this.data.cursor.object3DMap.mesh.renderOrder = window.APP.RENDER_ORDER.CURSOR;
-  },
-
-  _handleControllerConnected: function(e) {
-    const data = {
-      controller: e.target,
-      handedness: e.detail.component.data.hand
-    };
-
-    if (data.handedness === this.data.handedness) {
-      this.controllerQueue.unshift(data);
-    } else {
-      this.controllerQueue.push(data);
-    }
-
-    this._updateController();
-  },
-
-  _handleControllerDisconnected: function(e) {
-    for (let i = 0; i < this.controllerQueue.length; i++) {
-      if (e.target === this.controllerQueue[i].controller) {
-        this.controllerQueue.splice(i, 1);
-        this._updateController();
-        return;
-      }
-    }
-  },
-
-  _updateController: function() {
-    this.hasPointingDevice = this.controllerQueue.length > 0 && this.inVR;
-
-    this.setCursorVisibility(this.hasPointingDevice || this.isMobile || (!this.isMobile && !this.inVR));
-
-    if (this.hasPointingDevice) {
-      const controllerData = this.controllerQueue[0];
-      const hand = controllerData.handedness;
-      this.el.setAttribute("cursor-controller", { physicalHandSelector: `#player-${hand}-controller` });
-      this.controller = controllerData.controller;
-      this.rayObject = controllerData.controller.querySelector(`#player-${hand}-controller-reverse-z`).object3D;
-      this.useMousePos = false;
-    } else {
-      this.controller = null;
-      if (this.inVR) {
-        const camera = this.data.camera.components.camera.camera;
-        this.rayObject = camera;
-        this.useMousePos = false;
-      } else {
-        this.useMousePos = true;
-      }
-    }
+    this.data.cursor.removeEventListener("loaded", this._handleCursorLoaded);
   }
 });

@@ -4,6 +4,7 @@ export default class PrimaryActionHandler {
     this.cursor = cursor;
     this.isCursorInteracting = false;
     this.isTeleporting = false;
+    this.cursorController = null;
 
     this.addEventListeners = this.addEventListeners.bind(this);
     this.tearDown = this.tearDown.bind(this);
@@ -43,8 +44,12 @@ export default class PrimaryActionHandler {
     }
   }
 
+  setCursorController(cursorController) {
+    this.cursorController = cursorController;
+  }
+
   onGrab(e) {
-    if (this.cursor.controller && this.cursor.controller === e.target) {
+    if (this.cursorController && this.cursorController === e.target) {
       if (this.isCursorInteracting) {
         return;
       } else if (e.target.components["super-hands"].state.has("hover-start")) {
@@ -61,7 +66,7 @@ export default class PrimaryActionHandler {
   }
 
   onRelease(e) {
-    if (this.isCursorInteracting && this.cursor.controller && this.cursor.controller === e.target) {
+    if (this.isCursorInteracting && this.cursorController && this.cursorController === e.target) {
       this.isCursorInteracting = false;
       this.cursor.endInteraction();
     } else {
@@ -70,7 +75,7 @@ export default class PrimaryActionHandler {
   }
 
   onPrimaryDown(e) {
-    if (this.cursor.controller && this.cursor.controller === e.target) {
+    if (this.cursorController && this.cursorController === e.target) {
       if (this.isCursorInteracting) {
         return;
       } else if (e.target.components["super-hands"].state.has("hover-start")) {
@@ -89,7 +94,7 @@ export default class PrimaryActionHandler {
   }
 
   onPrimaryUp(e) {
-    const isCursorHand = this.cursor.controller && this.cursor.controller === e.target;
+    const isCursorHand = this.cursorController && this.cursorController === e.target;
     if (this.isCursorInteracting && isCursorHand) {
       this.isCursorInteracting = false;
       this.cursor.endInteraction();
