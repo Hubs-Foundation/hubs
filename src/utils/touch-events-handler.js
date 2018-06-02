@@ -3,11 +3,10 @@ const HORIZONTAL_LOOK_SPEED = 0.35;
 const VERTICAL_LOOK_SPEED = 0.18;
 
 export default class TouchEventsHandler {
-  constructor() {
-    this.cursor = null;
-    this.cameraController = null;
-
-    this.pinchEmitter = null;
+  constructor(cursor, cameraController, pinchEmitter) {
+    this.cursor = cursor;
+    this.cameraController = cameraController;
+    this.pinchEmitter = pinchEmitter;
     this.touches = [];
     this.touchReservedForCursor = null;
     this.touchesReservedForPinch = [];
@@ -16,10 +15,6 @@ export default class TouchEventsHandler {
     this.pinchTouchId1 = -1;
     this.pinchTouchId2 = -1;
 
-    this.registerCursor = this.registerCursor.bind(this);
-    this.registerCameraController = this.registerCameraController.bind(this);
-
-    this.isReady = this.isReady.bind(this);
     this.addEventListeners = this.addEventListeners.bind(this);
     this.handleTouchStart = this.handleTouchStart.bind(this);
     this.singleTouchStart = this.singleTouchStart.bind(this);
@@ -29,31 +24,9 @@ export default class TouchEventsHandler {
     this.singleTouchEnd = this.singleTouchEnd.bind(this);
     this.pinch = this.pinch.bind(this);
     this.look = this.look.bind(this);
-  }
+    this.tearDown = this.tearDown.bind(this);
 
-  registerCursor(cursor) {
-    this.cursor = cursor;
-    if (this.isReady()) {
-      this.addEventListeners();
-    }
-  }
-
-  registerCameraController(cameraController) {
-    this.cameraController = cameraController;
-    if (this.isReady()) {
-      this.addEventListeners();
-    }
-  }
-
-  registerPinchEmitter(pinchEmitter) {
-    this.pinchEmitter = pinchEmitter;
-    if (this.isReady()) {
-      this.addEventListeners();
-    }
-  }
-
-  isReady() {
-    return this.cursor && this.cameraController && this.pinchEmitter;
+    this.addEventListeners();
   }
 
   addEventListeners() {
@@ -61,6 +34,13 @@ export default class TouchEventsHandler {
     document.addEventListener("touchmove", this.handleTouchMove);
     document.addEventListener("touchend", this.handleTouchEnd);
     document.addEventListener("touchcancel", this.handleTouchEnd);
+  }
+
+  tearDown() {
+    document.removeEventListener("touchstart", this.handleTouchStart);
+    document.removeEventListener("touchmove", this.handleTouchMove);
+    document.removeEventListener("touchend", this.handleTouchEnd);
+    document.removeEventListener("touchcancel", this.handleTouchEnd);
   }
 
   handleTouchStart(e) {

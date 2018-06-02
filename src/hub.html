@@ -42,7 +42,7 @@
         personal-space-bubble="debug: false;"
         vr-mode-ui="enabled: false"
         pinch-to-move
-        look-on-mobile
+        input-configurator
     >
 
         <a-assets>
@@ -263,6 +263,7 @@
                 camera
                 position="0 1.6 0"
                 personal-space-bubble="radius: 0.4"
+                camera-controller
             >
                 <a-entity
                     id="gaze-teleport"
@@ -298,6 +299,7 @@
                 mixin="controller-super-hands"
                 controls-shape-offset
             >
+                <a-entity id="player-left-controller-reverse-z" rotation="0 180 0"></a-entity>
             </a-entity>
 
             <a-entity
@@ -318,7 +320,9 @@
                 body="type: static; shape: none;"
                 mixin="controller-super-hands"
                 controls-shape-offset
-            ></a-entity>
+            >
+                <a-entity id="player-right-controller-reverse-z" rotation="0 180 0"></a-entity>
+            </a-entity>
 
             <a-entity gltf-model-plus="inflate: true;"
                       class="model">

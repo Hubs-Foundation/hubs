@@ -1,39 +1,25 @@
 export default class GearVRMouseEventsHandler {
-  constructor() {
-    this.cursor = null;
-    this.gazeTeleporter = null;
+  constructor(cursor, gazeTeleporter) {
+    this.cursor = cursor;
+    this.gazeTeleporter = gazeTeleporter;
     this.isMouseDownHandledByCursor = false;
     this.isMouseDownHandledByGazeTeleporter = false;
 
-    this.registerCursor = this.registerCursor.bind(this);
-    this.registerGazeTeleporter = this.registerGazeTeleporter.bind(this);
-    this.isReady = this.isReady.bind(this);
     this.addEventListeners = this.addEventListeners.bind(this);
+    this.tearDown = this.tearDown.bind(this);
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
-  }
-
-  registerCursor(cursor) {
-    this.cursor = cursor;
-    if (this.isReady()) {
-      this.addEventListeners();
-    }
-  }
-
-  registerGazeTeleporter(gazeTeleporter) {
-    this.gazeTeleporter = gazeTeleporter;
-    if (this.isReady()) {
-      this.addEventListeners();
-    }
-  }
-
-  isReady() {
-    return this.cursor && this.gazeTeleporter;
+    this.addEventListeners();
   }
 
   addEventListeners() {
     document.addEventListener("mousedown", this.onMouseDown);
     document.addEventListener("mouseup", this.onMouseUp);
+  }
+
+  tearDown() {
+    document.removeEventListener("mousedown", this.onMouseDown);
+    document.removeEventListener("mouseup", this.onMouseUp);
   }
 
   onMouseDown() {

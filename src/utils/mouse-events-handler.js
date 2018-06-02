@@ -3,47 +3,38 @@ const HORIZONTAL_LOOK_SPEED = 0.1;
 const VERTICAL_LOOK_SPEED = 0.06;
 
 export default class MouseEventsHandler {
-  constructor() {
-    this.cursor = null;
-    this.cameraController = null;
+  constructor(cursor, cameraController) {
+    this.cursor = cursor;
+    this.cameraController = cameraController;
     this.isLeftButtonDown = false;
     this.isLeftButtonHandledByCursor = false;
     this.isPointerLocked = false;
 
-    this.registerCursor = this.registerCursor.bind(this);
-    this.registerCameraController = this.registerCameraController.bind(this);
-    this.isReady = this.isReady.bind(this);
     this.addEventListeners = this.addEventListeners.bind(this);
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onLeftButtonDown = this.onLeftButtonDown.bind(this);
     this.onRightButtonDown = this.onRightButtonDown.bind(this);
-
+    this.tearDown = this.tearDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
     this.onMouseWheel = this.onMouseWheel.bind(this);
     this.look = this.look.bind(this);
+
+    this.addEventListeners();
+  }
+
+  tearDown() {
+    document.removeEventListener("mousedown", this.onMouseDown);
+    document.removeEventListener("mousemove", this.onMouseMove);
+    document.removeEventListener("mouseup", this.onMouseUp);
+    document.removeEventListener("wheel", this.onMouseWheel);
+    document.removeEventListener("contextmenu", e => {
+      e.preventDefault();
+    });
   }
 
   setInverseMouseLook(invert) {
     this.invertMouseLook = invert;
-  }
-
-  registerCursor(cursor) {
-    this.cursor = cursor;
-    if (this.isReady()) {
-      this.addEventListeners();
-    }
-  }
-
-  registerCameraController(cameraController) {
-    this.cameraController = cameraController;
-    if (this.isReady()) {
-      this.addEventListeners();
-    }
-  }
-
-  isReady() {
-    return this.cursor && this.cameraController;
   }
 
   addEventListeners() {

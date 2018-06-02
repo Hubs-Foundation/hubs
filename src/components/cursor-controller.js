@@ -18,12 +18,13 @@ AFRAME.registerComponent("cursor-controller", {
     physicalHandSelector: { type: "string" },
     handedness: { default: "right", oneOf: ["right", "left"] },
     maxDistance: { default: 3 },
-    minDistance: { default: 0.5 },
+    minDistance: { default: 0 },
     cursorColorHovered: { default: "#2F80ED" },
     cursorColorUnhovered: { default: "#FFFFFF" }
   },
 
   init: function() {
+    this.enabled = true;
     this.inVR = false;
     this.isMobile = AFRAME.utils.device.isMobile();
     this.hasPointingDevice = false;
@@ -31,6 +32,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.currentDistance = this.data.maxDistance;
     this.currentDistanceMod = 0;
     this.mousePos = new THREE.Vector2();
+    this.useMousePos = true;
     this.controller = null;
     this.controllerQueue = [];
     this.wasCursorHovered = false;
@@ -91,48 +93,42 @@ AFRAME.registerComponent("cursor-controller", {
     this.el.sceneEl.removeEventListener("controllerdisconnected", this._handleControllerDisconnected);
   },
 
+  enable: function() {
+    this.enabled = true;
+  },
+
+  disable: function() {
+    this.enabled = false;
+    this.setCursorVisibility(false);
+  },
+
   tick: function() {
-    //handle physical hand
-    if (this.physicalHand) {
-      const state = this.physicalHand.components["super-hands"].state;
-      const isPhysicalHandGrabbing = state.has("grab-start") || state.has("hover-start");
-      if (this.wasPhysicalHandGrabbing != isPhysicalHandGrabbing) {
-        this.setCursorVisibility(!isPhysicalHandGrabbing);
-        this.currentTargetType = TARGET_TYPE_NONE;
-      }
-      this.wasPhysicalHandGrabbing = isPhysicalHandGrabbing;
-      if (isPhysicalHandGrabbing) {
-        return;
-      }
+    if (!this.enabled) {
+      return;
     }
 
-    //set raycaster origin/direction
-    const camera = this.data.camera.components.camera.camera;
-    if (!this.inVR) {
-      //mouse cursor mode
+    if (this.useMousePos) {
+      const camera = this.data.camera.components.camera.camera;
       const raycaster = this.el.components.raycaster.raycaster;
       raycaster.setFromCamera(this.mousePos, camera);
       this.origin.copy(raycaster.ray.origin);
       this.direction.copy(raycaster.ray.direction);
-    } else if ((this.inVR || this.isMobile) && !this.hasPointingDevice) {
-      //gaze cursor mode
-      camera.getWorldPosition(this.origin);
-      camera.getWorldDirection(this.direction);
-    } else if (this.controller != null) {
-      //3d cursor mode
-      this.controller.object3D.getWorldPosition(this.origin);
-      this.controller.object3D.getWorldQuaternion(this.controllerQuaternion);
-      this.direction
-        .set(0, 0, -1)
-        .applyQuaternion(this.controllerQuaternion)
-        .normalize();
+    } else {
+      this.rayObject.getWorldPosition(this.origin);
+      this.rayObject.getWorldDirection(this.direction);
     }
     this.el.setAttribute("raycaster", { origin: this.origin, direction: this.direction });
 
-    let intersection = null;
-
-    //update cursor position
-    if (!this._isGrabbing()) {
+    if (this._isGrabbing()) {
+      const distance = Math.min(
+        this.data.maxDistance,
+        Math.max(this.data.minDistance, this.currentDistance - this.currentDistanceMod)
+      );
+      this.direction.multiplyScalar(distance);
+      this.data.cursor.object3D.position.addVectors(this.origin, this.direction);
+    } else {
+      this.currentDistanceMod = 0;
+      let intersection = null;
       const intersections = this.el.components.raycaster.intersections;
       if (intersections.length > 0 && intersections[0].distance <= this.data.maxDistance) {
         intersection = intersections[0];
@@ -140,42 +136,28 @@ AFRAME.registerComponent("cursor-controller", {
         this.currentDistance = intersections[0].distance;
       } else {
         this.currentDistance = this.data.maxDistance;
+        this.direction.multiplyScalar(this.currentDistance);
+        this.data.cursor.object3D.position.addVectors(this.origin, this.direction);
       }
-      this.currentDistanceMod = 0;
-    }
 
-    if (this._isGrabbing() || !intersection) {
-      const max = Math.max(this.data.minDistance, this.currentDistance - this.currentDistanceMod);
-      const distance = Math.min(max, this.data.maxDistance);
-      this.currentDistanceMod = this.currentDistance - distance;
-      this.direction.multiplyScalar(distance);
-      this.data.cursor.object3D.position.addVectors(this.origin, this.direction);
-    }
-
-    //update currentTargetType
-    if (this._isGrabbing() && !intersection) {
-      this.currentTargetType = TARGET_TYPE_INTERACTABLE;
-    } else if (intersection) {
-      if (intersection.object.el.matches(".interactable, .interactable *")) {
+      if (!intersection) {
+        this.currentTargetType = TARGET_TYPE_NONE;
+      } else if (intersection.object.el.matches(".interactable, .interactable *")) {
         this.currentTargetType = TARGET_TYPE_INTERACTABLE;
       } else if (intersection.object.el.matches(".ui, .ui *")) {
         this.currentTargetType = TARGET_TYPE_UI;
       }
-    } else {
-      this.currentTargetType = TARGET_TYPE_NONE;
+
+      const isTarget = this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI);
+      if (isTarget && !this.wasCursorHovered) {
+        this.wasCursorHovered = true;
+        this.data.cursor.setAttribute("material", { color: this.data.cursorColorHovered });
+      } else if (!isTarget && this.wasCursorHovered) {
+        this.wasCursorHovered = false;
+        this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
+      }
     }
 
-    //update cursor material
-    const isTarget = this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI);
-    if ((this._isGrabbing() || isTarget) && !this.wasCursorHovered) {
-      this.wasCursorHovered = true;
-      this.data.cursor.setAttribute("material", { color: this.data.cursorColorHovered });
-    } else if (!this._isGrabbing() && !isTarget && this.wasCursorHovered) {
-      this.wasCursorHovered = false;
-      this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
-    }
-
-    //update line
     if (this.hasPointingDevice) {
       this.el.setAttribute("line", { start: this.origin.clone(), end: this.data.cursor.object3D.position.clone() });
     }
@@ -292,8 +274,17 @@ AFRAME.registerComponent("cursor-controller", {
       const hand = controllerData.handedness;
       this.el.setAttribute("cursor-controller", { physicalHandSelector: `#player-${hand}-controller` });
       this.controller = controllerData.controller;
+      this.rayObject = controllerData.controller.querySelector(`#player-${hand}-controller-reverse-z`).object3D;
+      this.useMousePos = false;
     } else {
       this.controller = null;
+      if (this.inVR) {
+        const camera = this.data.camera.components.camera.camera;
+        this.rayObject = camera;
+        this.useMousePos = false;
+      } else {
+        this.useMousePos = true;
+      }
     }
   }
 });

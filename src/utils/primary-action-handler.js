@@ -1,12 +1,12 @@
 export default class PrimaryActionHandler {
-  constructor(scene) {
+  constructor(scene, cursor) {
     this.scene = scene;
-    this.cursor = null;
+    this.cursor = cursor;
     this.isCursorInteracting = false;
+    this.isTeleporting = false;
 
-    this.registerCursor = this.registerCursor.bind(this);
-    this.isReady = this.isReady.bind(this);
     this.addEventListeners = this.addEventListeners.bind(this);
+    this.tearDown = this.tearDown.bind(this);
     this.onPrimaryDown = this.onPrimaryDown.bind(this);
     this.onPrimaryUp = this.onPrimaryUp.bind(this);
     this.onGrab = this.onGrab.bind(this);
@@ -14,17 +14,7 @@ export default class PrimaryActionHandler {
     this.onCardboardButtonDown = this.onCardboardButtonDown.bind(this);
     this.onCardboardButtonUp = this.onCardboardButtonUp.bind(this);
     this.onMoveDuck = this.onMoveDuck.bind(this);
-  }
-
-  registerCursor(cursor) {
-    this.cursor = cursor;
-    if (this.isReady()) {
-      this.addEventListeners();
-    }
-  }
-
-  isReady() {
-    return this.cursor;
+    this.addEventListeners();
   }
 
   addEventListeners() {
@@ -35,6 +25,16 @@ export default class PrimaryActionHandler {
     this.scene.addEventListener("cardboardbuttondown", this.onCardboardButtonDown);
     this.scene.addEventListener("cardboardbuttonup", this.onCardboardButtonUp);
     this.scene.addEventListener("move_duck", this.onMoveDuck);
+  }
+
+  tearDown() {
+    this.scene.removeEventListener("action_primary_down", this.onPrimaryDown);
+    this.scene.removeEventListener("action_primary_up", this.onPrimaryUp);
+    this.scene.removeEventListener("action_grab", this.onGrab);
+    this.scene.removeEventListener("action_release", this.onRelease);
+    this.scene.removeEventListener("cardboardbuttondown", this.onCardboardButtonDown);
+    this.scene.removeEventListener("cardboardbuttonup", this.onCardboardButtonUp);
+    this.scene.removeEventListener("move_duck", this.onMoveDuck);
   }
 
   onMoveDuck(e) {
@@ -85,22 +85,29 @@ export default class PrimaryActionHandler {
     this.cursor.setCursorVisibility(false);
     const button = e.target.components["teleport-controls"].data.button;
     e.target.emit(button + "down");
+    this.isTeleporting = true;
   }
 
   onPrimaryUp(e) {
-    if (this.isCursorInteracting && this.cursor.controller && this.cursor.controller === e.target) {
+    const isCursorHand = this.cursor.controller && this.cursor.controller === e.target;
+    if (this.isCursorInteracting && isCursorHand) {
       this.isCursorInteracting = false;
       this.cursor.endInteraction();
       return;
     }
 
-    if (e.target.components["super-hands"].state.has("grab-start")) {
+    const state = e.target.components["super-hands"].state;
+    if (state.has("grab-start")) {
       e.target.emit("hand_release");
+      return;
     }
 
-    this.cursor.setCursorVisibility(true);
+    if (isCursorHand) {
+      this.cursor.setCursorVisibility(!state.has("hover-start"));
+    }
     const button = e.target.components["teleport-controls"].data.button;
     e.target.emit(button + "up");
+    this.isTeleporting = false;
   }
 
   onCardboardButtonDown(e) {
@@ -114,6 +121,7 @@ export default class PrimaryActionHandler {
     const gazeTeleport = e.target.querySelector("#gaze-teleport");
     const button = gazeTeleport.components["teleport-controls"].data.button;
     gazeTeleport.emit(button + "down");
+    this.isTeleporting = true;
   }
 
   onCardboardButtonUp(e) {
@@ -128,5 +136,6 @@ export default class PrimaryActionHandler {
     const gazeTeleport = e.target.querySelector("#gaze-teleport");
     const button = gazeTeleport.components["teleport-controls"].data.button;
     gazeTeleport.emit(button + "up");
+    this.isTeleporting = false;
   }
 }

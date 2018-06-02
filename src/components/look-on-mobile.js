@@ -28,7 +28,6 @@ const average = a => {
 
 AFRAME.registerComponent("look-on-mobile", {
   schema: {
-    enabled: { default: false },
     horizontalLookSpeedRatio: { default: 0.4 }, // motion applied to camera / motion of polyfill object
     verticalLookSpeedRatio: { default: 0.4 } // motion applied to camera / motion of polyfill object
   },
@@ -64,9 +63,7 @@ AFRAME.registerComponent("look-on-mobile", {
   },
 
   tick() {
-    if (!this.data.enabled) return;
     const scene = this.el.sceneEl;
-    if (scene.is("vr-mode") && scene.checkHeadsetConnected()) return; // TODO: Why would this be ticking if we're in vr-mode?
     const hmdEuler = this.hmdEuler;
     const { horizontalLookSpeedRatio, verticalLookSpeedRatio } = this.data;
     this.polyfillControls.update();
