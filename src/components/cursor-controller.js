@@ -40,10 +40,6 @@ AFRAME.registerComponent("cursor-controller", {
     this.data.cursor.addEventListener("loaded", this._handleCursorLoaded);
   },
 
-  remove: function() {
-    this.data.cursor.removeEventListener("loaded", this._handleCursorLoaded);
-  },
-
   enable: function() {
     this.enabled = true;
   },
@@ -70,7 +66,8 @@ AFRAME.registerComponent("cursor-controller", {
     }
     this.el.setAttribute("raycaster", { origin: this.origin, direction: this.direction });
 
-    if (this._isGrabbing()) {
+    const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
+    if (isGrabbing) {
       const distance = Math.min(
         this.data.maxDistance,
         Math.max(this.data.minDistance, this.currentDistance - this.currentDistanceMod)
@@ -112,10 +109,6 @@ AFRAME.registerComponent("cursor-controller", {
     if (this.hasPointingDevice) {
       this.el.setAttribute("line", { start: this.origin.clone(), end: this.data.cursor.object3D.position.clone() });
     }
-  },
-
-  _isGrabbing() {
-    return this.data.cursor.components["super-hands"].state.has("grab-start");
   },
 
   _isTargetOfType: function(mask) {
@@ -174,6 +167,10 @@ AFRAME.registerComponent("cursor-controller", {
 
   _handleCursorLoaded: function() {
     this.data.cursor.object3DMap.mesh.renderOrder = window.APP.RENDER_ORDER.CURSOR;
+    this.data.cursor.removeEventListener("loaded", this._handleCursorLoaded);
+  },
+
+  remove: function() {
     this.data.cursor.removeEventListener("loaded", this._handleCursorLoaded);
   }
 });
