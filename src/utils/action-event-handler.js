@@ -39,9 +39,7 @@ export default class ActionEventHandler {
   }
 
   onMoveDuck(e) {
-    if (this.isCursorInteracting) {
-      this.cursor.changeDistanceMod(-e.detail.axis[1] / 8);
-    }
+    this.cursor.changeDistanceMod(-e.detail.axis[1] / 8);
   }
 
   setCursorController(cursorController) {

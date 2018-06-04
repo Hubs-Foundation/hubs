@@ -49,9 +49,10 @@ export default class MouseEventsHandler {
 
   onMouseDown(e) {
     const isLeftButton = e.button === 0;
+    const isRightButton = e.button === 2;
     if (isLeftButton) {
       this.onLeftButtonDown();
-    } else {
+    } else if (isRightButton) {
       this.onRightButtonDown();
     }
   }
