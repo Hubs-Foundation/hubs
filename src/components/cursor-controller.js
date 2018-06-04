@@ -117,7 +117,7 @@ AFRAME.registerComponent("cursor-controller", {
 
   setCursorVisibility(visible) {
     this.data.cursor.setAttribute("visible", visible);
-    this.el.setAttribute("line", { visible: visible && this.hasPointingDevice });
+    this.el.setAttribute("line", { visible: visible && this.drawLine });
   },
 
   forceCursorUpdate: function() {
@@ -162,7 +162,15 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   changeDistanceMod: function(delta) {
-    this.currentDistanceMod += delta;
+    const { minDistance, maxDistance } = this.data;
+    const targetDistanceMod = this.currentDistanceMod + delta;
+    if (this.currentDistance - targetDistanceMod > maxDistance) {
+      return;
+    }
+    if (this.currentDistance - targetDistanceMod < minDistance) {
+      return;
+    }
+    this.currentDistanceMod = targetDistanceMod;
   },
 
   _handleCursorLoaded: function() {

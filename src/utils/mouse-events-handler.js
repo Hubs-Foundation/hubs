@@ -59,9 +59,6 @@ export default class MouseEventsHandler {
   onLeftButtonDown() {
     this.isLeftButtonDown = true;
     this.isLeftButtonHandledByCursor = this.cursor.startInteraction();
-    if (this.isLeftButtonHandledByCursor) {
-      return;
-    }
   }
 
   onRightButtonDown() {

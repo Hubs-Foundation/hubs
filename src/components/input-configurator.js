@@ -1,7 +1,7 @@
 import TouchEventsHandler from "../utils/touch-events-handler.js";
 import MouseEventsHandler from "../utils/mouse-events-handler.js";
 import GearVRMouseEventsHandler from "../utils/gearvr-mouse-events-handler.js";
-import PrimaryActionHandler from "../utils/primary-action-handler.js";
+import ActionEventHandler from "../utils/action-event-handler.js";
 
 AFRAME.registerComponent("input-configurator", {
   init() {
@@ -11,9 +11,10 @@ AFRAME.registerComponent("input-configurator", {
     this.controller = null;
     this.controllerQueue = [];
     this.hasPointingDevice = false;
+    this.gazeCursorRayObject = document.querySelector("#player-camera-reverse-z");
     this.cursor = document.querySelector("#cursor-controller").components["cursor-controller"];
     this.gazeTeleporter = document.querySelector("#gaze-teleport").components["teleport-controls"];
-    this.cameraController = document.querySelector("#player-camera").components["camera-controller"];
+    this.cameraController = document.querySelector("#player-camera").components["pitch-yaw-rotator"];
     this.playerRig = document.querySelector("#player-rig");
     this.handedness = "right";
 
@@ -59,7 +60,7 @@ AFRAME.registerComponent("input-configurator", {
   tearDown() {
     this.eventHandlers.forEach(h => h.tearDown());
     this.eventHandlers = [];
-    this.primaryActionHandler = null;
+    this.actionEventHandler = null;
     if (this.lookOnMobile) {
       this.lookOnMobile.el.removeComponent("look-on-mobile");
       this.lookOnMobile = null;
@@ -83,10 +84,12 @@ AFRAME.registerComponent("input-configurator", {
       this.cursor.useMousePos = false;
       this.cursorRequiresManagement = true;
       this.hovered = false;
-      this.primaryActionHandler = new PrimaryActionHandler(this.el.sceneEl, this.cursor);
-      this.eventHandlers.push(this.primaryActionHandler);
+      this.actionEventHandler = new ActionEventHandler(this.el.sceneEl, this.cursor);
+      this.eventHandlers.push(this.actionEventHandler);
       if (this.isMobile) {
         this.eventHandlers.push(new GearVRMouseEventsHandler(this.cursor, this.gazeTeleporter));
+      } else {
+        this.eventHandlers.push(new MouseEventsHandler(this.cursor, this.cameraController));
       }
     } else {
       this.cameraController.play();
@@ -105,12 +108,12 @@ AFRAME.registerComponent("input-configurator", {
 
     if (this.physicalHand) {
       const state = this.physicalHand.components["super-hands"].state;
-      if (!this.hovered && state.has("hover-start") && !this.primaryActionHandler.isCursorInteracting) {
+      if (!this.hovered && state.has("hover-start") && !this.actionEventHandler.isCursorInteracting) {
         this.cursor.disable();
         this.hovered = true;
       } else if (this.hovered === true && !state.has("hover-start") && !state.has("grab-start")) {
         this.cursor.enable();
-        this.cursor.setCursorVisibility(!this.primaryActionHandler.isTeleporting);
+        this.cursor.setCursorVisibility(!this.actionEventHandler.isTeleporting);
         this.hovered = false;
       }
     }
@@ -145,7 +148,7 @@ AFRAME.registerComponent("input-configurator", {
     this.hasPointingDevice = this.controllerQueue.length > 0 && this.inVR;
     this.cursor.drawLine = this.hasPointingDevice;
 
-    this.cursor.setCursorVisibility(this.hasPointingDevice || this.isMobile || (!this.isMobile && !this.inVR));
+    this.cursor.setCursorVisibility(true);
 
     if (this.hasPointingDevice) {
       const controllerData = this.controllerQueue[0];
@@ -155,10 +158,11 @@ AFRAME.registerComponent("input-configurator", {
       this.cursor.rayObject = this.controller.querySelector(`#player-${hand}-controller-reverse-z`).object3D;
     } else {
       this.controller = null;
+      this.cursor.rayObject = this.gazeCursorRayObject.object3D;
     }
 
-    if (this.primaryActionHandler) {
-      this.primaryActionHandler.setCursorController(this.controller);
+    if (this.actionEventHandler) {
+      this.actionEventHandler.setCursorController(this.controller);
     }
   }
 });

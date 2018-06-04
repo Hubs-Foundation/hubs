@@ -1,7 +1,7 @@
-AFRAME.registerComponent("camera-controller", {
+AFRAME.registerComponent("pitch-yaw-rotator", {
   schema: {
-    lookDownLimit: { default: -50 },
-    lookUpLimit: { default: 50 }
+    minPitch: { default: -50 },
+    maxPitch: { default: 50 }
   },
 
   init() {
@@ -11,9 +11,9 @@ AFRAME.registerComponent("camera-controller", {
   },
 
   look(deltaPitch, deltaYaw) {
-    const { lookDownLimit, lookUpLimit } = this.data;
+    const { minPitch, maxPitch } = this.data;
     this.pitch += deltaPitch;
-    this.pitch = Math.max(lookDownLimit, Math.min(lookUpLimit, this.pitch));
+    this.pitch = Math.max(minPitch, Math.min(maxPitch, this.pitch));
     this.yaw += deltaYaw;
   },
 

@@ -263,7 +263,7 @@
                 camera
                 position="0 1.6 0"
                 personal-space-bubble="radius: 0.4"
-                camera-controller
+                pitch-yaw-rotator
             >
                 <a-entity
                     id="gaze-teleport"
@@ -278,6 +278,7 @@
                     hitOpacity: 0.3;
                     missOpacity: 0.2;"
                 ></a-entity>
+                <a-entity id="player-camera-reverse-z" rotation="0 180 0"></a-entity>
             </a-entity>
 
             <a-entity

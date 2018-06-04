@@ -64,7 +64,7 @@ import "./components/scene-shadow";
 import "./components/avatar-replay";
 import "./components/pinch-to-move";
 import "./components/look-on-mobile";
-import "./components/camera-controller";
+import "./components/pitch-yaw-rotator";
 import "./components/input-configurator";
 
 import ReactDOM from "react-dom";

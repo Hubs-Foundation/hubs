@@ -1,4 +1,4 @@
-export default class PrimaryActionHandler {
+export default class ActionEventHandler {
   constructor(scene, cursor) {
     this.scene = scene;
     this.cursor = cursor;
@@ -23,9 +23,9 @@ export default class PrimaryActionHandler {
     this.scene.addEventListener("action_primary_up", this.onPrimaryUp);
     this.scene.addEventListener("action_grab", this.onGrab);
     this.scene.addEventListener("action_release", this.onRelease);
-    this.scene.addEventListener("cardboardbuttondown", this.onCardboardButtonDown);
-    this.scene.addEventListener("cardboardbuttonup", this.onCardboardButtonUp);
     this.scene.addEventListener("move_duck", this.onMoveDuck);
+    this.scene.addEventListener("cardboardbuttondown", this.onCardboardButtonDown); // TODO: These should be actions
+    this.scene.addEventListener("cardboardbuttonup", this.onCardboardButtonUp);
   }
 
   tearDown() {
@@ -33,9 +33,9 @@ export default class PrimaryActionHandler {
     this.scene.removeEventListener("action_primary_up", this.onPrimaryUp);
     this.scene.removeEventListener("action_grab", this.onGrab);
     this.scene.removeEventListener("action_release", this.onRelease);
+    this.scene.removeEventListener("move_duck", this.onMoveDuck);
     this.scene.removeEventListener("cardboardbuttondown", this.onCardboardButtonDown);
     this.scene.removeEventListener("cardboardbuttonup", this.onCardboardButtonUp);
-    this.scene.removeEventListener("move_duck", this.onMoveDuck);
   }
 
   onMoveDuck(e) {
