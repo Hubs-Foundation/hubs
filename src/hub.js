@@ -222,7 +222,7 @@ const onReady = async () => {
     const scene = document.querySelector("a-scene");
     if (scene) {
       if (scene.renderer) {
-        scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
+        scene.renderer.setAnimationLoop(null); // Stop animation loop, TODO A-Frame should do this
       }
       document.body.removeChild(scene);
     }
@@ -403,11 +403,11 @@ const onReady = async () => {
     if (!isBotMode) {
       // Stop rendering while the UI is up. We restart the render loop in enterScene.
       // Wait a tick plus some margin so that the environments actually render.
-      setTimeout(() => scene.renderer.animate(null), 100);
+      setTimeout(() => scene.renderer.setAnimationLoop(null), 100);
     } else {
       const noop = () => {};
       // Replace renderer with a noop renderer to reduce bot resource usage.
-      scene.renderer = { animate: noop, render: noop };
+      scene.renderer = { setAnimationLoop: noop, render: noop };
       document.body.style.display = "none";
     }
   });
