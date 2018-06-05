@@ -70,7 +70,6 @@ AFRAME.registerComponent("cursor-controller", {
       if (this.data.useMousePos) {
         this.setRaycasterWithMousePos();
       } else {
-        //this.rayObject.updateMatrixWorld();
         rayObjectRotation.setFromRotationMatrix(this.rayObject.matrixWorld);
         this.direction
           .set(0, 0, 1)
