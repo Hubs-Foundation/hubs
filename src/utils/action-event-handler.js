@@ -4,7 +4,8 @@ export default class ActionEventHandler {
     this.cursor = cursor;
     this.isCursorInteracting = false;
     this.isTeleporting = false;
-    this.cursorController = null;
+    this.handThatAlsoDrivesCursor = null;
+    this.hovered = false;
 
     this.addEventListeners = this.addEventListeners.bind(this);
     this.tearDown = this.tearDown.bind(this);
@@ -15,6 +16,7 @@ export default class ActionEventHandler {
     this.onCardboardButtonDown = this.onCardboardButtonDown.bind(this);
     this.onCardboardButtonUp = this.onCardboardButtonUp.bind(this);
     this.onMoveDuck = this.onMoveDuck.bind(this);
+    this.manageCursorEnabled = this.manageCursorEnabled.bind(this);
     this.addEventListeners();
   }
 
@@ -42,12 +44,12 @@ export default class ActionEventHandler {
     this.cursor.changeDistanceMod(-e.detail.axis[1] / 8);
   }
 
-  setCursorController(cursorController) {
-    this.cursorController = cursorController;
+  setHandThatAlsoDrivesCursor(handThatAlsoDrivesCursor) {
+    this.handThatAlsoDrivesCursor = handThatAlsoDrivesCursor;
   }
 
   onGrab(e) {
-    if (this.cursorController && this.cursorController === e.target) {
+    if (this.handThatAlsoDrivesCursor && this.handThatAlsoDrivesCursor === e.target) {
       if (this.isCursorInteracting) {
         return;
       } else if (e.target.components["super-hands"].state.has("hover-start")) {
@@ -64,7 +66,7 @@ export default class ActionEventHandler {
   }
 
   onRelease(e) {
-    if (this.isCursorInteracting && this.cursorController && this.cursorController === e.target) {
+    if (this.isCursorInteracting && this.handThatAlsoDrivesCursor && this.handThatAlsoDrivesCursor === e.target) {
       this.isCursorInteracting = false;
       this.cursor.endInteraction();
     } else {
@@ -73,7 +75,7 @@ export default class ActionEventHandler {
   }
 
   onPrimaryDown(e) {
-    if (this.cursorController && this.cursorController === e.target) {
+    if (this.handThatAlsoDrivesCursor && this.handThatAlsoDrivesCursor === e.target) {
       if (this.isCursorInteracting) {
         return;
       } else if (e.target.components["super-hands"].state.has("hover-start")) {
@@ -92,7 +94,7 @@ export default class ActionEventHandler {
   }
 
   onPrimaryUp(e) {
-    const isCursorHand = this.cursorController && this.cursorController === e.target;
+    const isCursorHand = this.handThatAlsoDrivesCursor && this.handThatAlsoDrivesCursor === e.target;
     if (this.isCursorInteracting && isCursorHand) {
       this.isCursorInteracting = false;
       this.cursor.endInteraction();
@@ -140,5 +142,20 @@ export default class ActionEventHandler {
     const button = gazeTeleport.components["teleport-controls"].data.button;
     gazeTeleport.emit(button + "up");
     this.isTeleporting = false;
+  }
+
+  manageCursorEnabled() {
+    const handState = this.handThatAlsoDrivesCursor.components["super-hands"].state;
+    const handHoveredThisFrame = !this.hovered && handState.has("hover-start") && !this.isCursorInteracting;
+    const handStoppedHoveringThisFrame =
+      this.hovered === true && !handState.has("hover-start") && !handState.has("grab-start");
+    if (handHoveredThisFrame) {
+      this.hovered = true;
+      this.cursor.disable();
+    } else if (handStoppedHoveringThisFrame) {
+      this.hovered = false;
+      this.cursor.enable();
+      this.cursor.setCursorVisibility(!this.isTeleporting);
+    }
   }
 }

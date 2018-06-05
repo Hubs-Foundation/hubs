@@ -1,3 +1,4 @@
+const degToRad = THREE.Math.degToRad;
 AFRAME.registerComponent("pitch-yaw-rotator", {
   schema: {
     minPitch: { default: -50 },
@@ -20,6 +21,10 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
   tick() {
     this.rotation.x = this.pitch;
     this.rotation.y = this.yaw;
-    this.el.setAttribute("rotation", this.rotation);
+
+    // Update rotation of object3D the same way the rotation component of aframe does,
+    // skipping the work that would be done if we used this.el.setAttribute("rotation", this.rotation);
+    this.el.object3D.rotation.set(degToRad(this.rotation.x), degToRad(this.rotation.y), degToRad(this.rotation.z));
+    this.el.object3D.rotation.order = "YXZ";
   }
 });

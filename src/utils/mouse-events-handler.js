@@ -28,9 +28,7 @@ export default class MouseEventsHandler {
     document.removeEventListener("mousemove", this.onMouseMove);
     document.removeEventListener("mouseup", this.onMouseUp);
     document.removeEventListener("wheel", this.onMouseWheel);
-    document.removeEventListener("contextmenu", e => {
-      e.preventDefault();
-    });
+    document.removeEventListener("contextmenu", this.onContextMenu);
   }
 
   setInverseMouseLook(invert) {
@@ -42,9 +40,11 @@ export default class MouseEventsHandler {
     document.addEventListener("mousemove", this.onMouseMove);
     document.addEventListener("mouseup", this.onMouseUp);
     document.addEventListener("wheel", this.onMouseWheel);
-    document.addEventListener("contextmenu", e => {
-      e.preventDefault();
-    });
+    document.addEventListener("contextmenu", this.onContextMenu);
+  }
+
+  onContextMenu(e) {
+    e.preventDefault();
   }
 
   onMouseDown(e) {

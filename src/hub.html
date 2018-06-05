@@ -42,7 +42,16 @@
         personal-space-bubble="debug: false;"
         vr-mode-ui="enabled: false"
         pinch-to-move
-        input-configurator
+        input-configurator="
+                  gazeCursorRayObject: #player-camera-reverse-z;
+                  cursorController: #cursor-controller;
+                  gazeTeleporter: #gaze-teleport;
+                  camera: #player-camera;
+                  playerRig: #player-rig;
+                  leftController: #player-left-controller;
+                  leftControllerRayObject: #player-left-controller-reverse-z;
+                  rightController: #player-right-controller;
+                  rightControllerRayObject: #player-right-controller-reverse-z;"
     >
 
         <a-assets>
@@ -203,10 +212,7 @@
             id="cursor-controller"
             cursor-controller="
                 cursor: #cursor;
-                camera: #player-camera;
-                playerRig: #player-rig;
-                physicalHandSelector: #player-right-controller;
-                gazeTeleportControls: #gaze-teleport;"
+                camera: #player-camera; "
             raycaster="objects: .collidable, .interactable, .ui; far: 3;"
             line="visible: false; color: white; opacity: 0.2;"
         ></a-entity>

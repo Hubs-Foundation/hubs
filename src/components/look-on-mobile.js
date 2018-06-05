@@ -29,7 +29,8 @@ const average = a => {
 AFRAME.registerComponent("look-on-mobile", {
   schema: {
     horizontalLookSpeedRatio: { default: 0.4 }, // motion applied to camera / motion of polyfill object
-    verticalLookSpeedRatio: { default: 0.4 } // motion applied to camera / motion of polyfill object
+    verticalLookSpeedRatio: { default: 0.4 }, // motion applied to camera / motion of polyfill object
+    camera: { type: "selector" }
   },
 
   init() {
@@ -54,12 +55,12 @@ AFRAME.registerComponent("look-on-mobile", {
     this.polyfillObject = null;
   },
 
-  onRotateX(e) {
-    this.pendingLookX = e.detail.value;
+  update() {
+    this.cameraController = this.data.camera.components["pitch-yaw-rotator"];
   },
 
-  registerCameraController(cameraController) {
-    this.cameraController = cameraController;
+  onRotateX(e) {
+    this.pendingLookX = e.detail.value;
   },
 
   tick() {
