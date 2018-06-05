@@ -157,7 +157,7 @@ AFRAME.registerComponent("input-configurator", {
       const hand = controllerData.handedness;
       this.controller = controllerData.controller;
       this.cursor.el.setAttribute("cursor-controller", {
-        rayObject: this.hand === "left" ? this.data.leftControllerRayObject : this.data.rightControllerRayObject
+        rayObject: hand === "left" ? this.data.leftControllerRayObject : this.data.rightControllerRayObject
       });
     } else {
       this.controller = null;
