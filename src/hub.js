@@ -64,6 +64,8 @@ import "./components/scene-shadow";
 import "./components/avatar-replay";
 import "./components/pinch-to-move";
 import "./components/look-on-mobile";
+import "./components/pitch-yaw-rotator";
+import "./components/input-configurator";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -123,10 +125,6 @@ import registerTelemetry from "./telemetry";
 
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
-import TouchEventsHandler from "./utils/touch-events-handler.js";
-import MouseEventsHandler from "./utils/mouse-events-handler.js";
-window.APP.touchEventsHandler = new TouchEventsHandler();
-window.APP.mouseEventsHandler = new MouseEventsHandler();
 
 function qsTruthy(param) {
   const val = qs[param];
@@ -230,6 +228,7 @@ const onReady = async () => {
 
   const enterScene = async (mediaStream, enterInVR, hubId) => {
     const scene = document.querySelector("a-scene");
+    scene.style.cursor = "none";
     scene.renderer.sortObjects = true;
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("canvas").classList.remove("blurred");
@@ -240,24 +239,6 @@ const onReady = async () => {
     }
 
     AFRAME.registerInputActions(inGameActions, "default");
-
-    const camera = document.querySelector("#player-camera");
-    const registerLookControls = e => {
-      if (e.detail.name !== "look-controls") return;
-      camera.removeEventListener("componentinitialized", registerLookControls);
-
-      window.APP.touchEventsHandler.registerLookControls(camera.components["look-controls"]);
-      scene.components["look-on-mobile"].registerLookControls(camera.components["look-controls"]);
-      scene.setAttribute("look-on-mobile", "enabled", true);
-
-      window.APP.mouseEventsHandler.registerLookControls(camera.components["look-controls"]);
-      window.APP.mouseEventsHandler.setInverseMouseLook(qsTruthy("invertMouseLook"));
-    };
-    camera.addEventListener("componentinitialized", registerLookControls);
-    camera.setAttribute("look-controls", {
-      touchEnabled: false,
-      hmdEnabled: false
-    });
 
     scene.setAttribute("networked-scene", {
       room: hubId,
