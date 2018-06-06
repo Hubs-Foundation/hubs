@@ -7,7 +7,7 @@ function trackpad_scrolling(el) {
   this.x = 0;
   this.y = 0;
   this.axis = [0, 0];
-  this.emittedEventDetail = { axis: this.axis };
+  this.emittedEventDetail = { detail: { axis: this.axis } };
 
   this.onStart = this.onStart.bind(this);
   this.onMove = this.onMove.bind(this);
