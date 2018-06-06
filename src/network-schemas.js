@@ -90,6 +90,11 @@ function registerNetworkSchemas() {
       "scale"
     ]
   });
+
+  NAF.schemas.add({
+    template: "#interactable-image",
+    components: ["position", "rotation", "image-plus"]
+  });
 }
 
 export default registerNetworkSchemas;

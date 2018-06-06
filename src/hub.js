@@ -63,6 +63,7 @@ import "./components/networked-avatar";
 import "./components/css-class";
 import "./components/scene-shadow";
 import "./components/avatar-replay";
+import "./components/image-plus";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -290,6 +291,19 @@ const onReady = async () => {
 
     document.body.addEventListener("unblocked", ev => {
       NAF.connection.entities.completeSync(ev.detail.clientId);
+    });
+
+    document.addEventListener("paste", e => {
+      const scene = AFRAME.scenes[0];
+      const imgUrl = e.clipboardData.getData("text");
+      console.log("Pasted: ", imgUrl);
+
+      const image = document.createElement("a-entity");
+      image.id = "interactable-image-" + Date.now();
+      image.setAttribute("position", { x: 0, y: 2, z: 1 });
+      image.setAttribute("image-plus", "src", imgUrl);
+      image.setAttribute("networked", { template: "#interactable-image" });
+      scene.appendChild(image);
     });
 
     if (!qsTruthy("offline")) {

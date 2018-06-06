@@ -182,6 +182,21 @@
                 ></a-entity>
             </template>
 
+            <template id="interactable-image">
+                <a-entity
+                    class="interactable"
+                    super-networked-interactable="counter: #media-counter; mass: 1;"
+                    body="type: dynamic; shape: none; mass: 1;"
+                    grabbable="uusePhysics: never;"
+                    stretchable="useWorldPosition: true;"
+                    hoverable
+                    geometry="primitive: plane"
+                    material="side: double;"
+                    image-plus
+                >
+                </a-entity>
+            </template>
+
             <a-mixin id="super-hands"
                 super-hands="
                     colliderEvent: collisions; colliderEventProperty: els;
@@ -196,6 +211,7 @@
 
         <!-- Interactables -->
         <a-entity id="counter" networked-counter="max: 3; ttl: 120"></a-entity>
+        <a-entity id="media-counter" networked-counter="max: 3; ttl: 120"></a-entity>
 
         <a-entity
             id="cursor-controller"
