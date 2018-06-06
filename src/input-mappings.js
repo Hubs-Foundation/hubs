@@ -58,7 +58,8 @@ const config = {
         trackpadtouchstart: "thumb_down",
         trackpadtouchend: "thumb_up",
         triggerdown: ["action_grab", "index_down"],
-        triggerup: ["action_release", "index_up"]
+        triggerup: ["action_release", "index_up"],
+        axismove: { right: "move_duck" }
       },
       "oculus-touch-controls": {
         joystick_dpad4_west: {
