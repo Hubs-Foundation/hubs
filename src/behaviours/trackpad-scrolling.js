@@ -4,8 +4,8 @@ function trackpad_scrolling(el) {
   this.move = "axismove";
   this.end = "trackpadtouchend";
   this.isScrolling = false;
-  this.x = 0;
-  this.y = 0;
+  this.x = -10;
+  this.y = -10;
   this.axis = [0, 0];
   this.emittedEventDetail = { detail: { axis: this.axis } };
 
@@ -26,8 +26,7 @@ trackpad_scrolling.prototype = {
     this.el.removeEventListener(this.end, this.onEnd);
   },
   onStart: function(e) {
-    this.x = e.detail.axis[0];
-    this.y = e.detail.axis[1];
+    console.log(e);
     this.isScrolling = true;
   },
 
@@ -35,6 +34,11 @@ trackpad_scrolling.prototype = {
     if (!this.isScrolling) return;
     const x = e.detail.axis[0];
     const y = e.detail.axis[1];
+    if (this.x === -10) {
+      this.x = x;
+      this.y = y;
+      return;
+    }
 
     this.axis[0] = x - this.x;
     this.axis[1] = y - this.y;
@@ -46,6 +50,8 @@ trackpad_scrolling.prototype = {
 
   onEnd: function(e) {
     this.isScrolling = false;
+    this.x = -10;
+    this.y = -10;
   }
 };
 
