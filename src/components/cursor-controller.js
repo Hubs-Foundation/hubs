@@ -32,7 +32,6 @@ AFRAME.registerComponent("cursor-controller", {
 
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
-    this.forceCursorUpdate = this.forceCursorUpdate.bind(this);
     this.startInteraction = this.startInteraction.bind(this);
     this.moveCursor = this.moveCursor.bind(this);
     this.endInteraction = this.endInteraction.bind(this);
@@ -53,12 +52,6 @@ AFRAME.registerComponent("cursor-controller", {
     this.setCursorVisibility(false);
   },
 
-  update: function() {
-    if (this.data.rayObject) {
-      this.rayObject = this.data.rayObject.object3D;
-    }
-  },
-
   tick: (() => {
     const rayObjectRotation = new THREE.Quaternion();
 
@@ -70,12 +63,13 @@ AFRAME.registerComponent("cursor-controller", {
       if (this.data.useMousePos) {
         this.setRaycasterWithMousePos();
       } else {
-        rayObjectRotation.setFromRotationMatrix(this.rayObject.matrixWorld);
+        const rayObject = this.data.rayObject.object3D;
+        rayObjectRotation.setFromRotationMatrix(rayObject.matrixWorld);
         this.direction
           .set(0, 0, 1)
           .applyQuaternion(rayObjectRotation)
           .normalize();
-        this.origin.setFromMatrixPosition(this.rayObject.matrixWorld);
+        this.origin.setFromMatrixPosition(rayObject.matrixWorld);
         this.el.setAttribute("raycaster", { origin: this.origin, direction: this.direction });
       }
 
@@ -107,7 +101,7 @@ AFRAME.registerComponent("cursor-controller", {
     };
   })(),
 
-  setRaycasterWithMousePos() {
+  setRaycasterWithMousePos: function() {
     const camera = this.data.camera.components.camera.camera;
     const raycaster = this.el.components.raycaster.raycaster;
     raycaster.setFromCamera(this.mousePos, camera);
@@ -116,7 +110,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.el.setAttribute("raycaster", { origin: raycaster.ray.origin, direction: raycaster.ray.direction });
   },
 
-  updateDistanceAndTargetType() {
+  updateDistanceAndTargetType: function() {
     let intersection = null;
     const intersections = this.el.components.raycaster.intersections;
     if (intersections.length > 0 && intersections[0].distance <= this.data.maxDistance) {
@@ -142,7 +136,7 @@ AFRAME.registerComponent("cursor-controller", {
     return (this.currentTargetType & mask) === this.currentTargetType;
   },
 
-  setCursorVisibility(visible) {
+  setCursorVisibility: function(visible) {
     this.data.cursor.setAttribute("visible", visible);
     this.el.setAttribute("line", { visible: visible && this.data.drawLine });
   },
