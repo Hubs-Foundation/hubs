@@ -76,8 +76,8 @@ AFRAME.registerComponent("cursor-controller", {
           .applyQuaternion(rayObjectRotation)
           .normalize();
         this.origin.setFromMatrixPosition(this.rayObject.matrixWorld);
+        this.el.setAttribute("raycaster", { origin: this.origin, direction: this.direction });
       }
-      this.el.setAttribute("raycaster", { origin: this.origin, direction: this.direction });
 
       const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
       if (isGrabbing) {
