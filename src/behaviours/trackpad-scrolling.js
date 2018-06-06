@@ -40,8 +40,8 @@ trackpad_scrolling.prototype = {
       return;
     }
 
-    this.axis[0] = x - this.x;
-    this.axis[1] = y - this.y;
+    this.axis[0] = (x - this.x) * 8;
+    this.axis[1] = (y - this.y) * 8;
     this.emittedEventDetail.axis = this.axis;
     e.target.emit("scroll", this.emittedEventDetail);
     this.x = x;
