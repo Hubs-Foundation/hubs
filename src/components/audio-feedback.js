@@ -1,3 +1,8 @@
+/**
+ * Emits audioFrequencyChange events based on a networked audio source
+ * @namespace avatar
+ * @component networked-audio-analyser
+ */
 AFRAME.registerComponent("networked-audio-analyser", {
   async init() {
     this.volume = 0;
@@ -23,6 +28,10 @@ AFRAME.registerComponent("networked-audio-analyser", {
   }
 });
 
+/**
+ * Sets an entity's color base on audioFrequencyChange events.
+ * @component matcolor-audio-feedback
+ */
 AFRAME.registerComponent("matcolor-audio-feedback", {
   tick() {
     if (!this.mat) return;
@@ -35,6 +44,11 @@ AFRAME.registerComponent("matcolor-audio-feedback", {
   }
 });
 
+/**
+ * Sets an entity's scale base on audioFrequencyChange events.
+ * @namespace avatar
+ * @component scale-audio-feedback
+ */
 AFRAME.registerComponent("scale-audio-feedback", {
   schema: {
     minScale: { default: 1 },

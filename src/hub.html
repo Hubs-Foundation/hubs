@@ -17,6 +17,10 @@
     <% } else { %>
         <script src="https://cdn.rawgit.com/aframevr/aframe/3e7a4b3/dist/aframe-master.js" integrity="sha384-EaMOuyBOi9ERV/lVDwQgz/yFWBDWPsIju5Co6oCZZHXuvbLBO81yPWn80q0BbBn3" crossorigin="anonymous"></script>
     <% } %>
+
+    
+    <!-- HACK: this has to run after A-Frame but before our bundle, since A-Frame blows away the local storage setting -->
+    <script src="https://cdn.rawgit.com/gfodor/ba8f88d9f34fe9cbe59a01ce3c48420d/raw/03e31f0ef7b9eac5e947bd39e440f34df0701f75/naf-janus-adapter-logging.js" integrity="sha384-4q1V8Q88oeCFriFefFo5uEUtMzbw6K116tFyC9cwbiPr6wEe7050l5HoJUxMvnzj" crossorigin="anonymous"></script>
 </head>
 
 <body data-html-prefix="<%= HTML_PREFIX %>">
@@ -56,7 +60,7 @@
 
             <a-asset-item id="botdefault" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDefault_Avatar-9f71f8ff22.gltf"></a-asset-item>
             <a-asset-item id="botbobo" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotBobo_Avatar-f9740a010b.gltf"></a-asset-item>
-            <a-asset-item id="botdom" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDom_Avatar-6aa1b5d781.gltf"></a-asset-item>
+            <a-asset-item id="botdom" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDom_Avatar-0c48bf15a5.gltf"></a-asset-item>
             <a-asset-item id="botgreg" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotGreg_Avatar-98d39797bb.gltf"></a-asset-item>
             <a-asset-item id="botguest" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotGuest_Avatar-78cd857332.gltf"></a-asset-item>
             <a-asset-item id="botjim" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotJim_Avatar-d28005a687.gltf"></a-asset-item>

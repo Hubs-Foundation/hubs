@@ -9,7 +9,7 @@ export const avatars = [
   },
   {
     id: "botdom",
-    model: "https://asset-bundles-prod.reticulum.io/bots/BotDom_Avatar-6aa1b5d781.gltf"
+    model: "https://asset-bundles-prod.reticulum.io/bots/BotDom_Avatar-0c48bf15a5.gltf"
   },
   {
     id: "botgreg",

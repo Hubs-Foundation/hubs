@@ -1,3 +1,8 @@
+/**
+ * Toggles the visibility of this entity when the scene is frozen.
+ * @namespace ui
+ * @component visible-while-frozen
+ */
 AFRAME.registerComponent("visible-while-frozen", {
   init() {
     this.onStateChange = evt => {
@@ -18,6 +23,11 @@ AFRAME.registerComponent("visible-while-frozen", {
   }
 });
 
+/**
+ * Toggles the interactivity of a UI entity while the scene is frozen.
+ * @namespace ui
+ * @component ui-class-while-frozen
+ */
 AFRAME.registerComponent("ui-class-while-frozen", {
   init() {
     this.onStateChange = evt => {

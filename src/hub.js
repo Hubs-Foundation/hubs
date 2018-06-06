@@ -1,13 +1,12 @@
 import "./assets/stylesheets/hub.scss";
 import moment from "moment-timezone";
-import uuid from "uuid/v4";
 import queryString from "query-string";
-import { Socket } from "phoenix";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
 import "aframe-xr";
+
 import "./vendor/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
@@ -69,6 +68,9 @@ import ReactDOM from "react-dom";
 import React from "react";
 import UIRoot from "./react-components/ui-root";
 import HubChannel from "./utils/hub-channel";
+import LinkChannel from "./utils/link-channel";
+import { connectToReticulum } from "./utils/phoenix-utils";
+import { disableiOSZoom } from "./utils/disable-ios-zoom";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
@@ -118,7 +120,6 @@ import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 
-import { generateDefaultProfile, generateRandomName } from "./utils/identity.js";
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
@@ -129,10 +130,14 @@ function qsTruthy(param) {
 }
 
 const isBotMode = qsTruthy("bot");
+const isTelemetryDisabled = qsTruthy("disable_telemetry");
+const isDebug = qsTruthy("debug");
 
-if (!isBotMode) {
+if (!isBotMode && !isTelemetryDisabled) {
   registerTelemetry();
 }
+
+disableiOSZoom();
 
 AFRAME.registerInputBehaviour("trackpad_dpad4", trackpad_dpad4);
 AFRAME.registerInputBehaviour("joystick_dpad4", joystick_dpad4);
@@ -145,13 +150,7 @@ const concurrentLoadDetector = new ConcurrentLoadDetector();
 
 concurrentLoadDetector.start();
 
-// Always layer in any new default profile bits
-store.update({ activity: {}, settings: {}, profile: { ...generateDefaultProfile(), ...(store.state.profile || {}) } });
-
-// Regenerate name to encourage users to change it.
-if (!store.state.activity.hasChangedName) {
-  store.update({ profile: { displayName: generateRandomName() } });
-}
+store.init();
 
 function mountUI(scene, props = {}) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
@@ -181,13 +180,14 @@ function mountUI(scene, props = {}) {
 const onReady = async () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
+  const linkChannel = new LinkChannel(store);
 
   document.querySelector("canvas").classList.add("blurred");
   window.APP.scene = scene;
 
   registerNetworkSchemas();
 
-  let uiProps = {};
+  let uiProps = { linkChannel };
 
   mountUI(scene);
 
@@ -242,6 +242,10 @@ const onReady = async () => {
       room: hubId,
       serverURL: process.env.JANUS_SERVER
     });
+
+    if (isDebug) {
+      scene.setAttribute("networked-scene", { debug: true });
+    }
 
     scene.setAttribute("stats-plus", false);
 
@@ -313,11 +317,16 @@ const onReady = async () => {
       scene.components["networked-scene"].connect().catch(connectError => {
         // hacky until we get return codes
         const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+        console.error(connectError);
         remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
         exitScene();
 
         return;
       });
+
+      if (isDebug) {
+        NAF.connection.adapter.session.options.verbose = true;
+      }
 
       if (isBotMode) {
         playerRig.setAttribute("avatar-replay", {
@@ -327,7 +336,7 @@ const onReady = async () => {
         });
         const audio = document.getElementById("bot-recording");
         mediaStream.addTrack(audio.captureStream().getAudioTracks()[0]);
-        // wait for runner script to interact with the page so that we can play audio.
+        // Wait for runner script to interact with the page so that we can play audio.
         await new Promise(resolve => {
           window.interacted = resolve;
         });
@@ -391,6 +400,11 @@ const onReady = async () => {
       // Stop rendering while the UI is up. We restart the render loop in enterScene.
       // Wait a tick plus some margin so that the environments actually render.
       setTimeout(() => scene.renderer.animate(null), 100);
+    } else {
+      const noop = () => {};
+      // Replace renderer with a noop renderer to reduce bot resource usage.
+      scene.renderer = { animate: noop, render: noop };
+      document.body.style.display = "none";
     }
   });
   environmentRoot.appendChild(initialEnvironmentEl);
@@ -421,17 +435,7 @@ const onReady = async () => {
   const hubId = qs.hub_id || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
 
-  const socketProtocol = document.location.protocol === "https:" ? "wss:" : "ws:";
-  const [retHost, retPort] = (process.env.DEV_RETICULUM_SERVER || "").split(":");
-  const isProd = process.env.NODE_ENV === "production";
-  const socketPort = qs.phx_port || (isProd ? document.location.port : retPort) || "443";
-  const socketHost = qs.phx_host || (isProd ? document.location.hostname : retHost) || "";
-  const socketUrl = `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}/socket`;
-  console.log(`Phoenix Channel URL: ${socketUrl}`);
-
-  const socket = new Socket(socketUrl, { params: { session_id: uuid() } });
-  socket.connect();
-
+  const socket = connectToReticulum();
   const channel = socket.channel(`hub:${hubId}`, {});
 
   channel
@@ -452,6 +456,8 @@ const onReady = async () => {
 
       console.error(res);
     });
+
+  linkChannel.setSocket(socket);
 };
 
 document.addEventListener("DOMContentLoaded", onReady);
