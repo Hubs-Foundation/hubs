@@ -140,8 +140,10 @@ AFRAME.registerComponent("character-controller", {
       root.matrix.premultiply(pivotRotationMatrix);
       // Reapply playspace (player rig) rotation
       root.matrix.premultiply(rotationMatrix);
-      // Reapply playspace (player rig) translation and update pos/rot/scale
-      root.applyMatrix(trans);
+      // Reapply playspace (player rig) translation
+      root.matrix.premultiply(trans);
+      // update pos/rot/scale
+      root.matrix.decompose(root.position, root.quaternion, root.scale);
 
       // TODO: the above matrix trnsfomraitons introduce some floating point errors in scale, this reverts them to
       // avoid spamming network with fake scale updates

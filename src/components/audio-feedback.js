@@ -34,11 +34,9 @@ AFRAME.registerComponent("networked-audio-analyser", {
  */
 AFRAME.registerComponent("matcolor-audio-feedback", {
   tick() {
-    if (!this.mat) return;
-
     const audioAnalyser = this.el.components["networked-audio-analyser"];
 
-    if (!audioAnalyser) return;
+    if (!audioAnalyser || !this.mat) return;
 
     this.object3D.mesh.color.setScalar(1 + audioAnalyser.volume / 255 * 2);
   }
