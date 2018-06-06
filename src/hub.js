@@ -20,6 +20,7 @@ import "aframe-motion-capture-components";
 import "./utils/audio-context-fix";
 
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
+import trackpad_scrolling from "./behaviours/trackpad-scrolling";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
 import msft_mr_axis_with_deadzone from "./behaviours/msft-mr-axis-with-deadzone";
 import { PressedMove } from "./activators/pressedmove";
@@ -143,6 +144,7 @@ if (!isBotMode && !isTelemetryDisabled) {
 disableiOSZoom();
 
 AFRAME.registerInputBehaviour("trackpad_dpad4", trackpad_dpad4);
+AFRAME.registerInputBehaviour("trackpad_scrolling", trackpad_scrolling);
 AFRAME.registerInputBehaviour("joystick_dpad4", joystick_dpad4);
 AFRAME.registerInputBehaviour("msft_mr_axis_with_deadzone", msft_mr_axis_with_deadzone);
 AFRAME.registerInputActivator("pressedmove", PressedMove);

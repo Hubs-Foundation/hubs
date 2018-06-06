@@ -24,7 +24,8 @@ const config = {
         joystick: "joystick_dpad4"
       },
       "vive-controls": {
-        trackpad: "trackpad_dpad4"
+        trackpad: "trackpad_dpad4",
+        trackpad_scrolling: "trackpad_scrolling"
       },
       "windows-motion-controls": {
         joystick: "joystick_dpad4",
@@ -59,7 +60,7 @@ const config = {
         trackpadtouchend: "thumb_up",
         triggerdown: ["action_grab", "index_down"],
         triggerup: ["action_release", "index_up"],
-        axismove: { right: "move_duck" }
+        scroll: { right: "move_duck" }
       },
       "oculus-touch-controls": {
         joystick_dpad4_west: {
