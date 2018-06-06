@@ -33,7 +33,7 @@ const config = {
       },
       "daydream-controls": {
         trackpad: "trackpad_dpad4",
-        trackpad_scrolling: "trackpad_scrolling"
+        axisMoveWithDeadzone: "msft_mr_axis_with_deadzone"
       },
       "gearvr-controls": {
         trackpad: "trackpad_dpad4",
@@ -121,7 +121,7 @@ const config = {
         trackpad_dpad4_pressed_north_down: ["action_primary_down"],
         trackpad_dpad4_pressed_south_down: ["action_primary_down"],
         trackpadup: ["action_primary_up"],
-        scroll: { right: "move_duck" }
+        scroll: "move_duck"
       },
       "gearvr-controls": {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",
@@ -132,7 +132,7 @@ const config = {
         trackpadup: ["action_primary_up"],
         triggerdown: ["action_primary_down"],
         triggerup: ["action_primary_up"],
-        scroll: { right: "move_duck" }
+        axisMoveWithDeadzone: "move_duck"
       },
       "oculus-go-controls": {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",
@@ -143,7 +143,7 @@ const config = {
         trackpadup: ["action_primary_up"],
         triggerdown: ["action_primary_down"],
         triggerup: ["action_primary_up"],
-        scroll: { right: "move_duck" }
+        scroll: "move_duck"
       },
       keyboard: {
         m_press: "action_mute",
