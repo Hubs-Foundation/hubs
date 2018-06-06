@@ -3,6 +3,7 @@ export default class ActionEventHandler {
     this.scene = scene;
     this.cursor = cursor;
     this.isCursorInteracting = false;
+    this.isCursorInteractingOnGrab = false;
     this.isTeleporting = false;
     this.handThatAlsoDrivesCursor = null;
     this.hovered = false;
@@ -57,6 +58,9 @@ export default class ActionEventHandler {
         return;
       } else {
         this.isCursorInteracting = this.cursor.startInteraction();
+        if (this.isCursorInteracting) {
+          this.isCursorInteractingOnGrab = true;
+        }
         return;
       }
     } else {
@@ -66,8 +70,14 @@ export default class ActionEventHandler {
   }
 
   onRelease(e) {
-    if (this.isCursorInteracting && this.handThatAlsoDrivesCursor && this.handThatAlsoDrivesCursor === e.target) {
+    if (
+      this.isCursorInteracting &&
+      this.isCursorInteractingOnGrab &&
+      this.handThatAlsoDrivesCursor &&
+      this.handThatAlsoDrivesCursor === e.target
+    ) {
       this.isCursorInteracting = false;
+      this.isCursorInteractingOnGrab = false;
       this.cursor.endInteraction();
     } else {
       e.target.emit("hand_release");
@@ -75,6 +85,7 @@ export default class ActionEventHandler {
   }
 
   onPrimaryDown(e) {
+    if (this.isCursorInteractingOnGrab) return;
     if (this.handThatAlsoDrivesCursor && this.handThatAlsoDrivesCursor === e.target) {
       if (this.isCursorInteracting) {
         return;
@@ -94,6 +105,7 @@ export default class ActionEventHandler {
   }
 
   onPrimaryUp(e) {
+    if (this.isCursorInteractingOnGrab) return;
     const isCursorHand = this.handThatAlsoDrivesCursor && this.handThatAlsoDrivesCursor === e.target;
     if (this.isCursorInteracting && isCursorHand) {
       this.isCursorInteracting = false;
