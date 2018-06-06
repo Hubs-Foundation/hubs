@@ -48,7 +48,7 @@ trackpad_scrolling.prototype = {
     this.y = y;
   },
 
-  onEnd: function(e) {
+  onEnd: function() {
     this.isScrolling = false;
     this.x = -10;
     this.y = -10;
