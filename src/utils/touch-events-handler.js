@@ -15,15 +15,12 @@ export default class TouchEventsHandler {
     this.pinchTouchId1 = -1;
     this.pinchTouchId2 = -1;
 
-    this.addEventListeners = this.addEventListeners.bind(this);
     this.handleTouchStart = this.handleTouchStart.bind(this);
     this.singleTouchStart = this.singleTouchStart.bind(this);
     this.handleTouchMove = this.handleTouchMove.bind(this);
     this.singleTouchMove = this.singleTouchMove.bind(this);
     this.handleTouchEnd = this.handleTouchEnd.bind(this);
     this.singleTouchEnd = this.singleTouchEnd.bind(this);
-    this.pinch = this.pinch.bind(this);
-    this.look = this.look.bind(this);
     this.tearDown = this.tearDown.bind(this);
 
     this.addEventListeners();
@@ -44,8 +41,6 @@ export default class TouchEventsHandler {
   }
 
   handleTouchStart(e) {
-    this.cursor.setCursorVisibility(false);
-
     Array.prototype.forEach.call(e.changedTouches, this.singleTouchStart);
   }
 

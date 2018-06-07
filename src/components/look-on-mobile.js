@@ -1,6 +1,18 @@
 const PolyfillControls = AFRAME.utils.device.PolyfillControls;
 const TWOPI = Math.PI * 2;
 
+class CircularBuffer {
+  constructor(length) {
+    this.items = new Array(length).fill(0);
+    this.writePtr = 0;
+  }
+
+  push(item) {
+    this.items[this.writePtr] = item;
+    this.writePtr = (this.writePtr + 1) % this.items.length;
+  }
+}
+
 const abs = Math.abs;
 // Input: two numbers between [-Math.PI, Math.PI]
 // Output: difference between them, where -Math.PI === Math.PI
@@ -28,8 +40,8 @@ const average = a => {
 
 AFRAME.registerComponent("look-on-mobile", {
   schema: {
-    horizontalLookSpeedRatio: { default: 0.4 }, // motion applied to camera / motion of polyfill object
-    verticalLookSpeedRatio: { default: 0.4 }, // motion applied to camera / motion of polyfill object
+    horizontalLookSpeedRatio: { default: 1.0 }, // motion applied to camera / motion of polyfill object
+    verticalLookSpeedRatio: { default: 1.0 }, // motion applied to camera / motion of polyfill object
     camera: { type: "selector" }
   },
 
@@ -39,8 +51,8 @@ AFRAME.registerComponent("look-on-mobile", {
     this.prevY = this.hmdEuler.y;
     this.pendingLookX = 0;
     this.onRotateX = this.onRotateX.bind(this);
-    this.dXBuffer = [];
-    this.dYBuffer = [];
+    this.dXBuffer = new CircularBuffer(6);
+    this.dYBuffer = new CircularBuffer(6);
   },
 
   play() {
@@ -75,15 +87,8 @@ AFRAME.registerComponent("look-on-mobile", {
     this.dXBuffer.push(Math.abs(dX) < 0.001 ? 0 : dX);
     this.dYBuffer.push(Math.abs(dY) < 0.001 ? 0 : dY);
 
-    if (this.dXBuffer.length > 5) {
-      this.dXBuffer.splice(0, 1);
-    }
-    if (this.dYBuffer.length > 5) {
-      this.dYBuffer.splice(0, 1);
-    }
-
-    const deltaYaw = average(this.dYBuffer) * horizontalLookSpeedRatio;
-    const deltaPitch = average(this.dXBuffer) * verticalLookSpeedRatio + this.pendingLookX;
+    const deltaYaw = average(this.dYBuffer.items) * horizontalLookSpeedRatio;
+    const deltaPitch = average(this.dXBuffer.items) * verticalLookSpeedRatio + this.pendingLookX;
 
     this.cameraController.look(deltaPitch, deltaYaw);
 

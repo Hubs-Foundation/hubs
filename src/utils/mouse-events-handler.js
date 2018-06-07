@@ -10,15 +10,11 @@ export default class MouseEventsHandler {
     this.isLeftButtonHandledByCursor = false;
     this.isPointerLocked = false;
 
-    this.addEventListeners = this.addEventListeners.bind(this);
     this.onMouseDown = this.onMouseDown.bind(this);
-    this.onLeftButtonDown = this.onLeftButtonDown.bind(this);
-    this.onRightButtonDown = this.onRightButtonDown.bind(this);
     this.tearDown = this.tearDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
     this.onMouseWheel = this.onMouseWheel.bind(this);
-    this.look = this.look.bind(this);
 
     this.addEventListeners();
   }
