@@ -40,7 +40,9 @@ export default class TouchEventsHandler {
   }
 
   handleTouchStart(e) {
-    Array.prototype.forEach.call(e.changedTouches, this.singleTouchStart);
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      this.singleTouchStart(e.changedTouches[i]);
+    }
   }
 
   singleTouchStart(touch) {
@@ -58,7 +60,9 @@ export default class TouchEventsHandler {
   }
 
   handleTouchMove(e) {
-    Array.prototype.forEach.call(e.touches, this.singleTouchMove);
+    for (let i = 0; i < e.touches.length; i++) {
+      this.singleTouchMove(e.touches[i]);
+    }
     if (this.needsPinch) {
       this.pinch();
       this.needsPinch = false;
@@ -123,7 +127,9 @@ export default class TouchEventsHandler {
   }
 
   handleTouchEnd(e) {
-    Array.prototype.forEach.call(e.changedTouches, this.singleTouchEnd);
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      this.singleTouchEnd(e.changedTouches[i]);
+    }
   }
 
   singleTouchEnd(touch) {
