@@ -25,10 +25,9 @@ trackpad_scrolling.prototype = {
     this.el.removeEventListener(this.move, this.onMove);
     this.el.removeEventListener(this.end, this.onEnd);
   },
-  onStart: function(e) {
+  onStart: function() {
     this.isScrolling = true;
   },
-
   onMove: function(e) {
     if (!this.isScrolling) return;
     const x = e.detail.axis[0];
@@ -47,7 +46,6 @@ trackpad_scrolling.prototype = {
     this.x = x;
     this.y = y;
   },
-
   onEnd: function() {
     this.isScrolling = false;
     this.x = -10;
