@@ -41,6 +41,17 @@
         freeze-controller="toggleEvent: action_freeze"
         personal-space-bubble="debug: false;"
         vr-mode-ui="enabled: false"
+        pinch-to-move
+        input-configurator="
+                  gazeCursorRayObject: #player-camera-reverse-z;
+                  cursorController: #cursor-controller;
+                  gazeTeleporter: #gaze-teleport;
+                  camera: #player-camera;
+                  playerRig: #player-rig;
+                  leftController: #player-left-controller;
+                  leftControllerRayObject: #player-left-controller-reverse-z;
+                  rightController: #player-right-controller;
+                  rightControllerRayObject: #player-right-controller-reverse-z;"
     >
 
         <a-assets>
@@ -197,13 +208,13 @@
                 </a-entity>
             </template>
 
-            <a-mixin id="super-hands"
+            <a-mixin id="controller-super-hands"
                 super-hands="
                     colliderEvent: collisions; colliderEventProperty: els;
                     colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
-                    grabStartButtons: action_grab; grabEndButtons: action_release;
-                    stretchStartButtons: action_grab; stretchEndButtons: action_release;
-                    dragDropStartButtons: action_grab; dragDropEndButtons: action_release;"
+                    grabStartButtons: hand_grab; grabEndButtons: hand_release;
+                    stretchStartButtons: hand_grab; stretchEndButtons: hand_release;
+                    dragDropStartButtons: hand_grab; dragDropEndButtons: hand_release;"
                 collision-filter="collisionForces: false"
                 physics-collider
             ></a-mixin>
@@ -217,10 +228,7 @@
             id="cursor-controller"
             cursor-controller="
                 cursor: #cursor;
-                camera: #player-camera;
-                playerRig: #player-rig;
-                physicalHandSelector: #player-right-controller;
-                gazeTeleportControls: #gaze-teleport;"
+                camera: #player-camera; "
             raycaster="objects: .collidable, .interactable, .ui; far: 3;"
             line="visible: false; color: white; opacity: 0.2;"
         ></a-entity>
@@ -277,6 +285,7 @@
                 camera
                 position="0 1.6 0"
                 personal-space-bubble="radius: 0.4"
+                pitch-yaw-rotator
             >
                 <a-entity
                     id="gaze-teleport"
@@ -284,13 +293,14 @@
                     teleport-controls="
                     cameraRig: #player-rig;
                     teleportOrigin: #player-camera;
-                    button: cursor-teleport_;
+                    button: gaze-teleport_;
                     collisionEntities: [nav-mesh];
                     drawIncrementally: true;
                     incrementalDrawMs: 600;
                     hitOpacity: 0.3;
                     missOpacity: 0.2;"
                 ></a-entity>
+                <a-entity id="player-camera-reverse-z" rotation="0 180 0"></a-entity>
             </a-entity>
 
             <a-entity
@@ -309,9 +319,10 @@
                     missOpacity: 0.2;"
                 haptic-feedback
                 body="type: static; shape: none;"
-                mixin="super-hands"
+                mixin="controller-super-hands"
                 controls-shape-offset
             >
+                <a-entity id="player-left-controller-reverse-z" rotation="0 180 0"></a-entity>
             </a-entity>
 
             <a-entity
@@ -330,9 +341,11 @@
                     missOpacity: 0.2;"
                 haptic-feedback
                 body="type: static; shape: none;"
-                mixin="super-hands"
+                mixin="controller-super-hands"
                 controls-shape-offset
-            ></a-entity>
+            >
+                <a-entity id="player-right-controller-reverse-z" rotation="0 180 0"></a-entity>
+            </a-entity>
 
             <a-entity gltf-model-plus="inflate: true;"
                       class="model">

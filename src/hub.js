@@ -17,10 +17,10 @@ import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
 import "aframe-motion-capture-components";
-
 import "./utils/audio-context-fix";
 
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
+import trackpad_scrolling from "./behaviours/trackpad-scrolling";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
 import msft_mr_axis_with_deadzone from "./behaviours/msft-mr-axis-with-deadzone";
 import { PressedMove } from "./activators/pressedmove";
@@ -64,6 +64,10 @@ import "./components/css-class";
 import "./components/scene-shadow";
 import "./components/avatar-replay";
 import "./components/image-plus";
+import "./components/pinch-to-move";
+import "./components/look-on-mobile";
+import "./components/pitch-yaw-rotator";
+import "./components/input-configurator";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -141,6 +145,7 @@ if (!isBotMode && !isTelemetryDisabled) {
 disableiOSZoom();
 
 AFRAME.registerInputBehaviour("trackpad_dpad4", trackpad_dpad4);
+AFRAME.registerInputBehaviour("trackpad_scrolling", trackpad_scrolling);
 AFRAME.registerInputBehaviour("joystick_dpad4", joystick_dpad4);
 AFRAME.registerInputBehaviour("msft_mr_axis_with_deadzone", msft_mr_axis_with_deadzone);
 AFRAME.registerInputActivator("pressedmove", PressedMove);
@@ -226,6 +231,7 @@ const onReady = async () => {
 
   const enterScene = async (mediaStream, enterInVR, hubId) => {
     const scene = document.querySelector("a-scene");
+    scene.classList.add("no-cursor");
     scene.renderer.sortObjects = true;
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("canvas").classList.remove("blurred");
@@ -236,8 +242,6 @@ const onReady = async () => {
     }
 
     AFRAME.registerInputActions(inGameActions, "default");
-
-    document.querySelector("#player-camera").setAttribute("look-controls", "");
 
     scene.setAttribute("networked-scene", {
       room: hubId,
