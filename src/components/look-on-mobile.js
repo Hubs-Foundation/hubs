@@ -34,8 +34,8 @@ const difference = (curr, prev) => {
 
 const average = a => {
   let sum = 0;
-  for (let index of a) {
-    const n = a[index];
+  for (let i = 0; i < a.length; i++) {
+    const n = a[i];
     sum += n;
   }
   return sum / a.length;
