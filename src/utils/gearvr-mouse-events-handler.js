@@ -5,8 +5,6 @@ export default class GearVRMouseEventsHandler {
     this.isMouseDownHandledByCursor = false;
     this.isMouseDownHandledByGazeTeleporter = false;
 
-    this.addEventListeners = this.addEventListeners.bind(this);
-    this.tearDown = this.tearDown.bind(this);
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
     this.addEventListeners();

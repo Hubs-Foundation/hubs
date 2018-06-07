@@ -30,9 +30,6 @@ AFRAME.registerComponent("input-configurator", {
 
     this.onEnterVR = this.onEnterVR.bind(this);
     this.onExitVR = this.onExitVR.bind(this);
-    this.tearDown = this.tearDown.bind(this);
-    this.configureInput = this.configureInput.bind(this);
-    this.addLookOnMobile = this.addLookOnMobile.bind(this);
     this.handleControllerConnected = this.handleControllerConnected.bind(this);
     this.handleControllerDisconnected = this.handleControllerDisconnected.bind(this);
 

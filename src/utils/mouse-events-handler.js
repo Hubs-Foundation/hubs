@@ -11,7 +11,6 @@ export default class MouseEventsHandler {
     this.isPointerLocked = false;
 
     this.onMouseDown = this.onMouseDown.bind(this);
-    this.tearDown = this.tearDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
     this.onMouseWheel = this.onMouseWheel.bind(this);

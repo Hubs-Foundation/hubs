@@ -8,8 +8,6 @@ export default class ActionEventHandler {
     this.handThatAlsoDrivesCursor = null;
     this.hovered = false;
 
-    this.addEventListeners = this.addEventListeners.bind(this);
-    this.tearDown = this.tearDown.bind(this);
     this.onPrimaryDown = this.onPrimaryDown.bind(this);
     this.onPrimaryUp = this.onPrimaryUp.bind(this);
     this.onGrab = this.onGrab.bind(this);
@@ -17,7 +15,6 @@ export default class ActionEventHandler {
     this.onCardboardButtonDown = this.onCardboardButtonDown.bind(this);
     this.onCardboardButtonUp = this.onCardboardButtonUp.bind(this);
     this.onMoveDuck = this.onMoveDuck.bind(this);
-    this.manageCursorEnabled = this.manageCursorEnabled.bind(this);
     this.addEventListeners();
   }
 

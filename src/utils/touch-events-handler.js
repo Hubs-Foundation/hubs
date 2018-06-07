@@ -21,7 +21,6 @@ export default class TouchEventsHandler {
     this.singleTouchMove = this.singleTouchMove.bind(this);
     this.handleTouchEnd = this.handleTouchEnd.bind(this);
     this.singleTouchEnd = this.singleTouchEnd.bind(this);
-    this.tearDown = this.tearDown.bind(this);
 
     this.addEventListeners();
   }

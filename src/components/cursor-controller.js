@@ -32,13 +32,6 @@ AFRAME.registerComponent("cursor-controller", {
 
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
-    this.startInteraction = this.startInteraction.bind(this);
-    this.moveCursor = this.moveCursor.bind(this);
-    this.endInteraction = this.endInteraction.bind(this);
-    this.changeDistanceMod = this.changeDistanceMod.bind(this);
-    this.setRaycasterWithMousePos = this.setRaycasterWithMousePos.bind(this);
-    this.updateDistanceAndTargetType = this.updateDistanceAndTargetType.bind(this);
-
     this._handleCursorLoaded = this._handleCursorLoaded.bind(this);
     this.data.cursor.addEventListener("loaded", this._handleCursorLoaded);
   },
