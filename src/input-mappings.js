@@ -24,20 +24,24 @@ const config = {
         joystick: "joystick_dpad4"
       },
       "vive-controls": {
-        trackpad: "trackpad_dpad4"
+        trackpad: "trackpad_dpad4",
+        trackpad_scrolling: "trackpad_scrolling"
       },
       "windows-motion-controls": {
         joystick: "joystick_dpad4",
         axisMoveWithDeadzone: "msft_mr_axis_with_deadzone"
       },
       "daydream-controls": {
-        trackpad: "trackpad_dpad4"
+        trackpad: "trackpad_dpad4",
+        axisMoveWithDeadzone: "msft_mr_axis_with_deadzone"
       },
       "gearvr-controls": {
-        trackpad: "trackpad_dpad4"
+        trackpad: "trackpad_dpad4",
+        trackpad_scrolling: "trackpad_scrolling"
       },
       "oculus-go-controls": {
-        trackpad: "trackpad_dpad4"
+        trackpad: "trackpad_dpad4",
+        trackpad_scrolling: "trackpad_scrolling"
       }
     }
   },
@@ -58,7 +62,8 @@ const config = {
         trackpadtouchstart: "thumb_down",
         trackpadtouchend: "thumb_up",
         triggerdown: ["action_grab", "index_down"],
-        triggerup: ["action_release", "index_up"]
+        triggerup: ["action_release", "index_up"],
+        scroll: { right: "move_duck" }
       },
       "oculus-touch-controls": {
         joystick_dpad4_west: {
@@ -83,7 +88,7 @@ const config = {
         thumbsticktouchend: "thumb_up",
         triggerdown: ["action_grab", "index_down"],
         triggerup: ["action_release", "index_up"],
-        "axismove.reverseY": { left: "move" },
+        "axismove.reverseY": { left: "move", right: "move_duck" },
         abuttondown: "action_primary_down",
         abuttonup: "action_primary_up"
       },
@@ -107,7 +112,7 @@ const config = {
         trackpadtouchend: "thumb_up",
         triggerdown: ["action_grab", "index_down"],
         triggerup: ["action_release", "index_up"],
-        axisMoveWithDeadzone: { left: "move" }
+        axisMoveWithDeadzone: { left: "move", right: "move_duck" }
       },
       "daydream-controls": {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",
@@ -115,7 +120,8 @@ const config = {
         trackpad_dpad4_pressed_center_down: ["action_primary_down"],
         trackpad_dpad4_pressed_north_down: ["action_primary_down"],
         trackpad_dpad4_pressed_south_down: ["action_primary_down"],
-        trackpadup: ["action_primary_up"]
+        trackpadup: ["action_primary_up"],
+        axisMoveWithDeadzone: "move_duck"
       },
       "gearvr-controls": {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",
@@ -125,7 +131,8 @@ const config = {
         trackpad_dpad4_pressed_south_down: ["action_primary_down"],
         trackpadup: ["action_primary_up"],
         triggerdown: ["action_primary_down"],
-        triggerup: ["action_primary_up"]
+        triggerup: ["action_primary_up"],
+        scroll: "move_duck"
       },
       "oculus-go-controls": {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",
@@ -135,7 +142,8 @@ const config = {
         trackpad_dpad4_pressed_south_down: ["action_primary_down"],
         trackpadup: ["action_primary_up"],
         triggerdown: ["action_primary_down"],
-        triggerup: ["action_primary_up"]
+        triggerup: ["action_primary_up"],
+        scroll: "move_duck"
       },
       keyboard: {
         m_press: "action_mute",
