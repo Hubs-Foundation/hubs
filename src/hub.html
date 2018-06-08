@@ -18,7 +18,7 @@
         <script src="https://cdn.rawgit.com/aframevr/aframe/3e7a4b3/dist/aframe-master.js" integrity="sha384-EaMOuyBOi9ERV/lVDwQgz/yFWBDWPsIju5Co6oCZZHXuvbLBO81yPWn80q0BbBn3" crossorigin="anonymous"></script>
     <% } %>
 
-    
+
     <!-- HACK: this has to run after A-Frame but before our bundle, since A-Frame blows away the local storage setting -->
     <script src="https://cdn.rawgit.com/gfodor/ba8f88d9f34fe9cbe59a01ce3c48420d/raw/03e31f0ef7b9eac5e947bd39e440f34df0701f75/naf-janus-adapter-logging.js" integrity="sha384-4q1V8Q88oeCFriFefFo5uEUtMzbw6K116tFyC9cwbiPr6wEe7050l5HoJUxMvnzj" crossorigin="anonymous"></script>
 </head>
@@ -162,22 +162,37 @@
                     gltf-model-plus="src: #interactable-duck; inflate: true;"
                     class="interactable"
                     super-networked-interactable="counter: #counter; mass: 1;"
-                    body="type: dynamic; shape: none; mass: 1;"
+                    body="type: dynamic; shape: none; mass: 1; monitorScale: true"
                     grabbable
-                    stretchable="useWorldPosition: true;"
+                    stretchable="useWorldPosition: true; usePhysics: never"
                     hoverable
                     duck
-                    sticky-object
+                    sticky-object="autoLockOnRelease: true;"
                 ></a-entity>
+            </template>
+
+            <template id="interactable-model">
+                <a-entity
+                    gltf-model-plus="inflate: false;"
+                    class="interactable"
+                    super-networked-interactable="counter: #media-counter; mass: 1;"
+                    body="type: dynamic; shape: none; mass: 1; monitorScale: true"
+                    grabbable
+                    stretchable="useWorldPosition: true; usePhysics: never"
+                    hoverable
+                   auto-box-collider 
+                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
+                >
+                </a-entity>
             </template>
 
             <template id="interactable-image">
                 <a-entity
                     class="interactable"
                     super-networked-interactable="counter: #media-counter; mass: 1;"
-                    body="type: dynamic; shape: none; mass: 1;"
+                    body="type: dynamic; shape: none; mass: 1; monitorScale: true"
                     grabbable
-                    stretchable="useWorldPosition: true;"
+                    stretchable="useWorldPosition: true; usePhysics: never"
                     hoverable
                     geometry="primitive: plane"
                     material="shader: flat; side: double;"
@@ -338,6 +353,7 @@
                     collisionEntities: [nav-mesh];
                     drawIncrementally: true;
                     incrementalDrawMs: 600;
+                    curveShootingSpeed: 5;
                     hitOpacity: 0.3;
                     missOpacity: 0.2;"
                 haptic-feedback

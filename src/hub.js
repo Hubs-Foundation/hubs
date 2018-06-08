@@ -64,6 +64,8 @@ import "./components/css-class";
 import "./components/scene-shadow";
 import "./components/avatar-replay";
 import "./components/image-plus";
+import "./components/auto-box-collider";
+import "./components/spawn-in-front-of-object";
 import "./components/pinch-to-move";
 import "./components/look-on-mobile";
 import "./components/pitch-yaw-rotator";
@@ -300,15 +302,25 @@ const onReady = async () => {
 
     document.addEventListener("paste", e => {
       const scene = AFRAME.scenes[0];
-      const imgUrl = e.clipboardData.getData("text");
-      console.log("Pasted: ", imgUrl);
-
-      const image = document.createElement("a-entity");
-      image.id = "interactable-image-" + Date.now();
-      image.setAttribute("position", { x: 0, y: 2, z: 1 });
-      image.setAttribute("image-plus", "src", imgUrl);
-      image.setAttribute("networked", { template: "#interactable-image" });
-      scene.appendChild(image);
+      const mediaUrl = e.clipboardData.getData("text");
+      console.log("Pasted: ", mediaUrl);
+      if (mediaUrl.endsWith(".gltf") || mediaUrl.endsWith(".glb")) {
+        const model = document.createElement("a-entity");
+        model.id = "interactable-model-" + Date.now();
+        model.setAttribute("position", { x: 0, y: 2, z: 1 });
+        model.setAttribute("spawn-in-front-of-object", "");
+        model.setAttribute("gltf-model-plus", "src", mediaUrl);
+        model.setAttribute("auto-box-collider", "setInitialScale", true);
+        model.setAttribute("networked", { template: "#interactable-model" });
+        scene.appendChild(model);
+      } else {
+        const image = document.createElement("a-entity");
+        image.id = "interactable-image-" + Date.now();
+        image.setAttribute("position", { x: 0, y: 2, z: 1 });
+        image.setAttribute("image-plus", "src", mediaUrl);
+        image.setAttribute("networked", { template: "#interactable-image" });
+        scene.appendChild(image);
+      }
     });
 
     if (!qsTruthy("offline")) {

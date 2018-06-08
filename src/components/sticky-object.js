@@ -85,7 +85,6 @@ AFRAME.registerComponent("sticky-object-zone", {
     this.bootImpulse.copy(dir);
 
     this.el.addEventListener("collisions", e => {
-      console.log("collisions", e.detail.els, e.detail.clearedEls);
       e.detail.els.forEach(el => {
         const stickyObject = el.components["sticky-object"];
         if (!stickyObject) return;

@@ -106,6 +106,11 @@ function registerNetworkSchemas() {
       "image-plus"
     ]
   });
+
+  NAF.schemas.add({
+    template: "#interactable-model",
+    components: ["position", "rotation", "scale", "gltf-model-plus"]
+  });
 }
 
 export default registerNetworkSchemas;
