@@ -4,8 +4,6 @@ AFRAME.registerComponent("image-plus", {
   schema: {
     src: { type: "string" },
 
-    freezeSpeedLimit: { default: 1 },
-
     initialOffset: { default: { x: 0, y: 0, z: -1.5 } },
     reorientOnGrab: { default: false }
   },
@@ -45,19 +43,9 @@ AFRAME.registerComponent("image-plus", {
     }
   },
 
-  _sleepIfStill(e) {
-    if (
-      e.target === this.el &&
-      this.el.body.velocity.lengthSquared() < this.data.freezeSpeedLimit * this.data.freezeSpeedLimit
-    ) {
-      this.el.body.sleep();
-    }
-  },
-
   _onGrab: (function() {
     const q = new THREE.Quaternion();
     return function() {
-      this.el.body.wakeUp();
       if (this.data.reorientOnGrab) {
         this.billboardTarget.getWorldQuaternion(q);
         this.el.body.quaternion.copy(q);
@@ -67,20 +55,14 @@ AFRAME.registerComponent("image-plus", {
 
   init() {
     this._onMaterialLoaded = this._onMaterialLoaded.bind(this);
-    this._sleepIfStill = this._sleepIfStill.bind(this);
     this._onGrab = this._onGrab.bind(this);
 
-    this.billboardTarget = document.querySelector("#player-camera").object3D;
-
-    const el = this.el;
-    el.addEventListener("materialtextureloaded", this._onMaterialLoaded);
-    el.addEventListener("materialvideoloadeddata", this._onMaterialLoaded);
-
-    el.addEventListener("grab-start", this._onGrab);
-    el.addEventListener("grab-end", this._sleepIfStill);
-    el.addEventListener("body-loaded", this._sleepIfStill);
+    this.el.addEventListener("materialtextureloaded", this._onMaterialLoaded);
+    this.el.addEventListener("materialvideoloadeddata", this._onMaterialLoaded);
+    this.el.addEventListener("grab-start", this._onGrab);
 
     const worldPos = new THREE.Vector3().copy(this.data.initialOffset);
+    this.billboardTarget = document.querySelector("#player-camera").object3D;
     this.billboardTarget.localToWorld(worldPos);
     this.el.object3D.position.copy(worldPos);
     this.billboardTarget.getWorldQuaternion(this.el.object3D.quaternion);

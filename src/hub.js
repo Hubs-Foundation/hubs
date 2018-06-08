@@ -68,6 +68,7 @@ import "./components/pinch-to-move";
 import "./components/look-on-mobile";
 import "./components/pitch-yaw-rotator";
 import "./components/input-configurator";
+import "./components/sticky-object";
 
 import ReactDOM from "react-dom";
 import React from "react";

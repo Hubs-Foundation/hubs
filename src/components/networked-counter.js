@@ -6,7 +6,7 @@
 AFRAME.registerComponent("networked-counter", {
   schema: {
     max: { default: 3 },
-    ttl: { default: 120 },
+    ttl: { default: 0 },
     grab_event: { type: "string", default: "grab-start" },
     release_event: { type: "string", default: "grab-end" }
   },
@@ -115,6 +115,7 @@ AFRAME.registerComponent("networked-counter", {
   },
 
   _addTimeout: function(id) {
+    if (!this.data.ttl) return;
     const timeout = this.data.ttl * 1000;
     this.timeouts[id] = setTimeout(() => {
       const el = this.queue[id].el;
