@@ -93,7 +93,18 @@ function registerNetworkSchemas() {
 
   NAF.schemas.add({
     template: "#interactable-image",
-    components: ["position", "rotation", "image-plus"]
+    components: [
+      {
+        component: "position",
+        requiresNetworkUpdate: positionRequiresUpdate
+      },
+      {
+        component: "rotation",
+        requiresNetworkUpdate: rotationRequiresUpdate
+      },
+      "scale",
+      "image-plus"
+    ]
   });
 }
 
