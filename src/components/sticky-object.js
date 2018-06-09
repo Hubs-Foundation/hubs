@@ -54,20 +54,47 @@ AFRAME.registerComponent("sticky-object", {
 AFRAME.registerComponent("sticky-object-zone", {
   dependencies: ["physics"],
   init() {
-    const q = new THREE.Quaternion();
-    const p = new THREE.Vector3();
-    this.el.object3D.getWorldQuaternion(q);
-    this.el.object3D.getWorldPosition(p);
+    // TODO: position/rotation/impulse need to get updated if the sticky-object-zone moves
+    this.worldQuaternion = new THREE.Quaternion();
+    this.worldPosition = new THREE.Vector3();
+    this.el.object3D.getWorldQuaternion(this.worldQuaternion);
+    this.el.object3D.getWorldPosition(this.worldPosition);
+
+    const dir = new THREE.Vector3(0, 0, 5).applyQuaternion(this.el.object3D.quaternion);
+    this.bootImpulsePosition = new CANNON.Vec3(0, 0, 0);
+    this.bootImpulse = new CANNON.Vec3();
+    this.bootImpulse.copy(dir);
+
     this.el.addEventListener("collisions", e => {
       console.log("collisions", e.detail.els, e.detail.clearedEls);
       e.detail.els.forEach(el => {
         const stickyObject = el.components["sticky-object"];
         if (!stickyObject) return;
-
-        stickyObject.setLocked(true);
-        el.object3D.position.copy(p);
-        el.object3D.quaternion.copy(q);
+        this._setStuckObject(stickyObject);
       });
+      if (this.stuckObject) {
+        e.detail.clearedEls.forEach(el => {
+          if (this.stuckObject && this.stuckObject.el === el) {
+            delete this.stuckObject;
+          }
+        });
+      }
     });
+  },
+
+  _setStuckObject(stickyObject) {
+    stickyObject.setLocked(true);
+    stickyObject.el.object3D.position.copy(this.worldPosition);
+    stickyObject.el.object3D.quaternion.copy(this.worldQuaternion);
+    stickyObject.el.body.collisionResponse = false;
+
+    if (this.stuckObject && NAF.utils.isMine(this.stuckObject.el)) {
+      console.log("booting out object");
+      this.stuckObject.setLocked(false);
+      this.stuckObject.el.body.collisionResponse = true;
+      this.stuckObject.el.body.applyImpulse(this.bootImpulse, this.bootImpulsePosition);
+    }
+
+    this.stuckObject = stickyObject;
   }
 });
