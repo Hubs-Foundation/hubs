@@ -1,5 +1,6 @@
+/* global THREE, CANNON, AFRAME */
 AFRAME.registerComponent("sticky-object", {
-  dependencies: ["body"],
+  dependencies: ["body", "super-networked-interactable"],
 
   schema: {
     autoLockOnLoad: { default: false },
@@ -17,15 +18,20 @@ AFRAME.registerComponent("sticky-object", {
   },
 
   setLocked(locked) {
+    if (!NAF.utils.isMine(this.el)) {
+      console.log("Object not mine, ignoring setting locked: ", locked);
+      return;
+    }
+    const mass = this.el.components["super-networked-interactable"].data.mass;
+    console.log("setting locked", locked, mass);
     this.locked = locked;
     this.el.body.type = locked ? window.CANNON.Body.STATIC : window.CANNON.Body.DYNAMIC;
     this.el.setAttribute("body", {
-      mass: locked ? 0 : this.bodyMass
+      mass: locked ? 0 : mass
     });
   },
 
   _onBodyLoaded() {
-    this.bodyMass = this.el.body.mass;
     if (this.data.autoLockOnLoad) {
       this.setLocked(true);
     }
