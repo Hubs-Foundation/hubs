@@ -24,17 +24,17 @@ AFRAME.registerComponent("super-networked-interactable", {
       }
     });
 
-    this.grabStartListener = this._onGrabStart.bind(this);
-    this.ownershipLostListener = this._onOwnershipLost.bind(this);
-    this.el.addEventListener("grab-start", this.grabStartListener);
-    this.el.addEventListener("ownership-lost", this.ownershipLostListener);
+    this._onGrabStart = this._onGrabStart.bind(this);
+    this._onOwnershipLost = this._onOwnershipLost.bind(this);
+    this.el.addEventListener("grab-start", this._onGrabStart);
+    this.el.addEventListener("ownership-lost", this._onOwnershipLost);
     this.system.addComponent(this);
   },
 
   remove: function() {
     this.counter.deregister(this.el);
-    this.el.removeEventListener("grab-start", this.grabStartListener);
-    this.el.removeEventListener("ownership-lost", this.ownershipLostListener);
+    this.el.removeEventListener("grab-start", this._onGrabStart);
+    this.el.removeEventListener("ownership-lost", this._onOwnershipLost);
     this.system.removeComponent(this);
   },
 
