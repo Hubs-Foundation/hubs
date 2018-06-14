@@ -77,7 +77,7 @@ class Item extends React.Component {
   };
 
   static getItemHeight = () => {
-    return 80;
+    return 160;
   };
 
   render() {
@@ -101,8 +101,8 @@ class Item extends React.Component {
     return {
       top: 10,
       left: 10,
-      width: 120,
-      height: 120,
+      width: 240,
+      height: 240,
       backgroundColor: "#ddd",
       borderColor: "#999",
       borderWidth: 1
@@ -114,9 +114,9 @@ class Item extends React.Component {
       top: 32,
       left: 80,
       width: this.props.width - 90,
-      height: 36,
-      fontSize: 28,
-      lineHeight: 36
+      height: 72,
+      fontSize: 56,
+      lineHeight: 72
     };
   };
 }
@@ -165,8 +165,8 @@ export default class UICanvas extends React.Component {
 
   getSize = () => {
     return {
-      width: 1024,
-      height: 1024
+      width: 2048,
+      height: 2048
     };
   };
 
