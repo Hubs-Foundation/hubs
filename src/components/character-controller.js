@@ -125,23 +125,25 @@ AFRAME.registerComponent("character-controller", {
       yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 
       // Translate to middle of playspace (player rig)
-      root.applyMatrix(transInv);
+      root.matrix.multiplyMatrices(transInv, root.matrix);
       // Zero playspace (player rig) rotation
-      root.applyMatrix(rotationInvMatrix);
+      root.matrix.multiplyMatrices(rotationInvMatrix, root.matrix);
       // Zero pivot (camera/head) rotation
-      root.applyMatrix(pivotRotationInvMatrix);
+      root.matrix.multiplyMatrices(pivotRotationInvMatrix, root.matrix);
       // Apply joystick translation
-      root.applyMatrix(move);
+      root.matrix.multiplyMatrices(move, root.matrix);
       // Apply joystick yaw rotation
-      root.applyMatrix(yawMatrix);
+      root.matrix.multiplyMatrices(yawMatrix, root.matrix);
       // Apply snap rotation if necessary
-      root.applyMatrix(this.pendingSnapRotationMatrix);
+      root.matrix.multiplyMatrices(this.pendingSnapRotationMatrix, root.matrix);
       // Reapply pivot (camera/head) rotation
-      root.applyMatrix(pivotRotationMatrix);
+      root.matrix.multiplyMatrices(pivotRotationMatrix, root.matrix);
       // Reapply playspace (player rig) rotation
-      root.applyMatrix(rotationMatrix);
+      root.matrix.multiplyMatrices(rotationMatrix, root.matrix);
       // Reapply playspace (player rig) translation
-      root.applyMatrix(trans);
+      root.matrix.multiplyMatrices(trans, root.matrix);
+
+      root.matrix.decompose(root.position, root.quaternion, root.scale);
 
       // TODO: the above matrix trnsfomraitons introduce some floating point errors in scale, this reverts them to
       // avoid spamming network with fake scale updates
