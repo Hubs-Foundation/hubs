@@ -28,8 +28,8 @@ AFRAME.registerComponent("cursor-controller", {
     this.wasCursorHovered = false;
     this.origin = new THREE.Vector3();
     this.direction = new THREE.Vector3();
+    this.raycasterAttr = this.el.getAttribute("raycaster");
     this.controllerQuaternion = new THREE.Quaternion();
-
     this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
     this._handleCursorLoaded = this._handleCursorLoaded.bind(this);
@@ -43,6 +43,12 @@ AFRAME.registerComponent("cursor-controller", {
   disable: function() {
     this.enabled = false;
     this.setCursorVisibility(false);
+  },
+
+  updateRay: function() {
+    this.raycasterAttr.origin = this.origin;
+    this.raycasterAttr.direction = this.direction;
+    this.el.setAttribute("raycaster", this.raycasterAttr, true);
   },
 
   tick: (() => {
@@ -63,7 +69,7 @@ AFRAME.registerComponent("cursor-controller", {
           .applyQuaternion(rayObjectRotation)
           .normalize();
         this.origin.setFromMatrixPosition(rayObject.matrixWorld);
-        this.el.setAttribute("raycaster", { origin: this.origin, direction: this.direction });
+        this.updateRay();
       }
 
       const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
@@ -100,7 +106,7 @@ AFRAME.registerComponent("cursor-controller", {
     raycaster.setFromCamera(this.mousePos, camera);
     this.origin.copy(raycaster.ray.origin);
     this.direction.copy(raycaster.ray.direction);
-    this.el.setAttribute("raycaster", { origin: raycaster.ray.origin, direction: raycaster.ray.direction });
+    this.updateRay();
   },
 
   updateDistanceAndTargetType: function() {
