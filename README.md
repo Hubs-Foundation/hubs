@@ -21,6 +21,12 @@ To bundle javascript and generate the html templates, run:
 yarn build
 ```
 
+## hubs.local Host Entry
+
+When running the full stack for Hubs (which includes [Reticulum](https://github.com/mozilla/reticulum))
+locally it is necessary to add a `hosts` entry pointing `hubs.local` to your local server's IP.
+This will allow the CSP checks to pass that are served up by Reticulum so you can test the whole app.
+
 ## Query Params
 
 - `room` - Id of the room (an integer) that you want to join
