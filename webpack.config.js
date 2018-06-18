@@ -44,7 +44,7 @@ function createHTTPSConfig() {
               },
               {
                 type: 2,
-                value: "hubs.test"
+                value: "hubs.local"
               }
             ]
           }
@@ -97,7 +97,7 @@ const config = {
     https: createHTTPSConfig(),
     host: "0.0.0.0",
     useLocalIp: true,
-    public: "hubs.test:8080",
+    public: "hubs.local:8080",
     port: 8080,
     before: function(app) {
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
