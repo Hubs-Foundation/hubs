@@ -382,6 +382,7 @@ const onReady = async () => {
         map.magFilter = THREE.NearestFilter;
         map.minFilter = THREE.LinearMipMapLinearFilter;
         map.generateMipmaps = true;
+        map.anisotropy = scene.renderer.getMaxAnisotropy();
         console.log(map);
 
         //const cv = document.getElementById("ui-canvas");
