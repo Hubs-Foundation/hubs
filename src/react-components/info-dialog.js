@@ -13,6 +13,7 @@ class InfoDialog extends Component {
     slack: Symbol("slack"),
     email_submitted: Symbol("email_submitted"),
     invite: Symbol("invite"),
+    safari: Symbol(""),
     updates: Symbol("updates"),
     report: Symbol("report"),
     help: Symbol("help"),
@@ -139,6 +140,35 @@ class InfoDialog extends Component {
                 readOnly
                 onFocus={e => e.target.select()}
                 value={this.shareLink}
+                className="invite-form__link_field"
+              />
+              <div className="invite-form__buttons">
+                {navigator.share && (
+                  <button className="invite-form__action-button" onClick={this.shareLinkClicked}>
+                    <span>Share</span>
+                  </button>
+                )}
+                <button className="invite-form__action-button" onClick={this.copyLinkClicked}>
+                  <span>{this.state.copyLinkButtonText}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+        break;
+      case InfoDialog.dialogTypes.safari:
+        dialogTitle = "Open in Safari";
+        dialogBody = (
+          <div>
+            <div>
+              Hubs is not supported in your current browser on iOS. Copy and paste this link directly in Safari.
+            </div>
+            <div className="invite-form">
+              <input
+                type="text"
+                readOnly
+                onFocus={e => e.target.select()}
+                value={document.location}
                 className="invite-form__link_field"
               />
               <div className="invite-form__buttons">
