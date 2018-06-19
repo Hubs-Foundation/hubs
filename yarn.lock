@@ -1643,6 +1643,10 @@ buffer@^5.0.2:
     base64-js "^1.0.2"
     ieee754 "^1.1.4"
 
+buffered-interpolation@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/buffered-interpolation/-/buffered-interpolation-0.2.3.tgz#6e723d44c4f4aa76704fc470654174e279591c31"
+
 builtin-modules@^1.0.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/builtin-modules/-/builtin-modules-1.1.1.tgz#270f076c5a72c02f5b65a47df94c5fe3a278892f"
@@ -2036,8 +2040,8 @@ colormin@^1.0.5:
     has "^1.0.1"
 
 colors@*:
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/colors/-/colors-1.2.5.tgz#89c7ad9a374bc030df8013241f68136ed8835afc"
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/colors/-/colors-1.3.0.tgz#5f20c9fef6945cb1134260aab33bfbdc8295e04e"
 
 colors@1.0.3:
   version "1.0.3"
@@ -5511,8 +5515,9 @@ neo-async@^2.5.0:
 
 "networked-aframe@https://github.com/mozillareality/networked-aframe#mr-social-client/master":
   version "0.6.1"
-  resolved "https://github.com/mozillareality/networked-aframe#424b41cfdf53db64033885da411c33685644db97"
+  resolved "https://github.com/mozillareality/networked-aframe#7b88e49e855b60e376886abe23ea311b27acdffe"
   dependencies:
+    buffered-interpolation "^0.2.3"
     easyrtc "1.1.0"
     express "^4.10.7"
     serve-static "^1.8.0"
