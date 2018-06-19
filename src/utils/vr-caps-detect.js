@@ -57,8 +57,16 @@ export async function getAvailableVREntryTypes() {
   const isDaydreamCapableBrowser = !!(isWebVRCapableBrowser && browser.name === "chrome" && !isSamsungBrowser);
   const isIDevice = ["iPhone", "iPad", "iPod"].indexOf(deviceDetect.device) > -1;
   const isFirefoxBrowser = browser.name === "firefox";
+  const isUIWebView = typeof navigator.mediaDevices === "undefined";
 
-  const screen = isInHMD ? VR_DEVICE_AVAILABILITY.no : VR_DEVICE_AVAILABILITY.yes;
+  const safari = isIDevice
+    ? !isUIWebView ? VR_DEVICE_AVAILABILITY.yes : VR_DEVICE_AVAILABILITY.maybe
+    : VR_DEVICE_AVAILABILITY.no;
+
+  const screen = isInHMD
+    ? VR_DEVICE_AVAILABILITY.no
+    : isIDevice && isUIWebView ? VR_DEVICE_AVAILABILITY.maybe : VR_DEVICE_AVAILABILITY.yes;
+
   let generic = mobiledetect.mobile() ? VR_DEVICE_AVAILABILITY.no : VR_DEVICE_AVAILABILITY.maybe;
   let cardboard = VR_DEVICE_AVAILABILITY.no;
 
@@ -107,5 +115,5 @@ export async function getAvailableVREntryTypes() {
     }
   }
 
-  return { screen, generic, gearvr, daydream, cardboard, isInHMD };
+  return { screen, generic, gearvr, daydream, cardboard, isInHMD, safari };
 }

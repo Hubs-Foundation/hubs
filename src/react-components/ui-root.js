@@ -11,7 +11,13 @@ import screenfull from "screenfull";
 
 import { lang, messages } from "../utils/i18n";
 import AutoExitWarning from "./auto-exit-warning";
-import { TwoDEntryButton, DeviceEntryButton, GenericEntryButton, DaydreamEntryButton } from "./entry-buttons.js";
+import {
+  TwoDEntryButton,
+  DeviceEntryButton,
+  GenericEntryButton,
+  DaydreamEntryButton,
+  SafariEntryButton
+} from "./entry-buttons.js";
 import { ProfileInfoHeader } from "./profile-info-header.js";
 import ProfileEntryPanel from "./profile-entry-panel";
 import InfoDialog from "./info-dialog.js";
@@ -258,6 +264,10 @@ class UIRoot extends Component {
 
   enter2D = async () => {
     await this.performDirectEntryFlow(false);
+  };
+
+  linkSafari = async () => {
+    this.setState({ infoDialogType: InfoDialog.dialogTypes.safari });
   };
 
   enterVR = async () => {
@@ -616,8 +626,11 @@ class UIRoot extends Component {
       this.state.entryStep === ENTRY_STEPS.start ? (
         <div className="entry-panel">
           <div className="entry-panel__button-container">
-            {this.props.availableVREntryTypes.screen !== VR_DEVICE_AVAILABILITY.no && (
+            {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
               <TwoDEntryButton onClick={this.enter2D} />
+            )}
+            {this.props.availableVREntryTypes.safari === VR_DEVICE_AVAILABILITY.maybe && (
+              <SafariEntryButton onClick={this.linkSafari} />
             )}
             {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
               <GenericEntryButton onClick={this.enterVR} />
