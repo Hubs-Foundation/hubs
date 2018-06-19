@@ -63,8 +63,8 @@ class InfoDialog extends Component {
     });
   };
 
-  copyLinkClicked = () => {
-    copy(this.shareLink);
+  copyLinkClicked = link => {
+    copy(link);
     this.setState({ copyLinkButtonText: "Copied!" });
   };
 
@@ -148,7 +148,10 @@ class InfoDialog extends Component {
                     <span>Share</span>
                   </button>
                 )}
-                <button className="invite-form__action-button" onClick={this.copyLinkClicked}>
+                <button
+                  className="invite-form__action-button"
+                  onClick={this.copyLinkClicked.bind(this, this.shareLink)}
+                >
                   <span>{this.state.copyLinkButtonText}</span>
                 </button>
               </div>
@@ -172,12 +175,10 @@ class InfoDialog extends Component {
                 className="invite-form__link_field"
               />
               <div className="invite-form__buttons">
-                {navigator.share && (
-                  <button className="invite-form__action-button" onClick={this.shareLinkClicked}>
-                    <span>Share</span>
-                  </button>
-                )}
-                <button className="invite-form__action-button" onClick={this.copyLinkClicked}>
+                <button
+                  className="invite-form__action-button"
+                  onClick={this.copyLinkClicked.bind(this, document.location)}
+                >
                   <span>{this.state.copyLinkButtonText}</span>
                 </button>
               </div>
