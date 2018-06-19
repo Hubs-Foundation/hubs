@@ -13,7 +13,7 @@ class InfoDialog extends Component {
     slack: Symbol("slack"),
     email_submitted: Symbol("email_submitted"),
     invite: Symbol("invite"),
-    safari: Symbol(""),
+    safari: Symbol("safari"),
     updates: Symbol("updates"),
     report: Symbol("report"),
     help: Symbol("help"),
@@ -163,9 +163,7 @@ class InfoDialog extends Component {
         dialogTitle = "Open in Safari";
         dialogBody = (
           <div>
-            <div>
-              Hubs is not supported in your current browser on iOS. Copy and paste this link directly in Safari.
-            </div>
+            <div>Hubs does not support your current browser on iOS. Copy and paste this link directly in Safari.</div>
             <div className="invite-form">
               <input
                 type="text"
