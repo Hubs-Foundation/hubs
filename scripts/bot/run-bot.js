@@ -17,11 +17,11 @@ const puppeteer = require("puppeteer");
 const querystring = require("query-string");
 
 function log(...objs) {
-  console.log.call(null, [new Date().toISOString()].concat(objs));
+  console.log.call(null, [new Date().toISOString()].concat(objs).join(" "));
 }
 
 function error(...objs) {
-  console.error.call(null, [new Date().toISOString()].concat(objs));
+  console.error.call(null, [new Date().toISOString()].concat(objs).join(" "));
 }
 
 (async () => {
@@ -49,7 +49,7 @@ function error(...objs) {
     try {
       log("Spawning bot...");
       await page.goto(url);
-      await page.evaluate(() => log(navigator.userAgent));
+      await page.evaluate(() => console.log(navigator.userAgent));
       let retryCount = 5;
       let backoff = 1000;
       const interact = async () => {
