@@ -71,6 +71,7 @@ import "./components/look-on-mobile";
 import "./components/pitch-yaw-rotator";
 import "./components/input-configurator";
 import "./components/sticky-object";
+import "./components/auto-scale-cannon-physics-body";
 
 import ReactDOM from "react-dom";
 import React from "react";
