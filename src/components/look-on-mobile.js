@@ -1,4 +1,3 @@
-const PolyfillControls = AFRAME.utils.device.PolyfillControls;
 const TWOPI = Math.PI * 2;
 
 class CircularBuffer {
@@ -50,24 +49,23 @@ AFRAME.registerComponent("look-on-mobile", {
 
   init() {
     this.hmdEuler = new THREE.Euler();
+    this.hmdQuaternion = new THREE.Quaternion();
     this.prevX = this.hmdEuler.x;
     this.prevY = this.hmdEuler.y;
     this.pendingLookX = 0;
     this.onRotateX = this.onRotateX.bind(this);
     this.dXBuffer = new CircularBuffer(6);
     this.dYBuffer = new CircularBuffer(6);
+    this.vrDisplay = window.webvrpolyfill.getPolyfillDisplays()[0];
+    this.frameData = new window.webvrpolyfill.constructor.VRFrameData();
   },
 
   play() {
     this.el.addEventListener("rotateX", this.onRotateX);
-    this.polyfillObject = new THREE.Object3D();
-    this.polyfillControls = new PolyfillControls(this.polyfillObject);
   },
 
   pause() {
     this.el.removeEventListener("rotateX", this.onRotateX);
-    this.polyfillControls = null;
-    this.polyfillObject = null;
   },
 
   update() {
@@ -81,8 +79,11 @@ AFRAME.registerComponent("look-on-mobile", {
   tick() {
     const hmdEuler = this.hmdEuler;
     const { horizontalLookSpeedRatio, verticalLookSpeedRatio } = this.data;
-    this.polyfillControls.update();
-    hmdEuler.setFromQuaternion(this.polyfillObject.quaternion, "YXZ");
+    this.vrDisplay.getFrameData(this.frameData);
+    if (this.frameData.pose.orientation !== null) {
+      this.hmdQuaternion.fromArray(this.frameData.pose.orientation);
+      hmdEuler.setFromQuaternion(this.hmdQuaternion, "YXZ");
+    }
 
     const dX = THREE.Math.RAD2DEG * difference(hmdEuler.x, this.prevX);
     const dY = THREE.Math.RAD2DEG * difference(hmdEuler.y, this.prevY);
