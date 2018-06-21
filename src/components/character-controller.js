@@ -125,24 +125,24 @@ AFRAME.registerComponent("character-controller", {
       yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 
       // Translate to middle of playspace (player rig)
-      root.matrix.multiplyMatrices(transInv, root.matrix);
+      root.matrix.premultiply(transInv);
       // Zero playspace (player rig) rotation
-      root.matrix.multiplyMatrices(rotationInvMatrix, root.matrix);
+      root.matrix.premultiply(rotationInvMatrix);
       // Zero pivot (camera/head) rotation
-      root.matrix.multiplyMatrices(pivotRotationInvMatrix, root.matrix);
+      root.matrix.premultiply(pivotRotationInvMatrix);
       // Apply joystick translation
-      root.matrix.multiplyMatrices(move, root.matrix);
+      root.matrix.premultiply(move);
       // Apply joystick yaw rotation
-      root.matrix.multiplyMatrices(yawMatrix, root.matrix);
+      root.matrix.premultiply(yawMatrix);
       // Apply snap rotation if necessary
-      root.matrix.multiplyMatrices(this.pendingSnapRotationMatrix, root.matrix);
+      root.matrix.premultiply(this.pendingSnapRotationMatrix);
       // Reapply pivot (camera/head) rotation
-      root.matrix.multiplyMatrices(pivotRotationMatrix, root.matrix);
+      root.matrix.premultiply(pivotRotationMatrix);
       // Reapply playspace (player rig) rotation
-      root.matrix.multiplyMatrices(rotationMatrix, root.matrix);
+      root.matrix.premultiply(rotationMatrix);
       // Reapply playspace (player rig) translation
-      root.matrix.multiplyMatrices(trans, root.matrix);
-
+      root.matrix.premultiply(trans);
+      // update pos/rot/scale
       root.matrix.decompose(root.position, root.quaternion, root.scale);
 
       // TODO: the above matrix trnsfomraitons introduce some floating point errors in scale, this reverts them to

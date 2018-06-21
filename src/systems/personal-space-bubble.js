@@ -74,13 +74,10 @@ AFRAME.registerSystem("personal-space-bubble", {
   tick() {
     if (!this.data.enabled) return;
 
-    // Update matrix positions once for each space bubble and space invader
-    for (let i = 0; i < this.bubbles.length; i++) {
-      this.bubbles[i].el.object3D.updateMatrixWorld(true);
-    }
+    // precondition for this stuff -- the bubbles and invaders need updated world matrices.
+    // right now this is satisfied because we update the world matrices in the character controller
 
     for (let i = 0; i < this.invaders.length; i++) {
-      this.invaders[i].el.object3D.updateMatrixWorld(true);
       this.invaders[i].setInvading(false);
     }
 

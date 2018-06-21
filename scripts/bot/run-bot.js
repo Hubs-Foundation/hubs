@@ -2,7 +2,6 @@
 const doc = `
 Usage:
     ./run-bot.js [options]
-
 Options:
     -u --url=<url>    URL
     -o --host=<host>  Hubs host if URL is not specified [default: localhost:8080]
