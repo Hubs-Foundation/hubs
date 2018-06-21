@@ -64,6 +64,12 @@ AFRAME.registerComponent("sticky-object", {
 
   _onGrab() {
     this.setLocked(false);
+  },
+
+  remove() {
+    if (this.stuckTo) {
+      delete this.stuckTo.stuckObject;
+    }
   }
 });
 
@@ -90,12 +96,9 @@ AFRAME.registerComponent("sticky-object-zone", {
       if (this.stuckObject) {
         e.detail.clearedEls.forEach(el => {
           if (this.stuckObject && this.stuckObject.el === el) {
-            // this condition will be false when dragging an object directly from one sticky zone to another
-            if (this.stuckObject.stuckTo === this) {
-              this._unstickObject();
-            }
-            delete this.stuckObject;
+            this._unstickObject();
           }
+          delete this.stuckObject;
         });
       }
     });
@@ -117,8 +120,11 @@ AFRAME.registerComponent("sticky-object-zone", {
   },
 
   _unstickObject() {
-    this.stuckObject.setLocked(false);
-    this.stuckObject.el.body.collisionResponse = true;
-    delete this.stuckObject.stuckTo;
+    // this condition will be false when dragging an object directly from one sticky zone to another
+    if (this.stuckObject.stuckTo === this) {
+      this.stuckObject.setLocked(false);
+      this.stuckObject.el.body.collisionResponse = true;
+      delete this.stuckObject.stuckTo;
+    }
   }
 });
