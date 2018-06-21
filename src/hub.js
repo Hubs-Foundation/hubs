@@ -17,10 +17,10 @@ import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
 import "aframe-motion-capture-components";
-
 import "./utils/audio-context-fix";
 
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
+import trackpad_scrolling from "./behaviours/trackpad-scrolling";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
 import msft_mr_axis_with_deadzone from "./behaviours/msft-mr-axis-with-deadzone";
 import { PressedMove } from "./activators/pressedmove";
@@ -63,6 +63,10 @@ import "./components/networked-avatar";
 import "./components/css-class";
 import "./components/scene-shadow";
 import "./components/avatar-replay";
+import "./components/pinch-to-move";
+import "./components/look-on-mobile";
+import "./components/pitch-yaw-rotator";
+import "./components/input-configurator";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -140,6 +144,7 @@ if (!isBotMode && !isTelemetryDisabled) {
 disableiOSZoom();
 
 AFRAME.registerInputBehaviour("trackpad_dpad4", trackpad_dpad4);
+AFRAME.registerInputBehaviour("trackpad_scrolling", trackpad_scrolling);
 AFRAME.registerInputBehaviour("joystick_dpad4", joystick_dpad4);
 AFRAME.registerInputBehaviour("msft_mr_axis_with_deadzone", msft_mr_axis_with_deadzone);
 AFRAME.registerInputActivator("pressedmove", PressedMove);
@@ -217,7 +222,7 @@ const onReady = async () => {
     const scene = document.querySelector("a-scene");
     if (scene) {
       if (scene.renderer) {
-        scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
+        scene.renderer.setAnimationLoop(null); // Stop animation loop, TODO A-Frame should do this
       }
       document.body.removeChild(scene);
     }
@@ -225,6 +230,7 @@ const onReady = async () => {
 
   const enterScene = async (mediaStream, enterInVR, hubId) => {
     const scene = document.querySelector("a-scene");
+    scene.classList.add("no-cursor");
     scene.renderer.sortObjects = true;
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("canvas").classList.remove("blurred");
@@ -235,8 +241,6 @@ const onReady = async () => {
     }
 
     AFRAME.registerInputActions(inGameActions, "default");
-
-    document.querySelector("#player-camera").setAttribute("look-controls", "");
 
     scene.setAttribute("networked-scene", {
       room: hubId,
@@ -399,11 +403,11 @@ const onReady = async () => {
     if (!isBotMode) {
       // Stop rendering while the UI is up. We restart the render loop in enterScene.
       // Wait a tick plus some margin so that the environments actually render.
-      setTimeout(() => scene.renderer.animate(null), 100);
+      setTimeout(() => scene.renderer.setAnimationLoop(null), 100);
     } else {
       const noop = () => {};
       // Replace renderer with a noop renderer to reduce bot resource usage.
-      scene.renderer = { animate: noop, render: noop };
+      scene.renderer = { setAnimationLoop: noop, render: noop };
       document.body.style.display = "none";
     }
   });
