@@ -298,17 +298,24 @@ const onReady = async () => {
       NAF.connection.entities.completeSync(ev.detail.clientId);
     });
 
-    document.addEventListener("paste", e => {
-      const scene = AFRAME.scenes[0];
-      const imgUrl = e.clipboardData.getData("text");
-      console.log("Pasted: ", imgUrl);
-
+    const addMedia = url => {
       const image = document.createElement("a-entity");
       image.id = "interactable-image-" + Date.now();
-      image.setAttribute("position", { x: 0, y: 2, z: 1 });
-      image.setAttribute("image-plus", "src", imgUrl);
+      image.setAttribute("image-plus", "src", url);
       image.setAttribute("networked", { template: "#interactable-image" });
       scene.appendChild(image);
+    };
+
+    scene.addEventListener("add_media", e => {
+      addMedia(e.detail);
+    });
+
+    document.addEventListener("paste", e => {
+      if (e.target.nodeName === "INPUT") return;
+
+      const imgUrl = e.clipboardData.getData("text");
+      console.log("Pasted: ", imgUrl, e);
+      addMedia(imgUrl);
     });
 
     if (!qsTruthy("offline")) {
