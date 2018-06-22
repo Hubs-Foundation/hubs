@@ -83,7 +83,7 @@ AFRAME.registerComponent("networked-counter", {
     if (!this.data.ttl) return;
     clearTimeout(this.registeredEls.get(el).timeout);
     this.registeredEls.get(el).timeout = setTimeout(() => {
-      this._detroy(el);
+      this._destroy(el);
     }, this.data.ttl * 1000);
   },
 

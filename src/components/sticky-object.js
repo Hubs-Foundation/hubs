@@ -37,12 +37,9 @@ AFRAME.registerComponent("sticky-object", {
   },
 
   setLocked(locked) {
-    if (!NAF.utils.isMine(this.el)) {
-      console.log("Object not mine, ignoring setting locked: ", locked);
-      return;
-    }
+    if (!NAF.utils.isMine(this.el)) return;
+
     const mass = this.el.components["super-networked-interactable"].data.mass;
-    console.log("setting locked", locked, mass);
     this.locked = locked;
     this.el.body.type = locked ? window.CANNON.Body.STATIC : window.CANNON.Body.DYNAMIC;
     this.el.setAttribute("body", {
@@ -67,6 +64,12 @@ AFRAME.registerComponent("sticky-object", {
 
   _onGrab() {
     this.setLocked(false);
+  },
+
+  remove() {
+    if (this.stuckTo) {
+      delete this.stuckTo.stuckObject;
+    }
   }
 });
 
@@ -93,8 +96,9 @@ AFRAME.registerComponent("sticky-object-zone", {
       if (this.stuckObject) {
         e.detail.clearedEls.forEach(el => {
           if (this.stuckObject && this.stuckObject.el === el) {
-            delete this.stuckObject;
+            this._unstickObject();
           }
+          delete this.stuckObject;
         });
       }
     });
@@ -105,14 +109,22 @@ AFRAME.registerComponent("sticky-object-zone", {
     stickyObject.el.object3D.position.copy(this.worldPosition);
     stickyObject.el.object3D.quaternion.copy(this.worldQuaternion);
     stickyObject.el.body.collisionResponse = false;
+    stickyObject.stuckTo = this;
 
     if (this.stuckObject && NAF.utils.isMine(this.stuckObject.el)) {
-      console.log("booting out object");
-      this.stuckObject.setLocked(false);
-      this.stuckObject.el.body.collisionResponse = true;
+      this._unstickObject();
       this.stuckObject.el.body.applyImpulse(this.bootImpulse, this.bootImpulsePosition);
     }
 
     this.stuckObject = stickyObject;
+  },
+
+  _unstickObject() {
+    // this condition will be false when dragging an object directly from one sticky zone to another
+    if (this.stuckObject.stuckTo === this) {
+      this.stuckObject.setLocked(false);
+      this.stuckObject.el.body.collisionResponse = true;
+      delete this.stuckObject.stuckTo;
+    }
   }
 });

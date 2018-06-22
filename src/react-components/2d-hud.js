@@ -4,7 +4,18 @@ import cx from "classnames";
 
 import styles from "../assets/stylesheets/2d-hud.scss";
 
-const TwoDHUD = ({ muted, frozen, spacebubble, onToggleMute, onToggleFreeze, onToggleSpaceBubble }) => (
+import FontAwesomeIcon from "@fortawesome/react-fontawesome";
+import faPlus from "@fortawesome/fontawesome-free-solid/faPlus";
+
+const TwoDHUD = ({
+  muted,
+  frozen,
+  spacebubble,
+  onToggleMute,
+  onToggleFreeze,
+  onToggleSpaceBubble,
+  onClickAddMedia
+}) => (
   <div className={styles.container}>
     <div className={cx("ui-interactive", styles.panel, styles.left)}>
       <div
@@ -25,6 +36,13 @@ const TwoDHUD = ({ muted, frozen, spacebubble, onToggleMute, onToggleFreeze, onT
         onClick={onToggleSpaceBubble}
       />
     </div>
+    <div
+      className={cx("ui-interactive", styles.iconButton, styles.small, styles.addMediaButton)}
+      title="Add Media"
+      onClick={onClickAddMedia}
+    >
+      <FontAwesomeIcon icon={faPlus} />
+    </div>
   </div>
 );
 
@@ -34,7 +52,8 @@ TwoDHUD.propTypes = {
   spacebubble: PropTypes.bool,
   onToggleMute: PropTypes.func,
   onToggleFreeze: PropTypes.func,
-  onToggleSpaceBubble: PropTypes.func
+  onToggleSpaceBubble: PropTypes.func,
+  onClickAddMedia: PropTypes.func
 };
 
 export default TwoDHUD;
