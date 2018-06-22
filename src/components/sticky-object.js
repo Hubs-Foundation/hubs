@@ -68,7 +68,9 @@ AFRAME.registerComponent("sticky-object", {
 
   remove() {
     if (this.stuckTo) {
-      delete this.stuckTo.stuckObject;
+      const stuckTo = this.stuckTo;
+      delete this.stuckTo;
+      stuckTo._unstickObject();
     }
   }
 });
@@ -98,7 +100,6 @@ AFRAME.registerComponent("sticky-object-zone", {
           if (this.stuckObject && this.stuckObject.el === el) {
             this._unstickObject();
           }
-          delete this.stuckObject;
         });
       }
     });
@@ -112,8 +113,9 @@ AFRAME.registerComponent("sticky-object-zone", {
     stickyObject.stuckTo = this;
 
     if (this.stuckObject && NAF.utils.isMine(this.stuckObject.el)) {
+      const el = this.stuckObject.el;
       this._unstickObject();
-      this.stuckObject.el.body.applyImpulse(this.bootImpulse, this.bootImpulsePosition);
+      el.body.applyImpulse(this.bootImpulse, this.bootImpulsePosition);
     }
 
     this.stuckObject = stickyObject;
@@ -126,5 +128,6 @@ AFRAME.registerComponent("sticky-object-zone", {
       this.stuckObject.el.body.collisionResponse = true;
       delete this.stuckObject.stuckTo;
     }
+    delete this.stuckObject;
   }
 });
