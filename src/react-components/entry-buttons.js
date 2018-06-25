@@ -87,6 +87,17 @@ export const DaydreamEntryButton = props => {
   return <EntryButton {...entryButtonProps} />;
 };
 
+export const SafariEntryButton = props => {
+  const entryButtonProps = {
+    ...props,
+    iconSrc: MobileScreenEntryImg,
+    prefixMessageId: "entry.screen-prefix",
+    mediumMessageId: "entry.mobile-safari"
+  };
+
+  return <EntryButton {...entryButtonProps} />;
+};
+
 export const DeviceEntryButton = props => {
   const entryButtonProps = {
     ...props,

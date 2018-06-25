@@ -16,7 +16,6 @@ function registerNetworkSchemas() {
       },
       {
         component: "rotation",
-        lerp: false,
         requiresNetworkUpdate: rotationRequiresUpdate
       },
       "scale",

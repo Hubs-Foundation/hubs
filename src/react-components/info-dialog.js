@@ -15,6 +15,7 @@ class InfoDialog extends Component {
     slack: Symbol("slack"),
     email_submitted: Symbol("email_submitted"),
     invite: Symbol("invite"),
+    safari: Symbol("safari"),
     updates: Symbol("updates"),
     report: Symbol("report"),
     help: Symbol("help"),
@@ -74,8 +75,8 @@ class InfoDialog extends Component {
     });
   };
 
-  copyLinkClicked = () => {
-    copy(this.shareLink);
+  copyLinkClicked = link => {
+    copy(link);
     this.setState({ copyLinkButtonText: "Copied!" });
   };
 
@@ -160,7 +161,35 @@ class InfoDialog extends Component {
                     <span>Share</span>
                   </button>
                 )}
-                <button className="invite-form__action-button" onClick={this.copyLinkClicked}>
+                <button
+                  className="invite-form__action-button"
+                  onClick={this.copyLinkClicked.bind(this, this.shareLink)}
+                >
+                  <span>{this.state.copyLinkButtonText}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+        break;
+      case InfoDialog.dialogTypes.safari:
+        dialogTitle = "Open in Safari";
+        dialogBody = (
+          <div>
+            <div>Hubs does not support your current browser on iOS. Copy and paste this link directly in Safari.</div>
+            <div className="invite-form">
+              <input
+                type="text"
+                readOnly
+                onFocus={e => e.target.select()}
+                value={document.location}
+                className="invite-form__link_field"
+              />
+              <div className="invite-form__buttons">
+                <button
+                  className="invite-form__action-button"
+                  onClick={this.copyLinkClicked.bind(this, document.location)}
+                >
                   <span>{this.state.copyLinkButtonText}</span>
                 </button>
               </div>

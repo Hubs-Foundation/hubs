@@ -3,6 +3,7 @@
     "entry.screen-prefix": "Enter on ",
     "entry.desktop-screen": "Screen",
     "entry.mobile-screen": "Phone",
+    "entry.mobile-safari": "Safari",
     "entry.generic-prefix": "Enter in ",
     "entry.generic-medium": "VR",
     "entry.generic-subtitle-desktop": "Oculus or SteamVR",
