@@ -177,7 +177,7 @@ class InfoDialog extends Component {
               <div className="add-media-form">
                 <input
                   type="url"
-                  placeholder="Image or Video URL"
+                  placeholder="Image, Video, or GLTF URL"
                   className="add-media-form__link_field"
                   value={this.state.addMediaUrl}
                   onChange={e => this.setState({ addMediaUrl: e.target.value })}

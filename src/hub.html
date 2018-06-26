@@ -178,13 +178,18 @@
                     class="interactable"
                     super-networked-interactable="counter: #media-counter; mass: 1;"
                     body="type: dynamic; shape: none; mass: 1;"
-                    auto-scale-cannon-physics-body
                     grabbable
                     stretchable="useWorldPosition: true; usePhysics: never"
                     hoverable
-                   auto-box-collider 
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
+                    auto-scale-cannon-physics-body
+                    auto-box-collider
+                    position-at-box-border="target:.deleteButton"
                 >
+                    <a-entity class="deleteButton" visible-while-frozen>
+                        <a-entity mixin="rounded-text-button" remove-object-button position="0 0 0"> </a-entity>
+                        <a-entity text=" value:Delete; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    </a-entity>
                 </a-entity>
             </template>
 

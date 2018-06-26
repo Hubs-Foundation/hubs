@@ -72,6 +72,7 @@ import "./components/pitch-yaw-rotator";
 import "./components/input-configurator";
 import "./components/sticky-object";
 import "./components/auto-scale-cannon-physics-body";
+import "./components/position-at-bounding-radius";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -301,10 +302,8 @@ const onReady = async () => {
       NAF.connection.entities.completeSync(ev.detail.clientId);
     });
 
-    document.addEventListener("paste", e => {
+    const addMedia = mediaUrl => {
       const scene = AFRAME.scenes[0];
-      const mediaUrl = e.clipboardData.getData("text");
-      console.log("Pasted: ", mediaUrl);
       if (mediaUrl.endsWith(".gltf") || mediaUrl.endsWith(".glb")) {
         const model = document.createElement("a-entity");
         model.id = "interactable-model-" + Date.now();
@@ -317,11 +316,22 @@ const onReady = async () => {
       } else {
         const image = document.createElement("a-entity");
         image.id = "interactable-image-" + Date.now();
-        image.setAttribute("position", { x: 0, y: 2, z: 1 });
         image.setAttribute("image-plus", "src", mediaUrl);
         image.setAttribute("networked", { template: "#interactable-image" });
         scene.appendChild(image);
       }
+    };
+
+    scene.addEventListener("add_media", e => {
+      addMedia(e.detail);
+    });
+
+    document.addEventListener("paste", e => {
+      if (e.target.nodeName === "INPUT") return;
+
+      const imgUrl = e.clipboardData.getData("text");
+      console.log("Pasted: ", imgUrl, e);
+      addMedia(imgUrl);
     });
 
     if (!qsTruthy("offline")) {
