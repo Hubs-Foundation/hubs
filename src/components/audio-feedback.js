@@ -6,11 +6,13 @@
 AFRAME.registerComponent("networked-audio-analyser", {
   async init() {
     this.volume = 0;
+    this.prevVolume = 0;
+    this.smoothing = 0.3;
     this.el.addEventListener("sound-source-set", event => {
       const ctx = THREE.AudioContext.getContext();
       this.analyser = ctx.createAnalyser();
       this.analyser.fftSize = 32;
-      this.levels = new Uint8Array(this.analyser.frequencyBinCount);
+      this.levels = new Float32Array(this.analyser.frequencyBinCount);
       event.detail.soundSource.connect(this.analyser);
     });
   },
@@ -18,13 +20,15 @@ AFRAME.registerComponent("networked-audio-analyser", {
   tick: function() {
     if (!this.analyser) return;
 
-    this.analyser.getByteFrequencyData(this.levels);
+    this.analyser.getFloatTimeDomainData(this.levels);
 
     let sum = 0;
     for (let i = 0; i < this.levels.length; i++) {
-      sum += this.levels[i];
+      const amplitude = this.levels[i];
+      sum += amplitude * amplitude;
     }
-    this.volume = sum / this.levels.length;
+    this.volume = this.smoothing * Math.sqrt(sum / this.levels.length) + (1 - this.smoothing) * this.prevVolume;
+    this.prevVolume = this.volume;
   }
 });
 
@@ -38,7 +42,7 @@ AFRAME.registerComponent("matcolor-audio-feedback", {
 
     if (!audioAnalyser || !this.mat) return;
 
-    this.object3D.mesh.color.setScalar(1 + audioAnalyser.volume / 255 * 2);
+    this.object3D.mesh.color.setScalar(1 + audioAnalyser.volume * 16);
   }
 });
 
@@ -64,6 +68,7 @@ AFRAME.registerComponent("scale-audio-feedback", {
 
     if (!audioAnalyser) return;
 
-    this.el.object3D.scale.setScalar(minScale + (maxScale - minScale) * audioAnalyser.volume / 255);
+    const scale = Math.min(maxScale, minScale + (maxScale - minScale) * audioAnalyser.volume * 8);
+    this.el.object3D.scale.setScalar(scale);
   }
 });
