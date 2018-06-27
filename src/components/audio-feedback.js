@@ -33,20 +33,6 @@ AFRAME.registerComponent("networked-audio-analyser", {
 });
 
 /**
- * Sets an entity's color base on audioFrequencyChange events.
- * @component matcolor-audio-feedback
- */
-AFRAME.registerComponent("matcolor-audio-feedback", {
-  tick() {
-    const audioAnalyser = this.el.components["networked-audio-analyser"];
-
-    if (!audioAnalyser || !this.mat) return;
-
-    this.object3D.mesh.color.setScalar(1 + audioAnalyser.volume * 16);
-  }
-});
-
-/**
  * Sets an entity's scale base on audioFrequencyChange events.
  * @namespace avatar
  * @component scale-audio-feedback
