@@ -34,6 +34,7 @@
     </audio>
 
     <a-scene
+        tunnel-effect
         renderer="antialias: true"
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         physics="gravity: -6;"
@@ -87,7 +88,7 @@
             <a-asset-item id="specialquack" src="./assets/sfx/specialquack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
 
             <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
-
+            <img id="tunnel" src="./assets/images/tunnel.png">
             <!-- Templates -->
 
             <template id="video-template">
