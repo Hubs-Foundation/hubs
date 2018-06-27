@@ -127,6 +127,9 @@ import registerTelemetry from "./telemetry";
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
+import "./components/tools/pen";
+// import "./components/tools/networked-drawing";
+
 function qsTruthy(param) {
   const val = qs[param];
   // if the param exists but is not set (e.g. "?foo&bar"), its value is null.

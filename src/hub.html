@@ -231,6 +231,7 @@
             segments-height="9"
             segments-width="9"
             event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"
+            pen
         ></a-sphere>
 
         <!-- Player Rig -->
@@ -370,6 +371,11 @@
             nav-mesh-helper
             static-body="shape: none;"
         ></a-entity>
+
+<!--         <a-entity
+            position="0 2 0"
+            networked-drawing
+        ></a-entity> -->
     </a-scene>
 
     <div id="ui-root"></div>
