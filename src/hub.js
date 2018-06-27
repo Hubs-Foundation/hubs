@@ -65,14 +65,14 @@ import "./components/scene-shadow";
 import "./components/avatar-replay";
 import "./components/image-plus";
 import "./components/auto-box-collider";
-import "./components/spawn-in-front-of-object";
+import "./components/reposition-relative-to-target";
 import "./components/pinch-to-move";
 import "./components/look-on-mobile";
 import "./components/pitch-yaw-rotator";
 import "./components/input-configurator";
 import "./components/sticky-object";
 import "./components/auto-scale-cannon-physics-body";
-import "./components/position-at-bounding-radius";
+import "./components/position-at-box-border";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -302,15 +302,19 @@ const onReady = async () => {
       NAF.connection.entities.completeSync(ev.detail.clientId);
     });
 
+    const offset = { x: 0, y: 0, z: -1.5 };
     const addMedia = mediaUrl => {
       const scene = AFRAME.scenes[0];
       if (mediaUrl.endsWith(".gltf") || mediaUrl.endsWith(".glb")) {
         const model = document.createElement("a-entity");
         model.id = "interactable-model-" + Date.now();
-        model.setAttribute("position", { x: 0, y: 2, z: 1 });
-        model.setAttribute("spawn-in-front-of-object", "");
+        model.setAttribute("reposition-relative-to-target", {
+          on: "model-loaded",
+          target: "#player-camera",
+          offset: offset
+        });
         model.setAttribute("gltf-model-plus", "src", mediaUrl);
-        model.setAttribute("auto-box-collider", "setInitialScale", true);
+        model.setAttribute("auto-box-collider", { resize: true });
         model.setAttribute("networked", { template: "#interactable-model" });
         scene.appendChild(model);
       } else {

@@ -1,5 +1,5 @@
-function almostEquals(u, v, eps) {
-  return Math.abs(u.x - v.x) < eps && Math.abs(u.y - v.y) < eps && Math.abs(u.z - v.z) < eps;
+function almostEquals(u, v, epsilon) {
+  return Math.abs(u.x - v.x) < epsilon && Math.abs(u.y - v.y) < epsilon && Math.abs(u.z - v.z) < epsilon;
 }
 
 function debounce(fn, delay) {
@@ -13,25 +13,27 @@ function debounce(fn, delay) {
   };
 }
 
-AFRAME.registerComponent("auto-scale-cannon-physics-body", {
+const autoScaleCannonPhysicsBody = {
   dependencies: ["body"],
 
-  init: function() {
+  init() {
     this.body = this.el.components["body"];
     this.prevScale = this.el.object3D.scale.clone();
-    this.updateCannonScale = debounce(this.updateCannonScale.bind(this), 200);
+    this.updateCannonScale = debounce(this.updateCannonScale.bind(this), 100);
   },
 
-  tick: function() {
+  tick() {
     const scale = this.el.object3D.scale;
+    // Note: This only checks if the LOCAL scale of the object3D changes.
     if (!almostEquals(scale, this.prevScale, 0.001)) {
       this.updateCannonScale();
       this.prevScale.copy(scale);
     }
   },
 
-  updateCannonScale: function() {
+  updateCannonScale() {
     this.body.updateCannonScale();
-    console.log("updating?");
   }
-});
+};
+
+AFRAME.registerComponent("auto-scale-cannon-physics-body", autoScaleCannonPhysicsBody);

@@ -182,11 +182,11 @@
                     stretchable="useWorldPosition: true; usePhysics: never"
                     hoverable
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
-                    auto-scale-cannon-physics-body
                     auto-box-collider
                     position-at-box-border="target:.deleteButton"
+                    auto-scale-cannon-physics-body
                 >
-                    <a-entity class="deleteButton" visible-while-frozen>
+                    <a-entity class="deleteButton" visible-while-frozen scale="0.08 0.08 0.08">
                         <a-entity mixin="rounded-text-button" remove-object-button position="0 0 0"> </a-entity>
                         <a-entity text=" value:Delete; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
@@ -361,7 +361,6 @@
                     collisionEntities: [nav-mesh];
                     drawIncrementally: true;
                     incrementalDrawMs: 600;
-                    curveShootingSpeed: 5;
                     hitOpacity: 0.3;
                     missOpacity: 0.2;"
                 haptic-feedback
