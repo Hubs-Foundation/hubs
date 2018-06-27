@@ -38,6 +38,7 @@
     "device-detect": "^1.0.7",
     "event-target-shim": "^3.0.1",
     "form-urlencoded": "^2.0.4",
+    "gif-engine-js": "^1.0.1",
     "jsonschema": "^1.2.2",
     "mobile-detect": "^1.4.1",
     "moment": "^2.22.0",
@@ -89,6 +90,7 @@
     "style-loader": "^0.20.2",
     "webpack": "^4.0.1",
     "webpack-cli": "^2.0.9",
-    "webpack-dev-server": "^3.0.0"
+    "webpack-dev-server": "^3.0.0",
+    "worker-loader": "^2.0.0"
   }
 }

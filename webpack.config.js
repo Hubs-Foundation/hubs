@@ -130,6 +130,10 @@ const config = {
         }
       },
       {
+        test: /\.worker\.js$/,
+        use: { loader: "worker-loader" }
+      },
+      {
         test: /\.js$/,
         include: [path.resolve(__dirname, "src")],
         // Exclude JS assets in node_modules because they are already transformed and often big.
