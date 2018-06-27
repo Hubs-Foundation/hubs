@@ -303,9 +303,9 @@ const onReady = async () => {
     });
 
     const offset = { x: 0, y: 0, z: -1.5 };
-    const addMedia = mediaUrl => {
+    const addMedia = url => {
       const scene = AFRAME.scenes[0];
-      if (mediaUrl.endsWith(".gltf") || mediaUrl.endsWith(".glb")) {
+      if (url.endsWith(".gltf") || url.endsWith(".glb")) {
         const model = document.createElement("a-entity");
         model.id = "interactable-model-" + Date.now();
         model.setAttribute("reposition-relative-to-target", {
@@ -313,14 +313,14 @@ const onReady = async () => {
           target: "#player-camera",
           offset: offset
         });
-        model.setAttribute("gltf-model-plus", "src", mediaUrl);
+        model.setAttribute("gltf-model-plus", "src", url);
         model.setAttribute("auto-box-collider", { resize: true });
         model.setAttribute("networked", { template: "#interactable-model" });
         scene.appendChild(model);
       } else {
         const image = document.createElement("a-entity");
         image.id = "interactable-image-" + Date.now();
-        image.setAttribute("image-plus", "src", mediaUrl);
+        image.setAttribute("image-plus", "src", url);
         image.setAttribute("networked", { template: "#interactable-image" });
         scene.appendChild(image);
       }
