@@ -319,7 +319,7 @@ class UIRoot extends Component {
           mediaSource: "screen",
           // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
           // other than your current monitor that has a different aspect ratio.
-          width: (screen.width / screen.height) * 720,
+          width: 720 * screen.width / screen.height,
           height: 720,
           frameRate: 30
         }

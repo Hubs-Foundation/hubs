@@ -15,7 +15,7 @@ AFRAME.registerComponent("auto-box-collider", {
     const rotation = this.el.getAttribute("rotation");
     this.el.setAttribute("rotation", { x: 0, y: 0, z: 0 });
     const { min, max } = new THREE.Box3().setFromObject(this.el.object3DMap.mesh);
-    let halfExtents = new THREE.Vector3()
+    const halfExtents = new THREE.Vector3()
       .addVectors(min.clone().negate(), max)
       .multiplyScalar(0.5 / this.el.object3D.scale.x);
     this.el.setAttribute("shape", {
