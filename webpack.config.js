@@ -41,6 +41,10 @@ function createHTTPSConfig() {
               {
                 type: 2,
                 value: "localhost"
+              },
+              {
+                type: 2,
+                value: "hubs.local"
               }
             ]
           }
@@ -93,6 +97,7 @@ const config = {
     https: createHTTPSConfig(),
     host: "0.0.0.0",
     useLocalIp: true,
+    public: "hubs.local:8080",
     port: 8080,
     before: function(app) {
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
@@ -123,6 +128,10 @@ const config = {
           // You can get transformed asset urls in an html template using ${require("pathToFile.ext")}
           interpolate: "require"
         }
+      },
+      {
+        test: /\.worker\.js$/,
+        use: { loader: "worker-loader" }
       },
       {
         test: /\.js$/,
