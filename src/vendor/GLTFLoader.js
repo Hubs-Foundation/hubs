@@ -9,6 +9,21 @@
  * @author Don McCurdy / https://www.donmccurdy.com
  */
 
+async function toFarsparkURL(url){
+	var mediaJson = await fetch("https://smoke-dev.reticulum.io/api/v1/media", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json"
+		},
+		body: JSON.stringify({
+			media: {
+				url: url
+			}
+		})
+	}).then(r => r.json());
+	return mediaJson.images.raw;
+}
+
 THREE.GLTFLoader = ( function () {
 
 	function GLTFLoader( manager ) {
@@ -25,7 +40,7 @@ THREE.GLTFLoader = ( function () {
 
 		crossOrigin: 'Anonymous',
 
-		load: function ( url, onLoad, onProgress, onError ) {
+		load: async function ( url, onLoad, onProgress, onError ) {
 
 			var scope = this;
 
@@ -37,7 +52,9 @@ THREE.GLTFLoader = ( function () {
 
 			loader.setResponseType( 'arraybuffer' );
 
-			loader.load( url, function ( data ) {
+			var farsparkURL = await toFarsparkURL(url);
+
+			loader.load( farsparkURL, function ( data ) {
 
 				try {
 
@@ -1598,7 +1615,7 @@ THREE.GLTFLoader = ( function () {
 	 * @param {number} bufferIndex
 	 * @return {Promise<ArrayBuffer>}
 	 */
-	GLTFParser.prototype.loadBuffer = function ( bufferIndex ) {
+	GLTFParser.prototype.loadBuffer = async function ( bufferIndex ) {
 
 		var bufferDef = this.json.buffers[ bufferIndex ];
 		var loader = this.fileLoader;
@@ -1618,9 +1635,11 @@ THREE.GLTFLoader = ( function () {
 
 		var options = this.options;
 
+		var farsparkURL = await toFarsparkURL(resolveURL(bufferDef.uri, options.path));
+
 		return new Promise( function ( resolve, reject ) {
 
-			loader.load( resolveURL( bufferDef.uri, options.path ), resolve, undefined, function () {
+			loader.load( farsparkURL, resolve, undefined, function () {
 
 				reject( new Error( 'THREE.GLTFLoader: Failed to load buffer "' + bufferDef.uri + '".' ) );
 
@@ -1784,7 +1803,7 @@ THREE.GLTFLoader = ( function () {
 	 * @param {number} textureIndex
 	 * @return {Promise<THREE.Texture>}
 	 */
-	GLTFParser.prototype.loadTexture = function ( textureIndex ) {
+	GLTFParser.prototype.loadTexture = async function ( textureIndex ) {
 
 		var parser = this;
 		var json = this.json;
@@ -1813,6 +1832,8 @@ THREE.GLTFLoader = ( function () {
 
 		}
 
+		var farsparkURL = await toFarsparkURL(resolveURL(sourceURI, options.path));
+
 		return Promise.resolve( sourceURI ).then( function ( sourceURI ) {
 
 			// Load Texture resource.
@@ -1821,7 +1842,7 @@ THREE.GLTFLoader = ( function () {
 
 			return new Promise( function ( resolve, reject ) {
 
-				loader.load( resolveURL( sourceURI, options.path ), resolve, undefined, reject );
+				loader.load( farsparkURL, resolve, undefined, reject );
 
 			} );
 
