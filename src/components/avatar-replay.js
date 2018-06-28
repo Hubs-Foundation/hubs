@@ -1,5 +1,3 @@
-import botRecording from "../assets/avatars/bot-recording.json";
-
 // These controls are removed from the controller entities so that motion-capture-replayer is in full control of them.
 const controlsBlacklist = [
   "tracked-controls",
@@ -20,24 +18,30 @@ AFRAME.registerComponent("avatar-replay", {
   schema: {
     camera: { type: "selector" },
     leftController: { type: "selector" },
-    rightController: { type: "selector" }
+    rightController: { type: "selector" },
+    recordingUrl: { type: "string" }
   },
   init: function() {
-    const { camera, leftController, rightController } = this.data;
+    this.modelLoaded = new Promise(resolve => this.el.addEventListener("model-loaded", resolve));
+  },
 
+  update: function() {
+    const { camera, leftController, rightController, recordingUrl } = this.data;
+    const fetchRecording = fetch(recordingUrl).then(resp => resp.json());
     camera.setAttribute("motion-capture-replayer", { loop: true });
     this._setupController(leftController);
     this._setupController(rightController);
 
-    this.el.addEventListener("model-loaded", () => {
+    this.dataLoaded = Promise.all([fetchRecording, this.modelLoaded]).then(([recording]) => {
       const cameraReplayer = camera.components["motion-capture-replayer"];
-      cameraReplayer.startReplaying(botRecording.camera);
+      cameraReplayer.startReplaying(recording.camera);
       const leftControllerReplayer = leftController.components["motion-capture-replayer"];
-      leftControllerReplayer.startReplaying(botRecording.left);
+      leftControllerReplayer.startReplaying(recording.left);
       const rightControllerReplayer = rightController.components["motion-capture-replayer"];
-      rightControllerReplayer.startReplaying(botRecording.right);
+      rightControllerReplayer.startReplaying(recording.right);
     });
   },
+
   _setupController: function(controller) {
     controlsBlacklist.forEach(controlsComponent => controller.removeAttribute(controlsComponent));
     controller.setAttribute("visible", true);
