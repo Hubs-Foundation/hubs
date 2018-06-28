@@ -318,6 +318,19 @@ const onReady = async () => {
       addMedia(imgUrl);
     });
 
+    document.addEventListener("dragover", e => {
+      e.preventDefault();
+    });
+
+    document.addEventListener("drop", e => {
+      e.preventDefault();
+      const imgUrl = e.dataTransfer.getData("url");
+      if (imgUrl) {
+        console.log("Droped: ", imgUrl);
+        addMedia(imgUrl);
+      }
+    });
+
     if (!qsTruthy("offline")) {
       document.body.addEventListener("connected", () => {
         if (!isBotMode) {
