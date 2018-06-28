@@ -337,14 +337,14 @@ const onReady = async () => {
           camera: "#player-camera",
           leftController: "#player-left-controller",
           rightController: "#player-right-controller",
-          recordingUrl: "assets/avatars/bot-recording.json"
+          recordingUrl: "/assets/avatars/bot-recording.json"
         });
 
         const audioEl = document.createElement("audio");
         audioEl.loop = true;
         audioEl.muted = true;
         audioEl.crossorigin = "anonymous";
-        audioEl.src = "assets/avatars/bot-recording.mp3";
+        audioEl.src = "/assets/avatars/bot-recording.mp3";
         document.body.appendChild(audioEl);
 
         // Wait for runner script to interact with the page so that we can play audio.
