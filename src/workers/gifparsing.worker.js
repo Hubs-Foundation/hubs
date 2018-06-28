@@ -1,73 +1,72 @@
-import { GIF } from "gif-engine-js";
+/**
+ *
+ * Gif parser by @gtk2k
+ * https://github.com/gtk2k/gtk2k.github.io/tree/master/animation_gif
+ *
+ */
 
-const getDisposals = frameObj => (frameObj.graphicExtension && frameObj.graphicExtension.disposalMethod) || 0;
-const getDelays = frameObj => (frameObj.graphicExtension && frameObj.graphicExtension.delay - 1) || 0;
-const copyColorsTransparent = async (source, target, fWidth, fHeight, oLeft, oTop, cWidth, flag) => {
-  for (let row = 0, pointer = -1; fHeight > row; ++row)
-    for (let column = 0; fWidth > column; ++column) {
-      let offset = (column + oLeft + (row + oTop) * cWidth) * 4;
-      if (flag && source[pointer + 4] === 0) {
-        pointer += 4;
-        continue;
-      }
-      target[offset] = source[++pointer];
-      target[++offset] = source[++pointer];
-      target[++offset] = source[++pointer];
-      ++pointer;
-      target[++offset] = flag ? source[pointer] : 255;
-    }
-};
-const messageHandler = async e => {
-  try {
-    const o = await GIF(e.data);
-    const frameCount = o.frames.length;
-    const compiledFrames = new Array(frameCount);
-    const delays = o.frames.map(getDelays);
-    const canvasWidth = o.descriptor.width;
-    const canvasHeight = o.descriptor.height;
-    const disposals = o.frames.map(getDisposals);
-    const canvas = new Uint8ClampedArray(canvasWidth * canvasHeight * 4);
-    let index = 0;
-    do {
-      const frame = o.frames[index];
-      const transparentColorFlag = frame.graphicExtension && frame.graphicExtension.transparentColorFlag;
-      const [
-        { data: frameImageData, width: frameWidth, height: frameHeight },
-        offsetLeft,
-        offsetTop
-      ] = await o.toImageData(index);
-      await copyColorsTransparent(
-        frameImageData,
-        canvas,
-        frameWidth,
-        frameHeight,
-        offsetLeft,
-        offsetTop,
-        canvasWidth,
-        transparentColorFlag
-      );
-      const a = new Uint8ClampedArray(canvas);
-      compiledFrames[index] = [new ImageData(a, canvasWidth, canvasHeight)];
-      if (disposals[index] === 2) {
-        for (let row = 0; frameHeight > row; ++row) {
-          for (let column = 0; frameWidth > column; ++column) {
-            let offset = (column + offsetLeft + (row + offsetTop) * canvasWidth) * 4;
-            canvas[offset] = 0;
-            canvas[++offset] = 0;
-            canvas[++offset] = 0;
-            canvas[++offset] = transparentColorFlag ? 0 : 255;
+const parseGIF = function(gif, successCB, errorCB) {
+  let pos = 0;
+  const delayTimes = [];
+  let graphicControl = null;
+  const frames = [];
+  const disposals = [];
+  let loopCnt = 0;
+  if (
+    gif[0] === 0x47 &&
+    gif[1] === 0x49 &&
+    gif[2] === 0x46 && // 'GIF'
+    gif[3] === 0x38 &&
+    gif[4] === 0x39 &&
+    gif[5] === 0x61
+  ) {
+    // '89a'
+    pos += 13 + +!!(gif[10] & 0x80) * Math.pow(2, (gif[10] & 0x07) + 1) * 3;
+    const gifHeader = gif.subarray(0, pos);
+    while (gif[pos] && gif[pos] !== 0x3b) {
+      const offset = pos,
+        blockId = gif[pos];
+      if (blockId === 0x21) {
+        const label = gif[++pos];
+        if ([0x01, 0xfe, 0xf9, 0xff].indexOf(label) !== -1) {
+          label === 0xf9 && delayTimes.push((gif[pos + 3] + (gif[pos + 4] << 8)) * 10);
+          label === 0xff && (loopCnt = gif[pos + 15] + (gif[pos + 16] << 8));
+          while (gif[++pos]) pos += gif[pos];
+          if (label === 0xf9) {
+            graphicControl = gif.subarray(offset, pos + 1);
+            disposals.push((graphicControl[3] >> 2) & 0x07);
           }
+        } else {
+          errorCB && errorCB("parseGIF: unknown label");
+          break;
         }
+      } else if (blockId === 0x2c) {
+        pos += 9;
+        pos += 1 + +!!(gif[pos] & 0x80) * (Math.pow(2, (gif[pos] & 0x07) + 1) * 3);
+        while (gif[++pos]) pos += gif[pos];
+        const imageData = gif.subarray(offset, pos + 1);
+        frames.push(URL.createObjectURL(new Blob([gifHeader, graphicControl, imageData])));
+      } else {
+        errorCB && errorCB("parseGIF: unknown blockId");
+        break;
       }
-    } while (++index < frameCount);
-    postMessage([compiledFrames, delays, canvasWidth, canvasHeight]);
-  } catch (er) {
-    console.error(er);
+      pos++;
+    }
+  } else {
+    errorCB && errorCB("parseGIF: no GIF89a");
   }
+  successCB && successCB(delayTimes, loopCnt, frames, disposals);
 };
-(global => {
-  global.onmessage = messageHandler;
-  global.onerror = e => {
-    postMessage(["log", e]);
-  };
-})((() => self)());
+
+self.onmessage = e => {
+  parseGIF(
+    new Uint8Array(e.data),
+    (delays, loopcnt, frames, disposals) => {
+      self.postMessage([true, frames, delays, disposals]);
+    },
+    err => {
+      console.error("Error in gif parsing worker", err);
+      self.postMessage([false, err]);
+    }
+  );
+};
