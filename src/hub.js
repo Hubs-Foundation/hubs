@@ -310,26 +310,28 @@ const onReady = async () => {
       addMedia(e.detail);
     });
 
-    document.addEventListener("paste", e => {
-      if (e.target.nodeName === "INPUT") return;
+    if (qsTruthy("mediaTools")) {
+      document.addEventListener("paste", e => {
+        if (e.target.nodeName === "INPUT") return;
 
-      const imgUrl = e.clipboardData.getData("text");
-      console.log("Pasted: ", imgUrl, e);
-      addMedia(imgUrl);
-    });
-
-    document.addEventListener("dragover", e => {
-      e.preventDefault();
-    });
-
-    document.addEventListener("drop", e => {
-      e.preventDefault();
-      const imgUrl = e.dataTransfer.getData("url");
-      if (imgUrl) {
-        console.log("Droped: ", imgUrl);
+        const imgUrl = e.clipboardData.getData("text");
+        console.log("Pasted: ", imgUrl, e);
         addMedia(imgUrl);
-      }
-    });
+      });
+
+      document.addEventListener("dragover", e => {
+        e.preventDefault();
+      });
+
+      document.addEventListener("drop", e => {
+        e.preventDefault();
+        const imgUrl = e.dataTransfer.getData("url");
+        if (imgUrl) {
+          console.log("Droped: ", imgUrl);
+          addMedia(imgUrl);
+        }
+      });
+    }
 
     if (!qsTruthy("offline")) {
       document.body.addEventListener("connected", () => {
