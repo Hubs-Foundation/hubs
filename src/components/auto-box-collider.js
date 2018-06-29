@@ -7,7 +7,6 @@ AFRAME.registerComponent("auto-box-collider", {
   init() {
     this.onLoaded = this.onLoaded.bind(this);
     this.el.addEventListener("model-loaded", this.onLoaded);
-    window.auto = this;
   },
 
   onLoaded() {
