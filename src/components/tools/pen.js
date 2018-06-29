@@ -1,3 +1,5 @@
+const EPS = 10e-6;
+
 /**
  * Pen tool
  * @component pen
@@ -7,19 +9,21 @@ import SharedBufferGeometryManager from "../../vendor/sharedbuffergeometrymanage
 
 AFRAME.registerComponent("pen", {
   schema: {
-    drawFrequency: { default: 1000 },
     drawPoints: { default: [] },
+    drawFrequency: { default: 100 },
     minDistanceBetweenPoints: { default: 0.05 },
-    segments: { default: 3 },
-    radius: { default: 0.05 },
-    debug: { default: true }
+    defaultDirection: { default: { x: 1, y: 0, z: 0 } },
+    segments: { default: 8 },
+    radius: { default: 0.02 },
+    debug: { default: false },
+    camera: { type: "selector" }
   },
 
   init() {
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
 
-    let material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: 0xff0000 });
+    const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: 0xff0000 });
 
     this.sharedBufferGeometryManager = new SharedBufferGeometryManager();
     this.sharedBufferGeometryManager.addSharedBuffer(0, material, THREE.TriangleStripDrawMode);
@@ -28,9 +32,14 @@ AFRAME.registerComponent("pen", {
     this.timeSinceLastDraw = 0;
 
     this.lastPosition = new THREE.Vector3();
-    this.lastPositionSet = false;
-    this.lastSegmentsSet = false;
-    this.firstVertex = true;
+    this.lastPosition.copy(this.el.object3D.position);
+    this.direction = new THREE.Vector3();
+    this.direction.copy(this.data.defaultDirection);
+
+    this.lastPoint = new THREE.Vector3();
+    this.lastPointSet = false;
+    this.initialized = false;
+
     this.lastSegments = [];
     this.currentSegments = [];
     for (var x = 0; x < this.data.segments; x++) {
@@ -45,7 +54,7 @@ AFRAME.registerComponent("pen", {
     this.scene.add(this.drawing);
 
     if (this.data.debug) {
-      this.debugGeometry = new THREE.SphereGeometry(0.005, 32, 32);
+      this.debugGeometry = new THREE.SphereGeometry(0.005, 16, 16);
       this.debugMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
     }
   },
@@ -60,104 +69,167 @@ AFRAME.registerComponent("pen", {
     document.removeEventListener("mouseup", this.onMouseUp);
   },
 
-  tick: (() => {
-    return function(t, dt) {
-      if (this.isDrawing && this.timeSinceLastDraw + dt >= this.data.drawFrequency) {
-        this.addPoint(this.el.object3D.position);
-        this.sharedBuffer.update();
+  tick(t, dt) {
+    const currentPosition = this.el.object3D.position;
+
+    if (currentPosition.distanceToSquared(this.lastPosition) > EPS) {
+      this.direction.subVectors(currentPosition, this.lastPoint).normalize();
+    }
+    this.lastPosition.copy(currentPosition);
+
+    if (this.isDrawing) {
+      const time = this.timeSinceLastDraw + dt;
+      if (
+        time >= this.data.drawFrequency &&
+        this.lastPoint.distanceTo(currentPosition) >= this.data.minDistanceBetweenPoints
+      ) {
+        this.addPoint(currentPosition);
       }
 
-      this.timeSinceLastDraw = (this.timeSinceLastDraw + dt) % this.data.drawFrequency;
-    };
-  })(),
+      this.timeSinceLastDraw = time % this.data.drawFrequency;
+    }
+  },
 
   onMouseDown(e) {
     if (e.button === 0) {
       this.isDrawing = true;
-      this.restart();
+      this.startDraw();
     }
   },
 
   onMouseUp(e) {
     if (e.button === 0) {
       this.isDrawing = false;
+      this.endDraw();
     }
   },
 
-  restart() {
-    this.sharedBuffer.restartPrimitive();
+  startDraw: (() => {
+    const normal = new THREE.Vector3();
+    return function() {
+      this.addPoint(this.el.object3D.position);
+      this.getNormal(normal, this.el.object3D.position);
+      this.drawStart(normal);
+    };
+  })(),
 
-    //restart the draw (readd the last vertex) if this drawing has already been started
-    if (!this.firstVertex) {
-      this.restartDraw = true;
+  endDraw: (() => {
+    const endPoint = new THREE.Vector3();
+    const direction = new THREE.Vector3();
+    return function() {
+      //add the final point  and cap
+      this.addPoint(this.el.object3D.position);
+      direction.copy(this.direction).multiplyScalar(this.data.radius);
+      endPoint.copy(this.el.object3D.position).add(direction);
+      this.drawCap(endPoint, this.currentSegments);
+
+      //reset
+      this.sharedBuffer.restartPrimitive();
+      this.lastPointSet = false;
+      this.lastSegmentsSet = false;
+      this.timeSinceLastDraw = 0;
+      // this.direction.copy(this.data.defaultDirection);
+    };
+  })(),
+
+  //add a "cap" to the start or end of a drawing
+  drawCap(point, segments) {
+    let j = 0;
+    for (let i = 0; i < this.data.segments * 2 - 1; i++) {
+      if ((i - 1) % 3 === 0) {
+        this.addVertex(point);
+      } else {
+        this.addVertex(segments[j % this.data.segments]);
+        j++;
+      }
     }
-    this.lastPositionSet = false;
-    this.lastSegmentsSet = false;
+    this.sharedBuffer.update();
   },
 
+  //calculate the segments for a given point
   addSegments(segmentsList, point, forward, up) {
     const angleIncrement = Math.PI * 2 / this.data.segments;
     for (let i = 0; i < this.data.segments; i++) {
       const segment = segmentsList[i];
 
       this.rotatePointAroundAxis(segment, point, forward, up, angleIncrement * i, this.data.radius);
-
-      if (this.data.debug) {
-        const sphere = new THREE.Mesh(this.debugGeometry, this.debugMaterial);
-        this.scene.add(sphere);
-        sphere.position.copy(segment);
-      }
     }
   },
 
   addVertex(point) {
-    this.firstVertex = false;
+    this.initialized = true;
     this.sharedBuffer.addVertex(point.x, point.y, point.z);
+
+    if (this.data.debug) {
+      const sphere = new THREE.Mesh(this.debugGeometry, this.debugMaterial);
+      this.scene.add(sphere);
+      sphere.position.copy(point);
+    }
   },
 
-  addPoint: (() => {
-    const forward = new THREE.Vector3();
-    return function(position) {
-      if (this.lastPositionSet) {
-        //don't draw if distance from last point is not far enough
-        const distance = position.distanceTo(this.lastPosition);
-        if (distance >= this.data.minDistanceBetweenPoints) {
-          //calculate forward only if I have lastPositionSet
-          forward.subVectors(position, this.lastPosition).normalize();
+  //get lastSegments, draw the start cap
+  drawStart: (() => {
+    const startPoint = new THREE.Vector3();
+    const inverseDirection = new THREE.Vector3();
+    return function(normal) {
+      this.addSegments(this.lastSegments, this.lastPoint, this.direction, normal);
 
-          //if I don't have the lastSegments yet, add them now
-          if (!this.lastSegmentsSet) {
-            this.addSegments(this.lastSegments, this.lastPosition, forward, THREE.Object3D.DefaultUp);
-            this.lastSegmentsSet = true;
-          }
+      inverseDirection
+        .copy(this.direction)
+        .negate()
+        .multiplyScalar(this.data.radius);
+      startPoint.copy(this.lastPoint).add(inverseDirection);
 
-          //add currentSegments
-          this.addSegments(this.currentSegments, position, forward, THREE.Object3D.DefaultUp);
-
-          //add the first vertex of the currentSegment if this is a restartDraw
-          if (this.restartDraw) {
-            this.addVertex(this.lastSegments[0]);
-            this.restartDraw = false;
-          }
-
-          //draw the triangle strip
-          // this.printSegments();
-          for (var j = 0; j <= this.data.segments; j++) {
-            this.addVertex(this.lastSegments[j % this.data.segments]);
-            this.addVertex(this.currentSegments[j % this.data.segments]);
-          }
-
-          //copy the currentSegments to lastSegments
-          for (var j = 0; j < this.data.segments; j++) {
-            this.lastSegments[j].copy(this.currentSegments[j]);
-          }
-
-          this.lastPosition.copy(position);
-        }
-      } else {
-        this.lastPosition.copy(position);
-        this.lastPositionSet = true;
+      //add the first vertex of the lastSegments if this drawing has already been initialized
+      if (this.initialized) {
+        this.addVertex(this.lastSegments[0]);
       }
+
+      this.drawCap(startPoint, this.lastSegments);
+
+      this.sharedBuffer.restartPrimitive();
+      this.addVertex(this.lastSegments[0]);
+    };
+  })(),
+
+  //helper function to get normal of direction of drawing cross direction to camera
+  getNormal: (() => {
+    const directionToCamera = new THREE.Vector3();
+    return function(normal, position) {
+      if (this.data.camera) {
+        directionToCamera.subVectors(position, this.data.camera.object3D.position).normalize();
+        normal.crossVectors(this.direction, directionToCamera);
+      } else {
+        normal.copy(this.el.object3D.up);
+      }
+    };
+  })(),
+
+  addPoint: (() => {
+    const normal = new THREE.Vector3();
+    return function(position) {
+      if (this.lastPointSet) {
+        this.getNormal(normal, position);
+
+        this.addSegments(this.currentSegments, position, this.direction, normal);
+
+        //draw the triangle strip
+        for (let j = 0; j <= this.data.segments; j++) {
+          this.addVertex(this.lastSegments[j % this.data.segments]);
+          this.addVertex(this.currentSegments[j % this.data.segments]);
+        }
+
+        //update the drawing
+        this.sharedBuffer.update();
+
+        //copy the currentSegments to lastSegments
+        for (var j = 0; j < this.data.segments; j++) {
+          this.lastSegments[j].copy(this.currentSegments[j]);
+        }
+      }
+
+      this.lastPoint.copy(position);
+      this.lastPointSet = true;
     };
   })(),
 
@@ -168,19 +240,5 @@ AFRAME.registerComponent("pen", {
       calculatedDirection.applyAxisAngle(axis, angle);
       out.copy(point).add(calculatedDirection.normalize().multiplyScalar(radius));
     };
-  })(),
-
-  printSegments() {
-    console.group("lastSegments");
-    for (var i = 0; i < this.data.segments; i++) {
-      console.log(this.lastSegments[i].x, this.lastSegments[i].y, this.lastSegments[i].z);
-    }
-    console.groupEnd();
-
-    console.group("currentSegments");
-    for (var j = 0; j < this.data.segments; j++) {
-      console.log(this.currentSegments[j].x, this.currentSegments[j].y, this.currentSegments[j].z);
-    }
-    console.groupEnd();
-  }
+  })()
 });
