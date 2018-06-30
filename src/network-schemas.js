@@ -86,7 +86,8 @@ function registerNetworkSchemas() {
         component: "rotation",
         requiresNetworkUpdate: rotationRequiresUpdate
       },
-      "scale"
+      "scale",
+      "networked-drawing"
     ]
   });
 }

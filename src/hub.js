@@ -128,7 +128,7 @@ import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-cap
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
 import "./components/tools/pen";
-// import "./components/tools/networked-drawing";
+import "./components/tools/networked-drawing";
 
 function qsTruthy(param) {
   const val = qs[param];
