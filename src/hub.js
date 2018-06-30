@@ -65,14 +65,13 @@ import "./components/scene-shadow";
 import "./components/avatar-replay";
 import "./components/image-plus";
 import "./components/auto-box-collider";
-import "./components/reposition-relative-to-target";
 import "./components/pinch-to-move";
 import "./components/look-on-mobile";
 import "./components/pitch-yaw-rotator";
 import "./components/input-configurator";
 import "./components/sticky-object";
 import "./components/auto-scale-cannon-physics-body";
-import "./components/position-at-box-border";
+import "./components/position-at-box-shape-border";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -308,10 +307,11 @@ const onReady = async () => {
       if (url.endsWith(".gltf") || url.endsWith(".glb")) {
         const model = document.createElement("a-entity");
         model.id = "interactable-model-" + Date.now();
-        model.setAttribute("reposition-relative-to-target", {
+        model.setAttribute("offset-relative-to", {
           on: "model-loaded",
           target: "#player-camera",
-          offset: offset
+          offset: offset,
+          selfDestruct: true
         });
         model.setAttribute("gltf-model-plus", "src", url);
         model.setAttribute("auto-box-collider", { resize: true });

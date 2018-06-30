@@ -11,8 +11,8 @@ AFRAME.registerComponent("auto-box-collider", {
 
   onLoaded() {
     this.el.removeEventListener("model-loaded", this.onLoaded);
-    const rotation = this.el.getAttribute("rotation");
-    this.el.setAttribute("rotation", { x: 0, y: 0, z: 0 });
+    const rotation = this.el.object3D.rotation.clone();
+    this.el.object3D.rotation.set(0, 0, 0);
     const { min, max } = new THREE.Box3().setFromObject(this.el.object3DMap.mesh);
     const halfExtents = new THREE.Vector3()
       .addVectors(min.clone().negate(), max)
@@ -25,7 +25,7 @@ AFRAME.registerComponent("auto-box-collider", {
     if (this.data.resize) {
       this.resize(min, max);
     }
-    this.el.setAttribute("rotation", rotation);
+    this.el.object3D.rotation.copy(rotation);
     this.el.removeAttribute("auto-box-collider");
   },
 

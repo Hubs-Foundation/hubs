@@ -16,9 +16,7 @@ async function toFarsparkURL(url){
 			"Content-Type": "application/json"
 		},
 		body: JSON.stringify({
-			media: {
-				url: url
-			}
+			media: {url}
 		})
 	}).then(r => r.json());
 	return mediaJson.images.raw;
@@ -1817,11 +1815,12 @@ THREE.GLTFLoader = ( function () {
 		var sourceURI = source.uri;
 		var isObjectURL = false;
 
-		if ( source.bufferView !== undefined ) {
+    var hasBufferView = source.bufferView !== undefined;
+		if ( hasBufferView ) {
 
 			// Load binary image data from bufferView, if provided.
 
-			sourceURI = parser.getDependency( 'bufferView', source.bufferView ).then( function ( bufferView ) {
+			sourceURI = await parser.getDependency( 'bufferView', source.bufferView ).then( function ( bufferView ) {
 
 				isObjectURL = true;
 				var blob = new Blob( [ bufferView ], { type: source.mimeType } );
@@ -1832,7 +1831,10 @@ THREE.GLTFLoader = ( function () {
 
 		}
 
-		var farsparkURL = await toFarsparkURL(resolveURL(sourceURI, options.path));
+    var urlToLoad = resolveURL(sourceURI, options.path);
+    if (!hasBufferView){
+      urlToLoad = await toFarsparkURL(urlToLoad);
+    }
 
 		return Promise.resolve( sourceURI ).then( function ( sourceURI ) {
 
@@ -1842,7 +1844,7 @@ THREE.GLTFLoader = ( function () {
 
 			return new Promise( function ( resolve, reject ) {
 
-				loader.load( farsparkURL, resolve, undefined, reject );
+				loader.load( urlToLoad, resolve, undefined, reject );
 
 			} );
 
