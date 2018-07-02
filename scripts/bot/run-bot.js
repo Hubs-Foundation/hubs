@@ -2,7 +2,6 @@
 const doc = `
 Usage:
     ./run-bot.js [options]
-
 Options:
     -u --url=<url>    URL
     -o --host=<host>  Hubs host if URL is not specified [default: localhost:8080]
@@ -16,12 +15,20 @@ const options = docopt(doc);
 const puppeteer = require("puppeteer");
 const querystring = require("query-string");
 
+function log(...objs) {
+  console.log.call(null, [new Date().toISOString()].concat(objs).join(" "));
+}
+
+function error(...objs) {
+  console.error.call(null, [new Date().toISOString()].concat(objs).join(" "));
+}
+
 (async () => {
   const browser = await puppeteer.launch({ ignoreHTTPSErrors: true });
   const page = await browser.newPage();
-  page.on("console", msg => console.log("PAGE: ", msg.text()));
-  page.on("error", err => console.error("ERROR: ", err.toString().split("\n")[0]));
-  page.on("pageerror", err => console.error("PAGE ERROR: ", err.toString().split("\n")[0]));
+  page.on("console", msg => log("PAGE: ", msg.text()));
+  page.on("error", err => error("ERROR: ", err.toString().split("\n")[0]));
+  page.on("pageerror", err => error("PAGE ERROR: ", err.toString().split("\n")[0]));
 
   const baseUrl = options["--url"] || `https://${options["--host"]}/hub.html`;
 
@@ -35,11 +42,11 @@ const querystring = require("query-string");
   }
 
   const url = `${baseUrl}?${querystring.stringify(params)}`;
-  console.log(url);
+  log(url);
 
   const navigate = async () => {
     try {
-      console.log("Spawning bot...");
+      log("Spawning bot...");
       await page.goto(url);
       await page.evaluate(() => console.log(navigator.userAgent));
       let retryCount = 5;
@@ -50,14 +57,14 @@ const querystring = require("query-string");
           await page.mouse.click(100, 100);
           // Signal that the page has been interacted with.
           await page.evaluate(() => window.interacted());
-          console.log("Interacted.");
+          log("Interacted.");
         } catch (e) {
-          console.log("Interaction error", e.message);
+          log("Interaction error", e.message);
           if (retryCount-- < 0) {
             // If retries failed, throw and restart navigation.
             throw new Error("Retries failed");
           }
-          console.log("Retrying...");
+          log("Retrying...");
           backoff *= 2;
           // Retry interaction to start audio playback
           setTimeout(interact, backoff);
@@ -65,7 +72,7 @@ const querystring = require("query-string");
       };
       await interact();
     } catch (e) {
-      console.log("Navigation error", e.message);
+      log("Navigation error", e.message);
       setTimeout(navigate, 1000);
     }
   };
