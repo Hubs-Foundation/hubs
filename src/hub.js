@@ -339,15 +339,27 @@ const onReady = async () => {
         playerRig.setAttribute("avatar-replay", {
           camera: "#player-camera",
           leftController: "#player-left-controller",
-          rightController: "#player-right-controller"
+          rightController: "#player-right-controller",
+          recordingUrl: "/assets/avatars/bot-recording.json"
         });
-        const audio = document.getElementById("bot-recording");
-        mediaStream.addTrack(audio.captureStream().getAudioTracks()[0]);
+
+        const audioEl = document.createElement("audio");
+        audioEl.loop = true;
+        audioEl.muted = true;
+        audioEl.crossorigin = "anonymous";
+        audioEl.src = "/assets/avatars/bot-recording.mp3";
+        document.body.appendChild(audioEl);
+
         // Wait for runner script to interact with the page so that we can play audio.
-        await new Promise(resolve => {
+        const interacted = new Promise(resolve => {
           window.interacted = resolve;
         });
-        audio.play();
+        const canPlay = new Promise(resolve => {
+          audioEl.addEventListener("canplay", resolve);
+        });
+        await Promise.all([canPlay, interacted]);
+        mediaStream.addTrack(audioEl.captureStream().getAudioTracks()[0]);
+        audioEl.play();
       }
 
       if (mediaStream) {
