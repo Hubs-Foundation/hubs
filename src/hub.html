@@ -34,7 +34,6 @@
     </audio>
 
     <a-scene
-        tunnel-effect
         renderer="antialias: true"
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         physics="gravity: -6;"
@@ -268,10 +267,12 @@
                 id="player-camera"
                 class="camera"
                 camera
+                tunneleffect
                 position="0 1.6 0"
                 personal-space-bubble="radius: 0.4"
                 pitch-yaw-rotator
             >
+              <a-image id="tunnel-effect" src="#tunnel" visible="false" position="0.00 0 -0.03" width="0.36" height="0.12"></a-image>
                 <a-entity
                     id="gaze-teleport"
                     position = "0.15 0 0"

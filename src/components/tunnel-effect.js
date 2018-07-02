@@ -5,72 +5,48 @@ import "./shaderlib/MaskPass";
 import "./shaderlib/CopyShader";
 import "./shaderlib/VignetteShader";
 
-AFRAME.registerComponent('tunnel-effect', {
+AFRAME.registerComponent('tunneleffect', {
+  schema: {
+    checkThresholdMs: {type: 'number', default: 200},
+    
+  },
   init: function () {
-    console.log('init');
-    this.obj = null;
-    this.vrStarted = false;
-    var self = this;
-    var initVars = this._initVars.bind(self);
-    this.el.addEventListener('renderstart', initVars);
-  },
-
-  _initVars: function () {
-    console.log('vars');
-    this.obj = this.el;
-    this.scene = this.obj.object3D;
-    this.camera = this.obj.camera;
-    this.renderer = this.obj.renderer;
-    this.composer = new THREE.EffectComposer(this.renderer);
-    this.pass = new THREE.RenderPass(this.scene, this.camera);
-    this.composer.addPass(this.pass);
-    this._vignetteEffect();
-    this.vrStarted = true;
-    this.t = 0;
+    this.scene = this.el.sceneEl;
+    this.image = document.querySelector('#tunnel-effect');
+    this.isMoving = 0;
+    this.image.setAttribute('visible', false);
+    const openTunnelEffect = this._openTunnelEffect.bind(this);
+    this.scene.addEventListener('move', openTunnelEffect);
     this.dt = 0;
-    this.bind();
+    this.t = 0;
+    this.threshold = 300;
   },
 
-  _vignetteEffect: function () {
-    this.shaderVignette = THREE.VignetteShader;
-	  this.effectVignette = new THREE.ShaderPass( this.shaderVignette );
-    this.effectVignette.renderToScreen = true;
-    this.composer.addPass(this.effectVignette);
+  _openTunnelEffect: function () {
+    if (!this.isMoving) {
+      this.image.setAttribute('visible', true);
+      this.isMoving = true;
+    }
+    this.t = this.scene.time;
   },
 
-  tick: function (t, dt) {
-    // console.log('system ticks');
-    this.t = t;
-    this.dt = dt;
+  _closeTunnelEffect: function () {
+    console.log('visible false');
   },
 
-  tock: function (t, dt) {
+  tick: function (time, deltaTime) {
+    if (this.isMoving && time - this.t > this.threshold) {
+      this.isMoving = false;
+      this.image.setAttribute('visible', false);
+      this.t = time;
+    }
+
   },
 
-  renderPass: function (t) {
-    // console.log(this.composer);
-    this.composer.render(t);
-  },
+  play: function () {
+    // this._closeTunnelEffect();
 
-  registerComponent: function () {
-  },
-
-  bind: function () {
-    const renderer = this.obj.renderer;
-    const render = renderer.render;
-    const system = this;
-    let isDigest = false;
-
-    renderer.render = function () {
-      if (isDigest) {
-        render.apply(this, arguments);
-      } else {
-        isDigest = true;
-        system.composer.render(system.dt);
-        isDigest = false;
-      }
-    };
-}
+  }
 
 });
 
