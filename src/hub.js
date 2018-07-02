@@ -64,11 +64,14 @@ import "./components/css-class";
 import "./components/scene-shadow";
 import "./components/avatar-replay";
 import "./components/image-plus";
+import "./components/auto-box-collider";
 import "./components/pinch-to-move";
 import "./components/look-on-mobile";
 import "./components/pitch-yaw-rotator";
 import "./components/input-configurator";
 import "./components/sticky-object";
+import "./components/auto-scale-cannon-physics-body";
+import "./components/position-at-box-shape-border";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -298,12 +301,29 @@ const onReady = async () => {
       NAF.connection.entities.completeSync(ev.detail.clientId);
     });
 
+    const offset = { x: 0, y: 0, z: -1.5 };
     const addMedia = url => {
-      const image = document.createElement("a-entity");
-      image.id = "interactable-image-" + Date.now();
-      image.setAttribute("image-plus", "src", url);
-      image.setAttribute("networked", { template: "#interactable-image" });
-      scene.appendChild(image);
+      const scene = AFRAME.scenes[0];
+      if (url.endsWith(".gltf") || url.endsWith(".glb")) {
+        const model = document.createElement("a-entity");
+        model.id = "interactable-model-" + Date.now();
+        model.setAttribute("offset-relative-to", {
+          on: "model-loaded",
+          target: "#player-camera",
+          offset: offset,
+          selfDestruct: true
+        });
+        model.setAttribute("gltf-model-plus", "src", url);
+        model.setAttribute("auto-box-collider", { resize: true });
+        model.setAttribute("networked", { template: "#interactable-model" });
+        scene.appendChild(model);
+      } else {
+        const image = document.createElement("a-entity");
+        image.id = "interactable-image-" + Date.now();
+        image.setAttribute("image-plus", "src", url);
+        image.setAttribute("networked", { template: "#interactable-image" });
+        scene.appendChild(image);
+      }
     };
 
     scene.addEventListener("add_media", e => {
