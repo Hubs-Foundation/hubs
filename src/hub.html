@@ -87,7 +87,6 @@
             <a-asset-item id="specialquack" src="./assets/sfx/specialquack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
 
             <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
-            <img id="tunnel" src="./assets/images/tunnel.png">
             <!-- Templates -->
 
             <template id="video-template">
@@ -267,12 +266,10 @@
                 id="player-camera"
                 class="camera"
                 camera
-                tunneleffect
                 position="0 1.6 0"
                 personal-space-bubble="radius: 0.4"
                 pitch-yaw-rotator
             >
-              <a-image id="tunnel-effect" src="#tunnel" visible="false" position="0.00 0 -0.03" width="0.36" height="0.12"></a-image>
                 <a-entity
                     id="gaze-teleport"
                     position = "0.15 0 0"
