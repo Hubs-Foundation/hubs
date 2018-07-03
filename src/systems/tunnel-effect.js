@@ -10,14 +10,13 @@ AFRAME.registerSystem ('tunneleffect', {
     checkThresholdMs: { type: 'number', default: 200 },
     vignetteFadingMs: { type: 'number', default: 800 },
     movingEvent: { type: 'string', default: 'move' },
-    radius: { type: 'number', default: 0.9, min: 0.5 },
-    minRadius: { type: 'number', default: 0.5, min: 0.1 },
+    radius: { type: 'number', default: 0.5, min: 0.5 },
+    minRadius: { type: 'number', default: 0.25, min: 0.1 },
     softness: { type: 'number', default: 0.1, min: 0.0 },
     opacity: { type: 'number', default: 0.9, min: 0.0 }
   },
 
   init: function () {
-    console.log('init tunneleffect');
     const data = this.data;
     this.scene = this.el;
     this.isMoving = false;
@@ -27,7 +26,7 @@ AFRAME.registerSystem ('tunneleffect', {
     this.fadingMs = data.vignetteFadingMs;
     this.initMs = Date.now();
     this.radius = data.radius;
-    this.minRadius = 0.65;
+    this.minRadius = data.minRadius;
     this.softness = data.softness;
     this.opacity = data.opacity;
     this.movingStartTimeMs = 0;
@@ -57,8 +56,8 @@ AFRAME.registerSystem ('tunneleffect', {
       this._fadeInEffect(time, this.movingStartTimeMs, this.fadingMs);
     } else {
       if (time - this.lastMovingTimeMs < this.thresholdMs) { return; }
-      if (time - this.lastMovingTimeMs < this.fadingMs / 1.5) {
-        this._fadeOutEffect(time, this.lastMovingTimeMs, this.fadingMs / 1.5);
+      if (time - this.lastMovingTimeMs < this.fadingMs) {
+        this._fadeOutEffect(time, this.lastMovingTimeMs, this.fadingMs);
       } else {
         this.isMoving = false;
         this.scene.renderer.render = this.originalRenderFunc;
@@ -122,7 +121,7 @@ AFRAME.registerSystem ('tunneleffect', {
   _fadingEffect: function (currentTime, baseTime, fadingDuration, originRadius, targetRadius) {
     const progress = (currentTime - baseTime) / fadingDuration;
     const deltaR = (originRadius - targetRadius) * progress;
-    const r = this.radius - deltaR;
+    const r = originRadius - deltaR;
     this._updateVignettePass(r, this.softness, this.opacity);
   },
 

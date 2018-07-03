@@ -31,12 +31,18 @@ THREE.VignetteShader = {
 
 		"void main() {",
 			"vec4 texel = texture2D( tDiffuse, vUv);",
-			"vec2 uv = (vUv.xy) - vec2(0.5);",
-      "uv.x *= resolution.x / resolution.y;",
-      "float len = length(uv);",
-      "float vignette = smoothstep(radius, radius-softness, len);",
-      "texel.rgb = mix (texel.rgb, texel.rgb * vignette, opacity);",
-      "gl_FragColor = vec4(texel.rgb, 1.0);",
+			"vec2 uvLeft = (vUv.xy) - vec2(0.25, 0.5);",
+			"vec2 uvRight = (vUv.xy) - vec2(0.75, 0.5);",
+			"float ratio = resolution.x / resolution.y;",
+      "uvLeft.x *= ratio;",
+			"uvRight.x *= ratio;",
+      "float lenLeft = length(uvLeft);",
+			"float lenRight = length(uvRight);",
+      "float vignetteLeft = smoothstep(radius, radius-softness, lenLeft);",
+			"float vignetteRight = smoothstep(radius, radius-softness, lenRight);",
+			"vec3 final = mix (texel.rgb, texel.rgb * vignetteLeft, opacity);",
+			"final += mix(texel.rgb, texel.rgb * vignetteRight, opacity);",
+      "gl_FragColor = vec4(final.rgb, 1.0);",
 		"}"
 
 	].join( "\n" )
