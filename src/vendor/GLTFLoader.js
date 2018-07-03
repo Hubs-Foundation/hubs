@@ -9,18 +9,7 @@
  * @author Don McCurdy / https://www.donmccurdy.com
  */
 
-async function toFarsparkURL(url){
-	var mediaJson = await fetch("https://smoke-dev.reticulum.io/api/v1/media", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json"
-		},
-		body: JSON.stringify({
-			media: {url}
-		})
-	}).then(r => r.json());
-	return mediaJson.images.raw;
-}
+ import { resolveFarsparkUrl } from "../utils/media-utils"
 
 THREE.GLTFLoader = ( function () {
 
@@ -50,7 +39,7 @@ THREE.GLTFLoader = ( function () {
 
 			loader.setResponseType( 'arraybuffer' );
 
-			var farsparkURL = await toFarsparkURL(url);
+			var farsparkURL = await resolveFarsparkUrl(url);
 
 			loader.load( farsparkURL, function ( data ) {
 
@@ -1633,7 +1622,7 @@ THREE.GLTFLoader = ( function () {
 
 		var options = this.options;
 
-		var farsparkURL = await toFarsparkURL(resolveURL(bufferDef.uri, options.path));
+		var farsparkURL = await resolveFarsparkUrl(resolveURL(bufferDef.uri, options.path));
 
 		return new Promise( function ( resolve, reject ) {
 
@@ -1833,7 +1822,7 @@ THREE.GLTFLoader = ( function () {
 
     var urlToLoad = resolveURL(sourceURI, options.path);
     if (!hasBufferView){
-      urlToLoad = await toFarsparkURL(urlToLoad);
+      urlToLoad = await resolveFarsparkUrl(urlToLoad);
     }
 
 		return Promise.resolve( sourceURI ).then( function ( sourceURI ) {

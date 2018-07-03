@@ -81,6 +81,7 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
+import { addMedia } from "./utils/media-utils";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
@@ -301,31 +302,6 @@ const onReady = async () => {
     document.body.addEventListener("unblocked", ev => {
       NAF.connection.entities.completeSync(ev.detail.clientId);
     });
-
-    const offset = { x: 0, y: 0, z: -1.5 };
-    const addMedia = url => {
-      const scene = AFRAME.scenes[0];
-      if (url.endsWith(".gltf") || url.endsWith(".glb")) {
-        const model = document.createElement("a-entity");
-        model.id = "interactable-model-" + Date.now();
-        model.setAttribute("offset-relative-to", {
-          on: "model-loaded",
-          target: "#player-camera",
-          offset: offset,
-          selfDestruct: true
-        });
-        model.setAttribute("gltf-model-plus", "src", url);
-        model.setAttribute("auto-box-collider", { resize: true });
-        model.setAttribute("networked", { template: "#interactable-model" });
-        scene.appendChild(model);
-      } else {
-        const image = document.createElement("a-entity");
-        image.id = "interactable-image-" + Date.now();
-        image.setAttribute("image-plus", "src", url);
-        image.setAttribute("networked", { template: "#interactable-image" });
-        scene.appendChild(image);
-      }
-    };
 
     scene.addEventListener("add_media", e => {
       addMedia(e.detail);
