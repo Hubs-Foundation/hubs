@@ -119,7 +119,7 @@ import "./components/cardboard-controls";
 import "./components/cursor-controller";
 
 import "./components/nav-mesh-helper";
-import "./components/tunnel-effect";
+import "./systems/tunnel-effect";
 
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config as inputConfig } from "./input-mappings";
