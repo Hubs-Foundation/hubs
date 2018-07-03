@@ -3,6 +3,9 @@ import GIFWorker from "../workers/gifparsing.worker.js";
 class GIFTexture extends THREE.Texture {
   constructor(frames, delays, disposals) {
     super(document.createElement("canvas"));
+    this.image.width = frames[0].width;
+    this.image.height = frames[0].height;
+
     this._ctx = this.image.getContext("2d");
 
     this.generateMipmaps = false;
