@@ -1,11 +1,17 @@
 const whitelistedHosts = [/^.*\.reticulum\.io$/, /^.*hubs\.mozilla\.com$/, /^hubs\.local$/];
 const isHostWhitelisted = hostname => !!whitelistedHosts.filter(r => r.test(hostname)).length;
+
+let resolveMediaUrl = "/api/v1/media";
+if (process.env.NODE_ENV === "development") {
+  resolveMediaUrl = `https://${process.env.DEV_RETICULUM_SERVER}${resolveMediaUrl}`;
+}
+
 export const resolveFarsparkUrl = async url => {
   const parsedUrl = new URL(url);
   if ((parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") || isHostWhitelisted(parsedUrl.hostname))
     return url;
 
-  return (await fetch("https://dev.reticulum.io/api/v1/media", {
+  return (await fetch(resolveMediaUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ media: { url } })
