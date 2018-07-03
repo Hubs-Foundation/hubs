@@ -29,6 +29,8 @@ AFRAME.registerComponent("pen", {
     this.handleDrawingInitialized = this.handleDrawingInitialized.bind(this);
 
     this.data.drawing.addEventListener("componentinitialized", this.handleDrawingInitialized);
+
+    this.normal = new THREE.Vector3();
   },
 
   remove() {
@@ -60,12 +62,26 @@ AFRAME.registerComponent("pen", {
         time >= this.data.drawFrequency &&
         drawing.getLastPoint().distanceTo(currentPosition) >= this.data.minDistanceBetweenPoints
       ) {
-        drawing.addPoint(currentPosition, this.direction);
+        this.getNormal(this.normal, currentPosition, this.direction);
+        drawing.draw(currentPosition, this.direction, this.normal);
       }
 
       this.timeSinceLastDraw = time % this.data.drawFrequency;
     }
   },
+
+  //helper function to get normal of direction of drawing cross direction to camera
+  getNormal: (() => {
+    const directionToCamera = new THREE.Vector3();
+    return function(normal, position, direction) {
+      if (this.data.camera) {
+        directionToCamera.subVectors(position, this.data.camera.object3D.position).normalize();
+        normal.crossVectors(direction, directionToCamera);
+      } else {
+        normal.copy(this.el.object3D.up);
+      }
+    };
+  })(),
 
   handleDrawingInitialized(e) {
     if (e.detail.name === "networked-drawing") {
@@ -76,14 +92,19 @@ AFRAME.registerComponent("pen", {
   onMouseDown(e) {
     if (this.currentDrawing && e.button === 0) {
       this.isDrawing = true;
-      this.currentDrawing.startDraw(this.el.object3D.position, this.direction);
+      const position = this.el.object3D.position;
+      this.getNormal(this.normal, position, this.direction);
+      this.currentDrawing.startDraw(position, this.direction, this.normal);
     }
   },
 
   onMouseUp(e) {
     if (this.currentDrawing && e.button === 0) {
       this.isDrawing = false;
-      this.currentDrawing.endDraw(this.el.object3D.position, this.direction);
+      this.timeSinceLastDraw = 0;
+      const position = this.el.object3D.position;
+      this.getNormal(this.normal, position, this.direction);
+      this.currentDrawing.endDraw(position, this.direction, this.normal);
     }
   }
 });

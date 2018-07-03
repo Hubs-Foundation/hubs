@@ -8,7 +8,7 @@ import SharedBufferGeometryManager from "../../vendor/sharedbuffergeometrymanage
 
 AFRAME.registerComponent("networked-drawing", {
   schema: {
-    drawPoints: { default: [] },
+    drawBuffer: { default: [] },
     segments: { default: 8 },
     radius: { default: 0.02 }
   },
@@ -35,36 +35,139 @@ AFRAME.registerComponent("networked-drawing", {
     this.lastPoint = new THREE.Vector3();
     this.lastPointSet = false;
     this.initialized = false;
+
+    this.bufferIndex = 0;
+
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      this.networkedEl = networkedEl;
+    });
+  },
+
+  tick: (() => {
+    const position = new THREE.Vector3();
+    const direction = new THREE.Vector3();
+    const normal = new THREE.Vector3();
+    return function() {
+      if (this.networkedEl) {
+        const isMine = NAF.utils.isMine(this.networkedEl);
+        if (!isMine) {
+          // console.log(this.data.drawBuffer);
+          if (this.peekBuffer() != null) {
+            position.set(this.getNextFromBuffer(), this.getNextFromBuffer(), this.getNextFromBuffer());
+            direction.set(this.getNextFromBuffer(), this.getNextFromBuffer(), this.getNextFromBuffer());
+            normal.set(this.getNextFromBuffer(), this.getNextFromBuffer(), this.getNextFromBuffer());
+
+            if (!this.lastPointSet) {
+              this.startDraw(position, direction, normal);
+            } else {
+              this.draw(position, direction, normal);
+            }
+          } else if (this.data.drawBuffer.length > this.bufferIndex) {
+            if (this.lastPointSet) {
+              this.endDraw(position, direction, normal);
+            }
+            this.bufferIndex++;
+          }
+        } else if (this.data.drawBuffer.length > 0) {
+          this.bufferIndex = this.data.drawBuffer.length - 1;
+        }
+      }
+    };
+  })(),
+
+  peekBuffer() {
+    return this.data.drawBuffer[this.bufferIndex];
+  },
+
+  getNextFromBuffer() {
+    return this.data.drawBuffer[this.bufferIndex++];
   },
 
   getLastPoint() {
     return this.lastPoint;
   },
 
-  startDraw: (() => {
+  draw: (() => {
     const normal = new THREE.Vector3();
-    return function(position, direction) {
-      this.addPoint(position, direction);
-      this.getNormal(position);
-      this.drawStart(normal, direction);
+    return function(position, direction, normal) {
+      if (this.lastPointSet) {
+        this.addSegments(this.currentSegments, position, direction, normal);
+
+        //draw the triangle strip
+        for (let i = 0; i <= this.data.segments; i++) {
+          this.addVertex(this.lastSegments[i % this.data.segments]);
+          this.addVertex(this.currentSegments[i % this.data.segments]);
+        }
+
+        //update the drawing
+        this.sharedBuffer.update();
+
+        //copy the currentSegments to lastSegments
+        for (var j = 0; j < this.data.segments; j++) {
+          this.lastSegments[j].copy(this.currentSegments[j]);
+        }
+      }
+
+      this.lastPoint.copy(position);
+      this.lastPointSet = true;
+
+      if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
+        this.data.drawBuffer.push(position.x);
+        this.data.drawBuffer.push(position.y);
+        this.data.drawBuffer.push(position.z);
+        this.data.drawBuffer.push(direction.x);
+        this.data.drawBuffer.push(direction.y);
+        this.data.drawBuffer.push(direction.z);
+        this.data.drawBuffer.push(normal.x);
+        this.data.drawBuffer.push(normal.y);
+        this.data.drawBuffer.push(normal.z);
+      }
+    };
+  })(),
+
+  startDraw: (() => {
+    const startPoint = new THREE.Vector3();
+    const inverseDirection = new THREE.Vector3();
+    return function(position, direction, normal) {
+      //add the first point and cap
+      this.draw(position, direction, normal);
+      this.addSegments(this.lastSegments, this.getLastPoint(), direction, normal);
+
+      inverseDirection
+        .copy(direction)
+        .negate()
+        .multiplyScalar(this.data.radius);
+      startPoint.copy(this.getLastPoint()).add(inverseDirection);
+
+      //add the first vertex of the lastSegments if this drawing has already been initialized
+      if (this.initialized) {
+        this.addVertex(this.lastSegments[0]);
+      }
+
+      this.drawCap(startPoint, this.lastSegments);
+
+      this.sharedBuffer.restartPrimitive();
+      this.addVertex(this.lastSegments[0]);
     };
   })(),
 
   endDraw: (() => {
     const endPoint = new THREE.Vector3();
     const direction = new THREE.Vector3();
-    return function(position, direction) {
-      //add the final point  and cap
-      this.addPoint(position, direction);
+    return function(position, direction, normal) {
+      //add the final point and cap
+      this.draw(position, direction, normal);
       direction.copy(direction).multiplyScalar(this.data.radius);
       endPoint.copy(position).add(direction);
       this.drawCap(endPoint, this.currentSegments);
 
       //reset
       this.sharedBuffer.restartPrimitive();
+      if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
+        this.data.drawBuffer.push(null);
+      }
       this.lastPointSet = false;
       this.lastSegmentsSet = false;
-      this.timeSinceLastDraw = 0;
     };
   })(),
 
@@ -96,72 +199,6 @@ AFRAME.registerComponent("networked-drawing", {
     this.initialized = true;
     this.sharedBuffer.addVertex(point.x, point.y, point.z);
   },
-
-  //get lastSegments, draw the start cap
-  drawStart: (() => {
-    const startPoint = new THREE.Vector3();
-    const inverseDirection = new THREE.Vector3();
-    return function(normal, direction) {
-      this.addSegments(this.lastSegments, this.lastPoint, direction, normal);
-
-      inverseDirection
-        .copy(direction)
-        .negate()
-        .multiplyScalar(this.data.radius);
-      startPoint.copy(this.lastPoint).add(inverseDirection);
-
-      //add the first vertex of the lastSegments if this drawing has already been initialized
-      if (this.initialized) {
-        this.addVertex(this.lastSegments[0]);
-      }
-
-      this.drawCap(startPoint, this.lastSegments);
-
-      this.sharedBuffer.restartPrimitive();
-      this.addVertex(this.lastSegments[0]);
-    };
-  })(),
-
-  //helper function to get normal of direction of drawing cross direction to camera
-  getNormal: (() => {
-    const directionToCamera = new THREE.Vector3();
-    return function(normal, position, direction) {
-      if (this.data.camera) {
-        directionToCamera.subVectors(position, this.data.camera.object3D.position).normalize();
-        normal.crossVectors(direction, directionToCamera);
-      } else {
-        normal.copy(this.el.object3D.up);
-      }
-    };
-  })(),
-
-  addPoint: (() => {
-    const normal = new THREE.Vector3();
-    return function(position, direction) {
-      if (this.lastPointSet) {
-        this.getNormal(normal, position);
-
-        this.addSegments(this.currentSegments, position, direction, normal);
-
-        //draw the triangle strip
-        for (let j = 0; j <= this.data.segments; j++) {
-          this.addVertex(this.lastSegments[j % this.data.segments]);
-          this.addVertex(this.currentSegments[j % this.data.segments]);
-        }
-
-        //update the drawing
-        this.sharedBuffer.update();
-
-        //copy the currentSegments to lastSegments
-        for (var j = 0; j < this.data.segments; j++) {
-          this.lastSegments[j].copy(this.currentSegments[j]);
-        }
-      }
-
-      this.lastPoint.copy(position);
-      this.lastPointSet = true;
-    };
-  })(),
 
   rotatePointAroundAxis: (() => {
     const calculatedDirection = new THREE.Vector3();

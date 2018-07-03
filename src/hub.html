@@ -190,6 +190,12 @@
                 ></a-entity>
             </template>
 
+            <template id="drawing-template">
+                <a-entity
+                    networked-drawing
+                ></a-entity>
+            </template>
+
             <a-mixin id="controller-super-hands"
                 super-hands="
                     colliderEvent: collisions; colliderEventProperty: els;
@@ -372,7 +378,7 @@
 
         <a-entity
             id="my-first-drawing"
-            networked-drawing
+            networked="template: #drawing-template;"
         ></a-entity>
     </a-scene>
 

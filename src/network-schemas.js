@@ -92,6 +92,21 @@ function registerNetworkSchemas() {
         component: "rotation",
         requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
+      "scale"
+    ]
+  });
+
+  NAF.schemas.add({
+    template: "#drawing-template",
+    components: [
+      {
+        component: "position",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
+      {
+        component: "rotation",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
+      },
       "scale",
       "networked-drawing"
     ]
