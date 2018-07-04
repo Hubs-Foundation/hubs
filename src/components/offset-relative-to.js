@@ -37,6 +37,8 @@ AFRAME.registerComponent("offset-relative-to", {
         obj.parent.worldToLocal(offsetVector);
       }
       obj.position.copy(offsetVector);
+      // TODO: Hack here to deal with the fact that the rotation component mutates ordering, and we network rotation without sending ordering information
+      obj.rotation.order = "YXZ";
       target.getWorldQuaternion(obj.quaternion);
       if (this.data.selfDestruct) {
         if (this.data.on) {

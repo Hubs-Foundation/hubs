@@ -21,17 +21,22 @@ export const resolveFarsparkUrl = async url => {
 const fetchContentType = async url => fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
 let interactableId = 0;
 
+const offset = { x: 0, y: 0, z: -1.5 };
 export const spawnNetworkedImage = (src, contentType) => {
   const scene = AFRAME.scenes[0];
   const image = document.createElement("a-entity");
   image.id = "interactable-image-" + interactableId++;
   image.setAttribute("networked", { template: "#interactable-image" });
+  image.setAttribute("offset-relative-to", {
+    target: "#player-camera",
+    offset: offset,
+    selfDestruct: true
+  });
   image.setAttribute("image-plus", { src, contentType });
   scene.appendChild(image);
   return image;
 };
 
-const offset = { x: 0, y: 0, z: -1.5 };
 export const spawnNetworkedInteractable = src => {
   const scene = AFRAME.scenes[0];
   const model = document.createElement("a-entity");

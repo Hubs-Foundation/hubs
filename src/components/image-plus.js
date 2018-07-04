@@ -70,10 +70,7 @@ AFRAME.registerComponent("image-plus", {
 
   schema: {
     src: { type: "string" },
-    contentType: { type: "string" },
-
-    initialOffset: { default: { x: 0, y: 0, z: -1.5 } },
-    reorientOnGrab: { default: false }
+    contentType: { type: "string" }
   },
 
   _fit(w, h) {
@@ -103,31 +100,11 @@ AFRAME.registerComponent("image-plus", {
     });
   },
 
-  _onGrab: (function() {
-    const q = new THREE.Quaternion();
-    return function() {
-      if (this.data.reorientOnGrab) {
-        this.billboardTarget.getWorldQuaternion(q);
-        this.el.body.quaternion.copy(q);
-      }
-    };
-  })(),
-
   init() {
-    this._onGrab = this._onGrab.bind(this);
-
-    this.el.addEventListener("grab-start", this._onGrab);
-
     const material = new THREE.MeshBasicMaterial();
     material.side = THREE.DoubleSide;
     material.transparent = true;
     this.el.getObject3D("mesh").material = material;
-
-    const worldPos = new THREE.Vector3().copy(this.data.initialOffset);
-    this.billboardTarget = document.querySelector("#player-camera").object3D;
-    this.billboardTarget.localToWorld(worldPos);
-    this.el.object3D.position.copy(worldPos);
-    this.billboardTarget.getWorldQuaternion(this.el.object3D.quaternion);
   },
 
   remove() {
@@ -235,6 +212,9 @@ AFRAME.registerComponent("image-plus", {
     try {
       const url = this.data.src;
       const contentType = this.data.contentType;
+      if (!url) {
+        return;
+      }
 
       if (textureCache.has(url)) {
         const cacheItem = textureCache.get(url);
