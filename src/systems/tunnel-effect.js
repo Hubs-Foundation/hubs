@@ -9,7 +9,7 @@ AFRAME.registerSystem ('tunneleffect', {
   schema: {
     checkThresholdMs: { type: 'number', default: 200 },
     vignetteFadingMs: { type: 'number', default: 800 },
-    movingEvent: { type: 'string', default: 'move' },
+    movingEvent: { type: 'string', default: 'loaded' },
     radius: { type: 'number', default: 0.5, min: 0.5 },
     minRadius: { type: 'number', default: 0.25, min: 0.1 },
     softness: { type: 'number', default: 0.1, min: 0.0 },
@@ -34,37 +34,44 @@ AFRAME.registerSystem ('tunneleffect', {
     // original render function of the renderer
     this.originalRenderFunc = this.scene.renderer.render;
     // add event listener for moving event
-    this.enableTunnelEffect = this.enableTunnelEffect.bind(this);
-    this.scene.addEventListener(data.movingEvent, this.enableTunnelEffect);
+    this._updateComposer = this._updateComposer.bind(this);
+    this.scene.addEventListener(data.movingEvent, this._updateComposer);
   },
 
   update: function () {
     // todo
-  },
-
-  play: function () {
-
+    this.characterPos = new THREE.Vector3(0, 0, 0);
+    this.prevCharacterPos = new THREE.Vector3(0, 0, 0);
   },
 
   pause: function () {
-    this.scene.removeEventListener(data.movingEvent, this.enableTunnelEffect);
+    this.scene.removeEventListener(this.data.movingEvent, this._updateComposer);
   },
 
   tick: function (time, deltaTime) {
-    if (!this.isMoving) { return; }
-    if (time - this.movingStartTimeMs < this.fadingMs) {
-      this._fadeInEffect(time, this.movingStartTimeMs, this.fadingMs);
-    } else {
-      if (time - this.lastMovingTimeMs < this.thresholdMs) { return; }
-      if (time - this.lastMovingTimeMs < this.fadingMs) {
-        this._fadeOutEffect(time, this.lastMovingTimeMs, this.fadingMs);
-      } else {
-        this.isMoving = false;
-        this.scene.renderer.render = this.originalRenderFunc;
-        this.lastMovingTimeMs = time;
+    this.t = time;
+    this.dt = deltaTime;
+    if (!this.camera) { return; }
+    this.camera.getWorldPosition(this.characterPos);
+    if (this.characterPos.distanceTo(this.prevCharacterPos) > 0.01) {
+      if (!this.isMoving) {
         this.movingStartTimeMs = time;
+        this.isMoving = true;
+        this.bindRenderFunc();
       }
+      this.lastMovingTimeMs = time;
+      if (time - this.movingStartTimeMs < this.fadingMs) {
+        this._fadeInEffect(time, this.movingStartTimeMs, this.fadingMs);
+      }
+    } else {
+      if (this.isMoving) {
+        this.isMoving = false;
+      }
+      if (time - this.lastMovingTimeMs < this.fadingMs) { this._fadeOutEffect(time, this.lastMovingTimeMs, this.fadingMs); }
+      else
+        this.scene.renderer.render = this.originalRenderFunc;
     }
+    this.prevCharacterPos = this.characterPos.clone(false);
   },
 
   _updateComposer: function () {
@@ -131,16 +138,5 @@ AFRAME.registerSystem ('tunneleffect', {
 
   _fadeInEffect: function (currentTime, baseTime, fadingDuration) {
     this._fadingEffect(currentTime, baseTime, fadingDuration, this.radius, this.minRadius);
-  },
-
-  enableTunnelEffect: function () {
-    if (this.isMoving) {
-      this.lastMovingTimeMs = Date.now() - this.initMs;
-      return;
-    }
-    this.isMoving = true;
-    this.movingStartTimeMs = Date.now() - this.initMs;
-    this._updateComposer();
-    this.bindRenderFunc();
   }
 });
