@@ -100,7 +100,6 @@ const markLeaves = function(root, behaviorNodes) {
 const inflateEntities = function(parentEl, node, gltfPath) {
   if (node.userData.leaf) {
     // we don't need an entity for this node
-    console.log("Not doing ", node);
     return null;
   }
 
