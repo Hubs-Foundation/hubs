@@ -100,11 +100,11 @@
                     <a-entity class="right-controller"></a-entity>
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
-                        <template data-selector=".RootScene">
+                        <template data-name="RootScene">
                             <a-entity ik-controller hand-pose__left hand-pose__right animation-mixer space-invader-mesh="meshSelector: .Bot_Skinned"></a-entity>
                         </template>
 
-                        <template data-selector=".Neck">
+                        <template data-name="Neck">
                             <a-entity>
                                 <a-entity
                                    class="nametag"
@@ -116,7 +116,7 @@
                             </a-entity>
                         </template>
 
-                        <template data-selector=".Chest">
+                        <template data-name="Chest">
                             <a-entity>
                               <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility> </a-entity>
                               <a-entity billboard>
@@ -126,29 +126,44 @@
                             </a-entity>
                         </template>
 
-                        <template data-selector=".Head">
+                        <template data-name="Head">
                             <a-entity
                                 networked-audio-source
                                 networked-audio-analyser
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
                             >
-                            <a-cylinder
-                                static-body
-                                radius="0.13"
-                                height="0.2"
-                                position="0 0.07 0.05"
-                                visible="false"
-                            ></a-cylinder>
+                              <a-cylinder
+                                  static-body
+                                  radius="0.13"
+                                  height="0.2"
+                                  position="0 0.07 0.05"
+                                  visible="false"
+                              ></a-cylinder>
                             </a-entity>
                         </template>
 
-                        <template data-selector=".LeftHand">
-                            <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
+                        <!-- needs to exist for the benefit of the personal space calculator  -->
+                        <template data-name="Bot_Skinned">
+                          <a-entity></a-entity>
                         </template>
 
-                        <template data-selector=".RightHand">
-                            <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
+                        <!-- needs to exist for the benefit of the IK calculation  -->
+                        <template data-name="LeftEye">
+                          <a-entity></a-entity>
+                        </template>
+
+                        <!-- needs to exist for the benefit of the IK calculation  -->
+                        <template data-name="RightEye">
+                          <a-entity></a-entity>
+                        </template>
+
+                        <template data-name="LeftHand">
+                          <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
+                        </template>
+
+                        <template data-name="RightHand">
+                          <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
                         </template>
                     </a-entity>
                 </a-entity>
@@ -230,14 +245,14 @@
             ></a-mixin>
 
             <a-mixin id="controller-super-hands"
-                super-hands="
-                    colliderEvent: collisions; colliderEventProperty: els;
-                    colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
-                    grabStartButtons: hand_grab; grabEndButtons: hand_release;
-                    stretchStartButtons: hand_grab; stretchEndButtons: hand_release;
-                    dragDropStartButtons: hand_grab; dragDropEndButtons: hand_release;"
-                collision-filter="collisionForces: false"
-                physics-collider
+                     super-hands="
+                         colliderEvent: collisions; colliderEventProperty: els;
+                         colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
+                         grabStartButtons: hand_grab; grabEndButtons: hand_release;
+                         stretchStartButtons: hand_grab; stretchEndButtons: hand_release;
+                         dragDropStartButtons: hand_grab; dragDropEndButtons: hand_release;"
+                     collision-filter="collisionForces: false"
+                     physics-collider
             ></a-mixin>
         </a-assets>
 
@@ -283,35 +298,35 @@
             networked-avatar
             cardboard-controls
         >
-            <a-entity
-                id="player-hud"
-                hud-controller="head: #player-camera;"
-                vr-mode-toggle-visibility
-                vr-mode-toggle-playing__hud-controller
-            >
-                <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="30 0 0">
-                    <a-rounded height="0.13" width="0.48" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
-                    <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover" scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="ui hud mic" material="alphaTest:0.1;"></a-image>
-                    <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover" scale="0.2 0.2 0.2" position="0 0 0.005" class="ui hud freeze"></a-image>
-                    <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Enable Bubble; activeTooltipText: Disable Bubble; image: #bubble-off; hoverImage: #bubble-off-hover; activeImage: #bubble-on; activeHoverImage: #bubble-on-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="ui hud bubble" material="alphaTest:0.1;"></a-image>
-                    <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
-                        <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" ></a-entity>
-                    </a-rounded>
-                </a-entity>
+          <a-entity
+              id="player-hud"
+              hud-controller="head: #player-camera;"
+              vr-mode-toggle-visibility
+              vr-mode-toggle-playing__hud-controller
+          >
+            <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="30 0 0">
+              <a-rounded height="0.13" width="0.48" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
+              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover" scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="ui hud mic" material="alphaTest:0.1;"></a-image>
+              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover" scale="0.2 0.2 0.2" position="0 0 0.005" class="ui hud freeze"></a-image>
+              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Enable Bubble; activeTooltipText: Disable Bubble; image: #bubble-off; hoverImage: #bubble-off-hover; activeImage: #bubble-on; activeHoverImage: #bubble-on-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="ui hud bubble" material="alphaTest:0.1;"></a-image>
+              <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
+                <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" ></a-entity>
+              </a-rounded>
             </a-entity>
+          </a-entity>
 
+          <a-entity
+              id="player-camera"
+              class="camera"
+              camera
+              position="0 1.6 0"
+              personal-space-bubble="radius: 0.4"
+              pitch-yaw-rotator
+          >
             <a-entity
-                id="player-camera"
-                class="camera"
-                camera
-                position="0 1.6 0"
-                personal-space-bubble="radius: 0.4"
-                pitch-yaw-rotator
-            >
-                <a-entity
-                    id="gaze-teleport"
-                    position = "0.15 0 0"
-                    teleport-controls="
+                id="gaze-teleport"
+                position = "0.15 0 0"
+                teleport-controls="
                     cameraRig: #player-rig;
                     teleportOrigin: #player-camera;
                     button: gaze-teleport_;
@@ -320,84 +335,95 @@
                     incrementalDrawMs: 600;
                     hitOpacity: 0.3;
                     missOpacity: 0.2;"
-                ></a-entity>
-                <a-entity id="player-camera-reverse-z" rotation="0 180 0"></a-entity>
-            </a-entity>
+            ></a-entity>
+            <a-entity id="player-camera-reverse-z" rotation="0 180 0"></a-entity>
+          </a-entity>
 
-            <a-entity
-                id="player-left-controller"
-                class="left-controller"
-                hand-controls2="left"
-                tracked-controls
-                teleport-controls="
-                    cameraRig: #player-rig;
-                    teleportOrigin: #player-camera;
-                    button: cursor-teleport_;
-                    collisionEntities: [nav-mesh];
-                    drawIncrementally: true;
-                    incrementalDrawMs: 600;
-                    hitOpacity: 0.3;
-                    missOpacity: 0.2;"
-                haptic-feedback
-                body="type: static; shape: none;"
-                mixin="controller-super-hands"
-                controls-shape-offset
-            >
-                <a-entity id="player-left-controller-reverse-z" rotation="0 180 0"></a-entity>
-            </a-entity>
+          <a-entity
+              id="player-left-controller"
+              class="left-controller"
+              hand-controls2="left"
+              tracked-controls
+              teleport-controls="
+                  cameraRig: #player-rig;
+                  teleportOrigin: #player-camera;
+                  button: cursor-teleport_;
+                  collisionEntities: [nav-mesh];
+                  drawIncrementally: true;
+                  incrementalDrawMs: 600;
+                  hitOpacity: 0.3;
+                  missOpacity: 0.2;"
+              haptic-feedback
+              body="type: static; shape: none;"
+              mixin="controller-super-hands"
+              controls-shape-offset
+          >
+            <a-entity id="player-left-controller-reverse-z" rotation="0 180 0"></a-entity>
+          </a-entity>
 
-            <a-entity
-                id="player-right-controller"
-                class="right-controller"
-                hand-controls2="right"
-                tracked-controls
-                teleport-controls="
-                    cameraRig: #player-rig;
-                    teleportOrigin: #player-camera;
-                    button: cursor-teleport_;
-                    collisionEntities: [nav-mesh];
-                    drawIncrementally: true;
-                    incrementalDrawMs: 600;
-                    hitOpacity: 0.3;
-                    missOpacity: 0.2;"
-                haptic-feedback
-                body="type: static; shape: none;"
-                mixin="controller-super-hands"
-                controls-shape-offset
-            >
-                <a-entity id="player-right-controller-reverse-z" rotation="0 180 0"></a-entity>
-            </a-entity>
+          <a-entity
+              id="player-right-controller"
+              class="right-controller"
+              hand-controls2="right"
+              tracked-controls
+              teleport-controls="
+                  cameraRig: #player-rig;
+                  teleportOrigin: #player-camera;
+                  button: cursor-teleport_;
+                  collisionEntities: [nav-mesh];
+                  drawIncrementally: true;
+                  incrementalDrawMs: 600;
+                  hitOpacity: 0.3;
+                  missOpacity: 0.2;"
+              haptic-feedback
+              body="type: static; shape: none;"
+              mixin="controller-super-hands"
+              controls-shape-offset
+          >
+            <a-entity id="player-right-controller-reverse-z" rotation="0 180 0"></a-entity>
+          </a-entity>
 
-            <a-entity gltf-model-plus="inflate: true;"
-                      class="model">
-                <template data-selector=".RootScene">
-                    <a-entity
-                        ik-controller
-                        animation-mixer
-                        hand-pose__left
-                        hand-pose__right
-                        hand-pose-controller__left="networkedAvatar:#player-rig;eventSrc:#player-left-controller"
-                        hand-pose-controller__right="networkedAvatar:#player-rig;eventSrc:#player-right-controller"
-                    ></a-entity>
-                </template>
+          <a-entity gltf-model-plus="inflate: true;"
+                    class="model">
+            <template data-name="RootScene">
+              <a-entity
+                  ik-controller
+                  animation-mixer
+                  hand-pose__left
+                  hand-pose__right
+                  hand-pose-controller__left="networkedAvatar:#player-rig;eventSrc:#player-left-controller"
+                  hand-pose-controller__right="networkedAvatar:#player-rig;eventSrc:#player-right-controller"
+              ></a-entity>
+            </template>
 
-                <template data-selector=".Neck">
-                    <a-entity>
-                        <a-entity class="nametag" visible="false" text ></a-entity>
-                    </a-entity>
-                </template>
+            <template data-name="Neck">
+              <a-entity>
+                <a-entity class="nametag" visible="false" text ></a-entity>
+              </a-entity>
+            </template>
 
-                <template data-selector=".Head">
-                    <a-entity visible="false" bone-visibility></a-entity>
-                </template>
+            <!-- needs to exist for the benefit of the IK calculation  -->
+            <template data-name="LeftEye">
+              <a-entity></a-entity>
+            </template>
 
-                <template data-selector=".LeftHand">
-                    <a-entity bone-visibility></a-entity>
-                </template>
+            <!-- needs to exist for the benefit of the IK calculation  -->
+            <template data-name="RightEye">
+              <a-entity></a-entity>
+            </template>
 
-                <template data-selector=".RightHand">
-                    <a-entity bone-visibility></a-entity>
-                </template>
+
+            <template data-name="Head">
+              <a-entity visible="false" bone-visibility></a-entity>
+            </template>
+
+            <template data-name="LeftHand">
+              <a-entity bone-visibility></a-entity>
+            </template>
+
+            <template data-name="RightHand">
+              <a-entity bone-visibility></a-entity>
+            </template>
 
             </a-entity>
         </a-entity>

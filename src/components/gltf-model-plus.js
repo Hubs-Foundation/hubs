@@ -74,7 +74,36 @@ function cloneGltf(gltf) {
   return clone;
 }
 
+const getBehaviorNodes = function(root, templates) {
+  const nodes = new Set();
+  if (root.userData.components || root.name in templates) {
+    nodes.add(root);
+  }
+  for (const child of root.children) {
+    for (const other of getBehaviorNodes(child, templates)) {
+      nodes.add(other);
+    }
+  }
+  return nodes;
+};
+
+const markLeaves = function(root, behaviorNodes) {
+  root.userData.leaf = !behaviorNodes.has(root);
+  for (const child of root.children) {
+    if (!markLeaves(child, behaviorNodes)) {
+      root.userData.leaf = false;
+    }
+  }
+  return root.userData.leaf;
+};
+
 const inflateEntities = function(parentEl, node, gltfPath) {
+  if (node.userData.leaf) {
+    // we don't need an entity for this node
+    console.log("Not doing ", node);
+    return null;
+  }
+
   // setObject3D mutates the node's parent, so we have to copy
   const children = node.children.slice(0);
 
@@ -145,8 +174,8 @@ const inflateEntities = function(parentEl, node, gltfPath) {
   return el;
 };
 
-function attachTemplate(root, { selector, templateRoot }) {
-  const targetEls = root.querySelectorAll(selector);
+function attachTemplate(root, name, templateRoot) {
+  const targetEls = root.querySelectorAll("." + name);
   for (const el of targetEls) {
     const root = templateRoot.cloneNode(true);
     // Merge root element attributes with the target element
@@ -217,12 +246,10 @@ AFRAME.registerComponent("gltf-model-plus", {
 
   loadTemplates() {
     this.templates = [];
-    this.el.querySelectorAll(":scope > template").forEach(templateEl =>
-      this.templates.push({
-        selector: templateEl.getAttribute("data-selector"),
-        templateRoot: document.importNode(templateEl.firstElementChild || templateEl.content.firstElementChild, true)
-      })
-    );
+    this.el.querySelectorAll(":scope > template").forEach(templateEl => {
+      const root = document.importNode(templateEl.firstElementChild || templateEl.content.firstElementChild, true);
+      this.templates[templateEl.getAttribute("data-name")] = root;
+    });
   },
 
   async applySrc(src) {
@@ -260,17 +287,21 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.el.setObject3D("mesh", this.model);
 
       if (this.data.inflate) {
+        const behaviorNodes = getBehaviorNodes(this.model, this.templates);
+        markLeaves(this.model, behaviorNodes);
         this.inflatedEl = inflateEntities(this.el, this.model, gltfPath);
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
         // Wait one tick for the appended custom elements to be connected before attaching templates
         await nextTick();
         if (src != this.lastSrc) return; // TODO: there must be a nicer pattern for this
-        this.templates.forEach(attachTemplate.bind(null, this.el));
+        for (const name in this.templates) {
+          attachTemplate(this.el, name, this.templates[name]);
+        }
       }
 
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
-      console.error("Failed to load glTF model", e.message, this);
+      console.error("Failed to load glTF model", e, this);
       this.el.emit("model-error", { format: "gltf", src });
     }
   },
