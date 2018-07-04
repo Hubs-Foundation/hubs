@@ -15,7 +15,7 @@ export const resolveFarsparkUrl = async url => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ media: { url } })
-  }).then(r => r.json())).images.raw;
+  }).then(r => r.json())).raw;
 };
 
 const fetchContentType = async url => fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
