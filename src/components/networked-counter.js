@@ -88,7 +88,7 @@ AFRAME.registerComponent("networked-counter", {
   },
 
   _destroy(el) {
-    // networekd-interactable's remvoe will also call deregister, but it will happen async so we do it here as well.
+    // networked-interactable's remvoe will also call deregister, but it will happen async so we do it here as well.
     this.deregister(el);
     el.parentNode.removeChild(el);
   }
