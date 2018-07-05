@@ -101,11 +101,11 @@ function registerNetworkSchemas() {
     components: [
       {
         component: "position",
-        requiresNetworkUpdate: positionRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
         component: "rotation",
-        requiresNetworkUpdate: rotationRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       "scale",
       "image-plus"
