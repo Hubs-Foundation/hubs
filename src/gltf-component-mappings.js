@@ -23,6 +23,7 @@ AFRAME.GLTFModelPlus.registerComponent("shape", "shape");
 AFRAME.GLTFModelPlus.registerComponent("visible", "visible");
 AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point");
 AFRAME.GLTFModelPlus.registerComponent("hoverable", "hoverable");
+AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
 AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, componentName, componentData, gltfPath) => {
   if (componentData.src) {
     componentData.src = resolveURL(componentData.src, gltfPath);
