@@ -74,44 +74,34 @@ function cloneGltf(gltf) {
   return clone;
 }
 
-const getBehaviorNodes = function(root, templates) {
-  const nodes = new Set();
-  if (root.userData.components || root.name in templates) {
-    nodes.add(root);
-  }
-  for (const child of root.children) {
-    for (const other of getBehaviorNodes(child, templates)) {
-      nodes.add(other);
+/// Walks the tree of three.js objects starting at the given node, using the GLTF data
+/// and template data to construct A-Frame entities and components when necessary.
+/// (It's unnecessary to construct entities for subtrees that have no component data
+/// or templates associated with any of their nodes.)
+///
+/// Returns the A-Frame entity associated with the given node, if one was constructed.
+const inflateEntities = function(node, templates, gltfPath) {
+  // inflate subtrees first so that we can determine whether or not this node needs to be inflated
+  const childEntities = [];
+  const children = node.children.slice(0); // setObject3D mutates the node's parent, so we have to copy
+  for (const child of children) {
+    const el = inflateEntities(child, templates, gltfPath);
+    if (el) {
+      childEntities.push(el);
     }
   }
-  return nodes;
-};
 
-const markLeaves = function(root, behaviorNodes) {
-  root.userData.leaf = !behaviorNodes.has(root);
-  for (const child of root.children) {
-    if (!markLeaves(child, behaviorNodes)) {
-      root.userData.leaf = false;
-    }
+  const nodeHasBehavior = node.userData.components || node.name in templates;
+  if (!nodeHasBehavior && !childEntities.length) {
+    return null; // we don't need an entity for this node
   }
-  return root.userData.leaf;
-};
-
-const inflateEntities = function(parentEl, node, gltfPath) {
-  if (node.userData.leaf) {
-    // we don't need an entity for this node
-    return null;
-  }
-
-  // setObject3D mutates the node's parent, so we have to copy
-  const children = node.children.slice(0);
 
   const el = document.createElement("a-entity");
+  el.append.apply(el, childEntities);
 
   // Remove invalid CSS class name characters.
   const className = (node.name || node.uuid).replace(/[^\w-]/g, "");
   el.classList.add(className);
-  parentEl.appendChild(el);
 
   // AFRAME rotation component expects rotations in YXZ, convert it
   if (node.rotation.order !== "YXZ") {
@@ -165,10 +155,6 @@ const inflateEntities = function(parentEl, node, gltfPath) {
       }
     }
   }
-
-  children.forEach(childNode => {
-    inflateEntities(el, childNode, gltfPath);
-  });
 
   return el;
 };
@@ -286,9 +272,8 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.el.setObject3D("mesh", this.model);
 
       if (this.data.inflate) {
-        const behaviorNodes = getBehaviorNodes(this.model, this.templates);
-        markLeaves(this.model, behaviorNodes);
-        this.inflatedEl = inflateEntities(this.el, this.model, gltfPath);
+        this.inflatedEl = inflateEntities(this.model, this.templates, gltfPath);
+        this.el.appendChild(this.inflatedEl);
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
         // Wait one tick for the appended custom elements to be connected before attaching templates
         await nextTick();
