@@ -168,30 +168,15 @@ function nextTick() {
 }
 
 function cachedLoadGLTF(src, preferredTechnique, onProgress) {
-  return new Promise((resolve, reject) => {
-    // Load the gltf model from the cache if it exists.
-    if (GLTFCache[src]) {
-      // Use a cloned copy of the cached model.
-      resolve(cloneGltf(GLTFCache[src]));
-    } else {
-      // Otherwise load the new gltf model.
+  // Load the gltf model from the cache if it exists.
+  if (!GLTFCache[src]) {
+    GLTFCache[src] = new Promise((resolve, reject) => {
       const gltfLoader = new THREE.GLTFLoader();
       gltfLoader.preferredTechnique = preferredTechnique;
-
-      gltfLoader.load(
-        src,
-        model => {
-          if (!GLTFCache[src]) {
-            // Store a cloned copy of the gltf model.
-            GLTFCache[src] = cloneGltf(model);
-          }
-          resolve(model);
-        },
-        onProgress,
-        reject
-      );
-    }
-  });
+      gltfLoader.load(src, resolve, onProgress, reject);
+    });
+  }
+  return GLTFCache[src].then(cloneGltf);
 }
 
 /**
