@@ -230,7 +230,7 @@ AFRAME.registerComponent("gltf-model-plus", {
   },
 
   loadTemplates() {
-    this.templates = [];
+    this.templates = {};
     this.el.querySelectorAll(":scope > template").forEach(templateEl => {
       const root = document.importNode(templateEl.firstElementChild || templateEl.content.firstElementChild, true);
       this.templates[templateEl.getAttribute("data-name")] = root;
