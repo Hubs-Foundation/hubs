@@ -38,6 +38,7 @@ AFRAME.registerComponent("offset-relative-to", {
       }
       obj.position.copy(offsetVector);
       // TODO: Hack here to deal with the fact that the rotation component mutates ordering, and we network rotation without sending ordering information
+      // See https://github.com/networked-aframe/networked-aframe/issues/134
       obj.rotation.order = "YXZ";
       target.getWorldQuaternion(obj.quaternion);
       if (this.data.selfDestruct) {
