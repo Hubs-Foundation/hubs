@@ -130,6 +130,10 @@ const config = {
         }
       },
       {
+        test: /\.worker\.js$/,
+        use: { loader: "worker-loader" }
+      },
+      {
         test: /\.js$/,
         include: [path.resolve(__dirname, "src")],
         // Exclude JS assets in node_modules because they are already transformed and often big.
@@ -221,6 +225,18 @@ const config = {
       {
         from: "src/assets/images/hub-preview.png",
         to: "hub-preview.png"
+      }
+    ]),
+    new CopyWebpackPlugin([
+      {
+        from: "src/assets/avatars/bot-recording.json",
+        to: "assets/avatars/bot-recording.json"
+      }
+    ]),
+    new CopyWebpackPlugin([
+      {
+        from: "src/assets/avatars/bot-recording.mp3",
+        to: "assets/avatars/bot-recording.mp3"
       }
     ]),
     // Extract required css and add a content hash.

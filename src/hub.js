@@ -63,10 +63,16 @@ import "./components/networked-avatar";
 import "./components/css-class";
 import "./components/scene-shadow";
 import "./components/avatar-replay";
+import "./components/image-plus";
+import "./components/auto-box-collider";
 import "./components/pinch-to-move";
 import "./components/look-on-mobile";
 import "./components/pitch-yaw-rotator";
 import "./components/input-configurator";
+import "./components/sticky-object";
+import "./components/auto-scale-cannon-physics-body";
+import "./components/position-at-box-shape-border";
+import "./components/remove-networked-object-button";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -75,6 +81,7 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
+import { addMedia } from "./utils/media-utils";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
@@ -223,7 +230,7 @@ const onReady = async () => {
     const scene = document.querySelector("a-scene");
     if (scene) {
       if (scene.renderer) {
-        scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
+        scene.renderer.setAnimationLoop(null); // Stop animation loop, TODO A-Frame should do this
       }
       document.body.removeChild(scene);
     }
@@ -297,6 +304,33 @@ const onReady = async () => {
       NAF.connection.entities.completeSync(ev.detail.clientId);
     });
 
+    scene.addEventListener("add_media", e => {
+      addMedia(e.detail);
+    });
+
+    if (qsTruthy("mediaTools")) {
+      document.addEventListener("paste", e => {
+        if (e.target.nodeName === "INPUT") return;
+
+        const imgUrl = e.clipboardData.getData("text");
+        console.log("Pasted: ", imgUrl, e);
+        addMedia(imgUrl);
+      });
+
+      document.addEventListener("dragover", e => {
+        e.preventDefault();
+      });
+
+      document.addEventListener("drop", e => {
+        e.preventDefault();
+        const imgUrl = e.dataTransfer.getData("url");
+        if (imgUrl) {
+          console.log("Droped: ", imgUrl);
+          addMedia(imgUrl);
+        }
+      });
+    }
+
     if (!qsTruthy("offline")) {
       document.body.addEventListener("connected", () => {
         if (!isBotMode) {
@@ -337,15 +371,27 @@ const onReady = async () => {
         playerRig.setAttribute("avatar-replay", {
           camera: "#player-camera",
           leftController: "#player-left-controller",
-          rightController: "#player-right-controller"
+          rightController: "#player-right-controller",
+          recordingUrl: "/assets/avatars/bot-recording.json"
         });
-        const audio = document.getElementById("bot-recording");
-        mediaStream.addTrack(audio.captureStream().getAudioTracks()[0]);
+
+        const audioEl = document.createElement("audio");
+        audioEl.loop = true;
+        audioEl.muted = true;
+        audioEl.crossorigin = "anonymous";
+        audioEl.src = "/assets/avatars/bot-recording.mp3";
+        document.body.appendChild(audioEl);
+
         // Wait for runner script to interact with the page so that we can play audio.
-        await new Promise(resolve => {
+        const interacted = new Promise(resolve => {
           window.interacted = resolve;
         });
-        audio.play();
+        const canPlay = new Promise(resolve => {
+          audioEl.addEventListener("canplay", resolve);
+        });
+        await Promise.all([canPlay, interacted]);
+        mediaStream.addTrack(audioEl.captureStream().getAudioTracks()[0]);
+        audioEl.play();
       }
 
       if (mediaStream) {
@@ -404,11 +450,11 @@ const onReady = async () => {
     if (!isBotMode) {
       // Stop rendering while the UI is up. We restart the render loop in enterScene.
       // Wait a tick plus some margin so that the environments actually render.
-      setTimeout(() => scene.renderer.animate(null), 100);
+      setTimeout(() => scene.renderer.setAnimationLoop(null), 100);
     } else {
       const noop = () => {};
       // Replace renderer with a noop renderer to reduce bot resource usage.
-      scene.renderer = { animate: noop, render: noop };
+      scene.renderer = { setAnimationLoop: noop, render: noop };
       document.body.style.display = "none";
     }
   });

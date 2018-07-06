@@ -149,8 +149,7 @@ const config = {
         m_press: "action_mute",
         q_press: "snap_rotate_left",
         e_press: "snap_rotate_right",
-        v_press: "action_share_screen",
-        b_press: "action_select_hud_item",
+        b_press: "action_share_screen",
 
         // We can't create a keyboard behaviour with AFIM yet,
         // so these will get captured by wasd-to-analog2d

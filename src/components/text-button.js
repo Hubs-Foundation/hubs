@@ -57,3 +57,12 @@ AFRAME.registerComponent("text-button", {
     this.textEl.setAttribute("text", "color", hovering ? this.data.textHoverColor : this.data.textColor);
   }
 });
+
+const noop = function() {};
+// TODO: this should ideally be fixed upstream somehow but its pretty tricky since text is just a geometry not a different type of Object3D, and Object3D is what handles raycast checks.
+AFRAME.registerComponent("text-raycast-hack", {
+  dependencies: ["text"],
+  init() {
+    this.el.getObject3D("text").raycast = noop;
+  }
+});

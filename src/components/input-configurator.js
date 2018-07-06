@@ -69,7 +69,7 @@ AFRAME.registerComponent("input-configurator", {
     this.eventHandlers = [];
     this.actionEventHandler = null;
     if (this.lookOnMobile) {
-      this.lookOnMobile.el.removeComponent("look-on-mobile");
+      this.lookOnMobile.el.removeAttribute("look-on-mobile");
       this.lookOnMobile = null;
     }
     this.cursorRequiresManagement = false;

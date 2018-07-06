@@ -182,9 +182,9 @@ aframe-physics-extras@^0.1.3:
   version "0.1.3"
   resolved "https://registry.yarnpkg.com/aframe-physics-extras/-/aframe-physics-extras-0.1.3.tgz#803e2164fb96c0a80f2d1a81458f3277f262b130"
 
-"aframe-physics-system@github:donmccurdy/aframe-physics-system":
+"aframe-physics-system@https://github.com/mozillareality/aframe-physics-system#hubs/master":
   version "3.1.2"
-  resolved "https://codeload.github.com/donmccurdy/aframe-physics-system/tar.gz/c142a301e3ce76f88bab817c89daa5b3d4d97815"
+  resolved "https://github.com/mozillareality/aframe-physics-system#50f5deb1134eb0d43c0435d287eef7037818d3cc"
   dependencies:
     browserify "^14.3.0"
     budo "^10.0.3"
@@ -1643,6 +1643,10 @@ buffer@^5.0.2:
     base64-js "^1.0.2"
     ieee754 "^1.1.4"
 
+buffered-interpolation@^0.2.4:
+  version "0.2.4"
+  resolved "https://registry.yarnpkg.com/buffered-interpolation/-/buffered-interpolation-0.2.4.tgz#74210ccb57855e611d1dbb97b4689a3585caa4af"
+
 builtin-modules@^1.0.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/builtin-modules/-/builtin-modules-1.1.1.tgz#270f076c5a72c02f5b65a47df94c5fe3a278892f"
@@ -2036,8 +2040,8 @@ colormin@^1.0.5:
     has "^1.0.1"
 
 colors@*:
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/colors/-/colors-1.2.5.tgz#89c7ad9a374bc030df8013241f68136ed8835afc"
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/colors/-/colors-1.3.0.tgz#5f20c9fef6945cb1134260aab33bfbdc8295e04e"
 
 colors@1.0.3:
   version "1.0.3"
@@ -3272,6 +3276,10 @@ extsprintf@1.3.0, extsprintf@^1.2.0:
 fast-deep-equal@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-1.1.0.tgz#c053477817c86b51daa853c81e059b733d023614"
+
+fast-deep-equal@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-2.0.1.tgz#7b05218ddf9667bf7f370bf7fdb2cb15fdd0aa49"
 
 fast-diff@^1.1.1:
   version "1.1.2"
@@ -4948,7 +4956,7 @@ loader-utils@^0.2.16:
     json5 "^0.5.0"
     object-assign "^4.0.1"
 
-loader-utils@^1.0.1, loader-utils@^1.0.2, loader-utils@^1.1.0:
+loader-utils@^1.0.0, loader-utils@^1.0.1, loader-utils@^1.0.2, loader-utils@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/loader-utils/-/loader-utils-1.1.0.tgz#c98aef488bcceda2ffb5e2de646d6a754429f5cd"
   dependencies:
@@ -5258,6 +5266,10 @@ mime@1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/mime/-/mime-1.4.1.tgz#121f9ebc49e3766f311a76e1fa1c8003c4b03aa6"
 
+mime@^2.0.3:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/mime/-/mime-2.3.1.tgz#b1621c54d63b97c47d3cfe7f7215f7d64517c369"
+
 mime@^2.1.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/mime/-/mime-2.2.0.tgz#161e541965551d3b549fa1114391e3a3d55b923b"
@@ -5511,10 +5523,12 @@ neo-async@^2.5.0:
 
 "networked-aframe@https://github.com/mozillareality/networked-aframe#mr-social-client/master":
   version "0.6.1"
-  resolved "https://github.com/mozillareality/networked-aframe#424b41cfdf53db64033885da411c33685644db97"
+  resolved "https://github.com/mozillareality/networked-aframe#06236f794f83cfebdc4ea9f3a9e8a5804f5bdcf9"
   dependencies:
+    buffered-interpolation "^0.2.4"
     easyrtc "1.1.0"
     express "^4.10.7"
+    fast-deep-equal "^2.0.1"
     serve-static "^1.8.0"
     socket.io "^1.4.5"
     socket.io-client "^1.4.5"
@@ -7186,7 +7200,7 @@ sax@~1.2.1:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-schema-utils@^0.4.2, schema-utils@^0.4.3, schema-utils@^0.4.5:
+schema-utils@^0.4.0, schema-utils@^0.4.2, schema-utils@^0.4.3, schema-utils@^0.4.5:
   version "0.4.5"
   resolved "https://registry.yarnpkg.com/schema-utils/-/schema-utils-0.4.5.tgz#21836f0608aac17b78f9e3e24daff14a5ca13a3e"
   dependencies:
@@ -8258,6 +8272,14 @@ url-join@^2.0.2:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/url-join/-/url-join-2.0.5.tgz#5af22f18c052a000a48d7b82c5e9c2e2feeda728"
 
+url-loader@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/url-loader/-/url-loader-1.0.1.tgz#61bc53f1f184d7343da2728a1289ef8722ea45ee"
+  dependencies:
+    loader-utils "^1.1.0"
+    mime "^2.0.3"
+    schema-utils "^0.4.3"
+
 url-parse-lax@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/url-parse-lax/-/url-parse-lax-1.0.0.tgz#7af8f303645e9bd79a272e7a14ac68bc0609da73"
@@ -8662,6 +8684,13 @@ worker-farm@^1.5.2:
   dependencies:
     errno "^0.1.4"
     xtend "^4.0.1"
+
+worker-loader@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/worker-loader/-/worker-loader-2.0.0.tgz#45fda3ef76aca815771a89107399ee4119b430ac"
+  dependencies:
+    loader-utils "^1.0.0"
+    schema-utils "^0.4.0"
 
 wrap-ansi@^2.0.0:
   version "2.1.0"

@@ -1,10 +1,16 @@
 function registerNetworkSchemas() {
-  const positionRequiresUpdate = (oldData, newData) => {
-    return !NAF.utils.almostEqualVec3(oldData, newData, 0.001);
-  };
-
-  const rotationRequiresUpdate = (oldData, newData) => {
-    return !NAF.utils.almostEqualVec3(oldData, newData, 0.5);
+  const vectorRequiresUpdate = epsilon => {
+    let prev = null;
+    return curr => {
+      if (prev === null) {
+        prev = new THREE.Vector3(curr.x, curr.y, curr.z);
+        return true;
+      } else if (!NAF.utils.almostEqualVec3(prev, curr, epsilon)) {
+        prev.copy(curr);
+        return true;
+      }
+      return false;
+    };
   };
 
   NAF.schemas.add({
@@ -12,12 +18,11 @@ function registerNetworkSchemas() {
     components: [
       {
         component: "position",
-        requiresNetworkUpdate: positionRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
         component: "rotation",
-        lerp: false,
-        requiresNetworkUpdate: rotationRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       "scale",
       "player-info",
@@ -25,22 +30,22 @@ function registerNetworkSchemas() {
       {
         selector: ".camera",
         component: "position",
-        requiresNetworkUpdate: positionRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
         selector: ".camera",
         component: "rotation",
-        requiresNetworkUpdate: rotationRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       {
         selector: ".left-controller",
         component: "position",
-        requiresNetworkUpdate: positionRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
         selector: ".left-controller",
         component: "rotation",
-        requiresNetworkUpdate: rotationRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       {
         selector: ".left-controller",
@@ -49,12 +54,12 @@ function registerNetworkSchemas() {
       {
         selector: ".right-controller",
         component: "position",
-        requiresNetworkUpdate: positionRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
         selector: ".right-controller",
         component: "rotation",
-        requiresNetworkUpdate: rotationRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       {
         selector: ".right-controller",
@@ -81,14 +86,35 @@ function registerNetworkSchemas() {
     components: [
       {
         component: "position",
-        requiresNetworkUpdate: positionRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
         component: "rotation",
-        requiresNetworkUpdate: rotationRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       "scale"
     ]
+  });
+
+  NAF.schemas.add({
+    template: "#interactable-image",
+    components: [
+      {
+        component: "position",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
+      {
+        component: "rotation",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
+      },
+      "scale",
+      "image-plus"
+    ]
+  });
+
+  NAF.schemas.add({
+    template: "#interactable-model",
+    components: ["position", "rotation", "scale", "gltf-model-plus"]
   });
 }
 
