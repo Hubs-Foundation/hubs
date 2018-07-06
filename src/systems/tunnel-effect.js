@@ -54,6 +54,7 @@ AFRAME.registerSystem ('tunneleffect', {
 
     this.characterVelocity = this.characterComponent.velocity;
     if (this.characterVelocity.distanceTo(STATIC) < CLAMP_VELOCITY) {
+      // the character stops, so we use the aframe default render func
       this.scene.renderer.render = this.originalRenderFunc;
       this.isMoving = false;
       return;
@@ -117,6 +118,9 @@ AFRAME.registerSystem ('tunneleffect', {
     }
   },
 
+  /**
+    * use the render func of the effect composer when we need the postprocessing
+  */
   _bindRenderFunc: function () {
     const renderer = this.scene.renderer;
     const render = renderer.render;
