@@ -8,17 +8,17 @@ import "../utils/shaders/VignetteShader";
 const STATIC = new THREE.Vector3(0, 0, 0);
 const CLAMP_VELOCITY = 0.01;
 
-AFRAME.registerSystem ('tunneleffect', {
+AFRAME.registerSystem("tunneleffect", {
   schema: {
-    targetComponent: { type: 'string', default: 'character-controller'},
-    movingEvent: { type: 'string', default: 'renderstart' },
-    radius: { type: 'number', default: 0.45, min: 0.25 },
-    minRadius: { type: 'number', default: 0.2, min: 0.1 },
-    softness: { type: 'number', default: 0.1, min: 0.0 },
-    opacity: { type: 'number', default: 1, min: 0.0 }
+    targetComponent: { type: "string", default: "character-controller" },
+    movingEvent: { type: "string", default: "renderstart" },
+    radius: { type: "number", default: 0.45, min: 0.25 },
+    minRadius: { type: "number", default: 0.2, min: 0.1 },
+    softness: { type: "number", default: 0.1, min: 0.0 },
+    opacity: { type: "number", default: 1, min: 0.0 }
   },
 
-  init: function () {
+  init: function() {
     const data = this.data;
     this.scene = this.el;
     this.isMoving = false;
@@ -34,23 +34,24 @@ AFRAME.registerSystem ('tunneleffect', {
     this.characterEl = document.querySelector(`a-entity[${this.data.targetComponent}]`);
     if (this.characterEl) {
       this._initPostProcessing = this._initPostProcessing.bind(this);
-      this.characterEl.addEventListener('componentinitialized', this._initPostProcessing);
+      this.characterEl.addEventListener("componentinitialized", this._initPostProcessing);
     }
   },
 
-  update: function () {
+  pause: function() {
+    if (!this.characterEl) {
+      return;
+    }
+    this.characterEl.removeEventListener("componentinitialized", this._initPostProcessing);
   },
 
-  pause: function () {
-    if (!this.characterEl) { return; }
-    this.characterEl.removeEventListener('componentinitialized', this._initPostProcessing);
-  },
-
-  tick: function (time, deltaTime) {
+  tick: function(time, deltaTime) {
     this.t = time;
     this.dt = deltaTime;
 
-    if (!this._isPostProcessingReady()) { return; }
+    if (!this._isPostProcessingReady()) {
+      return;
+    }
 
     this.characterVelocity = this.characterComponent.velocity;
     if (this.characterVelocity.distanceTo(STATIC) < CLAMP_VELOCITY) {
@@ -69,7 +70,7 @@ AFRAME.registerSystem ('tunneleffect', {
     this._updateVignettePass(r, this.softness, this.opacity);
   },
 
-  _initPostProcessing: function (event) {
+  _initPostProcessing: function(event) {
     if (event.detail.name === this.data.targetComponent) {
       this.characterComponent = this.characterEl.components[this.data.targetComponent];
       this.characterVelocity = this.characterComponent.velocity;
@@ -77,13 +78,12 @@ AFRAME.registerSystem ('tunneleffect', {
     }
   },
 
-  _isPostProcessingReady: function () {
-    if (!this.characterComponent || !this.renderer || !this.camera || !this.composer)
-      return false;
+  _isPostProcessingReady: function() {
+    if (!this.characterComponent || !this.renderer || !this.camera || !this.composer) return false;
     return true;
   },
 
-  _initComposer: function () {
+  _initComposer: function() {
     if (!this.renderer) {
       this.renderer = this.scene.renderer;
       this.camera = this.scene.camera;
@@ -103,31 +103,31 @@ AFRAME.registerSystem ('tunneleffect', {
     this.composer.addPass(this.vignettePass);
   },
 
-  _updateVignettePass: function (radius, softness, opacity) {
+  _updateVignettePass: function(radius, softness, opacity) {
     if (!this.vignettePass) {
       this.vignettePass = new THREE.ShaderPass(THREE.VignetteShader);
     }
     const { width, height } = this.renderer.getSize();
     const pixelRatio = this.renderer.getPixelRatio();
-    this.vignettePass.uniforms['radius'].value = radius;
-    this.vignettePass.uniforms['softness'].value = softness;
-    this.vignettePass.uniforms['opacity'].value = opacity;
-    this.vignettePass['resolution'] = new THREE.Uniform(new THREE.Vector2(width * pixelRatio , height * pixelRatio));
+    this.vignettePass.uniforms["radius"].value = radius;
+    this.vignettePass.uniforms["softness"].value = softness;
+    this.vignettePass.uniforms["opacity"].value = opacity;
+    this.vignettePass["resolution"] = new THREE.Uniform(new THREE.Vector2(width * pixelRatio, height * pixelRatio));
     if (!this.vignettePass.renderToScreen) {
       this.vignettePass.renderToScreen = true;
     }
   },
 
   /**
-    * use the render func of the effect composer when we need the postprocessing
-  */
-  _bindRenderFunc: function () {
+   * use the render func of the effect composer when we need the postprocessing
+   */
+  _bindRenderFunc: function() {
     const renderer = this.scene.renderer;
     const render = renderer.render;
     const system = this;
     let isDigest = false;
 
-    renderer.render = function () {
+    renderer.render = function() {
       if (isDigest) {
         render.apply(this, arguments);
       } else {

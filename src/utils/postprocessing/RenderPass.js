@@ -2,62 +2,51 @@
  * @author alteredq / http://alteredqualia.com/
  */
 
-THREE.RenderPass = function ( scene, camera, overrideMaterial, clearColor, clearAlpha ) {
+THREE.RenderPass = function(scene, camera, overrideMaterial, clearColor, clearAlpha) {
+  THREE.Pass.call(this);
 
-	THREE.Pass.call( this );
+  this.scene = scene;
+  this.camera = camera;
 
-	this.scene = scene;
-	this.camera = camera;
+  this.overrideMaterial = overrideMaterial;
 
-	this.overrideMaterial = overrideMaterial;
+  this.clearColor = clearColor;
+  this.clearAlpha = clearAlpha !== undefined ? clearAlpha : 0;
 
-	this.clearColor = clearColor;
-	this.clearAlpha = ( clearAlpha !== undefined ) ? clearAlpha : 0;
-
-	this.clear = true;
-	this.clearDepth = false;
-	this.needsSwap = false;
-
+  this.clear = true;
+  this.clearDepth = false;
+  this.needsSwap = false;
 };
 
-THREE.RenderPass.prototype = Object.assign( Object.create( THREE.Pass.prototype ), {
+THREE.RenderPass.prototype = Object.assign(Object.create(THREE.Pass.prototype), {
+  constructor: THREE.RenderPass,
 
-	constructor: THREE.RenderPass,
+  render: function(renderer, writeBuffer, readBuffer) {
+    const oldAutoClear = renderer.autoClear;
+    renderer.autoClear = false;
 
-	render: function ( renderer, writeBuffer, readBuffer, delta, maskActive ) {
+    this.scene.overrideMaterial = this.overrideMaterial;
 
-		var oldAutoClear = renderer.autoClear;
-		renderer.autoClear = false;
+    let oldClearColor, oldClearAlpha;
 
-		this.scene.overrideMaterial = this.overrideMaterial;
+    if (this.clearColor) {
+      oldClearColor = renderer.getClearColor().getHex();
+      oldClearAlpha = renderer.getClearAlpha();
 
-		var oldClearColor, oldClearAlpha;
+      renderer.setClearColor(this.clearColor, this.clearAlpha);
+    }
 
-		if ( this.clearColor ) {
+    if (this.clearDepth) {
+      renderer.clearDepth();
+    }
 
-			oldClearColor = renderer.getClearColor().getHex();
-			oldClearAlpha = renderer.getClearAlpha();
+    renderer.render(this.scene, this.camera, this.renderToScreen ? null : readBuffer, this.clear);
 
-			renderer.setClearColor( this.clearColor, this.clearAlpha );
+    if (this.clearColor) {
+      renderer.setClearColor(oldClearColor, oldClearAlpha);
+    }
 
-		}
-
-		if ( this.clearDepth ) {
-
-			renderer.clearDepth();
-
-		}
-
-		renderer.render( this.scene, this.camera, this.renderToScreen ? null : readBuffer, this.clear );
-
-		if ( this.clearColor ) {
-
-			renderer.setClearColor( oldClearColor, oldClearAlpha );
-
-		}
-
-		this.scene.overrideMaterial = null;
-		renderer.autoClear = oldAutoClear;
-	}
-
-} );
+    this.scene.overrideMaterial = null;
+    renderer.autoClear = oldAutoClear;
+  }
+});
