@@ -9,7 +9,7 @@ function almostEquals(epsilon, u, v) {
 
 AFRAME.registerComponent("pen", {
   schema: {
-    drawFrequency: { default: 100 },
+    drawFrequency: { default: 20 },
     minDistanceBetweenPoints: { default: 0.04 },
     defaultDirection: { default: { x: 1, y: 0, z: 0 } },
     camera: { type: "selector" },
@@ -65,7 +65,7 @@ AFRAME.registerComponent("pen", {
     this.el.object3D.getWorldPosition(this.worldPosition);
     const drawing = this.currentDrawing;
 
-    if (almostEquals(0.005, this.worldPosition, this.lastPosition)) {
+    if (!almostEquals(0.005, this.worldPosition, this.lastPosition)) {
       this.direction.subVectors(this.worldPosition, this.lastPosition).normalize();
       this.lastPosition.copy(this.worldPosition);
     }
@@ -88,7 +88,6 @@ AFRAME.registerComponent("pen", {
   getNormal: (() => {
     const directionToCamera = new THREE.Vector3();
     const worldQuaternion = new THREE.Quaternion();
-    const temp = new THREE.Vector3();
     return function(normal, position, direction) {
       if (this.data.camera) {
         directionToCamera.subVectors(position, this.data.camera.object3D.position).normalize();
