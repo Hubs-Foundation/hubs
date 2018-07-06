@@ -74,7 +74,7 @@ THREE.ClearMaskPass = function() {
 THREE.ClearMaskPass.prototype = Object.create(THREE.Pass.prototype);
 
 Object.assign(THREE.ClearMaskPass.prototype, {
-  render: function() {
+  render: function(renderer) {
     renderer.state.buffers.stencil.setTest(false);
   }
 });
