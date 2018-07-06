@@ -14,7 +14,7 @@ AFRAME.registerSystem ('tunneleffect', {
     movingEvent: { type: 'string', default: 'renderstart' },
     radius: { type: 'number', default: 0.45, min: 0.25 },
     minRadius: { type: 'number', default: 0.2, min: 0.1 },
-    softness: { type: 'number', default: 0.1, min: 0.0 },
+    softness: { type: 'number', default: 0.2, min: 0.0 },
     opacity: { type: 'number', default: 1, min: 0.0 }
   },
 
@@ -39,13 +39,11 @@ AFRAME.registerSystem ('tunneleffect', {
   },
 
   update: function () {
-    // todo
-    this.characterPos = new THREE.Vector3(0, 0, 0);
-    this.prevCharacterPos = new THREE.Vector3(0, 0, 0);
   },
 
   pause: function () {
-    this.scene.removeEventListener(this.data.movingEvent, this._updateComposer);
+    if (!this.characterEl) { return; }
+    this.characterEl.removeEventListener('componentinitialized', this._initPostProcessing);
   },
 
   tick: function (time, deltaTime) {
