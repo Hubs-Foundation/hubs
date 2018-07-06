@@ -1,9 +1,9 @@
-import "./shaderlib/EffectComposer";
-import "./shaderlib/RenderPass";
-import "./shaderlib/ShaderPass";
-import "./shaderlib/MaskPass";
-import "./shaderlib/CopyShader";
-import "./shaderlib/VignetteShader";
+import "../utils/postprocessing/EffectComposer";
+import "../utils/postprocessing/RenderPass";
+import "../utils/postprocessing/ShaderPass";
+import "../utils/postprocessing/MaskPass";
+import "../utils/shaders/CopyShader";
+import "../utils/shaders/VignetteShader";
 
 const STATIC = new THREE.Vector3(0, 0, 0);
 const CLAMP_VELOCITY = 0.01;
@@ -14,7 +14,7 @@ AFRAME.registerSystem ('tunneleffect', {
     movingEvent: { type: 'string', default: 'renderstart' },
     radius: { type: 'number', default: 0.45, min: 0.25 },
     minRadius: { type: 'number', default: 0.2, min: 0.1 },
-    softness: { type: 'number', default: 0.2, min: 0.0 },
+    softness: { type: 'number', default: 0.1, min: 0.0 },
     opacity: { type: 'number', default: 1, min: 0.0 }
   },
 
