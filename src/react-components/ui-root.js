@@ -11,7 +11,13 @@ import screenfull from "screenfull";
 
 import { lang, messages } from "../utils/i18n";
 import AutoExitWarning from "./auto-exit-warning";
-import { TwoDEntryButton, DeviceEntryButton, GenericEntryButton, DaydreamEntryButton } from "./entry-buttons.js";
+import {
+  TwoDEntryButton,
+  DeviceEntryButton,
+  GenericEntryButton,
+  DaydreamEntryButton,
+  SafariEntryButton
+} from "./entry-buttons.js";
 import { ProfileInfoHeader } from "./profile-info-header.js";
 import ProfileEntryPanel from "./profile-entry-panel";
 import InfoDialog from "./info-dialog.js";
@@ -260,6 +266,10 @@ class UIRoot extends Component {
     await this.performDirectEntryFlow(false);
   };
 
+  linkSafari = async () => {
+    this.setState({ infoDialogType: InfoDialog.dialogTypes.safari });
+  };
+
   enterVR = async () => {
     if (this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.maybe) {
       await this.performDirectEntryFlow(true);
@@ -319,7 +329,7 @@ class UIRoot extends Component {
           mediaSource: "screen",
           // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
           // other than your current monitor that has a different aspect ratio.
-          width: screen.width / screen.height * 720,
+          width: 720 * screen.width / screen.height,
           height: 720,
           frameRate: 30
         }
@@ -518,6 +528,10 @@ class UIRoot extends Component {
     this.setState({ infoDialogType: null, linkCode: null, linkCodeCancel: null });
   };
 
+  handleAddMedia = url => {
+    this.props.scene.emit("add_media", url);
+  };
+
   render() {
     if (this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason) {
       let subtitle = null;
@@ -616,8 +630,11 @@ class UIRoot extends Component {
       this.state.entryStep === ENTRY_STEPS.start ? (
         <div className="entry-panel">
           <div className="entry-panel__button-container">
-            {this.props.availableVREntryTypes.screen !== VR_DEVICE_AVAILABILITY.no && (
+            {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
               <TwoDEntryButton onClick={this.enter2D} />
+            )}
+            {this.props.availableVREntryTypes.safari === VR_DEVICE_AVAILABILITY.maybe && (
+              <SafariEntryButton onClick={this.linkSafari} />
             )}
             {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
               <GenericEntryButton onClick={this.enterVR} />
@@ -822,6 +839,7 @@ class UIRoot extends Component {
             linkCode={this.state.linkCode}
             onSubmittedEmail={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.email_submitted })}
             onCloseDialog={this.handleCloseDialog}
+            onAddMedia={this.handleAddMedia}
           />
 
           {this.state.entryStep === ENTRY_STEPS.finished && (
@@ -859,6 +877,7 @@ class UIRoot extends Component {
                 onToggleMute={this.toggleMute}
                 onToggleFreeze={this.toggleFreeze}
                 onToggleSpaceBubble={this.toggleSpaceBubble}
+                onClickAddMedia={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.add_media })}
               />
               <Footer
                 hubName={this.props.hubName}
