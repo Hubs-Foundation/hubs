@@ -12,10 +12,10 @@ AFRAME.registerSystem ('tunneleffect', {
   schema: {
     targetComponent: { type: 'string', default: 'character-controller'},
     movingEvent: { type: 'string', default: 'renderstart' },
-    radius: { type: 'number', default: 0.5, min: 0.5 },
-    minRadius: { type: 'number', default: 0.25, min: 0.1 },
+    radius: { type: 'number', default: 0.45, min: 0.25 },
+    minRadius: { type: 'number', default: 0.2, min: 0.1 },
     softness: { type: 'number', default: 0.1, min: 0.0 },
-    opacity: { type: 'number', default: 0.9, min: 0.0 }
+    opacity: { type: 'number', default: 1, min: 0.0 }
   },
 
   init: function () {
@@ -31,11 +31,10 @@ AFRAME.registerSystem ('tunneleffect', {
     this.characterVelocity = new THREE.Vector3(0, 0, 0);
 
     // add event listener for init composer
-    //this._initComposer = this._initComposer.bind(this);
     this.characterEl = document.querySelector(`a-entity[${this.data.targetComponent}]`);
     if (this.characterEl) {
-      this._initComponent = this._initComponent.bind(this);
-      this.characterEl.addEventListener('componentinitialized', this._initComponent);
+      this._initPostProcessing = this._initPostProcessing.bind(this);
+      this.characterEl.addEventListener('componentinitialized', this._initPostProcessing);
     }
   },
 
@@ -71,7 +70,7 @@ AFRAME.registerSystem ('tunneleffect', {
     this._updateVignettePass(r, this.softness, this.opacity);
   },
 
-  _initComponent: function (event) {
+  _initPostProcessing: function (event) {
     if (event.detail.name === this.data.targetComponent) {
       this.characterComponent = this.characterEl.components[this.data.targetComponent];
       this.characterVelocity = this.characterComponent.velocity;
