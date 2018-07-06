@@ -203,11 +203,11 @@ function cachedLoadGLTF(src, preferredTechnique, onProgress) {
 AFRAME.registerComponent("gltf-model-plus", {
   schema: {
     src: { type: "string" },
-    inflate: { default: false },
-    preferredTechnique: { default: AFRAME.utils.device.isMobile() ? "KHR_materials_unlit" : "pbrMetallicRoughness" }
+    inflate: { default: false }
   },
 
   init() {
+    this.preferredTechnique = AFRAME.utils.device.isMobile() ? "KHR_materials_unlit" : "pbrMetallicRoughness";
     this.loadTemplates();
   },
 
@@ -245,7 +245,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       }
 
       const gltfPath = THREE.LoaderUtils.extractUrlBase(src);
-      const model = await cachedLoadGLTF(src, this.data.preferredTechnique);
+      const model = await cachedLoadGLTF(src, this.preferredTechnique);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead

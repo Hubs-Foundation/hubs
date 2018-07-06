@@ -329,7 +329,7 @@ class UIRoot extends Component {
           mediaSource: "screen",
           // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
           // other than your current monitor that has a different aspect ratio.
-          width: screen.width / screen.height * 720,
+          width: 720 * screen.width / screen.height,
           height: 720,
           frameRate: 30
         }
@@ -526,6 +526,10 @@ class UIRoot extends Component {
     }
 
     this.setState({ infoDialogType: null, linkCode: null, linkCodeCancel: null });
+  };
+
+  handleAddMedia = url => {
+    this.props.scene.emit("add_media", url);
   };
 
   render() {
@@ -835,6 +839,7 @@ class UIRoot extends Component {
             linkCode={this.state.linkCode}
             onSubmittedEmail={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.email_submitted })}
             onCloseDialog={this.handleCloseDialog}
+            onAddMedia={this.handleAddMedia}
           />
 
           {this.state.entryStep === ENTRY_STEPS.finished && (
@@ -872,6 +877,7 @@ class UIRoot extends Component {
                 onToggleMute={this.toggleMute}
                 onToggleFreeze={this.toggleFreeze}
                 onToggleSpaceBubble={this.toggleSpaceBubble}
+                onClickAddMedia={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.add_media })}
               />
               <Footer
                 hubName={this.props.hubName}
