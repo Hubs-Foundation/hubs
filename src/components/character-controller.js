@@ -18,8 +18,8 @@ AFRAME.registerComponent("character-controller", {
   },
 
   init: function() {
-    this.navGroup;
-    this.navNode;
+    this.navGroup = null;
+    this.navNode = null;
     this.velocity = new THREE.Vector3(0, 0, 0);
     this.accelerationInput = new THREE.Vector3(0, 0, 0);
     this.pendingSnapRotationMatrix = new THREE.Matrix4();
@@ -160,7 +160,7 @@ AFRAME.registerComponent("character-controller", {
   setPositionOnNavMesh: function(startPosition, endPosition, object3D) {
     const nav = this.el.sceneEl.systems.nav;
     if (nav.navMesh) {
-      if (!this.navGroup) {
+      if (this.navGroup == null) {
         this.navGroup = nav.getGroup(endPosition);
       }
       this.navNode = this.navNode || nav.getNode(endPosition, this.navGroup);
