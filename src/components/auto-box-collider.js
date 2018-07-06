@@ -9,8 +9,11 @@ AFRAME.registerComponent("auto-box-collider", {
     this.el.addEventListener("model-loaded", this.onLoaded);
   },
 
-  onLoaded() {
+  remove() {
     this.el.removeEventListener("model-loaded", this.onLoaded);
+  },
+
+  onLoaded() {
     const rotation = this.el.object3D.rotation.clone();
     this.el.object3D.rotation.set(0, 0, 0);
     const { min, max } = new THREE.Box3().setFromObject(this.el.object3DMap.mesh);

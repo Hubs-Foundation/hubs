@@ -118,7 +118,6 @@ AFRAME.registerComponent("image-plus", {
     const cacheItem = textureCache.get(url);
     cacheItem.count--;
     if (cacheItem.count <= 0) {
-      console.log("removing from cache");
       // Unload the video element to prevent it from continuing to play in the background
       if (texture.image instanceof HTMLVideoElement) {
         const video = texture.image;
@@ -179,7 +178,7 @@ AFRAME.registerComponent("image-plus", {
 
       const texture = new THREE.VideoTexture(videoEl);
       texture.minFilter = THREE.LinearFilter;
-      videoEl.addEventListener("loadedmetadata", () => resolve(texture));
+      videoEl.addEventListener("loadedmetadata", () => resolve(texture), { once: true });
       videoEl.onerror = reject;
 
       // If iOS and video is HLS, do some hacks.
@@ -225,13 +224,10 @@ AFRAME.registerComponent("image-plus", {
         if (url === "error") {
           texture = errorTexture;
         } else if (contentType === "image/gif") {
-          console.log("load gif", contentType);
           texture = await this.loadGIF(url);
         } else if (contentType.startsWith("image/")) {
-          console.log("load image", contentType);
           texture = await this.loadImage(url);
         } else if (contentType.startsWith("video")) {
-          console.log("load video", contentType);
           texture = await this.loadVideo(url);
         } else {
           throw new Error(`Unknown centent type: ${contentType}`);

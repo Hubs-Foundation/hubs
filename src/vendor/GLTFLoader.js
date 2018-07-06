@@ -7,6 +7,7 @@
  * @author Tony Parisi / http://www.tonyparisi.com/
  * @author Takahiro / https://github.com/takahirox
  * @author Don McCurdy / https://www.donmccurdy.com
+ * @author netpro2k / https://github.com/netpro2k
  */
 
  import { resolveFarsparkUrl } from "../utils/media-utils"

@@ -79,20 +79,27 @@ AFRAME.registerComponent("sticky-object-zone", {
     this.bootImpulse = new CANNON.Vec3();
     this.bootImpulse.copy(dir);
 
-    this.el.addEventListener("collisions", e => {
-      e.detail.els.forEach(el => {
-        const stickyObject = el.components["sticky-object"];
-        if (!stickyObject) return;
-        this._setStuckObject(stickyObject);
-      });
-      if (this.stuckObject) {
-        e.detail.clearedEls.forEach(el => {
-          if (this.stuckObject && this.stuckObject.el === el) {
-            this._unstickObject();
-          }
-        });
-      }
+    this._onCollisions = this._onCollisions.bind(this);
+    this.el.addEventListener("collisions", this._onCollisions);
+  },
+
+  remove() {
+    this.el.removeEventListener("collisions", this._onCollisions);
+  },
+
+  _onCollisions(e) {
+    e.detail.els.forEach(el => {
+      const stickyObject = el.components["sticky-object"];
+      if (!stickyObject) return;
+      this._setStuckObject(stickyObject);
     });
+    if (this.stuckObject) {
+      e.detail.clearedEls.forEach(el => {
+        if (this.stuckObject && this.stuckObject.el === el) {
+          this._unstickObject();
+        }
+      });
+    }
   },
 
   _setStuckObject(stickyObject) {
