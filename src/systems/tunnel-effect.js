@@ -5,11 +5,13 @@ import "./shaderlib/MaskPass";
 import "./shaderlib/CopyShader";
 import "./shaderlib/VignetteShader";
 
+const STATIC = new THREE.Vector3(0, 0, 0);
+const CLAMP_VELOCITY = 0.01;
+
 AFRAME.registerSystem ('tunneleffect', {
   schema: {
-    checkThresholdMs: { type: 'number', default: 200 },
-    vignetteFadingMs: { type: 'number', default: 800 },
-    movingEvent: { type: 'string', default: 'loaded' },
+    targetComponent: { type: 'string', default: 'character-controller'},
+    movingEvent: { type: 'string', default: 'renderstart' },
     radius: { type: 'number', default: 0.5, min: 0.5 },
     minRadius: { type: 'number', default: 0.25, min: 0.1 },
     softness: { type: 'number', default: 0.1, min: 0.0 },
@@ -22,20 +24,19 @@ AFRAME.registerSystem ('tunneleffect', {
     this.isMoving = false;
     this.dt = 0;
     this.t = 0;
-    this.thresholdMs = data.checkThresholdMs;
-    this.fadingMs = data.vignetteFadingMs;
-    this.initMs = Date.now();
     this.radius = data.radius;
     this.minRadius = data.minRadius;
     this.softness = data.softness;
     this.opacity = data.opacity;
-    this.movingStartTimeMs = 0;
-    this.lastMovingTimeMs = 0;
-    // original render function of the renderer
-    this.originalRenderFunc = this.scene.renderer.render;
-    // add event listener for moving event
-    this._updateComposer = this._updateComposer.bind(this);
-    this.scene.addEventListener(data.movingEvent, this._updateComposer);
+    this.characterVelocity = new THREE.Vector3(0, 0, 0);
+
+    // add event listener for init composer
+    //this._initComposer = this._initComposer.bind(this);
+    this.characterEl = document.querySelector(`a-entity[${this.data.targetComponent}]`);
+    if (this.characterEl) {
+      this._initComponent = this._initComponent.bind(this);
+      this.characterEl.addEventListener('componentinitialized', this._initComponent);
+    }
   },
 
   update: function () {
@@ -51,33 +52,44 @@ AFRAME.registerSystem ('tunneleffect', {
   tick: function (time, deltaTime) {
     this.t = time;
     this.dt = deltaTime;
-    if (!this.camera) { return; }
-    this.camera.getWorldPosition(this.characterPos);
-    if (this.characterPos.distanceTo(this.prevCharacterPos) > 0.01) {
-      if (!this.isMoving) {
-        this.movingStartTimeMs = time;
-        this.isMoving = true;
-        this.bindRenderFunc();
-      }
-      this.lastMovingTimeMs = time;
-      if (time - this.movingStartTimeMs < this.fadingMs) {
-        this._fadeInEffect(time, this.movingStartTimeMs, this.fadingMs);
-      }
-    } else {
-      if (this.isMoving) {
-        this.isMoving = false;
-      }
-      if (time - this.lastMovingTimeMs < this.fadingMs) { this._fadeOutEffect(time, this.lastMovingTimeMs, this.fadingMs); }
-      else
-        this.scene.renderer.render = this.originalRenderFunc;
+
+    if (!this._isPostProcessingReady()) { return; }
+
+    this.characterVelocity = this.characterComponent.velocity;
+    if (this.characterVelocity.distanceTo(STATIC) < CLAMP_VELOCITY) {
+      this.scene.renderer.render = this.originalRenderFunc;
+      this.isMoving = false;
+      return;
     }
-    this.prevCharacterPos = this.characterPos.clone(false);
+
+    if (!this.isMoving) {
+      this.isMoving = true;
+      this._bindRenderFunc();
+    }
+    const deltaR = (this.radius - this.minRadius) * this.characterVelocity.distanceTo(STATIC);
+    const r = this.radius - deltaR;
+    this._updateVignettePass(r, this.softness, this.opacity);
   },
 
-  _updateComposer: function () {
+  _initComponent: function (event) {
+    if (event.detail.name === this.data.targetComponent) {
+      this.characterComponent = this.characterEl.components[this.data.targetComponent];
+      this.characterVelocity = this.characterComponent.velocity;
+      this._initComposer();
+    }
+  },
+
+  _isPostProcessingReady: function () {
+    if (!this.characterComponent || !this.renderer || !this.camera || !this.composer)
+      return false;
+    return true;
+  },
+
+  _initComposer: function () {
     if (!this.renderer) {
       this.renderer = this.scene.renderer;
       this.camera = this.scene.camera;
+      this.originalRenderFunc = this.scene.renderer.render;
     }
     if (!this.composer) {
       this.composer = new THREE.EffectComposer(this.renderer);
@@ -108,7 +120,7 @@ AFRAME.registerSystem ('tunneleffect', {
     }
   },
 
-  bindRenderFunc: function () {
+  _bindRenderFunc: function () {
     const renderer = this.scene.renderer;
     const render = renderer.render;
     const system = this;
@@ -123,20 +135,5 @@ AFRAME.registerSystem ('tunneleffect', {
         isDigest = false;
       }
     };
-  },
-
-  _fadingEffect: function (currentTime, baseTime, fadingDuration, originRadius, targetRadius) {
-    const progress = (currentTime - baseTime) / fadingDuration;
-    const deltaR = (originRadius - targetRadius) * progress;
-    const r = originRadius - deltaR;
-    this._updateVignettePass(r, this.softness, this.opacity);
-  },
-
-  _fadeOutEffect: function (currentTime, baseTime, fadingDuration) {
-    this._fadingEffect(currentTime, baseTime, fadingDuration, this.minRadius, this.radius);
-  },
-
-  _fadeInEffect: function (currentTime, baseTime, fadingDuration) {
-    this._fadingEffect(currentTime, baseTime, fadingDuration, this.radius, this.minRadius);
   }
 });
