@@ -74,16 +74,34 @@ function cloneGltf(gltf) {
   return clone;
 }
 
-const inflateEntities = function(parentEl, node, gltfPath) {
-  // setObject3D mutates the node's parent, so we have to copy
-  const children = node.children.slice(0);
+/// Walks the tree of three.js objects starting at the given node, using the GLTF data
+/// and template data to construct A-Frame entities and components when necessary.
+/// (It's unnecessary to construct entities for subtrees that have no component data
+/// or templates associated with any of their nodes.)
+///
+/// Returns the A-Frame entity associated with the given node, if one was constructed.
+const inflateEntities = function(node, templates, gltfPath) {
+  // inflate subtrees first so that we can determine whether or not this node needs to be inflated
+  const childEntities = [];
+  const children = node.children.slice(0); // setObject3D mutates the node's parent, so we have to copy
+  for (const child of children) {
+    const el = inflateEntities(child, templates, gltfPath);
+    if (el) {
+      childEntities.push(el);
+    }
+  }
+
+  const nodeHasBehavior = node.userData.components || node.name in templates;
+  if (!nodeHasBehavior && !childEntities.length) {
+    return null; // we don't need an entity for this node
+  }
 
   const el = document.createElement("a-entity");
+  el.append.apply(el, childEntities);
 
   // Remove invalid CSS class name characters.
   const className = (node.name || node.uuid).replace(/[^\w-]/g, "");
   el.classList.add(className);
-  parentEl.appendChild(el);
 
   // AFRAME rotation component expects rotations in YXZ, convert it
   if (node.rotation.order !== "YXZ") {
@@ -138,15 +156,11 @@ const inflateEntities = function(parentEl, node, gltfPath) {
     }
   }
 
-  children.forEach(childNode => {
-    inflateEntities(el, childNode, gltfPath);
-  });
-
   return el;
 };
 
-function attachTemplate(root, { selector, templateRoot }) {
-  const targetEls = root.querySelectorAll(selector);
+function attachTemplate(root, name, templateRoot) {
+  const targetEls = root.querySelectorAll("." + name);
   for (const el of targetEls) {
     const root = templateRoot.cloneNode(true);
     // Merge root element attributes with the target element
@@ -216,13 +230,11 @@ AFRAME.registerComponent("gltf-model-plus", {
   },
 
   loadTemplates() {
-    this.templates = [];
-    this.el.querySelectorAll(":scope > template").forEach(templateEl =>
-      this.templates.push({
-        selector: templateEl.getAttribute("data-selector"),
-        templateRoot: document.importNode(templateEl.firstElementChild || templateEl.content.firstElementChild, true)
-      })
-    );
+    this.templates = {};
+    this.el.querySelectorAll(":scope > template").forEach(templateEl => {
+      const root = document.importNode(templateEl.firstElementChild || templateEl.content.firstElementChild, true);
+      this.templates[templateEl.getAttribute("data-name")] = root;
+    });
   },
 
   async applySrc(src) {
@@ -260,17 +272,20 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.el.setObject3D("mesh", this.model);
 
       if (this.data.inflate) {
-        this.inflatedEl = inflateEntities(this.el, this.model, gltfPath);
+        this.inflatedEl = inflateEntities(this.model, this.templates, gltfPath);
+        this.el.appendChild(this.inflatedEl);
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
         // Wait one tick for the appended custom elements to be connected before attaching templates
         await nextTick();
         if (src != this.lastSrc) return; // TODO: there must be a nicer pattern for this
-        this.templates.forEach(attachTemplate.bind(null, this.el));
+        for (const name in this.templates) {
+          attachTemplate(this.el, name, this.templates[name]);
+        }
       }
 
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
-      console.error("Failed to load glTF model", e.message, this);
+      console.error("Failed to load glTF model", e, this);
       this.el.emit("model-error", { format: "gltf", src });
     }
   },
