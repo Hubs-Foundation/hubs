@@ -1,28 +1,34 @@
-const EPS = 10e-6;
-
 /**
  * Pen tool
  * @component pen
  */
 
+function almostEquals(epsilon, u, v) {
+  return Math.abs(u.x - v.x) < epsilon && Math.abs(u.y - v.y) < epsilon && Math.abs(u.z - v.z) < epsilon;
+}
+
 AFRAME.registerComponent("pen", {
   schema: {
     drawFrequency: { default: 100 },
-    minDistanceBetweenPoints: { default: 0.05 },
+    minDistanceBetweenPoints: { default: 0.04 },
     defaultDirection: { default: { x: 1, y: 0, z: 0 } },
     camera: { type: "selector" },
     drawing: { type: "selector" }
   },
 
   init() {
-    this.onMouseDown = this.onMouseDown.bind(this);
-    this.onMouseUp = this.onMouseUp.bind(this);
+    // this.onMouseDown = this.onMouseDown.bind(this);
+    // this.onMouseUp = this.onMouseUp.bind(this);
+
+    this.startDraw = this.startDraw.bind(this);
+    this.endDraw = this.endDraw.bind(this);
 
     this.isDrawing = false;
     this.timeSinceLastDraw = 0;
 
     this.lastPosition = new THREE.Vector3();
     this.lastPosition.copy(this.el.object3D.position);
+
     this.direction = new THREE.Vector3();
     this.direction.copy(this.data.defaultDirection);
 
@@ -31,6 +37,8 @@ AFRAME.registerComponent("pen", {
     this.data.drawing.addEventListener("componentinitialized", this.handleDrawingInitialized);
 
     this.normal = new THREE.Vector3();
+
+    this.worldPosition = new THREE.Vector3();
   },
 
   remove() {
@@ -40,30 +48,36 @@ AFRAME.registerComponent("pen", {
   play() {
     document.addEventListener("mousedown", this.onMouseDown);
     document.addEventListener("mouseup", this.onMouseUp);
+
+    this.el.parentNode.addEventListener("index_down", this.startDraw);
+    this.el.parentNode.addEventListener("index_up", this.endDraw);
   },
 
   pause() {
     document.removeEventListener("mousedown", this.onMouseDown);
     document.removeEventListener("mouseup", this.onMouseUp);
+
+    this.el.parentNode.removeEventListener("index_down", this.startDraw);
+    this.el.parentNode.removeEventListener("index_up", this.endDraw);
   },
 
   tick(t, dt) {
-    const currentPosition = this.el.object3D.position;
+    this.el.object3D.getWorldPosition(this.worldPosition);
     const drawing = this.currentDrawing;
 
-    if (drawing && currentPosition.distanceToSquared(this.lastPosition) > EPS) {
-      this.direction.subVectors(currentPosition, drawing.getLastPoint()).normalize();
+    if (almostEquals(0.005, this.worldPosition, this.lastPosition)) {
+      this.direction.subVectors(this.worldPosition, this.lastPosition).normalize();
+      this.lastPosition.copy(this.worldPosition);
     }
-    this.lastPosition.copy(currentPosition);
 
     if (drawing && this.isDrawing) {
       const time = this.timeSinceLastDraw + dt;
       if (
         time >= this.data.drawFrequency &&
-        drawing.getLastPoint().distanceTo(currentPosition) >= this.data.minDistanceBetweenPoints
+        drawing.getLastPoint().distanceTo(this.worldPosition) >= this.data.minDistanceBetweenPoints
       ) {
-        this.getNormal(this.normal, currentPosition, this.direction);
-        drawing.draw(currentPosition, this.direction, this.normal);
+        this.getNormal(this.normal, this.worldPosition, this.direction);
+        drawing.draw(this.worldPosition, this.direction, this.normal);
       }
 
       this.timeSinceLastDraw = time % this.data.drawFrequency;
@@ -73,12 +87,19 @@ AFRAME.registerComponent("pen", {
   //helper function to get normal of direction of drawing cross direction to camera
   getNormal: (() => {
     const directionToCamera = new THREE.Vector3();
+    const worldQuaternion = new THREE.Quaternion();
+    const temp = new THREE.Vector3();
     return function(normal, position, direction) {
       if (this.data.camera) {
         directionToCamera.subVectors(position, this.data.camera.object3D.position).normalize();
         normal.crossVectors(direction, directionToCamera);
       } else {
-        normal.copy(this.el.object3D.up);
+        //TODO remove?
+        this.el.object3D.getWorldQuaternion(worldQuaternion);
+        normal
+          .copy(this.el.object3D.up)
+          .applyQuaternion(worldQuaternion)
+          .normalize();
       }
     };
   })(),
@@ -89,22 +110,30 @@ AFRAME.registerComponent("pen", {
     }
   },
 
-  onMouseDown(e) {
-    if (this.currentDrawing && e.button === 0) {
-      this.isDrawing = true;
-      const position = this.el.object3D.position;
-      this.getNormal(this.normal, position, this.direction);
-      this.currentDrawing.startDraw(position, this.direction, this.normal);
-    }
+  // onMouseDown(e) {
+  //   if (this.currentDrawing && e.button === 0) {
+  //     this.startDraw();
+  //   }
+  // },
+
+  // onMouseUp(e) {
+  //   if (this.currentDrawing && e.button === 0) {
+  //     this.endDraw();
+  //   }
+  // },
+
+  startDraw() {
+    this.isDrawing = true;
+    this.el.object3D.getWorldPosition(this.worldPosition);
+    this.getNormal(this.normal, this.worldPosition, this.direction);
+    this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal);
   },
 
-  onMouseUp(e) {
-    if (this.currentDrawing && e.button === 0) {
-      this.isDrawing = false;
-      this.timeSinceLastDraw = 0;
-      const position = this.el.object3D.position;
-      this.getNormal(this.normal, position, this.direction);
-      this.currentDrawing.endDraw(position, this.direction, this.normal);
-    }
+  endDraw() {
+    this.isDrawing = false;
+    this.timeSinceLastDraw = 0;
+    this.el.object3D.getWorldPosition(this.worldPosition);
+    this.getNormal(this.normal, this.worldPosition, this.direction);
+    this.currentDrawing.endDraw(this.worldPosition, this.direction, this.normal);
   }
 });

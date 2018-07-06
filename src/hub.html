@@ -235,8 +235,10 @@
             segments-height="9"
             segments-width="9"
             event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"
-            pen="camera: #player-camera; drawing: #my-first-drawing"
         ></a-sphere>
+
+        <!--             pen="camera: #player-camera; drawing: #my-first-drawing"
+ -->
 
         <!-- Player Rig -->
         <a-entity
@@ -310,6 +312,7 @@
                 mixin="controller-super-hands"
                 controls-shape-offset
             >
+                <a-sphere radius="0.02" color="red" pen="camera: #player-camera; drawing: #my-first-drawing"></a-sphere>
                 <a-entity id="player-left-controller-reverse-z" rotation="0 180 0"></a-entity>
             </a-entity>
 

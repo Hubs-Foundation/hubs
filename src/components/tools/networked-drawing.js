@@ -10,11 +10,21 @@ AFRAME.registerComponent("networked-drawing", {
   schema: {
     drawBuffer: { default: [] },
     segments: { default: 8 },
-    radius: { default: 0.02 }
+    radius: { default: 0.2 },
+    color: { default: { r: 255, g: 0, b: 0 } }
   },
 
   init() {
-    const material = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: 0xff0000 });
+    //TODO: figure out how to make this look nice
+    const options = {
+      roughness: 0.25,
+      metalness: 0.75,
+      vertexColors: THREE.VertexColors,
+      side: THREE.FrontSide,
+      emissive: 0xff0000
+    };
+
+    const material = new THREE.MeshStandardMaterial(options);
 
     this.sharedBufferGeometryManager = new SharedBufferGeometryManager();
     this.sharedBufferGeometryManager.addSharedBuffer(0, material, THREE.TriangleStripDrawMode);
@@ -28,12 +38,13 @@ AFRAME.registerComponent("networked-drawing", {
 
     this.sharedBuffer = this.sharedBufferGeometryManager.getSharedBuffer(0);
     this.drawing = this.sharedBuffer.getDrawing();
-    let sceneEl = document.querySelector("a-scene");
+    const sceneEl = document.querySelector("a-scene");
     this.scene = sceneEl.object3D;
     this.scene.add(this.drawing);
 
+    this.lineStarted = false;
+
     this.lastPoint = new THREE.Vector3();
-    this.lastPointSet = false;
     this.initialized = false;
 
     this.bufferIndex = 0;
@@ -51,19 +62,18 @@ AFRAME.registerComponent("networked-drawing", {
       if (this.networkedEl) {
         const isMine = NAF.utils.isMine(this.networkedEl);
         if (!isMine) {
-          // console.log(this.data.drawBuffer);
           if (this.peekBuffer() != null) {
             position.set(this.getNextFromBuffer(), this.getNextFromBuffer(), this.getNextFromBuffer());
             direction.set(this.getNextFromBuffer(), this.getNextFromBuffer(), this.getNextFromBuffer());
             normal.set(this.getNextFromBuffer(), this.getNextFromBuffer(), this.getNextFromBuffer());
 
-            if (!this.lastPointSet) {
+            if (!this.lineStarted) {
               this.startDraw(position, direction, normal);
             } else {
               this.draw(position, direction, normal);
             }
           } else if (this.data.drawBuffer.length > this.bufferIndex) {
-            if (this.lastPointSet) {
+            if (this.lineStarted) {
               this.endDraw(position, direction, normal);
             }
             this.bufferIndex++;
@@ -87,17 +97,30 @@ AFRAME.registerComponent("networked-drawing", {
     return this.lastPoint;
   },
 
+  //todo: if it is determined that a single point is trying to be drawn, just draw a point (sphere?)
+  //todo: draw sphere as multiple increasingly small segment rings
+
   draw: (() => {
-    const normal = new THREE.Vector3();
     return function(position, direction, normal) {
-      if (this.lastPointSet) {
+      if (!this.lineStarted) {
+        this.addSegments(this.lastSegments, position, direction, normal);
+        if (this.initialized) {
+          this.addVertex(this.lastSegments[0]);
+        }
+        this.drawCap(this.lastPoint, this.lastSegments);
+        this.lineStarted = true;
+      } else {
         this.addSegments(this.currentSegments, position, direction, normal);
 
         //draw the triangle strip
-        for (let i = 0; i <= this.data.segments; i++) {
-          this.addVertex(this.lastSegments[i % this.data.segments]);
-          this.addVertex(this.currentSegments[i % this.data.segments]);
+        for (let i = 0; i != this.data.segments + 1; i++) {
+          const lastSegment = this.lastSegments[i % this.data.segments];
+          const currentSegment = this.currentSegments[i % this.data.segments];
+          this.addVertex(lastSegment);
+          this.addVertex(currentSegment);
         }
+        this.sharedBuffer.restartPrimitive();
+        this.addVertex(this.currentSegments[0]);
 
         //update the drawing
         this.sharedBuffer.update();
@@ -109,56 +132,26 @@ AFRAME.registerComponent("networked-drawing", {
       }
 
       this.lastPoint.copy(position);
-      this.lastPointSet = true;
 
-      if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
-        this.data.drawBuffer.push(position.x);
-        this.data.drawBuffer.push(position.y);
-        this.data.drawBuffer.push(position.z);
-        this.data.drawBuffer.push(direction.x);
-        this.data.drawBuffer.push(direction.y);
-        this.data.drawBuffer.push(direction.z);
-        this.data.drawBuffer.push(normal.x);
-        this.data.drawBuffer.push(normal.y);
-        this.data.drawBuffer.push(normal.z);
-      }
+      this.addToDrawBuffer(position, direction, normal);
     };
   })(),
 
   startDraw: (() => {
-    const startPoint = new THREE.Vector3();
-    const inverseDirection = new THREE.Vector3();
     return function(position, direction, normal) {
-      //add the first point and cap
-      this.draw(position, direction, normal);
-      this.addSegments(this.lastSegments, this.getLastPoint(), direction, normal);
-
-      inverseDirection
-        .copy(direction)
-        .negate()
-        .multiplyScalar(this.data.radius);
-      startPoint.copy(this.getLastPoint()).add(inverseDirection);
-
-      //add the first vertex of the lastSegments if this drawing has already been initialized
-      if (this.initialized) {
-        this.addVertex(this.lastSegments[0]);
-      }
-
-      this.drawCap(startPoint, this.lastSegments);
-
-      this.sharedBuffer.restartPrimitive();
-      this.addVertex(this.lastSegments[0]);
+      this.lastPoint.copy(position);
+      this.addToDrawBuffer(position, direction, normal);
     };
   })(),
 
   endDraw: (() => {
+    const projectedDirection = new THREE.Vector3();
     const endPoint = new THREE.Vector3();
-    const direction = new THREE.Vector3();
     return function(position, direction, normal) {
       //add the final point and cap
       this.draw(position, direction, normal);
-      direction.copy(direction).multiplyScalar(this.data.radius);
-      endPoint.copy(position).add(direction);
+      projectedDirection.copy(direction).multiplyScalar(this.data.radius);
+      endPoint.copy(position).add(projectedDirection);
       this.drawCap(endPoint, this.currentSegments);
 
       //reset
@@ -166,15 +159,29 @@ AFRAME.registerComponent("networked-drawing", {
       if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
         this.data.drawBuffer.push(null);
       }
-      this.lastPointSet = false;
-      this.lastSegmentsSet = false;
+      this.lineStarted = false;
     };
   })(),
 
+  addToDrawBuffer(position, direction, normal) {
+    if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
+      this.data.drawBuffer.push(position.x);
+      this.data.drawBuffer.push(position.y);
+      this.data.drawBuffer.push(position.z);
+      this.data.drawBuffer.push(direction.x);
+      this.data.drawBuffer.push(direction.y);
+      this.data.drawBuffer.push(direction.z);
+      this.data.drawBuffer.push(normal.x);
+      this.data.drawBuffer.push(normal.y);
+      this.data.drawBuffer.push(normal.z);
+    }
+  },
+
   //add a "cap" to the start or end of a drawing
+  //TODO: fix this algorithm
   drawCap(point, segments) {
     let j = 0;
-    for (let i = 0; i < this.data.segments * 2 - 1; i++) {
+    for (let i = 0; i < this.data.segments * 2 - 2; i++) {
       if ((i - 1) % 3 === 0) {
         this.addVertex(point);
       } else {
@@ -195,9 +202,10 @@ AFRAME.registerComponent("networked-drawing", {
     }
   },
 
-  addVertex(point) {
+  addVertex(point, normal) {
     this.initialized = true;
     this.sharedBuffer.addVertex(point.x, point.y, point.z);
+    this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
   },
 
   rotatePointAroundAxis: (() => {
