@@ -131,7 +131,10 @@ const config = {
       },
       {
         test: /\.worker\.js$/,
-        use: { loader: "worker-loader" }
+        loader: "worker-loader",
+        options: {
+          name: "assets/js/[name]-[hash].js"
+        }
       },
       {
         test: /\.js$/,
