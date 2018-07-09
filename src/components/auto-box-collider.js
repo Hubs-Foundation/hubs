@@ -20,10 +20,13 @@ AFRAME.registerComponent("auto-box-collider", {
     const halfExtents = new THREE.Vector3()
       .addVectors(min.clone().negate(), max)
       .multiplyScalar(0.5 / this.el.object3D.scale.x);
+    const center = new THREE.Vector3().addVectors(min, max).multiplyScalar(0.5);
+    this.el.object3D.worldToLocal(center);
+    this.el.object3DMap.mesh.position.sub(center);
+
     this.el.setAttribute("shape", {
       shape: "box",
-      halfExtents: halfExtents,
-      offset: new THREE.Vector3(0, halfExtents.y, 0)
+      halfExtents: halfExtents
     });
     if (this.data.resize) {
       this.resize(min, max);
