@@ -1,6 +1,5 @@
 const whitelistedHosts = [/^.*\.reticulum\.io$/, /^.*hubs\.mozilla\.com$/, /^hubs\.local$/];
 const isHostWhitelisted = hostname => !!whitelistedHosts.filter(r => r.test(hostname)).length;
-
 let resolveMediaUrl = "/api/v1/media";
 if (process.env.NODE_ENV === "development") {
   resolveMediaUrl = `https://${process.env.DEV_RETICULUM_SERVER}${resolveMediaUrl}`;
@@ -18,9 +17,24 @@ export const resolveFarsparkUrl = async url => {
   }).then(r => r.json())).raw;
 };
 
-const fetchContentType = async url => fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
-let interactableId = 0;
+const farsparkRegex = /^farspark.*\.reticulum\.io$/;
+export const isFarsparkUrl = url => farsparkRegex.test(new URL(url).hostname);
+export const decodeFarsparkUrl = url => {
+  const parts = url.split("/");
+  return atob(parts[parts.length - 1]);
+};
 
+const staticContentMappings = {
+  "poly.googleapis.com": "model/gltf"
+};
+const fetchContentType = async url => {
+  const staticContentType = staticContentMappings[new URL(decodeFarsparkUrl(url)).hostname];
+  return staticContentType
+    ? Promise.resolve(staticContentType)
+    : fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
+};
+
+let interactableId = 0;
 const offset = { x: 0, y: 0, z: -1.5 };
 export const spawnNetworkedImage = (src, contentType) => {
   const scene = AFRAME.scenes[0];

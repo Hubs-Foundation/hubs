@@ -1,3 +1,4 @@
+import { isFarsparkUrl, decodeFarsparkUrl } from "../utils/media-utils";
 const GLTFCache = {};
 
 AFRAME.GLTFModelPlus = {
@@ -186,6 +187,10 @@ function cachedLoadGLTF(src, preferredTechnique, onProgress) {
   if (!GLTFCache[src]) {
     GLTFCache[src] = new Promise((resolve, reject) => {
       const gltfLoader = new THREE.GLTFLoader();
+      // Farspark urls can't handle relative paths. Use the original url as the base path.
+      if (isFarsparkUrl(src)) {
+        gltfLoader.path = THREE.LoaderUtils.extractUrlBase(decodeFarsparkUrl(src));
+      }
       gltfLoader.preferredTechnique = preferredTechnique;
       gltfLoader.load(src, resolve, onProgress, reject);
     });
