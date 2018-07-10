@@ -88,9 +88,7 @@ const config = {
         thumbsticktouchend: "thumb_up",
         triggerdown: ["action_grab", "index_down"],
         triggerup: ["action_release", "index_up"],
-        "axismove.reverseY": { left: "move", right: "move_duck" },
-        abuttondown: "action_primary_down",
-        abuttonup: "action_primary_up"
+        "axismove.reverseY": { left: "move", right: "move_duck" }
       },
       "windows-motion-controls": {
         joystick_dpad4_west: {

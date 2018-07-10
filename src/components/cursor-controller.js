@@ -48,7 +48,7 @@ AFRAME.registerComponent("cursor-controller", {
   updateRay: function() {
     this.raycasterAttr.origin = this.origin;
     this.raycasterAttr.direction = this.direction;
-    this.el.setAttribute("raycaster", this.raycasterAttr, true);
+    //    this.el.setAttribute("raycaster", this.raycasterAttr, true);
   },
 
   tick: (() => {
@@ -95,7 +95,7 @@ AFRAME.registerComponent("cursor-controller", {
       }
 
       if (this.data.drawLine) {
-        this.el.setAttribute("line", { start: this.origin.clone(), end: this.data.cursor.object3D.position.clone() });
+        //        this.el.setAttribute("line", { start: this.origin.clone(), end: this.data.cursor.object3D.position.clone() });
       }
     };
   })(),
@@ -137,7 +137,7 @@ AFRAME.registerComponent("cursor-controller", {
 
   setCursorVisibility: function(visible) {
     this.data.cursor.setAttribute("visible", visible);
-    this.el.setAttribute("line", { visible: visible && this.data.drawLine });
+    //    this.el.setAttribute("line", { visible: visible && this.data.drawLine });
   },
 
   forceCursorUpdate: function() {
