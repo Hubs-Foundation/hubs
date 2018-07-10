@@ -196,10 +196,6 @@ AFRAME.registerComponent("image-plus", {
         texture.flipY = false;
         texture.needsCorrectionFlipY = true;
       }
-
-      const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-      sound.setMediaElementSource(videoEl);
-      this.el.setObject3D("sound", sound);
     });
   },
 
@@ -238,6 +234,12 @@ AFRAME.registerComponent("image-plus", {
         }
 
         textureCache.set(url, { count: 1, texture });
+      }
+
+      if (contentType.startsWith("video")) {
+        const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+        sound.setMediaElementSource(texture.image);
+        this.el.setObject3D("sound", sound);
       }
     } catch (e) {
       console.error("Error loading media", this.data.src, e);
