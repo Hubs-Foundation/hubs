@@ -187,6 +187,7 @@
                     auto-box-collider
                     position-at-box-shape-border="target:.delete-button"
                     auto-scale-cannon-physics-body
+                    destroy-at-extreme-distances
                 >
                     <a-entity class="delete-button" visible-while-frozen scale="0.08 0.08 0.08">
                         <a-entity mixin="rounded-text-button" remove-object-button position="0 0 0"> </a-entity>
@@ -208,6 +209,7 @@
                     image-plus
                     sticky-object="autoLockOnLoad: true; autoLockOnRelease: true;"
                     position-at-box-shape-border="target:.delete-button;dirs:forward,back"
+                    destroy-at-extreme-distances
                 >
                     <a-entity class="delete-button" visible-while-frozen>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>

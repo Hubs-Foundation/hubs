@@ -73,6 +73,7 @@ import "./components/sticky-object";
 import "./components/auto-scale-cannon-physics-body";
 import "./components/position-at-box-shape-border";
 import "./components/remove-networked-object-button";
+import "./components/destroy-at-extreme-distances";
 
 import ReactDOM from "react-dom";
 import React from "react";
