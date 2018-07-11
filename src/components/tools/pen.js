@@ -17,8 +17,8 @@ AFRAME.registerComponent("pen", {
   },
 
   init() {
-    // this.onMouseDown = this.onMouseDown.bind(this);
-    // this.onMouseUp = this.onMouseUp.bind(this);
+    this.onMouseDown = this.onMouseDown.bind(this);
+    this.onMouseUp = this.onMouseUp.bind(this);
 
     this.startDraw = this.startDraw.bind(this);
     this.endDraw = this.endDraw.bind(this);
@@ -109,17 +109,17 @@ AFRAME.registerComponent("pen", {
     }
   },
 
-  // onMouseDown(e) {
-  //   if (this.currentDrawing && e.button === 0) {
-  //     this.startDraw();
-  //   }
-  // },
+  onMouseDown(e) {
+    if (this.currentDrawing && e.button === 0) {
+      this.startDraw();
+    }
+  },
 
-  // onMouseUp(e) {
-  //   if (this.currentDrawing && e.button === 0) {
-  //     this.endDraw();
-  //   }
-  // },
+  onMouseUp(e) {
+    if (this.currentDrawing && e.button === 0) {
+      this.endDraw();
+    }
+  },
 
   startDraw() {
     this.isDrawing = true;

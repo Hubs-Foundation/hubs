@@ -6,15 +6,43 @@
 
 import SharedBufferGeometryManager from "../../vendor/sharedbuffergeometrymanager";
 
+function round(x) {
+  return Math.round(x * 100000) / 100000;
+}
+
+function copyData(fromArray, toArray, fromIndex, toIndex) {
+  let i = fromIndex - 1;
+  let j = -1;
+  while (i + 1 < toIndex) {
+    if (fromArray[i + 1] === null) {
+      toArray[++j] = fromArray[++i];
+    } else {
+      //position
+      toArray[++j] = fromArray[++i];
+      toArray[++j] = fromArray[++i];
+      toArray[++j] = fromArray[++i];
+      //direction
+      toArray[++j] = fromArray[++i];
+      toArray[++j] = fromArray[++i];
+      toArray[++j] = fromArray[++i];
+      //normal
+      toArray[++j] = fromArray[++i];
+      toArray[++j] = fromArray[++i];
+      toArray[++j] = fromArray[++i];
+    }
+  }
+}
+
 AFRAME.registerComponent("networked-drawing", {
   schema: {
-    drawBuffer: { default: [] },
     segments: { default: 8 },
     radius: { default: 0.02 },
     color: { default: { r: 255, g: 0, b: 0 } }
   },
 
   init() {
+    this.drawBuffer = [];
+
     //TODO: figure out how to make this look nice
     const options = {
       roughness: 0.25,
@@ -22,6 +50,7 @@ AFRAME.registerComponent("networked-drawing", {
       vertexColors: THREE.VertexColors,
       side: THREE.DoubleSide,
       emissive: 0xff0000
+      // wireframe: true
     };
 
     const material = new THREE.MeshStandardMaterial(options);
@@ -43,55 +72,96 @@ AFRAME.registerComponent("networked-drawing", {
     this.scene.add(this.drawing);
 
     this.lineStarted = false;
+    this.remoteLineStarted = false;
 
     this.lastPoint = new THREE.Vector3();
     this.initialized = false;
 
     this.bufferIndex = 0;
 
-    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      this.networkedEl = networkedEl;
+    this.sendDrawBuffer = this.sendDrawBuffer.bind(this);
+    this.receiveDrawBuffer = this.receiveDrawBuffer.bind(this);
+
+    document.body.addEventListener("clientConnected", this.sendDrawBuffer);
+
+    NAF.connection.onConnect(() => {
+      NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+        this.networkedEl = networkedEl;
+
+        this.drawingId = "drawing-" + NAF.utils.getNetworkId(this.networkedEl);
+
+        if (!NAF.utils.isMine(this.networkedEl)) {
+          NAF.connection.subscribeToDataChannel(this.drawingId, this.receiveDrawBuffer);
+        }
+      });
     });
 
     this.debugGeometry = new THREE.SphereGeometry(0.02, 16, 16);
     this.debugMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
   },
 
+  remove() {
+    document.body.removeEventListener("clientConnected", this.sendDrawBuffer);
+    NAF.connection.unsubscribeToDataChannel(this.drawingId, this.receiveDrawBuffer);
+
+    this.scene.remove(this.drawing);
+  },
+
   tick: (() => {
     const position = new THREE.Vector3();
     const direction = new THREE.Vector3();
     const normal = new THREE.Vector3();
+    const copyArray = [];
     return function() {
-      if (this.networkedEl) {
-        const isMine = NAF.utils.isMine(this.networkedEl);
-        if (!isMine) {
-          if (this.peekBuffer() != null) {
-            position.set(this.getNextFromBuffer(), this.getNextFromBuffer(), this.getNextFromBuffer());
-            direction.set(this.getNextFromBuffer(), this.getNextFromBuffer(), this.getNextFromBuffer());
-            normal.set(this.getNextFromBuffer(), this.getNextFromBuffer(), this.getNextFromBuffer());
-
-            if (!this.lineStarted) {
+      if (this.bufferIndex < this.drawBuffer.length && NAF.connection.isConnected() && this.networkedEl) {
+        if (!NAF.utils.isMine(this.networkedEl)) {
+          if (this.drawBuffer[this.bufferIndex] != null && this.bufferIndex + 9 <= this.drawBuffer.length) {
+            --this.bufferIndex;
+            position.set(
+              this.drawBuffer[++this.bufferIndex],
+              this.drawBuffer[++this.bufferIndex],
+              this.drawBuffer[++this.bufferIndex]
+            );
+            direction.set(
+              this.drawBuffer[++this.bufferIndex],
+              this.drawBuffer[++this.bufferIndex],
+              this.drawBuffer[++this.bufferIndex]
+            );
+            normal.set(
+              this.drawBuffer[++this.bufferIndex],
+              this.drawBuffer[++this.bufferIndex],
+              this.drawBuffer[++this.bufferIndex]
+            );
+            if (!this.remoteLineStarted) {
               this.startDraw(position, direction, normal);
+              this.remoteLineStarted = true;
             } else {
               this.draw(position, direction, normal);
             }
-          } else if (this.data.drawBuffer.length > this.bufferIndex) {
+          } else if (this.drawBuffer[this.bufferIndex] === null) {
             this.endDraw(position, direction, normal);
-            this.bufferIndex++;
+            this.remoteLineStarted = false;
           }
-        } else if (this.data.drawBuffer.length > 0) {
-          this.bufferIndex = this.data.drawBuffer.length - 1;
+          ++this.bufferIndex;
+        } else if (this.drawBuffer.length > 0) {
+          copyArray.length = 0;
+          copyData(this.drawBuffer, copyArray, this.bufferIndex, this.drawBuffer.length);
+          NAF.connection.broadcastDataGuaranteed(this.drawingId, copyArray);
+          this.bufferIndex = this.drawBuffer.length;
         }
       }
     };
   })(),
 
-  peekBuffer() {
-    return this.data.drawBuffer[this.bufferIndex];
+  sendDrawBuffer(evt) {
+    if (NAF.utils.isMine(this.networkedEl)) {
+      //TODO: chunk this operation if drawBuffer is large
+      NAF.connection.sendDataGuaranteed(evt.detail.clientId, this.drawingId, this.drawBuffer);
+    }
   },
 
-  getNextFromBuffer() {
-    return this.data.drawBuffer[this.bufferIndex++];
+  receiveDrawBuffer(_, dataType, data) {
+    this.drawBuffer.push.apply(this.drawBuffer, data);
   },
 
   getLastPoint() {
@@ -99,6 +169,10 @@ AFRAME.registerComponent("networked-drawing", {
   },
 
   draw(position, direction, normal) {
+    if (!NAF.connection.isConnected()) {
+      return;
+    }
+
     if (!this.lineStarted) {
       this.addSegments(this.lastSegments, position, direction, normal, this.data.radius);
       if (this.initialized) {
@@ -115,6 +189,10 @@ AFRAME.registerComponent("networked-drawing", {
   },
 
   startDraw(position, direction, normal) {
+    if (!NAF.connection.isConnected()) {
+      return;
+    }
+
     this.lastPoint.copy(position);
     this.addToDrawBuffer(position, direction, normal);
   },
@@ -123,6 +201,10 @@ AFRAME.registerComponent("networked-drawing", {
     const projectedDirection = new THREE.Vector3();
     const projectedPoint = new THREE.Vector3();
     return function(position, direction, normal) {
+      if (!NAF.connection.isConnected()) {
+        return;
+      }
+
       if (!this.lineStarted) {
         this.drawPoint(position);
       } else {
@@ -133,7 +215,7 @@ AFRAME.registerComponent("networked-drawing", {
       }
 
       if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
-        this.data.drawBuffer.push(null);
+        this.drawBuffer.push(null);
       }
       this.lineStarted = false;
     };
@@ -141,15 +223,15 @@ AFRAME.registerComponent("networked-drawing", {
 
   addToDrawBuffer(position, direction, normal) {
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
-      this.data.drawBuffer.push(position.x);
-      this.data.drawBuffer.push(position.y);
-      this.data.drawBuffer.push(position.z);
-      this.data.drawBuffer.push(direction.x);
-      this.data.drawBuffer.push(direction.y);
-      this.data.drawBuffer.push(direction.z);
-      this.data.drawBuffer.push(normal.x);
-      this.data.drawBuffer.push(normal.y);
-      this.data.drawBuffer.push(normal.z);
+      this.drawBuffer.push(round(position.x));
+      this.drawBuffer.push(round(position.y));
+      this.drawBuffer.push(round(position.z));
+      this.drawBuffer.push(round(direction.x));
+      this.drawBuffer.push(round(direction.y));
+      this.drawBuffer.push(round(direction.z));
+      this.drawBuffer.push(round(normal.x));
+      this.drawBuffer.push(round(normal.y));
+      this.drawBuffer.push(round(normal.z));
     }
   },
 
@@ -208,7 +290,7 @@ AFRAME.registerComponent("networked-drawing", {
         this.addVertex(point);
       } else {
         this.addVertex(segments[segmentIndex % this.data.segments]);
-        segmentIndex++;
+        ++segmentIndex;
       }
     }
     this.sharedBuffer.restartPrimitive();
