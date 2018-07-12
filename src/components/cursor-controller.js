@@ -53,6 +53,7 @@ AFRAME.registerComponent("cursor-controller", {
 
   tick: (() => {
     const rayObjectRotation = new THREE.Quaternion();
+    const cameraPos = new THREE.Vector3();
 
     return function() {
       if (!this.enabled) {
@@ -97,6 +98,11 @@ AFRAME.registerComponent("cursor-controller", {
       if (this.data.drawLine) {
         this.el.setAttribute("line", { start: this.origin.clone(), end: this.data.cursor.object3D.position.clone() });
       }
+
+      // The curser will always be oriented towards the player about its Y axis, so bjects held by the cursor will rotate towards the player.
+      this.data.camera.object3D.getWorldPosition(cameraPos);
+      cameraPos.y = this.data.cursor.object3D.position.y;
+      this.data.cursor.object3D.lookAt(cameraPos);
     };
   })(),
 
