@@ -10,6 +10,7 @@ export TARGET_S3_PATH=$3
 # On exit, need to make all files writable so CI can clean on next build
 trap 'chmod -R a+rw .' EXIT
 
+echo "Started build in $(pwd)"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 pushd "$DIR/.."
