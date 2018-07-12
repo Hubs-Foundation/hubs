@@ -22,33 +22,32 @@ AFRAME.registerComponent("networked-drawing", {
   schema: {
     segments: { default: 8 },
     radius: { default: 0.02 },
-    color: { type: "color", default: "#00FF00" }
+    color: { type: "color", default: "#FF0000" }
   },
 
   init() {
     this.drawBuffer = [];
 
-    //TODO: figure out how to make this look nice
     const options = {
-      roughness: 0.25,
-      metalness: 0.75,
+      //seems to require calling computeVertexNormals() if > 0
+      roughness: 0,
+      metalness: 0,
       vertexColors: THREE.VertexColors,
-      side: THREE.DoubleSide,
-      emissive: 0xffffff,
-      emissiveIntensity: 0.1
-      // wireframe: true
+      side: THREE.DoubleSide
     };
 
-    this.color = new THREE.Color();
+    this.color = new THREE.Color(this.data.color);
+    this.radius = this.data.radius;
+    this.segments = this.data.segments;
 
     const material = new THREE.MeshStandardMaterial(options);
-
+    console.log(material);
     this.sharedBufferGeometryManager = new SharedBufferGeometryManager();
     this.sharedBufferGeometryManager.addSharedBuffer(0, material, THREE.TriangleStripDrawMode);
 
     this.lastSegments = [];
     this.currentSegments = [];
-    for (var x = 0; x < this.data.segments; x++) {
+    for (var x = 0; x < this.segments; x++) {
       this.lastSegments[x] = new THREE.Vector3();
       this.currentSegments[x] = new THREE.Vector3();
     }
@@ -83,9 +82,6 @@ AFRAME.registerComponent("networked-drawing", {
         }
       });
     });
-
-    this.debugGeometry = new THREE.SphereGeometry(0.02, 16, 16);
-    this.debugMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
   },
 
   remove() {
@@ -93,10 +89,6 @@ AFRAME.registerComponent("networked-drawing", {
     NAF.connection.unsubscribeToDataChannel(this.drawingId, this.receiveDrawBuffer);
 
     this.scene.remove(this.drawing);
-  },
-
-  update(oldData) {
-    if (oldData.color !== this.data.color) this.color.set(this.data.color);
   },
 
   tick: (() => {
@@ -107,7 +99,11 @@ AFRAME.registerComponent("networked-drawing", {
     return function() {
       if (this.bufferIndex < this.drawBuffer.length && NAF.connection.isConnected() && this.networkedEl) {
         if (!NAF.utils.isMine(this.networkedEl)) {
-          if (this.drawBuffer[this.bufferIndex] != null && this.bufferIndex + 9 <= this.drawBuffer.length) {
+          const head = this.drawBuffer[this.bufferIndex];
+          if (head != null && typeof head === "string") {
+            //TODO: check radius and segments as well, somehow
+            this.color.set(head);
+          } else if (head != null && this.bufferIndex + 9 <= this.drawBuffer.length) {
             --this.bufferIndex;
             position.set(
               this.drawBuffer[++this.bufferIndex],
@@ -130,7 +126,7 @@ AFRAME.registerComponent("networked-drawing", {
             } else {
               this.draw(position, direction, normal);
             }
-          } else if (this.drawBuffer[this.bufferIndex] === null) {
+          } else if (head === null) {
             this.endDraw(position, direction, normal);
             this.remoteLineStarted = false;
           }
@@ -183,24 +179,31 @@ AFRAME.registerComponent("networked-drawing", {
     }
 
     if (!this.lineStarted) {
-      this.addSegments(this.lastSegments, position, direction, normal, this.data.radius);
+      this.addSegments(this.lastSegments, position, direction, normal, this.radius);
       if (this.initialized) {
         this.addVertex(this.lastSegments[0]); //discarded
       }
       this.drawCap(this.lastPoint, this.lastSegments);
       this.lineStarted = true;
     } else {
-      this.addSegments(this.currentSegments, position, direction, normal, this.data.radius);
+      this.addSegments(this.currentSegments, position, direction, normal, this.radius);
       this.drawCylinder();
     }
     this.lastPoint.copy(position);
     this.addToDrawBuffer(position, direction, normal);
   },
 
-  startDraw(position, direction, normal) {
+  startDraw(position, direction, normal, color, radius, segments) {
     if (!NAF.connection.isConnected()) {
       return;
     }
+
+    if (color && color != "#" + this.color.getHex()) {
+      this.color.set(color);
+      this.drawBuffer.push(color);
+    }
+    if (radius) this.radius = radius;
+    if (segments) this.segments = segments;
 
     this.lastPoint.copy(position);
     this.addToDrawBuffer(position, direction, normal);
@@ -218,7 +221,7 @@ AFRAME.registerComponent("networked-drawing", {
         this.drawPoint(position);
       } else {
         this.draw(position, direction, normal);
-        projectedDirection.copy(direction).multiplyScalar(this.data.radius);
+        projectedDirection.copy(direction).multiplyScalar(this.radius);
         projectedPoint.copy(position).add(projectedDirection);
         this.drawCap(projectedPoint, this.lastSegments);
       }
@@ -247,16 +250,16 @@ AFRAME.registerComponent("networked-drawing", {
   //draw a cylinder from last to current segments
   drawCylinder() {
     this.addVertex(this.lastSegments[0]); //discarded
-    for (let i = 0; i != this.data.segments + 1; i++) {
-      this.addVertex(this.lastSegments[i % this.data.segments]);
-      this.addVertex(this.currentSegments[i % this.data.segments]);
+    for (let i = 0; i != this.segments + 1; i++) {
+      this.addVertex(this.lastSegments[i % this.segments]);
+      this.addVertex(this.currentSegments[i % this.segments]);
     }
 
     this.sharedBuffer.restartPrimitive();
 
     this.sharedBuffer.update();
 
-    for (var j = 0; j < this.data.segments; j++) {
+    for (var j = 0; j < this.segments; j++) {
       this.lastSegments[j].copy(this.currentSegments[j]);
     }
   },
@@ -269,23 +272,23 @@ AFRAME.registerComponent("networked-drawing", {
     const projectedDirection = new THREE.Vector3();
     const projectedPoint = new THREE.Vector3();
     return function(position) {
-      projectedDirection.copy(up).multiplyScalar(this.data.radius * 0.5);
+      projectedDirection.copy(up).multiplyScalar(this.radius * 0.5);
       projectedPoint.copy(position).add(projectedDirection);
-      this.addSegments(this.lastSegments, projectedPoint, up, left, this.data.radius * 0.5);
+      this.addSegments(this.lastSegments, projectedPoint, up, left, this.radius * 0.5);
       if (this.initialized) {
         this.addVertex(this.lastSegments[0]); //discarded
       }
-      projectedDirection.copy(up).multiplyScalar(this.data.radius * 0.75);
+      projectedDirection.copy(up).multiplyScalar(this.radius * 0.75);
       projectedPoint.copy(position).add(projectedDirection);
       this.drawCap(projectedPoint, this.lastSegments);
       this.addVertex(this.lastSegments[0]); //discared
-      this.addSegments(this.currentSegments, position, up, left, this.data.radius * 0.75);
+      this.addSegments(this.currentSegments, position, up, left, this.radius * 0.75);
       this.drawCylinder();
-      projectedDirection.copy(down).multiplyScalar(this.data.radius * 0.5);
+      projectedDirection.copy(down).multiplyScalar(this.radius * 0.5);
       projectedPoint.copy(position).add(projectedDirection);
-      this.addSegments(this.currentSegments, projectedPoint, up, left, this.data.radius * 0.5);
+      this.addSegments(this.currentSegments, projectedPoint, up, left, this.radius * 0.5);
       this.drawCylinder();
-      projectedDirection.copy(down).multiplyScalar(this.data.radius * 0.75);
+      projectedDirection.copy(down).multiplyScalar(this.radius * 0.75);
       projectedPoint.copy(position).add(projectedDirection);
       this.drawCap(projectedPoint, this.lastSegments);
     };
@@ -294,11 +297,11 @@ AFRAME.registerComponent("networked-drawing", {
   //draw a cap to start/end a line
   drawCap(point, segments) {
     let segmentIndex = 0;
-    for (let i = 0; i < this.data.segments + 4; i++) {
+    for (let i = 0; i < this.segments + 4; i++) {
       if ((i - 1) % 4 === 0) {
         this.addVertex(point);
       } else {
-        this.addVertex(segments[segmentIndex % this.data.segments]);
+        this.addVertex(segments[segmentIndex % this.segments]);
         ++segmentIndex;
       }
     }
@@ -310,15 +313,12 @@ AFRAME.registerComponent("networked-drawing", {
     this.initialized = true;
     this.sharedBuffer.addVertex(point.x, point.y, point.z);
     this.sharedBuffer.addColor(this.color.r, this.color.g, this.color.b);
-    // const sphere = new THREE.Mesh(this.debugGeometry, this.debugMaterial);
-    // this.scene.add(sphere);
-    // sphere.position.copy(point);
   },
 
   //calculate the segments for a given point
   addSegments(segmentsList, point, forward, up, radius) {
-    const angleIncrement = Math.PI * 2 / this.data.segments;
-    for (let i = 0; i < this.data.segments; i++) {
+    const angleIncrement = Math.PI * 2 / this.segments;
+    for (let i = 0; i < this.segments; i++) {
       const segment = segmentsList[i];
       this.rotatePointAroundAxis(segment, point, forward, up, angleIncrement * i, radius);
     }

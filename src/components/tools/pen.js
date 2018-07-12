@@ -125,10 +125,8 @@ AFRAME.registerComponent("pen", {
     this.isDrawing = true;
     this.el.object3D.getWorldPosition(this.worldPosition);
     this.getNormal(this.normal, this.worldPosition, this.direction);
-    this.data.drawing.setAttribute("networked-drawing", {
-      color: "#" + Math.floor(Math.random() * 16777215).toString(16)
-    });
-    this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal);
+    const color = "#" + Math.floor(Math.random() * 16777215).toString(16);
+    this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal, color);
   },
 
   endDraw() {
