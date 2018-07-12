@@ -41,8 +41,8 @@ pipeline {
 
           sh "/usr/bin/script --return -c ${shellString(habCommand)} /dev/null"
 
-          sh "aws s3 sync --acl public-read --cache-control max-age=31556926 build/assets $(shellString(s3AssetsDestination))"
-          sh "aws s3 sync --acl public-read --cache-control no-cache --delete build/pages $(shellString(s3PagesDestination))"
+          sh "aws s3 sync --acl public-read --cache-control max-age=31556926 build/assets ${shellString(s3AssetsDestination)}"
+          sh "aws s3 sync --acl public-read --cache-control no-cache --delete build/pages ${shellString(s3PagesDestination)}"
         }
       }
     }
