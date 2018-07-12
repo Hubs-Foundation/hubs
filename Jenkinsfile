@@ -34,7 +34,11 @@ pipeline {
       steps {
         script {
           def baseAssetsPath = "https://assets-dev.reticium.io/"
-          sh "GENERATE_SMOKE_TEST=true BASE_ASSETS_PATH=${shellString(baseAssetsPath)} yarn build -- --output-path build"
+          def s3Destination = "s3://assets.reticulum-dev-7f8d39c45878ee2e/hubs"
+
+          sh '''
+            /usr/bin/script --return -c \\\\"sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh ${shellString(baseAssetsPath)} ${shellString(s3Destination)}\\\\" /dev/null
+          '''
         }
       }
     }
