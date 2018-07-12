@@ -28,7 +28,7 @@ mkdir -p /usr/local/share
 
 rm /usr/bin/env
 ln -s "$(hab pkg path core/coreutils)/bin/env" /usr/bin/env
-hab pkg install -b core/coreutils core/bash core/node core/yarn core/aws-cli
+hab pkg install -b core/coreutils core/bash core/node core/yarn core/aws-cli core/git
 
 yarn install --cache-folder .yarn
 ls node_modules
