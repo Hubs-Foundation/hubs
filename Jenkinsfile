@@ -34,7 +34,7 @@ pipeline {
           def baseAssetsPath = env.BASE_ASSETS_PATH
           def assetBundleServer = env.ASSET_BUNDLE_SERVER
           def targetS3Url = env.TARGET_S3_URL
-          def slackUrl = env.SLACK_URL
+          def slackURL = env.SLACK_URL
 
           def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh ${baseAssetsPath} ${assetBundleServer} ${targetS3Url}"
           // sh "/usr/bin/script --return -c ${shellString(habCommand)} /dev/null"
