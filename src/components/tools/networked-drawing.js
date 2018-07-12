@@ -13,23 +13,8 @@ function round(x) {
 function copyData(fromArray, toArray, fromIndex, toIndex) {
   let i = fromIndex - 1;
   let j = -1;
-  while (i + 1 < toIndex) {
-    if (fromArray[i + 1] === null) {
-      toArray[++j] = fromArray[++i];
-    } else {
-      //position
-      toArray[++j] = fromArray[++i];
-      toArray[++j] = fromArray[++i];
-      toArray[++j] = fromArray[++i];
-      //direction
-      toArray[++j] = fromArray[++i];
-      toArray[++j] = fromArray[++i];
-      toArray[++j] = fromArray[++i];
-      //normal
-      toArray[++j] = fromArray[++i];
-      toArray[++j] = fromArray[++i];
-      toArray[++j] = fromArray[++i];
-    }
+  while (i + 1 <= toIndex) {
+    toArray[++j] = fromArray[++i];
   }
 }
 
@@ -144,8 +129,9 @@ AFRAME.registerComponent("networked-drawing", {
           }
           ++this.bufferIndex;
         } else if (this.drawBuffer.length > 0) {
+          //TODO: don't do this on every tick?
           copyArray.length = 0;
-          copyData(this.drawBuffer, copyArray, this.bufferIndex, this.drawBuffer.length);
+          copyData(this.drawBuffer, copyArray, this.bufferIndex, this.drawBuffer.length - 1);
           NAF.connection.broadcastDataGuaranteed(this.drawingId, copyArray);
           this.bufferIndex = this.drawBuffer.length;
         }
@@ -153,12 +139,28 @@ AFRAME.registerComponent("networked-drawing", {
     };
   })(),
 
-  sendDrawBuffer(evt) {
-    if (NAF.utils.isMine(this.networkedEl)) {
-      //TODO: chunk this operation if drawBuffer is large
-      NAF.connection.sendDataGuaranteed(evt.detail.clientId, this.drawingId, this.drawBuffer);
-    }
-  },
+  sendDrawBuffer: (() => {
+    const copyArray = [];
+    //This number needs to be approx. < ~6000 based on napkin math
+    //see: https://github.com/webrtc/adapter/blob/682e0f2439e139da6c0c406370eae820637b8c1a/src/js/common_shim.js#L157
+    const chunkAmount = 3000;
+    return function(evt) {
+      if (NAF.utils.isMine(this.networkedEl)) {
+        if (this.drawBuffer.length <= chunkAmount) {
+          NAF.connection.sendDataGuaranteed(evt.detail.clientId, this.drawingId, this.drawBuffer);
+        } else {
+          //TODO: do this in tick?
+          let x = 0;
+          while (x < this.drawBuffer.length) {
+            x = Math.min(x + chunkAmount, this.drawBuffer.length);
+            copyArray.length = 0;
+            copyData(this.drawBuffer, copyArray, x - chunkAmount, x - 1);
+            NAF.connection.sendDataGuaranteed(evt.detail.clientId, this.drawingId, copyArray);
+          }
+        }
+      }
+    };
+  })(),
 
   receiveDrawBuffer(_, dataType, data) {
     this.drawBuffer.push.apply(this.drawBuffer, data);
