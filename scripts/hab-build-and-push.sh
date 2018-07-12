@@ -13,6 +13,7 @@ trap 'chmod -R a+rw .' EXIT
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 pushd "$DIR/.."
+echo "Building in $(pwd)"
 
 mkdir -p .yarn
 mkdir -p node_modules
