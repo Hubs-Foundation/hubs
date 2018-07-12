@@ -46,7 +46,7 @@ pipeline {
             "*<http://localhost:8080/job/${env.JOB_NAME}/${env.BUILD_NUMBER}|#${env.BUILD_NUMBER}>* *${env.JOB_NAME}* " +
             "<https://github.com/mozilla/hubs/commit/$gitSha|$gitSha> " +
             "Hubs: ```${gitSha} ${gitMessage}```\n" +
-            "<${smokeURL}https://smoke-hubs.mozilla.com/0zuesf6c6mf/smoke-test?pollForSha=${gitSha}|Smoke Test> - to push:\n" +
+            "<${smokeURL}?pollForSha=${gitSha}|Smoke Test> - to push:\n" +
             "`/mr hubs deploy`"
           )
           def payload = 'payload=' + JsonOutput.toJson([
