@@ -28,7 +28,7 @@ const staticContentMappings = {
   "poly.googleapis.com": "model/gltf"
 };
 const fetchContentType = async url => {
-  const staticContentType = staticContentMappings[new URL(decodeFarsparkUrl(url)).hostname];
+  const staticContentType = staticContentMappings[new URL(isFarsparkUrl(url) ? decodeFarsparkUrl(url) : url).hostname];
   return staticContentType
     ? Promise.resolve(staticContentType)
     : fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
