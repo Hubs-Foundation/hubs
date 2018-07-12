@@ -14,34 +14,54 @@ let nextGrabId = 0;
  */
 AFRAME.registerComponent("super-spawner", {
   schema: {
+    /**
+     * Source of the media asset the spawner will spawn when grabbed. This can be a gltf, video, or image, or a url that the reticiulm media API can resolve to a gltf, video, or image.
+     */
     src: { default: "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf" },
 
+    /**
+     * Spawn the object at a custom position, rather than at the center of the spanwer.
+     */
     useCustomSpawnPosition: { default: false },
     spawnPosition: { type: "vec3" },
 
+    /**
+     * Spawn the object with a custom orientation, rather than copying that of the spawner.
+     */
     useCustomSpawnRotation: { default: false },
     spawnRotation: { type: "vec4" },
 
+    /**
+     * The events to emit for programmatically grabbing and releasing objects
+     */
     grabEvents: { default: ["cursor-grab", "hand_grab"] },
     releaseEvents: { default: ["cursor-release", "hand_release"] },
 
-    spawnCooldown: { default: 1 }
+    /**
+     * The spawner will become invisible and ungrabbable for this ammount of time after being grabbed. This can prevent rapidly spawning objects.
+     */
+    spawnCooldown: { default: 1 },
+
+    /**
+     * Center the spawned object on the hand that grabbed it after it finishes loading. By default the object will be grabbed relative to where the spawner was grabbed
+     */
+    centerSpawnedObject: { default: false }
   },
 
   init() {
     this.heldEntities = new Map();
     this.cooldownTimeout = null;
-    this.handleGrabStart = this.handleGrabStart.bind(this);
+    this.onGrabStart = this.onGrabStart.bind(this);
     this.onGrabEnd = this.onGrabEnd.bind(this);
   },
 
   play() {
-    this.el.addEventListener("grab-start", this.handleGrabStart);
+    this.el.addEventListener("grab-start", this.onGrabStart);
     this.el.addEventListener("grab-end", this.onGrabEnd);
   },
 
   pause() {
-    this.el.removeEventListener("grab-start", this.handleGrabStart);
+    this.el.removeEventListener("grab-start", this.onGrabStart);
     this.el.removeEventListener("grab-end", this.onGrabEnd);
 
     if (this.cooldownTimeout) {
@@ -56,25 +76,7 @@ AFRAME.registerComponent("super-spawner", {
     this.heldEntities.clear();
   },
 
-  onGrabEnd(e) {
-    this.heldEntities.delete(e.detail.hand);
-    // This tells super-hands we are handling this releae
-    e.preventDefault();
-  },
-
-  activateCooldown() {
-    if (this.data.spawnCooldown > 0) {
-      this.el.setAttribute("visible", false);
-      this.el.classList.remove("interactable");
-      this.cooldownTimeout = setTimeout(() => {
-        this.el.setAttribute("visible", true);
-        this.el.classList.add("interactable");
-        this.cooldownTimeout = null;
-      }, this.data.spawnCooldown * 1000);
-    }
-  },
-
-  async handleGrabStart(e) {
+  async onGrabStart(e) {
     if (this.cooldownTimeout) {
       return;
     }
@@ -100,12 +102,31 @@ AFRAME.registerComponent("super-spawner", {
 
     // If we are still holding the spawner with the hand that grabbed to create this entity, release the spawner and grab the entity
     if (this.heldEntities.get(hand) === thisGrabId) {
-      entity.body.position.copy(hand.object3D.position);
-      entity.body.velocity.set(0, 0, 0);
+      if (this.data.centerSpawnedObject) {
+        entity.body.position.copy(hand.object3D.position);
+      }
       for (let i = 0; i < this.data.grabEvents.length; i++) {
         hand.emit(this.data.releaseEvents[i]);
         hand.emit(this.data.grabEvents[i], { targetEntity: entity });
       }
+    }
+  },
+
+  onGrabEnd(e) {
+    this.heldEntities.delete(e.detail.hand);
+    // This tells super-hands we are handling this releae
+    e.preventDefault();
+  },
+
+  activateCooldown() {
+    if (this.data.spawnCooldown > 0) {
+      this.el.setAttribute("visible", false);
+      this.el.classList.remove("interactable");
+      this.cooldownTimeout = setTimeout(() => {
+        this.el.setAttribute("visible", true);
+        this.el.classList.add("interactable");
+        this.cooldownTimeout = null;
+      }, this.data.spawnCooldown * 1000);
     }
   }
 });
