@@ -34,9 +34,15 @@ pipeline {
           def baseAssetsPath = "https://assets-dev.reticium.io/"
           def assetBundleServer = "https://assets-bundles-dev.reticium.io/"
           def s3Destination = "s3://assets.reticulum-dev-7f8d39c45878ee2e/hubs"
-          def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh ${baseAssetsPath} ${assetBundleServer} ${s3Destination}"
+          def s3AssetsDestination = "${s3Destination}/assets"
+          def s3PagesDestination = "${s3Destination}/pages"
+
+          def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh ${baseAssetsPath} ${assetBundleServer}"
 
           sh "/usr/bin/script --return -c ${shellString(habCommand)} /dev/null"
+
+          sh "aws s3 sync --acl public-read --cache-control max-age=31556926 build/assets $(shellString(s3AssetsDestination))"
+          sh "aws s3 sync --acl public-read --cache-control no-cache --delete build/pages $(shellString(s3PagesDestination))"
         }
       }
     }
