@@ -24,7 +24,7 @@ pipeline {
   stages {
     stage('pre-build') {
       steps {
-        checkout scm: [$class: 'GitSCM', branches: scm.branches, clean: false, clearWorkspace: false]
+        checkout scm: [$class: 'GitSCM', clean: false, clearWorkspace: false]
 
         sh 'rm -rf ./build ./tmp'
       }
