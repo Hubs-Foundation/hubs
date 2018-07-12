@@ -34,6 +34,7 @@ pipeline {
           def baseAssetsPath = env.BASE_ASSETS_PATH
           def assetBundleServer = env.ASSET_BUNDLE_SERVER
           def targetS3Url = env.TARGET_S3_URL
+          def smokeURL = env.SMOKE_URL
           def slackURL = env.SLACK_URL
 
           def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh ${baseAssetsPath} ${assetBundleServer} ${targetS3Url}"
@@ -45,7 +46,7 @@ pipeline {
             "*<http://localhost:8080/job/${env.JOB_NAME}/${env.BUILD_NUMBER}|#${env.BUILD_NUMBER}>* *${env.JOB_NAME}* " +
             "<https://github.com/mozilla/hubs/commit/$gitSha|$gitSha> " +
             "Hubs: ```${gitSha} ${gitMessage}```\n" +
-            "<https://smoke-hubs.mozilla.com/0zuesf6c6mf/smoke-test?pollForSha=${gitSha}|Smoke Test> - to push:\n" +
+            "<${smokeURL}https://smoke-hubs.mozilla.com/0zuesf6c6mf/smoke-test?pollForSha=${gitSha}|Smoke Test> - to push:\n" +
             "`/mr hubs deploy`"
           )
           def payload = 'payload=' + JsonOutput.toJson([
