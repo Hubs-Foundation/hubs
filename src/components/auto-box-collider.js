@@ -24,13 +24,13 @@ AFRAME.registerComponent("auto-box-collider", {
     this.el.object3D.worldToLocal(center);
     this.el.object3DMap.mesh.position.sub(center);
 
+    if (this.data.resize) {
+      this.resize(min, max);
+    }
     this.el.setAttribute("shape", {
       shape: "box",
       halfExtents: halfExtents
     });
-    if (this.data.resize) {
-      this.resize(min, max);
-    }
     this.el.object3D.rotation.copy(rotation);
     this.el.removeAttribute("auto-box-collider");
   },

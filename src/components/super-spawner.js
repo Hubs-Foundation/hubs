@@ -1,3 +1,12 @@
+import { addMedia } from "../utils/media-utils";
+
+const waitForEvent = function(eventName, eventObj) {
+  return new Promise(resolve => {
+    eventObj.addEventListener(eventName, resolve, { once: true });
+  });
+};
+
+let nextGrabId = 0;
 /**
  * Spawns networked objects when grabbed.
  * @namespace network
@@ -5,108 +14,98 @@
  */
 AFRAME.registerComponent("super-spawner", {
   schema: {
-    template: { default: "" },
+    src: { default: "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf" },
+
     useCustomSpawnPosition: { default: false },
     spawnPosition: { type: "vec3" },
+
     useCustomSpawnRotation: { default: false },
     spawnRotation: { type: "vec4" },
-    events: { default: ["cursor-grab", "hand_grab"] },
+
+    grabEvents: { default: ["cursor-grab", "hand_grab"] },
+    releaseEvents: { default: ["cursor-release", "hand_release"] },
+
     spawnCooldown: { default: 1 }
   },
 
-  init: function() {
-    this.entities = new Map();
-    this.timeout = null;
+  init() {
+    this.heldEntities = new Map();
+    this.cooldownTimeout = null;
+    this.handleGrabStart = this.handleGrabStart.bind(this);
+    this.onGrabEnd = this.onGrabEnd.bind(this);
   },
 
-  play: function() {
-    this.handleGrabStart = this._handleGrabStart.bind(this);
+  play() {
     this.el.addEventListener("grab-start", this.handleGrabStart);
+    this.el.addEventListener("grab-end", this.onGrabEnd);
   },
 
-  pause: function() {
+  pause() {
     this.el.removeEventListener("grab-start", this.handleGrabStart);
+    this.el.removeEventListener("grab-end", this.onGrabEnd);
 
-    if (this.timeout) {
-      clearTimeout(this.timeout);
-      this.timeout = null;
+    if (this.cooldownTimeout) {
+      clearTimeout(this.cooldownTimeout);
+      this.cooldownTimeout = null;
       this.el.setAttribute("visible", true);
       this.el.classList.add("interactable");
     }
   },
 
-  remove: function() {
-    for (const entity of this.entities.keys()) {
-      const data = this.entities.get(entity);
-      entity.removeEventListener("componentinitialized", data.componentinInitializedListener);
-      entity.removeEventListener("body-loaded", data.bodyLoadedListener);
-    }
-
-    this.entities.clear();
+  remove() {
+    this.heldEntities.clear();
   },
 
-  _handleGrabStart: function(e) {
-    if (this.timeout) {
-      return;
-    }
-    const hand = e.detail.hand;
-    const entity = document.createElement("a-entity");
+  onGrabEnd(e) {
+    this.heldEntities.delete(e.detail.hand);
+    // This tells super-hands we are handling this releae
+    e.preventDefault();
+  },
 
-    entity.setAttribute("networked", "template:" + this.data.template);
-
-    const componentinInitializedListener = this._handleComponentInitialzed.bind(this, entity);
-    const bodyLoadedListener = this._handleBodyLoaded.bind(this, entity);
-    this.entities.set(entity, {
-      hand: hand,
-      componentInitialized: false,
-      bodyLoaded: false,
-      componentinInitializedListener: componentinInitializedListener,
-      bodyLoadedListener: bodyLoadedListener
-    });
-
-    entity.addEventListener("componentinitialized", componentinInitializedListener);
-    entity.addEventListener("body-loaded", bodyLoadedListener);
-
-    const pos = this.data.useCustomSpawnPosition ? this.data.spawnPosition : this.el.getAttribute("position");
-    entity.setAttribute("position", pos);
-    const rot = this.data.useCustomSpawnRotation ? this.data.spawnRotation : this.el.getAttribute("rotation");
-    entity.setAttribute("rotation", rot);
-    this.el.sceneEl.appendChild(entity);
-
+  activateCooldown() {
     if (this.data.spawnCooldown > 0) {
       this.el.setAttribute("visible", false);
       this.el.classList.remove("interactable");
-      this.timeout = setTimeout(() => {
+      this.cooldownTimeout = setTimeout(() => {
         this.el.setAttribute("visible", true);
         this.el.classList.add("interactable");
-        this.timeout = null;
+        this.cooldownTimeout = null;
       }, this.data.spawnCooldown * 1000);
     }
   },
 
-  _handleComponentInitialzed: function(entity, e) {
-    if (e.detail.name === "grabbable") {
-      this.entities.get(entity).componentInitialized = true;
-      this._emitEvents.call(this, entity);
+  async handleGrabStart(e) {
+    if (this.cooldownTimeout) {
+      return;
     }
-  },
 
-  _handleBodyLoaded: function(entity) {
-    this.entities.get(entity).bodyLoaded = true;
-    this._emitEvents.call(this, entity);
-  },
+    // This tells super-hands we are handling this grab. The user is now "grabbing" the spawner
+    e.preventDefault();
 
-  _emitEvents: function(entity) {
-    const data = this.entities.get(entity);
-    if (data.componentInitialized && data.bodyLoaded) {
-      for (let i = 0; i < this.data.events.length; i++) {
-        data.hand.emit(this.data.events[i], { targetEntity: entity });
+    const hand = e.detail.hand;
+    const thisGrabId = nextGrabId++;
+    this.heldEntities.set(hand, thisGrabId);
+
+    const entity = await addMedia(this.data.src);
+    entity.object3D.position.copy(
+      this.data.useCustomSpawnPosition ? this.data.spawnPosition : this.el.object3D.position
+    );
+    entity.object3D.rotation.copy(
+      this.data.useCustomSpawnRotation ? this.data.spawnRotation : this.el.object3D.rotation
+    );
+
+    this.activateCooldown();
+
+    await waitForEvent("body-loaded", entity);
+
+    // If we are still holding the spawner with the hand that grabbed to create this entity, release the spawner and grab the entity
+    if (this.heldEntities.get(hand) === thisGrabId) {
+      entity.body.position.copy(hand.object3D.position);
+      entity.body.velocity.set(0, 0, 0);
+      for (let i = 0; i < this.data.grabEvents.length; i++) {
+        hand.emit(this.data.releaseEvents[i]);
+        hand.emit(this.data.grabEvents[i], { targetEntity: entity });
       }
-
-      entity.removeEventListener("componentinitialized", data.componentinInitializedListener);
-      entity.removeEventListener("body-loaded", data.bodyLoadedListener);
-
-      this.entities.delete(entity);
     }
   }
 });

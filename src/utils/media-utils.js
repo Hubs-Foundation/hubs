@@ -57,7 +57,7 @@ export const spawnNetworkedInteractable = src => {
   model.id = "interactable-model-" + interactableId++;
   model.setAttribute("networked", { template: "#interactable-model" });
   model.setAttribute("offset-relative-to", {
-    on: "model-loaded",
+    // on: "model-loaded",
     target: "#player-camera",
     offset: offset,
     selfDestruct: true
@@ -76,9 +76,9 @@ export const addMedia = async url => {
     const contentType = await fetchContentType(farsparkUrl);
 
     if (contentType.startsWith("image/") || contentType.startsWith("video/")) {
-      spawnNetworkedImage(farsparkUrl, contentType);
+      return spawnNetworkedImage(farsparkUrl, contentType);
     } else if (contentType.startsWith("model/gltf") || url.endsWith(".gltf") || url.endsWith(".glb")) {
-      spawnNetworkedInteractable(farsparkUrl);
+      return spawnNetworkedInteractable(farsparkUrl);
     } else {
       throw new Error(`Unsupported content type: ${contentType}`);
     }
