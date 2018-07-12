@@ -16,6 +16,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pushd "$DIR/.."
 echo "Building in $(pwd)"
 
+ls
+
 mkdir -p .yarn
 mkdir -p node_modules
 mkdir -p build
