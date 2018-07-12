@@ -21,11 +21,12 @@ mkdir -p build
 # https://github.com/yarnpkg/yarn/issues/4628
 mkdir -p /usr/local/share
 
-[[ ! -f /usr/bin/env ]] && ln -s "$(hab pkg path core/coreutils)/bin/env" /usr/bin/env
+rm /usr/bin/env
+ln -s "$(hab pkg path core/coreutils)/bin/env" /usr/bin/env
 hab pkg install -b core/coreutils core/bash core/node core/yarn core/aws-cli
 
 yarn install --cache-folder .yarn
-GENERATE_SMOKE_TESTS=true yarn build --output-path build
+GENERATE_SMOKE_TESTS=true yarn build -- --output-path build
 mkdir build/pages
 mv build/*.html build/pages
 
