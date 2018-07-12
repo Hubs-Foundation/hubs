@@ -8,19 +8,15 @@ if (process.env.NODE_ENV === "development") {
 export const resolveFarsparkUrl = async url => {
   const parsedUrl = new URL(url);
   if ((parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") || isHostWhitelisted(parsedUrl.hostname))
-    return [url, url];
+    return { raw: url, origin: url };
 
-  const mediaResponse = await fetch(resolveMediaUrl, {
+  return await fetch(resolveMediaUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ media: { url } })
   }).then(r => r.json());
-  return [mediaResponse.raw, mediaResponse.origin];
 };
 
-const staticContentMappings = {
-  "poly.googleapis.com": "model/gltf"
-};
 const fetchContentType = async url => fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
 
 let interactableId = 0;
@@ -59,14 +55,14 @@ export const spawnNetworkedInteractable = (src, basePath) => {
 
 export const addMedia = async url => {
   try {
-    const [farsparkUrl, originUrl] = await resolveFarsparkUrl(url);
-    console.log("resolved", url, farsparkUrl, originUrl);
+    const { raw, origin, meta } = await resolveFarsparkUrl(url);
+    console.log("resolved", url, raw, origin, meta);
 
-    const contentType = staticContentMappings[new URL(originUrl).hostname] || (await fetchContentType(farsparkUrl));
+    const contentType = (meta && meta.expected_content_type) || (await fetchContentType(raw));
     if (contentType.startsWith("image/") || contentType.startsWith("video/")) {
-      return spawnNetworkedImage(farsparkUrl, contentType);
+      return spawnNetworkedImage(raw, contentType);
     } else if (contentType.startsWith("model/gltf") || url.endsWith(".gltf") || url.endsWith(".glb")) {
-      return spawnNetworkedInteractable(farsparkUrl, THREE.LoaderUtils.extractUrlBase(originUrl));
+      return spawnNetworkedInteractable(raw, THREE.LoaderUtils.extractUrlBase(origin));
     } else {
       throw new Error(`Unsupported content type: ${contentType}`);
     }
