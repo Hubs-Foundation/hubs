@@ -29,3 +29,6 @@ yarn install --cache-folder .yarn
 GENERATE_SMOKE_TESTS=true yarn build --output-path build
 mkdir build/pages
 mv build/*.html build/pages
+
+aws s3 sync --acl public-read --cache-control "max-age=31556926" build/assets "$TARGET_S3_PATH/assets"
+aws s3 sync --acl public-read --cache-control "no-cache" --delete build/pages "$TARGET_S3_PATH/pages"
