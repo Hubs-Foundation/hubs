@@ -38,7 +38,7 @@ pipeline {
           def slackURL = env.SLACK_URL
 
           def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh ${baseAssetsPath} ${assetBundleServer} ${targetS3Url}"
-          // sh "/usr/bin/script --return -c ${shellString(habCommand)} /dev/null"
+          sh "/usr/bin/script --return -c ${shellString(habCommand)} /dev/null"
 
           def gitMessage = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'[%an] %s'").trim()
           def gitSha = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
