@@ -22,7 +22,7 @@ AFRAME.registerComponent("networked-drawing", {
   schema: {
     segments: { default: 8 },
     radius: { default: 0.02 },
-    color: { default: { r: 255, g: 0, b: 0 } }
+    color: { type: "color", default: "#00FF00" }
   },
 
   init() {
@@ -34,9 +34,12 @@ AFRAME.registerComponent("networked-drawing", {
       metalness: 0.75,
       vertexColors: THREE.VertexColors,
       side: THREE.DoubleSide,
-      emissive: 0xff0000
+      emissive: 0xffffff,
+      emissiveIntensity: 0.1
       // wireframe: true
     };
+
+    this.color = new THREE.Color();
 
     const material = new THREE.MeshStandardMaterial(options);
 
@@ -90,6 +93,10 @@ AFRAME.registerComponent("networked-drawing", {
     NAF.connection.unsubscribeToDataChannel(this.drawingId, this.receiveDrawBuffer);
 
     this.scene.remove(this.drawing);
+  },
+
+  update(oldData) {
+    if (oldData.color !== this.data.color) this.color.set(this.data.color);
   },
 
   tick: (() => {
@@ -302,7 +309,7 @@ AFRAME.registerComponent("networked-drawing", {
   addVertex(point) {
     this.initialized = true;
     this.sharedBuffer.addVertex(point.x, point.y, point.z);
-    this.sharedBuffer.addColor(this.data.color.r, this.data.color.g, this.data.color.b);
+    this.sharedBuffer.addColor(this.color.r, this.color.g, this.color.b);
     // const sphere = new THREE.Mesh(this.debugGeometry, this.debugMaterial);
     // this.scene.add(sphere);
     // sphere.position.copy(point);
