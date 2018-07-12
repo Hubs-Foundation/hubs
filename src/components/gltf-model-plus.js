@@ -1,4 +1,3 @@
-import { isFarsparkUrl, decodeFarsparkUrl } from "../utils/media-utils";
 const GLTFCache = {};
 
 AFRAME.GLTFModelPlus = {
@@ -182,15 +181,12 @@ function nextTick() {
   });
 }
 
-function cachedLoadGLTF(src, preferredTechnique, onProgress) {
+function cachedLoadGLTF(src, basePath, preferredTechnique, onProgress) {
   // Load the gltf model from the cache if it exists.
   if (!GLTFCache[src]) {
     GLTFCache[src] = new Promise((resolve, reject) => {
       const gltfLoader = new THREE.GLTFLoader();
-      // Farspark urls can't handle relative paths. Use the original url as the base path.
-      if (isFarsparkUrl(src)) {
-        gltfLoader.path = THREE.LoaderUtils.extractUrlBase(decodeFarsparkUrl(src));
-      }
+      gltfLoader.path = basePath;
       gltfLoader.preferredTechnique = preferredTechnique;
       gltfLoader.load(src, resolve, onProgress, reject);
     });
@@ -207,6 +203,7 @@ function cachedLoadGLTF(src, preferredTechnique, onProgress) {
 AFRAME.registerComponent("gltf-model-plus", {
   schema: {
     src: { type: "string" },
+    basePath: { type: "string", default: undefined },
     inflate: { default: false }
   },
 
@@ -247,7 +244,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       }
 
       const gltfPath = THREE.LoaderUtils.extractUrlBase(src);
-      const model = await cachedLoadGLTF(src, this.preferredTechnique);
+      const model = await cachedLoadGLTF(src, this.data.basePath, this.preferredTechnique);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead

@@ -8,31 +8,20 @@ if (process.env.NODE_ENV === "development") {
 export const resolveFarsparkUrl = async url => {
   const parsedUrl = new URL(url);
   if ((parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") || isHostWhitelisted(parsedUrl.hostname))
-    return url;
+    return [url, url];
 
-  return (await fetch(resolveMediaUrl, {
+  const mediaResponse = await fetch(resolveMediaUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ media: { url } })
-  }).then(r => r.json())).raw;
-};
-
-const farsparkRegex = /^farspark.*\.reticulum\.io$/;
-export const isFarsparkUrl = url => farsparkRegex.test(new URL(url).hostname);
-export const decodeFarsparkUrl = url => {
-  const parts = url.split("/");
-  return atob(parts[parts.length - 1]);
+  }).then(r => r.json());
+  return [mediaResponse.raw, mediaResponse.origin];
 };
 
 const staticContentMappings = {
   "poly.googleapis.com": "model/gltf"
 };
-const fetchContentType = async url => {
-  const staticContentType = staticContentMappings[new URL(isFarsparkUrl(url) ? decodeFarsparkUrl(url) : url).hostname];
-  return staticContentType
-    ? Promise.resolve(staticContentType)
-    : fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
-};
+const fetchContentType = async url => fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
 
 let interactableId = 0;
 const offset = { x: 0, y: 0, z: -1.5 };
@@ -51,7 +40,7 @@ export const spawnNetworkedImage = (src, contentType) => {
   return image;
 };
 
-export const spawnNetworkedInteractable = src => {
+export const spawnNetworkedInteractable = (src, basePath) => {
   const scene = AFRAME.scenes[0];
   const model = document.createElement("a-entity");
   model.id = "interactable-model-" + interactableId++;
@@ -62,7 +51,7 @@ export const spawnNetworkedInteractable = src => {
     offset: offset,
     selfDestruct: true
   });
-  model.setAttribute("gltf-model-plus", "src", src);
+  model.setAttribute("gltf-model-plus", { src, basePath });
   model.setAttribute("auto-box-collider", { resize: true });
   scene.appendChild(model);
   return model;
@@ -70,15 +59,14 @@ export const spawnNetworkedInteractable = src => {
 
 export const addMedia = async url => {
   try {
-    const farsparkUrl = await resolveFarsparkUrl(url);
-    console.log("resolved", url, farsparkUrl);
+    const [farsparkUrl, originUrl] = await resolveFarsparkUrl(url);
+    console.log("resolved", url, farsparkUrl, originUrl);
 
-    const contentType = await fetchContentType(farsparkUrl);
-
+    const contentType = staticContentMappings[new URL(originUrl).hostname] || (await fetchContentType(farsparkUrl));
     if (contentType.startsWith("image/") || contentType.startsWith("video/")) {
       return spawnNetworkedImage(farsparkUrl, contentType);
     } else if (contentType.startsWith("model/gltf") || url.endsWith(".gltf") || url.endsWith(".glb")) {
-      return spawnNetworkedInteractable(farsparkUrl);
+      return spawnNetworkedInteractable(farsparkUrl, THREE.LoaderUtils.extractUrlBase(originUrl));
     } else {
       throw new Error(`Unsupported content type: ${contentType}`);
     }
