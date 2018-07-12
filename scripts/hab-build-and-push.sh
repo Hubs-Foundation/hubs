@@ -1,7 +1,8 @@
 #!/bin/bash
 
 export BASE_ASSETS_PATH=$1
-export TARGET_S3_PATH=$2
+export ASSET_BUNDLE_SERVER=$2
+export TARGET_S3_PATH=$3
 
 # To build + push to S3 run:
 # hab studio run "bash scripts/hab-build-and-push.sh"
@@ -13,6 +14,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 pushd "$DIR/.."
 
+mkdir -p .yarn
 mkdir -p node_modules
 mkdir -p build
 
@@ -24,7 +26,9 @@ rm /usr/bin/env
 ln -s "$(hab pkg path core/coreutils)/bin/env" /usr/bin/env
 hab pkg install -b core/coreutils core/bash core/node core/yarn core/aws-cli
 
-yarn install
+yarn install --cache-folder .yarn
+ls node_modules
+ls node_modules/.bin
 GENERATE_SMOKE_TESTS=true yarn build --output-path build
 mkdir build/pages
 mv build/*.html build/pages
