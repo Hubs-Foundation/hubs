@@ -33,7 +33,7 @@
     <a-scene
         renderer="antialias: true"
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
-        physics="gravity: -6;"
+        physics="gravity: -6; debug: true;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         freeze-controller="toggleEvent: action_freeze"
         personal-space-bubble="debug: false;"
@@ -79,6 +79,7 @@
 
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
             <a-asset-item id="interactable-duck" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf"></a-asset-item>
+            <a-asset-item id="interactable-pen" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-484ae5682f.gltf"></a-asset-item>
 
             <a-asset-item id="quack" src="./assets/sfx/quack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="specialquack" src="./assets/sfx/specialquack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -190,6 +191,22 @@
                 ></a-entity>
             </template>
 
+            <template id="pen-template">
+                <a-entity
+                    gltf-model-plus="src: #interactable-pen; inflate: true;"
+                    class="interactable"
+                    super-networked-interactable="counter: #counter; mass: 1;"
+                    body="type: dynamic; shape: none; mass: 1;"
+                    grabbable
+                    hoverable
+                    draggable
+                    scale="0.5 0.5 0.5"
+                >
+                    <a-sphere scale="1.5, 1.5, 1.5" position="0 -0.18 0" radius="0.02" color="red" pen="camera: #player-camera; drawing: #my-first-drawing;"></a-sphere>
+                </a-entity>
+            </template>
+
+
             <template id="drawing-template">
                 <a-entity
                     networked-drawing
@@ -202,7 +219,7 @@
                     colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
                     grabStartButtons: hand_grab; grabEndButtons: hand_release;
                     stretchStartButtons: hand_grab; stretchEndButtons: hand_release;
-                    dragDropStartButtons: hand_grab; dragDropEndButtons: hand_release;"
+                    dragDropStartButtons: index_down; dragDropEndButtons: index_up"
                 collision-filter="collisionForces: false"
                 physics-collider
             ></a-mixin>
@@ -235,7 +252,6 @@
             segments-height="9"
             segments-width="9"
             event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"
-            pen="camera: #player-camera; drawing: #my-first-drawing"
         ></a-sphere>
 
         <!-- Player Rig -->
@@ -380,6 +396,14 @@
         <a-entity
             id="my-first-drawing"
             networked="template: #drawing-template;"
+        ></a-entity>
+
+        <a-entity 
+            gltf-model-plus="src: #interactable-pen"
+            class="interactable" 
+            super-spawner="template: #pen-template;" 
+            position="2.9 1.2 0" 
+            body="mass: 0; type: static; shape: box;"
         ></a-entity>
     </a-scene>
 

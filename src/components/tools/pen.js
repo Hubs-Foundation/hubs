@@ -13,7 +13,7 @@ AFRAME.registerComponent("pen", {
     minDistanceBetweenPoints: { default: 0.04 },
     defaultDirection: { default: { x: 1, y: 0, z: 0 } },
     camera: { type: "selector" },
-    drawing: { type: "selector" }
+    drawing: { type: "string" }
   },
 
   init() {
@@ -34,7 +34,13 @@ AFRAME.registerComponent("pen", {
 
     this.handleDrawingInitialized = this.handleDrawingInitialized.bind(this);
 
-    this.data.drawing.addEventListener("componentinitialized", this.handleDrawingInitialized);
+    this.drawing = document.querySelector(this.data.drawing);
+
+    if (this.drawing.hasLoaded) {
+      this.currentDrawing = this.drawing.components["networked-drawing"];
+    } else {
+      this.drawing.addEventListener("componentinitialized", this.handleDrawingInitialized);
+    }
 
     this.normal = new THREE.Vector3();
 
@@ -42,15 +48,18 @@ AFRAME.registerComponent("pen", {
   },
 
   remove() {
-    this.data.drawing.removeEventListener("componentinitialized", this.handleDrawingInitialized);
+    this.drawing.removeEventListener("componentinitialized", this.handleDrawingInitialized);
   },
 
   play() {
-    document.addEventListener("mousedown", this.onMouseDown);
-    document.addEventListener("mouseup", this.onMouseUp);
+    // document.addEventListener("mousedown", this.onMouseDown);
+    // document.addEventListener("mouseup", this.onMouseUp);
 
-    this.el.parentNode.addEventListener("index_down", this.startDraw);
-    this.el.parentNode.addEventListener("index_up", this.endDraw);
+    // this.el.parentNode.addEventListener("index_down", this.startDraw);
+    // this.el.parentNode.addEventListener("index_up", this.endDraw);
+
+    this.el.parentNode.addEventListener("drag-start", this.startDraw);
+    this.el.parentNode.addEventListener("drag-end", this.endDraw);
   },
 
   pause() {
@@ -59,6 +68,9 @@ AFRAME.registerComponent("pen", {
 
     this.el.parentNode.removeEventListener("index_down", this.startDraw);
     this.el.parentNode.removeEventListener("index_up", this.endDraw);
+
+    this.el.parentNode.removeEventListener("drag-start", this.startDraw);
+    this.el.parentNode.removeEventListener("drag-end", this.endDraw);
   },
 
   tick(t, dt) {
@@ -105,7 +117,7 @@ AFRAME.registerComponent("pen", {
 
   handleDrawingInitialized(e) {
     if (e.detail.name === "networked-drawing") {
-      this.currentDrawing = this.data.drawing.components["networked-drawing"];
+      this.currentDrawing = this.drawing.components["networked-drawing"];
     }
   },
 
@@ -126,6 +138,7 @@ AFRAME.registerComponent("pen", {
     this.el.object3D.getWorldPosition(this.worldPosition);
     this.getNormal(this.normal, this.worldPosition, this.direction);
     const color = "#" + Math.floor(Math.random() * 16777215).toString(16);
+    this.el.setAttribute("material", { color: color });
     this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal, color);
   },
 
