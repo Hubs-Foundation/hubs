@@ -325,7 +325,7 @@ const onReady = async () => {
         e.preventDefault();
         const imgUrl = e.dataTransfer.getData("url");
         if (imgUrl) {
-          console.log("Droped: ", imgUrl);
+          console.log("Dropped: ", imgUrl);
           addMedia(imgUrl);
         }
       });

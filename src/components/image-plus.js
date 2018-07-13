@@ -67,8 +67,6 @@ errorImage.onload = () => {
 };
 
 AFRAME.registerComponent("image-plus", {
-  dependencies: ["geometry"],
-
   schema: {
     src: { type: "string" },
     contentType: { type: "string" }
@@ -85,27 +83,13 @@ AFRAME.registerComponent("image-plus", {
         height = geo.height * ratio;
       }
     } else if (geo && geo.height) {
+      //TODO
       width = geo.width / ratio;
     } else {
       width = Math.min(1.0, 1.0 / ratio);
       height = Math.min(1.0, ratio);
     }
-    this.el.setAttribute("geometry", { width, height });
-    this.el.setAttribute("shape", {
-      shape: "box",
-      halfExtents: {
-        x: width / 2,
-        y: height / 2,
-        z: 0.05
-      }
-    });
-  },
-
-  init() {
-    const material = new THREE.MeshBasicMaterial();
-    material.side = THREE.DoubleSide;
-    material.transparent = true;
-    this.el.getObject3D("mesh").material = material;
+    return { width, height };
   },
 
   remove() {
@@ -230,7 +214,7 @@ AFRAME.registerComponent("image-plus", {
         } else if (contentType.startsWith("video")) {
           texture = await this.loadVideo(url);
         } else {
-          throw new Error(`Unknown centent type: ${contentType}`);
+          throw new Error(`Unknown content type: ${contentType}`);
         }
 
         textureCache.set(url, { count: 1, texture });
@@ -246,9 +230,27 @@ AFRAME.registerComponent("image-plus", {
       texture = errorTexture;
     }
 
-    const material = this.el.getObject3D("mesh").material;
+    const { width, height } = this._fit(
+      texture.image.videoWidth || texture.image.width,
+      texture.image.videoHeight || texture.image.height
+    );
+    const material = new THREE.MeshBasicMaterial();
+    material.side = THREE.DoubleSide;
+    material.transparent = true;
     material.map = texture;
     material.needsUpdate = true;
-    this._fit(texture.image.videoWidth || texture.image.width, texture.image.videoHeight || texture.image.height);
+
+    const geometry = new THREE.PlaneGeometry(width, height, 1, 1);
+    this.mesh = new THREE.Mesh(geometry, material);
+    this.el.setObject3D("mesh", this.mesh);
+    this.el.setAttribute("shape", {
+      shape: "box",
+      halfExtents: { x: width / 2, y: height / 2, z: 0.05 }
+    });
+    if (this.el.components.body && this.el.components.body.body) {
+      this.el.components.body.syncToPhysics(); // not sure if necessary?
+      this.el.components.body.updateCannonScale();
+    }
+    this.el.emit("image-loaded");
   }
 });

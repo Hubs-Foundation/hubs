@@ -33,7 +33,7 @@
     <a-scene
         renderer="antialias: true"
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
-        physics="gravity: -6;"
+        physics="gravity: -6; debug: true;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         freeze-controller="toggleEvent: action_freeze"
         personal-space-bubble="debug: false;"
@@ -86,7 +86,6 @@
             <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
 
             <!-- Templates -->
-
             <template id="video-template">
                 <a-entity class="video" geometry="primitive: plane;" material="side: double; shader: flat;" networked-video-player></a-entity>
             </template>
@@ -163,15 +162,13 @@
                 <a-entity
                     gltf-model-plus="inflate: false;"
                     class="interactable"
-                    super-networked-interactable="counter: #media-counter; mass: 1;"
+                    super-networked-interactable="counter: #media-counter;"
                     body="type: dynamic; shape: none; mass: 1;"
                     grabbable
                     stretchable="useWorldPosition: true; usePhysics: never"
                     hoverable
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
-                    auto-box-collider
                     position-at-box-shape-border="target:.delete-button"
-                    auto-scale-cannon-physics-body
                     destroy-at-extreme-distances
                 >
                     <a-entity class="delete-button" visible-while-frozen scale="0.08 0.08 0.08">
@@ -184,13 +181,12 @@
             <template id="interactable-image">
                 <a-entity
                     class="interactable"
-                    super-networked-interactable="counter: #media-counter; mass: 1;"
+                    super-networked-interactable="counter: #media-counter;"
                     body="type: dynamic; shape: none; mass: 1;"
                     auto-scale-cannon-physics-body
                     grabbable
                     stretchable="useWorldPosition: true; usePhysics: never"
                     hoverable
-                    geometry="primitive: plane"
                     image-plus
                     sticky-object="autoLockOnLoad: true; autoLockOnRelease: true;"
                     position-at-box-shape-border="target:.delete-button;dirs:forward,back"
