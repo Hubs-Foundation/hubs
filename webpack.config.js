@@ -99,6 +99,7 @@ const config = {
     useLocalIp: true,
     public: "hubs.local:8080",
     port: 8080,
+    headers: { "Access-Control-Allow-Origin": "*" },
     before: function(app) {
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
       app.head("*", function(req, res, next) {
