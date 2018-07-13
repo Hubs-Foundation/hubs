@@ -432,6 +432,13 @@ const onReady = async () => {
     return;
   }
 
+  if (qs.required_version && qs.required_version !== process.env.BUILD_VERSION) {
+    remountUI({ roomUnavailableReason: "version_mismatch" });
+    setTimeout(() => document.location.reload(), 5000);
+    exitScene();
+    return;
+  }
+
   getAvailableVREntryTypes().then(availableVREntryTypes => {
     if (availableVREntryTypes.gearvr === VR_DEVICE_AVAILABILITY.yes) {
       remountUI({ availableVREntryTypes, forcedVREntryType: "gearvr" });
