@@ -3,6 +3,7 @@
 export BASE_ASSETS_PATH=$1
 export ASSET_BUNDLE_SERVER=$2
 export TARGET_S3_URL=$3
+export BUILD_VERSION=$4
 
 # To build + push to S3 run:
 # hab studio run "bash scripts/hab-build-and-push.sh"

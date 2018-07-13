@@ -37,7 +37,7 @@ pipeline {
           def smokeURL = env.SMOKE_URL
           def slackURL = env.SLACK_URL
 
-          def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh ${baseAssetsPath} ${assetBundleServer} ${targetS3Url}"
+          def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh ${baseAssetsPath} ${assetBundleServer} ${targetS3Url} ${env.BUILD_NUMBER}"
           sh "/usr/bin/script --return -c ${shellString(habCommand)} /dev/null"
 
           def gitMessage = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'[%an] %s'").trim()
@@ -46,7 +46,7 @@ pipeline {
             "*<http://localhost:8080/job/${env.JOB_NAME}/${env.BUILD_NUMBER}|#${env.BUILD_NUMBER}>* *${env.JOB_NAME}* " +
             "<https://github.com/mozilla/hubs/commit/$gitSha|$gitSha> " +
             "Hubs: ```${gitSha} ${gitMessage}```\n" +
-            "<${smokeURL}?pollForSha=${gitSha}|Smoke Test> - to push:\n" +
+            "<${smokeURL}?require_version=${env.BUILD_NUMBER}|Smoke Test> - to push:\n" +
             "`/mr hubs deploy ${targetS3Url}`"
           )
           def payload = 'payload=' + JsonOutput.toJson([
