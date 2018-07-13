@@ -40,15 +40,15 @@
         vr-mode-ui="enabled: false"
         pinch-to-move
         input-configurator="
-                  gazeCursorRayObject: #player-camera-reverse-z;
+                  gazeCursorRayObject: #player-camera;
                   cursorController: #cursor-controller;
                   gazeTeleporter: #gaze-teleport;
                   camera: #player-camera;
                   playerRig: #player-rig;
                   leftController: #player-left-controller;
-                  leftControllerRayObject: #player-left-controller-reverse-z;
+                  leftControllerRayObject: #player-left-controller;
                   rightController: #player-right-controller;
-                  rightControllerRayObject: #player-right-controller-reverse-z;"
+                  rightControllerRayObject: #player-right-controller;"
     >
 
         <a-assets>
@@ -326,7 +326,6 @@
                     hitOpacity: 0.3;
                     missOpacity: 0.2;"
             ></a-entity>
-            <a-entity id="player-camera-reverse-z" rotation="0 180 0"></a-entity>
           </a-entity>
 
           <a-entity
@@ -348,7 +347,6 @@
               mixin="controller-super-hands"
               controls-shape-offset
           >
-            <a-entity id="player-left-controller-reverse-z" rotation="0 180 0"></a-entity>
           </a-entity>
 
           <a-entity
@@ -370,7 +368,6 @@
               mixin="controller-super-hands"
               controls-shape-offset
           >
-            <a-entity id="player-right-controller-reverse-z" rotation="0 180 0"></a-entity>
           </a-entity>
 
           <a-entity gltf-model-plus="inflate: true;"
