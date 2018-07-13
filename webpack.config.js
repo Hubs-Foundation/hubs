@@ -99,6 +99,7 @@ const config = {
     useLocalIp: true,
     public: "hubs.local:8080",
     port: 8080,
+    headers: { "Access-Control-Allow-Origin": "*" },
     before: function(app) {
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
       app.head("*", function(req, res, next) {
@@ -127,6 +128,14 @@ const config = {
           attrs: ["img:src", "a-asset-item:src", "audio:src", "source:src"],
           // You can get transformed asset urls in an html template using ${require("pathToFile.ext")}
           interpolate: "require"
+        }
+      },
+      {
+        test: /\.worker\.js$/,
+        loader: "worker-loader",
+        options: {
+          name: "assets/js/[name]-[hash].js",
+          publicPath: "/"
         }
       },
       {
@@ -258,7 +267,8 @@ const config = {
         NODE_ENV: process.env.NODE_ENV,
         JANUS_SERVER: process.env.JANUS_SERVER,
         DEV_RETICULUM_SERVER: process.env.DEV_RETICULUM_SERVER,
-        ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER
+        ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER,
+        BUILD_VERSION: process.env.BUILD_VERSION
       })
     })
   ]

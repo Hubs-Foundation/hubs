@@ -1,3 +1,5 @@
+@import 'shared';
+
 :local(.container) {
   position: absolute;
   top: 10px;
@@ -37,7 +39,22 @@
   width: 40px;
   height: 40px;
   background-size: 100%;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
+}
+
+:local(.addMediaButton) {
+  position: absolute;
+  top: 90px;
+  background-color: #404040;
+}
+
+:local(.iconButton.small) {
+  width: 30px;
+  height: 30px;
 }
 
 :local(.iconButton.large) {
