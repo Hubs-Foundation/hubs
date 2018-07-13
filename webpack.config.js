@@ -266,7 +266,8 @@ const config = {
         NODE_ENV: process.env.NODE_ENV,
         JANUS_SERVER: process.env.JANUS_SERVER,
         DEV_RETICULUM_SERVER: process.env.DEV_RETICULUM_SERVER,
-        ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER
+        ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER,
+        BUILD_VERSION: process.env.BUILD_VERSION
       })
     })
   ]
