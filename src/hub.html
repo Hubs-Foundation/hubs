@@ -160,13 +160,14 @@
 
             <template id="interactable-model">
                 <a-entity
-                    gltf-model-plus="inflate: false;"
+                    gltf-model-plus="inflate: true;"
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
                     body="type: dynamic; shape: none; mass: 1;"
                     grabbable
                     stretchable="useWorldPosition: true; usePhysics: never"
                     hoverable
+                    auto-scale-cannon-physics-body
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
                     position-at-box-shape-border="target:.delete-button"
                     destroy-at-extreme-distances

@@ -25,20 +25,22 @@ const offset = { x: 0, y: 0, z: -1.5 };
 export const spawnNetworkedImage = (entity, src, contentType) => {
   entity.id = "interactable-image-" + interactableId++;
   entity.setAttribute("networked", { template: "#interactable-image" });
-  entity.addEventListener("image-loaded", function onBodyLoaded() {
-    entity.removeEventListener("image-loaded", onBodyLoaded);
+  entity.addEventListener("image-loaded", function onImageLoaded() {
+    entity.removeEventListener("image-loaded", onImageLoaded);
   });
   entity.setAttribute("image-plus", { src, contentType });
+  return entity;
 };
 
 export const spawnNetworkedInteractable = (entity, src, basePath) => {
   entity.id = "interactable-model-" + interactableId++;
   entity.setAttribute("networked", { template: "#interactable-model" });
-  entity.addEventListener("model-loaded", function onBodyLoaded() {
-    entity.removeEventListener("model-loaded", onBodyLoaded);
-    setShapeAndScale(entity);
+  entity.addEventListener("model-loaded", function onModelLoaded(evt) {
+    entity.removeEventListener("model-loaded", onModelLoaded);
+    setShapeAndScale(entity, evt.detail.didInflate);
   });
   entity.setAttribute("gltf-model-plus", { src: src, basePath: basePath });
+  return entity;
 };
 
 export const addMedia = async url => {
@@ -79,26 +81,27 @@ export const addMedia = async url => {
   }
 };
 
-function setShapeAndScale(entity) {
-  const box = getBox(entity);
-  const center = new THREE.Vector3();
-  const halfExtents = new THREE.Vector3();
-  getCenterAndHalfExtents(entity, box, center, halfExtents);
-  entity.getObject3D("mesh").position.sub(center);
+function setShapeAndScale(entity, didInflate) {
+  const mesh = entity.getObject3D("mesh");
+  const boxRoot = didInflate ? mesh.parent : mesh;
+  const box = getBox(entity, boxRoot);
   const scaleCoefficient = getScaleCoefficient(0.5, box);
-  entity.setAttribute("shape", {
-    shape: "box",
-    halfExtents: halfExtents
-  });
+  if (entity.components.body && entity.components.body.body && entity.components.body.body.shapes.length > 1) {
+    entity.removeAttribute("shape");
+  } else {
+    const center = new THREE.Vector3();
+    const halfExtents = new THREE.Vector3();
+    getCenterAndHalfExtents(entity, box, center, halfExtents);
+    boxRoot.position.sub(center);
+    entity.setAttribute("shape", {
+      shape: "box",
+      halfExtents: halfExtents
+    });
+  }
   const scale = entity.object3D.scale;
   entity.setAttribute("scale", {
     x: scale.x * scaleCoefficient,
     y: scale.y * scaleCoefficient,
     z: scale.z * scaleCoefficient
   });
-  if (entity.components.body && entity.components.body.body) {
-    // TODO: Do this in shape component update
-    entity.components.body.syncToPhysics();
-    entity.components.body.updateCannonScale();
-  }
 }

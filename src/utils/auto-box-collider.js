@@ -1,12 +1,11 @@
-export function getBox(entity) {
+export function getBox(entity, boxRoot) {
   const box = new THREE.Box3();
-  const mesh = entity.getObject3D("mesh");
   const rotation = entity.object3D.rotation.clone();
   entity.object3D.rotation.set(0, 0, 0);
   entity.object3D.updateMatrixWorld(true);
 
   box.expandByObject = expandByObject;
-  box.setFromObject(mesh);
+  box.setFromObject(boxRoot);
   entity.object3D.rotation.copy(rotation);
   return box;
 }
