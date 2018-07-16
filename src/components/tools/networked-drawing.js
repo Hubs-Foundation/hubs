@@ -21,7 +21,7 @@ function copyData(fromArray, toArray, fromIndex, toIndex) {
 AFRAME.registerComponent("networked-drawing", {
   schema: {
     segments: { default: 8 },
-    radius: { default: 0.02 },
+    radius: { default: 0.2 },
     color: { type: "color", default: "#FF0000" }
   },
 
@@ -32,8 +32,8 @@ AFRAME.registerComponent("networked-drawing", {
       //seems to require calling computeVertexNormals() if > 0
       roughness: 0,
       metalness: 0,
-      vertexColors: THREE.VertexColors,
-      side: THREE.DoubleSide
+      vertexColors: THREE.VertexColors
+      // side: THREE.DoubleSide
     };
 
     this.color = new THREE.Color(this.data.color);
@@ -223,7 +223,7 @@ AFRAME.registerComponent("networked-drawing", {
         this.draw(position, direction, normal);
         projectedDirection.copy(direction).multiplyScalar(this.radius);
         projectedPoint.copy(position).add(projectedDirection);
-        this.drawCap(projectedPoint, this.lastSegments);
+        //   this.drawCap(projectedPoint, this.lastSegments);
       }
 
       if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
