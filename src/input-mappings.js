@@ -61,8 +61,8 @@ const config = {
         gripup: ["action_release", "middle_ring_pinky_up"],
         trackpadtouchstart: "thumb_down",
         trackpadtouchend: "thumb_up",
-        triggerdown: ["action_grab", "index_down"],
-        triggerup: ["action_release", "index_up"],
+        triggerdown: ["index_down"],
+        triggerup: ["index_up"],
         scroll: { right: "move_duck" }
       },
       "oculus-touch-controls": {

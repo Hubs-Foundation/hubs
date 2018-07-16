@@ -13,7 +13,8 @@ AFRAME.registerComponent("pen", {
     minDistanceBetweenPoints: { default: 0.04 },
     defaultDirection: { default: { x: 1, y: 0, z: 0 } },
     camera: { type: "selector" },
-    drawing: { type: "string" }
+    drawing: { type: "string" },
+    useMouse: { defualt: false }
   },
 
   init() {
@@ -52,8 +53,10 @@ AFRAME.registerComponent("pen", {
   },
 
   play() {
-    // document.addEventListener("mousedown", this.onMouseDown);
-    // document.addEventListener("mouseup", this.onMouseUp);
+    if (this.data.useMouse) {
+      document.addEventListener("mousedown", this.onMouseDown);
+      document.addEventListener("mouseup", this.onMouseUp);
+    }
 
     // this.el.parentNode.addEventListener("index_down", this.startDraw);
     // this.el.parentNode.addEventListener("index_up", this.endDraw);

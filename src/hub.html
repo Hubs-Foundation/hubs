@@ -33,7 +33,7 @@
     <a-scene
         renderer="antialias: true"
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
-        physics="gravity: -6; debug: true;"
+        physics="gravity: -6;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         freeze-controller="toggleEvent: action_freeze"
         personal-space-bubble="debug: false;"
@@ -217,7 +217,7 @@
                 </a-entity>
             </template>
 
-             <template id="interactable-pen">
+             <template id="pen-interactable">
                 <a-entity
                     gltf-model-plus="src: #interactable-pen; inflate: true;"
                     class="interactable"
@@ -228,12 +228,19 @@
                     draggable
                     scale="0.5 0.5 0.5"
                 >
-                    <a-sphere scale="1.5, 1.5, 1.5" position="0 -0.18 0" radius="0.02" color="red" pen="camera: #player-camera; drawing: #my-first-drawing;"></a-sphere>
+                    <a-sphere 
+                        scale="1.5, 1.5, 1.5" 
+                        position="0 -0.18 0" 
+                        radius="0.02" 
+                        color="red" 
+                        position="0 -0.18 0" 
+                        pen="camera: #player-camera; drawing: #my-first-drawing;"
+                    ></a-sphere>
                 </a-entity>
             </template>
 
 
-            <template id="drawing-template">
+            <template id="interactable-drawing">
                 <a-entity
                     networked-drawing
                 ></a-entity>
@@ -298,6 +305,7 @@
             segments-height="9"
             segments-width="9"
             event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"
+            pen="camera: #player-camera; drawing: #my-first-drawing; useMouse: true;"
         ></a-sphere>
 
         <!-- Player Rig -->
@@ -350,7 +358,6 @@
                     hitOpacity: 0.3;
                     missOpacity: 0.2;"
             ></a-entity>
-            <!-- <a-sphere radius="0.02" color="red" pen="camera: #player-camera; drawing: #my-first-drawing;"></a-sphere> -->
             <a-entity id="player-camera-reverse-z" rotation="0 180 0"></a-entity>
           </a-entity>
 
@@ -441,15 +448,18 @@
 
         <a-entity
             id="my-first-drawing"
-            networked="template: #drawing-template;"
+            networked="template: #interactable-drawing;"
         ></a-entity>
 
         <a-entity 
             gltf-model-plus="src: #interactable-pen"
             class="interactable" 
-            super-spawner="template: #pen-template;" 
-            position="2.9 1.2 0" 
+            super-spawner="template: #pen-interactable;" 
+            position="-1 1.2 -5.5"
+            scale="0.5 0.5 0.5" 
             body="mass: 0; type: static; shape: box;"
+            collision-filter="collisionForces: false"
+            hoverable
         ></a-entity>
     </a-scene>
 

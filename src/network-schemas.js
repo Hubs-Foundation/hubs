@@ -117,6 +117,21 @@ function registerNetworkSchemas() {
       "networked-drawing"
     ]
   });
+
+  NAF.schemas.add({
+    template: "#pen-interactable",
+    components: [
+      {
+        component: "position",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
+      {
+        component: "rotation",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
+      },
+      "scale"
+    ]
+  });
 }
 
 export default registerNetworkSchemas;
