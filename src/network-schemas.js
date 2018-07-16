@@ -82,7 +82,7 @@ function registerNetworkSchemas() {
   });
 
   NAF.schemas.add({
-    template: "#interactable-image",
+    template: "#interactable-media",
     components: [
       {
         component: "position",
@@ -93,23 +93,7 @@ function registerNetworkSchemas() {
         requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       "scale",
-      "image-plus"
-    ]
-  });
-
-  NAF.schemas.add({
-    template: "#interactable-model",
-    components: [
-      {
-        component: "position",
-        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
-      },
-      {
-        component: "rotation",
-        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
-      },
-      "scale",
-      "gltf-model-plus"
+      "media-loader"
     ]
   });
 }

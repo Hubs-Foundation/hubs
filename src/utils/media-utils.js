@@ -24,17 +24,17 @@ let interactableId = 0;
 const offset = { x: 0, y: 0, z: -1.5 };
 export const spawnNetworkedImage = (entity, src, contentType) => {
   entity.id = "interactable-image-" + interactableId++;
-  entity.setAttribute("networked", { template: "#interactable-image" });
-  entity.addEventListener("image-loaded", function onImageLoaded() {
-    entity.removeEventListener("image-loaded", onImageLoaded);
-  });
+  // entity.setAttribute("networked", { template: "#interactable-image" });
+  // entity.addEventListener("image-loaded", function onBodyLoaded() {
+  //   entity.removeEventListener("image-loaded", onBodyLoaded);
+  // });
   entity.setAttribute("image-plus", { src, contentType });
   return entity;
 };
 
 export const spawnNetworkedInteractable = (entity, src, basePath) => {
   entity.id = "interactable-model-" + interactableId++;
-  entity.setAttribute("networked", { template: "#interactable-model" });
+  // entity.setAttribute("networked", { template: "#interactable-model" });
   entity.addEventListener("model-loaded", function onModelLoaded(evt) {
     entity.removeEventListener("model-loaded", onModelLoaded);
     setShapeAndScale(entity, evt.detail.didInflate);
@@ -43,42 +43,60 @@ export const spawnNetworkedInteractable = (entity, src, basePath) => {
   return entity;
 };
 
-export const addMedia = async url => {
+AFRAME.registerComponent("media-loader", {
+  schema: {
+    src: { type: "string" }
+  },
+
+  async update() {
+    const entity = this.el;
+    const url = this.data.src;
+
+    try {
+      // show loading mesh
+      entity.setObject3D("mesh", new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial()));
+      setShapeAndScale(entity);
+
+      const { raw, origin, meta } = await resolveFarsparkUrl(url);
+      console.log("resolved", url, raw, origin, meta);
+
+      const contentType = (meta && meta.expected_content_type) || (await fetchContentType(raw));
+      if (contentType.startsWith("image/") || contentType.startsWith("video/")) {
+        return spawnNetworkedImage(entity, raw, contentType);
+      } else if (contentType.startsWith("model/gltf") || url.endsWith(".gltf") || url.endsWith(".glb")) {
+        return spawnNetworkedInteractable(entity, raw, THREE.LoaderUtils.extractUrlBase(origin));
+      } else {
+        throw new Error(`Unsupported content type: ${contentType}`);
+      }
+    } catch (e) {
+      console.error("Error adding media", e);
+      return spawnNetworkedImage(entity, "error");
+    }
+  }
+});
+
+export const addMedia = url => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
-  entity.setObject3D("mesh", new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial()));
-  entity.classList.add("interactable");
-  entity.setAttribute("body", { type: "dynamic", shape: "none", mass: "1" });
-  entity.setAttribute("grabbable", "");
-  entity.setAttribute("hoverable", "");
-  entity.setAttribute("stretchable", { useWorldPosition: true, usePhysics: "never" });
-  entity.setAttribute("sticky-object", { autoLockOnRelease: true, autoLockOnLoad: true });
-  entity.setAttribute("destroy-at-extreme-distances", "");
+  entity.setAttribute("networked", { template: "#interactable-media" });
+  // entity.setObject3D("mesh", new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial()));
+  // entity.classList.add("interactable");
+  // entity.setAttribute("body", { type: "dynamic", shape: "none", mass: "1" });
+  // entity.setAttribute("grabbable", "");
+  // entity.setAttribute("hoverable", "");
+  // entity.setAttribute("stretchable", { useWorldPosition: true, usePhysics: "never" });
+  // entity.setAttribute("sticky-object", { autoLockOnRelease: true, autoLockOnLoad: true });
+  // entity.setAttribute("destroy-at-extreme-distances", "");
   entity.setAttribute("offset-relative-to", {
     target: "#player-camera",
     offset: offset,
     selfDestruct: true
   });
-  setShapeAndScale(entity);
+  entity.setAttribute("media-loader", { src: url });
+  // setShapeAndScale(entity);
   scene.appendChild(entity);
-
-  try {
-    const { raw, origin, meta } = await resolveFarsparkUrl(url);
-    console.log("resolved", url, raw, origin, meta);
-
-    const contentType = (meta && meta.expected_content_type) || (await fetchContentType(raw));
-    if (contentType.startsWith("image/") || contentType.startsWith("video/")) {
-      return spawnNetworkedImage(entity, raw, contentType);
-    } else if (contentType.startsWith("model/gltf") || url.endsWith(".gltf") || url.endsWith(".glb")) {
-      return spawnNetworkedInteractable(entity, raw, THREE.LoaderUtils.extractUrlBase(origin));
-    } else {
-      throw new Error(`Unsupported content type: ${contentType}`);
-    }
-  } catch (e) {
-    console.error("Error adding media", e);
-    return spawnNetworkedImage(entity, "error");
-  }
+  return entity;
 };
 
 function setShapeAndScale(entity, didInflate) {
