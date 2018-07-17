@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import queryString from "query-string";
-import MobileDetect from "mobile-detect";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import MovingAverage from "moving-average";
@@ -26,8 +25,6 @@ import Footer from "./footer";
 
 import FontAwesomeIcon from "@fortawesome/react-fontawesome";
 import faQuestion from "@fortawesome/fontawesome-free-solid/faQuestion";
-
-const mobiledetect = new MobileDetect(navigator.userAgent);
 
 addLocaleData([...en]);
 
@@ -456,7 +453,7 @@ class UIRoot extends Component {
   };
 
   shouldShowHmdMicWarning = () => {
-    if (mobiledetect.mobile()) return false;
+    if (AFRAME.utils.device.isMobile()) return false;
     if (!this.state.enterInVR) return false;
     if (!this.hasHmdMicrophone()) return false;
 
@@ -484,7 +481,7 @@ class UIRoot extends Component {
   };
 
   onAudioReadyButton = () => {
-    if (mobiledetect.mobile() && !this.state.enterInVR && screenfull.enabled) {
+    if (AFRAME.utils.device.isMobile() && !this.state.enterInVR && screenfull.enabled) {
       screenfull.request();
     }
 
@@ -613,7 +610,7 @@ class UIRoot extends Component {
     // Only show this in desktop firefox since other browsers/platforms will ignore the "screen" media constraint and
     // will attempt to share your webcam instead!
     const screenSharingCheckbox = this.props.enableScreenSharing &&
-      !mobiledetect.mobile() &&
+      !AFRAME.utils.device.isMobile() &&
       /firefox/i.test(navigator.userAgent) && (
         <label className="entry-panel__screen-sharing">
           <input
@@ -699,7 +696,7 @@ class UIRoot extends Component {
       clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)`
     };
     const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
-
+    const subtitleId = AFRAME.utils.device.isMobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
     const audioSetupPanel =
       this.state.entryStep === ENTRY_STEPS.audio_setup ? (
         <div className="audio-setup-panel">
@@ -708,9 +705,7 @@ class UIRoot extends Component {
               <FormattedMessage id="audio.title" />
             </div>
             <div className="audio-setup-panel__subtitle">
-              {(mobiledetect.mobile() || this.state.enterInVR) && (
-                <FormattedMessage id={mobiledetect.mobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop"} />
-              )}
+              {(AFRAME.utils.device.isMobile() || this.state.enterInVR) && <FormattedMessage id={subtitleId} />}
             </div>
             <div className="audio-setup-panel__levels">
               <div className="audio-setup-panel__levels__icon">

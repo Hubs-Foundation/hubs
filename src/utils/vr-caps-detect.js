@@ -1,9 +1,6 @@
 const { detect } = require("detect-browser");
-import MobileDetect from "mobile-detect";
 
 const browser = detect();
-const deviceDetect = require("device-detect")();
-const mobiledetect = new MobileDetect(navigator.userAgent);
 
 // Precision on device detection is fuzzy -- we can sometimes know if a device is definitely
 // available, or definitely *not* available, and assume it may be available otherwise.
@@ -55,7 +52,7 @@ export async function getAvailableVREntryTypes() {
   const isWebVRCapableBrowser = window.hasNativeWebVRImplementation;
 
   const isDaydreamCapableBrowser = !!(isWebVRCapableBrowser && browser.name === "chrome" && !isSamsungBrowser);
-  const isIDevice = ["iPhone", "iPad", "iPod"].indexOf(deviceDetect.device) > -1;
+  const isIDevice = AFRAME.utils.device.isIOS();
   const isFirefoxBrowser = browser.name === "firefox";
   const isUIWebView = typeof navigator.mediaDevices === "undefined";
 
@@ -67,7 +64,7 @@ export async function getAvailableVREntryTypes() {
     ? VR_DEVICE_AVAILABILITY.no
     : isIDevice && isUIWebView ? VR_DEVICE_AVAILABILITY.maybe : VR_DEVICE_AVAILABILITY.yes;
 
-  let generic = mobiledetect.mobile() ? VR_DEVICE_AVAILABILITY.no : VR_DEVICE_AVAILABILITY.maybe;
+  let generic = AFRAME.utils.device.isMobile() ? VR_DEVICE_AVAILABILITY.no : VR_DEVICE_AVAILABILITY.maybe;
   let cardboard = VR_DEVICE_AVAILABILITY.no;
 
   // We only consider GearVR support as "maybe" and never "yes". The only browser
