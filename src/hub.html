@@ -82,6 +82,10 @@
 
             <a-asset-item id="quack" src="./assets/sfx/quack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="specialquack" src="./assets/sfx/specialquack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <!-- https://freesound.org/people/pointparkcinema/sounds/407231/ -->
+            <a-asset-item id="teleport-start" src="./assets/sfx/teleport-start.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <!-- https://freesound.org/people/Chriddof/sounds/135513/ -->
+            <a-asset-item id="teleport-end" src="./assets/sfx/teleport-end.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
 
             <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
 
@@ -287,6 +291,8 @@
             player-info
             networked-avatar
             cardboard-controls
+            sound__teleport-start="on: cursor-teleport_down; poolSize: 2; src: #teleport-start"
+            sound__teleport-end="on: cursor-teleport_up; poolSize: 2; src: #teleport-end"
         >
           <a-entity
               id="player-hud"
