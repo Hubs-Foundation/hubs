@@ -1,5 +1,4 @@
 import "./assets/stylesheets/hub.scss";
-import moment from "moment-timezone";
 import queryString from "query-string";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
@@ -334,7 +333,7 @@ const onReady = async () => {
       document.body.addEventListener("connected", () => {
         if (!isBotMode) {
           hubChannel.sendEntryEvent().then(() => {
-            store.update({ activity: { lastEnteredAt: moment().toJSON() } });
+            store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
           });
         }
         remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
