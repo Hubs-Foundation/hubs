@@ -9,7 +9,7 @@
   },
   "scripts": {
     "postinstall": "node ./scripts/postinstall.js",
-    "start": "cross-env NODE_ENV=development webpack-dev-server",
+    "start": "cross-env NODE_ENV=development webpack-dev-server --mode=production",
     "build": "rimraf ./public && cross-env NODE_ENV=production webpack --mode=production",
     "doc": "node ./scripts/doc/build.js",
     "prettier": "prettier --write '*.js' 'src/**/*.js'",
