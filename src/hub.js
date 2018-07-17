@@ -343,7 +343,7 @@ const onReady = async () => {
         const imgUrl = e.dataTransfer.getData("url");
         if (imgUrl) {
           console.log("Dropped: ", imgUrl);
-          addMedia(imgUrl);
+          spawnMediaInfrontOfPlayer(imgUrl);
         }
       });
     }
