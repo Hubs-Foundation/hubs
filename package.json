@@ -34,6 +34,7 @@
     "classnames": "^2.2.5",
     "copy-to-clipboard": "^3.0.8",
     "copy-webpack-plugin": "^4.5.1",
+    "deepmerge": "^2.1.1",
     "detect-browser": "^2.1.0",
     "event-target-shim": "^3.0.1",
     "form-urlencoded": "^2.0.4",
