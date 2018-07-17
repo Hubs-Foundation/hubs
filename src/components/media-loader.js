@@ -8,10 +8,9 @@ AFRAME.registerComponent("media-loader", {
     src: { type: "string" }
   },
 
-  setShapeAndScale(didInflate) {
+  setShapeAndScale() {
     const mesh = this.el.getObject3D("mesh");
-    const boxRoot = didInflate ? mesh.parent : mesh;
-    const box = getBox(this.el, boxRoot);
+    const box = getBox(this.el, mesh);
     const scaleCoefficient = getScaleCoefficient(0.5, box);
     if (this.el.body && this.el.body.shapes.length > 1) {
       this.el.removeAttribute("shape");
@@ -19,7 +18,7 @@ AFRAME.registerComponent("media-loader", {
       const center = new THREE.Vector3();
       const halfExtents = new THREE.Vector3();
       getCenterAndHalfExtents(this.el, box, center, halfExtents);
-      boxRoot.position.sub(center);
+      mesh.position.sub(center);
       this.el.setAttribute("shape", {
         shape: "box",
         halfExtents: halfExtents
@@ -49,8 +48,12 @@ AFRAME.registerComponent("media-loader", {
       if (contentType.startsWith("image/") || contentType.startsWith("video/")) {
         this.el.setAttribute("image-plus", { src: raw, contentType });
       } else if (contentType.startsWith("model/gltf") || url.endsWith(".gltf") || url.endsWith(".glb")) {
-        this.el.addEventListener("model-loaded", evt => this.setShapeAndScale(evt.detail.didInflate), { once: true });
-        this.el.setAttribute("gltf-model-plus", { src: raw, basePath: THREE.LoaderUtils.extractUrlBase(origin) });
+        this.el.addEventListener("model-loaded", evt => this.setShapeAndScale(), { once: true });
+        this.el.setAttribute("gltf-model-plus", {
+          src: raw,
+          basePath: THREE.LoaderUtils.extractUrlBase(origin),
+          inflate: true
+        });
       } else {
         throw new Error(`Unsupported content type: ${contentType}`);
       }
