@@ -1,10 +1,5 @@
 import { addMedia } from "../utils/media-utils";
-
-const waitForEvent = function(eventName, eventObj) {
-  return new Promise(resolve => {
-    eventObj.addEventListener(eventName, resolve, { once: true });
-  });
-};
+import { waitForEvent } from "../utils/async-utils";
 
 let nextGrabId = 0;
 /**
