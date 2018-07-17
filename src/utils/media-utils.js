@@ -18,7 +18,6 @@ export const resolveFarsparkUrl = async url => {
 };
 
 let interactableId = 0;
-const offset = { x: 0, y: 0, z: -1.5 };
 export const addMedia = src => {
   const scene = AFRAME.scenes[0];
 
@@ -26,11 +25,6 @@ export const addMedia = src => {
   entity.id = "interactable-media-" + interactableId++;
   entity.setAttribute("networked", { template: "#interactable-media" });
   entity.setAttribute("media-loader", { src });
-  entity.setAttribute("offset-relative-to", {
-    target: "#player-camera",
-    offset: offset,
-    selfDestruct: true
-  });
   scene.appendChild(entity);
   return entity;
 };

@@ -304,8 +304,25 @@ const onReady = async () => {
       NAF.connection.entities.completeSync(ev.detail.clientId);
     });
 
+    const offset = { x: 0, y: 0, z: -1.5 };
+    const playerCamera = document.querySelector("#player-camera").object3D;
+    const spawnPos = new THREE.Vector3();
+    const spawnRot = new THREE.Quaternion();
+    const spawnMediaInfrontOfPlayer = url => {
+      const entity = addMedia(url, true);
+      entity.addEventListener("loaded", () => {
+        console.log("body loaded");
+        spawnPos.copy(offset);
+        playerCamera.localToWorld(spawnPos);
+        playerCamera.getWorldQuaternion(spawnRot);
+        console.log(spawnPos, spawnRot);
+        entity.body.position.copy(spawnPos);
+        entity.body.quaternion.copy(spawnRot);
+      });
+    };
+
     scene.addEventListener("add_media", e => {
-      addMedia(e.detail);
+      spawnMediaInfrontOfPlayer(e.detail);
     });
 
     if (qsTruthy("mediaTools")) {
@@ -314,7 +331,7 @@ const onReady = async () => {
 
         const imgUrl = e.clipboardData.getData("text");
         console.log("Pasted: ", imgUrl, e);
-        addMedia(imgUrl);
+        spawnMediaInfrontOfPlayer(imgUrl);
       });
 
       document.addEventListener("dragover", e => {
