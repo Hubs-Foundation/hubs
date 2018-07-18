@@ -9,6 +9,10 @@ AFRAME.registerComponent("media-loader", {
     resize: { default: false }
   },
 
+  init() {
+    this.onError = this.onError.bind(this);
+  },
+
   setShapeAndScale(resize) {
     const mesh = this.el.getObject3D("mesh");
     const box = getBox(this.el, mesh);
@@ -32,6 +36,11 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
+  onError() {
+    this.el.setAttribute("image-plus", { src: "error" });
+    clearTimeout(this.showLoaderTimeout);
+  },
+
   // TODO: correctly handle case where src changes
   async update() {
     try {
@@ -48,7 +57,15 @@ AFRAME.registerComponent("media-loader", {
       if (contentType.startsWith("image/") || contentType.startsWith("video/")) {
         this.el.setAttribute("image-plus", { src: raw, contentType });
       } else if (contentType.startsWith("model/gltf") || url.endsWith(".gltf") || url.endsWith(".glb")) {
-        this.el.addEventListener("model-loaded", evt => this.setShapeAndScale(this.data.resize), { once: true });
+        this.el.addEventListener(
+          "model-loaded",
+          () => {
+            console.log("clearing timeout");
+            this.setShapeAndScale(this.data.resize);
+          },
+          { once: true }
+        );
+        this.el.addEventListener("model-error", this.onError, { once: true });
         this.el.setAttribute("gltf-model-plus", {
           src: raw,
           basePath: THREE.LoaderUtils.extractUrlBase(origin),
@@ -59,7 +76,7 @@ AFRAME.registerComponent("media-loader", {
       }
     } catch (e) {
       console.error("Error adding media", e);
-      this.el.setAttribute("image-plus", { src: "error" });
+      this.onError();
     }
   }
 });
