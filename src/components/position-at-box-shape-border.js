@@ -1,3 +1,5 @@
+import { getBox } from "../utils/auto-box-collider.js";
+
 const PI = Math.PI;
 const HALF_PI = PI / 2;
 const THREE_HALF_PI = 3 * PI / 2;
@@ -47,25 +49,34 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     const targetPosition = new THREE.Vector3();
     const pointOnBoxFace = new THREE.Vector3();
     return function() {
-      if (!this.shape) {
-        this.shape = this.el.components["shape"];
-        if (!this.shape) return;
-      }
       if (!this.target) {
         this.target = this.el.querySelector(this.data.target).object3D;
         if (!this.target) return;
       }
-      const halfExtents = this.shape.data.halfExtents;
+      if (!this.halfExtents || this.mesh !== this.el.getObject3D("mesh") || this.shape !== this.el.components.shape) {
+        this.mesh = this.el.getObject3D("mesh"); //...
+        const box = getBox(this.el, this.mesh);
+        if (this.el.components.shape) {
+          this.shape = this.el.components.shape;
+          this.halfExtents = this.shape.data.halfExtents.clone();
+        } else {
+          this.halfExtents = box.min
+            .clone()
+            .negate()
+            .add(box.max)
+            .multiplyScalar(0.51 / this.el.object3D.scale.x);
+        }
+      }
       this.cam.getWorldPosition(camWorldPos);
 
       let minSquareDistance = Infinity;
       let targetDir = this.dirs[0].dir;
-      let targetHalfExtent = halfExtents[this.dirs[0].halfExtent];
+      let targetHalfExtent = this.halfExtents[this.dirs[0].halfExtent];
       let targetRotation = this.dirs[0].rotation;
 
       for (let i = 0; i < this.dirs.length; i++) {
         const dir = this.dirs[i].dir;
-        const halfExtent = halfExtents[this.dirs[i].halfExtent];
+        const halfExtent = this.halfExtents[this.dirs[i].halfExtent];
         pointOnBoxFace.copy(dir).multiplyScalar(halfExtent);
         this.el.object3D.localToWorld(pointOnBoxFace);
         const squareDistance = pointOnBoxFace.distanceToSquared(camWorldPos);
@@ -77,12 +88,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
         }
       }
 
-      this.target.position.copy(
-        targetPosition
-          .copy(targetDir)
-          .multiplyScalar(targetHalfExtent)
-          .add(this.shape.data.offset)
-      );
+      this.target.position.copy(targetPosition.copy(targetDir).multiplyScalar(targetHalfExtent));
       this.target.rotation.set(0, targetRotation, 0);
     };
   })()
