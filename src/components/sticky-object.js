@@ -12,20 +12,28 @@ AFRAME.registerComponent("sticky-object", {
     this._onGrab = this._onGrab.bind(this);
     this._onRelease = this._onRelease.bind(this);
     this._onBodyLoaded = this._onBodyLoaded.bind(this);
-    if (this.el.body) {
-      this._onBodyLoaded();
-    }
   },
 
   play() {
     this.el.addEventListener("grab-start", this._onGrab);
     this.el.addEventListener("grab-end", this._onRelease);
-    this.el.addEventListener("body-loaded", this._onBodyLoaded);
+
+    if (this.hasSetupBodyLoaded) return;
+    this.hasSetupBodyLoaded = true;
+
+    if (this.el.body) {
+      this._onBodyLoaded();
+    } else {
+      this.el.addEventListener("body-loaded", this._onBodyLoaded, { once: true });
+    }
   },
 
   pause() {
     this.el.removeEventListener("grab-start", this._onGrab);
     this.el.removeEventListener("grab-end", this._onRelease);
+  },
+
+  remove() {
     this.el.removeEventListener("body-loaded", this._onBodyLoaded);
   },
 
