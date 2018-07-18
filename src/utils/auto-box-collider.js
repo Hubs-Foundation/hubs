@@ -7,7 +7,6 @@ export function getBox(entity, boxRoot) {
   box.expandByObject = expandByObject;
   box.setFromObject(boxRoot);
   entity.object3D.rotation.copy(rotation);
-  entity.object3D.updateMatrixWorld(true);
   return box;
 }
 
