@@ -182,9 +182,9 @@ aframe-physics-extras@^0.1.3:
   version "0.1.3"
   resolved "https://registry.yarnpkg.com/aframe-physics-extras/-/aframe-physics-extras-0.1.3.tgz#803e2164fb96c0a80f2d1a81458f3277f262b130"
 
-"aframe-physics-system@https://github.com/mozillareality/aframe-physics-system#static-dynamic-mass-change":
+"aframe-physics-system@https://github.com/mozillareality/aframe-physics-system#hubs/master":
   version "3.1.2"
-  resolved "https://github.com/mozillareality/aframe-physics-system#1386ce9cf853ac9f65c312e033987685b65b1b9a"
+  resolved "https://github.com/mozillareality/aframe-physics-system#e4767d90dd3b828f348eea93814a2ebb58c0aee3"
   dependencies:
     browserify "^14.3.0"
     budo "^10.0.3"
