@@ -58,11 +58,11 @@ AFRAME.registerComponent("position-at-box-shape-border", {
       }
       if (!this.halfExtents || this.mesh !== this.el.getObject3D("mesh") || this.shape !== this.el.components.shape) {
         this.mesh = this.el.getObject3D("mesh");
-        const box = getBox(this.el, this.mesh);
         if (this.el.components.shape) {
           this.shape = this.el.components.shape;
           this.halfExtents = new THREE.Vector3().copy(this.shape.data.halfExtents);
         } else {
+          const box = getBox(this.el, this.mesh);
           this.halfExtents = box.min
             .clone()
             .negate()
