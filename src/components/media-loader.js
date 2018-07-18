@@ -18,21 +18,26 @@ AFRAME.registerComponent("media-loader", {
     const box = getBox(this.el, mesh);
     const scaleCoefficient = getScaleCoefficient(0.5, box);
     if (this.el.body && this.el.body.shapes.length > 1) {
-      resize && this.el.object3D.scale.multiplyScalar(scaleCoefficient);
+      if (resize) {
+        this.el.object3D.scale.multiplyScalar(scaleCoefficient);
+      } else {
+        this.el.object3D.scale.set(1, 1, 1);
+      }
       this.el.removeAttribute("shape");
     } else {
       const center = new THREE.Vector3();
       const halfExtents = new THREE.Vector3();
       getCenterAndHalfExtents(this.el, box, center, halfExtents);
       mesh.position.sub(center);
-      resize && this.el.object3D.scale.multiplyScalar(scaleCoefficient);
+      if (resize) {
+        this.el.object3D.scale.multiplyScalar(scaleCoefficient);
+      } else {
+        this.el.object3D.scale.set(1, 1, 1);
+      }
       this.el.setAttribute("shape", {
         shape: "box",
         halfExtents: halfExtents
       });
-    }
-    if (!resize) {
-      this.el.object3D.scale.set(1, 1, 1);
     }
   },
 
@@ -46,9 +51,12 @@ AFRAME.registerComponent("media-loader", {
     try {
       const url = this.data.src;
 
-      // show loading mesh
-      this.el.setObject3D("mesh", new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial()));
-      this.setShapeAndScale(true);
+      this.showLoaderTimeout = setTimeout(() => {
+        console.log("showing loader");
+        const loadingObj = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
+        this.el.setObject3D("mesh", loadingObj);
+        this.setShapeAndScale(true);
+      }, 100);
 
       const { raw, origin, meta } = await resolveFarsparkUrl(url);
       console.log("resolved", url, raw, origin, meta);
@@ -61,6 +69,7 @@ AFRAME.registerComponent("media-loader", {
           "model-loaded",
           () => {
             console.log("clearing timeout");
+            clearTimeout(this.showLoaderTimeout);
             this.setShapeAndScale(this.data.resize);
           },
           { once: true }
