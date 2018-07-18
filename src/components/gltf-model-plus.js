@@ -266,10 +266,10 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.model = model.scene || model.scenes[0];
       this.model.animations = model.animations;
 
-      this.el.setObject3D("mesh", this.model);
+      let object3DToSet = this.model;
       if (this.data.inflate && (this.inflatedEl = inflateEntities(this.model, this.templates, gltfPath))) {
         this.el.appendChild(this.inflatedEl);
-        this.el.setObject3D("mesh", this.inflatedEl.object3D);
+        object3DToSet = this.inflatedEl.object3D;
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
         // Wait one tick for the appended custom elements to be connected before attaching templates
         await nextTick();
@@ -278,6 +278,7 @@ AFRAME.registerComponent("gltf-model-plus", {
           attachTemplate(this.el, name, this.templates[name]);
         }
       }
+      this.el.setObject3D("mesh", object3DToSet);
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
       console.error("Failed to load glTF model", e, this);

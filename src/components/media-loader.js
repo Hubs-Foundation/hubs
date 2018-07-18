@@ -63,6 +63,14 @@ AFRAME.registerComponent("media-loader", {
 
       const contentType = (meta && meta.expected_content_type) || (await fetchContentType(raw));
       if (contentType.startsWith("image/") || contentType.startsWith("video/")) {
+        this.el.addEventListener(
+          "image-loaded",
+          () => {
+            console.log("clearing timeout");
+            clearTimeout(this.showLoaderTimeout);
+          },
+          { once: true }
+        );
         this.el.setAttribute("image-plus", { src: raw, contentType });
       } else if (contentType.startsWith("model/gltf") || url.endsWith(".gltf") || url.endsWith(".glb")) {
         this.el.addEventListener(
