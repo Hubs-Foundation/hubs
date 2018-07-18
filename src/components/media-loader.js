@@ -72,6 +72,7 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.setAttribute("image-plus", { src: raw, contentType });
+        this.el.setAttribute("position-at-box-shape-border", { target: ".delete-button", dirs: ["forward", "back"] });
       } else if (contentType.startsWith("model/gltf") || url.endsWith(".gltf") || url.endsWith(".glb")) {
         this.el.addEventListener(
           "model-loaded",
