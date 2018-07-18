@@ -239,6 +239,7 @@ AFRAME.registerComponent("image-plus", {
     material.transparent = true;
     material.map = texture;
     material.needsUpdate = true;
+    material.map.needsUpdate = true;
 
     const geometry = new THREE.PlaneGeometry(width, height, 1, 1);
     this.mesh = new THREE.Mesh(geometry, material);
