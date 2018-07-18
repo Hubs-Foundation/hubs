@@ -12,6 +12,9 @@ AFRAME.registerComponent("sticky-object", {
     this._onGrab = this._onGrab.bind(this);
     this._onRelease = this._onRelease.bind(this);
     this._onBodyLoaded = this._onBodyLoaded.bind(this);
+    if (this.el.body) {
+      this._onBodyLoaded();
+    }
   },
 
   play() {
