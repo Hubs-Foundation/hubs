@@ -1,11 +1,11 @@
 {
-  "name": "mr-social-client",
+  "name": "hubs",
   "version": "0.0.1",
   "main": "src/index.js",
   "license": "MPL-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mozilla/mr-social-client.git"
+    "url": "https://github.com/mozilla/hubs.git"
   },
   "scripts": {
     "postinstall": "node ./scripts/postinstall.js",
