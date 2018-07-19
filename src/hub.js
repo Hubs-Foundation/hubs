@@ -1,5 +1,6 @@
+console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
+
 import "./assets/stylesheets/hub.scss";
-import moment from "moment-timezone";
 import queryString from "query-string";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
@@ -344,7 +345,7 @@ const onReady = async () => {
       document.body.addEventListener("connected", () => {
         if (!isBotMode) {
           hubChannel.sendEntryEvent().then(() => {
-            store.update({ activity: { lastEnteredAt: moment().toJSON() } });
+            store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
           });
         }
         remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
@@ -440,6 +441,16 @@ const onReady = async () => {
     remountUI({ platformUnsupportedReason: platformUnsupportedReason });
     exitScene();
     return;
+  }
+
+  if (qs.required_version && process.env.BUILD_VERSION) {
+    const buildNumber = process.env.BUILD_VERSION.split(" ", 1)[0]; // e.g. "123 (abcd5678)"
+    if (qs.required_version !== buildNumber) {
+      remountUI({ roomUnavailableReason: "version_mismatch" });
+      setTimeout(() => document.location.reload(), 5000);
+      exitScene();
+      return;
+    }
   }
 
   getAvailableVREntryTypes().then(availableVREntryTypes => {

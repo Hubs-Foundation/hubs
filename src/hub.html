@@ -40,15 +40,15 @@
         vr-mode-ui="enabled: false"
         pinch-to-move
         input-configurator="
-                  gazeCursorRayObject: #player-camera-reverse-z;
+                  gazeCursorRayObject: #player-camera;
                   cursorController: #cursor-controller;
                   gazeTeleporter: #gaze-teleport;
                   camera: #player-camera;
                   playerRig: #player-rig;
                   leftController: #player-left-controller;
-                  leftControllerRayObject: #player-left-controller-reverse-z;
+                  leftControllerRayObject: #player-left-controller;
                   rightController: #player-right-controller;
-                  rightControllerRayObject: #player-right-controller-reverse-z;"
+                  rightControllerRayObject: #player-right-controller;"
     >
 
         <a-assets>
@@ -100,7 +100,7 @@
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
                         <template data-name="RootScene">
-                            <a-entity ik-controller hand-pose__left hand-pose__right animation-mixer space-invader-mesh="meshSelector: .Bot_Skinned"></a-entity>
+                            <a-entity ik-controller hand-pose__left hand-pose__right animation-mixer space-invader-mesh="meshName: Bot_Skinned"></a-entity>
                         </template>
 
                         <template data-name="Neck">
@@ -116,13 +116,12 @@
                         </template>
 
                         <template data-name="Chest">
-                            <a-entity>
-                              <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility> </a-entity>
-                              <a-entity billboard>
-                                  <a-entity mixin="rounded-text-button" block-button visible-while-frozen ui-class-while-frozen position="0 0 .35"> </a-entity>
-                                  <a-entity visible-while-frozen text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
-                              </a-entity>
+                          <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
+                            <a-entity billboard>
+                              <a-entity mixin="rounded-text-button" block-button visible-while-frozen ui-class-while-frozen position="0 0 .35"> </a-entity>
+                              <a-entity visible-while-frozen text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
                             </a-entity>
+                          </a-entity>
                         </template>
 
                         <template data-name="Head">
@@ -140,11 +139,6 @@
                                   visible="false"
                               ></a-cylinder>
                             </a-entity>
-                        </template>
-
-                        <!-- needs to exist for the benefit of the personal space calculator  -->
-                        <template data-name="Bot_Skinned">
-                          <a-entity></a-entity>
                         </template>
 
                         <template data-name="LeftHand">
@@ -287,7 +281,6 @@
                     hitOpacity: 0.3;
                     missOpacity: 0.2;"
             ></a-entity>
-            <a-entity id="player-camera-reverse-z" rotation="0 180 0"></a-entity>
           </a-entity>
 
           <a-entity
@@ -309,7 +302,6 @@
               mixin="controller-super-hands"
               controls-shape-offset
           >
-            <a-entity id="player-left-controller-reverse-z" rotation="0 180 0"></a-entity>
           </a-entity>
 
           <a-entity
@@ -331,7 +323,6 @@
               mixin="controller-super-hands"
               controls-shape-offset
           >
-            <a-entity id="player-right-controller-reverse-z" rotation="0 180 0"></a-entity>
           </a-entity>
 
           <a-entity gltf-model-plus="inflate: true;"
@@ -365,7 +356,7 @@
               <a-entity bone-visibility></a-entity>
             </template>
 
-            </a-entity>
+          </a-entity>
         </a-entity>
 
         <!-- Environment -->

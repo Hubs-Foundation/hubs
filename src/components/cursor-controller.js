@@ -66,7 +66,7 @@ AFRAME.registerComponent("cursor-controller", {
         const rayObject = this.data.rayObject.object3D;
         rayObjectRotation.setFromRotationMatrix(rayObject.matrixWorld);
         this.direction
-          .set(0, 0, 1)
+          .set(0, 0, -1)
           .applyQuaternion(rayObjectRotation)
           .normalize();
         this.origin.setFromMatrixPosition(rayObject.matrixWorld);
