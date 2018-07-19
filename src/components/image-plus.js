@@ -144,6 +144,7 @@ AFRAME.registerComponent("image-plus", {
       texture.minFilter = THREE.LinearFilter;
       videoEl.addEventListener("loadedmetadata", () => resolve(texture), { once: true });
       videoEl.onerror = reject;
+      texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(videoEl);
 
       // If iOS and video is HLS, do some hacks.
       if (
@@ -200,9 +201,9 @@ AFRAME.registerComponent("image-plus", {
         textureCache.set(url, { count: 1, texture });
       }
 
-      if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
+      if (texture.audioSource) {
         const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-        sound.setMediaElementSource(texture.image);
+        sound.setNodeSource(texture.audioSource);
         this.el.setObject3D("sound", sound);
       }
     } catch (e) {
