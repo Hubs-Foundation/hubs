@@ -40,7 +40,7 @@ AFRAME.registerComponent("networked-drawing", {
     this.radius = this.data.radius;
     this.segments = this.data.segments;
 
-    const material = new THREE.MeshStandardMaterial(options);
+    const material = new THREE.MeshBasicMaterial(options);
     console.log(material);
     this.sharedBufferGeometryManager = new SharedBufferGeometryManager();
     this.sharedBufferGeometryManager.addSharedBuffer(0, material, THREE.TriangleStripDrawMode);
