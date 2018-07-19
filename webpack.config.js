@@ -8,6 +8,7 @@ const webpack = require("webpack");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const _ = require("lodash");
 
 const SMOKE_PREFIX = "smoke-";
@@ -194,6 +195,10 @@ const config = {
         }
       }
     ]
+  },
+  // necessary due to https://github.com/visionmedia/debug/issues/547
+  optimization: {
+    minimizer: [new UglifyJsPlugin({ uglifyOptions: { compress: { collapse_vars: false } } })]
   },
   plugins: [
     // Each output page needs a HTMLWebpackPlugin entry
