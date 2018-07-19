@@ -72,26 +72,6 @@ AFRAME.registerComponent("image-plus", {
     contentType: { type: "string" }
   },
 
-  _fit(w, h) {
-    const ratio = (h || 1.0) / (w || 1.0);
-    const geo = this.el.geometry;
-    let width, height;
-    if (geo && geo.width) {
-      if (geo.height && ratio > 1) {
-        width = geo.width / ratio;
-      } else {
-        height = geo.height * ratio;
-      }
-    } else if (geo && geo.height) {
-      //TODO
-      width = geo.width / ratio;
-    } else {
-      width = Math.min(1.0, 1.0 / ratio);
-      height = Math.min(1.0, ratio);
-    }
-    return { width, height };
-  },
-
   remove() {
     const material = this.el.getObject3D("mesh").material;
     const texture = material.map;
@@ -230,16 +210,18 @@ AFRAME.registerComponent("image-plus", {
       texture = errorTexture;
     }
 
-    const { width, height } = this._fit(
-      texture.image.videoWidth || texture.image.width,
-      texture.image.videoHeight || texture.image.height
-    );
     const material = new THREE.MeshBasicMaterial();
     material.side = THREE.DoubleSide;
     material.transparent = true;
     material.map = texture;
     material.needsUpdate = true;
     material.map.needsUpdate = true;
+
+    const ratio =
+      (texture.image.videoHeight || texture.image.height || 1.0) /
+      (texture.image.videoWidth || texture.image.width || 1.0);
+    const width = Math.min(1.0, 1.0 / ratio);
+    const height = Math.min(1.0, ratio);
 
     const geometry = new THREE.PlaneGeometry(width, height, 1, 1);
     this.mesh = new THREE.Mesh(geometry, material);
