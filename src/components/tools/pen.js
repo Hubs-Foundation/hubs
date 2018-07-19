@@ -53,10 +53,10 @@ AFRAME.registerComponent("pen", {
   },
 
   play() {
-    if (this.data.useMouse && false) {
-      document.addEventListener("mousedown", this.onMouseDown);
-      document.addEventListener("mouseup", this.onMouseUp);
-    }
+    // if (this.data.useMouse && false) {
+    //   document.addEventListener("mousedown", this.onMouseDown);
+    //   document.addEventListener("mouseup", this.onMouseUp);
+    // }
 
     // this.el.parentNode.addEventListener("index_down", this.startDraw);
     // this.el.parentNode.addEventListener("index_up", this.endDraw);

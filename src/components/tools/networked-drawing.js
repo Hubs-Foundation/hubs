@@ -47,7 +47,7 @@ AFRAME.registerComponent("networked-drawing", {
 
     this.lastSegments = [];
     this.currentSegments = [];
-    for (var x = 0; x < this.segments; x++) {
+    for (let x = 0; x < this.segments; x++) {
       this.lastSegments[x] = new THREE.Vector3();
       this.currentSegments[x] = new THREE.Vector3();
     }
@@ -259,7 +259,7 @@ AFRAME.registerComponent("networked-drawing", {
 
     this.sharedBuffer.update();
 
-    for (var j = 0; j < this.segments; j++) {
+    for (let j = 0; j < this.segments; j++) {
       this.lastSegments[j].copy(this.currentSegments[j]);
     }
   },
