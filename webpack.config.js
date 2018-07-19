@@ -260,7 +260,7 @@ const config = {
       // expose these variables to the lodash template
       // ex: <%= ORIGIN_TRIAL_TOKEN %>
       imports: {
-        HTML_PREFIX: process.env.GENERATE_SMOKE_TESTS ? SMOKE_PREFIX : "",
+        HTML_PREFIX: "",
         NODE_ENV: process.env.NODE_ENV,
         ORIGIN_TRIAL_EXPIRES: process.env.ORIGIN_TRIAL_EXPIRES,
         ORIGIN_TRIAL_TOKEN: process.env.ORIGIN_TRIAL_TOKEN
@@ -294,6 +294,11 @@ module.exports = () => {
               filename: SMOKE_PREFIX + plugin.options.filename
             })
           );
+        } else if (plugin instanceof LodashTemplatePlugin) {
+          return new LodashTemplatePlugin({
+            ...plugin.options,
+            imports: { ...plugin.options.imports, HTML_PREFIX: SMOKE_PREFIX }
+          });
         }
 
         return plugin;
