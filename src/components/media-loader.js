@@ -1,4 +1,4 @@
-import { getBox, getCenterAndHalfExtents, getScaleCoefficient } from "../utils/auto-box-collider";
+import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import { resolveFarsparkUrl } from "../utils/media-utils";
 
 const fetchContentType = async url => fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
@@ -16,24 +16,23 @@ AFRAME.registerComponent("media-loader", {
   setShapeAndScale(resize) {
     const mesh = this.el.getObject3D("mesh");
     const box = getBox(this.el, mesh);
-    const scaleCoefficient = getScaleCoefficient(0.5, box);
+    if (resize) {
+      this.el.object3D.scale.multiplyScalar(getScaleCoefficient(0.5 / this.el.object3D.scale.x, box));
+    } else {
+      this.el.object3D.scale.set(1, 1, 1);
+    }
     if (this.el.body && this.el.body.shapes.length > 1) {
-      if (resize) {
-        this.el.object3D.scale.multiplyScalar(scaleCoefficient);
-      } else {
-        this.el.object3D.scale.set(1, 1, 1);
-      }
       this.el.removeAttribute("shape");
     } else {
       const center = new THREE.Vector3();
-      const halfExtents = new THREE.Vector3();
-      getCenterAndHalfExtents(this.el, box, center, halfExtents);
+      const { min, max } = box;
+      const halfExtents = {
+        x: Math.abs(min.x - max.x) / 2,
+        y: Math.abs(min.y - max.y) / 2,
+        z: Math.abs(min.z - max.z) / 2
+      };
+      center.addVectors(min, max).multiplyScalar(0.5);
       mesh.position.sub(center);
-      if (resize) {
-        this.el.object3D.scale.multiplyScalar(scaleCoefficient);
-      } else {
-        this.el.object3D.scale.set(1, 1, 1);
-      }
       this.el.setAttribute("shape", {
         shape: "box",
         halfExtents: halfExtents

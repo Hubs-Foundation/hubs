@@ -30,6 +30,11 @@ const dirs = {
   }
 };
 
+const inverseHalfExtents = {
+  x: "z",
+  z: "x"
+};
+
 AFRAME.registerComponent("position-at-box-shape-border", {
   schema: {
     target: { type: "string" },
@@ -74,12 +79,14 @@ AFRAME.registerComponent("position-at-box-shape-border", {
 
       let minSquareDistance = Infinity;
       let targetDir = this.dirs[0].dir;
-      let targetHalfExtent = this.halfExtents[this.dirs[0].halfExtent];
+      let targetHalfExtentStr = this.dirs[0].halfExtent;
+      let targetHalfExtent = this.halfExtents[targetHalfExtentStr];
       let targetRotation = this.dirs[0].rotation;
 
       for (let i = 0; i < this.dirs.length; i++) {
         const dir = this.dirs[i].dir;
-        const halfExtent = this.halfExtents[this.dirs[i].halfExtent];
+        const halfExtentStr = this.dirs[i].halfExtent;
+        const halfExtent = this.halfExtents[halfExtentStr];
         pointOnBoxFace.copy(dir).multiplyScalar(halfExtent);
         this.el.object3D.localToWorld(pointOnBoxFace);
         const squareDistance = pointOnBoxFace.distanceToSquared(camWorldPos);
@@ -88,11 +95,13 @@ AFRAME.registerComponent("position-at-box-shape-border", {
           targetDir = dir;
           targetHalfExtent = halfExtent;
           targetRotation = this.dirs[i].rotation;
+          targetHalfExtentStr = halfExtentStr;
         }
       }
 
       this.target.position.copy(targetPosition.copy(targetDir).multiplyScalar(targetHalfExtent));
       this.target.rotation.set(0, targetRotation, 0);
+      this.target.scale.setScalar(this.halfExtents[inverseHalfExtents[targetHalfExtentStr]] * 4);
     };
   })()
 });
