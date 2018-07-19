@@ -48,7 +48,6 @@ AFRAME.registerComponent("media-loader", {
       const url = this.data.src;
 
       this.showLoaderTimeout = setTimeout(() => {
-        console.log("showing loader");
         const loadingObj = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
         this.el.setObject3D("mesh", loadingObj);
         this.setShapeAndScale(true);
@@ -62,7 +61,6 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "image-loaded",
           () => {
-            console.log("clearing timeout");
             clearTimeout(this.showLoaderTimeout);
           },
           { once: true }
@@ -73,7 +71,6 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "model-loaded",
           () => {
-            console.log("clearing timeout");
             clearTimeout(this.showLoaderTimeout);
             this.setShapeAndScale(this.data.resize);
           },
