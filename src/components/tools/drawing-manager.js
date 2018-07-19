@@ -3,13 +3,11 @@
  * @component drawing-manager
  */
 AFRAME.registerComponent("drawing-manager", {
-	schema: {},
+  schema: {},
 
-	init() {
-		this.points = [];
-	},
+  init() {},
 
-	play() {},
+  play() {},
 
-	pause() {}
+  pause() {}
 });
