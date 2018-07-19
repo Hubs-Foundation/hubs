@@ -211,7 +211,7 @@ AFRAME.registerComponent("image-plus", {
           texture = await this.loadGIF(url);
         } else if (contentType.startsWith("image/")) {
           texture = await this.loadImage(url);
-        } else if (contentType.startsWith("video") || contentType.startsWith("audio/")) {
+        } else if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
           texture = await this.loadVideo(url);
         } else {
           throw new Error(`Unknown content type: ${contentType}`);
@@ -220,7 +220,7 @@ AFRAME.registerComponent("image-plus", {
         textureCache.set(url, { count: 1, texture });
       }
 
-      if (contentType.startsWith("video")) {
+      if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
         const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
         sound.setMediaElementSource(texture.image);
         this.el.setObject3D("sound", sound);
