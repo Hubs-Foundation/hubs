@@ -120,10 +120,10 @@ function createSphereGizmo(radius) {
  */
 AFRAME.registerComponent("space-invader-mesh", {
   schema: {
-    meshSelector: { type: "string" }
+    meshName: { type: "string" }
   },
-  init() {
-    this.targetMesh = this.el.querySelector(this.data.meshSelector).object3DMap.skinnedmesh;
+  update() {
+    this.targetMesh = this.el.object3D.getObjectByName(this.data.meshName);
   }
 });
 

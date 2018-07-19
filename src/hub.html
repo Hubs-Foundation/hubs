@@ -101,7 +101,7 @@
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
                         <template data-name="RootScene">
-                            <a-entity ik-controller hand-pose__left hand-pose__right animation-mixer space-invader-mesh="meshSelector: .Bot_Skinned"></a-entity>
+                            <a-entity ik-controller hand-pose__left hand-pose__right animation-mixer space-invader-mesh="meshName: Bot_Skinned"></a-entity>
                         </template>
 
                         <template data-name="Neck">
@@ -117,13 +117,12 @@
                         </template>
 
                         <template data-name="Chest">
-                            <a-entity>
-                              <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility> </a-entity>
-                              <a-entity billboard>
-                                  <a-entity mixin="rounded-text-button" block-button visible-while-frozen ui-class-while-frozen position="0 0 .35"> </a-entity>
-                                  <a-entity visible-while-frozen text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
-                              </a-entity>
+                          <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
+                            <a-entity billboard>
+                              <a-entity mixin="rounded-text-button" block-button visible-while-frozen ui-class-while-frozen position="0 0 .35"> </a-entity>
+                              <a-entity visible-while-frozen text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
                             </a-entity>
+                          </a-entity>
                         </template>
 
                         <template data-name="Head">
@@ -141,11 +140,6 @@
                                   visible="false"
                               ></a-cylinder>
                             </a-entity>
-                        </template>
-
-                        <!-- needs to exist for the benefit of the personal space calculator  -->
-                        <template data-name="Bot_Skinned">
-                          <a-entity></a-entity>
                         </template>
 
                         <template data-name="LeftHand">
@@ -404,7 +398,7 @@
               <a-entity bone-visibility></a-entity>
             </template>
 
-            </a-entity>
+          </a-entity>
         </a-entity>
 
         <!-- Environment -->
