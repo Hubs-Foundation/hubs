@@ -1,3 +1,5 @@
+console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
+
 import "./assets/stylesheets/hub.scss";
 import queryString from "query-string";
 
@@ -431,11 +433,14 @@ const onReady = async () => {
     return;
   }
 
-  if (qs.required_version && qs.required_version !== process.env.BUILD_VERSION) {
-    remountUI({ roomUnavailableReason: "version_mismatch" });
-    setTimeout(() => document.location.reload(), 5000);
-    exitScene();
-    return;
+  if (qs.required_version && process.env.BUILD_VERSION) {
+    const buildNumber = process.env.BUILD_VERSION.split(" ", 1)[0]; // e.g. "123 (abcd5678)"
+    if (qs.required_version !== buildNumber) {
+      remountUI({ roomUnavailableReason: "version_mismatch" });
+      setTimeout(() => document.location.reload(), 5000);
+      exitScene();
+      return;
+    }
   }
 
   getAvailableVREntryTypes().then(availableVREntryTypes => {
