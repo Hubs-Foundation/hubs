@@ -211,7 +211,7 @@ AFRAME.registerComponent("image-plus", {
           texture = await this.loadGIF(url);
         } else if (contentType.startsWith("image/")) {
           texture = await this.loadImage(url);
-        } else if (contentType.startsWith("video")) {
+        } else if (contentType.startsWith("video") || contentType.startsWith("audio/")) {
           texture = await this.loadVideo(url);
         } else {
           throw new Error(`Unknown content type: ${contentType}`);

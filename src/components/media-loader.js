@@ -58,7 +58,7 @@ AFRAME.registerComponent("media-loader", {
       console.log("resolved", url, raw, origin, meta);
 
       const contentType = (meta && meta.expected_content_type) || (await fetchContentType(raw));
-      if (contentType.startsWith("image/") || contentType.startsWith("video/")) {
+      if (contentType.startsWith("image/") || contentType.startsWith("video/") || contentType.startsWith("audio/")) {
         this.el.addEventListener(
           "image-loaded",
           () => {
