@@ -16,22 +16,19 @@ AFRAME.registerComponent("media-loader", {
   setShapeAndScale(resize) {
     const mesh = this.el.getObject3D("mesh");
     const box = getBox(this.el, mesh);
-    if (resize) {
-      this.el.object3D.scale.multiplyScalar(getScaleCoefficient(0.5 / this.el.object3D.scale.x, box));
-    } else {
-      this.el.object3D.scale.set(1, 1, 1);
-    }
+    const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
+    this.el.object3DMap.mesh.scale.multiplyScalar(scaleCoefficient);
     if (this.el.body && this.el.body.shapes.length > 1) {
       this.el.removeAttribute("shape");
     } else {
       const center = new THREE.Vector3();
       const { min, max } = box;
       const halfExtents = {
-        x: Math.abs(min.x - max.x) / 2,
-        y: Math.abs(min.y - max.y) / 2,
-        z: Math.abs(min.z - max.z) / 2
+        x: Math.abs(min.x - max.x) / 2 * scaleCoefficient,
+        y: Math.abs(min.y - max.y) / 2 * scaleCoefficient,
+        z: Math.abs(min.z - max.z) / 2 * scaleCoefficient
       };
-      center.addVectors(min, max).multiplyScalar(0.5);
+      center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
       mesh.position.sub(center);
       this.el.setAttribute("shape", {
         shape: "box",
