@@ -61,8 +61,8 @@ const config = {
         gripup: ["action_release", "middle_ring_pinky_up"],
         trackpadtouchstart: "thumb_down",
         trackpadtouchend: "thumb_up",
-        triggerdown: ["index_down"],
-        triggerup: ["index_up"],
+        triggerdown: ["secondary_action_grab", "index_down"],
+        triggerup: ["secondary_action_release", "index_up"],
         scroll: { right: "move_duck" }
       },
       "oculus-touch-controls": {
@@ -86,8 +86,8 @@ const config = {
         surfacetouchend: "thumb_up",
         thumbsticktouchstart: "thumb_down",
         thumbsticktouchend: "thumb_up",
-        triggerdown: ["action_grab", "index_down"],
-        triggerup: ["action_release", "index_up"],
+        triggerdown: ["secondary_action_grab", "index_down"],
+        triggerup: ["secondary_action_release", "index_up"],
         "axismove.reverseY": { left: "move", right: "move_duck" },
         abuttondown: "action_primary_down",
         abuttonup: "action_primary_up"

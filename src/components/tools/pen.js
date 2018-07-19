@@ -53,7 +53,7 @@ AFRAME.registerComponent("pen", {
   },
 
   play() {
-    if (this.data.useMouse) {
+    if (this.data.useMouse && false) {
       document.addEventListener("mousedown", this.onMouseDown);
       document.addEventListener("mouseup", this.onMouseUp);
     }
@@ -61,8 +61,10 @@ AFRAME.registerComponent("pen", {
     // this.el.parentNode.addEventListener("index_down", this.startDraw);
     // this.el.parentNode.addEventListener("index_up", this.endDraw);
 
-    this.el.parentNode.addEventListener("drag-start", this.startDraw);
-    this.el.parentNode.addEventListener("drag-end", this.endDraw);
+    if (!this.data.useMouse) {
+      this.el.parentNode.addEventListener("activate-start", this.startDraw);
+      this.el.parentNode.addEventListener("activate-end", this.endDraw);
+    }
   },
 
   pause() {
@@ -72,8 +74,8 @@ AFRAME.registerComponent("pen", {
     this.el.parentNode.removeEventListener("index_down", this.startDraw);
     this.el.parentNode.removeEventListener("index_up", this.endDraw);
 
-    this.el.parentNode.removeEventListener("drag-start", this.startDraw);
-    this.el.parentNode.removeEventListener("drag-end", this.endDraw);
+    this.el.parentNode.removeEventListener("activate-start", this.startDraw);
+    this.el.parentNode.removeEventListener("activate-end", this.endDraw);
   },
 
   tick(t, dt) {

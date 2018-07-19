@@ -220,12 +220,12 @@
              <template id="pen-interactable">
                 <a-entity
                     gltf-model-plus="src: #interactable-pen; inflate: true;"
-                    class="interactable"
+                    class="interactable sticky"
                     super-networked-interactable="counter: #counter; mass: 1;"
                     body="type: dynamic; shape: none; mass: 1;"
-                    grabbable
+                    grabbable="maxGrabbers: 1; maxGrabBehavior: drop;"
                     hoverable
-                    draggable
+                    activatable="buttonStartEvent: secondary_action_grab; buttonEndEvent: secondary_action_release;"
                     scale="0.5 0.5 0.5"
                 >
                     <a-sphere 
@@ -271,7 +271,8 @@
                          colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
                          grabStartButtons: hand_grab; grabEndButtons: hand_release;
                          stretchStartButtons: hand_grab; stretchEndButtons: hand_release;
-                         dragDropStartButtons: index_down; dragDropEndButtons: index_up;"
+                         dragDropStartButtons: hand_grab; dragDropEndButtons: hand_release;
+                         activateStartButtons: secondary_action_grab; activateEndButtons: secondary_action_release;"
                      collision-filter="collisionForces: false"
                      physics-collider
             ></a-mixin>
@@ -301,7 +302,8 @@
                 colliderEndEvent: raycaster-intersection-cleared; colliderEndEventProperty: clearedEls;
                 grabStartButtons: cursor-grab; grabEndButtons: cursor-release;
                 stretchStartButtons: cursor-grab; stretchEndButtons: cursor-release;
-                dragDropStartButtons: cursor-grab; dragDropEndButtons: cursor-release;"
+                dragDropStartButtons: cursor-grab; dragDropEndButtons: cursor-release;
+                activateStartButtons: TODO; activateEndButtons: TODO;"
             segments-height="9"
             segments-width="9"
             event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"
