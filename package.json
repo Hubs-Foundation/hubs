@@ -1,11 +1,16 @@
 {
   "name": "hubs",
   "version": "0.0.1",
+  "description": "Duck-themed multi-user virtual spaces in WebVR.",
   "main": "src/index.js",
   "license": "MPL-2.0",
+  "homepage": "https://github.com/mozilla/hubs#readme",
   "repository": {
     "type": "git",
     "url": "https://github.com/mozilla/hubs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mozilla/hubs/issues"
   },
   "scripts": {
     "postinstall": "node ./scripts/postinstall.js",
