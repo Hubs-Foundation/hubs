@@ -5,12 +5,12 @@ A prototype client demonstrating a multi-user experience in WebVR. Built with
 
 ## Getting Started
 
-To run the social client, run:
+To run the client, run:
 
 ```sh
 git clone https://github.com/mozilla/hubs.git
-yarn install
-yarn start
+npm ci
+npm start
 ```
 
 ## Building Static Files
@@ -18,7 +18,7 @@ yarn start
 To bundle javascript and generate the html templates, run:
 
 ```sh
-yarn build
+npm run build
 ```
 
 ## hubs.local Host Entry
