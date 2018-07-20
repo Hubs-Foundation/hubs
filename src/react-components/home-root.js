@@ -17,7 +17,8 @@ addLocaleData([...en]);
 class HomeRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
-    dialogType: PropTypes.symbol
+    dialogType: PropTypes.symbol,
+    initialEnvironment: PropTypes.string
   };
 
   state = {
@@ -155,7 +156,12 @@ class HomeRoot extends Component {
                 </div>
               </div>
               <div className="hero-content__create">
-                {this.state.environments.length > 0 && <HubCreatePanel environments={this.state.environments} />}
+                {this.state.environments.length > 0 && (
+                  <HubCreatePanel
+                    initialEnvironment={this.props.initialEnvironment}
+                    environments={this.state.environments}
+                  />
+                )}
               </div>
             </div>
             <div className="footer-content">

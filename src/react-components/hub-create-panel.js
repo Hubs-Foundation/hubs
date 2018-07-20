@@ -15,16 +15,25 @@ const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
 class HubCreatePanel extends Component {
   static propTypes = {
     intl: PropTypes.object,
-    environments: PropTypes.array
+    environments: PropTypes.array,
+    initialEnvironment: PropTypes.string
   };
 
   constructor(props) {
     super(props);
 
+    let environmentIndex = Math.floor(Math.random() * props.environments.length);
+
+    if (props.initialEnvironment) {
+      environmentIndex = props.environments.findIndex(
+        e => e.name.toLowerCase() === props.initialEnvironment.toLowerCase()
+      );
+    }
+
     this.state = {
       ready: false,
       name: generateHubName(),
-      environmentIndex: Math.floor(Math.random() * props.environments.length),
+      environmentIndex,
       // HACK: expand on small screens by default to ensure scene selection possible.
       // Eventually this could/should be done via media queries.
       expanded: window.innerWidth < 420

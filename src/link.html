@@ -8,6 +8,12 @@
     <title>Enter Code | Hubs by Mozilla</title>
     <link href="https://fonts.googleapis.com/css?family=Zilla+Slab:300,300i,400,400i,700" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <% if(NODE_ENV === "production") { %>
+    <script src="https://cdn.rawgit.com/aframevr/aframe/1be48d9/dist/aframe-master.min.js" integrity="sha384-SXrfoMHbXpA5RZhIyhgaR6tQ764dDZsbFk3PiokC/tc0+NnW1yaYQMUzWtL06hnq" crossorigin="anonymous"></script>
+    <% } else { %>
+    <script src="https://cdn.rawgit.com/aframevr/aframe/1be48d9/dist/aframe-master.js" integrity="sha384-AmjDGOMbvTrrUFdeVWcBIlXRINIWnO8iwj/4VS21OWbYDsa/7nheOIyPAPJSkR6J" crossorigin="anonymous"></script>
+    <% } %>
 </head>
 
 <body>
