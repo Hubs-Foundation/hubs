@@ -7,7 +7,6 @@ import InfoDialog from "./react-components/info-dialog.js";
 import queryString from "query-string";
 
 const qs = queryString.parse(location.search);
-
 registerTelemetry();
 
 ReactDOM.render(

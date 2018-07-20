@@ -6,130 +6,90 @@
 AFRAME.registerComponent("networked-counter", {
   schema: {
     max: { default: 3 },
-    ttl: { default: 120 },
+    ttl: { default: 0 },
     grab_event: { type: "string", default: "grab-start" },
     release_event: { type: "string", default: "grab-end" }
   },
 
-  init: function() {
-    this.count = 0;
-    this.queue = {};
-    this.timeouts = {};
+  init() {
+    this.registeredEls = new Map();
   },
 
-  remove: function() {
-    for (const id in this.queue) {
-      if (this.queue.hasOwnProperty(id)) {
-        const item = this.queue[id];
-        item.el.removeEventListener(this.data.grab_event, item.onGrabHandler);
-        item.el.removeEventListener(this.data.release_event, item.onReleaseHandler);
-      }
-    }
-
-    for (const id in this.timeouts) {
-      this._removeTimeout(id);
-    }
+  remove() {
+    this.registeredEls.forEach(({ onGrabHandler, onReleaseHandler, timeout }, el) => {
+      el.removeEventListener(this.data.grab_event, onGrabHandler);
+      el.removeEventListener(this.data.release_event, onReleaseHandler);
+      clearTimeout(timeout);
+    });
+    this.registeredEls.clear();
   },
 
-  register: function(networkedEl) {
-    if (this.data.max <= 0) {
-      return;
-    }
+  register(el) {
+    if (this.data.max <= 0 || this.registeredEls.has(el)) return;
 
-    const id = NAF.utils.getNetworkId(networkedEl);
-    if (id && this.queue.hasOwnProperty(id)) {
-      return;
-    }
+    const grabEventListener = this._onGrabbed.bind(this, el);
+    const releaseEventListener = this._onReleased.bind(this, el);
 
-    const now = Date.now();
-    const grabEventListener = this._onGrabbed.bind(this, id);
-    const releaseEventListener = this._onReleased.bind(this, id);
-
-    this.queue[id] = {
-      ts: now,
-      el: networkedEl,
+    this.registeredEls.set(el, {
+      ts: Date.now(),
       onGrabHandler: grabEventListener,
       onReleaseHandler: releaseEventListener
-    };
+    });
 
-    networkedEl.addEventListener(this.data.grab_event, grabEventListener);
-    networkedEl.addEventListener(this.data.release_event, releaseEventListener);
+    el.addEventListener(this.data.grab_event, grabEventListener);
+    el.addEventListener(this.data.release_event, releaseEventListener);
 
-    this.count++;
-
-    if (!this._isCurrentlyGrabbed(id)) {
-      this._addTimeout(id);
+    if (!el.is("grabbed")) {
+      this._startTimer(el);
     }
 
     this._destroyOldest();
   },
 
-  deregister: function(networkedEl) {
-    const id = NAF.utils.getNetworkId(networkedEl);
-    if (id && this.queue.hasOwnProperty(id)) {
-      const item = this.queue[id];
-      networkedEl.removeEventListener(this.data.grab_event, item.onGrabHandler);
-      networkedEl.removeEventListener(this.data.release_event, item.onReleaseHandler);
-
-      delete this.queue[id];
-
-      this._removeTimeout(id);
-      delete this.timeouts[id];
-
-      this.count--;
+  deregister(el) {
+    if (this.registeredEls.has(el)) {
+      const { onGrabHandler, onReleaseHandler, timeout } = this.registeredEls.get(el);
+      el.removeEventListener(this.data.grab_event, onGrabHandler);
+      el.removeEventListener(this.data.release_event, onReleaseHandler);
+      clearTimeout(timeout);
+      this.registeredEls.delete(el);
     }
   },
 
-  _onGrabbed: function(id) {
-    this._removeTimeout(id);
+  _onGrabbed(el) {
+    clearTimeout(this.registeredEls.get(el).timeout);
   },
 
-  _onReleased: function(id) {
-    this._removeTimeout(id);
-    this._addTimeout(id);
-    this.queue[id].ts = Date.now();
+  _onReleased(el) {
+    this._startTimer(el);
+    this.registeredEls.get(el).ts = Date.now();
   },
 
-  _destroyOldest: function() {
-    if (this.count > this.data.max) {
-      let oldest = null,
-        ts = Number.MAX_VALUE;
-      for (const id in this.queue) {
-        if (this.queue.hasOwnProperty(id)) {
-          if (this.queue[id].ts < ts && !this._isCurrentlyGrabbed(id)) {
-            oldest = this.queue[id];
-            ts = this.queue[id].ts;
-          }
+  _destroyOldest() {
+    if (this.registeredEls.size > this.data.max) {
+      let oldestEl = null,
+        minTs = Number.MAX_VALUE;
+      this.registeredEls.forEach(({ ts }, el) => {
+        if (ts < minTs && !el.is("grabbed")) {
+          oldestEl = el;
+          minTs = ts;
         }
-      }
-      if (ts > 0) {
-        this.deregister(oldest.el);
-        this._destroy(oldest.el);
-      }
+      });
+      this._destroy(oldestEl);
     }
   },
 
-  _isCurrentlyGrabbed: function(id) {
-    const networkedEl = this.queue[id].el;
-    return networkedEl.is("grabbed");
-  },
-
-  _addTimeout: function(id) {
-    const timeout = this.data.ttl * 1000;
-    this.timeouts[id] = setTimeout(() => {
-      const el = this.queue[id].el;
-      this.deregister(el);
+  _startTimer(el) {
+    if (!this.data.ttl) return;
+    clearTimeout(this.registeredEls.get(el).timeout);
+    this.registeredEls.get(el).timeout = setTimeout(() => {
       this._destroy(el);
-    }, timeout);
+    }, this.data.ttl * 1000);
   },
 
-  _removeTimeout: function(id) {
-    if (this.timeouts.hasOwnProperty(id)) {
-      clearTimeout(this.timeouts[id]);
-    }
-  },
-
-  _destroy: function(networkedEl) {
-    networkedEl.parentNode.removeChild(networkedEl);
+  _destroy(el) {
+    // networked-interactable's remvoe will also call deregister, but it will happen async so we do it here as well.
+    this.deregister(el);
+    el.parentNode.removeChild(el);
   }
 });

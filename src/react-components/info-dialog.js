@@ -8,6 +8,8 @@ import LinkDialog from "./link-dialog.js";
 
 // TODO i18n
 
+let lastAddMediaUrl = "";
+
 class InfoDialog extends Component {
   static dialogTypes = {
     slack: Symbol("slack"),
@@ -18,12 +20,14 @@ class InfoDialog extends Component {
     report: Symbol("report"),
     help: Symbol("help"),
     link: Symbol("link"),
-    webvr_recommend: Symbol("webvr_recommend")
+    webvr_recommend: Symbol("webvr_recommend"),
+    add_media: Symbol("add_media")
   };
   static propTypes = {
     dialogType: PropTypes.oneOf(Object.values(InfoDialog.dialogTypes)),
     onCloseDialog: PropTypes.func,
     onSubmittedEmail: PropTypes.func,
+    onAddMedia: PropTypes.func,
     linkCode: PropTypes.string
   };
 
@@ -34,14 +38,17 @@ class InfoDialog extends Component {
     this.shareLink = `${loc.protocol}//${loc.host}${loc.pathname}`;
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onContainerClicked = this.onContainerClicked.bind(this);
+    this.onAddMediaClicked = this.onAddMediaClicked.bind(this);
   }
 
   componentDidMount() {
     window.addEventListener("keydown", this.onKeyDown);
+    this.setState({ addMediaUrl: lastAddMediaUrl });
   }
 
   componentWillUnmount() {
     window.removeEventListener("keydown", this.onKeyDown);
+    lastAddMediaUrl = this.state.addMediaUrl;
   }
 
   onKeyDown(e) {
@@ -54,6 +61,11 @@ class InfoDialog extends Component {
     if (e.currentTarget === e.target) {
       this.props.onCloseDialog();
     }
+  }
+
+  onAddMediaClicked() {
+    this.props.onAddMedia(this.state.addMediaUrl);
+    this.props.onCloseDialog();
   }
 
   shareLinkClicked = () => {
@@ -71,7 +83,8 @@ class InfoDialog extends Component {
   state = {
     mailingListEmail: "",
     mailingListPrivacy: false,
-    copyLinkButtonText: "Copy"
+    copyLinkButtonText: "Copy",
+    addMediaUrl: ""
   };
 
   signUpForMailingList = async e => {
@@ -181,6 +194,31 @@ class InfoDialog extends Component {
                 </button>
               </div>
             </div>
+          </div>
+        );
+        break;
+      case InfoDialog.dialogTypes.add_media:
+        dialogTitle = "Add Media";
+        dialogBody = (
+          <div>
+            <div>Tip: You can paste media urls directly into hubs with ctrl+v</div>
+            <form onSubmit={this.onAddMediaClicked}>
+              <div className="add-media-form">
+                <input
+                  type="url"
+                  placeholder="Image, Video, or GLTF URL"
+                  className="add-media-form__link_field"
+                  value={this.state.addMediaUrl}
+                  onChange={e => this.setState({ addMediaUrl: e.target.value })}
+                  required
+                />
+                <div className="add-media-form__buttons">
+                  <button className="add-media-form__action-button">
+                    <span>Add</span>
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         );
         break;

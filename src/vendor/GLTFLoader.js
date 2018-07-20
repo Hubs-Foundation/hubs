@@ -7,7 +7,10 @@
  * @author Tony Parisi / http://www.tonyparisi.com/
  * @author Takahiro / https://github.com/takahirox
  * @author Don McCurdy / https://www.donmccurdy.com
+ * @author netpro2k / https://github.com/netpro2k
  */
+
+ import { resolveFarsparkUrl } from "../utils/media-utils"
 
 THREE.GLTFLoader = ( function () {
 
@@ -25,7 +28,7 @@ THREE.GLTFLoader = ( function () {
 
 		crossOrigin: 'Anonymous',
 
-		load: function ( url, onLoad, onProgress, onError ) {
+		load: async function ( url, onLoad, onProgress, onError ) {
 
 			var scope = this;
 
@@ -37,7 +40,9 @@ THREE.GLTFLoader = ( function () {
 
 			loader.setResponseType( 'arraybuffer' );
 
-			loader.load( url, function ( data ) {
+			var farsparkURL = await resolveFarsparkUrl(url);
+
+			loader.load( farsparkURL, function ( data ) {
 
 				try {
 
@@ -1598,7 +1603,7 @@ THREE.GLTFLoader = ( function () {
 	 * @param {number} bufferIndex
 	 * @return {Promise<ArrayBuffer>}
 	 */
-	GLTFParser.prototype.loadBuffer = function ( bufferIndex ) {
+	GLTFParser.prototype.loadBuffer = async function ( bufferIndex ) {
 
 		var bufferDef = this.json.buffers[ bufferIndex ];
 		var loader = this.fileLoader;
@@ -1618,9 +1623,11 @@ THREE.GLTFLoader = ( function () {
 
 		var options = this.options;
 
+		var farsparkURL = await resolveFarsparkUrl(resolveURL(bufferDef.uri, options.path));
+
 		return new Promise( function ( resolve, reject ) {
 
-			loader.load( resolveURL( bufferDef.uri, options.path ), resolve, undefined, function () {
+			loader.load( farsparkURL, resolve, undefined, function () {
 
 				reject( new Error( 'THREE.GLTFLoader: Failed to load buffer "' + bufferDef.uri + '".' ) );
 
@@ -1784,7 +1791,7 @@ THREE.GLTFLoader = ( function () {
 	 * @param {number} textureIndex
 	 * @return {Promise<THREE.Texture>}
 	 */
-	GLTFParser.prototype.loadTexture = function ( textureIndex ) {
+	GLTFParser.prototype.loadTexture = async function ( textureIndex ) {
 
 		var parser = this;
 		var json = this.json;
@@ -1798,11 +1805,12 @@ THREE.GLTFLoader = ( function () {
 		var sourceURI = source.uri;
 		var isObjectURL = false;
 
-		if ( source.bufferView !== undefined ) {
+    var hasBufferView = source.bufferView !== undefined;
+		if ( hasBufferView ) {
 
 			// Load binary image data from bufferView, if provided.
 
-			sourceURI = parser.getDependency( 'bufferView', source.bufferView ).then( function ( bufferView ) {
+			sourceURI = await parser.getDependency( 'bufferView', source.bufferView ).then( function ( bufferView ) {
 
 				isObjectURL = true;
 				var blob = new Blob( [ bufferView ], { type: source.mimeType } );
@@ -1813,6 +1821,11 @@ THREE.GLTFLoader = ( function () {
 
 		}
 
+    var urlToLoad = resolveURL(sourceURI, options.path);
+    if (!hasBufferView){
+      urlToLoad = await resolveFarsparkUrl(urlToLoad);
+    }
+
 		return Promise.resolve( sourceURI ).then( function ( sourceURI ) {
 
 			// Load Texture resource.
@@ -1821,7 +1834,7 @@ THREE.GLTFLoader = ( function () {
 
 			return new Promise( function ( resolve, reject ) {
 
-				loader.load( resolveURL( sourceURI, options.path ), resolve, undefined, reject );
+				loader.load( urlToLoad, resolve, undefined, reject );
 
 			} );
 

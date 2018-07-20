@@ -1,5 +1,6 @@
+console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
+
 import "./assets/stylesheets/hub.scss";
-import moment from "moment-timezone";
 import queryString from "query-string";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
@@ -63,10 +64,16 @@ import "./components/networked-avatar";
 import "./components/css-class";
 import "./components/scene-shadow";
 import "./components/avatar-replay";
+import "./components/image-plus";
+import "./components/auto-box-collider";
 import "./components/pinch-to-move";
 import "./components/look-on-mobile";
 import "./components/pitch-yaw-rotator";
 import "./components/input-configurator";
+import "./components/sticky-object";
+import "./components/auto-scale-cannon-physics-body";
+import "./components/position-at-box-shape-border";
+import "./components/remove-networked-object-button";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -75,6 +82,7 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
+import { addMedia } from "./utils/media-utils";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
@@ -296,11 +304,38 @@ const onReady = async () => {
       NAF.connection.entities.completeSync(ev.detail.clientId);
     });
 
+    scene.addEventListener("add_media", e => {
+      addMedia(e.detail);
+    });
+
+    if (qsTruthy("mediaTools")) {
+      document.addEventListener("paste", e => {
+        if (e.target.nodeName === "INPUT") return;
+
+        const imgUrl = e.clipboardData.getData("text");
+        console.log("Pasted: ", imgUrl, e);
+        addMedia(imgUrl);
+      });
+
+      document.addEventListener("dragover", e => {
+        e.preventDefault();
+      });
+
+      document.addEventListener("drop", e => {
+        e.preventDefault();
+        const imgUrl = e.dataTransfer.getData("url");
+        if (imgUrl) {
+          console.log("Droped: ", imgUrl);
+          addMedia(imgUrl);
+        }
+      });
+    }
+
     if (!qsTruthy("offline")) {
       document.body.addEventListener("connected", () => {
         if (!isBotMode) {
           hubChannel.sendEntryEvent().then(() => {
-            store.update({ activity: { lastEnteredAt: moment().toJSON() } });
+            store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
           });
         }
         remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
@@ -396,6 +431,16 @@ const onReady = async () => {
     remountUI({ platformUnsupportedReason: platformUnsupportedReason });
     exitScene();
     return;
+  }
+
+  if (qs.required_version && process.env.BUILD_VERSION) {
+    const buildNumber = process.env.BUILD_VERSION.split(" ", 1)[0]; // e.g. "123 (abcd5678)"
+    if (qs.required_version !== buildNumber) {
+      remountUI({ roomUnavailableReason: "version_mismatch" });
+      setTimeout(() => document.location.reload(), 5000);
+      exitScene();
+      return;
+    }
   }
 
   getAvailableVREntryTypes().then(availableVREntryTypes => {
