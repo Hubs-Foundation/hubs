@@ -191,17 +191,7 @@ function cachedLoadGLTF(src, basePath, preferredTechnique, onProgress) {
       gltfLoader.load(src, resolve, onProgress, reject);
     });
   }
-  return (
-    GLTFCache[src]
-      // .then(gltf => {
-      //   return new Promise((resolve, reject) => {
-      //     window.setTimeout(() => {
-      //       resolve(gltf);
-      //     }, 2000);
-      //   });
-      // })
-      .then(cloneGltf)
-  );
+  return GLTFCache[src].then(cloneGltf);
 }
 
 /**
