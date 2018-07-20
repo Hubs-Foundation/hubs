@@ -444,10 +444,10 @@ const onReady = async () => {
   }
 
   getAvailableVREntryTypes().then(availableVREntryTypes => {
-    if (availableVREntryTypes.gearvr === VR_DEVICE_AVAILABILITY.yes) {
-      remountUI({ availableVREntryTypes, forcedVREntryType: "gearvr" });
-    } else if (availableVREntryTypes.isInHMD) {
+    if (availableVREntryTypes.isInHMD) {
       remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
+    } else if (availableVREntryTypes.gearvr === VR_DEVICE_AVAILABILITY.yes) {
+      remountUI({ availableVREntryTypes, forcedVREntryType: "gearvr" });
     } else {
       remountUI({ availableVREntryTypes });
     }
