@@ -10,6 +10,9 @@ const qs = queryString.parse(location.search);
 registerTelemetry();
 
 ReactDOM.render(
-  <HomeRoot dialogType={qs.list_signup ? InfoDialog.dialogTypes.updates : null} />,
+  <HomeRoot
+    initialEnvironment={qs.initial_environment}
+    dialogType={qs.list_signup ? InfoDialog.dialogTypes.updates : null}
+  />,
   document.getElementById("home-root")
 );
