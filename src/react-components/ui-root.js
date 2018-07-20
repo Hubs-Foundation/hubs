@@ -284,8 +284,8 @@ class UIRoot extends Component {
       qs.set("vr_entry_type", "daydream"); // Auto-choose 'daydream' after landing in chrome
 
       const intentUrl =
-        `intent://${location.host}${location.pathname || ""}?` +
-        `${qs.toString()}#Intent;scheme=${(location.protocol || "http:").replace(":", "")};` +
+        `intent://${location.host}${location.pathname}?` +
+        `${qs}#Intent;scheme=${location.protocol.replace(":", "")};` +
         `action=android.intent.action.VIEW;package=com.android.chrome;end;`;
 
       window.location = intentUrl;
