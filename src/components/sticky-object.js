@@ -33,10 +33,6 @@ AFRAME.registerComponent("sticky-object", {
     this.el.removeEventListener("grab-end", this._onRelease);
   },
 
-  remove() {
-    this.el.removeEventListener("body-loaded", this._onBodyLoaded);
-  },
-
   setLocked(locked) {
     if (this.el.components.networked && !NAF.utils.isMine(this.el)) return;
 
@@ -64,6 +60,7 @@ AFRAME.registerComponent("sticky-object", {
   },
 
   remove() {
+    this.el.removeEventListener("body-loaded", this._onBodyLoaded);
     if (this.stuckTo) {
       const stuckTo = this.stuckTo;
       delete this.stuckTo;
