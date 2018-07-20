@@ -1,6 +1,12 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 
+import giphyLogo from "../assets/images/giphy_logo.png";
+
+const attributionHostnames = {
+  "giphy.com": giphyLogo
+};
+
 let lastAddMediaUrl = "";
 export default class MediaToolsDialog extends Component {
   state = {
@@ -19,7 +25,9 @@ export default class MediaToolsDialog extends Component {
   }
 
   componentDidMount() {
-    this.setState({ addMediaUrl: lastAddMediaUrl });
+    this.setState({ addMediaUrl: lastAddMediaUrl }, () => {
+      this.onUrlChange({ target: this.input });
+    });
   }
 
   componentWillUnmount() {
@@ -27,7 +35,10 @@ export default class MediaToolsDialog extends Component {
   }
 
   onUrlChange(e) {
-    this.setState({ addMediaUrl: e.target.value });
+    this.setState({
+      addMediaUrl: e.target.value,
+      attributionImage: e.target.validity.valid && attributionHostnames[new URL(e.target.value).hostname]
+    });
   }
 
   onAddMediaClicked() {
@@ -55,6 +66,11 @@ export default class MediaToolsDialog extends Component {
                 <span>Add</span>
               </button>
             </div>
+            {this.state.attributionImage ? (
+              <div>
+                <img src={this.state.attributionImage} />
+              </div>
+            ) : null}
           </div>
         </form>
       </div>
