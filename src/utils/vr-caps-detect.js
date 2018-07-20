@@ -46,7 +46,8 @@ export async function getAvailableVREntryTypes() {
   const ua = navigator.userAgent;
   const isSamsungBrowser = browser.name === "chrome" && /SamsungBrowser/.test(ua);
   const isOculusBrowser = /Oculus/.test(ua);
-  const isInHMD = isOculusBrowser;
+  const isFirefoxReality = /Firefox Reality/.test(ua);
+  const isInHMD = isOculusBrowser || isFirefoxReality;
 
   // This needs to be kept up-to-date with the latest browsers that can support VR and Hubs.
   // Checking for navigator.getVRDisplays always passes b/c of polyfill.
