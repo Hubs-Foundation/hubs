@@ -225,7 +225,8 @@
                     body="type: dynamic; shape: none; mass: 1;"
                     grabbable="maxGrabbers: 1; maxGrabBehavior: drop;"
                     hoverable
-                    activatable="buttonStartEvent: secondary_action_grab; buttonEndEvent: secondary_action_release;"
+                    activatable__hands="buttonStartEvent: secondary_action_grab; buttonEndEvent: secondary_action_release;"
+                    activatable__cursor="buttonStartEvent: secondary-cursor-grab; buttonEndEvent: secondary-cursor-release;"
                     scale="0.5 0.5 0.5"
                 >
                     <a-sphere 
@@ -302,7 +303,7 @@
                 grabStartButtons: cursor-grab; grabEndButtons: cursor-release;
                 stretchStartButtons: cursor-grab; stretchEndButtons: cursor-release;
                 dragDropStartButtons: cursor-grab; dragDropEndButtons: cursor-release;
-                activateStartButtons: TODO; activateEndButtons: TODO;"
+                activateStartButtons: secondary-cursor-grab; activateEndButtons: secondary-cursor-release;"
             segments-height="9"
             segments-width="9"
             event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"

@@ -5,10 +5,13 @@ const VERTICAL_LOOK_SPEED = 0.06;
 export default class MouseEventsHandler {
   constructor(cursor, cameraController) {
     this.cursor = cursor;
+    const cursorController = this.cursor.el.getAttribute("cursor-controller");
+    this.superHand = cursorController.cursor.components["super-hands"];
     this.cameraController = cameraController;
     this.isLeftButtonDown = false;
     this.isLeftButtonHandledByCursor = false;
     this.isPointerLocked = false;
+    this.currentlyGrabbingSticky = false;
 
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
@@ -43,27 +46,37 @@ export default class MouseEventsHandler {
   }
 
   onMouseDown(e) {
-    const isLeftButton = e.button === 0;
-    const isRightButton = e.button === 2;
-    if (isLeftButton) {
-      this.onLeftButtonDown();
-    } else if (isRightButton) {
-      this.onRightButtonDown();
+    switch (e.button) {
+      case 0: //left button
+        this.onLeftButtonDown();
+        break;
+      case 1: //middle/scroll button
+        //TODO: rotation? scaling?
+        break;
+      case 2: //right button
+        this.onRightButtonDown();
+        break;
     }
   }
 
   onLeftButtonDown() {
-    this.isLeftButtonDown = true;
-    this.isLeftButtonHandledByCursor = this.cursor.startInteraction();
+    if (this.currentlyGrabbingSticky) {
+      this.superHand.el.emit("secondary-cursor-grab");
+    } else {
+      this.isLeftButtonDown = true;
+      this.isLeftButtonHandledByCursor = this.cursor.startInteraction();
+    }
   }
 
   onRightButtonDown() {
-    if (this.isPointerLocked) {
-      document.exitPointerLock();
-      this.isPointerLocked = false;
-    } else {
-      document.body.requestPointerLock();
-      this.isPointerLocked = true;
+    if (!this.isLeftButtonHandledByCursor) {
+      if (this.isPointerLocked) {
+        document.exitPointerLock();
+        this.isPointerLocked = false;
+      } else {
+        document.body.requestPointerLock();
+        this.isPointerLocked = true;
+      }
     }
   }
 
@@ -91,14 +104,37 @@ export default class MouseEventsHandler {
   }
 
   onMouseUp(e) {
-    const isLeftButton = e.button === 0;
-    if (!isLeftButton) return;
+    switch (e.button) {
+      case 0: //left button
+        const grabbed = this.superHand.state.get("grab-start");
+        if (!this.isSticky(grabbed)) {
+          this.endCursorInteraction();
+        } else if (!this.currentlyGrabbingSticky) {
+          this.currentlyGrabbingSticky = true;
+        } else {
+          this.superHand.el.emit("secondary-cursor-release");
+        }
+        break;
+      case 1: //middle/scroll button
+        this.endCursorInteraction();
+        break;
+      case 2: //right button
+        this.endCursorInteraction();
+        break;
+    }
+  }
 
+  isSticky(el) {
+    return el && el.classList.contains("sticky");
+  }
+
+  endCursorInteraction() {
     if (this.isLeftButtonHandledByCursor) {
       this.cursor.endInteraction();
     }
     this.isLeftButtonHandledByCursor = false;
     this.isLeftButtonDown = false;
+    this.currentlyGrabbingSticky = false;
   }
 
   look(e) {
