@@ -21,13 +21,15 @@ class InfoDialog extends Component {
     help: Symbol("help"),
     link: Symbol("link"),
     webvr_recommend: Symbol("webvr_recommend"),
-    add_media: Symbol("add_media")
+    add_media: Symbol("add_media"),
+    custom_scene: Symbol("custom_scene")
   };
   static propTypes = {
     dialogType: PropTypes.oneOf(Object.values(InfoDialog.dialogTypes)),
     onCloseDialog: PropTypes.func,
     onSubmittedEmail: PropTypes.func,
     onAddMedia: PropTypes.func,
+    onCustomScene: PropTypes.func,
     linkCode: PropTypes.string
   };
 
@@ -37,8 +39,6 @@ class InfoDialog extends Component {
     const loc = document.location;
     this.shareLink = `${loc.protocol}//${loc.host}${loc.pathname}`;
     this.onKeyDown = this.onKeyDown.bind(this);
-    this.onContainerClicked = this.onContainerClicked.bind(this);
-    this.onAddMediaClicked = this.onAddMediaClicked.bind(this);
   }
 
   componentDidMount() {
@@ -57,16 +57,21 @@ class InfoDialog extends Component {
     }
   }
 
-  onContainerClicked(e) {
+  onContainerClicked = e => {
     if (e.currentTarget === e.target) {
       this.props.onCloseDialog();
     }
-  }
+  };
 
-  onAddMediaClicked() {
+  onAddMediaClicked = () => {
     this.props.onAddMedia(this.state.addMediaUrl);
     this.props.onCloseDialog();
-  }
+  };
+
+  onCustomSceneClicked = () => {
+    this.props.onCustomScene(this.state.customSceneUrl);
+    this.props.onCloseDialog();
+  };
 
   shareLinkClicked = () => {
     navigator.share({
@@ -84,7 +89,8 @@ class InfoDialog extends Component {
     mailingListEmail: "",
     mailingListPrivacy: false,
     copyLinkButtonText: "Copy",
-    addMediaUrl: ""
+    addMediaUrl: "",
+    customSceneUrl: ""
   };
 
   signUpForMailingList = async e => {
@@ -201,7 +207,7 @@ class InfoDialog extends Component {
         dialogTitle = "Add Media";
         dialogBody = (
           <div>
-            <div>Tip: You can paste media urls directly into hubs with ctrl+v</div>
+            <div>Tip: You can paste media URLs directly into Hubs with ctrl+v</div>
             <form onSubmit={this.onAddMediaClicked}>
               <div className="add-media-form">
                 <input
@@ -215,6 +221,31 @@ class InfoDialog extends Component {
                 <div className="add-media-form__buttons">
                   <button className="add-media-form__action-button">
                     <span>Add</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        );
+        break;
+      case InfoDialog.dialogTypes.custom_scene:
+        dialogTitle = "Use Custom Scene";
+        dialogBody = (
+          <div>
+            <div>Enter a URL to a GLTF file to use for your scene:</div>
+            <form onSubmit={this.onCustomSceneClicked}>
+              <div className="custom-scene-form">
+                <input
+                  type="url"
+                  placeholder="URL to Scene GLTF"
+                  className="custom-scene-form__link_field"
+                  value={this.state.customSceneUrl}
+                  onChange={e => this.setState({ customSceneUrl: e.target.value })}
+                  required
+                />
+                <div className="custom-scene-form__buttons">
+                  <button className="custom-scene-form__action-button">
+                    <span>Create Room</span>
                   </button>
                 </div>
               </div>
