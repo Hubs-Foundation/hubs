@@ -232,12 +232,12 @@ class InfoDialog extends Component {
         dialogTitle = "Use Custom Scene";
         dialogBody = (
           <div>
-            <div>Enter a URL to a GLTF file to use for your scene:</div>
+            <div>Enter a URL to a GLTF file to use for your room&apos;s scene:</div>
             <form onSubmit={this.onCustomSceneClicked}>
               <div className="custom-scene-form">
                 <input
                   type="url"
-                  placeholder="URL to Scene GLTF"
+                  placeholder="URL to Scene GLTF or GLB"
                   className="custom-scene-form__link_field"
                   value={this.state.customSceneUrl}
                   onChange={e => this.setState({ customSceneUrl: e.target.value })}
