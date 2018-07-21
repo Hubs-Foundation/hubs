@@ -1,7 +1,6 @@
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
-import queryString from "query-string";
 
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
@@ -101,14 +100,10 @@ window.APP.RENDER_ORDER = {
 };
 const store = window.APP.store;
 
-const qs = queryString.parse(location.search);
+const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 
-if (qs.quality) {
-  window.APP.quality = qs.quality;
-} else {
-  window.APP.quality = isMobile ? "low" : "high";
-}
+window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
 import "aframe-physics-system";
 import "aframe-physics-extras";
@@ -136,9 +131,9 @@ import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-cap
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
 function qsTruthy(param) {
-  const val = qs[param];
-  // if the param exists but is not set (e.g. "?foo&bar"), its value is null.
-  return val === null || /1|on|true/i.test(val);
+  const val = qs.get(param);
+  // if the param exists but is not set (e.g. "?foo&bar"), its value is the empty string.
+  return val === "" || /1|on|true/i.test(val);
 }
 
 const isBotMode = qsTruthy("bot");
@@ -167,7 +162,7 @@ store.init();
 
 function mountUI(scene, props = {}) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
-  const forcedVREntryType = qs.vr_entry_type || null;
+  const forcedVREntryType = qs.get("vr_entry_type");
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
   const htmlPrefix = document.body.dataset.htmlPrefix || "";
   const showProfileEntry = !store.state.activity.hasChangedName;
@@ -269,7 +264,7 @@ const onReady = async () => {
     applyProfileOnPlayerRig();
     store.addEventListener("statechanged", applyProfileOnPlayerRig);
 
-    const avatarScale = parseInt(qs.avatar_scale, 10);
+    const avatarScale = parseInt(qs.get("avatar_scale"), 10);
 
     if (avatarScale) {
       playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
@@ -433,9 +428,9 @@ const onReady = async () => {
     return;
   }
 
-  if (qs.required_version && process.env.BUILD_VERSION) {
+  if (qs.get("required_version") && process.env.BUILD_VERSION) {
     const buildNumber = process.env.BUILD_VERSION.split(" ", 1)[0]; // e.g. "123 (abcd5678)"
-    if (qs.required_version !== buildNumber) {
+    if (qs.get("required_version") !== buildNumber) {
       remountUI({ roomUnavailableReason: "version_mismatch" });
       setTimeout(() => document.location.reload(), 5000);
       exitScene();
@@ -485,9 +480,9 @@ const onReady = async () => {
     }
   };
 
-  if (qs.room) {
+  if (qs.has("room")) {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
-    setRoom(qs.room || "default");
+    setRoom(qs.get("room") || "default");
     initialEnvironmentEl.setAttribute("gltf-bundle", {
       src: DEFAULT_ENVIRONMENT_URL
     });
@@ -495,7 +490,7 @@ const onReady = async () => {
   }
 
   // Connect to reticulum over phoenix channels to get hub info.
-  const hubId = qs.hub_id || document.location.pathname.substring(1).split("/")[0];
+  const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
 
   const socket = connectToReticulum();

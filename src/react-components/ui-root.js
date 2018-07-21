@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
-import queryString from "query-string";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import MovingAverage from "moving-average";
@@ -281,12 +280,12 @@ class UIRoot extends Component {
 
       // We are not in mobile chrome, so launch into chrome via an Intent URL
       const location = window.location;
-      const qs = queryString.parse(location.search);
-      qs.vr_entry_type = "daydream"; // Auto-choose 'daydream' after landing in chrome
+      const qs = new URLSearchParams(location.search);
+      qs.set("vr_entry_type", "daydream"); // Auto-choose 'daydream' after landing in chrome
 
       const intentUrl =
-        `intent://${location.host}${location.pathname || ""}?` +
-        `${queryString.stringify(qs)}#Intent;scheme=${(location.protocol || "http:").replace(":", "")};` +
+        `intent://${location.host}${location.pathname}?` +
+        `${qs}#Intent;scheme=${location.protocol.replace(":", "")};` +
         `action=android.intent.action.VIEW;package=com.android.chrome;end;`;
 
       window.location = intentUrl;

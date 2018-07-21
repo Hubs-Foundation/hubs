@@ -1,6 +1,5 @@
 import ReactDOM from "react-dom";
 import React from "react";
-import queryString from "query-string";
 import { IntlProvider, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 
@@ -26,22 +25,16 @@ addLocaleData([...en]);
 
 registerTelemetry();
 
+const hash = new URLSearchParams(location.hash.replace(/^#/, "?"));
 window.APP = new App();
-const hash = queryString.parse(location.hash);
-const isMobile = AFRAME.utils.device.isMobile();
-if (hash.quality) {
-  window.APP.quality = hash.quality;
-} else {
-  window.APP.quality = isMobile ? "low" : "high";
-}
+window.APP.quality = hash.get("quality") || AFRAME.utils.device.isMobile() ? "low" : "high";
 
 function postAvatarIdToParent(newAvatarId) {
   window.parent.postMessage({ avatarId: newAvatarId }, location.origin);
 }
 
 function mountUI() {
-  const hash = queryString.parse(location.hash);
-  const avatarId = hash.avatar_id;
+  const avatarId = hash.get("avatar_id");
   ReactDOM.render(
     <IntlProvider locale={lang} messages={messages}>
       <AvatarSelector {...{ avatars, avatarId, onChange: postAvatarIdToParent }} />
