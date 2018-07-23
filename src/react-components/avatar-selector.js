@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl } from "react-intl";
-import FontAwesomeIcon from "@fortawesome/react-fontawesome";
-import faAngleLeft from "@fortawesome/fontawesome-free-solid/faAngleLeft";
-import faAngleRight from "@fortawesome/fontawesome-free-solid/faAngleRight";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
+import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 
 // TODO: we should make a bundle for avatar picker with it's own geometry, for now just use the indoor part of the meting room
 const meetingSpace = "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingSpace1_mesh-d48250ebc6.gltf";

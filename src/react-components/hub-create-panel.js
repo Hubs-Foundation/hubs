@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
 import { generateHubName } from "../utils/name-generation";
 import classNames from "classnames";
-import faAngleLeft from "@fortawesome/fontawesome-free-solid/faAngleLeft";
-import faAngleRight from "@fortawesome/fontawesome-free-solid/faAngleRight";
-import FontAwesomeIcon from "@fortawesome/react-fontawesome";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
+import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { resolveURL, extractUrlBase } from "../utils/resolveURL";
 
 import default_scene_preview_thumbnail from "../assets/images/default_thumbnail.png";

@@ -4,8 +4,8 @@ import cx from "classnames";
 
 import styles from "../assets/stylesheets/2d-hud.scss";
 
-import FontAwesomeIcon from "@fortawesome/react-fontawesome";
-import faPlus from "@fortawesome/fontawesome-free-solid/faPlus";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 
 const qs = new URLSearchParams(location.search);
 function qsTruthy(param) {

@@ -1,8 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import FontAwesomeIcon from "@fortawesome/react-fontawesome";
-import faQuestion from "@fortawesome/fontawesome-free-solid/faQuestion";
-import faShareAlt from "@fortawesome/fontawesome-free-solid/faShareAlt";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
+import { faShareAlt } from "@fortawesome/free-solid-svg-icons/faShareAlt";
 
 export const ProfileInfoHeader = props => (
   <div className="profile-info-header">

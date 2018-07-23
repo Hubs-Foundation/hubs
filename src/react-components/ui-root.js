@@ -22,8 +22,8 @@ import InfoDialog from "./info-dialog.js";
 import TwoDHUD from "./2d-hud";
 import Footer from "./footer";
 
-import FontAwesomeIcon from "@fortawesome/react-fontawesome";
-import faQuestion from "@fortawesome/fontawesome-free-solid/faQuestion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 
 addLocaleData([...en]);
 

@@ -23,9 +23,9 @@
     "lint": "yarn run lint:js && yarn run lint:html"
   },
   "dependencies": {
-    "@fortawesome/fontawesome": "^1.1.5",
-    "@fortawesome/fontawesome-free-solid": "^5.0.9",
-    "@fortawesome/react-fontawesome": "^0.0.18",
+    "@fortawesome/fontawesome-svg-core": "^1.2.2",
+    "@fortawesome/free-solid-svg-icons": "^5.2.0",
+    "@fortawesome/react-fontawesome": "^0.1.0",
     "aframe-billboard-component": "^1.0.0",
     "aframe-extras": "https://github.com/MozillaReality/aframe-extras#feature/precompute-nav-mesh",
     "aframe-input-mapping-component": "https://github.com/mozillareality/aframe-input-mapping-component#hubs/master",

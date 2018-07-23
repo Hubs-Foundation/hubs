@@ -1,14 +1,14 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import FontAwesomeIcon from "@fortawesome/react-fontawesome";
-import faUsers from "@fortawesome/fontawesome-free-solid/faUsers";
-import faBars from "@fortawesome/fontawesome-free-solid/faBars";
-import faShareAlt from "@fortawesome/fontawesome-free-solid/faShareAlt";
-import faExclamation from "@fortawesome/fontawesome-free-solid/faExclamation";
-import faTimes from "@fortawesome/fontawesome-free-solid/faTimes";
-import faArrowDown from "@fortawesome/fontawesome-free-solid/faArrowDown";
-import faQuestion from "@fortawesome/fontawesome-free-solid/faQuestion";
-import faNewspaper from "@fortawesome/fontawesome-free-solid/faNewspaper";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
+import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
+import { faShareAlt } from "@fortawesome/free-solid-svg-icons/faShareAlt";
+import { faExclamation } from "@fortawesome/free-solid-svg-icons/faExclamation";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { faArrowDown } from "@fortawesome/free-solid-svg-icons/faArrowDown";
+import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
+import { faNewspaper } from "@fortawesome/free-solid-svg-icons/faNewspaper";
 
 import styles from "../assets/stylesheets/footer.scss";
 
