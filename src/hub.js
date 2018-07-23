@@ -164,7 +164,6 @@ function mountUI(scene, props = {}) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
-  const htmlPrefix = document.body.dataset.htmlPrefix || "";
   const showProfileEntry = !store.state.activity.hasChangedName;
 
   ReactDOM.render(
@@ -176,7 +175,6 @@ function mountUI(scene, props = {}) {
         forcedVREntryType,
         enableScreenSharing,
         store,
-        htmlPrefix,
         showProfileEntry,
         ...props
       }}

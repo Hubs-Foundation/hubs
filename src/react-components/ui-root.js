@@ -63,7 +63,6 @@ class UIRoot extends Component {
     store: PropTypes.object,
     scene: PropTypes.object,
     linkChannel: PropTypes.object,
-    htmlPrefix: PropTypes.string,
     showProfileEntry: PropTypes.bool,
     availableVREntryTypes: PropTypes.object,
     initialEnvironmentLoaded: PropTypes.bool,
@@ -853,11 +852,7 @@ class UIRoot extends Component {
                 <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
 
                 {this.state.showProfileEntry && (
-                  <ProfileEntryPanel
-                    finished={this.onProfileFinished}
-                    store={this.props.store}
-                    htmlPrefix={this.props.htmlPrefix}
-                  />
+                  <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store} />
                 )}
               </div>
             )}
