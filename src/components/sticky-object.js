@@ -46,7 +46,7 @@ AFRAME.registerComponent("sticky-object", {
     }
   },
 
-  _onRelease(evt) {
+  _onRelease() {
     if (
       !this.el.is("grabbed") &&
       this.data.autoLockOnRelease &&
