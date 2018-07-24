@@ -5507,9 +5507,9 @@ neo-async@^2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.5.0.tgz#76b1c823130cca26acfbaccc8fbaf0a2fa33b18f"
 
-"networked-aframe@https://github.com/mozillareality/networked-aframe#bug/aframe-initialization-race-condition":
+"networked-aframe@https://github.com/mozillareality/networked-aframe#mr-social-client/master":
   version "0.6.1"
-  resolved "https://github.com/mozillareality/networked-aframe#1d93d17f95e877cf1efcec460d7f8a4bf59c3784"
+  resolved "https://github.com/mozillareality/networked-aframe#da92fd0068e9ef7430b3970733cec17dae910505"
   dependencies:
     buffered-interpolation "^0.2.4"
     easyrtc "1.1.0"
