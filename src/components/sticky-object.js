@@ -46,10 +46,11 @@ AFRAME.registerComponent("sticky-object", {
     }
   },
 
-  _onRelease() {
+  _onRelease(evt) {
     if (
       this.data.autoLockOnRelease &&
-      this.el.body.velocity.lengthSquared() < this.data.autoLockSpeedLimit * this.data.autoLockSpeedLimit
+      this.el.body.velocity.lengthSquared() < this.data.autoLockSpeedLimit * this.data.autoLockSpeedLimit &&
+      evt.detail.target.components.grabbable.grabbers.length === 0
     ) {
       this.setLocked(true);
     }
