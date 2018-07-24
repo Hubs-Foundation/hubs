@@ -110,8 +110,8 @@ const config = {
         gripup: ["action_release", "middle_ring_pinky_up"],
         trackpadtouchstart: "thumb_down",
         trackpadtouchend: "thumb_up",
-        triggerdown: ["action_grab", "index_down"],
-        triggerup: ["action_release", "index_up"],
+        triggerdown: ["secondary_action_grab", "index_down"],
+        triggerup: ["secondary_action_release", "index_up"],
         axisMoveWithDeadzone: { left: "move", right: "move_duck" }
       },
       "daydream-controls": {
@@ -141,8 +141,8 @@ const config = {
         trackpad_dpad4_pressed_north_down: ["action_primary_down"],
         trackpad_dpad4_pressed_south_down: ["action_primary_down"],
         trackpadup: ["action_primary_up"],
-        triggerdown: ["action_primary_down"],
-        triggerup: ["action_primary_up"],
+        triggerdown: ["action_secondary_down"],
+        triggerup: ["action_secondary_up"],
         scroll: "move_duck"
       },
       keyboard: {

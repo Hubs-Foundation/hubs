@@ -303,11 +303,10 @@
                 grabStartButtons: cursor-grab; grabEndButtons: cursor-release;
                 stretchStartButtons: cursor-grab; stretchEndButtons: cursor-release;
                 dragDropStartButtons: cursor-grab; dragDropEndButtons: cursor-release;
-                activateStartButtons: secondary-cursor-grab; activateEndButtons: secondary-cursor-release;"
+                activateStartButtons: secondary_action_grab, secondary-cursor-grab; activateEndButtons: secondary_action_release, secondary-cursor-release;"
             segments-height="9"
             segments-width="9"
             event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"
-            pen="camera: #player-camera; drawing: #my-first-drawing; useMouse: true;"
         ></a-sphere>
 
         <!-- Player Rig -->

@@ -116,7 +116,6 @@ export default class MouseEventsHandler {
         }
         break;
       case 1: //middle/scroll button
-        this.endCursorInteraction();
         break;
       case 2: //right button
         this.endCursorInteraction();
@@ -125,7 +124,7 @@ export default class MouseEventsHandler {
   }
 
   isSticky(el) {
-    return el && el.classList.contains("sticky");
+    return el && el.matches(".sticky, .sticky *");
   }
 
   endCursorInteraction() {
