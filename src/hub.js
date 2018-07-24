@@ -64,7 +64,6 @@ import "./components/css-class";
 import "./components/scene-shadow";
 import "./components/avatar-replay";
 import "./components/image-plus";
-import "./components/auto-box-collider";
 import "./components/pinch-to-move";
 import "./components/look-on-mobile";
 import "./components/pitch-yaw-rotator";
@@ -73,6 +72,8 @@ import "./components/sticky-object";
 import "./components/auto-scale-cannon-physics-body";
 import "./components/position-at-box-shape-border";
 import "./components/remove-networked-object-button";
+import "./components/destroy-at-extreme-distances";
+import "./components/media-loader";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -297,8 +298,17 @@ const onReady = async () => {
       NAF.connection.entities.completeSync(ev.detail.clientId);
     });
 
+    const offset = { x: 0, y: 0, z: -1.5 };
+    const spawnMediaInfrontOfPlayer = url => {
+      const entity = addMedia(url, true);
+      entity.setAttribute("offset-relative-to", {
+        target: "#player-camera",
+        offset
+      });
+    };
+
     scene.addEventListener("add_media", e => {
-      addMedia(e.detail);
+      spawnMediaInfrontOfPlayer(e.detail);
     });
 
     if (qsTruthy("mediaTools")) {
@@ -307,7 +317,7 @@ const onReady = async () => {
 
         const imgUrl = e.clipboardData.getData("text");
         console.log("Pasted: ", imgUrl, e);
-        addMedia(imgUrl);
+        spawnMediaInfrontOfPlayer(imgUrl);
       });
 
       document.addEventListener("dragover", e => {
@@ -318,8 +328,8 @@ const onReady = async () => {
         e.preventDefault();
         const imgUrl = e.dataTransfer.getData("url");
         if (imgUrl) {
-          console.log("Droped: ", imgUrl);
-          addMedia(imgUrl);
+          console.log("Dropped: ", imgUrl);
+          spawnMediaInfrontOfPlayer(imgUrl);
         }
       });
     }

@@ -181,11 +181,12 @@ function nextTick() {
   });
 }
 
-function cachedLoadGLTF(src, preferredTechnique, onProgress) {
+function cachedLoadGLTF(src, basePath, preferredTechnique, onProgress) {
   // Load the gltf model from the cache if it exists.
   if (!GLTFCache[src]) {
     GLTFCache[src] = new Promise((resolve, reject) => {
       const gltfLoader = new THREE.GLTFLoader();
+      gltfLoader.path = basePath;
       gltfLoader.preferredTechnique = preferredTechnique;
       gltfLoader.load(src, resolve, onProgress, reject);
     });
@@ -202,6 +203,7 @@ function cachedLoadGLTF(src, preferredTechnique, onProgress) {
 AFRAME.registerComponent("gltf-model-plus", {
   schema: {
     src: { type: "string" },
+    basePath: { type: "string", default: undefined },
     inflate: { default: false }
   },
 
@@ -242,7 +244,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       }
 
       const gltfPath = THREE.LoaderUtils.extractUrlBase(src);
-      const model = await cachedLoadGLTF(src, this.preferredTechnique);
+      const model = await cachedLoadGLTF(src, this.data.basePath, this.preferredTechnique);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
@@ -254,11 +256,10 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.model = model.scene || model.scenes[0];
       this.model.animations = model.animations;
 
-      this.el.setObject3D("mesh", this.model);
-
-      if (this.data.inflate) {
-        this.inflatedEl = inflateEntities(this.model, this.templates, gltfPath);
+      let object3DToSet = this.model;
+      if (this.data.inflate && (this.inflatedEl = inflateEntities(this.model, this.templates, gltfPath))) {
         this.el.appendChild(this.inflatedEl);
+        object3DToSet = this.inflatedEl.object3D;
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
         // Wait one tick for the appended custom elements to be connected before attaching templates
         await nextTick();
@@ -267,7 +268,7 @@ AFRAME.registerComponent("gltf-model-plus", {
           attachTemplate(this.el, name, this.templates[name]);
         }
       }
-
+      this.el.setObject3D("mesh", object3DToSet);
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
       console.error("Failed to load glTF model", e, this);
