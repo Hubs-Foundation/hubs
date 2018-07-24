@@ -2,7 +2,7 @@ import { getBox } from "../utils/auto-box-collider.js";
 
 const PI = Math.PI;
 const HALF_PI = PI / 2;
-const THREE_HALF_PI = 3 * PI / 2;
+const THREE_HALF_PI = 3 * HALF_PI;
 const right = new THREE.Vector3(1, 0, 0);
 const forward = new THREE.Vector3(0, 0, 1);
 const left = new THREE.Vector3(-1, 0, 0);
@@ -43,6 +43,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
 
   init() {
     this.cam = this.el.sceneEl.camera.el.object3D;
+    this.halfExtents = new THREE.Vector3();
   },
 
   update() {
@@ -65,7 +66,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
         this.mesh = this.el.getObject3D("mesh");
         if (this.el.components.shape) {
           this.shape = this.el.components.shape;
-          this.halfExtents = new THREE.Vector3().copy(this.shape.data.halfExtents);
+          this.halfExtents.copy(this.shape.data.halfExtents);
         } else {
           const box = getBox(this.el, this.mesh);
           this.halfExtents = box.min

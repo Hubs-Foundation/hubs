@@ -69,7 +69,9 @@ errorImage.onload = () => {
 AFRAME.registerComponent("image-plus", {
   schema: {
     src: { type: "string" },
-    contentType: { type: "string" }
+    contentType: { type: "string" },
+
+    depth: { default: 0.05 }
   },
 
   remove() {
@@ -144,7 +146,6 @@ AFRAME.registerComponent("image-plus", {
       texture.minFilter = THREE.LinearFilter;
       videoEl.addEventListener("loadedmetadata", () => resolve(texture), { once: true });
       videoEl.onerror = reject;
-      texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(videoEl);
 
       // If iOS and video is HLS, do some hacks.
       if (
@@ -181,11 +182,13 @@ AFRAME.registerComponent("image-plus", {
         return;
       }
 
+      let cacheItem;
       if (textureCache.has(url)) {
-        const cacheItem = textureCache.get(url);
+        cacheItem = textureCache.get(url);
         texture = cacheItem.texture;
         cacheItem.count++;
       } else {
+        cacheItem = { count: 1 };
         if (url === "error") {
           texture = errorTexture;
         } else if (contentType === "image/gif") {
@@ -194,16 +197,18 @@ AFRAME.registerComponent("image-plus", {
           texture = await this.loadImage(url);
         } else if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
           texture = await this.loadVideo(url);
+          cacheItem.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
         } else {
           throw new Error(`Unknown content type: ${contentType}`);
         }
 
-        textureCache.set(url, { count: 1, texture });
+        cacheItem.texture = texture;
+        textureCache.set(url, cacheItem);
       }
 
-      if (texture.audioSource) {
+      if (cacheItem.audioSource) {
         const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-        sound.setNodeSource(texture.audioSource);
+        sound.setNodeSource(cacheItem.audioSource);
         this.el.setObject3D("sound", sound);
       }
     } catch (e) {
@@ -229,10 +234,12 @@ AFRAME.registerComponent("image-plus", {
     this.el.setObject3D("mesh", this.mesh);
     this.el.setAttribute("shape", {
       shape: "box",
-      halfExtents: { x: width / 2, y: height / 2, z: 0.05 }
+      halfExtents: { x: width / 2, y: height / 2, z: this.data.depth }
     });
+
+    // TODO: verify if we actually need to do this
     if (this.el.components.body && this.el.components.body.body) {
-      this.el.components.body.syncToPhysics(); // not sure if necessary?
+      this.el.components.body.syncToPhysics();
       this.el.components.body.updateCannonScale();
     }
     this.el.emit("image-loaded");

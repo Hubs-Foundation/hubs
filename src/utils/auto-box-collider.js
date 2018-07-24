@@ -1,6 +1,7 @@
+const rotation = new THREE.Euler();
 export function getBox(entity, boxRoot) {
   const box = new THREE.Box3();
-  const rotation = entity.object3D.rotation.clone();
+  rotation.copy(entity.object3D.rotation);
   entity.object3D.rotation.set(0, 0, 0);
   entity.object3D.updateMatrixWorld(true);
   box.setFromObject(boxRoot);

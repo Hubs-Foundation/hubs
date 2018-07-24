@@ -109,7 +109,7 @@ AFRAME.registerComponent("super-spawner", {
 
   onGrabEnd(e) {
     this.heldEntities.delete(e.detail.hand);
-    // This tells super-hands we are handling this releae
+    // This tells super-hands we are handling this release
     e.preventDefault();
   },
 
