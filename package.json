@@ -53,7 +53,7 @@
     "react-dom": "^16.1.1",
     "react-intl": "^2.4.0",
     "screenfull": "^3.3.2",
-    "super-hands": "https://github.com/mozillareality/aframe-super-hands-component#hubs/master",
+    "super-hands": "https://github.com/mozillareality/aframe-super-hands-component#f8f9781d8b4c487bb544b3986000e85ed5f82fcc",
     "uuid": "^3.2.1",
     "webrtc-adapter": "^6.0.2"
   },

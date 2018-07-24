@@ -6900,9 +6900,9 @@ style-loader@^0.20.2:
     loader-utils "^1.1.0"
     schema-utils "^0.4.5"
 
-"super-hands@https://github.com/mozillareality/aframe-super-hands-component#hubs/master":
+"super-hands@https://github.com/mozillareality/aframe-super-hands-component#f8f9781d8b4c487bb544b3986000e85ed5f82fcc":
   version "3.0.0"
-  resolved "https://github.com/mozillareality/aframe-super-hands-component#ae01ff079032177fd8cd16a2881d459b71318207"
+  resolved "https://github.com/mozillareality/aframe-super-hands-component#f8f9781d8b4c487bb544b3986000e85ed5f82fcc"
 
 supports-color@^2.0.0:
   version "2.0.0"
