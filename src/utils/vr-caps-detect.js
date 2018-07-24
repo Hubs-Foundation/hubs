@@ -59,12 +59,16 @@ export async function getAvailableVREntryTypes() {
   const isUIWebView = typeof navigator.mediaDevices === "undefined";
 
   const safari = isIDevice
-    ? !isUIWebView ? VR_DEVICE_AVAILABILITY.yes : VR_DEVICE_AVAILABILITY.maybe
+    ? !isUIWebView
+      ? VR_DEVICE_AVAILABILITY.yes
+      : VR_DEVICE_AVAILABILITY.maybe
     : VR_DEVICE_AVAILABILITY.no;
 
   const screen = isInHMD
     ? VR_DEVICE_AVAILABILITY.no
-    : isIDevice && isUIWebView ? VR_DEVICE_AVAILABILITY.maybe : VR_DEVICE_AVAILABILITY.yes;
+    : isIDevice && isUIWebView
+      ? VR_DEVICE_AVAILABILITY.maybe
+      : VR_DEVICE_AVAILABILITY.yes;
 
   let generic = AFRAME.utils.device.isMobile() ? VR_DEVICE_AVAILABILITY.no : VR_DEVICE_AVAILABILITY.maybe;
   let cardboard = VR_DEVICE_AVAILABILITY.no;

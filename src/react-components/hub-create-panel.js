@@ -116,7 +116,7 @@ class HubCreatePanel extends Component {
   setToEnvironmentOffset = async offset => {
     const numEnvs = this.props.environments.length;
 
-    const environmentIndex = ((this.state.environmentIndex + offset) % numEnvs + numEnvs) % numEnvs;
+    const environmentIndex = (((this.state.environmentIndex + offset) % numEnvs) + numEnvs) % numEnvs;
     const environmentThumbnail = this._getEnvironmentThumbnail(environmentIndex);
     await this._preloadImage(environmentThumbnail.srcset);
 

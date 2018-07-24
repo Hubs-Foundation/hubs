@@ -50,7 +50,9 @@ export default class TouchEventsHandler {
       return;
     }
     if (!this.touchReservedForCursor) {
-      this.cursor.moveCursor(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
+      const targetX = (touch.clientX / window.innerWidth) * 2 - 1;
+      const targetY = -(touch.clientY / window.innerHeight) * 2 + 1;
+      this.cursor.moveCursor(targetX, targetY);
       this.cursor.forceCursorUpdate();
       if (this.cursor.startInteraction()) {
         this.touchReservedForCursor = touch;
@@ -71,7 +73,9 @@ export default class TouchEventsHandler {
 
   singleTouchMove(touch) {
     if (this.touchReservedForCursor && touch.identifier === this.touchReservedForCursor.identifier) {
-      this.cursor.moveCursor(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight) * 2 + 1);
+      const targetX = (touch.clientX / window.innerWidth) * 2 - 1;
+      const targetY = -(touch.clientY / window.innerHeight) * 2 + 1;
+      this.cursor.moveCursor(targetX, targetY);
       return;
     }
     if (touch.clientY / window.innerHeight >= VIRTUAL_JOYSTICK_HEIGHT) return;
@@ -100,7 +104,7 @@ export default class TouchEventsHandler {
     if (touch.identifier === this.touchReservedForLookControls.identifier) {
       if (!this.touchReservedForCursor) {
         this.cursor.moveCursor(
-          touch.clientX / window.innerWidth * 2 - 1,
+          (touch.clientX / window.innerWidth) * 2 - 1,
           -(touch.clientY / window.innerHeight) * 2 + 1
         );
       }

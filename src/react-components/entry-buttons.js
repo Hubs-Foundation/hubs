@@ -105,7 +105,9 @@ export const DeviceEntryButton = props => {
 
   entryButtonProps.subtitle = entryButtonProps.isInHMD
     ? "entry.device-subtitle-vr"
-    : AFRAME.utils.device.isMobile() ? "entry.device-subtitle-mobile" : "entry.device-subtitle-desktop";
+    : AFRAME.utils.device.isMobile()
+      ? "entry.device-subtitle-mobile"
+      : "entry.device-subtitle-desktop";
 
   return <EntryButton {...entryButtonProps} />;
 };
