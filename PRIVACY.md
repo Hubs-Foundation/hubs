@@ -1,6 +1,6 @@
 # Privacy Notice for Hubs by Mozilla
 
-Version 1.0, Effective April 26, 2018
+Version 2.0, Effective July 23, 2018
 
 ## At Mozilla (that’s us), we believe that privacy is fundamental to a healthy internet.
 
@@ -17,6 +17,16 @@ In this Privacy Notice, we explain what data may be accessible to Mozilla or oth
 - **Room data**: Rooms are publicly accessible to anyone with the URL. Mozilla receives data about the virtual objects and Avatars in a Room and shares that data with others in the Room.   
 - **Voice data**: If your microphone is on, Mozilla receives and sends audio to other users in the Room. Mozilla does not record or store the audio.  *Be aware that once you agree to let Hubs use your microphone, it will stay on as long as you remain in a Hubs room, unless you turn it off.*
 - You can learn more by looking at the code itself. [Janus SFU](https://github.com/mozilla/janus-plugin-sfu), [Reticulum](https://github.com/mozilla/reticulum), [Hubs](https://github.com/mozilla/hubs), [Hubs-Ops](https://github.com/mozilla/hubs-ops)
+</details>
+
+<details open>
+  <summary>
+    <strong>Mozilla receives data you share to display to the room.</strong>
+  </summary>
+
+- **Images and Video**: Mozilla receives video and image file links to process and display them in the Room. Mozilla stores this data as long as you remain in the Room.
+- **Scenes**: Mozilla receives 3D Room model links and the name of the Room in order to process and display the Room. Mozilla stores the name and the URL for the link you share so you and others with the link to the Room can use it again.
+- You can learn more by looking at the code itself.  [Janus SFU](https://github.com/mozilla/janus-plugin-sfu), [Reticulum](https://github.com/mozilla/reticulum), [Hubs](https://github.com/mozilla/hubs), [Hubs-Ops](https://github.com/mozilla/hubs-ops)
 </details>
 
 <details open>
