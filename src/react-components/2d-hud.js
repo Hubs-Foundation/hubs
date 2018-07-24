@@ -13,7 +13,6 @@ function qsTruthy(param) {
   // if the param exists but is not set (e.g. "?foo&bar"), its value is the empty string.
   return val === "" || /1|on|true/i.test(val);
 }
-const enableMediaTools = qsTruthy("mediaTools");
 
 const TwoDHUD = ({
   muted,
@@ -44,15 +43,13 @@ const TwoDHUD = ({
         onClick={onToggleSpaceBubble}
       />
     </div>
-    {enableMediaTools ? (
-      <div
-        className={cx("ui-interactive", styles.iconButton, styles.small, styles.addMediaButton)}
-        title="Add Media"
-        onClick={onClickAddMedia}
-      >
-        <FontAwesomeIcon icon={faPlus} />
-      </div>
-    ) : null}
+    <div
+      className={cx("ui-interactive", styles.iconButton, styles.small, styles.addMediaButton)}
+      title="Add Media"
+      onClick={onClickAddMedia}
+    >
+      <FontAwesomeIcon icon={faPlus} />
+    </div>
   </div>
 );
 

@@ -311,28 +311,26 @@ const onReady = async () => {
       spawnMediaInfrontOfPlayer(e.detail);
     });
 
-    if (qsTruthy("mediaTools")) {
-      document.addEventListener("paste", e => {
-        if (e.target.nodeName === "INPUT") return;
+    document.addEventListener("paste", e => {
+      if (e.target.nodeName === "INPUT") return;
 
-        const imgUrl = e.clipboardData.getData("text");
-        console.log("Pasted: ", imgUrl, e);
+      const imgUrl = e.clipboardData.getData("text");
+      console.log("Pasted: ", imgUrl, e);
+      spawnMediaInfrontOfPlayer(imgUrl);
+    });
+
+    document.addEventListener("dragover", e => {
+      e.preventDefault();
+    });
+
+    document.addEventListener("drop", e => {
+      e.preventDefault();
+      const imgUrl = e.dataTransfer.getData("url");
+      if (imgUrl) {
+        console.log("Dropped: ", imgUrl);
         spawnMediaInfrontOfPlayer(imgUrl);
-      });
-
-      document.addEventListener("dragover", e => {
-        e.preventDefault();
-      });
-
-      document.addEventListener("drop", e => {
-        e.preventDefault();
-        const imgUrl = e.dataTransfer.getData("url");
-        if (imgUrl) {
-          console.log("Dropped: ", imgUrl);
-          spawnMediaInfrontOfPlayer(imgUrl);
-        }
-      });
-    }
+      }
+    });
 
     if (!qsTruthy("offline")) {
       document.body.addEventListener("connected", () => {
