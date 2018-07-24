@@ -24,9 +24,9 @@ AFRAME.registerComponent("media-loader", {
       const center = new THREE.Vector3();
       const { min, max } = box;
       const halfExtents = {
-        x: Math.abs(min.x - max.x) / 2 * scaleCoefficient,
-        y: Math.abs(min.y - max.y) / 2 * scaleCoefficient,
-        z: Math.abs(min.z - max.z) / 2 * scaleCoefficient
+        x: (Math.abs(min.x - max.x) / 2) * scaleCoefficient,
+        y: (Math.abs(min.y - max.y) / 2) * scaleCoefficient,
+        z: (Math.abs(min.z - max.z) / 2) * scaleCoefficient
       };
       center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
       mesh.position.sub(center);

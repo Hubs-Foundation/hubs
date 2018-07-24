@@ -22,8 +22,8 @@ import InfoDialog from "./info-dialog.js";
 import TwoDHUD from "./2d-hud";
 import Footer from "./footer";
 
-import FontAwesomeIcon from "@fortawesome/react-fontawesome";
-import faQuestion from "@fortawesome/fontawesome-free-solid/faQuestion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 
 addLocaleData([...en]);
 
@@ -324,7 +324,7 @@ class UIRoot extends Component {
           mediaSource: "screen",
           // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
           // other than your current monitor that has a different aspect ratio.
-          width: 720 * screen.width / screen.height,
+          width: 720 * (screen.width / screen.height),
           height: 720,
           frameRate: 30
         }

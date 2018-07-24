@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
 import { generateHubName } from "../utils/name-generation";
 import classNames from "classnames";
-import faAngleLeft from "@fortawesome/fontawesome-free-solid/faAngleLeft";
-import faAngleRight from "@fortawesome/fontawesome-free-solid/faAngleRight";
-import FontAwesomeIcon from "@fortawesome/react-fontawesome";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
+import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { resolveURL, extractUrlBase } from "../utils/resolveURL";
 
 import default_scene_preview_thumbnail from "../assets/images/default_thumbnail.png";
@@ -116,7 +116,7 @@ class HubCreatePanel extends Component {
   setToEnvironmentOffset = async offset => {
     const numEnvs = this.props.environments.length;
 
-    const environmentIndex = ((this.state.environmentIndex + offset) % numEnvs + numEnvs) % numEnvs;
+    const environmentIndex = (((this.state.environmentIndex + offset) % numEnvs) + numEnvs) % numEnvs;
     const environmentThumbnail = this._getEnvironmentThumbnail(environmentIndex);
     await this._preloadImage(environmentThumbnail.srcset);
 

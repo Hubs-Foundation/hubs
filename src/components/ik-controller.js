@@ -169,7 +169,7 @@ AFRAME.registerComponent("ik-controller", {
     cameraYRotation.x = 0;
     cameraYRotation.z = 0;
     cameraYQuaternion.setFromEuler(cameraYRotation);
-    Quaternion.slerp(hips.quaternion, cameraYQuaternion, hips.quaternion, this.data.rotationSpeed * dt / 1000);
+    Quaternion.slerp(hips.quaternion, cameraYQuaternion, hips.quaternion, (this.data.rotationSpeed * dt) / 1000);
 
     // Take the head orientation computed from the hmd, remove the Y rotation already applied to it by the hips,
     // and apply it to the head

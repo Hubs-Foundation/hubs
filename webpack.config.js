@@ -157,7 +157,6 @@ const config = {
               loader: "css-loader",
               options: {
                 name: "[path][name]-[hash].[ext]",
-                minimize: process.env.NODE_ENV === "production",
                 localIdentName: "[name]__[local]__[hash:base64:5]",
                 camelCase: true
               }
@@ -174,7 +173,6 @@ const config = {
             loader: "css-loader",
             options: {
               name: "[path][name]-[hash].[ext]",
-              minimize: process.env.NODE_ENV === "production",
               localIdentName: "[name]__[local]__[hash:base64:5]",
               camelCase: true
             }
@@ -250,7 +248,7 @@ const config = {
     ]),
     // Extract required css and add a content hash.
     new ExtractTextPlugin({
-      filename: "assets/stylesheets/[name]-[contenthash].css",
+      filename: "assets/stylesheets/[name]-[md5:contenthash:hex:20].css",
       disable: process.env.NODE_ENV !== "production"
     }),
     // Transform the output of the html-loader using _.template
