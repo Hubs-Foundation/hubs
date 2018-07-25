@@ -22,9 +22,9 @@ ln -s "$(hab pkg path core/coreutils)/bin/env" /usr/bin/env
 hab pkg install -b core/coreutils core/bash core/node/8.11.3 core/git core/aws-cli
 
 npm ci
-npm run build --output-path build
-mkdir build/pages
-mv build/*.html build/pages
+npm run build
+mkdir dist/pages
+mv dist/*.html dist/pages
 
 aws s3 sync --acl public-read --cache-control "max-age=31556926" build/assets "$TARGET_S3_URL/assets"
 aws s3 sync --acl public-read --cache-control "no-cache" --delete build/pages "$TARGET_S3_URL/pages/latest"
