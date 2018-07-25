@@ -229,18 +229,6 @@ module.exports = (env, argv) => ({
         to: "hub-preview.png"
       }
     ]),
-    new CopyWebpackPlugin([
-      {
-        from: "src/assets/avatars/bot-recording.json",
-        to: "assets/avatars/bot-recording.json"
-      }
-    ]),
-    new CopyWebpackPlugin([
-      {
-        from: "src/assets/avatars/bot-recording.mp3",
-        to: "assets/avatars/bot-recording.mp3"
-      }
-    ]),
     // Extract required css and add a content hash.
     new ExtractTextPlugin({
       filename: "assets/stylesheets/[name]-[md5:contenthash:hex:20].css",
