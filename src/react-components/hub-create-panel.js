@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { resolveURL, extractUrlBase } from "../utils/resolveURL";
 
 import default_scene_preview_thumbnail from "../assets/images/default_thumbnail.png";
+import styles from "../assets/stylesheets/hub-create.scss";
 
 const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
 
@@ -153,21 +154,21 @@ class HubCreatePanel extends Component {
     const environmentAuthor = (meta.authors || [])[0];
     const environmentThumbnail = this._getEnvironmentThumbnail(this.state.environmentIndex);
 
-    const formNameClassNames = classNames("create-panel__form__name", {
-      "create-panel__form__name--expanded": this.state.expanded
+    const formNameClassNames = classNames(styles.name, {
+      [styles.expanded]: this.state.expanded
     });
 
     return (
       <form onSubmit={this.createHub}>
-        <div className="create-panel">
+        <div className={styles.createPanel}>
           {!this.state.expanded && (
-            <div className="create-panel__header">
+            <div className={styles.header}>
               <FormattedMessage id="home.create_header" />
             </div>
           )}
-          <div className="create-panel__form">
+          <div className={styles.form}>
             <div
-              className="create-panel__form__left-container"
+              className={styles.leftContainer}
               onClick={async () => {
                 if (this.state.expanded) {
                   this.shuffle();
@@ -177,7 +178,7 @@ class HubCreatePanel extends Component {
                 }
               }}
             >
-              <button type="button" tabIndex="3" className="create-panel__form__rotate-button">
+              <button type="button" tabIndex="3" className={styles.rotateButton}>
                 {this.state.expanded ? (
                   <img src="../assets/images/dice_icon.svg" />
                 ) : (
@@ -185,8 +186,8 @@ class HubCreatePanel extends Component {
                 )}
               </button>
             </div>
-            <div className="create-panel__form__right-container">
-              <button type="submit" tabIndex="5" className="create-panel__form__submit-button">
+            <div className={styles.rightContainer}>
+              <button type="submit" tabIndex="5" className={styles.submitButton}>
                 {this.isHubNameValid() ? (
                   <img src="../assets/images/hub_create_button_enabled.svg" />
                 ) : (
@@ -195,40 +196,27 @@ class HubCreatePanel extends Component {
               </button>
             </div>
             {this.state.expanded && (
-              <div className="create-panel__form__environment">
-                <div className="create-panel__form__environment__picker">
-                  <img
-                    className="create-panel__form__environment__picker__image"
-                    srcSet={environmentThumbnail.srcset}
-                  />
-                  <div className="create-panel__form__environment__picker__labels">
-                    <div className="create-panel__form__environment__picker__labels__header">
+              <div className={styles.environment}>
+                <div className={styles.picker}>
+                  <img className={styles.image} srcSet={environmentThumbnail.srcset} />
+                  <div className={styles.labels}>
+                    <div className={styles.header}>
                       {meta.url ? (
-                        <a
-                          href={meta.url}
-                          rel="noopener noreferrer"
-                          className="create-panel__form__environment__picker__labels__header__title"
-                        >
+                        <a href={meta.url} rel="noopener noreferrer" className={styles.title}>
                           {environmentTitle}
                         </a>
                       ) : (
-                        <span className="create-panel__form__environment__picker__labels__header__title">
-                          environmentTitle
-                        </span>
+                        <span className={styles.itle}>environmentTitle</span>
                       )}
                       {environmentAuthor &&
                         environmentAuthor.name &&
                         (environmentAuthor.url ? (
-                          <a
-                            href={environmentAuthor.url}
-                            rel="noopener noreferrer"
-                            className="create-panel__form__environment__picker__labels__header__author"
-                          >
+                          <a href={environmentAuthor.url} rel="noopener noreferrer" className={styles.author}>
                             <FormattedMessage id="home.environment_author_by" />
                             <span>{environmentAuthor.name}</span>
                           </a>
                         ) : (
-                          <span className="create-panel__form__environment__picker__labels__header__author">
+                          <span className={styles.author}>
                             <FormattedMessage id="home.environment_author_by" />
                             <span>{environmentAuthor.name}</span>
                           </span>
@@ -236,39 +224,25 @@ class HubCreatePanel extends Component {
                       {environmentAuthor &&
                         environmentAuthor.organization &&
                         (environmentAuthor.organization.url ? (
-                          <a
-                            href={environmentAuthor.organization.url}
-                            rel="noopener noreferrer"
-                            className="create-panel__form__environment__picker__labels__header__org"
-                          >
+                          <a href={environmentAuthor.organization.url} rel="noopener noreferrer" className={styles.org}>
                             <span>{environmentAuthor.organization.name}</span>
                           </a>
                         ) : (
-                          <span className="create-panel__form__environment__picker__labels__header__org">
+                          <span className={styles.org}>
                             <span>{environmentAuthor.organization.name}</span>
                           </span>
                         ))}
                     </div>
-                    <div className="create-panel__form__environment__picker__labels__footer">
+                    <div className={styles.footer}>
                       <FormattedMessage id="home.environment_picker_footer" />
                     </div>
                   </div>
-                  <div className="create-panel__form__environment__picker__controls">
-                    <button
-                      className="create-panel__form__environment__picker__controls__prev"
-                      type="button"
-                      tabIndex="1"
-                      onClick={this.setToPreviousEnvironment}
-                    >
+                  <div className={styles.controls}>
+                    <button className={styles.prev} type="button" tabIndex="1" onClick={this.setToPreviousEnvironment}>
                       <FontAwesomeIcon icon={faAngleLeft} />
                     </button>
 
-                    <button
-                      className="create-panel__form__environment__picker__controls__next"
-                      type="button"
-                      tabIndex="2"
-                      onClick={this.setToNextEnvironment}
-                    >
+                    <button className={styles.next} type="button" tabIndex="2" onClick={this.setToNextEnvironment}>
                       <FontAwesomeIcon icon={faAngleRight} />
                     </button>
                   </div>

@@ -1,4 +1,6 @@
-.create-panel {
+@import 'shared';
+
+:local(.create-panel) {
   display: flex;
   flex-direction: column;
 
@@ -6,7 +8,7 @@
     align-items: center;
   }
 
-  &__header {
+  :local(.header) {
     color: $grey-text;
     font-size: 1.2em;
     margin-bottom: 14px;
@@ -18,7 +20,7 @@
     }
   }
 
-  &__form {
+  :local(.form) {
     position: relative;
     width: 700px;
 
@@ -31,7 +33,7 @@
       width: 300px;
     }
 
-    &__name {
+    :local(.name) {
       @extend %rounded-border;
       @extend %default-font;
 
@@ -45,42 +47,42 @@
       line-height: 40px;
 
       &::selection {
-	background-color: #2F80ED;
-	color: white;
+        background-color: #2F80ED;
+        color: white;
       }
 
       &::-moz-selection {
-	background-color: #2F80ED;
-	color: white;
+        background-color: #2F80ED;
+        color: white;
       }
 
       @media (max-width: 768px) , (max-height: 715px) {
-	min-width: auto;
-	font-size: 1.5em;
-	width: 100%;
-	text-align: center;
+        min-width: auto;
+        font-size: 1.5em;
+        width: 100%;
+        text-align: center;
       }
 
       @media (max-width: 520px) {
-	padding-left: 15px;
-	font-size: 1.2em;
+        padding-left: 15px;
+        font-size: 1.2em;
       }
       
-      &--expanded {
-	margin-top: 340px;
-	border-radius: 0px 0px 14px 14px;
+      &:local(.expanded) {
+        margin-top: 340px;
+        border-radius: 0px 0px 14px 14px;
 
-	@media (max-width: 768px) , (max-height: 715px) {
-	  margin-top: 275px;
-	}
+        @media (max-width: 768px) , (max-height: 715px) {
+          margin-top: 275px;
+        }
 
-	@media (max-width: 520px) {
-	  margin-top: 165px;
-	}
+        @media (max-width: 520px) {
+          margin-top: 165px;
+        }
       }
     }
 
-    &__submit-button , &__rotate-button {
+    :local(.submit-button), :local(.rotate-button) {
       appearance: none;
       -moz-appearance: none;
       -webkit-appearance: none;
@@ -89,9 +91,8 @@
       cursor: pointer;
     }
 
-    &__left-container {
+    :local(.left-container) {
       position: absolute;
-      height: 100%;
       width: 90px;
       height: 95px;
       left: 4px;
@@ -102,11 +103,11 @@
       bottom: 0;
 
       @media (max-width: 520px) {
-	display: none;
+        display: none;
       }
     }
 
-    &__right-container {
+    :local(.right-container) {
       position: absolute;
       height: 95px;
       width: 90px;
@@ -118,128 +119,127 @@
       bottom: 0;
     }
 
-    &__environment {
+    :local(.environment) {
       position: absolute;
       top: 0px;
       left: 0px;
       width: 700px;
       height: 100%;
       box-sizing: border-box;
-      border-radius: 14px;
       border: 3px solid white;
       border-radius: 14px;
       overflow: hidden;
       pointer-events: none;
 
       @media (max-width: 768px) , (max-height: 715px) {
-	width: 100%;
+        width: 100%;
       }
 
-      &__picker {
-	width: 100%;
-	height: 340px;
-	border-bottom: 2px solid white;
-	overflow: hidden;
-	position: relative;
+      :local(.picker) {
+        width: 100%;
+        height: 340px;
+        border-bottom: 2px solid white;
+        overflow: hidden;
+        position: relative;
 
-	@media (max-width: 768px) , (max-height: 715px) {
-	  height: 280px;
-	}
+        @media (max-width: 768px) , (max-height: 715px) {
+          height: 280px;
+        }
 
-	@media (max-width: 520px) {
-	  height: 165px;
-	}
+        @media (max-width: 520px) {
+          height: 165px;
+        }
 
-	&__image {
-	  width: 106%;
-	  position: absolute;
-	  top: -3%;
-	  left: -3%;
-	}
+        :local(.image) {
+          width: 106%;
+          position: absolute;
+          top: -3%;
+          left: -3%;
+        }
 
-	&__labels {
-	  position: absolute;
-	  width: 100%;
-	  height: 100%;
-	  top: 0;
-	  left: 0;
-	  background: rgb(2,0,36);
-	  background: linear-gradient(0deg, rgba(2,0,36,0) 0%, rgba(1,0,11,0.2189076314119398) 60%, rgba(0,0,0,0.5242297602634804) 100%); 
+        :local(.labels) {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          left: 0;
+          background: rgb(2,0,36);
+          background: linear-gradient(0deg, rgba(2,0,36,0) 0%, rgba(1,0,11,0.2189076314119398) 60%, rgba(0,0,0,0.5242297602634804) 100%); 
 
-	  &__footer {
-	    position: absolute;
-	    bottom: 14px;
-	    left: 12px;
-	    font-size: 1.2em;
-	    text-shadow: 0px 0px 6px #202020;
-	    color: $light-text;
-	  }
+          :local(.footer) {
+            position: absolute;
+            bottom: 14px;
+            left: 12px;
+            font-size: 1.2em;
+            text-shadow: 0px 0px 6px #202020;
+            color: $light-text;
+          }
 
-	  &__header {
-	    position: absolute;
-	    top: 14px;
-	    left: 18px;
-	    display: flex;
-	    flex-direction: column;
-	    text-shadow: 0px 0px 3px #404040;
+          :local(.header) {
+            position: absolute;
+            top: 14px;
+            left: 18px;
+            display: flex;
+            flex-direction: column;
+            text-shadow: 0px 0px 3px #404040;
 
-	    &__title {
-	      font-size: 1.6em;
-	      font-weight: bold;
-	      color: white;
-	    }
+            :local(.title) {
+              font-size: 1.6em;
+              font-weight: bold;
+              color: white;
+            }
 
-	    &__author {
-	      color: $light-text;
-	      font-size: 1.4em;
+            :local(.author) {
+              color: $light-text;
+              font-size: 1.4em;
 
-	      @media (max-width: 520px) {
-		      display: none;
-	      }
-	}
+              @media (max-width: 520px) {
+                display: none;
+              }
+            }
 
-	    &__org {
-	      color: $light-text;
-	      font-size: 1.0em;
-	      display: inline;
+            :local(.org) {
+              color: $light-text;
+              font-size: 1.0em;
+              display: inline;
 
-	      @media (max-width: 520px) {
-		      display: none;
-	      }
-	}
+              @media (max-width: 520px) {
+                display: none;
+              }
+            }
 
-      a {
-        pointer-events: all;
-      }
-	  }
-	}
+            a {
+              pointer-events: all;
+            }
+          }
+        }
 
-	&__controls {
-	  position: absolute;
-	  width: 100%;
-	  height: 100%;
-	  top: 0;
-	  left: 0;
+        :local(.controls) {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          left: 0;
 
-	  &__next, &__prev {
-	    @extend %big-icon-button;
+          :local(.next), :local(.prev) {
+            @extend %big-icon-button;
 
-	    position: absolute;
-	    top: 50%;
-	    margin-top: -0.5em;
-	    pointer-events: auto;
-      cursor: pointer;
-      padding: 0;
-	  }
+            position: absolute;
+            top: 50%;
+            margin-top: -0.5em;
+            pointer-events: auto;
+            cursor: pointer;
+            padding: 0;
+          }
 
-	  &__prev {
-	    left: 0.2em;
-	  }
+          :local(.prev) {
+            left: 0.2em;
+          }
 
-	  &__next {
-	    right: 0.2em;
-	  }
-	}
+          :local(.next) {
+            right: 0.2em;
+          }
+        }
       }
     }
   }
