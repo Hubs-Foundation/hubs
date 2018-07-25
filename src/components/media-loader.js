@@ -1,3 +1,5 @@
+import JSZip from "jszip";
+
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import { resolveFarsparkUrl } from "../utils/media-utils";
 
@@ -68,6 +70,24 @@ AFRAME.registerComponent("media-loader", {
         this.el.setAttribute("image-plus", { src: raw, contentType });
         this.el.setAttribute("position-at-box-shape-border", { target: ".delete-button", dirs: ["forward", "back"] });
       } else if (contentType.startsWith("model/gltf") || url.endsWith(".gltf") || url.endsWith(".glb")) {
+        let gltfUrl = raw;
+        if (contentType === "model/gltf+zip") {
+          gltfUrl = await fetch(raw)
+            .then(r => r.blob())
+            .then(JSZip.loadAsync)
+            .then(async zip => {
+              const gltf = JSON.parse(await zip.file("scene.gltf").async("text"));
+              const fileMap = await Object.values(zip.files).reduce(async (prev, file) => {
+                if (file.name === "scene.gltf") return prev;
+                const out = await prev;
+                out[file.name] = URL.createObjectURL(await file.async("blob"));
+                return out;
+              }, Promise.resolve({}));
+              gltf.buffers && gltf.buffers.forEach(b => (b.uri = fileMap[b.uri]));
+              gltf.images && gltf.images.forEach(i => (i.uri = fileMap[i.uri]));
+              return URL.createObjectURL(new Blob([JSON.stringify(gltf, null, 2)], { type: "text/plain" }));
+            });
+        }
         this.el.addEventListener(
           "model-loaded",
           () => {
@@ -78,7 +98,7 @@ AFRAME.registerComponent("media-loader", {
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
         this.el.setAttribute("gltf-model-plus", {
-          src: raw,
+          src: gltfUrl,
           basePath: THREE.LoaderUtils.extractUrlBase(origin),
           inflate: true
         });
