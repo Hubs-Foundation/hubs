@@ -34,10 +34,7 @@ class HubCreatePanel extends Component {
     this.state = {
       ready: false,
       name: generateHubName(),
-      environmentIndex,
-      // HACK: expand on small screens by default to ensure scene selection possible.
-      // Eventually this could/should be done via media queries.
-      expanded: window.innerWidth < 420
+      environmentIndex
     };
 
     // Optimisticly preload all environment thumbnails
@@ -154,36 +151,18 @@ class HubCreatePanel extends Component {
     const environmentAuthor = (meta.authors || [])[0];
     const environmentThumbnail = this._getEnvironmentThumbnail(this.state.environmentIndex);
 
-    const formNameClassNames = classNames(styles.name, {
-      [styles.expanded]: this.state.expanded
-    });
-
     return (
       <form onSubmit={this.createHub}>
         <div className={styles.createPanel}>
-          {!this.state.expanded && (
-            <div className={styles.header}>
-              <FormattedMessage id="home.create_header" />
-            </div>
-          )}
           <div className={styles.form}>
             <div
               className={styles.leftContainer}
               onClick={async () => {
-                if (this.state.expanded) {
-                  this.shuffle();
-                } else {
-                  await this._preloadImage(this._getEnvironmentThumbnail(this.state.environmentIndex).srcset);
-                  this.setState({ expanded: true });
-                }
+                this.shuffle();
               }}
             >
               <button type="button" tabIndex="3" className={styles.rotateButton}>
-                {this.state.expanded ? (
-                  <img src="../assets/images/dice_icon.svg" />
-                ) : (
-                  <img src="../assets/images/expand_dots_icon.svg" />
-                )}
+                <img src="../assets/images/dice_icon.svg" />
               </button>
             </div>
             <div className={styles.rightContainer}>
@@ -195,63 +174,61 @@ class HubCreatePanel extends Component {
                 )}
               </button>
             </div>
-            {this.state.expanded && (
-              <div className={styles.environment}>
-                <div className={styles.picker}>
-                  <img className={styles.image} srcSet={environmentThumbnail.srcset} />
-                  <div className={styles.labels}>
-                    <div className={styles.header}>
-                      {meta.url ? (
-                        <a href={meta.url} rel="noopener noreferrer" className={styles.title}>
-                          {environmentTitle}
+            <div className={styles.environment}>
+              <div className={styles.picker}>
+                <img className={styles.image} srcSet={environmentThumbnail.srcset} />
+                <div className={styles.labels}>
+                  <div className={styles.header}>
+                    {meta.url ? (
+                      <a href={meta.url} rel="noopener noreferrer" className={styles.title}>
+                        {environmentTitle}
+                      </a>
+                    ) : (
+                      <span className={styles.itle}>environmentTitle</span>
+                    )}
+                    {environmentAuthor &&
+                      environmentAuthor.name &&
+                      (environmentAuthor.url ? (
+                        <a href={environmentAuthor.url} rel="noopener noreferrer" className={styles.author}>
+                          <FormattedMessage id="home.environment_author_by" />
+                          <span>{environmentAuthor.name}</span>
                         </a>
                       ) : (
-                        <span className={styles.itle}>environmentTitle</span>
-                      )}
-                      {environmentAuthor &&
-                        environmentAuthor.name &&
-                        (environmentAuthor.url ? (
-                          <a href={environmentAuthor.url} rel="noopener noreferrer" className={styles.author}>
-                            <FormattedMessage id="home.environment_author_by" />
-                            <span>{environmentAuthor.name}</span>
-                          </a>
-                        ) : (
-                          <span className={styles.author}>
-                            <FormattedMessage id="home.environment_author_by" />
-                            <span>{environmentAuthor.name}</span>
-                          </span>
-                        ))}
-                      {environmentAuthor &&
-                        environmentAuthor.organization &&
-                        (environmentAuthor.organization.url ? (
-                          <a href={environmentAuthor.organization.url} rel="noopener noreferrer" className={styles.org}>
-                            <span>{environmentAuthor.organization.name}</span>
-                          </a>
-                        ) : (
-                          <span className={styles.org}>
-                            <span>{environmentAuthor.organization.name}</span>
-                          </span>
-                        ))}
-                    </div>
-                    <div className={styles.footer}>
-                      <FormattedMessage id="home.environment_picker_footer" />
-                    </div>
+                        <span className={styles.author}>
+                          <FormattedMessage id="home.environment_author_by" />
+                          <span>{environmentAuthor.name}</span>
+                        </span>
+                      ))}
+                    {environmentAuthor &&
+                      environmentAuthor.organization &&
+                      (environmentAuthor.organization.url ? (
+                        <a href={environmentAuthor.organization.url} rel="noopener noreferrer" className={styles.org}>
+                          <span>{environmentAuthor.organization.name}</span>
+                        </a>
+                      ) : (
+                        <span className={styles.org}>
+                          <span>{environmentAuthor.organization.name}</span>
+                        </span>
+                      ))}
                   </div>
-                  <div className={styles.controls}>
-                    <button className={styles.prev} type="button" tabIndex="1" onClick={this.setToPreviousEnvironment}>
-                      <FontAwesomeIcon icon={faAngleLeft} />
-                    </button>
-
-                    <button className={styles.next} type="button" tabIndex="2" onClick={this.setToNextEnvironment}>
-                      <FontAwesomeIcon icon={faAngleRight} />
-                    </button>
+                  <div className={styles.footer}>
+                    <FormattedMessage id="home.environment_picker_footer" />
                   </div>
                 </div>
+                <div className={styles.controls}>
+                  <button className={styles.prev} type="button" tabIndex="1" onClick={this.setToPreviousEnvironment}>
+                    <FontAwesomeIcon icon={faAngleLeft} />
+                  </button>
+
+                  <button className={styles.next} type="button" tabIndex="2" onClick={this.setToNextEnvironment}>
+                    <FontAwesomeIcon icon={faAngleRight} />
+                  </button>
+                </div>
               </div>
-            )}
+            </div>
             <input
               tabIndex="4"
-              className={formNameClassNames}
+              className={styles.name}
               value={this.state.name}
               onChange={e => this.setState({ name: e.target.value })}
               onFocus={e => e.target.select()}

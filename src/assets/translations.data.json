@@ -45,7 +45,6 @@
     "autoexit.title_units": " seconds",
     "autoexit.subtitle": "You have started another session.",
     "autoexit.cancel": "CANCEL",
-    "home.create_header": "Name your room:",
     "home.environment_picker_footer": "Choose a scene",
     "home.create_name.validation_warning": "Invalid name, limited to 4 to 64 characters and limited symbols.",
     "home.webvr_disclaimer_pre": "A ",
