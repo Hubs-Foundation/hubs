@@ -28,6 +28,7 @@ function error(...objs) {
 (async () => {
   const browser = await puppeteer.launch({ ignoreHTTPSErrors: true });
   const page = await browser.newPage();
+  await page.setBypassCSP(true);
   page.on("console", msg => log("PAGE: ", msg.text()));
   page.on("error", err => error("ERROR: ", err.toString().split("\n")[0]));
   page.on("pageerror", err => error("PAGE ERROR: ", err.toString().split("\n")[0]));
