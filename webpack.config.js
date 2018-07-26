@@ -81,7 +81,6 @@ module.exports = (env, argv) => ({
     "avatar-selector": path.join(__dirname, "src", "avatar-selector.js")
   },
   output: {
-    path: path.join(__dirname, "public"),
     filename: "assets/js/[name]-[chunkhash].js",
     publicPath: process.env.BASE_ASSETS_PATH || ""
   },
@@ -179,7 +178,7 @@ module.exports = (env, argv) => ({
         use: {
           loader: "file-loader",
           options: {
-            // move required assets to /public and add a hash for cache busting
+            // move required assets to output dir and add a hash for cache busting
             name: "[path][name]-[hash].[ext]",
             // Make asset paths relative to /src
             context: path.join(__dirname, "src")
