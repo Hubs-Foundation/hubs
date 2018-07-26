@@ -148,6 +148,7 @@ body {
 
     @media (max-height: 720px) {
       padding-bottom: 0px;
+      flex: 1;
     }
 
     :local(.title) {
@@ -183,6 +184,10 @@ body {
 
       @media (min-width: 1824px) {
         font-size: 2.8em;
+      }
+
+      @media (max-height: 720px) {
+        display: none;
       }
     }
   }
