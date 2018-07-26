@@ -228,6 +228,13 @@ class HubCreatePanel extends Component {
                   <FormattedMessage id="home.room_create_button" />
                 </button>
               </div>
+              <div className={styles.linkCode}>
+                <div>
+                  <a className={styles.link} href="/link" rel="nofollow">
+                    <FormattedMessage id="home.have_entry_code" />
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </form>

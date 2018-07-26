@@ -89,54 +89,11 @@ class HomeRoot extends Component {
         <div className={styles.home}>
           <div className={mainContentClassNames}>
             <div className={styles.headerContent}>
-              <div className={styles.title}>
-                <img className={styles.name} src="../assets/images/logo.svg" />
+              <div className={styles.title} onClick={() => (document.location = "/")}>
+                <div className={styles.hubs}>hubs</div>
                 <div className={styles.preview}>preview</div>
               </div>
-              <div className={styles.entryCode}>
-                <a className={styles.link} href="/link" rel="nofollow">
-                  <FormattedMessage id="home.have_entry_code" />
-                </a>
-              </div>
-              <div className={styles.experiment}>
-                <div className={styles.container}>
-                  <img src="../assets/images/webvr_cube.svg" className={styles.icon} />
-                  <div className={styles.info}>
-                    <div className={styles.header}>
-                      <span>
-                        <FormattedMessage id="home.webvr_disclaimer_pre" />
-                      </span>
-                      <span style={{ fontWeight: "bold" }}>WebVR</span>
-                      <span>
-                        <FormattedMessage id="home.webvr_disclaimer_post" />
-                      </span>
-                      <span>
-                        <a rel="noopener noreferrer" target="_blank" href="https://blog.mozvr.com">
-                          <FormattedMessage id="home.webvr_disclaimer_mr_team" />
-                        </a>
-                      </span>
-                    </div>
-
-                    <div>
-                      <a
-                        className={styles.link}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                        href="https://github.com/mozilla/hubs"
-                      >
-                        <FormattedMessage id="home.view_source" />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className={styles.headerSubtitle}>
-              <div>
-                <a className={styles.link} href="/link" rel="nofollow">
-                  <FormattedMessage id="home.have_entry_code" />
-                </a>
-              </div>
+              <div className={styles.ident} />
             </div>
             <div className={styles.heroContent}>
               <div className={styles.attribution}>

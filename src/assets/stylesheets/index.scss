@@ -55,16 +55,17 @@ body {
 }
 
 :local(.header-content) {
-  padding: 1.5em 2.5em 1.5em 2.5em;
+  padding: 0.5em 1.75em 0.5em 1.75em;
   background-color: $darkest-transparent;
-  min-height: 90px;
-  height: 90px;
+  min-height: 65px;
+  height: 65px;
   display: flex;
   border-bottom: 1px solid $darkest-grey;
 
   :local(.title) {
     display: flex;
     width: $header-section-width;
+    cursor: pointer;
 
     @media (max-width: 768px) {
       justify-content: center;
@@ -78,89 +79,23 @@ body {
       width: 200px;
     }
 
+    :local(.hubs) {
+      font-size: 2.5em;
+      font-weight: bold;
+      pointer-events: none;
+    }
+
     :local(.preview) {
       color: $grey-text;
       margin-left: 10px;
+      pointer-events: none;
     }
   }
 
-  :local(.entry-code) {
-    @media (max-width: 1024px) {
-      display: none;
-    }
-
-    flex: 10;
-    text-align: center;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-
-    :local(.link) {
-      color: white;
-      text-decoration-color: $light-grey;
-    }
-  }
-
-  :local(.experiment) {
+  :local(.ident) {
     text-align: right;
     flex: 1 1 $header-section-width;
     width: $header-section-width;
-    color: $grey-text;
-    font-size: 1.0em;
-    font-weight: lighter;
-    white-space: nowrap;
-
-    @media (max-width: 768px) {
-      display: none;
-    }
-
-    :local(.container) {
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    :local(.icon) {
-      margin-left: 12px;
-      margin-right: 12px;
-    }
-
-    :local(.info) {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-
-      :local(.header) {
-        a {
-          color: $grey-text;
-        }
-      }
-
-      :local(.link) {
-        color: $dark-grey;
-        font-size: 0.8em;
-      }
-    }
-  }
-}
-
-:local(.header-subtitle) {
-  @media (min-width: 1024px) {
-    display: none;
-  }
-
-  padding: 8px;
-  background-color: $darkest-transparent;
-  text-align: center;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  border-bottom: 2px solid $darkest-grey;
-
-  :local(.link) {
-    color: white;
-    text-decoration-color: $light-grey;
   }
 }
 
@@ -242,6 +177,7 @@ body {
     padding: 2.1em;
     padding-bottom: 3.5vw;
     flex: 4;
+    position: relative;
 
     @media (max-width: 768px) {
       padding: 0.5em;

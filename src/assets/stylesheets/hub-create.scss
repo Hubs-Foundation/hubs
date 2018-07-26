@@ -200,5 +200,24 @@
         }
       }
     }
+
+    :local(.link-code) {
+      position: absolute;
+      bottom: -36px;
+      width: 100%;
+      text-shadow: 0px 0px 4px rgba(0, 0, 0, 1.0);
+      text-align: center;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+
+      :local(.link) {
+        color: white;
+        font-size: 1.2em;
+        text-decoration-color: $light-grey;
+      }
+    }
   }
 }
+
