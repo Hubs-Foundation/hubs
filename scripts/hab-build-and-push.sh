@@ -19,7 +19,7 @@ pushd "$DIR/.."
 
 rm /usr/bin/env
 ln -s "$(hab pkg path core/coreutils)/bin/env" /usr/bin/env
-hab pkg install -b core/coreutils core/bash core/node/8.11.3 core/git core/aws-cli
+hab pkg install -b core/coreutils core/bash core/node core/git core/aws-cli
 
 npm ci
 npm run build
