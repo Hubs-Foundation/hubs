@@ -5,16 +5,21 @@ if (process.env.NODE_ENV === "development") {
   resolveMediaUrl = `https://${process.env.DEV_RETICULUM_SERVER}${resolveMediaUrl}`;
 }
 
+const farsparkCache = new Map();
 export const resolveFarsparkUrl = async url => {
   const parsedUrl = new URL(url);
-  if ((parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") || isHostWhitelisted(parsedUrl.hostname))
-    return { raw: url, origin: url };
+  if (farsparkCache.has(url)) return farsparkCache.get(url);
 
-  return await fetch(resolveMediaUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ media: { url } })
-  }).then(r => r.json());
+  const resolved =
+    (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") || isHostWhitelisted(parsedUrl.hostname)
+      ? { raw: url, origin: url }
+      : await fetch(resolveMediaUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ media: { url } })
+        }).then(r => r.json());
+  farsparkCache.set(url, resolved);
+  return resolved;
 };
 
 let interactableId = 0;
