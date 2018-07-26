@@ -62,12 +62,7 @@ export async function getAvailableVREntryTypes() {
       : VR_DEVICE_AVAILABILITY.maybe
     : VR_DEVICE_AVAILABILITY.no;
 
-  let displays = [];
-
-  if (isWebVRCapableBrowser) {
-    displays = await navigator.getVRDisplays();
-  }
-
+  const displays = isWebVRCapableBrowser ? await navigator.getVRDisplays() : [];
   const isFirefoxReality = window.orientation === 0 && "buildID" in navigator && displays.length > 0;
   const isInHMD = isOculusBrowser || isFirefoxReality;
 
