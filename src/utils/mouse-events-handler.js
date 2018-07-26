@@ -11,7 +11,6 @@ export default class MouseEventsHandler {
     this.isLeftButtonDown = false;
     this.isLeftButtonHandledByCursor = false;
     this.isPointerLocked = false;
-    this.currentlyGrabbingSticky = false;
 
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
@@ -60,12 +59,11 @@ export default class MouseEventsHandler {
   }
 
   onLeftButtonDown() {
-    if (this.currentlyGrabbingSticky) {
+    this.isLeftButtonDown = true;
+    if (this.isSticky(this.superHand.state.get("grab-start"))) {
       this.superHand.el.emit("secondary-cursor-grab");
-    } else {
-      this.isLeftButtonDown = true;
-      this.isLeftButtonHandledByCursor = this.cursor.startInteraction();
     }
+    this.isLeftButtonHandledByCursor = this.cursor.startInteraction();
   }
 
   onRightButtonDown() {
@@ -106,34 +104,28 @@ export default class MouseEventsHandler {
   onMouseUp(e) {
     switch (e.button) {
       case 0: //left button
-        const grabbed = this.superHand.state.get("grab-start");
-        if (!this.isSticky(grabbed)) {
-          this.endCursorInteraction();
-        } else if (!this.currentlyGrabbingSticky) {
-          this.currentlyGrabbingSticky = true;
-        } else {
+        if (this.isSticky(this.superHand.state.get("grab-start"))) {
           this.superHand.el.emit("secondary-cursor-release");
+        } else {
+          this.endInteraction();
         }
+        this.isLeftButtonDown = false;
         break;
       case 1: //middle/scroll button
         break;
       case 2: //right button
-        this.endCursorInteraction();
+        this.endInteraction();
         break;
     }
   }
 
-  isSticky(el) {
-    return el && el.matches(".sticky, .sticky *");
+  endInteraction() {
+    this.cursor.endInteraction();
+    this.isLeftButtonHandledByCursor = false;
   }
 
-  endCursorInteraction() {
-    if (this.isLeftButtonHandledByCursor) {
-      this.cursor.endInteraction();
-    }
-    this.isLeftButtonHandledByCursor = false;
-    this.isLeftButtonDown = false;
-    this.currentlyGrabbingSticky = false;
+  isSticky(el) {
+    return el && el.matches(".sticky, .sticky *");
   }
 
   look(e) {

@@ -148,10 +148,12 @@ AFRAME.registerComponent("pen", {
   },
 
   endDraw() {
-    this.isDrawing = false;
-    this.timeSinceLastDraw = 0;
-    this.el.object3D.getWorldPosition(this.worldPosition);
-    this.getNormal(this.normal, this.worldPosition, this.direction);
-    this.currentDrawing.endDraw(this.worldPosition, this.direction, this.normal);
+    if (this.isDrawing) {
+      this.isDrawing = false;
+      this.timeSinceLastDraw = 0;
+      this.el.object3D.getWorldPosition(this.worldPosition);
+      this.getNormal(this.normal, this.worldPosition, this.direction);
+      this.currentDrawing.endDraw(this.worldPosition, this.direction, this.normal);
+    }
   }
 });

@@ -2,17 +2,18 @@ export default class ActionEventHandler {
   constructor(scene, cursor) {
     this.scene = scene;
     this.cursor = cursor;
+    this.cursorHand = this.cursor.data.cursor.components["super-hands"];
     this.isCursorInteracting = false;
-    this.isCursorInteractingOnGrab = false;
     this.isTeleporting = false;
     this.handThatAlsoDrivesCursor = null;
     this.hovered = false;
-    this.currentlyGrabbingSticky = {};
 
     this.onPrimaryDown = this.onPrimaryDown.bind(this);
     this.onPrimaryUp = this.onPrimaryUp.bind(this);
-    this.onGrab = this.onGrab.bind(this);
-    this.onRelease = this.onRelease.bind(this);
+    this.onPrimaryGrab = this.onPrimaryGrab.bind(this);
+    this.onPrimaryRelease = this.onPrimaryRelease.bind(this);
+    this.onSecondaryGrab = this.onSecondaryGrab.bind(this);
+    this.onSecondaryRelease = this.onSecondaryRelease.bind(this);
     this.onCardboardButtonDown = this.onCardboardButtonDown.bind(this);
     this.onCardboardButtonUp = this.onCardboardButtonUp.bind(this);
     this.onMoveDuck = this.onMoveDuck.bind(this);
@@ -24,10 +25,10 @@ export default class ActionEventHandler {
     this.scene.addEventListener("action_primary_up", this.onPrimaryUp);
     this.scene.addEventListener("action_secondary_down", this.onPrimaryDown);
     this.scene.addEventListener("action_secondary_up", this.onPrimaryUp);
-    this.scene.addEventListener("action_grab", this.onGrab);
-    this.scene.addEventListener("action_release", this.onRelease);
-    this.scene.addEventListener("secondary_action_grab", this.onGrab);
-    this.scene.addEventListener("secondary_action_release", this.onRelease);
+    this.scene.addEventListener("action_grab", this.onPrimaryGrab);
+    this.scene.addEventListener("action_release", this.onPrimaryRelease);
+    this.scene.addEventListener("secondary_action_grab", this.onSecondaryGrab);
+    this.scene.addEventListener("secondary_action_release", this.onSecondaryRelease);
     this.scene.addEventListener("move_duck", this.onMoveDuck);
     this.scene.addEventListener("cardboardbuttondown", this.onCardboardButtonDown); // TODO: These should be actions
     this.scene.addEventListener("cardboardbuttonup", this.onCardboardButtonUp);
@@ -38,10 +39,10 @@ export default class ActionEventHandler {
     this.scene.removeEventListener("action_primary_up", this.onPrimaryUp);
     this.scene.removeEventListener("action_secondary_down", this.onPrimaryDown);
     this.scene.removeEventListener("action_secondary_up", this.onPrimaryUp);
-    this.scene.removeEventListener("action_grab", this.onGrab);
-    this.scene.removeEventListener("action_release", this.onRelease);
-    this.scene.removeEventListener("secondary_action_grab", this.onGrab);
-    this.scene.removeEventListener("secondary_action_release", this.onRelease);
+    this.scene.removeEventListener("action_grab", this.onPrimaryGrab);
+    this.scene.removeEventListener("action_release", this.onPrimaryRelease);
+    this.scene.removeEventListener("secondary_action_grab", this.onSecondaryGrab);
+    this.scene.removeEventListener("secondary_action_release", this.onSecondaryRelease);
     this.scene.removeEventListener("move_duck", this.onMoveDuck);
     this.scene.removeEventListener("cardboardbuttondown", this.onCardboardButtonDown);
     this.scene.removeEventListener("cardboardbuttonup", this.onCardboardButtonUp);
@@ -59,85 +60,65 @@ export default class ActionEventHandler {
     return el && el.matches(".sticky, .sticky *");
   }
 
-  doGrab(e, primary_event_type) {
-    const superHand = e.target.components["super-hands"];
-    const cursorHand =
-      this.isCursorInteractingOnGrab && this.handThatAlsoDrivesCursor === e.target
-        ? this.cursor.data.cursor.components["super-hands"]
-        : null;
-    let grabbed = superHand.state.get("grab-start") || (cursorHand ? cursorHand.state.get("grab-start") : null);
-    if (this.currentlyGrabbingSticky[e.target.id] && !grabbed) {
-      this.currentlyGrabbingSticky[e.target.id] = false;
-    }
-    const validGrab =
-      !this.isSticky(grabbed) || !this.currentlyGrabbingSticky[e.target.id] || e.type === primary_event_type;
+  isHandThatAlsoDrivesCursor(el) {
+    return this.handThatAlsoDrivesCursor === el;
+  }
 
-    if (this.handThatAlsoDrivesCursor && this.handThatAlsoDrivesCursor === e.target && !this.isCursorInteracting) {
-      if (superHand.state.has("hover-start") && validGrab) {
-        e.target.emit("hand_grab");
+  onGrab(e, event) {
+    const superHand = e.target.components["super-hands"];
+    const isCursorHand = this.isHandThatAlsoDrivesCursor(e.target);
+
+    if (isCursorHand && !this.isCursorInteracting) {
+      if (superHand.state.has("hover-start")) {
+        e.target.emit(event);
       } else {
         this.isCursorInteracting = this.cursor.startInteraction();
-        if (this.isCursorInteracting) {
-          this.isCursorInteractingOnGrab = true;
-        }
       }
-    } else if (cursorHand !== null) {
-      cursorHand.el.emit(e.type);
-    } else if (!this.isCursorInteractingOnGrab && validGrab) {
-      e.target.emit("hand_grab");
+    } else if (isCursorHand && this.isCursorInteracting) {
+      this.cursorHand.el.emit(event);
+    } else {
+      e.target.emit(event);
     }
-
-    grabbed = superHand.state.get("grab-start") || (cursorHand ? cursorHand.state.get("grab-start") : null);
-    return this.isCursorInteractingOnGrab || grabbed !== null;
   }
 
-  doRelease(e, primary_event_type) {
+  onRelease(e, event) {
     const superHand = e.target.components["super-hands"];
-    const cursorHand =
-      this.isCursorInteractingOnGrab && this.handThatAlsoDrivesCursor === e.target
-        ? this.cursor.data.cursor.components["super-hands"]
-        : null;
-    let grabbed = superHand.state.get("grab-start") || (cursorHand ? cursorHand.state.get("grab-start") : null);
-    if (
-      (!this.currentlyGrabbingSticky[e.target.id] && this.isSticky(grabbed)) ||
-      (this.currentlyGrabbingSticky[e.target.id] && e.type !== primary_event_type)
-    ) {
-      if (this.currentlyGrabbingSticky[e.target.id] && cursorHand !== null) {
-        cursorHand.el.emit(e.type);
+    const isCursorHand = this.isHandThatAlsoDrivesCursor(e.target);
+
+    if (this.isCursorInteracting && isCursorHand) {
+      //need to check both grab-start and hover-start in the case that the spawner is being grabbed this frame
+      if (this.isSticky(this.cursorHand.state.get("grab-start") || this.cursorHand.state.get("hover-start"))) {
+        this.cursorHand.el.emit(event);
+        this.isCursorInteracting = !!this.cursorHand.state.get("grab-start");
+      } else {
+        this.isCursorInteracting = false;
+        this.cursor.endInteraction();
       }
-      this.currentlyGrabbingSticky[e.target.id] = true;
-      return true;
     } else {
-      this.currentlyGrabbingSticky[e.target.id] = false;
+      e.target.emit(event);
     }
-
-    if (
-      this.isCursorInteracting &&
-      this.isCursorInteractingOnGrab &&
-      this.handThatAlsoDrivesCursor &&
-      this.handThatAlsoDrivesCursor === e.target
-    ) {
-      this.isCursorInteracting = false;
-      this.isCursorInteractingOnGrab = false;
-      this.cursor.endInteraction();
-    } else {
-      e.target.emit("hand_release");
-    }
-
-    grabbed = superHand.state.get("grab-start") || (cursorHand ? cursorHand.state.get("grab-start") : null);
-    return !this.isCursorInteractingOnGrab && grabbed === null;
   }
 
-  onGrab(e) {
-    this.doGrab(e, "action_grab");
+  onPrimaryGrab(e) {
+    this.onGrab(e, "hand_grab");
   }
 
-  onRelease(e) {
-    this.doRelease(e, "action_release");
+  onPrimaryRelease(e) {
+    this.onRelease(e, "hand_release");
+  }
+
+  onSecondaryGrab(e) {
+    this.onGrab(e, "secondary_hand_grab");
+  }
+
+  onSecondaryRelease(e) {
+    this.onRelease(e, "secondary_hand_release");
   }
 
   onPrimaryDown(e) {
-    if (!this.doGrab(e, "action_primary_down")) {
+    this.onGrab(e, "secondary_hand_grab");
+
+    if (this.isHandThatAlsoDrivesCursor(e.target) && !this.isCursorInteracting) {
       this.cursor.setCursorVisibility(false);
       const button = e.target.components["teleport-controls"].data.button;
       e.target.emit(button + "down");
@@ -146,13 +127,14 @@ export default class ActionEventHandler {
   }
 
   onPrimaryUp(e) {
-    if (!this.doRelease(e, "primary_action_up")) {
-      if (isCursorHand) {
-        this.cursor.setCursorVisibility(!state.has("hover-start"));
-      }
+    if (this.isTeleporting && this.isHandThatAlsoDrivesCursor(e.target)) {
+      const superHand = e.target.components["super-hands"];
+      this.cursor.setCursorVisibility(!superHand.state.has("hover-start"));
       const button = e.target.components["teleport-controls"].data.button;
       e.target.emit(button + "up");
       this.isTeleporting = false;
+    } else {
+      this.onRelease(e, "secondary_hand_release");
     }
   }
 

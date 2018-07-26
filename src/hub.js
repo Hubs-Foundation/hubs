@@ -120,6 +120,7 @@ import "./components/event-repeater";
 import "./components/controls-shape-offset";
 import "./components/duck";
 import "./components/quack";
+import "./components/grabbable-toggle";
 
 import "./components/cardboard-controls";
 

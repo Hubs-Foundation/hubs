@@ -223,6 +223,7 @@
                     class="interactable sticky"
                     super-networked-interactable="counter: #counter; mass: 1;"
                     body="type: dynamic; shape: none; mass: 1;"
+                    grabbable-toggle
                     grabbable="maxGrabbers: 1; maxGrabBehavior: drop;"
                     hoverable
                     activatable__hands="buttonStartEvent: secondary_action_grab; buttonEndEvent: secondary_action_release;"
@@ -267,12 +268,18 @@
 
             <a-mixin id="controller-super-hands"
                      super-hands="
-                         colliderEvent: collisions; colliderEventProperty: els;
-                         colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
-                         grabStartButtons: hand_grab; grabEndButtons: hand_release;
-                         stretchStartButtons: hand_grab; stretchEndButtons: hand_release;
-                         dragDropStartButtons: hand_grab; dragDropEndButtons: hand_release;
-                         activateStartButtons: secondary_action_grab; activateEndButtons: secondary_action_release;"
+                         colliderEvent: collisions; 
+                         colliderEventProperty: els;
+                         colliderEndEvent: collisions; 
+                         colliderEndEventProperty: clearedEls;
+                         grabStartButtons: hand_grab, secondary_hand_grab; 
+                         grabEndButtons: hand_release, secondary_hand_release;
+                         stretchStartButtons: hand_grab, secondary_hand_grab; 
+                         stretchEndButtons: hand_release, secondary_hand_release;
+                         dragDropStartButtons: hand_grab, secondary_hand_grab; 
+                         dragDropEndButtons: hand_release, secondary_hand_release;
+                         activateStartButtons: secondary_hand_grab, secondary_action_grab; 
+                         activateEndButtons: secondary_hand_release, secondary_action_release;"
                      collision-filter="collisionForces: false"
                      physics-collider
             ></a-mixin>
@@ -298,12 +305,18 @@
             static-body="shape: sphere;"
             collision-filter="collisionForces: false"
             super-hands="
-                colliderEvent: raycaster-intersection; colliderEventProperty: els;
-                colliderEndEvent: raycaster-intersection-cleared; colliderEndEventProperty: clearedEls;
-                grabStartButtons: cursor-grab; grabEndButtons: cursor-release;
-                stretchStartButtons: cursor-grab; stretchEndButtons: cursor-release;
-                dragDropStartButtons: cursor-grab; dragDropEndButtons: cursor-release;
-                activateStartButtons: secondary_action_grab, secondary-cursor-grab; activateEndButtons: secondary_action_release, secondary-cursor-release;"
+                colliderEvent: raycaster-intersection; 
+                colliderEventProperty: els;
+                colliderEndEvent: raycaster-intersection-cleared; 
+                colliderEndEventProperty: clearedEls;
+                grabStartButtons: cursor-grab, hand_grab, secondary_hand_grab; 
+                grabEndButtons: cursor-release, hand_release, secondary_hand_release;
+                stretchStartButtons: cursor-grab, hand_grab, secondary_hand_grab; 
+                stretchEndButtons: cursor-release, hand_release, secondary_hand_release;
+                dragDropStartButtons: cursor-grab, hand_grab, secondary_hand_grab; 
+                dragDropEndButtons: cursor-release, hand_release, secondary_hand_release;
+                activateStartButtons: secondary_hand_grab, secondary_action_grab, secondary-cursor-grab; 
+                activateEndButtons: secondary_hand_release, secondary_action_release, secondary-cursor-release;"
             segments-height="9"
             segments-width="9"
             event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"
@@ -454,7 +467,7 @@
 
         <a-entity 
             gltf-model-plus="src: #interactable-pen"
-            class="interactable" 
+            class="interactable sticky" 
             super-spawner="template: #pen-interactable;" 
             position="-1 1.2 -5.5"
             scale="0.5 0.5 0.5" 
