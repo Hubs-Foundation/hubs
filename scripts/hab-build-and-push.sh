@@ -21,7 +21,7 @@ rm /usr/bin/env
 ln -s "$(hab pkg path core/coreutils)/bin/env" /usr/bin/env
 hab pkg install -b core/coreutils core/bash core/node core/git core/aws-cli
 
-npm ci --no-progress
+npm ci --verbose --no-progress
 npm run build
 mkdir dist/pages
 mv dist/*.html dist/pages
