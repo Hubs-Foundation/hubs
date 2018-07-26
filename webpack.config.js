@@ -239,7 +239,6 @@ module.exports = (env, argv) => ({
       // expose these variables to the lodash template
       // ex: <%= ORIGIN_TRIAL_TOKEN %>
       imports: {
-        NODE_ENV: argv.mode,
         ORIGIN_TRIAL_EXPIRES: process.env.ORIGIN_TRIAL_EXPIRES,
         ORIGIN_TRIAL_TOKEN: process.env.ORIGIN_TRIAL_TOKEN
       }
