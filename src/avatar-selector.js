@@ -25,16 +25,19 @@ addLocaleData([...en]);
 
 registerTelemetry();
 
-const hash = new URLSearchParams(location.hash.replace(/^#/, "?"));
+function getHashArg(arg) {
+  return new URLSearchParams(location.hash.replace(/^#/, "?")).get(arg);
+}
+
 window.APP = new App();
-window.APP.quality = hash.get("quality") || AFRAME.utils.device.isMobile() ? "low" : "high";
+window.APP.quality = getHashArg("quality") || AFRAME.utils.device.isMobile() ? "low" : "high";
 
 function postAvatarIdToParent(newAvatarId) {
   window.parent.postMessage({ avatarId: newAvatarId }, location.origin);
 }
 
 function mountUI() {
-  const avatarId = hash.get("avatar_id");
+  const avatarId = getHashArg("avatar_id");
   ReactDOM.render(
     <IntlProvider locale={lang} messages={messages}>
       <AvatarSelector {...{ avatars, avatarId, onChange: postAvatarIdToParent }} />
