@@ -27,6 +27,10 @@ AFRAME.registerComponent("avatar-replay", {
 
   update: function() {
     const { camera, leftController, rightController, recordingUrl } = this.data;
+    if (!recordingUrl) {
+      return;
+    }
+
     const fetchRecording = fetch(recordingUrl).then(resp => resp.json());
     camera.setAttribute("motion-capture-replayer", { loop: true });
     this._setupController(leftController);

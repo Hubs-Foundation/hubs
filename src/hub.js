@@ -171,6 +171,7 @@ function mountUI(scene, props = {}) {
     <UIRoot
       {...{
         scene,
+        isBotMode,
         concurrentLoadDetector,
         disableAutoExitOnConcurrentLoad,
         forcedVREntryType,
@@ -232,7 +233,9 @@ const onReady = async () => {
 
   const enterScene = async (mediaStream, enterInVR, hubId) => {
     const scene = document.querySelector("a-scene");
-    scene.classList.add("no-cursor");
+    if (!isBotMode) {
+      scene.classList.add("no-cursor");
+    }
     scene.renderer.sortObjects = true;
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("canvas").classList.remove("blurred");
@@ -374,25 +377,24 @@ const onReady = async () => {
         playerRig.setAttribute("avatar-replay", {
           camera: "#player-camera",
           leftController: "#player-left-controller",
-          rightController: "#player-right-controller",
-          recordingUrl: "/assets/avatars/bot-recording.json"
+          rightController: "#player-right-controller"
         });
 
         const audioEl = document.createElement("audio");
-        audioEl.loop = true;
-        audioEl.muted = true;
-        audioEl.crossorigin = "anonymous";
-        audioEl.src = "/assets/avatars/bot-recording.mp3";
-        document.body.appendChild(audioEl);
-
-        // Wait for runner script to interact with the page so that we can play audio.
-        const interacted = new Promise(resolve => {
-          window.interacted = resolve;
-        });
-        const canPlay = new Promise(resolve => {
-          audioEl.addEventListener("canplay", resolve);
-        });
-        await Promise.all([canPlay, interacted]);
+        const audioInput = document.querySelector("#bot-audio-input");
+        audioInput.onchange = () => {
+          audioEl.loop = true;
+          audioEl.muted = true;
+          audioEl.crossorigin = "anonymous";
+          audioEl.src = URL.createObjectURL(audioInput.files[0]);
+          document.body.appendChild(audioEl);
+        };
+        const dataInput = document.querySelector("#bot-data-input");
+        dataInput.onchange = () => {
+          const url = URL.createObjectURL(dataInput.files[0]);
+          playerRig.setAttribute("avatar-replay", { recordingUrl: url });
+        };
+        await new Promise(resolve => audioEl.addEventListener("canplay", resolve));
         mediaStream.addTrack(audioEl.captureStream().getAudioTracks()[0]);
         audioEl.play();
       }
@@ -470,7 +472,6 @@ const onReady = async () => {
       const noop = () => {};
       // Replace renderer with a noop renderer to reduce bot resource usage.
       scene.renderer = { setAnimationLoop: noop, render: noop };
-      document.body.style.display = "none";
     }
   });
   environmentRoot.appendChild(initialEnvironmentEl);

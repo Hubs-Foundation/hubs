@@ -60,6 +60,7 @@ class UIRoot extends Component {
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
     enableScreenSharing: PropTypes.bool,
+    isBotMode: PropTypes.bool,
     store: PropTypes.object,
     scene: PropTypes.object,
     linkChannel: PropTypes.object,
@@ -586,6 +587,16 @@ class UIRoot extends Component {
             <div className="exited-panel__subtitle">{subtitle}</div>
           </div>
         </IntlProvider>
+      );
+    }
+
+    if (this.props.isBotMode) {
+      return (
+        <div className="loading-panel">
+          <img className="loading-panel__logo" src="../assets/images/logo.svg" />
+          <input type="file" id="bot-audio-input" accept="audio/*" />
+          <input type="file" id="bot-data-input" accept="application/json" />
+        </div>
       );
     }
 
