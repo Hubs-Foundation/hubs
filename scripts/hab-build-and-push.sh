@@ -9,22 +9,30 @@ export BUILD_VERSION="${BUILD_NUMBER} (${GIT_COMMIT})"
 
 # To build + push to S3 run:
 # hab studio run "bash scripts/hab-build-and-push.sh"
-# On exit, need to make all files writable so CI can clean on next build
 
+# On exit, need to make all files writable so CI can clean on next build
 trap 'chmod -R a+rw .' EXIT
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 pushd "$DIR/.."
 
+mkdir -p .yarn
+mkdir -p node_modules
+mkdir -p build
+
+# Yarn expects /usr/local/share
+# https://github.com/yarnpkg/yarn/issues/4628
+mkdir -p /usr/local/share
+
 rm /usr/bin/env
 ln -s "$(hab pkg path core/coreutils)/bin/env" /usr/bin/env
-hab pkg install -b core/coreutils core/bash core/node core/git core/aws-cli
+hab pkg install -b core/coreutils core/bash core/node/8.11.3 core/yarn core/git core/aws-cli
 
-npm ci --verbose --no-progress
-npm run build
-mkdir dist/pages
-mv dist/*.html dist/pages
+yarn install --cache-folder .yarn
+yarn build --output-path build
+mkdir build/pages
+mv build/*.html build/pages
 
 aws s3 sync --acl public-read --cache-control "max-age=31556926" build/assets "$TARGET_S3_URL/assets"
 aws s3 sync --acl public-read --cache-control "no-cache" --delete build/pages "$TARGET_S3_URL/pages/latest"
