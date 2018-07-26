@@ -197,25 +197,28 @@ function getFilesFromSketchfabZip(src) {
 }
 
 function cachedLoadGLTF(src, basePath, contentType, preferredTechnique, onProgress) {
-  // Load the gltf model from the cache if it exists.
   if (!GLTFCache[src]) {
     GLTFCache[src] = new Promise(async (resolve, reject) => {
-      let gltfUrl = src;
-      let onLoad = resolve;
-      if (contentType === "model/gltf+zip") {
-        const fileMap = await getFilesFromSketchfabZip(src);
-        gltfUrl = fileMap["scene.gtlf"];
-        onLoad = model => {
-          // The GLTF is now cached as a THREE object, we can get rid of the original blobs
-          Object.keys(fileMap).forEach(URL.revokeObjectURL);
-          resolve(model);
-        };
-      }
+      try {
+        let gltfUrl = src;
+        let onLoad = resolve;
+        if (contentType === "model/gltf+zip") {
+          const fileMap = await getFilesFromSketchfabZip(src);
+          gltfUrl = fileMap["scene.gtlf"];
+          onLoad = model => {
+            // The GLTF is now cached as a THREE object, we can get rid of the original blobs
+            Object.keys(fileMap).forEach(URL.revokeObjectURL);
+            resolve(model);
+          };
+        }
 
-      const gltfLoader = new THREE.GLTFLoader();
-      gltfLoader.path = basePath;
-      gltfLoader.preferredTechnique = preferredTechnique;
-      gltfLoader.load(gltfUrl, onLoad, onProgress, reject);
+        const gltfLoader = new THREE.GLTFLoader();
+        gltfLoader.path = basePath;
+        gltfLoader.preferredTechnique = preferredTechnique;
+        gltfLoader.load(gltfUrl, onLoad, onProgress, reject);
+      } catch (e) {
+        reject(e);
+      }
     });
   }
   return GLTFCache[src].then(cloneGltf);

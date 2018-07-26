@@ -6,13 +6,14 @@ async function fetchZipAndGetBlobs(src) {
     .then(JSZip.loadAsync);
 
   // Rewrite any url refferences in the GLTF to blob urls
+  const fileMap = {};
+  const files = Object.values(zip.files);
+  const fileBlobs = await Promise.all(files.map(f => f.async("blob")));
+  for (let i = 0; i < fileBlobs.length; i++) {
+    fileMap[files[i].name] = URL.createObjectURL(fileBlobs[i]);
+  }
+
   const gltfJson = JSON.parse(await zip.file("scene.gltf").async("text"));
-  const fileMap = await Object.values(zip.files).reduce(async (prev, file) => {
-    if (file.name === "scene.gltf") return prev;
-    const out = await prev;
-    out[file.name] = URL.createObjectURL(await file.async("blob"));
-    return out;
-  }, Promise.resolve({}));
   gltfJson.buffers && gltfJson.buffers.forEach(b => (b.uri = fileMap[b.uri]));
   gltfJson.images && gltfJson.images.forEach(i => (i.uri = fileMap[i.uri]));
 
@@ -26,6 +27,6 @@ self.onmessage = async e => {
     const fileMap = await fetchZipAndGetBlobs(e.data);
     self.postMessage([true, fileMap]);
   } catch (e) {
-    self.postMessage([false, e]);
+    self.postMessage([false, e.message]);
   }
 };

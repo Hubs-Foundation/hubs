@@ -18,7 +18,7 @@ export const resolveFarsparkUrl = async url => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ media: { url } })
         }).then(r => r.json());
-  // farsparkCache.set(url, resolved);
+  farsparkCache.set(url, resolved);
   return resolved;
 };
 
