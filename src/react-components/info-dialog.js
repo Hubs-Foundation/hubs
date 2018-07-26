@@ -6,6 +6,7 @@ import { FormattedMessage } from "react-intl";
 import formurlencoded from "form-urlencoded";
 import LinkDialog from "./link-dialog.js";
 import MediaToolsDialog from "./media-tools-dialog.js";
+const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
 
 // TODO i18n
 
@@ -62,7 +63,7 @@ class InfoDialog extends Component {
   };
 
   onCustomSceneClicked = () => {
-    this.props.onCustomScene(this.state.customSceneUrl);
+    this.props.onCustomScene(this.state.customRoomName, this.state.customSceneUrl);
     this.props.onCloseDialog();
   };
 
@@ -83,6 +84,7 @@ class InfoDialog extends Component {
     mailingListPrivacy: false,
     copyLinkButtonText: "Copy",
     addMediaUrl: "",
+    customRoomName: "",
     customSceneUrl: ""
   };
 
@@ -201,19 +203,27 @@ class InfoDialog extends Component {
         dialogBody = <MediaToolsDialog onAddMedia={this.props.onAddMedia} onCloseDialog={this.props.onCloseDialog} />;
         break;
       case InfoDialog.dialogTypes.custom_scene:
-        dialogTitle = "Use Custom Scene";
+        dialogTitle = "Create a Room";
         dialogBody = (
           <div>
-            <div>Enter a URL to a GLTF file to use for your room&apos;s scene:</div>
+            <div>Choose a name and GLTF URL for your room&apos;s scene:</div>
             <form onSubmit={this.onCustomSceneClicked}>
               <div className="custom-scene-form">
                 <input
+                  type="text"
+                  placeholder="Room name"
+                  className="custom-scene-form__link_field"
+                  value={this.state.customRoomName}
+                  pattern={HUB_NAME_PATTERN}
+                  onChange={e => this.setState({ customRoomName: e.target.value })}
+                  required
+                />
+                <input
                   type="url"
-                  placeholder="URL to Scene GLTF or GLB"
+                  placeholder="URL to Scene GLTF or GLB (Optional)"
                   className="custom-scene-form__link_field"
                   value={this.state.customSceneUrl}
                   onChange={e => this.setState({ customSceneUrl: e.target.value })}
-                  required
                 />
                 <div className="custom-scene-form__buttons">
                   <button className="custom-scene-form__action-button">

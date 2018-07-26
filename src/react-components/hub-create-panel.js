@@ -259,8 +259,8 @@ class HubCreatePanel extends Component {
           <InfoDialog
             dialogType={dialogTypes.custom_scene}
             onCloseDialog={() => this.setState({ showCustomSceneDialog: false })}
-            onCustomScene={url => {
-              this.setState({ showCustomSceneDialog: false, customSceneUrl: url }, () => this.createHub());
+            onCustomScene={(name, url) => {
+              this.setState({ showCustomSceneDialog: false, name: name, customSceneUrl: url }, () => this.createHub());
             }}
           />
         )}

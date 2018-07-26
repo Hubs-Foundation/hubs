@@ -149,13 +149,12 @@
             @extend %default-font;
             cursor: pointer;
             position: absolute;
-            bottom: 14px;
-            left: 12px;
+            top: 14px;
+            right: 12px;
             font-size: 1.3em;
             text-shadow: 0px 0px 6px #202020;
             color: $light-text;
             appearance: none;
-            text-decoration: underline;
             -moz-appearance: none;
             -webkit-appearance: none;
             background: transparent;
