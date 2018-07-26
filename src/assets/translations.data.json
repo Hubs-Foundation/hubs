@@ -46,6 +46,7 @@
     "autoexit.subtitle": "You have started another session.",
     "autoexit.cancel": "CANCEL",
     "home.room_create_options": "options",
+    "home.room_create_button": "create a room",
     "home.create_name.validation_warning": "Invalid name, limited to 4 to 64 characters and limited symbols.",
     "home.webvr_disclaimer_pre": "A ",
     "home.webvr_disclaimer_post": " experiment by ",

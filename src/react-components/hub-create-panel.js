@@ -223,9 +223,9 @@ class HubCreatePanel extends Component {
                   </div>
                 </div>
               </div>
-              <div className={styles.rightContainer}>
+              <div className={styles.container}>
                 <button type="submit" tabIndex="5" className={styles.submitButton}>
-                  <img src="../assets/images/hub_create_button_enabled.svg" />
+                  <FormattedMessage id="home.room_create_button" />
                 </button>
               </div>
             </div>

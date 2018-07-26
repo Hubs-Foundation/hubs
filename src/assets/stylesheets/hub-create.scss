@@ -60,25 +60,18 @@
       }
     }
 
-    :local(.submit-button), :local(.rotate-button) {
-      appearance: none;
-      -moz-appearance: none;
-      -webkit-appearance: none;
-      background: transparent;
-      border: none;
-      cursor: pointer;
+    :local(.submit-button) {
+      @extend %big-action-button;
     }
 
-    :local(.right-container) {
+    :local(.container) {
       position: absolute;
-      height: 95px;
-      width: 90px;
-      right: 4px;
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      bottom: 0;
+      bottom: 5%;
     }
 
     :local(.environment) {

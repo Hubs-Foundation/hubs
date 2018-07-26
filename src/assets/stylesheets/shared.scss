@@ -18,6 +18,26 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
   border-radius: 14px;
 }
 
+%big-action-button {
+  @extend %default-font;
+  outline-style: none;
+  font-size: 2em;
+  font-weight: bold;
+  cursor: pointer;
+  border: 3px solid white;
+  border-radius: 26px;
+  padding: 12px 64px 12px 64px;
+  background: #2F80ED;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 150px;
+  margin-right: 12px;
+  margin-left: 12px;
+  white-space: nowrap;
+}
+
 %bottom-button {
   @extend %default-font;
   outline-style: none;
