@@ -187,33 +187,49 @@ module.exports = (env, argv) => ({
       }
     ]
   },
-  // necessary due to https://github.com/visionmedia/debug/issues/547
+
   optimization: {
-    minimizer: [new UglifyJsPlugin({ uglifyOptions: { compress: { collapse_vars: false } } })]
+    // necessary due to https://github.com/visionmedia/debug/issues/547
+    minimizer: [new UglifyJsPlugin({ uglifyOptions: { compress: { collapse_vars: false } } })],
+    splitChunks: {
+      cacheGroups: {
+        engine: {
+          test: /[\\/]node_modules[\\/](aframe|cannon|three\.js)/,
+          priority: 100,
+          name: "engine",
+          chunks: "all"
+        },
+        vendors: {
+          test: /([\\/]node_modules[\\/]|[\\/]vendor[\\/])/,
+          priority: 50,
+          name: "vendor",
+          chunks: "all"
+        }
+      }
+    }
   },
   plugins: [
     // Each output page needs a HTMLWebpackPlugin entry
     new HTMLWebpackPlugin({
       filename: "index.html",
       template: path.join(__dirname, "src", "index.html"),
-      // Chunks correspond with the entries you wish to include in your html template
-      chunks: ["index"]
+      chunks: ["vendor", "index"]
     }),
     new HTMLWebpackPlugin({
       filename: "hub.html",
       template: path.join(__dirname, "src", "hub.html"),
-      chunks: ["hub"],
+      chunks: ["vendor", "engine", "hub"],
       inject: "head"
     }),
     new HTMLWebpackPlugin({
       filename: "link.html",
       template: path.join(__dirname, "src", "link.html"),
-      chunks: ["link"]
+      chunks: ["vendor", "engine", "link"]
     }),
     new HTMLWebpackPlugin({
       filename: "avatar-selector.html",
       template: path.join(__dirname, "src", "avatar-selector.html"),
-      chunks: ["avatar-selector"],
+      chunks: ["vendor", "engine", "avatar-selector"],
       inject: "head"
     }),
     new CopyWebpackPlugin([
