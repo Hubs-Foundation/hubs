@@ -1,3 +1,5 @@
+import JSZip from "jszip";
+
 const GLTFCache = {};
 
 AFRAME.GLTFModelPlus = {
@@ -181,14 +183,41 @@ function nextTick() {
   });
 }
 
-function cachedLoadGLTF(src, basePath, preferredTechnique, onProgress) {
+function cachedLoadGLTF(src, basePath, contentType, preferredTechnique, onProgress) {
   // Load the gltf model from the cache if it exists.
   if (!GLTFCache[src]) {
-    GLTFCache[src] = new Promise((resolve, reject) => {
+    GLTFCache[src] = new Promise(async (resolve, reject) => {
+      let gltfUrl = src;
+      let onLoad = resolve;
+      if (contentType === "model/gltf+zip") {
+        const zip = await fetch(src)
+          .then(r => r.blob())
+          .then(JSZip.loadAsync);
+
+        // Rewrite any url refferences in the GLTF to blob urls
+        const gltfJson = JSON.parse(await zip.file("scene.gltf").async("text"));
+        const fileMap = await Object.values(zip.files).reduce(async (prev, file) => {
+          if (file.name === "scene.gltf") return prev;
+          const out = await prev;
+          out[file.name] = URL.createObjectURL(await file.async("blob"));
+          return out;
+        }, Promise.resolve({}));
+        gltfJson.buffers && gltfJson.buffers.forEach(b => (b.uri = fileMap[b.uri]));
+        gltfJson.images && gltfJson.images.forEach(i => (i.uri = fileMap[i.uri]));
+
+        gltfUrl = fileMap["scene.gtlf"] = URL.createObjectURL(
+          new Blob([JSON.stringify(gltfJson, null, 2)], { type: "text/plain" })
+        );
+
+        onLoad = model => {
+          Object.keys(fileMap).forEach(URL.revokeObjectURL);
+          resolve(model);
+        };
+      }
       const gltfLoader = new THREE.GLTFLoader();
       gltfLoader.path = basePath;
       gltfLoader.preferredTechnique = preferredTechnique;
-      gltfLoader.load(src, resolve, onProgress, reject);
+      gltfLoader.load(gltfUrl, onLoad, onProgress, reject);
     });
   }
   return GLTFCache[src].then(cloneGltf);
@@ -203,6 +232,7 @@ function cachedLoadGLTF(src, basePath, preferredTechnique, onProgress) {
 AFRAME.registerComponent("gltf-model-plus", {
   schema: {
     src: { type: "string" },
+    contentType: { type: "string" },
     basePath: { type: "string", default: undefined },
     inflate: { default: false }
   },
@@ -244,7 +274,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       }
 
       const gltfPath = THREE.LoaderUtils.extractUrlBase(src);
-      const model = await cachedLoadGLTF(src, this.data.basePath, this.preferredTechnique);
+      const model = await cachedLoadGLTF(src, this.data.basePath, this.data.contentType, this.preferredTechnique);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
