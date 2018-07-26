@@ -11,14 +11,16 @@
   :local(.form) {
     position: relative;
     width: 700px;
+    height: 460px;
 
     @media (max-width: 768px) , (max-height: 715px) {
-      width: auto;
       width: 500px;
+      height: 340px;
     }
 
     @media (max-width: 520px) {
       width: 300px;
+      height: 260px;
     }
 
     :local(.name) {
@@ -116,18 +118,9 @@
 
       :local(.picker) {
         width: 100%;
-        height: 340px;
-        border-bottom: 2px solid white;
+        height: 100%;
         overflow: hidden;
         position: relative;
-
-        @media (max-width: 768px) , (max-height: 715px) {
-          height: 280px;
-        }
-
-        @media (max-width: 520px) {
-          height: 165px;
-        }
 
         :local(.image) {
           width: 106%;
@@ -145,7 +138,7 @@
           background: rgb(2,0,36);
           background: linear-gradient(0deg, rgba(2,0,36,0.324) 0%, rgba(1,0,11,0.1189076314119398) 60%, rgba(0,0,0,0.3242297602634804) 100%); 
 
-          :local(.customButton) {
+          :local(.custom-button) {
             @extend %default-font;
             cursor: pointer;
             position: absolute;
@@ -160,6 +153,10 @@
             background: transparent;
             border: none;
             pointer-events: auto;
+
+            @media (max-width: 520px) {
+              display: none;
+            }
           }
 
           :local(.header) {

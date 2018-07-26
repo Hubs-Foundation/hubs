@@ -215,6 +215,7 @@ class InfoDialog extends Component {
                   className="custom-scene-form__link_field"
                   value={this.state.customRoomName}
                   pattern={HUB_NAME_PATTERN}
+                  title="Invalid name, limited to 4 to 64 characters and limited symbols."
                   onChange={e => this.setState({ customRoomName: e.target.value })}
                   required
                 />

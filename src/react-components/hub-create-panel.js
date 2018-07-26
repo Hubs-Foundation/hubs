@@ -169,25 +169,6 @@ class HubCreatePanel extends Component {
         <form onSubmit={this.createHub}>
           <div className={styles.createPanel}>
             <div className={styles.form}>
-              <div
-                className={styles.leftContainer}
-                onClick={async () => {
-                  this.shuffle();
-                }}
-              >
-                <button type="button" tabIndex="3" className={styles.rotateButton}>
-                  <img src="../assets/images/dice_icon.svg" />
-                </button>
-              </div>
-              <div className={styles.rightContainer}>
-                <button type="submit" tabIndex="5" className={styles.submitButton}>
-                  {this.isHubNameValid() ? (
-                    <img src="../assets/images/hub_create_button_enabled.svg" />
-                  ) : (
-                    <img src="../assets/images/hub_create_button_disabled.svg" />
-                  )}
-                </button>
-              </div>
               <div className={styles.environment}>
                 <div className={styles.picker}>
                   <img className={styles.image} srcSet={environmentThumbnail.srcset} />
@@ -242,16 +223,11 @@ class HubCreatePanel extends Component {
                   </div>
                 </div>
               </div>
-              <input
-                tabIndex="4"
-                className={styles.name}
-                value={this.state.name}
-                onChange={e => this.setState({ name: e.target.value })}
-                onFocus={e => e.target.select()}
-                required
-                pattern={HUB_NAME_PATTERN}
-                title={formatMessage({ id: "home.create_name.validation_warning" })}
-              />
+              <div className={styles.rightContainer}>
+                <button type="submit" tabIndex="5" className={styles.submitButton}>
+                  <img src="../assets/images/hub_create_button_enabled.svg" />
+                </button>
+              </div>
             </div>
           </div>
         </form>
