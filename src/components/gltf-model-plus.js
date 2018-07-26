@@ -1,5 +1,3 @@
-import JSZip from "jszip";
-
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 
 const GLTFCache = {};
