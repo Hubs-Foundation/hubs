@@ -224,7 +224,7 @@ module.exports = (env, argv) => ({
     new HTMLWebpackPlugin({
       filename: "link.html",
       template: path.join(__dirname, "src", "link.html"),
-      chunks: ["vendor", "engine", "link"]
+      chunks: ["vendor", "link"]
     }),
     new HTMLWebpackPlugin({
       filename: "avatar-selector.html",
