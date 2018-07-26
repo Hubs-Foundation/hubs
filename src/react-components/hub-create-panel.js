@@ -151,7 +151,6 @@ class HubCreatePanel extends Component {
 
   render() {
     if (!this.state.ready) return null;
-    const { formatMessage } = this.props.intl;
 
     if (this.props.environments.length == 0) {
       return <div />;
