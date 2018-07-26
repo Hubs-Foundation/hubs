@@ -73,12 +73,14 @@
   @extend %default-font;
 
   &__icon {
+    @extend %glass-icon;
     flex: 1 1 90px;
     min-width: 90px;
     min-height: 90px;
   }
 
   &__label {
+    @extend %glass-text;
     flex: 10 1 auto;
     margin-left: 20px;
     font-size: 1.5em;

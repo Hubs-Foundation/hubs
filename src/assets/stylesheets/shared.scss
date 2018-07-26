@@ -13,6 +13,17 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
   font-family: 'Zilla Slab', sans-serif;
 }
 
+%glass-text {
+  font-family: 'Zilla Slab', sans-serif;
+  text-shadow: 0px 0px 4px rgba(0, 0, 0, 1.0);
+  color: white; 
+}
+
+%glass-icon {
+  -webkit-filter: drop-shadow( 0px 0px 3px #606060 ); 
+  filter: drop-shadow( 0px 0px 3px #606060 );
+}
+
 %rounded-border {
   border: 3px solid white;
   box-sizing: border-box;
@@ -59,8 +70,15 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
   min-width: 150px;
 }
 
+%bottom-action-button {
+  @extend %bottom-button;
+  background: #2F80ED;
+  font-size: 1.3em;
+}
+
 %top-title {
   font-size: 1.3em;
+  font-weight: bold;
 }
 
 %top-subtitle {

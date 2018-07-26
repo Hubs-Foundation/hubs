@@ -76,13 +76,13 @@ class InfoDialog extends Component {
 
   copyLinkClicked = link => {
     copy(link);
-    this.setState({ copyLinkButtonText: "Copied!" });
+    this.setState({ copyLinkButtonText: "copied!" });
   };
 
   state = {
     mailingListEmail: "",
     mailingListPrivacy: false,
-    copyLinkButtonText: "Copy",
+    copyLinkButtonText: "copy",
     addMediaUrl: "",
     customRoomName: "",
     customSceneUrl: ""

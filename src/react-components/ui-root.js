@@ -824,10 +824,6 @@ class UIRoot extends Component {
       </div>
     );
 
-    const dialogClassNames = classNames("ui-dialog", {
-      "ui-dialog--darkened": this.state.entryStep !== ENTRY_STEPS.finished
-    });
-
     const dialogBoxClassNames = classNames({ "ui-interactive": !this.state.infoDialogType, "ui-dialog-box": true });
 
     const dialogBoxContentsClassNames = classNames({
@@ -857,7 +853,7 @@ class UIRoot extends Component {
             </button>
           )}
 
-          <div className={dialogClassNames}>
+          <div className="ui-dialog">
             {(this.state.entryStep !== ENTRY_STEPS.finished || this.isWaitingForAutoExit()) && (
               <div className={dialogBoxClassNames}>
                 <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
