@@ -2,16 +2,17 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
 import { generateHubName } from "../utils/name-generation";
-import classNames from "classnames";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { resolveURL, extractUrlBase } from "../utils/resolveURL";
+import InfoDialog from "./info-dialog.js";
 
 import default_scene_preview_thumbnail from "../assets/images/default_thumbnail.png";
 import styles from "../assets/stylesheets/hub-create.scss";
 
 const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
+const dialogTypes = InfoDialog.dialogTypes;
 
 class HubCreatePanel extends Component {
   static propTypes = {
@@ -34,7 +35,9 @@ class HubCreatePanel extends Component {
     this.state = {
       ready: false,
       name: generateHubName(),
-      environmentIndex
+      environmentIndex,
+      showCustomSceneDialog: false,
+      customSceneUrl: null
     };
 
     // Optimisticly preload all environment thumbnails
@@ -71,11 +74,15 @@ class HubCreatePanel extends Component {
   };
 
   createHub = async e => {
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+    }
+
     const environment = this.props.environments[this.state.environmentIndex];
+    const sceneUrl = this.state.customSceneUrl || environment.bundle_url;
 
     const payload = {
-      hub: { name: this.state.name, default_environment_gltf_bundle_url: environment.bundle_url }
+      hub: { name: this.state.name, default_environment_gltf_bundle_url: sceneUrl }
     };
 
     let createUrl = "/api/v1/hubs";
@@ -129,6 +136,12 @@ class HubCreatePanel extends Component {
     this.setToEnvironmentOffset(-1);
   };
 
+  showCustomSceneDialog = e => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.setState({ showCustomSceneDialog: true });
+  };
+
   shuffle = () => {
     this.setState({
       name: generateHubName(),
@@ -152,93 +165,106 @@ class HubCreatePanel extends Component {
     const environmentThumbnail = this._getEnvironmentThumbnail(this.state.environmentIndex);
 
     return (
-      <form onSubmit={this.createHub}>
-        <div className={styles.createPanel}>
-          <div className={styles.form}>
-            <div
-              className={styles.leftContainer}
-              onClick={async () => {
-                this.shuffle();
-              }}
-            >
-              <button type="button" tabIndex="3" className={styles.rotateButton}>
-                <img src="../assets/images/dice_icon.svg" />
-              </button>
-            </div>
-            <div className={styles.rightContainer}>
-              <button type="submit" tabIndex="5" className={styles.submitButton}>
-                {this.isHubNameValid() ? (
-                  <img src="../assets/images/hub_create_button_enabled.svg" />
-                ) : (
-                  <img src="../assets/images/hub_create_button_disabled.svg" />
-                )}
-              </button>
-            </div>
-            <div className={styles.environment}>
-              <div className={styles.picker}>
-                <img className={styles.image} srcSet={environmentThumbnail.srcset} />
-                <div className={styles.labels}>
-                  <div className={styles.header}>
-                    {meta.url ? (
-                      <a href={meta.url} rel="noopener noreferrer" className={styles.title}>
-                        {environmentTitle}
-                      </a>
-                    ) : (
-                      <span className={styles.itle}>environmentTitle</span>
-                    )}
-                    {environmentAuthor &&
-                      environmentAuthor.name &&
-                      (environmentAuthor.url ? (
-                        <a href={environmentAuthor.url} rel="noopener noreferrer" className={styles.author}>
-                          <FormattedMessage id="home.environment_author_by" />
-                          <span>{environmentAuthor.name}</span>
+      <div>
+        <form onSubmit={this.createHub}>
+          <div className={styles.createPanel}>
+            <div className={styles.form}>
+              <div
+                className={styles.leftContainer}
+                onClick={async () => {
+                  this.shuffle();
+                }}
+              >
+                <button type="button" tabIndex="3" className={styles.rotateButton}>
+                  <img src="../assets/images/dice_icon.svg" />
+                </button>
+              </div>
+              <div className={styles.rightContainer}>
+                <button type="submit" tabIndex="5" className={styles.submitButton}>
+                  {this.isHubNameValid() ? (
+                    <img src="../assets/images/hub_create_button_enabled.svg" />
+                  ) : (
+                    <img src="../assets/images/hub_create_button_disabled.svg" />
+                  )}
+                </button>
+              </div>
+              <div className={styles.environment}>
+                <div className={styles.picker}>
+                  <img className={styles.image} srcSet={environmentThumbnail.srcset} />
+                  <div className={styles.labels}>
+                    <div className={styles.header}>
+                      {meta.url ? (
+                        <a href={meta.url} rel="noopener noreferrer" className={styles.title}>
+                          {environmentTitle}
                         </a>
                       ) : (
-                        <span className={styles.author}>
-                          <FormattedMessage id="home.environment_author_by" />
-                          <span>{environmentAuthor.name}</span>
-                        </span>
-                      ))}
-                    {environmentAuthor &&
-                      environmentAuthor.organization &&
-                      (environmentAuthor.organization.url ? (
-                        <a href={environmentAuthor.organization.url} rel="noopener noreferrer" className={styles.org}>
-                          <span>{environmentAuthor.organization.name}</span>
-                        </a>
-                      ) : (
-                        <span className={styles.org}>
-                          <span>{environmentAuthor.organization.name}</span>
-                        </span>
-                      ))}
+                        <span className={styles.itle}>environmentTitle</span>
+                      )}
+                      {environmentAuthor &&
+                        environmentAuthor.name &&
+                        (environmentAuthor.url ? (
+                          <a href={environmentAuthor.url} rel="noopener noreferrer" className={styles.author}>
+                            <FormattedMessage id="home.environment_author_by" />
+                            <span>{environmentAuthor.name}</span>
+                          </a>
+                        ) : (
+                          <span className={styles.author}>
+                            <FormattedMessage id="home.environment_author_by" />
+                            <span>{environmentAuthor.name}</span>
+                          </span>
+                        ))}
+                      {environmentAuthor &&
+                        environmentAuthor.organization &&
+                        (environmentAuthor.organization.url ? (
+                          <a href={environmentAuthor.organization.url} rel="noopener noreferrer" className={styles.org}>
+                            <span>{environmentAuthor.organization.name}</span>
+                          </a>
+                        ) : (
+                          <span className={styles.org}>
+                            <span>{environmentAuthor.organization.name}</span>
+                          </span>
+                        ))}
+                    </div>
+                    <div className={styles.footer}>
+                      <button onClick={this.showCustomSceneDialog} className={styles.customButton}>
+                        <FormattedMessage id="home.room_create_options" />
+                      </button>
+                    </div>
                   </div>
-                  <div className={styles.footer}>
-                    <FormattedMessage id="home.environment_picker_footer" />
-                  </div>
-                </div>
-                <div className={styles.controls}>
-                  <button className={styles.prev} type="button" tabIndex="1" onClick={this.setToPreviousEnvironment}>
-                    <FontAwesomeIcon icon={faAngleLeft} />
-                  </button>
+                  <div className={styles.controls}>
+                    <button className={styles.prev} type="button" tabIndex="1" onClick={this.setToPreviousEnvironment}>
+                      <FontAwesomeIcon icon={faAngleLeft} />
+                    </button>
 
-                  <button className={styles.next} type="button" tabIndex="2" onClick={this.setToNextEnvironment}>
-                    <FontAwesomeIcon icon={faAngleRight} />
-                  </button>
+                    <button className={styles.next} type="button" tabIndex="2" onClick={this.setToNextEnvironment}>
+                      <FontAwesomeIcon icon={faAngleRight} />
+                    </button>
+                  </div>
                 </div>
               </div>
+              <input
+                tabIndex="4"
+                className={styles.name}
+                value={this.state.name}
+                onChange={e => this.setState({ name: e.target.value })}
+                onFocus={e => e.target.select()}
+                required
+                pattern={HUB_NAME_PATTERN}
+                title={formatMessage({ id: "home.create_name.validation_warning" })}
+              />
             </div>
-            <input
-              tabIndex="4"
-              className={styles.name}
-              value={this.state.name}
-              onChange={e => this.setState({ name: e.target.value })}
-              onFocus={e => e.target.select()}
-              required
-              pattern={HUB_NAME_PATTERN}
-              title={formatMessage({ id: "home.create_name.validation_warning" })}
-            />
           </div>
-        </div>
-      </form>
+        </form>
+        {this.state.showCustomSceneDialog && (
+          <InfoDialog
+            dialogType={dialogTypes.custom_scene}
+            onCloseDialog={() => this.setState({ showCustomSceneDialog: false })}
+            onCustomScene={url => {
+              this.setState({ showCustomSceneDialog: false, customSceneUrl: url }, () => this.createHub());
+            }}
+          />
+        )}
+      </div>
     );
   }
 }

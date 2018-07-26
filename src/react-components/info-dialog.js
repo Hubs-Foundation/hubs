@@ -20,13 +20,15 @@ class InfoDialog extends Component {
     help: Symbol("help"),
     link: Symbol("link"),
     webvr_recommend: Symbol("webvr_recommend"),
-    add_media: Symbol("add_media")
+    add_media: Symbol("add_media"),
+    custom_scene: Symbol("custom_scene")
   };
   static propTypes = {
     dialogType: PropTypes.oneOf(Object.values(InfoDialog.dialogTypes)),
     onCloseDialog: PropTypes.func,
     onSubmittedEmail: PropTypes.func,
     onAddMedia: PropTypes.func,
+    onCustomScene: PropTypes.func,
     linkCode: PropTypes.string
   };
 
@@ -53,11 +55,16 @@ class InfoDialog extends Component {
     }
   }
 
-  onContainerClicked(e) {
+  onContainerClicked = e => {
     if (e.currentTarget === e.target) {
       this.props.onCloseDialog();
     }
-  }
+  };
+
+  onCustomSceneClicked = () => {
+    this.props.onCustomScene(this.state.customSceneUrl);
+    this.props.onCloseDialog();
+  };
 
   shareLinkClicked = () => {
     navigator.share({
@@ -74,7 +81,9 @@ class InfoDialog extends Component {
   state = {
     mailingListEmail: "",
     mailingListPrivacy: false,
-    copyLinkButtonText: "Copy"
+    copyLinkButtonText: "Copy",
+    addMediaUrl: "",
+    customSceneUrl: ""
   };
 
   signUpForMailingList = async e => {
@@ -190,6 +199,31 @@ class InfoDialog extends Component {
       case InfoDialog.dialogTypes.add_media:
         dialogTitle = "Add Media";
         dialogBody = <MediaToolsDialog onAddMedia={this.props.onAddMedia} onCloseDialog={this.props.onCloseDialog} />;
+        break;
+      case InfoDialog.dialogTypes.custom_scene:
+        dialogTitle = "Use Custom Scene";
+        dialogBody = (
+          <div>
+            <div>Enter a URL to a GLTF file to use for your room&apos;s scene:</div>
+            <form onSubmit={this.onCustomSceneClicked}>
+              <div className="custom-scene-form">
+                <input
+                  type="url"
+                  placeholder="URL to Scene GLTF or GLB"
+                  className="custom-scene-form__link_field"
+                  value={this.state.customSceneUrl}
+                  onChange={e => this.setState({ customSceneUrl: e.target.value })}
+                  required
+                />
+                <div className="custom-scene-form__buttons">
+                  <button className="custom-scene-form__action-button">
+                    <span>Create Room</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        );
         break;
       case InfoDialog.dialogTypes.updates:
         dialogTitle = "";
