@@ -228,7 +228,7 @@ class InfoDialog extends Component {
                 />
                 <div className="custom-scene-form__buttons">
                   <button className="custom-scene-form__action-button">
-                    <span>Create Room</span>
+                    <span>create</span>
                   </button>
                 </div>
               </div>
