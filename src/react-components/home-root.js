@@ -38,7 +38,7 @@ class HomeRoot extends Component {
 
   loadHomeVideo = () => {
     const videoEl = document.querySelector("#background-video");
-    videoEl.playbackRate = 0.75;
+    videoEl.playbackRate = 0.9;
     function toggleVideo() {
       // Play the video if the window/tab is visible.
       if (document.hasFocus()) {

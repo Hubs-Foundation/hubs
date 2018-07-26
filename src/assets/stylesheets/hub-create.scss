@@ -3,23 +3,20 @@
 :local(.create-panel) {
   display: flex;
   flex-direction: column;
-
-  @media (max-width: 768px) {
-    align-items: center;
-  }
+  align-items: center;
 
   :local(.form) {
     position: relative;
-    width: 700px;
+    width: 690px;
     height: 460px;
 
     @media (max-width: 768px) , (max-height: 715px) {
-      width: 500px;
-      height: 340px;
+      width: 525px;
+      height: 350px;
     }
 
     @media (max-width: 520px) {
-      width: 300px;
+      width: 90%;
       height: 260px;
     }
 
@@ -72,22 +69,6 @@
       cursor: pointer;
     }
 
-    :local(.left-container) {
-      position: absolute;
-      width: 90px;
-      height: 95px;
-      left: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      bottom: 0;
-
-      @media (max-width: 520px) {
-        display: none;
-      }
-    }
-
     :local(.right-container) {
       position: absolute;
       height: 95px;
@@ -123,10 +104,10 @@
         position: relative;
 
         :local(.image) {
-          width: 106%;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
           position: absolute;
-          top: -3%;
-          left: -3%;
         }
 
         :local(.labels) {

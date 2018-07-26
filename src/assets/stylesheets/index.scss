@@ -47,8 +47,9 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  opacity: 0.45;
+  opacity: 0.5;
   min-width: 100%;
+  filter: saturate(1.5);
   min-height: 100%;
   z-index: 1;
 }
@@ -193,12 +194,8 @@ body {
     padding-top: 2vw;
     padding-left: 2.1em;
     padding-right: 2.1em;
-    flex: 10;
+    flex: 2;
     text-shadow: 0px 0px 2px rgba(32, 32, 32, 1.0);
-
-    @media (max-height: 812px) , (max-width: 768px) {
-      flex: 0 0 auto;
-    }
 
     @media (max-height: 720px) {
       padding-bottom: 0px;
@@ -244,10 +241,10 @@ body {
   :local(.create) {
     padding: 2.1em;
     padding-bottom: 3.5vw;
+    flex: 4;
 
     @media (max-width: 768px) {
       padding: 0.5em;
-      align-self: center;
     }
   }
 }
