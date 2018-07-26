@@ -73,9 +73,9 @@ export async function getAvailableVREntryTypes() {
       : VR_DEVICE_AVAILABILITY.yes;
 
   // HACK -- we prompt the user to install firefox if they click the VR button on a non-WebVR compatible
-  // browser. once we change this (ie when Chrome has VR support) then this check can be removed. Currently
-  // if you have FF on Mac/Linux you get the confusing flow of having a VR button but then being asked to
-  // download FF.
+  // browser. once we change this (ie when Chrome has VR support) then this check can be removed. Without this
+  // check if you have FF on Mac/Linux you'll get the confusing flow of having a VR button but then
+  // being asked to download FF.
   const isNonWebVRFirefox = !isWebVRCapableBrowser && isFirefoxBrowser;
   let generic =
     AFRAME.utils.device.isMobile() || isNonWebVRFirefox ? VR_DEVICE_AVAILABILITY.no : VR_DEVICE_AVAILABILITY.maybe;
