@@ -50,6 +50,8 @@
     "home.create_name.validation_warning": "Invalid name, limited to 4 to 64 characters and limited symbols.",
     "home.join_us": "Join the Conversation",
     "home.report_issue": "Report Issues",
+    "home.source_link": "source",
+    "home.about_link": "about",
     "home.privacy_notice": "Privacy Notice",
     "home.terms_of_use": "Terms of Use",
     "home.get_updates": "Get Updates",

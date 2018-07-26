@@ -62,7 +62,7 @@ body {
   display: flex;
   border-bottom: 1px solid $darkest-grey;
 
-  :local(.title) {
+  :local(.title-and-nav) {
     display: flex;
     width: $header-section-width;
     cursor: pointer;
@@ -88,7 +88,21 @@ body {
     :local(.preview) {
       color: $grey-text;
       margin-left: 10px;
+      margin-right: 20px;
       pointer-events: none;
+    }
+
+    :local(.links) {
+      display: flex;
+      align-items: center;
+
+      a {
+        margin: 0px 16px 0px 0px;
+        color: white;
+        font-weight: bold;
+        font-size: 1.4em;
+        text-decoration: none;
+      }
     }
   }
 

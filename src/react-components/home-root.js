@@ -89,9 +89,20 @@ class HomeRoot extends Component {
         <div className={styles.home}>
           <div className={mainContentClassNames}>
             <div className={styles.headerContent}>
-              <div className={styles.title} onClick={() => (document.location = "/")}>
+              <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
                 <div className={styles.hubs}>hubs</div>
                 <div className={styles.preview}>preview</div>
+                <div className={styles.links}>
+                  <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
+                    <FormattedMessage id="home.source_link" />
+                  </a>
+                  <a
+                    href="https://blog.mozvr.com/introducing-hubs-a-new-way-to-get-together-online/"
+                    rel="noreferrer noopener"
+                  >
+                    <FormattedMessage id="home.about_link" />
+                  </a>
+                </div>
               </div>
               <div className={styles.ident} />
             </div>
