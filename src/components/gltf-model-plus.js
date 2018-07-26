@@ -1,5 +1,7 @@
 import JSZip from "jszip";
 
+import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
+
 const GLTFCache = {};
 
 AFRAME.GLTFModelPlus = {
@@ -183,6 +185,17 @@ function nextTick() {
   });
 }
 
+function getFilesFromSketchfabZip(src) {
+  return new Promise((resolve, reject) => {
+    const worker = new SketchfabZipWorker();
+    worker.onmessage = e => {
+      const [success, fileMapOrError] = e.data;
+      (success ? resolve : reject)(fileMapOrError);
+    };
+    worker.postMessage(src);
+  });
+}
+
 function cachedLoadGLTF(src, basePath, contentType, preferredTechnique, onProgress) {
   // Load the gltf model from the cache if it exists.
   if (!GLTFCache[src]) {
@@ -190,30 +203,15 @@ function cachedLoadGLTF(src, basePath, contentType, preferredTechnique, onProgre
       let gltfUrl = src;
       let onLoad = resolve;
       if (contentType === "model/gltf+zip") {
-        const zip = await fetch(src)
-          .then(r => r.blob())
-          .then(JSZip.loadAsync);
-
-        // Rewrite any url refferences in the GLTF to blob urls
-        const gltfJson = JSON.parse(await zip.file("scene.gltf").async("text"));
-        const fileMap = await Object.values(zip.files).reduce(async (prev, file) => {
-          if (file.name === "scene.gltf") return prev;
-          const out = await prev;
-          out[file.name] = URL.createObjectURL(await file.async("blob"));
-          return out;
-        }, Promise.resolve({}));
-        gltfJson.buffers && gltfJson.buffers.forEach(b => (b.uri = fileMap[b.uri]));
-        gltfJson.images && gltfJson.images.forEach(i => (i.uri = fileMap[i.uri]));
-
-        gltfUrl = fileMap["scene.gtlf"] = URL.createObjectURL(
-          new Blob([JSON.stringify(gltfJson, null, 2)], { type: "text/plain" })
-        );
-
+        const fileMap = await getFilesFromSketchfabZip(src);
+        gltfUrl = fileMap["scene.gtlf"];
         onLoad = model => {
+          // The GLTF is now cached as a THREE object, we can get rid of the original blobs
           Object.keys(fileMap).forEach(URL.revokeObjectURL);
           resolve(model);
         };
       }
+
       const gltfLoader = new THREE.GLTFLoader();
       gltfLoader.path = basePath;
       gltfLoader.preferredTechnique = preferredTechnique;
