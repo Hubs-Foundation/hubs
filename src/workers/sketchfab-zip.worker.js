@@ -29,4 +29,5 @@ self.onmessage = async e => {
   } catch (e) {
     self.postMessage([false, e.message]);
   }
+  delete self.onmessage;
 };

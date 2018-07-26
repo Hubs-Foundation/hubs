@@ -63,10 +63,12 @@ self.onmessage = e => {
     new Uint8Array(e.data),
     (delays, loopcnt, frames, disposals) => {
       self.postMessage([true, frames, delays, disposals]);
+      delete self.onmessage;
     },
     err => {
       console.error("Error in gif parsing worker", err);
       self.postMessage([false, err]);
+      delete self.onmessage;
     }
   );
 };
