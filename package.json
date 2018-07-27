@@ -26,6 +26,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.2",
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
+    "aframe": "github:aframevr/aframe#1be48d9204f0919d6362ef4c4dfa955e4ef64439",
     "aframe-billboard-component": "^1.0.0",
     "aframe-extras": "github:MozillaReality/aframe-extras#feature/precompute-nav-mesh",
     "aframe-input-mapping-component": "github:mozillareality/aframe-input-mapping-component#hubs/master",

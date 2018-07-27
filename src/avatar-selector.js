@@ -1,3 +1,4 @@
+import "aframe";
 import ReactDOM from "react-dom";
 import React from "react";
 import { IntlProvider, addLocaleData } from "react-intl";
