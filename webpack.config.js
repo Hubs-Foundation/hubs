@@ -9,7 +9,6 @@ const HTMLWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
-const _ = require("lodash");
 
 function createHTTPSConfig() {
   // Generate certs for the local webpack-dev-server.
@@ -58,21 +57,6 @@ function createHTTPSConfig() {
   }
 }
 
-class LodashTemplatePlugin {
-  constructor(options) {
-    this.options = options;
-  }
-
-  apply(compiler) {
-    compiler.plugin("compilation", compilation => {
-      compilation.plugin("html-webpack-plugin-before-html-processing", async data => {
-        data.html = _.template(data.html, this.options)();
-        return data;
-      });
-    });
-  }
-}
-
 module.exports = (env, argv) => ({
   entry: {
     index: path.join(__dirname, "src", "index.js"),
@@ -118,9 +102,7 @@ module.exports = (env, argv) => ({
         loader: "html-loader",
         options: {
           // <a-asset-item>'s src property is overwritten with the correct transformed asset url.
-          attrs: ["img:src", "a-asset-item:src", "audio:src", "source:src"],
-          // You can get transformed asset urls in an html template using ${require("pathToFile.ext")}
-          interpolate: "require"
+          attrs: ["img:src", "a-asset-item:src", "audio:src", "source:src"]
         }
       },
       {
@@ -219,7 +201,15 @@ module.exports = (env, argv) => ({
       filename: "hub.html",
       template: path.join(__dirname, "src", "hub.html"),
       chunks: ["vendor", "engine", "hub"],
-      inject: "head"
+      inject: "head",
+      meta: [
+        {
+          "http-equiv": "origin-trial",
+          "data-feature": "WebVR (For Chrome M62+)",
+          "data-expires": process.env.ORIGIN_TRIAL_EXPIRES,
+          "data-content": process.env.ORIGIN_TRIAL_TOKEN
+        }
+      ]
     }),
     new HTMLWebpackPlugin({
       filename: "link.html",
@@ -248,16 +238,6 @@ module.exports = (env, argv) => ({
     new ExtractTextPlugin({
       filename: "assets/stylesheets/[name]-[md5:contenthash:hex:20].css",
       disable: argv.mode !== "production"
-    }),
-    // Transform the output of the html-loader using _.template
-    // before passing the result to html-webpack-plugin
-    new LodashTemplatePlugin({
-      // expose these variables to the lodash template
-      // ex: <%= ORIGIN_TRIAL_TOKEN %>
-      imports: {
-        ORIGIN_TRIAL_EXPIRES: process.env.ORIGIN_TRIAL_EXPIRES,
-        ORIGIN_TRIAL_TOKEN: process.env.ORIGIN_TRIAL_TOKEN
-      }
     }),
     // Define process.env variables in the browser context.
     new webpack.DefinePlugin({
