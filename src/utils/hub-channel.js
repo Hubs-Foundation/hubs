@@ -1,4 +1,13 @@
-import moment from "moment-timezone";
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
+
+function isSameMonth(da, db) {
+  return da.getFullYear() == db.getFullYear() && da.getMonth() == db.getMonth();
+}
+
+function isSameDay(da, db) {
+  return isSameMonth(da, db) && da.getDate() == db.getDate();
+}
 
 export default class HubChannel {
   constructor(store) {
@@ -52,18 +61,15 @@ export default class HubChannel {
       return entryTimingFlags;
     }
 
-    const lastEntered = moment(storedLastEnteredAt);
-    const lastEnteredPst = moment(lastEntered).tz("America/Los_Angeles");
-    const nowPst = moment().tz("America/Los_Angeles");
-    const dayWindowAgo = moment().subtract(1, "day");
-    const monthWindowAgo = moment().subtract(1, "month");
+    const now = new Date();
+    const lastEntered = new Date(storedLastEnteredAt);
+    const msSinceLastEntered = now - lastEntered;
 
-    entryTimingFlags.isNewDaily =
-      lastEnteredPst.dayOfYear() !== nowPst.dayOfYear() || lastEnteredPst.year() !== nowPst.year();
-    entryTimingFlags.isNewMonthly =
-      lastEnteredPst.month() !== nowPst.month() || lastEnteredPst.year() !== nowPst.year();
-    entryTimingFlags.isNewDayWindow = lastEntered.isBefore(dayWindowAgo);
-    entryTimingFlags.isNewMonthWindow = lastEntered.isBefore(monthWindowAgo);
+    // note that new daily and new monthly is based on client local time
+    entryTimingFlags.isNewDaily = !isSameDay(now, lastEntered);
+    entryTimingFlags.isNewMonthly = !isSameMonth(now, lastEntered);
+    entryTimingFlags.isNewDayWindow = msSinceLastEntered > MS_PER_DAY;
+    entryTimingFlags.isNewMonthWindow = msSinceLastEntered > MS_PER_MONTH;
 
     return entryTimingFlags;
   };

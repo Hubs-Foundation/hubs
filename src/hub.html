@@ -22,7 +22,7 @@
     <script src="https://cdn.rawgit.com/gfodor/ba8f88d9f34fe9cbe59a01ce3c48420d/raw/03e31f0ef7b9eac5e947bd39e440f34df0701f75/naf-janus-adapter-logging.js" integrity="sha384-4q1V8Q88oeCFriFefFo5uEUtMzbw6K116tFyC9cwbiPr6wEe7050l5HoJUxMvnzj" crossorigin="anonymous"></script>
 </head>
 
-<body data-html-prefix="<%= HTML_PREFIX %>">
+<body>
     <audio id="test-tone">
         <source src="./assets/sfx/tone.webm" type="audio/webm"/>
         <source src="./assets/sfx/tone.mp3" type="audio/mpeg"/>
@@ -40,15 +40,15 @@
         vr-mode-ui="enabled: false"
         pinch-to-move
         input-configurator="
-                  gazeCursorRayObject: #player-camera-reverse-z;
+                  gazeCursorRayObject: #player-camera;
                   cursorController: #cursor-controller;
                   gazeTeleporter: #gaze-teleport;
                   camera: #player-camera;
                   playerRig: #player-rig;
                   leftController: #player-left-controller;
-                  leftControllerRayObject: #player-left-controller-reverse-z;
+                  leftControllerRayObject: #player-left-controller;
                   rightController: #player-right-controller;
-                  rightControllerRayObject: #player-right-controller-reverse-z;"
+                  rightControllerRayObject: #player-right-controller;"
     >
 
         <a-assets>
@@ -79,7 +79,6 @@
 
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
             <a-asset-item id="interactable-duck" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf"></a-asset-item>
-            <a-asset-item id="interactable-pen" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-484ae5682f.gltf"></a-asset-item>
 
             <a-asset-item id="quack" src="./assets/sfx/quack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="specialquack" src="./assets/sfx/specialquack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -87,7 +86,6 @@
             <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
 
             <!-- Templates -->
-
             <template id="video-template">
                 <a-entity class="video" geometry="primitive: plane;" material="side: double; shader: flat;" networked-video-player></a-entity>
             </template>
@@ -102,7 +100,7 @@
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
                         <template data-name="RootScene">
-                            <a-entity ik-controller hand-pose__left hand-pose__right animation-mixer space-invader-mesh="meshSelector: .Bot_Skinned"></a-entity>
+                            <a-entity ik-controller hand-pose__left hand-pose__right animation-mixer space-invader-mesh="meshName: Bot_Skinned"></a-entity>
                         </template>
 
                         <template data-name="Neck">
@@ -118,13 +116,12 @@
                         </template>
 
                         <template data-name="Chest">
-                            <a-entity>
-                              <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility> </a-entity>
-                              <a-entity billboard>
-                                  <a-entity mixin="rounded-text-button" block-button visible-while-frozen ui-class-while-frozen position="0 0 .35"> </a-entity>
-                                  <a-entity visible-while-frozen text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
-                              </a-entity>
+                          <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
+                            <a-entity billboard>
+                              <a-entity mixin="rounded-text-button" block-button visible-while-frozen ui-class-while-frozen position="0 0 .35"> </a-entity>
+                              <a-entity visible-while-frozen text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
                             </a-entity>
+                          </a-entity>
                         </template>
 
                         <template data-name="Head">
@@ -144,11 +141,6 @@
                             </a-entity>
                         </template>
 
-                        <!-- needs to exist for the benefit of the personal space calculator  -->
-                        <template data-name="Bot_Skinned">
-                          <a-entity></a-entity>
-                        </template>
-
                         <template data-name="LeftHand">
                           <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
                         </template>
@@ -162,53 +154,37 @@
 
             <template id="interactable-template">
                 <a-entity
-                    gltf-model-plus="src: #interactable-duck; inflate: true;"
                     class="interactable"
-                    super-networked-interactable="counter: #counter; mass: 1;"
+                    super-networked-interactable="counter: #media-counter;"
                     body="type: dynamic; shape: none; mass: 1;"
+                    grabbable
+                    stretchable="useWorldPosition: true; usePhysics: never"
+                    hoverable
                     auto-scale-cannon-physics-body
-                    grabbable
-                    stretchable="useWorldPosition: true; usePhysics: never"
-                    hoverable
-                    duck
-                    sticky-object="autoLockOnRelease: true;"
-                ></a-entity>
-            </template>
-
-            <template id="interactable-model">
-                <a-entity
-                    gltf-model-plus="inflate: false;"
-                    class="interactable"
-                    super-networked-interactable="counter: #media-counter; mass: 1;"
-                    body="type: dynamic; shape: none; mass: 1;"
-                    grabbable
-                    stretchable="useWorldPosition: true; usePhysics: never"
-                    hoverable
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
-                    auto-box-collider
                     position-at-box-shape-border="target:.delete-button"
-                    auto-scale-cannon-physics-body
+                    destroy-at-extreme-distances
+                    duck
                 >
-                    <a-entity class="delete-button" visible-while-frozen scale="0.08 0.08 0.08">
-                        <a-entity mixin="rounded-text-button" remove-object-button position="0 0 0"> </a-entity>
+                    <a-entity class="delete-button" visible-while-frozen>
+                        <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
                         <a-entity text=" value:Delete; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>
 
-            <template id="interactable-image">
+            <template id="interactable-media">
                 <a-entity
                     class="interactable"
-                    super-networked-interactable="counter: #media-counter; mass: 1;"
+                    super-networked-interactable="counter: #media-counter;"
                     body="type: dynamic; shape: none; mass: 1;"
-                    auto-scale-cannon-physics-body
                     grabbable
                     stretchable="useWorldPosition: true; usePhysics: never"
                     hoverable
-                    geometry="primitive: plane"
-                    image-plus
-                    sticky-object="autoLockOnLoad: true; autoLockOnRelease: true;"
-                    position-at-box-shape-border="target:.delete-button;dirs:forward,back"
+                    auto-scale-cannon-physics-body
+                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
+                    position-at-box-shape-border="target:.delete-button"
+                    destroy-at-extreme-distances
                 >
                     <a-entity class="delete-button" visible-while-frozen>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
@@ -219,10 +195,10 @@
 
             <template id="pen-interactable">
                 <a-entity
-                    gltf-model-plus="src: #interactable-pen; inflate: true;"
                     class="interactable sticky"
-                    super-networked-interactable="counter: #counter; mass: 1;"
+                    super-networked-interactable="counter: #pen-counter; mass: 1;"
                     body="type: dynamic; shape: none; mass: 1;"
+                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
                     grabbable-toggle
                     grabbable="maxGrabbers: 1; maxGrabBehavior: drop;"
                     hoverable
@@ -286,8 +262,9 @@
         </a-assets>
 
         <!-- Interactables -->
-        <a-entity id="counter" networked-counter="max: 3; ttl: 120"></a-entity>
         <a-entity id="media-counter" networked-counter="max: 10;"></a-entity>
+
+        <a-entity id="pen-counter" networked-counter="max: 3;"></a-entity>
 
         <a-entity
             id="cursor-controller"
@@ -370,9 +347,9 @@
                     drawIncrementally: true;
                     incrementalDrawMs: 600;
                     hitOpacity: 0.3;
-                    missOpacity: 0.2;"
+                    missOpacity: 0.1;
+                    curveShootingSpeed: 12;"
             ></a-entity>
-            <a-entity id="player-camera-reverse-z" rotation="0 180 0"></a-entity>
           </a-entity>
 
           <a-entity
@@ -388,13 +365,13 @@
                   drawIncrementally: true;
                   incrementalDrawMs: 600;
                   hitOpacity: 0.3;
-                  missOpacity: 0.2;"
+                  missOpacity: 0.1;
+                  curveShootingSpeed: 12;"
               haptic-feedback
               body="type: static; shape: none;"
               mixin="controller-super-hands"
               controls-shape-offset
           >
-            <a-entity id="player-left-controller-reverse-z" rotation="0 180 0"></a-entity>
           </a-entity>
 
           <a-entity
@@ -410,13 +387,13 @@
                   drawIncrementally: true;
                   incrementalDrawMs: 600;
                   hitOpacity: 0.3;
-                  missOpacity: 0.2;"
+                  missOpacity: 0.1;
+                  curveShootingSpeed: 12;"
               haptic-feedback
               body="type: static; shape: none;"
               mixin="controller-super-hands"
               controls-shape-offset
           >
-            <a-entity id="player-right-controller-reverse-z" rotation="0 180 0"></a-entity>
           </a-entity>
 
           <a-entity gltf-model-plus="inflate: true;"
@@ -450,7 +427,7 @@
               <a-entity bone-visibility></a-entity>
             </template>
 
-            </a-entity>
+          </a-entity>
         </a-entity>
 
         <!-- Environment -->
@@ -466,9 +443,9 @@
         ></a-entity>
 
         <a-entity 
-            gltf-model-plus="src: #interactable-pen"
+            gltf-model-plus="src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-484ae5682f.gltf"
             class="interactable sticky" 
-            super-spawner="template: #pen-interactable;" 
+            super-spawner="template: #pen-interactable; src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-484ae5682f.gltf;" 
             position="-1 1.2 -5.5"
             scale="0.5 0.5 0.5" 
             body="mass: 0; type: static; shape: box;"

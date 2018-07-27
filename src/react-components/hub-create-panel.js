@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
 import { generateHubName } from "../utils/name-generation";
 import classNames from "classnames";
-import faAngleLeft from "@fortawesome/fontawesome-free-solid/faAngleLeft";
-import faAngleRight from "@fortawesome/fontawesome-free-solid/faAngleRight";
-import FontAwesomeIcon from "@fortawesome/react-fontawesome";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
+import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { resolveURL, extractUrlBase } from "../utils/resolveURL";
 
 import default_scene_preview_thumbnail from "../assets/images/default_thumbnail.png";
@@ -15,16 +15,25 @@ const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
 class HubCreatePanel extends Component {
   static propTypes = {
     intl: PropTypes.object,
-    environments: PropTypes.array
+    environments: PropTypes.array,
+    initialEnvironment: PropTypes.string
   };
 
   constructor(props) {
     super(props);
 
+    let environmentIndex = Math.floor(Math.random() * props.environments.length);
+
+    if (props.initialEnvironment) {
+      environmentIndex = props.environments.findIndex(
+        e => e.name.toLowerCase() === props.initialEnvironment.toLowerCase()
+      );
+    }
+
     this.state = {
       ready: false,
       name: generateHubName(),
-      environmentIndex: Math.floor(Math.random() * props.environments.length),
+      environmentIndex,
       // HACK: expand on small screens by default to ensure scene selection possible.
       // Eventually this could/should be done via media queries.
       expanded: window.innerWidth < 420
@@ -107,7 +116,7 @@ class HubCreatePanel extends Component {
   setToEnvironmentOffset = async offset => {
     const numEnvs = this.props.environments.length;
 
-    const environmentIndex = ((this.state.environmentIndex + offset) % numEnvs + numEnvs) % numEnvs;
+    const environmentIndex = (((this.state.environmentIndex + offset) % numEnvs) + numEnvs) % numEnvs;
     const environmentThumbnail = this._getEnvironmentThumbnail(environmentIndex);
     await this._preloadImage(environmentThumbnail.srcset);
 

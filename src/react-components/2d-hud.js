@@ -1,18 +1,17 @@
 import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
-import queryString from "query-string";
 
 import styles from "../assets/stylesheets/2d-hud.scss";
 
-import FontAwesomeIcon from "@fortawesome/react-fontawesome";
-import faPlus from "@fortawesome/fontawesome-free-solid/faPlus";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 
-const qs = queryString.parse(location.search);
+const qs = new URLSearchParams(location.search);
 function qsTruthy(param) {
-  const val = qs[param];
-  // if the param exists but is not set (e.g. "?foo&bar"), its value is null.
-  return val === null || /1|on|true/i.test(val);
+  const val = qs.get(param);
+  // if the param exists but is not set (e.g. "?foo&bar"), its value is the empty string.
+  return val === "" || /1|on|true/i.test(val);
 }
 const enableMediaTools = qsTruthy("mediaTools");
 

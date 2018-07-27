@@ -2,8 +2,6 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
-import queryString from "query-string";
-import MobileDetect from "mobile-detect";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import MovingAverage from "moving-average";
@@ -24,10 +22,8 @@ import InfoDialog from "./info-dialog.js";
 import TwoDHUD from "./2d-hud";
 import Footer from "./footer";
 
-import FontAwesomeIcon from "@fortawesome/react-fontawesome";
-import faQuestion from "@fortawesome/fontawesome-free-solid/faQuestion";
-
-const mobiledetect = new MobileDetect(navigator.userAgent);
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 
 addLocaleData([...en]);
 
@@ -64,10 +60,10 @@ class UIRoot extends Component {
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
     enableScreenSharing: PropTypes.bool,
+    isBotMode: PropTypes.bool,
     store: PropTypes.object,
     scene: PropTypes.object,
     linkChannel: PropTypes.object,
-    htmlPrefix: PropTypes.string,
     showProfileEntry: PropTypes.bool,
     availableVREntryTypes: PropTypes.object,
     initialEnvironmentLoaded: PropTypes.bool,
@@ -284,12 +280,12 @@ class UIRoot extends Component {
 
       // We are not in mobile chrome, so launch into chrome via an Intent URL
       const location = window.location;
-      const qs = queryString.parse(location.search);
-      qs.vr_entry_type = "daydream"; // Auto-choose 'daydream' after landing in chrome
+      const qs = new URLSearchParams(location.search);
+      qs.set("vr_entry_type", "daydream"); // Auto-choose 'daydream' after landing in chrome
 
       const intentUrl =
-        `intent://${location.host}${location.pathname || ""}?` +
-        `${queryString.stringify(qs)}#Intent;scheme=${(location.protocol || "http:").replace(":", "")};` +
+        `intent://${location.host}${location.pathname}?` +
+        `${qs}#Intent;scheme=${location.protocol.replace(":", "")};` +
         `action=android.intent.action.VIEW;package=com.android.chrome;end;`;
 
       window.location = intentUrl;
@@ -329,7 +325,7 @@ class UIRoot extends Component {
           mediaSource: "screen",
           // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
           // other than your current monitor that has a different aspect ratio.
-          width: 720 * screen.width / screen.height,
+          width: 720 * (screen.width / screen.height),
           height: 720,
           frameRate: 30
         }
@@ -456,7 +452,7 @@ class UIRoot extends Component {
   };
 
   shouldShowHmdMicWarning = () => {
-    if (mobiledetect.mobile()) return false;
+    if (AFRAME.utils.device.isMobile()) return false;
     if (!this.state.enterInVR) return false;
     if (!this.hasHmdMicrophone()) return false;
 
@@ -484,7 +480,7 @@ class UIRoot extends Component {
   };
 
   onAudioReadyButton = () => {
-    if (mobiledetect.mobile() && !this.state.enterInVR && screenfull.enabled) {
+    if (AFRAME.utils.device.isMobile() && !this.state.enterInVR && screenfull.enabled) {
       screenfull.request();
     }
 
@@ -594,6 +590,16 @@ class UIRoot extends Component {
       );
     }
 
+    if (this.props.isBotMode) {
+      return (
+        <div className="loading-panel">
+          <img className="loading-panel__logo" src="../assets/images/logo.svg" />
+          <input type="file" id="bot-audio-input" accept="audio/*" />
+          <input type="file" id="bot-data-input" accept="application/json" />
+        </div>
+      );
+    }
+
     if (!this.props.initialEnvironmentLoaded || !this.props.availableVREntryTypes || !this.props.hubId) {
       return (
         <IntlProvider locale={lang} messages={messages}>
@@ -613,7 +619,7 @@ class UIRoot extends Component {
     // Only show this in desktop firefox since other browsers/platforms will ignore the "screen" media constraint and
     // will attempt to share your webcam instead!
     const screenSharingCheckbox = this.props.enableScreenSharing &&
-      !mobiledetect.mobile() &&
+      !AFRAME.utils.device.isMobile() &&
       /firefox/i.test(navigator.userAgent) && (
         <label className="entry-panel__screen-sharing">
           <input
@@ -699,7 +705,7 @@ class UIRoot extends Component {
       clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)`
     };
     const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
-
+    const subtitleId = AFRAME.utils.device.isMobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
     const audioSetupPanel =
       this.state.entryStep === ENTRY_STEPS.audio_setup ? (
         <div className="audio-setup-panel">
@@ -708,9 +714,7 @@ class UIRoot extends Component {
               <FormattedMessage id="audio.title" />
             </div>
             <div className="audio-setup-panel__subtitle">
-              {(mobiledetect.mobile() || this.state.enterInVR) && (
-                <FormattedMessage id={mobiledetect.mobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop"} />
-              )}
+              {(AFRAME.utils.device.isMobile() || this.state.enterInVR) && <FormattedMessage id={subtitleId} />}
             </div>
             <div className="audio-setup-panel__levels">
               <div className="audio-setup-panel__levels__icon">
@@ -859,11 +863,7 @@ class UIRoot extends Component {
                 <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
 
                 {this.state.showProfileEntry && (
-                  <ProfileEntryPanel
-                    finished={this.onProfileFinished}
-                    store={this.props.store}
-                    htmlPrefix={this.props.htmlPrefix}
-                  />
+                  <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store} />
                 )}
               </div>
             )}

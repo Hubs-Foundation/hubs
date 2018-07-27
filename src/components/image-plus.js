@@ -67,45 +67,11 @@ errorImage.onload = () => {
 };
 
 AFRAME.registerComponent("image-plus", {
-  dependencies: ["geometry"],
-
   schema: {
     src: { type: "string" },
-    contentType: { type: "string" }
-  },
+    contentType: { type: "string" },
 
-  _fit(w, h) {
-    const ratio = (h || 1.0) / (w || 1.0);
-    const geo = this.el.geometry;
-    let width, height;
-    if (geo && geo.width) {
-      if (geo.height && ratio > 1) {
-        width = geo.width / ratio;
-      } else {
-        height = geo.height * ratio;
-      }
-    } else if (geo && geo.height) {
-      width = geo.width / ratio;
-    } else {
-      width = Math.min(1.0, 1.0 / ratio);
-      height = Math.min(1.0, ratio);
-    }
-    this.el.setAttribute("geometry", { width, height });
-    this.el.setAttribute("shape", {
-      shape: "box",
-      halfExtents: {
-        x: width / 2,
-        y: height / 2,
-        z: 0.05
-      }
-    });
-  },
-
-  init() {
-    const material = new THREE.MeshBasicMaterial();
-    material.side = THREE.DoubleSide;
-    material.transparent = true;
-    this.el.getObject3D("mesh").material = material;
+    depth: { default: 0.05 }
   },
 
   remove() {
@@ -216,33 +182,66 @@ AFRAME.registerComponent("image-plus", {
         return;
       }
 
+      let cacheItem;
       if (textureCache.has(url)) {
-        const cacheItem = textureCache.get(url);
+        cacheItem = textureCache.get(url);
         texture = cacheItem.texture;
         cacheItem.count++;
       } else {
+        cacheItem = { count: 1 };
         if (url === "error") {
           texture = errorTexture;
         } else if (contentType === "image/gif") {
           texture = await this.loadGIF(url);
         } else if (contentType.startsWith("image/")) {
           texture = await this.loadImage(url);
-        } else if (contentType.startsWith("video")) {
+        } else if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
           texture = await this.loadVideo(url);
+          cacheItem.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
         } else {
-          throw new Error(`Unknown centent type: ${contentType}`);
+          throw new Error(`Unknown content type: ${contentType}`);
         }
 
-        textureCache.set(url, { count: 1, texture });
+        cacheItem.texture = texture;
+        textureCache.set(url, cacheItem);
+      }
+
+      if (cacheItem.audioSource) {
+        const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+        sound.setNodeSource(cacheItem.audioSource);
+        this.el.setObject3D("sound", sound);
       }
     } catch (e) {
       console.error("Error loading media", this.data.src, e);
       texture = errorTexture;
     }
 
-    const material = this.el.getObject3D("mesh").material;
+    const material = new THREE.MeshBasicMaterial();
+    material.side = THREE.DoubleSide;
+    material.transparent = true;
     material.map = texture;
     material.needsUpdate = true;
-    this._fit(texture.image.videoWidth || texture.image.width, texture.image.videoHeight || texture.image.height);
+    material.map.needsUpdate = true;
+
+    const ratio =
+      (texture.image.videoHeight || texture.image.height || 1.0) /
+      (texture.image.videoWidth || texture.image.width || 1.0);
+    const width = Math.min(1.0, 1.0 / ratio);
+    const height = Math.min(1.0, ratio);
+
+    const geometry = new THREE.PlaneGeometry(width, height, 1, 1);
+    this.mesh = new THREE.Mesh(geometry, material);
+    this.el.setObject3D("mesh", this.mesh);
+    this.el.setAttribute("shape", {
+      shape: "box",
+      halfExtents: { x: width / 2, y: height / 2, z: this.data.depth }
+    });
+
+    // TODO: verify if we actually need to do this
+    if (this.el.components.body && this.el.components.body.body) {
+      this.el.components.body.syncToPhysics();
+      this.el.components.body.updateCannonScale();
+    }
+    this.el.emit("image-loaded");
   }
 });

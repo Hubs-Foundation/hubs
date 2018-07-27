@@ -1,6 +1,6 @@
 /* global THREE, CANNON, AFRAME */
 AFRAME.registerComponent("sticky-object", {
-  dependencies: ["body", "super-networked-interactable"],
+  dependencies: ["body"],
 
   schema: {
     autoLockOnLoad: { default: false },
@@ -17,24 +17,27 @@ AFRAME.registerComponent("sticky-object", {
   play() {
     this.el.addEventListener("grab-start", this._onGrab);
     this.el.addEventListener("grab-end", this._onRelease);
-    this.el.addEventListener("body-loaded", this._onBodyLoaded);
+
+    if (this.hasSetupBodyLoaded) return;
+    this.hasSetupBodyLoaded = true;
+
+    if (this.el.body) {
+      this._onBodyLoaded();
+    } else {
+      this.el.addEventListener("body-loaded", this._onBodyLoaded, { once: true });
+    }
   },
 
   pause() {
     this.el.removeEventListener("grab-start", this._onGrab);
     this.el.removeEventListener("grab-end", this._onRelease);
-    this.el.removeEventListener("body-loaded", this._onBodyLoaded);
   },
 
   setLocked(locked) {
-    if (!NAF.utils.isMine(this.el)) return;
+    if (this.el.components.networked && !NAF.utils.isMine(this.el)) return;
 
-    const mass = this.el.components["super-networked-interactable"].data.mass;
     this.locked = locked;
-    this.el.body.type = locked ? window.CANNON.Body.STATIC : window.CANNON.Body.DYNAMIC;
-    this.el.setAttribute("body", {
-      mass: locked ? 0 : mass
-    });
+    this.el.setAttribute("body", { type: locked ? "static" : "dynamic" });
   },
 
   _onBodyLoaded() {
@@ -45,6 +48,7 @@ AFRAME.registerComponent("sticky-object", {
 
   _onRelease() {
     if (
+      !this.el.is("grabbed") &&
       this.data.autoLockOnRelease &&
       this.el.body.velocity.lengthSquared() < this.data.autoLockSpeedLimit * this.data.autoLockSpeedLimit
     ) {
@@ -57,6 +61,7 @@ AFRAME.registerComponent("sticky-object", {
   },
 
   remove() {
+    this.el.removeEventListener("body-loaded", this._onBodyLoaded);
     if (this.stuckTo) {
       const stuckTo = this.stuckTo;
       delete this.stuckTo;

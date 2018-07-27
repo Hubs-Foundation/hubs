@@ -72,17 +72,19 @@ function registerNetworkSchemas() {
     template: "#video-template",
     components: [
       {
-        component: "position"
+        component: "position",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
-        component: "rotation"
+        component: "rotation",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       "visible"
     ]
   });
 
   NAF.schemas.add({
-    template: "#interactable-image",
+    template: "#interactable-template",
     components: [
       {
         component: "position",
@@ -93,13 +95,24 @@ function registerNetworkSchemas() {
         requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       "scale",
-      "image-plus"
+      "media-loader"
     ]
   });
 
   NAF.schemas.add({
-    template: "#interactable-model",
-    components: ["position", "rotation", "scale", "gltf-model-plus"]
+    template: "#interactable-media",
+    components: [
+      {
+        component: "position",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
+      {
+        component: "rotation",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
+      },
+      "scale",
+      "media-loader"
+    ]
   });
 
   NAF.schemas.add({
@@ -129,7 +142,8 @@ function registerNetworkSchemas() {
         component: "rotation",
         requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
-      "scale"
+      "scale",
+      "media-loader"
     ]
   });
 }

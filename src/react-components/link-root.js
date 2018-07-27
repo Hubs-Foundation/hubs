@@ -25,7 +25,7 @@ class LinkRoot extends Component {
     failedAtLeastOnce: false
   };
 
-  componentWillMount = () => {
+  componentDidMount = () => {
     document.addEventListener("keydown", this.handleKeyDown);
   };
 

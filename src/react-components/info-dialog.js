@@ -5,10 +5,9 @@ import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import formurlencoded from "form-urlencoded";
 import LinkDialog from "./link-dialog.js";
+import MediaToolsDialog from "./media-tools-dialog.js";
 
 // TODO i18n
-
-let lastAddMediaUrl = "";
 
 class InfoDialog extends Component {
   static dialogTypes = {
@@ -38,17 +37,14 @@ class InfoDialog extends Component {
     this.shareLink = `${loc.protocol}//${loc.host}${loc.pathname}`;
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onContainerClicked = this.onContainerClicked.bind(this);
-    this.onAddMediaClicked = this.onAddMediaClicked.bind(this);
   }
 
   componentDidMount() {
     window.addEventListener("keydown", this.onKeyDown);
-    this.setState({ addMediaUrl: lastAddMediaUrl });
   }
 
   componentWillUnmount() {
     window.removeEventListener("keydown", this.onKeyDown);
-    lastAddMediaUrl = this.state.addMediaUrl;
   }
 
   onKeyDown(e) {
@@ -61,11 +57,6 @@ class InfoDialog extends Component {
     if (e.currentTarget === e.target) {
       this.props.onCloseDialog();
     }
-  }
-
-  onAddMediaClicked() {
-    this.props.onAddMedia(this.state.addMediaUrl);
-    this.props.onCloseDialog();
   }
 
   shareLinkClicked = () => {
@@ -83,8 +74,7 @@ class InfoDialog extends Component {
   state = {
     mailingListEmail: "",
     mailingListPrivacy: false,
-    copyLinkButtonText: "Copy",
-    addMediaUrl: ""
+    copyLinkButtonText: "Copy"
   };
 
   signUpForMailingList = async e => {
@@ -199,28 +189,7 @@ class InfoDialog extends Component {
         break;
       case InfoDialog.dialogTypes.add_media:
         dialogTitle = "Add Media";
-        dialogBody = (
-          <div>
-            <div>Tip: You can paste media urls directly into hubs with ctrl+v</div>
-            <form onSubmit={this.onAddMediaClicked}>
-              <div className="add-media-form">
-                <input
-                  type="url"
-                  placeholder="Image, Video, or GLTF URL"
-                  className="add-media-form__link_field"
-                  value={this.state.addMediaUrl}
-                  onChange={e => this.setState({ addMediaUrl: e.target.value })}
-                  required
-                />
-                <div className="add-media-form__buttons">
-                  <button className="add-media-form__action-button">
-                    <span>Add</span>
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        );
+        dialogBody = <MediaToolsDialog onAddMedia={this.props.onAddMedia} onCloseDialog={this.props.onCloseDialog} />;
         break;
       case InfoDialog.dialogTypes.updates:
         dialogTitle = "";

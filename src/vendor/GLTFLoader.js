@@ -40,7 +40,7 @@ THREE.GLTFLoader = ( function () {
 
 			loader.setResponseType( 'arraybuffer' );
 
-			var farsparkURL = await resolveFarsparkUrl(url);
+			var farsparkURL = (await resolveFarsparkUrl(url)).raw;
 
 			loader.load( farsparkURL, function ( data ) {
 
@@ -1623,7 +1623,7 @@ THREE.GLTFLoader = ( function () {
 
 		var options = this.options;
 
-		var farsparkURL = await resolveFarsparkUrl(resolveURL(bufferDef.uri, options.path));
+		var farsparkURL = (await resolveFarsparkUrl(resolveURL(bufferDef.uri, options.path))).raw;
 
 		return new Promise( function ( resolve, reject ) {
 
@@ -1823,7 +1823,7 @@ THREE.GLTFLoader = ( function () {
 
     var urlToLoad = resolveURL(sourceURI, options.path);
     if (!hasBufferView){
-      urlToLoad = await resolveFarsparkUrl(urlToLoad);
+      urlToLoad = (await resolveFarsparkUrl(urlToLoad)).raw;
     }
 
 		return Promise.resolve( sourceURI ).then( function ( sourceURI ) {

@@ -1,6 +1,8 @@
+import { getBox } from "../utils/auto-box-collider.js";
+
 const PI = Math.PI;
 const HALF_PI = PI / 2;
-const THREE_HALF_PI = 3 * PI / 2;
+const THREE_HALF_PI = 3 * HALF_PI;
 const right = new THREE.Vector3(1, 0, 0);
 const forward = new THREE.Vector3(0, 0, 1);
 const left = new THREE.Vector3(-1, 0, 0);
@@ -28,6 +30,11 @@ const dirs = {
   }
 };
 
+const inverseHalfExtents = {
+  x: "z",
+  z: "x"
+};
+
 AFRAME.registerComponent("position-at-box-shape-border", {
   schema: {
     target: { type: "string" },
@@ -36,6 +43,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
 
   init() {
     this.cam = this.el.sceneEl.camera.el.object3D;
+    this.halfExtents = new THREE.Vector3();
   },
 
   update() {
@@ -47,25 +55,39 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     const targetPosition = new THREE.Vector3();
     const pointOnBoxFace = new THREE.Vector3();
     return function() {
-      if (!this.shape) {
-        this.shape = this.el.components["shape"];
-        if (!this.shape) return;
-      }
       if (!this.target) {
         this.target = this.el.querySelector(this.data.target).object3D;
         if (!this.target) return;
       }
-      const halfExtents = this.shape.data.halfExtents;
+      if (!this.el.getObject3D("mesh")) {
+        return;
+      }
+      if (!this.halfExtents || this.mesh !== this.el.getObject3D("mesh") || this.shape !== this.el.components.shape) {
+        this.mesh = this.el.getObject3D("mesh");
+        if (this.el.components.shape) {
+          this.shape = this.el.components.shape;
+          this.halfExtents.copy(this.shape.data.halfExtents);
+        } else {
+          const box = getBox(this.el, this.mesh);
+          this.halfExtents = box.min
+            .clone()
+            .negate()
+            .add(box.max)
+            .multiplyScalar(0.51 / this.el.object3D.scale.x);
+        }
+      }
       this.cam.getWorldPosition(camWorldPos);
 
       let minSquareDistance = Infinity;
       let targetDir = this.dirs[0].dir;
-      let targetHalfExtent = halfExtents[this.dirs[0].halfExtent];
+      let targetHalfExtentStr = this.dirs[0].halfExtent;
+      let targetHalfExtent = this.halfExtents[targetHalfExtentStr];
       let targetRotation = this.dirs[0].rotation;
 
       for (let i = 0; i < this.dirs.length; i++) {
         const dir = this.dirs[i].dir;
-        const halfExtent = halfExtents[this.dirs[i].halfExtent];
+        const halfExtentStr = this.dirs[i].halfExtent;
+        const halfExtent = this.halfExtents[halfExtentStr];
         pointOnBoxFace.copy(dir).multiplyScalar(halfExtent);
         this.el.object3D.localToWorld(pointOnBoxFace);
         const squareDistance = pointOnBoxFace.distanceToSquared(camWorldPos);
@@ -74,16 +96,13 @@ AFRAME.registerComponent("position-at-box-shape-border", {
           targetDir = dir;
           targetHalfExtent = halfExtent;
           targetRotation = this.dirs[i].rotation;
+          targetHalfExtentStr = halfExtentStr;
         }
       }
 
-      this.target.position.copy(
-        targetPosition
-          .copy(targetDir)
-          .multiplyScalar(targetHalfExtent)
-          .add(this.shape.data.offset)
-      );
+      this.target.position.copy(targetPosition.copy(targetDir).multiplyScalar(targetHalfExtent));
       this.target.rotation.set(0, targetRotation, 0);
+      this.target.scale.setScalar(this.halfExtents[inverseHalfExtents[targetHalfExtentStr]] * 4);
     };
   })()
 });
