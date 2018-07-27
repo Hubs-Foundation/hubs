@@ -317,7 +317,7 @@ AFRAME.registerComponent("networked-drawing", {
 
   //calculate the segments for a given point
   addSegments(segmentsList, point, forward, up, radius) {
-    const angleIncrement = Math.PI * 2 / this.segments;
+    const angleIncrement = (Math.PI * 2) / this.segments;
     for (let i = 0; i < this.segments; i++) {
       const segment = segmentsList[i];
       this.rotatePointAroundAxis(segment, point, forward, up, angleIncrement * i, radius);
