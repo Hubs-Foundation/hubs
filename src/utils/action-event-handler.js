@@ -82,7 +82,6 @@ export default class ActionEventHandler {
   }
 
   onRelease(e, event) {
-    const superHand = e.target.components["super-hands"];
     const isCursorHand = this.isHandThatAlsoDrivesCursor(e.target);
 
     if (this.isCursorInteracting && isCursorHand) {
