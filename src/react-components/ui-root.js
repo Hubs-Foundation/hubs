@@ -6,6 +6,7 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import MovingAverage from "moving-average";
 import screenfull from "screenfull";
+import entryStyles from "../assets/stylesheets/entry.scss";
 
 import { lang, messages } from "../utils/i18n";
 import AutoExitWarning from "./auto-exit-warning";
@@ -621,9 +622,9 @@ class UIRoot extends Component {
     const screenSharingCheckbox = this.props.enableScreenSharing &&
       !AFRAME.utils.device.isMobile() &&
       /firefox/i.test(navigator.userAgent) && (
-        <label className="entry-panel__screen-sharing">
+        <label className={entryStyles.screenSharing}>
           <input
-            className="entry-panel__screen-sharing__checkbox"
+            className={entryStyles.checkbox}
             type="checkbox"
             value={this.state.shareScreen}
             onChange={this.setStateAndRequestScreen}
@@ -634,8 +635,14 @@ class UIRoot extends Component {
 
     const entryPanel =
       this.state.entryStep === ENTRY_STEPS.start ? (
-        <div className="entry-panel">
-          <div className="entry-panel__button-container">
+        <div className={entryStyles.entryPanel}>
+          <div className={entryStyles.buttonContainer}>
+            <button
+              className={entryStyles.inviteButton}
+              onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
+            >
+              <FormattedMessage id="entry.invite-others" />
+            </button>
             {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
               <TwoDEntryButton onClick={this.enter2D} />
             )}
@@ -657,7 +664,7 @@ class UIRoot extends Component {
             )}
             <DeviceEntryButton onClick={this.attemptLink} isInHMD={this.props.availableVREntryTypes.isInHMD} />
             {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
-              <div className="entry-panel__secondary" onClick={this.enterVR}>
+              <div className={entryStyles.secondary} onClick={this.enterVR}>
                 <FormattedMessage id="entry.cardboard" />
               </div>
             )}
@@ -811,11 +818,10 @@ class UIRoot extends Component {
     const dialogContents = this.isWaitingForAutoExit() ? (
       <AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />
     ) : (
-      <div className="entry-dialog">
+      <div className={entryStyles.entryDialog}>
         <ProfileInfoHeader
           name={this.props.store.state.profile.displayName}
           onClickName={() => this.setState({ showProfileEntry: true })}
-          onClickInvite={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
           onClickHelp={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
         />
         {entryPanel}

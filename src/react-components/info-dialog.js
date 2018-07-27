@@ -144,7 +144,7 @@ class InfoDialog extends Component {
         dialogBody = "Great! Please check your e-mail to confirm your subscription.";
         break;
       case InfoDialog.dialogTypes.invite:
-        dialogTitle = "Invite Friends";
+        dialogTitle = "Invite Others";
         dialogBody = (
           <div>
             <div>Just share the link to invite others.</div>

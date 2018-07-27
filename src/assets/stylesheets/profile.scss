@@ -105,7 +105,7 @@
 
   &__menu-buttons {
     display: flex;
-    margin: 0 20px;
+    margin: 0 0 0 20px;
 
     &__menu-button {
       @extend %fa-icon-button;
@@ -113,9 +113,9 @@
 
       &__icon {
         @extend %glass-icon;
-        @extend %fa-icon-button-icon;
+        @extend %fa-icon-big;
+
         background: transparent;
-        border: 0;
         color: white;
       }
     }
@@ -129,6 +129,8 @@
   }
 
   &__profile_display_name {
+    margin: 0 30px 0 0;
+
     @extend %glass-text;
 
     img {

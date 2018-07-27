@@ -51,17 +51,21 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
 }
 
 %bottom-button {
-  @extend %default-font;
-  outline-style: none;
-  font-size: 1em;
-  font-weight: bold;
+  @extend %action-button;
   margin-top: auto;
   margin-bottom: 24px;
+}
+
+%action-button {
+  @extend %default-font;
+  outline-style: none;
+  font-weight: bold;
   cursor: pointer;
   border: 3px solid white;
   border-radius: 14px;
   padding: 12px;
-  background: none;
+  background: #2F80ED;
+  font-size: 1.3em;
   color: white;
   display: flex;
   align-items: center;
@@ -126,6 +130,18 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
   cursor: pointer;
   font-size: 0.8em;
   outline-style: none;
+}
+
+%fa-icon-big {
+  width: 40px !important;
+  height: 40px;
+  display: inline-block;
+  font-size: 22px;
+  vertical-align: sub;
+  line-height: 42px;
+  svg {
+    margin-left: 0px;
+  }
 }
 
 %fa-icon-button-icon {
