@@ -74,7 +74,7 @@
 
 :local(.invite-nag-button) {
   position: absolute;
-  top: 130px;
+  top: 110px;
   left: 0;
   width: 100%;
   display: flex;
@@ -86,5 +86,30 @@
   button {
     @extend %big-action-button;
     pointer-events: auto;
+  }
+}
+
+:local(.presence-info) {
+  text-align: right;
+  position: absolute;
+  top: 0;
+  right: 16px;
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 1.3em;
+  text-shadow: 0px 0px 4px rgba(0, 0, 0, 1.0);
+  -webkit-filter: drop-shadow( 0px 0px 3px #606060 ); 
+  filter: drop-shadow( 0px 0px 3px #606060 );
+
+  @media (min-width: 769px) and (min-height: 421px) {
+    flex: 1;
+  }
+  @media (max-width: 768px) , (max-height: 420px) {
+    margin: 16px 8px;
+  }
+  :local(.occupant-count) {
+    margin: 0 12px;
   }
 }

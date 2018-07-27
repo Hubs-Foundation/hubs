@@ -1,11 +1,10 @@
 import React, { Component } from "react";
 import copy from "copy-to-clipboard";
-import classNames from "classnames";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import formurlencoded from "form-urlencoded";
 import LinkDialog from "./link-dialog.js";
-import MediaToolsDialog from "./media-tools-dialog.js";
+import CreateObjectDialog from "./create-object-dialog.js";
 const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
 
 // TODO i18n
@@ -21,14 +20,14 @@ class InfoDialog extends Component {
     help: Symbol("help"),
     link: Symbol("link"),
     webvr_recommend: Symbol("webvr_recommend"),
-    add_media: Symbol("add_media"),
+    create_object: Symbol("create_object"),
     custom_scene: Symbol("custom_scene")
   };
   static propTypes = {
     dialogType: PropTypes.oneOf(Object.values(InfoDialog.dialogTypes)),
     onCloseDialog: PropTypes.func,
     onSubmittedEmail: PropTypes.func,
-    onAddMedia: PropTypes.func,
+    onCreateObject: PropTypes.func,
     onCustomScene: PropTypes.func,
     linkCode: PropTypes.string
   };
@@ -83,7 +82,7 @@ class InfoDialog extends Component {
     mailingListEmail: "",
     mailingListPrivacy: false,
     copyLinkButtonText: "copy",
-    addMediaUrl: "",
+    createObjectUrl: "",
     customRoomName: "",
     customSceneUrl: ""
   };
@@ -147,7 +146,7 @@ class InfoDialog extends Component {
         dialogTitle = "Invite Others";
         dialogBody = (
           <div>
-            <div>Just share the link to invite others.</div>
+            <div>Just share the link:</div>
             <div className="invite-form">
               <input
                 type="text"
@@ -198,9 +197,11 @@ class InfoDialog extends Component {
           </div>
         );
         break;
-      case InfoDialog.dialogTypes.add_media:
-        dialogTitle = "Add Media";
-        dialogBody = <MediaToolsDialog onAddMedia={this.props.onAddMedia} onCloseDialog={this.props.onCloseDialog} />;
+      case InfoDialog.dialogTypes.create_object:
+        dialogTitle = "Create Object";
+        dialogBody = (
+          <CreateObjectDialog onCreateObject={this.props.onCreateObject} onCloseDialog={this.props.onCloseDialog} />
+        );
         break;
       case InfoDialog.dialogTypes.custom_scene:
         dialogTitle = "Create a Room";
@@ -356,14 +357,9 @@ class InfoDialog extends Component {
         break;
     }
 
-    const dialogClasses = classNames({
-      dialog: true,
-      "dialog--tall": this.props.dialogType === InfoDialog.dialogTypes.help
-    });
-
     return (
       <div className="dialog-overlay">
-        <div className={dialogClasses} onClick={this.onContainerClicked}>
+        <div className="dialog" onClick={this.onContainerClicked}>
           <div className="dialog__box">
             <div className="dialog__box__contents">
               <button className="dialog__box__contents__close" onClick={this.props.onCloseDialog}>

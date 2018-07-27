@@ -46,12 +46,6 @@
   cursor: pointer;
 }
 
-:local(.addMediaButton) {
-  position: absolute;
-  top: 90px;
-  background-color: #404040;
-}
-
 :local(.iconButton.small) {
   width: 30px;
   height: 30px;
@@ -100,4 +94,11 @@
 }
 :local(.iconButton.freeze.active:hover) {
   background-image: url(../hud/freeze_on-hover.png);
+}
+
+:local(.iconButton.create-object) {
+  background-image: url(../hud/create_object.png);
+}
+:local(.iconButton.create-object:hover) {
+  background-image: url(../hud/create_object-hover.png);
 }
