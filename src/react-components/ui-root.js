@@ -6,6 +6,7 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import MovingAverage from "moving-average";
 import screenfull from "screenfull";
+import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 
 import { lang, messages } from "../utils/i18n";
@@ -637,6 +638,11 @@ class UIRoot extends Component {
       this.state.entryStep === ENTRY_STEPS.start ? (
         <div className={entryStyles.entryPanel}>
           <div className={entryStyles.buttonContainer}>
+            {false /* TODO */ && (
+              <div className={entryStyles.presenceInfo}>
+                <span className={entryStyles.people}>2 people</span> have joined
+              </div>
+            )}
             <button
               className={entryStyles.inviteButton}
               onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
@@ -881,6 +887,13 @@ class UIRoot extends Component {
                 onToggleSpaceBubble={this.toggleSpaceBubble}
                 onClickAddMedia={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.add_media })}
               />
+              {this.props.occupantCount <= 1 && (
+                <div className={styles.inviteNagButton}>
+                  <button onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}>
+                    <FormattedMessage id="entry.invite-others-nag" />
+                  </button>
+                </div>
+              )}
               <Footer
                 hubName={this.props.hubName}
                 occupantCount={this.props.occupantCount}

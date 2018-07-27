@@ -65,6 +65,15 @@
       align-self: center;
       width: 75%;
     }
+
+    :local(.presence-info) {
+      margin: 18px;
+      font-size: 1.3em;
+
+      :local(.people) {
+        font-weight: bold;
+      }
+    }
   }
 
   :local(.webvr-link-container) {

@@ -1,3 +1,5 @@
+@import 'shared';
+
 #ui-root .ui {
   @extend %default-font;
 
@@ -68,4 +70,21 @@
 
 .ui-interactive {
   pointer-events: auto;
+}
+
+:local(.invite-nag-button) {
+  position: absolute;
+  top: 110px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  pointer-events: none;
+  
+  button {
+    @extend %big-action-button;
+    pointer-events: auto;
+  }
 }
