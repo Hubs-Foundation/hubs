@@ -6,6 +6,8 @@ AFRAME.registerComponent("grabbable-toggle", {
 
   init() {
     this.toggle = false;
+    this.currentHand = null;
+
     this.onGrabEnd = this.onGrabEnd.bind(this);
     this.el.addEventListener("grab-end", this.onGrabEnd);
     this.el.classList.add("sticky");
@@ -18,11 +20,19 @@ AFRAME.registerComponent("grabbable-toggle", {
 
   onGrabEnd(e) {
     const type = e.detail && e.detail.buttonEvent ? e.detail.buttonEvent.type : null;
+
+    if (this.toggle && this.currentHand !== null && this.currentHand !== e.detail.hand) {
+      this.toggle = false;
+      this.currentHand = null;
+    }
+
     if ((this.isPrimaryRelease(type) && !this.toggle) || this.isSecondaryRelease(type)) {
       this.toggle = true;
+      this.currentHand = e.detail.hand;
       e.stopImmediatePropagation(); //prevents grabbable from calling preventDefault
     } else if (this.toggle && this.isPrimaryRelease(type)) {
       this.toggle = false;
+      this.currentHand = null;
     }
   },
 
