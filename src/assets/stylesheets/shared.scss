@@ -52,8 +52,7 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
 
 %bottom-button {
   @extend %action-button;
-  margin-top: auto;
-  margin-bottom: 24px;
+  margin-top: 16px;
 }
 
 %action-button {

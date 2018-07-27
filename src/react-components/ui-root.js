@@ -22,7 +22,6 @@ import { ProfileInfoHeader } from "./profile-info-header.js";
 import ProfileEntryPanel from "./profile-entry-panel";
 import InfoDialog from "./info-dialog.js";
 import TwoDHUD from "./2d-hud";
-import Footer from "./footer";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -901,7 +900,9 @@ class UIRoot extends Component {
                   </button>
                 </div>
               )}
-              <Footer onClickCreate={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.create_object })} />
+              <TwoDHUD.BottomHUD
+                onCreateObject={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.create_object })}
+              />
             </div>
           ) : null}
         </div>
