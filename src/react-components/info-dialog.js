@@ -330,6 +330,9 @@ class InfoDialog extends Component {
               >
                 <FormattedMessage id="profile.privacy_notice" />
               </a>
+              <a target="_blank" rel="noopener noreferrer" href="/?report">
+                <FormattedMessage id="help.report_issue" />
+              </a>
             </p>
           </div>
         );

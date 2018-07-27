@@ -71,6 +71,7 @@
     "link.link_page_header": "Enter your code:",
     "link.dont_have_a_code": "Don't have a code?",
     "link.create_a_room": "Create a Room",
-    "link.try_again": "We couldn't find that code. Please try again."
+    "link.try_again": "We couldn't find that code. Please try again.",
+    "help.report_issue": "Report an Issue"
   }
 }
