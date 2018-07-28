@@ -32,6 +32,7 @@
     align-items: center;
     position: relative;
     margin: 8px 0;
+    width: 100%;
 
     &__dropdown {
       @extend %rounded-border;
@@ -54,7 +55,8 @@
     &__mic-icon {
       pointer-events: none;
       position: absolute;
-      left: 8%;
+      left: 9%;
+      width: 12px;
     }
 
     &__dropdown-arrow {
