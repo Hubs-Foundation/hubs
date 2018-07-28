@@ -158,7 +158,7 @@ class InfoDialog extends Component {
               <div className="invite-form__buttons">
                 {navigator.share && (
                   <button className="invite-form__action-button" onClick={this.shareLinkClicked}>
-                    <span>Share</span>
+                    <span>share</span>
                   </button>
                 )}
                 <button
