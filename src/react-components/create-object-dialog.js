@@ -55,7 +55,7 @@ export default class CreateObjectDialog extends Component {
             Tip: You can paste directly into Hubs using Ctrl+V
           </div>
         ) : (
-          <div />
+          <div>Paste a URL from the web to create an object in the room.</div>
         )}
 
         <form onSubmit={this.onCreateClicked}>
