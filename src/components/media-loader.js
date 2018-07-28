@@ -6,6 +6,8 @@ const fetchContentType = async url => fetch(url, { method: "HEAD" }).then(r => r
 AFRAME.registerComponent("media-loader", {
   schema: {
     src: { type: "string" },
+    token: { type: "string" },
+    contentType: { type: "string" },
     resize: { default: false }
   },
 
@@ -46,17 +48,23 @@ AFRAME.registerComponent("media-loader", {
   async update() {
     try {
       const url = this.data.src;
+      const token = this.data.token;
 
-      this.showLoaderTimeout = setTimeout(() => {
-        const loadingObj = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
-        this.el.setObject3D("mesh", loadingObj);
-        this.setShapeAndScale(true);
-      }, 100);
+      this.showLoaderTimeout =
+        this.showLoaderTimeout ||
+        setTimeout(() => {
+          const loadingObj = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
+          this.el.setObject3D("mesh", loadingObj);
+          this.setShapeAndScale(true);
+        }, 100);
+
+      if (!url) return;
 
       const { raw, origin, meta } = await resolveMedia(url);
       console.log("resolved", url, raw, origin, meta);
 
-      const contentType = (meta && meta.expected_content_type) || (await fetchContentType(raw));
+      const contentType =
+        this.data.contentType || (meta && meta.expected_content_type) || (await fetchContentType(raw));
       if (contentType.startsWith("image/") || contentType.startsWith("video/") || contentType.startsWith("audio/")) {
         this.el.addEventListener(
           "image-loaded",
@@ -65,7 +73,16 @@ AFRAME.registerComponent("media-loader", {
           },
           { once: true }
         );
-        this.el.setAttribute("image-plus", { src: raw, contentType });
+        let blobUrl;
+        if (token) {
+          const imageResponse = await fetch(raw, {
+            method: "GET",
+            headers: { Authorization: `Token ${token}` }
+          });
+          const blob = await imageResponse.blob();
+          blobUrl = window.URL.createObjectURL(blob);
+        }
+        this.el.setAttribute("image-plus", { src: blobUrl || raw, contentType });
         this.el.setAttribute("position-at-box-shape-border", { target: ".delete-button", dirs: ["forward", "back"] });
       } else if (contentType.startsWith("model/gltf") || url.endsWith(".gltf") || url.endsWith(".glb")) {
         this.el.addEventListener(

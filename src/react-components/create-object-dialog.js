@@ -13,7 +13,9 @@ let lastUrl = "";
 
 export default class CreateObjectDialog extends Component {
   state = {
-    url: ""
+    url: "",
+    file: null,
+    text: ""
   };
 
   static propTypes = {
@@ -35,13 +37,25 @@ export default class CreateObjectDialog extends Component {
     if (e && e.target.value && e.target.value !== "") {
       this.setState({
         url: e.target.value,
+        text: e.target.value,
         attributionImage: e.target.validity.valid && attributionHostnames[new URL(e.target.value).hostname]
+      });
+    } else {
+      this.setState({
+        text: ""
       });
     }
   };
 
+  onFileChange = (e) =>{
+    this.setState({
+      file: e.target.files[0],
+      text: e.target.files[0].name
+    });
+  };
+
   onCreateClicked = () => {
-    this.props.onCreateObject(this.state.url || DEFAULT_OBJECT_URL);
+    this.props.onCreateObject(this.state.file || this.state.url || DEFAULT_OBJECT_URL);
     this.props.onCloseDialog();
   };
 
@@ -60,14 +74,22 @@ export default class CreateObjectDialog extends Component {
 
         <form onSubmit={this.onCreateClicked}>
           <div className="add-media-form">
-            <input
-              ref={el => (this.input = el)}
-              type="url"
-              placeholder="Image, Video, or GLTF URL"
-              className="add-media-form__link_field"
-              value={this.state.url}
-              onChange={this.onUrlChange}
-            />
+            <div className="add-media-form__input_fields">
+              <input
+                ref={el => (this.input = el)}
+                type={this.state.file ? "text" : "url"}
+                placeholder="Image, Video, or GLTF URL"
+                className="add-media-form__link_field"
+                value={this.state.text}
+                onChange={this.onUrlChange}
+              />
+              <input className="add-media-form__file"
+                id="file"
+                type="file"
+                onChange={this.onFileChange}
+              />
+              <label className="add-media-form__file_label" htmlFor="file">Choose a file</label>
+            </div>
             <div className="add-media-form__buttons">
               <button className="add-media-form__action-button">
                 <span>create</span>

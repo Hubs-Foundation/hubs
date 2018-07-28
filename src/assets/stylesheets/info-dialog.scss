@@ -82,6 +82,32 @@
   text-align: center;
   margin: 0;
 
+  &__input_fields {
+      position: relative;
+  }
+
+  &__file {
+      width: 0.1px;
+      height: 0.1px;
+      opacity: 0;
+      overflow: hidden;
+      position: absolute;
+      z-index: -1;
+  }
+
+  &__file_label {
+      font-size: 1.25em;
+      font-weight: 700;
+      color: white;
+      background-color: black;
+      display: inline-block;
+      top: 19px;
+      right: 24px;
+      bottom: 19px;
+      position: absolute;
+      line-height: 30px;
+  }
+
   &__buttons {
     display: flex;
     flex-direction: row;
@@ -101,7 +127,7 @@
     background-color: transparent;
     line-height: 2.0em;
     padding-left: 1.25em;
-    padding-right: 1.25em;
+    padding-right: 2.25em;
     margin: 0.5em 0;
     width: 100%;
   }

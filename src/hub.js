@@ -83,7 +83,7 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
-import { addMedia } from "./utils/media-utils";
+import { addMedia} from "./utils/media-utils";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
@@ -303,8 +303,8 @@ const onReady = async () => {
     });
 
     const offset = { x: 0, y: 0, z: -1.5 };
-    const spawnMediaInfrontOfPlayer = url => {
-      const entity = addMedia(url, true);
+    const spawnMediaInfrontOfPlayer = async (src) => {
+      const entity = addMedia(src, true);
       entity.setAttribute("offset-relative-to", {
         target: "#player-camera",
         offset
@@ -330,11 +330,9 @@ const onReady = async () => {
 
       document.addEventListener("drop", e => {
         e.preventDefault();
-        const imgUrl = e.dataTransfer.getData("url");
-        if (imgUrl) {
-          console.log("Dropped: ", imgUrl);
-          spawnMediaInfrontOfPlayer(imgUrl);
-        }
+        const url = e.dataTransfer.getData("url");
+        const file = e.dataTransfer.files && e.dataTransfer.files[0];
+        spawnMediaInfrontOfPlayer(url || file);
       });
     }
 

@@ -29,7 +29,31 @@ export const addMedia = (src, resize = false) => {
   const entity = document.createElement("a-entity");
   entity.id = "interactable-media-" + interactableId++;
   entity.setAttribute("networked", { template: "#interactable-media" });
-  entity.setAttribute("media-loader", { src, resize });
+  entity.setAttribute("media-loader", { resize, src: typeof src === "string" ? src : "" });
   scene.appendChild(entity);
+
+  if (typeof src === "object") {
+    const uploadResponse = upload(src).then(response => {
+      const src = response.raw;
+      const contentType = response.meta.expected_content_type;
+      const token = response.meta.access_token;
+      entity.setAttribute("media-loader", { src, contentType, token });
+    });
+  }
   return entity;
+};
+
+export const upload = file => {
+  const formData = new FormData();
+  formData.append("media", file);
+  return fetch(mediaAPIEndpoint, {
+    method: "POST",
+    body: formData
+
+    // We do NOT specify a Content-Type header like so
+    //     headers: { "Content-Type" : "multipart/form-data" },
+    // because we want the browser to automatically add
+    //     "Content-Type" : "multipart/form-data; boundary=...--------------<boundary_size>",
+    // See https://stanko.github.io/uploading-files-using-fetch-multipart-form-data/ for details.
+  }).then(r => r.json());
 };
