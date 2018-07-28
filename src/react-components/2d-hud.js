@@ -39,11 +39,13 @@ TopHUD.propTypes = {
 
 const BottomHUD = ({ onCreateObject }) => (
   <div className={cx(styles.container, styles.bottom)}>
-    <div
-      className={cx("ui-interactive", styles.iconButton, styles.large, styles.createObject)}
-      title={"Create Object"}
-      onClick={onCreateObject}
-    />
+    {new URLSearchParams(document.location.search).get("mediaTools") === "true" && (
+      <div
+        className={cx("ui-interactive", styles.iconButton, styles.large, styles.createObject)}
+        title={"Create Object"}
+        onClick={onCreateObject}
+      />
+    )}
   </div>
 );
 
