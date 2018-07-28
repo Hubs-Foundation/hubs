@@ -306,7 +306,7 @@ class InfoDialog extends Component {
         );
         break;
       case InfoDialog.dialogTypes.link:
-        dialogTitle = "Send Link to Device";
+        dialogTitle = "Open on Headset";
         dialogBody = <LinkDialog linkCode={this.props.linkCode} />;
         break;
     }
