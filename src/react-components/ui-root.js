@@ -643,12 +643,6 @@ class UIRoot extends Component {
                 <span className={entryStyles.people}>2 people</span> have joined
               </div>
             )}
-            <button
-              className={entryStyles.inviteButton}
-              onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
-            >
-              <FormattedMessage id="entry.invite-others" />
-            </button>
             {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
               <TwoDEntryButton onClick={this.enter2D} />
             )}
@@ -675,6 +669,12 @@ class UIRoot extends Component {
               </div>
             )}
             {screenSharingCheckbox}
+            <button
+              className={entryStyles.inviteButton}
+              onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
+            >
+              <FormattedMessage id="entry.invite-others" />
+            </button>
           </div>
         </div>
       ) : null;
