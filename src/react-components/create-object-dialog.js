@@ -7,63 +7,70 @@ const attributionHostnames = {
   "giphy.com": giphyLogo
 };
 
-let lastAddMediaUrl = "";
-export default class MediaToolsDialog extends Component {
+const DEFAULT_OBJECT_URL = "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf";
+
+let lastUrl = "";
+
+export default class CreateObjectDialog extends Component {
   state = {
-    addMediaUrl: ""
+    url: ""
   };
 
   static propTypes = {
-    onAddMedia: PropTypes.func,
+    onCreateObject: PropTypes.func,
     onCloseDialog: PropTypes.func
   };
 
-  constructor() {
-    super();
-    this.onAddMediaClicked = this.onAddMediaClicked.bind(this);
-    this.onUrlChange = this.onUrlChange.bind(this);
-  }
-
   componentDidMount() {
-    this.setState({ addMediaUrl: lastAddMediaUrl }, () => {
+    this.setState({ url: lastUrl }, () => {
       this.onUrlChange({ target: this.input });
     });
   }
 
   componentWillUnmount() {
-    lastAddMediaUrl = this.state.addMediaUrl;
+    lastUrl = this.state.url;
   }
 
-  onUrlChange(e) {
-    this.setState({
-      addMediaUrl: e.target.value,
-      attributionImage: e.target.validity.valid && attributionHostnames[new URL(e.target.value).hostname]
-    });
-  }
+  onUrlChange = e => {
+    if (e && e.target.value && e.target.value !== "") {
+      this.setState({
+        url: e.target.value,
+        attributionImage: e.target.validity.valid && attributionHostnames[new URL(e.target.value).hostname]
+      });
+    }
+  };
 
-  onAddMediaClicked() {
-    this.props.onAddMedia(this.state.addMediaUrl);
+  onCreateClicked = () => {
+    this.props.onCreateObject(this.state.url || DEFAULT_OBJECT_URL);
     this.props.onCloseDialog();
-  }
+  };
 
   render() {
     return (
       <div>
-        <div>Tip: You can paste media urls directly into hubs with ctrl+v</div>
-        <form onSubmit={this.onAddMediaClicked}>
+        {!AFRAME.utils.device.isMobile() ? (
+          <div>
+            Paste a URL from the web to create an object in the room.
+            <br />
+            Tip: You can paste directly into Hubs using Ctrl+V
+          </div>
+        ) : (
+          <div />
+        )}
+
+        <form onSubmit={this.onCreateClicked}>
           <div className="add-media-form">
             <input
               ref={el => (this.input = el)}
               type="url"
               placeholder="Image, Video, or GLTF URL"
               className="add-media-form__link_field"
-              value={this.state.addMediaUrl}
+              value={this.state.url}
               onChange={this.onUrlChange}
-              required
             />
             <div className="add-media-form__buttons">
               <button className="add-media-form__action-button">
-                <span>Add</span>
+                <span>create</span>
               </button>
             </div>
             {this.state.attributionImage ? (

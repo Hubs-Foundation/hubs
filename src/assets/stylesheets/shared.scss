@@ -52,8 +52,7 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
 
 %bottom-button {
   @extend %action-button;
-  margin-top: auto;
-  margin-bottom: 24px;
+  margin: 16px 0;
 }
 
 %action-button {
@@ -63,6 +62,7 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
   cursor: pointer;
   border: 3px solid white;
   border-radius: 26px;
+  height: 64px;
   padding: 12px;
   background: #2F80ED;
   font-size: 1.3em;

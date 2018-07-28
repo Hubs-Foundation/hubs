@@ -9,6 +9,7 @@
     flex: 1;
     display: flex;
     justify-content: center;
+    align-items: flex-end;
   }
   &__enter-button {
     @extend %bottom-action-button;
@@ -16,10 +17,12 @@
 
   &__title {
     @extend %top-title;
+    @extend %glass-text;
   }
 
   &__subtitle {
     @extend %top-subtitle;
+    @extend %glass-text;
   }
 
   &__device-chooser {
@@ -116,10 +119,12 @@
 
   &__title {
     @extend %top-title;
+    @extend %glass-text;
   }
 
   &__subtitle {
     @extend %top-subtitle;
+    @extend %glass-text;
   }
 
   &__button-container {

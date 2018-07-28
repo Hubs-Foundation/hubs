@@ -22,7 +22,7 @@ import { ProfileInfoHeader } from "./profile-info-header.js";
 import ProfileEntryPanel from "./profile-entry-panel";
 import InfoDialog from "./info-dialog.js";
 import TwoDHUD from "./2d-hud";
-import Footer from "./footer";
+import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
@@ -526,7 +526,7 @@ class UIRoot extends Component {
     this.setState({ infoDialogType: null, linkCode: null, linkCodeCancel: null });
   };
 
-  handleAddMedia = url => {
+  handleCreateObject = url => {
     this.props.scene.emit("add_media", url);
   };
 
@@ -643,12 +643,6 @@ class UIRoot extends Component {
                 <span className={entryStyles.people}>2 people</span> have joined
               </div>
             )}
-            <button
-              className={entryStyles.inviteButton}
-              onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
-            >
-              <FormattedMessage id="entry.invite-others" />
-            </button>
             {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
               <TwoDEntryButton onClick={this.enter2D} />
             )}
@@ -675,6 +669,12 @@ class UIRoot extends Component {
               </div>
             )}
             {screenSharingCheckbox}
+            <button
+              className={entryStyles.inviteButton}
+              onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
+            >
+              <FormattedMessage id="entry.invite-others" />
+            </button>
           </div>
         </div>
       ) : null;
@@ -851,7 +851,7 @@ class UIRoot extends Component {
             linkCode={this.state.linkCode}
             onSubmittedEmail={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.email_submitted })}
             onCloseDialog={this.handleCloseDialog}
-            onAddMedia={this.handleAddMedia}
+            onCreateObject={this.handleCreateObject}
           />
 
           {this.state.entryStep === ENTRY_STEPS.finished && (
@@ -863,6 +863,13 @@ class UIRoot extends Component {
                 <FontAwesomeIcon icon={faQuestion} />
               </i>
             </button>
+          )}
+
+          {this.state.entryStep === ENTRY_STEPS.finished && (
+            <div className={styles.presenceInfo}>
+              <FontAwesomeIcon icon={faUsers} />
+              <span className={styles.occupantCount}>{this.props.occupantCount || "-"}</span>
+            </div>
           )}
 
           <div className="ui-dialog">
@@ -878,14 +885,13 @@ class UIRoot extends Component {
           </div>
           {this.state.entryStep === ENTRY_STEPS.finished ? (
             <div>
-              <TwoDHUD
+              <TwoDHUD.TopHUD
                 muted={this.state.muted}
                 frozen={this.state.frozen}
                 spacebubble={this.state.spacebubble}
                 onToggleMute={this.toggleMute}
                 onToggleFreeze={this.toggleFreeze}
                 onToggleSpaceBubble={this.toggleSpaceBubble}
-                onClickAddMedia={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.add_media })}
               />
               {this.props.occupantCount <= 1 && (
                 <div className={styles.inviteNagButton}>
@@ -894,13 +900,8 @@ class UIRoot extends Component {
                   </button>
                 </div>
               )}
-              <Footer
-                hubName={this.props.hubName}
-                occupantCount={this.props.occupantCount}
-                onClickInvite={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
-                onClickReport={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.report })}
-                onClickHelp={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
-                onClickUpdates={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.updates })}
+              <TwoDHUD.BottomHUD
+                onCreateObject={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.create_object })}
               />
             </div>
           ) : null}

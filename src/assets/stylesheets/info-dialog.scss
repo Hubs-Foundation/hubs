@@ -11,14 +11,10 @@
 .dialog {
   display: grid;
   grid-template-columns: 1fr 20px minmax(200px, 525px) 20px 1fr;
-  grid-template-rows: 1fr 20px 360px 20px 1fr;
+  grid-template-rows: 1fr 20px minmax(200px, max-content) 20px 1fr;
   width: 100%;
   height: 100%;
   background-color: rgba(0,0,0,.2);
-
-  &--tall {
-    grid-template-rows: 1fr 20px minmax(200px, max-content) 20px 1fr;
-  }
 
   &__box {
     grid-column: 3;
@@ -49,6 +45,7 @@
         flex-direction: column;
         height: 100%;
         overflow-y: auto;
+        margin: 10px 0;
 
         a { color: white }
       }
@@ -149,7 +146,6 @@
 
   &__submit {
     @extend %bottom-button;
-    border: 0;
     margin-top: 0;
     margin-bottom: 0;
   }
@@ -162,6 +158,7 @@
   &__privacy_checkbox {
     @extend %checkbox;
     vertical-align: middle;
+    margin-bottom: 18px;
   }
 
   &__privacy_checkbox:checked {
