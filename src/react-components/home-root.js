@@ -9,6 +9,8 @@ import homeVideoMp4 from "../assets/video/home.mp4";
 import classNames from "classnames";
 import { ENVIRONMENT_URLS } from "../assets/environments/environments";
 
+import styles from "../assets/stylesheets/index.scss";
+
 import HubCreatePanel from "./hub-create-panel.js";
 import InfoDialog from "./info-dialog.js";
 
@@ -36,7 +38,7 @@ class HomeRoot extends Component {
 
   loadHomeVideo = () => {
     const videoEl = document.querySelector("#background-video");
-    videoEl.playbackRate = 0.75;
+    videoEl.playbackRate = 0.9;
     function toggleVideo() {
       // Play the video if the window/tab is visible.
       if (document.hasFocus()) {
@@ -77,67 +79,35 @@ class HomeRoot extends Component {
 
   render() {
     const mainContentClassNames = classNames({
-      "main-content": true,
-      "main-content--noninteractive": !!this.state.dialogType
+      [styles.mainContent]: true,
+      [styles.noninteractive]: !!this.state.dialogType
     });
     const dialogTypes = InfoDialog.dialogTypes;
 
     return (
       <IntlProvider locale={lang} messages={messages}>
-        <div className="home">
+        <div className={styles.home}>
           <div className={mainContentClassNames}>
-            <div className="header-content">
-              <div className="header-content__title">
-                <img className="header-content__title__name" src="../assets/images/logo.svg" />
-                <div className="header-content__title__preview">preview</div>
-              </div>
-              <div className="header-content__entry-code">
-                <a className="header-content__entry-code__link" href="/link" rel="nofollow">
-                  <FormattedMessage id="home.have_entry_code" />
-                </a>
-              </div>
-              <div className="header-content__experiment">
-                <div className="header-content__experiment__container">
-                  <img src="../assets/images/webvr_cube.svg" className="header-content__experiment__icon" />
-                  <div className="header-content__experiment__info">
-                    <div className="header-content__experiment__info__header">
-                      <span>
-                        <FormattedMessage id="home.webvr_disclaimer_pre" />
-                      </span>
-                      <span style={{ fontWeight: "bold" }}>WebVR</span>
-                      <span>
-                        <FormattedMessage id="home.webvr_disclaimer_post" />
-                      </span>
-                      <span>
-                        <a rel="noopener noreferrer" target="_blank" href="https://blog.mozvr.com">
-                          <FormattedMessage id="home.webvr_disclaimer_mr_team" />
-                        </a>
-                      </span>
-                    </div>
-
-                    <div>
-                      <a
-                        className="header-content__experiment__info__link"
-                        rel="noopener noreferrer"
-                        target="_blank"
-                        href="https://github.com/mozilla/hubs"
-                      >
-                        <FormattedMessage id="home.view_source" />
-                      </a>
-                    </div>
-                  </div>
+            <div className={styles.headerContent}>
+              <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
+                <div className={styles.hubs}>hubs</div>
+                <div className={styles.preview}>preview</div>
+                <div className={styles.links}>
+                  <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
+                    <FormattedMessage id="home.source_link" />
+                  </a>
+                  <a
+                    href="https://blog.mozvr.com/introducing-hubs-a-new-way-to-get-together-online/"
+                    rel="noreferrer noopener"
+                  >
+                    <FormattedMessage id="home.about_link" />
+                  </a>
                 </div>
               </div>
+              <div className={styles.ident} />
             </div>
-            <div className="header-subtitle">
-              <div>
-                <a className="header-subtitle__link" href="/link" rel="nofollow">
-                  <FormattedMessage id="home.have_entry_code" />
-                </a>
-              </div>
-            </div>
-            <div className="hero-content">
-              <div className="hero-content__attribution">
+            <div className={styles.heroContent}>
+              <div className={styles.attribution}>
                 Medieval Fantasy Book by{" "}
                 <a
                   target="_blank"
@@ -147,15 +117,15 @@ class HomeRoot extends Component {
                   Pixel
                 </a>
               </div>
-              <div className="hero-content__container">
-                <div className="hero-content__container__title">
+              <div className={styles.container}>
+                <div className={styles.title}>
                   <FormattedMessage id="home.hero_title" />
                 </div>
-                <div className="hero-content__container__subtitle">
+                <div className={styles.subtitle}>
                   <FormattedMessage id="home.hero_subtitle" />
                 </div>
               </div>
-              <div className="hero-content__create">
+              <div className={styles.create}>
                 {this.state.environments.length > 0 && (
                   <HubCreatePanel
                     initialEnvironment={this.props.initialEnvironment}
@@ -164,11 +134,11 @@ class HomeRoot extends Component {
                 )}
               </div>
             </div>
-            <div className="footer-content">
-              <div className="footer-content__links">
-                <div className="footer-content__links__top">
+            <div className={styles.footerContent}>
+              <div className={styles.links}>
+                <div className={styles.top}>
                   <a
-                    className="footer-content__links__link"
+                    className={styles.link}
                     rel="noopener noreferrer"
                     href="#"
                     onClick={this.showDialog(dialogTypes.slack)}
@@ -176,7 +146,7 @@ class HomeRoot extends Component {
                     <FormattedMessage id="home.join_us" />
                   </a>
                   <a
-                    className="footer-content__links__link"
+                    className={styles.link}
                     rel="noopener noreferrer"
                     href="#"
                     onClick={this.showDialog(dialogTypes.updates)}
@@ -184,7 +154,7 @@ class HomeRoot extends Component {
                     <FormattedMessage id="home.get_updates" />
                   </a>
                   <a
-                    className="footer-content__links__link"
+                    className={styles.link}
                     rel="noopener noreferrer"
                     href="#"
                     onClick={this.showDialog(dialogTypes.report)}
@@ -192,7 +162,7 @@ class HomeRoot extends Component {
                     <FormattedMessage id="home.report_issue" />
                   </a>
                   <a
-                    className="footer-content__links__link"
+                    className={styles.link}
                     target="_blank"
                     rel="noopener noreferrer"
                     href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
@@ -200,7 +170,7 @@ class HomeRoot extends Component {
                     <FormattedMessage id="home.terms_of_use" />
                   </a>
                   <a
-                    className="footer-content__links__link"
+                    className={styles.link}
                     target="_blank"
                     rel="noopener noreferrer"
                     href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
@@ -208,7 +178,7 @@ class HomeRoot extends Component {
                     <FormattedMessage id="home.privacy_notice" />
                   </a>
                 </div>
-                <div className="footer-content__links__bottom">
+                <div className={styles.bottom}>
                   <div>
                     <FormattedMessage id="home.made_with_love" />
                     <span style={{ fontWeight: "bold", color: "white" }}>Mozilla</span>
@@ -217,7 +187,7 @@ class HomeRoot extends Component {
               </div>
             </div>
           </div>
-          <video playsInline muted loop autoPlay className="background-video" id="background-video">
+          <video playsInline muted loop autoPlay className={styles.backgroundVideo} id="background-video">
             <source src={homeVideoWebM} type="video/webm" />
             <source src={homeVideoMp4} type="video/mp4" />
           </video>

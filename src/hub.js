@@ -511,9 +511,21 @@ const onReady = async () => {
     .receive("ok", data => {
       const hub = data.hubs[0];
       const defaultSpaceTopic = hub.topics[0];
-      const gltfBundleUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
+      const sceneUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
+
+      console.log(`Scene URL: ${sceneUrl}`);
+
+      if (/\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl)) {
+        const gltfEl = document.createElement("a-entity");
+        gltfEl.setAttribute("gltf-model-plus", { src: sceneUrl, inflate: true });
+        gltfEl.addEventListener("model-loaded", () => initialEnvironmentEl.emit("bundleloaded"));
+        initialEnvironmentEl.appendChild(gltfEl);
+      } else {
+        // TODO remove, and remove bundleloaded event
+        initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
+      }
+
       setRoom(hub.hub_id, hub.name);
-      initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`);
       hubChannel.setPhoenixChannel(channel);
     })
     .receive("error", res => {

@@ -80,7 +80,7 @@ function cloneGltf(gltf) {
 /// or templates associated with any of their nodes.)
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
-const inflateEntities = function(node, templates, gltfPath) {
+const inflateEntities = function(node, templates, gltfPath, isRoot) {
   // inflate subtrees first so that we can determine whether or not this node needs to be inflated
   const childEntities = [];
   const children = node.children.slice(0); // setObject3D mutates the node's parent, so we have to copy
@@ -92,7 +92,7 @@ const inflateEntities = function(node, templates, gltfPath) {
   }
 
   const nodeHasBehavior = node.userData.components || node.name in templates;
-  if (!nodeHasBehavior && !childEntities.length) {
+  if (!nodeHasBehavior && !childEntities.length && !isRoot) {
     return null; // we don't need an entity for this node
   }
 
@@ -257,7 +257,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.model.animations = model.animations;
 
       let object3DToSet = this.model;
-      if (this.data.inflate && (this.inflatedEl = inflateEntities(this.model, this.templates, gltfPath))) {
+      if (this.data.inflate && (this.inflatedEl = inflateEntities(this.model, this.templates, gltfPath, true))) {
         this.el.appendChild(this.inflatedEl);
         object3DToSet = this.inflatedEl.object3D;
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more

@@ -11,7 +11,9 @@ registerTelemetry();
 ReactDOM.render(
   <HomeRoot
     initialEnvironment={qs.get("initial_environment")}
-    dialogType={qs.has("list_signup") ? InfoDialog.dialogTypes.updates : null}
+    dialogType={
+      qs.has("list_signup") ? InfoDialog.dialogTypes.updates : qs.has("report") ? InfoDialog.dialogTypes.report : null
+    }
   />,
   document.getElementById("home-root")
 );

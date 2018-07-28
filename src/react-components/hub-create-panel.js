@@ -2,15 +2,17 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
 import { generateHubName } from "../utils/name-generation";
-import classNames from "classnames";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { resolveURL, extractUrlBase } from "../utils/resolveURL";
+import InfoDialog from "./info-dialog.js";
 
 import default_scene_preview_thumbnail from "../assets/images/default_thumbnail.png";
+import styles from "../assets/stylesheets/hub-create.scss";
 
 const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
+const dialogTypes = InfoDialog.dialogTypes;
 
 class HubCreatePanel extends Component {
   static propTypes = {
@@ -34,9 +36,8 @@ class HubCreatePanel extends Component {
       ready: false,
       name: generateHubName(),
       environmentIndex,
-      // HACK: expand on small screens by default to ensure scene selection possible.
-      // Eventually this could/should be done via media queries.
-      expanded: window.innerWidth < 420
+      showCustomSceneDialog: false,
+      customSceneUrl: null
     };
 
     // Optimisticly preload all environment thumbnails
@@ -73,11 +74,15 @@ class HubCreatePanel extends Component {
   };
 
   createHub = async e => {
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+    }
+
     const environment = this.props.environments[this.state.environmentIndex];
+    const sceneUrl = this.state.customSceneUrl || environment.bundle_url;
 
     const payload = {
-      hub: { name: this.state.name, default_environment_gltf_bundle_url: environment.bundle_url }
+      hub: { name: this.state.name, default_environment_gltf_bundle_url: sceneUrl }
     };
 
     let createUrl = "/api/v1/hubs";
@@ -131,6 +136,12 @@ class HubCreatePanel extends Component {
     this.setToEnvironmentOffset(-1);
   };
 
+  showCustomSceneDialog = e => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.setState({ showCustomSceneDialog: true });
+  };
+
   shuffle = () => {
     this.setState({
       name: generateHubName(),
@@ -140,7 +151,6 @@ class HubCreatePanel extends Component {
 
   render() {
     if (!this.state.ready) return null;
-    const { formatMessage } = this.props.intl;
 
     if (this.props.environments.length == 0) {
       return <div />;
@@ -153,82 +163,32 @@ class HubCreatePanel extends Component {
     const environmentAuthor = (meta.authors || [])[0];
     const environmentThumbnail = this._getEnvironmentThumbnail(this.state.environmentIndex);
 
-    const formNameClassNames = classNames("create-panel__form__name", {
-      "create-panel__form__name--expanded": this.state.expanded
-    });
-
     return (
-      <form onSubmit={this.createHub}>
-        <div className="create-panel">
-          {!this.state.expanded && (
-            <div className="create-panel__header">
-              <FormattedMessage id="home.create_header" />
-            </div>
-          )}
-          <div className="create-panel__form">
-            <div
-              className="create-panel__form__left-container"
-              onClick={async () => {
-                if (this.state.expanded) {
-                  this.shuffle();
-                } else {
-                  await this._preloadImage(this._getEnvironmentThumbnail(this.state.environmentIndex).srcset);
-                  this.setState({ expanded: true });
-                }
-              }}
-            >
-              <button type="button" tabIndex="3" className="create-panel__form__rotate-button">
-                {this.state.expanded ? (
-                  <img src="../assets/images/dice_icon.svg" />
-                ) : (
-                  <img src="../assets/images/expand_dots_icon.svg" />
-                )}
-              </button>
-            </div>
-            <div className="create-panel__form__right-container">
-              <button type="submit" tabIndex="5" className="create-panel__form__submit-button">
-                {this.isHubNameValid() ? (
-                  <img src="../assets/images/hub_create_button_enabled.svg" />
-                ) : (
-                  <img src="../assets/images/hub_create_button_disabled.svg" />
-                )}
-              </button>
-            </div>
-            {this.state.expanded && (
-              <div className="create-panel__form__environment">
-                <div className="create-panel__form__environment__picker">
-                  <img
-                    className="create-panel__form__environment__picker__image"
-                    srcSet={environmentThumbnail.srcset}
-                  />
-                  <div className="create-panel__form__environment__picker__labels">
-                    <div className="create-panel__form__environment__picker__labels__header">
+      <div>
+        <form onSubmit={this.createHub}>
+          <div className={styles.createPanel}>
+            <div className={styles.form}>
+              <div className={styles.environment}>
+                <div className={styles.picker}>
+                  <img className={styles.image} srcSet={environmentThumbnail.srcset} />
+                  <div className={styles.labels}>
+                    <div className={styles.header}>
                       {meta.url ? (
-                        <a
-                          href={meta.url}
-                          rel="noopener noreferrer"
-                          className="create-panel__form__environment__picker__labels__header__title"
-                        >
+                        <a href={meta.url} rel="noopener noreferrer" className={styles.title}>
                           {environmentTitle}
                         </a>
                       ) : (
-                        <span className="create-panel__form__environment__picker__labels__header__title">
-                          environmentTitle
-                        </span>
+                        <span className={styles.itle}>environmentTitle</span>
                       )}
                       {environmentAuthor &&
                         environmentAuthor.name &&
                         (environmentAuthor.url ? (
-                          <a
-                            href={environmentAuthor.url}
-                            rel="noopener noreferrer"
-                            className="create-panel__form__environment__picker__labels__header__author"
-                          >
+                          <a href={environmentAuthor.url} rel="noopener noreferrer" className={styles.author}>
                             <FormattedMessage id="home.environment_author_by" />
                             <span>{environmentAuthor.name}</span>
                           </a>
                         ) : (
-                          <span className="create-panel__form__environment__picker__labels__header__author">
+                          <span className={styles.author}>
                             <FormattedMessage id="home.environment_author_by" />
                             <span>{environmentAuthor.name}</span>
                           </span>
@@ -236,58 +196,57 @@ class HubCreatePanel extends Component {
                       {environmentAuthor &&
                         environmentAuthor.organization &&
                         (environmentAuthor.organization.url ? (
-                          <a
-                            href={environmentAuthor.organization.url}
-                            rel="noopener noreferrer"
-                            className="create-panel__form__environment__picker__labels__header__org"
-                          >
+                          <a href={environmentAuthor.organization.url} rel="noopener noreferrer" className={styles.org}>
                             <span>{environmentAuthor.organization.name}</span>
                           </a>
                         ) : (
-                          <span className="create-panel__form__environment__picker__labels__header__org">
+                          <span className={styles.org}>
                             <span>{environmentAuthor.organization.name}</span>
                           </span>
                         ))}
                     </div>
-                    <div className="create-panel__form__environment__picker__labels__footer">
-                      <FormattedMessage id="home.environment_picker_footer" />
+                    <div className={styles.footer}>
+                      <button onClick={this.showCustomSceneDialog} className={styles.customButton}>
+                        <FormattedMessage id="home.room_create_options" />
+                      </button>
                     </div>
                   </div>
-                  <div className="create-panel__form__environment__picker__controls">
-                    <button
-                      className="create-panel__form__environment__picker__controls__prev"
-                      type="button"
-                      tabIndex="1"
-                      onClick={this.setToPreviousEnvironment}
-                    >
+                  <div className={styles.controls}>
+                    <button className={styles.prev} type="button" tabIndex="1" onClick={this.setToPreviousEnvironment}>
                       <FontAwesomeIcon icon={faAngleLeft} />
                     </button>
 
-                    <button
-                      className="create-panel__form__environment__picker__controls__next"
-                      type="button"
-                      tabIndex="2"
-                      onClick={this.setToNextEnvironment}
-                    >
+                    <button className={styles.next} type="button" tabIndex="2" onClick={this.setToNextEnvironment}>
                       <FontAwesomeIcon icon={faAngleRight} />
                     </button>
                   </div>
                 </div>
               </div>
-            )}
-            <input
-              tabIndex="4"
-              className={formNameClassNames}
-              value={this.state.name}
-              onChange={e => this.setState({ name: e.target.value })}
-              onFocus={e => e.target.select()}
-              required
-              pattern={HUB_NAME_PATTERN}
-              title={formatMessage({ id: "home.create_name.validation_warning" })}
-            />
+              <div className={styles.container}>
+                <button type="submit" tabIndex="5" className={styles.submitButton}>
+                  <FormattedMessage id="home.room_create_button" />
+                </button>
+              </div>
+              <div className={styles.linkCode}>
+                <div>
+                  <a className={styles.link} href="/link" rel="nofollow">
+                    <FormattedMessage id="home.have_entry_code" />
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+        {this.state.showCustomSceneDialog && (
+          <InfoDialog
+            dialogType={dialogTypes.custom_scene}
+            onCloseDialog={() => this.setState({ showCustomSceneDialog: false })}
+            onCustomScene={(name, url) => {
+              this.setState({ showCustomSceneDialog: false, name: name, customSceneUrl: url }, () => this.createHub());
+            }}
+          />
+        )}
+      </div>
     );
   }
 }

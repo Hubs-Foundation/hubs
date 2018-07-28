@@ -9,17 +9,20 @@
     flex: 1;
     display: flex;
     justify-content: center;
+    align-items: flex-end;
   }
   &__enter-button {
-    @extend %bottom-button;
+    @extend %bottom-action-button;
   }
 
   &__title {
     @extend %top-title;
+    @extend %glass-text;
   }
 
   &__subtitle {
     @extend %top-subtitle;
+    @extend %glass-text;
   }
 
   &__device-chooser {
@@ -33,11 +36,12 @@
     &__dropdown {
       @extend %rounded-border;
       @extend %default-font;
+      @extend %glass-text;
 
       appearance: none;
+      background-color: rgba(64, 64, 64, 0.2);
       -moz-appearance: none;
       -webkit-appearance: none;
-      background-color: black;
       padding: 6px;
       padding-left: 15px;
       padding-right: 30px;
@@ -115,10 +119,12 @@
 
   &__title {
     @extend %top-title;
+    @extend %glass-text;
   }
 
   &__subtitle {
     @extend %top-subtitle;
+    @extend %glass-text;
   }
 
   &__button-container {
