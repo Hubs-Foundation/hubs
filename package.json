@@ -44,6 +44,7 @@
     "event-target-shim": "^3.0.1",
     "form-urlencoded": "^2.0.4",
     "jsonschema": "^1.2.2",
+    "jszip": "^3.1.5",
     "moving-average": "^1.0.0",
     "naf-janus-adapter": "^0.10.1",
     "networked-aframe": "github:mozillareality/networked-aframe#mr-social-client/master",
