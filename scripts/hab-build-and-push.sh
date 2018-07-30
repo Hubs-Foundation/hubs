@@ -21,10 +21,13 @@ rm /usr/bin/env
 ln -s "$(hab pkg path core/coreutils)/bin/env" /usr/bin/env
 hab pkg install -b core/coreutils core/bash core/node core/git core/aws-cli
 
+# todo: consider more elegant ways to accomplish this
+cp scripts/default.env .env
+
 npm ci --verbose --no-progress
 npm run build
 mkdir dist/pages
 mv dist/*.html dist/pages
 
-aws s3 sync --acl public-read --cache-control "max-age=31556926" build/assets "$TARGET_S3_URL/assets"
-aws s3 sync --acl public-read --cache-control "no-cache" --delete build/pages "$TARGET_S3_URL/pages/latest"
+aws s3 sync --acl public-read --cache-control "max-age=31556926" dist/assets "$TARGET_S3_URL/assets"
+aws s3 sync --acl public-read --cache-control "no-cache" --delete dist/pages "$TARGET_S3_URL/pages/latest"

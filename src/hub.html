@@ -5,18 +5,11 @@
     <!-- DO NOT REMOVE/EDIT THIS COMMENT - HUB_META_TAGS -->
 
     <meta charset="utf-8">
-    <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="<%= ORIGIN_TRIAL_EXPIRES %>" content="<%= ORIGIN_TRIAL_TOKEN %>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <link rel="shortcut icon" type="image/png" href="/favicon.ico">
     <title>Get together | Hubs by Mozilla</title>
     <link href="https://fonts.googleapis.com/css?family=Zilla+Slab:300,300i,400,400i,700" rel="stylesheet">
-
-    <% if(NODE_ENV === "production") { %>
-    <script src="https://cdn.rawgit.com/aframevr/aframe/1be48d9/dist/aframe-master.min.js" integrity="sha384-SXrfoMHbXpA5RZhIyhgaR6tQ764dDZsbFk3PiokC/tc0+NnW1yaYQMUzWtL06hnq" crossorigin="anonymous"></script>
-    <% } else { %>
-    <script src="https://cdn.rawgit.com/aframevr/aframe/1be48d9/dist/aframe-master.js" integrity="sha384-AmjDGOMbvTrrUFdeVWcBIlXRINIWnO8iwj/4VS21OWbYDsa/7nheOIyPAPJSkR6J" crossorigin="anonymous"></script>
-    <% } %>
 
     <!-- HACK: this has to run after A-Frame but before our bundle, since A-Frame blows away the local storage setting -->
     <script src="https://cdn.rawgit.com/gfodor/ba8f88d9f34fe9cbe59a01ce3c48420d/raw/03e31f0ef7b9eac5e947bd39e440f34df0701f75/naf-janus-adapter-logging.js" integrity="sha384-4q1V8Q88oeCFriFefFo5uEUtMzbw6K116tFyC9cwbiPr6wEe7050l5HoJUxMvnzj" crossorigin="anonymous"></script>

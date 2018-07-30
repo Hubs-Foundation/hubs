@@ -24,7 +24,7 @@ pipeline {
   stages {
     stage('pre-build') {
       steps {
-        sh 'rm -rf ./build ./tmp'
+        sh 'rm -rf ./dist ./tmp'
       }
     }
 

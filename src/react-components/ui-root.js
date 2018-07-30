@@ -6,6 +6,8 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import MovingAverage from "moving-average";
 import screenfull from "screenfull";
+import styles from "../assets/stylesheets/ui-root.scss";
+import entryStyles from "../assets/stylesheets/entry.scss";
 
 import { lang, messages } from "../utils/i18n";
 import AutoExitWarning from "./auto-exit-warning";
@@ -20,7 +22,7 @@ import { ProfileInfoHeader } from "./profile-info-header.js";
 import ProfileEntryPanel from "./profile-entry-panel";
 import InfoDialog from "./info-dialog.js";
 import TwoDHUD from "./2d-hud";
-import Footer from "./footer";
+import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
@@ -524,7 +526,7 @@ class UIRoot extends Component {
     this.setState({ infoDialogType: null, linkCode: null, linkCodeCancel: null });
   };
 
-  handleAddMedia = url => {
+  handleCreateObject = url => {
     this.props.scene.emit("add_media", url);
   };
 
@@ -621,9 +623,9 @@ class UIRoot extends Component {
     const screenSharingCheckbox = this.props.enableScreenSharing &&
       !AFRAME.utils.device.isMobile() &&
       /firefox/i.test(navigator.userAgent) && (
-        <label className="entry-panel__screen-sharing">
+        <label className={entryStyles.screenSharing}>
           <input
-            className="entry-panel__screen-sharing__checkbox"
+            className={entryStyles.checkbox}
             type="checkbox"
             value={this.state.shareScreen}
             onChange={this.setStateAndRequestScreen}
@@ -634,8 +636,13 @@ class UIRoot extends Component {
 
     const entryPanel =
       this.state.entryStep === ENTRY_STEPS.start ? (
-        <div className="entry-panel">
-          <div className="entry-panel__button-container">
+        <div className={entryStyles.entryPanel}>
+          <div className={entryStyles.buttonContainer}>
+            {false /* TODO */ && (
+              <div className={entryStyles.presenceInfo}>
+                <span className={entryStyles.people}>2 people</span> have joined
+              </div>
+            )}
             {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
               <TwoDEntryButton onClick={this.enter2D} />
             )}
@@ -657,11 +664,17 @@ class UIRoot extends Component {
             )}
             <DeviceEntryButton onClick={this.attemptLink} isInHMD={this.props.availableVREntryTypes.isInHMD} />
             {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
-              <div className="entry-panel__secondary" onClick={this.enterVR}>
+              <div className={entryStyles.secondary} onClick={this.enterVR}>
                 <FormattedMessage id="entry.cardboard" />
               </div>
             )}
             {screenSharingCheckbox}
+            <button
+              className={entryStyles.inviteButton}
+              onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
+            >
+              <FormattedMessage id="entry.invite-others" />
+            </button>
           </div>
         </div>
       ) : null;
@@ -811,11 +824,10 @@ class UIRoot extends Component {
     const dialogContents = this.isWaitingForAutoExit() ? (
       <AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />
     ) : (
-      <div className="entry-dialog">
+      <div className={entryStyles.entryDialog}>
         <ProfileInfoHeader
           name={this.props.store.state.profile.displayName}
           onClickName={() => this.setState({ showProfileEntry: true })}
-          onClickInvite={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
           onClickHelp={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
         />
         {entryPanel}
@@ -823,10 +835,6 @@ class UIRoot extends Component {
         {audioSetupPanel}
       </div>
     );
-
-    const dialogClassNames = classNames("ui-dialog", {
-      "ui-dialog--darkened": this.state.entryStep !== ENTRY_STEPS.finished
-    });
 
     const dialogBoxClassNames = classNames({ "ui-interactive": !this.state.infoDialogType, "ui-dialog-box": true });
 
@@ -843,7 +851,7 @@ class UIRoot extends Component {
             linkCode={this.state.linkCode}
             onSubmittedEmail={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.email_submitted })}
             onCloseDialog={this.handleCloseDialog}
-            onAddMedia={this.handleAddMedia}
+            onCreateObject={this.handleCreateObject}
           />
 
           {this.state.entryStep === ENTRY_STEPS.finished && (
@@ -857,7 +865,14 @@ class UIRoot extends Component {
             </button>
           )}
 
-          <div className={dialogClassNames}>
+          {this.state.entryStep === ENTRY_STEPS.finished && (
+            <div className={styles.presenceInfo}>
+              <FontAwesomeIcon icon={faUsers} />
+              <span className={styles.occupantCount}>{this.props.occupantCount || "-"}</span>
+            </div>
+          )}
+
+          <div className="ui-dialog">
             {(this.state.entryStep !== ENTRY_STEPS.finished || this.isWaitingForAutoExit()) && (
               <div className={dialogBoxClassNames}>
                 <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
@@ -870,22 +885,23 @@ class UIRoot extends Component {
           </div>
           {this.state.entryStep === ENTRY_STEPS.finished ? (
             <div>
-              <TwoDHUD
+              <TwoDHUD.TopHUD
                 muted={this.state.muted}
                 frozen={this.state.frozen}
                 spacebubble={this.state.spacebubble}
                 onToggleMute={this.toggleMute}
                 onToggleFreeze={this.toggleFreeze}
                 onToggleSpaceBubble={this.toggleSpaceBubble}
-                onClickAddMedia={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.add_media })}
               />
-              <Footer
-                hubName={this.props.hubName}
-                occupantCount={this.props.occupantCount}
-                onClickInvite={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
-                onClickReport={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.report })}
-                onClickHelp={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
-                onClickUpdates={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.updates })}
+              {this.props.occupantCount <= 1 && (
+                <div className={styles.inviteNagButton}>
+                  <button onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}>
+                    <FormattedMessage id="entry.invite-others-nag" />
+                  </button>
+                </div>
+              )}
+              <TwoDHUD.BottomHUD
+                onCreateObject={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.create_object })}
               />
             </div>
           ) : null}
