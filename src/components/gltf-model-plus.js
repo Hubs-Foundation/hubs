@@ -216,6 +216,7 @@ function cachedLoadGLTF(src, basePath, contentType, preferredTechnique, onProgre
         gltfLoader.load(gltfUrl, onLoad, onProgress, reject);
       } catch (e) {
         reject(e);
+        delete GLTFCache[src];
       }
     });
   }
