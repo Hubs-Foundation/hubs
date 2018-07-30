@@ -207,7 +207,7 @@ module.exports = (env, argv) => ({
           "http-equiv": "origin-trial",
           "data-feature": "WebVR (For Chrome M62+)",
           "data-expires": process.env.ORIGIN_TRIAL_EXPIRES,
-          "data-content": process.env.ORIGIN_TRIAL_TOKEN
+          content: process.env.ORIGIN_TRIAL_TOKEN
         }
       ]
     }),
