@@ -119,10 +119,7 @@ module.exports = (env, argv) => ({
         include: [path.resolve(__dirname, "src")],
         // Exclude JS assets in node_modules because they are already transformed and often big.
         exclude: [path.resolve(__dirname, "node_modules")],
-        loader: "babel-loader",
-        query: {
-          plugins: ["transform-class-properties", "transform-object-rest-spread"]
-        }
+        loader: "babel-loader"
       },
       {
         test: /\.(scss|css)$/,
