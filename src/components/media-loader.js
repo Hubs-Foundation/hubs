@@ -1,5 +1,5 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
-import { resolveFarsparkUrl } from "../utils/media-utils";
+import { resolveMedia } from "../utils/media-utils";
 
 const fetchContentType = async url => fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
 
@@ -53,7 +53,7 @@ AFRAME.registerComponent("media-loader", {
         this.setShapeAndScale(true);
       }, 100);
 
-      const { raw, origin, meta } = await resolveFarsparkUrl(url);
+      const { raw, origin, meta } = await resolveMedia(url);
       console.log("resolved", url, raw, origin, meta);
 
       const contentType = (meta && meta.expected_content_type) || (await fetchContentType(raw));
