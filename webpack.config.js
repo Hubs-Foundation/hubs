@@ -125,7 +125,7 @@ module.exports = (env, argv) => ({
         }
       },
       {
-        test: /\.scss$/,
+        test: /\.(scss|css)$/,
         loader: ExtractTextPlugin.extract({
           fallback: "style-loader",
           use: [
@@ -139,20 +139,6 @@ module.exports = (env, argv) => ({
             },
             "sass-loader"
           ]
-        })
-      },
-      {
-        test: /\.css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: "style-loader",
-          use: {
-            loader: "css-loader",
-            options: {
-              name: "[path][name]-[hash].[ext]",
-              localIdentName: "[name]__[local]__[hash:base64:5]",
-              camelCase: true
-            }
-          }
         })
       },
       {
