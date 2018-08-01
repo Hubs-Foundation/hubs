@@ -5,10 +5,18 @@ export function connectToReticulum() {
   const qs = new URLSearchParams(location.search);
 
   const socketProtocol = qs.get("phx_protocol") || (document.location.protocol === "https:" ? "wss:" : "ws:");
-  const [retHost, retPort] = (process.env.DEV_RETICULUM_SERVER || "").split(":");
-  const isProd = process.env.NODE_ENV === "production";
-  const socketPort = qs.get("phx_port") || (isProd ? document.location.port : retPort) || "443";
-  const socketHost = qs.get("phx_host") || (isProd ? document.location.hostname : retHost) || "";
+  let socketHost = qs.get("phx_host");
+  let socketPort = qs.get("phx_port");
+
+  if (process.env.RETICULUM_SERVER) {
+    const [retHost, retPort] = process.env.RETICULUM_SERVER.split(":");
+    socketHost = socketHost || retHost || "";
+    socketPort = socketPort || retPort || "443";
+  } else {
+    socketHost = socketHost || document.location.hostname || "";
+    socketPort = socketPort || document.location.port || "443";
+  }
+
   const socketUrl = `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}/socket`;
   console.log(`Phoenix Socket URL: ${socketUrl}`);
 
