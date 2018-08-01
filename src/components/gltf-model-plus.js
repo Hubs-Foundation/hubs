@@ -1,3 +1,5 @@
+import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
+
 const GLTFCache = {};
 
 AFRAME.GLTFModelPlus = {
@@ -181,14 +183,41 @@ function nextTick() {
   });
 }
 
-function cachedLoadGLTF(src, basePath, preferredTechnique, onProgress) {
-  // Load the gltf model from the cache if it exists.
+function getFilesFromSketchfabZip(src) {
+  return new Promise((resolve, reject) => {
+    const worker = new SketchfabZipWorker();
+    worker.onmessage = e => {
+      const [success, fileMapOrError] = e.data;
+      (success ? resolve : reject)(fileMapOrError);
+    };
+    worker.postMessage(src);
+  });
+}
+
+function cachedLoadGLTF(src, basePath, contentType, preferredTechnique, onProgress) {
   if (!GLTFCache[src]) {
-    GLTFCache[src] = new Promise((resolve, reject) => {
-      const gltfLoader = new THREE.GLTFLoader();
-      gltfLoader.path = basePath;
-      gltfLoader.preferredTechnique = preferredTechnique;
-      gltfLoader.load(src, resolve, onProgress, reject);
+    GLTFCache[src] = new Promise(async (resolve, reject) => {
+      try {
+        let gltfUrl = src;
+        let onLoad = resolve;
+        if (contentType === "model/gltf+zip") {
+          const fileMap = await getFilesFromSketchfabZip(src);
+          gltfUrl = fileMap["scene.gtlf"];
+          onLoad = model => {
+            // The GLTF is now cached as a THREE object, we can get rid of the original blobs
+            Object.keys(fileMap).forEach(URL.revokeObjectURL);
+            resolve(model);
+          };
+        }
+
+        const gltfLoader = new THREE.GLTFLoader();
+        gltfLoader.path = basePath;
+        gltfLoader.preferredTechnique = preferredTechnique;
+        gltfLoader.load(gltfUrl, onLoad, onProgress, reject);
+      } catch (e) {
+        reject(e);
+        delete GLTFCache[src];
+      }
     });
   }
   return GLTFCache[src].then(cloneGltf);
@@ -203,6 +232,7 @@ function cachedLoadGLTF(src, basePath, preferredTechnique, onProgress) {
 AFRAME.registerComponent("gltf-model-plus", {
   schema: {
     src: { type: "string" },
+    contentType: { type: "string" },
     basePath: { type: "string", default: undefined },
     inflate: { default: false }
   },
@@ -244,7 +274,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       }
 
       const gltfPath = THREE.LoaderUtils.extractUrlBase(src);
-      const model = await cachedLoadGLTF(src, this.data.basePath, this.preferredTechnique);
+      const model = await cachedLoadGLTF(src, this.data.basePath, this.data.contentType, this.preferredTechnique);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
