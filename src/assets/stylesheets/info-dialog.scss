@@ -75,38 +75,112 @@
   }
 }
 
+.input-border {
+    margin: 2% 1% 2% 1%;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    background:white;
+    @extend %rounded-border;
+    @extend %default-font;
+}
+
+.small-button {
+    width: 8%;
+    padding-right: 2%;
+    padding-left: 2%;
+}
+
+.url-input {
+    border: none;
+    padding-left: 2%;
+    flex-grow: 1;
+    text-align: center;
+    background:transparent;
+    color:black;
+    font-size: 1.1em;
+}
+
+.file-name {
+    text-align: center;
+    flex-grow: 1;
+    align-self: center;
+    color: black;
+}
+
+.form {
+    width: 80%;
+}
+
+.hide-file-input {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+#upload-svg {
+    fill: #222222;
+}
+
+#upload-svg.unhover {
+    animation-name: upload-button-unhover;
+    animation-duration: 0.5s;
+    animation-timing-function: ease-in;
+    animation-fill-mode: forwards;
+}
+
+#upload-svg.hover{
+    animation-name: upload-button-hover;
+    animation-duration: 0.2s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+}
+
+#cancel-svg {
+    fill: #FF9E9D;
+}
+
+#cancel-svg.unhover{
+    animation-name: cancel-button-unhover;
+    animation-duration: 0.5s;
+    animation-timing-function: ease-in;
+    animation-fill-mode: forwards;
+}
+
+#cancel-svg.hover{
+    animation-name: cancel-button-hover;
+    animation-duration: 0.2s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+}
+
+@keyframes upload-button-hover {
+    from { fill : #222222;}
+    to {fill : #c431bd;}
+}
+@keyframes upload-button-unhover {
+    from {fill : #c431bd;}
+    to { fill : #222222;}
+}
+
+@keyframes cancel-button-hover {
+    from { fill : #FF9E9D;}
+    to {fill : #FF3D7F;}
+}
+@keyframes cancel-button-unhover {
+    from {fill : #FF3D7F;}
+    to { fill : #FF9E9D;}
+}
+
 .invite-form, .add-media-form, .custom-scene-form {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   margin: 0;
-
-  &__input_fields {
-      position: relative;
-  }
-
-  &__file {
-      width: 0.1px;
-      height: 0.1px;
-      opacity: 0;
-      overflow: hidden;
-      position: absolute;
-      z-index: -1;
-  }
-
-  &__file_label {
-      font-size: 1.25em;
-      font-weight: 700;
-      color: white;
-      background-color: black;
-      display: inline-block;
-      top: 19px;
-      right: 24px;
-      bottom: 19px;
-      position: absolute;
-      line-height: 30px;
-  }
 
   &__buttons {
     display: flex;
