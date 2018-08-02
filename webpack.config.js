@@ -70,13 +70,11 @@ module.exports = (env, argv) => ({
   },
   devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
   devServer: {
-    open: false,
     https: createHTTPSConfig(),
     host: "0.0.0.0",
     useLocalIp: true,
-    public: "hubs.local:8080",
-    port: 8080,
-    headers: { "Access-Control-Allow-Origin": "*" },
+    allowedHosts: ["hubs.local"],
+    headers: { "Access-Control-Allow-Origin": "hubs.local" },
     before: function(app) {
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
       app.head("*", function(req, res, next) {
