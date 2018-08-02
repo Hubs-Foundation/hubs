@@ -1,8 +1,9 @@
 const whitelistedHosts = [/^.*\.reticulum\.io$/, /^.*hubs\.mozilla\.com$/, /^hubs\.local$/];
 const isHostWhitelisted = hostname => !!whitelistedHosts.filter(r => r.test(hostname)).length;
 let mediaAPIEndpoint = "/api/v1/media";
-if (process.env.NODE_ENV === "development") {
-  mediaAPIEndpoint = `https://${process.env.DEV_RETICULUM_SERVER}${mediaAPIEndpoint}`;
+
+if (process.env.RETICULUM_SERVER) {
+  mediaAPIEndpoint = `https://${process.env.RETICULUM_SERVER}${mediaAPIEndpoint}`;
 }
 
 const resolveMediaCache = new Map();
