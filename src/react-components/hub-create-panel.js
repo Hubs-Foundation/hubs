@@ -99,7 +99,7 @@ class HubCreatePanel extends Component {
 
     const hub = await res.json();
 
-    if (document.location.host === process.env.RETICULUM_SERVER) {
+    if (!process.env.RETICULUM_SERVER || document.location.host === process.env.RETICULUM_SERVER) {
       document.location = hub.url;
     } else {
       document.location = `/hub.html?hub_id=${hub.hub_id}`;
