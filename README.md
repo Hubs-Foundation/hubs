@@ -22,6 +22,26 @@ To bundle javascript and generate the html templates, run:
 npm run build
 ```
 
+## Sharing Your Changes
+
+When running a local copy of Hubs as-is, you'll use Mozilla's "dev" Reticulm and Janus servers
+for storing your room information and relaying messages between users in the room.
+
+This also means you can upload a modified copy of Hubs to a hosting provider as-is, and use it
+without having to set up your own servers. Simply run:
+
+```
+npm run build
+```
+
+and then upload the files in the `dist` folder to your hosting provider.
+
+If you are running your own servers, you can modify the environment variables `JANUS_SERVER` and
+`RETICULUM_SERVER` when building to point Hubs to your own infrastructure.
+
+See `scripts/default.env` for the full set of environment variables that can modify
+Hubs' behavior at build time.
+
 ## hubs.local Host Entry
 
 When running the full stack for Hubs (which includes [Reticulum](https://github.com/mozilla/reticulum))
