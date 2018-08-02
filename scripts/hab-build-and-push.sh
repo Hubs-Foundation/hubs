@@ -23,9 +23,6 @@ rm /usr/bin/env
 ln -s "$(hab pkg path core/coreutils)/bin/env" /usr/bin/env
 hab pkg install -b core/coreutils core/bash core/node core/git core/aws-cli
 
-# todo: consider more elegant ways to accomplish this
-cp scripts/default.env .env
-
 npm ci --verbose --no-progress
 npm run build
 mkdir dist/pages

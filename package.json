@@ -13,7 +13,6 @@
     "url": "https://github.com/mozilla/hubs/issues"
   },
   "scripts": {
-    "postinstall": "node ./scripts/postinstall.js",
     "start": "webpack-dev-server --mode=development",
     "build": "rimraf ./dist && webpack --mode=production",
     "doc": "node ./scripts/doc/build.js",

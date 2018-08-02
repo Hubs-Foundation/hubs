@@ -1,5 +1,7 @@
-// Variables in .env will be added to process.env
-require("dotenv").config();
+// Variables in .env and .env.defaults will be added to process.env
+const dotenv = require("dotenv");
+dotenv.config({ path: ".env" });
+dotenv.config({ path: ".env.defaults" });
 
 const fs = require("fs");
 const path = require("path");
