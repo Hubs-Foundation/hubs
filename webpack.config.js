@@ -119,13 +119,10 @@ module.exports = (env, argv) => ({
         include: [path.resolve(__dirname, "src")],
         // Exclude JS assets in node_modules because they are already transformed and often big.
         exclude: [path.resolve(__dirname, "node_modules")],
-        loader: "babel-loader",
-        query: {
-          plugins: ["transform-class-properties", "transform-object-rest-spread"]
-        }
+        loader: "babel-loader"
       },
       {
-        test: /\.scss$/,
+        test: /\.(scss|css)$/,
         loader: ExtractTextPlugin.extract({
           fallback: "style-loader",
           use: [
@@ -139,20 +136,6 @@ module.exports = (env, argv) => ({
             },
             "sass-loader"
           ]
-        })
-      },
-      {
-        test: /\.css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: "style-loader",
-          use: {
-            loader: "css-loader",
-            options: {
-              name: "[path][name]-[hash].[ext]",
-              localIdentName: "[name]__[local]__[hash:base64:5]",
-              camelCase: true
-            }
-          }
         })
       },
       {
