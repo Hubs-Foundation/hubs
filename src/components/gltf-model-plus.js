@@ -200,7 +200,7 @@ function cachedLoadGLTF(src, basePath, contentType, preferredTechnique, onProgre
       try {
         let gltfUrl = src;
         let onLoad = resolve;
-        if (contentType === "model/gltf+zip") {
+        if (contentType === "model/gltf+zip" || contentType === "application/x-zip-compressed") {
           const fileMap = await getFilesFromSketchfabZip(src);
           gltfUrl = fileMap["scene.gtlf"];
           onLoad = model => {

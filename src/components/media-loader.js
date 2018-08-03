@@ -84,7 +84,12 @@ AFRAME.registerComponent("media-loader", {
         }
         this.el.setAttribute("image-plus", { src: blobUrl || raw, contentType });
         this.el.setAttribute("position-at-box-shape-border", { target: ".delete-button", dirs: ["forward", "back"] });
-      } else if (contentType.startsWith("model/gltf") || url.endsWith(".gltf") || url.endsWith(".glb")) {
+      } else if (
+        contentType.indexOf("x-zip-compressed") !== -1 ||
+        contentType.startsWith("model/gltf") ||
+        url.endsWith(".gltf") ||
+        url.endsWith(".glb")
+      ) {
         this.el.addEventListener(
           "model-loaded",
           () => {
@@ -94,8 +99,17 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
+        let blobUrl;
+        if (token) {
+          const modelResponse = await fetch(raw, {
+            method: "GET",
+            headers: { Authorization: `Token ${token}` }
+          });
+          const blob = await modelResponse.blob();
+          blobUrl = window.URL.createObjectURL(blob);
+        }
         this.el.setAttribute("gltf-model-plus", {
-          src: raw,
+          src: blobUrl || raw,
           contentType,
           basePath: THREE.LoaderUtils.extractUrlBase(origin),
           inflate: true
