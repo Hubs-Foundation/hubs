@@ -124,7 +124,7 @@ class AvatarSelector extends Component {
 
   componentDidMount() {
     this.scene.addEventListener("loaded", () => {
-      this.scene.setAttribute("renderer", { gammaOutput: true });
+      this.scene.setAttribute("renderer", { gammaOutput: true, sortObjects: true, physicallyCorrectLights: true });
     });
   }
 

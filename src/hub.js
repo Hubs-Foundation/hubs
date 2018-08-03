@@ -235,7 +235,6 @@ const onReady = async () => {
     if (!isBotMode) {
       scene.classList.add("no-cursor");
     }
-    scene.renderer.sortObjects = true;
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("canvas").classList.remove("blurred");
     scene.render();
