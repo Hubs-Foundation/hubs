@@ -85,6 +85,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.setAttribute("image-plus", { src: blobUrl || raw, contentType });
         this.el.setAttribute("position-at-box-shape-border", { target: ".delete-button", dirs: ["forward", "back"] });
       } else if (
+        contentType.indexOf("application/octet-stream") !== -1 ||
         contentType.indexOf("x-zip-compressed") !== -1 ||
         contentType.startsWith("model/gltf") ||
         url.endsWith(".gltf") ||

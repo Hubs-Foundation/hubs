@@ -37,6 +37,8 @@
   font-size: 1.3em;
   padding-left: 8%;
   padding-right: 0%;
+  width: 80%;
+  white-space: nowrap;
 }
 
 :local(.fileNameLabel) {
@@ -45,6 +47,7 @@
   align-self: center;
   padding-left: 8%;
   padding-right: 0%;
+  width: 80%;
 }
 
 :local(.form) {
