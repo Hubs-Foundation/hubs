@@ -1,6 +1,14 @@
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
+import { resolveMedia } from "../utils/media-utils";
+import cubeMapPosX from "../assets/images/cubemap/posx.jpg";
+import cubeMapNegX from "../assets/images/cubemap/negx.jpg";
+import cubeMapPosY from "../assets/images/cubemap/posy.jpg";
+import cubeMapNegY from "../assets/images/cubemap/negx.jpg";
+import cubeMapPosZ from "../assets/images/cubemap/posz.jpg";
+import cubeMapNegZ from "../assets/images/cubemap/negz.jpg";
 
 const GLTFCache = {};
+let CachedEnvMapTexture = null;
 
 AFRAME.GLTFModelPlus = {
   // eslint-disable-next-line no-unused-vars
@@ -194,33 +202,120 @@ function getFilesFromSketchfabZip(src) {
   });
 }
 
-function cachedLoadGLTF(src, basePath, contentType, preferredTechnique, onProgress) {
-  if (!GLTFCache[src]) {
-    GLTFCache[src] = new Promise(async (resolve, reject) => {
-      try {
-        let gltfUrl = src;
-        let onLoad = resolve;
-        if (contentType === "model/gltf+zip") {
-          const fileMap = await getFilesFromSketchfabZip(src);
-          gltfUrl = fileMap["scene.gtlf"];
-          onLoad = model => {
-            // The GLTF is now cached as a THREE object, we can get rid of the original blobs
-            Object.keys(fileMap).forEach(URL.revokeObjectURL);
-            resolve(model);
-          };
-        }
+async function loadEnvMap() {
+  const urls = [cubeMapPosX, cubeMapNegX, cubeMapPosY, cubeMapNegY, cubeMapPosZ, cubeMapNegZ];
+  const texture = await new THREE.CubeTextureLoader().load(urls);
+  texture.format = THREE.RGBFormat;
+  return texture;
+}
 
-        const gltfLoader = new THREE.GLTFLoader();
-        gltfLoader.path = basePath;
-        gltfLoader.preferredTechnique = preferredTechnique;
-        gltfLoader.load(gltfUrl, onLoad, onProgress, reject);
-      } catch (e) {
-        reject(e);
-        delete GLTFCache[src];
-      }
-    });
+function resolveURL(url, path) {
+  // Invalid URL
+  if (typeof url !== "string" || url === "") return "";
+
+  // Absolute URL http://,https://,//
+  if (/^(https?:)?\/\//i.test(url)) return url;
+
+  // Data URI
+  if (/^data:.*,.*$/i.test(url)) return url;
+
+  // Blob URL
+  if (/^blob:.*$/i.test(url)) return url;
+
+  // Relative URL
+  return path + url;
+}
+
+async function loadGLTF(src, basePath, contentType, preferredTechnique, onProgress) {
+  let gltfUrl = (await resolveMedia(src)).raw;
+
+  let fileMap;
+
+  if (contentType === "model/gltf+zip") {
+    fileMap = await getFilesFromSketchfabZip(gltfUrl);
+    gltfUrl = fileMap["scene.gtlf"];
   }
-  return GLTFCache[src].then(cloneGltf);
+
+  const gltfLoader = new THREE.GLTFLoader();
+  gltfLoader.setPath(basePath);
+  gltfLoader.setLazy(true);
+
+  const { parser } = await new Promise((resolve, reject) => gltfLoader.load(gltfUrl, resolve, onProgress, reject));
+
+  const json = parser.json;
+  const images = json.images;
+  const buffers = json.buffers;
+  const materials = json.materials;
+
+  const pendingFarsparkPromises = [];
+
+  if (images) {
+    for (const image of images) {
+      const imagePromise = resolveMedia(resolveURL(image.uri, parser.options.path)).then(({ raw }) => {
+        image.uri = raw;
+      });
+
+      pendingFarsparkPromises.push(imagePromise);
+    }
+  }
+
+  if (buffers) {
+    for (const buffer of buffers) {
+      const bufferPromise = resolveMedia(resolveURL(buffer.uri, parser.options.path)).then(({ raw }) => {
+        buffer.uri = raw;
+      });
+
+      pendingFarsparkPromises.push(bufferPromise);
+    }
+  }
+
+  if (materials) {
+    for (let i = 0; i < materials.length; i++) {
+      const material = materials[i];
+
+      if (
+        material.extensions &&
+        material.extensions.MOZ_alt_materials &&
+        material.extensions.MOZ_alt_materials[preferredTechnique] !== undefined
+      ) {
+        const altMaterialIndex = material.extensions.MOZ_alt_materials[preferredTechnique];
+        materials[i] = altMaterialIndex;
+      }
+    }
+  }
+
+  if (!CachedEnvMapTexture) {
+    CachedEnvMapTexture = loadEnvMap();
+  }
+
+  await Promise.all(pendingFarsparkPromises);
+
+  const gltf = await new Promise((resolve, reject) =>
+    parser.parse(
+      (scene, scenes, cameras, animations, json) => {
+        resolve({ scene, scenes, cameras, animations, json });
+      },
+      e => {
+        reject(e);
+      }
+    )
+  );
+
+  const envMap = await CachedEnvMapTexture;
+
+  gltf.scene.traverse(object => {
+    if (object.material && object.material.type === "MeshStandardMaterial") {
+      object.material.envMap = envMap;
+      object.material.needsUpdate = true;
+    }
+  });
+
+  if (fileMap) {
+    // The GLTF is now cached as a THREE object, we can get rid of the original blobs
+    Object.keys(fileMap).forEach(URL.revokeObjectURL);
+  }
+
+  return gltf;
 }
 
 /**
@@ -274,7 +369,12 @@ AFRAME.registerComponent("gltf-model-plus", {
       }
 
       const gltfPath = THREE.LoaderUtils.extractUrlBase(src);
-      const model = await cachedLoadGLTF(src, this.data.basePath, this.data.contentType, this.preferredTechnique);
+
+      if (!GLTFCache[src]) {
+        GLTFCache[src] = loadGLTF(src, this.data.basePath, this.data.contentType, this.preferredTechnique);
+      }
+
+      const model = await GLTFCache[src].then(cloneGltf);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead

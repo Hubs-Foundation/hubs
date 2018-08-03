@@ -10,7 +10,7 @@ import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
 import "./assets/stylesheets/avatar-selector.scss";
-import "./vendor/GLTFLoader";
+import "three/examples/js/loaders/GLTFLoader";
 
 import "./components/animation-mixer";
 import "./components/audio-feedback";
