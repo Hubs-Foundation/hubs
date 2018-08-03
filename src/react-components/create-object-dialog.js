@@ -96,7 +96,9 @@ export default class CreateObjectDialog extends Component {
         <FontAwesomeIcon icon={faPaperclip} />
       </label>
     );
-    const filenameLabel = (<label className={cx(styles.fileNameLabel, "add-media-form__link_field")}>{this.state.fileName}</label>);
+    const filenameLabel = (
+      <label className={cx(styles.fileNameLabel, "add-media-form__link_field")}>{this.state.fileName}</label>
+    );
     const urlInput = (
       <input
         className={cx(styles.urlInput, "add-media-form__link_field")}
