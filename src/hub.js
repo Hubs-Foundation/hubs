@@ -83,7 +83,7 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
-import { addMedia} from "./utils/media-utils";
+import { addMedia } from "./utils/media-utils";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
@@ -303,7 +303,7 @@ const onReady = async () => {
     });
 
     const offset = { x: 0, y: 0, z: -1.5 };
-    const spawnMediaInfrontOfPlayer = async (src) => {
+    const spawnMediaInfrontOfPlayer = src => {
       const entity = addMedia(src, true);
       entity.setAttribute("offset-relative-to", {
         target: "#player-camera",

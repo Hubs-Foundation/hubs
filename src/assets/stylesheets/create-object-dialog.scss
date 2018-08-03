@@ -1,0 +1,61 @@
+@import 'shared';
+
+:local(.smallButton) {
+  padding-right: 5%;
+  font-size: 2em;
+  align-self: center;
+}
+
+:local(.cancelIcon) {
+  padding-left: 2%;
+  color: white;
+  :hover {
+    color: #FF3D7F
+  }
+}
+
+:local(.uploadIcon) {
+  color: white;
+  :hover {
+    color: #2F80ED;
+  }
+}
+
+:local(.inputBorder) {
+  margin: 2% 1% 2% 1%;
+  display: flex;
+  width: 100%;
+  height: 60px;
+  justify-content: space-between;
+  @extend %rounded-border;
+  @extend %default-font;
+}
+
+:local(.urlInput) {
+  border: none;
+  text-align: center;
+  font-size: 1.3em;
+  padding-left: 8%;
+  padding-right: 0%;
+}
+
+:local(.fileNameLabel) {
+  border: none;
+  text-align: center;
+  align-self: center;
+  padding-left: 8%;
+  padding-right: 0%;
+}
+
+:local(.form) {
+  width: 80%;
+}
+
+:local(.hideFileInput) {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}

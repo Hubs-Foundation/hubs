@@ -22,27 +22,6 @@ export const resolveMedia = async url => {
   return resolved;
 };
 
-let interactableId = 0;
-export const addMedia = (src, resize = false) => {
-  const scene = AFRAME.scenes[0];
-
-  const entity = document.createElement("a-entity");
-  entity.id = "interactable-media-" + interactableId++;
-  entity.setAttribute("networked", { template: "#interactable-media" });
-  entity.setAttribute("media-loader", { resize, src: typeof src === "string" ? src : "" });
-  scene.appendChild(entity);
-
-  if (typeof src === "object") {
-    const uploadResponse = upload(src).then(response => {
-      const src = response.raw;
-      const contentType = response.meta.expected_content_type;
-      const token = response.meta.access_token;
-      entity.setAttribute("media-loader", { src, contentType, token });
-    });
-  }
-  return entity;
-};
-
 export const upload = file => {
   const formData = new FormData();
   formData.append("media", file);
@@ -56,4 +35,25 @@ export const upload = file => {
     //     "Content-Type" : "multipart/form-data; boundary=...--------------<boundary_size>",
     // See https://stanko.github.io/uploading-files-using-fetch-multipart-form-data/ for details.
   }).then(r => r.json());
+};
+
+let interactableId = 0;
+export const addMedia = (src, resize = false) => {
+  const scene = AFRAME.scenes[0];
+
+  const entity = document.createElement("a-entity");
+  entity.id = "interactable-media-" + interactableId++;
+  entity.setAttribute("networked", { template: "#interactable-media" });
+  entity.setAttribute("media-loader", { resize, src: typeof src === "string" ? src : "" });
+  scene.appendChild(entity);
+
+  if (typeof src === "object") {
+    upload(src).then(response => {
+      const src = response.raw;
+      const contentType = response.meta.expected_content_type;
+      const token = response.meta.access_token;
+      entity.setAttribute("media-loader", { src, contentType, token });
+    });
+  }
+  return entity;
 };
