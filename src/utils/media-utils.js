@@ -6,6 +6,8 @@ if (process.env.RETICULUM_SERVER) {
   mediaAPIEndpoint = `https://${process.env.RETICULUM_SERVER}${mediaAPIEndpoint}`;
 }
 
+const fetchContentType = async url => fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
+
 const resolveMediaCache = new Map();
 export const resolveMedia = async url => {
   const parsedUrl = new URL(url);
@@ -19,6 +21,10 @@ export const resolveMedia = async url => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ media: { url } })
         }).then(r => r.json());
+
+  const contentType = (resolved.meta && resolved.meta.expected_content_type) || (await fetchContentType(resolved.raw));
+  resolved.contentType = contentType;
+
   resolveMediaCache.set(url, resolved);
   return resolved;
 };

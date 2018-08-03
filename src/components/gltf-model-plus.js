@@ -226,9 +226,11 @@ function resolveURL(url, path) {
   return path + url;
 }
 
-async function loadGLTF(src, basePath, contentType, preferredTechnique, onProgress) {
-  let gltfUrl = (await resolveMedia(src)).raw;
+async function loadGLTF(src, preferredTechnique, onProgress) {
+  const { raw, origin, contentType } = await resolveMedia(src);
+  const basePath = THREE.LoaderUtils.extractUrlBase(origin);
 
+  let gltfUrl = raw;
   let fileMap;
 
   if (contentType === "model/gltf+zip") {
@@ -327,8 +329,6 @@ async function loadGLTF(src, basePath, contentType, preferredTechnique, onProgre
 AFRAME.registerComponent("gltf-model-plus", {
   schema: {
     src: { type: "string" },
-    contentType: { type: "string" },
-    basePath: { type: "string", default: undefined },
     inflate: { default: false }
   },
 
@@ -371,7 +371,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       const gltfPath = THREE.LoaderUtils.extractUrlBase(src);
 
       if (!GLTFCache[src]) {
-        GLTFCache[src] = loadGLTF(src, this.data.basePath, this.data.contentType, this.preferredTechnique);
+        GLTFCache[src] = loadGLTF(src, this.preferredTechnique);
       }
 
       const cachedModel = await GLTFCache[src];

@@ -1,8 +1,6 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import { resolveMedia } from "../utils/media-utils";
 
-const fetchContentType = async url => fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
-
 AFRAME.registerComponent("media-loader", {
   schema: {
     src: { type: "string" },
@@ -53,10 +51,8 @@ AFRAME.registerComponent("media-loader", {
         this.setShapeAndScale(true);
       }, 100);
 
-      const { raw, origin, meta } = await resolveMedia(url);
-      console.log("resolved", url, raw, origin, meta);
+      const { raw, contentType } = await resolveMedia(url);
 
-      const contentType = (meta && meta.expected_content_type) || (await fetchContentType(raw));
       if (contentType.startsWith("image/") || contentType.startsWith("video/") || contentType.startsWith("audio/")) {
         this.el.addEventListener(
           "image-loaded",
@@ -78,9 +74,7 @@ AFRAME.registerComponent("media-loader", {
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
         this.el.setAttribute("gltf-model-plus", {
-          src: raw,
-          contentType,
-          basePath: THREE.LoaderUtils.extractUrlBase(origin),
+          src: url,
           inflate: true
         });
       } else {
