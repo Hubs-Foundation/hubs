@@ -209,23 +209,6 @@ async function loadEnvMap() {
   return texture;
 }
 
-function resolveURL(url, path) {
-  // Invalid URL
-  if (typeof url !== "string" || url === "") return "";
-
-  // Absolute URL http://,https://,//
-  if (/^(https?:)?\/\//i.test(url)) return url;
-
-  // Data URI
-  if (/^data:.*,.*$/i.test(url)) return url;
-
-  // Blob URL
-  if (/^blob:.*$/i.test(url)) return url;
-
-  // Relative URL
-  return path + url;
-}
-
 async function loadGLTF(src, preferredTechnique, onProgress) {
   const { raw, origin, contentType } = await resolveMedia(src);
   const basePath = THREE.LoaderUtils.extractUrlBase(origin);
@@ -253,7 +236,7 @@ async function loadGLTF(src, preferredTechnique, onProgress) {
 
   if (images) {
     for (const image of images) {
-      const imagePromise = resolveMedia(resolveURL(image.uri, parser.options.path)).then(({ raw }) => {
+      const imagePromise = resolveMedia(new URL(image.uri, parser.options.path).href).then(({ raw }) => {
         image.uri = raw;
       });
 
@@ -263,7 +246,7 @@ async function loadGLTF(src, preferredTechnique, onProgress) {
 
   if (buffers) {
     for (const buffer of buffers) {
-      const bufferPromise = resolveMedia(resolveURL(buffer.uri, parser.options.path)).then(({ raw }) => {
+      const bufferPromise = resolveMedia(new URL(buffer.uri, parser.options.path).href).then(({ raw }) => {
         buffer.uri = raw;
       });
 
