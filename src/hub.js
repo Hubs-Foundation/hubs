@@ -3,6 +3,7 @@ console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 import "./assets/stylesheets/hub.scss";
 
 import "aframe";
+import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
@@ -129,12 +130,7 @@ import registerTelemetry from "./telemetry";
 
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
-
-function qsTruthy(param) {
-  const val = qs.get(param);
-  // if the param exists but is not set (e.g. "?foo&bar"), its value is the empty string.
-  return val === "" || /1|on|true/i.test(val);
-}
+import qsTruthy from "./utils/qs_truthy";
 
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
