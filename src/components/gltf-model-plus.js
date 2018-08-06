@@ -209,6 +209,10 @@ async function loadEnvMap() {
   return texture;
 }
 
+function resolveGLTFUri(gltfProperty, basePath) {
+  return resolveMedia(new URL(gltfProperty.uri, basePath).href).then(({ raw }) => (gltfProperty.uri = raw));
+}
+
 async function loadGLTF(src, preferredTechnique, onProgress) {
   const { raw, origin, contentType } = await resolveMedia(src);
   const basePath = THREE.LoaderUtils.extractUrlBase(origin);
@@ -236,21 +240,13 @@ async function loadGLTF(src, preferredTechnique, onProgress) {
 
   if (images) {
     for (const image of images) {
-      const imagePromise = resolveMedia(new URL(image.uri, parser.options.path).href).then(({ raw }) => {
-        image.uri = raw;
-      });
-
-      pendingFarsparkPromises.push(imagePromise);
+      pendingFarsparkPromises.push(resolveGLTFUri(image, parser.options.path));
     }
   }
 
   if (buffers) {
     for (const buffer of buffers) {
-      const bufferPromise = resolveMedia(new URL(buffer.uri, parser.options.path).href).then(({ raw }) => {
-        buffer.uri = raw;
-      });
-
-      pendingFarsparkPromises.push(bufferPromise);
+      pendingFarsparkPromises.push(resolveGLTFUri(buffer, parser.options.path));
     }
   }
 
