@@ -74,7 +74,7 @@ AFRAME.registerComponent("media-loader", {
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
         this.el.setAttribute("gltf-model-plus", {
-          src: url,
+          src: url, // gltf-model-plus expects the unresolved gltf url. The resolved farspark URL will be retrieved from the cache.
           inflate: true
         });
       } else {
