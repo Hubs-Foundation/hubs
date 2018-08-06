@@ -12,8 +12,8 @@ AFRAME.registerSystem("tunneleffect", {
   schema: {
     targetComponent: { type: "string", default: "character-controller" },
     movingEvent: { type: "string", default: "renderstart" },
-    radius: { type: "number", default: 0.45, min: 0.25 },
-    minRadius: { type: "number", default: 0.2, min: 0.1 },
+    radius: { type: "number", default: 2.0, min: 0.25 },
+    minRadius: { type: "number", default: 0.6, min: 0.1 },
     softness: { type: "number", default: 0.1, min: 0.0 },
     opacity: { type: "number", default: 1, min: 0.0 }
   },
@@ -22,6 +22,7 @@ AFRAME.registerSystem("tunneleffect", {
     const data = this.data;
     this.scene = this.el;
     this.isMoving = false;
+    this.isVR = false;
     this.dt = 0;
     this.t = 0;
     this.radius = data.radius;
@@ -36,6 +37,10 @@ AFRAME.registerSystem("tunneleffect", {
       this._initPostProcessing = this._initPostProcessing.bind(this);
       this.characterEl.addEventListener("componentinitialized", this._initPostProcessing);
     }
+    this._enterVR = this._enterVR.bind(this);
+    this._exitVR = this._exitVR.bind(this);
+    this.scene.addEventListener("enter-vr", this._enterVR);
+    this.scene.addEventListener("exit-vr", this._exitVR);
   },
 
   pause: function() {
@@ -43,13 +48,15 @@ AFRAME.registerSystem("tunneleffect", {
       return;
     }
     this.characterEl.removeEventListener("componentinitialized", this._initPostProcessing);
+    this.scene.removeEventListener("enter-vr", this._enterVR);
+    this.scene.removeEventListener("exit-vr", this._exitVR);
   },
 
   tick: function(time, deltaTime) {
     this.t = time;
     this.dt = deltaTime;
 
-    if (!this._isPostProcessingReady()) {
+    if (!this._isPostProcessingReady() || !this.isVR) {
       return;
     }
 
@@ -65,8 +72,7 @@ AFRAME.registerSystem("tunneleffect", {
       this.isMoving = true;
       this._bindRenderFunc();
     }
-    const deltaR = (this.radius - this.minRadius) * this.characterVelocity.distanceTo(STATIC);
-    const r = this.radius - deltaR;
+    const r = this.radius * (1 - this.characterVelocity.distanceTo(STATIC)) - this.minRadius;
     this._updateVignettePass(r, this.softness, this.opacity);
   },
 
@@ -76,6 +82,14 @@ AFRAME.registerSystem("tunneleffect", {
       this.characterVelocity = this.characterComponent.velocity;
       this._initComposer();
     }
+  },
+
+  _enterVR: function() {
+    this.isVR = true;
+  },
+
+  _exitVR: function() {
+    this.isVR = false;
   },
 
   _isPostProcessingReady: function() {
