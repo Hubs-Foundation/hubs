@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl } from "react-intl";
-import FontAwesomeIcon from "@fortawesome/react-fontawesome";
-import faAngleLeft from "@fortawesome/fontawesome-free-solid/faAngleLeft";
-import faAngleRight from "@fortawesome/fontawesome-free-solid/faAngleRight";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
+import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 
 // TODO: we should make a bundle for avatar picker with it's own geometry, for now just use the indoor part of the meting room
 const meetingSpace = "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingSpace1_mesh-d48250ebc6.gltf";
@@ -18,7 +18,7 @@ class AvatarSelector extends Component {
   static getAvatarIndex = (props, offset = 0) => {
     const currAvatarIndex = props.avatars.findIndex(avatar => avatar.id === props.avatarId);
     const numAvatars = props.avatars.length;
-    return ((currAvatarIndex + offset) % numAvatars + numAvatars) % numAvatars;
+    return (((currAvatarIndex + offset) % numAvatars) + numAvatars) % numAvatars;
   };
   static nextAvatarIndex = props => AvatarSelector.getAvatarIndex(props, -1);
   static previousAvatarIndex = props => AvatarSelector.getAvatarIndex(props, 1);
@@ -52,7 +52,7 @@ class AvatarSelector extends Component {
     ];
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Push new avatar indices onto the array if necessary.
     this.setState(state => {
       const numAvatars = nextProps.avatars.length;
@@ -128,7 +128,7 @@ class AvatarSelector extends Component {
     ));
     const avatarData = this.state.avatarIndices.map(i => [this.props.avatars[i], i]);
     const avatarEntities = avatarData.map(([avatar, i]) => (
-      <a-entity key={avatar.id} rotation={`0 ${360 * -i / this.props.avatars.length} 0`}>
+      <a-entity key={avatar.id} rotation={`0 ${(360 * -i) / this.props.avatars.length} 0`}>
         <a-entity position="0 0 5" gltf-model-plus={`src: #${avatar.id}`} inflate="true">
           <template data-selector=".RootScene">
             <a-entity animation-mixer="" />
@@ -144,7 +144,7 @@ class AvatarSelector extends Component {
       </a-entity>
     ));
 
-    const rotationFromIndex = index => (360 * index / this.props.avatars.length + 180) % 360;
+    const rotationFromIndex = index => ((360 * index) / this.props.avatars.length + 180) % 360;
     const initialRotation = rotationFromIndex(this.state.initialAvatarIndex);
     const toRotation = rotationFromIndex(this.getAvatarIndex());
 

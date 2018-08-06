@@ -10,7 +10,7 @@
  * @author netpro2k / https://github.com/netpro2k
  */
 
- import { resolveFarsparkUrl } from "../utils/media-utils"
+ import { resolveMedia } from "../utils/media-utils"
 
 THREE.GLTFLoader = ( function () {
 
@@ -40,7 +40,7 @@ THREE.GLTFLoader = ( function () {
 
 			loader.setResponseType( 'arraybuffer' );
 
-			var farsparkURL = await resolveFarsparkUrl(url);
+			var farsparkURL = (await resolveMedia(url)).raw;
 
 			loader.load( farsparkURL, function ( data ) {
 
@@ -1623,7 +1623,7 @@ THREE.GLTFLoader = ( function () {
 
 		var options = this.options;
 
-		var farsparkURL = await resolveFarsparkUrl(resolveURL(bufferDef.uri, options.path));
+		var farsparkURL = (await resolveMedia(resolveURL(bufferDef.uri, options.path))).raw;
 
 		return new Promise( function ( resolve, reject ) {
 
@@ -1823,7 +1823,7 @@ THREE.GLTFLoader = ( function () {
 
     var urlToLoad = resolveURL(sourceURI, options.path);
     if (!hasBufferView){
-      urlToLoad = await resolveFarsparkUrl(urlToLoad);
+      urlToLoad = (await resolveMedia(urlToLoad)).raw;
     }
 
 		return Promise.resolve( sourceURI ).then( function ( sourceURI ) {

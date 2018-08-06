@@ -87,7 +87,7 @@ export default class MouseEventsHandler {
       this.look(e);
     }
 
-    this.cursor.moveCursor(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+    this.cursor.moveCursor((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
   }
 
   onMouseUp(e) {

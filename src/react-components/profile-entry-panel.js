@@ -8,7 +8,6 @@ class ProfileEntryPanel extends Component {
     store: PropTypes.object,
     messages: PropTypes.object,
     finished: PropTypes.func,
-    htmlPrefix: PropTypes.string,
     intl: PropTypes.object
   };
 
@@ -103,7 +102,7 @@ class ProfileEntryPanel extends Component {
               </div>
               <iframe
                 className="profile-entry__avatar-selector"
-                src={`/${this.props.htmlPrefix}avatar-selector.html#avatar_id=${this.state.avatarId}`}
+                src={`/avatar-selector.html#avatar_id=${this.state.avatarId}`}
                 ref={ifr => (this.avatarSelector = ifr)}
               />
             </div>

@@ -53,6 +53,7 @@ AFRAME.registerComponent("cursor-controller", {
 
   tick: (() => {
     const rayObjectRotation = new THREE.Quaternion();
+    const cameraPos = new THREE.Vector3();
 
     return function() {
       if (!this.enabled) {
@@ -65,7 +66,7 @@ AFRAME.registerComponent("cursor-controller", {
         const rayObject = this.data.rayObject.object3D;
         rayObjectRotation.setFromRotationMatrix(rayObject.matrixWorld);
         this.direction
-          .set(0, 0, 1)
+          .set(0, 0, -1)
           .applyQuaternion(rayObjectRotation)
           .normalize();
         this.origin.setFromMatrixPosition(rayObject.matrixWorld);
@@ -97,6 +98,11 @@ AFRAME.registerComponent("cursor-controller", {
       if (this.data.drawLine) {
         this.el.setAttribute("line", { start: this.origin.clone(), end: this.data.cursor.object3D.position.clone() });
       }
+
+      // The cursor will always be oriented towards the player about its Y axis, so objects held by the cursor will rotate towards the player.
+      this.data.camera.object3D.getWorldPosition(cameraPos);
+      cameraPos.y = this.data.cursor.object3D.position.y;
+      this.data.cursor.object3D.lookAt(cameraPos);
     };
   })(),
 

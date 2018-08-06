@@ -1,0 +1,8 @@
+{
+  "extends": "stylelint-config-recommended-scss",
+  "rules": {
+    "indentation": 2,
+		"selector-pseudo-class-no-unknown": [true, { "ignorePseudoClasses": ["local"] }],
+		"no-descending-specificity": false
+  }
+}

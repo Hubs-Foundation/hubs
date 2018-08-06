@@ -1,5 +1,7 @@
-// Variables in .env will be added to process.env
-require("dotenv").config();
+// Variables in .env and .env.defaults will be added to process.env
+const dotenv = require("dotenv");
+dotenv.config({ path: ".env" });
+dotenv.config({ path: ".env.defaults" });
 
 const fs = require("fs");
 const path = require("path");
@@ -8,15 +10,9 @@ const webpack = require("webpack");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const _ = require("lodash");
-
-const SMOKE_PREFIX = "smoke-";
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 function createHTTPSConfig() {
-  if (process.env.NODE_ENV === "production") {
-    return false;
-  }
-
   // Generate certs for the local webpack-dev-server.
   if (fs.existsSync(path.join(__dirname, "certs"))) {
     const key = fs.readFileSync(path.join(__dirname, "certs", "key.pem"));
@@ -63,22 +59,7 @@ function createHTTPSConfig() {
   }
 }
 
-class LodashTemplatePlugin {
-  constructor(options) {
-    this.options = options;
-  }
-
-  apply(compiler) {
-    compiler.plugin("compilation", compilation => {
-      compilation.plugin("html-webpack-plugin-before-html-processing", async data => {
-        data.html = _.template(data.html, this.options)();
-        return data;
-      });
-    });
-  }
-}
-
-const config = {
+module.exports = (env, argv) => ({
   entry: {
     index: path.join(__dirname, "src", "index.js"),
     hub: path.join(__dirname, "src", "hub.js"),
@@ -86,19 +67,16 @@ const config = {
     "avatar-selector": path.join(__dirname, "src", "avatar-selector.js")
   },
   output: {
-    path: path.join(__dirname, "public"),
     filename: "assets/js/[name]-[chunkhash].js",
     publicPath: process.env.BASE_ASSETS_PATH || ""
   },
-  mode: "development",
-  devtool: process.env.NODE_ENV === "production" ? "source-map" : "inline-source-map",
+  devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
   devServer: {
-    open: false,
     https: createHTTPSConfig(),
     host: "0.0.0.0",
     useLocalIp: true,
-    public: "hubs.local:8080",
-    port: 8080,
+    allowedHosts: ["hubs.local"],
+    headers: { "Access-Control-Allow-Origin": "hubs.local" },
     before: function(app) {
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
       app.head("*", function(req, res, next) {
@@ -124,27 +102,27 @@ const config = {
         loader: "html-loader",
         options: {
           // <a-asset-item>'s src property is overwritten with the correct transformed asset url.
-          attrs: ["img:src", "a-asset-item:src", "audio:src", "source:src"],
-          // You can get transformed asset urls in an html template using ${require("pathToFile.ext")}
-          interpolate: "require"
+          attrs: ["img:src", "a-asset-item:src", "audio:src", "source:src"]
         }
       },
       {
         test: /\.worker\.js$/,
-        use: { loader: "worker-loader" }
+        loader: "worker-loader",
+        options: {
+          name: "assets/js/[name]-[hash].js",
+          publicPath: "/",
+          inline: true
+        }
       },
       {
         test: /\.js$/,
         include: [path.resolve(__dirname, "src")],
         // Exclude JS assets in node_modules because they are already transformed and often big.
         exclude: [path.resolve(__dirname, "node_modules")],
-        loader: "babel-loader",
-        query: {
-          plugins: ["transform-class-properties", "transform-object-rest-spread"]
-        }
+        loader: "babel-loader"
       },
       {
-        test: /\.scss$/,
+        test: /\.(scss|css)$/,
         loader: ExtractTextPlugin.extract({
           fallback: "style-loader",
           use: [
@@ -152,7 +130,6 @@ const config = {
               loader: "css-loader",
               options: {
                 name: "[path][name]-[hash].[ext]",
-                minimize: process.env.NODE_ENV === "production",
                 localIdentName: "[name]__[local]__[hash:base64:5]",
                 camelCase: true
               }
@@ -162,26 +139,11 @@ const config = {
         })
       },
       {
-        test: /\.css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: "style-loader",
-          use: {
-            loader: "css-loader",
-            options: {
-              name: "[path][name]-[hash].[ext]",
-              minimize: process.env.NODE_ENV === "production",
-              localIdentName: "[name]__[local]__[hash:base64:5]",
-              camelCase: true
-            }
-          }
-        })
-      },
-      {
         test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|svg|webm)$/,
         use: {
           loader: "file-loader",
           options: {
-            // move required assets to /public and add a hash for cache busting
+            // move required assets to output dir and add a hash for cache busting
             name: "[path][name]-[hash].[ext]",
             // Make asset paths relative to /src
             context: path.join(__dirname, "src")
@@ -190,29 +152,57 @@ const config = {
       }
     ]
   },
+
+  optimization: {
+    // necessary due to https://github.com/visionmedia/debug/issues/547
+    minimizer: [new UglifyJsPlugin({ uglifyOptions: { compress: { collapse_vars: false } } })],
+    splitChunks: {
+      cacheGroups: {
+        engine: {
+          test: /[\\/]node_modules[\\/](aframe|cannon|three\.js)/,
+          priority: 100,
+          name: "engine",
+          chunks: "all"
+        },
+        vendors: {
+          test: /([\\/]node_modules[\\/]|[\\/]vendor[\\/])/,
+          priority: 50,
+          name: "vendor",
+          chunks: "all"
+        }
+      }
+    }
+  },
   plugins: [
     // Each output page needs a HTMLWebpackPlugin entry
     new HTMLWebpackPlugin({
       filename: "index.html",
       template: path.join(__dirname, "src", "index.html"),
-      // Chunks correspond with the entries you wish to include in your html template
-      chunks: ["index"]
+      chunks: ["vendor", "index"]
     }),
     new HTMLWebpackPlugin({
       filename: "hub.html",
       template: path.join(__dirname, "src", "hub.html"),
-      chunks: ["hub"],
-      inject: "head"
+      chunks: ["vendor", "engine", "hub"],
+      inject: "head",
+      meta: [
+        {
+          "http-equiv": "origin-trial",
+          "data-feature": "WebVR (For Chrome M62+)",
+          "data-expires": process.env.ORIGIN_TRIAL_EXPIRES,
+          content: process.env.ORIGIN_TRIAL_TOKEN
+        }
+      ]
     }),
     new HTMLWebpackPlugin({
       filename: "link.html",
       template: path.join(__dirname, "src", "link.html"),
-      chunks: ["link"]
+      chunks: ["vendor", "link"]
     }),
     new HTMLWebpackPlugin({
       filename: "avatar-selector.html",
       template: path.join(__dirname, "src", "avatar-selector.html"),
-      chunks: ["avatar-selector"],
+      chunks: ["vendor", "engine", "avatar-selector"],
       inject: "head"
     }),
     new CopyWebpackPlugin([
@@ -227,70 +217,20 @@ const config = {
         to: "hub-preview.png"
       }
     ]),
-    new CopyWebpackPlugin([
-      {
-        from: "src/assets/avatars/bot-recording.json",
-        to: "assets/avatars/bot-recording.json"
-      }
-    ]),
-    new CopyWebpackPlugin([
-      {
-        from: "src/assets/avatars/bot-recording.mp3",
-        to: "assets/avatars/bot-recording.mp3"
-      }
-    ]),
     // Extract required css and add a content hash.
     new ExtractTextPlugin({
-      filename: "assets/stylesheets/[name]-[contenthash].css",
-      disable: process.env.NODE_ENV !== "production"
-    }),
-    // Transform the output of the html-loader using _.template
-    // before passing the result to html-webpack-plugin
-    new LodashTemplatePlugin({
-      // expose these variables to the lodash template
-      // ex: <%= ORIGIN_TRIAL_TOKEN %>
-      imports: {
-        HTML_PREFIX: process.env.GENERATE_SMOKE_TESTS ? SMOKE_PREFIX : "",
-        NODE_ENV: process.env.NODE_ENV,
-        ORIGIN_TRIAL_EXPIRES: process.env.ORIGIN_TRIAL_EXPIRES,
-        ORIGIN_TRIAL_TOKEN: process.env.ORIGIN_TRIAL_TOKEN
-      }
+      filename: "assets/stylesheets/[name]-[md5:contenthash:hex:20].css",
+      disable: argv.mode !== "production"
     }),
     // Define process.env variables in the browser context.
     new webpack.DefinePlugin({
       "process.env": JSON.stringify({
-        NODE_ENV: process.env.NODE_ENV,
+        NODE_ENV: argv.mode,
         JANUS_SERVER: process.env.JANUS_SERVER,
-        DEV_RETICULUM_SERVER: process.env.DEV_RETICULUM_SERVER,
-        ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER
+        RETICULUM_SERVER: process.env.RETICULUM_SERVER,
+        ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER,
+        BUILD_VERSION: process.env.BUILD_VERSION
       })
     })
   ]
-};
-
-module.exports = () => {
-  if (process.env.GENERATE_SMOKE_TESTS && process.env.BASE_ASSETS_PATH) {
-    const smokeConfig = Object.assign({}, config, {
-      // Set the public path for to point to the correct assets on the smoke-test build.
-      output: Object.assign({}, config.output, {
-        publicPath: process.env.BASE_ASSETS_PATH.replace("://", `://${SMOKE_PREFIX}`)
-      }),
-      // For this config
-      plugins: config.plugins.map(plugin => {
-        if (plugin instanceof HTMLWebpackPlugin) {
-          return new HTMLWebpackPlugin(
-            Object.assign({}, plugin.options, {
-              filename: SMOKE_PREFIX + plugin.options.filename
-            })
-          );
-        }
-
-        return plugin;
-      })
-    });
-
-    return [config, smokeConfig];
-  } else {
-    return config;
-  }
-};
+});

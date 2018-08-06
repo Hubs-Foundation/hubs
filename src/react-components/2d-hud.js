@@ -1,31 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
-import queryString from "query-string";
 
 import styles from "../assets/stylesheets/2d-hud.scss";
+import qsTruthy from "../utils/qs_truthy";
 
-import FontAwesomeIcon from "@fortawesome/react-fontawesome";
-import faPlus from "@fortawesome/fontawesome-free-solid/faPlus";
-
-const qs = queryString.parse(location.search);
-function qsTruthy(param) {
-  const val = qs[param];
-  // if the param exists but is not set (e.g. "?foo&bar"), its value is null.
-  return val === null || /1|on|true/i.test(val);
-}
-const enableMediaTools = qsTruthy("mediaTools");
-
-const TwoDHUD = ({
-  muted,
-  frozen,
-  spacebubble,
-  onToggleMute,
-  onToggleFreeze,
-  onToggleSpaceBubble,
-  onClickAddMedia
-}) => (
-  <div className={styles.container}>
+const TopHUD = ({ muted, frozen, spacebubble, onToggleMute, onToggleFreeze, onToggleSpaceBubble }) => (
+  <div className={cx(styles.container, styles.top)}>
     <div className={cx("ui-interactive", styles.panel, styles.left)}>
       <div
         className={cx(styles.iconButton, styles.mute, { [styles.active]: muted })}
@@ -45,26 +26,32 @@ const TwoDHUD = ({
         onClick={onToggleSpaceBubble}
       />
     </div>
-    {enableMediaTools ? (
-      <div
-        className={cx("ui-interactive", styles.iconButton, styles.small, styles.addMediaButton)}
-        title="Add Media"
-        onClick={onClickAddMedia}
-      >
-        <FontAwesomeIcon icon={faPlus} />
-      </div>
-    ) : null}
   </div>
 );
 
-TwoDHUD.propTypes = {
+TopHUD.propTypes = {
   muted: PropTypes.bool,
   frozen: PropTypes.bool,
   spacebubble: PropTypes.bool,
   onToggleMute: PropTypes.func,
   onToggleFreeze: PropTypes.func,
-  onToggleSpaceBubble: PropTypes.func,
-  onClickAddMedia: PropTypes.func
+  onToggleSpaceBubble: PropTypes.func
 };
 
-export default TwoDHUD;
+const BottomHUD = ({ onCreateObject }) => (
+  <div className={cx(styles.container, styles.bottom)}>
+    {qsTruthy("mediaTools") && (
+      <div
+        className={cx("ui-interactive", styles.iconButton, styles.large, styles.createObject)}
+        title={"Create Object"}
+        onClick={onCreateObject}
+      />
+    )}
+  </div>
+);
+
+BottomHUD.propTypes = {
+  onCreateObject: PropTypes.func
+};
+
+export default { TopHUD, BottomHUD };

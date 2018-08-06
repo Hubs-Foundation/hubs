@@ -1,5 +1,5 @@
 import { Validator } from "jsonschema";
-import merge from "lodash/merge";
+import merge from "deepmerge";
 
 const LOCAL_STORE_KEY = "___hubs_store";
 const STORE_STATE_CACHE_KEY = Symbol();

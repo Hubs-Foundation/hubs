@@ -11,14 +11,10 @@
 .dialog {
   display: grid;
   grid-template-columns: 1fr 20px minmax(200px, 525px) 20px 1fr;
-  grid-template-rows: 1fr 20px 275px 20px 1fr;
+  grid-template-rows: 1fr 20px minmax(200px, max-content) 20px 1fr;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,.6);
-
-  &--tall {
-    grid-template-rows: 1fr 20px minmax(200px, max-content) 20px 1fr;
-  }
+  background-color: rgba(0,0,0,.2);
 
   &__box {
     grid-column: 3;
@@ -28,29 +24,29 @@
 
     &__contents {
       padding: 30px;
-      background-color: rgba(0,0,0,0.8);
+      background-color: rgba(0,0,0,0.9);
       box-shadow: 0px 0px 30px 1px #202020;
       border-radius: 8px;
-      height: 100%;
       display: flex;
       flex-direction: column;
       text-align: center;
       position: relative;
 
       &__title {
-	@extend %top-title;
-	margin-bottom: 20px;
+        @extend %top-title;
+        margin-bottom: 20px;
       }
 
       &__body {
-	font-size: 1.1em;
-	color: $grey-text;
-	display: flex;
-	flex-direction: column;
-	height: 100%;
-	overflow-y: auto;
+        font-size: 1.1em;
+        color: $grey-text;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow-y: auto;
+        margin: 10px 0;
 
-	a { color: white }
+        a { color: white }
       }
 
       &__links {
@@ -65,21 +61,21 @@
 
 
       &__close {
-	position: absolute;
-	left: 12px;
-	top: 6px;
-	color: white;
-	font-size: 1.4em;
+        position: absolute;
+        left: 12px;
+        top: 6px;
+        color: white;
+        font-size: 1.4em;
 
-	background: none;
-	cursor: pointer;
-	border: none;
+        background: none;
+        cursor: pointer;
+        border: none;
       }
     }
   }
 }
 
-.invite-form, .add-media-form {
+.invite-form, .add-media-form, .custom-scene-form {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -111,7 +107,7 @@
   }
 
   &__action-button {
-    @extend %bottom-button;
+    @extend %bottom-action-button;
     margin-left: 6px;
     margin-right: 6px;
     appearance: none;
@@ -149,7 +145,6 @@
 
   &__submit {
     @extend %bottom-button;
-    border: 0;
     margin-top: 0;
     margin-bottom: 0;
   }
@@ -162,6 +157,7 @@
   &__privacy_checkbox {
     @extend %checkbox;
     vertical-align: middle;
+    margin-bottom: 18px;
   }
 
   &__privacy_checkbox:checked {
