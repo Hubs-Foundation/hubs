@@ -1,64 +1,73 @@
 @import 'shared';
 
+:local(.addMediaForm) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 0;
+}
+
+:local(.actionButton) {
+  @extend %bottom-action-button;
+  margin-left: 6px;
+  margin-right: 6px;
+  appearance: none;
+  width: 128px;
+  text-align: center;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+}
+
+:local(.buttons) {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 :local(.smallButton) {
-  padding-right: 5%;
+  padding-left: 0.25em;
+  padding-right: 0.5em;
   font-size: 2em;
   align-self: center;
 }
 
 :local(.cancelIcon) {
-  padding-left: 2%;
   color: white;
-  :hover {
+  &:hover {
     color: #FF3D7F
   }
 }
 
 :local(.uploadIcon) {
   color: white;
-  :hover {
+  &:hover {
     color: #2F80ED;
   }
 }
 
 :local(.inputBorder) {
-  margin: 2% 1% 2% 1%;
   display: flex;
-  width: 100%;
-  height: 60px;
+  align-self: stretch;
   justify-content: space-between;
-  @extend %rounded-border;
+  border: 0.25em solid white;
+  border-radius: 1em;
+  margin: 1em;
+  padding: 0.5em;
   @extend %default-font;
 }
 
-:local(.urlInput) {
+:local(.leftSideOfInput) {
+  flex-grow: 1;
   border: none;
-  text-align: center;
-  font-size: 1.3em;
-  padding-left: 8%;
-  padding-right: 0%;
-  width: 80%;
   white-space: nowrap;
-}
-
-:local(.fileNameLabel) {
-  border: none;
+  background: transparent;
+  color: white;
   text-align: center;
   align-self: center;
-  padding-left: 8%;
-  padding-right: 0%;
-  width: 80%;
-}
-
-:local(.form) {
-  width: 80%;
 }
 
 :local(.hideFileInput) {
-  width: 0.1px;
-  height: 0.1px;
-  opacity: 0;
-  overflow: hidden;
+  visibility: hidden;
   position: absolute;
-  z-index: -1;
 }

@@ -96,12 +96,10 @@ export default class CreateObjectDialog extends Component {
         <FontAwesomeIcon icon={faPaperclip} />
       </label>
     );
-    const filenameLabel = (
-      <label className={cx(styles.fileNameLabel, "add-media-form__link_field")}>{this.state.fileName}</label>
-    );
+    const filenameLabel = <label className={cx(styles.leftSideOfInput)}>{this.state.fileName}</label>;
     const urlInput = (
       <input
-        className={cx(styles.urlInput, "add-media-form__link_field")}
+        className={cx(styles.leftSideOfInput)}
         placeholder="Image/Video/glTF URL"
         onChange={this.onUrlChange}
         value={this.state.url}
@@ -112,14 +110,14 @@ export default class CreateObjectDialog extends Component {
       <div>
         {isMobile ? mobileInstructions : desktopInstructions}
         <form onSubmit={this.onCreateClicked}>
-          <div className="add-media-form">
+          <div className={styles.addMediaForm}>
             <input id={fileInputId} className={styles.hideFileInput} type="file" onChange={this.onFileChange} />
             <div className={styles.inputBorder}>
               {this.state.file ? filenameLabel : urlInput}
               {this.state.url || this.state.fileName ? cancelButton : uploadButton}
             </div>
-            <div className="add-media-form__buttons">
-              <button className="add-media-form__action-button">
+            <div className={styles.buttons}>
+              <button className={styles.actionButton}>
                 <span>create</span>
               </button>
             </div>
