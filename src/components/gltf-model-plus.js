@@ -353,8 +353,7 @@ AFRAME.registerComponent("gltf-model-plus", {
         GLTFCache[src] = loadGLTF(src, this.preferredTechnique);
       }
 
-      const cachedModel = await GLTFCache[src];
-      const model = cloneGltf(cachedModel);
+      const model = cloneGltf(await GLTFCache[src]);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
