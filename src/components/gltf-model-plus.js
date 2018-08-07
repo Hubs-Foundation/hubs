@@ -209,8 +209,15 @@ async function loadEnvMap() {
   return texture;
 }
 
-function resolveGLTFUri(gltfProperty, basePath) {
-  return resolveMedia(new URL(gltfProperty.uri, basePath).href).then(({ raw }) => (gltfProperty.uri = raw));
+async function resolveGLTFUri(gltfProperty, basePath) {
+  const url = new URL(gltfProperty.uri, basePath);
+
+  if (url.protocol === "blob:") {
+    gltfProperty.uri = url.href;
+  } else {
+    const { raw } = await resolveMedia(url.href);
+    gltfProperty.uri = raw;
+  }
 }
 
 async function loadGLTF(src, preferredTechnique, onProgress) {
@@ -270,6 +277,8 @@ async function loadGLTF(src, preferredTechnique, onProgress) {
   }
 
   await Promise.all(pendingFarsparkPromises);
+
+  console.log(parser.json);
 
   const gltf = await new Promise((resolve, reject) =>
     parser.parse(
