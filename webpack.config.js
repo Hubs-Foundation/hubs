@@ -80,7 +80,7 @@ module.exports = (env, argv) => ({
     proxy: {
       "/test-environment": {
         target: process.env.TEST_ENVIRONMENT_HOST,
-        pathRewrite: {'^/test-environment' : ''}
+        pathRewrite: { "^/test-environment": "" }
       }
     },
     before: function(app) {
@@ -236,7 +236,7 @@ module.exports = (env, argv) => ({
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
         ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER,
         BUILD_VERSION: process.env.BUILD_VERSION,
-        TEST_ENVIRONMENT_PATH: process.env.TEST_ENVIRONMENT_PATH,
+        TEST_ENVIRONMENT_PATH: process.env.TEST_ENVIRONMENT_PATH
       })
     })
   ]
