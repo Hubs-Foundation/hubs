@@ -77,6 +77,12 @@ module.exports = (env, argv) => ({
     useLocalIp: true,
     allowedHosts: ["hubs.local"],
     headers: { "Access-Control-Allow-Origin": "hubs.local" },
+    proxy: {
+      "/test-environment": {
+        target: process.env.TEST_ENVIRONMENT_HOST,
+        pathRewrite: {'^/test-environment' : ''}
+      }
+    },
     before: function(app) {
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
       app.head("*", function(req, res, next) {
@@ -229,7 +235,8 @@ module.exports = (env, argv) => ({
         JANUS_SERVER: process.env.JANUS_SERVER,
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
         ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER,
-        BUILD_VERSION: process.env.BUILD_VERSION
+        BUILD_VERSION: process.env.BUILD_VERSION,
+        TEST_ENVIRONMENT_PATH: process.env.TEST_ENVIRONMENT_PATH,
       })
     })
   ]
