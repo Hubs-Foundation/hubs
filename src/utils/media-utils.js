@@ -42,12 +42,16 @@ export const addMedia = (src, resize = false) => {
   scene.appendChild(entity);
 
   if (typeof src === "object") {
-    upload(src).then(response => {
-      const src = response.raw;
-      const contentType = response.meta.expected_content_type;
-      const token = response.meta.access_token;
-      entity.setAttribute("media-loader", { src, contentType, token });
-    });
+    upload(src)
+      .then(response => {
+        const src = response.raw;
+        const contentType = response.meta.expected_content_type;
+        const token = response.meta.access_token;
+        entity.setAttribute("media-loader", { src, contentType, token });
+      })
+      .catch(() => {
+        entity.setAttribute("media-loader", { src: "error" });
+      });
   }
   return entity;
 };
