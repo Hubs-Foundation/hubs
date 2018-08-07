@@ -28,12 +28,6 @@ export const upload = file => {
   return fetch(mediaAPIEndpoint, {
     method: "POST",
     body: formData
-
-    // We do NOT specify a Content-Type header like so
-    //     headers: { "Content-Type" : "multipart/form-data" },
-    // because we want the browser to automatically add
-    //     "Content-Type" : "multipart/form-data; boundary=...--------------<boundary_size>",
-    // See https://stanko.github.io/uploading-files-using-fetch-multipart-form-data/ for details.
   }).then(r => r.json());
 };
 
