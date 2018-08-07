@@ -49,7 +49,7 @@ export default class CreateObjectDialog extends Component {
 
   onUrlChange = e => {
     let attributionImage = this.state.attributionImage;
-    if (e.target && e.target.value && e.target.validity.valid){
+    if (e.target && e.target.value && e.target.validity.valid) {
       attributionImage = attributionHostnames[new URL(e.target.value).hostname];
     }
     this.setState({
