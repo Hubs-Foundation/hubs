@@ -1,13 +1,20 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import { resolveMedia } from "../utils/media-utils";
 
-const fetchContentType = async url => fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
+const fetchContentType = async (url, token) => {
+  const args = { method: "HEAD" };
+
+  if (token) {
+    args.headers = { Authorization: `Token ${token}` };
+  }
+
+  return fetch(url, args).then(r => r.headers.get("content-type"));
+};
 
 AFRAME.registerComponent("media-loader", {
   schema: {
     src: { type: "string" },
     token: { type: "string" },
-    contentType: { type: "string" },
     resize: { default: false }
   },
 
@@ -64,8 +71,7 @@ AFRAME.registerComponent("media-loader", {
       const { raw, origin, meta } = await resolveMedia(url);
       console.log("resolved", url, raw, origin, meta);
 
-      const contentType =
-        this.data.contentType || (meta && meta.expected_content_type) || (await fetchContentType(raw));
+      const contentType = (meta && meta.expected_content_type) || (await fetchContentType(raw, token));
       let blobUrl;
       if (token) {
         const response = await fetch(raw, {
