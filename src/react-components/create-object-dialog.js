@@ -84,6 +84,7 @@ export default class CreateObjectDialog extends Component {
       file: null,
       fileName: ""
     });
+    this.fileInput.value = null;
   };
 
   render() {
@@ -112,7 +113,13 @@ export default class CreateObjectDialog extends Component {
         {isMobile ? mobileInstructions : desktopInstructions}
         <form onSubmit={this.onCreateClicked}>
           <div className={styles.addMediaForm}>
-            <input id={fileInputId} className={styles.hideFileInput} type="file" onChange={this.onFileChange} />
+            <input
+              id={fileInputId}
+              ref={f => (this.fileInput = f)}
+              className={styles.hideFileInput}
+              type="file"
+              onChange={this.onFileChange}
+            />
             <div className={styles.inputBorder}>
               {this.state.file ? filenameLabel : urlInput}
               {this.state.url || this.state.fileName ? cancelButton : uploadButton}
