@@ -26,8 +26,7 @@
 }
 
 :local(.smallButton) {
-  padding-left: 0.25em;
-  padding-right: 0.5em;
+  margin-left: 0.25em;
   font-size: 2em;
   align-self: center;
 }
@@ -48,12 +47,12 @@
 
 :local(.inputBorder) {
   display: flex;
-  align-self: stretch;
-  justify-content: space-between;
   border: 0.25em solid white;
   border-radius: 1em;
   margin: 1em;
-  padding: 0.5em;
+  padding: 0.5em 0.75em;
+  width: 100%;
+  box-sizing: border-box;
   @extend %default-font;
 }
 
@@ -63,8 +62,10 @@
   white-space: nowrap;
   background: transparent;
   color: white;
-  text-align: center;
+  font-size: 1.2em;
   align-self: center;
+  overflow: hidden;
+  text-overflow: ellipsis; 
 }
 
 :local(.hideFileInput) {
