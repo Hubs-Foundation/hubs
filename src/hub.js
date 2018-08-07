@@ -73,6 +73,7 @@ import "./components/position-at-box-shape-border";
 import "./components/remove-networked-object-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/media-loader";
+import "./components/gamma-factor";
 
 import ReactDOM from "react-dom";
 import React from "react";
