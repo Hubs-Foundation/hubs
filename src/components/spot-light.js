@@ -12,6 +12,7 @@ AFRAME.registerComponent("spot-light", {
     const el = this.el;
     this.light = new THREE.SpotLight();
     this.light.target.position.set(0, 0, 1);
+    this.light.add(this.light.target);
     this.light.decay = 2;
     this.el.setObject3D("spot-light", this.light);
     this.el.sceneEl.systems.light.registerLight(el);

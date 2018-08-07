@@ -14,7 +14,7 @@ AFRAME.registerComponent("hemisphere-light", {
 
   update(prevData) {
     if (this.data.skyColor !== prevData.skyColor) {
-      this.light.skyColor.set(this.data.skyColor);
+      this.light.color.set(this.data.skyColor);
     }
 
     if (this.data.groundColor !== prevData.groundColor) {
