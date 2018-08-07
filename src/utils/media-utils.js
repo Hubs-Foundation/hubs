@@ -45,9 +45,8 @@ export const addMedia = (src, resize = false) => {
     upload(src)
       .then(response => {
         const src = response.raw;
-        const contentType = response.meta.expected_content_type;
         const token = response.meta.access_token;
-        entity.setAttribute("media-loader", { src, contentType, token });
+        entity.setAttribute("media-loader", { src, token });
       })
       .catch(() => {
         entity.setAttribute("media-loader", { src: "error" });

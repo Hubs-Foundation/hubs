@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import "aframe";
 import PropTypes from "prop-types";
 import giphyLogo from "../assets/images/giphy_logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,14 +14,13 @@ const attributionHostnames = {
 
 const DEFAULT_OBJECT_URL = "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf";
 const isMobile = AFRAME.utils.device.isMobile();
-const instructions = "Paste a URL or upload a file";
+const instructions = "Paste a URL or upload a file.";
 const desktopTips = "Tip: You can paste links directly into Hubs with Ctrl+V";
 const mobileInstructions = <div>{instructions}</div>;
 const desktopInstructions = (
   <div>
-    {instructions}
-    <br />
-    {desktopTips}
+    <p>{instructions}</p>
+    <p>{desktopTips}</p>
   </div>
 );
 
