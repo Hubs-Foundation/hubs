@@ -319,9 +319,15 @@ const onReady = async () => {
       document.addEventListener("paste", e => {
         if (e.target.nodeName === "INPUT") return;
 
-        const imgUrl = e.clipboardData.getData("text");
-        console.log("Pasted: ", imgUrl, e);
-        spawnMediaInfrontOfPlayer(imgUrl);
+        const url = e.clipboardData.getData("text");
+        const files = e.clipboardData.files && e.clipboardData.files;
+        if (url) {
+          spawnMediaInfrontOfPlayer(url);
+        } else {
+          for (const file of files) {
+            spawnMediaInfrontOfPlayer(file);
+          }
+        }
       });
 
       document.addEventListener("dragover", e => {
@@ -331,8 +337,14 @@ const onReady = async () => {
       document.addEventListener("drop", e => {
         e.preventDefault();
         const url = e.dataTransfer.getData("url");
-        const file = e.dataTransfer.files && e.dataTransfer.files[0];
-        spawnMediaInfrontOfPlayer(url || file);
+        const files = e.dataTransfer.files;
+        if (url) {
+          spawnMediaInfrontOfPlayer(url);
+        } else {
+          for (const file of files) {
+            spawnMediaInfrontOfPlayer(file);
+          }
+        }
       });
     }
 

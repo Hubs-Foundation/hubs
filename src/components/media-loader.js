@@ -13,6 +13,7 @@ AFRAME.registerComponent("media-loader", {
 
   init() {
     this.onError = this.onError.bind(this);
+    this.showLoader = this.showLoader.bind(this);
   },
 
   setShapeAndScale(resize) {
@@ -44,19 +45,19 @@ AFRAME.registerComponent("media-loader", {
     clearTimeout(this.showLoaderTimeout);
   },
 
+  showLoader() {
+    const loadingObj = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
+    this.el.setObject3D("mesh", loadingObj);
+    this.setShapeAndScale(true);
+  },
+
   // TODO: correctly handle case where src changes
   async update() {
     try {
       const url = this.data.src;
       const token = this.data.token;
 
-      this.showLoaderTimeout =
-        this.showLoaderTimeout ||
-        setTimeout(() => {
-          const loadingObj = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
-          this.el.setObject3D("mesh", loadingObj);
-          this.setShapeAndScale(true);
-        }, 100);
+      this.showLoaderTimeout = this.showLoaderTimeout || setTimeout(this.showLoader, 100);
 
       if (!url) return;
 
@@ -65,6 +66,15 @@ AFRAME.registerComponent("media-loader", {
 
       const contentType =
         this.data.contentType || (meta && meta.expected_content_type) || (await fetchContentType(raw));
+      let blobUrl;
+      if (token) {
+        const response = await fetch(raw, {
+          method: "GET",
+          headers: { Authorization: `Token ${token}` }
+        });
+        const blob = await response.blob();
+        blobUrl = window.URL.createObjectURL(blob);
+      }
       if (contentType.startsWith("image/") || contentType.startsWith("video/") || contentType.startsWith("audio/")) {
         this.el.addEventListener(
           "image-loaded",
@@ -73,15 +83,6 @@ AFRAME.registerComponent("media-loader", {
           },
           { once: true }
         );
-        let blobUrl;
-        if (token) {
-          const imageResponse = await fetch(raw, {
-            method: "GET",
-            headers: { Authorization: `Token ${token}` }
-          });
-          const blob = await imageResponse.blob();
-          blobUrl = window.URL.createObjectURL(blob);
-        }
         this.el.setAttribute("image-plus", { src: blobUrl || raw, contentType });
         this.el.setAttribute("position-at-box-shape-border", { target: ".delete-button", dirs: ["forward", "back"] });
       } else if (
@@ -100,15 +101,6 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
-        let blobUrl;
-        if (token) {
-          const modelResponse = await fetch(raw, {
-            method: "GET",
-            headers: { Authorization: `Token ${token}` }
-          });
-          const blob = await modelResponse.blob();
-          blobUrl = window.URL.createObjectURL(blob);
-        }
         this.el.setAttribute("gltf-model-plus", {
           src: blobUrl || raw,
           contentType,
