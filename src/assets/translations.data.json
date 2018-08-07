@@ -22,6 +22,7 @@
     "entry.invite-others": "invite others",
     "entry.invite-others-nag": "invite others to join",
     "entry.enable-screen-sharing": "Share my desktop",
+    "entry.return-to-vr": "Return to VR",
     "profile.save": "save",
     "profile.display_name.validation_warning": "Alphanumerics and hyphens. At least 3 characters, no more than 32",
     "profile.header": "Your display name:",
