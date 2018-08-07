@@ -191,7 +191,7 @@ AFRAME.registerComponent("image-plus", {
         cacheItem = { count: 1 };
         if (url === "error") {
           texture = errorTexture;
-        } else if (contentType === "image/gif") {
+        } else if (contentType.includes("image/gif")) {
           texture = await this.loadGIF(url);
         } else if (contentType.startsWith("image/")) {
           texture = await this.loadImage(url);

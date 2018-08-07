@@ -41,7 +41,7 @@ export const addMedia = (src, resize = false) => {
   entity.setAttribute("media-loader", { resize, src: typeof src === "string" ? src : "" });
   scene.appendChild(entity);
 
-  if (typeof src === "object") {
+  if (src instanceof File) {
     upload(src)
       .then(response => {
         const src = response.raw;
