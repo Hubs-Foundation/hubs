@@ -134,6 +134,7 @@ import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
 import "./components/tools/pen";
 import "./components/tools/networked-drawing";
+import "./components/tools/drawing-manager";
 
 function qsTruthy(param) {
   const val = qs.get(param);

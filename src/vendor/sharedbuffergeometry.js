@@ -11,14 +11,10 @@ export default class SharedBufferGeometry {
     this.addBuffer(false);
   }
 
-  getDrawing () {
-    return this.drawing;
-  }
-
   restartPrimitive () {
     if (this.idx.position >= this.current.attributes.position.count) {
       this.addBuffer(false);
-    } else if (this.idx.position !== 0) {
+    } else if (this.idx.position !== 0) {   
       let prev = (this.idx.position - 1) * 3;
       const position = this.current.attributes.position.array;
       this.addVertex(position[prev++], position[prev++], position[prev++]);
@@ -30,7 +26,7 @@ export default class SharedBufferGeometry {
   }
 
   remove (prevIdx, idx) {
-    const pos = this.current.attributes.position.array;
+    // const pos = this.current.attributes.position.array;
 
     // Loop through all the attributes: position, color, uv, normal,...
     if (this.idx.position > idx.position) {
@@ -41,14 +37,26 @@ export default class SharedBufferGeometry {
         const end = this.idx[key] * componentSize;
         for (let i = start; i < end; i++) {
           this.current.attributes[key].array[pos++] = this.current.attributes[key].array[i];
+          // this.current.attributes[key].array[i] = Number.NEGATIVE_INFINITY;
         }
+        const diff = (idx[key] - prevIdx[key] + 1);
+        this.idx[key] -= diff;
       }
-    }
+    } else {
+      for (let key in this.idx) {
+        // const componentSize = key === 'uv' ? 2 : 3;
+        // for (let i = 0; i < this.idx.position * componentSize; i++) {
+        //     this.current.attributes[key].array[i] = Number.NEGATIVE_INFINITY;
+        // }
+        const diff = (idx[key] - prevIdx[key]);
+        this.idx[key] -= diff;
+      }
+    } 
 
-    for (key in this.idx) {
-      const diff = (idx[key] - prevIdx[key]);
-      this.idx[key] -= diff;
-    }
+    // for (let key in this.idx) {
+      // const diff = (idx[key] - prevIdx[key]);
+      // this.idx[key] -= diff;
+    // }
 
     this.update();
   }
@@ -59,6 +67,7 @@ export default class SharedBufferGeometry {
   }
 
   addBuffer (copyLast) {
+    console.log("addBuffer", copyLast)
     const geometry = new THREE.BufferGeometry();
 
     const vertices = new Float32Array(this.maxBufferSize * 3);

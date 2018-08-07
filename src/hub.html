@@ -211,7 +211,7 @@
                         position="0 -0.18 0" 
                         radius="0.02" 
                         color="red" 
-                        pen="camera: #player-camera; drawing: #my-first-drawing;"
+                        pen="camera: #player-camera; drawingManager: #drawing-manager"
                     ></a-sphere>
                 </a-entity>
             </template>
@@ -265,6 +265,8 @@
         <a-entity id="media-counter" networked-counter="max: 10;"></a-entity>
 
         <a-entity id="pen-counter" networked-counter="max: 3;"></a-entity>
+
+        <a-entity id="drawing-manager" drawing-manager="drawing: #my-first-drawing;"></a-entity>
 
         <a-entity
             id="cursor-controller"
