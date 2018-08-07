@@ -123,8 +123,10 @@ class AvatarSelector extends Component {
   }
 
   componentDidMount() {
+    // <a-scene> component not initialized until scene element mounted and loaded.
     this.scene.addEventListener("loaded", () => {
       this.scene.setAttribute("renderer", { gammaOutput: true, sortObjects: true, physicallyCorrectLights: true });
+      this.scene.setAttribute("gamma-factor", "");
     });
   }
 
