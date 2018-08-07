@@ -260,7 +260,7 @@ async function loadGLTF(src, preferredTechnique, onProgress) {
         material.extensions.MOZ_alt_materials[preferredTechnique] !== undefined
       ) {
         const altMaterialIndex = material.extensions.MOZ_alt_materials[preferredTechnique];
-        materials[i] = altMaterialIndex;
+        materials[i] = materials[altMaterialIndex];
       }
     }
   }
@@ -312,7 +312,8 @@ AFRAME.registerComponent("gltf-model-plus", {
   },
 
   init() {
-    this.preferredTechnique = AFRAME.utils.device.isMobile() ? "KHR_materials_unlit" : "pbrMetallicRoughness";
+    this.preferredTechnique =
+      window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness";
     this.loadTemplates();
   },
 
