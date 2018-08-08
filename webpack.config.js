@@ -1,5 +1,7 @@
-// Variables in .env will be added to process.env
-require("dotenv").config();
+// Variables in .env and .env.defaults will be added to process.env
+const dotenv = require("dotenv");
+dotenv.config({ path: ".env" });
+dotenv.config({ path: ".env.defaults" });
 
 const fs = require("fs");
 const path = require("path");
@@ -70,13 +72,11 @@ module.exports = (env, argv) => ({
   },
   devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
   devServer: {
-    open: false,
     https: createHTTPSConfig(),
     host: "0.0.0.0",
     useLocalIp: true,
-    public: "hubs.local:8080",
-    port: 8080,
-    headers: { "Access-Control-Allow-Origin": "*" },
+    allowedHosts: ["hubs.local"],
+    headers: { "Access-Control-Allow-Origin": "hubs.local" },
     before: function(app) {
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
       app.head("*", function(req, res, next) {
@@ -119,13 +119,10 @@ module.exports = (env, argv) => ({
         include: [path.resolve(__dirname, "src")],
         // Exclude JS assets in node_modules because they are already transformed and often big.
         exclude: [path.resolve(__dirname, "node_modules")],
-        loader: "babel-loader",
-        query: {
-          plugins: ["transform-class-properties", "transform-object-rest-spread"]
-        }
+        loader: "babel-loader"
       },
       {
-        test: /\.scss$/,
+        test: /\.(scss|css)$/,
         loader: ExtractTextPlugin.extract({
           fallback: "style-loader",
           use: [
@@ -139,20 +136,6 @@ module.exports = (env, argv) => ({
             },
             "sass-loader"
           ]
-        })
-      },
-      {
-        test: /\.css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: "style-loader",
-          use: {
-            loader: "css-loader",
-            options: {
-              name: "[path][name]-[hash].[ext]",
-              localIdentName: "[name]__[local]__[hash:base64:5]",
-              camelCase: true
-            }
-          }
         })
       },
       {
@@ -244,7 +227,7 @@ module.exports = (env, argv) => ({
       "process.env": JSON.stringify({
         NODE_ENV: argv.mode,
         JANUS_SERVER: process.env.JANUS_SERVER,
-        DEV_RETICULUM_SERVER: process.env.DEV_RETICULUM_SERVER,
+        RETICULUM_SERVER: process.env.RETICULUM_SERVER,
         ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER,
         BUILD_VERSION: process.env.BUILD_VERSION
       })

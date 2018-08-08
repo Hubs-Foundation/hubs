@@ -10,9 +10,6 @@
     <link rel="shortcut icon" type="image/png" href="/favicon.ico">
     <title>Get together | Hubs by Mozilla</title>
     <link href="https://fonts.googleapis.com/css?family=Zilla+Slab:300,300i,400,400i,700" rel="stylesheet">
-
-    <!-- HACK: this has to run after A-Frame but before our bundle, since A-Frame blows away the local storage setting -->
-    <script src="https://cdn.rawgit.com/gfodor/ba8f88d9f34fe9cbe59a01ce3c48420d/raw/03e31f0ef7b9eac5e947bd39e440f34df0701f75/naf-janus-adapter-logging.js" integrity="sha384-4q1V8Q88oeCFriFefFo5uEUtMzbw6K116tFyC9cwbiPr6wEe7050l5HoJUxMvnzj" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -24,7 +21,8 @@
     </audio>
 
     <a-scene
-        renderer="antialias: true"
+        renderer="antialias: true; gammaOutput: true; sortObjects: true; physicallyCorrectLights: true;"
+        gamma-factor
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         physics="gravity: -6; debug: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"

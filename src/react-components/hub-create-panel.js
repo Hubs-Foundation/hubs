@@ -87,8 +87,8 @@ class HubCreatePanel extends Component {
 
     let createUrl = "/api/v1/hubs";
 
-    if (process.env.NODE_ENV === "development") {
-      createUrl = `https://${process.env.DEV_RETICULUM_SERVER}${createUrl}`;
+    if (process.env.RETICULUM_SERVER) {
+      createUrl = `https://${process.env.RETICULUM_SERVER}${createUrl}`;
     }
 
     const res = await fetch(createUrl, {
@@ -99,7 +99,7 @@ class HubCreatePanel extends Component {
 
     const hub = await res.json();
 
-    if (process.env.NODE_ENV === "production" || document.location.host === process.env.DEV_RETICULUM_SERVER) {
+    if (!process.env.RETICULUM_SERVER || document.location.host === process.env.RETICULUM_SERVER) {
       document.location = hub.url;
     } else {
       document.location = `/hub.html?hub_id=${hub.hub_id}`;

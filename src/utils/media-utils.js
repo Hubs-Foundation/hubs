@@ -1,23 +1,42 @@
 const whitelistedHosts = [/^.*\.reticulum\.io$/, /^.*hubs\.mozilla\.com$/, /^hubs\.local$/];
 const isHostWhitelisted = hostname => !!whitelistedHosts.filter(r => r.test(hostname)).length;
 let mediaAPIEndpoint = "/api/v1/media";
-if (process.env.NODE_ENV === "development") {
-  mediaAPIEndpoint = `https://${process.env.DEV_RETICULUM_SERVER}${mediaAPIEndpoint}`;
+
+if (process.env.RETICULUM_SERVER) {
+  mediaAPIEndpoint = `https://${process.env.RETICULUM_SERVER}${mediaAPIEndpoint}`;
 }
 
+const fetchContentType = async (url, token) => {
+  const args = { method: "HEAD" };
+
+  if (token) {
+    args.headers = { Authorization: `Token ${token}` };
+  }
+
+  return fetch(url, args).then(r => r.headers.get("content-type"));
+};
+
 const resolveMediaCache = new Map();
-export const resolveMedia = async url => {
+export const resolveMedia = async (url, token) => {
   const parsedUrl = new URL(url);
   if (resolveMediaCache.has(url)) return resolveMediaCache.get(url);
 
+  const isNotHttpOrHttps = parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:";
   const resolved =
-    (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") || isHostWhitelisted(parsedUrl.hostname)
+    isNotHttpOrHttps || isHostWhitelisted(parsedUrl.hostname)
       ? { raw: url, origin: url }
       : await fetch(mediaAPIEndpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ media: { url } })
         }).then(r => r.json());
+
+  if (!isNotHttpOrHttps) {
+    const contentType =
+      (resolved.meta && resolved.meta.expected_content_type) || (await fetchContentType(resolved.raw, token));
+    resolved.contentType = contentType;
+  }
+
   resolveMediaCache.set(url, resolved);
   return resolved;
 };

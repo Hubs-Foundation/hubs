@@ -1,16 +1,6 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import { resolveMedia } from "../utils/media-utils";
 
-const fetchContentType = async (url, token) => {
-  const args = { method: "HEAD" };
-
-  if (token) {
-    args.headers = { Authorization: `Token ${token}` };
-  }
-
-  return fetch(url, args).then(r => r.headers.get("content-type"));
-};
-
 AFRAME.registerComponent("media-loader", {
   schema: {
     src: { type: "string" },
@@ -68,10 +58,8 @@ AFRAME.registerComponent("media-loader", {
 
       if (!url) return;
 
-      const { raw, origin, meta } = await resolveMedia(url);
-      console.log("resolved", url, raw, origin, meta);
+      const { raw, contentType } = await resolveMedia(url, token);
 
-      const contentType = (meta && meta.expected_content_type) || (await fetchContentType(raw, token));
       let blobUrl;
       if (token) {
         const response = await fetch(raw, {
@@ -81,6 +69,7 @@ AFRAME.registerComponent("media-loader", {
         const blob = await response.blob();
         blobUrl = window.URL.createObjectURL(blob);
       }
+
       if (contentType.startsWith("image/") || contentType.startsWith("video/") || contentType.startsWith("audio/")) {
         this.el.addEventListener(
           "image-loaded",
@@ -89,7 +78,7 @@ AFRAME.registerComponent("media-loader", {
           },
           { once: true }
         );
-        this.el.setAttribute("image-plus", { src: blobUrl || raw, contentType });
+        this.el.setAttribute("image-plus", { src: blobUrl || raw, contentType, token });
         this.el.setAttribute("position-at-box-shape-border", { target: ".delete-button", dirs: ["forward", "back"] });
       } else if (
         contentType.includes("application/octet-stream") ||
@@ -108,9 +97,8 @@ AFRAME.registerComponent("media-loader", {
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
         this.el.setAttribute("gltf-model-plus", {
-          src: blobUrl || raw,
+          src: blobUrl || url,
           contentType,
-          basePath: THREE.LoaderUtils.extractUrlBase(origin),
           inflate: true
         });
       } else {

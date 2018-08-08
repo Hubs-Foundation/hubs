@@ -3,12 +3,11 @@ console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 import "./assets/stylesheets/hub.scss";
 
 import "aframe";
+import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
-import "aframe-xr";
-
-import "./vendor/GLTFLoader";
+import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
@@ -75,6 +74,7 @@ import "./components/position-at-box-shape-border";
 import "./components/remove-networked-object-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/media-loader";
+import "./components/gamma-factor";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -131,12 +131,7 @@ import registerTelemetry from "./telemetry";
 
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
-
-function qsTruthy(param) {
-  const val = qs.get(param);
-  // if the param exists but is not set (e.g. "?foo&bar"), its value is the empty string.
-  return val === "" || /1|on|true/i.test(val);
-}
+import qsTruthy from "./utils/qs_truthy";
 
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
@@ -237,7 +232,6 @@ const onReady = async () => {
     if (!isBotMode) {
       scene.classList.add("no-cursor");
     }
-    scene.renderer.sortObjects = true;
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("canvas").classList.remove("blurred");
     scene.render();
