@@ -24,7 +24,6 @@ AFRAME.registerSystem("tunneleffect", {
     this.isMoving = false;
     this.isVR = false;
     this.dt = 0;
-    this.t = 0;
     this.radius = data.radius;
     this.minRadius = data.minRadius;
     this.softness = data.softness;
@@ -53,7 +52,6 @@ AFRAME.registerSystem("tunneleffect", {
   },
 
   tick: function(time, deltaTime) {
-    this.t = time;
     this.dt = deltaTime;
 
     if (!this._isPostProcessingReady() || !this.isVR) {
