@@ -221,13 +221,9 @@ async function resolveGLTFUri(gltfProperty, basePath) {
 }
 
 async function loadGLTF(src, token, contentType, preferredTechnique, onProgress) {
-  const resolved = await resolveMedia(src, token);
-  const raw = resolved.raw;
-  const origin = resolved.origin;
-  contentType = contentType || resolved.contentType;
-  const basePath = THREE.LoaderUtils.extractUrlBase(origin);
+  const basePath = THREE.LoaderUtils.extractUrlBase(src);
 
-  let gltfUrl = raw;
+  let gltfUrl = src;
   let fileMap;
 
   if (contentType.includes("model/gltf+zip") || contentType.includes("application/x-zip-compressed")) {
