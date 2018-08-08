@@ -1,3 +1,4 @@
+import "aframe";
 import ReactDOM from "react-dom";
 import React from "react";
 import { IntlProvider, addLocaleData } from "react-intl";
@@ -9,11 +10,12 @@ import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
 import "./assets/stylesheets/avatar-selector.scss";
-import "./vendor/GLTFLoader";
+import "three/examples/js/loaders/GLTFLoader";
 
 import "./components/animation-mixer";
 import "./components/audio-feedback";
 import "./components/loop-animation";
+import "./components/gamma-factor";
 import "./gltf-component-mappings";
 import { avatars } from "./assets/avatars/avatars";
 
@@ -25,16 +27,19 @@ addLocaleData([...en]);
 
 registerTelemetry();
 
-const hash = new URLSearchParams(location.hash.replace(/^#/, "?"));
+function getHashArg(arg) {
+  return new URLSearchParams(location.hash.replace(/^#/, "?")).get(arg);
+}
+
 window.APP = new App();
-window.APP.quality = hash.get("quality") || AFRAME.utils.device.isMobile() ? "low" : "high";
+window.APP.quality = getHashArg("quality") || AFRAME.utils.device.isMobile() ? "low" : "high";
 
 function postAvatarIdToParent(newAvatarId) {
   window.parent.postMessage({ avatarId: newAvatarId }, location.origin);
 }
 
 function mountUI() {
-  const avatarId = hash.get("avatar_id");
+  const avatarId = getHashArg("avatar_id");
   ReactDOM.render(
     <IntlProvider locale={lang} messages={messages}>
       <AvatarSelector {...{ avatars, avatarId, onChange: postAvatarIdToParent }} />

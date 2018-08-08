@@ -24,7 +24,7 @@ pipeline {
   stages {
     stage('pre-build') {
       steps {
-        sh 'rm -rf ./build ./tmp'
+        sh 'rm -rf ./dist ./tmp'
       }
     }
 
@@ -35,9 +35,11 @@ pipeline {
           def assetBundleServer = env.ASSET_BUNDLE_SERVER
           def targetS3Url = env.TARGET_S3_URL
           def smokeURL = env.SMOKE_URL
+          def janusServer = env.JANUS_SERVER
+          def reticulumServer = env.RETICULUM_SERVER
           def slackURL = env.SLACK_URL
 
-          def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh ${baseAssetsPath} ${assetBundleServer} ${targetS3Url} ${env.BUILD_NUMBER} ${env.GIT_COMMIT}"
+          def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh \\\"${baseAssetsPath}\\\" \\\"${assetBundleServer}\\\" \\\"${janusServer}\\\" \\\"${reticulumServer}\\\" \\\"${targetS3Url}\\\" \\\"${env.BUILD_NUMBER}\\\" \\\"${env.GIT_COMMIT}\\\""
           sh "/usr/bin/script --return -c ${shellString(habCommand)} /dev/null"
 
           def gitMessage = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'[%an] %s'").trim()

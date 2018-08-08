@@ -15,6 +15,10 @@
     margin-bottom: 0.5em;
     width: 95%;
     text-align: center;
+
+    .loading-panel {
+      background: transparent;
+    }
   }
 
   &__avatar-selector {
@@ -30,7 +34,7 @@
   }
 
   &__box {
-    border-radius: 8px;
+    border-radius: 18px;
     box-shadow: 0px 0px 30px 1px #202020;
     display: flex;
     flex-direction: column;
@@ -52,8 +56,8 @@
       margin: 16px;
 
       a {
-	margin: 0px 12px;
-	color: $light-text;
+        margin: 0px 12px;
+        color: $light-text;
       }
     }
 
@@ -87,7 +91,7 @@
   }
 
   &__form-submit {
-    @extend %bottom-button;
+    @extend %bottom-action-button;
     margin: 0;
     min-height: max-content;
   }
@@ -101,17 +105,18 @@
 
   &__menu-buttons {
     display: flex;
-    margin: 0 20px;
+    margin: 0 0 0 20px;
 
     &__menu-button {
       @extend %fa-icon-button;
       margin-left: 16px;
 
       &__icon {
-	@extend %fa-icon-button-icon;
-	background: transparent;
-	border-color: $darker-grey;
-	color: $light-grey;
+        @extend %glass-icon;
+        @extend %fa-icon-big;
+
+        background: transparent;
+        color: white;
       }
     }
   }
@@ -124,6 +129,14 @@
   }
 
   &__profile_display_name {
+    margin: 0 30px 0 0;
+
+    @extend %glass-text;
+
+    img {
+      @extend %glass-icon;
+    }
+
     margin-left: 16px;
     cursor: pointer;
     font-size: 1.2em;

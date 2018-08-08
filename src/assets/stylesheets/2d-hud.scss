@@ -2,13 +2,20 @@
 
 :local(.container) {
   position: absolute;
-  top: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 80px;
   width: 100%;
   user-select: none;
+
+  &:local(.top) {
+    top: 10px;
+  }
+
+  &:local(.bottom) {
+    bottom: 20px;
+  }
 }
 
 :local(.panel) {
@@ -44,12 +51,6 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
-}
-
-:local(.addMediaButton) {
-  position: absolute;
-  top: 90px;
-  background-color: #404040;
 }
 
 :local(.iconButton.small) {
@@ -100,4 +101,11 @@
 }
 :local(.iconButton.freeze.active:hover) {
   background-image: url(../hud/freeze_on-hover.png);
+}
+
+:local(.iconButton.create-object) {
+  background-image: url(../hud/create_object.png);
+}
+:local(.iconButton.create-object:hover) {
+  background-image: url(../hud/create_object-hover.png);
 }

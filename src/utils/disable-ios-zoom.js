@@ -1,5 +1,7 @@
+import { detectOS } from "detect-browser";
+
 export function disableiOSZoom() {
-  if (!AFRAME.utils.device.isIOS()) return;
+  if (detectOS(navigator.userAgent) !== "iOS") return;
 
   let lastTouchAtMs = 0;
 

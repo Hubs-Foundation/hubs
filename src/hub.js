@@ -2,12 +2,12 @@ console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
 
+import "aframe";
+import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
-import "aframe-xr";
-
-import "./vendor/GLTFLoader";
+import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
@@ -74,6 +74,7 @@ import "./components/position-at-box-shape-border";
 import "./components/remove-networked-object-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/media-loader";
+import "./components/gamma-factor";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -136,11 +137,7 @@ import "./components/tools/pen";
 import "./components/tools/networked-drawing";
 import "./components/tools/drawing-manager";
 
-function qsTruthy(param) {
-  const val = qs.get(param);
-  // if the param exists but is not set (e.g. "?foo&bar"), its value is the empty string.
-  return val === "" || /1|on|true/i.test(val);
-}
+import qsTruthy from "./utils/qs_truthy";
 
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
@@ -241,7 +238,6 @@ const onReady = async () => {
     if (!isBotMode) {
       scene.classList.add("no-cursor");
     }
-    scene.renderer.sortObjects = true;
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("canvas").classList.remove("blurred");
     scene.render();
@@ -515,9 +511,21 @@ const onReady = async () => {
     .receive("ok", data => {
       const hub = data.hubs[0];
       const defaultSpaceTopic = hub.topics[0];
-      const gltfBundleUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
+      const sceneUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
+
+      console.log(`Scene URL: ${sceneUrl}`);
+
+      if (/\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl)) {
+        const gltfEl = document.createElement("a-entity");
+        gltfEl.setAttribute("gltf-model-plus", { src: sceneUrl, inflate: true });
+        gltfEl.addEventListener("model-loaded", () => initialEnvironmentEl.emit("bundleloaded"));
+        initialEnvironmentEl.appendChild(gltfEl);
+      } else {
+        // TODO remove, and remove bundleloaded event
+        initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
+      }
+
       setRoom(hub.hub_id, hub.name);
-      initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`);
       hubChannel.setPhoenixChannel(channel);
     })
     .receive("error", res => {

@@ -122,6 +122,14 @@ class AvatarSelector extends Component {
     }
   }
 
+  componentDidMount() {
+    // <a-scene> component not initialized until scene element mounted and loaded.
+    this.scene.addEventListener("loaded", () => {
+      this.scene.setAttribute("renderer", { gammaOutput: true, sortObjects: true, physicallyCorrectLights: true });
+      this.scene.setAttribute("gamma-factor", "");
+    });
+  }
+
   render() {
     const avatarAssets = this.props.avatars.map(avatar => (
       <a-asset-item id={avatar.id} key={avatar.id} response-type="arraybuffer" src={`${avatar.model}`} />

@@ -202,6 +202,8 @@ AFRAME.registerComponent("image-plus", {
           throw new Error(`Unknown content type: ${contentType}`);
         }
 
+        texture.encoding = THREE.sRGBEncoding;
+
         cacheItem.texture = texture;
         textureCache.set(url, cacheItem);
       }

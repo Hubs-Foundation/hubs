@@ -5,12 +5,13 @@ A prototype client demonstrating a multi-user experience in WebVR. Built with
 
 ## Getting Started
 
-To run the social client, run:
+To run the client, run:
 
 ```sh
 git clone https://github.com/mozilla/hubs.git
-yarn install
-yarn start
+cd hubs
+npm ci
+npm start
 ```
 
 ## Building Static Files
@@ -18,8 +19,28 @@ yarn start
 To bundle javascript and generate the html templates, run:
 
 ```sh
-yarn build
+npm run build
 ```
+
+## Sharing Your Changes
+
+When running a local copy of Hubs as-is, you'll use Mozilla's "dev" Reticulm and Janus servers
+for storing your room information and relaying messages between users in the room.
+
+This also means you can upload a modified copy of Hubs to a hosting provider as-is, and use it
+without having to set up your own servers. Simply run:
+
+```
+npm run build
+```
+
+and then upload the files in the `dist` folder to your hosting provider.
+
+If you are running your own servers, you can modify the environment variables `JANUS_SERVER` and
+`RETICULUM_SERVER` when building to point Hubs to your own infrastructure.
+
+See `scripts/default.env` for the full set of environment variables that can modify
+Hubs' behavior at build time.
 
 ## hubs.local Host Entry
 

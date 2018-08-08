@@ -1,4 +1,14 @@
+import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
+import { resolveMedia } from "../utils/media-utils";
+import cubeMapPosX from "../assets/images/cubemap/posx.jpg";
+import cubeMapNegX from "../assets/images/cubemap/negx.jpg";
+import cubeMapPosY from "../assets/images/cubemap/posy.jpg";
+import cubeMapNegY from "../assets/images/cubemap/negx.jpg";
+import cubeMapPosZ from "../assets/images/cubemap/posz.jpg";
+import cubeMapNegZ from "../assets/images/cubemap/negz.jpg";
+
 const GLTFCache = {};
+let CachedEnvMapTexture = null;
 
 AFRAME.GLTFModelPlus = {
   // eslint-disable-next-line no-unused-vars
@@ -80,7 +90,7 @@ function cloneGltf(gltf) {
 /// or templates associated with any of their nodes.)
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
-const inflateEntities = function(node, templates, gltfPath) {
+const inflateEntities = function(node, templates, gltfPath, isRoot) {
   // inflate subtrees first so that we can determine whether or not this node needs to be inflated
   const childEntities = [];
   const children = node.children.slice(0); // setObject3D mutates the node's parent, so we have to copy
@@ -92,7 +102,7 @@ const inflateEntities = function(node, templates, gltfPath) {
   }
 
   const nodeHasBehavior = node.userData.components || node.name in templates;
-  if (!nodeHasBehavior && !childEntities.length) {
+  if (!nodeHasBehavior && !childEntities.length && !isRoot) {
     return null; // we don't need an entity for this node
   }
 
@@ -181,17 +191,121 @@ function nextTick() {
   });
 }
 
-function cachedLoadGLTF(src, basePath, preferredTechnique, onProgress) {
-  // Load the gltf model from the cache if it exists.
-  if (!GLTFCache[src]) {
-    GLTFCache[src] = new Promise((resolve, reject) => {
-      const gltfLoader = new THREE.GLTFLoader();
-      gltfLoader.path = basePath;
-      gltfLoader.preferredTechnique = preferredTechnique;
-      gltfLoader.load(src, resolve, onProgress, reject);
-    });
+function getFilesFromSketchfabZip(src) {
+  return new Promise((resolve, reject) => {
+    const worker = new SketchfabZipWorker();
+    worker.onmessage = e => {
+      const [success, fileMapOrError] = e.data;
+      (success ? resolve : reject)(fileMapOrError);
+    };
+    worker.postMessage(src);
+  });
+}
+
+async function loadEnvMap() {
+  const urls = [cubeMapPosX, cubeMapNegX, cubeMapPosY, cubeMapNegY, cubeMapPosZ, cubeMapNegZ];
+  const texture = await new THREE.CubeTextureLoader().load(urls);
+  texture.format = THREE.RGBFormat;
+  return texture;
+}
+
+async function resolveGLTFUri(gltfProperty, basePath) {
+  const url = new URL(gltfProperty.uri, basePath);
+
+  if (url.protocol === "blob:") {
+    gltfProperty.uri = url.href;
+  } else {
+    const { raw } = await resolveMedia(url.href);
+    gltfProperty.uri = raw;
   }
-  return GLTFCache[src].then(cloneGltf);
+}
+
+async function loadGLTF(src, preferredTechnique, onProgress) {
+  const { raw, origin, contentType } = await resolveMedia(src);
+  const basePath = THREE.LoaderUtils.extractUrlBase(origin);
+
+  let gltfUrl = raw;
+  let fileMap;
+
+  if (contentType === "model/gltf+zip") {
+    fileMap = await getFilesFromSketchfabZip(gltfUrl);
+    gltfUrl = fileMap["scene.gtlf"];
+  }
+
+  const gltfLoader = new THREE.GLTFLoader();
+  gltfLoader.setPath(basePath);
+  gltfLoader.setLazy(true);
+
+  const { parser } = await new Promise((resolve, reject) => gltfLoader.load(gltfUrl, resolve, onProgress, reject));
+
+  const json = parser.json;
+  const images = json.images;
+  const buffers = json.buffers;
+  const materials = json.materials;
+
+  const pendingFarsparkPromises = [];
+
+  if (images) {
+    for (const image of images) {
+      pendingFarsparkPromises.push(resolveGLTFUri(image, parser.options.path));
+    }
+  }
+
+  if (buffers) {
+    for (const buffer of buffers) {
+      pendingFarsparkPromises.push(resolveGLTFUri(buffer, parser.options.path));
+    }
+  }
+
+  if (materials) {
+    for (let i = 0; i < materials.length; i++) {
+      const material = materials[i];
+
+      if (
+        material.extensions &&
+        material.extensions.MOZ_alt_materials &&
+        material.extensions.MOZ_alt_materials[preferredTechnique] !== undefined
+      ) {
+        const altMaterialIndex = material.extensions.MOZ_alt_materials[preferredTechnique];
+        materials[i] = materials[altMaterialIndex];
+      }
+    }
+  }
+
+  if (!CachedEnvMapTexture) {
+    CachedEnvMapTexture = loadEnvMap();
+  }
+
+  await Promise.all(pendingFarsparkPromises);
+
+  console.log(parser.json);
+
+  const gltf = await new Promise((resolve, reject) =>
+    parser.parse(
+      (scene, scenes, cameras, animations, json) => {
+        resolve({ scene, scenes, cameras, animations, json });
+      },
+      e => {
+        reject(e);
+      }
+    )
+  );
+
+  const envMap = await CachedEnvMapTexture;
+
+  gltf.scene.traverse(object => {
+    if (object.material && object.material.type === "MeshStandardMaterial") {
+      object.material.envMap = envMap;
+      object.material.needsUpdate = true;
+    }
+  });
+
+  if (fileMap) {
+    // The GLTF is now cached as a THREE object, we can get rid of the original blobs
+    Object.keys(fileMap).forEach(URL.revokeObjectURL);
+  }
+
+  return gltf;
 }
 
 /**
@@ -203,12 +317,12 @@ function cachedLoadGLTF(src, basePath, preferredTechnique, onProgress) {
 AFRAME.registerComponent("gltf-model-plus", {
   schema: {
     src: { type: "string" },
-    basePath: { type: "string", default: undefined },
     inflate: { default: false }
   },
 
   init() {
-    this.preferredTechnique = AFRAME.utils.device.isMobile() ? "KHR_materials_unlit" : "pbrMetallicRoughness";
+    this.preferredTechnique =
+      window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness";
     this.loadTemplates();
   },
 
@@ -244,7 +358,12 @@ AFRAME.registerComponent("gltf-model-plus", {
       }
 
       const gltfPath = THREE.LoaderUtils.extractUrlBase(src);
-      const model = await cachedLoadGLTF(src, this.data.basePath, this.preferredTechnique);
+
+      if (!GLTFCache[src]) {
+        GLTFCache[src] = loadGLTF(src, this.preferredTechnique);
+      }
+
+      const model = cloneGltf(await GLTFCache[src]);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
@@ -257,7 +376,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.model.animations = model.animations;
 
       let object3DToSet = this.model;
-      if (this.data.inflate && (this.inflatedEl = inflateEntities(this.model, this.templates, gltfPath))) {
+      if (this.data.inflate && (this.inflatedEl = inflateEntities(this.model, this.templates, gltfPath, true))) {
         this.el.appendChild(this.inflatedEl);
         object3DToSet = this.inflatedEl.object3D;
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
@@ -271,6 +390,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.el.setObject3D("mesh", object3DToSet);
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
+      delete GLTFCache[src];
       console.error("Failed to load glTF model", e, this);
       this.el.emit("model-error", { format: "gltf", src });
     }
