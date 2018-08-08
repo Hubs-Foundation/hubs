@@ -76,8 +76,8 @@ AFRAME.registerSystem("tunneleffect", {
           this.deltaR = this.targetRadius - r;
           this.deltaS = softness - this.targetSoftness;
         }
-        const unit = this.dt / this.fadeTimeoutMs;
-        this._updateVignettePass(r + this.deltaR * unit, softness - this.deltaS * unit, this.opacity);
+        const ratio = this.dt / this.fadeTimeoutMs;
+        this._updateVignettePass(r + this.deltaR * ratio, softness - this.deltaS * ratio, this.opacity);
       } else {
         this._exitTunnel();
       }
