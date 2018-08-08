@@ -102,6 +102,18 @@ AFRAME.registerSystem("tunneleffect", {
       this.renderer = this.scene.renderer;
       this.camera = this.scene.camera;
       this.originalRenderFunc = this.scene.renderer.render;
+      this.isDigest = false;
+      const render = this.scene.renderer.render;
+      const system = this;
+      this.postProcessingRenderFunc = function() {
+        if (system.isDigest) {
+          render.apply(this, arguments);
+        } else {
+          system.isDigest = true;
+          system.composer.render(system.dt);
+          system.isDigest = false;
+        }
+      };
     }
     if (!this.composer) {
       this.composer = new THREE.EffectComposer(this.renderer);
@@ -136,19 +148,6 @@ AFRAME.registerSystem("tunneleffect", {
    * use the render func of the effect composer when we need the postprocessing
    */
   _bindRenderFunc: function() {
-    const renderer = this.scene.renderer;
-    const render = renderer.render;
-    const system = this;
-    let isDigest = false;
-
-    renderer.render = function() {
-      if (isDigest) {
-        render.apply(this, arguments);
-      } else {
-        isDigest = true;
-        system.composer.render(system.dt);
-        isDigest = false;
-      }
-    };
+    this.scene.renderer.render = this.postProcessingRenderFunc;
   }
 });
