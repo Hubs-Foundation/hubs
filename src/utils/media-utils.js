@@ -17,7 +17,7 @@ const fetchContentType = async (url, token) => {
 };
 
 const resolveMediaCache = new Map();
-export const resolveMedia = async (url, token) => {
+export const resolveMedia = async (url, token, skipContentType) => {
   const parsedUrl = new URL(url);
   if (resolveMediaCache.has(url)) return resolveMediaCache.get(url);
 
@@ -31,7 +31,7 @@ export const resolveMedia = async (url, token) => {
           body: JSON.stringify({ media: { url } })
         }).then(r => r.json());
 
-  if (!isNotHttpOrHttps) {
+  if (!isNotHttpOrHttps && !skipContentType) {
     const contentType =
       (resolved.meta && resolved.meta.expected_content_type) || (await fetchContentType(resolved.raw, token));
     resolved.contentType = contentType;

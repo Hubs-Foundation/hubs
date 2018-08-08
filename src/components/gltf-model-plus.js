@@ -215,7 +215,7 @@ async function resolveGLTFUri(gltfProperty, basePath) {
   if (url.protocol === "blob:") {
     gltfProperty.uri = url.href;
   } else {
-    const { raw } = await resolveMedia(url.href);
+    const { raw } = await resolveMedia(url.href, null, true);
     gltfProperty.uri = raw;
   }
 }

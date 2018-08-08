@@ -13,6 +13,13 @@ AFRAME.registerComponent("media-loader", {
     this.showLoader = this.showLoader.bind(this);
   },
 
+  remove() {
+    if (this.blobURL) {
+      URL.revokeObjectURL(this.blobURL);
+      this.blobURL = null;
+    }
+  },
+
   setShapeAndScale(resize) {
     const mesh = this.el.getObject3D("mesh");
     const box = getBox(this.el, mesh);
@@ -58,16 +65,19 @@ AFRAME.registerComponent("media-loader", {
 
       if (!url) return;
 
-      const { raw, contentType } = await resolveMedia(url, token);
+      const { raw, origin, contentType } = await resolveMedia(url, token);
 
-      let blobUrl;
       if (token) {
+        if (this.blobURL) {
+          URL.revokeObjectURL(this.blobURL);
+          this.blobURL = null;
+        }
         const response = await fetch(raw, {
           method: "GET",
           headers: { Authorization: `Token ${token}` }
         });
         const blob = await response.blob();
-        blobUrl = window.URL.createObjectURL(blob);
+        this.blobURL = window.URL.createObjectURL(blob);
       }
 
       if (contentType.startsWith("image/") || contentType.startsWith("video/") || contentType.startsWith("audio/")) {
@@ -78,7 +88,7 @@ AFRAME.registerComponent("media-loader", {
           },
           { once: true }
         );
-        this.el.setAttribute("image-plus", { src: blobUrl || raw, contentType, token });
+        this.el.setAttribute("image-plus", { src: this.blobURL || raw, contentType, token });
         this.el.setAttribute("position-at-box-shape-border", { target: ".delete-button", dirs: ["forward", "back"] });
       } else if (
         contentType.includes("application/octet-stream") ||
@@ -96,8 +106,9 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
+        const src = this.blobURL || origin || url;
         this.el.setAttribute("gltf-model-plus", {
-          src: blobUrl || url,
+          src,
           contentType,
           inflate: true
         });
