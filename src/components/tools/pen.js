@@ -10,7 +10,7 @@ function almostEquals(epsilon, u, v) {
 AFRAME.registerComponent("pen", {
   schema: {
     drawFrequency: { default: 20 },
-    minDistanceBetweenPoints: { default: 0.4 },
+    minDistanceBetweenPoints: { default: 0.04 },
     defaultDirection: { default: { x: 1, y: 0, z: 0 } },
     camera: { type: "selector" },
     drawing: { type: "string" },
@@ -73,21 +73,9 @@ AFRAME.registerComponent("pen", {
   //helper function to get normal of direction of drawing cross direction to camera
   getNormal: (() => {
     const directionToCamera = new THREE.Vector3();
-    // const worldQuaternion = new THREE.Quaternion();
     return function(normal, position, direction) {
-      // if (this.data.camera) {
       directionToCamera.subVectors(position, this.data.camera.object3D.position).normalize();
       normal.crossVectors(direction, directionToCamera);
-      // normal.set(normal.x, Math.abs(normal.y), normal.z);
-      // console.log(normal);
-      // } else {
-      //TODO remove?
-      // this.el.object3D.getWorldQuaternion(worldQuaternion);
-      // normal
-      //   .copy(this.el.object3D.up)
-      //   .applyQuaternion(worldQuaternion)
-      //   .normalize();
-      // }
     };
   })(),
 

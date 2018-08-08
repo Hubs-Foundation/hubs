@@ -1,5 +1,4 @@
 export default class SharedBufferGeometry {
-
   constructor(material, primitiveMode) {
     this.material = material;
     this.primitiveMode = primitiveMode;
@@ -11,10 +10,10 @@ export default class SharedBufferGeometry {
     this.addBuffer(false);
   }
 
-  restartPrimitive () {
+  restartPrimitive() {
     if (this.idx.position >= this.current.attributes.position.count) {
       this.addBuffer(false);
-    } else if (this.idx.position !== 0) {   
+    } else if (this.idx.position !== 0) {
       let prev = (this.idx.position - 1) * 3;
       const position = this.current.attributes.position.array;
       this.addVertex(position[prev++], position[prev++], position[prev++]);
@@ -25,49 +24,37 @@ export default class SharedBufferGeometry {
     }
   }
 
-  remove (prevIdx, idx) {
-    // const pos = this.current.attributes.position.array;
-
+  remove(prevIdx, idx) {
     // Loop through all the attributes: position, color, uv, normal,...
     if (this.idx.position > idx.position) {
       for (let key in this.idx) {
-        const componentSize = key === 'uv' ? 2 : 3;
-        let pos = (prevIdx[key]) * componentSize;
+        const componentSize = key === "uv" ? 2 : 3;
+        let pos = prevIdx[key] * componentSize;
         const start = (idx[key] + 1) * componentSize;
         const end = this.idx[key] * componentSize;
         for (let i = start; i < end; i++) {
           this.current.attributes[key].array[pos++] = this.current.attributes[key].array[i];
-          // this.current.attributes[key].array[i] = Number.NEGATIVE_INFINITY;
         }
-        const diff = (idx[key] - prevIdx[key] + 1);
+        const diff = idx[key] - prevIdx[key] + 1;
         this.idx[key] -= diff;
       }
     } else {
       for (let key in this.idx) {
-        // const componentSize = key === 'uv' ? 2 : 3;
-        // for (let i = 0; i < this.idx.position * componentSize; i++) {
-        //     this.current.attributes[key].array[i] = Number.NEGATIVE_INFINITY;
-        // }
-        const diff = (idx[key] - prevIdx[key]);
+        const diff = idx[key] - prevIdx[key];
         this.idx[key] -= diff;
       }
-    } 
-
-    // for (let key in this.idx) {
-      // const diff = (idx[key] - prevIdx[key]);
-      // this.idx[key] -= diff;
-    // }
+    }
 
     this.update();
   }
 
-  undo (prevIdx) {
+  undo(prevIdx) {
     this.idx = prevIdx;
     this.update();
   }
 
-  addBuffer (copyLast) {
-    console.log("addBuffer", copyLast)
+  addBuffer(copyLast) {
+    console.log("addBuffer", copyLast);
     const geometry = new THREE.BufferGeometry();
 
     const vertices = new Float32Array(this.maxBufferSize * 3);
@@ -87,11 +74,10 @@ export default class SharedBufferGeometry {
     this.object3D.add(mesh);
 
     geometry.setDrawRange(0, 0);
-    geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3).setDynamic(true));
-    geometry.addAttribute('uv', new THREE.BufferAttribute(uvs, 2).setDynamic(true));
-    geometry.addAttribute('normal', new THREE.BufferAttribute(normals, 3).setDynamic(true));
-    geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3).setDynamic(true));
-
+    geometry.addAttribute("position", new THREE.BufferAttribute(vertices, 3).setDynamic(true));
+    geometry.addAttribute("uv", new THREE.BufferAttribute(uvs, 2).setDynamic(true));
+    geometry.addAttribute("normal", new THREE.BufferAttribute(normals, 3).setDynamic(true));
+    geometry.addAttribute("color", new THREE.BufferAttribute(colors, 3).setDynamic(true));
 
     this.previous = null;
     if (this.geometries.length > 0) {
@@ -127,19 +113,18 @@ export default class SharedBufferGeometry {
       this.addColor(color[col++], color[col++], color[col++]);
 
       const uvs = this.previous.attributes.uv.array;
-
     }
   }
 
-  addColor (r, g, b) {
+  addColor(r, g, b) {
     this.current.attributes.color.setXYZ(this.idx.color++, r, g, b);
   }
 
-  addNormal (x, y, z) {
+  addNormal(x, y, z) {
     this.current.attributes.normal.setXYZ(this.idx.normal++, x, y, z);
   }
 
-  addVertex (x, y, z) {
+  addVertex(x, y, z) {
     let buffer = this.current.attributes.position;
     if (this.idx.position === buffer.count) {
       this.addBuffer(true);
@@ -148,11 +133,11 @@ export default class SharedBufferGeometry {
     buffer.setXYZ(this.idx.position++, x, y, z);
   }
 
-  addUV (u, v) {
+  addUV(u, v) {
     this.current.attributes.uv.setXY(this.idx.uv++, u, v);
   }
 
-  update () {
+  update() {
     this.current.setDrawRange(0, this.idx.position);
 
     this.current.attributes.color.needsUpdate = true;
@@ -160,4 +145,4 @@ export default class SharedBufferGeometry {
     this.current.attributes.position.needsUpdate = true;
     this.current.attributes.uv.needsUpdate = true;
   }
-};
+}
