@@ -61,8 +61,7 @@ AFRAME.registerSystem("tunneleffect", {
     this.characterVelocity = this.characterComponent.velocity;
     if (this.characterVelocity.distanceTo(STATIC) < CLAMP_VELOCITY) {
       // the character stops, so we use the aframe default render func
-      this.scene.renderer.render = this.originalRenderFunc;
-      this.isMoving = false;
+      this._exitTunnel();
       return;
     }
 
@@ -72,6 +71,11 @@ AFRAME.registerSystem("tunneleffect", {
     }
     const r = this.radius * (1 - this.characterVelocity.distanceTo(STATIC)) - this.minRadius;
     this._updateVignettePass(r, this.softness, this.opacity);
+  },
+
+  _exitTunnel: function() {
+    this.scene.renderer.render = this.originalRenderFunc;
+    this.isMoving = false;
   },
 
   _initPostProcessing: function(event) {
@@ -87,6 +91,7 @@ AFRAME.registerSystem("tunneleffect", {
   },
 
   _exitVR: function() {
+    this._exitTunnel();
     this.isVR = false;
   },
 
