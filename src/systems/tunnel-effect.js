@@ -11,9 +11,9 @@ const CLAMP_VELOCITY = 0.01;
 AFRAME.registerSystem("tunneleffect", {
   schema: {
     targetComponent: { type: "string", default: "character-controller" },
-    movingEvent: { type: "string", default: "renderstart" },
-    radius: { type: "number", default: 2.0, min: 0.25 },
-    minRadius: { type: "number", default: 0.6, min: 0.1 },
+    radius: { type: "number", default: 1.0, min: 0.25 },
+    minRadius: { type: "number", default: 0.25, min: 0.1 },
+    maxVelocity: { type: "number", default: 0.7, min: 0.1 },
     softness: { type: "number", default: 0.1, min: 0.0 },
     opacity: { type: "number", default: 1, min: 0.0 }
   },
@@ -25,11 +25,14 @@ AFRAME.registerSystem("tunneleffect", {
     this.isVR = false;
     this.dt = 0;
     this.radius = data.radius;
+    this.targetRadius = 10.0;
+    this.targetSoftness = 0.0;
     this.minRadius = data.minRadius;
     this.softness = data.softness;
     this.opacity = data.opacity;
     this.characterVelocity = new THREE.Vector3(0, 0, 0);
-
+    this.fadeTimeoutMs = 300;
+    this.maxV = data.maxVelocity;
     // add event listener for init composer
     this.characterEl = document.querySelector(`a-entity[${this.data.targetComponent}]`);
     if (this.characterEl) {
@@ -51,6 +54,11 @@ AFRAME.registerSystem("tunneleffect", {
     this.scene.removeEventListener("exit-vr", this._exitVR);
   },
 
+  play: function() {
+    this.scene.addEventListener("enter-vr", this._enterVR);
+    this.scene.addEventListener("exit-vr", this._exitVR);
+  },
+
   tick: function(time, deltaTime) {
     this.dt = deltaTime;
 
@@ -61,7 +69,18 @@ AFRAME.registerSystem("tunneleffect", {
     this.characterVelocity = this.characterComponent.velocity;
     if (this.characterVelocity.distanceTo(STATIC) < CLAMP_VELOCITY) {
       // the character stops, so we use the aframe default render func
-      this._exitTunnel();
+      const r = this.vignettePass.uniforms["radius"].value;
+      const softness = this.vignettePass.uniforms["softness"].value;
+      if (this.isMoving && r < this.targetRadius && softness > this.targetSoftness) {
+        if (this.deltaR !== 0 && this.deltaS !== 0) {
+          this.deltaR = this.targetRadius - r;
+          this.deltaS = softness - this.targetSoftness;
+        }
+        const unit = this.dt / this.fadeTimeoutMs;
+        this._updateVignettePass(r + this.deltaR * unit, softness - this.deltaS * unit, this.opacity);
+      } else {
+        this._exitTunnel();
+      }
       return;
     }
 
@@ -69,7 +88,7 @@ AFRAME.registerSystem("tunneleffect", {
       this.isMoving = true;
       this._bindRenderFunc();
     }
-    const r = this.radius * (1 - this.characterVelocity.distanceTo(STATIC)) - this.minRadius;
+    const r = (this.radius - this.minRadius) * (this.maxV - this.characterVelocity.distanceTo(STATIC)) + this.minRadius;
     this._updateVignettePass(r, this.softness, this.opacity);
   },
 
