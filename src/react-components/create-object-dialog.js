@@ -98,6 +98,7 @@ export default class CreateObjectDialog extends Component {
         className={cx(styles.leftSideOfInput)}
         placeholder="Image/Video/glTF URL"
         onChange={this.onUrlChange}
+        type="url"
         value={this.state.url}
       />
     );
