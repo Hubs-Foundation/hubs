@@ -67,6 +67,8 @@ AFRAME.registerComponent("media-loader", {
 
       const { raw, origin, contentType } = await resolveMedia(url, token);
 
+      this.el.emit("media_resolved", { src: this.data.src, raw, origin, contentType });
+
       if (token) {
         if (this.blobURL) {
           URL.revokeObjectURL(this.blobURL);

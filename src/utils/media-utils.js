@@ -1,3 +1,5 @@
+import { objectTypeForOriginAndContentType } from "../object-types";
+
 const whitelistedHosts = [/^.*\.reticulum\.io$/, /^.*hubs\.mozilla\.com$/, /^hubs\.local$/];
 const isHostWhitelisted = hostname => !!whitelistedHosts.filter(r => r.test(hostname)).length;
 let mediaAPIEndpoint = "/api/v1/media";
@@ -51,7 +53,7 @@ export const upload = file => {
 };
 
 let interactableId = 0;
-export const addMedia = (src, resize = false) => {
+export const addMedia = (src, contentOrigin, resize = false) => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
@@ -71,5 +73,11 @@ export const addMedia = (src, resize = false) => {
         entity.setAttribute("media-loader", { src: "error" });
       });
   }
+
+  entity.addEventListener("media_resolved", ({ detail }) => {
+    const objectType = objectTypeForOriginAndContentType(contentOrigin, detail.contentType);
+    scene.emit("object_spawned", { objectType });
+  });
+
   return entity;
 };
