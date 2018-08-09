@@ -1,6 +1,5 @@
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
-import { resolveMedia } from "../utils/media-utils";
 
 class GIFTexture extends THREE.Texture {
   constructor(frames, delays, disposals) {
@@ -37,6 +36,41 @@ class GIFTexture extends THREE.Texture {
   }
 }
 
+async function createGIFTexture(url) {
+  return new Promise((resolve, reject) => {
+    // TODO: pool workers
+    const worker = new GIFWorker();
+    worker.onmessage = e => {
+      const [success, frames, delays, disposals] = e.data;
+      if (!success) {
+        reject(`error loading gif: ${e.data[1]}`);
+        return;
+      }
+
+      let loadCnt = 0;
+      for (let i = 0; i < frames.length; i++) {
+        const img = new Image();
+        img.onload = e => {
+          loadCnt++;
+          frames[i] = e.target;
+          if (loadCnt === frames.length) {
+            const texture = new GIFTexture(frames, delays, disposals);
+            texture.image.src = url;
+            resolve(texture);
+          }
+        };
+        img.src = frames[i];
+      }
+    };
+    fetch(url, { mode: "cors" })
+      .then(r => r.arrayBuffer())
+      .then(rawImageData => {
+        worker.postMessage(rawImageData, [rawImageData]);
+      })
+      .catch(reject);
+  });
+}
+
 /**
  * Create video element to be used as a texture.
  *
@@ -54,8 +88,42 @@ function createVideoEl(src) {
   return videoEl;
 }
 
+function createVideoTexture(url) {
+  return new Promise((resolve, reject) => {
+    const videoEl = createVideoEl(url);
+
+    const texture = new THREE.VideoTexture(videoEl);
+    texture.minFilter = THREE.LinearFilter;
+    videoEl.addEventListener("loadedmetadata", () => resolve(texture), { once: true });
+    videoEl.onerror = reject;
+
+    // If iOS and video is HLS, do some hacks.
+    if (
+      AFRAME.utils.device.isIOS() &&
+      AFRAME.utils.material.isHLS(
+        videoEl.src || videoEl.getAttribute("src"),
+        videoEl.type || videoEl.getAttribute("type")
+      )
+    ) {
+      // Actually BGRA. Tell shader to correct later.
+      texture.format = THREE.RGBAFormat;
+      texture.needsCorrectionBGRA = true;
+      // Apparently needed for HLS. Tell shader to correct later.
+      texture.flipY = false;
+      texture.needsCorrectionFlipY = true;
+    }
+  });
+}
+
 const textureLoader = new THREE.TextureLoader();
 textureLoader.setCrossOrigin("anonymous");
+function createImageTexture(url) {
+  return new Promise((resolve, reject) => {
+    textureLoader.load(url, resolve, null, function(xhr) {
+      reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
+    });
+  });
+}
 
 const textureCache = new Map();
 
@@ -105,76 +173,6 @@ AFRAME.registerComponent("image-plus", {
     console.log(textureCache);
   },
 
-  async loadGIF(url) {
-    return new Promise((resolve, reject) => {
-      // TODO: pool workers
-      const worker = new GIFWorker();
-      worker.onmessage = e => {
-        const [success, frames, delays, disposals] = e.data;
-        if (!success) {
-          reject(`error loading gif: ${e.data[1]}`);
-          return;
-        }
-
-        let loadCnt = 0;
-        for (let i = 0; i < frames.length; i++) {
-          const img = new Image();
-          img.onload = e => {
-            loadCnt++;
-            frames[i] = e.target;
-            if (loadCnt === frames.length) {
-              const texture = new GIFTexture(frames, delays, disposals);
-              texture.image.src = url;
-              resolve(texture);
-            }
-          };
-          img.src = frames[i];
-        }
-      };
-      fetch(url, { mode: "cors" })
-        .then(r => r.arrayBuffer())
-        .then(rawImageData => {
-          worker.postMessage(rawImageData, [rawImageData]);
-        })
-        .catch(reject);
-    });
-  },
-
-  loadVideo(url) {
-    return new Promise((resolve, reject) => {
-      const videoEl = createVideoEl(url);
-
-      const texture = new THREE.VideoTexture(videoEl);
-      texture.minFilter = THREE.LinearFilter;
-      videoEl.addEventListener("loadedmetadata", () => resolve(texture), { once: true });
-      videoEl.onerror = reject;
-
-      // If iOS and video is HLS, do some hacks.
-      if (
-        this.el.sceneEl.isIOS &&
-        AFRAME.utils.material.isHLS(
-          videoEl.src || videoEl.getAttribute("src"),
-          videoEl.type || videoEl.getAttribute("type")
-        )
-      ) {
-        // Actually BGRA. Tell shader to correct later.
-        texture.format = THREE.RGBAFormat;
-        texture.needsCorrectionBGRA = true;
-        // Apparently needed for HLS. Tell shader to correct later.
-        texture.flipY = false;
-        texture.needsCorrectionFlipY = true;
-      }
-    });
-  },
-
-  loadImage(url) {
-    return new Promise((resolve, reject) => {
-      textureLoader.load(url, resolve, null, function(xhr) {
-        reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
-      });
-    });
-  },
-
   async update(oldData) {
     let texture;
     try {
@@ -195,11 +193,11 @@ AFRAME.registerComponent("image-plus", {
         if (src === "error") {
           texture = errorTexture;
         } else if (contentType.includes("image/gif")) {
-          texture = await this.loadGIF(src);
+          texture = await createGIFTexture(src);
         } else if (contentType.startsWith("image/")) {
-          texture = await this.loadImage(src);
+          texture = await createImageTexture(src);
         } else if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
-          texture = await this.loadVideo(src);
+          texture = await createVideoTexture(src);
           cacheItem.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
         } else {
           throw new Error(`Unknown content type: ${contentType}`);
