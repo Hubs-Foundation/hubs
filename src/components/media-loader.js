@@ -53,19 +53,21 @@ AFRAME.registerComponent("media-loader", {
     const loadingObj = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
     this.el.setObject3D("mesh", loadingObj);
     this.setShapeAndScale(true);
+    delete this.showLoaderTimeout;
   },
 
   // TODO: correctly handle case where src changes
-  async update() {
+  async update(oldData) {
     try {
-      const url = this.data.src;
-      const token = this.data.token;
+      const { src, token } = this.data;
 
-      this.showLoaderTimeout = this.showLoaderTimeout || setTimeout(this.showLoader, 100);
+      if (src !== oldData.src && !this.showLoaderTimeout) {
+        this.showLoaderTimeout = setTimeout(this.showLoader, 100);
+      }
 
-      if (!url) return;
+      if (!src) return;
 
-      const { raw, contentType } = await resolveMedia(url, token);
+      const { raw, images, contentType } = await resolveMedia(src, token);
 
       if (token) {
         if (this.blobURL) {
@@ -80,35 +82,46 @@ AFRAME.registerComponent("media-loader", {
         this.blobURL = window.URL.createObjectURL(blob);
       }
 
-      if (contentType.startsWith("image/") || contentType.startsWith("video/") || contentType.startsWith("audio/")) {
+      if (
+        contentType.startsWith("image/") ||
+        contentType.startsWith("video/") ||
+        contentType.startsWith("audio/") ||
+        contentType === "application/pdf"
+      ) {
         this.el.addEventListener(
           "image-loaded",
           () => {
             clearTimeout(this.showLoaderTimeout);
+            delete this.showLoaderTimeout;
           },
           { once: true }
         );
-        this.el.setAttribute("image-plus", { src: this.blobURL || raw, contentType, token });
-        this.el.setAttribute("position-at-box-shape-border", { target: ".delete-button", dirs: ["forward", "back"] });
+        const imageSrc = contentType === "application/pdf" ? images.png : raw;
+        const imageContentType = contentType === "application/pdf" ? "image/png" : contentType;
+        this.el.removeAttribute("gltf-model-plus");
+        this.el.setAttribute("image-plus", { src: this.blobUrl || imageSrc, contentType: imageContentType, token });
+        this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
       } else if (
         contentType.includes("application/octet-stream") ||
         contentType.includes("x-zip-compressed") ||
         contentType.startsWith("model/gltf") ||
-        url.endsWith(".gltf") ||
-        url.endsWith(".glb")
+        src.endsWith(".gltf") ||
+        src.endsWith(".glb")
       ) {
         this.el.addEventListener(
           "model-loaded",
           () => {
             clearTimeout(this.showLoaderTimeout);
             this.setShapeAndScale(this.data.resize);
+            delete this.showLoaderTimeout;
           },
           { once: true }
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
-        const src = this.blobURL || url;
+        const modelSrc = this.blobURL || src;
+        this.el.removeAttribute("image-plus");
         this.el.setAttribute("gltf-model-plus", {
-          src,
+          src: modelSrc,
           contentType,
           inflate: true
         });

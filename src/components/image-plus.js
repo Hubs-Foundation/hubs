@@ -76,14 +76,14 @@ AFRAME.registerComponent("image-plus", {
     depth: { default: 0.05 }
   },
 
-  remove() {
-    const material = this.el.getObject3D("mesh").material;
-    const texture = material.map;
+  releaseTexture(src) {
+    const texture = this.mesh && this.mesh.material.map;
+    if (!texture || this.mesh.material.map === errorTexture) return;
 
-    if (texture === errorTexture) return;
+    this.mesh.material.map = null;
+    this.mesh.material.needsUpdate = true;
 
-    const url = texture.image.src;
-    const cacheItem = textureCache.get(url);
+    const cacheItem = textureCache.get(src);
     cacheItem.count--;
     if (cacheItem.count <= 0) {
       // Unload the video element to prevent it from continuing to play in the background
@@ -96,13 +96,13 @@ AFRAME.registerComponent("image-plus", {
 
       texture.dispose();
 
-      // THREE never lets go of material refs, long running PR HERE https://github.com/mrdoob/three.js/pull/12464
-      // Mitigate the damage a bit by at least breaking the image ref so Image/Video elements can be freed
-      // TODO: If/when THREE gets fixed, we should be able to safely remove this
-      delete texture.image;
-
-      textureCache.delete(url);
+      textureCache.delete(src);
     }
+  },
+
+  remove() {
+    this.releaseTexture(this.data.src, this.data.mediaIndex);
+    console.log(textureCache);
   },
 
   async loadGIF(url) {
@@ -175,46 +175,41 @@ AFRAME.registerComponent("image-plus", {
     });
   },
 
-  async update() {
+  async update(oldData) {
     let texture;
     try {
-      const url = this.data.src;
-      const token = this.data.token;
-      let contentType = this.data.contentType;
-      if (!url) {
-        return;
+      const { src, token, contentType } = this.data;
+      if (!src) return;
+
+      if (this.mesh) {
+        this.releaseTexture(oldData.src, oldData.mediaIndex);
       }
 
       let cacheItem;
-      if (textureCache.has(url)) {
-        cacheItem = textureCache.get(url);
+      if (textureCache.has(src)) {
+        cacheItem = textureCache.get(src);
         texture = cacheItem.texture;
         cacheItem.count++;
       } else {
-        const resolved = await resolveMedia(url, token);
-        const { raw } = resolved;
-        if (!contentType) {
-          contentType = resolved.contentType;
-        }
-
         cacheItem = { count: 1 };
-        if (raw === "error") {
+        if (src === "error") {
           texture = errorTexture;
         } else if (contentType.includes("image/gif")) {
-          texture = await this.loadGIF(raw);
+          texture = await this.loadGIF(src);
         } else if (contentType.startsWith("image/")) {
-          texture = await this.loadImage(raw);
+          texture = await this.loadImage(src);
         } else if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
-          texture = await this.loadVideo(raw);
+          texture = await this.loadVideo(src);
           cacheItem.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
         } else {
           throw new Error(`Unknown content type: ${contentType}`);
         }
 
         texture.encoding = THREE.sRGBEncoding;
+        texture.minFilter = THREE.LinearFilter;
 
         cacheItem.texture = texture;
-        textureCache.set(url, cacheItem);
+        textureCache.set(src, cacheItem);
       }
 
       if (cacheItem.audioSource) {
@@ -227,22 +222,31 @@ AFRAME.registerComponent("image-plus", {
       texture = errorTexture;
     }
 
-    const material = new THREE.MeshBasicMaterial();
-    material.side = THREE.DoubleSide;
-    material.transparent = true;
-    material.map = texture;
-    material.needsUpdate = true;
-    material.map.needsUpdate = true;
-
     const ratio =
       (texture.image.videoHeight || texture.image.height || 1.0) /
       (texture.image.videoWidth || texture.image.width || 1.0);
     const width = Math.min(1.0, 1.0 / ratio);
     const height = Math.min(1.0, ratio);
 
-    const geometry = new THREE.PlaneGeometry(width, height, 1, 1);
-    this.mesh = new THREE.Mesh(geometry, material);
+    if (!this.mesh) {
+      const material = new THREE.MeshBasicMaterial();
+      material.side = THREE.DoubleSide;
+      material.transparent = true;
+      material.map = texture;
+      material.needsUpdate = true;
+
+      const geometry = new THREE.PlaneGeometry();
+      this.mesh = new THREE.Mesh(geometry, material);
+    } else {
+      const { material } = this.mesh;
+      material.map = texture;
+      material.needsUpdate = true;
+      this.mesh.needsUpdate = true;
+    }
+
     this.el.setObject3D("mesh", this.mesh);
+
+    this.mesh.scale.set(width, height, 1);
     this.el.setAttribute("shape", {
       shape: "box",
       halfExtents: { x: width / 2, y: height / 2, z: this.data.depth }
