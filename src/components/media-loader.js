@@ -65,7 +65,7 @@ AFRAME.registerComponent("media-loader", {
 
       if (!url) return;
 
-      const { raw, origin, contentType } = await resolveMedia(url, token);
+      const { raw, contentType } = await resolveMedia(url, token);
 
       if (token) {
         if (this.blobURL) {
@@ -106,7 +106,7 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
-        const src = this.blobURL || origin || url;
+        const src = this.blobURL || url;
         this.el.setAttribute("gltf-model-plus", {
           src,
           contentType,
