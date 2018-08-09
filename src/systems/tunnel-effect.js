@@ -4,9 +4,13 @@ import "../utils/postprocessing/ShaderPass";
 import "../utils/postprocessing/MaskPass";
 import "../utils/shaders/CopyShader";
 import "../utils/shaders/VignetteShader";
+import qsTruthy from "../utils/qs_truthy";
 
 const STATIC = new THREE.Vector3(0, 0, 0);
 const CLAMP_VELOCITY = 0.01;
+const CLAMP_RADIUS = 0.001;
+const CLAMP_SOFTNESS = 0.001;
+const isDisabled = qsTruthy("disableTunnel");
 
 AFRAME.registerSystem("tunneleffect", {
   schema: {
@@ -62,7 +66,7 @@ AFRAME.registerSystem("tunneleffect", {
   tick: function(time, deltaTime) {
     this.dt = deltaTime;
 
-    if (!this._isPostProcessingReady() || !this.isVR) {
+    if (!this._isPostProcessingReady() || !this.isVR || isDisabled) {
       return;
     }
 
@@ -71,7 +75,11 @@ AFRAME.registerSystem("tunneleffect", {
       // the character stops, so we use the aframe default render func
       const r = this.vignettePass.uniforms["radius"].value;
       const softness = this.vignettePass.uniforms["softness"].value;
-      if (this.isMoving && r < this.targetRadius && softness > this.targetSoftness) {
+      if (
+        this.isMoving &&
+        Math.abs(r - this.targetRadius) > CLAMP_RADIUS &&
+        Math.abs(softness - this.targetSoftness) > CLAMP_SOFTNESS
+      ) {
         if (this.deltaR !== 0 && this.deltaS !== 0) {
           this.deltaR = this.targetRadius - r;
           this.deltaS = softness - this.targetSoftness;
