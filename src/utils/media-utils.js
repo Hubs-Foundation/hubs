@@ -17,9 +17,10 @@ const fetchContentType = async (url, token) => {
 };
 
 const resolveMediaCache = new Map();
-export const resolveMedia = async (url, token, skipContentType) => {
+export const resolveMedia = async (url, token, skipContentType, index) => {
   const parsedUrl = new URL(url);
-  if (resolveMediaCache.has(url)) return resolveMediaCache.get(url);
+  const cacheKey = `${url}|${index}`;
+  if (resolveMediaCache.has(cacheKey)) return resolveMediaCache.get(cacheKey);
 
   const isNotHttpOrHttps = parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:";
   const resolved =
@@ -28,7 +29,7 @@ export const resolveMedia = async (url, token, skipContentType) => {
       : await fetch(mediaAPIEndpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ media: { url } })
+          body: JSON.stringify({ media: { url, index } })
         }).then(r => r.json());
 
   if (!isNotHttpOrHttps && !skipContentType) {
@@ -37,7 +38,7 @@ export const resolveMedia = async (url, token, skipContentType) => {
     resolved.contentType = contentType;
   }
 
-  resolveMediaCache.set(url, resolved);
+  resolveMediaCache.set(cacheKey, resolved);
   return resolved;
 };
 

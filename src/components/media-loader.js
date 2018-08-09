@@ -5,6 +5,7 @@ AFRAME.registerComponent("media-loader", {
   schema: {
     src: { type: "string" },
     token: { type: "string" },
+    index: { type: "number" },
     resize: { default: false }
   },
 
@@ -59,7 +60,7 @@ AFRAME.registerComponent("media-loader", {
   // TODO: correctly handle case where src changes
   async update(oldData) {
     try {
-      const { src, token } = this.data;
+      const { src, token, index } = this.data;
 
       if (src !== oldData.src && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
@@ -67,7 +68,7 @@ AFRAME.registerComponent("media-loader", {
 
       if (!src) return;
 
-      const { raw, images, contentType } = await resolveMedia(src, token);
+      const { raw, images, contentType } = await resolveMedia(src, token, false, index);
 
       if (token) {
         if (this.blobURL) {
