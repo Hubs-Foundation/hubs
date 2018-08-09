@@ -178,7 +178,7 @@ module.exports = (env, argv) => ({
     new HTMLWebpackPlugin({
       filename: "index.html",
       template: path.join(__dirname, "src", "index.html"),
-      chunks: ["vendor", "index"]
+      chunks: ["vendor", "engine", "index"]
     }),
     new HTMLWebpackPlugin({
       filename: "hub.html",

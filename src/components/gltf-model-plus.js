@@ -215,19 +215,18 @@ async function resolveGLTFUri(gltfProperty, basePath) {
   if (url.protocol === "blob:") {
     gltfProperty.uri = url.href;
   } else {
-    const { raw } = await resolveMedia(url.href);
+    const { raw } = await resolveMedia(url.href, null, true);
     gltfProperty.uri = raw;
   }
 }
 
-async function loadGLTF(src, preferredTechnique, onProgress) {
-  const { raw, origin, contentType } = await resolveMedia(src);
-  const basePath = THREE.LoaderUtils.extractUrlBase(origin);
+async function loadGLTF(src, token, contentType, preferredTechnique, onProgress) {
+  const basePath = THREE.LoaderUtils.extractUrlBase(src);
 
-  let gltfUrl = raw;
+  let gltfUrl = src;
   let fileMap;
 
-  if (contentType === "model/gltf+zip") {
+  if (contentType.includes("model/gltf+zip") || contentType.includes("application/x-zip-compressed")) {
     fileMap = await getFilesFromSketchfabZip(gltfUrl);
     gltfUrl = fileMap["scene.gtlf"];
   }
@@ -247,13 +246,17 @@ async function loadGLTF(src, preferredTechnique, onProgress) {
 
   if (images) {
     for (const image of images) {
-      pendingFarsparkPromises.push(resolveGLTFUri(image, parser.options.path));
+      if (image.uri) {
+        pendingFarsparkPromises.push(resolveGLTFUri(image, parser.options.path));
+      }
     }
   }
 
   if (buffers) {
     for (const buffer of buffers) {
-      pendingFarsparkPromises.push(resolveGLTFUri(buffer, parser.options.path));
+      if (buffer.uri) {
+        pendingFarsparkPromises.push(resolveGLTFUri(buffer, parser.options.path));
+      }
     }
   }
 
@@ -277,8 +280,6 @@ async function loadGLTF(src, preferredTechnique, onProgress) {
   }
 
   await Promise.all(pendingFarsparkPromises);
-
-  console.log(parser.json);
 
   const gltf = await new Promise((resolve, reject) =>
     parser.parse(
@@ -317,6 +318,8 @@ async function loadGLTF(src, preferredTechnique, onProgress) {
 AFRAME.registerComponent("gltf-model-plus", {
   schema: {
     src: { type: "string" },
+    token: { type: "string" },
+    contentType: { type: "string" },
     inflate: { default: false }
   },
 
@@ -327,7 +330,7 @@ AFRAME.registerComponent("gltf-model-plus", {
   },
 
   update() {
-    this.applySrc(this.data.src);
+    this.applySrc(this.data.src, this.data.token, this.data.contentType);
   },
 
   loadTemplates() {
@@ -338,7 +341,7 @@ AFRAME.registerComponent("gltf-model-plus", {
     });
   },
 
-  async applySrc(src) {
+  async applySrc(src, token, contentType) {
     try {
       // If the src attribute is a selector, get the url from the asset item.
       if (src && src.charAt(0) === "#") {
@@ -360,7 +363,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       const gltfPath = THREE.LoaderUtils.extractUrlBase(src);
 
       if (!GLTFCache[src]) {
-        GLTFCache[src] = loadGLTF(src, this.preferredTechnique);
+        GLTFCache[src] = loadGLTF(src, token, contentType, this.preferredTechnique);
       }
 
       const model = cloneGltf(await GLTFCache[src]);

@@ -297,8 +297,8 @@ const onReady = async () => {
     });
 
     const offset = { x: 0, y: 0, z: -1.5 };
-    const spawnMediaInfrontOfPlayer = url => {
-      const entity = addMedia(url, true);
+    const spawnMediaInfrontOfPlayer = src => {
+      const entity = addMedia(src, true);
       entity.setAttribute("offset-relative-to", {
         target: "#player-camera",
         offset
@@ -313,9 +313,15 @@ const onReady = async () => {
       document.addEventListener("paste", e => {
         if (e.target.nodeName === "INPUT") return;
 
-        const imgUrl = e.clipboardData.getData("text");
-        console.log("Pasted: ", imgUrl, e);
-        spawnMediaInfrontOfPlayer(imgUrl);
+        const url = e.clipboardData.getData("text");
+        const files = e.clipboardData.files && e.clipboardData.files;
+        if (url) {
+          spawnMediaInfrontOfPlayer(url);
+        } else {
+          for (const file of files) {
+            spawnMediaInfrontOfPlayer(file);
+          }
+        }
       });
 
       document.addEventListener("dragover", e => {
@@ -324,10 +330,14 @@ const onReady = async () => {
 
       document.addEventListener("drop", e => {
         e.preventDefault();
-        const imgUrl = e.dataTransfer.getData("url");
-        if (imgUrl) {
-          console.log("Dropped: ", imgUrl);
-          spawnMediaInfrontOfPlayer(imgUrl);
+        const url = e.dataTransfer.getData("url");
+        const files = e.dataTransfer.files;
+        if (url) {
+          spawnMediaInfrontOfPlayer(url);
+        } else {
+          for (const file of files) {
+            spawnMediaInfrontOfPlayer(file);
+          }
         }
       });
     }
