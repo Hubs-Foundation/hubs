@@ -309,38 +309,36 @@ const onReady = async () => {
       spawnMediaInfrontOfPlayer(e.detail);
     });
 
-    if (qsTruthy("mediaTools")) {
-      document.addEventListener("paste", e => {
-        if (e.target.nodeName === "INPUT") return;
+    document.addEventListener("paste", e => {
+      if (e.target.nodeName === "INPUT") return;
 
-        const url = e.clipboardData.getData("text");
-        const files = e.clipboardData.files && e.clipboardData.files;
-        if (url) {
-          spawnMediaInfrontOfPlayer(url);
-        } else {
-          for (const file of files) {
-            spawnMediaInfrontOfPlayer(file);
-          }
+      const url = e.clipboardData.getData("text");
+      const files = e.clipboardData.files && e.clipboardData.files;
+      if (url) {
+        spawnMediaInfrontOfPlayer(url);
+      } else {
+        for (const file of files) {
+          spawnMediaInfrontOfPlayer(file);
         }
-      });
+      }
+    });
 
-      document.addEventListener("dragover", e => {
-        e.preventDefault();
-      });
+    document.addEventListener("dragover", e => {
+      e.preventDefault();
+    });
 
-      document.addEventListener("drop", e => {
-        e.preventDefault();
-        const url = e.dataTransfer.getData("url");
-        const files = e.dataTransfer.files;
-        if (url) {
-          spawnMediaInfrontOfPlayer(url);
-        } else {
-          for (const file of files) {
-            spawnMediaInfrontOfPlayer(file);
-          }
+    document.addEventListener("drop", e => {
+      e.preventDefault();
+      const url = e.dataTransfer.getData("url");
+      const files = e.dataTransfer.files;
+      if (url) {
+        spawnMediaInfrontOfPlayer(url);
+      } else {
+        for (const file of files) {
+          spawnMediaInfrontOfPlayer(file);
         }
-      });
-    }
+      }
+    });
 
     if (!qsTruthy("offline")) {
       document.body.addEventListener("connected", () => {
