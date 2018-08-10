@@ -1,7 +1,7 @@
 AFRAME.registerComponent("grabbable-toggle", {
   schema: {
-    primaryReleaseEvents: { default: ["hand_release", "action_release"] },
-    secondaryReleaseEvents: { default: ["secondary_hand_release", "secondary_action_release"] }
+    primaryReleaseEvents: { default: ["primary_hand_release"] },
+    secondaryReleaseEvents: { default: ["secondary_hand_release"] }
   },
 
   init() {

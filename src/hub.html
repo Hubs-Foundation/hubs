@@ -193,8 +193,10 @@
                     grabbable-toggle
                     grabbable="maxGrabbers: 1; maxGrabBehavior: drop;"
                     hoverable
-                    activatable__hands="buttonStartEvent: secondary_action_grab; buttonEndEvent: secondary_action_release;"
-                    activatable__cursor="buttonStartEvent: secondary-cursor-grab; buttonEndEvent: secondary-cursor-release;"
+                    activatable__drawHand="buttonStartEvent: secondary_hand_grab; buttonEndEvent: secondary_hand_release;"
+                    activatable__drawCursor="buttonStartEvent: secondary-cursor-grab; buttonEndEvent: secondary-cursor-release;"
+                    activatable__colorNext="buttonStartEvent: tertiary_action_north; buttonEndEvent: action_primary_up; activatedState: colorNext;"
+                    activatable__colorPrev="buttonStartEvent: tertiary_action_south; buttonEndEvent: action_primary_up; activatedState: colorPrev;"
                     scale="0.5 0.5 0.5"
                 >
                     <a-sphere 
@@ -239,14 +241,14 @@
                          colliderEventProperty: els;
                          colliderEndEvent: collisions; 
                          colliderEndEventProperty: clearedEls;
-                         grabStartButtons: hand_grab, secondary_hand_grab; 
-                         grabEndButtons: hand_release, secondary_hand_release;
-                         stretchStartButtons: hand_grab, secondary_hand_grab; 
-                         stretchEndButtons: hand_release, secondary_hand_release;
+                         grabStartButtons: primary_hand_grab, secondary_hand_grab; 
+                         grabEndButtons: primary_hand_release, secondary_hand_release;
+                         stretchStartButtons: primary_hand_grab, secondary_hand_grab; 
+                         stretchEndButtons: primary_hand_release, secondary_hand_release;
                          dragDropStartButtons: hand_grab, secondary_hand_grab; 
                          dragDropEndButtons: hand_release, secondary_hand_release;
-                         activateStartButtons: secondary_hand_grab, secondary_action_grab; 
-                         activateEndButtons: secondary_hand_release, secondary_action_release;"
+                         activateStartButtons: secondary_hand_grab, tertiary_action_north, tertiary_action_south; 
+                         activateEndButtons: secondary_hand_release, action_primary_up;"
                      collision-filter="collisionForces: false"
                      physics-collider
             ></a-mixin>
@@ -279,14 +281,14 @@
                 colliderEventProperty: els;
                 colliderEndEvent: raycaster-intersection-cleared; 
                 colliderEndEventProperty: clearedEls;
-                grabStartButtons: cursor-grab, hand_grab, secondary_hand_grab; 
-                grabEndButtons: cursor-release, hand_release, secondary_hand_release;
-                stretchStartButtons: cursor-grab, hand_grab, secondary_hand_grab; 
-                stretchEndButtons: cursor-release, hand_release, secondary_hand_release;
-                dragDropStartButtons: cursor-grab, hand_grab, secondary_hand_grab; 
-                dragDropEndButtons: cursor-release, hand_release, secondary_hand_release;
-                activateStartButtons: secondary_hand_grab, secondary_action_grab, secondary-cursor-grab; 
-                activateEndButtons: secondary_hand_release, secondary_action_release, secondary-cursor-release;"
+                grabStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab; 
+                grabEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
+                stretchStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
+                stretchEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
+                dragDropStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
+                dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
+                activateStartButtons: secondary-cursor-grab, secondary_hand_grab, tertiary_action_north, tertiary_action_south; 
+                activateEndButtons: secondary-cursor-release, secondary_hand_release, action_primary_up;"
             segments-height="9"
             segments-width="9"
             event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"
