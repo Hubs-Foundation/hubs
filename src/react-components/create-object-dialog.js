@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import giphyLogo from "../assets/images/giphy_logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperclip, faTimes } from "@fortawesome/free-solid-svg-icons";
+import getSurpriseMediaUrl from "../utils/surprise-media-urls";
 import styles from "../assets/stylesheets/create-object-dialog.scss";
 import cx from "classnames";
 
@@ -11,6 +12,10 @@ const attributionHostnames = {
   "giphy.com": giphyLogo,
   "media.giphy.com": giphyLogo
 };
+
+function attributionImageForUrl(url) {
+  return attributionHostnames[new URL(url).hostname];
+}
 
 const DEFAULT_OBJECT_URL = "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf";
 const isMobile = AFRAME.utils.device.isMobile();
@@ -50,7 +55,7 @@ export default class CreateObjectDialog extends Component {
   onUrlChange = e => {
     let attributionImage = this.state.attributionImage;
     if (e.target && e.target.value && e.target.validity.valid) {
-      attributionImage = attributionHostnames[new URL(e.target.value).hostname];
+      attributionImage = attributionImageForUrl(e.target.value);
     }
     this.setState({
       url: e.target && e.target.value,
@@ -67,8 +72,18 @@ export default class CreateObjectDialog extends Component {
 
   onCreateClicked = e => {
     e.preventDefault();
-    this.props.onCreateObject(this.state.file || this.state.url || DEFAULT_OBJECT_URL);
-    this.props.onCloseDialog();
+
+    if (this.state.file || this.state.url) {
+      this.props.onCreateObject(this.state.file || this.state.url || DEFAULT_OBJECT_URL);
+      this.props.onCloseDialog();
+    } else {
+      const url = getSurpriseMediaUrl();
+
+      this.setState({
+        url,
+        attributionImage: attributionImageForUrl(url)
+      });
+    }
   };
 
   reset = e => {
@@ -121,7 +136,7 @@ export default class CreateObjectDialog extends Component {
             </div>
             <div className={styles.buttons}>
               <button className={styles.actionButton}>
-                <span>create</span>
+                <span>{this.state.file || this.state.url ? "create" : "surprise me!"}</span>
               </button>
             </div>
             {this.state.attributionImage ? (
