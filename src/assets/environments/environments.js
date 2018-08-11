@@ -1,5 +1,5 @@
 export const ENVIRONMENT_URLS = [
-  "https://www.jonicoma.com/Museum/Museum_Attempt_1.json",
+  "https://www.jonicoma.com/Museum/Museum_Attempt_1.bundle.json",
   process.env.ASSET_BUNDLE_SERVER + "/rooms/meetingroom/MeetingRoom.bundle.json",
   process.env.ASSET_BUNDLE_SERVER + "/rooms/atrium/Atrium.bundle.json",
   process.env.ASSET_BUNDLE_SERVER + "/rooms/MedievalFantasyBook/MedievalFantasyBook.bundle.json",
