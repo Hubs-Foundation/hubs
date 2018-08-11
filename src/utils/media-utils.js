@@ -1,4 +1,4 @@
-const whitelistedHosts = [/^.*\.reticulum\.io$/, /^.*hubs\.mozilla\.com$/, /^hubs\.local$/];
+const whitelistedHosts = [/^.*\.jonicoma\.com$/,/^.*\.reticulum\.io$/, /^.*hubs\.mozilla\.com$/, /^hubs\.local$/];
 const isHostWhitelisted = hostname => !!whitelistedHosts.filter(r => r.test(hostname)).length;
 let mediaAPIEndpoint = "/api/v1/media";
 

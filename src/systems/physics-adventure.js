@@ -38,7 +38,8 @@ AFRAME.registerComponent("marker", {
   },
 
   init: function() {
-    AFRAME.scenes[0].systems["physics-adventure"].registerMarker(this);
+//    AFRAME.scenes[0].systems["physics-adventure"].registerMarker(this);
+    console.log(this);
   }
 });
 
@@ -46,6 +47,7 @@ AFRAME.registerSystem("physics-adventure", {
   init: function() {
     this.zones = [];
     window.setTimeout(() => {
+      console.log(this);
       this.player = AFRAME.scenes[0].querySelector("#player-rig").object3D;
     }, 2000);
   },
@@ -59,10 +61,10 @@ AFRAME.registerSystem("physics-adventure", {
   },
 
   tick: function() {
-    if (this.player) {
-      const player = this.player;
-      const activeZones = activeZonesForPlayer(player, this.zones);
-    }
+//    if (this.player) {
+//      const player = this.player;
+//      const activeZones = activeZonesForPlayer(player, this.zones);
+//    }
   }
 });
 
