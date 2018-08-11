@@ -14,7 +14,7 @@
   },
   "scripts": {
     "start": "webpack-dev-server --mode=development",
-    "build": "rimraf ./dist && webpack --mode=production",
+    "build": "rimraf ./dist && webpack --mode=development",
     "doc": "node ./scripts/doc/build.js",
     "prettier": "prettier --write '*.js' 'src/**/*.js'",
     "lint:js": "eslint '*.js' 'scripts/**/*.js' 'src/**/*.js'",

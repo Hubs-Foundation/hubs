@@ -367,7 +367,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       const gltfPath = THREE.LoaderUtils.extractUrlBase(src);
 
       if (!GLTFCache[src]) {
-        GLTFCache[src] = loadGLTF(src, token, contentType, this.preferredTechnique);
+        GLTFCache[src] = loadGLTF(src, token, contentType || "model/gltf", this.preferredTechnique);
       }
 
       const model = cloneGltf(await GLTFCache[src]);
