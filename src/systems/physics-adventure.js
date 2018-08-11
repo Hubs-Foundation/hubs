@@ -1,11 +1,13 @@
+import { addMedia } from "../utils/media-utils";
+
 const mediaForMarkerName = {
   problem_room_1_right: "problem_1_with_audio",
   problem_room_1_left: "problem_1_with_picture"
 };
 
+const jonicomaMedia = "https://www.jonicoma.com/media";
 const urlsForMedia = {
-  problem_1_with_audio: "media/problem_room_1/problem_1_with_audio.mp4",
-  problem_1_with_picture: "media/problem_room_1/problem_1_with_picture.mp4"
+  problem_1_with_audio: jonicomaMedia + "/problem_room_1/problem_1_with_audio.mp4",
 };
 
 const mediaForZone = {
@@ -18,8 +20,8 @@ const activeZonesForPlayer = function(player, zones) {
   const activeZones = [];
   for (let i = 0; i < zones.length; i++) {
     const zone = zones[i];
-    pos.subVectors(player.position, zone.position);
-    if (pos.length < 5) {
+    pos.subVectors(player.position, zone.el.object3D.position);
+    if (pos.lengthSq() < 400) {
       activeZones.push(zone);
     }
   }
@@ -38,7 +40,7 @@ AFRAME.registerComponent("marker", {
   },
 
   init: function() {
-//    AFRAME.scenes[0].systems["physics-adventure"].registerMarker(this);
+    AFRAME.scenes[0].systems["physics-adventure"].registerMarker(this);
     console.log(this);
   }
 });
@@ -46,10 +48,12 @@ AFRAME.registerComponent("marker", {
 AFRAME.registerSystem("physics-adventure", {
   init: function() {
     this.zones = [];
+    this.markers = [];
     window.setTimeout(() => {
       console.log(this);
       this.player = AFRAME.scenes[0].querySelector("#player-rig").object3D;
     }, 2000);
+    this.activeMarkers = [];
   },
 
   registerZone: function(zone) {
@@ -60,11 +64,32 @@ AFRAME.registerSystem("physics-adventure", {
     this.markers.push(marker);
   },
 
-  tick: function() {
-//    if (this.player) {
-//      const player = this.player;
-//      const activeZones = activeZonesForPlayer(player, this.zones);
-//    }
+  tick: async function () {
+    if (this.player) {
+      const player = this.player;
+      const zones = this.zones;
+      const markers = this.markers;
+      const activeZones = activeZonesForPlayer(player, this.zones);
+      const activeMarkers = activeZonesForPlayer(player, markers);
+
+      for (var i=0; i<activeMarkers.length; i++){
+        if (this.activeMarkers.indexOf(activeMarkers[i]) === -1){
+          this.activeMarkers.push(activeMarkers[i]);
+          console.log("ACTIVATE:", activeMarkers[i]);
+          const mediaName = mediaForMarkerName[activeMarkers[i].data.name];
+          if (mediaName){
+            const url = urlsForMedia[mediaName];
+            if (url){
+              console.log(url);
+              const media = await addMedia(url);
+              media.object3D.position.copy(activeMarkers[i].el.object3D.position);
+              media.object3D.rotation.copy(activeMarkers[i].el.object3D.rotation);
+              media.object3D.scale.copy(activeMarkers[i].el.object3D.scale);
+            }
+          }
+        }
+      }
+    }
   }
 });
 

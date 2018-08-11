@@ -206,7 +206,9 @@ AFRAME.registerComponent("image-plus", {
           texture = await this.loadImage(raw);
         } else if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
           texture = await this.loadVideo(raw);
-          cacheItem.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
+          if (this.el.sceneEl.audioListener){
+            cacheItem.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
+          }
         } else {
           throw new Error(`Unknown content type: ${contentType}`);
         }
