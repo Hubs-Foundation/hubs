@@ -14,7 +14,8 @@ AFRAME.registerComponent("character-controller", {
     easing: { default: 10 },
     pivot: { type: "selector" },
     snapRotationDegrees: { default: THREE.Math.DEG2RAD * 45 },
-    rotationSpeed: { default: -3 }
+    rotationSpeed: { default: -3 },
+    fly: { default: false }
   },
 
   init: function() {
@@ -98,6 +99,7 @@ AFRAME.registerComponent("character-controller", {
     const pivotRotationInvMatrix = new THREE.Matrix4();
     const startPos = new THREE.Vector3();
     const startScale = new THREE.Vector3();
+    const velocity = new THREE.Vector3();
 
     return function(t, dt) {
       const deltaSeconds = dt / 1000;
@@ -121,7 +123,12 @@ AFRAME.registerComponent("character-controller", {
       pivotRotationMatrix.makeRotationAxis(rotationAxis, pivot.rotation.y);
       pivotRotationInvMatrix.makeRotationAxis(rotationAxis, -pivot.rotation.y);
       this.updateVelocity(deltaSeconds);
-      move.makeTranslation(this.velocity.x * distance, this.velocity.y * distance, this.velocity.z * distance);
+
+      velocity.copy(this.velocity);
+      if (this.data.fly) {
+        velocity.applyQuaternion(pivot.quaternion);
+      }
+      move.makeTranslation(velocity.x * distance, velocity.y * distance, velocity.z * distance);
       yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 
       // Translate to middle of playspace (player rig)
@@ -129,7 +136,9 @@ AFRAME.registerComponent("character-controller", {
       // Zero playspace (player rig) rotation
       root.matrix.premultiply(rotationInvMatrix);
       // Zero pivot (camera/head) rotation
-      root.matrix.premultiply(pivotRotationInvMatrix);
+      if (!this.data.fly) {
+        root.matrix.premultiply(pivotRotationInvMatrix);
+      }
       // Apply joystick translation
       root.matrix.premultiply(move);
       // Apply joystick yaw rotation
@@ -137,7 +146,9 @@ AFRAME.registerComponent("character-controller", {
       // Apply snap rotation if necessary
       root.matrix.premultiply(this.pendingSnapRotationMatrix);
       // Reapply pivot (camera/head) rotation
-      root.matrix.premultiply(pivotRotationMatrix);
+      if (!this.data.fly) {
+        root.matrix.premultiply(pivotRotationMatrix);
+      }
       // Reapply playspace (player rig) rotation
       root.matrix.premultiply(rotationMatrix);
       // Reapply playspace (player rig) translation
@@ -151,7 +162,7 @@ AFRAME.registerComponent("character-controller", {
 
       this.pendingSnapRotationMatrix.identity(); // Revert to identity
 
-      if (this.velocity.lengthSq() > EPS) {
+      if (!this.data.fly && this.velocity.lengthSq() > EPS) {
         this.setPositionOnNavMesh(startPos, root.position, root);
       }
     };

@@ -262,6 +262,10 @@ const onReady = async () => {
       playerRig.setAttribute("virtual-gamepad-controls", {});
     }
 
+    if (qsTruthy("fly")) {
+      document.querySelector("[character-controller]").setAttribute("character-controller", "fly", true);
+    }
+
     const applyProfileOnPlayerRig = applyProfileFromStore.bind(null, playerRig);
     applyProfileOnPlayerRig();
     store.addEventListener("statechanged", applyProfileOnPlayerRig);
