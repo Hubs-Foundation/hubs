@@ -16,6 +16,20 @@ const fetchContentType = async (url, token) => {
   return fetch(url, args).then(r => r.headers.get("content-type"));
 };
 
+const contentIndexCache = new Map();
+export const fetchMaxContentIndex = async (documentUrl, pageUrl, token) => {
+  if (contentIndexCache.has(documentUrl)) return contentIndexCache.get(documentUrl);
+  const args = {};
+
+  if (token) {
+    args.headers = { Authorization: `Token ${token}` };
+  }
+
+  const maxIndex = await fetch(pageUrl, args).then(r => parseInt(r.headers.get("x-max-content-index")));
+  contentIndexCache.set(documentUrl, maxIndex);
+  return maxIndex;
+};
+
 const resolveMediaCache = new Map();
 export const resolveMedia = async (url, token, skipContentType, index) => {
   const parsedUrl = new URL(url);

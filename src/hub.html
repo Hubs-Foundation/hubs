@@ -165,6 +165,20 @@
                 </a-entity>
             </template>
 
+            <template id="paging-toolbar">
+                <a-entity class="paging-toolbar" visible-to-owner>
+                    <a-entity class="prev-button" position="-0.3 0 0">
+                        <a-entity mixin="rounded-text-button" slice9="width: 0.2"> </a-entity>
+                        <a-entity text=" value:<; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    </a-entity>
+                    <a-entity class="page-label" text="width:2; align:center;" text-raycast-hack></a-entity>
+                    <a-entity class="next-button" position="0.3 0 0">
+                        <a-entity mixin="rounded-text-button" slice9="width: 0.2"> </a-entity>
+                        <a-entity text=" value:>; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
             <a-mixin id="rounded-text-button"
                 text-button="
                     haptic:#player-right-controller;

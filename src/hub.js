@@ -75,6 +75,7 @@ import "./components/remove-networked-object-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/media-loader";
 import "./components/gamma-factor";
+import "./components/visible-to-owner";
 
 import ReactDOM from "react-dom";
 import React from "react";
