@@ -145,32 +145,32 @@ AFRAME.registerComponent("image-plus", {
   },
 
   releaseTexture(src) {
-    const texture = this.mesh && this.mesh.material.map;
-    if (!texture || this.mesh.material.map === errorTexture) return;
+    if (this.mesh && this.mesh.material.map !== errorTexture) {
+      this.mesh.material.map = null;
+      this.mesh.material.needsUpdate = true;
+    }
 
-    this.mesh.material.map = null;
-    this.mesh.material.needsUpdate = true;
+    if (!textureCache.has(src)) return;
 
     const cacheItem = textureCache.get(src);
     cacheItem.count--;
     if (cacheItem.count <= 0) {
       // Unload the video element to prevent it from continuing to play in the background
-      if (texture.image instanceof HTMLVideoElement) {
-        const video = texture.image;
+      if (cacheItem.texture.image instanceof HTMLVideoElement) {
+        const video = cacheItem.texture.image;
         video.pause();
         video.src = "";
         video.load();
       }
 
-      texture.dispose();
+      cacheItem.texture.dispose();
 
       textureCache.delete(src);
     }
   },
 
   remove() {
-    this.releaseTexture(this.data.src, this.data.mediaIndex);
-    console.log(textureCache);
+    this.releaseTexture(this.data.src);
   },
 
   async update(oldData) {
@@ -180,7 +180,7 @@ AFRAME.registerComponent("image-plus", {
       if (!src) return;
 
       if (this.mesh) {
-        this.releaseTexture(oldData.src, oldData.mediaIndex);
+        this.releaseTexture(oldData.src);
       }
 
       let cacheItem;
@@ -208,6 +208,12 @@ AFRAME.registerComponent("image-plus", {
 
         cacheItem.texture = texture;
         textureCache.set(src, cacheItem);
+
+        // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
+        if (this.data.src !== src) {
+          this.releaseTexture(src);
+          return;
+        }
       }
 
       if (cacheItem.audioSource) {
