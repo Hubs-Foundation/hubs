@@ -59,7 +59,6 @@ AFRAME.registerComponent("media-loader", {
     delete this.showLoaderTimeout;
   },
 
-  // TODO: correctly handle case where src changes
   async update(oldData) {
     try {
       const { src, token, index } = this.data;
