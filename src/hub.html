@@ -155,7 +155,9 @@
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
                     position-at-box-shape-border="target:.delete-button"
                     destroy-at-extreme-distances
+                    rotation
                 >
+                    <!-- HACK: rotation component above is required for its side effect of setting YXZ order -->
                     <a-entity class="delete-button" visible-while-frozen>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
                         <a-entity text=" value:Delete; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
