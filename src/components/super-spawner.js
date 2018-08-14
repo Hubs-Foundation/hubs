@@ -40,8 +40,8 @@ AFRAME.registerComponent("super-spawner", {
     /**
      * The events to emit for programmatically grabbing and releasing objects
      */
-    grabEvents: { default: ["cursor-grab", "hand_grab"] },
-    releaseEvents: { default: ["cursor-release", "hand_release"] },
+    grabEvents: { default: ["cursor-grab", "primary_hand_grab"] },
+    releaseEvents: { default: ["cursor-release", "primary_hand_release"] },
 
     /**
      * The spawner will become invisible and ungrabbable for this ammount of time after being grabbed. This can prevent rapidly spawning objects.

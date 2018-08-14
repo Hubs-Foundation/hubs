@@ -190,13 +190,12 @@
                     super-networked-interactable="counter: #pen-counter; mass: 1;"
                     body="type: dynamic; shape: none; mass: 1;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
-                    grabbable-toggle
-                    grabbable="maxGrabbers: 1; maxGrabBehavior: drop;"
+                    grabbable-toggle="maxGrabbers: 1; maxGrabBehavior: drop;"
                     hoverable
                     activatable__drawHand="buttonStartEvent: secondary_hand_grab; buttonEndEvent: secondary_hand_release;"
                     activatable__drawCursor="buttonStartEvent: secondary-cursor-grab; buttonEndEvent: secondary-cursor-release;"
-                    activatable__colorNext="buttonStartEvent: tertiary_action_north; buttonEndEvent: action_primary_up; activatedState: colorNext;"
-                    activatable__colorPrev="buttonStartEvent: tertiary_action_south; buttonEndEvent: action_primary_up; activatedState: colorPrev;"
+                    activatable__colorNext="buttonStartEvent: tertiary_action_north; buttonEndEvent: secondary_hand_release; activatedState: colorNext;"
+                    activatable__colorPrev="buttonStartEvent: tertiary_action_south; buttonEndEvent: secondary_hand_release; activatedState: colorPrev;"
                     scale="0.5 0.5 0.5"
                 >
                     <a-sphere 
@@ -248,7 +247,7 @@
                          dragDropStartButtons: hand_grab, secondary_hand_grab; 
                          dragDropEndButtons: hand_release, secondary_hand_release;
                          activateStartButtons: secondary_hand_grab, tertiary_action_north, tertiary_action_south; 
-                         activateEndButtons: secondary_hand_release, action_primary_up;"
+                         activateEndButtons: secondary_hand_release;"
                      collision-filter="collisionForces: false"
                      physics-collider
             ></a-mixin>
@@ -288,7 +287,7 @@
                 dragDropStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
                 dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
                 activateStartButtons: secondary-cursor-grab, secondary_hand_grab, tertiary_action_north, tertiary_action_south; 
-                activateEndButtons: secondary-cursor-release, secondary_hand_release, action_primary_up;"
+                activateEndButtons: secondary-cursor-release, secondary_hand_release;"
             segments-height="9"
             segments-width="9"
             event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"

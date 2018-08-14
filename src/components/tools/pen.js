@@ -17,7 +17,7 @@ AFRAME.registerComponent("pen", {
     drawingManager: { type: "string" },
     color: { type: "color", default: "#FF0000" },
     availableColors: {
-      default: ["#FF0033", "FFFF00", "#00FF33", "#0099FF", "#9900FF", "#FFFFFF", "#000000"]
+      default: ["#FF0033", "#FFFF00", "#00FF33", "#0099FF", "#9900FF", "#FFFFFF", "#000000"]
     }
   },
 
@@ -125,13 +125,18 @@ AFRAME.registerComponent("pen", {
       case "colorPrev":
         this.changeColor(-1);
         break;
+      default:
+        break;
     }
   },
 
   stateRemoved(evt) {
     switch (evt.detail) {
       case "activated":
+      case "grabbed":
         this.endDraw();
+        break;
+      default:
         break;
     }
   }

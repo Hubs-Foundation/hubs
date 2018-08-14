@@ -8,6 +8,8 @@ export default class ActionEventHandler {
     this.handThatAlsoDrivesCursor = null;
     this.hovered = false;
 
+    this.gotPrimaryDown = false;
+
     this.onPrimaryDown = this.onPrimaryDown.bind(this);
     this.onPrimaryUp = this.onPrimaryUp.bind(this);
     this.onSecondaryDown = this.onSecondaryDown.bind(this);
@@ -119,7 +121,11 @@ export default class ActionEventHandler {
   onDown(e, event) {
     this.onGrab(e, event);
 
-    if (this.isHandThatAlsoDrivesCursor(e.target) && !this.isCursorInteracting) {
+    if (
+      this.isHandThatAlsoDrivesCursor(e.target) &&
+      !this.isCursorInteracting &&
+      !this.cursorHand.state.get("grab-start")
+    ) {
       this.cursor.setCursorVisibility(false);
       const button = e.target.components["teleport-controls"].data.button;
       e.target.emit(button + "down");
@@ -141,10 +147,16 @@ export default class ActionEventHandler {
 
   onPrimaryDown(e) {
     this.onDown(e, "primary_hand_grab");
+    this.gotPrimaryDown = true;
   }
 
   onPrimaryUp(e) {
-    this.onUp(e, "primary_hand_release");
+    if (this.gotPrimaryDown) {
+      this.onUp(e, "primary_hand_release");
+    } else {
+      this.onUp(e, "secondary_hand_release");
+    }
+    this.gotPrimaryDown = false;
   }
 
   onSecondaryDown(e) {

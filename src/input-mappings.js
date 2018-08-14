@@ -51,7 +51,7 @@ const config = {
         "trackpad.pressedmove": { left: "move" },
         trackpad_dpad4_pressed_west_down: { right: "snap_rotate_left" },
         trackpad_dpad4_pressed_east_down: { right: "snap_rotate_right" },
-        trackpad_dpad4_pressed_center_down: { right: "action_primary_down" },
+        trackpad_dpad4_pressed_center_down: { left: "action_primary_down", right: "action_primary_down" },
         trackpad_dpad4_pressed_north_down: { left: "tertiary_action_north", right: "tertiary_action_north" },
         trackpad_dpad4_pressed_south_down: { left: "tertiary_action_south", right: "tertiary_action_south" },
         trackpadup: { left: "action_primary_up", right: "action_primary_up" },
