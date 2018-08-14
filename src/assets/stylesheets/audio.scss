@@ -4,22 +4,26 @@
   display: flex; 
   flex-direction: column;
   height: 100%;
+  width: 100%;
   
   &__enter-button-container {
     flex: 1;
     display: flex;
     justify-content: center;
+    align-items: flex-end;
   }
   &__enter-button {
-    @extend %bottom-button;
+    @extend %bottom-action-button;
   }
 
   &__title {
     @extend %top-title;
+    @extend %glass-text;
   }
 
   &__subtitle {
     @extend %top-subtitle;
+    @extend %glass-text;
   }
 
   &__device-chooser {
@@ -29,15 +33,17 @@
     align-items: center;
     position: relative;
     margin: 8px 0;
+    width: 100%;
 
     &__dropdown {
       @extend %rounded-border;
       @extend %default-font;
+      @extend %glass-text;
 
       appearance: none;
+      background-color: rgba(64, 64, 64, 0.2);
       -moz-appearance: none;
       -webkit-appearance: none;
-      background-color: black;
       padding: 6px;
       padding-left: 15px;
       padding-right: 30px;
@@ -50,7 +56,8 @@
     &__mic-icon {
       pointer-events: none;
       position: absolute;
-      left: 8%;
+      left: 9%;
+      width: 12px;
     }
 
     &__dropdown-arrow {
@@ -115,10 +122,12 @@
 
   &__title {
     @extend %top-title;
+    @extend %glass-text;
   }
 
   &__subtitle {
     @extend %top-subtitle;
+    @extend %glass-text;
   }
 
   &__button-container {

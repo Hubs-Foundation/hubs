@@ -1,3 +1,7 @@
+/**
+ * Loops the given clip using this entity's animation mixer
+ * @component loop-animation
+ */
 AFRAME.registerComponent("loop-animation", {
   dependencies: ["animation-mixer"],
   schema: {

@@ -1,8 +1,7 @@
-import MobileDetect from "mobile-detect";
-const mobiledetect = new MobileDetect(navigator.userAgent);
+import { detectOS } from "detect-browser";
 
 export function disableiOSZoom() {
-  if (!mobiledetect.is("iPhone") && !mobiledetect.is("iPad")) return;
+  if (detectOS(navigator.userAgent) !== "iOS") return;
 
   let lastTouchAtMs = 0;
 

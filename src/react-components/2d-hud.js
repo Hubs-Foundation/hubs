@@ -4,8 +4,8 @@ import cx from "classnames";
 
 import styles from "../assets/stylesheets/2d-hud.scss";
 
-const TwoDHUD = ({ muted, frozen, spacebubble, onToggleMute, onToggleFreeze, onToggleSpaceBubble }) => (
-  <div className={styles.container}>
+const TopHUD = ({ muted, frozen, spacebubble, onToggleMute, onToggleFreeze, onToggleSpaceBubble }) => (
+  <div className={cx(styles.container, styles.top)}>
     <div className={cx("ui-interactive", styles.panel, styles.left)}>
       <div
         className={cx(styles.iconButton, styles.mute, { [styles.active]: muted })}
@@ -28,7 +28,7 @@ const TwoDHUD = ({ muted, frozen, spacebubble, onToggleMute, onToggleFreeze, onT
   </div>
 );
 
-TwoDHUD.propTypes = {
+TopHUD.propTypes = {
   muted: PropTypes.bool,
   frozen: PropTypes.bool,
   spacebubble: PropTypes.bool,
@@ -37,4 +37,18 @@ TwoDHUD.propTypes = {
   onToggleSpaceBubble: PropTypes.func
 };
 
-export default TwoDHUD;
+const BottomHUD = ({ onCreateObject }) => (
+  <div className={cx(styles.container, styles.bottom)}>
+    <div
+      className={cx("ui-interactive", styles.iconButton, styles.large, styles.createObject)}
+      title={"Create Object"}
+      onClick={onCreateObject}
+    />
+  </div>
+);
+
+BottomHUD.propTypes = {
+  onCreateObject: PropTypes.func
+};
+
+export default { TopHUD, BottomHUD };

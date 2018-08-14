@@ -1,5 +1,3 @@
-import queryString from "query-string";
-
 import styles from "./networked-video-player.css";
 
 const nafConnected = function() {
@@ -8,6 +6,11 @@ const nafConnected = function() {
   });
 };
 
+/**
+ * Instantiates and plays a network video stream, setting the video as the source material for this entity.
+ * @namespace network
+ * @component networked-video-player
+ */
 AFRAME.registerComponent("networked-video-player", {
   schema: {},
   async init() {
@@ -20,8 +23,8 @@ AFRAME.registerComponent("networked-video-player", {
 
     const ownerId = networkedEl.components.networked.data.owner;
 
-    const qs = queryString.parse(location.search);
-    const rejectScreenShares = qs.accept_screen_shares === undefined;
+    const qs = new URLSearchParams(location.search);
+    const rejectScreenShares = !qs.has("accept_screen_shares");
     if (ownerId !== NAF.clientId && rejectScreenShares) {
       // Toggle material visibility since object visibility is network-synced
       // TODO: There ought to be a better way to disable network syncs on a remote entity

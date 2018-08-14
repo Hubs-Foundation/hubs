@@ -1,3 +1,8 @@
+/**
+ * Scales an object to near-zero if the object is invisible. Useful for bones representing avatar body parts.
+ * @namespace avatar
+ * @component bone-visibility
+ */
 AFRAME.registerComponent("bone-visibility", {
   tick() {
     const { visible } = this.el.object3D;

@@ -1,4 +1,14 @@
+import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
+import { resolveMedia } from "../utils/media-utils";
+import cubeMapPosX from "../assets/images/cubemap/posx.jpg";
+import cubeMapNegX from "../assets/images/cubemap/negx.jpg";
+import cubeMapPosY from "../assets/images/cubemap/posy.jpg";
+import cubeMapNegY from "../assets/images/cubemap/negx.jpg";
+import cubeMapPosZ from "../assets/images/cubemap/posz.jpg";
+import cubeMapNegZ from "../assets/images/cubemap/negz.jpg";
+
 const GLTFCache = {};
+let CachedEnvMapTexture = null;
 
 AFRAME.GLTFModelPlus = {
   // eslint-disable-next-line no-unused-vars
@@ -74,16 +84,34 @@ function cloneGltf(gltf) {
   return clone;
 }
 
-const inflateEntities = function(parentEl, node, gltfPath) {
-  // setObject3D mutates the node's parent, so we have to copy
-  const children = node.children.slice(0);
+/// Walks the tree of three.js objects starting at the given node, using the GLTF data
+/// and template data to construct A-Frame entities and components when necessary.
+/// (It's unnecessary to construct entities for subtrees that have no component data
+/// or templates associated with any of their nodes.)
+///
+/// Returns the A-Frame entity associated with the given node, if one was constructed.
+const inflateEntities = function(node, templates, gltfPath, isRoot) {
+  // inflate subtrees first so that we can determine whether or not this node needs to be inflated
+  const childEntities = [];
+  const children = node.children.slice(0); // setObject3D mutates the node's parent, so we have to copy
+  for (const child of children) {
+    const el = inflateEntities(child, templates, gltfPath);
+    if (el) {
+      childEntities.push(el);
+    }
+  }
+
+  const nodeHasBehavior = node.userData.components || node.name in templates;
+  if (!nodeHasBehavior && !childEntities.length && !isRoot) {
+    return null; // we don't need an entity for this node
+  }
 
   const el = document.createElement("a-entity");
+  el.append.apply(el, childEntities);
 
   // Remove invalid CSS class name characters.
   const className = (node.name || node.uuid).replace(/[^\w-]/g, "");
   el.classList.add(className);
-  parentEl.appendChild(el);
 
   // AFRAME rotation component expects rotations in YXZ, convert it
   if (node.rotation.order !== "YXZ") {
@@ -138,15 +166,11 @@ const inflateEntities = function(parentEl, node, gltfPath) {
     }
   }
 
-  children.forEach(childNode => {
-    inflateEntities(el, childNode, gltfPath);
-  });
-
   return el;
 };
 
-function attachTemplate(root, { selector, templateRoot }) {
-  const targetEls = root.querySelectorAll(selector);
+function attachTemplate(root, name, templateRoot) {
+  const targetEls = root.querySelectorAll("." + name);
   for (const el of targetEls) {
     const root = templateRoot.cloneNode(true);
     // Merge root element attributes with the target element
@@ -167,59 +191,161 @@ function nextTick() {
   });
 }
 
-function cachedLoadGLTF(src, preferredTechnique, onProgress) {
+function getFilesFromSketchfabZip(src) {
   return new Promise((resolve, reject) => {
-    // Load the gltf model from the cache if it exists.
-    if (GLTFCache[src]) {
-      // Use a cloned copy of the cached model.
-      resolve(cloneGltf(GLTFCache[src]));
-    } else {
-      // Otherwise load the new gltf model.
-      const gltfLoader = new THREE.GLTFLoader();
-      gltfLoader.preferredTechnique = preferredTechnique;
-
-      gltfLoader.load(
-        src,
-        model => {
-          if (!GLTFCache[src]) {
-            // Store a cloned copy of the gltf model.
-            GLTFCache[src] = cloneGltf(model);
-          }
-          resolve(model);
-        },
-        onProgress,
-        reject
-      );
-    }
+    const worker = new SketchfabZipWorker();
+    worker.onmessage = e => {
+      const [success, fileMapOrError] = e.data;
+      (success ? resolve : reject)(fileMapOrError);
+    };
+    worker.postMessage(src);
   });
 }
 
+async function loadEnvMap() {
+  const urls = [cubeMapPosX, cubeMapNegX, cubeMapPosY, cubeMapNegY, cubeMapPosZ, cubeMapNegZ];
+  const texture = await new THREE.CubeTextureLoader().load(urls);
+  texture.format = THREE.RGBFormat;
+  return texture;
+}
+
+async function resolveGLTFUri(gltfProperty, basePath) {
+  const url = new URL(gltfProperty.uri, basePath);
+
+  if (url.protocol === "blob:") {
+    gltfProperty.uri = url.href;
+  } else {
+    const { raw } = await resolveMedia(url.href, null, true);
+    gltfProperty.uri = raw;
+  }
+}
+
+async function loadGLTF(src, token, contentType, preferredTechnique, onProgress) {
+  const resolved = await resolveMedia(src, token);
+  const raw = resolved.raw;
+  const origin = resolved.origin;
+  contentType = contentType || resolved.contentType;
+  const basePath = THREE.LoaderUtils.extractUrlBase(origin);
+
+  let gltfUrl = raw;
+  let fileMap;
+
+  if (contentType.includes("model/gltf+zip") || contentType.includes("application/x-zip-compressed")) {
+    fileMap = await getFilesFromSketchfabZip(gltfUrl);
+    gltfUrl = fileMap["scene.gtlf"];
+  }
+
+  const gltfLoader = new THREE.GLTFLoader();
+  gltfLoader.setPath(basePath);
+  gltfLoader.setLazy(true);
+
+  const { parser } = await new Promise((resolve, reject) => gltfLoader.load(gltfUrl, resolve, onProgress, reject));
+
+  const json = parser.json;
+  const images = json.images;
+  const buffers = json.buffers;
+  const materials = json.materials;
+
+  const pendingFarsparkPromises = [];
+
+  if (images) {
+    for (const image of images) {
+      if (image.uri) {
+        pendingFarsparkPromises.push(resolveGLTFUri(image, parser.options.path));
+      }
+    }
+  }
+
+  if (buffers) {
+    for (const buffer of buffers) {
+      if (buffer.uri) {
+        pendingFarsparkPromises.push(resolveGLTFUri(buffer, parser.options.path));
+      }
+    }
+  }
+
+  if (materials) {
+    for (let i = 0; i < materials.length; i++) {
+      const material = materials[i];
+
+      if (
+        material.extensions &&
+        material.extensions.MOZ_alt_materials &&
+        material.extensions.MOZ_alt_materials[preferredTechnique] !== undefined
+      ) {
+        const altMaterialIndex = material.extensions.MOZ_alt_materials[preferredTechnique];
+        materials[i] = materials[altMaterialIndex];
+      }
+    }
+  }
+
+  if (!CachedEnvMapTexture) {
+    CachedEnvMapTexture = loadEnvMap();
+  }
+
+  await Promise.all(pendingFarsparkPromises);
+
+  const gltf = await new Promise((resolve, reject) =>
+    parser.parse(
+      (scene, scenes, cameras, animations, json) => {
+        resolve({ scene, scenes, cameras, animations, json });
+      },
+      e => {
+        reject(e);
+      }
+    )
+  );
+
+  const envMap = await CachedEnvMapTexture;
+
+  gltf.scene.traverse(object => {
+    if (object.material && object.material.type === "MeshStandardMaterial") {
+      object.material.envMap = envMap;
+      object.material.needsUpdate = true;
+    }
+  });
+
+  if (fileMap) {
+    // The GLTF is now cached as a THREE object, we can get rid of the original blobs
+    Object.keys(fileMap).forEach(URL.revokeObjectURL);
+  }
+
+  return gltf;
+}
+
+/**
+ * Loads a GLTF model, optionally recursively "inflates" the child nodes of a model into a-entities and sets
+ * whitelisted components on them if defined in the node's extras.
+ * @namespace gltf
+ * @component gltf-model-plus
+ */
 AFRAME.registerComponent("gltf-model-plus", {
   schema: {
     src: { type: "string" },
-    inflate: { default: false },
-    preferredTechnique: { default: AFRAME.utils.device.isMobile() ? "KHR_materials_unlit" : "pbrMetallicRoughness" }
+    token: { type: "string" },
+    contentType: { type: "string" },
+    inflate: { default: false }
   },
 
   init() {
+    this.preferredTechnique =
+      window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness";
     this.loadTemplates();
   },
 
   update() {
-    this.applySrc(this.data.src);
+    this.applySrc(this.data.src, this.data.token, this.data.contentType);
   },
 
   loadTemplates() {
-    this.templates = [];
-    this.el.querySelectorAll(":scope > template").forEach(templateEl =>
-      this.templates.push({
-        selector: templateEl.getAttribute("data-selector"),
-        templateRoot: document.importNode(templateEl.firstElementChild || templateEl.content.firstElementChild, true)
-      })
-    );
+    this.templates = {};
+    this.el.querySelectorAll(":scope > template").forEach(templateEl => {
+      const root = document.importNode(templateEl.firstElementChild || templateEl.content.firstElementChild, true);
+      this.templates[templateEl.getAttribute("data-name")] = root;
+    });
   },
 
-  async applySrc(src) {
+  async applySrc(src, token, contentType) {
     try {
       // If the src attribute is a selector, get the url from the asset item.
       if (src && src.charAt(0) === "#") {
@@ -239,7 +365,12 @@ AFRAME.registerComponent("gltf-model-plus", {
       }
 
       const gltfPath = THREE.LoaderUtils.extractUrlBase(src);
-      const model = await cachedLoadGLTF(src, this.data.preferredTechnique);
+
+      if (!GLTFCache[src]) {
+        GLTFCache[src] = loadGLTF(src, token, contentType, this.preferredTechnique);
+      }
+
+      const model = cloneGltf(await GLTFCache[src]);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
@@ -251,20 +382,23 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.model = model.scene || model.scenes[0];
       this.model.animations = model.animations;
 
-      this.el.setObject3D("mesh", this.model);
-
-      if (this.data.inflate) {
-        this.inflatedEl = inflateEntities(this.el, this.model, gltfPath);
+      let object3DToSet = this.model;
+      if (this.data.inflate && (this.inflatedEl = inflateEntities(this.model, this.templates, gltfPath, true))) {
+        this.el.appendChild(this.inflatedEl);
+        object3DToSet = this.inflatedEl.object3D;
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
         // Wait one tick for the appended custom elements to be connected before attaching templates
         await nextTick();
         if (src != this.lastSrc) return; // TODO: there must be a nicer pattern for this
-        this.templates.forEach(attachTemplate.bind(null, this.el));
+        for (const name in this.templates) {
+          attachTemplate(this.el, name, this.templates[name]);
+        }
       }
-
+      this.el.setObject3D("mesh", object3DToSet);
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
-      console.error("Failed to load glTF model", e.message, this);
+      delete GLTFCache[src];
+      console.error("Failed to load glTF model", e, this);
       this.el.emit("model-error", { format: "gltf", src });
     }
   },

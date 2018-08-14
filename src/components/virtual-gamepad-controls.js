@@ -1,6 +1,11 @@
 import nipplejs from "nipplejs";
 import styles from "./virtual-gamepad-controls.css";
 
+/**
+ * Instantiates 2D virtual gamepads and emits associated events.
+ * @namespace user-input
+ * @component virtual-gamepad-controls
+ */
 AFRAME.registerComponent("virtual-gamepad-controls", {
   schema: {},
 
@@ -72,6 +77,9 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.rotateYEvent = {
       value: 0
     };
+    this.rotateXEvent = {
+      value: 0
+    };
 
     this.el.sceneEl.addEventListener("enter-vr", this.onEnterVr);
     this.el.sceneEl.addEventListener("exit-vr", this.onExitVr);
@@ -86,8 +94,9 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   onMoveJoystickChanged(event, joystick) {
     const angle = joystick.angle.radian;
     const force = joystick.force < 1 ? joystick.force : 1;
-    const x = Math.cos(angle) * force;
-    const z = Math.sin(angle) * force;
+    const moveStrength = 0.85;
+    const x = Math.cos(angle) * force * moveStrength;
+    const z = Math.sin(angle) * force * moveStrength;
     this.moving = true;
     this.moveEvent.axis[0] = x;
     this.moveEvent.axis[1] = z;
@@ -104,14 +113,18 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     // Set pitch and yaw angles on right stick move
     const angle = joystick.angle.radian;
     const force = joystick.force < 1 ? joystick.force : 1;
+    const turnStrength = 0.5;
     this.rotating = true;
-    this.rotateYEvent.value = Math.cos(angle) * force;
+    this.rotateYEvent.value = Math.cos(angle) * force * turnStrength;
+    this.rotateXEvent.value = Math.sin(angle) * force * turnStrength;
   },
 
   onLookJoystickEnd() {
     this.rotating = false;
     this.rotateYEvent.value = 0;
+    this.rotateXEvent.value = 0;
     this.el.sceneEl.emit("rotateY", this.rotateYEvent);
+    this.el.sceneEl.emit("rotateX", this.rotateXEvent);
   },
 
   tick() {
@@ -122,6 +135,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
 
       if (this.rotating) {
         this.el.sceneEl.emit("rotateY", this.rotateYEvent);
+        this.el.sceneEl.emit("rotateX", this.rotateXEvent);
       }
     }
   },

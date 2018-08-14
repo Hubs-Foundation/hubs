@@ -1,6 +1,14 @@
+/**
+ * Emits audioFrequencyChange events based on a networked audio source
+ * @namespace avatar
+ * @component networked-audio-analyser
+ */
 AFRAME.registerComponent("networked-audio-analyser", {
-  schema: {},
   async init() {
+    this.volume = 0;
+    this.prevVolume = 0;
+    this.smoothing = 0.3;
+    this.threshold = 0.01;
     this.el.addEventListener("sound-source-set", event => {
       const ctx = THREE.AudioContext.getContext();
       this.analyser = ctx.createAnalyser();
@@ -13,67 +21,46 @@ AFRAME.registerComponent("networked-audio-analyser", {
   tick: function() {
     if (!this.analyser) return;
 
-    this.analyser.getByteFrequencyData(this.levels);
+    // take care with compatibility, e.g. safari doesn't support getFloatTimeDomainData
+    this.analyser.getByteTimeDomainData(this.levels);
 
     let sum = 0;
     for (let i = 0; i < this.levels.length; i++) {
-      sum += this.levels[i];
+      const amplitude = (this.levels[i] - 128) / 128;
+      sum += amplitude * amplitude;
     }
-    this.volume = sum / this.levels.length;
-    this.el.emit("audioFrequencyChange", {
-      volume: this.volume,
-      levels: this.levels
-    });
+    let currVolume = Math.sqrt(sum / this.levels.length);
+    if (currVolume < this.threshold) {
+      currVolume = 0;
+    }
+    this.volume = this.smoothing * currVolume + (1 - this.smoothing) * this.prevVolume;
+    this.prevVolume = this.volume;
   }
 });
 
-AFRAME.registerComponent("matcolor-audio-feedback", {
-  schema: {
-    analyserSrc: { type: "selector" }
-  },
-  init: function() {
-    this.onAudioFrequencyChange = this.onAudioFrequencyChange.bind(this);
-  },
-
-  play() {
-    (this.data.analyserSrc || this.el).addEventListener("audioFrequencyChange", this.onAudioFrequencyChange);
-  },
-
-  pause() {
-    (this.data.analyserSrc || this.el).removeEventListener("audioFrequencyChange", this.onAudioFrequencyChange);
-  },
-
-  onAudioFrequencyChange(e) {
-    if (!this.mat) return;
-    this.object3D.mesh.color.setScalar(1 + e.detail.volume / 255 * 2);
-  }
-});
-
+/**
+ * Sets an entity's scale base on audioFrequencyChange events.
+ * @namespace avatar
+ * @component scale-audio-feedback
+ */
 AFRAME.registerComponent("scale-audio-feedback", {
   schema: {
-    analyserSrc: { type: "selector" },
-
     minScale: { default: 1 },
     maxScale: { default: 2 }
   },
 
-  init() {
-    this.onAudioFrequencyChange = this.onAudioFrequencyChange.bind(this);
-  },
-
-  play() {
-    (this.data.analyserSrc || this.el).addEventListener("audioFrequencyChange", this.onAudioFrequencyChange);
-  },
-
-  pause() {
-    (this.data.analyserSrc || this.el).removeEventListener("audioFrequencyChange", this.onAudioFrequencyChange);
-  },
-
-  onAudioFrequencyChange(e) {
+  tick() {
     // TODO: come up with a cleaner way to handle this.
     // bone's are "hidden" by scaling them with bone-visibility, without this we would overwrite that.
     if (!this.el.object3D.visible) return;
+
     const { minScale, maxScale } = this.data;
-    this.el.object3D.scale.setScalar(minScale + (maxScale - minScale) * e.detail.volume / 255);
+
+    const audioAnalyser = this.el.components["networked-audio-analyser"];
+
+    if (!audioAnalyser) return;
+
+    const scale = Math.min(maxScale, minScale + (maxScale - minScale) * audioAnalyser.volume * 8);
+    this.el.object3D.scale.setScalar(scale);
   }
 });

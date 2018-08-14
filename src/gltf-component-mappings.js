@@ -11,10 +11,14 @@ AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
 AFRAME.GLTFModelPlus.registerComponent("body", "body");
 AFRAME.GLTFModelPlus.registerComponent("hide-when-quality", "hide-when-quality");
 AFRAME.GLTFModelPlus.registerComponent("light", "light");
+AFRAME.GLTFModelPlus.registerComponent("ambient-light", "ambient-light");
+AFRAME.GLTFModelPlus.registerComponent("directional-light", "directional-light");
+AFRAME.GLTFModelPlus.registerComponent("hemisphere-light", "hemisphere-light");
+AFRAME.GLTFModelPlus.registerComponent("point-light", "point-light");
+AFRAME.GLTFModelPlus.registerComponent("spot-light", "spot-light");
 AFRAME.GLTFModelPlus.registerComponent("skybox", "skybox");
 AFRAME.GLTFModelPlus.registerComponent("layers", "layers");
 AFRAME.GLTFModelPlus.registerComponent("shadow", "shadow");
-AFRAME.GLTFModelPlus.registerComponent("xr", "xr");
 AFRAME.GLTFModelPlus.registerComponent("water", "water");
 AFRAME.GLTFModelPlus.registerComponent("scale-audio-feedback", "scale-audio-feedback");
 AFRAME.GLTFModelPlus.registerComponent("animation-mixer", "animation-mixer");
@@ -23,6 +27,7 @@ AFRAME.GLTFModelPlus.registerComponent("shape", "shape");
 AFRAME.GLTFModelPlus.registerComponent("visible", "visible");
 AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point");
 AFRAME.GLTFModelPlus.registerComponent("hoverable", "hoverable");
+AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
 AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, componentName, componentData, gltfPath) => {
   if (componentData.src) {
     componentData.src = resolveURL(componentData.src, gltfPath);

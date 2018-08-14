@@ -2,7 +2,12 @@ const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
 
-// Does not have any type of collisions yet.
+/**
+ * Avatar movement controller that listens to move, rotate and teleportation events and moves the avatar accordingly.
+ * The controller accounts for playspace offset and orientation and depends on the nav mesh system for translation.
+ * @namespace avatar
+ * @component character-controller
+ */
 AFRAME.registerComponent("character-controller", {
   schema: {
     groundAcc: { default: 5.5 },
@@ -13,8 +18,8 @@ AFRAME.registerComponent("character-controller", {
   },
 
   init: function() {
-    this.navGroup;
-    this.navNode;
+    this.navGroup = null;
+    this.navNode = null;
     this.velocity = new THREE.Vector3(0, 0, 0);
     this.accelerationInput = new THREE.Vector3(0, 0, 0);
     this.pendingSnapRotationMatrix = new THREE.Matrix4();
@@ -75,7 +80,9 @@ AFRAME.registerComponent("character-controller", {
   },
 
   handleTeleport: function(event) {
-    this.setPositionOnNavMesh(event.detail.oldPosition, event.detail.newPosition, this.el.object3D, true);
+    const position = event.detail.newPosition;
+    const navPosition = event.detail.hitPoint;
+    this.resetPositionOnNavMesh(position, navPosition, this.el.object3D);
   },
 
   tick: (function() {
@@ -118,25 +125,28 @@ AFRAME.registerComponent("character-controller", {
       yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 
       // Translate to middle of playspace (player rig)
-      root.applyMatrix(transInv);
+      root.matrix.premultiply(transInv);
       // Zero playspace (player rig) rotation
-      root.applyMatrix(rotationInvMatrix);
+      root.matrix.premultiply(rotationInvMatrix);
       // Zero pivot (camera/head) rotation
-      root.applyMatrix(pivotRotationInvMatrix);
+      root.matrix.premultiply(pivotRotationInvMatrix);
       // Apply joystick translation
-      root.applyMatrix(move);
+      root.matrix.premultiply(move);
       // Apply joystick yaw rotation
-      root.applyMatrix(yawMatrix);
+      root.matrix.premultiply(yawMatrix);
       // Apply snap rotation if necessary
-      root.applyMatrix(this.pendingSnapRotationMatrix);
+      root.matrix.premultiply(this.pendingSnapRotationMatrix);
       // Reapply pivot (camera/head) rotation
-      root.applyMatrix(pivotRotationMatrix);
+      root.matrix.premultiply(pivotRotationMatrix);
       // Reapply playspace (player rig) rotation
-      root.applyMatrix(rotationMatrix);
+      root.matrix.premultiply(rotationMatrix);
       // Reapply playspace (player rig) translation
-      root.applyMatrix(trans);
+      root.matrix.premultiply(trans);
+      // update pos/rot/scale
+      root.matrix.decompose(root.position, root.quaternion, root.scale);
 
-      // TODO: the above matrix trnsfomraitons introduce some floating point erros in scale, this reverts them to avoid spamming network with fake scale updates
+      // TODO: the above matrix trnsfomraitons introduce some floating point errors in scale, this reverts them to
+      // avoid spamming network with fake scale updates
       root.scale.copy(startScale);
 
       this.pendingSnapRotationMatrix.identity(); // Revert to identity
@@ -147,18 +157,23 @@ AFRAME.registerComponent("character-controller", {
     };
   })(),
 
-  setPositionOnNavMesh: function(startPosition, endPosition, object3D, resetPosition = false) {
+  setPositionOnNavMesh: function(startPosition, endPosition, object3D) {
     const nav = this.el.sceneEl.systems.nav;
     if (nav.navMesh) {
-      if (!this.navGroup || resetPosition) {
+      if (this.navGroup == null) {
         this.navGroup = nav.getGroup(endPosition);
       }
-
-      if (!this.navNode || resetPosition) {
-        this.navNode = nav.getNode(endPosition, this.navGroup) || this.navNode;
-      }
-
+      this.navNode = this.navNode || nav.getNode(endPosition, this.navGroup);
       this.navNode = nav.clampStep(startPosition, endPosition, this.navGroup, this.navNode, object3D.position);
+    }
+  },
+
+  resetPositionOnNavMesh: function(position, navPosition, object3D) {
+    const nav = this.el.sceneEl.systems.nav;
+    if (nav.navMesh) {
+      this.navGroup = nav.getGroup(position);
+      this.navNode = nav.getNode(navPosition, this.navGroup) || this.navNode;
+      this.navNode = nav.clampStep(position, position, this.navGroup, this.navNode, object3D.position);
     }
   },
 

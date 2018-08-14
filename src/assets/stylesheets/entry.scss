@@ -1,67 +1,13 @@
-.entry-dialog {
+@import 'shared';
+
+:local(.entry-dialog) {
   display: flex;
   flex-direction: column;
   height: 100%;
+  align-items: center;
 }
 
-.entry-button--bolded {
-  font-weight: bold;
-}
-
-.entry-button__subtitle {
-  font-size: 0.7em;
-  color: $light-text;
-}
-
-.entry-panel {
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-
-  &__button-container {
-    margin: auto;
-    text-align: center;
-    flex: 10;
-    display: flex;
-    flex-direction: column;
-    min-height: max-content;
-    justify-content: center;
-  }
-  &__webvr-link-container {
-    text-align: center;
-    margin-bottom: 24px;
-  }
-  &__webvr-link {
-    color: white;
-    flex: 1;
-    min-height: max-content;
-  }
-
-  &__screen-sharing {
-    font-size: 1.4em;
-    margin-left: 2.95em;
-    margin-top: 0.6em;
-
-    &__checkbox {
-      @extend %checkbox;
-    }
-    &__checkbox:checked {
-      @extend %checkbox-checked;
-    }
-  }
-
-
-  &__secondary {
-    width: 100%;
-    text-align: center;
-    margin-top: 10px;
-    cursor: pointer;
-    color: $grey-text;
-  }
-}
-
-.entry-button {
+:local(.entry-button) {
   display: flex;
   margin: 20px 0;
   margin-bottom: 0;
@@ -72,18 +18,96 @@
   align-items: center;
   @extend %default-font;
 
-  &__icon {
+  :local(.icon) {
+    @extend %glass-icon;
     flex: 1 1 90px;
     min-width: 90px;
     min-height: 90px;
   }
 
-  &__label {
+  :local(.label) {
+    @extend %glass-text;
     flex: 10 1 auto;
     margin-left: 20px;
     font-size: 1.5em;
     display: flex;
     flex-direction: column;
     justify-content: center;
+  }
+
+  :local(.bolded) {
+    font-weight: bold;
+  }
+
+  :local(.subtitle) {
+    font-size: 0.7em;
+    color: $light-text;
+  }
+}
+
+:local(.entry-panel) {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
+  :local(.button-container) {
+    margin: auto;
+    margin-top: -72px;
+    text-align: center;
+    flex: 10;
+    display: flex;
+    flex-direction: column;
+    min-height: max-content;
+    justify-content: center;
+
+    :local(.invite-button) {
+      @extend %action-button;
+      align-self: center;
+      width: 75%;
+      margin-top: 28px;
+    }
+
+    :local(.presence-info) {
+      margin: 18px;
+      font-size: 1.3em;
+
+      :local(.people) {
+        font-weight: bold;
+      }
+    }
+  }
+
+  :local(.webvr-link-container) {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  :local(.webvr-link) {
+    color: white;
+    flex: 1;
+    min-height: max-content;
+  }
+
+  :local(.screen-sharing) {
+    font-size: 1.4em;
+    margin-left: 2.95em;
+    margin-top: 0.6em;
+
+    :local(.checkbox) {
+      @extend %checkbox;
+    }
+
+    :local(.checkbox:checked) {
+      @extend %checkbox-checked;
+    }
+  }
+
+  :local(.secondary) {
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+    cursor: pointer;
+    color: $grey-text;
   }
 }

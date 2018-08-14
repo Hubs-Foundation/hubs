@@ -222,7 +222,7 @@ AFRAME.registerComponent("water", {
   },
 
   tick(time) {
-    this.water.material.uniforms.time.value = time / 1000 * this.data.speed;
+    this.water.material.uniforms.time.value = (time / 1000) * this.data.speed;
   },
 
   remove() {

@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import copy from "copy-to-clipboard";
-import classNames from "classnames";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import formurlencoded from "form-urlencoded";
 import LinkDialog from "./link-dialog.js";
+import CreateObjectDialog from "./create-object-dialog.js";
+const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
 
 // TODO i18n
 
@@ -13,16 +14,21 @@ class InfoDialog extends Component {
     slack: Symbol("slack"),
     email_submitted: Symbol("email_submitted"),
     invite: Symbol("invite"),
+    safari: Symbol("safari"),
     updates: Symbol("updates"),
     report: Symbol("report"),
     help: Symbol("help"),
     link: Symbol("link"),
-    webvr_recommend: Symbol("webvr_recommend")
+    webvr_recommend: Symbol("webvr_recommend"),
+    create_object: Symbol("create_object"),
+    custom_scene: Symbol("custom_scene")
   };
   static propTypes = {
     dialogType: PropTypes.oneOf(Object.values(InfoDialog.dialogTypes)),
     onCloseDialog: PropTypes.func,
     onSubmittedEmail: PropTypes.func,
+    onCreateObject: PropTypes.func,
+    onCustomScene: PropTypes.func,
     linkCode: PropTypes.string
   };
 
@@ -49,11 +55,16 @@ class InfoDialog extends Component {
     }
   }
 
-  onContainerClicked(e) {
+  onContainerClicked = e => {
     if (e.currentTarget === e.target) {
       this.props.onCloseDialog();
     }
-  }
+  };
+
+  onCustomSceneClicked = () => {
+    this.props.onCustomScene(this.state.customRoomName, this.state.customSceneUrl);
+    this.props.onCloseDialog();
+  };
 
   shareLinkClicked = () => {
     navigator.share({
@@ -62,15 +73,18 @@ class InfoDialog extends Component {
     });
   };
 
-  copyLinkClicked = () => {
-    copy(this.shareLink);
-    this.setState({ copyLinkButtonText: "Copied!" });
+  copyLinkClicked = link => {
+    copy(link);
+    this.setState({ copyLinkButtonText: "copied!" });
   };
 
   state = {
     mailingListEmail: "",
     mailingListPrivacy: false,
-    copyLinkButtonText: "Copy"
+    copyLinkButtonText: "copy",
+    createObjectUrl: "",
+    customRoomName: "",
+    customSceneUrl: ""
   };
 
   signUpForMailingList = async e => {
@@ -137,10 +151,10 @@ class InfoDialog extends Component {
         dialogBody = "Great! Please check your e-mail to confirm your subscription.";
         break;
       case InfoDialog.dialogTypes.invite:
-        dialogTitle = "Invite Friends";
+        dialogTitle = "Invite Others";
         dialogBody = (
           <div>
-            <div>Just share the link to invite others.</div>
+            <div>Just share the link and they&apos;ll join you:</div>
             <div className="invite-form">
               <input
                 type="text"
@@ -152,14 +166,82 @@ class InfoDialog extends Component {
               <div className="invite-form__buttons">
                 {navigator.share && (
                   <button className="invite-form__action-button" onClick={this.shareLinkClicked}>
-                    <span>Share</span>
+                    <span>share</span>
                   </button>
                 )}
-                <button className="invite-form__action-button" onClick={this.copyLinkClicked}>
+                <button
+                  className="invite-form__action-button"
+                  onClick={this.copyLinkClicked.bind(this, this.shareLink)}
+                >
                   <span>{this.state.copyLinkButtonText}</span>
                 </button>
               </div>
             </div>
+          </div>
+        );
+        break;
+      case InfoDialog.dialogTypes.safari:
+        dialogTitle = "Open in Safari";
+        dialogBody = (
+          <div>
+            <div>Hubs does not support your current browser on iOS. Copy and paste this link directly in Safari.</div>
+            <div className="invite-form">
+              <input
+                type="text"
+                readOnly
+                onFocus={e => e.target.select()}
+                value={document.location}
+                className="invite-form__link_field"
+              />
+              <div className="invite-form__buttons">
+                <button
+                  className="invite-form__action-button"
+                  onClick={this.copyLinkClicked.bind(this, document.location)}
+                >
+                  <span>{this.state.copyLinkButtonText}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+        break;
+      case InfoDialog.dialogTypes.create_object:
+        dialogTitle = "Create Object";
+        dialogBody = (
+          <CreateObjectDialog onCreateObject={this.props.onCreateObject} onCloseDialog={this.props.onCloseDialog} />
+        );
+        break;
+      case InfoDialog.dialogTypes.custom_scene:
+        dialogTitle = "Create a Room";
+        dialogBody = (
+          <div>
+            <div>Choose a name and GLTF URL for your room&apos;s scene:</div>
+            <form onSubmit={this.onCustomSceneClicked}>
+              <div className="custom-scene-form">
+                <input
+                  type="text"
+                  placeholder="Room name"
+                  className="custom-scene-form__link_field"
+                  value={this.state.customRoomName}
+                  pattern={HUB_NAME_PATTERN}
+                  title="Invalid name, limited to 4 to 64 characters and limited symbols."
+                  onChange={e => this.setState({ customRoomName: e.target.value })}
+                  required
+                />
+                <input
+                  type="url"
+                  placeholder="URL to Scene GLTF or GLB (Optional)"
+                  className="custom-scene-form__link_field"
+                  value={this.state.customSceneUrl}
+                  onChange={e => this.setState({ customSceneUrl: e.target.value })}
+                />
+                <div className="custom-scene-form__buttons">
+                  <button className="custom-scene-form__action-button">
+                    <span>create</span>
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         );
         break;
@@ -262,6 +344,9 @@ class InfoDialog extends Component {
               >
                 <FormattedMessage id="profile.privacy_notice" />
               </a>
+              <a target="_blank" rel="noopener noreferrer" href="/?report">
+                <FormattedMessage id="help.report_issue" />
+              </a>
             </p>
           </div>
         );
@@ -284,19 +369,14 @@ class InfoDialog extends Component {
         );
         break;
       case InfoDialog.dialogTypes.link:
-        dialogTitle = "Send Link to Device";
+        dialogTitle = "Open on Headset";
         dialogBody = <LinkDialog linkCode={this.props.linkCode} />;
         break;
     }
 
-    const dialogClasses = classNames({
-      dialog: true,
-      "dialog--tall": this.props.dialogType === InfoDialog.dialogTypes.help
-    });
-
     return (
       <div className="dialog-overlay">
-        <div className={dialogClasses} onClick={this.onContainerClicked}>
+        <div className="dialog" onClick={this.onContainerClicked}>
           <div className="dialog__box">
             <div className="dialog__box__contents">
               <button className="dialog__box__contents__close" onClick={this.props.onCloseDialog}>

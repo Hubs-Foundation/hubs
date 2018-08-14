@@ -1,3 +1,8 @@
+/**
+ * Toggles freezing of network traffic on the given event.
+ * @namespace network
+ * @component freeze-controller
+ */
 AFRAME.registerComponent("freeze-controller", {
   schema: {
     toggleEvent: { type: "string" }

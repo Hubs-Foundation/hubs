@@ -1,12 +1,13 @@
-import "./assets/stylesheets/hub.scss";
-import moment from "moment-timezone";
-import queryString from "query-string";
+console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
+import "./assets/stylesheets/hub.scss";
+
+import "aframe";
+import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
-import "aframe-xr";
-import "./vendor/GLTFLoader";
+import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
@@ -16,10 +17,10 @@ import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
 import "aframe-motion-capture-components";
-
 import "./utils/audio-context-fix";
 
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
+import trackpad_scrolling from "./behaviours/trackpad-scrolling";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
 import msft_mr_axis_with_deadzone from "./behaviours/msft-mr-axis-with-deadzone";
 import { PressedMove } from "./activators/pressedmove";
@@ -62,6 +63,23 @@ import "./components/networked-avatar";
 import "./components/css-class";
 import "./components/scene-shadow";
 import "./components/avatar-replay";
+import "./components/image-plus";
+import "./components/pinch-to-move";
+import "./components/look-on-mobile";
+import "./components/pitch-yaw-rotator";
+import "./components/input-configurator";
+import "./components/sticky-object";
+import "./components/auto-scale-cannon-physics-body";
+import "./components/position-at-box-shape-border";
+import "./components/remove-networked-object-button";
+import "./components/destroy-at-extreme-distances";
+import "./components/media-loader";
+import "./components/gamma-factor";
+import "./components/ambient-light";
+import "./components/directional-light";
+import "./components/hemisphere-light";
+import "./components/point-light";
+import "./components/spot-light";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -70,6 +88,7 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
+import { addMedia } from "./utils/media-utils";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
@@ -88,14 +107,10 @@ window.APP.RENDER_ORDER = {
 };
 const store = window.APP.store;
 
-const qs = queryString.parse(location.search);
+const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 
-if (qs.quality) {
-  window.APP.quality = qs.quality;
-} else {
-  window.APP.quality = isMobile ? "low" : "high";
-}
+window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
 import "aframe-physics-system";
 import "aframe-physics-extras";
@@ -121,22 +136,20 @@ import registerTelemetry from "./telemetry";
 
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
-
-function qsTruthy(param) {
-  const val = qs[param];
-  // if the param exists but is not set (e.g. "?foo&bar"), its value is null.
-  return val === null || /1|on|true/i.test(val);
-}
+import qsTruthy from "./utils/qs_truthy";
 
 const isBotMode = qsTruthy("bot");
+const isTelemetryDisabled = qsTruthy("disable_telemetry");
+const isDebug = qsTruthy("debug");
 
-if (!isBotMode) {
+if (!isBotMode && !isTelemetryDisabled) {
   registerTelemetry();
 }
 
 disableiOSZoom();
 
 AFRAME.registerInputBehaviour("trackpad_dpad4", trackpad_dpad4);
+AFRAME.registerInputBehaviour("trackpad_scrolling", trackpad_scrolling);
 AFRAME.registerInputBehaviour("joystick_dpad4", joystick_dpad4);
 AFRAME.registerInputBehaviour("msft_mr_axis_with_deadzone", msft_mr_axis_with_deadzone);
 AFRAME.registerInputActivator("pressedmove", PressedMove);
@@ -151,21 +164,20 @@ store.init();
 
 function mountUI(scene, props = {}) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
-  const forcedVREntryType = qs.vr_entry_type || null;
+  const forcedVREntryType = qs.get("vr_entry_type");
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
-  const htmlPrefix = document.body.dataset.htmlPrefix || "";
   const showProfileEntry = !store.state.activity.hasChangedName;
 
   ReactDOM.render(
     <UIRoot
       {...{
         scene,
+        isBotMode,
         concurrentLoadDetector,
         disableAutoExitOnConcurrentLoad,
         forcedVREntryType,
         enableScreenSharing,
         store,
-        htmlPrefix,
         showProfileEntry,
         ...props
       }}
@@ -214,7 +226,7 @@ const onReady = async () => {
     const scene = document.querySelector("a-scene");
     if (scene) {
       if (scene.renderer) {
-        scene.renderer.animate(null); // Stop animation loop, TODO A-Frame should do this
+        scene.renderer.setAnimationLoop(null); // Stop animation loop, TODO A-Frame should do this
       }
       document.body.removeChild(scene);
     }
@@ -222,7 +234,9 @@ const onReady = async () => {
 
   const enterScene = async (mediaStream, enterInVR, hubId) => {
     const scene = document.querySelector("a-scene");
-    scene.renderer.sortObjects = true;
+    if (!isBotMode) {
+      scene.classList.add("no-cursor");
+    }
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("canvas").classList.remove("blurred");
     scene.render();
@@ -233,12 +247,14 @@ const onReady = async () => {
 
     AFRAME.registerInputActions(inGameActions, "default");
 
-    document.querySelector("#player-camera").setAttribute("look-controls", "");
-
     scene.setAttribute("networked-scene", {
       room: hubId,
       serverURL: process.env.JANUS_SERVER
     });
+
+    if (isDebug) {
+      scene.setAttribute("networked-scene", { debug: true });
+    }
 
     scene.setAttribute("stats-plus", false);
 
@@ -250,7 +266,7 @@ const onReady = async () => {
     applyProfileOnPlayerRig();
     store.addEventListener("statechanged", applyProfileOnPlayerRig);
 
-    const avatarScale = parseInt(qs.avatar_scale, 10);
+    const avatarScale = parseInt(qs.get("avatar_scale"), 10);
 
     if (avatarScale) {
       playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
@@ -285,11 +301,55 @@ const onReady = async () => {
       NAF.connection.entities.completeSync(ev.detail.clientId);
     });
 
+    const offset = { x: 0, y: 0, z: -1.5 };
+    const spawnMediaInfrontOfPlayer = src => {
+      const entity = addMedia(src, true);
+      entity.setAttribute("offset-relative-to", {
+        target: "#player-camera",
+        offset
+      });
+    };
+
+    scene.addEventListener("add_media", e => {
+      spawnMediaInfrontOfPlayer(e.detail);
+    });
+
+    document.addEventListener("paste", e => {
+      if (e.target.nodeName === "INPUT") return;
+
+      const url = e.clipboardData.getData("text");
+      const files = e.clipboardData.files && e.clipboardData.files;
+      if (url) {
+        spawnMediaInfrontOfPlayer(url);
+      } else {
+        for (const file of files) {
+          spawnMediaInfrontOfPlayer(file);
+        }
+      }
+    });
+
+    document.addEventListener("dragover", e => {
+      e.preventDefault();
+    });
+
+    document.addEventListener("drop", e => {
+      e.preventDefault();
+      const url = e.dataTransfer.getData("url");
+      const files = e.dataTransfer.files;
+      if (url) {
+        spawnMediaInfrontOfPlayer(url);
+      } else {
+        for (const file of files) {
+          spawnMediaInfrontOfPlayer(file);
+        }
+      }
+    });
+
     if (!qsTruthy("offline")) {
       document.body.addEventListener("connected", () => {
         if (!isBotMode) {
           hubChannel.sendEntryEvent().then(() => {
-            store.update({ activity: { lastEnteredAt: moment().toJSON() } });
+            store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
           });
         }
         remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
@@ -310,11 +370,16 @@ const onReady = async () => {
       scene.components["networked-scene"].connect().catch(connectError => {
         // hacky until we get return codes
         const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+        console.error(connectError);
         remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
         exitScene();
 
         return;
       });
+
+      if (isDebug) {
+        NAF.connection.adapter.session.options.verbose = true;
+      }
 
       if (isBotMode) {
         playerRig.setAttribute("avatar-replay", {
@@ -322,13 +387,24 @@ const onReady = async () => {
           leftController: "#player-left-controller",
           rightController: "#player-right-controller"
         });
-        const audio = document.getElementById("bot-recording");
-        mediaStream.addTrack(audio.captureStream().getAudioTracks()[0]);
-        // wait for runner script to interact with the page so that we can play audio.
-        await new Promise(resolve => {
-          window.interacted = resolve;
-        });
-        audio.play();
+
+        const audioEl = document.createElement("audio");
+        const audioInput = document.querySelector("#bot-audio-input");
+        audioInput.onchange = () => {
+          audioEl.loop = true;
+          audioEl.muted = true;
+          audioEl.crossorigin = "anonymous";
+          audioEl.src = URL.createObjectURL(audioInput.files[0]);
+          document.body.appendChild(audioEl);
+        };
+        const dataInput = document.querySelector("#bot-data-input");
+        dataInput.onchange = () => {
+          const url = URL.createObjectURL(dataInput.files[0]);
+          playerRig.setAttribute("avatar-replay", { recordingUrl: url });
+        };
+        await new Promise(resolve => audioEl.addEventListener("canplay", resolve));
+        mediaStream.addTrack(audioEl.captureStream().getAudioTracks()[0]);
+        audioEl.play();
       }
 
       if (mediaStream) {
@@ -370,8 +446,20 @@ const onReady = async () => {
     return;
   }
 
+  if (qs.get("required_version") && process.env.BUILD_VERSION) {
+    const buildNumber = process.env.BUILD_VERSION.split(" ", 1)[0]; // e.g. "123 (abcd5678)"
+    if (qs.get("required_version") !== buildNumber) {
+      remountUI({ roomUnavailableReason: "version_mismatch" });
+      setTimeout(() => document.location.reload(), 5000);
+      exitScene();
+      return;
+    }
+  }
+
   getAvailableVREntryTypes().then(availableVREntryTypes => {
-    if (availableVREntryTypes.gearvr === VR_DEVICE_AVAILABILITY.yes) {
+    if (availableVREntryTypes.isInHMD) {
+      remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
+    } else if (availableVREntryTypes.gearvr === VR_DEVICE_AVAILABILITY.yes) {
       remountUI({ availableVREntryTypes, forcedVREntryType: "gearvr" });
     } else {
       remountUI({ availableVREntryTypes });
@@ -387,7 +475,11 @@ const onReady = async () => {
     if (!isBotMode) {
       // Stop rendering while the UI is up. We restart the render loop in enterScene.
       // Wait a tick plus some margin so that the environments actually render.
-      setTimeout(() => scene.renderer.animate(null), 100);
+      setTimeout(() => scene.renderer.setAnimationLoop(null), 100);
+    } else {
+      const noop = () => {};
+      // Replace renderer with a noop renderer to reduce bot resource usage.
+      scene.renderer = { setAnimationLoop: noop, render: noop };
     }
   });
   environmentRoot.appendChild(initialEnvironmentEl);
@@ -405,9 +497,9 @@ const onReady = async () => {
     }
   };
 
-  if (qs.room) {
+  if (qs.has("room")) {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
-    setRoom(qs.room || "default");
+    setRoom(qs.get("room") || "default");
     initialEnvironmentEl.setAttribute("gltf-bundle", {
       src: DEFAULT_ENVIRONMENT_URL
     });
@@ -415,7 +507,7 @@ const onReady = async () => {
   }
 
   // Connect to reticulum over phoenix channels to get hub info.
-  const hubId = qs.hub_id || document.location.pathname.substring(1).split("/")[0];
+  const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
 
   const socket = connectToReticulum();
@@ -426,9 +518,21 @@ const onReady = async () => {
     .receive("ok", data => {
       const hub = data.hubs[0];
       const defaultSpaceTopic = hub.topics[0];
-      const gltfBundleUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
+      const sceneUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
+
+      console.log(`Scene URL: ${sceneUrl}`);
+
+      if (/\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl)) {
+        const gltfEl = document.createElement("a-entity");
+        gltfEl.setAttribute("gltf-model-plus", { src: sceneUrl, inflate: true });
+        gltfEl.addEventListener("model-loaded", () => initialEnvironmentEl.emit("bundleloaded"));
+        initialEnvironmentEl.appendChild(gltfEl);
+      } else {
+        // TODO remove, and remove bundleloaded event
+        initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
+      }
+
       setRoom(hub.hub_id, hub.name);
-      initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${gltfBundleUrl}`);
       hubChannel.setPhoenixChannel(channel);
     })
     .receive("error", res => {
