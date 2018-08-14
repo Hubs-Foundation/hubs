@@ -199,10 +199,11 @@
                     scale="0.5 0.5 0.5"
                 >
                     <a-sphere 
+                        id="pen"
                         scale="1.5, 1.5, 1.5" 
                         position="0 -0.18 0" 
-                        radius="0.02" 
-                        color="red" 
+                        radius="0.02"  
+                        color="#FF0033"
                         pen="camera: #player-camera; drawingManager: #drawing-manager"
                     ></a-sphere>
                 </a-entity>
@@ -258,7 +259,7 @@
 
         <a-entity id="pen-counter" networked-counter="max: 3;"></a-entity>
 
-        <a-entity id="drawing-manager" drawing-manager="drawing: #my-first-drawing;"></a-entity>
+        <a-entity id="drawing-manager" drawing-manager="drawing: #default-drawing;"></a-entity>
 
         <a-entity
             id="cursor-controller"
@@ -432,7 +433,7 @@
         ></a-entity>
 
         <a-entity
-            id="my-first-drawing"
+            id="default-drawing"
             networked="template: #interactable-drawing;"
         ></a-entity>
 

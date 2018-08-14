@@ -143,10 +143,10 @@ AFRAME.registerComponent(
         evt.preventDefault();
       }
     },
-    resetGrabber: (function() {
+    resetGrabber: (() => {
       const objPos = new THREE.Vector3();
       const grabPos = new THREE.Vector3();
-      const function() {
+      return function() {
         if (!this.grabber) {
           return false;
         }

@@ -15,7 +15,6 @@ AFRAME.registerComponent("pen", {
     camera: { type: "selector" },
     drawing: { type: "string" },
     drawingManager: { type: "string" },
-    color: { type: "color", default: "#FF0000" },
     availableColors: {
       default: ["#FF0033", "#FFFF00", "#00FF33", "#0099FF", "#9900FF", "#FFFFFF", "#000000"]
     }
@@ -24,6 +23,8 @@ AFRAME.registerComponent("pen", {
   init() {
     this.stateAdded = this.stateAdded.bind(this);
     this.stateRemoved = this.stateRemoved.bind(this);
+    this.onMouseWheel = this.onMouseWheel.bind(this);
+    this.onComponentChanged = this.onComponentChanged.bind(this);
 
     this.timeSinceLastDraw = 0;
 
@@ -39,9 +40,9 @@ AFRAME.registerComponent("pen", {
 
     this.worldPosition = new THREE.Vector3();
 
-    this.el.setAttribute("material", { color: this.data.color });
-
     this.colorIndex = 0;
+
+    this.grabbed = false;
   },
 
   play() {
@@ -49,11 +50,16 @@ AFRAME.registerComponent("pen", {
 
     this.el.parentNode.addEventListener("stateadded", this.stateAdded);
     this.el.parentNode.addEventListener("stateremoved", this.stateRemoved);
+    this.el.addEventListener("onComponentChanged", this.onComponentChanged);
+    document.addEventListener("wheel", this.onMouseWheel);
   },
 
   pause() {
     this.el.parentNode.removeEventListener("stateadded", this.stateAdded);
     this.el.parentNode.removeEventListener("stateremoved", this.stateRemoved);
+    this.el.removeEventListener("onComponentChanged", this.onComponentChanged);
+
+    document.removeEventListener("wheel", this.onMouseWheel);
   },
 
   tick(t, dt) {
@@ -93,7 +99,7 @@ AFRAME.registerComponent("pen", {
       this.el.object3D.getWorldPosition(this.worldPosition);
       this.getNormal(this.normal, this.worldPosition, this.direction);
 
-      this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal, this.data.color);
+      this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal, this.el.getAttribute("color"));
     }
   },
 
@@ -110,8 +116,8 @@ AFRAME.registerComponent("pen", {
 
   changeColor(mod) {
     this.colorIndex = (this.colorIndex + mod + this.data.availableColors.length) % this.data.availableColors.length;
-    this.data.color = this.data.availableColors[this.colorIndex];
-    this.el.setAttribute("material", { color: this.data.color });
+    const color = this.data.availableColors[this.colorIndex];
+    this.el.setAttribute("color", color);
   },
 
   stateAdded(evt) {
@@ -125,6 +131,8 @@ AFRAME.registerComponent("pen", {
       case "colorPrev":
         this.changeColor(-1);
         break;
+      case "grabbed":
+        this.grabbed = true;
       default:
         break;
     }
@@ -133,11 +141,24 @@ AFRAME.registerComponent("pen", {
   stateRemoved(evt) {
     switch (evt.detail) {
       case "activated":
+        this.endDraw();
+        break;
       case "grabbed":
+        this.grabbed = false;
         this.endDraw();
         break;
       default:
         break;
     }
+  },
+
+  onComponentChanged(evt) {
+    if (evt.detail.name === "color") {
+      changeColor(0);
+    }
+  },
+
+  onMouseWheel(e) {
+    if (this.grabbed) this.changeColor(e.deltaY > 0 ? 1 : -1);
   }
 });

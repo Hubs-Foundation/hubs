@@ -143,7 +143,11 @@ function registerNetworkSchemas() {
         requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       "scale",
-      "media-loader"
+      "media-loader",
+      {
+        selector: "#pen",
+        component: "color"
+      }
     ]
   });
 }
