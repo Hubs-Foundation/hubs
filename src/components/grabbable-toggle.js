@@ -45,11 +45,11 @@ AFRAME.registerComponent(
       this.yFactor = (this.data.invert ? -1 : 1) * !this.data.suppressY;
     },
     tick: (function() {
-      var q = new THREE.Quaternion();
-      var v = new THREE.Vector3();
+      const q = new THREE.Quaternion();
+      const v = new THREE.Vector3();
 
       return function() {
-        var entityPosition;
+        let entityPosition;
         if (this.grabber) {
           // reflect on z-axis to point in same direction as the laser
           this.targetPosition.copy(this.grabDirection);
@@ -144,14 +144,13 @@ AFRAME.registerComponent(
       }
     },
     resetGrabber: (function() {
-      var objPos = new THREE.Vector3();
-      var grabPos = new THREE.Vector3();
-      return function() {
-        let raycaster;
+      const objPos = new THREE.Vector3();
+      const grabPos = new THREE.Vector3();
+      const function() {
         if (!this.grabber) {
           return false;
         }
-        raycaster = this.grabber.getAttribute("raycaster");
+        const raycaster = this.grabber.getAttribute("raycaster");
         this.deltaPositionIsValid = false;
         this.grabDistance = this.el.object3D
           .getWorldPosition(objPos)
@@ -164,7 +163,7 @@ AFRAME.registerComponent(
       };
     })(),
     lostGrabber: function(evt) {
-      let i = this.grabbers.indexOf(evt.relatedTarget);
+      const i = this.grabbers.indexOf(evt.relatedTarget);
       // if a queued, non-physics grabber leaves the collision zone, forget it
       if (i !== -1 && evt.relatedTarget !== this.grabber && !this.physicsIsConstrained(evt.relatedTarget)) {
         this.grabbers.splice(i, 1);
