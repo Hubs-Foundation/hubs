@@ -75,6 +75,10 @@
   }
 }
 
+.dialog__box__contents__body p:first-child {
+  margin-top: 0;
+}
+
 .invite-form, .add-media-form, .custom-scene-form {
   display: flex;
   flex-direction: column;
