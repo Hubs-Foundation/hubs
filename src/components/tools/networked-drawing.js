@@ -1,6 +1,7 @@
 /* global THREE */
 /**
- * Networked Drawing
+ * Creates procedurally generated 'lines' (or tubes) that are networked.
+ * @namespace drawing
  * @component networked-drawing
  */
 
@@ -23,10 +24,13 @@ function copyData(fromArray, toArray, fromIndex, toIndex) {
 
 AFRAME.registerComponent("networked-drawing", {
   schema: {
-    segments: { default: 4 },
-    radius: { default: 0.02 },
-    color: { type: "color", default: "#FF0000" },
-    drawTimeout: { default: 5000 }
+    segments: { default: 8 }, //the number of "sides" the procedural tube should have
+    radius: { default: 0.02 }, //the radius of the procedural tube
+    color: { type: "color", default: "#FF0000" }, //default color
+    minDrawTimeout: { default: 5000 }, //the minimum time a drawn line will live
+    maxDrawTimeout: { default: 60000 }, //the maximum time a drawn line will live
+    maxLines: { default: 10 }, //how many lines can persist before lines older than minDrawTime are removed
+    maxPointsPerLine: { default: 100 } //the max number of points a single line can have
   },
 
   init() {
@@ -65,6 +69,7 @@ AFRAME.registerComponent("networked-drawing", {
     this.scene = sceneEl.object3D;
     this.scene.add(this.drawing);
 
+    this.drawStarted = false;
     this.lineStarted = false;
     this.remoteLineStarted = false;
 
@@ -77,6 +82,7 @@ AFRAME.registerComponent("networked-drawing", {
     this.idx = Object.assign({}, this.sharedBuffer.idx);
     this.vertexCount = 0;
     this.drawBufferCount = 0;
+    this.currentPointCount = 0;
 
     this.receiveData = this.receiveData.bind(this);
 
@@ -154,21 +160,29 @@ AFRAME.registerComponent("networked-drawing", {
   })(),
 
   deleteLines() {
-    if (this.drawBufferHistory.length > 0 && this.drawBufferHistory[0].time + this.data.drawTimeout <= Date.now()) {
-      const datum = this.drawBufferHistory[0];
-      if (this.drawBufferHistory.length > 1) {
-        datum.idxLength += 2 - (this.segments % 2);
-        this.drawBufferHistory[1].idxLength -= 2 - (this.segments % 2);
-      }
-      this.idx.position = datum.idxLength;
-      this.idx.uv = datum.idxLength;
-      this.idx.normal = datum.idxLength;
-      this.idx.color = datum.idxLength;
-      this.sharedBuffer.remove(this.prevIdx, this.idx);
-      this.drawBufferHistory.shift();
-      if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
-        this.drawBuffer.splice(0, datum.drawBufferCount);
-        this.bufferIndex -= datum.drawBufferCount;
+    const length = this.drawBufferHistory.length;
+    if (length > 0) {
+      const now = Date.now();
+      const time = this.drawBufferHistory[0].time;
+      if (
+        (length > this.data.maxLines && time + this.data.minDrawTimeout <= now) ||
+        time + this.data.maxDrawTimeout <= now
+      ) {
+        const datum = this.drawBufferHistory[0];
+        if (length > 1) {
+          datum.idxLength += 2 - (this.segments % 2);
+          this.drawBufferHistory[1].idxLength -= 2 - (this.segments % 2);
+        }
+        this.idx.position = datum.idxLength;
+        this.idx.uv = datum.idxLength;
+        this.idx.normal = datum.idxLength;
+        this.idx.color = datum.idxLength;
+        this.sharedBuffer.remove(this.prevIdx, this.idx);
+        this.drawBufferHistory.shift();
+        if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
+          this.drawBuffer.splice(0, datum.drawBufferCount);
+          this.bufferIndex -= datum.drawBufferCount;
+        }
       }
     }
   },
@@ -222,7 +236,9 @@ AFRAME.registerComponent("networked-drawing", {
       return;
     }
 
-    if (color && color != "#" + this.color.getHex()) {
+    this.drawStarted = true;
+
+    if (color && color != "#" + this.color.getHexString().toUpperCase()) {
       this.color.set(color);
       this.pushToDrawBuffer(color);
     }
@@ -235,7 +251,7 @@ AFRAME.registerComponent("networked-drawing", {
   },
 
   draw(position, direction, normal) {
-    if (!NAF.connection.isConnected()) {
+    if (!NAF.connection.isConnected() || !this.drawStarted) {
       return;
     }
 
@@ -278,33 +294,36 @@ AFRAME.registerComponent("networked-drawing", {
 
         this.lineStarted = true;
       } else {
-        this.addSegments(this.currentSegments, position, direction, normal, this.radius * radiusMultiplier);
-        this.drawCylinder();
+        if (this.currentPointCount > this.data.maxPointsPerLine) {
+          this.doEndDraw(position, direction, normal);
+        } else {
+          this.addSegments(this.currentSegments, position, direction, normal, this.radius * radiusMultiplier);
+          this.drawCylinder();
+        }
       }
       this.lastPoint.copy(position);
     };
   })(),
 
-  endDraw: (() => {
+  endDraw(position, direction, normal) {
+    if (!this.lineStarted && this.drawStarted) {
+      this.drawPoint(position);
+    } else {
+      this.draw(position, direction, normal);
+      this.doEndDraw(position, direction, normal);
+    }
+  },
+
+  doEndDraw: (() => {
     const projectedDirection = new THREE.Vector3();
     const projectedPoint = new THREE.Vector3();
     return function(position, direction, normal) {
-      if (!NAF.connection.isConnected()) {
-        return;
-      }
-
-      if (!this.lineStarted) {
-        this.drawPoint(position);
-      } else {
-        this.draw(position, direction, normal);
+      if (this.lineStarted && this.drawStarted) {
         projectedDirection.copy(direction).multiplyScalar(this.radius);
         projectedPoint.copy(position).add(projectedDirection);
 
         this.addDegenerateTriangle(); //flip faceculling order before drawing end-cap
         this.drawCap(projectedPoint, this.lastSegments, direction);
-      }
-
-      if (this.lineStarted /*&& this.networkedEl && NAF.utils.isMine(this.networkedEl)*/) {
         if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) this.pushToDrawBuffer(null);
         this.drawBufferHistory.push({
           drawBufferCount: this.drawBufferCount,
@@ -315,12 +334,15 @@ AFRAME.registerComponent("networked-drawing", {
 
       this.vertexCount = 0;
       this.drawBufferCount = 0;
+      this.currentPointCount = 0;
       this.lineStarted = false;
+      this.drawStarted = false;
     };
   })(),
 
   addToDrawBuffer(position, direction, normal) {
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
+      ++this.currentPointCount;
       this.pushToDrawBuffer(round(position.x));
       this.pushToDrawBuffer(round(position.y));
       this.pushToDrawBuffer(round(position.z));
@@ -330,7 +352,6 @@ AFRAME.registerComponent("networked-drawing", {
       this.pushToDrawBuffer(round(normal.x));
       this.pushToDrawBuffer(round(normal.y));
       this.pushToDrawBuffer(round(normal.z));
-      // this.drawBufferCount += 9;
     }
   },
 
