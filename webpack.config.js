@@ -77,6 +77,13 @@ module.exports = (env, argv) => ({
     host: "0.0.0.0",
     useLocalIp: true,
     allowedHosts: ["hubs.local"],
+    headers: { "Access-Control-Allow-Origin": "hubs.local" },
+    proxy: {
+      "/test-environment": {
+        target: process.env.TEST_ENVIRONMENT_HOST,
+        pathRewrite: { "^/test-environment": "" }
+      }
+    },
     before: function(app) {
       // be flexible with people accessing via a local reticulum on another port
       app.use(cors({ origin: /hubs\.local(:\d*)?$/ }));
@@ -231,7 +238,8 @@ module.exports = (env, argv) => ({
         JANUS_SERVER: process.env.JANUS_SERVER,
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
         ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER,
-        BUILD_VERSION: process.env.BUILD_VERSION
+        BUILD_VERSION: process.env.BUILD_VERSION,
+        TEST_ENVIRONMENT_PATH: process.env.TEST_ENVIRONMENT_PATH
       })
     })
   ]
