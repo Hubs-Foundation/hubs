@@ -295,7 +295,7 @@ AFRAME.registerComponent("networked-drawing", {
         this.lineStarted = true;
       } else {
         if (this.currentPointCount > this.data.maxPointsPerLine) {
-          this.doEndDraw(position, direction, normal);
+          this.doEndDraw(position, direction);
         } else {
           this.addSegments(this.currentSegments, position, direction, normal, this.radius * radiusMultiplier);
           this.drawCylinder();
@@ -310,14 +310,14 @@ AFRAME.registerComponent("networked-drawing", {
       this.drawPoint(position);
     } else {
       this.draw(position, direction, normal);
-      this.doEndDraw(position, direction, normal);
+      this.doEndDraw(position, direction);
     }
   },
 
   doEndDraw: (() => {
     const projectedDirection = new THREE.Vector3();
     const projectedPoint = new THREE.Vector3();
-    return function(position, direction, normal) {
+    return function(position, direction) {
       if (this.lineStarted && this.drawStarted) {
         projectedDirection.copy(direction).multiplyScalar(this.radius);
         projectedPoint.copy(position).add(projectedDirection);

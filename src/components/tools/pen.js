@@ -133,6 +133,7 @@ AFRAME.registerComponent("pen", {
         break;
       case "grabbed":
         this.grabbed = true;
+        break;
       default:
         break;
     }
@@ -154,7 +155,7 @@ AFRAME.registerComponent("pen", {
 
   onComponentChanged(evt) {
     if (evt.detail.name === "color") {
-      changeColor(0);
+      this.changeColor(0);
     }
   },
 
