@@ -1,16 +1,23 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import { resolveMedia } from "../utils/media-utils";
 
-const fetchContentType = async url => fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
-
 AFRAME.registerComponent("media-loader", {
   schema: {
     src: { type: "string" },
+    token: { type: "string" },
     resize: { default: false }
   },
 
   init() {
     this.onError = this.onError.bind(this);
+    this.showLoader = this.showLoader.bind(this);
+  },
+
+  remove() {
+    if (this.blobURL) {
+      URL.revokeObjectURL(this.blobURL);
+      this.blobURL = null;
+    }
   },
 
   setShapeAndScale(resize) {
@@ -42,21 +49,37 @@ AFRAME.registerComponent("media-loader", {
     clearTimeout(this.showLoaderTimeout);
   },
 
+  showLoader() {
+    const loadingObj = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
+    this.el.setObject3D("mesh", loadingObj);
+    this.setShapeAndScale(true);
+  },
+
   // TODO: correctly handle case where src changes
   async update() {
     try {
       const url = this.data.src;
+      const token = this.data.token;
 
-      this.showLoaderTimeout = setTimeout(() => {
-        const loadingObj = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
-        this.el.setObject3D("mesh", loadingObj);
-        this.setShapeAndScale(true);
-      }, 100);
+      this.showLoaderTimeout = this.showLoaderTimeout || setTimeout(this.showLoader, 100);
 
-      const { raw, origin, meta } = await resolveMedia(url);
-      console.log("resolved", url, raw, origin, meta);
+      if (!url) return;
 
-      const contentType = (meta && meta.expected_content_type) || (await fetchContentType(raw));
+      const { raw, contentType } = await resolveMedia(url, token);
+
+      if (token) {
+        if (this.blobURL) {
+          URL.revokeObjectURL(this.blobURL);
+          this.blobURL = null;
+        }
+        const response = await fetch(raw, {
+          method: "GET",
+          headers: { Authorization: `Token ${token}` }
+        });
+        const blob = await response.blob();
+        this.blobURL = window.URL.createObjectURL(blob);
+      }
+
       if (contentType.startsWith("image/") || contentType.startsWith("video/") || contentType.startsWith("audio/")) {
         this.el.addEventListener(
           "image-loaded",
@@ -65,9 +88,15 @@ AFRAME.registerComponent("media-loader", {
           },
           { once: true }
         );
-        this.el.setAttribute("image-plus", { src: raw, contentType });
+        this.el.setAttribute("image-plus", { src: this.blobURL || raw, contentType, token });
         this.el.setAttribute("position-at-box-shape-border", { target: ".delete-button", dirs: ["forward", "back"] });
-      } else if (contentType.startsWith("model/gltf") || url.endsWith(".gltf") || url.endsWith(".glb")) {
+      } else if (
+        contentType.includes("application/octet-stream") ||
+        contentType.includes("x-zip-compressed") ||
+        contentType.startsWith("model/gltf") ||
+        url.endsWith(".gltf") ||
+        url.endsWith(".glb")
+      ) {
         this.el.addEventListener(
           "model-loaded",
           () => {
@@ -77,10 +106,10 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
+        const src = this.blobURL || url;
         this.el.setAttribute("gltf-model-plus", {
-          src: raw,
+          src,
           contentType,
-          basePath: THREE.LoaderUtils.extractUrlBase(origin),
           inflate: true
         });
       } else {

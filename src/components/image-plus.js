@@ -1,5 +1,6 @@
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
+import { resolveMedia } from "../utils/media-utils";
 
 class GIFTexture extends THREE.Texture {
   constructor(frames, delays, disposals) {
@@ -69,6 +70,7 @@ errorImage.onload = () => {
 AFRAME.registerComponent("image-plus", {
   schema: {
     src: { type: "string" },
+    token: { type: "string" },
     contentType: { type: "string" },
 
     depth: { default: 0.05 }
@@ -177,7 +179,8 @@ AFRAME.registerComponent("image-plus", {
     let texture;
     try {
       const url = this.data.src;
-      const contentType = this.data.contentType;
+      const token = this.data.token;
+      let contentType = this.data.contentType;
       if (!url) {
         return;
       }
@@ -188,19 +191,27 @@ AFRAME.registerComponent("image-plus", {
         texture = cacheItem.texture;
         cacheItem.count++;
       } else {
+        const resolved = await resolveMedia(url, token);
+        const { raw } = resolved;
+        if (!contentType) {
+          contentType = resolved.contentType;
+        }
+
         cacheItem = { count: 1 };
-        if (url === "error") {
+        if (raw === "error") {
           texture = errorTexture;
-        } else if (contentType === "image/gif") {
-          texture = await this.loadGIF(url);
+        } else if (contentType.includes("image/gif")) {
+          texture = await this.loadGIF(raw);
         } else if (contentType.startsWith("image/")) {
-          texture = await this.loadImage(url);
+          texture = await this.loadImage(raw);
         } else if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
-          texture = await this.loadVideo(url);
+          texture = await this.loadVideo(raw);
           cacheItem.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
         } else {
           throw new Error(`Unknown content type: ${contentType}`);
         }
+
+        texture.encoding = THREE.sRGBEncoding;
 
         cacheItem.texture = texture;
         textureCache.set(url, cacheItem);

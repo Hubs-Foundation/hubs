@@ -7,7 +7,7 @@ import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
-import "./vendor/GLTFLoader";
+import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
@@ -74,6 +74,12 @@ import "./components/position-at-box-shape-border";
 import "./components/remove-networked-object-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/media-loader";
+import "./components/gamma-factor";
+import "./components/ambient-light";
+import "./components/directional-light";
+import "./components/hemisphere-light";
+import "./components/point-light";
+import "./components/spot-light";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -231,7 +237,6 @@ const onReady = async () => {
     if (!isBotMode) {
       scene.classList.add("no-cursor");
     }
-    scene.renderer.sortObjects = true;
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("canvas").classList.remove("blurred");
     scene.render();
@@ -297,8 +302,8 @@ const onReady = async () => {
     });
 
     const offset = { x: 0, y: 0, z: -1.5 };
-    const spawnMediaInfrontOfPlayer = url => {
-      const entity = addMedia(url, true);
+    const spawnMediaInfrontOfPlayer = src => {
+      const entity = addMedia(src, true);
       entity.setAttribute("offset-relative-to", {
         target: "#player-camera",
         offset
@@ -309,28 +314,36 @@ const onReady = async () => {
       spawnMediaInfrontOfPlayer(e.detail);
     });
 
-    if (qsTruthy("mediaTools")) {
-      document.addEventListener("paste", e => {
-        if (e.target.nodeName === "INPUT") return;
+    document.addEventListener("paste", e => {
+      if (e.target.nodeName === "INPUT") return;
 
-        const imgUrl = e.clipboardData.getData("text");
-        console.log("Pasted: ", imgUrl, e);
-        spawnMediaInfrontOfPlayer(imgUrl);
-      });
-
-      document.addEventListener("dragover", e => {
-        e.preventDefault();
-      });
-
-      document.addEventListener("drop", e => {
-        e.preventDefault();
-        const imgUrl = e.dataTransfer.getData("url");
-        if (imgUrl) {
-          console.log("Dropped: ", imgUrl);
-          spawnMediaInfrontOfPlayer(imgUrl);
+      const url = e.clipboardData.getData("text");
+      const files = e.clipboardData.files && e.clipboardData.files;
+      if (url) {
+        spawnMediaInfrontOfPlayer(url);
+      } else {
+        for (const file of files) {
+          spawnMediaInfrontOfPlayer(file);
         }
-      });
-    }
+      }
+    });
+
+    document.addEventListener("dragover", e => {
+      e.preventDefault();
+    });
+
+    document.addEventListener("drop", e => {
+      e.preventDefault();
+      const url = e.dataTransfer.getData("url");
+      const files = e.dataTransfer.files;
+      if (url) {
+        spawnMediaInfrontOfPlayer(url);
+      } else {
+        for (const file of files) {
+          spawnMediaInfrontOfPlayer(file);
+        }
+      }
+    });
 
     if (!qsTruthy("offline")) {
       document.body.addEventListener("connected", () => {
