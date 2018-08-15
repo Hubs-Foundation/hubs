@@ -215,13 +215,13 @@ async function resolveGLTFUri(gltfProperty, basePath) {
   if (url.protocol === "blob:") {
     gltfProperty.uri = url.href;
   } else {
-    const { raw } = await resolveMedia(url.href, null, true);
+    const { raw } = await resolveMedia(url.href, true);
     gltfProperty.uri = raw;
   }
 }
 
-async function loadGLTF(src, token, contentType, preferredTechnique, onProgress) {
-  const resolved = await resolveMedia(src, token);
+async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
+  const resolved = await resolveMedia(src);
   const raw = resolved.raw;
   const origin = resolved.origin;
   contentType = contentType || resolved.contentType;
@@ -322,7 +322,6 @@ async function loadGLTF(src, token, contentType, preferredTechnique, onProgress)
 AFRAME.registerComponent("gltf-model-plus", {
   schema: {
     src: { type: "string" },
-    token: { type: "string" },
     contentType: { type: "string" },
     inflate: { default: false }
   },
@@ -334,7 +333,7 @@ AFRAME.registerComponent("gltf-model-plus", {
   },
 
   update() {
-    this.applySrc(this.data.src, this.data.token, this.data.contentType);
+    this.applySrc(this.data.src, this.data.contentType);
   },
 
   loadTemplates() {
@@ -345,7 +344,7 @@ AFRAME.registerComponent("gltf-model-plus", {
     });
   },
 
-  async applySrc(src, token, contentType) {
+  async applySrc(src, contentType) {
     try {
       // If the src attribute is a selector, get the url from the asset item.
       if (src && src.charAt(0) === "#") {
@@ -367,7 +366,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       const gltfPath = THREE.LoaderUtils.extractUrlBase(src);
 
       if (!GLTFCache[src]) {
-        GLTFCache[src] = loadGLTF(src, token, contentType, this.preferredTechnique);
+        GLTFCache[src] = loadGLTF(src, contentType, this.preferredTechnique);
       }
 
       const model = cloneGltf(await GLTFCache[src]);

@@ -4,7 +4,6 @@ import { resolveMedia, fetchMaxContentIndex } from "../utils/media-utils";
 AFRAME.registerComponent("media-loader", {
   schema: {
     src: { type: "string" },
-    token: { type: "string" },
     index: { type: "number" },
     resize: { default: false }
   },
@@ -61,7 +60,7 @@ AFRAME.registerComponent("media-loader", {
 
   async update(oldData) {
     try {
-      const { src, token, index } = this.data;
+      const { src, index } = this.data;
 
       if (src !== oldData.src && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
@@ -69,26 +68,14 @@ AFRAME.registerComponent("media-loader", {
 
       if (!src) return;
 
-      const { raw, images, contentType } = await resolveMedia(src, token, false, index);
+      const { raw, images, contentType } = await resolveMedia(src, false, index);
 
-      if (token) {
-        if (this.blobURL) {
-          URL.revokeObjectURL(this.blobURL);
-          this.blobURL = null;
-        }
-        const response = await fetch(raw, {
-          method: "GET",
-          headers: { Authorization: `Token ${token}` }
-        });
-        const blob = await response.blob();
-        this.blobURL = window.URL.createObjectURL(blob);
-      }
-
+      const isPDF = contentType.startsWith("application/pdf");
       if (
         contentType.startsWith("image/") ||
         contentType.startsWith("video/") ||
         contentType.startsWith("audio/") ||
-        contentType === "application/pdf"
+        isPDF
       ) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.addEventListener(
@@ -96,24 +83,21 @@ AFRAME.registerComponent("media-loader", {
           async () => {
             clearTimeout(this.showLoaderTimeout);
             delete this.showLoaderTimeout;
-            if (contentType === "application/pdf") {
+            if (isPDF) {
               const maxIndex = await fetchMaxContentIndex(src, images.png);
               this.el.setAttribute("media-pager", { index, maxIndex });
             }
           },
           { once: true }
         );
-        let imageSrc = contentType === "application/pdf" ? images.png : raw;
-        let imageContentType = contentType === "application/pdf" ? "image/png" : contentType;
+        const imageSrc = isPDF ? images.png : raw;
+        const imageContentType = isPDF ? "image/png" : contentType;
 
-        if (contentType === "application/pdf") {
-          imageSrc = images.png;
-          imageContentType = "image/png";
-        } else {
+        if (!isPDF) {
           this.el.removeAttribute("media-pager");
         }
 
-        this.el.setAttribute("image-plus", { src: this.blobUrl || imageSrc, contentType: imageContentType, token });
+        this.el.setAttribute("image-plus", { src: imageSrc, contentType: imageContentType });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
       } else if (
         contentType.includes("application/octet-stream") ||

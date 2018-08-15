@@ -138,7 +138,6 @@ errorImage.onload = () => {
 AFRAME.registerComponent("image-plus", {
   schema: {
     src: { type: "string" },
-    token: { type: "string" },
     contentType: { type: "string" },
 
     depth: { default: 0.05 }
@@ -176,7 +175,7 @@ AFRAME.registerComponent("image-plus", {
   async update(oldData) {
     let texture;
     try {
-      const { src, token, contentType } = this.data;
+      const { src, contentType } = this.data;
       if (!src) return;
 
       if (this.mesh) {
