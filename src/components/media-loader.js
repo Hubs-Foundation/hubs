@@ -13,13 +13,6 @@ AFRAME.registerComponent("media-loader", {
     this.showLoader = this.showLoader.bind(this);
   },
 
-  remove() {
-    if (this.blobURL) {
-      URL.revokeObjectURL(this.blobURL);
-      this.blobURL = null;
-    }
-  },
-
   setShapeAndScale(resize) {
     const mesh = this.el.getObject3D("mesh");
     const box = getBox(this.el, mesh);
@@ -118,9 +111,8 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
-        const modelSrc = this.blobURL || src;
         this.el.setAttribute("gltf-model-plus", {
-          src: modelSrc,
+          src,
           contentType,
           inflate: true
         });
