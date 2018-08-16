@@ -22,6 +22,8 @@ export default class ActionEventHandler {
     this.onCardboardButtonUp = this.onCardboardButtonUp.bind(this);
     this.onScrollMove = this.onScrollMove.bind(this);
     this.addEventListeners();
+
+    this.lastScrollTime = 0;
   }
 
   addEventListeners() {
@@ -53,7 +55,24 @@ export default class ActionEventHandler {
   }
 
   onScrollMove(e) {
-    this.cursor.changeDistanceMod(-e.detail.axis[1] / 8);
+    const direction = this.cursor.changeDistanceMod(-e.detail.axis[1] / 8);
+    let event;
+    if (direction === 1) {
+      event = "scroll_up";
+    } else if (direction === -1) {
+      event = "scroll_down";
+    }
+
+    if (direction !== 0 && (this.lastScrollTime === 0 || this.lastScrollTime + 500 < Date.now())) {
+      if (this.isCursorInteracting && this.isHandThatAlsoDrivesCursor(e.target)) {
+        this.cursorHand.el.emit(event);
+        this.cursorHand.el.emit("scroll_release");
+      } else {
+        e.target.emit(event);
+        e.target.emit("scroll_release");
+      }
+      this.lastScrollTime = Date.now();
+    }
   }
 
   setHandThatAlsoDrivesCursor(handThatAlsoDrivesCursor) {

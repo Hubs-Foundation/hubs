@@ -23,7 +23,6 @@ AFRAME.registerComponent("pen", {
   init() {
     this.stateAdded = this.stateAdded.bind(this);
     this.stateRemoved = this.stateRemoved.bind(this);
-    this.onMouseWheel = this.onMouseWheel.bind(this);
     this.onComponentChanged = this.onComponentChanged.bind(this);
 
     this.timeSinceLastDraw = 0;
@@ -51,15 +50,12 @@ AFRAME.registerComponent("pen", {
     this.el.parentNode.addEventListener("stateadded", this.stateAdded);
     this.el.parentNode.addEventListener("stateremoved", this.stateRemoved);
     this.el.addEventListener("onComponentChanged", this.onComponentChanged);
-    document.addEventListener("wheel", this.onMouseWheel);
   },
 
   pause() {
     this.el.parentNode.removeEventListener("stateadded", this.stateAdded);
     this.el.parentNode.removeEventListener("stateremoved", this.stateRemoved);
     this.el.removeEventListener("onComponentChanged", this.onComponentChanged);
-
-    document.removeEventListener("wheel", this.onMouseWheel);
   },
 
   tick(t, dt) {
@@ -157,9 +153,5 @@ AFRAME.registerComponent("pen", {
     if (evt.detail.name === "color") {
       this.changeColor(0);
     }
-  },
-
-  onMouseWheel(e) {
-    if (this.grabbed) this.changeColor(e.deltaY > 0 ? 1 : -1);
   }
 });

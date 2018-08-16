@@ -1,6 +1,7 @@
 // TODO: Make look speed adjustable by the user
 const HORIZONTAL_LOOK_SPEED = 0.1;
 const VERTICAL_LOOK_SPEED = 0.06;
+const SCROLL_TIMEOUT = 250;
 
 export default class MouseEventsHandler {
   constructor(cursor, cameraController) {
@@ -18,6 +19,8 @@ export default class MouseEventsHandler {
     this.onMouseWheel = this.onMouseWheel.bind(this);
 
     this.addEventListeners();
+
+    this.lastScrollTime = 0;
   }
 
   tearDown() {
@@ -79,16 +82,31 @@ export default class MouseEventsHandler {
   }
 
   onMouseWheel(e) {
+    let mod = 0;
     switch (e.deltaMode) {
       case e.DOM_DELTA_PIXEL:
-        this.cursor.changeDistanceMod(e.deltaY / 500);
+        mod = e.deltaY / 500;
         break;
       case e.DOM_DELTA_LINE:
-        this.cursor.changeDistanceMod(e.deltaY / 10);
+        mod = e.deltaY / 10;
         break;
       case e.DOM_DELTA_PAGE:
-        this.cursor.changeDistanceMod(e.deltaY / 2);
+        mod = e.deltaY / 2;
         break;
+    }
+
+    const direction = this.cursor.changeDistanceMod(mod);
+    let event;
+    if (direction === 1) {
+      event = "scroll_up";
+    } else if (direction === -1) {
+      event = "scroll_down";
+    }
+
+    if (direction !== 0 && (this.lastScrollTime === 0 || this.lastScrollTime + SCROLL_TIMEOUT < Date.now())) {
+      this.superHand.el.emit(event);
+      this.superHand.el.emit("scroll_release");
+      this.lastScrollTime = Date.now();
     }
   }
 
