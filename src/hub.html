@@ -155,10 +155,26 @@
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
                     position-at-box-shape-border="target:.delete-button"
                     destroy-at-extreme-distances
+                    rotation
                 >
+                    <!-- HACK: rotation component above is required for its side effect of setting YXZ order -->
                     <a-entity class="delete-button" visible-while-frozen>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
                         <a-entity text=" value:Delete; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="paging-toolbar">
+                <a-entity class="paging-toolbar" visible-to-owner>
+                    <a-entity class="prev-button" position="-0.3 0 0">
+                        <a-entity mixin="rounded-text-button" slice9="width: 0.2"> </a-entity>
+                        <a-entity text=" value:<; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    </a-entity>
+                    <a-entity class="page-label" text="width:2; align:center;" text-raycast-hack></a-entity>
+                    <a-entity class="next-button" position="0.3 0 0">
+                        <a-entity mixin="rounded-text-button" slice9="width: 0.2"> </a-entity>
+                        <a-entity text=" value:>; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>

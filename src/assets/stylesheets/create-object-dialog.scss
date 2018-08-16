@@ -1,0 +1,74 @@
+@import 'shared';
+
+:local(.add-media-form) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 0;
+}
+
+:local(.action-button) {
+  @extend %bottom-action-button;
+  margin-left: 6px;
+  margin-right: 6px;
+  appearance: none;
+  width: 128px;
+  text-align: center;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+}
+
+:local(.buttons) {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+:local(.small-button) {
+  margin-left: 0.25em;
+  font-size: 2em;
+  align-self: center;
+}
+
+:local(.cancel-icon) {
+  color: white;
+  &:hover {
+    color: #FF3D7F
+  }
+}
+
+:local(.upload-icon) {
+  color: white;
+  &:hover {
+    color: #2F80ED;
+  }
+}
+
+:local(.input-border) {
+  display: flex;
+  border: 0.25em solid white;
+  border-radius: 1em;
+  margin: 1em;
+  padding: 0.5em 0.75em;
+  width: 100%;
+  box-sizing: border-box;
+  @extend %default-font;
+}
+
+:local(.left-side-of-input) {
+  flex-grow: 1;
+  border: none;
+  white-space: nowrap;
+  background: transparent;
+  color: white;
+  font-size: 1.2em;
+  align-self: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:local(.hide-file-input) {
+  visibility: hidden;
+  position: absolute;
+}
