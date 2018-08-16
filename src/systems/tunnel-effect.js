@@ -6,42 +6,36 @@ import "../utils/shaders/CopyShader";
 import "../utils/shaders/VignetteShader";
 import qsTruthy from "../utils/qs_truthy";
 
-const STATIC = new THREE.Vector3(0, 0, 0);
-const CLAMP_VELOCITY = 0.01;
+const isDisabled = qsTruthy("disableTunnel");
+const CLAMP_SPEED = 0.01;
 const CLAMP_RADIUS = 0.001;
 const CLAMP_SOFTNESS = 0.001;
-const isDisabled = qsTruthy("disableTunnel");
+const FADE_TIMEOUT_MS = 300;
+const TARGET_RADIUS = 10.0;
+const TARGET_SOFTNESS = 0.0;
 
 AFRAME.registerSystem("tunneleffect", {
   schema: {
     targetComponent: { type: "string", default: "character-controller" },
     radius: { type: "number", default: 1.0, min: 0.25 },
     minRadius: { type: "number", default: 0.25, min: 0.1 },
-    maxVelocity: { type: "number", default: 0.7, min: 0.1 },
+    maxSpeed: { type: "number", default: 0.7, min: 0.1 },
     softness: { type: "number", default: 0.1, min: 0.0 },
     opacity: { type: "number", default: 1, min: 0.0 }
   },
 
   init: function() {
-    const data = this.data;
     this.scene = this.el;
     this.isMoving = false;
     this.isVR = false;
     this.dt = 0;
-    this.radius = data.radius;
-    this.targetRadius = 10.0;
-    this.targetSoftness = 0.0;
-    this.minRadius = data.minRadius;
-    this.softness = data.softness;
-    this.opacity = data.opacity;
-    this.characterVelocity = new THREE.Vector3(0, 0, 0);
-    this.fadeTimeoutMs = 300;
-    this.maxV = data.maxVelocity;
-    // add event listener for init composer
+    this.isPostProcessingReady = false;
     this.characterEl = document.querySelector(`a-entity[${this.data.targetComponent}]`);
     if (this.characterEl) {
       this._initPostProcessing = this._initPostProcessing.bind(this);
       this.characterEl.addEventListener("componentinitialized", this._initPostProcessing);
+    } else {
+      console.warn("Could not find target component.");
     }
     this._enterVR = this._enterVR.bind(this);
     this._exitVR = this._exitVR.bind(this);
@@ -63,29 +57,29 @@ AFRAME.registerSystem("tunneleffect", {
     this.scene.addEventListener("exit-vr", this._exitVR);
   },
 
-  tick: function(time, deltaTime) {
-    this.dt = deltaTime;
+  tick: function(t, dt) {
+    this.dt = dt;
 
-    if (!this._isPostProcessingReady() || !this.isVR || isDisabled) {
+    if (isDisabled || !this.isPostProcessingReady || !this.isVR) {
       return;
     }
 
-    this.characterVelocity = this.characterComponent.velocity;
-    if (this.characterVelocity.distanceTo(STATIC) < CLAMP_VELOCITY) {
+    const characterSpeed = this.characterComponent.velocity.length();
+    if (characterSpeed < CLAMP_SPEED) {
       // the character stops, so we use the aframe default render func
       const r = this.vignettePass.uniforms["radius"].value;
       const softness = this.vignettePass.uniforms["softness"].value;
       if (
         this.isMoving &&
-        Math.abs(r - this.targetRadius) > CLAMP_RADIUS &&
-        Math.abs(softness - this.targetSoftness) > CLAMP_SOFTNESS
+        Math.abs(r - TARGET_RADIUS) > CLAMP_RADIUS &&
+        Math.abs(softness - TARGET_SOFTNESS) > CLAMP_SOFTNESS
       ) {
         if (this.deltaR !== 0 && this.deltaS !== 0) {
-          this.deltaR = this.targetRadius - r;
-          this.deltaS = softness - this.targetSoftness;
+          this.deltaR = TARGET_RADIUS - r;
+          this.deltaS = softness - TARGET_SOFTNESS;
         }
-        const ratio = this.dt / this.fadeTimeoutMs;
-        this._updateVignettePass(r + this.deltaR * ratio, softness - this.deltaS * ratio, this.opacity);
+        const ratio = this.dt / FADE_TIMEOUT_MS;
+        this._updateVignettePass(r + this.deltaR * ratio, softness - this.deltaS * ratio, this.data.opacity);
       } else {
         this._exitTunnel();
       }
@@ -96,8 +90,9 @@ AFRAME.registerSystem("tunneleffect", {
       this.isMoving = true;
       this._bindRenderFunc();
     }
-    const r = (this.radius - this.minRadius) * (this.maxV - this.characterVelocity.distanceTo(STATIC)) + this.minRadius;
-    this._updateVignettePass(r, this.softness, this.opacity);
+    const { radius, minRadius, maxSpeed, softness, opacity } = this.data;
+    const r = (radius - minRadius) * (maxSpeed - characterSpeed) + minRadius;
+    this._updateVignettePass(r, softness, opacity);
   },
 
   _exitTunnel: function() {
@@ -107,8 +102,8 @@ AFRAME.registerSystem("tunneleffect", {
 
   _initPostProcessing: function(event) {
     if (event.detail.name === this.data.targetComponent) {
+      this.characterEl.removeEventListener("componentinitialized", this._initPostProcessing);
       this.characterComponent = this.characterEl.components[this.data.targetComponent];
-      this.characterVelocity = this.characterComponent.velocity;
       this._initComposer();
     }
   },
@@ -122,47 +117,33 @@ AFRAME.registerSystem("tunneleffect", {
     this.isVR = false;
   },
 
-  _isPostProcessingReady: function() {
-    if (!this.characterComponent || !this.renderer || !this.camera || !this.composer) return false;
-    return true;
-  },
-
   _initComposer: function() {
-    if (!this.renderer) {
-      this.renderer = this.scene.renderer;
-      this.camera = this.scene.camera;
-      this.originalRenderFunc = this.scene.renderer.render;
-      this.isDigest = false;
-      const render = this.scene.renderer.render;
-      const system = this;
-      this.postProcessingRenderFunc = function() {
-        if (system.isDigest) {
-          render.apply(this, arguments);
-        } else {
-          system.isDigest = true;
-          system.composer.render(system.dt);
-          system.isDigest = false;
-        }
-      };
-    }
-    if (!this.composer) {
-      this.composer = new THREE.EffectComposer(this.renderer);
-    }
+    this.renderer = this.scene.renderer;
+    this.camera = this.scene.camera;
+    this.originalRenderFunc = this.scene.renderer.render;
+    this.isDigest = false;
+    const render = this.scene.renderer.render;
+    const system = this;
+    this.postProcessingRenderFunc = function() {
+      if (system.isDigest) {
+        render.apply(this, arguments);
+      } else {
+        system.isDigest = true;
+        system.composer.render(system.dt);
+        system.isDigest = false;
+      }
+    };
+    this.composer = new THREE.EffectComposer(this.renderer);
     this.composer.resize();
-    if (!this.scenePass) {
-      this.scenePass = new THREE.RenderPass(this.scene.object3D, this.camera);
-    }
-    if (!this.vignettePass) {
-      this._updateVignettePass(this.radius, this.softness, this.opacity);
-    }
+    this.scenePass = new THREE.RenderPass(this.scene.object3D, this.camera);
+    this.vignettePass = new THREE.ShaderPass(THREE.VignetteShader);
+    this._updateVignettePass(this.data.radius, this.data.softness, this.data.opacity);
     this.composer.addPass(this.scenePass);
     this.composer.addPass(this.vignettePass);
+    this.isPostProcessingReady = true;
   },
 
   _updateVignettePass: function(radius, softness, opacity) {
-    if (!this.vignettePass) {
-      this.vignettePass = new THREE.ShaderPass(THREE.VignetteShader);
-    }
     const { width, height } = this.renderer.getSize();
     const pixelRatio = this.renderer.getPixelRatio();
     this.vignettePass.uniforms["radius"].value = radius;
