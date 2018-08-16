@@ -119,8 +119,8 @@ AFRAME.registerComponent("networked-drawing", {
             type: MSG_CONFIRM_CONNECT,
             clientId: NAF.clientId
           });
+          this.connectedToOwner = true;
         }
-        this.connectedToOwner = true;
       }
 
       if (this.drawBuffer.length > 0 && NAF.connection.isConnected() && this.networkedEl) {
