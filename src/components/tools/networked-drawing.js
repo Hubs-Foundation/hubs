@@ -238,7 +238,7 @@ AFRAME.registerComponent("networked-drawing", {
 
     this.drawStarted = true;
 
-    if (color && color != "#" + this.color.getHexString().toUpperCase()) {
+    if (color) {
       this.color.set(color);
       this.pushToDrawBuffer(color);
     }
