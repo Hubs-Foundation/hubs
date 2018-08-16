@@ -80,6 +80,7 @@ import "./components/directional-light";
 import "./components/hemisphere-light";
 import "./components/point-light";
 import "./components/spot-light";
+import "./components/visible-to-owner";
 
 import ReactDOM from "react-dom";
 import React from "react";
