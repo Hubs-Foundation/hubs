@@ -7,6 +7,7 @@ const fs = require("fs");
 const path = require("path");
 const selfsigned = require("selfsigned");
 const webpack = require("webpack");
+const cors = require("cors");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
@@ -76,8 +77,9 @@ module.exports = (env, argv) => ({
     host: "0.0.0.0",
     useLocalIp: true,
     allowedHosts: ["hubs.local"],
-    headers: { "Access-Control-Allow-Origin": "hubs.local" },
     before: function(app) {
+      // be flexible with people accessing via a local reticulum on another port
+      app.use(cors({ origin: /hubs\.local(:\d*)?$/ }));
       // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
       app.head("*", function(req, res, next) {
         if (req.method === "HEAD") {
@@ -178,7 +180,7 @@ module.exports = (env, argv) => ({
     new HTMLWebpackPlugin({
       filename: "index.html",
       template: path.join(__dirname, "src", "index.html"),
-      chunks: ["vendor", "index"]
+      chunks: ["vendor", "engine", "index"]
     }),
     new HTMLWebpackPlugin({
       filename: "hub.html",

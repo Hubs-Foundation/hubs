@@ -893,10 +893,18 @@ class UIRoot extends Component {
                 onToggleFreeze={this.toggleFreeze}
                 onToggleSpaceBubble={this.toggleSpaceBubble}
               />
-              {this.props.occupantCount <= 1 && (
-                <div className={styles.inviteNagButton}>
-                  <button onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}>
-                    <FormattedMessage id="entry.invite-others-nag" />
+              {!this.props.availableVREntryTypes.isInHMD &&
+                this.props.occupantCount <= 1 && (
+                  <div className={styles.nagButton}>
+                    <button onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}>
+                      <FormattedMessage id="entry.invite-others-nag" />
+                    </button>
+                  </div>
+                )}
+              {this.props.availableVREntryTypes.isInHMD && (
+                <div className={styles.nagButton}>
+                  <button onClick={() => this.props.scene.enterVR()}>
+                    <FormattedMessage id="entry.return-to-vr" />
                   </button>
                 </div>
               )}
