@@ -42,6 +42,7 @@ AFRAME.registerComponent("media-loader", {
     this.el.removeAttribute("media-pager");
     this.el.setAttribute("image-plus", { src: "error" });
     clearTimeout(this.showLoaderTimeout);
+    delete this.showLoaderTimeout;
   },
 
   showLoader() {
@@ -105,8 +106,8 @@ AFRAME.registerComponent("media-loader", {
           "model-loaded",
           () => {
             clearTimeout(this.showLoaderTimeout);
-            this.setShapeAndScale(this.data.resize);
             delete this.showLoaderTimeout;
+            this.setShapeAndScale(this.data.resize);
           },
           { once: true }
         );
@@ -136,10 +137,10 @@ AFRAME.registerComponent("media-pager", {
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
 
-    const tempalte = document.getElementById("paging-toolbar");
-    this.el.appendChild(document.importNode(tempalte.content, true));
+    const template = document.getElementById("paging-toolbar");
+    this.el.appendChild(document.importNode(template.content, true));
     this.toolbar = this.el.querySelector(".paging-toolbar");
-    // we have to wait a tick for the attach callbacks to get fired for the elements in a tempalte
+    // we have to wait a tick for the attach callbacks to get fired for the elements in a template
     setTimeout(() => {
       this.nextButton = this.el.querySelector(".next-button [text-button]");
       this.prevButton = this.el.querySelector(".prev-button [text-button]");

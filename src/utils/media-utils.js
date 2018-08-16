@@ -63,9 +63,9 @@ export const addMedia = (src, resize = false) => {
   if (src instanceof File) {
     upload(src)
       .then(response => {
-        const src = response.raw;
-        const token = response.meta.access_token;
-        entity.setAttribute("media-loader", { src: `${src}?token=${token}` });
+        const srcUrl = new URL(response.raw);
+        srcUrl.searchParams.set("token", response.meta.access_token);
+        entity.setAttribute("media-loader", { src: srcUrl.href });
       })
       .catch(() => {
         entity.setAttribute("media-loader", { src: "error" });
