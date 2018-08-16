@@ -54,8 +54,6 @@ async function grantedMicLabels() {
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
-const isOculusBrowser = navigator.userAgent.match(/Oculus/);
-
 class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
@@ -895,7 +893,7 @@ class UIRoot extends Component {
                 onToggleFreeze={this.toggleFreeze}
                 onToggleSpaceBubble={this.toggleSpaceBubble}
               />
-              {!isOculusBrowser &&
+              {!this.props.availableVREntryTypes.isInHMD &&
                 this.props.occupantCount <= 1 && (
                   <div className={styles.nagButton}>
                     <button onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}>
@@ -903,7 +901,7 @@ class UIRoot extends Component {
                     </button>
                   </div>
                 )}
-              {isOculusBrowser && (
+              {this.props.availableVREntryTypes.isInHMD && (
                 <div className={styles.nagButton}>
                   <button onClick={() => this.props.scene.enterVR()}>
                     <FormattedMessage id="entry.return-to-vr" />
