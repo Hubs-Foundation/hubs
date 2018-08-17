@@ -74,7 +74,7 @@ AFRAME.registerSystem("tunneleffect", {
         Math.abs(r - TARGET_RADIUS) > CLAMP_RADIUS &&
         Math.abs(softness - TARGET_SOFTNESS) > CLAMP_SOFTNESS
       ) {
-        if (this.deltaR !== 0 && this.deltaS !== 0) {
+        if (!this.deltaR && !this.deltaS) {
           this.deltaR = TARGET_RADIUS - r;
           this.deltaS = softness - TARGET_SOFTNESS;
         }
