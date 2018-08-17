@@ -312,6 +312,7 @@ AFRAME.registerComponent("networked-drawing", {
       this.draw(position, direction, normal);
       this.doEndDraw(position, direction);
     }
+    this.endLine();
   },
 
   doEndDraw: (() => {
@@ -324,21 +325,23 @@ AFRAME.registerComponent("networked-drawing", {
 
         this.addDegenerateTriangle(); //flip faceculling order before drawing end-cap
         this.drawCap(projectedPoint, this.lastSegments, direction);
-        if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) this.pushToDrawBuffer(null);
-        this.drawBufferHistory.push({
-          drawBufferCount: this.drawBufferCount,
-          idxLength: this.vertexCount - 1,
-          time: Date.now()
-        });
       }
-
-      this.vertexCount = 0;
-      this.drawBufferCount = 0;
-      this.currentPointCount = 0;
-      this.lineStarted = false;
-      this.drawStarted = false;
     };
   })(),
+
+  endLine() {
+    if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) this.pushToDrawBuffer(null);
+    this.drawBufferHistory.push({
+      drawBufferCount: this.drawBufferCount,
+      idxLength: this.vertexCount - 1,
+      time: Date.now()
+    });
+    this.vertexCount = 0;
+    this.drawBufferCount = 0;
+    this.currentPointCount = 0;
+    this.lineStarted = false;
+    this.drawStarted = false;
+  },
 
   addToDrawBuffer(position, direction, normal) {
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
