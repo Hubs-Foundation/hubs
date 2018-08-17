@@ -56,6 +56,8 @@ async function createGIFTexture(url) {
           if (loadCnt === frames.length) {
             const texture = new GIFTexture(frames, delays, disposals);
             texture.image.src = url;
+            texture.encoding = THREE.sRGBEncoding;
+            texture.minFilter = THREE.LinearFilter;
             resolve(texture);
           }
         };
@@ -81,7 +83,6 @@ function createVideoEl(src) {
   const videoEl = document.createElement("video");
   videoEl.setAttribute("playsinline", "");
   videoEl.setAttribute("webkit-playsinline", "");
-  videoEl.autoplay = true;
   videoEl.loop = true;
   videoEl.crossOrigin = "anonymous";
   videoEl.src = src;
@@ -94,6 +95,8 @@ function createVideoTexture(url) {
 
     const texture = new THREE.VideoTexture(videoEl);
     texture.minFilter = THREE.LinearFilter;
+    texture.encoding = THREE.sRGBEncoding;
+
     videoEl.addEventListener("loadedmetadata", () => resolve(texture), { once: true });
     videoEl.onerror = reject;
 
@@ -115,17 +118,94 @@ function createVideoTexture(url) {
   });
 }
 
+function createPlaneMesh(texture) {
+  const material = new THREE.MeshBasicMaterial();
+  material.side = THREE.DoubleSide;
+  material.transparent = true;
+  material.map = texture;
+  material.needsUpdate = true;
+
+  const geometry = new THREE.PlaneGeometry();
+  return new THREE.Mesh(geometry, material);
+}
+
+function fitToTexture(el, texture) {
+  const ratio =
+    (texture.image.videoHeight || texture.image.height || 1.0) /
+    (texture.image.videoWidth || texture.image.width || 1.0);
+  const width = Math.min(1.0, 1.0 / ratio);
+  const height = Math.min(1.0, ratio);
+  el.object3DMap.mesh.scale.set(width, height, 1);
+  el.setAttribute("shape", {
+    shape: "box",
+    halfExtents: { x: width / 2, y: height / 2, z: 0.05 }
+  });
+}
+
 const textureLoader = new THREE.TextureLoader();
 textureLoader.setCrossOrigin("anonymous");
 function createImageTexture(url) {
   return new Promise((resolve, reject) => {
-    textureLoader.load(url, resolve, null, function(xhr) {
-      reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
-    });
+    textureLoader.load(
+      url,
+      texture => {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.minFilter = THREE.LinearFilter;
+        resolve(texture);
+      },
+      null,
+      function(xhr) {
+        reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
+      }
+    );
   });
 }
 
-const textureCache = new Map();
+class TextureCache {
+  cache = new Map();
+
+  set(src, texture) {
+    this.cache.set(src, {
+      texture,
+      count: 0
+    });
+    this.retain(src);
+  }
+
+  has(src) {
+    return this.cache.has(src);
+  }
+
+  get(src) {
+    return this.cache.get(src).texture;
+  }
+
+  retain(src) {
+    const cacheItem = this.cache.get(src);
+    cacheItem.count++;
+    console.log("retain", src, cacheItem.count);
+    return cacheItem.texture;
+  }
+
+  release(src) {
+    const cacheItem = this.cache.get(src);
+    cacheItem.count--;
+    console.log("release", src, cacheItem.count);
+    if (cacheItem.count <= 0) {
+      // Unload the video element to prevent it from continuing to play in the background
+      if (cacheItem.texture.image instanceof HTMLVideoElement) {
+        const video = cacheItem.texture.image;
+        video.pause();
+        video.src = "";
+        video.load();
+      }
+      cacheItem.texture.dispose();
+      this.cache.delete(src);
+    }
+  }
+}
+
+const textureCache = new TextureCache();
 
 const errorImage = new Image();
 errorImage.src = errorImageSrc;
@@ -135,41 +215,155 @@ errorImage.onload = () => {
   errorTexture.needsUpdate = true;
 };
 
-AFRAME.registerComponent("image-plus", {
+AFRAME.registerComponent("media-video", {
   schema: {
     src: { type: "string" },
-    contentType: { type: "string" },
-
-    depth: { default: 0.05 }
+    time: { type: "number" },
+    videoPaused: { type: "boolean" },
+    tickRate: { default: 1000 }, // ms interval to send time interval updates
+    syncTolerance: { default: 2 }
   },
 
-  releaseTexture(src) {
-    if (this.mesh && this.mesh.material.map !== errorTexture) {
-      this.mesh.material.map = null;
-      this.mesh.material.needsUpdate = true;
-    }
+  init() {
+    this.onPauseStateChange = this.onPauseStateChange.bind(this);
+    this.togglePlayingIfOwner = this.togglePlayingIfOwner.bind(this);
 
-    if (!textureCache.has(src)) return;
+    this.lastUpdate = 0;
 
-    const cacheItem = textureCache.get(src);
-    cacheItem.count--;
-    if (cacheItem.count <= 0) {
-      // Unload the video element to prevent it from continuing to play in the background
-      if (cacheItem.texture.image instanceof HTMLVideoElement) {
-        const video = cacheItem.texture.image;
-        video.pause();
-        video.src = "";
-        video.load();
-      }
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      this.networkedEl = networkedEl;
+      this.updatePlaybackState();
+    });
+  },
 
-      cacheItem.texture.dispose();
+  // aframe component play, unrelated to video
+  play() {
+    this.el.addEventListener("click", this.togglePlayingIfOwner);
+  },
 
-      textureCache.delete(src);
+  // aframe component pause, unrelated to video
+  pause() {
+    this.el.removeEventListener("click", this.togglePlayingIfOwner);
+  },
+
+  togglePlayingIfOwner() {
+    if (this.networkedEl && NAF.utils.isMine(this.networkedEl) && this.video) {
+      this.data.videoPaused ? this.video.play() : this.video.pause();
     }
   },
 
   remove() {
-    this.releaseTexture(this.data.src);
+    if (this.data.src) {
+      textureCache.release(this.data.src);
+    }
+  },
+
+  onPauseStateChange() {
+    this.el.setAttribute("media-video", "videoPaused", this.video.paused);
+  },
+
+  async updateTexture(src) {
+    let texture;
+    try {
+      if (textureCache.has(src)) {
+        texture = textureCache.retain(src);
+      } else {
+        texture = await createVideoTexture(src);
+        texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
+        // window.v = texture.image;
+        this.video = texture.image;
+
+        this.video.addEventListener("pause", this.onPauseStateChange);
+        this.video.addEventListener("play", this.onPauseStateChange);
+
+        textureCache.set(src, texture);
+
+        // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
+        if (this.data.src !== src) {
+          textureCache.release(src);
+          return;
+        }
+      }
+
+      const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+      sound.setNodeSource(texture.audioSource);
+      this.el.setObject3D("sound", sound);
+    } catch (e) {
+      console.error("Error loading video", this.data.src, e);
+      texture = errorTexture;
+    }
+
+    if (!this.mesh) {
+      this.mesh = createPlaneMesh(texture);
+      this.el.setObject3D("mesh", this.mesh);
+    } else {
+      const { material } = this.mesh;
+      material.map = texture;
+      material.needsUpdate = true;
+      this.mesh.needsUpdate = true;
+    }
+
+    fitToTexture(this.el, texture);
+
+    this.updatePlaybackState(true);
+
+    // TODO: verify if we actually need to do this
+    if (this.el.components.body && this.el.components.body.body) {
+      this.el.components.body.syncToPhysics();
+      this.el.components.body.updateCannonScale();
+    }
+
+    this.el.emit("video-loaded");
+  },
+
+  updatePlaybackState(force) {
+    if (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && this.video)) {
+      if (Math.abs(this.data.time - this.video.currentTime) > this.data.syncTolerance) {
+        // console.log("updating time", this.data.time);
+        this.video.currentTime = this.data.time;
+      }
+      this.data.videoPaused ? this.video.pause() : this.video.play();
+    }
+  },
+
+  update(oldData) {
+    const { src } = this.data;
+
+    this.updatePlaybackState();
+
+    if (!src || src === oldData.src) return;
+
+    if (this.mesh && this.mesh.map) {
+      this.mesh.material.map = null;
+      this.mesh.material.needsUpdate = true;
+      if (this.mesh.map !== errorTexture) {
+        textureCache.release(oldData.src);
+      }
+    }
+
+    this.updateTexture(src);
+  },
+
+  tick() {
+    if (this.data.videoPaused || !this.video || !this.networkedEl || !NAF.utils.isMine(this.networkedEl)) return;
+
+    const now = performance.now();
+    if (now - this.lastUpdate > this.data.tickRate) {
+      // console.log("sending time", this.video.currentTime);
+      this.el.setAttribute("media-video", "time", this.video.currentTime);
+      this.lastUpdate = now;
+    }
+  }
+});
+
+AFRAME.registerComponent("media-image", {
+  schema: {
+    src: { type: "string" },
+    contentType: { type: "string" }
+  },
+
+  remove() {
+    textureCache.release(this.data.src);
   },
 
   async update(oldData) {
@@ -178,68 +372,43 @@ AFRAME.registerComponent("image-plus", {
       const { src, contentType } = this.data;
       if (!src) return;
 
-      if (this.mesh) {
-        this.releaseTexture(oldData.src);
+      if (this.mesh && this.mesh.map) {
+        this.mesh.material.map = null;
+        this.mesh.material.needsUpdate = true;
+        if (this.mesh.map !== errorTexture) {
+          textureCache.release(oldData.src);
+        }
       }
 
-      let cacheItem;
       if (textureCache.has(src)) {
-        cacheItem = textureCache.get(src);
-        texture = cacheItem.texture;
-        cacheItem.count++;
+        texture = textureCache.retain(src);
       } else {
-        cacheItem = { count: 1 };
         if (src === "error") {
           texture = errorTexture;
         } else if (contentType.includes("image/gif")) {
           texture = await createGIFTexture(src);
         } else if (contentType.startsWith("image/")) {
           texture = await createImageTexture(src);
-        } else if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
-          texture = await createVideoTexture(src);
-          cacheItem.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
         } else {
-          throw new Error(`Unknown content type: ${contentType}`);
+          throw new Error(`Unknown image content type: ${contentType}`);
         }
 
-        texture.encoding = THREE.sRGBEncoding;
-        texture.minFilter = THREE.LinearFilter;
-
-        cacheItem.texture = texture;
-        textureCache.set(src, cacheItem);
+        textureCache.set(src, texture);
 
         // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
         if (this.data.src !== src) {
-          this.releaseTexture(src);
+          textureCache.release(src);
           return;
         }
       }
-
-      if (cacheItem.audioSource) {
-        const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-        sound.setNodeSource(cacheItem.audioSource);
-        this.el.setObject3D("sound", sound);
-      }
     } catch (e) {
-      console.error("Error loading media", this.data.src, e);
+      console.error("Error loading image", this.data.src, e);
       texture = errorTexture;
     }
 
-    const ratio =
-      (texture.image.videoHeight || texture.image.height || 1.0) /
-      (texture.image.videoWidth || texture.image.width || 1.0);
-    const width = Math.min(1.0, 1.0 / ratio);
-    const height = Math.min(1.0, ratio);
-
     if (!this.mesh) {
-      const material = new THREE.MeshBasicMaterial();
-      material.side = THREE.DoubleSide;
-      material.transparent = true;
-      material.map = texture;
-      material.needsUpdate = true;
-
-      const geometry = new THREE.PlaneGeometry();
-      this.mesh = new THREE.Mesh(geometry, material);
+      this.mesh = createPlaneMesh(texture);
+      this.el.setObject3D("mesh", this.mesh);
     } else {
       const { material } = this.mesh;
       material.map = texture;
@@ -247,19 +416,14 @@ AFRAME.registerComponent("image-plus", {
       this.mesh.needsUpdate = true;
     }
 
-    this.el.setObject3D("mesh", this.mesh);
-
-    this.mesh.scale.set(width, height, 1);
-    this.el.setAttribute("shape", {
-      shape: "box",
-      halfExtents: { x: width / 2, y: height / 2, z: this.data.depth }
-    });
+    fitToTexture(this.el, texture);
 
     // TODO: verify if we actually need to do this
     if (this.el.components.body && this.el.components.body.body) {
       this.el.components.body.syncToPhysics();
       this.el.components.body.updateCannonScale();
     }
+
     this.el.emit("image-loaded");
   }
 });
