@@ -25,12 +25,13 @@ AFRAME.registerSystem("tunneleffect", {
   },
 
   init: function() {
+    const { radius, minRadius, maxSpeed } = this.data;
     this.scene = this.el;
     this.isMoving = false;
     this.isVR = false;
     this.dt = 0;
     this.isPostProcessingReady = false;
-    this.deltaR = TARGET_RADIUS - this.minRadius;
+    this.deltaR = TARGET_RADIUS - (radius - minRadius) * maxSpeed - minRadius;
     this.deltaS = this.softness - TARGET_SOFTNESS;
     this.characterEl = document.querySelector(`a-entity[${this.data.targetComponent}]`);
     if (this.characterEl) {
