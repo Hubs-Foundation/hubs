@@ -24,8 +24,10 @@ AFRAME.registerComponent("super-networked-interactable", {
     });
 
     this._onGrabStart = this._onGrabStart.bind(this);
+    this._onGrabEnd = this._onGrabEnd.bind(this);
     this._onOwnershipLost = this._onOwnershipLost.bind(this);
     this.el.addEventListener("grab-start", this._onGrabStart);
+    this.el.addEventListener("grab-end", this._onGrabEnd);
     this.el.addEventListener("ownership-lost", this._onOwnershipLost);
     this.system.addComponent(this);
   },
@@ -33,21 +35,14 @@ AFRAME.registerComponent("super-networked-interactable", {
   remove: function() {
     this.counter.deregister(this.el);
     this.el.removeEventListener("grab-start", this._onGrabStart);
+    this.el.removeEventListener("grab-end", this._onGrabEnd);
     this.el.removeEventListener("ownership-lost", this._onOwnershipLost);
     this.system.removeComponent(this);
   },
 
-  afterStep: function() {
-    if (this.el.is("grabbed") && this.hand && this.hand.components.hasOwnProperty("haptic-feedback")) {
-      const hapticFeedback = this.hand.components["haptic-feedback"];
-      let velocity = this.el.body.velocity.lengthSquared() * this.el.body.mass * this.data.hapticsMassVelocityFactor;
-      velocity = Math.min(1, velocity);
-      hapticFeedback.pulse(velocity);
-    }
-  },
-
   _onGrabStart: function(e) {
     this.hand = e.detail.hand;
+    this.hand.emit("haptic_pulse", { intensity: "high" });
     if (this.networkedEl && !NAF.utils.isMine(this.networkedEl)) {
       if (NAF.utils.takeOwnership(this.networkedEl)) {
         this.el.setAttribute("body", { type: "dynamic" });
@@ -57,6 +52,10 @@ AFRAME.registerComponent("super-networked-interactable", {
         this.hand = null;
       }
     }
+  },
+
+  _onGrabEnd: function(e) {
+    e.detail.hand.emit("haptic_pulse", { intensity: "high" });
   },
 
   _onOwnershipLost: function() {
