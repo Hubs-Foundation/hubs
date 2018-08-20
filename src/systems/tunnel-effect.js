@@ -30,6 +30,8 @@ AFRAME.registerSystem("tunneleffect", {
     this.isVR = false;
     this.dt = 0;
     this.isPostProcessingReady = false;
+    this.deltaR = TARGET_RADIUS - this.minRadius;
+    this.deltaS = this.softness - TARGET_SOFTNESS;
     this.characterEl = document.querySelector(`a-entity[${this.data.targetComponent}]`);
     if (this.characterEl) {
       this._initPostProcessing = this._initPostProcessing.bind(this);
@@ -74,10 +76,6 @@ AFRAME.registerSystem("tunneleffect", {
         Math.abs(r - TARGET_RADIUS) > CLAMP_RADIUS &&
         Math.abs(softness - TARGET_SOFTNESS) > CLAMP_SOFTNESS
       ) {
-        if (!this.deltaR && !this.deltaS) {
-          this.deltaR = TARGET_RADIUS - r;
-          this.deltaS = softness - TARGET_SOFTNESS;
-        }
         const ratio = this.dt / FADE_TIMEOUT_MS;
         this._updateVignettePass(r + this.deltaR * ratio, softness - this.deltaS * ratio, this.data.opacity);
       } else {
