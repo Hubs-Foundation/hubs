@@ -228,8 +228,6 @@ AFRAME.registerComponent("networked-drawing", {
         this.sendDrawBuffer(data.clientId);
         break;
       case MSG_BUFFER_DATA:
-        // console.log("MSG_BUFFER_DATA_FULL", data, this.receivedBufferParts);
-
         if (this.drawBufferInitialized) {
           this.drawBuffer.push.apply(this.drawBuffer, data.buffer);
         } else {
@@ -237,7 +235,6 @@ AFRAME.registerComponent("networked-drawing", {
         }
         break;
       case MSG_BUFFER_DATA_FULL:
-        console.log("MSG_BUFFER_DATA_FULL", data, this.receivedBufferParts);
         this.drawBuffer.push.apply(this.drawBuffer, data.buffer);
         if (++this.receivedBufferParts >= data.parts) {
           this.drawBufferInitialized = true;
