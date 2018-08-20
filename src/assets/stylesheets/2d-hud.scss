@@ -16,6 +16,10 @@
   &:local(.bottom) {
     bottom: 20px;
   }
+
+  &:local(.aboveBottom) {
+    bottom: 120px;
+  }
 }
 
 :local(.panel) {
@@ -108,4 +112,8 @@
 }
 :local(.iconButton.create-object:hover) {
   background-image: url(../hud/create_object-hover.png);
+}
+
+:local(.iconButton.mobile-media-picker) {
+  background-image: url(../hud/mobile_media_picker.png);
 }

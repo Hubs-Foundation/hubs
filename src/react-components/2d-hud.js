@@ -37,18 +37,45 @@ TopHUD.propTypes = {
   onToggleSpaceBubble: PropTypes.func
 };
 
-const BottomHUD = ({ onCreateObject }) => (
-  <div className={cx(styles.container, styles.bottom)}>
-    <div
-      className={cx("ui-interactive", styles.iconButton, styles.large, styles.createObject)}
-      title={"Create Object"}
-      onClick={onCreateObject}
-    />
+const mediaPickerInput = "media-picker-input";
+const BottomHUD = ({ onCreateObject, onMediaPicked }) => (
+  <div>
+    {onMediaPicked ? (
+      <div>
+        <input
+          id={mediaPickerInput}
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={e => {
+            for (const file of e.target.files) {
+              onMediaPicked(file);
+            }
+          }}
+        />
+        <label htmlFor={mediaPickerInput} className={cx(styles.container, styles.aboveBottom)}>
+          <div
+            className={cx("ui-interactive", styles.iconButton, styles.large, styles.mobileMediaPicker)}
+            title={"Pick Media"}
+          />
+        </label>
+      </div>
+    ) : (
+      <div />
+    )}
+    <div className={cx(styles.container, styles.bottom)}>
+      <div
+        className={cx("ui-interactive", styles.iconButton, styles.large, styles.createObject)}
+        title={"Create Object"}
+        onClick={onCreateObject}
+      />
+    </div>
   </div>
 );
 
 BottomHUD.propTypes = {
-  onCreateObject: PropTypes.func
+  onCreateObject: PropTypes.func,
+  onMediaPicked: PropTypes.func
 };
 
 export default { TopHUD, BottomHUD };

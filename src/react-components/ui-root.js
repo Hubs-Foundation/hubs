@@ -526,8 +526,8 @@ class UIRoot extends Component {
     this.setState({ infoDialogType: null, linkCode: null, linkCodeCancel: null });
   };
 
-  handleCreateObject = url => {
-    this.props.scene.emit("add_media", url);
+  handleCreateObject = media => {
+    this.props.scene.emit("add_media", media);
   };
 
   render() {
@@ -910,6 +910,7 @@ class UIRoot extends Component {
               )}
               <TwoDHUD.BottomHUD
                 onCreateObject={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.create_object })}
+                onMediaPicked={AFRAME.utils.device.isMobile() ? this.handleCreateObject : null}
               />
             </div>
           ) : null}
