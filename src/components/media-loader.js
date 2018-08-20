@@ -64,7 +64,11 @@ AFRAME.registerComponent("media-loader", {
 
       const { raw, origin, images, contentType } = await resolveMedia(src, false, index);
 
-      this.el.emit("media_resolved", { src, raw, origin, contentType });
+      const pagedContent = !!index;
+      const firstPage = index === 0;
+      if (!pagedContent || firstPage) {
+        this.el.emit("media_resolved", { src, raw, origin, contentType });
+      }
 
       const isPDF = contentType.startsWith("application/pdf");
       if (
