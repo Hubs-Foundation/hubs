@@ -9,6 +9,7 @@ import SharedBufferGeometryManager from "../../utils/sharedbuffergeometrymanager
 
 const MSG_CONFIRM_CONNECT = 0;
 const MSG_BUFFER_DATA = 1;
+const MSG_BUFFER_DATA_FULL = 2;
 
 function round(x) {
   return Math.round(x * 100000) / 100000;
@@ -28,13 +29,16 @@ AFRAME.registerComponent("networked-drawing", {
     radius: { default: 0.02 }, //the radius of the procedural tube
     color: { type: "color", default: "#FF0000" }, //default color
     minDrawTimeout: { default: 5000 }, //the minimum time a drawn line will live
-    maxDrawTimeout: { default: 60000 }, //the maximum time a drawn line will live
-    maxLines: { default: 10 }, //how many lines can persist before lines older than minDrawTime are removed
-    maxPointsPerLine: { default: 100 } //the max number of points a single line can have
+    maxDrawTimeout: { default: 600000 }, //the maximum time a drawn line will live
+    maxLines: { default: 25 }, //how many lines can persist before lines older than minDrawTime are removed
+    maxPointsPerLine: { default: 250 } //the max number of points a single line can have
   },
 
   init() {
     this.drawBuffer = [];
+    this.tempDrawBuffer = [];
+    this.receivedBufferParts = 0;
+    this.drawBufferInitialized = false;
     this.bufferIndex = 0;
     this.drawBufferHistory = [];
 
@@ -196,7 +200,8 @@ AFRAME.registerComponent("networked-drawing", {
       if (NAF.utils.isMine(this.networkedEl)) {
         if (this.drawBuffer.length <= chunkAmount) {
           NAF.connection.sendDataGuaranteed(clientId, this.drawingId, {
-            type: MSG_BUFFER_DATA,
+            type: MSG_BUFFER_DATA_FULL,
+            parts: 1,
             buffer: this.drawBuffer
           });
         } else {
@@ -207,7 +212,8 @@ AFRAME.registerComponent("networked-drawing", {
             copyArray.length = 0;
             copyData(this.drawBuffer, copyArray, x - chunkAmount, x - 1);
             NAF.connection.sendDataGuaranteed(clientId, this.drawingId, {
-              type: MSG_BUFFER_DATA,
+              type: MSG_BUFFER_DATA_FULL,
+              parts: Math.ceil(this.drawBuffer.length / chunkAmount),
               buffer: copyArray
             });
           }
@@ -222,7 +228,24 @@ AFRAME.registerComponent("networked-drawing", {
         this.sendDrawBuffer(data.clientId);
         break;
       case MSG_BUFFER_DATA:
+        // console.log("MSG_BUFFER_DATA_FULL", data, this.receivedBufferParts);
+
+        if (this.drawBufferInitialized) {
+          this.drawBuffer.push.apply(this.drawBuffer, data.buffer);
+        } else {
+          this.tempDrawBuffer.push.apply(this.tempDrawBuffer, data.buffer);
+        }
+        break;
+      case MSG_BUFFER_DATA_FULL:
+        console.log("MSG_BUFFER_DATA_FULL", data, this.receivedBufferParts);
         this.drawBuffer.push.apply(this.drawBuffer, data.buffer);
+        if (++this.receivedBufferParts >= data.parts) {
+          this.drawBufferInitialized = true;
+          if (this.tempDrawBuffer.length > 0) {
+            this.drawBuffer.push.apply(this.drawBuffer, this.tempDrawBuffer);
+            this.tempDrawBuffer = [];
+          }
+        }
         break;
     }
   },
@@ -296,6 +319,7 @@ AFRAME.registerComponent("networked-drawing", {
       } else {
         if (this.currentPointCount > this.data.maxPointsPerLine) {
           this.doEndDraw(position, direction);
+          this.endLine();
         } else {
           this.addSegments(this.currentSegments, position, direction, normal, this.radius * radiusMultiplier);
           this.drawCylinder();
