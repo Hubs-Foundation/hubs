@@ -183,14 +183,14 @@ class TextureCache {
   retain(src) {
     const cacheItem = this.cache.get(src);
     cacheItem.count++;
-    console.log("retain", src, cacheItem.count);
+    // console.log("retain", src, cacheItem.count);
     return cacheItem.texture;
   }
 
   release(src) {
     const cacheItem = this.cache.get(src);
     cacheItem.count--;
-    console.log("release", src, cacheItem.count);
+    // console.log("release", src, cacheItem.count);
     if (cacheItem.count <= 0) {
       // Unload the video element to prevent it from continuing to play in the background
       if (cacheItem.texture.image instanceof HTMLVideoElement) {
@@ -270,7 +270,6 @@ AFRAME.registerComponent("media-video", {
       } else {
         texture = await createVideoTexture(src);
         texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
-        // window.v = texture.image;
         this.video = texture.image;
 
         this.video.addEventListener("pause", this.onPauseStateChange);
@@ -307,19 +306,12 @@ AFRAME.registerComponent("media-video", {
 
     this.updatePlaybackState(true);
 
-    // TODO: verify if we actually need to do this
-    if (this.el.components.body && this.el.components.body.body) {
-      this.el.components.body.syncToPhysics();
-      this.el.components.body.updateCannonScale();
-    }
-
     this.el.emit("video-loaded");
   },
 
   updatePlaybackState(force) {
     if (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && this.video)) {
       if (Math.abs(this.data.time - this.video.currentTime) > this.data.syncTolerance) {
-        // console.log("updating time", this.data.time);
         this.video.currentTime = this.data.time;
       }
       this.data.videoPaused ? this.video.pause() : this.video.play();
@@ -349,7 +341,6 @@ AFRAME.registerComponent("media-video", {
 
     const now = performance.now();
     if (now - this.lastUpdate > this.data.tickRate) {
-      // console.log("sending time", this.video.currentTime);
       this.el.setAttribute("media-video", "time", this.video.currentTime);
       this.lastUpdate = now;
     }
@@ -417,12 +408,6 @@ AFRAME.registerComponent("media-image", {
     }
 
     fitToTexture(this.el, texture);
-
-    // TODO: verify if we actually need to do this
-    if (this.el.components.body && this.el.components.body.body) {
-      this.el.components.body.syncToPhysics();
-      this.el.components.body.updateCannonScale();
-    }
 
     this.el.emit("image-loaded");
   }
