@@ -309,9 +309,9 @@ const onReady = async () => {
     };
 
     scene.addEventListener("add_media", e => {
-      const origin = e.detail instanceof File ? ObjectContentOrigins.FILE : ObjectContentOrigins.URL;
+      const contentOrigin = e.detail instanceof File ? ObjectContentOrigins.FILE : ObjectContentOrigins.URL;
 
-      spawnMediaInfrontOfPlayer(e.detail, origin);
+      spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
     });
 
     scene.addEventListener("object_spawned", e => {

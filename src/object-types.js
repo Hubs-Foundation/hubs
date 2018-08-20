@@ -44,12 +44,12 @@ const ObjectTypes = {
 
 // Given an origin and three object type values for URL, FILE, and CLIPBOARD
 // origins respectively, return the appropriate one
-function objectTypeForOrigin(origin, urlType, fileType, clipboardType, spawnerType) {
-  if (origin === ObjectContentOrigins.URL) {
+function objectTypeForOrigin(contentOrigin, urlType, fileType, clipboardType, spawnerType) {
+  if (contentOrigin === ObjectContentOrigins.URL) {
     return urlType;
-  } else if (origin === ObjectContentOrigins.FILE) {
+  } else if (contentOrigin === ObjectContentOrigins.FILE) {
     return fileType;
-  } else if (origin === ObjectContentOrigins.CLIPBOARD) {
+  } else if (contentOrigin === ObjectContentOrigins.CLIPBOARD) {
     return clipboardType;
   } else {
     return spawnerType;
@@ -74,11 +74,11 @@ const objectTypeMimePrefixLookupMap = {
 
 // Given an content origin and the resolved mime type of a piece of content, return
 // the ObjectType, if any, for that content.
-export function objectTypeForOriginAndContentType(origin, contentType) {
+export function objectTypeForOriginAndContentType(contentOrigin, contentType) {
   for (const prefix in objectTypeMimePrefixLookupMap) {
     if (contentType.startsWith(prefix)) {
       const types = objectTypeMimePrefixLookupMap[prefix];
-      return objectTypeForOrigin(origin, ...types);
+      return objectTypeForOrigin(contentOrigin, ...types);
     }
   }
 
