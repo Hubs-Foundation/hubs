@@ -64,9 +64,8 @@ AFRAME.registerComponent("media-loader", {
 
       const { raw, origin, images, contentType } = await resolveMedia(src, false, index);
 
-      const pagedContent = !!index;
-      const firstPage = index === 0;
-      if (!pagedContent || firstPage) {
+      // We don't want to emit media_resolved for index updates.
+      if (src !== oldData.src) {
         this.el.emit("media_resolved", { src, raw, origin, contentType });
       }
 
