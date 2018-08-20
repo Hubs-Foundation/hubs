@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 
 import styles from "../assets/stylesheets/2d-hud.scss";
-import qsTruthy from "../utils/qs_truthy";
 
 const TopHUD = ({ muted, frozen, spacebubble, onToggleMute, onToggleFreeze, onToggleSpaceBubble }) => (
   <div className={cx(styles.container, styles.top)}>
@@ -40,13 +39,11 @@ TopHUD.propTypes = {
 
 const BottomHUD = ({ onCreateObject }) => (
   <div className={cx(styles.container, styles.bottom)}>
-    {qsTruthy("mediaTools") && (
-      <div
-        className={cx("ui-interactive", styles.iconButton, styles.large, styles.createObject)}
-        title={"Create Object"}
-        onClick={onCreateObject}
-      />
-    )}
+    <div
+      className={cx("ui-interactive", styles.iconButton, styles.large, styles.createObject)}
+      title={"Create Object"}
+      onClick={onCreateObject}
+    />
   </div>
 );
 

@@ -1,6 +1,5 @@
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
-import { resolveMedia } from "../utils/media-utils";
 
 class GIFTexture extends THREE.Texture {
   constructor(frames, delays, disposals) {
@@ -37,6 +36,41 @@ class GIFTexture extends THREE.Texture {
   }
 }
 
+async function createGIFTexture(url) {
+  return new Promise((resolve, reject) => {
+    // TODO: pool workers
+    const worker = new GIFWorker();
+    worker.onmessage = e => {
+      const [success, frames, delays, disposals] = e.data;
+      if (!success) {
+        reject(`error loading gif: ${e.data[1]}`);
+        return;
+      }
+
+      let loadCnt = 0;
+      for (let i = 0; i < frames.length; i++) {
+        const img = new Image();
+        img.onload = e => {
+          loadCnt++;
+          frames[i] = e.target;
+          if (loadCnt === frames.length) {
+            const texture = new GIFTexture(frames, delays, disposals);
+            texture.image.src = url;
+            resolve(texture);
+          }
+        };
+        img.src = frames[i];
+      }
+    };
+    fetch(url, { mode: "cors" })
+      .then(r => r.arrayBuffer())
+      .then(rawImageData => {
+        worker.postMessage(rawImageData, [rawImageData]);
+      })
+      .catch(reject);
+  });
+}
+
 /**
  * Create video element to be used as a texture.
  *
@@ -54,8 +88,42 @@ function createVideoEl(src) {
   return videoEl;
 }
 
+function createVideoTexture(url) {
+  return new Promise((resolve, reject) => {
+    const videoEl = createVideoEl(url);
+
+    const texture = new THREE.VideoTexture(videoEl);
+    texture.minFilter = THREE.LinearFilter;
+    videoEl.addEventListener("loadedmetadata", () => resolve(texture), { once: true });
+    videoEl.onerror = reject;
+
+    // If iOS and video is HLS, do some hacks.
+    if (
+      AFRAME.utils.device.isIOS() &&
+      AFRAME.utils.material.isHLS(
+        videoEl.src || videoEl.getAttribute("src"),
+        videoEl.type || videoEl.getAttribute("type")
+      )
+    ) {
+      // Actually BGRA. Tell shader to correct later.
+      texture.format = THREE.RGBAFormat;
+      texture.needsCorrectionBGRA = true;
+      // Apparently needed for HLS. Tell shader to correct later.
+      texture.flipY = false;
+      texture.needsCorrectionFlipY = true;
+    }
+  });
+}
+
 const textureLoader = new THREE.TextureLoader();
 textureLoader.setCrossOrigin("anonymous");
+function createImageTexture(url) {
+  return new Promise((resolve, reject) => {
+    textureLoader.load(url, resolve, null, function(xhr) {
+      reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
+    });
+  });
+}
 
 const textureCache = new Map();
 
@@ -70,151 +138,81 @@ errorImage.onload = () => {
 AFRAME.registerComponent("image-plus", {
   schema: {
     src: { type: "string" },
-    token: { type: "string" },
     contentType: { type: "string" },
 
     depth: { default: 0.05 }
   },
 
-  remove() {
-    const material = this.el.getObject3D("mesh").material;
-    const texture = material.map;
+  releaseTexture(src) {
+    if (this.mesh && this.mesh.material.map !== errorTexture) {
+      this.mesh.material.map = null;
+      this.mesh.material.needsUpdate = true;
+    }
 
-    if (texture === errorTexture) return;
+    if (!textureCache.has(src)) return;
 
-    const url = texture.image.src;
-    const cacheItem = textureCache.get(url);
+    const cacheItem = textureCache.get(src);
     cacheItem.count--;
     if (cacheItem.count <= 0) {
       // Unload the video element to prevent it from continuing to play in the background
-      if (texture.image instanceof HTMLVideoElement) {
-        const video = texture.image;
+      if (cacheItem.texture.image instanceof HTMLVideoElement) {
+        const video = cacheItem.texture.image;
         video.pause();
         video.src = "";
         video.load();
       }
 
-      texture.dispose();
+      cacheItem.texture.dispose();
 
-      // THREE never lets go of material refs, long running PR HERE https://github.com/mrdoob/three.js/pull/12464
-      // Mitigate the damage a bit by at least breaking the image ref so Image/Video elements can be freed
-      // TODO: If/when THREE gets fixed, we should be able to safely remove this
-      delete texture.image;
-
-      textureCache.delete(url);
+      textureCache.delete(src);
     }
   },
 
-  async loadGIF(url) {
-    return new Promise((resolve, reject) => {
-      // TODO: pool workers
-      const worker = new GIFWorker();
-      worker.onmessage = e => {
-        const [success, frames, delays, disposals] = e.data;
-        if (!success) {
-          reject(`error loading gif: ${e.data[1]}`);
-          return;
-        }
-
-        let loadCnt = 0;
-        for (let i = 0; i < frames.length; i++) {
-          const img = new Image();
-          img.onload = e => {
-            loadCnt++;
-            frames[i] = e.target;
-            if (loadCnt === frames.length) {
-              const texture = new GIFTexture(frames, delays, disposals);
-              texture.image.src = url;
-              resolve(texture);
-            }
-          };
-          img.src = frames[i];
-        }
-      };
-      fetch(url, { mode: "cors" })
-        .then(r => r.arrayBuffer())
-        .then(rawImageData => {
-          worker.postMessage(rawImageData, [rawImageData]);
-        })
-        .catch(reject);
-    });
+  remove() {
+    this.releaseTexture(this.data.src);
   },
 
-  loadVideo(url) {
-    return new Promise((resolve, reject) => {
-      const videoEl = createVideoEl(url);
-
-      const texture = new THREE.VideoTexture(videoEl);
-      texture.minFilter = THREE.LinearFilter;
-      videoEl.addEventListener("loadedmetadata", () => resolve(texture), { once: true });
-      videoEl.onerror = reject;
-
-      // If iOS and video is HLS, do some hacks.
-      if (
-        this.el.sceneEl.isIOS &&
-        AFRAME.utils.material.isHLS(
-          videoEl.src || videoEl.getAttribute("src"),
-          videoEl.type || videoEl.getAttribute("type")
-        )
-      ) {
-        // Actually BGRA. Tell shader to correct later.
-        texture.format = THREE.RGBAFormat;
-        texture.needsCorrectionBGRA = true;
-        // Apparently needed for HLS. Tell shader to correct later.
-        texture.flipY = false;
-        texture.needsCorrectionFlipY = true;
-      }
-    });
-  },
-
-  loadImage(url) {
-    return new Promise((resolve, reject) => {
-      textureLoader.load(url, resolve, null, function(xhr) {
-        reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
-      });
-    });
-  },
-
-  async update() {
+  async update(oldData) {
     let texture;
     try {
-      const url = this.data.src;
-      const token = this.data.token;
-      let contentType = this.data.contentType;
-      if (!url) {
-        return;
+      const { src, contentType } = this.data;
+      if (!src) return;
+
+      if (this.mesh) {
+        this.releaseTexture(oldData.src);
       }
 
       let cacheItem;
-      if (textureCache.has(url)) {
-        cacheItem = textureCache.get(url);
+      if (textureCache.has(src)) {
+        cacheItem = textureCache.get(src);
         texture = cacheItem.texture;
         cacheItem.count++;
       } else {
-        const resolved = await resolveMedia(url, token);
-        const { raw } = resolved;
-        if (!contentType) {
-          contentType = resolved.contentType;
-        }
-
         cacheItem = { count: 1 };
-        if (raw === "error") {
+        if (src === "error") {
           texture = errorTexture;
         } else if (contentType.includes("image/gif")) {
-          texture = await this.loadGIF(raw);
+          texture = await createGIFTexture(src);
         } else if (contentType.startsWith("image/")) {
-          texture = await this.loadImage(raw);
+          texture = await createImageTexture(src);
         } else if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
-          texture = await this.loadVideo(raw);
+          texture = await createVideoTexture(src);
           cacheItem.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
         } else {
           throw new Error(`Unknown content type: ${contentType}`);
         }
 
         texture.encoding = THREE.sRGBEncoding;
+        texture.minFilter = THREE.LinearFilter;
 
         cacheItem.texture = texture;
-        textureCache.set(url, cacheItem);
+        textureCache.set(src, cacheItem);
+
+        // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
+        if (this.data.src !== src) {
+          this.releaseTexture(src);
+          return;
+        }
       }
 
       if (cacheItem.audioSource) {
@@ -227,22 +225,31 @@ AFRAME.registerComponent("image-plus", {
       texture = errorTexture;
     }
 
-    const material = new THREE.MeshBasicMaterial();
-    material.side = THREE.DoubleSide;
-    material.transparent = true;
-    material.map = texture;
-    material.needsUpdate = true;
-    material.map.needsUpdate = true;
-
     const ratio =
       (texture.image.videoHeight || texture.image.height || 1.0) /
       (texture.image.videoWidth || texture.image.width || 1.0);
     const width = Math.min(1.0, 1.0 / ratio);
     const height = Math.min(1.0, ratio);
 
-    const geometry = new THREE.PlaneGeometry(width, height, 1, 1);
-    this.mesh = new THREE.Mesh(geometry, material);
+    if (!this.mesh) {
+      const material = new THREE.MeshBasicMaterial();
+      material.side = THREE.DoubleSide;
+      material.transparent = true;
+      material.map = texture;
+      material.needsUpdate = true;
+
+      const geometry = new THREE.PlaneGeometry();
+      this.mesh = new THREE.Mesh(geometry, material);
+    } else {
+      const { material } = this.mesh;
+      material.map = texture;
+      material.needsUpdate = true;
+      this.mesh.needsUpdate = true;
+    }
+
     this.el.setObject3D("mesh", this.mesh);
+
+    this.mesh.scale.set(width, height, 1);
     this.el.setAttribute("shape", {
       shape: "box",
       halfExtents: { x: width / 2, y: height / 2, z: this.data.depth }

@@ -77,6 +77,12 @@ import "./components/remove-networked-object-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/media-loader";
 import "./components/gamma-factor";
+import "./components/ambient-light";
+import "./components/directional-light";
+import "./components/hemisphere-light";
+import "./components/point-light";
+import "./components/spot-light";
+import "./components/visible-to-owner";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -320,38 +326,36 @@ const onReady = async () => {
       }
     });
 
-    if (qsTruthy("mediaTools")) {
-      document.addEventListener("paste", e => {
-        if (e.target.nodeName === "INPUT") return;
+    document.addEventListener("paste", e => {
+      if (e.target.nodeName === "INPUT") return;
 
-        const url = e.clipboardData.getData("text");
-        const files = e.clipboardData.files && e.clipboardData.files;
-        if (url) {
-          spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
-        } else {
-          for (const file of files) {
-            spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.CLIPBOARD);
-          }
+      const url = e.clipboardData.getData("text");
+      const files = e.clipboardData.files && e.clipboardData.files;
+      if (url) {
+        spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
+      } else {
+        for (const file of files) {
+          spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.CLIPBOARD);
         }
-      });
+      }
+    });
 
-      document.addEventListener("dragover", e => {
-        e.preventDefault();
-      });
+    document.addEventListener("dragover", e => {
+      e.preventDefault();
+    });
 
-      document.addEventListener("drop", e => {
-        e.preventDefault();
-        const url = e.dataTransfer.getData("url");
-        const files = e.dataTransfer.files;
-        if (url) {
-          spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
-        } else {
-          for (const file of files) {
-            spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.FILE);
-          }
+    document.addEventListener("drop", e => {
+      e.preventDefault();
+      const url = e.dataTransfer.getData("url");
+      const files = e.dataTransfer.files;
+      if (url) {
+        spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
+      } else {
+        for (const file of files) {
+          spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.FILE);
         }
-      });
-    }
+      }
+    });
 
     if (!qsTruthy("offline")) {
       document.body.addEventListener("connected", () => {
