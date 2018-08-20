@@ -7,6 +7,7 @@ import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
+import screenfull from "screenfull";
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
@@ -244,6 +245,10 @@ const onReady = async () => {
 
     if (enterInVR) {
       scene.enterVR();
+    } else if (AFRAME.utils.device.isMobile()) {
+      document.body.addEventListener("touchend", () => {
+        if (screenfull.enabled && !screenfull.isFullscreen) screenfull.request();
+      });
     }
 
     AFRAME.registerInputActions(inGameActions, "default");
