@@ -69,7 +69,12 @@ AFRAME.registerComponent("media-loader", {
 
       if (!src) return;
 
-      const { raw, images, contentType } = await resolveMedia(src, false, index);
+      const { raw, origin, images, contentType } = await resolveMedia(src, false, index);
+
+      // We don't want to emit media_resolved for index updates.
+      if (src !== oldData.src) {
+        this.el.emit("media_resolved", { src, raw, origin, contentType });
+      }
 
       const isPDF = contentType.startsWith("application/pdf");
       if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {

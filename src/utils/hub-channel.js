@@ -74,6 +74,19 @@ export default class HubChannel {
     return entryTimingFlags;
   };
 
+  sendObjectSpawnedEvent = objectType => {
+    if (!this.channel) {
+      console.warn("No phoenix channel initialized before object spawn.");
+      return;
+    }
+
+    const spawnEvent = {
+      object_type: objectType
+    };
+
+    this.channel.push("events:object_spawned", spawnEvent);
+  };
+
   disconnect = () => {
     if (this.channel) {
       this.channel.socket.disconnect();

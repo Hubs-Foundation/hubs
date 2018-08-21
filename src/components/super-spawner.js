@@ -1,5 +1,6 @@
 import { addMedia } from "../utils/media-utils";
 import { waitForEvent } from "../utils/async-utils";
+import { ObjectContentOrigins } from "../object-types";
 
 let nextGrabId = 0;
 /**
@@ -83,7 +84,7 @@ AFRAME.registerComponent("super-spawner", {
     const thisGrabId = nextGrabId++;
     this.heldEntities.set(hand, thisGrabId);
 
-    const entity = addMedia(this.data.src);
+    const entity = addMedia(this.data.src, ObjectContentOrigins.SPAWNER);
     entity.object3D.position.copy(
       this.data.useCustomSpawnPosition ? this.data.spawnPosition : this.el.object3D.position
     );

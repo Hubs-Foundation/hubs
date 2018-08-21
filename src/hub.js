@@ -25,6 +25,8 @@ import joystick_dpad4 from "./behaviours/joystick-dpad4";
 import msft_mr_axis_with_deadzone from "./behaviours/msft-mr-axis-with-deadzone";
 import { PressedMove } from "./activators/pressedmove";
 import { ReverseY } from "./activators/reversey";
+import { ObjectContentOrigins } from "./object-types";
+
 import "./activators/shortpress";
 
 import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
@@ -303,8 +305,9 @@ const onReady = async () => {
     });
 
     const offset = { x: 0, y: 0, z: -1.5 };
-    const spawnMediaInfrontOfPlayer = src => {
-      const entity = addMedia(src, true);
+    const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
+      const entity = addMedia(src, contentOrigin, true);
+
       entity.setAttribute("offset-relative-to", {
         target: "#player-camera",
         offset
@@ -312,7 +315,15 @@ const onReady = async () => {
     };
 
     scene.addEventListener("add_media", e => {
-      spawnMediaInfrontOfPlayer(e.detail);
+      const contentOrigin = e.detail instanceof File ? ObjectContentOrigins.FILE : ObjectContentOrigins.URL;
+
+      spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
+    });
+
+    scene.addEventListener("object_spawned", e => {
+      if (hubChannel) {
+        hubChannel.sendObjectSpawnedEvent(e.detail.objectType);
+      }
     });
 
     document.addEventListener("paste", e => {
@@ -321,10 +332,10 @@ const onReady = async () => {
       const url = e.clipboardData.getData("text");
       const files = e.clipboardData.files && e.clipboardData.files;
       if (url) {
-        spawnMediaInfrontOfPlayer(url);
+        spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
       } else {
         for (const file of files) {
-          spawnMediaInfrontOfPlayer(file);
+          spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.CLIPBOARD);
         }
       }
     });
@@ -338,10 +349,10 @@ const onReady = async () => {
       const url = e.dataTransfer.getData("url");
       const files = e.dataTransfer.files;
       if (url) {
-        spawnMediaInfrontOfPlayer(url);
+        spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
       } else {
         for (const file of files) {
-          spawnMediaInfrontOfPlayer(file);
+          spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.FILE);
         }
       }
     });
