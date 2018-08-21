@@ -66,6 +66,12 @@ export const addMedia = (src, resize = false) => {
         const srcUrl = new URL(response.raw);
         srcUrl.searchParams.set("token", response.meta.access_token);
         entity.setAttribute("media-loader", { src: srcUrl.href });
+        // Need to only do this media uploaded from the CAMERA, but how can we tell?
+        entity.object3D.rotation.set(
+          entity.object3D.rotation.x,
+          entity.object3D.rotation.y,
+          entity.object3D.rotation.z + ((screen.orientation.angle - 90) * Math.PI) / 180
+        );
       })
       .catch(() => {
         entity.setAttribute("media-loader", { src: "error" });
