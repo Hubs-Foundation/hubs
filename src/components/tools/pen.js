@@ -10,7 +10,7 @@ function almostEquals(epsilon, u, v) {
 AFRAME.registerComponent("pen", {
   schema: {
     drawFrequency: { default: 20 },
-    minDistanceBetweenPoints: { default: 0.04 },
+    minDistanceBetweenPoints: { default: 0.01 },
     defaultDirection: { default: { x: 1, y: 0, z: 0 } },
     camera: { type: "selector" },
     drawing: { type: "string" },
@@ -59,9 +59,13 @@ AFRAME.registerComponent("pen", {
     this.el.parentNode.removeEventListener("stateremoved", this.stateRemoved);
   },
 
-  update(_prevData) {
-    this.el.setAttribute("color", this.data.color);
-    this.el.setAttribute("radius", this.data.radius);
+  update(prevData) {
+    if (prevData.color != this.data.color) {
+      this.el.setAttribute("color", this.data.color);
+    }
+    if (prevData.radius != this.data.radius) {
+      this.el.setAttribute("radius", this.data.radius);
+    }
   },
 
   tick(t, dt) {

@@ -130,13 +130,16 @@ AFRAME.registerComponent("networked-drawing", {
         if (!NAF.utils.isMine(this.networkedEl)) {
           const head = this.drawBuffer[0];
           if (head !== null && typeof head === "string") {
-            //TODO: check radius and segments as well, somehow
             this.color.set(head);
             this.drawBuffer.shift();
           } else if (head != null && this.drawBuffer.length >= 9) {
             position.set(this.drawBuffer[0], this.drawBuffer[1], this.drawBuffer[2]);
             direction.set(this.drawBuffer[3], this.drawBuffer[4], this.drawBuffer[5]);
+            this.radius = direction.length(); //radius is encoded as length of direction vector
+            direction.normalize();
             normal.set(this.drawBuffer[6], this.drawBuffer[7], this.drawBuffer[8]);
+            //TODO: maybe encode segments in normal vector?
+
             if (!this.remoteLineStarted) {
               this.startDraw(position, direction, normal);
               this.remoteLineStarted = true;
@@ -369,6 +372,7 @@ AFRAME.registerComponent("networked-drawing", {
       this.pushToDrawBuffer(round(position.x));
       this.pushToDrawBuffer(round(position.y));
       this.pushToDrawBuffer(round(position.z));
+      direction.setLength(this.radius); //encode radius as length of direction vector
       this.pushToDrawBuffer(round(direction.x));
       this.pushToDrawBuffer(round(direction.y));
       this.pushToDrawBuffer(round(direction.z));
