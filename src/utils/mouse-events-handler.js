@@ -84,17 +84,25 @@ export default class MouseEventsHandler {
   }
 
   onMouseWheel(e) {
-    const direction = this.cursor.changeDistanceMod(this.getScrollMod(e.deltaY, e.deltaMode));
-    if (
-      direction !== 0 &&
-      (this.lastVerticalScrollTime === 0 || this.lastVerticalScrollTime + VERTICAL_SCROLL_TIMEOUT < Date.now())
-    ) {
-      this.superHand.el.emit(direction > 0 ? "scroll_up" : "scroll_down");
-      this.superHand.el.emit("vertical_scroll_release");
-      this.lastVerticalScrollTime = Date.now();
-    }
+    let mod = this.getScrollMod(e.deltaY, e.deltaMode);
+    if (!e.shiftKey) {
+      let direction = 0;
+      if (!e.altKey) {
+        direction = this.cursor.changeDistanceMod(mod);
+      } else {
+        direction = e.deltaY;
+      }
+      if (
+        direction !== 0 &&
+        (this.lastVerticalScrollTime === 0 || this.lastVerticalScrollTime + VERTICAL_SCROLL_TIMEOUT < Date.now())
+      ) {
+        this.superHand.el.emit(direction > 0 ? "scroll_up" : "scroll_down");
+        this.superHand.el.emit("vertical_scroll_release");
+        this.lastVerticalScrollTime = Date.now();
+      }
 
-    const mod = this.getScrollMod(e.deltaX, e.deltaMode);
+      mod = e.deltaX;
+    }
     if (
       mod !== 0 &&
       (this.lastHorizontalScrollTime === 0 || this.lastHorizontalScrollTime + HORIZONTAL_SCROLL_TIMEOUT < Date.now())

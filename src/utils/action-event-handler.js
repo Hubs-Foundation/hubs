@@ -1,3 +1,5 @@
+const SCROLL_TIMEOUT = 250;
+
 export default class ActionEventHandler {
   constructor(scene, cursor) {
     this.scene = scene;
@@ -35,7 +37,7 @@ export default class ActionEventHandler {
     this.scene.addEventListener("primary_action_release", this.onPrimaryRelease);
     this.scene.addEventListener("secondary_action_grab", this.onSecondaryGrab);
     this.scene.addEventListener("secondary_action_release", this.onSecondaryRelease);
-    this.scene.addEventListener("scroll", this.onScrollMove);
+    this.scene.addEventListener("scroll_move", this.onScrollMove);
     this.scene.addEventListener("cardboardbuttondown", this.onCardboardButtonDown); // TODO: These should be actions
     this.scene.addEventListener("cardboardbuttonup", this.onCardboardButtonUp);
   }
@@ -56,19 +58,13 @@ export default class ActionEventHandler {
 
   onScrollMove(e) {
     const direction = this.cursor.changeDistanceMod(-e.detail.axis[1] / 8);
-    let event;
-    if (direction === 1) {
-      event = "scroll_up";
-    } else if (direction === -1) {
-      event = "scroll_down";
-    }
 
-    if (direction !== 0 && (this.lastScrollTime === 0 || this.lastScrollTime + 500 < Date.now())) {
+    if (direction !== 0 && (this.lastScrollTime === 0 || this.lastScrollTime + SCROLL_TIMEOUT < Date.now())) {
       if (this.isCursorInteracting && this.isHandThatAlsoDrivesCursor(e.target)) {
-        this.cursorHand.el.emit(event);
+        this.cursorHand.el.emit(direction > 0 ? "scroll_up" : "scroll_down");
         this.cursorHand.el.emit("scroll_release");
       } else {
-        e.target.emit(event);
+        e.target.emit(direction > 0 ? "scroll_up" : "scroll_down");
         e.target.emit("scroll_release");
       }
       this.lastScrollTime = Date.now();
