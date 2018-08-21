@@ -146,7 +146,13 @@ function registerNetworkSchemas() {
       "media-loader",
       {
         selector: "#pen",
-        component: "color"
+        component: "pen",
+        property: "radius"
+      },
+      {
+        selector: "#pen",
+        component: "pen",
+        property: "color"
       }
     ]
   });

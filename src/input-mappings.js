@@ -49,8 +49,8 @@ const config = {
     default: {
       "vive-controls": {
         "trackpad.pressedmove": { left: "move" },
-        trackpad_dpad4_pressed_west_down: { right: "snap_rotate_left" },
-        trackpad_dpad4_pressed_east_down: { right: "snap_rotate_right" },
+        trackpad_dpad4_pressed_west_down: { left: "tertiary_action_west", right: "snap_rotate_left" },
+        trackpad_dpad4_pressed_east_down: { left: "tertiary_action_east", right: "snap_rotate_right" },
         trackpad_dpad4_pressed_center_down: { left: "action_primary_down", right: "action_primary_down" },
         trackpad_dpad4_pressed_north_down: { left: "tertiary_action_north", right: "tertiary_action_north" },
         trackpad_dpad4_pressed_south_down: { left: "tertiary_action_south", right: "tertiary_action_south" },
@@ -66,8 +66,8 @@ const config = {
         scroll: { right: "scroll_move" }
       },
       "oculus-touch-controls": {
-        joystick_dpad4_west: { right: "snap_rotate_left" },
-        joystick_dpad4_east: { right: "snap_rotate_right" },
+        joystick_dpad4_west: { left: "tertiary_action_west", right: "snap_rotate_left" },
+        joystick_dpad4_east: { left: "tertiary_action_east", right: "snap_rotate_right" },
         joystick_dpad4_north: { left: "tertiary_action_north", right: "tertiary_action_north" },
         joystick_dpad4_south: { left: "tertiary_action_south", right: "tertiary_action_south" },
         joystick_dpad4_center: { left: "action_primary_up", right: "action_primary_up" },

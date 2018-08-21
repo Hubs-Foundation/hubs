@@ -196,8 +196,10 @@
                     hoverable
                     activatable__draw-hand="buttonStartEvents: secondary_hand_grab; buttonEndEvents: secondary_hand_release;"
                     activatable__draw-cursor="buttonStartEvents: secondary-cursor-grab; buttonEndEvents: secondary-cursor-release;"
-                    activatable__color-next="buttonStartEvents: tertiary_action_north, scroll_up; buttonEndEvents: secondary_hand_release, scroll_release; activatedState: colorNext;"
-                    activatable__color-prev="buttonStartEvents: tertiary_action_south, scroll_down; buttonEndEvents: secondary_hand_release, scroll_release; activatedState: colorPrev;"
+                    activatable__color-next="buttonStartEvents: tertiary_action_north, scroll_up; buttonEndEvents: secondary_hand_release, vertical_scroll_release; activatedState: colorNext;"
+                    activatable__color-prev="buttonStartEvents: tertiary_action_south, scroll_down; buttonEndEvents: secondary_hand_release, vertical_scroll_release; activatedState: colorPrev;"
+                    activatable__increase-radius="buttonStartEvents: tertiary_action_east, scroll_left; buttonEndEvents: secondary_hand_release, horizontal_scroll_release; activatedState: radiusUp;"
+                    activatable__decrease-radius="buttonStartEvents: tertiary_action_west, scroll_right; buttonEndEvents: secondary_hand_release, horizontal_scroll_release; activatedState: radiusDown;"
                     scale="0.5 0.5 0.5"
                 >
                     <a-sphere 
@@ -262,8 +264,8 @@
                          stretchEndButtons: primary_hand_release, secondary_hand_release;
                          dragDropStartButtons: hand_grab, secondary_hand_grab; 
                          dragDropEndButtons: hand_release, secondary_hand_release;
-                         activateStartButtons: secondary_hand_grab, tertiary_action_north, tertiary_action_south, scroll_up, scroll_down; 
-                         activateEndButtons: secondary_hand_release, scroll_release;"
+                         activateStartButtons: secondary_hand_grab, tertiary_action_north, tertiary_action_south, tertiary_action_east, tertiary_action_west, scroll_up, scroll_down, scroll_left, scroll_right; 
+                         activateEndButtons: secondary_hand_release, vertical_scroll_release, horizontal_scroll_release;"
                      collision-filter="collisionForces: false"
                      physics-collider
             ></a-mixin>
@@ -302,8 +304,8 @@
                 stretchEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
                 dragDropStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
                 dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
-                activateStartButtons: secondary-cursor-grab, secondary_hand_grab, tertiary_action_north, tertiary_action_south, scroll_up, scroll_down; 
-                activateEndButtons: secondary-cursor-release, secondary_hand_release, scroll_release;"
+                activateStartButtons: secondary-cursor-grab, secondary_hand_grab, tertiary_action_north, tertiary_action_south, tertiary_action_east, tertiary_action_west, scroll_up, scroll_down, scroll_left, scroll_right; 
+                activateEndButtons: secondary-cursor-release, secondary_hand_release, vertical_scroll_release, horizontal_scroll_release;"
             segments-height="9"
             segments-width="9"
             event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"

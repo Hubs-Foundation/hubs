@@ -1,7 +1,8 @@
 // TODO: Make look speed adjustable by the user
 const HORIZONTAL_LOOK_SPEED = 0.1;
 const VERTICAL_LOOK_SPEED = 0.06;
-const SCROLL_TIMEOUT = 250;
+const VERTICAL_SCROLL_TIMEOUT = 250;
+const HORIZONTAL_SCROLL_TIMEOUT = 250;
 
 export default class MouseEventsHandler {
   constructor(cursor, cameraController) {
@@ -20,7 +21,8 @@ export default class MouseEventsHandler {
 
     this.addEventListeners();
 
-    this.lastScrollTime = 0;
+    this.lastVerticalScrollTime = 0;
+    this.lastHorizontalScrollTime = 0;
   }
 
   tearDown() {
@@ -82,31 +84,35 @@ export default class MouseEventsHandler {
   }
 
   onMouseWheel(e) {
-    let mod = 0;
-    switch (e.deltaMode) {
-      case e.DOM_DELTA_PIXEL:
-        mod = e.deltaY / 500;
-        break;
-      case e.DOM_DELTA_LINE:
-        mod = e.deltaY / 10;
-        break;
-      case e.DOM_DELTA_PAGE:
-        mod = e.deltaY / 2;
-        break;
+    const direction = this.cursor.changeDistanceMod(this.getScrollMod(e.deltaY, e.deltaMode));
+    if (
+      direction !== 0 &&
+      (this.lastVerticalScrollTime === 0 || this.lastVerticalScrollTime + VERTICAL_SCROLL_TIMEOUT < Date.now())
+    ) {
+      this.superHand.el.emit(direction > 0 ? "scroll_up" : "scroll_down");
+      this.superHand.el.emit("vertical_scroll_release");
+      this.lastVerticalScrollTime = Date.now();
     }
 
-    const direction = this.cursor.changeDistanceMod(mod);
-    let event;
-    if (direction === 1) {
-      event = "scroll_up";
-    } else if (direction === -1) {
-      event = "scroll_down";
+    const mod = this.getScrollMod(e.deltaX, e.deltaMode);
+    if (
+      mod !== 0 &&
+      (this.lastHorizontalScrollTime === 0 || this.lastHorizontalScrollTime + HORIZONTAL_SCROLL_TIMEOUT < Date.now())
+    ) {
+      this.superHand.el.emit(mod < 0 ? "scroll_left" : "scroll_right");
+      this.superHand.el.emit("horizontal_scroll_release");
+      this.lastHorizontalScrollTime = Date.now();
     }
+  }
 
-    if (direction !== 0 && (this.lastScrollTime === 0 || this.lastScrollTime + SCROLL_TIMEOUT < Date.now())) {
-      this.superHand.el.emit(event);
-      this.superHand.el.emit("scroll_release");
-      this.lastScrollTime = Date.now();
+  getScrollMod(delta, deltaMode) {
+    switch (deltaMode) {
+      case WheelEvent.DOM_DELTA_PIXEL:
+        return delta / 500;
+      case WheelEvent.DOM_DELTA_LINE:
+        return delta / 10;
+      case WheelEvent.DOM_DELTA_PAGE:
+        return delta / 2;
     }
   }
 

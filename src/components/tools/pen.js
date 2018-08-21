@@ -15,15 +15,18 @@ AFRAME.registerComponent("pen", {
     camera: { type: "selector" },
     drawing: { type: "string" },
     drawingManager: { type: "string" },
+    color: { type: "color", default: "#FF0033" },
     availableColors: {
       default: ["#FF0033", "#FFFF00", "#00FF33", "#0099FF", "#9900FF", "#FFFFFF", "#000000"]
-    }
+    },
+    radius: { default: 0.01 },
+    minRadius: { default: 0.005 },
+    maxRadius: { default: 0.05 }
   },
 
   init() {
     this.stateAdded = this.stateAdded.bind(this);
     this.stateRemoved = this.stateRemoved.bind(this);
-    this.onComponentChanged = this.onComponentChanged.bind(this);
 
     this.timeSinceLastDraw = 0;
 
@@ -49,13 +52,16 @@ AFRAME.registerComponent("pen", {
 
     this.el.parentNode.addEventListener("stateadded", this.stateAdded);
     this.el.parentNode.addEventListener("stateremoved", this.stateRemoved);
-    this.el.addEventListener("onComponentChanged", this.onComponentChanged);
   },
 
   pause() {
     this.el.parentNode.removeEventListener("stateadded", this.stateAdded);
     this.el.parentNode.removeEventListener("stateremoved", this.stateRemoved);
-    this.el.removeEventListener("onComponentChanged", this.onComponentChanged);
+  },
+
+  update(_prevData) {
+    this.el.setAttribute("color", this.data.color);
+    this.el.setAttribute("radius", this.data.radius);
   },
 
   tick(t, dt) {
@@ -95,7 +101,7 @@ AFRAME.registerComponent("pen", {
       this.el.object3D.getWorldPosition(this.worldPosition);
       this.getNormal(this.normal, this.worldPosition, this.direction);
 
-      this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal, this.el.getAttribute("color"));
+      this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal, this.data.color, this.data.radius);
     }
   },
 
@@ -112,8 +118,13 @@ AFRAME.registerComponent("pen", {
 
   changeColor(mod) {
     this.colorIndex = (this.colorIndex + mod + this.data.availableColors.length) % this.data.availableColors.length;
-    const color = this.data.availableColors[this.colorIndex];
-    this.el.setAttribute("color", color);
+    this.data.color = this.data.availableColors[this.colorIndex];
+    this.el.setAttribute("color", this.data.color);
+  },
+
+  changeRadius(mod) {
+    this.data.radius = Math.max(this.data.minRadius, Math.min(this.data.radius + mod, this.data.maxRadius));
+    this.el.setAttribute("radius", this.data.radius);
   },
 
   stateAdded(evt) {
@@ -126,6 +137,12 @@ AFRAME.registerComponent("pen", {
         break;
       case "colorPrev":
         this.changeColor(-1);
+        break;
+      case "radiusUp":
+        this.changeRadius(this.data.minRadius);
+        break;
+      case "radiusDown":
+        this.changeRadius(-this.data.minRadius);
         break;
       case "grabbed":
         this.grabbed = true;
@@ -146,12 +163,6 @@ AFRAME.registerComponent("pen", {
         break;
       default:
         break;
-    }
-  },
-
-  onComponentChanged(evt) {
-    if (evt.detail.name === "color") {
-      this.changeColor(0);
     }
   }
 });

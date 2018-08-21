@@ -26,8 +26,7 @@ function copyData(fromArray, toArray, fromIndex, toIndex) {
 AFRAME.registerComponent("networked-drawing", {
   schema: {
     segments: { default: 8 }, //the number of "sides" the procedural tube should have
-    radius: { default: 0.02 }, //the radius of the procedural tube
-    color: { type: "color", default: "#FF0000" }, //default color
+    defaultRadius: { default: 0.01 }, //the radius of the procedural tube
     minDrawTimeout: { default: 5000 }, //the minimum time a drawn line will live
     maxDrawTimeout: { default: 600000 }, //the maximum time a drawn line will live
     maxLines: { default: 25 }, //how many lines can persist before lines older than minDrawTime are removed
@@ -46,8 +45,8 @@ AFRAME.registerComponent("networked-drawing", {
       vertexColors: THREE.VertexColors
     };
 
-    this.color = new THREE.Color(this.data.color);
-    this.radius = this.data.radius;
+    this.color = new THREE.Color();
+    this.radius = this.data.defaultRadius;
     this.segments = this.data.segments;
 
     const material = new THREE.MeshStandardMaterial(options);
