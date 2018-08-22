@@ -62,10 +62,10 @@ export default class ActionEventHandler {
     if (direction !== 0 && (this.lastScrollTime === 0 || this.lastScrollTime + SCROLL_TIMEOUT < Date.now())) {
       if (this.isCursorInteracting && this.isHandThatAlsoDrivesCursor(e.target)) {
         this.cursorHand.el.emit(direction > 0 ? "scroll_up" : "scroll_down");
-        this.cursorHand.el.emit("scroll_release");
+        this.cursorHand.el.emit("vertical_scroll_release");
       } else {
         e.target.emit(direction > 0 ? "scroll_up" : "scroll_down");
-        e.target.emit("scroll_release");
+        e.target.emit("vertical_scroll_release");
       }
       this.lastScrollTime = Date.now();
     }
