@@ -83,7 +83,7 @@ AFRAME.registerComponent("pen", {
         this.currentDrawing.getLastPoint().distanceTo(this.worldPosition) >= this.data.minDistanceBetweenPoints
       ) {
         this.getNormal(this.normal, this.worldPosition, this.direction);
-        this.currentDrawing.draw(this.worldPosition, this.direction, this.normal);
+        this.currentDrawing.draw(this.worldPosition, this.direction, this.normal, this.data.color, this.data.radius);
       }
 
       this.timeSinceLastDraw = time % this.data.drawFrequency;

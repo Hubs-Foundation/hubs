@@ -90,6 +90,7 @@ export default class MouseEventsHandler {
       if (!e.altKey) {
         direction = this.cursor.changeDistanceMod(mod);
       } else {
+        e.preventDefault(); //prevent forward/back in firefox
         direction = e.deltaY;
       }
       if (

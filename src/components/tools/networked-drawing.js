@@ -11,10 +11,6 @@ const MSG_CONFIRM_CONNECT = 0;
 const MSG_BUFFER_DATA = 1;
 const MSG_BUFFER_DATA_FULL = 2;
 
-function round(x) {
-  return Math.round(x * 100000) / 100000;
-}
-
 function copyData(fromArray, toArray, fromIndex, toIndex) {
   let i = fromIndex - 1;
   let j = -1;
@@ -129,16 +125,14 @@ AFRAME.registerComponent("networked-drawing", {
       if (this.drawBuffer.length > 0 && NAF.connection.isConnected() && this.networkedEl) {
         if (!NAF.utils.isMine(this.networkedEl)) {
           const head = this.drawBuffer[0];
-          if (head !== null && typeof head === "string") {
-            this.color.set(head);
-            this.drawBuffer.shift();
-          } else if (head != null && this.drawBuffer.length >= 9) {
+          if (head != null && this.drawBuffer.length >= 9) {
             position.set(this.drawBuffer[0], this.drawBuffer[1], this.drawBuffer[2]);
             direction.set(this.drawBuffer[3], this.drawBuffer[4], this.drawBuffer[5]);
             this.radius = direction.length(); //radius is encoded as length of direction vector
             direction.normalize();
             normal.set(this.drawBuffer[6], this.drawBuffer[7], this.drawBuffer[8]);
-            //TODO: maybe encode segments in normal vector?
+            this.color.setHex(Math.round(normal.length()) - 1); //color is encoded as length of normal vector
+            normal.normalize();
 
             if (!this.remoteLineStarted) {
               this.startDraw(position, direction, normal);
@@ -253,7 +247,7 @@ AFRAME.registerComponent("networked-drawing", {
     return this.lastPoint;
   },
 
-  startDraw(position, direction, normal, color, radius, segments) {
+  startDraw(position, direction, normal, color, radius) {
     if (!NAF.connection.isConnected()) {
       return;
     }
@@ -262,20 +256,23 @@ AFRAME.registerComponent("networked-drawing", {
 
     if (color) {
       this.color.set(color);
-      this.pushToDrawBuffer(color);
     }
     if (radius) this.radius = radius;
-    if (segments) this.segments = segments;
 
     this.lastPoint.copy(position);
     this.addToDrawBuffer(position, direction, normal);
     this.lastDrawTime = Date.now();
   },
 
-  draw(position, direction, normal) {
+  draw(position, direction, normal, color, radius) {
     if (!NAF.connection.isConnected() || !this.drawStarted) {
       return;
     }
+
+    if (color && color != "#" + this.color.getHexString().toUpperCase()) {
+      this.color.set(color);
+    }
+    if (radius) this.radius = radius;
 
     this.doDraw(position, direction, normal);
 
@@ -369,16 +366,17 @@ AFRAME.registerComponent("networked-drawing", {
   addToDrawBuffer(position, direction, normal) {
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
       ++this.currentPointCount;
-      this.pushToDrawBuffer(round(position.x));
-      this.pushToDrawBuffer(round(position.y));
-      this.pushToDrawBuffer(round(position.z));
+      this.pushToDrawBuffer(position.x);
+      this.pushToDrawBuffer(position.y);
+      this.pushToDrawBuffer(position.z);
       direction.setLength(this.radius); //encode radius as length of direction vector
-      this.pushToDrawBuffer(round(direction.x));
-      this.pushToDrawBuffer(round(direction.y));
-      this.pushToDrawBuffer(round(direction.z));
-      this.pushToDrawBuffer(round(normal.x));
-      this.pushToDrawBuffer(round(normal.y));
-      this.pushToDrawBuffer(round(normal.z));
+      this.pushToDrawBuffer(direction.x);
+      this.pushToDrawBuffer(direction.y);
+      this.pushToDrawBuffer(direction.z);
+      normal.setLength(this.color.getHex() + 1); //encode color as length, add one in case color is black
+      this.pushToDrawBuffer(normal.x);
+      this.pushToDrawBuffer(normal.y);
+      this.pushToDrawBuffer(normal.z);
     }
   },
 
