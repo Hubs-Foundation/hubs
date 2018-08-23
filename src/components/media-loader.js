@@ -63,15 +63,15 @@ AFRAME.registerComponent("media-loader", {
 
   showLoader() {
     const useFancyLoader = !!loadingObject;
-    const loadingObj = useFancyLoader
+    const mesh = useFancyLoader
       ? loadingObject.scene.clone()
       : new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
     if (useFancyLoader) {
-      this.loaderMixer = new THREE.AnimationMixer(loadingObj);
+      this.loaderMixer = new THREE.AnimationMixer(mesh);
       this.loadingClip = this.loaderMixer.clipAction(loadingObject.animations[0]);
       this.loadingClip.play();
     }
-    this.el.setObject3D("mesh", loadingObj);
+    this.el.setObject3D("mesh", mesh);
     this.setShapeAndScale(true);
     delete this.showLoaderTimeout;
   },
@@ -80,7 +80,7 @@ AFRAME.registerComponent("media-loader", {
     clearTimeout(this.showLoaderTimeout);
     if (this.loaderMixer) {
       this.loadingClip.stop();
-      this.loaderMixer = null;
+      delete this.loaderMixer;
     }
     delete this.showLoaderTimeout;
   },
