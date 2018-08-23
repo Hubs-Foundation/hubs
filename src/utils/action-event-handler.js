@@ -100,8 +100,8 @@ export default class ActionEventHandler {
     this.handThatAlsoDrivesCursor = handThatAlsoDrivesCursor;
   }
 
-  isSticky(el) {
-    return el && el.matches(".sticky, .sticky *");
+  isToggle(el) {
+    return el && el.matches(".toggle, .toggle *");
   }
 
   isHandThatAlsoDrivesCursor(el) {
@@ -130,7 +130,7 @@ export default class ActionEventHandler {
     const isCursorHand = this.isHandThatAlsoDrivesCursor(e.target);
     if (this.isCursorInteracting && isCursorHand) {
       //need to check both grab-start and hover-start in the case that the spawner is being grabbed this frame
-      if (this.isSticky(this.cursorHand.state.get("grab-start") || this.cursorHand.state.get("hover-start"))) {
+      if (this.isToggle(this.cursorHand.state.get("grab-start") || this.cursorHand.state.get("hover-start"))) {
         this.cursorHand.el.emit(event);
         this.isCursorInteracting = !!this.cursorHand.state.get("grab-start");
       } else {

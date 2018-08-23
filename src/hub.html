@@ -188,7 +188,7 @@
 
             <template id="pen-interactable">
                 <a-entity
-                    class="interactable sticky"
+                    class="interactable toggle"
                     super-networked-interactable="counter: #pen-counter; mass: 1;"
                     body="type: dynamic; shape: none; mass: 1;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
@@ -456,7 +456,7 @@
 
         <a-entity 
             gltf-model-plus="src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-484ae5682f.gltf"
-            class="interactable sticky" 
+            class="interactable toggle" 
             super-spawner="template: #pen-interactable; src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-484ae5682f.gltf;" 
             position="-1 1.2 -5.5"
             scale="0.5 0.5 0.5" 

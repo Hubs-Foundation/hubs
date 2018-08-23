@@ -65,7 +65,7 @@ export default class MouseEventsHandler {
 
   onLeftButtonDown() {
     this.isLeftButtonDown = true;
-    if (this.isSticky(this.superHand.state.get("grab-start"))) {
+    if (this.isToggle(this.superHand.state.get("grab-start"))) {
       this.superHand.el.emit("secondary-cursor-grab");
     }
     this.isLeftButtonHandledByCursor = this.cursor.startInteraction();
@@ -132,7 +132,7 @@ export default class MouseEventsHandler {
   onMouseUp(e) {
     switch (e.button) {
       case 0: //left button
-        if (this.isSticky(this.superHand.state.get("grab-start"))) {
+        if (this.isToggle(this.superHand.state.get("grab-start"))) {
           this.superHand.el.emit("secondary-cursor-release");
         } else {
           this.endInteraction();
@@ -152,8 +152,8 @@ export default class MouseEventsHandler {
     this.isLeftButtonHandledByCursor = false;
   }
 
-  isSticky(el) {
-    return el && el.matches(".sticky, .sticky *");
+  isToggle(el) {
+    return el && el.matches(".toggle, .toggle *");
   }
 
   look(e) {
