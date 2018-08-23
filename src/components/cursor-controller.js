@@ -174,12 +174,12 @@ AFRAME.registerComponent("cursor-controller", {
     const targetDistanceMod = this.currentDistanceMod + delta;
     const moddedDistance = this.currentDistance - targetDistanceMod;
     if (moddedDistance > maxDistance) {
-      return 1;
+      return false;
     } else if (moddedDistance < minDistance) {
-      return -1;
+      return false;
     }
     this.currentDistanceMod = targetDistanceMod;
-    return 0;
+    return true;
   },
 
   _handleCursorLoaded: function() {

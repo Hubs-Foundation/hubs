@@ -1,4 +1,7 @@
-const SCROLL_TIMEOUT = 250;
+const VERTICAL_SCROLL_TIMEOUT = 250;
+const HORIZONTAL_SCROLL_TIMEOUT = 250;
+const SCROLL_THRESHOLD = 0.05;
+const SCROLL_MODIFIER = 0.1;
 
 export default class ActionEventHandler {
   constructor(scene, cursor) {
@@ -25,7 +28,8 @@ export default class ActionEventHandler {
     this.onScrollMove = this.onScrollMove.bind(this);
     this.addEventListeners();
 
-    this.lastScrollTime = 0;
+    this.lastVerticalScrollTime = 0;
+    this.lastHorizontalScrollTime = 0;
   }
 
   addEventListeners() {
@@ -57,17 +61,38 @@ export default class ActionEventHandler {
   }
 
   onScrollMove(e) {
-    const direction = this.cursor.changeDistanceMod(-e.detail.axis[1] / 8);
+    let scrollY = e.detail.axis[1] * SCROLL_MODIFIER;
+    scrollY = Math.abs(scrollY) > SCROLL_THRESHOLD ? scrollY : 0;
+    const changed = this.cursor.changeDistanceMod(-scrollY); //TODO: don't negate this for certain controllers
 
-    if (direction !== 0 && (this.lastScrollTime === 0 || this.lastScrollTime + SCROLL_TIMEOUT < Date.now())) {
-      if (this.isCursorInteracting && this.isHandThatAlsoDrivesCursor(e.target)) {
-        this.cursorHand.el.emit(direction > 0 ? "scroll_up" : "scroll_down");
+    let scrollX = e.detail.axis[0] * SCROLL_MODIFIER;
+    scrollX = Math.abs(scrollX) > SCROLL_THRESHOLD ? scrollX : 0;
+
+    if (
+      Math.abs(scrollY) > 0 &&
+      (this.lastVerticalScrollTime === 0 || this.lastVerticalScrollTime + VERTICAL_SCROLL_TIMEOUT < Date.now())
+    ) {
+      if (!changed && this.isCursorInteracting && this.isHandThatAlsoDrivesCursor(e.target)) {
+        this.cursorHand.el.emit(scrollY < 0 ? "scroll_up" : "scroll_down");
         this.cursorHand.el.emit("vertical_scroll_release");
       } else {
-        e.target.emit(direction > 0 ? "scroll_up" : "scroll_down");
+        e.target.emit(scrollY < 0 ? "scroll_up" : "scroll_down");
         e.target.emit("vertical_scroll_release");
       }
-      this.lastScrollTime = Date.now();
+      this.lastVerticalScrollTime = Date.now();
+    }
+
+    if (
+      Math.abs(scrollX) > 0 &&
+      (this.lastHorizontalScrollTime === 0 || this.lastHorizontalScrollTime + HORIZONTAL_SCROLL_TIMEOUT < Date.now())
+    ) {
+      if (this.isCursorInteracting && this.isHandThatAlsoDrivesCursor(e.target)) {
+        this.cursorHand.el.emit(scrollX < 0 ? "scroll_left" : "scroll_right");
+        this.cursorHand.el.emit("horizontal_scroll_release");
+      } else {
+        e.target.emit(scrollX < 0 ? "scroll_left" : "scroll_right");
+        e.target.emit("horizontal_scroll_release");
+      }
     }
   }
 
