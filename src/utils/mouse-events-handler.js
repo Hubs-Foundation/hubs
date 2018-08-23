@@ -107,6 +107,8 @@ export default class MouseEventsHandler {
       this.superHand.el.emit("horizontal_scroll_release");
       this.lastHorizontalScrollTime = Date.now();
     }
+
+    if (e.altKey) e.preventDefault(); //prevent forward/back on firefox
   }
 
   getScrollMod(delta, deltaMode) {
