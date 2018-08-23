@@ -196,10 +196,10 @@
                     hoverable
                     activatable__draw-hand="buttonStartEvents: secondary_hand_grab; buttonEndEvents: secondary_hand_release;"
                     activatable__draw-cursor="buttonStartEvents: secondary-cursor-grab; buttonEndEvents: secondary-cursor-release;"
-                    activatable__color-next="buttonStartEvents: tertiary_action_north, scroll_up; buttonEndEvents: thumb_up, secondary_hand_release, vertical_scroll_release; activatedState: colorNext;"
-                    activatable__color-prev="buttonStartEvents: tertiary_action_south, scroll_down; buttonEndEvents: thumb_up, secondary_hand_release, vertical_scroll_release; activatedState: colorPrev;"
-                    activatable__increase-radius="buttonStartEvents: tertiary_action_east, scroll_right; buttonEndEvents: thumb_up, secondary_hand_release, horizontal_scroll_release; activatedState: radiusUp;"
-                    activatable__decrease-radius="buttonStartEvents: tertiary_action_west, scroll_left; buttonEndEvents: thumb_up, secondary_hand_release, horizontal_scroll_release; activatedState: radiusDown;"
+                    activatable__color-next="buttonStartEvents: next_color, scroll_up; buttonEndEvents: thumb_up, secondary_hand_release, vertical_scroll_release; activatedState: colorNext;"
+                    activatable__color-prev="buttonStartEvents: previous_color, scroll_down; buttonEndEvents: thumb_up, secondary_hand_release, vertical_scroll_release; activatedState: colorPrev;"
+                    activatable__increase-radius="buttonStartEvents: increase_radius, scroll_right; buttonEndEvents: thumb_up, secondary_hand_release, horizontal_scroll_release; activatedState: radiusUp;"
+                    activatable__decrease-radius="buttonStartEvents: decrease_radius, scroll_left; buttonEndEvents: thumb_up, secondary_hand_release, horizontal_scroll_release; activatedState: radiusDown;"
                     scale="0.5 0.5 0.5"
                 >
                     <a-sphere 
@@ -264,7 +264,7 @@
                          stretchEndButtons: primary_hand_release, secondary_hand_release;
                          dragDropStartButtons: hand_grab, secondary_hand_grab; 
                          dragDropEndButtons: hand_release, secondary_hand_release;
-                         activateStartButtons: secondary_hand_grab, tertiary_action_north, tertiary_action_south, tertiary_action_east, tertiary_action_west, scroll_up, scroll_down, scroll_left, scroll_right; 
+                         activateStartButtons: secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right; 
                          activateEndButtons: secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
                      collision-filter="collisionForces: false"
                      physics-collider
@@ -304,7 +304,7 @@
                 stretchEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
                 dragDropStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
                 dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
-                activateStartButtons: secondary-cursor-grab, secondary_hand_grab, tertiary_action_north, tertiary_action_south, tertiary_action_east, tertiary_action_west, scroll_up, scroll_down, scroll_left, scroll_right; 
+                activateStartButtons: secondary-cursor-grab, secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right; 
                 activateEndButtons: secondary-cursor-release, secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
             segments-height="9"
             segments-width="9"
