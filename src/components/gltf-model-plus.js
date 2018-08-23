@@ -221,10 +221,10 @@ async function resolveGLTFUri(gltfProperty, basePath) {
 }
 
 async function loadGLTF(src, token, contentType, preferredTechnique, onProgress) {
-  const resolved = await resolveMedia(src, token);
-  const raw = resolved.raw;
-  const origin = resolved.origin;
-  contentType = contentType || resolved.contentType;
+  //const resolved = await resolveMedia(src, token);
+  const raw = src;
+  const origin = src;
+  //contentType = contentType || resolved.contentType;
   const basePath = THREE.LoaderUtils.extractUrlBase(origin);
 
   let gltfUrl = raw;
@@ -251,7 +251,7 @@ async function loadGLTF(src, token, contentType, preferredTechnique, onProgress)
   if (images) {
     for (const image of images) {
       if (image.uri) {
-        pendingFarsparkPromises.push(resolveGLTFUri(image, parser.options.path));
+        //pendingFarsparkPromises.push(resolveGLTFUri(image, parser.options.path));
       }
     }
   }
@@ -259,7 +259,7 @@ async function loadGLTF(src, token, contentType, preferredTechnique, onProgress)
   if (buffers) {
     for (const buffer of buffers) {
       if (buffer.uri) {
-        pendingFarsparkPromises.push(resolveGLTFUri(buffer, parser.options.path));
+       // pendingFarsparkPromises.push(resolveGLTFUri(buffer, parser.options.path));
       }
     }
   }
