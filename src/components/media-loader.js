@@ -12,6 +12,7 @@ AFRAME.registerComponent("media-loader", {
     this.onError = this.onError.bind(this);
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
+    this.shapeAdded = false;
   },
 
   setShapeAndScale(resize) {
@@ -19,9 +20,10 @@ AFRAME.registerComponent("media-loader", {
     const box = getBox(this.el, mesh);
     const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
     this.el.object3DMap.mesh.scale.multiplyScalar(scaleCoefficient);
-    if (this.el.body && this.el.body.shapes.length > 1) {
+    if (this.el.body && this.shapeAdded) {
       this.el.removeAttribute("shape");
-    } else {
+      this.shapeAdded = false;
+    } else if (this.el.body.shapes.length === 0) {
       const center = new THREE.Vector3();
       const { min, max } = box;
       const halfExtents = {
@@ -35,6 +37,7 @@ AFRAME.registerComponent("media-loader", {
         shape: "box",
         halfExtents: halfExtents
       });
+      this.shapeAdded = true;
     }
   },
 

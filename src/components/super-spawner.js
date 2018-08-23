@@ -13,7 +13,7 @@ AFRAME.registerComponent("super-spawner", {
     /**
      * Source of the media asset the spawner will spawn when grabbed. This can be a gltf, video, or image, or a url that the reticiulm media API can resolve to a gltf, video, or image.
      */
-    src: { default: "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf" },
+    src: { default: "" },
 
     /**
      * The template to use for this object

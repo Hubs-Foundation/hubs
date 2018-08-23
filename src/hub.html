@@ -69,7 +69,6 @@
             <a-asset-item id="botwoody" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotWoody_Avatar-0140485a23.gltf"></a-asset-item>
 
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
-            <a-asset-item id="interactable-duck" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf"></a-asset-item>
 
             <a-asset-item id="quack" src="./assets/sfx/quack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="specialquack" src="./assets/sfx/specialquack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -143,27 +142,6 @@
                 </a-entity>
             </template>
 
-            <template id="interactable-template">
-                <a-entity
-                    class="interactable"
-                    super-networked-interactable="counter: #media-counter;"
-                    body="type: dynamic; shape: none; mass: 1;"
-                    grabbable
-                    stretchable="useWorldPosition: true; usePhysics: never"
-                    hoverable
-                    auto-scale-cannon-physics-body
-                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
-                    position-at-box-shape-border="target:.delete-button"
-                    destroy-at-extreme-distances
-                    duck
-                >
-                    <a-entity class="delete-button" visible-while-frozen>
-                        <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
-                        <a-entity text=" value:Delete; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
-                    </a-entity>
-                </a-entity>
-            </template>
-
             <template id="interactable-media">
                 <a-entity
                     class="interactable"
@@ -210,6 +188,10 @@
                         color="#FF0033"
                         pen="camera: #player-camera; drawingManager: #drawing-manager"
                     ></a-sphere>
+                    <a-entity class="delete-button" visible-while-frozen>
+                        <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
+                        <a-entity text=" value:Delete; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    </a-entity>
                 </a-entity>
             </template>
 
@@ -454,6 +436,7 @@
             networked="template: #interactable-drawing;"
         ></a-entity>
 
+        <!-- TODO: remove this once the pens are added into the environments -->
         <a-entity 
             gltf-model-plus="src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-484ae5682f.gltf"
             class="interactable toggle" 
