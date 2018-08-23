@@ -1,3 +1,4 @@
+import { objectTypeForOriginAndContentType } from "../object-types";
 let mediaAPIEndpoint = "/api/v1/media";
 
 if (process.env.RETICULUM_SERVER) {
@@ -51,7 +52,7 @@ export const upload = file => {
 };
 
 let interactableId = 0;
-export const addMedia = (src, template, resize = false) => {
+export const addMedia = (src, template, contentOrigin, resize = false) => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
@@ -71,5 +72,11 @@ export const addMedia = (src, template, resize = false) => {
         entity.setAttribute("media-loader", { src: "error" });
       });
   }
+
+  entity.addEventListener("media_resolved", ({ detail }) => {
+    const objectType = objectTypeForOriginAndContentType(contentOrigin, detail.contentType);
+    scene.emit("object_spawned", { objectType });
+  });
+
   return entity;
 };

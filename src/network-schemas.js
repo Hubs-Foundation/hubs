@@ -111,7 +111,15 @@ function registerNetworkSchemas() {
         requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       "scale",
-      "media-loader"
+      "media-loader",
+      {
+        component: "media-video",
+        property: "time"
+      },
+      {
+        component: "media-video",
+        property: "videoPaused"
+      }
     ]
   });
 

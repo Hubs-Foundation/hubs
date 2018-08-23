@@ -11,6 +11,7 @@ AFRAME.registerComponent("media-loader", {
   init() {
     this.onError = this.onError.bind(this);
     this.showLoader = this.showLoader.bind(this);
+    this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
   },
 
   setShapeAndScale(resize) {
@@ -40,7 +41,8 @@ AFRAME.registerComponent("media-loader", {
   onError() {
     this.el.removeAttribute("gltf-model-plus");
     this.el.removeAttribute("media-pager");
-    this.el.setAttribute("image-plus", { src: "error" });
+    this.el.removeAttribute("media-video");
+    this.el.setAttribute("media-image", { src: "error" });
     clearTimeout(this.showLoaderTimeout);
     delete this.showLoaderTimeout;
   },
@@ -49,6 +51,11 @@ AFRAME.registerComponent("media-loader", {
     const loadingObj = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
     this.el.setObject3D("mesh", loadingObj);
     this.setShapeAndScale(true);
+    delete this.showLoaderTimeout;
+  },
+
+  clearLoadingTimeout() {
+    clearTimeout(this.showLoaderTimeout);
     delete this.showLoaderTimeout;
   },
 
@@ -62,21 +69,27 @@ AFRAME.registerComponent("media-loader", {
 
       if (!src) return;
 
-      const { raw, images, contentType } = await resolveMedia(src, false, index);
+      const { raw, origin, images, contentType } = await resolveMedia(src, false, index);
+
+      // We don't want to emit media_resolved for index updates.
+      if (src !== oldData.src) {
+        this.el.emit("media_resolved", { src, raw, origin, contentType });
+      }
 
       const isPDF = contentType.startsWith("application/pdf");
-      if (
-        contentType.startsWith("image/") ||
-        contentType.startsWith("video/") ||
-        contentType.startsWith("audio/") ||
-        isPDF
-      ) {
+      if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
         this.el.removeAttribute("gltf-model-plus");
+        this.el.removeAttribute("media-image");
+        this.el.addEventListener("video-loaded", this.clearLoadingTimeout, { once: true });
+        this.el.setAttribute("media-video", { src: raw });
+        this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+      } else if (contentType.startsWith("image/") || isPDF) {
+        this.el.removeAttribute("gltf-model-plus");
+        this.el.removeAttribute("media-video");
         this.el.addEventListener(
           "image-loaded",
           async () => {
-            clearTimeout(this.showLoaderTimeout);
-            delete this.showLoaderTimeout;
+            this.clearLoadingTimeout();
             if (isPDF) {
               const maxIndex = await fetchMaxContentIndex(src, images.png);
               this.el.setAttribute("media-pager", { index, maxIndex });
@@ -91,7 +104,7 @@ AFRAME.registerComponent("media-loader", {
           this.el.removeAttribute("media-pager");
         }
 
-        this.el.setAttribute("image-plus", { src: imageSrc, contentType: imageContentType });
+        this.el.setAttribute("media-image", { src: imageSrc, contentType: imageContentType });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
       } else if (
         contentType.includes("application/octet-stream") ||
@@ -100,13 +113,13 @@ AFRAME.registerComponent("media-loader", {
         src.endsWith(".gltf") ||
         src.endsWith(".glb")
       ) {
-        this.el.removeAttribute("image-plus");
+        this.el.removeAttribute("media-image");
+        this.el.removeAttribute("media-video");
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(
           "model-loaded",
           () => {
-            clearTimeout(this.showLoaderTimeout);
-            delete this.showLoaderTimeout;
+            this.clearLoadingTimeout();
             this.setShapeAndScale(this.data.resize);
           },
           { once: true }
