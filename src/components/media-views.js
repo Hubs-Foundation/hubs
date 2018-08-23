@@ -161,6 +161,16 @@ function createImageTexture(url) {
   });
 }
 
+function disposeTexture(texture) {
+  if (texture.image instanceof HTMLVideoElement) {
+    const video = texture.image;
+    video.pause();
+    video.src = "";
+    video.load();
+  }
+  texture.dispose();
+}
+
 class TextureCache {
   cache = new Map();
 
@@ -193,13 +203,7 @@ class TextureCache {
     // console.log("release", src, cacheItem.count);
     if (cacheItem.count <= 0) {
       // Unload the video element to prevent it from continuing to play in the background
-      if (cacheItem.texture.image instanceof HTMLVideoElement) {
-        const video = cacheItem.texture.image;
-        video.pause();
-        video.src = "";
-        video.load();
-      }
-      cacheItem.texture.dispose();
+      disposeTexture(cacheItem.texture);
       this.cache.delete(src);
     }
   }
@@ -253,8 +257,12 @@ AFRAME.registerComponent("media-video", {
   },
 
   remove() {
-    if (this.data.src) {
-      textureCache.release(this.data.src);
+    if (this.mesh && this.mesh.material) {
+      disposeTexture(this.mesh.material.map);
+    }
+    if (this.video) {
+      this.video.removeEventListener("pause", this.onPauseStateChange);
+      this.video.removeEventListener("play", this.onPauseStateChange);
     }
   },
 
@@ -265,24 +273,19 @@ AFRAME.registerComponent("media-video", {
   async updateTexture(src) {
     let texture;
     try {
-      if (textureCache.has(src)) {
-        texture = textureCache.retain(src);
-      } else {
-        texture = await createVideoTexture(src);
-        texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
-        this.video = texture.image;
+      texture = await createVideoTexture(src);
 
-        this.video.addEventListener("pause", this.onPauseStateChange);
-        this.video.addEventListener("play", this.onPauseStateChange);
-
-        textureCache.set(src, texture);
-
-        // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
-        if (this.data.src !== src) {
-          textureCache.release(src);
-          return;
-        }
+      // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
+      if (this.data.src !== src) {
+        disposeTexture(texture);
+        return;
       }
+
+      texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
+      this.video = texture.image;
+
+      this.video.addEventListener("pause", this.onPauseStateChange);
+      this.video.addEventListener("play", this.onPauseStateChange);
 
       const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
       sound.setNodeSource(texture.audioSource);
@@ -325,12 +328,10 @@ AFRAME.registerComponent("media-video", {
 
     if (!src || src === oldData.src) return;
 
-    if (this.mesh && this.mesh.map) {
+    this.remove();
+    if (this.mesh && this.mesh.material) {
       this.mesh.material.map = null;
       this.mesh.material.needsUpdate = true;
-      if (this.mesh.map !== errorTexture) {
-        textureCache.release(oldData.src);
-      }
     }
 
     this.updateTexture(src);
