@@ -134,16 +134,16 @@ import "./components/cursor-controller";
 
 import "./components/nav-mesh-helper";
 
+import "./components/tools/pen";
+import "./components/tools/networked-drawing";
+import "./components/tools/drawing-manager";
+
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
-
-import "./components/tools/pen";
-import "./components/tools/networked-drawing";
-import "./components/tools/drawing-manager";
 
 import qsTruthy from "./utils/qs_truthy";
 

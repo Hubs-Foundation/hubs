@@ -66,9 +66,9 @@ export default class SharedBufferGeometry {
     mesh.frustumCulled = false;
     mesh.vertices = vertices;
 
-    this.object3D = new THREE.Object3D();
-    this.drawing.add(this.object3D);
-    this.object3D.add(mesh);
+    const object3D = new THREE.Object3D();
+    this.drawing.add(object3D);
+    object3D.add(mesh);
 
     geometry.setDrawRange(0, 0);
     geometry.addAttribute("position", new THREE.BufferAttribute(vertices, 3).setDynamic(true));

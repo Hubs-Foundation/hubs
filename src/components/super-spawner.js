@@ -103,7 +103,7 @@ AFRAME.registerComponent("super-spawner", {
     entity.object3D.rotation.copy(
       this.data.useCustomSpawnRotation ? this.data.spawnRotation : this.el.object3D.rotation
     );
-    entity.object3D.scale.copy(this.data.useCustomSpawnRotation ? this.data.spawnScale : this.el.object3D.scale);
+    entity.object3D.scale.copy(this.data.useCustomSpawnScale ? this.data.spawnScale : this.el.object3D.scale);
 
     this.activateCooldown();
 

@@ -121,7 +121,6 @@ AFRAME.registerComponent(
       }
 
       if (handIndex !== -1) {
-        this.grabbers.splice(handIndex, 1);
         this.grabber = this.grabbers[0];
       }
 
@@ -132,6 +131,10 @@ AFRAME.registerComponent(
       } else if (this.toggle && this.isPrimaryRelease(type)) {
         this.toggle = false;
         this.lastGrabber = null;
+      }
+
+      if (handIndex !== -1) {
+        this.grabbers.splice(handIndex, 1);
       }
 
       this.physicsEnd(evt);

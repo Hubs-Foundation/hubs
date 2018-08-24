@@ -10,25 +10,12 @@ AFRAME.registerComponent("drawing-manager", {
   init() {
     this.handleDrawingInitialized = this.handleDrawingInitialized.bind(this);
 
-    // this.drawingEl = document.querySelector(this.data.drawing);
     this.drawingToPen = new Map();
-
-    // if (this.drawingEl.hasLoaded) {
-    //   this.drawing = this.drawingEl.components["networked-drawing"];
-    // } else {
-    //   this.drawingEl.addEventListener("componentinitialized", this.handleDrawingInitialized);
-    // }
-  },
-
-  remove() {
-    // this.drawingEl.removeEventListener("componentinitialized", this.handleDrawingInitialized);
   },
 
   play() {
     this.drawing = document.querySelector(this.data.drawing).components["networked-drawing"];
   },
-
-  pause() {},
 
   handleDrawingInitialized(e) {
     if (e.detail.name === "networked-drawing") {
