@@ -1,6 +1,14 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import { resolveMedia, fetchMaxContentIndex } from "../utils/media-utils";
 
+import "three/examples/js/loaders/GLTFLoader";
+import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
+const gltfLoader = new THREE.GLTFLoader();
+let loadingObject;
+gltfLoader.load(loadingObjectSrc, gltf => {
+  loadingObject = gltf;
+});
+
 AFRAME.registerComponent("media-loader", {
   schema: {
     src: { type: "string" },
@@ -41,6 +49,12 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
+  tick(t, dt) {
+    if (this.loaderMixer) {
+      this.loaderMixer.update(dt / 1000);
+    }
+  },
+
   onError() {
     this.el.removeAttribute("gltf-model-plus");
     this.el.removeAttribute("media-pager");
@@ -51,14 +65,26 @@ AFRAME.registerComponent("media-loader", {
   },
 
   showLoader() {
-    const loadingObj = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
-    this.el.setObject3D("mesh", loadingObj);
+    const useFancyLoader = !!loadingObject;
+    const mesh = useFancyLoader
+      ? loadingObject.scene.clone()
+      : new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
+    if (useFancyLoader) {
+      this.loaderMixer = new THREE.AnimationMixer(mesh);
+      this.loadingClip = this.loaderMixer.clipAction(loadingObject.animations[0]);
+      this.loadingClip.play();
+    }
+    this.el.setObject3D("mesh", mesh);
     this.setShapeAndScale(true);
     delete this.showLoaderTimeout;
   },
 
   clearLoadingTimeout() {
     clearTimeout(this.showLoaderTimeout);
+    if (this.loaderMixer) {
+      this.loadingClip.stop();
+      delete this.loaderMixer;
+    }
     delete this.showLoaderTimeout;
   },
 
