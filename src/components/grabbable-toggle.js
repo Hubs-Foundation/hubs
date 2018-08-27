@@ -135,6 +135,7 @@ AFRAME.registerComponent(
 
       if (handIndex !== -1) {
         this.grabbers.splice(handIndex, 1);
+        this.grabber = this.grabbers[0];
       }
 
       this.physicsEnd(evt);
