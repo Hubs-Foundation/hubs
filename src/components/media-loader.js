@@ -152,8 +152,8 @@ AFRAME.registerComponent("media-loader", {
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
         this.el.setAttribute("gltf-model-plus", {
-          src,
-          contentType,
+          src: raw,
+          contentType: contentType,
           inflate: true
         });
       } else {
