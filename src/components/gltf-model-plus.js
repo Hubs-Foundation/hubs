@@ -1,5 +1,4 @@
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
-import { resolveMedia } from "../utils/media-utils";
 import cubeMapPosX from "../assets/images/cubemap/posx.jpg";
 import cubeMapNegX from "../assets/images/cubemap/negx.jpg";
 import cubeMapPosY from "../assets/images/cubemap/posy.jpg";
@@ -209,25 +208,8 @@ async function loadEnvMap() {
   return texture;
 }
 
-async function resolveGLTFUri(gltfProperty, basePath) {
-  const url = new URL(gltfProperty.uri, basePath);
-
-  if (url.protocol === "blob:") {
-    gltfProperty.uri = url.href;
-  } else {
-    const { raw } = await resolveMedia(url.href, true);
-    gltfProperty.uri = raw;
-  }
-}
-
 async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
-  const resolved = await resolveMedia(src);
-  const raw = resolved.raw;
-  const origin = resolved.origin;
-  contentType = contentType || resolved.contentType;
-  const basePath = THREE.LoaderUtils.extractUrlBase(origin);
-
-  let gltfUrl = raw;
+  let gltfUrl = src;
   let fileMap;
 
   if (contentType.includes("model/gltf+zip") || contentType.includes("application/x-zip-compressed")) {
@@ -236,34 +218,11 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   }
 
   const gltfLoader = new THREE.GLTFLoader();
-  gltfLoader.setPath(basePath);
   gltfLoader.setLazy(true);
 
   const { parser } = await new Promise((resolve, reject) => gltfLoader.load(gltfUrl, resolve, onProgress, reject));
 
-  const json = parser.json;
-  const images = json.images;
-  const buffers = json.buffers;
-  const materials = json.materials;
-
-  const pendingFarsparkPromises = [];
-
-  if (images) {
-    for (const image of images) {
-      if (image.uri) {
-        pendingFarsparkPromises.push(resolveGLTFUri(image, parser.options.path));
-      }
-    }
-  }
-
-  if (buffers) {
-    for (const buffer of buffers) {
-      if (buffer.uri) {
-        pendingFarsparkPromises.push(resolveGLTFUri(buffer, parser.options.path));
-      }
-    }
-  }
-
+  const materials = parser.json.materials;
   if (materials) {
     for (let i = 0; i < materials.length; i++) {
       const material = materials[i];
@@ -282,8 +241,6 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   if (!CachedEnvMapTexture) {
     CachedEnvMapTexture = loadEnvMap();
   }
-
-  await Promise.all(pendingFarsparkPromises);
 
   const gltf = await new Promise((resolve, reject) =>
     parser.parse(
