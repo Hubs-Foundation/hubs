@@ -238,6 +238,16 @@ AFRAME.registerComponent("media-video", {
       this.networkedEl = networkedEl;
       this.updatePlaybackState();
     });
+
+    // from a-sound
+    const sceneEl = this.el.sceneEl;
+    sceneEl.audioListener = sceneEl.audioListener || new THREE.AudioListener();
+    if (sceneEl.camera) {
+      sceneEl.camera.add(sceneEl.audioListener);
+    }
+    sceneEl.addEventListener("camera-set-active", function(evt) {
+      evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
+    });
   },
 
   // aframe component play, unrelated to video
