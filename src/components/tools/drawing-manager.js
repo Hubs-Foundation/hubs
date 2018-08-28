@@ -1,5 +1,7 @@
 /**
  * Drawing Manager
+ * Manages what networked-drawings are available to pen components
+ * @namespace drawing
  * @component drawing-manager
  */
 AFRAME.registerComponent("drawing-manager", {

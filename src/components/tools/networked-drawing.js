@@ -1,5 +1,6 @@
 /* global THREE */
 /**
+ * Networked Drawing
  * Creates procedurally generated 'lines' (or tubes) that are networked.
  * @namespace drawing
  * @component networked-drawing
@@ -30,12 +31,19 @@ AFRAME.registerComponent("networked-drawing", {
   },
 
   init() {
+    this.receiveData = this.receiveData.bind(this);
+
     this.drawBuffer = [];
-    this.tempDrawBuffer = [];
+
+    this.drawStarted = false;
+    this.lineStarted = false;
+    this.remoteLineStarted = false;
+
+    this.tempDrawBuffer = []; //used for temporary storage of new line data when drawing is still being initialized.
     this.receivedBufferParts = 0;
-    this.drawBufferInitialized = false;
     this.bufferIndex = 0;
-    this.drawBufferHistory = [];
+    this.connectedToOwner = false;
+    this.drawBufferInitialized = false;
 
     const options = {
       vertexColors: THREE.VertexColors
@@ -48,6 +56,8 @@ AFRAME.registerComponent("networked-drawing", {
     const material = new THREE.MeshStandardMaterial(options);
     this.sharedBufferGeometryManager = new SharedBufferGeometryManager();
     this.sharedBufferGeometryManager.addSharedBuffer(0, material, THREE.TriangleStripDrawMode);
+
+    this.lastPoint = new THREE.Vector3();
 
     this.lastSegments = [];
     this.currentSegments = [];
@@ -68,22 +78,12 @@ AFRAME.registerComponent("networked-drawing", {
     this.scene = sceneEl.object3D;
     this.scene.add(this.drawing);
 
-    this.drawStarted = false;
-    this.lineStarted = false;
-    this.remoteLineStarted = false;
-
-    this.lastPoint = new THREE.Vector3();
-    this.lastDrawTime = -1;
-
-    this.connectedToOwner = false;
-
     this.prevIdx = Object.assign({}, this.sharedBuffer.idx);
     this.idx = Object.assign({}, this.sharedBuffer.idx);
-    this.vertexCount = 0;
-    this.drawBufferCount = 0;
-    this.currentPointCount = 0;
-
-    this.receiveData = this.receiveData.bind(this);
+    this.vertexCount = 0; //number of vertices added for current line (used for line deletion).
+    this.drawBufferCount = 0; //number of items added to drawBuffer for current line (used for line deletion).
+    this.currentPointCount = 0; //number of points added for current line (used for maxPointsPerLine).
+    this.drawBufferHistory = []; //tracks vertexCount and drawBufferCount so that lines can be deleted.
 
     NAF.connection.onConnect(() => {
       NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
@@ -105,57 +105,66 @@ AFRAME.registerComponent("networked-drawing", {
     this.scene.remove(this.drawing);
   },
 
-  tick: (() => {
+  tick() {
+    if (!this.connectedToOwner && NAF.connection.isConnected() && this.networkedEl) {
+      const owner = NAF.utils.getNetworkOwner(this.networkedEl);
+      if (!NAF.utils.isMine(this.networkedEl) && NAF.connection.hasActiveDataChannel(owner)) {
+        NAF.connection.sendDataGuaranteed(owner, this.drawingId, {
+          type: MSG_CONFIRM_CONNECT,
+          clientId: NAF.clientId
+        });
+        this.connectedToOwner = true;
+      }
+    }
+
+    if (this.drawBuffer.length > 0 && NAF.connection.isConnected() && this.networkedEl) {
+      if (!NAF.utils.isMine(this.networkedEl)) {
+        this.drawFromNetwork();
+      } else if (this.bufferIndex < this.drawBuffer.length) {
+        this.broadcastDrawing();
+      }
+    }
+
+    this.deleteLines();
+  },
+
+  broadcastDrawing: (() => {
+    const copyArray = [];
+    return function() {
+      copyArray.length = 0;
+      copyData(this.drawBuffer, copyArray, this.bufferIndex, this.drawBuffer.length - 1);
+      this.bufferIndex = this.drawBuffer.length;
+      NAF.connection.broadcastDataGuaranteed(this.drawingId, { type: MSG_BUFFER_DATA, buffer: copyArray });
+    };
+  })(),
+
+  drawFromNetwork: (() => {
     const position = new THREE.Vector3();
     const direction = new THREE.Vector3();
     const normal = new THREE.Vector3();
-    const copyArray = [];
     return function() {
-      if (!this.connectedToOwner && NAF.connection.isConnected() && this.networkedEl) {
-        const owner = NAF.utils.getNetworkOwner(this.networkedEl);
-        if (!NAF.utils.isMine(this.networkedEl) && NAF.connection.hasActiveDataChannel(owner)) {
-          NAF.connection.sendDataGuaranteed(owner, this.drawingId, {
-            type: MSG_CONFIRM_CONNECT,
-            clientId: NAF.clientId
-          });
-          this.connectedToOwner = true;
+      const head = this.drawBuffer[0];
+      if (head != null && this.drawBuffer.length >= 9) {
+        position.set(this.drawBuffer[0], this.drawBuffer[1], this.drawBuffer[2]);
+        direction.set(this.drawBuffer[3], this.drawBuffer[4], this.drawBuffer[5]);
+        this.radius = Math.round(direction.length() * 1000) / 1000; //radius is encoded as length of direction vector
+        direction.normalize();
+        normal.set(this.drawBuffer[6], this.drawBuffer[7], this.drawBuffer[8]);
+        this.color.setHex(Math.round(normal.length()) - 1); //color is encoded as length of normal vector
+        normal.normalize();
+
+        if (!this.remoteLineStarted) {
+          this.startDraw(position, direction, normal);
+          this.remoteLineStarted = true;
+        } else {
+          this.doDraw(position, direction, normal);
         }
+        this.drawBuffer.splice(0, 9);
+      } else if (head === null && this.remoteLineStarted) {
+        this.endDraw(position, direction, normal);
+        this.remoteLineStarted = false;
+        this.drawBuffer.shift();
       }
-
-      if (this.drawBuffer.length > 0 && NAF.connection.isConnected() && this.networkedEl) {
-        if (!NAF.utils.isMine(this.networkedEl)) {
-          const head = this.drawBuffer[0];
-          if (head != null && this.drawBuffer.length >= 9) {
-            position.set(this.drawBuffer[0], this.drawBuffer[1], this.drawBuffer[2]);
-            direction.set(this.drawBuffer[3], this.drawBuffer[4], this.drawBuffer[5]);
-            this.radius = direction.length(); //radius is encoded as length of direction vector
-            direction.normalize();
-            normal.set(this.drawBuffer[6], this.drawBuffer[7], this.drawBuffer[8]);
-            this.color.setHex(Math.round(normal.length()) - 1); //color is encoded as length of normal vector
-            normal.normalize();
-
-            if (!this.remoteLineStarted) {
-              this.startDraw(position, direction, normal);
-              this.remoteLineStarted = true;
-            } else {
-              this.doDraw(position, direction, normal);
-            }
-            this.drawBuffer.splice(0, 9);
-          } else if (head === null && this.remoteLineStarted) {
-            this.endDraw(position, direction, normal);
-            this.remoteLineStarted = false;
-            this.drawBuffer.shift();
-          }
-        } else if (this.bufferIndex < this.drawBuffer.length) {
-          //TODO: don't do this on every tick?
-          copyArray.length = 0;
-          copyData(this.drawBuffer, copyArray, this.bufferIndex, this.drawBuffer.length - 1);
-          this.bufferIndex = this.drawBuffer.length;
-          NAF.connection.broadcastDataGuaranteed(this.drawingId, { type: MSG_BUFFER_DATA, buffer: copyArray });
-        }
-      }
-
-      this.deleteLines();
     };
   })(),
 
@@ -201,12 +210,13 @@ AFRAME.registerComponent("networked-drawing", {
             buffer: this.drawBuffer
           });
         } else {
-          //TODO: do this in tick?
-          let x = 0;
-          while (x < this.drawBuffer.length) {
-            x = Math.min(x + chunkAmount, this.drawBuffer.length);
+          let start = 0;
+          let end = 0;
+          while (end < this.drawBuffer.length) {
+            end = Math.min(end + chunkAmount, this.drawBuffer.length);
             copyArray.length = 0;
-            copyData(this.drawBuffer, copyArray, x - chunkAmount, x - 1);
+            copyData(this.drawBuffer, copyArray, start, end - 1);
+            start = end;
             NAF.connection.sendDataGuaranteed(clientId, this.drawingId, {
               type: MSG_BUFFER_DATA_FULL,
               parts: Math.ceil(this.drawBuffer.length / chunkAmount),
@@ -261,7 +271,6 @@ AFRAME.registerComponent("networked-drawing", {
 
     this.lastPoint.copy(position);
     this.addToDrawBuffer(position, direction, normal);
-    this.lastDrawTime = Date.now();
   },
 
   draw(position, direction, normal, color, radius) {
@@ -274,9 +283,8 @@ AFRAME.registerComponent("networked-drawing", {
     }
     if (radius) this.radius = radius;
 
-    this.doDraw(position, direction, normal);
-
     this.addToDrawBuffer(position, direction, normal);
+    this.doDraw(position, direction, normal);
   },
 
   doDraw: (() => {
@@ -328,7 +336,7 @@ AFRAME.registerComponent("networked-drawing", {
   endDraw(position, direction, normal) {
     if (!this.lineStarted && this.drawStarted) {
       this.drawPoint(position);
-    } else {
+    } else if (this.lineStarted && this.drawStarted) {
       this.draw(position, direction, normal);
       this.doEndDraw(position, direction);
     }
@@ -350,12 +358,16 @@ AFRAME.registerComponent("networked-drawing", {
   })(),
 
   endLine() {
+    if (!this.drawStarted) return;
+
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) this.pushToDrawBuffer(null);
-    this.drawBufferHistory.push({
+
+    const datum = {
       drawBufferCount: this.drawBufferCount,
       idxLength: this.vertexCount - 1,
       time: Date.now()
-    });
+    };
+    this.drawBufferHistory.push(datum);
     this.vertexCount = 0;
     this.drawBufferCount = 0;
     this.currentPointCount = 0;

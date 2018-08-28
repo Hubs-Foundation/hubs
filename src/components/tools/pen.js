@@ -1,5 +1,7 @@
 /**
  * Pen tool
+ * A tool that allows drawing on networked-drawing components.
+ * @namespace drawing
  * @component pen
  */
 
@@ -9,17 +11,15 @@ function almostEquals(epsilon, u, v) {
 
 AFRAME.registerComponent("pen", {
   schema: {
-    drawFrequency: { default: 20 },
-    minDistanceBetweenPoints: { default: 0.01 },
-    defaultDirection: { default: { x: 1, y: 0, z: 0 } },
+    drawFrequency: { default: 20 }, //frequency of polling for drawing points
+    minDistanceBetweenPoints: { default: 0.01 }, //minimum distance to register new drawing point
     camera: { type: "selector" },
-    drawing: { type: "string" },
     drawingManager: { type: "string" },
     color: { type: "color", default: "#FF0033" },
     availableColors: {
       default: ["#FF0033", "#FFFF00", "#00FF33", "#0099FF", "#9900FF", "#FFFFFF", "#000000"]
     },
-    radius: { default: 0.01 },
+    radius: { default: 0.01 }, //drawing geometry radius
     minRadius: { default: 0.005 },
     maxRadius: { default: 0.05 }
   },
@@ -33,8 +33,7 @@ AFRAME.registerComponent("pen", {
     this.lastPosition = new THREE.Vector3();
     this.lastPosition.copy(this.el.object3D.position);
 
-    this.direction = new THREE.Vector3();
-    this.direction.copy(this.data.defaultDirection);
+    this.direction = new THREE.Vector3(1, 0, 0);
 
     this.currentDrawing = null;
 
