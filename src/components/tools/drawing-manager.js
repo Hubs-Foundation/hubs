@@ -10,19 +10,11 @@ AFRAME.registerComponent("drawing-manager", {
   },
 
   init() {
-    this.handleDrawingInitialized = this.handleDrawingInitialized.bind(this);
-
     this.drawingToPen = new Map();
   },
 
   play() {
     this.drawing = document.querySelector(this.data.drawing).components["networked-drawing"];
-  },
-
-  handleDrawingInitialized(e) {
-    if (e.detail.name === "networked-drawing") {
-      this.drawing = this.drawingEl.components["networked-drawing"];
-    }
   },
 
   getDrawing(pen) {

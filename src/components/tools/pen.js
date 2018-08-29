@@ -11,7 +11,7 @@ function almostEquals(epsilon, u, v) {
 
 AFRAME.registerComponent("pen", {
   schema: {
-    drawFrequency: { default: 20 }, //frequency of polling for drawing points
+    drawFrequency: { default: 5 }, //frequency of polling for drawing points
     minDistanceBetweenPoints: { default: 0.01 }, //minimum distance to register new drawing point
     camera: { type: "selector" },
     drawingManager: { type: "string" },
@@ -25,8 +25,8 @@ AFRAME.registerComponent("pen", {
   },
 
   init() {
-    this.stateAdded = this.stateAdded.bind(this);
-    this.stateRemoved = this.stateRemoved.bind(this);
+    this._stateAdded = this._stateAdded.bind(this);
+    this._stateRemoved = this._stateRemoved.bind(this);
 
     this.timeSinceLastDraw = 0;
 
@@ -49,13 +49,13 @@ AFRAME.registerComponent("pen", {
   play() {
     this.drawingManager = document.querySelector(this.data.drawingManager).components["drawing-manager"];
 
-    this.el.parentNode.addEventListener("stateadded", this.stateAdded);
-    this.el.parentNode.addEventListener("stateremoved", this.stateRemoved);
+    this.el.parentNode.addEventListener("stateadded", this._stateAdded);
+    this.el.parentNode.addEventListener("stateremoved", this._stateRemoved);
   },
 
   pause() {
-    this.el.parentNode.removeEventListener("stateadded", this.stateAdded);
-    this.el.parentNode.removeEventListener("stateremoved", this.stateRemoved);
+    this.el.parentNode.removeEventListener("stateadded", this._stateAdded);
+    this.el.parentNode.removeEventListener("stateremoved", this._stateRemoved);
   },
 
   update(prevData) {
@@ -81,7 +81,7 @@ AFRAME.registerComponent("pen", {
         time >= this.data.drawFrequency &&
         this.currentDrawing.getLastPoint().distanceTo(this.worldPosition) >= this.data.minDistanceBetweenPoints
       ) {
-        this.getNormal(this.normal, this.worldPosition, this.direction);
+        this._getNormal(this.normal, this.worldPosition, this.direction);
         this.currentDrawing.draw(this.worldPosition, this.direction, this.normal, this.data.color, this.data.radius);
       }
 
@@ -90,7 +90,7 @@ AFRAME.registerComponent("pen", {
   },
 
   //helper function to get normal of direction of drawing cross direction to camera
-  getNormal: (() => {
+  _getNormal: (() => {
     const directionToCamera = new THREE.Vector3();
     return function(normal, position, direction) {
       directionToCamera.subVectors(position, this.data.camera.object3D.position).normalize();
@@ -98,54 +98,54 @@ AFRAME.registerComponent("pen", {
     };
   })(),
 
-  startDraw() {
+  _startDraw() {
     this.currentDrawing = this.drawingManager.getDrawing(this);
     if (this.currentDrawing) {
       this.el.object3D.getWorldPosition(this.worldPosition);
-      this.getNormal(this.normal, this.worldPosition, this.direction);
+      this._getNormal(this.normal, this.worldPosition, this.direction);
 
       this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal, this.data.color, this.data.radius);
     }
   },
 
-  endDraw() {
+  _endDraw() {
     if (this.currentDrawing) {
       this.timeSinceLastDraw = 0;
       this.el.object3D.getWorldPosition(this.worldPosition);
-      this.getNormal(this.normal, this.worldPosition, this.direction);
+      this._getNormal(this.normal, this.worldPosition, this.direction);
       this.currentDrawing.endDraw(this.worldPosition, this.direction, this.normal);
       this.drawingManager.returnDrawing(this);
       this.currentDrawing = null;
     }
   },
 
-  changeColor(mod) {
+  _changeColor(mod) {
     this.colorIndex = (this.colorIndex + mod + this.data.availableColors.length) % this.data.availableColors.length;
     this.data.color = this.data.availableColors[this.colorIndex];
     this.el.setAttribute("color", this.data.color);
   },
 
-  changeRadius(mod) {
+  _changeRadius(mod) {
     this.data.radius = Math.max(this.data.minRadius, Math.min(this.data.radius + mod, this.data.maxRadius));
     this.el.setAttribute("radius", this.data.radius);
   },
 
-  stateAdded(evt) {
+  _stateAdded(evt) {
     switch (evt.detail) {
       case "activated":
-        this.startDraw();
+        this._startDraw();
         break;
       case "colorNext":
-        this.changeColor(1);
+        this._changeColor(1);
         break;
       case "colorPrev":
-        this.changeColor(-1);
+        this._changeColor(-1);
         break;
       case "radiusUp":
-        this.changeRadius(this.data.minRadius);
+        this._changeRadius(this.data.minRadius);
         break;
       case "radiusDown":
-        this.changeRadius(-this.data.minRadius);
+        this._changeRadius(-this.data.minRadius);
         break;
       case "grabbed":
         this.grabbed = true;
@@ -155,14 +155,14 @@ AFRAME.registerComponent("pen", {
     }
   },
 
-  stateRemoved(evt) {
+  _stateRemoved(evt) {
     switch (evt.detail) {
       case "activated":
-        this.endDraw();
+        this._endDraw();
         break;
       case "grabbed":
         this.grabbed = false;
-        this.endDraw();
+        this._endDraw();
         break;
       default:
         break;
