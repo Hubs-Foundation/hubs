@@ -186,8 +186,10 @@ export default class ActionEventHandler {
   }
 
   onPrimaryDown(e) {
-    this.onDown(e, "primary_hand_grab");
-    this.gotPrimaryDown = true;
+    if (!this.gotPrimaryDown) {
+      this.onDown(e, "primary_hand_grab");
+      this.gotPrimaryDown = true;
+    }
   }
 
   onPrimaryUp(e) {
