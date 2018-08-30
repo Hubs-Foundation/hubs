@@ -27,7 +27,7 @@
         physics="gravity: -6; debug: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         freeze-controller="toggleEvent: action_freeze"
-        personal-space-bubble="debug: false;"
+        personal-space-bubble="enabled: false; debug: false;"
         vr-mode-ui="enabled: false"
         pinch-to-move
         input-configurator="
@@ -327,7 +327,7 @@
               class="camera"
               camera
               position="0 1.6 0"
-              personal-space-bubble="radius: 0.4"
+              personal-space-bubble="enabled: false; radius: 0.4;"
               pitch-yaw-rotator
           >
             <a-entity
@@ -436,16 +436,15 @@
             networked="template: #interactable-drawing;"
         ></a-entity>
 
-        <!-- TODO: remove this once the pens are added into the environments -->
         <a-entity 
-            media-loader="src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-484ae5682f.gltf"
-            class="interactable toggle" 
-            super-spawner="template: #pen-interactable; src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-484ae5682f.gltf;" 
-            position="-1 1.2 -5.5"
-            scale="0.5 0.5 0.5" 
-            body="mass: 0; type: static; shape: box;"
-            collision-filter="collisionForces: false"
-            hoverable
+        super-spawner="
+            template: #pen-interactable; 
+            src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-484ae5682f.gltf;
+            centerSpawnedObject: true;
+            spawnEvent: spawn_pen; 
+            defaultHand: #cursor;
+            useCustomSpawnScale: true;
+            spawnScale: 0.5 0.5 0.5;" 
         ></a-entity>
     </a-scene>
 

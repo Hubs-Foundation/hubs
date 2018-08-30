@@ -73,7 +73,7 @@ AFRAME.registerComponent("cursor-controller", {
         this.updateRay();
       }
 
-      const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
+      const isGrabbing = this.isInteracting();
       if (isGrabbing) {
         const distance = Math.min(
           this.data.maxDistance,
@@ -151,6 +151,10 @@ AFRAME.registerComponent("cursor-controller", {
     this.el.components.raycaster.checkIntersections();
     this.updateDistanceAndTargetType();
     this.data.cursor.components["static-body"].syncToPhysics();
+  },
+
+  isInteracting: function() {
+    return this.data.cursor.components["super-hands"].state.has("grab-start");
   },
 
   startInteraction: function() {

@@ -4,7 +4,7 @@ import { ObjectContentOrigins } from "../object-types";
 
 let nextGrabId = 0;
 /**
- * Spawns networked objects when grabbed.
+ * Spawns networked objects when grabbed or when a specified event is fired.
  * @namespace network
  * @component super-spawner
  */
@@ -52,7 +52,17 @@ AFRAME.registerComponent("super-spawner", {
     /**
      * Center the spawned object on the hand that grabbed it after it finishes loading. By default the object will be grabbed relative to where the spawner was grabbed
      */
-    centerSpawnedObject: { default: false }
+    centerSpawnedObject: { default: false },
+
+    /**
+     * Optional event to listen for to spawn an object on the defaultHand
+     */
+    spawnEvent: { type: "string" },
+
+    /**
+     * The hand to use if an object is spawned via spawnEvent
+     */
+    defaultHand: { type: "selector" }
   },
 
   init() {
@@ -60,16 +70,26 @@ AFRAME.registerComponent("super-spawner", {
     this.cooldownTimeout = null;
     this.onGrabStart = this.onGrabStart.bind(this);
     this.onGrabEnd = this.onGrabEnd.bind(this);
+
+    this.onSpawnEvent = this.onSpawnEvent.bind(this);
+
+    this.sceneEl = document.querySelector("a-scene");
   },
 
   play() {
     this.el.addEventListener("grab-start", this.onGrabStart);
     this.el.addEventListener("grab-end", this.onGrabEnd);
+    if (this.data.spawnEvent) {
+      this.sceneEl.addEventListener(this.data.spawnEvent, this.onSpawnEvent);
+    }
   },
 
   pause() {
     this.el.removeEventListener("grab-start", this.onGrabStart);
     this.el.removeEventListener("grab-end", this.onGrabEnd);
+    if (this.data.spawnEvent) {
+      this.sceneEl.removeEventListener(this.data.spawnEvent, this.onSpawnEvent);
+    }
 
     if (this.cooldownTimeout) {
       clearTimeout(this.cooldownTimeout);
@@ -81,6 +101,32 @@ AFRAME.registerComponent("super-spawner", {
 
   remove() {
     this.heldEntities.clear();
+  },
+
+  async onSpawnEvent(e) {
+    const hand = this.data.defaultHand;
+
+    if (this.cooldownTimeout || !hand) {
+      return;
+    }
+
+    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER);
+
+    entity.object3D.position.copy(hand.object3D.position);
+    entity.object3D.rotation.copy(hand.object3D.rotation);
+    entity.object3D.scale.copy(this.data.useCustomSpawnScale ? this.data.spawnScale : this.el.object3D.scale);
+
+    this.activateCooldown();
+
+    await waitForEvent("body-loaded", entity);
+
+    if (this.data.centerSpawnedObject) {
+      entity.body.position.copy(hand.object3D.position);
+    }
+
+    for (let i = 0; i < this.data.grabEvents.length; i++) {
+      hand.emit(this.data.grabEvents[i], { targetEntity: entity });
+    }
   },
 
   async onGrabStart(e) {

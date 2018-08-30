@@ -4,7 +4,7 @@ import cx from "classnames";
 
 import styles from "../assets/stylesheets/2d-hud.scss";
 
-const TopHUD = ({ muted, frozen, spacebubble, onToggleMute, onToggleFreeze, onToggleSpaceBubble }) => (
+const TopHUD = ({ muted, frozen, spacebubble, onToggleMute, onToggleFreeze, onToggleSpaceBubble, onSpawnPen }) => (
   <div className={cx(styles.container, styles.top)}>
     <div className={cx("ui-interactive", styles.panel, styles.left)}>
       <div
@@ -20,9 +20,12 @@ const TopHUD = ({ muted, frozen, spacebubble, onToggleMute, onToggleFreeze, onTo
     />
     <div className={cx("ui-interactive", styles.panel, styles.right)}>
       <div
-        className={cx(styles.iconButton, styles.bubble, { [styles.active]: spacebubble })}
-        title={spacebubble ? "Disable Bubble" : "Enable Bubble"}
-        onClick={onToggleSpaceBubble}
+        // className={cx(styles.iconButton, styles.bubble, { [styles.active]: spacebubble })}
+        // title={spacebubble ? "Disable Bubble" : "Enable Bubble"}
+        // onClick={onToggleSpaceBubble}
+        className={cx(styles.iconButton, styles.spawn_pen)}
+        title={"Drawing Pen"}
+        onClick={onSpawnPen}
       />
     </div>
   </div>
@@ -34,7 +37,8 @@ TopHUD.propTypes = {
   spacebubble: PropTypes.bool,
   onToggleMute: PropTypes.func,
   onToggleFreeze: PropTypes.func,
-  onToggleSpaceBubble: PropTypes.func
+  onToggleSpaceBubble: PropTypes.func,
+  onSpawnPen: PropTypes.func
 };
 
 const BottomHUD = ({ onCreateObject }) => (

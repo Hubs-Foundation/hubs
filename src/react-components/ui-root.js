@@ -160,6 +160,10 @@ class UIRoot extends Component {
     this.props.scene.emit("action_space_bubble");
   };
 
+  spawnPen = () => {
+    this.props.scene.emit("spawn_pen");
+  };
+
   handleForcedVREntryType = () => {
     if (!this.props.forcedVREntryType) return;
 
@@ -892,6 +896,7 @@ class UIRoot extends Component {
                 onToggleMute={this.toggleMute}
                 onToggleFreeze={this.toggleFreeze}
                 onToggleSpaceBubble={this.toggleSpaceBubble}
+                onSpawnPen={this.spawnPen}
               />
               {!this.props.availableVREntryTypes.isInHMD &&
                 this.props.occupantCount <= 1 && (

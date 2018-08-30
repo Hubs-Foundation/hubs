@@ -72,6 +72,7 @@ export default class MouseEventsHandler {
   }
 
   onRightButtonDown() {
+    this.isLeftButtonHandledByCursor = this.cursor.isInteracting();
     if (!this.isLeftButtonHandledByCursor) {
       if (this.isPointerLocked) {
         document.exitPointerLock();
