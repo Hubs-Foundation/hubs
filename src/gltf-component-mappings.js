@@ -33,7 +33,7 @@ AFRAME.GLTFModelPlus.registerComponent(
     const orientation = new THREE.Quaternion();
     return (el, componentName, componentData) => {
       const { scale, rotation } = componentData;
-      euler.copy(rotation);
+      euler.set(rotation.x, rotation.y, rotation.z);
       orientation.setFromEuler(euler);
       el.setAttribute(componentName, {
         shape: "box",
