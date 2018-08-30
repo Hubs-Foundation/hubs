@@ -112,6 +112,7 @@ export default class ActionEventHandler {
     event = event || e.type;
     const superHand = e.target.components["super-hands"];
     const isCursorHand = this.isHandThatAlsoDrivesCursor(e.target);
+    this.isCursorInteracting = this.cursor.isInteracting();
     if (isCursorHand && !this.isCursorInteracting) {
       if (superHand.state.has("hover-start") || superHand.state.get("grab-start")) {
         e.target.emit(event);
@@ -132,7 +133,7 @@ export default class ActionEventHandler {
       //need to check both grab-start and hover-start in the case that the spawner is being grabbed this frame
       if (this.isToggle(this.cursorHand.state.get("grab-start") || this.cursorHand.state.get("hover-start"))) {
         this.cursorHand.el.emit(event);
-        this.isCursorInteracting = !!this.cursorHand.state.get("grab-start");
+        this.isCursorInteracting = this.cursor.isInteracting();
       } else {
         this.isCursorInteracting = false;
         this.cursor.endInteraction();

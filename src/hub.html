@@ -27,7 +27,7 @@
         physics="gravity: -6; debug: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         freeze-controller="toggleEvent: action_freeze"
-        personal-space-bubble="enabled: false; debug: false;"
+        personal-space-bubble="debug: false;"
         vr-mode-ui="enabled: false"
         pinch-to-move
         input-configurator="
@@ -56,6 +56,8 @@
             <img id="freeze-off-hover" crossorigin="anonymous" src="./assets/hud/freeze_off-hover.png">
             <img id="freeze-on" crossorigin="anonymous" src="./assets/hud/freeze_on.png">
             <img id="freeze-on-hover" crossorigin="anonymous" src="./assets/hud/freeze_on-hover.png">
+            <img id="spawn-pen" crossorigin="anonymous" src="./assets/hud/spawn_pen.png">
+            <img id="spawn-pen-hover" crossorigin="anonymous" src="./assets/hud/spawn_pen-hover.png">
 
             <a-asset-item id="botdefault" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDefault_Avatar-9f71f8ff22.gltf"></a-asset-item>
             <a-asset-item id="botbobo" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotBobo_Avatar-f9740a010b.gltf"></a-asset-item>
@@ -315,7 +317,7 @@
               <a-rounded height="0.13" width="0.48" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
               <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover" scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="ui hud mic" material="alphaTest:0.1;"></a-image>
               <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover" scale="0.2 0.2 0.2" position="0 0 0.005" class="ui hud freeze"></a-image>
-              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Enable Bubble; activeTooltipText: Disable Bubble; image: #bubble-off; hoverImage: #bubble-off-hover; activeImage: #bubble-on; activeHoverImage: #bubble-on-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="ui hud bubble" material="alphaTest:0.1;"></a-image>
+              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Spawn Pen; activeTooltipText: Spawn Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="ui hud pen" material="alphaTest:0.1;"></a-image>
               <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
                 <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" ></a-entity>
               </a-rounded>
@@ -327,7 +329,7 @@
               class="camera"
               camera
               position="0 1.6 0"
-              personal-space-bubble="enabled: false; radius: 0.4;"
+              personal-space-bubble="radius: 0.4;"
               pitch-yaw-rotator
           >
             <a-entity
