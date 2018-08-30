@@ -375,22 +375,28 @@ AFRAME.registerComponent("networked-drawing", {
     this.drawStarted = false;
   },
 
-  _addToDrawBuffer(position, direction, normal) {
-    if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
-      ++this.currentPointCount;
-      this._pushToDrawBuffer(position.x);
-      this._pushToDrawBuffer(position.y);
-      this._pushToDrawBuffer(position.z);
-      direction.setLength(this.radius); //encode radius as length of direction vector
-      this._pushToDrawBuffer(direction.x);
-      this._pushToDrawBuffer(direction.y);
-      this._pushToDrawBuffer(direction.z);
-      normal.setLength(this.color.getHex() + 1); //encode color as length, add one in case color is black
-      this._pushToDrawBuffer(normal.x);
-      this._pushToDrawBuffer(normal.y);
-      this._pushToDrawBuffer(normal.z);
-    }
-  },
+  _addToDrawBuffer: (() => {
+    const copyDirection = new THREE.Vector3();
+    const copyNormal = new THREE.Vector3();
+    return function(position, direction, normal) {
+      if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
+        ++this.currentPointCount;
+        this._pushToDrawBuffer(position.x);
+        this._pushToDrawBuffer(position.y);
+        this._pushToDrawBuffer(position.z);
+        copyDirection.copy(direction);
+        copyDirection.setLength(this.radius); //encode radius as length of direction vector
+        this._pushToDrawBuffer(copyDirection.x);
+        this._pushToDrawBuffer(copyDirection.y);
+        this._pushToDrawBuffer(copyDirection.z);
+        copyNormal.copy(normal);
+        copyNormal.setLength(this.color.getHex() + 1); //encode color as length, add one in case color is black
+        this._pushToDrawBuffer(copyNormal.x);
+        this._pushToDrawBuffer(copyNormal.y);
+        this._pushToDrawBuffer(copyNormal.z);
+      }
+    };
+  })(),
 
   _pushToDrawBuffer(val) {
     ++this.drawBufferCount;
