@@ -103,7 +103,7 @@ AFRAME.registerComponent("super-spawner", {
     this.heldEntities.clear();
   },
 
-  async onSpawnEvent(e) {
+  async onSpawnEvent() {
     const hand = this.data.defaultHand;
 
     if (this.cooldownTimeout || !hand) {
