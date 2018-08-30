@@ -22,12 +22,13 @@ const remember = function remember(keyFrame, prevKeyFrame) {
 const consume = function consume(queue, frame) {
   for (let i = 0; i < queue.length; i++) {
     const event = queue[i];
+    const key = event.key.toLowerCase();
     switch (event.type) {
       case "keydown":
-        frame[event.key] = true;
+        frame[key] = true;
         break;
       case "keyup":
-        frame[event.key] = false;
+        frame[key] = false;
         break;
       case "blur":
         for (const key in frame) {
@@ -112,7 +113,7 @@ const bindDefn = [
       keys: ["d", "a", "w", "s"],
       filters: ["key", "key", "key", "key"]
     }
-  }
+  },
   // means that
   //
   //   `AFRAME.scenes[0].systems.keyboardFrame.poll( "move" )`
@@ -122,6 +123,12 @@ const bindDefn = [
   //   -1 < v < 1,
   // replacing the need for the component, wasd-to-analog2d.
   // TODO: The filter doesn't fully mimick wasd-to-analog2d yet.
+  {
+    action: "boost",
+    set: "moving",
+    filter: "key",
+    key: "shift"
+  }
 ];
 
 const actionFrame = {};
@@ -147,7 +154,7 @@ const fillActionFrameFromBinding = function fillActionFrameFromBinding(binding, 
       if (!binding.filterFn) {
         binding.filterFn = key4_to_vec2();
       }
-      action = binding.filterFn.filter(binding.filter_params, keyFrame, prevKeyFrame, actionFrame);
+      action = binding.filterFn.filter(binding.filter_params, keyFrame, prevKeyFrame);
       break;
   }
   actionFrame[binding.action] = action;

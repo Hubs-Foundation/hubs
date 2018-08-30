@@ -115,7 +115,8 @@ AFRAME.registerComponent("character-controller", {
       const deltaSeconds = dt / 1000;
       const root = this.el.object3D;
       const pivot = this.data.pivot.object3D;
-      const distance = this.data.groundAcc * deltaSeconds;
+      const boost = keyboardFrame.poll("boost") ? 2 : 1;
+      const distance = this.data.groundAcc * deltaSeconds * boost;
       const rotationDelta = this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
 
       startScale.copy(root.scale);
