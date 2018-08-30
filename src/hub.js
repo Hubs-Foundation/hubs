@@ -91,7 +91,7 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
-import { addMedia } from "./utils/media-utils";
+import { addMedia, resolveMedia } from "./utils/media-utils";
 
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
@@ -534,16 +534,16 @@ const onReady = async () => {
 
   channel
     .join()
-    .receive("ok", data => {
+    .receive("ok", async data => {
       const hub = data.hubs[0];
       const defaultSpaceTopic = hub.topics[0];
       const sceneUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
-
       console.log(`Scene URL: ${sceneUrl}`);
 
       if (/\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl)) {
+        const resolved = await resolveMedia(sceneUrl, false, 0);
         const gltfEl = document.createElement("a-entity");
-        gltfEl.setAttribute("gltf-model-plus", { src: sceneUrl, inflate: true });
+        gltfEl.setAttribute("gltf-model-plus", { src: resolved.raw, inflate: true });
         gltfEl.addEventListener("model-loaded", () => initialEnvironmentEl.emit("bundleloaded"));
         initialEnvironmentEl.appendChild(gltfEl);
       } else {

@@ -1,5 +1,4 @@
 import "./components/gltf-model-plus";
-import { resolveURL } from "./utils/resolveURL";
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
@@ -30,10 +29,4 @@ AFRAME.GLTFModelPlus.registerComponent("visible", "visible");
 AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point");
 AFRAME.GLTFModelPlus.registerComponent("hoverable", "hoverable");
 AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
-AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, componentName, componentData, gltfPath) => {
-  if (componentData.src) {
-    componentData.src = resolveURL(componentData.src, gltfPath);
-  }
-
-  el.setAttribute(componentName, componentData);
-});
+AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh");
