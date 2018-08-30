@@ -10,27 +10,24 @@ const GLTFCache = {};
 let CachedEnvMapTexture = null;
 
 AFRAME.GLTFModelPlus = {
-  // eslint-disable-next-line no-unused-vars
-  defaultInflator(el, componentName, componentData, _gltfPath) {
-    if (!AFRAME.components[componentName]) {
-      throw new Error(`Inflator failed. "${componentName}" component does not exist.`);
-    }
-    if (AFRAME.components[componentName].multiple && Array.isArray(componentData)) {
-      for (let i = 0; i < componentData.length; i++) {
-        el.setAttribute(componentName + "__" + i, componentData[i]);
-      }
-    } else {
-      el.setAttribute(componentName, componentData);
-    }
-  },
-  registerComponent(componentKey, componentName, inflator) {
-    AFRAME.GLTFModelPlus.components[componentKey] = {
-      inflator: inflator || AFRAME.GLTFModelPlus.defaultInflator,
-      componentName
-    };
-  },
-  components: {}
+  components: {},
+  registerComponent(componentKey, componentName) {
+    AFRAME.GLTFModelPlus.components[componentKey] = componentName;
+  }
 };
+
+function inflateComponent(el, componentName, componentData) {
+  if (!AFRAME.components[componentName]) {
+    throw new Error(`Inflator failed. "${componentName}" component does not exist.`);
+  }
+  if (AFRAME.components[componentName].multiple && Array.isArray(componentData)) {
+    for (let i = 0; i < componentData.length; i++) {
+      el.setAttribute(componentName + "__" + i, componentData[i]);
+    }
+  } else {
+    el.setAttribute(componentName, componentData);
+  }
+}
 
 // From https://gist.github.com/cdata/f2d7a6ccdec071839bc1954c32595e87
 // Tracking glTF cloning here: https://github.com/mrdoob/three.js/issues/11573
@@ -89,12 +86,12 @@ function cloneGltf(gltf) {
 /// or templates associated with any of their nodes.)
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
-const inflateEntities = function(node, templates, gltfPath, isRoot) {
+const inflateEntities = function(node, templates, isRoot) {
   // inflate subtrees first so that we can determine whether or not this node needs to be inflated
   const childEntities = [];
   const children = node.children.slice(0); // setObject3D mutates the node's parent, so we have to copy
   for (const child of children) {
-    const el = inflateEntities(child, templates, gltfPath);
+    const el = inflateEntities(child, templates);
     if (el) {
       childEntities.push(el);
     }
@@ -156,11 +153,8 @@ const inflateEntities = function(node, templates, gltfPath, isRoot) {
   if (entityComponents) {
     for (const prop in entityComponents) {
       if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
-        const { inflator, componentName } = AFRAME.GLTFModelPlus.components[prop];
-
-        if (inflator) {
-          inflator(el, componentName, entityComponents[prop], gltfPath);
-        }
+        const componentName = AFRAME.GLTFModelPlus.components[prop];
+        inflateComponent(el, componentName, entityComponents[prop]);
       }
     }
   }
@@ -320,8 +314,6 @@ AFRAME.registerComponent("gltf-model-plus", {
         return;
       }
 
-      const gltfPath = THREE.LoaderUtils.extractUrlBase(src);
-
       if (!GLTFCache[src]) {
         GLTFCache[src] = loadGLTF(src, contentType, this.preferredTechnique);
       }
@@ -339,7 +331,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.model.animations = model.animations;
 
       let object3DToSet = this.model;
-      if (this.data.inflate && (this.inflatedEl = inflateEntities(this.model, this.templates, gltfPath, true))) {
+      if (this.data.inflate && (this.inflatedEl = inflateEntities(this.model, this.templates, true))) {
         this.el.appendChild(this.inflatedEl);
         object3DToSet = this.inflatedEl.object3D;
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
