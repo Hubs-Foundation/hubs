@@ -28,7 +28,7 @@ AFRAME.registerComponent("media-loader", {
     const box = getBox(this.el, mesh);
     const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
     this.el.object3DMap.mesh.scale.multiplyScalar(scaleCoefficient);
-    if (this.el.body && this.shapeAdded) {
+    if (this.el.body && this.shapeAdded && this.el.body.shapes.length > 1) {
       this.el.removeAttribute("shape");
       this.shapeAdded = false;
     } else if (this.el.body.shapes.length === 0) {

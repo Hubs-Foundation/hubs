@@ -68,7 +68,6 @@ const config = {
       "oculus-touch-controls": {
         joystick_dpad4_west: { right: "snap_rotate_left" },
         joystick_dpad4_east: { right: "snap_rotate_right" },
-        joystick_dpad4_center: { left: "action_primary_up", right: "action_primary_up" },
         gripdown: ["primary_action_grab", "middle_ring_pinky_down"],
         gripup: ["primary_action_release", "middle_ring_pinky_up"],
         abuttontouchstart: ["thumb_down", "increase_radius"],
