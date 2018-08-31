@@ -22,13 +22,12 @@ const remember = function remember(keyFrame, prevKeyFrame) {
 const consume = function consume(queue, frame) {
   for (let i = 0; i < queue.length; i++) {
     const event = queue[i];
-    const key = event.key.toLowerCase();
     switch (event.type) {
       case "keydown":
-        frame[key] = true;
+        frame[event.key.toLowerCase()] = true;
         break;
       case "keyup":
-        frame[key] = false;
+        frame[event.key.toLowerCase()] = false;
         break;
       case "blur":
         for (const key in frame) {

@@ -56,6 +56,37 @@ AFRAME.registerComponent("cursor-controller", {
     const cameraPos = new THREE.Vector3();
 
     return function() {
+      const mouseFrame = AFRAME.scenes[0].systems.mouseFrame;
+      if (!mouseFrame.isActive("targetHovering") && !mouseFrame.isActive("objectMoving")) {
+        if (this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI)) {
+          mouseFrame.activateSet("targetHovering");
+        }
+      }
+      if (mouseFrame.isActive("targetHovering") && !mouseFrame.isActive("objectMoving")) {
+        if (!this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI)) {
+          mouseFrame.deactivateSet("targetHovering");
+        }
+      }
+      if (mouseFrame.isActive("targetHovering") && !mouseFrame.isActive("objectMoving")) {
+        if (mouseFrame.poll("grabTargettedObject")) {
+          this.startInteraction();
+          mouseFrame.activateSet("objectMoving");
+        }
+      }
+      if (mouseFrame.isActive("objectMoving")) {
+        this.changeDistanceMod(mouseFrame.poll("dCursorDistanceMod"));
+        if (mouseFrame.poll("dropGrabbedObject")) {
+          this.endInteraction();
+          mouseFrame.deactivateSet("objectMoving");
+        }
+      }
+      if (mouseFrame.isActive("cursorMoving")) {
+        const cursorMovement = mouseFrame.poll("cursorMovement");
+        if (cursorMovement[0] !== 0 || cursorMovement[1] !== 0) {
+          this.moveCursor(cursorMovement[0], cursorMovement[1]);
+        }
+      }
+
       if (!this.enabled) {
         return;
       }
@@ -112,6 +143,7 @@ AFRAME.registerComponent("cursor-controller", {
     raycaster.setFromCamera(this.mousePos, camera);
     this.origin.copy(raycaster.ray.origin);
     this.direction.copy(raycaster.ray.direction);
+    this.direction.normalize();
     this.updateRay();
   },
 
