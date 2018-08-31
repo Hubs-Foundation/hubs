@@ -271,6 +271,8 @@ AFRAME.registerComponent("skybox", {
       const z = distance * Math.sin(phi) * Math.cos(theta);
 
       uniforms.sunPosition.value.set(x, y, z).normalize();
+
+      this.sky.scale.set(distance, distance, distance);
     }
   },
 

@@ -4,6 +4,9 @@ AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
 AFRAME.GLTFModelPlus.registerComponent("sound", "sound");
 AFRAME.GLTFModelPlus.registerComponent("collision-filter", "collision-filter");
 AFRAME.GLTFModelPlus.registerComponent("css-class", "css-class");
+AFRAME.GLTFModelPlus.registerComponent("interactable", "css-class", (el, componentName) => {
+  el.setAttribute(componentName, "interactable");
+});
 AFRAME.GLTFModelPlus.registerComponent("scene-shadow", "scene-shadow");
 AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner");
 AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
@@ -43,7 +46,13 @@ AFRAME.GLTFModelPlus.registerComponent(
     };
   })()
 );
-AFRAME.GLTFModelPlus.registerComponent("visible", "visible");
+AFRAME.GLTFModelPlus.registerComponent("visible", "visible", (el, componentName, componentData) => {
+  if (typeof componentData === "object") {
+    el.setAttribute(componentName, componentData.visible);
+  } else {
+    el.setAttribute(componentName, componentData);
+  }
+});
 AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point");
 AFRAME.GLTFModelPlus.registerComponent("hoverable", "hoverable");
 AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
