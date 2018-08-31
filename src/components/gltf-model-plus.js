@@ -137,6 +137,9 @@ const inflateEntities = function(node, templates, isRoot) {
   node.matrix.identity();
 
   el.setObject3D(node.type.toLowerCase(), node);
+  if (node.userData.components && "nav-mesh" in node.userData.components) {
+    el.setObject3D("mesh", node);
+  }
 
   // Set the name of the `THREE.Group` to match the name of the node,
   // so that `THREE.PropertyBinding` will find (and later animate)

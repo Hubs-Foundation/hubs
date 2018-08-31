@@ -18,6 +18,7 @@ AFRAME.registerComponent("character-controller", {
   },
 
   init: function() {
+    this.navZone = "character";
     this.navGroup = null;
     this.navNode = null;
     this.velocity = new THREE.Vector3(0, 0, 0);
@@ -157,23 +158,25 @@ AFRAME.registerComponent("character-controller", {
     };
   })(),
 
-  setPositionOnNavMesh: function(startPosition, endPosition, object3D) {
-    const nav = this.el.sceneEl.systems.nav;
-    if (nav.navMesh) {
+  setPositionOnNavMesh: function(start, end, object3D) {
+    const pathfinder = this.el.sceneEl.systems.nav.pathfinder;
+    const zone = this.navZone;
+    if (zone in pathfinder.zones) {
       if (this.navGroup == null) {
-        this.navGroup = nav.getGroup(endPosition);
+        this.navGroup = pathfinder.getGroup(zone, end);
       }
-      this.navNode = this.navNode || nav.getNode(endPosition, this.navGroup);
-      this.navNode = nav.clampStep(startPosition, endPosition, this.navGroup, this.navNode, object3D.position);
+      this.navNode = this.navNode || pathfinder.getClosestNode(end, zone, this.navGroup, true);
+      this.navNode = pathfinder.clampStep(start, end, this.navNode, zone, this.navGroup, object3D.position);
     }
   },
 
   resetPositionOnNavMesh: function(position, navPosition, object3D) {
-    const nav = this.el.sceneEl.systems.nav;
-    if (nav.navMesh) {
-      this.navGroup = nav.getGroup(position);
-      this.navNode = nav.getNode(navPosition, this.navGroup) || this.navNode;
-      this.navNode = nav.clampStep(position, position, this.navGroup, this.navNode, object3D.position);
+    const pathfinder = this.el.sceneEl.systems.nav.pathfinder;
+    const zone = this.navZone;
+    if (zone in pathfinder.zones) {
+      this.navGroup = pathfinder.getGroup(zone, position);
+      this.navNode = pathfinder.getClosestNode(navPosition, zone, this.navGroup, true) || this.navNode;
+      this.navNode = pathfinder.clampStep(position, position, this.navNode, zone, this.navGroup, object3D.position);
     }
   },
 
