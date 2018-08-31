@@ -144,31 +144,6 @@ const config = {
         triggerdown: ["action_primary_down"],
         triggerup: ["action_primary_up"],
         scroll: "move_duck"
-      },
-      keyboard: {
-        m_press: "action_mute",
-        q_press: "snap_rotate_left",
-        e_press: "snap_rotate_right",
-        b_press: "action_share_screen",
-
-        // We can't create a keyboard behaviour with AFIM yet,
-        // so these will get captured by wasd-to-analog2d
-        w_down: "w_down",
-        w_up: "w_up",
-        a_down: "a_down",
-        a_up: "a_up",
-        s_down: "s_down",
-        s_up: "s_up",
-        d_down: "d_down",
-        d_up: "d_up",
-        arrowup_down: "w_down",
-        arrowup_up: "w_up",
-        arrowleft_down: "a_down",
-        arrowleft_up: "a_up",
-        arrowdown_down: "s_down",
-        arrowdown_up: "s_up",
-        arrowright_down: "d_down",
-        arrowright_up: "d_up"
       }
     },
     hud: {
