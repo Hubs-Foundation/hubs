@@ -93,6 +93,7 @@ import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { addMedia, resolveMedia } from "./utils/media-utils";
 
+import "./systems/nav";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/exit-on-blur";
@@ -117,7 +118,6 @@ window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
 import "aframe-physics-system";
 import "aframe-physics-extras";
-import "aframe-extras/src/pathfinding";
 import "super-hands";
 import "./components/super-networked-interactable";
 import "./components/networked-counter";
