@@ -1,4 +1,3 @@
-let shouldLock = false;
 const degToRad = THREE.Math.degToRad;
 AFRAME.registerComponent("pitch-yaw-rotator", {
   schema: {
@@ -19,49 +18,30 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
     this.yaw += deltaYaw;
   },
 
-  tick(t) {
+  tick() {
     this.el.object3D.rotation.set(degToRad(this.pitch), degToRad(this.yaw), 0);
     this.el.object3D.rotation.order = "YXZ";
 
-    const mouseFrame = AFRAME.scenes[0].systems.mouseFrame;
-    if (mouseFrame.isActive("transientLooking") || mouseFrame.isActive("lockedLooking")) {
-      const look = mouseFrame.poll("look");
+    const actions = AFRAME.scenes[0].systems.actions;
+    const look = actions.poll("look");
+    if (look) {
       this.look(look[0], look[1]);
     }
-    if (mouseFrame.isActive("notTransientLooking")) {
-      if (mouseFrame.poll("startTransientLook")) {
-        mouseFrame.deactivateSet("notTransientLooking");
-        mouseFrame.activateSet("transientLooking");
-      }
+    if (actions.poll("startTransientLook")) {
+      actions.deactivate("notTransientLooking");
+      actions.activate("transientLooking");
     }
-    if (mouseFrame.isActive("transientLooking")) {
-      if (mouseFrame.poll("stopTransientLook")) {
-        mouseFrame.deactivateSet("transientLooking");
-        mouseFrame.activateSet("notTransientLooking");
-      }
+    if (actions.poll("stopTransientLook")) {
+      actions.deactivate("transientLooking");
+      actions.activate("notTransientLooking");
     }
-    if (mouseFrame.isActive("notLockedLooking")) {
-      if (mouseFrame.poll("startLockedLook")) {
-        mouseFrame.deactivateSet("notLockedLooking");
-        mouseFrame.activateSet("lockedLooking");
-        shouldLock = true;
-      }
+    if (actions.poll("startLockedLook")) {
+      actions.deactivate("notLockedLooking");
+      actions.activate("lockedLooking");
     }
-    if (mouseFrame.isActive("lockedLooking")) {
-      if (mouseFrame.poll("stopLockedLook")) {
-        mouseFrame.deactivateSet("lockedLooking");
-        mouseFrame.activateSet("notLockedLooking");
-        shouldLock = false;
-      }
+    if (actions.poll("stopLockedLook")) {
+      actions.deactivate("lockedLooking");
+      actions.activate("notLockedLooking");
     }
-
-    // requestPointerLock can only be called on user gesture.
-    document.querySelector("mousedown", () => {
-      if (shouldLock) {
-        document.body.requestPointerLock();
-      } else {
-        document.exitPointerLock();
-      }
-    });
   }
 });

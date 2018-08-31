@@ -56,35 +56,19 @@ AFRAME.registerComponent("cursor-controller", {
     const cameraPos = new THREE.Vector3();
 
     return function() {
-      const mouseFrame = AFRAME.scenes[0].systems.mouseFrame;
-      if (!mouseFrame.isActive("targetHovering") && !mouseFrame.isActive("objectMoving")) {
-        if (this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI)) {
-          mouseFrame.activateSet("targetHovering");
-        }
+      const actions = AFRAME.scenes[0].systems.actions;
+
+      const dCursorDistanceMod = actions.poll("dCursorDistanceMod");
+      if (dCursorDistanceMod) {
+        this.changeDistanceMod(actions.poll("dCursorDistanceMod"));
       }
-      if (mouseFrame.isActive("targetHovering") && !mouseFrame.isActive("objectMoving")) {
-        if (!this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI)) {
-          mouseFrame.deactivateSet("targetHovering");
-        }
+      if (actions.poll("dropGrabbedObject")) {
+        this.endInteraction();
+        actions.deactivate("objectMoving");
       }
-      if (mouseFrame.isActive("targetHovering") && !mouseFrame.isActive("objectMoving")) {
-        if (mouseFrame.poll("grabTargettedObject")) {
-          this.startInteraction();
-          mouseFrame.activateSet("objectMoving");
-        }
-      }
-      if (mouseFrame.isActive("objectMoving")) {
-        this.changeDistanceMod(mouseFrame.poll("dCursorDistanceMod"));
-        if (mouseFrame.poll("dropGrabbedObject")) {
-          this.endInteraction();
-          mouseFrame.deactivateSet("objectMoving");
-        }
-      }
-      if (mouseFrame.isActive("cursorMoving")) {
-        const cursorMovement = mouseFrame.poll("cursorMovement");
-        if (cursorMovement[0] !== 0 || cursorMovement[1] !== 0) {
-          this.moveCursor(cursorMovement[0], cursorMovement[1]);
-        }
+      const cursorMovement = actions.poll("cursorMovement");
+      if (cursorMovement && (cursorMovement[0] !== 0 || cursorMovement[1] !== 0)) {
+        this.moveCursor(cursorMovement[0], cursorMovement[1]);
       }
 
       if (!this.enabled) {
@@ -105,6 +89,10 @@ AFRAME.registerComponent("cursor-controller", {
       }
 
       const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
+      if (actions.active("objectMoving") && !isGrabbing) {
+        actions.deactivate("objectMoving");
+      }
+
       if (isGrabbing) {
         const distance = Math.min(
           this.data.maxDistance,
@@ -117,6 +105,9 @@ AFRAME.registerComponent("cursor-controller", {
         this.updateDistanceAndTargetType();
 
         const isTarget = this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI);
+        if (actions.active("targetHovering") !== isTarget) {
+          isTarget ? actions.activate("targetHovering") : actions.deactivate("targetHovering");
+        }
         if (isTarget && !this.wasCursorHovered) {
           this.wasCursorHovered = true;
           this.data.cursor.setAttribute("material", { color: this.data.cursorColorHovered });
@@ -124,6 +115,11 @@ AFRAME.registerComponent("cursor-controller", {
           this.wasCursorHovered = false;
           this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
         }
+      }
+
+      if (actions.poll("grabTargettedObject")) {
+        this.startInteraction();
+        actions.activate("objectMoving");
       }
 
       if (this.data.drawLine) {

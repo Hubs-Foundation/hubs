@@ -1,4 +1,10 @@
-let debug = false;
+import { mouseBindDefn } from "./binding-definitions";
+
+mouseBindDefn.forEach(binding => {
+  if (binding.priorityKey) return;
+  // Generate default priorityKey
+  binding.priorityKey = "mouse" + binding.set + binding.action + binding.filter;
+});
 
 const eventQueue = [];
 const capture = function capture(e) {
@@ -13,21 +19,16 @@ const prevent = function prevent(e) {
 };
 document.addEventListener("contextmenu", prevent.bind(eventQueue));
 
-let prevDeviceFrame = {};
-let deviceFrame = {
-  normalizedCoords: [0, 0],
-  wheel: 0
-};
-const remember = function remember(deviceFrame, prevDeviceFrame) {
-  for (const key in deviceFrame) {
-    if (deviceFrame[key]) {
-      prevDeviceFrame[key] = true;
+const remember = function remember(frame, prevFrame) {
+  for (const key in frame) {
+    if (frame[key]) {
+      prevFrame[key] = true;
     }
   }
-  return prevDeviceFrame;
+  return prevFrame;
 };
 
-const consume = function consume(queue, frame) {
+const framify = function framify(queue, frame) {
   frame["wheel"] = 0;
   frame["dY"] = 0;
   frame["dX"] = 0;
@@ -80,255 +81,111 @@ const consume = function consume(queue, frame) {
   return frame;
 };
 
-const sets = [
-  "notTransientLooking", // when active will poll "transientLook" to activate set "transientLooking"
-  "transientLooking", // when active and "isLooking", will poll "look" to look around
-  "notLockedLooking", // when active, will poll "startLockedLooking" to deactivate self and activate set "lockedLooking"
-  "lockedLooking", // when active, will poll "look" to look around
-  //            , will poll "stopLockedLooking" to deactivate self and activate set "notLockedLooking"
-  "cursorMoving", // when active, will poll "cursorMovement" to drive the cursor around
-  "targetHovering", // when active, will poll "grabTargettedObject" to deactivate self and activate "objectMoving"
-  "objectMoving" // when active, will poll "dropGrabbedObject" to deactivate self
-];
-const bindDefn = [
-  {
-    action: "startTransientLook",
-    set: "notTransientLooking",
-    filter: "keydown",
-    key: "left",
-    priority: 1,
-    priorityKey: "leftMouseDown"
-  },
-  {
-    action: "stopTransientLook",
-    set: "transientLooking",
-    filter: "keyup",
-    key: "left",
-    priority: 1,
-    priorityKey: "leftMouseDown"
-  },
-  {
-    action: "look",
-    set: "transientLooking",
-    filter: "vec2_deltas",
-    filterParams: {
-      horizontalLookSpeed: 0.1,
-      verticalLookSpeed: 0.06,
-      keys: ["dY", "dX"],
-      filters: ["number", "number"]
-    },
-    priority: 2,
-    priorityKey: "mousemove"
-  },
-  {
-    action: "startLockedLook",
-    set: "notLockedLooking",
-    filter: "keydown",
-    key: "right"
-  },
-  {
-    action: "stopLockedLook",
-    set: "lockedLooking",
-    filter: "keydown",
-    key: "right"
-  },
-  {
-    action: "look",
-    set: "lockedLooking",
-    filter: "vec2_deltas",
-    filterParams: {
-      horizontalLookSpeed: 0.1,
-      verticalLookSpeed: 0.06,
-      keys: ["dY", "dX"],
-      filters: ["number", "number"]
-    },
-    priority: 4,
-    priorityKey: "mousemove"
-  },
-  {
-    action: "cursorMovement",
-    set: "cursorMoving",
-    filter: "vec2",
-    key: "normalizedCoords",
-    priority: 1,
-    priorityKey: "mousemove"
-  },
-  {
-    action: "cursorMovement",
-    set: "objectMoving",
-    filter: "vec2",
-    key: "normalizedCoords",
-    priority: 3,
-    priorityKey: "mousemove"
-  },
-  {
-    action: "grabTargettedObject",
-    set: "targetHovering",
-    filter: "keydown",
-    key: "left"
-  },
-  {
-    action: "dropGrabbedObject",
-    set: "objectMoving",
-    filter: "keyup",
-    key: "left",
-    priority: 2,
-    priorityKey: "leftMouseDown"
-  },
-  {
-    action: "dCursorDistanceMod",
-    set: "objectMoving",
-    filter: "number",
-    key: "wheel"
-  }
-];
-
 const vec2_deltas = function vec2_deltas() {
   return {
     vec2: [0, 0],
-    filter: function filter({ horizontalLookSpeed, verticalLookSpeed, keys, filters }, deviceFrame, prevDeviceFrame) {
+    // TODO: filters here is unused, because instead of calling `actionForBinding`
+    //       for each of the inputs to the filter here, we instead do this weird thing.
+    //       In the future, I think the correct thing to do for filters will involve
+    //       calling `actionForBinding` recursively to resolve all of the inputs to
+    //       a given filter.
+    //       Until we do that, we won't be able to (for example) build a filter out
+    //       of filtered input, which definitely adds value (especially when user
+    //       configuration is a thing, see steam controller configurations).
+    filter: function filter({ horizontalLookSpeed, verticalLookSpeed, keys, filters }, frame, prevFrame) {
       const sign = this.invertMouseLook ? 1 : -1;
-      this.vec2[0] = deviceFrame[keys[0]] * verticalLookSpeed * sign;
-      this.vec2[1] = deviceFrame[keys[1]] * horizontalLookSpeed * sign;
+      this.vec2[0] = frame[keys[0]] * verticalLookSpeed * sign;
+      this.vec2[1] = frame[keys[1]] * horizontalLookSpeed * sign;
       return this.vec2;
     }
   };
 };
 
-const actionFrame = {
-  dCursorDistanceMod: 0,
-  look: [0, 0],
-  cursorMovement: [0, 0]
-};
-const activeActionSets = ["notTransientLooking", "notLockedLooking", "cursorMoving"];
-let priority = {};
-window.activeActionSets = activeActionSets;
-const fillActionFrameFromBinding = function fillActionFrameFromBinding(
-  binding,
-  deviceFrame,
-  prevDeviceFrame,
-  actionFrame
-) {
-  const setIsActive = activeActionSets.indexOf(binding.set) !== -1;
-  if (!setIsActive) return; // leave actionFrame[binding.action] as it is
+function actionForBinding(binding, frame, prevFrame) {
   let action;
   switch (binding.filter) {
     case "keydown":
-      action = !prevDeviceFrame[binding.key] && deviceFrame[binding.key];
+      action = !prevFrame[binding.key] && frame[binding.key];
       break;
     case "keyup":
-      action = prevDeviceFrame[binding.key] && !deviceFrame[binding.key];
+      action = prevFrame[binding.key] && !frame[binding.key];
       break;
     case "key":
     case "vec2":
     case "number":
-      action = deviceFrame[binding.key];
+      action = frame[binding.key];
       break;
     case "nokey":
-      action = !deviceFrame[binding.key];
+      action = !frame[binding.key];
       break;
     case "vec2_deltas":
       if (!binding.filterFn) {
         binding.filterFn = vec2_deltas();
       }
-      action = binding.filterFn.filter(binding.filterParams, deviceFrame, prevDeviceFrame);
+      action = binding.filterFn.filter(binding.filterParams, frame, prevFrame);
       break;
   }
+  return action;
+}
 
-  if (binding.priority && (!priority[binding.priorityKey] || priority[binding.priorityKey].value < binding.priority)) {
-    priority[binding.priorityKey] = { value: binding.priority, action: binding.action };
+function defaultValue(filter) {
+  let action;
+  switch (filter) {
+    case "number":
+      action = 0;
+      break;
+    case "vec2_deltas":
+    case "vec2":
+      action = [0, 0];
+      break;
+    case "key":
+    case "keydown":
+    case "keyup":
+      action = false;
+      break;
+    case "nokey":
+      action = false; // I guess?
+      break;
   }
+  return action;
+}
 
-  actionFrame[binding.action] = action;
-};
-
-const fillActionFrame = function fillActionFrame(bindDefn, deviceFrame, prevDeviceFrame, actionFrame) {
-  for (let i = 0; i < bindDefn.length; i++) {
-    const binding = bindDefn[i];
-    fillActionFrameFromBinding(binding, deviceFrame, prevDeviceFrame, actionFrame);
-    if (debug && actionFrame[binding.action] && binding.filter === "keydown") {
-      console.log(binding.action);
-    }
-  }
-};
-
-const resolvePriorityConflicts = function resolvePriorityConflicts(bindDefn, actionFrame) {
-  for (let i = 0; i < bindDefn.length; i++) {
-    const binding = bindDefn[i];
-    const setIsActive = activeActionSets.indexOf(binding.set) !== -1;
-    if (!setIsActive || !binding.priority) continue;
-    if (
-      priority[binding.priorityKey].value > binding.priority &&
-      priority[binding.priorityKey].action !== binding.action
-    ) {
-      let action;
-      switch (binding.filter) {
-        case "number":
-          action = 0;
-          break;
-        case "vec2_deltas":
-        case "vec2":
-          action = [0, 0];
-          break;
-        case "key":
-        case "keydown":
-        case "keyup":
-          action = false;
-          break;
-        case "nokey":
-          action = false; // I guess?
-          break;
+export const mouse = {
+  name: "mouse",
+  bindDefn: mouseBindDefn,
+  state: {
+    prevFrame: {},
+    frame: {},
+    eventQueue
+  },
+  fillActionFrame: function fillActionFrame(sets, priorities, actions) {
+    let { prevFrame, frame } = this.state;
+    const { eventQueue } = this.state;
+    prevFrame = {}; // garbage
+    prevFrame = remember(frame, prevFrame);
+    frame = framify(eventQueue, frame);
+    this.bindDefn.forEach(binding => {
+      const { set, priorityKey } = binding;
+      const priority = sets.indexOf(set);
+      if (!priorities[priorityKey] || priorities[priorityKey].value < priority) {
+        priorities[priorityKey] = { value: priority, actions: [] }; // garbage
       }
+      if (priorities[priorityKey].value === priority) {
+        const action = priority === -1 ? defaultValue(binding.action) : actionForBinding(binding, frame, prevFrame);
+        priorities[priorityKey].actions.push(binding.action); // garbage
+        actions[binding.action] = action;
+      }
+    });
 
-      actionFrame[binding.action] = action;
-    }
+    eventQueue.length = 0; // garbage
+  },
+  resolvePriorityConflicts: function resolvePriorityConflicts(sets, priorities, actions) {
+    this.bindDefn.forEach(binding => {
+      const { set, priorityKey } = binding;
+      if (!priorities[priorityKey].actions.includes(binding.action)) {
+        const action = defaultValue(binding.action);
+        actions[binding.action] = action;
+      }
+    });
   }
 };
-
-const activeSetQueue = [];
-AFRAME.registerSystem("mouseFrame", {
-  init() {},
-
-  tick() {
-    for (const set of activeSetQueue) {
-      switch (set.change) {
-        case "activate":
-          activeActionSets.push(set.name);
-          break;
-        case "deactivate":
-          if (activeActionSets.indexOf(set.name) === -1) continue;
-          activeActionSets.splice(activeActionSets.indexOf(set.name), 1);
-          break;
-      }
-    }
-    activeSetQueue.length = 0;
-
-    prevDeviceFrame = {}; // garbage
-    prevDeviceFrame = remember(deviceFrame, prevDeviceFrame);
-    deviceFrame = consume(eventQueue, deviceFrame);
-    eventQueue.length = 0;
-    priority = {};
-    fillActionFrame(bindDefn, deviceFrame, prevDeviceFrame, actionFrame);
-    resolvePriorityConflicts(bindDefn, actionFrame);
-  },
-
-  poll(action) {
-    return actionFrame[action];
-  },
-
-  activateSet(set) {
-    activeSetQueue.push({ change: "activate", name: set });
-  },
-
-  deactivateSet(set) {
-    activeSetQueue.push({ change: "deactivate", name: set });
-  },
-
-  isActive(set) {
-    return activeActionSets.indexOf(set) !== -1;
-  },
-
-  setDebug(d) {
-    debug = d;
-  }
-});

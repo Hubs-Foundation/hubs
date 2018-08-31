@@ -1,4 +1,10 @@
-let debug = false;
+import { keyboardBindDefn } from "./binding-definitions";
+
+// Generate default priority keys
+keyboardBindDefn.forEach(binding => {
+  if (binding.priorityKey) return;
+  binding.priorityKey = "keyboard" + binding.set + binding.action + binding.filter;
+});
 
 const eventQueue = [];
 const capture = function capture(e) {
@@ -8,18 +14,16 @@ document.addEventListener("keydown", capture.bind(eventQueue));
 document.addEventListener("keyup", capture.bind(eventQueue));
 document.addEventListener("blur", capture.bind(eventQueue));
 
-let prevKeyFrame = {};
-let keyFrame = {};
-const remember = function remember(keyFrame, prevKeyFrame) {
+function remember(keyFrame, prevKeyFrame) {
   for (const key in keyFrame) {
     if (keyFrame[key]) {
       prevKeyFrame[key] = true;
     }
   }
   return prevKeyFrame;
-};
+}
 
-const consume = function consume(queue, frame) {
+function framify(queue, frame) {
   for (let i = 0; i < queue.length; i++) {
     const event = queue[i];
     switch (event.type) {
@@ -37,28 +41,28 @@ const consume = function consume(queue, frame) {
     }
   }
   return frame;
-};
+}
 
-const key4_to_vec2 = function key4_to_vec2() {
+function key4_to_vec2() {
   return {
     key4: [false, false, false, false],
     vec2: [0, 0],
-    filter: function filter({ keys, filters }, keyFrame, prevKeyFrame) {
+    filter: function filter({ keys, filters }, frame, prevFrame) {
       for (let i = 0; i < this.key4.length; i++) {
         const key = keys[i];
         const filter = filters[i];
         switch (filter) {
           case "keydown":
-            this.key4[i] = !prevKeyFrame[key] && keyFrame[key];
+            this.key4[i] = !prevFrame[key] && frame[key];
             break;
           case "keyup":
-            this.key4[i] = prevKeyFrame[key] && !keyFrame[key];
+            this.key4[i] = prevFrame[key] && !frame[key];
             break;
           case "key":
-            this.key4[i] = keyFrame[key];
+            this.key4[i] = frame[key];
             break;
           case "nokey":
-            this.key4[i] = !keyFrame[key];
+            this.key4[i] = !frame[key];
             break;
         }
       }
@@ -67,152 +71,90 @@ const key4_to_vec2 = function key4_to_vec2() {
       return this.vec2;
     }
   };
-};
+}
 
-const bindDefn = [
-  // This entry in `bindDefn`
-  {
-    action: "snapRotateLeft",
-    set: "snapRotating",
-    filter: "keydown",
-    key: "q"
-  },
-  // means that when you run
-  //
-  //   `AFRAME.scenes[0].systems.keyboardFrame.poll( "snapRotateLeft" )`
-  //
-  // in the console, it returns `true` on the frame that you press `q`,
-  // and `false` otherwise.
-  //
-  {
-    action: "snapRotateRight",
-    set: "snapRotating",
-    filter: "keydown",
-    key: "e"
-  },
-  {
-    action: "toggleMute",
-    set: "muteToggling",
-    filter: "keydown",
-    key: "m"
-  },
-  {
-    action: "toggleScreenShare",
-    set: "screenShareToggling",
-    filter: "keydown",
-    key: "b"
-  },
-
-  // This entry in `bindDefn`
-  {
-    action: "move",
-    set: "moving",
-    filter: "key4_to_vec2",
-    filter_params: {
-      keys: ["d", "a", "w", "s"],
-      filters: ["key", "key", "key", "key"]
-    }
-  },
-  // means that
-  //
-  //   `AFRAME.scenes[0].systems.keyboardFrame.poll( "move" )`
-  //
-  // will return a vector [u,v] where
-  //   -1 < u < 1 and
-  //   -1 < v < 1,
-  // replacing the need for the component, wasd-to-analog2d.
-  // TODO: The filter doesn't fully mimick wasd-to-analog2d yet.
-  {
-    action: "boost",
-    set: "moving",
-    filter: "key",
-    key: "shift"
-  }
-];
-
-const actionFrame = {};
-const activeActionSets = ["muteToggling", "snapRotating", "screenShareToggling", "moving"];
-const fillActionFrameFromBinding = function fillActionFrameFromBinding(binding, keyFrame, prevKeyFrame, actionFrame) {
-  const setIsActive = activeActionSets.indexOf(binding.set) !== -1;
-  if (!setIsActive) return; // leave actionFrame(binding.action) as it is for now.
+function actionForBinding(binding, frame, prevFrame) {
   let action;
   switch (binding.filter) {
     case "keydown":
-      action = !prevKeyFrame[binding.key] && keyFrame[binding.key];
+      action = !prevFrame[binding.key] && frame[binding.key];
       break;
     case "keyup":
-      action = prevKeyFrame[binding.key] && !keyFrame[binding.key];
+      action = prevFrame[binding.key] && !frame[binding.key];
       break;
     case "key":
-      action = keyFrame[binding.key];
+      action = frame[binding.key];
       break;
     case "nokey":
-      action = !keyFrame[binding.key];
+      action = !frame[binding.key];
       break;
     case "key4_to_vec2":
       if (!binding.filterFn) {
         binding.filterFn = key4_to_vec2();
       }
-      action = binding.filterFn.filter(binding.filter_params, keyFrame, prevKeyFrame);
+      action = binding.filterFn.filter(binding.filter_params, frame, prevFrame);
       break;
   }
-  actionFrame[binding.action] = action;
-};
+  return action;
+}
 
-const fillActionFrame = function fillActionFrame(bindDefn, keyFrame, prevKeyFrame, actionFrame) {
-  for (let i = 0; i < bindDefn.length; i++) {
-    const binding = bindDefn[i];
-    fillActionFrameFromBinding(binding, keyFrame, prevKeyFrame, actionFrame);
-    if (debug && actionFrame[binding.action]) {
-      console.log(binding.action);
-    }
+export const keyboard = {
+  name: "keyboard",
+  state: {
+    prevFrame: {},
+    frame: {},
+    eventQueue
+  },
+  bindDefn: keyboardBindDefn,
+  fillActionFrame: function fillActionFrame(sets, priorities, actions) {
+    let { prevFrame, frame, eventQueue } = this.state;
+    prevFrame = {}; // garbage
+    prevFrame = remember(frame, prevFrame);
+    frame = framify(eventQueue, frame);
+    this.bindDefn.forEach(binding => {
+      const { set, priorityKey } = binding;
+      const priority = sets.indexOf(set);
+      if (!priorities[priorityKey] || priorities[priorityKey].value < priority) {
+        priorities[priorityKey] = { value: priority, actions: [] }; // garbage
+      }
+      if (priorities[priorityKey].value === priority) {
+        const action = priority === -1 ? defaultValue(binding.action) : actionForBinding(binding, frame, prevFrame);
+        priorities[priorityKey].actions.push(binding.action); // garbage
+        actions[binding.action] = action;
+      }
+    });
+
+    eventQueue.length = 0; // garbage
+  },
+  resolvePriorityConflicts: function resolvePriorityConflicts(sets, priorities, actions) {
+    this.bindDefn.forEach(binding => {
+      const { set, priorityKey } = binding;
+      if (!priorities[priorityKey].actions.includes(binding.action)) {
+        const action = defaultValue(binding.action);
+        actions[binding.action] = action;
+      }
+    });
   }
 };
 
-AFRAME.registerSystem("keyboardFrame", {
-  init() {},
-
-  tick() {
-    prevKeyFrame = {}; // garbage
-    prevKeyFrame = remember(keyFrame, prevKeyFrame);
-    keyFrame = consume(eventQueue, keyFrame);
-    eventQueue.length = 0;
-    fillActionFrame(bindDefn, keyFrame, prevKeyFrame, actionFrame);
-  },
-
-  poll(action) {
-    return actionFrame[action];
-  },
-
-  setDebug(d) {
-    debug = d;
+function defaultValue(filter) {
+  let action;
+  switch (filter) {
+    case "number":
+      action = 0;
+      break;
+    case "vec2_deltas":
+    case "vec2":
+      action = [0, 0];
+      break;
+    case "key":
+    case "keydown":
+    case "keyup":
+      action = false;
+      break;
+    case "nokey":
+      action = false; // I guess?
+      break;
   }
-});
-
-// The code in this file replaces this segment of `input-mappings.js` :
-//     keyboard: {
-//       m_press: "action_mute",
-//       q_press: "snap_rotate_left",
-//       e_press: "snap_rotate_right",
-//       b_press: "action_share_screen",
-//
-//       // We can't create a keyboard behaviour with AFIM yet,
-//       // so these will get captured by wasd-to-analog2d
-//       w_down: "w_down",
-//       w_up: "w_up",
-//       a_down: "a_down",
-//       a_up: "a_up",
-//       s_down: "s_down",
-//       s_up: "s_up",
-//       d_down: "d_down",
-//       d_up: "d_up",
-//       arrowup_down: "w_down",
-//       arrowup_up: "w_up",
-//       arrowleft_down: "a_down",
-//       arrowleft_up: "a_up",
-//       arrowdown_down: "s_down",
-//       arrowdown_up: "s_up",
-//       arrowright_down: "d_down",
-//       arrowright_up: "d_up"
-//     }
-// TODO: Remove this comment
+  return action;
+}

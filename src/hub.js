@@ -96,8 +96,7 @@ import { addMedia } from "./utils/media-utils";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/exit-on-blur";
-import "./systems/keyboard-frame";
-import "./systems/mouse-frame";
+import "./systems/actions";
 
 import "./gltf-component-mappings";
 import { DEFAULT_ENVIRONMENT_URL } from "./assets/environments/environments";
@@ -440,6 +439,36 @@ const onReady = async () => {
         }
       }
     }
+
+    //// // UH OH, we have to do this OUTSIDE of normal
+    // action flow because it HAS to be done in a
+    // "short running user gesture"
+    let locked = false;
+    function updatePointerLock(e) {
+      const actions = AFRAME.scenes[0].systems.actions;
+      if (e.button === 0) {
+        if (!locked && e.type === "mousedown" && !actions.active("targetHovering") && !actions.active("objectMoving")) {
+          document.body.requestPointerLock();
+        } else if (e.type === "mouseup") {
+          if (!locked) {
+            document.exitPointerLock();
+          }
+        }
+      } else if (e.button === 2) {
+        if (e.type === "mousedown") {
+          if (locked) {
+            document.exitPointerLock();
+            locked = false;
+          } else {
+            document.body.requestPointerLock();
+            locked = true;
+          }
+        }
+      }
+    }
+    const sceneEl = document.querySelector("a-scene");
+    sceneEl.addEventListener("mousedown", updatePointerLock);
+    document.addEventListener("mouseup", updatePointerLock);
   };
 
   const getPlatformUnsupportedReason = () => {

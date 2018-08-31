@@ -100,22 +100,22 @@ AFRAME.registerComponent("character-controller", {
     const startScale = new THREE.Vector3();
 
     return function(t, dt) {
-      const keyboardFrame = AFRAME.scenes[0].systems.keyboardFrame;
-      if (keyboardFrame.poll("snapRotateRight")) {
+      const actions = AFRAME.scenes[0].systems.actions;
+      if (actions.poll("snapRotateRight")) {
         this.snapRotateRight();
       }
-      if (keyboardFrame.poll("snapRotateLeft")) {
+      if (actions.poll("snapRotateLeft")) {
         this.snapRotateLeft();
       }
-      const axes = keyboardFrame.poll("move");
-      if (axes) {
-        this.accelerationInput.set(axes[0], 0, axes[1]);
+      const acc = actions.poll("accSelf");
+      if (acc) {
+        this.accelerationInput.set(acc[0], 0, acc[1]);
       }
 
       const deltaSeconds = dt / 1000;
       const root = this.el.object3D;
       const pivot = this.data.pivot.object3D;
-      const boost = keyboardFrame.poll("boost") ? 2 : 1;
+      const boost = actions.active("selfMoving") && actions.poll("boost") ? 2 : 1;
       const distance = this.data.groundAcc * deltaSeconds * boost;
       const rotationDelta = this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
 
