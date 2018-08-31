@@ -68,6 +68,8 @@ export default class ActionEventHandler {
     let scrollX = e.detail.axis[0] * SCROLL_MODIFIER;
     scrollX = Math.abs(scrollX) > SCROLL_THRESHOLD ? scrollX : 0;
 
+    this.isCursorInteracting = this.cursor.isInteracting();
+
     if (
       Math.abs(scrollY) > 0 &&
       (this.lastVerticalScrollTime === 0 || this.lastVerticalScrollTime + VERTICAL_SCROLL_TIMEOUT < Date.now())

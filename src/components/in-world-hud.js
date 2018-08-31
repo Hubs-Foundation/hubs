@@ -50,7 +50,7 @@ AFRAME.registerComponent("in-world-hud", {
 
     this.mic.addEventListener("click", this.onMicClick);
     this.freeze.addEventListener("click", this.onFreezeClick);
-    this.pen.addEventListener("click", this.onPenClick);
+    this.pen.addEventListener("mousedown", this.onPenClick);
   },
 
   pause() {
@@ -59,6 +59,6 @@ AFRAME.registerComponent("in-world-hud", {
 
     this.mic.removeEventListener("click", this.onMicClick);
     this.freeze.removeEventListener("click", this.onFreezeClick);
-    this.pen.removeEventListener("click", this.onPenClick);
+    this.pen.removeEventListener("mousedown", this.onPenClick);
   }
 });
