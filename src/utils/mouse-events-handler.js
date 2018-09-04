@@ -1,8 +1,8 @@
 // TODO: Make look speed adjustable by the user
 const HORIZONTAL_LOOK_SPEED = 0.1;
 const VERTICAL_LOOK_SPEED = 0.06;
-const VERTICAL_SCROLL_TIMEOUT = 250;
-const HORIZONTAL_SCROLL_TIMEOUT = 250;
+const VERTICAL_SCROLL_TIMEOUT = 50;
+const HORIZONTAL_SCROLL_TIMEOUT = 50;
 
 export default class MouseEventsHandler {
   constructor(cursor, cameraController) {

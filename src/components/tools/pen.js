@@ -17,11 +17,22 @@ AFRAME.registerComponent("pen", {
     drawingManager: { type: "string" },
     color: { type: "color", default: "#FF0033" },
     availableColors: {
-      default: ["#FF0033", "#FFFF00", "#00FF33", "#0099FF", "#9900FF", "#FFFFFF", "#000000"]
+      default: [
+        "#FF0033",
+        "#FFFF00",
+        "#0099FF",
+        "#00FF33",
+        "#9900FF",
+        "#FF6600",
+        "#FFFFFF",
+        "#CCCCCC",
+        "#777777",
+        "#000000"
+      ]
     },
     radius: { default: 0.01 }, //drawing geometry radius
     minRadius: { default: 0.005 },
-    maxRadius: { default: 0.05 }
+    maxRadius: { default: 0.2 }
   },
 
   init() {

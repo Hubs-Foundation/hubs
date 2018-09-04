@@ -5,16 +5,27 @@
  * @component drawing-manager
  */
 AFRAME.registerComponent("drawing-manager", {
-  schema: {
-    drawing: { type: "string" }
-  },
-
   init() {
+    this._onComponentInitialized = this._onComponentInitialized.bind(this);
+
     this.drawingToPen = new Map();
+
+    this.drawingEl = document.createElement("a-entity");
+    this.drawingEl.setAttribute("networked", "template: #interactable-drawing");
+    this.el.sceneEl.appendChild(this.drawingEl);
+
+    this.drawingEl.addEventListener("componentinitialized", this._onComponentInitialized);
   },
 
-  play() {
-    this.drawing = document.querySelector(this.data.drawing).components["networked-drawing"];
+  remove() {
+    this.drawingEl.removeEventListener("componentinitialized", this._onComponentInitialized);
+  },
+
+  _onComponentInitialized(e) {
+    console.log(e);
+    if (e.detail.name == "networked-drawing") {
+      this.drawing = this.drawingEl.components["networked-drawing"];
+    }
   },
 
   getDrawing(pen) {

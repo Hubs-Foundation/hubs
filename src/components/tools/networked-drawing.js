@@ -33,7 +33,7 @@ AFRAME.registerComponent("networked-drawing", {
   init() {
     this._receiveData = this._receiveData.bind(this);
 
-    this.drawBuffer = [];
+    this.networkBuffer = [];
 
     this.drawStarted = false;
     this.lineStarted = false;
@@ -43,7 +43,7 @@ AFRAME.registerComponent("networked-drawing", {
     this.receivedBufferParts = 0;
     this.bufferIndex = 0;
     this.connectedToOwner = false;
-    this.drawBufferInitialized = false;
+    this.networkBufferInitialized = false;
 
     const options = {
       vertexColors: THREE.VertexColors
@@ -81,19 +81,15 @@ AFRAME.registerComponent("networked-drawing", {
     this.prevIdx = Object.assign({}, this.sharedBuffer.idx);
     this.idx = Object.assign({}, this.sharedBuffer.idx);
     this.vertexCount = 0; //number of vertices added for current line (used for line deletion).
-    this.drawBufferCount = 0; //number of items added to drawBuffer for current line (used for line deletion).
+    this.networkBufferCount = 0; //number of items added to networkBuffer for current line (used for line deletion).
     this.currentPointCount = 0; //number of points added for current line (used for maxPointsPerLine).
-    this.drawBufferHistory = []; //tracks vertexCount and drawBufferCount so that lines can be deleted.
+    this.networkBufferHistory = []; //tracks vertexCount and networkBufferCount so that lines can be deleted.
 
     NAF.connection.onConnect(() => {
       NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
         this.networkedEl = networkedEl;
         this.networkId = NAF.utils.getNetworkId(this.networkedEl);
-        if (!this.networkId) {
-          console.error("No networkId for", this.networkedEl);
-        }
         this.drawingId = "drawing-" + this.networkId;
-
         NAF.connection.subscribeToDataChannel(this.drawingId, this._receiveData);
       });
     });
@@ -117,10 +113,10 @@ AFRAME.registerComponent("networked-drawing", {
       }
     }
 
-    if (this.drawBuffer.length > 0 && NAF.connection.isConnected() && this.networkedEl) {
+    if (this.networkBuffer.length > 0 && NAF.connection.isConnected() && this.networkedEl) {
       if (!NAF.utils.isMine(this.networkedEl)) {
         this._drawFromNetwork();
-      } else if (this.bufferIndex < this.drawBuffer.length) {
+      } else if (this.bufferIndex < this.networkBuffer.length) {
         this._broadcastDrawing();
       }
     }
@@ -132,8 +128,8 @@ AFRAME.registerComponent("networked-drawing", {
     const copyArray = [];
     return function() {
       copyArray.length = 0;
-      copyData(this.drawBuffer, copyArray, this.bufferIndex, this.drawBuffer.length - 1);
-      this.bufferIndex = this.drawBuffer.length;
+      copyData(this.networkBuffer, copyArray, this.bufferIndex, this.networkBuffer.length - 1);
+      this.bufferIndex = this.networkBuffer.length;
       NAF.connection.broadcastDataGuaranteed(this.drawingId, { type: MSG_BUFFER_DATA, buffer: copyArray });
     };
   })(),
@@ -143,54 +139,57 @@ AFRAME.registerComponent("networked-drawing", {
     const direction = new THREE.Vector3();
     const normal = new THREE.Vector3();
     return function() {
-      const head = this.drawBuffer[0];
-      if (head != null && this.drawBuffer.length >= 9) {
-        position.set(this.drawBuffer[0], this.drawBuffer[1], this.drawBuffer[2]);
-        direction.set(this.drawBuffer[3], this.drawBuffer[4], this.drawBuffer[5]);
+      const head = this.networkBuffer[0];
+      if (head != null && this.networkBuffer.length >= 10) {
+        position.set(this.networkBuffer[0], this.networkBuffer[1], this.networkBuffer[2]);
+        direction.set(this.networkBuffer[3], this.networkBuffer[4], this.networkBuffer[5]);
         this.radius = Math.round(direction.length() * 1000) / 1000; //radius is encoded as length of direction vector
         direction.normalize();
-        normal.set(this.drawBuffer[6], this.drawBuffer[7], this.drawBuffer[8]);
+        normal.set(this.networkBuffer[6], this.networkBuffer[7], this.networkBuffer[8]);
         this.color.setHex(Math.round(normal.length()) - 1); //color is encoded as length of normal vector
         normal.normalize();
+
+        this.networkBuffer.splice(0, 9);
 
         if (!this.remoteLineStarted) {
           this.startDraw(position, direction, normal);
           this.remoteLineStarted = true;
+        }
+
+        if (this.networkBuffer[0] === null) {
+          this.endDraw(position, direction, normal);
+          this.remoteLineStarted = false;
+          this.networkBuffer.shift();
         } else {
           this._draw(position, direction, normal);
         }
-        this.drawBuffer.splice(0, 9);
-      } else if (head === null && this.remoteLineStarted) {
-        this.endDraw(position, direction, normal);
-        this.remoteLineStarted = false;
-        this.drawBuffer.shift();
       }
     };
   })(),
 
   _deleteLines() {
-    const length = this.drawBufferHistory.length;
+    const length = this.networkBufferHistory.length;
     if (length > 0) {
       const now = Date.now();
-      const time = this.drawBufferHistory[0].time;
+      const time = this.networkBufferHistory[0].time;
       if (
         (length > this.data.maxLines && time + this.data.minDrawTimeout <= now) ||
         time + this.data.maxDrawTimeout <= now
       ) {
-        const datum = this.drawBufferHistory[0];
+        const datum = this.networkBufferHistory[0];
         if (length > 1) {
           datum.idxLength += 2 - (this.segments % 2);
-          this.drawBufferHistory[1].idxLength -= 2 - (this.segments % 2);
+          this.networkBufferHistory[1].idxLength -= 2 - (this.segments % 2);
         }
         this.idx.position = datum.idxLength;
         this.idx.uv = datum.idxLength;
         this.idx.normal = datum.idxLength;
         this.idx.color = datum.idxLength;
         this.sharedBuffer.remove(this.prevIdx, this.idx);
-        this.drawBufferHistory.shift();
+        this.networkBufferHistory.shift();
         if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
-          this.drawBuffer.splice(0, datum.drawBufferCount);
-          this.bufferIndex -= datum.drawBufferCount;
+          this.networkBuffer.splice(0, datum.networkBufferCount);
+          this.bufferIndex -= datum.networkBufferCount;
         }
       }
     }
@@ -199,27 +198,27 @@ AFRAME.registerComponent("networked-drawing", {
   _sendDrawBuffer: (() => {
     const copyArray = [];
     //This number needs to be approx. < ~6000 based on napkin math
-    //see: https://github.com/webrtc/adapter/blob/682e0f2439e139da6c0c406370eae820637b8c1a/src/js/common_shim.js#L157
+    //see: https://github.com/webrtc/adapter/blob/682e0f2439e139da6c0c406370eae820637b8sc1a/src/js/common_shim.js#L157
     const chunkAmount = 3000;
     return function(clientId) {
       if (NAF.utils.isMine(this.networkedEl)) {
-        if (this.drawBuffer.length <= chunkAmount) {
+        if (this.networkBuffer.length <= chunkAmount) {
           NAF.connection.sendDataGuaranteed(clientId, this.drawingId, {
             type: MSG_BUFFER_DATA_FULL,
             parts: 1,
-            buffer: this.drawBuffer
+            buffer: this.networkBuffer
           });
         } else {
           let start = 0;
           let end = 0;
-          while (end < this.drawBuffer.length) {
-            end = Math.min(end + chunkAmount, this.drawBuffer.length);
+          while (end < this.networkBuffer.length) {
+            end = Math.min(end + chunkAmount, this.networkBuffer.length);
             copyArray.length = 0;
-            copyData(this.drawBuffer, copyArray, start, end - 1);
+            copyData(this.networkBuffer, copyArray, start, end - 1);
             start = end;
             NAF.connection.sendDataGuaranteed(clientId, this.drawingId, {
               type: MSG_BUFFER_DATA_FULL,
-              parts: Math.ceil(this.drawBuffer.length / chunkAmount),
+              parts: Math.ceil(this.networkBuffer.length / chunkAmount),
               buffer: copyArray
             });
           }
@@ -234,18 +233,18 @@ AFRAME.registerComponent("networked-drawing", {
         this._sendDrawBuffer(data.clientId);
         break;
       case MSG_BUFFER_DATA:
-        if (this.drawBufferInitialized) {
-          this.drawBuffer.push.apply(this.drawBuffer, data.buffer);
+        if (this.networkBufferInitialized) {
+          this.networkBuffer.push.apply(this.networkBuffer, data.buffer);
         } else {
           this.tempDrawBuffer.push.apply(this.tempDrawBuffer, data.buffer);
         }
         break;
       case MSG_BUFFER_DATA_FULL:
-        this.drawBuffer.push.apply(this.drawBuffer, data.buffer);
+        this.networkBuffer.push.apply(this.networkBuffer, data.buffer);
         if (++this.receivedBufferParts >= data.parts) {
-          this.drawBufferInitialized = true;
+          this.networkBufferInitialized = true;
           if (this.tempDrawBuffer.length > 0) {
-            this.drawBuffer.push.apply(this.drawBuffer, this.tempDrawBuffer);
+            this.networkBuffer.push.apply(this.networkBuffer, this.tempDrawBuffer);
             this.tempDrawBuffer = [];
           }
         }
@@ -270,7 +269,7 @@ AFRAME.registerComponent("networked-drawing", {
     if (radius) this.radius = radius;
 
     this.lastPoint.copy(position);
-    this._addToDrawBuffer(position, direction, normal);
+    this._addToNetworkBuffer(position, direction, normal);
   },
 
   draw(position, direction, normal, color, radius) {
@@ -283,7 +282,7 @@ AFRAME.registerComponent("networked-drawing", {
     }
     if (radius) this.radius = radius;
 
-    this._addToDrawBuffer(position, direction, normal);
+    this._addToNetworkBuffer(position, direction, normal);
     this._draw(position, direction, normal);
   },
 
@@ -293,7 +292,7 @@ AFRAME.registerComponent("networked-drawing", {
       if (!this.lineStarted) {
         this._generateSegments(this.lastSegments, position, direction, normal, this.radius * radiusMultiplier);
 
-        if (this.drawBufferHistory.length === 0) {
+        if (this.networkBufferHistory.length === 0) {
           //start with CW faceculling order
           this._addDegenerateTriangle();
         } else {
@@ -321,12 +320,12 @@ AFRAME.registerComponent("networked-drawing", {
 
         this.lineStarted = true;
       } else {
+        this._generateSegments(this.currentSegments, position, direction, normal, this.radius * radiusMultiplier);
+        this._drawCylinder();
+
         if (this.currentPointCount > this.data.maxPointsPerLine) {
           this._endDraw(position, direction);
           this._endLine();
-        } else {
-          this._generateSegments(this.currentSegments, position, direction, normal, this.radius * radiusMultiplier);
-          this._drawCylinder();
         }
       }
       this.lastPoint.copy(position);
@@ -360,47 +359,47 @@ AFRAME.registerComponent("networked-drawing", {
   _endLine() {
     if (!this.drawStarted) return;
 
-    if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) this._pushToDrawBuffer(null);
+    if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) this._pushToNetworkBuffer(null);
 
     const datum = {
-      drawBufferCount: this.drawBufferCount,
+      networkBufferCount: this.networkBufferCount,
       idxLength: this.vertexCount - 1,
       time: Date.now()
     };
-    this.drawBufferHistory.push(datum);
+    this.networkBufferHistory.push(datum);
     this.vertexCount = 0;
-    this.drawBufferCount = 0;
+    this.networkBufferCount = 0;
     this.currentPointCount = 0;
     this.lineStarted = false;
     this.drawStarted = false;
   },
 
-  _addToDrawBuffer: (() => {
+  _addToNetworkBuffer: (() => {
     const copyDirection = new THREE.Vector3();
     const copyNormal = new THREE.Vector3();
     return function(position, direction, normal) {
       if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
         ++this.currentPointCount;
-        this._pushToDrawBuffer(position.x);
-        this._pushToDrawBuffer(position.y);
-        this._pushToDrawBuffer(position.z);
+        this._pushToNetworkBuffer(position.x);
+        this._pushToNetworkBuffer(position.y);
+        this._pushToNetworkBuffer(position.z);
         copyDirection.copy(direction);
         copyDirection.setLength(this.radius); //encode radius as length of direction vector
-        this._pushToDrawBuffer(copyDirection.x);
-        this._pushToDrawBuffer(copyDirection.y);
-        this._pushToDrawBuffer(copyDirection.z);
+        this._pushToNetworkBuffer(copyDirection.x);
+        this._pushToNetworkBuffer(copyDirection.y);
+        this._pushToNetworkBuffer(copyDirection.z);
         copyNormal.copy(normal);
         copyNormal.setLength(this.color.getHex() + 1); //encode color as length, add one in case color is black
-        this._pushToDrawBuffer(copyNormal.x);
-        this._pushToDrawBuffer(copyNormal.y);
-        this._pushToDrawBuffer(copyNormal.z);
+        this._pushToNetworkBuffer(copyNormal.x);
+        this._pushToNetworkBuffer(copyNormal.y);
+        this._pushToNetworkBuffer(copyNormal.z);
       }
     };
   })(),
 
-  _pushToDrawBuffer(val) {
-    ++this.drawBufferCount;
-    this.drawBuffer.push(val);
+  _pushToNetworkBuffer(val) {
+    ++this.networkBufferCount;
+    this.networkBuffer.push(val);
   },
 
   //draw a cylinder from last to current segments
