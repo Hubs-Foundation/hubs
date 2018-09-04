@@ -7,9 +7,6 @@ import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
-// Get aframe inspector url using the webpack file-loader.
-import aframeInspectorUrl from "file-loader!./assets/js/aframe-inspector";
-
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
@@ -241,6 +238,8 @@ const onReady = async () => {
   const enterScene = async (mediaStream, enterInVR, hubId) => {
     const scene = document.querySelector("a-scene");
 
+    // Get aframe inspector url using the webpack file-loader.
+    const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
     // Set the aframe-inspector url to our hosted copy.
     scene.setAttribute("inspector", { url: aframeInspectorUrl });
 
