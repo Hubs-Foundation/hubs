@@ -7,6 +7,9 @@ import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
+// Get aframe inspector url using the webpack file-loader.
+import aframeInspectorUrl from "file-loader!./assets/js/aframe-inspector";
+
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
@@ -237,6 +240,10 @@ const onReady = async () => {
 
   const enterScene = async (mediaStream, enterInVR, hubId) => {
     const scene = document.querySelector("a-scene");
+
+    // Set the aframe-inspector url to our hosted copy.
+    scene.setAttribute("inspector", { url: aframeInspectorUrl });
+
     if (!isBotMode) {
       scene.classList.add("no-cursor");
     }
