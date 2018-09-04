@@ -38,9 +38,9 @@ TopHUD.propTypes = {
 };
 
 const mediaPickerInput = "media-picker-input";
-const BottomHUD = ({ onCreateObject, onMediaPicked }) => (
+const BottomHUD = ({ onCreateObject, showImageOnlyButton, onMediaPicked }) => (
   <div>
-    {onMediaPicked ? (
+    {showImageOnlyButton ? (
       <div>
         <input
           id={mediaPickerInput}

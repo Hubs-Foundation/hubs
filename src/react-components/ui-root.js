@@ -910,7 +910,8 @@ class UIRoot extends Component {
               )}
               <TwoDHUD.BottomHUD
                 onCreateObject={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.create_object })}
-                onMediaPicked={AFRAME.utils.device.isMobile() ? this.handleCreateObject : null}
+                showImageOnlyButton={AFRAME.utils.device.isMobile()}
+                onMediaPicked={this.handleCreateObject}
               />
             </div>
           ) : null}
