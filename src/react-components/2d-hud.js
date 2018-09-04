@@ -75,6 +75,7 @@ const BottomHUD = ({ onCreateObject, showImageOnlyButton, onMediaPicked }) => (
 
 BottomHUD.propTypes = {
   onCreateObject: PropTypes.func,
+  showImageOnlyButton: PropTypes.bool,
   onMediaPicked: PropTypes.func
 };
 

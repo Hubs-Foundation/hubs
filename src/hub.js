@@ -306,11 +306,14 @@ const onReady = async () => {
 
     const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
-      const entity = addMedia(src, contentOrigin, true);
+      const { entity, orientation } = addMedia(src, contentOrigin, true);
 
-      entity.setAttribute("offset-relative-to", {
-        target: "#player-camera",
-        offset
+      orientation.then(or => {
+        entity.setAttribute("offset-relative-to", {
+          target: "#player-camera",
+          offset,
+          orientation: or
+        });
       });
     };
 

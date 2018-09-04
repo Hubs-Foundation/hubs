@@ -13,6 +13,9 @@ AFRAME.registerComponent("offset-relative-to", {
     on: {
       type: "string"
     },
+    orientation: {
+      default: 1 // see doc/image_orientations.gif
+    },
     selfDestruct: {
       default: false
     }
@@ -27,6 +30,9 @@ AFRAME.registerComponent("offset-relative-to", {
   },
 
   updateOffset: (function() {
+    const y = new THREE.Vector3(0, 1, 0);
+    const z = new THREE.Vector3(0, 0, -1);
+    const QUARTER_CIRCLE = Math.PI / 2;
     const offsetVector = new THREE.Vector3();
     return function() {
       const obj = this.el.object3D;
@@ -40,6 +46,38 @@ AFRAME.registerComponent("offset-relative-to", {
       this.el.body && this.el.body.position.copy(obj.position);
       target.getWorldQuaternion(obj.quaternion);
       this.el.body && this.el.body.quaternion.copy(obj.quaternion);
+
+      // See doc/image_orientations.gif
+      switch (this.data.orientation) {
+        case 8:
+          obj.rotateOnAxis(z, 3 * QUARTER_CIRCLE);
+          break;
+        case 7:
+          obj.rotateOnAxis(z, 3 * QUARTER_CIRCLE);
+          obj.rotateOnAxis(y, 2 * QUARTER_CIRCLE);
+          break;
+        case 6:
+          obj.rotateOnAxis(z, QUARTER_CIRCLE);
+          break;
+        case 5:
+          obj.rotateOnAxis(z, QUARTER_CIRCLE);
+          obj.rotateOnAxis(y, 2 * QUARTER_CIRCLE);
+          break;
+        case 4:
+          obj.rotateOnAxis(z, 2 * QUARTER_CIRCLE);
+          obj.rotateOnAxis(y, 2 * QUARTER_CIRCLE);
+          break;
+        case 3:
+          obj.rotateOnAxis(z, 2 * QUARTER_CIRCLE);
+          break;
+        case 2:
+          obj.rotateOnAxis(y, 2 * QUARTER_CIRCLE);
+          break;
+        case 1:
+        default:
+          break;
+      }
+
       if (this.data.selfDestruct) {
         if (this.data.on) {
           this.el.sceneEl.removeEventListener(this.data.on, this.updateOffset);
