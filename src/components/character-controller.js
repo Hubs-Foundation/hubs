@@ -101,17 +101,17 @@ AFRAME.registerComponent("character-controller", {
 
     return function(t, dt) {
       const actions = AFRAME.scenes[0].systems.actions;
+      const acc = actions.poll("accSelf");
+      if (acc) {
+        this.accelerationInput.set(acc[0], 0, acc[1]);
+      }
+
       if (actions.poll("snapRotateRight")) {
         this.snapRotateRight();
       }
       if (actions.poll("snapRotateLeft")) {
         this.snapRotateLeft();
       }
-      const acc = actions.poll("accSelf");
-      if (acc) {
-        this.accelerationInput.set(acc[0], 0, acc[1]);
-      }
-
       const deltaSeconds = dt / 1000;
       const root = this.el.object3D;
       const pivot = this.data.pivot.object3D;
