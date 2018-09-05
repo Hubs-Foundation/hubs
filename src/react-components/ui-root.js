@@ -108,7 +108,8 @@ class UIRoot extends Component {
 
     exited: false,
 
-    showProfileEntry: false
+    showProfileEntry: false,
+    landscapeMode: false
   };
 
   constructor(props) {
@@ -123,6 +124,11 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
     this.props.scene.addEventListener("exit", this.exit);
+    window.addEventListener("deviceorientation", () => {
+      this.setState({
+        landscapeMode: AFRAME.utils.device.isMobile() && document.body.clientWidth > document.body.clientHeight
+      });
+    });
   }
 
   componentWillUnmount() {
@@ -912,6 +918,7 @@ class UIRoot extends Component {
                 onCreateObject={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.create_object })}
                 showImageOnlyButton={AFRAME.utils.device.isMobile()}
                 onMediaPicked={this.handleCreateObject}
+                landscapeMode={this.state.landscapeMode}
               />
             </div>
           ) : null}

@@ -38,7 +38,7 @@ TopHUD.propTypes = {
 };
 
 const mediaPickerInput = "media-picker-input";
-const BottomHUD = ({ onCreateObject, showImageOnlyButton, onMediaPicked }) => (
+const BottomHUD = ({ onCreateObject, showImageOnlyButton, onMediaPicked, landscapeMode }) => (
   <div>
     {showImageOnlyButton ? (
       <div>
@@ -53,9 +53,17 @@ const BottomHUD = ({ onCreateObject, showImageOnlyButton, onMediaPicked }) => (
             }
           }}
         />
-        <label htmlFor={mediaPickerInput} className={cx(styles.container, styles.aboveBottom)}>
+        <label
+          htmlFor={mediaPickerInput}
+          className={cx(styles.container, landscapeMode ? styles.bottomLeft : styles.aboveBottom)}
+        >
           <div
-            className={cx("ui-interactive", styles.iconButton, styles.large, styles.mobileMediaPicker)}
+            className={cx(
+              "ui-interactive",
+              styles.iconButton,
+              landscapeMode ? styles.medium : styles.large,
+              styles.mobileMediaPicker
+            )}
             title={"Pick Media"}
           />
         </label>
@@ -63,9 +71,14 @@ const BottomHUD = ({ onCreateObject, showImageOnlyButton, onMediaPicked }) => (
     ) : (
       <div />
     )}
-    <div className={cx(styles.container, styles.bottom)}>
+    <div className={cx(styles.container, landscapeMode ? styles.bottomRight : styles.bottom)}>
       <div
-        className={cx("ui-interactive", styles.iconButton, styles.large, styles.createObject)}
+        className={cx(
+          "ui-interactive",
+          styles.iconButton,
+          landscapeMode ? styles.medium : styles.large,
+          styles.createObject
+        )}
         title={"Create Object"}
         onClick={onCreateObject}
       />
@@ -76,7 +89,8 @@ const BottomHUD = ({ onCreateObject, showImageOnlyButton, onMediaPicked }) => (
 BottomHUD.propTypes = {
   onCreateObject: PropTypes.func,
   showImageOnlyButton: PropTypes.bool,
-  onMediaPicked: PropTypes.func
+  onMediaPicked: PropTypes.func,
+  landscapeMode: PropTypes.bool
 };
 
 export default { TopHUD, BottomHUD };
