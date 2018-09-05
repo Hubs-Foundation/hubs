@@ -5,31 +5,26 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 80px;
   width: 100%;
   user-select: none;
 
   &:local(.top) {
     top: 10px;
+    height: 80px;
   }
 
-  &:local(.bottom) {
+  &:local(.column) {
+    flex-direction: column;
     bottom: 20px;
   }
+}
 
-  &:local(.aboveBottom) {
-    bottom: 110px;
-  }
+:local(.bottom) {
+  margin-bottom: 20px;
+}
 
-  &:local(.bottomLeft) {
-    bottom: 10px;
-    right: 35px;
-  }
-
-  &:local(.bottomRight) {
-    bottom: 10px;
-    left: 35px;
-  }
+:local(.hide) {
+  display: none;
 }
 
 :local(.panel) {
@@ -56,6 +51,14 @@
   margin-left: -40px;
 }
 
+:local(.panel.up) {
+  border-top-right-radius: 30px;
+  border-top-left-radius: 30px;
+  padding-top: 5px;
+  padding-bottom: 45px;
+  margin-bottom: -40px;
+}
+
 :local(.iconButton) {
   width: 40px;
   height: 40px;
@@ -70,12 +73,6 @@
 :local(.iconButton.small) {
   width: 30px;
   height: 30px;
-}
-
-:local(.iconButton.medium) {
-  width: 60px;
-  height: 60px;
-  z-index: 1;
 }
 
 :local(.iconButton.large) {

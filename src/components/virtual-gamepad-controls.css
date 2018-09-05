@@ -6,11 +6,11 @@
 
 :local(.touchZone.left) {
   left: 0;
-  right: 50%;
+  right: 55%;
 }
 
 :local(.touchZone.right) {
-  left: 50%;
+  left: 55%;
   right: 0;
 }
 

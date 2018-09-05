@@ -37,13 +37,13 @@ TopHUD.propTypes = {
   onToggleSpaceBubble: PropTypes.func
 };
 
-const mediaPickerInput = "media-picker-input";
-const BottomHUD = ({ onCreateObject, showImageOnlyButton, onMediaPicked, landscapeMode }) => (
-  <div>
-    {showImageOnlyButton ? (
-      <div>
+const BottomHUD = ({ onCreateObject, showPhotoPicker, onMediaPicked }) => (
+  <div className={cx(styles.container, styles.column, styles.bottom)}>
+    {showPhotoPicker ? (
+      <div className={cx("ui-interactive", styles.panel, styles.up)}>
         <input
-          id={mediaPickerInput}
+          id="media-picker-input"
+          className={cx(styles.hide)}
           type="file"
           accept="image/*"
           multiple
@@ -53,32 +53,16 @@ const BottomHUD = ({ onCreateObject, showImageOnlyButton, onMediaPicked, landsca
             }
           }}
         />
-        <label
-          htmlFor={mediaPickerInput}
-          className={cx(styles.container, landscapeMode ? styles.bottomLeft : styles.aboveBottom)}
-        >
-          <div
-            className={cx(
-              "ui-interactive",
-              styles.iconButton,
-              landscapeMode ? styles.medium : styles.large,
-              styles.mobileMediaPicker
-            )}
-            title={"Pick Media"}
-          />
+        <label htmlFor="media-picker-input">
+          <div className={cx(styles.iconButton, styles.mobileMediaPicker)} title={"Pick Media"} />
         </label>
       </div>
     ) : (
       <div />
     )}
-    <div className={cx(styles.container, landscapeMode ? styles.bottomRight : styles.bottom)}>
+    <div>
       <div
-        className={cx(
-          "ui-interactive",
-          styles.iconButton,
-          landscapeMode ? styles.medium : styles.large,
-          styles.createObject
-        )}
+        className={cx("ui-interactive", styles.iconButton, styles.large, styles.createObject)}
         title={"Create Object"}
         onClick={onCreateObject}
       />
@@ -88,9 +72,8 @@ const BottomHUD = ({ onCreateObject, showImageOnlyButton, onMediaPicked, landsca
 
 BottomHUD.propTypes = {
   onCreateObject: PropTypes.func,
-  showImageOnlyButton: PropTypes.bool,
-  onMediaPicked: PropTypes.func,
-  landscapeMode: PropTypes.bool
+  showPhotoPicker: PropTypes.bool,
+  onMediaPicked: PropTypes.func
 };
 
 export default { TopHUD, BottomHUD };
