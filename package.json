@@ -19,7 +19,8 @@
     "prettier": "prettier --write '*.js' 'src/**/*.js'",
     "lint:js": "eslint '*.js' 'scripts/**/*.js' 'src/**/*.js'",
     "lint:html": "htmlhint 'src/**/*.html'",
-    "lint": "npm run lint:js && npm run lint:html"
+    "lint": "npm run lint:js && npm run lint:html",
+    "test": "npm run lint && npm run build"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.2",
