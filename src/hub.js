@@ -7,6 +7,7 @@ import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
+import screenfull from "screenfull";
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
@@ -189,6 +190,10 @@ function mountUI(scene, props = {}) {
   );
 }
 
+function requestFullscreen() {
+  if (screenfull.enabled && !screenfull.isFullscreen) screenfull.request();
+}
+
 const onReady = async () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
@@ -233,6 +238,7 @@ const onReady = async () => {
       }
       document.body.removeChild(scene);
     }
+    document.body.removeEventListener("touchend", requestFullscreen);
   };
 
   const enterScene = async (mediaStream, enterInVR, hubId) => {
@@ -246,6 +252,8 @@ const onReady = async () => {
 
     if (enterInVR) {
       scene.enterVR();
+    } else if (AFRAME.utils.device.isMobile()) {
+      document.body.addEventListener("touchend", requestFullscreen);
     }
 
     AFRAME.registerInputActions(inGameActions, "default");
