@@ -161,7 +161,7 @@ module.exports = (env, argv) => ({
     splitChunks: {
       cacheGroups: {
         engine: {
-          test: /[\\/]node_modules[\\/](aframe|cannon|three\.js)/,
+          test: /([\\/]src[\\/]workers|[\\/]node_modules[\\/](aframe|cannon|three\.js))/,
           priority: 100,
           name: "engine",
           chunks: "all"
