@@ -16,3 +16,5 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package-lock.json" }}
       - run: npm test
+      - store_artifacts:
+          path: dist
