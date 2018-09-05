@@ -25,8 +25,37 @@ AFRAME.GLTFModelPlus.registerComponent("scale-audio-feedback", "scale-audio-feed
 AFRAME.GLTFModelPlus.registerComponent("animation-mixer", "animation-mixer");
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
 AFRAME.GLTFModelPlus.registerComponent("shape", "shape");
+AFRAME.GLTFModelPlus.registerComponent(
+  "box-collider",
+  "shape",
+  (() => {
+    const euler = new THREE.Euler();
+    const orientation = new THREE.Quaternion();
+    return (el, componentName, componentData) => {
+      const { scale, rotation } = componentData;
+      euler.set(rotation.x, rotation.y, rotation.z);
+      orientation.setFromEuler(euler);
+      el.setAttribute(componentName, {
+        shape: "box",
+        offset: componentData.position,
+        halfExtents: { x: scale.x / 2, y: scale.y / 2, z: scale.z / 2 },
+        orientation
+      });
+    };
+  })()
+);
 AFRAME.GLTFModelPlus.registerComponent("visible", "visible");
 AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point");
 AFRAME.GLTFModelPlus.registerComponent("hoverable", "hoverable");
 AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
-AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh");
+AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentName, componentData) => {
+  const nav = AFRAME.scenes[0].systems.nav;
+  const zone = componentData.zone || "character";
+  let found = false;
+  el.object3D.traverse(node => {
+    if (node.isMesh && !found) {
+      found = true;
+      nav.loadMesh(node, zone);
+    }
+  });
+});

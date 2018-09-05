@@ -110,7 +110,7 @@ AFRAME.registerComponent("super-spawner", {
       return;
     }
 
-    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER);
+    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER).entity;
 
     entity.object3D.position.copy(hand.object3D.position);
     entity.object3D.rotation.copy(hand.object3D.rotation);
@@ -141,7 +141,7 @@ AFRAME.registerComponent("super-spawner", {
     const thisGrabId = nextGrabId++;
     this.heldEntities.set(hand, thisGrabId);
 
-    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER);
+    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER).entity;
 
     entity.object3D.position.copy(
       this.data.useCustomSpawnPosition ? this.data.spawnPosition : this.el.object3D.position

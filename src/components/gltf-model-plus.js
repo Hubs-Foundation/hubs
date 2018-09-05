@@ -2,19 +2,12 @@ import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import cubeMapPosX from "../assets/images/cubemap/posx.jpg";
 import cubeMapNegX from "../assets/images/cubemap/negx.jpg";
 import cubeMapPosY from "../assets/images/cubemap/posy.jpg";
-import cubeMapNegY from "../assets/images/cubemap/negx.jpg";
+import cubeMapNegY from "../assets/images/cubemap/negy.jpg";
 import cubeMapPosZ from "../assets/images/cubemap/posz.jpg";
 import cubeMapNegZ from "../assets/images/cubemap/negz.jpg";
 
 const GLTFCache = {};
 let CachedEnvMapTexture = null;
-
-AFRAME.GLTFModelPlus = {
-  components: {},
-  registerComponent(componentKey, componentName) {
-    AFRAME.GLTFModelPlus.components[componentKey] = componentName;
-  }
-};
 
 function inflateComponent(el, componentName, componentData) {
   if (!AFRAME.components[componentName]) {
@@ -28,6 +21,15 @@ function inflateComponent(el, componentName, componentData) {
     el.setAttribute(componentName, componentData);
   }
 }
+
+AFRAME.GLTFModelPlus = {
+  // eslint-disable-next-line no-unused-vars
+  components: {},
+  registerComponent(componentKey, componentName, inflator) {
+    inflator = inflator || inflateComponent;
+    AFRAME.GLTFModelPlus.components[componentKey] = { inflator, componentName };
+  }
+};
 
 // From https://gist.github.com/cdata/f2d7a6ccdec071839bc1954c32595e87
 // Tracking glTF cloning here: https://github.com/mrdoob/three.js/issues/11573
@@ -135,6 +137,9 @@ const inflateEntities = function(node, templates, isRoot) {
   node.matrix.identity();
 
   el.setObject3D(node.type.toLowerCase(), node);
+  if (node.userData.components && "nav-mesh" in node.userData.components) {
+    el.setObject3D("mesh", node);
+  }
 
   // Set the name of the `THREE.Group` to match the name of the node,
   // so that `THREE.PropertyBinding` will find (and later animate)
@@ -153,8 +158,8 @@ const inflateEntities = function(node, templates, isRoot) {
   if (entityComponents) {
     for (const prop in entityComponents) {
       if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
-        const componentName = AFRAME.GLTFModelPlus.components[prop];
-        inflateComponent(el, componentName, entityComponents[prop]);
+        const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
+        inflator(el, componentName, entityComponents[prop]);
       }
     }
   }
