@@ -157,7 +157,7 @@ module.exports = (env, argv) => ({
 
   optimization: {
     // necessary due to https://github.com/visionmedia/debug/issues/547
-    minimizer: [new UglifyJsPlugin({ uglifyOptions: { compress: { collapse_vars: false } } })],
+    minimizer: [new UglifyJsPlugin({ sourceMap: true, uglifyOptions: { compress: { collapse_vars: false } } })],
     splitChunks: {
       cacheGroups: {
         engine: {
