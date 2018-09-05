@@ -3,7 +3,8 @@ import "aframe";
 import PropTypes from "prop-types";
 import giphyLogo from "../assets/images/giphy_logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperclip, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faPaperclip } from "@fortawesome/free-solid-svg-icons/faPaperclip";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import styles from "../assets/stylesheets/create-object-dialog.scss";
 import cx from "classnames";
 
