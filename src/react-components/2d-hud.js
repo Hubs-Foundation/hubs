@@ -5,7 +5,7 @@ import cx from "classnames";
 import styles from "../assets/stylesheets/2d-hud.scss";
 
 const TopHUD = ({ muted, frozen, spacebubble, onToggleMute, onToggleFreeze, onToggleSpaceBubble }) => (
-  <div className={cx(styles.container, styles.top)}>
+  <div className={cx(styles.container, styles.top, styles.unselectable)}>
     <div className={cx("ui-interactive", styles.panel, styles.left)}>
       <div
         className={cx(styles.iconButton, styles.mute, { [styles.active]: muted })}
@@ -38,7 +38,7 @@ TopHUD.propTypes = {
 };
 
 const BottomHUD = ({ onCreateObject, showPhotoPicker, onMediaPicked }) => (
-  <div className={cx(styles.container, styles.column, styles.bottom)}>
+  <div className={cx(styles.container, styles.column, styles.bottom, styles.unselectable)}>
     {showPhotoPicker ? (
       <div className={cx("ui-interactive", styles.panel, styles.up)}>
         <input
