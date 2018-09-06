@@ -5,7 +5,7 @@ import { FormattedMessage } from "react-intl";
 
 import styles from "../assets/stylesheets/link-dialog.scss";
 
-class LinkDialog extends Component {
+export default class LinkDialog extends Component {
   static propTypes = {
     linkCode: PropTypes.string
   };
@@ -50,5 +50,3 @@ class LinkDialog extends Component {
     );
   }
 }
-
-export default LinkDialog;
