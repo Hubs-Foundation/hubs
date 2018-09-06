@@ -120,7 +120,7 @@ AFRAME.registerComponent("networked-drawing", {
     //TODO: handle possibility that a clientId gets stuck in sendNetworkBufferQueue
     //if that client disconnects before this executes and an activeDataChannel is opened.
     if (isMine && this.sendNetworkBufferQueue.length > 0) {
-      let connected = [];
+      const connected = [];
       for (let i = 0; i < this.sendNetworkBufferQueue.length; i++) {
         if (NAF.connection.hasActiveDataChannel(this.sendNetworkBufferQueue[i])) {
           connected.push(this.sendNetworkBufferQueue[i]);
