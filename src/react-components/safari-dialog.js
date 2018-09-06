@@ -13,6 +13,7 @@ export default class SafariDialog extends Component {
   };
 
   render() {
+    const onCopyClicked = this.copyLinkClicked.bind(this, document.location);
     return (
       <DialogContainer title="Open in Safari" {...this.props}>
         <div>
@@ -26,7 +27,7 @@ export default class SafariDialog extends Component {
               className="invite-form__link_field"
             />
             <div className="invite-form__buttons">
-              <button className="invite-form__action-button" onClick={this.copyLinkClicked.bind(this, document.location)}>
+              <button className="invite-form__action-button" onClick={onCopyClicked}>
                 <span>{this.state.copyLinkButtonText}</span>
               </button>
             </div>
