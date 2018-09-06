@@ -157,6 +157,8 @@
                     position-at-box-shape-border="target:.delete-button"
                     destroy-at-extreme-distances
                     rotation
+                    activatable__increase-scale="buttonStartEvents: scroll_right; buttonEndEvents: horizontal_scroll_release; activatedState: scaleUp;"
+                    activatable__decrease-scale="buttonStartEvents: scroll_left; buttonEndEvents: horizontal_scroll_release; activatedState: scaleDown;"
                 >
                     <!-- HACK: rotation component above is required for its side effect of setting YXZ order -->
                     <a-entity class="delete-button" visible-while-frozen>
