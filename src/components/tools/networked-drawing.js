@@ -35,11 +35,12 @@ AFRAME.registerComponent("networked-drawing", {
 
     this.networkBuffer = [];
 
+    this.sendNetworkBufferQueue = [];
+
     this.drawStarted = false;
     this.lineStarted = false;
     this.remoteLineStarted = false;
 
-    this.tempDrawBuffer = []; //used for temporary storage of new line data when drawing is still being initialized.
     this.receivedBufferParts = 0;
     this.bufferIndex = 0;
     this.connectedToOwner = false;
@@ -102,9 +103,12 @@ AFRAME.registerComponent("networked-drawing", {
   },
 
   tick() {
-    if (!this.connectedToOwner && NAF.connection.isConnected() && this.networkedEl) {
+    const connected = NAF.connection.isConnected() && this.networkedEl;
+    const isMine = connected && NAF.utils.isMine(this.networkedEl);
+
+    if (!this.connectedToOwner && connected) {
       const owner = NAF.utils.getNetworkOwner(this.networkedEl);
-      if (!NAF.utils.isMine(this.networkedEl) && NAF.connection.hasActiveDataChannel(owner)) {
+      if (!isMine && NAF.connection.hasActiveDataChannel(owner)) {
         NAF.connection.sendDataGuaranteed(owner, this.drawingId, {
           type: MSG_CONFIRM_CONNECT,
           clientId: NAF.clientId
@@ -113,8 +117,24 @@ AFRAME.registerComponent("networked-drawing", {
       }
     }
 
-    if (this.networkBuffer.length > 0 && NAF.connection.isConnected() && this.networkedEl) {
-      if (!NAF.utils.isMine(this.networkedEl)) {
+    //TODO: handle possibility that a clientId gets stuck in sendNetworkBufferQueue
+    //if that client disconnects before this executes and an activeDataChannel is opened.
+    if (isMine && this.sendNetworkBufferQueue.length > 0) {
+      let connected = [];
+      for (let i = 0; i < this.sendNetworkBufferQueue.length; i++) {
+        if (NAF.connection.hasActiveDataChannel(this.sendNetworkBufferQueue[i])) {
+          connected.push(this.sendNetworkBufferQueue[i]);
+        }
+      }
+      for (let j = 0; j < connected.length; j++) {
+        const pos = this.sendNetworkBufferQueue.indexOf(connected[j]);
+        this._sendNetworkBuffer(connected[j]);
+        this.sendNetworkBufferQueue.splice(pos, 1);
+      }
+    }
+
+    if (this.networkBuffer.length > 0 && connected) {
+      if (!isMine) {
         this._drawFromNetwork();
       } else if (this.bufferIndex < this.networkBuffer.length) {
         this._broadcastDrawing();
@@ -195,7 +215,7 @@ AFRAME.registerComponent("networked-drawing", {
     }
   },
 
-  _sendDrawBuffer: (() => {
+  _sendNetworkBuffer: (() => {
     const copyArray = [];
     //This number needs to be approx. < ~6000 based on napkin math
     //see: https://github.com/webrtc/adapter/blob/682e0f2439e139da6c0c406370eae820637b8sc1a/src/js/common_shim.js#L157
@@ -230,23 +250,17 @@ AFRAME.registerComponent("networked-drawing", {
   _receiveData(_, dataType, data) {
     switch (data.type) {
       case MSG_CONFIRM_CONNECT:
-        this._sendDrawBuffer(data.clientId);
+        this.sendNetworkBufferQueue.push(data.clientId);
         break;
       case MSG_BUFFER_DATA:
         if (this.networkBufferInitialized) {
           this.networkBuffer.push.apply(this.networkBuffer, data.buffer);
-        } else {
-          this.tempDrawBuffer.push.apply(this.tempDrawBuffer, data.buffer);
         }
         break;
       case MSG_BUFFER_DATA_FULL:
         this.networkBuffer.push.apply(this.networkBuffer, data.buffer);
         if (++this.receivedBufferParts >= data.parts) {
           this.networkBufferInitialized = true;
-          if (this.tempDrawBuffer.length > 0) {
-            this.networkBuffer.push.apply(this.networkBuffer, this.tempDrawBuffer);
-            this.tempDrawBuffer = [];
-          }
         }
         break;
     }

@@ -22,7 +22,6 @@ AFRAME.registerComponent("drawing-manager", {
   },
 
   _onComponentInitialized(e) {
-    console.log(e);
     if (e.detail.name == "networked-drawing") {
       this.drawing = this.drawingEl.components["networked-drawing"];
     }

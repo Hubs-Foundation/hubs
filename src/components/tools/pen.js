@@ -25,7 +25,7 @@ AFRAME.registerComponent("pen", {
         "#9900FF",
         "#FF6600",
         "#FFFFFF",
-        "#CCCCCC",
+        "#AAAAAA",
         "#777777",
         "#000000"
       ]
