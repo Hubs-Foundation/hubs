@@ -117,6 +117,14 @@ AFRAME.registerComponent("networked-drawing", {
       }
     }
 
+    if (this.networkBuffer.length > 0 && connected) {
+      if (!isMine) {
+        this._drawFromNetwork();
+      } else if (this.bufferIndex < this.networkBuffer.length) {
+        this._broadcastDrawing();
+      }
+    }
+
     //TODO: handle possibility that a clientId gets stuck in sendNetworkBufferQueue
     //if that client disconnects before this executes and an activeDataChannel is opened.
     if (isMine && this.sendNetworkBufferQueue.length > 0) {
@@ -130,14 +138,6 @@ AFRAME.registerComponent("networked-drawing", {
         const pos = this.sendNetworkBufferQueue.indexOf(connected[j]);
         this._sendNetworkBuffer(connected[j]);
         this.sendNetworkBufferQueue.splice(pos, 1);
-      }
-    }
-
-    if (this.networkBuffer.length > 0 && connected) {
-      if (!isMine) {
-        this._drawFromNetwork();
-      } else if (this.bufferIndex < this.networkBuffer.length) {
-        this._broadcastDrawing();
       }
     }
 
@@ -160,7 +160,8 @@ AFRAME.registerComponent("networked-drawing", {
     const normal = new THREE.Vector3();
     return function() {
       const head = this.networkBuffer[0];
-      if (head != null && this.networkBuffer.length >= 10) {
+      let didWork = false;
+      while (head != null && this.networkBuffer.length >= 10) {
         position.set(this.networkBuffer[0], this.networkBuffer[1], this.networkBuffer[2]);
         direction.set(this.networkBuffer[3], this.networkBuffer[4], this.networkBuffer[5]);
         this.radius = Math.round(direction.length() * 1000) / 1000; //radius is encoded as length of direction vector
@@ -177,13 +178,15 @@ AFRAME.registerComponent("networked-drawing", {
         }
 
         if (this.networkBuffer[0] === null) {
-          this.endDraw(position, direction, normal);
+          this._endDraw(position, direction, normal);
           this.remoteLineStarted = false;
           this.networkBuffer.shift();
         } else {
           this._draw(position, direction, normal);
+          didWork = true;
         }
       }
+      if (didWork) this._updateBuffer();
     };
   })(),
 
@@ -298,6 +301,8 @@ AFRAME.registerComponent("networked-drawing", {
 
     this._addToNetworkBuffer(position, direction, normal);
     this._draw(position, direction, normal);
+
+    this._updateBuffer();
   },
 
   _draw: (() => {
@@ -338,7 +343,7 @@ AFRAME.registerComponent("networked-drawing", {
         this._drawCylinder();
 
         if (this.currentPointCount > this.data.maxPointsPerLine) {
-          this._endDraw(position, direction);
+          this._drawEndCap(position, direction);
           this._endLine();
         }
       }
@@ -347,23 +352,28 @@ AFRAME.registerComponent("networked-drawing", {
   })(),
 
   endDraw(position, direction, normal) {
+    this._endDraw(position, direction, normal);
+    this._updateBuffer();
+  },
+
+  _endDraw(position, direction, normal) {
     if (!this.lineStarted && this.drawStarted) {
       this._drawPoint(position);
     } else if (this.lineStarted && this.drawStarted) {
-      this.draw(position, direction, normal);
-      this._endDraw(position, direction);
+      this._addToNetworkBuffer(position, direction, normal);
+      this._draw(position, direction, normal);
+      this._drawEndCap(position, direction);
     }
     this._endLine();
   },
 
-  _endDraw: (() => {
+  _drawEndCap: (() => {
     const projectedDirection = new THREE.Vector3();
     const projectedPoint = new THREE.Vector3();
     return function(position, direction) {
       if (this.lineStarted && this.drawStarted) {
         projectedDirection.copy(direction).multiplyScalar(this.radius);
         projectedPoint.copy(position).add(projectedDirection);
-
         this._addDegenerateTriangle(); //flip faceculling order before drawing end-cap
         this._drawCap(projectedPoint, this.lastSegments, direction);
       }
@@ -428,7 +438,6 @@ AFRAME.registerComponent("networked-drawing", {
       this._addVertex(this.lastSegments[i % this.segments]);
       this._addVertex(this.currentSegments[i % this.segments]);
     }
-    this.sharedBuffer.update();
 
     for (let i = 0; i < this.segments; i++) {
       this.lastSegments[i].position.copy(this.currentSegments[i].position);
@@ -479,12 +488,15 @@ AFRAME.registerComponent("networked-drawing", {
         }
       }
     }
-    this.sharedBuffer.update();
   },
 
   _restartPrimitive() {
     this.sharedBuffer.restartPrimitive();
     ++this.vertexCount;
+  },
+
+  _updateBuffer() {
+    this.sharedBuffer.update();
   },
 
   _addVertex(segment) {
