@@ -4,6 +4,7 @@ import LinkDialog from "./link-dialog.js";
 import SlackDialog from "./slack-dialog.js";
 import CreateObjectDialog from "./create-object-dialog.js";
 import CreateRoomDialog from "./create-room-dialog.js";
+import DialogContainer from "./dialog-container.js";
 import InviteDialog from "./invite-dialog.js";
 import SafariDialog from "./safari-dialog.js";
 import UpdatesDialog from "./updates-dialog.js";
@@ -29,7 +30,7 @@ export default class InfoDialog extends Component {
   };
   static propTypes = {
     dialogType: PropTypes.oneOf(Object.values(InfoDialog.dialogTypes)),
-    onCloseDialog: PropTypes.func,
+    onClose: PropTypes.func,
     onSubmittedEmail: PropTypes.func,
     onCreateObject: PropTypes.func,
     onCustomScene: PropTypes.func,
@@ -52,13 +53,13 @@ export default class InfoDialog extends Component {
 
   onKeyDown(e) {
     if (e.key === "Escape") {
-      this.props.onCloseDialog();
+      this.props.onClose();
     }
   }
 
   onContainerClicked = e => {
     if (e.currentTarget === e.target) {
-      this.props.onCloseDialog();
+      this.props.onClose();
     }
   };
 
@@ -67,76 +68,33 @@ export default class InfoDialog extends Component {
       return <div />;
     }
 
-    let dialogTitle = null;
-    let dialogBody = null;
-
     switch (this.props.dialogType) {
-      // TODO i18n, FormattedMessage doesn't play nicely with links
       case InfoDialog.dialogTypes.slack:
-        dialogTitle = "Get in Touch";
-        dialogBody = <SlackDialog />;
-        break;
+        return <SlackDialog onClose={this.props.onClose} />;
       case InfoDialog.dialogTypes.email_submitted:
-        dialogTitle = "";
-        dialogBody = "Great! Please check your e-mail to confirm your subscription.";
-        break;
+        return (
+          <DialogContainer onClose={this.props.onClose}>
+            Great! Please check your e-mail to confirm your subscription.
+          </DialogContainer>
+        );
       case InfoDialog.dialogTypes.invite:
-        dialogTitle = "Invite Others";
-        dialogBody = <InviteDialog />;
-        break;
+        return <InviteDialog onClose={this.props.onClose} />;
       case InfoDialog.dialogTypes.safari:
-        dialogTitle = "Open in Safari";
-        dialogBody = <SafariDialog />;
-        break;
+        return <SafariDialog onClose={this.props.onClose} />;
       case InfoDialog.dialogTypes.create_object:
-        dialogTitle = "Create Object";
-        dialogBody = (
-          <CreateObjectDialog onCreateObject={this.props.onCreateObject} onCloseDialog={this.props.onCloseDialog} />
-        );
-        break;
+        return <CreateObjectDialog onCreateObject={this.props.onCreateObject} onClose={this.props.onClose} />;
       case InfoDialog.dialogTypes.custom_scene:
-        dialogTitle = "Create a Room";
-        dialogBody = (
-          <CreateRoomDialog onCustomScene={this.props.onCustomScene} onCloseDialog={this.props.onCloseDialog} />
-        );
-        break;
+        return <CreateRoomDialog onCustomScene={this.props.onCustomScene} onClose={this.props.onClose} />;
       case InfoDialog.dialogTypes.updates:
-        dialogTitle = "";
-        dialogBody = <UpdatesDialog onSubmittedEmail={this.props.onSubmittedEmail} />;
-        break;
+        return <UpdatesDialog onSubmittedEmail={this.props.onSubmittedEmail} onClose={this.props.onClose} />;
       case InfoDialog.dialogTypes.report:
-        dialogTitle = "Report an Issue";
-        dialogBody = <ReportDialog />;
-        break;
+        return <ReportDialog onClose={this.props.onClose} />;
       case InfoDialog.dialogTypes.help:
-        dialogTitle = "Getting Started";
-        dialogBody = <HelpDialog />;
-        break;
+        return <HelpDialog onClose={this.props.onClose} />;
       case InfoDialog.dialogTypes.webvr_recommend:
-        dialogTitle = "Enter in VR";
-        dialogBody = <WebVRRecommendDialog />;
-        break;
+        return <WebVRRecommendDialog onClose={this.props.onClose} />;
       case InfoDialog.dialogTypes.link:
-        dialogTitle = "Open on Headset";
-        dialogBody = <LinkDialog linkCode={this.props.linkCode} />;
-        break;
+        return <LinkDialog linkCode={this.props.linkCode} onClose={this.props.onClose} />;
     }
-
-    return (
-      <div className="dialog-overlay">
-        <div className="dialog" onClick={this.onContainerClicked}>
-          <div className="dialog__box">
-            <div className="dialog__box__contents">
-              <button className="dialog__box__contents__close" onClick={this.props.onCloseDialog}>
-                <span>×</span>
-              </button>
-              <div className="dialog__box__contents__title">{dialogTitle}</div>
-              <div className="dialog__box__contents__body">{dialogBody}</div>
-              <div className="dialog__box__contents__button-container" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
   }
 }

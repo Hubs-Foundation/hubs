@@ -194,7 +194,7 @@ class HomeRoot extends Component {
           {this.state.dialogType && (
             <InfoDialog
               dialogType={this.state.dialogType}
-              onCloseDialog={() => this.setState({ dialogType: null })}
+              onClose={() => this.setState({ dialogType: null })}
               onSubmittedEmail={() => this.setState({ dialogType: dialogTypes.email_submitted })}
             />
           )}
