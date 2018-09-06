@@ -1,5 +1,6 @@
 import { keyboard } from "./keyboard-frame";
 import { mouse } from "./mouse-frame";
+import { touch } from "./touch-frame";
 
 const history = {
   ring: [],
@@ -42,7 +43,7 @@ const sets = [
 
 const pendingSetChanges = [];
 
-const devices = [keyboard, mouse];
+const devices = [keyboard, mouse, touch];
 
 const state = {
   history,

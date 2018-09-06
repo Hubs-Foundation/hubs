@@ -1,0 +1,12 @@
+:local(.touchZone) {
+    user-select: none;
+    touch-action: none;
+    position: absolute;
+    height: 20vh;
+    bottom: 0;
+}
+
+:local(.touchZone.left) {
+    left: 0;
+    right: 40%;
+}

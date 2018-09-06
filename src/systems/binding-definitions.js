@@ -123,3 +123,12 @@ export const mouseBindDefn = [
     key: "wheel"
   }
 ];
+
+export const touchBindDefn = [
+  {
+    set: "selfMoving",
+    action: "accSelf",
+    filter: "vec2",
+    key: "joystickLeft"
+  }
+];

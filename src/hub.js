@@ -263,7 +263,7 @@ const onReady = async () => {
     scene.setAttribute("stats-plus", false);
 
     if (isMobile || qsTruthy("mobile")) {
-      playerRig.setAttribute("virtual-gamepad-controls", {});
+      //playerRig.setAttribute("virtual-gamepad-controls", {});
     }
 
     const applyProfileOnPlayerRig = applyProfileFromStore.bind(null, playerRig);

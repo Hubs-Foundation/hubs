@@ -106,7 +106,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.moving = false;
     this.moveEvent.axis[0] = 0;
     this.moveEvent.axis[1] = 0;
-    this.el.sceneEl.emit("move", this.moveEvent);
+//    this.el.sceneEl.emit("move", this.moveEvent);
   },
 
   onLookJoystickChanged(event, joystick) {
@@ -130,7 +130,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   tick() {
     if (!this.inVr) {
       if (this.moving) {
-        this.el.sceneEl.emit("move", this.moveEvent);
+//        this.el.sceneEl.emit("move", this.moveEvent);
       }
 
       if (this.rotating) {
