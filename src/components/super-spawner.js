@@ -55,14 +55,19 @@ AFRAME.registerComponent("super-spawner", {
     centerSpawnedObject: { default: false },
 
     /**
-     * Optional event to listen for to spawn an object on the defaultHand
+     * Optional event to listen for to spawn an object on the preferred superHand
      */
     spawnEvent: { type: "string" },
 
     /**
-     * The hand to use if an object is spawned via spawnEvent
+     * The superHand to use if an object is spawned via spawnEvent
      */
-    defaultHand: { type: "selector" }
+    superHand: { type: "selector" },
+
+    /**
+     * The cursor superHand to use if an object is spawned via spawnEvent
+     */
+    cursorSuperHand: { type: "selector" }
   },
 
   init() {
@@ -103,31 +108,38 @@ AFRAME.registerComponent("super-spawner", {
     this.heldEntities.clear();
   },
 
-  async onSpawnEvent() {
-    const hand = this.data.defaultHand;
+  onSpawnEvent: (() => {
+    const spawnOffset = new THREE.Vector3();
+    return async function() {
+      const controllerCount = this.el.sceneEl.components["input-configurator"].controllerQueue.length;
+      const using6DOF = controllerCount > 1 && this.el.sceneEl.is("vr-mode");
+      const hand = using6DOF ? this.data.superHand : this.data.cursorSuperHand;
 
-    if (this.cooldownTimeout || !hand) {
-      return;
-    }
+      if (this.cooldownTimeout || !hand) {
+        return;
+      }
 
-    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER).entity;
+      const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER).entity;
 
-    entity.object3D.position.copy(hand.object3D.position);
-    entity.object3D.rotation.copy(hand.object3D.rotation);
-    entity.object3D.scale.copy(this.data.useCustomSpawnScale ? this.data.spawnScale : this.el.object3D.scale);
+      hand.object3D.getWorldPosition(entity.object3D.position);
+      hand.object3D.getWorldQuaternion(entity.object3D.quaternion);
+      if (this.data.useCustomSpawnScale) {
+        entity.object3D.scale.copy(this.data.spawnScale);
+      }
 
-    this.activateCooldown();
+      this.activateCooldown();
 
-    await waitForEvent("body-loaded", entity);
+      await waitForEvent("body-loaded", entity);
 
-    if (this.data.centerSpawnedObject) {
-      entity.body.position.copy(hand.object3D.position);
-    }
+      hand.object3D.getWorldPosition(entity.object3D.position);
 
-    for (let i = 0; i < this.data.grabEvents.length; i++) {
-      hand.emit(this.data.grabEvents[i], { targetEntity: entity });
-    }
-  },
+      if (!using6DOF) {
+        for (let i = 0; i < this.data.grabEvents.length; i++) {
+          hand.emit(this.data.grabEvents[i], { targetEntity: entity });
+        }
+      }
+    };
+  })(),
 
   async onGrabStart(e) {
     if (this.cooldownTimeout) {
