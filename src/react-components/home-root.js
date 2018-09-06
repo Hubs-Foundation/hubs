@@ -12,27 +12,31 @@ import { ENVIRONMENT_URLS } from "../assets/environments/environments";
 import styles from "../assets/stylesheets/index.scss";
 
 import HubCreatePanel from "./hub-create-panel.js";
-import InfoDialog from "./info-dialog.js";
+import ReportDialog from "./report-dialog.js";
+import SlackDialog from "./slack-dialog.js";
+import UpdatesDialog from "./updates-dialog.js";
+import DialogContainer from "./dialog-container.js";
 
 addLocaleData([...en]);
 
 class HomeRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
-    dialogType: PropTypes.symbol,
+    dialog: PropTypes.string,
     initialEnvironment: PropTypes.string
   };
 
   state = {
     environments: [],
-    dialogType: null,
+    dialog: null,
     mailingListEmail: "",
     mailingListPrivacy: false
   };
 
   componentDidMount() {
     this.loadEnvironments();
-    this.setState({ dialogType: this.props.dialogType });
+    this.setState({ dialog: this.props.dialog });
+    this.closeDialog = this.closeDialog.bind(this);
     this.loadHomeVideo();
   }
 
@@ -54,13 +58,33 @@ class HomeRoot extends Component {
     }
   };
 
-  showDialog = dialogType => {
-    return e => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.setState({ dialogType });
-    };
-  };
+  closeDialog() {
+    this.setState({ dialog: null });
+  }
+
+  showSlackDialog() {
+    this.setState({ dialog: <SlackDialog onClose={this.closeDialog} /> });
+  }
+
+  showReportDialog() {
+    this.setState({ dialog: <ReportDialog onClose={this.closeDialog} /> });
+  }
+
+  showUpdatesDialog() {
+    this.setState({
+      dialog: <UpdatesDialog onClose={this.closeDialog} onSubmittedEmail={() => this.showEmailSubmittedDialog()} />
+    });
+  }
+
+  showEmailSubmittedDialog() {
+    this.setState({
+      dialog: (
+        <DialogContainer onClose={this.closeDialog}>
+          Great! Please check your e-mail to confirm your subscription.
+        </DialogContainer>
+      )
+    });
+  }
 
   loadEnvironments = () => {
     const environments = [];
@@ -80,9 +104,16 @@ class HomeRoot extends Component {
   render() {
     const mainContentClassNames = classNames({
       [styles.mainContent]: true,
-      [styles.noninteractive]: !!this.state.dialogType
+      [styles.noninteractive]: !!this.state.dialog
     });
-    const dialogTypes = InfoDialog.dialogTypes;
+
+    const onLinkClicked = trigger => {
+      return e => {
+        e.preventDefault();
+        e.stopPropagation();
+        trigger();
+      };
+    };
 
     return (
       <IntlProvider locale={lang} messages={messages}>
@@ -141,7 +172,7 @@ class HomeRoot extends Component {
                     className={styles.link}
                     rel="noopener noreferrer"
                     href="#"
-                    onClick={this.showDialog(dialogTypes.slack)}
+                    onClick={onLinkClicked(this.showSlackDialog.bind(this))}
                   >
                     <FormattedMessage id="home.join_us" />
                   </a>
@@ -149,7 +180,7 @@ class HomeRoot extends Component {
                     className={styles.link}
                     rel="noopener noreferrer"
                     href="#"
-                    onClick={this.showDialog(dialogTypes.updates)}
+                    onClick={onLinkClicked(this.showUpdatesDialog.bind(this))}
                   >
                     <FormattedMessage id="home.get_updates" />
                   </a>
@@ -157,7 +188,7 @@ class HomeRoot extends Component {
                     className={styles.link}
                     rel="noopener noreferrer"
                     href="#"
-                    onClick={this.showDialog(dialogTypes.report)}
+                    onClick={onLinkClicked(this.showReportDialog.bind(this))}
                   >
                     <FormattedMessage id="home.report_issue" />
                   </a>
@@ -191,13 +222,7 @@ class HomeRoot extends Component {
             <source src={homeVideoWebM} type="video/webm" />
             <source src={homeVideoMp4} type="video/mp4" />
           </video>
-          {this.state.dialogType && (
-            <InfoDialog
-              dialogType={this.state.dialogType}
-              onClose={() => this.setState({ dialogType: null })}
-              onSubmittedEmail={() => this.setState({ dialogType: dialogTypes.email_submitted })}
-            />
-          )}
+          {this.state.dialog}
         </div>
       </IntlProvider>
     );
