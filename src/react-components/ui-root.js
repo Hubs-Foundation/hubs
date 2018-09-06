@@ -850,7 +850,7 @@ class UIRoot extends Component {
             dialogType={this.state.infoDialogType}
             linkCode={this.state.linkCode}
             onSubmittedEmail={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.email_submitted })}
-            onCloseDialog={this.handleCloseDialog}
+            onClose={this.handleCloseDialog}
             onCreateObject={this.handleCreateObject}
           />
 
