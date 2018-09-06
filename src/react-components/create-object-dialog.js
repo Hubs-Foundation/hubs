@@ -37,7 +37,7 @@ export default class CreateObjectDialog extends Component {
   };
 
   static propTypes = {
-    onCreateObject: PropTypes.func,
+    onCreate: PropTypes.func,
     onClose: PropTypes.func
   };
 
@@ -79,11 +79,11 @@ export default class CreateObjectDialog extends Component {
   };
 
   render() {
-    const { onCreateObject, onClose, ...other } = this.props;
+    const { onCreate, onClose, ...other } = this.props;
 
     const onCreateClicked = e => {
       e.preventDefault();
-      onCreateObject(this.state.file || this.state.url || DEFAULT_OBJECT_URL);
+      onCreate(this.state.file || this.state.url || DEFAULT_OBJECT_URL);
       onClose();
     };
 
