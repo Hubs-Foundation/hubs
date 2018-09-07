@@ -160,6 +160,10 @@ class UIRoot extends Component {
     this.props.scene.emit("action_space_bubble");
   };
 
+  spawnPen = () => {
+    this.props.scene.emit("spawn_pen");
+  };
+
   handleForcedVREntryType = () => {
     if (!this.props.forcedVREntryType) return;
 
@@ -526,8 +530,8 @@ class UIRoot extends Component {
     this.setState({ infoDialogType: null, linkCode: null, linkCodeCancel: null });
   };
 
-  handleCreateObject = url => {
-    this.props.scene.emit("add_media", url);
+  handleCreateObject = media => {
+    this.props.scene.emit("add_media", media);
   };
 
   render() {
@@ -892,16 +896,27 @@ class UIRoot extends Component {
                 onToggleMute={this.toggleMute}
                 onToggleFreeze={this.toggleFreeze}
                 onToggleSpaceBubble={this.toggleSpaceBubble}
+                onSpawnPen={this.spawnPen}
               />
-              {this.props.occupantCount <= 1 && (
-                <div className={styles.inviteNagButton}>
-                  <button onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}>
-                    <FormattedMessage id="entry.invite-others-nag" />
+              {!this.props.availableVREntryTypes.isInHMD &&
+                this.props.occupantCount <= 1 && (
+                  <div className={styles.nagButton}>
+                    <button onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}>
+                      <FormattedMessage id="entry.invite-others-nag" />
+                    </button>
+                  </div>
+                )}
+              {this.props.availableVREntryTypes.isInHMD && (
+                <div className={styles.nagButton}>
+                  <button onClick={() => this.props.scene.enterVR()}>
+                    <FormattedMessage id="entry.return-to-vr" />
                   </button>
                 </div>
               )}
               <TwoDHUD.BottomHUD
                 onCreateObject={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.create_object })}
+                showPhotoPicker={AFRAME.utils.device.isMobile()}
+                onMediaPicked={this.handleCreateObject}
               />
             </div>
           ) : null}

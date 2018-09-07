@@ -1,16 +1,27 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
-import { resolveMedia } from "../utils/media-utils";
+import { resolveMedia, fetchMaxContentIndex } from "../utils/media-utils";
 
-const fetchContentType = async url => fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
+import "three/examples/js/loaders/GLTFLoader";
+import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
+const gltfLoader = new THREE.GLTFLoader();
+let loadingObject;
+gltfLoader.load(loadingObjectSrc, gltf => {
+  loadingObject = gltf;
+});
 
 AFRAME.registerComponent("media-loader", {
   schema: {
     src: { type: "string" },
+    index: { type: "number" },
     resize: { default: false }
   },
 
   init() {
     this.onError = this.onError.bind(this);
+    this.showLoader = this.showLoader.bind(this);
+    this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
+    this.shapeAdded = false;
+    this.hasBakedShapes = false;
   },
 
   setShapeAndScale(resize) {
@@ -18,9 +29,10 @@ AFRAME.registerComponent("media-loader", {
     const box = getBox(this.el, mesh);
     const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
     this.el.object3DMap.mesh.scale.multiplyScalar(scaleCoefficient);
-    if (this.el.body && this.el.body.shapes.length > 1) {
+    if (this.el.body && this.shapeAdded && this.el.body.shapes.length > 1) {
       this.el.removeAttribute("shape");
-    } else {
+      this.shapeAdded = false;
+    } else if (!this.hasBakedShapes) {
       const center = new THREE.Vector3();
       const { min, max } = box;
       const halfExtents = {
@@ -34,44 +46,115 @@ AFRAME.registerComponent("media-loader", {
         shape: "box",
         halfExtents: halfExtents
       });
+      this.shapeAdded = true;
+    }
+  },
+
+  tick(t, dt) {
+    if (this.loaderMixer) {
+      this.loaderMixer.update(dt / 1000);
     }
   },
 
   onError() {
-    this.el.setAttribute("image-plus", { src: "error" });
+    this.el.removeAttribute("gltf-model-plus");
+    this.el.removeAttribute("media-pager");
+    this.el.removeAttribute("media-video");
+    this.el.setAttribute("media-image", { src: "error" });
     clearTimeout(this.showLoaderTimeout);
+    delete this.showLoaderTimeout;
   },
 
-  // TODO: correctly handle case where src changes
-  async update() {
+  showLoader() {
+    const useFancyLoader = !!loadingObject;
+    const mesh = useFancyLoader
+      ? loadingObject.scene.clone()
+      : new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
+    if (useFancyLoader) {
+      this.loaderMixer = new THREE.AnimationMixer(mesh);
+      this.loadingClip = this.loaderMixer.clipAction(loadingObject.animations[0]);
+      this.loadingClip.play();
+    }
+    this.el.setObject3D("mesh", mesh);
+    //check if the object has baked shape data and that it's not a spawner
+    //if it is a spawner, this will ignore the baked shape data so that it resizes correctly
+    //TODO: update DefaultEnvironment.json so this is not required
+    this.hasBakedShapes = this.el.body.shapes.length > 0 && !this.el.components.hasOwnProperty("super-spawner");
+    this.setShapeAndScale(true);
+    delete this.showLoaderTimeout;
+  },
+
+  clearLoadingTimeout() {
+    clearTimeout(this.showLoaderTimeout);
+    if (this.loaderMixer) {
+      this.loadingClip.stop();
+      delete this.loaderMixer;
+    }
+    delete this.showLoaderTimeout;
+  },
+
+  async update(oldData) {
     try {
-      const url = this.data.src;
+      const { src, index } = this.data;
 
-      this.showLoaderTimeout = setTimeout(() => {
-        const loadingObj = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
-        this.el.setObject3D("mesh", loadingObj);
-        this.setShapeAndScale(true);
-      }, 100);
+      if (src !== oldData.src && !this.showLoaderTimeout) {
+        this.showLoaderTimeout = setTimeout(this.showLoader, 100);
+      }
 
-      const { raw, origin, meta } = await resolveMedia(url);
-      console.log("resolved", url, raw, origin, meta);
+      if (!src) return;
 
-      const contentType = (meta && meta.expected_content_type) || (await fetchContentType(raw));
-      if (contentType.startsWith("image/") || contentType.startsWith("video/") || contentType.startsWith("audio/")) {
+      const { raw, origin, images, contentType } = await resolveMedia(src, false, index);
+
+      // We don't want to emit media_resolved for index updates.
+      if (src !== oldData.src) {
+        this.el.emit("media_resolved", { src, raw, origin, contentType });
+      }
+
+      const isPDF = contentType.startsWith("application/pdf");
+      if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
+        this.el.removeAttribute("gltf-model-plus");
+        this.el.removeAttribute("media-image");
+        this.el.addEventListener("video-loaded", this.clearLoadingTimeout, { once: true });
+        this.el.setAttribute("media-video", { src: raw });
+        this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+      } else if (contentType.startsWith("image/") || isPDF) {
+        this.el.removeAttribute("gltf-model-plus");
+        this.el.removeAttribute("media-video");
         this.el.addEventListener(
           "image-loaded",
-          () => {
-            clearTimeout(this.showLoaderTimeout);
+          async () => {
+            this.clearLoadingTimeout();
+            if (isPDF) {
+              const maxIndex = await fetchMaxContentIndex(src, images.png);
+              this.el.setAttribute("media-pager", { index, maxIndex });
+            }
           },
           { once: true }
         );
-        this.el.setAttribute("image-plus", { src: raw, contentType });
-        this.el.setAttribute("position-at-box-shape-border", { target: ".delete-button", dirs: ["forward", "back"] });
-      } else if (contentType.startsWith("model/gltf") || url.endsWith(".gltf") || url.endsWith(".glb")) {
+        const imageSrc = isPDF ? images.png : raw;
+        const imageContentType = isPDF ? "image/png" : contentType;
+
+        if (!isPDF) {
+          this.el.removeAttribute("media-pager");
+        }
+
+        this.el.setAttribute("media-image", { src: imageSrc, contentType: imageContentType });
+        this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+      } else if (
+        contentType.includes("application/octet-stream") ||
+        contentType.includes("x-zip-compressed") ||
+        contentType.startsWith("model/gltf") ||
+        src.endsWith(".gltf") ||
+        src.endsWith(".glb")
+      ) {
+        this.el.removeAttribute("media-image");
+        this.el.removeAttribute("media-video");
+        this.el.removeAttribute("media-pager");
         this.el.addEventListener(
           "model-loaded",
           () => {
-            clearTimeout(this.showLoaderTimeout);
+            this.clearLoadingTimeout();
+            this.hasBakedShapes = this.el.body.shapes.length > (this.shapeAdded ? 1 : 0);
             this.setShapeAndScale(this.data.resize);
           },
           { once: true }
@@ -79,8 +162,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener("model-error", this.onError, { once: true });
         this.el.setAttribute("gltf-model-plus", {
           src: raw,
-          contentType,
-          basePath: THREE.LoaderUtils.extractUrlBase(origin),
+          contentType: contentType,
           inflate: true
         });
       } else {
@@ -90,5 +172,56 @@ AFRAME.registerComponent("media-loader", {
       console.error("Error adding media", e);
       this.onError();
     }
+  }
+});
+
+AFRAME.registerComponent("media-pager", {
+  schema: {
+    index: { type: "string" },
+    maxIndex: { type: "string" }
+  },
+
+  init() {
+    this.onNext = this.onNext.bind(this);
+    this.onPrev = this.onPrev.bind(this);
+
+    const template = document.getElementById("paging-toolbar");
+    this.el.appendChild(document.importNode(template.content, true));
+    this.toolbar = this.el.querySelector(".paging-toolbar");
+    // we have to wait a tick for the attach callbacks to get fired for the elements in a template
+    setTimeout(() => {
+      this.nextButton = this.el.querySelector(".next-button [text-button]");
+      this.prevButton = this.el.querySelector(".prev-button [text-button]");
+      this.pageLabel = this.el.querySelector(".page-label");
+
+      this.nextButton.addEventListener("click", this.onNext);
+      this.prevButton.addEventListener("click", this.onPrev);
+
+      this.update();
+    }, 0);
+  },
+
+  update() {
+    if (!this.pageLabel) return;
+    this.pageLabel.setAttribute("text", "value", `${this.data.index + 1}/${this.data.maxIndex + 1}`);
+    this.repositionToolbar();
+  },
+
+  remove() {
+    this.nextButton.removeEventListener("click", this.onNext);
+    this.prevButton.removeEventListener("click", this.onPrev);
+    this.el.removeChild(this.toolbar);
+  },
+
+  onNext() {
+    this.el.setAttribute("media-loader", "index", Math.min(this.data.index + 1, this.data.maxIndex));
+  },
+
+  onPrev() {
+    this.el.setAttribute("media-loader", "index", Math.max(this.data.index - 1, 0));
+  },
+
+  repositionToolbar() {
+    this.toolbar.object3D.position.y = -this.el.getAttribute("shape").halfExtents.y - 0.2;
   }
 });

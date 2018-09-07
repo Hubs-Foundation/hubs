@@ -7,7 +7,8 @@ import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
-import "./vendor/GLTFLoader";
+import screenfull from "screenfull";
+import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
@@ -25,6 +26,8 @@ import joystick_dpad4 from "./behaviours/joystick-dpad4";
 import msft_mr_axis_with_deadzone from "./behaviours/msft-mr-axis-with-deadzone";
 import { PressedMove } from "./activators/pressedmove";
 import { ReverseY } from "./activators/reversey";
+import { ObjectContentOrigins } from "./object-types";
+
 import "./activators/shortpress";
 
 import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
@@ -63,7 +66,7 @@ import "./components/networked-avatar";
 import "./components/css-class";
 import "./components/scene-shadow";
 import "./components/avatar-replay";
-import "./components/image-plus";
+import "./components/media-views";
 import "./components/pinch-to-move";
 import "./components/look-on-mobile";
 import "./components/pitch-yaw-rotator";
@@ -74,6 +77,13 @@ import "./components/position-at-box-shape-border";
 import "./components/remove-networked-object-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/media-loader";
+import "./components/gamma-factor";
+import "./components/ambient-light";
+import "./components/directional-light";
+import "./components/hemisphere-light";
+import "./components/point-light";
+import "./components/spot-light";
+import "./components/visible-to-owner";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -82,8 +92,9 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
-import { addMedia } from "./utils/media-utils";
+import { addMedia, resolveMedia } from "./utils/media-utils";
 
+import "./systems/nav";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/exit-on-blur";
@@ -108,7 +119,6 @@ window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
 import "aframe-physics-system";
 import "aframe-physics-extras";
-import "aframe-extras/src/pathfinding";
 import "super-hands";
 import "./components/super-networked-interactable";
 import "./components/networked-counter";
@@ -117,6 +127,7 @@ import "./components/event-repeater";
 import "./components/controls-shape-offset";
 import "./components/duck";
 import "./components/quack";
+import "./components/grabbable-toggle";
 
 import "./components/cardboard-controls";
 
@@ -125,12 +136,17 @@ import "./components/cursor-controller";
 import "./components/nav-mesh-helper";
 import "./systems/tunnel-effect";
 
+import "./components/tools/pen";
+import "./components/tools/networked-drawing";
+import "./components/tools/drawing-manager";
+
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
+
 import qsTruthy from "./utils/qs_truthy";
 
 const isBotMode = qsTruthy("bot");
@@ -181,6 +197,10 @@ function mountUI(scene, props = {}) {
   );
 }
 
+function requestFullscreen() {
+  if (screenfull.enabled && !screenfull.isFullscreen) screenfull.request();
+}
+
 const onReady = async () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
@@ -225,20 +245,28 @@ const onReady = async () => {
       }
       document.body.removeChild(scene);
     }
+    document.body.removeEventListener("touchend", requestFullscreen);
   };
 
   const enterScene = async (mediaStream, enterInVR, hubId) => {
     const scene = document.querySelector("a-scene");
+
+    // Get aframe inspector url using the webpack file-loader.
+    const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
+    // Set the aframe-inspector url to our hosted copy.
+    scene.setAttribute("inspector", { url: aframeInspectorUrl });
+
     if (!isBotMode) {
       scene.classList.add("no-cursor");
     }
-    scene.renderer.sortObjects = true;
     const playerRig = document.querySelector("#player-rig");
     document.querySelector("canvas").classList.remove("blurred");
     scene.render();
 
     if (enterInVR) {
       scene.enterVR();
+    } else if (AFRAME.utils.device.isMobile()) {
+      document.body.addEventListener("touchend", requestFullscreen);
     }
 
     AFRAME.registerInputActions(inGameActions, "default");
@@ -298,40 +326,61 @@ const onReady = async () => {
     });
 
     const offset = { x: 0, y: 0, z: -1.5 };
-    const spawnMediaInfrontOfPlayer = url => {
-      const entity = addMedia(url, true);
-      entity.setAttribute("offset-relative-to", {
-        target: "#player-camera",
-        offset
+
+    const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
+      const { entity, orientation } = addMedia(src, "#interactable-media", contentOrigin, true);
+
+      orientation.then(or => {
+        entity.setAttribute("offset-relative-to", {
+          target: "#player-camera",
+          offset,
+          orientation: or
+        });
       });
     };
 
     scene.addEventListener("add_media", e => {
-      spawnMediaInfrontOfPlayer(e.detail);
+      const contentOrigin = e.detail instanceof File ? ObjectContentOrigins.FILE : ObjectContentOrigins.URL;
+
+      spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
     });
 
-    if (qsTruthy("mediaTools")) {
-      document.addEventListener("paste", e => {
-        if (e.target.nodeName === "INPUT") return;
+    scene.addEventListener("object_spawned", e => {
+      if (hubChannel) {
+        hubChannel.sendObjectSpawnedEvent(e.detail.objectType);
+      }
+    });
 
-        const imgUrl = e.clipboardData.getData("text");
-        console.log("Pasted: ", imgUrl, e);
-        spawnMediaInfrontOfPlayer(imgUrl);
-      });
+    document.addEventListener("paste", e => {
+      if (e.target.nodeName === "INPUT") return;
 
-      document.addEventListener("dragover", e => {
-        e.preventDefault();
-      });
-
-      document.addEventListener("drop", e => {
-        e.preventDefault();
-        const imgUrl = e.dataTransfer.getData("url");
-        if (imgUrl) {
-          console.log("Dropped: ", imgUrl);
-          spawnMediaInfrontOfPlayer(imgUrl);
+      const url = e.clipboardData.getData("text");
+      const files = e.clipboardData.files && e.clipboardData.files;
+      if (url) {
+        spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
+      } else {
+        for (const file of files) {
+          spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.CLIPBOARD);
         }
-      });
-    }
+      }
+    });
+
+    document.addEventListener("dragover", e => {
+      e.preventDefault();
+    });
+
+    document.addEventListener("drop", e => {
+      e.preventDefault();
+      const url = e.dataTransfer.getData("url");
+      const files = e.dataTransfer.files;
+      if (url) {
+        spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
+      } else {
+        for (const file of files) {
+          spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.FILE);
+        }
+      }
+    });
 
     if (!qsTruthy("offline")) {
       document.body.addEventListener("connected", () => {
@@ -503,16 +552,16 @@ const onReady = async () => {
 
   channel
     .join()
-    .receive("ok", data => {
+    .receive("ok", async data => {
       const hub = data.hubs[0];
       const defaultSpaceTopic = hub.topics[0];
       const sceneUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
-
       console.log(`Scene URL: ${sceneUrl}`);
 
       if (/\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl)) {
+        const resolved = await resolveMedia(sceneUrl, false, 0);
         const gltfEl = document.createElement("a-entity");
-        gltfEl.setAttribute("gltf-model-plus", { src: sceneUrl, inflate: true });
+        gltfEl.setAttribute("gltf-model-plus", { src: resolved.raw, inflate: true });
         gltfEl.addEventListener("model-loaded", () => initialEnvironmentEl.emit("bundleloaded"));
         initialEnvironmentEl.appendChild(gltfEl);
       } else {

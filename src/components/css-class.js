@@ -6,6 +6,7 @@ AFRAME.registerComponent("css-class", {
   schema: {
     type: "string"
   },
+  multiple: true,
   init() {
     this.el.classList.add(this.data);
   },

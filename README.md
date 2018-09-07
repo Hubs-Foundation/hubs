@@ -39,7 +39,7 @@ and then upload the files in the `dist` folder to your hosting provider.
 If you are running your own servers, you can modify the environment variables `JANUS_SERVER` and
 `RETICULUM_SERVER` when building to point Hubs to your own infrastructure.
 
-See `scripts/default.env` for the full set of environment variables that can modify
+See `.env.defaults` for the full set of environment variables that can modify
 Hubs' behavior at build time.
 
 ## hubs.local Host Entry
