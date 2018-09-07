@@ -124,6 +124,7 @@ export const touch = {
     let { prevFrame, frame } = this.state;
     const { eventQueue } = this.state;
     //    prevFrame = {}; // garbage
+    prevFrame = _.each()
     prevFrame = remember(frame, prevFrame);
     frame = framify(eventQueue, frame);
     this.bindDefn.forEach(binding => {

@@ -30,18 +30,27 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
     if (actions.poll("startTransientLook")) {
       actions.deactivate("notTransientLooking");
       actions.activate("transientLooking");
+      actions.activate("looking");
     }
     if (actions.poll("stopTransientLook")) {
       actions.deactivate("transientLooking");
       actions.activate("notTransientLooking");
+      if (!actions.isActive("lockedLooking")) {
+        // bug: if you stopTransientLook AND stopLockedLook on the same frame, you lose
+        actions.deactivate("looking");
+      }
     }
     if (actions.poll("startLockedLook")) {
       actions.deactivate("notLockedLooking");
       actions.activate("lockedLooking");
+      actions.activate("looking");
     }
     if (actions.poll("stopLockedLook")) {
       actions.deactivate("lockedLooking");
       actions.activate("notLockedLooking");
+      if (!actions.isActive("transientLooking")) {
+        actions.deactivate("looking");
+      }
     }
   }
 });

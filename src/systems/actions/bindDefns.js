@@ -1,37 +1,50 @@
+//                    alice - is it true that comments that are born true, die a lie?
+//                      bob - hard to say. can anything that doesn't execute be true?
+//sets :
+//  selfSnapRotating
+//  muteToggling
+//  screenShareToggling
+//  selfMoving
+//  notTransientLooking
+//  transientLooking
+//  looking
+//  notLockedLooking
+//  lockedLooking
+//  cursorMoving
+//  targetHovering
+//  objectMoving
+// sets + actions :
+//  selfSnapRotating
+//    snapRotateLeft
+//
 export const keyboardBindDefn = [
   {
-    action: "logActiveSets",
-    set: "debug",
-    filter: "keydown",
-    key: "l"
-  },
-  {
-    action: "snapRotateLeft",
     set: "selfSnapRotating",
+    action: "snapRotateLeft",
     filter: "keydown",
     key: "q"
   },
   {
-    action: "snapRotateRight",
     set: "selfSnapRotating",
+    action: "snapRotateRight",
     filter: "keydown",
     key: "e"
   },
   {
-    action: "toggleMute",
     set: "muteToggling",
+    action: "toggleMute",
     filter: "keydown",
     key: "m"
   },
   {
-    action: "toggleScreenShare",
     set: "screenShareToggling",
+    action: "toggleScreenShare",
     filter: "keydown",
     key: "b"
   },
   {
-    action: "accSelf",
     set: "selfMoving",
+    action: "accSelf",
     filter: "key4_to_vec2",
     filter_params: {
       keys: ["d", "a", "w", "s"],
@@ -39,8 +52,8 @@ export const keyboardBindDefn = [
     }
   },
   {
-    action: "boost",
     set: "selfMoving",
+    action: "boost",
     filter: "key",
     key: "shift"
   }
@@ -61,7 +74,7 @@ export const mouseBindDefn = [
     key: "left"
   },
   {
-    set: "transientLooking",
+    set: "looking",
     action: "look",
     filter: "vec2_deltas",
     filterParams: {
@@ -83,18 +96,6 @@ export const mouseBindDefn = [
     action: "stopLockedLook",
     filter: "keydown",
     key: "right"
-  },
-  {
-    set: "lockedLooking",
-    action: "look",
-    filter: "vec2_deltas",
-    filterParams: {
-      horizontalLookSpeed: 0.1,
-      verticalLookSpeed: 0.06,
-      keys: ["dY", "dX"],
-      filters: ["number", "number"]
-    },
-    priorityKey: "mousemove"
   },
   {
     set: "cursorMoving",
@@ -124,16 +125,13 @@ export const mouseBindDefn = [
   }
 ];
 
-export const touchLeftJoystickBindDefn = [
+export const touchscreenBindDefn = [
   {
     set: "selfMoving",
     action: "accSelf",
     filter: "vec2",
-    key: "joystickLeft"
-  }
-];
-
-export const touchBindDefn = [
+    key: "onScreenJoystickLeft"
+  },
   {
     set: "cursorMoving",
     action: "cursorMovement",
@@ -141,9 +139,17 @@ export const touchBindDefn = [
     key: "cursorMoverVec2"
   },
   {
-    set: "notTransientLooking", //TODO: looking should be its own set
+    set: "looking",
     action: "look",
     filter: "vec2",
     key: "cameraMoverVec2"
   }
 ];
+
+[keyboardBindDefn, mouseBindDefn, touchscreenBindDefn].forEach(defn => {
+  defn.forEach(binding => {
+    if (binding.priorityKey) return;
+    // Generate default priorityKey
+    binding.priorityKey = binding.set + binding.action + binding.filter;
+  });
+});

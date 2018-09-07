@@ -89,7 +89,7 @@ AFRAME.registerComponent("cursor-controller", {
       }
 
       const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
-      if (actions.active("objectMoving") && !isGrabbing) {
+      if (actions.isActive("objectMoving") && !isGrabbing) {
         actions.deactivate("objectMoving");
       }
 
@@ -105,7 +105,7 @@ AFRAME.registerComponent("cursor-controller", {
         this.updateDistanceAndTargetType();
 
         const isTarget = this._isTargetOfType(TARGET_TYPE_INTERACTABLE_OR_UI);
-        if (actions.active("targetHovering") !== isTarget) {
+        if (actions.isActive("targetHovering") !== isTarget) {
           isTarget ? actions.activate("targetHovering") : actions.deactivate("targetHovering");
         }
         if (isTarget && !this.wasCursorHovered) {

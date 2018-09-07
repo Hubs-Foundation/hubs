@@ -105,7 +105,6 @@ AFRAME.registerComponent("character-controller", {
       if (acc) {
         this.accelerationInput.set(acc[0], 0, acc[1]);
       }
-
       if (actions.poll("snapRotateRight")) {
         this.snapRotateRight();
       }
@@ -115,7 +114,7 @@ AFRAME.registerComponent("character-controller", {
       const deltaSeconds = dt / 1000;
       const root = this.el.object3D;
       const pivot = this.data.pivot.object3D;
-      const boost = actions.active("selfMoving") && actions.poll("boost") ? 2 : 1;
+      const boost = actions.poll("boost") ? 2 : 1;
       const distance = this.data.groundAcc * deltaSeconds * boost;
       const rotationDelta = this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
 
