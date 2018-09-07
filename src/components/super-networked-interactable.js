@@ -55,16 +55,16 @@ AFRAME.registerComponent("super-networked-interactable", {
       if (NAF.utils.takeOwnership(this.networkedEl)) {
         this.el.setAttribute("body", { type: "dynamic" });
         this.counter.register(this.networkedEl);
-        this.currentScale.copy(this.el.getAttribute("scale"));
       } else {
         this.el.emit("grab-end", { hand: this.hand });
         this.hand = null;
       }
     }
+    this.currentScale.copy(this.el.getAttribute("scale"));
   },
 
   _onGrabEnd: function(e) {
-    e.detail.hand.emit("haptic_pulse", { intensity: "high" });
+    if (e.detail.hand) e.detail.hand.emit("haptic_pulse", { intensity: "high" });
   },
 
   _onOwnershipLost: function() {

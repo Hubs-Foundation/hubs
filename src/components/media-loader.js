@@ -76,10 +76,7 @@ AFRAME.registerComponent("media-loader", {
       this.loadingClip.play();
     }
     this.el.setObject3D("mesh", mesh);
-    //check if the object has baked shape data and that it's not a spawner
-    //if it is a spawner, this will ignore the baked shape data so that it resizes correctly
-    //TODO: update DefaultEnvironment.json so this is not required
-    this.hasBakedShapes = this.el.body.shapes.length > 0 && !this.el.components.hasOwnProperty("super-spawner");
+    this.hasBakedShapes = !!(this.el.body && this.el.body.shapes.length > 0);
     this.setShapeAndScale(true);
     delete this.showLoaderTimeout;
   },
@@ -154,7 +151,7 @@ AFRAME.registerComponent("media-loader", {
           "model-loaded",
           () => {
             this.clearLoadingTimeout();
-            this.hasBakedShapes = this.el.body.shapes.length > (this.shapeAdded ? 1 : 0);
+            this.hasBakedShapes = !!(this.el.body && this.el.body.shapes.length > (this.shapeAdded ? 1 : 0));
             this.setShapeAndScale(this.data.resize);
           },
           { once: true }
