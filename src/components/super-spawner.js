@@ -108,38 +108,35 @@ AFRAME.registerComponent("super-spawner", {
     this.heldEntities.clear();
   },
 
-  onSpawnEvent: (() => {
-    const spawnOffset = new THREE.Vector3();
-    return async function() {
-      const controllerCount = this.el.sceneEl.components["input-configurator"].controllerQueue.length;
-      const using6DOF = controllerCount > 1 && this.el.sceneEl.is("vr-mode");
-      const hand = using6DOF ? this.data.superHand : this.data.cursorSuperHand;
+  async onSpawnEvent() {
+    const controllerCount = this.el.sceneEl.components["input-configurator"].controllerQueue.length;
+    const using6DOF = controllerCount > 1 && this.el.sceneEl.is("vr-mode");
+    const hand = using6DOF ? this.data.superHand : this.data.cursorSuperHand;
 
-      if (this.cooldownTimeout || !hand) {
-        return;
+    if (this.cooldownTimeout || !hand) {
+      return;
+    }
+
+    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER).entity;
+
+    hand.object3D.getWorldPosition(entity.object3D.position);
+    hand.object3D.getWorldQuaternion(entity.object3D.quaternion);
+    if (this.data.useCustomSpawnScale) {
+      entity.object3D.scale.copy(this.data.spawnScale);
+    }
+
+    this.activateCooldown();
+
+    await waitForEvent("body-loaded", entity);
+
+    hand.object3D.getWorldPosition(entity.object3D.position);
+
+    if (!using6DOF) {
+      for (let i = 0; i < this.data.grabEvents.length; i++) {
+        hand.emit(this.data.grabEvents[i], { targetEntity: entity });
       }
-
-      const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER).entity;
-
-      hand.object3D.getWorldPosition(entity.object3D.position);
-      hand.object3D.getWorldQuaternion(entity.object3D.quaternion);
-      if (this.data.useCustomSpawnScale) {
-        entity.object3D.scale.copy(this.data.spawnScale);
-      }
-
-      this.activateCooldown();
-
-      await waitForEvent("body-loaded", entity);
-
-      hand.object3D.getWorldPosition(entity.object3D.position);
-
-      if (!using6DOF) {
-        for (let i = 0; i < this.data.grabEvents.length; i++) {
-          hand.emit(this.data.grabEvents[i], { targetEntity: entity });
-        }
-      }
-    };
-  })(),
+    }
+  },
 
   async onGrabStart(e) {
     if (this.cooldownTimeout) {
