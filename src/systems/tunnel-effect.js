@@ -6,33 +6,37 @@ import "../utils/shaders/CopyShader";
 import "../utils/shaders/VignetteShader";
 import qsTruthy from "../utils/qs_truthy";
 
-const isDisabled = qsTruthy("disableTunnel");
+const disabledByQueryString = qsTruthy("disableTunnel");
 const CLAMP_SPEED = 0.01;
 const CLAMP_RADIUS = 0.001;
-const CLAMP_SOFTNESS = 0.001;
-const FADE_TIMEOUT_MS = 300;
-const TARGET_RADIUS = 10.0;
-const TARGET_SOFTNESS = 0.0;
+const NO_TUNNEL_RADIUS = 10.0;
+const NO_TUNNEL_SOFTNESS = 0.0;
+
+function lerp(start, end, t) {
+  return (1 - t) * start + t * end;
+}
+
+function f(t) {
+  const x = t - 1;
+  return 1 + x * x * x * x * x;
+}
 
 AFRAME.registerSystem("tunneleffect", {
   schema: {
     targetComponent: { type: "string", default: "character-controller" },
     radius: { type: "number", default: 1.0, min: 0.25 },
     minRadius: { type: "number", default: 0.25, min: 0.1 },
-    maxSpeed: { type: "number", default: 0.7, min: 0.1 },
-    softness: { type: "number", default: 0.1, min: 0.0 },
+    maxSpeed: { type: "number", default: 0.5, min: 0.1 },
+    softest: { type: "number", default: 0.1, min: 0.0 },
     opacity: { type: "number", default: 1, min: 0.0 }
   },
 
   init: function() {
-    const { radius, minRadius, maxSpeed } = this.data;
     this.scene = this.el;
     this.isMoving = false;
     this.isVR = false;
     this.dt = 0;
     this.isPostProcessingReady = false;
-    this.deltaR = TARGET_RADIUS - (radius - minRadius) * maxSpeed - minRadius;
-    this.deltaS = this.softness - TARGET_SOFTNESS;
     this.characterEl = document.querySelector(`a-entity[${this.data.targetComponent}]`);
     if (this.characterEl) {
       this._initPostProcessing = this._initPostProcessing.bind(this);
@@ -63,35 +67,31 @@ AFRAME.registerSystem("tunneleffect", {
   tick: function(t, dt) {
     this.dt = dt;
 
-    if (isDisabled || !this.isPostProcessingReady || !this.isVR) {
+    if (disabledByQueryString || !this.isPostProcessingReady || !this.isVR) {
       return;
     }
 
+    const { maxSpeed, minRadius, softest } = this.data;
     const characterSpeed = this.characterComponent.velocity.length();
-    if (characterSpeed < CLAMP_SPEED) {
-      // the character stops, so we use the aframe default render func
-      const r = this.vignettePass.uniforms["radius"].value;
-      const softness = this.vignettePass.uniforms["softness"].value;
-      if (
-        this.isMoving &&
-        Math.abs(r - TARGET_RADIUS) > CLAMP_RADIUS &&
-        Math.abs(softness - TARGET_SOFTNESS) > CLAMP_SOFTNESS
-      ) {
-        const ratio = this.dt / FADE_TIMEOUT_MS;
-        this._updateVignettePass(r + this.deltaR * ratio, softness - this.deltaS * ratio, this.data.opacity);
-      } else {
-        this._exitTunnel();
-      }
-      return;
-    }
-
-    if (!this.isMoving) {
-      this.isMoving = true;
+    const shaderRadius = this.vignettePass.uniforms["radius"].value || NO_TUNNEL_RADIUS;
+    if (!this.enabled && characterSpeed > CLAMP_SPEED) {
+      this.enabled = true;
       this._bindRenderFunc();
+    } else if (
+      this.enabled &&
+      characterSpeed < CLAMP_SPEED &&
+      Math.abs(NO_TUNNEL_RADIUS - shaderRadius) < CLAMP_RADIUS
+    ) {
+      this.enabled = false;
+      this._exitTunnel();
     }
-    const { radius, minRadius, maxSpeed, softness, opacity } = this.data;
-    const r = (radius - minRadius) * (maxSpeed - characterSpeed) + minRadius;
-    this._updateVignettePass(r, softness, opacity);
+    if (this.enabled) {
+      const clampedSpeed = characterSpeed > maxSpeed ? maxSpeed : characterSpeed;
+      const speedRatio = clampedSpeed / maxSpeed;
+      this.targetRadius = lerp(NO_TUNNEL_RADIUS, minRadius, f(speedRatio));
+      this.targetSoftness = lerp(NO_TUNNEL_SOFTNESS, softest, f(speedRatio));
+      this._updateVignettePass(this.targetRadius, this.targetSoftness, this.data.opacity);
+    }
   },
 
   _exitTunnel: function() {
@@ -108,7 +108,7 @@ AFRAME.registerSystem("tunneleffect", {
   },
 
   _enterVR: function() {
-    this.isVR = true;
+    this.isVR = true; //TODO: This is called in 2D mode when you press "f", which is bad
   },
 
   _exitVR: function() {
