@@ -54,41 +54,37 @@ const config = {
         trackpad_dpad4_pressed_center_down: { right: "action_primary_down" },
         trackpad_dpad4_pressed_north_down: { right: "action_primary_down" },
         trackpad_dpad4_pressed_south_down: { right: "action_primary_down" },
-        trackpadup: { right: "action_primary_up" },
+        trackpadup: { left: "action_primary_up", right: "action_primary_up" },
         menudown: "thumb_down",
         menuup: "thumb_up",
-        gripdown: ["action_grab", "middle_ring_pinky_down"],
-        gripup: ["action_release", "middle_ring_pinky_up"],
+        gripdown: ["primary_action_grab", "middle_ring_pinky_down"],
+        gripup: ["primary_action_release", "middle_ring_pinky_up"],
         trackpadtouchstart: "thumb_down",
         trackpadtouchend: "thumb_up",
-        triggerdown: ["action_grab", "index_down"],
-        triggerup: ["action_release", "index_up"],
-        scroll: { right: "move_duck" }
+        triggerdown: ["secondary_action_grab", "index_down"],
+        triggerup: ["secondary_action_release", "index_up"],
+        scroll: { left: "scroll_move", right: "scroll_move" }
       },
       "oculus-touch-controls": {
-        joystick_dpad4_west: {
-          right: "snap_rotate_left"
-        },
-        joystick_dpad4_east: {
-          right: "snap_rotate_right"
-        },
-        gripdown: ["action_grab", "middle_ring_pinky_down"],
-        gripup: ["action_release", "middle_ring_pinky_up"],
-        abuttontouchstart: "thumb_down",
+        joystick_dpad4_west: { right: "snap_rotate_left" },
+        joystick_dpad4_east: { right: "snap_rotate_right" },
+        gripdown: ["primary_action_grab", "middle_ring_pinky_down"],
+        gripup: ["primary_action_release", "middle_ring_pinky_up"],
+        abuttontouchstart: ["thumb_down", "increase_radius"],
         abuttontouchend: "thumb_up",
-        bbuttontouchstart: "thumb_down",
+        bbuttontouchstart: ["thumb_down", "decrease_radius"],
         bbuttontouchend: "thumb_up",
-        xbuttontouchstart: "thumb_down",
+        xbuttontouchstart: ["thumb_down", "increase_radius"],
         xbuttontouchend: "thumb_up",
-        ybuttontouchstart: "thumb_down",
+        ybuttontouchstart: ["thumb_down", "decrease_radius"],
         ybuttontouchend: "thumb_up",
-        surfacetouchstart: "thumb_down",
+        surfacetouchstart: ["thumb_down", "next_color"],
         surfacetouchend: "thumb_up",
         thumbsticktouchstart: "thumb_down",
         thumbsticktouchend: "thumb_up",
-        triggerdown: ["action_grab", "index_down"],
-        triggerup: ["action_release", "index_up"],
-        "axismove.reverseY": { left: "move", right: "move_duck" },
+        triggerdown: ["secondary_action_grab", "index_down"],
+        triggerup: ["secondary_action_release", "index_up"],
+        "axismove.reverseY": { left: "move", right: "scroll_move" },
         abuttondown: "action_primary_down",
         abuttonup: "action_primary_up"
       },
@@ -103,16 +99,16 @@ const config = {
         joystick_dpad4_pressed_west_down: { right: "snap_rotate_left" },
         joystick_dpad4_pressed_east_down: { right: "snap_rotate_right" },
         trackpaddown: { right: "action_primary_down" },
-        trackpadup: { right: "action_primary_up" },
+        trackpadup: { left: "action_primary_up", right: "action_primary_up" },
         menudown: "thumb_down",
         menuup: "thumb_up",
-        gripdown: ["action_grab", "middle_ring_pinky_down"],
-        gripup: ["action_release", "middle_ring_pinky_up"],
+        gripdown: ["primary_action_grab", "middle_ring_pinky_down"],
+        gripup: ["primary_action_release", "middle_ring_pinky_up"],
         trackpadtouchstart: "thumb_down",
         trackpadtouchend: "thumb_up",
-        triggerdown: ["action_grab", "index_down"],
-        triggerup: ["action_release", "index_up"],
-        axisMoveWithDeadzone: { left: "move", right: "move_duck" }
+        triggerdown: ["secondary_action_grab", "index_down"],
+        triggerup: ["secondary_action_release", "index_up"],
+        axisMoveWithDeadzone: { left: "move", right: "scroll_move" }
       },
       "daydream-controls": {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",
@@ -121,7 +117,7 @@ const config = {
         trackpad_dpad4_pressed_north_down: ["action_primary_down"],
         trackpad_dpad4_pressed_south_down: ["action_primary_down"],
         trackpadup: ["action_primary_up"],
-        axisMoveWithDeadzone: "move_duck"
+        axisMoveWithDeadzone: "scroll_move"
       },
       "gearvr-controls": {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",
@@ -130,9 +126,9 @@ const config = {
         trackpad_dpad4_pressed_north_down: ["action_primary_down"],
         trackpad_dpad4_pressed_south_down: ["action_primary_down"],
         trackpadup: ["action_primary_up"],
-        triggerdown: ["action_primary_down"],
-        triggerup: ["action_primary_up"],
-        scroll: "move_duck"
+        triggerdown: ["action_secondary_down"],
+        triggerup: ["action_secondary_up"],
+        scroll: "scroll_move"
       },
       "oculus-go-controls": {
         trackpad_dpad4_pressed_west_down: "snap_rotate_left",
@@ -141,9 +137,9 @@ const config = {
         trackpad_dpad4_pressed_north_down: ["action_primary_down"],
         trackpad_dpad4_pressed_south_down: ["action_primary_down"],
         trackpadup: ["action_primary_up"],
-        triggerdown: ["action_primary_down"],
-        triggerup: ["action_primary_up"],
-        scroll: "move_duck"
+        triggerdown: ["action_secondary_down"],
+        triggerup: ["action_secondary_up"],
+        scroll: "scroll_move"
       },
       keyboard: {
         m_press: "action_mute",
@@ -169,44 +165,6 @@ const config = {
         arrowdown_up: "s_up",
         arrowright_down: "d_down",
         arrowright_up: "d_up"
-      }
-    },
-    hud: {
-      "vive-controls": {
-        triggerdown: ["action_grab", "index_down"],
-        triggerup: ["action_release", "index_up"]
-      },
-      "oculus-touch-controls": {
-        abuttondown: "action_ui_select_down",
-        abuttonup: "action_ui_select_up",
-        gripdown: "middle_ring_pinky_down",
-        gripup: "middle_ring_pinky_up",
-        abuttontouchstart: "thumb_down",
-        abuttontouchend: "thumb_up",
-        bbuttontouchstart: "thumb_down",
-        bbuttontouchend: "thumb_up",
-        xbuttontouchstart: "thumb_down",
-        xbuttontouchend: "thumb_up",
-        ybuttontouchstart: "thumb_down",
-        ybuttontouchend: "thumb_up",
-        surfacetouchstart: "thumb_down",
-        surfacetouchend: "thumb_up",
-        thumbsticktouchstart: "thumb_down",
-        thumbsticktouchend: "thumb_up",
-        triggertouchstart: "index_down",
-        triggertouchend: "index_up"
-      },
-      "daydream-controls": {
-        trackpaddown: { right: "action_ui_select_down" },
-        trackpadup: { right: "action_ui_select_up" }
-      },
-      "gearvr-controls": {
-        trackpaddown: { right: "action_ui_select_down" },
-        trackpadup: { right: "action_ui_select_up" }
-      },
-      "oculus-go-controls": {
-        trackpaddown: { right: "action_ui_select_down" },
-        trackpadup: { right: "action_ui_select_up" }
       }
     }
   }
