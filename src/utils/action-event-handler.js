@@ -1,5 +1,5 @@
-const VERTICAL_SCROLL_TIMEOUT = 250;
-const HORIZONTAL_SCROLL_TIMEOUT = 250;
+const VERTICAL_SCROLL_TIMEOUT = 150;
+const HORIZONTAL_SCROLL_TIMEOUT = 150;
 const SCROLL_THRESHOLD = 0.05;
 const SCROLL_MODIFIER = 0.1;
 
@@ -95,6 +95,7 @@ export default class ActionEventHandler {
         e.target.emit(scrollX < 0 ? "scroll_left" : "scroll_right");
         e.target.emit("horizontal_scroll_release");
       }
+      this.lastHorizontalScrollTime = Date.now();
     }
   }
 
@@ -198,7 +199,7 @@ export default class ActionEventHandler {
   onPrimaryUp(e) {
     if (this.gotPrimaryDown) {
       this.onUp(e, "primary_hand_release");
-    } else {
+    } else if (this.isToggle(this.cursorHand.state.get("grab-start") || this.cursorHand.state.get("hover-start"))) {
       this.onUp(e, "secondary_hand_release");
     }
     this.gotPrimaryDown = false;

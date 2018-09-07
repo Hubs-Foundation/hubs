@@ -26,7 +26,7 @@ AFRAME.registerComponent("networked-drawing", {
     defaultRadius: { default: 0.01 }, //the radius of the procedural tube
     minDrawTimeout: { default: 5000 }, //the minimum time a drawn line will live
     maxDrawTimeout: { default: 600000 }, //the maximum time a drawn line will live
-    maxLines: { default: 25 }, //how many lines can persist before lines older than minDrawTime are removed
+    maxLines: { default: 50 }, //how many lines can persist before lines older than minDrawTime are removed
     maxPointsPerLine: { default: 250 } //the max number of points a single line can have
   },
 
