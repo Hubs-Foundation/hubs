@@ -55,6 +55,7 @@ AFRAME.registerComponent("super-networked-interactable", {
       if (NAF.utils.takeOwnership(this.networkedEl)) {
         this.el.setAttribute("body", { type: "dynamic" });
         this.counter.register(this.networkedEl);
+        this.currentScale.copy(this.el.getAttribute("scale"));
       } else {
         this.el.emit("grab-end", { hand: this.hand });
         this.hand = null;
