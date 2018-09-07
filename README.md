@@ -62,6 +62,7 @@ This will allow the CSP checks to pass that are served up by Reticulum so you ca
 - `disable_telemetry` - If `true` disables Sentry telemetry.
 - `log_filter` - A `debug` style filter for setting the logging level.
 - `debug` - If `true` performs verbose logging of Janus and NAF traffic.
+- `disableTunnel` - Tunnel vision is on by default. Disable the tunnel vision by this parameter.
 
 ## Additional Resources
 
