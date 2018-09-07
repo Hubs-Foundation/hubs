@@ -124,7 +124,9 @@ export default class MouseEventsHandler {
   }
 
   onMouseMove(e) {
-    const shouldLook = this.isPointerLocked || (this.isLeftButtonDown && !this.isLeftButtonHandledByCursor);
+    const shouldLook =
+      this.isPointerLocked ||
+      (!this.superHand.state.get("grab-start") && this.isLeftButtonDown && !this.isLeftButtonHandledByCursor);
     if (shouldLook) {
       this.look(e);
     }
