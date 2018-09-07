@@ -80,7 +80,25 @@ function error(...objs) {
           setTimeout(loadFiles, backoff);
         }
       };
+
       await loadFiles();
+
+      // Do a periodic sanity check of the state of the bots.
+      setInterval(async function() {
+        const avatarCounts = await page.evaluate(() => ({
+          connectionCount: Object.keys(NAF.connection.adapter.occupants).length,
+          avatarCount: document.querySelectorAll("[networked-avatar]").length - 1
+        }));
+        log(JSON.stringify(avatarCounts));
+        // Check for more than two connections to allow for a margin where we have a connection but the a-frame
+        // entity has not initialized yet.
+        if (avatarCounts.connectionCount > 2 && avatarCounts.avatarCount === 0) {
+          // It seems the bots have dog-piled on to a restarting server, so we're going to shut things down and
+          // let the hubs-ops bash script restart us.
+          log("Detected avatar dog-pile. Restarting.");
+          process.exit(1);
+        }
+      }, 60 * 1000);
     } catch (e) {
       log("Navigation error", e.message);
       setTimeout(navigate, 1000);
