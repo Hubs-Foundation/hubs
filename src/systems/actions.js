@@ -43,7 +43,7 @@ const sets = [
 
 const pendingSetChanges = [];
 
-const devices = [keyboard, mouse, touch];
+const devices = [keyboard, touch];
 
 const state = {
   history,

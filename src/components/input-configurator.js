@@ -103,7 +103,7 @@ AFRAME.registerComponent("input-configurator", {
     } else {
       this.cameraController.play();
       if (this.isMobile) {
-        this.cursor.setCursorVisibility(false);
+        //this.cursor.setCursorVisibility(false);
         this.eventHandlers.push(new TouchEventsHandler(this.cursor, this.cameraController, this.cursor.el));
         this.addLookOnMobile();
       } else {

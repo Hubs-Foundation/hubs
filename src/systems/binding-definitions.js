@@ -124,11 +124,26 @@ export const mouseBindDefn = [
   }
 ];
 
-export const touchBindDefn = [
+export const touchLeftJoystickBindDefn = [
   {
     set: "selfMoving",
     action: "accSelf",
     filter: "vec2",
     key: "joystickLeft"
+  }
+];
+
+export const touchBindDefn = [
+  {
+    set: "cursorMoving",
+    action: "cursorMovement",
+    filter: "vec2",
+    key: "cursorMoverVec2"
+  },
+  {
+    set: "notTransientLooking", //TODO: looking should be its own set
+    action: "look",
+    filter: "vec2",
+    key: "cameraMoverVec2"
   }
 ];

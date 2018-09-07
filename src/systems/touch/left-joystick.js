@@ -1,7 +1,7 @@
-import { touchBindDefn } from "../binding-definitions";
+import { touchLeftJoystickBindDefn } from "../binding-definitions";
 import styles from "./touch-frame.css";
 
-touchBindDefn.forEach(binding => {
+touchLeftJoystickBindDefn.forEach(binding => {
   if (binding.priorityKey) return;
   // Generate default priorityKey
   binding.priorityKey = "touch" + binding.set + binding.action + binding.filter;
@@ -87,7 +87,7 @@ let prevFrameLeftJoystick = {};
 let frameLeftJoystick = {};
 export const leftJoystick = {
   name: "touch (left joystick)",
-  bindDefn: touchBindDefn,
+  bindDefn: touchLeftJoystickBindDefn,
   state: {
     prevFrame: prevFrameLeftJoystick,
     frame: frameLeftJoystick,
