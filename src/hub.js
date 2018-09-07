@@ -7,6 +7,7 @@ import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
+import screenfull from "screenfull";
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
@@ -189,6 +190,10 @@ function mountUI(scene, props = {}) {
   );
 }
 
+function requestFullscreen() {
+  if (screenfull.enabled && !screenfull.isFullscreen) screenfull.request();
+}
+
 const onReady = async () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
@@ -233,10 +238,17 @@ const onReady = async () => {
       }
       document.body.removeChild(scene);
     }
+    document.body.removeEventListener("touchend", requestFullscreen);
   };
 
   const enterScene = async (mediaStream, enterInVR, hubId) => {
     const scene = document.querySelector("a-scene");
+
+    // Get aframe inspector url using the webpack file-loader.
+    const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
+    // Set the aframe-inspector url to our hosted copy.
+    scene.setAttribute("inspector", { url: aframeInspectorUrl });
+
     if (!isBotMode) {
       scene.classList.add("no-cursor");
     }
@@ -246,6 +258,8 @@ const onReady = async () => {
 
     if (enterInVR) {
       scene.enterVR();
+    } else if (AFRAME.utils.device.isMobile()) {
+      document.body.addEventListener("touchend", requestFullscreen);
     }
 
     AFRAME.registerInputActions(inGameActions, "default");
@@ -306,11 +320,14 @@ const onReady = async () => {
 
     const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
-      const entity = addMedia(src, contentOrigin, true);
+      const { entity, orientation } = addMedia(src, contentOrigin, true);
 
-      entity.setAttribute("offset-relative-to", {
-        target: "#player-camera",
-        offset
+      orientation.then(or => {
+        entity.setAttribute("offset-relative-to", {
+          target: "#player-camera",
+          offset,
+          orientation: or
+        });
       });
     };
 

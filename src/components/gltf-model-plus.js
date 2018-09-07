@@ -2,7 +2,7 @@ import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import cubeMapPosX from "../assets/images/cubemap/posx.jpg";
 import cubeMapNegX from "../assets/images/cubemap/negx.jpg";
 import cubeMapPosY from "../assets/images/cubemap/posy.jpg";
-import cubeMapNegY from "../assets/images/cubemap/negx.jpg";
+import cubeMapNegY from "../assets/images/cubemap/negy.jpg";
 import cubeMapPosZ from "../assets/images/cubemap/posz.jpg";
 import cubeMapNegZ from "../assets/images/cubemap/negz.jpg";
 

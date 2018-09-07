@@ -84,7 +84,7 @@ AFRAME.registerComponent("super-spawner", {
     const thisGrabId = nextGrabId++;
     this.heldEntities.set(hand, thisGrabId);
 
-    const entity = addMedia(this.data.src, ObjectContentOrigins.SPAWNER);
+    const entity = addMedia(this.data.src, ObjectContentOrigins.SPAWNER).entity;
     entity.object3D.position.copy(
       this.data.useCustomSpawnPosition ? this.data.spawnPosition : this.el.object3D.position
     );
