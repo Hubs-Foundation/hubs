@@ -47,17 +47,21 @@ AFRAME.registerComponent("sticky-object", {
   },
 
   _onRelease() {
+    // Happens if the object is still being heald by another hand
+    if (this.el.is("grabbed")) return;
+
     if (
-      !this.el.is("grabbed") &&
       this.data.autoLockOnRelease &&
       this.el.body.velocity.lengthSquared() < this.data.autoLockSpeedLimit * this.data.autoLockSpeedLimit
     ) {
       this.setLocked(true);
     }
+    this.el.body.collisionResponse = true;
   },
 
   _onGrab() {
     this.setLocked(false);
+    this.el.body.collisionResponse = false;
   },
 
   remove() {
