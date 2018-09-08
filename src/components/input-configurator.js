@@ -89,12 +89,10 @@ AFRAME.registerComponent("input-configurator", {
     this.actionEventHandler = new ActionEventHandler(this.el.sceneEl, this.cursor);
     this.eventHandlers.push(this.actionEventHandler);
 
-    this.cursor.el.setAttribute("cursor-controller", "useMousePos", !this.inVR);
-
     if (this.inVR) {
       this.cameraController.pause();
       this.cursorRequiresManagement = true;
-      this.cursor.el.setAttribute("cursor-controller", "minDistance", 0);
+      this.cursor.el.setAttribute("cursor-controller", "near", 0);
       if (this.isMobile) {
         this.eventHandlers.push(new GearVRMouseEventsHandler(this.cursor, this.gazeTeleporter));
       } else {
@@ -108,7 +106,7 @@ AFRAME.registerComponent("input-configurator", {
         this.addLookOnMobile();
       } else {
         this.eventHandlers.push(new MouseEventsHandler(this.cursor, this.cameraController));
-        this.cursor.el.setAttribute("cursor-controller", "minDistance", 0.3);
+        this.cursor.el.setAttribute("cursor-controller", "near", 0.3);
       }
     }
   },

@@ -184,11 +184,11 @@
                     activatable__decrease-radius="buttonStartEvents: decrease_radius, scroll_down; buttonEndEvents: thumb_up, secondary_hand_release, vertical_scroll_release; activatedState: radiusDown;"
                     scale="0.5 0.5 0.5"
                 >
-                    <a-sphere 
+                    <a-sphere
                         id="pen"
-                        scale="1.5, 1.5, 1.5" 
-                        position="0 -0.18 0" 
-                        radius="0.02"  
+                        scale="1.5, 1.5, 1.5"
+                        position="0 -0.18 0"
+                        radius="0.02"
                         color="#FF0033"
                         pen="camera: #player-camera; drawingManager: #drawing-manager"
                     ></a-sphere>
@@ -240,17 +240,17 @@
 
             <a-mixin id="controller-super-hands"
                      super-hands="
-                         colliderEvent: collisions; 
+                         colliderEvent: collisions;
                          colliderEventProperty: els;
-                         colliderEndEvent: collisions; 
+                         colliderEndEvent: collisions;
                          colliderEndEventProperty: clearedEls;
-                         grabStartButtons: primary_hand_grab, secondary_hand_grab; 
+                         grabStartButtons: primary_hand_grab, secondary_hand_grab;
                          grabEndButtons: primary_hand_release, secondary_hand_release;
-                         stretchStartButtons: primary_hand_grab, secondary_hand_grab; 
+                         stretchStartButtons: primary_hand_grab, secondary_hand_grab;
                          stretchEndButtons: primary_hand_release, secondary_hand_release;
-                         dragDropStartButtons: hand_grab, secondary_hand_grab; 
+                         dragDropStartButtons: hand_grab, secondary_hand_grab;
                          dragDropEndButtons: hand_release, secondary_hand_release;
-                         activateStartButtons: secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right; 
+                         activateStartButtons: secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
                          activateEndButtons: secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
                      collision-filter="collisionForces: false"
                      physics-collider
@@ -268,8 +268,8 @@
             id="cursor-controller"
             cursor-controller="
                 cursor: #cursor;
-                camera: #player-camera; "
-            raycaster="objects: .collidable, .interactable, .ui; far: 3;"
+                camera: #player-camera;
+                objects: .collidable, .interactable, .ui;"
             line="visible: false; color: white; opacity: 0.2;"
         ></a-entity>
 
@@ -280,21 +280,18 @@
             static-body="shape: sphere;"
             collision-filter="collisionForces: false"
             super-hands="
-                colliderEvent: raycaster-intersection; 
-                colliderEventProperty: els;
-                colliderEndEvent: raycaster-intersection-cleared; 
-                colliderEndEventProperty: clearedEls;
-                grabStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab; 
+                colliderEvent: raycaster-intersection;
+                colliderEndEvent: raycaster-intersection-cleared;
+                grabStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
                 grabEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
                 stretchStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
                 stretchEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
                 dragDropStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
                 dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
-                activateStartButtons: secondary-cursor-grab, secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right; 
+                activateStartButtons: secondary-cursor-grab, secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
                 activateEndButtons: secondary-cursor-release, secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
             segments-height="9"
             segments-width="9"
-            event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"
         ></a-sphere>
 
         <!-- Player Rig -->
@@ -436,9 +433,9 @@
             static-body="shape: none;"
         ></a-entity>
 
-        <a-entity 
+        <a-entity
         super-spawner="
-            template: #pen-interactable; 
+            template: #pen-interactable;
             src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf;
             spawnEvent: spawn_pen;
             superHand: #player-right-controller;
