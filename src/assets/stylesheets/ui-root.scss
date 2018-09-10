@@ -84,8 +84,14 @@
   pointer-events: none;
   
   button {
-    @extend %big-action-button;
+    @extend %action-button;
     pointer-events: auto;
+    padding: 16px 28px;
+    height: 58px;
+  }
+
+  @media (max-height: 419px) {
+    display: none;
   }
 }
 
