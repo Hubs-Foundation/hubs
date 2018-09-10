@@ -1,0 +1,643 @@
+* hello, motivation for this document
+This document talks about what I've been thinking about re: input handling 
+in hubs. Several points were made a couple weeks ago that I want to recall.
+See https://github.com/johnshaughnessy/ux_design_mtg/blob/master/design_notes.org
+for more details.
+We talked about:
+- closing the existing gaps in 3D manipulation for each input device,
+- wanting to offer additional degrees of freedom to the user when 
+  altering the the "brush characteristics" of the pen
+- how we are very limited on input on certain devices. it sometimes feels 
+  "impossible to get what you want". 
+- wanting something you can do (menus, buttons, something to press) 
+  to unlock richness of the interaction space 
+  available to you if only we can use the buttons and axes at your disposal 
+  strategically, especially a device with limited inputs like a daydream 
+  or go controller.
+- wanting to experiment with navigating a menu or 
+  muting-without-pointing-at-floating-button,
+- concern that although our interactions "work", they do so in an undesirably
+  ad-hoc fashion. each one is a new modality to learn. they are "serviceable" 
+  but not "delightful" to interact with, and we would like it to be more 
+  "delightful" moving forward.
+- concern about spending too much time and effort trying to change the 
+  input code. Spending time on it may not be a good strategy if we are close to 
+  having everything we need to validate that certain types of interaction 
+  are worth doing, and that if users like doing them, we can feel confident 
+  recommending that more people use our product for those kinds of interactions,
+  and maybe we can decide to support those interactions even better.  
+
+Kudos to Kevin, who added the ability to draw with a customizable color and 
+brush size last week. Along with these changes he also wrote in the ability
+to scale objects with the mouse, filling another of the gaps.
+
+Dom added support to play and pause videos, which at the moment 
+this happens a little more often than we mean for it to, because grabbing 
+a video to move it also counts as a play or a pause. Still, this is way 
+better than not being able to pause videos at all.
+
+Rotating objects with the touchscreens is limited to the y axis. 
+Scaling is not yet supported. I spend some time thinking through using 
+pinch to scale ducks. I don't quite know the best way to implement it, 
+but it's likely reserving fingers for a pinch differently depending on 
+the results of a raycast on that touch, to know whether we're scaling a 
+duck or just pinching-to-move. It also doesn't account for the possibility 
+of being too close to a duck and then wanting to move backwards but 
+instead scaling the duck you're too clode to. Drawing on mobile is not 
+yet supported but could be. Pinching to move will interact with having a 
+sticky object in your hand, but as long as we order things correctly it 
+should still work. I think our sentement was that we felt ok about drawing 
+not working on mobile, because maybe it's not so important for people to 
+draw with fingers or a stylus and it's worth getting into peoples' 
+6DOF-driven-hands now that we can.
+
+I think our collaboration in that meeting was somewhat limited 
+by the scope of our intended discussion and the capabilities of the meeting 
+place we chose. We didn't discuss code examples and we didn't type. This is 
+a kind of (late to the game, but hopefully still relevant) contribution to 
+that same discussion, or thread of discussion, or ongoing conversation 
+we're having about what to do next as we do the stuff we want to do right now.
+
+One sentiment expressed was that there may no be "any new 
+universal design language that we can both solve some of these issues 
+and solve the issues we’re also talking about, namely 3D object interaction 
+AND also the tool controls."
+
+And I agree insofar as I don't know what a universal design language would 
+be that solved everything. In lieu of a universal one, I think there are some 
+design language or patterns for which there is prior art we can mimic to make it 
+easier for us to solve some of the problems we face when trying to change, 
+or add interaction mechanics to the client.
+* about this branch (actions)
+This document describes an aframe system called actions whose main loop 
+runs alongside all the other aframe system ticks, in some order. 
+
+We considered writing something like this actions system as a standalone 
+library so authors of other web applications with similar interaction needs
+could benefit and contribute, and so we would have a "web-based" input handling
+system similar enough to OpenXR to better understand application patterns that
+might emerge as it approaches ratification, implementation, adoption.
+
+We care most that js apps like ours can access this system's capabilities, 
+so we say "web-based" instead of saying "js library"  because for all I care 
+this code could be written in (for example) rust and compiled to webassembly.
+
+Given that FxR may want to write itself (as an application) against 
+many types of input devices, perhaps a rust library may allow more people to 
+be involved, as it may serve more peoples' needs or at least be a point of 
+comparison with more in common to those FxR developers codebase. Prior art
+is mentioned below, but I have not seen anything like this written in rust
+(but I haven't looked so don't take that as evidence that no such library 
+exists).
+
+The code is nascent at the time of this writing and will change a lot unless
+everyone says I should stop working on this and work on something more useful.
+I don't know where to draw the line between the "library" and "app code". 
+Still, I sometimes refer to the actions system as "library code", 
+and anything using it (i.e. the rest of our aframe application) as "app code". 
+
+Given the the unproven state of this code and the ideas it tries to express, 
+I'm not concerned with making this grow to other teams or projects at this 
+time. That could change if it turns out that this attempted fix of problems 
+outlined below is effective, which I don't know until it is further along 
+and "put to the test".
+
+I'm writing it in js on a branch of hubs, because that is how locally 
+I care to satisfy these input needs, and hope to employ some strategy 
+for thinking about and describing user interaction so as to make 
+application code easier to write simply. 
+That is, I want it to be easier to write simple application code, 
+and I think this model is a way of doing that, and it comes at the 
+cost of adding complexity between the user's input devices and the 
+application code that queries the "action frame". 
+I argue that this is essential complexity, and it is 
+better handled "earlier" in the model than where it is handled now, 
+which I call "app code".
+
+The system was written into the hubs client because I don't know where the 
+app should start and the library should end, and I wanted to make sure the 
+ideas stood up to our existing application's already substantial set of 
+interaction needs.
+
+*** Feedback welcome
+The motivation for writing this document is in part to solicit criticism
+and feedback about whether this code actually meets its aims, which are to  
+
+- minimize the amount of "input-based branching" required of app code, 
+- support a wide variety of input devices,
+- allow people to customize the way they "drive" the application by 
+  "binding" an application's "actions" to their input device's capabilities
+  (buttons, joysticks, axes) via "filters" (name subject to change), and
+- reduce the complexity of cursor-controller, drawing-manager, 
+  character-controller, interactables, and anything else that touches 
+  input, allowing us to write new interactions (e.g. change the volume 
+  of a video, select pen color from a color picker) into our app
+  faster and with fewer bugs.
+ 
+If these aims are not met, are there changes that would allow them to be,
+or are there critical errors that cannot be fixed without changing the 
+mental model for handling input? (In case it's not clear, this is not a
+rhetorical question. Please give feedback if you can.)
+
+*** Prior art
+There is some prior art this code is based on. I can provide more information
+about each, but for now I will summarize as follows: 
+- The steam controller API influenced my thinking on this problem.
+- OpenXR's proposal for handling input is similar in many ways to what is 
+  written here (probably because it is written by the same people who 
+  wrote the steam controller API).
+- Trevor wrote some code in a shared repo that captured some of these ideas.
+  There were enough minor things I wanted to try to do differently that it 
+  that it made more sense to me to start from scratch than start from what he'd
+  written. I want to compare his approach to what's implemented here and 
+  hopefully learn something from the differences.
+- Fernando (and co)'s `aframe-input-mappings` captures some of these ideas 
+  as well, and we make use of them in our application.
+  As a minimal experiment, I replaced the keyboard bindings 
+  in hubs' "input-mappings.js" which bound the keyboard to named events via 
+  `aframe-input-mappings` with code that exposes the current state of the keyboard
+  through an api that took an "action name" and responded with a boolean value.
+- The addition of "behaviors" to `input-mappings` satisfied some of our input 
+  needs when it came to transforming the input from a device to ready it for 
+  use in the application (see scrolling, or dpad implementations.)
+- I wrote branch of three.js a few weeks ago that had a kind of primitive cursor
+  that was driven by oculus touch through an actions system like frame + binding 
+  definition + mapping process.
+
+*** Progress report
+I have so far supported the mouse, keyboard, and am working adding touchscreen 
+support. Supporting touchscreens in our application has been challenging so far.
+Below I will talk through what some of the challenges have been, and how I 
+want to handle them or did handle them (if I do).
+
+I hope that by driving the application with the touchscreen and this actions 
+system, where to draw a line between "library" code and "app code" will 
+be made clearer.
+
+After touchscreen, I suspect that support for 3DOF, 6DOF, and gamepads will 
+follow rapidly. The biggest differences I anticipate when adding support for 
+those are:
+- not needing to use an eventQueue each frame and instead creating a frame 
+  by reading from the Gamepad API, and
+- being encouraged to remove more of the app code than is necessary just to 
+  start integrating the actions system into the main codebranch without 
+  breaking functionality.
+Ideally (and I think in reality) we will be able to decide where and how to 
+break from what we've done up till now with input and where to apply the 
+actions system, if we agree something like this is how we ought to do it.
+I don't claim we should use this code, but rather hypothesize we may and want 
+to test the hypothesis openly, garnering feedback, criticism, and support 
+(if it's any good).
+
+If I complete support for the touchscreen, and a 3DOF device, then the 
+code will be at a point where we can have a meaningful, example-driven 
+discussion about its merits and shortcomings. This is not my immediate
+plan because 1) I have a list of four or five minor issues and improvements
+I mean to push out in the next couple days and 2) it's at least close 
+to a state where I stand to benefit from some feedback from others.
+
+"Priority" is how I've thought about how to resolve a situation where 
+multiple "action sets" can "care about" a certain input (like the way 
+a video object can "care about" both being grabbed and being played/paused,
+currently on the same button for most platforms) and the app knows how 
+to "decide" which of the action sets' actions should be "prioritized"
+(do they want to pause or grab the object?).
+
+I think "resolving priority" where each active set 
+is assigned a priority value accounts for many of the differences between 
+(3DOF, 6DOF, wands and such) and (mouse, keyboard, touchscreen) devices. 
+I think supporting them will mostly require applying what is already 
+learned from supporting mouse, keyboard, and touchscreen. 
+
+I'm not sure that the current algorithm for "priority" resolution is the 
+right one for the job, and I don't know how to test it besides implementing 
+enough of the functionality we have in hubs to see it play out. 
+Strategies that have been proposed are,
+ - the user chooses the priority of each set or action within a set
+ - the application chooses the priority of each set or actions within a set
+ - the order that sets are activated determines their priority. (This is 
+the way I currently implemented this. Not sure if it's any good. It seems 
+correct for the use case described as : "point at something, activate an 
+action set that corresponds with that thing, now your buttons do something
+different". A concern about this model is that making the order of events
+matter in the code is a good way to not understand how the actions system 
+sets got into the state they're in on a given frame, especially since we 
+haven't written any explicit control over the tick order of our aframe 
+systems or components.
+
+An example priority conflict I tried to resolve so far is when applying the 
+"default binding definition for the mouse", the actions system decides to 
+write a vector2 either for cursor movement or camera movement when processing
+mousedown+mousemove events, and it does so based on the only state it carries 
+that is directly manipulated by the application, namely the action sets active
+at the start, and "user-provided" binding definitions (that are actually 
+hard-coded as defaults in this implementation, but could EASILY be swapped 
+out and probably should be, once a change using semantic paths lands).
+
+An example of something this actions system does not help us with (and in 
+fact makes us feel a mixture of pain and sadness), is that entering 
+pointer lock (which we like to do when a user clicks the screen somewhere 
+that is not a duck, or they right click when they're not "holding a pen")
+is only permitted in response to a "short running event handler in response
+to a user gesture". We can't wait until the frame to process the mouse 
+click to enter and exit pointer lock.
+
+* case study: touchscreen in hubs
+** our current application
+In our current application (which does not have this action system),
+the aframe component `"input-configurator"` configured in `hub.html`
+#+BEGIN_EXAMPLE html
+<a-scene
+    input-configurator="
+              gazeCursorRayObject: #player-camera;
+              cursorController: #cursor-controller;
+              gazeTeleporter: #gaze-teleport;
+              camera: #player-camera;
+              playerRig: #player-rig;
+              leftController: #player-left-controller;
+              leftControllerRayObject: #player-left-controller;
+              rightController: #player-right-controller;
+              rightControllerRayObject: #player-right-controller;">
+</a-scene>
+#+END_EXAMPLE
+creates a TouchEventsHandler which, in response to touch events
+changes the state of the application. 
+#+BEGIN_EXAMPLE js
+// "handle" the events
+document.addEventListener("touchstart", this.handleTouchStart);
+document.addEventListener("touchmove", this.handleTouchMove);
+document.addEventListener("touchend", this.handleTouchEnd);
+document.addEventListener("touchcancel", this.handleTouchEnd);
+#+END_EXAMPLE
+When a touchdown event occurs, we decide whether its touch is already 
+handled by virtual joysticks, then (if not) we might move the cursor, 
+call "forceCursorUpdate", and, if the cursor's "startInteraction" 
+function returns true (which is not always, because the cursor may have 
+nothing to "interact(ion)" with), "reserves" all future touch events' 
+touches whose identifier matches this touch's identifier.
+#+BEGIN_EXAMPLE js
+// The way we "handle" each (changed)touch in a "touchdown" event
+// is to test whether it's already handled, or mutate app state.
+// We "remember" what touches are "reserved" which comes in handy
+// as we process future touch events.
+function singleTouchStart(touch) {
+  if (touch.clientY / window.innerHeight >= VIRTUAL_JOYSTICK_HEIGHT) {
+    return;
+  }
+  if (!this.touchReservedForCursor) {
+    const targetX = (touch.clientX / window.innerWidth) * 2 - 1;
+    const targetY = -(touch.clientY / window.innerHeight) * 2 + 1;
+    this.cursor.moveCursor(targetX, targetY);
+    this.cursor.forceCursorUpdate();
+    if (this.cursor.startInteraction()) {
+      this.touchReservedForCursor = touch;
+    }
+  }
+  this.touches.push(touch);
+}
+#+END_EXAMPLE
+The touches produced by touchmove events move the cursor, manipulate
+on-screen joysticks, move the character, and move the camera. At any point 
+in time, touches can be "reserved" for certain actions.
+#+BEGIN_EXAMPLE js
+  handleTouchMove(e) {
+    for (let i = 0; i < e.touches.length; i++) {
+      this.singleTouchMove(e.touches[i]);
+    }
+    if (this.needsPinch) {
+      this.pinch();
+      this.needsPinch = false;
+    }
+  }
+
+  singleTouchMove(touch) {
+    if (this.touchReservedForCursor && touch.identifier === this.touchReservedForCursor.identifier) {
+      const targetX = (touch.clientX / window.innerWidth) * 2 - 1;
+      const targetY = -(touch.clientY / window.innerHeight) * 2 + 1;
+      this.cursor.moveCursor(targetX, targetY);
+      return;
+    }
+    if (touch.clientY / window.innerHeight >= VIRTUAL_JOYSTICK_HEIGHT) return;
+    if (!this.touches.some(t => touch.identifier === t.identifier)) {
+      return;
+    }
+
+    let pinchIndex = this.touchesReservedForPinch.findIndex(t => touch.identifier === t.identifier);
+    if (pinchIndex !== -1) {
+      this.touchesReservedForPinch[pinchIndex] = touch;
+    } else if (this.touchesReservedForPinch.length < 2) {
+      this.touchesReservedForPinch.push(touch);
+      pinchIndex = this.touchesReservedForPinch.length - 1;
+    }
+    if (this.touchesReservedForPinch.length == 2 && pinchIndex !== -1) {
+      if (this.touchReservedForLookControls && touch.identifier === this.touchReservedForLookControls.identifier) {
+        this.touchReservedForLookControls = null;
+      }
+      this.needsPinch = true;
+      return;
+    }
+
+    if (!this.touchReservedForLookControls) {
+      this.touchReservedForLookControls = touch;
+    }
+    if (touch.identifier === this.touchReservedForLookControls.identifier) {
+      if (!this.touchReservedForCursor) {
+        this.cursor.moveCursor(
+          (touch.clientX / window.innerWidth) * 2 - 1,
+          -(touch.clientY / window.innerHeight) * 2 + 1
+        );
+      }
+      this.look(this.touchReservedForLookControls, touch);
+      this.touchReservedForLookControls = touch;
+      return;
+    }
+  }
+#+END_EXAMPLE
+[Aside: Reserving touches like this seems to duplicate state, or... allow for
+the potential to miss state changes happening elsewhere. For example, the 
+TouchEventsHandler does not know whether someone took an object from this 
+touchscreen toucher's cursor. The touch will continue to be "reserved" for 
+the cursor, then will "release" an object this user no longer has grabbed
+when the touchend for it is fired. This happens to not cause any particularly
+bad bugs in our app, except when someone takes something from the end of your 
+cursor when you use a 3DOF/6DOF controller. In that case, you can call 
+"changeCursorMod" on the cursor by "scroll"ing with your thumb. Perhaps the
+MouseEventHandler/TouchEventHandler should be informed of this cursor state,
+which may actually be state in super-hands.]
+
+The basic idea for replacing the TouchEventsHandler is to replace the concept
+of "reserving" touches for actions, instead set up a binding file for a 
+touchscreen device's semantic paths to be used to transform its input and
+resolving "priority" for action sets that care about the action mapped to 
+by a given touch. The two-fold challenge of replacing TouchEventsHandler 
+is in 
+- Replacing the "cursor update on demand in response to a touch event" codepath
+  with the same one that will be used for all other input devices and 
+- Communicating raycast results back to the "device" in "lib code" such that
+  touching on a duck is different than touching on a pen is different than 
+  touching on nothing is different than having a second touch nothing, and 
+  then treating it like a pinch, and separating that from two touches that 
+  were meant to be a pinch that scaled a duck.
+
+The TouchEventsHandler does not handle any of the behavior of the on-screen
+buttons. Instead, these are handled via click handlers on the buttons themselves.
+#+BEGIN_EXAMPLE js
+#+END_EXAMPLE
+** using the actions system
+Our aframe systems/components may poll the actions system 
+to read the the current frame's action state. 
+#+BEGIN_EXAMPLE js
+// in character controller
+function tick(t, dt) {
+  const actions = AFRAME.scenes[0].systems.actions;
+  const acc = actions.poll("accerateSelf"); // a vector 2
+  if (acc) {
+    this.acceleration.set(acc[0], 0, acc[1]);
+  }
+  if (actions.poll("snapRotateRight")) {
+    this.snapRotateRight();
+  }
+  if (actions.poll("snapRotateLeft")) {
+    this.snapRotateLeft();
+  }
+  // move the character
+}
+#+END_EXAMPLE
+The actions systems api exposes `isActive` and `poll`.
+- `isActive` receives the name of an action set and returns 
+a boolean indicating whether the action set is active in 
+the most recent action frame.
+- `poll` receives the name of an action and returns the value
+associated with that action from the most recent action frame.
+#+BEGIN_EXAMPLE js
+AFRAME.registerSystem("actions", {
+  isActive(set) {
+    if (!this.didInit) return undefined;
+    return history.read(0).sets.includes(set);
+  },
+
+  poll(action) {
+    return history.read(0).actions[action];
+  },
+#+END_EXAMPLE
+Transformations of input state from various devices are bound 
+to action state by having the appropriate filters (name subject to change)
+assigned from an input to an output via a binding definition.
+#+BEGIN_EXAMPLE  js
+export const keyboardBindDefn = [
+  {
+    set: "selfSnapRotating",
+    action: "snapRotateLeft",
+    filter: "keydown",
+    key: "q"
+  },
+// I'd like to change this to use "semantic paths", 
+// a concept from the Steam Controller API + OpenXR:
+// {
+//   src: "/keyboard/q",
+//   dest: "/selfSnapRotating/snapRotateLeft",
+//   transformation: "keydown"
+// },
+  {
+    set: "selfSnapRotating",
+    action: "snapRotateRight",
+    filter: "keydown",
+    key: "e"
+  },
+  {
+    set: "muteToggling",
+    action: "toggleMute",
+    filter: "keydown",
+    key: "m"
+  },
+  {
+    set: "screenShareToggling",
+    action: "toggleScreenShare",
+    filter: "keydown",
+    key: "b"
+  },
+  {
+    set: "selfMoving",
+    action: "accSelf",
+    filter: "key4_to_vec2",
+    filter_params: {
+      keys: ["d", "a", "w", "s"],
+      filters: ["key", "key", "key", "key"]
+    }
+  },
+// Here is an example where a transformation has multiple srcs:
+// {
+//   src: ["/keyboard/d",
+//         "/keyboard/a",
+//         "/keyboard/w",
+//         "/keyboard/s"]
+//   dest: "/selfMoving/accSelf",
+//   transformation: "bool4_to_vec2" // transforms four bools to a vector2
+//                                   // (the order of the srcs matter)
+// },
+  {
+    set: "selfMoving",
+    action: "boost",
+    filter: "key",
+    key: "shift"
+  }
+];
+#+END_EXAMPLE
+Defining bindings this way allows for user customization and control.
+The following mouse keybinding says to transform mousemove events' "movementX/Y" 
+by multiplying each by user-customizable "LookSpeed" values then 
+composing them into a vector2:
+#+BEGIN_EXAMPLE js
+  {
+    set: "looking",
+    action: "look",
+    filter: "vec2_deltas",
+    filterParams: {
+      horizontalLookSpeed: 0.1,
+      verticalLookSpeed: 0.06,
+      keys: ["dY", "dX"],
+      filters: ["number", "number"]
+    },
+    priorityKey: "mousemove"
+  },
+// or, how I'd like to write it
+// {
+//   src: "/mouse/movementX",
+//   dest: "/filters/mouseVerticalLook",
+//   transformation: "multiply"
+//   transformation_params: {
+//     scalar : 0.06
+//   }
+// },
+// {
+//   src: "/mouse/movementY",
+//   dest: "/filters/mouseHorizontalLook",
+//   transformation: "multiply"
+//   transformation_params: {
+//     scalar : 0.1
+//   }
+// },
+// {
+//   src: ["/filters/mouseVerticalLook", "/filters/mouseHorizontalLook"],
+//   dest: "/looking/look",
+//   transformation: "compose_vec2"
+// },
+#+END_EXAMPLE
+The current binding definitions' bindings currently define an optional
+"priorityKey" that is used to resolve conflicts that can occur when actions 
+from two sets that are both active read from the same input or input that
+is so closely related that it should block reading of all related value. 
+For an example of the ladder, the "mousemove" priorityKey above describes 
+the mousemove event's "movementX/Y" AND "clientX/clientY" values 
+(and probably everything else in the mousemove event, even though "/mouse/move"
+ is not a readable binding src). 
+
+[Aside: I don't know if "/mouse/move" should be a readable binding src 
+because we read input state in frames and mousemove events 
+can occur multiple times in a frame. I suppose "/mouse/move" could be a 
+readable binding src if we sum the results of deltas and always take the 
+latest of clientX/Y and the others like that.]
+
+I believe we will be able to know about all the "priorityKey" type of conflicts
+automatically, so I think this is a temporary field in the binding file (and 
+not meant to be customized by the user).
+
+When the actions system ticks, it 
+- creates a new frame, 
+- processes pending set changes to decide which sets should be active 
+this frame (which are the same as last frame, if there were no pending changes),
+- tells each device to "fill" the action frame, given the currently 
+active sets,
+- then saves the frame to its history.
+#+BEGIN_EXAMPLE js
+  tick() {
+    const prev = history.read(0);
+    const frame = {
+      sets: [],
+      actions: {},
+      priorities: {}
+    };
+    const {sets, actions, priorities} = frame;
+    for (const idx in prev.sets) {
+      sets.push(prev.sets[idx]);
+    }
+    pendingSetChanges.forEach(sc => {
+      const {set, fn} = sc;
+      const isActive = sets.includes(set);
+      if (!isActive && fn === "activate") {
+        sets.push(set);
+      } else if (isActive && fn === "deactivate") {
+        sets.splice(sets.indexOf(set), 1); // TODO: replace splice
+      }
+    });
+    applySetChanges(pendingSetChanges, frame.sets);
+    pendingSetChanges.length = 0; // garbage
+    devices.forEach(device => {
+      device.fillActionFrame(frame);
+    });
+    history.write(frame);
+  }
+#+END_EXAMPLE
+While at first glance this seems to me to "read nicely", I think it's
+superficial "niceness", as the complexity of what's going on has just 
+been buried into `fillActionFrame` on all of the devices. 
+
+Still, I hope it shows very clearly a few things about the way this 
+actions model works that are critical to understand in order to write 
+application code against it:
+
+1) Actions are written in frames. This means that application code queries
+for the state of an action from the most recent "frame". If ever the action
+system tick runs out-of-sync with other system/component updates (depending
+on the architecture of the application (e.g. what we've been callign a 
+"pure" entity-component system vs aframe/unity-monobehaviour "component-based 
+architecture")), the application will be responsible for calling the action
+system tick and reading from its history appropriately. 
+
+2) Action state does not change mid-frame. This includes which action sets
+are currently active. If you wish to change the actions that your buttons 
+will enable when you "hover over" or "point to" or "select" or "activate" 
+something in app code, and you try to "activate" the appropriate action set, 
+you must wait until the NEXT FRAME before you can expect meaningful state 
+to be returned when `poll`ing for action names from the "activate"d set.
+
+3) The way I'm currently thinking about filling the action frame is by 
+iterating through all of the devices. Code that recognizes which devices 
+are connected, as well as what to do when connection state changes, is 
+not yet written. Also, the way binding definitions are assigned right 
+now is written into the device definitions. The way the devices and 
+"fillActionFrame" is more of a relic of the order in which I happened 
+to start writing this system than it is a belief that this organization 
+makes sense. `fillActionFrame` is now a reusable function that each 
+device binds to itself (instead of passing in some arguments... for no
+apparent reason) because I initially started writing completely separate 
+codepaths to support each device (go, mouse, keyboard, and now touchscreen)
+and I wanted to look for commonalities AFTER some code that works was 
+written, rather than during, when the differences between devices would 
+be difficult to understand at first. An example of a way "fillActionFrame" 
+is currently implemented that I think will change is that its implementation
+includes a step where an "eventQueue" (full of browser events) is "framify"ed
+into a[n input-]`frame`. Input devices whose state we'll read from the 
+GamepadAPI will not have an eventQueue to "framify", so this organization 
+is wrong.
+
+#+BEGIN_EXAMPLE js
+#+END_EXAMPLE
+* a disclaimer about voice and purpose
+In any given sentence, I or we might write I or we or we or I.
+I or we don't know what voice to give a sentence when we are or I am
+echoing concerns voiced initially by other people in a conversation that 
+happened elsewhere.
+Also we or I want to encourage other people to edit, improve, or refer to 
+this document as they see fit, and that seems easiest to do when not talking
+about a viewpoint, "I think yada yada yada" and instead is a assertion of 
+something about the code, the model about the code, or the existence of some 
+code snippet/pseudocode.
+If it's easier for you, repeat the phrase, 
+  "we be the royal we 'cuz we be royal-ty"
+until you don't mind it anymore.
+
+Regarding the format of this information, is this a useful format to capture 
+these thoughts? Are there too many words here that will be out of date before
+they become worth it? Let's see.
+

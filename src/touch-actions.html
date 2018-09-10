@@ -1,0 +1,1083 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2018-09-09 Sun 20:18 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>&lrm;</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="LAPTOP-5AAM7987" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org506c9ee">1. hello, motivation for this document</a></li>
+<li><a href="#org800d34c">2. about this branch (actions)</a>
+<ul>
+<li>
+<ul>
+<li><a href="#orgddfd250">2.0.1. Feedback welcome</a></li>
+<li><a href="#orgd972d24">2.0.2. Prior art</a></li>
+<li><a href="#org321d748">2.0.3. Progress report</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org012e1b0">3. case study: touchscreen in hubs</a>
+<ul>
+<li><a href="#org3d39957">3.1. our current application</a></li>
+<li><a href="#orgfe8d2d3">3.2. using the actions system</a></li>
+</ul>
+</li>
+<li><a href="#org26e6236">4. a disclaimer about voice and purpose</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org506c9ee" class="outline-2">
+<h2 id="org506c9ee"><span class="section-number-2">1</span> hello, motivation for this document</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+This document talks about what I've been thinking about re: input handling 
+in hubs. Several points were made a couple weeks ago that I want to recall.
+See <a href="https://github.com/johnshaughnessy/ux_design_mtg/blob/master/design_notes.org">https://github.com/johnshaughnessy/ux_design_mtg/blob/master/design_notes.org</a>
+for more details.
+We talked about:
+</p>
+<ul class="org-ul">
+<li>closing the existing gaps in 3D manipulation for each input device,</li>
+<li>wanting to offer additional degrees of freedom to the user when 
+altering the the "brush characteristics" of the pen</li>
+<li>how we are very limited on input on certain devices. it sometimes feels 
+"impossible to get what you want".</li>
+<li>wanting something you can do (menus, buttons, something to press) 
+to unlock richness of the interaction space 
+available to you if only we can use the buttons and axes at your disposal 
+strategically, especially a device with limited inputs like a daydream 
+or go controller.</li>
+<li>wanting to experiment with navigating a menu or 
+muting-without-pointing-at-floating-button,</li>
+<li>concern that although our interactions "work", they do so in an undesirably
+ad-hoc fashion. each one is a new modality to learn. they are "serviceable" 
+but not "delightful" to interact with, and we would like it to be more 
+"delightful" moving forward.</li>
+<li>concern about spending too much time and effort trying to change the 
+input code. Spending time on it may not be a good strategy if we are close to 
+having everything we need to validate that certain types of interaction 
+are worth doing, and that if users like doing them, we can feel confident 
+recommending that more people use our product for those kinds of interactions,
+and maybe we can decide to support those interactions even better.</li>
+</ul>
+
+<p>
+Kudos to Kevin, who added the ability to draw with a customizable color and 
+brush size last week. Along with these changes he also wrote in the ability
+to scale objects with the mouse, filling another of the gaps.
+</p>
+
+<p>
+Dom added support to play and pause videos, which at the moment 
+this happens a little more often than we mean for it to, because grabbing 
+a video to move it also counts as a play or a pause. Still, this is way 
+better than not being able to pause videos at all.
+</p>
+
+<p>
+Rotating objects with the touchscreens is limited to the y axis. 
+Scaling is not yet supported. I spend some time thinking through using 
+pinch to scale ducks. I don't quite know the best way to implement it, 
+but it's likely reserving fingers for a pinch differently depending on 
+the results of a raycast on that touch, to know whether we're scaling a 
+duck or just pinching-to-move. It also doesn't account for the possibility 
+of being too close to a duck and then wanting to move backwards but 
+instead scaling the duck you're too clode to. Drawing on mobile is not 
+yet supported but could be. Pinching to move will interact with having a 
+sticky object in your hand, but as long as we order things correctly it 
+should still work. I think our sentement was that we felt ok about drawing 
+not working on mobile, because maybe it's not so important for people to 
+draw with fingers or a stylus and it's worth getting into peoples' 
+6DOF-driven-hands now that we can.
+</p>
+
+<p>
+I think our collaboration in that meeting was somewhat limited 
+by the scope of our intended discussion and the capabilities of the meeting 
+place we chose. We didn't discuss code examples and we didn't type. This is 
+a kind of (late to the game, but hopefully still relevant) contribution to 
+that same discussion, or thread of discussion, or ongoing conversation 
+we're having about what to do next as we do the stuff we want to do right now.
+</p>
+
+<p>
+One sentiment expressed was that there may no be "any new 
+universal design language that we can both solve some of these issues 
+and solve the issues we’re also talking about, namely 3D object interaction 
+AND also the tool controls."
+</p>
+
+<p>
+And I agree insofar as I don't know what a universal design language would 
+be that solved everything. In lieu of a universal one, I think there are some 
+design language or patterns for which there is prior art we can mimic to make it 
+easier for us to solve some of the problems we face when trying to change, 
+or add interaction mechanics to the client.
+</p>
+</div>
+</div>
+<div id="outline-container-org800d34c" class="outline-2">
+<h2 id="org800d34c"><span class="section-number-2">2</span> about this branch (actions)</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+This document describes an aframe system called actions whose main loop 
+runs alongside all the other aframe system ticks, in some order. 
+</p>
+
+<p>
+We considered writing something like this actions system as a standalone 
+library so authors of other web applications with similar interaction needs
+could benefit and contribute, and so we would have a "web-based" input handling
+system similar enough to OpenXR to better understand application patterns that
+might emerge as it approaches ratification, implementation, adoption.
+</p>
+
+<p>
+We care most that js apps like ours can access this system's capabilities, 
+so we say "web-based" instead of saying "js library"  because for all I care 
+this code could be written in (for example) rust and compiled to webassembly.
+</p>
+
+<p>
+Given that FxR may want to write itself (as an application) against 
+many types of input devices, perhaps a rust library may allow more people to 
+be involved, as it may serve more peoples' needs or at least be a point of 
+comparison with more in common to those FxR developers codebase. Prior art
+is mentioned below, but I have not seen anything like this written in rust
+(but I haven't looked so don't take that as evidence that no such library 
+exists).
+</p>
+
+<p>
+The code is nascent at the time of this writing and will change a lot unless
+everyone says I should stop working on this and work on something more useful.
+I don't know where to draw the line between the "library" and "app code". 
+Still, I sometimes refer to the actions system as "library code", 
+and anything using it (i.e. the rest of our aframe application) as "app code". 
+</p>
+
+<p>
+Given the the unproven state of this code and the ideas it tries to express, 
+I'm not concerned with making this grow to other teams or projects at this 
+time. That could change if it turns out that this attempted fix of problems 
+outlined below is effective, which I don't know until it is further along 
+and "put to the test".
+</p>
+
+<p>
+I'm writing it in js on a branch of hubs, because that is how locally 
+I care to satisfy these input needs, and hope to employ some strategy 
+for thinking about and describing user interaction so as to make 
+application code easier to write simply. 
+That is, I want it to be easier to write simple application code, 
+and I think this model is a way of doing that, and it comes at the 
+cost of adding complexity between the user's input devices and the 
+application code that queries the "action frame". 
+I argue that this is essential complexity, and it is 
+better handled "earlier" in the model than where it is handled now, 
+which I call "app code".
+</p>
+
+<p>
+The system was written into the hubs client because I don't know where the 
+app should start and the library should end, and I wanted to make sure the 
+ideas stood up to our existing application's already substantial set of 
+interaction needs.
+</p>
+</div>
+
+<div id="outline-container-orgddfd250" class="outline-4">
+<h4 id="orgddfd250"><span class="section-number-4">2.0.1</span> Feedback welcome</h4>
+<div class="outline-text-4" id="text-2-0-1">
+<p>
+The motivation for writing this document is in part to solicit criticism
+and feedback about whether this code actually meets its aims, which are to  
+</p>
+
+<ul class="org-ul">
+<li>minimize the amount of "input-based branching" required of app code,</li>
+<li>support a wide variety of input devices,</li>
+<li>allow people to customize the way they "drive" the application by 
+"binding" an application's "actions" to their input device's capabilities
+(buttons, joysticks, axes) via "filters" (name subject to change), and</li>
+<li>reduce the complexity of cursor-controller, drawing-manager, 
+character-controller, interactables, and anything else that touches 
+input, allowing us to write new interactions (e.g. change the volume 
+of a video, select pen color from a color picker) into our app
+faster and with fewer bugs.</li>
+</ul>
+
+<p>
+If these aims are not met, are there changes that would allow them to be,
+or are there critical errors that cannot be fixed without changing the 
+mental model for handling input? (In case it's not clear, this is not a
+rhetorical question. Please give feedback if you can.)
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd972d24" class="outline-4">
+<h4 id="orgd972d24"><span class="section-number-4">2.0.2</span> Prior art</h4>
+<div class="outline-text-4" id="text-2-0-2">
+<p>
+There is some prior art this code is based on. I can provide more information
+about each, but for now I will summarize as follows: 
+</p>
+<ul class="org-ul">
+<li>The steam controller API influenced my thinking on this problem.</li>
+<li>OpenXR's proposal for handling input is similar in many ways to what is 
+written here (probably because it is written by the same people who 
+wrote the steam controller API).</li>
+<li>Trevor wrote some code in a shared repo that captured some of these ideas.
+There were enough minor things I wanted to try to do differently that it 
+that it made more sense to me to start from scratch than start from what he'd
+written. I want to compare his approach to what's implemented here and 
+hopefully learn something from the differences.</li>
+<li>Fernando (and co)'s `aframe-input-mappings` captures some of these ideas 
+as well, and we make use of them in our application.
+As a minimal experiment, I replaced the keyboard bindings 
+in hubs' "input-mappings.js" which bound the keyboard to named events via 
+`aframe-input-mappings` with code that exposes the current state of the keyboard
+through an api that took an "action name" and responded with a boolean value.</li>
+<li>The addition of "behaviors" to `input-mappings` satisfied some of our input 
+needs when it came to transforming the input from a device to ready it for 
+use in the application (see scrolling, or dpad implementations.)</li>
+<li>I wrote branch of three.js a few weeks ago that had a kind of primitive cursor
+that was driven by oculus touch through an actions system like frame + binding 
+definition + mapping process.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org321d748" class="outline-4">
+<h4 id="org321d748"><span class="section-number-4">2.0.3</span> Progress report</h4>
+<div class="outline-text-4" id="text-2-0-3">
+<p>
+I have so far supported the mouse, keyboard, and am working adding touchscreen 
+support. Supporting touchscreens in our application has been challenging so far.
+Below I will talk through what some of the challenges have been, and how I 
+want to handle them or did handle them (if I do).
+</p>
+
+<p>
+I hope that by driving the application with the touchscreen and this actions 
+system, where to draw a line between "library" code and "app code" will 
+be made clearer.
+</p>
+
+<p>
+After touchscreen, I suspect that support for 3DOF, 6DOF, and gamepads will 
+follow rapidly. The biggest differences I anticipate when adding support for 
+those are:
+</p>
+<ul class="org-ul">
+<li>not needing to use an eventQueue each frame and instead creating a frame 
+by reading from the Gamepad API, and</li>
+<li>being encouraged to remove more of the app code than is necessary just to 
+start integrating the actions system into the main codebranch without 
+breaking functionality.</li>
+</ul>
+<p>
+Ideally (and I think in reality) we will be able to decide where and how to 
+break from what we've done up till now with input and where to apply the 
+actions system, if we agree something like this is how we ought to do it.
+I don't claim we should use this code, but rather hypothesize we may and want 
+to test the hypothesis openly, garnering feedback, criticism, and support 
+(if it's any good).
+</p>
+
+<p>
+If I complete support for the touchscreen, and a 3DOF device, then the 
+code will be at a point where we can have a meaningful, example-driven 
+discussion about its merits and shortcomings. This is not my immediate
+plan because 1) I have a list of four or five minor issues and improvements
+I mean to push out in the next couple days and 2) it's at least close 
+to a state where I stand to benefit from some feedback from others.
+</p>
+
+<p>
+"Priority" is how I've thought about how to resolve a situation where 
+multiple "action sets" can "care about" a certain input (like the way 
+a video object can "care about" both being grabbed and being played/paused,
+currently on the same button for most platforms) and the app knows how 
+to "decide" which of the action sets' actions should be "prioritized"
+(do they want to pause or grab the object?).
+</p>
+
+<p>
+I think "resolving priority" where each active set 
+is assigned a priority value accounts for many of the differences between 
+(3DOF, 6DOF, wands and such) and (mouse, keyboard, touchscreen) devices. 
+I think supporting them will mostly require applying what is already 
+learned from supporting mouse, keyboard, and touchscreen. 
+</p>
+
+<p>
+I'm not sure that the current algorithm for "priority" resolution is the 
+right one for the job, and I don't know how to test it besides implementing 
+enough of the functionality we have in hubs to see it play out. 
+Strategies that have been proposed are,
+</p>
+<ul class="org-ul">
+<li>the user chooses the priority of each set or action within a set</li>
+<li>the application chooses the priority of each set or actions within a set</li>
+<li>the order that sets are activated determines their priority. (This is</li>
+</ul>
+<p>
+the way I currently implemented this. Not sure if it's any good. It seems 
+correct for the use case described as : "point at something, activate an 
+action set that corresponds with that thing, now your buttons do something
+different". A concern about this model is that making the order of events
+matter in the code is a good way to not understand how the actions system 
+sets got into the state they're in on a given frame, especially since we 
+haven't written any explicit control over the tick order of our aframe 
+systems or components.
+</p>
+
+<p>
+An example priority conflict I tried to resolve so far is when applying the 
+"default binding definition for the mouse", the actions system decides to 
+write a vector2 either for cursor movement or camera movement when processing
+mousedown+mousemove events, and it does so based on the only state it carries 
+that is directly manipulated by the application, namely the action sets active
+at the start, and "user-provided" binding definitions (that are actually 
+hard-coded as defaults in this implementation, but could EASILY be swapped 
+out and probably should be, once a change using semantic paths lands).
+</p>
+
+<p>
+An example of something this actions system does not help us with (and in 
+fact makes us feel a mixture of pain and sadness), is that entering 
+pointer lock (which we like to do when a user clicks the screen somewhere 
+that is not a duck, or they right click when they're not "holding a pen")
+is only permitted in response to a "short running event handler in response
+to a user gesture". We can't wait until the frame to process the mouse 
+click to enter and exit pointer lock.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org012e1b0" class="outline-2">
+<h2 id="org012e1b0"><span class="section-number-2">3</span> case study: touchscreen in hubs</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org3d39957" class="outline-3">
+<h3 id="org3d39957"><span class="section-number-3">3.1</span> our current application</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+In our current application (which does not have this action system),
+the aframe component `"input-configurator"` configured in `hub.html`
+</p>
+<pre class="example">
+&lt;a-scene
+    input-configurator="
+              gazeCursorRayObject: #player-camera;
+              cursorController: #cursor-controller;
+              gazeTeleporter: #gaze-teleport;
+              camera: #player-camera;
+              playerRig: #player-rig;
+              leftController: #player-left-controller;
+              leftControllerRayObject: #player-left-controller;
+              rightController: #player-right-controller;
+              rightControllerRayObject: #player-right-controller;"&gt;
+&lt;/a-scene&gt;
+</pre>
+<p>
+creates a TouchEventsHandler which, in response to touch events
+changes the state of the application. 
+</p>
+<pre class="example">
+// "handle" the events
+document.addEventListener("touchstart", this.handleTouchStart);
+document.addEventListener("touchmove", this.handleTouchMove);
+document.addEventListener("touchend", this.handleTouchEnd);
+document.addEventListener("touchcancel", this.handleTouchEnd);
+</pre>
+<p>
+When a touchdown event occurs, we decide whether its touch is already 
+handled by virtual joysticks, then (if not) we might move the cursor, 
+call "forceCursorUpdate", and, if the cursor's "startInteraction" 
+function returns true (which is not always, because the cursor may have 
+nothing to "interact(ion)" with), "reserves" all future touch events' 
+touches whose identifier matches this touch's identifier.
+</p>
+<pre class="example">
+// The way we "handle" each (changed)touch in a "touchdown" event
+// is to test whether it's already handled, or mutate app state.
+// We "remember" what touches are "reserved" which comes in handy
+// as we process future touch events.
+function singleTouchStart(touch) {
+  if (touch.clientY / window.innerHeight &gt;= VIRTUAL_JOYSTICK_HEIGHT) {
+    return;
+  }
+  if (!this.touchReservedForCursor) {
+    const targetX = (touch.clientX / window.innerWidth) * 2 - 1;
+    const targetY = -(touch.clientY / window.innerHeight) * 2 + 1;
+    this.cursor.moveCursor(targetX, targetY);
+    this.cursor.forceCursorUpdate();
+    if (this.cursor.startInteraction()) {
+      this.touchReservedForCursor = touch;
+    }
+  }
+  this.touches.push(touch);
+}
+</pre>
+<p>
+The touches produced by touchmove events move the cursor, manipulate
+on-screen joysticks, move the character, and move the camera. At any point 
+in time, touches can be "reserved" for certain actions.
+</p>
+<pre class="example">
+handleTouchMove(e) {
+  for (let i = 0; i &lt; e.touches.length; i++) {
+    this.singleTouchMove(e.touches[i]);
+  }
+  if (this.needsPinch) {
+    this.pinch();
+    this.needsPinch = false;
+  }
+}
+
+singleTouchMove(touch) {
+  if (this.touchReservedForCursor &amp;&amp; touch.identifier === this.touchReservedForCursor.identifier) {
+    const targetX = (touch.clientX / window.innerWidth) * 2 - 1;
+    const targetY = -(touch.clientY / window.innerHeight) * 2 + 1;
+    this.cursor.moveCursor(targetX, targetY);
+    return;
+  }
+  if (touch.clientY / window.innerHeight &gt;= VIRTUAL_JOYSTICK_HEIGHT) return;
+  if (!this.touches.some(t =&gt; touch.identifier === t.identifier)) {
+    return;
+  }
+
+  let pinchIndex = this.touchesReservedForPinch.findIndex(t =&gt; touch.identifier === t.identifier);
+  if (pinchIndex !== -1) {
+    this.touchesReservedForPinch[pinchIndex] = touch;
+  } else if (this.touchesReservedForPinch.length &lt; 2) {
+    this.touchesReservedForPinch.push(touch);
+    pinchIndex = this.touchesReservedForPinch.length - 1;
+  }
+  if (this.touchesReservedForPinch.length == 2 &amp;&amp; pinchIndex !== -1) {
+    if (this.touchReservedForLookControls &amp;&amp; touch.identifier === this.touchReservedForLookControls.identifier) {
+      this.touchReservedForLookControls = null;
+    }
+    this.needsPinch = true;
+    return;
+  }
+
+  if (!this.touchReservedForLookControls) {
+    this.touchReservedForLookControls = touch;
+  }
+  if (touch.identifier === this.touchReservedForLookControls.identifier) {
+    if (!this.touchReservedForCursor) {
+      this.cursor.moveCursor(
+        (touch.clientX / window.innerWidth) * 2 - 1,
+        -(touch.clientY / window.innerHeight) * 2 + 1
+      );
+    }
+    this.look(this.touchReservedForLookControls, touch);
+    this.touchReservedForLookControls = touch;
+    return;
+  }
+}
+</pre>
+<p>
+[Aside: Reserving touches like this seems to duplicate state, or&#x2026; allow for
+the potential to miss state changes happening elsewhere. For example, the 
+TouchEventsHandler does not know whether someone took an object from this 
+touchscreen toucher's cursor. The touch will continue to be "reserved" for 
+the cursor, then will "release" an object this user no longer has grabbed
+when the touchend for it is fired. This happens to not cause any particularly
+bad bugs in our app, except when someone takes something from the end of your 
+cursor when you use a 3DOF/6DOF controller. In that case, you can call 
+"changeCursorMod" on the cursor by "scroll"ing with your thumb. Perhaps the
+MouseEventHandler/TouchEventHandler should be informed of this cursor state,
+which may actually be state in super-hands.]
+</p>
+
+<p>
+The basic idea for replacing the TouchEventsHandler is to replace the concept
+of "reserving" touches for actions, instead set up a binding file for a 
+touchscreen device's semantic paths to be used to transform its input and
+resolving "priority" for action sets that care about the action mapped to 
+by a given touch. The two-fold challenge of replacing TouchEventsHandler 
+is in 
+</p>
+<ul class="org-ul">
+<li>Replacing the "cursor update on demand in response to a touch event" codepath
+with the same one that will be used for all other input devices and</li>
+<li>Communicating raycast results back to the "device" in "lib code" such that
+touching on a duck is different than touching on a pen is different than 
+touching on nothing is different than having a second touch nothing, and 
+then treating it like a pinch, and separating that from two touches that 
+were meant to be a pinch that scaled a duck.</li>
+</ul>
+
+<p>
+The TouchEventsHandler does not handle any of the behavior of the on-screen
+buttons. Instead, these are handled via click handlers on the buttons themselves.
+</p>
+<pre class="example">
+
+</pre>
+</div>
+</div>
+<div id="outline-container-orgfe8d2d3" class="outline-3">
+<h3 id="orgfe8d2d3"><span class="section-number-3">3.2</span> using the actions system</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+Our aframe systems/components may poll the actions system 
+to read the the current frame's action state. 
+</p>
+<pre class="example">
+// in character controller
+function tick(t, dt) {
+  const actions = AFRAME.scenes[0].systems.actions;
+  const acc = actions.poll("accerateSelf"); // a vector 2
+  if (acc) {
+    this.acceleration.set(acc[0], 0, acc[1]);
+  }
+  if (actions.poll("snapRotateRight")) {
+    this.snapRotateRight();
+  }
+  if (actions.poll("snapRotateLeft")) {
+    this.snapRotateLeft();
+  }
+  // move the character
+}
+</pre>
+<p>
+The actions systems api exposes `isActive` and `poll`.
+</p>
+<ul class="org-ul">
+<li>`isActive` receives the name of an action set and returns</li>
+</ul>
+<p>
+a boolean indicating whether the action set is active in 
+the most recent action frame.
+</p>
+<ul class="org-ul">
+<li>`poll` receives the name of an action and returns the value</li>
+</ul>
+<p>
+associated with that action from the most recent action frame.
+</p>
+<pre class="example">
+AFRAME.registerSystem("actions", {
+  isActive(set) {
+    if (!this.didInit) return undefined;
+    return history.read(0).sets.includes(set);
+  },
+
+  poll(action) {
+    return history.read(0).actions[action];
+  },
+</pre>
+<p>
+Transformations of input state from various devices are bound 
+to action state by having the appropriate filters (name subject to change)
+assigned from an input to an output via a binding definition.
+</p>
+<pre class="example">
+export const keyboardBindDefn = [
+  {
+    set: "selfSnapRotating",
+    action: "snapRotateLeft",
+    filter: "keydown",
+    key: "q"
+  },
+// I'd like to change this to use "semantic paths", 
+// a concept from the Steam Controller API + OpenXR:
+// {
+//   src: "/keyboard/q",
+//   dest: "/selfSnapRotating/snapRotateLeft",
+//   transformation: "keydown"
+// },
+  {
+    set: "selfSnapRotating",
+    action: "snapRotateRight",
+    filter: "keydown",
+    key: "e"
+  },
+  {
+    set: "muteToggling",
+    action: "toggleMute",
+    filter: "keydown",
+    key: "m"
+  },
+  {
+    set: "screenShareToggling",
+    action: "toggleScreenShare",
+    filter: "keydown",
+    key: "b"
+  },
+  {
+    set: "selfMoving",
+    action: "accSelf",
+    filter: "key4_to_vec2",
+    filter_params: {
+      keys: ["d", "a", "w", "s"],
+      filters: ["key", "key", "key", "key"]
+    }
+  },
+// Here is an example where a transformation has multiple srcs:
+// {
+//   src: ["/keyboard/d",
+//         "/keyboard/a",
+//         "/keyboard/w",
+//         "/keyboard/s"]
+//   dest: "/selfMoving/accSelf",
+//   transformation: "bool4_to_vec2" // transforms four bools to a vector2
+//                                   // (the order of the srcs matter)
+// },
+  {
+    set: "selfMoving",
+    action: "boost",
+    filter: "key",
+    key: "shift"
+  }
+];
+</pre>
+<p>
+Defining bindings this way allows for user customization and control.
+The following mouse keybinding says to transform mousemove events' "movementX/Y" 
+by multiplying each by user-customizable "LookSpeed" values then 
+composing them into a vector2:
+</p>
+<pre class="example">
+  {
+    set: "looking",
+    action: "look",
+    filter: "vec2_deltas",
+    filterParams: {
+      horizontalLookSpeed: 0.1,
+      verticalLookSpeed: 0.06,
+      keys: ["dY", "dX"],
+      filters: ["number", "number"]
+    },
+    priorityKey: "mousemove"
+  },
+// or, how I'd like to write it
+// {
+//   src: "/mouse/movementX",
+//   dest: "/filters/mouseVerticalLook",
+//   transformation: "multiply"
+//   transformation_params: {
+//     scalar : 0.06
+//   }
+// },
+// {
+//   src: "/mouse/movementY",
+//   dest: "/filters/mouseHorizontalLook",
+//   transformation: "multiply"
+//   transformation_params: {
+//     scalar : 0.1
+//   }
+// },
+// {
+//   src: ["/filters/mouseVerticalLook", "/filters/mouseHorizontalLook"],
+//   dest: "/looking/look",
+//   transformation: "compose_vec2"
+// },
+</pre>
+<p>
+The current binding definitions' bindings currently define an optional
+"priorityKey" that is used to resolve conflicts that can occur when actions 
+from two sets that are both active read from the same input or input that
+is so closely related that it should block reading of all related value. 
+For an example of the ladder, the "mousemove" priorityKey above describes 
+the mousemove event's "movementX/Y" AND "clientX/clientY" values 
+(and probably everything else in the mousemove event, even though "/mouse/move"
+ is not a readable binding src). 
+</p>
+
+<p>
+[Aside: I don't know if "/mouse/move" should be a readable binding src 
+because we read input state in frames and mousemove events 
+can occur multiple times in a frame. I suppose "/mouse/move" could be a 
+readable binding src if we sum the results of deltas and always take the 
+latest of clientX/Y and the others like that.]
+</p>
+
+<p>
+I believe we will be able to know about all the "priorityKey" type of conflicts
+automatically, so I think this is a temporary field in the binding file (and 
+not meant to be customized by the user).
+</p>
+
+<p>
+When the actions system ticks, it 
+</p>
+<ul class="org-ul">
+<li>creates a new frame,</li>
+<li>processes pending set changes to decide which sets should be active</li>
+</ul>
+<p>
+this frame (which are the same as last frame, if there were no pending changes),
+</p>
+<ul class="org-ul">
+<li>tells each device to "fill" the action frame, given the currently</li>
+</ul>
+<p>
+active sets,
+</p>
+<ul class="org-ul">
+<li>then saves the frame to its history.</li>
+</ul>
+<pre class="example">
+tick() {
+  const prev = history.read(0);
+  const frame = {
+    sets: [],
+    actions: {},
+    priorities: {}
+  };
+  const {sets, actions, priorities} = frame;
+  for (const idx in prev.sets) {
+    sets.push(prev.sets[idx]);
+  }
+  pendingSetChanges.forEach(sc =&gt; {
+    const {set, fn} = sc;
+    const isActive = sets.includes(set);
+    if (!isActive &amp;&amp; fn === "activate") {
+      sets.push(set);
+    } else if (isActive &amp;&amp; fn === "deactivate") {
+      sets.splice(sets.indexOf(set), 1); // TODO: replace splice
+    }
+  });
+  applySetChanges(pendingSetChanges, frame.sets);
+  pendingSetChanges.length = 0; // garbage
+  devices.forEach(device =&gt; {
+    device.fillActionFrame(frame);
+  });
+  history.write(frame);
+}
+</pre>
+<p>
+While at first glance this seems to me to "read nicely", I think it's
+superficial "niceness", as the complexity of what's going on has just 
+been buried into `fillActionFrame` on all of the devices. 
+</p>
+
+<p>
+Still, I hope it shows very clearly a few things about the way this 
+actions model works that are critical to understand in order to write 
+application code against it:
+</p>
+
+<ol class="org-ol">
+<li>Actions are written in frames. This means that application code queries</li>
+</ol>
+<p>
+for the state of an action from the most recent "frame". If ever the action
+system tick runs out-of-sync with other system/component updates (depending
+on the architecture of the application (e.g. what we've been callign a 
+"pure" entity-component system vs aframe/unity-monobehaviour "component-based 
+architecture")), the application will be responsible for calling the action
+system tick and reading from its history appropriately. 
+</p>
+
+<ol class="org-ol">
+<li>Action state does not change mid-frame. This includes which action sets</li>
+</ol>
+<p>
+are currently active. If you wish to change the actions that your buttons 
+will enable when you "hover over" or "point to" or "select" or "activate" 
+something in app code, and you try to "activate" the appropriate action set, 
+you must wait until the NEXT FRAME before you can expect meaningful state 
+to be returned when `poll`ing for action names from the "activate"d set.
+</p>
+
+<ol class="org-ol">
+<li>The way I'm currently thinking about filling the action frame is by</li>
+</ol>
+<p>
+iterating through all of the devices. Code that recognizes which devices 
+are connected, as well as what to do when connection state changes, is 
+not yet written. Also, the way binding definitions are assigned right 
+now is written into the device definitions. The way the devices and 
+"fillActionFrame" is more of a relic of the order in which I happened 
+to start writing this system than it is a belief that this organization 
+makes sense. `fillActionFrame` is now a reusable function that each 
+device binds to itself (instead of passing in some arguments&#x2026; for no
+apparent reason) because I initially started writing completely separate 
+codepaths to support each device (go, mouse, keyboard, and now touchscreen)
+and I wanted to look for commonalities AFTER some code that works was 
+written, rather than during, when the differences between devices would 
+be difficult to understand at first. An example of a way "fillActionFrame" 
+is currently implemented that I think will change is that its implementation
+includes a step where an "eventQueue" (full of browser events) is "framify"ed
+into a[n input-]`frame`. Input devices whose state we'll read from the 
+GamepadAPI will not have an eventQueue to "framify", so this organization 
+is wrong.
+</p>
+
+<pre class="example">
+
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org26e6236" class="outline-2">
+<h2 id="org26e6236"><span class="section-number-2">4</span> a disclaimer about voice and purpose</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+In any given sentence, I or we might write I or we or we or I.
+I or we don't know what voice to give a sentence when we are or I am
+echoing concerns voiced initially by other people in a conversation that 
+happened elsewhere.
+Also we or I want to encourage other people to edit, improve, or refer to 
+this document as they see fit, and that seems easiest to do when not talking
+about a viewpoint, "I think yada yada yada" and instead is a assertion of 
+something about the code, the model about the code, or the existence of some 
+code snippet/pseudocode.
+If it's easier for you, repeat the phrase, 
+  "we be the royal we 'cuz we be royal-ty"
+until you don't mind it anymore.
+</p>
+
+<p>
+Regarding the format of this information, is this a useful format to capture 
+these thoughts? Are there too many words here that will be out of date before
+they become worth it? Let's see.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: LAPTOP-5AAM7987</p>
+<p class="date">Created: 2018-09-09 Sun 20:18</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
