@@ -19,6 +19,7 @@ import "webrtc-adapter";
 import "aframe-slice9-component";
 import "aframe-motion-capture-components";
 import "./utils/audio-context-fix";
+import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
 import trackpad_scrolling from "./behaviours/trackpad-scrolling";
@@ -211,7 +212,7 @@ const onReady = async () => {
 
   registerNetworkSchemas();
 
-  let uiProps = { linkChannel };
+  let uiProps = { hubChannel, linkChannel };
 
   mountUI(scene);
 
@@ -229,6 +230,23 @@ const onReady = async () => {
     const hudController = playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !store.state.activity.hasFoundFreeze });
     document.querySelector("a-scene").emit("username-changed", { username: displayName });
+  };
+
+  const pollForSupportAvailability = callback => {
+    let isSupportAvailable = null;
+    const availabilityUrl = getReticulumFetchUrl("/api/v1/support/availability");
+
+    const updateIfChanged = () => {
+      fetch(availabilityUrl).then(({ ok }) => {
+        if (isSupportAvailable !== ok) {
+          isSupportAvailable = ok;
+          callback(isSupportAvailable);
+        }
+      });
+    };
+
+    updateIfChanged();
+    setInterval(updateIfChanged, 30000);
   };
 
   const exitScene = () => {
@@ -462,6 +480,10 @@ const onReady = async () => {
           sceneEl.appendChild(screenEntity);
         }
       }
+
+      pollForSupportAvailability(isSupportAvailable => {
+        remountUI({ isSupportAvailable });
+      });
     }
   };
 
