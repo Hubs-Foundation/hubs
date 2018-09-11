@@ -100,7 +100,7 @@ export default class SharedBufferGeometry {
   }
 
   addVertex(x, y, z) {
-    let buffer = this.current.attributes.position;
+    const buffer = this.current.attributes.position;
     if (this.idx.position === buffer.count) {
       console.error("maxBufferSize limit exceeded");
     }
