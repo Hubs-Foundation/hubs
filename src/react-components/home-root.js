@@ -22,7 +22,8 @@ addLocaleData([...en]);
 class HomeRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
-    dialog: PropTypes.string,
+    listSignup: PropTypes.bool,
+    report: PropTypes.bool,
     initialEnvironment: PropTypes.string
   };
 
@@ -34,10 +35,14 @@ class HomeRoot extends Component {
   };
 
   componentDidMount() {
-    this.loadEnvironments();
-    this.setState({ dialog: this.props.dialog });
     this.closeDialog = this.closeDialog.bind(this);
+    this.loadEnvironments();
     this.loadHomeVideo();
+    if (this.props.listSignup) {
+      this.showUpdatesDialog();
+    } else if (this.props.report) {
+      this.showReportDialog();
+    }
   }
 
   loadHomeVideo = () => {
