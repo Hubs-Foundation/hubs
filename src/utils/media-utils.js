@@ -1,9 +1,6 @@
 import { objectTypeForOriginAndContentType } from "../object-types";
-let mediaAPIEndpoint = "/api/v1/media";
-
-if (process.env.RETICULUM_SERVER) {
-  mediaAPIEndpoint = `https://${process.env.RETICULUM_SERVER}${mediaAPIEndpoint}`;
-}
+import { getReticulumFetchUrl } from "./phoenix-utils";
+const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
 const fetchContentType = async url => {
   return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));

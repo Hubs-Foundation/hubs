@@ -25,3 +25,11 @@ export function connectToReticulum() {
 
   return socket;
 }
+
+export function getReticulumFetchUrl(path) {
+  if (process.env.RETICULUM_SERVER) {
+    return `https://${process.env.RETICULUM_SERVER}${path}`;
+  } else {
+    return path;
+  }
+}
