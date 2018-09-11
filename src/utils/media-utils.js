@@ -88,12 +88,12 @@ function getOrientation(file, callback) {
 }
 
 let interactableId = 0;
-export const addMedia = (src, contentOrigin, resize = false) => {
+export const addMedia = (src, template, contentOrigin, resize = false) => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
   entity.id = "interactable-media-" + interactableId++;
-  entity.setAttribute("networked", { template: "#interactable-media" });
+  entity.setAttribute("networked", { template: template });
   entity.setAttribute("media-loader", { resize, src: typeof src === "string" ? src : "" });
   scene.appendChild(entity);
 

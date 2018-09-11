@@ -77,14 +77,14 @@ export default class CreateObjectDialog extends Component {
     this.fileInput.value = null;
   };
 
-  render() {
-    const { onCreate, onClose, ...other } = this.props;
+  onCreateClicked = e => {
+    e.preventDefault();
+    this.props.onCreate(this.state.file || this.state.url || DEFAULT_OBJECT_URL);
+    this.props.onClose();
+  };
 
-    const onCreateClicked = e => {
-      e.preventDefault();
-      onCreate(this.state.file || this.state.url || DEFAULT_OBJECT_URL);
-      onClose();
-    };
+  render() {
+    const { onCreate, onClose, ...other } = this.props; // eslint-disable-line no-unused-vars
 
     const cancelButton = (
       <label className={cx(styles.smallButton, styles.cancelIcon)} onClick={this.reset}>
@@ -111,7 +111,7 @@ export default class CreateObjectDialog extends Component {
       <DialogContainer title="Create Object" onClose={onClose} {...other}>
         <div>
           {isMobile ? mobileInstructions : desktopInstructions}
-          <form onSubmit={onCreateClicked}>
+          <form onSubmit={this.onCreateClicked}>
             <div className={styles.addMediaForm}>
               <input
                 id={fileInputId}

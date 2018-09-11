@@ -162,7 +162,7 @@ AFRAME.registerComponent("input-configurator", {
       this.cursor.el.setAttribute("cursor-controller", { rayObject: this.data.gazeCursorRayObject });
     }
 
-    if (this.actionEventHandler) {
+    if (this.actionEventHandler && this.controller) {
       this.actionEventHandler.setHandThatAlsoDrivesCursor(this.controller);
     }
   }
