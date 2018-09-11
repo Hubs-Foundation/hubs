@@ -1,18 +1,19 @@
 export default class SharedBufferGeometry {
-  constructor(material, primitiveMode) {
+  constructor(material, primitiveMode, maxBufferSize) {
     this.material = material;
     this.primitiveMode = primitiveMode;
 
-    this.maxBufferSize = 1000000;
+    console.log("maxBufferSize", maxBufferSize);
+    this.maxBufferSize = maxBufferSize;
     this.geometries = [];
     this.current = null;
     this.drawing = new THREE.Object3D();
-    this.addBuffer(false);
+    this.addBuffer();
   }
 
   restartPrimitive() {
     if (this.idx.position >= this.current.attributes.position.count) {
-      this.addBuffer(false);
+      console.error("maxBufferSize limit exceeded");
     } else if (this.idx.position !== 0) {
       let prev = (this.idx.position - 1) * 3;
       const position = this.current.attributes.position.array;
@@ -52,7 +53,7 @@ export default class SharedBufferGeometry {
     this.update();
   }
 
-  addBuffer(copyLast) {
+  addBuffer() {
     const geometry = new THREE.BufferGeometry();
 
     const vertices = new Float32Array(this.maxBufferSize * 3);
@@ -88,24 +89,6 @@ export default class SharedBufferGeometry {
 
     this.geometries.push(geometry);
     this.current = geometry;
-
-    if (this.previous && copyLast) {
-      let prev = (this.maxBufferSize - 2) * 3;
-      let col = (this.maxBufferSize - 2) * 3;
-      let norm = (this.maxBufferSize - 2) * 3;
-
-      const position = this.previous.attributes.position.array;
-      this.addVertex(position[prev++], position[prev++], position[prev++]);
-      this.addVertex(position[prev++], position[prev++], position[prev++]);
-
-      const normal = this.previous.attributes.normal.array;
-      this.addNormal(normal[norm++], normal[norm++], normal[norm++]);
-      this.addNormal(normal[norm++], normal[norm++], normal[norm++]);
-
-      const color = this.previous.attributes.color.array;
-      this.addColor(color[col++], color[col++], color[col++]);
-      this.addColor(color[col++], color[col++], color[col++]);
-    }
   }
 
   addColor(r, g, b) {
@@ -119,8 +102,7 @@ export default class SharedBufferGeometry {
   addVertex(x, y, z) {
     let buffer = this.current.attributes.position;
     if (this.idx.position === buffer.count) {
-      this.addBuffer(true);
-      buffer = this.current.attributes.position;
+      console.error("maxBufferSize limit exceeded");
     }
     buffer.setXYZ(this.idx.position++, x, y, z);
   }

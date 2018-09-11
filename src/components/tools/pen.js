@@ -64,6 +64,7 @@ AFRAME.registerComponent("pen", {
 
   play() {
     this.drawingManager = document.querySelector(this.data.drawingManager).components["drawing-manager"];
+    this.drawingManager.createDrawing();
 
     this.el.parentNode.addEventListener("stateadded", this._stateAdded);
     this.el.parentNode.addEventListener("stateremoved", this._stateRemoved);

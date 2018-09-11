@@ -191,6 +191,8 @@
                         radius="0.02"  
                         color="#FF0033"
                         pen="camera: #player-camera; drawingManager: #drawing-manager"
+                        widthSegments="8"
+                        heightSegments="6"
                     ></a-sphere>
                     <a-entity class="delete-button" visible-while-frozen>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
@@ -277,6 +279,8 @@
             id="cursor"
             material="depthTest: false; opacity:0.9;"
             radius="0.02"
+            widthSegments="8"
+            heightSegments="6"
             static-body="shape: sphere;"
             collision-filter="collisionForces: false"
             super-hands="
@@ -292,8 +296,6 @@
                 dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
                 activateStartButtons: secondary-cursor-grab, secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right; 
                 activateEndButtons: secondary-cursor-release, secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
-            segments-height="9"
-            segments-width="9"
             event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"
         ></a-sphere>
 
