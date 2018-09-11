@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import "aframe";
 import PropTypes from "prop-types";
 import giphyLogo from "../assets/images/giphy_logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -7,6 +6,7 @@ import { faPaperclip } from "@fortawesome/free-solid-svg-icons/faPaperclip";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import styles from "../assets/stylesheets/create-object-dialog.scss";
 import cx from "classnames";
+import DialogContainer from "./dialog-container.js";
 
 const attributionHostnames = {
   "giphy.com": giphyLogo,
@@ -36,8 +36,8 @@ export default class CreateObjectDialog extends Component {
   };
 
   static propTypes = {
-    onCreateObject: PropTypes.func,
-    onCloseDialog: PropTypes.func
+    onCreate: PropTypes.func,
+    onClose: PropTypes.func
   };
 
   componentDidMount() {
@@ -67,12 +67,6 @@ export default class CreateObjectDialog extends Component {
     });
   };
 
-  onCreateClicked = e => {
-    e.preventDefault();
-    this.props.onCreateObject(this.state.file || this.state.url || DEFAULT_OBJECT_URL);
-    this.props.onCloseDialog();
-  };
-
   reset = e => {
     e.preventDefault();
     this.setState({
@@ -83,7 +77,15 @@ export default class CreateObjectDialog extends Component {
     this.fileInput.value = null;
   };
 
+  onCreateClicked = e => {
+    e.preventDefault();
+    this.props.onCreate(this.state.file || this.state.url || DEFAULT_OBJECT_URL);
+    this.props.onClose();
+  };
+
   render() {
+    const { onCreate, onClose, ...other } = this.props; // eslint-disable-line no-unused-vars
+
     const cancelButton = (
       <label className={cx(styles.smallButton, styles.cancelIcon)} onClick={this.reset}>
         <FontAwesomeIcon icon={faTimes} />
@@ -106,34 +108,36 @@ export default class CreateObjectDialog extends Component {
     );
 
     return (
-      <div>
-        {isMobile ? mobileInstructions : desktopInstructions}
-        <form onSubmit={this.onCreateClicked}>
-          <div className={styles.addMediaForm}>
-            <input
-              id={fileInputId}
-              ref={f => (this.fileInput = f)}
-              className={styles.hideFileInput}
-              type="file"
-              onChange={this.onFileChange}
-            />
-            <div className={styles.inputBorder}>
-              {this.state.file ? filenameLabel : urlInput}
-              {this.state.url || this.state.fileName ? cancelButton : uploadButton}
-            </div>
-            <div className={styles.buttons}>
-              <button className={styles.actionButton}>
-                <span>create</span>
-              </button>
-            </div>
-            {this.state.attributionImage ? (
-              <div>
-                <img src={this.state.attributionImage} />
+      <DialogContainer title="Create Object" onClose={onClose} {...other}>
+        <div>
+          {isMobile ? mobileInstructions : desktopInstructions}
+          <form onSubmit={this.onCreateClicked}>
+            <div className={styles.addMediaForm}>
+              <input
+                id={fileInputId}
+                ref={f => (this.fileInput = f)}
+                className={styles.hideFileInput}
+                type="file"
+                onChange={this.onFileChange}
+              />
+              <div className={styles.inputBorder}>
+                {this.state.file ? filenameLabel : urlInput}
+                {this.state.url || this.state.fileName ? cancelButton : uploadButton}
               </div>
-            ) : null}
-          </div>
-        </form>
-      </div>
+              <div className={styles.buttons}>
+                <button className={styles.actionButton}>
+                  <span>create</span>
+                </button>
+              </div>
+              {this.state.attributionImage ? (
+                <div>
+                  <img src={this.state.attributionImage} />
+                </div>
+              ) : null}
+            </div>
+          </form>
+        </div>
+      </DialogContainer>
     );
   }
 }

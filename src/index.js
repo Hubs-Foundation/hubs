@@ -3,17 +3,15 @@ import React from "react";
 import ReactDOM from "react-dom";
 import registerTelemetry from "./telemetry";
 import HomeRoot from "./react-components/home-root";
-import InfoDialog from "./react-components/info-dialog.js";
 
 const qs = new URLSearchParams(location.search);
 registerTelemetry();
 
-ReactDOM.render(
+const root = (
   <HomeRoot
     initialEnvironment={qs.get("initial_environment")}
-    dialogType={
-      qs.has("list_signup") ? InfoDialog.dialogTypes.updates : qs.has("report") ? InfoDialog.dialogTypes.report : null
-    }
-  />,
-  document.getElementById("home-root")
+    listSignup={qs.has("list_signup")}
+    report={qs.has("report")}
+  />
 );
+ReactDOM.render(root, document.getElementById("home-root"));
