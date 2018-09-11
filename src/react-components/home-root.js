@@ -106,19 +106,19 @@ class HomeRoot extends Component {
     Promise.all(environmentLoads).then(() => this.setState({ environments }));
   };
 
+  onDialogLinkClicked = trigger => {
+    return e => {
+      e.preventDefault();
+      e.stopPropagation();
+      trigger();
+    };
+  };
+
   render() {
     const mainContentClassNames = classNames({
       [styles.mainContent]: true,
       [styles.noninteractive]: !!this.state.dialog
     });
-
-    const onLinkClicked = trigger => {
-      return e => {
-        e.preventDefault();
-        e.stopPropagation();
-        trigger();
-      };
-    };
 
     return (
       <IntlProvider locale={lang} messages={messages}>
@@ -177,7 +177,7 @@ class HomeRoot extends Component {
                     className={styles.link}
                     rel="noopener noreferrer"
                     href="#"
-                    onClick={onLinkClicked(this.showSlackDialog.bind(this))}
+                    onClick={this.onDialogLinkClicked(this.showSlackDialog.bind(this))}
                   >
                     <FormattedMessage id="home.join_us" />
                   </a>
@@ -185,7 +185,7 @@ class HomeRoot extends Component {
                     className={styles.link}
                     rel="noopener noreferrer"
                     href="#"
-                    onClick={onLinkClicked(this.showUpdatesDialog.bind(this))}
+                    onClick={this.onDialogLinkClicked(this.showUpdatesDialog.bind(this))}
                   >
                     <FormattedMessage id="home.get_updates" />
                   </a>
@@ -193,7 +193,7 @@ class HomeRoot extends Component {
                     className={styles.link}
                     rel="noopener noreferrer"
                     href="#"
-                    onClick={onLinkClicked(this.showReportDialog.bind(this))}
+                    onClick={this.onDialogLinkClicked(this.showReportDialog.bind(this))}
                   >
                     <FormattedMessage id="home.report_issue" />
                   </a>
