@@ -47,7 +47,7 @@ AFRAME.registerComponent("sticky-object", {
   },
 
   _onRelease() {
-    // Happens if the object is still being heald by another hand
+    // Happens if the object is still being held by another hand
     if (this.el.is("grabbed")) return;
 
     if (
