@@ -520,6 +520,7 @@ class UIRoot extends Component {
     this.showLinkDialog();
     const { code, cancel, onFinished } = await this.props.linkChannel.generateCode();
     this.setState({ linkCode: code, linkCodeCancel: cancel });
+    this.showLinkDialog();
     onFinished.then(this.closeDialog);
   };
 
