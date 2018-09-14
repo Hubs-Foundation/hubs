@@ -24,6 +24,7 @@ addLocaleData([...en]);
 class HomeRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
+    sceneId: PropTypes.string,
     authVerify: PropTypes.bool,
     authTopic: PropTypes.string,
     authToken: PropTypes.string,
@@ -47,7 +48,11 @@ class HomeRoot extends Component {
       this.verifyAuth().then(this.showAuthDialog);
       return;
     }
-    this.loadEnvironments();
+    if (this.props.sceneId) {
+      this.loadEnvironmentFromScene();
+    } else {
+      this.loadEnvironments();
+    }
     this.loadHomeVideo();
     if (this.props.listSignup) {
       this.showUpdatesDialog();
@@ -117,6 +122,25 @@ class HomeRoot extends Component {
       )
     });
   }
+
+  loadEnvironmentFromScene = async () => {
+    const sceneInfoUrl = `https://${process.env.RETICULUM_SERVER}/api/v1/scenes/${this.props.sceneId}`;
+    const resp = await fetch(sceneInfoUrl).then(r => r.json());
+    const scene = resp.scenes[0];
+    // Transform the scene info into a an environment bundle structure.
+    this.setState({
+      environments: [
+        {
+          // Environment loading doesn't check the content-type, so we force a .glb extension here.
+          bundle_url: `${scene.model_url}.glb`,
+          meta: {
+            title: scene.name,
+            images: [{ type: "preview-thumbnail", srcset: scene.screenshot_url }]
+          }
+        }
+      ]
+    });
+  };
 
   loadEnvironments = () => {
     const environments = [];

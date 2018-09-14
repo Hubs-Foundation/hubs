@@ -177,7 +177,7 @@ class HubCreatePanel extends Component {
                           {environmentTitle}
                         </a>
                       ) : (
-                        <span className={styles.itle}>environmentTitle</span>
+                        <span className={styles.title}>{environmentTitle}</span>
                       )}
                       {environmentAuthor &&
                         environmentAuthor.name &&
