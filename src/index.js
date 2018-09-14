@@ -7,9 +7,13 @@ import HomeRoot from "./react-components/home-root";
 const qs = new URLSearchParams(location.search);
 registerTelemetry();
 
+const { pathname } = document.location;
+const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathname.substring(1).split("/")[1]);
+
 const root = (
   <HomeRoot
     initialEnvironment={qs.get("initial_environment")}
+    sceneId={sceneId}
     listSignup={qs.has("list_signup")}
     report={qs.has("report")}
   />
