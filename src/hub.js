@@ -414,6 +414,17 @@ const onReady = async () => {
         return;
       });
 
+      const sendHubDataMessage = function(clientId, dataType, data) {
+        const payload = { dataType, data };
+        if (clientId != null) {
+          payload.clientId = clientId;
+        }
+        hubChannel.channel.push("naf", { payload });
+      };
+
+      NAF.connection.adapter.reliableTransport = sendHubDataMessage;
+      NAF.connection.adapter.unreliableTransport = sendHubDataMessage;
+
       if (isDebug) {
         NAF.connection.adapter.session.options.verbose = true;
       }
@@ -580,6 +591,10 @@ const onReady = async () => {
 
       console.error(res);
     });
+
+  channel.on("naf", data => {
+    NAF.connection.adapter.onData(data.payload);
+  });
 
   linkChannel.setSocket(socket);
 };
