@@ -1,3 +1,5 @@
+import { paths } from "../systems/userinput/paths";
+
 const degToRad = THREE.Math.degToRad;
 const radToDeg = THREE.Math.radToDeg;
 
@@ -26,6 +28,12 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
   },
 
   tick() {
+    const userinput = AFRAME.scenes[0].systems.userinput;
+    const cameraDelta = userinput.readFrameValueAtPath(paths.actions.cameraDelta);
+    if (cameraDelta) {
+      this.look(cameraDelta[1], cameraDelta[0]);
+    }
+
     this.el.object3D.rotation.set(degToRad(this.pitch), degToRad(this.yaw), 0);
     this.el.object3D.rotation.order = "YXZ";
   }

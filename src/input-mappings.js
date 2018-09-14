@@ -39,10 +39,6 @@ const config = {
         trackpad: "trackpad_dpad4",
         trackpad_scrolling: "trackpad_scrolling"
       },
-      "oculus-go-controls": {
-        trackpad: "trackpad_dpad4",
-        trackpad_scrolling: "trackpad_scrolling"
-      }
     }
   },
   mappings: {
@@ -64,29 +60,6 @@ const config = {
         triggerdown: ["secondary_action_grab", "index_down"],
         triggerup: ["secondary_action_release", "index_up"],
         scroll: { left: "scroll_move", right: "scroll_move" }
-      },
-      "oculus-touch-controls": {
-        joystick_dpad4_west: { right: "snap_rotate_left" },
-        joystick_dpad4_east: { right: "snap_rotate_right" },
-        gripdown: ["primary_action_grab", "middle_ring_pinky_down"],
-        gripup: ["primary_action_release", "middle_ring_pinky_up"],
-        abuttontouchstart: ["thumb_down", "increase_radius"],
-        abuttontouchend: "thumb_up",
-        bbuttontouchstart: ["thumb_down", "decrease_radius"],
-        bbuttontouchend: "thumb_up",
-        xbuttontouchstart: ["thumb_down", "increase_radius"],
-        xbuttontouchend: "thumb_up",
-        ybuttontouchstart: ["thumb_down", "decrease_radius"],
-        ybuttontouchend: "thumb_up",
-        surfacetouchstart: ["thumb_down", "next_color"],
-        surfacetouchend: "thumb_up",
-        thumbsticktouchstart: "thumb_down",
-        thumbsticktouchend: "thumb_up",
-        triggerdown: ["secondary_action_grab", "index_down"],
-        triggerup: ["secondary_action_release", "index_up"],
-        "axismove.reverseY": { left: "move", right: "scroll_move" },
-        abuttondown: "action_primary_down",
-        abuttonup: "action_primary_up"
       },
       "windows-motion-controls": {
         joystick_dpad4_west: {
@@ -143,8 +116,6 @@ const config = {
       },
       keyboard: {
         m_press: "action_mute",
-        q_press: "snap_rotate_left",
-        e_press: "snap_rotate_right",
         b_press: "action_share_screen",
 
         // We can't create a keyboard behaviour with AFIM yet,

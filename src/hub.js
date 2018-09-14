@@ -71,6 +71,7 @@ import "./components/destroy-at-extreme-distances";
 import "./components/gamma-factor";
 import "./components/visible-to-owner";
 import "./components/camera-tool";
+import "./components/emit-something";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -86,6 +87,7 @@ import "./systems/nav";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/exit-on-blur";
+import "./systems/userinput/userinput";
 
 import "./gltf-component-mappings";
 

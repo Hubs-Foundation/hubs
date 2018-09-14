@@ -1,3 +1,5 @@
+import { paths } from "../../systems/userinput/paths";
+import { sets } from "../../systems/userinput/sets";
 /**
  * Pen tool
  * A tool that allows drawing on networked-drawing components.
@@ -85,6 +87,73 @@ AFRAME.registerComponent("pen", {
   },
 
   tick(t, dt) {
+    const grabbable = this.el.parentNode.components.grabbable;
+    if (
+      grabbable.grabbers.length &&
+      grabbable.grabbers[0] ===
+        document.querySelector("[cursor-controller]").components["cursor-controller"].data.cursor
+    ) {
+      const userinput = AFRAME.scenes[0].systems.userinput;
+      if (userinput.readFrameValueAtPath(paths.actions.cursorStartDrawing)) {
+        this._startDraw();
+      }
+      if (userinput.readFrameValueAtPath(paths.actions.cursorStopDrawing)) {
+        this._endDraw();
+      }
+      const penScaleMod = userinput.readFrameValueAtPath(paths.actions.cursorScalePenTip);
+      if (penScaleMod) {
+        this._changeRadius(userinput.readFrameValueAtPath(paths.actions.cursorScalePenTip));
+      }
+      if (userinput.readFrameValueAtPath(paths.actions.cursorPenNextColor)) {
+        this._changeColor(1);
+      }
+      if (userinput.readFrameValueAtPath(paths.actions.cursorPenPrevColor)) {
+        this._changeColor(-1);
+      }
+    } else if (
+      grabbable.grabbers.length &&
+      grabbable.grabbers[0] === document.querySelector("[super-hands], #player-right-controller")
+    ) {
+      const userinput = AFRAME.scenes[0].systems.userinput;
+      if (userinput.readFrameValueAtPath(paths.actions.rightHandStartDrawing)) {
+        this._startDraw();
+      }
+      if (userinput.readFrameValueAtPath(paths.actions.rightHandStopDrawing)) {
+        this._endDraw();
+      }
+      const penScaleMod = userinput.readFrameValueAtPath(paths.actions.rightHandScalePenTip);
+      if (penScaleMod) {
+        this._changeRadius(userinput.readFrameValueAtPath(paths.actions.rightHandScalePenTip));
+      }
+      if (userinput.readFrameValueAtPath(paths.actions.rightHandPenNextColor)) {
+        this._changeColor(1);
+      }
+      if (userinput.readFrameValueAtPath(paths.actions.rightHandPenPrevColor)) {
+        this._changeColor(-1);
+      }
+    } else if (
+      grabbable.grabbers.length &&
+      grabbable.grabbers[0] === document.querySelector("[super-hands], #player-left-controller")
+    ) {
+      const userinput = AFRAME.scenes[0].systems.userinput;
+      if (userinput.readFrameValueAtPath(paths.actions.leftHandStartDrawing)) {
+        this._startDraw();
+      }
+      if (userinput.readFrameValueAtPath(paths.actions.leftHandStopDrawing)) {
+        this._endDraw();
+      }
+      const penScaleMod = userinput.readFrameValueAtPath(paths.actions.leftHandScalePenTip);
+      if (penScaleMod) {
+        this._changeRadius(userinput.readFrameValueAtPath(paths.actions.leftHandScalePenTip));
+      }
+      if (userinput.readFrameValueAtPath(paths.actions.leftHandPenNextColor)) {
+        this._changeColor(1);
+      }
+      if (userinput.readFrameValueAtPath(paths.actions.leftHandPenPrevColor)) {
+        this._changeColor(-1);
+      }
+    }
+
     this.el.object3D.getWorldPosition(this.worldPosition);
 
     if (!almostEquals(0.005, this.worldPosition, this.lastPosition)) {
@@ -166,6 +235,9 @@ AFRAME.registerComponent("pen", {
         break;
       case "grabbed":
         this.grabbed = true;
+        const userinput = AFRAME.scenes[0].systems.userinput;
+        userinput.activate(sets.cursorHoldingInteractable);
+        userinput.activate(sets.cursorHoldingPen);
         break;
       default:
         break;
@@ -180,6 +252,9 @@ AFRAME.registerComponent("pen", {
       case "grabbed":
         this.grabbed = false;
         this._endDraw();
+        const userinput = AFRAME.scenes[0].systems.userinput;
+        userinput.deactivate(sets.cursorHoldingPen);
+        userinput.deactivate(sets.cursorHoldingInteractable);
         break;
       default:
         break;

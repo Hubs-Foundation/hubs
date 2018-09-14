@@ -38,11 +38,11 @@ export default class MouseEventsHandler {
   }
 
   addEventListeners() {
-    document.addEventListener("mousedown", this.onMouseDown);
-    document.addEventListener("mousemove", this.onMouseMove);
-    document.addEventListener("mouseup", this.onMouseUp);
-    document.addEventListener("wheel", this.onMouseWheel);
-    document.addEventListener("contextmenu", this.onContextMenu);
+    //document.addEventListener("mousedown", this.onMouseDown);
+    //document.addEventListener("mousemove", this.onMouseMove);
+    //document.addEventListener("mouseup", this.onMouseUp);
+    //document.addEventListener("wheel", this.onMouseWheel);
+    //document.addEventListener("contextmenu", this.onContextMenu);
   }
 
   onContextMenu(e) {

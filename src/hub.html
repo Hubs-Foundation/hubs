@@ -172,10 +172,10 @@
 
             <template id="pen-interactable">
                 <a-entity
-                    class="interactable toggle"
+                    class="pen interactable toggle"
                     super-networked-interactable="counter: #pen-counter;"
                     body="type: dynamic; shape: none; mass: 1;"
-                    grabbable-toggle="maxGrabbers: 1;"
+                    grabbable
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
                     hoverable
                     activatable__draw-hand="buttonStartEvents: secondary_hand_grab; buttonEndEvents: secondary_hand_release;"
@@ -319,6 +319,8 @@
                 dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
                 activateStartButtons: secondary-cursor-grab, secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
                 activateEndButtons: secondary-cursor-release, secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
+            action-to-event__a="path: /actions/cursorGrab; event: cursor-grab";
+            action-to-event__b="path: /actions/cursorDrop; event: cursor-release";
         ></a-sphere>
 
         <!-- Player Rig -->
@@ -371,6 +373,8 @@
                     hitOpacity: 0.3;
                     missOpacity: 0.1;
                     curveShootingSpeed: 12;"
+                action-to-event__startTeleport="path: /actions/startTeleport; event: gaze-teleport_down"
+                action-to-event__stopTeleport="path: /actions/stopTeleport; event: gaze-teleport_up"
             ></a-entity>
           </a-entity>
 
@@ -382,7 +386,7 @@
               teleport-controls="
                   cameraRig: #player-rig;
                   teleportOrigin: #player-camera;
-                  button: cursor-teleport_;
+                  button: left-teleport_;
                   collisionEntities: [nav-mesh];
                   drawIncrementally: true;
                   incrementalDrawMs: 600;
@@ -393,6 +397,10 @@
               body="type: static; shape: none;"
               mixin="controller-super-hands"
               controls-shape-offset
+              action-to-event__a="path: /actions/leftHandStartTeleport; event: left-teleport_down";
+              action-to-event__b="path: /actions/leftHandStopTeleport; event: left-teleport_up";
+              action-to-event__c="path: /actions/leftHandGrab; event: primary_hand_grab";
+              action-to-event__d="path: /actions/leftHandDrop; event: primary_hand_release";
           >
           </a-entity>
 
@@ -404,7 +412,7 @@
               teleport-controls="
                   cameraRig: #player-rig;
                   teleportOrigin: #player-camera;
-                  button: cursor-teleport_;
+                  button: right-teleport_;
                   collisionEntities: [nav-mesh];
                   drawIncrementally: true;
                   incrementalDrawMs: 600;
@@ -412,10 +420,13 @@
                   missOpacity: 0.1;
                   curveShootingSpeed: 12;"
               haptic-feedback
-              event-repeater="events: haptic_pulse; eventSource: #cursor"
               body="type: static; shape: none;"
               mixin="controller-super-hands"
               controls-shape-offset
+              action-to-event__a="path: /actions/rightHandStartTeleport; event: right-teleport_down";
+              action-to-event__b="path: /actions/rightHandStopTeleport; event: right-teleport_up";
+              action-to-event__c="path: /actions/rightHandGrab; event: primary_hand_grab";
+              action-to-event__d="path: /actions/rightHandDrop; event: primary_hand_release";
           >
           </a-entity>
 
@@ -462,12 +473,13 @@
         </a-entity>
 
         <a-entity
-        super-spawner="
-            template: #pen-interactable;
-            src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf;
-            spawnEvent: spawn_pen;
-            superHand: #player-right-controller;
-            cursorSuperHand: #cursor;"
+            action-to-event="path: /actions/spawnPen; event: spawn_pen"
+            super-spawner="
+                template: #pen-interactable;
+                src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf;
+                spawnEvent: spawn_pen;
+                superHand: #player-right-controller;
+                cursorSuperHand: #cursor;"
         ></a-entity>
 
     </a-scene>

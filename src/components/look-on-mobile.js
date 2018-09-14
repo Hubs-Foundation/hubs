@@ -77,27 +77,27 @@ AFRAME.registerComponent("look-on-mobile", {
   },
 
   tick() {
-    const hmdEuler = this.hmdEuler;
-    const { horizontalLookSpeedRatio, verticalLookSpeedRatio } = this.data;
-    this.vrDisplay.getFrameData(this.frameData);
-    if (this.frameData.pose.orientation !== null) {
-      this.hmdQuaternion.fromArray(this.frameData.pose.orientation);
-      hmdEuler.setFromQuaternion(this.hmdQuaternion, "YXZ");
-    }
+    //const hmdEuler = this.hmdEuler;
+    //const { horizontalLookSpeedRatio, verticalLookSpeedRatio } = this.data;
+    //this.vrDisplay.getFrameData(this.frameData);
+    //if (this.frameData.pose.orientation !== null) {
+    //  this.hmdQuaternion.fromArray(this.frameData.pose.orientation);
+    //  hmdEuler.setFromQuaternion(this.hmdQuaternion, "YXZ");
+    //}
 
-    const dX = THREE.Math.RAD2DEG * difference(hmdEuler.x, this.prevX);
-    const dY = THREE.Math.RAD2DEG * difference(hmdEuler.y, this.prevY);
+    //const dX = THREE.Math.RAD2DEG * difference(hmdEuler.x, this.prevX);
+    //const dY = THREE.Math.RAD2DEG * difference(hmdEuler.y, this.prevY);
 
-    this.dXBuffer.push(Math.abs(dX) < 0.001 ? 0 : dX);
-    this.dYBuffer.push(Math.abs(dY) < 0.001 ? 0 : dY);
+    //this.dXBuffer.push(Math.abs(dX) < 0.001 ? 0 : dX);
+    //this.dYBuffer.push(Math.abs(dY) < 0.001 ? 0 : dY);
 
-    const deltaYaw = average(this.dYBuffer.items) * horizontalLookSpeedRatio;
-    const deltaPitch = average(this.dXBuffer.items) * verticalLookSpeedRatio + this.pendingLookX;
+    //const deltaYaw = average(this.dYBuffer.items) * horizontalLookSpeedRatio;
+    //const deltaPitch = average(this.dXBuffer.items) * verticalLookSpeedRatio + this.pendingLookX;
 
-    this.cameraController.look(deltaPitch, deltaYaw);
+    //this.cameraController.look(deltaPitch, deltaYaw);
 
-    this.prevX = hmdEuler.x;
-    this.prevY = hmdEuler.y;
-    this.pendingLookX = 0;
+    //this.prevX = hmdEuler.x;
+    //this.prevY = hmdEuler.y;
+    //this.pendingLookX = 0;
   }
 });
