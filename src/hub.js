@@ -98,6 +98,7 @@ import "./systems/nav";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/exit-on-blur";
+import "./systems/actions";
 
 import "./gltf-component-mappings";
 import { DEFAULT_ENVIRONMENT_URL } from "./assets/environments/environments";

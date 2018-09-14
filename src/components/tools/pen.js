@@ -1,3 +1,5 @@
+import { paths } from "../../systems/actions/paths";
+import { sets } from "../../systems/actions/sets";
 /**
  * Pen tool
  * A tool that allows drawing on networked-drawing components.
@@ -68,6 +70,11 @@ AFRAME.registerComponent("pen", {
 
     this.el.parentNode.addEventListener("stateadded", this._stateAdded);
     this.el.parentNode.addEventListener("stateremoved", this._stateRemoved);
+
+    const actions = AFRAME.scenes[0].systems.actions;
+
+    this.el.parentNode.addEventListener("grab-start", ()=>{actions.activate(sets.cursorHoldingPen);});
+    this.el.parentNode.addEventListener("grab-end", ()=>{actions.deactivate(sets.cursorHoldingPen);});
   },
 
   pause() {
@@ -85,6 +92,14 @@ AFRAME.registerComponent("pen", {
   },
 
   tick(t, dt) {
+    const actions = AFRAME.scenes[0].systems.actions;
+    if (actions.poll(paths.app.cursorStartDrawing)) {
+      this._startDraw();
+    }
+    if (actions.poll(paths.app.cursorStopDrawing)) {
+      this._endDraw();
+    }
+
     this.el.object3D.getWorldPosition(this.worldPosition);
 
     if (!almostEquals(0.005, this.worldPosition, this.lastPosition)) {
