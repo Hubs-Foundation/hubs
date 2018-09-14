@@ -40,9 +40,11 @@ export default class DialogContainer extends Component {
         <div className="dialog" onClick={this.onContainerClicked}>
           <div className="dialog__box">
             <div className="dialog__box__contents">
-              <button className="dialog__box__contents__close" onClick={this.props.onClose}>
-                <span>×</span>
-              </button>
+              {this.props.onClose && (
+                <button className="dialog__box__contents__close" onClick={this.props.onClose}>
+                  <span>×</span>
+                </button>
+              )}
               <div className="dialog__box__contents__title">{this.props.title}</div>
               <div className="dialog__box__contents__body">{this.props.children}</div>
               <div className="dialog__box__contents__button-container" />

@@ -1,5 +1,9 @@
 {
   "en": {
+    "auth.verifying": "Verifying...",
+    "auth.verified-title": "E-Mail Verified!",
+    "auth.verified": "Your email has been verified!",
+    "auth.spoke-verified": "You email has been verified! {br} You can now close this browser tab and return to Spoke.",
     "entry.screen-prefix": "Enter on ",
     "entry.desktop-screen": "Screen",
     "entry.mobile-screen": "Phone",
