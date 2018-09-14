@@ -8,10 +8,12 @@ import homeVideoWebM from "../assets/video/home.webm";
 import homeVideoMp4 from "../assets/video/home.mp4";
 import classNames from "classnames";
 import { ENVIRONMENT_URLS } from "../assets/environments/environments";
+import { connectToReticulum } from "../utils/phoenix-utils";
 
 import styles from "../assets/stylesheets/index.scss";
 
 import HubCreatePanel from "./hub-create-panel.js";
+import AuthDialog from "./auth-dialog.js";
 import ReportDialog from "./report-dialog.js";
 import SlackDialog from "./slack-dialog.js";
 import UpdatesDialog from "./updates-dialog.js";
@@ -22,6 +24,10 @@ addLocaleData([...en]);
 class HomeRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
+    authVerify: PropTypes.bool,
+    authTopic: PropTypes.string,
+    authToken: PropTypes.string,
+    authOrigin: PropTypes.string,
     listSignup: PropTypes.bool,
     report: PropTypes.bool,
     initialEnvironment: PropTypes.string
@@ -36,6 +42,11 @@ class HomeRoot extends Component {
 
   componentDidMount() {
     this.closeDialog = this.closeDialog.bind(this);
+    if (this.props.authVerify) {
+      this.showAuthDialog(true);
+      this.verifyAuth().then(this.showAuthDialog);
+      return;
+    }
     this.loadEnvironments();
     this.loadHomeVideo();
     if (this.props.listSignup) {
@@ -44,6 +55,22 @@ class HomeRoot extends Component {
       this.showReportDialog();
     }
   }
+
+  async verifyAuth() {
+    const socket = connectToReticulum();
+    const channel = socket.channel(this.props.authTopic);
+    await new Promise((resolve, reject) =>
+      channel
+        .join()
+        .receive("ok", resolve)
+        .receive("error", reject)
+    );
+    channel.push("auth_verified", { token: this.props.authToken });
+  }
+
+  showAuthDialog = verifying => {
+    this.setState({ dialog: <AuthDialog verifying={verifying} authOrigin={this.props.authOrigin} /> });
+  };
 
   loadHomeVideo = () => {
     const videoEl = document.querySelector("#background-video");
