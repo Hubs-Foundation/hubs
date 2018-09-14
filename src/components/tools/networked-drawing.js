@@ -24,7 +24,6 @@ AFRAME.registerComponent("networked-drawing", {
   schema: {
     segments: { default: 8 }, //the number of "sides" the procedural tube should have
     defaultRadius: { default: 0.01 }, //the radius of the procedural tube
-    minDrawTimeout: { default: 5000 }, //the minimum time a drawn line will live
     maxDrawTimeout: { default: 600000 }, //the maximum time a drawn line will live
     maxLines: { default: 50 }, //how many lines can persist before lines older than minDrawTime are removed
     maxPointsPerLine: { default: 250 } //the max number of points a single line can have
@@ -56,7 +55,11 @@ AFRAME.registerComponent("networked-drawing", {
 
     const material = new THREE.MeshStandardMaterial(options);
     this.sharedBufferGeometryManager = new SharedBufferGeometryManager();
-    this.sharedBufferGeometryManager.addSharedBuffer(0, material, THREE.TriangleStripDrawMode);
+    // NOTE: 20 is approximate for how many floats per point are added.
+    // maxLines + 1 because a line can be currently drawing while at maxLines.
+    // Multiply by 1/3 (0.333) because 3 floats per vertex (x, y, z).
+    const maxBufferSize = Math.round(this.data.maxPointsPerLine * 20 * (this.data.maxLines + 1) * 0.333);
+    this.sharedBufferGeometryManager.addSharedBuffer(0, material, THREE.TriangleStripDrawMode, maxBufferSize);
 
     this.lastPoint = new THREE.Vector3();
 
@@ -195,10 +198,7 @@ AFRAME.registerComponent("networked-drawing", {
     if (length > 0) {
       const now = Date.now();
       const time = this.networkBufferHistory[0].time;
-      if (
-        (length > this.data.maxLines && time + this.data.minDrawTimeout <= now) ||
-        time + this.data.maxDrawTimeout <= now
-      ) {
+      if (length > this.data.maxLines || time + this.data.maxDrawTimeout <= now) {
         const datum = this.networkBufferHistory[0];
         if (length > 1) {
           datum.idxLength += 2 - (this.segments % 2);

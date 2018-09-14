@@ -20,7 +20,12 @@ import {
 } from "./entry-buttons.js";
 import { ProfileInfoHeader } from "./profile-info-header.js";
 import ProfileEntryPanel from "./profile-entry-panel";
-import InfoDialog from "./info-dialog.js";
+import HelpDialog from "./help-dialog.js";
+import SafariDialog from "./safari-dialog.js";
+import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
+import InviteDialog from "./invite-dialog.js";
+import LinkDialog from "./link-dialog.js";
+import CreateObjectDialog from "./create-object-dialog.js";
 import TwoDHUD from "./2d-hud";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
@@ -79,7 +84,7 @@ class UIRoot extends Component {
   state = {
     entryStep: ENTRY_STEPS.start,
     enterInVR: false,
-    infoDialogType: null,
+    dialog: null,
     linkCode: null,
     linkCodeCancel: null,
 
@@ -268,15 +273,11 @@ class UIRoot extends Component {
     await this.performDirectEntryFlow(false);
   };
 
-  linkSafari = async () => {
-    this.setState({ infoDialogType: InfoDialog.dialogTypes.safari });
-  };
-
   enterVR = async () => {
     if (this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.maybe) {
       await this.performDirectEntryFlow(true);
     } else {
-      this.setState({ infoDialogType: InfoDialog.dialogTypes.webvr_recommend });
+      this.showWebVRRecommendDialog();
     }
   };
 
@@ -516,23 +517,48 @@ class UIRoot extends Component {
   };
 
   attemptLink = async () => {
-    this.setState({ infoDialogType: InfoDialog.dialogTypes.link });
+    this.showLinkDialog();
     const { code, cancel, onFinished } = await this.props.linkChannel.generateCode();
     this.setState({ linkCode: code, linkCodeCancel: cancel });
-    onFinished.then(this.handleCloseDialog);
+    this.showLinkDialog();
+    onFinished.then(this.closeDialog);
   };
 
-  handleCloseDialog = async () => {
+  closeDialog = async () => {
     if (this.state.linkCodeCancel) {
       this.state.linkCodeCancel();
     }
 
-    this.setState({ infoDialogType: null, linkCode: null, linkCodeCancel: null });
+    this.setState({ dialog: null, linkCode: null, linkCodeCancel: null });
   };
 
-  handleCreateObject = media => {
+  createObject = media => {
     this.props.scene.emit("add_media", media);
   };
+
+  showHelpDialog() {
+    this.setState({ dialog: <HelpDialog onClose={this.closeDialog} /> });
+  }
+
+  showSafariDialog() {
+    this.setState({ dialog: <SafariDialog onClose={this.closeDialog} /> });
+  }
+
+  showInviteDialog() {
+    this.setState({ dialog: <InviteDialog onClose={this.closeDialog} /> });
+  }
+
+  showCreateObjectDialog() {
+    this.setState({ dialog: <CreateObjectDialog onCreate={this.createObject} onClose={this.closeDialog} /> });
+  }
+
+  showLinkDialog() {
+    this.setState({ dialog: <LinkDialog linkCode={this.state.linkCode} onClose={this.closeDialog} /> });
+  }
+
+  showWebVRRecommendDialog() {
+    this.setState({ dialog: <WebVRRecommendDialog onClose={this.closeDialog} /> });
+  }
 
   render() {
     if (this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason) {
@@ -651,7 +677,7 @@ class UIRoot extends Component {
               <TwoDEntryButton onClick={this.enter2D} />
             )}
             {this.props.availableVREntryTypes.safari === VR_DEVICE_AVAILABILITY.maybe && (
-              <SafariEntryButton onClick={this.linkSafari} />
+              <SafariEntryButton onClick={this.showSafariDialog} />
             )}
             {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
               <GenericEntryButton onClick={this.enterVR} />
@@ -673,10 +699,7 @@ class UIRoot extends Component {
               </div>
             )}
             {screenSharingCheckbox}
-            <button
-              className={entryStyles.inviteButton}
-              onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
-            >
+            <button className={entryStyles.inviteButton} onClick={() => this.showInviteDialog()}>
               <FormattedMessage id="entry.invite-others" />
             </button>
           </div>
@@ -832,7 +855,7 @@ class UIRoot extends Component {
         <ProfileInfoHeader
           name={this.props.store.state.profile.displayName}
           onClickName={() => this.setState({ showProfileEntry: true })}
-          onClickHelp={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
+          onClickHelp={() => this.showHelpDialog()}
         />
         {entryPanel}
         {micPanel}
@@ -840,7 +863,7 @@ class UIRoot extends Component {
       </div>
     );
 
-    const dialogBoxClassNames = classNames({ "ui-interactive": !this.state.infoDialogType, "ui-dialog-box": true });
+    const dialogBoxClassNames = classNames({ "ui-interactive": !this.state.dialog, "ui-dialog-box": true });
 
     const dialogBoxContentsClassNames = classNames({
       "ui-dialog-box-contents": true,
@@ -850,19 +873,10 @@ class UIRoot extends Component {
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className="ui">
-          <InfoDialog
-            dialogType={this.state.infoDialogType}
-            linkCode={this.state.linkCode}
-            onSubmittedEmail={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.email_submitted })}
-            onCloseDialog={this.handleCloseDialog}
-            onCreateObject={this.handleCreateObject}
-          />
+          {this.state.dialog}
 
           {this.state.entryStep === ENTRY_STEPS.finished && (
-            <button
-              onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
-              className="ui__help-icon"
-            >
+            <button onClick={() => this.showHelpDialog()} className="ui__help-icon">
               <i className="ui__help-icon__icon">
                 <FontAwesomeIcon icon={faQuestion} />
               </i>
@@ -901,7 +915,7 @@ class UIRoot extends Component {
               {!this.props.availableVREntryTypes.isInHMD &&
                 this.props.occupantCount <= 1 && (
                   <div className={styles.nagButton}>
-                    <button onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}>
+                    <button onClick={() => this.showInviteDialog()}>
                       <FormattedMessage id="entry.invite-others-nag" />
                     </button>
                   </div>
@@ -914,9 +928,9 @@ class UIRoot extends Component {
                 </div>
               )}
               <TwoDHUD.BottomHUD
-                onCreateObject={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.create_object })}
+                onCreateObject={() => this.showCreateObjectDialog()}
                 showPhotoPicker={AFRAME.utils.device.isMobile()}
-                onMediaPicked={this.handleCreateObject}
+                onMediaPicked={this.createObject}
               />
             </div>
           ) : null}
