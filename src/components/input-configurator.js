@@ -21,7 +21,6 @@ AFRAME.registerComponent("input-configurator", {
     this.isMobile = AFRAME.utils.device.isMobile();
     this.eventHandlers = [];
     this.controllerQueue = [];
-    this.hasPointingDevice = false;
     this.cursor = this.data.cursorController.components["cursor-controller"];
     this.gazeTeleporter = this.data.gazeTeleporter.components["teleport-controls"];
     this.cameraController = this.data.camera.components["pitch-yaw-rotator"];
@@ -143,25 +142,30 @@ AFRAME.registerComponent("input-configurator", {
   },
 
   updateController: function() {
-    this.hasPointingDevice = this.controllerQueue.length > 0 && this.inVR;
-    this.cursor.el.setAttribute("cursor-controller", "drawLine", this.hasPointingDevice);
-
     this.cursor.setCursorVisibility(true);
+    const controllerData = this.controllerQueue.length ? this.controllerQueue[0] : null;
 
-    if (this.hasPointingDevice) {
-      const controllerData = this.controllerQueue[0];
-      const hand = controllerData.handedness;
+    if (controllerData) {
       this.controller = controllerData.controller;
-      this.cursor.el.setAttribute("cursor-controller", {
-        rayObject: hand === "left" ? this.data.leftControllerRayObject : this.data.rightControllerRayObject
-      });
+      this.actionEventHandler.setHandThatAlsoDrivesCursor(this.controller);
     } else {
       this.controller = null;
-      this.cursor.el.setAttribute("cursor-controller", { rayObject: this.data.gazeCursorRayObject });
+      this.actionEventHandler.setHandThatAlsoDrivesCursor(null);
     }
 
-    if (this.actionEventHandler && this.controller) {
-      this.actionEventHandler.setHandThatAlsoDrivesCursor(this.controller);
+    let rayObject;
+    let drawLine;
+    if (controllerData && this.inVR) {
+      rayObject =
+        controllerData.handedness === "left" ? this.data.leftControllerRayObject : this.data.rightControllerRayObject;
+      drawLine = true;
+    } else if (this.inVR) {
+      rayObject = this.data.gazeCursorRayObject;
+      drawLine = false;
+    } else {
+      rayObject = null;
+      drawLine = false;
     }
+    this.cursor.el.setAttribute("cursor-controller", { rayObject, drawLine });
   }
 });
