@@ -414,9 +414,6 @@ const onReady = async () => {
         return;
       });
 
-      NAF.connection.adapter.reliableTransport = "websocket";
-      NAF.connection.adapter.unreliableTransport = "websocket";
-
       if (isDebug) {
         NAF.connection.adapter.session.options.verbose = true;
       }
