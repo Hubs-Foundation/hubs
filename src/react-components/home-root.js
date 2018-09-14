@@ -124,7 +124,11 @@ class HomeRoot extends Component {
   }
 
   loadEnvironmentFromScene = async () => {
-    const sceneInfoUrl = `https://${process.env.RETICULUM_SERVER}/api/v1/scenes/${this.props.sceneId}`;
+    let sceneUrlBase = "/api/v1/scenes";
+    if (process.env.RETICULUM_SERVER) {
+      sceneUrlBase = `https://${process.env.RETICULUM_SERVER}${sceneUrlBase}`;
+    }
+    const sceneInfoUrl = `${sceneUrlBase}/${this.props.sceneId}`;
     const resp = await fetch(sceneInfoUrl).then(r => r.json());
     const scene = resp.scenes[0];
     // Transform the scene info into a an environment bundle structure.
