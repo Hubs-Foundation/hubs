@@ -147,6 +147,8 @@ const config = {
         e_press: "snap_rotate_right",
         b_press: "action_share_screen",
 
+        c_press: "action_capture_picture",
+
         // We can't create a keyboard behaviour with AFIM yet,
         // so these will get captured by wasd-to-analog2d
         w_down: "w_down",

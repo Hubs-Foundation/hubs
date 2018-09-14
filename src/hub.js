@@ -202,6 +202,20 @@ function requestFullscreen() {
   if (screenfull.enabled && !screenfull.isFullscreen) screenfull.request();
 }
 
+const offset = { x: 0, y: 0, z: -1.5 };
+
+const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
+  const { entity, orientation } = addMedia(src, "#interactable-media", contentOrigin, true);
+
+  orientation.then(or => {
+    entity.setAttribute("offset-relative-to", {
+      target: "#player-camera",
+      offset,
+      orientation: or
+    });
+  });
+};
+
 const onReady = async () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
@@ -342,20 +356,6 @@ const onReady = async () => {
     document.body.addEventListener("unblocked", ev => {
       NAF.connection.entities.completeSync(ev.detail.clientId);
     });
-
-    const offset = { x: 0, y: 0, z: -1.5 };
-
-    const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
-      const { entity, orientation } = addMedia(src, "#interactable-media", contentOrigin, true);
-
-      orientation.then(or => {
-        entity.setAttribute("offset-relative-to", {
-          target: "#player-camera",
-          offset,
-          orientation: or
-        });
-      });
-    };
 
     scene.addEventListener("add_media", e => {
       const contentOrigin = e.detail instanceof File ? ObjectContentOrigins.FILE : ObjectContentOrigins.URL;
@@ -639,3 +639,91 @@ const onReady = async () => {
 };
 
 document.addEventListener("DOMContentLoaded", onReady);
+
+const dataURLtoBlob = dataURL => {
+  const binary = atob(dataURL.split(",")[1]);
+  const array = [];
+  let i = 0;
+  while (i < binary.length) {
+    array.push(binary.charCodeAt(i));
+    i++;
+  }
+  return new Blob([new Uint8Array(array)], { type: "image/png" });
+};
+
+AFRAME.registerComponent("observer-cam", {
+  init() {
+    // this.render = this.render.bind(this);
+    console.log("OBSERVER CAM");
+    this.renderTarget = new THREE.WebGLRenderTarget(512, 512, {
+      format: THREE.RGBAFormat,
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.NearestFilter
+      // depth: false,
+      // stencil: false
+    });
+    this.camera = new THREE.PerspectiveCamera();
+    this.el.setObject3D("camera", this.camera);
+
+    // this.renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
+    // this.renderer.setPixelRatio(1);
+    // this.renderer.setSize(512, 512);
+    // this.renderer.domElement.style.position = "fixed";
+    // this.renderer.domElement.style.top = 0;
+    // this.renderer.domElement.style.left = 0;
+    // document.body.appendChild(this.renderer.domElement);
+
+    const material = new THREE.MeshBasicMaterial({
+      // color: 0x000000,
+      side: THREE.DoubleSide,
+      // map: new THREE.CanvasTexture(this.renderer.domElement)
+      map: this.renderTarget.texture
+    });
+    // material.needsUpdate = true;
+
+    const geometry = new THREE.PlaneGeometry();
+    this.mesh = new THREE.Mesh(geometry, material);
+    this.el.setObject3D("mesh", this.mesh);
+
+    this.el.sceneEl.addEventListener("action_capture_picture", () => {
+      this.takeSnapshot = true;
+      // console.log(this.renderTarget.texture);
+      // this.renderer.domElement.toBlob(blob => {
+      //   const file = new File([blob], "snap.png", { type: "image/png" });
+      //   spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.CLIPBOARD);
+      // });
+    });
+
+    // requestAnimationFrame(this.render);
+  },
+
+  tick() {
+    const scene = this.el.sceneEl.object3D;
+    const renderer = this.el.sceneEl.renderer;
+    const camera = this.camera; //document.getElementById("player-camera").components.camera.camera; //.object3D; //this.camera;
+    renderer.render(scene, camera, this.renderTarget, true);
+    if (this.takeSnapshot) {
+      this.takeSnapshot = false;
+      const gl = renderer.getContext();
+      const pixels = new Uint8Array(512 * 512 * 4);
+      renderer.readRenderTargetPixels(this.renderTarget, 0, 0, 512, 512, pixels);
+      // gl.readPixels(0, 0, 512, 512, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+      console.log(pixels);
+      // //   console.log(this.renderer.domElement.)
+      // const dataUrl = renderer.domElement.toDataURL();
+      // const i = document.createElement("img");
+      // i.src = dataUrl;
+      // document.body.appendChild(i);
+      // console.log(dataUrl);
+      // const blob = dataURLtoBlob(dataUrl);
+      // this.renderer.domElement.toBlob(blob => {
+      // console.log(blob);
+      // const file = new File([blob], "snap.png", { type: "image/png" });
+      // spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.CLIPBOARD);
+      // });
+    }
+
+    // this.mesh.material.map.needsUpdate = true;
+    // requestAnimationFrame(this.render);
+  }
+});
