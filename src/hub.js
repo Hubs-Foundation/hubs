@@ -558,7 +558,7 @@ const onReady = async () => {
   const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
 
-  const socket = connectToReticulum();
+  const socket = connectToReticulum(isDebug);
   const channel = socket.channel(`hub:${hubId}`, {});
 
   channel
@@ -593,7 +593,9 @@ const onReady = async () => {
     });
 
   channel.on("naf", data => {
-    NAF.connection.adapter.onData(data.payload);
+    if (NAF.connection.adapter) {
+      NAF.connection.adapter.onData(data.payload);
+    }
   });
 
   linkChannel.setSocket(socket);

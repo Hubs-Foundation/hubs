@@ -1,7 +1,7 @@
 import uuid from "uuid/v4";
 import { Socket } from "phoenix";
 
-export function connectToReticulum() {
+export function connectToReticulum(debug = false) {
   const qs = new URLSearchParams(location.search);
 
   const socketProtocol = qs.get("phx_protocol") || (document.location.protocol === "https:" ? "wss:" : "ws:");
@@ -20,7 +20,17 @@ export function connectToReticulum() {
   const socketUrl = `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}/socket`;
   console.log(`Phoenix Socket URL: ${socketUrl}`);
 
-  const socket = new Socket(socketUrl, { params: { session_id: uuid() } });
+  const socketSettings = {
+    params: { session_id: uuid() }
+  };
+
+  if (debug) {
+    socketSettings.logger = (kind, msg, data) => {
+      console.log(`${kind}: ${msg}`, data);
+    };
+  }
+
+  const socket = new Socket(socketUrl, socketSettings);
   socket.connect();
 
   return socket;
