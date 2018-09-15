@@ -414,16 +414,27 @@ const onReady = async () => {
         return;
       });
 
-      const sendHubDataMessage = function(clientId, dataType, data) {
+      const sendHubDataMessage = function(clientId, dataType, data, reliable) {
         const payload = { dataType, data };
+
         if (clientId != null) {
           payload.clientId = clientId;
         }
-        hubChannel.channel.push("naf", { payload });
+
+        if (reliable) {
+          hubChannel.channel.push("naf", { payload });
+        } else {
+          hubChannel.channel.pushUnreliable("naf", { payload });
+        }
       };
 
-      NAF.connection.adapter.reliableTransport = sendHubDataMessage;
-      NAF.connection.adapter.unreliableTransport = sendHubDataMessage;
+      window.sendHubDataMessage = sendHubDataMessage;
+
+      NAF.connection.adapter.reliableTransport = (clientId, dataType, data) =>
+        sendHubDataMessage(clientId, dataType, data, true);
+
+      NAF.connection.adapter.unreliableTransport = (clientId, dataType, data) =>
+        sendHubDataMessage(clientId, dataType, data, false);
 
       if (isDebug) {
         NAF.connection.adapter.session.options.verbose = true;
