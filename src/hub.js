@@ -541,7 +541,7 @@ const onReady = async () => {
   });
   environmentRoot.appendChild(initialEnvironmentEl);
 
-  const enterSceneWhenReady = () => {
+  const enterSceneWhenReady = (hudId) => {
     const enterSceneImmediately = () => enterScene(new MediaStream(), false, hubId);
     if (scene.hasLoaded) {
       enterSceneImmediately();
@@ -556,7 +556,8 @@ const onReady = async () => {
 
   if (qs.has("room")) {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
-    setRoom(qs.get("room") || "default");
+    const hubId = qs.get("room") || "default";
+    setRoom(hubId, hubId);
     if (isBotMode) enterSceneWhenReady();
     initialEnvironmentEl.setAttribute("gltf-bundle", {
       src: DEFAULT_ENVIRONMENT_URL
@@ -595,7 +596,7 @@ const onReady = async () => {
 
     setRoom(hub.hub_id, hub.name);
     hubChannel.setPhoenixChannel(channel);
-    if (isBotMode) enterSceneWhenReady();
+    if (isBotMode) enterSceneWhenReady(hub.hub_id);
 
     if (NAF.connection.adapter) {
       // Send complete sync on phoenix re-join.
