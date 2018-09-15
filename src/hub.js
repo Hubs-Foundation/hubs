@@ -248,7 +248,12 @@ const onReady = async () => {
     document.body.removeEventListener("touchend", requestFullscreen);
   };
 
+  let hasEnteredScene = false;
+
   const enterScene = async (mediaStream, enterInVR, hubId) => {
+    if (hasEnteredScene) return;
+    hasEnteredScene = true;
+
     const scene = document.querySelector("a-scene");
 
     // Get aframe inspector url using the webpack file-loader.
@@ -536,22 +541,23 @@ const onReady = async () => {
   });
   environmentRoot.appendChild(initialEnvironmentEl);
 
-  const setRoom = (hubId, hubName) => {
-    if (!isBotMode) {
-      remountUI({ hubId, hubName });
+  const enterSceneWhenReady = () => {
+    const enterSceneImmediately = () => enterScene(new MediaStream(), false, hubId);
+    if (scene.hasLoaded) {
+      enterSceneImmediately();
     } else {
-      const enterSceneImmediately = () => enterScene(new MediaStream(), false, hubId);
-      if (scene.hasLoaded) {
-        enterSceneImmediately();
-      } else {
-        scene.addEventListener("loaded", enterSceneImmediately);
-      }
+      scene.addEventListener("loaded", enterSceneImmediately);
     }
+  };
+
+  const setRoom = (hubId, hubName) => {
+    remountUI({ hubId, hubName });
   };
 
   if (qs.has("room")) {
     // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
     setRoom(qs.get("room") || "default");
+    if (isBotMode) enterSceneWhenReady();
     initialEnvironmentEl.setAttribute("gltf-bundle", {
       src: DEFAULT_ENVIRONMENT_URL
     });
@@ -564,29 +570,42 @@ const onReady = async () => {
 
   const socket = connectToReticulum(isDebug);
   const channel = socket.channel(`hub:${hubId}`, {});
+  let loadedSceneUrl = null;
 
-  channel
-    .join()
-    .receive("ok", async data => {
-      const hub = data.hubs[0];
-      const defaultSpaceTopic = hub.topics[0];
-      const sceneUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
-      console.log(`Scene URL: ${sceneUrl}`);
+  // This routine needs to handle re-joins.
+  const handleJoinedHubChannel = async data => {
+    const hub = data.hubs[0];
+    const defaultSpaceTopic = hub.topics[0];
+    const sceneUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
+    console.log(`Scene URL: ${sceneUrl}`);
 
-      if (/\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl)) {
+    if (/\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl)) {
+      if (loadedSceneUrl !== sceneUrl) {
         const resolved = await resolveMedia(sceneUrl, false, 0);
         const gltfEl = document.createElement("a-entity");
         gltfEl.setAttribute("gltf-model-plus", { src: resolved.raw, inflate: true });
         gltfEl.addEventListener("model-loaded", () => initialEnvironmentEl.emit("bundleloaded"));
         initialEnvironmentEl.appendChild(gltfEl);
-      } else {
-        // TODO remove, and remove bundleloaded event
-        initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
+        loadedSceneUrl = sceneUrl;
       }
+    } else {
+      // TODO remove, and remove bundleloaded event
+      initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
+    }
 
-      setRoom(hub.hub_id, hub.name);
-      hubChannel.setPhoenixChannel(channel);
-    })
+    setRoom(hub.hub_id, hub.name);
+    hubChannel.setPhoenixChannel(channel);
+    if (isBotMode) enterSceneWhenReady();
+
+    if (NAF.connection.adapter) {
+      // Send complete sync on phoenix re-join.
+      NAF.connection.entities.completeSync(null, true);
+    }
+  };
+
+  channel
+    .join()
+    .receive("ok", handleJoinedHubChannel)
     .receive("error", res => {
       if (res.reason === "closed") {
         exitScene();
