@@ -539,7 +539,7 @@ const onReady = async () => {
   });
   environmentRoot.appendChild(initialEnvironmentEl);
 
-  const enterSceneWhenReady = hudId => {
+  const enterSceneWhenReady = hubId => {
     const enterSceneImmediately = () => enterScene(new MediaStream(), false, hubId);
     if (scene.hasLoaded) {
       enterSceneImmediately();
