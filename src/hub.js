@@ -429,8 +429,6 @@ const onReady = async () => {
         hubChannel.channel.pushUnreliable("naf", { payload });
       };
 
-      window.sendHubDataMessage = sendHubDataMessage;
-
       NAF.connection.adapter.reliableTransport = sendHubDataMessage;
       NAF.connection.adapter.unreliableTransport = sendHubDataMessage;
 
@@ -541,7 +539,7 @@ const onReady = async () => {
   });
   environmentRoot.appendChild(initialEnvironmentEl);
 
-  const enterSceneWhenReady = (hudId) => {
+  const enterSceneWhenReady = hudId => {
     const enterSceneImmediately = () => enterScene(new MediaStream(), false, hubId);
     if (scene.hasLoaded) {
       enterSceneImmediately();
