@@ -30,3 +30,4 @@ mv dist/*.html dist/pages
 
 aws s3 sync --acl public-read --cache-control "max-age=31556926" dist/assets "$TARGET_S3_URL/assets"
 aws s3 sync --acl public-read --cache-control "no-cache" --delete dist/pages "$TARGET_S3_URL/pages/latest"
+aws s3 sync --acl public-read --cache-control "no-cache" --delete dist/pages "$TARGET_S3_URL/pages/releases/${BUILD_NUMBER}"

@@ -56,6 +56,8 @@
             <img id="freeze-off-hover" crossorigin="anonymous" src="./assets/hud/freeze_off-hover.png">
             <img id="freeze-on" crossorigin="anonymous" src="./assets/hud/freeze_on.png">
             <img id="freeze-on-hover" crossorigin="anonymous" src="./assets/hud/freeze_on-hover.png">
+            <img id="spawn-pen" crossorigin="anonymous" src="./assets/hud/spawn_pen.png">
+            <img id="spawn-pen-hover" crossorigin="anonymous" src="./assets/hud/spawn_pen-hover.png">
 
             <a-asset-item id="botdefault" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDefault_Avatar-9f71f8ff22.gltf"></a-asset-item>
             <a-asset-item id="botbobo" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotBobo_Avatar-f9740a010b.gltf"></a-asset-item>
@@ -69,7 +71,6 @@
             <a-asset-item id="botwoody" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotWoody_Avatar-0140485a23.gltf"></a-asset-item>
 
             <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
-            <a-asset-item id="interactable-duck" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf"></a-asset-item>
 
             <a-asset-item id="quack" src="./assets/sfx/quack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="specialquack" src="./assets/sfx/specialquack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -156,6 +157,8 @@
                     position-at-box-shape-border="target:.delete-button"
                     destroy-at-extreme-distances
                     rotation
+                    activatable__increase-scale="buttonStartEvents: scroll_right; buttonEndEvents: horizontal_scroll_release; activatedState: scaleUp;"
+                    activatable__decrease-scale="buttonStartEvents: scroll_left; buttonEndEvents: horizontal_scroll_release; activatedState: scaleDown;"
                 >
                     <!-- HACK: rotation component above is required for its side effect of setting YXZ order -->
                     <a-entity class="delete-button" visible-while-frozen>
@@ -163,6 +166,46 @@
                         <a-entity text=" value:Delete; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
                 </a-entity>
+            </template>
+
+            <template id="pen-interactable">
+                <a-entity
+                    class="interactable toggle"
+                    super-networked-interactable="counter: #pen-counter;"
+                    body="type: dynamic; shape: none; mass: 1;"
+                    grabbable-toggle="maxGrabbers: 1;"
+                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
+                    hoverable
+                    activatable__draw-hand="buttonStartEvents: secondary_hand_grab; buttonEndEvents: secondary_hand_release;"
+                    activatable__draw-cursor="buttonStartEvents: secondary-cursor-grab; buttonEndEvents: secondary-cursor-release;"
+                    activatable__color-next="buttonStartEvents: next_color, scroll_right; buttonEndEvents: thumb_up, secondary_hand_release, horizontal_scroll_release; activatedState: colorNext;"
+                    activatable__color-prev="buttonStartEvents: previous_color, scroll_left; buttonEndEvents: thumb_up, secondary_hand_release, horizontal_scroll_release; activatedState: colorPrev;"
+                    activatable__increase-radius="buttonStartEvents: increase_radius, scroll_up; buttonEndEvents: thumb_up, secondary_hand_release, vertical_scroll_release; activatedState: radiusUp;"
+                    activatable__decrease-radius="buttonStartEvents: decrease_radius, scroll_down; buttonEndEvents: thumb_up, secondary_hand_release, vertical_scroll_release; activatedState: radiusDown;"
+                    scale="0.5 0.5 0.5"
+                >
+                    <a-sphere
+                        id="pen"
+                        scale="1.5, 1.5, 1.5"
+                        position="0 -0.18 0"
+                        radius="0.02"
+                        color="#FF0033"
+                        pen="camera: #player-camera; drawingManager: #drawing-manager"
+                        segments-width="16"
+                        segments-height="12"
+                    ></a-sphere>
+                    <a-entity class="delete-button" visible-while-frozen>
+                        <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
+                        <a-entity text=" value:Delete; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+
+            <template id="interactable-drawing">
+                <a-entity
+                    networked-drawing
+                ></a-entity>
             </template>
 
             <template id="paging-toolbar">
@@ -199,11 +242,18 @@
 
             <a-mixin id="controller-super-hands"
                      super-hands="
-                         colliderEvent: collisions; colliderEventProperty: els;
-                         colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
-                         grabStartButtons: hand_grab; grabEndButtons: hand_release;
-                         stretchStartButtons: hand_grab; stretchEndButtons: hand_release;
-                         dragDropStartButtons: hand_grab; dragDropEndButtons: hand_release;"
+                         colliderEvent: collisions;
+                         colliderEventProperty: els;
+                         colliderEndEvent: collisions;
+                         colliderEndEventProperty: clearedEls;
+                         grabStartButtons: primary_hand_grab, secondary_hand_grab;
+                         grabEndButtons: primary_hand_release, secondary_hand_release;
+                         stretchStartButtons: primary_hand_grab, secondary_hand_grab;
+                         stretchEndButtons: primary_hand_release, secondary_hand_release;
+                         dragDropStartButtons: hand_grab, secondary_hand_grab;
+                         dragDropEndButtons: hand_release, secondary_hand_release;
+                         activateStartButtons: secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
+                         activateEndButtons: secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
                      collision-filter="collisionForces: false"
                      physics-collider
             ></a-mixin>
@@ -212,12 +262,16 @@
         <!-- Interactables -->
         <a-entity id="media-counter" networked-counter="max: 10;"></a-entity>
 
+        <a-entity id="pen-counter" networked-counter="max: 10;"></a-entity>
+
+        <a-entity id="drawing-manager" drawing-manager></a-entity>
+
         <a-entity
             id="cursor-controller"
             cursor-controller="
                 cursor: #cursor;
-                camera: #player-camera; "
-            raycaster="objects: .collidable, .interactable, .ui; far: 3;"
+                camera: #player-camera;
+                objects: .collidable, .interactable, .ui;"
             line="visible: false; color: white; opacity: 0.2;"
         ></a-entity>
 
@@ -225,17 +279,21 @@
             id="cursor"
             material="depthTest: false; opacity:0.9;"
             radius="0.02"
+            segments-width="9"
+            segments-height="9"
             static-body="shape: sphere;"
             collision-filter="collisionForces: false"
             super-hands="
-                colliderEvent: raycaster-intersection; colliderEventProperty: els;
-                colliderEndEvent: raycaster-intersection-cleared; colliderEndEventProperty: clearedEls;
-                grabStartButtons: cursor-grab; grabEndButtons: cursor-release;
-                stretchStartButtons: cursor-grab; stretchEndButtons: cursor-release;
-                dragDropStartButtons: cursor-grab; dragDropEndButtons: cursor-release;"
-            segments-height="9"
-            segments-width="9"
-            event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"
+                colliderEvent: raycaster-intersection;
+                colliderEndEvent: raycaster-intersection-cleared;
+                grabStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
+                grabEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
+                stretchStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
+                stretchEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
+                dragDropStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
+                dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
+                activateStartButtons: secondary-cursor-grab, secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
+                activateEndButtons: secondary-cursor-release, secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
         ></a-sphere>
 
         <!-- Player Rig -->
@@ -260,7 +318,7 @@
               <a-rounded height="0.13" width="0.48" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
               <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover" scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="ui hud mic" material="alphaTest:0.1;"></a-image>
               <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover" scale="0.2 0.2 0.2" position="0 0 0.005" class="ui hud freeze"></a-image>
-              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Enable Bubble; activeTooltipText: Disable Bubble; image: #bubble-off; hoverImage: #bubble-off-hover; activeImage: #bubble-on; activeHoverImage: #bubble-on-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="ui hud bubble" material="alphaTest:0.1;"></a-image>
+              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Spawn Pen; activeTooltipText: Spawn Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="ui hud pen" material="alphaTest:0.1;"></a-image>
               <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
                 <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" ></a-entity>
               </a-rounded>
@@ -272,7 +330,7 @@
               class="camera"
               camera
               position="0 1.6 0"
-              personal-space-bubble="radius: 0.4"
+              personal-space-bubble="radius: 0.4;"
               pitch-yaw-rotator
           >
             <a-entity
@@ -329,6 +387,7 @@
                   missOpacity: 0.1;
                   curveShootingSpeed: 12;"
               haptic-feedback
+              event-repeater="events: haptic_pulse; eventSource: #cursor"
               body="type: static; shape: none;"
               mixin="controller-super-hands"
               controls-shape-offset
@@ -376,6 +435,14 @@
             static-body="shape: none;"
         ></a-entity>
 
+        <a-entity
+        super-spawner="
+            template: #pen-interactable;
+            src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf;
+            spawnEvent: spawn_pen;
+            superHand: #player-right-controller;
+            cursorSuperHand: #cursor;"
+        ></a-entity>
     </a-scene>
 
     <div id="ui-root"></div>

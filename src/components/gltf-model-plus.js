@@ -2,7 +2,7 @@ import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import cubeMapPosX from "../assets/images/cubemap/posx.jpg";
 import cubeMapNegX from "../assets/images/cubemap/negx.jpg";
 import cubeMapPosY from "../assets/images/cubemap/posy.jpg";
-import cubeMapNegY from "../assets/images/cubemap/negx.jpg";
+import cubeMapNegY from "../assets/images/cubemap/negy.jpg";
 import cubeMapPosZ from "../assets/images/cubemap/posz.jpg";
 import cubeMapNegZ from "../assets/images/cubemap/negz.jpg";
 
@@ -279,6 +279,7 @@ AFRAME.registerComponent("gltf-model-plus", {
   schema: {
     src: { type: "string" },
     contentType: { type: "string" },
+    useCache: { default: true },
     inflate: { default: false }
   },
 
@@ -300,6 +301,17 @@ AFRAME.registerComponent("gltf-model-plus", {
     });
   },
 
+  async loadModel(src, contentType, technique, useCache) {
+    if (useCache) {
+      if (!GLTFCache[src]) {
+        GLTFCache[src] = await loadGLTF(src, contentType, technique);
+      }
+      return cloneGltf(GLTFCache[src]);
+    } else {
+      return await loadGLTF(src, contentType, technique);
+    }
+  },
+
   async applySrc(src, contentType) {
     try {
       // If the src attribute is a selector, get the url from the asset item.
@@ -319,11 +331,7 @@ AFRAME.registerComponent("gltf-model-plus", {
         return;
       }
 
-      if (!GLTFCache[src]) {
-        GLTFCache[src] = loadGLTF(src, contentType, this.preferredTechnique);
-      }
-
-      const model = cloneGltf(await GLTFCache[src]);
+      const model = await this.loadModel(src, contentType, this.preferredTechnique, this.data.useCache);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead

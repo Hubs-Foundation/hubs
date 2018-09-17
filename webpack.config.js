@@ -157,11 +157,11 @@ module.exports = (env, argv) => ({
 
   optimization: {
     // necessary due to https://github.com/visionmedia/debug/issues/547
-    minimizer: [new UglifyJsPlugin({ uglifyOptions: { compress: { collapse_vars: false } } })],
+    minimizer: [new UglifyJsPlugin({ sourceMap: true, uglifyOptions: { compress: { collapse_vars: false } } })],
     splitChunks: {
       cacheGroups: {
         engine: {
-          test: /[\\/]node_modules[\\/](aframe|cannon|three\.js)/,
+          test: /([\\/]src[\\/]workers|[\\/]node_modules[\\/](aframe|cannon|three\.js))/,
           priority: 100,
           name: "engine",
           chunks: "all"
@@ -180,7 +180,7 @@ module.exports = (env, argv) => ({
     new HTMLWebpackPlugin({
       filename: "index.html",
       template: path.join(__dirname, "src", "index.html"),
-      chunks: ["vendor", "engine", "index"]
+      chunks: ["vendor", "index"]
     }),
     new HTMLWebpackPlugin({
       filename: "hub.html",

@@ -7,6 +7,7 @@ import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
+import screenfull from "screenfull";
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
@@ -126,12 +127,18 @@ import "./components/event-repeater";
 import "./components/controls-shape-offset";
 import "./components/duck";
 import "./components/quack";
+import "./components/grabbable-toggle";
 
 import "./components/cardboard-controls";
 
 import "./components/cursor-controller";
 
 import "./components/nav-mesh-helper";
+import "./systems/tunnel-effect";
+
+import "./components/tools/pen";
+import "./components/tools/networked-drawing";
+import "./components/tools/drawing-manager";
 
 import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config as inputConfig } from "./input-mappings";
@@ -139,6 +146,7 @@ import registerTelemetry from "./telemetry";
 
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
+
 import qsTruthy from "./utils/qs_truthy";
 
 const isBotMode = qsTruthy("bot");
@@ -189,6 +197,10 @@ function mountUI(scene, props = {}) {
   );
 }
 
+function requestFullscreen() {
+  if (screenfull.enabled && !screenfull.isFullscreen) screenfull.request();
+}
+
 const onReady = async () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
@@ -233,10 +245,17 @@ const onReady = async () => {
       }
       document.body.removeChild(scene);
     }
+    document.body.removeEventListener("touchend", requestFullscreen);
   };
 
   const enterScene = async (mediaStream, enterInVR, hubId) => {
     const scene = document.querySelector("a-scene");
+
+    // Get aframe inspector url using the webpack file-loader.
+    const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
+    // Set the aframe-inspector url to our hosted copy.
+    scene.setAttribute("inspector", { url: aframeInspectorUrl });
+
     if (!isBotMode) {
       scene.classList.add("no-cursor");
     }
@@ -246,6 +265,8 @@ const onReady = async () => {
 
     if (enterInVR) {
       scene.enterVR();
+    } else if (AFRAME.utils.device.isMobile()) {
+      document.body.addEventListener("touchend", requestFullscreen);
     }
 
     AFRAME.registerInputActions(inGameActions, "default");
@@ -305,12 +326,16 @@ const onReady = async () => {
     });
 
     const offset = { x: 0, y: 0, z: -1.5 };
-    const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
-      const entity = addMedia(src, contentOrigin, true);
 
-      entity.setAttribute("offset-relative-to", {
-        target: "#player-camera",
-        offset
+    const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
+      const { entity, orientation } = addMedia(src, "#interactable-media", contentOrigin, true);
+
+      orientation.then(or => {
+        entity.setAttribute("offset-relative-to", {
+          target: "#player-camera",
+          offset,
+          orientation: or
+        });
       });
     };
 
@@ -536,7 +561,7 @@ const onReady = async () => {
       if (/\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl)) {
         const resolved = await resolveMedia(sceneUrl, false, 0);
         const gltfEl = document.createElement("a-entity");
-        gltfEl.setAttribute("gltf-model-plus", { src: resolved.raw, inflate: true });
+        gltfEl.setAttribute("gltf-model-plus", { src: resolved.raw, useCache: false, inflate: true });
         gltfEl.addEventListener("model-loaded", () => initialEnvironmentEl.emit("bundleloaded"));
         initialEnvironmentEl.appendChild(gltfEl);
       } else {

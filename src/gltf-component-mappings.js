@@ -1,5 +1,6 @@
 import "./components/gltf-model-plus";
 
+AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
 AFRAME.GLTFModelPlus.registerComponent("sound", "sound");
 AFRAME.GLTFModelPlus.registerComponent("collision-filter", "collision-filter");
