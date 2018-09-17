@@ -248,12 +248,7 @@ const onReady = async () => {
     document.body.removeEventListener("touchend", requestFullscreen);
   };
 
-  let hasEnteredScene = false;
-
   const enterScene = async (mediaStream, enterInVR, hubId) => {
-    if (hasEnteredScene) return;
-    hasEnteredScene = true;
-
     const scene = document.querySelector("a-scene");
 
     // Get aframe inspector url using the webpack file-loader.
