@@ -4,7 +4,7 @@ import cx from "classnames";
 
 import styles from "../assets/stylesheets/2d-hud.scss";
 
-const TopHUD = ({ muted, frozen, spacebubble, onToggleMute, onToggleFreeze, onToggleSpaceBubble }) => (
+const TopHUD = ({ muted, frozen, onToggleMute, onToggleFreeze, onSpawnPen }) => (
   <div className={cx(styles.container, styles.top, styles.unselectable)}>
     <div className={cx("ui-interactive", styles.panel, styles.left)}>
       <div
@@ -19,11 +19,7 @@ const TopHUD = ({ muted, frozen, spacebubble, onToggleMute, onToggleFreeze, onTo
       onClick={onToggleFreeze}
     />
     <div className={cx("ui-interactive", styles.panel, styles.right)}>
-      <div
-        className={cx(styles.iconButton, styles.bubble, { [styles.active]: spacebubble })}
-        title={spacebubble ? "Disable Bubble" : "Enable Bubble"}
-        onClick={onToggleSpaceBubble}
-      />
+      <div className={cx(styles.iconButton, styles.spawn_pen)} title={"Drawing Pen"} onClick={onSpawnPen} />
     </div>
   </div>
 );
@@ -31,10 +27,9 @@ const TopHUD = ({ muted, frozen, spacebubble, onToggleMute, onToggleFreeze, onTo
 TopHUD.propTypes = {
   muted: PropTypes.bool,
   frozen: PropTypes.bool,
-  spacebubble: PropTypes.bool,
   onToggleMute: PropTypes.func,
   onToggleFreeze: PropTypes.func,
-  onToggleSpaceBubble: PropTypes.func
+  onSpawnPen: PropTypes.func
 };
 
 const BottomHUD = ({ onCreateObject, showPhotoPicker, onMediaPicked }) => (

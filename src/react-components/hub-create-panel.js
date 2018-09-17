@@ -6,13 +6,12 @@ import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { resolveURL, extractUrlBase } from "../utils/resolveURL";
-import InfoDialog from "./info-dialog.js";
+import CreateRoomDialog from "./create-room-dialog.js";
 
 import default_scene_preview_thumbnail from "../assets/images/default_thumbnail.png";
 import styles from "../assets/stylesheets/hub-create.scss";
 
 const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
-const dialogTypes = InfoDialog.dialogTypes;
 
 class HubCreatePanel extends Component {
   static propTypes = {
@@ -178,7 +177,7 @@ class HubCreatePanel extends Component {
                           {environmentTitle}
                         </a>
                       ) : (
-                        <span className={styles.itle}>environmentTitle</span>
+                        <span className={styles.title}>{environmentTitle}</span>
                       )}
                       {environmentAuthor &&
                         environmentAuthor.name &&
@@ -238,9 +237,8 @@ class HubCreatePanel extends Component {
           </div>
         </form>
         {this.state.showCustomSceneDialog && (
-          <InfoDialog
-            dialogType={dialogTypes.custom_scene}
-            onCloseDialog={() => this.setState({ showCustomSceneDialog: false })}
+          <CreateRoomDialog
+            onClose={() => this.setState({ showCustomSceneDialog: false })}
             onCustomScene={(name, url) => {
               this.setState({ showCustomSceneDialog: false, name: name, customSceneUrl: url }, () => this.createHub());
             }}

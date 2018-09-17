@@ -49,7 +49,7 @@ pipeline {
             "<https://github.com/mozilla/hubs/commit/$gitSha|$gitSha> " +
             "Hubs: ```${gitSha} ${gitMessage}```\n" +
             "<${smokeURL}?required_version=${env.BUILD_NUMBER}|Smoke Test> - to push:\n" +
-            "`/mr hubs deploy ${targetS3Url}`"
+            "`/mr hubs deploy ${env.BUILD_NUMBER} ${targetS3Url}`"
           )
           def payload = 'payload=' + JsonOutput.toJson([
             text      : text,
