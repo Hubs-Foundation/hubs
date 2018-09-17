@@ -552,17 +552,6 @@ const onReady = async () => {
     remountUI({ hubId, hubName });
   };
 
-  if (qs.has("room")) {
-    // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
-    const hubId = qs.get("room") || "default";
-    setRoom(hubId, hubId);
-    if (isBotMode) enterSceneWhenReady();
-    initialEnvironmentEl.setAttribute("gltf-bundle", {
-      src: DEFAULT_ENVIRONMENT_URL
-    });
-    return;
-  }
-
   // Connect to reticulum over phoenix channels to get hub info.
   const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
