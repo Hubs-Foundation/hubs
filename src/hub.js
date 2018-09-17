@@ -421,7 +421,7 @@ const onReady = async () => {
           payload.clientId = clientId;
         }
 
-        hubChannel.channel.pushUnreliable("naf", { payload });
+        hubChannel.channel.push("naf", { payload });
       };
 
       NAF.connection.adapter.reliableTransport = sendHubDataMessage;
