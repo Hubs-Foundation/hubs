@@ -543,10 +543,6 @@ const onReady = async () => {
     }
   };
 
-  const setRoom = (hubId, hubName) => {
-    remountUI({ hubId, hubName });
-  };
-
   // Connect to reticulum over phoenix channels to get hub info.
   const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
@@ -576,7 +572,7 @@ const onReady = async () => {
       initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
     }
 
-    setRoom(hub.hub_id, hub.name);
+    remountUI({ hubId: hub.hub_id, hubName: hub.name });
     hubChannel.setPhoenixChannel(channel);
     if (isBotMode) enterSceneWhenReady(hub.hub_id);
 
