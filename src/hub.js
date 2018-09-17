@@ -561,7 +561,7 @@ const onReady = async () => {
       if (/\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl)) {
         const resolved = await resolveMedia(sceneUrl, false, 0);
         const gltfEl = document.createElement("a-entity");
-        gltfEl.setAttribute("gltf-model-plus", { src: resolved.raw, inflate: true });
+        gltfEl.setAttribute("gltf-model-plus", { src: resolved.raw, useCache: false, inflate: true });
         gltfEl.addEventListener("model-loaded", () => initialEnvironmentEl.emit("bundleloaded"));
         initialEnvironmentEl.appendChild(gltfEl);
       } else {
