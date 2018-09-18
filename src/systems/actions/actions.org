@@ -1,0 +1,144 @@
+* actions and the frame
+The aframe game loop looks something like this: 
+#+BEGIN_EXAMPLE js
+while (!quit) {
+  scene.components.forEach(component => component.tick(t, dt));
+  scene.systems.forEach(system => system.tick(t, dt));
+  render(scene);
+}
+#+END_EXAMPLE 
+Game state is not stored exclusively in components, to be mutated by
+systems like what we might imagine writing if we wanted to try the ECS
+pattern we learned about. 
+Since the difference between aframe-systems and aframe-components is 
+therefore insignificant to what we care about right now, I'll minimize
+our mock aframe game loop as follows:
+#+BEGIN_EXAMPLE js
+while (!quit) {
+  scene.compOrSystem.forEach(compOrSystem => compOrSystem.tick(t, dt));
+  render(scene);
+}
+#+END_EXAMPLE 
+Once the components and systems `tick`, the scene renders. The infinitely
+running (at least until a crash) loop,
+#+BEGIN_EXAMPLE js
+while (!quit) {
+  //... 
+}
+#+END_EXAMPLE 
+is provided by hooking the scene update/tick function onto the browser 
+callback, requestAnimationFrame. 
+
+In some games, work is scheduled in jobs to be executed in concurrently, 
+when possible. Soft- and hard-realtime deadlines often depend on frequency 
+and recency requirements of data available to the various systems.
+A "frame" can be understood as the serialized state of the system at a 
+given point. A rendering system's job is to transform the framebuffer
+using the game state made available to it. It runs as some framerate like
+90 fps. A physics system may run at 120 fps and may need to be 
+deterministic some networked physics based games.
+
+As can be seen in our game loop, we decide not to take on the task of 
+managing that ourselves. Writing games this way is often done to maximize 
+performance in resource constrained environments. This isn't exactly the 
+case for us (except that we're a VR app and all VR apps wish they could 
+do more), because aframe had other qualities we cared about. 
+
+However, there are things to be learned from the patterns deployed by those
+other games that we can adopt at least in part to some benefit. 
+
+One benefit to orchestrating the systems that make up a game as outlined
+above is in knowing, at any point in the frame, which game state may be 
+affected and in what ways.
+
+In order to write a threadsafe scheduler to run jobs for two systems 
+concurrently, the programmer declares the read and write dependencies
+of each job. Contrast the visibility this requires of that programmer 
+with the lack of requirements placed on us by the aframe game loop.
+
+While some of our components/systems have implicit initialization order
+requirements, very few of them manage tick-order dependencies. This is
+good, because we don't know which order they will tick. If the scene 
+is played or paused, or if components are played or paused, the tick 
+order is subject to change. Best not to have ordering dependencies on 
+any of your system ticks. 
+
+Also the browser engine runs our javascript client, script execution 
+will pause while dom events bubble and event handlers are called at 
+predictably unpredictable times.
+
+We want to change game state in response to some browser events and 
+apis, and we want to do it in a predictable and understandable way.
+
+The actions system is an attempt to help us do that.
+* motivation
+We wish to 
+- reduce the complexity of app code, especially by minimizing the number of "input-based branches",
+- support a wide variety of input devices,
+- understand how and when user input will be used to transform game state,
+- provide a framework to expand and customize these transformations across
+a wide variety of input devices
+- adapt better to changing design requirements 
+- increase the delightfulness of interactions (improve ux)
+If the code in this branch doesn't achieve these aims, why not?
+Can it be improved to the point where it does?
+Is it an improvement over what we have? 
+* nouns
+** path
+A path is a key in the frames produced by the action system.
+Paths are separated conceptually into "app" paths (aka "actions"),
+"device" paths (aka "user input"), and "vars" (intermediate values).
+#+BEGIN_EXAMPLE js
+paths.app.cameraDelta = "/app/cameraDelta";
+paths.app.cursorStartDrawing = "/app/cursorStartDrawing";
+paths.device.smartMouse.cursorPose = "/device/smartMouse/cursorPose";
+paths.device.mouse.coords = "/device/mouse/coords";
+paths.device.touchscreen.joystickLeft = "/device/touchscreen/joystickLeft";
+#+END_EXAMPLE 
+** action
+An app path used by app code (components) to query the current frame.
+#+BEGIN_EXAMPLE js
+if (actions.poll(paths.app.cursorGrab)) {
+  this.startInteraction();
+}
+#+END_EXAMPLE 
+** frame
+A key-value store created once each frame by the actions system by 
+reading from devices and applying the transformations specified by the 
+active bindings. 
+** device
+*** devices.keyboard
+A device which stores boolean values for each key. Browser events 
+are collected into a queue to be processed in sequence once a frame.
+*** devices.smartMouse
+A "smart" device which stores values taken from mouse events. The device
+is "smart" because it required some access to "app code", not just the 
+browser apis. Namely, it requires access to cursor controller state and 
+the in game camera to provide a pose value at 
+frame[paths.devices.smartMouse.cursorPose]
+and a vec2 value at 
+frame[paths.devices.smartMouse.cameraDelta]
+*** devices.smartTouchscreen
+Similar to devices.smart.mouse, but more complicated due to having to 
+handle multiple touches.
+*** devices.oculusGoController
+A device with a limited input capabilities. A good case-study for working 
+with binding definitions with priority conflicts.
+*** devices.viveController
+A device with "plenty" of capabilities, many which often feel underutilized.
+** set
+App state that determines the current capabilities of the user. For example,
+when the "cursor hovering on a video" action set is enabled, you might expect 
+to be able to change the video volume. 
+** binding
+An object that specifying an `xform` (transformation) of the values in the 
+frame at the paths in `src` to the values in the frame at the paths in `dest`,
+as well its priority. These ought to be treated as user-customizable, although
+we are likely the only ones to do this customization for some time. Bindings
+are associated with devices and sets.
+** xform
+A function that takes `src` paths to read from the frame as input,
+and the `dest` paths to write as output.
+** priority
+  
+
