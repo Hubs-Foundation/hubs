@@ -28,6 +28,7 @@ AFRAME.GLTFModelPlus.registerComponent("scale-audio-feedback", "scale-audio-feed
 AFRAME.GLTFModelPlus.registerComponent("animation-mixer", "animation-mixer");
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
 AFRAME.GLTFModelPlus.registerComponent("shape", "shape");
+AFRAME.GLTFModelPlus.registerComponent("heightfield", "heightfield");
 AFRAME.GLTFModelPlus.registerComponent(
   "box-collider",
   "shape",

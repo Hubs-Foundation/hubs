@@ -133,6 +133,7 @@ import "./components/cardboard-controls";
 
 import "./components/cursor-controller";
 
+import "./components/heightfield";
 import "./components/nav-mesh-helper";
 import "./systems/tunnel-effect";
 
