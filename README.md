@@ -50,7 +50,6 @@ This will allow the CSP checks to pass that are served up by Reticulum so you ca
 
 ## Query Params
 
-- `room` - Id of the room (an integer) that you want to join
 - `allow_multi` - Allow multiple instances off the app in the same browser session
 - `enable_screen_sharing` - Enable screen sharing
 - `accept_screen_shares` - Display screens shared by other users

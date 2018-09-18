@@ -101,7 +101,6 @@ import "./systems/app-mode";
 import "./systems/exit-on-blur";
 
 import "./gltf-component-mappings";
-import { DEFAULT_ENVIRONMENT_URL } from "./assets/environments/environments";
 
 import { App } from "./App";
 
@@ -433,6 +432,19 @@ const onReady = async () => {
         return;
       });
 
+      const sendHubDataMessage = function(clientId, dataType, data) {
+        const payload = { dataType, data };
+
+        if (clientId != null) {
+          payload.clientId = clientId;
+        }
+
+        hubChannel.channel.push("naf", { payload });
+      };
+
+      NAF.connection.adapter.reliableTransport = sendHubDataMessage;
+      NAF.connection.adapter.unreliableTransport = sendHubDataMessage;
+
       if (isDebug) {
         NAF.connection.adapter.session.options.verbose = true;
       }
@@ -544,57 +556,57 @@ const onReady = async () => {
   });
   environmentRoot.appendChild(initialEnvironmentEl);
 
-  const setRoom = (hubId, hubName) => {
-    if (!isBotMode) {
-      remountUI({ hubId, hubName });
+  const enterSceneWhenReady = hubId => {
+    const enterSceneImmediately = () => enterScene(new MediaStream(), false, hubId);
+    if (scene.hasLoaded) {
+      enterSceneImmediately();
     } else {
-      const enterSceneImmediately = () => enterScene(new MediaStream(), false, hubId);
-      if (scene.hasLoaded) {
-        enterSceneImmediately();
-      } else {
-        scene.addEventListener("loaded", enterSceneImmediately);
-      }
+      scene.addEventListener("loaded", enterSceneImmediately);
     }
   };
-
-  if (qs.has("room")) {
-    // If ?room is set, this is `yarn start`, so just use a default environment and query string room.
-    setRoom(qs.get("room") || "default");
-    initialEnvironmentEl.setAttribute("gltf-bundle", {
-      src: DEFAULT_ENVIRONMENT_URL
-    });
-    return;
-  }
 
   // Connect to reticulum over phoenix channels to get hub info.
   const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
 
-  const socket = connectToReticulum();
+  const socket = connectToReticulum(isDebug);
   const channel = socket.channel(`hub:${hubId}`, {});
+  let loadedSceneUrl = null;
 
-  channel
-    .join()
-    .receive("ok", async data => {
-      const hub = data.hubs[0];
-      const defaultSpaceTopic = hub.topics[0];
-      const sceneUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
-      console.log(`Scene URL: ${sceneUrl}`);
+  // This routine needs to handle re-joins.
+  const handleJoinedHubChannel = async data => {
+    const hub = data.hubs[0];
+    const defaultSpaceTopic = hub.topics[0];
+    const sceneUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
+    console.log(`Scene URL: ${sceneUrl}`);
 
-      if (/\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl)) {
+    if (/\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl)) {
+      if (loadedSceneUrl !== sceneUrl) {
         const resolved = await resolveMedia(sceneUrl, false, 0);
         const gltfEl = document.createElement("a-entity");
         gltfEl.setAttribute("gltf-model-plus", { src: resolved.raw, useCache: false, inflate: true });
         gltfEl.addEventListener("model-loaded", () => initialEnvironmentEl.emit("bundleloaded"));
         initialEnvironmentEl.appendChild(gltfEl);
-      } else {
-        // TODO remove, and remove bundleloaded event
-        initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
+        loadedSceneUrl = sceneUrl;
       }
+    } else {
+      // TODO remove, and remove bundleloaded event
+      initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
+    }
 
-      setRoom(hub.hub_id, hub.name);
-      hubChannel.setPhoenixChannel(channel);
-    })
+    remountUI({ hubId: hub.hub_id, hubName: hub.name });
+    hubChannel.setPhoenixChannel(channel);
+    if (isBotMode) enterSceneWhenReady(hub.hub_id);
+
+    if (NAF.connection.adapter) {
+      // Send complete sync on phoenix re-join.
+      NAF.connection.entities.completeSync(null, true);
+    }
+  };
+
+  channel
+    .join()
+    .receive("ok", handleJoinedHubChannel)
     .receive("error", res => {
       if (res.reason === "closed") {
         exitScene();
@@ -603,6 +615,12 @@ const onReady = async () => {
 
       console.error(res);
     });
+
+  channel.on("naf", data => {
+    if (NAF.connection.adapter) {
+      NAF.connection.adapter.onData(data.payload);
+    }
+  });
 
   linkChannel.setSocket(socket);
 };
