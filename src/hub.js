@@ -432,18 +432,27 @@ const onReady = async () => {
         return;
       });
 
-      const sendHubDataMessage = function(clientId, dataType, data) {
+      const sendHubDataMessage = function(clientId, dataType, data, reliable) {
+        const event = "naf";
         const payload = { dataType, data };
 
         if (clientId != null) {
           payload.clientId = clientId;
         }
 
-        hubChannel.channel.push("naf", { payload });
+        if (reliable) {
+          hubChannel.channel.push(event, payload);
+        } else {
+          const topic = hubChannel.channel.topic;
+          const join_ref = hubChannel.channel.joinRef();
+          hubChannel.channel.socket.push({ topic, event, payload, join_ref, ref: null }, false);
+        }
       };
 
-      NAF.connection.adapter.reliableTransport = sendHubDataMessage;
-      NAF.connection.adapter.unreliableTransport = sendHubDataMessage;
+      NAF.connection.adapter.reliableTransport = (clientId, dataType, data) =>
+        sendHubDataMessage(clientId, dataType, data, true);
+      NAF.connection.adapter.unreliableTransport = (clientId, dataType, data) =>
+        sendHubDataMessage(clientId, dataType, data, false);
 
       if (isDebug) {
         NAF.connection.adapter.session.options.verbose = true;
@@ -618,7 +627,7 @@ const onReady = async () => {
 
   channel.on("naf", data => {
     if (NAF.connection.adapter) {
-      NAF.connection.adapter.onData(data.payload);
+      NAF.connection.adapter.onData(data);
     }
   });
 
