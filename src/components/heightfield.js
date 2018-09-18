@@ -3,12 +3,12 @@ AFRAME.registerComponent("heightfield", {
   init() {
     this.el.addEventListener("componentinitialized", e => {
       if (e.detail.name === "static-body") {
-        this.initShape(this.el.components["static-body"]);
+        this.generateAndAddHeightfield(this.el.components["static-body"]);
       }
     });
     this.el.setAttribute("static-body", { shape: "none", mass: 0 });
   },
-  initShape(body) {
+  generateAndAddHeightfield(body) {
     const mesh = this.el.object3D.getObjectByProperty("type", "Mesh");
     mesh.geometry.computeBoundingBox();
     const size = new THREE.Vector3();
