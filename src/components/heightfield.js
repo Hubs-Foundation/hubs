@@ -9,7 +9,6 @@ AFRAME.registerComponent("heightfield", {
     this.el.setAttribute("static-body", { shape: "none", mass: 0 });
   },
   initShape(body) {
-    console.log("BPDEBUG body", body);
     const mesh = this.el.object3D.getObjectByProperty("type", "Mesh");
     mesh.geometry.computeBoundingBox();
     const size = new THREE.Vector3();
