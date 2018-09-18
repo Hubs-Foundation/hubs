@@ -68,4 +68,7 @@ AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentNa
       nav.loadMesh(node, zone);
     }
   });
+  // There isn't actually an a-frame nav-mesh component, but we want to tag this el as a nav-mesh since
+  // nav-mesh-helper will query for it later.
+  el.setAttribute("nav-mesh");
 });
