@@ -24,6 +24,7 @@ import HelpDialog from "./help-dialog.js";
 import SafariDialog from "./safari-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import InviteDialog from "./invite-dialog.js";
+import InviteTeamDialog from "./invite-team-dialog.js";
 import LinkDialog from "./link-dialog.js";
 import CreateObjectDialog from "./create-object-dialog.js";
 import TwoDHUD from "./2d-hud";
@@ -70,6 +71,7 @@ class UIRoot extends Component {
     isBotMode: PropTypes.bool,
     store: PropTypes.object,
     scene: PropTypes.object,
+    hubChannel: PropTypes.object,
     linkChannel: PropTypes.object,
     showProfileEntry: PropTypes.bool,
     availableVREntryTypes: PropTypes.object,
@@ -78,7 +80,8 @@ class UIRoot extends Component {
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
     hubName: PropTypes.string,
-    occupantCount: PropTypes.number
+    occupantCount: PropTypes.number,
+    isSupportAvailable: PropTypes.bool
   };
 
   state = {
@@ -547,6 +550,10 @@ class UIRoot extends Component {
     this.setState({ dialog: <InviteDialog onClose={this.closeDialog} /> });
   }
 
+  showInviteTeamDialog() {
+    this.setState({ dialog: <InviteTeamDialog hubChannel={this.props.hubChannel} onClose={this.closeDialog} /> });
+  }
+
   showCreateObjectDialog() {
     this.setState({ dialog: <CreateObjectDialog onCreate={this.createObject} onClose={this.closeDialog} /> });
   }
@@ -923,6 +930,13 @@ class UIRoot extends Component {
                 <div className={styles.nagButton}>
                   <button onClick={() => this.props.scene.enterVR()}>
                     <FormattedMessage id="entry.return-to-vr" />
+                  </button>
+                </div>
+              )}
+              {this.props.isSupportAvailable && (
+                <div className={styles.nagCornerButton}>
+                  <button onClick={() => this.showInviteTeamDialog()}>
+                    <FormattedMessage id="entry.invite-team-nag" />
                   </button>
                 </div>
               )}
