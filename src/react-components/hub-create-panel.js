@@ -6,6 +6,7 @@ import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { resolveURL, extractUrlBase } from "../utils/resolveURL";
+import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import CreateRoomDialog from "./create-room-dialog.js";
 
 import default_scene_preview_thumbnail from "../assets/images/default_thumbnail.png";
@@ -84,11 +85,7 @@ class HubCreatePanel extends Component {
       hub: { name: this.state.name, default_environment_gltf_bundle_url: sceneUrl }
     };
 
-    let createUrl = "/api/v1/hubs";
-
-    if (process.env.RETICULUM_SERVER) {
-      createUrl = `https://${process.env.RETICULUM_SERVER}${createUrl}`;
-    }
+    const createUrl = getReticulumFetchUrl("/api/v1/hubs");
 
     const res = await fetch(createUrl, {
       body: JSON.stringify(payload),

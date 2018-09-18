@@ -84,8 +84,48 @@
   pointer-events: none;
   
   button {
-    @extend %big-action-button;
+    @extend %action-button;
     pointer-events: auto;
+    padding: 16px 28px;
+    height: 58px;
+  }
+
+  @media (max-height: 420px) {
+    display: none;
+  }
+}
+
+:local(.nag-corner-button) {
+  position: absolute;
+  bottom: 42px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 80px;
+  pointer-events: none;
+
+  button {
+    @extend %default-font;
+    font-size: 1.3em;
+    font-weight: bold;
+    cursor: pointer;
+    min-width: 150px;
+    margin-right: 12px;
+    margin-left: 12px;
+    white-space: nowrap;
+    background: none;
+    border: none;
+    pointer-events: auto;
+    padding: 16px 28px;
+    height: 58px;
+    color: $light-text;
+    text-shadow: 0px 0px 4px rgba(0, 0, 0, 1.0);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 740px) {
+    display: none;
   }
 }
 

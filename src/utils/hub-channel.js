@@ -87,6 +87,10 @@ export default class HubChannel {
     this.channel.push("events:object_spawned", spawnEvent);
   };
 
+  requestSupport = () => {
+    this.channel.push("events:request_support", {});
+  };
+
   disconnect = () => {
     if (this.channel) {
       this.channel.socket.disconnect();

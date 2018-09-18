@@ -79,7 +79,7 @@
   margin-top: 0;
 }
 
-.invite-form, .add-media-form, .custom-scene-form {
+.invite-form, .invite-team-form, .add-media-form, .custom-scene-form {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -119,6 +119,12 @@
     text-align: center;
     -moz-appearance: none;
     -webkit-appearance: none;
+  }
+}
+
+.invite-team-form {
+  &__action-button {
+    width: 350px;
   }
 }
 
