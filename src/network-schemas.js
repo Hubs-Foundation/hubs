@@ -1,15 +1,19 @@
 function registerNetworkSchemas() {
   const vectorRequiresUpdate = epsilon => {
-    let prev = null;
-    return curr => {
-      if (prev === null) {
-        prev = new THREE.Vector3(curr.x, curr.y, curr.z);
-        return true;
-      } else if (!NAF.utils.almostEqualVec3(prev, curr, epsilon)) {
-        prev.copy(curr);
-        return true;
-      }
-      return false;
+    return () => {
+      let prev = null;
+
+      return curr => {
+        if (prev === null) {
+          prev = new THREE.Vector3(curr.x, curr.y, curr.z);
+          return true;
+        } else if (!NAF.utils.almostEqualVec3(prev, curr, epsilon)) {
+          prev.copy(curr);
+          return true;
+        }
+
+        return false;
+      };
     };
   };
 
