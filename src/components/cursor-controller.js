@@ -1,10 +1,5 @@
 import { paths } from "../systems/actions/paths";
 import { sets } from "../systems/actions/sets";
-const TARGET_TYPE_NONE = 1;
-const TARGET_TYPE_INTERACTABLE = 2;
-const TARGET_TYPE_UI = 4;
-const TARGET_TYPE_INTERACTABLE_OR_UI = TARGET_TYPE_INTERACTABLE | TARGET_TYPE_UI;
-
 /**
  * Manages targeting and physical cursor location. Has the following responsibilities:
  *
@@ -66,9 +61,9 @@ AFRAME.registerComponent("cursor-controller", {
       this.raycaster.intersectObjects(this.targets, true, rawIntersections);
       const intersection = rawIntersections.find(x => x.object.el);
       this.intersection = intersection;
-      let isHoveringOnPen = intersection && intersection.object.el.matches(".pen, .pen *");
-      let isHoveringOnVideo = intersection && intersection.object.el.matches(".video, .video *");
-      let isHoveringOnInteractable = intersection && intersection.object.el.matches(".interactable, .interactable *");
+      const isHoveringOnPen = intersection && intersection.object.el.matches(".pen, .pen *");
+      const isHoveringOnVideo = intersection && intersection.object.el.matches(".video, .video *");
+      const isHoveringOnInteractable = intersection && intersection.object.el.matches(".interactable, .interactable *");
       const actions = AFRAME.scenes[0].systems.actions;
       actions[isHoveringOnPen ? "activate" : "deactivate"](sets.cursorHoveringOnPen);
       actions[isHoveringOnVideo ? "activate" : "deactivate"](sets.cursorHoveringOnVideo);
@@ -183,7 +178,9 @@ AFRAME.registerComponent("cursor-controller", {
       const isGrabbing = cursor.components["super-hands"].state.has("grab-start");
       if (isGrabbing) {
         const cursorModDelta = actions.poll(paths.app.cursorModDelta);
-        this.changeDistanceMod(cursorModDelta);
+        if (cursorModDelta) {
+          this.changeDistanceMod(cursorModDelta);
+        }
         cursorPosition
           .copy(cursorPose.position)
           .addScaledVector(cursorPose.direction, THREE.Math.clamp(this.distance - this.currentDistanceMod, near, far));

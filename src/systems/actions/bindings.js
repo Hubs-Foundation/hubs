@@ -43,19 +43,93 @@ export const deviceSetBindings = [
         src: { value: paths.device.mouse.buttonLeft },
         dest: { value: paths.app.cursorStartDrawing },
         xform: xforms.rising(),
-        priority: 100
+        priority: 200
       },
       {
         src: { value: paths.device.mouse.buttonLeft },
         dest: { value: paths.app.cursorStopDrawing },
         xform: xforms.falling(),
-        priority: 100
+        priority: 200,
+        root: "lmb"
       },
       {
         src: { value: paths.device.mouse.buttonRight },
         dest: { value: paths.app.cursorDrop },
         xform: xforms.falling(),
+        priority: 200
+      }
+    ]
+  },
+  {
+    set: sets.cursorHoldingPen,
+    bindings: [
+      {
+        src: {
+          bool: `${paths.device.keyboard}alt`,
+          value: paths.device.mouse.wheel
+        },
+        dest: { value: "/var/cursorScalePenTipWheel" },
+        xform: xforms.copyIfTrue,
+        priority: 200,
+        root: "wheel"
+      },
+      {
+        src: { value: "/var/cursorScalePenTipWheel" },
+        dest: { value: paths.app.cursorScalePenTip },
+        xform: xforms.scale(0.03)
+      },
+      {
+        src: {
+          value: `${paths.device.keyboard}q`
+        },
+        dest: { value: paths.app.cursorPenNextColor },
+        xform: xforms.rising()
+      },
+      {
+        src: {
+          value: `${paths.device.keyboard}e`
+        },
+        dest: { value: paths.app.cursorPenPrevColor },
+        xform: xforms.rising()
+      }
+    ]
+  },
+  {
+    set: sets.cursorHoldingInteractable,
+    bindings: [
+      {
+        src: {
+          value: paths.device.mouse.wheel
+        },
+        dest: {
+          value: paths.app.cursorModDelta
+        },
+        xform: xforms.copy,
+        root: "wheel",
         priority: 100
+      },
+      {
+        src: {
+          bool: `${paths.device.keyboard}alt`,
+          value: paths.device.mouse.wheel
+        },
+        dest: { value: paths.app.cursorModDelta },
+        xform: xforms.copyIfFalse
+      }
+    ]
+  },
+  {
+    device: devices.keyboard.name,
+    set: sets.global,
+    bindings: [
+      {
+        src: {
+          value: `${paths.device.keyboard}l`
+        },
+        dest: {
+          value: paths.app.logDebugFrame
+        },
+        xform: xforms.rising()
       }
     ]
   },
@@ -74,18 +148,15 @@ export const deviceSetBindings = [
     device: devices.mouse.name,
     set: sets.global,
     bindings: [
-      // {
-      //   src: { value: paths.device.mouse.buttonLeft },
-      //   dest: { value: paths.app.cursorDrop},
-      //   xform: xforms.falling()
-      // },
       {
-        src: { value: paths.device.mouse.wheel },
-        dest: { value: paths.app.cursorModDelta },
-        xform: xforms.copy
+        src: { value: paths.device.mouse.buttonLeft },
+        dest: { value: paths.app.cursorDrop },
+        xform: xforms.falling(),
+        priority: 100,
+        root: "lmb"
       }
     ]
-  },
+  }
   //  {
   //    device: devices.mouse.name,
   //    set: sets.cursorHoldingCamera,

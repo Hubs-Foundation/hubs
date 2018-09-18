@@ -73,8 +73,12 @@ AFRAME.registerComponent("pen", {
 
     const actions = AFRAME.scenes[0].systems.actions;
 
-    this.el.parentNode.addEventListener("grab-start", ()=>{actions.activate(sets.cursorHoldingPen);});
-    this.el.parentNode.addEventListener("grab-end", ()=>{actions.deactivate(sets.cursorHoldingPen);});
+    this.el.parentNode.addEventListener("grab-start", () => {
+      actions.activate(sets.cursorHoldingPen);
+    });
+    this.el.parentNode.addEventListener("grab-end", () => {
+      actions.deactivate(sets.cursorHoldingPen);
+    });
   },
 
   pause() {
@@ -92,12 +96,29 @@ AFRAME.registerComponent("pen", {
   },
 
   tick(t, dt) {
-    const actions = AFRAME.scenes[0].systems.actions;
-    if (actions.poll(paths.app.cursorStartDrawing)) {
-      this._startDraw();
-    }
-    if (actions.poll(paths.app.cursorStopDrawing)) {
-      this._endDraw();
+    const grabbable = this.el.parentNode.components.grabbable;
+    if (
+      grabbable.grabbers.length &&
+      grabbable.grabbers[0] ===
+        document.querySelector("[cursor-controller]").components["cursor-controller"].data.cursor
+    ) {
+      const actions = AFRAME.scenes[0].systems.actions;
+      if (actions.poll(paths.app.cursorStartDrawing)) {
+        this._startDraw();
+      }
+      if (actions.poll(paths.app.cursorStopDrawing)) {
+        this._endDraw();
+      }
+      const penScaleMod = actions.poll(paths.app.cursorScalePenTip);
+      if (penScaleMod) {
+        this._changeRadius(actions.poll(paths.app.cursorScalePenTip));
+      }
+      if (actions.poll(paths.app.cursorPenNextColor)) {
+        this._changeColor(1);
+      }
+      if (actions.poll(paths.app.cursorPenPrevColor)) {
+        this._changeColor(-1);
+      }
     }
 
     this.el.object3D.getWorldPosition(this.worldPosition);

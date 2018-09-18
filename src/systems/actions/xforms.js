@@ -20,10 +20,16 @@ export const xforms = {
       frame[dest.value] = [frame[src.x], frame[src.y]];
     }
   },
+  copyIfFalse: function(frame, src, dest) {
+    frame[dest.value] = frame[src.bool] ? 0 : frame[src.value];
+  },
+  copyIfTrue: function(frame, src, dest) {
+    frame[dest.value] = frame[src.bool] ? frame[src.value] : 0;
+  },
   true: function(frame, src, dest) {
     frame[dest.value] = true;
   },
-  rising: function()  {
+  rising: function() {
     let prev = false;
     return function rising(frame, src, dest) {
       frame[dest.value] = frame[src.value] && !prev;

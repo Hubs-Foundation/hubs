@@ -1,14 +1,13 @@
 import { paths } from "./paths";
-import { pose } from "./pose";
 
 // TODO: Where do these values (500, 10, 2) come from?
 const modeMod = {
-  [WheelEvent.DOM_DELTA_PIXEL] : 500,
-  [WheelEvent.DOM_DELTA_LINE] : 10,
-  [WheelEvent.DOM_DELTA_PAGE] : 2
+  [WheelEvent.DOM_DELTA_PIXEL]: 500,
+  [WheelEvent.DOM_DELTA_LINE]: 10,
+  [WheelEvent.DOM_DELTA_PAGE]: 2
 };
 
-let coords = [0, 0]; // normalized screenspace coordinates in [(-1, 1), (-1, 1)]
+const coords = [0, 0]; // normalized screenspace coordinates in [(-1, 1), (-1, 1)]
 let movementXY = [0, 0]; // deltas
 let buttonLeft = false;
 let buttonRight = false;
@@ -63,3 +62,6 @@ export const mouse = {
   }
 };
 
+window.oncontextmenu = e => {
+  e.preventDefault();
+};

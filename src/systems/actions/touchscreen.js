@@ -5,8 +5,6 @@ const touchEvents = [];
   document.addEventListener(x, touchEvents.push.bind(touchEvents))
 );
 
-function process(touchEvent) {}
-
 export const touchscreen = {
   getDeviceFrame(deviceFrame) {
     const isReserved = {};
@@ -15,13 +13,13 @@ export const touchscreen = {
       if (isReserved["joystickLeft"]) return false;
       const pX = touch.clientX / window.innerWidth;
       const pY = touch.clientY / window.innerHeight;
-      return pX < .4 && pY < .2;
+      return pX < 0.4 && pY < 0.2;
     }
     function shouldReserveForJoystickRight(touch) {
       if (isReserved["joystickRight"]) return false;
       const pX = touch.clientX / window.innerWidth;
       const pY = touch.clientY / window.innerHeight;
-      return pX > .6 && pY < .2;
+      return pX > 0.6 && pY < 0.2;
     }
     touchEvents.forEach(touchEvent => {
       touchEvent.changedTouches.forEach(touch => {
@@ -35,9 +33,6 @@ export const touchscreen = {
             isReserved["joystickRight"] = true;
             reserved["joystickRight"] = touch.idenfier;
           }
-        }
-
-        if (reserved["joystickLeft"] === touch.idenfier){
         }
 
         deviceFrame[paths.device.touchscreen.joystickLeft] = [touch.clientX, touch.clientY];
