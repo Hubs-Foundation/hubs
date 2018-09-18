@@ -451,8 +451,8 @@ const onReady = async () => {
 
       NAF.connection.adapter.reliableTransport = (clientId, dataType, data) =>
         sendHubDataMessage(clientId, dataType, data, true);
-      NAF.connection.adapter.unreliableTransport = (clientId, dataType, data) =>
-        sendHubDataMessage(clientId, dataType, data, false);
+      /*NAF.connection.adapter.unreliableTransport = (clientId, dataType, data) =>
+        sendHubDataMessage(clientId, dataType, data, false);*/
 
       if (isDebug) {
         NAF.connection.adapter.session.options.verbose = true;
