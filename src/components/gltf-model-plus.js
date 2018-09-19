@@ -99,7 +99,15 @@ const inflateEntities = function(node, templates, isRoot) {
     }
   }
 
-  const nodeHasBehavior = node.userData.components || node.name in templates;
+  const hubsComponents = node.userData.gltfExtensions && node.userData.gltfExtensions.HUBS_components;
+
+  // We can remove support for legacy components when our environment, avatar and interactable models are
+  // updated to match Spoke output.
+  const legacyComponents = node.userData.components;
+
+  const entityComponents = hubsComponents || legacyComponents;
+
+  const nodeHasBehavior = !!entityComponents || node.name in templates;
   if (!nodeHasBehavior && !childEntities.length && !isRoot) {
     return null; // we don't need an entity for this node
   }
@@ -137,7 +145,7 @@ const inflateEntities = function(node, templates, isRoot) {
   node.matrix.identity();
 
   el.setObject3D(node.type.toLowerCase(), node);
-  if (node.userData.components && "nav-mesh" in node.userData.components) {
+  if (entityComponents && "nav-mesh" in entityComponents) {
     el.setObject3D("mesh", node);
   }
 
@@ -154,7 +162,6 @@ const inflateEntities = function(node, templates, isRoot) {
     node.parent.animations = node.animations;
   }
 
-  const entityComponents = node.userData.components;
   if (entityComponents) {
     for (const prop in entityComponents) {
       if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
