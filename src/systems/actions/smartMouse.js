@@ -15,12 +15,12 @@ const calculateCursorPose = function(camera, coords) {
   return cursorPose;
 };
 
-let prevButtonLeft = false;
-let clickedOnAnything = false;
+export default class SmartMouseDevice {
+  constructor() {
+    this.prevButtonLeft = false;
+    this.clickedOnAnything = false;
+  }
 
-export const smartMouse = {
-  name: "smartMouse",
-  init() {},
   write(frame) {
     const cursorController = document.querySelector("[cursor-controller]").components["cursor-controller"];
     if (!cursorController) {
@@ -37,25 +37,25 @@ export const smartMouse = {
     }
 
     const buttonLeft = frame[paths.device.mouse.buttonLeft];
-    if (buttonLeft && !prevButtonLeft) {
+    if (buttonLeft && !this.prevButtonLeft) {
       const rawIntersections = [];
       cursorController.raycaster.intersectObjects(cursorController.targets, true, rawIntersections);
       const intersection = rawIntersections.find(x => x.object.el);
-      clickedOnAnything =
+      this.clickedOnAnything =
         intersection &&
         intersection.object.el.matches(".pen, .pen *, .video, .video *, .interactable, .interactable *");
     }
-    prevButtonLeft = buttonLeft;
+    this.prevButtonLeft = buttonLeft;
 
     if (!buttonLeft) {
-      clickedOnAnything = false;
+      this.clickedOnAnything = false;
     }
 
-    if (!clickedOnAnything && buttonLeft) {
+    if (!this.clickedOnAnything && buttonLeft) {
       frame[paths.device.smartMouse.cameraDelta] = frame[paths.device.mouse.movementXY];
     } else {
       const camera = document.querySelector("#player-camera").components.camera.camera;
       frame[paths.device.smartMouse.cursorPose] = calculateCursorPose(camera, coords);
     }
   }
-};
+}

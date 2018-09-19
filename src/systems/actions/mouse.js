@@ -7,60 +7,61 @@ const modeMod = {
   [WheelEvent.DOM_DELTA_PAGE]: 2
 };
 
-const coords = [0, 0]; // normalized screenspace coordinates in [(-1, 1), (-1, 1)]
-let movementXY = [0, 0]; // deltas
-let buttonLeft = false;
-let buttonRight = false;
-let wheel = 0; // delta
+export default class MouseDevice {
+  constructor() {
+    this.events = [];
+    this.coords = [0, 0]; // normalized screenspace coordinates in [(-1, 1), (-1, 1)]
+    this.movementXY = [0, 0]; // deltas
+    this.buttonLeft = false;
+    this.buttonRight = false;
+    this.wheel = 0; // delta
 
-function process(event) {
-  if (event.type === "wheel") {
-    wheel += event.deltaY / modeMod[event.deltaMode];
-    return;
-  }
-  const left = event.button === 0;
-  const right = event.button === 2;
-  coords[0] = (event.clientX / window.innerWidth) * 2 - 1;
-  coords[1] = -(event.clientY / window.innerHeight) * 2 + 1;
-  movementXY[0] += event.movementX;
-  movementXY[1] += event.movementY;
-  if (event.type === "mousedown" && left) {
-    buttonLeft = true;
-  } else if (event.type === "mousedown" && right) {
-    buttonRight = true;
-  } else if (event.type === "mouseup" && left) {
-    buttonLeft = false;
-  } else if (event.type === "mouseup" && right) {
-    buttonRight = false;
-  }
-}
-
-const events = [];
-export const mouse = {
-  name: "mouse",
-  init() {
+    const queueEvent = this.events.push.bind(this.events);
     const canvas = document.querySelector("canvas");
-    ["mousedown", "mouseup", "mousemove", "wheel"].map(x => canvas.addEventListener(x, events.push.bind(events)));
-  },
+    ["mousedown", "mouseup", "mousemove", "wheel"].map(x => canvas.addEventListener(x, queueEvent));
+  }
+
+  process(event) {
+    if (event.type === "wheel") {
+      this.wheel += event.deltaY / modeMod[event.deltaMode];
+      return;
+    }
+    const left = event.button === 0;
+    const right = event.button === 2;
+    this.coords[0] = (event.clientX / window.innerWidth) * 2 - 1;
+    this.coords[1] = -(event.clientY / window.innerHeight) * 2 + 1;
+    this.movementXY[0] += event.movementX;
+    this.movementXY[1] += event.movementY;
+    if (event.type === "mousedown" && left) {
+      this.buttonLeft = true;
+    } else if (event.type === "mousedown" && right) {
+      this.buttonRight = true;
+    } else if (event.type === "mouseup" && left) {
+      this.buttonLeft = false;
+    } else if (event.type === "mouseup" && right) {
+      this.buttonRight = false;
+    }
+  }
+
   write(frame) {
-    movementXY = [0, 0]; // deltas
-    wheel = 0; // delta
-    events.forEach(event => {
-      process(event, frame);
+    this.movementXY = [0, 0]; // deltas
+    this.wheel = 0; // delta
+    this.events.forEach(event => {
+      this.process(event, frame);
     });
-    while (events.length) {
-      events.pop();
+    while (this.events.length) {
+      this.events.pop();
       // we pop until events is empty
       // setting events.length = 0 results in the `forEach` above to access the elements illegally on the next tick
       // setting events = [] would mean I'd need to create new event listeners for this array
     }
-    frame[paths.device.mouse.coords] = coords;
-    frame[paths.device.mouse.movementXY] = movementXY;
-    frame[paths.device.mouse.buttonLeft] = buttonLeft;
-    frame[paths.device.mouse.buttonRight] = buttonRight;
-    frame[paths.device.mouse.wheel] = wheel;
+    frame[paths.device.mouse.coords] = this.coords;
+    frame[paths.device.mouse.movementXY] = this.movementXY;
+    frame[paths.device.mouse.buttonLeft] = this.buttonLeft;
+    frame[paths.device.mouse.buttonRight] = this.buttonRight;
+    frame[paths.device.mouse.wheel] = this.wheel;
   }
-};
+}
 
 window.oncontextmenu = e => {
   e.preventDefault();

@@ -35,3 +35,4 @@ paths.device.keyboard = "/device/keyboard/";
 // There are so many keys on the keyboard that the paths here
 // are written like `${paths.device.keyboard}${key}` where `key`
 // comes from the dom's keyboard events
+paths.device.gamepad = {};

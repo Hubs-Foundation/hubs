@@ -1,21 +1,23 @@
 import { paths } from "./paths";
-let keys = {};
-const events = [];
-export const keyboard = {
-  name: "keyboard",
-  init() {
-    ["keydown", "keyup"].map(x => document.addEventListener(x, events.push.bind(events)));
+export default class KeyboardDevice {
+  constructor() {
+    this.keys = {};
+    this.events = [];
+
+    ["keydown", "keyup"].map(x => document.addEventListener(x, this.events.push.bind(this.events)));
+
     document.addEventListener("blur", () => {
-      keys = {};
+      this.keys = {};
     });
-  },
-  write(frame) {
-    events.forEach(event => {
-      keys[`${paths.device.keyboard}${event.key.toLowerCase()}`] = event.type === "keydown";
-    });
-    while (events.length) {
-      events.pop();
-    }
-    Object.assign(frame, keys);
   }
-};
+
+  write(frame) {
+    this.events.forEach(event => {
+      this.keys[`${paths.device.keyboard}${event.key.toLowerCase()}`] = event.type === "keydown";
+    });
+    while (this.events.length) {
+      this.events.pop();
+    }
+    Object.assign(frame, this.keys);
+  }
+}

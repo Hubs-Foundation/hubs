@@ -1,7 +1,10 @@
-import { deviceSetBindings } from "./actions/bindings";
+import { KBMBindings } from "./actions/bindings";
 import { sets } from "./actions/sets";
-import { devices } from "./actions/devices";
 import { paths } from "./actions/paths";
+
+import MouseDevice from "./actions/mouse";
+import KeyboardDevice from "./actions/keyboard";
+import SmartMouseDevice from "./actions/smartMouse";
 
 function difference(setA, setB) {
   const _difference = new Set(setA);
@@ -31,15 +34,16 @@ function applyChange(sets, change) {
   }
 }
 
-const activeDeviceNames = new Set([devices.mouse.name, devices.smartMouse.name, devices.keyboard.name]);
 const activeSets = new Set([sets.global]);
+const registeredMappings = new Set();
+
 function getActiveBindings() {
   const prioritizedBindings = new Map();
   const activeBindings = new Set();
-  deviceSetBindings.forEach(x => {
-    const { device, set, bindings } = x;
-    if ((!device || activeDeviceNames.has(device)) && activeSets.has(set)) {
-      bindings.forEach(binding => {
+  registeredMappings.forEach(mapping => {
+    activeSets.forEach(setName => {
+      const set = mapping[setName] || [];
+      set.forEach(binding => {
         const { root, priority } = binding;
         if (!root || !priority) {
           activeBindings.add(binding);
@@ -66,20 +70,25 @@ function getActiveBindings() {
           return;
         }
       });
-    }
+    });
   });
   return activeBindings;
 }
+
 const callbacks = [];
 let pendingSetChanges = [];
 let frame = {};
 let activeBindings = new Set();
-// TODO: Handle device (dis/re)connection
+const activeDevices = new Set();
+
 AFRAME.registerSystem("actions", {
   init() {
-    activeDeviceNames.forEach(name => {
-      devices[name].init();
-    });
+    // TODO: Handle device (dis/re)connection
+    activeDevices.add(new MouseDevice());
+    activeDevices.add(new SmartMouseDevice());
+    activeDevices.add(new KeyboardDevice());
+
+    registeredMappings.add(KBMBindings);
   },
 
   tick() {
@@ -89,8 +98,8 @@ AFRAME.registerSystem("actions", {
     pendingSetChanges = [];
 
     const deviceFrame = {};
-    activeDeviceNames.forEach(name => {
-      devices[name].write(deviceFrame); // smartMouse runs after mouse
+    activeDevices.forEach(device => {
+      device.write(deviceFrame); // smartMouse runs after mouse
     });
 
     frame = {};

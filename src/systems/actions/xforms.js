@@ -16,7 +16,7 @@ export const xforms = {
     }
   },
   compose_vec2: function(frame, src, dest) {
-    if (frame[src.x] && frame[src.y]) {
+    if (frame[src.x] !== undefined && frame[src.y] !== undefined) {
       frame[dest.value] = [frame[src.x], frame[src.y]];
     }
   },
