@@ -2,6 +2,15 @@ import { paths } from "./paths";
 import { sets } from "./sets";
 import { xforms } from "./xforms";
 
+export const gamepadBindings = {
+  // [sets.global]: [
+  //   {
+  //     src: { x: paths.device.gamepad(0).axis(0), y: paths.device.gamepad(0).axis(1) },
+  //     dest: { value: paths.app.cameraDelta },
+  //     xform: xforms.compose_vec2
+  //   }
+  // ]
+};
 
 export const KBMBindings = {
   [sets.global]: [

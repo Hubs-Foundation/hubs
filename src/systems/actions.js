@@ -1,10 +1,11 @@
-import { KBMBindings } from "./actions/bindings";
+import { KBMBindings, gamepadBindings } from "./actions/bindings";
 import { sets } from "./actions/sets";
 import { paths } from "./actions/paths";
 
 import MouseDevice from "./actions/devices/mouse";
 import KeyboardDevice from "./actions/devices/keyboard";
 import SmartMouseDevice from "./actions/devices/smartMouse";
+import GamepadDevice from "./actions/devices/gamepad";
 
 function difference(setA, setB) {
   const _difference = new Set(setA);
@@ -80,6 +81,26 @@ let pendingSetChanges = [];
 let frame = {};
 let activeBindings = new Set();
 const activeDevices = new Set();
+const gamepads = {};
+window.addEventListener(
+  "gamepadconnected",
+  e => {
+    const gamepadDevice = new GamepadDevice(e.gamepad);
+    activeDevices.add(gamepadDevice);
+    gamepads[e.gamepad.index] = gamepadDevice;
+  },
+  false
+);
+window.addEventListener(
+  "gamepaddisconnected",
+  e => {
+    if (gamepads[e.gamepad.index]) {
+      activeDevices.delete(gamepads[e.gamepad.index]);
+      delete gamepads[e.gamepad.index];
+    }
+  },
+  false
+);
 
 AFRAME.registerSystem("actions", {
   init() {
@@ -89,6 +110,7 @@ AFRAME.registerSystem("actions", {
     activeDevices.add(new KeyboardDevice());
 
     registeredMappings.add(KBMBindings);
+    registeredMappings.add(gamepadBindings);
   },
 
   tick() {

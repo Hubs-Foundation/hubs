@@ -35,4 +35,12 @@ paths.device.keyboard = "/device/keyboard/";
 // There are so many keys on the keyboard that the paths here
 // are written like `${paths.device.keyboard}${key}` where `key`
 // comes from the dom's keyboard events
-paths.device.gamepad = {};
+
+paths.device.gamepad = gamepadIndex => ({
+  button: buttonIndex => ({
+    pressed: `/device/gamepad/${gamepadIndex}/button/${buttonIndex}`,
+    touched: `/device/gamepad/${gamepadIndex}/button/${buttonIndex}`,
+    value: `/device/gamepad/${gamepadIndex}/button/${buttonIndex}`
+  }),
+  axis: axisIndex => `/device/gamepad/${gamepadIndex}/button/${axisIndex}`
+});
