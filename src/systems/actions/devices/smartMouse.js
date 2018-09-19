@@ -1,5 +1,5 @@
-import { paths } from "./paths";
-import { Pose } from "./pose";
+import { paths } from "../paths";
+import { Pose } from "../pose";
 
 const calculateCursorPose = function(camera, coords) {
   const cursorPose = new Pose();

@@ -2,9 +2,9 @@ import { KBMBindings } from "./actions/bindings";
 import { sets } from "./actions/sets";
 import { paths } from "./actions/paths";
 
-import MouseDevice from "./actions/mouse";
-import KeyboardDevice from "./actions/keyboard";
-import SmartMouseDevice from "./actions/smartMouse";
+import MouseDevice from "./actions/devices/mouse";
+import KeyboardDevice from "./actions/devices/keyboard";
+import SmartMouseDevice from "./actions/devices/smartMouse";
 
 function difference(setA, setB) {
   const _difference = new Set(setA);

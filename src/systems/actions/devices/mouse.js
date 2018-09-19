@@ -1,4 +1,4 @@
-import { paths } from "./paths";
+import { paths } from "../paths";
 
 // TODO: Where do these values (500, 10, 2) come from?
 const modeMod = {
