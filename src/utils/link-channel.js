@@ -109,7 +109,7 @@ export default class LinkChannel {
           if (numOccupants === 1) {
             // Great, only sender is in topic, request link
             channel.push("link_request", {
-              reply_to_session_id: this.socket.params.session_id,
+              reply_to_session_id: this.socket.params().session_id,
               public_key: publicKeyString
             });
 
