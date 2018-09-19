@@ -131,6 +131,8 @@ class HomeRoot extends Component {
     const sceneInfoUrl = `${sceneUrlBase}/${this.props.sceneId}`;
     const resp = await fetch(sceneInfoUrl).then(r => r.json());
     const scene = resp.scenes[0];
+    const attribution = scene.attribution && scene.attribution.split("\n").join(", ");
+    const authors = attribution && [{ organization: { name: attribution } }];
     // Transform the scene info into a an environment bundle structure.
     this.setState({
       environments: [
@@ -139,7 +141,7 @@ class HomeRoot extends Component {
           bundle_url: `${scene.model_url}.glb`,
           meta: {
             title: scene.name,
-            authors: [{ organization: { name: scene.attribution.split("\n").join(", ") } }],
+            authors,
             images: [{ type: "preview-thumbnail", srcset: scene.screenshot_url }]
           }
         }
