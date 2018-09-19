@@ -101,7 +101,8 @@ const inflateEntities = function(node, templates, isRoot) {
 
   const hubsComponents = node.userData.gltfExtensions && node.userData.gltfExtensions.HUBS_components;
 
-  // We can remove support for legacy components when our environments are updated to match Spoke output.
+  // We can remove support for legacy components when our environment, avatar and interactable models are
+  // updated to match Spoke output.
   const legacyComponents = node.userData.components;
 
   const entityComponents = hubsComponents || legacyComponents;
