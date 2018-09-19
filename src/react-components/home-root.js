@@ -139,6 +139,7 @@ class HomeRoot extends Component {
           bundle_url: `${scene.model_url}.glb`,
           meta: {
             title: scene.name,
+            authors: [{ organization: { name: scene.attribution.split("\n").join(", ") } }],
             images: [{ type: "preview-thumbnail", srcset: scene.screenshot_url }]
           }
         }
