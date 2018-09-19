@@ -640,90 +640,123 @@ const onReady = async () => {
 
 document.addEventListener("DOMContentLoaded", onReady);
 
-const dataURLtoBlob = dataURL => {
-  const binary = atob(dataURL.split(",")[1]);
-  const array = [];
-  let i = 0;
-  while (i < binary.length) {
-    array.push(binary.charCodeAt(i));
-    i++;
-  }
-  return new Blob([new Uint8Array(array)], { type: "image/png" });
-};
+const snapCanvas = document.createElement("canvas");
+async function snap(pixels, width, height) {
+  snapCanvas.width = width;
+  snapCanvas.height = height;
+  const context = snapCanvas.getContext("2d");
+
+  const imageData = context.createImageData(width, height);
+  imageData.data.set(pixels);
+  const bitmap = await createImageBitmap(imageData);
+  context.scale(1, -1);
+  context.drawImage(bitmap, 0, -height);
+  const blob = await new Promise(resolve => snapCanvas.toBlob(resolve));
+  return new File([blob], "snap.png", { type: "image/png" });
+}
 
 AFRAME.registerComponent("observer-cam", {
+  schema: {
+    previewFPS: { default: 6 },
+    imageWidth: { default: 512 },
+    imageHeight: { default: 512 }
+  },
+
   init() {
-    // this.render = this.render.bind(this);
-    console.log("OBSERVER CAM");
-    this.renderTarget = new THREE.WebGLRenderTarget(512, 512, {
+    this.stateAdded = this.stateAdded.bind(this);
+
+    this.lastUpdate = performance.now();
+    this.renderTarget = new THREE.WebGLRenderTarget(this.data.imageWidth, this.data.imageHeight, {
       format: THREE.RGBAFormat,
       minFilter: THREE.LinearFilter,
-      magFilter: THREE.NearestFilter
-      // depth: false,
-      // stencil: false
+      magFilter: THREE.NearestFilter,
+      encoding: THREE.sRGBEncoding,
+      depth: false,
+      stencil: false
     });
+
     this.camera = new THREE.PerspectiveCamera();
+    this.camera.rotation.set(0, Math.PI, 0);
     this.el.setObject3D("camera", this.camera);
 
-    // this.renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
-    // this.renderer.setPixelRatio(1);
-    // this.renderer.setSize(512, 512);
-    // this.renderer.domElement.style.position = "fixed";
-    // this.renderer.domElement.style.top = 0;
-    // this.renderer.domElement.style.left = 0;
-    // document.body.appendChild(this.renderer.domElement);
-
     const material = new THREE.MeshBasicMaterial({
-      // color: 0x000000,
-      side: THREE.DoubleSide,
-      // map: new THREE.CanvasTexture(this.renderer.domElement)
       map: this.renderTarget.texture
     });
-    // material.needsUpdate = true;
+    // Bit of a hack here to only update the renderTarget when the screens are in view and at a reduced FPS
+    material.map.isVideoTexture = true;
+    material.map.update = () => {
+      if (performance.now() - this.lastUpdate >= 1000 / this.data.previewFPS) {
+        this.updateRenderTargetNextTick = true;
+      }
+    };
 
-    const geometry = new THREE.PlaneGeometry();
-    this.mesh = new THREE.Mesh(geometry, material);
-    this.el.setObject3D("mesh", this.mesh);
+    const geometry = new THREE.PlaneGeometry(0.25, 0.25);
 
-    this.el.sceneEl.addEventListener("action_capture_picture", () => {
-      this.takeSnapshot = true;
-      // console.log(this.renderTarget.texture);
-      // this.renderer.domElement.toBlob(blob => {
-      //   const file = new File([blob], "snap.png", { type: "image/png" });
-      //   spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.CLIPBOARD);
-      // });
-    });
+    const screen = new THREE.Mesh(geometry, material);
+    screen.rotation.set(0, Math.PI, 0);
+    screen.position.set(0, -0.015, -0.08);
+    this.el.setObject3D("screen", screen);
 
-    // requestAnimationFrame(this.render);
+    const selfieScreen = new THREE.Mesh(geometry, material);
+    selfieScreen.position.set(0, 0.3, 0);
+    selfieScreen.scale.set(-1, 1, 1);
+    this.el.setObject3D("selfieScreen", selfieScreen);
+  },
+
+  play() {
+    this.el.parentNode.addEventListener("stateadded", this.stateAdded);
+  },
+
+  pause() {
+    this.el.parentNode.removeEventListener("stateadded", this.stateAdded);
+  },
+
+  stateAdded(evt) {
+    if (evt.detail === "activated") {
+      this.takeSnapshotNextTick = true;
+    }
   },
 
   tick() {
-    const scene = this.el.sceneEl.object3D;
-    const renderer = this.el.sceneEl.renderer;
-    const camera = this.camera; //document.getElementById("player-camera").components.camera.camera; //.object3D; //this.camera;
-    renderer.render(scene, camera, this.renderTarget, true);
-    if (this.takeSnapshot) {
-      this.takeSnapshot = false;
-      const gl = renderer.getContext();
-      const pixels = new Uint8Array(512 * 512 * 4);
-      renderer.readRenderTargetPixels(this.renderTarget, 0, 0, 512, 512, pixels);
-      // gl.readPixels(0, 0, 512, 512, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-      console.log(pixels);
-      // //   console.log(this.renderer.domElement.)
-      // const dataUrl = renderer.domElement.toDataURL();
-      // const i = document.createElement("img");
-      // i.src = dataUrl;
-      // document.body.appendChild(i);
-      // console.log(dataUrl);
-      // const blob = dataURLtoBlob(dataUrl);
-      // this.renderer.domElement.toBlob(blob => {
-      // console.log(blob);
-      // const file = new File([blob], "snap.png", { type: "image/png" });
-      // spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.CLIPBOARD);
-      // });
+    const sceneEl = this.el.sceneEl;
+    const renderer = sceneEl.renderer;
+    const now = performance.now();
+
+    if (!this.playerHead) {
+      const headEl = document.getElementById("player-head");
+      this.playerHead = headEl && headEl.object3D;
     }
 
-    // this.mesh.material.map.needsUpdate = true;
-    // requestAnimationFrame(this.render);
+    if (this.takeSnapshotNextTick || this.updateRenderTargetNextTick) {
+      const tempScale = new THREE.Vector3();
+      if (this.playerHead) {
+        tempScale.copy(this.playerHead.scale);
+        this.playerHead.scale.set(1, 1, 1);
+      }
+      renderer.render(sceneEl.object3D, this.camera, this.renderTarget, true);
+      if (this.playerHead) {
+        this.playerHead.scale.copy(tempScale);
+      }
+      this.lastUpdate = now;
+      this.updateRenderTargetNextTick = false;
+    }
+
+    if (this.takeSnapshotNextTick) {
+      const width = this.renderTarget.width;
+      const height = this.renderTarget.height;
+      if (!this.snapPixels) {
+        this.snapPixels = new Uint8Array(width * height * 4);
+      }
+      renderer.readRenderTargetPixels(this.renderTarget, 0, 0, width, height, this.snapPixels);
+      snap(this.snapPixels, width, height).then(file => {
+        const { entity, orientation } = addMedia(file, "#interactable-media", ObjectContentOrigins.CLIPBOARD, true);
+        orientation.then(() => {
+          entity.object3D.position.copy(this.el.object3D.position);
+          entity.object3D.rotation.copy(this.el.object3D.rotation);
+          entity.components["sticky-object"].setLocked(false);
+        });
+      });
+      this.takeSnapshotNextTick = false;
+    }
   }
 });

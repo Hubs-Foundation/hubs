@@ -414,7 +414,7 @@
             </template>
 
             <template data-name="Head">
-              <a-entity visible="false" bone-visibility></a-entity>
+              <a-entity id="player-head" visible="false" bone-visibility></a-entity>
             </template>
 
             <template data-name="LeftHand">
@@ -445,13 +445,15 @@
         ></a-entity>
 
         <a-entity
-            class="interactable"
-            grabbable
+            class="interactable toggle"
+            grabbable-toggle="maxGrabbers: 1;"
+            activatable__snap-hand="buttonStartEvents: secondary_hand_grab; buttonEndEvents: secondary_hand_release;"
+            activatable__snap-cursor="buttonStartEvents: secondary-cursor-grab; buttonEndEvents: secondary-cursor-release;"
             position="-2 2 0"
             observer-cam
             body="type: dynamic; shape: none; mass: 1;"
-            shape="shape: box; halfExtents: 0.5 0.5 0.1;"
             sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
+            media-loader="src: https://sketchfab.com/models/2e8778db90e845888e38edd80be28283; resize: true"
             >
         </a-entity>
     </a-scene>
