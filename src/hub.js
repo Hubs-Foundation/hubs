@@ -586,10 +586,14 @@ const onReady = async () => {
   const handleJoinedHubChannel = async data => {
     const hub = data.hubs[0];
     const defaultSpaceTopic = hub.topics[0];
-    const sceneUrl = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle").src;
+    const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");
+    const bundleAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle");
+    const sceneUrl = (glbAsset || bundleAsset).src;
+    const hasExtension = /\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl);
+
     console.log(`Scene URL: ${sceneUrl}`);
 
-    if (/\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl)) {
+    if (glbAsset || hasExtension) {
       if (loadedSceneUrl !== sceneUrl) {
         const resolved = await resolveMedia(sceneUrl, false, 0);
         const gltfEl = document.createElement("a-entity");
@@ -599,7 +603,7 @@ const onReady = async () => {
         loadedSceneUrl = sceneUrl;
       }
     } else {
-      // TODO remove, and remove bundleloaded event
+      // TODO kill bundles
       initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
     }
 

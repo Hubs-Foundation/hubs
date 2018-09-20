@@ -62,11 +62,18 @@ class HubCreatePanel extends Component {
       const thumbnailImage = meta.images.find(i => i.type === "preview-thumbnail");
 
       if (thumbnailImage) {
-        const baseURL = new URL(extractUrlBase(environment.bundle_url), window.location.href);
+        // TODO kill bundles
+        if (environment.bundle_url) {
+          const baseURL = new URL(extractUrlBase(environment.bundle_url), window.location.href);
 
-        environmentThumbnail = {
-          srcset: resolveURL(thumbnailImage.srcset, baseURL)
-        };
+          environmentThumbnail = {
+            srcset: resolveURL(thumbnailImage.srcset, baseURL)
+          };
+        } else {
+          environmentThumbnail = {
+            srcset: thumbnailImage.srcset
+          };
+        }
       }
     }
 
@@ -79,11 +86,17 @@ class HubCreatePanel extends Component {
     }
 
     const environment = this.props.environments[this.state.environmentIndex];
-    const sceneUrl = this.state.customSceneUrl || environment.bundle_url;
 
     const payload = {
-      hub: { name: this.state.name, default_environment_gltf_bundle_url: sceneUrl }
+      hub: { name: this.state.name }
     };
+
+    if (!this.state.customSceneUrl && environment.scene_id) {
+      payload.hub.scene_id = environment.scene_id;
+    } else {
+      const sceneUrl = this.state.customSceneUrl || environment.bundle_url;
+      payload.hub.default_environment_gltf_bundle_url = sceneUrl;
+    }
 
     const createUrl = getReticulumFetchUrl("/api/v1/hubs");
 
