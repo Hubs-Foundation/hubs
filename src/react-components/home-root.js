@@ -137,8 +137,7 @@ class HomeRoot extends Component {
     this.setState({
       environments: [
         {
-          // Environment loading doesn't check the content-type, so we force a .glb extension here.
-          bundle_url: `${scene.model_url}.glb`,
+          scene_id: this.props.sceneId,
           meta: {
             title: scene.name,
             authors,
