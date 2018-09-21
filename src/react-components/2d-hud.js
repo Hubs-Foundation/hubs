@@ -4,7 +4,7 @@ import cx from "classnames";
 
 import styles from "../assets/stylesheets/2d-hud.scss";
 
-const TopHUD = ({ muted, frozen, onToggleMute, onToggleFreeze, onSpawnPen }) => (
+const TopHUD = ({ muted, frozen, onToggleMute, onToggleFreeze, onSpawnPen, onSpawnCamera }) => (
   <div className={cx(styles.container, styles.top, styles.unselectable)}>
     <div className={cx("ui-interactive", styles.panel, styles.left)}>
       <div
@@ -20,6 +20,7 @@ const TopHUD = ({ muted, frozen, onToggleMute, onToggleFreeze, onSpawnPen }) => 
     />
     <div className={cx("ui-interactive", styles.panel, styles.right)}>
       <div className={cx(styles.iconButton, styles.spawn_pen)} title={"Drawing Pen"} onClick={onSpawnPen} />
+      <div className={cx(styles.iconButton, styles.spawn_camera)} title={"Camera"} onClick={onSpawnCamera} />
     </div>
   </div>
 );

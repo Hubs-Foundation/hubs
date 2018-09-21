@@ -24,7 +24,7 @@
         renderer="antialias: true; gammaOutput: true; sortObjects: true; physicallyCorrectLights: true;"
         gamma-factor
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
-        physics="gravity: -6; debug: true;"
+        physics="gravity: -6; debug: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         freeze-controller="toggleEvent: action_freeze"
         personal-space-bubble="debug: false;"
@@ -201,6 +201,27 @@
                 </a-entity>
             </template>
 
+            <template id="interactable-camera">
+                <a-entity
+                    class="interactable toggle"
+                    grabbable-toggle="maxGrabbers: 1;"
+                    hoverable
+                    activatable__snap-hand="buttonStartEvents: secondary_hand_grab; buttonEndEvents: secondary_hand_release;"
+                    activatable__snap-cursor="buttonStartEvents: secondary-cursor-grab; buttonEndEvents: secondary-cursor-release;"
+                    camera-tool
+                    body="type: dynamic; shape: none; mass: 1;"
+                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
+                    media-loader="src: https://sketchfab.com/models/2e8778db90e845888e38edd80be28283; resize: true"
+                    super-networked-interactable="counter: #camera-counter;"
+                    position-at-box-shape-border="target:.delete-button"
+                    rotation
+                >
+                    <a-entity class="delete-button" visible-while-frozen>
+                        <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
+                        <a-entity text=" value:Delete; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
 
             <template id="interactable-drawing">
                 <a-entity
@@ -263,6 +284,8 @@
         <a-entity id="media-counter" networked-counter="max: 10;"></a-entity>
 
         <a-entity id="pen-counter" networked-counter="max: 10;"></a-entity>
+
+        <a-entity id="camera-counter" networked-counter="max: 1;"></a-entity>
 
         <a-entity id="drawing-manager" drawing-manager></a-entity>
 
@@ -444,18 +467,6 @@
             cursorSuperHand: #cursor;"
         ></a-entity>
 
-        <a-entity
-            class="interactable toggle"
-            grabbable-toggle="maxGrabbers: 1;"
-            activatable__snap-hand="buttonStartEvents: secondary_hand_grab; buttonEndEvents: secondary_hand_release;"
-            activatable__snap-cursor="buttonStartEvents: secondary-cursor-grab; buttonEndEvents: secondary-cursor-release;"
-            position="-2 2 0"
-            observer-cam
-            body="type: dynamic; shape: none; mass: 1;"
-            sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
-            media-loader="src: https://sketchfab.com/models/2e8778db90e845888e38edd80be28283; resize: true"
-            >
-        </a-entity>
     </a-scene>
 
     <div id="ui-root"></div>

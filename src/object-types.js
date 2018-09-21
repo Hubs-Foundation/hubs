@@ -38,7 +38,7 @@ const ObjectTypes = {
   SPAWNER_PDF: 27,
   SPAWNER_AUDIO: 28,
   //SPAWNER_TEXT: 29,
-  //DRAWING: 30,
+  CAMERA: 30,
   UNKNOWN: 31
 };
 
