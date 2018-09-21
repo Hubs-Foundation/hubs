@@ -15,6 +15,7 @@ paths.app.cursorPenPrevColor = "/app/cursorPenPrevColor";
 paths.app.spawnPen = "/app/spawnPen";
 paths.app.translate = {};
 paths.app.translate.forward = "/app/translate/forward";
+paths.app.translate.backward = "/app/translate/backward";
 paths.app.snapRotateLeft = "/app/snapRotateLeft";
 paths.app.snapRotateRight = "/app/snapRotateRight";
 paths.app.boost = "/app/boost";
@@ -62,5 +63,8 @@ paths.device.xbox = {
     pressed: `${xbox}button/${buttonName}/pressed`,
     touched: `${xbox}button/${buttonName}/touched`,
     value: `${xbox}button/${buttonName}/value`
-  })
+  }),
+  axis: axisName => {
+    return `${xbox}axis/${axisName}`;
+  }
 };
