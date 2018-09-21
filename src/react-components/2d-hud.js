@@ -30,7 +30,8 @@ TopHUD.propTypes = {
   frozen: PropTypes.bool,
   onToggleMute: PropTypes.func,
   onToggleFreeze: PropTypes.func,
-  onSpawnPen: PropTypes.func
+  onSpawnPen: PropTypes.func,
+  onSpawnCamera: PropTypes.func
 };
 
 const BottomHUD = ({ onCreateObject, showPhotoPicker, onMediaPicked }) => (
