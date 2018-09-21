@@ -143,8 +143,6 @@ const config = {
       },
       keyboard: {
         m_press: "action_mute",
-        q_press: "snap_rotate_left",
-        e_press: "snap_rotate_right",
         b_press: "action_share_screen",
 
         // We can't create a keyboard behaviour with AFIM yet,

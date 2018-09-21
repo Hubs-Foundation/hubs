@@ -113,16 +113,15 @@ window.addEventListener(
 AFRAME.registerSystem("actions", {
   init() {
     // TODO: Handle device (dis/re)connection
-    //activeDevices.add(new MouseDevice());
-    //activeDevices.add(new SmartMouseDevice());
+    activeDevices.add(new MouseDevice());
+    activeDevices.add(new SmartMouseDevice());
     activeDevices.add(new KeyboardDevice());
-    this.touchscreen = new TouchscreenDevice();
-    activeDevices.add(this.touchscreen);
+      //activeDevices.add(new TouchscreenDevice());
     activeDevices.add(new Hud());
 
-    //registeredMappings.add(KBMBindings);
+    registeredMappings.add(KBMBindings);
     //registeredMappings.add(gamepadBindings);
-    registeredMappings.add(touchscreenBindings);
+    //registeredMappings.add(touchscreenBindings);
     registeredMappings.add(keyboardDebugBindings);
     registeredMappings.add(xboxBindings);
   },
@@ -174,7 +173,6 @@ AFRAME.registerSystem("actions", {
       console.log("frame", this.frame);
       console.log("sets", this.activeSets);
       console.log("bindings", this.activeBindings);
-      console.log("touchscreen", this.touchscreen.assignments);
     }
   },
 

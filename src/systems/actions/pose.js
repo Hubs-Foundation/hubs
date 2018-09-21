@@ -17,7 +17,8 @@ export function Pose() {
         .unproject(camera)
         .sub(this.position)
         .normalize();
-      return this.fromOriginAndDirection(this.position, this.direction);
+      this.fromOriginAndDirection(this.position, this.direction);
+      return this;
     }
   };
 }

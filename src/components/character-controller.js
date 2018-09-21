@@ -100,6 +100,7 @@ AFRAME.registerComponent("character-controller", {
     const pivotRotationInvMatrix = new THREE.Matrix4();
     const startPos = new THREE.Vector3();
     const startScale = new THREE.Vector3();
+    const jump = new THREE.Vector3();
 
     return function(t, dt) {
       const deltaSeconds = dt / 1000;
@@ -114,6 +115,21 @@ AFRAME.registerComponent("character-controller", {
       // Other aframe components like teleport-controls set position/rotation/scale, not the matrix, so we need to make sure to compose them back into the matrix
       root.updateMatrix();
 
+      const actions = AFRAME.scenes[0].systems.actions;
+      if (actions.poll(paths.app.snapRotateLeft)) {
+        this.snapRotateLeft();
+      }
+      if (actions.poll(paths.app.snapRotateRight)) {
+        this.snapRotateRight();
+      }
+      jump.set(0, 0, 0);
+      if (actions.poll(paths.app.translate.forward)) {
+        jump.z += actions.poll(paths.app.translate.forward);
+      }
+      if (actions.poll(paths.app.translate.backward)) {
+        jump.z -= actions.poll(paths.app.translate.backward);
+      }
+
       pivotPos.copy(pivot.position);
       pivotPos.applyMatrix4(root.matrix);
       trans.setPosition(pivotPos);
@@ -124,18 +140,11 @@ AFRAME.registerComponent("character-controller", {
       pivotRotationInvMatrix.makeRotationAxis(rotationAxis, -pivot.rotation.y);
       this.updateVelocity(deltaSeconds);
 
-      const actions = AFRAME.scenes[0].systems.actions;
-      const jump = new THREE.Vector3();
-      if (actions.poll(paths.app.translate.forward)) {
-        jump.z += actions.poll(paths.app.translate.forward);
-      }
-      if (actions.poll(paths.app.translate.backward)) {
-        jump.z -= actions.poll(paths.app.translate.backward);
-      }
+      const boost = actions.poll(paths.app.boost) ? 2 : 1;
       move.makeTranslation(
-        jump.x + this.velocity.x * distance,
-        jump.y + this.velocity.y * distance,
-        jump.z + this.velocity.z * distance
+        jump.x + this.velocity.x * distance * boost,
+        jump.y + this.velocity.y * distance * boost,
+        jump.z + this.velocity.z * distance * boost
       );
       yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 

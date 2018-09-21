@@ -15,6 +15,9 @@ paths.app.cursorPenPrevColor = "/app/cursorPenPrevColor";
 paths.app.spawnPen = "/app/spawnPen";
 paths.app.translate = {};
 paths.app.translate.forward = "/app/translate/forward";
+paths.app.snapRotateLeft = "/app/snapRotateLeft";
+paths.app.snapRotateRight = "/app/snapRotateRight";
+paths.app.boost = "/app/boost";
 
 paths.device = {};
 
@@ -38,10 +41,11 @@ paths.device.touchscreen.isTouchingGrabbable = "/device/touchscreen/isTouchingGr
 paths.device.hud = {};
 paths.device.hud.penButton = "/device/hud/penButton";
 
-paths.device.keyboard = "/device/keyboard/";
-// There are so many keys on the keyboard that the paths here
-// are written like `${paths.device.keyboard}${key}` where `key`
-// comes from the dom's keyboard events
+paths.device.keyboard = {
+  key: key => {
+    return `/device/keyboard/${key.toLowerCase()}`;
+  }
+};
 
 paths.device.gamepad = gamepadIndex => ({
   button: buttonIndex => ({

@@ -4,16 +4,16 @@ export default class KeyboardDevice {
     this.keys = {};
     this.events = [];
 
-    ["keydown", "keyup"].map(x => document.addEventListener(x, this.events.push.bind(this.events)));
-
-    document.addEventListener("blur", () => {
-      this.keys = {};
-    });
+    ["keydown", "keyup", "blur", "mouseout"].map(x => document.addEventListener(x, this.events.push.bind(this.events)));
   }
 
   write(frame) {
     this.events.forEach(event => {
-      this.keys[`${paths.device.keyboard}${event.key.toLowerCase()}`] = event.type === "keydown";
+      if (event.type === "blur" || event.type === "mouseout") {
+        this.keys = {};
+        return;
+      }
+      this.keys[paths.device.keyboard.key(event.key)] = event.type === "keydown";
     });
     while (this.events.length) {
       this.events.pop();

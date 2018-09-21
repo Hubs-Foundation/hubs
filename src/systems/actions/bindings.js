@@ -152,7 +152,7 @@ export const keyboardDebugBindings = {
   [sets.global]: [
     {
       src: {
-        value: `${paths.device.keyboard}l`
+        value: paths.device.keyboard.key("l")
       },
       dest: {
         value: paths.app.logDebugFrame
@@ -164,6 +164,30 @@ export const keyboardDebugBindings = {
 
 export const KBMBindings = {
   [sets.global]: [
+    {
+      src: { value: paths.device.keyboard.key("shift") },
+      dest: { value: paths.app.boost },
+      xform: xforms.copy
+    },
+    {
+      src: { value: paths.device.keyboard.key("q") },
+      dest: { value: paths.app.snapRotateLeft },
+      xform: xforms.rising(),
+      root: "q",
+      priority: 100
+    },
+    {
+      src: { value: paths.device.keyboard.key("e") },
+      dest: { value: paths.app.snapRotateRight },
+      xform: xforms.rising(),
+      root: "e",
+      priority: 100
+    },
+    {
+      src: { value: paths.device.hud.penButton },
+      dest: { value: paths.app.spawnPen },
+      xform: xforms.rising()
+    },
     {
       src: { value: paths.device.smartMouse.cursorPose },
       dest: { value: paths.app.cursorPose },
@@ -198,7 +222,7 @@ export const KBMBindings = {
     },
     {
       src: {
-        value: `${paths.device.keyboard}l`
+        value: paths.device.keyboard.key("l")
       },
       dest: {
         value: paths.app.logDebugFrame
@@ -208,6 +232,62 @@ export const KBMBindings = {
   ],
 
   [sets.cursorHoldingPen]: [
+    {
+      src: {
+        bool: paths.device.keyboard.key("shift"),
+        value: paths.device.keyboard.key("q")
+      },
+      dest: { value: "/var/shift+q" },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+q" },
+      dest: { value: paths.app.cursorPenPrevColor },
+      xform: xforms.rising()
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("shift"),
+        value: paths.device.keyboard.key("e")
+      },
+      dest: { value: "/var/shift+e" },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+e" },
+      dest: { value: paths.app.cursorPenNextColor },
+      xform: xforms.rising()
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("shift"),
+        value: paths.device.keyboard.key("q")
+      },
+      dest: { value: "/var/notshift+q" },
+      xform: xforms.copyIfFalse
+    },
+    {
+      src: { value: "/var/notshift+q" },
+      dest: { value: paths.app.snapRotateLeft },
+      xform: xforms.rising(),
+      root: "q",
+      priority: 200
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("shift"),
+        value: paths.device.keyboard.key("e")
+      },
+      dest: { value: "/var/notshift+e" },
+      xform: xforms.copyIfFalse
+    },
+    {
+      src: { value: "/var/notshift+e" },
+      dest: { value: paths.app.snapRotateRight },
+      xform: xforms.rising(),
+      root: "e",
+      priority: 200
+    },
     {
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.app.cursorStartDrawing },
@@ -227,10 +307,9 @@ export const KBMBindings = {
       xform: xforms.falling(),
       priority: 200
     },
-
     {
       src: {
-        bool: `${paths.device.keyboard}v`,
+        bool: paths.device.keyboard.key("shift"),
         value: paths.device.mouse.wheel
       },
       dest: { value: "/var/cursorScalePenTipWheel" },
@@ -242,20 +321,6 @@ export const KBMBindings = {
       src: { value: "/var/cursorScalePenTipWheel" },
       dest: { value: paths.app.cursorScalePenTip },
       xform: xforms.scale(0.12)
-    },
-    {
-      src: {
-        value: `${paths.device.keyboard}q`
-      },
-      dest: { value: paths.app.cursorPenNextColor },
-      xform: xforms.rising()
-    },
-    {
-      src: {
-        value: `${paths.device.keyboard}e`
-      },
-      dest: { value: paths.app.cursorPenPrevColor },
-      xform: xforms.rising()
     }
   ],
 
@@ -273,7 +338,7 @@ export const KBMBindings = {
     },
     {
       src: {
-        bool: `${paths.device.keyboard}v`,
+        bool: paths.device.keyboard.key("shift"),
         value: paths.device.mouse.wheel
       },
       dest: { value: paths.app.cursorModDelta },
