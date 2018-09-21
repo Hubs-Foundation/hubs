@@ -1,4 +1,4 @@
-import { KBMBindings, gamepadBindings, touchscreenBindings, keyboardDebugBindings } from "./actions/bindings";
+import { KBMBindings, gamepadBindings, touchscreenBindings, keyboardDebugBindings, xboxBindings } from "./actions/bindings";
 import { sets } from "./actions/sets";
 import { paths } from "./actions/paths";
 
@@ -8,6 +8,7 @@ import SmartMouseDevice from "./actions/devices/smartMouse";
 import GamepadDevice from "./actions/devices/gamepad";
 import TouchscreenDevice from "./actions/touchscreen";
 import Hud from "./actions/devices/hud";
+import XboxController from "./actions/devices/xbox";
 
 function difference(setA, setB) {
   const _difference = new Set(setA);
@@ -91,7 +92,8 @@ const gamepads = {};
 window.addEventListener(
   "gamepadconnected",
   e => {
-    const gamepadDevice = new GamepadDevice(e.gamepad);
+    console.log("XBOX CONTROLELR!");
+    const gamepadDevice = new XboxController(e.gamepad);
     activeDevices.add(gamepadDevice);
     gamepads[e.gamepad.index] = gamepadDevice;
   },
@@ -122,6 +124,7 @@ AFRAME.registerSystem("actions", {
     //registeredMappings.add(gamepadBindings);
     registeredMappings.add(touchscreenBindings);
     registeredMappings.add(keyboardDebugBindings);
+    registeredMappings.add(xboxBindings);
   },
 
   tick() {

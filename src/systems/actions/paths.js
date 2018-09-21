@@ -13,6 +13,8 @@ paths.app.cursorScalePenTip = "/app/cursorScalePenTip";
 paths.app.cursorPenNextColor = "/app/cursorPenNextColor";
 paths.app.cursorPenPrevColor = "/app/cursorPenPrevColor";
 paths.app.spawnPen = "/app/spawnPen";
+paths.app.translate = {};
+paths.app.translate.forward = "/app/translate/forward";
 
 paths.device = {};
 
@@ -47,5 +49,14 @@ paths.device.gamepad = gamepadIndex => ({
     touched: `/device/gamepad/${gamepadIndex}/button/${buttonIndex}`,
     value: `/device/gamepad/${gamepadIndex}/button/${buttonIndex}`
   }),
-  axis: axisIndex => `/device/gamepad/${gamepadIndex}/button/${axisIndex}`
+  axis: axisIndex => `/device/gamepad/${gamepadIndex}/axis/${axisIndex}`
 });
+
+const xbox = "/device/xbox/";
+paths.device.xbox = {
+  button: buttonName => ({
+    pressed: `${xbox}button/${buttonName}/pressed`,
+    touched: `${xbox}button/${buttonName}/touched`,
+    value: `${xbox}button/${buttonName}/value`
+  })
+};

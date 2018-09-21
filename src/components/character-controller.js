@@ -1,3 +1,4 @@
+import { paths } from "../systems/actions/paths";
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
@@ -122,7 +123,20 @@ AFRAME.registerComponent("character-controller", {
       pivotRotationMatrix.makeRotationAxis(rotationAxis, pivot.rotation.y);
       pivotRotationInvMatrix.makeRotationAxis(rotationAxis, -pivot.rotation.y);
       this.updateVelocity(deltaSeconds);
-      move.makeTranslation(this.velocity.x * distance, this.velocity.y * distance, this.velocity.z * distance);
+
+      const actions = AFRAME.scenes[0].systems.actions;
+      const jump = new THREE.Vector3();
+      if (actions.poll(paths.app.translate.forward)) {
+        jump.z += actions.poll(paths.app.translate.forward);
+      }
+      if (actions.poll(paths.app.translate.backward)) {
+        jump.z -= actions.poll(paths.app.translate.backward);
+      }
+      move.makeTranslation(
+        jump.x + this.velocity.x * distance,
+        jump.y + this.velocity.y * distance,
+        jump.z + this.velocity.z * distance
+      );
       yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 
       // Translate to middle of playspace (player rig)

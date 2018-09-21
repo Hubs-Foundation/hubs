@@ -2,6 +2,61 @@ import { paths } from "./paths";
 import { sets } from "./sets";
 import { xforms } from "./xforms";
 
+export const xboxBindings = {
+  [sets.global]: [
+    {
+      src: { value: paths.device.xbox.button("a").value },
+      dest: { value: "/var/translate/a" },
+      xform: xforms.copy
+    },
+    {
+      src: { value: "/var/translate/a" },
+      dest: { value: "/var/translate/a_negate" },
+      xform: xforms.negate
+    },
+    {
+      src: { value: "/var/translate/a_negate" },
+      dest: { value: "/var/translate/forward" },
+      xform: xforms.throttleDecrement(20, 10)
+    },
+    {
+      src: { value: "/var/translate/forward" },
+      dest: { value: "/var/translate/forward_scaled" },
+      xform: xforms.scale(0.4)
+    },
+    {
+      src: { value: "/var/translate/forward_scaled" },
+      dest: { value: paths.app.translate.forward },
+      xform: xforms.copy
+    },
+    {
+      src: { value: paths.device.xbox.button("b").value },
+      dest: { value: "/var/translate/b" },
+      xform: xforms.copy
+    },
+    {
+      src: { value: "/var/translate/b" },
+      dest: { value: "/var/translate/b_negate" },
+      xform: xforms.negate
+    },
+    {
+      src: { value: "/var/translate/b_negate" },
+      dest: { value: "/var/translate/backward" },
+      xform: xforms.throttleDecrement(30, 9)
+    },
+    {
+      src: { value: "/var/translate/backward" },
+      dest: { value: "/var/translate/backward_scaled" },
+      xform: xforms.scale(0.4)
+    },
+    {
+      src: { value: "/var/translate/backward_scaled" },
+      dest: { value: paths.app.translate.backward },
+      xform: xforms.copy
+    }
+  ]
+};
+
 export const gamepadBindings = {
   // [sets.global]: [
   //   {
