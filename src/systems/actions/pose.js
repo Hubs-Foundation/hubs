@@ -8,6 +8,16 @@ export function Pose() {
       this.position = origin;
       this.direction = direction;
       this.orientation = this.orientation.setFromUnitVectors(forward, direction);
+      return this;
+    },
+    fromCameraProjection: function(camera, normalizedX, normalizedY) {
+      this.position.setFromMatrixPosition(camera.matrixWorld);
+      this.direction
+        .set(normalizedX, normalizedY, 0.5)
+        .unproject(camera)
+        .sub(this.position)
+        .normalize();
+      return this.fromOriginAndDirection(this.position, this.direction);
     }
   };
 }

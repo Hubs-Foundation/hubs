@@ -166,7 +166,7 @@ class UIRoot extends Component {
   };
 
   spawnPen = () => {
-    this.props.scene.emit("spawn_pen");
+    this.props.scene.emit("penButtonPressed");
   };
 
   handleForcedVREntryType = () => {

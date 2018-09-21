@@ -12,6 +12,101 @@ export const gamepadBindings = {
   // ]
 };
 
+export const touchscreenBindings = {
+  [sets.global]: [
+    {
+      src: { value: paths.device.touchscreen.cursorPose },
+      dest: { value: paths.app.cursorPose },
+      xform: xforms.copy
+    },
+    {
+      src: { value: paths.device.touchscreen.cameraDelta },
+      dest: { x: "/var/touchscreenCamDeltaX", y: "/var/touchscreenCamDeltaY" },
+      xform: xforms.split_vec2
+    },
+    {
+      src: { value: "/var/touchscreenCamDeltaX" },
+      dest: { value: "/var/touchscreenCamDeltaXScaled" },
+      xform: xforms.scale(0.18)
+    },
+    {
+      src: { value: "/var/touchscreenCamDeltaY" },
+      dest: { value: "/var/touchscreenCamDeltaYScaled" },
+      xform: xforms.scale(0.35)
+    },
+    {
+      src: { x: "/var/touchscreenCamDeltaXScaled", y: "/var/touchscreenCamDeltaYScaled" },
+      dest: { value: paths.app.cameraDelta },
+      xform: xforms.compose_vec2
+    },
+    {
+      src: { value: paths.device.touchscreen.isTouchingGrabbable },
+      dest: { value: paths.app.cursorGrab },
+      xform: xforms.copy,
+      root: "touchscreen.isTouchingGrabbable",
+      priority: 100
+    },
+    {
+      src: { value: paths.device.hud.penButton },
+      dest: { value: paths.app.spawnPen },
+      xform: xforms.rising(),
+      root: "hud.penButton",
+      priority: 100
+    }
+  ],
+  [sets.cursorHoldingInteractable]: [
+    {
+      src: { value: paths.device.touchscreen.isTouchingGrabbable },
+      dest: { value: paths.app.cursorDrop },
+      xform: xforms.falling(),
+      root: "touchscreen.cursorDrop",
+      priority: 100
+    }
+  ],
+
+  [sets.cursorHoveringOnPen]: [],
+  [sets.cursorHoldingPen]: [
+    {
+      src: { value: paths.device.touchscreen.isTouchingGrabbable },
+      dest: { value: paths.noop },
+      xform: xforms.noop,
+      root: "touchscreen.cursorDrop",
+      priority: 200
+    },
+    {
+      src: { value: paths.device.touchscreen.isTouchingGrabbable },
+      dest: { value: paths.app.cursorStartDrawing },
+      xform: xforms.risingWithFrameDelay(5)
+    },
+    {
+      src: { value: paths.device.touchscreen.isTouchingGrabbable },
+      dest: { value: paths.app.cursorStopDrawing },
+      xform: xforms.falling()
+    },
+    {
+      src: { value: paths.device.hud.penButton },
+      dest: { value: paths.app.cursorDrop },
+      xform: xforms.rising(),
+      root: "hud.penButton",
+      priority: 200
+    }
+  ]
+};
+
+export const keyboardDebugBindings = {
+  [sets.global]: [
+    {
+      src: {
+        value: `${paths.device.keyboard}l`
+      },
+      dest: {
+        value: paths.app.logDebugFrame
+      },
+      xform: xforms.rising()
+    }
+  ]
+};
+
 export const KBMBindings = {
   [sets.global]: [
     {
@@ -80,7 +175,7 @@ export const KBMBindings = {
 
     {
       src: {
-        bool: `${paths.device.keyboard}alt`,
+        bool: `${paths.device.keyboard}v`,
         value: paths.device.mouse.wheel
       },
       dest: { value: "/var/cursorScalePenTipWheel" },
@@ -91,7 +186,7 @@ export const KBMBindings = {
     {
       src: { value: "/var/cursorScalePenTipWheel" },
       dest: { value: paths.app.cursorScalePenTip },
-      xform: xforms.scale(0.03)
+      xform: xforms.scale(0.12)
     },
     {
       src: {
@@ -123,7 +218,7 @@ export const KBMBindings = {
     },
     {
       src: {
-        bool: `${paths.device.keyboard}alt`,
+        bool: `${paths.device.keyboard}v`,
         value: paths.device.mouse.wheel
       },
       dest: { value: paths.app.cursorModDelta },

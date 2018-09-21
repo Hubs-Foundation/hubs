@@ -26,10 +26,10 @@ export default class TouchEventsHandler {
   }
 
   addEventListeners() {
-    document.addEventListener("touchstart", this.handleTouchStart);
-    document.addEventListener("touchmove", this.handleTouchMove);
-    document.addEventListener("touchend", this.handleTouchEnd);
-    document.addEventListener("touchcancel", this.handleTouchEnd);
+//    document.addEventListener("touchstart", this.handleTouchStart);
+//    document.addEventListener("touchmove", this.handleTouchMove);
+//    document.addEventListener("touchend", this.handleTouchEnd);
+//    document.addEventListener("touchcancel", this.handleTouchEnd);
   }
 
   tearDown() {

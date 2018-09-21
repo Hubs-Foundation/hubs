@@ -42,35 +42,6 @@ AFRAME.registerComponent("cursor-controller", {
     this.actionSystemCallback = this.actionSystemCallback.bind(this);
   },
 
-  actionSystemCallback: (function() {
-    const rawIntersections = [];
-    return function actionSystemCallback(frame) {
-      const superhandsIsGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
-      const cursorPose = frame[paths.app.cursorPose];
-      if (!this.enabled || superhandsIsGrabbing || !cursorPose) {
-        return;
-      }
-
-      if (this.dirty) {
-        this.populateEntities(this.data.objects, this.targets);
-        this.dirty = false;
-      }
-      rawIntersections.length = 0;
-      this.raycaster.ray.origin = cursorPose.position;
-      this.raycaster.ray.direction = cursorPose.direction;
-      this.raycaster.intersectObjects(this.targets, true, rawIntersections);
-      const intersection = rawIntersections.find(x => x.object.el);
-      this.intersection = intersection;
-      const isHoveringOnPen = intersection && intersection.object.el.matches(".pen, .pen *");
-      const isHoveringOnVideo = intersection && intersection.object.el.matches(".video, .video *");
-      const isHoveringOnInteractable = intersection && intersection.object.el.matches(".interactable, .interactable *");
-      const actions = AFRAME.scenes[0].systems.actions;
-      actions[isHoveringOnPen ? "activate" : "deactivate"](sets.cursorHoveringOnPen);
-      actions[isHoveringOnVideo ? "activate" : "deactivate"](sets.cursorHoveringOnVideo);
-      actions[isHoveringOnInteractable ? "activate" : "deactivate"](sets.cursorHoveringOnInteractable);
-    };
-  })(),
-
   update: function() {
     this.raycaster.far = this.data.far;
     this.raycaster.near = this.data.near;
@@ -108,12 +79,10 @@ AFRAME.registerComponent("cursor-controller", {
     // if we are now intersecting something, and previously we were intersecting nothing or something else
     if (currIntersection && (!prevIntersection || currIntersection.object.el !== prevIntersection.object.el)) {
       this.data.cursor.emit("raycaster-intersection", { el: currIntersection.object.el });
-      this.data.cursor.setAttribute("material", { color: this.data.cursorColorHovered });
     }
     // if we were intersecting something, but now we are intersecting nothing or something else
     if (prevIntersection && (!currIntersection || currIntersection.object.el !== prevIntersection.object.el)) {
       this.data.cursor.emit("raycaster-intersection-cleared", { el: prevIntersection.object.el });
-      this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
     }
   },
 
@@ -150,6 +119,45 @@ AFRAME.registerComponent("cursor-controller", {
     this.setCursorVisibility(false);
   },
 
+  actionSystemCallback: (function() {
+    const rawIntersections = [];
+    return function actionSystemCallback(frame) {
+      if (!this.enabled) {
+        return;
+      }
+      const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
+      if (isGrabbing) {
+          return;
+      }
+
+      const cursorPose = frame[paths.app.cursorPose];
+      const actions = AFRAME.scenes[0].systems.actions;
+      if (!cursorPose) {
+        actions.deactivate(sets.cursorHoveringOnPen);
+        actions.deactivate(sets.cursorHoveringOnVideo);
+        actions.deactivate(sets.cursorHoveringOnInteractable);
+        return;
+      }
+
+      if (this.dirty) {
+        this.populateEntities(this.data.objects, this.targets);
+        this.dirty = false;
+      }
+      rawIntersections.length = 0;
+      this.raycaster.ray.origin = cursorPose.position;
+      this.raycaster.ray.direction = cursorPose.direction;
+      this.raycaster.intersectObjects(this.targets, true, rawIntersections);
+      const intersection = rawIntersections.find(x => x.object.el);
+      this.intersection = intersection;
+      const isHoveringOnPen = intersection && intersection.object.el.matches(".pen, .pen *");
+      const isHoveringOnVideo = intersection && intersection.object.el.matches(".video, .video *");
+      const isHoveringOnInteractable = intersection && intersection.object.el.matches(".interactable, .interactable *");
+      actions[isHoveringOnPen ? "activate" : "deactivate"](sets.cursorHoveringOnPen);
+      actions[isHoveringOnVideo ? "activate" : "deactivate"](sets.cursorHoveringOnVideo);
+      actions[isHoveringOnInteractable ? "activate" : "deactivate"](sets.cursorHoveringOnInteractable);
+    };
+  })(),
+
   tick: (() => {
     const cameraPos = new THREE.Vector3();
     return function() {
@@ -157,9 +165,18 @@ AFRAME.registerComponent("cursor-controller", {
         return;
       }
 
+      const { cursor, near, far, drawLine, camera } = this.data;
+      if (this.dirty) {
+        this.populateEntities(this.data.objects, this.targets);
+        this.dirty = false;
+      }
+
       const intersection = this.intersection;
       this.emitIntersectionEvents(this.prevIntersection, intersection);
       this.prevIntersection = intersection;
+      this.data.cursor.setAttribute("material", {
+        color: intersection ? this.data.cursorColorHovered : this.data.cursorColorUnhovered
+      });
       if (intersection) {
         this.distance = intersection.distance;
       } else {
@@ -167,15 +184,20 @@ AFRAME.registerComponent("cursor-controller", {
       }
 
       const actions = AFRAME.scenes[0].systems.actions;
+
       const cursorPose = actions.poll(paths.app.cursorPose);
       this.setCursorVisibility(!!cursorPose);
+      const isGrabbing = cursor.components["super-hands"].state.has("grab-start");
+      if (isGrabbing) {
+        if (actions.poll(paths.app.cursorDrop)) {
+          this.endInteraction();
+        }
+      }
       if (!cursorPose) {
         return;
       }
 
-      const { cursor, near, far, drawLine, camera } = this.data;
       const cursorPosition = cursor.object3D.position;
-      const isGrabbing = cursor.components["super-hands"].state.has("grab-start");
       if (isGrabbing) {
         const cursorModDelta = actions.poll(paths.app.cursorModDelta);
         if (cursorModDelta) {
@@ -205,11 +227,7 @@ AFRAME.registerComponent("cursor-controller", {
       cameraPos.y = cursor.object3D.position.y;
       cursor.object3D.lookAt(cameraPos);
 
-      if (isGrabbing) {
-        if (actions.poll(paths.app.cursorDrop)) {
-          this.endInteraction();
-        }
-      } else {
+      if (!isGrabbing) {
         if (actions.poll(paths.app.cursorGrab)) {
           this.startInteraction();
         }
@@ -241,6 +259,8 @@ AFRAME.registerComponent("cursor-controller", {
   },
 
   endInteraction: function() {
+    const actions = AFRAME.scenes[0].systems.actions;
+    actions.deactivate(sets.cursorHoldingInteractable);
     this.data.cursor.emit("cursor-release", {});
   },
 

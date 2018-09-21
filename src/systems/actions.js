@@ -1,4 +1,4 @@
-import { KBMBindings, gamepadBindings } from "./actions/bindings";
+import { KBMBindings, gamepadBindings, touchscreenBindings, keyboardDebugBindings } from "./actions/bindings";
 import { sets } from "./actions/sets";
 import { paths } from "./actions/paths";
 
@@ -6,6 +6,8 @@ import MouseDevice from "./actions/devices/mouse";
 import KeyboardDevice from "./actions/devices/keyboard";
 import SmartMouseDevice from "./actions/devices/smartMouse";
 import GamepadDevice from "./actions/devices/gamepad";
+import TouchscreenDevice from "./actions/touchscreen";
+import Hud from "./actions/devices/hud";
 
 function difference(setA, setB) {
   const _difference = new Set(setA);
@@ -38,28 +40,33 @@ function applyChange(sets, change) {
 const activeSets = new Set([sets.global]);
 const registeredMappings = new Set();
 
-function getActiveBindings() {
-  const prioritizedBindings = new Map();
-  const activeBindings = new Set();
+function prioritizeBindings(prioritizedBindings, activeBindings) {
   registeredMappings.forEach(mapping => {
     activeSets.forEach(setName => {
       const set = mapping[setName] || [];
       set.forEach(binding => {
         const { root, priority } = binding;
         if (!root || !priority) {
+          // priority info not found : activate
           activeBindings.add(binding);
           return;
         }
         if (!prioritizedBindings.has(root)) {
+          // root seen for the first time : activate
           prioritizedBindings.set(root, binding);
           activeBindings.add(binding);
           return;
         }
         const prevPriority = prioritizedBindings.get(root).priority;
-        if (prevPriority > priority) {
+        if (priority < prevPriority) {
+          // priority too low : deactivate
+          // pause debugger here to see when bindings never get activated,
+          // because their priority is not the highest for this root.
           return;
         }
-        if (prevPriority < priority) {
+        if (priority > prevPriority) {
+          // priority is higher : deactivate binding stored for this root
+          // pause debugger here to step thru bindings getting overwritten this frame
           activeBindings.delete(prioritizedBindings.get(root));
           prioritizedBindings.delete(root);
           prioritizedBindings.set(root, binding);
@@ -67,19 +74,18 @@ function getActiveBindings() {
           return;
         }
         if (prevPriority === priority) {
+          // (?) perhaps we could allow this somehow
           console.error("equal priorities on same root", binding, prioritizedBindings.get(root));
           return;
         }
       });
     });
   });
-  return activeBindings;
 }
 
 const callbacks = [];
 let pendingSetChanges = [];
 let frame = {};
-let activeBindings = new Set();
 const activeDevices = new Set();
 const gamepads = {};
 window.addEventListener(
@@ -105,12 +111,17 @@ window.addEventListener(
 AFRAME.registerSystem("actions", {
   init() {
     // TODO: Handle device (dis/re)connection
-    activeDevices.add(new MouseDevice());
-    activeDevices.add(new SmartMouseDevice());
+    //activeDevices.add(new MouseDevice());
+    //activeDevices.add(new SmartMouseDevice());
     activeDevices.add(new KeyboardDevice());
+    this.touchscreen = new TouchscreenDevice();
+    activeDevices.add(this.touchscreen);
+    activeDevices.add(new Hud());
 
-    registeredMappings.add(KBMBindings);
-    registeredMappings.add(gamepadBindings);
+    //registeredMappings.add(KBMBindings);
+    //registeredMappings.add(gamepadBindings);
+    registeredMappings.add(touchscreenBindings);
+    registeredMappings.add(keyboardDebugBindings);
   },
 
   tick() {
@@ -121,19 +132,22 @@ AFRAME.registerSystem("actions", {
 
     const deviceFrame = {};
     activeDevices.forEach(device => {
-      device.write(deviceFrame); // smartMouse runs after mouse
+      device.write(deviceFrame);
     });
 
     frame = {};
     Object.assign(frame, deviceFrame);
-    activeBindings = getActiveBindings();
+    const priorityMap = new Map();
+    const activeBindings = new Set();
+    prioritizeBindings(priorityMap, activeBindings);
     activeBindings.forEach(binding => {
       resolve(frame, binding);
     });
 
     const cursorController = document.querySelector("[cursor-controller]").components["cursor-controller"];
     cursorController.actionSystemCallback(frame);
-    // Callbacks are here to let app code activate or deactivate an action set THIS FRAME.
+    // (?) We could put callbacks here to let app code activate or deactivate an action set THIS FRAME.
+    // (?) Cursors (and possibly colliders?) can know whether they've targetted something THIS FRAME.
 
     const prevActiveSets = new Set(activeSets);
     pendingSetChanges.forEach(change => {
@@ -143,14 +157,21 @@ AFRAME.registerSystem("actions", {
     if (difference(prevActiveSets, activeSets).size || difference(activeSets, prevActiveSets).size) {
       frame = {};
       Object.assign(frame, deviceFrame);
-      activeBindings = getActiveBindings();
+      const priorityMap = new Map();
+      const activeBindings = new Set();
+      prioritizeBindings(priorityMap, activeBindings);
       activeBindings.forEach(binding => {
         resolve(frame, binding);
       });
     }
-    this.debugFrame = frame;
+    this.frame = frame;
+    this.activeSets = activeSets;
+    this.activeBindings = activeBindings;
     if (frame[paths.app.logDebugFrame]) {
-      console.log(JSON.stringify(this.debugFrame, null, " "));
+      console.log("frame", this.frame);
+      console.log("sets", this.activeSets);
+      console.log("bindings", this.activeBindings);
+      console.log("touchscreen", this.touchscreen.assignments);
     }
   },
 

@@ -1,4 +1,5 @@
 export const paths = {};
+paths.noop = "/noop";
 paths.app = {};
 paths.app.logDebugFrame = "/app/logDebugFrame";
 paths.app.cameraDelta = "/app/cameraDelta";
@@ -11,6 +12,7 @@ paths.app.cursorStopDrawing = "/app/cursorStopDrawing";
 paths.app.cursorScalePenTip = "/app/cursorScalePenTip";
 paths.app.cursorPenNextColor = "/app/cursorPenNextColor";
 paths.app.cursorPenPrevColor = "/app/cursorPenPrevColor";
+paths.app.spawnPen = "/app/spawnPen";
 
 paths.device = {};
 
@@ -26,10 +28,13 @@ paths.device.smartMouse.cursorPose = "/device/smartMouse/cursorPose";
 paths.device.smartMouse.cameraDelta = "/device/smartMouse/cameraDelta";
 
 paths.device.touchscreen = {};
-paths.device.touchscreen.joystickLeft = "/device/touchscreen/joystickLeft";
-paths.device.touchscreen.joystickRight = "/device/touchscreen/joystickRight";
-paths.device.touchscreen.targetlessPinch = "/device/touchscreen/targetlessPinch";
-paths.device.touchscreen.interactablePinch = "/device/touchscreen/interactablePinch";
+paths.device.touchscreen.cursorPose = "/device/touchscreen/cursorPose";
+paths.device.touchscreen.cameraDelta = "/device/touchscreen/cameraDelta";
+paths.device.touchscreen.pinchDelta = "/device/touchscreen/pinchDelta";
+paths.device.touchscreen.isTouchingGrabbable = "/device/touchscreen/isTouchingGrabbable";
+
+paths.device.hud = {};
+paths.device.hud.penButton = "/device/hud/penButton";
 
 paths.device.keyboard = "/device/keyboard/";
 // There are so many keys on the keyboard that the paths here

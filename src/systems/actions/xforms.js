@@ -1,4 +1,5 @@
 export const xforms = {
+  noop: function() {},
   copy: function(frame, src, dest) {
     frame[dest.value] = frame[src.value];
   },
@@ -33,6 +34,19 @@ export const xforms = {
     let prev = false;
     return function rising(frame, src, dest) {
       frame[dest.value] = frame[src.value] && !prev;
+      prev = frame[src.value];
+    };
+  },
+  risingWithFrameDelay: function(n) {
+    let values = [];
+    for (var i = 0; i < n; i++) {
+      values[i] = undefined;
+    }
+    let valueForThisFrame;
+    let prev = false;
+    return function risingWithFrameDelay(frame, src, dest) {
+      frame[dest.value] = values.splice(0, 1)[0];
+      values.push(frame[src.value] && !prev);
       prev = frame[src.value];
     };
   },

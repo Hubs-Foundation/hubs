@@ -74,10 +74,12 @@ AFRAME.registerComponent("pen", {
     const actions = AFRAME.scenes[0].systems.actions;
 
     this.el.parentNode.addEventListener("grab-start", () => {
+      actions.activate(sets.cursorHoldingInteractable);
       actions.activate(sets.cursorHoldingPen);
     });
     this.el.parentNode.addEventListener("grab-end", () => {
       actions.deactivate(sets.cursorHoldingPen);
+      actions.deactivate(sets.cursorHoldingInteractable);
     });
   },
 
