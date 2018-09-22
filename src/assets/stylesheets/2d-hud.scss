@@ -121,6 +121,13 @@
   background-image: url(../hud/spawn_pen-hover.png);
 }
 
+:local(.iconButton.spawn_camera) {
+  background-image: url(../hud/spawn_camera.png);
+}
+:local(.iconButton.spawn_camera:hover) {
+  background-image: url(../hud/spawn_camera-hover.png);
+}
+
 :local(.iconButton.freeze) {
   background-image: url(../hud/freeze_off.png);
 }
