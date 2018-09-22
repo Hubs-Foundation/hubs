@@ -87,53 +87,55 @@ AFRAME.registerComponent("camera-tool", {
     }
   },
 
-  tock() {
-    const sceneEl = this.el.sceneEl;
-    const renderer = this.renderer || sceneEl.renderer;
-    const now = performance.now();
+  tock: (function() {
+    const tempScale = new THREE.Vector3();
+    return function tock() {
+      const sceneEl = this.el.sceneEl;
+      const renderer = this.renderer || sceneEl.renderer;
+      const now = performance.now();
 
-    if (!this.playerHead) {
-      const headEl = document.getElementById("player-head");
-      this.playerHead = headEl && headEl.object3D;
-    }
+      if (!this.playerHead) {
+        const headEl = document.getElementById("player-head");
+        this.playerHead = headEl && headEl.object3D;
+      }
 
-    if (this.takeSnapshotNextTick || this.updateRenderTargetNextTick) {
-      const tempScale = new THREE.Vector3();
-      if (this.playerHead) {
-        tempScale.copy(this.playerHead.scale);
-        this.playerHead.scale.set(1, 1, 1);
+      if (this.takeSnapshotNextTick || this.updateRenderTargetNextTick) {
+        if (this.playerHead) {
+          tempScale.copy(this.playerHead.scale);
+          this.playerHead.scale.set(1, 1, 1);
+        }
+        const tmpVRFlag = renderer.vr.enabled;
+        const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
+        delete sceneEl.object3D.onAfterRender;
+        renderer.vr.enabled = false;
+        renderer.render(sceneEl.object3D, this.camera, this.renderTarget, true);
+        renderer.vr.enabled = tmpVRFlag;
+        sceneEl.object3D.onAfterRender = tmpOnAfterRender;
+        if (this.playerHead) {
+          this.playerHead.scale.copy(tempScale);
+        }
+        this.lastUpdate = now;
+        this.updateRenderTargetNextTick = false;
       }
-      const tmpVRFlag = renderer.vr.enabled;
-      const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
-      delete sceneEl.object3D.onAfterRender;
-      renderer.vr.enabled = false;
-      renderer.render(sceneEl.object3D, this.camera, this.renderTarget, true);
-      renderer.vr.enabled = tmpVRFlag;
-      sceneEl.object3D.onAfterRender = tmpOnAfterRender;
-      if (this.playerHead) {
-        this.playerHead.scale.copy(tempScale);
-      }
-      this.lastUpdate = now;
-      this.updateRenderTargetNextTick = false;
-    }
 
-    if (this.takeSnapshotNextTick) {
-      const width = this.renderTarget.width;
-      const height = this.renderTarget.height;
-      if (!this.snapPixels) {
-        this.snapPixels = new Uint8Array(width * height * 4);
-      }
-      renderer.readRenderTargetPixels(this.renderTarget, 0, 0, width, height, this.snapPixels);
-      pixelsToPNG(this.snapPixels, width, height).then(file => {
-        const { entity, orientation } = addMedia(file, "#interactable-media", undefined, true);
-        orientation.then(() => {
-          entity.object3D.position.copy(this.el.object3D.position);
-          entity.object3D.rotation.copy(this.el.object3D.rotation);
-          entity.components["sticky-object"].setLocked(false);
-          sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
+      if (this.takeSnapshotNextTick) {
+        const width = this.renderTarget.width;
+        const height = this.renderTarget.height;
+        if (!this.snapPixels) {
+          this.snapPixels = new Uint8Array(width * height * 4);
+        }
+        renderer.readRenderTargetPixels(this.renderTarget, 0, 0, width, height, this.snapPixels);
+        pixelsToPNG(this.snapPixels, width, height).then(file => {
+          const { entity, orientation } = addMedia(file, "#interactable-media", undefined, true);
+          orientation.then(() => {
+            entity.object3D.position.copy(this.el.object3D.position);
+            entity.object3D.rotation.copy(this.el.object3D.rotation);
+            entity.components["sticky-object"].setLocked(false);
+            sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
+          });
         });
-      });
-      this.takeSnapshotNextTick = false;
-    }
-  }
+        this.takeSnapshotNextTick = false;
+      }
+    };
+  })()
 });
