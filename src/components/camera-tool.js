@@ -87,12 +87,7 @@ AFRAME.registerComponent("camera-tool", {
     }
   },
 
-  tock(_, __, tockCamera) {
-    // tock gets called after any render. We trigger a render by rendering the camera preview, so ignore those
-    if (tockCamera === this.camera) {
-      return;
-    }
-
+  tock() {
     const sceneEl = this.el.sceneEl;
     const renderer = this.renderer || sceneEl.renderer;
     const now = performance.now();
@@ -109,9 +104,12 @@ AFRAME.registerComponent("camera-tool", {
         this.playerHead.scale.set(1, 1, 1);
       }
       const tmpVRFlag = renderer.vr.enabled;
+      const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
+      delete sceneEl.object3D.onAfterRender;
       renderer.vr.enabled = false;
       renderer.render(sceneEl.object3D, this.camera, this.renderTarget, true);
       renderer.vr.enabled = tmpVRFlag;
+      sceneEl.object3D.onAfterRender = tmpOnAfterRender;
       if (this.playerHead) {
         this.playerHead.scale.copy(tempScale);
       }
