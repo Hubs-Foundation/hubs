@@ -12,13 +12,13 @@ AFRAME.registerComponent("in-world-hud", {
     this.mic = this.el.querySelector(".mic");
     this.freeze = this.el.querySelector(".freeze");
     this.pen = this.el.querySelector(".pen");
-    this.camera = this.el.querySelector(".camera");
+    this.cameraBtn = this.el.querySelector(".cameraBtn");
     this.background = this.el.querySelector(".bg");
     const renderOrder = window.APP.RENDER_ORDER;
     this.mic.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
     this.freeze.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
     this.pen.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
-    this.camera.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
+    this.cameraBtn.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
     this.background.object3DMap.mesh.renderORder = renderOrder.HUD_BACKGROUND;
 
     this.updateButtonStates = () => {
@@ -57,7 +57,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.mic.addEventListener("click", this.onMicClick);
     this.freeze.addEventListener("click", this.onFreezeClick);
     this.pen.addEventListener("mousedown", this.onPenClick);
-    this.camera.addEventListener("click", this.onCameraClick);
+    this.cameraBtn.addEventListener("click", this.onCameraClick);
   },
 
   pause() {
@@ -67,6 +67,6 @@ AFRAME.registerComponent("in-world-hud", {
     this.mic.removeEventListener("click", this.onMicClick);
     this.freeze.removeEventListener("click", this.onFreezeClick);
     this.pen.removeEventListener("mousedown", this.onPenClick);
-    this.camera.removeEventListener("click", this.onCameraClick);
+    this.cameraBtn.removeEventListener("click", this.onCameraClick);
   }
 });
