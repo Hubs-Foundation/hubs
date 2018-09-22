@@ -123,11 +123,15 @@ AFRAME.registerComponent("character-controller", {
         this.snapRotateRight();
       }
       jump.set(0, 0, 0);
-      if (actions.poll(paths.app.translate.forward)) {
-        jump.z += actions.poll(paths.app.translate.forward);
+      if (actions.poll(paths.app.translate.up)) {
+        jump.y += actions.poll(paths.app.translate.up);
       }
-      if (actions.poll(paths.app.translate.backward)) {
-        jump.z -= actions.poll(paths.app.translate.backward);
+      if (actions.poll(paths.app.translate.down)) {
+        jump.y -= actions.poll(paths.app.translate.down);
+      }
+      const acc = actions.poll(paths.app.characterAcceleration);
+      if (acc) {
+        this.accelerationInput.set(acc[0], 0, acc[1]);
       }
 
       pivotPos.copy(pivot.position);

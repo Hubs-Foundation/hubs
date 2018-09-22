@@ -113,13 +113,13 @@ window.addEventListener(
 AFRAME.registerSystem("actions", {
   init() {
     // TODO: Handle device (dis/re)connection
-    activeDevices.add(new MouseDevice());
-    activeDevices.add(new SmartMouseDevice());
+    //activeDevices.add(new MouseDevice());
+    //activeDevices.add(new SmartMouseDevice());
     activeDevices.add(new KeyboardDevice());
-      //activeDevices.add(new TouchscreenDevice());
+    //activeDevices.add(new TouchscreenDevice());
     activeDevices.add(new Hud());
 
-    registeredMappings.add(KBMBindings);
+    //registeredMappings.add(KBMBindings);
     //registeredMappings.add(gamepadBindings);
     //registeredMappings.add(touchscreenBindings);
     registeredMappings.add(keyboardDebugBindings);

@@ -1,3 +1,5 @@
+import { Pose } from "./pose";
+const zeroVec2 = [0, 0];
 export const xforms = {
   noop: function() {},
   copy: function(frame, src, dest) {
@@ -5,13 +7,13 @@ export const xforms = {
   },
   scale: function(scalar) {
     return function scale(frame, src, dest) {
-      if (frame[src.value]) {
+      if (frame[src.value] !== undefined) {
         frame[dest.value] = frame[src.value] * scalar;
       }
     };
   },
   split_vec2: function(frame, src, dest) {
-    if (frame[src.value]) {
+    if (frame[src.value] !== undefined) {
       frame[dest.x] = frame[src.value][0];
       frame[dest.y] = frame[src.value][1];
     }
@@ -25,10 +27,13 @@ export const xforms = {
     frame[dest.value] = -frame[src.value];
   },
   copyIfFalse: function(frame, src, dest) {
-    frame[dest.value] = frame[src.bool] ? 0 : frame[src.value];
+    frame[dest.value] = frame[src.bool] ? undefined : frame[src.value];
   },
   copyIfTrue: function(frame, src, dest) {
-    frame[dest.value] = frame[src.bool] ? frame[src.value] : 0;
+    frame[dest.value] = frame[src.bool] ? frame[src.value] : undefined;
+  },
+  zeroIfDefined: function(frame, src, dest) {
+    frame[dest.value] = frame[src.bool] !== undefined ? 0 : frame[src.value];
   },
   true: function(frame, src, dest) {
     frame[dest.value] = true;
@@ -87,12 +92,29 @@ export const xforms = {
           i = 0;
           max = max + n;
           frame[dest.value] = frame[src.value];
-          console.log(dest.value, frame[dest.value]);
         }
       } else {
         i = 0;
         max = 0;
       }
     };
+  },
+  vec2Zero: function(frame, _, dest) {
+    frame[dest.value] = zeroVec2;
+  },
+  poseFromCameraProjection: function() {
+    let camera;
+    const pose = new Pose();
+    return function poseFromCameraProjection(frame, src, dest) {
+      if (!camera) {
+        camera = document.querySelector("#player-camera").components.camera.camera;
+      }
+      frame[dest.value] = pose.fromCameraProjection(camera, frame[src.value][0], frame[src.value][1]);
+    };
+  },
+  alternativeIfUndefined: function(frame, src, dest) {
+    if (frame[src.value] === undefined) {
+    }
+    frame[dest.value] = frame[src.value] === undefined ? frame[src.alternative] : frame[src.value];
   }
 };
