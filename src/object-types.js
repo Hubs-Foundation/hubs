@@ -12,7 +12,7 @@ export const ObjectContentOrigins = {
 // Enumeration of spawnable object types, used for telemetry, which encapsulates
 // both the origin of the content for the object and also the type of content
 // contained in the object.
-const ObjectTypes = {
+export const ObjectTypes = {
   URL_IMAGE: 0,
   URL_VIDEO: 1,
   URL_MODEL: 2,
