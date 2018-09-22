@@ -166,7 +166,13 @@ AFRAME.registerComponent("character-controller", {
         this.navGroup = pathfinder.getGroup(zone, end);
       }
       this.navNode = this.navNode || pathfinder.getClosestNode(end, zone, this.navGroup, true);
-      this.navNode = pathfinder.clampStep(start, end, this.navNode, zone, this.navGroup, object3D.position);
+      if (this.navNode) {
+        try {
+          this.navNode = pathfinder.clampStep(start, end, this.navNode, zone, this.navGroup, object3D.position);
+        } catch (e) {
+          // clampStep failed for whatever reason. Don't stop the main loop.
+        }
+      }
     }
   },
 
@@ -176,7 +182,13 @@ AFRAME.registerComponent("character-controller", {
     if (zone in pathfinder.zones) {
       this.navGroup = pathfinder.getGroup(zone, position);
       this.navNode = pathfinder.getClosestNode(navPosition, zone, this.navGroup, true) || this.navNode;
-      this.navNode = pathfinder.clampStep(position, position, this.navNode, zone, this.navGroup, object3D.position);
+      if (this.navNode) {
+        try {
+          this.navNode = pathfinder.clampStep(position, position, this.navNode, zone, this.navGroup, object3D.position);
+        } catch (e) {
+          // clampStep failed for whatever reason. Don't stop the main loop.
+        }
+      }
     }
   },
 
