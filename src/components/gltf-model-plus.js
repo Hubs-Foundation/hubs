@@ -302,10 +302,13 @@ AFRAME.registerComponent("gltf-model-plus", {
 
   loadTemplates() {
     this.templates = {};
-    this.el.querySelectorAll(":scope > template").forEach(templateEl => {
+
+    for (let i = 0; i < this.el.childNodes; i++) {
+      const templateEl = this.el.childNodes[i];
+      if (templateEl.tagName !== "template") continue;
       const root = document.importNode(templateEl.firstElementChild || templateEl.content.firstElementChild, true);
       this.templates[templateEl.getAttribute("data-name")] = root;
-    });
+    }
   },
 
   async loadModel(src, contentType, technique, useCache) {
