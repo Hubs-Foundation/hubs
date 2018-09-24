@@ -1,6 +1,7 @@
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
+const MAX_WARNINGS = 10;
 
 /**
  * Avatar movement controller that listens to move, rotate and teleportation events and moves the avatar accordingly.
@@ -25,6 +26,8 @@ AFRAME.registerComponent("character-controller", {
     this.accelerationInput = new THREE.Vector3(0, 0, 0);
     this.pendingSnapRotationMatrix = new THREE.Matrix4();
     this.angularVelocity = 0; // Scalar value because we only allow rotation around Y
+    this._withinWarningLimit = true;
+    this._warningCount = 0;
     this.setAccelerationInput = this.setAccelerationInput.bind(this);
     this.snapRotateLeft = this.snapRotateLeft.bind(this);
     this.snapRotateRight = this.snapRotateRight.bind(this);
@@ -158,6 +161,16 @@ AFRAME.registerComponent("character-controller", {
     };
   })(),
 
+  _warnWithWarningLimit: function(msg) {
+    if (!this._withinWarningLimit) return;
+    this._warningCount++;
+    if (this._warningCount > MAX_WARNINGS) {
+      this._withinWarningLimit = false;
+      msg = "Warning count exceeded. Will not log further warnings";
+    }
+    console.warn("character-controller", msg);
+  },
+
   setPositionOnNavMesh: function(start, end, object3D) {
     const pathfinder = this.el.sceneEl.systems.nav.pathfinder;
     const zone = this.navZone;
@@ -166,7 +179,16 @@ AFRAME.registerComponent("character-controller", {
         this.navGroup = pathfinder.getGroup(zone, end);
       }
       this.navNode = this.navNode || pathfinder.getClosestNode(end, zone, this.navGroup, true);
-      this.navNode = pathfinder.clampStep(start, end, this.navNode, zone, this.navGroup, object3D.position);
+      if (this.navNode) {
+        try {
+          this.navNode = pathfinder.clampStep(start, end, this.navNode, zone, this.navGroup, object3D.position);
+        } catch (e) {
+          // clampStep failed for whatever reason. Don't stop the main loop.
+          if (this._withinWarningLimit) this._warnWithWarningLimit(`setPositionOnNavMesh: clampStep failed. ${e}`);
+        }
+      } else {
+        if (this._withinWarningLimit) this._warnWithWarningLimit("setPositionOnNavMesh: navNode is null.");
+      }
     }
   },
 
@@ -176,7 +198,16 @@ AFRAME.registerComponent("character-controller", {
     if (zone in pathfinder.zones) {
       this.navGroup = pathfinder.getGroup(zone, position);
       this.navNode = pathfinder.getClosestNode(navPosition, zone, this.navGroup, true) || this.navNode;
-      this.navNode = pathfinder.clampStep(position, position, this.navNode, zone, this.navGroup, object3D.position);
+      if (this.navNode) {
+        try {
+          this.navNode = pathfinder.clampStep(position, position, this.navNode, zone, this.navGroup, object3D.position);
+        } catch (e) {
+          // clampStep failed for whatever reason. Don't stop the main loop.
+          if (this._withinWarningLimit) this._warnWithWarningLimit(`resetPositionOnNavMesh: clampStep failed. ${e}`);
+        }
+      } else {
+        if (this._withinWarningLimit) this._warnWithWarningLimit("resetPositionOnNavMesh: navNode is null.");
+      }
     }
   },
 
