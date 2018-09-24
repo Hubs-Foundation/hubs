@@ -6,7 +6,7 @@ import MouseDevice from "./actions/devices/mouse";
 import KeyboardDevice from "./actions/devices/keyboard";
 import SmartMouseDevice from "./actions/devices/smartMouse";
 import GamepadDevice from "./actions/devices/gamepad";
-import TouchscreenDevice from "./actions/touchscreen";
+import TouchscreenDevice from "./actions/devices/touchscreen";
 import Hud from "./actions/devices/hud";
 import XboxController from "./actions/devices/xbox";
 
@@ -116,14 +116,14 @@ AFRAME.registerSystem("actions", {
     //activeDevices.add(new MouseDevice());
     //activeDevices.add(new SmartMouseDevice());
     activeDevices.add(new KeyboardDevice());
-    //activeDevices.add(new TouchscreenDevice());
+    activeDevices.add(new TouchscreenDevice());
     activeDevices.add(new Hud());
 
     //registeredMappings.add(KBMBindings);
     //registeredMappings.add(gamepadBindings);
-    //registeredMappings.add(touchscreenBindings);
+    registeredMappings.add(touchscreenBindings);
     registeredMappings.add(keyboardDebugBindings);
-    registeredMappings.add(xboxBindings);
+    //registeredMappings.add(xboxBindings);
   },
 
   tick() {

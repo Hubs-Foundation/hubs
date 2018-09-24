@@ -1,61 +1,16 @@
-import { paths } from "./paths";
-import { Pose } from "./pose";
+import { paths } from "../paths";
+import { Pose } from "../pose";
+import { touchIsAssigned, jobIsAssigned, assign, unassign, findByJob, findByTouch } from "./touchscreen/assignments";
 
-const job = {};
-job.moveCursor = "moveCursor";
-job.moveCamera = "moveCamera";
-job.firstPincher = "firstPincher";
-job.secondPincher = "secondPincher";
+const MOVE_CURSOR_JOB = "MOVE CURSOR";
+const MOVE_CAMERA_JOB = "MOVE CAMERA";
+const FIRST_PINCHER_JOB = "FIRST PINCHER";
+const SECOND_PINCHER_JOB = "SECOND PINCHER";
 
 function distance(x1, y1, x2, y2) {
   const dx = x1 - x2;
   const dy = y1 - y2;
   return Math.sqrt(dx * dx + dy * dy);
-}
-
-function touchIsAssigned(touch, assignments) {
-  return (
-    assignments.find(assignment => {
-      return assignment.touch.identifier === touch.identifier;
-    }) !== undefined
-  );
-}
-
-function jobIsAssigned(job, assignments) {
-  return (
-    assignments.find(assignment => {
-      return assignment.job === job;
-    }) !== undefined
-  );
-}
-
-function assign(touch, job, assignments) {
-  if (touchIsAssigned(touch, assignments) || jobIsAssigned(job, assignments)) {
-    console.error("cannot reassign touches or jobs. unassign first");
-    return undefined;
-  }
-  const assignment = { job, touch };
-  assignments.push(assignment);
-  return assignment;
-}
-
-function unassign(touch, job, assignments) {
-  function match(assignment) {
-    return assignment.touch.identifier === touch.identifier && assignment.job === job;
-  }
-  assignments.splice(assignments.findIndex(match), 1);
-}
-
-function findByJob(job, assignments) {
-  return assignments.find(assignment => {
-    return assignment.job === job;
-  });
-}
-
-function findByTouch(touch, assignments) {
-  return assignments.find(assignment => {
-    return assignment.touch.identifier === touch.identifier;
-  });
 }
 
 function shouldMoveCursor(touch, raycaster) {
@@ -74,8 +29,7 @@ function shouldMoveCursor(touch, raycaster) {
   );
   raycaster.intersectObjects(cursorController.targets, true, rawIntersections);
   const intersection = rawIntersections.find(x => x.object.el);
-  const cursorShouldGrab = intersection && intersection.object.el.matches(".interactable, .interactable *");
-  return cursorShouldGrab;
+  return intersection && intersection.object.el.matches(".interactable, .interactable *");
 }
 
 export default class Touchscreen {
@@ -97,39 +51,39 @@ export default class Touchscreen {
 
     const assignment = findByTouch(touch, this.assignments);
     switch (assignment.job) {
-      case job.moveCursor:
-      case job.moveCamera:
+      case MOVE_CURSOR_JOB:
+      case MOVE_CAMERA_JOB:
         unassign(assignment.touch, assignment.job, this.assignments);
         break;
-      case job.firstPincher:
+      case FIRST_PINCHER_JOB:
         unassign(assignment.touch, assignment.job, this.assignments);
         this.pinch = undefined;
 
-        if (jobIsAssigned(job.secondPincher, this.assignments)) {
-          const second = findByJob(job.secondPincher, this.assignments);
+        if (jobIsAssigned(SECOND_PINCHER_JOB, this.assignments)) {
+          const second = findByJob(SECOND_PINCHER_JOB, this.assignments);
           unassign(second.touch, second.job, this.assignments);
-          if (jobIsAssigned(job.moveCamera, this.assignments)) {
+          if (jobIsAssigned(MOVE_CAMERA_JOB, this.assignments)) {
             // reassign secondPincher to firstPincher
-            const first = assign(second.touch, job.firstPincher, this.assignments);
+            const first = assign(second.touch, FIRST_PINCHER_JOB, this.assignments);
             first.clientX = second.clientX;
             first.clientY = second.clientY;
           } else {
             // reassign secondPincher to moveCamera
-            const cameraMover = assign(second.touch, job.moveCamera, this.assignments);
+            const cameraMover = assign(second.touch, MOVE_CAMERA_JOB, this.assignments);
             cameraMover.clientX = second.clientX;
             cameraMover.clientY = second.clientY;
             cameraMover.delta = [0, 0];
           }
         }
         break;
-      case job.secondPincher:
+      case SECOND_PINCHER_JOB:
         unassign(assignment.touch, assignment.job, this.assignments);
         this.pinch = undefined;
-        if (jobIsAssigned(job.firstPincher, this.assignments) && !jobIsAssigned(job.moveCamera, this.assignments)) {
+        if (jobIsAssigned(FIRST_PINCHER_JOB, this.assignments) && !jobIsAssigned(MOVE_CAMERA_JOB, this.assignments)) {
           //reassign firstPincher to moveCamera
-          const first = findByJob(job.firstPincher, this.assignments);
+          const first = findByJob(FIRST_PINCHER_JOB, this.assignments);
           unassign(first.touch, first.job, this.assignments);
-          const cameraMover = assign(first.touch, job.moveCamera, this.assignments);
+          const cameraMover = assign(first.touch, MOVE_CAMERA_JOB, this.assignments);
           cameraMover.clientX = first.clientX;
           cameraMover.clientY = first.clientY;
           cameraMover.delta = [0, 0];
@@ -146,26 +100,26 @@ export default class Touchscreen {
 
     const assignment = findByTouch(touch, this.assignments);
     switch (assignment.job) {
-      case job.moveCursor:
+      case MOVE_CURSOR_JOB:
         assignment.cursorPose.fromCameraProjection(
           document.querySelector("#player-camera").components.camera.camera,
           (touch.clientX / window.innerWidth) * 2 - 1,
           -(touch.clientY / window.innerHeight) * 2 + 1
         );
         break;
-      case job.moveCamera:
+      case MOVE_CAMERA_JOB:
         assignment.delta[0] += touch.clientX - assignment.clientX;
         assignment.delta[1] += touch.clientY - assignment.clientY;
         assignment.clientX = touch.clientX;
         assignment.clientY = touch.clientY;
         break;
-      case job.firstPincher:
-      case job.secondPincher:
+      case FIRST_PINCHER_JOB:
+      case SECOND_PINCHER_JOB:
         assignment.clientX = touch.clientX;
         assignment.clientY = touch.clientY;
-        if (jobIsAssigned(job.firstPincher, this.assignments) && jobIsAssigned(job.secondPincher, this.assignments)) {
-          const first = findByJob(job.firstPincher, this.assignments);
-          const second = findByJob(job.secondPincher, this.assignments);
+        if (jobIsAssigned(FIRST_PINCHER_JOB, this.assignments) && jobIsAssigned(SECOND_PINCHER_JOB, this.assignments)) {
+          const first = findByJob(FIRST_PINCHER_JOB, this.assignments);
+          const second = findByJob(SECOND_PINCHER_JOB, this.assignments);
           const currentDistance = distance(first.clientX, first.clientY, second.clientX, second.clientY);
           this.pinch.delta += currentDistance - this.pinch.currentDistance;
           this.pinch.currentDistance = currentDistance;
@@ -180,8 +134,8 @@ export default class Touchscreen {
       return;
     }
 
-    if (!jobIsAssigned(job.moveCursor, this.assignments) && shouldMoveCursor(touch, this.raycaster)) {
-      const assignment = assign(touch, job.moveCursor, this.assignments);
+    if (!jobIsAssigned(MOVE_CURSOR_JOB, this.assignments) && shouldMoveCursor(touch, this.raycaster)) {
+      const assignment = assign(touch, MOVE_CURSOR_JOB, this.assignments);
       assignment.cursorPose = new Pose().fromCameraProjection(
         document.querySelector("#player-camera").components.camera.camera,
         (touch.clientX / window.innerWidth) * 2 - 1,
@@ -190,28 +144,28 @@ export default class Touchscreen {
       return;
     }
 
-    if (!jobIsAssigned(job.moveCamera, this.assignments)) {
-      const assignment = assign(touch, job.moveCamera, this.assignments);
+    if (!jobIsAssigned(MOVE_CAMERA_JOB, this.assignments)) {
+      const assignment = assign(touch, MOVE_CAMERA_JOB, this.assignments);
       assignment.clientX = touch.clientX;
       assignment.clientY = touch.clientY;
       assignment.delta = [0, 0];
       return;
     }
 
-    if (!jobIsAssigned(job.secondPincher, this.assignments)) {
+    if (!jobIsAssigned(SECOND_PINCHER_JOB, this.assignments)) {
       let first;
-      if (jobIsAssigned(job.firstPincher, this.assignments)) {
-        first = findByJob(job.firstPincher, this.assignments);
+      if (jobIsAssigned(FIRST_PINCHER_JOB, this.assignments)) {
+        first = findByJob(FIRST_PINCHER_JOB, this.assignments);
       } else {
-        const cameraMover = findByJob(job.moveCamera, this.assignments);
+        const cameraMover = findByJob(MOVE_CAMERA_JOB, this.assignments);
         unassign(cameraMover.touch, cameraMover.job, this.assignments);
 
-        const first = assign(cameraMover.touch, job.firstPincher, this.assignments);
+        first = assign(cameraMover.touch, FIRST_PINCHER_JOB, this.assignments);
         first.clientX = cameraMover.clientX;
         first.clientY = cameraMover.clientY;
       }
 
-      const second = assign(touch, job.secondPincher, this.assignments);
+      const second = assign(touch, SECOND_PINCHER_JOB, this.assignments);
       second.clientX = touch.clientX;
       second.clientY = touch.clientY;
 
@@ -249,7 +203,7 @@ export default class Touchscreen {
   }
 
   write(frame) {
-    let cameraMover = jobIsAssigned(job.moveCamera, this.assignments) && findByJob(job.moveCamera, this.assignments);
+    let cameraMover = jobIsAssigned(MOVE_CAMERA_JOB, this.assignments) && findByJob(MOVE_CAMERA_JOB, this.assignments);
     if (this.pinch) {
       this.pinch.delta = 0;
     }
@@ -266,8 +220,8 @@ export default class Touchscreen {
     }
 
     const cursorPose =
-      jobIsAssigned(job.moveCursor, this.assignments) && findByJob(job.moveCursor, this.assignments).cursorPose;
-    cameraMover = jobIsAssigned(job.moveCamera, this.assignments) && findByJob(job.moveCamera, this.assignments);
+      jobIsAssigned(MOVE_CURSOR_JOB, this.assignments) && findByJob(MOVE_CURSOR_JOB, this.assignments).cursorPose;
+    cameraMover = jobIsAssigned(MOVE_CAMERA_JOB, this.assignments) && findByJob(MOVE_CAMERA_JOB, this.assignments);
 
     const path = paths.device.touchscreen;
     frame[path.cursorPose] = cursorPose ? cursorPose : undefined;
