@@ -9,6 +9,7 @@
 }
 
 :local(.action-button) {
+  @extend %unselectable;
   @extend %bottom-action-button;
   margin-left: 6px;
   margin-right: 6px;
@@ -20,12 +21,14 @@
 }
 
 :local(.buttons) {
+  @extend %unselectable;
   display: flex;
   flex-direction: row;
   align-items: center;
 }
 
 :local(.small-button) {
+  @extend %unselectable;
   margin-left: 0.25em;
   font-size: 2em;
   align-self: center;

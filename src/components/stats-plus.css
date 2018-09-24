@@ -19,6 +19,9 @@
   padding: 8px 12px;
   color: #aaa;
   font-size: 10px;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
   user-select: none;
 }
 
@@ -26,5 +29,8 @@
   right: 10px;
   left: auto;
   top: 10px;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
   user-select: none;
 }
