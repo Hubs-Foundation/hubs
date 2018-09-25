@@ -138,24 +138,22 @@ window.addEventListener(
 AFRAME.registerSystem("actions", {
   init() {
     // TODO: Handle device (dis/re)connection
-    //activeDevices.add(new MouseDevice());
-    //activeDevices.add(new SmartMouseDevice());
+    activeDevices.add(new MouseDevice());
+    activeDevices.add(new SmartMouseDevice());
     activeDevices.add(new KeyboardDevice());
-    // activeDevices.add(new TouchscreenDevice());
+    activeDevices.add(new TouchscreenDevice());
     activeDevices.add(new Hud());
 
-    //registeredMappings.add(KBMBindings);
+    registeredMappings.add(KBMBindings);
     //registeredMappings.add(gamepadBindings);
     //registeredMappings.add(touchscreenBindings);
     //registeredMappings.add(xboxBindings);
     registeredMappings.add(keyboardDebugBindings);
-    registeredMappings.add(oculusGoBindings);
-    registeredMappings.add(oculusTouchBindings);
+    //registeredMappings.add(oculusGoBindings);
+    //registeredMappings.add(oculusTouchBindings);
   },
 
   tick() {
-    // if (document.querySelector("[super-hands]#player-right-controller").components === undefined) return;
-    // if (document.querySelector("[super-hands]#player-left-controller").components === undefined) return;
     pendingSetChanges.forEach(change => {
       applyChange(activeSets, change);
     });
@@ -178,30 +176,30 @@ AFRAME.registerSystem("actions", {
     // (?) Cursors and super hands know whether they've targetted something THIS FRAME.
     // (?) We let app code activate or deactivate an action set THIS FRAME.
     let enableCursor = true;
-    const rightHand = document.querySelector("[super-hands]#player-right-controller").components["super-hands"].state;
-    if (rightHand.has("hover-start")) {
-      const hoverEl = rightHand.get("hover-start");
-      this[hoverEl.matches(".interactable, .interactable *") ? "activate" : "deactivate"](
-        sets.rightHandHoveringOnInteractable
-      );
-      this[hoverEl.matches(".pen, .pen *") ? "activate" : "deactivate"](sets.rightHandHoveringOnPen);
-      if (hoverEl.matches(".interactable, .interactable *")) {
-        enableCursor = false;
-      }
-    } else {
-      this.deactivate(sets.rightHandHoveringOnInteractable);
-      this.deactivate(sets.rightHandHoveringOnPen);
-      this.deactivate(sets.rightHandHoveringOnVideo);
-      this.deactivate(sets.rightHandHoveringOnCamera);
-    }
-    const leftHand = document.querySelector("[super-hands]#player-left-controller").components["super-hands"].state;
-    if (leftHand.has("hover-start")) {
-      const hoverEl = leftHand.get("hover-start");
-      this[hoverEl.matches(".interactable, .interactable *") ? "activate" : "deactivate"](
-        sets.leftHandHoveringOnInteractable
-      );
-      this[hoverEl.matches(".pen, .pen *") ? "activate" : "deactivate"](sets.leftHandHoveringOnPen);
-    }
+//    const rightHand = document.querySelector("[super-hands]#player-right-controller").components["super-hands"].state;
+//    if (rightHand.has("hover-start")) {
+//      const hoverEl = rightHand.get("hover-start");
+//      this[hoverEl.matches(".interactable, .interactable *") ? "activate" : "deactivate"](
+//        sets.rightHandHoveringOnInteractable
+//      );
+//      this[hoverEl.matches(".pen, .pen *") ? "activate" : "deactivate"](sets.rightHandHoveringOnPen);
+//      if (hoverEl.matches(".interactable, .interactable *")) {
+//        enableCursor = false;
+//      }
+//    } else {
+//      this.deactivate(sets.rightHandHoveringOnInteractable);
+//      this.deactivate(sets.rightHandHoveringOnPen);
+//      this.deactivate(sets.rightHandHoveringOnVideo);
+//      this.deactivate(sets.rightHandHoveringOnCamera);
+//    }
+//    const leftHand = document.querySelector("[super-hands]#player-left-controller").components["super-hands"].state;
+//    if (leftHand.has("hover-start")) {
+//      const hoverEl = leftHand.get("hover-start");
+//      this[hoverEl.matches(".interactable, .interactable *") ? "activate" : "deactivate"](
+//        sets.leftHandHoveringOnInteractable
+//      );
+//      this[hoverEl.matches(".pen, .pen *") ? "activate" : "deactivate"](sets.leftHandHoveringOnPen);
+//    }
 
     const cursorController = document.querySelector("[cursor-controller]").components["cursor-controller"];
     if (enableCursor) {
@@ -209,25 +207,9 @@ AFRAME.registerSystem("actions", {
     } else {
       cursorController.disable();
     }
-    cursorController.actionSystemCallback(frame);
 
     // Check to see whether we do want to change hovering states this frame, and resolve bindings accordingly.
     // TODO: This causes problems with any bindings that keep internal state and expect to be called at most once a frame.
-    const prevActiveSets = new Set(activeSets);
-    pendingSetChanges.forEach(change => {
-      applyChange(activeSets, change);
-    });
-    pendingSetChanges = [];
-    if (difference(prevActiveSets, activeSets).size || difference(activeSets, prevActiveSets).size) {
-      frame = {};
-      Object.assign(frame, deviceFrame);
-      const priorityMap = new Map();
-      const activeBindings = new Set();
-      prioritizeBindings(priorityMap, activeBindings);
-      activeBindings.forEach(binding => {
-        resolve(frame, binding);
-      });
-    }
     this.frame = frame;
     this.activeSets = activeSets;
     this.activeBindings = activeBindings;

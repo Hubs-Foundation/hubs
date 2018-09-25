@@ -70,17 +70,6 @@ AFRAME.registerComponent("pen", {
 
     this.el.parentNode.addEventListener("stateadded", this._stateAdded);
     this.el.parentNode.addEventListener("stateremoved", this._stateRemoved);
-
-    const actions = AFRAME.scenes[0].systems.actions;
-
-    this.el.parentNode.addEventListener("grab-start", () => {
-      actions.activate(sets.cursorHoldingInteractable);
-      actions.activate(sets.cursorHoldingPen);
-    });
-    this.el.parentNode.addEventListener("grab-end", () => {
-      actions.deactivate(sets.cursorHoldingPen);
-      actions.deactivate(sets.cursorHoldingInteractable);
-    });
   },
 
   pause() {
@@ -246,6 +235,9 @@ AFRAME.registerComponent("pen", {
         break;
       case "grabbed":
         this.grabbed = true;
+        const actions = AFRAME.scenes[0].systems.actions;
+        actions.activate(sets.cursorHoldingInteractable);
+        actions.activate(sets.cursorHoldingPen);
         break;
       default:
         break;
@@ -260,6 +252,9 @@ AFRAME.registerComponent("pen", {
       case "grabbed":
         this.grabbed = false;
         this._endDraw();
+        const actions = AFRAME.scenes[0].systems.actions;
+        actions.deactivate(sets.cursorHoldingPen);
+        actions.deactivate(sets.cursorHoldingInteractable);
         break;
       default:
         break;

@@ -220,20 +220,24 @@ export default class Touchscreen {
       this.events.pop();
     }
 
-    const assignmentForCursorMove =
-      jobIsAssigned(MOVE_CURSOR_JOB, this.assignments) && findByJob(MOVE_CURSOR_JOB, this.assignments);
-    const cursorPose = assignmentForCursorMove.cursorPose;
-    // If you touch a grabbable, we want to wait 1 frame before admitting it to anyone else, because we
-    // want to hover on the first frame and grab on the next.
-    const didTouchGrabbableThisFrame = assignmentForCursorMove.isFirstFrame;
-    assignmentForCursorMove.isFirstFrame = false;
-
-    cameraMover = jobIsAssigned(MOVE_CAMERA_JOB, this.assignments) && findByJob(MOVE_CAMERA_JOB, this.assignments);
-
     const path = paths.device.touchscreen;
-    frame[path.cursorPose] = cursorPose ? cursorPose : undefined;
-    frame[path.isTouchingGrabbable] = !didTouchGrabbableThisFrame && cursorPose;
-    frame[path.cameraDelta] = cameraMover ? cameraMover.delta : undefined;
-    frame[path.pinchDelta] = this.pinch ? this.pinch.delta : undefined;
+    if (jobIsAssigned(MOVE_CURSOR_JOB, this.assignments)) {
+      const assignment = findByJob(MOVE_CURSOR_JOB, this.assignments);
+      frame[path.cursorPose] = assignment.cursorPose;
+      // If you touch a grabbable, we want to wait 1 frame before admitting it to anyone else, because we
+      // want to hover on the first frame and grab on the next.
+      frame[path.isTouchingGrabbable] = !assignment.isFirstFrame;
+      assignment.isFirstFrame = false;
+    }
+
+    if (jobIsAssigned(MOVE_CAMERA_JOB, this.assignments)) {
+      frame[path.cameraDelta] = findByJob(MOVE_CAMERA_JOB, this.assignments).delta;
+    }
+
+    if (this.pinch) {
+      frame[path.pinchDelta] = this.pinch.delta;
+      frame[path.initialPinchDistance] = this.pinch.initialDistance;
+      frame[path.currentPinchDistance] = this.pinch.currentDistance;
+    }
   }
 }

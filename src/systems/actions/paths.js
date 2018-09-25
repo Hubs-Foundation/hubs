@@ -60,6 +60,8 @@ paths.device.touchscreen = {};
 paths.device.touchscreen.cursorPose = "/device/touchscreen/cursorPose";
 paths.device.touchscreen.cameraDelta = "/device/touchscreen/cameraDelta";
 paths.device.touchscreen.pinchDelta = "/device/touchscreen/pinchDelta";
+paths.device.touchscreen.initialPinchDistance = "/device/touchscreen/initialPinchDistance";
+paths.device.touchscreen.currentPinchDistance = "/device/touchscreen/currentPinchDistance";
 paths.device.touchscreen.isTouchingGrabbable = "/device/touchscreen/isTouchingGrabbable";
 
 paths.device.hud = {};
