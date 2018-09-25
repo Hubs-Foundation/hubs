@@ -12,3 +12,24 @@ sets.cursorHoldingNothing = "cursorHoldingNothing";
 sets.cursorHoldingInteractable = "cursorHoldingInteractable";
 
 sets.rightHandTeleporting = "rightHandTeleporting";
+
+sets.rightHandHoveringOnPen = "rightHandHoveringOnPen";
+sets.rightHandHoveringOnVideo = "rightHandHoveringOnVideo";
+sets.rightHandHoveringOnCamera = "rightHandHoveringOnCamera";
+sets.rightHandHoveringOnNothing = "rightHandHoveringOnNothing";
+sets.rightHandHoveringOnInteractable = "rightHandHoveringOnInteractable";
+sets.rightHandHoldingPen = "rightHandHoldingPen";
+sets.rightHandHoldingVideo = "rightHandHoldingVideo";
+sets.rightHandHoldingCamera = "rightHandHoldingCamera";
+sets.rightHandHoldingNothing = "rightHandHoldingNothing";
+sets.rightHandHoldingInteractable = "rightHandHoldingInteractable";
+sets.leftHandHoveringOnPen = "leftHandHoveringOnPen";
+sets.leftHandHoveringOnVideo = "leftHandHoveringOnVideo";
+sets.leftHandHoveringOnCamera = "leftHandHoveringOnCamera";
+sets.leftHandHoveringOnNothing = "leftHandHoveringOnNothing";
+sets.leftHandHoveringOnInteractable = "leftHandHoveringOnInteractable";
+sets.leftHandHoldingPen = "leftHandHoldingPen";
+sets.leftHandHoldingVideo = "leftHandHoldingVideo";
+sets.leftHandHoldingCamera = "leftHandHoldingCamera";
+sets.leftHandHoldingNothing = "leftHandHoldingNothing";
+sets.leftHandHoldingInteractable = "leftHandHoldingInteractable";

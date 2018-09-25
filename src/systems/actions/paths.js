@@ -12,10 +12,10 @@ paths.app.translate.forward = "/app/translate/forward";
 paths.app.translate.backward = "/app/translate/backward";
 paths.app.translate.up = "/app/translate/up";
 paths.app.translate.down = "/app/translate/down";
+paths.app.spawnPen = "/app/spawnPen";
 paths.app.cursorPose = "/app/cursorPose";
 paths.app.cursorGrab = "/app/cursorGrab";
 paths.app.cursorDrop = "/app/cursorDrop";
-paths.app.spawnPen = "/app/spawnPen";
 paths.app.cursorModDelta = "/app/cursorModDelta";
 paths.app.cursorStartDrawing = "/app/cursorStartDrawing";
 paths.app.cursorStopDrawing = "/app/cursorStopDrawing";
@@ -24,6 +24,24 @@ paths.app.cursorPenPrevColor = "/app/cursorPenPrevColor";
 paths.app.cursorScalePenTip = "/app/cursorScalePenTip";
 paths.app.startTeleport = "/app/startTeleport";
 paths.app.stopTeleport = "/app/stopTeleport";
+paths.app.rightHandPose = "/app/rightHandPose";
+paths.app.rightHandGrab = "/app/rightHandGrab";
+paths.app.rightHandDrop = "/app/rightHandDrop";
+paths.app.rightHandModDelta = "/app/rightHandModDelta";
+paths.app.rightHandStartDrawing = "/app/rightHandStartDrawing";
+paths.app.rightHandStopDrawing = "/app/rightHandStopDrawing";
+paths.app.rightHandPenNextColor = "/app/rightHandPenNextColor";
+paths.app.rightHandPenPrevColor = "/app/rightHandPenPrevColor";
+paths.app.rightHandScalePenTip = "/app/rightHandScalePenTip";
+paths.app.leftHandPose = "/app/leftHandPose";
+paths.app.leftHandGrab = "/app/leftHandGrab";
+paths.app.leftHandDrop = "/app/leftHandDrop";
+paths.app.leftHandModDelta = "/app/leftHandModDelta";
+paths.app.leftHandStartDrawing = "/app/leftHandStartDrawing";
+paths.app.leftHandStopDrawing = "/app/leftHandStopDrawing";
+paths.app.leftHandPenNextColor = "/app/leftHandPenNextColor";
+paths.app.leftHandPenPrevColor = "/app/leftHandPenPrevColor";
+paths.app.leftHandScalePenTip = "/app/leftHandScalePenTip";
 
 paths.device = {};
 
@@ -84,4 +102,30 @@ paths.device.oculusgo = {
   axis: axisName => {
     return `${oculusgo}axis/${axisName}`;
   }
+};
+
+const rightOculusTouch = "/device/rightOculusTouch/";
+paths.device.rightOculusTouch = {
+  button: buttonName => ({
+    pressed: `${rightOculusTouch}button/${buttonName}/pressed`,
+    touched: `${rightOculusTouch}button/${buttonName}/touched`,
+    value: `${rightOculusTouch}button/${buttonName}/value`
+  }),
+  axis: axisName => {
+    return `${rightOculusTouch}axis/${axisName}`;
+  },
+  pose: `${rightOculusTouch}pose`
+};
+
+const leftOculusTouch = "/device/leftOculusTouch/";
+paths.device.leftOculusTouch = {
+  button: buttonName => ({
+    pressed: `${leftOculusTouch}button/${buttonName}/pressed`,
+    touched: `${leftOculusTouch}button/${buttonName}/touched`,
+    value: `${leftOculusTouch}button/${buttonName}/value`
+  }),
+  axis: axisName => {
+    return `${leftOculusTouch}axis/${axisName}`;
+  },
+  pose: `${leftOculusTouch}pose`
 };

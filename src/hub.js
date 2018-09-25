@@ -85,6 +85,7 @@ import "./components/point-light";
 import "./components/spot-light";
 import "./components/visible-to-owner";
 import "./components/emit-something";
+import "./components/stupid-thing";
 
 import ReactDOM from "react-dom";
 import React from "react";

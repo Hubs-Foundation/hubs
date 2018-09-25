@@ -4,6 +4,54 @@ import { xforms } from "./xforms";
 
 const xboxUnscaledCursorScalePenTip = "foobarbazbotbooch";
 
+const leftOculusTouch_scaledJoystickHorizontal = "leftOculusTouch_scaledJoystickHorizontal";
+const leftOculusTouch_scaledJoystickVertical = "leftOculusTouch_scaledJoystickVertical";
+export const oculusTouchBindings = {
+  [sets.global]: [
+    {
+      src: {
+        value: paths.device.leftOculusTouch.axis("joystickHorizontal")
+      },
+      dest: { value: leftOculusTouch_scaledJoystickHorizontal },
+      xform: xforms.scale(1.5) // horizontal character speed modifier
+    },
+    {
+      src: {
+        value: paths.device.leftOculusTouch.axis("joystickVertical")
+      },
+      dest: { value: leftOculusTouch_scaledJoystickVertical },
+      xform: xforms.scale(-1.5) // vertical character speed modifier
+    },
+    {
+      src: {
+        x: leftOculusTouch_scaledJoystickHorizontal,
+        y: leftOculusTouch_scaledJoystickVertical
+      },
+      dest: { value: paths.app.characterAcceleration },
+      xform: xforms.compose_vec2
+    },
+    {
+      src: { value: paths.device.rightOculusTouch.pose },
+      dest: { value: paths.app.cursorPose },
+      xform: xforms.copy
+    }
+  ],
+  [sets.rightHandHoveringOnInteractable]: [
+    {
+      src: { value: paths.device.rightOculusTouch.button("grip").pressed },
+      dest: { value: paths.app.rightHandGrab },
+      xform: xforms.rising()
+    }
+  ],
+
+  [sets.rightHandHoldingInteractable]: [
+    {
+      src: { value: paths.device.rightOculusTouch.button("grip").pressed },
+      dest: { value: paths.app.rightHandDrop },
+      xform: xforms.falling()
+    }
+  ]
+};
 export const xboxBindings = {
   [sets.cursorHoldingInteractable]: [
     {

@@ -122,19 +122,24 @@ AFRAME.registerComponent("cursor-controller", {
   actionSystemCallback: (function() {
     const rawIntersections = [];
     return function actionSystemCallback(frame) {
+      const actions = AFRAME.scenes[0].systems.actions;
       if (!this.enabled) {
+        actions.deactivate(sets.cursorHoveringOnPen);
+        actions.deactivate(sets.cursorHoveringOnVideo);
+        actions.deactivate(sets.cursorHoveringOnCamera);
+        actions.deactivate(sets.cursorHoveringOnInteractable);
         return;
       }
       const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
       if (isGrabbing) {
-          return;
+        return;
       }
 
       const cursorPose = frame[paths.app.cursorPose];
-      const actions = AFRAME.scenes[0].systems.actions;
       if (!cursorPose) {
         actions.deactivate(sets.cursorHoveringOnPen);
         actions.deactivate(sets.cursorHoveringOnVideo);
+        actions.deactivate(sets.cursorHoveringOnCamera);
         actions.deactivate(sets.cursorHoveringOnInteractable);
         return;
       }

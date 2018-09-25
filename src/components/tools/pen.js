@@ -121,6 +121,48 @@ AFRAME.registerComponent("pen", {
       if (actions.poll(paths.app.cursorPenPrevColor)) {
         this._changeColor(-1);
       }
+    } else if (
+      grabbable.grabbers.length &&
+      grabbable.grabbers[0] === document.querySelector("[super-hands], #player-right-controller")
+    ) {
+      const actions = AFRAME.scenes[0].systems.actions;
+      if (actions.poll(paths.app.rightHandStartDrawing)) {
+        this._startDraw();
+      }
+      if (actions.poll(paths.app.rightHandStopDrawing)) {
+        this._endDraw();
+      }
+      const penScaleMod = actions.poll(paths.app.rightHandScalePenTip);
+      if (penScaleMod) {
+        this._changeRadius(actions.poll(paths.app.rightHandScalePenTip));
+      }
+      if (actions.poll(paths.app.rightHandPenNextColor)) {
+        this._changeColor(1);
+      }
+      if (actions.poll(paths.app.rightHandPenPrevColor)) {
+        this._changeColor(-1);
+      }
+    } else if (
+      grabbable.grabbers.length &&
+      grabbable.grabbers[0] === document.querySelector("[super-hands], #player-left-controller")
+    ) {
+      const actions = AFRAME.scenes[0].systems.actions;
+      if (actions.poll(paths.app.leftHandStartDrawing)) {
+        this._startDraw();
+      }
+      if (actions.poll(paths.app.leftHandStopDrawing)) {
+        this._endDraw();
+      }
+      const penScaleMod = actions.poll(paths.app.leftHandScalePenTip);
+      if (penScaleMod) {
+        this._changeRadius(actions.poll(paths.app.leftHandScalePenTip));
+      }
+      if (actions.poll(paths.app.leftHandPenNextColor)) {
+        this._changeColor(1);
+      }
+      if (actions.poll(paths.app.leftHandPenPrevColor)) {
+        this._changeColor(-1);
+      }
     }
 
     this.el.object3D.getWorldPosition(this.worldPosition);
