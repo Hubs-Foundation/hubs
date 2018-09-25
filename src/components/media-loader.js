@@ -1,5 +1,5 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
-import { proxiedUrlFor, resolveMedia, fetchMaxContentIndex } from "../utils/media-utils";
+import { proxiedUrlFor, resolveUrl } from "../utils/media-utils";
 
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
@@ -9,11 +9,29 @@ gltfLoader.load(loadingObjectSrc, gltf => {
   loadingObject = gltf;
 });
 
+const contentTypeCache = new Map();
+const fetchContentType = async url => {
+  if (contentTypeCache.has(url)) return contentTypeCache.get(url);
+  const contentType = await fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
+  contentTypeCache.set(url, contentType);
+  return contentType;
+};
+
+const contentIndexCache = new Map();
+const fetchMaxContentIndex = async (documentUrl, pageUrl) => {
+  if (contentIndexCache.has(documentUrl)) return contentIndexCache.get(documentUrl);
+  const maxIndex = await fetch(pageUrl).then(r => parseInt(r.headers.get("x-max-content-index")));
+  contentIndexCache.set(documentUrl, maxIndex);
+  return maxIndex;
+};
+
 AFRAME.registerComponent("media-loader", {
   schema: {
     src: { type: "string" },
     index: { type: "number" },
-    resize: { default: false }
+    resize: { default: false },
+    resolve: { default: true },
+    contentType: { default: null }
   },
 
   init() {
@@ -100,11 +118,24 @@ AFRAME.registerComponent("media-loader", {
 
       if (!src) return;
 
-      const { raw, origin, contentType } = await resolveMedia(src, false, index);
+      let accessibleUrl = proxiedUrlFor(src);
+      let contentType = this.data.contentType;
+
+      if (this.data.resolve) {
+        const result = await resolveUrl(src, index);
+        accessibleUrl = proxiedUrlFor(result.origin);
+        contentType = (result.meta && result.meta.expected_content_type) || contentType;
+      }
+
+      // if the component creator didn't know the content type and we didn't get it from reticulum either,
+      // we need to make a HEAD request to find it out
+      if (contentType == null) {
+        contentType = await fetchContentType(accessibleUrl);
+      }
 
       // We don't want to emit media_resolved for index updates.
       if (src !== oldData.src) {
-        this.el.emit("media_resolved", { src, raw, origin, contentType });
+        this.el.emit("media_resolved", { src, raw: accessibleUrl, contentType });
       }
 
       const isPDF = contentType.startsWith("application/pdf");
@@ -112,7 +143,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-image");
         this.el.addEventListener("video-loaded", this.clearLoadingTimeout, { once: true });
-        this.el.setAttribute("media-video", { src: raw });
+        this.el.setAttribute("media-video", { src: accessibleUrl });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
       } else if (contentType.startsWith("image/") || isPDF) {
         this.el.removeAttribute("gltf-model-plus");
@@ -129,7 +160,7 @@ AFRAME.registerComponent("media-loader", {
           },
           { once: true }
         );
-        const imageSrc = isPDF ? proxiedUrlFor(src, index) : raw;
+        const imageSrc = isPDF ? proxiedUrlFor(src, index) : accessibleUrl;
         const imageContentType = isPDF ? "image/png" : contentType;
 
         if (!isPDF) {
@@ -159,7 +190,7 @@ AFRAME.registerComponent("media-loader", {
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
         this.el.setAttribute("gltf-model-plus", {
-          src: raw,
+          src: accessibleUrl,
           contentType: contentType,
           inflate: true
         });

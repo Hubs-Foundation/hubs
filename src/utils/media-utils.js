@@ -17,41 +17,16 @@ export const proxiedUrlFor = (url, index) => {
   return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${encodedUrl}`;
 };
 
-const fetchContentType = async url => {
-  return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
-};
-
-const contentIndexCache = new Map();
-export const fetchMaxContentIndex = async (documentUrl, pageUrl) => {
-  if (contentIndexCache.has(documentUrl)) return contentIndexCache.get(documentUrl);
-  const maxIndex = await fetch(pageUrl).then(r => parseInt(r.headers.get("x-max-content-index")));
-  contentIndexCache.set(documentUrl, maxIndex);
-  return maxIndex;
-};
-
-const resolveMediaCache = new Map();
-export const resolveMediaURL = async (url, index) => {
-  return fetch(mediaAPIEndpoint, {
+const resolveUrlCache = new Map();
+export const resolveUrl = async (url, index) => {
+  const cacheKey = `${url}|${index}`;
+  if (resolveUrlCache.has(cacheKey)) return resolveUrlCache.get(cacheKey);
+  const resolved = await fetch(mediaAPIEndpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ media: { url, index } })
   }).then(r => r.json());
-};
-
-export const resolveMedia = async (url, skipContentType, index) => {
-  const parsedUrl = new URL(url);
-  const cacheKey = `${url}|${index}`;
-  if (resolveMediaCache.has(cacheKey)) return resolveMediaCache.get(cacheKey);
-
-  const isHttpOrHttps = parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:";
-  const resolved = isHttpOrHttps ? await resolveMediaURL(url, index) : { raw: url, origin: url };
-  if (isHttpOrHttps && !skipContentType) {
-    const contentType =
-      (resolved.meta && resolved.meta.expected_content_type) || (await fetchContentType(resolved.raw));
-    resolved.contentType = contentType;
-  }
-
-  resolveMediaCache.set(cacheKey, resolved);
+  resolveUrlCache.set(cacheKey, resolved);
   return resolved;
 };
 
