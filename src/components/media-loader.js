@@ -1,5 +1,5 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
-import { resolveMedia, fetchMaxContentIndex } from "../utils/media-utils";
+import { proxiedUrlFor, resolveMedia, fetchMaxContentIndex } from "../utils/media-utils";
 
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
@@ -100,7 +100,7 @@ AFRAME.registerComponent("media-loader", {
 
       if (!src) return;
 
-      const { raw, origin, images, contentType } = await resolveMedia(src, false, index);
+      const { raw, origin, contentType } = await resolveMedia(src, false, index);
 
       // We don't want to emit media_resolved for index updates.
       if (src !== oldData.src) {
@@ -122,13 +122,14 @@ AFRAME.registerComponent("media-loader", {
           async () => {
             this.clearLoadingTimeout();
             if (isPDF) {
-              const maxIndex = await fetchMaxContentIndex(src, images.png);
+              const testImage = proxiedUrlFor(src, index);
+              const maxIndex = await fetchMaxContentIndex(src, testImage);
               this.el.setAttribute("media-pager", { index, maxIndex });
             }
           },
           { once: true }
         );
-        const imageSrc = isPDF ? images.png : raw;
+        const imageSrc = isPDF ? proxiedUrlFor(src, index) : raw;
         const imageContentType = isPDF ? "image/png" : contentType;
 
         if (!isPDF) {
