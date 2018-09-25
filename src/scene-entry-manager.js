@@ -185,7 +185,7 @@ export default class SceneEntryManager {
   _setupMedia = () => {
     const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
-      const { entity, orientation } = addMedia(src, "#interactable-media", contentOrigin, true);
+      const { entity, orientation } = addMedia(src, "#interactable-media", contentOrigin, true, true);
 
       orientation.then(or => {
         entity.setAttribute("offset-relative-to", {
