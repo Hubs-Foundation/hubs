@@ -34,10 +34,6 @@ class SceneUI extends Component {
     this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
   }
 
-  onSceneLoaded = () => {
-    this.setState({ sceneLoaded: true });
-  };
-
   render() {
     if (!this.props.sceneLoaded || !this.props.sceneId) {
       return (

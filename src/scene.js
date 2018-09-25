@@ -9,17 +9,32 @@ patchWebGLRenderingContext();
 
 import "three/examples/js/loaders/GLTFLoader";
 
-import "./components/skybox";
-import "./components/layers";
-import "./components/debug";
-import "./components/animation-mixer";
-import "./components/loop-animation";
-import "./components/gltf-model-plus";
 import "./components/ambient-light";
+import "./components/animation-mixer";
+import "./components/audio-feedback";
+import "./components/css-class";
+import "./components/debug";
 import "./components/directional-light";
+import "./components/duck";
+import "./components/gltf-model-plus";
+import "./components/heightfield";
 import "./components/hemisphere-light";
+import "./components/hide-when-quality";
+import "./components/layers";
+import "./components/loop-animation";
+import "./components/media-loader";
 import "./components/point-light";
+import "./components/quack";
+import "./components/scene-shadow";
+import "./components/skybox";
+import "./components/spawn-controller";
 import "./components/spot-light";
+import "./components/sticky-object";
+import "./components/super-spawner";
+import "./components/water";
+import "./systems/nav";
+
+import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -72,7 +87,10 @@ const onReady = async () => {
   const scene = document.querySelector("a-scene");
   window.APP.scene = scene;
 
-  let uiProps = {};
+  const sceneId = qs.get("scene_id") || document.location.pathname.substring(1).split("/")[0];
+  console.log(`Scene ID: ${sceneId}`);
+
+  let uiProps = { sceneId: sceneId };
 
   mountUI(scene);
 
@@ -90,18 +108,22 @@ const onReady = async () => {
 
   sceneRoot.appendChild(sceneModelEntity);
 
-  const sceneId = qs.get("scene_id") || document.location.pathname.substring(1).split("/")[0];
-  console.log(`Scene ID: ${sceneId}`);
+  const res = await fetch(getReticulumFetchUrl(`/api/v1/scenes/${sceneId}`)).then(r => r.json());
+  const sceneInfo = res.scenes[0];
 
-  const sceneUrl = "";
-  console.log(`Scene URL: ${sceneUrl}`);
+  const modelUrl = sceneInfo.model_url;
+  console.log(`Scene Model URL: ${modelUrl}`);
 
   const gltfEl = document.createElement("a-entity");
-  gltfEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
+  gltfEl.setAttribute("gltf-model-plus", { src: modelUrl, useCache: false, inflate: true });
   gltfEl.addEventListener("model-loaded", () => sceneModelEntity.emit("scene-loaded"));
   sceneModelEntity.appendChild(gltfEl);
 
-  //remountUI({ sceneId: scene.scene_id, sceneName: scene.name, sceneDescription: scene.description, sceneAttribution: scene.attribution  });
+  remountUI({
+    sceneName: sceneInfo.name,
+    sceneDescription: sceneInfo.description,
+    sceneAttribution: sceneInfo.attribution
+  });
 };
 
 document.addEventListener("DOMContentLoaded", onReady);
