@@ -346,6 +346,10 @@
                     hitOpacity: 0.3;
                     missOpacity: 0.1;
                     curveShootingSpeed: 12;"
+                emit-something__startTeleport="path: /app/startTeleport; event: gaze-teleport_down"
+                emit-something__stopTeleport="path: /app/stopTeleport; event: gaze-teleport_up"
+                set-actionset-on-event__startTeleport="set: rightHandTeleporting; event: gaze-teleport_down; activate: true;"
+                set-actionset-on-event__stopTeleport="set: rightHandTeleporting; event: gaze-teleport_up; activate: false;"
             ></a-entity>
           </a-entity>
 

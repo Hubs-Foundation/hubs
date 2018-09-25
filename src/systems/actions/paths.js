@@ -22,6 +22,8 @@ paths.app.cursorStopDrawing = "/app/cursorStopDrawing";
 paths.app.cursorPenNextColor = "/app/cursorPenNextColor";
 paths.app.cursorPenPrevColor = "/app/cursorPenPrevColor";
 paths.app.cursorScalePenTip = "/app/cursorScalePenTip";
+paths.app.startTeleport = "/app/startTeleport";
+paths.app.stopTeleport = "/app/stopTeleport";
 
 paths.device = {};
 
@@ -53,9 +55,9 @@ paths.device.keyboard = {
 
 paths.device.gamepad = gamepadIndex => ({
   button: buttonIndex => ({
-    pressed: `/device/gamepad/${gamepadIndex}/button/${buttonIndex}`,
-    touched: `/device/gamepad/${gamepadIndex}/button/${buttonIndex}`,
-    value: `/device/gamepad/${gamepadIndex}/button/${buttonIndex}`
+    pressed: `/device/gamepad/${gamepadIndex}/button/${buttonIndex}/pressed`,
+    touched: `/device/gamepad/${gamepadIndex}/button/${buttonIndex}/touched`,
+    value: `/device/gamepad/${gamepadIndex}/button/${buttonIndex}/value`
   }),
   axis: axisIndex => `/device/gamepad/${gamepadIndex}/axis/${axisIndex}`
 });
@@ -69,5 +71,17 @@ paths.device.xbox = {
   }),
   axis: axisName => {
     return `${xbox}axis/${axisName}`;
+  }
+};
+
+const oculusgo = "/device/oculusgo/";
+paths.device.oculusgo = {
+  button: buttonName => ({
+    pressed: `${oculusgo}button/${buttonName}/pressed`,
+    touched: `${oculusgo}button/${buttonName}/touched`,
+    value: `${oculusgo}button/${buttonName}/value`
+  }),
+  axis: axisName => {
+    return `${oculusgo}axis/${axisName}`;
   }
 };

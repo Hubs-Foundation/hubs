@@ -1,4 +1,6 @@
 import { Pose } from "./pose";
+import { angleTo4Direction } from "../../utils/dpad";
+
 const zeroVec2 = [0, 0];
 export const xforms = {
   noop: function() {},
@@ -46,8 +48,8 @@ export const xforms = {
     };
   },
   risingWithFrameDelay: function(n) {
-    let values = [];
-    for (var i = 0; i < n; i++) {
+    const values = [];
+    for (let i = 0; i < n; i++) {
       values[i] = undefined;
     }
     let valueForThisFrame;
@@ -112,9 +114,18 @@ export const xforms = {
       frame[dest.value] = pose.fromCameraProjection(camera, frame[src.value][0], frame[src.value][1]);
     };
   },
-  alternativeIfUndefined: function(frame, src, dest) {
-    if (frame[src.value] === undefined) {
-    }
-    frame[dest.value] = frame[src.value] === undefined ? frame[src.alternative] : frame[src.value];
+  vec2dpad: function(deadzoneRadius) {
+    const deadzoneRadiusSquared = deadzoneRadius * deadzoneRadius;
+    return function vec2dpad(frame, { value }, dest) {
+      const [x, y] = frame[value];
+      const inCenter = x * x + y * y < deadzoneRadiusSquared;
+      const direction = inCenter ? "center" : angleTo4Direction(Math.atan2(x, -y));
+      frame[dest[direction]] = true;
+    };
+  },
+  always: function(constValue) {
+    return function always(frame, _, dest) {
+      frame[dest.value] = constValue;
+    };
   }
 };

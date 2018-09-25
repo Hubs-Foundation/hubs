@@ -1,4 +1,11 @@
-import { KBMBindings, gamepadBindings, touchscreenBindings, keyboardDebugBindings, xboxBindings } from "./actions/bindings";
+import {
+  KBMBindings,
+  gamepadBindings,
+  touchscreenBindings,
+  keyboardDebugBindings,
+  xboxBindings,
+  oculusGoBindings
+} from "./actions/bindings";
 import { sets } from "./actions/sets";
 import { paths } from "./actions/paths";
 
@@ -9,6 +16,7 @@ import GamepadDevice from "./actions/devices/gamepad";
 import TouchscreenDevice from "./actions/devices/touchscreen";
 import Hud from "./actions/devices/hud";
 import XboxController from "./actions/devices/xbox";
+import OculusGoController from "./actions/devices/oculusgo";
 
 function difference(setA, setB) {
   const _difference = new Set(setA);
@@ -93,7 +101,7 @@ window.addEventListener(
   "gamepadconnected",
   e => {
     console.log("XBOX CONTROLELR!");
-    const gamepadDevice = new XboxController(e.gamepad);
+    const gamepadDevice = new OculusGoController(e.gamepad);
     activeDevices.add(gamepadDevice);
     gamepads[e.gamepad.index] = gamepadDevice;
   },
@@ -116,14 +124,15 @@ AFRAME.registerSystem("actions", {
     //activeDevices.add(new MouseDevice());
     //activeDevices.add(new SmartMouseDevice());
     activeDevices.add(new KeyboardDevice());
-    activeDevices.add(new TouchscreenDevice());
+    // activeDevices.add(new TouchscreenDevice());
     activeDevices.add(new Hud());
 
     //registeredMappings.add(KBMBindings);
     //registeredMappings.add(gamepadBindings);
-    registeredMappings.add(touchscreenBindings);
+    // registeredMappings.add(touchscreenBindings);
     registeredMappings.add(keyboardDebugBindings);
     //registeredMappings.add(xboxBindings);
+    registeredMappings.add(oculusGoBindings);
   },
 
   tick() {
