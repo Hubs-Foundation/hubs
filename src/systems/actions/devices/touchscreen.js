@@ -141,6 +141,7 @@ export default class Touchscreen {
         (touch.clientX / window.innerWidth) * 2 - 1,
         -(touch.clientY / window.innerHeight) * 2 + 1
       );
+      assignment.isFirstFrame = true;
       return;
     }
 
@@ -203,10 +204,10 @@ export default class Touchscreen {
   }
 
   write(frame) {
-    let cameraMover = jobIsAssigned(MOVE_CAMERA_JOB, this.assignments) && findByJob(MOVE_CAMERA_JOB, this.assignments);
     if (this.pinch) {
       this.pinch.delta = 0;
     }
+    let cameraMover = jobIsAssigned(MOVE_CAMERA_JOB, this.assignments) && findByJob(MOVE_CAMERA_JOB, this.assignments);
     if (cameraMover) {
       cameraMover.delta[0] = 0;
       cameraMover.delta[1] = 0;
@@ -219,13 +220,19 @@ export default class Touchscreen {
       this.events.pop();
     }
 
-    const cursorPose =
-      jobIsAssigned(MOVE_CURSOR_JOB, this.assignments) && findByJob(MOVE_CURSOR_JOB, this.assignments).cursorPose;
+    const assignmentForCursorMove =
+      jobIsAssigned(MOVE_CURSOR_JOB, this.assignments) && findByJob(MOVE_CURSOR_JOB, this.assignments);
+    const cursorPose = assignmentForCursorMove.cursorPose;
+    // If you touch a grabbable, we want to wait 1 frame before admitting it to anyone else, because we
+    // want to hover on the first frame and grab on the next.
+    const didTouchGrabbableThisFrame = assignmentForCursorMove.isFirstFrame;
+    assignmentForCursorMove.isFirstFrame = false;
+
     cameraMover = jobIsAssigned(MOVE_CAMERA_JOB, this.assignments) && findByJob(MOVE_CAMERA_JOB, this.assignments);
 
     const path = paths.device.touchscreen;
     frame[path.cursorPose] = cursorPose ? cursorPose : undefined;
-    frame[path.isTouchingGrabbable] = cursorPose ? true : undefined;
+    frame[path.isTouchingGrabbable] = !didTouchGrabbableThisFrame && cursorPose;
     frame[path.cameraDelta] = cameraMover ? cameraMover.delta : undefined;
     frame[path.pinchDelta] = this.pinch ? this.pinch.delta : undefined;
   }

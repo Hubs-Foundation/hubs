@@ -155,6 +155,7 @@ AFRAME.registerSystem("actions", {
       resolve(frame, binding);
     });
 
+
     const cursorController = document.querySelector("[cursor-controller]").components["cursor-controller"];
     cursorController.actionSystemCallback(frame);
     // (?) We could put callbacks here to let app code activate or deactivate an action set THIS FRAME.
@@ -185,6 +186,7 @@ AFRAME.registerSystem("actions", {
     }
   },
 
+  // TODO: rename
   poll(path) {
     return frame[path];
   },
