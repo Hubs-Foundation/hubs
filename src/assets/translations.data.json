@@ -78,6 +78,7 @@
     "link.dont_have_a_code": "Don't have a code?",
     "link.create_a_room": "Create a Room",
     "link.try_again": "We couldn't find that code. Please try again.",
-    "help.report_issue": "Report an Issue"
+    "help.report_issue": "Report an Issue",
+    "scene.logo_tagline": "A new way to get together"
   }
 }

@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 //import classNames from "classnames";
-import { IntlProvider, /*FormattedMessage, */ addLocaleData } from "react-intl";
+import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import styles from "../assets/stylesheets/scene-ui.scss";
+import hubLogo from "../assets/images/hub-preview-white.png";
 
 import { lang, messages } from "../utils/i18n";
 
@@ -53,7 +54,24 @@ class SceneUI extends Component {
 
     return (
       <IntlProvider locale={lang} messages={messages}>
-        <div className={styles.ui}>hello</div>
+        <div className={styles.ui}>
+          <div className={styles.grid}>
+            <div className={styles.mainPanel}>
+              <a href="/" className={styles.logo}>
+                <img src={hubLogo} />
+              </a>
+              <div className={styles.logoTagline}>
+                <FormattedMessage id="scene.logo_tagline" />
+              </div>
+              <button>create a room with this scene</button>
+            </div>
+          </div>
+          <div className={styles.info}>
+            <div className={styles.name}>{this.props.sceneName}</div>
+            <div className={styles.name}>{this.props.sceneAttribution}</div>
+          </div>
+          <div className={styles.description}>{this.props.sceneDescription}</div>
+        </div>
       </IntlProvider>
     );
   }
