@@ -118,10 +118,12 @@ export const addMedia = (src, template, contentOrigin, resize = false) => {
       });
   }
 
-  entity.addEventListener("media_resolved", ({ detail }) => {
-    const objectType = objectTypeForOriginAndContentType(contentOrigin, detail.contentType);
-    scene.emit("object_spawned", { objectType });
-  });
+  if (contentOrigin) {
+    entity.addEventListener("media_resolved", ({ detail }) => {
+      const objectType = objectTypeForOriginAndContentType(contentOrigin, detail.contentType);
+      scene.emit("object_spawned", { objectType });
+    });
+  }
 
   return { entity, orientation };
 };

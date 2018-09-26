@@ -85,6 +85,7 @@ import "./components/hemisphere-light";
 import "./components/point-light";
 import "./components/spot-light";
 import "./components/visible-to-owner";
+import "./components/camera-tool";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -344,7 +345,6 @@ const onReady = async () => {
     });
 
     const offset = { x: 0, y: 0, z: -1.5 };
-
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
       const { entity, orientation } = addMedia(src, "#interactable-media", contentOrigin, true);
 
@@ -361,6 +361,16 @@ const onReady = async () => {
       const contentOrigin = e.detail instanceof File ? ObjectContentOrigins.FILE : ObjectContentOrigins.URL;
 
       spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
+    });
+
+    scene.addEventListener("action_spawn_camera", () => {
+      const entity = document.createElement("a-entity");
+      entity.setAttribute("networked", { template: "#interactable-camera" });
+      entity.setAttribute("offset-relative-to", {
+        target: "#player-camera",
+        offset: { x: 0, y: 0, z: -1.5 }
+      });
+      scene.appendChild(entity);
     });
 
     scene.addEventListener("object_spawned", e => {

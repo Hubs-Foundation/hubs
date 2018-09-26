@@ -22,6 +22,7 @@
   &:local(.column) {
     flex-direction: column;
     bottom: 20px;
+    z-index: 1;
   }
 }
 
@@ -118,6 +119,13 @@
 }
 :local(.iconButton.spawn_pen:hover) {
   background-image: url(../hud/spawn_pen-hover.png);
+}
+
+:local(.iconButton.spawn_camera) {
+  background-image: url(../hud/spawn_camera.png);
+}
+:local(.iconButton.spawn_camera:hover) {
+  background-image: url(../hud/spawn_camera-hover.png);
 }
 
 :local(.iconButton.freeze) {

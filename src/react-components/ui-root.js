@@ -918,6 +918,7 @@ class UIRoot extends Component {
                 onToggleFreeze={this.toggleFreeze}
                 onToggleSpaceBubble={this.toggleSpaceBubble}
                 onSpawnPen={this.spawnPen}
+                onSpawnCamera={() => this.props.scene.emit("action_spawn_camera")}
               />
               {!this.props.availableVREntryTypes.isInHMD &&
                 this.props.occupantCount <= 1 && (

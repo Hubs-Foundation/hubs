@@ -128,6 +128,11 @@ function registerNetworkSchemas() {
   });
 
   NAF.schemas.add({
+    template: "#interactable-camera",
+    components: ["position", "rotation"]
+  });
+
+  NAF.schemas.add({
     template: "#pen-interactable",
     components: [
       {
