@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-//import classNames from "classnames";
+import classNames from "classnames";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import styles from "../assets/stylesheets/scene-ui.scss";
@@ -20,10 +20,13 @@ class SceneUI extends Component {
     sceneId: PropTypes.string,
     sceneName: PropTypes.string,
     sceneDescription: PropTypes.string,
-    sceneAttribution: PropTypes.string
+    sceneAttribution: PropTypes.string,
+    sceneScreenshotURL: PropTypes.string
   };
 
-  state = {};
+  state = {
+    screenshotReady: false
+  };
 
   constructor(props) {
     super(props);
@@ -57,25 +60,20 @@ class SceneUI extends Component {
   };
 
   render() {
-    if (!this.props.sceneLoaded || !this.props.sceneId) {
-      return (
-        <IntlProvider locale={lang} messages={messages}>
-          <div className="loading-panel">
-            <div className="loader-wrap">
-              <div className="loader">
-                <div className="loader-center" />
-              </div>
-            </div>
-
-            <img className="loading-panel__logo" src="../assets/images/logo.svg" />
-          </div>
-        </IntlProvider>
-      );
-    }
+    const showScreenshot = !this.props.sceneLoaded || !this.props.sceneId;
 
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.ui}>
+          <div
+            className={classNames({
+              [styles.screenshot]: true,
+              [styles.screenshotHidden]: !showScreenshot
+            })}
+          >
+            <img src={this.props.sceneScreenshotURL} onLoad={() => this.setState({ screenshotReady: true })} />
+          </div>
+          <div className={styles.whiteOverlay} />
           <div className={styles.grid}>
             <div className={styles.mainPanel}>
               <a href="/" className={styles.logo}>

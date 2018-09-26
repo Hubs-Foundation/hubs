@@ -132,7 +132,8 @@ const onReady = async () => {
   remountUI({
     sceneName: sceneInfo.name,
     sceneDescription: sceneInfo.description,
-    sceneAttribution: sceneInfo.attribution
+    sceneAttribution: sceneInfo.attribution,
+    sceneScreenshotURL: sceneInfo.screenshot_url
   });
 };
 
