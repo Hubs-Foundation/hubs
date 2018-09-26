@@ -89,7 +89,7 @@ const onReady = async () => {
   window.APP.scene = scene;
   document.querySelector("canvas").classList.add("brightened");
 
-  const sceneId = qs.get("scene_id") || document.location.pathname.substring(1).split("/")[0];
+  const sceneId = qs.get("scene_id") || document.location.pathname.substring(1).split("/")[1];
   console.log(`Scene ID: ${sceneId}`);
 
   let uiProps = { sceneId: sceneId };
