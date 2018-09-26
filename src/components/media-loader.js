@@ -9,20 +9,12 @@ gltfLoader.load(loadingObjectSrc, gltf => {
   loadingObject = gltf;
 });
 
-const contentTypeCache = new Map();
-const fetchContentType = async url => {
-  if (contentTypeCache.has(url)) return contentTypeCache.get(url);
-  const contentType = await fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
-  contentTypeCache.set(url, contentType);
-  return contentType;
+const fetchContentType = url => {
+  return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
 };
 
-const contentIndexCache = new Map();
-const fetchMaxContentIndex = async (documentUrl, pageUrl) => {
-  if (contentIndexCache.has(documentUrl)) return contentIndexCache.get(documentUrl);
-  const maxIndex = await fetch(pageUrl).then(r => parseInt(r.headers.get("x-max-content-index")));
-  contentIndexCache.set(documentUrl, maxIndex);
-  return maxIndex;
+const fetchMaxContentIndex = url => {
+  return fetch(url).then(r => parseInt(r.headers.get("x-max-content-index")));
 };
 
 AFRAME.registerComponent("media-loader", {
@@ -207,7 +199,7 @@ AFRAME.registerComponent("media-pager", {
     this.el.addEventListener("image-loaded", async e => {
       // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
       // request for the same page to read out the max-content-index header
-      this.maxIndex = await fetchMaxContentIndex(this.data.src, e.detail.src);
+      this.maxIndex = await fetchMaxContentIndex(e.detail.src);
       // if this is the first image we ever loaded, set up the UI
       if (this.toolbar == null) {
         const template = document.getElementById("paging-toolbar");
