@@ -1,5 +1,5 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
-import { proxiedUrlFor, resolveUrl } from "../utils/media-utils";
+import { guessContentType, proxiedUrlFor, resolveUrl } from "../utils/media-utils";
 
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
@@ -130,11 +130,9 @@ AFRAME.registerComponent("media-loader", {
       // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
       accessibleUrl = proxiedUrlFor(canonicalUrl);
 
-      // if the component creator didn't know the content type and we didn't get it from reticulum either,
-      // we need to make a HEAD request to find it out
-      if (contentType == null) {
-        contentType = await fetchContentType(accessibleUrl);
-      }
+      // if the component creator didn't know the content type, we didn't get it from reticulum, and
+      // we don't think we can infer it from the extension, we need to make a HEAD request to find it out
+      contentType = contentType || guessContentType(canonicalUrl) || (await fetchContentType(accessibleUrl));
 
       // We don't want to emit media_resolved for index updates.
       if (src !== oldData.src) {
@@ -166,9 +164,7 @@ AFRAME.registerComponent("media-loader", {
       } else if (
         contentType.includes("application/octet-stream") ||
         contentType.includes("x-zip-compressed") ||
-        contentType.startsWith("model/gltf") ||
-        src.endsWith(".gltf") ||
-        src.endsWith(".glb")
+        contentType.startsWith("model/gltf")
       ) {
         this.el.removeAttribute("media-image");
         this.el.removeAttribute("media-video");

@@ -2,6 +2,17 @@ import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
+const commonKnownContentTypes = {
+  gltf: "model/gltf",
+  glb: "model/gltf-binary",
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  pdf: "application/pdf",
+  mp4: "video/mp4",
+  mp3: "audio/mpeg"
+};
+
 // thanks to https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
 function b64EncodeUnicode(str) {
   // first we use encodeURIComponent to get percent-encoded UTF-8, then we convert the percent-encodings
@@ -28,6 +39,11 @@ export const resolveUrl = async (url, index) => {
   }).then(r => r.json());
   resolveUrlCache.set(cacheKey, resolved);
   return resolved;
+};
+
+export const guessContentType = url => {
+  const extension = new URL(url).pathname.split(".").pop();
+  return commonKnownContentTypes[extension];
 };
 
 export const upload = file => {
