@@ -26,6 +26,7 @@ import "./components/media-loader";
 import "./components/point-light";
 import "./components/quack";
 import "./components/scene-shadow";
+import "./components/scene-preview-camera";
 import "./components/skybox";
 import "./components/spawn-controller";
 import "./components/spot-light";
@@ -86,6 +87,7 @@ function mountUI(scene, props = {}) {
 const onReady = async () => {
   const scene = document.querySelector("a-scene");
   window.APP.scene = scene;
+  document.querySelector("canvas").classList.add("brightened");
 
   const sceneId = qs.get("scene_id") || document.location.pathname.substring(1).split("/")[0];
   console.log(`Scene ID: ${sceneId}`);
@@ -101,9 +103,18 @@ const onReady = async () => {
 
   const sceneRoot = document.querySelector("#scene-root");
   const sceneModelEntity = document.createElement("a-entity");
+  const gltfEl = document.createElement("a-entity");
+  const camera = document.getElementById("camera");
 
   sceneModelEntity.addEventListener("scene-loaded", () => {
     remountUI({ sceneLoaded: true });
+    const previewCamera = gltfEl.object3D.getObjectByName("scene-preview-camera");
+
+    if (previewCamera) {
+      camera.object3D.applyMatrix(previewCamera.matrixWorld);
+    }
+
+    camera.setAttribute("scene-preview-camera", "");
   });
 
   sceneRoot.appendChild(sceneModelEntity);
@@ -114,7 +125,6 @@ const onReady = async () => {
   const modelUrl = sceneInfo.model_url;
   console.log(`Scene Model URL: ${modelUrl}`);
 
-  const gltfEl = document.createElement("a-entity");
   gltfEl.setAttribute("gltf-model-plus", { src: modelUrl, useCache: false, inflate: true });
   gltfEl.addEventListener("model-loaded", () => sceneModelEntity.emit("scene-loaded"));
   sceneModelEntity.appendChild(gltfEl);
