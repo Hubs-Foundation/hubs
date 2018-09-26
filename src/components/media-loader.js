@@ -158,7 +158,7 @@ AFRAME.registerComponent("media-loader", {
         // two small differences:
         // 1. we pass the canonical URL to the pager so it can easily make subresource URLs
         // 2. we don't remove the media-image component -- media-pager uses that internally
-        this.el.setAttribute("media-pager", { src: canonicalUrl, index: 0 });
+        this.el.setAttribute("media-pager", { src: canonicalUrl });
         this.el.addEventListener("preview-loaded", this.clearLoadingTimeout, { once: true });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
       } else if (
@@ -197,20 +197,19 @@ AFRAME.registerComponent("media-loader", {
 AFRAME.registerComponent("media-pager", {
   schema: {
     src: { type: "string" },
-    index: { type: "number" }
+    index: { default: 0 }
   },
 
   init() {
+    this.toolbar = null;
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
-    this.el.setAttribute("media-image", "contentType", "image/png");
-    this.el.addEventListener(
-      "image-loaded",
-      async () => {
-        // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
-        // request for the same page to read out the max-content-index header
-        this.maxIndex = await fetchMaxContentIndex(this.src, this.el.getAttribute("media-image").src);
-
+    this.el.addEventListener("image-loaded", async e => {
+      // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
+      // request for the same page to read out the max-content-index header
+      this.maxIndex = await fetchMaxContentIndex(this.data.src, e.detail.src);
+      // if this is the first image we ever loaded, set up the UI
+      if (this.toolbar == null) {
         const template = document.getElementById("paging-toolbar");
         this.el.appendChild(document.importNode(template.content, true));
         this.toolbar = this.el.querySelector(".paging-toolbar");
@@ -226,13 +225,16 @@ AFRAME.registerComponent("media-pager", {
           this.update();
           this.el.emit("preview-loaded");
         }, 0);
-      },
-      { once: true }
-    );
+      } else {
+        this.update();
+      }
+    });
   },
 
   update() {
-    this.el.setAttribute("media-image", "src", proxiedUrlFor(this.data.src, this.data.index));
+    if (!this.data.src) return;
+    const pageSrc = proxiedUrlFor(this.data.src, this.data.index);
+    this.el.setAttribute("media-image", { src: pageSrc, contentType: "image/png" });
     if (this.pageLabel) {
       this.pageLabel.setAttribute("text", "value", `${this.data.index + 1}/${this.maxIndex + 1}`);
       this.repositionToolbar();
@@ -240,9 +242,9 @@ AFRAME.registerComponent("media-pager", {
   },
 
   remove() {
-    this.nextButton.removeEventListener("click", this.onNext);
-    this.prevButton.removeEventListener("click", this.onPrev);
-    this.el.removeChild(this.toolbar);
+    if (this.toolbar) {
+      this.el.removeChild(this.toolbar);
+    }
   },
 
   onNext() {
