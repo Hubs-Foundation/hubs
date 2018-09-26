@@ -84,7 +84,9 @@ class SceneUI extends Component {
               <div className={styles.logoTagline}>
                 <FormattedMessage id="scene.logo_tagline" />
               </div>
-              <button onClick={this.createRoom}>create a room with this scene</button>
+              <button onClick={this.createRoom}>
+                <FormattedMessage id="scene.create_button" />
+              </button>
             </div>
           </div>
           <div className={styles.info}>
