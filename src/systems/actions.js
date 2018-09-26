@@ -9,6 +9,7 @@ import {
 } from "./actions/bindings";
 import { sets } from "./actions/sets";
 import { paths } from "./actions/paths";
+import { updateActionSetsBasedOnSuperhands } from "./actions/resolve-action-sets";
 
 import MouseDevice from "./actions/devices/mouse";
 import KeyboardDevice from "./actions/devices/keyboard";
@@ -135,17 +136,18 @@ AFRAME.registerSystem("actions", {
     activeDevices.add(new TouchscreenDevice());
     activeDevices.add(new Hud());
 
-    registeredMappings.add(KBMBindings);
+    //registeredMappings.add(KBMBindings);
     //registeredMappings.add(gamepadBindings);
     //registeredMappings.add(touchscreenBindings);
     //registeredMappings.add(xboxBindings);
     registeredMappings.add(keyboardDebugBindings);
     //registeredMappings.add(oculusGoBindings);
-    //registeredMappings.add(oculusTouchBindings);
     this.xformStates = new Map();
+    registeredMappings.add(oculusTouchBindings);
   },
 
   tick() {
+    updateActionSetsBasedOnSuperhands();
     pendingSetChanges.forEach(change => {
       applyChange(activeSets, change);
     });
@@ -174,43 +176,6 @@ AFRAME.registerSystem("actions", {
       }
     });
 
-    // (?) Cursors and super hands know whether they've targetted something THIS FRAME.
-    // (?) We let app code activate or deactivate an action set THIS FRAME.
-    const enableCursor = true;
-    //    const rightHand = document.querySelector("[super-hands]#player-right-controller").components["super-hands"].state;
-    //    if (rightHand.has("hover-start")) {
-    //      const hoverEl = rightHand.get("hover-start");
-    //      this[hoverEl.matches(".interactable, .interactable *") ? "activate" : "deactivate"](
-    //        sets.rightHandHoveringOnInteractable
-    //      );
-    //      this[hoverEl.matches(".pen, .pen *") ? "activate" : "deactivate"](sets.rightHandHoveringOnPen);
-    //      if (hoverEl.matches(".interactable, .interactable *")) {
-    //        enableCursor = false;
-    //      }
-    //    } else {
-    //      this.deactivate(sets.rightHandHoveringOnInteractable);
-    //      this.deactivate(sets.rightHandHoveringOnPen);
-    //      this.deactivate(sets.rightHandHoveringOnVideo);
-    //      this.deactivate(sets.rightHandHoveringOnCamera);
-    //    }
-    //    const leftHand = document.querySelector("[super-hands]#player-left-controller").components["super-hands"].state;
-    //    if (leftHand.has("hover-start")) {
-    //      const hoverEl = leftHand.get("hover-start");
-    //      this[hoverEl.matches(".interactable, .interactable *") ? "activate" : "deactivate"](
-    //        sets.leftHandHoveringOnInteractable
-    //      );
-    //      this[hoverEl.matches(".pen, .pen *") ? "activate" : "deactivate"](sets.leftHandHoveringOnPen);
-    //    }
-
-    const cursorController = document.querySelector("[cursor-controller]").components["cursor-controller"];
-    if (enableCursor) {
-      cursorController.enable();
-    } else {
-      cursorController.disable();
-    }
-
-    // Check to see whether we do want to change hovering states this frame, and resolve bindings accordingly.
-    // TODO: This causes problems with any bindings that keep internal state and expect to be called at most once a frame.
     this.frame = frame;
     this.activeSets = activeSets;
     this.activeBindings = activeBindings;
@@ -228,8 +193,8 @@ AFRAME.registerSystem("actions", {
     return frame[path];
   },
 
-  activate(set) {
-    pendingSetChanges.push({ set, fn: "activate" });
+  activate(set, value) {
+    pendingSetChanges.push({ set, fn: value === false ? "deactivate" : "activate" });
   },
 
   deactivate(set) {

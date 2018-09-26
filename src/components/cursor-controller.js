@@ -105,8 +105,6 @@ AFRAME.registerComponent("cursor-controller", {
       const actions = AFRAME.scenes[0].systems.actions;
       if (!this.enabled) {
         actions.deactivate(sets.cursorHoveringOnPen);
-        actions.deactivate(sets.cursorHoveringOnVideo);
-        actions.deactivate(sets.cursorHoveringOnCamera);
         actions.deactivate(sets.cursorHoveringOnInteractable);
         return;
       }
@@ -122,16 +120,12 @@ AFRAME.registerComponent("cursor-controller", {
           const intersection = rawIntersections.find(x => x.object.el);
           this.intersection = intersection;
           const isHoveringOnPen = intersection && intersection.object.el.matches(".pen, .pen *");
-          const isHoveringOnVideo = intersection && intersection.object.el.matches(".video, .video *");
           const isHoveringOnInteractable =
             intersection && intersection.object.el.matches(".interactable, .interactable *");
           actions[isHoveringOnPen ? "activate" : "deactivate"](sets.cursorHoveringOnPen);
-          actions[isHoveringOnVideo ? "activate" : "deactivate"](sets.cursorHoveringOnVideo);
           actions[isHoveringOnInteractable ? "activate" : "deactivate"](sets.cursorHoveringOnInteractable);
         } else {
           actions.deactivate(sets.cursorHoveringOnPen);
-          actions.deactivate(sets.cursorHoveringOnVideo);
-          actions.deactivate(sets.cursorHoveringOnCamera);
           actions.deactivate(sets.cursorHoveringOnInteractable);
         }
       }

@@ -33,6 +33,8 @@ paths.app.rightHandStopDrawing = "/app/rightHandStopDrawing";
 paths.app.rightHandPenNextColor = "/app/rightHandPenNextColor";
 paths.app.rightHandPenPrevColor = "/app/rightHandPenPrevColor";
 paths.app.rightHandScalePenTip = "/app/rightHandScalePenTip";
+paths.app.rightHandStartTeleport = "/app/rightHandStartTeleport";
+paths.app.rightHandStopTeleport = "/app/rightHandStopTeleport";
 paths.app.leftHandPose = "/app/leftHandPose";
 paths.app.leftHandGrab = "/app/leftHandGrab";
 paths.app.leftHandDrop = "/app/leftHandDrop";
@@ -42,6 +44,8 @@ paths.app.leftHandStopDrawing = "/app/leftHandStopDrawing";
 paths.app.leftHandPenNextColor = "/app/leftHandPenNextColor";
 paths.app.leftHandPenPrevColor = "/app/leftHandPenPrevColor";
 paths.app.leftHandScalePenTip = "/app/leftHandScalePenTip";
+paths.app.leftHandStartTeleport = "/app/leftHandStartTeleport";
+paths.app.leftHandStopTeleport = "/app/leftHandStopTeleport";
 
 paths.device = {};
 

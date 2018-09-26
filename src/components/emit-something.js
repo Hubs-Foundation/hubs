@@ -1,4 +1,6 @@
-AFRAME.registerComponent("emit-something", {
+import { sets } from "../systems/actions/sets";
+
+AFRAME.registerComponent("action-to-event", {
   multiple: true,
 
   schema: {
