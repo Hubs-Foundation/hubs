@@ -40,67 +40,56 @@ export const xforms = {
   true: function(frame, src, dest) {
     frame[dest.value] = true;
   },
-  rising: function() {
-    let prev = false;
-    return function rising(frame, src, dest) {
-      frame[dest.value] = frame[src.value] && !prev;
-      prev = frame[src.value];
-    };
+  rising: function rising(frame, src, dest, prevState) {
+    frame[dest.value] = frame[src.value] && prevState === false;
+    return !!frame[src.value];
   },
   risingWithFrameDelay: function(n) {
-    const values = [];
-    for (let i = 0; i < n; i++) {
-      values[i] = undefined;
-    }
-    let valueForThisFrame;
-    let prev = false;
-    return function risingWithFrameDelay(frame, src, dest) {
-      frame[dest.value] = values.splice(0, 1)[0];
-      values.push(frame[src.value] && !prev);
-      prev = frame[src.value];
+    return function risingWithFrameDelay(frame, src, dest, state = { values: new Array(n) }) {
+      frame[dest.value] = state.values.shift();
+      state.values.push(frame[src.value] && !state.prev);
+      state.prev = frame[src.value];
+      return state;
     };
   },
-  falling: function() {
-    let prev = false;
-    return function falling(frame, src, dest) {
-      frame[dest.value] = !frame[src.value] && prev;
-      prev = frame[src.value];
-    };
+  falling: function falling(frame, src, dest, prevState) {
+    frame[dest.value] = !frame[src.value] && prevState;
+    return !!frame[src.value];
   },
-  throttleDecrement: function(max, step) {
-    let ceiling = max;
-    let i = max;
-    return function throttleDecrement(frame, src, dest) {
-      if (frame[src.value]) {
-        i = i - 1;
-        if (i < 0) {
-          ceiling = ceiling - step;
-          i = ceiling;
-          frame[dest.value] = frame[src.value];
-        }
-      } else {
-        ceiling = max;
-        i = -1;
-      }
-    };
-  },
-  throttleIncrement: function(n) {
-    let i = 0;
-    let max = 0;
-    return function throttleIncrement(frame, src, dest) {
-      if (frame[src.value]) {
-        i = i + 1;
-        if (i > max) {
-          i = 0;
-          max = max + n;
-          frame[dest.value] = frame[src.value];
-        }
-      } else {
-        i = 0;
-        max = 0;
-      }
-    };
-  },
+  // throttleDecrement: function(max, step) {
+  //   let ceiling = max;
+  //   let i = max;
+  //   return function throttleDecrement(frame, src, dest) {
+  //     if (frame[src.value]) {
+  //       i = i - 1;
+  //       if (i < 0) {
+  //         ceiling = ceiling - step;
+  //         i = ceiling;
+  //         frame[dest.value] = frame[src.value];
+  //       }
+  //     } else {
+  //       ceiling = max;
+  //       i = -1;
+  //     }
+  //   };
+  // },
+  // throttleIncrement: function(n) {
+  //   let i = 0;
+  //   let max = 0;
+  //   return function throttleIncrement(frame, src, dest) {
+  //     if (frame[src.value]) {
+  //       i = i + 1;
+  //       if (i > max) {
+  //         i = 0;
+  //         max = max + n;
+  //         frame[dest.value] = frame[src.value];
+  //       }
+  //     } else {
+  //       i = 0;
+  //       max = 0;
+  //     }
+  //   };
+  // },
   vec2Zero: function(frame, _, dest) {
     frame[dest.value] = zeroVec2;
   },

@@ -40,7 +40,7 @@ export const oculusTouchBindings = {
     {
       src: { value: paths.device.rightOculusTouch.button("grip").pressed },
       dest: { value: paths.app.rightHandGrab },
-      xform: xforms.rising()
+      xform: xforms.rising
     }
   ],
 
@@ -48,7 +48,7 @@ export const oculusTouchBindings = {
     {
       src: { value: paths.device.rightOculusTouch.button("grip").pressed },
       dest: { value: paths.app.rightHandDrop },
-      xform: xforms.falling()
+      xform: xforms.falling
     }
   ]
 };
@@ -57,7 +57,7 @@ export const xboxBindings = {
     {
       src: { value: paths.device.xbox.button("rightTrigger").pressed },
       dest: { value: paths.app.cursorDrop },
-      xform: xforms.falling(),
+      xform: xforms.falling,
       root: "xboxRightTriggerFalling",
       priority: 100
     },
@@ -91,21 +91,21 @@ export const xboxBindings = {
     {
       src: { value: paths.device.xbox.button("rightTrigger").pressed },
       dest: { value: paths.app.cursorStartDrawing },
-      xform: xforms.rising(),
+      xform: xforms.rising,
       root: "xboxRightTriggerRising",
       priority: 200
     },
     {
       src: { value: paths.device.xbox.button("rightTrigger").pressed },
       dest: { value: paths.app.cursorStopDrawing },
-      xform: xforms.falling(),
+      xform: xforms.falling,
       root: "xboxRightTriggerFalling",
       priority: 200
     },
     {
       src: { value: paths.device.xbox.button("b").pressed },
       dest: { value: paths.app.cursorDrop },
-      xform: xforms.rising()
+      xform: xforms.rising
     },
     {
       src: { value: paths.device.xbox.button("y").pressed },
@@ -117,12 +117,12 @@ export const xboxBindings = {
     {
       src: { value: paths.device.xbox.button("a").pressed },
       dest: { value: paths.app.cursorPenNextColor },
-      xform: xforms.rising()
+      xform: xforms.rising
     },
     {
       src: { value: paths.device.xbox.button("x").pressed },
       dest: { value: paths.app.cursorPenPrevColor },
-      xform: xforms.rising()
+      xform: xforms.rising
     },
     {
       src: {
@@ -198,12 +198,12 @@ export const xboxBindings = {
     {
       src: { value: paths.device.xbox.button("leftBumper").pressed },
       dest: { value: paths.app.snapRotateLeft },
-      xform: xforms.rising()
+      xform: xforms.rising
     },
     {
       src: { value: paths.device.xbox.button("rightBumper").pressed },
       dest: { value: paths.app.snapRotateRight },
-      xform: xforms.rising()
+      xform: xforms.rising
     },
     {
       src: { value: paths.device.xbox.button("dpadUp").pressed },
@@ -227,7 +227,7 @@ export const xboxBindings = {
     {
       src: { value: paths.device.xbox.button("y").pressed },
       dest: { value: paths.app.spawnPen },
-      xform: xforms.rising(),
+      xform: xforms.rising,
       root: "xbox/y",
       priority: 100
     }
@@ -236,7 +236,7 @@ export const xboxBindings = {
     {
       src: { value: paths.device.xbox.button("rightTrigger").pressed },
       dest: { value: paths.app.cursorGrab },
-      xform: xforms.rising(),
+      xform: xforms.rising,
       root: "xboxRightTriggerRising",
       priority: 100
     }
@@ -282,7 +282,7 @@ export const touchscreenBindings = {
     {
       src: { value: paths.device.hud.penButton },
       dest: { value: paths.app.spawnPen },
-      xform: xforms.rising(),
+      xform: xforms.rising,
       root: "hud.penButton",
       priority: 100
     }
@@ -291,7 +291,7 @@ export const touchscreenBindings = {
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
       dest: { value: paths.app.cursorDrop },
-      xform: xforms.falling(),
+      xform: xforms.falling,
       root: "touchscreen.cursorDrop",
       priority: 100
     }
@@ -314,12 +314,12 @@ export const touchscreenBindings = {
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
       dest: { value: paths.app.cursorStopDrawing },
-      xform: xforms.falling()
+      xform: xforms.falling
     },
     {
       src: { value: paths.device.hud.penButton },
       dest: { value: paths.app.cursorDrop },
-      xform: xforms.rising(),
+      xform: xforms.rising,
       root: "hud.penButton",
       priority: 200
     }
@@ -335,7 +335,7 @@ export const keyboardDebugBindings = {
       dest: {
         value: paths.app.logDebugFrame
       },
-      xform: xforms.rising()
+      xform: xforms.rising
     }
   ]
 };
@@ -350,21 +350,21 @@ export const KBMBindings = {
     {
       src: { value: paths.device.keyboard.key("q") },
       dest: { value: paths.app.snapRotateLeft },
-      xform: xforms.rising(),
+      xform: xforms.rising,
       root: "q",
       priority: 100
     },
     {
       src: { value: paths.device.keyboard.key("e") },
       dest: { value: paths.app.snapRotateRight },
-      xform: xforms.rising(),
+      xform: xforms.rising,
       root: "e",
       priority: 100
     },
     {
       src: { value: paths.device.hud.penButton },
       dest: { value: paths.app.spawnPen },
-      xform: xforms.rising()
+      xform: xforms.rising
     },
     {
       src: { value: paths.device.smartMouse.cursorPose },
@@ -394,7 +394,7 @@ export const KBMBindings = {
     {
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.app.cursorDrop },
-      xform: xforms.falling(),
+      xform: xforms.falling,
       priority: 100,
       root: "lmb"
     },
@@ -405,7 +405,7 @@ export const KBMBindings = {
       dest: {
         value: paths.app.logDebugFrame
       },
-      xform: xforms.rising()
+      xform: xforms.rising
     }
   ],
 
@@ -421,7 +421,7 @@ export const KBMBindings = {
     {
       src: { value: "/var/shift+q" },
       dest: { value: paths.app.cursorPenPrevColor },
-      xform: xforms.rising()
+      xform: xforms.rising
     },
     {
       src: {
@@ -434,7 +434,7 @@ export const KBMBindings = {
     {
       src: { value: "/var/shift+e" },
       dest: { value: paths.app.cursorPenNextColor },
-      xform: xforms.rising()
+      xform: xforms.rising
     },
     {
       src: {
@@ -447,7 +447,7 @@ export const KBMBindings = {
     {
       src: { value: "/var/notshift+q" },
       dest: { value: paths.app.snapRotateLeft },
-      xform: xforms.rising(),
+      xform: xforms.rising,
       root: "q",
       priority: 200
     },
@@ -462,27 +462,27 @@ export const KBMBindings = {
     {
       src: { value: "/var/notshift+e" },
       dest: { value: paths.app.snapRotateRight },
-      xform: xforms.rising(),
+      xform: xforms.rising,
       root: "e",
       priority: 200
     },
     {
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.app.cursorStartDrawing },
-      xform: xforms.rising(),
+      xform: xforms.rising,
       priority: 200
     },
     {
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.app.cursorStopDrawing },
-      xform: xforms.falling(),
+      xform: xforms.falling,
       priority: 200,
       root: "lmb"
     },
     {
       src: { value: paths.device.mouse.buttonRight },
       dest: { value: paths.app.cursorDrop },
-      xform: xforms.falling(),
+      xform: xforms.falling,
       priority: 200
     },
     {
@@ -528,7 +528,7 @@ export const KBMBindings = {
     {
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.app.cursorGrab },
-      xform: xforms.rising()
+      xform: xforms.rising
     }
   ]
 };
@@ -560,7 +560,7 @@ export const oculusGoBindings = {
         value: paths.device.oculusgo.button("touchpad").pressed
       },
       dest: { value: touchpadPressed },
-      xform: xforms.rising()
+      xform: xforms.rising
     },
     {
       src: {
@@ -602,7 +602,7 @@ export const oculusGoBindings = {
       dest: {
         value: paths.app.startTeleport
       },
-      xform: xforms.rising(),
+      xform: xforms.rising,
       root: triggerRisingRoot,
       priority: 100
     },
@@ -623,7 +623,7 @@ export const oculusGoBindings = {
         value: paths.device.oculusgo.button("trigger").pressed
       },
       dest: { value: paths.app.cursorGrab },
-      xform: xforms.rising(),
+      xform: xforms.rising,
       root: triggerRisingRoot,
       priority: 200
     },
@@ -632,7 +632,7 @@ export const oculusGoBindings = {
         value: paths.device.oculusgo.button("trigger").pressed
       },
       dest: { value: paths.app.cursorDrop },
-      xform: xforms.falling(),
+      xform: xforms.falling,
       root: triggerFallingRoot,
       priority: 200
     }
@@ -646,7 +646,7 @@ export const oculusGoBindings = {
       dest: {
         value: paths.app.stopTeleport
       },
-      xform: xforms.falling(),
+      xform: xforms.falling,
       root: triggerFallingRoot,
       priority: 100
     }
@@ -658,7 +658,7 @@ export const oculusGoBindings = {
         value: paths.device.oculusgo.button("trigger").pressed
       },
       dest: { value: paths.app.cursorStartDrawing },
-      xform: xforms.rising(),
+      xform: xforms.rising,
       root: triggerRisingRoot,
       priority: 300
     },
@@ -667,7 +667,7 @@ export const oculusGoBindings = {
         value: paths.device.oculusgo.button("trigger").pressed
       },
       dest: { value: paths.app.cursorStopDrawing },
-      xform: xforms.falling(),
+      xform: xforms.falling,
       root: triggerFallingRoot,
       priority: 300
     },

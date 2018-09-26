@@ -29,16 +29,7 @@ function difference(setA, setB) {
   return _difference;
 }
 
-function resolvePriorityConflict() {}
-function resolve(frame, binding) {
-  const { src, dest, xform, priority } = binding;
-  const priorityConflict = priority == "conflict";
-  if (priorityConflict) {
-    resolvePriorityConflict(frame, binding);
-  } else {
-    xform(frame, src, dest);
-  }
-}
+function resolve(frame, binding, xformState) {}
 
 function applyChange(sets, change) {
   const { set, fn } = change;
@@ -151,6 +142,7 @@ AFRAME.registerSystem("actions", {
     registeredMappings.add(keyboardDebugBindings);
     //registeredMappings.add(oculusGoBindings);
     //registeredMappings.add(oculusTouchBindings);
+    this.xformStates = new Map();
   },
 
   tick() {
@@ -170,36 +162,45 @@ AFRAME.registerSystem("actions", {
     const activeBindings = new Set();
     prioritizeBindings(priorityMap, activeBindings);
     activeBindings.forEach(binding => {
-      resolve(frame, binding);
+      const bindingExistedLastFrame = this.activeBindings && this.activeBindings.has(binding);
+      if (!bindingExistedLastFrame) {
+        this.xformStates.delete(binding);
+      }
+
+      const { src, dest, xform } = binding;
+      const newState = xform(frame, src, dest, this.xformStates.get(binding));
+      if (newState !== undefined) {
+        this.xformStates.set(binding, newState);
+      }
     });
 
     // (?) Cursors and super hands know whether they've targetted something THIS FRAME.
     // (?) We let app code activate or deactivate an action set THIS FRAME.
-    let enableCursor = true;
-//    const rightHand = document.querySelector("[super-hands]#player-right-controller").components["super-hands"].state;
-//    if (rightHand.has("hover-start")) {
-//      const hoverEl = rightHand.get("hover-start");
-//      this[hoverEl.matches(".interactable, .interactable *") ? "activate" : "deactivate"](
-//        sets.rightHandHoveringOnInteractable
-//      );
-//      this[hoverEl.matches(".pen, .pen *") ? "activate" : "deactivate"](sets.rightHandHoveringOnPen);
-//      if (hoverEl.matches(".interactable, .interactable *")) {
-//        enableCursor = false;
-//      }
-//    } else {
-//      this.deactivate(sets.rightHandHoveringOnInteractable);
-//      this.deactivate(sets.rightHandHoveringOnPen);
-//      this.deactivate(sets.rightHandHoveringOnVideo);
-//      this.deactivate(sets.rightHandHoveringOnCamera);
-//    }
-//    const leftHand = document.querySelector("[super-hands]#player-left-controller").components["super-hands"].state;
-//    if (leftHand.has("hover-start")) {
-//      const hoverEl = leftHand.get("hover-start");
-//      this[hoverEl.matches(".interactable, .interactable *") ? "activate" : "deactivate"](
-//        sets.leftHandHoveringOnInteractable
-//      );
-//      this[hoverEl.matches(".pen, .pen *") ? "activate" : "deactivate"](sets.leftHandHoveringOnPen);
-//    }
+    const enableCursor = true;
+    //    const rightHand = document.querySelector("[super-hands]#player-right-controller").components["super-hands"].state;
+    //    if (rightHand.has("hover-start")) {
+    //      const hoverEl = rightHand.get("hover-start");
+    //      this[hoverEl.matches(".interactable, .interactable *") ? "activate" : "deactivate"](
+    //        sets.rightHandHoveringOnInteractable
+    //      );
+    //      this[hoverEl.matches(".pen, .pen *") ? "activate" : "deactivate"](sets.rightHandHoveringOnPen);
+    //      if (hoverEl.matches(".interactable, .interactable *")) {
+    //        enableCursor = false;
+    //      }
+    //    } else {
+    //      this.deactivate(sets.rightHandHoveringOnInteractable);
+    //      this.deactivate(sets.rightHandHoveringOnPen);
+    //      this.deactivate(sets.rightHandHoveringOnVideo);
+    //      this.deactivate(sets.rightHandHoveringOnCamera);
+    //    }
+    //    const leftHand = document.querySelector("[super-hands]#player-left-controller").components["super-hands"].state;
+    //    if (leftHand.has("hover-start")) {
+    //      const hoverEl = leftHand.get("hover-start");
+    //      this[hoverEl.matches(".interactable, .interactable *") ? "activate" : "deactivate"](
+    //        sets.leftHandHoveringOnInteractable
+    //      );
+    //      this[hoverEl.matches(".pen, .pen *") ? "activate" : "deactivate"](sets.leftHandHoveringOnPen);
+    //    }
 
     const cursorController = document.querySelector("[cursor-controller]").components["cursor-controller"];
     if (enableCursor) {
@@ -217,6 +218,8 @@ AFRAME.registerSystem("actions", {
       console.log("frame", this.frame);
       console.log("sets", this.activeSets);
       console.log("bindings", this.activeBindings);
+      console.log("devices", activeDevices);
+      console.log("xformStates", this.xformStates);
     }
   },
 
