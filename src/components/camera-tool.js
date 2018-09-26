@@ -1,6 +1,10 @@
 import { addMedia } from "../utils/media-utils";
 import { ObjectTypes } from "../object-types";
 
+import cameraModelSrc from "../assets/camera_tool.glb";
+
+const cameraModelPromise = new Promise(resolve => new THREE.GLTFLoader().load(cameraModelSrc, resolve));
+
 const snapCanvas = document.createElement("canvas");
 async function pixelsToPNG(pixels, width, height) {
   snapCanvas.width = width;
@@ -19,8 +23,8 @@ async function pixelsToPNG(pixels, width, height) {
 AFRAME.registerComponent("camera-tool", {
   schema: {
     previewFPS: { default: 6 },
-    imageWidth: { default: 512 },
-    imageHeight: { default: 512 }
+    imageWidth: { default: 1024 },
+    imageHeight: { default: 1024 / (16 / 9) }
   },
 
   init() {
@@ -37,13 +41,14 @@ AFRAME.registerComponent("camera-tool", {
       stencil: false
     });
 
-    this.camera = new THREE.PerspectiveCamera();
+    this.camera = new THREE.PerspectiveCamera(50, this.renderTarget.width / this.renderTarget.height, 0.1, 30000);
     this.camera.rotation.set(0, Math.PI, 0);
     this.el.setObject3D("camera", this.camera);
 
     const material = new THREE.MeshBasicMaterial({
       map: this.renderTarget.texture
     });
+
     // Bit of a hack here to only update the renderTarget when the screens are in view and at a reduced FPS
     material.map.isVideoTexture = true;
     material.map.update = () => {
@@ -52,25 +57,26 @@ AFRAME.registerComponent("camera-tool", {
       }
     };
 
-    this.el.addEventListener(
-      "model-loaded",
-      () => {
-        const geometry = new THREE.PlaneGeometry(0.25, 0.25);
+    cameraModelPromise.then(model => {
+      const mesh = model.scene.clone();
+      mesh.scale.set(2, 2, 2);
+      this.el.setObject3D("mesh", mesh);
 
-        const screen = new THREE.Mesh(geometry, material);
-        screen.rotation.set(0, Math.PI, 0);
-        screen.position.set(0, -0.015, -0.08);
-        this.el.setObject3D("screen", screen);
+      const width = 0.28;
+      const geometry = new THREE.PlaneGeometry(width, width / this.camera.aspect);
 
-        const selfieScreen = new THREE.Mesh(geometry, material);
-        selfieScreen.position.set(0, 0.3, 0);
-        selfieScreen.scale.set(-1, 1, 1);
-        this.el.setObject3D("selfieScreen", selfieScreen);
+      const screen = new THREE.Mesh(geometry, material);
+      screen.rotation.set(0, Math.PI, 0);
+      screen.position.set(0, 0, -0.042);
+      this.el.setObject3D("screen", screen);
 
-        this.updateRenderTargetNextTick = true;
-      },
-      { once: true }
-    );
+      const selfieScreen = new THREE.Mesh(geometry, material);
+      selfieScreen.position.set(0, 0.4, 0);
+      selfieScreen.scale.set(-2, 2, 2);
+      this.el.setObject3D("selfieScreen", selfieScreen);
+
+      this.updateRenderTargetNextTick = true;
+    });
   },
 
   play() {
@@ -128,9 +134,8 @@ AFRAME.registerComponent("camera-tool", {
         pixelsToPNG(this.snapPixels, width, height).then(file => {
           const { entity, orientation } = addMedia(file, "#interactable-media", undefined, true);
           orientation.then(() => {
-            entity.object3D.position.copy(this.el.object3D.position);
+            entity.object3D.position.copy(this.el.object3D.position).add(new THREE.Vector3(0, -0.5, 0));
             entity.object3D.rotation.copy(this.el.object3D.rotation);
-            entity.components["sticky-object"].setLocked(false);
             sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
           });
         });
