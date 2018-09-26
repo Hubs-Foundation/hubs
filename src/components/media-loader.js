@@ -29,7 +29,7 @@ AFRAME.registerComponent("media-loader", {
   schema: {
     src: { type: "string" },
     resize: { default: false },
-    resolve: { default: true },
+    resolve: { default: false },
     contentType: { default: null }
   },
 

@@ -79,13 +79,13 @@ function getOrientation(file, callback) {
 }
 
 let interactableId = 0;
-export const addMedia = (src, template, contentOrigin, resize = false) => {
+export const addMedia = (src, template, contentOrigin, resolve = false, resize = false) => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
   entity.id = "interactable-media-" + interactableId++;
   entity.setAttribute("networked", { template: template });
-  entity.setAttribute("media-loader", { resize, src: typeof src === "string" ? src : "" });
+  entity.setAttribute("media-loader", { resize, resolve, src: typeof src === "string" ? src : "" });
   scene.appendChild(entity);
 
   const orientation = new Promise(function(resolve) {
@@ -102,7 +102,7 @@ export const addMedia = (src, template, contentOrigin, resize = false) => {
       .then(response => {
         const srcUrl = new URL(response.raw);
         srcUrl.searchParams.set("token", response.meta.access_token);
-        entity.setAttribute("media-loader", { src: srcUrl.href });
+        entity.setAttribute("media-loader", { resolve: false, src: srcUrl.href });
       })
       .catch(() => {
         entity.setAttribute("media-loader", { src: "error" });
