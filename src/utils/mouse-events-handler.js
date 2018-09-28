@@ -69,10 +69,6 @@ export default class MouseEventsHandler {
       this.superHand.el.emit("secondary-cursor-grab");
     }
     this.isLeftButtonHandledByCursor = this.cursor.startInteraction();
-    if (!this.isLeftButtonHandledByCursor) {
-      this.cursor.setCursorVisibility(false);
-      document.getElementById("gaze-teleport").emit("gaze-teleport_down");
-    }
   }
 
   onRightButtonDown() {
@@ -146,8 +142,6 @@ export default class MouseEventsHandler {
         } else {
           this.endInteraction();
         }
-        this.cursor.setCursorVisibility(true);
-        document.getElementById("gaze-teleport").emit("gaze-teleport_up");
         this.isLeftButtonDown = false;
         break;
       case 1: //middle/scroll button
