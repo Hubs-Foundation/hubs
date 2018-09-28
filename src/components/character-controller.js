@@ -175,12 +175,20 @@ AFRAME.registerComponent("character-controller", {
     const pathfinder = this.el.sceneEl.systems.nav.pathfinder;
     const zone = this.navZone;
     if (zone in pathfinder.zones) {
+      const roundedPos = end.clone();
+      roundedPos.x = Math.round(roundedPos.x * 100) / 100;
+      roundedPos.y = Math.round(roundedPos.y * 100) / 100;
+      roundedPos.z = Math.round(roundedPos.z * 100) / 100;
       if (this.navGroup == null) {
-        this.navGroup = pathfinder.getGroup(zone, end, true);
+        this.navGroup = pathfinder.getGroup(zone, roundedPos, true);
       }
       //console.log("BPDEBUG setPositionOnNavMesh", '\nnavNode', this.navNode, '\nstart', start, '\nend', end, '\nobjpos', object3D.position);
-      this.navNode = this.navNode || pathfinder.getClosestNode(end, zone, this.navGroup, true) || pathfinder.getClosestNode(end, zone, this.navGroup);
-      this.navNode = pathfinder.clampStep(start, end.clone(), this.navNode, zone, this.navGroup, object3D.position);
+      this.navNode = (
+        this.navNode || pathfinder.getClosestNode(end, zone, this.navGroup, true) ||
+        pathfinder.getClosestNode(end, zone, this.navGroup)
+      );
+      console.log("BPDEBUG setPositionOnNavMesh", "navNode", this.navNode);
+      this.navNode = pathfinder.clampStep(start, roundedPos, this.navNode, zone, this.navGroup, object3D.position);
       //console.log("BPDEBUG setPositionOnNavMesh", '\nnavNode', this.navNode, '\nobjpos', object3D.position);
     }
   },
@@ -188,8 +196,14 @@ AFRAME.registerComponent("character-controller", {
   resetPositionOnNavMesh: function(position, navPosition, object3D) {
     const pathfinder = this.el.sceneEl.systems.nav.pathfinder;
     const zone = this.navZone;
-    console.log("BPDEBUG resetPositionOnNavMesh", '\nnavGroup', this.navGroup, '\nposition', position, '\nnavPosition', navPosition, '\nobjpos', object3D.position);
-    this.navGroup = pathfinder.getGroup(zone, navPosition, true) || this.navGroup;
+    console.log("BPDEBUG resetPositionOnNavMesh", '\nzone', zone, '\nnavGroup', this.navGroup, '\nposition', position, '\nnavPosition', navPosition, '\nobjpos', object3D.position, object3D);
+    const roundedPos = navPosition.clone();
+    roundedPos.x = Math.round(roundedPos.x * 100) / 100;
+    roundedPos.y = Math.round(roundedPos.y * 100) / 100;
+    roundedPos.z = Math.round(roundedPos.z * 100) / 100;
+    console.log("BPDEBUG roundedPos", roundedPos);
+    this.navGroup = pathfinder.getGroup(zone, roundedPos, true);
+    object3D.position.copy(navPosition);
     console.log("BPDEBUG resetPositionOnNavMesh", '\nnavGroup', this.navGroup);
     //console.log("BPDEBUG position", JSON.stringify(object3D.position));
     //console.log("BPDEBUG to", JSON.stringify(position));
