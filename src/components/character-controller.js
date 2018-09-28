@@ -116,20 +116,20 @@ AFRAME.registerComponent("character-controller", {
       root.updateMatrix();
 
       const actions = AFRAME.scenes[0].systems.actions;
-      if (actions.poll(paths.app.snapRotateLeft)) {
+      if (actions.poll(paths.actions.snapRotateLeft)) {
         this.snapRotateLeft();
       }
-      if (actions.poll(paths.app.snapRotateRight)) {
+      if (actions.poll(paths.actions.snapRotateRight)) {
         this.snapRotateRight();
       }
       jump.set(0, 0, 0);
-      if (actions.poll(paths.app.translate.up)) {
-        jump.y += actions.poll(paths.app.translate.up);
+      if (actions.poll(paths.actions.translate.up)) {
+        jump.y += actions.poll(paths.actions.translate.up);
       }
-      if (actions.poll(paths.app.translate.down)) {
-        jump.y -= actions.poll(paths.app.translate.down);
+      if (actions.poll(paths.actions.translate.down)) {
+        jump.y -= actions.poll(paths.actions.translate.down);
       }
-      const acc = actions.poll(paths.app.characterAcceleration);
+      const acc = actions.poll(paths.actions.characterAcceleration);
       if (acc) {
         this.accelerationInput.set(acc[0], 0, acc[1]);
       }
@@ -144,7 +144,7 @@ AFRAME.registerComponent("character-controller", {
       pivotRotationInvMatrix.makeRotationAxis(rotationAxis, -pivot.rotation.y);
       this.updateVelocity(deltaSeconds);
 
-      const boost = actions.poll(paths.app.boost) ? 2 : 1;
+      const boost = actions.poll(paths.actions.boost) ? 2 : 1;
       move.makeTranslation(
         jump.x + this.velocity.x * distance * boost,
         jump.y + this.velocity.y * distance * boost,

@@ -1,6 +1,6 @@
 import { paths } from "../paths";
 
-export default class Hud {
+export class Hud {
   constructor() {
     this.events = [];
     document.querySelector("a-scene").addEventListener("penButtonPressed", this.events.push.bind(this.events));

@@ -21,7 +21,7 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
 
   tick() {
     const actions = AFRAME.scenes[0].systems.actions;
-    const cameraDelta = actions.poll(paths.app.cameraDelta);
+    const cameraDelta = actions.poll(paths.actions.cameraDelta);
     if (cameraDelta) {
       this.look(cameraDelta[1], cameraDelta[0]);
     }

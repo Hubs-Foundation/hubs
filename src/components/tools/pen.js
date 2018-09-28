@@ -94,20 +94,20 @@ AFRAME.registerComponent("pen", {
         document.querySelector("[cursor-controller]").components["cursor-controller"].data.cursor
     ) {
       const actions = AFRAME.scenes[0].systems.actions;
-      if (actions.poll(paths.app.cursorStartDrawing)) {
+      if (actions.poll(paths.actions.cursorStartDrawing)) {
         this._startDraw();
       }
-      if (actions.poll(paths.app.cursorStopDrawing)) {
+      if (actions.poll(paths.actions.cursorStopDrawing)) {
         this._endDraw();
       }
-      const penScaleMod = actions.poll(paths.app.cursorScalePenTip);
+      const penScaleMod = actions.poll(paths.actions.cursorScalePenTip);
       if (penScaleMod) {
-        this._changeRadius(actions.poll(paths.app.cursorScalePenTip));
+        this._changeRadius(actions.poll(paths.actions.cursorScalePenTip));
       }
-      if (actions.poll(paths.app.cursorPenNextColor)) {
+      if (actions.poll(paths.actions.cursorPenNextColor)) {
         this._changeColor(1);
       }
-      if (actions.poll(paths.app.cursorPenPrevColor)) {
+      if (actions.poll(paths.actions.cursorPenPrevColor)) {
         this._changeColor(-1);
       }
     } else if (
@@ -115,20 +115,20 @@ AFRAME.registerComponent("pen", {
       grabbable.grabbers[0] === document.querySelector("[super-hands], #player-right-controller")
     ) {
       const actions = AFRAME.scenes[0].systems.actions;
-      if (actions.poll(paths.app.rightHandStartDrawing)) {
+      if (actions.poll(paths.actions.rightHandStartDrawing)) {
         this._startDraw();
       }
-      if (actions.poll(paths.app.rightHandStopDrawing)) {
+      if (actions.poll(paths.actions.rightHandStopDrawing)) {
         this._endDraw();
       }
-      const penScaleMod = actions.poll(paths.app.rightHandScalePenTip);
+      const penScaleMod = actions.poll(paths.actions.rightHandScalePenTip);
       if (penScaleMod) {
-        this._changeRadius(actions.poll(paths.app.rightHandScalePenTip));
+        this._changeRadius(actions.poll(paths.actions.rightHandScalePenTip));
       }
-      if (actions.poll(paths.app.rightHandPenNextColor)) {
+      if (actions.poll(paths.actions.rightHandPenNextColor)) {
         this._changeColor(1);
       }
-      if (actions.poll(paths.app.rightHandPenPrevColor)) {
+      if (actions.poll(paths.actions.rightHandPenPrevColor)) {
         this._changeColor(-1);
       }
     } else if (
@@ -136,20 +136,20 @@ AFRAME.registerComponent("pen", {
       grabbable.grabbers[0] === document.querySelector("[super-hands], #player-left-controller")
     ) {
       const actions = AFRAME.scenes[0].systems.actions;
-      if (actions.poll(paths.app.leftHandStartDrawing)) {
+      if (actions.poll(paths.actions.leftHandStartDrawing)) {
         this._startDraw();
       }
-      if (actions.poll(paths.app.leftHandStopDrawing)) {
+      if (actions.poll(paths.actions.leftHandStopDrawing)) {
         this._endDraw();
       }
-      const penScaleMod = actions.poll(paths.app.leftHandScalePenTip);
+      const penScaleMod = actions.poll(paths.actions.leftHandScalePenTip);
       if (penScaleMod) {
-        this._changeRadius(actions.poll(paths.app.leftHandScalePenTip));
+        this._changeRadius(actions.poll(paths.actions.leftHandScalePenTip));
       }
-      if (actions.poll(paths.app.leftHandPenNextColor)) {
+      if (actions.poll(paths.actions.leftHandPenNextColor)) {
         this._changeColor(1);
       }
-      if (actions.poll(paths.app.leftHandPenPrevColor)) {
+      if (actions.poll(paths.actions.leftHandPenPrevColor)) {
         this._changeColor(-1);
       }
     }

@@ -1,7 +1,7 @@
 import { paths } from "../paths";
 import { Pose } from "../pose";
 
-export default class LeftOculusTouch {
+export class LeftOculusTouch {
   constructor(gamepad) {
     // wake the gamepad api up. otherwise it does not report touch controllers.
     // in chrome it still won't unless you enter vr. phooey on that.
@@ -26,7 +26,7 @@ export default class LeftOculusTouch {
         const buttonPath = paths.device.gamepad(this.gamepad.index).button(i);
         frame[buttonPath.pressed] = !!button.pressed;
         frame[buttonPath.touched] = !!button.touched;
-        frame[buttonPath.value] = !!button.value;
+        frame[buttonPath.value] = button.value;
       });
       this.gamepad.axes.forEach((axis, i) => {
         frame[paths.device.gamepad(this.gamepad.index).axis(i)] = axis;
@@ -36,7 +36,7 @@ export default class LeftOculusTouch {
         const outpath = paths.device.leftOculusTouch.button(button.name);
         frame[outpath.pressed] = !!frame[paths.device.gamepad(this.gamepad.index).button(button.buttonId).pressed];
         frame[outpath.touched] = !!frame[paths.device.gamepad(this.gamepad.index).button(button.buttonId).touched];
-        frame[outpath.value] = !!frame[paths.device.gamepad(this.gamepad.index).button(button.buttonId).value];
+        frame[outpath.value] = frame[paths.device.gamepad(this.gamepad.index).button(button.buttonId).value];
       });
       this.axisMap.forEach(axis => {
         frame[paths.device.leftOculusTouch.axis(axis.name)] =

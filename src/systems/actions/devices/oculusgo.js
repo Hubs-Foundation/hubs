@@ -1,6 +1,6 @@
 import { paths } from "../paths";
 
-export default class OculusGoController {
+export class OculusGoController {
   constructor(gamepad) {
     this.gamepad = gamepad;
     this.buttonMap = [{ name: "touchpad", buttonId: 0 }, { name: "trigger", buttonId: 7 }];
@@ -13,7 +13,7 @@ export default class OculusGoController {
         const buttonPath = paths.device.gamepad(this.gamepad.index).button(i);
         frame[buttonPath.pressed] = !!button.pressed;
         frame[buttonPath.touched] = !!button.touched;
-        frame[buttonPath.value] = !!button.value;
+        frame[buttonPath.value] = button.value;
       });
       this.gamepad.axes.forEach((axis, i) => {
         frame[paths.device.gamepad(this.gamepad.index).axis(i)] = axis;

@@ -294,8 +294,8 @@
                 dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
                 activateStartButtons: secondary-cursor-grab, secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
                 activateEndButtons: secondary-cursor-release, secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
-            action-to-event__a="path: /app/cursorGrab; event: cursor-grab";
-            action-to-event__b="path: /app/cursorDrop; event: cursor-release";
+            action-to-event__a="path: /actions/cursorGrab; event: cursor-grab";
+            action-to-event__b="path: /actions/cursorDrop; event: cursor-release";
         ></a-sphere>
 
         <!-- Player Rig -->
@@ -348,8 +348,8 @@
                     hitOpacity: 0.3;
                     missOpacity: 0.1;
                     curveShootingSpeed: 12;"
-                action-to-event__startTeleport="path: /app/startTeleport; event: gaze-teleport_down"
-                action-to-event__stopTeleport="path: /app/stopTeleport; event: gaze-teleport_up"
+                action-to-event__startTeleport="path: /actions/startTeleport; event: gaze-teleport_down"
+                action-to-event__stopTeleport="path: /actions/stopTeleport; event: gaze-teleport_up"
             ></a-entity>
           </a-entity>
 
@@ -372,10 +372,10 @@
               body="type: static; shape: none;"
               mixin="controller-super-hands"
               controls-shape-offset
-              action-to-event__a="path: /app/leftHandStartTeleport; event: left-teleport_down";
-              action-to-event__b="path: /app/leftHandStopTeleport; event: left-teleport_up";
-              action-to-event__c="path: /app/leftHandGrab; event: primary_hand_grab";
-              action-to-event__d="path: /app/leftHandDrop; event: primary_hand_release";
+              action-to-event__a="path: /actions/leftHandStartTeleport; event: left-teleport_down";
+              action-to-event__b="path: /actions/leftHandStopTeleport; event: left-teleport_up";
+              action-to-event__c="path: /actions/leftHandGrab; event: primary_hand_grab";
+              action-to-event__d="path: /actions/leftHandDrop; event: primary_hand_release";
           >
           </a-entity>
 
@@ -398,10 +398,10 @@
               body="type: static; shape: none;"
               mixin="controller-super-hands"
               controls-shape-offset
-              action-to-event__a="path: /app/rightHandStartTeleport; event: right-teleport_down";
-              action-to-event__b="path: /app/rightHandStopTeleport; event: right-teleport_up";
-              action-to-event__c="path: /app/rightHandGrab; event: primary_hand_grab";
-              action-to-event__d="path: /app/rightHandDrop; event: primary_hand_release";
+              action-to-event__a="path: /actions/rightHandStartTeleport; event: right-teleport_down";
+              action-to-event__b="path: /actions/rightHandStopTeleport; event: right-teleport_up";
+              action-to-event__c="path: /actions/rightHandGrab; event: primary_hand_grab";
+              action-to-event__d="path: /actions/rightHandDrop; event: primary_hand_release";
           >
           </a-entity>
 
@@ -447,7 +447,7 @@
         ></a-entity>
 
         <a-entity
-            action-to-event="path: /app/spawnPen; event: spawn_pen"
+            action-to-event="path: /actions/spawnPen; event: spawn_pen"
             super-spawner="
                 template: #pen-interactable;
                 src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf;

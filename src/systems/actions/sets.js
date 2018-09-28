@@ -5,9 +5,7 @@ sets.cursorHoveringOnInteractable = "cursorHoveringOnInteractable";
 sets.cursorHoveringOnNothing = "cursorHoveringOnNothing";
 sets.cursorHoldingPen = "cursorHoldingPen";
 sets.cursorHoldingInteractable = "cursorHoldingInteractable";
-
 sets.rightHandTeleporting = "rightHandTeleporting";
-
 sets.rightHandHoveringOnPen = "rightHandHoveringOnPen";
 sets.rightHandHoveringOnInteractable = "rightHandHoveringOnInteractable";
 sets.rightHandHoveringOnNothing = "rightHandHoveringOnNothing";

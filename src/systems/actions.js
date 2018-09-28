@@ -1,26 +1,25 @@
-import {
-  KBMBindings,
-  gamepadBindings,
-  touchscreenBindings,
-  keyboardDebugBindings,
-  xboxBindings,
-  oculusGoBindings,
-  oculusTouchBindings
-} from "./actions/bindings";
-import { sets } from "./actions/sets";
 import { paths } from "./actions/paths";
-import { updateActionSetsBasedOnSuperhands } from "./actions/resolve-action-sets";
+import { sets } from "./actions/sets";
 
-import MouseDevice from "./actions/devices/mouse";
-import KeyboardDevice from "./actions/devices/keyboard";
-import SmartMouseDevice from "./actions/devices/smartMouse";
-import GamepadDevice from "./actions/devices/gamepad";
-import TouchscreenDevice from "./actions/devices/touchscreen";
-import Hud from "./actions/devices/hud";
-import XboxController from "./actions/devices/xbox";
-import OculusGoController from "./actions/devices/oculusgo";
-import RightOculusTouch from "./actions/devices/rightOculusTouch";
-import LeftOculusTouch from "./actions/devices/leftOculusTouch";
+import { MouseDevice } from "./actions/devices/mouse";
+import { KeyboardDevice } from "./actions/devices/keyboard";
+import { SmartMouseDevice } from "./actions/devices/smartMouse";
+import { GamepadDevice } from "./actions/devices/gamepad";
+import { TouchscreenDevice } from "./actions/devices/touchscreen";
+import { Hud } from "./actions/devices/hud";
+import { XboxController } from "./actions/devices/xbox";
+import { OculusGoController } from "./actions/devices/oculusgo";
+import { RightOculusTouch } from "./actions/devices/rightOculusTouch";
+import { LeftOculusTouch } from "./actions/devices/leftOculusTouch";
+
+import { KBMBindings } from "./actions/bindings/KBMBindings";
+import { gamepadBindings } from "./actions/bindings/gamepadBindings";
+import { touchscreenBindings } from "./actions/bindings/touchscreenBindings";
+import { keyboardDebugBindings } from "./actions/bindings/keyboardDebugBindings";
+import { oculusgoBindings } from "./actions/bindings/oculusgoBindings";
+import { oculustouchBindings } from "./actions/bindings/oculustouchBindings";
+
+import { updateActionSetsBasedOnSuperhands } from "./actions/resolve-action-sets";
 
 function difference(setA, setB) {
   const _difference = new Set(setA);
@@ -29,8 +28,6 @@ function difference(setA, setB) {
   });
   return _difference;
 }
-
-function resolve(frame, binding, xformState) {}
 
 function applyChange(sets, change) {
   const { set, fn } = change;
@@ -136,14 +133,14 @@ AFRAME.registerSystem("actions", {
     activeDevices.add(new TouchscreenDevice());
     activeDevices.add(new Hud());
 
-    //registeredMappings.add(KBMBindings);
+    registeredMappings.add(KBMBindings);
     //registeredMappings.add(gamepadBindings);
     //registeredMappings.add(touchscreenBindings);
     //registeredMappings.add(xboxBindings);
     registeredMappings.add(keyboardDebugBindings);
-    //registeredMappings.add(oculusGoBindings);
+    //registeredMappings.add(oculusgoBindings);
     this.xformStates = new Map();
-    registeredMappings.add(oculusTouchBindings);
+    registeredMappings.add(oculustouchBindings);
   },
 
   tick() {
@@ -179,16 +176,18 @@ AFRAME.registerSystem("actions", {
     this.frame = frame;
     this.activeSets = activeSets;
     this.activeBindings = activeBindings;
-    if (frame[paths.app.logDebugFrame]) {
+    if (frame[paths.actions.logDebugFrame]) {
       console.log("frame", this.frame);
       console.log("sets", this.activeSets);
       console.log("bindings", this.activeBindings);
       console.log("devices", activeDevices);
       console.log("xformStates", this.xformStates);
     }
+    if (frame[paths.actions.drawDebugFrame]) {
+      // TODO: draw debug data to the screen
+    }
   },
 
-  // TODO: rename
   poll(path) {
     return frame[path];
   },

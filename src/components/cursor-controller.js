@@ -111,7 +111,7 @@ AFRAME.registerComponent("cursor-controller", {
 
       const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
       if (!isGrabbing) {
-        const cursorPose = actions.poll(paths.app.cursorPose);
+        const cursorPose = actions.poll(paths.actions.cursorPose);
         if (cursorPose) {
           rawIntersections.length = 0;
           this.raycaster.ray.origin = cursorPose.position;
@@ -143,10 +143,10 @@ AFRAME.registerComponent("cursor-controller", {
         this.distance = this.data.far;
       }
 
-      const cursorPose = actions.poll(paths.app.cursorPose);
+      const cursorPose = actions.poll(paths.actions.cursorPose);
       this.setCursorVisibility(!!cursorPose);
       if (isGrabbing) {
-        if (actions.poll(paths.app.cursorDrop)) {
+        if (actions.poll(paths.actions.cursorDrop)) {
           this.endInteraction();
         }
       }
@@ -156,7 +156,7 @@ AFRAME.registerComponent("cursor-controller", {
 
       const cursorPosition = cursor.object3D.position;
       if (isGrabbing) {
-        const cursorModDelta = actions.poll(paths.app.cursorModDelta);
+        const cursorModDelta = actions.poll(paths.actions.cursorModDelta);
         if (cursorModDelta) {
           this.changeDistanceMod(cursorModDelta);
         }
@@ -185,7 +185,7 @@ AFRAME.registerComponent("cursor-controller", {
       cursor.object3D.lookAt(cameraPos);
 
       if (!isGrabbing) {
-        if (actions.poll(paths.app.cursorGrab)) {
+        if (actions.poll(paths.actions.cursorGrab)) {
           this.startInteraction();
         }
       }

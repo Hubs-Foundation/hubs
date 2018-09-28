@@ -1,5 +1,5 @@
-import { Pose } from "./pose";
-import { angleTo4Direction } from "../../utils/dpad";
+import { Pose } from "../pose";
+import { angleTo4Direction } from "../../../utils/dpad";
 
 const zeroVec2 = [0, 0];
 export const xforms = {
@@ -56,40 +56,6 @@ export const xforms = {
     frame[dest.value] = !frame[src.value] && prevState;
     return !!frame[src.value];
   },
-  // throttleDecrement: function(max, step) {
-  //   let ceiling = max;
-  //   let i = max;
-  //   return function throttleDecrement(frame, src, dest) {
-  //     if (frame[src.value]) {
-  //       i = i - 1;
-  //       if (i < 0) {
-  //         ceiling = ceiling - step;
-  //         i = ceiling;
-  //         frame[dest.value] = frame[src.value];
-  //       }
-  //     } else {
-  //       ceiling = max;
-  //       i = -1;
-  //     }
-  //   };
-  // },
-  // throttleIncrement: function(n) {
-  //   let i = 0;
-  //   let max = 0;
-  //   return function throttleIncrement(frame, src, dest) {
-  //     if (frame[src.value]) {
-  //       i = i + 1;
-  //       if (i > max) {
-  //         i = 0;
-  //         max = max + n;
-  //         frame[dest.value] = frame[src.value];
-  //       }
-  //     } else {
-  //       i = 0;
-  //       max = 0;
-  //     }
-  //   };
-  // },
   vec2Zero: function(frame, _, dest) {
     frame[dest.value] = zeroVec2;
   },

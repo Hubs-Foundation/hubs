@@ -7,7 +7,7 @@ const modeMod = {
   [WheelEvent.DOM_DELTA_PAGE]: 2
 };
 
-export default class MouseDevice {
+export class MouseDevice {
   constructor() {
     this.events = [];
     this.coords = [0, 0]; // normalized screenspace coordinates in [(-1, 1), (-1, 1)]

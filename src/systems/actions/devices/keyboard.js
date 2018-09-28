@@ -1,5 +1,5 @@
 import { paths } from "../paths";
-export default class KeyboardDevice {
+export class KeyboardDevice {
   constructor() {
     this.keys = {};
     this.events = [];
