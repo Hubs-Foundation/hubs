@@ -171,51 +171,30 @@ AFRAME.registerComponent("character-controller", {
     console.warn("character-controller", msg);
   },
 
-  setPositionOnNavMesh: function(start, end, object3D) {
-    const pathfinder = this.el.sceneEl.systems.nav.pathfinder;
-    const zone = this.navZone;
-    if (zone in pathfinder.zones) {
-      const roundedPos = end.clone();
-      roundedPos.x = Math.round(roundedPos.x * 100) / 100;
-      roundedPos.y = Math.round(roundedPos.y * 100) / 100;
-      roundedPos.z = Math.round(roundedPos.z * 100) / 100;
-      if (this.navGroup == null) {
-        this.navGroup = pathfinder.getGroup(zone, roundedPos, true);
-      }
-      //console.log("BPDEBUG setPositionOnNavMesh", '\nnavNode', this.navNode, '\nstart', start, '\nend', end, '\nobjpos', object3D.position);
-      this.navNode = (
-        this.navNode || pathfinder.getClosestNode(end, zone, this.navGroup, true) ||
-        pathfinder.getClosestNode(end, zone, this.navGroup)
-      );
-      console.log("BPDEBUG setPositionOnNavMesh", "navNode", this.navNode);
-      this.navNode = pathfinder.clampStep(start, roundedPos, this.navNode, zone, this.navGroup, object3D.position);
-      //console.log("BPDEBUG setPositionOnNavMesh", '\nnavNode', this.navNode, '\nobjpos', object3D.position);
+  _updateNavState: function(pos, forceUpdate) {
+    const { pathfinder } = this.el.sceneEl.systems.nav;
+    if (this.navGroup === null || forceUpdate) {
+      this.navGroup = pathfinder.getGroup(this.navZone, pos, true);
+    }
+    if (this.navNode === null || forceUpdate) {
+      this.navNode =
+        pathfinder.getClosestNode(pos, this.navZone, this.navGroup, true) ||
+        pathfinder.getClosestNode(pos, this.navZone, this.navGroup);
     }
   },
 
+  setPositionOnNavMesh: function(start, end, object3D) {
+    const { pathfinder } = this.el.sceneEl.systems.nav;
+    if (!(this.navZone in pathfinder.zones)) return;
+    this._updateNavState(end);
+    this.navNode = pathfinder.clampStep(start, end, this.navNode, this.navZone, this.navGroup, object3D.position);
+  },
+
   resetPositionOnNavMesh: function(position, navPosition, object3D) {
-    const pathfinder = this.el.sceneEl.systems.nav.pathfinder;
-    const zone = this.navZone;
-    console.log("BPDEBUG resetPositionOnNavMesh", '\nzone', zone, '\nnavGroup', this.navGroup, '\nposition', position, '\nnavPosition', navPosition, '\nobjpos', object3D.position, object3D);
-    const roundedPos = navPosition.clone();
-    roundedPos.x = Math.round(roundedPos.x * 100) / 100;
-    roundedPos.y = Math.round(roundedPos.y * 100) / 100;
-    roundedPos.z = Math.round(roundedPos.z * 100) / 100;
-    console.log("BPDEBUG roundedPos", roundedPos);
-    this.navGroup = pathfinder.getGroup(zone, roundedPos, true);
+    const { pathfinder } = this.el.sceneEl.systems.nav;
+    if (!(this.navZone in pathfinder.zones)) return;
+    this._updateNavState(navPosition, true);
     object3D.position.copy(navPosition);
-    console.log("BPDEBUG resetPositionOnNavMesh", '\nnavGroup', this.navGroup);
-    //console.log("BPDEBUG position", JSON.stringify(object3D.position));
-    //console.log("BPDEBUG to", JSON.stringify(position));
-    //const pathfinder = this.el.sceneEl.systems.nav.pathfinder;
-    //const zone = this.navZone;
-    //if (zone in pathfinder.zones) {
-    //  this.navGroup = pathfinder.getGroup(zone, position, true);
-    //  this.navNode = pathfinder.getClosestNode(navPosition, zone, this.navGroup, true) || this.navNode;
-    //  this.navNode = pathfinder.clampStep(position, position.clone(), this.navNode, zone, this.navGroup, object3D.position);
-    //  console.log("BPDEBUG end", JSON.stringify(object3D.position));
-    //  console.log("BPDEBUG --------------");
-    //}
   },
 
   updateVelocity: function(dt) {
