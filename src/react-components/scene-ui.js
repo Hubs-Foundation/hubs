@@ -14,7 +14,6 @@ addLocaleData([...en]);
 
 class SceneUI extends Component {
   static propTypes = {
-    store: PropTypes.object,
     scene: PropTypes.object,
     sceneLoaded: PropTypes.bool,
     sceneId: PropTypes.string,
@@ -96,7 +95,6 @@ class SceneUI extends Component {
             <div className={styles.name}>{this.props.sceneName}</div>
             <div className={styles.attribution}>{this.props.sceneAttribution}</div>
           </div>
-          <div className={styles.description}>{this.props.sceneDescription}</div>
         </div>
       </IntlProvider>
     );

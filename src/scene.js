@@ -9,30 +9,8 @@ patchWebGLRenderingContext();
 
 import "three/examples/js/loaders/GLTFLoader";
 
-import "./components/ambient-light";
-import "./components/animation-mixer";
-import "./components/audio-feedback";
-import "./components/css-class";
+import "./components/scene-components";
 import "./components/debug";
-import "./components/directional-light";
-import "./components/duck";
-import "./components/gltf-model-plus";
-import "./components/heightfield";
-import "./components/hemisphere-light";
-import "./components/hide-when-quality";
-import "./components/layers";
-import "./components/loop-animation";
-import "./components/media-loader";
-import "./components/point-light";
-import "./components/quack";
-import "./components/scene-shadow";
-import "./components/scene-preview-camera";
-import "./components/skybox";
-import "./components/spawn-controller";
-import "./components/spot-light";
-import "./components/sticky-object";
-import "./components/super-spawner";
-import "./components/water";
 import "./systems/nav";
 
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
@@ -47,12 +25,6 @@ import "./gltf-component-mappings";
 import { App } from "./App";
 
 window.APP = new App();
-window.APP.RENDER_ORDER = {
-  HUD_BACKGROUND: 1,
-  HUD_ICONS: 2,
-  CURSOR: 3
-};
-const store = window.APP.store;
 
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
@@ -69,14 +41,12 @@ import registerTelemetry from "./telemetry";
 registerTelemetry();
 
 disableiOSZoom();
-store.init();
 
 function mountUI(scene, props = {}) {
   ReactDOM.render(
     <SceneUI
       {...{
         scene,
-        store,
         ...props
       }}
     />,
@@ -118,8 +88,6 @@ const onReady = async () => {
     camera.setAttribute("scene-preview-camera", "");
   });
 
-  sceneRoot.appendChild(sceneModelEntity);
-
   const res = await fetch(getReticulumFetchUrl(`/api/v1/scenes/${sceneId}`)).then(r => r.json());
   const sceneInfo = res.scenes[0];
 
@@ -129,6 +97,7 @@ const onReady = async () => {
   gltfEl.setAttribute("gltf-model-plus", { src: modelUrl, useCache: false, inflate: true });
   gltfEl.addEventListener("model-loaded", () => sceneModelEntity.emit("scene-loaded"));
   sceneModelEntity.appendChild(gltfEl);
+  sceneRoot.appendChild(sceneModelEntity);
 
   remountUI({
     sceneName: sceneInfo.name,
