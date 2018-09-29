@@ -126,7 +126,7 @@ import registerNetworkSchemas from "./network-schemas";
 import { inGameActions, config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 
-import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
+import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
 import qsTruthy from "./utils/qs_truthy";
