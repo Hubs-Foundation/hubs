@@ -183,6 +183,12 @@ function requestFullscreen() {
   if (screenfull.enabled && !screenfull.isFullscreen) screenfull.request();
 }
 
+function nextTick() {
+  return new Promise(resolve => {
+    setTimeout(resolve, 0);
+  });
+}
+
 const onReady = async () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
@@ -482,8 +488,6 @@ const onReady = async () => {
   getAvailableVREntryTypes().then(availableVREntryTypes => {
     if (availableVREntryTypes.isInHMD) {
       remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
-    } else if (availableVREntryTypes.gearvr === VR_DEVICE_AVAILABILITY.yes) {
-      remountUI({ availableVREntryTypes, forcedVREntryType: "gearvr" });
     } else {
       remountUI({ availableVREntryTypes });
     }
@@ -575,6 +579,8 @@ const onReady = async () => {
       scene.setAttribute("networked-scene", { debug: true });
     }
 
+    await nextTick();
+
     document.body.addEventListener("connected", () => {
       remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
     });
@@ -589,16 +595,6 @@ const onReady = async () => {
       remountUI({
         occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
       });
-    });
-
-    scene.components["networked-scene"].connect().catch(connectError => {
-      // hacky until we get return codes
-      const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
-      console.error(connectError);
-      remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
-      exitScene();
-
-      return;
     });
 
     const sendHubDataMessage = function(clientId, dataType, data, reliable) {
@@ -618,8 +614,21 @@ const onReady = async () => {
       }
     };
 
-    NAF.connection.adapter.reliableTransport = (clientId, dataType, data) =>
-      sendHubDataMessage(clientId, dataType, data, true);
+    scene.components["networked-scene"]
+      .connect()
+      .then(() => {
+        NAF.connection.adapter.reliableTransport = (clientId, dataType, data) =>
+          sendHubDataMessage(clientId, dataType, data, true);
+      })
+      .catch(connectError => {
+        // hacky until we get return codes
+        const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+        console.error(connectError);
+        remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
+        exitScene();
+
+        return;
+      });
   };
 
   channel

@@ -689,16 +689,6 @@ class UIRoot extends Component {
             {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
               <GenericEntryButton onClick={this.enterVR} />
             )}
-            {this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
-              <DaydreamEntryButton
-                onClick={this.enterDaydream}
-                subtitle={
-                  this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe
-                    ? "entry.daydream-via-chrome"
-                    : null
-                }
-              />
-            )}
             <DeviceEntryButton onClick={this.attemptLink} isInHMD={this.props.availableVREntryTypes.isInHMD} />
             {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
               <div className={entryStyles.secondary} onClick={this.enterVR}>
