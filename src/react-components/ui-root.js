@@ -265,9 +265,12 @@ class UIRoot extends Component {
     const hasGrantedMic = await this.hasGrantedMicPermissions();
 
     if (hasGrantedMic) {
+      console.log("a");
       await this.setMediaStreamToDefault();
+      console.log("b");
       this.beginOrSkipAudioSetup();
     } else {
+      console.log("c");
       this.setState({ entryStep: ENTRY_STEPS.mic_grant });
     }
   };
