@@ -7,9 +7,11 @@ function lerp(start, end, t) {
   return (1 - t) * start + t * end;
 }
 
-const DURATION = 90.0;
-
 AFRAME.registerComponent("scene-preview-camera", {
+  schema: {
+    duration: { default: 90, type: "number" }
+  },
+
   init: function() {
     this.startPoint = this.el.object3D.position.clone();
     this.startRotation = new THREE.Quaternion();
@@ -29,7 +31,8 @@ AFRAME.registerComponent("scene-preview-camera", {
   },
 
   tick: function() {
-    const t = (new Date().getTime() - this.startTime) / (1000.0 * DURATION);
+    let t = (new Date().getTime() - this.startTime) / (1000.0 * this.data.duration);
+    t = (t * t) / (2 * (t * t - t) + 1);
 
     const from = this.backwards ? this.targetPoint : this.startPoint;
     const to = this.backwards ? this.startPoint : this.targetPoint;

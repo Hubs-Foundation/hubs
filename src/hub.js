@@ -98,6 +98,7 @@ const store = window.APP.store;
 
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
+const playerHeight = 1.6;
 
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
@@ -187,7 +188,6 @@ const onReady = async () => {
   const hubChannel = new HubChannel(store);
   const linkChannel = new LinkChannel(store);
 
-  document.querySelector("canvas").classList.add("blurred");
   window.APP.scene = scene;
 
   registerNetworkSchemas();
@@ -246,7 +246,11 @@ const onReady = async () => {
     document.body.removeEventListener("touchend", requestFullscreen);
   };
 
-  const enterScene = async (mediaStream, enterInVR, hubId) => {
+  const enterScene = async (mediaStream, enterInVR) => {
+    const playerCamera = document.querySelector("#player-camera");
+    playerCamera.removeAttribute("scene-preview-camera");
+    playerCamera.object3D.position.set(0, playerHeight, 0);
+
     const scene = document.querySelector("a-scene");
 
     // Get aframe inspector url using the webpack file-loader.
@@ -257,9 +261,8 @@ const onReady = async () => {
     if (!isBotMode) {
       scene.classList.add("no-cursor");
     }
+
     const playerRig = document.querySelector("#player-rig");
-    document.querySelector("canvas").classList.remove("blurred");
-    scene.render();
 
     if (enterInVR) {
       scene.enterVR();
@@ -267,16 +270,13 @@ const onReady = async () => {
       document.body.addEventListener("touchend", requestFullscreen);
     }
 
-    AFRAME.registerInputActions(inGameActions, "default");
-
-    scene.setAttribute("networked-scene", {
-      room: hubId,
-      serverURL: process.env.JANUS_SERVER
-    });
-
-    if (isDebug) {
-      scene.setAttribute("networked-scene", { debug: true });
+    if (!isBotMode) {
+      hubChannel.sendEntryEvent().then(() => {
+        store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
+      });
     }
+
+    AFRAME.registerInputActions(inGameActions, "default");
 
     scene.setAttribute("stats-plus", false);
 
@@ -390,59 +390,6 @@ const onReady = async () => {
     });
 
     if (!qsTruthy("offline")) {
-      document.body.addEventListener("connected", () => {
-        if (!isBotMode) {
-          hubChannel.sendEntryEvent().then(() => {
-            store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
-          });
-        }
-        remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
-      });
-
-      document.body.addEventListener("clientConnected", () => {
-        remountUI({
-          occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
-        });
-      });
-
-      document.body.addEventListener("clientDisconnected", () => {
-        remountUI({
-          occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
-        });
-      });
-
-      scene.components["networked-scene"].connect().catch(connectError => {
-        // hacky until we get return codes
-        const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
-        console.error(connectError);
-        remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
-        exitScene();
-
-        return;
-      });
-
-      const sendHubDataMessage = function(clientId, dataType, data, reliable) {
-        const event = "naf";
-        const payload = { dataType, data };
-
-        if (clientId != null) {
-          payload.clientId = clientId;
-        }
-
-        if (reliable) {
-          hubChannel.channel.push(event, payload);
-        } else {
-          const topic = hubChannel.channel.topic;
-          const join_ref = hubChannel.channel.joinRef();
-          hubChannel.channel.socket.push({ topic, event, payload, join_ref, ref: null }, false);
-        }
-      };
-
-      NAF.connection.adapter.reliableTransport = (clientId, dataType, data) =>
-        sendHubDataMessage(clientId, dataType, data, true);
-      /*NAF.connection.adapter.unreliableTransport = (clientId, dataType, data) =>
-        sendHubDataMessage(clientId, dataType, data, false);*/
-
       if (isDebug) {
         NAF.connection.adapter.session.options.verbose = true;
       }
@@ -491,6 +438,12 @@ const onReady = async () => {
           sceneEl.appendChild(screenEntity);
         }
       }
+
+      // Spawn avatar & remove preview camera
+      const rig = document.querySelector("#player-rig");
+      rig.setAttribute("networked", "template: #remote-avatar-template; attachTemplateToLocal: false;");
+      rig.setAttribute("networked-avatar", "");
+      rig.emit("entered");
 
       pollForSupportAvailability(isSupportAvailable => {
         remountUI({ isSupportAvailable });
@@ -541,14 +494,22 @@ const onReady = async () => {
   const initialEnvironmentEl = document.createElement("a-entity");
   initialEnvironmentEl.addEventListener("bundleloaded", () => {
     remountUI({ initialEnvironmentLoaded: true });
-    // We never want to stop the render loop when were running in "bot" mode.
-    if (!isBotMode) {
-      // Stop rendering while the UI is up. We restart the render loop in enterScene.
-      // Wait a tick plus some margin so that the environments actually render.
-      setTimeout(() => scene.renderer.setAnimationLoop(null), 100);
+
+    const camera = document.querySelector("#player-camera");
+    const previewCamera = initialEnvironmentEl.object3D.getObjectByName("scene-preview-camera");
+
+    if (previewCamera) {
+      camera.object3D.position.copy(previewCamera.position);
+      camera.object3D.rotation.copy(previewCamera.rotation);
+      camera.object3D.updateMatrix();
     } else {
+      const cameraPos = camera.object3D.position;
+      camera.object3D.position.set(cameraPos.x, 2.5, cameraPos.z);
+    }
+
+    // Replace renderer with a noop renderer to reduce bot resource usage.
+    if (isBotMode) {
       const noop = () => {};
-      // Replace renderer with a noop renderer to reduce bot resource usage.
       scene.renderer = { setAnimationLoop: noop, render: noop };
     }
   });
@@ -604,6 +565,61 @@ const onReady = async () => {
       // Send complete sync on phoenix re-join.
       NAF.connection.entities.completeSync(null, true);
     }
+
+    scene.setAttribute("networked-scene", {
+      room: hub.hub_id,
+      serverURL: process.env.JANUS_SERVER
+    });
+
+    if (isDebug) {
+      scene.setAttribute("networked-scene", { debug: true });
+    }
+
+    document.body.addEventListener("connected", () => {
+      remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
+    });
+
+    document.body.addEventListener("clientConnected", () => {
+      remountUI({
+        occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
+      });
+    });
+
+    document.body.addEventListener("clientDisconnected", () => {
+      remountUI({
+        occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
+      });
+    });
+
+    scene.components["networked-scene"].connect().catch(connectError => {
+      // hacky until we get return codes
+      const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+      console.error(connectError);
+      remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
+      exitScene();
+
+      return;
+    });
+
+    const sendHubDataMessage = function(clientId, dataType, data, reliable) {
+      const event = "naf";
+      const payload = { dataType, data };
+
+      if (clientId != null) {
+        payload.clientId = clientId;
+      }
+
+      if (reliable) {
+        hubChannel.channel.push(event, payload);
+      } else {
+        const topic = hubChannel.channel.topic;
+        const join_ref = hubChannel.channel.joinRef();
+        hubChannel.channel.socket.push({ topic, event, payload, join_ref, ref: null }, false);
+      }
+    };
+
+    NAF.connection.adapter.reliableTransport = (clientId, dataType, data) =>
+      sendHubDataMessage(clientId, dataType, data, true);
   };
 
   channel

@@ -324,13 +324,11 @@
         <!-- Player Rig -->
         <a-entity
             id="player-rig"
-            networked="template: #remote-avatar-template; attachTemplateToLocal: false;"
-            spawn-controller="loadedEvent: bundleloaded; target: #environment-root"
+            spawn-controller="loadedEvent: entered; target: #player-rig"
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
             player-info
-            networked-avatar
             cardboard-controls
         >
           <a-entity
@@ -355,7 +353,6 @@
               id="player-camera"
               class="camera"
               camera
-              position="0 1.6 0"
               personal-space-bubble="radius: 0.4;"
               pitch-yaw-rotator
           >
