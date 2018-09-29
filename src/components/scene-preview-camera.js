@@ -29,8 +29,7 @@ AFRAME.registerComponent("scene-preview-camera", {
   },
 
   tick: function() {
-    let t = (new Date().getTime() - this.startTime) / (1000.0 * DURATION);
-    t = (Math.sin(t * Math.PI * 2) + 1.0) / 2.0;
+    const t = (new Date().getTime() - this.startTime) / (1000.0 * DURATION);
 
     const from = this.backwards ? this.targetPoint : this.startPoint;
     const to = this.backwards ? this.startPoint : this.targetPoint;
@@ -43,7 +42,7 @@ AFRAME.registerComponent("scene-preview-camera", {
     this.el.object3D.position.set(lerp(from.x, to.x, t), lerp(from.y, to.y, t), lerp(from.z, to.z, t));
     this.el.object3D.rotation.setFromQuaternion(newRot);
 
-    if (t >= 1.0) {
+    if (t >= 0.99) {
       this.backwards = !this.backwards;
       this.startTime = new Date().getTime();
     }

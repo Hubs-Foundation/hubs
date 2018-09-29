@@ -25,11 +25,18 @@ class SceneUI extends Component {
   };
 
   state = {
-    screenshotReady: false
+    showScreenshot: false
   };
 
   constructor(props) {
     super(props);
+
+    // Show screenshot if scene isn't loaded in 5 seconds
+    setTimeout(() => {
+      if (!this.props.sceneLoaded) {
+        this.setState({ showScreenshot: true });
+      }
+    }, 5000);
   }
 
   componentDidMount() {
@@ -60,18 +67,16 @@ class SceneUI extends Component {
   };
 
   render() {
-    const showScreenshot = !this.props.sceneLoaded || !this.props.sceneId;
-
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.ui}>
           <div
             className={classNames({
               [styles.screenshot]: true,
-              [styles.screenshotHidden]: !showScreenshot
+              [styles.screenshotHidden]: this.props.sceneLoaded
             })}
           >
-            <img src={this.props.sceneScreenshotURL} onLoad={() => this.setState({ screenshotReady: true })} />
+            {this.state.showScreenshot && <img src={this.props.sceneScreenshotURL} />}
           </div>
           <div className={styles.whiteOverlay} />
           <div className={styles.grid}>
