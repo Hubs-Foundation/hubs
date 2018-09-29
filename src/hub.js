@@ -183,12 +183,6 @@ function requestFullscreen() {
   if (screenfull.enabled && !screenfull.isFullscreen) screenfull.request();
 }
 
-function nextTick() {
-  return new Promise(resolve => {
-    setTimeout(resolve, 0);
-  });
-}
-
 const onReady = async () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
@@ -254,6 +248,7 @@ const onReady = async () => {
 
   const enterScene = async (mediaStream, enterInVR) => {
     const playerCamera = document.querySelector("#player-camera");
+    playerCamera.removeAttribute("scene-preview-camera");
     playerCamera.object3D.position.set(0, playerHeight, 0);
 
     const scene = document.querySelector("a-scene");
@@ -510,6 +505,8 @@ const onReady = async () => {
       camera.object3D.position.set(cameraPos.x, 2.5, cameraPos.z);
     }
 
+    camera.setAttribute("scene-preview-camera", "positionOnly: true; duration: 30");
+
     // Replace renderer with a noop renderer to reduce bot resource usage.
     if (isBotMode) {
       const noop = () => {};
@@ -562,12 +559,6 @@ const onReady = async () => {
 
     remountUI({ hubId: hub.hub_id, hubName: hub.name });
     hubChannel.setPhoenixChannel(channel);
-    if (isBotMode) enterSceneWhenReady(hub.hub_id);
-
-    if (NAF.connection.adapter) {
-      // Send complete sync on phoenix re-join.
-      NAF.connection.entities.completeSync(null, true);
-    }
 
     scene.setAttribute("networked-scene", {
       room: hub.hub_id,
@@ -578,7 +569,12 @@ const onReady = async () => {
       scene.setAttribute("networked-scene", { debug: true });
     }
 
-    await nextTick();
+    if (isBotMode) enterSceneWhenReady(hub.hub_id);
+
+    if (NAF.connection.adapter) {
+      // Send complete sync on phoenix re-join.
+      NAF.connection.entities.completeSync(null, true);
+    }
 
     document.body.addEventListener("connected", () => {
       remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
@@ -613,21 +609,30 @@ const onReady = async () => {
       }
     };
 
-    scene.components["networked-scene"]
-      .connect()
-      .then(() => {
-        NAF.connection.adapter.reliableTransport = (clientId, dataType, data) =>
-          sendHubDataMessage(clientId, dataType, data, true);
-      })
-      .catch(connectError => {
-        // hacky until we get return codes
-        const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
-        console.error(connectError);
-        remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
-        exitScene();
-
+    const connectWhenNetworkedSceneReady = () => {
+      if (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) {
+        setTimeout(connectWhenNetworkedSceneReady, 0);
         return;
-      });
+      }
+
+      scene.components["networked-scene"]
+        .connect()
+        .then(() => {
+          NAF.connection.adapter.reliableTransport = (clientId, dataType, data) =>
+            sendHubDataMessage(clientId, dataType, data, true);
+        })
+        .catch(connectError => {
+          // hacky until we get return codes
+          const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+          console.error(connectError);
+          remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
+          exitScene();
+
+          return;
+        });
+    };
+
+    connectWhenNetworkedSceneReady();
   };
 
   channel

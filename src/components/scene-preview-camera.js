@@ -9,7 +9,8 @@ function lerp(start, end, t) {
 
 AFRAME.registerComponent("scene-preview-camera", {
   schema: {
-    duration: { default: 90, type: "number" }
+    duration: { default: 90, type: "number" },
+    positionOnly: { default: false, type: "boolean" }
   },
 
   init: function() {
@@ -43,7 +44,10 @@ AFRAME.registerComponent("scene-preview-camera", {
     THREE.Quaternion.slerp(fromRot, toRot, newRot, t);
 
     this.el.object3D.position.set(lerp(from.x, to.x, t), lerp(from.y, to.y, t), lerp(from.z, to.z, t));
-    this.el.object3D.rotation.setFromQuaternion(newRot);
+
+    if (!this.data.positionOnly) {
+      this.el.object3D.rotation.setFromQuaternion(newRot);
+    }
 
     if (t >= 0.99) {
       this.backwards = !this.backwards;
