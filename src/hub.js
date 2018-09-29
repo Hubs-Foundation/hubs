@@ -254,7 +254,6 @@ const onReady = async () => {
 
   const enterScene = async (mediaStream, enterInVR) => {
     const playerCamera = document.querySelector("#player-camera");
-    playerCamera.removeAttribute("scene-preview-camera");
     playerCamera.object3D.position.set(0, playerHeight, 0);
 
     const scene = document.querySelector("a-scene");
