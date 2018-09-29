@@ -171,44 +171,30 @@ AFRAME.registerComponent("character-controller", {
     console.warn("character-controller", msg);
   },
 
-  setPositionOnNavMesh: function(start, end, object3D) {
-    const pathfinder = this.el.sceneEl.systems.nav.pathfinder;
-    const zone = this.navZone;
-    if (zone in pathfinder.zones) {
-      if (this.navGroup == null) {
-        this.navGroup = pathfinder.getGroup(zone, end);
-      }
-      this.navNode = this.navNode || pathfinder.getClosestNode(end, zone, this.navGroup, true);
-      if (this.navNode) {
-        try {
-          this.navNode = pathfinder.clampStep(start, end, this.navNode, zone, this.navGroup, object3D.position);
-        } catch (e) {
-          // clampStep failed for whatever reason. Don't stop the main loop.
-          if (this._withinWarningLimit) this._warnWithWarningLimit(`setPositionOnNavMesh: clampStep failed. ${e}`);
-        }
-      } else {
-        if (this._withinWarningLimit) this._warnWithWarningLimit("setPositionOnNavMesh: navNode is null.");
-      }
+  _updateNavState: function(pos, forceUpdate) {
+    const { pathfinder } = this.el.sceneEl.systems.nav;
+    if (this.navGroup === null || forceUpdate) {
+      this.navGroup = pathfinder.getGroup(this.navZone, pos, true);
+    }
+    if (this.navNode === null || forceUpdate) {
+      this.navNode =
+        pathfinder.getClosestNode(pos, this.navZone, this.navGroup, true) ||
+        pathfinder.getClosestNode(pos, this.navZone, this.navGroup);
     }
   },
 
+  setPositionOnNavMesh: function(start, end, object3D) {
+    const { pathfinder } = this.el.sceneEl.systems.nav;
+    if (!(this.navZone in pathfinder.zones)) return;
+    this._updateNavState(end);
+    this.navNode = pathfinder.clampStep(start, end, this.navNode, this.navZone, this.navGroup, object3D.position);
+  },
+
   resetPositionOnNavMesh: function(position, navPosition, object3D) {
-    const pathfinder = this.el.sceneEl.systems.nav.pathfinder;
-    const zone = this.navZone;
-    if (zone in pathfinder.zones) {
-      this.navGroup = pathfinder.getGroup(zone, position);
-      this.navNode = pathfinder.getClosestNode(navPosition, zone, this.navGroup, true) || this.navNode;
-      if (this.navNode) {
-        try {
-          this.navNode = pathfinder.clampStep(position, position, this.navNode, zone, this.navGroup, object3D.position);
-        } catch (e) {
-          // clampStep failed for whatever reason. Don't stop the main loop.
-          if (this._withinWarningLimit) this._warnWithWarningLimit(`resetPositionOnNavMesh: clampStep failed. ${e}`);
-        }
-      } else {
-        if (this._withinWarningLimit) this._warnWithWarningLimit("resetPositionOnNavMesh: navNode is null.");
-      }
-    }
+    const { pathfinder } = this.el.sceneEl.systems.nav;
+    if (!(this.navZone in pathfinder.zones)) return;
+    this._updateNavState(navPosition, true);
+    object3D.position.copy(navPosition);
   },
 
   updateVelocity: function(dt) {
