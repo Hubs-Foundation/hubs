@@ -110,7 +110,9 @@ const onReady = async () => {
     const previewCamera = gltfEl.object3D.getObjectByName("scene-preview-camera");
 
     if (previewCamera) {
-      camera.object3D.applyMatrix(previewCamera.matrixWorld);
+      camera.object3D.position.copy(previewCamera.position);
+      camera.object3D.rotation.copy(previewCamera.rotation);
+      camera.object3D.updateMatrix();
     }
 
     camera.setAttribute("scene-preview-camera", "");
