@@ -31,9 +31,9 @@ import { ObjectContentOrigins } from "./object-types";
 
 import "./activators/shortpress";
 
+import "./components/scene-components";
 import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
 import "./components/mute-mic";
-import "./components/audio-feedback";
 import "./components/bone-mute-state-indicator";
 import "./components/bone-visibility";
 import "./components/in-world-hud";
@@ -44,17 +44,9 @@ import "./components/character-controller";
 import "./components/haptic-feedback";
 import "./components/networked-video-player";
 import "./components/offset-relative-to";
-import "./components/water";
-import "./components/skybox";
-import "./components/layers";
-import "./components/spawn-controller";
-import "./components/hide-when-quality";
 import "./components/player-info";
 import "./components/debug";
-import "./components/animation-mixer";
-import "./components/loop-animation";
 import "./components/hand-poses";
-import "./components/gltf-model-plus";
 import "./components/gltf-bundle";
 import "./components/hud-controller";
 import "./components/freeze-controller";
@@ -64,26 +56,17 @@ import "./components/block-button";
 import "./components/visible-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
-import "./components/css-class";
-import "./components/scene-shadow";
 import "./components/avatar-replay";
 import "./components/media-views";
 import "./components/pinch-to-move";
 import "./components/look-on-mobile";
 import "./components/pitch-yaw-rotator";
 import "./components/input-configurator";
-import "./components/sticky-object";
 import "./components/auto-scale-cannon-physics-body";
 import "./components/position-at-box-shape-border";
 import "./components/remove-networked-object-button";
 import "./components/destroy-at-extreme-distances";
-import "./components/media-loader";
 import "./components/gamma-factor";
-import "./components/ambient-light";
-import "./components/directional-light";
-import "./components/hemisphere-light";
-import "./components/point-light";
-import "./components/spot-light";
 import "./components/visible-to-owner";
 import "./components/camera-tool";
 
@@ -123,18 +106,13 @@ import "aframe-physics-extras";
 import "super-hands";
 import "./components/super-networked-interactable";
 import "./components/networked-counter";
-import "./components/super-spawner";
 import "./components/event-repeater";
 import "./components/controls-shape-offset";
-import "./components/duck";
-import "./components/quack";
-import "./components/grabbable-toggle";
 
 import "./components/cardboard-controls";
 
 import "./components/cursor-controller";
 
-import "./components/heightfield";
 import "./components/nav-mesh-helper";
 import "./systems/tunnel-effect";
 
