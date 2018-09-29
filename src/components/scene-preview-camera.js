@@ -49,7 +49,7 @@ AFRAME.registerComponent("scene-preview-camera", {
       this.el.object3D.rotation.setFromQuaternion(newRot);
     }
 
-    if (t >= 0.99) {
+    if (t >= 0.9999) {
       this.backwards = !this.backwards;
       this.startTime = new Date().getTime();
     }
