@@ -1,8 +1,8 @@
-const playerHeight = 1.6;
 import qsTruthy from "./utils/qs_truthy";
 import screenfull from "screenfull";
 import { inGameActions } from "./input-mappings";
 
+const playerHeight = 1.6;
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
 const isDebug = qsTruthy("debug");
