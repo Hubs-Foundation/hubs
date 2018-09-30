@@ -15,7 +15,6 @@ import {
   TwoDEntryButton,
   DeviceEntryButton,
   GenericEntryButton,
-  DaydreamEntryButton,
   SafariEntryButton
 } from "./entry-buttons.js";
 import { ProfileInfoHeader } from "./profile-info-header.js";
