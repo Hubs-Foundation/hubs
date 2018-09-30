@@ -36,6 +36,7 @@ addLocaleData([...en]);
 
 const ENTRY_STEPS = {
   start: "start",
+  device: "device",
   mic_grant: "mic_grant",
   mic_granted: "mic_granted",
   audio_setup: "audio_setup",
@@ -638,7 +639,26 @@ class UIRoot extends Component {
     );
   };
 
-  renderDeviceSelector = () => {
+  renderEntryStartPanel = () => {
+    return (
+      <div className={entryStyles.entryPanel}>
+        <div className={entryStyles.center}>
+          <FormattedMessage id="entry.enter-room-title" />
+        </div>
+
+        <div className={entryStyles.buttonContainer}>
+          <button
+            className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
+            onClick={() => this.setState({ entryStep: ENTRY_STEPS.device })}
+          >
+            <FormattedMessage id="entry.enter-room" />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  renderDevicePanel = () => {
     // Only screen sharing in desktop firefox since other browsers/platforms will ignore the "screen" media constraint and will attempt to share your webcam instead!
     const isFireFox = /firefox/i.test(navigator.userAgent);
     const isNonMobile = !AFRAME.utils.device.isMobile();
@@ -648,12 +668,11 @@ class UIRoot extends Component {
 
     return (
       <div className={entryStyles.entryPanel}>
+        <div className={entryStyles.title}>
+          <FormattedMessage id="entry.choose-device" />
+        </div>
+
         <div className={entryStyles.buttonContainer}>
-          {false /* TODO */ && (
-            <div className={entryStyles.presenceInfo}>
-              <span className={entryStyles.people}>2 people</span> have joined
-            </div>
-          )}
           {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
             <TwoDEntryButton onClick={this.enter2D} />
           )}
@@ -844,7 +863,8 @@ class UIRoot extends Component {
     if (isLoading) return this.renderLoader();
     if (this.props.isBotMode) return this.renderBotMode();
 
-    const entryPanel = this.state.entryStep === ENTRY_STEPS.start && this.renderDeviceSelector();
+    const startPanel = this.state.entryStep === ENTRY_STEPS.start && this.renderEntryStartPanel();
+    const devicePanel = this.state.entryStep === ENTRY_STEPS.device && this.renderDevicePanel();
 
     const micPanel =
       (this.state.entryStep === ENTRY_STEPS.mic_grant || this.state.entryStep === ENTRY_STEPS.mic_granted) &&
@@ -856,7 +876,8 @@ class UIRoot extends Component {
       <AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />
     ) : (
       <div className={entryStyles.entryDialog}>
-        {entryPanel}
+        {startPanel}
+        {devicePanel}
         {micPanel}
         {audioSetupPanel}
       </div>

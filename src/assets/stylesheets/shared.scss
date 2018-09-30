@@ -62,12 +62,20 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
   margin: 16px 0;
 }
 
+%wide-button {
+  width: 512px;
+
+  @media (max-width: 768px) {
+    width: 327px;
+  }
+}
+
 %action-button {
   @extend %default-font;
   outline-style: none;
   font-weight: bold;
   cursor: pointer;
-  border: 3px solid white;
+  border: 0;
   border-radius: 26px;
   height: 64px;
   padding: 12px;

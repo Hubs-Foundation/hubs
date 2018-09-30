@@ -5,6 +5,7 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
+  margin: 24px;
   
   &__enter-button-container {
     flex: 1;
@@ -110,6 +111,7 @@
   justify-content: flex-start;
   align-items: center;
   overflow-y: auto;
+  margin: 24px;
 
   &__grant-container {
     flex: 1;

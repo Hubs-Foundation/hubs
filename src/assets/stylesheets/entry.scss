@@ -4,31 +4,32 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  height: 100%;
 }
 
 :local(.entry-button) {
+  @extend %action-button;
   display: flex;
-  margin: 20px 0;
-  margin-bottom: 0;
+  flex-direction: row;
   cursor: pointer;
-  background: none;
   color: white;
-  border: none;
   align-items: center;
   @extend %default-font;
+  border: 0;
+  border-radius: 12px;
+  margin: 6px;
+  padding: 12px 18px;
 
   :local(.icon) {
-    @extend %glass-icon;
-    flex: 1 1 90px;
-    min-width: 90px;
-    min-height: 90px;
+    height: 40px;
+    width: 40px;
   }
 
   :local(.label) {
     @extend %glass-text;
     flex: 10 1 auto;
     margin-left: 20px;
-    font-size: 1.5em;
+    font-size: 0.8em;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -49,30 +50,35 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  text-align: center;
+  margin: 24px;
+  min-height: 150px;
+  height: 100%;
+
+  :local(.title) {
+    @extend %top-title;
+    @extend %glass-text;
+    margin-bottom: 12px;
+  }
+
+  :local(.center) {
+    @extend %glass-text;
+    flex: 10;
+  }
 
   :local(.button-container) {
-    margin: auto;
     text-align: center;
-    flex: 10;
     display: flex;
     flex-direction: column;
-    min-height: max-content;
-    justify-content: center;
+    height: 100%;
+    justify-content: flex-end;
 
-    :local(.invite-button) {
+    :local(.action-button) {
       @extend %action-button;
-      align-self: center;
-      width: 75%;
-      margin-top: 28px;
     }
 
-    :local(.presence-info) {
-      margin: 18px;
-      font-size: 1.3em;
-
-      :local(.people) {
-        font-weight: bold;
-      }
+    :local(.wide-button) {
+      @extend %wide-button;
     }
   }
 
