@@ -61,6 +61,8 @@ export default class SceneEntryManager {
       NAF.connection.adapter.setLocalMediaStream(mediaStream);
     }
 
+    this.spawnAvatar();
+
     if (isBotMode) {
       this.runBot(mediaStream);
       return;
@@ -71,8 +73,6 @@ export default class SceneEntryManager {
     this.hubChannel.sendEntryEvent().then(() => {
       this.store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
     });
-
-    this.spawnAvatar();
   };
 
   enterSceneWhenLoaded = (mediaStream, enterInVR) => {
