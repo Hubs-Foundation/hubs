@@ -11,7 +11,13 @@ import entryStyles from "../assets/stylesheets/entry.scss";
 
 import { lang, messages } from "../utils/i18n";
 import AutoExitWarning from "./auto-exit-warning";
-import { TwoDEntryButton, DeviceEntryButton, GenericEntryButton, SafariEntryButton } from "./entry-buttons.js";
+import {
+  TwoDEntryButton,
+  DeviceEntryButton,
+  GenericEntryButton,
+  DaydreamEntryButton,
+  SafariEntryButton
+} from "./entry-buttons.js";
 import { ProfileInfoHeader } from "./profile-info-header.js";
 import ProfileEntryPanel from "./profile-entry-panel";
 import HelpDialog from "./help-dialog.js";
@@ -682,6 +688,9 @@ class UIRoot extends Component {
             )}
             {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
               <GenericEntryButton onClick={this.enterVR} />
+            )}
+            {this.props.availableVREntryTypes.daydream === VR_DEVICE_AVAILABILITY.yes && (
+              <DaydreamEntryButton onClick={this.enterDaydream} subtitle={null} />
             )}
             <DeviceEntryButton onClick={this.attemptLink} isInHMD={this.props.availableVREntryTypes.isInHMD} />
             {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
