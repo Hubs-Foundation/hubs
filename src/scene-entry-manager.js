@@ -16,7 +16,7 @@ function requestFullscreen() {
   if (screenfull.enabled && !screenfull.isFullscreen) screenfull.request();
 }
 
-export default class RoomEntryManager {
+export default class SceneEntryManager {
   constructor(hubChannel) {
     this.hubChannel = hubChannel;
     this.store = window.APP.store;

@@ -76,7 +76,7 @@ import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { resolveMedia } from "./utils/media-utils";
-import RoomEntryManager from "./room-entry-manager";
+import SceneEntryManager from "./scene-entry-manager";
 
 import "./systems/nav";
 import "./systems/personal-space-bubble";
@@ -224,7 +224,7 @@ const onReady = async () => {
     return null;
   };
 
-  const entryManager = new RoomEntryManager(hubChannel);
+  const entryManager = new SceneEntryManager(hubChannel);
   remountUI({ enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
 
   const platformUnsupportedReason = getPlatformUnsupportedReason();
