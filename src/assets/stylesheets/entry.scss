@@ -3,7 +3,6 @@
 :local(.entry-dialog) {
   display: flex;
   flex-direction: column;
-  height: 100%;
   align-items: center;
 }
 
@@ -53,7 +52,6 @@
 
   :local(.button-container) {
     margin: auto;
-    margin-top: -72px;
     text-align: center;
     flex: 10;
     display: flex;

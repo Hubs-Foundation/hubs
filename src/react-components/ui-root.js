@@ -18,7 +18,6 @@ import {
   DaydreamEntryButton,
   SafariEntryButton
 } from "./entry-buttons.js";
-import { ProfileInfoHeader } from "./profile-info-header.js";
 import ProfileEntryPanel from "./profile-entry-panel";
 import HelpDialog from "./help-dialog.js";
 import SafariDialog from "./safari-dialog.js";
@@ -96,6 +95,7 @@ class UIRoot extends Component {
     mediaStream: null,
     videoTrack: null,
     audioTrack: null,
+    lowerPanelCollapsed: false,
 
     toneInterval: null,
     tonePlaying: false,
@@ -673,9 +673,6 @@ class UIRoot extends Component {
             </div>
           )}
           {screenSharingCheckbox}
-          <button className={entryStyles.inviteButton} onClick={() => this.showInviteDialog()}>
-            <FormattedMessage id="entry.invite-others" />
-          </button>
         </div>
       </div>
     );
@@ -859,55 +856,54 @@ class UIRoot extends Component {
       <AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />
     ) : (
       <div className={entryStyles.entryDialog}>
-        <ProfileInfoHeader
-          name={this.props.store.state.profile.displayName}
-          onClickName={() => this.setState({ showProfileEntry: true })}
-          onClickHelp={() => this.showHelpDialog()}
-        />
         {entryPanel}
         {micPanel}
         {audioSetupPanel}
       </div>
     );
 
-    const dialogBoxClassNames = classNames({ "ui-interactive": !this.state.dialog, "ui-dialog-box": true });
-
     const dialogBoxContentsClassNames = classNames({
-      "ui-dialog-box-contents": true,
-      "ui-dialog-box-contents--backgrounded": this.state.showProfileEntry
+      [styles.uiInteractive]: !this.state.dialog,
+      [styles.uiDialogBoxContents]: true,
+      [styles.backgrounded]: this.state.showProfileEntry
     });
+
+    const entryFinished = this.state.entryStep === ENTRY_STEPS.finished;
 
     return (
       <IntlProvider locale={lang} messages={messages}>
-        <div className="ui">
+        <div className={styles.ui}>
           {this.state.dialog}
 
-          {this.state.entryStep === ENTRY_STEPS.finished && (
-            <button onClick={() => this.showHelpDialog()} className="ui__help-icon">
-              <i className="ui__help-icon__icon">
-                <FontAwesomeIcon icon={faQuestion} />
-              </i>
-            </button>
-          )}
+          <button onClick={() => this.showHelpDialog()} className={styles.helpIcon}>
+            <i>
+              <FontAwesomeIcon icon={faQuestion} />
+            </i>
+          </button>
 
-          {this.state.entryStep === ENTRY_STEPS.finished && (
-            <div className={styles.presenceInfo}>
-              <FontAwesomeIcon icon={faUsers} />
-              <span className={styles.occupantCount}>{this.props.occupantCount || "-"}</span>
+          <div className={styles.presenceInfo}>
+            <FontAwesomeIcon icon={faUsers} />
+            <span className={styles.occupantCount}>{this.props.occupantCount || "-"}</span>
+          </div>
+
+          {(!entryFinished || this.isWaitingForAutoExit()) && (
+            <div className={styles.uiDialog}>
+              <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
+
+              {this.state.showProfileEntry && (
+                <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store} />
+              )}
             </div>
           )}
 
-          <div className="ui-dialog">
-            {(this.state.entryStep !== ENTRY_STEPS.finished || this.isWaitingForAutoExit()) && (
-              <div className={dialogBoxClassNames}>
-                <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
-
-                {this.state.showProfileEntry && (
-                  <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store} />
-                )}
+          {!this.props.availableVREntryTypes.isInHMD &&
+            (!entryFinished || this.props.occupantCount <= 1) && (
+              <div className={classNames({ [styles.nagButton]: true, [styles.nagButtonBelowHud]: entryFinished })}>
+                <button onClick={() => this.showInviteDialog()}>
+                  <FormattedMessage id="entry.invite-others-nag" />
+                </button>
               </div>
             )}
-          </div>
           {this.state.entryStep === ENTRY_STEPS.finished ? (
             <div>
               <TwoDHUD.TopHUD
@@ -920,14 +916,6 @@ class UIRoot extends Component {
                 onSpawnPen={this.spawnPen}
                 onSpawnCamera={() => this.props.scene.emit("action_spawn_camera")}
               />
-              {!this.props.availableVREntryTypes.isInHMD &&
-                this.props.occupantCount <= 1 && (
-                  <div className={styles.nagButton}>
-                    <button onClick={() => this.showInviteDialog()}>
-                      <FormattedMessage id="entry.invite-others-nag" />
-                    </button>
-                  </div>
-                )}
               {this.props.availableVREntryTypes.isInHMD && (
                 <div className={styles.nagButton}>
                   <button onClick={() => this.props.scene.enterVR()}>
@@ -942,11 +930,13 @@ class UIRoot extends Component {
                   </button>
                 </div>
               )}
-              <TwoDHUD.BottomHUD
-                onCreateObject={() => this.showCreateObjectDialog()}
-                showPhotoPicker={AFRAME.utils.device.isMobile()}
-                onMediaPicked={this.createObject}
-              />
+              {!this.isWaitingForAutoExit() && (
+                <TwoDHUD.BottomHUD
+                  onCreateObject={() => this.showCreateObjectDialog()}
+                  showPhotoPicker={AFRAME.utils.device.isMobile()}
+                  onMediaPicked={this.createObject}
+                />
+              )}
             </div>
           ) : null}
         </div>
