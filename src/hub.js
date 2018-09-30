@@ -222,9 +222,8 @@ function remountUI(props) {
   mountUI(uiProps);
 }
 
-async function handleHubChannelJoined(entryManager, data) {
-  const scene = entryManager.scene;
-  const hubChannel = entryManager.hubChannel;
+async function handleHubChannelJoined(entryManager, hubChannel, data) {
+  const scene = document.querySelector("a-scene");
 
   if (NAF.connection.isConnected()) {
     // Send complete sync on phoenix re-join.
@@ -371,7 +370,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .join()
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(channel);
-      await handleHubChannelJoined(entryManager, data);
+      await handleHubChannelJoined(entryManager, hubChannel, data);
     })
     .receive("error", res => {
       if (res.reason === "closed") {
