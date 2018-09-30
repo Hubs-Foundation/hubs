@@ -11,12 +11,7 @@ import entryStyles from "../assets/stylesheets/entry.scss";
 
 import { lang, messages } from "../utils/i18n";
 import AutoExitWarning from "./auto-exit-warning";
-import {
-  TwoDEntryButton,
-  DeviceEntryButton,
-  GenericEntryButton,
-  SafariEntryButton
-} from "./entry-buttons.js";
+import { TwoDEntryButton, DeviceEntryButton, GenericEntryButton, SafariEntryButton } from "./entry-buttons.js";
 import { ProfileInfoHeader } from "./profile-info-header.js";
 import ProfileEntryPanel from "./profile-entry-panel";
 import HelpDialog from "./help-dialog.js";
