@@ -271,7 +271,7 @@ const onReady = async () => {
       camera.object3D.position.set(cameraPos.x, 2.5, cameraPos.z);
     }
 
-    camera.setAttribute("scene-preview-camera", "positionOnly: true; duration: 30");
+    camera.setAttribute("scene-preview-camera", "positionOnly: true; duration: 60");
 
     // Replace renderer with a noop renderer to reduce bot resource usage.
     if (isBotMode) {
