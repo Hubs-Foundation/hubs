@@ -75,6 +75,16 @@ export default class SceneEntryManager {
     this.spawnAvatar();
   };
 
+  enterSceneWhenLoaded = (mediaStream, enterInVR) => {
+    const enterSceneImmediately = () => this.enterScene(mediaStream, enterInVR);
+
+    if (this.scene.hasLoaded) {
+      enterSceneImmediately();
+    } else {
+      this.scene.addEventListener("loaded", enterSceneImmediately);
+    }
+  };
+
   exitScene = () => {
     if (NAF.connection.adapter && NAF.connection.adapter.localMediaStream) {
       NAF.connection.adapter.localMediaStream.getTracks().forEach(t => t.stop());

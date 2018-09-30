@@ -75,7 +75,7 @@ class UIRoot extends Component {
     linkChannel: PropTypes.object,
     showProfileEntry: PropTypes.bool,
     availableVREntryTypes: PropTypes.object,
-    initialEnvironmentLoaded: PropTypes.bool,
+    environmentSceneLoaded: PropTypes.bool,
     roomUnavailableReason: PropTypes.string,
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
@@ -639,7 +639,7 @@ class UIRoot extends Component {
       );
     }
 
-    if (!this.props.initialEnvironmentLoaded || !this.props.availableVREntryTypes || !this.props.hubId) {
+    if (!this.props.environmentSceneLoaded || !this.props.availableVREntryTypes || !this.props.hubId) {
       return (
         <IntlProvider locale={lang} messages={messages}>
           <div className="loading-panel">
