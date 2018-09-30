@@ -57,6 +57,10 @@ export default class SceneEntryManager {
 
     if (qsTruthy("offline")) return;
 
+    if (mediaStream) {
+      NAF.connection.adapter.setLocalMediaStream(mediaStream);
+    }
+
     if (isBotMode) {
       this.runBot(mediaStream);
       return;
@@ -67,10 +71,6 @@ export default class SceneEntryManager {
     this.hubChannel.sendEntryEvent().then(() => {
       this.store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
     });
-
-    if (mediaStream) {
-      NAF.connection.adapter.setLocalMediaStream(mediaStream);
-    }
 
     this.spawnAvatar();
   };
