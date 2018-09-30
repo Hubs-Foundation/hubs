@@ -20,6 +20,7 @@ import "aframe-motion-capture-components";
 import "./utils/audio-context-fix";
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
+import nextTick from "./utils/next-tick";
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
 import trackpad_scrolling from "./behaviours/trackpad-scrolling";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
@@ -264,47 +265,30 @@ async function handleHubChannelJoined(entryManager, data) {
     entryManager.enterSceneWhenLoaded(new MediaStream(), false);
   }
 
-  const sendHubDataMessage = function(clientId, dataType, data, reliable) {
-    const event = "naf";
-    const payload = { dataType, data };
+  while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
 
-    if (clientId != null) {
-      payload.clientId = clientId;
-    }
+  scene.components["networked-scene"]
+    .connect()
+    .then(() => {
+      NAF.connection.adapter.reliableTransport = (clientId, dataType, data) => {
+        const payload = { dataType, data };
 
-    if (reliable) {
-      hubChannel.channel.push(event, payload);
-    } else {
-      const topic = hubChannel.channel.topic;
-      const join_ref = hubChannel.channel.joinRef();
-      hubChannel.channel.socket.push({ topic, event, payload, join_ref, ref: null }, false);
-    }
-  };
+        if (clientId) {
+          payload.clientId = clientId;
+        }
 
-  const connectWhenNetworkedSceneReady = () => {
-    if (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) {
-      setTimeout(connectWhenNetworkedSceneReady, 0);
+        hubChannel.channel.push("naf", payload);
+      };
+    })
+    .catch(connectError => {
+      // hacky until we get return codes
+      const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+      console.error(connectError);
+      remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
+      entryManager.exitScene();
+
       return;
-    }
-
-    scene.components["networked-scene"]
-      .connect()
-      .then(() => {
-        NAF.connection.adapter.reliableTransport = (clientId, dataType, data) =>
-          sendHubDataMessage(clientId, dataType, data, true);
-      })
-      .catch(connectError => {
-        // hacky until we get return codes
-        const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
-        console.error(connectError);
-        remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
-        entryManager.exitScene();
-
-        return;
-      });
-  };
-
-  connectWhenNetworkedSceneReady();
+    });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
