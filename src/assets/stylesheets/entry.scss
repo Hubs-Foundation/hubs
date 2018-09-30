@@ -9,7 +9,9 @@
 
 :local(.entry-button) {
   @extend %action-button;
+  width: 256px;
   display: flex;
+  text-align: left;
   flex-direction: row;
   cursor: pointer;
   color: white;
