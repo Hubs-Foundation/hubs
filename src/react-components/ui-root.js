@@ -639,8 +639,7 @@ class UIRoot extends Component {
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.title}>
-          {this.props.hubName}&apos;s&nbsp;
-          <FormattedMessage id="entry.enter-room-title" />
+          {this.props.hubName}
         </div>
 
         <div className={entryStyles.center}>
