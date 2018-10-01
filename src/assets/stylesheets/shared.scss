@@ -141,6 +141,11 @@ $action-text: #2F80ED;
   outline-offset: -18px;
 }
 
+%background-agnostic {
+  color: black;
+  text-shadow: 0px 0px 10px #888;
+}
+
 %fa-icon-button {
   @extend %default-font;
   margin: 16px 0;

@@ -5,6 +5,21 @@
   flex-direction: column;
   align-items: center;
   height: 100%;
+  position: relative;
+
+  :local(.collapse) {
+    @extend %fa-icon-button;
+    position: absolute;
+    top: 4px;
+    right: 24px;
+  }
+
+  :local(.expand) {
+    @extend %fa-icon-button;
+    position: absolute;
+    top: -32px;
+    right: 24px;
+  }
 }
 
 :local(.entry-button) {

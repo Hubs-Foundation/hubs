@@ -31,6 +31,8 @@ import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons/faChevronDown";
+import { faChevronUp } from "@fortawesome/free-solid-svg-icons/faChevronUp";
 
 addLocaleData([...en]);
 
@@ -96,7 +98,7 @@ class UIRoot extends Component {
     mediaStream: null,
     videoTrack: null,
     audioTrack: null,
-    lowerPanelCollapsed: false,
+    entryPanelCollapsed: false,
 
     toneInterval: null,
     tonePlaying: false,
@@ -880,16 +882,42 @@ class UIRoot extends Component {
 
     const audioSetupPanel = this.state.entryStep === ENTRY_STEPS.audio_setup && this.renderAudioSetupPanel();
 
-    const dialogContents = this.isWaitingForAutoExit() ? (
-      <AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />
-    ) : (
-      <div className={entryStyles.entryDialog}>
-        {startPanel}
-        {devicePanel}
-        {micPanel}
-        {audioSetupPanel}
-      </div>
-    );
+    // Dialog is empty if coll
+    let dialogContents = null;
+
+    if (this.state.entryPanelCollapsed && !this.isWaitingForAutoExit()) {
+      dialogContents = (
+        <div className={entryStyles.entryDialog}>
+          <div>&nbsp;</div>
+          <button onClick={() => this.setState({ entryPanelCollapsed: false })} className={entryStyles.expand}>
+            <i>
+              <FontAwesomeIcon icon={faChevronUp} />
+            </i>
+          </button>
+        </div>
+      );
+    } else {
+      dialogContents = this.isWaitingForAutoExit() ? (
+        <AutoExitWarning
+          secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
+          onCancel={this.endAutoExitTimer}
+        />
+      ) : (
+        <div className={entryStyles.entryDialog}>
+          {!this.state.entryPanelCollapsed && (
+            <button onClick={() => this.setState({ entryPanelCollapsed: true })} className={entryStyles.collapse}>
+              <i>
+                <FontAwesomeIcon icon={faChevronDown} />
+              </i>
+            </button>
+          )}
+          {startPanel}
+          {devicePanel}
+          {micPanel}
+          {audioSetupPanel}
+        </div>
+      );
+    }
 
     const dialogBoxContentsClassNames = classNames({
       [styles.uiInteractive]: !this.state.dialog,
