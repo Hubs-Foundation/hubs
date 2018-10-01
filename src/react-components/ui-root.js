@@ -638,9 +638,7 @@ class UIRoot extends Component {
   renderEntryStartPanel = () => {
     return (
       <div className={entryStyles.entryPanel}>
-        <div className={entryStyles.title}>
-          {this.props.hubName}
-        </div>
+        <div className={entryStyles.title}>{this.props.hubName}</div>
 
         <div className={entryStyles.center}>
           <div onClick={() => this.setState({ showProfileEntry: true })} className={entryStyles.profileName}>
