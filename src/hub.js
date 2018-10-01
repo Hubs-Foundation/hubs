@@ -73,6 +73,7 @@ import ReactDOM from "react-dom";
 import React from "react";
 import UIRoot from "./react-components/ui-root";
 import HubChannel from "./utils/hub-channel";
+import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { resolveMedia } from "./utils/media-utils";
@@ -295,11 +296,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const entryManager = new SceneEntryManager(hubChannel);
   entryManager.init();
 
+  const linkChannel = new LinkChannel(store);
+
   window.APP.scene = scene;
 
   registerNetworkSchemas();
   mountUI({});
-  remountUI({ hubChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
+  remountUI({ hubChannel, linkChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 
@@ -384,4 +387,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!NAF.connection.adapter) return;
     NAF.connection.adapter.onData(data);
   });
+
+  linkChannel.setSocket(socket);
 });

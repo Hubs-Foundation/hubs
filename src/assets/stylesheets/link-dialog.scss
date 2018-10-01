@@ -1,0 +1,31 @@
+@import 'shared.scss';
+
+:local(.domain) , :local(.code) {
+  color: white;
+  font-family: monospace;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+:local(.domain) {
+  font-size: 3em;
+  padding: 14px;
+  display: block;
+}
+
+:local(.code) {
+  font-size: 4.0em;
+  padding: 8px;
+}
+
+:local(.keep-open) {
+  font-size: 0.8em;
+}
+
+:local(.digit) {
+  padding: 0 8px;
+}
+
+:local(.code-loading-panel) {
+  background: none;
+}

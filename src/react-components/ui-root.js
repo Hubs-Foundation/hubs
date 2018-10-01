@@ -24,6 +24,7 @@ import SafariDialog from "./safari-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
 import InviteDialog from "./invite-dialog.js";
+import LinkDialog from "./link-dialog.js";
 import CreateObjectDialog from "./create-object-dialog.js";
 import TwoDHUD from "./2d-hud";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
@@ -73,6 +74,7 @@ class UIRoot extends Component {
     store: PropTypes.object,
     scene: PropTypes.object,
     hubChannel: PropTypes.object,
+    linkChannel: PropTypes.object,
     hubEntryCode: PropTypes.number,
     showProfileEntry: PropTypes.bool,
     availableVREntryTypes: PropTypes.object,
@@ -89,7 +91,10 @@ class UIRoot extends Component {
     entryStep: ENTRY_STEPS.start,
     enterInVR: false,
     dialog: null,
-    inviteDialogType: null,
+    showInviteDialog: false,
+    showLinkDialog: false,
+    linkCode: null,
+    linkCodeCancel: null,
 
     shareScreen: false,
     requestedScreen: false,
@@ -172,8 +177,7 @@ class UIRoot extends Component {
   handleStartEntry = () => {
     if (!this.props.forcedVREntryType) {
       this.setState({ entryStep: ENTRY_STEPS.device });
-    }
-    if (this.props.forcedVREntryType.startsWith("daydream")) {
+    } else if (this.props.forcedVREntryType.startsWith("daydream")) {
       this.enterDaydream();
     } else if (this.props.forcedVREntryType.startsWith("vr")) {
       this.enterVR();
@@ -501,24 +505,19 @@ class UIRoot extends Component {
     this.setState({ entryStep: ENTRY_STEPS.finished });
   };
 
-  showInviteDialog = async forHeadset => {
-    this.setState({ inviteDialogType: forHeadset ? "headset" : "invite" });
+  attemptLink = async () => {
+    this.setState({ showLinkDialog: true });
+    const { code, cancel, onFinished } = await this.props.linkChannel.generateCode();
+    this.setState({ linkCode: code, linkCodeCancel: cancel });
+    onFinished.then(() => this.setState({ showLinkDialog: false, linkCode: null, linkCodeCancel: null }));
+  };
+
+  showInviteDialog = () => {
+    this.setState({ showInviteDialog: true });
   };
 
   toggleInviteDialog = async () => {
-    if (this.state.inviteDialogType) {
-      this.setState({ inviteDialogType: null });
-    } else {
-      this.showInviteDialog(false);
-    }
-  };
-
-  closeDialog = async () => {
-    if (this.state.linkCodeCancel) {
-      this.state.linkCodeCancel();
-    }
-
-    this.setState({ dialog: null, linkCode: null, linkCodeCancel: null });
+    this.setState({ showInviteDialog: !this.state.showInviteDialog });
   };
 
   createObject = media => {
@@ -683,10 +682,7 @@ class UIRoot extends Component {
           {this.props.availableVREntryTypes.daydream === VR_DEVICE_AVAILABILITY.yes && (
             <DaydreamEntryButton onClick={this.enterDaydream} subtitle={null} />
           )}
-          <DeviceEntryButton
-            onClick={() => this.showInviteDialog(true)}
-            isInHMD={this.props.availableVREntryTypes.isInHMD}
-          />
+          <DeviceEntryButton onClick={() => this.attemptLink()} isInHMD={this.props.availableVREntryTypes.isInHMD} />
           {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
             <div className={entryStyles.secondary} onClick={this.enterVR}>
               <FormattedMessage id="entry.cardboard" />
@@ -937,7 +933,7 @@ class UIRoot extends Component {
             className={classNames({
               [styles.inviteContainer]: true,
               [styles.inviteContainerBelowHud]: entryFinished,
-              [styles.inviteContainerInverted]: this.state.inviteDialogType
+              [styles.inviteContainerInverted]: this.state.showInviteDialog
             })}
           >
             {!this.props.availableVREntryTypes.isInHMD &&
@@ -952,14 +948,23 @@ class UIRoot extends Component {
                   <FormattedMessage id="entry.return-to-vr" />
                 </button>
               )}
-            {this.state.inviteDialogType && (
+            {this.state.showInviteDialog && (
               <InviteDialog
                 entryCode={this.props.hubEntryCode}
-                dialogType={this.state.inviteDialogType}
-                onClose={() => this.setState({ inviteDialogType: null })}
+                onClose={() => this.setState({ showInviteDialog: false })}
               />
             )}
           </div>
+
+          {this.state.showLinkDialog && (
+            <LinkDialog
+              linkCode={this.state.linkCode}
+              onClose={() => {
+                this.state.linkCodeCancel();
+                this.setState({ showLinkDialog: false, linkCode: null, linkCodeCancel: null });
+              }}
+            />
+          )}
 
           <button onClick={() => this.showHelpDialog()} className={styles.helpIcon}>
             <i>
