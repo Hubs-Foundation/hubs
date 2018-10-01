@@ -936,26 +936,39 @@ class UIRoot extends Component {
             </div>
           )}
 
-          {!this.props.availableVREntryTypes.isInHMD &&
-            (!entryFinished || this.props.occupantCount <= 1) && (
-              <div
-                className={classNames({
-                  [styles.inviteContainer]: true,
-                  [styles.inviteContainerBelowHud]: entryFinished,
-                  [styles.inviteContainerInverted]: this.state.inviteDialogType
-                })}
-              >
+          <div
+            className={classNames({
+              [styles.inviteContainer]: true,
+              [styles.inviteContainerBelowHud]: entryFinished,
+              [styles.inviteContainerInverted]: this.state.inviteDialogType
+            })}
+          >
+            {!this.props.availableVREntryTypes.isInHMD &&
+              (!entryFinished || this.props.occupantCount <= 1) && (
                 <button onClick={() => this.toggleInviteDialog()}>
                   <FormattedMessage id="entry.invite-others-nag" />
                 </button>
-                {this.state.inviteDialogType && (
-                  <InviteDialog
-                    entryCode={this.props.hubEntryCode}
-                    dialogType={this.state.inviteDialogType}
-                    onClose={() => this.setState({ inviteDialogType: null })}
-                  />
-                )}
-              </div>
+              )}
+            {this.props.availableVREntryTypes.isInHMD &&
+              entryFinished && (
+                <button onClick={() => this.props.scene.enterVR()}>
+                  <FormattedMessage id="entry.return-to-vr" />
+                </button>
+              )}
+            {this.state.inviteDialogType && (
+              <InviteDialog
+                entryCode={this.props.hubEntryCode}
+                dialogType={this.state.inviteDialogType}
+                onClose={() => this.setState({ inviteDialogType: null })}
+              />
+            )}
+          </div>
+
+          {this.props.availableVREntryTypes.isInHMD &&
+            entryFinished && (
+              <button onClick={() => this.props.scene.enterVR()}>
+                <FormattedMessage id="entry.return-to-vr" />
+              </button>
             )}
 
           <button onClick={() => this.showHelpDialog()} className={styles.helpIcon}>
@@ -981,13 +994,6 @@ class UIRoot extends Component {
                 onSpawnPen={this.spawnPen}
                 onSpawnCamera={() => this.props.scene.emit("action_spawn_camera")}
               />
-              {this.props.availableVREntryTypes.isInHMD && (
-                <div className={styles.nagButton}>
-                  <button onClick={() => this.props.scene.enterVR()}>
-                    <FormattedMessage id="entry.return-to-vr" />
-                  </button>
-                </div>
-              )}
               {this.props.isSupportAvailable && (
                 <div className={styles.nagCornerButton}>
                   <button onClick={() => this.showInviteTeamDialog()}>
