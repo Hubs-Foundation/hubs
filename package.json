@@ -45,7 +45,7 @@
     "jsonschema": "^1.2.2",
     "jszip": "^3.1.5",
     "moving-average": "^1.0.0",
-    "naf-janus-adapter": "github:mozilla/naf-janus-adapter#flexible-transport",
+    "naf-janus-adapter": "^0.13.0",
     "networked-aframe": "github:mozillareality/networked-aframe#master",
     "nipplejs": "github:mozillareality/nipplejs#mr-social-client/master",
     "phoenix": "github:gfodor/phoenix-js#master",
