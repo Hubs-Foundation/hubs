@@ -964,13 +964,6 @@ class UIRoot extends Component {
             )}
           </div>
 
-          {this.props.availableVREntryTypes.isInHMD &&
-            entryFinished && (
-              <button onClick={() => this.props.scene.enterVR()}>
-                <FormattedMessage id="entry.return-to-vr" />
-              </button>
-            )}
-
           <button onClick={() => this.showHelpDialog()} className={styles.helpIcon}>
             <i>
               <FontAwesomeIcon icon={faQuestion} />
