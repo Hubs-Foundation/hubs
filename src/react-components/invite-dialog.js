@@ -74,9 +74,6 @@ export default class InviteDialog extends Component {
               hub.link
             </a>
           </div>
-          <div>
-            <FormattedMessage id="invite.and_enter_code" />
-          </div>
           <div className={styles.code}>
             {entryCodeString.split("").map((d, i) => (
               <div className={styles.digit} key={`link_code_${i}`}>
