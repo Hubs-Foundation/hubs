@@ -642,8 +642,24 @@ class UIRoot extends Component {
   renderEntryStartPanel = () => {
     return (
       <div className={entryStyles.entryPanel}>
-        <div className={entryStyles.center}>
+        <div className={entryStyles.title}>
           <FormattedMessage id="entry.enter-room-title" />
+        </div>
+
+        <div className={entryStyles.center}>
+          <div className={entryStyles.profileName}>
+            <img
+              src="../assets/images/account.svg"
+              onClick={() => this.setState({ showProfileEntry: true })}
+              className={entryStyles.profileIcon}
+            />
+            <div
+              onClick={() => this.setState({ showProfileEntry: true })}
+              title={this.props.store.state.profile.displayName}
+            >
+              {this.props.store.state.profile.displayName}
+            </div>
+          </div>
         </div>
 
         <div className={entryStyles.buttonContainer}>

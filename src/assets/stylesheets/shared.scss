@@ -8,6 +8,7 @@ $light-grey: lightgrey;
 $dark-grey: rgba(128, 128, 128, 1.0);
 $darker-grey: rgba(64, 64, 64, 1.0);
 $darkest-grey: rgba(32, 32, 32, 1.0);
+$action-text: #2F80ED;
 
 %unselectable {
   -moz-user-select: none;
@@ -69,7 +70,7 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
 }
 
 %wide-button {
-  width: 512px;
+  width: 350px;
 
   @media (max-width: 768px) {
     width: 327px;
@@ -102,7 +103,7 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
 }
 
 %top-title {
-  font-size: 1.3em;
+  font-size: 1.4em;
   font-weight: bold;
 }
 

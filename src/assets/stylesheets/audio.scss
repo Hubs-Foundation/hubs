@@ -15,6 +15,7 @@
   }
   &__enter-button {
     @extend %bottom-action-button;
+    @extend %wide-button;
   }
 
   &__title {
@@ -155,6 +156,7 @@
 
   &__next {
     @extend %bottom-button;
+    @extend %wide-button;
     flex: 1 1;
   }
 

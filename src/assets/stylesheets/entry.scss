@@ -68,6 +68,23 @@
     flex: 10;
   }
 
+  :local(.profile-name) {
+    margin-top: 4px;
+    @extend %default-font;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  :local(.profile-icon) {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    margin-right: 12px;
+  }
+
   :local(.button-container) {
     text-align: center;
     display: flex;
