@@ -294,6 +294,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
   const entryManager = new SceneEntryManager(hubChannel);
+  entryManager.init();
+
   const linkChannel = new LinkChannel(store);
 
   window.APP.scene = scene;

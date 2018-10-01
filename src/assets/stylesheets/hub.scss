@@ -13,10 +13,13 @@
   display: none;
 }
 
+.grab-cursor {
+  cursor: grab;
+}
+
 .no-cursor {
   cursor: none;
 }
-
 
 .webxr-realities, .webxr-sessions {
   @extend %unselectable
