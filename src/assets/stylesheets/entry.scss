@@ -107,6 +107,7 @@
     flex-direction: column;
     height: 100%;
     justify-content: flex-end;
+    align-items: center;
 
     :local(.action-button) {
       @extend %action-button;
