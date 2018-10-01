@@ -74,6 +74,7 @@ a {
 :local(.entry-footer-image) {
   width: 200px;
   margin: 12px;
+  margin-top: 24px;
 }
 
 
@@ -128,17 +129,17 @@ a {
   background-color: $darker-grey;
 }
 
-:local(.keypad-zero-button) {
-  grid-column: 2;
-}
-
 :local(.keypad-button):disabled {
   color: $light-grey;
   border: 6px $dark-grey solid;
 }
 
-:local(.keypad-backspace) , :local(.keypad-backspace):disabled , :local(.keypad-backspace):active {
+:local(.keypad-backspace) , :local(.keypad-backspace):disabled , :local(.keypad-backspace):active, :local(.keypad-toggle-mode), :local(.keypad-toggle-mode):disabled, :local(.keypad-toggle-mode):active {
   border: none;
+}
+
+:local(.keypad-backspace) {
+  grid-column: 3;
 }
 
 :local(.keypad-backspace):active {
@@ -146,8 +147,12 @@ a {
   color: $light-grey;
 }
 
-:local(.entered-digits) {
-  font-face: monospace;
+:local(.keypad-toggle-mode) {
+  font-size: 1.0em;
+}
+
+:local(.entered) {
+  font-family: monospace;
   height: 100px;
   width: 300px;
   text-align: center;
@@ -157,11 +162,11 @@ a {
   justify-content: center;
 }
 
-:local(.digit) {
+:local(.char) {
   margin: 8px;
 }
 
-:local(.digit-input) {
+:local(.char-input) {
   outline-style: none;
   appearance:textfield;
   -moz-appearance:textfield;
@@ -176,7 +181,32 @@ a {
   text-align: center;
 }
 
-:local(.digit-input::placeholder) {
+:local(.char-input::placeholder) {
   letter-spacing: 0;
 }
 
+:local(.headset-icon) {
+  width: 64px;
+  height: 64px;
+  background-color: white;
+  border-radius: 32px;
+  margin-bottom: 8px;
+  padding-right: 2px;
+  cursor: pointer;
+}
+
+:local(.link-headset-footer-link) {
+  display: flex;
+  align-items: center;
+
+  img {
+    width: 32px;
+    height: 32px;
+    background-color: white;
+    border-radius: 32px;
+    margin-bottom: 8px;
+    margin-right: 16px;
+    padding-right: 2px;
+    cursor: pointer;
+  }
+}
