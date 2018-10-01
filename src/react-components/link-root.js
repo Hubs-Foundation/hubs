@@ -8,16 +8,14 @@ import classNames from "classnames";
 import styles from "../assets/stylesheets/link.scss";
 import { disableiOSZoom } from "../utils/disable-ios-zoom";
 
-const MAX_DIGITS = 4;
+const MAX_DIGITS = 6;
 
 addLocaleData([...en]);
 disableiOSZoom();
 
 class LinkRoot extends Component {
   static propTypes = {
-    intl: PropTypes.object,
-    store: PropTypes.object,
-    linkChannel: PropTypes.object
+    intl: PropTypes.object
   };
 
   state = {
@@ -62,30 +60,15 @@ class LinkRoot extends Component {
     this.setState({ enteredDigits: enteredDigits.substring(0, enteredDigits.length - 1) });
   };
 
-  attemptLink = code => {
-    this.props.linkChannel
-      .attemptLink(code)
-      .then(response => {
-        // If there is a profile from the linked device, copy it over if we don't have one yet.
-        if (response.profile) {
-          const { hasChangedName } = this.props.store.state.activity;
+  attemptLink = async code => {
+    const url = "https://hub.link/" + code;
+    const res = await fetch(url);
 
-          if (!hasChangedName) {
-            this.props.store.update({ activity: { hasChangedName: true }, profile: response.profile });
-          }
-        }
-
-        if (response.path) {
-          window.location.href = response.path;
-        }
-      })
-      .catch(e => {
-        this.setState({ failedAtLeastOnce: true, enteredDigits: "" });
-
-        if (!(e instanceof Error && (e.message === "in_use" || e.message === "failed"))) {
-          throw e;
-        }
-      });
+    if (res.status >= 400) {
+      this.setState({ failedAtLeastOnce: true, enteredDigits: "" });
+    } else {
+      document.location = url;
+    }
   };
 
   render() {
@@ -119,7 +102,7 @@ class LinkRoot extends Component {
                   onChange={ev => {
                     this.setState({ enteredDigits: ev.target.value });
                   }}
-                  placeholder="- - - -"
+                  placeholder="- - - - - -"
                 />
               </div>
 
