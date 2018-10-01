@@ -137,7 +137,6 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
     this.props.scene.addEventListener("exit", this.exit);
-    setTimeout(() => this.attemptLink(), 50);
   }
 
   componentWillUnmount() {
@@ -521,6 +520,10 @@ class UIRoot extends Component {
 
   createObject = media => {
     this.props.scene.emit("add_media", media);
+  };
+
+  closeDialog = () => {
+    this.setState({ dialog: null });
   };
 
   showHelpDialog() {

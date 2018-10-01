@@ -8,7 +8,8 @@ import styles from "../assets/stylesheets/link-dialog.scss";
 
 export default class LinkDialog extends Component {
   static propTypes = {
-    linkCode: PropTypes.string
+    linkCode: PropTypes.string,
+    onClose: PropTypes.func
   };
 
   render() {
@@ -16,6 +17,9 @@ export default class LinkDialog extends Component {
 
     return (
       <div className={styles.dialog}>
+        <div className={styles.close} onClick={() => this.props.onClose()}>
+          <span>×</span>
+        </div>
         <div>
           {!linkCode && (
             <div>
@@ -28,33 +32,38 @@ export default class LinkDialog extends Component {
               </div>
             </div>
           )}
-          <div className={styles.contents}>
-            <img className={styles.imageHeader} src={LinkDialogHeader} />
-            <div className={styles.header}>
-              <FormattedMessage id="link.connect_headset" />
-            </div>
-            <div>
-              <FormattedMessage id="link.in_your_browser" />
-            </div>
-            <a href="https://hub.link" className={styles.domain} target="_blank" rel="noopener noreferrer">
-              hub.link
-            </a>
-            <div>
-              <FormattedMessage id="link.enter_code" />
-            </div>
-            {linkCode && (
-              <div className={styles.code}>
-                {linkCode.split("").map((d, i) => (
-                  <span className={styles.digit} key={`link_code_${i}`}>
-                    {d}
-                  </span>
-                ))}
+          {linkCode && (
+            <div className={styles.contents}>
+              <img className={styles.imageHeader} src={LinkDialogHeader} />
+              <div className={styles.header}>
+                <FormattedMessage id="link.connect_headset" />
               </div>
-            )}
-            <div className={styles.keepOpen}>
-              <FormattedMessage id="link.do_not_close" />
+              <div>
+                <FormattedMessage id="link.in_your_browser" />
+              </div>
+              <a href="https://hub.link" className={styles.domain} target="_blank" rel="noopener noreferrer">
+                hub.link
+              </a>
+              <div>
+                <FormattedMessage id="link.enter_code" />
+              </div>
+              {linkCode && (
+                <div className={styles.code}>
+                  {linkCode.split("").map((d, i) => (
+                    <span className={styles.digit} key={`link_code_${i}`}>
+                      {d}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div className={styles.keepOpen}>
+                <FormattedMessage id="link.do_not_close" />
+              </div>
+              <button className={styles.closeButton} onClick={() => this.props.onClose()}>
+                <FormattedMessage id="link.cancel" />
+              </button>
             </div>
-          </div>
+          )}
         </div>
       </div>
     );

@@ -59,11 +59,13 @@
 }
 
 :local(.imageHeader) {
-  width: 200px;
-  height: 200px;
+  width: 175px;
+  height: 175px;
   background-color: white;
   border-radius: 100px;
   fill: black;
+  margin-bottom: 24px;
+  padding-right: 6px;
 }
 
 :local(.keep-open) {
@@ -86,3 +88,20 @@
 :local(.code-loading-panel) {
   background: none;
 }
+
+:local(.close) {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  right: 12px;
+  font-size: 3.0em;
+  top: 0px;
+  cursor: pointer;
+}
+
+:local(.close-button) {
+  @extend %action-button;
+  background-color: $darker-grey;
+  margin-top: 24px;
+}
+
