@@ -139,11 +139,7 @@ class UIRoot extends Component {
     this.props.scene.removeEventListener("exit", this.exit);
   }
 
-  componentDidUpdate(prevProps) {
-    if (this.props.availableVREntryTypes && prevProps.availableVREntryTypes !== this.props.availableVREntryTypes) {
-      this.handleForcedVREntryType();
-    }
-  }
+  componentDidUpdate(prevProps) {}
 
   onSceneLoaded = () => {
     this.setState({ sceneLoaded: true });
@@ -173,9 +169,10 @@ class UIRoot extends Component {
     this.props.scene.emit("spawn_pen");
   };
 
-  handleForcedVREntryType = () => {
-    if (!this.props.forcedVREntryType) return;
-
+  handleStartEntry = () => {
+    if (!this.props.forcedVREntryType) {
+      this.setState({ entryStep: ENTRY_STEPS.device });
+    }
     if (this.props.forcedVREntryType.startsWith("daydream")) {
       this.enterDaydream();
     } else if (this.props.forcedVREntryType.startsWith("vr")) {
@@ -650,7 +647,7 @@ class UIRoot extends Component {
         <div className={entryStyles.buttonContainer}>
           <button
             className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
-            onClick={() => this.setState({ entryStep: ENTRY_STEPS.device })}
+            onClick={() => this.handleStartEntry()}
           >
             <FormattedMessage id="entry.enter-room" />
           </button>
