@@ -1,4 +1,6 @@
-.profile-entry {
+@import 'shared';
+
+:local(.profile-entry) {
   position: absolute;
   top: 0;
   left: 0;
@@ -8,20 +10,34 @@
   align-items: center;
   display: flex;
   pointer-events: auto;
+  z-index: 2;
+  background-color: rgba(255, 255, 255, 0.9);
 
-  &__avatar-selector-container {
+  :local(.logo) {
+    width: 100px;
+    position: absolute;
+    right: 32px;
+    bottom: 32px;
+    display: none;
+
+    @media (min-width: 500px) {
+      display: block;
+    }
+  }
+
+  :local(.avatar-selector-container) {
     flex: 1;
     position: relative;
-    margin-bottom: 0.5em;
     width: 95%;
     text-align: center;
+    margin: 16px;
 
     .loading-panel {
       background: transparent;
     }
   }
 
-  &__avatar-selector {
+  :local(.avatar-selector) {
     border: none;
     width: 95%;
     height: 100%;
@@ -29,18 +45,16 @@
     position: relative;
   }
 
-  &__form {
+  :local(.form) {
     height: 100%;
   }
 
-  &__box {
-    border-radius: 18px;
-    box-shadow: 0px 0px 30px 1px #202020;
+  :local(.box) {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    padding: 15px;
+    margin-top: 32px;
     flex: 1 1 100%;
     width: 60vw;
     min-width: 300px;
@@ -49,7 +63,7 @@
     max-height: 1000px;
     height: 90%;
 
-    &__links {
+    :local(.links) {
       display: flex;
       justify-content: center;
       width: 100%;
@@ -57,43 +71,43 @@
 
       a {
         margin: 0px 12px;
-        color: $light-text;
+        color: $grey-text;
       }
     }
 
-    &--darkened {
+    :local(.darkened) {
       background-color: $darkest-transparent;
     }
   }
 
-  &__subtitle {
+  :local(.title) {
+    @extend %top-title;
     width: 100%;
+    color: black;
     text-align: center;
-    font-size: 1.2em;
-    color: $grey-text;
   }
 
-  &__display-name-label {
+  :local(.display-name) {
     font-size: 1.2em;
     margin-right: 0.5em;
   }
-  &__form-field-text {
-    @extend %rounded-border;
+  :local(.form-field-text) {
+    @extend %form-field-on-white;
     @extend %default-font;
 
-    color: $light-text;
-    font-size: 1.2em;
-    background-color: transparent;
+    color: black;
+    outline: none;
     line-height: 2.0em;
     padding-left: 1.25em;
     padding-right: 1.25em;
     margin: 0.5em 0;
   }
 
-  &__form-submit {
+  :local(.form-submit) {
     @extend %bottom-action-button;
     margin: 0;
     min-height: max-content;
+    margin-top: 16px;
   }
 }
 

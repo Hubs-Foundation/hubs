@@ -907,13 +907,13 @@ class UIRoot extends Component {
             <span className={styles.occupantCount}>{this.props.occupantCount || "-"}</span>
           </div>
 
+          {this.state.showProfileEntry && (
+            <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store} />
+          )}
+
           {(!entryFinished || this.isWaitingForAutoExit()) && (
             <div className={styles.uiDialog}>
               <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
-
-              {this.state.showProfileEntry && (
-                <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store} />
-              )}
             </div>
           )}
 

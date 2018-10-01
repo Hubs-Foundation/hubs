@@ -5,9 +5,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 
-// TODO: we should make a bundle for avatar picker with it's own geometry, for now just use the indoor part of the meting room
-const meetingSpace = "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingSpace1_mesh-d48250ebc6.gltf";
-
 class AvatarSelector extends Component {
   static propTypes = {
     avatars: PropTypes.array,
@@ -159,10 +156,7 @@ class AvatarSelector extends Component {
     return (
       <div className="avatar-selector">
         <a-scene vr-mode-ui="enabled: false" ref={sce => (this.scene = sce)}>
-          <a-assets>
-            {avatarAssets}
-            <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src={meetingSpace} />
-          </a-assets>
+          <a-assets>{avatarAssets}</a-assets>
 
           <a-entity rotation={`0 ${initialRotation} 0`}>
             <a-animation
