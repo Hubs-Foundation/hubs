@@ -37,6 +37,7 @@ export default class InviteDialog extends Component {
     if (isHeadsetLink) {
       return (
         <div className={styles.dialog}>
+          <div className={styles.attachPoint} />
           <div className={styles.close} onClick={() => this.props.onClose()}>
             <span>×</span>
           </div>
