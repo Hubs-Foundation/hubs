@@ -22,9 +22,8 @@ import ProfileEntryPanel from "./profile-entry-panel";
 import HelpDialog from "./help-dialog.js";
 import SafariDialog from "./safari-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
-import InviteDialog from "./invite-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
-import LinkDialog from "./link-dialog.js";
+import InviteDialog from "./invite-dialog.js";
 import CreateObjectDialog from "./create-object-dialog.js";
 import TwoDHUD from "./2d-hud";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
@@ -74,7 +73,7 @@ class UIRoot extends Component {
     store: PropTypes.object,
     scene: PropTypes.object,
     hubChannel: PropTypes.object,
-    linkChannel: PropTypes.object,
+    hubEntryCode: PropTypes.number,
     showProfileEntry: PropTypes.bool,
     availableVREntryTypes: PropTypes.object,
     environmentSceneLoaded: PropTypes.bool,
@@ -90,8 +89,7 @@ class UIRoot extends Component {
     entryStep: ENTRY_STEPS.start,
     enterInVR: false,
     dialog: null,
-    linkCode: null,
-    linkCodeCancel: null,
+    inviteDialogType: null,
 
     shareScreen: false,
     requestedScreen: false,
@@ -506,12 +504,16 @@ class UIRoot extends Component {
     this.setState({ entryStep: ENTRY_STEPS.finished });
   };
 
-  attemptLink = async () => {
-    this.showLinkDialog();
-    const { code, cancel, onFinished } = await this.props.linkChannel.generateCode();
-    this.setState({ linkCode: code, linkCodeCancel: cancel });
-    this.showLinkDialog();
-    onFinished.then(this.closeDialog);
+  showInviteDialog = async forHeadset => {
+    this.setState({ inviteDialogType: forHeadset ? "headset" : "invite" });
+  };
+
+  toggleInviteDialog = async () => {
+    if (this.state.inviteDialogType) {
+      this.setState({ inviteDialogType: null });
+    } else {
+      this.showInviteDialog(false);
+    }
   };
 
   closeDialog = async () => {
@@ -534,20 +536,12 @@ class UIRoot extends Component {
     this.setState({ dialog: <SafariDialog onClose={this.closeDialog} /> });
   }
 
-  showInviteDialog() {
-    this.setState({ dialog: <InviteDialog onClose={this.closeDialog} /> });
-  }
-
   showInviteTeamDialog() {
     this.setState({ dialog: <InviteTeamDialog hubChannel={this.props.hubChannel} onClose={this.closeDialog} /> });
   }
 
   showCreateObjectDialog() {
     this.setState({ dialog: <CreateObjectDialog onCreate={this.createObject} onClose={this.closeDialog} /> });
-  }
-
-  showLinkDialog() {
-    this.setState({ dialog: <LinkDialog linkCode={this.state.linkCode} onClose={this.closeDialog} /> });
   }
 
   showWebVRRecommendDialog() {
@@ -695,7 +689,10 @@ class UIRoot extends Component {
           {this.props.availableVREntryTypes.daydream === VR_DEVICE_AVAILABILITY.yes && (
             <DaydreamEntryButton onClick={this.enterDaydream} subtitle={null} />
           )}
-          <DeviceEntryButton onClick={this.attemptLink} isInHMD={this.props.availableVREntryTypes.isInHMD} />
+          <DeviceEntryButton
+            onClick={() => this.showInviteDialog(true)}
+            isInHMD={this.props.availableVREntryTypes.isInHMD}
+          />
           {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
             <div className={entryStyles.secondary} onClick={this.enterVR}>
               <FormattedMessage id="entry.cardboard" />
@@ -955,10 +952,23 @@ class UIRoot extends Component {
 
           {!this.props.availableVREntryTypes.isInHMD &&
             (!entryFinished || this.props.occupantCount <= 1) && (
-              <div className={classNames({ [styles.nagButton]: true, [styles.nagButtonBelowHud]: entryFinished })}>
-                <button onClick={() => this.showInviteDialog()}>
+              <div
+                className={classNames({
+                  [styles.inviteContainer]: true,
+                  [styles.inviteContainerBelowHud]: entryFinished,
+                  [styles.inviteContainerInverted]: this.state.inviteDialogType
+                })}
+              >
+                <button onClick={() => this.toggleInviteDialog()}>
                   <FormattedMessage id="entry.invite-others-nag" />
                 </button>
+                {this.state.inviteDialogType && (
+                  <InviteDialog
+                    entryCode={this.props.hubEntryCode}
+                    dialogType={this.state.inviteDialogType}
+                    onClose={() => this.setState({ inviteDialogType: null })}
+                  />
+                )}
               </div>
             )}
           {this.state.entryStep === ENTRY_STEPS.finished ? (

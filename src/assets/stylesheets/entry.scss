@@ -90,6 +90,7 @@
 
   :local(.profile-name) {
     margin-top: 4px;
+    margin-bottom: 16px;
     @extend %default-font;
     cursor: pointer;
     font-weight: bold;

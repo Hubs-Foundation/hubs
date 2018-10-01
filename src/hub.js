@@ -252,7 +252,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
     environmentScene.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
   }
 
-  remountUI({ hubId: hub.hub_id, hubName: hub.name });
+  remountUI({ hubId: hub.hub_id, hubName: hub.name, hubEntryCode: hub.entry_code });
 
   scene.setAttribute("networked-scene", {
     room: hub.hub_id,
@@ -296,13 +296,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const entryManager = new SceneEntryManager(hubChannel);
   entryManager.init();
 
-  const linkChannel = new LinkChannel(store);
-
   window.APP.scene = scene;
 
   registerNetworkSchemas();
   mountUI({});
-  remountUI({ hubChannel, linkChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
+  remountUI({ hubChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 
@@ -387,6 +385,4 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!NAF.connection.adapter) return;
     NAF.connection.adapter.onData(data);
   });
-
-  linkChannel.setSocket(socket);
 });
