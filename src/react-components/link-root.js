@@ -96,7 +96,7 @@ class LinkRoot extends Component {
         }
       })
       .catch(e => {
-        this.setState({ failedAtLeastOnce: true, enteredDigits: "" });
+        this.setState({ failedAtLeastOnce: true, entered: "" });
 
         if (!(e instanceof Error && (e.message === "in_use" || e.message === "failed"))) {
           throw e;
@@ -126,7 +126,7 @@ class LinkRoot extends Component {
   };
 
   toggleMode = () => {
-    this.setState({ isAlphaMode: !this.state.isAlphaMode, entered: "" });
+    this.setState({ isAlphaMode: !this.state.isAlphaMode, entered: "", failedAtLeastOnce: false });
   };
 
   render() {
