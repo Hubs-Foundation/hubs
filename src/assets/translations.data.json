@@ -33,7 +33,7 @@
     "entry.return-to-vr": "Enter in VR",
     "profile.save": "accept",
     "profile.display_name.validation_warning": "Alphanumerics and hyphens. At least 3 characters, no more than 32",
-    "profile.header": "Choose Avatar & Name",
+    "profile.header": "Avatar & Name",
     "profile.avatar-selector.loading": "Loading Avatars...",
     "profile.terms_of_use": "Terms of Use",
     "profile.privacy_notice": "Privacy Notice",
