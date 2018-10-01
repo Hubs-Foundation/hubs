@@ -929,17 +929,6 @@ class UIRoot extends Component {
         <div className={styles.ui}>
           {this.state.dialog}
 
-          <button onClick={() => this.showHelpDialog()} className={styles.helpIcon}>
-            <i>
-              <FontAwesomeIcon icon={faQuestion} />
-            </i>
-          </button>
-
-          <div className={styles.presenceInfo}>
-            <FontAwesomeIcon icon={faUsers} />
-            <span className={styles.occupantCount}>{this.props.occupantCount || "-"}</span>
-          </div>
-
           {this.state.showProfileEntry && (
             <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store} />
           )}
@@ -971,6 +960,18 @@ class UIRoot extends Component {
                 )}
               </div>
             )}
+
+          <button onClick={() => this.showHelpDialog()} className={styles.helpIcon}>
+            <i>
+              <FontAwesomeIcon icon={faQuestion} />
+            </i>
+          </button>
+
+          <div className={styles.presenceInfo}>
+            <FontAwesomeIcon icon={faUsers} />
+            <span className={styles.occupantCount}>{this.props.occupantCount || "-"}</span>
+          </div>
+
           {this.state.entryStep === ENTRY_STEPS.finished ? (
             <div>
               <TwoDHUD.TopHUD
