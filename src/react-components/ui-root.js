@@ -172,8 +172,7 @@ class UIRoot extends Component {
   handleStartEntry = () => {
     if (!this.props.forcedVREntryType) {
       this.setState({ entryStep: ENTRY_STEPS.device });
-    }
-    if (this.props.forcedVREntryType.startsWith("daydream")) {
+    } else if (this.props.forcedVREntryType.startsWith("daydream")) {
       this.enterDaydream();
     } else if (this.props.forcedVREntryType.startsWith("vr")) {
       this.enterVR();
