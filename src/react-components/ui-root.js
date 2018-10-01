@@ -647,18 +647,9 @@ class UIRoot extends Component {
         </div>
 
         <div className={entryStyles.center}>
-          <div className={entryStyles.profileName}>
-            <img
-              src="../assets/images/account.svg"
-              onClick={() => this.setState({ showProfileEntry: true })}
-              className={entryStyles.profileIcon}
-            />
-            <div
-              onClick={() => this.setState({ showProfileEntry: true })}
-              title={this.props.store.state.profile.displayName}
-            >
-              {this.props.store.state.profile.displayName}
-            </div>
+          <div onClick={() => this.setState({ showProfileEntry: true })} className={entryStyles.profileName}>
+            <img src="../assets/images/account.svg" className={entryStyles.profileIcon} />
+            <div title={this.props.store.state.profile.displayName}>{this.props.store.state.profile.displayName}</div>
           </div>
         </div>
 
