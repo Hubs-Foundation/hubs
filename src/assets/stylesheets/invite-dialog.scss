@@ -50,10 +50,6 @@
   margin: 12px;
 }
 
-:local(.header) {
-  font-weight: bold;
-}
-
 :local(.keep-open) {
   font-size: 0.8em;
 }
@@ -96,4 +92,8 @@
 
 :local(.code-loading-panel) {
   background: none;
+}
+
+:local(.hub-link-link) {
+  font-size: 1.2em;
 }

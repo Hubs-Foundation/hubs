@@ -18,12 +18,17 @@ export default class InviteDialog extends Component {
   };
 
   state = {
-    copyLinkButtonText: "copy"
+    linkButtonText: navigator.share ? "share" : "copy"
   };
 
-  copyLinkClicked = link => {
-    copy(link);
-    this.setState({ copyLinkButtonText: "copied!" });
+  linkClicked = link => {
+    if (navigator.share) {
+      navigator.share({ title: document.title, url: link });
+      this.props.onClose();
+    } else {
+      copy(link);
+      this.setState({ linkButtonText: "copied!" });
+    }
   };
 
   render() {
@@ -38,14 +43,12 @@ export default class InviteDialog extends Component {
         <div className={styles.close} onClick={() => this.props.onClose()}>
           <span>×</span>
         </div>
-        <div className={styles.header}>
-          <FormattedMessage id="invite.entry_code" />
-        </div>
         <div>
-          <FormattedMessage id="invite.join_at" />
-          <a href="https://hub.link" target="_blank" rel="noopener noreferrer">
+          <FormattedMessage id="invite.enter_via" />
+          <a href="https://hub.link" target="_blank" className={styles.hubLinkLink} rel="noopener noreferrer">
             hub.link
           </a>
+          <FormattedMessage id="invite.and_enter_code" />
         </div>
         <div className={styles.code}>
           {entryCodeString.split("").map((d, i) => (
@@ -54,17 +57,14 @@ export default class InviteDialog extends Component {
             </div>
           ))}
         </div>
-        <div className={styles.header} style={{ marginTop: "16px" }}>
-          <FormattedMessage id="invite.direct_link" />
-        </div>
         <div>
-          <FormattedMessage id="invite.enter_in_browser" />
+          <FormattedMessage id="invite.or_visit" />
         </div>
         <div className={styles.domain}>
           <input type="text" readOnly onFocus={e => e.target.select()} value={shareLink} />
         </div>
-        <button className={styles.copyLinkButton} onClick={this.copyLinkClicked.bind(this, "https://" + shareLink)}>
-          <span>{this.state.copyLinkButtonText}</span>
+        <button className={styles.linkButton} onClick={this.linkClicked.bind(this, "https://" + shareLink)}>
+          <span>{this.state.linkButtonText}</span>
         </button>
       </div>
     );

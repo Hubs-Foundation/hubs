@@ -86,10 +86,8 @@
     "link.do_not_close": "Keep this open to use this code.",
     "link.connect_headset": "Connect Mobile Headset",
     "link.cancel": "cancel",
-    "invite.entry_code": "Entry Code:",
-    "invite.and_enter_code": "and enter code:",
-    "invite.join_at": "Join room at ",
-    "invite.direct_link": "Direct Link:",
-    "invite.enter_in_browser": "Enter in browser:"
+    "invite.enter_via": "Enter via ",
+    "invite.and_enter_code": " and enter code:",
+    "invite.or_visit": "or visit"
   }
 }

@@ -500,7 +500,7 @@ class UIRoot extends Component {
       clearInterval(this.state.micUpdateInterval);
     }
 
-    this.setState({ entryStep: ENTRY_STEPS.finished });
+    this.setState({ showInviteDialog: false, entryStep: ENTRY_STEPS.finished });
   };
 
   attemptLink = async () => {
