@@ -299,7 +299,6 @@ document.addEventListener("DOMContentLoaded", () => {
   window.APP.scene = scene;
 
   registerNetworkSchemas();
-  mountUI({});
   remountUI({ hubChannel, linkChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
