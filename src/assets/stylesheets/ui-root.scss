@@ -71,7 +71,7 @@
   @extend %unselectable;
 }
 
-:local(.nag-button) {
+:local(.invite-container) {
   @extend %unselectable;
   position: absolute;
   top: 0;
@@ -79,9 +79,10 @@
   margin-top: 16px;
   width: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
+  pointer-events: auto;
 
   button {
     @extend %action-button;
@@ -95,7 +96,13 @@
   }
 }
 
-:local(.nag-button-below-hud) {
+:local(.invite-container-inverted) {
+  button {
+    @extend %action-button-selected;
+  }
+}
+
+:local(.invite-container-below-hud) {
   margin-top: 100px;
 }
 

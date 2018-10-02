@@ -73,7 +73,6 @@ import ReactDOM from "react-dom";
 import React from "react";
 import UIRoot from "./react-components/ui-root";
 import HubChannel from "./utils/hub-channel";
-import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { resolveMedia } from "./utils/media-utils";
@@ -252,7 +251,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
     environmentScene.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
   }
 
-  remountUI({ hubId: hub.hub_id, hubName: hub.name });
+  remountUI({ hubId: hub.hub_id, hubName: hub.name, hubEntryCode: hub.entry_code });
 
   scene.setAttribute("networked-scene", {
     room: hub.hub_id,
@@ -294,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
   const entryManager = new SceneEntryManager(hubChannel);
-  const linkChannel = new LinkChannel(store);
+  entryManager.init();
 
   window.APP.scene = scene;
 
@@ -384,6 +383,4 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!NAF.connection.adapter) return;
     NAF.connection.adapter.onData(data);
   });
-
-  linkChannel.setSocket(socket);
 });

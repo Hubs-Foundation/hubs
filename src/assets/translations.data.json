@@ -74,15 +74,18 @@
     "home.have_entry_code": "have a link code?",
     "mailing_list.privacy_label": "I'm okay with Mozilla handling my info as explained in",
     "mailing_list.privacy_link": "this Privacy Notice",
-    "link.in_your_browser": "In your headset's browser, go to:",
-    "link.enter_code": "Then, enter this link code:",
-    "link.do_not_close": "Keep this dialog open to use this code.",
     "link.link_page_header": "Enter your code:",
     "link.dont_have_a_code": "Don't have a code?",
     "link.create_a_room": "Create a Room",
     "link.try_again": "We couldn't find that code. Please try again.",
     "help.report_issue": "Report an Issue",
     "scene.logo_tagline": "A new way to get together",
-    "scene.create_button": "create a room with this scene"
+    "scene.create_button": "create a room with this scene",
+    "invite.in_your_browser": "In your headset's browser, go to:",
+    "invite.entry_code": "Entry Code:",
+    "invite.and_enter_code": "and enter code:",
+    "invite.join_at": "Join room at ",
+    "invite.direct_link": "Direct Link:",
+    "invite.enter_in_browser": "Enter in browser:"
   }
 }

@@ -21,8 +21,15 @@ export default class SceneEntryManager {
     this.hubChannel = hubChannel;
     this.store = window.APP.store;
     this.scene = document.querySelector("a-scene");
+    this.cursorController = document.querySelector("#cursor-controller");
     this.playerRig = document.querySelector("#player-rig");
   }
+
+  init = () => {
+    this.whenSceneLoaded(() => {
+      this.cursorController.components["cursor-controller"].disable();
+    });
+  };
 
   enterScene = async (mediaStream, enterInVR) => {
     const playerCamera = document.querySelector("#player-camera");
@@ -68,21 +75,28 @@ export default class SceneEntryManager {
       return;
     }
 
+    this.scene.classList.remove("hand-cursor");
     this.scene.classList.add("no-cursor");
+
+    const cursor = this.cursorController.components["cursor-controller"];
+    cursor.enable();
+    cursor.setCursorVisibility(true);
 
     this.hubChannel.sendEntryEvent().then(() => {
       this.store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
     });
   };
 
-  enterSceneWhenLoaded = (mediaStream, enterInVR) => {
-    const enterSceneImmediately = () => this.enterScene(mediaStream, enterInVR);
-
+  whenSceneLoaded = callback => {
     if (this.scene.hasLoaded) {
-      enterSceneImmediately();
+      callback();
     } else {
-      this.scene.addEventListener("loaded", enterSceneImmediately);
+      this.scene.addEventListener("loaded", callback);
     }
+  };
+
+  enterSceneWhenLoaded = (mediaStream, enterInVR) => {
+    this.whenSceneLoaded(() => this.enterScene(mediaStream, enterInVR));
   };
 
   exitScene = () => {

@@ -10,15 +10,19 @@
   :local(.collapse) {
     @extend %fa-icon-button;
     position: absolute;
-    top: 4px;
-    right: 24px;
+    top: 0px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
   }
 
   :local(.expand) {
     @extend %fa-icon-button;
     position: absolute;
-    top: -32px;
-    right: 24px;
+    top: -48px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
   }
 }
 
@@ -86,6 +90,7 @@
 
   :local(.profile-name) {
     margin-top: 4px;
+    margin-bottom: 16px;
     @extend %default-font;
     cursor: pointer;
     font-weight: bold;
@@ -107,6 +112,7 @@
     flex-direction: column;
     height: 100%;
     justify-content: flex-end;
+    align-items: center;
 
     :local(.action-button) {
       @extend %action-button;

@@ -81,6 +81,18 @@ class ProfileEntryPanel extends Component {
             <label htmlFor="#profile-entry-display-name" className={styles.title}>
               <FormattedMessage id="profile.header" />
             </label>
+            <input
+              id="profile-entry-display-name"
+              className={styles.formFieldText}
+              value={this.state.displayName}
+              onFocus={e => e.target.select()}
+              onChange={e => this.setState({ displayName: e.target.value })}
+              required
+              spellCheck="false"
+              pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
+              title={formatMessage({ id: "profile.display_name.validation_warning" })}
+              ref={inp => (this.nameInput = inp)}
+            />
             <div className={styles.avatarSelectorContainer}>
               <div className="loading-panel">
                 <div className="loader-wrap">
@@ -95,18 +107,6 @@ class ProfileEntryPanel extends Component {
                 ref={ifr => (this.avatarSelector = ifr)}
               />
             </div>
-            <input
-              id="profile-entry-display-name"
-              className={styles.formFieldText}
-              value={this.state.displayName}
-              onFocus={e => e.target.select()}
-              onChange={e => this.setState({ displayName: e.target.value })}
-              required
-              spellCheck="false"
-              pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
-              title={formatMessage({ id: "profile.display_name.validation_warning" })}
-              ref={inp => (this.nameInput = inp)}
-            />
             <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
             <div className={styles.links}>
               <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
