@@ -11,6 +11,7 @@ $dark-grey: rgba(128, 128, 128, 1.0);
 $darker-grey: rgba(64, 64, 64, 1.0);
 $darkest-grey: rgba(32, 32, 32, 1.0);
 $action-color: #FF3464;
+$action-color-transparent: rgba(255, 52, 100, 0.9);
 
 %unselectable {
   -moz-user-select: none;
@@ -94,7 +95,7 @@ $action-color: #FF3464;
   cursor: pointer;
   border: 0;
   border-radius: 28px;
-  padding: 18px 18px;
+  padding: 0px 18px;
 
   background: #FF3464;
   font-size: 1em;
@@ -104,7 +105,7 @@ $action-color: #FF3464;
   flex-direction: column;
   justify-content: center;
   min-width: 150px;
-  min-height: 54px;
+  height: 48px;
 }
 
 %action-button-selected {
@@ -115,7 +116,6 @@ $action-color: #FF3464;
 %bottom-action-button {
   @extend %bottom-button;
   background: #FF3464;
-  font-size: 1.3em;
 }
 
 %top-title {

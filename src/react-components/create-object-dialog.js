@@ -126,7 +126,7 @@ export default class CreateObjectDialog extends Component {
               </div>
               <div className={styles.buttons}>
                 <button className={styles.actionButton}>
-                  <span>create</span>
+                  <span>Create</span>
                 </button>
               </div>
               {this.state.attributionImage ? (

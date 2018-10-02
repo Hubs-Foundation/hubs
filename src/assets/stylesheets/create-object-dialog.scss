@@ -35,28 +35,27 @@
 }
 
 :local(.cancel-icon) {
-  color: white;
+  color: $darkest-grey;
   &:hover {
     color: #FF3D7F
   }
 }
 
 :local(.upload-icon) {
-  color: white;
+  color: $darkest-grey;
   &:hover {
-    color: #2F80ED;
+    color: $action-color;
   }
 }
 
 :local(.input-border) {
   display: flex;
-  border: 0.25em solid white;
-  border-radius: 1em;
+  @extend %rounded-border;
+  @extend %default-font;
   margin: 1em;
   padding: 0.5em 0.75em;
   width: 100%;
   box-sizing: border-box;
-  @extend %default-font;
 }
 
 :local(.left-side-of-input) {
