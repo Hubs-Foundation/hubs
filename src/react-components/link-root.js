@@ -14,6 +14,7 @@ const MAX_LETTERS = 4;
 
 addLocaleData([...en]);
 disableiOSZoom();
+const hasTouchEvents = "ontouchstart" in document.documentElement;
 
 class LinkRoot extends Component {
   static propTypes = {
@@ -196,14 +197,20 @@ class LinkRoot extends Component {
                   disabled={this.state.entered.length === this.maxAllowedChars()}
                   key={`char_${i}`}
                   className={styles.keypadButton}
-                  onClick={() => this.addToEntry(d)}
+                  onClick={() => {
+                    if (!hasTouchEvents) this.addToEntry(d);
+                  }}
+                  onTouchStart={() => this.addToEntry(d)}
                 >
                   {d}
                 </button>
               ))}
               <button
                 className={classNames(styles.keypadButton, styles.keypadToggleMode)}
-                onClick={() => this.toggleMode()}
+                onTouchStart={() => this.toggleMode()}
+                onClick={() => {
+                  if (!hasTouchEvents) this.toggleMode();
+                }}
               >
                 {this.state.isAlphaMode ? "123" : "ABC"}
               </button>
@@ -211,7 +218,10 @@ class LinkRoot extends Component {
                 <button
                   disabled={this.state.entered.length === this.maxAllowedChars()}
                   className={classNames(styles.keypadButton, styles.keypadZeroButton)}
-                  onClick={() => this.addToEntry(0)}
+                  onTouchStart={() => this.addToEntry(0)}
+                  onClick={() => {
+                    if (!hasTouchEvents) this.addToEntry(0);
+                  }}
                 >
                   0
                 </button>
@@ -219,23 +229,27 @@ class LinkRoot extends Component {
               <button
                 disabled={this.state.entered.length === 0 || this.state.entered.length === this.maxAllowedChars()}
                 className={classNames(styles.keypadButton, styles.keypadBackspace)}
-                onClick={() => this.removeChar()}
+                onTouchStart={() => this.removeChar()}
+                onClick={() => {
+                  if (!hasTouchEvents) this.removeChar();
+                }}
               >
                 ⌫
               </button>
             </div>
 
             <div className={styles.footer}>
-              {!this.state.isAlphaMode && (
-                <div className={styles.linkHeadsetFooterLink}>
-                  <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
-                  <span>
-                    <a href="#" onClick={() => this.toggleMode()}>
-                      <FormattedMessage id="link.linking_a_headset" />
-                    </a>
-                  </span>
-                </div>
-              )}
+              <div
+                className={styles.linkHeadsetFooterLink}
+                style={{ visibility: this.state.isAlphaMode ? "hidden" : "visible" }}
+              >
+                <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
+                <span>
+                  <a href="#" onClick={() => this.toggleMode()}>
+                    <FormattedMessage id="link.linking_a_headset" />
+                  </a>
+                </span>
+              </div>
             </div>
           </div>
         </div>

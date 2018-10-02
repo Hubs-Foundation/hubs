@@ -76,7 +76,7 @@
     "link.link_page_header_entry": "Enter your code:",
     "link.link_page_header_headset": "Enter headset link code:",
     "link.linking_a_headset": "Linking a Headset?",
-    "link.try_again": "We couldn't find that code. Please try again.",
+    "link.try_again": "We couldn't find that code.\nPlease try again.",
     "help.report_issue": "Report an Issue",
     "scene.logo_tagline": "A new way to get together",
     "scene.create_button": "Create a room with this scene",

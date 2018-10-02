@@ -10,6 +10,17 @@ body {
   padding: 0;
   background-color: white;
   color: black;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  overflow-y: hidden;
+}
+
+button {
+  outline: none;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0); 
+  -webkit-tap-highlight-color: transparent;
 }
 
 a {
@@ -112,6 +123,7 @@ a {
 
 :local(.header) {
   text-align: center;
+  white-space: pre-wrap;
 }
 
 :local(.footer) {
