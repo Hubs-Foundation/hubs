@@ -2,9 +2,10 @@
 
 :local(.dialog) {
   position: absolute;
+  color: white;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.85);
+  background-color: rgba(0, 0, 0, 0.9);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -17,6 +18,11 @@
   font-size: 2em;
   font-weight: bold;
   margin-bottom: 12px;
+  text-align: center;
+
+  @media(max-height: 420px) {
+    display: none;
+  }
 }
 
 :local(.contents) {
@@ -50,7 +56,6 @@
 
 :local(.code) {
   color: black;
-  font-family: monospace;
   font-weight: bold;
   text-decoration: none;
   font-size: 2.5em;
@@ -59,13 +64,17 @@
 }
 
 :local(.imageHeader) {
-  width: 175px;
-  height: 175px;
+  width: 100px;
+  height: 100px;
   background-color: white;
-  border-radius: 100px;
+  border-radius: 50px;
   fill: black;
   margin-bottom: 24px;
-  padding-right: 6px;
+  padding-right: 4px;
+
+  @media(max-height: 420px) {
+    display: none;
+  }
 }
 
 :local(.keep-open) {

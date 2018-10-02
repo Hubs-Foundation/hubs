@@ -12,23 +12,15 @@ export default class HelpDialog extends Component {
             Use your controller&apos;s action button to teleport from place to place. If it has a trigger, use it to
             pick up objects.
           </p>
-          <p style={{ textAlign: "center" }}>
-            In VR, <b>look up</b> to find your menu:
-            <img
-              className="info-dialog__help__hud"
-              src="../assets/images/help-hud.png"
-              srcSet="../assets/images/help-hud@2x.png 2x"
-            />
+          <p>
+            In VR, <b>look up</b> to find your menu.
           </p>
           <p>
             The <b>Mic Toggle</b> mutes your mic.
           </p>
           <p>
-            The <b>Pause/Resume Toggle</b> pauses all other avatars. You can then block them from having further
+            The <b>Pause/Resume Toggle</b> pauses all other avatars and lets you block others or remove objects.
             interactions with you.
-          </p>
-          <p>
-            The <b>Bubble Toggle</b> hides avatars that enter your personal space.
           </p>
           <p className="dialog__box__contents__links">
             <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">

@@ -8,7 +8,6 @@ import uiStyles from "../assets/stylesheets/ui-root.scss";
 const TopHUD = ({ muted, frozen, onToggleMute, onToggleFreeze, onSpawnPen, onSpawnCamera }) => (
   <div className={cx(styles.container, styles.top, styles.unselectable)}>
     <div className={cx(uiStyles.uiInteractive, styles.panel, styles.left)}>
-      <div className={cx(styles.iconButton)} />
       <div
         className={cx(styles.iconButton, styles.mute, { [styles.active]: muted })}
         title={muted ? "Unmute Mic" : "Mute Mic"}

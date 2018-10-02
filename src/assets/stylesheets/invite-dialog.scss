@@ -11,7 +11,8 @@
   padding: 14px;
   text-align: center;
   position: relative;
-  font-size: 1.1em;
+  font-size: 1.0em;
+  color: white;
   
   a {
     color: white;
@@ -42,7 +43,6 @@
 
 :local(.code) {
   color: black;
-  font-family: monospace;
   font-weight: bold;
   text-decoration: none;
   font-size: 2.0em;

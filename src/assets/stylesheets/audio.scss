@@ -43,14 +43,16 @@
       @extend %glass-text;
 
       appearance: none;
-      background-color: rgba(64, 64, 64, 0.2);
+      background-color: white;
       -moz-appearance: none;
       -webkit-appearance: none;
+      border: 1px solid #e2e2e2;
       padding: 6px;
+      font-weight: bold;
+      font-size: 0.9em;
       padding-left: 15px;
       padding-right: 30px;
       color: white;
-      font-size: 1.1em;
       width: 90%;
       height: 50px;
     }
