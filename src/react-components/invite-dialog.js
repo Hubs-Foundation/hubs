@@ -14,15 +14,16 @@ function pad(num, size) {
 export default class InviteDialog extends Component {
   static propTypes = {
     entryCode: PropTypes.number,
+    allowShare: PropTypes.bool,
     onClose: PropTypes.func
   };
 
   state = {
-    linkButtonText: navigator.share ? "share" : "copy"
+    linkButtonText: navigator.share && this.props.allowShare ? "share" : "copy"
   };
 
   linkClicked = link => {
-    if (navigator.share) {
+    if (navigator.share && this.props.allowShare) {
       navigator.share({ title: document.title, url: link });
       this.props.onClose();
     } else {

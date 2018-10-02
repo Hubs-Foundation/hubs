@@ -13,11 +13,21 @@
   position: relative;
   font-size: 1.0em;
   color: white;
+  z-index: 3;
   
   a {
     color: white;
     text-decoration: underline;
     font-weight: bold;
+  }
+
+  :local(.link-button) {
+    @extend %action-button-selected;
+    margin-top: 4px;
+
+    @media (max-height: 370px) {
+      display: none;
+    }
   }
 }
 
@@ -72,10 +82,6 @@
   }
 }
 
-:local(.copy-link-button) {
-  @extend %action-button-selected;
-  margin-top: 4px;
-}
 
 :local(.digit) {
   padding: 0 8px;

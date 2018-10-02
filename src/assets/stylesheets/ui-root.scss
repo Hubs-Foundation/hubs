@@ -49,6 +49,7 @@
   border-radius: 18px 18px 0 0;
   width: 100%;
   max-width: 600px;
+  z-index: 2;
 
   :local(.backgrounded) {
     filter: blur(1px);
@@ -80,7 +81,7 @@
     pointer-events: auto;
   }
 
-  @media (max-height: 420px) {
+  @media (max-height: 320px) {
     display: none;
   }
 }

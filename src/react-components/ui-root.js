@@ -938,12 +938,11 @@ class UIRoot extends Component {
               [styles.inviteContainerInverted]: this.state.showInviteDialog
             })}
           >
-            {!this.props.availableVREntryTypes.isInHMD &&
-              (!entryFinished || this.props.occupantCount <= 1) && (
-                <button onClick={() => this.toggleInviteDialog()}>
-                  <FormattedMessage id="entry.invite-others-nag" />
-                </button>
-              )}
+            {(!entryFinished || (this.props.occupantCount <= 1 && !this.props.availableVREntryTypes.isInHMD)) && (
+              <button onClick={() => this.toggleInviteDialog()}>
+                <FormattedMessage id="entry.invite-others-nag" />
+              </button>
+            )}
             {this.props.availableVREntryTypes.isInHMD &&
               entryFinished && (
                 <button onClick={() => this.props.scene.enterVR()}>
@@ -952,6 +951,7 @@ class UIRoot extends Component {
               )}
             {this.state.showInviteDialog && (
               <InviteDialog
+                allowShare={!this.props.availableVREntryTypes.isInHMD}
                 entryCode={this.props.hubEntryCode}
                 onClose={() => this.setState({ showInviteDialog: false })}
               />
