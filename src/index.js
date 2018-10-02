@@ -13,7 +13,7 @@ const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathna
 const root = (
   <HomeRoot
     initialEnvironment={qs.get("initial_environment")}
-    sceneId={sceneId}
+    sceneId={sceneId || ""}
     authVerify={qs.has("auth_topic")}
     authTopic={qs.get("auth_topic")}
     authToken={qs.get("auth_token")}

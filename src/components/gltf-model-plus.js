@@ -1,3 +1,4 @@
+import nextTick from "../utils/next-tick";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import cubeMapPosX from "../assets/images/cubemap/posx.jpg";
 import cubeMapNegX from "../assets/images/cubemap/negx.jpg";
@@ -188,12 +189,6 @@ function attachTemplate(root, name, templateRoot) {
       el.appendChild(root.children[0]);
     }
   }
-}
-
-function nextTick() {
-  return new Promise(resolve => {
-    setTimeout(resolve, 0);
-  });
 }
 
 function getFilesFromSketchfabZip(src) {
