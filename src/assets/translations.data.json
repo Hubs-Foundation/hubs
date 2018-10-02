@@ -46,7 +46,7 @@
     "audio.grant-subtitle": "Mic access needed to be heard by others",
     "audio.granted-title": "Mic permissions granted",
     "audio.granted-subtitle": "You can still mute yourself in-game",
-    "audio.granted-next": "next",
+    "audio.granted-next": "Next",
     "exit.subtitle.exited": "Your session has ended. Refresh your browser to start a new one.",
     "exit.subtitle.closed": "This room is no longer available.",
     "exit.subtitle.full": "This room is full, please try again later.",
