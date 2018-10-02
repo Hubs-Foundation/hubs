@@ -120,13 +120,14 @@ AFRAME.registerComponent("pen", {
     if (this.currentDrawing) {
       this.el.object3D.getWorldPosition(this.worldPosition);
       this._getNormal(this.normal, this.worldPosition, this.direction);
-
+      this.el.emit("start_draw");
       this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal, this.data.color, this.data.radius);
     }
   },
 
   _endDraw() {
     if (this.currentDrawing) {
+      this.el.emit("stop_draw");
       this.timeSinceLastDraw = 0;
       this.el.object3D.getWorldPosition(this.worldPosition);
       this._getNormal(this.normal, this.worldPosition, this.direction);
@@ -151,18 +152,23 @@ AFRAME.registerComponent("pen", {
     switch (evt.detail) {
       case "activated":
         this._startDraw();
+        this.el.emit("start_draw");
         break;
       case "colorNext":
         this._changeColor(1);
+        this.el.emit("next_pen_color");
         break;
       case "colorPrev":
         this._changeColor(-1);
+        this.el.emit("prev_pen_color");
         break;
       case "radiusUp":
         this._changeRadius(this.data.minRadius);
+        this.el.emit("increase_pen_radius");
         break;
       case "radiusDown":
         this._changeRadius(-this.data.minRadius);
+        this.el.emit("decrease_pen_radius");
         break;
       case "grabbed":
         this.grabbed = true;

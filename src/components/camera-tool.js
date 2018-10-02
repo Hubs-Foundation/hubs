@@ -139,6 +139,7 @@ AFRAME.registerComponent("camera-tool", {
             sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
           });
         });
+        sceneEl.emit("camera_tool_took_snapshot");
         this.takeSnapshotNextTick = false;
       }
     };

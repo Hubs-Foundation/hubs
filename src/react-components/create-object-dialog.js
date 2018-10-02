@@ -7,6 +7,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import styles from "../assets/stylesheets/create-object-dialog.scss";
 import cx from "classnames";
 import DialogContainer from "./dialog-container.js";
+import { AudioContext } from "../AudioContext";
 
 const attributionHostnames = {
   "giphy.com": giphyLogo,
@@ -87,14 +88,32 @@ export default class CreateObjectDialog extends Component {
     const { onCreate, onClose, ...other } = this.props; // eslint-disable-line no-unused-vars
 
     const cancelButton = (
-      <label className={cx(styles.smallButton, styles.cancelIcon)} onClick={this.reset}>
-        <FontAwesomeIcon icon={faTimes} />
-      </label>
+      <AudioContext.Consumer>
+        {audio => (
+          <label
+            className={cx(styles.smallButton, styles.cancelIcon)}
+            onClick={this.reset}
+            onMouseEnter={audio.onMouseEnter}
+            onMouseLeave={audio.onMouseLeave}
+          >
+            <FontAwesomeIcon icon={faTimes} />
+          </label>
+        )}
+      </AudioContext.Consumer>
     );
     const uploadButton = (
-      <label htmlFor={fileInputId} className={cx(styles.smallButton, styles.uploadIcon)}>
-        <FontAwesomeIcon icon={faPaperclip} />
-      </label>
+      <AudioContext.Consumer>
+        {audio => (
+          <label
+            htmlFor={fileInputId}
+            className={cx(styles.smallButton, styles.uploadIcon)}
+            onMouseEnter={audio.onMouseEnter}
+            onMouseLeave={audio.onMouseLeave}
+          >
+            <FontAwesomeIcon icon={faPaperclip} />
+          </label>
+        )}
+      </AudioContext.Consumer>
     );
     const filenameLabel = <label className={cx(styles.leftSideOfInput)}>{this.state.fileName}</label>;
     const urlInput = (
@@ -108,7 +127,7 @@ export default class CreateObjectDialog extends Component {
     );
 
     return (
-      <DialogContainer title="Create Object" onClose={onClose} {...other}>
+      <DialogContainer title="Create Object" onClose={this.props.onClose} {...other}>
         <div>
           {isMobile ? mobileInstructions : desktopInstructions}
           <form onSubmit={this.onCreateClicked}>
@@ -125,9 +144,17 @@ export default class CreateObjectDialog extends Component {
                 {this.state.url || this.state.fileName ? cancelButton : uploadButton}
               </div>
               <div className={styles.buttons}>
-                <button className={styles.actionButton}>
-                  <span>Create</span>
-                </button>
+                <AudioContext.Consumer>
+                  {audio => (
+                    <button
+                      className={styles.actionButton}
+                      onMouseEnter={audio.onMouseEnter}
+                      onMouseLeave={audio.onMouseLeave}
+                    >
+                      <span>Create</span>
+                    </button>
+                  )}
+                </AudioContext.Consumer>
               </div>
               {this.state.attributionImage ? (
                 <div>

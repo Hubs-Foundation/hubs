@@ -5,6 +5,7 @@ import { SCHEMA } from "../storage/store";
 import styles from "../assets/stylesheets/profile.scss";
 import classNames from "classnames";
 import hubLogo from "../assets/images/hub-preview-white.png";
+import { AudioContext } from "../AudioContext";
 
 class ProfileEntryPanel extends Component {
   static propTypes = {
@@ -75,55 +76,73 @@ class ProfileEntryPanel extends Component {
     const { formatMessage } = this.props.intl;
 
     return (
-      <div className={styles.profileEntry}>
-        <form onSubmit={this.saveStateAndFinish} className={styles.form}>
-          <div className={classNames([styles.box, styles.darkened])}>
-            <label htmlFor="#profile-entry-display-name" className={styles.title}>
-              <FormattedMessage id="profile.header" />
-            </label>
-            <input
-              id="profile-entry-display-name"
-              className={styles.formFieldText}
-              value={this.state.displayName}
-              onFocus={e => e.target.select()}
-              onChange={e => this.setState({ displayName: e.target.value })}
-              required
-              spellCheck="false"
-              pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
-              title={formatMessage({ id: "profile.display_name.validation_warning" })}
-              ref={inp => (this.nameInput = inp)}
-            />
-            <div className={styles.avatarSelectorContainer}>
-              <div className="loading-panel">
-                <div className="loader-wrap">
-                  <div className="loader">
-                    <div className="loader-center" />
+      <AudioContext.Consumer>
+        {audio => (
+          <div className={styles.profileEntry}>
+            <form onSubmit={this.saveStateAndFinish} className={styles.form}>
+              <div className={classNames([styles.box, styles.darkened])}>
+                <label htmlFor="#profile-entry-display-name" className={styles.title}>
+                  <FormattedMessage id="profile.header" />
+                </label>
+                <input
+                  id="profile-entry-display-name"
+                  className={styles.formFieldText}
+                  value={this.state.displayName}
+                  onFocus={e => e.target.select()}
+                  onChange={e => this.setState({ displayName: e.target.value })}
+                  required
+                  spellCheck="false"
+                  pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
+                  title={formatMessage({ id: "profile.display_name.validation_warning" })}
+                  ref={inp => (this.nameInput = inp)}
+                />
+                <div className={styles.avatarSelectorContainer}>
+                  <div className="loading-panel">
+                    <div className="loader-wrap">
+                      <div className="loader">
+                        <div className="loader-center" />
+                      </div>
+                    </div>
                   </div>
+                  <iframe
+                    className={styles.avatarSelector}
+                    src={`/avatar-selector.html#avatar_id=${this.state.avatarId}`}
+                    ref={ifr => (this.avatarSelector = ifr)}
+                  />
+                </div>
+                <input
+                  className={styles.formSubmit}
+                  type="submit"
+                  value={formatMessage({ id: "profile.save" })}
+                  onMouseEnter={audio.onMouseEnter}
+                  onMouseLeave={audio.onMouseLeave}
+                />
+                <div className={styles.links}>
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
+                    onMouseEnter={audio.onMouseEnter}
+                    onMouseLeave={audio.onMouseLeave}
+                  >
+                    <FormattedMessage id="profile.terms_of_use" />
+                  </a>
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+                    onMouseEnter={audio.onMouseEnter}
+                    onMouseLeave={audio.onMouseLeave}
+                  >
+                    <FormattedMessage id="profile.privacy_notice" />
+                  </a>
                 </div>
               </div>
-              <iframe
-                className={styles.avatarSelector}
-                src={`/avatar-selector.html#avatar_id=${this.state.avatarId}`}
-                ref={ifr => (this.avatarSelector = ifr)}
-              />
-            </div>
-            <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
-            <div className={styles.links}>
-              <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
-                <FormattedMessage id="profile.terms_of_use" />
-              </a>
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
-              >
-                <FormattedMessage id="profile.privacy_notice" />
-              </a>
-            </div>
+            </form>
+            <img className={styles.logo} src={hubLogo} />
           </div>
-        </form>
-        <img className={styles.logo} src={hubLogo} />
-      </div>
+        )}
+      </AudioContext.Consumer>
     );
   }
 }

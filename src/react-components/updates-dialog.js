@@ -3,6 +3,7 @@ import { FormattedMessage } from "react-intl";
 import PropTypes from "prop-types";
 import formurlencoded from "form-urlencoded";
 import DialogContainer from "./dialog-container.js";
+import { AudioContext } from "../AudioContext";
 
 export default class UpdatesDialog extends Component {
   static propTypes = {
@@ -40,37 +41,57 @@ export default class UpdatesDialog extends Component {
 
     return (
       <DialogContainer {...other}>
-        <span>
-          <p>Sign up to get updates about new features in Hubs.</p>
-          <form onSubmit={signUpForMailingList}>
-            <div className="mailing-list-form">
-              <input
-                type="email"
-                value={this.state.mailingListEmail}
-                onChange={e => this.setState({ mailingListEmail: e.target.value })}
-                className="mailing-list-form__email_field"
-                required
-                placeholder="Your email here"
-              />
-              <label className="mailing-list-form__privacy">
-                <input
-                  className="mailing-list-form__privacy_checkbox"
-                  type="checkbox"
-                  required
-                  value={this.state.mailingListPrivacy}
-                  onChange={e => this.setState({ mailingListPrivacy: e.target.checked })}
-                />
-                <span className="mailing-list-form__privacy_label">
-                  <FormattedMessage id="mailing_list.privacy_label" />{" "}
-                  <a target="_blank" rel="noopener noreferrer" href="https://www.mozilla.org/en-US/privacy/">
-                    <FormattedMessage id="mailing_list.privacy_link" />
-                  </a>
-                </span>
-              </label>
-              <input className="mailing-list-form__submit" type="submit" value="Sign Up Now" />
-            </div>
-          </form>
-        </span>
+        <AudioContext.Consumer>
+          {audio => (
+            <span>
+              <p>Sign up to get updates about new features in Hubs.</p>
+              <form onSubmit={signUpForMailingList}>
+                <div className="mailing-list-form">
+                  <input
+                    type="email"
+                    value={this.state.mailingListEmail}
+                    onChange={e => this.setState({ mailingListEmail: e.target.value })}
+                    className="mailing-list-form__email_field"
+                    required
+                    placeholder="Your email here"
+                    onMouseEnter={audio.onMouseEnter}
+                    onMouseLeave={audio.onMouseLeave}
+                  />
+                  <label className="mailing-list-form__privacy">
+                    <input
+                      className="mailing-list-form__privacy_checkbox"
+                      type="checkbox"
+                      required
+                      value={this.state.mailingListPrivacy}
+                      onChange={e => this.setState({ mailingListPrivacy: e.target.checked })}
+                      onMouseEnter={audio.onMouseEnter}
+                      onMouseLeave={audio.onMouseLeave}
+                    />
+                    <span className="mailing-list-form__privacy_label">
+                      <FormattedMessage id="mailing_list.privacy_label" />{" "}
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href="https://www.mozilla.org/en-US/privacy/"
+                        onMouseEnter={audio.onMouseEnter}
+                        onMouseLeave={audio.onMouseLeave}
+                      >
+                        <FormattedMessage id="mailing_list.privacy_link" />
+                      </a>
+                    </span>
+                  </label>
+                  <input
+                    className="mailing-list-form__submit"
+                    type="submit"
+                    value="Sign Up Now"
+                    onMouseEnter={audio.onMouseEnter}
+                    onMouseLeave={audio.onMouseLeave}
+                  />
+                </div>
+              </form>
+            </span>
+          )}
+        </AudioContext.Consumer>
       </DialogContainer>
     );
   }

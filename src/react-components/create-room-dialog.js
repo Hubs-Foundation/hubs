@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import DialogContainer from "./dialog-container.js";
+import { AudioContext } from "../AudioContext";
 
 const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
 
-export default class CreateObjectDialog extends Component {
+export default class CreateRoomDialog extends Component {
   static propTypes = {
     onCustomScene: PropTypes.func,
     onClose: PropTypes.func
@@ -46,9 +47,17 @@ export default class CreateObjectDialog extends Component {
                 onChange={e => this.setState({ customSceneUrl: e.target.value })}
               />
               <div className="custom-scene-form__buttons">
-                <button className="custom-scene-form__action-button">
-                  <span>create</span>
-                </button>
+                <AudioContext.Consumer>
+                  {audio => (
+                    <button
+                      className="custom-scene-form__action-button"
+                      onMouseEnter={audio.onMouseEnter}
+                      onMouseLeave={audio.onMouseLeave}
+                    >
+                      <span>create</span>
+                    </button>
+                  )}
+                </AudioContext.Consumer>
               </div>
             </div>
           </form>

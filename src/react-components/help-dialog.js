@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { FormattedMessage } from "react-intl";
 import DialogContainer from "./dialog-container.js";
+import { AudioContext } from "../AudioContext";
 
 export default class HelpDialog extends Component {
   render() {
@@ -21,17 +22,39 @@ export default class HelpDialog extends Component {
           <p>
             The <b>Pause/Resume Toggle</b> pauses all other avatars and lets you block others or remove objects.
           </p>
-          <p className="dialog__box__contents__links">
-            <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
-              <FormattedMessage id="profile.terms_of_use" />
-            </a>
-            <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md">
-              <FormattedMessage id="profile.privacy_notice" />
-            </a>
-            <a target="_blank" rel="noopener noreferrer" href="/?report">
-              <FormattedMessage id="help.report_issue" />
-            </a>
-          </p>
+          <AudioContext.Consumer>
+            {audio => (
+              <p className="dialog__box__contents__links">
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
+                  onMouseEnter={audio.onMouseEnter}
+                  onMouseLeave={audio.onMouseLeave}
+                >
+                  <FormattedMessage id="profile.terms_of_use" />
+                </a>
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+                  onMouseEnter={audio.onMouseEnter}
+                  onMouseLeave={audio.onMouseLeave}
+                >
+                  <FormattedMessage id="profile.privacy_notice" />
+                </a>
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="/?report"
+                  onMouseEnter={audio.onMouseEnter}
+                  onMouseLeave={audio.onMouseLeave}
+                >
+                  <FormattedMessage id="help.report_issue" />
+                </a>
+              </p>
+            )}
+          </AudioContext.Consumer>
         </div>
       </DialogContainer>
     );

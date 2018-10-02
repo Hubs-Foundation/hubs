@@ -70,6 +70,8 @@ import "./components/destroy-at-extreme-distances";
 import "./components/gamma-factor";
 import "./components/visible-to-owner";
 import "./components/camera-tool";
+import "./components/scene-sound";
+import "./components/emit-state-change";
 
 import ReactDOM from "react-dom";
 import React from "react";

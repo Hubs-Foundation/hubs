@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import copy from "copy-to-clipboard";
 import DialogContainer from "./dialog-container.js";
+import { AudioContext } from "../AudioContext";
 
 export default class SafariDialog extends Component {
   state = {
@@ -27,9 +28,18 @@ export default class SafariDialog extends Component {
               className="invite-form__link_field"
             />
             <div className="invite-form__buttons">
-              <button className="invite-form__action-button" onClick={onCopyClicked}>
-                <span>{this.state.copyLinkButtonText}</span>
-              </button>
+              <AudioContext.Consumer>
+                {audio => (
+                  <button
+                    className="invite-form__action-button"
+                    onClick={onCopyClicked}
+                    onMouseEnter={audio.onMouseEnter}
+                    onMouseLeave={audio.onMouseLeave}
+                  >
+                    <span>{this.state.copyLinkButtonText}</span>
+                  </button>
+                )}
+              </AudioContext.Consumer>
             </div>
           </div>
         </div>

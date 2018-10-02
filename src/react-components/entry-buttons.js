@@ -1,6 +1,7 @@
 import React from "react";
 import { FormattedMessage } from "react-intl";
 import PropTypes from "prop-types";
+import { AudioContext } from "../AudioContext";
 
 import MobileScreenEntryImg from "../assets/images/mobile_screen_entry.svg";
 import DesktopScreenEntryImg from "../assets/images/desktop_screen_entry.svg";
@@ -11,24 +12,33 @@ import DeviceEntryImg from "../assets/images/device_entry.svg";
 import styles from "../assets/stylesheets/entry.scss";
 
 const EntryButton = props => (
-  <button className={styles.entryButton} onClick={props.onClick}>
-    <img src={props.iconSrc} className={styles.icon} />
-    <div className={styles.label}>
-      <div className={styles.contents}>
-        <span>
-          <FormattedMessage id={props.prefixMessageId} />
-        </span>
-        <span className={styles.bolded}>
-          <FormattedMessage id={props.mediumMessageId} />
-        </span>
-        {props.subtitle && (
-          <div className={styles.subtitle}>
-            <FormattedMessage id={props.subtitle} />
+  <AudioContext.Consumer>
+    {audio => (
+      <button
+        className={styles.entryButton}
+        onClick={props.onClick}
+        onMouseEnter={audio.onMouseEnter}
+        onMouseLeave={audio.onMouseLeave}
+      >
+        <img src={props.iconSrc} className={styles.icon} />
+        <div className={styles.label}>
+          <div className={styles.contents}>
+            <span>
+              <FormattedMessage id={props.prefixMessageId} />
+            </span>
+            <span className={styles.bolded}>
+              <FormattedMessage id={props.mediumMessageId} />
+            </span>
+            {props.subtitle && (
+              <div className={styles.subtitle}>
+                <FormattedMessage id={props.subtitle} />
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </div>
-  </button>
+        </div>
+      </button>
+    )}
+  </AudioContext.Consumer>
 );
 
 EntryButton.propTypes = {

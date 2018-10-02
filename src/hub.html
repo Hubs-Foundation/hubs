@@ -62,6 +62,7 @@
             <img id="spawn-pen-hover" crossorigin="anonymous" src="./assets/hud/spawn_pen-hover.png">
             <img id="spawn-camera" crossorigin="anonymous" src="./assets/hud/spawn_camera.png">
             <img id="spawn-camera-hover" crossorigin="anonymous" src="./assets/hud/spawn_camera-hover.png">
+            <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
 
             <a-asset-item id="botdefault" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDefault_Avatar-9f71f8ff22.gltf"></a-asset-item>
             <a-asset-item id="botbobo" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotBobo_Avatar-f9740a010b.gltf"></a-asset-item>
@@ -74,11 +75,32 @@
             <a-asset-item id="botrobert" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotRobert_Avatar-e9554880f3.gltf"></a-asset-item>
             <a-asset-item id="botwoody" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotWoody_Avatar-0140485a23.gltf"></a-asset-item>
 
-            <a-asset-item id="quack" src="./assets/sfx/quack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="specialquack" src="./assets/sfx/specialquack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="quack"                                      src="./assets/sfx/quack.mp3"          response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="specialquack"                               src="./assets/sfx/specialquack.mp3"   response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-teleport_start"                 src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-teleport_end"                   src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-snap_rotate"                    src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-media_loaded"                   src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-hud_mouseout"                   src="./assets/sfx/footfall_click.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-hud_mouseover"                  src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-hover"                          src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-hover_off"                      src="./assets/sfx/footfall_click.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-cursor_distance_change_blocked" src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-cursor_distance_changed"        src="./assets/sfx/footfall_click.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-hud_click"                      src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-toggle_mute"                    src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-toggle_freeze"                  src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-toggle_space_bubble"            src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-spawn_pen"                      src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-increase_pen_radius"            src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-decrease_pen_radius"            src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-next_pen_color"                 src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-prev_pen_color"                 src="./assets/sfx/footfall_click.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-start_draw"                     src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-stop_draw"                      src="./assets/sfx/footfall_click.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-camera_tool_took_snapshot"      src="./assets/sfx/footfall_click.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
 
-            <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
-
+            <!-- <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item> -->
             <!-- Templates -->
             <template id="video-template">
                 <a-entity class="video" geometry="primitive: plane;" material="side: double; shader: flat;" networked-video-player></a-entity>
@@ -161,6 +183,10 @@
                     rotation
                     activatable__increase-scale="buttonStartEvents: scroll_right; buttonEndEvents: horizontal_scroll_release; activatedState: scaleUp;"
                     activatable__decrease-scale="buttonStartEvents: scroll_left; buttonEndEvents: horizontal_scroll_release; activatedState: scaleDown;"
+                    sound__hover="src: #sound_asset-hover; on: hovered; poolSize: 1;"
+                    sound__hoveroff ="src: #sound_asset-hover_off; on: unhovered; poolSize: 1;"
+                    emit-state-change__hovered="state: hovered; transform: rising; event: hovered;"
+                    emit-state-change__unhovered="state: hovered; transform: falling; event: unhovered;"
                 >
                     <!-- HACK: rotation component above is required for its side effect of setting YXZ order -->
                     <a-entity class="delete-button" visible-while-frozen>
@@ -185,6 +211,16 @@
                     activatable__increase-radius="buttonStartEvents: increase_radius, scroll_up; buttonEndEvents: thumb_up, secondary_hand_release, vertical_scroll_release; activatedState: radiusUp;"
                     activatable__decrease-radius="buttonStartEvents: decrease_radius, scroll_down; buttonEndEvents: thumb_up, secondary_hand_release, vertical_scroll_release; activatedState: radiusDown;"
                     scale="0.5 0.5 0.5"
+                    sound__next_pen_color="src: #sound_asset-next_pen_color; on: next_pen_color; poolSize: 2;"
+                    sound__prev_pen_color="src: #sound_asset-prev_pen_color; on: prev_pen_color; poolSize: 2;"
+                    sound__start_draw="src: #sound_asset-start_draw; on: start_draw; poolSize: 2;"
+                    sound__stop_draw="src: #sound_asset-stop_draw; on: stop_draw; poolSize: 2;"
+                    sound__increase_pen_radius="src: #sound_asset-increase_pen_radius; on: increase_pen_radius; poolSize: 2;"
+                    sound__decrease_pen_radius="src: #sound_asset-decrease_pen_radius; on: decrease_pen_radius; poolSize: 2;"
+                    sound__hover="src: #sound_asset-hover; on: hovered; poolSize: 1;"
+                    sound__hoveroff ="src: #sound_asset-hover_off; on: unhovered; poolSize: 1;"
+                    emit-state-change__hovered="state: hovered; transform: rising; event: hovered;"
+                    emit-state-change__unhovered="state: hovered; transform: falling; event: unhovered;"
                 >
                     <a-sphere
                         id="pen"
@@ -341,10 +377,45 @@
               <a-rounded height="0.08" width="0.5" color="#000000" position="-0.20 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
               <a-entity id="hud-hub-entry-link" text=" value:; width:1.1; align:center;" position="0.05 0.165 0"></a-entity>
               <a-rounded height="0.13" width="0.59" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
-              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover" scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="ui hud mic" material="alphaTest:0.1;"></a-image>
-              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover" scale="0.2 0.2 0.2" position="0 0 0.005" class="ui hud freeze"></a-image>
-              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="ui hud pen" material="alphaTest:0.1;"></a-image>
-              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #spawn-camera; hoverImage: #spawn-camera-hover; activeImage: #spawn-camera; activeHoverImage: #spawn-camera-hover" scale="0.1 0.1 0.1" position="0.28 0 0.001" class="ui hud cameraBtn" material="alphaTest:0.1;"></a-image>
+              <a-image
+                  icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover"
+                  scale="0.1 0.1 0.1"
+                  position="-0.17 0 0.001"
+                  class="ui hud mic"
+                  material="alphaTest:0.1;"
+                  sound__hud_mouseover="src: #sound_asset-hud_mouseover; on: mouseover; poolSize: 5;"
+                  sound__hud_mouseout="src: #sound_asset-hud_mouseout; on: mouseout; poolSize: 5;"
+                  sound__hud_click="src: #sound_asset-hud_click; on: click; poolSize: 3;"
+              ></a-image>
+              <a-image
+                  icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover"
+                  scale="0.2 0.2 0.2"
+                  position="0 0 0.005"
+                  class="ui hud freeze"
+                  sound__hud_mouseover="src: #sound_asset-hud_mouseover; on: mouseover; poolSize: 5;"
+                  sound__hud_mouseout="src: #sound_asset-hud_mouseout; on: mouseout; poolSize: 5;"
+                  sound__hud_click="src: #sound_asset-hud_click; on: click; poolSize: 3;"
+              ></a-image>
+              <a-image
+                  icon-button="tooltip: #hud-tooltip; tooltipText: Spawn Pen; activeTooltipText: Spawn Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover"
+                  scale="0.1 0.1 0.1"
+                  position="0.17 0 0.001"
+                  class="ui hud pen"
+                  material="alphaTest:0.1;"
+                  sound__hud_mouseover="src: #sound_asset-hud_mouseover; on: mouseover; poolSize: 5;"
+                  sound__hud_mouseout="src: #sound_asset-hud_mouseout; on: mouseout; poolSize: 5;"
+                  sound__hud_click="src: #sound_asset-hud_click; on: click; poolSize: 3;"
+              ></a-image>
+              <a-image
+                  icon-button="tooltip: #hud-tooltip; tooltipText: Spawn Camera; activeTooltipText: Spawn Camera; image: #spawn-camera; hoverImage: #spawn-camera-hover; activeImage: #spawn-camera; activeHoverImage: #spawn-camera-hover"
+                  scale="0.1 0.1 0.1"
+                  position="0.28 0 0.001"
+                  class="ui hud cameraBtn"
+                  material="alphaTest:0.1;"
+                  sound__hud_mouseover="src: #sound_asset-hud_mouseover; on: mouseover; poolSize: 5;"
+                  sound__hud_mouseout="src: #sound_asset-hud_mouseout; on: mouseout; poolSize: 5;"
+                  sound__hud_click="src: #sound_asset-hud_click; on: click; poolSize: 3;"
+              ></a-image>
               <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
                 <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" ></a-entity>
               </a-rounded>
@@ -357,6 +428,38 @@
               camera
               personal-space-bubble="radius: 0.4;"
               pitch-yaw-rotator
+              sound__teleport_start="src: #sound_asset-teleport_start; on: nothing; poolSize: 2;"
+              scene-sound__teleport_start="on: cursor-teleport_down;"
+              sound__teleport_end="src: #sound_asset-teleport_end; on: nothing; poolSize: 2;"
+              scene-sound__teleport_end="on: cursor-teleport_up;"
+              sound__snap_rotate_left="src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
+              scene-sound__snap_rotate_left="on: snap_rotate_left;"
+              sound__snap_rotate_right="src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
+              scene-sound__snap_rotate_right="on: snap_rotate_right;"
+              sound__model_loaded="src: #sound_asset-media_loaded; on: nothing; poolSize: 2;"
+              scene-sound__model_loaded="on: model-loaded;"
+              sound__image_loaded="src: #sound_asset-media_loaded; on: nothing; poolSize: 2;"
+              scene-sound__image_loaded="on: image-loaded;"
+              sound__hud_action_mute="src: #sound_asset-toggle_mute; on: nothing; poolSize: 2;"
+              scene-sound__hud_action_mute="on: action_mute;"
+              sound__hud_action_freeze="src: #sound_asset-toggle_freeze; on: nothing; poolSize: 2;"
+              scene-sound__hud_action_freeze="on: action_freeze;"
+              sound__hud_action_space_bubble="src: #sound_asset-toggle_space_bubble; on: nothing; poolSize: 2;"
+              scene-sound__hud_action_space_bubble="on: action_space_bubble;"
+              sound__hud_spawn_pen="src: #sound_asset-spawn_pen; on: nothing; poolSize: 2;"
+              scene-sound__hud_spawn_pen="on: spawn_pen;"
+              sound__hud_mouseover="src: #sound_asset-hud_mouseover; on: nothing; poolSize: 1;"
+              scene-sound__hud_mouseover="on: play_sound-hud_mouse_enter;"
+              sound__hud_mouseout="src: #sound_asset-hud_mouseout; on: nothing; poolSize: 1;"
+              scene-sound__hud_mouseout="on: play_sound-hud_mouse_leave;"
+              sound__hud_click="src: #sound_asset-hud_click; on: nothing; poolSize: 1;"
+              scene-sound__hud_click="on: hud_click;"
+              sound__cursor_distance_changed="src: #sound_asset-cursor_distance_changed; on: nothing; poolSize: 1;"
+              scene-sound__cursor_distance_changed="on: cursor-distance-changed;"
+              sound__cursor_distance_change_blocked="src: #sound_asset-cursor_distance_change_blocked; on: nothing; poolSize: 1;"
+              scene-sound__cursor_distance_change_blocked="on: cursor-distance-change-blocked;"
+              sound__camera_tool_took_snapshot="src: #sound_asset-camera_tool_took_snapshot; on: nothing; poolSize: 1;"
+              scene-sound__camera_tool_took_snapshot="on: camera_tool_took_snapshot;"
           >
             <a-entity
                 id="gaze-teleport"

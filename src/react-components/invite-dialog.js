@@ -4,6 +4,7 @@ import copy from "copy-to-clipboard";
 import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
 
+import { AudioContext } from "../AudioContext";
 import styles from "../assets/stylesheets/invite-dialog.scss";
 
 function pad(num, size) {
@@ -45,43 +46,72 @@ export default class InviteDialog extends Component {
     const shareLink = `hub.link/${entryCodeString}`;
 
     return (
-      <div className={styles.dialog}>
-        <div className={styles.attachPoint} />
-        <div className={styles.close} onClick={() => this.props.onClose()}>
-          <span>×</span>
-        </div>
-        <div>
-          <FormattedMessage id="invite.enter_via" />
-          <a href="https://hub.link" target="_blank" className={styles.hubLinkLink} rel="noopener noreferrer">
-            hub.link
-          </a>
-          <FormattedMessage id="invite.and_enter_code" />
-        </div>
-        <div className={styles.code}>
-          {entryCodeString.split("").map((d, i) => (
-            <div className={classNames({ [styles.digit]: true, [styles[`digit_${i}`]]: true })} key={`link_code_${i}`}>
-              {d}
+      <AudioContext.Consumer>
+        {audio => (
+          <div className={styles.dialog}>
+            <div className={styles.attachPoint} />
+            <div
+              className={styles.close}
+              onClick={() => this.props.onClose()}
+              onMouseEnter={audio.onMouseEnter}
+              onMouseLeave={audio.onMouseLeave}
+            >
+              <span>×</span>
             </div>
-          ))}
-        </div>
-        <div>
-          <FormattedMessage id="invite.or_visit" />
-        </div>
-        <div className={styles.domain}>
-          <input type="text" readOnly onFocus={e => e.target.select()} value={shareLink} />
-        </div>
-        <div className={styles.buttons}>
-          <button className={styles.linkButton} onClick={this.copyClicked.bind(this, "https://" + shareLink)}>
-            <span>{this.state.copyButtonActive ? "copied!" : "copy"}</span>
-          </button>
-          {this.props.allowShare &&
-            navigator.share && (
-              <button className={styles.linkButton} onClick={this.shareClicked.bind(this, "https://" + shareLink)}>
-                <span>{this.state.shareButtonActive ? "sharing..." : "share"}</span>
+            <div>
+              <FormattedMessage id="invite.enter_via" />
+              <a
+                href="https://hub.link"
+                target="_blank"
+                className={styles.hubLinkLink}
+                rel="noopener noreferrer"
+                onMouseEnter={audio.onMouseEnter}
+                onMouseLeave={audio.onMouseLeave}
+              >
+                hub.link
+              </a>
+              <FormattedMessage id="invite.and_enter_code" />
+            </div>
+            <div className={styles.code}>
+              {entryCodeString.split("").map((d, i) => (
+                <div
+                  className={classNames({ [styles.digit]: true, [styles[`digit_${i}`]]: true })}
+                  key={`link_code_${i}`}
+                >
+                  {d}
+                </div>
+              ))}
+            </div>
+            <div>
+              <FormattedMessage id="invite.or_visit" />
+            </div>
+            <div className={styles.domain}>
+              <input type="text" readOnly onFocus={e => e.target.select()} value={shareLink} />
+            </div>
+            <div className={styles.buttons}>
+              <button
+                className={styles.linkButton}
+                onClick={this.copyClicked.bind(this, "https://" + shareLink)}
+                onMouseEnter={audio.onMouseEnter}
+                onMouseLeave={audio.onMouseLeave}
+              >
+                <span>{this.state.copyButtonActive ? "copied!" : "copy"}</span>
               </button>
-            )}
-        </div>
-      </div>
+              {this.props.allowShare &&
+                navigator.share && (
+                  <button
+                    className={styles.linkButton}
+                    onClick={this.shareClicked.bind(this, "https://" + shareLink)}
+                    onMouseEnter={audio.onMouseEnter}
+                    onMouseLeave={audio.onMouseLeave}
+                  >
+                    <span>{this.state.shareButtonActive ? "sharing..." : "share"}</span>
+                  </button>
+                )}
+            </div>
+          </div>
+        )}
+      </AudioContext.Consumer>
     );
   }
 }

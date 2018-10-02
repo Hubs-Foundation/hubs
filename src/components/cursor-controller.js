@@ -229,10 +229,12 @@ AFRAME.registerComponent("cursor-controller", {
     const targetDistanceMod = this.currentDistanceMod + delta;
     const moddedDistance = this.currentDistance - targetDistanceMod;
     if (moddedDistance > far || moddedDistance < near) {
+      this.el.emit("cursor-distance-change-blocked");
       return false;
     }
 
     this.currentDistanceMod = targetDistanceMod;
+    this.el.emit("cursor-distance-changed");
     return true;
   },
 
