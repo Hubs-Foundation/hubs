@@ -255,6 +255,8 @@ export default class SceneEntryManager {
   };
 
   _runBot = async mediaStream => {
+    console.log("Running bot");
+
     this.playerRig.setAttribute("avatar-replay", {
       camera: "#player-camera",
       leftController: "#player-left-controller",

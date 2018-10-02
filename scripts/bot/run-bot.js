@@ -37,7 +37,7 @@ function log(...objs) {
   };
   const roomOption = options["--room"];
   if (roomOption) {
-    params.room = roomOption;
+    params.hub_id = roomOption;
   }
 
   const url = `${baseUrl}?${querystring.stringify(params)}`;

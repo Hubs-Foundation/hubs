@@ -273,10 +273,6 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
 
         hubChannel.channel.push("naf", payload);
       };
-
-      if (isBotMode) {
-        entryManager.enterSceneWhenLoaded(new MediaStream(), false);
-      }
     })
     .catch(connectError => {
       // hacky until we get return codes
@@ -287,6 +283,14 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
 
       return;
     });
+}
+
+async function runBotMode(scene, entryManager) {
+  const noop = () => {};
+  scene.renderer = { setAnimationLoop: noop, render: noop };
+
+  while (!NAF.connection.isConnected()) await nextTick();
+  entryManager.enterSceneWhenLoaded(new MediaStream(), false);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -354,8 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Replace renderer with a noop renderer to reduce bot resource usage.
     if (isBotMode) {
-      const noop = () => {};
-      scene.renderer = { setAnimationLoop: noop, render: noop };
+      runBotMode(scene, entryManager);
     }
   });
 
