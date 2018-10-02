@@ -20,7 +20,6 @@ export default class HelpDialog extends Component {
           </p>
           <p>
             The <b>Pause/Resume Toggle</b> pauses all other avatars and lets you block others or remove objects.
-            interactions with you.
           </p>
           <p className="dialog__box__contents__links">
             <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">

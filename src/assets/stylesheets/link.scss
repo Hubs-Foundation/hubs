@@ -8,12 +8,12 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: black;
-  color: white;
+  background-color: white;
+  color: black;
 }
 
 a {
-  color: white;
+  color: black;
 }
 
 .link-root {
@@ -27,6 +27,29 @@ a {
   position: absolute;
 }
 
+:local(.logo) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+
+  img {
+    width: 247px;
+    height: 57px;
+  }
+
+  @media(max-height: 600px) {
+    display: none;
+  }
+
+  @media(max-width: 690px) {
+    display: none;
+  }
+}
+
 :local(.link) {
   display: flex;
   align-items: center;
@@ -38,9 +61,9 @@ a {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
-  color: $grey-text;
-  font-size: 1.4em;
+  color: black;
+  font-weight: bold;
+  font-size: 1.2em;
 
   @media (max-width: 690px) {
     flex-direction: column;
@@ -88,7 +111,6 @@ a {
 }
 
 :local(.header) {
-  margin: 16px;
   text-align: center;
 }
 
@@ -111,32 +133,40 @@ a {
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr 1fr;
   text-align: center;
+  background-color: #f7f7f7;
+  border-radius: 24px;
+  padding: 12px;
 }
 
 :local(.keypad-button) {
   @extend %big-icon-button;
-  font-size: 1.8em;
-  font-family: sans-serif;
-  border: 4px $light-grey solid;
+  @extend %default-font;
+  font-weight: bold;
+  color: $action-color;
+  font-size: 1.4em;
   border-radius: 128px;
+  box-shadow: 0px 2px 12px #ccc;
   min-width: 80px;
   min-height: 80px;
   cursor: pointer;
   line-height: 68px;
   margin: 8px;
+  background: white;
 }
 
 :local(.keypad-button):active {
-  background-color: $darker-grey;
+  background-color: $light-grey;
 }
 
 :local(.keypad-button):disabled {
   color: $light-grey;
-  border: 6px $dark-grey solid;
 }
 
 :local(.keypad-backspace) , :local(.keypad-backspace):disabled , :local(.keypad-backspace):active, :local(.keypad-toggle-mode), :local(.keypad-toggle-mode):disabled, :local(.keypad-toggle-mode):active {
   border: none;
+  background: transparent;
+  box-shadow: none;
+  color: black;
 }
 
 :local(.keypad-backspace) {
@@ -153,12 +183,12 @@ a {
 }
 
 :local(.entered) {
-  font-family: monospace;
+  @extend %default-font;
   height: 100px;
   width: 300px;
   text-align: center;
-  font-size: 3.0em;
-  color: white;
+  font-size: 2.0em;
+  color: black;
   display: flex;
   justify-content: center;
 }
@@ -168,12 +198,13 @@ a {
 }
 
 :local(.char-input) {
+  @extend %default-font;
+  font-weight: bold;
   outline-style: none;
   appearance:textfield;
   -moz-appearance:textfield;
   -webkit-appearance:textfield;
   background: transparent;
-  color: white;
   margin: 0;
   font-size: 52pt;
   border: 0;
@@ -189,7 +220,7 @@ a {
 :local(.headset-icon) {
   width: 64px;
   height: 64px;
-  background-color: white;
+  background-color: #333;
   border-radius: 32px;
   margin-bottom: 8px;
   padding-right: 2px;
@@ -203,7 +234,6 @@ a {
   img {
     width: 32px;
     height: 32px;
-    background-color: white;
     border-radius: 32px;
     margin-bottom: 8px;
     margin-right: 16px;

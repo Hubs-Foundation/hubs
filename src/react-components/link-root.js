@@ -7,7 +7,7 @@ import { lang, messages } from "../utils/i18n";
 import classNames from "classnames";
 import styles from "../assets/stylesheets/link.scss";
 import { disableiOSZoom } from "../utils/disable-ios-zoom";
-import LinkDialogHeader from "../assets/images/link_dialog_header.svg";
+import HeadsetIcon from "../assets/images/generic_vr_entry.svg";
 
 const MAX_DIGITS = 6;
 const MAX_LETTERS = 4;
@@ -136,6 +136,9 @@ class LinkRoot extends Component {
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.link}>
           <div className={styles.linkContents}>
+            <div className={styles.logo}>
+              <img src="../assets/images/hub-preview-light-no-shadow.png" />
+            </div>
             {this.state.entered.length === this.maxAllowedChars() && (
               <div className={classNames("loading-panel", styles.codeLoadingPanel)}>
                 <div className="loader-wrap">
@@ -172,7 +175,7 @@ class LinkRoot extends Component {
 
               <div className={styles.enteredFooter}>
                 {!this.state.isAlphaMode && (
-                  <img onClick={() => this.toggleMode()} src={LinkDialogHeader} className={styles.headsetIcon} />
+                  <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
                 )}
                 {!this.state.isAlphaMode && (
                   <span>
@@ -181,7 +184,6 @@ class LinkRoot extends Component {
                     </a>
                   </span>
                 )}
-                <img className={styles.entryFooterImage} src="../assets/images/logo.svg" />
               </div>
             </div>
 
@@ -226,7 +228,7 @@ class LinkRoot extends Component {
             <div className={styles.footer}>
               {!this.state.isAlphaMode && (
                 <div className={styles.linkHeadsetFooterLink}>
-                  <img onClick={() => this.toggleMode()} src={LinkDialogHeader} className={styles.headsetIcon} />
+                  <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
                   <span>
                     <a href="#" onClick={() => this.toggleMode()}>
                       <FormattedMessage id="link.linking_a_headset" />
@@ -234,7 +236,6 @@ class LinkRoot extends Component {
                   </span>
                 </div>
               )}
-              <img className={styles.footerImage} src="../assets/images/logo.svg" alt="Logo" />
             </div>
           </div>
         </div>
