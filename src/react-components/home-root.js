@@ -6,6 +6,8 @@ import en from "react-intl/locale-data/en";
 import { lang, messages } from "../utils/i18n";
 import homeVideoWebM from "../assets/video/home.webm";
 import homeVideoMp4 from "../assets/video/home.mp4";
+import hubLogo from "../assets/images/hub-preview-white.png";
+import mozLogo from "../assets/images/moz-logo-black.png";
 import classNames from "classnames";
 import { ENVIRONMENT_URLS } from "../assets/environments/environments";
 import { connectToReticulum } from "../utils/phoenix-utils";
@@ -182,18 +184,16 @@ class HomeRoot extends Component {
         <div className={styles.home}>
           <div className={mainContentClassNames}>
             <div className={styles.headerContent}>
-              <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
-                <div className={styles.hubs}>hubs</div>
-                <div className={styles.preview}>preview</div>
+              <div className={styles.titleAndNav}>
                 <div className={styles.links}>
-                  <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
-                    <FormattedMessage id="home.source_link" />
-                  </a>
                   <a
                     href="https://blog.mozvr.com/introducing-hubs-a-new-way-to-get-together-online/"
                     rel="noreferrer noopener"
                   >
                     <FormattedMessage id="home.about_link" />
+                  </a>
+                  <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
+                    <FormattedMessage id="home.source_link" />
                   </a>
                 </div>
               </div>
@@ -211,20 +211,21 @@ class HomeRoot extends Component {
                 </a>
               </div>
               <div className={styles.container}>
+                <img className={styles.logo} src={hubLogo} />
                 <div className={styles.title}>
                   <FormattedMessage id="home.hero_title" />
                 </div>
-                <div className={styles.subtitle}>
-                  <FormattedMessage id="home.hero_subtitle" />
-                </div>
               </div>
               <div className={styles.create}>
-                {this.state.environments.length > 0 && (
-                  <HubCreatePanel
-                    initialEnvironment={this.props.initialEnvironment}
-                    environments={this.state.environments}
-                  />
-                )}
+                <HubCreatePanel
+                  initialEnvironment={this.props.initialEnvironment}
+                  environments={this.state.environments}
+                />
+              </div>
+              <div className={styles.joinButton}>
+                <a href="/link">
+                  <FormattedMessage id="home.join_room" />
+                </a>
               </div>
             </div>
             <div className={styles.footerContent}>
@@ -270,12 +271,8 @@ class HomeRoot extends Component {
                   >
                     <FormattedMessage id="home.privacy_notice" />
                   </a>
-                </div>
-                <div className={styles.bottom}>
-                  <div>
-                    <FormattedMessage id="home.made_with_love" />
-                    <span style={{ fontWeight: "bold", color: "white" }}>Mozilla</span>
-                  </div>
+
+                  <img className={styles.mozLogo} src={mozLogo} />
                 </div>
               </div>
             </div>

@@ -9,7 +9,7 @@ $light-grey: lightgrey;
 $dark-grey: rgba(128, 128, 128, 1.0);
 $darker-grey: rgba(64, 64, 64, 1.0);
 $darkest-grey: rgba(32, 32, 32, 1.0);
-$action-color: #2F80ED;
+$action-color: #FF3464;
 
 %unselectable {
   -moz-user-select: none;
@@ -19,11 +19,11 @@ $action-color: #2F80ED;
 }
 
 %default-font {
-  font-family: 'Zilla Slab', sans-serif;
+  font-family: 'Open Sans', sans-serif;
 }
 
 %glass-text {
-  font-family: 'Zilla Slab', sans-serif;
+  font-family: 'Open Sans', sans-serif;
   text-shadow: 0px 0px 4px rgba(0, 0, 0, 1.0);
   color: white; 
 }
@@ -48,13 +48,21 @@ $action-color: #2F80ED;
 %big-action-button {
   @extend %default-font;
   outline-style: none;
-  font-size: 2em;
+  font-size: 18px;
   font-weight: bold;
   cursor: pointer;
-  border: 3px solid white;
-  border-radius: 26px;
-  padding: 12px 64px 12px 64px;
-  background: #2F80ED;
+  border-radius: 32px;
+  border: 0;
+  width: 350px;
+  padding: 18px;
+  text-decoration: none;
+
+  @media (max-width: 768px) {
+    width: auto;
+    padding: 18px 48px;
+  }
+
+  background: #FF3464;
   color: white;
   display: flex;
   align-items: center;
@@ -80,15 +88,16 @@ $action-color: #2F80ED;
 
 %action-button {
   @extend %default-font;
+  text-decoration: none;
   outline-style: none;
   font-weight: bold;
   cursor: pointer;
   border: 0;
   border-radius: 26px;
-  height: 64px;
-  padding: 12px;
-  background: #2F80ED;
-  font-size: 1.3em;
+  padding: 18px 18px;
+
+  background: #FF3464;
+  font-size: 1em;
   color: white;
   display: flex;
   align-items: center;
@@ -104,7 +113,7 @@ $action-color: #2F80ED;
 
 %bottom-action-button {
   @extend %bottom-button;
-  background: #2F80ED;
+  background: #FF3464;
   font-size: 1.3em;
 }
 

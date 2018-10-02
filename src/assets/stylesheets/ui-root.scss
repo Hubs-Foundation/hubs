@@ -32,10 +32,6 @@
   }
 }
 
-.blurred {
-  filter: blur(5px) saturate(1.1) brightness(1.1);
-}
-
 :local(.ui-dialog) {
   position: absolute;
   top: 0;
