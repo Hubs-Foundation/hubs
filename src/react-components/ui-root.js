@@ -74,7 +74,6 @@ class UIRoot extends Component {
     scene: PropTypes.object,
     hubChannel: PropTypes.object,
     hubEntryCode: PropTypes.number,
-    showProfileEntry: PropTypes.bool,
     availableVREntryTypes: PropTypes.object,
     environmentSceneLoaded: PropTypes.bool,
     roomUnavailableReason: PropTypes.string,
@@ -120,11 +119,6 @@ class UIRoot extends Component {
     showProfileEntry: false
   };
 
-  constructor(props) {
-    super(props);
-    this.state.showProfileEntry = this.props.showProfileEntry;
-  }
-
   componentDidMount() {
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
     this.micLevelMovingAverage = MovingAverage(100);
@@ -138,8 +132,6 @@ class UIRoot extends Component {
     this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
     this.props.scene.removeEventListener("exit", this.exit);
   }
-
-  componentDidUpdate(prevProps) {}
 
   onSceneLoaded = () => {
     this.setState({ sceneLoaded: true });
@@ -170,6 +162,12 @@ class UIRoot extends Component {
   };
 
   handleStartEntry = () => {
+    const promptForNameAndAvatarBeforeEntry = !this.props.store.state.activity.hasChangedName;
+
+    if (promptForNameAndAvatarBeforeEntry) {
+      this.setState({ showProfileEntry: true });
+    }
+
     if (!this.props.forcedVREntryType) {
       this.setState({ entryStep: ENTRY_STEPS.device });
     } else if (this.props.forcedVREntryType.startsWith("daydream")) {

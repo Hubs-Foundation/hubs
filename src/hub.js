@@ -196,7 +196,6 @@ function mountUI(props = {}) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
-  const showProfileEntry = !store.state.activity.hasChangedName;
 
   ReactDOM.render(
     <UIRoot
@@ -208,7 +207,6 @@ function mountUI(props = {}) {
         forcedVREntryType,
         enableScreenSharing,
         store,
-        showProfileEntry,
         ...props
       }}
     />,
@@ -298,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.APP.scene = scene;
 
   registerNetworkSchemas();
-  remountUI({ hubChannel, linkChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
+  remountUI({ hubChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 
