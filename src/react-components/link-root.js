@@ -7,11 +7,14 @@ import { lang, messages } from "../utils/i18n";
 import classNames from "classnames";
 import styles from "../assets/stylesheets/link.scss";
 import { disableiOSZoom } from "../utils/disable-ios-zoom";
+import HeadsetIcon from "../assets/images/generic_vr_entry.svg";
 
-const MAX_DIGITS = 4;
+const MAX_DIGITS = 6;
+const MAX_LETTERS = 4;
 
 addLocaleData([...en]);
 disableiOSZoom();
+const hasTouchEvents = "ontouchstart" in document.documentElement;
 
 class LinkRoot extends Component {
   static propTypes = {
@@ -21,7 +24,8 @@ class LinkRoot extends Component {
   };
 
   state = {
-    enteredDigits: "",
+    entered: "",
+    isAlphaMode: false,
     failedAtLeastOnce: false
   };
 
@@ -35,34 +39,47 @@ class LinkRoot extends Component {
 
   handleKeyDown = e => {
     // Number keys 0-9
-    if (e.keyCode < 48 || e.keyCode > 57) {
+    if ((e.keyCode < 48 || e.keyCode > 57) && !this.state.isAlphaMode) {
+      return;
+    }
+
+    // Alpha keys A-I
+    if ((e.keyCode < 65 || e.keyCode > 73) && this.state.isAlphaMode) {
       return;
     }
 
     e.preventDefault();
     e.stopPropagation();
 
-    this.addDigit(e.keyCode - 48);
+    if (this.state.isAlphaMode) {
+      this.addToEntry("IHGFEDCBA"[73 - e.keyCode]);
+    } else {
+      this.addToEntry(e.keyCode - 48);
+    }
   };
 
-  addDigit = digit => {
-    if (this.state.enteredDigits.length >= MAX_DIGITS) return;
-    const newDigits = `${this.state.enteredDigits}${digit}`;
+  maxAllowedChars = () => {
+    return this.state.isAlphaMode ? MAX_LETTERS : MAX_DIGITS;
+  };
 
-    if (newDigits.length === MAX_DIGITS) {
-      this.attemptLink(newDigits);
+  addToEntry = ch => {
+    if (this.state.entered.length >= this.maxAllowedChars()) return;
+    const newChars = `${this.state.entered}${ch}`;
+
+    if (newChars.length === this.maxAllowedChars()) {
+      this.attemptLookup(newChars);
     }
 
-    this.setState({ enteredDigits: newDigits });
+    this.setState({ entered: newChars });
   };
 
-  removeDigit = () => {
-    const enteredDigits = this.state.enteredDigits;
-    if (enteredDigits.length === 0) return;
-    this.setState({ enteredDigits: enteredDigits.substring(0, enteredDigits.length - 1) });
+  removeChar = () => {
+    const entered = this.state.entered;
+    if (entered.length === 0) return;
+    this.setState({ entered: entered.substring(0, entered.length - 1) });
   };
 
-  attemptLink = code => {
+  attemptLink = async code => {
     this.props.linkChannel
       .attemptLink(code)
       .then(response => {
@@ -80,12 +97,37 @@ class LinkRoot extends Component {
         }
       })
       .catch(e => {
-        this.setState({ failedAtLeastOnce: true, enteredDigits: "" });
+        this.setState({ failedAtLeastOnce: true, entered: "" });
 
         if (!(e instanceof Error && (e.message === "in_use" || e.message === "failed"))) {
           throw e;
         }
       });
+  };
+
+  attemptEntry = async code => {
+    const url = "https://hub.link/" + code;
+    const res = await fetch(url);
+
+    if (res.status >= 400) {
+      this.setState({ failedAtLeastOnce: true, entered: "" });
+    } else {
+      document.location = url;
+    }
+  };
+
+  attemptLookup = async code => {
+    if (this.state.isAlphaMode) {
+      // Headset link code
+      this.attemptLink(code);
+    } else {
+      // Room entry code
+      this.attemptEntry(code);
+    }
+  };
+
+  toggleMode = () => {
+    this.setState({ isAlphaMode: !this.state.isAlphaMode, entered: "", failedAtLeastOnce: false });
   };
 
   render() {
@@ -95,7 +137,10 @@ class LinkRoot extends Component {
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.link}>
           <div className={styles.linkContents}>
-            {this.state.enteredDigits.length === MAX_DIGITS && (
+            <div className={styles.logo}>
+              <img src="../assets/images/hub-preview-light-no-shadow.png" />
+            </div>
+            {this.state.entered.length === this.maxAllowedChars() && (
               <div className={classNames("loading-panel", styles.codeLoadingPanel)}>
                 <div className="loader-wrap">
                   <div className="loader">
@@ -107,72 +152,108 @@ class LinkRoot extends Component {
 
             <div className={styles.enteredContents}>
               <div className={styles.header}>
-                <FormattedMessage id={this.state.failedAtLeastOnce ? "link.try_again" : "link.link_page_header"} />
+                <FormattedMessage
+                  id={
+                    this.state.failedAtLeastOnce
+                      ? "link.try_again"
+                      : "link.link_page_header_" + (!this.state.isAlphaMode ? "entry" : "headset")
+                  }
+                />
               </div>
 
-              <div className={styles.enteredDigits}>
+              <div className={styles.entered}>
                 <input
-                  className={styles.digitInput}
-                  type="tel"
-                  pattern="[0-9]*"
-                  value={this.state.enteredDigits}
+                  className={styles.charInput}
+                  type={this.state.isAlphaMode ? "text" : "tel"}
+                  pattern="[0-9A-I]*"
+                  value={this.state.entered}
                   onChange={ev => {
-                    this.setState({ enteredDigits: ev.target.value });
+                    if (!this.state.isAlphaMode && ev.target.value.match(/[a-z]/i)) {
+                      this.setState({ isAlphaMode: true });
+                    }
+
+                    this.setState({ entered: ev.target.value.toUpperCase() });
                   }}
-                  placeholder="- - - -"
+                  placeholder={this.state.isAlphaMode ? "- - - -" : "- - - - - -"}
                 />
               </div>
 
               <div className={styles.enteredFooter}>
-                <span>
-                  <FormattedMessage id="link.dont_have_a_code" />
-                </span>{" "}
-                <span>
-                  <a href="/">
-                    <FormattedMessage id="link.create_a_room" />
-                  </a>
-                </span>
-                <img className={styles.entryFooterImage} src="../assets/images/logo.svg" />
+                {!this.state.isAlphaMode && (
+                  <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
+                )}
+                {!this.state.isAlphaMode && (
+                  <span>
+                    <a href="#" onClick={() => this.toggleMode()}>
+                      <FormattedMessage id="link.linking_a_headset" />
+                    </a>
+                  </span>
+                )}
               </div>
             </div>
 
             <div className={styles.keypad}>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d, i) => (
+              {(this.state.isAlphaMode
+                ? ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
+                : [1, 2, 3, 4, 5, 6, 7, 8, 9]
+              ).map((d, i) => (
                 <button
-                  disabled={this.state.enteredDigits.length === MAX_DIGITS}
-                  key={`digit_${i}`}
+                  disabled={this.state.entered.length === this.maxAllowedChars()}
+                  key={`char_${i}`}
                   className={styles.keypadButton}
-                  onClick={() => this.addDigit(d)}
+                  onClick={() => {
+                    if (!hasTouchEvents) this.addToEntry(d);
+                  }}
+                  onTouchStart={() => this.addToEntry(d)}
                 >
                   {d}
                 </button>
               ))}
               <button
-                disabled={this.state.enteredDigits.length === MAX_DIGITS}
-                className={classNames(styles.keypadButton, styles.keypadZeroButton)}
-                onClick={() => this.addDigit(0)}
+                className={classNames(styles.keypadButton, styles.keypadToggleMode)}
+                onTouchStart={() => this.toggleMode()}
+                onClick={() => {
+                  if (!hasTouchEvents) this.toggleMode();
+                }}
               >
-                0
+                {this.state.isAlphaMode ? "123" : "ABC"}
               </button>
+              {!this.state.isAlphaMode && (
+                <button
+                  disabled={this.state.entered.length === this.maxAllowedChars()}
+                  className={classNames(styles.keypadButton, styles.keypadZeroButton)}
+                  onTouchStart={() => this.addToEntry(0)}
+                  onClick={() => {
+                    if (!hasTouchEvents) this.addToEntry(0);
+                  }}
+                >
+                  0
+                </button>
+              )}
               <button
-                disabled={this.state.enteredDigits.length === 0 || this.state.enteredDigits.length === MAX_DIGITS}
+                disabled={this.state.entered.length === 0 || this.state.entered.length === this.maxAllowedChars()}
                 className={classNames(styles.keypadButton, styles.keypadBackspace)}
-                onClick={() => this.removeDigit()}
+                onTouchStart={() => this.removeChar()}
+                onClick={() => {
+                  if (!hasTouchEvents) this.removeChar();
+                }}
               >
                 ⌫
               </button>
             </div>
 
             <div className={styles.footer}>
-              <span>
-                <FormattedMessage id="link.dont_have_a_code" />
-              </span>{" "}
-              <span>
-                <a href="/">
-                  <FormattedMessage id="link.create_a_room" />
-                </a>
-              </span>
-              <img className={styles.footerImage} src="../assets/images/logo.svg" alt="Logo" />
+              <div
+                className={styles.linkHeadsetFooterLink}
+                style={{ visibility: this.state.isAlphaMode ? "hidden" : "visible" }}
+              >
+                <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
+                <span>
+                  <a href="#" onClick={() => this.toggleMode()}>
+                    <FormattedMessage id="link.linking_a_headset" />
+                  </a>
+                </span>
+              </div>
             </div>
           </div>
         </div>

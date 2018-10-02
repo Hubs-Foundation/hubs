@@ -7,9 +7,12 @@ function lerp(start, end, t) {
   return (1 - t) * start + t * end;
 }
 
-const DURATION = 90.0;
-
 AFRAME.registerComponent("scene-preview-camera", {
+  schema: {
+    duration: { default: 90, type: "number" },
+    positionOnly: { default: false, type: "boolean" }
+  },
+
   init: function() {
     this.startPoint = this.el.object3D.position.clone();
     this.startRotation = new THREE.Quaternion();
@@ -26,10 +29,17 @@ AFRAME.registerComponent("scene-preview-camera", {
 
     this.startTime = new Date().getTime();
     this.backwards = false;
+    this.ranOnePass = false;
   },
 
   tick: function() {
-    const t = (new Date().getTime() - this.startTime) / (1000.0 * DURATION);
+    let t = (new Date().getTime() - this.startTime) / (1000.0 * this.data.duration);
+
+    if (!this.ranOnePass) {
+      t = t * (2 - t);
+    } else {
+      t = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
 
     const from = this.backwards ? this.targetPoint : this.startPoint;
     const to = this.backwards ? this.startPoint : this.targetPoint;
@@ -40,9 +50,13 @@ AFRAME.registerComponent("scene-preview-camera", {
     THREE.Quaternion.slerp(fromRot, toRot, newRot, t);
 
     this.el.object3D.position.set(lerp(from.x, to.x, t), lerp(from.y, to.y, t), lerp(from.z, to.z, t));
-    this.el.object3D.rotation.setFromQuaternion(newRot);
 
-    if (t >= 0.99) {
+    if (!this.data.positionOnly) {
+      this.el.object3D.rotation.setFromQuaternion(newRot);
+    }
+
+    if (t >= 0.9999) {
+      this.ranOnePass = true;
       this.backwards = !this.backwards;
       this.startTime = new Date().getTime();
     }
