@@ -21,6 +21,7 @@
     </audio>
 
     <a-scene
+        class="grab-cursor"
         renderer="antialias: true; gammaOutput: true; sortObjects: true; physicallyCorrectLights: true;"
         gamma-factor
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
@@ -30,6 +31,7 @@
         personal-space-bubble="debug: false;"
         vr-mode-ui="enabled: false"
         pinch-to-move
+        stats-plus="false"
         input-configurator="
                   gazeCursorRayObject: #player-camera;
                   cursorController: #cursor-controller;

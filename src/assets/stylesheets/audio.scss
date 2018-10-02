@@ -5,6 +5,7 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
+  margin: 24px;
   
   &__enter-button-container {
     flex: 1;
@@ -14,6 +15,7 @@
   }
   &__enter-button {
     @extend %bottom-action-button;
+    @extend %wide-button;
   }
 
   &__title {
@@ -110,6 +112,7 @@
   justify-content: flex-start;
   align-items: center;
   overflow-y: auto;
+  margin: 24px;
 
   &__grant-container {
     flex: 1;
@@ -153,6 +156,7 @@
 
   &__next {
     @extend %bottom-button;
+    @extend %wide-button;
     flex: 1 1;
   }
 

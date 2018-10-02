@@ -73,7 +73,6 @@ import ReactDOM from "react-dom";
 import React from "react";
 import UIRoot from "./react-components/ui-root";
 import HubChannel from "./utils/hub-channel";
-import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { resolveMedia } from "./utils/media-utils";
@@ -197,7 +196,6 @@ function mountUI(props = {}) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
-  const showProfileEntry = !store.state.activity.hasChangedName;
 
   ReactDOM.render(
     <UIRoot
@@ -209,7 +207,6 @@ function mountUI(props = {}) {
         forcedVREntryType,
         enableScreenSharing,
         store,
-        showProfileEntry,
         ...props
       }}
     />,
@@ -252,7 +249,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
     environmentScene.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
   }
 
-  remountUI({ hubId: hub.hub_id, hubName: hub.name });
+  remountUI({ hubId: hub.hub_id, hubName: hub.name, hubEntryCode: hub.entry_code });
 
   scene.setAttribute("networked-scene", {
     room: hub.hub_id,
@@ -294,12 +291,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
   const entryManager = new SceneEntryManager(hubChannel);
-  const linkChannel = new LinkChannel(store);
+  entryManager.init();
 
   window.APP.scene = scene;
 
   registerNetworkSchemas();
-  remountUI({ hubChannel, linkChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
+  remountUI({ hubChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 
@@ -384,6 +381,4 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!NAF.connection.adapter) return;
     NAF.connection.adapter.onData(data);
   });
-
-  linkChannel.setSocket(socket);
 });

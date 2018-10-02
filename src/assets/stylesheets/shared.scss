@@ -3,11 +3,13 @@ $dark-transparent: rgba(0, 0, 0, 0.4);
 $darker-transparent: rgba(0, 0, 0, 0.6);
 $darkest-transparent: rgba(0, 0, 0, 0.9);
 $grey-text: rgba(192, 192, 192, 1.0);
+$dark-grey-text: rgba(64, 64, 64, 1.0);
 $light-text: rgba(240, 240, 240, 1.0);
 $light-grey: lightgrey;
 $dark-grey: rgba(128, 128, 128, 1.0);
 $darker-grey: rgba(64, 64, 64, 1.0);
 $darkest-grey: rgba(32, 32, 32, 1.0);
+$action-color: #2F80ED;
 
 %unselectable {
   -moz-user-select: none;
@@ -37,6 +39,12 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
   border-radius: 14px;
 }
 
+%form-field-on-white {
+  border: 1px solid #e2e2e2;
+  background-color: white;
+  border-radius: 10px;
+}
+
 %big-action-button {
   @extend %default-font;
   outline-style: none;
@@ -62,12 +70,20 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
   margin: 16px 0;
 }
 
+%wide-button {
+  width: 350px;
+
+  @media (max-width: 768px) {
+    width: 327px;
+  }
+}
+
 %action-button {
   @extend %default-font;
   outline-style: none;
   font-weight: bold;
   cursor: pointer;
-  border: 3px solid white;
+  border: 0;
   border-radius: 26px;
   height: 64px;
   padding: 12px;
@@ -81,6 +97,11 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
   min-width: 150px;
 }
 
+%action-button-selected {
+  background: white;
+  color: $action-color;
+}
+
 %bottom-action-button {
   @extend %bottom-button;
   background: #2F80ED;
@@ -88,7 +109,7 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
 }
 
 %top-title {
-  font-size: 1.3em;
+  font-size: 1.4em;
   font-weight: bold;
 }
 
@@ -124,6 +145,11 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
   border: 9px double white;
   outline: 9px solid white;
   outline-offset: -18px;
+}
+
+%background-agnostic {
+  color: black;
+  text-shadow: 0px 0px 10px #888;
 }
 
 %fa-icon-button {

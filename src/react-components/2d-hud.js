@@ -3,10 +3,12 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 
 import styles from "../assets/stylesheets/2d-hud.scss";
+import uiStyles from "../assets/stylesheets/ui-root.scss";
 
 const TopHUD = ({ muted, frozen, onToggleMute, onToggleFreeze, onSpawnPen, onSpawnCamera }) => (
   <div className={cx(styles.container, styles.top, styles.unselectable)}>
-    <div className={cx("ui-interactive", styles.panel, styles.left)}>
+    <div className={cx(uiStyles.uiInteractive, styles.panel, styles.left)}>
+      <div className={cx(styles.iconButton)} />
       <div
         className={cx(styles.iconButton, styles.mute, { [styles.active]: muted })}
         title={muted ? "Unmute Mic" : "Mute Mic"}
@@ -14,11 +16,13 @@ const TopHUD = ({ muted, frozen, onToggleMute, onToggleFreeze, onSpawnPen, onSpa
       />
     </div>
     <div
-      className={cx("ui-interactive", styles.iconButton, styles.large, styles.freeze, { [styles.active]: frozen })}
+      className={cx(uiStyles.uiInteractive, styles.iconButton, styles.large, styles.freeze, {
+        [styles.active]: frozen
+      })}
       title={frozen ? "Resume" : "Pause"}
       onClick={onToggleFreeze}
     />
-    <div className={cx("ui-interactive", styles.panel, styles.right)}>
+    <div className={cx(uiStyles.uiInteractive, styles.panel, styles.right)}>
       <div className={cx(styles.iconButton, styles.spawn_pen)} title={"Drawing Pen"} onClick={onSpawnPen} />
       <div className={cx(styles.iconButton, styles.spawn_camera)} title={"Camera"} onClick={onSpawnCamera} />
     </div>
@@ -37,7 +41,7 @@ TopHUD.propTypes = {
 const BottomHUD = ({ onCreateObject, showPhotoPicker, onMediaPicked }) => (
   <div className={cx(styles.container, styles.column, styles.bottom, styles.unselectable)}>
     {showPhotoPicker ? (
-      <div className={cx("ui-interactive", styles.panel, styles.up)}>
+      <div className={cx(uiStyles.uiInteractive, styles.panel, styles.up)}>
         <input
           id="media-picker-input"
           className={cx(styles.hide)}
@@ -59,7 +63,7 @@ const BottomHUD = ({ onCreateObject, showPhotoPicker, onMediaPicked }) => (
     )}
     <div>
       <div
-        className={cx("ui-interactive", styles.iconButton, styles.large, styles.createObject)}
+        className={cx(uiStyles.uiInteractive, styles.iconButton, styles.large, styles.createObject)}
         title={"Create Object"}
         onClick={onCreateObject}
       />
