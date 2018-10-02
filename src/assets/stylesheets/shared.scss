@@ -34,9 +34,9 @@ $action-color: #FF3464;
 }
 
 %rounded-border {
-  border: 3px solid white;
+  border: 1px solid #e2e2e2;
   box-sizing: border-box;
-  border-radius: 14px;
+  border-radius: 10px;
 }
 
 %form-field-on-white {
@@ -93,7 +93,7 @@ $action-color: #FF3464;
   font-weight: bold;
   cursor: pointer;
   border: 0;
-  border-radius: 26px;
+  border-radius: 28px;
   padding: 18px 18px;
 
   background: #FF3464;
@@ -104,6 +104,7 @@ $action-color: #FF3464;
   flex-direction: column;
   justify-content: center;
   min-width: 150px;
+  min-height: 54px;
 }
 
 %action-button-selected {
@@ -144,15 +145,15 @@ $action-color: #FF3464;
   -webkit-appearance: none;
   width: 2em;
   height: 2em;
-  border: 3px solid white;
+  border: 1px solid #e2e2e2;
   border-radius: 9px;
   vertical-align: sub;
   margin: 0 0.6em
 }
 
 %checkbox-checked {
-  border: 9px double white;
-  outline: 9px solid white;
+  border: 9px double #aaa;
+  outline: 9px solid #aaa;
   outline-offset: -18px;
 }
 
