@@ -5,7 +5,7 @@ export default class WebVRRecommendDialog extends Component {
   render() {
     return (
       <DialogContainer title="Enter in VR" {...this.props}>
-        <div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
           <p>To enter Hubs with Oculus or SteamVR, you can use Firefox.</p>
           <a className="info-dialog--action-button" href="https://www.mozilla.org/firefox">
             Download Firefox

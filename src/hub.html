@@ -21,6 +21,7 @@
     </audio>
 
     <a-scene
+        class="grab-cursor"
         renderer="antialias: true; gammaOutput: true; sortObjects: true; physicallyCorrectLights: true;"
         gamma-factor
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
@@ -30,6 +31,7 @@
         personal-space-bubble="debug: false;"
         vr-mode-ui="enabled: false"
         pinch-to-move
+        stats-plus="false"
         input-configurator="
                   gazeCursorRayObject: #player-camera;
                   cursorController: #cursor-controller;
@@ -324,13 +326,11 @@
         <!-- Player Rig -->
         <a-entity
             id="player-rig"
-            networked="template: #remote-avatar-template; attachTemplateToLocal: false;"
-            spawn-controller="loadedEvent: bundleloaded; target: #environment-root"
+            spawn-controller="loadedEvent: entered; target: #player-rig"
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
             player-info
-            networked-avatar
             cardboard-controls
         >
           <a-entity
@@ -355,7 +355,6 @@
               id="player-camera"
               class="camera"
               camera
-              position="0 1.6 0"
               personal-space-bubble="radius: 0.4;"
               pitch-yaw-rotator
           >
@@ -459,7 +458,9 @@
             id="environment-root"
             nav-mesh-helper
             static-body="shape: none;"
-        ></a-entity>
+        >
+            <a-entity id="environment-scene"/>
+        </a-entity>
 
         <a-entity
         super-spawner="

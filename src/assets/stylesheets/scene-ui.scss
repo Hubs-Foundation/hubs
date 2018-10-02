@@ -45,8 +45,7 @@
 }
 
 :local(.logoTagline) {
-  color: black;
-  text-shadow: 0px 0px 10px #888;
+  @extend %background-agnostic;
   font-weight: bold;
   text-align: center;
   font-size: 1.2em;
