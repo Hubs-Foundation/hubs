@@ -168,7 +168,11 @@ class LinkRoot extends Component {
                   pattern="[0-9A-I]*"
                   value={this.state.entered}
                   onChange={ev => {
-                    this.setState({ entered: ev.target.value });
+                    if (!this.state.isAlphaMode && ev.target.value.match(/[a-z]/i)) {
+                      this.setState({ isAlphaMode: true });
+                    }
+
+                    this.setState({ entered: ev.target.value.toUpperCase() });
                   }}
                   placeholder={this.state.isAlphaMode ? "- - - -" : "- - - - - -"}
                 />
