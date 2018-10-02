@@ -33,7 +33,12 @@ AFRAME.registerComponent("scene-preview-camera", {
 
   tick: function() {
     let t = (new Date().getTime() - this.startTime) / (1000.0 * this.data.duration);
-    t = (t * t) / (2 * (t * t - t) + 1); // Simple beizer smoothing
+
+    if (!this.backwards) {
+      t = t * (2 - t);
+    } else {
+      t = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
 
     const from = this.backwards ? this.targetPoint : this.startPoint;
     const to = this.backwards ? this.startPoint : this.targetPoint;
