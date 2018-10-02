@@ -181,6 +181,7 @@ function setupLobbyCamera() {
   if (previewCamera) {
     camera.object3D.position.copy(previewCamera.position);
     camera.object3D.rotation.copy(previewCamera.rotation);
+    camera.object3D.rotation.reorder("YXZ");
     camera.object3D.updateMatrix();
   } else {
     const cameraPos = camera.object3D.position;
@@ -188,7 +189,7 @@ function setupLobbyCamera() {
   }
 
   camera.setAttribute("scene-preview-camera", "positionOnly: true; duration: 60");
-  camera.components["pitch-yaw-rotator"].set(camera.object3D.rotation.x / 2, camera.object3D.rotation.y);
+  camera.components["pitch-yaw-rotator"].set(camera.object3D.rotation.x, camera.object3D.rotation.y);
 }
 
 let uiProps = {};
