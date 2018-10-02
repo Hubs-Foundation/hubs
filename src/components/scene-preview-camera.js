@@ -29,12 +29,13 @@ AFRAME.registerComponent("scene-preview-camera", {
 
     this.startTime = new Date().getTime();
     this.backwards = false;
+    this.ranOnePass = false;
   },
 
   tick: function() {
     let t = (new Date().getTime() - this.startTime) / (1000.0 * this.data.duration);
 
-    if (!this.backwards) {
+    if (!this.ranOnePass) {
       t = t * (2 - t);
     } else {
       t = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
@@ -55,6 +56,7 @@ AFRAME.registerComponent("scene-preview-camera", {
     }
 
     if (t >= 0.9999) {
+      this.ranOnePass = true;
       this.backwards = !this.backwards;
       this.startTime = new Date().getTime();
     }
