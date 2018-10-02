@@ -6,7 +6,7 @@ import en from "react-intl/locale-data/en";
 import { lang, messages } from "../utils/i18n";
 import homeVideoWebM from "../assets/video/home.webm";
 import homeVideoMp4 from "../assets/video/home.mp4";
-import hubLogo from "../assets/images/hub-preview-white.png";
+import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import mozLogo from "../assets/images/moz-logo-black.png";
 import classNames from "classnames";
 import { ENVIRONMENT_URLS } from "../assets/environments/environments";
