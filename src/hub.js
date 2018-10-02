@@ -260,10 +260,6 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
     debug: !!isDebug
   });
 
-  if (isBotMode) {
-    entryManager.enterSceneWhenLoaded(new MediaStream(), false);
-  }
-
   while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
 
   scene.components["networked-scene"]
@@ -278,6 +274,10 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
 
         hubChannel.channel.push("naf", payload);
       };
+
+      if (isBotMode) {
+        entryManager.enterSceneWhenLoaded(new MediaStream(), false);
+      }
     })
     .catch(connectError => {
       // hacky until we get return codes
@@ -299,7 +299,6 @@ document.addEventListener("DOMContentLoaded", () => {
   window.APP.scene = scene;
 
   registerNetworkSchemas();
-  mountUI({});
   remountUI({ hubChannel, linkChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));

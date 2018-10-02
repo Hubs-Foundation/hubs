@@ -49,11 +49,11 @@ export default class SceneEntryManager {
       this.playerRig.setAttribute("virtual-gamepad-controls", {});
     }
 
-    this.setupPlayerRig();
-    this.setupScreensharing(mediaStream);
-    this.setupBlocking();
-    this.setupMedia();
-    this.setupCamera();
+    this._setupPlayerRig();
+    this._setupScreensharing(mediaStream);
+    this._setupBlocking();
+    this._setupMedia();
+    this._setupCamera();
 
     if (qsTruthy("offline")) return;
 
@@ -61,10 +61,10 @@ export default class SceneEntryManager {
       NAF.connection.adapter.setLocalMediaStream(mediaStream);
     }
 
-    this.spawnAvatar();
+    this._spawnAvatar();
 
     if (isBotMode) {
-      this.runBot(mediaStream);
+      this._runBot(mediaStream);
       return;
     }
 
@@ -99,9 +99,9 @@ export default class SceneEntryManager {
     document.body.removeEventListener("touchend", requestFullscreen);
   };
 
-  setupPlayerRig = () => {
-    this.updatePlayerRigWithProfile();
-    this.store.addEventListener("statechanged", this.updatePlayerRigWithProfile);
+  _setupPlayerRig = () => {
+    this._updatePlayerRigWithProfile();
+    this.store.addEventListener("statechanged", this._updatePlayerRigWithProfile);
 
     const avatarScale = parseInt(qs.get("avatar_scale"), 10);
 
@@ -110,7 +110,7 @@ export default class SceneEntryManager {
     }
   };
 
-  updatePlayerRigWithProfile = () => {
+  _updatePlayerRigWithProfile = () => {
     const displayName = this.store.state.profile.displayName;
     this.playerRig.setAttribute("player-info", {
       displayName,
@@ -118,10 +118,10 @@ export default class SceneEntryManager {
     });
     const hudController = this.playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });
-    document.querySelector("a-scene").emit("username-changed", { username: displayName });
+    this.scene.emit("username-changed", { username: displayName });
   };
 
-  setupScreensharing = mediaStream => {
+  _setupScreensharing = mediaStream => {
     const videoTracks = mediaStream ? mediaStream.getVideoTracks() : [];
     let sharingScreen = videoTracks.length > 0;
 
@@ -131,7 +131,6 @@ export default class SceneEntryManager {
     if (screenEntity) {
       screenEntity.setAttribute("visible", sharingScreen);
     } else if (sharingScreen) {
-      const sceneEl = document.querySelector("a-scene");
       screenEntity = document.createElement("a-entity");
       screenEntity.id = screenEntityId;
       screenEntity.setAttribute("offset-relative-to", {
@@ -140,7 +139,7 @@ export default class SceneEntryManager {
         on: "action_share_screen"
       });
       screenEntity.setAttribute("networked", { template: "#video-template" });
-      sceneEl.appendChild(screenEntity);
+      this.scene.appendChild(screenEntity);
     }
 
     this.scene.addEventListener("action_share_screen", () => {
@@ -159,7 +158,7 @@ export default class SceneEntryManager {
     });
   };
 
-  setupBlocking = () => {
+  _setupBlocking = () => {
     document.body.addEventListener("blocked", ev => {
       NAF.connection.entities.removeEntitiesOfClient(ev.detail.clientId);
     });
@@ -169,7 +168,7 @@ export default class SceneEntryManager {
     });
   };
 
-  setupMedia = () => {
+  _setupMedia = () => {
     const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
       const { entity, orientation } = addMedia(src, "#interactable-media", contentOrigin, true);
@@ -223,7 +222,7 @@ export default class SceneEntryManager {
     });
   };
 
-  setupCamera = () => {
+  _setupCamera = () => {
     this.scene.addEventListener("action_spawn_camera", () => {
       const entity = document.createElement("a-entity");
       entity.setAttribute("networked", { template: "#interactable-camera" });
@@ -235,13 +234,13 @@ export default class SceneEntryManager {
     });
   };
 
-  spawnAvatar = () => {
+  _spawnAvatar = () => {
     this.playerRig.setAttribute("networked", "template: #remote-avatar-template; attachTemplateToLocal: false;");
     this.playerRig.setAttribute("networked-avatar", "");
     this.playerRig.emit("entered");
   };
 
-  runBot = async mediaStream => {
+  _runBot = async mediaStream => {
     this.playerRig.setAttribute("avatar-replay", {
       camera: "#player-camera",
       leftController: "#player-left-controller",
