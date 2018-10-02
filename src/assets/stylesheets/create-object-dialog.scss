@@ -36,15 +36,19 @@
 
 :local(.cancel-icon) {
   color: $darkest-grey;
+  cursor: pointer;
+
   &:hover {
     color: #FF3D7F
   }
 }
 
 :local(.upload-icon) {
-  color: $darkest-grey;
+  color: $action-color;
+  cursor: pointer;
+
   &:hover {
-    color: $action-color;
+    color: $action-color-light;
   }
 }
 
@@ -59,11 +63,12 @@
 }
 
 :local(.left-side-of-input) {
+  @extend %default-font;
   flex-grow: 1;
   border: none;
   white-space: nowrap;
   background: transparent;
-  color: white;
+  color: black;
   font-size: 1.2em;
   align-self: center;
   overflow: hidden;
