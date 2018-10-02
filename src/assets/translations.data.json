@@ -86,7 +86,7 @@
     "link.connect_headset": "Connect Mobile Headset",
     "link.cancel": "cancel",
     "invite.enter_via": "Enter via ",
-    "invite.and_enter_code": " and enter code:",
+    "invite.and_enter_code": " with code:",
     "invite.or_visit": "or visit"
   }
 }
