@@ -526,25 +526,25 @@ class UIRoot extends Component {
     this.setState({ dialog: null });
   };
 
-  showHelpDialog() {
+  showHelpDialog = () => {
     this.setState({ dialog: <HelpDialog onClose={this.closeDialog} /> });
-  }
+  };
 
-  showSafariDialog() {
+  showSafariDialog = () => {
     this.setState({ dialog: <SafariDialog onClose={this.closeDialog} /> });
-  }
+  };
 
-  showInviteTeamDialog() {
+  showInviteTeamDialog = () => {
     this.setState({ dialog: <InviteTeamDialog hubChannel={this.props.hubChannel} onClose={this.closeDialog} /> });
-  }
+  };
 
-  showCreateObjectDialog() {
+  showCreateObjectDialog = () => {
     this.setState({ dialog: <CreateObjectDialog onCreate={this.createObject} onClose={this.closeDialog} /> });
-  }
+  };
 
-  showWebVRRecommendDialog() {
+  showWebVRRecommendDialog = () => {
     this.setState({ dialog: <WebVRRecommendDialog onClose={this.closeDialog} /> });
-  }
+  };
 
   renderExitedPane = () => {
     let subtitle = null;
