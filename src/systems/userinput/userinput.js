@@ -185,7 +185,7 @@ AFRAME.registerSystem("userinput", {
     }
   },
 
-  readValueAtPath(path) {
+  readFrameValueAtPath(path) {
     return frame[path];
   },
 

@@ -1,6 +1,5 @@
 import qsTruthy from "./utils/qs_truthy";
 import screenfull from "screenfull";
-import { inGameActions } from "./input-mappings";
 import nextTick from "./utils/next-tick";
 
 const playerHeight = 1.6;
@@ -55,8 +54,6 @@ export default class SceneEntryManager {
     } else if (AFRAME.utils.device.isMobile()) {
       document.body.addEventListener("touchend", requestFullscreen);
     }
-
-    AFRAME.registerInputActions(inGameActions, "default");
 
     if (isMobile || qsTruthy("mobile")) {
       this.playerRig.setAttribute("virtual-gamepad-controls", {});

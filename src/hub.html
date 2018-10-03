@@ -32,16 +32,6 @@
         vr-mode-ui="enabled: false"
         pinch-to-move
         stats-plus="false"
-        input-configurator="
-                  gazeCursorRayObject: #player-camera;
-                  cursorController: #cursor-controller;
-                  gazeTeleporter: #gaze-teleport;
-                  camera: #player-camera;
-                  playerRig: #player-rig;
-                  leftController: #player-left-controller;
-                  leftControllerRayObject: #player-left-controller;
-                  rightController: #player-right-controller;
-                  rightControllerRayObject: #player-right-controller;"
     >
 
         <a-assets>
@@ -381,8 +371,8 @@
           <a-entity
               id="player-left-controller"
               class="left-controller"
-              hand-controls2="left"
               tracked-controls
+              hand-controls2="left"
               teleport-controls="
                   cameraRig: #player-rig;
                   teleportOrigin: #player-camera;
@@ -407,8 +397,8 @@
           <a-entity
               id="player-right-controller"
               class="right-controller"
-              hand-controls2="right"
               tracked-controls
+              hand-controls2="right"
               teleport-controls="
                   cameraRig: #player-rig;
                   teleportOrigin: #player-camera;
