@@ -21,10 +21,12 @@
     @extend %fa-icon-button;
     color: white;
     position: absolute;
-    top: -48px;
+    top: -64px;
     right: 12px;
-    width: 32px;
-    height: 32px;
+    width: 38px;
+    height: 38px;
+    background-color: $action-color;
+    border-radius: 19px;
   }
 }
 
