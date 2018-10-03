@@ -73,7 +73,6 @@ function cloneSkinnedMesh(source) {
 // From https://gist.github.com/cdata/f2d7a6ccdec071839bc1954c32595e87
 // Tracking glTF cloning here: https://github.com/mrdoob/three.js/issues/11573
 function cloneGltf(gltf) {
-  console.log("cloneGLTF");
   return {
     animations: gltf.animations,
     scene: cloneSkinnedMesh(gltf.scene)
@@ -271,8 +270,6 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
     Object.keys(fileMap).forEach(URL.revokeObjectURL);
   }
 
-  gltf.canClone = gltf.animations.length === 0;
-
   return gltf;
 }
 
@@ -312,21 +309,9 @@ AFRAME.registerComponent("gltf-model-plus", {
     if (useCache) {
       if (!GLTFCache[src]) {
         GLTFCache[src] = await loadGLTF(src, contentType, technique);
-
-        if (GLTFCache[src].canClone) {
-          return cloneGltf(GLTFCache[src]);
-        } else {
-          console.log("a");
-          return GLTFCache[src];
-        }
-      } else {
-        if (GLTFCache[src].canClone) {
-          return cloneGltf(GLTFCache[src]);
-        } else {
-          console.log("b");
-          return await loadGLTF(src, contentType, technique);
-        }
       }
+
+      return cloneGltf(GLTFCache[src]);
     } else {
       return await loadGLTF(src, contentType, technique);
     }
