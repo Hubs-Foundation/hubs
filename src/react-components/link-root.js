@@ -106,7 +106,7 @@ class LinkRoot extends Component {
   };
 
   attemptEntry = async code => {
-    const url = "https://hub.link/" + code;
+    const url = "/link/" + code;
     const res = await fetch(url);
 
     if (res.status >= 400) {
