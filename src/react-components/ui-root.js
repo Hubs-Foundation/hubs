@@ -174,7 +174,7 @@ class UIRoot extends Component {
     }
 
     if (!this.props.forcedVREntryType) {
-      this.setState({ entryStep: ENTRY_STEPS.device });
+      this.goToEntryStep(ENTRY_STEPS.device);
     } else if (this.props.forcedVREntryType.startsWith("daydream")) {
       this.enterDaydream();
     } else if (this.props.forcedVREntryType.startsWith("vr")) {
@@ -182,6 +182,10 @@ class UIRoot extends Component {
     } else if (this.props.forcedVREntryType.startsWith("2d")) {
       this.enter2D();
     }
+  };
+
+  goToEntryStep = entryStep => {
+    this.setState({ entryStep: entryStep, showInviteDialog: false });
   };
 
   playTestTone = () => {
@@ -268,7 +272,7 @@ class UIRoot extends Component {
       await this.setMediaStreamToDefault();
       this.beginOrSkipAudioSetup();
     } else {
-      this.setState({ entryStep: ENTRY_STEPS.mic_grant });
+      this.goToEntryStep(ENTRY_STEPS.mic_grant);
     }
   };
 
@@ -409,7 +413,7 @@ class UIRoot extends Component {
       const { hasAudio } = await this.setMediaStreamToDefault();
 
       if (hasAudio) {
-        this.setState({ entryStep: ENTRY_STEPS.mic_granted });
+        this.goToEntryStep(ENTRY_STEPS.mic_granted);
       } else {
         this.beginOrSkipAudioSetup();
       }
@@ -424,7 +428,7 @@ class UIRoot extends Component {
 
   beginOrSkipAudioSetup = () => {
     if (!this.props.forcedVREntryType || !this.props.forcedVREntryType.endsWith("_now")) {
-      this.setState({ entryStep: ENTRY_STEPS.audio_setup });
+      this.goToEntryStep(ENTRY_STEPS.audio_setup);
     } else {
       setTimeout(this.onAudioReadyButton, 3000); // Need to wait otherwise input doesn't work :/
     }
@@ -500,7 +504,7 @@ class UIRoot extends Component {
       clearInterval(this.state.micUpdateInterval);
     }
 
-    this.setState({ showInviteDialog: false, entryStep: ENTRY_STEPS.finished });
+    this.goToEntryStep(ENTRY_STEPS.finished);
   };
 
   attemptLink = async () => {

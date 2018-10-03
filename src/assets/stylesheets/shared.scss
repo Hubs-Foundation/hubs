@@ -49,6 +49,9 @@ $action-color-transparent: rgba(255, 52, 100, 0.9);
 
 %big-action-button {
   @extend %default-font;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
   outline-style: none;
   font-size: 18px;
   font-weight: bold;
@@ -90,6 +93,9 @@ $action-color-transparent: rgba(255, 52, 100, 0.9);
 
 %action-button {
   @extend %default-font;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
   text-decoration: none;
   outline-style: none;
   font-weight: bold;
