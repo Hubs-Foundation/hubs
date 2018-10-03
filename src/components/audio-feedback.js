@@ -46,7 +46,7 @@ AFRAME.registerComponent("networked-audio-analyser", {
 AFRAME.registerComponent("scale-audio-feedback", {
   schema: {
     minScale: { default: 1 },
-    maxScale: { default: 2 }
+    maxScale: { default: 1.5 }
   },
 
   tick() {
