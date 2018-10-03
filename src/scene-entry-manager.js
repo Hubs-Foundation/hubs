@@ -64,15 +64,15 @@ export default class SceneEntryManager {
 
     if (qsTruthy("offline")) return;
 
-    if (mediaStream) {
-      NAF.connection.adapter.setLocalMediaStream(mediaStream);
-    }
-
     this._spawnAvatar();
 
     if (isBotMode) {
       this._runBot(mediaStream);
       return;
+    }
+
+    if (mediaStream) {
+      NAF.connection.adapter.setLocalMediaStream(mediaStream);
     }
 
     this.scene.classList.remove("hand-cursor");
@@ -279,6 +279,7 @@ export default class SceneEntryManager {
     };
     await new Promise(resolve => audioEl.addEventListener("canplay", resolve));
     mediaStream.addTrack(audioEl.captureStream().getAudioTracks()[0]);
+    NAF.connection.adapter.setLocalMediaStream(mediaStream);
     audioEl.play();
   };
 }
