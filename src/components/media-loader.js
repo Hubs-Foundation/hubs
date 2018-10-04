@@ -1,5 +1,6 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import { guessContentType, proxiedUrlFor, resolveUrl } from "../utils/media-utils";
+import { addAnimationComponents } from "../utils/animation";
 
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
@@ -163,20 +164,11 @@ AFRAME.registerComponent("media-loader", {
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(
           "model-loaded",
-          event => {
+          () => {
             this.clearLoadingTimeout();
             this.hasBakedShapes = !!(this.el.body && this.el.body.shapes.length > (this.shapeAdded ? 1 : 0));
             this.setShapeAndScale(this.data.resize);
-
-            const model = event.detail.model;
-
-            if (model.animations.length > 0) {
-              this.el.setAttribute("animation-mixer", "");
-
-              if (!this.el.querySelector("[loop-animation]")) {
-                this.el.setAttribute("loop-animation", "");
-              }
-            }
+            addAnimationComponents(this.el);
           },
           { once: true }
         );

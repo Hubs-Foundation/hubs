@@ -21,6 +21,8 @@ import "./utils/audio-context-fix";
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
+import { addAnimationComponents } from "./utils/animation";
+
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
 import trackpad_scrolling from "./behaviours/trackpad-scrolling";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
@@ -357,15 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
     remountUI({ environmentSceneLoaded: true });
 
     for (const modelEl of environmentScene.children) {
-      if (!modelEl.components["gltf-model-plus"]) {
-        continue;
-      }
-
-      const model = modelEl.object3DMap.mesh;
-
-      if (model && model.animations.length > 0) {
-        modelEl.setAttribute("animation-mixer", "");
-      }
+      addAnimationComponents(modelEl);
     }
 
     setupLobbyCamera();
