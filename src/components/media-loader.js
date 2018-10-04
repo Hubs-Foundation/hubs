@@ -1,5 +1,6 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import { guessContentType, proxiedUrlFor, resolveUrl } from "../utils/media-utils";
+import { addAnimationComponents } from "../utils/animation";
 
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
@@ -167,6 +168,7 @@ AFRAME.registerComponent("media-loader", {
             this.clearLoadingTimeout();
             this.hasBakedShapes = !!(this.el.body && this.el.body.shapes.length > (this.shapeAdded ? 1 : 0));
             this.setShapeAndScale(this.data.resize);
+            addAnimationComponents(this.el);
           },
           { once: true }
         );

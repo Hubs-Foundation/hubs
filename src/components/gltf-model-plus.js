@@ -32,55 +32,52 @@ AFRAME.GLTFModelPlus = {
   }
 };
 
-// From https://gist.github.com/cdata/f2d7a6ccdec071839bc1954c32595e87
-// Tracking glTF cloning here: https://github.com/mrdoob/three.js/issues/11573
-function cloneGltf(gltf) {
-  const skinnedMeshes = {};
-  gltf.scene.traverse(node => {
-    if (!node.name) {
-      node.name = node.uuid;
-    }
-    if (node.isSkinnedMesh) {
-      skinnedMeshes[node.name] = node;
-    }
-  });
+function parallelTraverse(a, b, callback) {
+  callback(a, b);
 
-  const clone = {
-    animations: gltf.animations,
-    scene: gltf.scene.clone(true)
-  };
-
-  const cloneBones = {};
-  const cloneSkinnedMeshes = {};
-
-  clone.scene.traverse(node => {
-    if (node.isBone) {
-      cloneBones[node.name] = node;
-    }
-
-    if (node.isSkinnedMesh) {
-      cloneSkinnedMeshes[node.name] = node;
-    }
-  });
-
-  for (const name in skinnedMeshes) {
-    const skinnedMesh = skinnedMeshes[name];
-    const skeleton = skinnedMesh.skeleton;
-    const cloneSkinnedMesh = cloneSkinnedMeshes[name];
-
-    const orderedCloneBones = [];
-
-    for (let i = 0; i < skeleton.bones.length; ++i) {
-      const cloneBone = cloneBones[skeleton.bones[i].name];
-      orderedCloneBones.push(cloneBone);
-    }
-
-    cloneSkinnedMesh.bind(new THREE.Skeleton(orderedCloneBones, skeleton.boneInverses), cloneSkinnedMesh.matrixWorld);
-
-    cloneSkinnedMesh.material = skinnedMesh.material.clone();
+  for (let i = 0; i < a.children.length; i++) {
+    parallelTraverse(a.children[i], b.children[i], callback);
   }
+}
+
+// Modified version of Don McCurdy's AnimationUtils.clone
+// https://github.com/mrdoob/three.js/pull/14494
+function cloneSkinnedMesh(source) {
+  const cloneLookup = new Map();
+
+  const clone = source.clone();
+
+  parallelTraverse(source, clone, function(sourceNode, clonedNode) {
+    cloneLookup.set(sourceNode, clonedNode);
+  });
+
+  source.traverse(function(sourceMesh) {
+    if (!sourceMesh.isSkinnedMesh) return;
+
+    const sourceBones = sourceMesh.skeleton.bones;
+    const clonedMesh = cloneLookup.get(sourceMesh);
+
+    clonedMesh.skeleton = sourceMesh.skeleton.clone();
+
+    clonedMesh.skeleton.bones = sourceBones.map(function(sourceBone) {
+      if (!cloneLookup.has(sourceBone)) {
+        throw new Error("Required bones are not descendants of the given object.");
+      }
+
+      return cloneLookup.get(sourceBone);
+    });
+
+    clonedMesh.bind(clonedMesh.skeleton, sourceMesh.bindMatrix);
+  });
 
   return clone;
+}
+
+function cloneGltf(gltf) {
+  return {
+    animations: gltf.animations,
+    scene: cloneSkinnedMesh(gltf.scene)
+  };
 }
 
 /// Walks the tree of three.js objects starting at the given node, using the GLTF data
@@ -308,6 +305,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       if (!GLTFCache[src]) {
         GLTFCache[src] = await loadGLTF(src, contentType, technique);
       }
+
       return cloneGltf(GLTFCache[src]);
     } else {
       return await loadGLTF(src, contentType, technique);
@@ -357,7 +355,9 @@ AFRAME.registerComponent("gltf-model-plus", {
           attachTemplate(this.el, name, this.templates[name]);
         }
       }
+
       this.el.setObject3D("mesh", object3DToSet);
+
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
       delete GLTFCache[src];
