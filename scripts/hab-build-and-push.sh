@@ -4,9 +4,10 @@ export BASE_ASSETS_PATH=$1
 export ASSET_BUNDLE_SERVER=$2
 export JANUS_SERVER=$3
 export RETICULUM_SERVER=$4
-export TARGET_S3_URL=$5
-export BUILD_NUMBER=$6
-export GIT_COMMIT=$7
+export FARSPARK_SERVER=$5
+export TARGET_S3_URL=$6
+export BUILD_NUMBER=$7
+export GIT_COMMIT=$8
 export BUILD_VERSION="${BUILD_NUMBER} (${GIT_COMMIT})"
 
 # To build + push to S3 run:
