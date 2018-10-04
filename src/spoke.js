@@ -3,8 +3,9 @@ import React, { Component } from "react";
 //import PropTypes from "prop-types";
 //import classNames from "classnames";
 import { playVideoWithStopOnBlur } from "./utils/video-utils.js";
-import { IntlProvider, /*FormattedMessage, */ addLocaleData } from "react-intl";
+import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import styles from "./assets/stylesheets/spoke.scss";
+import spokeLogo from "./assets/images/spoke_logo.png";
 
 //const qs = new URLSearchParams(location.search);
 
@@ -20,15 +21,79 @@ addLocaleData([...en]);
 class SpokeLanding extends Component {
   static propTypes = {};
 
-  state = {};
+  state = { downloadLinkForCurrentPlatform: {} };
 
   constructor(props) {
     super(props);
+    this.state = { platform: "win" };
   }
 
   componentDidMount() {
     this.loadVideo();
+    this.fetchReleases();
   }
+
+  tryGetJson = async request => {
+    const text = await request.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.log(`JSON error parsing response from ${request.url} "${text}"`, e);
+    }
+  };
+
+  getDownloadUrlForPlatform = (assets, platform) => {
+    return assets.find(asset => asset.name.includes(platform)).downloadUrl;
+  };
+
+  fetchReleases = async () => {
+    // Read-only, public access token.
+    const token = "de8cbfb4cc0281c7b731c891df431016c29b0ace";
+    const result = await fetch("https://api.github.com/graphql", {
+      timeout: 5000,
+      method: "POST",
+      headers: { authorization: `bearer ${token}` },
+      body: JSON.stringify({
+        query: `
+          {
+            repository(owner: "mozillareality", name: "spoke") {
+          releases(
+                orderBy: { field: CREATED_AT, direction: DESC },
+                first: 5
+              ) {
+                nodes {
+                  isPrerelease,
+                  isDraft,
+                  tag { name },
+                  releaseAssets(last: 3) {
+                    nodes { name, downloadUrl }
+                  }
+                },
+                pageInfo { endCursor, hasNextPage }
+              }
+            }
+          }
+        `
+      })
+    }).then(this.tryGetJson);
+
+    if (!result || !result.data) {
+      this.setState({ platform: "unavailable" });
+      return;
+    }
+
+    const releases = result.data.repository.releases;
+    const release = releases.nodes.find(release => /*!release.isPrerelease && */ !release.isDraft);
+
+    if (!release) {
+      this.setState({ platform: "unavailable" });
+      return;
+    }
+
+    this.setState({
+      downloadLinkForCurrentPlatform: this.getDownloadUrlForPlatform(release.releaseAssets.nodes, this.state.platform)
+    });
+  };
 
   loadVideo() {
     const videoEl = document.querySelector("#preview-video");
@@ -36,6 +101,10 @@ class SpokeLanding extends Component {
   }
 
   render() {
+    const platform = this.state.platform;
+    const releasesLink = "https://github.com/MozillaReality/Spoke/releases";
+    const downloadLink = platform === "unavailable" ? releasesLink : this.state.downloadLinkForCurrentPlatform;
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.ui}>
@@ -54,7 +123,31 @@ class SpokeLanding extends Component {
           </div>
           <div className={styles.content}>
             <div className={styles.heroPane}>
-              <div className={styles.heroMessage}>Message</div>
+              <div className={styles.heroMessage}>
+                <div className={styles.spokeLogo}>
+                  <img src={spokeLogo} />
+                  <div className={styles.primaryTagline}>
+                    <FormattedMessage id="spoke.primary_tagline" />
+                  </div>
+                </div>
+                <div className={styles.secondaryTagline}>
+                  <FormattedMessage id="spoke.secondary_tagline" />
+                  <a href="/">Hubs</a>
+                </div>
+                <div className={styles.actionButtons}>
+                  <a href={downloadLink} className={styles.downloadButton}>
+                    <FormattedMessage id={"spoke.download_" + this.state.platform} />
+                  </a>
+                  {platform !== "unavailable" && (
+                    <a href={releasesLink} className={styles.browseVersions}>
+                      <FormattedMessage id="spoke.browse_all_versions" />
+                    </a>
+                  )}
+                  <button className={styles.playButton} onClick={() => this.setState({ playVideo: true })}>
+                    <FormattedMessage id="spoke.play_button" />
+                  </button>
+                </div>
+              </div>
               <div className={styles.heroVideo}>
                 <video playsInline muted loop autoPlay className={styles.previewVideo} id="preview-video">
                   <source

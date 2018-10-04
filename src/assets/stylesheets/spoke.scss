@@ -1,6 +1,7 @@
 @import 'shared';
 @import 'loader';
 
+$spoke-action-color: #2F80ED;
 $breakpoint: 1280px;
 
 body {
@@ -23,13 +24,12 @@ body {
 :local(.ui) {
   display: flex;
   flex-direction: column;
-  height: calc(100vh);
 }
 
 :local(.content) {
   display: flex;
-  height: 100%;
   flex-direction: column;
+  height: calc(100vh);
 }
 
 :local(.header) {
@@ -52,19 +52,53 @@ body {
 :local(.hero-pane) {
   display: flex;
   height: 100%;
+  position: relative;
 
   @media(max-width: $breakpoint) {
     flex-direction: column;
   }
 }
 
+:local(.spoke-logo) {
+  position: relative;
+
+  img {
+    width: 400px;
+  }
+}
+
+:local(.primary-tagline) {
+  position: absolute;
+  right: 6px;
+  bottom: -8px;
+  font-weight: bold;
+  font-size: 1.7em;
+}
+
+:local(.secondary-tagline) {
+  font-weight: lighter;
+  font-size: 1.5em;
+  text-align: center;
+  margin-top: 48px;
+
+  a {
+    color: white;
+  }
+}
+
 :local(.hero-message) {
   width: 600px;
-  background-color: red;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 
   @media(max-width: $breakpoint) {
     order: 2;
     width: 100%;
+    margin: 32px 0;
+    height: auto;
   }
 }
 
@@ -78,7 +112,11 @@ body {
   flex: 1;
 
   @media(max-width: $breakpoint) {
-    height: auto;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
     margin: 0px
   }
 }
@@ -97,4 +135,27 @@ body {
   }
 
   z-index: -1;
+}
+
+:local(.download-button) {
+  @extend %action-button;
+  @extend %wide-button;
+  background-color: $spoke-action-color;
+  margin-top: 64px;
+}
+
+:local(.play-button) {
+  @extend %action-button;
+  background-color: $darker-grey;
+  margin: auto;
+  margin-top: 64px;
+  padding: 0px 82px;
+}
+
+:local(.browse-versions) {
+  color: $grey-text;
+  margin-top: 12px;
+  display: block;
+  text-align: center;
+  width: 100%;
 }
