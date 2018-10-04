@@ -23,7 +23,9 @@ function b64EncodeUnicode(str) {
 
 export const proxiedUrlFor = (url, index) => {
   // farspark doesn't know how to read '=' base64 padding characters
-  const encodedUrl = b64EncodeUnicode(url).replace(/=+$/g, "");
+  const base64Url = b64EncodeUnicode(url).replace(/=+$/g, "");
+  // translate base64 + to - and / to _ for URL safety
+  const encodedUrl = base64Url.replace(/\+/g, "-").replace(/\//g, "_");
   const method = index != null ? "extract" : "raw";
   return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${encodedUrl}`;
 };
