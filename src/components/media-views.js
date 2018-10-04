@@ -420,6 +420,6 @@ AFRAME.registerComponent("media-image", {
 
     fitToTexture(this.el, texture);
 
-    this.el.emit("image-loaded");
+    this.el.emit("image-loaded", { src: this.data.src });
   }
 });

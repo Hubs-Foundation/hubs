@@ -76,7 +76,7 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
-import { resolveMedia } from "./utils/media-utils";
+import { proxiedUrlFor } from "./utils/media-utils";
 import SceneEntryManager from "./scene-entry-manager";
 
 import "./systems/nav";
@@ -242,9 +242,8 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
   const environmentScene = document.querySelector("#environment-scene");
 
   if (glbAsset || hasExtension) {
-    const resolved = await resolveMedia(sceneUrl, false, 0);
     const gltfEl = document.createElement("a-entity");
-    gltfEl.setAttribute("gltf-model-plus", { src: resolved.raw, useCache: false, inflate: true });
+    gltfEl.setAttribute("gltf-model-plus", { src: proxiedUrlFor(sceneUrl), useCache: false, inflate: true });
     gltfEl.addEventListener("model-loaded", () => environmentScene.emit("bundleloaded"));
     environmentScene.appendChild(gltfEl);
   } else {

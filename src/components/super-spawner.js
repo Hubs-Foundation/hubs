@@ -16,6 +16,11 @@ AFRAME.registerComponent("super-spawner", {
     src: { default: "" },
 
     /**
+     * Whether to use the Reticulum media resolution API to interpret the src URL (e.g. find a video URL for Youtube videos.)
+     */
+    resolve: { default: false },
+
+    /**
      * The template to use for this object
      */
     template: { default: "" },
@@ -117,7 +122,7 @@ AFRAME.registerComponent("super-spawner", {
       return;
     }
 
-    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER).entity;
+    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve).entity;
 
     hand.object3D.getWorldPosition(entity.object3D.position);
     hand.object3D.getWorldQuaternion(entity.object3D.quaternion);
@@ -150,7 +155,7 @@ AFRAME.registerComponent("super-spawner", {
     const thisGrabId = nextGrabId++;
     this.heldEntities.set(hand, thisGrabId);
 
-    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER).entity;
+    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve).entity;
 
     entity.object3D.position.copy(
       this.data.useCustomSpawnPosition ? this.data.spawnPosition : this.el.object3D.position
