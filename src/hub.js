@@ -541,6 +541,15 @@ const onReady = async () => {
   const initialEnvironmentEl = document.createElement("a-entity");
   initialEnvironmentEl.addEventListener("bundleloaded", () => {
     remountUI({ initialEnvironmentLoaded: true });
+
+    for (const modelEl of initialEnvironmentEl.querySelectorAll(":scope > [gltf-model-plus]")) {
+      const model = modelEl.object3DMap.mesh;
+
+      if (model && model.animations.length > 0) {
+        modelEl.setAttribute("animation-mixer", "");
+      }
+    }
+
     // We never want to stop the render loop when were running in "bot" mode.
     if (!isBotMode) {
       // Stop rendering while the UI is up. We restart the render loop in enterScene.

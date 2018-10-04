@@ -149,10 +149,20 @@ AFRAME.registerComponent("media-loader", {
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(
           "model-loaded",
-          () => {
+          event => {
             this.clearLoadingTimeout();
             this.hasBakedShapes = !!(this.el.body && this.el.body.shapes.length > (this.shapeAdded ? 1 : 0));
             this.setShapeAndScale(this.data.resize);
+
+            const model = event.detail.model;
+
+            if (model.animations.length > 0) {
+              this.el.setAttribute("animation-mixer", "");
+
+              if (!this.el.querySelector("[loop-animation]")) {
+                this.el.setAttribute("loop-animation", "");
+              }
+            }
           },
           { once: true }
         );

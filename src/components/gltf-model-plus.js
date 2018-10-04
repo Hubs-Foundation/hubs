@@ -363,14 +363,6 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       this.el.setObject3D("mesh", object3DToSet);
 
-      if (model.animations.length > 0) {
-        this.el.setAttribute("animation-mixer", "");
-
-        if (!this.el.querySelector("[loop-animation]")) {
-          this.el.setAttribute("loop-animation", "");
-        }
-      }
-
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
       delete GLTFCache[src];
