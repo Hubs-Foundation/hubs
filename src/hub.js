@@ -7,7 +7,6 @@ import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
-import screenfull from "screenfull";
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
@@ -21,13 +20,13 @@ import "aframe-motion-capture-components";
 import "./utils/audio-context-fix";
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
+import nextTick from "./utils/next-tick";
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
 import trackpad_scrolling from "./behaviours/trackpad-scrolling";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
 import msft_mr_axis_with_deadzone from "./behaviours/msft-mr-axis-with-deadzone";
 import { PressedMove } from "./activators/pressedmove";
 import { ReverseY } from "./activators/reversey";
-import { ObjectContentOrigins } from "./object-types";
 
 import "./activators/shortpress";
 
@@ -77,7 +76,8 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
-import { addMedia, resolveMedia } from "./utils/media-utils";
+import { proxiedUrlFor } from "./utils/media-utils";
+import SceneEntryManager from "./scene-entry-manager";
 
 import "./systems/nav";
 import "./systems/personal-space-bubble";
@@ -122,10 +122,10 @@ import "./components/tools/networked-drawing";
 import "./components/tools/drawing-manager";
 
 import registerNetworkSchemas from "./network-schemas";
-import { inGameActions, config as inputConfig } from "./input-mappings";
+import { config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 
-import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
+import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
 import qsTruthy from "./utils/qs_truthy";
@@ -154,11 +154,51 @@ concurrentLoadDetector.start();
 
 store.init();
 
-function mountUI(scene, props = {}) {
+function getPlatformUnsupportedReason() {
+  if (typeof RTCDataChannelEvent === "undefined") return "no_data_channels";
+  return null;
+}
+
+function pollForSupportAvailability(callback) {
+  const availabilityUrl = getReticulumFetchUrl("/api/v1/support/availability");
+  let isSupportAvailable = null;
+
+  const updateIfChanged = () =>
+    fetch(availabilityUrl).then(({ ok }) => {
+      if (isSupportAvailable === ok) return;
+      isSupportAvailable = ok;
+      callback(isSupportAvailable);
+    });
+
+  updateIfChanged();
+  setInterval(updateIfChanged, 30000);
+}
+
+function setupLobbyCamera() {
+  const camera = document.querySelector("#player-camera");
+  const previewCamera = document.querySelector("#environment-scene").object3D.getObjectByName("scene-preview-camera");
+
+  if (previewCamera) {
+    camera.object3D.position.copy(previewCamera.position);
+    camera.object3D.rotation.copy(previewCamera.rotation);
+    camera.object3D.rotation.reorder("YXZ");
+    camera.object3D.updateMatrix();
+  } else {
+    const cameraPos = camera.object3D.position;
+    camera.object3D.position.set(cameraPos.x, 2.5, cameraPos.z);
+  }
+
+  camera.setAttribute("scene-preview-camera", "positionOnly: true; duration: 60");
+  camera.components["pitch-yaw-rotator"].set(camera.object3D.rotation.x, camera.object3D.rotation.y);
+}
+
+let uiProps = {};
+
+function mountUI(props = {}) {
+  const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
   const enableScreenSharing = qsTruthy("enable_screen_sharing");
-  const showProfileEntry = !store.state.activity.hasChangedName;
 
   ReactDOM.render(
     <UIRoot
@@ -170,7 +210,6 @@ function mountUI(scene, props = {}) {
         forcedVREntryType,
         enableScreenSharing,
         store,
-        showProfileEntry,
         ...props
       }}
     />,
@@ -178,350 +217,128 @@ function mountUI(scene, props = {}) {
   );
 }
 
-function requestFullscreen() {
-  if (screenfull.enabled && !screenfull.isFullscreen) screenfull.request();
+function remountUI(props) {
+  uiProps = { ...uiProps, ...props };
+  mountUI(uiProps);
 }
 
-const onReady = async () => {
+async function handleHubChannelJoined(entryManager, hubChannel, data) {
   const scene = document.querySelector("a-scene");
-  const hubChannel = new HubChannel(store);
-  const linkChannel = new LinkChannel(store);
 
-  document.querySelector("canvas").classList.add("blurred");
-  window.APP.scene = scene;
+  if (NAF.connection.isConnected()) {
+    // Send complete sync on phoenix re-join.
+    NAF.connection.entities.completeSync(null, true);
+    return;
+  }
 
-  registerNetworkSchemas();
+  const hub = data.hubs[0];
+  const defaultSpaceTopic = hub.topics[0];
+  const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");
+  const bundleAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle");
+  const sceneUrl = (glbAsset || bundleAsset).src;
+  const hasExtension = /\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl);
 
-  let uiProps = { hubChannel, linkChannel };
+  console.log(`Scene URL: ${sceneUrl}`);
+  const environmentScene = document.querySelector("#environment-scene");
 
-  mountUI(scene);
+  if (glbAsset || hasExtension) {
+    const gltfEl = document.createElement("a-entity");
+    gltfEl.setAttribute("gltf-model-plus", { src: proxiedUrlFor(sceneUrl), useCache: false, inflate: true });
+    gltfEl.addEventListener("model-loaded", () => environmentScene.emit("bundleloaded"));
+    environmentScene.appendChild(gltfEl);
+  } else {
+    // TODO kill bundles
+    environmentScene.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
+  }
 
-  const remountUI = props => {
-    uiProps = { ...uiProps, ...props };
-    mountUI(scene, uiProps);
-  };
+  remountUI({ hubId: hub.hub_id, hubName: hub.name, hubEntryCode: hub.entry_code });
 
-  const applyProfileFromStore = playerRig => {
-    const displayName = store.state.profile.displayName;
-    playerRig.setAttribute("player-info", {
-      displayName,
-      avatarSrc: "#" + (store.state.profile.avatarId || "botdefault")
-    });
-    const hudController = playerRig.querySelector("[hud-controller]");
-    hudController.setAttribute("hud-controller", { showTip: !store.state.activity.hasFoundFreeze });
-    document.querySelector("a-scene").emit("username-changed", { username: displayName });
-  };
+  scene.setAttribute("networked-scene", {
+    room: hub.hub_id,
+    serverURL: process.env.JANUS_SERVER,
+    debug: !!isDebug
+  });
 
-  const pollForSupportAvailability = callback => {
-    let isSupportAvailable = null;
-    const availabilityUrl = getReticulumFetchUrl("/api/v1/support/availability");
+  while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
 
-    const updateIfChanged = () => {
-      fetch(availabilityUrl).then(({ ok }) => {
-        if (isSupportAvailable !== ok) {
-          isSupportAvailable = ok;
-          callback(isSupportAvailable);
-        }
-      });
-    };
-
-    updateIfChanged();
-    setInterval(updateIfChanged, 30000);
-  };
-
-  const exitScene = () => {
-    if (NAF.connection.adapter && NAF.connection.adapter.localMediaStream) {
-      NAF.connection.adapter.localMediaStream.getTracks().forEach(t => t.stop());
-    }
-    if (hubChannel) {
-      hubChannel.disconnect();
-    }
-    const scene = document.querySelector("a-scene");
-    if (scene) {
-      if (scene.renderer) {
-        scene.renderer.setAnimationLoop(null); // Stop animation loop, TODO A-Frame should do this
-      }
-      document.body.removeChild(scene);
-    }
-    document.body.removeEventListener("touchend", requestFullscreen);
-  };
-
-  const enterScene = async (mediaStream, enterInVR, hubId) => {
-    const scene = document.querySelector("a-scene");
-
-    // Get aframe inspector url using the webpack file-loader.
-    const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
-    // Set the aframe-inspector url to our hosted copy.
-    scene.setAttribute("inspector", { url: aframeInspectorUrl });
-
-    if (!isBotMode) {
-      scene.classList.add("no-cursor");
-    }
-    const playerRig = document.querySelector("#player-rig");
-    document.querySelector("canvas").classList.remove("blurred");
-    scene.render();
-
-    if (enterInVR) {
-      scene.enterVR();
-    } else if (AFRAME.utils.device.isMobile()) {
-      document.body.addEventListener("touchend", requestFullscreen);
-    }
-
-    AFRAME.registerInputActions(inGameActions, "default");
-
-    scene.setAttribute("networked-scene", {
-      room: hubId,
-      serverURL: process.env.JANUS_SERVER
-    });
-
-    if (isDebug) {
-      scene.setAttribute("networked-scene", { debug: true });
-    }
-
-    scene.setAttribute("stats-plus", false);
-
-    if (isMobile || qsTruthy("mobile")) {
-      playerRig.setAttribute("virtual-gamepad-controls", {});
-    }
-
-    const applyProfileOnPlayerRig = applyProfileFromStore.bind(null, playerRig);
-    applyProfileOnPlayerRig();
-    store.addEventListener("statechanged", applyProfileOnPlayerRig);
-
-    const avatarScale = parseInt(qs.get("avatar_scale"), 10);
-
-    if (avatarScale) {
-      playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
-    }
-
-    const videoTracks = mediaStream ? mediaStream.getVideoTracks() : [];
-    let sharingScreen = videoTracks.length > 0;
-
-    const screenEntityId = `${NAF.clientId}-screen`;
-    let screenEntity = document.getElementById(screenEntityId);
-
-    scene.addEventListener("action_share_screen", () => {
-      sharingScreen = !sharingScreen;
-      if (sharingScreen) {
-        for (const track of videoTracks) {
-          mediaStream.addTrack(track);
-        }
-      } else {
-        for (const track of mediaStream.getVideoTracks()) {
-          mediaStream.removeTrack(track);
-        }
-      }
-      NAF.connection.adapter.setLocalMediaStream(mediaStream);
-      screenEntity.setAttribute("visible", sharingScreen);
-    });
-
-    document.body.addEventListener("blocked", ev => {
-      NAF.connection.entities.removeEntitiesOfClient(ev.detail.clientId);
-    });
-
-    document.body.addEventListener("unblocked", ev => {
-      NAF.connection.entities.completeSync(ev.detail.clientId);
-    });
-
-    const offset = { x: 0, y: 0, z: -1.5 };
-    const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
-      const { entity, orientation } = addMedia(src, "#interactable-media", contentOrigin, true);
-
-      orientation.then(or => {
-        entity.setAttribute("offset-relative-to", {
-          target: "#player-camera",
-          offset,
-          orientation: or
-        });
-      });
-    };
-
-    scene.addEventListener("add_media", e => {
-      const contentOrigin = e.detail instanceof File ? ObjectContentOrigins.FILE : ObjectContentOrigins.URL;
-
-      spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
-    });
-
-    scene.addEventListener("action_spawn_camera", () => {
-      const entity = document.createElement("a-entity");
-      entity.setAttribute("networked", { template: "#interactable-camera" });
-      entity.setAttribute("offset-relative-to", {
-        target: "#player-camera",
-        offset: { x: 0, y: 0, z: -1.5 }
-      });
-      scene.appendChild(entity);
-    });
-
-    scene.addEventListener("object_spawned", e => {
-      if (hubChannel) {
-        hubChannel.sendObjectSpawnedEvent(e.detail.objectType);
-      }
-    });
-
-    document.addEventListener("paste", e => {
-      if (e.target.nodeName === "INPUT") return;
-
-      const url = e.clipboardData.getData("text");
-      const files = e.clipboardData.files && e.clipboardData.files;
-      if (url) {
-        spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
-      } else {
-        for (const file of files) {
-          spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.CLIPBOARD);
-        }
-      }
-    });
-
-    document.addEventListener("dragover", e => {
-      e.preventDefault();
-    });
-
-    document.addEventListener("drop", e => {
-      e.preventDefault();
-      const url = e.dataTransfer.getData("url");
-      const files = e.dataTransfer.files;
-      if (url) {
-        spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
-      } else {
-        for (const file of files) {
-          spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.FILE);
-        }
-      }
-    });
-
-    if (!qsTruthy("offline")) {
-      document.body.addEventListener("connected", () => {
-        if (!isBotMode) {
-          hubChannel.sendEntryEvent().then(() => {
-            store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
-          });
-        }
-        remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 });
-      });
-
-      document.body.addEventListener("clientConnected", () => {
-        remountUI({
-          occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
-        });
-      });
-
-      document.body.addEventListener("clientDisconnected", () => {
-        remountUI({
-          occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
-        });
-      });
-
-      scene.components["networked-scene"].connect().catch(connectError => {
-        // hacky until we get return codes
-        const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
-        console.error(connectError);
-        remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
-        exitScene();
-
-        return;
-      });
-
-      const sendHubDataMessage = function(clientId, dataType, data, reliable) {
-        const event = "naf";
+  scene.components["networked-scene"]
+    .connect()
+    .then(() => {
+      NAF.connection.adapter.reliableTransport = (clientId, dataType, data) => {
         const payload = { dataType, data };
 
-        if (clientId != null) {
+        if (clientId) {
           payload.clientId = clientId;
         }
 
-        if (reliable) {
-          hubChannel.channel.push(event, payload);
-        } else {
-          const topic = hubChannel.channel.topic;
-          const join_ref = hubChannel.channel.joinRef();
-          hubChannel.channel.socket.push({ topic, event, payload, join_ref, ref: null }, false);
-        }
+        hubChannel.channel.push("naf", payload);
       };
+    })
+    .catch(connectError => {
+      // hacky until we get return codes
+      const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+      console.error(connectError);
+      remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
+      entryManager.exitScene();
 
-      NAF.connection.adapter.reliableTransport = (clientId, dataType, data) =>
-        sendHubDataMessage(clientId, dataType, data, true);
-      /*NAF.connection.adapter.unreliableTransport = (clientId, dataType, data) =>
-        sendHubDataMessage(clientId, dataType, data, false);*/
+      return;
+    });
+}
 
-      if (isDebug) {
-        NAF.connection.adapter.session.options.verbose = true;
-      }
+async function runBotMode(scene, entryManager) {
+  const noop = () => {};
+  scene.renderer = { setAnimationLoop: noop, render: noop };
 
-      if (isBotMode) {
-        playerRig.setAttribute("avatar-replay", {
-          camera: "#player-camera",
-          leftController: "#player-left-controller",
-          rightController: "#player-right-controller"
-        });
+  while (!NAF.connection.isConnected()) await nextTick();
+  entryManager.enterSceneWhenLoaded(new MediaStream(), false);
+}
 
-        const audioEl = document.createElement("audio");
-        const audioInput = document.querySelector("#bot-audio-input");
-        audioInput.onchange = () => {
-          audioEl.loop = true;
-          audioEl.muted = true;
-          audioEl.crossorigin = "anonymous";
-          audioEl.src = URL.createObjectURL(audioInput.files[0]);
-          document.body.appendChild(audioEl);
-        };
-        const dataInput = document.querySelector("#bot-data-input");
-        dataInput.onchange = () => {
-          const url = URL.createObjectURL(dataInput.files[0]);
-          playerRig.setAttribute("avatar-replay", { recordingUrl: url });
-        };
-        await new Promise(resolve => audioEl.addEventListener("canplay", resolve));
-        mediaStream.addTrack(audioEl.captureStream().getAudioTracks()[0]);
-        audioEl.play();
-      }
+document.addEventListener("DOMContentLoaded", () => {
+  const scene = document.querySelector("a-scene");
+  const hubChannel = new HubChannel(store);
+  const entryManager = new SceneEntryManager(hubChannel);
+  entryManager.init();
 
-      if (mediaStream) {
-        NAF.connection.adapter.setLocalMediaStream(mediaStream);
+  const linkChannel = new LinkChannel(store);
 
-        if (screenEntity) {
-          screenEntity.setAttribute("visible", sharingScreen);
-        } else if (sharingScreen) {
-          const sceneEl = document.querySelector("a-scene");
-          screenEntity = document.createElement("a-entity");
-          screenEntity.id = screenEntityId;
-          screenEntity.setAttribute("offset-relative-to", {
-            target: "#player-camera",
-            offset: "0 0 -2",
-            on: "action_share_screen"
-          });
-          screenEntity.setAttribute("networked", { template: "#video-template" });
-          sceneEl.appendChild(screenEntity);
-        }
-      }
+  window.APP.scene = scene;
 
-      pollForSupportAvailability(isSupportAvailable => {
-        remountUI({ isSupportAvailable });
-      });
-    }
-  };
+  registerNetworkSchemas();
+  remountUI({ hubChannel, linkChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
 
-  const getPlatformUnsupportedReason = () => {
-    if (typeof RTCDataChannelEvent === "undefined") {
-      return "no_data_channels";
-    }
+  pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 
-    return null;
-  };
+  document.body.addEventListener("connected", () =>
+    remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 })
+  );
 
-  remountUI({ enterScene, exitScene });
+  document.body.addEventListener("clientConnected", () =>
+    remountUI({
+      occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
+    })
+  );
+
+  document.body.addEventListener("clientDisconnected", () =>
+    remountUI({
+      occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
+    })
+  );
 
   const platformUnsupportedReason = getPlatformUnsupportedReason();
 
   if (platformUnsupportedReason) {
-    remountUI({ platformUnsupportedReason: platformUnsupportedReason });
-    exitScene();
+    remountUI({ platformUnsupportedReason });
+    entryManager.exitScene();
     return;
   }
 
   if (qs.get("required_version") && process.env.BUILD_VERSION) {
     const buildNumber = process.env.BUILD_VERSION.split(" ", 1)[0]; // e.g. "123 (abcd5678)"
+
     if (qs.get("required_version") !== buildNumber) {
       remountUI({ roomUnavailableReason: "version_mismatch" });
       setTimeout(() => document.location.reload(), 5000);
-      exitScene();
+      entryManager.exitScene();
       return;
     }
   }
@@ -529,20 +346,17 @@ const onReady = async () => {
   getAvailableVREntryTypes().then(availableVREntryTypes => {
     if (availableVREntryTypes.isInHMD) {
       remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
-    } else if (availableVREntryTypes.gearvr === VR_DEVICE_AVAILABILITY.yes) {
-      remountUI({ availableVREntryTypes, forcedVREntryType: "gearvr" });
     } else {
       remountUI({ availableVREntryTypes });
     }
   });
 
-  const environmentRoot = document.querySelector("#environment-root");
+  const environmentScene = document.querySelector("#environment-scene");
 
-  const initialEnvironmentEl = document.createElement("a-entity");
-  initialEnvironmentEl.addEventListener("bundleloaded", () => {
-    remountUI({ initialEnvironmentLoaded: true });
+  environmentScene.addEventListener("bundleloaded", () => {
+    remountUI({ environmentSceneLoaded: true });
 
-    for (const modelEl of initialEnvironmentEl.querySelectorAll(":scope > [gltf-model-plus]")) {
+    for (const modelEl of environmentScene.querySelectorAll(":scope > [gltf-model-plus]")) {
       const model = modelEl.object3DMap.mesh;
 
       if (model && model.animations.length > 0) {
@@ -550,27 +364,13 @@ const onReady = async () => {
       }
     }
 
-    // We never want to stop the render loop when were running in "bot" mode.
-    if (!isBotMode) {
-      // Stop rendering while the UI is up. We restart the render loop in enterScene.
-      // Wait a tick plus some margin so that the environments actually render.
-      setTimeout(() => scene.renderer.setAnimationLoop(null), 100);
-    } else {
-      const noop = () => {};
-      // Replace renderer with a noop renderer to reduce bot resource usage.
-      scene.renderer = { setAnimationLoop: noop, render: noop };
+    setupLobbyCamera();
+
+    // Replace renderer with a noop renderer to reduce bot resource usage.
+    if (isBotMode) {
+      runBotMode(scene, entryManager);
     }
   });
-  environmentRoot.appendChild(initialEnvironmentEl);
-
-  const enterSceneWhenReady = hubId => {
-    const enterSceneImmediately = () => enterScene(new MediaStream(), false, hubId);
-    if (scene.hasLoaded) {
-      enterSceneImmediately();
-    } else {
-      scene.addEventListener("loaded", enterSceneImmediately);
-    }
-  };
 
   // Connect to reticulum over phoenix channels to get hub info.
   const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
@@ -578,49 +378,16 @@ const onReady = async () => {
 
   const socket = connectToReticulum(isDebug);
   const channel = socket.channel(`hub:${hubId}`, {});
-  let loadedSceneUrl = null;
-
-  // This routine needs to handle re-joins.
-  const handleJoinedHubChannel = async data => {
-    const hub = data.hubs[0];
-    const defaultSpaceTopic = hub.topics[0];
-    const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");
-    const bundleAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle");
-    const sceneUrl = (glbAsset || bundleAsset).src;
-    const hasExtension = /\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl);
-
-    console.log(`Scene URL: ${sceneUrl}`);
-
-    if (glbAsset || hasExtension) {
-      if (loadedSceneUrl !== sceneUrl) {
-        const resolved = await resolveMedia(sceneUrl, false, 0);
-        const gltfEl = document.createElement("a-entity");
-        gltfEl.setAttribute("gltf-model-plus", { src: resolved.raw, useCache: false, inflate: true });
-        gltfEl.addEventListener("model-loaded", () => initialEnvironmentEl.emit("bundleloaded"));
-        initialEnvironmentEl.appendChild(gltfEl);
-        loadedSceneUrl = sceneUrl;
-      }
-    } else {
-      // TODO kill bundles
-      initialEnvironmentEl.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
-    }
-
-    remountUI({ hubId: hub.hub_id, hubName: hub.name });
-    hubChannel.setPhoenixChannel(channel);
-    if (isBotMode) enterSceneWhenReady(hub.hub_id);
-
-    if (NAF.connection.adapter) {
-      // Send complete sync on phoenix re-join.
-      NAF.connection.entities.completeSync(null, true);
-    }
-  };
 
   channel
     .join()
-    .receive("ok", handleJoinedHubChannel)
+    .receive("ok", async data => {
+      hubChannel.setPhoenixChannel(channel);
+      await handleHubChannelJoined(entryManager, hubChannel, data);
+    })
     .receive("error", res => {
       if (res.reason === "closed") {
-        exitScene();
+        entryManager.exitScene();
         remountUI({ roomUnavailableReason: "closed" });
       }
 
@@ -628,12 +395,9 @@ const onReady = async () => {
     });
 
   channel.on("naf", data => {
-    if (NAF.connection.adapter) {
-      NAF.connection.adapter.onData(data);
-    }
+    if (!NAF.connection.adapter) return;
+    NAF.connection.adapter.onData(data);
   });
 
   linkChannel.setSocket(socket);
-};
-
-document.addEventListener("DOMContentLoaded", onReady);
+});

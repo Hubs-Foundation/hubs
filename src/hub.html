@@ -9,7 +9,7 @@
 
     <link rel="shortcut icon" type="image/png" href="/favicon.ico">
     <title>Get together | Hubs by Mozilla</title>
-    <link href="https://fonts.googleapis.com/css?family=Zilla+Slab:300,300i,400,400i,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700" rel="stylesheet">
 </head>
 
 <body>
@@ -21,6 +21,7 @@
     </audio>
 
     <a-scene
+        class="grab-cursor"
         renderer="antialias: true; gammaOutput: true; sortObjects: true; physicallyCorrectLights: true;"
         gamma-factor
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
@@ -30,6 +31,7 @@
         personal-space-bubble="debug: false;"
         vr-mode-ui="enabled: false"
         pinch-to-move
+        stats-plus="false"
         input-configurator="
                   gazeCursorRayObject: #player-camera;
                   cursorController: #cursor-controller;
@@ -165,7 +167,7 @@
                     <!-- HACK: rotation component above is required for its side effect of setting YXZ order -->
                     <a-entity class="delete-button" visible-while-frozen>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
-                        <a-entity text=" value:Delete; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                        <a-entity text=" value:Remove; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>
@@ -198,7 +200,7 @@
                     ></a-sphere>
                     <a-entity class="delete-button" visible-while-frozen>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
-                        <a-entity text=" value:Delete; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                        <a-entity text=" value:Remove; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>
@@ -220,7 +222,7 @@
                 >
                     <a-entity class="delete-button" visible-while-frozen>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
-                        <a-entity text=" value:Delete; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                        <a-entity text=" value:Remove; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>
@@ -324,13 +326,11 @@
         <!-- Player Rig -->
         <a-entity
             id="player-rig"
-            networked="template: #remote-avatar-template; attachTemplateToLocal: false;"
-            spawn-controller="loadedEvent: bundleloaded; target: #environment-root"
+            spawn-controller="loadedEvent: entered; target: #player-rig"
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
             player-info
-            networked-avatar
             cardboard-controls
         >
           <a-entity
@@ -355,7 +355,6 @@
               id="player-camera"
               class="camera"
               camera
-              position="0 1.6 0"
               personal-space-bubble="radius: 0.4;"
               pitch-yaw-rotator
           >
@@ -459,7 +458,9 @@
             id="environment-root"
             nav-mesh-helper
             static-body="shape: none;"
-        ></a-entity>
+        >
+            <a-entity id="environment-scene"/>
+        </a-entity>
 
         <a-entity
         super-spawner="

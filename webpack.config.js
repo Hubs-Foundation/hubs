@@ -245,6 +245,7 @@ module.exports = (env, argv) => ({
         NODE_ENV: argv.mode,
         JANUS_SERVER: process.env.JANUS_SERVER,
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
+        FARSPARK_SERVER: process.env.FARSPARK_SERVER,
         ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER,
         EXTRA_ENVIRONMENTS: process.env.EXTRA_ENVIRONMENTS,
         BUILD_VERSION: process.env.BUILD_VERSION

@@ -1,19 +1,80 @@
+@import 'shared.scss';
+
+:local(.dialog) {
+  position: absolute;
+  color: white;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+:local(.header) {
+  font-size: 2em;
+  font-weight: bold;
+  margin-bottom: 12px;
+  text-align: center;
+
+  @media(max-height: 420px) {
+    display: none;
+  }
+}
+
+:local(.contents) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
 :local(.domain) , :local(.code) {
   color: white;
-  font-family: monospace;
   font-weight: bold;
   text-decoration: none;
 }
 
 :local(.domain) {
+  @extend %default-font;
   font-size: 3em;
+  font-weight: bold;
+  text-decoration: none;
+  color: black;
+  text-align: center;
+  background-color: white;
+  border: 1px solid #e2e2e2;
+  border-radius: 12px;
+  margin: 12px;
   padding: 14px;
   display: block;
+  width: 295px;
 }
 
 :local(.code) {
-  font-size: 4.0em;
-  padding: 8px;
+  color: black;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 2.5em;
+  display: flex;
+  margin: 12px;
+}
+
+:local(.imageHeader) {
+  width: 100px;
+  height: 100px;
+  background-color: white;
+  border-radius: 50px;
+  fill: black;
+  margin-bottom: 24px;
+  padding-right: 4px;
+
+  @media(max-height: 420px) {
+    display: none;
+  }
 }
 
 :local(.keep-open) {
@@ -22,8 +83,34 @@
 
 :local(.digit) {
   padding: 0 8px;
+  margin: 2px;
+  background-color: white;
+  border: 1px solid #e2e2e2;
+  border-radius: 12px;
+  width: 32px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 :local(.code-loading-panel) {
   background: none;
 }
+
+:local(.close) {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  right: 12px;
+  font-size: 3.0em;
+  top: 0px;
+  cursor: pointer;
+}
+
+:local(.close-button) {
+  @extend %action-button;
+  background-color: $darker-grey;
+  margin-top: 24px;
+}
+

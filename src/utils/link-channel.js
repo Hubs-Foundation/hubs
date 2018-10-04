@@ -24,9 +24,8 @@ export default class LinkChannel {
     return new Promise(resolve => {
       const onFinished = new Promise(finished => {
         const step = () => {
-          const code = Math.floor(Math.random() * 9999)
-            .toString()
-            .padStart(4, "0");
+          const getLetter = () => "ABCDEFGHI"[Math.floor(Math.random() * 9)];
+          const code = `${getLetter()}${getLetter()}${getLetter()}${getLetter()}`;
 
           // Only respond to one link_request in this channel.
           let readyToSend = false;

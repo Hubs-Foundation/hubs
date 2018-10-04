@@ -162,7 +162,7 @@ class HubCreatePanel extends Component {
     if (!this.state.ready) return null;
 
     if (this.props.environments.length == 0) {
-      return <div />;
+      return <div className={styles.placeholder} />;
     }
 
     const environment = this.props.environments[this.state.environmentIndex];
@@ -235,13 +235,6 @@ class HubCreatePanel extends Component {
                 <button type="submit" tabIndex="5" className={styles.submitButton}>
                   <FormattedMessage id="home.room_create_button" />
                 </button>
-              </div>
-              <div className={styles.linkCode}>
-                <div>
-                  <a className={styles.link} href="/link" rel="nofollow">
-                    <FormattedMessage id="home.have_entry_code" />
-                  </a>
-                </div>
               </div>
             </div>
           </div>

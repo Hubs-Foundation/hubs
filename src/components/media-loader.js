@@ -1,5 +1,5 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
-import { resolveMedia, fetchMaxContentIndex } from "../utils/media-utils";
+import { guessContentType, proxiedUrlFor, resolveUrl } from "../utils/media-utils";
 
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
@@ -9,11 +9,20 @@ gltfLoader.load(loadingObjectSrc, gltf => {
   loadingObject = gltf;
 });
 
+const fetchContentType = url => {
+  return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
+};
+
+const fetchMaxContentIndex = url => {
+  return fetch(url).then(r => parseInt(r.headers.get("x-max-content-index")));
+};
+
 AFRAME.registerComponent("media-loader", {
   schema: {
     src: { type: "string" },
-    index: { type: "number" },
-    resize: { default: false }
+    resize: { default: false },
+    resolve: { default: false },
+    contentType: { default: null }
   },
 
   init() {
@@ -92,7 +101,7 @@ AFRAME.registerComponent("media-loader", {
 
   async update(oldData) {
     try {
-      const { src, index } = this.data;
+      const { src } = this.data;
 
       if (src !== oldData.src && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
@@ -100,49 +109,54 @@ AFRAME.registerComponent("media-loader", {
 
       if (!src) return;
 
-      const { raw, origin, images, contentType } = await resolveMedia(src, false, index);
+      let canonicalUrl = src;
+      let accessibleUrl = src;
+      let contentType = this.data.contentType;
+
+      if (this.data.resolve) {
+        const result = await resolveUrl(src);
+        canonicalUrl = result.origin;
+        contentType = (result.meta && result.meta.expected_content_type) || contentType;
+      }
+
+      // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
+      accessibleUrl = proxiedUrlFor(canonicalUrl);
+
+      // if the component creator didn't know the content type, we didn't get it from reticulum, and
+      // we don't think we can infer it from the extension, we need to make a HEAD request to find it out
+      contentType = contentType || guessContentType(canonicalUrl) || (await fetchContentType(accessibleUrl));
 
       // We don't want to emit media_resolved for index updates.
       if (src !== oldData.src) {
-        this.el.emit("media_resolved", { src, raw, origin, contentType });
+        this.el.emit("media_resolved", { src, raw: accessibleUrl, contentType });
       }
 
-      const isPDF = contentType.startsWith("application/pdf");
       if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-image");
         this.el.addEventListener("video-loaded", this.clearLoadingTimeout, { once: true });
-        this.el.setAttribute("media-video", { src: raw });
+        this.el.setAttribute("media-video", { src: accessibleUrl });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
-      } else if (contentType.startsWith("image/") || isPDF) {
+      } else if (contentType.startsWith("image/")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
-        this.el.addEventListener(
-          "image-loaded",
-          async () => {
-            this.clearLoadingTimeout();
-            if (isPDF) {
-              const maxIndex = await fetchMaxContentIndex(src, images.png);
-              this.el.setAttribute("media-pager", { index, maxIndex });
-            }
-          },
-          { once: true }
-        );
-        const imageSrc = isPDF ? images.png : raw;
-        const imageContentType = isPDF ? "image/png" : contentType;
-
-        if (!isPDF) {
-          this.el.removeAttribute("media-pager");
-        }
-
-        this.el.setAttribute("media-image", { src: imageSrc, contentType: imageContentType });
+        this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
+        this.el.removeAttribute("media-pager");
+        this.el.setAttribute("media-image", { src: accessibleUrl, contentType });
+        this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+      } else if (contentType.startsWith("application/pdf")) {
+        this.el.removeAttribute("gltf-model-plus");
+        this.el.removeAttribute("media-video");
+        // two small differences:
+        // 1. we pass the canonical URL to the pager so it can easily make subresource URLs
+        // 2. we don't remove the media-image component -- media-pager uses that internally
+        this.el.setAttribute("media-pager", { src: canonicalUrl });
+        this.el.addEventListener("preview-loaded", this.clearLoadingTimeout, { once: true });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
       } else if (
         contentType.includes("application/octet-stream") ||
         contentType.includes("x-zip-compressed") ||
-        contentType.startsWith("model/gltf") ||
-        src.endsWith(".gltf") ||
-        src.endsWith(".glb")
+        contentType.startsWith("model/gltf")
       ) {
         this.el.removeAttribute("media-image");
         this.el.removeAttribute("media-video");
@@ -168,7 +182,7 @@ AFRAME.registerComponent("media-loader", {
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
         this.el.setAttribute("gltf-model-plus", {
-          src: raw,
+          src: accessibleUrl,
           contentType: contentType,
           inflate: true
         });
@@ -184,48 +198,63 @@ AFRAME.registerComponent("media-loader", {
 
 AFRAME.registerComponent("media-pager", {
   schema: {
-    index: { type: "string" },
-    maxIndex: { type: "string" }
+    src: { type: "string" },
+    index: { default: 0 }
   },
 
   init() {
+    this.toolbar = null;
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
+    this.el.addEventListener("image-loaded", async e => {
+      // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
+      // request for the same page to read out the max-content-index header
+      this.maxIndex = await fetchMaxContentIndex(e.detail.src);
+      // if this is the first image we ever loaded, set up the UI
+      if (this.toolbar == null) {
+        const template = document.getElementById("paging-toolbar");
+        this.el.appendChild(document.importNode(template.content, true));
+        this.toolbar = this.el.querySelector(".paging-toolbar");
+        // we have to wait a tick for the attach callbacks to get fired for the elements in a template
+        setTimeout(() => {
+          this.nextButton = this.el.querySelector(".next-button [text-button]");
+          this.prevButton = this.el.querySelector(".prev-button [text-button]");
+          this.pageLabel = this.el.querySelector(".page-label");
 
-    const template = document.getElementById("paging-toolbar");
-    this.el.appendChild(document.importNode(template.content, true));
-    this.toolbar = this.el.querySelector(".paging-toolbar");
-    // we have to wait a tick for the attach callbacks to get fired for the elements in a template
-    setTimeout(() => {
-      this.nextButton = this.el.querySelector(".next-button [text-button]");
-      this.prevButton = this.el.querySelector(".prev-button [text-button]");
-      this.pageLabel = this.el.querySelector(".page-label");
+          this.nextButton.addEventListener("click", this.onNext);
+          this.prevButton.addEventListener("click", this.onPrev);
 
-      this.nextButton.addEventListener("click", this.onNext);
-      this.prevButton.addEventListener("click", this.onPrev);
-
-      this.update();
-    }, 0);
+          this.update();
+          this.el.emit("preview-loaded");
+        }, 0);
+      } else {
+        this.update();
+      }
+    });
   },
 
   update() {
-    if (!this.pageLabel) return;
-    this.pageLabel.setAttribute("text", "value", `${this.data.index + 1}/${this.data.maxIndex + 1}`);
-    this.repositionToolbar();
+    if (!this.data.src) return;
+    const pageSrc = proxiedUrlFor(this.data.src, this.data.index);
+    this.el.setAttribute("media-image", { src: pageSrc, contentType: "image/png" });
+    if (this.pageLabel) {
+      this.pageLabel.setAttribute("text", "value", `${this.data.index + 1}/${this.maxIndex + 1}`);
+      this.repositionToolbar();
+    }
   },
 
   remove() {
-    this.nextButton.removeEventListener("click", this.onNext);
-    this.prevButton.removeEventListener("click", this.onPrev);
-    this.el.removeChild(this.toolbar);
+    if (this.toolbar) {
+      this.el.removeChild(this.toolbar);
+    }
   },
 
   onNext() {
-    this.el.setAttribute("media-loader", "index", Math.min(this.data.index + 1, this.data.maxIndex));
+    this.el.setAttribute("media-pager", "index", Math.min(this.data.index + 1, this.maxIndex));
   },
 
   onPrev() {
-    this.el.setAttribute("media-loader", "index", Math.max(this.data.index - 1, 0));
+    this.el.setAttribute("media-pager", "index", Math.max(this.data.index - 1, 0));
   },
 
   repositionToolbar() {

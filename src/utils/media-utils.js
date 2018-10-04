@@ -2,41 +2,48 @@ import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
-const fetchContentType = async url => {
-  return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
+const commonKnownContentTypes = {
+  gltf: "model/gltf",
+  glb: "model/gltf-binary",
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  pdf: "application/pdf",
+  mp4: "video/mp4",
+  mp3: "audio/mpeg"
 };
 
-const contentIndexCache = new Map();
-export const fetchMaxContentIndex = async (documentUrl, pageUrl) => {
-  if (contentIndexCache.has(documentUrl)) return contentIndexCache.get(documentUrl);
-  const maxIndex = await fetch(pageUrl).then(r => parseInt(r.headers.get("x-max-content-index")));
-  contentIndexCache.set(documentUrl, maxIndex);
-  return maxIndex;
+// thanks to https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
+function b64EncodeUnicode(str) {
+  // first we use encodeURIComponent to get percent-encoded UTF-8, then we convert the percent-encodings
+  // into raw bytes which can be fed into btoa.
+  const CHAR_RE = /%([0-9A-F]{2})/g;
+  return btoa(encodeURIComponent(str).replace(CHAR_RE, (_, p1) => String.fromCharCode("0x" + p1)));
+}
+
+export const proxiedUrlFor = (url, index) => {
+  // farspark doesn't know how to read '=' base64 padding characters
+  const encodedUrl = b64EncodeUnicode(url).replace(/=+$/g, "");
+  const method = index != null ? "extract" : "raw";
+  return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${encodedUrl}`;
 };
 
-const resolveMediaCache = new Map();
-export const resolveMedia = async (url, skipContentType, index) => {
-  const parsedUrl = new URL(url);
+const resolveUrlCache = new Map();
+export const resolveUrl = async (url, index) => {
   const cacheKey = `${url}|${index}`;
-  if (resolveMediaCache.has(cacheKey)) return resolveMediaCache.get(cacheKey);
-
-  const isHttpOrHttps = parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:";
-  const resolved = !isHttpOrHttps
-    ? { raw: url, origin: url }
-    : await fetch(mediaAPIEndpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ media: { url, index } })
-      }).then(r => r.json());
-
-  if (isHttpOrHttps && !skipContentType) {
-    const contentType =
-      (resolved.meta && resolved.meta.expected_content_type) || (await fetchContentType(resolved.raw));
-    resolved.contentType = contentType;
-  }
-
-  resolveMediaCache.set(cacheKey, resolved);
+  if (resolveUrlCache.has(cacheKey)) return resolveUrlCache.get(cacheKey);
+  const resolved = await fetch(mediaAPIEndpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ media: { url, index } })
+  }).then(r => r.json());
+  resolveUrlCache.set(cacheKey, resolved);
   return resolved;
+};
+
+export const guessContentType = url => {
+  const extension = new URL(url).pathname.split(".").pop();
+  return commonKnownContentTypes[extension];
 };
 
 export const upload = file => {
@@ -88,13 +95,13 @@ function getOrientation(file, callback) {
 }
 
 let interactableId = 0;
-export const addMedia = (src, template, contentOrigin, resize = false) => {
+export const addMedia = (src, template, contentOrigin, resolve = false, resize = false) => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
   entity.id = "interactable-media-" + interactableId++;
   entity.setAttribute("networked", { template: template });
-  entity.setAttribute("media-loader", { resize, src: typeof src === "string" ? src : "" });
+  entity.setAttribute("media-loader", { resize, resolve, src: typeof src === "string" ? src : "" });
   scene.appendChild(entity);
 
   const orientation = new Promise(function(resolve) {
@@ -111,7 +118,7 @@ export const addMedia = (src, template, contentOrigin, resize = false) => {
       .then(response => {
         const srcUrl = new URL(response.raw);
         srcUrl.searchParams.set("token", response.meta.access_token);
-        entity.setAttribute("media-loader", { src: srcUrl.href });
+        entity.setAttribute("media-loader", { resolve: false, src: srcUrl.href });
       })
       .catch(() => {
         entity.setAttribute("media-loader", { src: "error" });

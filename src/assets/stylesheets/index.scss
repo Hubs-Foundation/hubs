@@ -11,8 +11,8 @@ $header-section-width: 350px;
 body {
   margin: 0;
   padding: 0;
-  background-color: black;
-  color: white;
+  background-color: white;
+  color: black;
 }
 
 .home-root {
@@ -47,20 +47,22 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  opacity: 0.5;
+  opacity: 0.3;
   min-width: 100%;
-  filter: saturate(1.5);
   min-height: 100%;
   z-index: 1;
 }
 
 :local(.header-content) {
   padding: 0.5em 1.75em 0.5em 1.75em;
-  background-color: $darkest-transparent;
+  background-color: white;
   min-height: 65px;
   height: 65px;
   display: flex;
-  border-bottom: 1px solid $darkest-grey;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 
   :local(.title-and-nav) {
     display: flex;
@@ -97,11 +99,15 @@ body {
       align-items: center;
 
       a {
-        margin: 0px 16px 0px 0px;
-        color: white;
+        margin: 0px 32px 0px 0px;
+        color: black;
         font-weight: bold;
         font-size: 1.4em;
         text-decoration: none;
+      }
+
+      a:first-child {
+        margin-left: 16px;
       }
     }
   }
@@ -118,123 +124,123 @@ body {
   min-height: 740px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   position: relative;
 
   @media (max-width: 768px) {
-    padding: 1em 1.5em 1em 1.5em;
-    justify-content: space-around;
+    padding: 0px;
     min-height: 490px;
   }
 
   :local(.attribution) {
     position: absolute;
     right: 12px;
-    bottom: 12px;
-    color: $grey-text;
-    text-shadow: 0px 0px 2px rgba(32, 32, 32, 1.0);
-    opacity: 0.5;
+    top: 12px;
+    color: white;
+    opacity: 0.8;
 
     a {
-      color: $grey-text;
+      font-weight: bold;
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      display: none;
     }
   }
 
   :local(.container) {
-    padding-top: 2vw;
-    padding-left: 2.1em;
-    padding-right: 2.1em;
-    flex: 2;
-    text-shadow: 0px 0px 2px rgba(32, 32, 32, 1.0);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 
-    @media (max-height: 720px) {
-      padding-bottom: 0px;
-      flex: 1;
+    :local(.logo) {
+      width: 350px;
     }
+
+    padding: 2em;
 
     :local(.title) {
-      font-size: 4vw;
+      text-align: center;
+      font-size: 1.5em;
       font-weight: bold;
-
-      @media (max-width: 768px) , (max-height: 715px) {
-        font-size: 1.9em;
-      }
-
-      @media (max-width: 768px) {
-        text-align: center;
-      }
-
-      @media (min-width: 1824px) {
-        font-size: 4.5em;
-      }
-    }
-
-    :local(.subtitle) {
-      font-size: 2.5vw;
-      font-weight: lighter;
-      color: $light-text;
-
-      @media (max-width: 768px) , (max-height: 715px) {
-        font-size: 1.1em;
-        margin-top: 0.2em;
-      }
-
-      @media (max-width: 768px) {
-        text-align: center;
-      }
-
-      @media (min-width: 1824px) {
-        font-size: 2.8em;
-      }
-
-      @media (max-height: 720px) {
-        display: none;
-      }
     }
   }
 
   :local(.create) {
     padding: 2.1em;
     padding-bottom: 3.5vw;
-    flex: 4;
     position: relative;
 
     @media (max-width: 768px) {
       padding: 0.5em;
     }
   }
+
+  :local(.join-button) {
+    display: flex;
+    justify-content: center;
+
+    a {
+      margin-top: 8px;
+      @extend %action-button;
+    }
+  }
 }
 
 :local(.footer-content) {
-  padding: 1em 2.25em 1em 2.25em;
-  background-color: $darkest-transparent;
+  padding: 1em 2.25em;
+  margin: 24px;
+
+  @media (max-width: 768px) {
+    padding: 1em;
+    margin: 0;
+  }
+
   min-height: 80px;
   display: flex;
-  border-top: 2px solid #242424;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
 
   :local(.links) {
     text-align: center;
-    color: $dark-grey;
+    color: black;
     display: flex;
     flex-direction: column;
+
+    :local(.moz-logo) {
+      width: 172px;
+      height: 49px;
+      margin-left: 18px;
+
+      @media (max-width: 768px) {
+        width: 113px;
+        height: 32px;
+        margin: 0;
+      }
+    }
 
     :local(.top) {
       display: flex;
       justify-content: space-between;
+      align-items: flex-end;
     }
 
     :local(.link) {
-      color: $grey-text;
-      margin-left: 8px;
-      margin-right: 8px;
+      color: black;
+      font-weight: bold;
+      margin: 0 18px;
+
+      @media (max-width: 768px) {
+        display: none;
+      }
     }
 
     :local(.bottom) {
       margin-top: 8px;
 
       a {
-        color: $grey-text;
+        color: black;
       }
     }
   }
