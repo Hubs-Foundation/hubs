@@ -1,2 +1,100 @@
 @import 'shared';
 @import 'loader';
+
+$breakpoint: 1280px;
+
+body {
+  @extend %default-font;
+  background: black;
+  color: white;
+  margin: 0;
+}
+
+:local(.bg) {
+  background: radial-gradient(#222C41 0%, black 100%); 
+  top: 0;
+  left: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+}
+
+:local(.ui) {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh);
+}
+
+:local(.content) {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+:local(.header) {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: white;
+}
+
+:local(.header-links) {
+  display: flex;
+  margin: 24px 12px;
+
+  a {
+    color: white;
+    text-decoration: none;
+    margin: 0px 18px;
+  }
+}
+
+:local(.hero-pane) {
+  display: flex;
+  height: 100%;
+
+  @media(max-width: $breakpoint) {
+    flex-direction: column;
+  }
+}
+
+:local(.hero-message) {
+  width: 600px;
+  background-color: red;
+
+  @media(max-width: $breakpoint) {
+    order: 2;
+    width: 100%;
+  }
+}
+
+:local(.hero-video) {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  position: relative;
+  margin-left: 32px;
+  flex: 1;
+
+  @media(max-width: $breakpoint) {
+    height: auto;
+    margin: 0px
+  }
+}
+
+:local(.preview-video) {
+  width: 100%;
+  top: 0;
+  left: 0;
+  position: absolute;
+
+  border-radius: 12px 0 0 12px;
+
+  // TODO match to real video
+  @media(max-width: 1280px) {
+    border-radius: 12px;
+  }
+
+  z-index: -1;
+}
