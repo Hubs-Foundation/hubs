@@ -21,8 +21,6 @@ import "./utils/audio-context-fix";
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
-import { addAnimationComponents } from "./utils/animation";
-
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
 import trackpad_scrolling from "./behaviours/trackpad-scrolling";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
@@ -353,14 +351,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  const environmentScene = document.querySelector("#environment-scene");
-
-  environmentScene.addEventListener("bundleloaded", () => {
+  document.querySelector("#environment-scene").addEventListener("bundleloaded", () => {
     remountUI({ environmentSceneLoaded: true });
-
-    for (const modelEl of environmentScene.children) {
-      addAnimationComponents(modelEl);
-    }
 
     setupLobbyCamera();
 

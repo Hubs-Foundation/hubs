@@ -21,7 +21,7 @@ AFRAME.registerComponent("animation-mixer", {
     const sceneObject3D = event.detail.model;
     this.setAnimationMixer(sceneObject3D);
 
-    this.el.removeEventListener("model-loaded", this.onModelLoaded);
+    this.el.removeEventListener(this.onModelLoaded);
   },
 
   setAnimationMixer(rootObject3D) {
@@ -35,6 +35,6 @@ AFRAME.registerComponent("animation-mixer", {
   },
 
   destroy() {
-    this.el.removeEventListener("model-loaded", this.onModelLoaded);
+    this.el.removeEventListener(this.onModelLoaded);
   }
 });
