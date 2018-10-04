@@ -1,62 +1,81 @@
+function findModel(entity) {
+  while (entity && !(entity.components && entity.components["gltf-model-plus"])) {
+    entity = entity.parentNode;
+  }
+  return entity;
+}
+
 /**
  * Loops the given clip using this entity's animation mixer
  * @component loop-animation
  */
 AFRAME.registerComponent("loop-animation", {
-  dependencies: ["animation-mixer"],
   schema: {
-    clip: { type: "string", required: true }
+    clip: { type: "string" }
   },
   init() {
-    const object3DMap = this.el.object3DMap;
-    this.model = object3DMap.mesh || object3DMap.scene;
+    this.mixerEl = findModel(this.el);
 
-    if (this.model) {
-      this.mixer = this.el.components["animation-mixer"].mixer;
+    this.onMixerReady = this.onMixerReady.bind(this);
+
+    if (!this.mixerEl) {
+      return;
+    }
+
+    if (this.mixerEl.components["animation-mixer"]) {
+      this.onMixerReady();
     } else {
-      this.onModelLoaded = this.onModelLoaded.bind(this);
-      this.el.addEventListener("model-loaded", this.onModelLoaded);
+      this.el.addEventListener("model-loaded", this.onMixerReady);
     }
   },
 
-  onModelLoaded(event) {
-    const animationMixerComponent = this.el.components["animation-mixer"];
-    this.model = event.detail.model;
-    this.mixer = animationMixerComponent.mixer;
-
-    this.updateClipState(true);
-
-    this.el.removeEventListener(this.onModelLoaded);
+  onMixerReady() {
+    this.mixer = this.mixerEl.components["animation-mixer"].mixer;
+    this.updateClip();
   },
 
   update(oldData) {
-    if (oldData.clip !== this.data.clip && this.model) {
-      this.updateClipState(true);
+    if (oldData.clip !== this.data.clip && this.mixer) {
+      this.updateClip();
     }
   },
 
-  updateClipState(play) {
-    const model = this.model;
+  updateClip() {
+    const mixer = this.mixer;
+    const root = mixer.getRoot();
+    const animations = root.animations;
     const clipName = this.data.clip;
 
-    for (const clip of this.model.animations) {
-      if (clip.name === clipName) {
-        const action = this.mixer.clipAction(clip, model.parent);
-
-        if (play) {
-          action.enabled = true;
-          action.setLoop(THREE.LoopRepeat, Infinity).play();
-        } else {
-          action.stop();
-        }
-
-        break;
-      }
+    if (!animations || animations.length === 0) {
+      return;
     }
+
+    let clip;
+
+    if (!clipName) {
+      clip = animations[0];
+    } else {
+      clip = animations.find(({ name }) => name === clipName);
+    }
+
+    if (!clip) {
+      return;
+    }
+
+    const action = this.mixer.clipAction(clip, this.el.object3D);
+    action.enabled = true;
+    action.setLoop(THREE.LoopRepeat, Infinity).play();
+    this.currentAction = action;
   },
 
   destroy() {
-    this.updateClipState(false);
-    this.el.removeEventListener(this.onModelLoaded);
+    if (this.currentAction) {
+      this.currentAction.enabled = false;
+      this.currentAction.stop();
+    }
+
+    if (this.mixerEl) {
+      this.mixerEl.removeEventListener("model-loaded", this.onMixerReady);
+    }
   }
 });
