@@ -18,13 +18,14 @@ AFRAME.registerComponent("loop-animation", {
 
     this.onMixerReady = this.onMixerReady.bind(this);
 
-    if (this.mixerEl) {
-      if (this.mixerEl.components["animation-mixer"]) {
-        this.mixer = this.mixerEl.components["animation-mixer"].mixer;
-        this.updateClip();
-      } else {
-        this.el.addEventListener("model-loaded", this.onMixerReady);
-      }
+    if (!this.mixerEl) {
+      return;
+    }
+
+    if (this.mixerEl.components["animation-mixer"]) {
+      this.onMixerReady();
+    } else {
+      this.el.addEventListener("model-loaded", this.onMixerReady);
     }
   },
 
@@ -57,12 +58,14 @@ AFRAME.registerComponent("loop-animation", {
       clip = animations.find(({ name }) => name === clipName);
     }
 
-    if (clip) {
-      const action = this.mixer.clipAction(clip, this.el.object3D);
-      action.enabled = true;
-      action.setLoop(THREE.LoopRepeat, Infinity).play();
-      this.currentAction = action;
+    if (!clip) {
+      return;
     }
+
+    const action = this.mixer.clipAction(clip, this.el.object3D);
+    action.enabled = true;
+    action.setLoop(THREE.LoopRepeat, Infinity).play();
+    this.currentAction = action;
   },
 
   destroy() {

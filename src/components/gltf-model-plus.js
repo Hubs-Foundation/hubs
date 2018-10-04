@@ -40,6 +40,8 @@ function parallelTraverse(a, b, callback) {
   }
 }
 
+// Modified version of Don McCurdy's AnimationUtils.clone
+// https://github.com/mrdoob/three.js/pull/14494
 function cloneSkinnedMesh(source) {
   const cloneLookup = new Map();
 
@@ -59,7 +61,7 @@ function cloneSkinnedMesh(source) {
 
     clonedMesh.skeleton.bones = sourceBones.map(function(sourceBone) {
       if (!cloneLookup.has(sourceBone)) {
-        throw new Error("THREE.AnimationUtils: Required bones are not descendants of the given object.");
+        throw new Error("Required bones are not descendants of the given object.");
       }
 
       return cloneLookup.get(sourceBone);
@@ -71,8 +73,6 @@ function cloneSkinnedMesh(source) {
   return clone;
 }
 
-// From https://gist.github.com/cdata/f2d7a6ccdec071839bc1954c32595e87
-// Tracking glTF cloning here: https://github.com/mrdoob/three.js/issues/11573
 function cloneGltf(gltf) {
   return {
     animations: gltf.animations,

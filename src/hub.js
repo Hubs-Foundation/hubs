@@ -356,7 +356,11 @@ document.addEventListener("DOMContentLoaded", () => {
   environmentScene.addEventListener("bundleloaded", () => {
     remountUI({ environmentSceneLoaded: true });
 
-    for (const modelEl of environmentScene.querySelectorAll(":scope > [gltf-model-plus]")) {
+    for (const modelEl of environmentScene.children) {
+      if (!modelEl.components["gltf-model-plus"]) {
+        continue;
+      }
+
       const model = modelEl.object3DMap.mesh;
 
       if (model && model.animations.length > 0) {
