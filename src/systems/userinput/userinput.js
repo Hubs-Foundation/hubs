@@ -122,6 +122,17 @@ window.addEventListener(
 );
 
 AFRAME.registerSystem("userinput", {
+    readFrameValueAtPath(path) {
+        return frame[path];
+    },
+
+    activate(set, value) {
+        pendingSetChanges.push({ set, fn: value === false ? "deactivate" : "activate" });
+    },
+
+    deactivate(set) {
+        pendingSetChanges.push({ set, fn: "deactivate" });
+    },
   init() {
     // TODO: Handle device (dis/re)connection
     activeDevices.add(new MouseDevice());
@@ -137,7 +148,7 @@ AFRAME.registerSystem("userinput", {
     registeredMappings.add(keyboardDebugBindings);
     //registeredMappings.add(oculusgoBindings);
     this.xformStates = new Map();
-    registeredMappings.add(oculustouchBindings);
+    //registeredMappings.add(oculustouchBindings);
   },
 
   tick() {
@@ -184,20 +195,4 @@ AFRAME.registerSystem("userinput", {
       // TODO: draw debug data to the screen
     }
   },
-
-  readFrameValueAtPath(path) {
-    return frame[path];
-  },
-
-  activate(set, value) {
-    pendingSetChanges.push({ set, fn: value === false ? "deactivate" : "activate" });
-  },
-
-  deactivate(set) {
-    pendingSetChanges.push({ set, fn: "deactivate" });
-  },
-
-  registerTickCallback(cb) {
-    callbacks.push(cb);
-  }
 });

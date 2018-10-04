@@ -22,6 +22,7 @@ paths.actions.cursorStopDrawing = "/actions/cursorStopDrawing";
 paths.actions.cursorPenNextColor = "/actions/cursorPenNextColor";
 paths.actions.cursorPenPrevColor = "/actions/cursorPenPrevColor";
 paths.actions.cursorScalePenTip = "/actions/cursorScalePenTip";
+paths.actions.cursorScaleGrabbedGrabbable = "/actions/cursorScaleGrabbedGrabbable";
 paths.actions.startTeleport = "/actions/startTeleport";
 paths.actions.stopTeleport = "/actions/stopTeleport";
 paths.actions.rightHandPose = "/actions/rightHandPose";

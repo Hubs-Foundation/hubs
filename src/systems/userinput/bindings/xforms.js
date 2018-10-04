@@ -82,5 +82,14 @@ export const xforms = {
     return function always(frame, _, dest) {
       frame[dest.value] = constValue;
     };
+  },
+  wasd_to_vec2: function(frame, { w, a, s, d }, { vec2 }) {
+    let x = 0;
+    let y = 0;
+    if (frame[a]) x -= 1;
+    if (frame[d]) x += 1;
+    if (frame[w]) y += 1;
+    if (frame[s]) y -= 1;
+    frame[vec2] = [x, y];
   }
 };

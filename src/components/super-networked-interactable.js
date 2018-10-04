@@ -1,3 +1,4 @@
+import { paths } from "../systems/userinput/paths";
 /**
  * Manages ownership and haptics on an interatable
  * @namespace network
@@ -82,6 +83,13 @@ AFRAME.registerComponent("super-networked-interactable", {
     }
   },
 
+  tick: function() {
+    const userinput = AFRAME.scenes[0].systems.userinput;
+    const delta = userinput.readFrameValueAtPath(paths.actions.cursorScaleGrabbedGrabbable);
+    if (delta) {
+      this._changeScale(delta);
+    }
+  },
   _stateAdded(evt) {
     switch (evt.detail) {
       case "scaleUp":

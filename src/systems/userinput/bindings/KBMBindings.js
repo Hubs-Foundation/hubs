@@ -2,8 +2,24 @@ import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
 
+const wasd_vec2 = "/var/mouse-and-keyboard/wasd_vec2";
 export const KBMBindings = {
   [sets.global]: [
+    {
+      src: {
+        w: paths.device.keyboard.key("w"),
+        a: paths.device.keyboard.key("a"),
+        s: paths.device.keyboard.key("s"),
+        d: paths.device.keyboard.key("d")
+      },
+      dest: { vec2: wasd_vec2 },
+      xform: xforms.wasd_to_vec2
+    },
+    {
+      src: { value: wasd_vec2 },
+      dest: { value: paths.actions.characterAcceleration },
+      xform: xforms.copy
+    },
     {
       src: { value: paths.device.keyboard.key("shift") },
       dest: { value: paths.actions.boost },
@@ -183,6 +199,16 @@ export const KBMBindings = {
       },
       dest: { value: paths.actions.cursorModDelta },
       xform: xforms.copyIfFalse
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("shift"),
+        value: paths.device.mouse.wheel
+      },
+      dest: { value: paths.actions.cursorScaleGrabbedGrabbable },
+      xform: xforms.copyIfTrue,
+      priority: 150,
+      root: "wheel"
     }
   ],
 
