@@ -93,7 +93,7 @@
     "spoke.download_win": "Download for Windows",
     "spoke.download_macos": "Download for Mac",
     "spoke.download_linux": "Download for Linux",
-    "spoke.download_unavailable": "View Releases",
+    "spoke.download_unsupported": "View Releases",
     "spoke.browse_all_versions": "Browse All Versions",
     "spoke.play_button": "Watch the Video"
   }

@@ -18,6 +18,20 @@ import { lang, messages } from "./utils/i18n";
 
 addLocaleData([...en]);
 
+function getPlatform() {
+  const platform = window.navigator.platform;
+
+  if (["Macintosh", "MacIntel", "MacPPC", "Mac68K"].indexOf(platform) >= 0) {
+    return "macos";
+  } else if (["Win32", "Win64", "Windows"].indexOf(platform) >= 0) {
+    return "win";
+  } else if (/Linux/.test(platform)) {
+    return "linux";
+  }
+
+  return "unsupported";
+}
+
 class SpokeLanding extends Component {
   static propTypes = {};
 
@@ -25,7 +39,7 @@ class SpokeLanding extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { platform: "win" };
+    this.state = { platform: getPlatform() };
   }
 
   componentDidMount() {
@@ -78,7 +92,7 @@ class SpokeLanding extends Component {
     }).then(this.tryGetJson);
 
     if (!result || !result.data) {
-      this.setState({ platform: "unavailable" });
+      this.setState({ platform: "unsupported" });
       return;
     }
 
@@ -86,7 +100,7 @@ class SpokeLanding extends Component {
     const release = releases.nodes.find(release => /*!release.isPrerelease && */ !release.isDraft);
 
     if (!release) {
-      this.setState({ platform: "unavailable" });
+      this.setState({ platform: "unsupported" });
       return;
     }
 
@@ -103,7 +117,7 @@ class SpokeLanding extends Component {
   render() {
     const platform = this.state.platform;
     const releasesLink = "https://github.com/MozillaReality/Spoke/releases";
-    const downloadLink = platform === "unavailable" ? releasesLink : this.state.downloadLinkForCurrentPlatform;
+    const downloadLink = platform === "unsupported" ? releasesLink : this.state.downloadLinkForCurrentPlatform;
 
     return (
       <IntlProvider locale={lang} messages={messages}>
@@ -138,7 +152,7 @@ class SpokeLanding extends Component {
                   <a href={downloadLink} className={styles.downloadButton}>
                     <FormattedMessage id={"spoke.download_" + this.state.platform} />
                   </a>
-                  {platform !== "unavailable" && (
+                  {platform !== "unsupported" && (
                     <a href={releasesLink} className={styles.browseVersions}>
                       <FormattedMessage id="spoke.browse_all_versions" />
                     </a>
