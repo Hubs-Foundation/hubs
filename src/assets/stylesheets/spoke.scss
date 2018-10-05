@@ -43,6 +43,10 @@ body {
   display: flex;
   margin: 24px 12px;
 
+  @media(max-width: $mobile-breakpoint) {
+    justify-content: space-between;
+  }
+
   a {
     color: white;
     text-decoration: none;
