@@ -345,7 +345,7 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       if (gltf.animations.length > 0) {
         this.el.setAttribute("animation-mixer", {});
-        this.el.components["animation-mixer"].initMixer(this.model, gltf.animations);
+        this.el.components["animation-mixer"].initMixer(gltf.animations);
       }
 
       let object3DToSet = this.model;

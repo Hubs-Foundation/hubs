@@ -3,8 +3,9 @@
  * @component animation-mixer
  */
 AFRAME.registerComponent("animation-mixer", {
-  initMixer(model, animations) {
-    this.mixer = new THREE.AnimationMixer(model);
+  initMixer(animations) {
+    this.mixer = new THREE.AnimationMixer(this.el.object3D);
+    this.el.object3D.animations = animations;
     this.animations = animations;
   },
 
