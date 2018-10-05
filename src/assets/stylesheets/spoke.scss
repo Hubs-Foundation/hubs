@@ -3,6 +3,7 @@
 
 $spoke-action-color: #2F80ED;
 $breakpoint: 1280px;
+$mobile-breakpoint: 450px;
 
 body {
   @extend %default-font;
@@ -64,6 +65,10 @@ body {
 
   img {
     width: 400px;
+
+    @media(max-width: $mobile-breakpoint) {
+      width: 320px;
+    }
   }
 }
 
@@ -80,6 +85,10 @@ body {
   font-size: 1.5em;
   text-align: center;
   margin-top: 48px;
+
+  @media(max-width: $mobile-breakpoint) {
+    font-size: 1.3em;
+  }
 
   a {
     color: white;
