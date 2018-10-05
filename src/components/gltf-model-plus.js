@@ -331,7 +331,7 @@ AFRAME.registerComponent("gltf-model-plus", {
         return;
       }
 
-      const model = await this.loadModel(src, contentType, this.preferredTechnique, this.data.useCache);
+      const gltf = await this.loadModel(src, contentType, this.preferredTechnique, this.data.useCache);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
@@ -340,8 +340,13 @@ AFRAME.registerComponent("gltf-model-plus", {
       // If we had inflated something already before, clean that up
       this.removeInflatedEl();
 
-      this.model = model.scene || model.scenes[0];
-      this.model.animations = model.animations;
+      this.model = gltf.scene || gltf.scenes[0];
+      this.model.animations = gltf.animations;
+
+      if (gltf.animations.length > 0) {
+        this.el.setAttribute("animation-mixer", {});
+        this.el.components["animation-mixer"].initMixer(this.model, gltf.animations);
+      }
 
       let object3DToSet = this.model;
       if (this.data.inflate && (this.inflatedEl = inflateEntities(this.model, this.templates, true))) {

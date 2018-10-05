@@ -134,11 +134,7 @@ class AvatarSelector extends Component {
     const avatarData = this.state.avatarIndices.map(i => [this.props.avatars[i], i]);
     const avatarEntities = avatarData.map(([avatar, i]) => (
       <a-entity key={avatar.id} rotation={`0 ${(360 * -i) / this.props.avatars.length} 0`}>
-        <a-entity position="0 0 5" gltf-model-plus={`src: #${avatar.id}`} inflate="true">
-          <template data-selector=".RootScene">
-            <a-entity animation-mixer="" />
-          </template>
-
+        <a-entity position="0 0 5" gltf-model-plus={`src: #${avatar.id}; inflate: true`}>
           <a-animation
             attribute="rotation"
             dur="12000"
@@ -179,7 +175,6 @@ class AvatarSelector extends Component {
             position="0 5 -15"
           />
           <a-entity hide-when-quality="low" light="type: ambient; color: #FFF" />
-          <a-entity id="meeting-space" gltf-model-plus="src: #meeting-space1-mesh" position="0 0 0" />
         </a-scene>
         <button className="avatar-selector__previous-button" onClick={this.emitChangeToPrevious}>
           <FontAwesomeIcon icon={faAngleLeft} />

@@ -1,9 +1,4 @@
-function findModel(entity) {
-  while (entity && !(entity.components && entity.components["gltf-model-plus"])) {
-    entity = entity.parentNode;
-  }
-  return entity;
-}
+import { findAncestorWithComponent } from "../utils/scene-graph";
 
 /**
  * Loops the given clip using this entity's animation mixer
@@ -13,40 +8,29 @@ AFRAME.registerComponent("loop-animation", {
   schema: {
     clip: { type: "string" }
   },
-  init() {
-    this.mixerEl = findModel(this.el);
 
-    this.onMixerReady = this.onMixerReady.bind(this);
+  init() {
+    this.mixerEl = findAncestorWithComponent(this.el, "animation-mixer");
 
     if (!this.mixerEl) {
+      console.warn("loop-animation component could not find an animation-mixer in its ancestors.");
       return;
     }
 
-    if (this.mixerEl.components["animation-mixer"]) {
-      this.onMixerReady();
-    } else {
-      this.el.addEventListener("model-loaded", this.onMixerReady);
-    }
-  },
-
-  onMixerReady() {
-    this.mixer = this.mixerEl.components["animation-mixer"].mixer;
     this.updateClip();
   },
 
   update(oldData) {
-    if (oldData.clip !== this.data.clip && this.mixer) {
+    if (oldData.clip !== this.data.clip && this.mixerEl) {
       this.updateClip();
     }
   },
 
   updateClip() {
-    const mixer = this.mixer;
-    const root = mixer.getRoot();
-    const animations = root.animations;
+    const { mixer, animations } = this.mixerEl.components["animation-mixer"];
     const clipName = this.data.clip;
 
-    if (!animations || animations.length === 0) {
+    if (animations.length === 0) {
       return;
     }
 
@@ -62,7 +46,7 @@ AFRAME.registerComponent("loop-animation", {
       return;
     }
 
-    const action = this.mixer.clipAction(clip, this.el.object3D);
+    const action = mixer.clipAction(clip, this.el.object3D);
     action.enabled = true;
     action.setLoop(THREE.LoopRepeat, Infinity).play();
     this.currentAction = action;
@@ -72,10 +56,6 @@ AFRAME.registerComponent("loop-animation", {
     if (this.currentAction) {
       this.currentAction.enabled = false;
       this.currentAction.stop();
-    }
-
-    if (this.mixerEl) {
-      this.mixerEl.removeEventListener("model-loaded", this.onMixerReady);
     }
   }
 });
