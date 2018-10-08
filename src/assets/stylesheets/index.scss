@@ -1,6 +1,7 @@
 @import 'shared';
 @import 'hub-create';
 @import 'info-dialog';
+@import 'loader';
 
 $header-section-width: 350px;
 
@@ -227,7 +228,7 @@ body {
     }
 
     :local(.link) {
-      color: black;
+      color: $dark-grey;
       font-weight: bold;
       margin: 0 18px;
 
