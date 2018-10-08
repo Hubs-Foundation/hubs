@@ -96,6 +96,14 @@
   justify-content: center;
 }
 
+:local(.digit_2) {
+  margin-right: 8px;
+}
+
+:local(.digit_3) {
+  margin-left: 8px;
+}
+
 :local(.code-loading-panel) {
   background: none;
 }

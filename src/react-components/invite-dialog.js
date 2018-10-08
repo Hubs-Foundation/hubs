@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import copy from "copy-to-clipboard";
+import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
 
 import styles from "../assets/stylesheets/invite-dialog.scss";
@@ -58,7 +59,7 @@ export default class InviteDialog extends Component {
         </div>
         <div className={styles.code}>
           {entryCodeString.split("").map((d, i) => (
-            <div className={styles.digit} key={`link_code_${i}`}>
+            <div className={classNames({ [styles.digit]: true, [styles[`digit_${i}`]]: true })} key={`link_code_${i}`}>
               {d}
             </div>
           ))}
