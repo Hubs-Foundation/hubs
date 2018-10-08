@@ -14,7 +14,7 @@ const vec2zero = "/vars/vec2zero";
 const triggerRisingRoot = "oculusGoTriggerRising";
 const triggerFallingRoot = "oculusGoTriggerFalling";
 
-export const oculusGoBindings = {
+export const oculusGoUserBindings = {
   [sets.global]: [
     {
       src: {
@@ -81,7 +81,7 @@ export const oculusGoBindings = {
     },
     {
       src: { value: vec2zero },
-      dest: { value: paths.actions.cursorPose },
+      dest: { value: paths.actions.cursor.pose },
       xform: xforms.poseFromCameraProjection()
     }
   ],
@@ -91,7 +91,7 @@ export const oculusGoBindings = {
       src: {
         value: paths.device.oculusgo.button("trigger").pressed
       },
-      dest: { value: paths.actions.cursorGrab },
+      dest: { value: paths.actions.cursor.grab },
       xform: xforms.rising,
       root: triggerRisingRoot,
       priority: 200
@@ -100,7 +100,7 @@ export const oculusGoBindings = {
       src: {
         value: paths.device.oculusgo.button("trigger").pressed
       },
-      dest: { value: paths.actions.cursorDrop },
+      dest: { value: paths.actions.cursor.drop },
       xform: xforms.falling,
       root: triggerFallingRoot,
       priority: 200
@@ -126,7 +126,7 @@ export const oculusGoBindings = {
       src: {
         value: paths.device.oculusgo.button("trigger").pressed
       },
-      dest: { value: paths.actions.cursorStartDrawing },
+      dest: { value: paths.actions.cursor.startDrawing },
       xform: xforms.rising,
       root: triggerRisingRoot,
       priority: 300
@@ -135,7 +135,7 @@ export const oculusGoBindings = {
       src: {
         value: paths.device.oculusgo.button("trigger").pressed
       },
-      dest: { value: paths.actions.cursorStopDrawing },
+      dest: { value: paths.actions.cursor.stopDrawing },
       xform: xforms.falling,
       root: triggerFallingRoot,
       priority: 300
@@ -145,7 +145,7 @@ export const oculusGoBindings = {
         value: dpadCenter,
         bool: touchpadPressed
       },
-      dest: { value: paths.actions.cursorDrop },
+      dest: { value: paths.actions.cursor.drop },
       xform: xforms.copyIfTrue
     }
   ]

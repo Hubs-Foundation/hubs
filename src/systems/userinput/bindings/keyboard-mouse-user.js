@@ -3,7 +3,7 @@ import { sets } from "../sets";
 import { xforms } from "./xforms";
 
 const wasd_vec2 = "/var/mouse-and-keyboard/wasd_vec2";
-export const KBMBindings = {
+export const keyboardMouseUserBindings = {
   [sets.global]: [
     {
       src: {
@@ -46,7 +46,7 @@ export const KBMBindings = {
     },
     {
       src: { value: paths.device.smartMouse.cursorPose },
-      dest: { value: paths.actions.cursorPose },
+      dest: { value: paths.actions.cursor.pose },
       xform: xforms.copy
     },
     {
@@ -70,13 +70,6 @@ export const KBMBindings = {
       xform: xforms.compose_vec2
     },
     {
-      src: { value: paths.device.mouse.buttonLeft },
-      dest: { value: paths.actions.cursorDrop },
-      xform: xforms.falling,
-      priority: 100,
-      root: "lmb"
-    },
-    {
       src: {
         value: paths.device.keyboard.key("l")
       },
@@ -98,7 +91,7 @@ export const KBMBindings = {
     },
     {
       src: { value: "/var/shift+q" },
-      dest: { value: paths.actions.cursorPenPrevColor },
+      dest: { value: paths.actions.cursor.penPrevColor },
       xform: xforms.rising
     },
     {
@@ -111,7 +104,7 @@ export const KBMBindings = {
     },
     {
       src: { value: "/var/shift+e" },
-      dest: { value: paths.actions.cursorPenNextColor },
+      dest: { value: paths.actions.cursor.penNextColor },
       xform: xforms.rising
     },
     {
@@ -146,22 +139,21 @@ export const KBMBindings = {
     },
     {
       src: { value: paths.device.mouse.buttonLeft },
-      dest: { value: paths.actions.cursorStartDrawing },
+      dest: { value: paths.actions.cursor.startDrawing },
       xform: xforms.rising,
       priority: 200
     },
     {
       src: { value: paths.device.mouse.buttonLeft },
-      dest: { value: paths.actions.cursorStopDrawing },
+      dest: { value: paths.actions.cursor.stopDrawing },
       xform: xforms.falling,
       priority: 200,
       root: "lmb"
     },
     {
       src: { value: paths.device.mouse.buttonRight },
-      dest: { value: paths.actions.cursorDrop },
+      dest: { value: paths.actions.cursor.drop },
       xform: xforms.falling,
-      priority: 200
     },
     {
       src: {
@@ -175,7 +167,7 @@ export const KBMBindings = {
     },
     {
       src: { value: "/var/cursorScalePenTipWheel" },
-      dest: { value: paths.actions.cursorScalePenTip },
+      dest: { value: paths.actions.cursor.scalePenTip },
       xform: xforms.scale(0.12)
     }
   ],
@@ -186,7 +178,7 @@ export const KBMBindings = {
         value: paths.device.mouse.wheel
       },
       dest: {
-        value: paths.actions.cursorModDelta
+        value: paths.actions.cursor.modDelta
       },
       xform: xforms.copy,
       root: "wheel",
@@ -197,7 +189,7 @@ export const KBMBindings = {
         bool: paths.device.keyboard.key("shift"),
         value: paths.device.mouse.wheel
       },
-      dest: { value: paths.actions.cursorModDelta },
+      dest: { value: paths.actions.cursor.modDelta },
       xform: xforms.copyIfFalse
     },
     {
@@ -205,17 +197,24 @@ export const KBMBindings = {
         bool: paths.device.keyboard.key("shift"),
         value: paths.device.mouse.wheel
       },
-      dest: { value: paths.actions.cursorScaleGrabbedGrabbable },
+      dest: { value: paths.actions.cursor.scaleGrabbedGrabbable },
       xform: xforms.copyIfTrue,
       priority: 150,
       root: "wheel"
+    },
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.falling,
+      priority: 100,
+      root: "lmb"
     }
   ],
 
   [sets.cursorHoveringOnInteractable]: [
     {
       src: { value: paths.device.mouse.buttonLeft },
-      dest: { value: paths.actions.cursorGrab },
+      dest: { value: paths.actions.cursor.grab },
       xform: xforms.rising
     }
   ]

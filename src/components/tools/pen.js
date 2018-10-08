@@ -1,5 +1,29 @@
 import { paths } from "../../systems/userinput/paths";
 import { sets } from "../../systems/userinput/sets";
+
+const pathsMap = {
+  "player-right-controller": {
+    startDrawing: paths.actions.rightHand.startDrawing,
+    stopDrawing: paths.actions.rightHand.stopDrawing,
+    penNextColor: paths.actions.rightHand.penNextColor,
+    penPrevColor: paths.actions.rightHand.penPrevColor,
+    scalePenTip: paths.actions.rightHand.scalePenTip
+  },
+  "player-left-controller": {
+    startDrawing: paths.actions.leftHand.startDrawing,
+    stopDrawing: paths.actions.leftHand.stopDrawing,
+    penNextColor: paths.actions.leftHand.penNextColor,
+    penPrevColor: paths.actions.leftHand.penPrevColor,
+    scalePenTip: paths.actions.leftHand.scalePenTip
+  },
+  cursor: {
+    startDrawing: paths.actions.cursor.startDrawing,
+    stopDrawing: paths.actions.cursor.stopDrawing,
+    penNextColor: paths.actions.cursor.penNextColor,
+    penPrevColor: paths.actions.cursor.penPrevColor,
+    scalePenTip: paths.actions.cursor.scalePenTip
+  }
+};
 /**
  * Pen tool
  * A tool that allows drawing on networked-drawing components.
@@ -39,7 +63,12 @@ AFRAME.registerComponent("pen", {
     },
     radius: { default: 0.01 }, //drawing geometry radius
     minRadius: { default: 0.005 },
-    maxRadius: { default: 0.2 }
+    maxRadius: { default: 0.2 },
+    startDrawingPath: { default: undefined },
+    stopDrawingPath: { default: undefined },
+    changePenSizePath: { default: undefined },
+    nextColorPath: { default: undefined },
+    prevColorPath: { default: undefined }
   },
 
   init() {
@@ -62,6 +91,7 @@ AFRAME.registerComponent("pen", {
     this.colorIndex = 0;
 
     this.grabbed = false;
+    this.actionPath = null;
   },
 
   play() {
@@ -87,69 +117,24 @@ AFRAME.registerComponent("pen", {
   },
 
   tick(t, dt) {
-    const grabbable = this.el.parentNode.components.grabbable;
-    if (
-      grabbable.grabbers.length &&
-      grabbable.grabbers[0] ===
-        document.querySelector("[cursor-controller]").components["cursor-controller"].data.cursor
-    ) {
-      const userinput = AFRAME.scenes[0].systems.userinput;
-      if (userinput.readFrameValueAtPath(paths.actions.cursorStartDrawing)) {
+    const grabber = this.el.parentNode.components.grabbable.grabbers[0];
+    const userinput = AFRAME.scenes[0].systems.userinput;
+    if (grabber && pathsMap.has(grabber.id)) {
+      const paths = pathsMap[grabber.id];
+      if (userinput.readFrameValueAtPath(paths.startDrawing)) {
         this._startDraw();
       }
-      if (userinput.readFrameValueAtPath(paths.actions.cursorStopDrawing)) {
+      if (userinput.readFrameValueAtPath(paths.stopDrawing)) {
         this._endDraw();
       }
-      const penScaleMod = userinput.readFrameValueAtPath(paths.actions.cursorScalePenTip);
+      const penScaleMod = userinput.readFrameValueAtPath(paths.scalePenTip);
       if (penScaleMod) {
-        this._changeRadius(userinput.readFrameValueAtPath(paths.actions.cursorScalePenTip));
+        this._changeRadius(penScaleMod);
       }
-      if (userinput.readFrameValueAtPath(paths.actions.cursorPenNextColor)) {
+      if (userinput.readFrameValueAtPath(paths.penNextColor)) {
         this._changeColor(1);
       }
-      if (userinput.readFrameValueAtPath(paths.actions.cursorPenPrevColor)) {
-        this._changeColor(-1);
-      }
-    } else if (
-      grabbable.grabbers.length &&
-      grabbable.grabbers[0] === document.querySelector("[super-hands], #player-right-controller")
-    ) {
-      const userinput = AFRAME.scenes[0].systems.userinput;
-      if (userinput.readFrameValueAtPath(paths.actions.rightHandStartDrawing)) {
-        this._startDraw();
-      }
-      if (userinput.readFrameValueAtPath(paths.actions.rightHandStopDrawing)) {
-        this._endDraw();
-      }
-      const penScaleMod = userinput.readFrameValueAtPath(paths.actions.rightHandScalePenTip);
-      if (penScaleMod) {
-        this._changeRadius(userinput.readFrameValueAtPath(paths.actions.rightHandScalePenTip));
-      }
-      if (userinput.readFrameValueAtPath(paths.actions.rightHandPenNextColor)) {
-        this._changeColor(1);
-      }
-      if (userinput.readFrameValueAtPath(paths.actions.rightHandPenPrevColor)) {
-        this._changeColor(-1);
-      }
-    } else if (
-      grabbable.grabbers.length &&
-      grabbable.grabbers[0] === document.querySelector("[super-hands], #player-left-controller")
-    ) {
-      const userinput = AFRAME.scenes[0].systems.userinput;
-      if (userinput.readFrameValueAtPath(paths.actions.leftHandStartDrawing)) {
-        this._startDraw();
-      }
-      if (userinput.readFrameValueAtPath(paths.actions.leftHandStopDrawing)) {
-        this._endDraw();
-      }
-      const penScaleMod = userinput.readFrameValueAtPath(paths.actions.leftHandScalePenTip);
-      if (penScaleMod) {
-        this._changeRadius(userinput.readFrameValueAtPath(paths.actions.leftHandScalePenTip));
-      }
-      if (userinput.readFrameValueAtPath(paths.actions.leftHandPenNextColor)) {
-        this._changeColor(1);
-      }
-      if (userinput.readFrameValueAtPath(paths.actions.leftHandPenPrevColor)) {
+      if (userinput.readFrameValueAtPath(paths.penPrevColor)) {
         this._changeColor(-1);
       }
     }
@@ -214,50 +199,5 @@ AFRAME.registerComponent("pen", {
   _changeRadius(mod) {
     this.data.radius = Math.max(this.data.minRadius, Math.min(this.data.radius + mod, this.data.maxRadius));
     this.el.setAttribute("radius", this.data.radius);
-  },
-
-  _stateAdded(evt) {
-    switch (evt.detail) {
-      case "activated":
-        this._startDraw();
-        break;
-      case "colorNext":
-        this._changeColor(1);
-        break;
-      case "colorPrev":
-        this._changeColor(-1);
-        break;
-      case "radiusUp":
-        this._changeRadius(this.data.minRadius);
-        break;
-      case "radiusDown":
-        this._changeRadius(-this.data.minRadius);
-        break;
-      case "grabbed":
-        this.grabbed = true;
-        const userinput = AFRAME.scenes[0].systems.userinput;
-        userinput.activate(sets.cursorHoldingInteractable);
-        userinput.activate(sets.cursorHoldingPen);
-        break;
-      default:
-        break;
-    }
-  },
-
-  _stateRemoved(evt) {
-    switch (evt.detail) {
-      case "activated":
-        this._endDraw();
-        break;
-      case "grabbed":
-        this.grabbed = false;
-        this._endDraw();
-        const userinput = AFRAME.scenes[0].systems.userinput;
-        userinput.deactivate(sets.cursorHoldingPen);
-        userinput.deactivate(sets.cursorHoldingInteractable);
-        break;
-      default:
-        break;
-    }
   }
 });

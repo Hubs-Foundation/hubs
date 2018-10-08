@@ -1,5 +1,5 @@
-import { paths } from "./paths";
-import { sets } from "./sets";
+import { paths } from "../paths";
+import { sets } from "../sets";
 import { xforms } from "./xforms";
 
 const xboxUnscaledCursorScalePenTip = "foobarbazbotbooch";
@@ -8,11 +8,11 @@ const button = paths.device.xbox.button;
 const axis = paths.device.xbox.axis;
 const rightTriggerFalling = "/vars/xbox/rightTriggerFalling";
 
-export const xboxBindings = {
+export const xboxControllerUserBindings = {
   [sets.cursorHoldingInteractable]: [
     {
       src: { value: button("rightTrigger").pressed },
-      dest: { value: paths.actions.cursorDrop },
+      dest: { value: paths.actions.cursor.drop },
       xform: xforms.falling,
       root: rightTriggerFalling,
       priority: 100
@@ -29,7 +29,7 @@ export const xboxBindings = {
       src: {
         value: "/vars/xbox/cursorModDelta"
       },
-      dest: { value: paths.actions.cursorModDelta },
+      dest: { value: paths.actions.cursor.modDelta },
       xform: xforms.copy
     },
     {
@@ -46,21 +46,21 @@ export const xboxBindings = {
   [sets.cursorHoldingPen]: [
     {
       src: { value: button("rightTrigger").pressed },
-      dest: { value: paths.actions.cursorStartDrawing },
+      dest: { value: paths.actions.cursor.startDrawing },
       xform: xforms.rising,
       root: "xboxRightTriggerRising",
       priority: 200
     },
     {
       src: { value: button("rightTrigger").pressed },
-      dest: { value: paths.actions.cursorStopDrawing },
+      dest: { value: paths.actions.cursor.stopDrawing },
       xform: xforms.falling,
       root: rightTriggerFalling,
       priority: 200
     },
     {
       src: { value: button("b").pressed },
-      dest: { value: paths.actions.cursorDrop },
+      dest: { value: paths.actions.cursor.drop },
       xform: xforms.rising
     },
     {
@@ -72,12 +72,12 @@ export const xboxBindings = {
     },
     {
       src: { value: button("a").pressed },
-      dest: { value: paths.actions.cursorPenNextColor },
+      dest: { value: paths.actions.cursor.penNextColor },
       xform: xforms.rising
     },
     {
       src: { value: button("x").pressed },
-      dest: { value: paths.actions.cursorPenPrevColor },
+      dest: { value: paths.actions.cursor.penPrevColor },
       xform: xforms.rising
     },
     {
@@ -177,7 +177,7 @@ export const xboxBindings = {
     },
     {
       src: { value: "var/vec2/zero" },
-      dest: { value: paths.actions.cursorPose },
+      dest: { value: paths.actions.cursor.pose },
       xform: xforms.poseFromCameraProjection()
     },
     {
@@ -191,7 +191,7 @@ export const xboxBindings = {
   [sets.cursorHoveringOnInteractable]: [
     {
       src: { value: button("rightTrigger").pressed },
-      dest: { value: paths.actions.cursorGrab },
+      dest: { value: paths.actions.cursor.grab },
       xform: xforms.rising,
       root: "xboxRightTriggerRising",
       priority: 100

@@ -2,11 +2,11 @@ import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
 
-export const touchscreenBindings = {
+export const touchscreenUserBindings = {
   [sets.global]: [
     {
       src: { value: paths.device.touchscreen.cursorPose },
-      dest: { value: paths.actions.cursorPose },
+      dest: { value: paths.actions.cursor.pose },
       xform: xforms.copy
     },
     {
@@ -31,7 +31,7 @@ export const touchscreenBindings = {
     },
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
-      dest: { value: paths.actions.cursorGrab },
+      dest: { value: paths.actions.cursor.grab },
       xform: xforms.copy,
       root: "touchscreen.isTouchingGrabbable",
       priority: 100
@@ -47,7 +47,7 @@ export const touchscreenBindings = {
   [sets.cursorHoldingInteractable]: [
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
-      dest: { value: paths.actions.cursorDrop },
+      dest: { value: paths.actions.cursor.drop },
       xform: xforms.falling,
       root: "touchscreen.cursorDrop",
       priority: 100
@@ -65,17 +65,17 @@ export const touchscreenBindings = {
     },
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
-      dest: { value: paths.actions.cursorStartDrawing },
+      dest: { value: paths.actions.cursor.startDrawing },
       xform: xforms.risingWithFrameDelay(5)
     },
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
-      dest: { value: paths.actions.cursorStopDrawing },
+      dest: { value: paths.actions.cursor.stopDrawing },
       xform: xforms.falling
     },
     {
       src: { value: paths.device.hud.penButton },
-      dest: { value: paths.actions.cursorDrop },
+      dest: { value: paths.actions.cursor.drop },
       xform: xforms.rising,
       root: "hud.penButton",
       priority: 200

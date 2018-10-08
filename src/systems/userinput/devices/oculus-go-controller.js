@@ -1,6 +1,6 @@
 import { paths } from "../paths";
 
-export class OculusGoController {
+export class OculusGoControllerDevice {
   constructor(gamepad) {
     this.gamepad = gamepad;
     this.buttonMap = [{ name: "touchpad", buttonId: 0 }, { name: "trigger", buttonId: 7 }];

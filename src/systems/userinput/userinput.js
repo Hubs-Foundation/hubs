@@ -1,21 +1,27 @@
-import { MouseDevice } from "./devices/mouse";
-import { KeyboardDevice } from "./devices/keyboard";
-import { SmartMouseDevice } from "./devices/smartMouse";
-import { GamepadDevice } from "./devices/gamepad";
-import { TouchscreenDevice } from "./devices/touchscreen";
-import { Hud } from "./devices/hud";
-import { XboxController } from "./devices/xbox";
-import { OculusGoController } from "./devices/oculusgo";
-import { RightOculusTouch } from "./devices/rightOculusTouch";
-import { LeftOculusTouch } from "./devices/leftOculusTouch";
-import { KBMBindings } from "./bindings/KBMBindings";
-import { gamepadBindings } from "./bindings/gamepadBindings";
-import { touchscreenBindings } from "./bindings/touchscreenBindings";
-import { keyboardDebugBindings } from "./bindings/keyboardDebugBindings";
-import { oculusgoBindings } from "./bindings/oculusgoBindings";
-import { oculustouchBindings } from "./bindings/oculustouchBindings";
 import { paths } from "./paths";
 import { sets } from "./sets";
+
+// User input is supplied by devices.
+import { MouseDevice } from "./devices/mouse";
+import { KeyboardDevice } from "./devices/keyboard";
+import { HudDevice } from "./devices/hud";
+import { XboxControllerDevice } from "./devices/xbox-controller";
+import { OculusGoControllerDevice } from "./devices/oculus-go-controller";
+import { OculusTouchControllerDevice } from "./devices/oculus-touch-controller";
+
+// App-aware devices need references to entities in the scene.
+import { AppAwareMouseDevice } from "./devices/app-aware-mouse";
+import { AppAwareTouchscreenDevice } from "./devices/app-aware-touchscreen";
+
+// Bindings determine how user input is transformed to fill the values stored in the frame at action paths.
+// Intermediate values are also stored in the frame when transformations are called..
+import { keyboardMouseUserBindings } from "./bindings/keyboard-mouse-user";
+import { touchscreenUserBindings } from "./bindings/touchscreen-user";
+import { keyboardDebuggingBindings } from "./bindings/keyboard-debugging";
+import { oculusGoUserBindings } from "./bindings/oculus-go-user";
+import { oculusTouchUserBindings } from "./bindings/oculus-touch-user";
+import { xboxControllerUserBindings } from "./bindings/xbox-controller-user";
+
 import { updateActionSetsBasedOnSuperhands } from "./resolve-action-sets";
 
 function difference(setA, setB) {
@@ -26,19 +32,7 @@ function difference(setA, setB) {
   return _difference;
 }
 
-function applyChange(sets, change) {
-  const { set, fn } = change;
-  if (fn === "activate") {
-    sets.add(set);
-  } else if (fn === "deactivate") {
-    sets.delete(set);
-  }
-}
-
-const activeSets = new Set([sets.global]);
-const registeredMappings = new Set();
-
-function prioritizeBindings(prioritizedBindings, activeBindings) {
+function prioritizeBindings(registeredMappings, activeSets, prioritizedBindings, activeBindings) {
   registeredMappings.forEach(mapping => {
     activeSets.forEach(setName => {
       const set = mapping[setName] || [];
@@ -81,93 +75,106 @@ function prioritizeBindings(prioritizedBindings, activeBindings) {
   });
 }
 
-const callbacks = [];
-let pendingSetChanges = [];
-let frame = {};
-const activeDevices = new Set();
-const gamepads = {};
-window.addEventListener(
-  "gamepadconnected",
-  e => {
-    console.log(e.gamepad);
-    if (e.gamepad.id === "Oculus Touch (Left)") {
-      const gamepadDevice = new LeftOculusTouch(e.gamepad);
-      activeDevices.add(gamepadDevice);
-      gamepads[e.gamepad.index] = gamepadDevice;
-    } else if (e.gamepad.id === "Oculus Touch (Right)") {
-      const gamepadDevice = new RightOculusTouch(e.gamepad);
-      activeDevices.add(gamepadDevice);
-      gamepads[e.gamepad.index] = gamepadDevice;
-    } else if (e.gamepad.id.includes("Xbox")) {
-      const gamepadDevice = new XboxController(e.gamepad);
-      activeDevices.add(gamepadDevice);
-      gamepads[e.gamepad.index] = gamepadDevice;
-    } else {
-      const gamepadDevice = new OculusGoController(e.gamepad);
-      activeDevices.add(gamepadDevice);
-      gamepads[e.gamepad.index] = gamepadDevice;
-    }
-  },
-  false
-);
-window.addEventListener(
-  "gamepaddisconnected",
-  e => {
-    if (gamepads[e.gamepad.index]) {
-      activeDevices.delete(gamepads[e.gamepad.index]);
-      delete gamepads[e.gamepad.index];
-    }
-  },
-  false
-);
-
 AFRAME.registerSystem("userinput", {
-    readFrameValueAtPath(path) {
-        return frame[path];
-    },
+  readFrameValueAtPath(path) {
+    return this.frame && this.frame[path];
+  },
 
-    activate(set, value) {
-        pendingSetChanges.push({ set, fn: value === false ? "deactivate" : "activate" });
-    },
+  toggleActive(set, value) {
+    this.pendingSetChanges.push({ set, value });
+  },
 
-    deactivate(set) {
-        pendingSetChanges.push({ set, fn: "deactivate" });
-    },
+  activate(set) {
+    this.pendingSetChanges.push({ set, value: true });
+  },
+
+  deactivate(set) {
+    this.pendingSetChanges.push({ set, value: false });
+  },
+
   init() {
-    // TODO: Handle device (dis/re)connection
-    activeDevices.add(new MouseDevice());
-    activeDevices.add(new SmartMouseDevice());
-    activeDevices.add(new KeyboardDevice());
-    activeDevices.add(new TouchscreenDevice());
-    activeDevices.add(new Hud());
+    this.activeSets = new Set([sets.global]);
+    this.pendingSetChanges = [];
+    this.activeDevices = new Set([new MouseDevice(), new AppAwareMouseDevice(), new KeyboardDevice(), new HudDevice()]);
 
-    registeredMappings.add(KBMBindings);
-    //registeredMappings.add(gamepadBindings);
-    //registeredMappings.add(touchscreenBindings);
-    //registeredMappings.add(xboxBindings);
-    registeredMappings.add(keyboardDebugBindings);
-    //registeredMappings.add(oculusgoBindings);
+    this.registeredMappings = new Set([keyboardDebuggingBindings]);
     this.xformStates = new Map();
-    //registeredMappings.add(oculustouchBindings);
+
+    this.gamepads = [];
+
+    let activeDevices = this.activeDevices;
+    let registeredMappings = this.registeredMappings;
+    if (AFRAME.utils.device.isMobile()) {
+      window.addEventListener(
+        "touchdown",
+        e => {
+          activeDevices.add(new AppAwareTouchscreenDevice());
+          registeredMappings.add(touchscreenUserBindings);
+        },
+        {
+          once: true,
+          passive: true
+        }
+      );
+    }
+
+    let gamepads = this.gamepads;
+    window.addEventListener(
+      "gamepadconnected",
+      e => {
+        console.log(e.gamepad);
+        if (e.gamepad.id === "Oculus Touch (Left)") {
+          const gamepadDevice = new OculusTouchControllerDevice(e.gamepad, true);
+          activeDevices.add(gamepadDevice);
+          gamepads[e.gamepad.index] = gamepadDevice;
+          registeredMappings.add(oculusTouchUserBindings);
+        } else if (e.gamepad.id === "Oculus Touch (Right)") {
+          const gamepadDevice = new OculusTouchControllerDevice(e.gamepad, false);
+          activeDevices.add(gamepadDevice);
+          gamepads[e.gamepad.index] = gamepadDevice;
+          registeredMappings.add(oculusTouchUserBindings);
+        } else if (e.gamepad.id.includes("Xbox")) {
+          const gamepadDevice = new XboxControllerDevice(e.gamepad);
+          activeDevices.add(gamepadDevice);
+          gamepads[e.gamepad.index] = gamepadDevice;
+          registeredMappings.add(xboxControllerUserBindings);
+        } else {
+          const gamepadDevice = new OculusGoControllerDevice(e.gamepad);
+          activeDevices.add(gamepadDevice);
+          gamepads[e.gamepad.index] = gamepadDevice;
+          registeredMappings.add(oculusGoUserBindings);
+        }
+      },
+      false
+    );
+    window.addEventListener(
+      "gamepaddisconnected",
+      e => {
+        if (gamepads[e.gamepad.index]) {
+          activeDevices.delete(gamepads[e.gamepad.index]);
+          delete gamepads[e.gamepad.index];
+        }
+      },
+      false
+    );
   },
 
   tick() {
     updateActionSetsBasedOnSuperhands();
-    pendingSetChanges.forEach(change => {
-      applyChange(activeSets, change);
-    });
-    pendingSetChanges = [];
 
-    const deviceFrame = {};
-    activeDevices.forEach(device => {
-      device.write(deviceFrame);
+    this.pendingSetChanges.forEach(({ set, value }) => {
+      this.activeSets[value ? "add" : "delete"](set);
+    });
+    this.pendingSetChanges = [];
+
+    const frame = {};
+    this.activeDevices.forEach(device => {
+      device.write(frame);
     });
 
-    frame = {};
-    Object.assign(frame, deviceFrame);
     const priorityMap = new Map();
     const activeBindings = new Set();
-    prioritizeBindings(priorityMap, activeBindings);
+    prioritizeBindings(this.registeredMappings, this.activeSets, priorityMap, activeBindings);
     activeBindings.forEach(binding => {
       const bindingExistedLastFrame = this.activeBindings && this.activeBindings.has(binding);
       if (!bindingExistedLastFrame) {
@@ -182,17 +189,13 @@ AFRAME.registerSystem("userinput", {
     });
 
     this.frame = frame;
-    this.activeSets = activeSets;
     this.activeBindings = activeBindings;
     if (frame[paths.actions.logDebugFrame]) {
       console.log("frame", this.frame);
       console.log("sets", this.activeSets);
       console.log("bindings", this.activeBindings);
-      console.log("devices", activeDevices);
+      console.log("devices", this.activeDevices);
       console.log("xformStates", this.xformStates);
     }
-    if (frame[paths.actions.drawDebugFrame]) {
-      // TODO: draw debug data to the screen
-    }
-  },
+  }
 });

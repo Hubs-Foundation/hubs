@@ -71,8 +71,8 @@ export const xforms = {
   },
   vec2dpad: function(deadzoneRadius) {
     const deadzoneRadiusSquared = deadzoneRadius * deadzoneRadius;
-    return function vec2dpad(frame, { value }, dest) {
-      const [x, y] = frame[value];
+    return function vec2dpad(frame, src, dest) {
+      const [x, y] = frame[src.value];
       const inCenter = x * x + y * y < deadzoneRadiusSquared;
       const direction = inCenter ? "center" : angleTo4Direction(Math.atan2(x, -y));
       frame[dest[direction]] = true;
@@ -91,5 +91,12 @@ export const xforms = {
     if (frame[w]) y += 1;
     if (frame[s]) y -= 1;
     frame[vec2] = [x, y];
+  },
+  add_vec2: function(frame, src, dest) {
+    const first = frame[src.first];
+    const second = frame[src.second];
+    if (first && second) {
+        frame[dest.value] = [first[0] + second[0], first[1] + second[1]];
+    }
   }
 };

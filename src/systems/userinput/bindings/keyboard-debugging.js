@@ -2,7 +2,7 @@ import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
 
-export const keyboardDebugBindings = {
+export const keyboardDebuggingBindings = {
     [sets.global]: [
         {
             src: {

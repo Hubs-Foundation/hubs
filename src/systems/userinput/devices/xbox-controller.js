@@ -1,6 +1,6 @@
 import { paths } from "../paths";
 
-export class XboxController {
+export class XboxControllerDevice {
   constructor(gamepad) {
     this.gamepad = gamepad;
     this.buttonMap = [

@@ -21,10 +21,10 @@ from "device" paths, which specify where device state
 is recorded. 
 
 #+BEGIN_EXAMPLE js
-paths.actions.rightHandGrab = "/actions/rightHandGrab";
-paths.actions.rightHandDrop = "/actions/rightHandDrop";
-paths.actions.rightHandStartDrawing = "/actions/rightHandStartDrawing";
-paths.actions.rightHandStopDrawing = "/actions/rightHandStopDrawing";
+paths.actions.rightHand.grab = "/actions/rightHandGrab";
+paths.actions.rightHand.drop = "/actions/rightHandDrop";
+paths.actions.rightHand.startDrawing = "/actions/rightHandStartDrawing";
+paths.actions.rightHand.stopDrawing = "/actions/rightHandStopDrawing";
 #+END_EXAMPLE 
 
 #+BEGIN_EXAMPLE js
@@ -43,7 +43,7 @@ paths.device.keyboard = {
 A path used by app code when reading a user input frame.
 #+BEGIN_EXAMPLE js
 const userinput = AFRAME.scenes[0].systems.userinput;
-const grab = userinput.readFrameValueAtPath(paths.actions.rightHandGrab);
+const grab = userinput.readFrameValueAtPath(paths.actions.rightHand.grab);
 if (grab) {
   this.startInteraction();
 }

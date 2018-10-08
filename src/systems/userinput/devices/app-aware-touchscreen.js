@@ -32,7 +32,7 @@ function shouldMoveCursor(touch, raycaster) {
   return intersection && intersection.object.el.matches(".interactable, .interactable *");
 }
 
-export class TouchscreenDevice {
+export class AppAwareTouchscreenDevice {
   constructor() {
     this.raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 3);
     this.assignments = [];

@@ -15,7 +15,7 @@ const calculateCursorPose = function(camera, coords) {
   return cursorPose;
 };
 
-export class SmartMouseDevice {
+export class AppAwareMouseDevice {
   constructor() {
     this.prevButtonLeft = false;
     this.clickedOnAnything = false;

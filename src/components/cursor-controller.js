@@ -111,7 +111,7 @@ AFRAME.registerComponent("cursor-controller", {
 
       const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
       if (!isGrabbing) {
-        const cursorPose = userinput.readFrameValueAtPath(paths.actions.cursorPose);
+        const cursorPose = userinput.readFrameValueAtPath(paths.actions.cursor.pose);
         if (cursorPose) {
           rawIntersections.length = 0;
           this.raycaster.ray.origin = cursorPose.position;
@@ -143,10 +143,10 @@ AFRAME.registerComponent("cursor-controller", {
         this.distance = this.data.far;
       }
 
-      const cursorPose = userinput.readFrameValueAtPath(paths.actions.cursorPose);
+      const cursorPose = userinput.readFrameValueAtPath(paths.actions.cursor.pose);
       this.setCursorVisibility(!!cursorPose);
       if (isGrabbing) {
-        if (userinput.readFrameValueAtPath(paths.actions.cursorDrop)) {
+        if (userinput.readFrameValueAtPath(paths.actions.cursor.drop)) {
           this.endInteraction();
         }
       }
@@ -156,7 +156,7 @@ AFRAME.registerComponent("cursor-controller", {
 
       const cursorPosition = cursor.object3D.position;
       if (isGrabbing) {
-        const cursorModDelta = userinput.readFrameValueAtPath(paths.actions.cursorModDelta);
+        const cursorModDelta = userinput.readFrameValueAtPath(paths.actions.cursor.modDelta);
         if (cursorModDelta) {
           this.changeDistanceMod(cursorModDelta);
         }
@@ -185,7 +185,7 @@ AFRAME.registerComponent("cursor-controller", {
       cursor.object3D.lookAt(cameraPos);
 
       if (!isGrabbing) {
-        if (userinput.readFrameValueAtPath(paths.actions.cursorGrab)) {
+        if (userinput.readFrameValueAtPath(paths.actions.cursor.grab)) {
           this.startInteraction();
         }
       }
