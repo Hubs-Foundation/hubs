@@ -19,17 +19,17 @@ export default class InviteDialog extends Component {
   };
 
   state = {
-    linkButtonText: navigator.share && this.props.allowShare ? "share" : "copy"
+    copyButtonText: "copy"
   };
 
-  linkClicked = link => {
-    if (navigator.share && this.props.allowShare) {
-      navigator.share({ title: document.title, url: link });
-      this.props.onClose();
-    } else {
-      copy(link);
-      this.setState({ linkButtonText: "copied!" });
-    }
+  shareClicked = link => {
+    navigator.share({ title: document.title, url: link });
+    this.props.onClose();
+  };
+
+  copyClicked = link => {
+    copy(link);
+    this.setState({ copyButtonText: "copied!" });
   };
 
   render() {
@@ -64,9 +64,17 @@ export default class InviteDialog extends Component {
         <div className={styles.domain}>
           <input type="text" readOnly onFocus={e => e.target.select()} value={shareLink} />
         </div>
-        <button className={styles.linkButton} onClick={this.linkClicked.bind(this, "https://" + shareLink)}>
-          <span>{this.state.linkButtonText}</span>
-        </button>
+        <div className={styles.buttons}>
+          <button className={styles.linkButton} onClick={this.copyClicked.bind(this, "https://" + shareLink)}>
+            <span>{this.state.copyButtonText}</span>
+          </button>
+          {this.props.allowShare &&
+            navigator.share && (
+              <button className={styles.linkButton} onClick={this.shareClicked.bind(this, "https://" + shareLink)}>
+                <span>share</span>
+              </button>
+            )}
+        </div>
       </div>
     );
   }
