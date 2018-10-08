@@ -174,7 +174,6 @@ class LinkRoot extends Component {
 
                     this.setState({ entered: ev.target.value.toUpperCase() });
                   }}
-                  placeholder={this.state.isAlphaMode ? "- - - -" : "- - - - - -"}
                 />
               </div>
 
