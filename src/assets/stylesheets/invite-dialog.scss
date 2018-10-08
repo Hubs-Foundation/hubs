@@ -96,10 +96,27 @@
   justify-content: center;
 }
 
+:local(.digit_2) {
+  margin-right: 8px;
+}
+
+:local(.digit_3) {
+  margin-left: 8px;
+}
+
 :local(.code-loading-panel) {
   background: none;
 }
 
 :local(.hub-link-link) {
   font-size: 1.2em;
+}
+
+:local(.buttons) {
+  display: flex;
+  justify-content: space-between;
+
+  button {
+    margin: 0 12px;
+  }
 }

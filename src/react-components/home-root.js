@@ -215,6 +215,13 @@ class HomeRoot extends Component {
                 <div className={styles.title}>
                   <FormattedMessage id="home.hero_title" />
                 </div>
+                {this.state.environments.length === 0 && (
+                  <div className="loader-wrap">
+                    <div className="loader">
+                      <div className="loader-center" />
+                    </div>
+                  </div>
+                )}
               </div>
               <div className={styles.create}>
                 <HubCreatePanel
@@ -222,11 +229,13 @@ class HomeRoot extends Component {
                   environments={this.state.environments}
                 />
               </div>
-              <div className={styles.joinButton}>
-                <a href="/link">
-                  <FormattedMessage id="home.join_room" />
-                </a>
-              </div>
+              {this.state.environments.length > 1 && (
+                <div className={styles.joinButton}>
+                  <a href="/link">
+                    <FormattedMessage id="home.join_room" />
+                  </a>
+                </div>
+              )}
             </div>
             <div className={styles.footerContent}>
               <div className={styles.links}>

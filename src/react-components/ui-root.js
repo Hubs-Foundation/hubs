@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
+import copy from "copy-to-clipboard";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
@@ -94,6 +95,7 @@ class UIRoot extends Component {
     showLinkDialog: false,
     linkCode: null,
     linkCodeCancel: null,
+    miniInviteActivated: false,
 
     shareScreen: false,
     requestedScreen: false,
@@ -550,6 +552,21 @@ class UIRoot extends Component {
     this.setState({ dialog: <WebVRRecommendDialog onClose={this.closeDialog} /> });
   };
 
+  onMiniInviteClicked = () => {
+    const link = "https://hub.link/" + this.props.hubEntryCode;
+
+    this.setState({ miniInviteActivated: true });
+    setTimeout(() => {
+      this.setState({ miniInviteActivated: false });
+    }, 5000);
+
+    if (navigator.share) {
+      navigator.share({ title: document.title, url: link });
+    } else {
+      copy(link);
+    }
+  };
+
   renderExitedPane = () => {
     let subtitle = null;
     if (this.props.roomUnavailableReason === "closed") {
@@ -919,6 +936,7 @@ class UIRoot extends Component {
     });
 
     const entryFinished = this.state.entryStep === ENTRY_STEPS.finished;
+    const showVREntryButton = entryFinished && this.props.availableVREntryTypes.isInHMD;
 
     return (
       <IntlProvider locale={lang} messages={messages}>
@@ -942,17 +960,32 @@ class UIRoot extends Component {
               [styles.inviteContainerInverted]: this.state.showInviteDialog
             })}
           >
-            {(!entryFinished || (this.props.occupantCount <= 1 && !this.props.availableVREntryTypes.isInHMD)) && (
-              <button onClick={() => this.toggleInviteDialog()}>
+            {!showVREntryButton && (
+              <button
+                className={classNames({ [styles.hideSmallScreens]: this.props.occupantCount > 1 && entryFinished })}
+                onClick={() => this.toggleInviteDialog()}
+              >
                 <FormattedMessage id="entry.invite-others-nag" />
               </button>
             )}
-            {this.props.availableVREntryTypes.isInHMD &&
+            {!showVREntryButton &&
+              this.props.occupantCount > 1 &&
               entryFinished && (
-                <button onClick={() => this.props.scene.enterVR()}>
-                  <FormattedMessage id="entry.return-to-vr" />
+                <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
+                  <span>
+                    {this.state.miniInviteActivated
+                      ? navigator.share
+                        ? "sharing..."
+                        : "copied!"
+                      : "hub.link/" + this.props.hubEntryCode}
+                  </span>
                 </button>
               )}
+            {showVREntryButton && (
+              <button onClick={() => this.props.scene.enterVR()}>
+                <FormattedMessage id="entry.return-to-vr" />
+              </button>
+            )}
             {this.state.showInviteDialog && (
               <InviteDialog
                 allowShare={!this.props.availableVREntryTypes.isInHMD}

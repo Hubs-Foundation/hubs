@@ -255,6 +255,10 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
 
   remountUI({ hubId: hub.hub_id, hubName: hub.name, hubEntryCode: hub.entry_code });
 
+  document
+    .querySelector("#hud-hub-entry-link")
+    .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
+
   scene.setAttribute("networked-scene", {
     room: hub.hub_id,
     serverURL: process.env.JANUS_SERVER,
