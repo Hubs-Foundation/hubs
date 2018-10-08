@@ -19,17 +19,22 @@ export default class InviteDialog extends Component {
   };
 
   state = {
-    copyButtonText: "copy"
+    copyButtonActive: false,
+    shareButtonActive: false
   };
 
   shareClicked = link => {
+    this.setState({ shareButtonActive: true });
+    setTimeout(() => this.setState({ shareButtonActive: false }), 5000);
+
     navigator.share({ title: document.title, url: link });
-    this.props.onClose();
   };
 
   copyClicked = link => {
+    this.setState({ copyButtonActive: true });
+    setTimeout(() => this.setState({ copyButtonActive: false }), 5000);
+
     copy(link);
-    this.setState({ copyButtonText: "copied!" });
   };
 
   render() {
@@ -66,12 +71,12 @@ export default class InviteDialog extends Component {
         </div>
         <div className={styles.buttons}>
           <button className={styles.linkButton} onClick={this.copyClicked.bind(this, "https://" + shareLink)}>
-            <span>{this.state.copyButtonText}</span>
+            <span>{this.state.copyButtonActive ? "copied!" : "copy"}</span>
           </button>
           {this.props.allowShare &&
             navigator.share && (
               <button className={styles.linkButton} onClick={this.shareClicked.bind(this, "https://" + shareLink)}>
-                <span>share</span>
+                <span>{this.state.shareButtonActive ? "sharing..." : "share"}</span>
               </button>
             )}
         </div>
