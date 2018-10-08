@@ -182,13 +182,7 @@ class HubCreatePanel extends Component {
                   <img className={styles.image} srcSet={environmentThumbnail.srcset} />
                   <div className={styles.labels}>
                     <div className={styles.header}>
-                      {meta.url ? (
-                        <a href={meta.url} rel="noopener noreferrer" className={styles.title}>
-                          {environmentTitle}
-                        </a>
-                      ) : (
-                        <span className={styles.title}>{environmentTitle}</span>
-                      )}
+                      <span className={styles.title}>{environmentTitle}</span>
                       {environmentAuthor &&
                         environmentAuthor.name &&
                         (environmentAuthor.url ? (
