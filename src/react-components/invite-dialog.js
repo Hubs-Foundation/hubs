@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import copy from "copy-to-clipboard";
+import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
 
 import styles from "../assets/stylesheets/invite-dialog.scss";
@@ -19,17 +20,22 @@ export default class InviteDialog extends Component {
   };
 
   state = {
-    linkButtonText: navigator.share && this.props.allowShare ? "share" : "copy"
+    copyButtonActive: false,
+    shareButtonActive: false
   };
 
-  linkClicked = link => {
-    if (navigator.share && this.props.allowShare) {
-      navigator.share({ title: document.title, url: link });
-      this.props.onClose();
-    } else {
-      copy(link);
-      this.setState({ linkButtonText: "copied!" });
-    }
+  shareClicked = link => {
+    this.setState({ shareButtonActive: true });
+    setTimeout(() => this.setState({ shareButtonActive: false }), 5000);
+
+    navigator.share({ title: document.title, url: link });
+  };
+
+  copyClicked = link => {
+    this.setState({ copyButtonActive: true });
+    setTimeout(() => this.setState({ copyButtonActive: false }), 5000);
+
+    copy(link);
   };
 
   render() {
@@ -53,7 +59,7 @@ export default class InviteDialog extends Component {
         </div>
         <div className={styles.code}>
           {entryCodeString.split("").map((d, i) => (
-            <div className={styles.digit} key={`link_code_${i}`}>
+            <div className={classNames({ [styles.digit]: true, [styles[`digit_${i}`]]: true })} key={`link_code_${i}`}>
               {d}
             </div>
           ))}
@@ -64,9 +70,17 @@ export default class InviteDialog extends Component {
         <div className={styles.domain}>
           <input type="text" readOnly onFocus={e => e.target.select()} value={shareLink} />
         </div>
-        <button className={styles.linkButton} onClick={this.linkClicked.bind(this, "https://" + shareLink)}>
-          <span>{this.state.linkButtonText}</span>
-        </button>
+        <div className={styles.buttons}>
+          <button className={styles.linkButton} onClick={this.copyClicked.bind(this, "https://" + shareLink)}>
+            <span>{this.state.copyButtonActive ? "copied!" : "copy"}</span>
+          </button>
+          {this.props.allowShare &&
+            navigator.share && (
+              <button className={styles.linkButton} onClick={this.shareClicked.bind(this, "https://" + shareLink)}>
+                <span>{this.state.shareButtonActive ? "sharing..." : "share"}</span>
+              </button>
+            )}
+        </div>
       </div>
     );
   }
