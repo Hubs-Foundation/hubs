@@ -4,6 +4,7 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 
 import { lang, messages } from "../utils/i18n";
+import { playVideoWithStopOnBlur } from "../utils/video-utils.js";
 import homeVideoWebM from "../assets/video/home.webm";
 import homeVideoMp4 from "../assets/video/home.mp4";
 import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
@@ -82,19 +83,7 @@ class HomeRoot extends Component {
   loadHomeVideo = () => {
     const videoEl = document.querySelector("#background-video");
     videoEl.playbackRate = 0.9;
-    function toggleVideo() {
-      // Play the video if the window/tab is visible.
-      if (document.hasFocus()) {
-        videoEl.play();
-      } else {
-        videoEl.pause();
-      }
-    }
-    if ("hasFocus" in document) {
-      document.addEventListener("visibilitychange", toggleVideo);
-      window.addEventListener("focus", toggleVideo);
-      window.addEventListener("blur", toggleVideo);
-    }
+    playVideoWithStopOnBlur(videoEl);
   };
 
   closeDialog() {
