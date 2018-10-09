@@ -89,6 +89,8 @@ body {
   font-size: 1.5em;
   text-align: center;
   margin-top: 48px;
+  margin-left: 12px;
+  margin-right: 12px;
 
   @media(max-width: $mobile-breakpoint) {
     font-size: 1.3em;
@@ -155,6 +157,7 @@ body {
 :local(.download-button) {
   @extend %action-button;
   @extend %wide-button;
+
   background-color: $spoke-action-color;
   margin-top: 64px;
 }
