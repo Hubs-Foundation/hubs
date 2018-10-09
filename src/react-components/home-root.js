@@ -17,7 +17,7 @@ import styles from "../assets/stylesheets/index.scss";
 import HubCreatePanel from "./hub-create-panel.js";
 import AuthDialog from "./auth-dialog.js";
 import ReportDialog from "./report-dialog.js";
-import SlackDialog from "./slack-dialog.js";
+import JoinUsDialog from "./join-us-dialog.js";
 import UpdatesDialog from "./updates-dialog.js";
 import DialogContainer from "./dialog-container.js";
 
@@ -101,8 +101,8 @@ class HomeRoot extends Component {
     this.setState({ dialog: null });
   }
 
-  showSlackDialog() {
-    this.setState({ dialog: <SlackDialog onClose={this.closeDialog} /> });
+  showJoinUsDialog() {
+    this.setState({ dialog: <JoinUsDialog onClose={this.closeDialog} /> });
   }
 
   showReportDialog() {
@@ -186,14 +186,17 @@ class HomeRoot extends Component {
             <div className={styles.headerContent}>
               <div className={styles.titleAndNav}>
                 <div className={styles.links}>
+                  <a href="/spoke" rel="noreferrer noopener">
+                    <FormattedMessage id="home.spoke_link" />
+                  </a>
+                  <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
+                    <FormattedMessage id="home.source_link" />
+                  </a>
                   <a
                     href="https://blog.mozvr.com/introducing-hubs-a-new-way-to-get-together-online/"
                     rel="noreferrer noopener"
                   >
                     <FormattedMessage id="home.about_link" />
-                  </a>
-                  <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
-                    <FormattedMessage id="home.source_link" />
                   </a>
                 </div>
               </div>
@@ -244,7 +247,7 @@ class HomeRoot extends Component {
                     className={styles.link}
                     rel="noopener noreferrer"
                     href="#"
-                    onClick={this.onDialogLinkClicked(this.showSlackDialog.bind(this))}
+                    onClick={this.onDialogLinkClicked(this.showJoinUsDialog.bind(this))}
                   >
                     <FormattedMessage id="home.join_us" />
                   </a>
