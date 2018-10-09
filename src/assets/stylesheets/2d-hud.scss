@@ -32,7 +32,7 @@
   justify-content: space-around;
   align-items: center;
   padding: 5px;
-  background-color: rgba(#4F4F4F, 0.45);
+  background-color: $hud-panel-background;
 }
 
 :local(.panel.left) {

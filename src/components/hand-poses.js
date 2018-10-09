@@ -1,3 +1,5 @@
+import { findAncestorWithComponent } from "../utils/scene-graph";
+
 const POSES = {
   open: "allOpen",
   thumbDown: "thumbDown",
@@ -22,12 +24,10 @@ AFRAME.registerComponent("hand-pose", {
   init() {
     this.pose = 0;
     this.animatePose = this.animatePose.bind(this);
-    this.mixer = this.el.components["animation-mixer"];
-    const object3DMap = this.mixer.el.object3DMap;
-    const rootObj = object3DMap.mesh || object3DMap.scene;
-    this.clipActionObject = rootObj.parent;
+    const mixerEl = findAncestorWithComponent(this.el, "animation-mixer");
+    this.mixer = mixerEl.components["animation-mixer"].mixer;
     const suffix = this.id == "left" ? "_L" : "_R";
-    this.from = this.to = this.mixer.mixer.clipAction(POSES.open + suffix, this.clipActionObject);
+    this.from = this.to = this.mixer.clipAction(POSES.open + suffix);
     this.from.play();
 
     const getNetworkedAvatar = el => {
@@ -59,15 +59,15 @@ AFRAME.registerComponent("hand-pose", {
 
     const duration = 0.065;
     const suffix = this.id == "left" ? "_L" : "_R";
-    this.from = this.mixer.mixer.clipAction(prev + suffix, this.clipActionObject);
-    this.to = this.mixer.mixer.clipAction(curr + suffix, this.clipActionObject);
+    this.from = this.mixer.clipAction(prev + suffix);
+    this.to = this.mixer.clipAction(curr + suffix);
 
     this.from.fadeOut(duration);
     this.to.fadeIn(duration);
     this.to.play();
     this.from.play();
 
-    this.mixer.mixer.update(0.001);
+    this.mixer.update(0.001);
   }
 });
 

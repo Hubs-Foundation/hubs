@@ -171,29 +171,30 @@ AFRAME.registerComponent("character-controller", {
     console.warn("character-controller", msg);
   },
 
-  _updateNavState: function(pos, forceUpdate) {
+  _setNavNode: function(pos) {
+    if (this.navNode !== null) return;
     const { pathfinder } = this.el.sceneEl.systems.nav;
-    if (this.navGroup === null || forceUpdate) {
-      this.navGroup = pathfinder.getGroup(this.navZone, pos, true);
-    }
-    if (this.navNode === null || forceUpdate) {
-      this.navNode =
-        pathfinder.getClosestNode(pos, this.navZone, this.navGroup, true) ||
-        pathfinder.getClosestNode(pos, this.navZone, this.navGroup);
-    }
+    this.navNode =
+      pathfinder.getClosestNode(pos, this.navZone, this.navGroup, true) ||
+      pathfinder.getClosestNode(pos, this.navZone, this.navGroup);
   },
 
   setPositionOnNavMesh: function(start, end, object3D) {
     const { pathfinder } = this.el.sceneEl.systems.nav;
     if (!(this.navZone in pathfinder.zones)) return;
-    this._updateNavState(end);
+    if (this.navGroup === null) {
+      this.navGroup = pathfinder.getGroup(this.navZone, end, true, true);
+    }
+    this._setNavNode(end);
     this.navNode = pathfinder.clampStep(start, end, this.navNode, this.navZone, this.navGroup, object3D.position);
   },
 
   resetPositionOnNavMesh: function(position, navPosition, object3D) {
     const { pathfinder } = this.el.sceneEl.systems.nav;
     if (!(this.navZone in pathfinder.zones)) return;
-    this._updateNavState(navPosition, true);
+    this.navGroup = pathfinder.getGroup(this.navZone, navPosition, true);
+    this.navNode = null;
+    this._setNavNode(navPosition);
     object3D.position.copy(navPosition);
   },
 

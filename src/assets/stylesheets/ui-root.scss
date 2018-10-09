@@ -84,6 +84,25 @@
   @media (max-height: 320px) {
     display: none;
   }
+
+  :local(.hide-small-screens) {
+    display: none;
+
+    @media (min-height: 737px) {
+      display: flex;
+    }
+  }
+
+  :local(.invite-mini-button) {
+    display: none;
+    background-color: $hud-panel-background;
+    height: 28px;
+    font-size: 0.8em;
+
+    @media (max-height: 736px) and (min-height: 325px) {
+      display: flex;
+    }
+  }
 }
 
 :local(.invite-container-inverted) {

@@ -21,6 +21,8 @@ import "./utils/audio-context-fix";
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
+import { addAnimationComponents } from "./utils/animation";
+
 import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
 import trackpad_scrolling from "./behaviours/trackpad-scrolling";
 import joystick_dpad4 from "./behaviours/joystick-dpad4";
@@ -253,6 +255,10 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
 
   remountUI({ hubId: hub.hub_id, hubName: hub.name, hubEntryCode: hub.entry_code });
 
+  document
+    .querySelector("#hud-hub-entry-link")
+    .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
+
   scene.setAttribute("networked-scene", {
     room: hub.hub_id,
     serverURL: process.env.JANUS_SERVER,
@@ -351,8 +357,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  document.querySelector("#environment-scene").addEventListener("bundleloaded", () => {
+  const environmentScene = document.querySelector("#environment-scene");
+
+  environmentScene.addEventListener("bundleloaded", () => {
     remountUI({ environmentSceneLoaded: true });
+
+    for (const modelEl of environmentScene.children) {
+      addAnimationComponents(modelEl);
+    }
 
     setupLobbyCamera();
 
