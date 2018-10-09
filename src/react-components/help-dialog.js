@@ -7,6 +7,12 @@ export default class HelpDialog extends Component {
     return (
       <DialogContainer title="Getting Started" {...this.props}>
         <div className="info-dialog__help">
+          <p style={{ textAlign: "center" }}>
+            Join the Hubs community on{" "}
+            <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/XzrGUY8">
+              Discord
+            </a>!
+          </p>
           <p>When in a room, other avatars can see and hear you.</p>
           <p>
             Use your controller&apos;s action button to teleport from place to place. If it has a trigger, use it to
