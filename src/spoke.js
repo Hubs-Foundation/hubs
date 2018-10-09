@@ -39,7 +39,7 @@ class SpokeLanding extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { platform: getPlatform() };
+    this.state = { platform: getPlatform(), downloadClicked: false };
   }
 
   componentDidMount() {
@@ -149,14 +149,32 @@ class SpokeLanding extends Component {
                   <a href="/">Hubs</a>
                 </div>
                 <div className={styles.actionButtons}>
-                  <a href={downloadLink} className={styles.downloadButton}>
-                    <FormattedMessage id={"spoke.download_" + this.state.platform} />
-                  </a>
-                  {platform !== "unsupported" && (
-                    <a href={releasesLink} className={styles.browseVersions}>
-                      <FormattedMessage id="spoke.browse_all_versions" />
+                  {!this.state.downloadClicked ? (
+                    <a
+                      href={downloadLink}
+                      onClick={() => this.setState({ downloadClicked: true })}
+                      className={styles.downloadButton}
+                    >
+                      <FormattedMessage id={"spoke.download_" + this.state.platform} />
                     </a>
+                  ) : (
+                    <div className={styles.thankYou}>
+                      <p>
+                        <FormattedMessage id="spoke.thank_you" />
+                      </p>
+
+                      <p>
+                        You can also <a href="https://discord.gg/XzrGUY8/">join our community</a> on Discord.
+                      </p>
+                    </div>
                   )}
+
+                  {platform !== "unsupported" &&
+                    !this.state.downloadClicked && (
+                      <a href={releasesLink} className={styles.browseVersions}>
+                        <FormattedMessage id="spoke.browse_all_versions" />
+                      </a>
+                    )}
                   <button className={styles.playButton} onClick={() => this.setState({ playVideo: true })}>
                     <FormattedMessage id="spoke.play_button" />
                   </button>

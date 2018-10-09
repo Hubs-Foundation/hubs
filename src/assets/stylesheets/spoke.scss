@@ -30,7 +30,7 @@ body {
 :local(.content) {
   display: flex;
   flex-direction: column;
-  height: calc(100vh);
+  height: calc(100vh - 72px);
 }
 
 :local(.header) {
@@ -173,4 +173,12 @@ body {
   display: block;
   text-align: center;
   width: 100%;
+}
+
+:local(.thank-you) {
+  text-align: center;
+
+  a {
+    color: $grey-text;
+  }
 }
