@@ -82,9 +82,12 @@ export default class SceneEntryManager {
     cursor.enable();
     cursor.setCursorVisibility(true);
 
-    this.hubChannel.sendEntryEvent().then(() => {
-      this.store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
-    });
+    // Delay sending entry event telemetry so VR display is presenting.
+    setTimeout(() => {
+      this.hubChannel.sendEntryEvent().then(() => {
+        this.store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
+      });
+    }, 5000);
   };
 
   whenSceneLoaded = callback => {
