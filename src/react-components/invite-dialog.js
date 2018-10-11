@@ -28,7 +28,7 @@ export default class InviteDialog extends Component {
     this.setState({ shareButtonActive: true });
     setTimeout(() => this.setState({ shareButtonActive: false }), 5000);
 
-    navigator.share({ title: document.title, url: link });
+    navigator.share({ title: "Join me now in #hubs!", url: link });
   };
 
   copyClicked = link => {
