@@ -187,6 +187,9 @@ class HomeRoot extends Component {
                   <a href="/spoke" rel="noreferrer noopener">
                     <FormattedMessage id="home.spoke_link" />
                   </a>
+                  <a href="https://discord.gg/XzrGUY8" rel="noreferrer noopener">
+                    <FormattedMessage id="home.community_link" />
+                  </a>
                 </div>
               </div>
               <div className={styles.ident} />

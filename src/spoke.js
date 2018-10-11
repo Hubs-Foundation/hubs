@@ -126,13 +126,16 @@ class SpokeLanding extends Component {
           <div className={styles.header}>
             <div className={styles.headerLinks}>
               <a href="/about" rel="noopener noreferrer">
-                About
+                <FormattedMessage id="home.about_link" />
               </a>
               <a href="https://github.com/mozillareality/spoke" rel="noopener noreferrer">
-                Source
+                <FormattedMessage id="home.source_link" />
               </a>
               <a href="https://hubs.mozilla.com" rel="noopener noreferrer">
                 Hubs
+              </a>
+              <a href="https://discord.gg/XzrGUY8" rel="noreferrer noopener">
+                <FormattedMessage id="home.community_link" />
               </a>
             </div>
           </div>
