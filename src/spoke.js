@@ -147,7 +147,9 @@ class SpokeLanding extends Component {
                 </div>
                 <div className={styles.secondaryTagline}>
                   <FormattedMessage id="spoke.secondary_tagline" />
-                  <a href="/">Hubs</a>
+                  <a style={{ fontWeight: "bold" }} href="/">
+                    Hubs
+                  </a>
                 </div>
                 <div className={styles.actionButtons}>
                   {!this.state.downloadClicked ? (

@@ -126,6 +126,7 @@ body {
   position: relative;
   margin-left: 32px;
   flex: 1;
+  z-index: -1;
 
   @media(max-width: $breakpoint) {
     width: 100%;
