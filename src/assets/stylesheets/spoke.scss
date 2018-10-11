@@ -157,6 +157,8 @@ body {
 :local(.download-button) {
   @extend %action-button;
   @extend %wide-button;
+  height: 64px;
+  border-radius: 32px;
 
   background-color: $spoke-action-color;
   margin-top: 64px;
