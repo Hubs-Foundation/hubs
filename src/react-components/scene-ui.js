@@ -66,6 +66,10 @@ class SceneUI extends Component {
   };
 
   render() {
+    const sceneUrl = [location.protocol, "//", location.host, location.pathname].join("");
+    const text = `${this.props.sceneName} in #hubs`;
+    const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(sceneUrl)}&text=${encodeURIComponent(text)}`;
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.ui}>
@@ -89,6 +93,12 @@ class SceneUI extends Component {
               <button onClick={this.createRoom}>
                 <FormattedMessage id="scene.create_button" />
               </button>
+              <a href={tweetLink} rel="noopener noreferrer" target="_blank" className={styles.tweetButton}>
+                <img src="../assets/images/twitter.svg" />
+                <div>
+                  <FormattedMessage id="scene.tweet_button" />
+                </div>
+              </a>
             </div>
           </div>
           <div className={styles.info}>
