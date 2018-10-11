@@ -25,7 +25,7 @@ function getPlatform() {
     return "macos";
   } else if (["Win32", "Win64", "Windows"].indexOf(platform) >= 0) {
     return "win";
-  } else if (/Linux/.test(platform)) {
+  } else if (/Linux/.test(platform) && !/\WAndroid\W/.test(navigator.userAgent)) {
     return "linux";
   }
 
