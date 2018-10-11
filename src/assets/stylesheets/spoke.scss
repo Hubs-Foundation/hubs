@@ -30,7 +30,7 @@ body {
 :local(.content) {
   display: flex;
   flex-direction: column;
-  height: calc(100vh);
+  height: calc(100vh - 72px);
 }
 
 :local(.header) {
@@ -89,6 +89,8 @@ body {
   font-size: 1.5em;
   text-align: center;
   margin-top: 48px;
+  margin-left: 12px;
+  margin-right: 12px;
 
   @media(max-width: $mobile-breakpoint) {
     font-size: 1.3em;
@@ -155,8 +157,18 @@ body {
 :local(.download-button) {
   @extend %action-button;
   @extend %wide-button;
+  height: 64px;
+  border-radius: 32px;
+
   background-color: $spoke-action-color;
   margin-top: 64px;
+  display: flex;
+  flex-direction: column;
+
+  :local(.version) {
+    font-size: 0.8em;
+    font-weight: lighter;
+  }
 }
 
 :local(.play-button) {
@@ -173,4 +185,12 @@ body {
   display: block;
   text-align: center;
   width: 100%;
+}
+
+:local(.thank-you) {
+  text-align: center;
+
+  a {
+    color: $grey-text;
+  }
 }
