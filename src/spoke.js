@@ -105,7 +105,8 @@ class SpokeLanding extends Component {
     }
 
     this.setState({
-      downloadLinkForCurrentPlatform: this.getDownloadUrlForPlatform(release.releaseAssets.nodes, this.state.platform)
+      downloadLinkForCurrentPlatform: this.getDownloadUrlForPlatform(release.releaseAssets.nodes, this.state.platform),
+      spokeVersion: release.tag.name
     });
   };
 
@@ -155,7 +156,10 @@ class SpokeLanding extends Component {
                       onClick={() => this.setState({ downloadClicked: true })}
                       className={styles.downloadButton}
                     >
-                      <FormattedMessage id={"spoke.download_" + this.state.platform} />
+                      <div>
+                        <FormattedMessage id={"spoke.download_" + this.state.platform} />
+                      </div>
+                      <div className={styles.version}>{this.state.spokeVersion} Beta</div>
                     </a>
                   ) : (
                     <div className={styles.thankYou}>
