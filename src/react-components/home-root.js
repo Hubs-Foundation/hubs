@@ -175,17 +175,17 @@ class HomeRoot extends Component {
             <div className={styles.headerContent}>
               <div className={styles.titleAndNav}>
                 <div className={styles.links}>
-                  <a href="/spoke" rel="noreferrer noopener">
-                    <FormattedMessage id="home.spoke_link" />
-                  </a>
-                  <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
-                    <FormattedMessage id="home.source_link" />
-                  </a>
                   <a
                     href="https://blog.mozvr.com/introducing-hubs-a-new-way-to-get-together-online/"
                     rel="noreferrer noopener"
                   >
                     <FormattedMessage id="home.about_link" />
+                  </a>
+                  <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
+                    <FormattedMessage id="home.source_link" />
+                  </a>
+                  <a href="/spoke" rel="noreferrer noopener">
+                    <FormattedMessage id="home.spoke_link" />
                   </a>
                 </div>
               </div>
