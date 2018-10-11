@@ -87,6 +87,15 @@
     "link.cancel": "cancel",
     "invite.enter_via": "Enter via ",
     "invite.and_enter_code": " with code:",
-    "invite.or_visit": "or visit"
+    "invite.or_visit": "or visit",
+    "spoke.primary_tagline": "make your space",
+    "spoke.secondary_tagline": "Create 3D social scenes for ",
+    "spoke.thank_you": "Thank you for downloading Spoke!",
+    "spoke.download_win": "Download for Windows",
+    "spoke.download_macos": "Download for Mac",
+    "spoke.download_linux": "Download for Linux",
+    "spoke.download_unsupported": "View Releases",
+    "spoke.browse_all_versions": "Browse All Versions",
+    "spoke.play_button": "Learn Spoke in 5 Minutes"
   }
 }
