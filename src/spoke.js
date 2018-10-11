@@ -130,7 +130,7 @@ class SpokeLanding extends Component {
               <a href="https://github.com/mozillareality/spoke" rel="noopener noreferrer">
                 Source
               </a>
-              <a href="https://github.com/mozilla/hubs" rel="noopener noreferrer">
+              <a href="https://hubs.mozilla.com" rel="noopener noreferrer">
                 Hubs
               </a>
             </div>
