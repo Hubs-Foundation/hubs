@@ -155,13 +155,15 @@ class SpokeLanding extends Component {
                   {!this.state.downloadClicked ? (
                     <a
                       href={downloadLink}
-                      onClick={() => this.setState({ downloadClicked: true })}
+                      onClick={() => this.setState({ downloadClicked: platform !== "unsupported" })}
                       className={styles.downloadButton}
                     >
                       <div>
                         <FormattedMessage id={"spoke.download_" + this.state.platform} />
                       </div>
-                      <div className={styles.version}>{this.state.spokeVersion} Beta</div>
+                      {platform !== "unsupported" && (
+                        <div className={styles.version}>{this.state.spokeVersion} Beta</div>
+                      )}
                     </a>
                   ) : (
                     <div className={styles.thankYou}>
