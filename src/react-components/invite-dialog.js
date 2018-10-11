@@ -44,6 +44,11 @@ export default class InviteDialog extends Component {
     const entryCodeString = pad(entryCode, 6);
     const shareLink = `hub.link/${entryCodeString}`;
 
+    const tweetText = `Join me now in #hubs!`;
+    const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(
+      "https://" + shareLink
+    )}&text=${encodeURIComponent(tweetText)}`;
+
     return (
       <div className={styles.dialog}>
         <div className={styles.attachPoint} />
@@ -79,6 +84,12 @@ export default class InviteDialog extends Component {
               <button className={styles.linkButton} onClick={this.shareClicked.bind(this, "https://" + shareLink)}>
                 <span>{this.state.shareButtonActive ? "sharing..." : "share"}</span>
               </button>
+            )}
+          {this.props.allowShare &&
+            !navigator.share && (
+              <a href={tweetLink} className={styles.linkButton} target="_blank" rel="noopener noreferrer">
+                <FormattedMessage id="invite.tweet" />
+              </a>
             )}
         </div>
       </div>

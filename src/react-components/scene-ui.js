@@ -67,8 +67,10 @@ class SceneUI extends Component {
 
   render() {
     const sceneUrl = [location.protocol, "//", location.host, location.pathname].join("");
-    const text = `${this.props.sceneName} in #hubs`;
-    const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(sceneUrl)}&text=${encodeURIComponent(text)}`;
+    const tweetText = `${this.props.sceneName} in #hubs`;
+    const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(sceneUrl)}&text=${encodeURIComponent(
+      tweetText
+    )}`;
 
     return (
       <IntlProvider locale={lang} messages={messages}>
