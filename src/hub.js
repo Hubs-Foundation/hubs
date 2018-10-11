@@ -379,12 +379,14 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log(`Hub ID: ${hubId}`);
 
   const socket = connectToReticulum(isDebug);
-  const channel = socket.channel(`hub:${hubId}`, {});
 
-  channel
+  // Hub local channel
+  const hubPhxChannel = socket.channel(`hub:${hubId}`, {});
+
+  hubPhxChannel
     .join()
     .receive("ok", async data => {
-      hubChannel.setPhoenixChannel(channel);
+      hubChannel.setPhoenixChannel(hubPhxChannel);
       await handleHubChannelJoined(entryManager, hubChannel, data);
     })
     .receive("error", res => {
@@ -396,9 +398,15 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error(res);
     });
 
-  channel.on("naf", data => {
+  hubPhxChannel.on("naf", data => {
     if (!NAF.connection.adapter) return;
     NAF.connection.adapter.onData(data);
+  });
+
+  // Reticulum global channel
+  const retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
+  retPhxChannel.join().receive("error", res => {
+    console.error(res);
   });
 
   linkChannel.setSocket(socket);
