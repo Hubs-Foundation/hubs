@@ -192,10 +192,10 @@ AFRAME.registerComponent("character-controller", {
   resetPositionOnNavMesh: function(position, navPosition, object3D) {
     const { pathfinder } = this.el.sceneEl.systems.nav;
     if (!(this.navZone in pathfinder.zones)) return;
-    this.navGroup = pathfinder.getGroup(this.navZone, navPosition, true);
+    this.navGroup = pathfinder.getGroup(this.navZone, navPosition, true, true);
     this.navNode = null;
     this._setNavNode(navPosition);
-    object3D.position.copy(navPosition);
+    pathfinder.clampStep(position, navPosition, this.navNode, this.navZone, this.navGroup, object3D.position);
   },
 
   updateVelocity: function(dt) {
