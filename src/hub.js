@@ -29,6 +29,7 @@ import joystick_dpad4 from "./behaviours/joystick-dpad4";
 import msft_mr_axis_with_deadzone from "./behaviours/msft-mr-axis-with-deadzone";
 import { PressedMove } from "./activators/pressedmove";
 import { ReverseY } from "./activators/reversey";
+import { Presence } from "phoenix";
 
 import "./activators/shortpress";
 
@@ -408,6 +409,33 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubPhxChannel.on("naf", data => {
     if (!NAF.connection.adapter) return;
     NAF.connection.adapter.onData(data);
+  });
+
+  let presences = {};
+
+  hubPhxChannel.on("presence_state", state => {
+    presences = Presence.syncState(presences, state);
+    console.log(presences);
+  });
+
+  hubPhxChannel.on("presence_diff", diff => {
+    for (const [sessionId, info] of Object.entries(diff.joins || {})) {
+      if (!presences[sessionId]) continue;
+      const currentMeta = presences[sessionId].metas[0];
+      const newMeta = info.metas[0];
+
+      if (currentMeta.presence !== newMeta.presence) {
+        console.log("User entered " + newMeta.presence);
+      }
+
+      console.log(newMeta.profile);
+      if (currentMeta.profile && newMeta.profile && currentMeta.profile.displayName !== newMeta.profile.displayName) {
+        console.log(currentMeta.profile.displayName + " is now known as " + newMeta.profile.displayName);
+      }
+    }
+
+    presences = Presence.syncDiff(presences, diff);
+    console.log(presences);
   });
 
   // Reticulum global channel
