@@ -418,19 +418,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log(presences);
   });
 
+  const renderPresenceEvent = ev => {
+    console.log(ev);
+  }
+
   hubPhxChannel.on("presence_diff", diff => {
     for (const [sessionId, info] of Object.entries(diff.joins || {})) {
       if (!presences[sessionId]) continue;
       const currentMeta = presences[sessionId].metas[0];
       const newMeta = info.metas[0];
 
-      if (currentMeta.presence !== newMeta.presence) {
-        console.log("User entered " + newMeta.presence);
+      if (currentMeta.presence !== newMeta.presence && newMeta.profile.displayName) {
+        renderPresenceEvent({
+          type: "entered",
+          destination: newMeta.presence,
+          name: newMeta.profile.displayName
+        });
       }
 
-      console.log(newMeta.profile);
       if (currentMeta.profile && newMeta.profile && currentMeta.profile.displayName !== newMeta.profile.displayName) {
-        console.log(currentMeta.profile.displayName + " is now known as " + newMeta.profile.displayName);
+        renderPresenceEvent({
+          type: "display_name_changed",
+          oldName: currentMeta.profile.displaName,
+          newName: newMeta.profile.displayName
+        });
       }
     }
 
