@@ -27,6 +27,7 @@ import InviteTeamDialog from "./invite-team-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import LinkDialog from "./link-dialog.js";
 import CreateObjectDialog from "./create-object-dialog.js";
+import PresenceLog from "./presence-log.js";
 import TwoDHUD from "./2d-hud";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
@@ -84,7 +85,8 @@ class UIRoot extends Component {
     hubId: PropTypes.string,
     hubName: PropTypes.string,
     occupantCount: PropTypes.number,
-    isSupportAvailable: PropTypes.bool
+    isSupportAvailable: PropTypes.bool,
+    presenceLogEntries: PropTypes.array
   };
 
   state = {
@@ -950,6 +952,7 @@ class UIRoot extends Component {
 
           {(!entryFinished || this.isWaitingForAutoExit()) && (
             <div className={styles.uiDialog}>
+              <PresenceLog entries={this.props.presenceLogEntries || []} />
               <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
             </div>
           )}

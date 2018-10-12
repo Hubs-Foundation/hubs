@@ -406,6 +406,60 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error(res);
     });
 
+  const hubPhxPresence = new Presence(hubPhxChannel);
+
+  const presenceLogEntries = [];
+
+  const addToPresenceLog = entry => {
+    entry.key = new Date().getTime().toString();
+    presenceLogEntries.push(entry);
+    remountUI({ presenceLogEntries });
+
+    // Fade out and then remove
+    setTimeout(() => {
+      entry.expired = true;
+      remountUI({ presenceLogEntries });
+
+      setTimeout(() => {
+        presenceLogEntries.splice(presenceLogEntries.indexOf(entry), 1);
+        remountUI({ presenceLogEntries });
+      }, 5000);
+    }, 30000);
+  };
+
+  window.add = addToPresenceLog;
+
+  hubPhxPresence.onJoin((sessionId, current, info) => {
+    if (current) return;
+
+    const meta = info.metas[0];
+
+    if (meta.presence && meta.profile.displayName) {
+      addToPresenceLog({
+        type: "join",
+        presence: meta.presence,
+        name: meta.profile.displayName
+      });
+    }
+  });
+
+  hubPhxPresence.onLeave((sessionId, current, info) => {
+    if (current) return;
+
+    const meta = info.metas[0];
+
+    if (meta.presence && meta.profile.displayName) {
+      addToPresenceLog({
+        type: "leave",
+        name: meta.profile.displayName
+      });
+    }
+  });
+
+  hubPhxPresence.onSync(() => {
+    console.log("New presence");
+  });
+
   hubPhxChannel.on("naf", data => {
     if (!NAF.connection.adapter) return;
     NAF.connection.adapter.onData(data);
@@ -418,10 +472,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log(presences);
   });
 
-  const renderPresenceEvent = ev => {
-    console.log(ev);
-  }
-
   hubPhxChannel.on("presence_diff", diff => {
     for (const [sessionId, info] of Object.entries(diff.joins || {})) {
       if (!presences[sessionId]) continue;
@@ -429,15 +479,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       const newMeta = info.metas[0];
 
       if (currentMeta.presence !== newMeta.presence && newMeta.profile.displayName) {
-        renderPresenceEvent({
+        addToPresenceLog({
           type: "entered",
-          destination: newMeta.presence,
+          presence: newMeta.presence,
           name: newMeta.profile.displayName
         });
       }
 
       if (currentMeta.profile && newMeta.profile && currentMeta.profile.displayName !== newMeta.profile.displayName) {
-        renderPresenceEvent({
+        addToPresenceLog({
           type: "display_name_changed",
           oldName: currentMeta.profile.displaName,
           newName: newMeta.profile.displayName
