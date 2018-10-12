@@ -299,7 +299,7 @@ async function runBotMode(scene, entryManager) {
   entryManager.enterSceneWhenLoaded(new MediaStream(), false);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
   const entryManager = new SceneEntryManager(hubChannel);
@@ -349,13 +349,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  getAvailableVREntryTypes().then(availableVREntryTypes => {
-    if (availableVREntryTypes.isInHMD) {
-      remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
-    } else {
-      remountUI({ availableVREntryTypes });
-    }
-  });
+  const availableVREntryTypes = await getAvailableVREntryTypes();
+
+  if (availableVREntryTypes.isInHMD) {
+    remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
+  } else {
+    remountUI({ availableVREntryTypes });
+  }
 
   const environmentScene = document.querySelector("#environment-scene");
 
@@ -381,7 +381,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const socket = connectToReticulum(isDebug);
 
   // Hub local channel
-  const hubPhxChannel = socket.channel(`hub:${hubId}`, {});
+
+  const context = {
+    mobile: isMobile,
+    hmd: availableVREntryTypes.isInHMD
+  };
+
+  const joinPayload = { profile: store.state.profile, context };
+  const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
 
   hubPhxChannel
     .join()

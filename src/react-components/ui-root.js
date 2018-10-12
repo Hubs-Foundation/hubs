@@ -426,6 +426,7 @@ class UIRoot extends Component {
 
   onProfileFinished = () => {
     this.setState({ showProfileEntry: false });
+    this.props.hubChannel.sendProfileUpdate();
   };
 
   beginOrSkipAudioSetup = () => {
