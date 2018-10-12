@@ -93,6 +93,21 @@
     margin-left: 8px;
   }
 
+  :local(.name) {
+    @extend %top-title;
+    @extend %glass-text;
+    margin-bottom: 4px;
+    margin-right: 8px;
+    margin-left: 8px;
+  }
+
+  :local(.lobby) {
+    margin-bottom: 24px;
+    margin-right: 8px;
+    margin-left: 8px;
+    font-size: 0.9em;
+  }
+
   :local(.center) {
     @extend %glass-text;
     flex: 10;
@@ -100,7 +115,7 @@
 
   :local(.profile-name) {
     margin-top: 4px;
-    margin-bottom: 16px;
+    margin-bottom: 32px;
     @extend %default-font;
     font-size: 1.1em;
     color: $action-color;

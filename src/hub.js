@@ -407,7 +407,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
   const hubPhxPresence = new Presence(hubPhxChannel);
-
   const presenceLogEntries = [];
 
   const addToPresenceLog = entry => {
@@ -427,37 +426,43 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 30000);
   };
 
-  window.add = addToPresenceLog;
-
-  hubPhxPresence.onJoin((sessionId, current, info) => {
-    if (current) return;
-
-    const meta = info.metas[0];
-
-    if (meta.presence && meta.profile.displayName) {
-      addToPresenceLog({
-        type: "join",
-        presence: meta.presence,
-        name: meta.profile.displayName
-      });
-    }
-  });
-
-  hubPhxPresence.onLeave((sessionId, current, info) => {
-    if (current) return;
-
-    const meta = info.metas[0];
-
-    if (meta.presence && meta.profile.displayName) {
-      addToPresenceLog({
-        type: "leave",
-        name: meta.profile.displayName
-      });
-    }
-  });
+  let isInitialSync = true;
+  let presences = {};
 
   hubPhxPresence.onSync(() => {
     console.log("New presence");
+
+    if (isInitialSync) {
+      hubPhxPresence.onJoin((sessionId, current, info) => {
+        if (current) return;
+
+        const meta = info.metas[0];
+        // Wire up join/leave event handlers after initial sync.
+
+        if (meta.presence && meta.profile.displayName) {
+          addToPresenceLog({
+            type: "join",
+            presence: meta.presence,
+            name: meta.profile.displayName
+          });
+        }
+      });
+
+      hubPhxPresence.onLeave((sessionId, current, info) => {
+        if (current && current.metas.length > 0) return;
+
+        const meta = info.metas[0];
+
+        if (meta.profile.displayName) {
+          addToPresenceLog({
+            type: "leave",
+            name: meta.profile.displayName
+          });
+        }
+      });
+    }
+
+    isInitialSync = false;
   });
 
   hubPhxChannel.on("naf", data => {
@@ -465,11 +470,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     NAF.connection.adapter.onData(data);
   });
 
-  let presences = {};
-
   hubPhxChannel.on("presence_state", state => {
     presences = Presence.syncState(presences, state);
-    console.log(presences);
   });
 
   hubPhxChannel.on("presence_diff", diff => {
@@ -489,14 +491,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (currentMeta.profile && newMeta.profile && currentMeta.profile.displayName !== newMeta.profile.displayName) {
         addToPresenceLog({
           type: "display_name_changed",
-          oldName: currentMeta.profile.displaName,
+          oldName: currentMeta.profile.displayName,
           newName: newMeta.profile.displayName
         });
       }
     }
 
     presences = Presence.syncDiff(presences, diff);
-    console.log(presences);
   });
 
   // Reticulum global channel
