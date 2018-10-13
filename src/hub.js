@@ -385,6 +385,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   console.log(`Hub ID: ${hubId}`);
 
   const socket = connectToReticulum(isDebug);
+  remountUI({ sessionId: socket.params().session_id });
 
   // Hub local channel
   const context = {
@@ -466,6 +467,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     isInitialSync = false;
+
+    remountUI({ presences });
   });
 
   hubPhxChannel.on("naf", data => {
@@ -487,12 +490,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubPhxChannel.on("presence_diff", diff => {
     for (const [sessionId, info] of Object.entries(diff.joins || {})) {
       if (!presences[sessionId]) continue;
-      if (sessionId === socket.params().session_id) continue; // Don't show entry or name changes for self
 
+      const isSelf = sessionId === socket.params().session_id;
       const currentMeta = presences[sessionId].metas[0];
       const newMeta = info.metas[0];
 
-      if (currentMeta.presence !== newMeta.presence && newMeta.profile.displayName) {
+      if (!isSelf && currentMeta.presence !== newMeta.presence && newMeta.profile.displayName) {
         addToPresenceLog({
           type: "entered",
           presence: newMeta.presence,

@@ -61,6 +61,8 @@
     "presence.join_lobby": "joined the lobby.",
     "presence.leave": "left.",
     "presence.name_change": "is now known as",
+    "presence.lobby": "Lobby",
+    "presence.in_room": "In Room",
     "home.room_create_options": "options",
     "home.room_create_button": "Create Room",
     "home.create_name.validation_warning": "Invalid name, limited to 4 to 64 characters and limited symbols.",

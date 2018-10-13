@@ -165,6 +165,8 @@
   border-radius: 24px;
   font-weight: bold;
   padding: 8px 18px;
+  pointer-events: auto;
+  cursor: pointer;
 
   @media (min-width: 769px) and (min-height: 421px) {
     flex: 1;
@@ -177,6 +179,10 @@
   :local(.occupant-count) {
     margin: 0 12px;
   }
+}
+
+:local(.presence-info-selected) {
+  color: $action-color;
 }
 
 :local(.message-entry) {

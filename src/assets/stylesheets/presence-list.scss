@@ -1,0 +1,85 @@
+@import 'shared.scss';
+
+:local(.attach-point) {
+  width: 0; 
+  height: 0; 
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid $white-transparent;
+  position: absolute;
+  top: -5px;
+  left: 44px;
+
+  @media(max-width: 768px), (max-height: 420px) {
+    left: 34px;
+  }
+}
+
+:local(.presence-list) {
+  position: absolute;
+  top: 72px;
+  left: 16px;
+  bottom: 0;
+  z-index: 5;
+}
+
+:local(.contents) {
+  background-color: white;
+  border-radius: 12px;
+  padding: 12px 18px;
+  min-width: 308px;
+  max-height: 75%;
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
+:local(.rows) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+:local(.row) {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  font-weight: bold;
+  justify-content: space-between;
+  align-items: center;
+  margin: 6px 0;
+}
+
+:local(.device) {
+  width: 32px;
+  height: 32px;
+  background-color: black;
+  border-radius: 16px;
+  position: relative;
+  margin: 0px 12px 0px 0px;
+
+  img {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+:local(.display-name) {
+  flex: 10;
+  white-space: nowrap;
+  margin-right: 24px;
+  max-width: 45vw;
+  overflow: hidden;
+}
+
+:local(.self-display-name) {
+  text-decoration: underline;
+}
+
+:local(.presence) {
+  flex: 1;
+  white-space: nowrap;
+  text-align: right;
+}

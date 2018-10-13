@@ -28,6 +28,7 @@ import InviteDialog from "./invite-dialog.js";
 import LinkDialog from "./link-dialog.js";
 import CreateObjectDialog from "./create-object-dialog.js";
 import PresenceLog from "./presence-log.js";
+import PresenceList from "./presence-list.js";
 import TwoDHUD from "./2d-hud";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
@@ -87,7 +88,9 @@ class UIRoot extends Component {
     hubName: PropTypes.string,
     occupantCount: PropTypes.number,
     isSupportAvailable: PropTypes.bool,
-    presenceLogEntries: PropTypes.array
+    presenceLogEntries: PropTypes.array,
+    presences: PropTypes.object,
+    sessionId: PropTypes.string
   };
 
   state = {
@@ -96,6 +99,7 @@ class UIRoot extends Component {
     dialog: null,
     showInviteDialog: false,
     showLinkDialog: false,
+    showPresenceList: true,
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
@@ -669,9 +673,6 @@ class UIRoot extends Component {
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>{this.props.hubName}</div>
-        <div className={entryStyles.lobby}>
-          <FormattedMessage id="entry.lobby" />
-        </div>
 
         <div className={entryStyles.center}>
           <div onClick={() => this.setState({ showProfileEntry: true })} className={entryStyles.profileName}>
@@ -1058,10 +1059,20 @@ class UIRoot extends Component {
             </i>
           </button>
 
-          <div className={styles.presenceInfo}>
+          <div
+            onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
+            className={classNames({
+              [styles.presenceInfo]: true,
+              [styles.presenceInfoSelected]: this.state.showPresenceList
+            })}
+          >
             <FontAwesomeIcon icon={faUsers} />
             <span className={styles.occupantCount}>{this.props.occupantCount || "-"}</span>
           </div>
+
+          {this.state.showPresenceList && (
+            <PresenceList presences={this.props.presences} sessionId={this.props.sessionId} />
+          )}
 
           {this.state.entryStep === ENTRY_STEPS.finished ? (
             <div>
