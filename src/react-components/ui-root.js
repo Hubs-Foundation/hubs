@@ -27,6 +27,7 @@ import InviteTeamDialog from "./invite-team-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import LinkDialog from "./link-dialog.js";
 import CreateObjectDialog from "./create-object-dialog.js";
+import PresenceLog from "./presence-log.js";
 import TwoDHUD from "./2d-hud";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
@@ -67,6 +68,7 @@ class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
     exitScene: PropTypes.func,
+    onSendMessage: PropTypes.func,
     concurrentLoadDetector: PropTypes.object,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
@@ -84,7 +86,8 @@ class UIRoot extends Component {
     hubId: PropTypes.string,
     hubName: PropTypes.string,
     occupantCount: PropTypes.number,
-    isSupportAvailable: PropTypes.bool
+    isSupportAvailable: PropTypes.bool,
+    presenceLogEntries: PropTypes.array
   };
 
   state = {
@@ -123,7 +126,8 @@ class UIRoot extends Component {
 
     exited: false,
 
-    showProfileEntry: false
+    showProfileEntry: false,
+    pendingMessage: ""
   };
 
   componentDidMount() {
@@ -426,6 +430,7 @@ class UIRoot extends Component {
 
   onProfileFinished = () => {
     this.setState({ showProfileEntry: false });
+    this.props.hubChannel.sendProfileUpdate();
   };
 
   beginOrSkipAudioSetup = () => {
@@ -567,6 +572,12 @@ class UIRoot extends Component {
     }
   };
 
+  sendMessage = e => {
+    e.preventDefault();
+    this.props.onSendMessage(this.state.pendingMessage);
+    this.setState({ pendingMessage: "" });
+  };
+
   renderExitedPane = () => {
     let subtitle = null;
     if (this.props.roomUnavailableReason === "closed") {
@@ -657,13 +668,29 @@ class UIRoot extends Component {
   renderEntryStartPanel = () => {
     return (
       <div className={entryStyles.entryPanel}>
-        <div className={entryStyles.title}>{this.props.hubName}</div>
+        <div className={entryStyles.name}>{this.props.hubName}</div>
+        <div className={entryStyles.lobby}>
+          <FormattedMessage id="entry.lobby" />
+        </div>
 
         <div className={entryStyles.center}>
           <div onClick={() => this.setState({ showProfileEntry: true })} className={entryStyles.profileName}>
             <img src="../assets/images/account.svg" className={entryStyles.profileIcon} />
             <div title={this.props.store.state.profile.displayName}>{this.props.store.state.profile.displayName}</div>
           </div>
+
+          <form onSubmit={this.sendMessage}>
+            <div className={styles.messageEntry}>
+              <input
+                className={styles.messageEntryInput}
+                value={this.state.pendingMessage}
+                onFocus={e => e.target.select()}
+                onChange={e => this.setState({ pendingMessage: e.target.value })}
+                placeholder="Send a message..."
+              />
+              <input className={styles.messageEntrySubmit} type="submit" value="send" />
+            </div>
+          </form>
         </div>
 
         <div className={entryStyles.buttonContainer}>
@@ -949,8 +976,28 @@ class UIRoot extends Component {
 
           {(!entryFinished || this.isWaitingForAutoExit()) && (
             <div className={styles.uiDialog}>
+              <PresenceLog entries={this.props.presenceLogEntries || []} />
               <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
             </div>
+          )}
+
+          {entryFinished && <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} />}
+          {entryFinished && (
+            <form onSubmit={this.sendMessage}>
+              <div className={styles.messageEntryInRoom}>
+                <input
+                  className={styles.messageEntryInputInRoom}
+                  value={this.state.pendingMessage}
+                  onFocus={e => e.target.select()}
+                  onChange={e => {
+                    e.stopPropagation();
+                    this.setState({ pendingMessage: e.target.value });
+                  }}
+                  placeholder="Send a message..."
+                />
+                <input className={styles.messageEntrySubmitInRoom} type="submit" value="send" />
+              </div>
+            </form>
           )}
 
           <div
