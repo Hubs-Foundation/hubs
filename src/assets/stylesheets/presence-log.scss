@@ -9,16 +9,22 @@
   align-items: flex-start;
   margin-bottom: 8px;
   margin-top: 90px;
-  overflow-y: hidden;
+  overflow: hidden;
   width: 100%;
 
   :local(.presence-log-entry) {
     @extend %default-font;
+    pointer-events: auto;
+    user-select: text;
     background-color: $white-transparent;
     margin: 8px 64px 8px 16px;
     font-size: 0.8em;
     padding: 8px 16px;
     border-radius: 16px;
+
+    a {
+      color: $action-color;
+    }
 
     @media (max-width: 1000px) {
       max-width: 75%;

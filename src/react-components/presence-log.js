@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
+import Linkify from "react-linkify";
 import { FormattedMessage } from "react-intl";
 
 export default class PresenceLog extends Component {
@@ -43,7 +44,7 @@ export default class PresenceLog extends Component {
       case "message":
         return (
           <div key={e.key} className={classNames(entryClasses)}>
-            <b>{e.name}</b>: {e.body}
+            <b>{e.name}</b>: <Linkify properties={{ target: "_blank", rel: "noopener referrer" }}>{e.body}</Linkify>
           </div>
         );
     }
