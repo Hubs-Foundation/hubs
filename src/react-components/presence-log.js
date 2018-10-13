@@ -6,7 +6,8 @@ import { FormattedMessage } from "react-intl";
 
 export default class PresenceLog extends Component {
   static propTypes = {
-    entries: PropTypes.array
+    entries: PropTypes.array,
+    inRoom: PropTypes.bool
   };
 
   constructor(props) {
@@ -49,6 +50,11 @@ export default class PresenceLog extends Component {
   };
 
   render() {
-    return <div className={styles.presenceLog}>{this.props.entries.map(this.domForEntry)}</div>;
+    const presenceClasses = {
+      [styles.presenceLog]: true,
+      [styles.presenceLogInRoom]: this.props.inRoom
+    };
+
+    return <div className={classNames(presenceClasses)}>{this.props.entries.map(this.domForEntry)}</div>;
   }
 }

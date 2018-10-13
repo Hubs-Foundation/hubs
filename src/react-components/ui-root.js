@@ -981,6 +981,8 @@ class UIRoot extends Component {
             </div>
           )}
 
+          {entryFinished && <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} />}
+
           <div
             className={classNames({
               [styles.inviteContainer]: true,

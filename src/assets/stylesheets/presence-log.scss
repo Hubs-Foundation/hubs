@@ -33,3 +33,15 @@
   }
 
 }
+
+:local(.presence-log-in-room) {
+  max-height: 200px;
+  position: absolute;
+  bottom: 165px;
+
+  :local(.presence-log-entry) {
+    background-color: $hud-panel-background;
+    color: $light-text;
+  }
+}
+

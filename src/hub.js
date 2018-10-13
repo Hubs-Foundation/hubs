@@ -428,7 +428,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         presenceLogEntries.splice(presenceLogEntries.indexOf(entry), 1);
         remountUI({ presenceLogEntries });
       }, 5000);
-    }, 30000);
+    }, entryManager.isEntered() ? 10000 : 30000); // Fade out things faster once entered.
   };
   window.add = addToPresenceLog;
 
@@ -436,8 +436,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   let presences = {};
 
   hubPhxPresence.onSync(() => {
-    console.log("New presence");
-
     if (isInitialSync) {
       hubPhxPresence.onJoin((sessionId, current, info) => {
         if (current) return;
@@ -490,6 +488,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubPhxChannel.on("presence_diff", diff => {
     for (const [sessionId, info] of Object.entries(diff.joins || {})) {
       if (!presences[sessionId]) continue;
+      if (sessionId === socket.params().session_id) continue; // Don't show entry or name changes for self
+
       const currentMeta = presences[sessionId].metas[0];
       const newMeta = info.metas[0];
 
