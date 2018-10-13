@@ -236,10 +236,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: $hud-panel-background;
+  background-color: $darker-grey;
   border-radius: 16px;
   pointer-events: auto;
-  opacity: 0.5;
+  opacity: 0.3;
   transition: opacity 0.25s linear;
 
   :local(.message-entry-input-in-room) {
