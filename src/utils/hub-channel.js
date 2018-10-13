@@ -92,7 +92,7 @@ export default class HubChannel {
   };
 
   sendMessage = body => {
-    this.channel.push("events:message", { body });
+    this.channel.push("message", { body });
   };
 
   requestSupport = () => {

@@ -254,7 +254,12 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
     environmentScene.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
   }
 
-  remountUI({ hubId: hub.hub_id, hubName: hub.name, hubEntryCode: hub.entry_code });
+  remountUI({
+    hubId: hub.hub_id,
+    hubName: hub.name,
+    hubEntryCode: hub.entry_code,
+    onSendMessage: hubChannel.sendMessage
+  });
 
   document
     .querySelector("#hud-hub-entry-link")
@@ -423,7 +428,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         presenceLogEntries.splice(presenceLogEntries.indexOf(entry), 1);
         remountUI({ presenceLogEntries });
       }, 5000);
-    }, 5000);
+    }, 30000);
   };
   window.add = addToPresenceLog;
 
@@ -469,6 +474,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubPhxChannel.on("naf", data => {
     if (!NAF.connection.adapter) return;
     NAF.connection.adapter.onData(data);
+  });
+
+  hubPhxChannel.on("message", data => {
+    const userInfo = presences[data.session_id];
+    if (!userInfo) return;
+
+    addToPresenceLog({ type: "message", name: userInfo.metas[0].profile.displayName, body: data.body });
   });
 
   hubPhxChannel.on("presence_state", state => {

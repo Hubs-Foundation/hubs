@@ -688,7 +688,7 @@ class UIRoot extends Component {
                 onChange={e => this.setState({ pendingMessage: e.target.value })}
                 placeholder="Send a message..."
               />
-              <input className={styles.messageEntrySubmit} type="submit" value="Send" />
+              <input className={styles.messageEntrySubmit} type="submit" value="send" />
             </div>
           </form>
         </div>
