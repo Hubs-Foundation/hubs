@@ -99,7 +99,7 @@ class UIRoot extends Component {
     dialog: null,
     showInviteDialog: false,
     showLinkDialog: false,
-    showPresenceList: true,
+    showPresenceList: false,
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,

@@ -13,122 +13,46 @@ export default class PresenceList extends Component {
     sessionId: PropTypes.string
   };
 
+  domForPresence = ([sessionId, data]) => {
+    const meta = data.metas[0];
+    const context = meta.context;
+    const profile = meta.profile;
+
+    const image = context && context.mobile ? PhoneImage : context && context.hmd ? HMDImage : DesktopImage;
+
+    return (
+      <div className={styles.row} key={sessionId}>
+        <div className={styles.device}>
+          <img src={image} />
+        </div>
+        <div
+          className={classNames({
+            [styles.displayName]: true,
+            [styles.selfDisplayName]: sessionId === this.props.sessionId
+          })}
+        >
+          {profile && profile.displayName}
+        </div>
+        <div className={styles.presence}>
+          <FormattedMessage id={`presence.in_${meta.presence}`} />
+        </div>
+      </div>
+    );
+  };
+
   render() {
+    // Draw self first
     return (
       <div className={styles.presenceList}>
         <div className={styles.attachPoint} />
         <div className={styles.contents}>
           <div className={styles.rows}>
-            <div className={styles.row}>
-              <div className={styles.device}>
-                <img src={HMDImage} />
-              </div>
-              <div className={classNames({ [styles.displayName]: true, [styles.selfDisplayName]: true })}>
-                Rian Long
-              </div>
-              <div className={styles.presence}>
-                <FormattedMessage id="presence.lobby" />
-              </div>
-            </div>
-            <div className={styles.row}>
-              <div className={styles.device}>
-                <img src={PhoneImage} />
-              </div>
-              <div className={classNames({ [styles.displayName]: true, [styles.selfDisplayName]: false })}>
-                Greg Fodor
-              </div>
-              <div className={styles.presence}>
-                <FormattedMessage id="presence.lobby" />
-              </div>
-            </div>
-            <div className={styles.row}>
-              <div className={styles.device}>
-                <img src={DesktopImage} />
-              </div>
-              <div className={classNames({ [styles.displayName]: true, [styles.selfDisplayName]: false })}>
-                Dominick D&quot;Aniello
-              </div>
-              <div className={styles.presence}>
-                <FormattedMessage id="presence.in_room" />
-              </div>
-            </div>
-            <div className={styles.row}>
-              <div className={styles.device}>
-                <img src={DesktopImage} />
-              </div>
-              <div className={classNames({ [styles.displayName]: true, [styles.selfDisplayName]: false })}>
-                Really-Long-Named-Person-12348
-              </div>
-              <div className={styles.presence}>
-                <FormattedMessage id="presence.in_room" />
-              </div>
-            </div>
-            <div className={styles.row}>
-              <div className={styles.device}>
-                <img src={DesktopImage} />
-              </div>
-              <div className={classNames({ [styles.displayName]: true, [styles.selfDisplayName]: false })}>
-                Really-Long-Named-Person-12348
-              </div>
-              <div className={styles.presence}>
-                <FormattedMessage id="presence.in_room" />
-              </div>
-            </div>
-            <div className={styles.row}>
-              <div className={styles.device}>
-                <img src={DesktopImage} />
-              </div>
-              <div className={classNames({ [styles.displayName]: true, [styles.selfDisplayName]: false })}>
-                Really-Long-Named-Person-12348
-              </div>
-              <div className={styles.presence}>
-                <FormattedMessage id="presence.in_room" />
-              </div>
-            </div>
-            <div className={styles.row}>
-              <div className={styles.device}>
-                <img src={DesktopImage} />
-              </div>
-              <div className={classNames({ [styles.displayName]: true, [styles.selfDisplayName]: false })}>
-                Really-Long-Named-Person-12348
-              </div>
-              <div className={styles.presence}>
-                <FormattedMessage id="presence.in_room" />
-              </div>
-            </div>
-            <div className={styles.row}>
-              <div className={styles.device}>
-                <img src={DesktopImage} />
-              </div>
-              <div className={classNames({ [styles.displayName]: true, [styles.selfDisplayName]: false })}>
-                Really-Long-Named-Person-12348
-              </div>
-              <div className={styles.presence}>
-                <FormattedMessage id="presence.in_room" />
-              </div>
-            </div>
-            <div className={styles.row}>
-              <div className={styles.device}>
-                <img src={DesktopImage} />
-              </div>
-              <div className={classNames({ [styles.displayName]: true, [styles.selfDisplayName]: false })}>
-                Really-Long-Named-Person-12348
-              </div>
-              <div className={styles.presence}>
-                <FormattedMessage id="presence.in_room" />
-              </div>
-            </div>
-            <div className={styles.row}>
-              <div className={styles.device}>
-                <img src={DesktopImage} />
-              </div>
-              <div className={classNames({ [styles.displayName]: true, [styles.selfDisplayName]: false })}>
-                Really-Long-Named-Person-12348
-              </div>
-              <div className={styles.presence}>
-                <FormattedMessage id="presence.in_room" />
-              </div>
-            </div>
+            {Object.entries(this.props.presences || {})
+              .filter(([k]) => k === this.props.sessionId)
+              .map(this.domForPresence)}
+            {Object.entries(this.props.presences || {})
+              .filter(([k]) => k !== this.props.sessionId)
+              .map(this.domForPresence)}
           </div>
         </div>
       </div>

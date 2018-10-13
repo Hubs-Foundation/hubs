@@ -320,22 +320,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 
-  document.body.addEventListener("connected", () =>
-    remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 })
-  );
-
-  document.body.addEventListener("clientConnected", () =>
-    remountUI({
-      occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
-    })
-  );
-
-  document.body.addEventListener("clientDisconnected", () =>
-    remountUI({
-      occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
-    })
-  );
-
   const platformUnsupportedReason = getPlatformUnsupportedReason();
 
   if (platformUnsupportedReason) {
@@ -467,8 +451,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     isInitialSync = false;
-
-    remountUI({ presences });
   });
 
   hubPhxChannel.on("naf", data => {
@@ -485,6 +467,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hubPhxChannel.on("presence_state", state => {
     presences = Presence.syncState(presences, state);
+    remountUI({ presences, occupantCount: Object.keys(presences).length });
   });
 
   hubPhxChannel.on("presence_diff", diff => {
@@ -513,6 +496,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     presences = Presence.syncDiff(presences, diff);
+    remountUI({ presences, occupantCount: Object.keys(presences).length });
   });
 
   // Reticulum global channel
