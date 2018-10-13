@@ -222,3 +222,65 @@
     min-width: 80px;
   }
 }
+
+:local(.message-entry-in-room) {
+  @media(max-width: 900px) {
+    display:none;
+  }
+
+  position: absolute;
+  left: 16px;
+  bottom: 20px;
+  width: 33%;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: $hud-panel-background;
+  border-radius: 16px;
+  pointer-events: auto;
+  opacity: 0.5;
+  transition: opacity 0.25s linear;
+
+  :local(.message-entry-input-in-room) {
+    @extend %default-font;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    outline-style: none;
+    background-color: transparent;
+    color: white;
+    padding: 8px 1.25em;
+    line-height: 2em;
+    font-size: 1.1em;
+    width: 100%;
+    border: 0px;
+    height: 32px;
+    margin-right: 100px;
+  }
+
+  :local(.message-entry-input-in-room)::placeholder{
+    color: $light-grey;
+    font-weight: 300;
+    font-style: italic;
+  }
+
+  :local(.message-entry-submit-in-room) {
+    @extend %action-button;
+    border: 0;
+    position: absolute;
+    right: 12px;
+    height: 32px;
+    min-width: 80px;
+    visibility: hidden;
+  }
+}
+
+:local(.message-entry-in-room):hover {
+  opacity: 1.0;
+  transition: opacity 0.25s linear;
+
+  :local(.message-entry-submit-in-room) {
+    visibility: visible;
+  }
+}

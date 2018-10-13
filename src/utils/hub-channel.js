@@ -92,6 +92,7 @@ export default class HubChannel {
   };
 
   sendMessage = body => {
+    if (body === "") return;
     this.channel.push("message", { body });
   };
 

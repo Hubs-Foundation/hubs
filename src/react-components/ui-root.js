@@ -982,6 +982,23 @@ class UIRoot extends Component {
           )}
 
           {entryFinished && <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} />}
+          {entryFinished && (
+            <form onSubmit={this.sendMessage}>
+              <div className={styles.messageEntryInRoom}>
+                <input
+                  className={styles.messageEntryInputInRoom}
+                  value={this.state.pendingMessage}
+                  onFocus={e => e.target.select()}
+                  onChange={e => {
+                    e.stopPropagation();
+                    this.setState({ pendingMessage: e.target.value });
+                  }}
+                  placeholder="Send a message..."
+                />
+                <input className={styles.messageEntrySubmitInRoom} type="submit" value="send" />
+              </div>
+            </form>
+          )}
 
           <div
             className={classNames({

@@ -387,7 +387,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const socket = connectToReticulum(isDebug);
 
   // Hub local channel
-
   const context = {
     mobile: isMobile,
     hmd: availableVREntryTypes.isInHMD
