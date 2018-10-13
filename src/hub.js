@@ -428,7 +428,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         presenceLogEntries.splice(presenceLogEntries.indexOf(entry), 1);
         remountUI({ presenceLogEntries });
       }, 5000);
-    }, entryManager.isEntered() ? 10000 : 30000); // Fade out things faster once entered.
+    }, entryManager.hasEntered() ? 10000 : 30000); // Fade out things faster once entered.
   };
   window.add = addToPresenceLog;
 

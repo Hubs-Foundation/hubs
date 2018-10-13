@@ -33,7 +33,7 @@ export default class SceneEntryManager {
     });
   };
 
-  isEntered = () => {
+  hasEntered = () => {
     return this._entered;
   };
 
