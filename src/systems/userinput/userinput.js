@@ -24,14 +24,6 @@ import { xboxControllerUserBindings } from "./bindings/xbox-controller-user";
 
 import { updateActionSetsBasedOnSuperhands } from "./resolve-action-sets";
 
-function difference(setA, setB) {
-  const _difference = new Set(setA);
-  setB.forEach(elem => {
-    _difference.delete(elem);
-  });
-  return _difference;
-}
-
 function prioritizeBindings(registeredMappings, activeSets, prioritizedBindings, activeBindings) {
   registeredMappings.forEach(mapping => {
     activeSets.forEach(setName => {
@@ -102,14 +94,12 @@ AFRAME.registerSystem("userinput", {
 
     this.gamepads = [];
 
-    let activeDevices = this.activeDevices;
-    let registeredMappings = this.registeredMappings;
     if (AFRAME.utils.device.isMobile()) {
       window.addEventListener(
         "touchdown",
-        e => {
-          activeDevices.add(new AppAwareTouchscreenDevice());
-          registeredMappings.add(touchscreenUserBindings);
+        () => {
+          this.activeDevices.add(new AppAwareTouchscreenDevice());
+          this.registeredMappings.add(touchscreenUserBindings);
         },
         {
           once: true,
@@ -118,31 +108,30 @@ AFRAME.registerSystem("userinput", {
       );
     }
 
-    let gamepads = this.gamepads;
     window.addEventListener(
       "gamepadconnected",
       e => {
         console.log(e.gamepad);
         if (e.gamepad.id === "Oculus Touch (Left)") {
-          const gamepadDevice = new OculusTouchControllerDevice(e.gamepad, true);
-          activeDevices.add(gamepadDevice);
-          gamepads[e.gamepad.index] = gamepadDevice;
-          registeredMappings.add(oculusTouchUserBindings);
+          const gamepadDevice = new OculusTouchControllerDevice(e.gamepad, "left");
+          this.activeDevices.add(gamepadDevice);
+          this.gamepads[e.gamepad.index] = gamepadDevice;
+          this.registeredMappings.add(oculusTouchUserBindings);
         } else if (e.gamepad.id === "Oculus Touch (Right)") {
-          const gamepadDevice = new OculusTouchControllerDevice(e.gamepad, false);
-          activeDevices.add(gamepadDevice);
-          gamepads[e.gamepad.index] = gamepadDevice;
-          registeredMappings.add(oculusTouchUserBindings);
+          const gamepadDevice = new OculusTouchControllerDevice(e.gamepad, "right");
+          this.activeDevices.add(gamepadDevice);
+          this.gamepads[e.gamepad.index] = gamepadDevice;
+          this.registeredMappings.add(oculusTouchUserBindings);
         } else if (e.gamepad.id.includes("Xbox")) {
           const gamepadDevice = new XboxControllerDevice(e.gamepad);
-          activeDevices.add(gamepadDevice);
-          gamepads[e.gamepad.index] = gamepadDevice;
-          registeredMappings.add(xboxControllerUserBindings);
+          this.activeDevices.add(gamepadDevice);
+          this.gamepads[e.gamepad.index] = gamepadDevice;
+          this.registeredMappings.add(xboxControllerUserBindings);
         } else {
           const gamepadDevice = new OculusGoControllerDevice(e.gamepad);
-          activeDevices.add(gamepadDevice);
-          gamepads[e.gamepad.index] = gamepadDevice;
-          registeredMappings.add(oculusGoUserBindings);
+          this.activeDevices.add(gamepadDevice);
+          this.gamepads[e.gamepad.index] = gamepadDevice;
+          this.registeredMappings.add(oculusGoUserBindings);
         }
       },
       false
@@ -150,9 +139,9 @@ AFRAME.registerSystem("userinput", {
     window.addEventListener(
       "gamepaddisconnected",
       e => {
-        if (gamepads[e.gamepad.index]) {
-          activeDevices.delete(gamepads[e.gamepad.index]);
-          delete gamepads[e.gamepad.index];
+        if (this.gamepads[e.gamepad.index]) {
+          this.activeDevices.delete(this.gamepads[e.gamepad.index]);
+          delete this.gamepads[e.gamepad.index];
         }
       },
       false

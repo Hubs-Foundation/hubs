@@ -17,19 +17,29 @@ export const rightOculusTouchButtonMap = [
 ];
 
 export class OculusTouchControllerDevice {
-  constructor(gamepad, isLeft) {
+  constructor(gamepad, hand) {
     this.rayObjectRotation = new THREE.Quaternion();
 
     // wake the gamepad api up. otherwise it does not report touch controllers.
     // in chrome it still won't unless you enter vr.
     navigator.getVRDisplays();
 
+    const buttonMaps = {
+      left: leftOculusTouchButtonMap,
+      right: rightOculusTouchButtonMap
+    };
+
+    const devicePaths = {
+      left: paths.device.leftOculusTouch,
+      right: paths.device.rightOculusTouch
+    };
+
     this.gamepad = gamepad;
     this.pose = new Pose();
-    this.buttonMap = isLeft ? leftOculusTouchButtonMap : rightOculusTouchButtonMap;
+    this.buttonMap = buttonMaps[hand];
     this.axisMap = [{ name: "joystickHorizontal", axisId: 0 }, { name: "joystickVertical", axisId: 1 }];
-    this.path = isLeft ? paths.device.leftOculusTouch : paths.device.rightOculusTouch;
-    this.selector = `[super-hands]#player-${isLeft ? "left" : "right"}-controller`;
+    this.path = devicePaths[hand];
+    this.selector = `[super-hands]#player-${hand}-controller`;
   }
   write(frame) {
     if (!this.gamepad.connected) return;
