@@ -42,6 +42,11 @@
 
 :local(.presence-log-in-room) {
   max-height: 200px;
+
+  @media(min-height: 800px) and (min-width: 600px) {
+    max-height: 400px;
+  }
+
   position: absolute;
   bottom: 165px;
 
