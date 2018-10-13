@@ -423,8 +423,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         presenceLogEntries.splice(presenceLogEntries.indexOf(entry), 1);
         remountUI({ presenceLogEntries });
       }, 5000);
-    }, 30000);
+    }, 5000);
   };
+  window.add = addToPresenceLog;
 
   let isInitialSync = true;
   let presences = {};

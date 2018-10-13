@@ -10,8 +10,10 @@
   margin-bottom: 8px;
   margin-top: 90px;
   overflow-y: hidden;
+  width: 100%;
 
   :local(.presence-log-entry) {
+    @extend %default-font;
     background-color: $white-transparent;
     margin: 8px 64px 8px 16px;
     font-size: 0.8em;
@@ -26,7 +28,8 @@
   :local(.expired) {
     visibility: hidden;
     opacity: 0;
-    transition: visibility 0s 2s, opacity 1s linear;
+    transform: translateY(-8px);
+    transition: visibility 0s 0.5s, opacity 0.5s linear, transform 0.5s;
   }
-}
 
+}

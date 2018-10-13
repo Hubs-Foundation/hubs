@@ -68,6 +68,7 @@ class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
     exitScene: PropTypes.func,
+    onSendMessage: PropTypes.func,
     concurrentLoadDetector: PropTypes.object,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
@@ -125,7 +126,8 @@ class UIRoot extends Component {
 
     exited: false,
 
-    showProfileEntry: false
+    showProfileEntry: false,
+    pendingMessage: ""
   };
 
   componentDidMount() {
@@ -570,6 +572,12 @@ class UIRoot extends Component {
     }
   };
 
+  sendMessage = e => {
+    e.preventDefault();
+    this.props.onSendMessage(this.state.pendingMessage);
+    this.setState({ pendingMessage: "" });
+  };
+
   renderExitedPane = () => {
     let subtitle = null;
     if (this.props.roomUnavailableReason === "closed") {
@@ -661,13 +669,28 @@ class UIRoot extends Component {
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>{this.props.hubName}</div>
-        <div className={entryStyles.lobby}><FormattedMessage id="entry.lobby"/></div>
+        <div className={entryStyles.lobby}>
+          <FormattedMessage id="entry.lobby" />
+        </div>
 
         <div className={entryStyles.center}>
           <div onClick={() => this.setState({ showProfileEntry: true })} className={entryStyles.profileName}>
             <img src="../assets/images/account.svg" className={entryStyles.profileIcon} />
             <div title={this.props.store.state.profile.displayName}>{this.props.store.state.profile.displayName}</div>
           </div>
+
+          <form onSubmit={this.sendMessage}>
+            <div className={styles.messageEntry}>
+              <input
+                className={styles.messageEntryInput}
+                value={this.state.pendingMessage}
+                onFocus={e => e.target.select()}
+                onChange={e => this.setState({ pendingMessage: e.target.value })}
+                placeholder="Send a message..."
+              />
+              <input className={styles.messageEntrySubmit} type="submit" value="Send" />
+            </div>
+          </form>
         </div>
 
         <div className={entryStyles.buttonContainer}>

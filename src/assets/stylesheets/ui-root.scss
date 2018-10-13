@@ -44,30 +44,6 @@
   align-items: center;
 }
 
-:local(.presence-messages) {
-  align-self: flex-start;
-  flex: 10;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: flex-start;
-  margin-bottom: 8px;
-  margin-top: 90px;
-  overflow-y: hidden;
-
-  :local(.presence-message) {
-    background-color: $white-transparent;
-    margin: 8px 64px 8px 16px;
-    font-size: 0.8em;
-    padding: 8px 16px;
-    border-radius: 16px;
-
-    @media (max-width: 1000px) {
-      max-width: 75%;
-    }
-  }
-}
-
 :local(.ui-dialog-box-contents) {
   background-color: $white-transparent;
   border-radius: 18px 18px 0 0;
@@ -200,5 +176,49 @@
   }
   :local(.occupant-count) {
     margin: 0 12px;
+  }
+}
+
+:local(.message-entry) {
+  position: relative;
+  margin: 8px 24px 24px 24px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border: 1px solid #e2e2e2;
+  border-radius: 16px;
+
+  :local(.message-entry-input) {
+    @extend %default-font;
+    pointer-events: auto;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    outline-style: none;
+    background-color: transparent;
+    color: black;
+    padding: 8px 1.25em;
+    line-height: 2em;
+    font-size: 1.1em;
+    width: 100%;
+    border: 0px;
+    height: 32px;
+    margin-right: 100px;
+  }
+
+  :local(.message-entry-input)::placeholder{
+    color: $light-grey;
+    font-weight: 300;
+    font-style: italic;
+  }
+
+  :local(.message-entry-submit) {
+    @extend %action-button;
+    position: absolute;
+    right: 12px;
+    height: 32px;
+    min-width: 100px;
   }
 }

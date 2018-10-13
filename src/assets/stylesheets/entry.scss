@@ -84,6 +84,7 @@
   margin: 24px;
   min-height: 150px;
   height: 100%;
+  width: 100%;
 
   :local(.title) {
     @extend %top-title;
@@ -111,6 +112,7 @@
   :local(.center) {
     @extend %glass-text;
     flex: 10;
+    width: 100%;
   }
 
   :local(.profile-name) {
