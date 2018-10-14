@@ -399,7 +399,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const presenceLogEntries = [];
 
   const addToPresenceLog = entry => {
-    entry.key = new Date().getTime().toString();
+    entry.key = Date.now().toString();
+
     presenceLogEntries.push(entry);
     remountUI({ presenceLogEntries });
 
@@ -414,7 +415,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       }, 5000);
     }, entryManager.hasEntered() ? 10000 : 30000); // Fade out things faster once entered.
   };
-  window.add = addToPresenceLog;
 
   let isInitialSync = true;
 

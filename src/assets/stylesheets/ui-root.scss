@@ -195,38 +195,38 @@
   background-color: white;
   border: 1px solid #e2e2e2;
   border-radius: 16px;
+}
 
-  :local(.message-entry-input) {
-    @extend %default-font;
-    pointer-events: auto;
-    appearance: none;
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    outline-style: none;
-    background-color: transparent;
-    color: black;
-    padding: 8px 1.25em;
-    line-height: 2em;
-    font-size: 1.1em;
-    width: 100%;
-    border: 0px;
-    height: 32px;
-    margin-right: 100px;
-  }
+:local(.message-entry-input) {
+  @extend %default-font;
+  pointer-events: auto;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
+  background-color: transparent;
+  color: black;
+  padding: 8px 1.25em;
+  line-height: 2em;
+  font-size: 1.1em;
+  width: 100%;
+  border: 0px;
+  height: 32px;
+  margin-right: 100px;
+}
 
-  :local(.message-entry-input)::placeholder{
-    color: $light-grey;
-    font-weight: 300;
-    font-style: italic;
-  }
+:local(.message-entry-input)::placeholder{
+  color: $dark-grey;
+  font-weight: 300;
+  font-style: italic;
+}
 
-  :local(.message-entry-submit) {
-    @extend %action-button;
-    position: absolute;
-    right: 12px;
-    height: 32px;
-    min-width: 80px;
-  }
+:local(.message-entry-submit) {
+  @extend %action-button;
+  position: absolute;
+  right: 12px;
+  height: 32px;
+  min-width: 80px;
 }
 
 :local(.message-entry-in-room) {
@@ -249,35 +249,12 @@
   transition: opacity 0.25s linear;
 
   :local(.message-entry-input-in-room) {
-    @extend %default-font;
-    appearance: none;
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    outline-style: none;
-    background-color: transparent;
     color: white;
     padding: 8px 1.25em;
-    line-height: 2em;
-    font-size: 1.1em;
-    width: 100%;
-    border: 0px;
-    height: 32px;
-    margin-right: 100px;
-  }
-
-  :local(.message-entry-input-in-room)::placeholder{
-    color: $light-grey;
-    font-weight: 300;
-    font-style: italic;
   }
 
   :local(.message-entry-submit-in-room) {
-    @extend %action-button;
     border: 0;
-    position: absolute;
-    right: 12px;
-    height: 32px;
-    min-width: 80px;
     visibility: hidden;
   }
 }

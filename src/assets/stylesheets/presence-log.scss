@@ -15,7 +15,12 @@
   :local(.presence-log-entry) {
     @extend %default-font;
     pointer-events: auto;
+
     user-select: text;
+    -moz-user-select: text;
+    -webkit-user-select: text;
+    -ms-user-select: text;
+
     background-color: $white-transparent;
     margin: 8px 64px 8px 16px;
     font-size: 0.8em;
@@ -53,6 +58,11 @@
   :local(.presence-log-entry) {
     background-color: $hud-panel-background;
     color: $light-text;
+
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
   }
 }
 

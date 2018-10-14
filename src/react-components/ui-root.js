@@ -990,7 +990,7 @@ class UIRoot extends Component {
             <form onSubmit={this.sendMessage}>
               <div className={styles.messageEntryInRoom}>
                 <input
-                  className={styles.messageEntryInputInRoom}
+                  className={classNames([styles.messageEntryInput, styles.messageEntryInputInRoom])}
                   value={this.state.pendingMessage}
                   onFocus={e => e.target.select()}
                   onChange={e => {
@@ -999,7 +999,11 @@ class UIRoot extends Component {
                   }}
                   placeholder="Send a message..."
                 />
-                <input className={styles.messageEntrySubmitInRoom} type="submit" value="send" />
+                <input
+                  className={classNames([styles.messageEntrySubmit, styles.messageEntrySubmitInRoom])}
+                  type="submit"
+                  value="send"
+                />
               </div>
             </form>
           )}
