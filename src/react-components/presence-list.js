@@ -2,9 +2,9 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/presence-list.scss";
 import classNames from "classnames";
-import PhoneImage from "../assets/images/mobile_screen_entry.svg";
-import DesktopImage from "../assets/images/desktop_screen_entry.svg";
-import HMDImage from "../assets/images/generic_vr_entry.svg";
+import PhoneImage from "../assets/images/presence_phone.png";
+import DesktopImage from "../assets/images/presence_desktop.png";
+import HMDImage from "../assets/images/presence_vr.png";
 import { FormattedMessage } from "react-intl";
 
 export default class PresenceList extends Component {
