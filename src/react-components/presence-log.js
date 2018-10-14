@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
 import Linkify from "react-linkify";
-import { emojify } from "react-emojione";
+import Emoji from "react-emoji-render";
 import { FormattedMessage } from "react-intl";
 
 export default class PresenceLog extends Component {
@@ -47,9 +47,7 @@ export default class PresenceLog extends Component {
           <div key={e.key} className={classNames(entryClasses)}>
             <b>{e.name}</b>:{" "}
             <Linkify properties={{ target: "_blank", rel: "noopener referrer" }}>
-              {emojify(e.body, {
-                style: { textIndent: "auto", height: "20px", width: "20px", fontSize: "1.25em", margin: "0" }
-              })}
+              <Emoji options={{ className: styles.emoji }} text={e.body} />
             </Linkify>
           </div>
         );

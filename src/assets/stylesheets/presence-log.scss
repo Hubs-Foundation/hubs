@@ -56,3 +56,8 @@
   }
 }
 
+:local(.emoji) {
+  // Undo annoying CSS in emoji plugin
+  margin: auto !important;
+  vertical-align: 0em !important;
+}
