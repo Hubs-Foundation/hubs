@@ -15,6 +15,7 @@ function pad(num, size) {
 export default class InviteDialog extends Component {
   static propTypes = {
     entryCode: PropTypes.number,
+    hubId: PropTypes.string,
     allowShare: PropTypes.bool,
     onClose: PropTypes.func
   };
@@ -42,11 +43,11 @@ export default class InviteDialog extends Component {
     const { entryCode } = this.props;
 
     const entryCodeString = pad(entryCode, 6);
-    const shareShortLink = `hub.link/${entryCodeString}`;
-    const shareFullLink = [location.protocol, "//", location.host, location.pathname].join("");
+    const shareShortLink = `hub.link/${this.props.hubId}`;
+    const shareFullLink = [location.protocol, "//", "hub.link", location.pathname].join("");
 
     const tweetText = `Join me now in #hubs!`;
-    const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(shareFullLink)}&text=${encodeURIComponent(
+    const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(shareShortLink)}&text=${encodeURIComponent(
       tweetText
     )}`;
 

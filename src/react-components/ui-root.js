@@ -990,6 +990,7 @@ class UIRoot extends Component {
               <InviteDialog
                 allowShare={!this.props.availableVREntryTypes.isInHMD}
                 entryCode={this.props.hubEntryCode}
+                hubId={this.props.hubId}
                 onClose={() => this.setState({ showInviteDialog: false })}
               />
             )}
