@@ -417,15 +417,40 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.add = addToPresenceLog;
 
   let isInitialSync = true;
-  let presences = {};
 
   hubPhxPresence.onSync(() => {
-    if (isInitialSync) {
-      hubPhxPresence.onJoin((sessionId, current, info) => {
-        if (current) return;
+    remountUI({ presences: hubPhxPresence.state });
 
+    if (!isInitialSync) return;
+    // Wire up join/leave event handlers after initial sync.
+    isInitialSync = false;
+
+    hubPhxPresence.onJoin((sessionId, current, info) => {
+      const meta = info.metas[info.metas.length - 1];
+
+      if (current) {
+        // Change to existing presence
+        const isSelf = sessionId === socket.params().session_id;
+        const currentMeta = current.metas[0];
+
+        if (!isSelf && currentMeta.presence !== meta.presence && meta.profile.displayName) {
+          addToPresenceLog({
+            type: "entered",
+            presence: meta.presence,
+            name: meta.profile.displayName
+          });
+        }
+
+        if (currentMeta.profile && meta.profile && currentMeta.profile.displayName !== meta.profile.displayName) {
+          addToPresenceLog({
+            type: "display_name_changed",
+            oldName: currentMeta.profile.displayName,
+            newName: meta.profile.displayName
+          });
+        }
+      } else {
+        // New presence
         const meta = info.metas[0];
-        // Wire up join/leave event handlers after initial sync.
 
         if (meta.presence && meta.profile.displayName) {
           addToPresenceLog({
@@ -434,23 +459,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             name: meta.profile.displayName
           });
         }
-      });
+      }
+    });
 
-      hubPhxPresence.onLeave((sessionId, current, info) => {
-        if (current && current.metas.length > 0) return;
+    hubPhxPresence.onLeave((sessionId, current, info) => {
+      if (current && current.metas.length > 0) return;
 
-        const meta = info.metas[0];
+      const meta = info.metas[0];
 
-        if (meta.profile.displayName) {
-          addToPresenceLog({
-            type: "leave",
-            name: meta.profile.displayName
-          });
-        }
-      });
-    }
-
-    isInitialSync = false;
+      if (meta.profile.displayName) {
+        addToPresenceLog({
+          type: "leave",
+          name: meta.profile.displayName
+        });
+      }
+    });
   });
 
   hubPhxChannel.on("naf", data => {
@@ -459,51 +482,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   hubPhxChannel.on("message", data => {
-    const userInfo = presences[data.session_id];
+    const userInfo = hubPhxPresence.state[data.session_id];
     if (!userInfo) return;
 
     addToPresenceLog({ type: "message", name: userInfo.metas[0].profile.displayName, body: data.body });
   });
 
-  hubPhxChannel.on("presence_state", state => {
-    presences = Presence.syncState(presences, state);
-    remountUI({ presences, occupantCount: Object.keys(presences).length });
-  });
-
-  hubPhxChannel.on("presence_diff", diff => {
-    for (const [sessionId, info] of Object.entries(diff.joins || {})) {
-      if (!presences[sessionId]) continue;
-
-      const isSelf = sessionId === socket.params().session_id;
-      const currentMeta = presences[sessionId].metas[0];
-      const newMeta = info.metas[0];
-
-      if (!isSelf && currentMeta.presence !== newMeta.presence && newMeta.profile.displayName) {
-        addToPresenceLog({
-          type: "entered",
-          presence: newMeta.presence,
-          name: newMeta.profile.displayName
-        });
-      }
-
-      if (currentMeta.profile && newMeta.profile && currentMeta.profile.displayName !== newMeta.profile.displayName) {
-        addToPresenceLog({
-          type: "display_name_changed",
-          oldName: currentMeta.profile.displayName,
-          newName: newMeta.profile.displayName
-        });
-      }
-    }
-
-    presences = Presence.syncDiff(presences, diff);
-    remountUI({ presences, occupantCount: Object.keys(presences).length });
-  });
-
   // Reticulum global channel
   const retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
-  retPhxChannel.join().receive("error", res => {
-    console.error(res);
-  });
-
+  retPhxChannel.join().receive("error", res => console.error(res));
   linkChannel.setSocket(socket);
 });

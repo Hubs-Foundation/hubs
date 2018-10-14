@@ -86,7 +86,6 @@ class UIRoot extends Component {
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
     hubName: PropTypes.string,
-    occupantCount: PropTypes.number,
     isSupportAvailable: PropTypes.bool,
     presenceLogEntries: PropTypes.array,
     presences: PropTypes.object,
@@ -582,6 +581,10 @@ class UIRoot extends Component {
     this.setState({ pendingMessage: "" });
   };
 
+  occupantCount = () => {
+    return this.props.presences ? Object.entries(this.props.presences).length : 0;
+  };
+
   renderExitedPane = () => {
     let subtitle = null;
     if (this.props.roomUnavailableReason === "closed") {
@@ -1010,14 +1013,14 @@ class UIRoot extends Component {
           >
             {!showVREntryButton && (
               <button
-                className={classNames({ [styles.hideSmallScreens]: this.props.occupantCount > 1 && entryFinished })}
+                className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entryFinished })}
                 onClick={() => this.toggleInviteDialog()}
               >
                 <FormattedMessage id="entry.invite-others-nag" />
               </button>
             )}
             {!showVREntryButton &&
-              this.props.occupantCount > 1 &&
+              this.occupantCount() > 1 &&
               entryFinished && (
                 <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
                   <span>
@@ -1067,7 +1070,7 @@ class UIRoot extends Component {
             })}
           >
             <FontAwesomeIcon icon={faUsers} />
-            <span className={styles.occupantCount}>{this.props.occupantCount || "-"}</span>
+            <span className={styles.occupantCount}>{this.occupantCount()}</span>
           </div>
 
           {this.state.showPresenceList && (
