@@ -5,7 +5,7 @@
     "auth.verified": "Your email has been verified!",
     "auth.spoke-verified": "You email has been verified! {br} You can now close this browser tab and return to Spoke.",
     "entry.enter-room-title": "Lobby",
-    "entry.enter-room": "Next",
+    "entry.enter-room": "Enter Room",
     "entry.screen-prefix": "Enter on ",
     "entry.desktop-screen": "Screen",
     "entry.mobile-screen": "Phone",
