@@ -22,6 +22,11 @@ function isMaybeDaydreamCompatibleDevice(ua) {
 // that can be entered into as a "generic" entry flow.
 const GENERIC_ENTRY_TYPE_DEVICE_BLACKLIST = [/cardboard/i];
 
+export function detectInHMD() {
+  const isOculusBrowser = /Oculus/.test(navigator.userAgent);
+  return isOculusBrowser;
+}
+
 // Tries to determine VR entry compatibility regardless of the current browser.
 //
 // For each VR "entry type", returns VR_DEVICE_AVAILABILITY.yes if that type can be launched into directly from this browser
@@ -45,7 +50,6 @@ const GENERIC_ENTRY_TYPE_DEVICE_BLACKLIST = [/cardboard/i];
 export async function getAvailableVREntryTypes() {
   const ua = navigator.userAgent;
   const isSamsungBrowser = browser.name === "chrome" && /SamsungBrowser/.test(ua);
-  const isOculusBrowser = /Oculus/.test(ua);
 
   // This needs to be kept up-to-date with the latest browsers that can support VR and Hubs.
   // Checking for navigator.getVRDisplays always passes b/c of polyfill.
@@ -63,7 +67,9 @@ export async function getAvailableVREntryTypes() {
     : VR_DEVICE_AVAILABILITY.no;
 
   const displays = isWebVRCapableBrowser ? await navigator.getVRDisplays() : [];
-  const isInHMD = isOculusBrowser;
+
+  const isOculusBrowser = /Oculus/.test(ua);
+  const isInHMD = detectInHMD();
 
   const screen = isInHMD
     ? VR_DEVICE_AVAILABILITY.no
