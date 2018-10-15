@@ -553,7 +553,7 @@ class UIRoot extends Component {
   };
 
   onMiniInviteClicked = () => {
-    const link = "https://hub.link/" + this.props.hubEntryCode;
+    const link = "https://hub.link/" + this.props.hubId;
 
     this.setState({ miniInviteActivated: true });
     setTimeout(() => {
