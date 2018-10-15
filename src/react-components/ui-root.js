@@ -977,7 +977,7 @@ class UIRoot extends Component {
                       ? navigator.share
                         ? "sharing..."
                         : "copied!"
-                      : "hub.link/" + this.props.hubEntryCode}
+                      : "hub.link/" + this.props.hubId}
                   </span>
                 </button>
               )}
