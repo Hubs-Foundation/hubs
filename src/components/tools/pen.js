@@ -72,9 +72,6 @@ AFRAME.registerComponent("pen", {
   },
 
   init() {
-    this._stateAdded = this._stateAdded.bind(this);
-    this._stateRemoved = this._stateRemoved.bind(this);
-
     this.timeSinceLastDraw = 0;
 
     this.lastPosition = new THREE.Vector3();
@@ -97,14 +94,6 @@ AFRAME.registerComponent("pen", {
   play() {
     this.drawingManager = document.querySelector(this.data.drawingManager).components["drawing-manager"];
     this.drawingManager.createDrawing();
-
-    this.el.parentNode.addEventListener("stateadded", this._stateAdded);
-    this.el.parentNode.addEventListener("stateremoved", this._stateRemoved);
-  },
-
-  pause() {
-    this.el.parentNode.removeEventListener("stateadded", this._stateAdded);
-    this.el.parentNode.removeEventListener("stateremoved", this._stateRemoved);
   },
 
   update(prevData) {
@@ -119,7 +108,7 @@ AFRAME.registerComponent("pen", {
   tick(t, dt) {
     const grabber = this.el.parentNode.components.grabbable.grabbers[0];
     const userinput = AFRAME.scenes[0].systems.userinput;
-    if (grabber && pathsMap.has(grabber.id)) {
+    if (grabber && pathsMap[grabber.id]) {
       const paths = pathsMap[grabber.id];
       if (userinput.readFrameValueAtPath(paths.startDrawing)) {
         this._startDraw();

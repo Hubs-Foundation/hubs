@@ -37,7 +37,7 @@ export class OculusTouchControllerDevice {
     this.gamepad = gamepad;
     this.pose = new Pose();
     this.buttonMap = buttonMaps[hand];
-    this.axisMap = [{ name: "joystickHorizontal", axisId: 0 }, { name: "joystickVertical", axisId: 1 }];
+    this.axisMap = [{ name: "joyX", axisId: 0 }, { name: "joyY", axisId: 1 }];
     this.path = devicePaths[hand];
     this.selector = `[super-hands]#player-${hand}-controller`;
   }

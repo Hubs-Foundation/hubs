@@ -197,6 +197,13 @@ export function updateActionSetsBasedOnSuperhands() {
     !rightHandGrabbing &&
     cursorHand.has("hover-start") &&
     cursorHand.get("hover-start").matches(".interactable, .interactable *");
+  const cursorHoveringOnUI =
+    !rightTeleporter.active &&
+    !rightHandHovering &&
+    !rightHandGrabbing &&
+    ((cursorHand.has("hover-start") && cursorHand.get("hover-start").matches(".ui, .ui *")) ||
+      (cursorController.data.cursor.components["super-hands"].hoverEls.length &&
+        cursorController.data.cursor.components["super-hands"].hoverEls[0].matches(".ui, .ui *"))); // Why isn't hover-start on the cursorHand?
   const cursorHoveringOnPen =
     !rightTeleporter.active &&
     !rightHandHovering &&
@@ -215,7 +222,8 @@ export function updateActionSetsBasedOnSuperhands() {
     !rightHandHovering &&
     !rightHandGrabbing &&
     !cursorHand.has("hover-start") &&
-    !cursorHand.has("grab-start");
+    !cursorHand.has("grab-start") &&
+    !cursorHoveringOnUI;
 
   if (rightTeleporter.active || rightHandHovering || rightHandGrabbing) {
     cursorController.disable();
@@ -238,6 +246,7 @@ export function updateActionSetsBasedOnSuperhands() {
 
   userinput.toggleActive(sets.cursorHoveringOnPen, cursorHoveringOnPen);
   userinput.toggleActive(sets.cursorHoveringOnInteractable, cursorHoveringOnInteractable);
+  userinput.toggleActive(sets.cursorHoveringOnUI, cursorHoveringOnUI);
   userinput.toggleActive(sets.cursorHoveringOnNothing, cursorHoveringOnNothing);
   userinput.toggleActive(sets.cursorHoldingPen, cursorHoldingPen);
   userinput.toggleActive(sets.cursorHoldingInteractable, cursorHoldingInteractable);

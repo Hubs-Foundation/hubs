@@ -2,6 +2,7 @@ export const sets = {};
 sets.global = "global";
 sets.cursorHoveringOnPen = "cursorHoveringOnPen";
 sets.cursorHoveringOnInteractable = "cursorHoveringOnInteractable";
+sets.cursorHoveringOnUI = "cursorHoveringOnUI";
 sets.cursorHoveringOnNothing = "cursorHoveringOnNothing";
 sets.cursorHoldingPen = "cursorHoldingPen";
 sets.cursorHoldingInteractable = "cursorHoldingInteractable";

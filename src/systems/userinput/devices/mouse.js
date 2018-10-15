@@ -59,12 +59,11 @@ export class MouseDevice {
     this.events.forEach(event => {
       this.process(event, frame);
     });
+
     while (this.events.length) {
       this.events.pop();
-      // we pop until events is empty
-      // setting events.length = 0 results in the `forEach` above to access the elements illegally on the next tick
-      // setting events = [] would mean I'd need to create new event listeners for this array
     }
+
     frame[paths.device.mouse.coords] = this.coords;
     frame[paths.device.mouse.movementXY] = this.movementXY;
     frame[paths.device.mouse.buttonLeft] = this.buttonLeft;
