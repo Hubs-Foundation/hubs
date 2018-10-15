@@ -161,71 +161,73 @@ export function updateActionSetsBasedOnSuperhands() {
 
   const cursorGrabbing = cursorHand.has("grab-start");
 
+  const rightHandTeleporting = rightTeleporter.active;
+  const rightHandHovering = !rightHandTeleporting && !cursorGrabbing && rightHand.has("hover-start");
+  const rightHandGrabbing = !rightHandTeleporting && !cursorGrabbing && rightHand.has("grab-start");
+
   const rightHandHoveringOnInteractable =
-    !rightTeleporter.active &&
+    !rightHandTeleporting &&
     !cursorGrabbing &&
     rightHand.has("hover-start") &&
     rightHand.get("hover-start").matches(".interactable, .interactable *");
   const rightHandHoveringOnPen =
-    !rightTeleporter.active &&
+    !rightHandTeleporting &&
     !cursorGrabbing &&
     rightHand.has("hover-start") &&
     rightHand.get("hover-start").matches(".pen, .pen *");
   const rightHandHoldingInteractable =
-    !rightTeleporter.active &&
+    !rightHandTeleporting &&
     !cursorGrabbing &&
     rightHand.has("grab-start") &&
     rightHand.get("grab-start").matches(".interactable, .interactable *");
   const rightHandHoldingPen =
-    !rightTeleporter.active &&
+    !rightHandTeleporting &&
     !cursorGrabbing &&
     rightHand.has("grab-start") &&
     rightHand.get("grab-start").matches(".pen, .pen *");
 
-  const rightHandHovering = !rightTeleporter.active && !cursorGrabbing && rightHand.has("hover-start");
-  const rightHandGrabbing = !rightTeleporter.active && !cursorGrabbing && rightHand.has("grab-start");
   const rightHandHoveringOnNothing =
-    !rightTeleporter.active &&
+    !rightHandTeleporting &&
     !rightHandHovering &&
     !cursorHand.has("hover-start") &&
     !cursorGrabbing &&
     !rightHand.has("grab-start");
 
   const cursorHoveringOnInteractable =
-    !rightTeleporter.active &&
+    !rightHandTeleporting &&
     !rightHandHovering &&
     !rightHandGrabbing &&
     cursorHand.has("hover-start") &&
     cursorHand.get("hover-start").matches(".interactable, .interactable *");
   const cursorHoveringOnUI =
-    !rightTeleporter.active &&
+    !rightHandTeleporting &&
     !rightHandHovering &&
     !rightHandGrabbing &&
     ((cursorHand.has("hover-start") && cursorHand.get("hover-start").matches(".ui, .ui *")) ||
       (cursorController.data.cursor.components["super-hands"].hoverEls.length &&
         cursorController.data.cursor.components["super-hands"].hoverEls[0].matches(".ui, .ui *"))); // Why isn't hover-start on the cursorHand?
   const cursorHoveringOnPen =
-    !rightTeleporter.active &&
+    !rightHandTeleporting &&
     !rightHandHovering &&
     !rightHandGrabbing &&
     cursorHand.has("hover-start") &&
     cursorHand.get("hover-start").matches(".pen, .pen *");
   const cursorHoldingInteractable =
-    !rightTeleporter.active &&
+    !rightHandTeleporting &&
     cursorHand.has("grab-start") &&
     cursorHand.get("grab-start").matches(".interactable, .interactable *");
   const cursorHoldingPen =
-    !rightTeleporter.active && cursorHand.has("grab-start") && cursorHand.get("grab-start").matches(".pen, .pen *");
+    !rightHandTeleporting && cursorHand.has("grab-start") && cursorHand.get("grab-start").matches(".pen, .pen *");
 
   const cursorHoveringOnNothing =
-    !rightTeleporter.active &&
+    !rightHandTeleporting &&
     !rightHandHovering &&
     !rightHandGrabbing &&
     !cursorHand.has("hover-start") &&
     !cursorHand.has("grab-start") &&
     !cursorHoveringOnUI;
 
-  if (rightTeleporter.active || rightHandHovering || rightHandGrabbing) {
+  if (rightHandTeleporting || rightHandHovering || rightHandGrabbing) {
     cursorController.disable();
   } else {
     cursorController.enable();
@@ -243,6 +245,7 @@ export function updateActionSetsBasedOnSuperhands() {
   userinput.toggleActive(sets.rightHandHoveringOnNothing, rightHandHoveringOnNothing);
   userinput.toggleActive(sets.rightHandHoldingPen, rightHandHoldingPen);
   userinput.toggleActive(sets.rightHandHoldingInteractable, rightHandHoldingInteractable);
+  userinput.toggleActive(sets.rightHandTeleporting, rightHandTeleporting);
 
   userinput.toggleActive(sets.cursorHoveringOnPen, cursorHoveringOnPen);
   userinput.toggleActive(sets.cursorHoveringOnInteractable, cursorHoveringOnInteractable);

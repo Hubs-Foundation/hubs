@@ -68,9 +68,7 @@ export const oculusGoUserBindings = {
       src: {
         value: paths.device.oculusgo.button("trigger").pressed
       },
-      dest: {
-        value: paths.actions.startTeleport
-      },
+      dest: { value: paths.actions.rightHand.startTeleport },
       xform: xforms.rising,
       root: triggerRisingRoot,
       priority: 100
@@ -83,6 +81,11 @@ export const oculusGoUserBindings = {
       src: { value: vec2zero },
       dest: { value: paths.actions.cursor.pose },
       xform: xforms.poseFromCameraProjection()
+    },
+    {
+      src: { value: paths.device.oculusgo.pose },
+      dest: { value: paths.actions.cursor.pose },
+      xform: xforms.copy
     }
   ],
 
@@ -95,7 +98,10 @@ export const oculusGoUserBindings = {
       xform: xforms.rising,
       root: triggerRisingRoot,
       priority: 200
-    },
+    }
+  ],
+
+  [sets.cursorHoldingInteractable]: [
     {
       src: {
         value: paths.device.oculusgo.button("trigger").pressed
@@ -112,9 +118,7 @@ export const oculusGoUserBindings = {
       src: {
         value: paths.device.oculusgo.button("trigger").pressed
       },
-      dest: {
-        value: paths.actions.stopTeleport
-      },
+      dest: { value: paths.actions.rightHand.stopTeleport },
       xform: xforms.falling,
       root: triggerFallingRoot,
       priority: 100

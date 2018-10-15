@@ -1,10 +1,15 @@
 import { paths } from "../paths";
+import { Pose } from "../pose";
 
 export class OculusGoControllerDevice {
   constructor(gamepad) {
     this.gamepad = gamepad;
-    this.buttonMap = [{ name: "touchpad", buttonId: 0 }, { name: "trigger", buttonId: 7 }];
+    this.buttonMap = [{ name: "touchpad", buttonId: 0 }, { name: "trigger", buttonId: 1 }];
     this.axisMap = [{ name: "touchpadX", axisId: 0 }, { name: "touchpadY", axisId: 1 }];
+
+    this.rayObjectRotation = new THREE.Quaternion();
+    this.selector = `#player-${gamepad.hand}-controller`;
+    this.pose = new Pose();
   }
 
   write(frame) {
@@ -19,23 +24,27 @@ export class OculusGoControllerDevice {
         frame[paths.device.gamepad(this.gamepad.index).axis(i)] = axis;
       });
 
-      const touchpadPath = paths.device.oculusgo.button("touchpad");
-      frame[touchpadPath.pressed] = !!frame[paths.device.gamepad(this.gamepad.index).button(6).pressed];
-      frame[touchpadPath.touched] = !!(
-        frame[paths.device.gamepad(this.gamepad.index).axis(0)] ||
-        frame[paths.device.gamepad(this.gamepad.index).axis(1)]
-      );
-      frame[touchpadPath.value] = frame[paths.device.gamepad(this.gamepad.index).button(6).value];
-
-      const triggerPath = paths.device.oculusgo.button("trigger");
-      frame[triggerPath.pressed] = !!frame[paths.device.gamepad(this.gamepad.index).button(7).pressed];
-      frame[triggerPath.touched] = !!frame[paths.device.gamepad(this.gamepad.index).button(7).touched];
-      frame[triggerPath.value] = frame[paths.device.gamepad(this.gamepad.index).button(7).value];
-
+      this.buttonMap.forEach(button => {
+        const outpath = paths.device.oculusgo.button(button.name);
+        frame[outpath.pressed] = !!frame[paths.device.gamepad(this.gamepad.index).button(button.buttonId).pressed];
+        frame[outpath.touched] = !!frame[paths.device.gamepad(this.gamepad.index).button(button.buttonId).touched];
+        frame[outpath.value] = frame[paths.device.gamepad(this.gamepad.index).button(button.buttonId).value];
+      });
       this.axisMap.forEach(axis => {
         frame[paths.device.oculusgo.axis(axis.name)] =
           frame[paths.device.gamepad(this.gamepad.index).axis(axis.axisId)];
       });
+
+      // TODO ideally we should just be getting pose from the gamepad
+      if (!this.rayObject) {
+        this.rayObject = document.querySelector(this.selector).object3D;
+      }
+      this.rayObject.updateMatrixWorld();
+      this.rayObjectRotation.setFromRotationMatrix(this.rayObject.matrixWorld);
+      this.pose.position.setFromMatrixPosition(this.rayObject.matrixWorld);
+      this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
+      this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
+      frame[paths.device.oculusgo.pose] = this.pose;
     }
   }
 }

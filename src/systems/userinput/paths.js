@@ -107,7 +107,8 @@ paths.device.oculusgo = {
   }),
   axis: axisName => {
     return `${oculusgo}axis/${axisName}`;
-  }
+  },
+  pose: `${oculusgo}pose`
 };
 
 const rightOculusTouch = "/device/rightOculusTouch/";
