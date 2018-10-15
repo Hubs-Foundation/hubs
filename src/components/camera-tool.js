@@ -1,9 +1,22 @@
 import { addMedia } from "../utils/media-utils";
 import { ObjectTypes } from "../object-types";
+import { paths } from "../systems/userinput/paths";
 
 import cameraModelSrc from "../assets/camera_tool.glb";
 
 const cameraModelPromise = new Promise(resolve => new THREE.GLTFLoader().load(cameraModelSrc, resolve));
+
+const pathsMap = {
+  "player-right-controller": {
+    takeSnapshot: paths.actions.rightHand.takeSnapshot
+  },
+  "player-left-controller": {
+    takeSnapshot: paths.actions.leftHand.takeSnapshot
+  },
+  cursor: {
+    takeSnapshot: paths.actions.cursor.takeSnapshot
+  }
+};
 
 const snapCanvas = document.createElement("canvas");
 async function pixelsToPNG(pixels, width, height) {
@@ -90,6 +103,16 @@ AFRAME.registerComponent("camera-tool", {
   stateAdded(evt) {
     if (evt.detail === "activated") {
       this.takeSnapshotNextTick = true;
+    }
+  },
+
+  tick() {
+    const grabber = this.el.components.grabbable.grabbers[0];
+    if (grabber && !!pathsMap[grabber.id]) {
+      const paths = pathsMap[grabber.id];
+      if (AFRAME.scenes[0].systems.userinput.readFrameValueAtPath(paths.takeSnapshot)) {
+        this.takeSnapshotNextTick = true;
+      }
     }
   },
 

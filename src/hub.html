@@ -189,9 +189,10 @@
 
             <template id="interactable-camera">
                 <a-entity
-                    class="interactable toggle"
-                    grabbable-toggle="maxGrabbers: 1;"
+                    class="interactable icamera"
+                    grabbable
                     hoverable
+                    stretchable
                     activatable__snap-hand="buttonStartEvents: secondary_hand_grab; buttonEndEvents: secondary_hand_release;"
                     activatable__snap-cursor="buttonStartEvents: secondary-cursor-grab; buttonEndEvents: secondary-cursor-release;"
                     camera-tool
@@ -303,8 +304,6 @@
                 dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
                 activateStartButtons: secondary-cursor-grab, secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
                 activateEndButtons: secondary-cursor-release, secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
-            action-to-event__a="path: /actions/cursorGrab; event: cursor-grab";
-            action-to-event__b="path: /actions/cursorDrop; event: cursor-release";
         ></a-sphere>
 
         <!-- Player Rig -->
@@ -327,10 +326,10 @@
               <a-rounded height="0.08" width="0.5" color="#000000" position="-0.20 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
               <a-entity id="hud-hub-entry-link" text=" value:; width:1.1; align:center;" position="0.05 0.165 0"></a-entity>
               <a-rounded height="0.13" width="0.59" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
-              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover" scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="ui hud mic" material="alphaTest:0.1;"></a-image>
-              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover" scale="0.2 0.2 0.2" position="0 0 0.005" class="ui hud freeze"></a-image>
-              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="ui hud pen" material="alphaTest:0.1;"></a-image>
-              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #spawn-camera; hoverImage: #spawn-camera-hover; activeImage: #spawn-camera; activeHoverImage: #spawn-camera-hover" scale="0.1 0.1 0.1" position="0.28 0 0.001" class="ui hud cameraBtn" material="alphaTest:0.1;"></a-image>
+              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover" scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="ui hud mic" material="alphaTest:0.1;" hoverable></a-image>
+              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover" scale="0.2 0.2 0.2" position="0 0 0.005" class="ui hud freeze" hoverable></a-image>
+              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="ui hud penhud" material="alphaTest:0.1;" hoverable></a-image>
+              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #spawn-camera; hoverImage: #spawn-camera-hover; activeImage: #spawn-camera; activeHoverImage: #spawn-camera-hover" scale="0.1 0.1 0.1" position="0.28 0 0.001" class="ui hud cameraBtn" material="alphaTest:0.1;" hoverable></a-image>
               <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
                 <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" ></a-entity>
               </a-rounded>

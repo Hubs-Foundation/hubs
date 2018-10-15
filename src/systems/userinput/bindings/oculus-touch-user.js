@@ -27,12 +27,16 @@ const rightDpadEast = `${name}rightDpad/east`;
 const rightDpadWest = `${name}rightDpad/west`;
 const rightDpadCenter = `${name}rightDpad/center`;
 const rightJoy = `${name}right/joy`;
+const rightJoyY = `${name}right/joyY`;
+const rightJoyYCursorMod = `${name}right/joyYCursorMod`;
 const leftDpadNorth = `${name}leftDpad/north`;
 const leftDpadSouth = `${name}leftDpad/south`;
 const leftDpadEast = `${name}leftDpad/east`;
 const leftDpadWest = `${name}leftDpad/west`;
 const leftDpadCenter = `${name}leftDpad/center`;
 const leftJoy = `${name}left/joy`;
+const leftJoyY = `${name}left/joyY`;
+const leftJoyYCursorMod = `${name}left/joyYCursorMod`;
 const oculusTouchCharacterAcceleration = `${name}characterAcceleration`;
 const keyboardCharacterAcceleration = "/var/keyboard/characterAcceleration";
 
@@ -191,7 +195,6 @@ export const oculusTouchUserBindings = {
     }
   ],
 
-  [sets.rightHandHoveringOnNothing]: [],
   [sets.cursorHoveringOnUI]: [
     {
       src: { value: rightButton("trigger").pressed },
@@ -280,6 +283,29 @@ export const oculusTouchUserBindings = {
       xform: xforms.rising,
       root: leftDpadWest,
       priority: 200
+    },
+    {
+      src: {
+        bool: leftButton("grip").pressed,
+        value: leftAxis("joyY")
+      },
+      dest: { value: leftJoyY },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: leftJoyY },
+      dest: { value: paths.actions.leftHand.scalePenTip },
+      xform: xforms.scale(-0.01)
+    },
+    {
+      src: {
+        boo: leftButton("grip").pressed,
+        value: leftAxis("joyY")
+      },
+      dest: { value: leftJoyYCursorMod },
+      xform: xforms.copyIfFalse,
+      root: leftJoyY,
+      priority: 100
     }
   ],
 
@@ -312,6 +338,13 @@ export const oculusTouchUserBindings = {
       src: { value: rightAxis("joyY") },
       dest: { value: paths.actions.cursor.modDelta },
       xform: xforms.copy
+    },
+    {
+      src: { value: rightJoyYCursorMod },
+      dest: { value: paths.actions.cursor.modDelta },
+      xform: xforms.scale(0.1),
+      root: rightJoyY,
+      priority: 100
     }
   ],
 
@@ -397,6 +430,81 @@ export const oculusTouchUserBindings = {
       xform: xforms.rising,
       root: rightDpadWest,
       priority: 200
+    },
+    {
+      src: {
+        bool: rightButton("grip").pressed,
+        value: rightAxis("joyY")
+      },
+      dest: { value: rightJoyY },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: rightJoyY },
+      dest: { value: paths.actions.rightHand.scalePenTip },
+      xform: xforms.scale(-0.01)
+    },
+    {
+      src: {
+        boo: rightButton("grip").pressed,
+        value: rightAxis("joyY")
+      },
+      dest: { value: rightJoyYCursorMod },
+      xform: xforms.copyIfFalse,
+      root: rightJoyY,
+      priority: 100
     }
-  ]
+  ],
+
+  [sets.cursorHoveringOnCamera]: [
+    {
+      src: { value: rightButton("trigger").pressed },
+      dest: { value: paths.actions.cursor.grab },
+      xform: xforms.rising,
+      root: rightTriggerRising,
+      priority: 300
+    }
+  ],
+  [sets.rightHandHoveringOnCamera]: [
+    {
+      src: { value: rightButton("trigger").pressed },
+      dest: { value: paths.actions.rightHand.grab },
+      xform: xforms.rising,
+      root: rightTriggerRising,
+      priority: 300
+    }
+  ],
+  [sets.leftHandHoveringOnCamera]: [
+    {
+      src: { value: leftButton("trigger").pressed },
+      dest: { value: paths.actions.leftHand.grab },
+      xform: xforms.rising,
+      root: leftTriggerRising,
+      priority: 300
+    }
+  ],
+
+  [sets.rightHandHoldingCamera]: [
+    {
+      src: { value: rightButton("trigger").pressed },
+      dest: { value: paths.actions.rightHand.takeSnapshot },
+      xform: xforms.rising
+    }
+  ],
+  [sets.leftHandHoldingCamera]: [
+    {
+      src: { value: leftButton("trigger").pressed },
+      dest: { value: paths.actions.leftHand.takeSnapshot },
+      xform: xforms.rising
+    }
+  ],
+  [sets.cursorHoldingCamera]: [
+    {
+      src: { value: rightButton("trigger").pressed },
+      dest: { value: paths.actions.cursor.takeSnapshot },
+      xform: xforms.rising
+    }
+  ],
+
+  [sets.rightHandHoveringOnNothing]: []
 };

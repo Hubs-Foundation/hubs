@@ -1,5 +1,4 @@
 import { paths } from "../../systems/userinput/paths";
-import { sets } from "../../systems/userinput/sets";
 
 const pathsMap = {
   "player-right-controller": {
