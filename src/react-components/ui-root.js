@@ -553,7 +553,7 @@ class UIRoot extends Component {
   };
 
   onMiniInviteClicked = () => {
-    const link = "https://hub.link/" + this.props.hubEntryCode;
+    const link = "https://hub.link/" + this.props.hubId;
 
     this.setState({ miniInviteActivated: true });
     setTimeout(() => {
@@ -977,7 +977,7 @@ class UIRoot extends Component {
                       ? navigator.share
                         ? "sharing..."
                         : "copied!"
-                      : "hub.link/" + this.props.hubEntryCode}
+                      : "hub.link/" + this.props.hubId}
                   </span>
                 </button>
               )}
@@ -990,6 +990,7 @@ class UIRoot extends Component {
               <InviteDialog
                 allowShare={!this.props.availableVREntryTypes.isInHMD}
                 entryCode={this.props.hubEntryCode}
+                hubId={this.props.hubId}
                 onClose={() => this.setState({ showInviteDialog: false })}
               />
             )}

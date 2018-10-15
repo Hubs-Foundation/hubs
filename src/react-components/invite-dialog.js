@@ -15,6 +15,7 @@ function pad(num, size) {
 export default class InviteDialog extends Component {
   static propTypes = {
     entryCode: PropTypes.number,
+    hubId: PropTypes.string,
     allowShare: PropTypes.bool,
     onClose: PropTypes.func
   };
@@ -42,11 +43,11 @@ export default class InviteDialog extends Component {
     const { entryCode } = this.props;
 
     const entryCodeString = pad(entryCode, 6);
-    const shareShortLink = `hub.link/${entryCodeString}`;
-    const shareFullLink = [location.protocol, "//", location.host, location.pathname].join("");
+    const shortLinkText = `hub.link/${this.props.hubId}`;
+    const shortLink = "https://" + shortLinkText;
 
     const tweetText = `Join me now in #hubs!`;
-    const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(shareFullLink)}&text=${encodeURIComponent(
+    const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(shortLink)}&text=${encodeURIComponent(
       tweetText
     )}`;
 
@@ -74,15 +75,15 @@ export default class InviteDialog extends Component {
           <FormattedMessage id="invite.or_visit" />
         </div>
         <div className={styles.domain}>
-          <input type="text" readOnly onFocus={e => e.target.select()} value={shareShortLink} />
+          <input type="text" readOnly onFocus={e => e.target.select()} value={shortLinkText} />
         </div>
         <div className={styles.buttons}>
-          <button className={styles.linkButton} onClick={this.copyClicked.bind(this, "https://" + shareShortLink)}>
+          <button className={styles.linkButton} onClick={this.copyClicked.bind(this, shortLink)}>
             <span>{this.state.copyButtonActive ? "copied!" : "copy"}</span>
           </button>
           {this.props.allowShare &&
             navigator.share && (
-              <button className={styles.linkButton} onClick={this.shareClicked.bind(this, shareFullLink)}>
+              <button className={styles.linkButton} onClick={this.shareClicked.bind(this, shortLink)}>
                 <span>{this.state.shareButtonActive ? "sharing..." : "share"}</span>
               </button>
             )}
