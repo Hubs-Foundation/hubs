@@ -1,4 +1,4 @@
-# Terms of Service for Hubs by Mozilla
+# Terms of Service for Hubs and Spoke
 
 Version 3.0, Effective October 16, 2018
 
