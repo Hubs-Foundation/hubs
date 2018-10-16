@@ -263,7 +263,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
 
   document
     .querySelector("#hud-hub-entry-link")
-    .setAttribute("text", { value: `hub.link/${hub.hub_id}`, width: 1.1, align: "center" });
+    .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
 
   scene.setAttribute("networked-scene", {
     room: hub.hub_id,

@@ -249,17 +249,20 @@ class LinkRoot extends Component {
             </div>
 
             <div className={styles.footer}>
-              <div
-                className={styles.linkHeadsetFooterLink}
-                style={{ visibility: this.state.isAlphaMode ? "hidden" : "visible" }}
-              >
-                <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
-                <span>
-                  <a href="#" onClick={() => this.toggleMode()}>
-                    <FormattedMessage id="link.linking_a_headset" />
-                  </a>
-                </span>
-              </div>
+              {!this.state.isAlphaMode &&
+                this.props.showHeadsetLinkOption && (
+                  <div
+                    className={styles.linkHeadsetFooterLink}
+                    style={{ visibility: this.state.isAlphaMode ? "hidden" : "visible" }}
+                  >
+                    <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
+                    <span>
+                      <a href="#" onClick={() => this.toggleMode()}>
+                        <FormattedMessage id="link.linking_a_headset" />
+                      </a>
+                    </span>
+                  </div>
+                )}
             </div>
           </div>
         </div>
