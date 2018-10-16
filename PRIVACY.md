@@ -1,4 +1,4 @@
-# Privacy Notice for Hubs by Mozilla
+# Privacy Notice for Hubs and Spoke
 
 Version 3.0, October 16, 2018
 
