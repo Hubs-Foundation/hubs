@@ -61,7 +61,7 @@ body {
   height: 65px;
   display: flex;
 
-  @media (max-width: 768px) {
+  @media (max-width: 768px), (max-height: 690px) {
     display: none;
   }
 
@@ -127,6 +127,10 @@ body {
     min-height: 490px;
   }
 
+  @media (max-height: 690px) {
+    justify-content: flex-start;
+  }
+
   :local(.attribution) {
     position: absolute;
     right: 12px;
@@ -159,6 +163,10 @@ body {
       text-align: center;
       font-size: 1.5em;
       font-weight: bold;
+
+      @media (max-height: 690px) {
+        display: none;
+      }
     }
   }
 

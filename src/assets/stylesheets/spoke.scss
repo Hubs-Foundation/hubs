@@ -211,10 +211,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-
-  :local(.player-overlay-visible) {
-    display: flex;
-  }
 }
 
 :local(.player-content) {
