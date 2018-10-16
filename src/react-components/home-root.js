@@ -192,7 +192,6 @@ class HomeRoot extends Component {
                   </a>
                 </div>
               </div>
-              <div className={styles.ident} />
             </div>
             <div className={styles.heroContent}>
               <div className={styles.attribution}>

@@ -6,6 +6,7 @@ import { playVideoWithStopOnBlur } from "./utils/video-utils.js";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import styles from "./assets/stylesheets/spoke.scss";
 import spokeLogo from "./assets/images/spoke_logo.png";
+import YouTube from "react-youtube";
 
 //const qs = new URLSearchParams(location.search);
 
@@ -35,11 +36,14 @@ function getPlatform() {
 class SpokeLanding extends Component {
   static propTypes = {};
 
-  state = { downloadLinkForCurrentPlatform: {} };
-
   constructor(props) {
     super(props);
-    this.state = { platform: getPlatform(), downloadClicked: false };
+    this.state = {
+      platform: getPlatform(),
+      downloadClicked: false,
+      downloadLinkForCurrentPlatform: {},
+      showPlayer: false
+    };
   }
 
   componentDidMount() {
@@ -117,7 +121,7 @@ class SpokeLanding extends Component {
 
   render() {
     const platform = this.state.platform;
-    const releasesLink = "https://github.com/MozillaReality/Spoke/releases";
+    const releasesLink = "https://github.com/MozillaReality/Spoke/releases/latest";
     const downloadLink = platform === "unsupported" ? releasesLink : this.state.downloadLinkForCurrentPlatform;
 
     return (
@@ -130,9 +134,6 @@ class SpokeLanding extends Component {
               </a>
               <a href="https://github.com/mozillareality/spoke" rel="noopener noreferrer">
                 <FormattedMessage id="home.source_link" />
-              </a>
-              <a href="https://hubs.mozilla.com" rel="noopener noreferrer">
-                Hubs
               </a>
               <a href="https://discord.gg/XzrGUY8" rel="noreferrer noopener">
                 <FormattedMessage id="home.community_link" />
@@ -186,7 +187,7 @@ class SpokeLanding extends Component {
                         <FormattedMessage id="spoke.browse_all_versions" />
                       </a>
                     )}
-                  <button className={styles.playButton} onClick={() => this.setState({ playVideo: true })}>
+                  <button className={styles.playButton} onClick={() => this.setState({ showPlayer: true })}>
                     <FormattedMessage id="spoke.play_button" />
                   </button>
                 </div>
@@ -206,6 +207,29 @@ class SpokeLanding extends Component {
             </div>
           </div>
           <div className={styles.bg} />
+          {this.state.showPlayer && (
+            <div className={styles.playerOverlay}>
+              <div className={styles.playerContent}>
+                <YouTube
+                  className={styles.playerVideo}
+                  opts={{ rel: 0 }}
+                  videoId="cw-XvgdyGNo"
+                  onReady={e => e.target.playVideo()}
+                />
+                {platform !== "unsupported" && (
+                  <a href={downloadLink} className={styles.downloadButton}>
+                    <div>
+                      <FormattedMessage id={"spoke.download_" + this.state.platform} />
+                    </div>
+                    <div className={styles.version}>{this.state.spokeVersion} Beta</div>
+                  </a>
+                )}
+                <a onClick={() => this.setState({ showPlayer: false })} className={styles.closeVideo}>
+                  <FormattedMessage id="spoke.close" />
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </IntlProvider>
     );

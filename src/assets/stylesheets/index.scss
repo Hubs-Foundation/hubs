@@ -112,12 +112,6 @@ body {
       }
     }
   }
-
-  :local(.ident) {
-    text-align: right;
-    flex: 1 1 $header-section-width;
-    width: $header-section-width;
-  }
 }
 
 :local(.hero-content) {

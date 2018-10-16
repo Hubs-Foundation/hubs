@@ -24,6 +24,7 @@ body {
 
 :local(.ui) {
   display: flex;
+  position: relative;
   flex-direction: column;
 }
 
@@ -172,12 +173,16 @@ body {
   }
 }
 
-:local(.play-button) {
+:local(.play-button), :local(.close-video) {
   @extend %action-button;
   background-color: $darker-grey;
   margin: auto;
   margin-top: 64px;
   padding: 0px 82px;
+}
+
+:local(.close-video) {
+  margin-top: 12px;
 }
 
 :local(.browse-versions) {
@@ -193,5 +198,48 @@ body {
 
   a {
     color: $grey-text;
+  }
+}
+
+:local(.player-overlay) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  :local(.player-overlay-visible) {
+    display: flex;
+  }
+}
+
+:local(.player-content) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+:local(.player-video) {
+  width: 960px;
+  height: 540px;
+
+  @media (max-width: 980px), (max-height: 760px) {
+    width: 640px;
+    height: 360px;
+  }
+
+  @media (max-width: 650px), (max-height: 580px) {
+    width: 480px;
+    height: 270px;
+  }
+
+  @media (max-width: 490px), (max-height: 480px) {
+    width: 320px;
+    height: 180px;
   }
 }
