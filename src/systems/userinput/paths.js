@@ -1,6 +1,7 @@
 export const paths = {};
 paths.noop = "/noop";
 paths.actions = {};
+paths.actions.toggleScreenShare = "/actions/toggleScreenShare";
 paths.actions.logDebugFrame = "/actions/logDebugFrame";
 paths.actions.cameraDelta = "/actions/cameraDelta";
 paths.actions.characterAcceleration = "/actions/characterAcceleration";

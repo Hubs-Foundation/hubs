@@ -98,7 +98,16 @@ export const xforms = {
     const first = frame[src.first];
     const second = frame[src.second];
     if (first && second) {
-        frame[dest.value] = [first[0] + second[0], first[1] + second[1]];
+      frame[dest.value] = [first[0] + second[0], first[1] + second[1]];
     }
+  },
+  any: function(frame, src, dest) {
+    for (let path in src) {
+      if (!!frame[src[path]]) {
+        frame[dest.value] = true;
+        return;
+      }
+    }
+    frame[dest.value] = false;
   }
 };

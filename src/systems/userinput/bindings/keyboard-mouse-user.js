@@ -7,6 +7,15 @@ export const keyboardMouseUserBindings = {
   [sets.global]: [
     {
       src: {
+        value: paths.device.keyboard.key("b")
+      },
+      dest: {
+        value: paths.actions.toggleScreenShare
+      },
+      xform: xforms.rising
+    },
+    {
+      src: {
         w: paths.device.keyboard.key("w"),
         a: paths.device.keyboard.key("a"),
         s: paths.device.keyboard.key("s"),
@@ -153,7 +162,7 @@ export const keyboardMouseUserBindings = {
     {
       src: { value: paths.device.mouse.buttonRight },
       dest: { value: paths.actions.cursor.drop },
-      xform: xforms.falling,
+      xform: xforms.falling
     },
     {
       src: {
