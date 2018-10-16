@@ -102,12 +102,21 @@ export const xforms = {
     }
   },
   any: function(frame, src, dest) {
-    for (let path in src) {
+    for (const path in src) {
       if (!!frame[src[path]]) {
         frame[dest.value] = true;
         return;
       }
     }
     frame[dest.value] = false;
+  },
+  touch_axis_scroll(scale = 1) {
+    return function(frame, src, dest, state = { value: 0, touching: false }) {
+      frame[dest.value] =
+        !state.touching || !frame[src.touching] ? 0 : scale * (frame[src.value] + 1 - (state.value + 1));
+      state.value = frame[src.value];
+      state.touching = frame[src.touching];
+      return state;
+    };
   }
 };
