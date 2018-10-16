@@ -32,9 +32,8 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
     const cameraDelta = userinput.readFrameValueAtPath(paths.actions.cameraDelta);
     if (cameraDelta) {
       this.look(cameraDelta[1], cameraDelta[0]);
+      this.el.object3D.rotation.set(degToRad(this.pitch), degToRad(this.yaw), 0);
+      this.el.object3D.rotation.order = "YXZ";
     }
-
-    this.el.object3D.rotation.set(degToRad(this.pitch), degToRad(this.yaw), 0);
-    this.el.object3D.rotation.order = "YXZ";
   }
 });
