@@ -68,7 +68,7 @@ export default class Subscriptions {
         });
       }
 
-      subscriptions[this.hubId] = JSON.parse(JSON.stringify(subscription));
+      subscriptions[this.hubId] = { endpoint: subscription.endpoint };
       console.log("Register push subscription with reticulum");
     }
 
