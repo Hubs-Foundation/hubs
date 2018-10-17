@@ -137,6 +137,9 @@ class SpokeLanding extends Component {
               <a href="https://discord.gg/XzrGUY8" rel="noreferrer noopener">
                 <FormattedMessage id="home.community_link" />
               </a>
+              <a href="/" rel="noreferrer noopener">
+                Hubs
+              </a>
             </div>
           </div>
           <div className={styles.content}>
