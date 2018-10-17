@@ -81,6 +81,7 @@ import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { proxiedUrlFor } from "./utils/media-utils";
 import SceneEntryManager from "./scene-entry-manager";
+import Subscriptions from "./subscriptions";
 
 import "./systems/nav";
 import "./systems/personal-space-bubble";
@@ -490,6 +491,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Reticulum global channel
   const retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
-  retPhxChannel.join().receive("error", res => console.error(res));
+  retPhxChannel
+    .join()
+    .receive("ok", async data => {
+      const vapidPublicKey = data.vapid_public_key;
+      console.log("Load service");
+      navigator.serviceWorker.register("/hub.service.js");
+      console.log("222");
+      navigator.serviceWorker.ready.then(serviceWorkerRegistration => {
+        console.log("333");
+        const subscriptions = new Subscriptions(hubId, hubChannel, vapidPublicKey, store, serviceWorkerRegistration);
+        remountUI({ subscriptions });
+      });
+    })
+    .receive("error", res => console.error(res));
+
   linkChannel.setSocket(socket);
 });

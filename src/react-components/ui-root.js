@@ -89,7 +89,8 @@ class UIRoot extends Component {
     isSupportAvailable: PropTypes.bool,
     presenceLogEntries: PropTypes.array,
     presences: PropTypes.object,
-    sessionId: PropTypes.string
+    sessionId: PropTypes.string,
+    subscriptions: PropTypes.object
   };
 
   state = {
@@ -130,7 +131,8 @@ class UIRoot extends Component {
     exited: false,
 
     showProfileEntry: false,
-    pendingMessage: ""
+    pendingMessage: "",
+    isSubscribed: false
   };
 
   componentDidMount() {
@@ -140,12 +142,18 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
     this.props.scene.addEventListener("exit", this.exit);
+    this.updateSubscribedState();
   }
 
   componentWillUnmount() {
     this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
     this.props.scene.removeEventListener("exit", this.exit);
   }
+
+  updateSubscribedState = () => {
+    const isSubscribed = this.props.subscriptions && this.props.subscriptions.isSubscribed();
+    this.setState({ isSubscribed });
+  };
 
   onSceneLoaded = () => {
     this.setState({ sceneLoaded: true });
@@ -173,6 +181,13 @@ class UIRoot extends Component {
 
   spawnPen = () => {
     this.props.scene.emit("spawn_pen");
+  };
+
+  onSubscribeClicked = async () => {
+    if (!this.props.subscriptions) return;
+
+    await this.props.subscriptions.toggle();
+    this.updateSubscribedState();
   };
 
   handleStartEntry = () => {
@@ -695,6 +710,13 @@ class UIRoot extends Component {
               <input className={styles.messageEntrySubmit} type="submit" value="send" />
             </div>
           </form>
+        </div>
+
+        <div>
+          <input id="subscribe" type="checkbox" onClick={this.onSubscribeClicked} checked={this.state.isSubscribed} />
+          <label htmlFor="subscribe">
+            <FormattedMessage id="entry.notify_me" />
+          </label>
         </div>
 
         <div className={entryStyles.buttonContainer}>
