@@ -687,6 +687,8 @@ class UIRoot extends Component {
   };
 
   renderEntryStartPanel = () => {
+    const hasPush = "PushManager" in window;
+
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>{this.props.hubName}</div>
@@ -711,19 +713,23 @@ class UIRoot extends Component {
           </form>
         </div>
 
-        <div>
-          <input
-            id="subscribe"
-            type="checkbox"
-            onChange={this.onSubscribeChanged}
-            checked={
-              typeof this.state.isSubscribed === "undefined" ? this.props.initialIsSubscribed : this.state.isSubscribed
-            }
-          />
-          <label htmlFor="subscribe">
-            <FormattedMessage id="entry.notify_me" />
-          </label>
-        </div>
+        {hasPush && (
+          <div className={entryStyles.subscribe}>
+            <input
+              id="subscribe"
+              type="checkbox"
+              onChange={this.onSubscribeChanged}
+              checked={
+                typeof this.state.isSubscribed === "undefined"
+                  ? this.props.initialIsSubscribed
+                  : this.state.isSubscribed
+              }
+            />
+            <label htmlFor="subscribe">
+              <FormattedMessage id="entry.notify_me" />
+            </label>
+          </div>
+        )}
 
         <div className={entryStyles.buttonContainer}>
           <button

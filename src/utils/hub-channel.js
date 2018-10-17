@@ -91,6 +91,14 @@ export default class HubChannel {
     this.channel.push("events:profile_updated", { profile: this.store.state.profile });
   };
 
+  subscribe = subscription => {
+    this.channel.push("subscribe", { subscription });
+  };
+
+  unsubscribe = endpoint => {
+    this.channel.push("unsubscribe", { endpoint });
+  };
+
   sendMessage = body => {
     if (body === "") return;
     this.channel.push("message", { body });

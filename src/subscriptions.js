@@ -55,12 +55,12 @@ export default class Subscriptions {
 
     if (this.isSubscribed()) {
       const endpoint = subscriptions[this.hubId].endpoint;
-      console.log("De-register push subscription with reticulum for endpoint " + endpoint);
+      this.hubChannel.unsubscribe(endpoint);
 
       delete subscriptions[this.hubId];
 
       if (Object.keys(subscriptions).length === 0) {
-        console.log("Remove push subscription from browser");
+        this.registration.pushManager.unregister(endpoint);
       }
     } else {
       let subscription = await this.registration.pushManager.getSubscription();
@@ -75,7 +75,7 @@ export default class Subscriptions {
       }
 
       subscriptions[this.hubId] = { endpoint: subscription.endpoint };
-      console.log("Register push subscription with reticulum");
+      this.hubChannel.subscribe(subscription);
     }
 
     delete this._isSubscribed;
