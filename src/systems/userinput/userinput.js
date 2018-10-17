@@ -26,7 +26,9 @@ import { updateActionSetsBasedOnSuperhands } from "./resolve-action-sets";
 
 function prioritizeBindings(registeredMappings, activeSets, prioritizedBindings, activeBindings) {
   registeredMappings.forEach(mapping => {
-    activeSets.forEach(setName => {
+    Object.keys(mapping).forEach(setName => {
+      if (!activeSets.has(setName)) return;
+
       const set = mapping[setName] || [];
       set.forEach(binding => {
         const { root, priority } = binding;
@@ -165,7 +167,7 @@ AFRAME.registerSystem("userinput", {
     const activeBindings = new Set();
     prioritizeBindings(this.registeredMappings, this.activeSets, priorityMap, activeBindings);
     activeBindings.forEach(binding => {
-      const bindingExistedLastFrame = this.activeBindings && this.activeBindings.has(binding);
+      const bindingExistedLastFrame = activeBindings && activeBindings.has(binding);
       if (!bindingExistedLastFrame) {
         this.xformStates.delete(binding);
       }
