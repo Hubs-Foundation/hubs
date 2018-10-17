@@ -83,7 +83,7 @@ export const oculusTouchUserBindings = {
         west: leftDpadWest,
         center: leftDpadCenter
       },
-      xform: xforms.vec2dpad(0.2)
+      xform: xforms.vec2dpad(0.2, false, true)
     },
     {
       src: {
@@ -106,7 +106,7 @@ export const oculusTouchUserBindings = {
         west: rightDpadWest,
         center: rightDpadCenter
       },
-      xform: xforms.vec2dpad(0.2)
+      xform: xforms.vec2dpad(0.2, false, true)
     },
     {
       src: {

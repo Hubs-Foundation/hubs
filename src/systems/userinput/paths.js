@@ -115,6 +115,19 @@ paths.device.oculusgo = {
   pose: `${oculusgo}pose`
 };
 
+const daydream = "/device/daydream/";
+paths.device.daydream = {
+  button: buttonName => ({
+    pressed: `${daydream}button/${buttonName}/pressed`,
+    touched: `${daydream}button/${buttonName}/touched`,
+    value: `${daydream}button/${buttonName}/value`
+  }),
+  axis: axisName => {
+    return `${daydream}axis/${axisName}`;
+  },
+  pose: `${daydream}pose`
+};
+
 const rightOculusTouch = "/device/rightOculusTouch/";
 paths.device.rightOculusTouch = {
   button: buttonName => ({

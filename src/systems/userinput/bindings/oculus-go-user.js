@@ -107,8 +107,6 @@ export const oculusGoUserBindings = {
 
   [sets.cursorHoveringOnInteractable]: [grabBinding],
   [sets.cursorHoveringOnUI]: [grabBinding],
-  [sets.cursorHoveringOnCamera]: [grabBinding],
-  [sets.cursorHoveringOnPen]: [grabBinding],
 
   [sets.cursorHoldingInteractable]: [
     {

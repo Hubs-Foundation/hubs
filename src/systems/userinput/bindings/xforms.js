@@ -41,7 +41,7 @@ export const xforms = {
     frame[dest.value] = true;
   },
   rising: function rising(frame, src, dest, prevState) {
-    if (!!frame[dest.value]) return true;
+    if (frame[dest.value]) return true;
     frame[dest.value] = frame[src.value] && prevState === false;
     return !!frame[src.value];
   },
@@ -70,13 +70,13 @@ export const xforms = {
       frame[dest.value] = pose.fromCameraProjection(camera, frame[src.value][0], frame[src.value][1]);
     };
   },
-  vec2dpad: function(deadzoneRadius) {
+  vec2dpad: function(deadzoneRadius, invertX = false, invertY = false) {
     const deadzoneRadiusSquared = deadzoneRadius * deadzoneRadius;
     return function vec2dpad(frame, src, dest) {
       if (!frame[src.value]) return;
       const [x, y] = frame[src.value];
       const inCenter = x * x + y * y < deadzoneRadiusSquared;
-      const direction = inCenter ? "center" : angleTo4Direction(Math.atan2(x, -y));
+      const direction = inCenter ? "center" : angleTo4Direction(Math.atan2(invertX ? -x : x, invertY ? -y : y));
       frame[dest[direction]] = true;
     };
   },
@@ -103,7 +103,7 @@ export const xforms = {
   },
   any: function(frame, src, dest) {
     for (const path in src) {
-      if (!!frame[src[path]]) {
+      if (frame[src[path]]) {
         frame[dest.value] = true;
         return;
       }

@@ -8,6 +8,7 @@ import { HudDevice } from "./devices/hud";
 import { XboxControllerDevice } from "./devices/xbox-controller";
 import { OculusGoControllerDevice } from "./devices/oculus-go-controller";
 import { OculusTouchControllerDevice } from "./devices/oculus-touch-controller";
+import { DaydreamControllerDevice } from "./devices/daydream-controller";
 
 // App-aware devices need references to entities in the scene.
 import { AppAwareMouseDevice } from "./devices/app-aware-mouse";
@@ -21,8 +22,11 @@ import { keyboardDebuggingBindings } from "./bindings/keyboard-debugging";
 import { oculusGoUserBindings } from "./bindings/oculus-go-user";
 import { oculusTouchUserBindings } from "./bindings/oculus-touch-user";
 import { xboxControllerUserBindings } from "./bindings/xbox-controller-user";
+import { daydreamUserBindings } from "./bindings/daydream-user";
 
 import { updateActionSetsBasedOnSuperhands } from "./resolve-action-sets";
+import { GamepadDevice } from "./devices/gamepad";
+import { gamepadBindings } from "./bindings/generic-gamepad";
 
 function prioritizeBindings(registeredMappings, activeSets, prioritizedBindings, activeBindings) {
   registeredMappings.forEach(mapping => {
@@ -114,27 +118,25 @@ AFRAME.registerSystem("userinput", {
       "gamepadconnected",
       e => {
         console.log(e.gamepad);
-        if (e.gamepad.id === "Oculus Touch (Left)") {
-          const gamepadDevice = new OculusTouchControllerDevice(e.gamepad, "left");
-          this.activeDevices.add(gamepadDevice);
-          this.gamepads[e.gamepad.index] = gamepadDevice;
+        let gamepadDevice;
+        if (e.gamepad.id.startsWith("Oculus Touch")) {
+          gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
           this.registeredMappings.add(oculusTouchUserBindings);
-        } else if (e.gamepad.id === "Oculus Touch (Right)") {
-          const gamepadDevice = new OculusTouchControllerDevice(e.gamepad, "right");
-          this.activeDevices.add(gamepadDevice);
-          this.gamepads[e.gamepad.index] = gamepadDevice;
-          this.registeredMappings.add(oculusTouchUserBindings);
+        } else if (e.gamepad.id === "Oculus Go Controller") {
+          gamepadDevice = new OculusGoControllerDevice(e.gamepad);
+          this.registeredMappings.add(oculusGoUserBindings);
+        } else if (e.gamepad.id === "Daydream Controller") {
+          gamepadDevice = new DaydreamControllerDevice(e.gamepad);
+          this.registeredMappings.add(daydreamUserBindings);
         } else if (e.gamepad.id.includes("Xbox")) {
-          const gamepadDevice = new XboxControllerDevice(e.gamepad);
-          this.activeDevices.add(gamepadDevice);
-          this.gamepads[e.gamepad.index] = gamepadDevice;
+          gamepadDevice = new XboxControllerDevice(e.gamepad);
           this.registeredMappings.add(xboxControllerUserBindings);
         } else {
-          const gamepadDevice = new OculusGoControllerDevice(e.gamepad);
-          this.activeDevices.add(gamepadDevice);
-          this.gamepads[e.gamepad.index] = gamepadDevice;
-          this.registeredMappings.add(oculusGoUserBindings);
+          gamepadDevice = new GamepadDevice(e.gamepad);
+          this.registeredMappings.add(gamepadBindings);
         }
+        this.activeDevices.add(gamepadDevice);
+        this.gamepads[e.gamepad.index] = gamepadDevice;
       },
       false
     );

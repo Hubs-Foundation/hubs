@@ -17,7 +17,7 @@ export const rightOculusTouchButtonMap = [
 ];
 
 export class OculusTouchControllerDevice {
-  constructor(gamepad, hand) {
+  constructor(gamepad) {
     this.rayObjectRotation = new THREE.Quaternion();
 
     // wake the gamepad api up. otherwise it does not report touch controllers.
@@ -36,10 +36,10 @@ export class OculusTouchControllerDevice {
 
     this.gamepad = gamepad;
     this.pose = new Pose();
-    this.buttonMap = buttonMaps[hand];
+    this.buttonMap = buttonMaps[gamepad.hand];
     this.axisMap = [{ name: "joyX", axisId: 0 }, { name: "joyY", axisId: 1 }];
-    this.path = devicePaths[hand];
-    this.selector = `[super-hands]#player-${hand}-controller`;
+    this.path = devicePaths[gamepad.hand];
+    this.selector = `#player-${gamepad.hand}-controller`;
   }
   write(frame) {
     if (!this.gamepad.connected) return;
