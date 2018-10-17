@@ -199,6 +199,7 @@ class SpokeLanding extends Component {
                   <source src={spokeVideoMp4} type="video/mp4" />
                   <source src={spokeVideoWebm} type="video/webm" />
                 </video>
+                <div className={styles.attribution}>Low Poly Campfire by Minzkraut</div>
               </div>
             </div>
           </div>

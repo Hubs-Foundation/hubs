@@ -229,3 +229,10 @@ body {
     height: 180px;
   }
 }
+
+:local(.attribution) {
+  position: absolute;
+  bottom: -40px;
+  right: 84px;
+  color: $darker-grey;
+}
