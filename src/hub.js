@@ -51,7 +51,6 @@ import "./components/networked-avatar";
 import "./components/avatar-replay";
 import "./components/media-views";
 import "./components/pinch-to-move";
-import "./components/look-on-mobile";
 import "./components/pitch-yaw-rotator";
 import "./components/auto-scale-cannon-physics-body";
 import "./components/position-at-box-shape-border";
@@ -60,7 +59,7 @@ import "./components/destroy-at-extreme-distances";
 import "./components/gamma-factor";
 import "./components/visible-to-owner";
 import "./components/camera-tool";
-import "./components/emit-something";
+import "./components/action-to-event";
 
 import ReactDOM from "react-dom";
 import React from "react";

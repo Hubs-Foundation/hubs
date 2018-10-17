@@ -1,5 +1,3 @@
-import { sets } from "../systems/userinput/sets";
-
 AFRAME.registerComponent("action-to-event", {
   multiple: true,
 
