@@ -306,12 +306,13 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const subscriptions = new Subscriptions();
+  // Connect to reticulum over phoenix channels to get hub info.
+  const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
+  console.log(`Hub ID: ${hubId}`);
+
+  const subscriptions = new Subscriptions(hubId);
   navigator.serviceWorker.register("/hub.service.js");
-  navigator.serviceWorker.ready.then(registration => {
-    subscriptions.setRegistration(registration);
-    remountUI({ subscriptions });
-  });
+  navigator.serviceWorker.ready.then(registration => subscriptions.setRegistration(registration));
 
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
@@ -323,7 +324,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.APP.scene = scene;
 
   registerNetworkSchemas();
-  remountUI({ hubChannel, linkChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
+  remountUI({
+    hubChannel,
+    linkChannel,
+    subscriptions,
+    enterScene: entryManager.enterScene,
+    exitScene: entryManager.exitScene,
+    initialIsSubscribed: subscriptions.isSubscribed()
+  });
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 
@@ -371,10 +379,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Connect to reticulum over phoenix channels to get hub info.
-  const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
-  console.log(`Hub ID: ${hubId}`);
-
   const socket = connectToReticulum(isDebug);
   remountUI({ sessionId: socket.params().session_id });
 
@@ -391,8 +395,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     .join()
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
-      subscriptions.setHubInfo(hubId, hubChannel);
-      remountUI({ subscriptions });
+      subscriptions.setHubChannel(hubChannel);
       await handleHubChannelJoined(entryManager, hubChannel, data);
     })
     .receive("error", res => {
@@ -501,10 +504,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
   retPhxChannel
     .join()
-    .receive("ok", async data => {
-      subscriptions.setVapidPublicKey(data.vapid_public_key);
-      remountUI({ subscriptions });
-    })
+    .receive("ok", async data => subscriptions.setVapidPublicKey(data.vapid_public_key))
     .receive("error", res => console.error(res));
 
   linkChannel.setSocket(socket);

@@ -18,8 +18,11 @@ function urlBase64ToUint8Array(base64String) {
 const LOCAL_STORE_KEY = "___hubs_subscriptions";
 
 export default class Subscriptions {
-  setHubInfo = (hubId, hubChannel) => {
+  constructor(hubId) {
     this.hubId = hubId;
+  }
+
+  setHubChannel = hubChannel => {
     this.hubChannel = hubChannel;
   };
 
@@ -40,8 +43,11 @@ export default class Subscriptions {
   };
 
   isSubscribed = () => {
-    console.log("WAT");
-    return this.getSubscriptionsFromStorage()[this.hubId];
+    if (typeof this._isSubscribed === "undefined") {
+      this._isSubscribed = !!this.getSubscriptionsFromStorage()[this.hubId];
+    }
+
+    return this._isSubscribed;
   };
 
   toggle = async () => {
@@ -72,6 +78,7 @@ export default class Subscriptions {
       console.log("Register push subscription with reticulum");
     }
 
+    delete this._isSubscribed;
     this.setSubscriptionsToStorage(subscriptions);
   };
 }

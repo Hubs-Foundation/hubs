@@ -90,7 +90,8 @@ class UIRoot extends Component {
     presenceLogEntries: PropTypes.array,
     presences: PropTypes.object,
     sessionId: PropTypes.string,
-    subscriptions: PropTypes.object
+    subscriptions: PropTypes.object,
+    initialIsSubscribed: PropTypes.bool
   };
 
   state = {
@@ -131,8 +132,7 @@ class UIRoot extends Component {
     exited: false,
 
     showProfileEntry: false,
-    pendingMessage: "",
-    isSubscribed: false
+    pendingMessage: ""
   };
 
   componentDidMount() {
@@ -142,7 +142,6 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
     this.props.scene.addEventListener("exit", this.exit);
-    this.updateSubscribedState();
   }
 
   componentWillUnmount() {
@@ -183,7 +182,7 @@ class UIRoot extends Component {
     this.props.scene.emit("spawn_pen");
   };
 
-  onSubscribeClicked = async () => {
+  onSubscribeChanged = async () => {
     if (!this.props.subscriptions) return;
 
     await this.props.subscriptions.toggle();
@@ -713,7 +712,14 @@ class UIRoot extends Component {
         </div>
 
         <div>
-          <input id="subscribe" type="checkbox" onClick={this.onSubscribeClicked} checked={this.state.isSubscribed} />
+          <input
+            id="subscribe"
+            type="checkbox"
+            onChange={this.onSubscribeChanged}
+            checked={
+              typeof this.state.isSubscribed === "undefined" ? this.props.initialIsSubscribed : this.state.isSubscribed
+            }
+          />
           <label htmlFor="subscribe">
             <FormattedMessage id="entry.notify_me" />
           </label>
