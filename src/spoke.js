@@ -7,6 +7,7 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import styles from "./assets/stylesheets/spoke.scss";
 import spokeLogo from "./assets/images/spoke_logo.png";
 import spokeVideoMp4 from "./assets/video/spoke.mp4";
+import spokeVideoWebm from "./assets/video/spoke.webm";
 import YouTube from "react-youtube";
 
 //const qs = new URLSearchParams(location.search);
@@ -196,6 +197,7 @@ class SpokeLanding extends Component {
               <div className={styles.heroVideo}>
                 <video playsInline muted loop autoPlay className={styles.previewVideo} id="preview-video">
                   <source src={spokeVideoMp4} type="video/mp4" />
+                  <source src={spokeVideoWebm} type="video/webm" />
                 </video>
               </div>
             </div>
