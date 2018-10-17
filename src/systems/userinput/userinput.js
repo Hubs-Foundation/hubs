@@ -110,6 +110,8 @@ AFRAME.registerSystem("userinput", {
           passive: true
         }
       );
+    } else {
+      this.registeredMappings.add(keyboardMouseUserBindings);
     }
 
     window.addEventListener(
