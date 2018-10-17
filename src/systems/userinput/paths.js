@@ -153,3 +153,27 @@ paths.device.leftOculusTouch = {
   },
   pose: `${leftOculusTouch}pose`
 };
+
+paths.device.vive = {};
+paths.device.vive.left = {
+  button: buttonName => ({
+    pressed: `/device/vive/left/button/${buttonName}/pressed`,
+    touched: `/device/vive/left/button/${buttonName}/touched`,
+    value: `/device/vive/left/button/${buttonName}/value`
+  }),
+  axis: axisName => {
+    return `/device/vive/left/axis/${axisName}`;
+  },
+  pose: `/device/vive/left/pose`
+};
+paths.device.vive.right = {
+  button: buttonName => ({
+    pressed: `/device/vive/right/button/${buttonName}/pressed`,
+    touched: `/device/vive/right/button/${buttonName}/touched`,
+    value: `/device/vive/right/button/${buttonName}/value`
+  }),
+  axis: axisName => {
+    return `/device/vive/right/axis/${axisName}`;
+  },
+  pose: `/device/vive/right/pose`
+};

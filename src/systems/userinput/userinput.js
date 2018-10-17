@@ -1,7 +1,6 @@
 import { paths } from "./paths";
 import { sets } from "./sets";
 
-// User input is supplied by devices.
 import { MouseDevice } from "./devices/mouse";
 import { KeyboardDevice } from "./devices/keyboard";
 import { HudDevice } from "./devices/hud";
@@ -9,18 +8,17 @@ import { XboxControllerDevice } from "./devices/xbox-controller";
 import { OculusGoControllerDevice } from "./devices/oculus-go-controller";
 import { OculusTouchControllerDevice } from "./devices/oculus-touch-controller";
 import { DaydreamControllerDevice } from "./devices/daydream-controller";
+import { ViveControllerDevice } from "./devices/vive-controller";
 
-// App-aware devices need references to entities in the scene.
 import { AppAwareMouseDevice } from "./devices/app-aware-mouse";
 import { AppAwareTouchscreenDevice } from "./devices/app-aware-touchscreen";
 
-// Bindings determine how user input is transformed to fill the values stored in the frame at action paths.
-// Intermediate values are also stored in the frame when transformations are called..
 import { keyboardMouseUserBindings } from "./bindings/keyboard-mouse-user";
 import { touchscreenUserBindings } from "./bindings/touchscreen-user";
 import { keyboardDebuggingBindings } from "./bindings/keyboard-debugging";
 import { oculusGoUserBindings } from "./bindings/oculus-go-user";
 import { oculusTouchUserBindings } from "./bindings/oculus-touch-user";
+import { viveUserBindings } from "./bindings/vive-user";
 import { xboxControllerUserBindings } from "./bindings/xbox-controller-user";
 import { daydreamUserBindings } from "./bindings/daydream-user";
 
@@ -119,7 +117,13 @@ AFRAME.registerSystem("userinput", {
       e => {
         console.log(e.gamepad);
         let gamepadDevice;
-        if (e.gamepad.id.startsWith("Oculus Touch")) {
+          if (e.gamepad.id === "OpenVR Gamepad") {
+              const gamepadDevice = new ViveControllerDevice(e.gamepad);
+              this.activeDevices.add(gamepadDevice);
+              this.gamepads[e.gamepad.index] = gamepadDevice;
+              this.registeredMappings.add(viveUserBindings);
+          }
+        else if (e.gamepad.id.startsWith("Oculus Touch")) {
           gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
           this.registeredMappings.add(oculusTouchUserBindings);
         } else if (e.gamepad.id === "Oculus Go Controller") {
