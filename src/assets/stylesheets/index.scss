@@ -61,7 +61,7 @@ body {
   height: 65px;
   display: flex;
 
-  @media (max-width: 768px) {
+  @media (max-width: 768px), (max-height: 715px) {
     display: none;
   }
 
@@ -112,12 +112,6 @@ body {
       }
     }
   }
-
-  :local(.ident) {
-    text-align: right;
-    flex: 1 1 $header-section-width;
-    width: $header-section-width;
-  }
 }
 
 :local(.hero-content) {
@@ -131,6 +125,10 @@ body {
   @media (max-width: 768px) {
     padding: 0px;
     min-height: 490px;
+  }
+
+  @media (max-height: 715px) {
+    justify-content: flex-start;
   }
 
   :local(.attribution) {
@@ -165,6 +163,10 @@ body {
       text-align: center;
       font-size: 1.5em;
       font-weight: bold;
+
+      @media (max-height: 715px) {
+        display: none;
+      }
     }
   }
 

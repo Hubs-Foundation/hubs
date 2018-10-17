@@ -5,6 +5,7 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import styles from "../assets/stylesheets/scene-ui.scss";
 import hubLogo from "../assets/images/hub-preview-white.png";
+import spokeLogo from "../assets/images/spoke_logo_black.png";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { generateHubName } from "../utils/name-generation";
 
@@ -94,6 +95,12 @@ class SceneUI extends Component {
           <div className={styles.info}>
             <div className={styles.name}>{this.props.sceneName}</div>
             <div className={styles.attribution}>{this.props.sceneAttribution}</div>
+          </div>
+          <div className={styles.spoke}>
+            <div className={styles.madeWith}>made with</div>
+            <a href="/spoke">
+              <img src={spokeLogo} />
+            </a>
           </div>
         </div>
       </IntlProvider>

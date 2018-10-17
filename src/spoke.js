@@ -6,6 +6,9 @@ import { playVideoWithStopOnBlur } from "./utils/video-utils.js";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import styles from "./assets/stylesheets/spoke.scss";
 import spokeLogo from "./assets/images/spoke_logo.png";
+import spokeVideoMp4 from "./assets/video/spoke.mp4";
+import spokeVideoWebm from "./assets/video/spoke.webm";
+import YouTube from "react-youtube";
 
 //const qs = new URLSearchParams(location.search);
 
@@ -25,7 +28,7 @@ function getPlatform() {
     return "macos";
   } else if (["Win32", "Win64", "Windows"].indexOf(platform) >= 0) {
     return "win";
-  } else if (/Linux/.test(platform)) {
+  } else if (/Linux/.test(platform) && !/\WAndroid\W/.test(navigator.userAgent)) {
     return "linux";
   }
 
@@ -35,11 +38,14 @@ function getPlatform() {
 class SpokeLanding extends Component {
   static propTypes = {};
 
-  state = { downloadLinkForCurrentPlatform: {} };
-
   constructor(props) {
     super(props);
-    this.state = { platform: getPlatform(), downloadClicked: false };
+    this.state = {
+      platform: getPlatform(),
+      downloadClicked: false,
+      downloadLinkForCurrentPlatform: {},
+      showPlayer: false
+    };
   }
 
   componentDidMount() {
@@ -117,7 +123,7 @@ class SpokeLanding extends Component {
 
   render() {
     const platform = this.state.platform;
-    const releasesLink = "https://github.com/MozillaReality/Spoke/releases";
+    const releasesLink = "https://github.com/MozillaReality/Spoke/releases/latest";
     const downloadLink = platform === "unsupported" ? releasesLink : this.state.downloadLinkForCurrentPlatform;
 
     return (
@@ -125,13 +131,13 @@ class SpokeLanding extends Component {
         <div className={styles.ui}>
           <div className={styles.header}>
             <div className={styles.headerLinks}>
-              <a href="/about" rel="noopener noreferrer">
-                About
-              </a>
               <a href="https://github.com/mozillareality/spoke" rel="noopener noreferrer">
-                Source
+                <FormattedMessage id="home.source_link" />
               </a>
-              <a href="https://github.com/mozilla/hubs" rel="noopener noreferrer">
+              <a href="https://discord.gg/XzrGUY8" rel="noreferrer noopener">
+                <FormattedMessage id="home.community_link" />
+              </a>
+              <a href="/" rel="noreferrer noopener">
                 Hubs
               </a>
             </div>
@@ -147,19 +153,23 @@ class SpokeLanding extends Component {
                 </div>
                 <div className={styles.secondaryTagline}>
                   <FormattedMessage id="spoke.secondary_tagline" />
-                  <a href="/">Hubs</a>
+                  <a style={{ fontWeight: "bold" }} href="/">
+                    Hubs
+                  </a>
                 </div>
                 <div className={styles.actionButtons}>
                   {!this.state.downloadClicked ? (
                     <a
                       href={downloadLink}
-                      onClick={() => this.setState({ downloadClicked: true })}
+                      onClick={() => this.setState({ downloadClicked: platform !== "unsupported" })}
                       className={styles.downloadButton}
                     >
                       <div>
                         <FormattedMessage id={"spoke.download_" + this.state.platform} />
                       </div>
-                      <div className={styles.version}>{this.state.spokeVersion} Beta</div>
+                      {platform !== "unsupported" && (
+                        <div className={styles.version}>{this.state.spokeVersion} Beta</div>
+                      )}
                     </a>
                   ) : (
                     <div className={styles.thankYou}>
@@ -179,26 +189,43 @@ class SpokeLanding extends Component {
                         <FormattedMessage id="spoke.browse_all_versions" />
                       </a>
                     )}
-                  <button className={styles.playButton} onClick={() => this.setState({ playVideo: true })}>
+                  <button className={styles.playButton} onClick={() => this.setState({ showPlayer: true })}>
                     <FormattedMessage id="spoke.play_button" />
                   </button>
                 </div>
               </div>
               <div className={styles.heroVideo}>
                 <video playsInline muted loop autoPlay className={styles.previewVideo} id="preview-video">
-                  <source
-                    src="https://assets-prod.reticulum.io/assets/video/home-aee18c619a9005bd4b0d31295670af80.webm"
-                    type="video/webm"
-                  />
-                  <source
-                    src="https://assets-prod.reticulum.io/assets/video/home-5af051d2c531928dbaaf51b9badaabde.mp4"
-                    type="video/mp4"
-                  />
+                  <source src={spokeVideoMp4} type="video/mp4" />
+                  <source src={spokeVideoWebm} type="video/webm" />
                 </video>
               </div>
             </div>
           </div>
           <div className={styles.bg} />
+          {this.state.showPlayer && (
+            <div className={styles.playerOverlay}>
+              <div className={styles.playerContent}>
+                <YouTube
+                  className={styles.playerVideo}
+                  opts={{ rel: 0 }}
+                  videoId="WmQKZJPhV7s"
+                  onReady={e => e.target.playVideo()}
+                />
+                {platform !== "unsupported" && (
+                  <a href={downloadLink} className={styles.downloadButton}>
+                    <div>
+                      <FormattedMessage id={"spoke.download_" + this.state.platform} />
+                    </div>
+                    <div className={styles.version}>{this.state.spokeVersion} Beta</div>
+                  </a>
+                )}
+                <a onClick={() => this.setState({ showPlayer: false })} className={styles.closeVideo}>
+                  <FormattedMessage id="spoke.close" />
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </IntlProvider>
     );
