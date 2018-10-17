@@ -166,8 +166,6 @@ AFRAME.registerComponent("super-spawner", {
     );
     entity.object3D.scale.copy(this.data.useCustomSpawnScale ? this.data.spawnScale : this.el.object3D.scale);
 
-    this.activateCooldown();
-
     await waitForEvent("body-loaded", entity);
 
     // If we are still holding the spawner with the hand that grabbed to create this entity, release the spawner and grab the entity
@@ -180,6 +178,8 @@ AFRAME.registerComponent("super-spawner", {
         hand.emit(this.data.grabEvents[i], { targetEntity: entity });
       }
     }
+
+    this.activateCooldown();
   },
 
   onGrabEnd(e) {
