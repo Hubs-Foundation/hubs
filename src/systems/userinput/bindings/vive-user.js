@@ -2,18 +2,14 @@ import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
 
-const v = name => {
-  return `/vive-user/vive-var/${name}`;
-};
-const k = name => {
-    return `/vive-user/keyboard-var/${name}`;
-};
-
 const lButton = paths.device.vive.left.button;
 const lAxis = paths.device.vive.left.axis;
 const rButton = paths.device.vive.left.button;
 const rAxis = paths.device.vive.left.axis;
 
+const v = name => {
+  return `/vive-user/vive-var/${name}`;
+};
 const rJoy = v("right/joy");
 const lJoyXScaled = v("left/joyX/scaled");
 const lJoyYScaled = v("left/joyY/scaled");
@@ -24,7 +20,11 @@ const rDpadWest = v("/right/dpad/west");
 const rDpadCenter = v("/right/dpad/center");
 const rSnapRight = v("right/snap-right");
 const rSnapLeft = v("left/snap-left");
+const rTouchpadRising = v("right/touchpad-rising");
 
+const k = name => {
+  return `/vive-user/keyboard-var/${name}`;
+};
 const keyboardSnapRight = k("snap-right");
 const keyboardSnapLeft = k("snap-left");
 
@@ -55,12 +55,22 @@ export const viveUserBindings = {
     },
     {
       src: {
+        value: rButton("touchpad").pressed
+      },
+      dest: {
+        rTouchpadRising
+      },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: rTouchpadRising,
         value: rDpadEast
       },
       dest: {
         value: rSnapRight
       },
-      xform: xforms.rising,
+      xform: xforms.copyIfTrue,
       root: rDpadEast,
       priority: 100
     },
@@ -76,14 +86,34 @@ export const viveUserBindings = {
     },
     {
       src: {
+        value: rButton("touchpad").pressed
+      },
+      dest: {
+        rTouchpadRising
+      },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: rTouchpadRising,
         value: rDpadWest
       },
       dest: {
         value: rSnapLeft
       },
-      xform: xforms.rising,
+      xform: xforms.copyIfTrue,
       root: rDpadWest,
       priority: 100
+    },
+    {
+      src: { value: paths.device.keyboard.key("q") },
+      dest: { value: keyboardSnapLeft },
+      xform: xforms.rising
+    },
+    {
+      src: [rSnapLeft, keyboardSnapLeft],
+      dest: { value: paths.actions.snapRotateLeft },
+      xform: xforms.any
     }
   ]
 };

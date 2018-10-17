@@ -11,10 +11,9 @@ export class ViveControllerDevice {
 
     this.buttonMap = [
       { name: "touchpad", buttonId: 0 },
-      { name: "top", buttonId: 1 },
-      { name: "bottom", buttonId: 2 },
-      { name: "trigger", buttonId: 3 },
-      { name: "grip", buttonId: 4 }
+      { name: "trigger", buttonId: 1 },
+      { name: "grip", buttonId: 2 },
+      { name: "top", buttonId: 3 }
     ];
 
     this.gamepad = gamepad;

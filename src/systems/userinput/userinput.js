@@ -119,13 +119,10 @@ AFRAME.registerSystem("userinput", {
       e => {
         console.log(e.gamepad);
         let gamepadDevice;
-          if (e.gamepad.id === "OpenVR Gamepad") {
-              const gamepadDevice = new ViveControllerDevice(e.gamepad);
-              this.activeDevices.add(gamepadDevice);
-              this.gamepads[e.gamepad.index] = gamepadDevice;
-              this.registeredMappings.add(viveUserBindings);
-          }
-        else if (e.gamepad.id.startsWith("Oculus Touch")) {
+        if (e.gamepad.id === "OpenVR Gamepad") {
+          gamepadDevice = new ViveControllerDevice(e.gamepad);
+          this.registeredMappings.add(viveUserBindings);
+        } else if (e.gamepad.id.startsWith("Oculus Touch")) {
           gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
           this.registeredMappings.add(oculusTouchUserBindings);
         } else if (e.gamepad.id === "Oculus Go Controller") {
