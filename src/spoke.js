@@ -6,6 +6,7 @@ import { playVideoWithStopOnBlur } from "./utils/video-utils.js";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import styles from "./assets/stylesheets/spoke.scss";
 import spokeLogo from "./assets/images/spoke_logo.png";
+import spokeVideoMp4 from "./assets/video/spoke.mp4";
 import YouTube from "react-youtube";
 
 //const qs = new URLSearchParams(location.search);
@@ -194,14 +195,7 @@ class SpokeLanding extends Component {
               </div>
               <div className={styles.heroVideo}>
                 <video playsInline muted loop autoPlay className={styles.previewVideo} id="preview-video">
-                  <source
-                    src="https://assets-prod.reticulum.io/assets/video/home-aee18c619a9005bd4b0d31295670af80.webm"
-                    type="video/webm"
-                  />
-                  <source
-                    src="https://assets-prod.reticulum.io/assets/video/home-5af051d2c531928dbaaf51b9badaabde.mp4"
-                    type="video/mp4"
-                  />
+                  <source src={spokeVideoMp4} type="video/mp4" />
                 </video>
               </div>
             </div>
@@ -213,7 +207,7 @@ class SpokeLanding extends Component {
                 <YouTube
                   className={styles.playerVideo}
                   opts={{ rel: 0 }}
-                  videoId="cw-XvgdyGNo"
+                  videoId="WmQKZJPhV7s"
                   onReady={e => e.target.playVideo()}
                 />
                 {platform !== "unsupported" && (
