@@ -184,9 +184,6 @@ class HomeRoot extends Component {
                   <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
                     <FormattedMessage id="home.source_link" />
                   </a>
-                  <a href="/spoke" rel="noreferrer noopener">
-                    <FormattedMessage id="home.spoke_link" />
-                  </a>
                   <a href="https://discord.gg/XzrGUY8" rel="noreferrer noopener">
                     <FormattedMessage id="home.community_link" />
                   </a>
