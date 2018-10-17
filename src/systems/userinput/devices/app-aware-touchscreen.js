@@ -207,7 +207,8 @@ export class AppAwareTouchscreenDevice {
     if (this.pinch) {
       this.pinch.delta = 0;
     }
-    let cameraMover = jobIsAssigned(MOVE_CAMERA_JOB, this.assignments) && findByJob(MOVE_CAMERA_JOB, this.assignments);
+    const cameraMover =
+      jobIsAssigned(MOVE_CAMERA_JOB, this.assignments) && findByJob(MOVE_CAMERA_JOB, this.assignments);
     if (cameraMover) {
       cameraMover.delta[0] = 0;
       cameraMover.delta[1] = 0;

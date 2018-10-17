@@ -1,5 +1,4 @@
 import { sets } from "./sets";
-import { paths } from "./paths";
 
 export function updateActionSetsBasedOnSuperhands() {
   const rightHandState = document.querySelector("#player-right-controller").components["super-hands"].state;

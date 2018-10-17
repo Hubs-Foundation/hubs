@@ -1,10 +1,5 @@
 import { paths } from "../systems/userinput/paths";
 
-const scaleGrabbedGrabbablePaths = {
-  left: paths.actions.leftHand.scaleGrabbedGrabbable,
-  right: paths.actions.rightHand.scaleGrabbedGrabbable,
-  cursor: paths.actions.cursor.scaleGrabbedGrabbable
-};
 /**
  * Manages ownership and haptics on an interatable
  * @namespace network

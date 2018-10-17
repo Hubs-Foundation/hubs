@@ -3,17 +3,15 @@ import { sets } from "../sets";
 import { xforms } from "./xforms";
 
 export const keyboardDebuggingBindings = {
-    [sets.global]: [
-        {
-            src: {
-                value: paths.device.keyboard.key("l")
-            },
-            dest: {
-                value: paths.actions.logDebugFrame
-            },
-            xform: xforms.rising
-        }
-    ]
+  [sets.global]: [
+    {
+      src: {
+        value: paths.device.keyboard.key("l")
+      },
+      dest: {
+        value: paths.actions.logDebugFrame
+      },
+      xform: xforms.rising
+    }
+  ]
 };
-
-
