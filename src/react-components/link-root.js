@@ -20,7 +20,8 @@ class LinkRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
     store: PropTypes.object,
-    linkChannel: PropTypes.object
+    linkChannel: PropTypes.object,
+    showHeadsetLinkOption: PropTypes.bool
   };
 
   state = {
@@ -178,16 +179,18 @@ class LinkRoot extends Component {
               </div>
 
               <div className={styles.enteredFooter}>
-                {!this.state.isAlphaMode && (
-                  <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
-                )}
-                {!this.state.isAlphaMode && (
-                  <span>
-                    <a href="#" onClick={() => this.toggleMode()}>
-                      <FormattedMessage id="link.linking_a_headset" />
-                    </a>
-                  </span>
-                )}
+                {!this.state.isAlphaMode &&
+                  this.props.showHeadsetLinkOption && (
+                    <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
+                  )}
+                {!this.state.isAlphaMode &&
+                  this.props.showHeadsetLinkOption && (
+                    <span>
+                      <a href="#" onClick={() => this.toggleMode()}>
+                        <FormattedMessage id="link.linking_a_headset" />
+                      </a>
+                    </span>
+                  )}
               </div>
             </div>
 
@@ -208,15 +211,19 @@ class LinkRoot extends Component {
                   {d}
                 </button>
               ))}
-              <button
-                className={classNames(styles.keypadButton, styles.keypadToggleMode)}
-                onTouchStart={() => this.toggleMode()}
-                onClick={() => {
-                  if (!hasTouchEvents) this.toggleMode();
-                }}
-              >
-                {this.state.isAlphaMode ? "123" : "ABC"}
-              </button>
+              {this.props.showHeadsetLinkOption ? (
+                <button
+                  className={classNames(styles.keypadButton, styles.keypadToggleMode)}
+                  onTouchStart={() => this.toggleMode()}
+                  onClick={() => {
+                    if (!hasTouchEvents) this.toggleMode();
+                  }}
+                >
+                  {this.state.isAlphaMode ? "123" : "ABC"}
+                </button>
+              ) : (
+                <div />
+              )}
               {!this.state.isAlphaMode && (
                 <button
                   disabled={this.state.entered.length === this.maxAllowedChars()}
@@ -242,17 +249,20 @@ class LinkRoot extends Component {
             </div>
 
             <div className={styles.footer}>
-              <div
-                className={styles.linkHeadsetFooterLink}
-                style={{ visibility: this.state.isAlphaMode ? "hidden" : "visible" }}
-              >
-                <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
-                <span>
-                  <a href="#" onClick={() => this.toggleMode()}>
-                    <FormattedMessage id="link.linking_a_headset" />
-                  </a>
-                </span>
-              </div>
+              {!this.state.isAlphaMode &&
+                this.props.showHeadsetLinkOption && (
+                  <div
+                    className={styles.linkHeadsetFooterLink}
+                    style={{ visibility: this.state.isAlphaMode ? "hidden" : "visible" }}
+                  >
+                    <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
+                    <span>
+                      <a href="#" onClick={() => this.toggleMode()}>
+                        <FormattedMessage id="link.linking_a_headset" />
+                      </a>
+                    </span>
+                  </div>
+                )}
             </div>
           </div>
         </div>

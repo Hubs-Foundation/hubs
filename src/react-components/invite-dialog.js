@@ -15,6 +15,7 @@ function pad(num, size) {
 export default class InviteDialog extends Component {
   static propTypes = {
     entryCode: PropTypes.number,
+    hubId: PropTypes.string,
     allowShare: PropTypes.bool,
     onClose: PropTypes.func
   };
@@ -28,7 +29,7 @@ export default class InviteDialog extends Component {
     this.setState({ shareButtonActive: true });
     setTimeout(() => this.setState({ shareButtonActive: false }), 5000);
 
-    navigator.share({ title: document.title, url: link });
+    navigator.share({ title: "Join me now in #hubs!", url: link });
   };
 
   copyClicked = link => {
@@ -42,7 +43,13 @@ export default class InviteDialog extends Component {
     const { entryCode } = this.props;
 
     const entryCodeString = pad(entryCode, 6);
-    const shareLink = `hub.link/${entryCodeString}`;
+    const shortLinkText = `hub.link/${this.props.hubId}`;
+    const shortLink = "https://" + shortLinkText;
+
+    const tweetText = `Join me now in #hubs!`;
+    const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(shortLink)}&text=${encodeURIComponent(
+      tweetText
+    )}`;
 
     return (
       <div className={styles.dialog}>
@@ -68,17 +75,23 @@ export default class InviteDialog extends Component {
           <FormattedMessage id="invite.or_visit" />
         </div>
         <div className={styles.domain}>
-          <input type="text" readOnly onFocus={e => e.target.select()} value={shareLink} />
+          <input type="text" readOnly onFocus={e => e.target.select()} value={shortLinkText} />
         </div>
         <div className={styles.buttons}>
-          <button className={styles.linkButton} onClick={this.copyClicked.bind(this, "https://" + shareLink)}>
+          <button className={styles.linkButton} onClick={this.copyClicked.bind(this, shortLink)}>
             <span>{this.state.copyButtonActive ? "copied!" : "copy"}</span>
           </button>
           {this.props.allowShare &&
             navigator.share && (
-              <button className={styles.linkButton} onClick={this.shareClicked.bind(this, "https://" + shareLink)}>
+              <button className={styles.linkButton} onClick={this.shareClicked.bind(this, shortLink)}>
                 <span>{this.state.shareButtonActive ? "sharing..." : "share"}</span>
               </button>
+            )}
+          {this.props.allowShare &&
+            !navigator.share && (
+              <a href={tweetLink} className={styles.linkButton} target="_blank" rel="noopener noreferrer">
+                <FormattedMessage id="invite.tweet" />
+              </a>
             )}
         </div>
       </div>

@@ -52,6 +52,22 @@
   margin-bottom: 32px;
 }
 
+:local(.tweetButton) {
+  @extend %action-button;
+  margin-top: 12px;
+  background-color: #1b95e0;
+  align-self: center;
+  padding-right: 32px;
+  display: flex;
+  flex-direction: row;
+
+  img {
+    width: 42px;
+    height: 42px;
+    margin-right: 6px;
+  }
+}
+
 :local(.logo) {
   width: 100%;
   display: block;

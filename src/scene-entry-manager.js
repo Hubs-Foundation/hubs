@@ -24,12 +24,17 @@ export default class SceneEntryManager {
     this.scene = document.querySelector("a-scene");
     this.cursorController = document.querySelector("#cursor-controller");
     this.playerRig = document.querySelector("#player-rig");
+    this._entered = false;
   }
 
   init = () => {
     this.whenSceneLoaded(() => {
       this.cursorController.components["cursor-controller"].disable();
     });
+  };
+
+  hasEntered = () => {
+    return this._entered;
   };
 
   enterScene = async (mediaStream, enterInVR) => {
@@ -82,6 +87,7 @@ export default class SceneEntryManager {
     const cursor = this.cursorController.components["cursor-controller"];
     cursor.enable();
     cursor.setCursorVisibility(true);
+    this._entered = true;
 
     // Delay sending entry event telemetry until VR display is presenting.
     (async () => {
@@ -215,7 +221,7 @@ export default class SceneEntryManager {
     });
 
     document.addEventListener("paste", e => {
-      if (e.target.nodeName === "INPUT") return;
+      if (e.target.nodeName === "INPUT" && document.activeElement === e.target) return;
 
       const url = e.clipboardData.getData("text");
       const files = e.clipboardData.files && e.clipboardData.files;

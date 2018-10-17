@@ -50,6 +50,7 @@
   width: 100%;
   max-width: 600px;
   z-index: 2;
+  position: relative;
 
   :local(.backgrounded) {
     filter: blur(1px);
@@ -164,6 +165,8 @@
   border-radius: 24px;
   font-weight: bold;
   padding: 8px 18px;
+  pointer-events: auto;
+  cursor: pointer;
 
   @media (min-width: 769px) and (min-height: 421px) {
     flex: 1;
@@ -175,5 +178,92 @@
   }
   :local(.occupant-count) {
     margin: 0 12px;
+  }
+}
+
+:local(.presence-info-selected) {
+  color: $action-color;
+}
+
+:local(.message-entry) {
+  position: relative;
+  margin: 8px 24px 24px 24px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border: 1px solid #e2e2e2;
+  border-radius: 16px;
+}
+
+:local(.message-entry-input) {
+  @extend %default-font;
+  pointer-events: auto;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
+  background-color: transparent;
+  color: black;
+  padding: 8px 1.25em;
+  line-height: 2em;
+  font-size: 1.1em;
+  width: 100%;
+  border: 0px;
+  height: 32px;
+  margin-right: 100px;
+}
+
+:local(.message-entry-input)::placeholder{
+  color: $dark-grey;
+  font-weight: 300;
+  font-style: italic;
+}
+
+:local(.message-entry-submit) {
+  @extend %action-button;
+  position: absolute;
+  right: 12px;
+  height: 32px;
+  min-width: 80px;
+}
+
+:local(.message-entry-in-room) {
+  @media(max-width: 900px) {
+    display:none;
+  }
+
+  position: absolute;
+  left: 16px;
+  bottom: 20px;
+  width: 33%;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: $darker-grey;
+  border-radius: 16px;
+  pointer-events: auto;
+  opacity: 0.3;
+  transition: opacity 0.25s linear;
+
+  :local(.message-entry-input-in-room) {
+    color: white;
+    padding: 8px 1.25em;
+  }
+
+  :local(.message-entry-submit-in-room) {
+    border: 0;
+    visibility: hidden;
+  }
+}
+
+:local(.message-entry-in-room):hover {
+  opacity: 1.0;
+  transition: opacity 0.25s linear;
+
+  :local(.message-entry-submit-in-room) {
+    visibility: visible;
   }
 }
