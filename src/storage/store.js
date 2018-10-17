@@ -38,13 +38,6 @@ export const SCHEMA = {
       properties: {
         lastUsedMicDeviceId: { type: "string" }
       }
-    },
-
-    // Map of sid -> { endpoint: "<endpoint>" }
-    // If entry exists, it means there is a subscription to that room, wired to that endpoint.
-    subscriptions: {
-      type: "object",
-      additionalProperties: true
     }
   },
 

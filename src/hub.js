@@ -153,7 +153,6 @@ AFRAME.registerInputActivator("reverseY", ReverseY);
 AFRAME.registerInputMappings(inputConfig, true);
 
 const concurrentLoadDetector = new ConcurrentLoadDetector();
-
 concurrentLoadDetector.start();
 
 store.init();
@@ -307,6 +306,13 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const subscriptions = new Subscriptions();
+  navigator.serviceWorker.register("/hub.service.js");
+  navigator.serviceWorker.ready.then(registration => {
+    subscriptions.setRegistration(registration);
+    remountUI({ subscriptions });
+  });
+
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
   const entryManager = new SceneEntryManager(hubChannel);
@@ -385,6 +391,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     .join()
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
+      subscriptions.setHubInfo(hubId, hubChannel);
+      remountUI({ subscriptions });
       await handleHubChannelJoined(entryManager, hubChannel, data);
     })
     .receive("error", res => {
@@ -494,15 +502,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   retPhxChannel
     .join()
     .receive("ok", async data => {
-      const vapidPublicKey = data.vapid_public_key;
-      console.log("Load service");
-      navigator.serviceWorker.register("/hub.service.js");
-      console.log("222");
-      navigator.serviceWorker.ready.then(serviceWorkerRegistration => {
-        console.log("333");
-        const subscriptions = new Subscriptions(hubId, hubChannel, vapidPublicKey, store, serviceWorkerRegistration);
-        remountUI({ subscriptions });
-      });
+      subscriptions.setVapidPublicKey(data.vapid_public_key);
+      remountUI({ subscriptions });
     })
     .receive("error", res => console.error(res));
 

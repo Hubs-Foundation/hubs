@@ -13,29 +13,43 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
+// In local storage: Map of sid -> { endpoint: "<endpoint>" }
+// If entry exists, it means there is a subscription to that room, wired to that endpoint.
+const LOCAL_STORE_KEY = "___hubs_subscriptions";
+
 export default class Subscriptions {
-  constructor(hubId, hubChannel, vapidPublicKey, store, registration) {
-    this.store = store;
+  setHubInfo = (hubId, hubChannel) => {
     this.hubId = hubId;
     this.hubChannel = hubChannel;
+  };
+
+  setRegistration = registration => {
     this.registration = registration;
-    this.vapidPublicKey = vapidPublicKey;
-  }
+  };
 
   setVapidPublicKey = vapidPublicKey => {
     this.vapidPublicKey = vapidPublicKey;
   };
 
+  getSubscriptionsFromStorage = () => {
+    return JSON.parse(localStorage.getItem(LOCAL_STORE_KEY) || "{}");
+  };
+
+  setSubscriptionsToStorage = subscriptions => {
+    return localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(subscriptions));
+  };
+
   isSubscribed = () => {
-    return !!this.store.subscriptions[this.hubId];
+    console.log("WAT");
+    return this.getSubscriptionsFromStorage()[this.hubId];
   };
 
   toggle = async () => {
-    console.log("toggle");
-    const subscriptions = this.store.subscriptions;
+    const subscriptions = this.getSubscriptionsFromStorage();
 
     if (this.isSubscribed()) {
-      console.log("Send channel unsubscribe");
+      const endpoint = subscriptions[this.hubId].endpoint;
+      console.log("De-register push subscription with reticulum for endpoint " + endpoint);
 
       delete subscriptions[this.hubId];
 
@@ -43,9 +57,7 @@ export default class Subscriptions {
         console.log("Remove push subscription from browser");
       }
     } else {
-      console.log("Get current");
       let subscription = await this.registration.pushManager.getSubscription();
-      console.log(subscription);
 
       if (!subscription) {
         const convertedVapidKey = urlBase64ToUint8Array(this.vapidPublicKey);
@@ -56,11 +68,10 @@ export default class Subscriptions {
         });
       }
 
-      console.log(JSON.stringify(subscription));
-      const endpoint = subscription.endpoint;
-      subscriptions[this.hubId] = { endpoint };
+      subscriptions[this.hubId] = JSON.parse(JSON.stringify(subscription));
+      console.log("Register push subscription with reticulum");
     }
 
-    this.store.update({ subscriptions });
+    this.setSubscriptionsToStorage(subscriptions);
   };
 }
