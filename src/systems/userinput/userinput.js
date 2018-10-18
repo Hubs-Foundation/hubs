@@ -179,7 +179,7 @@ AFRAME.registerSystem("userinput", {
     const activeBindings = new Set();
     prioritizeBindings(this.registeredMappings, this.activeSets, priorityMap, activeBindings);
     activeBindings.forEach(binding => {
-      const bindingExistedLastFrame = activeBindings && activeBindings.has(binding);
+      const bindingExistedLastFrame = this.activeBindings && this.activeBindings.has(binding);
       if (!bindingExistedLastFrame) {
         this.xformStates.delete(binding);
       }
