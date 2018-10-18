@@ -95,8 +95,8 @@ export default class HubChannel {
     this.channel.push("subscribe", { subscription });
   };
 
-  unsubscribe = endpoint => {
-    this.channel.push("unsubscribe", { endpoint });
+  unsubscribe = subscription => {
+    this.channel.push("unsubscribe", { subscription });
   };
 
   sendMessage = body => {

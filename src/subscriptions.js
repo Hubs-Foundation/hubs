@@ -54,13 +54,13 @@ export default class Subscriptions {
     const subscriptions = this.getSubscriptionsFromStorage();
 
     if (this.isSubscribed()) {
-      const endpoint = subscriptions[this.hubId].endpoint;
-      this.hubChannel.unsubscribe(endpoint);
+      const subscription = await this.registration.pushManager.getSubscription();
+      this.hubChannel.unsubscribe(subscription);
 
       delete subscriptions[this.hubId];
 
       if (Object.keys(subscriptions).length === 0) {
-        this.registration.pushManager.unregister(endpoint);
+        subscription.unsubscribe();
       }
     } else {
       let subscription = await this.registration.pushManager.getSubscription();
