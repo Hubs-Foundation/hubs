@@ -103,15 +103,15 @@ AFRAME.registerSystem("userinput", {
       const inVRMode = this.el.sceneEl.is("vr-mode");
       if (AFRAME.utils.device.isMobile()) {
         if (inVRMode) {
-          this.activeDevices.remove(appAwareTouchscreenDevice);
-          this.registeredMappings.remove(touchscreenUserBindings);
+          this.activeDevices.delete(appAwareTouchscreenDevice);
+          this.registeredMappings.delete(touchscreenUserBindings);
         } else {
           this.activeDevices.add(appAwareTouchscreenDevice);
           this.registeredMappings.add(touchscreenUserBindings);
         }
       } else {
         if (inVRMode) {
-          this.registeredMappings.remove(keyboardMouseUserBindings);
+          this.registeredMappings.delete(keyboardMouseUserBindings);
         } else {
           this.registeredMappings.add(keyboardMouseUserBindings);
         }
