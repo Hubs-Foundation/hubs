@@ -71,7 +71,9 @@
     "home.join_room": "Join Room",
     "home.report_issue": "Report Issues",
     "home.source_link": "Source",
+    "home.spoke_link": "Spoke",
     "home.about_link": "About",
+    "home.community_link": "Community",
     "home.privacy_notice": "Privacy Notice",
     "home.terms_of_use": "Terms of Use",
     "home.get_updates": "Get Updates",
@@ -106,6 +108,7 @@
     "spoke.download_linux": "Download for Linux",
     "spoke.download_unsupported": "View Releases",
     "spoke.browse_all_versions": "Browse All Versions",
+    "spoke.close": "Close",
     "spoke.play_button": "Learn Spoke in 5 Minutes"
   }
 }
