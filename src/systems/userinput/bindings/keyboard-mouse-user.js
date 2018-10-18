@@ -181,6 +181,25 @@ export const keyboardMouseUserBindings = {
     }
   ],
 
+  [sets.cursorHoldingCamera]: [
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: paths.actions.cursor.takeSnapshot },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      xform: xforms.noop,
+      priority: 200,
+      root: "lmb"
+    },
+    {
+      src: { value: paths.device.mouse.buttonRight },
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.falling
+    }
+  ],
+
   [sets.cursorHoldingInteractable]: [
     {
       src: {
