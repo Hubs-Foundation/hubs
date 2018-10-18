@@ -98,21 +98,28 @@ AFRAME.registerSystem("userinput", {
 
     this.gamepads = [];
 
-    if (AFRAME.utils.device.isMobile()) {
-      window.addEventListener(
-        "touchdown",
-        () => {
-          this.activeDevices.add(new AppAwareTouchscreenDevice());
+    const appAwareTouchscreenDevice = new AppAwareTouchscreenDevice();
+    const updateBindingsForVRMode = () => {
+      const inVRMode = this.el.sceneEl.is("vr-mode");
+      if (AFRAME.utils.device.isMobile()) {
+        if (inVRMode) {
+          this.activeDevices.remove(appAwareTouchscreenDevice);
+          this.registeredMappings.remove(touchscreenUserBindings);
+        } else {
+          this.activeDevices.add(appAwareTouchscreenDevice);
           this.registeredMappings.add(touchscreenUserBindings);
-        },
-        {
-          once: true,
-          passive: true
         }
-      );
-    } else {
-      this.registeredMappings.add(keyboardMouseUserBindings);
-    }
+      } else {
+        if (inVRMode) {
+          this.registeredMappings.remove(keyboardMouseUserBindings);
+        } else {
+          this.registeredMappings.add(keyboardMouseUserBindings);
+        }
+      }
+    };
+    this.el.sceneEl.addEventListener("enter-vr", updateBindingsForVRMode);
+    this.el.sceneEl.addEventListener("exit-vr", updateBindingsForVRMode);
+    updateBindingsForVRMode();
 
     window.addEventListener(
       "gamepadconnected",
