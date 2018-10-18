@@ -10,13 +10,22 @@ self.addEventListener("push", function(e) {
   const payload = JSON.parse(e.data.text());
 
   return e.waitUntil(
-    self.registration.showNotification("Hubs by Mozilla", {
-      body: "Someone has joined " + payload.hub_name,
-      image: payload.image,
-      icon: "/favicon.ico",
-      badge: "/favicon.ico",
-      tag: payload.hub_id,
-      data: { hub_url: payload.hub_url }
+    self.clients.matchAll({ type: "window" }).then(function(clientList) {
+      for (let i = 0; i < clientList.length; i++) {
+        const client = clientList[i];
+        console.log(client.url);
+        console.log(e.notification.data);
+        if (client.url.indexOf(e.notification.data.hub_id) >= 0) return;
+      }
+
+      return self.registration.showNotification("Hubs by Mozilla", {
+        body: "Someone has joined " + payload.hub_name,
+        image: payload.image,
+        icon: "/favicon.ico",
+        badge: "/favicon.ico",
+        tag: payload.hub_id,
+        data: { hub_url: payload.hub_url }
+      });
     })
   );
 });

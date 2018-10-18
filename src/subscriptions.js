@@ -59,7 +59,7 @@ export default class Subscriptions {
 
       delete subscriptions[this.hubId];
 
-      if (Object.keys(subscriptions).length === 0) {
+      if (Object.keys(subscriptions).length === 0 && subscription) {
         subscription.unsubscribe();
       }
     } else {
