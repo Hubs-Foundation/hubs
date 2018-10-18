@@ -311,8 +311,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   console.log(`Hub ID: ${hubId}`);
 
   const subscriptions = new Subscriptions(hubId);
-  navigator.serviceWorker.register("/hub.service.js");
-  navigator.serviceWorker.ready.then(registration => subscriptions.setRegistration(registration));
+
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.register("/hub.service.js");
+    navigator.serviceWorker.ready.then(registration => subscriptions.setRegistration(registration));
+  }
 
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);

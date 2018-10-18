@@ -687,7 +687,7 @@ class UIRoot extends Component {
   };
 
   renderEntryStartPanel = () => {
-    const hasPush = "PushManager" in window;
+    const hasPush = navigator.serviceWorker && "PushManager" in window;
 
     return (
       <div className={entryStyles.entryPanel}>
