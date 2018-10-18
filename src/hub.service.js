@@ -13,8 +13,6 @@ self.addEventListener("push", function(e) {
     self.clients.matchAll({ type: "window" }).then(function(clientList) {
       for (let i = 0; i < clientList.length; i++) {
         const client = clientList[i];
-        console.log(client.url);
-        console.log(e.notification.data);
         if (client.url.indexOf(e.notification.data.hub_id) >= 0) return;
       }
 
