@@ -127,7 +127,14 @@ AFRAME.registerSystem("userinput", {
         console.log(e.gamepad);
         let gamepadDevice;
         if (e.gamepad.id === "OpenVR Gamepad") {
-          gamepadDevice = new ViveControllerDevice(e.gamepad);
+          for (var i = 0; i < this.activeDevices.length; i++) {
+            const activeDevice = this.activeDevices[i];
+            if (activeDevice.gamepad && activeDevice.gamepad === e.gamepad) {
+              console.warn("ignoring gamepad");
+              return; // multiple connect events without a disconnect event
+            }
+          }
+          if (this.activeDevices) gamepadDevice = new ViveControllerDevice(e.gamepad);
           this.registeredMappings.add(viveUserBindings);
         } else if (e.gamepad.id.startsWith("Oculus Touch")) {
           gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
@@ -193,7 +200,7 @@ AFRAME.registerSystem("userinput", {
 
     this.frame = frame;
     this.activeBindings = activeBindings;
-    if (frame[paths.actions.logDebugFrame]) {
+    if (frame[paths.actions.logDebugFrame] || frame[paths.actions.log]) {
       console.log("frame", this.frame);
       console.log("sets", this.activeSets);
       console.log("bindings", this.activeBindings);

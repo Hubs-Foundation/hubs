@@ -21,6 +21,10 @@ const rightHandDrop2 = `${name}right/rightHandDrop2`;
 const rightHandDrop1 = `${name}right/rightHandDrop1`;
 const rightGripRising = `${name}right/GripRising`;
 const rightTriggerRising = `${name}right/TriggerRising`;
+const rightGripRisingGrab = `${name}right/grip/RisingGrab`;
+const rightTriggerRisingGrab = `${name}right/trigger/RisingGrab`;
+const leftGripRisingGrab = `${name}left/grip/RisingGrab`;
+const leftTriggerRisingGrab = `${name}left/trigger/RisingGrab`;
 const leftGripFalling = `${name}left/GripFalling`;
 const leftGripRising = `${name}left/GripRising`;
 const leftTriggerRising = `${name}left/TriggerRising`;
@@ -65,7 +69,7 @@ export const oculusTouchUserBindings = {
     {
       src: {
         x: leftAxis("joyX"),
-        y: leftAxis("joyV")
+        y: leftAxis("joyY")
       },
       dest: {
         value: leftJoy
@@ -286,17 +290,22 @@ export const oculusTouchUserBindings = {
   [sets.leftHandHoveringOnInteractable]: [
     {
       src: { value: leftButton("grip").pressed },
-      dest: { value: paths.actions.leftHand.grab },
+      dest: { value: leftGripRisingGrab },
       xform: xforms.rising,
       root: leftGripRising,
       priority: 200
     },
     {
       src: { value: leftButton("trigger").pressed },
-      dest: { value: paths.actions.leftHand.grab },
+      dest: { value: leftTriggerRisingGrab },
       xform: xforms.rising,
       root: leftTriggerRising,
       priority: 200
+    },
+    {
+      src: [leftGripRisingGrab, leftTriggerRisingGrab],
+      dest: { value: paths.actions.cursor.grab },
+      xform: xforms.any
     }
   ],
 
@@ -310,15 +319,7 @@ export const oculusTouchUserBindings = {
     }
   ],
 
-  [sets.leftHandHoveringOnPen]: [
-    {
-      src: { value: leftButton("trigger").pressed },
-      dest: { value: paths.actions.leftHand.grab },
-      xform: xforms.rising,
-      root: leftTriggerRising,
-      priority: 200
-    }
-  ],
+  [sets.leftHandHoveringOnPen]: [],
   [sets.leftHandHoldingPen]: [
     {
       src: { value: leftButton("trigger").pressed },
@@ -380,17 +381,22 @@ export const oculusTouchUserBindings = {
   [sets.cursorHoveringOnInteractable]: [
     {
       src: { value: rightButton("grip").pressed },
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: rightGripRisingGrab },
       xform: xforms.rising,
       root: rightGripRising,
       priority: 200
     },
     {
       src: { value: rightButton("trigger").pressed },
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: rightTriggerRisingGrab },
       xform: xforms.rising,
       root: rightTriggerRising,
       priority: 200
+    },
+    {
+      src: [rightGripRisingGrab, rightTriggerRisingGrab],
+      dest: { value: paths.actions.cursor.grab },
+      xform: xforms.any
     }
   ],
 
@@ -443,17 +449,22 @@ export const oculusTouchUserBindings = {
   [sets.rightHandHoveringOnInteractable]: [
     {
       src: { value: rightButton("grip").pressed },
-      dest: { value: paths.actions.rightHand.grab },
+      dest: { value: rightGripRisingGrab },
       xform: xforms.rising,
       root: rightGripRising,
       priority: 200
     },
     {
       src: { value: rightButton("trigger").pressed },
-      dest: { value: paths.actions.rightHand.grab },
+      dest: { value: rightTriggerRisingGrab },
       xform: xforms.rising,
       root: rightTriggerRising,
       priority: 200
+    },
+    {
+      src: [rightGripRisingGrab, rightTriggerRisingGrab],
+      dest: { value: paths.actions.cursor.grab },
+      xform: xforms.any
     }
   ],
 
@@ -480,15 +491,7 @@ export const oculusTouchUserBindings = {
       xform: xforms.any
     }
   ],
-  [sets.rightHandHoveringOnPen]: [
-    {
-      src: { value: rightButton("trigger").pressed },
-      dest: { value: paths.actions.rightHand.grab },
-      xform: xforms.rising,
-      root: rightTriggerRising,
-      priority: 300
-    }
-  ],
+  [sets.rightHandHoveringOnPen]: [],
   [sets.rightHandHoldingPen]: [
     {
       src: { value: rightButton("trigger").pressed },
@@ -549,33 +552,9 @@ export const oculusTouchUserBindings = {
     }
   ],
 
-  [sets.cursorHoveringOnCamera]: [
-    {
-      src: { value: rightButton("trigger").pressed },
-      dest: { value: paths.actions.cursor.grab },
-      xform: xforms.rising,
-      root: rightTriggerRising,
-      priority: 300
-    }
-  ],
-  [sets.rightHandHoveringOnCamera]: [
-    {
-      src: { value: rightButton("trigger").pressed },
-      dest: { value: paths.actions.rightHand.grab },
-      xform: xforms.rising,
-      root: rightTriggerRising,
-      priority: 300
-    }
-  ],
-  [sets.leftHandHoveringOnCamera]: [
-    {
-      src: { value: leftButton("trigger").pressed },
-      dest: { value: paths.actions.leftHand.grab },
-      xform: xforms.rising,
-      root: leftTriggerRising,
-      priority: 300
-    }
-  ],
+  [sets.cursorHoveringOnCamera]: [],
+  [sets.rightHandHoveringOnCamera]: [],
+  [sets.leftHandHoveringOnCamera]: [],
 
   [sets.rightHandHoldingCamera]: [
     {

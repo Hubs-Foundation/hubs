@@ -19,8 +19,12 @@ export class ViveControllerDevice {
     this.gamepad = gamepad;
     this.pose = new Pose();
     this.axisMap = [{ name: "joyX", axisId: 0 }, { name: "joyY", axisId: 1 }];
-    this.path = paths.device.vive[gamepad.hand];
-    this.selector = `[super-hands]#player-${gamepad.hand}-controller`;
+    this.path = paths.device.vive[gamepad.hand || "right"];
+    if (!gamepad.hand) {
+      console.warn("gamepad detected without hand specified");
+    } else {
+      this.selector = `[super-hands]#player-${gamepad.hand}-controller`;
+    }
   }
   write(frame) {
     if (!this.gamepad.connected) return;
@@ -45,7 +49,23 @@ export class ViveControllerDevice {
       frame[this.path.axis(axis.name)] = frame[paths.device.gamepad(this.gamepad.index).axis(axis.axisId)];
     });
 
-    const rayObject = document.querySelector(this.selector).object3D;
+    if (!this.selector) {
+      if (this.gamepad.hand) {
+        this.path = paths.device.vive[this.gamepad.hand];
+        this.selector = `[super-hands]#player-${this.gamepad.hand}-controller`;
+        console.warn("gamepad hand eventually specified");
+      } else {
+        return;
+      }
+    }
+    const el = document.querySelector(this.selector);
+    if (el === "null") {
+    }
+    if (el.components["tracked-controls"].controller !== this.gamepad) {
+      el.components["tracked-controls"].controller = this.gamepad;
+      el.setAttribute("tracked-controls", "controller", this.gamepad.index);
+    }
+    const rayObject = el.object3D;
     rayObject.updateMatrixWorld();
     this.rayObjectRotation.setFromRotationMatrix(rayObject.matrixWorld);
     this.pose.position.setFromMatrixPosition(rayObject.matrixWorld);

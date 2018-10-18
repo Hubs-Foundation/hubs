@@ -41,7 +41,6 @@ export const xforms = {
     frame[dest.value] = true;
   },
   rising: function rising(frame, src, dest, prevState) {
-    if (frame[dest.value]) return true;
     frame[dest.value] = frame[src.value] && prevState === false;
     return !!frame[src.value];
   },
