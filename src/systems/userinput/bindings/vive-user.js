@@ -2,8 +2,6 @@ import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
 
-const lButton = paths.device.vive.left.button;
-const lAxis = paths.device.vive.left.axis;
 const rButton = paths.device.vive.left.button;
 const rAxis = paths.device.vive.left.axis;
 
@@ -11,8 +9,6 @@ const v = name => {
   return `/vive-user/vive-var/${name}`;
 };
 const rJoy = v("right/joy");
-const lJoyXScaled = v("left/joyX/scaled");
-const lJoyYScaled = v("left/joyY/scaled");
 const rDpadNorth = v("/right/dpad/north");
 const rDpadSouth = v("/right/dpad/south");
 const rDpadEast = v("/right/dpad/east");
