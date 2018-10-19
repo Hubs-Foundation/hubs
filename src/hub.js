@@ -307,6 +307,8 @@ async function runBotMode(scene, entryManager) {
 
 document.addEventListener("DOMContentLoaded", async () => {
   const scene = document.querySelector("a-scene");
+  scene.removeAttribute("keyboard-shortcuts"); // Remove F and ESC hotkeys from aframe
+
   const hubChannel = new HubChannel(store);
   const entryManager = new SceneEntryManager(hubChannel);
   entryManager.init();
