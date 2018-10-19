@@ -59,8 +59,6 @@ export class ViveControllerDevice {
       }
     }
     const el = document.querySelector(this.selector);
-    if (el === "null") {
-    }
     if (el.components["tracked-controls"].controller !== this.gamepad) {
       el.components["tracked-controls"].controller = this.gamepad;
       el.setAttribute("tracked-controls", "controller", this.gamepad.index);

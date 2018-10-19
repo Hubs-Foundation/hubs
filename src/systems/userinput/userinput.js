@@ -127,7 +127,7 @@ AFRAME.registerSystem("userinput", {
         console.log(e.gamepad);
         let gamepadDevice;
         if (e.gamepad.id === "OpenVR Gamepad") {
-          for (var i = 0; i < this.activeDevices.length; i++) {
+          for (let i = 0; i < this.activeDevices.length; i++) {
             const activeDevice = this.activeDevices[i];
             if (activeDevice.gamepad && activeDevice.gamepad === e.gamepad) {
               console.warn("ignoring gamepad");
