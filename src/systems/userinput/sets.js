@@ -16,6 +16,7 @@ sets.rightHandHoveringOnNothing = "rightHandHoveringOnNothing";
 sets.rightHandHoldingPen = "rightHandHoldingPen";
 sets.rightHandHoldingCamera = "rightHandHoldingCamera";
 sets.rightHandHoldingInteractable = "rightHandHoldingInteractable";
+sets.leftHandTeleporting = "leftHandTeleporting";
 sets.leftHandHoveringOnPen = "leftHandHoveringOnPen";
 sets.leftHandHoveringOnCamera = "leftHandHoveringOnCamera";
 sets.leftHandHoveringOnInteractable = "leftHandHoveringOnInteractable";

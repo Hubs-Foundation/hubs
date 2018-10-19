@@ -34,6 +34,7 @@ export function updateActionSetsBasedOnSuperhands() {
     leftHandState.get("grab-start").matches(".icamera, .icamera *");
   const leftHandHovering = !leftTeleporter.active && leftHandState.has("hover-start");
   const leftHandHoveringOnNothing = !leftHandHovering && !leftHandState.has("grab-start");
+  const leftHandTeleporting = leftTeleporter.active;
 
   const cursorGrabbing = cursorHand.has("grab-start");
 
@@ -135,6 +136,7 @@ export function updateActionSetsBasedOnSuperhands() {
   userinput.toggleActive(sets.leftHandHoldingPen, leftHandHoldingPen);
   userinput.toggleActive(sets.leftHandHoldingInteractable, leftHandHoldingInteractable);
   userinput.toggleActive(sets.leftHandHoldingCamera, leftHandHoldingCamera);
+  userinput.toggleActive(sets.leftHandTeleporting, leftHandTeleporting);
 
   userinput.toggleActive(sets.rightHandHoveringOnInteractable, rightHandHoveringOnInteractable);
   userinput.toggleActive(sets.rightHandHoveringOnPen, rightHandHoveringOnPen);

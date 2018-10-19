@@ -21,6 +21,9 @@ const lDpadEast = v("left/dpad/east");
 const lDpadWest = v("left/dpad/west");
 const lDpadCenter = v("left/dpad/center");
 const lTriggerFalling = v("left/trigger/falling");
+const lTriggerFallingStopDrawing = v("left/trigger/falling/stopDrawing");
+const lGripFallingStopDrawing = v("left/grip/falling/stopDrawing");
+
 const lTriggerRising = v("left/trigger/rising");
 const lTriggerRisingGrab = v("right/trigger/rising/grab");
 const lGripRisingGrab = v("right/grab/rising/grab");
@@ -78,6 +81,51 @@ const keyboardSnapLeft = k("snap-left");
 const keyboardCharacterAcceleration = k("characterAcceleration");
 const keyboardBoost = k("boost");
 
+const teleportLeft = [
+  {
+    src: { value: lButton("trigger").pressed },
+    dest: { value: lTriggerStartTeleport },
+    xform: xforms.rising,
+    root: lTriggerRising,
+    priority: 100
+  },
+  {
+    src: {
+      bool: lTouchpadRising,
+      value: lDpadCenter
+    },
+    dest: { value: lDpadCenterStartTeleport },
+    xform: xforms.copyIfTrue
+  },
+  {
+    src: [lTriggerStartTeleport, lDpadCenterStartTeleport],
+    dest: { value: paths.actions.leftHand.startTeleport },
+    xform: xforms.any
+  }
+];
+const teleportRight = [
+  {
+    src: { value: rButton("trigger").pressed },
+    dest: { value: rTriggerStartTeleport },
+    xform: xforms.rising,
+    root: rTriggerRising,
+    priority: 100
+  },
+  {
+    src: {
+      bool: rTouchpadRising,
+      value: rDpadCenter
+    },
+    dest: { value: rDpadCenterStartTeleport },
+    xform: xforms.copyIfTrue
+  },
+  {
+    src: [rTriggerStartTeleport, rDpadCenterStartTeleport],
+    dest: { value: paths.actions.rightHand.startTeleport },
+    xform: xforms.any
+  }
+];
+
 export const viveUserBindings = {
   [sets.global]: [
     {
@@ -110,7 +158,16 @@ export const viveUserBindings = {
         west: lDpadWest,
         center: lDpadCenter
       },
-      xform: xforms.vec2dpad(0.2, false, true)
+      xform: xforms.vec2dpad(0.35)
+    },
+    {
+      src: {
+        value: lButton("touchpad").pressed
+      },
+      dest: {
+        value: lTouchpadRising
+      },
+      xform: xforms.rising
     },
     {
       src: {
@@ -133,7 +190,7 @@ export const viveUserBindings = {
         west: rDpadWest,
         center: rDpadCenter
       },
-      xform: xforms.vec2dpad(0.2)
+      xform: xforms.vec2dpad(0.35)
     },
     {
       src: {
@@ -283,13 +340,6 @@ export const viveUserBindings = {
       src: { value: lPose },
       dest: { value: paths.actions.leftHand.pose },
       xform: xforms.copy
-    },
-    {
-      src: { value: lButton("trigger").pressed },
-      dest: { value: paths.actions.leftHand.stopTeleport },
-      xform: xforms.falling,
-      root: lTriggerFalling,
-      priority: 100
     }
   ],
   [sets.rightHandTeleporting]: [
@@ -311,28 +361,8 @@ export const viveUserBindings = {
       xform: xforms.any
     }
   ],
-  [sets.leftHandHoveringOnNothing]: [
-    {
-      src: { value: lButton("trigger").pressed },
-      dest: { value: lTriggerStartTeleport },
-      xform: xforms.rising,
-      root: lTriggerRising,
-      priority: 100
-    },
-    {
-      src: {
-        bool: lTouchpadRising,
-        value: lDpadCenter
-      },
-      dest: { value: lDpadCenterStartTeleport },
-      xform: xforms.copyIfTrue
-    },
-    {
-      src: [lTriggerStartTeleport, lDpadCenterStartTeleport],
-      dest: { value: paths.actions.leftHand.startTeleport },
-      xform: xforms.any
-    }
-  ],
+  [sets.leftHandHoveringOnNothing]: [...teleportLeft],
+
   [sets.leftHandTeleporting]: [
     {
       src: { value: lButton("trigger").pressed },
@@ -353,28 +383,7 @@ export const viveUserBindings = {
     }
   ],
 
-  [sets.rightHandHoveringOnNothing]: [
-    {
-      src: { value: rButton("trigger").pressed },
-      dest: { value: rTriggerStartTeleport },
-      xform: xforms.rising,
-      root: rTriggerRising,
-      priority: 100
-    },
-    {
-      src: {
-        bool: rTouchpadRising,
-        value: rDpadCenter
-      },
-      dest: { value: rDpadCenterStartTeleport },
-      xform: xforms.copyIfTrue
-    },
-    {
-      src: [rTriggerStartTeleport, rDpadCenterStartTeleport],
-      dest: { value: paths.actions.rightHand.startTeleport },
-      xform: xforms.any
-    }
-  ],
+  [sets.rightHandHoveringOnNothing]: [...teleportRight],
 
   [sets.cursorHoveringOnNothing]: [],
 
@@ -423,46 +432,55 @@ export const viveUserBindings = {
   [sets.leftHandHoveringOnPen]: [],
   [sets.leftHandHoldingPen]: [
     {
+      src: {
+        bool: lTouchpadRising,
+        value: lDpadCenter
+      },
+      dest: { value: paths.actions.leftHand.startTeleport },
+      xform: xforms.copyIfTrue
+    },
+    {
       src: { value: lButton("trigger").pressed },
       dest: { value: paths.actions.leftHand.startDrawing },
       xform: xforms.rising
     },
     {
       src: { value: lButton("trigger").pressed },
-      dest: { value: paths.actions.leftHand.stopDrawing },
+      dest: { value: lTriggerFallingStopDrawing },
       xform: xforms.falling
     },
     {
-      src: {
-        value: lButton("touchpad").pressed
-      },
-      dest: {
-        value: lTouchpadRising
-      },
-      xform: xforms.rising
+      src: { value: lButton("grip").pressed },
+      dest: { value: lGripFallingStopDrawing },
+      xform: xforms.falling
+    },
+    {
+      src: [lTriggerFallingStopDrawing, lGripFallingStopDrawing],
+      dest: { value: paths.actions.leftHand.stopDrawing },
+      xform: xforms.any
     },
     {
       src: {
         bool: lTouchpadRising,
-        value: lDpadEast
+        value: lDpadNorth
       },
       dest: {
         value: paths.actions.leftHand.penNextColor
       },
       xform: xforms.copyIfTrue,
-      root: lDpadEast,
+      root: lDpadNorth,
       priority: 200
     },
     {
       src: {
         bool: lTouchpadRising,
-        value: lDpadWest
+        value: lDpadSouth
       },
       dest: {
         value: paths.actions.leftHand.penPrevColor
       },
       xform: xforms.copyIfTrue,
-      root: lDpadWest,
+      root: lDpadSouth,
       priority: 200
     },
     {
@@ -533,6 +551,14 @@ export const viveUserBindings = {
 
   [sets.cursorHoldingPen]: [
     {
+      src: {
+        bool: rTouchpadRising,
+        value: rDpadCenter
+      },
+      dest: { value: paths.actions.rightHand.startTeleport },
+      xform: xforms.copyIfTrue
+    },
+    {
       src: { value: rButton("trigger").pressed },
       dest: { value: paths.actions.cursor.startDrawing },
       xform: xforms.rising
@@ -550,7 +576,31 @@ export const viveUserBindings = {
         touching: rButton("touchpad").touched
       },
       dest: { value: paths.actions.cursor.scalePenTip },
-      xform: xforms.touch_axis_scroll(-0.1)
+      xform: xforms.touch_axis_scroll(0.1)
+    },
+    {
+      src: {
+        bool: rTouchpadRising,
+        value: rDpadNorth
+      },
+      dest: {
+        value: paths.actions.cursor.penNextColor
+      },
+      xform: xforms.copyIfTrue,
+      root: rDpadNorth,
+      priority: 200
+    },
+    {
+      src: {
+        bool: rTouchpadRising,
+        value: rDpadSouth
+      },
+      dest: {
+        value: paths.actions.cursor.penPrevColor
+      },
+      xform: xforms.copyIfTrue,
+      root: rDpadSouth,
+      priority: 200
     }
   ],
 
@@ -602,6 +652,14 @@ export const viveUserBindings = {
   [sets.rightHandHoveringOnPen]: [],
   [sets.rightHandHoldingPen]: [
     {
+      src: {
+        bool: rTouchpadRising,
+        value: rDpadCenter
+      },
+      dest: { value: paths.actions.rightHand.startTeleport },
+      xform: xforms.copyIfTrue
+    },
+    {
       src: { value: rButton("trigger").pressed },
       dest: { value: paths.actions.rightHand.startDrawing },
       xform: xforms.rising
@@ -615,35 +673,26 @@ export const viveUserBindings = {
     },
     {
       src: {
-        value: rButton("touchpad").pressed
-      },
-      dest: {
-        value: rTouchpadRising
-      },
-      xform: xforms.rising
-    },
-    {
-      src: {
         bool: rTouchpadRising,
-        value: rDpadEast
+        value: rDpadNorth
       },
       dest: {
         value: paths.actions.rightHand.penNextColor
       },
       xform: xforms.copyIfTrue,
-      root: rDpadEast,
+      root: rDpadNorth,
       priority: 200
     },
     {
       src: {
         bool: rTouchpadRising,
-        value: rDpadWest
+        value: rDpadSouth
       },
       dest: {
         value: paths.actions.rightHand.penPrevColor
       },
       xform: xforms.copyIfTrue,
-      root: rDpadWest,
+      root: rDpadSouth,
       priority: 200
     },
     {
