@@ -149,8 +149,6 @@
                     position-at-box-shape-border="target:.delete-button"
                     destroy-at-extreme-distances
                     rotation
-                    activatable__increase-scale="buttonStartEvents: scroll_right; buttonEndEvents: horizontal_scroll_release; activatedState: scaleUp;"
-                    activatable__decrease-scale="buttonStartEvents: scroll_left; buttonEndEvents: horizontal_scroll_release; activatedState: scaleDown;"
                 >
                     <!-- HACK: rotation component above is required for its side effect of setting YXZ order -->
                     <a-entity class="delete-button" visible-while-frozen>
@@ -162,7 +160,7 @@
 
             <template id="pen-interactable">
                 <a-entity
-                    class="pen interactable toggle"
+                    class="pen interactable"
                     super-networked-interactable="counter: #pen-counter;"
                     body="type: dynamic; shape: none; mass: 1;"
                     grabbable="maxGrabbers: 1"
@@ -193,8 +191,6 @@
                     grabbable
                     hoverable
                     stretchable
-                    activatable__snap-hand="buttonStartEvents: secondary_hand_grab; buttonEndEvents: secondary_hand_release;"
-                    activatable__snap-cursor="buttonStartEvents: secondary-cursor-grab; buttonEndEvents: secondary-cursor-release;"
                     camera-tool
                     body="type: dynamic; shape: none; mass: 1;"
                     shape="shape: box; halfExtents: 0.22 0.145 0.1; offset: 0 0.02 0"

@@ -101,7 +101,6 @@ import "./components/super-networked-interactable";
 import "./components/networked-counter";
 import "./components/event-repeater";
 import "./components/controls-shape-offset";
-import "./components/grabbable-toggle";
 
 import "./components/cardboard-controls";
 

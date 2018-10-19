@@ -62,12 +62,7 @@ AFRAME.registerComponent("pen", {
     },
     radius: { default: 0.01 }, //drawing geometry radius
     minRadius: { default: 0.005 },
-    maxRadius: { default: 0.2 },
-    startDrawingPath: { default: undefined },
-    stopDrawingPath: { default: undefined },
-    changePenSizePath: { default: undefined },
-    nextColorPath: { default: undefined },
-    prevColorPath: { default: undefined }
+    maxRadius: { default: 0.2 }
   },
 
   init() {
@@ -87,7 +82,6 @@ AFRAME.registerComponent("pen", {
     this.colorIndex = 0;
 
     this.grabbed = false;
-    this.actionPath = null;
   },
 
   play() {
