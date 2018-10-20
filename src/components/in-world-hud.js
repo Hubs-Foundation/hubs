@@ -30,27 +30,22 @@ AFRAME.registerComponent("in-world-hud", {
 
     this.onStateChange = evt => {
       if (!(evt.detail === "muted" || evt.detail === "frozen" || evt.detail === "pen")) return;
-      console.log(evt);
       this.updateButtonStates();
     };
 
-    this.onMicClick = e => {
-      console.log(e);
+    this.onMicClick = () => {
       this.el.emit("action_mute");
     };
 
-    this.onFreezeClick = e => {
-      console.log(e);
+    this.onFreezeClick = () => {
       this.el.emit("action_freeze");
     };
 
-    this.onPenClick = e => {
-      console.log(e);
+    this.onPenClick = () => {
       this.el.emit("spawn_pen");
     };
 
-    this.onCameraClick = e => {
-      console.log(e);
+    this.onCameraClick = () => {
       this.el.emit("action_spawn_camera");
     };
   },
