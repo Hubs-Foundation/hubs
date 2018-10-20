@@ -304,7 +304,7 @@ export const oculusTouchUserBindings = {
     },
     {
       src: [leftGripRisingGrab, leftTriggerRisingGrab],
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: paths.actions.leftHand.grab },
       xform: xforms.any
     }
   ],
@@ -463,7 +463,7 @@ export const oculusTouchUserBindings = {
     },
     {
       src: [rightGripRisingGrab, rightTriggerRisingGrab],
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: paths.actions.rightHand.grab },
       xform: xforms.any
     }
   ],
