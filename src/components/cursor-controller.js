@@ -1,5 +1,4 @@
 import { paths } from "../systems/userinput/paths";
-import { sets } from "../systems/userinput/sets";
 /**
  * Manages targeting and physical cursor location. Has the following responsibilities:
  *
@@ -18,24 +17,25 @@ AFRAME.registerComponent("cursor-controller", {
     cursorColorHovered: { default: "#2F80ED" },
     cursorColorUnhovered: { default: "#FFFFFF" },
     rayObject: { type: "selector" },
-    drawLine: { default: false },
+    drawLine: { default: true },
     objects: { default: "" }
   },
 
   init: function() {
     this.enabled = true;
-    this.currentDistanceMod = 0;
-    this.mousePos = new THREE.Vector2();
-    this.data.cursor.setAttribute("material", { color: this.data.cursorColorUnhovered });
 
-    this._handleCursorLoaded = this._handleCursorLoaded.bind(this);
-    this.data.cursor.addEventListener("loaded", this._handleCursorLoaded);
+    this.data.cursor.addEventListener(
+      "loaded",
+      () => {
+        this.data.cursor.object3DMap.mesh.renderOrder = window.APP.RENDER_ORDER.CURSOR;
+      },
+      { once: true }
+    );
 
     // raycaster state
-    this.targets = [];
-    this.intersection = null;
-    this.raycaster = new THREE.Raycaster();
     this.setDirty = this.setDirty.bind(this);
+    this.targets = [];
+    this.raycaster = new THREE.Raycaster();
     this.dirty = true;
     this.distance = this.data.far;
   },
@@ -98,153 +98,64 @@ AFRAME.registerComponent("cursor-controller", {
     const cameraPos = new THREE.Vector3();
     return function() {
       if (this.dirty) {
-        this.populateEntities(this.data.objects, this.targets); // touchscreen cares about this.targets
+        // app aware devices cares about this.targets so we must update it even if cursor is not enabled
+        this.populateEntities(this.data.objects, this.targets);
         this.dirty = false;
       }
 
       const userinput = AFRAME.scenes[0].systems.userinput;
-      if (!this.enabled) {
-        userinput.deactivate(sets.cursorHoveringOnPen);
-        userinput.deactivate(sets.cursorHoveringOnInteractable);
+      const cursorPose = userinput.readFrameValueAtPath(paths.actions.cursor.pose);
+
+      this.setCursorVisibility(this.enabled && !!cursorPose);
+
+      if (!this.enabled || !cursorPose) {
         return;
       }
 
+      let intersection;
       const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
       if (!isGrabbing) {
-        const cursorPose = userinput.readFrameValueAtPath(paths.actions.cursor.pose);
-        if (cursorPose) {
-          rawIntersections.length = 0;
-          this.raycaster.ray.origin = cursorPose.position;
-          this.raycaster.ray.direction = cursorPose.direction;
-          this.raycaster.intersectObjects(this.targets, true, rawIntersections);
-          const intersection = rawIntersections.find(x => x.object.el);
-          this.intersection = intersection;
-          const isHoveringOnPen = intersection && intersection.object.el.matches(".pen, .pen *");
-          const isHoveringOnInteractable =
-            intersection && intersection.object.el.matches(".interactable, .interactable *");
-          userinput[isHoveringOnPen ? "activate" : "deactivate"](sets.cursorHoveringOnPen);
-          userinput[isHoveringOnInteractable ? "activate" : "deactivate"](sets.cursorHoveringOnInteractable);
-        } else {
-          userinput.deactivate(sets.cursorHoveringOnPen);
-          userinput.deactivate(sets.cursorHoveringOnInteractable);
-        }
+        rawIntersections.length = 0;
+        this.raycaster.ray.origin = cursorPose.position;
+        this.raycaster.ray.direction = cursorPose.direction;
+        this.raycaster.intersectObjects(this.targets, true, rawIntersections);
+        intersection = rawIntersections.find(x => x.object.el);
+        this.emitIntersectionEvents(this.prevIntersection, intersection);
+        this.prevIntersection = intersection;
+        this.distance = intersection ? intersection.distance : this.data.far;
       }
 
-      const { cursor, near, far, drawLine, camera } = this.data;
-      const intersection = this.intersection;
-      this.emitIntersectionEvents(this.prevIntersection, intersection);
-      this.prevIntersection = intersection;
+      const { cursor, near, far, drawLine, camera, cursorColorHovered, cursorColorUnhovered } = this.data;
+
+      const cursorModDelta = userinput.readFrameValueAtPath(paths.actions.cursor.modDelta);
+      if (isGrabbing && cursorModDelta) {
+        this.distance = THREE.Math.clamp(this.distance - cursorModDelta, near, far);
+      }
+      cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);
+      // The cursor will always be oriented towards the player about its Y axis, so objects held by the cursor will rotate towards the player.
+      camera.object3D.getWorldPosition(cameraPos);
+      cameraPos.y = cursor.object3D.position.y;
+      cursor.object3D.lookAt(cameraPos);
+
       this.data.cursor.setAttribute("material", {
-        color: intersection ? this.data.cursorColorHovered : this.data.cursorColorUnhovered
+        color: intersection || isGrabbing ? cursorColorHovered : cursorColorUnhovered
       });
-      if (intersection) {
-        this.distance = intersection.distance;
-      } else {
-        this.distance = this.data.far;
-      }
-
-      const cursorPose = userinput.readFrameValueAtPath(paths.actions.cursor.pose);
-      this.setCursorVisibility(!!cursorPose);
-      if (isGrabbing) {
-        if (userinput.readFrameValueAtPath(paths.actions.cursor.drop)) {
-          this.endInteraction();
-        }
-      }
-      if (!cursorPose) {
-        return;
-      }
-
-      const cursorPosition = cursor.object3D.position;
-      if (isGrabbing) {
-        const cursorModDelta = userinput.readFrameValueAtPath(paths.actions.cursor.modDelta);
-        if (cursorModDelta) {
-          this.changeDistanceMod(cursorModDelta);
-        }
-        cursorPosition
-          .copy(cursorPose.position)
-          .addScaledVector(cursorPose.direction, THREE.Math.clamp(this.distance - this.currentDistanceMod, near, far));
-      } else {
-        this.currentDistanceMod = 0;
-        if (intersection) {
-          cursorPosition.copy(intersection.point);
-        } else {
-          cursorPosition.copy(cursorPose.position).addScaledVector(cursorPose.direction, far);
-        }
-      }
-
       if (drawLine) {
         this.el.setAttribute("line", {
           start: cursorPose.position.clone(),
           end: cursor.object3D.position.clone()
         });
       }
-
-      // The cursor will always be oriented towards the player about its Y axis, so objects held by the cursor will rotate towards the player.
-      camera.object3D.getWorldPosition(cameraPos);
-      cameraPos.y = cursor.object3D.position.y;
-      cursor.object3D.lookAt(cameraPos);
-
-      if (!isGrabbing) {
-        if (userinput.readFrameValueAtPath(paths.actions.cursor.grab)) {
-          this.startInteraction();
-        }
-      }
     };
   })(),
-
-  updateDistanceAndTargetType: function() {},
 
   setCursorVisibility: function(visible) {
     this.data.cursor.setAttribute("visible", visible);
     this.el.setAttribute("line", { visible: visible && this.data.drawLine });
   },
 
-  isInteracting: function() {
-    return;
-  },
-
-  startInteraction: function() {
-    const userinput = AFRAME.scenes[0].systems.userinput;
-    this.data.cursor.emit("cursor-grab", {});
-    const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
-    if (isGrabbing) {
-      userinput.activate(sets.cursorHoldingInteractable);
-    }
-  },
-
-  endInteraction: function() {
-    const userinput = AFRAME.scenes[0].systems.userinput;
-    this.data.cursor.emit("cursor-release", {});
-    const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
-    if (!isGrabbing) {
-      userinput.deactivate(sets.cursorHoldingInteractable);
-    }
-  },
-
-  moveCursor: function(x, y) {
-    this.mousePos.set(x, y);
-  },
-
-  changeDistanceMod: function(delta) {
-    const { near, far } = this.data;
-    const targetDistanceMod = this.currentDistanceMod + delta;
-    const moddedDistance = this.distance - targetDistanceMod;
-    if (moddedDistance > far || moddedDistance < near) {
-      return false;
-    }
-
-    this.currentDistanceMod = targetDistanceMod;
-    return true;
-  },
-
-  _handleCursorLoaded: function() {
-    this.data.cursor.object3DMap.mesh.renderOrder = window.APP.RENDER_ORDER.CURSOR;
-    this.data.cursor.removeEventListener("loaded", this._handleCursorLoaded);
-  },
-
   remove: function() {
-    this.emitIntersectionEvents(this.intersection, null);
-    this.intersection = null;
-    this.data.cursor.removeEventListener("loaded", this._handleCursorLoaded);
+    this.emitIntersectionEvents(this.prevIntersection, null);
+    delete this.prevIntersection;
   }
 });

@@ -80,53 +80,64 @@ export function updateActionSetsBasedOnSuperhands() {
     !cursorGrabbing &&
     !rightHandState.has("grab-start");
 
+  // Cursor
+  if (rightHandTeleporting || rightHandHovering || rightHandGrabbing) {
+    cursorController.disable();
+  } else {
+    cursorController.enable();
+  }
+
   const cursorHoveringOnInteractable =
+    cursorController.enabled &&
     !rightHandTeleporting &&
     !rightHandHovering &&
     !rightHandGrabbing &&
     cursorHand.has("hover-start") &&
     cursorHand.get("hover-start").matches(".interactable, .interactable *");
   const cursorHoveringOnCamera =
+    cursorController.enabled &&
     !rightTeleporter.active &&
     !rightHandHovering &&
     !rightHandGrabbing &&
     (cursorHand.has("hover-start") && cursorHand.get("hover-start").matches(".icamera, .icamera *"));
   const cursorHoveringOnUI =
+    cursorController.enabled &&
     !rightHandTeleporting &&
     !rightHandHovering &&
     !rightHandGrabbing &&
     (cursorHand.has("hover-start") && cursorHand.get("hover-start").matches(".ui, .ui *"));
   const cursorHoveringOnPen =
+    cursorController.enabled &&
     !rightHandTeleporting &&
     !rightHandHovering &&
     !rightHandGrabbing &&
     cursorHand.has("hover-start") &&
     cursorHand.get("hover-start").matches(".pen, .pen *");
   const cursorHoldingInteractable =
+    cursorController.enabled &&
     !rightHandTeleporting &&
     cursorHand.has("grab-start") &&
     cursorHand.get("grab-start").matches(".interactable, .interactable *");
   const cursorHoldingPen =
-    !rightHandTeleporting && cursorHand.has("grab-start") && cursorHand.get("grab-start").matches(".pen, .pen *");
+    cursorController.enabled &&
+    !rightHandTeleporting &&
+    cursorHand.has("grab-start") &&
+    cursorHand.get("grab-start").matches(".pen, .pen *");
 
   const cursorHoldingCamera =
+    cursorController.enabled &&
     !rightTeleporter.active &&
     cursorHand.has("grab-start") &&
     cursorHand.get("grab-start").matches(".icamera, .icamera *");
 
   const cursorHoveringOnNothing =
+    cursorController.enabled &&
     !rightHandTeleporting &&
     !rightHandHovering &&
     !rightHandGrabbing &&
     !cursorHand.has("hover-start") &&
     !cursorHand.has("grab-start") &&
     !cursorHoveringOnUI;
-
-  if (rightHandTeleporting || rightHandHovering || rightHandGrabbing) {
-    cursorController.disable();
-  } else {
-    cursorController.enable();
-  }
 
   const userinput = AFRAME.scenes[0].systems.userinput;
   userinput.toggleActive(sets.leftHandHoveringOnInteractable, leftHandHoveringOnInteractable);
