@@ -74,8 +74,6 @@ AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentNa
 });
 
 AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
-  // TODO compute a network id based upon URL and transform
-  const networkId = "foo";
-  el.setAttribute("networked", { template: "#interactable-media", owner: "scene", networkId });
+  el.setAttribute("networked", { template: "#interactable-media", owner: "scene", networkId: componentData.networkId });
   el.setAttribute("media-loader", { resolve: true, src: componentData.src });
 });
