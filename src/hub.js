@@ -67,6 +67,8 @@ import "./components/pitch-yaw-rotator";
 import "./components/input-configurator";
 import "./components/auto-scale-cannon-physics-body";
 import "./components/position-at-box-shape-border";
+import "./components/pinned";
+import "./components/pin-networked-object-button";
 import "./components/remove-networked-object-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/gamma-factor";

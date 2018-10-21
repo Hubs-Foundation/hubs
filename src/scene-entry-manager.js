@@ -216,6 +216,11 @@ export default class SceneEntryManager {
       spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
     });
 
+    this.scene.addEventListener("object_pinned", e => {
+      console.log("pinned");
+      console.log(e);
+    });
+
     this.scene.addEventListener("object_spawned", e => {
       this.hubChannel.sendObjectSpawnedEvent(e.detail.objectType);
     });
