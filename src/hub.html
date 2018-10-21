@@ -45,6 +45,7 @@
     >
 
         <a-assets>
+            <img id="action-button" crossorigin="anonymous" src="./assets/hud/action_button.9.png">
             <img id="tooltip" crossorigin="anonymous" src="./assets/hud/tooltip.9.png">
             <img id="mute-off" crossorigin="anonymous" src="./assets/hud/mute_off.png">
             <img id="mute-off-hover" crossorigin="anonymous" src="./assets/hud/mute_off-hover.png">
@@ -156,15 +157,17 @@
                     hoverable
                     auto-scale-cannon-physics-body
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
-                    position-at-box-shape-border="target:.delete-button"
+                    position-at-box-shape-border="target:.action-buttons"
                     destroy-at-extreme-distances
+                    set-yxz-order
                     activatable__increase-scale="buttonStartEvents: scroll_right; buttonEndEvents: horizontal_scroll_release; activatedState: scaleUp;"
                     activatable__decrease-scale="buttonStartEvents: scroll_left; buttonEndEvents: horizontal_scroll_release; activatedState: scaleDown;"
                 >
-                    <!-- HACK: rotation component above is required for its side effect of setting YXZ order -->
-                    <a-entity class="delete-button" visible-while-frozen>
-                        <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
-                        <a-entity text=" value:Remove; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    <a-entity class="action-buttons" visible-while-frozen>
+                        <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0.125 0.01"> </a-entity>
+                        <a-entity text=" value:Pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
+                        <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
+                        <a-entity text=" value:Remove; width:1.75; align:center;" text-raycast-hack position="0 -0.125 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>
@@ -249,17 +252,17 @@
                     haptic:#player-right-controller;
                     textHoverColor: #fff;
                     textColor: #fff;
-                    backgroundHoverColor: #ea4b54;
+                    backgroundHoverColor: #ff3464;
                     backgroundColor: #fff;"
                 slice9="
                     width: 0.45;
                     height: 0.2;
-                    left: 53;
-                    top: 53;
-                    right: 10;
-                    bottom: 10;
-                    opacity: 1.3;
-                    src: #tooltip"
+                    left: 64;
+                    top: 64;
+                    right: 66;
+                    bottom: 66;
+                    opacity: 1.0;
+                    src: #action-button"
             ></a-mixin>
 
             <a-mixin id="controller-super-hands"
