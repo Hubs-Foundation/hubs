@@ -72,3 +72,9 @@ AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentNa
   // nav-mesh-helper will query for it later.
   el.setAttribute("nav-mesh");
 });
+
+AFRAME.GLTFModelPlus.registerComponent("networked", "networked", (el, componentName, componentData) => {
+  // Mark this to act as a "full sync" from the GLTF scene itself, to avoid taking ownership.
+  el.firstUpdateData = componentData;
+  el.setAttribute(componentName, componentData);
+});

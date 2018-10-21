@@ -243,6 +243,12 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
 
   console.log(`Scene URL: ${sceneUrl}`);
   const environmentScene = document.querySelector("#environment-scene");
+  const objectsScene = document.querySelector("#objects-scene");
+  const objectsUrl =
+    "https://farspark-dev.reticulum.io/0/raw/0/0/0/0/aHR0cHM6Ly91cGxvYWRzLWRldi5yZXRpY3VsdW0uaW8vZmlsZXMvMDAxODQ0NmEtY2NjMi00ODczLTkwMDItM2VkZmI4NzEzZTRmLmdsdGY_dG9rZW49MjVmOTVkMjhkODY1NzJhMjRhOTI4ZjJiNDExZTQ1YWE";
+  const objectsEl = document.createElement("a-entity");
+  objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
+  objectsScene.appendChild(objectsEl);
 
   if (glbAsset || hasExtension) {
     const gltfEl = document.createElement("a-entity");
