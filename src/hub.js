@@ -12,7 +12,6 @@ import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
-import "aframe-input-mapping-component";
 import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
@@ -23,16 +22,7 @@ import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
-
-import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
-import trackpad_scrolling from "./behaviours/trackpad-scrolling";
-import joystick_dpad4 from "./behaviours/joystick-dpad4";
-import msft_mr_axis_with_deadzone from "./behaviours/msft-mr-axis-with-deadzone";
-import { PressedMove } from "./activators/pressedmove";
-import { ReverseY } from "./activators/reversey";
 import { Presence } from "phoenix";
-
-import "./activators/shortpress";
 
 import "./components/scene-components";
 import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
@@ -62,9 +52,7 @@ import "./components/networked-avatar";
 import "./components/avatar-replay";
 import "./components/media-views";
 import "./components/pinch-to-move";
-import "./components/look-on-mobile";
 import "./components/pitch-yaw-rotator";
-import "./components/input-configurator";
 import "./components/auto-scale-cannon-physics-body";
 import "./components/position-at-box-shape-border";
 import "./components/pinned";
@@ -74,6 +62,7 @@ import "./components/destroy-at-extreme-distances";
 import "./components/gamma-factor";
 import "./components/visible-to-owner";
 import "./components/camera-tool";
+import "./components/action-to-event";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -89,6 +78,7 @@ import "./systems/nav";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/exit-on-blur";
+import "./systems/userinput/userinput";
 
 import "./gltf-component-mappings";
 
@@ -114,7 +104,6 @@ import "./components/super-networked-interactable";
 import "./components/networked-counter";
 import "./components/event-repeater";
 import "./components/controls-shape-offset";
-import "./components/grabbable-toggle";
 import "./components/set-yxz-order";
 
 import "./components/cardboard-controls";
@@ -129,7 +118,6 @@ import "./components/tools/networked-drawing";
 import "./components/tools/drawing-manager";
 
 import registerNetworkSchemas from "./network-schemas";
-import { config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
 
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
@@ -146,14 +134,6 @@ if (!isBotMode && !isTelemetryDisabled) {
 }
 
 disableiOSZoom();
-
-AFRAME.registerInputBehaviour("trackpad_dpad4", trackpad_dpad4);
-AFRAME.registerInputBehaviour("trackpad_scrolling", trackpad_scrolling);
-AFRAME.registerInputBehaviour("joystick_dpad4", joystick_dpad4);
-AFRAME.registerInputBehaviour("msft_mr_axis_with_deadzone", msft_mr_axis_with_deadzone);
-AFRAME.registerInputActivator("pressedmove", PressedMove);
-AFRAME.registerInputActivator("reverseY", ReverseY);
-AFRAME.registerInputMappings(inputConfig, true);
 
 const concurrentLoadDetector = new ConcurrentLoadDetector();
 

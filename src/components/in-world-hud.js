@@ -11,7 +11,7 @@ AFRAME.registerComponent("in-world-hud", {
   init() {
     this.mic = this.el.querySelector(".mic");
     this.freeze = this.el.querySelector(".freeze");
-    this.pen = this.el.querySelector(".pen");
+    this.pen = this.el.querySelector(".penhud");
     this.cameraBtn = this.el.querySelector(".cameraBtn");
     this.background = this.el.querySelector(".bg");
     const renderOrder = window.APP.RENDER_ORDER;
@@ -54,19 +54,19 @@ AFRAME.registerComponent("in-world-hud", {
     this.el.sceneEl.addEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.addEventListener("stateremoved", this.onStateChange);
 
-    this.mic.addEventListener("click", this.onMicClick);
-    this.freeze.addEventListener("click", this.onFreezeClick);
+    this.mic.addEventListener("mousedown", this.onMicClick);
+    this.freeze.addEventListener("mousedown", this.onFreezeClick);
     this.pen.addEventListener("mousedown", this.onPenClick);
-    this.cameraBtn.addEventListener("click", this.onCameraClick);
+    this.cameraBtn.addEventListener("mousedown", this.onCameraClick);
   },
 
   pause() {
     this.el.sceneEl.removeEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.removeEventListener("stateremoved", this.onStateChange);
 
-    this.mic.removeEventListener("click", this.onMicClick);
-    this.freeze.removeEventListener("click", this.onFreezeClick);
+    this.mic.removeEventListener("mousedown", this.onMicClick);
+    this.freeze.removeEventListener("mousedown", this.onFreezeClick);
     this.pen.removeEventListener("mousedown", this.onPenClick);
-    this.cameraBtn.removeEventListener("click", this.onCameraClick);
+    this.cameraBtn.removeEventListener("mousedown", this.onCameraClick);
   }
 });

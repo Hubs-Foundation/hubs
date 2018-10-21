@@ -114,7 +114,8 @@ AFRAME.registerComponent("super-spawner", {
   },
 
   async onSpawnEvent() {
-    const controllerCount = this.el.sceneEl.components["input-configurator"].controllerQueue.length;
+    // TODO: I remove input-configurato, so this is wrong:
+    const controllerCount = 0; //this.el.sceneEl.components["input-configurator"].controllerQueue.length;
     const using6DOF = controllerCount > 1 && this.el.sceneEl.is("vr-mode");
     const hand = using6DOF ? this.data.superHand : this.data.cursorSuperHand;
 
@@ -165,8 +166,6 @@ AFRAME.registerComponent("super-spawner", {
     );
     entity.object3D.scale.copy(this.data.useCustomSpawnScale ? this.data.spawnScale : this.el.object3D.scale);
 
-    this.activateCooldown();
-
     await waitForEvent("body-loaded", entity);
 
     // If we are still holding the spawner with the hand that grabbed to create this entity, release the spawner and grab the entity
@@ -179,6 +178,8 @@ AFRAME.registerComponent("super-spawner", {
         hand.emit(this.data.grabEvents[i], { targetEntity: entity });
       }
     }
+
+    this.activateCooldown();
   },
 
   onGrabEnd(e) {

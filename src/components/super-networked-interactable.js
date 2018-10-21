@@ -1,3 +1,5 @@
+import { paths } from "../systems/userinput/paths";
+
 /**
  * Manages ownership and haptics on an interatable
  * @namespace network
@@ -79,6 +81,29 @@ AFRAME.registerComponent("super-networked-interactable", {
       this.currentScale.addScalar(delta).clampScalar(this.data.minScale, this.data.maxScale);
       this.el.setAttribute("scale", this.currentScale);
       this.el.components["stretchable"].stretchBody(this.el, this.currentScale);
+    }
+  },
+
+  tick: function() {
+    const userinput = AFRAME.scenes[0].systems.userinput;
+    const grabbable = this.el.components.grabbable;
+    let delta = 0;
+    if (this.el.is("grabbed") && this.el.components.hasOwnProperty("stretchable")) {
+      const isLeftHand = grabbable.grabbers[0] === document.querySelector("[super-hands], #player-left-controller");
+      if (isLeftHand) {
+        delta = userinput.readFrameValueAtPath(paths.actions.leftHand.scaleGrabbedGrabbable);
+      }
+      const isRightHand = grabbable.grabbers[0] === document.querySelector("[super-hands], #player-right-controller");
+      if (isRightHand) {
+        delta = userinput.readFrameValueAtPath(paths.actions.rightHand.scaleGrabbedGrabbable);
+      }
+      const isCursor = document.querySelector("[cursor-controller]").components["cursor-controller"].data.cursor;
+      if (isCursor) {
+        delta = userinput.readFrameValueAtPath(paths.actions.cursor.scaleGrabbedGrabbable);
+      }
+    }
+    if (delta) {
+      this._changeScale(delta);
     }
   },
 
