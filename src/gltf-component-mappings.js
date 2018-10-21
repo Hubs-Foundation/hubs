@@ -77,5 +77,5 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
   // TODO compute a network id based upon URL and transform
   const networkId = "foo";
   el.setAttribute("networked", { template: "#interactable-media", owner: "scene", networkId });
-  el.setAttribute("media-loader", { resize: true, resolve: true, src: componentData.src });
+  el.setAttribute("media-loader", { resolve: true, src: componentData.src });
 });
