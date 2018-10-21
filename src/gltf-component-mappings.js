@@ -73,10 +73,9 @@ AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentNa
   el.setAttribute("nav-mesh");
 });
 
-AFRAME.GLTFModelPlus.registerComponent("networked", "networked", (el, componentName, componentData) => {
-  // Mark this to act as a "full sync" from the GLTF scene itself, to avoid taking ownership.
-  componentData.isFirstSync = true;
-  componentData.components = [];
-  console.log(componentData);
-  NAF.connection.entities.updateEntity(componentData.owner, "u", componentData);
+AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
+  // TODO compute a network id based upon URL and transform
+  const networkId = "foo";
+  el.setAttribute("networked", { template: "#interactable-media", owner: "scene", networkId });
+  el.setAttribute("media-loader", { resize: true, resolve: true, src: componentData.src });
 });

@@ -246,7 +246,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
   const environmentScene = document.querySelector("#environment-scene");
   const objectsScene = document.querySelector("#objects-scene");
   const objectsUrl =
-    "https://farspark-dev.reticulum.io/0/raw/0/0/0/0/aHR0cHM6Ly91cGxvYWRzLWRldi5yZXRpY3VsdW0uaW8vZmlsZXMvMDAxODQ0NmEtY2NjMi00ODczLTkwMDItM2VkZmI4NzEzZTRmLmdsdGY_dG9rZW49MjVmOTVkMjhkODY1NzJhMjRhOTI4ZjJiNDExZTQ1YWE";
+    "https://farspark-dev.reticulum.io/0/raw/0/0/0/0/aHR0cHM6Ly91cGxvYWRzLWRldi5yZXRpY3VsdW0uaW8vZmlsZXMvNTQ4NTBlNjUtNzhlMi00MjAyLTkzMjItMzk2YmFlZDQ4MTJhLmdsdGY_dG9rZW49NzA2YzdkMjM1OGM0MDIxYzVjOGU2MmIzNGM5MDZiZDY";
   const objectsEl = document.createElement("a-entity");
   objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
   objectsScene.appendChild(objectsEl);
