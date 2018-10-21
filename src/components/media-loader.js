@@ -42,7 +42,7 @@ AFRAME.registerComponent("media-loader", {
     if (this.el.body && this.shapeAdded && this.el.body.shapes.length > 1) {
       this.el.removeAttribute("shape");
       this.shapeAdded = false;
-    } else if (!this.hasBakedShapes) {
+    } else if (!this.hasBakedShapes && !box.isEmpty()) {
       const center = new THREE.Vector3();
       const { min, max } = box;
       const halfExtents = {
