@@ -4,8 +4,8 @@
   top: 0;
   left: 0;
   position: fixed;
-  color: white;
-  z-index: 2;
+  color: black;
+  z-index: 10;
 }
 
 .dialog {
@@ -14,7 +14,7 @@
   grid-template-rows: 1fr 20px minmax(200px, max-content) 20px 1fr;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,.2);
+  background-color: rgba(0,0,0,.85);
 
   &__box {
     grid-column: 3;
@@ -24,13 +24,13 @@
 
     &__contents {
       padding: 30px;
-      background-color: rgba(0,0,0,0.9);
       box-shadow: 0px 0px 30px 1px #202020;
-      border-radius: 8px;
+      border-radius: 12px;
       display: flex;
       flex-direction: column;
       text-align: center;
       position: relative;
+      background-color: white;
 
       &__title {
         @extend %top-title;
@@ -38,15 +38,16 @@
       }
 
       &__body {
-        font-size: 1.1em;
-        color: $grey-text;
+        font-size: 0.9em;
+        font-weight: bold;
+        color: black;
         display: flex;
         flex-direction: column;
         height: 100%;
         overflow-y: auto;
         margin: 10px 0;
 
-        a { color: white }
+        a { color: black }
       }
 
       &__links {
@@ -55,17 +56,18 @@
         margin: 16px 0;
         a {
           margin: 0 12px;
-          color: $light-text;
+          color: black;
         }
       }
 
 
       &__close {
         position: absolute;
-        left: 12px;
+        right: 12px;
         top: 6px;
-        color: white;
-        font-size: 1.4em;
+        color: black;
+        font-size: 1.8em;
+        font-weight: bold;
 
         background: none;
         cursor: pointer;
@@ -79,7 +81,7 @@
   margin-top: 0;
 }
 
-.invite-form, .add-media-form, .custom-scene-form {
+.invite-form, .invite-team-form, .add-media-form, .custom-scene-form {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -100,7 +102,7 @@
   &__link_field {
     @extend %rounded-border;
     @extend %default-font;
-    color: $light-text;
+    color: black;
     font-size: 1.2em;
     background-color: transparent;
     line-height: 2.0em;
@@ -122,6 +124,12 @@
   }
 }
 
+.invite-team-form {
+  &__action-button {
+    width: 350px;
+  }
+}
+
 .mailing-list-form {
   display: flex;
   height: 100%;
@@ -137,10 +145,10 @@
   &__email_field {
     @extend %rounded-border;
     @extend %default-font;
-    color: $light-text;
+    color: black;
     font-size: 1.2em;
     background-color: transparent;
-    line-height: 2.0em;
+    line-height: 2.5em;
     padding-left: 1.25em;
     padding-right: 1.25em;
     margin: 0.5em 0;

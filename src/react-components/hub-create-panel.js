@@ -6,13 +6,13 @@ import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { resolveURL, extractUrlBase } from "../utils/resolveURL";
-import InfoDialog from "./info-dialog.js";
+import { getReticulumFetchUrl } from "../utils/phoenix-utils";
+import CreateRoomDialog from "./create-room-dialog.js";
 
 import default_scene_preview_thumbnail from "../assets/images/default_thumbnail.png";
 import styles from "../assets/stylesheets/hub-create.scss";
 
 const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
-const dialogTypes = InfoDialog.dialogTypes;
 
 class HubCreatePanel extends Component {
   static propTypes = {
@@ -62,11 +62,18 @@ class HubCreatePanel extends Component {
       const thumbnailImage = meta.images.find(i => i.type === "preview-thumbnail");
 
       if (thumbnailImage) {
-        const baseURL = new URL(extractUrlBase(environment.bundle_url), window.location.href);
+        // TODO kill bundles
+        if (environment.bundle_url) {
+          const baseURL = new URL(extractUrlBase(environment.bundle_url), window.location.href);
 
-        environmentThumbnail = {
-          srcset: resolveURL(thumbnailImage.srcset, baseURL)
-        };
+          environmentThumbnail = {
+            srcset: resolveURL(thumbnailImage.srcset, baseURL)
+          };
+        } else {
+          environmentThumbnail = {
+            srcset: thumbnailImage.srcset
+          };
+        }
       }
     }
 
@@ -79,17 +86,19 @@ class HubCreatePanel extends Component {
     }
 
     const environment = this.props.environments[this.state.environmentIndex];
-    const sceneUrl = this.state.customSceneUrl || environment.bundle_url;
 
     const payload = {
-      hub: { name: this.state.name, default_environment_gltf_bundle_url: sceneUrl }
+      hub: { name: this.state.name }
     };
 
-    let createUrl = "/api/v1/hubs";
-
-    if (process.env.RETICULUM_SERVER) {
-      createUrl = `https://${process.env.RETICULUM_SERVER}${createUrl}`;
+    if (!this.state.customSceneUrl && environment.scene_id) {
+      payload.hub.scene_id = environment.scene_id;
+    } else {
+      const sceneUrl = this.state.customSceneUrl || environment.bundle_url;
+      payload.hub.default_environment_gltf_bundle_url = sceneUrl;
     }
+
+    const createUrl = getReticulumFetchUrl("/api/v1/hubs");
 
     const res = await fetch(createUrl, {
       body: JSON.stringify(payload),
@@ -153,7 +162,7 @@ class HubCreatePanel extends Component {
     if (!this.state.ready) return null;
 
     if (this.props.environments.length == 0) {
-      return <div />;
+      return <div className={styles.placeholder} />;
     }
 
     const environment = this.props.environments[this.state.environmentIndex];
@@ -173,13 +182,7 @@ class HubCreatePanel extends Component {
                   <img className={styles.image} srcSet={environmentThumbnail.srcset} />
                   <div className={styles.labels}>
                     <div className={styles.header}>
-                      {meta.url ? (
-                        <a href={meta.url} rel="noopener noreferrer" className={styles.title}>
-                          {environmentTitle}
-                        </a>
-                      ) : (
-                        <span className={styles.itle}>environmentTitle</span>
-                      )}
+                      <span className={styles.title}>{environmentTitle}</span>
                       {environmentAuthor &&
                         environmentAuthor.name &&
                         (environmentAuthor.url ? (
@@ -227,20 +230,12 @@ class HubCreatePanel extends Component {
                   <FormattedMessage id="home.room_create_button" />
                 </button>
               </div>
-              <div className={styles.linkCode}>
-                <div>
-                  <a className={styles.link} href="/link" rel="nofollow">
-                    <FormattedMessage id="home.have_entry_code" />
-                  </a>
-                </div>
-              </div>
             </div>
           </div>
         </form>
         {this.state.showCustomSceneDialog && (
-          <InfoDialog
-            dialogType={dialogTypes.custom_scene}
-            onCloseDialog={() => this.setState({ showCustomSceneDialog: false })}
+          <CreateRoomDialog
+            onClose={() => this.setState({ showCustomSceneDialog: false })}
             onCustomScene={(name, url) => {
               this.setState({ showCustomSceneDialog: false, name: name, customSceneUrl: url }, () => this.createHub());
             }}

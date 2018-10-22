@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
+import copy from "copy-to-clipboard";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
@@ -18,19 +19,29 @@ import {
   DaydreamEntryButton,
   SafariEntryButton
 } from "./entry-buttons.js";
-import { ProfileInfoHeader } from "./profile-info-header.js";
 import ProfileEntryPanel from "./profile-entry-panel";
-import InfoDialog from "./info-dialog.js";
+import HelpDialog from "./help-dialog.js";
+import SafariDialog from "./safari-dialog.js";
+import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
+import InviteTeamDialog from "./invite-team-dialog.js";
+import InviteDialog from "./invite-dialog.js";
+import LinkDialog from "./link-dialog.js";
+import CreateObjectDialog from "./create-object-dialog.js";
+import PresenceLog from "./presence-log.js";
+import PresenceList from "./presence-list.js";
 import TwoDHUD from "./2d-hud";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons/faChevronDown";
+import { faChevronUp } from "@fortawesome/free-solid-svg-icons/faChevronUp";
 
 addLocaleData([...en]);
 
 const ENTRY_STEPS = {
   start: "start",
+  device: "device",
   mic_grant: "mic_grant",
   mic_granted: "mic_granted",
   audio_setup: "audio_setup",
@@ -58,6 +69,7 @@ class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
     exitScene: PropTypes.func,
+    onSendMessage: PropTypes.func,
     concurrentLoadDetector: PropTypes.object,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
@@ -65,29 +77,38 @@ class UIRoot extends Component {
     isBotMode: PropTypes.bool,
     store: PropTypes.object,
     scene: PropTypes.object,
+    hubChannel: PropTypes.object,
     linkChannel: PropTypes.object,
-    showProfileEntry: PropTypes.bool,
+    hubEntryCode: PropTypes.number,
     availableVREntryTypes: PropTypes.object,
-    initialEnvironmentLoaded: PropTypes.bool,
+    environmentSceneLoaded: PropTypes.bool,
     roomUnavailableReason: PropTypes.string,
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
     hubName: PropTypes.string,
-    occupantCount: PropTypes.number
+    isSupportAvailable: PropTypes.bool,
+    presenceLogEntries: PropTypes.array,
+    presences: PropTypes.object,
+    sessionId: PropTypes.string
   };
 
   state = {
     entryStep: ENTRY_STEPS.start,
     enterInVR: false,
-    infoDialogType: null,
+    dialog: null,
+    showInviteDialog: false,
+    showLinkDialog: false,
+    showPresenceList: false,
     linkCode: null,
     linkCodeCancel: null,
+    miniInviteActivated: false,
 
     shareScreen: false,
     requestedScreen: false,
     mediaStream: null,
     videoTrack: null,
     audioTrack: null,
+    entryPanelCollapsed: false,
 
     toneInterval: null,
     tonePlaying: false,
@@ -108,13 +129,9 @@ class UIRoot extends Component {
 
     exited: false,
 
-    showProfileEntry: false
+    showProfileEntry: false,
+    pendingMessage: ""
   };
-
-  constructor(props) {
-    super(props);
-    this.state.showProfileEntry = this.props.showProfileEntry;
-  }
 
   componentDidMount() {
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
@@ -128,12 +145,6 @@ class UIRoot extends Component {
   componentWillUnmount() {
     this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
     this.props.scene.removeEventListener("exit", this.exit);
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this.props.availableVREntryTypes && prevProps.availableVREntryTypes !== this.props.availableVREntryTypes) {
-      this.handleForcedVREntryType();
-    }
   }
 
   onSceneLoaded = () => {
@@ -160,16 +171,30 @@ class UIRoot extends Component {
     this.props.scene.emit("action_space_bubble");
   };
 
-  handleForcedVREntryType = () => {
-    if (!this.props.forcedVREntryType) return;
+  spawnPen = () => {
+    this.props.scene.emit("spawn_pen");
+  };
 
-    if (this.props.forcedVREntryType.startsWith("daydream")) {
+  handleStartEntry = () => {
+    const promptForNameAndAvatarBeforeEntry = !this.props.store.state.activity.hasChangedName;
+
+    if (promptForNameAndAvatarBeforeEntry) {
+      this.setState({ showProfileEntry: true });
+    }
+
+    if (!this.props.forcedVREntryType) {
+      this.goToEntryStep(ENTRY_STEPS.device);
+    } else if (this.props.forcedVREntryType.startsWith("daydream")) {
       this.enterDaydream();
     } else if (this.props.forcedVREntryType.startsWith("vr")) {
       this.enterVR();
     } else if (this.props.forcedVREntryType.startsWith("2d")) {
       this.enter2D();
     }
+  };
+
+  goToEntryStep = entryStep => {
+    this.setState({ entryStep: entryStep, showInviteDialog: false });
   };
 
   playTestTone = () => {
@@ -256,7 +281,7 @@ class UIRoot extends Component {
       await this.setMediaStreamToDefault();
       this.beginOrSkipAudioSetup();
     } else {
-      this.setState({ entryStep: ENTRY_STEPS.mic_grant });
+      this.goToEntryStep(ENTRY_STEPS.mic_grant);
     }
   };
 
@@ -264,36 +289,16 @@ class UIRoot extends Component {
     await this.performDirectEntryFlow(false);
   };
 
-  linkSafari = async () => {
-    this.setState({ infoDialogType: InfoDialog.dialogTypes.safari });
-  };
-
   enterVR = async () => {
     if (this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.maybe) {
       await this.performDirectEntryFlow(true);
     } else {
-      this.setState({ infoDialogType: InfoDialog.dialogTypes.webvr_recommend });
+      this.showWebVRRecommendDialog();
     }
   };
 
   enterDaydream = async () => {
-    if (this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe) {
-      this.exit();
-
-      // We are not in mobile chrome, so launch into chrome via an Intent URL
-      const location = window.location;
-      const qs = new URLSearchParams(location.search);
-      qs.set("vr_entry_type", "daydream"); // Auto-choose 'daydream' after landing in chrome
-
-      const intentUrl =
-        `intent://${location.host}${location.pathname}?` +
-        `${qs}#Intent;scheme=${location.protocol.replace(":", "")};` +
-        `action=android.intent.action.VIEW;package=com.android.chrome;end;`;
-
-      window.location = intentUrl;
-    } else {
-      await this.performDirectEntryFlow(true);
-    }
+    await this.performDirectEntryFlow(true);
   };
 
   micDeviceChanged = async ev => {
@@ -417,7 +422,7 @@ class UIRoot extends Component {
       const { hasAudio } = await this.setMediaStreamToDefault();
 
       if (hasAudio) {
-        this.setState({ entryStep: ENTRY_STEPS.mic_granted });
+        this.goToEntryStep(ENTRY_STEPS.mic_granted);
       } else {
         this.beginOrSkipAudioSetup();
       }
@@ -428,11 +433,12 @@ class UIRoot extends Component {
 
   onProfileFinished = () => {
     this.setState({ showProfileEntry: false });
+    this.props.hubChannel.sendProfileUpdate();
   };
 
   beginOrSkipAudioSetup = () => {
     if (!this.props.forcedVREntryType || !this.props.forcedVREntryType.endsWith("_now")) {
-      this.setState({ entryStep: ENTRY_STEPS.audio_setup });
+      this.goToEntryStep(ENTRY_STEPS.audio_setup);
     } else {
       setTimeout(this.onAudioReadyButton, 3000); // Need to wait otherwise input doesn't work :/
     }
@@ -508,381 +514,574 @@ class UIRoot extends Component {
       clearInterval(this.state.micUpdateInterval);
     }
 
-    this.setState({ entryStep: ENTRY_STEPS.finished });
+    this.goToEntryStep(ENTRY_STEPS.finished);
   };
 
   attemptLink = async () => {
-    this.setState({ infoDialogType: InfoDialog.dialogTypes.link });
+    this.setState({ showLinkDialog: true });
     const { code, cancel, onFinished } = await this.props.linkChannel.generateCode();
     this.setState({ linkCode: code, linkCodeCancel: cancel });
-    onFinished.then(this.handleCloseDialog);
+    onFinished.then(() => this.setState({ showLinkDialog: false, linkCode: null, linkCodeCancel: null }));
   };
 
-  handleCloseDialog = async () => {
-    if (this.state.linkCodeCancel) {
-      this.state.linkCodeCancel();
+  showInviteDialog = () => {
+    this.setState({ showInviteDialog: true });
+  };
+
+  toggleInviteDialog = async () => {
+    this.setState({ showInviteDialog: !this.state.showInviteDialog });
+  };
+
+  createObject = media => {
+    this.props.scene.emit("add_media", media);
+  };
+
+  closeDialog = () => {
+    this.setState({ dialog: null });
+  };
+
+  showHelpDialog = () => {
+    this.setState({ dialog: <HelpDialog onClose={this.closeDialog} /> });
+  };
+
+  showSafariDialog = () => {
+    this.setState({ dialog: <SafariDialog onClose={this.closeDialog} /> });
+  };
+
+  showInviteTeamDialog = () => {
+    this.setState({ dialog: <InviteTeamDialog hubChannel={this.props.hubChannel} onClose={this.closeDialog} /> });
+  };
+
+  showCreateObjectDialog = () => {
+    this.setState({ dialog: <CreateObjectDialog onCreate={this.createObject} onClose={this.closeDialog} /> });
+  };
+
+  showWebVRRecommendDialog = () => {
+    this.setState({ dialog: <WebVRRecommendDialog onClose={this.closeDialog} /> });
+  };
+
+  onMiniInviteClicked = () => {
+    const link = "https://hub.link/" + this.props.hubId;
+
+    this.setState({ miniInviteActivated: true });
+    setTimeout(() => {
+      this.setState({ miniInviteActivated: false });
+    }, 5000);
+
+    if (navigator.share) {
+      navigator.share({ title: document.title, url: link });
+    } else {
+      copy(link);
     }
-
-    this.setState({ infoDialogType: null, linkCode: null, linkCodeCancel: null });
   };
 
-  handleCreateObject = url => {
-    this.props.scene.emit("add_media", url);
+  sendMessage = e => {
+    e.preventDefault();
+    this.props.onSendMessage(this.state.pendingMessage);
+    this.setState({ pendingMessage: "" });
   };
 
-  render() {
-    if (this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason) {
-      let subtitle = null;
-      if (this.props.roomUnavailableReason === "closed") {
-        // TODO i18n, due to links and markup
-        subtitle = (
-          <div>
-            Sorry, this room is no longer available.
-            <p />
-            A room may be closed if we receive reports that it violates our{" "}
-            <a target="_blank" rel="noreferrer noopener" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
-              Terms of Use
-            </a>.
-            <br />
-            If you have questions, contact us at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>.
-            <p />
-            If you&apos;d like to run your own server, hubs&apos;s source code is available on{" "}
-            <a href="https://github.com/mozilla/hubs">GitHub</a>.
-          </div>
-        );
-      } else if (this.props.platformUnsupportedReason === "no_data_channels") {
-        // TODO i18n, due to links and markup
-        subtitle = (
-          <div>
-            Your browser does not support{" "}
-            <a
-              href="https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createDataChannel#Browser_compatibility"
-              rel="noreferrer noopener"
-            >
-              WebRTC Data Channels
-            </a>, which is required to use Hubs.<br />If you&quot;d like to use Hubs with Oculus or SteamVR, you can{" "}
-            <a href="https://www.mozilla.org/firefox" rel="noreferrer noopener">
-              Download Firefox
-            </a>.
-          </div>
-        );
-      } else {
-        const reason = this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
-        const exitSubtitleId = `exit.subtitle.${this.state.exited ? "exited" : reason}`;
-        subtitle = (
-          <div>
-            <FormattedMessage id={exitSubtitleId} />
-            <p />
-            {this.props.roomUnavailableReason && (
-              <div>
-                You can also <a href="/">create a new room</a>.
-              </div>
-            )}
-          </div>
-        );
-      }
+  occupantCount = () => {
+    return this.props.presences ? Object.entries(this.props.presences).length : 0;
+  };
 
-      return (
-        <IntlProvider locale={lang} messages={messages}>
-          <div className="exited-panel">
-            <img className="exited-panel__logo" src="../assets/images/logo.svg" />
-            <div className="exited-panel__subtitle">{subtitle}</div>
-          </div>
-        </IntlProvider>
+  renderExitedPane = () => {
+    let subtitle = null;
+    if (this.props.roomUnavailableReason === "closed") {
+      // TODO i18n, due to links and markup
+      subtitle = (
+        <div>
+          Sorry, this room is no longer available.
+          <p />
+          A room may be closed if we receive reports that it violates our{" "}
+          <a target="_blank" rel="noreferrer noopener" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
+            Terms of Use
+          </a>.
+          <br />
+          If you have questions, contact us at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>.
+          <p />
+          If you&apos;d like to run your own server, hubs&apos;s source code is available on{" "}
+          <a href="https://github.com/mozilla/hubs">GitHub</a>.
+        </div>
+      );
+    } else if (this.props.platformUnsupportedReason === "no_data_channels") {
+      // TODO i18n, due to links and markup
+      subtitle = (
+        <div>
+          Your browser does not support{" "}
+          <a
+            href="https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createDataChannel#Browser_compatibility"
+            rel="noreferrer noopener"
+          >
+            WebRTC Data Channels
+          </a>, which is required to use Hubs.<br />If you&quot;d like to use Hubs with Oculus or SteamVR, you can{" "}
+          <a href="https://www.mozilla.org/firefox" rel="noreferrer noopener">
+            Download Firefox
+          </a>.
+        </div>
+      );
+    } else {
+      const reason = this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
+      const exitSubtitleId = `exit.subtitle.${this.state.exited ? "exited" : reason}`;
+      subtitle = (
+        <div>
+          <FormattedMessage id={exitSubtitleId} />
+          <p />
+          {this.props.roomUnavailableReason && (
+            <div>
+              You can also <a href="/">create a new room</a>.
+            </div>
+          )}
+        </div>
       );
     }
 
-    if (this.props.isBotMode) {
-      return (
+    return (
+      <IntlProvider locale={lang} messages={messages}>
+        <div className="exited-panel">
+          <img className="exited-panel__logo" src="../assets/images/logo.svg" />
+          <div className="exited-panel__subtitle">{subtitle}</div>
+        </div>
+      </IntlProvider>
+    );
+  };
+
+  renderBotMode = () => {
+    return (
+      <div className="loading-panel">
+        <img className="loading-panel__logo" src="../assets/images/logo.svg" />
+        <input type="file" id="bot-audio-input" accept="audio/*" />
+        <input type="file" id="bot-data-input" accept="application/json" />
+      </div>
+    );
+  };
+
+  renderLoader = () => {
+    return (
+      <IntlProvider locale={lang} messages={messages}>
         <div className="loading-panel">
-          <img className="loading-panel__logo" src="../assets/images/logo.svg" />
-          <input type="file" id="bot-audio-input" accept="audio/*" />
-          <input type="file" id="bot-data-input" accept="application/json" />
+          <div className="loader-wrap">
+            <div className="loader">
+              <div className="loader-center" />
+            </div>
+          </div>
+
+          <img className="loading-panel__logo" src="../assets/images/hub-preview-light-no-shadow.png" />
         </div>
-      );
-    }
+      </IntlProvider>
+    );
+  };
 
-    if (!this.props.initialEnvironmentLoaded || !this.props.availableVREntryTypes || !this.props.hubId) {
-      return (
-        <IntlProvider locale={lang} messages={messages}>
-          <div className="loading-panel">
-            <div className="loader-wrap">
-              <div className="loader">
-                <div className="loader-center" />
-              </div>
-            </div>
+  renderEntryStartPanel = () => {
+    return (
+      <div className={entryStyles.entryPanel}>
+        <div className={entryStyles.name}>{this.props.hubName}</div>
 
-            <img className="loading-panel__logo" src="../assets/images/logo.svg" />
+        <div className={entryStyles.center}>
+          <div onClick={() => this.setState({ showProfileEntry: true })} className={entryStyles.profileName}>
+            <img src="../assets/images/account.svg" className={entryStyles.profileIcon} />
+            <div title={this.props.store.state.profile.displayName}>{this.props.store.state.profile.displayName}</div>
           </div>
-        </IntlProvider>
-      );
-    }
 
-    // Only show this in desktop firefox since other browsers/platforms will ignore the "screen" media constraint and
-    // will attempt to share your webcam instead!
-    const screenSharingCheckbox = this.props.enableScreenSharing &&
-      !AFRAME.utils.device.isMobile() &&
-      /firefox/i.test(navigator.userAgent) && (
-        <label className={entryStyles.screenSharing}>
-          <input
-            className={entryStyles.checkbox}
-            type="checkbox"
-            value={this.state.shareScreen}
-            onChange={this.setStateAndRequestScreen}
-          />
-          <FormattedMessage id="entry.enable-screen-sharing" />
-        </label>
-      );
-
-    const entryPanel =
-      this.state.entryStep === ENTRY_STEPS.start ? (
-        <div className={entryStyles.entryPanel}>
-          <div className={entryStyles.buttonContainer}>
-            {false /* TODO */ && (
-              <div className={entryStyles.presenceInfo}>
-                <span className={entryStyles.people}>2 people</span> have joined
-              </div>
-            )}
-            {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
-              <TwoDEntryButton onClick={this.enter2D} />
-            )}
-            {this.props.availableVREntryTypes.safari === VR_DEVICE_AVAILABILITY.maybe && (
-              <SafariEntryButton onClick={this.linkSafari} />
-            )}
-            {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
-              <GenericEntryButton onClick={this.enterVR} />
-            )}
-            {this.props.availableVREntryTypes.daydream !== VR_DEVICE_AVAILABILITY.no && (
-              <DaydreamEntryButton
-                onClick={this.enterDaydream}
-                subtitle={
-                  this.props.availableVREntryTypes.daydream == VR_DEVICE_AVAILABILITY.maybe
-                    ? "entry.daydream-via-chrome"
-                    : null
-                }
+          <form onSubmit={this.sendMessage}>
+            <div className={styles.messageEntry}>
+              <input
+                className={styles.messageEntryInput}
+                value={this.state.pendingMessage}
+                onFocus={e => e.target.select()}
+                onChange={e => this.setState({ pendingMessage: e.target.value })}
+                placeholder="Send a message..."
               />
+              <input className={styles.messageEntrySubmit} type="submit" value="send" />
+            </div>
+          </form>
+        </div>
+
+        <div className={entryStyles.buttonContainer}>
+          <button
+            className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
+            onClick={() => this.handleStartEntry()}
+          >
+            <FormattedMessage id="entry.enter-room" />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  renderDevicePanel = () => {
+    // Only screen sharing in desktop firefox since other browsers/platforms will ignore the "screen" media constraint and will attempt to share your webcam instead!
+    const isFireFox = /firefox/i.test(navigator.userAgent);
+    const isNonMobile = !AFRAME.utils.device.isMobile();
+
+    const screenSharingCheckbox =
+      this.props.enableScreenSharing && isNonMobile && isFireFox && this.renderScreensharing();
+
+    return (
+      <div className={entryStyles.entryPanel}>
+        <div className={entryStyles.title}>
+          <FormattedMessage id="entry.choose-device" />
+        </div>
+
+        <div className={entryStyles.buttonContainer}>
+          {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
+            <TwoDEntryButton onClick={this.enter2D} />
+          )}
+          {this.props.availableVREntryTypes.safari === VR_DEVICE_AVAILABILITY.maybe && (
+            <SafariEntryButton onClick={this.showSafariDialog} />
+          )}
+          {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
+            <GenericEntryButton onClick={this.enterVR} />
+          )}
+          {this.props.availableVREntryTypes.daydream === VR_DEVICE_AVAILABILITY.yes && (
+            <DaydreamEntryButton onClick={this.enterDaydream} subtitle={null} />
+          )}
+          <DeviceEntryButton onClick={() => this.attemptLink()} isInHMD={this.props.availableVREntryTypes.isInHMD} />
+          {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
+            <div className={entryStyles.secondary} onClick={this.enterVR}>
+              <FormattedMessage id="entry.cardboard" />
+            </div>
+          )}
+          {screenSharingCheckbox}
+        </div>
+      </div>
+    );
+  };
+
+  renderScreensharing = () => {
+    return (
+      <label className={entryStyles.screenSharing}>
+        <input
+          className={entryStyles.checkbox}
+          type="checkbox"
+          value={this.state.shareScreen}
+          onChange={this.setStateAndRequestScreen}
+        />
+        <FormattedMessage id="entry.enable-screen-sharing" />
+      </label>
+    );
+  };
+
+  renderMicPanel = () => {
+    return (
+      <div className="mic-grant-panel">
+        <div className="mic-grant-panel__grant-container">
+          <div className="mic-grant-panel__title">
+            <FormattedMessage
+              id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-title" : "audio.granted-title"}
+            />
+          </div>
+          <div className="mic-grant-panel__subtitle">
+            <FormattedMessage
+              id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-subtitle" : "audio.granted-subtitle"}
+            />
+          </div>
+          <div className="mic-grant-panel__button-container">
+            {this.state.entryStep == ENTRY_STEPS.mic_grant ? (
+              <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
+                <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
+              </button>
+            ) : (
+              <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
+                <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
+              </button>
             )}
-            <DeviceEntryButton onClick={this.attemptLink} isInHMD={this.props.availableVREntryTypes.isInHMD} />
-            {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
-              <div className={entryStyles.secondary} onClick={this.enterVR}>
-                <FormattedMessage id="entry.cardboard" />
-              </div>
-            )}
-            {screenSharingCheckbox}
-            <button
-              className={entryStyles.inviteButton}
-              onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}
-            >
-              <FormattedMessage id="entry.invite-others" />
-            </button>
           </div>
         </div>
-      ) : null;
-
-    const micPanel =
-      this.state.entryStep === ENTRY_STEPS.mic_grant || this.state.entryStep === ENTRY_STEPS.mic_granted ? (
-        <div className="mic-grant-panel">
-          <div className="mic-grant-panel__grant-container">
-            <div className="mic-grant-panel__title">
-              <FormattedMessage
-                id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-title" : "audio.granted-title"}
-              />
-            </div>
-            <div className="mic-grant-panel__subtitle">
-              <FormattedMessage
-                id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-subtitle" : "audio.granted-subtitle"}
-              />
-            </div>
-            <div className="mic-grant-panel__button-container">
-              {this.state.entryStep == ENTRY_STEPS.mic_grant ? (
-                <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
-                  <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
-                </button>
-              ) : (
-                <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
-                  <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
-                </button>
-              )}
-            </div>
-          </div>
-          <div className="mic-grant-panel__next-container">
-            <button className={classNames("mic-grant-panel__next")} onClick={this.onMicGrantButton}>
-              <FormattedMessage id="audio.granted-next" />
-            </button>
-          </div>
+        <div className="mic-grant-panel__next-container">
+          <button className={classNames("mic-grant-panel__next")} onClick={this.onMicGrantButton}>
+            <FormattedMessage id="audio.granted-next" />
+          </button>
         </div>
-      ) : null;
+      </div>
+    );
+  };
 
+  renderAudioSetupPanel = () => {
     const maxLevelHeight = 111;
     const micClip = {
       clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)`
     };
     const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
     const subtitleId = AFRAME.utils.device.isMobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
-    const audioSetupPanel =
-      this.state.entryStep === ENTRY_STEPS.audio_setup ? (
-        <div className="audio-setup-panel">
-          <div>
-            <div className="audio-setup-panel__title">
-              <FormattedMessage id="audio.title" />
-            </div>
-            <div className="audio-setup-panel__subtitle">
-              {(AFRAME.utils.device.isMobile() || this.state.enterInVR) && <FormattedMessage id={subtitleId} />}
-            </div>
-            <div className="audio-setup-panel__levels">
-              <div className="audio-setup-panel__levels__icon">
-                <img
-                  src="../assets/images/level_background.png"
-                  srcSet="../assets/images/level_background@2x.png 2x"
-                  className="audio-setup-panel__levels__icon-part"
-                />
-                <img
-                  src="../assets/images/level_fill.png"
-                  srcSet="../assets/images/level_fill@2x.png 2x"
-                  className="audio-setup-panel__levels__icon-part"
-                  style={micClip}
-                />
-                {this.state.audioTrack ? (
-                  <img
-                    src="../assets/images/mic_level.png"
-                    srcSet="../assets/images/mic_level@2x.png 2x"
-                    className="audio-setup-panel__levels__icon-part"
-                  />
-                ) : (
-                  <img
-                    src="../assets/images/mic_denied.png"
-                    srcSet="../assets/images/mic_denied@2x.png 2x"
-                    className="audio-setup-panel__levels__icon-part"
-                  />
-                )}
-              </div>
-              <div className="audio-setup-panel__levels__icon" onClick={this.playTestTone}>
-                <img
-                  src="../assets/images/level_background.png"
-                  srcSet="../assets/images/level_background@2x.png 2x"
-                  className="audio-setup-panel__levels__icon-part"
-                />
-                <img
-                  src="../assets/images/level_fill.png"
-                  srcSet="../assets/images/level_fill@2x.png 2x"
-                  className="audio-setup-panel__levels__icon-part"
-                  style={speakerClip}
-                />
-                <img
-                  src="../assets/images/speaker_level.png"
-                  srcSet="../assets/images/speaker_level@2x.png 2x"
-                  className="audio-setup-panel__levels__icon-part"
-                />
-              </div>
-            </div>
-            {this.state.audioTrack && (
-              <div className="audio-setup-panel__device-chooser">
-                <select
-                  className="audio-setup-panel__device-chooser__dropdown"
-                  value={this.selectedMicDeviceId()}
-                  onChange={this.micDeviceChanged}
-                >
-                  {this.state.micDevices.map(d => (
-                    <option key={d.deviceId} value={d.deviceId}>
-                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}
-                    </option>
-                  ))}
-                </select>
-                <img
-                  className="audio-setup-panel__device-chooser__mic-icon"
-                  src="../assets/images/mic_small.png"
-                  srcSet="../assets/images/mic_small@2x.png 2x"
-                />
-                <img
-                  className="audio-setup-panel__device-chooser__dropdown-arrow"
-                  src="../assets/images/dropdown_arrow.png"
-                  srcSet="../assets/images/dropdown_arrow@2x.png 2x"
-                />
-              </div>
-            )}
-            {this.shouldShowHmdMicWarning() && (
-              <div className="audio-setup-panel__hmd-mic-warning">
-                <img
-                  src="../assets/images/warning_icon.png"
-                  srcSet="../assets/images/warning_icon@2x.png 2x"
-                  className="audio-setup-panel__hmd-mic-warning__icon"
-                />
-                <span className="audio-setup-panel__hmd-mic-warning__label">
-                  <FormattedMessage id="audio.hmd-mic-warning" />
-                </span>
-              </div>
-            )}
+    return (
+      <div className="audio-setup-panel">
+        <div>
+          <div className="audio-setup-panel__title">
+            <FormattedMessage id="audio.title" />
           </div>
-          <div className="audio-setup-panel__enter-button-container">
-            <button className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
-              <FormattedMessage id="audio.enter-now" />
-            </button>
+          <div className="audio-setup-panel__subtitle">
+            {(AFRAME.utils.device.isMobile() || this.state.enterInVR) && <FormattedMessage id={subtitleId} />}
           </div>
+          <div className="audio-setup-panel__levels">
+            <div className="audio-setup-panel__levels__icon">
+              <img
+                src="../assets/images/level_background.png"
+                srcSet="../assets/images/level_background@2x.png 2x"
+                className="audio-setup-panel__levels__icon-part"
+              />
+              <img
+                src="../assets/images/level_fill.png"
+                srcSet="../assets/images/level_fill@2x.png 2x"
+                className="audio-setup-panel__levels__icon-part"
+                style={micClip}
+              />
+              {this.state.audioTrack ? (
+                <img
+                  src="../assets/images/mic_level.png"
+                  srcSet="../assets/images/mic_level@2x.png 2x"
+                  className="audio-setup-panel__levels__icon-part"
+                />
+              ) : (
+                <img
+                  src="../assets/images/mic_denied.png"
+                  srcSet="../assets/images/mic_denied@2x.png 2x"
+                  className="audio-setup-panel__levels__icon-part"
+                />
+              )}
+            </div>
+            <div className="audio-setup-panel__levels__icon" onClick={this.playTestTone}>
+              <img
+                src="../assets/images/level_background.png"
+                srcSet="../assets/images/level_background@2x.png 2x"
+                className="audio-setup-panel__levels__icon-part"
+              />
+              <img
+                src="../assets/images/level_fill.png"
+                srcSet="../assets/images/level_fill@2x.png 2x"
+                className="audio-setup-panel__levels__icon-part"
+                style={speakerClip}
+              />
+              <img
+                src="../assets/images/speaker_level.png"
+                srcSet="../assets/images/speaker_level@2x.png 2x"
+                className="audio-setup-panel__levels__icon-part"
+              />
+            </div>
+          </div>
+          {this.state.audioTrack && (
+            <div className="audio-setup-panel__device-chooser">
+              <select
+                className="audio-setup-panel__device-chooser__dropdown"
+                value={this.selectedMicDeviceId()}
+                onChange={this.micDeviceChanged}
+              >
+                {this.state.micDevices.map(d => (
+                  <option key={d.deviceId} value={d.deviceId}>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}
+                  </option>
+                ))}
+              </select>
+              <img
+                className="audio-setup-panel__device-chooser__mic-icon"
+                src="../assets/images/mic_small.png"
+                srcSet="../assets/images/mic_small@2x.png 2x"
+              />
+              <img
+                className="audio-setup-panel__device-chooser__dropdown-arrow"
+                src="../assets/images/dropdown_arrow.png"
+                srcSet="../assets/images/dropdown_arrow@2x.png 2x"
+              />
+            </div>
+          )}
+          {this.shouldShowHmdMicWarning() && (
+            <div className="audio-setup-panel__hmd-mic-warning">
+              <img
+                src="../assets/images/warning_icon.png"
+                srcSet="../assets/images/warning_icon@2x.png 2x"
+                className="audio-setup-panel__hmd-mic-warning__icon"
+              />
+              <span className="audio-setup-panel__hmd-mic-warning__label">
+                <FormattedMessage id="audio.hmd-mic-warning" />
+              </span>
+            </div>
+          )}
         </div>
-      ) : null;
-
-    const dialogContents = this.isWaitingForAutoExit() ? (
-      <AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />
-    ) : (
-      <div className={entryStyles.entryDialog}>
-        <ProfileInfoHeader
-          name={this.props.store.state.profile.displayName}
-          onClickName={() => this.setState({ showProfileEntry: true })}
-          onClickHelp={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
-        />
-        {entryPanel}
-        {micPanel}
-        {audioSetupPanel}
+        <div className="audio-setup-panel__enter-button-container">
+          <button className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
+            <FormattedMessage id="audio.enter-now" />
+          </button>
+        </div>
       </div>
     );
+  };
 
-    const dialogBoxClassNames = classNames({ "ui-interactive": !this.state.infoDialogType, "ui-dialog-box": true });
+  render() {
+    const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
+    const isLoading = !this.props.environmentSceneLoaded || !this.props.availableVREntryTypes || !this.props.hubId;
 
-    const dialogBoxContentsClassNames = classNames({
-      "ui-dialog-box-contents": true,
-      "ui-dialog-box-contents--backgrounded": this.state.showProfileEntry
-    });
+    if (isExited) return this.renderExitedPane();
+    if (isLoading) return this.renderLoader();
+    if (this.props.isBotMode) return this.renderBotMode();
 
-    return (
-      <IntlProvider locale={lang} messages={messages}>
-        <div className="ui">
-          <InfoDialog
-            dialogType={this.state.infoDialogType}
-            linkCode={this.state.linkCode}
-            onSubmittedEmail={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.email_submitted })}
-            onCloseDialog={this.handleCloseDialog}
-            onCreateObject={this.handleCreateObject}
-          />
+    const startPanel = this.state.entryStep === ENTRY_STEPS.start && this.renderEntryStartPanel();
+    const devicePanel = this.state.entryStep === ENTRY_STEPS.device && this.renderDevicePanel();
 
-          {this.state.entryStep === ENTRY_STEPS.finished && (
-            <button
-              onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.help })}
-              className="ui__help-icon"
-            >
-              <i className="ui__help-icon__icon">
-                <FontAwesomeIcon icon={faQuestion} />
+    const micPanel =
+      (this.state.entryStep === ENTRY_STEPS.mic_grant || this.state.entryStep === ENTRY_STEPS.mic_granted) &&
+      this.renderMicPanel();
+
+    const audioSetupPanel = this.state.entryStep === ENTRY_STEPS.audio_setup && this.renderAudioSetupPanel();
+
+    // Dialog is empty if coll
+    let dialogContents = null;
+
+    if (this.state.entryPanelCollapsed && !this.isWaitingForAutoExit()) {
+      dialogContents = (
+        <div className={entryStyles.entryDialog}>
+          <div>&nbsp;</div>
+          <button onClick={() => this.setState({ entryPanelCollapsed: false })} className={entryStyles.expand}>
+            <i>
+              <FontAwesomeIcon icon={faChevronUp} />
+            </i>
+          </button>
+        </div>
+      );
+    } else {
+      dialogContents = this.isWaitingForAutoExit() ? (
+        <AutoExitWarning
+          secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
+          onCancel={this.endAutoExitTimer}
+        />
+      ) : (
+        <div className={entryStyles.entryDialog}>
+          {!this.state.entryPanelCollapsed && (
+            <button onClick={() => this.setState({ entryPanelCollapsed: true })} className={entryStyles.collapse}>
+              <i>
+                <FontAwesomeIcon icon={faChevronDown} />
               </i>
             </button>
           )}
+          {startPanel}
+          {devicePanel}
+          {micPanel}
+          {audioSetupPanel}
+        </div>
+      );
+    }
 
-          {this.state.entryStep === ENTRY_STEPS.finished && (
-            <div className={styles.presenceInfo}>
-              <FontAwesomeIcon icon={faUsers} />
-              <span className={styles.occupantCount}>{this.props.occupantCount || "-"}</span>
+    const dialogBoxContentsClassNames = classNames({
+      [styles.uiInteractive]: !this.state.dialog,
+      [styles.uiDialogBoxContents]: true,
+      [styles.backgrounded]: this.state.showProfileEntry
+    });
+
+    const entryFinished = this.state.entryStep === ENTRY_STEPS.finished;
+    const showVREntryButton = entryFinished && this.props.availableVREntryTypes.isInHMD;
+
+    return (
+      <IntlProvider locale={lang} messages={messages}>
+        <div className={styles.ui}>
+          {this.state.dialog}
+
+          {this.state.showProfileEntry && (
+            <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store} />
+          )}
+
+          {(!entryFinished || this.isWaitingForAutoExit()) && (
+            <div className={styles.uiDialog}>
+              <PresenceLog entries={this.props.presenceLogEntries || []} />
+              <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
             </div>
           )}
 
-          <div className="ui-dialog">
-            {(this.state.entryStep !== ENTRY_STEPS.finished || this.isWaitingForAutoExit()) && (
-              <div className={dialogBoxClassNames}>
-                <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
-
-                {this.state.showProfileEntry && (
-                  <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store} />
-                )}
+          {entryFinished && <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} />}
+          {entryFinished && (
+            <form onSubmit={this.sendMessage}>
+              <div className={styles.messageEntryInRoom}>
+                <input
+                  className={classNames([styles.messageEntryInput, styles.messageEntryInputInRoom])}
+                  value={this.state.pendingMessage}
+                  onFocus={e => e.target.select()}
+                  onChange={e => {
+                    e.stopPropagation();
+                    this.setState({ pendingMessage: e.target.value });
+                  }}
+                  placeholder="Send a message..."
+                />
+                <input
+                  className={classNames([styles.messageEntrySubmit, styles.messageEntrySubmitInRoom])}
+                  type="submit"
+                  value="send"
+                />
               </div>
+            </form>
+          )}
+
+          <div
+            className={classNames({
+              [styles.inviteContainer]: true,
+              [styles.inviteContainerBelowHud]: entryFinished,
+              [styles.inviteContainerInverted]: this.state.showInviteDialog
+            })}
+          >
+            {!showVREntryButton && (
+              <button
+                className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entryFinished })}
+                onClick={() => this.toggleInviteDialog()}
+              >
+                <FormattedMessage id="entry.invite-others-nag" />
+              </button>
+            )}
+            {!showVREntryButton &&
+              this.occupantCount() > 1 &&
+              entryFinished && (
+                <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
+                  <span>
+                    {this.state.miniInviteActivated
+                      ? navigator.share
+                        ? "sharing..."
+                        : "copied!"
+                      : "hub.link/" + this.props.hubId}
+                  </span>
+                </button>
+              )}
+            {showVREntryButton && (
+              <button onClick={() => this.props.scene.enterVR()}>
+                <FormattedMessage id="entry.return-to-vr" />
+              </button>
+            )}
+            {this.state.showInviteDialog && (
+              <InviteDialog
+                allowShare={!this.props.availableVREntryTypes.isInHMD}
+                entryCode={this.props.hubEntryCode}
+                hubId={this.props.hubId}
+                onClose={() => this.setState({ showInviteDialog: false })}
+              />
             )}
           </div>
+
+          {this.state.showLinkDialog && (
+            <LinkDialog
+              linkCode={this.state.linkCode}
+              onClose={() => {
+                this.state.linkCodeCancel();
+                this.setState({ showLinkDialog: false, linkCode: null, linkCodeCancel: null });
+              }}
+            />
+          )}
+
+          <button onClick={() => this.showHelpDialog()} className={styles.helpIcon}>
+            <i>
+              <FontAwesomeIcon icon={faQuestion} />
+            </i>
+          </button>
+
+          <div
+            onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
+            className={classNames({
+              [styles.presenceInfo]: true,
+              [styles.presenceInfoSelected]: this.state.showPresenceList
+            })}
+          >
+            <FontAwesomeIcon icon={faUsers} />
+            <span className={styles.occupantCount}>{this.occupantCount()}</span>
+          </div>
+
+          {this.state.showPresenceList && (
+            <PresenceList presences={this.props.presences} sessionId={this.props.sessionId} />
+          )}
+
           {this.state.entryStep === ENTRY_STEPS.finished ? (
             <div>
               <TwoDHUD.TopHUD
@@ -892,25 +1091,23 @@ class UIRoot extends Component {
                 onToggleMute={this.toggleMute}
                 onToggleFreeze={this.toggleFreeze}
                 onToggleSpaceBubble={this.toggleSpaceBubble}
+                onSpawnPen={this.spawnPen}
+                onSpawnCamera={() => this.props.scene.emit("action_spawn_camera")}
               />
-              {!this.props.availableVREntryTypes.isInHMD &&
-                this.props.occupantCount <= 1 && (
-                  <div className={styles.nagButton}>
-                    <button onClick={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.invite })}>
-                      <FormattedMessage id="entry.invite-others-nag" />
-                    </button>
-                  </div>
-                )}
-              {this.props.availableVREntryTypes.isInHMD && (
-                <div className={styles.nagButton}>
-                  <button onClick={() => this.props.scene.enterVR()}>
-                    <FormattedMessage id="entry.return-to-vr" />
+              {this.props.isSupportAvailable && (
+                <div className={styles.nagCornerButton}>
+                  <button onClick={() => this.showInviteTeamDialog()}>
+                    <FormattedMessage id="entry.invite-team-nag" />
                   </button>
                 </div>
               )}
-              <TwoDHUD.BottomHUD
-                onCreateObject={() => this.setState({ infoDialogType: InfoDialog.dialogTypes.create_object })}
-              />
+              {!this.isWaitingForAutoExit() && (
+                <TwoDHUD.BottomHUD
+                  onCreateObject={() => this.showCreateObjectDialog()}
+                  showPhotoPicker={AFRAME.utils.device.isMobile()}
+                  onMediaPicked={this.createObject}
+                />
+              )}
             </div>
           ) : null}
         </div>

@@ -4,7 +4,7 @@ import { ObjectContentOrigins } from "../object-types";
 
 let nextGrabId = 0;
 /**
- * Spawns networked objects when grabbed.
+ * Spawns networked objects when grabbed or when a specified event is fired.
  * @namespace network
  * @component super-spawner
  */
@@ -13,7 +13,17 @@ AFRAME.registerComponent("super-spawner", {
     /**
      * Source of the media asset the spawner will spawn when grabbed. This can be a gltf, video, or image, or a url that the reticiulm media API can resolve to a gltf, video, or image.
      */
-    src: { default: "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf" },
+    src: { default: "" },
+
+    /**
+     * Whether to use the Reticulum media resolution API to interpret the src URL (e.g. find a video URL for Youtube videos.)
+     */
+    resolve: { default: false },
+
+    /**
+     * The template to use for this object
+     */
+    template: { default: "" },
 
     /**
      * Spawn the object at a custom position, rather than at the center of the spanwer.
@@ -28,10 +38,16 @@ AFRAME.registerComponent("super-spawner", {
     spawnRotation: { type: "vec4" },
 
     /**
+     * Spawn the object with a custom scale, rather than copying that of the spawner.
+     */
+    useCustomSpawnScale: { default: false },
+    spawnScale: { type: "vec3" },
+
+    /**
      * The events to emit for programmatically grabbing and releasing objects
      */
-    grabEvents: { default: ["cursor-grab", "hand_grab"] },
-    releaseEvents: { default: ["cursor-release", "hand_release"] },
+    grabEvents: { default: ["cursor-grab", "primary_hand_grab"] },
+    releaseEvents: { default: ["cursor-release", "primary_hand_release"] },
 
     /**
      * The spawner will become invisible and ungrabbable for this ammount of time after being grabbed. This can prevent rapidly spawning objects.
@@ -41,7 +57,22 @@ AFRAME.registerComponent("super-spawner", {
     /**
      * Center the spawned object on the hand that grabbed it after it finishes loading. By default the object will be grabbed relative to where the spawner was grabbed
      */
-    centerSpawnedObject: { default: false }
+    centerSpawnedObject: { default: false },
+
+    /**
+     * Optional event to listen for to spawn an object on the preferred superHand
+     */
+    spawnEvent: { type: "string" },
+
+    /**
+     * The superHand to use if an object is spawned via spawnEvent
+     */
+    superHand: { type: "selector" },
+
+    /**
+     * The cursor superHand to use if an object is spawned via spawnEvent
+     */
+    cursorSuperHand: { type: "selector" }
   },
 
   init() {
@@ -49,16 +80,26 @@ AFRAME.registerComponent("super-spawner", {
     this.cooldownTimeout = null;
     this.onGrabStart = this.onGrabStart.bind(this);
     this.onGrabEnd = this.onGrabEnd.bind(this);
+
+    this.onSpawnEvent = this.onSpawnEvent.bind(this);
+
+    this.sceneEl = document.querySelector("a-scene");
   },
 
   play() {
     this.el.addEventListener("grab-start", this.onGrabStart);
     this.el.addEventListener("grab-end", this.onGrabEnd);
+    if (this.data.spawnEvent) {
+      this.sceneEl.addEventListener(this.data.spawnEvent, this.onSpawnEvent);
+    }
   },
 
   pause() {
     this.el.removeEventListener("grab-start", this.onGrabStart);
     this.el.removeEventListener("grab-end", this.onGrabEnd);
+    if (this.data.spawnEvent) {
+      this.sceneEl.removeEventListener(this.data.spawnEvent, this.onSpawnEvent);
+    }
 
     if (this.cooldownTimeout) {
       clearTimeout(this.cooldownTimeout);
@@ -70,6 +111,36 @@ AFRAME.registerComponent("super-spawner", {
 
   remove() {
     this.heldEntities.clear();
+  },
+
+  async onSpawnEvent() {
+    const controllerCount = this.el.sceneEl.components["input-configurator"].controllerQueue.length;
+    const using6DOF = controllerCount > 1 && this.el.sceneEl.is("vr-mode");
+    const hand = using6DOF ? this.data.superHand : this.data.cursorSuperHand;
+
+    if (this.cooldownTimeout || !hand) {
+      return;
+    }
+
+    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve).entity;
+
+    hand.object3D.getWorldPosition(entity.object3D.position);
+    hand.object3D.getWorldQuaternion(entity.object3D.quaternion);
+    if (this.data.useCustomSpawnScale) {
+      entity.object3D.scale.copy(this.data.spawnScale);
+    }
+
+    this.activateCooldown();
+
+    await waitForEvent("body-loaded", entity);
+
+    hand.object3D.getWorldPosition(entity.object3D.position);
+
+    if (!using6DOF) {
+      for (let i = 0; i < this.data.grabEvents.length; i++) {
+        hand.emit(this.data.grabEvents[i], { targetEntity: entity });
+      }
+    }
   },
 
   async onGrabStart(e) {
@@ -84,13 +155,15 @@ AFRAME.registerComponent("super-spawner", {
     const thisGrabId = nextGrabId++;
     this.heldEntities.set(hand, thisGrabId);
 
-    const entity = addMedia(this.data.src, ObjectContentOrigins.SPAWNER);
+    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve).entity;
+
     entity.object3D.position.copy(
       this.data.useCustomSpawnPosition ? this.data.spawnPosition : this.el.object3D.position
     );
     entity.object3D.rotation.copy(
       this.data.useCustomSpawnRotation ? this.data.spawnRotation : this.el.object3D.rotation
     );
+    entity.object3D.scale.copy(this.data.useCustomSpawnScale ? this.data.spawnScale : this.el.object3D.scale);
 
     this.activateCooldown();
 

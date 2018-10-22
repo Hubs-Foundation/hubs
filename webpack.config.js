@@ -64,7 +64,9 @@ module.exports = (env, argv) => ({
   entry: {
     index: path.join(__dirname, "src", "index.js"),
     hub: path.join(__dirname, "src", "hub.js"),
+    scene: path.join(__dirname, "src", "scene.js"),
     link: path.join(__dirname, "src", "link.js"),
+    spoke: path.join(__dirname, "src", "spoke.js"),
     "avatar-selector": path.join(__dirname, "src", "avatar-selector.js")
   },
   output: {
@@ -157,11 +159,11 @@ module.exports = (env, argv) => ({
 
   optimization: {
     // necessary due to https://github.com/visionmedia/debug/issues/547
-    minimizer: [new UglifyJsPlugin({ uglifyOptions: { compress: { collapse_vars: false } } })],
+    minimizer: [new UglifyJsPlugin({ sourceMap: true, uglifyOptions: { compress: { collapse_vars: false } } })],
     splitChunks: {
       cacheGroups: {
         engine: {
-          test: /[\\/]node_modules[\\/](aframe|cannon|three\.js)/,
+          test: /([\\/]src[\\/]workers|[\\/]node_modules[\\/](aframe|cannon|three\.js))/,
           priority: 100,
           name: "engine",
           chunks: "all"
@@ -180,7 +182,7 @@ module.exports = (env, argv) => ({
     new HTMLWebpackPlugin({
       filename: "index.html",
       template: path.join(__dirname, "src", "index.html"),
-      chunks: ["vendor", "engine", "index"]
+      chunks: ["vendor", "index"]
     }),
     new HTMLWebpackPlugin({
       filename: "hub.html",
@@ -197,9 +199,28 @@ module.exports = (env, argv) => ({
       ]
     }),
     new HTMLWebpackPlugin({
+      filename: "scene.html",
+      template: path.join(__dirname, "src", "scene.html"),
+      chunks: ["vendor", "engine", "scene"],
+      inject: "head",
+      meta: [
+        {
+          "http-equiv": "origin-trial",
+          "data-feature": "WebVR (For Chrome M62+)",
+          "data-expires": process.env.ORIGIN_TRIAL_EXPIRES,
+          content: process.env.ORIGIN_TRIAL_TOKEN
+        }
+      ]
+    }),
+    new HTMLWebpackPlugin({
       filename: "link.html",
       template: path.join(__dirname, "src", "link.html"),
       chunks: ["vendor", "link"]
+    }),
+    new HTMLWebpackPlugin({
+      filename: "spoke.html",
+      template: path.join(__dirname, "src", "spoke.html"),
+      chunks: ["vendor", "spoke"]
     }),
     new HTMLWebpackPlugin({
       filename: "avatar-selector.html",
@@ -230,6 +251,7 @@ module.exports = (env, argv) => ({
         NODE_ENV: argv.mode,
         JANUS_SERVER: process.env.JANUS_SERVER,
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
+        FARSPARK_SERVER: process.env.FARSPARK_SERVER,
         ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER,
         EXTRA_ENVIRONMENTS: process.env.EXTRA_ENVIRONMENTS,
         BUILD_VERSION: process.env.BUILD_VERSION

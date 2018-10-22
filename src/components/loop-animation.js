@@ -1,62 +1,61 @@
+import { findAncestorWithComponent } from "../utils/scene-graph";
+
 /**
  * Loops the given clip using this entity's animation mixer
  * @component loop-animation
  */
 AFRAME.registerComponent("loop-animation", {
-  dependencies: ["animation-mixer"],
   schema: {
-    clip: { type: "string", required: true }
+    clip: { type: "string" }
   },
+
   init() {
-    const object3DMap = this.el.object3DMap;
-    this.model = object3DMap.mesh || object3DMap.scene;
+    this.mixerEl = findAncestorWithComponent(this.el, "animation-mixer");
 
-    if (this.model) {
-      this.mixer = this.el.components["animation-mixer"].mixer;
-    } else {
-      this.onModelLoaded = this.onModelLoaded.bind(this);
-      this.el.addEventListener("model-loaded", this.onModelLoaded);
+    if (!this.mixerEl) {
+      console.warn("loop-animation component could not find an animation-mixer in its ancestors.");
+      return;
     }
-  },
 
-  onModelLoaded(event) {
-    const animationMixerComponent = this.el.components["animation-mixer"];
-    this.model = event.detail.model;
-    this.mixer = animationMixerComponent.mixer;
-
-    this.updateClipState(true);
-
-    this.el.removeEventListener(this.onModelLoaded);
+    this.updateClip();
   },
 
   update(oldData) {
-    if (oldData.clip !== this.data.clip && this.model) {
-      this.updateClipState(true);
+    if (oldData.clip !== this.data.clip && this.mixerEl) {
+      this.updateClip();
     }
   },
 
-  updateClipState(play) {
-    const model = this.model;
+  updateClip() {
+    const { mixer, animations } = this.mixerEl.components["animation-mixer"];
     const clipName = this.data.clip;
 
-    for (const clip of this.model.animations) {
-      if (clip.name === clipName) {
-        const action = this.mixer.clipAction(clip, model.parent);
-
-        if (play) {
-          action.enabled = true;
-          action.setLoop(THREE.LoopRepeat, Infinity).play();
-        } else {
-          action.stop();
-        }
-
-        break;
-      }
+    if (animations.length === 0) {
+      return;
     }
+
+    let clip;
+
+    if (!clipName) {
+      clip = animations[0];
+    } else {
+      clip = animations.find(({ name }) => name === clipName);
+    }
+
+    if (!clip) {
+      return;
+    }
+
+    const action = mixer.clipAction(clip, this.el.object3D);
+    action.enabled = true;
+    action.setLoop(THREE.LoopRepeat, Infinity).play();
+    this.currentAction = action;
   },
 
   destroy() {
-    this.updateClipState(false);
-    this.el.removeEventListener(this.onModelLoaded);
+    if (this.currentAction) {
+      this.currentAction.enabled = false;
+      this.currentAction.stop();
+    }
   }
 });

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- DO NOT REMOVE/EDIT THIS COMMENT - META_TAGS -->
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="shortcut icon" type="image/png" href="/favicon.ico">
+    <title>Scene | Hubs by Mozilla</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700" rel="stylesheet">
+</head>
+
+<body>
+    <a-scene
+        renderer="antialias: true; gammaOutput: true; sortObjects: true; physicallyCorrectLights: true;"
+        vr-mode-ui="enabled: false"
+        gamma-factor
+    >
+        <a-entity
+            id="scene-root"
+            static-body="shape: none;"
+        ></a-entity>
+
+        <a-camera id="camera" fov="80" look-controls="enabled: false" wasd-controls="enabled: false"></a-camera>
+    </a-scene>
+
+    <div id="ui-root"></div>
+</body>
+
+</html>

@@ -5,17 +5,26 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 80px;
   width: 100%;
-  user-select: none;
 
   &:local(.top) {
     top: 10px;
+    height: 80px;
   }
 
-  &:local(.bottom) {
-    bottom: 20px;
+  &:local(.column) {
+    flex-direction: column;
+    bottom: 0;
+    z-index: 1;
   }
+}
+
+:local(.bottom) {
+  margin-bottom: 20px;
+}
+
+:local(.hide) {
+  display: none;
 }
 
 :local(.panel) {
@@ -23,7 +32,7 @@
   justify-content: space-around;
   align-items: center;
   padding: 5px;
-  background-color: rgba(#4F4F4F, 0.45);
+  background-color: $hud-panel-background;
 }
 
 :local(.panel.left) {
@@ -40,6 +49,14 @@
   padding-right: 5px;
   padding-left: 45px;
   margin-left: -40px;
+}
+
+:local(.panel.up) {
+  border-top-right-radius: 30px;
+  border-top-left-radius: 30px;
+  padding-top: 5px;
+  padding-bottom: 45px;
+  margin-bottom: -40px;
 }
 
 :local(.iconButton) {
@@ -90,6 +107,20 @@
   background-image: url(../hud/bubble_on-hover.png);
 }
 
+:local(.iconButton.spawn_pen) {
+  background-image: url(../hud/spawn_pen.png);
+}
+:local(.iconButton.spawn_pen:hover) {
+  background-image: url(../hud/spawn_pen-hover.png);
+}
+
+:local(.iconButton.spawn_camera) {
+  background-image: url(../hud/spawn_camera.png);
+}
+:local(.iconButton.spawn_camera:hover) {
+  background-image: url(../hud/spawn_camera-hover.png);
+}
+
 :local(.iconButton.freeze) {
   background-image: url(../hud/freeze_off.png);
 }
@@ -108,4 +139,8 @@
 }
 :local(.iconButton.create-object:hover) {
   background-image: url(../hud/create_object-hover.png);
+}
+
+:local(.iconButton.mobile-media-picker) {
+  background-image: url(../hud/spawn_photo.png);
 }

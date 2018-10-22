@@ -5,9 +5,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 
-// TODO: we should make a bundle for avatar picker with it's own geometry, for now just use the indoor part of the meting room
-const meetingSpace = "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingSpace1_mesh-d48250ebc6.gltf";
-
 class AvatarSelector extends Component {
   static propTypes = {
     avatars: PropTypes.array,
@@ -137,11 +134,7 @@ class AvatarSelector extends Component {
     const avatarData = this.state.avatarIndices.map(i => [this.props.avatars[i], i]);
     const avatarEntities = avatarData.map(([avatar, i]) => (
       <a-entity key={avatar.id} rotation={`0 ${(360 * -i) / this.props.avatars.length} 0`}>
-        <a-entity position="0 0 5" gltf-model-plus={`src: #${avatar.id}`} inflate="true">
-          <template data-selector=".RootScene">
-            <a-entity animation-mixer="" />
-          </template>
-
+        <a-entity position="0 0 5" gltf-model-plus={`src: #${avatar.id}; inflate: true`}>
           <a-animation
             attribute="rotation"
             dur="12000"
@@ -159,10 +152,7 @@ class AvatarSelector extends Component {
     return (
       <div className="avatar-selector">
         <a-scene vr-mode-ui="enabled: false" ref={sce => (this.scene = sce)}>
-          <a-assets>
-            {avatarAssets}
-            <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src={meetingSpace} />
-          </a-assets>
+          <a-assets>{avatarAssets}</a-assets>
 
           <a-entity rotation={`0 ${initialRotation} 0`}>
             <a-animation
@@ -185,7 +175,6 @@ class AvatarSelector extends Component {
             position="0 5 -15"
           />
           <a-entity hide-when-quality="low" light="type: ambient; color: #FFF" />
-          <a-entity id="meeting-space" gltf-model-plus="src: #meeting-space1-mesh" position="0 0 0" />
         </a-scene>
         <button className="avatar-selector__previous-button" onClick={this.emitChangeToPrevious}>
           <FontAwesomeIcon icon={faAngleLeft} />

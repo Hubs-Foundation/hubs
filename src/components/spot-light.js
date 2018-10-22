@@ -11,6 +11,7 @@ AFRAME.registerComponent("spot-light", {
   init() {
     const el = this.el;
     this.light = new THREE.SpotLight();
+    this.light.position.set(0, 0, 0);
     this.light.target.position.set(0, 0, 1);
     this.light.add(this.light.target);
     this.light.decay = 2;

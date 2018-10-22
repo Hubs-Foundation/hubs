@@ -87,6 +87,19 @@ export default class HubChannel {
     this.channel.push("events:object_spawned", spawnEvent);
   };
 
+  sendProfileUpdate = () => {
+    this.channel.push("events:profile_updated", { profile: this.store.state.profile });
+  };
+
+  sendMessage = body => {
+    if (body === "") return;
+    this.channel.push("message", { body });
+  };
+
+  requestSupport = () => {
+    this.channel.push("events:request_support", {});
+  };
+
   disconnect = () => {
     if (this.channel) {
       this.channel.socket.disconnect();

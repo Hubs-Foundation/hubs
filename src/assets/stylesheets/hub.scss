@@ -7,16 +7,20 @@
 @import 'entry';
 @import 'audio';
 @import 'info-dialog';
+@import 'shared';
 
 .a-enter-vr, .a-orientation-modal {
   display: none;
+}
+
+.grab-cursor {
+  cursor: grab;
 }
 
 .no-cursor {
   cursor: none;
 }
 
-
 .webxr-realities, .webxr-sessions {
-  user-select: none;
+  @extend %unselectable
 }

@@ -1,6 +1,7 @@
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
+const MAX_WARNINGS = 10;
 
 /**
  * Avatar movement controller that listens to move, rotate and teleportation events and moves the avatar accordingly.
@@ -25,6 +26,8 @@ AFRAME.registerComponent("character-controller", {
     this.accelerationInput = new THREE.Vector3(0, 0, 0);
     this.pendingSnapRotationMatrix = new THREE.Matrix4();
     this.angularVelocity = 0; // Scalar value because we only allow rotation around Y
+    this._withinWarningLimit = true;
+    this._warningCount = 0;
     this.setAccelerationInput = this.setAccelerationInput.bind(this);
     this.snapRotateLeft = this.snapRotateLeft.bind(this);
     this.snapRotateRight = this.snapRotateRight.bind(this);
@@ -158,26 +161,41 @@ AFRAME.registerComponent("character-controller", {
     };
   })(),
 
-  setPositionOnNavMesh: function(start, end, object3D) {
-    const pathfinder = this.el.sceneEl.systems.nav.pathfinder;
-    const zone = this.navZone;
-    if (zone in pathfinder.zones) {
-      if (this.navGroup == null) {
-        this.navGroup = pathfinder.getGroup(zone, end);
-      }
-      this.navNode = this.navNode || pathfinder.getClosestNode(end, zone, this.navGroup, true);
-      this.navNode = pathfinder.clampStep(start, end, this.navNode, zone, this.navGroup, object3D.position);
+  _warnWithWarningLimit: function(msg) {
+    if (!this._withinWarningLimit) return;
+    this._warningCount++;
+    if (this._warningCount > MAX_WARNINGS) {
+      this._withinWarningLimit = false;
+      msg = "Warning count exceeded. Will not log further warnings";
     }
+    console.warn("character-controller", msg);
+  },
+
+  _setNavNode: function(pos) {
+    if (this.navNode !== null) return;
+    const { pathfinder } = this.el.sceneEl.systems.nav;
+    this.navNode =
+      pathfinder.getClosestNode(pos, this.navZone, this.navGroup, true) ||
+      pathfinder.getClosestNode(pos, this.navZone, this.navGroup);
+  },
+
+  setPositionOnNavMesh: function(start, end, object3D) {
+    const { pathfinder } = this.el.sceneEl.systems.nav;
+    if (!(this.navZone in pathfinder.zones)) return;
+    if (this.navGroup === null) {
+      this.navGroup = pathfinder.getGroup(this.navZone, end, true, true);
+    }
+    this._setNavNode(end);
+    this.navNode = pathfinder.clampStep(start, end, this.navNode, this.navZone, this.navGroup, object3D.position);
   },
 
   resetPositionOnNavMesh: function(position, navPosition, object3D) {
-    const pathfinder = this.el.sceneEl.systems.nav.pathfinder;
-    const zone = this.navZone;
-    if (zone in pathfinder.zones) {
-      this.navGroup = pathfinder.getGroup(zone, position);
-      this.navNode = pathfinder.getClosestNode(navPosition, zone, this.navGroup, true) || this.navNode;
-      this.navNode = pathfinder.clampStep(position, position, this.navNode, zone, this.navGroup, object3D.position);
-    }
+    const { pathfinder } = this.el.sceneEl.systems.nav;
+    if (!(this.navZone in pathfinder.zones)) return;
+    this.navGroup = pathfinder.getGroup(this.navZone, navPosition, true, true);
+    this.navNode = null;
+    this._setNavNode(navPosition);
+    pathfinder.clampStep(position, navPosition, this.navNode, this.navZone, this.navGroup, object3D.position);
   },
 
   updateVelocity: function(dt) {

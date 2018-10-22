@@ -1,6 +1,6 @@
 @import 'shared';
 
-#ui-root .ui {
+:local(.ui) {
   @extend %default-font;
 
   width: 100%;
@@ -9,22 +9,21 @@
   left: 0;
   position: absolute;
   pointer-events: none;
-  color: white;
 
-  &__help-icon {
+  :local(.help-icon) {
     @extend %fa-icon-button;
     pointer-events: auto;
     position: absolute;
     top: 0px;
-    left: 14px;
+    right: 14px;
 
-    &__icon {
-      background: rgba(33, 33, 33, 0.5);
+    i {
+      background: white;
       border-radius: 36px;
       display: inline-block;
       font-size: 22px;
       vertical-align: sub;
-      line-height: 38px;
+      line-height: 34px;
       border: 0;
       width: 36px;
       height: 36px;
@@ -32,84 +31,239 @@
   }
 }
 
-.blurred {
-  filter: blur(5px) saturate(1.1) brightness(1.1);
-}
-
-.ui-dialog {
-  display: grid;
-  grid-template-columns: 1fr 20px minmax(200px, 400px) 20px 1fr;
-  grid-template-rows: 1fr 20px minmax(200px, 600px) 20px 1fr;
-  width: 100%;
+:local(.ui-dialog) {
+  position: absolute;
+  top: 0;
+  left: 0;
   height: 100%;
-  user-select: none;
-
-  &--darkened {
-    background-color: $dark-transparent;
-  }
+  width: 100%;
+  @extend %unselectable;
+  flex-direction: column;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 
-.ui-dialog-box {
-  grid-column: 3;
-  grid-row: 3;
+:local(.ui-dialog-box-contents) {
+  background-color: $white-transparent;
+  border-radius: 18px 18px 0 0;
+  width: 100%;
+  max-width: 600px;
+  z-index: 2;
   position: relative;
-}
 
-.ui-dialog-box-contents {
-  background-color: $light-transparent;
-  border-radius: 18px;
-  width: 100%;
-  height: 100%;
-
-  &--backgrounded {
+  :local(.backgrounded) {
     filter: blur(1px);
     opacity: 0.7;
     pointer-events: none;
   }
 }
 
-.ui-interactive {
+:local(.ui-interactive) {
   pointer-events: auto;
+  @extend %unselectable;
 }
 
-:local(.nag-button) {
+:local(.invite-container) {
+  @extend %unselectable;
   position: absolute;
-  top: 110px;
+  top: 0;
   left: 0;
+  margin-top: 16px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+
+  button {
+    @extend %action-button;
+    pointer-events: auto;
+  }
+
+  @media (max-height: 320px) {
+    display: none;
+  }
+
+  :local(.hide-small-screens) {
+    display: none;
+
+    @media (min-height: 737px) {
+      display: flex;
+    }
+  }
+
+  :local(.invite-mini-button) {
+    display: none;
+    background-color: $hud-panel-background;
+    height: 28px;
+    font-size: 0.8em;
+
+    @media (max-height: 736px) and (min-height: 325px) {
+      display: flex;
+    }
+  }
+}
+
+:local(.invite-container-inverted) {
+  button {
+    @extend %action-button-selected;
+  }
+}
+
+:local(.invite-container-below-hud) {
+  margin-top: 100px;
+}
+
+:local(.nag-corner-button) {
+  position: absolute;
+  bottom: 42px;
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   height: 80px;
   pointer-events: none;
-  
+
   button {
-    @extend %big-action-button;
+    @extend %default-font;
+    font-size: 1.3em;
+    font-weight: bold;
+    cursor: pointer;
+    min-width: 150px;
+    margin-right: 12px;
+    margin-left: 12px;
+    white-space: nowrap;
+    background: none;
+    border: none;
     pointer-events: auto;
+    padding: 16px 28px;
+    height: 58px;
+    color: $light-text;
+    text-shadow: 0px 0px 4px rgba(0, 0, 0, 1.0);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 740px) {
+    display: none;
   }
 }
 
 :local(.presence-info) {
+  @extend %unselectable;
   text-align: right;
   position: absolute;
   top: 0;
-  right: 16px;
+  left: 16px;
   margin: 16px 0;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   font-size: 1.3em;
-  text-shadow: 0px 0px 4px rgba(0, 0, 0, 1.0);
-  -webkit-filter: drop-shadow( 0px 0px 3px #606060 ); 
-  filter: drop-shadow( 0px 0px 3px #606060 );
+  background-color: white;
+  border-radius: 24px;
+  font-weight: bold;
+  padding: 8px 18px;
+  pointer-events: auto;
+  cursor: pointer;
 
   @media (min-width: 769px) and (min-height: 421px) {
     flex: 1;
   }
   @media (max-width: 768px) , (max-height: 420px) {
-    margin: 16px 8px;
+    margin: 16px 0;
+    margin-right: 0;
+    padding: 2px 8px;
   }
   :local(.occupant-count) {
     margin: 0 12px;
+  }
+}
+
+:local(.presence-info-selected) {
+  color: $action-color;
+}
+
+:local(.message-entry) {
+  position: relative;
+  margin: 8px 24px 24px 24px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border: 1px solid #e2e2e2;
+  border-radius: 16px;
+}
+
+:local(.message-entry-input) {
+  @extend %default-font;
+  pointer-events: auto;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
+  background-color: transparent;
+  color: black;
+  padding: 8px 1.25em;
+  line-height: 2em;
+  font-size: 1.1em;
+  width: 100%;
+  border: 0px;
+  height: 32px;
+  margin-right: 100px;
+}
+
+:local(.message-entry-input)::placeholder{
+  color: $dark-grey;
+  font-weight: 300;
+  font-style: italic;
+}
+
+:local(.message-entry-submit) {
+  @extend %action-button;
+  position: absolute;
+  right: 12px;
+  height: 32px;
+  min-width: 80px;
+}
+
+:local(.message-entry-in-room) {
+  @media(max-width: 900px) {
+    display:none;
+  }
+
+  position: absolute;
+  left: 16px;
+  bottom: 20px;
+  width: 33%;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: $darker-grey;
+  border-radius: 16px;
+  pointer-events: auto;
+  opacity: 0.3;
+  transition: opacity 0.25s linear;
+
+  :local(.message-entry-input-in-room) {
+    color: white;
+    padding: 8px 1.25em;
+  }
+
+  :local(.message-entry-submit-in-room) {
+    border: 0;
+    visibility: hidden;
+  }
+}
+
+:local(.message-entry-in-room):hover {
+  opacity: 1.0;
+  transition: opacity 0.25s linear;
+
+  :local(.message-entry-submit-in-room) {
+    visibility: visible;
   }
 }

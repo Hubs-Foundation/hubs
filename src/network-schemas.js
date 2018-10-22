@@ -1,15 +1,19 @@
 function registerNetworkSchemas() {
   const vectorRequiresUpdate = epsilon => {
-    let prev = null;
-    return curr => {
-      if (prev === null) {
-        prev = new THREE.Vector3(curr.x, curr.y, curr.z);
-        return true;
-      } else if (!NAF.utils.almostEqualVec3(prev, curr, epsilon)) {
-        prev.copy(curr);
-        return true;
-      }
-      return false;
+    return () => {
+      let prev = null;
+
+      return curr => {
+        if (prev === null) {
+          prev = new THREE.Vector3(curr.x, curr.y, curr.z);
+          return true;
+        } else if (!NAF.utils.almostEqualVec3(prev, curr, epsilon)) {
+          prev.copy(curr);
+          return true;
+        }
+
+        return false;
+      };
     };
   };
 
@@ -72,10 +76,12 @@ function registerNetworkSchemas() {
     template: "#video-template",
     components: [
       {
-        component: "position"
+        component: "position",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
-        component: "rotation"
+        component: "rotation",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       "visible"
     ]
@@ -101,6 +107,57 @@ function registerNetworkSchemas() {
       {
         component: "media-video",
         property: "videoPaused"
+      },
+      {
+        component: "media-pager",
+        property: "index"
+      }
+    ]
+  });
+
+  NAF.schemas.add({
+    template: "#interactable-drawing",
+    components: [
+      {
+        component: "position",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
+      {
+        component: "rotation",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
+      },
+      "scale",
+      "networked-drawing"
+    ]
+  });
+
+  NAF.schemas.add({
+    template: "#interactable-camera",
+    components: ["position", "rotation"]
+  });
+
+  NAF.schemas.add({
+    template: "#pen-interactable",
+    components: [
+      {
+        component: "position",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
+      {
+        component: "rotation",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
+      },
+      "scale",
+      "media-loader",
+      {
+        selector: "#pen",
+        component: "pen",
+        property: "radius"
+      },
+      {
+        selector: "#pen",
+        component: "pen",
+        property: "color"
       }
     ]
   });

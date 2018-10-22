@@ -1,9 +1,13 @@
 import "./components/gltf-model-plus";
 
+AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
 AFRAME.GLTFModelPlus.registerComponent("sound", "sound");
 AFRAME.GLTFModelPlus.registerComponent("collision-filter", "collision-filter");
 AFRAME.GLTFModelPlus.registerComponent("css-class", "css-class");
+AFRAME.GLTFModelPlus.registerComponent("interactable", "css-class", (el, componentName) => {
+  el.setAttribute(componentName, "interactable");
+});
 AFRAME.GLTFModelPlus.registerComponent("scene-shadow", "scene-shadow");
 AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner");
 AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
@@ -24,6 +28,7 @@ AFRAME.GLTFModelPlus.registerComponent("scale-audio-feedback", "scale-audio-feed
 AFRAME.GLTFModelPlus.registerComponent("animation-mixer", "animation-mixer");
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
 AFRAME.GLTFModelPlus.registerComponent("shape", "shape");
+AFRAME.GLTFModelPlus.registerComponent("heightfield", "heightfield");
 AFRAME.GLTFModelPlus.registerComponent(
   "box-collider",
   "shape",
@@ -43,7 +48,13 @@ AFRAME.GLTFModelPlus.registerComponent(
     };
   })()
 );
-AFRAME.GLTFModelPlus.registerComponent("visible", "visible");
+AFRAME.GLTFModelPlus.registerComponent("visible", "visible", (el, componentName, componentData) => {
+  if (typeof componentData === "object") {
+    el.setAttribute(componentName, componentData.visible);
+  } else {
+    el.setAttribute(componentName, componentData);
+  }
+});
 AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point");
 AFRAME.GLTFModelPlus.registerComponent("hoverable", "hoverable");
 AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
@@ -57,4 +68,7 @@ AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentNa
       nav.loadMesh(node, zone);
     }
   });
+  // There isn't actually an a-frame nav-mesh component, but we want to tag this el as a nav-mesh since
+  // nav-mesh-helper will query for it later.
+  el.setAttribute("nav-mesh");
 });

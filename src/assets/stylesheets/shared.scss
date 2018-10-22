@@ -1,22 +1,34 @@
 $light-transparent: rgba(0, 0, 0, 0.2);
+$white-transparent: rgba(255, 255, 255, 0.90);
 $dark-transparent: rgba(0, 0, 0, 0.4);
 $darker-transparent: rgba(0, 0, 0, 0.6);
 $darkest-transparent: rgba(0, 0, 0, 0.9);
 $grey-text: rgba(192, 192, 192, 1.0);
+$dark-grey-text: rgba(64, 64, 64, 1.0);
 $light-text: rgba(240, 240, 240, 1.0);
 $light-grey: lightgrey;
 $dark-grey: rgba(128, 128, 128, 1.0);
 $darker-grey: rgba(64, 64, 64, 1.0);
 $darkest-grey: rgba(32, 32, 32, 1.0);
+$action-color: #FF3464;
+$action-color-light: #FF74A4;
+$action-color-transparent: rgba(255, 52, 100, 0.9);
+$hud-panel-background: rgba(79, 79, 79, 0.45);
+
+%unselectable {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
 
 %default-font {
-  font-family: 'Zilla Slab', sans-serif;
+  font-family: 'Open Sans', sans-serif;
 }
 
 %glass-text {
-  font-family: 'Zilla Slab', sans-serif;
-  text-shadow: 0px 0px 4px rgba(0, 0, 0, 1.0);
-  color: white; 
+  font-family: 'Open Sans', sans-serif;
+  color: black;
 }
 
 %glass-icon {
@@ -25,21 +37,38 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
 }
 
 %rounded-border {
-  border: 3px solid white;
+  border: 1px solid #e2e2e2;
   box-sizing: border-box;
-  border-radius: 14px;
+  border-radius: 10px;
+}
+
+%form-field-on-white {
+  border: 1px solid #e2e2e2;
+  background-color: white;
+  border-radius: 10px;
 }
 
 %big-action-button {
   @extend %default-font;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
   outline-style: none;
-  font-size: 2em;
+  font-size: 18px;
   font-weight: bold;
   cursor: pointer;
-  border: 3px solid white;
-  border-radius: 26px;
-  padding: 12px 64px 12px 64px;
-  background: #2F80ED;
+  border-radius: 32px;
+  border: 0;
+  width: 350px;
+  padding: 18px;
+  text-decoration: none;
+
+  @media (max-width: 768px) {
+    width: auto;
+    padding: 18px 48px;
+  }
+
+  background: #FF3464;
   color: white;
   display: flex;
   align-items: center;
@@ -55,33 +84,50 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
   margin: 16px 0;
 }
 
+%wide-button {
+  width: 350px;
+
+  @media (max-width: 768px) {
+    width: 327px;
+  }
+}
+
 %action-button {
   @extend %default-font;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  text-decoration: none;
   outline-style: none;
   font-weight: bold;
   cursor: pointer;
-  border: 3px solid white;
-  border-radius: 26px;
-  height: 64px;
-  padding: 12px;
-  background: #2F80ED;
-  font-size: 1.3em;
+  border: 0;
+  border-radius: 28px;
+  padding: 0px 18px;
+
+  background: #FF3464;
+  font-size: 1em;
   color: white;
   display: flex;
   align-items: center;
   flex-direction: column;
   justify-content: center;
   min-width: 150px;
+  height: 48px;
+}
+
+%action-button-selected {
+  background: white;
+  color: $action-color;
 }
 
 %bottom-action-button {
   @extend %bottom-button;
-  background: #2F80ED;
-  font-size: 1.3em;
+  background: #FF3464;
 }
 
 %top-title {
-  font-size: 1.3em;
+  font-size: 1.5em;
   font-weight: bold;
 }
 
@@ -107,16 +153,21 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
   -webkit-appearance: none;
   width: 2em;
   height: 2em;
-  border: 3px solid white;
+  border: 1px solid #e2e2e2;
   border-radius: 9px;
   vertical-align: sub;
   margin: 0 0.6em
 }
 
 %checkbox-checked {
-  border: 9px double white;
-  outline: 9px solid white;
+  border: 9px double #aaa;
+  outline: 9px solid #aaa;
   outline-offset: -18px;
+}
+
+%background-agnostic {
+  color: black;
+  text-shadow: 0px 0px 10px #888;
 }
 
 %fa-icon-button {
@@ -126,7 +177,7 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
   display: block;
   background: none;
   border: none;
-  color: white;
+  color: black;
   cursor: pointer;
   font-size: 0.8em;
   outline-style: none;
@@ -155,7 +206,7 @@ $darkest-grey: rgba(32, 32, 32, 1.0);
   vertical-align: sub;
   line-height: 42px;
   svg {
-    margin-left: 0px;
+    margin-right: 2px;
   }
 }
 

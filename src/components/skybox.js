@@ -271,6 +271,12 @@ AFRAME.registerComponent("skybox", {
       const z = distance * Math.sin(phi) * Math.cos(theta);
 
       uniforms.sunPosition.value.set(x, y, z).normalize();
+
+      // HACK Remove this if condition and always set the scale based on distance when the existing environments
+      // have their sky scales set to 1.
+      if (this.el.object3D.scale.x === 1) {
+        this.sky.scale.set(distance, distance, distance);
+      }
     }
   },
 

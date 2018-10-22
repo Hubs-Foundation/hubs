@@ -21,7 +21,6 @@ AFRAME.registerComponent("input-configurator", {
     this.isMobile = AFRAME.utils.device.isMobile();
     this.eventHandlers = [];
     this.controllerQueue = [];
-    this.hasPointingDevice = false;
     this.cursor = this.data.cursorController.components["cursor-controller"];
     this.gazeTeleporter = this.data.gazeTeleporter.components["teleport-controls"];
     this.cameraController = this.data.camera.components["pitch-yaw-rotator"];
@@ -89,12 +88,10 @@ AFRAME.registerComponent("input-configurator", {
     this.actionEventHandler = new ActionEventHandler(this.el.sceneEl, this.cursor);
     this.eventHandlers.push(this.actionEventHandler);
 
-    this.cursor.el.setAttribute("cursor-controller", "useMousePos", !this.inVR);
-
     if (this.inVR) {
       this.cameraController.pause();
       this.cursorRequiresManagement = true;
-      this.cursor.el.setAttribute("cursor-controller", "minDistance", 0);
+      this.cursor.el.setAttribute("cursor-controller", "near", 0);
       if (this.isMobile) {
         this.eventHandlers.push(new GearVRMouseEventsHandler(this.cursor, this.gazeTeleporter));
       } else {
@@ -108,7 +105,7 @@ AFRAME.registerComponent("input-configurator", {
         this.addLookOnMobile();
       } else {
         this.eventHandlers.push(new MouseEventsHandler(this.cursor, this.cameraController));
-        this.cursor.el.setAttribute("cursor-controller", "minDistance", 0.3);
+        this.cursor.el.setAttribute("cursor-controller", "near", 0.3);
       }
     }
   },
@@ -145,25 +142,30 @@ AFRAME.registerComponent("input-configurator", {
   },
 
   updateController: function() {
-    this.hasPointingDevice = this.controllerQueue.length > 0 && this.inVR;
-    this.cursor.el.setAttribute("cursor-controller", "drawLine", this.hasPointingDevice);
-
     this.cursor.setCursorVisibility(true);
+    const controllerData = this.controllerQueue.length ? this.controllerQueue[0] : null;
 
-    if (this.hasPointingDevice) {
-      const controllerData = this.controllerQueue[0];
-      const hand = controllerData.handedness;
+    if (controllerData) {
       this.controller = controllerData.controller;
-      this.cursor.el.setAttribute("cursor-controller", {
-        rayObject: hand === "left" ? this.data.leftControllerRayObject : this.data.rightControllerRayObject
-      });
+      this.actionEventHandler.setHandThatAlsoDrivesCursor(this.controller);
     } else {
       this.controller = null;
-      this.cursor.el.setAttribute("cursor-controller", { rayObject: this.data.gazeCursorRayObject });
+      this.actionEventHandler.setHandThatAlsoDrivesCursor(null);
     }
 
-    if (this.actionEventHandler) {
-      this.actionEventHandler.setHandThatAlsoDrivesCursor(this.controller);
+    let rayObject;
+    let drawLine;
+    if (controllerData && this.inVR) {
+      rayObject =
+        controllerData.handedness === "left" ? this.data.leftControllerRayObject : this.data.rightControllerRayObject;
+      drawLine = true;
+    } else if (this.inVR) {
+      rayObject = this.data.gazeCursorRayObject;
+      drawLine = false;
+    } else {
+      rayObject = null;
+      drawLine = false;
     }
+    this.cursor.el.setAttribute("cursor-controller", { rayObject, drawLine });
   }
 });

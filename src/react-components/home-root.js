@@ -4,62 +4,139 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 
 import { lang, messages } from "../utils/i18n";
+import { playVideoWithStopOnBlur } from "../utils/video-utils.js";
 import homeVideoWebM from "../assets/video/home.webm";
 import homeVideoMp4 from "../assets/video/home.mp4";
+import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
+import mozLogo from "../assets/images/moz-logo-black.png";
 import classNames from "classnames";
 import { ENVIRONMENT_URLS } from "../assets/environments/environments";
+import { connectToReticulum } from "../utils/phoenix-utils";
 
 import styles from "../assets/stylesheets/index.scss";
 
 import HubCreatePanel from "./hub-create-panel.js";
-import InfoDialog from "./info-dialog.js";
+import AuthDialog from "./auth-dialog.js";
+import ReportDialog from "./report-dialog.js";
+import JoinUsDialog from "./join-us-dialog.js";
+import UpdatesDialog from "./updates-dialog.js";
+import DialogContainer from "./dialog-container.js";
 
 addLocaleData([...en]);
 
 class HomeRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
-    dialogType: PropTypes.symbol,
+    sceneId: PropTypes.string,
+    authVerify: PropTypes.bool,
+    authTopic: PropTypes.string,
+    authToken: PropTypes.string,
+    authOrigin: PropTypes.string,
+    listSignup: PropTypes.bool,
+    report: PropTypes.bool,
     initialEnvironment: PropTypes.string
   };
 
   state = {
     environments: [],
-    dialogType: null,
+    dialog: null,
     mailingListEmail: "",
     mailingListPrivacy: false
   };
 
   componentDidMount() {
-    this.loadEnvironments();
-    this.setState({ dialogType: this.props.dialogType });
+    this.closeDialog = this.closeDialog.bind(this);
+    if (this.props.authVerify) {
+      this.showAuthDialog(true);
+      this.verifyAuth().then(this.showAuthDialog);
+      return;
+    }
+    if (this.props.sceneId) {
+      this.loadEnvironmentFromScene();
+    } else {
+      this.loadEnvironments();
+    }
     this.loadHomeVideo();
+    if (this.props.listSignup) {
+      this.showUpdatesDialog();
+    } else if (this.props.report) {
+      this.showReportDialog();
+    }
   }
+
+  async verifyAuth() {
+    const socket = connectToReticulum();
+    const channel = socket.channel(this.props.authTopic);
+    await new Promise((resolve, reject) =>
+      channel
+        .join()
+        .receive("ok", resolve)
+        .receive("error", reject)
+    );
+    channel.push("auth_verified", { token: this.props.authToken });
+  }
+
+  showAuthDialog = verifying => {
+    this.setState({ dialog: <AuthDialog verifying={verifying} authOrigin={this.props.authOrigin} /> });
+  };
 
   loadHomeVideo = () => {
     const videoEl = document.querySelector("#background-video");
     videoEl.playbackRate = 0.9;
-    function toggleVideo() {
-      // Play the video if the window/tab is visible.
-      if (document.hasFocus()) {
-        videoEl.play();
-      } else {
-        videoEl.pause();
-      }
-    }
-    if ("hasFocus" in document) {
-      document.addEventListener("visibilitychange", toggleVideo);
-      window.addEventListener("focus", toggleVideo);
-      window.addEventListener("blur", toggleVideo);
-    }
+    playVideoWithStopOnBlur(videoEl);
   };
 
-  showDialog = dialogType => {
-    return e => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.setState({ dialogType });
-    };
+  closeDialog() {
+    this.setState({ dialog: null });
+  }
+
+  showJoinUsDialog() {
+    this.setState({ dialog: <JoinUsDialog onClose={this.closeDialog} /> });
+  }
+
+  showReportDialog() {
+    this.setState({ dialog: <ReportDialog onClose={this.closeDialog} /> });
+  }
+
+  showUpdatesDialog() {
+    this.setState({
+      dialog: <UpdatesDialog onClose={this.closeDialog} onSubmittedEmail={() => this.showEmailSubmittedDialog()} />
+    });
+  }
+
+  showEmailSubmittedDialog() {
+    this.setState({
+      dialog: (
+        <DialogContainer onClose={this.closeDialog}>
+          Great! Please check your e-mail to confirm your subscription.
+        </DialogContainer>
+      )
+    });
+  }
+
+  loadEnvironmentFromScene = async () => {
+    let sceneUrlBase = "/api/v1/scenes";
+    if (process.env.RETICULUM_SERVER) {
+      sceneUrlBase = `https://${process.env.RETICULUM_SERVER}${sceneUrlBase}`;
+    }
+    const sceneInfoUrl = `${sceneUrlBase}/${this.props.sceneId}`;
+    const resp = await fetch(sceneInfoUrl).then(r => r.json());
+    const scene = resp.scenes[0];
+    const attribution = scene.attribution && scene.attribution.split("\n").join(", ");
+    const authors = attribution && [{ organization: { name: attribution } }];
+    // Transform the scene info into a an environment bundle structure.
+    this.setState({
+      environments: [
+        {
+          scene_id: this.props.sceneId,
+          meta: {
+            title: scene.name,
+            authors,
+            images: [{ type: "preview-thumbnail", srcset: scene.screenshot_url }]
+          }
+        }
+      ]
+    });
   };
 
   loadEnvironments = () => {
@@ -77,34 +154,38 @@ class HomeRoot extends Component {
     Promise.all(environmentLoads).then(() => this.setState({ environments }));
   };
 
+  onDialogLinkClicked = trigger => {
+    return e => {
+      e.preventDefault();
+      e.stopPropagation();
+      trigger();
+    };
+  };
+
   render() {
     const mainContentClassNames = classNames({
       [styles.mainContent]: true,
-      [styles.noninteractive]: !!this.state.dialogType
+      [styles.noninteractive]: !!this.state.dialog
     });
-    const dialogTypes = InfoDialog.dialogTypes;
 
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.home}>
           <div className={mainContentClassNames}>
             <div className={styles.headerContent}>
-              <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
-                <div className={styles.hubs}>hubs</div>
-                <div className={styles.preview}>preview</div>
+              <div className={styles.titleAndNav}>
                 <div className={styles.links}>
                   <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
                     <FormattedMessage id="home.source_link" />
                   </a>
-                  <a
-                    href="https://blog.mozvr.com/introducing-hubs-a-new-way-to-get-together-online/"
-                    rel="noreferrer noopener"
-                  >
-                    <FormattedMessage id="home.about_link" />
+                  <a href="https://discord.gg/XzrGUY8" rel="noreferrer noopener">
+                    <FormattedMessage id="home.community_link" />
+                  </a>
+                  <a href="/spoke" rel="noreferrer noopener">
+                    Spoke
                   </a>
                 </div>
               </div>
-              <div className={styles.ident} />
             </div>
             <div className={styles.heroContent}>
               <div className={styles.attribution}>
@@ -118,21 +199,31 @@ class HomeRoot extends Component {
                 </a>
               </div>
               <div className={styles.container}>
+                <img className={styles.logo} src={hubLogo} />
                 <div className={styles.title}>
                   <FormattedMessage id="home.hero_title" />
                 </div>
-                <div className={styles.subtitle}>
-                  <FormattedMessage id="home.hero_subtitle" />
-                </div>
-              </div>
-              <div className={styles.create}>
-                {this.state.environments.length > 0 && (
-                  <HubCreatePanel
-                    initialEnvironment={this.props.initialEnvironment}
-                    environments={this.state.environments}
-                  />
+                {this.state.environments.length === 0 && (
+                  <div className="loader-wrap">
+                    <div className="loader">
+                      <div className="loader-center" />
+                    </div>
+                  </div>
                 )}
               </div>
+              <div className={styles.create}>
+                <HubCreatePanel
+                  initialEnvironment={this.props.initialEnvironment}
+                  environments={this.state.environments}
+                />
+              </div>
+              {this.state.environments.length > 1 && (
+                <div className={styles.joinButton}>
+                  <a href="/link">
+                    <FormattedMessage id="home.join_room" />
+                  </a>
+                </div>
+              )}
             </div>
             <div className={styles.footerContent}>
               <div className={styles.links}>
@@ -141,7 +232,7 @@ class HomeRoot extends Component {
                     className={styles.link}
                     rel="noopener noreferrer"
                     href="#"
-                    onClick={this.showDialog(dialogTypes.slack)}
+                    onClick={this.onDialogLinkClicked(this.showJoinUsDialog.bind(this))}
                   >
                     <FormattedMessage id="home.join_us" />
                   </a>
@@ -149,7 +240,7 @@ class HomeRoot extends Component {
                     className={styles.link}
                     rel="noopener noreferrer"
                     href="#"
-                    onClick={this.showDialog(dialogTypes.updates)}
+                    onClick={this.onDialogLinkClicked(this.showUpdatesDialog.bind(this))}
                   >
                     <FormattedMessage id="home.get_updates" />
                   </a>
@@ -157,7 +248,7 @@ class HomeRoot extends Component {
                     className={styles.link}
                     rel="noopener noreferrer"
                     href="#"
-                    onClick={this.showDialog(dialogTypes.report)}
+                    onClick={this.onDialogLinkClicked(this.showReportDialog.bind(this))}
                   >
                     <FormattedMessage id="home.report_issue" />
                   </a>
@@ -177,12 +268,8 @@ class HomeRoot extends Component {
                   >
                     <FormattedMessage id="home.privacy_notice" />
                   </a>
-                </div>
-                <div className={styles.bottom}>
-                  <div>
-                    <FormattedMessage id="home.made_with_love" />
-                    <span style={{ fontWeight: "bold", color: "white" }}>Mozilla</span>
-                  </div>
+
+                  <img className={styles.mozLogo} src={mozLogo} />
                 </div>
               </div>
             </div>
@@ -191,13 +278,7 @@ class HomeRoot extends Component {
             <source src={homeVideoWebM} type="video/webm" />
             <source src={homeVideoMp4} type="video/mp4" />
           </video>
-          {this.state.dialogType && (
-            <InfoDialog
-              dialogType={this.state.dialogType}
-              onCloseDialog={() => this.setState({ dialogType: null })}
-              onSubmittedEmail={() => this.setState({ dialogType: dialogTypes.email_submitted })}
-            />
-          )}
+          {this.state.dialog}
         </div>
       </IntlProvider>
     );
