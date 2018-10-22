@@ -13,17 +13,17 @@ void main() {
   #include <uv_vertex>
   #include <uv2_vertex>
   #include <color_vertex>
-	#include <skinbase_vertex>
+  #include <skinbase_vertex>
 
   #include <begin_vertex>
-	#include <morphtarget_vertex>
-	#include <skinning_vertex>
-	#include <project_vertex>
-	#include <logdepthbuf_vertex>
+  #include <morphtarget_vertex>
+  #include <skinning_vertex>
+  #include <project_vertex>
+  #include <logdepthbuf_vertex>
 
-	#include <worldpos_vertex>
-	#include <clipping_planes_vertex>
-	#include <fog_vertex>
+  #include <worldpos_vertex>
+  #include <clipping_planes_vertex>
+  #include <fog_vertex>
 }
 `;
 
