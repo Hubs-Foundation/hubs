@@ -19,11 +19,11 @@ AFRAME.registerComponent("pin-networked-object-button", {
 
       if (!pinned) {
         this.el.parentNode.setAttribute("clickable", "");
-        this.labelEl.setAttribute("text", { value: "pinned" });
+        this.labelEl.setAttribute("text", { value: "un-pin" });
         this.scene.emit("object_pinned", { el: this.targetEl });
       } else {
         this.el.parentNode.removeAttribute("clickable");
-        this.labelEl.setAttribute("text", { value: "unpinned" });
+        this.labelEl.setAttribute("text", { value: "pin" });
         this.scene.emit("object_unpinned", { el: this.targetEl });
       }
 
