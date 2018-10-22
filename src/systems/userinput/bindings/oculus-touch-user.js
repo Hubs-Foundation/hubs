@@ -59,6 +59,52 @@ export const oculusTouchUserBindings = {
   [sets.global]: [
     {
       src: {
+        value: leftButton("grip").pressed
+      },
+      dest: {
+        value: paths.actions.leftHand.middleRingPinky
+      },
+      xform: xforms.copy
+    },
+    {
+      src: [leftButton("x").touched, leftButton("y").touched, leftButton("thumbStick").touched],
+      dest: {
+        value: paths.actions.leftHand.thumb
+      },
+      xform: xforms.any
+    },
+    {
+      src: { value: leftButton("trigger").pressed },
+      dest: {
+        value: paths.actions.leftHand.index
+      },
+      xform: xforms.copy
+    },
+    {
+      src: {
+        value: rightButton("grip").pressed
+      },
+      dest: {
+        value: paths.actions.rightHand.middleRingPinky
+      },
+      xform: xforms.copy
+    },
+    {
+      src: [rightButton("x").touched, rightButton("y").touched, rightButton("thumbStick").touched],
+      dest: {
+        value: paths.actions.rightHand.thumb
+      },
+      xform: xforms.any
+    },
+    {
+      src: { value: rightButton("trigger").pressed },
+      dest: {
+        value: paths.actions.rightHand.index
+      },
+      xform: xforms.copy
+    },
+    {
+      src: {
         value: paths.device.keyboard.key("b")
       },
       dest: {

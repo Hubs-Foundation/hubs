@@ -120,6 +120,52 @@ export const viveUserBindings = {
   [sets.global]: [
     {
       src: {
+        value: lButton("grip").touched
+      },
+      dest: {
+        value: paths.actions.leftHand.middleRingPinky
+      },
+      xform: xforms.copy
+    },
+    {
+      src: [lButton("touchpad").touched, lButton("top").touched],
+      dest: {
+        value: paths.actions.leftHand.thumb
+      },
+      xform: xforms.any
+    },
+    {
+      src: { value: lButton("trigger").pressed },
+      dest: {
+        value: paths.actions.leftHand.index
+      },
+      xform: xforms.copy
+    },
+    {
+      src: {
+        value: rButton("grip").touched
+      },
+      dest: {
+        value: paths.actions.rightHand.middleRingPinky
+      },
+      xform: xforms.copy
+    },
+    {
+      src: [rButton("touchpad").touched, rButton("top").touched],
+      dest: {
+        value: paths.actions.rightHand.thumb
+      },
+      xform: xforms.any
+    },
+    {
+      src: { value: rButton("trigger").pressed },
+      dest: {
+        value: paths.actions.rightHand.index
+      },
+      xform: xforms.copy
+    },
+    {
+      src: {
         value: paths.device.keyboard.key("b")
       },
       dest: {
