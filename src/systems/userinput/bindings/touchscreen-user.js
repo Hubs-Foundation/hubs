@@ -2,8 +2,25 @@ import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
 
+const zero = "/vars/touchscreen/zero";
+const forward = "/vars/touchscreen/pinchDeltaForward";
+
 export const touchscreenUserBindings = {
   [sets.global]: [
+    {
+      src: { value: paths.device.touchscreen.pinch.delta },
+      dest: { value: forward },
+      xform: xforms.scale(0.25)
+    },
+    {
+      dest: { value: zero },
+      xform: xforms.always(0)
+    },
+    {
+      src: { x: zero, y: forward },
+      dest: { value: paths.actions.characterAcceleration },
+      xform: xforms.compose_vec2
+    },
     {
       src: { value: paths.device.touchscreen.cursorPose },
       dest: { value: paths.actions.cursor.pose },

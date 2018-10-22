@@ -126,7 +126,11 @@ AFRAME.registerComponent("character-controller", {
       }
       const acc = userinput.readFrameValueAtPath(paths.actions.characterAcceleration);
       if (acc) {
-        this.accelerationInput.set(acc[0], 0, acc[1]);
+        this.accelerationInput.set(
+          this.accelerationInput.x + acc[0],
+          this.accelerationInput.y + 0,
+          this.accelerationInput.z + acc[1]
+        );
       }
 
       pivotPos.copy(pivot.position);
@@ -138,6 +142,7 @@ AFRAME.registerComponent("character-controller", {
       pivotRotationMatrix.makeRotationAxis(rotationAxis, pivot.rotation.y);
       pivotRotationInvMatrix.makeRotationAxis(rotationAxis, -pivot.rotation.y);
       this.updateVelocity(deltaSeconds);
+      this.accelerationInput.set(0, 0, 0);
 
       const boost = userinput.readFrameValueAtPath(paths.actions.boost) ? 2 : 1;
       move.makeTranslation(
