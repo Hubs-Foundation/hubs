@@ -51,7 +51,7 @@ AFRAME.registerComponent("super-networked-interactable", {
   },
 
   _onGrabStart: function(e) {
-    if (!this.el.grabbable || this.el.grabbable.data.maxGrabbers === 0) return;
+    if (!this.el.components.grabbable || this.el.components.grabbable.data.maxGrabbers === 0) return;
 
     this.hand = e.detail.hand;
     this.hand.emit("haptic_pulse", { intensity: "high" });
