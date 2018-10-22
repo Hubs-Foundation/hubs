@@ -1,3 +1,4 @@
+import { paths } from "../systems/userinput/paths";
 import { addMedia } from "../utils/media-utils";
 import { waitForEvent } from "../utils/async-utils";
 import { ObjectContentOrigins } from "../object-types";
@@ -114,8 +115,10 @@ AFRAME.registerComponent("super-spawner", {
   },
 
   async onSpawnEvent() {
-    // TODO: I remove input-configurato, so this is wrong:
-    const controllerCount = 0; //this.el.sceneEl.components["input-configurator"].controllerQueue.length;
+    const userinput = AFRAME.scenes[0].systems.userinput;
+    const leftPose = userinput.readFrameValueAtPath(paths.actions.leftHand.pose);
+    const rightPose = userinput.readFrameValueAtPath(paths.actions.rightHand.pose);
+    const controllerCount = leftPose && rightPose ? 2 : leftPose || rightPose ? 1 : 0;
     const using6DOF = controllerCount > 1 && this.el.sceneEl.is("vr-mode");
     const hand = using6DOF ? this.data.superHand : this.data.cursorSuperHand;
 
