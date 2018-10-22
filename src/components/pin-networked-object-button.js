@@ -1,6 +1,7 @@
 AFRAME.registerComponent("pin-networked-object-button", {
   schema: {
-    labelSelector: { type: "string" }
+    labelSelector: { type: "string" },
+    hideWhenPinnedSelector: { type: "string" }
   },
 
   init() {
@@ -18,15 +19,19 @@ AFRAME.registerComponent("pin-networked-object-button", {
 
       if (!pinned) {
         this.el.parentNode.setAttribute("clickable", "");
-        this.targetEl.setAttribute("pinnable", { pinned: true });
         this.labelEl.setAttribute("text", { value: "pinned" });
         this.scene.emit("object_pinned", { el: this.targetEl });
       } else {
         this.el.parentNode.removeAttribute("clickable");
-        this.targetEl.setAttribute("pinnable", { pinned: false });
         this.labelEl.setAttribute("text", { value: "unpinned" });
         this.scene.emit("object_unpinned", { el: this.targetEl });
       }
+
+      this.targetEl.setAttribute("pinnable", { pinned: !pinned });
+
+      this.el.parentNode.querySelectorAll(this.data.hideWhenPinnedSelector).forEach(hideEl => {
+        hideEl.setAttribute("visible", pinned);
+      });
     };
   },
 

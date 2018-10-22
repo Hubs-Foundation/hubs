@@ -153,10 +153,10 @@
                     pinnable
                 >
                     <a-entity class="action-buttons" visible-while-frozen>
-                        <a-entity mixin="rounded-text-button" pin-networked-object-button="labelSelector:.pin-button-label" position="0 0.125 0.01"> </a-entity>
+                        <a-entity mixin="rounded-text-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned" position="0 0.125 0.01"> </a-entity>
                         <a-entity class="pin-button-label" text=" value:unpinned; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
-                        <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
-                        <a-entity text=" value:remove; width:1.75; align:center;" text-raycast-hack position="0 -0.125 0.02"></a-entity>
+                        <a-entity mixin="rounded-text-button" class="hide-when-pinned" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
+                        <a-entity text=" value:remove; width:1.75; align:center;" class="hide-when-pinned" text-raycast-hack position="0 -0.125 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>
