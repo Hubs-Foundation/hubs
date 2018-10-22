@@ -55,7 +55,7 @@ import "./components/pinch-to-move";
 import "./components/pitch-yaw-rotator";
 import "./components/auto-scale-cannon-physics-body";
 import "./components/position-at-box-shape-border";
-import "./components/pinned";
+import "./components/pinnable";
 import "./components/pin-networked-object-button";
 import "./components/remove-networked-object-button";
 import "./components/destroy-at-extreme-distances";

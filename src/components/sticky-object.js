@@ -60,6 +60,8 @@ AFRAME.registerComponent("sticky-object", {
   },
 
   _onGrab() {
+    if (!this.el.grabbable || this.el.grabbable.data.maxGrabbers === 0) return;
+
     this.setLocked(false);
     this.el.body.collisionResponse = false;
   },

@@ -3,7 +3,7 @@ AFRAME.registerComponent("pin-networked-object-button", {
     this.scene = document.querySelector("a-scene");
 
     this.onClick = () => {
-      this.targetEl.setAttribute("pinned", "");
+      this.targetEl.setAttribute("pinnable", { pinned: true });
       this.scene.emit("object_pinned", { el: this.targetEl });
     };
 
