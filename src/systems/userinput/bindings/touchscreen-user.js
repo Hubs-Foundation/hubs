@@ -57,12 +57,12 @@ export const touchscreenUserBindings = {
     {
       src: { value: paths.device.gyro.averageDeltaX },
       dest: { value: gyroCamDeltaXScaled },
-      xform: xforms.scale(1.00)
+      xform: xforms.scale(1.0)
     },
     {
       src: { value: paths.device.gyro.averageDeltaY },
       dest: { value: gyroCamDeltaYScaled },
-      xform: xforms.scale(1.00)
+      xform: xforms.scale(1.0)
     },
     {
       src: { x: gyroCamDeltaYScaled, y: gyroCamDeltaXScaled },
