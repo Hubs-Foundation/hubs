@@ -94,13 +94,13 @@ export const oculusGoUserBindings = {
       xform: xforms.always([0, -0.2])
     },
     {
-      src: { value: vec2zero },
+      src: { value: paths.device.oculusgo.pose },
       dest: { value: paths.actions.cursor.pose },
-      xform: xforms.poseFromCameraProjection()
+      xform: xforms.copy
     },
     {
       src: { value: paths.device.oculusgo.pose },
-      dest: { value: paths.actions.cursor.pose },
+      dest: { value: paths.actions.rightHand.pose },
       xform: xforms.copy
     }
   ],

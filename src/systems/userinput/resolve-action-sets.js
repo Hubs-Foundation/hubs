@@ -81,11 +81,7 @@ export function updateActionSetsBasedOnSuperhands() {
     !rightHandState.has("grab-start");
 
   // Cursor
-  if (rightHandTeleporting || rightHandHovering || rightHandGrabbing) {
-    cursorController.disable();
-  } else {
-    cursorController.enable();
-  }
+  cursorController.enabled = !(rightHandTeleporting || rightHandHovering || rightHandGrabbing);
 
   const cursorHoveringOnInteractable =
     cursorController.enabled &&
