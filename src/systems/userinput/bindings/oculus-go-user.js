@@ -9,7 +9,6 @@ const dpadSouth = "/vars/oculusgo/dpad/south";
 const dpadEast = "/vars/oculusgo/dpad/east";
 const dpadWest = "/vars/oculusgo/dpad/west";
 const dpadCenter = "/vars/oculusgo/dpad/center";
-const vec2zero = "/vars/vec2zero";
 
 const triggerRisingRoot = "oculusGoTriggerRising";
 const triggerFallingRoot = "oculusGoTriggerFalling";
@@ -80,6 +79,7 @@ export const oculusGoUserBindings = {
       root: dpadWestRoot,
       priority: 100
     },
+
     {
       src: {
         value: paths.device.oculusgo.button("trigger").pressed
@@ -89,10 +89,7 @@ export const oculusGoUserBindings = {
       root: triggerRisingRoot,
       priority: 100
     },
-    {
-      dest: { value: vec2zero },
-      xform: xforms.always([0, -0.2])
-    },
+
     {
       src: { value: paths.device.oculusgo.pose },
       dest: { value: paths.actions.cursor.pose },
@@ -101,6 +98,22 @@ export const oculusGoUserBindings = {
     {
       src: { value: paths.device.oculusgo.pose },
       dest: { value: paths.actions.rightHand.pose },
+      xform: xforms.copy
+    },
+
+    {
+      src: { value: paths.device.oculusgo.button("touchpad").touched },
+      dest: { value: paths.actions.rightHand.thumb },
+      xform: xforms.copy
+    },
+    {
+      src: { value: paths.device.oculusgo.button("trigger").pressed },
+      dest: { value: paths.actions.rightHand.index },
+      xform: xforms.copy
+    },
+    {
+      src: { value: paths.device.oculusgo.button("trigger").pressed },
+      dest: { value: paths.actions.rightHand.middleRingPinky },
       xform: xforms.copy
     }
   ],
