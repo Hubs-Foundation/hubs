@@ -53,17 +53,22 @@ AFRAME.registerComponent("hand-controls2", {
   },
 
   update(prevData) {
+    const el = this.el;
     const hand = this.data;
 
     const controlConfiguration = {
       hand: hand,
-      orientationOffset: { x: 0, y: 0, z: 0 },
-      model: false
+      model: false,
+      orientationOffset: { x: 0, y: 0, z: 0 }
     };
 
     if (hand !== prevData) {
-      this.el.setAttribute("tracked-controls", controlConfiguration);
-      this.el.setAttribute("oculus-touch-controls", controlConfiguration);
+      el.setAttribute("vive-controls", controlConfiguration);
+      el.setAttribute("oculus-touch-controls", controlConfiguration);
+      el.setAttribute("oculus-go-controls", controlConfiguration);
+      el.setAttribute("windows-motion-controls", controlConfiguration);
+      el.setAttribute("daydream-controls", controlConfiguration);
+      el.setAttribute("gearvr-controls", controlConfiguration);
     }
   },
 
