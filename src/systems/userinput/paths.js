@@ -69,12 +69,17 @@ paths.device.smartMouse.cursorPose = "/device/smartMouse/cursorPose";
 paths.device.smartMouse.cameraDelta = "/device/smartMouse/cameraDelta";
 paths.device.touchscreen = {};
 paths.device.touchscreen.cursorPose = "/device/touchscreen/cursorPose";
+paths.device.touchscreen.touchCameraDelta = "/device/touchscreen/touchCameraDelta";
+paths.device.touchscreen.gyroCameraDelta = "/device/touchscreen/gyroCameraDelta";
 paths.device.touchscreen.cameraDelta = "/device/touchscreen/cameraDelta";
 paths.device.touchscreen.pinch = {};
 paths.device.touchscreen.pinch.delta = "/device/touchscreen/pinch/delta";
 paths.device.touchscreen.pinch.initialDistance = "/device/touchscreen/pinch/initialDistance";
 paths.device.touchscreen.pinch.currentDistance = "/device/touchscreen/pinch/currentDistance";
 paths.device.touchscreen.isTouchingGrabbable = "/device/touchscreen/isTouchingGrabbable";
+paths.device.gyro = {};
+paths.device.gyro.averageDeltaX = "/device/gyro/averageDeltaX";
+paths.device.gyro.averageDeltaY = "/device/gyro/averageDeltaY";
 paths.device.hud = {};
 paths.device.hud.penButton = "/device/hud/penButton";
 

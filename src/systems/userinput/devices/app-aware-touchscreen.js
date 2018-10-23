@@ -94,7 +94,9 @@ export class AppAwareTouchscreenDevice {
 
   move(touch) {
     if (!touchIsAssigned(touch, this.assignments)) {
-      console.warn("touch does not have job", touch);
+      if (!touch.target.classList[0] || !touch.target.classList[0].startsWith("virtual-gamepad-controls")) {
+        console.warn("touch does not have job", touch);
+      }
       return;
     }
 
@@ -232,7 +234,7 @@ export class AppAwareTouchscreenDevice {
     }
 
     if (jobIsAssigned(MOVE_CAMERA_JOB, this.assignments)) {
-      frame[path.cameraDelta] = findByJob(MOVE_CAMERA_JOB, this.assignments).delta;
+      frame[path.touchCameraDelta] = findByJob(MOVE_CAMERA_JOB, this.assignments).delta;
     }
 
     frame[path.pinch.delta] = this.pinch.delta;

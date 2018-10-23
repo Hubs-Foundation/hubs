@@ -9,6 +9,7 @@ import { OculusGoControllerDevice } from "./devices/oculus-go-controller";
 import { OculusTouchControllerDevice } from "./devices/oculus-touch-controller";
 import { DaydreamControllerDevice } from "./devices/daydream-controller";
 import { ViveControllerDevice } from "./devices/vive-controller";
+import { GyroDevice } from "./devices/gyro";
 
 import { AppAwareMouseDevice } from "./devices/app-aware-mouse";
 import { AppAwareTouchscreenDevice } from "./devices/app-aware-touchscreen";
@@ -101,14 +102,17 @@ AFRAME.registerSystem("userinput", {
     this.gamepads = [];
 
     const appAwareTouchscreenDevice = new AppAwareTouchscreenDevice();
+    const gyroDevice = new GyroDevice();
     const updateBindingsForVRMode = () => {
       const inVRMode = this.el.sceneEl.is("vr-mode");
       if (AFRAME.utils.device.isMobile()) {
         if (inVRMode) {
           this.activeDevices.delete(appAwareTouchscreenDevice);
+          this.activeDevices.delete(gyroDevice);
           this.registeredMappings.delete(touchscreenUserBindings);
         } else {
           this.activeDevices.add(appAwareTouchscreenDevice);
+          this.activeDevices.add(gyroDevice);
           this.registeredMappings.add(touchscreenUserBindings);
         }
       } else {

@@ -12,6 +12,13 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
   init() {
     this.pitch = 0;
     this.yaw = 0;
+    this.onRotateX = this.onRotateX.bind(this);
+    this.el.sceneEl.addEventListener("rotateX", this.onRotateX);
+    this.pendingXRotation = 0;
+  },
+
+  onRotateX(e) {
+    this.pendingXRotation += e.detail.value;
   },
 
   look(deltaPitch, deltaYaw) {
@@ -30,10 +37,17 @@ AFRAME.registerComponent("pitch-yaw-rotator", {
   tick() {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const cameraDelta = userinput.readFrameValueAtPath(paths.actions.cameraDelta);
+    let lookX = this.pendingXRotation;
+    let lookY = 0;
     if (cameraDelta) {
-      this.look(cameraDelta[1], cameraDelta[0]);
+      lookY += cameraDelta[0];
+      lookX += cameraDelta[1];
+    }
+    if (lookX !== 0 || lookY !== 0) {
+      this.look(lookX, lookY);
       this.el.object3D.rotation.set(degToRad(this.pitch), degToRad(this.yaw), 0);
       this.el.object3D.rotation.order = "YXZ";
     }
+    this.pendingXRotation = 0;
   }
 });

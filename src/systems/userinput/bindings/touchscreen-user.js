@@ -4,6 +4,14 @@ import { xforms } from "./xforms";
 
 const zero = "/vars/touchscreen/zero";
 const forward = "/vars/touchscreen/pinchDeltaForward";
+const touchCamDelta = "vars/touchscreen/touchCameraDelta";
+const touchCamDeltaX = "vars/touchscreen/touchCameraDelta/x";
+const touchCamDeltaY = "vars/touchscreen/touchCameraDelta/y";
+const touchCamDeltaXScaled = "vars/touchscreen/touchCameraDelta/x/scaled";
+const touchCamDeltaYScaled = "vars/touchscreen/touchCameraDelta/y/scaled";
+const gyroCamDelta = "vars/gyro/gyroCameraDelta";
+const gyroCamDeltaXScaled = "vars/gyro/gyroCameraDelta/x/scaled";
+const gyroCamDeltaYScaled = "vars/gyro/gyroCameraDelta/y/scaled";
 
 export const touchscreenUserBindings = {
   [sets.global]: [
@@ -27,24 +35,47 @@ export const touchscreenUserBindings = {
       xform: xforms.copy
     },
     {
-      src: { value: paths.device.touchscreen.cameraDelta },
-      dest: { x: "/var/touchscreenCamDeltaX", y: "/var/touchscreenCamDeltaY" },
+      src: { value: paths.device.touchscreen.touchCameraDelta },
+      dest: { x: touchCamDeltaX, y: touchCamDeltaY },
       xform: xforms.split_vec2
     },
     {
-      src: { value: "/var/touchscreenCamDeltaX" },
-      dest: { value: "/var/touchscreenCamDeltaXScaled" },
+      src: { value: touchCamDeltaX },
+      dest: { value: touchCamDeltaXScaled },
       xform: xforms.scale(0.18)
     },
     {
-      src: { value: "/var/touchscreenCamDeltaY" },
-      dest: { value: "/var/touchscreenCamDeltaYScaled" },
+      src: { value: touchCamDeltaY },
+      dest: { value: touchCamDeltaYScaled },
       xform: xforms.scale(0.35)
     },
     {
-      src: { x: "/var/touchscreenCamDeltaXScaled", y: "/var/touchscreenCamDeltaYScaled" },
-      dest: { value: paths.actions.cameraDelta },
+      src: { x: touchCamDeltaXScaled, y: touchCamDeltaYScaled },
+      dest: { value: touchCamDelta },
       xform: xforms.compose_vec2
+    },
+    {
+      src: { value: paths.device.gyro.averageDeltaX },
+      dest: { value: gyroCamDeltaXScaled },
+      xform: xforms.scale(1.00)
+    },
+    {
+      src: { value: paths.device.gyro.averageDeltaY },
+      dest: { value: gyroCamDeltaYScaled },
+      xform: xforms.scale(1.00)
+    },
+    {
+      src: { x: gyroCamDeltaYScaled, y: gyroCamDeltaXScaled },
+      dest: { value: gyroCamDelta },
+      xform: xforms.compose_vec2
+    },
+    {
+      src: {
+        first: touchCamDelta,
+        second: gyroCamDelta
+      },
+      dest: { value: paths.actions.cameraDelta },
+      xform: xforms.add_vec2
     },
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
