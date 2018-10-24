@@ -96,6 +96,14 @@ export default class HubChannel {
     this.channel.push("message", { body });
   };
 
+  pin = (id, gltfNode) => {
+    this.channel.push("pin", { id, gltf_node: gltfNode });
+  };
+
+  unpin = id => {
+    this.channel.push("unpin", { id });
+  };
+
   requestSupport = () => {
     this.channel.push("events:request_support", {});
   };
