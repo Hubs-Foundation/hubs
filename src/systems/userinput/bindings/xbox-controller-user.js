@@ -162,16 +162,6 @@ export const xboxControllerUserBindings = {
       xform: xforms.rising
     },
     {
-      src: { value: button("dpadUp").pressed },
-      dest: { value: paths.actions.translate.up },
-      xform: xforms.scale(0.1)
-    },
-    {
-      src: { value: button("dpadDown").pressed },
-      dest: { value: paths.actions.translate.down },
-      xform: xforms.scale(0.1)
-    },
-    {
       dest: { value: "var/vec2/zero" },
       xform: xforms.vec2Zero
     },

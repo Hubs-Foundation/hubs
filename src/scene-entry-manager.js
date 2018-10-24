@@ -28,7 +28,7 @@ export default class SceneEntryManager {
 
   init = () => {
     this.whenSceneLoaded(() => {
-      this.cursorController.components["cursor-controller"].disable();
+      this.cursorController.components["cursor-controller"].enabled = false;
     });
   };
 
@@ -81,9 +81,7 @@ export default class SceneEntryManager {
     this.scene.classList.remove("hand-cursor");
     this.scene.classList.add("no-cursor");
 
-    const cursor = this.cursorController.components["cursor-controller"];
-    cursor.enable();
-    cursor.setCursorVisibility(true);
+    this.cursorController.components["cursor-controller"].enabled = true;
     this._entered = true;
 
     // Delay sending entry event telemetry until VR display is presenting.

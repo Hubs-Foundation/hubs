@@ -98,6 +98,10 @@ export const xforms = {
     const second = frame[src.second];
     if (first && second) {
       frame[dest.value] = [first[0] + second[0], first[1] + second[1]];
+    } else if (second) {
+      frame[dest.value] = second;
+    } else if (first) {
+      frame[dest.value] = first;
     }
   },
   any: function(frame, src, dest) {

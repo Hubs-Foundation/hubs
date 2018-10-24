@@ -103,7 +103,6 @@ AFRAME.registerComponent("character-controller", {
     const pivotRotationInvMatrix = new THREE.Matrix4();
     const startPos = new THREE.Vector3();
     const startScale = new THREE.Vector3();
-    const jump = new THREE.Vector3();
 
     return function(t, dt) {
       const deltaSeconds = dt / 1000;
@@ -125,16 +124,13 @@ AFRAME.registerComponent("character-controller", {
       if (userinput.readFrameValueAtPath(paths.actions.snapRotateRight)) {
         this.snapRotateRight();
       }
-      jump.set(0, 0, 0);
-      if (userinput.readFrameValueAtPath(paths.actions.translate.up)) {
-        jump.y += userinput.readFrameValueAtPath(paths.actions.translate.up);
-      }
-      if (userinput.readFrameValueAtPath(paths.actions.translate.down)) {
-        jump.y -= userinput.readFrameValueAtPath(paths.actions.translate.down);
-      }
       const acc = userinput.readFrameValueAtPath(paths.actions.characterAcceleration);
       if (acc) {
-        this.accelerationInput.set(acc[0], 0, acc[1]);
+        this.accelerationInput.set(
+          this.accelerationInput.x + acc[0],
+          this.accelerationInput.y + 0,
+          this.accelerationInput.z + acc[1]
+        );
       }
 
       pivotPos.copy(pivot.position);
@@ -146,12 +142,13 @@ AFRAME.registerComponent("character-controller", {
       pivotRotationMatrix.makeRotationAxis(rotationAxis, pivot.rotation.y);
       pivotRotationInvMatrix.makeRotationAxis(rotationAxis, -pivot.rotation.y);
       this.updateVelocity(deltaSeconds);
+      this.accelerationInput.set(0, 0, 0);
 
       const boost = userinput.readFrameValueAtPath(paths.actions.boost) ? 2 : 1;
       move.makeTranslation(
-        jump.x + this.velocity.x * distance * boost,
-        jump.y + this.velocity.y * distance * boost,
-        jump.z + this.velocity.z * distance * boost
+        this.velocity.x * distance * boost,
+        this.velocity.y * distance * boost,
+        this.velocity.z * distance * boost
       );
       yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 

@@ -3,6 +3,27 @@ import { sets } from "../sets";
 import { xforms } from "./xforms";
 
 const wasd_vec2 = "/var/mouse-and-keyboard/wasd_vec2";
+const dropWithRMB = "/vars/mouse-and-keyboard/drop_with_RMB";
+const dropWithEsc = "/vars/mouse-and-keyboard/drop_with_esc";
+
+const dropWithRMBorEscBindings = [
+  {
+    src: { value: paths.device.mouse.buttonRight },
+    dest: { value: dropWithRMB },
+    xform: xforms.falling
+  },
+  {
+    src: { value: paths.device.keyboard.key("Escape") },
+    dest: { value: dropWithEsc },
+    xform: xforms.falling
+  },
+  {
+    src: [dropWithRMB, dropWithEsc],
+    dest: { value: paths.actions.cursor.drop },
+    xform: xforms.any
+  }
+];
+
 export const keyboardMouseUserBindings = {
   [sets.global]: [
     {
@@ -160,11 +181,6 @@ export const keyboardMouseUserBindings = {
       root: "lmb"
     },
     {
-      src: { value: paths.device.mouse.buttonRight },
-      dest: { value: paths.actions.cursor.drop },
-      xform: xforms.falling
-    },
-    {
       src: {
         bool: paths.device.keyboard.key("shift"),
         value: paths.device.mouse.wheel
@@ -178,7 +194,8 @@ export const keyboardMouseUserBindings = {
       src: { value: "/var/cursorScalePenTipWheel" },
       dest: { value: paths.actions.cursor.scalePenTip },
       xform: xforms.scale(0.12)
-    }
+    },
+    ...dropWithRMBorEscBindings
   ],
 
   [sets.cursorHoldingCamera]: [
@@ -193,11 +210,7 @@ export const keyboardMouseUserBindings = {
       priority: 200,
       root: "lmb"
     },
-    {
-      src: { value: paths.device.mouse.buttonRight },
-      dest: { value: paths.actions.cursor.drop },
-      xform: xforms.falling
-    }
+    ...dropWithRMBorEscBindings
   ],
 
   [sets.cursorHoldingInteractable]: [

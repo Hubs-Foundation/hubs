@@ -36,7 +36,7 @@ export class AppAwareTouchscreenDevice {
   constructor() {
     this.raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 3);
     this.assignments = [];
-    this.pinch = {};
+    this.pinch = { initialDistance: 0, currentDistance: 0, delta: 0 };
     this.events = [];
     ["touchstart", "touchend", "touchmove", "touchcancel"].map(x =>
       document.querySelector("canvas").addEventListener(x, this.events.push.bind(this.events))
@@ -57,7 +57,7 @@ export class AppAwareTouchscreenDevice {
         break;
       case FIRST_PINCHER_JOB:
         unassign(assignment.touch, assignment.job, this.assignments);
-        this.pinch = undefined;
+        this.pinch = { initialDistance: 0, currentDistance: 0, delta: 0 };
 
         if (jobIsAssigned(SECOND_PINCHER_JOB, this.assignments)) {
           const second = findByJob(SECOND_PINCHER_JOB, this.assignments);
@@ -78,7 +78,7 @@ export class AppAwareTouchscreenDevice {
         break;
       case SECOND_PINCHER_JOB:
         unassign(assignment.touch, assignment.job, this.assignments);
-        this.pinch = undefined;
+        this.pinch = { initialDistance: 0, currentDistance: 0, delta: 0 };
         if (jobIsAssigned(FIRST_PINCHER_JOB, this.assignments) && !jobIsAssigned(MOVE_CAMERA_JOB, this.assignments)) {
           //reassign firstPincher to moveCamera
           const first = findByJob(FIRST_PINCHER_JOB, this.assignments);
@@ -94,7 +94,9 @@ export class AppAwareTouchscreenDevice {
 
   move(touch) {
     if (!touchIsAssigned(touch, this.assignments)) {
-      console.warn("touch does not have job", touch);
+      if (!touch.target.classList[0] || !touch.target.classList[0].startsWith("virtual-gamepad-controls")) {
+        console.warn("touch does not have job", touch);
+      }
       return;
     }
 
@@ -232,13 +234,11 @@ export class AppAwareTouchscreenDevice {
     }
 
     if (jobIsAssigned(MOVE_CAMERA_JOB, this.assignments)) {
-      frame[path.cameraDelta] = findByJob(MOVE_CAMERA_JOB, this.assignments).delta;
+      frame[path.touchCameraDelta] = findByJob(MOVE_CAMERA_JOB, this.assignments).delta;
     }
 
-    if (this.pinch) {
-      frame[path.pinchDelta] = this.pinch.delta;
-      frame[path.initialPinchDistance] = this.pinch.initialDistance;
-      frame[path.currentPinchDistance] = this.pinch.currentDistance;
-    }
+    frame[path.pinch.delta] = this.pinch.delta;
+    frame[path.pinch.initialDistance] = this.pinch.initialDistance;
+    frame[path.pinch.currentDistance] = this.pinch.currentDistance;
   }
 }

@@ -17,7 +17,6 @@ AFRAME.registerComponent("cursor-controller", {
     cursorColorHovered: { default: "#2F80ED" },
     cursorColorUnhovered: { default: "#FFFFFF" },
     rayObject: { type: "selector" },
-    drawLine: { default: true },
     objects: { default: "" }
   },
 
@@ -84,15 +83,6 @@ AFRAME.registerComponent("cursor-controller", {
     }
   },
 
-  enable: function() {
-    this.enabled = true;
-  },
-
-  disable: function() {
-    this.enabled = false;
-    this.setCursorVisibility(false);
-  },
-
   tick: (() => {
     const rawIntersections = [];
     const cameraPos = new THREE.Vector3();
@@ -105,8 +95,10 @@ AFRAME.registerComponent("cursor-controller", {
 
       const userinput = AFRAME.scenes[0].systems.userinput;
       const cursorPose = userinput.readFrameValueAtPath(paths.actions.cursor.pose);
+      const rightHandPose = userinput.readFrameValueAtPath(paths.actions.rightHand.pose);
 
-      this.setCursorVisibility(this.enabled && !!cursorPose);
+      this.data.cursor.object3D.visible = this.enabled && !!cursorPose;
+      this.el.setAttribute("line", "visible", this.enabled && !!rightHandPose);
 
       if (!this.enabled || !cursorPose) {
         return;
@@ -125,7 +117,7 @@ AFRAME.registerComponent("cursor-controller", {
         this.distance = intersection ? intersection.distance : this.data.far;
       }
 
-      const { cursor, near, far, drawLine, camera, cursorColorHovered, cursorColorUnhovered } = this.data;
+      const { cursor, near, far, camera, cursorColorHovered, cursorColorUnhovered } = this.data;
 
       const cursorModDelta = userinput.readFrameValueAtPath(paths.actions.cursor.modDelta);
       if (isGrabbing && cursorModDelta) {
@@ -137,10 +129,12 @@ AFRAME.registerComponent("cursor-controller", {
       cameraPos.y = cursor.object3D.position.y;
       cursor.object3D.lookAt(cameraPos);
 
-      this.data.cursor.setAttribute("material", {
-        color: intersection || isGrabbing ? cursorColorHovered : cursorColorUnhovered
-      });
-      if (drawLine) {
+      this.data.cursor.setAttribute(
+        "material",
+        "color",
+        intersection || isGrabbing ? cursorColorHovered : cursorColorUnhovered
+      );
+      if (this.el.components.line.data.visible) {
         this.el.setAttribute("line", {
           start: cursorPose.position.clone(),
           end: cursor.object3D.position.clone()
@@ -148,11 +142,6 @@ AFRAME.registerComponent("cursor-controller", {
       }
     };
   })(),
-
-  setCursorVisibility: function(visible) {
-    this.data.cursor.setAttribute("visible", visible);
-    this.el.setAttribute("line", { visible: visible && this.data.drawLine });
-  },
 
   remove: function() {
     this.emitIntersectionEvents(this.prevIntersection, null);
