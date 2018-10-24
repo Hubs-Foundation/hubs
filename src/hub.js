@@ -8,7 +8,6 @@ import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
 import "three/examples/js/loaders/GLTFLoader";
-//import "three/examples/js/exporters/GLTFExporter";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
