@@ -180,6 +180,11 @@ export const oculusTouchUserBindings = {
       xform: xforms.any
     },
     {
+      src: { value: paths.device.keyboard.key(" ") },
+      dest: { value: paths.actions.toggleFreeze },
+      xform: xforms.rising
+    },
+    {
       src: {
         value: rightDpadWest
       },
