@@ -11,20 +11,17 @@ AFRAME.registerComponent("pinnable", {
         this.prevMaxGrabbers = this.el.components.grabbable.data.maxGrabbers;
       }
 
-      if (this.el.components.body) {
-        this.prevBodyType = this.el.components.body.data.type;
-      }
-
       this.el.setAttribute("body", { type: "static" });
       this.el.setAttribute("grabbable", { maxGrabbers: 0 });
+      this.el.removeAttribute("stretchable");
+      this.el.emit("pinned");
     } else {
       if (typeof this.prevMaxGrabbers !== "undefined") {
         this.el.setAttribute("grabbable", { maxGrabbers: this.prevMaxGrabbers });
       }
 
-      if (typeof this.prevBodyType !== "undefined") {
-        this.el.setAttribute("body", { type: this.prevBodyType });
-      }
+      this.el.setAttribute("stretchable");
+      this.el.emit("unpinned");
     }
   }
 });
