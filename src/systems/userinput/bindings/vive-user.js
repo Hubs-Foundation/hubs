@@ -260,6 +260,11 @@ export const viveUserBindings = {
       xform: xforms.any
     },
     {
+      src: { value: paths.device.keyboard.key(" ") },
+      dest: { value: paths.actions.toggleFreeze },
+      xform: xforms.rising
+    },
+    {
       src: {
         bool: rTouchpadRising,
         value: rDpadWest
