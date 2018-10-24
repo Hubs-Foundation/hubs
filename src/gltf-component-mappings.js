@@ -73,6 +73,8 @@ AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentNa
   el.setAttribute("nav-mesh");
 });
 
+AFRAME.GLTFModelPlus.registerComponent("pinnable", "pinnable");
+
 AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
   el.setAttribute("networked", { template: "#interactable-media", owner: "scene", networkId: componentData.networkId });
   el.setAttribute("media-loader", { resolve: true, src: componentData.src });
