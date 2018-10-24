@@ -104,15 +104,15 @@ AFRAME.registerSystem("userinput", {
       "gamepadconnected",
       e => {
         let gamepadDevice;
-        if (e.gamepad.id === "OpenVR Gamepad") {
-          for (let i = 0; i < this.activeDevices.length; i++) {
-            const activeDevice = this.activeDevices[i];
-            if (activeDevice.gamepad && activeDevice.gamepad === e.gamepad) {
-              console.warn("ignoring gamepad");
-              return; // multiple connect events without a disconnect event
-            }
+        for (let i = 0; i < this.activeDevices.length; i++) {
+          const activeDevice = this.activeDevices[i];
+          if (activeDevice.gamepad && activeDevice.gamepad === e.gamepad) {
+            console.warn("ignoring gamepad", e.gamepad);
+            return; // multiple connect events without a disconnect event
           }
-          if (this.activeDevices) gamepadDevice = new ViveControllerDevice(e.gamepad);
+        }
+        if (e.gamepad.id === "OpenVR Gamepad") {
+          gamepadDevice = new ViveControllerDevice(e.gamepad);
           this.registeredMappings.add(viveUserBindings);
         } else if (e.gamepad.id.startsWith("Oculus Touch")) {
           gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
