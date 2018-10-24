@@ -238,8 +238,6 @@ export default class SceneEntryManager {
       if (components["media-loader"]) {
         gltfComponents.media = { src: components["media-loader"].data.src, networkId };
       }
-
-      console.log(gltfNode);
     });
 
     this.scene.addEventListener("object_unpinned", e => {

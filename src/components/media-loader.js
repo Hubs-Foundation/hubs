@@ -205,7 +205,7 @@ AFRAME.registerComponent("media-pager", {
       // if this is the first image we ever loaded, set up the UI
       if (this.toolbar == null) {
         const template = document.getElementById("paging-toolbar");
-        this.el.appendChild(document.importNode(template.content, true));
+        this.el.querySelector(".ui").appendChild(document.importNode(template.content, true));
         this.toolbar = this.el.querySelector(".paging-toolbar");
         // we have to wait a tick for the attach callbacks to get fired for the elements in a template
         setTimeout(() => {
@@ -237,7 +237,7 @@ AFRAME.registerComponent("media-pager", {
 
   remove() {
     if (this.toolbar) {
-      this.el.removeChild(this.toolbar);
+      this.toolbar.parentNode.removeChild(this.toolbar);
     }
   },
 

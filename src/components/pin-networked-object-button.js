@@ -1,13 +1,26 @@
 AFRAME.registerComponent("pin-networked-object-button", {
   schema: {
+    // Selector for root of all UI that needs to be clickable when pinned
+    uiSelector: { type: "string" },
+
+    // Selector for label to change when pinned/unpinned
     labelSelector: { type: "string" },
+
+    // Selector for items to hide iff pinned
     hideWhenPinnedSelector: { type: "string" }
   },
 
   init() {
     this._updateUI = this._updateUI.bind(this);
     this.scene = document.querySelector("a-scene");
-    this.labelEl = this.el.parentNode.querySelector(this.data.labelSelector);
+
+    let uiElSearch = this.el;
+    while (uiElSearch && !uiElSearch.querySelector(this.data.uiSelector)) {
+      uiElSearch = uiElSearch.parentNode;
+    }
+
+    this.uiEl = uiElSearch.querySelector(this.data.uiSelector);
+    this.labelEl = this.uiEl.querySelector(this.data.labelSelector);
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.targetEl = networkedEl;
@@ -45,10 +58,10 @@ AFRAME.registerComponent("pin-networked-object-button", {
     const isPinned = this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned;
 
     if (isPinned) {
-      this.el.parentNode.setAttribute("clickable", "");
+      this.uiEl.setAttribute("clickable", "");
       this.labelEl.setAttribute("text", { value: "un-pin" });
     } else {
-      this.el.parentNode.removeAttribute("clickable");
+      this.uiEl.removeAttribute("clickable");
       this.labelEl.setAttribute("text", { value: "pin" });
     }
 
