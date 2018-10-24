@@ -213,7 +213,7 @@ export default class SceneEntryManager {
       spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
     });
 
-    this.scene.addEventListener("object_pinned", e => {
+    this.scene.addEventListener("my_object_pinned", e => {
       // Construct a GLTF node from this entity
       const el = e.detail.el;
       const object3D = el.object3D;
@@ -239,6 +239,8 @@ export default class SceneEntryManager {
 
       console.log(gltfNode);
     });
+
+    this.scene.addEventListener("my_object_unpinned", e => {});
 
     this.scene.addEventListener("object_spawned", e => {
       this.hubChannel.sendObjectSpawnedEvent(e.detail.objectType);
