@@ -24,8 +24,12 @@ AFRAME.registerComponent("freeze-controller", {
 
   tick: function() {
     const userinput = AFRAME.scenes[0].systems.userinput;
+    const ensureFrozen = userinput.readFrameValueAtPath(paths.actions.ensureFrozen);
+    const thaw = userinput.readFrameValueAtPath(paths.actions.thaw);
 
-    if (userinput.readFrameValueAtPath(paths.actions.toggleFreeze)) {
+    const toggleFreezeDueToInput = (this.el.is("frozen") && thaw) || (!this.el.is("frozen") && ensureFrozen);
+
+    if (toggleFreezeDueToInput) {
       this.onToggle();
     }
   },

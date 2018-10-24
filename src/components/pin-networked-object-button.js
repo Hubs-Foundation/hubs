@@ -38,7 +38,6 @@ AFRAME.registerComponent("pin-networked-object-button", {
 
       const wasPinned = this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned;
       this.targetEl.setAttribute("pinnable", { pinned: !wasPinned });
-      this.el.sceneEl.emit("action_freeze");
     };
   },
 

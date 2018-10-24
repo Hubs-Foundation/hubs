@@ -6,7 +6,6 @@ AFRAME.registerComponent("remove-networked-object-button", {
       if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) return;
 
       this.targetEl.parentNode.removeChild(this.targetEl);
-      this.scene.emit("action_freeze");
     };
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
