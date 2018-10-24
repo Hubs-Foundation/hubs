@@ -15,9 +15,11 @@ AFRAME.registerComponent("pin-networked-object-button", {
     this.scene = document.querySelector("a-scene");
 
     let uiElSearch = this.el;
-    while (uiElSearch && !uiElSearch.querySelector(this.data.uiSelector)) {
+
+    do {
       uiElSearch = uiElSearch.parentNode;
-    }
+      this.uiEl = uiElSearch.querySelector(this.data.uiSelector);
+    } while (uiElSearch && !this.uiEl);
 
     this.uiEl = uiElSearch.querySelector(this.data.uiSelector);
     this.labelEl = this.uiEl.querySelector(this.data.labelSelector);
