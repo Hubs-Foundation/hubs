@@ -1,3 +1,5 @@
+import { paths } from "../systems/userinput/paths";
+
 /**
  * Toggles freezing of network traffic on the given event.
  * @namespace network
@@ -18,6 +20,14 @@ AFRAME.registerComponent("freeze-controller", {
 
   pause: function() {
     this.el.removeEventListener(this.data.toggleEvent, this.onToggle);
+  },
+
+  tick: function() {
+    const userinput = AFRAME.scenes[0].systems.userinput;
+
+    if (userinput.readFrameValueAtPath(paths.actions.toggleFreeze)) {
+      this.onToggle();
+    }
   },
 
   onToggle: function() {

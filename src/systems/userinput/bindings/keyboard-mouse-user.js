@@ -70,6 +70,11 @@ export const keyboardMouseUserBindings = {
       priority: 100
     },
     {
+      src: { value: paths.device.keyboard.key(" ") },
+      dest: { value: paths.actions.toggleFreeze },
+      xform: xforms.rising
+    },
+    {
       src: { value: paths.device.hud.penButton },
       dest: { value: paths.actions.spawnPen },
       xform: xforms.rising
