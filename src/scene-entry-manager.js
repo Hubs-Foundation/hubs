@@ -237,6 +237,8 @@ export default class SceneEntryManager {
         gltfComponents.media = { src: components["media-loader"].data.src, networkId };
       }
 
+      gltfComponents.pinnable = { pinned: true };
+
       this.hubChannel.pin(networkId, gltfNode);
     });
 
