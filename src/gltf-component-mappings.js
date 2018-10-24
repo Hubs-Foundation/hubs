@@ -72,8 +72,3 @@ AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentNa
   // nav-mesh-helper will query for it later.
   el.setAttribute("nav-mesh");
 });
-
-AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
-  el.setAttribute("networked", { template: "#interactable-media", owner: "scene", networkId: componentData.networkId });
-  el.setAttribute("media-loader", { resolve: true, src: componentData.src });
-});
