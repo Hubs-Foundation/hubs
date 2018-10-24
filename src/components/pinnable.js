@@ -23,7 +23,7 @@ AFRAME.registerComponent("pinnable", {
         this.el.setAttribute("grabbable", { maxGrabbers: this.prevMaxGrabbers });
       }
 
-      this.el.setAttribute("stretchable");
+      this.el.setAttribute("stretchable", "");
       this.el.emit("unpinned");
       this.scene.emit("object_unpinned", { el: this.el });
     }
