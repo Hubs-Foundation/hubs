@@ -75,8 +75,6 @@ AFRAME.registerSystem("userinput", {
     this.registeredMappings = new Set([keyboardDebuggingBindings]);
     this.xformStates = new Map();
 
-    this.gamepads = [];
-
     const appAwareTouchscreenDevice = new AppAwareTouchscreenDevice();
     const updateBindingsForVRMode = () => {
       const inVRMode = this.el.sceneEl.is("vr-mode");
@@ -131,16 +129,17 @@ AFRAME.registerSystem("userinput", {
           this.registeredMappings.add(gamepadBindings);
         }
         this.activeDevices.add(gamepadDevice);
-        this.gamepads[e.gamepad.index] = gamepadDevice;
       },
       false
     );
     window.addEventListener(
       "gamepaddisconnected",
       e => {
-        if (this.gamepads[e.gamepad.index]) {
-          this.activeDevices.delete(this.gamepads[e.gamepad.index]);
-          delete this.gamepads[e.gamepad.index];
+        for (const device of this.activeDevices) {
+          if (device.gamepad === e.gamepad) {
+            this.activeDevices.delete(device);
+            return;
+          }
         }
       },
       false
