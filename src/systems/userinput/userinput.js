@@ -103,7 +103,6 @@ AFRAME.registerSystem("userinput", {
     window.addEventListener(
       "gamepadconnected",
       e => {
-        console.log(e.gamepad);
         let gamepadDevice;
         if (e.gamepad.id === "OpenVR Gamepad") {
           for (let i = 0; i < this.activeDevices.length; i++) {
