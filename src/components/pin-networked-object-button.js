@@ -12,7 +12,8 @@ AFRAME.registerComponent("pin-networked-object-button", {
 
   init() {
     this._updateUI = this._updateUI.bind(this);
-    this.scene = document.querySelector("a-scene");
+    this.el.sceneEl.addEventListener("stateadded", this._updateUI);
+    this.el.sceneEl.addEventListener("stateremoved", this._updateUI);
 
     let uiElSearch = this.el;
 
@@ -37,7 +38,6 @@ AFRAME.registerComponent("pin-networked-object-button", {
 
       const wasPinned = this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned;
       this.targetEl.setAttribute("pinnable", { pinned: !wasPinned });
-      this.scene.emit("action_freeze");
     };
   },
 
@@ -50,6 +50,9 @@ AFRAME.registerComponent("pin-networked-object-button", {
   },
 
   remove() {
+    this.el.sceneEl.removeEventListener("stateadded", this._updateUI);
+    this.el.sceneEl.removeEventListener("stateremoved", this._updateUI);
+
     if (this.targetEl) {
       this.targetEl.removeEventListener("pinned", this._updateUI);
       this.targetEl.removeEventListener("unpinned", this._updateUI);
@@ -59,13 +62,7 @@ AFRAME.registerComponent("pin-networked-object-button", {
   _updateUI() {
     const isPinned = this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned;
 
-    if (isPinned) {
-      this.uiEl.setAttribute("clickable", "");
-      this.labelEl.setAttribute("text", { value: "un-pin" });
-    } else {
-      this.uiEl.removeAttribute("clickable");
-      this.labelEl.setAttribute("text", { value: "pin" });
-    }
+    this.labelEl.setAttribute("text", { value: isPinned ? "un-pin" : "pin" });
 
     this.el.parentNode.querySelectorAll(this.data.hideWhenPinnedSelector).forEach(hideEl => {
       hideEl.setAttribute("visible", !isPinned);
