@@ -213,9 +213,11 @@ export default class SceneEntryManager {
       spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
     });
 
-    this.scene.addEventListener("my_object_pinned", e => {
-      // Construct a GLTF node from this entity
+    this.scene.addEventListener("object_pinned", e => {
       const el = e.detail.el;
+      if (!NAF.utils.isMine(el)) return;
+
+      // Construct a GLTF node from this entity
       const object3D = el.object3D;
       const components = el.components;
       const networkId = components.networked.data.networkId;
@@ -240,7 +242,10 @@ export default class SceneEntryManager {
       console.log(gltfNode);
     });
 
-    this.scene.addEventListener("my_object_unpinned", e => {});
+    this.scene.addEventListener("object_unpinned", e => {
+      const el = e.detail.el;
+      if (!NAF.utils.isMine(el)) return;
+    });
 
     this.scene.addEventListener("object_spawned", e => {
       this.hubChannel.sendObjectSpawnedEvent(e.detail.objectType);

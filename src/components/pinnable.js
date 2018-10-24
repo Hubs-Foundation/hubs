@@ -3,7 +3,9 @@ AFRAME.registerComponent("pinnable", {
     pinned: { default: false }
   },
 
-  init() {},
+  init() {
+    this.scene = document.querySelector("a-scene");
+  },
 
   update() {
     if (this.data.pinned) {
@@ -15,6 +17,7 @@ AFRAME.registerComponent("pinnable", {
       this.el.setAttribute("grabbable", { maxGrabbers: 0 });
       this.el.removeAttribute("stretchable");
       this.el.emit("pinned");
+      this.scene.emit("object_pinned", { el: this.targetEl });
     } else {
       if (typeof this.prevMaxGrabbers !== "undefined") {
         this.el.setAttribute("grabbable", { maxGrabbers: this.prevMaxGrabbers });
@@ -22,6 +25,7 @@ AFRAME.registerComponent("pinnable", {
 
       this.el.setAttribute("stretchable");
       this.el.emit("unpinned");
+      this.scene.emit("object_unpinned", { el: this.targetEl });
     }
   }
 });

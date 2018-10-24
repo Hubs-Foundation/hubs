@@ -21,7 +21,6 @@ AFRAME.registerComponent("pin-networked-object-button", {
       if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) return;
 
       const wasPinned = this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned;
-      this.scene.emit(this.wasPinned ? "my_object_unpinned" : "my_object_pinned", { el: this.targetEl });
       this.targetEl.setAttribute("pinnable", { pinned: !wasPinned });
       this.scene.emit("action_freeze");
     };
