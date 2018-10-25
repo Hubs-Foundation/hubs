@@ -213,8 +213,8 @@ AFRAME.registerComponent("media-pager", {
           this.prevButton = this.el.querySelector(".prev-button [text-button]");
           this.pageLabel = this.el.querySelector(".page-label");
 
-          this.nextButton.addEventListener("click", this.onNext);
-          this.prevButton.addEventListener("click", this.onPrev);
+          this.nextButton.addEventListener("grab-start", this.onNext);
+          this.prevButton.addEventListener("grab-start", this.onPrev);
 
           this.update();
           this.el.emit("preview-loaded");

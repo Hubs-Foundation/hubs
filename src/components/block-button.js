@@ -14,11 +14,11 @@ AFRAME.registerComponent("block-button", {
   },
 
   play() {
-    this.el.addEventListener("click", this.onClick);
+    this.el.addEventListener("grab-start", this.onClick);
   },
 
   pause() {
-    this.el.removeEventListener("click", this.onClick);
+    this.el.removeEventListener("grab-start", this.onClick);
   },
 
   block(clientId) {

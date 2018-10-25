@@ -42,11 +42,11 @@ AFRAME.registerComponent("pin-networked-object-button", {
   },
 
   play() {
-    this.el.addEventListener("click", this.onClick);
+    this.el.addEventListener("grab-start", this.onClick);
   },
 
   pause() {
-    this.el.removeEventListener("click", this.onClick);
+    this.el.removeEventListener("grab-start", this.onClick);
   },
 
   remove() {
@@ -62,14 +62,6 @@ AFRAME.registerComponent("pin-networked-object-button", {
   _updateUI() {
     const isPinned = this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned;
 
-    if (isPinned) {
-      this.labelEl.setAttribute("text", { value: isPinned ? "un-pin" : "pin" });
-      this.uiEl.setAttribute("clickable", "");
-      this.labelEl.setAttribute("text", { value: "un-pin" });
-    } else {
-      this.uiEl.removeAttribute("clickable");
-      this.labelEl.setAttribute("text", { value: "pin" });
-    }
     this.labelEl.setAttribute("text", { value: isPinned ? "un-pin" : "pin" });
 
     this.el.parentNode.querySelectorAll(this.data.hideWhenPinnedSelector).forEach(hideEl => {

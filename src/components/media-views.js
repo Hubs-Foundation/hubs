@@ -230,7 +230,9 @@ AFRAME.registerComponent("media-video", {
 
   init() {
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
-    this.togglePlayingIfOwner = this.togglePlayingIfOwner.bind(this);
+
+    this._grabStart = this._grabStart.bind(this);
+    this._grabEnd = this._grabEnd.bind(this);
 
     this.lastUpdate = 0;
 
@@ -252,12 +254,28 @@ AFRAME.registerComponent("media-video", {
 
   // aframe component play, unrelated to video
   play() {
-    this.el.addEventListener("click", this.togglePlayingIfOwner);
+    this.el.addEventListener("grab-start", this._grabStart);
+    this.el.addEventListener("grab-end", this._grabEnd);
   },
 
   // aframe component pause, unrelated to video
   pause() {
-    this.el.removeEventListener("click", this.togglePlayingIfOwner);
+    this.el.removeEventListener("grab-start", this._grabStart);
+    this.el.removeEventListener("grab-end", this._grabEnd);
+  },
+
+  _grabStart() {
+    if (!this.el.components.grabbable || this.el.components.grabbable.data.maxGrabbers === 0) return;
+    if (this.el.sceneEl.is("frozen")) return; // Ignore clicks on video when clicking on buttons.
+
+    this.grabStartPosition = this.el.object3D.position.clone();
+  },
+
+  _grabEnd() {
+    if (this.grabStartPosition && this.grabStartPosition.distanceTo(this.el.object3D.position) < 0.01) {
+      this.togglePlayingIfOwner();
+      this.grabStartPosition = null;
+    }
   },
 
   togglePlayingIfOwner() {
