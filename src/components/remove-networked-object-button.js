@@ -6,7 +6,6 @@ AFRAME.registerComponent("remove-networked-object-button", {
       if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) return;
 
       this.targetEl.parentNode.removeChild(this.targetEl);
-      this.scene.emit("action_freeze");
     };
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
@@ -15,10 +14,10 @@ AFRAME.registerComponent("remove-networked-object-button", {
   },
 
   play() {
-    this.el.addEventListener("click", this.onClick);
+    this.el.addEventListener("grab-start", this.onClick);
   },
 
   pause() {
-    this.el.removeEventListener("click", this.onClick);
+    this.el.removeEventListener("grab-start", this.onClick);
   }
 });

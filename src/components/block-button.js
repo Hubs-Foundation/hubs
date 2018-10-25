@@ -7,7 +7,6 @@ AFRAME.registerComponent("block-button", {
   init() {
     this.onClick = () => {
       this.block(this.owner);
-      this.scene.emit("action_freeze");
     };
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.owner = networkedEl.components.networked.data.owner;
@@ -15,11 +14,11 @@ AFRAME.registerComponent("block-button", {
   },
 
   play() {
-    this.el.addEventListener("click", this.onClick);
+    this.el.addEventListener("grab-start", this.onClick);
   },
 
   pause() {
-    this.el.removeEventListener("click", this.onClick);
+    this.el.removeEventListener("grab-start", this.onClick);
   },
 
   block(clientId) {

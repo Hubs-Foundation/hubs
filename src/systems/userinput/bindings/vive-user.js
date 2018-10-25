@@ -261,8 +261,13 @@ export const viveUserBindings = {
     },
     {
       src: { value: paths.device.keyboard.key(" ") },
-      dest: { value: paths.actions.toggleFreeze },
-      xform: xforms.rising
+      dest: { value: paths.actions.ensureFrozen },
+      xform: xforms.copy
+    },
+    {
+      src: { value: paths.device.keyboard.key(" ") },
+      dest: { value: paths.actions.thaw },
+      xform: xforms.falling
     },
     {
       src: {
