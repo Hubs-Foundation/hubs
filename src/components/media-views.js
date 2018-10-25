@@ -245,7 +245,6 @@ AFRAME.registerComponent("media-video", {
       if (NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
         setTimeout(() => {
           if (NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
-            console.log("Take video ownership");
             NAF.utils.takeOwnership(this.networkedEl);
           }
         }, 2000 + Math.floor(Math.random() * 2000));

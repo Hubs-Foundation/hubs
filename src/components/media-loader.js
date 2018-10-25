@@ -243,10 +243,12 @@ AFRAME.registerComponent("media-pager", {
 
   onNext() {
     this.el.setAttribute("media-pager", "index", Math.min(this.data.index + 1, this.maxIndex));
+    this.el.emit("pager-page-changed");
   },
 
   onPrev() {
     this.el.setAttribute("media-pager", "index", Math.max(this.data.index - 1, 0));
+    this.el.emit("pager-page-changed");
   },
 
   repositionToolbar() {

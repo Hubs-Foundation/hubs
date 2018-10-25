@@ -6,6 +6,8 @@ AFRAME.registerComponent("pinnable", {
   init() {
     this._apply = this._apply.bind(this);
     this._fireEvents = this._fireEvents.bind(this);
+    this._firePinnedEvents = this._firePinnedEvents.bind(this);
+    this._fireUnpinnedEvents = this._fireUnpinnedEvents.bind(this);
     this._allowApplyOnceComponentsReady = this._allowApplyOnceComponentsReady.bind(this);
     this._allowApply = false;
 
@@ -14,7 +16,10 @@ AFRAME.registerComponent("pinnable", {
 
     // Fire pinned events when we drag and drop or scale in freeze mode,
     // so transform gets updated.
-    this.el.addEventListener("grab-end", this._fireEvents);
+    this.el.addEventListener("grab-end", this._firePinnedEvents);
+
+    // Fire pinned events when page changes so we can persist the page.
+    this.el.addEventListener("pager-page-changed", this._firePinnedEvents);
 
     // Hack: need to wait for the initial grabbable and stretchable components
     // to show up from the template before applying.
@@ -34,10 +39,19 @@ AFRAME.registerComponent("pinnable", {
   },
 
   _fireEvents() {
+    this._firePinnedEvents();
+    this._fireUnpinnedEvents();
+  },
+
+  _firePinnedEvents() {
     if (this.data.pinned) {
       this.el.emit("pinned");
       this.el.sceneEl.emit("object_pinned", { el: this.el });
-    } else {
+    }
+  },
+
+  _fireUnpinnedEvents() {
+    if (!this.data.pinned) {
       this.el.emit("unpinned");
       this.el.sceneEl.emit("object_unpinned", { el: this.el });
     }

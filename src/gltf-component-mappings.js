@@ -76,12 +76,18 @@ AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentNa
 AFRAME.GLTFModelPlus.registerComponent("pinnable", "pinnable");
 
 AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
-  el.setAttribute("networked", {
-    template: "#interactable-media",
-    owner: "scene",
-    lastOwnerTime: 1,
-    networkId: componentData.networkId
-  });
+  if (componentData.networkId) {
+    el.setAttribute("networked", {
+      template: "#interactable-media",
+      owner: "scene",
+      lastOwnerTime: 1,
+      networkId: componentData.networkId
+    });
+  }
 
   el.setAttribute("media-loader", { resolve: true, src: componentData.src });
+
+  if (componentData.pageIndex) {
+    el.setAttribute("media-pager", { index: componentData.page_index });
+  }
 });
