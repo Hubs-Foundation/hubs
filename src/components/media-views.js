@@ -239,6 +239,17 @@ AFRAME.registerComponent("media-video", {
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
       this.updatePlaybackState();
+
+      // For scene-owned videos, take ownership after a random delay if nobody
+      // else has so there is a timekeeper.
+      if (NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
+        setTimeout(() => {
+          if (NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
+            console.log("Take video ownership");
+            NAF.utils.takeOwnership(this.networkedEl);
+          }
+        }, 2000 + Math.floor(Math.random() * 2000));
+      }
     });
 
     // from a-sound
