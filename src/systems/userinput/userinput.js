@@ -26,29 +26,27 @@ import { updateActionSetsBasedOnSuperhands } from "./resolve-action-sets";
 import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
 
-const prioritizedBindings = new Map();
+const priorityMap = new Map();
 function prioritizeBindings(registeredMappings, activeSets) {
   const activeBindings = new Set();
-  prioritizedBindings.clear();
+  priorityMap.clear();
   for (const mapping of registeredMappings) {
     for (const setName in mapping) {
       if (!activeSets.has(setName) || !mapping[setName]) continue;
       for (const binding of mapping[setName]) {
         const { root, priority } = binding;
+        const prevBinding = priorityMap.get(root);
         if (!root || !priority) {
           activeBindings.add(binding);
-        } else if (!prioritizedBindings.has(root)) {
+        } else if (!prevBinding) {
           activeBindings.add(binding);
-          prioritizedBindings.set(root, binding);
-        } else {
-          const prevPriority = prioritizedBindings.get(root).priority;
-          if (priority > prevPriority) {
-            activeBindings.delete(prioritizedBindings.get(root));
-            activeBindings.add(binding);
-            prioritizedBindings.set(root, binding);
-          } else if (prevPriority === priority) {
-            console.error("equal priorities on same root", binding, prioritizedBindings.get(root));
-          }
+          priorityMap.set(root, binding);
+        } else if (priority > prevBinding.priority) {
+          activeBindings.delete(priorityMap.get(root));
+          activeBindings.add(binding);
+          priorityMap.set(root, binding);
+        } else if (prevBinding.priority === priority) {
+          console.error("equal priorities on same root", binding, priorityMap.get(root));
         }
       }
     }
