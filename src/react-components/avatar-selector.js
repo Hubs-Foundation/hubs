@@ -4,7 +4,7 @@ import { injectIntl } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
-import { AudioContext } from "../AudioContext";
+import { WithHoverSound } from "./wrap-with-audio";
 
 class AvatarSelector extends Component {
   static propTypes = {
@@ -177,30 +177,16 @@ class AvatarSelector extends Component {
           />
           <a-entity hide-when-quality="low" light="type: ambient; color: #FFF" />
         </a-scene>
-        <AudioContext.Consumer>
-          {audio => (
-            <button
-              className="avatar-selector__previous-button"
-              onClick={this.emitChangeToPrevious}
-              onMouseEnter={audio.onMouseEnter}
-              onMouseLeave={audio.onMouseLeave}
-            >
-              <FontAwesomeIcon icon={faAngleLeft} />
-            </button>
-          )}
-        </AudioContext.Consumer>
-        <AudioContext.Consumer>
-          {audio => (
-            <button
-              className="avatar-selector__next-button"
-              onClick={this.emitChangeToNext}
-              onMouseEnter={audio.onMouseEnter}
-              onMouseLeave={audio.onMouseLeave}
-            >
-              <FontAwesomeIcon icon={faAngleRight} />
-            </button>
-          )}
-        </AudioContext.Consumer>
+        <WithHoverSound>
+          <button className="avatar-selector__previous-button" onClick={this.emitChangeToPrevious}>
+            <FontAwesomeIcon icon={faAngleLeft} />
+          </button>
+        </WithHoverSound>
+        <WithHoverSound>
+          <button className="avatar-selector__next-button" onClick={this.emitChangeToNext}>
+            <FontAwesomeIcon icon={faAngleRight} />
+          </button>
+        </WithHoverSound>
       </div>
     );
   }

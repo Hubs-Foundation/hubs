@@ -3,7 +3,7 @@ import { FormattedMessage } from "react-intl";
 import PropTypes from "prop-types";
 import formurlencoded from "form-urlencoded";
 import DialogContainer from "./dialog-container.js";
-import { AudioContext } from "../AudioContext";
+import { WithHoverSound } from "./wrap-with-audio";
 
 export default class UpdatesDialog extends Component {
   static propTypes = {
@@ -41,57 +41,45 @@ export default class UpdatesDialog extends Component {
 
     return (
       <DialogContainer {...other}>
-        <AudioContext.Consumer>
-          {audio => (
-            <span>
-              <p>Sign up to get updates about new features in Hubs.</p>
-              <form onSubmit={signUpForMailingList}>
-                <div className="mailing-list-form">
+        <span>
+          <p>Sign up to get updates about new features in Hubs.</p>
+          <form onSubmit={signUpForMailingList}>
+            <div className="mailing-list-form">
+              <WithHoverSound>
+                <input
+                  type="email"
+                  value={this.state.mailingListEmail}
+                  onChange={e => this.setState({ mailingListEmail: e.target.value })}
+                  className="mailing-list-form__email_field"
+                  required
+                  placeholder="Your email here"
+                />
+              </WithHoverSound>
+              <label className="mailing-list-form__privacy">
+                <WithHoverSound>
                   <input
-                    type="email"
-                    value={this.state.mailingListEmail}
-                    onChange={e => this.setState({ mailingListEmail: e.target.value })}
-                    className="mailing-list-form__email_field"
+                    className="mailing-list-form__privacy_checkbox"
+                    type="checkbox"
                     required
-                    placeholder="Your email here"
-                    onMouseEnter={audio.onMouseEnter}
-                    onMouseLeave={audio.onMouseLeave}
+                    value={this.state.mailingListPrivacy}
+                    onChange={e => this.setState({ mailingListPrivacy: e.target.checked })}
                   />
-                  <label className="mailing-list-form__privacy">
-                    <input
-                      className="mailing-list-form__privacy_checkbox"
-                      type="checkbox"
-                      required
-                      value={this.state.mailingListPrivacy}
-                      onChange={e => this.setState({ mailingListPrivacy: e.target.checked })}
-                      onMouseEnter={audio.onMouseEnter}
-                      onMouseLeave={audio.onMouseLeave}
-                    />
-                    <span className="mailing-list-form__privacy_label">
-                      <FormattedMessage id="mailing_list.privacy_label" />{" "}
-                      <a
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        href="https://www.mozilla.org/en-US/privacy/"
-                        onMouseEnter={audio.onMouseEnter}
-                        onMouseLeave={audio.onMouseLeave}
-                      >
-                        <FormattedMessage id="mailing_list.privacy_link" />
-                      </a>
-                    </span>
-                  </label>
-                  <input
-                    className="mailing-list-form__submit"
-                    type="submit"
-                    value="Sign Up Now"
-                    onMouseEnter={audio.onMouseEnter}
-                    onMouseLeave={audio.onMouseLeave}
-                  />
-                </div>
-              </form>
-            </span>
-          )}
-        </AudioContext.Consumer>
+                </WithHoverSound>
+                <span className="mailing-list-form__privacy_label">
+                  <FormattedMessage id="mailing_list.privacy_label" />{" "}
+                  <WithHoverSound>
+                    <a target="_blank" rel="noopener noreferrer" href="https://www.mozilla.org/en-US/privacy/">
+                      <FormattedMessage id="mailing_list.privacy_link" />
+                    </a>
+                  </WithHoverSound>
+                </span>
+              </label>
+              <WithHoverSound>
+                <input className="mailing-list-form__submit" type="submit" value="Sign Up Now" />
+              </WithHoverSound>
+            </div>
+          </form>
+        </span>
       </DialogContainer>
     );
   }

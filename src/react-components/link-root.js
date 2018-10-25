@@ -8,7 +8,7 @@ import classNames from "classnames";
 import styles from "../assets/stylesheets/link.scss";
 import { disableiOSZoom } from "../utils/disable-ios-zoom";
 import HeadsetIcon from "../assets/images/generic_vr_entry.svg";
-import { AudioContext } from "../AudioContext";
+import { WithHoverSound } from "./wrap-with-audio";
 
 const MAX_DIGITS = 6;
 const MAX_LETTERS = 4;
@@ -136,155 +136,142 @@ class LinkRoot extends Component {
 
     return (
       <IntlProvider locale={lang} messages={messages}>
-        <AudioContext.Consumer>
-          {audio => (
-            <div className={styles.link}>
-              <div className={styles.linkContents}>
-                <div className={styles.logo}>
-                  <img src="../assets/images/hub-preview-light-no-shadow.png" />
-                </div>
-                {this.state.entered.length === this.maxAllowedChars() && (
-                  <div className={classNames("loading-panel", styles.codeLoadingPanel)}>
-                    <div className="loader-wrap">
-                      <div className="loader">
-                        <div className="loader-center" />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className={styles.enteredContents}>
-                  <div className={styles.header}>
-                    <FormattedMessage
-                      id={
-                        this.state.failedAtLeastOnce
-                          ? "link.try_again"
-                          : "link.link_page_header_" + (!this.state.isAlphaMode ? "entry" : "headset")
-                      }
-                    />
-                  </div>
-
-                  <div className={styles.entered}>
-                    <input
-                      className={styles.charInput}
-                      type={this.state.isAlphaMode ? "text" : "tel"}
-                      pattern="[0-9A-I]*"
-                      value={this.state.entered}
-                      onChange={ev => {
-                        if (!this.state.isAlphaMode && ev.target.value.match(/[a-z]/i)) {
-                          this.setState({ isAlphaMode: true });
-                        }
-
-                        this.setState({ entered: ev.target.value.toUpperCase() });
-                      }}
-                    />
-                  </div>
-
-                  <div className={styles.enteredFooter}>
-                    {!this.state.isAlphaMode && (
-                      <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
-                    )}
-                    {!this.state.isAlphaMode && (
-                      <span>
-                        <a
-                          href="#"
-                          onClick={() => this.toggleMode()}
-                          onMouseEnter={audio.onMouseEnter}
-                          onMouseLeave={audio.onMouseLeave}
-                        >
-                          <FormattedMessage id="link.linking_a_headset" />
-                        </a>
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className={styles.keypad}>
-                  {(this.state.isAlphaMode
-                    ? ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
-                    : [1, 2, 3, 4, 5, 6, 7, 8, 9]
-                  ).map((d, i) => (
-                    <button
-                      disabled={this.state.entered.length === this.maxAllowedChars()}
-                      key={`char_${i}`}
-                      className={styles.keypadButton}
-                      onClick={() => {
-                        if (!hasTouchEvents) this.addToEntry(d);
-                      }}
-                      onTouchStart={() => this.addToEntry(d)}
-                      onMouseEnter={audio.onMouseEnter}
-                      onMouseLeave={audio.onMouseLeave}
-                    >
-                      {d}
-                    </button>
-                  ))}
-                  <button
-                    className={classNames(styles.keypadButton, styles.keypadToggleMode)}
-                    onTouchStart={() => this.toggleMode()}
-                    onClick={() => {
-                      if (!hasTouchEvents) this.toggleMode();
-                    }}
-                    onMouseEnter={audio.onMouseEnter}
-                    onMouseLeave={audio.onMouseLeave}
-                  >
-                    {this.state.isAlphaMode ? "123" : "ABC"}
-                  </button>
-                  {!this.state.isAlphaMode && (
-                    <button
-                      disabled={this.state.entered.length === this.maxAllowedChars()}
-                      className={classNames(styles.keypadButton, styles.keypadZeroButton)}
-                      onTouchStart={() => this.addToEntry(0)}
-                      onClick={() => {
-                        if (!hasTouchEvents) this.addToEntry(0);
-                      }}
-                      onMouseEnter={audio.onMouseEnter}
-                      onMouseLeave={audio.onMouseLeave}
-                    >
-                      0
-                    </button>
-                  )}
-                  <button
-                    disabled={this.state.entered.length === 0 || this.state.entered.length === this.maxAllowedChars()}
-                    className={classNames(styles.keypadButton, styles.keypadBackspace)}
-                    onTouchStart={() => this.removeChar()}
-                    onClick={() => {
-                      if (!hasTouchEvents) this.removeChar();
-                    }}
-                    onMouseEnter={audio.onMouseEnter}
-                    onMouseLeave={audio.onMouseLeave}
-                  >
-                    ⌫
-                  </button>
-                </div>
-
-                <div className={styles.footer}>
-                  <div
-                    className={styles.linkHeadsetFooterLink}
-                    style={{ visibility: this.state.isAlphaMode ? "hidden" : "visible" }}
-                  >
-                    <img
-                      onClick={() => this.toggleMode()}
-                      src={HeadsetIcon}
-                      className={styles.headsetIcon}
-                      onMouseEnter={audio.onMouseEnter}
-                      onMouseLeave={audio.onMouseLeave}
-                    />
-                    <span>
-                      <a
-                        href="#"
-                        onClick={() => this.toggleMode()}
-                        onMouseEnter={audio.onMouseEnter}
-                        onMouseLeave={audio.onMouseLeave}
-                      >
-                        <FormattedMessage id="link.linking_a_headset" />
-                      </a>
-                    </span>
+        <div className={styles.link}>
+          <div className={styles.linkContents}>
+            <div className={styles.logo}>
+              <img src="../assets/images/hub-preview-light-no-shadow.png" />
+            </div>
+            {this.state.entered.length === this.maxAllowedChars() && (
+              <div className={classNames("loading-panel", styles.codeLoadingPanel)}>
+                <div className="loader-wrap">
+                  <div className="loader">
+                    <div className="loader-center" />
                   </div>
                 </div>
               </div>
+            )}
+
+            <div className={styles.enteredContents}>
+              <div className={styles.header}>
+                <FormattedMessage
+                  id={
+                    this.state.failedAtLeastOnce
+                      ? "link.try_again"
+                      : "link.link_page_header_" + (!this.state.isAlphaMode ? "entry" : "headset")
+                  }
+                />
+              </div>
+
+              <div className={styles.entered}>
+                <input
+                  className={styles.charInput}
+                  type={this.state.isAlphaMode ? "text" : "tel"}
+                  pattern="[0-9A-I]*"
+                  value={this.state.entered}
+                  onChange={ev => {
+                    if (!this.state.isAlphaMode && ev.target.value.match(/[a-z]/i)) {
+                      this.setState({ isAlphaMode: true });
+                    }
+
+                    this.setState({ entered: ev.target.value.toUpperCase() });
+                  }}
+                />
+              </div>
+
+              <div className={styles.enteredFooter}>
+                {!this.state.isAlphaMode && (
+                  <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
+                )}
+                {!this.state.isAlphaMode && (
+                  <span>
+                    {" "}
+                    <WithHoverSound>
+                      <a href="#" onClick={() => this.toggleMode()}>
+                        <FormattedMessage id="link.linking_a_headset" />
+                      </a>
+                    </WithHoverSound>
+                  </span>
+                )}
+              </div>
             </div>
-          )}
-        </AudioContext.Consumer>
+
+            <div className={styles.keypad}>
+              {(this.state.isAlphaMode
+                ? ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
+                : [1, 2, 3, 4, 5, 6, 7, 8, 9]
+              ).map((d, i) => (
+                <WithHoverSound>
+                  <button
+                    disabled={this.state.entered.length === this.maxAllowedChars()}
+                    key={`char_${i}`}
+                    className={styles.keypadButton}
+                    onClick={() => {
+                      if (!hasTouchEvents) this.addToEntry(d);
+                    }}
+                    onTouchStart={() => this.addToEntry(d)}
+                  >
+                    {d}
+                  </button>
+                </WithHoverSound>
+              ))}
+              <WithHoverSound>
+                <button
+                  className={classNames(styles.keypadButton, styles.keypadToggleMode)}
+                  onTouchStart={() => this.toggleMode()}
+                  onClick={() => {
+                    if (!hasTouchEvents) this.toggleMode();
+                  }}
+                >
+                  {this.state.isAlphaMode ? "123" : "ABC"}
+                </button>
+              </WithHoverSound>
+              {!this.state.isAlphaMode && (
+                <WithHoverSound>
+                  <button
+                    disabled={this.state.entered.length === this.maxAllowedChars()}
+                    className={classNames(styles.keypadButton, styles.keypadZeroButton)}
+                    onTouchStart={() => this.addToEntry(0)}
+                    onClick={() => {
+                      if (!hasTouchEvents) this.addToEntry(0);
+                    }}
+                  >
+                    0
+                  </button>
+                </WithHoverSound>
+              )}
+              <WithHoverSound>
+                <button
+                  disabled={this.state.entered.length === 0 || this.state.entered.length === this.maxAllowedChars()}
+                  className={classNames(styles.keypadButton, styles.keypadBackspace)}
+                  onTouchStart={() => this.removeChar()}
+                  onClick={() => {
+                    if (!hasTouchEvents) this.removeChar();
+                  }}
+                >
+                  ⌫
+                </button>
+              </WithHoverSound>
+            </div>
+
+            <div className={styles.footer}>
+              <div
+                className={styles.linkHeadsetFooterLink}
+                style={{ visibility: this.state.isAlphaMode ? "hidden" : "visible" }}
+              >
+                <WithHoverSound>
+                  <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
+                </WithHoverSound>
+                <span>
+                  <WithHoverSound>
+                    <a href="#" onClick={() => this.toggleMode()}>
+                      <FormattedMessage id="link.linking_a_headset" />
+                    </a>
+                  </WithHoverSound>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </IntlProvider>
     );
   }

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import DialogContainer from "./dialog-container.js";
 import PropTypes from "prop-types";
-import { AudioContext } from "../AudioContext";
+import { WithHoverSound } from "./wrap-with-audio";
 
 export default class InviteTeamDialog extends Component {
   static propTypes = {
@@ -31,18 +31,11 @@ export default class InviteTeamDialog extends Component {
           </div>
           <div className="invite-team-form">
             <div className="invite-team-form__buttons">
-              <AudioContext.Consumer>
-                {audio => (
-                  <button
-                    className="invite-team-form__action-button"
-                    onClick={this.inviteClicked}
-                    onMouseEnter={audio.onMouseEnter}
-                    onMouseLeave={audio.onMouseLeave}
-                  >
-                    <span>{this.state.inviteButtonText}</span>
-                  </button>
-                )}
-              </AudioContext.Consumer>
+              <WithHoverSound>
+                <button className="invite-team-form__action-button" onClick={this.inviteClicked}>
+                  <span>{this.state.inviteButtonText}</span>
+                </button>
+              </WithHoverSound>
             </div>
           </div>
         </div>

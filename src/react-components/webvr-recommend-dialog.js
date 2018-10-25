@@ -1,39 +1,27 @@
 import React, { Component } from "react";
 import DialogContainer from "./dialog-container.js";
-import { AudioContext } from "../AudioContext";
+import { WithHoverSound } from "./wrap-with-audio";
 
 export default class WebVRRecommendDialog extends Component {
   render() {
     return (
       <DialogContainer title="Enter in VR" {...this.props}>
-        <AudioContext.Consumer>
-          {audio => (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-              <p>To enter Hubs with Oculus or SteamVR, you can use Firefox.</p>
-              <a
-                className="info-dialog--action-button"
-                href="https://www.mozilla.org/firefox"
-                onMouseEnter={audio.onMouseEnter}
-                onMouseLeave={audio.onMouseLeave}
-              >
-                Download Firefox
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <p>To enter Hubs with Oculus or SteamVR, you can use Firefox.</p>
+          <WithHoverSound>
+            <a className="info-dialog--action-button" href="https://www.mozilla.org/firefox">
+              Download Firefox
+            </a>
+          </WithHoverSound>
+          <p style={{ fontSize: "0.8em" }}>
+            For a full list of browsers with experimental VR support, visit{" "}
+            <WithHoverSound>
+              <a href="https://webvr.rocks" target="_blank" rel="noopener noreferrer">
+                WebVR Rocks
               </a>
-              <p style={{ fontSize: "0.8em" }}>
-                For a full list of browsers with experimental VR support, visit{" "}
-                <a
-                  href="https://webvr.rocks"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onMouseEnter={audio.onMouseEnter}
-                  onMouseLeave={audio.onMouseLeave}
-                >
-                  WebVR Rocks
-                </a>
-                .
-              </p>
-            </div>
-          )}
-        </AudioContext.Consumer>
+            </WithHoverSound>
+          </p>
+        </div>
       </DialogContainer>
     );
   }

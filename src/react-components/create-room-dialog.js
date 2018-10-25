@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import DialogContainer from "./dialog-container.js";
-import { AudioContext } from "../AudioContext";
+import { WithHoverSound } from "./wrap-with-audio";
 
 const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
 
@@ -47,17 +47,11 @@ export default class CreateRoomDialog extends Component {
                 onChange={e => this.setState({ customSceneUrl: e.target.value })}
               />
               <div className="custom-scene-form__buttons">
-                <AudioContext.Consumer>
-                  {audio => (
-                    <button
-                      className="custom-scene-form__action-button"
-                      onMouseEnter={audio.onMouseEnter}
-                      onMouseLeave={audio.onMouseLeave}
-                    >
-                      <span>create</span>
-                    </button>
-                  )}
-                </AudioContext.Consumer>
+                <WithHoverSound>
+                  <button className="custom-scene-form__action-button">
+                    <span>create</span>
+                  </button>
+                </WithHoverSound>
               </div>
             </div>
           </form>

@@ -20,7 +20,7 @@ import ReportDialog from "./report-dialog.js";
 import SlackDialog from "./slack-dialog.js";
 import UpdatesDialog from "./updates-dialog.js";
 import DialogContainer from "./dialog-container.js";
-import { AudioContext } from "../AudioContext";
+import { WithHoverSound } from "./wrap-with-audio";
 
 addLocaleData([...en]);
 
@@ -181,146 +181,141 @@ class HomeRoot extends Component {
     });
 
     return (
-      <AudioContext.Consumer>
-        {audio => (
-          <IntlProvider locale={lang} messages={messages}>
-            <div className={styles.home}>
-              <div className={mainContentClassNames}>
-                <div className={styles.headerContent}>
-                  <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
-                    <div className={styles.hubs} onMouseEnter={audio.onMouseEnter} onMouseLeave={audio.onMouseLeave}>
-                      hubs
-                    </div>
-                    <div className={styles.preview} onMouseEnter={audio.onMouseEnter} onMouseLeave={audio.onMouseLeave}>
-                      preview
-                    </div>
-                    <div className={styles.links}>
-                      <a
-                        href="https://blog.mozvr.com/introducing-hubs-a-new-way-to-get-together-online/"
-                        rel="noreferrer noopener"
-                        onMouseEnter={audio.onMouseEnter}
-                        onMouseLeave={audio.onMouseLeave}
-                      >
-                        <FormattedMessage id="home.about_link" />
-                      </a>
-                      <a
-                        href="https://github.com/mozilla/hubs"
-                        rel="noreferrer noopener"
-                        onMouseEnter={audio.onMouseEnter}
-                        onMouseLeave={audio.onMouseLeave}
-                      >
-                        <FormattedMessage id="home.source_link" />
-                      </a>
-                    </div>
-                  </div>
-                  <div className={styles.ident} />
-                </div>
-                <div className={styles.heroContent}>
-                  <div className={styles.attribution}>
-                    Medieval Fantasy Book by{" "}
+      <IntlProvider locale={lang} messages={messages}>
+        <div className={styles.home}>
+          <div className={mainContentClassNames}>
+            <div className={styles.headerContent}>
+              <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
+                <WithHoverSound>
+                  <div className={styles.hubs}>hubs</div>
+                </WithHoverSound>
+                <WithHoverSound>
+                  <div className={styles.preview}>preview</div>
+                </WithHoverSound>
+                <div className={styles.links}>
+                  <WithHoverSound>
                     <a
-                      target="_blank"
+                      href="https://blog.mozvr.com/introducing-hubs-a-new-way-to-get-together-online/"
                       rel="noreferrer noopener"
-                      href="https://sketchfab.com/models/06d5a80a04fc4c5ab552759e9a97d91a?utm_campaign=06d5a80a04fc4c5ab552759e9a97d91a&utm_medium=embed&utm_source=oembed"
                     >
-                      Pixel
+                      <FormattedMessage id="home.about_link" />
                     </a>
-                  </div>
-                  <div className={styles.container}>
-                    <img className={styles.logo} src={hubLogo} />
-                    <div className={styles.title}>
-                      <FormattedMessage id="home.hero_title" />
-                    </div>
-                    {this.state.environments.length === 0 && (
-                      <div className="loader-wrap">
-                        <div className="loader">
-                          <div className="loader-center" />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className={styles.create}>
-                    <HubCreatePanel
-                      initialEnvironment={this.props.initialEnvironment}
-                      environments={this.state.environments}
-                    />
-                  </div>
-                  {this.state.environments.length > 1 && (
-                    <div className={styles.joinButton}>
-                      <a href="/link" onMouseEnter={audio.onMouseEnter} onMouseLeave={audio.onMouseLeave}>
-                        <FormattedMessage id="home.join_room" />
-                      </a>
-                    </div>
-                  )}
-                </div>
-                <div className={styles.footerContent}>
-                  <div className={styles.links}>
-                    <div className={styles.top}>
-                      <a
-                        className={styles.link}
-                        rel="noopener noreferrer"
-                        href="#"
-                        onClick={this.onDialogLinkClicked(this.showSlackDialog.bind(this))}
-                        onMouseEnter={audio.onMouseEnter}
-                        onMouseLeave={audio.onMouseLeave}
-                      >
-                        <FormattedMessage id="home.join_us" />
-                      </a>
-                      <a
-                        className={styles.link}
-                        rel="noopener noreferrer"
-                        href="#"
-                        onClick={this.onDialogLinkClicked(this.showUpdatesDialog.bind(this))}
-                        onMouseEnter={audio.onMouseEnter}
-                        onMouseLeave={audio.onMouseLeave}
-                      >
-                        <FormattedMessage id="home.get_updates" />
-                      </a>
-                      <a
-                        className={styles.link}
-                        rel="noopener noreferrer"
-                        href="#"
-                        onClick={this.onDialogLinkClicked(this.showReportDialog.bind(this))}
-                        onMouseEnter={audio.onMouseEnter}
-                        onMouseLeave={audio.onMouseLeave}
-                      >
-                        <FormattedMessage id="home.report_issue" />
-                      </a>
-                      <a
-                        className={styles.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
-                        onMouseEnter={audio.onMouseEnter}
-                        onMouseLeave={audio.onMouseLeave}
-                      >
-                        <FormattedMessage id="home.terms_of_use" />
-                      </a>
-                      <a
-                        className={styles.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
-                        onMouseEnter={audio.onMouseEnter}
-                        onMouseLeave={audio.onMouseLeave}
-                      >
-                        <FormattedMessage id="home.privacy_notice" />
-                      </a>
-
-                      <img className={styles.mozLogo} src={mozLogo} />
-                    </div>
-                  </div>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
+                      <FormattedMessage id="home.source_link" />
+                    </a>
+                  </WithHoverSound>
                 </div>
               </div>
-              <video playsInline muted loop autoPlay className={styles.backgroundVideo} id="background-video">
-                <source src={homeVideoWebM} type="video/webm" />
-                <source src={homeVideoMp4} type="video/mp4" />
-              </video>
-              {this.state.dialog}
+              <div className={styles.ident} />
             </div>
-          </IntlProvider>
-        )}
-      </AudioContext.Consumer>
+            <div className={styles.heroContent}>
+              <div className={styles.attribution}>
+                Medieval Fantasy Book by{" "}
+                <a
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  href="https://sketchfab.com/models/06d5a80a04fc4c5ab552759e9a97d91a?utm_campaign=06d5a80a04fc4c5ab552759e9a97d91a&utm_medium=embed&utm_source=oembed"
+                >
+                  Pixel
+                </a>
+              </div>
+              <div className={styles.container}>
+                <img className={styles.logo} src={hubLogo} />
+                <div className={styles.title}>
+                  <FormattedMessage id="home.hero_title" />
+                </div>
+                {this.state.environments.length === 0 && (
+                  <div className="loader-wrap">
+                    <div className="loader">
+                      <div className="loader-center" />
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className={styles.create}>
+                <HubCreatePanel
+                  initialEnvironment={this.props.initialEnvironment}
+                  environments={this.state.environments}
+                />
+              </div>
+              {this.state.environments.length > 1 && (
+                <div className={styles.joinButton}>
+                  <WithHoverSound>
+                    <a href="/link">
+                      <FormattedMessage id="home.join_room" />
+                    </a>
+                  </WithHoverSound>
+                </div>
+              )}
+            </div>
+            <div className={styles.footerContent}>
+              <div className={styles.links}>
+                <div className={styles.top}>
+                  <WithHoverSound>
+                    <a
+                      className={styles.link}
+                      rel="noopener noreferrer"
+                      href="#"
+                      onClick={this.onDialogLinkClicked(this.showSlackDialog.bind(this))}
+                    >
+                      <FormattedMessage id="home.join_us" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a
+                      className={styles.link}
+                      rel="noopener noreferrer"
+                      href="#"
+                      onClick={this.onDialogLinkClicked(this.showUpdatesDialog.bind(this))}
+                    >
+                      <FormattedMessage id="home.get_updates" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a
+                      className={styles.link}
+                      rel="noopener noreferrer"
+                      href="#"
+                      onClick={this.onDialogLinkClicked(this.showReportDialog.bind(this))}
+                    >
+                      <FormattedMessage id="home.report_issue" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
+                    >
+                      <FormattedMessage id="home.terms_of_use" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+                    >
+                      <FormattedMessage id="home.privacy_notice" />
+                    </a>
+                  </WithHoverSound>
+
+                  <img className={styles.mozLogo} src={mozLogo} />
+                </div>
+              </div>
+            </div>
+          </div>
+          <video playsInline muted loop autoPlay className={styles.backgroundVideo} id="background-video">
+            <source src={homeVideoWebM} type="video/webm" />
+            <source src={homeVideoMp4} type="video/mp4" />
+          </video>
+          {this.state.dialog}
+        </div>
+      </IntlProvider>
     );
   }
 }

@@ -1,7 +1,6 @@
 import React from "react";
 import { FormattedMessage } from "react-intl";
 import PropTypes from "prop-types";
-import { AudioContext } from "../AudioContext";
 
 import MobileScreenEntryImg from "../assets/images/mobile_screen_entry.svg";
 import DesktopScreenEntryImg from "../assets/images/desktop_screen_entry.svg";
@@ -10,16 +9,12 @@ import GearVREntryImg from "../assets/images/gearvr_entry.svg";
 import DaydreamEntryImg from "../assets/images/daydream_entry.svg";
 import DeviceEntryImg from "../assets/images/device_entry.svg";
 import styles from "../assets/stylesheets/entry.scss";
+import { WithHoverSound } from "./wrap-with-audio";
 
-const EntryButton = props => (
-  <AudioContext.Consumer>
-    {audio => (
-      <button
-        className={styles.entryButton}
-        onClick={props.onClick}
-        onMouseEnter={audio.onMouseEnter}
-        onMouseLeave={audio.onMouseLeave}
-      >
+const EntryButton = props => {
+  return (
+    <WithHoverSound>
+      <button className={styles.entryButton} onClick={props.onClick}>
         <img src={props.iconSrc} className={styles.icon} />
         <div className={styles.label}>
           <div className={styles.contents}>
@@ -37,9 +32,9 @@ const EntryButton = props => (
           </div>
         </div>
       </button>
-    )}
-  </AudioContext.Consumer>
-);
+    </WithHoverSound>
+  );
+};
 
 EntryButton.propTypes = {
   onClick: PropTypes.func,
