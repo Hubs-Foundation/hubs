@@ -20,7 +20,7 @@ export default function pinnedEntityToGltf(el) {
   if (!equalArray(scale, [1, 1, 1])) gltfNode.scale = scale;
 
   if (components["media-loader"]) {
-    gltfComponents.media = { src: components["media-loader"].data.src, networkId };
+    gltfComponents.media = { src: components["media-loader"].data.src, id: networkId };
 
     if (components["media-pager"]) {
       gltfComponents.media.pageIndex = components["media-pager"].data.index;
