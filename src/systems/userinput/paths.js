@@ -12,6 +12,7 @@ paths.actions.boost = "/actions/boost";
 paths.actions.startGazeTeleport = "/actions/startTeleport";
 paths.actions.stopGazeTeleport = "/actions/stopTeleport";
 paths.actions.spawnPen = "/actions/spawnPen";
+paths.actions.muteMic = "/actions/muteMic";
 paths.actions.cursor = {};
 paths.actions.cursor.pose = "/actions/cursorPose";
 paths.actions.cursor.grab = "/actions/cursorGrab";
