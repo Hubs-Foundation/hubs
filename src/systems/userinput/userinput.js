@@ -59,7 +59,7 @@ AFRAME.registerSystem("userinput", {
     return this.frame && this.frame[path];
   },
 
-  toggleActive(set, value) {
+  toggleSet(set, value) {
     this.pendingSetChanges.push({ set, value });
   },
 
