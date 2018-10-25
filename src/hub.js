@@ -29,6 +29,7 @@ import joystick_dpad4 from "./behaviours/joystick-dpad4";
 import msft_mr_axis_with_deadzone from "./behaviours/msft-mr-axis-with-deadzone";
 import { PressedMove } from "./activators/pressedmove";
 import { ReverseY } from "./activators/reversey";
+import { Presence } from "phoenix";
 
 import "./activators/shortpress";
 
@@ -255,7 +256,12 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
     environmentScene.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
   }
 
-  remountUI({ hubId: hub.hub_id, hubName: hub.name, hubEntryCode: hub.entry_code });
+  remountUI({
+    hubId: hub.hub_id,
+    hubName: hub.name,
+    hubEntryCode: hub.entry_code,
+    onSendMessage: hubChannel.sendMessage
+  });
 
   document
     .querySelector("#hud-hub-entry-link")
@@ -301,7 +307,7 @@ async function runBotMode(scene, entryManager) {
   entryManager.enterSceneWhenLoaded(new MediaStream(), false);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
   const entryManager = new SceneEntryManager(hubChannel);
@@ -315,22 +321,6 @@ document.addEventListener("DOMContentLoaded", () => {
   remountUI({ hubChannel, linkChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
-
-  document.body.addEventListener("connected", () =>
-    remountUI({ occupantCount: NAF.connection.adapter.publisher.initialOccupants.length + 1 })
-  );
-
-  document.body.addEventListener("clientConnected", () =>
-    remountUI({
-      occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
-    })
-  );
-
-  document.body.addEventListener("clientDisconnected", () =>
-    remountUI({
-      occupantCount: Object.keys(NAF.connection.adapter.occupants).length + 1
-    })
-  );
 
   const platformUnsupportedReason = getPlatformUnsupportedReason();
 
@@ -351,13 +341,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  getAvailableVREntryTypes().then(availableVREntryTypes => {
-    if (availableVREntryTypes.isInHMD) {
-      remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
-    } else {
-      remountUI({ availableVREntryTypes });
-    }
-  });
+  const availableVREntryTypes = await getAvailableVREntryTypes();
+
+  if (availableVREntryTypes.isInHMD) {
+    remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
+  } else {
+    remountUI({ availableVREntryTypes });
+  }
 
   const environmentScene = document.querySelector("#environment-scene");
 
@@ -381,12 +371,21 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log(`Hub ID: ${hubId}`);
 
   const socket = connectToReticulum(isDebug);
-  const channel = socket.channel(`hub:${hubId}`, {});
+  remountUI({ sessionId: socket.params().session_id });
 
-  channel
+  // Hub local channel
+  const context = {
+    mobile: isMobile,
+    hmd: availableVREntryTypes.isInHMD
+  };
+
+  const joinPayload = { profile: store.state.profile, context };
+  const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
+
+  hubPhxChannel
     .join()
     .receive("ok", async data => {
-      hubChannel.setPhoenixChannel(channel);
+      hubChannel.setPhoenixChannel(hubPhxChannel);
       await handleHubChannelJoined(entryManager, hubChannel, data);
     })
     .receive("error", res => {
@@ -398,10 +397,101 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error(res);
     });
 
-  channel.on("naf", data => {
+  const hubPhxPresence = new Presence(hubPhxChannel);
+  const presenceLogEntries = [];
+
+  const addToPresenceLog = entry => {
+    entry.key = Date.now().toString();
+
+    presenceLogEntries.push(entry);
+    remountUI({ presenceLogEntries });
+
+    // Fade out and then remove
+    setTimeout(() => {
+      entry.expired = true;
+      remountUI({ presenceLogEntries });
+
+      setTimeout(() => {
+        presenceLogEntries.splice(presenceLogEntries.indexOf(entry), 1);
+        remountUI({ presenceLogEntries });
+      }, 5000);
+    }, entryManager.hasEntered() ? 10000 : 30000); // Fade out things faster once entered.
+  };
+
+  let isInitialSync = true;
+
+  hubPhxPresence.onSync(() => {
+    remountUI({ presences: hubPhxPresence.state });
+
+    if (!isInitialSync) return;
+    // Wire up join/leave event handlers after initial sync.
+    isInitialSync = false;
+
+    hubPhxPresence.onJoin((sessionId, current, info) => {
+      const meta = info.metas[info.metas.length - 1];
+
+      if (current) {
+        // Change to existing presence
+        const isSelf = sessionId === socket.params().session_id;
+        const currentMeta = current.metas[0];
+
+        if (!isSelf && currentMeta.presence !== meta.presence && meta.profile.displayName) {
+          addToPresenceLog({
+            type: "entered",
+            presence: meta.presence,
+            name: meta.profile.displayName
+          });
+        }
+
+        if (currentMeta.profile && meta.profile && currentMeta.profile.displayName !== meta.profile.displayName) {
+          addToPresenceLog({
+            type: "display_name_changed",
+            oldName: currentMeta.profile.displayName,
+            newName: meta.profile.displayName
+          });
+        }
+      } else {
+        // New presence
+        const meta = info.metas[0];
+
+        if (meta.presence && meta.profile.displayName) {
+          addToPresenceLog({
+            type: "join",
+            presence: meta.presence,
+            name: meta.profile.displayName
+          });
+        }
+      }
+    });
+
+    hubPhxPresence.onLeave((sessionId, current, info) => {
+      if (current && current.metas.length > 0) return;
+
+      const meta = info.metas[0];
+
+      if (meta.profile.displayName) {
+        addToPresenceLog({
+          type: "leave",
+          name: meta.profile.displayName
+        });
+      }
+    });
+  });
+
+  hubPhxChannel.on("naf", data => {
     if (!NAF.connection.adapter) return;
     NAF.connection.adapter.onData(data);
   });
 
+  hubPhxChannel.on("message", data => {
+    const userInfo = hubPhxPresence.state[data.session_id];
+    if (!userInfo) return;
+
+    addToPresenceLog({ type: "message", name: userInfo.metas[0].profile.displayName, body: data.body });
+  });
+
+  // Reticulum global channel
+  const retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
+  retPhxChannel.join().receive("error", res => console.error(res));
   linkChannel.setSocket(socket);
 });

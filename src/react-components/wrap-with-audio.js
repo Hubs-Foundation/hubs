@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 export const AudioContext = React.createContext({});
 
@@ -17,4 +18,9 @@ export const WithHoverSound = ({ sound, children }) => {
       }}
     </AudioContext.Consumer>
   );
+};
+
+WithHoverSound.propTypes = {
+  children: PropTypes.object,
+  sound: PropTypes.string
 };

@@ -34,6 +34,7 @@ AFRAME.registerComponent("scene-preview-camera", {
 
   tick: function() {
     let t = (new Date().getTime() - this.startTime) / (1000.0 * this.data.duration);
+    t = Math.min(1.0, Math.max(0.0, t));
 
     if (!this.ranOnePass) {
       t = t * (2 - t);

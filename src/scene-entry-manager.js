@@ -1,6 +1,7 @@
 import qsTruthy from "./utils/qs_truthy";
 import screenfull from "screenfull";
 import { inGameActions } from "./input-mappings";
+import nextTick from "./utils/next-tick";
 
 const playerHeight = 1.6;
 const isBotMode = qsTruthy("bot");
@@ -23,12 +24,17 @@ export default class SceneEntryManager {
     this.scene = document.querySelector("a-scene");
     this.cursorController = document.querySelector("#cursor-controller");
     this.playerRig = document.querySelector("#player-rig");
+    this._entered = false;
   }
 
   init = () => {
     this.whenSceneLoaded(() => {
       this.cursorController.components["cursor-controller"].disable();
     });
+  };
+
+  hasEntered = () => {
+    return this._entered;
   };
 
   enterScene = async (mediaStream, enterInVR) => {
@@ -81,10 +87,18 @@ export default class SceneEntryManager {
     const cursor = this.cursorController.components["cursor-controller"];
     cursor.enable();
     cursor.setCursorVisibility(true);
+    this._entered = true;
 
-    this.hubChannel.sendEntryEvent().then(() => {
-      this.store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
-    });
+    // Delay sending entry event telemetry until VR display is presenting.
+    (async () => {
+      while (enterInVR && !(await navigator.getVRDisplays()).find(d => d.isPresenting)) {
+        await nextTick();
+      }
+
+      this.hubChannel.sendEntryEvent().then(() => {
+        this.store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
+      });
+    })();
   };
 
   whenSceneLoaded = callback => {
@@ -207,7 +221,7 @@ export default class SceneEntryManager {
     });
 
     document.addEventListener("paste", e => {
-      if (e.target.nodeName === "INPUT") return;
+      if (e.target.nodeName === "INPUT" && document.activeElement === e.target) return;
 
       const url = e.clipboardData.getData("text");
       const files = e.clipboardData.files && e.clipboardData.files;

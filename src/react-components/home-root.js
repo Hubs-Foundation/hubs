@@ -4,6 +4,7 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 
 import { lang, messages } from "../utils/i18n";
+import { playVideoWithStopOnBlur } from "../utils/video-utils.js";
 import homeVideoWebM from "../assets/video/home.webm";
 import homeVideoMp4 from "../assets/video/home.mp4";
 import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
@@ -17,7 +18,7 @@ import styles from "../assets/stylesheets/index.scss";
 import HubCreatePanel from "./hub-create-panel.js";
 import AuthDialog from "./auth-dialog.js";
 import ReportDialog from "./report-dialog.js";
-import SlackDialog from "./slack-dialog.js";
+import JoinUsDialog from "./join-us-dialog.js";
 import UpdatesDialog from "./updates-dialog.js";
 import DialogContainer from "./dialog-container.js";
 import { WithHoverSound } from "./wrap-with-audio";
@@ -83,27 +84,15 @@ class HomeRoot extends Component {
   loadHomeVideo = () => {
     const videoEl = document.querySelector("#background-video");
     videoEl.playbackRate = 0.9;
-    function toggleVideo() {
-      // Play the video if the window/tab is visible.
-      if (document.hasFocus()) {
-        videoEl.play();
-      } else {
-        videoEl.pause();
-      }
-    }
-    if ("hasFocus" in document) {
-      document.addEventListener("visibilitychange", toggleVideo);
-      window.addEventListener("focus", toggleVideo);
-      window.addEventListener("blur", toggleVideo);
-    }
+    playVideoWithStopOnBlur(videoEl);
   };
 
   closeDialog() {
     this.setState({ dialog: null });
   }
 
-  showSlackDialog() {
-    this.setState({ dialog: <SlackDialog onClose={this.closeDialog} /> });
+  showJoinUsDialog() {
+    this.setState({ dialog: <JoinUsDialog onClose={this.closeDialog} /> });
   }
 
   showReportDialog() {
@@ -194,21 +183,22 @@ class HomeRoot extends Component {
                 </WithHoverSound>
                 <div className={styles.links}>
                   <WithHoverSound>
-                    <a
-                      href="https://blog.mozvr.com/introducing-hubs-a-new-way-to-get-together-online/"
-                      rel="noreferrer noopener"
-                    >
-                      <FormattedMessage id="home.about_link" />
-                    </a>
-                  </WithHoverSound>
-                  <WithHoverSound>
                     <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
                       <FormattedMessage id="home.source_link" />
                     </a>
                   </WithHoverSound>
+                  <WithHoverSound>
+                    <a href="https://discord.gg/XzrGUY8" rel="noreferrer noopener">
+                      <FormattedMessage id="home.community_link" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a href="/spoke" rel="noreferrer noopener">
+                      Spoke
+                    </a>
+                  </WithHoverSound>
                 </div>
               </div>
-              <div className={styles.ident} />
             </div>
             <div className={styles.heroContent}>
               <div className={styles.attribution}>
@@ -258,7 +248,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       rel="noopener noreferrer"
                       href="#"
-                      onClick={this.onDialogLinkClicked(this.showSlackDialog.bind(this))}
+                      onClick={this.onDialogLinkClicked(this.showJoinUsDialog.bind(this))}
                     >
                       <FormattedMessage id="home.join_us" />
                     </a>

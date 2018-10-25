@@ -21,7 +21,8 @@ class LinkRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
     store: PropTypes.object,
-    linkChannel: PropTypes.object
+    linkChannel: PropTypes.object,
+    showHeadsetLinkOption: PropTypes.bool
   };
 
   state = {
@@ -179,19 +180,20 @@ class LinkRoot extends Component {
               </div>
 
               <div className={styles.enteredFooter}>
-                {!this.state.isAlphaMode && (
-                  <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
-                )}
-                {!this.state.isAlphaMode && (
-                  <span>
-                    {" "}
-                    <WithHoverSound>
-                      <a href="#" onClick={() => this.toggleMode()}>
-                        <FormattedMessage id="link.linking_a_headset" />
-                      </a>
-                    </WithHoverSound>
-                  </span>
-                )}
+                {!this.state.isAlphaMode &&
+                  this.props.showHeadsetLinkOption && (
+                    <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
+                  )}
+                {!this.state.isAlphaMode &&
+                  this.props.showHeadsetLinkOption && (
+                    <span>
+                      <WithHoverSound>
+                        <a href="#" onClick={() => this.toggleMode()}>
+                          <FormattedMessage id="link.linking_a_headset" />
+                        </a>
+                      </WithHoverSound>
+                    </span>
+                  )}
               </div>
             </div>
 
@@ -200,11 +202,11 @@ class LinkRoot extends Component {
                 ? ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
                 : [1, 2, 3, 4, 5, 6, 7, 8, 9]
               ).map((d, i) => (
-                <WithHoverSound>
+                <WithHoverSound key={`char_${i}`}>
                   <button
                     disabled={this.state.entered.length === this.maxAllowedChars()}
-                    key={`char_${i}`}
                     className={styles.keypadButton}
+                    key={`char_${i}`}
                     onClick={() => {
                       if (!hasTouchEvents) this.addToEntry(d);
                     }}
@@ -214,17 +216,21 @@ class LinkRoot extends Component {
                   </button>
                 </WithHoverSound>
               ))}
-              <WithHoverSound>
-                <button
-                  className={classNames(styles.keypadButton, styles.keypadToggleMode)}
-                  onTouchStart={() => this.toggleMode()}
-                  onClick={() => {
-                    if (!hasTouchEvents) this.toggleMode();
-                  }}
-                >
-                  {this.state.isAlphaMode ? "123" : "ABC"}
-                </button>
-              </WithHoverSound>
+              {this.props.showHeadsetLinkOption ? (
+                <WithHoverSound>
+                  <button
+                    className={classNames(styles.keypadButton, styles.keypadToggleMode)}
+                    onTouchStart={() => this.toggleMode()}
+                    onClick={() => {
+                      if (!hasTouchEvents) this.toggleMode();
+                    }}
+                  >
+                    {this.state.isAlphaMode ? "123" : "ABC"}
+                  </button>
+                </WithHoverSound>
+              ) : (
+                <div />
+              )}
               {!this.state.isAlphaMode && (
                 <WithHoverSound>
                   <button
@@ -254,21 +260,24 @@ class LinkRoot extends Component {
             </div>
 
             <div className={styles.footer}>
-              <div
-                className={styles.linkHeadsetFooterLink}
-                style={{ visibility: this.state.isAlphaMode ? "hidden" : "visible" }}
-              >
-                <WithHoverSound>
-                  <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
-                </WithHoverSound>
-                <span>
-                  <WithHoverSound>
-                    <a href="#" onClick={() => this.toggleMode()}>
-                      <FormattedMessage id="link.linking_a_headset" />
-                    </a>
-                  </WithHoverSound>
-                </span>
-              </div>
+              {!this.state.isAlphaMode &&
+                this.props.showHeadsetLinkOption && (
+                  <div
+                    className={styles.linkHeadsetFooterLink}
+                    style={{ visibility: this.state.isAlphaMode ? "hidden" : "visible" }}
+                  >
+                    <WithHoverSound>
+                      <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
+                    </WithHoverSound>
+                    <span>
+                      <WithHoverSound>
+                        <a href="#" onClick={() => this.toggleMode()}>
+                          <FormattedMessage id="link.linking_a_headset" />
+                        </a>
+                      </WithHoverSound>
+                    </span>
+                  </div>
+                )}
             </div>
           </div>
         </div>

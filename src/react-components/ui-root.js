@@ -28,6 +28,8 @@ import InviteTeamDialog from "./invite-team-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import LinkDialog from "./link-dialog.js";
 import CreateObjectDialog from "./create-object-dialog.js";
+import PresenceLog from "./presence-log.js";
+import PresenceList from "./presence-list.js";
 import TwoDHUD from "./2d-hud";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
@@ -68,6 +70,7 @@ class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
     exitScene: PropTypes.func,
+    onSendMessage: PropTypes.func,
     concurrentLoadDetector: PropTypes.object,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
@@ -84,8 +87,10 @@ class UIRoot extends Component {
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
     hubName: PropTypes.string,
-    occupantCount: PropTypes.number,
-    isSupportAvailable: PropTypes.bool
+    isSupportAvailable: PropTypes.bool,
+    presenceLogEntries: PropTypes.array,
+    presences: PropTypes.object,
+    sessionId: PropTypes.string
   };
 
   state = {
@@ -94,6 +99,7 @@ class UIRoot extends Component {
     dialog: null,
     showInviteDialog: false,
     showLinkDialog: false,
+    showPresenceList: false,
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
@@ -124,7 +130,8 @@ class UIRoot extends Component {
 
     exited: false,
 
-    showProfileEntry: false
+    showProfileEntry: false,
+    pendingMessage: ""
   };
 
   componentDidMount() {
@@ -438,6 +445,7 @@ class UIRoot extends Component {
 
   onProfileFinished = () => {
     this.setState({ showProfileEntry: false });
+    this.props.hubChannel.sendProfileUpdate();
   };
 
   beginOrSkipAudioSetup = () => {
@@ -575,7 +583,7 @@ class UIRoot extends Component {
   }
 
   onMiniInviteClicked = () => {
-    const link = "https://hub.link/" + this.props.hubEntryCode;
+    const link = "https://hub.link/" + this.props.hubId;
 
     this.setState({ miniInviteActivated: true });
     setTimeout(() => {
@@ -587,6 +595,16 @@ class UIRoot extends Component {
     } else {
       copy(link);
     }
+  };
+
+  sendMessage = e => {
+    e.preventDefault();
+    this.props.onSendMessage(this.state.pendingMessage);
+    this.setState({ pendingMessage: "" });
+  };
+
+  occupantCount = () => {
+    return this.props.presences ? Object.entries(this.props.presences).length : 0;
   };
 
   renderExitedPane = () => {
@@ -697,7 +715,7 @@ class UIRoot extends Component {
   renderEntryStartPanel = () => {
     return (
       <div className={entryStyles.entryPanel}>
-        <div className={entryStyles.title}>{this.props.hubName}</div>
+        <div className={entryStyles.name}>{this.props.hubName}</div>
 
         <div className={entryStyles.center}>
           <WithHoverSound>
@@ -706,6 +724,21 @@ class UIRoot extends Component {
               <div title={this.props.store.state.profile.displayName}>{this.props.store.state.profile.displayName}</div>
             </div>
           </WithHoverSound>
+
+          <form onSubmit={this.sendMessage}>
+            <div className={styles.messageEntry}>
+              <input
+                className={styles.messageEntryInput}
+                value={this.state.pendingMessage}
+                onFocus={e => e.target.select()}
+                onChange={e => this.setState({ pendingMessage: e.target.value })}
+                placeholder="Send a message..."
+              />
+              <WithHoverSound>
+                <input className={styles.messageEntrySubmit} type="submit" value="send" />
+              </WithHoverSound>
+            </div>
+          </form>
         </div>
 
         <div className={entryStyles.buttonContainer}>
@@ -751,11 +784,9 @@ class UIRoot extends Component {
           )}
           <DeviceEntryButton onClick={() => this.attemptLink()} isInHMD={this.props.availableVREntryTypes.isInHMD} />
           {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
-            <WithHoverSound>
-              <div className={entryStyles.secondary} onClick={this.enterVR}>
-                <FormattedMessage id="entry.cardboard" />
-              </div>
-            </WithHoverSound>
+            <div className={entryStyles.secondary} onClick={this.enterVR}>
+              <FormattedMessage id="entry.cardboard" />
+            </div>
           )}
           {screenSharingCheckbox}
         </div>
@@ -1013,8 +1044,32 @@ class UIRoot extends Component {
 
             {(!entryFinished || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
+                <PresenceLog entries={this.props.presenceLogEntries || []} />
                 <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
               </div>
+            )}
+
+            {entryFinished && <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} />}
+            {entryFinished && (
+              <form onSubmit={this.sendMessage}>
+                <div className={styles.messageEntryInRoom}>
+                  <input
+                    className={classNames([styles.messageEntryInput, styles.messageEntryInputInRoom])}
+                    value={this.state.pendingMessage}
+                    onFocus={e => e.target.select()}
+                    onChange={e => {
+                      e.stopPropagation();
+                      this.setState({ pendingMessage: e.target.value });
+                    }}
+                    placeholder="Send a message..."
+                  />
+                  <input
+                    className={classNames([styles.messageEntrySubmit, styles.messageEntrySubmitInRoom])}
+                    type="submit"
+                    value="send"
+                  />
+                </div>
+              </form>
             )}
 
             <div
@@ -1027,9 +1082,7 @@ class UIRoot extends Component {
               {!showVREntryButton && (
                 <WithHoverSound>
                   <button
-                    className={classNames({
-                      [styles.hideSmallScreens]: this.props.occupantCount > 1 && entryFinished
-                    })}
+                    className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entryFinished })}
                     onClick={() => this.toggleInviteDialog()}
                   >
                     <FormattedMessage id="entry.invite-others-nag" />
@@ -1037,7 +1090,7 @@ class UIRoot extends Component {
                 </WithHoverSound>
               )}
               {!showVREntryButton &&
-                this.props.occupantCount > 1 &&
+                this.occupantCount() > 1 &&
                 entryFinished && (
                   <WithHoverSound>
                     <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
@@ -1046,7 +1099,7 @@ class UIRoot extends Component {
                           ? navigator.share
                             ? "sharing..."
                             : "copied!"
-                          : "hub.link/" + this.props.hubEntryCode}
+                          : "hub.link/" + this.props.hubId}
                       </span>
                     </button>
                   </WithHoverSound>
@@ -1062,6 +1115,7 @@ class UIRoot extends Component {
                 <InviteDialog
                   allowShare={!this.props.availableVREntryTypes.isInHMD}
                   entryCode={this.props.hubEntryCode}
+                  hubId={this.props.hubId}
                   onClose={() => this.setState({ showInviteDialog: false })}
                 />
               )}
@@ -1086,11 +1140,21 @@ class UIRoot extends Component {
             </WithHoverSound>
 
             <WithHoverSound>
-              <div className={styles.presenceInfo}>
+              <div
+                onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
+                className={classNames({
+                  [styles.presenceInfo]: true,
+                  [styles.presenceInfoSelected]: this.state.showPresenceList
+                })}
+              >
                 <FontAwesomeIcon icon={faUsers} />
-                <span className={styles.occupantCount}>{this.props.occupantCount || "-"}</span>
+                <span className={styles.occupantCount}>{this.occupantCount()}</span>
               </div>
             </WithHoverSound>
+
+            {this.state.showPresenceList && (
+              <PresenceList presences={this.props.presences} sessionId={this.props.sessionId} />
+            )}
 
             {this.state.entryStep === ENTRY_STEPS.finished ? (
               <div>

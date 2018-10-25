@@ -22,8 +22,11 @@
   }
 
   :local(.link-button) {
+    @extend %action-button;
     @extend %action-button-selected;
+    min-width: auto;
     margin-top: 4px;
+    flex: 1;
 
     @media (max-height: 370px) {
       display: none;
@@ -115,8 +118,9 @@
 :local(.buttons) {
   display: flex;
   justify-content: space-between;
+  width: 100%;
 
-  button {
+  button, a {
     margin: 0 12px;
   }
 }
