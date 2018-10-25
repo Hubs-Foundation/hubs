@@ -35,8 +35,10 @@ AFRAME.registerComponent("hoverable-visuals", {
   },
   removeVisual(e) {
     if (e.detail.hand.id === "cursor") return;
-    for (const uniform of this.uniforms) {
-      uniform.hubsShouldAttract.value = false;
+    if (this.uniforms) {
+      for (const uniform of this.uniforms) {
+        uniform.hubsShouldAttract.value = false;
+      }
     }
     this.uniforms = null;
     this.interactor = null;
