@@ -253,36 +253,39 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
     .querySelector("#hud-hub-entry-link")
     .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
 
-  scene.setAttribute("networked-scene", {
-    room: hub.hub_id,
-    serverURL: process.env.JANUS_SERVER,
-    debug: !!isDebug
-  });
-
-  while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
-
-  scene.components["networked-scene"]
-    .connect()
-    .then(() => {
-      NAF.connection.adapter.reliableTransport = (clientId, dataType, data) => {
-        const payload = { dataType, data };
-
-        if (clientId) {
-          payload.clientId = clientId;
-        }
-
-        hubChannel.channel.push("naf", payload);
-      };
-    })
-    .catch(connectError => {
-      // hacky until we get return codes
-      const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
-      console.error(connectError);
-      remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
-      entryManager.exitScene();
-
-      return;
+  // Wait for scene objects to load before connecting, so there is no race condition on network state.
+  objectsEl.addEventListener("model-loaded", async () => {
+    scene.setAttribute("networked-scene", {
+      room: hub.hub_id,
+      serverURL: process.env.JANUS_SERVER,
+      debug: !!isDebug
     });
+
+    while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
+
+    scene.components["networked-scene"]
+      .connect()
+      .then(() => {
+        NAF.connection.adapter.reliableTransport = (clientId, dataType, data) => {
+          const payload = { dataType, data };
+
+          if (clientId) {
+            payload.clientId = clientId;
+          }
+
+          hubChannel.channel.push("naf", payload);
+        };
+      })
+      .catch(connectError => {
+        // hacky until we get return codes
+        const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+        console.error(connectError);
+        remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
+        entryManager.exitScene();
+
+        return;
+      });
+  });
 }
 
 async function runBotMode(scene, entryManager) {
