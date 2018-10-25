@@ -5,11 +5,16 @@ AFRAME.registerComponent("pinnable", {
 
   init() {
     this._apply = this._apply.bind(this);
+    this._fireEvents = this._fireEvents.bind(this);
     this._allowApplyOnceComponentsReady = this._allowApplyOnceComponentsReady.bind(this);
     this._allowApply = false;
 
     this.el.sceneEl.addEventListener("stateadded", this._apply);
     this.el.sceneEl.addEventListener("stateremoved", this._apply);
+
+    // Fire pinned events when we drag and drop or scale in freeze mode,
+    // so transform gets updated.
+    this.el.addEventListener("grab-end", this._fireEvents);
 
     // Hack: need to wait for the initial grabbable and stretchable components
     // to show up from the template before applying.
@@ -25,7 +30,10 @@ AFRAME.registerComponent("pinnable", {
 
   update() {
     this._apply();
+    this._fireEvents();
+  },
 
+  _fireEvents() {
     if (this.data.pinned) {
       this.el.emit("pinned");
       this.el.sceneEl.emit("object_pinned", { el: this.el });
