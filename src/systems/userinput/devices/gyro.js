@@ -1,3 +1,5 @@
+import { paths } from "../paths";
+
 const TWOPI = Math.PI * 2;
 
 class CircularBuffer {
@@ -40,45 +42,20 @@ const average = a => {
   return sum / a.length;
 };
 
-AFRAME.registerComponent("look-on-mobile", {
-  schema: {
-    horizontalLookSpeedRatio: { default: 1.0 }, // motion applied to camera / motion of polyfill object
-    verticalLookSpeedRatio: { default: 1.0 }, // motion applied to camera / motion of polyfill object
-    camera: { type: "selector" }
-  },
-
-  init() {
+export class GyroDevice {
+  constructor() {
     this.hmdEuler = new THREE.Euler();
     this.hmdQuaternion = new THREE.Quaternion();
     this.prevX = this.hmdEuler.x;
     this.prevY = this.hmdEuler.y;
-    this.pendingLookX = 0;
-    this.onRotateX = this.onRotateX.bind(this);
     this.dXBuffer = new CircularBuffer(6);
     this.dYBuffer = new CircularBuffer(6);
     this.vrDisplay = window.webvrpolyfill.getPolyfillDisplays()[0];
     this.frameData = new window.webvrpolyfill.constructor.VRFrameData();
-  },
+  }
 
-  play() {
-    this.el.addEventListener("rotateX", this.onRotateX);
-  },
-
-  pause() {
-    this.el.removeEventListener("rotateX", this.onRotateX);
-  },
-
-  update() {
-    this.cameraController = this.data.camera.components["pitch-yaw-rotator"];
-  },
-
-  onRotateX(e) {
-    this.pendingLookX = e.detail.value;
-  },
-
-  tick() {
+  write(frame) {
     const hmdEuler = this.hmdEuler;
-    const { horizontalLookSpeedRatio, verticalLookSpeedRatio } = this.data;
     this.vrDisplay.getFrameData(this.frameData);
     if (this.frameData.pose.orientation !== null) {
       this.hmdQuaternion.fromArray(this.frameData.pose.orientation);
@@ -91,13 +68,12 @@ AFRAME.registerComponent("look-on-mobile", {
     this.dXBuffer.push(Math.abs(dX) < 0.001 ? 0 : dX);
     this.dYBuffer.push(Math.abs(dY) < 0.001 ? 0 : dY);
 
-    const deltaYaw = average(this.dYBuffer.items) * horizontalLookSpeedRatio;
-    const deltaPitch = average(this.dXBuffer.items) * verticalLookSpeedRatio + this.pendingLookX;
-
-    this.cameraController.look(deltaPitch, deltaYaw);
+    this.averageDeltaX = average(this.dXBuffer.items);
+    this.averageDeltaY = average(this.dYBuffer.items);
 
     this.prevX = hmdEuler.x;
     this.prevY = hmdEuler.y;
-    this.pendingLookX = 0;
+    frame[paths.device.gyro.averageDeltaX] = this.averageDeltaX;
+    frame[paths.device.gyro.averageDeltaY] = this.averageDeltaY;
   }
-});
+}

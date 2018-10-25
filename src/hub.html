@@ -30,18 +30,8 @@
         freeze-controller="toggleEvent: action_freeze"
         personal-space-bubble="debug: false;"
         vr-mode-ui="enabled: false"
-        pinch-to-move
         stats-plus="false"
-        input-configurator="
-                  gazeCursorRayObject: #player-camera;
-                  cursorController: #cursor-controller;
-                  gazeTeleporter: #gaze-teleport;
-                  camera: #player-camera;
-                  playerRig: #player-rig;
-                  leftController: #player-left-controller;
-                  leftControllerRayObject: #player-left-controller;
-                  rightController: #player-right-controller;
-                  rightControllerRayObject: #player-right-controller;"
+        action-to-event__mute="path: /actions/muteMic; event: action_mute;"
     >
 
         <a-assets>
@@ -159,8 +149,6 @@
                     position-at-box-shape-border="target:.delete-button"
                     destroy-at-extreme-distances
                     rotation
-                    activatable__increase-scale="buttonStartEvents: scroll_right; buttonEndEvents: horizontal_scroll_release; activatedState: scaleUp;"
-                    activatable__decrease-scale="buttonStartEvents: scroll_left; buttonEndEvents: horizontal_scroll_release; activatedState: scaleDown;"
                 >
                     <!-- HACK: rotation component above is required for its side effect of setting YXZ order -->
                     <a-entity class="delete-button" visible-while-frozen>
@@ -172,18 +160,12 @@
 
             <template id="pen-interactable">
                 <a-entity
-                    class="interactable toggle"
+                    class="pen interactable"
                     super-networked-interactable="counter: #pen-counter;"
                     body="type: dynamic; shape: none; mass: 1;"
-                    grabbable-toggle="maxGrabbers: 1;"
+                    grabbable="maxGrabbers: 1"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
                     hoverable
-                    activatable__draw-hand="buttonStartEvents: secondary_hand_grab; buttonEndEvents: secondary_hand_release;"
-                    activatable__draw-cursor="buttonStartEvents: secondary-cursor-grab; buttonEndEvents: secondary-cursor-release;"
-                    activatable__color-next="buttonStartEvents: next_color, scroll_right; buttonEndEvents: thumb_up, secondary_hand_release, horizontal_scroll_release; activatedState: colorNext;"
-                    activatable__color-prev="buttonStartEvents: previous_color, scroll_left; buttonEndEvents: thumb_up, secondary_hand_release, horizontal_scroll_release; activatedState: colorPrev;"
-                    activatable__increase-radius="buttonStartEvents: increase_radius, scroll_up; buttonEndEvents: thumb_up, secondary_hand_release, vertical_scroll_release; activatedState: radiusUp;"
-                    activatable__decrease-radius="buttonStartEvents: decrease_radius, scroll_down; buttonEndEvents: thumb_up, secondary_hand_release, vertical_scroll_release; activatedState: radiusDown;"
                     scale="0.5 0.5 0.5"
                 >
                     <a-sphere
@@ -205,11 +187,10 @@
 
             <template id="interactable-camera">
                 <a-entity
-                    class="interactable toggle"
-                    grabbable-toggle="maxGrabbers: 1;"
+                    class="interactable icamera"
+                    grabbable
                     hoverable
-                    activatable__snap-hand="buttonStartEvents: secondary_hand_grab; buttonEndEvents: secondary_hand_release;"
-                    activatable__snap-cursor="buttonStartEvents: secondary-cursor-grab; buttonEndEvents: secondary-cursor-release;"
+                    stretchable
                     camera-tool
                     body="type: dynamic; shape: none; mass: 1;"
                     shape="shape: box; halfExtents: 0.22 0.145 0.1; offset: 0 0.02 0"
@@ -217,6 +198,7 @@
                     super-networked-interactable="counter: #camera-counter;"
                     position-at-box-shape-border="target:.delete-button"
                     rotation
+                    auto-scale-cannon-physics-body
                 >
                     <a-entity class="delete-button" visible-while-frozen>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
@@ -319,6 +301,8 @@
                 dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
                 activateStartButtons: secondary-cursor-grab, secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
                 activateEndButtons: secondary-cursor-release, secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
+            action-to-event__grab="path: /actions/cursorGrab; event: cursor-grab"
+            action-to-event__drop="path: /actions/cursorDrop; event: cursor-release"
         ></a-sphere>
 
         <!-- Player Rig -->
@@ -341,10 +325,10 @@
               <a-rounded height="0.08" width="0.5" color="#000000" position="-0.20 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
               <a-entity id="hud-hub-entry-link" text=" value:; width:1.1; align:center;" position="0.05 0.165 0"></a-entity>
               <a-rounded height="0.13" width="0.59" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
-              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover" scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="ui hud mic" material="alphaTest:0.1;"></a-image>
-              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover" scale="0.2 0.2 0.2" position="0 0 0.005" class="ui hud freeze"></a-image>
-              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="ui hud pen" material="alphaTest:0.1;"></a-image>
-              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #spawn-camera; hoverImage: #spawn-camera-hover; activeImage: #spawn-camera; activeHoverImage: #spawn-camera-hover" scale="0.1 0.1 0.1" position="0.28 0 0.001" class="ui hud cameraBtn" material="alphaTest:0.1;"></a-image>
+              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover" scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="ui hud mic" material="alphaTest:0.1;" hoverable></a-image>
+              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover" scale="0.2 0.2 0.2" position="0 0 0.005" class="ui hud freeze" hoverable></a-image>
+              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="ui hud penhud" material="alphaTest:0.1;" hoverable></a-image>
+              <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #spawn-camera; hoverImage: #spawn-camera-hover; activeImage: #spawn-camera; activeHoverImage: #spawn-camera-hover" scale="0.1 0.1 0.1" position="0.28 0 0.001" class="ui hud cameraBtn" material="alphaTest:0.1;" hoverable></a-image>
               <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
                 <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" ></a-entity>
               </a-rounded>
@@ -367,10 +351,12 @@
                     button: gaze-teleport_;
                     collisionEntities: [nav-mesh];
                     drawIncrementally: true;
-                    incrementalDrawMs: 600;
+                    incrementalDrawMs: 300;
                     hitOpacity: 0.3;
                     missOpacity: 0.1;
                     curveShootingSpeed: 12;"
+                action-to-event__start-teleport="path: /actions/startTeleport; event: gaze-teleport_down"
+                action-to-event__stop-teleport="path: /actions/stopTeleport; event: gaze-teleport_up"
             ></a-entity>
           </a-entity>
 
@@ -382,10 +368,10 @@
               teleport-controls="
                   cameraRig: #player-rig;
                   teleportOrigin: #player-camera;
-                  button: cursor-teleport_;
+                  button: left-teleport_;
                   collisionEntities: [nav-mesh];
                   drawIncrementally: true;
-                  incrementalDrawMs: 600;
+                  incrementalDrawMs: 300;
                   hitOpacity: 0.3;
                   missOpacity: 0.1;
                   curveShootingSpeed: 12;"
@@ -393,6 +379,10 @@
               body="type: static; shape: none;"
               mixin="controller-super-hands"
               controls-shape-offset
+              action-to-event__a="path: /actions/leftHandStartTeleport; event: left-teleport_down;"
+              action-to-event__b="path: /actions/leftHandStopTeleport; event: left-teleport_up;"
+              action-to-event__c="path: /actions/leftHandGrab; event: primary_hand_grab;"
+              action-to-event__d="path: /actions/leftHandDrop; event: primary_hand_release;"
           >
           </a-entity>
 
@@ -404,18 +394,21 @@
               teleport-controls="
                   cameraRig: #player-rig;
                   teleportOrigin: #player-camera;
-                  button: cursor-teleport_;
+                  button: right-teleport_;
                   collisionEntities: [nav-mesh];
                   drawIncrementally: true;
-                  incrementalDrawMs: 600;
+                  incrementalDrawMs: 300;
                   hitOpacity: 0.3;
                   missOpacity: 0.1;
                   curveShootingSpeed: 12;"
               haptic-feedback
-              event-repeater="events: haptic_pulse; eventSource: #cursor"
               body="type: static; shape: none;"
               mixin="controller-super-hands"
               controls-shape-offset
+              action-to-event__a="path: /actions/rightHandStartTeleport; event: right-teleport_down;"
+              action-to-event__b="path: /actions/rightHandStopTeleport; event: right-teleport_up;"
+              action-to-event__c="path: /actions/rightHandGrab; event: primary_hand_grab;"
+              action-to-event__d="path: /actions/rightHandDrop; event: primary_hand_release;"
           >
           </a-entity>
 
@@ -462,12 +455,13 @@
         </a-entity>
 
         <a-entity
-        super-spawner="
-            template: #pen-interactable;
-            src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf;
-            spawnEvent: spawn_pen;
-            superHand: #player-right-controller;
-            cursorSuperHand: #cursor;"
+            action-to-event="path: /actions/spawnPen; event: spawn_pen"
+            super-spawner="
+                template: #pen-interactable;
+                src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf;
+                spawnEvent: spawn_pen;
+                superHand: #player-right-controller;
+                cursorSuperHand: #cursor;"
         ></a-entity>
 
     </a-scene>

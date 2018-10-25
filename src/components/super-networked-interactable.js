@@ -1,3 +1,17 @@
+import { paths } from "../systems/userinput/paths";
+
+const pathsMap = {
+  "player-right-controller": {
+    scaleGrabbedGrabbable: paths.actions.rightHand.scaleGrabbedGrabbable
+  },
+  "player-left-controller": {
+    scaleGrabbedGrabbable: paths.actions.leftHand.scaleGrabbedGrabbable
+  },
+  cursor: {
+    scaleGrabbedGrabbable: paths.actions.cursor.scaleGrabbedGrabbable
+  }
+};
+
 /**
  * Manages ownership and haptics on an interatable
  * @namespace network
@@ -28,14 +42,12 @@ AFRAME.registerComponent("super-networked-interactable", {
       }
     });
 
-    this._stateAdded = this._stateAdded.bind(this);
     this._onGrabStart = this._onGrabStart.bind(this);
     this._onGrabEnd = this._onGrabEnd.bind(this);
     this._onOwnershipLost = this._onOwnershipLost.bind(this);
     this.el.addEventListener("grab-start", this._onGrabStart);
     this.el.addEventListener("grab-end", this._onGrabEnd);
     this.el.addEventListener("ownership-lost", this._onOwnershipLost);
-    this.el.addEventListener("stateadded", this._stateAdded);
     this.system.addComponent(this);
   },
 
@@ -44,7 +56,6 @@ AFRAME.registerComponent("super-networked-interactable", {
     this.el.removeEventListener("grab-start", this._onGrabStart);
     this.el.removeEventListener("grab-end", this._onGrabEnd);
     this.el.removeEventListener("ownership-lost", this._onOwnershipLost);
-    this.el.removeEventListener("stateadded", this._stateAdded);
     this.system.removeComponent(this);
   },
 
@@ -75,23 +86,18 @@ AFRAME.registerComponent("super-networked-interactable", {
   },
 
   _changeScale: function(delta) {
-    if (this.el.is("grabbed") && this.el.components.hasOwnProperty("stretchable")) {
+    if (delta && this.el.is("grabbed") && this.el.components.hasOwnProperty("stretchable")) {
       this.currentScale.addScalar(delta).clampScalar(this.data.minScale, this.data.maxScale);
       this.el.setAttribute("scale", this.currentScale);
       this.el.components["stretchable"].stretchBody(this.el, this.currentScale);
     }
   },
 
-  _stateAdded(evt) {
-    switch (evt.detail) {
-      case "scaleUp":
-        this._changeScale(-this.data.scrollScaleDelta);
-        break;
-      case "scaleDown":
-        this._changeScale(this.data.scrollScaleDelta);
-        break;
-      default:
-        break;
-    }
+  tick: function() {
+    const grabber = this.el.components.grabbable.grabbers[0];
+    if (!(grabber && pathsMap[grabber.id])) return;
+
+    const userinput = AFRAME.scenes[0].systems.userinput;
+    this._changeScale(userinput.readFrameValueAtPath(pathsMap[grabber.id].scaleGrabbedGrabbable));
   }
 });
