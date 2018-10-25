@@ -94,6 +94,8 @@ export default class SceneEntryManager {
         this.store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
       });
     })();
+
+    this.scene.addState("entered");
   };
 
   whenSceneLoaded = callback => {
