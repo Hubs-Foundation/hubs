@@ -253,6 +253,9 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   );
 
   const envMap = await CachedEnvMapTexture;
+  const beginVertexRegex = /\bbegin_vertex\b/;
+  const materialsSeen = new Set();
+  const shaderUniforms = [];
 
   gltf.scene.traverse(object => {
     if (object.material && object.material.type === "MeshStandardMaterial") {
@@ -260,6 +263,31 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
         object.material = MobileStandardMaterial.fromStandardMaterial(object.material);
       } else {
         object.material.envMap = envMap;
+        object.material.onBeforeCompile = shader => {
+          if (!beginVertexRegex.test(shader.vertexShader)) return;
+          const lines = shader.vertexShader.split("\n");
+          const beginVertexIndex = lines.findIndex(line => beginVertexRegex.test(line));
+          lines.splice(
+            beginVertexIndex + 1,
+            0,
+            `
+              if (hubsShouldAttract) {
+                vec4 wt = modelMatrix * vec4(transformed, 1);
+                vec4 p4 = vec4(hubsAttractorPosition, 1);
+                transformed += (normalize(wt - p4) / 5.0 / pow(distance(wt, p4), -0.2)).xyz;
+              }
+            `
+          );
+          lines.unshift("uniform vec3 hubsAttractorPosition;");
+          lines.unshift("uniform bool hubsShouldAttract;");
+          shader.vertexShader = lines.join("\n");
+          shader.uniforms.hubsAttractorPosition = { value: [0, 0, 0] };
+          shader.uniforms.hubsShouldAttract = { value: false };
+          if (!materialsSeen.has(object.material.uuid)) {
+            shaderUniforms.push(shader.uniforms);
+            materialsSeen.add(object.material.uuid);
+          }
+        };
         object.material.needsUpdate = true;
       }
     }
@@ -270,7 +298,7 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
     Object.keys(fileMap).forEach(URL.revokeObjectURL);
   }
 
-  return gltf;
+  return { gltf, shaderUniforms };
 }
 
 /**
@@ -311,7 +339,8 @@ AFRAME.registerComponent("gltf-model-plus", {
         GLTFCache[src] = await loadGLTF(src, contentType, technique);
       }
 
-      return cloneGltf(GLTFCache[src]);
+      const cached = GLTFCache[src];
+      return { gltf: cloneGltf(cached.gltf), shaderUniforms: cached.shaderUniforms };
     } else {
       return await loadGLTF(src, contentType, technique);
     }
@@ -336,7 +365,14 @@ AFRAME.registerComponent("gltf-model-plus", {
         return;
       }
 
-      const gltf = await this.loadModel(src, contentType, this.preferredTechnique, this.data.useCache);
+      const { gltf, shaderUniforms } = await this.loadModel(
+        src,
+        contentType,
+        this.preferredTechnique,
+        this.data.useCache
+      );
+
+      this.shaderUniforms = shaderUniforms;
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
