@@ -50,6 +50,13 @@ AFRAME.registerComponent("hand-controls2", {
   init() {
     this.pose = POSES.open;
     this.el.setAttribute("visible", false);
+
+    this.connectedController = null;
+
+    this.onControllerConnected = this.onControllerConnected.bind(this);
+    this.onControllerDisconnected = this.onControllerDisconnected.bind(this);
+    this.el.addEventListener("controllerconnected", this.onControllerConnected);
+    this.el.addEventListener("controllerdisconnected", this.onControllerDisconnected);
   },
 
   update(prevData) {
@@ -109,5 +116,17 @@ AFRAME.registerComponent("hand-controls2", {
       this.pose = pose;
     }
     this.el.setAttribute("visible", hasPose);
+  },
+
+  // Show controller when connected
+  onControllerConnected(e) {
+    this.connectedController = e.detail.name;
+    this.el.setAttribute("visible", true);
+  },
+
+  // Hide controller on disconnect
+  onControllerDisconnected() {
+    this.connectedController = null;
+    this.el.setAttribute("visible", false);
   }
 });
