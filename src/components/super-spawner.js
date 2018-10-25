@@ -116,8 +116,8 @@ AFRAME.registerComponent("super-spawner", {
 
   async onSpawnEvent() {
     const userinput = AFRAME.scenes[0].systems.userinput;
-    const leftPose = userinput.readFrameValueAtPath(paths.actions.leftHand.pose);
-    const rightPose = userinput.readFrameValueAtPath(paths.actions.rightHand.pose);
+    const leftPose = userinput.get(paths.actions.leftHand.pose);
+    const rightPose = userinput.get(paths.actions.rightHand.pose);
     const controllerCount = leftPose && rightPose ? 2 : leftPose || rightPose ? 1 : 0;
     const using6DOF = controllerCount > 1 && this.el.sceneEl.is("vr-mode");
     const hand = using6DOF ? this.data.superHand : this.data.cursorSuperHand;

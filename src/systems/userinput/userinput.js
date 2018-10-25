@@ -55,7 +55,7 @@ function prioritizeBindings(registeredMappings, activeSets) {
 }
 
 AFRAME.registerSystem("userinput", {
-  readFrameValueAtPath(path) {
+  get(path) {
     return this.frame && this.frame[path];
   },
 
