@@ -181,6 +181,9 @@ export default function serializeElement(el, stylesToSkip = []) {
           e.style[cssPropName] = computedStyle[cssPropName];
         }
       }
+      for (let ii = 0; ii < stylesToSkip.length; ii++) {
+        e.style.removeProperty(stylesToSkip[ii]);
+      }
     }
   }
   const result = el.outerHTML;

@@ -32,6 +32,19 @@ function ChatMessage(props) {
       emoji[0].props.children.match &&
       emoji[0].props.children.match(emojiRegex);
 
+    // These CSS properties are overridden by the wrapper for rendering the SVG.
+    const stylesToSkip = [
+      "color",
+      "-webkit-text-fill-color",
+      "-webkit-text-stroke-color",
+      "-webkit-text-emphasis-color"
+    ];
+
+    // Remove padding on emoji.
+    if (isEmoji) {
+      stylesToSkip.push("padding", "margin");
+    }
+
     let style = isEmoji ? presenceLogPureEmojiStyle : presenceLogSpawnedStyle;
 
     if (props.body.split("\n").length === 1) {
@@ -39,19 +52,14 @@ function ChatMessage(props) {
     }
 
     // Scale by 12x
-    messageCanvas.width = (el.offsetWidth + 33) * 12.1;
-    messageCanvas.height = (el.offsetHeight + 33) * 12.1;
+    messageCanvas.width = (el.offsetWidth + (isEmoji ? 0 : 33)) * 12.1;
+    messageCanvas.height = (el.offsetHeight + (isEmoji ? 0 : 33)) * 12.1;
 
     const xhtml = encodeURIComponent(`
       <svg xmlns="http://www.w3.org/2000/svg" width="${messageCanvas.width}" height="${messageCanvas.height}">
         <foreignObject width="8.33%" height="8.33%" style="transform: scale(12.0);">
           <div xmlns="http://www.w3.org/1999/xhtml" style="${style}">
-            ${serializeElement(el, [
-              "color",
-              "-webkit-text-fill-color",
-              "-webkit-text-stroke-color",
-              "-webkit-text-emphasis-color"
-            ])}
+            ${serializeElement(el, stylesToSkip)}
           </div>
         </foreignObject>
       </svg>
