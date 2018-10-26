@@ -42,13 +42,34 @@ export default class PresenceLog extends Component {
             <b>{e.oldName}</b> <FormattedMessage id="presence.name_change" /> <b>{e.newName}</b>.
           </div>
         );
-      case "message":
+      case "chat":
         return (
           <div key={e.key} className={classNames(entryClasses)}>
             <b>{e.name}</b>:{" "}
             <Linkify properties={{ target: "_blank", rel: "noopener referrer" }}>{toEmojis(e.body)}</Linkify>
           </div>
         );
+      case "spawn": {
+        const { src } = e.body;
+        return (
+          <div key={e.key} className={classNames(entryClasses, styles.media)}>
+            <a href={src} target="_blank" rel="noopener noreferrer">
+              <img src={src} />
+            </a>
+            <div className={styles.mediaBody}>
+              <span>
+                <b>{e.name}</b>:
+              </span>
+              <span>
+                {"took a "}
+                <a href={src} target="_blank" rel="noopener noreferrer">
+                  photo
+                </a>
+              </span>
+            </div>
+          </div>
+        );
+      }
     }
   };
 
