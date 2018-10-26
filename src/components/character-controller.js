@@ -105,6 +105,7 @@ AFRAME.registerComponent("character-controller", {
     const startScale = new THREE.Vector3();
 
     return function(t, dt) {
+      if (!this.el.sceneEl.is("entered")) return;
       const deltaSeconds = dt / 1000;
       const root = this.el.object3D;
       const pivot = this.data.pivot.object3D;

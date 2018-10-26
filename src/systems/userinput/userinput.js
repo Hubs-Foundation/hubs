@@ -75,8 +75,6 @@ AFRAME.registerSystem("userinput", {
     this.registeredMappings = new Set([keyboardDebuggingBindings]);
     this.xformStates = new Map();
 
-    this.gamepads = [];
-
     const appAwareTouchscreenDevice = new AppAwareTouchscreenDevice();
     const updateBindingsForVRMode = () => {
       const inVRMode = this.el.sceneEl.is("vr-mode");
@@ -103,17 +101,16 @@ AFRAME.registerSystem("userinput", {
     window.addEventListener(
       "gamepadconnected",
       e => {
-        console.log(e.gamepad);
         let gamepadDevice;
-        if (e.gamepad.id === "OpenVR Gamepad") {
-          for (let i = 0; i < this.activeDevices.length; i++) {
-            const activeDevice = this.activeDevices[i];
-            if (activeDevice.gamepad && activeDevice.gamepad === e.gamepad) {
-              console.warn("ignoring gamepad");
-              return; // multiple connect events without a disconnect event
-            }
+        for (let i = 0; i < this.activeDevices.length; i++) {
+          const activeDevice = this.activeDevices[i];
+          if (activeDevice.gamepad && activeDevice.gamepad === e.gamepad) {
+            console.warn("ignoring gamepad", e.gamepad);
+            return; // multiple connect events without a disconnect event
           }
-          if (this.activeDevices) gamepadDevice = new ViveControllerDevice(e.gamepad);
+        }
+        if (e.gamepad.id === "OpenVR Gamepad") {
+          gamepadDevice = new ViveControllerDevice(e.gamepad);
           this.registeredMappings.add(viveUserBindings);
         } else if (e.gamepad.id.startsWith("Oculus Touch")) {
           gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
@@ -132,16 +129,17 @@ AFRAME.registerSystem("userinput", {
           this.registeredMappings.add(gamepadBindings);
         }
         this.activeDevices.add(gamepadDevice);
-        this.gamepads[e.gamepad.index] = gamepadDevice;
       },
       false
     );
     window.addEventListener(
       "gamepaddisconnected",
       e => {
-        if (this.gamepads[e.gamepad.index]) {
-          this.activeDevices.delete(this.gamepads[e.gamepad.index]);
-          delete this.gamepads[e.gamepad.index];
+        for (const device of this.activeDevices) {
+          if (device.gamepad === e.gamepad) {
+            this.activeDevices.delete(device);
+            return;
+          }
         }
       },
       false

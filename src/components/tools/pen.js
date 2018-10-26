@@ -140,6 +140,10 @@ AFRAME.registerComponent("pen", {
 
       this.timeSinceLastDraw = time % this.data.drawFrequency;
     }
+
+    if (this.currentDrawing && !grabber) {
+      this._endDraw();
+    }
   },
 
   //helper function to get normal of direction of drawing cross direction to camera
