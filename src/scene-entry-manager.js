@@ -1,6 +1,5 @@
 import qsTruthy from "./utils/qs_truthy";
 import screenfull from "screenfull";
-import { inGameActions } from "./input-mappings";
 import nextTick from "./utils/next-tick";
 
 const playerHeight = 1.6;
@@ -29,7 +28,7 @@ export default class SceneEntryManager {
 
   init = () => {
     this.whenSceneLoaded(() => {
-      this.cursorController.components["cursor-controller"].disable();
+      this.cursorController.components["cursor-controller"].enabled = false;
     });
   };
 
@@ -55,8 +54,6 @@ export default class SceneEntryManager {
     } else if (AFRAME.utils.device.isMobile()) {
       document.body.addEventListener("touchend", requestFullscreen);
     }
-
-    AFRAME.registerInputActions(inGameActions, "default");
 
     if (isMobile || qsTruthy("mobile")) {
       this.playerRig.setAttribute("virtual-gamepad-controls", {});
@@ -84,9 +81,7 @@ export default class SceneEntryManager {
     this.scene.classList.remove("hand-cursor");
     this.scene.classList.add("no-cursor");
 
-    const cursor = this.cursorController.components["cursor-controller"];
-    cursor.enable();
-    cursor.setCursorVisibility(true);
+    this.cursorController.components["cursor-controller"].enabled = true;
     this._entered = true;
 
     // Delay sending entry event telemetry until VR display is presenting.
@@ -99,6 +94,8 @@ export default class SceneEntryManager {
         this.store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
       });
     })();
+
+    this.scene.addState("entered");
   };
 
   whenSceneLoaded = callback => {
