@@ -294,6 +294,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const linkChannel = new LinkChannel(store);
 
   window.APP.scene = scene;
+  window.APP.hubChannel = hubChannel;
 
   registerNetworkSchemas();
   remountUI({ hubChannel, linkChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
@@ -461,11 +462,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     NAF.connection.adapter.onData(data);
   });
 
-  hubPhxChannel.on("message", data => {
-    const userInfo = hubPhxPresence.state[data.session_id];
+  hubPhxChannel.on("message", ({ session_id, type, body }) => {
+    const userInfo = hubPhxPresence.state[session_id];
     if (!userInfo) return;
 
-    addToPresenceLog({ type: "message", name: userInfo.metas[0].profile.displayName, body: data.body });
+    addToPresenceLog({ name: userInfo.metas[0].profile.displayName, type, body });
   });
 
   // Reticulum global channel
