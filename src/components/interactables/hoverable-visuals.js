@@ -21,6 +21,8 @@ AFRAME.registerComponent("hoverable-visuals", {
   },
   tick() {
     if (!this.uniforms) return;
+    // BPDEBUG update uniforms array every tick
+    this.uniforms = this.el.components["gltf-model-plus"].shaderUniforms;
     this.interactor.getWorldPosition(interactorPos);
     interactorPos.toArray(interactorPosArr);
     for (const uniform of this.uniforms) {

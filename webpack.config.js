@@ -78,6 +78,7 @@ module.exports = (env, argv) => ({
   devServer: {
     https: createHTTPSConfig(),
     host: "0.0.0.0",
+    public: "hubs.local:8080",
     useLocalIp: true,
     allowedHosts: ["hubs.local"],
     before: function(app) {
@@ -202,7 +203,7 @@ module.exports = (env, argv) => ({
     new HTMLWebpackPlugin({
       filename: "shader-test.html",
       template: path.join(__dirname, "src", "shader-test.html"),
-      chunks: ["vendor", "engine", "scene"],
+      chunks: ["vendor", "engine", "shader-test"],
       inject: "head"
     }),
     new HTMLWebpackPlugin({

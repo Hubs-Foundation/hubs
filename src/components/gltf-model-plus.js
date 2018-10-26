@@ -333,7 +333,7 @@ AFRAME.registerComponent("gltf-model-plus", {
               if (hubsShouldAttract) {
                 vec4 wt = modelMatrix * vec4(transformed, 1);
                 vec4 p4 = vec4(hubsAttractorPosition, 1);
-                transformed += (normalize(wt - p4) / 5.0 / pow(distance(wt, p4), -0.2)).xyz;
+                transformed += (normalize(wt - p4) / 5.0 * pow(distance(wt, p4), 0.2)).xyz;
               }
             `
           );

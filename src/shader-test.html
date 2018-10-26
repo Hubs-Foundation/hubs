@@ -13,7 +13,7 @@
 </head>
 
 <body>
-    <a-scene physics="debug: false">
+    <a-scene physics="debug: false" background="color: lightblue">
         <a-assets>
             <a-mixin id="interactable"
                 body="type: static; shape: none;"
@@ -40,21 +40,23 @@
         <a-plane color="green" rotation="-90 0 0" width="100" height="100" shadow="receive: true"></a-plane>
 
         <a-entity 
-            position="0.3 1.5 -0.8"
+            position="0.5 -0.5 -0.6"
             mixin="interactable"
             media-loader="src: https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf"
             ></a-entity>
+
+        <!--
         <a-entity 
-            position="-0.3 1.5 -0.8"
+            position="-0.3 1.5 -0.6"
             mixin="interactable"
             media-loader="src: https://sketchfab.com/models/f26063c8ca6a438d9e328b28434d1c44; resolve: true; resize: true;"
             ></a-entity>
+        -->
 
-        <a-entity mixin="hand" hand-controls="left" ></a-entity>
         <a-entity mixin="hand" hand-controls="right" ></a-entity>
 
+        <a-entity position="0.5 -0.25 0">
             <a-entity camera look-controls wasd-controls="fly: true"></a-entity>
-        <a-entity position="2 2 0" rotation="0 45 0">
         </a-entity>
     </a-scene>
 </body>
