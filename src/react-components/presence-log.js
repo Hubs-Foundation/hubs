@@ -51,18 +51,23 @@ export default class PresenceLog extends Component {
         );
       case "spawn": {
         const { src } = e.body;
+        console.log(styles);
         return (
-          <div key={e.key} className={classNames(entryClasses, styles.spawn)}>
+          <div key={e.key} className={classNames(entryClasses, styles.media)}>
             <a href={src} target="_blank" rel="noopener noreferrer">
               <img src={src} />
             </a>
-            <b>{e.name}</b>:
-            <i>
-              {" took a "}
-              <a href={src} target="_blank" rel="noopener noreferrer">
-                photo
-              </a>
-            </i>
+            <div className={styles.mediaBody}>
+              <span>
+                <b>{e.name}</b>:
+              </span>
+              <span>
+                {"took a "}
+                <a href={src} target="_blank" rel="noopener noreferrer">
+                  photo
+                </a>
+              </span>
+            </div>
           </div>
         );
       }
