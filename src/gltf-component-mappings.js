@@ -88,6 +88,6 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
   el.setAttribute("media-loader", { resolve: true, src: componentData.src });
 
   if (componentData.pageIndex) {
-    el.setAttribute("media-pager", { index: componentData.page_index });
+    el.setAttribute("media-pager", { index: componentData.pageIndex });
   }
 });
