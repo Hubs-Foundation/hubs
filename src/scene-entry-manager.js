@@ -216,6 +216,7 @@ export default class SceneEntryManager {
       const el = e.detail.el;
       const networkId = el.components.networked.data.networkId;
       const gltfNode = pinnedEntityToGltf(el);
+      el.setAttribute("networked", { persistent: true });
 
       this.hubChannel.pin(networkId, gltfNode);
     });
@@ -226,6 +227,7 @@ export default class SceneEntryManager {
 
       const components = el.components;
       const networkId = components.networked.data.networkId;
+      el.setAttribute("networked", { persistent: false });
 
       this.hubChannel.unpin(networkId);
     });
