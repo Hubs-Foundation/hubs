@@ -65,6 +65,7 @@ module.exports = (env, argv) => ({
     index: path.join(__dirname, "src", "index.js"),
     hub: path.join(__dirname, "src", "hub.js"),
     scene: path.join(__dirname, "src", "scene.js"),
+    "shader-test": path.join(__dirname, "src", "shader-test.js"),
     link: path.join(__dirname, "src", "link.js"),
     spoke: path.join(__dirname, "src", "spoke.js"),
     "avatar-selector": path.join(__dirname, "src", "avatar-selector.js")
@@ -197,6 +198,12 @@ module.exports = (env, argv) => ({
           content: process.env.ORIGIN_TRIAL_TOKEN
         }
       ]
+    }),
+    new HTMLWebpackPlugin({
+      filename: "shader-test.html",
+      template: path.join(__dirname, "src", "shader-test.html"),
+      chunks: ["vendor", "engine", "scene"],
+      inject: "head"
     }),
     new HTMLWebpackPlugin({
       filename: "scene.html",
