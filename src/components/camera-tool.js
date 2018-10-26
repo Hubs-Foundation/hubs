@@ -159,10 +159,7 @@ AFRAME.registerComponent("camera-tool", {
           entity.addEventListener(
             "media_resolved",
             () => {
-              window.APP.hubChannel.sendMessage(
-                { contentType: "image/jpg", src: entity.components["media-loader"].data.src },
-                "spawn"
-              );
+              this.el.emit("photo_taken", entity.components["media-loader"].data.src);
             },
             { once: true }
           );

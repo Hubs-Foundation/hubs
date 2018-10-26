@@ -294,7 +294,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const linkChannel = new LinkChannel(store);
 
   window.APP.scene = scene;
-  window.APP.hubChannel = hubChannel;
 
   registerNetworkSchemas();
   remountUI({ hubChannel, linkChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });

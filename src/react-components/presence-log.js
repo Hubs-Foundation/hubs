@@ -51,7 +51,6 @@ export default class PresenceLog extends Component {
         );
       case "spawn": {
         const { src } = e.body;
-        console.log(styles);
         return (
           <div key={e.key} className={classNames(entryClasses, styles.media)}>
             <a href={src} target="_blank" rel="noopener noreferrer">
