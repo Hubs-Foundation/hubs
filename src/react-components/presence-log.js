@@ -29,8 +29,8 @@ function ChatMessage(props) {
     const style = isEmoji ? presenceLogPureEmojiStyle : presenceLogSpawnedStyle;
 
     // Scale by 12x
-    messageCanvas.width = (el.offsetWidth + 33) * 12;
-    messageCanvas.height = (el.offsetHeight + 17) * 12;
+    messageCanvas.width = (el.offsetWidth + 33) * 12.1;
+    messageCanvas.height = (el.offsetHeight + 17) * 12.1;
 
     const xhtml = encodeURIComponent(`
       <svg xmlns="http://www.w3.org/2000/svg" width="${messageCanvas.width}" height="${messageCanvas.height}">
