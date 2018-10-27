@@ -154,7 +154,7 @@ function getDefaultStyleByTagName(tagName) {
   return defaultStylesByTagName[tagName];
 }
 
-export default function serializeElement(el) {
+export default function serializeElement(el, stylesToSkip = []) {
   if (Object.keys(defaultStylesByTagName).length === 0) {
     // Precompute the lookup tables.
     for (let i = 0; i < tagNames.length; i++) {
