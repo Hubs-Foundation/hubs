@@ -440,7 +440,7 @@ class UIRoot extends Component {
     if (!this.props.forcedVREntryType || !this.props.forcedVREntryType.endsWith("_now")) {
       this.goToEntryStep(ENTRY_STEPS.audio_setup);
     } else {
-      setTimeout(this.onAudioReadyButton, 3000); // Need to wait otherwise input doesn't work :/
+      this.onAudioReadyButton(); // Need to wait otherwise input doesn't work :/
     }
   };
 
@@ -673,6 +673,10 @@ class UIRoot extends Component {
   };
 
   renderEntryStartPanel = () => {
+    const textRows = this.state.pendingMessage.split("\n").length;
+    const pendingMessageTextareaHeight = textRows * 28 + "px";
+    const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
+
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>{this.props.hubName}</div>
@@ -684,12 +688,19 @@ class UIRoot extends Component {
           </div>
 
           <form onSubmit={this.sendMessage}>
-            <div className={styles.messageEntry}>
-              <input
+            <div className={styles.messageEntry} style={{ height: pendingMessageFieldHeight }}>
+              <textarea
                 className={styles.messageEntryInput}
                 value={this.state.pendingMessage}
+                rows={textRows}
+                style={{ height: pendingMessageTextareaHeight }}
                 onFocus={e => e.target.select()}
                 onChange={e => this.setState({ pendingMessage: e.target.value })}
+                onKeyDown={e => {
+                  if (e.keyCode === 13 && !e.shiftKey) {
+                    this.sendMessage(e);
+                  }
+                }}
                 placeholder="Send a message..."
               />
               <input className={styles.messageEntrySubmit} type="submit" value="send" />
@@ -969,6 +980,10 @@ class UIRoot extends Component {
     const entryFinished = this.state.entryStep === ENTRY_STEPS.finished;
     const showVREntryButton = entryFinished && this.props.availableVREntryTypes.isInHMD;
 
+    const textRows = this.state.pendingMessage.split("\n").length;
+    const pendingMessageTextareaHeight = textRows * 28 + "px";
+    const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.ui}>
@@ -988,14 +1003,21 @@ class UIRoot extends Component {
           {entryFinished && <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} />}
           {entryFinished && (
             <form onSubmit={this.sendMessage}>
-              <div className={styles.messageEntryInRoom}>
-                <input
+              <div className={styles.messageEntryInRoom} style={{ height: pendingMessageFieldHeight }}>
+                <textarea
+                  style={{ height: pendingMessageTextareaHeight }}
                   className={classNames([styles.messageEntryInput, styles.messageEntryInputInRoom])}
                   value={this.state.pendingMessage}
+                  rows={textRows}
                   onFocus={e => e.target.select()}
                   onChange={e => {
                     e.stopPropagation();
                     this.setState({ pendingMessage: e.target.value });
+                  }}
+                  onKeyDown={e => {
+                    if (e.keyCode === 13 && !e.shiftKey) {
+                      this.sendMessage(e);
+                    }
                   }}
                   placeholder="Send a message..."
                 />

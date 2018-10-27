@@ -204,10 +204,12 @@
   -moz-appearance: none;
   -webkit-appearance: none;
   outline-style: none;
+  overflow: hidden;
+  resize: none;
   background-color: transparent;
   color: black;
   padding: 8px 1.25em;
-  line-height: 2em;
+  line-height: 28px;
   font-size: 1.1em;
   width: 100%;
   border: 0px;
@@ -227,6 +229,7 @@
   right: 12px;
   height: 32px;
   min-width: 80px;
+  bottom: 8px;
 }
 
 :local(.message-entry-in-room) {
