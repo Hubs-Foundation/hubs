@@ -218,7 +218,8 @@ export default class SceneEntryManager {
     });
 
     document.addEventListener("paste", e => {
-      if (e.target.nodeName === "INPUT" && document.activeElement === e.target) return;
+      if ((e.target.nodeName === "INPUT" || e.target.nodeName === "TEXTAREA") && document.activeElement === e.target)
+        return;
 
       const url = e.clipboardData.getData("text");
       const files = e.clipboardData.files && e.clipboardData.files;
