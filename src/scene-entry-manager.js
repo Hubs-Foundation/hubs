@@ -278,6 +278,11 @@ export default class SceneEntryManager {
       });
       this.scene.appendChild(entity);
     });
+
+    this.scene.addEventListener("photo_taken", e => {
+      console.log(e);
+      this.hubChannel.sendMessage({ src: e.detail }, "spawn");
+    });
   };
 
   _spawnAvatar = () => {

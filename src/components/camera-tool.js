@@ -156,6 +156,13 @@ AFRAME.registerComponent("camera-tool", {
         renderer.readRenderTargetPixels(this.renderTarget, 0, 0, width, height, this.snapPixels);
         pixelsToPNG(this.snapPixels, width, height).then(file => {
           const { entity, orientation } = addMedia(file, "#interactable-media", undefined, true);
+          entity.addEventListener(
+            "media_resolved",
+            () => {
+              this.el.emit("photo_taken", entity.components["media-loader"].data.src);
+            },
+            { once: true }
+          );
           orientation.then(() => {
             entity.object3D.position.copy(this.el.object3D.position).add(new THREE.Vector3(0, -0.5, 0));
             entity.object3D.rotation.copy(this.el.object3D.rotation);

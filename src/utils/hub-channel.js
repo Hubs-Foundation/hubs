@@ -91,9 +91,9 @@ export default class HubChannel {
     this.channel.push("events:profile_updated", { profile: this.store.state.profile });
   };
 
-  sendMessage = body => {
-    if (body === "") return;
-    this.channel.push("message", { body });
+  sendMessage = (body, type = "chat") => {
+    if (!body) return;
+    this.channel.push("message", { body, type });
   };
 
   pin = (id, gltfNode) => {
