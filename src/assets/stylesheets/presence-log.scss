@@ -25,7 +25,13 @@
     margin: 8px 64px 8px 16px;
     font-size: 0.8em;
     padding: 8px 16px;
-    border-radius: 16px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+
+    :local(.message-body) {
+      margin-left: 4px;
+    }
 
     a {
       color: $action-color;
@@ -33,6 +39,28 @@
 
     @media (max-width: 1000px) {
       max-width: 75%;
+    }
+
+    :local(.spawn-message) {
+      appearance: none;
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      outline-style: none;
+      width: 24px;
+      height: 24px;
+      background-size: 100%;
+      border: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      background-image: url(../spawn_message.png);
+      margin-right: 6px;
+      background-color: transparent;
+    }
+
+    :local(.spawn-message):hover {
+      background-image: url(../spawn_message-hover.png);
     }
 
     &:local(.spawn) {
@@ -56,6 +84,9 @@
     transition: visibility 0s 0.5s, opacity 0.5s linear, transform 0.5s;
   }
 
+  :local(.presence-log-entry-with-button) {
+    padding: 8px 18px 8px 10px;
+  }
 }
 
 :local(.presence-log-in-room) {
@@ -76,6 +107,10 @@
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
+
+    a {
+      color: white;
+    }
   }
 }
 

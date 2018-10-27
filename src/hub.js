@@ -68,7 +68,7 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
-import { proxiedUrlFor } from "./utils/media-utils";
+import { proxiedUrlFor, addMedia } from "./utils/media-utils";
 import SceneEntryManager from "./scene-entry-manager";
 
 import "./systems/nav";
@@ -465,8 +465,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubPhxChannel.on("message", ({ session_id, type, body }) => {
     const userInfo = hubPhxPresence.state[session_id];
     if (!userInfo) return;
+    const maySpawn = session_id === socket.params().session_id && scene.is("entered");
 
-    addToPresenceLog({ name: userInfo.metas[0].profile.displayName, type, body });
+    addToPresenceLog({ name: userInfo.metas[0].profile.displayName, type, body, maySpawn });
   });
 
   // Reticulum global channel
