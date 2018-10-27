@@ -39,25 +39,36 @@
         <a-entity light="type: directional; castShadow: true;" position="2 2 2"></a-entity>
         <a-plane color="green" rotation="-90 0 0" width="100" height="100" shadow="receive: true"></a-plane>
 
+        <a-entity position="0 1.2 -0.6">
         <a-entity 
-            position="0.5 -0.5 -0.6"
+            position="0.3 0.5 0"
+            mixin="interactable"
+            media-loader="src: https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf"
+            ></a-entity>
+        <a-entity 
+            position="0.3 0 0"
             mixin="interactable"
             media-loader="src: https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf"
             ></a-entity>
 
-        <!--
         <a-entity 
-            position="-0.3 1.5 -0.6"
+            position="-0.3 0.2 0"
             mixin="interactable"
             media-loader="src: https://sketchfab.com/models/f26063c8ca6a438d9e328b28434d1c44; resolve: true; resize: true;"
             ></a-entity>
-        -->
-
-        <a-entity mixin="hand" hand-controls="right" ></a-entity>
-
-        <a-entity position="0.5 -0.25 0">
-            <a-entity camera look-controls wasd-controls="fly: true"></a-entity>
         </a-entity>
+
+        <!--
+        <a-entity position="-0.3 0 -0.6">
+            <a-box scale="0.1 0.1 0.1" color="green" mixin="hand" >
+                <a-animation attribute="position" dur="2000" from="0 1 0" to="0 2 0" direction="alternate" repeat="indefinite">
+                </a-animation>
+            </a-box>
+        </a-entity>
+        -->
+        <a-entity mixin="hand" hand-controls="right"></a-entity>
+
+        <a-entity camera position="0 1.5 0.3" look-controls wasd-controls="fly: true"></a-entity>
     </a-scene>
 </body>
 

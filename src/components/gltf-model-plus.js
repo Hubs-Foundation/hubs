@@ -273,6 +273,88 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   return gltf;
 }
 
+function injectCustomShaderChunks(gltf) {
+  const vertexRegex = /\bbegin_vertex\b/;
+  const fragRegex = /\bgl_FragColor\b/;
+
+  const materialsSeen = new Set();
+  const shaderUniforms = [];
+
+  gltf.scene.traverse(object => {
+    if (object.material && object.material.type === "MeshStandardMaterial") {
+      object.material.onBeforeCompile = shader => {
+        if (!vertexRegex.test(shader.vertexShader)) return;
+
+        shader.uniforms.hubsAttractorPosition = { value: [0, 0, 0] };
+        shader.uniforms.hubsShouldAttract = { value: false };
+
+        const vchunk = `
+		  if (hubsShouldAttract) {
+			vec4 wt = modelMatrix * vec4(transformed, 1);
+
+			// hubsWorldPosition is used in the fragment shader below.
+			hubsWorldPosition = wt.xyz;
+
+			mat4 mm = modelMatrix;
+			vec4 scale = vec4(
+			  length(vec3(mm[0][0], mm[0][1], mm[0][2])),
+			  length(vec3(mm[1][0], mm[1][1], mm[1][2])),
+			  length(vec3(mm[2][0], mm[2][1], mm[2][2])),
+			  1
+			);
+
+			vec4 p4 = vec4(hubsAttractorPosition, 1);
+			float dist = distance(wt, p4); 
+
+			// Translate vertices towards hubsAttractorPosition, falling off with an inverted power curve.
+			transformed += (1.0 / scale * (p4 - wt) * (max(-1.0, pow(-dist * 7.0, 3.0)) + 1.0)).xyz;
+		  }
+		`;
+
+        const vlines = shader.vertexShader.split("\n");
+        const vindex = vlines.findIndex(line => vertexRegex.test(line));
+        vlines.splice(vindex + 1, 0, vchunk);
+        vlines.unshift("varying vec3 hubsWorldPosition;");
+        vlines.unshift("uniform vec3 hubsAttractorPosition;");
+        vlines.unshift("uniform bool hubsShouldAttract;");
+        shader.vertexShader = vlines.join("\n");
+
+        const fchunk = `
+		  if (hubsShouldAttract) {
+			float dist = distance(hubsWorldPosition, hubsAttractorPosition);
+			vec3 wp = hubsWorldPosition;
+			vec3 ap = hubsAttractorPosition;
+			float d = pow(0.15, 2.0);
+
+			// Highlight object with a circular spot in cardinal directions and a gradient falling off with distance.
+			float ratio = min(1.0, pow(dist * 7.0, 3.0));
+			if (length(ap.xy - wp.xy) < d || length(ap.xz - wp.xz) < d || length(ap.yz - wp.yz) < d) { 
+			  ratio = 0.0;
+			}
+			gl_FragColor.rgb = (gl_FragColor.rgb * ratio) + (vec3(1, 0.2, 0.4) * (1.0 - ratio));
+		  }
+		`;
+
+        const flines = shader.fragmentShader.split("\n");
+        const findex = flines.findIndex(line => fragRegex.test(line));
+        flines.splice(findex + 1, 0, fchunk);
+        flines.unshift("varying vec3 hubsWorldPosition;");
+        flines.unshift("uniform vec3 hubsAttractorPosition;");
+        flines.unshift("uniform bool hubsShouldAttract;");
+        shader.fragmentShader = flines.join("\n");
+
+        if (!materialsSeen.has(object.material.uuid)) {
+          shaderUniforms.push(shader.uniforms);
+          materialsSeen.add(object.material.uuid);
+        }
+      };
+      object.material.needsUpdate = true;
+    }
+  });
+
+  return shaderUniforms;
+}
+
 /**
  * Loads a GLTF model, optionally recursively "inflates" the child nodes of a model into a-entities and sets
  * whitelisted components on them if defined in the node's extras.
@@ -316,40 +398,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       gltf = await loadGLTF(src, contentType, technique);
     }
 
-    const beginVertexRegex = /\bbegin_vertex\b/;
-    const materialsSeen = new Set();
-    const shaderUniforms = [];
-
-    gltf.scene.traverse(object => {
-      if (object.material && object.material.type === "MeshStandardMaterial") {
-        object.material.onBeforeCompile = shader => {
-          if (!beginVertexRegex.test(shader.vertexShader)) return;
-          const lines = shader.vertexShader.split("\n");
-          const beginVertexIndex = lines.findIndex(line => beginVertexRegex.test(line));
-          lines.splice(
-            beginVertexIndex + 1,
-            0,
-            `
-              if (hubsShouldAttract) {
-                vec4 wt = modelMatrix * vec4(transformed, 1);
-                vec4 p4 = vec4(hubsAttractorPosition, 1);
-                transformed += (normalize(wt - p4) / 5.0 * pow(distance(wt, p4), 0.2)).xyz;
-              }
-            `
-          );
-          lines.unshift("uniform vec3 hubsAttractorPosition;");
-          lines.unshift("uniform bool hubsShouldAttract;");
-          shader.vertexShader = lines.join("\n");
-          shader.uniforms.hubsAttractorPosition = { value: [0, 0, 0] };
-          shader.uniforms.hubsShouldAttract = { value: false };
-          if (!materialsSeen.has(object.material.uuid)) {
-            shaderUniforms.push(shader.uniforms);
-            materialsSeen.add(object.material.uuid);
-          }
-        };
-        object.material.needsUpdate = true;
-      }
-    });
+    const shaderUniforms = injectCustomShaderChunks(gltf);
 
     return { gltf, shaderUniforms };
   },
