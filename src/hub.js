@@ -465,7 +465,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubPhxChannel.on("message", ({ session_id, type, body }) => {
     const userInfo = hubPhxPresence.state[session_id];
     if (!userInfo) return;
-    const maySpawn = session_id === socket.params().session_id && scene.is("entered");
+    const maySpawn = scene.is("entered");
 
     addToPresenceLog({ name: userInfo.metas[0].profile.displayName, type, body, maySpawn });
   });
