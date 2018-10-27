@@ -262,7 +262,7 @@
   }
 }
 
-:local(.message-entry-in-room):hover {
+:local(.message-entry-in-room):focus-within {
   opacity: 1.0;
   transition: opacity 0.25s linear;
 

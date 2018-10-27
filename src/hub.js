@@ -297,6 +297,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   registerNetworkSchemas();
   remountUI({ hubChannel, linkChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
+  scene.addEventListener("action_focus_chat", () => document.querySelector(".chat-focus-target").focus());
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 

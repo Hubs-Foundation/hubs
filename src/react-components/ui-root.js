@@ -690,7 +690,7 @@ class UIRoot extends Component {
           <form onSubmit={this.sendMessage}>
             <div className={styles.messageEntry} style={{ height: pendingMessageFieldHeight }}>
               <textarea
-                className={styles.messageEntryInput}
+                className={classNames([styles.messageEntryInput, "chat-focus-target"])}
                 value={this.state.pendingMessage}
                 rows={textRows}
                 style={{ height: pendingMessageTextareaHeight }}
@@ -699,6 +699,8 @@ class UIRoot extends Component {
                 onKeyDown={e => {
                   if (e.keyCode === 13 && !e.shiftKey) {
                     this.sendMessage(e);
+                  } else if (e.keyCode === 27) {
+                    e.target.blur();
                   }
                 }}
                 placeholder="Send a message..."
@@ -1006,7 +1008,11 @@ class UIRoot extends Component {
               <div className={styles.messageEntryInRoom} style={{ height: pendingMessageFieldHeight }}>
                 <textarea
                   style={{ height: pendingMessageTextareaHeight }}
-                  className={classNames([styles.messageEntryInput, styles.messageEntryInputInRoom])}
+                  className={classNames([
+                    styles.messageEntryInput,
+                    styles.messageEntryInputInRoom,
+                    "chat-focus-target"
+                  ])}
                   value={this.state.pendingMessage}
                   rows={textRows}
                   onFocus={e => e.target.select()}
@@ -1017,6 +1023,8 @@ class UIRoot extends Component {
                   onKeyDown={e => {
                     if (e.keyCode === 13 && !e.shiftKey) {
                       this.sendMessage(e);
+                    } else if (e.keyCode === 27) {
+                      e.target.blur();
                     }
                   }}
                   placeholder="Send a message..."

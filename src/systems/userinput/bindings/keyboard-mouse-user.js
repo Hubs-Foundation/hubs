@@ -110,6 +110,15 @@ export const keyboardMouseUserBindings = {
     },
     {
       src: {
+        value: paths.device.keyboard.key("t")
+      },
+      dest: {
+        value: paths.actions.focusChat
+      },
+      xform: xforms.rising
+    },
+    {
+      src: {
         value: paths.device.keyboard.key("l")
       },
       dest: {
