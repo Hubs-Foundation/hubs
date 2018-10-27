@@ -68,7 +68,7 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
-import { proxiedUrlFor, addMedia } from "./utils/media-utils";
+import { proxiedUrlFor } from "./utils/media-utils";
 import SceneEntryManager from "./scene-entry-manager";
 
 import "./systems/nav";
