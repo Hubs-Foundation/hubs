@@ -104,7 +104,7 @@ export default class PresenceLog extends Component {
       case "display_name_changed":
         return (
           <div key={e.key} className={classNames(entryClasses)}>
-            <b>{e.oldName}</b> <FormattedMessage id="presence.name_change" />&nbsp;<b>{e.newName}</b>.
+            <b>{e.oldName}</b>&nbsp;<FormattedMessage id="presence.name_change" />&nbsp;<b>{e.newName}</b>.
           </div>
         );
       case "chat":
