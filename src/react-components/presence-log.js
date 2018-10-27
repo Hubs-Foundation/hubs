@@ -109,22 +109,34 @@ export default class PresenceLog extends Component {
         );
       case "chat":
         return (
-          <ChatMessage key={e.key} name={e.name} className={classNames(entryClasses)} body={e.body} maySpawn={e.maySpawn} />
+          <ChatMessage
+            key={e.key}
+            name={e.name}
+            className={classNames(entryClasses)}
+            body={e.body}
+            maySpawn={e.maySpawn}
+          />
         );
       case "spawn": {
         const { src } = e.body;
         return (
-          <div key={e.key} className={classNames(entryClasses, styles.spawn)}>
+          <div key={e.key} className={classNames(entryClasses, styles.media)}>
             <a href={src} target="_blank" rel="noopener noreferrer">
               <img src={src} />
             </a>
-            <b>{e.name}</b>&nbsp;
-            {"took a"}&nbsp;
-            <b>
-              <a href={src} target="_blank" rel="noopener noreferrer">
-                photo
-              </a>
-            </b>.
+            <div className={styles.mediaBody}>
+              <span>
+                <b>{e.name}</b>
+              </span>
+              <span>
+                {"took a "}
+                <b>
+                  <a href={src} target="_blank" rel="noopener noreferrer">
+                    photo
+                  </a>
+                </b>.
+              </span>
+            </div>
           </div>
         );
       }

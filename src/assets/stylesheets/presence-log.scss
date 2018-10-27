@@ -63,12 +63,18 @@
       background-image: url(../spawn_message-hover.png);
     }
 
-    &:local(.spawn) {
+    &:local(.media) {
       display: flex;
       align-items: center;
       min-height: 35px;
+
+      :local(.mediaBody) {
+        display: flex;
+        flex-direction: column;
+      }
+
       img {
-        max-height: 36px;
+        height: 35px;
         margin-right: 8px;
         border: 2px solid rgba(255,255,255,0.15);
         display: block;
