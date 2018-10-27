@@ -35,18 +35,22 @@ AFRAME.registerComponent("super-networked-interactable", {
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
+      this._syncCounterRegistration(networkedEl);
       if (!NAF.utils.isMine(networkedEl)) {
         this.el.setAttribute("body", { type: "static" });
-      } else {
-        this.counter.register(networkedEl);
       }
     });
 
     this._onGrabStart = this._onGrabStart.bind(this);
     this._onGrabEnd = this._onGrabEnd.bind(this);
     this._onOwnershipLost = this._onOwnershipLost.bind(this);
+    this._onPinned = this._onPinned.bind(this);
+    this._onUnpinned = this._onUnpinned.bind(this);
+    this._syncCounterRegistration = this._syncCounterRegistration.bind(this);
     this.el.addEventListener("grab-start", this._onGrabStart);
     this.el.addEventListener("grab-end", this._onGrabEnd);
+    this.el.addEventListener("pinned", this._onPinned);
+    this.el.addEventListener("unpinned", this._onUnpinned);
     this.el.addEventListener("ownership-lost", this._onOwnershipLost);
     this.system.addComponent(this);
   },
@@ -67,7 +71,7 @@ AFRAME.registerComponent("super-networked-interactable", {
     if (this.networkedEl && !NAF.utils.isMine(this.networkedEl)) {
       if (NAF.utils.takeOwnership(this.networkedEl)) {
         this.el.setAttribute("body", { type: "dynamic" });
-        this.counter.register(this.networkedEl);
+        this._syncCounterRegistration(this.networkedEl);
       } else {
         this.el.emit("grab-end", { hand: this.hand });
         this.hand = null;
@@ -84,7 +88,15 @@ AFRAME.registerComponent("super-networked-interactable", {
     this.el.setAttribute("body", { type: "static" });
     this.el.emit("grab-end", { hand: this.hand });
     this.hand = null;
-    this.counter.deregister(this.el);
+    this._syncCounterRegistration(this.el);
+  },
+
+  _onPinned: function() {
+    this._syncCounterRegistration(this.el);
+  },
+
+  _onUnpinned: function() {
+    this._syncCounterRegistration(this.el);
   },
 
   _changeScale: function(delta) {
@@ -92,6 +104,16 @@ AFRAME.registerComponent("super-networked-interactable", {
       this.currentScale.addScalar(delta).clampScalar(this.data.minScale, this.data.maxScale);
       this.el.setAttribute("scale", this.currentScale);
       this.el.components["stretchable"].stretchBody(this.el, this.currentScale);
+    }
+  },
+
+  _syncCounterRegistration: function(el) {
+    const isPinned = el.components["pinnable"] && el.components["pinnable"].data.pinned;
+
+    if (NAF.utils.isMine(el) && !isPinned) {
+      this.counter.register(el);
+    } else {
+      this.counter.deregister(el);
     }
   },
 
