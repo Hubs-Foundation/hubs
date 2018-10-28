@@ -184,7 +184,6 @@ function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
-  const enableScreenSharing = qsTruthy("enable_screen_sharing");
 
   ReactDOM.render(
     <UIRoot
@@ -194,7 +193,6 @@ function mountUI(props = {}) {
         concurrentLoadDetector,
         disableAutoExitOnConcurrentLoad,
         forcedVREntryType,
-        enableScreenSharing,
         store,
         ...props
       }}

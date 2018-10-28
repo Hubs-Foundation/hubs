@@ -73,7 +73,6 @@ class UIRoot extends Component {
     concurrentLoadDetector: PropTypes.object,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
-    enableScreenSharing: PropTypes.bool,
     isBotMode: PropTypes.bool,
     store: PropTypes.object,
     scene: PropTypes.object,
@@ -106,7 +105,6 @@ class UIRoot extends Component {
     shareScreen: false,
     requestedScreen: false,
     mediaStream: null,
-    videoTrack: null,
     audioTrack: null,
     entryPanelCollapsed: false,
 
@@ -323,30 +321,6 @@ class UIRoot extends Component {
     return { hasAudio };
   };
 
-  setStateAndRequestScreen = async e => {
-    const checked = e.target.checked;
-    await this.setState({ requestedScreen: true, shareScreen: checked });
-    if (checked) {
-      this.fetchVideoTrack({
-        video: {
-          mediaSource: "screen",
-          // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
-          // other than your current monitor that has a different aspect ratio.
-          width: 720 * (screen.width / screen.height),
-          height: 720,
-          frameRate: 30
-        }
-      });
-    } else {
-      this.setState({ videoTrack: null });
-    }
-  };
-
-  fetchVideoTrack = async constraints => {
-    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-    this.setState({ videoTrack: mediaStream.getVideoTracks()[0] });
-  };
-
   fetchAudioTrack = async constraints => {
     if (this.state.audioTrack) {
       this.state.audioTrack.stop();
@@ -367,10 +341,6 @@ class UIRoot extends Component {
     const mediaStream = new MediaStream();
 
     await this.fetchMicDevices();
-
-    if (this.state.videoTrack) {
-      mediaStream.addTrack(this.state.videoTrack);
-    }
 
     // we should definitely have an audioTrack at this point unless they denied mic access
     if (this.state.audioTrack) {
@@ -711,11 +681,11 @@ class UIRoot extends Component {
 
   renderDevicePanel = () => {
     // Only screen sharing in desktop firefox since other browsers/platforms will ignore the "screen" media constraint and will attempt to share your webcam instead!
-    const isFireFox = /firefox/i.test(navigator.userAgent);
-    const isNonMobile = !AFRAME.utils.device.isMobile();
+    //const isFireFox = /firefox/i.test(navigator.userAgent);
+    //const isNonMobile = !AFRAME.utils.device.isMobile();
 
-    const screenSharingCheckbox =
-      this.props.enableScreenSharing && isNonMobile && isFireFox && this.renderScreensharing();
+    //const screenSharingCheckbox =
+    //  this.props.enableScreenSharing && isNonMobile && isFireFox && this.renderScreensharing();
 
     return (
       <div className={entryStyles.entryPanel}>
@@ -742,7 +712,6 @@ class UIRoot extends Component {
               <FormattedMessage id="entry.cardboard" />
             </div>
           )}
-          {screenSharingCheckbox}
         </div>
       </div>
     );

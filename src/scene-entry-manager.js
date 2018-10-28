@@ -61,9 +61,9 @@ export default class SceneEntryManager {
     }
 
     this._setupPlayerRig();
-    this._setupScreensharing(mediaStream);
     this._setupBlocking();
     this._setupMedia();
+    this._setupScreenShare(mediaStream);
     this._setupCamera();
 
     if (qsTruthy("offline")) return;
@@ -147,40 +147,55 @@ export default class SceneEntryManager {
     this.scene.emit("username-changed", { username: displayName });
   };
 
-  _setupScreensharing = mediaStream => {
-    const videoTracks = mediaStream ? mediaStream.getVideoTracks() : [];
-    let sharingScreen = videoTracks.length > 0;
+  _setupScreenShare = mediaStream => {
+    let isSharing = false;
+    let isToggling = false;
+    let screenEntity = null;
 
-    const screenEntityId = `${NAF.clientId}-screen`;
-    let screenEntity = document.getElementById(screenEntityId);
+    this.scene.addEventListener("action_share_screen", async () => {
+      if (isToggling) return;
+      isToggling = true;
 
-    if (screenEntity) {
-      screenEntity.setAttribute("visible", sharingScreen);
-    } else if (sharingScreen) {
-      screenEntity = document.createElement("a-entity");
-      screenEntity.id = screenEntityId;
-      screenEntity.setAttribute("offset-relative-to", {
-        target: "#player-camera",
-        offset: "0 0 -2",
-        on: "action_share_screen"
-      });
-      screenEntity.setAttribute("networked", { template: "#video-template" });
-      this.scene.appendChild(screenEntity);
-    }
+      if (!isSharing) {
+        const constraints = {
+          video: {
+            mediaSource: "screen",
+            // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
+            // other than your current monitor that has a different aspect ratio.
+            width: 720 * (screen.width / screen.height),
+            height: 720,
+            frameRate: 30
+          }
+        };
 
-    this.scene.addEventListener("action_share_screen", () => {
-      sharingScreen = !sharingScreen;
-      if (sharingScreen) {
-        for (const track of videoTracks) {
-          mediaStream.addTrack(track);
+        console.log("a");
+        const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+        console.log(newStream);
+        const videoTracks = newStream ? newStream.getVideoTracks() : [];
+
+        if (videoTracks.length > 0) {
+          newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
+          NAF.connection.adapter.setLocalMediaStream(mediaStream);
+          console.log("b");
+
+          screenEntity = document.createElement("a-entity");
+          screenEntity.setAttribute("offset-relative-to", { target: "#player-camera", offset: "0 0 -1.5" });
+          screenEntity.setAttribute("networked", { template: "#screen-template" });
+          this.scene.appendChild(screenEntity);
+          isSharing = true;
         }
       } else {
+        screenEntity.parentNode.removeChild(screenEntity);
+
         for (const track of mediaStream.getVideoTracks()) {
           mediaStream.removeTrack(track);
         }
+
+        NAF.connection.adapter.setLocalMediaStream(mediaStream);
+        isSharing = false;
       }
-      NAF.connection.adapter.setLocalMediaStream(mediaStream);
-      screenEntity.setAttribute("visible", sharingScreen);
+
+      isToggling = false;
     });
   };
 

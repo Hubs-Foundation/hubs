@@ -73,7 +73,7 @@ function registerNetworkSchemas() {
   });
 
   NAF.schemas.add({
-    template: "#video-template",
+    template: "#screen-template",
     components: [
       {
         component: "position",
@@ -83,7 +83,7 @@ function registerNetworkSchemas() {
         component: "rotation",
         requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
-      "visible"
+      "scale"
     ]
   });
 
