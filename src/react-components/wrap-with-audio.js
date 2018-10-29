@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 export const AudioContext = React.createContext({});
 
-export const hudHoverSound = "play_sound-hud_mouse_enter";
+export const hudHoverSound = "play_sound-hud_hover_start";
 
 export const WithHoverSound = ({ sound, children }) => {
   return (

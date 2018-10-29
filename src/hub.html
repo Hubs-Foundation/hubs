@@ -71,7 +71,7 @@
             <a-asset-item id="sound_asset-snap_rotate"                    src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-media_loaded"                   src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-hud_mouseout"                   src="./assets/sfx/footfall_click.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-hud_mouseover"                  src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-hud_hover_start"                src="./assets/sfx/Roll_Over_New.wav"  response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-hover"                          src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-hover_off"                      src="./assets/sfx/footfall_click.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-cursor_distance_change_blocked" src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -365,14 +365,14 @@
                        class="ui hud mic"
                        material="alphaTest:0.1;"
                        hoverable
-                       sound__hud_mouseover="src: #sound_asset-hud_mouseover; on: mouseover; poolSize: 5;"
+                       sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
               ></a-image>
               <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover"
                        scale="0.2 0.2 0.2"
                        position="0 0 0.005"
                        class="ui hud freeze"
                        hoverable
-                       sound__hud_mouseover="src: #sound_asset-hud_mouseover; on: mouseover; poolSize: 5;"
+                       sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
               ></a-image>
               <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover"
                        scale="0.1 0.1 0.1"
@@ -380,7 +380,7 @@
                        class="ui hud penhud"
                        material="alphaTest:0.1;"
                        hoverable
-                       sound__hud_mouseover="src: #sound_asset-hud_mouseover; on: mouseover; poolSize: 5;"
+                       sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
               ></a-image>
               <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #spawn-camera; hoverImage: #spawn-camera-hover; activeImage: #spawn-camera; activeHoverImage: #spawn-camera-hover"
                        scale="0.1 0.1 0.1"
@@ -388,7 +388,7 @@
                        class="ui hud cameraBtn"
                        material="alphaTest:0.1;"
                        hoverable
-                       sound__hud_mouseover="src: #sound_asset-hud_mouseover; on: mouseover; poolSize: 5;"
+                       sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
               ></a-image>
               <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
                 <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" ></a-entity>
@@ -422,8 +422,8 @@
               scene-sound__hud_action_space_bubble="on: action_space_bubble;"
               sound__hud_spawn_pen="src: #sound_asset-spawn_pen; on: nothing; poolSize: 2;"
               scene-sound__hud_spawn_pen="on: spawn_pen;"
-              sound__hud_mouseover="src: #sound_asset-hud_mouseover; on: nothing; poolSize: 5;"
-              scene-sound__hud_mouseover="on: play_sound-hud_mouse_enter;"
+              sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: nothing; poolSize: 5;"
+              scene-sound__hud_hover_start="on: play_sound-hud_hover_start;"
               sound__hud_mouseout="src: #sound_asset-hud_mouseout; on: nothing; poolSize: 1;"
               scene-sound__hud_mouseout="on: play_sound-hud_mouse_leave;"
               sound__hud_click="src: #sound_asset-hud_click; on: nothing; poolSize: 1;"
