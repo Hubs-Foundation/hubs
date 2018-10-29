@@ -3,6 +3,8 @@ import { sets } from "../sets";
 import { xforms } from "./xforms";
 
 const wasd_vec2 = "/var/mouse-and-keyboard/wasd_vec2";
+const keyboardCharacterAcceleration = "/var/mouse-and-keyboard/keyboardCharacterAcceleration";
+const arrows_vec2 = "/var/mouse-and-keyboard/arrows_vec2";
 const dropWithRMB = "/vars/mouse-and-keyboard/drop_with_RMB";
 const dropWithEsc = "/vars/mouse-and-keyboard/drop_with_esc";
 
@@ -37,6 +39,16 @@ export const keyboardMouseUserBindings = {
     },
     {
       src: {
+        w: paths.device.keyboard.key("arrowup"),
+        a: paths.device.keyboard.key("arrowleft"),
+        s: paths.device.keyboard.key("arrowdown"),
+        d: paths.device.keyboard.key("arrowright")
+      },
+      dest: { vec2: arrows_vec2 },
+      xform: xforms.wasd_to_vec2
+    },
+    {
+      src: {
         w: paths.device.keyboard.key("w"),
         a: paths.device.keyboard.key("a"),
         s: paths.device.keyboard.key("s"),
@@ -46,7 +58,15 @@ export const keyboardMouseUserBindings = {
       xform: xforms.wasd_to_vec2
     },
     {
-      src: { value: wasd_vec2 },
+      src: {
+        first: wasd_vec2,
+        second: arrows_vec2
+      },
+      dest: { value: keyboardCharacterAcceleration },
+      xform: xforms.add_vec2
+    },
+    {
+      src: { value: keyboardCharacterAcceleration },
       dest: { value: paths.actions.characterAcceleration },
       xform: xforms.copy
     },

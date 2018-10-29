@@ -47,6 +47,8 @@ const leftJoyY = `${name}left/joyY`;
 const leftJoyYCursorMod = `${name}left/joyYCursorMod`;
 const oculusTouchCharacterAcceleration = `${name}characterAcceleration`;
 const keyboardCharacterAcceleration = "/var/keyboard/characterAcceleration";
+const wasd_vec2 = "/var/keyboard/wasd_vec2";
+const arrows_vec2 = "/var/keyboard/arrows_vec2";
 const keyboardBoost = "/var/keyboard-oculus/boost";
 const rightBoost = "/var/right-oculus/boost";
 const leftBoost = "/var/left-oculus/boost";
@@ -226,13 +228,31 @@ export const oculusTouchUserBindings = {
     },
     {
       src: {
+        w: paths.device.keyboard.key("arrowup"),
+        a: paths.device.keyboard.key("arrowleft"),
+        s: paths.device.keyboard.key("arrowdown"),
+        d: paths.device.keyboard.key("arrowright")
+      },
+      dest: { vec2: arrows_vec2 },
+      xform: xforms.wasd_to_vec2
+    },
+    {
+      src: {
         w: paths.device.keyboard.key("w"),
         a: paths.device.keyboard.key("a"),
         s: paths.device.keyboard.key("s"),
         d: paths.device.keyboard.key("d")
       },
-      dest: { vec2: keyboardCharacterAcceleration },
+      dest: { vec2: wasd_vec2 },
       xform: xforms.wasd_to_vec2
+    },
+    {
+      src: {
+        first: wasd_vec2,
+        second: arrows_vec2
+      },
+      dest: { value: keyboardCharacterAcceleration },
+      xform: xforms.add_vec2
     },
     {
       src: {
