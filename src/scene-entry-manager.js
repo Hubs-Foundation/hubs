@@ -255,6 +255,8 @@ export default class SceneEntryManager {
           NAF.connection.adapter.setLocalMediaStream(mediaStream);
           currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
         }
+
+        this.scene.emit("share_video_enabled", { constraints });
       } else {
         currentVideoShareEntity.parentNode.removeChild(currentVideoShareEntity);
 
@@ -264,6 +266,8 @@ export default class SceneEntryManager {
 
         NAF.connection.adapter.setLocalMediaStream(mediaStream);
         currentVideoShareEntity = null;
+
+        this.scene.emit("share_video_disabled");
       }
 
       isHandlingVideoShare = false;

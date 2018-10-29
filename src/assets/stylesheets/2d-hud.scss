@@ -41,6 +41,24 @@
   padding-left: 5px;
   padding-right: 45px;
   margin-right: -40px;
+  position: relative;
+
+  :local(.video-share-extra-options) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: 30px;
+    padding: 5px 5px 8px 5px;
+    background-color: rgba(79, 79, 79, 0.2);
+    z-index: 1;
+
+    :local(.icon-button) {
+      margin-top: 4px;
+      background-color: $hud-panel-background;
+    }
+  }
 }
 
 :local(.panel.right) {
@@ -68,6 +86,7 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  margin: 0px 2px;
 }
 
 :local(.iconButton.small) {
@@ -143,4 +162,25 @@
 
 :local(.iconButton.mobile-media-picker) {
   background-image: url(../hud/spawn_photo.png);
+}
+
+:local(.iconButton.share_camera) {
+  background-image: url(../hud/share_camera.png);
+}
+:local(.iconButton.share_camera:hover) {
+  background-image: url(../hud/share_camera-hover.png);
+}
+
+:local(.iconButton.share_screen) {
+  background-image: url(../hud/share_screen.png);
+}
+:local(.iconButton.share_screen:hover) {
+  background-image: url(../hud/share_screen-hover.png);
+}
+
+:local(.iconButton.share_window) {
+  background-image: url(../hud/share_window.png);
+}
+:local(.iconButton.share_window:hover) {
+  background-image: url(../hud/share_window-hover.png);
 }
