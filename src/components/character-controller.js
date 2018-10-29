@@ -45,8 +45,6 @@ AFRAME.registerComponent("character-controller", {
     const eventSrc = this.el.sceneEl;
     eventSrc.addEventListener("move", this.setAccelerationInput);
     eventSrc.addEventListener("rotateY", this.setAngularVelocity);
-    eventSrc.addEventListener("snap_rotate_left", this.snapRotateLeft);
-    eventSrc.addEventListener("snap_rotate_right", this.snapRotateRight);
     eventSrc.addEventListener("teleported", this.handleTeleport);
   },
 
@@ -54,8 +52,6 @@ AFRAME.registerComponent("character-controller", {
     const eventSrc = this.el.sceneEl;
     eventSrc.removeEventListener("move", this.setAccelerationInput);
     eventSrc.removeEventListener("rotateY", this.setAngularVelocity);
-    eventSrc.removeEventListener("snap_rotate_left", this.snapRotateLeft);
-    eventSrc.removeEventListener("snap_rotate_right", this.snapRotateRight);
     eventSrc.removeEventListener("teleported", this.handleTeleport);
     this.reset();
   },
@@ -78,10 +74,12 @@ AFRAME.registerComponent("character-controller", {
 
   snapRotateLeft: function() {
     this.pendingSnapRotationMatrix.copy(this.leftRotationMatrix);
+    this.el.emit("snap_rotate_left");
   },
 
   snapRotateRight: function() {
     this.pendingSnapRotationMatrix.copy(this.rightRotationMatrix);
+    this.el.emit("snap_rotate_right");
   },
 
   handleTeleport: function(event) {
