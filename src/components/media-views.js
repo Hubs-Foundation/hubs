@@ -327,15 +327,17 @@ AFRAME.registerComponent("media-video", {
         return;
       }
 
-      texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
-      this.video = texture.image;
+      if (!src.startsWith("webrtc://")) {
+        texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
 
+        const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+        sound.setNodeSource(texture.audioSource);
+        this.el.setObject3D("sound", sound);
+      }
+
+      this.video = texture.image;
       this.video.addEventListener("pause", this.onPauseStateChange);
       this.video.addEventListener("play", this.onPauseStateChange);
-
-      const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-      sound.setNodeSource(texture.audioSource);
-      this.el.setObject3D("sound", sound);
     } catch (e) {
       console.error("Error loading video", this.data.src, e);
       texture = errorTexture;

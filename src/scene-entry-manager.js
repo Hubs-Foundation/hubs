@@ -174,6 +174,8 @@ export default class SceneEntryManager {
           orientation: or
         });
       });
+
+      return entity;
     };
 
     this.scene.addEventListener("add_media", e => {
@@ -186,6 +188,8 @@ export default class SceneEntryManager {
       const el = e.detail.el;
       const networkId = el.components.networked.data.networkId;
       const gltfNode = pinnedEntityToGltf(el);
+      if (!gltfNode) return;
+
       el.setAttribute("networked", { persistent: true });
 
       this.hubChannel.pin(networkId, gltfNode);
@@ -235,8 +239,61 @@ export default class SceneEntryManager {
       }
     });
 
-    this.scene.addEventListener("action_share_screen", async () => {
-      const constraints = {
+    let currentVideoShareEntity;
+    let isHandlingVideoShare = false;
+
+    const shareVideoMediaStream = async constraints => {
+      if (isHandlingVideoShare) return;
+      isHandlingVideoShare = true;
+
+      if (!currentVideoShareEntity) {
+        const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const videoTracks = newStream ? newStream.getVideoTracks() : [];
+
+        if (videoTracks.length > 0) {
+          newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
+          NAF.connection.adapter.setLocalMediaStream(mediaStream);
+          currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
+        }
+      } else {
+        currentVideoShareEntity.parentNode.removeChild(currentVideoShareEntity);
+
+        for (const track of mediaStream.getVideoTracks()) {
+          mediaStream.removeTrack(track);
+        }
+
+        NAF.connection.adapter.setLocalMediaStream(mediaStream);
+        currentVideoShareEntity = null;
+      }
+
+      isHandlingVideoShare = false;
+    };
+
+    this.scene.addEventListener("action_share_camera", () => {
+      shareVideoMediaStream({
+        video: {
+          mediaSource: "camera",
+          width: 720,
+          frameRate: 30
+        }
+      });
+    });
+
+    this.scene.addEventListener("action_share_window", () => {
+      shareVideoMediaStream({
+        video: {
+          mediaSource: "window",
+          // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
+          // other than your current monitor that has a different aspect ratio.
+          width: 720 * (screen.width / screen.height),
+          height: 720,
+          frameRate: 30
+        }
+      });
+    });
+
+    this.scene.addEventListener("action_share_screen", () => {
+      shareVideoMediaStream({
         video: {
           mediaSource: "screen",
           // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
@@ -245,16 +302,7 @@ export default class SceneEntryManager {
           height: 720,
           frameRate: 30
         }
-      };
-
-      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
-      const videoTracks = newStream ? newStream.getVideoTracks() : [];
-
-      if (videoTracks.length > 0) {
-        newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
-        NAF.connection.adapter.setLocalMediaStream(mediaStream);
-        spawnMediaInfrontOfPlayer(mediaStream, undefined);
-      }
+      });
     });
   };
 
