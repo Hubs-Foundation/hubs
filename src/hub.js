@@ -34,7 +34,6 @@ import "./components/ik-controller";
 import "./components/hand-controls2";
 import "./components/character-controller";
 import "./components/haptic-feedback";
-import "./components/networked-video-player";
 import "./components/offset-relative-to";
 import "./components/player-info";
 import "./components/debug";

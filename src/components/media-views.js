@@ -79,19 +79,27 @@ async function createGIFTexture(url) {
  * @param {string} src - Url to a video file.
  * @returns {Element} Video element.
  */
-function createVideoEl(src) {
+async function createVideoEl(src) {
   const videoEl = document.createElement("video");
   videoEl.setAttribute("playsinline", "");
   videoEl.setAttribute("webkit-playsinline", "");
   videoEl.loop = true;
   videoEl.crossOrigin = "anonymous";
-  videoEl.src = src;
+
+  if (!src.startsWith("webrtc://")) {
+    videoEl.src = src;
+  } else {
+    const streamClientId = src.substring(9);
+    const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
+    videoEl.srcObject = new MediaStream(stream.getVideoTracks());
+  }
+
   return videoEl;
 }
 
 function createVideoTexture(url) {
-  return new Promise((resolve, reject) => {
-    const videoEl = createVideoEl(url);
+  return new Promise(async (resolve, reject) => {
+    const videoEl = await createVideoEl(url);
 
     const texture = new THREE.VideoTexture(videoEl);
     texture.minFilter = THREE.LinearFilter;

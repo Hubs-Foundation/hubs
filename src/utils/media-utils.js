@@ -22,6 +22,8 @@ function b64EncodeUnicode(str) {
 }
 
 export const proxiedUrlFor = (url, index) => {
+  if (url.startsWith("webrtc://")) return url;
+
   // farspark doesn't know how to read '=' base64 padding characters
   const base64Url = b64EncodeUnicode(url).replace(/=+$/g, "");
   // translate base64 + to - and / to _ for URL safety
@@ -44,6 +46,7 @@ export const resolveUrl = async (url, index) => {
 };
 
 export const guessContentType = url => {
+  if (url.startsWith("webrtc://")) return "video/webrtc";
   const extension = new URL(url).pathname.split(".").pop();
   return commonKnownContentTypes[extension];
 };
@@ -125,6 +128,9 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
       .catch(() => {
         entity.setAttribute("media-loader", { src: "error" });
       });
+  }
+  if (src instanceof MediaStream) {
+    entity.setAttribute("media-loader", { src: `webrtc://${NAF.clientId}` });
   }
 
   if (contentOrigin) {

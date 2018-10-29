@@ -71,33 +71,6 @@
 
             <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
 
-            <!-- Templates -->
-            <template id="screen-template">
-                <a-entity
-                    class="interactable"
-                    geometry="primitive: plane;"
-                    material="side: double; shader: flat;"
-                    super-networked-interactable="counter: #screen-counter;"
-                    body="type: dynamic; shape: none; mass: 1;"
-                    grabbable
-                    stretchable="useWorldPosition: true; usePhysics: never"
-                    hoverable
-                    auto-scale-cannon-physics-body
-                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
-                    position-at-box-shape-border="target:.freeze-menu"
-                    destroy-at-extreme-distances
-                    set-yxz-order
-                    networked-video-player>
-
-                    <a-entity class="interactable-ui">
-                        <a-entity class="freeze-menu" visible-while-frozen>
-                            <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
-                            <a-entity text=" value:remove; width:1.75; align:center;" text-raycast-hack position="0 -0.125 0.02"></a-entity>
-                        </a-entity>
-                    </a-entity>
-                </a-entity>
-            </template>
-
             <template id="remote-avatar-template">
                 <a-entity networked-avatar ik-root player-info>
                     <a-entity class="camera"></a-entity>

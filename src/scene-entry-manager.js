@@ -62,8 +62,7 @@ export default class SceneEntryManager {
 
     this._setupPlayerRig();
     this._setupBlocking();
-    this._setupMedia();
-    this._setupScreenShare(mediaStream);
+    this._setupMedia(mediaStream);
     this._setupCamera();
 
     if (qsTruthy("offline")) return;
@@ -147,58 +146,6 @@ export default class SceneEntryManager {
     this.scene.emit("username-changed", { username: displayName });
   };
 
-  _setupScreenShare = mediaStream => {
-    let isSharing = false;
-    let isToggling = false;
-    let screenEntity = null;
-
-    this.scene.addEventListener("action_share_screen", async () => {
-      if (isToggling) return;
-      isToggling = true;
-
-      if (!isSharing) {
-        const constraints = {
-          video: {
-            mediaSource: "screen",
-            // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
-            // other than your current monitor that has a different aspect ratio.
-            width: 720 * (screen.width / screen.height),
-            height: 720,
-            frameRate: 30
-          }
-        };
-
-        console.log("a");
-        const newStream = await navigator.mediaDevices.getUserMedia(constraints);
-        console.log(newStream);
-        const videoTracks = newStream ? newStream.getVideoTracks() : [];
-
-        if (videoTracks.length > 0) {
-          newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
-          NAF.connection.adapter.setLocalMediaStream(mediaStream);
-          console.log("b");
-
-          screenEntity = document.createElement("a-entity");
-          screenEntity.setAttribute("offset-relative-to", { target: "#player-camera", offset: "0 0 -1.5" });
-          screenEntity.setAttribute("networked", { template: "#screen-template" });
-          this.scene.appendChild(screenEntity);
-          isSharing = true;
-        }
-      } else {
-        screenEntity.parentNode.removeChild(screenEntity);
-
-        for (const track of mediaStream.getVideoTracks()) {
-          mediaStream.removeTrack(track);
-        }
-
-        NAF.connection.adapter.setLocalMediaStream(mediaStream);
-        isSharing = false;
-      }
-
-      isToggling = false;
-    });
-  };
-
   _setupBlocking = () => {
     document.body.addEventListener("blocked", ev => {
       NAF.connection.entities.removeEntitiesOfClient(ev.detail.clientId);
@@ -209,10 +156,16 @@ export default class SceneEntryManager {
     });
   };
 
-  _setupMedia = () => {
+  _setupMedia = mediaStream => {
     const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
-      const { entity, orientation } = addMedia(src, "#interactable-media", contentOrigin, true, true);
+      const { entity, orientation } = addMedia(
+        src,
+        "#interactable-media",
+        contentOrigin,
+        !(src instanceof MediaStream),
+        true
+      );
 
       orientation.then(or => {
         entity.setAttribute("offset-relative-to", {
@@ -281,6 +234,28 @@ export default class SceneEntryManager {
         }
       }
     });
+
+    this.scene.addEventListener("action_share_screen", async () => {
+      const constraints = {
+        video: {
+          mediaSource: "screen",
+          // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
+          // other than your current monitor that has a different aspect ratio.
+          width: 720 * (screen.width / screen.height),
+          height: 720,
+          frameRate: 30
+        }
+      };
+
+      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      const videoTracks = newStream ? newStream.getVideoTracks() : [];
+
+      if (videoTracks.length > 0) {
+        newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
+        NAF.connection.adapter.setLocalMediaStream(mediaStream);
+        spawnMediaInfrontOfPlayer(mediaStream, undefined);
+      }
+    });
   };
 
   _setupCamera = () => {
@@ -295,7 +270,6 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("photo_taken", e => {
-      console.log(e);
       this.hubChannel.sendMessage({ src: e.detail }, "spawn");
     });
   };
