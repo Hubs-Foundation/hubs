@@ -1,5 +1,6 @@
 import nextTick from "../utils/next-tick";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
+import MobileStandardMaterial from "../materials/MobileStandardMaterial";
 import cubeMapPosX from "../assets/images/cubemap/posx.jpg";
 import cubeMapNegX from "../assets/images/cubemap/negx.jpg";
 import cubeMapPosY from "../assets/images/cubemap/posy.jpg";
@@ -255,8 +256,12 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
 
   gltf.scene.traverse(object => {
     if (object.material && object.material.type === "MeshStandardMaterial") {
-      object.material.envMap = envMap;
-      object.material.needsUpdate = true;
+      if (preferredTechnique === "KHR_materials_unlit") {
+        object.material = MobileStandardMaterial.fromStandardMaterial(object.material);
+      } else {
+        object.material.envMap = envMap;
+        object.material.needsUpdate = true;
+      }
     }
   });
 

@@ -28,7 +28,6 @@
     "@fortawesome/react-fontawesome": "^0.1.0",
     "aframe": "github:mozillareality/aframe#bugfix/oculus-go-controller-reconnect-pre-e0c8ff7",
     "aframe-billboard-component": "^1.0.0",
-    "aframe-input-mapping-component": "github:mozillareality/aframe-input-mapping-component#hubs/master",
     "aframe-inspector": "^0.8.3",
     "aframe-motion-capture-components": "github:mozillareality/aframe-motion-capture-components#1ca616fa67b627e447b23b35a09da175d8387668",
     "aframe-physics-extras": "github:mozillareality/aframe-physics-extras#bugfix/physics-collider-world",

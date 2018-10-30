@@ -99,9 +99,9 @@ export default class HubChannel {
     this.channel.push("unsubscribe", { subscription });
   };
 
-  sendMessage = body => {
-    if (body === "") return;
-    this.channel.push("message", { body });
+  sendMessage = (body, type = "chat") => {
+    if (!body) return;
+    this.channel.push("message", { body, type });
   };
 
   requestSupport = () => {

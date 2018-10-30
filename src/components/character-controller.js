@@ -1,3 +1,4 @@
+import { paths } from "../systems/userinput/paths";
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
@@ -104,6 +105,7 @@ AFRAME.registerComponent("character-controller", {
     const startScale = new THREE.Vector3();
 
     return function(t, dt) {
+      if (!this.el.sceneEl.is("entered")) return;
       const deltaSeconds = dt / 1000;
       const root = this.el.object3D;
       const pivot = this.data.pivot.object3D;
@@ -116,6 +118,22 @@ AFRAME.registerComponent("character-controller", {
       // Other aframe components like teleport-controls set position/rotation/scale, not the matrix, so we need to make sure to compose them back into the matrix
       root.updateMatrix();
 
+      const userinput = AFRAME.scenes[0].systems.userinput;
+      if (userinput.readFrameValueAtPath(paths.actions.snapRotateLeft)) {
+        this.snapRotateLeft();
+      }
+      if (userinput.readFrameValueAtPath(paths.actions.snapRotateRight)) {
+        this.snapRotateRight();
+      }
+      const acc = userinput.readFrameValueAtPath(paths.actions.characterAcceleration);
+      if (acc) {
+        this.accelerationInput.set(
+          this.accelerationInput.x + acc[0],
+          this.accelerationInput.y + 0,
+          this.accelerationInput.z + acc[1]
+        );
+      }
+
       pivotPos.copy(pivot.position);
       pivotPos.applyMatrix4(root.matrix);
       trans.setPosition(pivotPos);
@@ -125,7 +143,14 @@ AFRAME.registerComponent("character-controller", {
       pivotRotationMatrix.makeRotationAxis(rotationAxis, pivot.rotation.y);
       pivotRotationInvMatrix.makeRotationAxis(rotationAxis, -pivot.rotation.y);
       this.updateVelocity(deltaSeconds);
-      move.makeTranslation(this.velocity.x * distance, this.velocity.y * distance, this.velocity.z * distance);
+      this.accelerationInput.set(0, 0, 0);
+
+      const boost = userinput.readFrameValueAtPath(paths.actions.boost) ? 2 : 1;
+      move.makeTranslation(
+        this.velocity.x * distance * boost,
+        this.velocity.y * distance * boost,
+        this.velocity.z * distance * boost
+      );
       yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 
       // Translate to middle of playspace (player rig)

@@ -1,9 +1,22 @@
 import { addMedia } from "../utils/media-utils";
 import { ObjectTypes } from "../object-types";
+import { paths } from "../systems/userinput/paths";
 
 import cameraModelSrc from "../assets/camera_tool.glb";
 
 const cameraModelPromise = new Promise(resolve => new THREE.GLTFLoader().load(cameraModelSrc, resolve));
+
+const pathsMap = {
+  "player-right-controller": {
+    takeSnapshot: paths.actions.rightHand.takeSnapshot
+  },
+  "player-left-controller": {
+    takeSnapshot: paths.actions.leftHand.takeSnapshot
+  },
+  cursor: {
+    takeSnapshot: paths.actions.cursor.takeSnapshot
+  }
+};
 
 const snapCanvas = document.createElement("canvas");
 async function pixelsToPNG(pixels, width, height) {
@@ -93,6 +106,16 @@ AFRAME.registerComponent("camera-tool", {
     }
   },
 
+  tick() {
+    const grabber = this.el.components.grabbable.grabbers[0];
+    if (grabber && !!pathsMap[grabber.id]) {
+      const paths = pathsMap[grabber.id];
+      if (AFRAME.scenes[0].systems.userinput.readFrameValueAtPath(paths.takeSnapshot)) {
+        this.takeSnapshotNextTick = true;
+      }
+    }
+  },
+
   tock: (function() {
     const tempScale = new THREE.Vector3();
     return function tock() {
@@ -133,6 +156,13 @@ AFRAME.registerComponent("camera-tool", {
         renderer.readRenderTargetPixels(this.renderTarget, 0, 0, width, height, this.snapPixels);
         pixelsToPNG(this.snapPixels, width, height).then(file => {
           const { entity, orientation } = addMedia(file, "#interactable-media", undefined, true);
+          entity.addEventListener(
+            "media_resolved",
+            () => {
+              this.el.emit("photo_taken", entity.components["media-loader"].data.src);
+            },
+            { once: true }
+          );
           orientation.then(() => {
             entity.object3D.position.copy(this.el.object3D.position).add(new THREE.Vector3(0, -0.5, 0));
             entity.object3D.rotation.copy(this.el.object3D.rotation);
