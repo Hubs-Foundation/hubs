@@ -70,4 +70,3 @@ export class MouseDevice {
 window.oncontextmenu = e => {
   e.preventDefault();
 };
->>>>>>> 81d272a82c36362425464a2dd8f222a60bdad7f6
