@@ -22,7 +22,7 @@ AFRAME.registerComponent("hoverable-visuals", {
     this.interactorOne = null;
     this.interactorTwo = null;
   },
-  tick() {
+  tick(time) {
     if (!this.uniforms) return;
 
     if (this.interactorOne) {
@@ -37,6 +37,7 @@ AFRAME.registerComponent("hoverable-visuals", {
       uniform.hubsInteractorOneTransform.value = this.interactorOneTransform;
       uniform.hubsHighlightInteractorTwo.value = !!this.interactorTwo;
       uniform.hubsInteractorTwoTransform.value = this.interactorTwoTransform;
+      uniform.hubsTime.value = time;
     }
   },
   addVisual(e) {
