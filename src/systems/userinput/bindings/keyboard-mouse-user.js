@@ -12,7 +12,9 @@ const dropWithRMBorEscBindings = [
   {
     src: { value: paths.device.mouse.buttonRight },
     dest: { value: dropWithRMB },
-    xform: xforms.falling
+    xform: xforms.falling,
+    root: "rmb",
+    priority: 200
   },
   {
     src: { value: paths.device.keyboard.key("Escape") },
@@ -136,6 +138,26 @@ export const keyboardMouseUserBindings = {
         value: paths.actions.logDebugFrame
       },
       xform: xforms.rising
+    },
+    {
+      src: {
+        value: paths.device.mouse.buttonRight
+      },
+      dest: {
+        value: paths.actions.startGazeTeleport
+      },
+      xform: xforms.rising,
+      root: "rmb",
+      priority: 100
+    },
+    {
+      src: {
+        value: paths.device.mouse.buttonRight
+      },
+      dest: {
+        value: paths.actions.stopGazeTeleport
+      },
+      xform: xforms.falling
     }
   ],
 
