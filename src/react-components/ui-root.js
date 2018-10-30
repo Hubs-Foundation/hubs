@@ -719,11 +719,7 @@ class UIRoot extends Component {
               id="subscribe"
               type="checkbox"
               onChange={this.onSubscribeChanged}
-              checked={
-                typeof this.state.isSubscribed === "undefined"
-                  ? this.props.initialIsSubscribed
-                  : this.state.isSubscribed
-              }
+              checked={this.state.isSubscribed === undefined ? this.props.initialIsSubscribed : this.state.isSubscribed}
             />
             <label htmlFor="subscribe">
               <FormattedMessage id="entry.notify_me" />
