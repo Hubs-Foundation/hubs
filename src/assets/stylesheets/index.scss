@@ -172,7 +172,7 @@ body {
 
   :local(.create) {
     padding: 2.1em;
-    padding-bottom: 3.5vw;
+    padding-bottom: 2vw;
     position: relative;
 
     @media (max-width: 768px) {
@@ -187,6 +187,17 @@ body {
     a {
       margin-top: 8px;
       @extend %action-button;
+    }
+  }
+
+  :local(.spoke-button) {
+    display: flex;
+    justify-content: center;
+
+    a {
+      margin-top: 16px;
+      @extend %action-button;
+      background: $spoke-action-color;
     }
   }
 }
