@@ -282,32 +282,22 @@ function injectCustomShaderChunks(gltf) {
 
   gltf.scene.traverse(object => {
     if (object.material && object.material.type === "MeshStandardMaterial") {
+      object.material = object.material.clone();
       object.material.onBeforeCompile = shader => {
         if (!vertexRegex.test(shader.vertexShader)) return;
 
-        shader.uniforms.hubsAttractorPosition = { value: [0, 0, 0] };
-        shader.uniforms.hubsShouldAttract = { value: false };
+        shader.uniforms.hubsInteractorOneTransform = { value: [] };
+        shader.uniforms.hubsInteractorTwoTransform = { value: [] };
+        shader.uniforms.hubsInteractorTwoPos = { value: [] };
+        shader.uniforms.hubsHighlightInteractorOne = { value: false };
+        shader.uniforms.hubsHighlightInteractorTwo = { value: false };
 
         const vchunk = `
-		  if (hubsShouldAttract) {
+		  if (hubsHighlightInteractorOne || hubsHighlightInteractorTwo) {
 			vec4 wt = modelMatrix * vec4(transformed, 1);
 
-			// hubsWorldPosition is used in the fragment shader below.
+			// Used in the fragment shader below.
 			hubsWorldPosition = wt.xyz;
-
-			mat4 mm = modelMatrix;
-			vec4 scale = vec4(
-			  length(vec3(mm[0][0], mm[0][1], mm[0][2])),
-			  length(vec3(mm[1][0], mm[1][1], mm[1][2])),
-			  length(vec3(mm[2][0], mm[2][1], mm[2][2])),
-			  1
-			);
-
-			vec4 p4 = vec4(hubsAttractorPosition, 1);
-			float dist = distance(wt, p4); 
-
-			// Translate vertices towards hubsAttractorPosition, falling off with an inverted power curve.
-			transformed += (1.0 / scale * (p4 - wt) * (max(-1.0, pow(-dist * 7.0, 3.0)) + 1.0)).xyz;
 		  }
 		`;
 
@@ -315,23 +305,78 @@ function injectCustomShaderChunks(gltf) {
         const vindex = vlines.findIndex(line => vertexRegex.test(line));
         vlines.splice(vindex + 1, 0, vchunk);
         vlines.unshift("varying vec3 hubsWorldPosition;");
-        vlines.unshift("uniform vec3 hubsAttractorPosition;");
-        vlines.unshift("uniform bool hubsShouldAttract;");
+        vlines.unshift("uniform bool hubsHighlightInteractorOne;");
+        vlines.unshift("uniform bool hubsHighlightInteractorTwo;");
         shader.vertexShader = vlines.join("\n");
 
         const fchunk = `
-		  if (hubsShouldAttract) {
-			float dist = distance(hubsWorldPosition, hubsAttractorPosition);
-			vec3 wp = hubsWorldPosition;
-			vec3 ap = hubsAttractorPosition;
-			float d = pow(0.15, 2.0);
+		  if (hubsHighlightInteractorOne || hubsHighlightInteractorTwo) {
+            mat4 it;
+            vec3 ip;
+            vec3 rp;
+            float w;
+            vec3 rrp1, rrp2;
+            float dist1, dist2;
 
-			// Highlight object with a circular spot in cardinal directions and a gradient falling off with distance.
-			float ratio = min(1.0, pow(dist * 7.0, 3.0));
-			if (length(ap.xy - wp.xy) < d || length(ap.xz - wp.xz) < d || length(ap.yz - wp.yz) < d) { 
-			  ratio = 0.0;
-			}
-			gl_FragColor.rgb = (gl_FragColor.rgb * ratio) + (vec3(1, 0.2, 0.4) * (1.0 - ratio));
+            if (hubsHighlightInteractorOne) {
+              it = mat4(hubsInteractorOneTransform);
+              ip = vec3(it[3][0], it[3][1], it[3][2]);
+              rp = hubsWorldPosition - ip;
+
+              // Apply quaternion to position.
+              w = 1.0 / (it[3][0] * rp.x + it[3][1] * rp.y + it[3][2] * rp.z + it[3][3]);
+              rrp1 = vec3(
+                (it[0][0] * rp.x + it[0][1] * rp.y + it[0][2] * rp.z + it[0][3]) * w,
+                (it[1][0] * rp.x + it[1][1] * rp.y + it[1][2] * rp.z + it[1][3]) * w,
+                (it[2][0] * rp.x + it[2][1] * rp.y + it[2][2] * rp.z + it[2][3]) * w
+              );
+
+              dist1 = distance(hubsWorldPosition, ip);
+            }
+
+            if (hubsHighlightInteractorTwo) {
+              it = mat4(hubsInteractorTwoTransform);
+              ip = vec3(it[3][0], it[3][1], it[3][2]);
+              rp = hubsWorldPosition - ip;
+
+              // Apply quaternion to position.
+              w = 1.0 / (it[3][0] * rp.x + it[3][1] * rp.y + it[3][2] * rp.z + it[3][3]);
+              rrp2 = vec3(
+                (it[0][0] * rp.x + it[0][1] * rp.y + it[0][2] * rp.z + it[0][3]) * w,
+                (it[1][0] * rp.x + it[1][1] * rp.y + it[1][2] * rp.z + it[1][3]) * w,
+                (it[2][0] * rp.x + it[2][1] * rp.y + it[2][2] * rp.z + it[2][3]) * w
+              );
+
+              dist2 = distance(hubsWorldPosition, ip);
+            }
+
+            float ratio;
+
+			float d = 0.0009;
+            if (
+              hubsHighlightInteractorOne && 
+                (-d < rrp1.x  && rrp1.x < d || -d < rrp1.y  && rrp1.y < d || -d < rrp1.z  && rrp1.z < d) || 
+              hubsHighlightInteractorTwo && 
+                (-d < rrp2.x  && rrp2.x < d || -d < rrp2.y  && rrp2.y < d || -d < rrp2.z  && rrp2.z < d)
+            ) {
+              // Highlight object with axes lines
+			  ratio = 0.5;
+			} else {
+              ratio = 0.0;
+
+              // Highlight with a gradient falling off with distance.
+              if (hubsHighlightInteractorOne) {
+                ratio = -min(1.0, pow(dist1 * 12.0, 3.0)) + 1.0;
+              } 
+              if (hubsHighlightInteractorTwo) {
+                ratio += -min(1.0, pow(dist2 * 12.0, 3.0)) + 1.0;
+              }
+            }
+
+            // gamma corrected highlight color
+            vec3 highlightColor = vec3(0.184, 0.499, 0.933);
+
+			gl_FragColor.rgb = (gl_FragColor.rgb * (1.0 - ratio)) + (highlightColor * ratio);
 		  }
 		`;
 
@@ -339,8 +384,10 @@ function injectCustomShaderChunks(gltf) {
         const findex = flines.findIndex(line => fragRegex.test(line));
         flines.splice(findex + 1, 0, fchunk);
         flines.unshift("varying vec3 hubsWorldPosition;");
-        flines.unshift("uniform vec3 hubsAttractorPosition;");
-        flines.unshift("uniform bool hubsShouldAttract;");
+        flines.unshift("uniform bool hubsHighlightInteractorOne;");
+        flines.unshift("uniform mat4 hubsInteractorOneTransform;");
+        flines.unshift("uniform bool hubsHighlightInteractorTwo;");
+        flines.unshift("uniform mat4 hubsInteractorTwoTransform;");
         shader.fragmentShader = flines.join("\n");
 
         if (!materialsSeen.has(object.material.uuid)) {

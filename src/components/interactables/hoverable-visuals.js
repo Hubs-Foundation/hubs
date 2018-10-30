@@ -1,5 +1,3 @@
-const interactorPos = new THREE.Vector3();
-const interactorPosArr = [];
 /**
  * Listens for hoverable state changes and applies a visual effect to an entity
  * @namespace interactables
@@ -7,9 +5,11 @@ const interactorPosArr = [];
  */
 AFRAME.registerComponent("hoverable-visuals", {
   init: function() {
-    this.uniforms = null;
+    this.uniforms = [];
     this.addVisual = this.addVisual.bind(this);
     this.removeVisual = this.removeVisual.bind(this);
+    this.interactorOneTransform = [];
+    this.interactorTwoTransform = [];
   },
   play() {
     this.el.addEventListener("hover-start", this.addVisual);
@@ -18,31 +18,42 @@ AFRAME.registerComponent("hoverable-visuals", {
   pause() {
     this.el.removeEventListener("hover-start", this.addVisual);
     this.el.removeEventListener("hover-end", this.removeVisual);
+    this.uniforms = [];
+    this.interactorOne = null;
+    this.interactorTwo = null;
   },
   tick() {
     if (!this.uniforms) return;
-    // BPDEBUG update uniforms array every tick
-    this.uniforms = this.el.components["gltf-model-plus"].shaderUniforms;
-    this.interactor.getWorldPosition(interactorPos);
-    interactorPos.toArray(interactorPosArr);
+
+    if (this.interactorOne) {
+      this.interactorOne.matrixWorld.toArray(this.interactorOneTransform);
+    }
+    if (this.interactorTwo) {
+      this.interactorTwo.matrixWorld.toArray(this.interactorTwoTransform);
+    }
+
     for (const uniform of this.uniforms) {
-      uniform.hubsAttractorPosition.value = interactorPosArr;
-      uniform.hubsShouldAttract.value = true;
+      uniform.hubsHighlightInteractorOne.value = !!this.interactorOne;
+      uniform.hubsInteractorOneTransform.value = this.interactorOneTransform;
+      uniform.hubsHighlightInteractorTwo.value = !!this.interactorTwo;
+      uniform.hubsInteractorTwoTransform.value = this.interactorTwoTransform;
     }
   },
   addVisual(e) {
     if (e.detail.hand.id === "cursor") return;
-    this.interactor = e.detail.hand.object3D;
+    if (e.detail.hand.id === "player-left-controller") {
+      this.interactorOne = e.detail.hand.object3D;
+    } else {
+      this.interactorTwo = e.detail.hand.object3D;
+    }
     this.uniforms = this.el.components["gltf-model-plus"].shaderUniforms;
   },
   removeVisual(e) {
     if (e.detail.hand.id === "cursor") return;
-    if (this.uniforms) {
-      for (const uniform of this.uniforms) {
-        uniform.hubsShouldAttract.value = false;
-      }
+    if (e.detail.hand.id === "player-left-controller") {
+      this.interactorOne = null;
+    } else {
+      this.interactorTwo = null;
     }
-    this.uniforms = null;
-    this.interactor = null;
   }
 });
