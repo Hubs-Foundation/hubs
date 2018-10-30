@@ -34,6 +34,25 @@
     @media (max-width: 1000px) {
       max-width: 75%;
     }
+
+    &:local(.media) {
+      display: flex;
+      align-items: center;
+      min-height: 35px;
+
+      :local(.mediaBody) {
+        display: flex;
+        flex-direction: column;
+      }
+
+      img {
+        height: 35px;
+        margin-right: 8px;
+        border: 2px solid rgba(255,255,255,0.15);
+        display: block;
+        border-radius: 5px;
+      }
+    }
   }
 
   :local(.expired) {

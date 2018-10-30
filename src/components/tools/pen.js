@@ -1,3 +1,28 @@
+import { paths } from "../../systems/userinput/paths";
+
+const pathsMap = {
+  "player-right-controller": {
+    startDrawing: paths.actions.rightHand.startDrawing,
+    stopDrawing: paths.actions.rightHand.stopDrawing,
+    penNextColor: paths.actions.rightHand.penNextColor,
+    penPrevColor: paths.actions.rightHand.penPrevColor,
+    scalePenTip: paths.actions.rightHand.scalePenTip
+  },
+  "player-left-controller": {
+    startDrawing: paths.actions.leftHand.startDrawing,
+    stopDrawing: paths.actions.leftHand.stopDrawing,
+    penNextColor: paths.actions.leftHand.penNextColor,
+    penPrevColor: paths.actions.leftHand.penPrevColor,
+    scalePenTip: paths.actions.leftHand.scalePenTip
+  },
+  cursor: {
+    startDrawing: paths.actions.cursor.startDrawing,
+    stopDrawing: paths.actions.cursor.stopDrawing,
+    penNextColor: paths.actions.cursor.penNextColor,
+    penPrevColor: paths.actions.cursor.penPrevColor,
+    scalePenTip: paths.actions.cursor.scalePenTip
+  }
+};
 /**
  * Pen tool
  * A tool that allows drawing on networked-drawing components.
@@ -41,9 +66,6 @@ AFRAME.registerComponent("pen", {
   },
 
   init() {
-    this._stateAdded = this._stateAdded.bind(this);
-    this._stateRemoved = this._stateRemoved.bind(this);
-
     this.timeSinceLastDraw = 0;
 
     this.lastPosition = new THREE.Vector3();
@@ -65,14 +87,6 @@ AFRAME.registerComponent("pen", {
   play() {
     this.drawingManager = document.querySelector(this.data.drawingManager).components["drawing-manager"];
     this.drawingManager.createDrawing();
-
-    this.el.parentNode.addEventListener("stateadded", this._stateAdded);
-    this.el.parentNode.addEventListener("stateremoved", this._stateRemoved);
-  },
-
-  pause() {
-    this.el.parentNode.removeEventListener("stateadded", this._stateAdded);
-    this.el.parentNode.removeEventListener("stateremoved", this._stateRemoved);
   },
 
   update(prevData) {
@@ -85,6 +99,28 @@ AFRAME.registerComponent("pen", {
   },
 
   tick(t, dt) {
+    const grabber = this.el.parentNode.components.grabbable.grabbers[0];
+    const userinput = AFRAME.scenes[0].systems.userinput;
+    if (grabber && pathsMap[grabber.id]) {
+      const paths = pathsMap[grabber.id];
+      if (userinput.readFrameValueAtPath(paths.startDrawing)) {
+        this._startDraw();
+      }
+      if (userinput.readFrameValueAtPath(paths.stopDrawing)) {
+        this._endDraw();
+      }
+      const penScaleMod = userinput.readFrameValueAtPath(paths.scalePenTip);
+      if (penScaleMod) {
+        this._changeRadius(penScaleMod);
+      }
+      if (userinput.readFrameValueAtPath(paths.penNextColor)) {
+        this._changeColor(1);
+      }
+      if (userinput.readFrameValueAtPath(paths.penPrevColor)) {
+        this._changeColor(-1);
+      }
+    }
+
     this.el.object3D.getWorldPosition(this.worldPosition);
 
     if (!almostEquals(0.005, this.worldPosition, this.lastPosition)) {
@@ -103,6 +139,10 @@ AFRAME.registerComponent("pen", {
       }
 
       this.timeSinceLastDraw = time % this.data.drawFrequency;
+    }
+
+    if (this.currentDrawing && !grabber) {
+      this._endDraw();
     }
   },
 
@@ -145,44 +185,5 @@ AFRAME.registerComponent("pen", {
   _changeRadius(mod) {
     this.data.radius = Math.max(this.data.minRadius, Math.min(this.data.radius + mod, this.data.maxRadius));
     this.el.setAttribute("radius", this.data.radius);
-  },
-
-  _stateAdded(evt) {
-    switch (evt.detail) {
-      case "activated":
-        this._startDraw();
-        break;
-      case "colorNext":
-        this._changeColor(1);
-        break;
-      case "colorPrev":
-        this._changeColor(-1);
-        break;
-      case "radiusUp":
-        this._changeRadius(this.data.minRadius);
-        break;
-      case "radiusDown":
-        this._changeRadius(-this.data.minRadius);
-        break;
-      case "grabbed":
-        this.grabbed = true;
-        break;
-      default:
-        break;
-    }
-  },
-
-  _stateRemoved(evt) {
-    switch (evt.detail) {
-      case "activated":
-        this._endDraw();
-        break;
-      case "grabbed":
-        this.grabbed = false;
-        this._endDraw();
-        break;
-      default:
-        break;
-    }
   }
 });
