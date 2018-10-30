@@ -70,6 +70,7 @@ import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { proxiedUrlFor } from "./utils/media-utils";
 import SceneEntryManager from "./scene-entry-manager";
+import Subscriptions from "./subscriptions";
 
 import "./systems/nav";
 import "./systems/personal-space-bubble";
@@ -132,7 +133,6 @@ if (!isBotMode && !isTelemetryDisabled) {
 disableiOSZoom();
 
 const concurrentLoadDetector = new ConcurrentLoadDetector();
-
 concurrentLoadDetector.start();
 
 store.init();
@@ -286,6 +286,26 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
+  console.log(`Hub ID: ${hubId}`);
+
+  const subscriptions = new Subscriptions(hubId);
+
+  if (navigator.serviceWorker) {
+    try {
+      navigator.serviceWorker
+        .register("/hub.service.js")
+        .then(() => {
+          navigator.serviceWorker.ready
+            .then(registration => subscriptions.setRegistration(registration))
+            .catch(() => subscriptions.setRegistrationFailed());
+        })
+        .catch(() => subscriptions.setRegistrationFailed());
+    } catch (e) {
+      subscriptions.setRegistrationFailed();
+    }
+  }
+
   const scene = document.querySelector("a-scene");
   const hubChannel = new HubChannel(store);
   const entryManager = new SceneEntryManager(hubChannel);
@@ -296,7 +316,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.APP.scene = scene;
 
   registerNetworkSchemas();
-  remountUI({ hubChannel, linkChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
+
+  remountUI({
+    hubChannel,
+    linkChannel,
+    subscriptions,
+    enterScene: entryManager.enterScene,
+    exitScene: entryManager.exitScene,
+    initialIsSubscribed: subscriptions.isSubscribed()
+  });
+
   scene.addEventListener("action_focus_chat", () => document.querySelector(".chat-focus-target").focus());
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
@@ -345,10 +374,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Connect to reticulum over phoenix channels to get hub info.
-  const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
-  console.log(`Hub ID: ${hubId}`);
-
   const socket = connectToReticulum(isDebug);
   remountUI({ sessionId: socket.params().session_id });
 
@@ -358,13 +383,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     hmd: availableVREntryTypes.isInHMD
   };
 
-  const joinPayload = { profile: store.state.profile, context };
+  // Reticulum global channel
+  const retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
+  retPhxChannel
+    .join()
+    .receive("ok", async data => subscriptions.setVapidPublicKey(data.vapid_public_key))
+    .receive("error", res => {
+      subscriptions.setVapidPublicKey(null);
+      console.error(res);
+    });
+
+  const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
+  const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
 
   hubPhxChannel
     .join()
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
+      subscriptions.setHubChannel(hubChannel);
+      subscriptions.setSubscribed(data.subscriptions.web_push);
+      remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
       await handleHubChannelJoined(entryManager, hubChannel, data);
     })
     .receive("error", res => {
@@ -470,8 +509,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     addToPresenceLog({ name: userInfo.metas[0].profile.displayName, type, body, maySpawn });
   });
 
-  // Reticulum global channel
-  const retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
-  retPhxChannel.join().receive("error", res => console.error(res));
   linkChannel.setSocket(socket);
 });
