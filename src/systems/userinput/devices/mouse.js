@@ -35,8 +35,6 @@ export class MouseDevice {
       this.coords[1] = 0;
       this.movementXY[0] = 0;
       this.movementXY[1] = 0;
-      this.buttonLeft = false;
-      this.buttonRight = false;
       this.wheel = 0;
     }
     const left = event.button === 0;
