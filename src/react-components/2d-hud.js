@@ -2,8 +2,11 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 
+const { detect } = require("detect-browser");
 import styles from "../assets/stylesheets/2d-hud.scss";
 import uiStyles from "../assets/stylesheets/ui-root.scss";
+
+const browser = detect();
 
 class TopHUD extends Component {
   static propTypes = {
@@ -16,7 +19,8 @@ class TopHUD extends Component {
     onSpawnPen: PropTypes.func,
     onSpawnCamera: PropTypes.func,
     onShareVideo: PropTypes.func,
-    onEndShareVideo: PropTypes.func
+    onEndShareVideo: PropTypes.func,
+    onShareVideoNotCapable: PropTypes.func
   };
 
   state = {
@@ -25,6 +29,11 @@ class TopHUD extends Component {
   };
 
   handleVideoShareClicked = source => {
+    if ((source === "screen" || source === "window") && browser.name !== "firefox") {
+      this.props.onShareVideoNotCapable();
+      return;
+    }
+
     if (this.props.videoShareMediaSource) {
       this.props.onEndShareVideo();
     } else {
@@ -62,14 +71,15 @@ class TopHUD extends Component {
 
     const hideExtrasOnOut = () => {
       this.hideVideoSharingButtonTimeout = setTimeout(() => {
-        this.setState({ showVideoShareOptions: false });
+        //this.setState({ showVideoShareOptions: false });
       }, 250);
     };
 
     return (
       <div
         className={cx(styles.iconButton, styles[`share_${primaryVideoShareType}`], {
-          [styles.active]: this.props.videoShareMediaSource === primaryVideoShareType
+          [styles.active]: this.props.videoShareMediaSource === primaryVideoShareType,
+          [styles.videoShare]: true
         })}
         title={this.props.videoShareMediaSource !== null ? "Stop sharing" : `Share ${primaryVideoShareType}`}
         onClick={() => {
@@ -102,23 +112,21 @@ class TopHUD extends Component {
     const videoSharingButtons = this.buildVideoSharingButtons();
 
     return (
-      <div className={cx(styles.container, styles.top, styles.unselectable)}>
-        <div className={cx(uiStyles.uiInteractive, styles.panel, styles.left)}>
+      <div className={cx(styles.container, styles.top, styles.unselectable, uiStyles.uiInteractive)}>
+        <div className={cx(uiStyles.uiInteractive, styles.panel)}>
           {videoSharingButtons}
           <div
             className={cx(styles.iconButton, styles.mute, { [styles.active]: this.props.muted })}
             title={this.props.muted ? "Unmute Mic" : "Mute Mic"}
             onClick={this.props.onToggleMute}
           />
-        </div>
-        <div
-          className={cx(uiStyles.uiInteractive, styles.iconButton, styles.large, styles.freeze, {
-            [styles.active]: this.props.frozen
-          })}
-          title={this.props.frozen ? "Resume" : "Pause"}
-          onClick={this.props.onToggleFreeze}
-        />
-        <div className={cx(uiStyles.uiInteractive, styles.panel, styles.right)}>
+          <div
+            className={cx(styles.iconButton, styles.freeze, {
+              [styles.active]: this.props.frozen
+            })}
+            title={this.props.frozen ? "Resume" : "Pause"}
+            onClick={this.props.onToggleFreeze}
+          />
           <div
             className={cx(styles.iconButton, styles.spawn_pen)}
             title={"Drawing Pen"}
