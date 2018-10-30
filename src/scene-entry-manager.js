@@ -256,6 +256,7 @@ export default class SceneEntryManager {
       }
 
       this.scene.emit("share_video_enabled", { source: constraints.video.mediaSource });
+      isHandlingVideoShare = false;
     };
 
     this.scene.addEventListener("action_share_camera", () => {

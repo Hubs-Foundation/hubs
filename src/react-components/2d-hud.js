@@ -9,7 +9,7 @@ class TopHUD extends Component {
   static propTypes = {
     muted: PropTypes.bool,
     frozen: PropTypes.bool,
-    videoShareSource: PropTypes.string,
+    videoShareMediaSource: PropTypes.string,
     availableVREntryTypes: PropTypes.object,
     onToggleMute: PropTypes.func,
     onToggleFreeze: PropTypes.func,
@@ -20,14 +20,16 @@ class TopHUD extends Component {
   };
 
   state = {
-    showVideoShareOptions: false
+    showVideoShareOptions: false,
+    lastActiveMediaSource: null
   };
 
   handleVideoShareClicked = source => {
-    if (this.props.videoShareSource) {
+    if (this.props.videoShareMediaSource) {
       this.props.onEndShareVideo();
     } else {
       this.props.onShareVideo(source);
+      this.setState({ lastActiveMediaSource: source });
     }
   };
 
@@ -35,7 +37,10 @@ class TopHUD extends Component {
     if (this.props.availableVREntryTypes.isInHMD) return null;
 
     const videoShareExtraOptionTypes = [];
-    const primaryVideoShareType = this.props.videoShareSource || (AFRAME.utils.device.isMobile() ? "camera" : "screen");
+    const primaryVideoShareType =
+      this.props.videoShareMediaSource ||
+      this.state.lastActiveMediaSource ||
+      (AFRAME.utils.device.isMobile() ? "camera" : "screen");
 
     if (this.state.showVideoShareOptions) {
       videoShareExtraOptionTypes.push(primaryVideoShareType);
@@ -60,10 +65,10 @@ class TopHUD extends Component {
 
     return (
       <div
-        className={cx(styles.iconButton, styles.share_screen, {
-          [styles.active]: this.props.videoShareSource === primaryVideoShareType
+        className={cx(styles.iconButton, styles[`share_${primaryVideoShareType}`], {
+          [styles.active]: this.props.videoShareMediaSource === primaryVideoShareType
         })}
-        title={this.props.videoShareSource !== null ? "Stop sharing" : `Share ${primaryVideoShareType}`}
+        title={this.props.videoShareMediaSource !== null ? "Stop sharing" : `Share ${primaryVideoShareType}`}
         onClick={() => {
           if (!this.state.showVideoShareOptions) {
             this.handleVideoShareClicked(primaryVideoShareType);
@@ -77,9 +82,9 @@ class TopHUD extends Component {
               <div
                 key={type}
                 className={cx(styles.iconButton, styles[`share_${type}`], {
-                  [styles.active]: this.props.videoShareSource === type
+                  [styles.active]: this.props.videoShareMediaSource === type
                 })}
-                title={this.props.videoShareSource === type ? "Stop sharing" : `Share ${type}`}
+                title={this.props.videoShareMediaSource === type ? "Stop sharing" : `Share ${type}`}
                 onClick={() => this.handleVideoShareClicked(type)}
                 onMouseOver={showExtrasOnHover}
               />

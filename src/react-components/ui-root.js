@@ -128,7 +128,8 @@ class UIRoot extends Component {
     exited: false,
 
     showProfileEntry: false,
-    pendingMessage: ""
+    pendingMessage: "",
+    videoShareMediaSource: null
   };
 
   componentDidMount() {
@@ -137,12 +138,16 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
     this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
+    this.props.scene.addEventListener("share_video_enabled", this.onShareVideoEnabled);
+    this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.addEventListener("exit", this.exit);
   }
 
   componentWillUnmount() {
     this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
     this.props.scene.removeEventListener("exit", this.exit);
+    this.props.scene.removeEventListener("share_video_enabled", this.onShareVideoEnabled);
+    this.props.scene.removeEventListener("share_video_disabled", this.onShareVideoDisabled);
   }
 
   onSceneLoaded = () => {
@@ -157,6 +162,14 @@ class UIRoot extends Component {
     });
   };
 
+  onShareVideoEnabled = e => {
+    this.setState({ videoShareMediaSource: e.detail.source });
+  };
+
+  onShareVideoDisabled = () => {
+    this.setState({ videoShareMediaSource: null });
+  };
+
   toggleMute = () => {
     this.props.scene.emit("action_mute");
   };
@@ -167,6 +180,14 @@ class UIRoot extends Component {
 
   toggleSpaceBubble = () => {
     this.props.scene.emit("action_space_bubble");
+  };
+
+  shareVideo = mediaSource => {
+    this.props.scene.emit(`action_share_${mediaSource}`);
+  };
+
+  endShareVideo = () => {
+    this.props.scene.emit("action_end_video_sharing");
   };
 
   spawnPen = () => {
@@ -1057,10 +1078,13 @@ class UIRoot extends Component {
                 muted={this.state.muted}
                 frozen={this.state.frozen}
                 spacebubble={this.state.spacebubble}
+                videoShareMediaSource={this.state.videoShareMediaSource}
                 availableVREntryTypes={this.props.availableVREntryTypes}
                 onToggleMute={this.toggleMute}
                 onToggleFreeze={this.toggleFreeze}
                 onToggleSpaceBubble={this.toggleSpaceBubble}
+                onShareVideo={this.shareVideo}
+                onEndShareVideo={this.endShareVideo}
                 onSpawnPen={this.spawnPen}
                 onSpawnCamera={() => this.props.scene.emit("action_spawn_camera")}
               />
