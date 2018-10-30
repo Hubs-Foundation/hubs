@@ -1,19 +1,4 @@
 
-# Table of Contents
-
-1.  [The userinput system](#org6030eab)
-    1.  [Overview](#org2da9acd)
-    2.  [Terms and Conventions](#org4721ce9)
-        1.  [path](#orgd62cc68)
-        2.  [action](#orgb8066a6)
-        3.  [frame](#org15eafde)
-        4.  [device](#orgea2f123)
-        5.  [binding](#org47c9c20)
-        6.  [xforms](#org876e7b0)
-        7.  [set](#orgbe4669b)
-        8.  [priority and root](#orgdd3c0c5)
-
-
 <a id="org6030eab"></a>
 
 # The userinput system
@@ -25,7 +10,7 @@ The userinput system is a module that manages mappings from device state changes
 
 ## Overview
 
-The userinput system happens to be an `aframe` `system`; its `tick` is called once a frame within the `aframe` `scene`'s `tick`. When the userinput system `tick` happens, it is responsible for creating a map called the frame. The keys of the frame are called "paths". The values stored in the frame can be any type, but are usually one of: bool, number, vec2, vec3, vec4, pose. On each tick, each connected `device` writes "raw" input values to known "device paths" within the frame. Configuration units called `bindings` are then applied to transform "raw" input values to app-specific "actions". The userinput system exposes the state of a given `action` in the current frame via `readFrameValueAtPath`. The `bindings` that are applied to transform input to "actions" must be `available`, `active`, and `prioritized`.
+The userinput system happens to be an `aframe` `system`; its `tick` is called once a frame within the `aframe` `scene`'s `tick`. When the userinput system `tick` happens, it is responsible for creating a map called the frame. The keys of the frame are called "paths". The values stored in the frame can be any type, but are usually one of: bool, number, vec2, vec3, vec4, pose. On each tick, each connected `device` writes "raw" input values to known "device paths" within the frame. Configuration units called `bindings` are then applied to transform "raw" input values to app-specific "actions". The userinput system exposes the state of a given `action` in the current frame via `get`. The `bindings` that are applied to transform input to "actions" must be `available`, `active`, and `prioritized`.
 
 1.  A `binding` is made `available` when the userinput system detects a change to the user's device configuration that matches certain criteria. A touchscreen user only has `availableBindings` related to touchscreen input. A mouse-and-keyboard user only has `availableBindings` related to mouse-and-keyboard input. An oculus/vive user has `bindings` related to mouse, keyboard, and oculus/vive controllers.
 
@@ -70,14 +55,14 @@ A path is used as a key when writing or querying the state a user input frame. P
 A path used by app code when reading a user input frame.
 
     const userinput = AFRAME.scenes[0].systems.userinput;
-    if (userinput.readFrameValueAtPath("/actions/rightHandGrab")) {
+    if (userinput.get("/actions/rightHandGrab")) {
       this.startInteraction();
     }
 
 The value in the frame can be of any type, but we have tried to keep it to simple types like bool, number, vec2, vec3, and pose.
 
     const userinput = AFRAME.scenes[0].systems.userinput;
-    const acceleration = userinput.readFrameValueAtPath("/actions/characterAcceleration");
+    const acceleration = userinput.get("/actions/characterAcceleration");
     this.updateVelocity( this.velocity, acceleration || zero );
     this.move( this.velocity );
 

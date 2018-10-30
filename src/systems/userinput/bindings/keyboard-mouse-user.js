@@ -3,6 +3,8 @@ import { sets } from "../sets";
 import { xforms } from "./xforms";
 
 const wasd_vec2 = "/var/mouse-and-keyboard/wasd_vec2";
+const keyboardCharacterAcceleration = "/var/mouse-and-keyboard/keyboardCharacterAcceleration";
+const arrows_vec2 = "/var/mouse-and-keyboard/arrows_vec2";
 const dropWithRMB = "/vars/mouse-and-keyboard/drop_with_RMB";
 const dropWithEsc = "/vars/mouse-and-keyboard/drop_with_esc";
 
@@ -10,7 +12,9 @@ const dropWithRMBorEscBindings = [
   {
     src: { value: paths.device.mouse.buttonRight },
     dest: { value: dropWithRMB },
-    xform: xforms.falling
+    xform: xforms.falling,
+    root: "rmb",
+    priority: 200
   },
   {
     src: { value: paths.device.keyboard.key("Escape") },
@@ -37,6 +41,16 @@ export const keyboardMouseUserBindings = {
     },
     {
       src: {
+        w: paths.device.keyboard.key("arrowup"),
+        a: paths.device.keyboard.key("arrowleft"),
+        s: paths.device.keyboard.key("arrowdown"),
+        d: paths.device.keyboard.key("arrowright")
+      },
+      dest: { vec2: arrows_vec2 },
+      xform: xforms.wasd_to_vec2
+    },
+    {
+      src: {
         w: paths.device.keyboard.key("w"),
         a: paths.device.keyboard.key("a"),
         s: paths.device.keyboard.key("s"),
@@ -46,9 +60,17 @@ export const keyboardMouseUserBindings = {
       xform: xforms.wasd_to_vec2
     },
     {
-      src: { value: wasd_vec2 },
+      src: {
+        first: wasd_vec2,
+        second: arrows_vec2
+      },
+      dest: { value: keyboardCharacterAcceleration },
+      xform: xforms.max_vec2
+    },
+    {
+      src: { value: keyboardCharacterAcceleration },
       dest: { value: paths.actions.characterAcceleration },
-      xform: xforms.copy
+      xform: xforms.normalize_vec2
     },
     {
       src: { value: paths.device.keyboard.key("shift") },
@@ -87,7 +109,7 @@ export const keyboardMouseUserBindings = {
     {
       src: { value: "/var/smartMouseCamDeltaX" },
       dest: { value: "/var/smartMouseCamDeltaXScaled" },
-      xform: xforms.scale(-0.06)
+      xform: xforms.scale(-0.2)
     },
     {
       src: { value: "/var/smartMouseCamDeltaY" },
@@ -125,6 +147,26 @@ export const keyboardMouseUserBindings = {
         value: paths.actions.logDebugFrame
       },
       xform: xforms.rising
+    },
+    {
+      src: {
+        value: paths.device.mouse.buttonRight
+      },
+      dest: {
+        value: paths.actions.startGazeTeleport
+      },
+      xform: xforms.rising,
+      root: "rmb",
+      priority: 100
+    },
+    {
+      src: {
+        value: paths.device.mouse.buttonRight
+      },
+      dest: {
+        value: paths.actions.stopGazeTeleport
+      },
+      xform: xforms.falling
     }
   ],
 
