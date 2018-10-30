@@ -47,6 +47,7 @@ const leftJoyY = `${name}left/joyY`;
 const leftJoyYCursorMod = `${name}left/joyYCursorMod`;
 const oculusTouchCharacterAcceleration = `${name}characterAcceleration`;
 const keyboardCharacterAcceleration = "/var/keyboard/characterAcceleration";
+const characterAcceleration = "/var/oculus-touch/nonNormalizedCharacterAcceleration";
 const wasd_vec2 = "/var/keyboard/wasd_vec2";
 const arrows_vec2 = "/var/keyboard/arrows_vec2";
 const keyboardBoost = "/var/keyboard-oculus/boost";
@@ -252,7 +253,7 @@ export const oculusTouchUserBindings = {
         second: arrows_vec2
       },
       dest: { value: keyboardCharacterAcceleration },
-      xform: xforms.add_vec2
+      xform: xforms.max_vec2
     },
     {
       src: {
@@ -260,9 +261,14 @@ export const oculusTouchUserBindings = {
         second: keyboardCharacterAcceleration
       },
       dest: {
-        value: paths.actions.characterAcceleration
+        value: characterAcceleration
       },
-      xform: xforms.add_vec2
+      xform: xforms.max_vec2
+    },
+    {
+      src: { value: characterAcceleration },
+      dest: { value: paths.actions.characterAcceleration },
+      xform: xforms.normalize_vec2
     },
     {
       src: { value: paths.device.keyboard.key("shift") },

@@ -26,6 +26,7 @@ const lTriggerRisingGrab = v("right/trigger/rising/grab");
 const lGripRisingGrab = v("right/grab/rising/grab");
 const lTouchpadRising = v("left/touchpad/rising");
 const lCharacterAcceleration = v("left/characterAcceleration");
+const characterAcceleration = v("nonNormalizedCharacterAcceleration");
 const lGripFalling = v("left/grip/falling");
 const lGripRising = v("left/grip/rising");
 const leftBoost = v("left/boost");
@@ -342,7 +343,7 @@ export const viveUserBindings = {
         second: arrows_vec2
       },
       dest: { value: keyboardCharacterAcceleration },
-      xform: xforms.add_vec2
+      xform: xforms.max_vec2
     },
     {
       src: {
@@ -350,9 +351,14 @@ export const viveUserBindings = {
         second: keyboardCharacterAcceleration
       },
       dest: {
-        value: paths.actions.characterAcceleration
+        value: characterAcceleration
       },
-      xform: xforms.add_vec2
+      xform: xforms.max_vec2
+    },
+    {
+      src: { value: characterAcceleration },
+      dest: { value: paths.actions.characterAcceleration },
+      xform: xforms.normalize_vec2
     },
     {
       src: { value: paths.device.keyboard.key("shift") },

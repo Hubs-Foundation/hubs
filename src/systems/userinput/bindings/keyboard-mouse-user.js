@@ -65,12 +65,12 @@ export const keyboardMouseUserBindings = {
         second: arrows_vec2
       },
       dest: { value: keyboardCharacterAcceleration },
-      xform: xforms.add_vec2
+      xform: xforms.max_vec2
     },
     {
       src: { value: keyboardCharacterAcceleration },
       dest: { value: paths.actions.characterAcceleration },
-      xform: xforms.copy
+      xform: xforms.normalize_vec2
     },
     {
       src: { value: paths.device.keyboard.key("shift") },
