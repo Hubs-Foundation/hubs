@@ -88,15 +88,15 @@ AFRAME.registerComponent("super-networked-interactable", {
     this.el.setAttribute("body", { type: "static" });
     this.el.emit("grab-end", { hand: this.hand });
     this.hand = null;
-    this._syncCounterRegistration(this.el);
+    this._syncCounterRegistration();
   },
 
   _onPinned: function() {
-    this._syncCounterRegistration(this.el);
+    this._syncCounterRegistration();
   },
 
   _onUnpinned: function() {
-    this._syncCounterRegistration(this.el);
+    this._syncCounterRegistration();
   },
 
   _changeScale: function(delta) {
@@ -107,7 +107,10 @@ AFRAME.registerComponent("super-networked-interactable", {
     }
   },
 
-  _syncCounterRegistration: function(el) {
+  _syncCounterRegistration: function() {
+    const el = this.networkedEl;
+    if (!el) return;
+
     const isPinned = el.components["pinnable"] && el.components["pinnable"].data.pinned;
 
     if (NAF.utils.isMine(el) && !isPinned) {
