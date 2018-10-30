@@ -44,12 +44,11 @@ class TopHUD extends Component {
 
   buildVideoSharingButtons = () => {
     if (this.props.availableVREntryTypes.isInHMD) return null;
+    const isMobile = AFRAME.utils.device.isMobile();
 
     const videoShareExtraOptionTypes = [];
     const primaryVideoShareType =
-      this.props.videoShareMediaSource ||
-      this.state.lastActiveMediaSource ||
-      (AFRAME.utils.device.isMobile() ? "camera" : "screen");
+      this.props.videoShareMediaSource || this.state.lastActiveMediaSource || (isMobile ? "camera" : "screen");
 
     if (this.state.showVideoShareOptions) {
       videoShareExtraOptionTypes.push(primaryVideoShareType);
@@ -62,6 +61,8 @@ class TopHUD extends Component {
     }
 
     const showExtrasOnHover = () => {
+      if (isMobile) return;
+
       clearTimeout(this.hideVideoSharingButtonTimeout);
 
       if (!this.props.videoShareMediaSource) {

@@ -302,7 +302,7 @@ export default class SceneEntryManager {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
-      if (currentVideoShareEntity.parentNode) {
+      if (currentVideoShareEntity && currentVideoShareEntity.parentNode) {
         currentVideoShareEntity.parentNode.removeChild(currentVideoShareEntity);
       }
 
