@@ -706,13 +706,6 @@ class UIRoot extends Component {
   };
 
   renderDevicePanel = () => {
-    // Only screen sharing in desktop firefox since other browsers/platforms will ignore the "screen" media constraint and will attempt to share your webcam instead!
-    //const isFireFox = /firefox/i.test(navigator.userAgent);
-    //const isNonMobile = !AFRAME.utils.device.isMobile();
-
-    //const screenSharingCheckbox =
-    //  this.props.enableScreenSharing && isNonMobile && isFireFox && this.renderScreensharing();
-
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.title}>
