@@ -9,55 +9,94 @@ class TopHUD extends Component {
   static propTypes = {
     muted: PropTypes.bool,
     frozen: PropTypes.bool,
-    videoShareSource: PropTypes.bool,
+    videoShareSource: PropTypes.string,
+    availableVREntryTypes: PropTypes.object,
     onToggleMute: PropTypes.func,
     onToggleFreeze: PropTypes.func,
     onSpawnPen: PropTypes.func,
     onSpawnCamera: PropTypes.func,
-    onShareVideo: PropTypes.func
+    onShareVideo: PropTypes.func,
+    onEndShareVideo: PropTypes.func
   };
 
   state = {
     showVideoShareOptions: false
   };
 
-  handleVideoShareClicked = source => {};
+  handleVideoShareClicked = source => {
+    if (this.props.videoShareSource) {
+      this.props.onEndShareVideo();
+    } else {
+      this.props.onShareVideo(source);
+    }
+  };
+
+  buildVideoSharingButtons = () => {
+    if (this.props.availableVREntryTypes.isInHMD) return null;
+
+    const videoShareExtraOptionTypes = [];
+    const primaryVideoShareType = this.props.videoShareSource || (AFRAME.utils.device.isMobile() ? "camera" : "screen");
+
+    if (this.state.showVideoShareOptions) {
+      videoShareExtraOptionTypes.push(primaryVideoShareType);
+
+      ["screen", "window", "camera"].forEach(t => {
+        if (videoShareExtraOptionTypes.indexOf(t) === -1) {
+          videoShareExtraOptionTypes.push(t);
+        }
+      });
+    }
+
+    const showExtrasOnHover = () => {
+      clearTimeout(this.hideVideoSharingButtonTimeout);
+      this.setState({ showVideoShareOptions: true });
+    };
+
+    const hideExtrasOnOut = () => {
+      this.hideVideoSharingButtonTimeout = setTimeout(() => {
+        this.setState({ showVideoShareOptions: false });
+      }, 250);
+    };
+
+    return (
+      <div
+        className={cx(styles.iconButton, styles.share_screen, {
+          [styles.active]: this.props.videoShareSource === primaryVideoShareType
+        })}
+        title={this.props.videoShareSource !== null ? "Stop sharing" : `Share ${primaryVideoShareType}`}
+        onClick={() => {
+          if (!this.state.showVideoShareOptions) {
+            this.handleVideoShareClicked(primaryVideoShareType);
+          }
+        }}
+        onMouseOver={showExtrasOnHover}
+      >
+        {videoShareExtraOptionTypes.length > 0 && (
+          <div className={cx(styles.videoShareExtraOptions)} onMouseOut={hideExtrasOnOut}>
+            {videoShareExtraOptionTypes.map(type => (
+              <div
+                key={type}
+                className={cx(styles.iconButton, styles[`share_${type}`], {
+                  [styles.active]: this.props.videoShareSource === type
+                })}
+                title={this.props.videoShareSource === type ? "Stop sharing" : `Share ${type}`}
+                onClick={() => this.handleVideoShareClicked(type)}
+                onMouseOver={showExtrasOnHover}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   render() {
+    const videoSharingButtons = this.buildVideoSharingButtons();
+
     return (
       <div className={cx(styles.container, styles.top, styles.unselectable)}>
         <div className={cx(uiStyles.uiInteractive, styles.panel, styles.left)}>
-          <div
-            className={cx(styles.iconButton, styles.share_screen, {
-              [styles.active]: this.props.videoShareSource === "screen"
-            })}
-            title={this.props.videoShareSource === "screen" ? "Stop Screen Sharing" : "Share Screen"}
-            onClick={() => this.handleVideoShareClicked("screen")}
-          >
-            <div className={cx(styles.videoShareExtraOptions)}>
-              <div
-                className={cx(styles.iconButton, styles.share_window, {
-                  [styles.active]: this.props.videoShareSource === "window"
-                })}
-                title={this.props.videoShareSource === "window" ? "Stop Window Sharing" : "Share Window"}
-                onClick={() => this.handleVideoShareClicked("window")}
-              />
-              <div
-                className={cx(styles.iconButton, styles.share_window, {
-                  [styles.active]: this.props.videoShareSource === "window"
-                })}
-                title={this.props.videoShareSource === "window" ? "Stop Window Sharing" : "Share Window"}
-                onClick={() => this.handleVideoShareClicked("window")}
-              />
-              <div
-                className={cx(styles.iconButton, styles.share_camera, {
-                  [styles.active]: this.props.videoShareSource === "camera"
-                })}
-                title={this.props.videoShareSource === "camera" ? "Stop Camera Sharing" : "Share Camera"}
-                onClick={() => this.handleVideoShareClicked("camera")}
-              />
-            </div>
-          </div>
+          {videoSharingButtons}
           <div
             className={cx(styles.iconButton, styles.mute, { [styles.active]: this.props.muted })}
             title={this.props.muted ? "Unmute Mic" : "Mute Mic"}

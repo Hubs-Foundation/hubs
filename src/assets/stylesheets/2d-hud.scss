@@ -50,12 +50,18 @@
     display: flex;
     flex-direction: column;
     border-radius: 30px;
-    padding: 5px 5px 8px 5px;
-    background-color: rgba(79, 79, 79, 0.2);
+    padding: 3px 3px 6px 3px;
+    background-color: rgba(72, 72, 72, 0.2);
+    border: 2px solid rgba(72, 72, 72, 0.3);
+    pointer-events: auto;
     z-index: 1;
 
     :local(.iconButton) {
       margin-top: 4px;
+    }
+
+    :local(.iconButton):first-child {
+      margin-top: 0;
     }
   }
 }

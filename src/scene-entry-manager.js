@@ -246,31 +246,16 @@ export default class SceneEntryManager {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
-      if (!currentVideoShareEntity) {
-        const newStream = await navigator.mediaDevices.getUserMedia(constraints);
-        const videoTracks = newStream ? newStream.getVideoTracks() : [];
+      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      const videoTracks = newStream ? newStream.getVideoTracks() : [];
 
-        if (videoTracks.length > 0) {
-          newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
-          NAF.connection.adapter.setLocalMediaStream(mediaStream);
-          currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
-        }
-
-        this.scene.emit("share_video_enabled", { constraints });
-      } else {
-        currentVideoShareEntity.parentNode.removeChild(currentVideoShareEntity);
-
-        for (const track of mediaStream.getVideoTracks()) {
-          mediaStream.removeTrack(track);
-        }
-
+      if (videoTracks.length > 0) {
+        newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
         NAF.connection.adapter.setLocalMediaStream(mediaStream);
-        currentVideoShareEntity = null;
-
-        this.scene.emit("share_video_disabled");
+        currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
       }
 
-      isHandlingVideoShare = false;
+      this.scene.emit("share_video_enabled", { source: constraints.video.mediaSource });
     };
 
     this.scene.addEventListener("action_share_camera", () => {
@@ -307,6 +292,22 @@ export default class SceneEntryManager {
           frameRate: 30
         }
       });
+    });
+
+    this.scene.addEventListener("action_end_video_sharing", () => {
+      if (isHandlingVideoShare) return;
+      isHandlingVideoShare = true;
+      currentVideoShareEntity.parentNode.removeChild(currentVideoShareEntity);
+
+      for (const track of mediaStream.getVideoTracks()) {
+        mediaStream.removeTrack(track);
+      }
+
+      NAF.connection.adapter.setLocalMediaStream(mediaStream);
+      currentVideoShareEntity = null;
+
+      this.scene.emit("share_video_disabled");
+      isHandlingVideoShare = false;
     });
   };
 

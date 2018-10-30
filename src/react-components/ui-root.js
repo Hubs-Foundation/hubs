@@ -1057,6 +1057,7 @@ class UIRoot extends Component {
                 muted={this.state.muted}
                 frozen={this.state.frozen}
                 spacebubble={this.state.spacebubble}
+                availableVREntryTypes={this.props.availableVREntryTypes}
                 onToggleMute={this.toggleMute}
                 onToggleFreeze={this.toggleFreeze}
                 onToggleSpaceBubble={this.toggleSpaceBubble}
