@@ -51,12 +51,12 @@
       border-radius: 0px 0px 14px 14px;
 
       &::selection {
-        background-color: #2F80ED;
+        background-color: $spoke-action-color;
         color: white;
       }
 
       &::-moz-selection {
-        background-color: #2F80ED;
+        background-color: $spoke-action-color;
         color: white;
       }
 
