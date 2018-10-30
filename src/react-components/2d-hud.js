@@ -13,7 +13,6 @@ class TopHUD extends Component {
     muted: PropTypes.bool,
     frozen: PropTypes.bool,
     videoShareMediaSource: PropTypes.string,
-    availableVREntryTypes: PropTypes.object,
     onToggleMute: PropTypes.func,
     onToggleFreeze: PropTypes.func,
     onSpawnPen: PropTypes.func,
@@ -43,7 +42,6 @@ class TopHUD extends Component {
   };
 
   buildVideoSharingButtons = () => {
-    if (this.props.availableVREntryTypes.isInHMD) return null;
     const isMobile = AFRAME.utils.device.isMobile();
 
     const videoShareExtraOptionTypes = [];
