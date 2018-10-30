@@ -225,9 +225,11 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("object_unpinned", e => {
       const el = e.detail.el;
-      if (!NAF.utils.isMine(el)) return;
-
       const components = el.components;
+      const networked = components.networked;
+
+      if (!networked || !NAF.utils.isMine(el)) return;
+
       const networkId = components.networked.data.networkId;
       el.setAttribute("networked", { persistent: false });
 
