@@ -64,7 +64,7 @@
       max-width: 75%;
     }
 
-    :local(.spawn-message) {
+    :local(.icon-button) {
       appearance: none;
       -moz-appearance: none;
       -webkit-appearance: none;
@@ -78,12 +78,25 @@
       align-items: center;
       align-self: flex-start;
       cursor: pointer;
-      background-image: url(../spawn_message.png);
       margin-right: 6px;
       background-color: transparent;
     }
 
+    :local(.spawn-message) {
+      background-image: url(../spawn_message.png);
+    }
+
     :local(.spawn-message):hover {
+      background-image: url(../spawn_message-hover.png);
+    }
+
+
+    // TODO replace these icons with share button
+    :local(.share) {
+      background-image: url(../spawn_message.png);
+    }
+
+    :local(.share):hover {
       background-image: url(../spawn_message-hover.png);
     }
 
@@ -99,7 +112,7 @@
 
       img {
         height: 35px;
-        margin-right: 8px;
+        margin-left: 8px;
         border: 2px solid rgba(255,255,255,0.15);
         display: block;
         border-radius: 5px;

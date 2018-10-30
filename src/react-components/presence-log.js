@@ -4,6 +4,46 @@ import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
 import ChatMessage from "./chat-message";
+import { share } from "../utils/share";
+
+function SpawnPhotoMessage({ name, body: { src: url }, className, maySpawn }) {
+  const onShareClicked = share.bind(null, { url, title: "Check out this photo from #hubs" });
+  return (
+    <div className={className}>
+      {maySpawn && <button className={classNames(styles.iconButton, styles.share)} onClick={onShareClicked} />}
+      <div className={styles.mediaBody}>
+        <span>
+          <b>{name}</b>
+        </span>
+        <span>
+          {"took a "}
+          <b>
+            <a href={url} target="_blank" rel="noopener noreferrer">
+              photo
+            </a>
+          </b>.
+        </span>
+      </div>
+      <a href={url} target="_blank" rel="noopener noreferrer">
+        <img src={url} />
+      </a>
+    </div>
+  );
+}
+SpawnPhotoMessage.propTypes = {
+  name: PropTypes.string,
+  maySpawn: PropTypes.bool,
+  body: PropTypes.object,
+  className: PropTypes.string
+};
+
+function ChatBody(props) {
+  return <div>{...props.children}</div>;
+}
+
+ChatBody.propTypes = {
+  children: PropTypes.array
+};
 
 export default class PresenceLog extends Component {
   static propTypes = {
@@ -54,26 +94,14 @@ export default class PresenceLog extends Component {
           />
         );
       case "spawn": {
-        const { src } = e.body;
         return (
-          <div key={e.key} className={classNames(entryClasses, styles.media)}>
-            <a href={src} target="_blank" rel="noopener noreferrer">
-              <img src={src} />
-            </a>
-            <div className={styles.mediaBody}>
-              <span>
-                <b>{e.name}</b>
-              </span>
-              <span>
-                {"took a "}
-                <b>
-                  <a href={src} target="_blank" rel="noopener noreferrer">
-                    photo
-                  </a>
-                </b>.
-              </span>
-            </div>
-          </div>
+          <SpawnPhotoMessage
+            key={e.key}
+            name={e.name}
+            className={classNames(entryClasses, styles.media)}
+            body={e.body}
+            maySpawn={e.maySpawn}
+          />
         );
       }
     }
