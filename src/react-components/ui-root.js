@@ -687,13 +687,10 @@ class UIRoot extends Component {
   };
 
   renderEntryStartPanel = () => {
-<<<<<<< HEAD
     const textRows = this.state.pendingMessage.split("\n").length;
     const pendingMessageTextareaHeight = textRows * 28 + "px";
     const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
-=======
     const hasPush = navigator.serviceWorker && "PushManager" in window;
->>>>>>> 58f4eba535de1894589cb9dfa455da3e3376fb8d
 
     return (
       <div className={entryStyles.entryPanel}>
