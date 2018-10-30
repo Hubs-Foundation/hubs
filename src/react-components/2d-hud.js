@@ -71,7 +71,7 @@ class TopHUD extends Component {
 
     const hideExtrasOnOut = () => {
       this.hideVideoSharingButtonTimeout = setTimeout(() => {
-        //this.setState({ showVideoShareOptions: false });
+        this.setState({ showVideoShareOptions: false });
       }, 250);
     };
 

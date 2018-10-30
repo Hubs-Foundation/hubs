@@ -6,6 +6,7 @@
   justify-content: center;
   align-items: center;
   width: 100%;
+  pointer-events: none;
 
   &:local(.top) {
     top: 10px;
