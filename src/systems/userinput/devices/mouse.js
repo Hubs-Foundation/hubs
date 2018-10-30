@@ -18,8 +18,8 @@ export class MouseDevice {
 
     const queueEvent = this.events.push.bind(this.events);
     const canvas = document.querySelector("canvas");
-    ["mousedown", "mouseup", "mousemove", "wheel"].map(x => canvas.addEventListener(x, queueEvent));
-    ["mouseout", "blur"].map(x => document.addEventListener(x, queueEvent));
+    ["mousedown", "wheel"].map(x => canvas.addEventListener(x, queueEvent));
+    ["mousemove", "mouseup"].map(x => window.addEventListener(x, queueEvent));
     document.addEventListener("wheel", e => {
       e.preventDefault();
     });
@@ -30,13 +30,7 @@ export class MouseDevice {
       this.wheel += (event.deltaX + event.deltaY) / modeMod[event.deltaMode];
       return;
     }
-    if (event.type === "mouseout" || event.type === "blur") {
-      this.coords[0] = 0;
-      this.coords[1] = 0;
-      this.movementXY[0] = 0;
-      this.movementXY[1] = 0;
-      this.wheel = 0;
-    }
+
     const left = event.button === 0;
     const right = event.button === 2;
     this.coords[0] = (event.clientX / window.innerWidth) * 2 - 1;
