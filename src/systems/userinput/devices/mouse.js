@@ -20,6 +20,9 @@ export class MouseDevice {
     const canvas = document.querySelector("canvas");
     ["mousedown", "mouseup", "mousemove", "wheel"].map(x => canvas.addEventListener(x, queueEvent));
     ["mouseout", "blur"].map(x => document.addEventListener(x, queueEvent));
+    document.addEventListener("wheel", e => {
+      e.preventDefault();
+    });
   }
 
   process(event) {
