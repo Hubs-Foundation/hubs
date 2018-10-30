@@ -2,7 +2,6 @@ export const paths = {};
 paths.noop = "/noop";
 paths.actions = {};
 paths.actions.log = "/actions/log";
-paths.actions.toggleScreenShare = "/actions/toggleScreenShare";
 paths.actions.snapRotateLeft = "/actions/snapRotateLeft";
 paths.actions.snapRotateRight = "/actions/snapRotateRight";
 paths.actions.logDebugFrame = "/actions/logDebugFrame";
