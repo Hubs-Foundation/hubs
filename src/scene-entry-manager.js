@@ -253,6 +253,9 @@ export default class SceneEntryManager {
         newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
         NAF.connection.adapter.setLocalMediaStream(mediaStream);
         currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
+
+        // Wire up custom removal event which will stop the stream.
+        currentVideoShareEntity.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
       }
 
       this.scene.emit("share_video_enabled", { source: constraints.video.mediaSource });
@@ -298,7 +301,10 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_end_video_sharing", () => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
-      currentVideoShareEntity.parentNode.removeChild(currentVideoShareEntity);
+
+      if (currentVideoShareEntity.parentNode) {
+        currentVideoShareEntity.parentNode.removeChild(currentVideoShareEntity);
+      }
 
       for (const track of mediaStream.getVideoTracks()) {
         mediaStream.removeTrack(track);

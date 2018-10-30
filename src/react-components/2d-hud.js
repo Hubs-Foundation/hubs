@@ -54,7 +54,10 @@ class TopHUD extends Component {
 
     const showExtrasOnHover = () => {
       clearTimeout(this.hideVideoSharingButtonTimeout);
-      this.setState({ showVideoShareOptions: true });
+
+      if (!this.props.videoShareMediaSource) {
+        this.setState({ showVideoShareOptions: true });
+      }
     };
 
     const hideExtrasOnOut = () => {
