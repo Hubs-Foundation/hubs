@@ -27,7 +27,7 @@ export class MouseDevice {
 
   process(event) {
     if (event.type === "wheel") {
-      this.wheel += event.deltaY / modeMod[event.deltaMode];
+      this.wheel += (event.deltaX + event.deltaY) / modeMod[event.deltaMode];
       return;
     }
     if (event.type === "mouseout" || event.type === "blur") {
