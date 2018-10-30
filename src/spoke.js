@@ -77,7 +77,7 @@ class SpokeLanding extends Component {
         query: `
           {
             repository(owner: "mozillareality", name: "spoke") {
-          releases(
+              releases(
                 orderBy: { field: CREATED_AT, direction: DESC },
                 first: 5
               ) {
