@@ -292,10 +292,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   const subscriptions = new Subscriptions(hubId);
 
   if (navigator.serviceWorker) {
-    navigator.serviceWorker.register("/hub.service.js");
-    navigator.serviceWorker.ready
-      .then(registration => subscriptions.setRegistration(registration))
-      .catch(() => subscriptions.setRegistrationFailed());
+    try {
+      navigator.serviceWorker.register("/hub.service.js");
+      navigator.serviceWorker.ready
+        .then(registration => subscriptions.setRegistration(registration))
+        .catch(() => subscriptions.setRegistrationFailed());
+    } catch (e) {
+      subscriptions.setRegistrationFailed();
+    }
   }
 
   const scene = document.querySelector("a-scene");
