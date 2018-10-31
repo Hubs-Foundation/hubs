@@ -139,6 +139,42 @@
   }
 }
 
+:local(.presence-log-spawn) {
+  position: absolute;
+  top: 0;
+  z-index: -10;
+  width: auto;
+  margin: 0;
+
+  :local(.presence-log-entry) {
+    background-color: white;
+    color: black;
+    min-height: 18px;
+    padding: 8px 16px;
+    border-radius: 16px;
+    line-height: 18px;
+    margin: 0;
+
+    :local(.message-body) {
+      margin-left: 0;
+    }
+
+    a {
+      color: white;
+    }
+  }
+
+  :local(.presence-log-entry-one-line) {
+    font-weight: bold;
+  }
+
+  :local(.presence-log-emoji) {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+  }
+}
+
 :local(.emoji) {
   // Undo annoying CSS in emoji plugin
   margin: auto !important;

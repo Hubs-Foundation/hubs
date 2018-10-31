@@ -249,7 +249,7 @@
   border-radius: 16px;
   pointer-events: auto;
   opacity: 0.3;
-  transition: opacity 0.25s linear;
+  transition: opacity 0.15s linear;
 
   :local(.message-entry-input-in-room) {
     color: white;
@@ -264,7 +264,7 @@
 
 :local(.message-entry-in-room):focus-within {
   opacity: 1.0;
-  transition: opacity 0.25s linear;
+  transition: opacity 0.15s linear;
 
   :local(.message-entry-submit-in-room) {
     visibility: visible;

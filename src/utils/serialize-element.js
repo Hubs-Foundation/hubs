@@ -154,7 +154,7 @@ function getDefaultStyleByTagName(tagName) {
   return defaultStylesByTagName[tagName];
 }
 
-export default function serializeElement(el, stylesToSkip = []) {
+export default function serializeElement(el) {
   if (Object.keys(defaultStylesByTagName).length === 0) {
     // Precompute the lookup tables.
     for (let i = 0; i < tagNames.length; i++) {
@@ -180,9 +180,6 @@ export default function serializeElement(el, stylesToSkip = []) {
         if (computedStyle[cssPropName] !== defaultStyle[cssPropName]) {
           e.style[cssPropName] = computedStyle[cssPropName];
         }
-      }
-      for (let ii = 0; ii < stylesToSkip.length; ii++) {
-        e.style.removeProperty(stylesToSkip[ii]);
       }
     }
   }

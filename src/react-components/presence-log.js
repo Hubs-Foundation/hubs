@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
@@ -14,15 +15,11 @@ const emojiRegex = /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udb
 const urlRegex = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)$/;
 
 function ChatMessage(props) {
-  const ref = React.createRef();
-
-  const handleSpawn = () => {
+  const handleSpawn = domToRender => {
     if (props.body.match(urlRegex)) {
       document.querySelector("a-scene").emit("add_media", props.body);
       return;
     }
-
-    const el = ref.current;
 
     const context = messageCanvas.getContext("2d");
     const emoji = toEmojis(props.body);
@@ -32,47 +29,51 @@ function ChatMessage(props) {
       emoji[0].props.children.match &&
       emoji[0].props.children.match(emojiRegex);
 
-    // These CSS properties are overridden by the wrapper for rendering the SVG.
-    const stylesToSkip = [
-      "color",
-      "-webkit-text-fill-color",
-      "-webkit-text-stroke-color",
-      "-webkit-text-emphasis-color"
-    ];
+    const isOneLine = props.body.split("\n").length === 1;
 
-    // Remove padding on emoji.
-    if (isEmoji) {
-      stylesToSkip.push("padding", "margin");
-    }
+    const el = document.createElement("div");
+    el.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+    el.setAttribute("class", `${styles.presenceLog} ${styles.presenceLogSpawn}`);
 
-    let style = isEmoji ? presenceLogPureEmojiStyle : presenceLogSpawnedStyle;
+    // The element is added to the DOM in order to have layout compute the width & height,
+    // and then it is removed after being rendered.
+    document.body.appendChild(el);
 
-    if (props.body.split("\n").length === 1) {
-      style += "font-weight: bold;"; // Boldify single liners
-    }
+    const entryDom = (
+      <div
+        className={classNames({
+          [styles.presenceLogEntry]: !isEmoji,
+          [styles.presenceLogEntryOneLine]: !isEmoji && isOneLine,
+          [styles.presenceLogEmoji]: isEmoji
+        })}
+      >
+        {domToRender}
+      </div>
+    );
 
-    // Scale by 12x
-    messageCanvas.width = (el.offsetWidth + (isEmoji ? 0 : 33)) * 12.1;
-    messageCanvas.height = (el.offsetHeight + (isEmoji ? 0 : 33)) * 12.1;
+    ReactDOM.render(entryDom, el, () => {
+      // Scale by 12x
+      messageCanvas.width = el.offsetWidth * 12;
+      messageCanvas.height = el.offsetHeight * 12;
 
-    const xhtml = encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="${messageCanvas.width}" height="${messageCanvas.height}">
-        <foreignObject width="8.33%" height="8.33%" style="transform: scale(12.0);">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="${style}">
-            ${serializeElement(el, stylesToSkip)}
-          </div>
-        </foreignObject>
-      </svg>
-`);
-    const img = new Image();
+      const xhtml = encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="${messageCanvas.width}" height="${messageCanvas.height}">
+          <foreignObject width="8.333%" height="8.333%" style="transform: scale(12.0);">
+            ${serializeElement(el)}
+          </foreignObject>
+        </svg>
+  `);
+      const img = new Image();
 
-    img.onload = async () => {
-      context.drawImage(img, 0, 0);
-      const blob = await new Promise(resolve => messageCanvas.toBlob(resolve));
-      document.querySelector("a-scene").emit("add_media", new File([blob], "message.png", { type: "image/png" }));
-    };
+      img.onload = async () => {
+        context.drawImage(img, 0, 0);
+        const blob = await new Promise(resolve => messageCanvas.toBlob(resolve));
+        document.querySelector("a-scene").emit("add_media", new File([blob], "message.png", { type: "image/png" }));
+        el.parentNode.removeChild(el);
+      };
 
-    img.src = "data:image/svg+xml," + xhtml;
+      img.src = "data:image/svg+xml," + xhtml;
+    });
   };
 
   // Support wrapping text in ` to get monospace, and multiline.
@@ -85,16 +86,20 @@ function ChatMessage(props) {
   };
   const body = (mono ? props.body.substring(1, props.body.length - 1) : props.body).trim();
 
+  const spawnableDom = (
+    <div className={classNames(messageBodyClasses)}>
+      <Linkify properties={{ target: "_blank", rel: "noopener referrer" }}>{toEmojis(body)}</Linkify>
+    </div>
+  );
+
   return (
     <div className={props.className}>
-      {props.maySpawn && <button className={styles.spawnMessage} onClick={handleSpawn} />}
+      {props.maySpawn && <button className={styles.spawnMessage} onClick={() => handleSpawn(spawnableDom)} />}
       <div className={multiLine ? styles.messageWrapMulti : styles.messageWrap}>
         <div className={styles.messageSource}>
           <b>{props.name}</b>:
         </div>
-        <div className={classNames(messageBodyClasses)} ref={ref}>
-          <Linkify properties={{ target: "_blank", rel: "noopener referrer" }}>{toEmojis(body)}</Linkify>
-        </div>
+        {spawnableDom}
       </div>
     </div>
   );
