@@ -54,7 +54,7 @@ export default class Subscriptions {
     const sub = await this.registration.pushManager.getSubscription();
     if (!sub) return null;
 
-    return sub && sub.endpoint;
+    return sub.endpoint;
   };
 
   toggle = async () => {
