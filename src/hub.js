@@ -293,9 +293,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (navigator.serviceWorker) {
     try {
-      navigator.serviceWorker.register("/hub.service.js");
-      navigator.serviceWorker.ready
-        .then(registration => subscriptions.setRegistration(registration))
+      navigator.serviceWorker
+        .register("/hub.service.js")
+        .then(() => {
+          navigator.serviceWorker.ready
+            .then(registration => subscriptions.setRegistration(registration))
+            .catch(() => subscriptions.setRegistrationFailed());
+        })
         .catch(() => subscriptions.setRegistrationFailed());
     } catch (e) {
       subscriptions.setRegistrationFailed();
