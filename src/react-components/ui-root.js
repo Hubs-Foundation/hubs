@@ -30,6 +30,7 @@ import CreateObjectDialog from "./create-object-dialog.js";
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
 import TwoDHUD from "./2d-hud";
+import { spawnChatMessage } from "./chat-message";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -1052,6 +1053,9 @@ class UIRoot extends Component {
                   onKeyDown={e => {
                     if (e.keyCode === 13 && !e.shiftKey) {
                       this.sendMessage(e);
+                    } else if (e.keyCode === 13 && e.shiftKey && e.ctrlKey) {
+                      spawnChatMessage(e.target.value);
+                      this.setState({ pendingMessage: "" });
                     } else if (e.keyCode === 27) {
                       e.target.blur();
                     }
@@ -1062,6 +1066,13 @@ class UIRoot extends Component {
                   className={classNames([styles.messageEntrySubmit, styles.messageEntrySubmitInRoom])}
                   type="submit"
                   value="send"
+                />
+                <button
+                  className={classNames([styles.messageEntrySpawn])}
+                  onClick={() => {
+                    spawnChatMessage(this.state.pendingMessage);
+                    this.setState({ pendingMessage: "" });
+                  }}
                 />
               </div>
             </form>

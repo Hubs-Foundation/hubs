@@ -31,6 +31,8 @@ const messageBodyDom = body => {
 };
 
 export function spawnChatMessage(body) {
+  if (body.length === 0) return;
+
   if (body.match(urlRegex)) {
     document.querySelector("a-scene").emit("add_media", body);
     return;
@@ -64,8 +66,8 @@ export function spawnChatMessage(body) {
 
   ReactDOM.render(entryDom, el, () => {
     // Scale by 12x
-    messageCanvas.width = el.offsetWidth * 12;
-    messageCanvas.height = el.offsetHeight * 12;
+    messageCanvas.width = el.offsetWidth * 12.1;
+    messageCanvas.height = el.offsetHeight * 12.1;
 
     const xhtml = encodeURIComponent(`
         <svg xmlns="http://www.w3.org/2000/svg" width="${messageCanvas.width}" height="${messageCanvas.height}">
