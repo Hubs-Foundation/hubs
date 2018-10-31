@@ -98,6 +98,6 @@ AFRAME.registerComponent("super-networked-interactable", {
     if (!(grabber && pathsMap[grabber.id])) return;
 
     const userinput = AFRAME.scenes[0].systems.userinput;
-    this._changeScale(userinput.readFrameValueAtPath(pathsMap[grabber.id].scaleGrabbedGrabbable));
+    this._changeScale(userinput.get(pathsMap[grabber.id].scaleGrabbedGrabbable));
   }
 });

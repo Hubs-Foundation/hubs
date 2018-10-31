@@ -136,30 +136,30 @@ export function updateActionSetsBasedOnSuperhands() {
     !cursorHoveringOnUI;
 
   const userinput = AFRAME.scenes[0].systems.userinput;
-  userinput.toggleActive(sets.leftHandHoveringOnInteractable, leftHandHoveringOnInteractable);
-  userinput.toggleActive(sets.leftHandHoveringOnPen, leftHandHoveringOnPen);
-  userinput.toggleActive(sets.leftHandHoveringOnCamera, leftHandHoveringOnCamera);
-  userinput.toggleActive(sets.leftHandHoveringOnNothing, leftHandHoveringOnNothing);
-  userinput.toggleActive(sets.leftHandHoldingPen, leftHandHoldingPen);
-  userinput.toggleActive(sets.leftHandHoldingInteractable, leftHandHoldingInteractable);
-  userinput.toggleActive(sets.leftHandHoldingCamera, leftHandHoldingCamera);
-  userinput.toggleActive(sets.leftHandTeleporting, leftHandTeleporting);
+  userinput.toggleSet(sets.leftHandHoveringOnInteractable, leftHandHoveringOnInteractable);
+  userinput.toggleSet(sets.leftHandHoveringOnPen, leftHandHoveringOnPen);
+  userinput.toggleSet(sets.leftHandHoveringOnCamera, leftHandHoveringOnCamera);
+  userinput.toggleSet(sets.leftHandHoveringOnNothing, leftHandHoveringOnNothing);
+  userinput.toggleSet(sets.leftHandHoldingPen, leftHandHoldingPen);
+  userinput.toggleSet(sets.leftHandHoldingInteractable, leftHandHoldingInteractable);
+  userinput.toggleSet(sets.leftHandHoldingCamera, leftHandHoldingCamera);
+  userinput.toggleSet(sets.leftHandTeleporting, leftHandTeleporting);
 
-  userinput.toggleActive(sets.rightHandHoveringOnInteractable, rightHandHoveringOnInteractable);
-  userinput.toggleActive(sets.rightHandHoveringOnPen, rightHandHoveringOnPen);
-  userinput.toggleActive(sets.rightHandHoveringOnNothing, rightHandHoveringOnNothing);
-  userinput.toggleActive(sets.rightHandHoveringOnCamera, rightHandHoveringOnCamera);
-  userinput.toggleActive(sets.rightHandHoldingPen, rightHandHoldingPen);
-  userinput.toggleActive(sets.rightHandHoldingInteractable, rightHandHoldingInteractable);
-  userinput.toggleActive(sets.rightHandTeleporting, rightHandTeleporting);
-  userinput.toggleActive(sets.rightHandHoldingCamera, rightHandHoldingCamera);
+  userinput.toggleSet(sets.rightHandHoveringOnInteractable, rightHandHoveringOnInteractable);
+  userinput.toggleSet(sets.rightHandHoveringOnPen, rightHandHoveringOnPen);
+  userinput.toggleSet(sets.rightHandHoveringOnNothing, rightHandHoveringOnNothing);
+  userinput.toggleSet(sets.rightHandHoveringOnCamera, rightHandHoveringOnCamera);
+  userinput.toggleSet(sets.rightHandHoldingPen, rightHandHoldingPen);
+  userinput.toggleSet(sets.rightHandHoldingInteractable, rightHandHoldingInteractable);
+  userinput.toggleSet(sets.rightHandTeleporting, rightHandTeleporting);
+  userinput.toggleSet(sets.rightHandHoldingCamera, rightHandHoldingCamera);
 
-  userinput.toggleActive(sets.cursorHoveringOnPen, cursorHoveringOnPen);
-  userinput.toggleActive(sets.cursorHoveringOnCamera, cursorHoveringOnCamera);
-  userinput.toggleActive(sets.cursorHoveringOnInteractable, cursorHoveringOnInteractable);
-  userinput.toggleActive(sets.cursorHoveringOnUI, cursorHoveringOnUI);
-  userinput.toggleActive(sets.cursorHoveringOnNothing, cursorHoveringOnNothing);
-  userinput.toggleActive(sets.cursorHoldingPen, cursorHoldingPen);
-  userinput.toggleActive(sets.cursorHoldingCamera, cursorHoldingCamera);
-  userinput.toggleActive(sets.cursorHoldingInteractable, cursorHoldingInteractable);
+  userinput.toggleSet(sets.cursorHoveringOnPen, cursorHoveringOnPen);
+  userinput.toggleSet(sets.cursorHoveringOnCamera, cursorHoveringOnCamera);
+  userinput.toggleSet(sets.cursorHoveringOnInteractable, cursorHoveringOnInteractable);
+  userinput.toggleSet(sets.cursorHoveringOnUI, cursorHoveringOnUI);
+  userinput.toggleSet(sets.cursorHoveringOnNothing, cursorHoveringOnNothing);
+  userinput.toggleSet(sets.cursorHoldingPen, cursorHoldingPen);
+  userinput.toggleSet(sets.cursorHoldingCamera, cursorHoldingCamera);
+  userinput.toggleSet(sets.cursorHoldingInteractable, cursorHoldingInteractable);
 }

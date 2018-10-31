@@ -106,10 +106,10 @@ AFRAME.registerComponent("hand-controls2", {
     const hand = this.data;
     const userinput = AFRAME.scenes[0].systems.userinput;
     const subpath = hand === "left" ? paths.actions.leftHand : paths.actions.rightHand;
-    const hasPose = userinput.readFrameValueAtPath(subpath.pose);
-    const thumb = userinput.readFrameValueAtPath(subpath.thumb);
-    const index = userinput.readFrameValueAtPath(subpath.index);
-    const middleRingPinky = userinput.readFrameValueAtPath(subpath.middleRingPinky);
+    const hasPose = userinput.get(subpath.pose);
+    const thumb = userinput.get(subpath.thumb);
+    const index = userinput.get(subpath.index);
+    const middleRingPinky = userinput.get(subpath.middleRingPinky);
     const pose = this.poseForFingers(thumb, index, middleRingPinky);
     if (pose !== this.pose) {
       this.el.emit("hand-pose", { previous: this.pose, current: pose });

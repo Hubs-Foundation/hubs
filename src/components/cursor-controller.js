@@ -94,8 +94,8 @@ AFRAME.registerComponent("cursor-controller", {
       }
 
       const userinput = AFRAME.scenes[0].systems.userinput;
-      const cursorPose = userinput.readFrameValueAtPath(paths.actions.cursor.pose);
-      const rightHandPose = userinput.readFrameValueAtPath(paths.actions.rightHand.pose);
+      const cursorPose = userinput.get(paths.actions.cursor.pose);
+      const rightHandPose = userinput.get(paths.actions.rightHand.pose);
 
       this.data.cursor.object3D.visible = this.enabled && !!cursorPose;
       this.el.setAttribute("line", "visible", this.enabled && !!rightHandPose);
@@ -119,7 +119,7 @@ AFRAME.registerComponent("cursor-controller", {
 
       const { cursor, near, far, camera, cursorColorHovered, cursorColorUnhovered } = this.data;
 
-      const cursorModDelta = userinput.readFrameValueAtPath(paths.actions.cursor.modDelta);
+      const cursorModDelta = userinput.get(paths.actions.cursor.modDelta);
       if (isGrabbing && cursorModDelta) {
         this.distance = THREE.Math.clamp(this.distance - cursorModDelta, near, far);
       }
