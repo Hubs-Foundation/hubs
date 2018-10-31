@@ -4,6 +4,9 @@
  * @component hoverable-visuals
  */
 AFRAME.registerComponent("hoverable-visuals", {
+  schema: {
+    cursorController: { type: "selector" }
+  },
   init: function() {
     this.interactorOneTransform = [];
     this.interactorTwoTransform = [];
@@ -23,8 +26,11 @@ AFRAME.registerComponent("hoverable-visuals", {
     for (const hoverer of hoverers) {
       if (hoverer.id === "player-left-controller") {
         interactorOne = hoverer.object3D;
+      } else if (hoverer.id === "cursor") {
+        if (this.data.cursorController.components["cursor-controller"].enabled) {
+          interactorTwo = hoverer.object3D;
+        }
       } else {
-        // Either the right hand or the cursor.
         interactorTwo = hoverer.object3D;
       }
     }
