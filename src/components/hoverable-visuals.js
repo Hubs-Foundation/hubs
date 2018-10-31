@@ -8,6 +8,8 @@ AFRAME.registerComponent("hoverable-visuals", {
     cursorController: { type: "selector" }
   },
   init: function() {
+    // uniforms are set from the component responsible for loading the mesh.
+    this.uniforms = null;
     this.interactorOneTransform = [];
     this.interactorTwoTransform = [];
   },
@@ -16,9 +18,7 @@ AFRAME.registerComponent("hoverable-visuals", {
     this.interactorTwoTransform = null;
   },
   tick(time) {
-    const uniforms = this.el.components["media-loader"].shaderUniforms;
-
-    if (!uniforms) return;
+    if (!this.uniforms) return;
 
     const { hoverers } = this.el.components["hoverable"];
 
@@ -42,7 +42,7 @@ AFRAME.registerComponent("hoverable-visuals", {
       interactorTwo.matrixWorld.toArray(this.interactorTwoTransform);
     }
 
-    for (const uniform of uniforms) {
+    for (const uniform of this.uniforms) {
       uniform.hubs_HighlightInteractorOne.value = !!interactorOne;
       uniform.hubs_InteractorOneTransform.value = this.interactorOneTransform;
       uniform.hubs_HighlightInteractorTwo.value = !!interactorTwo;

@@ -1,7 +1,6 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
-import { guessContentType, proxiedUrlFor, resolveUrl } from "../utils/media-utils";
+import { guessContentType, proxiedUrlFor, resolveUrl, injectCustomShaderChunks } from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
-import mediaHighlightFrag from "./media-highlight-frag.glsl";
 
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
@@ -19,67 +18,6 @@ const fetchContentType = url => {
 const fetchMaxContentIndex = url => {
   return fetch(url).then(r => parseInt(r.headers.get("x-max-content-index")));
 };
-
-function injectCustomShaderChunks(obj) {
-  const vertexRegex = /\bbegin_vertex\b/;
-  const fragRegex = /\bgl_FragColor\b/;
-
-  const materialsSeen = new Set();
-  const shaderUniforms = [];
-
-  obj.traverse(object => {
-    if (!object.material || !["MeshStandardMaterial", "MeshBasicMaterial"].includes(object.material.type)) {
-      return;
-    }
-    object.material = object.material.clone();
-    object.material.onBeforeCompile = shader => {
-      if (!vertexRegex.test(shader.vertexShader)) return;
-
-      shader.uniforms.hubs_InteractorOneTransform = { value: [] };
-      shader.uniforms.hubs_InteractorTwoTransform = { value: [] };
-      shader.uniforms.hubs_InteractorTwoPos = { value: [] };
-      shader.uniforms.hubs_HighlightInteractorOne = { value: false };
-      shader.uniforms.hubs_HighlightInteractorTwo = { value: false };
-      shader.uniforms.hubs_Time = { value: 0 };
-
-      const vchunk = `
-        if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo) {
-          vec4 wt = modelMatrix * vec4(transformed, 1);
-
-          // Used in the fragment shader below.
-          hubs_WorldPosition = wt.xyz;
-        }
-      `;
-
-      const vlines = shader.vertexShader.split("\n");
-      const vindex = vlines.findIndex(line => vertexRegex.test(line));
-      vlines.splice(vindex + 1, 0, vchunk);
-      vlines.unshift("varying vec3 hubs_WorldPosition;");
-      vlines.unshift("uniform bool hubs_HighlightInteractorOne;");
-      vlines.unshift("uniform bool hubs_HighlightInteractorTwo;");
-      shader.vertexShader = vlines.join("\n");
-
-      const flines = shader.fragmentShader.split("\n");
-      const findex = flines.findIndex(line => fragRegex.test(line));
-      flines.splice(findex + 1, 0, mediaHighlightFrag);
-      flines.unshift("varying vec3 hubs_WorldPosition;");
-      flines.unshift("uniform bool hubs_HighlightInteractorOne;");
-      flines.unshift("uniform mat4 hubs_InteractorOneTransform;");
-      flines.unshift("uniform bool hubs_HighlightInteractorTwo;");
-      flines.unshift("uniform mat4 hubs_InteractorTwoTransform;");
-      flines.unshift("uniform float hubs_Time;");
-      shader.fragmentShader = flines.join("\n");
-
-      if (!materialsSeen.has(object.material.uuid)) {
-        shaderUniforms.push(shader.uniforms);
-        materialsSeen.add(object.material.uuid);
-      }
-    };
-    object.material.needsUpdate = true;
-  });
-
-  return shaderUniforms;
-}
 
 AFRAME.registerComponent("media-loader", {
   schema: {
@@ -166,7 +104,9 @@ AFRAME.registerComponent("media-loader", {
 
   onMediaLoaded() {
     this.clearLoadingTimeout();
-    this.shaderUniforms = injectCustomShaderChunks(this.el.object3D);
+    if (this.el.components["hoverable-visuals"]) {
+      this.el.components["hoverable-visuals"].uniforms = injectCustomShaderChunks(this.el.object3D);
+    }
   },
 
   async update(oldData) {
