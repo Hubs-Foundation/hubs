@@ -145,21 +145,23 @@ function fitToTexture(el, texture) {
 
 const textureLoader = new THREE.TextureLoader();
 textureLoader.setCrossOrigin("anonymous");
-function createImageTexture(url) {
+function loadTexturePromise(url) {
   return new Promise((resolve, reject) => {
-    textureLoader.load(
-      url,
-      texture => {
-        texture.encoding = THREE.sRGBEncoding;
-        texture.minFilter = THREE.LinearFilter;
-        resolve(texture);
-      },
-      null,
-      function(xhr) {
-        reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
-      }
-    );
+    textureLoader.load(url, texture => resolve(texture), null, xhr => reject(xhr));
   });
+}
+
+function createImageTexture(url) {
+  return loadTexturePromise(url)
+    .catch(ev => {
+      console.warn(`Error loading image; retrying with CORS proxy. (${ev.error})`);
+      return loadTexturePromise(proxiedUrlFor(url));
+    })
+    .then(texture => {
+      texture.encoding = THREE.sRGBEncoding;
+      texture.minFilter = THREE.LinearFilter;
+      return texture;
+    });
 }
 
 function disposeTexture(texture) {
