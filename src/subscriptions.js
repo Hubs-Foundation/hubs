@@ -50,7 +50,11 @@ export default class Subscriptions {
     // registration becomes null if failed, non null if registered
     while (this.registration === undefined) await nextTick();
     if (!this.registration || !this.registration.pushManager) return null;
-    if ((await this.registration.pushManager.permissionState()) !== "granted") return null;
+    try {
+      if ((await this.registration.pushManager.permissionState()) !== "granted") return null;
+    } catch (e) {
+      return null; // Chrome can throw here complaining about userVisible if push is not right
+    }
     const sub = await this.registration.pushManager.getSubscription();
     if (!sub) return null;
 
