@@ -45,8 +45,6 @@ AFRAME.registerComponent("character-controller", {
     const eventSrc = this.el.sceneEl;
     eventSrc.addEventListener("move", this.setAccelerationInput);
     eventSrc.addEventListener("rotateY", this.setAngularVelocity);
-    eventSrc.addEventListener("snap_rotate_left", this.snapRotateLeft);
-    eventSrc.addEventListener("snap_rotate_right", this.snapRotateRight);
     eventSrc.addEventListener("teleported", this.handleTeleport);
   },
 
@@ -54,8 +52,6 @@ AFRAME.registerComponent("character-controller", {
     const eventSrc = this.el.sceneEl;
     eventSrc.removeEventListener("move", this.setAccelerationInput);
     eventSrc.removeEventListener("rotateY", this.setAngularVelocity);
-    eventSrc.removeEventListener("snap_rotate_left", this.snapRotateLeft);
-    eventSrc.removeEventListener("snap_rotate_right", this.snapRotateRight);
     eventSrc.removeEventListener("teleported", this.handleTeleport);
     this.reset();
   },
@@ -78,10 +74,12 @@ AFRAME.registerComponent("character-controller", {
 
   snapRotateLeft: function() {
     this.pendingSnapRotationMatrix.copy(this.leftRotationMatrix);
+    this.el.emit("snap_rotate_left");
   },
 
   snapRotateRight: function() {
     this.pendingSnapRotationMatrix.copy(this.rightRotationMatrix);
+    this.el.emit("snap_rotate_right");
   },
 
   handleTeleport: function(event) {
@@ -119,13 +117,13 @@ AFRAME.registerComponent("character-controller", {
       root.updateMatrix();
 
       const userinput = AFRAME.scenes[0].systems.userinput;
-      if (userinput.readFrameValueAtPath(paths.actions.snapRotateLeft)) {
+      if (userinput.get(paths.actions.snapRotateLeft)) {
         this.snapRotateLeft();
       }
-      if (userinput.readFrameValueAtPath(paths.actions.snapRotateRight)) {
+      if (userinput.get(paths.actions.snapRotateRight)) {
         this.snapRotateRight();
       }
-      const acc = userinput.readFrameValueAtPath(paths.actions.characterAcceleration);
+      const acc = userinput.get(paths.actions.characterAcceleration);
       if (acc) {
         this.accelerationInput.set(
           this.accelerationInput.x + acc[0],
@@ -145,7 +143,7 @@ AFRAME.registerComponent("character-controller", {
       this.updateVelocity(deltaSeconds);
       this.accelerationInput.set(0, 0, 0);
 
-      const boost = userinput.readFrameValueAtPath(paths.actions.boost) ? 2 : 1;
+      const boost = userinput.get(paths.actions.boost) ? 2 : 1;
       move.makeTranslation(
         this.velocity.x * distance * boost,
         this.velocity.y * distance * boost,
