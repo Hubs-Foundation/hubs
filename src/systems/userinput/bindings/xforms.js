@@ -104,6 +104,29 @@ export const xforms = {
       frame[dest.value] = first;
     }
   },
+  max_vec2: function(frame, src, dest) {
+    const first = frame[src.first];
+    const second = frame[src.second];
+    if (first && second) {
+      frame[dest.value] =
+        first[0] * first[0] + first[1] * first[1] > second[0] * second[0] + second[1] * second[1] ? first : second;
+    } else if (second) {
+      frame[dest.value] = second;
+    } else if (first) {
+      frame[dest.value] = first;
+    }
+  },
+  normalize_vec2: function(frame, src, dest) {
+    const vec2 = frame[src.value];
+    if (vec2) {
+      if (vec2[0] === 0 && vec2[0] === 0) {
+        frame[dest.value] = vec2;
+      } else {
+        const l = Math.sqrt(vec2[0] * vec2[0] + vec2[1] * vec2[1]);
+        frame[dest.value] = [vec2[0] / l, vec2[1] / l];
+      }
+    }
+  },
   any: function(frame, src, dest) {
     for (const path in src) {
       if (frame[src[path]]) {
