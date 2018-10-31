@@ -1,5 +1,6 @@
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
+import { proxiedUrlFor } from "../utils/media-utils.js";
 
 class GIFTexture extends THREE.Texture {
   constructor(frames, delays, disposals) {
@@ -76,46 +77,47 @@ async function createGIFTexture(url) {
 /**
  * Create video element to be used as a texture.
  *
- * @param {string} src - Url to a video file.
+ * @param {string} url - Url to a video file.
  * @returns {Element} Video element.
  */
-function createVideoEl(src) {
-  const videoEl = document.createElement("video");
-  videoEl.setAttribute("playsinline", "");
-  videoEl.setAttribute("webkit-playsinline", "");
-  videoEl.loop = true;
-  videoEl.crossOrigin = "anonymous";
-  videoEl.src = src;
-  return videoEl;
+function createVideoEl(url) {
+  return new Promise((resolve, reject) => {
+    const videoEl = document.createElement("video");
+    videoEl.setAttribute("playsinline", "");
+    videoEl.setAttribute("webkit-playsinline", "");
+    videoEl.loop = true;
+    videoEl.crossOrigin = "anonymous";
+    videoEl.src = url;
+    videoEl.addEventListener("loadedmetadata", () => resolve(videoEl), { once: true });
+    videoEl.onerror = err => {
+      console.warn(`Error loading video; retrying with CORS proxy. (${err})`);
+      videoEl.onerror = reject;
+      videoEl.src = proxiedUrlFor(url);
+    };
+  });
 }
 
-function createVideoTexture(url) {
-  return new Promise((resolve, reject) => {
-    const videoEl = createVideoEl(url);
+function createVideoTexture(videoEl) {
+  const texture = new THREE.VideoTexture(videoEl);
+  texture.minFilter = THREE.LinearFilter;
+  texture.encoding = THREE.sRGBEncoding;
 
-    const texture = new THREE.VideoTexture(videoEl);
-    texture.minFilter = THREE.LinearFilter;
-    texture.encoding = THREE.sRGBEncoding;
-
-    videoEl.addEventListener("loadedmetadata", () => resolve(texture), { once: true });
-    videoEl.onerror = reject;
-
-    // If iOS and video is HLS, do some hacks.
-    if (
-      AFRAME.utils.device.isIOS() &&
-      AFRAME.utils.material.isHLS(
-        videoEl.src || videoEl.getAttribute("src"),
-        videoEl.type || videoEl.getAttribute("type")
-      )
-    ) {
-      // Actually BGRA. Tell shader to correct later.
-      texture.format = THREE.RGBAFormat;
-      texture.needsCorrectionBGRA = true;
-      // Apparently needed for HLS. Tell shader to correct later.
-      texture.flipY = false;
-      texture.needsCorrectionFlipY = true;
-    }
-  });
+  // If iOS and video is HLS, do some hacks.
+  if (
+    AFRAME.utils.device.isIOS() &&
+    AFRAME.utils.material.isHLS(
+      videoEl.src || videoEl.getAttribute("src"),
+      videoEl.type || videoEl.getAttribute("type")
+    )
+  ) {
+    // Actually BGRA. Tell shader to correct later.
+    texture.format = THREE.RGBAFormat;
+    texture.needsCorrectionBGRA = true;
+    // Apparently needed for HLS. Tell shader to correct later.
+    texture.flipY = false;
+    texture.needsCorrectionFlipY = true;
+  }
+  return texture;
 }
 
 function createPlaneMesh(texture) {
@@ -283,7 +285,8 @@ AFRAME.registerComponent("media-video", {
   async updateTexture(src) {
     let texture;
     try {
-      texture = await createVideoTexture(src);
+      const videoEl = await createVideoEl(src);
+      texture = createVideoTexture(videoEl);
 
       // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
       if (this.data.src !== src) {
