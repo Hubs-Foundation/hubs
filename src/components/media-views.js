@@ -1,6 +1,6 @@
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
-import { fetchProxyable, proxiedUrlFor } from "../utils/media-utils.js";
+import { fetchProxyable, loadProxyable, proxiedUrlFor } from "../utils/media-utils.js";
 
 class GIFTexture extends THREE.Texture {
   constructor(frames, delays, disposals) {
@@ -145,23 +145,13 @@ function fitToTexture(el, texture) {
 
 const textureLoader = new THREE.TextureLoader();
 textureLoader.setCrossOrigin("anonymous");
-function loadTexturePromise(url) {
-  return new Promise((resolve, reject) => {
-    textureLoader.load(url, texture => resolve(texture), null, xhr => reject(xhr));
-  });
-}
 
 function createImageTexture(url) {
-  return loadTexturePromise(url)
-    .catch(ev => {
-      console.warn(`Error loading image; retrying with CORS proxy. (${ev.error})`);
-      return loadTexturePromise(proxiedUrlFor(url));
-    })
-    .then(texture => {
-      texture.encoding = THREE.sRGBEncoding;
-      texture.minFilter = THREE.LinearFilter;
-      return texture;
-    });
+  return loadProxyable(textureLoader, url).then(texture => {
+    texture.encoding = THREE.sRGBEncoding;
+    texture.minFilter = THREE.LinearFilter;
+    return texture;
+  });
 }
 
 function disposeTexture(texture) {
