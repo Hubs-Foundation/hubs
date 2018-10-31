@@ -380,6 +380,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     hmd: availableVREntryTypes.isInHMD
   };
 
+  // Reticulum global channel
+  const retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
+  retPhxChannel
+    .join()
+    .receive("ok", async data => subscriptions.setVapidPublicKey(data.vapid_public_key))
+    .receive("error", res => {
+      subscriptions.setVapidPublicKey(null);
+      console.error(res);
+    });
+
   const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
   const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
@@ -494,16 +504,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     addToPresenceLog({ name: userInfo.metas[0].profile.displayName, type, body });
   });
-
-  // Reticulum global channel
-  const retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
-  retPhxChannel
-    .join()
-    .receive("ok", async data => subscriptions.setVapidPublicKey(data.vapid_public_key))
-    .receive("error", res => {
-      subscriptions.setVapidPublicKey(null);
-      console.error(res);
-    });
 
   linkChannel.setSocket(socket);
 });
