@@ -455,7 +455,7 @@ class UIRoot extends Component {
     if (!this.props.forcedVREntryType || !this.props.forcedVREntryType.endsWith("_now")) {
       this.goToEntryStep(ENTRY_STEPS.audio_setup);
     } else {
-      this.onAudioReadyButton(); // Need to wait otherwise input doesn't work :/
+      this.onAudioReadyButton();
     }
   };
 
