@@ -117,13 +117,13 @@ AFRAME.registerComponent("character-controller", {
       root.updateMatrix();
 
       const userinput = AFRAME.scenes[0].systems.userinput;
-      if (userinput.readFrameValueAtPath(paths.actions.snapRotateLeft)) {
+      if (userinput.get(paths.actions.snapRotateLeft)) {
         this.snapRotateLeft();
       }
-      if (userinput.readFrameValueAtPath(paths.actions.snapRotateRight)) {
+      if (userinput.get(paths.actions.snapRotateRight)) {
         this.snapRotateRight();
       }
-      const acc = userinput.readFrameValueAtPath(paths.actions.characterAcceleration);
+      const acc = userinput.get(paths.actions.characterAcceleration);
       if (acc) {
         this.accelerationInput.set(
           this.accelerationInput.x + acc[0],
@@ -143,7 +143,7 @@ AFRAME.registerComponent("character-controller", {
       this.updateVelocity(deltaSeconds);
       this.accelerationInput.set(0, 0, 0);
 
-      const boost = userinput.readFrameValueAtPath(paths.actions.boost) ? 2 : 1;
+      const boost = userinput.get(paths.actions.boost) ? 2 : 1;
       move.makeTranslation(
         this.velocity.x * distance * boost,
         this.velocity.y * distance * boost,
