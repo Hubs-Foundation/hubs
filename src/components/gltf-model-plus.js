@@ -306,17 +306,15 @@ AFRAME.registerComponent("gltf-model-plus", {
   },
 
   async loadModel(src, contentType, technique, useCache) {
-    let gltf;
     if (useCache) {
       if (!GLTFCache[src]) {
         GLTFCache[src] = await loadGLTF(src, contentType, technique);
       }
-      gltf = cloneGltf(GLTFCache[src]);
-    } else {
-      gltf = await loadGLTF(src, contentType, technique);
-    }
 
-    return { gltf };
+      return cloneGltf(GLTFCache[src]);
+    } else {
+      return await loadGLTF(src, contentType, technique);
+    }
   },
 
   async applySrc(src, contentType) {
@@ -338,12 +336,7 @@ AFRAME.registerComponent("gltf-model-plus", {
         return;
       }
 
-      const { gltf } = await this.loadModel(
-        src,
-        contentType,
-        this.preferredTechnique,
-        this.data.useCache
-      );
+      const gltf = await this.loadModel(src, contentType, this.preferredTechnique, this.data.useCache);
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
