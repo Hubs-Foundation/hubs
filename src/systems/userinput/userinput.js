@@ -22,7 +22,7 @@ import { viveUserBindings } from "./bindings/vive-user";
 import { xboxControllerUserBindings } from "./bindings/xbox-controller-user";
 import { daydreamUserBindings } from "./bindings/daydream-user";
 
-import { updateActionSetsBasedOnSuperhands } from "./resolve-action-sets";
+import { resolveActionSets } from "./resolve-action-sets";
 import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
 
@@ -145,7 +145,7 @@ AFRAME.registerSystem("userinput", {
   },
 
   tick() {
-    updateActionSetsBasedOnSuperhands();
+    resolveActionSets();
 
     for (const { set, value } of this.pendingSetChanges) {
       this.activeSets[value ? "add" : "delete"](set);

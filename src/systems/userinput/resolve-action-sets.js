@@ -1,6 +1,6 @@
 import { sets } from "./sets";
 
-export function updateActionSetsBasedOnSuperhands() {
+export function resolveActionSets() {
   const rightHandState = document.querySelector("#player-right-controller").components["super-hands"].state;
   const leftHandState = document.querySelector("#player-left-controller").components["super-hands"].state;
   const cursorHand = document.querySelector("#cursor").components["super-hands"].state;
