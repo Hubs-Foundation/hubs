@@ -109,7 +109,7 @@ export const keyboardMouseUserBindings = {
     {
       src: { value: "/var/smartMouseCamDeltaX" },
       dest: { value: "/var/smartMouseCamDeltaXScaled" },
-      xform: xforms.scale(-0.16)
+      xform: xforms.scale(-0.2)
     },
     {
       src: { value: "/var/smartMouseCamDeltaY" },
