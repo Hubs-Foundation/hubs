@@ -30,6 +30,14 @@ export const proxiedUrlFor = (url, index) => {
   return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${encodedUrl}`;
 };
 
+export const fetchProxyable = url => {
+  const opts = { mode: "cors" };
+  return fetch(url, opts).catch(err => {
+    console.warn(`Error loading ${url}; retrying with CORS proxy. (${err})`);
+    return fetch(proxiedUrlFor(url), opts);
+  });
+};
+
 const resolveUrlCache = new Map();
 export const resolveUrl = async (url, index) => {
   const cacheKey = `${url}|${index}`;

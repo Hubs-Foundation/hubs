@@ -1,5 +1,5 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
-import { guessContentType, proxiedUrlFor, resolveUrl } from "../utils/media-utils";
+import { guessContentType, proxiedUrlFor, fetchProxyable, resolveUrl } from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
 
 import "three/examples/js/loaders/GLTFLoader";
@@ -11,7 +11,7 @@ gltfLoader.load(loadingObjectSrc, gltf => {
 });
 
 const fetchContentType = url => {
-  return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
+  return fetchProxyable(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
 };
 
 const fetchMaxContentIndex = url => {
@@ -124,15 +124,7 @@ AFRAME.registerComponent("media-loader", {
 
       // if the component creator didn't know the content type, we didn't get it from reticulum, and
       // we don't think we can infer it from the extension, we need to make a HEAD request to find it out
-      contentType = contentType || guessContentType(canonicalUrl);
-
-      if (contentType == null) {
-        try {
-          contentType = await fetchContentType(accessibleUrl);
-        } catch (err) {
-          contentType = await fetchContentType(proxiedUrlFor(canonicalUrl));
-        }
-      }
+      contentType = contentType || guessContentType(canonicalUrl) || (await fetchContentType(accessibleUrl));
 
       // We don't want to emit media_resolved for index updates.
       if (src !== oldData.src) {
