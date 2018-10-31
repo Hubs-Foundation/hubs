@@ -1,6 +1,7 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import { guessContentType, proxiedUrlFor, resolveUrl } from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
+import mediaHighlightFrag from "./media-highlight-frag.glsl";
 
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
@@ -58,56 +59,9 @@ function injectCustomShaderChunks(obj) {
       vlines.unshift("uniform bool hubs_HighlightInteractorTwo;");
       shader.vertexShader = vlines.join("\n");
 
-      const fchunk = `
-        if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo) {
-          mat4 it;
-          vec3 ip;
-          float dist1, dist2;
-
-          if (hubs_HighlightInteractorOne) {
-            it = hubs_InteractorOneTransform;
-            ip = vec3(it[3][0], it[3][1], it[3][2]);
-            dist1 = distance(hubs_WorldPosition, ip);
-          }
-
-          if (hubs_HighlightInteractorTwo) {
-            it = hubs_InteractorTwoTransform;
-            ip = vec3(it[3][0], it[3][1], it[3][2]);
-            dist2 = distance(hubs_WorldPosition, ip);
-          }
-
-          float ratio = 0.0;
-          float pulse = sin(hubs_Time / 1000.0) + 1.0;
-          float spacing = 0.5;
-          float line = spacing * pulse - spacing / 2.0;
-          float lineWidth= 0.01;
-          float mody = mod(hubs_WorldPosition.y, spacing);
-
-          if (-lineWidth + line < mody && mody < lineWidth + line) {
-            // Highlight with an animated line effect
-            ratio = 0.5;
-          } else {
-            // Highlight with a gradient falling off with distance.
-            if (hubs_HighlightInteractorOne) {
-              ratio = -min(1.0, pow(dist1 * (9.0 + 3.0 * pulse), 3.0)) + 1.0;
-            } 
-            if (hubs_HighlightInteractorTwo) {
-              ratio += -min(1.0, pow(dist2 * (9.0 + 3.0 * pulse), 3.0)) + 1.0;
-            }
-          }
-
-          ratio = min(1.0, ratio);
-
-          // Gamma corrected highlight color
-          vec3 highlightColor = vec3(0.184, 0.499, 0.933);
-
-          gl_FragColor.rgb = (gl_FragColor.rgb * (1.0 - ratio)) + (highlightColor * ratio);
-        }
-      `;
-
       const flines = shader.fragmentShader.split("\n");
       const findex = flines.findIndex(line => fragRegex.test(line));
-      flines.splice(findex + 1, 0, fchunk);
+      flines.splice(findex + 1, 0, mediaHighlightFrag);
       flines.unshift("varying vec3 hubs_WorldPosition;");
       flines.unshift("uniform bool hubs_HighlightInteractorOne;");
       flines.unshift("uniform mat4 hubs_InteractorOneTransform;");

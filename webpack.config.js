@@ -154,6 +154,10 @@ module.exports = (env, argv) => ({
             context: path.join(__dirname, "src")
           }
         }
+      },
+      {
+        test: /\.(glsl)$/,
+        use: { loader: "raw-loader" }
       }
     ]
   },
