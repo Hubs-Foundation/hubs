@@ -111,7 +111,6 @@ AFRAME.registerComponent("media-loader", {
       if (!src) return;
 
       let canonicalUrl = src;
-      let accessibleUrl = src;
       let contentType = this.data.contentType;
 
       if (this.data.resolve) {
@@ -120,36 +119,32 @@ AFRAME.registerComponent("media-loader", {
         contentType = (result.meta && result.meta.expected_content_type) || contentType;
       }
 
-      accessibleUrl = canonicalUrl;
-
       // if the component creator didn't know the content type, we didn't get it from reticulum, and
       // we don't think we can infer it from the extension, we need to make a HEAD request to find it out
-      contentType = contentType || guessContentType(canonicalUrl) || (await fetchContentType(accessibleUrl));
+      contentType = contentType || guessContentType(canonicalUrl) || (await fetchContentType(canonicalUrl));
 
       // We don't want to emit media_resolved for index updates.
       if (src !== oldData.src) {
-        this.el.emit("media_resolved", { src, raw: accessibleUrl, contentType });
+        this.el.emit("media_resolved", { src, raw: canonicalUrl, contentType });
       }
 
       if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-image");
         this.el.addEventListener("video-loaded", this.clearLoadingTimeout, { once: true });
-        this.el.setAttribute("media-video", { src: accessibleUrl });
+        this.el.setAttribute("media-video", { src: canonicalUrl });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
       } else if (contentType.startsWith("image/")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
         this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
         this.el.removeAttribute("media-pager");
-        this.el.setAttribute("media-image", { src: accessibleUrl, contentType });
+        this.el.setAttribute("media-image", { src: canonicalUrl, contentType });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
       } else if (contentType.startsWith("application/pdf")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
-        // two small differences:
-        // 1. we pass the canonical URL to the pager so it can easily make subresource URLs
-        // 2. we don't remove the media-image component -- media-pager uses that internally
+        // small difference: we don't remove the media-image component -- media-pager uses that internally
         this.el.setAttribute("media-pager", { src: canonicalUrl });
         this.el.addEventListener("preview-loaded", this.clearLoadingTimeout, { once: true });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
@@ -173,7 +168,7 @@ AFRAME.registerComponent("media-loader", {
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
         this.el.setAttribute("gltf-model-plus", {
-          src: accessibleUrl,
+          src: canonicalUrl,
           contentType: contentType,
           inflate: true
         });
