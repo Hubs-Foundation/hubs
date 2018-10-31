@@ -293,7 +293,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (navigator.serviceWorker) {
     navigator.serviceWorker.register("/hub.service.js");
-    navigator.serviceWorker.ready.then(registration => subscriptions.setRegistration(registration));
+    navigator.serviceWorker.ready
+      .then(registration => subscriptions.setRegistration(registration))
+      .catch(() => subscriptions.setRegistrationFailed());
   }
 
   const scene = document.querySelector("a-scene");
@@ -370,7 +372,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     hmd: availableVREntryTypes.isInHMD
   };
 
-  const joinPayload = { profile: store.state.profile, context };
+  const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
+  const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
 
   hubPhxChannel
@@ -378,6 +381,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
       subscriptions.setHubChannel(hubChannel);
+      subscriptions.setSubscribed(data.subscriptions.web_push);
+      remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
       await handleHubChannelJoined(entryManager, hubChannel, data);
     })
     .receive("error", res => {

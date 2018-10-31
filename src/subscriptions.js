@@ -1,3 +1,5 @@
+import nextTick from "./utils/next-tick.js";
+
 // Manages web push subscriptions
 //
 function urlBase64ToUint8Array(base64String) {
@@ -13,10 +15,6 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
-// In local storage: Map of sid -> { endpoint: "<endpoint>" }
-// If entry exists, it means there is a subscription to that room, wired to that endpoint.
-const LOCAL_STORE_KEY = "___hubs_subscriptions";
-
 export default class Subscriptions {
   constructor(hubId) {
     this.hubId = hubId;
@@ -30,55 +28,58 @@ export default class Subscriptions {
     this.registration = registration;
   };
 
+  setRegistrationFailed = () => {
+    this.registration = null;
+  };
+
   setVapidPublicKey = vapidPublicKey => {
     this.vapidPublicKey = vapidPublicKey;
   };
 
-  getSubscriptionsFromStorage = () => {
-    return JSON.parse(localStorage.getItem(LOCAL_STORE_KEY) || "{}");
-  };
-
-  setSubscriptionsToStorage = subscriptions => {
-    return localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(subscriptions));
+  setSubscribed = isSubscribed => {
+    this._isSubscribed = isSubscribed;
   };
 
   isSubscribed = () => {
-    if (typeof this._isSubscribed === "undefined") {
-      this._isSubscribed = !!this.getSubscriptionsFromStorage()[this.hubId];
-    }
-
     return this._isSubscribed;
   };
 
+  getCurrentEndpoint = async () => {
+    if (!navigator.serviceWorker) return null;
+
+    // registration becomes null if failed, non null if registered
+    while (this.registration === undefined) await nextTick();
+    if (!this.registration || !this.registration.pushManager) return null;
+    if ((await this.registration.pushManager.permissionState()) !== "granted") return null;
+    const sub = await this.registration.pushManager.getSubscription();
+    if (!sub) return null;
+
+    return sub && sub.endpoint;
+  };
+
   toggle = async () => {
-    const subscriptions = this.getSubscriptionsFromStorage();
+    if (this._isSubscribed) {
+      const pushSubscription = await this.registration.pushManager.getSubscription();
+      const res = await this.hubChannel.unsubscribe(pushSubscription);
 
-    if (this.isSubscribed()) {
-      const subscription = await this.registration.pushManager.getSubscription();
-      this.hubChannel.unsubscribe(subscription);
-
-      delete subscriptions[this.hubId];
-
-      if (Object.keys(subscriptions).length === 0 && subscription) {
-        subscription.unsubscribe();
+      if (res && res.has_remaining_subscriptions === false) {
+        pushSubscription.unsubscribe();
       }
     } else {
-      let subscription = await this.registration.pushManager.getSubscription();
+      let pushSubscription = await this.registration.pushManager.getSubscription();
 
-      if (!subscription) {
+      if (!pushSubscription) {
         const convertedVapidKey = urlBase64ToUint8Array(this.vapidPublicKey);
 
-        subscription = await this.registration.pushManager.subscribe({
+        pushSubscription = await this.registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: convertedVapidKey
         });
       }
 
-      subscriptions[this.hubId] = { endpoint: subscription.endpoint };
-      this.hubChannel.subscribe(subscription);
+      this.hubChannel.subscribe(pushSubscription);
     }
 
-    delete this._isSubscribed;
-    this.setSubscriptionsToStorage(subscriptions);
+    this._isSubscribed = !this._isSubscribed;
   };
 }

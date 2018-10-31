@@ -96,7 +96,7 @@ export default class HubChannel {
   };
 
   unsubscribe = subscription => {
-    this.channel.push("unsubscribe", { subscription });
+    return new Promise(resolve => this.channel.push("unsubscribe", { subscription }).receive("ok", resolve));
   };
 
   sendMessage = (body, type = "chat") => {
