@@ -120,12 +120,19 @@ AFRAME.registerComponent("media-loader", {
         contentType = (result.meta && result.meta.expected_content_type) || contentType;
       }
 
-      // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
-      accessibleUrl = proxiedUrlFor(canonicalUrl);
+      accessibleUrl = canonicalUrl;
 
       // if the component creator didn't know the content type, we didn't get it from reticulum, and
       // we don't think we can infer it from the extension, we need to make a HEAD request to find it out
-      contentType = contentType || guessContentType(canonicalUrl) || (await fetchContentType(accessibleUrl));
+      contentType = contentType || guessContentType(canonicalUrl);
+
+      if (contentType == null) {
+        try {
+          contentType = await fetchContentType(accessibleUrl);
+        } catch (err) {
+          contentType = await fetchContentType(proxiedUrlFor(canonicalUrl));
+        }
+      }
 
       // We don't want to emit media_resolved for index updates.
       if (src !== oldData.src) {
