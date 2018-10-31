@@ -37,11 +37,11 @@ AFRAME.registerComponent("hoverable-visuals", {
     }
 
     for (const uniform of uniforms) {
-      uniform.hubsHighlightInteractorOne.value = !!interactorOne;
-      uniform.hubsInteractorOneTransform.value = this.interactorOneTransform;
-      uniform.hubsHighlightInteractorTwo.value = !!interactorTwo;
-      uniform.hubsInteractorTwoTransform.value = this.interactorTwoTransform;
-      uniform.hubsTime.value = time;
+      uniform.hubs_HighlightInteractorOne.value = !!interactorOne;
+      uniform.hubs_InteractorOneTransform.value = this.interactorOneTransform;
+      uniform.hubs_HighlightInteractorTwo.value = !!interactorTwo;
+      uniform.hubs_InteractorTwoTransform.value = this.interactorTwoTransform;
+      uniform.hubs_Time.value = time;
     }
   }
 });

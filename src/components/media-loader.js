@@ -34,64 +34,64 @@ function injectCustomShaderChunks(obj) {
     object.material.onBeforeCompile = shader => {
       if (!vertexRegex.test(shader.vertexShader)) return;
 
-      shader.uniforms.hubsInteractorOneTransform = { value: [] };
-      shader.uniforms.hubsInteractorTwoTransform = { value: [] };
-      shader.uniforms.hubsInteractorTwoPos = { value: [] };
-      shader.uniforms.hubsHighlightInteractorOne = { value: false };
-      shader.uniforms.hubsHighlightInteractorTwo = { value: false };
-      shader.uniforms.hubsTime = { value: 0 };
+      shader.uniforms.hubs_InteractorOneTransform = { value: [] };
+      shader.uniforms.hubs_InteractorTwoTransform = { value: [] };
+      shader.uniforms.hubs_InteractorTwoPos = { value: [] };
+      shader.uniforms.hubs_HighlightInteractorOne = { value: false };
+      shader.uniforms.hubs_HighlightInteractorTwo = { value: false };
+      shader.uniforms.hubs_Time = { value: 0 };
 
       const vchunk = `
-        if (hubsHighlightInteractorOne || hubsHighlightInteractorTwo) {
+        if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo) {
           vec4 wt = modelMatrix * vec4(transformed, 1);
 
           // Used in the fragment shader below.
-          hubsWorldPosition = wt.xyz;
+          hubs_WorldPosition = wt.xyz;
         }
       `;
 
       const vlines = shader.vertexShader.split("\n");
       const vindex = vlines.findIndex(line => vertexRegex.test(line));
       vlines.splice(vindex + 1, 0, vchunk);
-      vlines.unshift("varying vec3 hubsWorldPosition;");
-      vlines.unshift("uniform bool hubsHighlightInteractorOne;");
-      vlines.unshift("uniform bool hubsHighlightInteractorTwo;");
+      vlines.unshift("varying vec3 hubs_WorldPosition;");
+      vlines.unshift("uniform bool hubs_HighlightInteractorOne;");
+      vlines.unshift("uniform bool hubs_HighlightInteractorTwo;");
       shader.vertexShader = vlines.join("\n");
 
       const fchunk = `
-        if (hubsHighlightInteractorOne || hubsHighlightInteractorTwo) {
+        if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo) {
           mat4 it;
           vec3 ip;
           float dist1, dist2;
 
-          if (hubsHighlightInteractorOne) {
-            it = hubsInteractorOneTransform;
+          if (hubs_HighlightInteractorOne) {
+            it = hubs_InteractorOneTransform;
             ip = vec3(it[3][0], it[3][1], it[3][2]);
-            dist1 = distance(hubsWorldPosition, ip);
+            dist1 = distance(hubs_WorldPosition, ip);
           }
 
-          if (hubsHighlightInteractorTwo) {
-            it = hubsInteractorTwoTransform;
+          if (hubs_HighlightInteractorTwo) {
+            it = hubs_InteractorTwoTransform;
             ip = vec3(it[3][0], it[3][1], it[3][2]);
-            dist2 = distance(hubsWorldPosition, ip);
+            dist2 = distance(hubs_WorldPosition, ip);
           }
 
           float ratio = 0.0;
-          float pulse = sin(hubsTime / 1000.0) + 1.0;
+          float pulse = sin(hubs_Time / 1000.0) + 1.0;
           float spacing = 0.5;
           float line = spacing * pulse - spacing / 2.0;
           float lineWidth= 0.01;
-          float mody = mod(hubsWorldPosition.y, spacing);
+          float mody = mod(hubs_WorldPosition.y, spacing);
 
           if (-lineWidth + line < mody && mody < lineWidth + line) {
             // Highlight with an animated line effect
             ratio = 0.5;
           } else {
             // Highlight with a gradient falling off with distance.
-            if (hubsHighlightInteractorOne) {
+            if (hubs_HighlightInteractorOne) {
               ratio = -min(1.0, pow(dist1 * (9.0 + 3.0 * pulse), 3.0)) + 1.0;
             } 
-            if (hubsHighlightInteractorTwo) {
+            if (hubs_HighlightInteractorTwo) {
               ratio += -min(1.0, pow(dist2 * (9.0 + 3.0 * pulse), 3.0)) + 1.0;
             }
           }
@@ -108,12 +108,12 @@ function injectCustomShaderChunks(obj) {
       const flines = shader.fragmentShader.split("\n");
       const findex = flines.findIndex(line => fragRegex.test(line));
       flines.splice(findex + 1, 0, fchunk);
-      flines.unshift("varying vec3 hubsWorldPosition;");
-      flines.unshift("uniform bool hubsHighlightInteractorOne;");
-      flines.unshift("uniform mat4 hubsInteractorOneTransform;");
-      flines.unshift("uniform bool hubsHighlightInteractorTwo;");
-      flines.unshift("uniform mat4 hubsInteractorTwoTransform;");
-      flines.unshift("uniform float hubsTime;");
+      flines.unshift("varying vec3 hubs_WorldPosition;");
+      flines.unshift("uniform bool hubs_HighlightInteractorOne;");
+      flines.unshift("uniform mat4 hubs_InteractorOneTransform;");
+      flines.unshift("uniform bool hubs_HighlightInteractorTwo;");
+      flines.unshift("uniform mat4 hubs_InteractorTwoTransform;");
+      flines.unshift("uniform float hubs_Time;");
       shader.fragmentShader = flines.join("\n");
 
       if (!materialsSeen.has(object.material.uuid)) {
