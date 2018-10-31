@@ -1,6 +1,6 @@
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
-import { proxiedUrlFor } from "../utils/media-utils.js";
+import { fetchProxyable, proxiedUrlFor } from "../utils/media-utils.js";
 
 class GIFTexture extends THREE.Texture {
   constructor(frames, delays, disposals) {
@@ -65,12 +65,11 @@ async function createGIFTexture(url) {
         img.src = frames[i];
       }
     };
-    fetch(url, { mode: "cors" })
+    fetchProxyable(url, { mode: "cors" })
       .then(r => r.arrayBuffer())
       .then(rawImageData => {
         worker.postMessage(rawImageData, [rawImageData]);
-      })
-      .catch(reject);
+      });
   });
 }
 
