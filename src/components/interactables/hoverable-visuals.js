@@ -5,56 +5,43 @@
  */
 AFRAME.registerComponent("hoverable-visuals", {
   init: function() {
-    this.uniforms = [];
-    this.addVisual = this.addVisual.bind(this);
-    this.removeVisual = this.removeVisual.bind(this);
     this.interactorOneTransform = [];
     this.interactorTwoTransform = [];
   },
-  play() {
-    this.el.addEventListener("hover-start", this.addVisual);
-    this.el.addEventListener("hover-end", this.removeVisual);
-  },
-  pause() {
-    this.el.removeEventListener("hover-start", this.addVisual);
-    this.el.removeEventListener("hover-end", this.removeVisual);
-    this.uniforms = [];
-    this.interactorOne = null;
-    this.interactorTwo = null;
+  remove() {
+    this.interactorOneTransform = null;
+    this.interactorTwoTransform = null;
   },
   tick(time) {
-    if (!this.uniforms) return;
+    const uniforms = this.el.components["media-loader"].shaderUniforms;
 
-    if (this.interactorOne) {
-      this.interactorOne.matrixWorld.toArray(this.interactorOneTransform);
-    }
-    if (this.interactorTwo) {
-      this.interactorTwo.matrixWorld.toArray(this.interactorTwoTransform);
+    if (!uniforms) return;
+
+    const { hoverers } = this.el.components["hoverable"];
+
+    let interactorOne, interactorTwo;
+    for (const hoverer of hoverers) {
+      if (hoverer.id === "player-left-controller") {
+        interactorOne = hoverer.object3D;
+      } else {
+        // Either the right hand or the cursor.
+        interactorTwo = hoverer.object3D;
+      }
     }
 
-    for (const uniform of this.uniforms) {
-      uniform.hubsHighlightInteractorOne.value = !!this.interactorOne;
+    if (interactorOne) {
+      interactorOne.matrixWorld.toArray(this.interactorOneTransform);
+    }
+    if (interactorTwo) {
+      interactorTwo.matrixWorld.toArray(this.interactorTwoTransform);
+    }
+
+    for (const uniform of uniforms) {
+      uniform.hubsHighlightInteractorOne.value = !!interactorOne;
       uniform.hubsInteractorOneTransform.value = this.interactorOneTransform;
-      uniform.hubsHighlightInteractorTwo.value = !!this.interactorTwo;
+      uniform.hubsHighlightInteractorTwo.value = !!interactorTwo;
       uniform.hubsInteractorTwoTransform.value = this.interactorTwoTransform;
       uniform.hubsTime.value = time;
-    }
-  },
-  addVisual(e) {
-    if (e.detail.hand.id === "cursor") return;
-    if (e.detail.hand.id === "player-left-controller") {
-      this.interactorOne = e.detail.hand.object3D;
-    } else {
-      this.interactorTwo = e.detail.hand.object3D;
-    }
-    this.uniforms = this.el.components["gltf-model-plus"].shaderUniforms;
-  },
-  removeVisual(e) {
-    if (e.detail.hand.id === "cursor") return;
-    if (e.detail.hand.id === "player-left-controller") {
-      this.interactorOne = null;
-    } else {
-      this.interactorTwo = null;
     }
   }
 });

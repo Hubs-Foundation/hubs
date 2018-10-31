@@ -4,6 +4,7 @@ import { addAnimationComponents } from "../utils/animation";
 
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
+
 const gltfLoader = new THREE.GLTFLoader();
 let loadingObject;
 gltfLoader.load(loadingObjectSrc, gltf => {
@@ -18,6 +19,114 @@ const fetchMaxContentIndex = url => {
   return fetch(url).then(r => parseInt(r.headers.get("x-max-content-index")));
 };
 
+function injectCustomShaderChunks(obj) {
+  const vertexRegex = /\bbegin_vertex\b/;
+  const fragRegex = /\bgl_FragColor\b/;
+
+  const materialsSeen = new Set();
+  const shaderUniforms = [];
+
+  obj.traverse(object => {
+    if (!object.material || !["MeshStandardMaterial", "MeshBasicMaterial"].includes(object.material.type)) {
+      return;
+    }
+    object.material = object.material.clone();
+    object.material.onBeforeCompile = shader => {
+      if (!vertexRegex.test(shader.vertexShader)) return;
+
+      shader.uniforms.hubsInteractorOneTransform = { value: [] };
+      shader.uniforms.hubsInteractorTwoTransform = { value: [] };
+      shader.uniforms.hubsInteractorTwoPos = { value: [] };
+      shader.uniforms.hubsHighlightInteractorOne = { value: false };
+      shader.uniforms.hubsHighlightInteractorTwo = { value: false };
+      shader.uniforms.hubsTime = { value: 0 };
+
+      const vchunk = `
+        if (hubsHighlightInteractorOne || hubsHighlightInteractorTwo) {
+          vec4 wt = modelMatrix * vec4(transformed, 1);
+
+          // Used in the fragment shader below.
+          hubsWorldPosition = wt.xyz;
+        }
+      `;
+
+      const vlines = shader.vertexShader.split("\n");
+      const vindex = vlines.findIndex(line => vertexRegex.test(line));
+      vlines.splice(vindex + 1, 0, vchunk);
+      vlines.unshift("varying vec3 hubsWorldPosition;");
+      vlines.unshift("uniform bool hubsHighlightInteractorOne;");
+      vlines.unshift("uniform bool hubsHighlightInteractorTwo;");
+      shader.vertexShader = vlines.join("\n");
+
+      const fchunk = `
+        if (hubsHighlightInteractorOne || hubsHighlightInteractorTwo) {
+          mat4 it;
+          vec3 ip;
+          float dist1, dist2;
+
+          if (hubsHighlightInteractorOne) {
+            it = hubsInteractorOneTransform;
+            ip = vec3(it[3][0], it[3][1], it[3][2]);
+            dist1 = distance(hubsWorldPosition, ip);
+          }
+
+          if (hubsHighlightInteractorTwo) {
+            it = hubsInteractorTwoTransform;
+            ip = vec3(it[3][0], it[3][1], it[3][2]);
+            dist2 = distance(hubsWorldPosition, ip);
+          }
+
+          float ratio = 0.0;
+          float pulse = sin(hubsTime / 1000.0) + 1.0;
+          float spacing = 0.5;
+          float line = spacing * pulse - spacing / 2.0;
+          float lineWidth= 0.01;
+          float mody = mod(hubsWorldPosition.y, spacing);
+
+          if (-lineWidth + line < mody && mody < lineWidth + line) {
+            // Highlight with an animated line effect
+            ratio = 0.5;
+          } else {
+            // Highlight with a gradient falling off with distance.
+            if (hubsHighlightInteractorOne) {
+              ratio = -min(1.0, pow(dist1 * (9.0 + 3.0 * pulse), 3.0)) + 1.0;
+            } 
+            if (hubsHighlightInteractorTwo) {
+              ratio += -min(1.0, pow(dist2 * (9.0 + 3.0 * pulse), 3.0)) + 1.0;
+            }
+          }
+
+          ratio = min(1.0, ratio);
+
+          // Gamma corrected highlight color
+          vec3 highlightColor = vec3(0.184, 0.499, 0.933);
+
+          gl_FragColor.rgb = (gl_FragColor.rgb * (1.0 - ratio)) + (highlightColor * ratio);
+        }
+      `;
+
+      const flines = shader.fragmentShader.split("\n");
+      const findex = flines.findIndex(line => fragRegex.test(line));
+      flines.splice(findex + 1, 0, fchunk);
+      flines.unshift("varying vec3 hubsWorldPosition;");
+      flines.unshift("uniform bool hubsHighlightInteractorOne;");
+      flines.unshift("uniform mat4 hubsInteractorOneTransform;");
+      flines.unshift("uniform bool hubsHighlightInteractorTwo;");
+      flines.unshift("uniform mat4 hubsInteractorTwoTransform;");
+      flines.unshift("uniform float hubsTime;");
+      shader.fragmentShader = flines.join("\n");
+
+      if (!materialsSeen.has(object.material.uuid)) {
+        shaderUniforms.push(shader.uniforms);
+        materialsSeen.add(object.material.uuid);
+      }
+    };
+    object.material.needsUpdate = true;
+  });
+
+  return shaderUniforms;
+}
+
 AFRAME.registerComponent("media-loader", {
   schema: {
     src: { type: "string" },
@@ -30,6 +139,7 @@ AFRAME.registerComponent("media-loader", {
     this.onError = this.onError.bind(this);
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
+    this.onMediaLoaded = this.onMediaLoaded.bind(this);
     this.shapeAdded = false;
     this.hasBakedShapes = false;
   },
@@ -100,6 +210,11 @@ AFRAME.registerComponent("media-loader", {
     delete this.showLoaderTimeout;
   },
 
+  onMediaLoaded() {
+    this.clearLoadingTimeout();
+    this.shaderUniforms = injectCustomShaderChunks(this.el.object3D);
+  },
+
   async update(oldData) {
     try {
       const { src } = this.data;
@@ -135,13 +250,13 @@ AFRAME.registerComponent("media-loader", {
       if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-image");
-        this.el.addEventListener("video-loaded", this.clearLoadingTimeout, { once: true });
+        this.el.addEventListener("video-loaded", this.onMediaLoaded, { once: true });
         this.el.setAttribute("media-video", { src: accessibleUrl });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
       } else if (contentType.startsWith("image/")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
-        this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
+        this.el.addEventListener("image-loaded", this.onMediaLoaded, { once: true });
         this.el.removeAttribute("media-pager");
         this.el.setAttribute("media-image", { src: accessibleUrl, contentType });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
@@ -152,7 +267,7 @@ AFRAME.registerComponent("media-loader", {
         // 1. we pass the canonical URL to the pager so it can easily make subresource URLs
         // 2. we don't remove the media-image component -- media-pager uses that internally
         this.el.setAttribute("media-pager", { src: canonicalUrl });
-        this.el.addEventListener("preview-loaded", this.clearLoadingTimeout, { once: true });
+        this.el.addEventListener("preview-loaded", this.onMediaLoaded, { once: true });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
       } else if (
         contentType.includes("application/octet-stream") ||
@@ -165,7 +280,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "model-loaded",
           () => {
-            this.clearLoadingTimeout();
+            this.onMediaLoaded();
             this.hasBakedShapes = !!(this.el.body && this.el.body.shapes.length > (this.shapeAdded ? 1 : 0));
             this.setShapeAndScale(this.data.resize);
             addAnimationComponents(this.el);

@@ -273,112 +273,6 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   return gltf;
 }
 
-function injectCustomShaderChunks(gltf) {
-  const vertexRegex = /\bbegin_vertex\b/;
-  const fragRegex = /\bgl_FragColor\b/;
-
-  const materialsSeen = new Set();
-  const shaderUniforms = [];
-
-  gltf.scene.traverse(object => {
-    if (object.material && object.material.type === "MeshStandardMaterial") {
-      object.material = object.material.clone();
-      object.material.onBeforeCompile = shader => {
-        if (!vertexRegex.test(shader.vertexShader)) return;
-
-        shader.uniforms.hubsInteractorOneTransform = { value: [] };
-        shader.uniforms.hubsInteractorTwoTransform = { value: [] };
-        shader.uniforms.hubsInteractorTwoPos = { value: [] };
-        shader.uniforms.hubsHighlightInteractorOne = { value: false };
-        shader.uniforms.hubsHighlightInteractorTwo = { value: false };
-        shader.uniforms.hubsTime = { value: 0 };
-
-        const vchunk = `
-		  if (hubsHighlightInteractorOne || hubsHighlightInteractorTwo) {
-			vec4 wt = modelMatrix * vec4(transformed, 1);
-
-			// Used in the fragment shader below.
-			hubsWorldPosition = wt.xyz;
-		  }
-		`;
-
-        const vlines = shader.vertexShader.split("\n");
-        const vindex = vlines.findIndex(line => vertexRegex.test(line));
-        vlines.splice(vindex + 1, 0, vchunk);
-        vlines.unshift("varying vec3 hubsWorldPosition;");
-        vlines.unshift("uniform bool hubsHighlightInteractorOne;");
-        vlines.unshift("uniform bool hubsHighlightInteractorTwo;");
-        shader.vertexShader = vlines.join("\n");
-
-        const fchunk = `
-		  if (hubsHighlightInteractorOne || hubsHighlightInteractorTwo) {
-            mat4 it;
-            vec3 ip;
-            float dist1, dist2;
-
-            if (hubsHighlightInteractorOne) {
-              it = hubsInteractorOneTransform;
-              ip = vec3(it[3][0], it[3][1], it[3][2]);
-              dist1 = distance(hubsWorldPosition, ip);
-            }
-
-            if (hubsHighlightInteractorTwo) {
-              it = hubsInteractorTwoTransform;
-              ip = vec3(it[3][0], it[3][1], it[3][2]);
-              dist2 = distance(hubsWorldPosition, ip);
-            }
-
-            float ratio = 0.0;
-            float time = sin(hubsTime / 1000.0 * 2.0) / 2.0 + 0.5;
-            float spacing = 0.5;
-            float line = spacing * time - spacing / 2.0;
-            float lineWidth= 0.01;
-            float mody = mod(hubsWorldPosition.y, spacing);
-
-            if (-lineWidth + line < mody && mody < lineWidth + line) {
-              ratio = 0.5;
-            } else {
-              // Highlight with a gradient falling off with distance.
-              if (hubsHighlightInteractorOne) {
-                ratio = -min(1.0, pow(dist1 * (9.0 + 3.0 * time), 3.0)) + 1.0;
-              } 
-              if (hubsHighlightInteractorTwo) {
-                ratio += -min(1.0, pow(dist2 * (9.0 + 3.0 * time), 3.0)) + 1.0;
-              }
-            }
-
-            ratio = min(1.0, ratio);
-
-            // gamma corrected highlight color
-            vec3 highlightColor = vec3(0.184, 0.499, 0.933);
-
-			gl_FragColor.rgb = (gl_FragColor.rgb * (1.0 - ratio)) + (highlightColor * ratio);
-		  }
-		`;
-
-        const flines = shader.fragmentShader.split("\n");
-        const findex = flines.findIndex(line => fragRegex.test(line));
-        flines.splice(findex + 1, 0, fchunk);
-        flines.unshift("varying vec3 hubsWorldPosition;");
-        flines.unshift("uniform bool hubsHighlightInteractorOne;");
-        flines.unshift("uniform mat4 hubsInteractorOneTransform;");
-        flines.unshift("uniform bool hubsHighlightInteractorTwo;");
-        flines.unshift("uniform mat4 hubsInteractorTwoTransform;");
-        flines.unshift("uniform float hubsTime;");
-        shader.fragmentShader = flines.join("\n");
-
-        if (!materialsSeen.has(object.material.uuid)) {
-          shaderUniforms.push(shader.uniforms);
-          materialsSeen.add(object.material.uuid);
-        }
-      };
-      object.material.needsUpdate = true;
-    }
-  });
-
-  return shaderUniforms;
-}
-
 /**
  * Loads a GLTF model, optionally recursively "inflates" the child nodes of a model into a-entities and sets
  * whitelisted components on them if defined in the node's extras.
@@ -422,9 +316,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       gltf = await loadGLTF(src, contentType, technique);
     }
 
-    const shaderUniforms = injectCustomShaderChunks(gltf);
-
-    return { gltf, shaderUniforms };
+    return { gltf };
   },
 
   async applySrc(src, contentType) {
@@ -446,14 +338,12 @@ AFRAME.registerComponent("gltf-model-plus", {
         return;
       }
 
-      const { gltf, shaderUniforms } = await this.loadModel(
+      const { gltf } = await this.loadModel(
         src,
         contentType,
         this.preferredTechnique,
         this.data.useCache
       );
-
-      this.shaderUniforms = shaderUniforms;
 
       // If we started loading something else already
       // TODO: there should be a way to cancel loading instead
