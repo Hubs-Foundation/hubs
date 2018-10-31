@@ -500,7 +500,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   retPhxChannel
     .join()
     .receive("ok", async data => subscriptions.setVapidPublicKey(data.vapid_public_key))
-    .receive("error", res => console.error(res));
+    .receive("error", res => {
+      subscriptions.setVapidPublicKey(null);
+      console.error(res);
+    });
 
   linkChannel.setSocket(socket);
 });

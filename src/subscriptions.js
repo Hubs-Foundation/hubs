@@ -50,6 +50,10 @@ export default class Subscriptions {
     // registration becomes null if failed, non null if registered
     while (this.registration === undefined) await nextTick();
     if (!this.registration || !this.registration.pushManager) return null;
+
+    while (this.vapidPublicKey === undefined) await nextTick();
+    if (this.vapidPublicKey === null) return null;
+
     try {
       const convertedVapidKey = urlBase64ToUint8Array(this.vapidPublicKey);
 
