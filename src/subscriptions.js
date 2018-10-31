@@ -51,7 +51,15 @@ export default class Subscriptions {
     while (this.registration === undefined) await nextTick();
     if (!this.registration || !this.registration.pushManager) return null;
     try {
-      if ((await this.registration.pushManager.permissionState()) !== "granted") return null;
+      const convertedVapidKey = urlBase64ToUint8Array(this.vapidPublicKey);
+
+      if (
+        (await this.registration.pushManager.permissionState({
+          userVisibleOnly: true,
+          applicationServerKey: convertedVapidKey
+        })) !== "granted"
+      )
+        return null;
     } catch (e) {
       return null; // Chrome can throw here complaining about userVisible if push is not right
     }
