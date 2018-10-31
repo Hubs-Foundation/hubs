@@ -38,8 +38,8 @@ export const fetchProxyable = url => {
   });
 };
 
-export const loadProxyable = (loader, url) => {
-  const load = url => new Promise((resolve, reject) => loader.load(url, resolve, null, reject));
+export const loadProxyable = (loader, url, onProgress) => {
+  const load = url => new Promise((resolve, reject) => loader.load(url, resolve, onProgress, reject));
   return load(url).catch(ev => {
     console.warn(`Error loading ${url}; retrying with CORS proxy. (${ev.error})`);
     return load(proxiedUrlFor(url));

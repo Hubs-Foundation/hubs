@@ -7,6 +7,7 @@ import cubeMapPosY from "../assets/images/cubemap/posy.jpg";
 import cubeMapNegY from "../assets/images/cubemap/negy.jpg";
 import cubeMapPosZ from "../assets/images/cubemap/posz.jpg";
 import cubeMapNegZ from "../assets/images/cubemap/negz.jpg";
+import { loadProxyable } from "../utils/media-utils.js";
 
 const GLTFCache = {};
 let CachedEnvMapTexture = null;
@@ -219,7 +220,7 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   const gltfLoader = new THREE.GLTFLoader();
   gltfLoader.setLazy(true);
 
-  const { parser } = await new Promise((resolve, reject) => gltfLoader.load(gltfUrl, resolve, onProgress, reject));
+  const { parser } = await loadProxyable(gltfLoader, gltfUrl, onProgress);
 
   const materials = parser.json.materials;
   if (materials) {
