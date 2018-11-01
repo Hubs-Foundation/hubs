@@ -1070,8 +1070,12 @@ class UIRoot extends Component {
                 <button
                   className={classNames([styles.messageEntrySpawn])}
                   onClick={() => {
-                    spawnChatMessage(this.state.pendingMessage);
-                    this.setState({ pendingMessage: "" });
+                    if (this.state.pendingMessage.length > 0) {
+                      spawnChatMessage(this.state.pendingMessage);
+                      this.setState({ pendingMessage: "" });
+                    } else {
+                      this.showCreateObjectDialog();
+                    }
                   }}
                 />
               </div>
