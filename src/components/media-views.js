@@ -328,6 +328,7 @@ AFRAME.registerComponent("media-video", {
       }
 
       if (!src.startsWith("webrtc://")) {
+        // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
         texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
 
         const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);

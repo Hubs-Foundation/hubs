@@ -23,7 +23,7 @@ import ProfileEntryPanel from "./profile-entry-panel";
 import HelpDialog from "./help-dialog.js";
 import SafariDialog from "./safari-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
-import WebRTCScreenshareDialog from "./webrtc-screenshare-dialog.js";
+import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import LinkDialog from "./link-dialog.js";
@@ -567,8 +567,8 @@ class UIRoot extends Component {
     this.setState({ dialog: <WebVRRecommendDialog onClose={this.closeDialog} /> });
   };
 
-  showWebRTCScreenshareDialog = () => {
-    this.setState({ dialog: <WebRTCScreenshareDialog onClose={this.closeDialog} /> });
+  showWebRTCScreenshareUnsupportedDialog = () => {
+    this.setState({ dialog: <WebRTCScreenshareUnsupportedDialog onClose={this.closeDialog} /> });
   };
 
   onMiniInviteClicked = () => {
@@ -1156,7 +1156,7 @@ class UIRoot extends Component {
                 onToggleSpaceBubble={this.toggleSpaceBubble}
                 onShareVideo={this.shareVideo}
                 onEndShareVideo={this.endShareVideo}
-                onShareVideoNotCapable={() => this.showWebRTCScreenshareDialog()}
+                onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
                 onSpawnPen={this.spawnPen}
                 onSpawnCamera={() => this.props.scene.emit("action_spawn_camera")}
               />
