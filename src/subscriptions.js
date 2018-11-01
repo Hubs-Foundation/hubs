@@ -74,6 +74,8 @@ export default class Subscriptions {
   };
 
   toggle = async () => {
+    if (!this.registration) return;
+
     if (this._isSubscribed) {
       const pushSubscription = await this.registration.pushManager.getSubscription();
       const res = await this.hubChannel.unsubscribe(pushSubscription);
