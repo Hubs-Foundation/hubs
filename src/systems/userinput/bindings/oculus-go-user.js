@@ -39,11 +39,6 @@ export const oculusGoUserBindings = {
       xform: xforms.compose_vec2
     },
     {
-      src: [dpadNorth, dpadSouth, dpadCenter],
-      dest: { value: dpadCenterStrip },
-      xform: xforms.any
-    },
-    {
       src: {
         value: paths.device.oculusgo.button("touchpad").pressed
       },
@@ -71,6 +66,11 @@ export const oculusGoUserBindings = {
       xform: xforms.vec2dpad(0.8)
     },
     {
+      src: [dpadNorth, dpadSouth, dpadCenter],
+      dest: { value: dpadCenterStrip },
+      xform: xforms.any
+    },
+    {
       src: {
         value: dpadCenterStrip,
         bool: paths.device.oculusgo.button("touchpad").pressed
@@ -87,7 +87,7 @@ export const oculusGoUserBindings = {
       dest: {
         value: paths.actions.thaw
       },
-      xform: xforms.copyIfTrue
+      xform: xforms.copy
     },
     {
       src: {
