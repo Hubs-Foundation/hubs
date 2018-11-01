@@ -1,4 +1,3 @@
-import { paths } from "./paths";
 import { sets } from "./sets";
 
 import { MouseDevice } from "./devices/mouse";
@@ -154,7 +153,7 @@ AFRAME.registerSystem("userinput", {
     for (const { set, value } of this.pendingSetChanges) {
       this.activeSets[value ? "add" : "delete"](set);
     }
-    let runners = this.pendingSetChanges.length ? [] : this.runners;
+    const runners = this.pendingSetChanges.length ? [] : this.runners;
     if (this.pendingSetChanges.length) {
       this.pendingSetChanges.length = 0;
       this.actives = [];
@@ -200,15 +199,15 @@ AFRAME.registerSystem("userinput", {
         let active = true;
         for (const p in binding.src) {
           const path = binding.src[p];
-          let subpaths = String.split(path, "/");
-          while (binding.priority && subpaths.length) {
-            if (binding.priority < maxAmongActive(Array.join(subpaths, "/"), this.map, this.activeSets)) {
+          const subpaths = String.split(path, "/");
+          while (subpaths.length > 1) {
+            if ((binding.priority || 0) < maxAmongActive(Array.join(subpaths, "/"), this.map, this.activeSets)) {
               active = false;
             }
             subpaths.pop();
           }
-          this.actives[i] = active;
         }
+        this.actives[i] = active;
       }
     }
 
@@ -233,83 +232,5 @@ AFRAME.registerSystem("userinput", {
     }
 
     this.runners = runners;
-
-    if (this.frame[paths.actions.logDebugFrame] || this.frame[paths.actions.log]) {
-      const line = "__________________________________________________________________";
-      const bindingToString = b => {
-        let sb = [];
-        sb.push("  ");
-        sb.push("src: ");
-        sb.push("\n");
-        for (const s of Object.keys(b.src)) {
-          sb.push("  ");
-          sb.push("  ");
-          sb.push(s);
-          sb.push(" : ");
-          sb.push(b.src[s]);
-          sb.push("\n");
-        }
-        sb.push("  ");
-        sb.push("dest: ");
-        sb.push("\n");
-        for (const s of Object.keys(b.dest)) {
-          sb.push("  ");
-          sb.push("  ");
-          sb.push(s);
-          sb.push(" : ");
-          sb.push(b.dest[s]);
-          sb.push("\n");
-        }
-        sb.push("  ");
-        sb.push("priority");
-        sb.push(" : ");
-        sb.push(b.priority || 0);
-        for (const s of b.sets) {
-          sb.push("\n");
-          sb.push("  ");
-          sb.push("in set");
-          sb.push(" : ");
-          sb.push(s);
-          sb.push("\n");
-        }
-        sb.push(line);
-        sb.push("\n");
-        return sb.join("");
-      };
-      let sb = [];
-      sb.push("\n");
-      sb.push(line);
-      sb.push("\n");
-      sb.push("actives:");
-      sb.push("\n");
-      sb.push(line);
-      sb.push("\n");
-      for (let i = 0; i < this.runners.length; i++) {
-        if (this.actives[i]) {
-          sb.push(bindingToString(this.runners[i]));
-        }
-      }
-      sb.push("\n");
-      sb.push(line);
-      sb.push("\n");
-      sb.push("inactives:");
-      sb.push("\n");
-      sb.push(line);
-      sb.push("\n");
-      for (let i = 0; i < this.runners.length; i++) {
-        if (!this.actives[i]) {
-          sb.push(bindingToString(this.runners[i]));
-        }
-      }
-      console.log("active and inactive bindings");
-      console.log(sb.join(""));
-      console.log("runners", this.runners);
-      console.log("actives", this.actives);
-      console.log("xformStates", this.xformStates);
-      console.log("devices", this.activeDevices);
-      console.log("map", this.map);
-      console.log("activeSets", this.activeSets);
-      console.log("frame", this.frame);
-    }
   }
 });

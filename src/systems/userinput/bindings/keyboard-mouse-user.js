@@ -158,7 +158,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: {
         value: paths.actions.stopGazeTeleport
       },
-      xform: xforms.falling
+      xform: xforms.falling,
+      priority: 100
     }
   ],
 
@@ -310,6 +311,20 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.actions.cursor.grab },
       xform: xforms.rising
+    }
+  ],
+  [sets.inputFocused]: [
+    {
+      src: { value: "/device/keyboard" },
+      dest: { value: paths.noop },
+      xform: xforms.noop,
+      priority: 1000
+    },
+    {
+      src: { value: "/device/keyboard/l" },
+      dest: { value: paths.actions.logDebugFrame },
+      xform: xforms.rising,
+      priority: 1100
     }
   ]
 });

@@ -1,5 +1,6 @@
 export const sets = {};
 sets.global = "global";
+sets.inputFocused = "inputFocused";
 sets.cursorHoveringOnPen = "cursorHoveringOnPen";
 sets.cursorHoveringOnCamera = "cursorHoveringOnCamera";
 sets.cursorHoveringOnInteractable = "cursorHoveringOnInteractable";
