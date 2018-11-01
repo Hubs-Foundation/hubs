@@ -2,6 +2,7 @@ import { paths } from "./paths";
 const line = "__________________________________________________________________";
 const bindingToString = b => {
   const sb = [];
+  sb.push("{\n");
   sb.push("  ");
   sb.push("src: ");
   sb.push("\n");
@@ -36,8 +37,8 @@ const bindingToString = b => {
     sb.push(s);
     sb.push("\n");
   }
-  sb.push(line);
   sb.push("\n");
+  sb.push("}\n");
   return sb.join("");
 };
 AFRAME.registerSystem("userinput-debug", {
@@ -66,7 +67,19 @@ AFRAME.registerSystem("userinput-debug", {
       sb.push("\n");
       for (let i = 0; i < userinput.runners.length; i++) {
         if (!userinput.actives[i]) {
+          sb.push("\n");
+          sb.push("The inactive binding:\n");
           sb.push(bindingToString(userinput.runners[i]));
+          sb.push("\n");
+          sb.push("is overridden by the following ");
+          sb.push(userinput.overrides[i].length);
+          sb.push(" bindings.\n");
+          for (const o of userinput.overrides[i]) {
+            sb.push("\n");
+            sb.push("Override:\n");
+            sb.push(bindingToString(o));
+            sb.push("\n");
+          }
         }
       }
       console.log("active and inactive bindings");

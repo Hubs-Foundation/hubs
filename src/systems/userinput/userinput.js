@@ -157,6 +157,7 @@ AFRAME.registerSystem("userinput", {
     if (this.pendingSetChanges.length) {
       this.pendingSetChanges.length = 0;
       this.actives = [];
+      this.overrides = [];
       for (const mapping of this.registeredMappings) {
         for (const setName in mapping) {
           if (!this.activeSets.has(setName) || !mapping[setName]) continue;
@@ -169,12 +170,13 @@ AFRAME.registerSystem("userinput", {
             }
             this.actives.push(active);
             runners.push(binding);
+            this.overrides.push([]);
           }
         }
       }
 
       const maxAmongActive = (path, map) => {
-        let max = -1;
+        let max = { priority: -1 };
         const bindings = map.get(path);
         if (!bindings) {
           return -1;
@@ -186,8 +188,8 @@ AFRAME.registerSystem("userinput", {
               active = true;
             }
           }
-          if (active && binding.priority && binding.priority > max) {
-            max = binding.priority;
+          if (active && binding.priority && binding.priority > max.priority) {
+            max = binding;
           }
         }
         return max;
@@ -201,7 +203,13 @@ AFRAME.registerSystem("userinput", {
           const path = binding.src[p];
           const subpaths = String.split(path, "/");
           while (subpaths.length > 1) {
-            if ((binding.priority || 0) < maxAmongActive(Array.join(subpaths, "/"), this.map, this.activeSets)) {
+            const highestPriorityBindingForSubpath = maxAmongActive(
+              Array.join(subpaths, "/"),
+              this.map,
+              this.activeSets
+            );
+            if ((binding.priority || 0) < highestPriorityBindingForSubpath.priority) {
+              this.overrides[i].push(highestPriorityBindingForSubpath);
               active = false;
             }
             subpaths.pop();
