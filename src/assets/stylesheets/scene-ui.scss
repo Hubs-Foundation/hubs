@@ -38,10 +38,6 @@
   justify-content: center;
   pointer-events: auto;
 
-  button {
-    @extend %action-button;
-    border: 0;
-  }
 }
 
 :local(.logoTagline) {
@@ -146,4 +142,24 @@
   img {
     width: 200px;
   }
+}
+
+:local(.createButtons) {
+  position: relative;
+  display: flex;
+}
+
+:local(.create-button) {
+  @extend %action-button;
+  width: 100%;
+  border: 0;
+}
+
+:local(.options-button) {
+  @extend %fa-icon-button;
+  @extend %fa-icon-big;
+  position: absolute;
+  right: 10px;
+  top: -12px;
+  color: white;
 }
