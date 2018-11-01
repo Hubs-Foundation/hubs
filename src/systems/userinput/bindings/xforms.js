@@ -128,13 +128,12 @@ export const xforms = {
     }
   },
   any: function(frame, src, dest) {
-    for (let i = 0; i < src.length; i++) {
-      if (frame[src[i]]) {
+    for (const path in src) {
+      if (frame[src[path]]) {
         frame[dest.value] = true;
         return;
       }
     }
-
     frame[dest.value] = false;
   },
   touch_axis_scroll(scale = 1) {

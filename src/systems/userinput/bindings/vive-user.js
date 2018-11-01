@@ -30,10 +30,6 @@ const characterAcceleration = v("nonNormalizedCharacterAcceleration");
 const lGripFalling = v("left/grip/falling");
 const lGripRising = v("left/grip/rising");
 const leftBoost = v("left/boost");
-const lTriggerStartTeleport = v("left/trigger/startTeleport");
-const lDpadCenterStartTeleport = v("left/dpadCenter/startTeleport");
-const lTriggerStopTeleport = v("left/trigger/stopTeleport");
-const lTouchpadStopTeleport = v("left/touchpad/stopTeleport");
 
 const rButton = paths.device.vive.right.button;
 const rAxis = paths.device.vive.right.axis;
@@ -44,6 +40,7 @@ const rDpadSouth = v("right/dpad/south");
 const rDpadEast = v("right/dpad/east");
 const rDpadWest = v("right/dpad/west");
 const rDpadCenter = v("right/dpad/center");
+const rDpadCenterStrip = v("right/dpad/centerStrip");
 const rTriggerFalling = v("right/trigger/falling");
 const rTriggerRising = v("right/trigger/rising");
 const rTouchpadRising = v("right/touchpad/rising");
@@ -52,15 +49,14 @@ const rightBoost = v("right/boost");
 const rGripRising = v("right/grip/rising");
 const rTriggerRisingGrab = v("right/trigger/rising/grab");
 const rGripRisingGrab = v("right/grab/rising/grab");
-const rGripFalling = v("right/grip/rising");
+const rGripFalling = v("right/grip/falling");
 const cursorDrop1 = v("right/cursorDrop1");
 const cursorDrop2 = v("right/cursorDrop2");
 const rHandDrop1 = v("right/drop1");
 const rHandDrop2 = v("right/drop2");
-const rTriggerStartTeleport = v("right/trigger/startTeleport");
-const rDpadNorthStartTeleport = v("right/dpadNorth/startTeleport");
 const rTriggerStopTeleport = v("right/trigger/stopTeleport");
 const rTouchpadStopTeleport = v("right/touchpad/stopTeleport");
+const rootForFrozenOverrideWhenHolding = "rootForFrozenOverrideWhenHolding";
 
 const ensureFrozenViaDpad = v("dpad/ensureFrozen");
 const ensureFrozenViaKeyboard = v("keyboard/ensureFrozen");
@@ -81,76 +77,23 @@ const wasd_vec2 = k("wasd_vec2");
 const arrows_vec2 = k("arrows_vec2");
 const keyboardBoost = k("boost");
 
-const freezeMappings = [
-  {
-    src: [ensureFrozenViaDpad, ensureFrozenViaKeyboard],
-    dest: { value: paths.actions.ensureFrozen },
-    xform: xforms.any
-  },
-  {
-    src: [thawViaDpad, thawViaKeyboard],
-    dest: { value: paths.actions.thaw },
-    xform: xforms.any
-  }
-];
-
 const nothingHeldLeft = [
   {
     src: { value: lButton("trigger").pressed },
-    dest: { value: lTriggerStartTeleport },
+    dest: { value: paths.actions.leftHand.startTeleport },
     xform: xforms.rising,
     root: lTriggerRising,
     priority: 100
-  },
-  {
-    src: {
-      bool: lTouchpadRising,
-      value: lDpadCenter
-    },
-    dest: { value: lDpadCenterStartTeleport },
-    xform: xforms.copyIfTrue
-  },
-  {
-    src: [lTriggerStartTeleport, lDpadCenterStartTeleport],
-    dest: { value: paths.actions.leftHand.startTeleport },
-    xform: xforms.any
   }
 ];
 const nothingHeldRight = [
   {
     src: { value: rButton("trigger").pressed },
-    dest: { value: rTriggerStartTeleport },
+    dest: { value: paths.actions.rightHand.startTeleport },
     xform: xforms.rising,
     root: rTriggerRising,
     priority: 100
-  },
-  {
-    src: {
-      bool: rTouchpadRising,
-      value: rDpadNorth
-    },
-    dest: { value: rDpadNorthStartTeleport },
-    xform: xforms.copyIfTrue
-  },
-  {
-    src: {
-      bool: rButton("touchpad").pressed,
-      value: rDpadCenter
-    },
-    dest: { value: ensureFrozenViaDpad },
-    xform: xforms.copyIfTrue
-  },
-  {
-    src: { value: rTouchpadFalling },
-    dest: { value: thawViaDpad },
-    xform: xforms.copy
-  },
-  {
-    src: [rTriggerStartTeleport, rDpadNorthStartTeleport],
-    dest: { value: paths.actions.rightHand.startTeleport },
-    xform: xforms.any
-  },
-  ...freezeMappings
+  }
 ];
 
 export const viveUserBindings = {
@@ -263,7 +206,12 @@ export const viveUserBindings = {
         west: rDpadWest,
         center: rDpadCenter
       },
-      xform: xforms.vec2dpad(0.35)
+      xform: xforms.vec2dpad(0.35, false, true)
+    },
+    {
+      src: [rDpadNorth, rDpadSouth, rDpadCenter],
+      dest: { value: rDpadCenterStrip },
+      xform: xforms.any
     },
     {
       src: {
@@ -315,7 +263,17 @@ export const viveUserBindings = {
       dest: { value: thawViaKeyboard },
       xform: xforms.falling
     },
-    ...freezeMappings,
+    {
+      src: { value: rButton("touchpad").pressed, bool: rDpadCenterStrip },
+      dest: { value: ensureFrozenViaDpad },
+      root: rootForFrozenOverrideWhenHolding,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: rTouchpadFalling },
+      dest: { value: thawViaDpad },
+      xform: xforms.copy
+    },
     {
       src: {
         bool: rTouchpadRising,
@@ -482,20 +440,10 @@ export const viveUserBindings = {
   [sets.leftHandTeleporting]: [
     {
       src: { value: lButton("trigger").pressed },
-      dest: { value: lTriggerStopTeleport },
+      dest: { value: paths.actions.leftHand.stopTeleport },
       xform: xforms.falling,
       root: lTriggerFalling,
       priority: 100
-    },
-    {
-      src: { value: lButton("touchpad").pressed },
-      dest: { value: lTouchpadStopTeleport },
-      xform: xforms.falling
-    },
-    {
-      src: [lTriggerStopTeleport, lTouchpadStopTeleport],
-      dest: { value: paths.actions.leftHand.stopTeleport },
-      xform: xforms.any
     }
   ],
 
@@ -660,6 +608,13 @@ export const viveUserBindings = {
       src: [cursorDrop1, cursorDrop2],
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.any
+    },
+    {
+      src: null,
+      dest: { value: ensureFrozenViaDpad },
+      root: rootForFrozenOverrideWhenHolding,
+      priority: 100,
+      xform: xforms.always(false)
     }
   ],
 
@@ -763,6 +718,13 @@ export const viveUserBindings = {
       src: [rHandDrop1, rHandDrop2],
       dest: { value: paths.actions.rightHand.drop },
       xform: xforms.any
+    },
+    {
+      src: null,
+      dest: { value: ensureFrozenViaDpad },
+      root: rootForFrozenOverrideWhenHolding,
+      priority: 100,
+      xform: xforms.always(false)
     }
   ],
   [sets.rightHandHoveringOnPen]: [],
@@ -858,6 +820,18 @@ export const viveUserBindings = {
       xform: xforms.falling,
       root: rTriggerFalling,
       priority: 400
+    }
+  ],
+  [sets.globalPost]: [
+    {
+      src: [ensureFrozenViaDpad, ensureFrozenViaKeyboard],
+      dest: { value: paths.actions.ensureFrozen },
+      xform: xforms.any
+    },
+    {
+      src: [thawViaDpad, thawViaKeyboard],
+      dest: { value: paths.actions.thaw },
+      xform: xforms.any
     }
   ]
 };
