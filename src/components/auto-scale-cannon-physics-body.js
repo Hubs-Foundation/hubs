@@ -3,14 +3,14 @@ function almostEquals(epsilon, u, v) {
 }
 
 AFRAME.registerComponent("auto-scale-cannon-physics-body", {
-  dependencies: ["body"],
+  dependencies: ["ammo-body"],
   schema: {
     equalityEpsilon: { default: 0.001 },
     debounceDelay: { default: 100 }
   },
 
   init() {
-    this.body = this.el.components["body"];
+    this.body = this.el.components["ammo-body"];
     this.prevScale = this.el.object3D.scale.clone();
     this.nextUpdateTime = -1;
   },
@@ -25,7 +25,7 @@ AFRAME.registerComponent("auto-scale-cannon-physics-body", {
 
     if (this.nextUpdateTime > 0 && t > this.nextUpdateTime) {
       this.nextUpdateTime = -1;
-      this.body.updateCannonScale();
+      this.el.setAttribute("ammo-body", { meshScale: scale });
     }
   }
 });

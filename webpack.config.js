@@ -257,5 +257,8 @@ module.exports = (env, argv) => ({
         BUILD_VERSION: process.env.BUILD_VERSION
       })
     })
-  ]
+  ],
+  node: {
+    fs: "empty"
+  }
 });

@@ -31,7 +31,6 @@ AFRAME.registerComponent("media-loader", {
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
     this.shapeAdded = false;
-    this.hasBakedShapes = false;
   },
 
   setShapeAndScale(resize) {
@@ -39,25 +38,16 @@ AFRAME.registerComponent("media-loader", {
     const box = getBox(this.el, mesh);
     const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
     this.el.object3DMap.mesh.scale.multiplyScalar(scaleCoefficient);
-    if (this.el.body && this.shapeAdded && this.el.body.shapes.length > 1) {
-      this.el.removeAttribute("shape");
-      this.shapeAdded = false;
-    } else if (!this.hasBakedShapes) {
-      const center = new THREE.Vector3();
-      const { min, max } = box;
-      const halfExtents = {
-        x: (Math.abs(min.x - max.x) / 2) * scaleCoefficient,
-        y: (Math.abs(min.y - max.y) / 2) * scaleCoefficient,
-        z: (Math.abs(min.z - max.z) / 2) * scaleCoefficient
-      };
-      center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
-      mesh.position.sub(center);
-      this.el.setAttribute("shape", {
-        shape: "box",
-        halfExtents: halfExtents
-      });
-      this.shapeAdded = true;
-    }
+    this.el.setAttribute("ammo-body", { meshScale: this.el.object3DMap.mesh.scale });
+    const center = new THREE.Vector3();
+    const { min, max } = box;
+    const halfExtents = {
+      x: (Math.abs(min.x - max.x) / 2) * scaleCoefficient,
+      y: (Math.abs(min.y - max.y) / 2) * scaleCoefficient,
+      z: (Math.abs(min.z - max.z) / 2) * scaleCoefficient
+    };
+    center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
+    mesh.position.sub(center);
   },
 
   tick(t, dt) {
@@ -86,7 +76,6 @@ AFRAME.registerComponent("media-loader", {
       this.loadingClip.play();
     }
     this.el.setObject3D("mesh", mesh);
-    this.hasBakedShapes = !!(this.el.body && this.el.body.shapes.length > 0);
     this.setShapeAndScale(true);
     delete this.showLoaderTimeout;
   },
@@ -166,7 +155,6 @@ AFRAME.registerComponent("media-loader", {
           "model-loaded",
           () => {
             this.clearLoadingTimeout();
-            this.hasBakedShapes = !!(this.el.body && this.el.body.shapes.length > (this.shapeAdded ? 1 : 0));
             this.setShapeAndScale(this.data.resize);
             addAnimationComponents(this.el);
           },

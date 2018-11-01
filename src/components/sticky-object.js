@@ -1,6 +1,6 @@
 /* global THREE, CANNON, AFRAME */
 AFRAME.registerComponent("sticky-object", {
-  dependencies: ["body"],
+  dependencies: ["ammo-body"],
 
   schema: {
     autoLockOnLoad: { default: false },
@@ -37,7 +37,7 @@ AFRAME.registerComponent("sticky-object", {
     if (this.el.components.networked && !NAF.utils.isMine(this.el)) return;
 
     this.locked = locked;
-    this.el.setAttribute("body", { type: locked ? "static" : "dynamic" });
+    this.el.setAttribute("ammo-body", { type: locked ? "kinematic" : "dynamic" });
   },
 
   _onBodyLoaded() {
@@ -50,18 +50,19 @@ AFRAME.registerComponent("sticky-object", {
     // Happens if the object is still being held by another hand
     if (this.el.is("grabbed")) return;
 
-    if (
-      this.data.autoLockOnRelease &&
-      this.el.body.velocity.lengthSquared() < this.data.autoLockSpeedLimit * this.data.autoLockSpeedLimit
-    ) {
-      this.setLocked(true);
-    }
-    this.el.body.collisionResponse = true;
+    //TODO:
+    // if (
+    //   this.data.autoLockOnRelease &&
+    //   this.el.body.velocity.lengthSquared() < this.data.autoLockSpeedLimit * this.data.autoLockSpeedLimit
+    // ) {
+    //   this.setLocked(true);
+    // }
+    // this.el.body.collisionResponse = true;
   },
 
   _onGrab() {
     this.setLocked(false);
-    this.el.body.collisionResponse = false;
+    // this.el.body.collisionResponse = false;
   },
 
   remove() {
