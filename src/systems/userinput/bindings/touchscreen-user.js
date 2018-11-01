@@ -1,6 +1,7 @@
 import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
+import { addSetsToBindings } from "./utils";
 
 const zero = "/vars/touchscreen/zero";
 const forward = "/vars/touchscreen/pinchDeltaForward";
@@ -13,7 +14,7 @@ const gyroCamDelta = "vars/gyro/gyroCameraDelta";
 const gyroCamDeltaXScaled = "vars/gyro/gyroCameraDelta/x/scaled";
 const gyroCamDeltaYScaled = "vars/gyro/gyroCameraDelta/y/scaled";
 
-export const touchscreenUserBindings = {
+export const touchscreenUserBindings = addSetsToBindings({
   [sets.global]: [
     {
       src: { value: paths.device.touchscreen.pinch.delta },
@@ -129,4 +130,4 @@ export const touchscreenUserBindings = {
       priority: 200
     }
   ]
-};
+});

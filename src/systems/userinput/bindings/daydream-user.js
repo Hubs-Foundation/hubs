@@ -1,6 +1,7 @@
 import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
+import { addSetsToBindings } from "./utils";
 
 // vars
 const v = s => `/vars/daydream/${s}`;
@@ -53,7 +54,7 @@ const dropOnCenterOrSouth = [
   }
 ];
 
-export const daydreamUserBindings = {
+export const daydreamUserBindings = addSetsToBindings({
   [sets.global]: [
     {
       src: {
@@ -262,4 +263,4 @@ export const daydreamUserBindings = {
     },
     ...dropOnCenterOrSouth
   ]
-};
+});

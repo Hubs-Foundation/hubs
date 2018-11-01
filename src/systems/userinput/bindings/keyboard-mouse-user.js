@@ -1,6 +1,7 @@
 import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
+import { addSetsToBindings } from "./utils";
 
 const wasd_vec2 = "/var/mouse-and-keyboard/wasd_vec2";
 const keyboardCharacterAcceleration = "/var/mouse-and-keyboard/keyboardCharacterAcceleration";
@@ -28,7 +29,7 @@ const dropWithRMBorEscBindings = [
   }
 ];
 
-export const keyboardMouseUserBindings = {
+export const keyboardMouseUserBindings = addSetsToBindings({
   [sets.global]: [
     {
       src: {
@@ -258,6 +259,7 @@ export const keyboardMouseUserBindings = {
     {
       src: { value: paths.device.mouse.buttonLeft },
       xform: xforms.noop,
+      dest: { value: paths.noop },
       priority: 200,
       root: "lmb"
     },
@@ -310,4 +312,4 @@ export const keyboardMouseUserBindings = {
       xform: xforms.rising
     }
   ]
-};
+});

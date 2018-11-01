@@ -1,6 +1,7 @@
 import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
+import { addSetsToBindings } from "./utils";
 
 const touchpad = "/vars/oculusgo/touchpad";
 const touchpadPressed = "/vars/oculusgo/touchpadPressed";
@@ -25,7 +26,7 @@ const grabBinding = {
   priority: 200
 };
 
-export const oculusGoUserBindings = {
+export const oculusGoUserBindings = addSetsToBindings({
   [sets.global]: [
     {
       src: {
@@ -241,4 +242,4 @@ export const oculusGoUserBindings = {
       xform: xforms.copyIfTrue
     }
   ]
-};
+});

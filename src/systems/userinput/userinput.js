@@ -26,32 +26,32 @@ import { resolveActionSets } from "./resolve-action-sets";
 import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
 
-const priorityMap = new Map();
-function prioritizeBindings(registeredMappings, activeSets) {
-  const activeBindings = new Set();
-  priorityMap.clear();
+function buildMap(registeredMappings) {
+  const map = new Map();
+  const add = (path, binding) => {
+    if (!map.has(path)) {
+      map.set(path, [binding]);
+    } else {
+      map.get(path).push(binding);
+    }
+  };
   for (const mapping of registeredMappings) {
     for (const setName in mapping) {
-      if (!activeSets.has(setName) || !mapping[setName]) continue;
       for (const binding of mapping[setName]) {
-        const { root, priority } = binding;
-        const prevBinding = priorityMap.get(root);
-        if (!root || !priority) {
-          activeBindings.add(binding);
-        } else if (!prevBinding) {
-          activeBindings.add(binding);
-          priorityMap.set(root, binding);
-        } else if (priority > prevBinding.priority) {
-          activeBindings.delete(priorityMap.get(root));
-          activeBindings.add(binding);
-          priorityMap.set(root, binding);
-        } else if (prevBinding.priority === priority) {
-          console.error("equal priorities on same root", binding, priorityMap.get(root));
+        if (Array.isArray(binding.src)) {
+          for (const path of binding.src) {
+            add(path, binding);
+          }
+        } else {
+          for (const srcKey in binding.src) {
+            const path = binding.src[srcKey];
+            add(path, binding);
+          }
         }
       }
     }
   }
-  return activeBindings;
+  return map;
 }
 
 AFRAME.registerSystem("userinput", {
@@ -71,6 +71,7 @@ AFRAME.registerSystem("userinput", {
     this.activeDevices = new Set([new MouseDevice(), new AppAwareMouseDevice(), new KeyboardDevice(), new HudDevice()]);
 
     this.registeredMappings = new Set([keyboardDebuggingBindings]);
+    this.map = buildMap(this.registeredMappings);
     this.xformStates = new Map();
 
     const appAwareTouchscreenDevice = new AppAwareTouchscreenDevice();
@@ -91,6 +92,7 @@ AFRAME.registerSystem("userinput", {
           this.registeredMappings.add(keyboardMouseUserBindings);
         }
       }
+      this.map = buildMap(this.registeredMappings);
     };
     this.el.sceneEl.addEventListener("enter-vr", updateBindingsForVRMode);
     this.el.sceneEl.addEventListener("exit-vr", updateBindingsForVRMode);
@@ -127,6 +129,7 @@ AFRAME.registerSystem("userinput", {
           this.registeredMappings.add(gamepadBindings);
         }
         this.activeDevices.add(gamepadDevice);
+        this.map = buildMap(this.registeredMappings);
       },
       false
     );
@@ -136,6 +139,7 @@ AFRAME.registerSystem("userinput", {
         for (const device of this.activeDevices) {
           if (device.gamepad === e.gamepad) {
             this.activeDevices.delete(device);
+            this.map = buildMap(this.registeredMappings);
             return;
           }
         }
@@ -150,16 +154,73 @@ AFRAME.registerSystem("userinput", {
     for (const { set, value } of this.pendingSetChanges) {
       this.activeSets[value ? "add" : "delete"](set);
     }
-    this.pendingSetChanges.length = 0;
+    let runners = this.pendingSetChanges.length ? [] : this.runners;
+    if (this.pendingSetChanges.length) {
+      this.pendingSetChanges.length = 0;
+      this.actives = [];
+      for (const mapping of this.registeredMappings) {
+        for (const setName in mapping) {
+          if (!this.activeSets.has(setName) || !mapping[setName]) continue;
+          for (const binding of mapping[setName]) {
+            let active = false;
+            for (const set of binding.sets) {
+              if (this.activeSets.has(set)) {
+                active = true;
+              }
+            }
+            this.actives.push(active);
+            runners.push(binding);
+          }
+        }
+      }
+
+      const maxAmongActive = (path, map) => {
+        let max = -1;
+        const bindings = map.get(path);
+        if (!bindings) {
+          return -1;
+        }
+        for (const binding of bindings) {
+          let active = false;
+          for (const set of binding.sets) {
+            if (this.activeSets.has(set)) {
+              active = true;
+            }
+          }
+          if (active && binding.priority && binding.priority > max) {
+            max = binding.priority;
+          }
+        }
+        return max;
+      };
+
+      for (const i in runners) {
+        if (!this.actives[i]) continue;
+        const binding = runners[i];
+        let active = true;
+        for (const p in binding.src) {
+          const path = binding.src[p];
+          let subpaths = String.split(path, "/");
+          while (binding.priority && subpaths.length) {
+            if (binding.priority < maxAmongActive(Array.join(subpaths, "/"), this.map, this.activeSets)) {
+              active = false;
+            }
+            subpaths.pop();
+          }
+          this.actives[i] = active;
+        }
+      }
+    }
 
     this.frame = {};
     for (const device of this.activeDevices) {
       device.write(this.frame);
     }
 
-    const activeBindings = prioritizeBindings(this.registeredMappings, this.activeSets);
-    for (const binding of activeBindings) {
-      const bindingExistedLastFrame = this.activeBindings && this.activeBindings.has(binding);
+    for (const i in runners) {
+      const binding = runners[i];
+      if (!this.actives[i]) continue;
+      const bindingExistedLastFrame = this.runners && this.runners.includes(binding);
       if (!bindingExistedLastFrame) {
         this.xformStates.delete(binding);
       }
@@ -171,14 +232,84 @@ AFRAME.registerSystem("userinput", {
       }
     }
 
-    this.activeBindings = activeBindings;
+    this.runners = runners;
 
     if (this.frame[paths.actions.logDebugFrame] || this.frame[paths.actions.log]) {
-      console.log("frame", this.frame);
-      console.log("sets", this.activeSets);
-      console.log("bindings", this.activeBindings);
-      console.log("devices", this.activeDevices);
+      const line = "__________________________________________________________________";
+      const bindingToString = b => {
+        let sb = [];
+        sb.push("  ");
+        sb.push("src: ");
+        sb.push("\n");
+        for (const s of Object.keys(b.src)) {
+          sb.push("  ");
+          sb.push("  ");
+          sb.push(s);
+          sb.push(" : ");
+          sb.push(b.src[s]);
+          sb.push("\n");
+        }
+        sb.push("  ");
+        sb.push("dest: ");
+        sb.push("\n");
+        for (const s of Object.keys(b.dest)) {
+          sb.push("  ");
+          sb.push("  ");
+          sb.push(s);
+          sb.push(" : ");
+          sb.push(b.dest[s]);
+          sb.push("\n");
+        }
+        sb.push("  ");
+        sb.push("priority");
+        sb.push(" : ");
+        sb.push(b.priority || 0);
+        for (const s of b.sets) {
+          sb.push("\n");
+          sb.push("  ");
+          sb.push("in set");
+          sb.push(" : ");
+          sb.push(s);
+          sb.push("\n");
+        }
+        sb.push(line);
+        sb.push("\n");
+        return sb.join("");
+      };
+      let sb = [];
+      sb.push("\n");
+      sb.push(line);
+      sb.push("\n");
+      sb.push("actives:");
+      sb.push("\n");
+      sb.push(line);
+      sb.push("\n");
+      for (let i = 0; i < this.runners.length; i++) {
+        if (this.actives[i]) {
+          sb.push(bindingToString(this.runners[i]));
+        }
+      }
+      sb.push("\n");
+      sb.push(line);
+      sb.push("\n");
+      sb.push("inactives:");
+      sb.push("\n");
+      sb.push(line);
+      sb.push("\n");
+      for (let i = 0; i < this.runners.length; i++) {
+        if (!this.actives[i]) {
+          sb.push(bindingToString(this.runners[i]));
+        }
+      }
+      console.log("active and inactive bindings");
+      console.log(sb.join(""));
+      console.log("runners", this.runners);
+      console.log("actives", this.actives);
       console.log("xformStates", this.xformStates);
+      console.log("devices", this.activeDevices);
+      console.log("map", this.map);
+      console.log("activeSets", this.activeSets);
+      console.log("frame", this.frame);
     }
   }
 });

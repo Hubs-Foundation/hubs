@@ -1,6 +1,7 @@
 import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
+import { addSetsToBindings } from "./utils";
 
 const v = name => {
   return `/vive-user/vive-var/${name}`;
@@ -119,7 +120,7 @@ const teleportRight = [
   }
 ];
 
-export const viveUserBindings = {
+export const viveUserBindings = addSetsToBindings({
   [sets.global]: [
     {
       src: {
@@ -806,4 +807,4 @@ export const viveUserBindings = {
       priority: 400
     }
   ]
-};
+});

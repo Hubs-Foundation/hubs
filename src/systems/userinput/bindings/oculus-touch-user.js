@@ -1,6 +1,7 @@
 import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
+import { addSetsToBindings } from "./utils";
 
 const name = "/touch/var/";
 
@@ -58,7 +59,7 @@ const rightTouchSnapLeft = `${name}/right/snap-left`;
 const keyboardSnapRight = `${name}/keyboard/snap-right`;
 const keyboardSnapLeft = `${name}/keyboard/snap-left`;
 
-export const oculusTouchUserBindings = {
+export const oculusTouchUserBindings = addSetsToBindings({
   [sets.global]: [
     {
       src: {
@@ -665,4 +666,4 @@ export const oculusTouchUserBindings = {
   ],
 
   [sets.rightHandHoveringOnNothing]: []
-};
+});

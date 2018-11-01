@@ -5,8 +5,8 @@ const radToDeg = THREE.Math.radToDeg;
 
 AFRAME.registerComponent("pitch-yaw-rotator", {
   schema: {
-    minPitch: { default: -50 },
-    maxPitch: { default: 50 }
+    minPitch: { default: -65 },
+    maxPitch: { default: 65 }
   },
 
   init() {
