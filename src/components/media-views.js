@@ -86,10 +86,10 @@ async function createVideoEl(src) {
   videoEl.loop = true;
   videoEl.crossOrigin = "anonymous";
 
-  if (!src.startsWith("webrtc://")) {
+  if (!src.startsWith("hubs://")) {
     videoEl.src = src;
   } else {
-    const streamClientId = src.substring(9);
+    const streamClientId = src.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
     const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
     videoEl.srcObject = new MediaStream(stream.getVideoTracks());
   }
@@ -327,7 +327,7 @@ AFRAME.registerComponent("media-video", {
         return;
       }
 
-      if (!src.startsWith("webrtc://")) {
+      if (!src.startsWith("hubs://")) {
         // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
         texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
 

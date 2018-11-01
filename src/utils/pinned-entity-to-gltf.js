@@ -22,8 +22,8 @@ export default function pinnedEntityToGltf(el) {
   if (components["media-loader"]) {
     const mediaSrc = components["media-loader"].data.src;
 
-    if (mediaSrc.startsWith("webrtc://")) {
-      // Do not persist webrtc media shares
+    if (mediaSrc.startsWith("hubs://") && mediaSrc.endsWith("/video")) {
+      // Do not persist hubs client video urls
       return null;
     }
 
