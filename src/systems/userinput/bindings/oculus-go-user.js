@@ -79,7 +79,7 @@ export const oculusGoUserBindings = {
         value: paths.actions.ensureFrozen
       },
       root: rootForFrozenOverrideWhenHolding,
-      priority: 100
+      priority: 100,
       xform: xforms.copyIfTrue
     },
     {
