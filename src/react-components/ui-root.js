@@ -30,6 +30,7 @@ import CreateObjectDialog from "./create-object-dialog.js";
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
 import TwoDHUD from "./2d-hud";
+import { spawnChatMessage } from "./chat-message";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -454,7 +455,7 @@ class UIRoot extends Component {
     if (!this.props.forcedVREntryType || !this.props.forcedVREntryType.endsWith("_now")) {
       this.goToEntryStep(ENTRY_STEPS.audio_setup);
     } else {
-      setTimeout(this.onAudioReadyButton, 3000); // Need to wait otherwise input doesn't work :/
+      this.onAudioReadyButton();
     }
   };
 
@@ -687,6 +688,9 @@ class UIRoot extends Component {
   };
 
   renderEntryStartPanel = () => {
+    const textRows = this.state.pendingMessage.split("\n").length;
+    const pendingMessageTextareaHeight = textRows * 28 + "px";
+    const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
     const hasPush = navigator.serviceWorker && "PushManager" in window;
 
     return (
@@ -700,12 +704,21 @@ class UIRoot extends Component {
           </div>
 
           <form onSubmit={this.sendMessage}>
-            <div className={styles.messageEntry}>
-              <input
-                className={styles.messageEntryInput}
+            <div className={styles.messageEntry} style={{ height: pendingMessageFieldHeight }}>
+              <textarea
+                className={classNames([styles.messageEntryInput, "chat-focus-target"])}
                 value={this.state.pendingMessage}
+                rows={textRows}
+                style={{ height: pendingMessageTextareaHeight }}
                 onFocus={e => e.target.select()}
                 onChange={e => this.setState({ pendingMessage: e.target.value })}
+                onKeyDown={e => {
+                  if (e.keyCode === 13 && !e.shiftKey) {
+                    this.sendMessage(e);
+                  } else if (e.keyCode === 27) {
+                    e.target.blur();
+                  }
+                }}
                 placeholder="Send a message..."
               />
               <input className={styles.messageEntrySubmit} type="submit" value="send" />
@@ -999,6 +1012,10 @@ class UIRoot extends Component {
     const entryFinished = this.state.entryStep === ENTRY_STEPS.finished;
     const showVREntryButton = entryFinished && this.props.availableVREntryTypes.isInHMD;
 
+    const textRows = this.state.pendingMessage.split("\n").length;
+    const pendingMessageTextareaHeight = textRows * 28 + "px";
+    const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.ui}>
@@ -1018,14 +1035,30 @@ class UIRoot extends Component {
           {entryFinished && <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} />}
           {entryFinished && (
             <form onSubmit={this.sendMessage}>
-              <div className={styles.messageEntryInRoom}>
-                <input
-                  className={classNames([styles.messageEntryInput, styles.messageEntryInputInRoom])}
+              <div className={styles.messageEntryInRoom} style={{ height: pendingMessageFieldHeight }}>
+                <textarea
+                  style={{ height: pendingMessageTextareaHeight }}
+                  className={classNames([
+                    styles.messageEntryInput,
+                    styles.messageEntryInputInRoom,
+                    "chat-focus-target"
+                  ])}
                   value={this.state.pendingMessage}
+                  rows={textRows}
                   onFocus={e => e.target.select()}
                   onChange={e => {
                     e.stopPropagation();
                     this.setState({ pendingMessage: e.target.value });
+                  }}
+                  onKeyDown={e => {
+                    if (e.keyCode === 13 && !e.shiftKey) {
+                      this.sendMessage(e);
+                    } else if (e.keyCode === 13 && e.shiftKey && e.ctrlKey) {
+                      spawnChatMessage(e.target.value);
+                      this.setState({ pendingMessage: "" });
+                    } else if (e.keyCode === 27) {
+                      e.target.blur();
+                    }
                   }}
                   placeholder="Send a message..."
                 />
@@ -1033,6 +1066,17 @@ class UIRoot extends Component {
                   className={classNames([styles.messageEntrySubmit, styles.messageEntrySubmitInRoom])}
                   type="submit"
                   value="send"
+                />
+                <button
+                  className={classNames([styles.messageEntrySpawn])}
+                  onClick={() => {
+                    if (this.state.pendingMessage.length > 0) {
+                      spawnChatMessage(this.state.pendingMessage);
+                      this.setState({ pendingMessage: "" });
+                    } else {
+                      this.showCreateObjectDialog();
+                    }
+                  }}
                 />
               </div>
             </form>

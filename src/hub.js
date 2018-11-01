@@ -316,6 +316,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.APP.scene = scene;
 
   registerNetworkSchemas();
+
   remountUI({
     hubChannel,
     linkChannel,
@@ -324,6 +325,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     exitScene: entryManager.exitScene,
     initialIsSubscribed: subscriptions.isSubscribed()
   });
+
+  scene.addEventListener("action_focus_chat", () => document.querySelector(".chat-focus-target").focus());
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 
@@ -501,8 +504,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubPhxChannel.on("message", ({ session_id, type, body }) => {
     const userInfo = hubPhxPresence.state[session_id];
     if (!userInfo) return;
+    const maySpawn = scene.is("entered");
 
-    addToPresenceLog({ name: userInfo.metas[0].profile.displayName, type, body });
+    addToPresenceLog({ name: userInfo.metas[0].profile.displayName, type, body, maySpawn });
   });
 
   linkChannel.setSocket(socket);
