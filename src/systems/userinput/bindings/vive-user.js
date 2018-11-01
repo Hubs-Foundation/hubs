@@ -47,6 +47,7 @@ const rDpadCenter = v("right/dpad/center");
 const rTriggerFalling = v("right/trigger/falling");
 const rTriggerRising = v("right/trigger/rising");
 const rTouchpadRising = v("right/touchpad/rising");
+const rTouchpadFalling = v("right/touchpad/falling");
 const rightBoost = v("right/boost");
 const rGripRising = v("right/grip/rising");
 const rTriggerRisingGrab = v("right/trigger/rising/grab");
@@ -57,9 +58,15 @@ const cursorDrop2 = v("right/cursorDrop2");
 const rHandDrop1 = v("right/drop1");
 const rHandDrop2 = v("right/drop2");
 const rTriggerStartTeleport = v("right/trigger/startTeleport");
-const rDpadCenterStartTeleport = v("right/dpadCenter/startTeleport");
+const rDpadNorthStartTeleport = v("right/dpadNorth/startTeleport");
 const rTriggerStopTeleport = v("right/trigger/stopTeleport");
 const rTouchpadStopTeleport = v("right/touchpad/stopTeleport");
+
+const ensureFrozenViaDpad = v("dpad/ensureFrozen");
+const ensureFrozenViaKeyboard = v("keyboard/ensureFrozen");
+
+const thawViaDpad = v("dpad/thaw");
+const thawViaKeyboard = v("keyboard/thaw");
 
 const rSnapRight = v("right/snap-right");
 const rSnapLeft = v("right/snap-left");
@@ -74,7 +81,20 @@ const wasd_vec2 = k("wasd_vec2");
 const arrows_vec2 = k("arrows_vec2");
 const keyboardBoost = k("boost");
 
-const teleportLeft = [
+const freezeMappings = [
+  {
+    src: [ensureFrozenViaDpad, ensureFrozenViaKeyboard],
+    dest: { value: paths.actions.ensureFrozen },
+    xform: xforms.any
+  },
+  {
+    src: [thawViaDpad, thawViaKeyboard],
+    dest: { value: paths.actions.thaw },
+    xform: xforms.any
+  }
+];
+
+const nothingHeldLeft = [
   {
     src: { value: lButton("trigger").pressed },
     dest: { value: lTriggerStartTeleport },
@@ -96,7 +116,7 @@ const teleportLeft = [
     xform: xforms.any
   }
 ];
-const teleportRight = [
+const nothingHeldRight = [
   {
     src: { value: rButton("trigger").pressed },
     dest: { value: rTriggerStartTeleport },
@@ -107,16 +127,30 @@ const teleportRight = [
   {
     src: {
       bool: rTouchpadRising,
-      value: rDpadCenter
+      value: rDpadNorth
     },
-    dest: { value: rDpadCenterStartTeleport },
+    dest: { value: rDpadNorthStartTeleport },
     xform: xforms.copyIfTrue
   },
   {
-    src: [rTriggerStartTeleport, rDpadCenterStartTeleport],
+    src: {
+      bool: rButton("touchpad").pressed,
+      value: rDpadCenter
+    },
+    dest: { value: ensureFrozenViaDpad },
+    xform: xforms.copyIfTrue
+  },
+  {
+    src: { value: rTouchpadFalling },
+    dest: { value: thawViaDpad },
+    xform: xforms.copy
+  },
+  {
+    src: [rTriggerStartTeleport, rDpadNorthStartTeleport],
     dest: { value: paths.actions.rightHand.startTeleport },
     xform: xforms.any
-  }
+  },
+  ...freezeMappings
 ];
 
 export const viveUserBindings = {
@@ -242,6 +276,15 @@ export const viveUserBindings = {
     },
     {
       src: {
+        value: rButton("touchpad").pressed
+      },
+      dest: {
+        value: rTouchpadFalling
+      },
+      xform: xforms.falling
+    },
+    {
+      src: {
         bool: rTouchpadRising,
         value: rDpadEast
       },
@@ -264,14 +307,15 @@ export const viveUserBindings = {
     },
     {
       src: { value: paths.device.keyboard.key(" ") },
-      dest: { value: paths.actions.ensureFrozen },
+      dest: { value: ensureFrozenViaKeyboard },
       xform: xforms.copy
     },
     {
       src: { value: paths.device.keyboard.key(" ") },
-      dest: { value: paths.actions.thaw },
+      dest: { value: thawViaKeyboard },
       xform: xforms.falling
     },
+    ...freezeMappings,
     {
       src: {
         bool: rTouchpadRising,
@@ -433,7 +477,7 @@ export const viveUserBindings = {
       xform: xforms.any
     }
   ],
-  [sets.leftHandHoveringOnNothing]: [...teleportLeft],
+  [sets.leftHandHoveringOnNothing]: [...nothingHeldLeft],
 
   [sets.leftHandTeleporting]: [
     {
@@ -455,7 +499,7 @@ export const viveUserBindings = {
     }
   ],
 
-  [sets.rightHandHoveringOnNothing]: [...teleportRight],
+  [sets.rightHandHoveringOnNothing]: [...nothingHeldRight],
 
   [sets.cursorHoveringOnNothing]: [],
 
