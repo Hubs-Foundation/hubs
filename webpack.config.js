@@ -240,6 +240,12 @@ module.exports = (env, argv) => ({
         to: "hub-preview.png"
       }
     ]),
+    new CopyWebpackPlugin([
+      {
+        from: "src/hub.service.js",
+        to: "hub.service.js"
+      }
+    ]),
     // Extract required css and add a content hash.
     new ExtractTextPlugin({
       filename: "assets/stylesheets/[name]-[md5:contenthash:hex:20].css",

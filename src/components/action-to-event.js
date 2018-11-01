@@ -8,7 +8,7 @@ AFRAME.registerComponent("action-to-event", {
 
   tick() {
     const userinput = AFRAME.scenes[0].systems.userinput;
-    if (userinput.readFrameValueAtPath(this.data.path)) {
+    if (userinput.get(this.data.path)) {
       this.el.emit(this.data.event);
     }
   }

@@ -90,7 +90,9 @@ class UIRoot extends Component {
     isSupportAvailable: PropTypes.bool,
     presenceLogEntries: PropTypes.array,
     presences: PropTypes.object,
-    sessionId: PropTypes.string
+    sessionId: PropTypes.string,
+    subscriptions: PropTypes.object,
+    initialIsSubscribed: PropTypes.bool
   };
 
   state = {
@@ -159,6 +161,11 @@ class UIRoot extends Component {
     this.props.scene.removeEventListener("exit", this.exit);
   }
 
+  updateSubscribedState = () => {
+    const isSubscribed = this.props.subscriptions && this.props.subscriptions.isSubscribed();
+    this.setState({ isSubscribed });
+  };
+
   onSceneLoaded = () => {
     this.setState({ sceneLoaded: true });
   };
@@ -185,6 +192,13 @@ class UIRoot extends Component {
 
   spawnPen = () => {
     this.props.scene.emit("penButtonPressed");
+  };
+
+  onSubscribeChanged = async () => {
+    if (!this.props.subscriptions) return;
+
+    await this.props.subscriptions.toggle();
+    this.updateSubscribedState();
   };
 
   handleStartEntry = () => {
@@ -713,6 +727,8 @@ class UIRoot extends Component {
   };
 
   renderEntryStartPanel = () => {
+    const hasPush = navigator.serviceWorker && "PushManager" in window;
+
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>{this.props.hubName}</div>
@@ -740,6 +756,20 @@ class UIRoot extends Component {
             </div>
           </form>
         </div>
+
+        {hasPush && (
+          <div className={entryStyles.subscribe}>
+            <input
+              id="subscribe"
+              type="checkbox"
+              onChange={this.onSubscribeChanged}
+              checked={this.state.isSubscribed === undefined ? this.props.initialIsSubscribed : this.state.isSubscribed}
+            />
+            <label htmlFor="subscribe">
+              <FormattedMessage id="entry.notify_me" />
+            </label>
+          </div>
+        )}
 
         <div className={entryStyles.buttonContainer}>
           <WithHoverSound>

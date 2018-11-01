@@ -110,7 +110,7 @@ AFRAME.registerComponent("camera-tool", {
     const grabber = this.el.components.grabbable.grabbers[0];
     if (grabber && !!pathsMap[grabber.id]) {
       const paths = pathsMap[grabber.id];
-      if (AFRAME.scenes[0].systems.userinput.readFrameValueAtPath(paths.takeSnapshot)) {
+      if (AFRAME.scenes[0].systems.userinput.get(paths.takeSnapshot)) {
         this.takeSnapshotNextTick = true;
       }
     }
