@@ -26,6 +26,7 @@ const lTriggerRisingGrab = v("right/trigger/rising/grab");
 const lGripRisingGrab = v("right/grab/rising/grab");
 const lTouchpadRising = v("left/touchpad/rising");
 const lCharacterAcceleration = v("left/characterAcceleration");
+const characterAcceleration = v("nonNormalizedCharacterAcceleration");
 const lGripFalling = v("left/grip/falling");
 const lGripRising = v("left/grip/rising");
 const leftBoost = v("left/boost");
@@ -69,6 +70,8 @@ const k = name => {
 const keyboardSnapRight = k("snap-right");
 const keyboardSnapLeft = k("snap-left");
 const keyboardCharacterAcceleration = k("characterAcceleration");
+const wasd_vec2 = k("wasd_vec2");
+const arrows_vec2 = k("arrows_vec2");
 const keyboardBoost = k("boost");
 
 const teleportLeft = [
@@ -317,13 +320,31 @@ export const viveUserBindings = {
     },
     {
       src: {
+        w: paths.device.keyboard.key("arrowup"),
+        a: paths.device.keyboard.key("arrowleft"),
+        s: paths.device.keyboard.key("arrowdown"),
+        d: paths.device.keyboard.key("arrowright")
+      },
+      dest: { vec2: arrows_vec2 },
+      xform: xforms.wasd_to_vec2
+    },
+    {
+      src: {
         w: paths.device.keyboard.key("w"),
         a: paths.device.keyboard.key("a"),
         s: paths.device.keyboard.key("s"),
         d: paths.device.keyboard.key("d")
       },
-      dest: { vec2: keyboardCharacterAcceleration },
+      dest: { vec2: wasd_vec2 },
       xform: xforms.wasd_to_vec2
+    },
+    {
+      src: {
+        first: wasd_vec2,
+        second: arrows_vec2
+      },
+      dest: { value: keyboardCharacterAcceleration },
+      xform: xforms.max_vec2
     },
     {
       src: {
@@ -331,9 +352,14 @@ export const viveUserBindings = {
         second: keyboardCharacterAcceleration
       },
       dest: {
-        value: paths.actions.characterAcceleration
+        value: characterAcceleration
       },
-      xform: xforms.add_vec2
+      xform: xforms.max_vec2
+    },
+    {
+      src: { value: characterAcceleration },
+      dest: { value: paths.actions.characterAcceleration },
+      xform: xforms.normalize_vec2
     },
     {
       src: { value: paths.device.keyboard.key("shift") },
