@@ -149,13 +149,13 @@
   display: flex;
 }
 
-:local(.create-button) {
+:local(.createButton) {
   @extend %action-button;
   width: 100%;
   border: 0;
 }
 
-:local(.options-button) {
+:local(.optionsButton) {
   @extend %fa-icon-button;
   @extend %fa-icon-big;
   position: absolute;
