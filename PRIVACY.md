@@ -1,6 +1,6 @@
 # Privacy Notice for Hubs and Spoke
 
-Version 3.0, October 16, 2018
+Version 3.1, October 16, 2018
 
 ## At Mozilla (that’s us), we believe that privacy is fundamental to a healthy internet.
 
@@ -14,7 +14,7 @@ In this Privacy Notice, we explain what data may be accessible to Mozilla or oth
   </summary>
 
 - **Avatar data**: We receive and send to others in the Room the name of your Avatar, its position in the Room, and your interactions with objects in the Room.  Mozilla does not record or store this data. You can optionally store information about your Avatar in your browser’s local storage.  
-- **Room data**: Rooms are publicly accessible to anyone with the URL. Mozilla receives data about the virtual objects and Avatars in a Room and shares that data with others in the Room.   
+- **Room data**: Rooms are publicly accessible to anyone with the URL. Mozilla receives data about the virtual objects and Avatars in a Room and shares that data with others in the Room or who have been in the room.   
 - **Voice data**: If your microphone is on, Mozilla receives and sends audio to other users in the Room. Mozilla does not record or store the audio.  *Be aware that once you agree to let Hubs use your microphone, it will stay on as long as you remain in a Hubs room, unless you turn it off.*
 - You can learn more by looking at the [code itself](https://github.com/mozilla/hubs) for Hubs. [Janus SFU](https://github.com/mozilla/janus-plugin-sfu), [Reticulum](https://github.com/mozilla/reticulum), [Hubs](https://github.com/mozilla/hubs), [Hubs-Ops](https://github.com/mozilla/hubs-ops)
 </details>

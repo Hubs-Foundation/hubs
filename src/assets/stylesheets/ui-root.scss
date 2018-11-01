@@ -203,10 +203,12 @@
   -moz-appearance: none;
   -webkit-appearance: none;
   outline-style: none;
+  overflow: hidden;
+  resize: none;
   background-color: transparent;
   color: black;
   padding: 8px 1.25em;
-  line-height: 2em;
+  line-height: 28px;
   font-size: 1.1em;
   width: 100%;
   border: 0px;
@@ -223,9 +225,11 @@
 :local(.message-entry-submit) {
   @extend %action-button;
   position: absolute;
-  right: 12px;
+  right: 10px;
   height: 32px;
   min-width: 80px;
+  bottom: 8px;
+  border-radius: 10px;
 }
 
 :local(.message-entry-in-room) {
@@ -245,11 +249,29 @@
   border-radius: 16px;
   pointer-events: auto;
   opacity: 0.3;
-  transition: opacity 0.25s linear;
+  transition: opacity 0.15s linear;
 
   :local(.message-entry-input-in-room) {
     color: white;
     padding: 8px 1.25em;
+    margin-left: 32px;
+  }
+
+  :local(.message-entry-spawn) {
+    @extend %action-button;
+    position: absolute;
+    left: 12px;
+    height: 32px;
+    width: 32px;
+    bottom: 8px;
+    min-width: auto;
+    background-size: 90%;
+    background-image: url(../spawn_message.png);
+    background-position-x: 1px;
+    background-position-y: 1px;
+    padding: 0;
+    border-radius: 16px;
+    visibility: hidden;
   }
 
   :local(.message-entry-submit-in-room) {
@@ -258,11 +280,15 @@
   }
 }
 
-:local(.message-entry-in-room):hover {
+:local(.message-entry-in-room):focus-within {
   opacity: 1.0;
-  transition: opacity 0.25s linear;
+  transition: opacity 0.15s linear;
 
   :local(.message-entry-submit-in-room) {
+    visibility: visible;
+  }
+
+  :local(.message-entry-spawn) {
     visibility: visible;
   }
 }
