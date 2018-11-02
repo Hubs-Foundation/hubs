@@ -114,6 +114,7 @@ AFRAME.registerComponent("media-loader", {
   },
 
   onMediaLoaded() {
+    this.clearLoadingTimeout();
     this.setupHoverableVisuals();
   },
 
