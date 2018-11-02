@@ -8,7 +8,8 @@ const interactorTwoTransform = [];
  */
 AFRAME.registerComponent("hoverable-visuals", {
   schema: {
-    cursorController: { type: "selector" }
+    cursorController: { type: "selector" },
+    enableSweepingEffect: { type: "boolean", default: true }
   },
   init() {
     // uniforms and boundingSphere are set from the component responsible for loading the mesh.
@@ -54,7 +55,7 @@ AFRAME.registerComponent("hoverable-visuals", {
     }
 
     for (const uniform of this.uniforms.values()) {
-      uniform.hubs_EnableSweepingEffect.value = true;
+      uniform.hubs_EnableSweepingEffect.value = this.data.enableSweepingEffect;
       uniform.hubs_SweepParams.value = this.sweepParams;
 
       uniform.hubs_HighlightInteractorOne.value = !!interactorOne;
