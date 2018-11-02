@@ -431,6 +431,10 @@
                     </a-entity>
                 </template>
 
+                <template data-name="Head">
+                    <a-entity id="player-head" visible="false" bone-visibility></a-entity>
+                </template>
+
                 <template data-name="LeftHand">
                     <a-entity bone-visibility hover-visuals="hand: left; controller: #player-left-controller"></a-entity>
                 </template>
@@ -439,9 +443,6 @@
                     <a-entity bone-visibility hover-visuals="hand: right; controller: #player-right-controller"></a-entity>
                 </template>
 
-                <template data-name="RightHand">
-                    <a-entity bone-visibility></a-entity>
-                </template>
             </a-entity>
         </a-entity>
 
