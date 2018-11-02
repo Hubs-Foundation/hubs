@@ -71,7 +71,9 @@
       outline-style: none;
       width: 24px;
       height: 24px;
-      background-size: 100%;
+      background-size: 20px;
+      background-position: center;
+      background-repeat: no-repeat;
       border: 0;
       display: flex;
       justify-content: center;
@@ -79,25 +81,21 @@
       align-self: flex-start;
       cursor: pointer;
       margin-right: 6px;
+      border-radius: 12px;
       background-color: transparent;
+
+      &:hover {
+        background-color: $action-color;
+      }
     }
 
     :local(.spawn-message) {
       background-image: url(../spawn_message.png);
     }
 
-    :local(.spawn-message):hover {
-      background-image: url(../spawn_message-hover.png);
-    }
-
-
     // TODO replace these icons with share button
     :local(.share) {
-      background-image: url(../spawn_message.png);
-    }
-
-    :local(.share):hover {
-      background-image: url(../spawn_message-hover.png);
+      background-image: url(../share_message.png);
     }
 
     &:local(.media) {
