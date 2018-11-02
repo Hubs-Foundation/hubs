@@ -102,9 +102,7 @@ class SceneUI extends Component {
                   <FormattedMessage id="scene.create_button" />
                 </button>
                 <button className={styles.optionsButton} onClick={() => this.setState({ showCustomRoomDialog: true })}>
-                  <i>
-                    <FontAwesomeIcon icon={faEllipsisH} />
-                  </i>
+                  <FontAwesomeIcon icon={faEllipsisH} />
                 </button>
               </div>
               <a href={tweetLink} rel="noopener noreferrer" target="_blank" className={styles.tweetButton}>

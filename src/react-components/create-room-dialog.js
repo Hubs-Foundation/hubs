@@ -55,7 +55,7 @@ export default class CreateRoomDialog extends Component {
               )}
               <div className="custom-scene-form__buttons">
                 <button className="custom-scene-form__action-button">
-                  <span>create</span>
+                  <span>Create Room</span>
                 </button>
               </div>
             </div>
