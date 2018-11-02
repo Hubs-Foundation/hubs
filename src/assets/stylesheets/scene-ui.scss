@@ -95,6 +95,12 @@
 :local(.attribution) {
   font-size: 1.0em;
   white-space: wrap;
+
+  a {
+    font-size: 0.8em;
+    color: black;
+    pointer-events: auto;
+  }
 }
 
 :local(.screenshot) {
