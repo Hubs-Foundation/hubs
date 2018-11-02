@@ -23,7 +23,7 @@ class SceneUI extends Component {
     sceneId: PropTypes.string,
     sceneName: PropTypes.string,
     sceneDescription: PropTypes.string,
-    sceneAttribution: PropTypes.string,
+    sceneAttributions: PropTypes.object,
     sceneScreenshotURL: PropTypes.string
   };
 
@@ -77,6 +77,47 @@ class SceneUI extends Component {
       tweetText
     )}`;
 
+    let attributions;
+
+    const toAttributionSpan = a => {
+      if (a.url) {
+        const source = a.url.indexOf("sketchfab.com")
+          ? "on Sketchfab"
+          : a.url.indexOf("poly.google.com")
+            ? "on Google Poly"
+            : "";
+
+        return (
+          <span key={a.url}>
+            <a href={a.url} target="_blank" rel="noopener noreferrer">
+              {a.name} by {a.author} {source}
+            </a>&nbsp;
+          </span>
+        );
+      } else {
+        return (
+          <span key={`${a.name} ${a.author}`}>
+            {a.name} by {a.author}&nbsp;
+          </span>
+        );
+      }
+    };
+
+    if (this.props.sceneAttributions) {
+      if (!this.props.sceneAttributions.extras) {
+        attributions = (
+          <span>
+            <span>by {this.props.sceneAttributions.creator}</span>&nbsp;
+            <br />
+            {this.props.sceneAttributions.content && this.props.sceneAttributions.content.map(toAttributionSpan)}
+          </span>
+        );
+      } else {
+        // Legacy
+        attributions = <span>{this.props.sceneAttributions.extras}</span>;
+      }
+    }
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.ui}>
@@ -115,7 +156,7 @@ class SceneUI extends Component {
           </div>
           <div className={styles.info}>
             <div className={styles.name}>{this.props.sceneName}</div>
-            <div className={styles.attribution}>{this.props.sceneAttribution}</div>
+            <div className={styles.attribution}>{attributions}</div>
           </div>
           <div className={styles.spoke}>
             <div className={styles.madeWith}>made with</div>
