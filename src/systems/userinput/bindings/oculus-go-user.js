@@ -223,8 +223,8 @@ export const oculusGoUserBindings = {
     },
     {
       src: {
-        value: dpadCenter,
-        bool: touchpadPressed
+        value: dpadCenterStrip,
+        bool: touchpadReleased
       },
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.copyIfTrue
@@ -275,8 +275,8 @@ export const oculusGoUserBindings = {
     },
     {
       src: {
-        value: dpadCenter,
-        bool: touchpadPressed
+        value: dpadCenterStrip,
+        bool: touchpadReleased
       },
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.copyIfTrue
