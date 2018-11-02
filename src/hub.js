@@ -33,6 +33,8 @@ import "./components/virtual-gamepad-controls";
 import "./components/ik-controller";
 import "./components/hand-controls2";
 import "./components/character-controller";
+import "./components/hoverable-visuals";
+import "./components/hover-visuals";
 import "./components/haptic-feedback";
 import "./components/networked-video-player";
 import "./components/offset-relative-to";

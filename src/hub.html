@@ -145,6 +145,7 @@
                     grabbable
                     stretchable="useWorldPosition: true; usePhysics: never"
                     hoverable
+                    hoverable-visuals="cursorController: #cursor-controller"
                     auto-scale-cannon-physics-body
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
                     position-at-box-shape-border="target:.delete-button"
@@ -436,11 +437,11 @@
             </template>
 
             <template data-name="LeftHand">
-              <a-entity bone-visibility></a-entity>
+              <a-entity bone-visibility hover-visuals="hand: left; controller: #player-left-controller"></a-entity>
             </template>
 
             <template data-name="RightHand">
-              <a-entity bone-visibility></a-entity>
+              <a-entity bone-visibility hover-visuals="hand: right; controller: #player-right-controller"></a-entity>
             </template>
 
           </a-entity>
