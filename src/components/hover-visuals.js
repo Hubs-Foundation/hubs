@@ -1,3 +1,5 @@
+const interactorTransform = [];
+
 /**
  * Applies effects to a hoverer based on hover state.
  * @namespace interactables
@@ -8,27 +10,30 @@ AFRAME.registerComponent("hover-visuals", {
     hand: { type: "string" },
     controller: { type: "selector" }
   },
-  init: function() {
+  init() {
     // uniforms are set from the component responsible for loading the mesh.
     this.uniforms = null;
-    this.interactorTransform = [];
   },
   remove() {
-    this.interactorTransform = null;
+    this.uniforms = null;
   },
   tick() {
-    if (!this.uniforms) return;
+    if (!this.uniforms || !this.uniforms.size) return;
 
-    this.el.object3D.matrixWorld.toArray(this.interactorTransform);
+    this.el.object3D.matrixWorld.toArray(interactorTransform);
     const hovering = this.data.controller.components["super-hands"].state.has("hover-start");
 
-    for (const uniform of this.uniforms) {
+    for (const uniform of this.uniforms.values()) {
       if (this.data.hand === "left") {
         uniform.hubs_HighlightInteractorOne.value = hovering;
-        uniform.hubs_InteractorOneTransform.value = this.interactorTransform;
+        uniform.hubs_InteractorOnePos[0] = interactorTransform[12];
+        uniform.hubs_InteractorOnePos[1] = interactorTransform[13];
+        uniform.hubs_InteractorOnePos[2] = interactorTransform[14];
       } else {
         uniform.hubs_HighlightInteractorTwo.value = hovering;
-        uniform.hubs_InteractorTwoTransform.value = this.interactorTransform;
+        uniform.hubs_InteractorTwoPos[0] = interactorTransform[12];
+        uniform.hubs_InteractorTwoPos[1] = interactorTransform[13];
+        uniform.hubs_InteractorTwoPos[2] = interactorTransform[14];
       }
     }
   }

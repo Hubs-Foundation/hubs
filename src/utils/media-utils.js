@@ -144,8 +144,7 @@ export function injectCustomShaderChunks(obj) {
   const fragRegex = /\bgl_FragColor\b/;
   const validMaterials = ["MeshStandardMaterial", "MeshBasicMaterial", "MobileStandardMaterial"];
 
-  const materialsSeen = new Set();
-  const shaderUniforms = [];
+  const shaderUniforms = new Map();
 
   obj.traverse(object => {
     if (!object.material || !validMaterials.includes(object.material.type)) {
@@ -155,11 +154,10 @@ export function injectCustomShaderChunks(obj) {
     object.material.onBeforeCompile = shader => {
       if (!vertexRegex.test(shader.vertexShader)) return;
 
-      shader.uniforms.hubs_InteractorOneTransform = { value: [] };
-      shader.uniforms.hubs_InteractorTwoTransform = { value: [] };
-      shader.uniforms.hubs_InteractorTwoPos = { value: [] };
       shader.uniforms.hubs_EnableSweepingEffect = { value: false };
-      shader.uniforms.hubs_SweepParams = { value: [] };
+      shader.uniforms.hubs_SweepParams = { value: [0, 0] };
+      shader.uniforms.hubs_InteractorOnePos = { value: [0, 0, 0] };
+      shader.uniforms.hubs_InteractorTwoPos = { value: [0, 0, 0] };
       shader.uniforms.hubs_HighlightInteractorOne = { value: false };
       shader.uniforms.hubs_HighlightInteractorTwo = { value: false };
       shader.uniforms.hubs_Time = { value: 0 };
@@ -188,16 +186,13 @@ export function injectCustomShaderChunks(obj) {
       flines.unshift("uniform bool hubs_EnableSweepingEffect;");
       flines.unshift("uniform vec2 hubs_SweepParams;");
       flines.unshift("uniform bool hubs_HighlightInteractorOne;");
-      flines.unshift("uniform mat4 hubs_InteractorOneTransform;");
+      flines.unshift("uniform vec3 hubs_InteractorOnePos;");
       flines.unshift("uniform bool hubs_HighlightInteractorTwo;");
-      flines.unshift("uniform mat4 hubs_InteractorTwoTransform;");
+      flines.unshift("uniform vec3 hubs_InteractorTwoPos;");
       flines.unshift("uniform float hubs_Time;");
       shader.fragmentShader = flines.join("\n");
 
-      if (!materialsSeen.has(object.material.uuid)) {
-        shaderUniforms.push(shader.uniforms);
-        materialsSeen.add(object.material.uuid);
-      }
+      shaderUniforms.set(object.material.uuid, shader.uniforms);
     };
     object.material.needsUpdate = true;
   });

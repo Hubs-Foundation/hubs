@@ -1,18 +1,12 @@
 if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo) {
-  mat4 it;
-  vec3 ip;
   float dist1, dist2;
 
   if (hubs_HighlightInteractorOne) {
-    it = hubs_InteractorOneTransform;
-    ip = vec3(it[3][0], it[3][1], it[3][2]);
-    dist1 = distance(hubs_WorldPosition, ip);
+    dist1 = distance(hubs_WorldPosition, hubs_InteractorOnePos);
   }
 
   if (hubs_HighlightInteractorTwo) {
-    it = hubs_InteractorTwoTransform;
-    ip = vec3(it[3][0], it[3][1], it[3][2]);
-    dist2 = distance(hubs_WorldPosition, ip);
+    dist2 = distance(hubs_WorldPosition, hubs_InteractorTwoPos);
   }
 
   float size = hubs_SweepParams.t - hubs_SweepParams.s;
