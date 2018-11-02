@@ -25,7 +25,7 @@ import { resolveActionSets } from "./resolve-action-sets";
 import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
 
-function buildMap(registeredMappings) {
+function buildBindingsForSrcs(registeredMappings) {
   const map = new Map();
   const add = (path, binding) => {
     if (!map.has(path)) {
@@ -70,7 +70,7 @@ AFRAME.registerSystem("userinput", {
     this.activeDevices = new Set([new MouseDevice(), new AppAwareMouseDevice(), new KeyboardDevice(), new HudDevice()]);
 
     this.registeredMappings = new Set([keyboardDebuggingBindings]);
-    this.map = buildMap(this.registeredMappings);
+    this.bindingsForSrc = buildBindingsForSrcs(this.registeredMappings);
     this.xformStates = new Map();
 
     const appAwareTouchscreenDevice = new AppAwareTouchscreenDevice();
@@ -91,7 +91,7 @@ AFRAME.registerSystem("userinput", {
           this.registeredMappings.add(keyboardMouseUserBindings);
         }
       }
-      this.map = buildMap(this.registeredMappings);
+      this.bindingsForSrc = buildBindingsForSrcs(this.registeredMappings);
     };
     this.el.sceneEl.addEventListener("enter-vr", updateBindingsForVRMode);
     this.el.sceneEl.addEventListener("exit-vr", updateBindingsForVRMode);
@@ -128,7 +128,7 @@ AFRAME.registerSystem("userinput", {
           this.registeredMappings.add(gamepadBindings);
         }
         this.activeDevices.add(gamepadDevice);
-        this.map = buildMap(this.registeredMappings);
+        this.bindingsForSrc = buildBindingsForSrcs(this.registeredMappings);
       },
       false
     );
@@ -138,7 +138,7 @@ AFRAME.registerSystem("userinput", {
         for (const device of this.activeDevices) {
           if (device.gamepad === e.gamepad) {
             this.activeDevices.delete(device);
-            this.map = buildMap(this.registeredMappings);
+            this.bindingsForSrc = buildBindingsForSrcs(this.registeredMappings);
             return;
           }
         }
@@ -205,7 +205,7 @@ AFRAME.registerSystem("userinput", {
           while (subpaths.length > 1) {
             const highestPriorityBindingForSubpath = maxAmongActive(
               Array.join(subpaths, "/"),
-              this.map,
+              this.bindingsForSrc,
               this.activeSets
             );
             if ((binding.priority || 0) < highestPriorityBindingForSubpath.priority) {
