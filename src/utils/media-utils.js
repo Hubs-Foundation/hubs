@@ -142,12 +142,13 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
 export function injectCustomShaderChunks(obj) {
   const vertexRegex = /\bskinning_vertex\b/;
   const fragRegex = /\bgl_FragColor\b/;
+  const validMaterials = ["MeshStandardMaterial", "MeshBasicMaterial", "MobileStandardMaterial"];
 
   const materialsSeen = new Set();
   const shaderUniforms = [];
 
   obj.traverse(object => {
-    if (!object.material || !["MeshStandardMaterial", "MeshBasicMaterial"].includes(object.material.type)) {
+    if (!object.material || !validMaterials.includes(object.material.type)) {
       return;
     }
     object.material = object.material.clone();
