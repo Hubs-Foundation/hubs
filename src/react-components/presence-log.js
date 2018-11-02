@@ -49,14 +49,6 @@ SpawnPhotoMessage.propTypes = {
   hubId: PropTypes.string
 };
 
-function ChatBody(props) {
-  return <div>{...props.children}</div>;
-}
-
-ChatBody.propTypes = {
-  children: PropTypes.array
-};
-
 export default class PresenceLog extends Component {
   static propTypes = {
     entries: PropTypes.array,
