@@ -9,13 +9,15 @@ if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo) {
     dist2 = distance(hubs_WorldPosition, hubs_InteractorTwoPos);
   }
 
-  float size = hubs_SweepParams.t - hubs_SweepParams.s;
-  float line = mod(hubs_Time / 3000.0 * size, size * 2.0) + hubs_SweepParams.s - size / 2.0;
+  if (hubs_EnableSweepingEffect) {
+    float size = hubs_SweepParams.t - hubs_SweepParams.s;
+    float line = mod(hubs_Time / 3000.0 * size, size * 2.0) + hubs_SweepParams.s - size / 2.0;
 
-  float ratio = 0.0;
-  if (hubs_EnableSweepingEffect && hubs_WorldPosition.y < line) {
-    // Highlight with an sweeping gradient
-    ratio = max(0.0, 1.0 - (line - hubs_WorldPosition.y) / size * 3.0);
+    float ratio = 0.0;
+    if (hubs_WorldPosition.y < line) {
+      // Highlight with an sweeping gradient
+      ratio = max(0.0, 1.0 - (line - hubs_WorldPosition.y) / size * 3.0);
+    }
   }
 
   float pulse = sin(hubs_Time / 1000.0) + 1.0;
