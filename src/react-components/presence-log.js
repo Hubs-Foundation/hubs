@@ -3,12 +3,15 @@ import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
+
 import ChatMessage from "./chat-message";
+import PhotoMessage from "./photo-message";
 
 export default class PresenceLog extends Component {
   static propTypes = {
     entries: PropTypes.array,
-    inRoom: PropTypes.bool
+    inRoom: PropTypes.bool,
+    hubId: PropTypes.string
   };
 
   constructor(props) {
@@ -54,26 +57,15 @@ export default class PresenceLog extends Component {
           />
         );
       case "spawn": {
-        const { src } = e.body;
         return (
-          <div key={e.key} className={classNames(entryClasses, styles.media)}>
-            <a href={src} target="_blank" rel="noopener noreferrer">
-              <img src={src} />
-            </a>
-            <div className={styles.mediaBody}>
-              <span>
-                <b>{e.name}</b>
-              </span>
-              <span>
-                {"took a "}
-                <b>
-                  <a href={src} target="_blank" rel="noopener noreferrer">
-                    photo
-                  </a>
-                </b>.
-              </span>
-            </div>
-          </div>
+          <PhotoMessage
+            key={e.key}
+            name={e.name}
+            className={classNames(entryClasses, styles.media)}
+            body={e.body}
+            maySpawn={e.maySpawn}
+            hubId={this.props.hubId}
+          />
         );
       }
     }

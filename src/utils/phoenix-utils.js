@@ -43,3 +43,8 @@ export function getReticulumFetchUrl(path) {
     return path;
   }
 }
+
+export function getLandingPageForPhoto(photoUrl) {
+  const parsedUrl = new URL(photoUrl);
+  return getReticulumFetchUrl(parsedUrl.pathname.replace(".png", ".html") + parsedUrl.search);
+}
