@@ -103,20 +103,20 @@ AFRAME.registerComponent("pen", {
     const userinput = AFRAME.scenes[0].systems.userinput;
     if (grabber && pathsMap[grabber.id]) {
       const paths = pathsMap[grabber.id];
-      if (userinput.readFrameValueAtPath(paths.startDrawing)) {
+      if (userinput.get(paths.startDrawing)) {
         this._startDraw();
       }
-      if (userinput.readFrameValueAtPath(paths.stopDrawing)) {
+      if (userinput.get(paths.stopDrawing)) {
         this._endDraw();
       }
-      const penScaleMod = userinput.readFrameValueAtPath(paths.scalePenTip);
+      const penScaleMod = userinput.get(paths.scalePenTip);
       if (penScaleMod) {
         this._changeRadius(penScaleMod);
       }
-      if (userinput.readFrameValueAtPath(paths.penNextColor)) {
+      if (userinput.get(paths.penNextColor)) {
         this._changeColor(1);
       }
-      if (userinput.readFrameValueAtPath(paths.penPrevColor)) {
+      if (userinput.get(paths.penPrevColor)) {
         this._changeColor(-1);
       }
     }
