@@ -3,51 +3,9 @@ import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
+
 import ChatMessage from "./chat-message";
-import { share } from "../utils/share";
-
-function SpawnPhotoMessage({ name, body: { src: url }, className, maySpawn, hubId }) {
-  let landingPageUrl = new URL(url);
-  const [hostname, port] = process.env.RETICULUM_SERVER.split(":");
-  console.log(hostname, port, landingPageUrl.port);
-  landingPageUrl.hostname = hostname;
-  if (port) landingPageUrl.port = port;
-  landingPageUrl.pathname = landingPageUrl.pathname.replace(".png", ".html");
-  landingPageUrl = landingPageUrl.toString();
-
-  const onShareClicked = share.bind(null, {
-    url: landingPageUrl,
-    title: `Taken in #hubs, join me at https://hub.link/${hubId}`
-  });
-  return (
-    <div className={className}>
-      {maySpawn && <button className={classNames(styles.iconButton, styles.share)} onClick={onShareClicked} />}
-      <div className={styles.mediaBody}>
-        <span>
-          <b>{name}</b>
-        </span>
-        <span>
-          {"took a "}
-          <b>
-            <a href={landingPageUrl} target="_blank" rel="noopener noreferrer">
-              photo
-            </a>
-          </b>.
-        </span>
-      </div>
-      <a href={landingPageUrl} target="_blank" rel="noopener noreferrer">
-        <img src={url} />
-      </a>
-    </div>
-  );
-}
-SpawnPhotoMessage.propTypes = {
-  name: PropTypes.string,
-  maySpawn: PropTypes.bool,
-  body: PropTypes.object,
-  className: PropTypes.string,
-  hubId: PropTypes.string
-};
+import PhotoMessage from "./photo-message";
 
 export default class PresenceLog extends Component {
   static propTypes = {
@@ -100,7 +58,7 @@ export default class PresenceLog extends Component {
         );
       case "spawn": {
         return (
-          <SpawnPhotoMessage
+          <PhotoMessage
             key={e.key}
             name={e.name}
             className={classNames(entryClasses, styles.media)}

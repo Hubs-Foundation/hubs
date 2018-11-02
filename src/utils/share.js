@@ -1,3 +1,6 @@
+/**
+ * Wraps navigator.share with a fallback to twitter for unsupported browsers
+ */
 export function share(opts) {
   if (navigator.share) {
     return navigator.share(opts);
