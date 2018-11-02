@@ -433,7 +433,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         presenceLogEntries.splice(presenceLogEntries.indexOf(entry), 1);
         remountUI({ presenceLogEntries });
       }, 5000);
-    }, 30000);
+    }, 20000);
   };
 
   let isInitialSync = true;
