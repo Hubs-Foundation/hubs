@@ -8,6 +8,9 @@ import hubLogo from "../assets/images/hub-preview-white.png";
 import spokeLogo from "../assets/images/spoke_logo_black.png";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { generateHubName } from "../utils/name-generation";
+import CreateRoomDialog from "./create-room-dialog.js";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEllipsisH } from "@fortawesome/free-solid-svg-icons/faEllipsisH";
 
 import { lang, messages } from "../utils/i18n";
 
@@ -25,7 +28,8 @@ class SceneUI extends Component {
   };
 
   state = {
-    showScreenshot: false
+    showScreenshot: false,
+    showCustomRoomDialog: false
   };
 
   constructor(props) {
@@ -48,7 +52,7 @@ class SceneUI extends Component {
   }
 
   createRoom = async () => {
-    const payload = { hub: { name: generateHubName(), scene_id: this.props.sceneId } };
+    const payload = { hub: { name: this.state.customRoomName || generateHubName(), scene_id: this.props.sceneId } };
     const createUrl = getReticulumFetchUrl("/api/v1/hubs");
 
     const res = await fetch(createUrl, {
@@ -93,9 +97,14 @@ class SceneUI extends Component {
               <div className={styles.logoTagline}>
                 <FormattedMessage id="scene.logo_tagline" />
               </div>
-              <button onClick={this.createRoom}>
-                <FormattedMessage id="scene.create_button" />
-              </button>
+              <div className={styles.createButtons}>
+                <button className={styles.createButton} onClick={this.createRoom}>
+                  <FormattedMessage id="scene.create_button" />
+                </button>
+                <button className={styles.optionsButton} onClick={() => this.setState({ showCustomRoomDialog: true })}>
+                  <FontAwesomeIcon icon={faEllipsisH} />
+                </button>
+              </div>
               <a href={tweetLink} rel="noopener noreferrer" target="_blank" className={styles.tweetButton}>
                 <img src="../assets/images/twitter.svg" />
                 <div>
@@ -114,6 +123,15 @@ class SceneUI extends Component {
               <img src={spokeLogo} />
             </a>
           </div>
+          {this.state.showCustomRoomDialog && (
+            <CreateRoomDialog
+              includeScenePrompt={false}
+              onClose={() => this.setState({ showCustomRoomDialog: false })}
+              onCustomScene={name => {
+                this.setState({ showCustomRoomDialog: false, customRoomName: name }, () => this.createRoom());
+              }}
+            />
+          )}
         </div>
       </IntlProvider>
     );

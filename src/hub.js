@@ -433,7 +433,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         presenceLogEntries.splice(presenceLogEntries.indexOf(entry), 1);
         remountUI({ presenceLogEntries });
       }, 5000);
-    }, entryManager.hasEntered() ? 10000 : 30000); // Fade out things faster once entered.
+    }, 20000);
   };
 
   let isInitialSync = true;
