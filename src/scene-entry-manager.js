@@ -218,7 +218,7 @@ export default class SceneEntryManager {
     });
 
     document.addEventListener("paste", e => {
-      if (e.target.nodeName === "INPUT" && document.activeElement === e.target) return;
+      if (e.target.matches("input, textarea") && document.activeElement === e.target) return;
 
       const url = e.clipboardData.getData("text");
       const files = e.clipboardData.files && e.clipboardData.files;
@@ -259,7 +259,6 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("photo_taken", e => {
-      console.log(e);
       this.hubChannel.sendMessage({ src: e.detail }, "spawn");
     });
   };

@@ -155,16 +155,15 @@ $spoke-action-color: $bright-blue;
   -webkit-appearance: none;
   width: 2em;
   height: 2em;
-  border: 1px solid #e2e2e2;
-  border-radius: 9px;
+  border: 3px solid #aaa;
+  border-radius: 6px;
   vertical-align: sub;
   margin: 0 0.6em
 }
 
 %checkbox-checked {
-  border: 9px double #aaa;
-  outline: 9px solid #aaa;
-  outline-offset: -18px;
+  outline: 9px solid $action-color;
+  outline-offset: -15px;
 }
 
 %background-agnostic {

@@ -38,10 +38,6 @@
   justify-content: center;
   pointer-events: auto;
 
-  button {
-    @extend %action-button;
-    border: 0;
-  }
 }
 
 :local(.logoTagline) {
@@ -95,6 +91,12 @@
 :local(.attribution) {
   font-size: 1.0em;
   white-space: wrap;
+
+  a {
+    font-size: 0.8em;
+    color: black;
+    pointer-events: auto;
+  }
 }
 
 :local(.screenshot) {
@@ -146,4 +148,24 @@
   img {
     width: 200px;
   }
+}
+
+:local(.createButtons) {
+  position: relative;
+  display: flex;
+}
+
+:local(.createButton) {
+  @extend %action-button;
+  width: 100%;
+  border: 0;
+}
+
+:local(.optionsButton) {
+  @extend %fa-icon-button;
+  @extend %fa-icon-big;
+  position: absolute;
+  right: 10px;
+  top: -12px;
+  color: white;
 }

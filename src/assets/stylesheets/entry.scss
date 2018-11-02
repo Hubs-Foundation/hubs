@@ -184,4 +184,24 @@
     cursor: pointer;
     color: $dark-grey-text;
   }
+
+  :local(.subscribe) {
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $darker-grey;
+
+    input {
+      @extend %checkbox;
+    }
+
+    input:checked {
+      @extend %checkbox-checked;
+    }
+
+    label {
+      margin-right: 8px;
+    }
+  }
 }

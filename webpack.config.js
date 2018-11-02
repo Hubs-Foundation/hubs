@@ -77,6 +77,7 @@ module.exports = (env, argv) => ({
   devServer: {
     https: createHTTPSConfig(),
     host: "0.0.0.0",
+    public: "hubs.local:8080",
     useLocalIp: true,
     allowedHosts: ["hubs.local"],
     before: function(app) {
@@ -153,6 +154,10 @@ module.exports = (env, argv) => ({
             context: path.join(__dirname, "src")
           }
         }
+      },
+      {
+        test: /\.(glsl)$/,
+        use: { loader: "raw-loader" }
       }
     ]
   },
@@ -238,6 +243,12 @@ module.exports = (env, argv) => ({
       {
         from: "src/assets/images/hub-preview.png",
         to: "hub-preview.png"
+      }
+    ]),
+    new CopyWebpackPlugin([
+      {
+        from: "src/hub.service.js",
+        to: "hub.service.js"
       }
     ]),
     // Extract required css and add a content hash.

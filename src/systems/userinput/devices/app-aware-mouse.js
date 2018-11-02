@@ -30,13 +30,6 @@ export class AppAwareMouseDevice {
       this.camera = document.querySelector("#player-camera").components.camera.camera;
     }
 
-    const coords = frame[paths.device.mouse.coords];
-    const isCursorGrabbing = this.cursorController.data.cursor.components["super-hands"].state.has("grab-start");
-    if (isCursorGrabbing) {
-      frame[paths.device.smartMouse.cursorPose] = calculateCursorPose(this.camera, coords);
-      return;
-    }
-
     const buttonLeft = frame[paths.device.mouse.buttonLeft];
     if (buttonLeft && !this.prevButtonLeft) {
       const rawIntersections = [];
@@ -54,8 +47,9 @@ export class AppAwareMouseDevice {
 
     if (!this.clickedOnAnything && buttonLeft) {
       frame[paths.device.smartMouse.cameraDelta] = frame[paths.device.mouse.movementXY];
-    } else {
-      frame[paths.device.smartMouse.cursorPose] = calculateCursorPose(this.camera, coords);
     }
+
+    const coords = frame[paths.device.mouse.coords];
+    frame[paths.device.smartMouse.cursorPose] = calculateCursorPose(this.camera, coords);
   }
 }
