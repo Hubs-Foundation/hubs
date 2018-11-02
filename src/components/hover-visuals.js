@@ -26,14 +26,14 @@ AFRAME.registerComponent("hover-visuals", {
     for (const uniform of this.uniforms.values()) {
       if (this.data.hand === "left") {
         uniform.hubs_HighlightInteractorOne.value = hovering;
-        uniform.hubs_InteractorOnePos[0] = interactorTransform[12];
-        uniform.hubs_InteractorOnePos[1] = interactorTransform[13];
-        uniform.hubs_InteractorOnePos[2] = interactorTransform[14];
+        uniform.hubs_InteractorOnePos.value[0] = interactorTransform[12];
+        uniform.hubs_InteractorOnePos.value[1] = interactorTransform[13];
+        uniform.hubs_InteractorOnePos.value[2] = interactorTransform[14];
       } else {
         uniform.hubs_HighlightInteractorTwo.value = hovering;
-        uniform.hubs_InteractorTwoPos[0] = interactorTransform[12];
-        uniform.hubs_InteractorTwoPos[1] = interactorTransform[13];
-        uniform.hubs_InteractorTwoPos[2] = interactorTransform[14];
+        uniform.hubs_InteractorTwoPos.value[0] = interactorTransform[12];
+        uniform.hubs_InteractorTwoPos.value[1] = interactorTransform[13];
+        uniform.hubs_InteractorTwoPos.value[2] = interactorTransform[14];
       }
     }
   }
