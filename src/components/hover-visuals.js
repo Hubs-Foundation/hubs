@@ -1,5 +1,5 @@
 /**
- * Listens for hoverable state changes and applies a visual effect to an entity
+ * Applies effects to a hoverer based on hover state.
  * @namespace interactables
  * @component hover-visuals
  */
