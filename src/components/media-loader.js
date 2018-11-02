@@ -19,6 +19,8 @@ const fetchMaxContentIndex = url => {
   return fetch(url).then(r => parseInt(r.headers.get("x-max-content-index")));
 };
 
+const boundingBox = new THREE.Box3();
+
 AFRAME.registerComponent("media-loader", {
   schema: {
     src: { type: "string" },
@@ -102,11 +104,17 @@ AFRAME.registerComponent("media-loader", {
     delete this.showLoaderTimeout;
   },
 
-  onMediaLoaded() {
-    this.clearLoadingTimeout();
-    if (this.el.components["hoverable-visuals"]) {
-      this.el.components["hoverable-visuals"].uniforms = injectCustomShaderChunks(this.el.object3D);
+  setupHoverableVisuals() {
+    const hoverableVisuals = this.el.components["hoverable-visuals"];
+    if (hoverableVisuals) {
+      hoverableVisuals.uniforms = injectCustomShaderChunks(this.el.object3D);
+      boundingBox.setFromObject(this.el.object3DMap.mesh);
+      boundingBox.getBoundingSphere(hoverableVisuals.boundingSphere);
     }
+  },
+
+  onMediaLoaded() {
+    this.setupHoverableVisuals();
   },
 
   async update(oldData) {
@@ -174,9 +182,10 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "model-loaded",
           () => {
-            this.onMediaLoaded();
+            this.clearLoadingTimeout();
             this.hasBakedShapes = !!(this.el.body && this.el.body.shapes.length > (this.shapeAdded ? 1 : 0));
             this.setShapeAndScale(this.data.resize);
+            this.setupHoverableVisuals();
             addAnimationComponents(this.el);
           },
           { once: true }

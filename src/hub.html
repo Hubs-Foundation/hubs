@@ -377,7 +377,6 @@
                   missOpacity: 0.1;
                   curveShootingSpeed: 12;"
               haptic-feedback
-              hover-visuals
               body="type: static; shape: none;"
               mixin="controller-super-hands"
               controls-shape-offset
@@ -404,7 +403,6 @@
                   missOpacity: 0.1;
                   curveShootingSpeed: 12;"
               haptic-feedback
-              hover-visuals
               body="type: static; shape: none;"
               mixin="controller-super-hands"
               controls-shape-offset
@@ -438,11 +436,11 @@
             </template>
 
             <template data-name="LeftHand">
-              <a-entity bone-visibility></a-entity>
+              <a-entity bone-visibility hover-visuals="hand: left; controller: #player-left-controller"></a-entity>
             </template>
 
             <template data-name="RightHand">
-              <a-entity bone-visibility></a-entity>
+              <a-entity bone-visibility hover-visuals="hand: right; controller: #player-right-controller"></a-entity>
             </template>
 
           </a-entity>

@@ -140,7 +140,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
 };
 
 export function injectCustomShaderChunks(obj) {
-  const vertexRegex = /\bbegin_vertex\b/;
+  const vertexRegex = /\bskinning_vertex\b/;
   const fragRegex = /\bgl_FragColor\b/;
 
   const materialsSeen = new Set();
@@ -157,6 +157,8 @@ export function injectCustomShaderChunks(obj) {
       shader.uniforms.hubs_InteractorOneTransform = { value: [] };
       shader.uniforms.hubs_InteractorTwoTransform = { value: [] };
       shader.uniforms.hubs_InteractorTwoPos = { value: [] };
+      shader.uniforms.hubs_EnableSweepingEffect = { value: false };
+      shader.uniforms.hubs_SweepParams = { value: [] };
       shader.uniforms.hubs_HighlightInteractorOne = { value: false };
       shader.uniforms.hubs_HighlightInteractorTwo = { value: false };
       shader.uniforms.hubs_Time = { value: 0 };
@@ -182,6 +184,8 @@ export function injectCustomShaderChunks(obj) {
       const findex = flines.findIndex(line => fragRegex.test(line));
       flines.splice(findex + 1, 0, mediaHighlightFrag);
       flines.unshift("varying vec3 hubs_WorldPosition;");
+      flines.unshift("uniform bool hubs_EnableSweepingEffect;");
+      flines.unshift("uniform vec2 hubs_SweepParams;");
       flines.unshift("uniform bool hubs_HighlightInteractorOne;");
       flines.unshift("uniform mat4 hubs_InteractorOneTransform;");
       flines.unshift("uniform bool hubs_HighlightInteractorTwo;");

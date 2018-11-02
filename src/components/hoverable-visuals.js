@@ -8,12 +8,17 @@ AFRAME.registerComponent("hoverable-visuals", {
     cursorController: { type: "selector" }
   },
   init: function() {
-    // uniforms are set from the component responsible for loading the mesh.
+    // uniforms and boundingSphere are set from the component responsible for loading the mesh.
     this.uniforms = null;
+    this.boundingSphere = new THREE.Sphere();
+
     this.interactorOneTransform = [];
     this.interactorTwoTransform = [];
+    this.sweepParams = [];
   },
   remove() {
+    this.uniforms = null;
+    this.boundingBox = null;
     this.interactorOneTransform = null;
     this.interactorTwoTransform = null;
   },
@@ -42,7 +47,16 @@ AFRAME.registerComponent("hoverable-visuals", {
       interactorTwo.matrixWorld.toArray(this.interactorTwoTransform);
     }
 
+    if (interactorOne || interactorTwo) {
+      const worldY = this.el.object3D.matrixWorld.elements[13];
+      const scaledRadius = this.el.object3D.scale.y * this.boundingSphere.radius;
+      this.sweepParams[0] = worldY - scaledRadius;
+      this.sweepParams[1] = worldY + scaledRadius;
+    }
+
     for (const uniform of this.uniforms) {
+      uniform.hubs_EnableSweepingEffect.value = true;
+      uniform.hubs_SweepParams.value = this.sweepParams;
       uniform.hubs_HighlightInteractorOne.value = !!interactorOne;
       uniform.hubs_InteractorOneTransform.value = this.interactorOneTransform;
       uniform.hubs_HighlightInteractorTwo.value = !!interactorTwo;

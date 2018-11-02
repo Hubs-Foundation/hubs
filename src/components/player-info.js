@@ -35,8 +35,9 @@ AFRAME.registerComponent("player-info", {
       modelEl.setAttribute("gltf-model-plus", "src", this.data.avatarSrc);
     }
 
+    const uniforms = injectCustomShaderChunks(this.el.object3D);
     this.el.querySelectorAll("[hover-visuals]").forEach(el => {
-      el.components["hover-visuals"].uniforms = injectCustomShaderChunks(this.el.object3D);
+      el.components["hover-visuals"].uniforms = uniforms;
     });
   }
 });

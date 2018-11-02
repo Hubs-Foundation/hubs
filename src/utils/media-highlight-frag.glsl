@@ -15,24 +15,22 @@ if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo) {
     dist2 = distance(hubs_WorldPosition, ip);
   }
 
-  float ratio = 0.0;
-  float pulse = sin(hubs_Time / 1000.0) + 1.0;
-  float spacing = 0.5;
-  float line = spacing * pulse - spacing / 2.0;
-  float lineWidth= 0.01;
-  float mody = mod(hubs_WorldPosition.y, spacing);
+  float size = hubs_SweepParams.t - hubs_SweepParams.s;
+  float line = mod(hubs_Time / 3000.0 * size, size * 2.0) + hubs_SweepParams.s - size / 2.0;
 
-  if (-lineWidth + line < mody && mody < lineWidth + line) {
-    // Highlight with an animated line effect
-    ratio = 0.5;
-  } else {
-    // Highlight with a gradient falling off with distance.
-    if (hubs_HighlightInteractorOne) {
-      ratio = -min(1.0, pow(dist1 * (9.0 + 3.0 * pulse), 3.0)) + 1.0;
-    } 
-    if (hubs_HighlightInteractorTwo) {
-      ratio += -min(1.0, pow(dist2 * (9.0 + 3.0 * pulse), 3.0)) + 1.0;
-    }
+  float ratio = 0.0;
+  if (hubs_EnableSweepingEffect && hubs_WorldPosition.y < line) {
+    // Highlight with an sweeping gradient
+    ratio = max(0.0, 1.0 - (line - hubs_WorldPosition.y) / size * 3.0);
+  }
+
+  float pulse = sin(hubs_Time / 1000.0) + 1.0;
+  // Highlight with a gradient falling off with distance.
+  if (hubs_HighlightInteractorOne) {
+    ratio += -min(1.0, pow(dist1 * (9.0 + 3.0 * pulse), 3.0)) + 1.0;
+  } 
+  if (hubs_HighlightInteractorTwo) {
+    ratio += -min(1.0, pow(dist2 * (9.0 + 3.0 * pulse), 3.0)) + 1.0;
   }
 
   ratio = min(1.0, ratio);
