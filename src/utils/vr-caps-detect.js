@@ -23,8 +23,10 @@ function isMaybeDaydreamCompatibleDevice(ua) {
 const GENERIC_ENTRY_TYPE_DEVICE_BLACKLIST = [/cardboard/i];
 
 export function detectInHMD() {
-  const isOculusBrowser = /Oculus/.test(navigator.userAgent);
-  return isOculusBrowser;
+  const ua = navigator.userAgent;
+  const isFirefoxReality = /Firefox/.test(ua) && /Android/.test(ua) && window.hasNativeWebVRImplementation;
+  const isOculusBrowser = /Oculus/.test(ua);
+  return isOculusBrowser || isFirefoxReality;
 }
 
 // Tries to determine VR entry compatibility regardless of the current browser.
