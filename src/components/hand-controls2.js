@@ -14,9 +14,27 @@ const POSES = {
 
 // TODO: If the hands or controllers are mispositioned, then rightHand.controllerPose and rightHand.pose
 //       should be bound differently.
-export const CONTROLLER_OFFSETS = {
+export const LEFT_CONTROLLER_OFFSETS = {
   default: new THREE.Matrix4(),
-  "oculus-touch-controls": new THREE.Matrix4().makeTranslation(0, -0.015, 0.04),
+  "oculus-touch-controls": new THREE.Matrix4().makeTranslation(-0.025, -0.03, 0.1),
+  "oculus-go-controls": new THREE.Matrix4(),
+  "vive-controls": new THREE.Matrix4().compose(
+    new THREE.Vector3(0, -0.017, 0.13),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler(-40 * THREE.Math.DEG2RAD, 0, 0)),
+    new THREE.Vector3(1, 1, 1)
+  ),
+  "windows-motion-controls": new THREE.Matrix4().compose(
+    new THREE.Vector3(0, -0.017, 0.13),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler(-40 * THREE.Math.DEG2RAD, 0, 0)),
+    new THREE.Vector3(1, 1, 1)
+  ),
+  "daydream-controls": new THREE.Matrix4().makeTranslation(0, 0, -0.04),
+  "gearvr-controls": new THREE.Matrix4()
+};
+
+export const RIGHT_CONTROLLER_OFFSETS = {
+  default: new THREE.Matrix4(),
+  "oculus-touch-controls": new THREE.Matrix4().makeTranslation(0.025, -0.03, 0.1),
   "oculus-go-controls": new THREE.Matrix4(),
   "vive-controls": new THREE.Matrix4().compose(
     new THREE.Vector3(0, -0.017, 0.13),
@@ -40,11 +58,18 @@ export const CONTROLLER_OFFSETS = {
 AFRAME.registerComponent("hand-controls2", {
   schema: { default: "left" },
 
-  getControllerOffset() {
-    if (CONTROLLER_OFFSETS[this.connectedController] === undefined) {
-      return CONTROLLER_OFFSETS.default;
+  getLeftControllerOffset() {
+    if (LEFT_CONTROLLER_OFFSETS[this.connectedController] === undefined) {
+      return LEFT_CONTROLLER_OFFSETS.default;
     }
-    return CONTROLLER_OFFSETS[this.connectedController];
+    return LEFT_CONTROLLER_OFFSETS[this.connectedController];
+  },
+
+  getRightControllerOffset() {
+    if (RIGHT_CONTROLLER_OFFSETS[this.connectedController] === undefined) {
+      return RIGHT_CONTROLLER_OFFSETS.default;
+    }
+    return RIGHT_CONTROLLER_OFFSETS[this.connectedController];
   },
 
   init() {
