@@ -317,7 +317,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   window.APP.scene = scene;
 
-  scene.addEventListener("enter-vr", () => document.body.classList.add("vr-mode"));
+  scene.addEventListener("enter-vr", () => {
+    document.body.classList.add("vr-mode");
+
+    if (!scene.is("entered")) {
+      // If VR headset is activated, refreshing page will fire vrdisplayactivate
+      // which puts A-Frame in VR mode, so exit VR mode whenever it is attempted
+      // to be entered and we haven't entered the room yet.
+      scene.exitVR();
+    }
+  });
+
   scene.addEventListener("exit-vr", () => document.body.classList.remove("vr-mode"));
 
   registerNetworkSchemas();

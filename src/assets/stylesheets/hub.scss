@@ -9,7 +9,7 @@
 @import 'info-dialog';
 
 body.vr-mode {
-  a-scene.fullscreen {
+  a-scene {
     .a-canvas {
       width: 200% !important;
     }
