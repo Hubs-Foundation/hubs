@@ -317,6 +317,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   window.APP.scene = scene;
 
+  scene.addEventListener("enter-vr", () => document.body.classList.add("vr-mode"));
+  scene.addEventListener("exit-vr", () => document.body.classList.remove("vr-mode"));
+
   registerNetworkSchemas();
 
   remountUI({

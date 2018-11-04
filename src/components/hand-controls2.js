@@ -12,8 +12,6 @@ const POSES = {
   mrpDown: "mrpDown"
 };
 
-// TODO: If the hands or controllers are mispositioned, then rightHand.controllerPose and rightHand.pose
-//       should be bound differently.
 export const LEFT_CONTROLLER_OFFSETS = {
   default: new THREE.Matrix4(),
   "oculus-touch-controls": new THREE.Matrix4().makeTranslation(-0.025, -0.03, 0.1),
