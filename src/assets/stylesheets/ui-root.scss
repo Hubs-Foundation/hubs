@@ -14,6 +14,7 @@
     @extend %fa-icon-button;
     pointer-events: auto;
     position: absolute;
+    z-index: 1;
     top: 0px;
     right: 14px;
 
@@ -28,6 +29,12 @@
       width: 36px;
       height: 36px;
     }
+  }
+}
+
+body.vr-mode {
+  :local(.ui) {
+    pointer-events: auto;
   }
 }
 
@@ -118,6 +125,7 @@
 
 :local(.nag-corner-button) {
   position: absolute;
+  z-index: 1;
   bottom: 42px;
   width: 100%;
   display: flex;
@@ -154,6 +162,7 @@
   @extend %unselectable;
   text-align: right;
   position: absolute;
+  z-index: 1;
   top: 0;
   left: 16px;
   margin: 16px 0;
@@ -239,6 +248,7 @@
   }
 
   position: absolute;
+  z-index: 2;
   left: 16px;
   bottom: 20px;
   width: 33%;
