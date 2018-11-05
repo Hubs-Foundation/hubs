@@ -73,6 +73,8 @@ AFRAME.registerSystem("userinput", {
     this.registeredMappings = new Set([keyboardDebuggingBindings]);
     this.xformStates = new Map();
 
+    let connectedGamepadBindings;
+
     const appAwareTouchscreenDevice = new AppAwareTouchscreenDevice();
     const updateBindingsForVRMode = () => {
       const inVRMode = this.el.sceneEl.is("vr-mode");
@@ -80,15 +82,31 @@ AFRAME.registerSystem("userinput", {
         if (inVRMode) {
           this.activeDevices.delete(appAwareTouchscreenDevice);
           this.registeredMappings.delete(touchscreenUserBindings);
+
+          if (connectedGamepadBindings) {
+            this.registeredMappings.add(connectedGamepadBindings);
+          }
         } else {
           this.activeDevices.add(appAwareTouchscreenDevice);
           this.registeredMappings.add(touchscreenUserBindings);
+
+          if (connectedGamepadBindings) {
+            this.registeredMappings.delete(connectedGamepadBindings);
+          }
         }
       } else {
         if (inVRMode) {
           this.registeredMappings.delete(keyboardMouseUserBindings);
+
+          if (connectedGamepadBindings) {
+            this.registeredMappings.add(connectedGamepadBindings);
+          }
         } else {
           this.registeredMappings.add(keyboardMouseUserBindings);
+
+          if (connectedGamepadBindings) {
+            this.registeredMappings.delete(connectedGamepadBindings);
+          }
         }
       }
     };
@@ -109,21 +127,27 @@ AFRAME.registerSystem("userinput", {
         }
         if (e.gamepad.id === "OpenVR Gamepad") {
           gamepadDevice = new ViveControllerDevice(e.gamepad);
+          connectedGamepadBindings = viveUserBindings;
           this.registeredMappings.add(viveUserBindings);
         } else if (e.gamepad.id.startsWith("Oculus Touch")) {
           gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
+          connectedGamepadBindings = oculusTouchUserBindings;
           this.registeredMappings.add(oculusTouchUserBindings);
         } else if (e.gamepad.id === "Oculus Go Controller") {
           gamepadDevice = new OculusGoControllerDevice(e.gamepad);
+          connectedGamepadBindings = oculusGoUserBindings;
           this.registeredMappings.add(oculusGoUserBindings);
         } else if (e.gamepad.id === "Daydream Controller") {
           gamepadDevice = new DaydreamControllerDevice(e.gamepad);
+          connectedGamepadBindings = daydreamUserBindings;
           this.registeredMappings.add(daydreamUserBindings);
         } else if (e.gamepad.id.includes("Xbox")) {
           gamepadDevice = new XboxControllerDevice(e.gamepad);
+          connectedGamepadBindings = xboxControllerUserBindings;
           this.registeredMappings.add(xboxControllerUserBindings);
         } else {
           gamepadDevice = new GamepadDevice(e.gamepad);
+          connectedGamepadBindings = gamepadBindings;
           this.registeredMappings.add(gamepadBindings);
         }
         this.activeDevices.add(gamepadDevice);
