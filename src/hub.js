@@ -33,6 +33,8 @@ import "./components/virtual-gamepad-controls";
 import "./components/ik-controller";
 import "./components/hand-controls2";
 import "./components/character-controller";
+import "./components/hoverable-visuals";
+import "./components/hover-visuals";
 import "./components/haptic-feedback";
 import "./components/networked-video-player";
 import "./components/offset-relative-to";
@@ -446,7 +448,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         presenceLogEntries.splice(presenceLogEntries.indexOf(entry), 1);
         remountUI({ presenceLogEntries });
       }, 5000);
-    }, entryManager.hasEntered() ? 10000 : 30000); // Fade out things faster once entered.
+    }, 20000);
   };
 
   let isInitialSync = true;

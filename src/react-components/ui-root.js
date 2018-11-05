@@ -1027,12 +1027,14 @@ class UIRoot extends Component {
 
           {(!entryFinished || this.isWaitingForAutoExit()) && (
             <div className={styles.uiDialog}>
-              <PresenceLog entries={this.props.presenceLogEntries || []} />
+              <PresenceLog entries={this.props.presenceLogEntries || []} hubId={this.props.hubId} />
               <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
             </div>
           )}
 
-          {entryFinished && <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} />}
+          {entryFinished && (
+            <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} hubId={this.props.hubId} />
+          )}
           {entryFinished && (
             <form onSubmit={this.sendMessage}>
               <div className={styles.messageEntryInRoom} style={{ height: pendingMessageFieldHeight }}>
