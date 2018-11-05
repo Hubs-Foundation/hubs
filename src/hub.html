@@ -154,7 +154,7 @@
                     set-yxz-order
                     pinnable
                 >
-                    <a-entity class="interactable-ui">
+                    <a-entity class="interactable-ui" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end">
                         <a-entity class="freeze-menu" visible-while-frozen>
                             <a-entity mixin="rounded-text-action-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned; uiSelector:.interactable-ui" position="0 0.125 0.01"> </a-entity>
                             <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>

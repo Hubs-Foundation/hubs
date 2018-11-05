@@ -64,6 +64,7 @@ import "./components/gamma-factor";
 import "./components/visible-to-owner";
 import "./components/camera-tool";
 import "./components/action-to-event";
+import "./components/stop-event-propagation";
 
 import ReactDOM from "react-dom";
 import React from "react";
