@@ -25,32 +25,125 @@ import { resolveActionSets } from "./resolve-action-sets";
 import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
 
-function buildBindingsForSrcs(registeredMappings) {
-  const map = new Map();
-  const add = (path, binding) => {
-    if (!map.has(path)) {
-      map.set(path, [binding]);
-    } else {
-      map.get(path).push(binding);
+const satisfiesPath = (binding, path) => {
+  return Object.values(binding.dest).indexOf(path) !== -1;
+};
+
+const satisfyPath = (bindings, path) => {
+  for (const binding of bindings) {
+    if (satisfiesPath(binding, path)) {
+      return true;
     }
-  };
-  for (const mapping of registeredMappings) {
+  }
+  return false;
+};
+
+const satisfiedBy = (binding, bindings) => {
+  for (const path of Object.values(binding.src)) {
+    if (path.startsWith("/device/")) continue;
+    if (!satisfyPath(bindings, path)) return false;
+  }
+  return true;
+};
+
+function dependencySort(mappings) {
+  const unsorted = [];
+  for (const mapping of mappings) {
     for (const setName in mapping) {
       for (const binding of mapping[setName]) {
-        if (Array.isArray(binding.src)) {
-          for (const path of binding.src) {
-            add(path, binding);
-          }
-        } else {
-          for (const srcKey in binding.src) {
-            const path = binding.src[srcKey];
-            add(path, binding);
-          }
-        }
+        unsorted.push(binding);
       }
     }
   }
-  return map;
+
+  const sorted = [];
+  while (unsorted.length > 0) {
+    const binding = unsorted.shift();
+    if (satisfiedBy(binding, sorted)) {
+      sorted.push(binding);
+    } else {
+      unsorted.push(binding);
+    }
+  }
+
+  return sorted;
+}
+
+function computeDepsDAG(bindings) {
+  const dag = [];
+  for (const row in bindings) {
+    for (const col in bindings) {
+      for (const path of bindings[row].src) {
+        dag[Number(row) * bindings.length + Number(col)] = satisfiesPath(bindings[col], path) ? 1 : 0;
+      }
+    }
+  }
+  return dag;
+}
+
+function canMask(masker, masked) {
+  if (masker.priority === undefined) {
+    console.warn("priority undefined", masker);
+    masker.priority = 0;
+  }
+  if (masked.priority === undefined) {
+    console.warn("priority undefined", masked);
+    masked.priority = 0;
+  }
+  if (masked.priority >= masker.priority) return false;
+  for (const maskerPath of Object.values(masker.src)) {
+    for (const maskedPath of Object.values(masked.src)) {
+      if (maskedPath.indexOf(maskerPath) !== -1) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function computeMasks(bindings) {
+  const masks = [];
+  for (const row in bindings) {
+    for (const col in bindings) {
+      let ColCanMaskRow = false;
+      for (const path of Object.values(bindings[row].src)) {
+        if (canMask(bindings[col], bindings[row])) {
+          ColCanMaskRow = true;
+        }
+      }
+      masks[Number(row) * bindings.length + Number(col)] = ColCanMaskRow;
+    }
+  }
+  return masks;
+}
+
+function isActive(binding, sets) {
+  for (const s of binding.sets) {
+    if (sets.has(s)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function computeExecutionStrategy(sortedBindings, masks, activeSets) {
+  const actives = [];
+  for (const row in sortedBindings) {
+    actives[row] = isActive(sortedBindings[row], activeSets);
+  }
+
+  const masked = [];
+  for (const row in sortedBindings) {
+    for (const col in sortedBindings) {
+      let rowMask = masked[row] || [];
+      if (masks[Number(row) * sortedBindings.length + Number(col)] && isActive(sortedBindings[col], activeSets)) {
+        rowMask.push(col);
+      }
+      masked[row] = rowMask;
+    }
+  }
+
+  return { actives, masked };
 }
 
 AFRAME.registerSystem("userinput", {
@@ -64,14 +157,12 @@ AFRAME.registerSystem("userinput", {
 
   init() {
     this.frame = {};
-
     this.activeSets = new Set([sets.global]);
     this.pendingSetChanges = [];
-    this.activeDevices = new Set([new MouseDevice(), new AppAwareMouseDevice(), new KeyboardDevice(), new HudDevice()]);
-
-    this.registeredMappings = new Set([keyboardDebuggingBindings]);
-    this.bindingsForSrc = buildBindingsForSrcs(this.registeredMappings);
     this.xformStates = new Map();
+    this.activeDevices = new Set([new MouseDevice(), new AppAwareMouseDevice(), new KeyboardDevice(), new HudDevice()]);
+    this.registeredMappings = new Set([keyboardDebuggingBindings]);
+    this.registeredMappingsChanged = true;
 
     const appAwareTouchscreenDevice = new AppAwareTouchscreenDevice();
     const updateBindingsForVRMode = () => {
@@ -91,7 +182,7 @@ AFRAME.registerSystem("userinput", {
           this.registeredMappings.add(keyboardMouseUserBindings);
         }
       }
-      this.bindingsForSrc = buildBindingsForSrcs(this.registeredMappings);
+      this.registeredMappingsChanged = true;
     };
     this.el.sceneEl.addEventListener("enter-vr", updateBindingsForVRMode);
     this.el.sceneEl.addEventListener("exit-vr", updateBindingsForVRMode);
@@ -128,7 +219,7 @@ AFRAME.registerSystem("userinput", {
           this.registeredMappings.add(gamepadBindings);
         }
         this.activeDevices.add(gamepadDevice);
-        this.bindingsForSrc = buildBindingsForSrcs(this.registeredMappings);
+        this.registeredMappingsChanged = true;
       },
       false
     );
@@ -137,8 +228,9 @@ AFRAME.registerSystem("userinput", {
       e => {
         for (const device of this.activeDevices) {
           if (device.gamepad === e.gamepad) {
+            console.warn("NEED TO UPDATE REGISTERED MAPPINGS WHEN GAMEPAD DISCONNECTED!");
             this.activeDevices.delete(device);
-            this.bindingsForSrc = buildBindingsForSrcs(this.registeredMappings);
+            this.registeredMappingsChanged = true;
             return;
           }
         }
@@ -148,75 +240,29 @@ AFRAME.registerSystem("userinput", {
   },
 
   tick() {
-    resolveActionSets();
+    const registeredMappingsChanged = this.registeredMappingsChanged;
+    if (registeredMappingsChanged) {
+      this.registeredMappingsChanged = false;
+      this.prevSortedBindings = this.sortedBindings;
+      this.sortedBindings = dependencySort(this.registeredMappings);
+      if (!this.prevSortedBindings) {
+        this.prevSortedBindings = this.sortedBindings;
+      }
+      this.masks = computeMasks(this.sortedBindings);
+    }
 
+    resolveActionSets();
     for (const { set, value } of this.pendingSetChanges) {
       this.activeSets[value ? "add" : "delete"](set);
     }
-    const runners = this.pendingSetChanges.length ? [] : this.runners;
-    if (this.pendingSetChanges.length) {
-      this.pendingSetChanges.length = 0;
-      this.actives = [];
-      this.overrides = [];
-      for (const mapping of this.registeredMappings) {
-        for (const setName in mapping) {
-          if (!this.activeSets.has(setName) || !mapping[setName]) continue;
-          for (const binding of mapping[setName]) {
-            let active = false;
-            for (const set of binding.sets) {
-              if (this.activeSets.has(set)) {
-                active = true;
-              }
-            }
-            this.actives.push(active);
-            runners.push(binding);
-            this.overrides.push([]);
-          }
-        }
-      }
-
-      const maxAmongActive = (path, map) => {
-        let max = { priority: -1 };
-        const bindings = map.get(path);
-        if (!bindings) {
-          return -1;
-        }
-        for (const binding of bindings) {
-          let active = false;
-          for (const set of binding.sets) {
-            if (this.activeSets.has(set)) {
-              active = true;
-            }
-          }
-          if (active && binding.priority && binding.priority > max.priority) {
-            max = binding;
-          }
-        }
-        return max;
-      };
-
-      for (const i in runners) {
-        if (!this.actives[i]) continue;
-        const binding = runners[i];
-        let active = true;
-        for (const p in binding.src) {
-          const path = binding.src[p];
-          const subpaths = String.split(path, "/");
-          while (subpaths.length > 1) {
-            const highestPriorityBindingForSubpath = maxAmongActive(
-              Array.join(subpaths, "/"),
-              this.bindingsForSrc,
-              this.activeSets
-            );
-            if ((binding.priority || 0) < highestPriorityBindingForSubpath.priority) {
-              this.overrides[i].push(highestPriorityBindingForSubpath);
-              active = false;
-            }
-            subpaths.pop();
-          }
-        }
-        this.actives[i] = active;
-      }
+    const activeSetsChanged = this.pendingSetChanges.length; // TODO: correct this
+    this.pendingSetChanges.length = 0;
+    if (registeredMappingsChanged || activeSetsChanged || (!this.actives && !this.masked)) {
+      this.prevActives = this.actives;
+      this.prevMasked = this.masked;
+      const { actives, masked } = computeExecutionStrategy(this.sortedBindings, this.masks, this.activeSets);
+      this.actives = actives;
+      this.masked = masked;
     }
 
     this.frame = {};
@@ -224,11 +270,18 @@ AFRAME.registerSystem("userinput", {
       device.write(this.frame);
     }
 
-    for (const i in runners) {
-      const binding = runners[i];
-      if (!this.actives[i]) continue;
-      const bindingExistedLastFrame = this.runners && this.runners.includes(binding);
+    for (const i in this.sortedBindings) {
+      if (!this.actives[i] || this.masked[i].length > 0) continue;
+
+      const binding = this.sortedBindings[i];
+
+      let bindingExistedLastFrame = true;
+      if (!registeredMappingsChanged && activeSetsChanged && this.prevSortedBindings) {
+        const j = this.prevSortedBindings.indexOf(binding);
+        bindingExistedLastFrame = j > -1 && this.prevActives[j] && this.prevMasked[j].length === 0;
+      }
       if (!bindingExistedLastFrame) {
+        console.log("deleting xform state for ", binding);
         this.xformStates.delete(binding);
       }
 
@@ -239,6 +292,7 @@ AFRAME.registerSystem("userinput", {
       }
     }
 
-    this.runners = runners;
+    this.prevSortedBindings = this.sortedBindings;
+    this.prevFrame = this.frame;
   }
 });

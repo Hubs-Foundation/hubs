@@ -9,25 +9,11 @@ const arrows_vec2 = "/var/mouse-and-keyboard/arrows_vec2";
 const dropWithRMB = "/vars/mouse-and-keyboard/drop_with_RMB";
 const dropWithEsc = "/vars/mouse-and-keyboard/drop_with_esc";
 
-const dropWithRMBorEscBindings = [
-  {
-    src: { value: paths.device.mouse.buttonRight },
-    dest: { value: dropWithRMB },
-    xform: xforms.falling,
-    root: "rmb",
-    priority: 200
-  },
-  {
-    src: { value: paths.device.keyboard.key("Escape") },
-    dest: { value: dropWithEsc },
-    xform: xforms.falling
-  },
-  {
-    src: [dropWithRMB, dropWithEsc],
-    dest: { value: paths.actions.cursor.drop },
-    xform: xforms.any
-  }
-];
+const k = name => {
+  return `/keyboard-mouse-user/keyboard-var/${name}`;
+};
+
+const dropWithRMBorEscBindings = [];
 
 export const keyboardMouseUserBindings = addSetsToBindings({
   [sets.global]: [
@@ -81,16 +67,12 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.keyboard.key("q") },
       dest: { value: paths.actions.snapRotateLeft },
-      xform: xforms.rising,
-      root: "q",
-      priority: 100
+      xform: xforms.rising
     },
     {
       src: { value: paths.device.keyboard.key("e") },
       dest: { value: paths.actions.snapRotateRight },
-      xform: xforms.rising,
-      root: "e",
-      priority: 100
+      xform: xforms.rising
     },
     {
       src: { value: paths.device.hud.penButton },
@@ -148,7 +130,6 @@ export const keyboardMouseUserBindings = addSetsToBindings({
         value: paths.actions.startGazeTeleport
       },
       xform: xforms.rising,
-      root: "rmb",
       priority: 100
     },
     {
@@ -202,7 +183,6 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       src: { value: "/var/notshift+q" },
       dest: { value: paths.actions.snapRotateLeft },
       xform: xforms.rising,
-      root: "q",
       priority: 200
     },
     {
@@ -217,92 +197,116 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       src: { value: "/var/notshift+e" },
       dest: { value: paths.actions.snapRotateRight },
       xform: xforms.rising,
-      root: "e",
       priority: 200
     },
     {
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.actions.cursor.startDrawing },
       xform: xforms.rising,
-      priority: 200
+      priority: 3
     },
     {
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.actions.cursor.stopDrawing },
       xform: xforms.falling,
-      priority: 200,
-      root: "lmb"
+      priority: 3
     },
     {
       src: {
-        bool: paths.device.keyboard.key("shift"),
-        value: paths.device.mouse.wheel
+        value: k("wheelWithShift")
       },
       dest: { value: "/var/cursorScalePenTipWheel" },
-      xform: xforms.copyIfTrue,
-      priority: 200,
-      root: "wheel"
+      xform: xforms.copy,
+      priority: 200
     },
     {
       src: { value: "/var/cursorScalePenTipWheel" },
       dest: { value: paths.actions.cursor.scalePenTip },
       xform: xforms.scale(0.12)
     },
-    ...dropWithRMBorEscBindings
+    {
+      src: { value: paths.device.mouse.buttonRight },
+      dest: { value: dropWithRMB },
+      xform: xforms.falling,
+      priority: 200
+    },
+    {
+      src: { value: paths.device.keyboard.key("Escape") },
+      dest: { value: dropWithEsc },
+      xform: xforms.falling
+    },
+    {
+      src: [dropWithRMB, dropWithEsc],
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.any
+    }
   ],
 
   [sets.cursorHoldingCamera]: [
     {
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.actions.cursor.takeSnapshot },
-      xform: xforms.rising
+      xform: xforms.rising,
+      priority: 3
     },
     {
-      src: { value: paths.device.mouse.buttonLeft },
-      xform: xforms.noop,
-      dest: { value: paths.noop },
-      priority: 200,
-      root: "lmb"
+      src: { value: paths.device.mouse.buttonRight },
+      dest: { value: dropWithRMB },
+      xform: xforms.falling,
+      priority: 200
     },
-    ...dropWithRMBorEscBindings
+    {
+      src: { value: paths.device.keyboard.key("Escape") },
+      dest: { value: dropWithEsc },
+      xform: xforms.falling
+    },
+    {
+      src: [dropWithRMB, dropWithEsc],
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.any
+    }
   ],
 
   [sets.cursorHoldingInteractable]: [
     {
       src: {
+        bool: paths.device.keyboard.key("shift"),
         value: paths.device.mouse.wheel
       },
       dest: {
-        value: paths.actions.cursor.modDelta
+        value: k("wheelWithShift")
       },
-      xform: xforms.copy,
-      root: "wheel",
-      priority: 100
+      xform: xforms.copyIfTrue
     },
     {
       src: {
         bool: paths.device.keyboard.key("shift"),
         value: paths.device.mouse.wheel
       },
-      dest: { value: paths.actions.cursor.modDelta },
+      dest: {
+        value: k("wheelWithoutShift")
+      },
       xform: xforms.copyIfFalse
     },
     {
       src: {
-        bool: paths.device.keyboard.key("shift"),
-        value: paths.device.mouse.wheel
+        value: k("wheelWithoutShift")
+      },
+      dest: { value: paths.actions.cursor.modDelta },
+      xform: xforms.copy
+    },
+    {
+      src: {
+        value: k("wheelWithShift")
       },
       dest: { value: paths.actions.cursor.scaleGrabbedGrabbable },
-      xform: xforms.copyIfTrue,
-      priority: 150,
-      root: "wheel"
+      xform: xforms.copy
     },
     {
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.falling,
-      priority: 100,
-      root: "lmb"
+      priority: 2
     }
   ],
 
@@ -310,7 +314,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.actions.cursor.grab },
-      xform: xforms.rising
+      xform: xforms.rising,
+      priority: 1
     }
   ],
   [sets.inputFocused]: [
