@@ -5,7 +5,7 @@ AFRAME.registerComponent("sticky-object", {
   schema: {
     autoLockOnLoad: { default: false },
     autoLockOnRelease: { default: false },
-    autoLockSpeedLimit: { default: 0.5 }
+    autoLockSpeedLimit: { default: 0.5 } // Set to 0 to always autolock on release
   },
 
   init() {
