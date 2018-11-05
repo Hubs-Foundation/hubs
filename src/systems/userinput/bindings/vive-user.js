@@ -357,6 +357,15 @@ export const viveUserBindings = {
     },
     {
       src: {
+        value: paths.device.keyboard.key("m")
+      },
+      dest: {
+        value: paths.actions.muteMic
+      },
+      xform: xforms.rising
+    },
+    {
+      src: {
         first: wasd_vec2,
         second: arrows_vec2
       },
