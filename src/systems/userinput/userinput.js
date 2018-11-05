@@ -143,7 +143,7 @@ AFRAME.registerSystem("userinput", {
         }
 
         if (entered) {
-          this.registeredMappings.add(viveUserBindings);
+          this.registeredMappings.add(connectedGamepadBindings);
         }
 
         this.activeDevices.add(gamepadDevice);
