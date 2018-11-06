@@ -5,7 +5,7 @@ AFRAME.registerComponent("sticky-object", {
   schema: {
     autoLockOnLoad: { default: false },
     autoLockOnRelease: { default: false },
-    autoLockSpeedLimit: { default: 0.25 }
+    autoLockSpeedLimit: { default: 0.5 } // Set to 0 to always autolock on release
   },
 
   init() {
@@ -52,7 +52,8 @@ AFRAME.registerComponent("sticky-object", {
 
     if (
       this.data.autoLockOnRelease &&
-      this.el.body.velocity.lengthSquared() < this.data.autoLockSpeedLimit * this.data.autoLockSpeedLimit
+      (this.data.autoLockSpeedLimit === 0 ||
+        this.el.body.velocity.lengthSquared() < this.data.autoLockSpeedLimit * this.data.autoLockSpeedLimit)
     ) {
       this.setLocked(true);
     }

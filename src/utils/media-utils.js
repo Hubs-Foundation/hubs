@@ -150,6 +150,13 @@ export function injectCustomShaderChunks(obj) {
     if (!object.material || !validMaterials.includes(object.material.type)) {
       return;
     }
+
+    // HACK, this routine inadvertently leaves the A-Frame shaders wired to the old, dark
+    // material, so maps cannot be updated at runtime. This breaks UI elements who have
+    // hover/toggle state, so for now just skip these while we figure out a more correct
+    // solution.
+    if (object.el.classList.contains("ui")) return;
+
     object.material = object.material.clone();
     object.material.onBeforeCompile = shader => {
       if (!vertexRegex.test(shader.vertexShader)) return;

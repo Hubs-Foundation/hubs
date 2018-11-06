@@ -171,7 +171,7 @@
                     super-networked-interactable="counter: #pen-counter;"
                     body="type: dynamic; shape: none; mass: 1;"
                     grabbable="maxGrabbers: 1"
-                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
+                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     hoverable
                     scale="0.5 0.5 0.5"
                 >
@@ -201,7 +201,7 @@
                     camera-tool
                     body="type: dynamic; shape: none; mass: 1;"
                     shape="shape: box; halfExtents: 0.22 0.145 0.1; offset: 0 0.02 0"
-                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
+                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     super-networked-interactable="counter: #camera-counter;"
                     position-at-box-shape-border="target:.delete-button"
                     set-yxz-order
@@ -365,6 +365,7 @@
                 class="camera"
                 camera
                 personal-space-bubble="radius: 0.4;"
+                rotation
                 pitch-yaw-rotator
                 set-yxz-order
             >

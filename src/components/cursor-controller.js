@@ -13,7 +13,7 @@ AFRAME.registerComponent("cursor-controller", {
     cursor: { type: "selector" },
     camera: { type: "selector" },
     far: { default: 3 },
-    near: { default: 0 },
+    near: { default: 0.06 },
     cursorColorHovered: { default: "#2F80ED" },
     cursorColorUnhovered: { default: "#FFFFFF" },
     rayObject: { type: "selector" },

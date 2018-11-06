@@ -133,6 +133,7 @@
 :local(.presence-log-in-room) {
   position: absolute;
   bottom: 165px;
+  z-index: 1;
 
   :local(.presence-log-entry) {
     background-color: $hud-panel-background;
