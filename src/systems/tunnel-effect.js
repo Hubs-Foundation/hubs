@@ -25,7 +25,7 @@ AFRAME.registerSystem("tunneleffect", {
   schema: {
     targetComponent: { type: "string", default: "character-controller" },
     radius: { type: "number", default: 1.0, min: 0.25 },
-    minRadius: { type: "number", default: 0.25, min: 0.1 },
+    minRadius: { type: "number", default: 0.3, min: 0.1 },
     maxSpeed: { type: "number", default: 0.5, min: 0.1 },
     softest: { type: "number", default: 0.1, min: 0.0 },
     opacity: { type: "number", default: 1, min: 0.0 }
