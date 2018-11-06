@@ -1,4 +1,4 @@
-import { CONTROLLER_OFFSETS } from "./hand-controls2.js";
+import { LEFT_CONTROLLER_OFFSETS, RIGHT_CONTROLLER_OFFSETS } from "./hand-controls2.js";
 
 /**
  * Sets the offset of the aframe-physics shape on this entity based on the current VR controller type
@@ -7,11 +7,12 @@ import { CONTROLLER_OFFSETS } from "./hand-controls2.js";
  */
 AFRAME.registerComponent("controls-shape-offset", {
   schema: {
-    additionalOffset: { type: "vec3", default: { x: 0, y: -0.03, z: -0.04 } }
+    additionalOffset: { type: "vec3", default: { x: 0, y: 0, z: -0.04 } }
   },
   init: function() {
     this.controller = null;
     this.shapeAdded = false;
+    this.isLeft = this.el.getAttribute("hand-controls2") === "left";
 
     this._handleControllerConnected = this._handleControllerConnected.bind(this);
     this.el.addEventListener("controllerconnected", this._handleControllerConnected);
@@ -24,8 +25,9 @@ AFRAME.registerComponent("controls-shape-offset", {
   tick: function() {
     if (!this.shapeAdded && this.controller) {
       this.shapeAdded = true;
-      const hasOffset = CONTROLLER_OFFSETS.hasOwnProperty(this.controller);
-      const offset = hasOffset ? CONTROLLER_OFFSETS[this.controller] : CONTROLLER_OFFSETS.default;
+      const offsets = this.isLeft ? LEFT_CONTROLLER_OFFSETS : RIGHT_CONTROLLER_OFFSETS;
+      const hasOffset = offsets.hasOwnProperty(this.controller);
+      const offset = hasOffset ? offsets[this.controller] : offsets.default;
       const position = new THREE.Vector3();
       const quaternion = new THREE.Quaternion();
       const scale = new THREE.Vector3();
@@ -34,8 +36,8 @@ AFRAME.registerComponent("controls-shape-offset", {
       quaternion.conjugate();
 
       const shape = {
-        shape: "sphere",
-        radius: "0.02",
+        shape: "box",
+        halfExtents: { x: 0.03, y: 0.04, z: 0.05 },
         orientation: quaternion,
         offset: position
       };

@@ -180,11 +180,11 @@ AFRAME.registerComponent("ik-controller", {
     rootToChest.multiplyMatrices(hips.matrix, chest.matrix);
     invRootToChest.getInverse(rootToChest);
 
-    this.updateHand(this.hands.left, leftHand, leftController);
-    this.updateHand(this.hands.right, rightHand, rightController);
+    this.updateHand(this.hands.left, leftHand, leftController, true);
+    this.updateHand(this.hands.right, rightHand, rightController, false);
   },
 
-  updateHand(handState, handObject3D, controller) {
+  updateHand(handState, handObject3D, controller, isLeft) {
     const hand = handObject3D.el;
     const handMatrix = handObject3D.matrix;
     const controllerObject3D = controller.object3D;
@@ -201,7 +201,7 @@ AFRAME.registerComponent("ik-controller", {
       const handControls = controller.components["hand-controls2"];
 
       if (handControls) {
-        handMatrix.multiply(handControls.getControllerOffset());
+        handMatrix.multiply(isLeft ? handControls.getLeftControllerOffset() : handControls.getRightControllerOffset());
       }
 
       handMatrix.multiply(handState.rotation);

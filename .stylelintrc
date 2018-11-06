@@ -3,6 +3,7 @@
   "rules": {
     "indentation": 2,
 		"selector-pseudo-class-no-unknown": [true, { "ignorePseudoClasses": ["local"] }],
+		"selector-type-no-unknown": [true, { "ignoreTypes": ["/^a-/"] }],
 		"no-descending-specificity": false
   }
 }
