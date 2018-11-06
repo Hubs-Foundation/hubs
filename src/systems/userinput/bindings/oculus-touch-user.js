@@ -58,6 +58,16 @@ const rightTouchSnapLeft = `${name}/right/snap-left`;
 const keyboardSnapRight = `${name}/keyboard/snap-right`;
 const keyboardSnapLeft = `${name}/keyboard/snap-left`;
 
+const rootForFrozenOverrideWhenHolding = "rootForFrozenOverrideWhenHolding";
+
+const lowerButtons = `${name}buttons/lower`;
+
+const ensureFrozenViaButtons = `${name}buttons/ensureFrozen`;
+const ensureFrozenViaKeyboard = `${name}keyboard/ensureFrozen`;
+
+const thawViaButtons = `${name}buttons/thaw`;
+const thawViaKeyboard = `${name}keyboard/thaw`;
+
 export const oculusTouchUserBindings = {
   [sets.global]: [
     {
@@ -183,6 +193,32 @@ export const oculusTouchUserBindings = {
       xform: xforms.any
     },
     {
+      src: { value: paths.device.keyboard.key(" ") },
+      dest: { value: ensureFrozenViaKeyboard },
+      xform: xforms.copy
+    },
+    {
+      src: [leftButton("x").pressed, rightButton("a").pressed],
+      dest: { value: lowerButtons },
+      xform: xforms.any
+    },
+    {
+      src: { value: lowerButtons },
+      dest: { value: ensureFrozenViaButtons },
+      root: rootForFrozenOverrideWhenHolding,
+      xform: xforms.copy
+    },
+    {
+      src: { value: lowerButtons },
+      dest: { value: thawViaButtons },
+      xform: xforms.falling
+    },
+    {
+      src: { value: paths.device.keyboard.key(" ") },
+      dest: { value: thawViaKeyboard },
+      xform: xforms.falling
+    },
+    {
       src: {
         value: rightDpadWest
       },
@@ -304,7 +340,7 @@ export const oculusTouchUserBindings = {
     },
     {
       src: {
-        value: leftButton("x").pressed
+        value: leftButton("y").pressed
       },
       dest: {
         value: leftBoost
@@ -313,7 +349,7 @@ export const oculusTouchUserBindings = {
     },
     {
       src: {
-        value: rightButton("a").pressed
+        value: rightButton("b").pressed
       },
       dest: {
         value: rightBoost
@@ -415,6 +451,13 @@ export const oculusTouchUserBindings = {
       xform: xforms.falling,
       root: leftGripFalling,
       priority: 200
+    },
+    {
+      src: null,
+      dest: { value: ensureFrozenViaButtons },
+      root: rootForFrozenOverrideWhenHolding,
+      priority: 100,
+      xform: xforms.always(false)
     }
   ],
 
@@ -525,6 +568,13 @@ export const oculusTouchUserBindings = {
       src: [cursorDrop1, cursorDrop2],
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.any
+    },
+    {
+      src: null,
+      dest: { value: ensureFrozenViaButtons },
+      root: rootForFrozenOverrideWhenHolding,
+      priority: 100,
+      xform: xforms.always(false)
     }
   ],
 
@@ -588,6 +638,13 @@ export const oculusTouchUserBindings = {
       src: [rightHandDrop1, rightHandDrop2],
       dest: { value: paths.actions.rightHand.drop },
       xform: xforms.any
+    },
+    {
+      src: null,
+      dest: { value: ensureFrozenViaButtons },
+      root: rootForFrozenOverrideWhenHolding,
+      priority: 100,
+      xform: xforms.always(false)
     }
   ],
   [sets.rightHandHoveringOnPen]: [],
@@ -691,5 +748,17 @@ export const oculusTouchUserBindings = {
     }
   ],
 
-  [sets.rightHandHoveringOnNothing]: []
+  [sets.rightHandHoveringOnNothing]: [],
+  [sets.globalPost]: [
+    {
+      src: [ensureFrozenViaButtons, ensureFrozenViaKeyboard],
+      dest: { value: paths.actions.ensureFrozen },
+      xform: xforms.any
+    },
+    {
+      src: [thawViaButtons, thawViaKeyboard],
+      dest: { value: paths.actions.thaw },
+      xform: xforms.any
+    }
+  ]
 };

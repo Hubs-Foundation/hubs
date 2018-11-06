@@ -82,7 +82,6 @@ body.vr-mode {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  pointer-events: auto;
 
   button {
     @extend %action-button;
