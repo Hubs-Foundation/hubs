@@ -11,7 +11,6 @@ AFRAME.registerComponent("stop-event-propagation", {
   },
 
   play() {
-    console.log("HELLO " + this.data.event);
     this.el.addEventListener(this.data.event, handler);
   },
 

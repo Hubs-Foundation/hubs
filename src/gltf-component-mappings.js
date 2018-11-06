@@ -80,7 +80,6 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
     el.setAttribute("networked", {
       template: "#interactable-media",
       owner: "scene",
-      lastOwnerTime: 1,
       networkId: componentData.id
     });
   }

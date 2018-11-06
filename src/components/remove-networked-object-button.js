@@ -1,7 +1,5 @@
 AFRAME.registerComponent("remove-networked-object-button", {
   init() {
-    this.scene = document.querySelector("a-scene");
-
     this.onClick = () => {
       if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) return;
 

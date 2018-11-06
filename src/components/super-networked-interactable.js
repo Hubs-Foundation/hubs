@@ -49,8 +49,8 @@ AFRAME.registerComponent("super-networked-interactable", {
     this._syncCounterRegistration = this._syncCounterRegistration.bind(this);
     this.el.addEventListener("grab-start", this._onGrabStart);
     this.el.addEventListener("grab-end", this._onGrabEnd);
-    this.el.addEventListener("pinned", this._onPinned);
-    this.el.addEventListener("unpinned", this._onUnpinned);
+    this.el.addEventListener("pinned", this._syncCounterRegistration);
+    this.el.addEventListener("unpinned", this._syncCounterRegistration);
     this.el.addEventListener("ownership-lost", this._onOwnershipLost);
     this.system.addComponent(this);
   },
@@ -88,14 +88,6 @@ AFRAME.registerComponent("super-networked-interactable", {
     this.el.setAttribute("body", { type: "static" });
     this.el.emit("grab-end", { hand: this.hand });
     this.hand = null;
-    this._syncCounterRegistration();
-  },
-
-  _onPinned: function() {
-    this._syncCounterRegistration();
-  },
-
-  _onUnpinned: function() {
     this._syncCounterRegistration();
   },
 

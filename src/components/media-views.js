@@ -277,13 +277,12 @@ AFRAME.registerComponent("media-video", {
 
   _grabStart() {
     if (!this.el.components.grabbable || this.el.components.grabbable.data.maxGrabbers === 0) return;
-    if (this.el.sceneEl.is("frozen")) return; // Ignore clicks on video when clicking on buttons.
 
     this.grabStartPosition = this.el.object3D.position.clone();
   },
 
   _grabEnd() {
-    if (this.grabStartPosition && this.grabStartPosition.distanceTo(this.el.object3D.position) < 0.01) {
+    if (this.grabStartPosition && this.grabStartPosition.distanceToSquared(this.el.object3D.position) < 0.01 * 0.01) {
       this.togglePlayingIfOwner();
       this.grabStartPosition = null;
     }
