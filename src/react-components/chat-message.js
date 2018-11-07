@@ -94,7 +94,12 @@ export default function ChatMessage(props) {
 
   return (
     <div className={props.className}>
-      {props.maySpawn && <button className={styles.spawnMessage} onClick={() => spawnChatMessage(props.body)} />}
+      {props.maySpawn && (
+        <button
+          className={classNames(styles.iconButton, styles.spawnMessage)}
+          onClick={() => spawnChatMessage(props.body)}
+        />
+      )}
       <div className={isOneLine ? styles.messageWrap : styles.messageWrapMulti}>
         <div className={styles.messageSource}>
           <b>{props.name}</b>:
