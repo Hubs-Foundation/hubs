@@ -257,7 +257,9 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
     .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
 
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
-  objectsEl.addEventListener("model-loaded", async () => {
+  objectsEl.addEventListener("model-loaded", async el => {
+    if (el.target !== objectsEl) return;
+
     scene.setAttribute("networked-scene", {
       room: hub.hub_id,
       serverURL: process.env.JANUS_SERVER,
