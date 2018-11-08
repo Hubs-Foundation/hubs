@@ -75,6 +75,8 @@ export default class SceneEntryManager {
       return;
     }
 
+    this.scene.setAttribute("motion-capture-replayer", "enabled", false);
+
     if (mediaStream) {
       NAF.connection.adapter.setLocalMediaStream(mediaStream);
     }
