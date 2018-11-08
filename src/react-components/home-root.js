@@ -131,6 +131,7 @@ class HomeRoot extends Component {
 
   signOut = () => {
     this.props.authChannel.removeCredentials();
+    // TODO BP - should randomize avatar and display name on sign out.
     this.setState({ signedIn: false });
   };
 
