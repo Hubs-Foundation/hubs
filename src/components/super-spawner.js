@@ -85,6 +85,8 @@ AFRAME.registerComponent("super-spawner", {
     this.onSpawnEvent = this.onSpawnEvent.bind(this);
 
     this.sceneEl = document.querySelector("a-scene");
+
+    this.el.setAttribute("hoverable-visuals", { cursorController: "#cursor-controller", enableSweepingEffect: false });
   },
 
   play() {

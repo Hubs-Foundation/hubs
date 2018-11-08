@@ -18,7 +18,7 @@
     "doc": "node ./scripts/doc/build.js",
     "prettier": "prettier --write '*.js' 'src/**/*.js'",
     "lint:js": "eslint '*.js' 'scripts/**/*.js' 'src/**/*.js'",
-    "lint:html": "htmlhint 'src/**/*.html'",
+    "lint:html": "htmlhint 'src/**/*.html' && node scripts/indent-linter.js 'src/**/*.html'",
     "lint": "npm run lint:js && npm run lint:html",
     "test": "npm run lint && npm run build"
   },
@@ -87,6 +87,7 @@
     "htmlhint": "^0.9.13",
     "node-sass": "^4.9.3",
     "prettier": "^1.7.0",
+    "raw-loader": "^0.5.1",
     "rimraf": "^2.6.2",
     "sass-loader": "^6.0.7",
     "selfsigned": "^1.10.2",

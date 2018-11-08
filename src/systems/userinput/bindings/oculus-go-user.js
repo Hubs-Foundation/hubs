@@ -5,16 +5,19 @@ import { addSetsToBindings } from "./utils";
 
 const touchpad = "/vars/oculusgo/touchpad";
 const touchpadPressed = "/vars/oculusgo/touchpadPressed";
+const touchpadReleased = "/vars/oculusgo/touchpadReleased";
 const dpadNorth = "/vars/oculusgo/dpad/north";
 const dpadSouth = "/vars/oculusgo/dpad/south";
 const dpadEast = "/vars/oculusgo/dpad/east";
 const dpadWest = "/vars/oculusgo/dpad/west";
 const dpadCenter = "/vars/oculusgo/dpad/center";
+const dpadCenterStrip = "/vars/oculusgo/dpad/centerStrip";
 
 const triggerRisingRoot = "oculusGoTriggerRising";
 const triggerFallingRoot = "oculusGoTriggerFalling";
 const dpadEastRoot = "oculusGoDpadEast";
 const dpadWestRoot = "oculusGoDpadWest";
+const rootForFrozenOverrideWhenHolding = "rootForFrozenOverrideWhenHolding";
 
 const grabBinding = {
   src: {
@@ -45,6 +48,13 @@ export const oculusGoUserBindings = addSetsToBindings({
     },
     {
       src: {
+        value: paths.device.oculusgo.button("touchpad").pressed
+      },
+      dest: { value: touchpadReleased },
+      xform: xforms.falling
+    },
+    {
+      src: {
         value: touchpad
       },
       dest: {
@@ -55,6 +65,30 @@ export const oculusGoUserBindings = addSetsToBindings({
         center: dpadCenter
       },
       xform: xforms.vec2dpad(0.8)
+    },
+    {
+      src: [dpadNorth, dpadSouth, dpadCenter],
+      dest: { value: dpadCenterStrip },
+      xform: xforms.any
+    },
+    {
+      src: {
+        value: dpadCenterStrip,
+        bool: paths.device.oculusgo.button("touchpad").pressed
+      },
+      dest: {
+        value: paths.actions.ensureFrozen
+      },
+      root: rootForFrozenOverrideWhenHolding,
+      priority: 100,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: touchpadReleased },
+      dest: {
+        value: paths.actions.thaw
+      },
+      xform: xforms.copy
     },
     {
       src: {
@@ -139,6 +173,13 @@ export const oculusGoUserBindings = addSetsToBindings({
       },
       dest: { value: paths.actions.cursor.modDelta },
       xform: xforms.touch_axis_scroll()
+    },
+    {
+      src: null,
+      dest: { value: paths.actions.ensureFrozen },
+      root: rootForFrozenOverrideWhenHolding,
+      priority: 200,
+      xform: xforms.always(false)
     }
   ],
 
@@ -183,8 +224,8 @@ export const oculusGoUserBindings = addSetsToBindings({
     },
     {
       src: {
-        value: dpadCenter,
-        bool: touchpadPressed
+        value: dpadCenterStrip,
+        bool: touchpadReleased
       },
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.copyIfTrue
@@ -235,8 +276,8 @@ export const oculusGoUserBindings = addSetsToBindings({
     },
     {
       src: {
-        value: dpadCenter,
-        bool: touchpadPressed
+        value: dpadCenterStrip,
+        bool: touchpadReleased
       },
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.copyIfTrue

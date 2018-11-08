@@ -2,14 +2,16 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
-import Linkify from "react-linkify";
-import { toArray as toEmojis } from "react-emoji-render";
 import { FormattedMessage } from "react-intl";
+
+import ChatMessage from "./chat-message";
+import PhotoMessage from "./photo-message";
 
 export default class PresenceLog extends Component {
   static propTypes = {
     entries: PropTypes.array,
-    inRoom: PropTypes.bool
+    inRoom: PropTypes.bool,
+    hubId: PropTypes.string
   };
 
   constructor(props) {
@@ -19,6 +21,8 @@ export default class PresenceLog extends Component {
   domForEntry = e => {
     const entryClasses = {
       [styles.presenceLogEntry]: true,
+      [styles.presenceLogEntryWithButton]: e.type === "chat" && e.maySpawn,
+      [styles.presenceLogChat]: e.type === "chat",
       [styles.expired]: !!e.expired
     };
 
@@ -27,47 +31,41 @@ export default class PresenceLog extends Component {
       case "entered":
         return (
           <div key={e.key} className={classNames(entryClasses)}>
-            <b>{e.name}</b> <FormattedMessage id={`presence.${e.type}_${e.presence}`} />
+            <b>{e.name}</b>&nbsp;<FormattedMessage id={`presence.${e.type}_${e.presence}`} />
           </div>
         );
       case "leave":
         return (
           <div key={e.key} className={classNames(entryClasses)}>
-            <b>{e.name}</b> <FormattedMessage id={`presence.${e.type}`} />
+            <b>{e.name}</b>&nbsp;<FormattedMessage id={`presence.${e.type}`} />
           </div>
         );
       case "display_name_changed":
         return (
           <div key={e.key} className={classNames(entryClasses)}>
-            <b>{e.oldName}</b> <FormattedMessage id="presence.name_change" /> <b>{e.newName}</b>.
+            <b>{e.oldName}</b>&nbsp;<FormattedMessage id="presence.name_change" />&nbsp;<b>{e.newName}</b>.
           </div>
         );
       case "chat":
         return (
-          <div key={e.key} className={classNames(entryClasses)}>
-            <b>{e.name}</b>:{" "}
-            <Linkify properties={{ target: "_blank", rel: "noopener referrer" }}>{toEmojis(e.body)}</Linkify>
-          </div>
+          <ChatMessage
+            key={e.key}
+            name={e.name}
+            className={classNames(entryClasses)}
+            body={e.body}
+            maySpawn={e.maySpawn}
+          />
         );
       case "spawn": {
-        const { src } = e.body;
         return (
-          <div key={e.key} className={classNames(entryClasses, styles.media)}>
-            <a href={src} target="_blank" rel="noopener noreferrer">
-              <img src={src} />
-            </a>
-            <div className={styles.mediaBody}>
-              <span>
-                <b>{e.name}</b>:
-              </span>
-              <span>
-                {"took a "}
-                <a href={src} target="_blank" rel="noopener noreferrer">
-                  photo
-                </a>
-              </span>
-            </div>
-          </div>
+          <PhotoMessage
+            key={e.key}
+            name={e.name}
+            className={classNames(entryClasses, styles.media)}
+            body={e.body}
+            maySpawn={e.maySpawn}
+            hubId={this.props.hubId}
+          />
         );
       }
     }

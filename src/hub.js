@@ -33,6 +33,8 @@ import "./components/virtual-gamepad-controls";
 import "./components/ik-controller";
 import "./components/hand-controls2";
 import "./components/character-controller";
+import "./components/hoverable-visuals";
+import "./components/hover-visuals";
 import "./components/haptic-feedback";
 import "./components/networked-video-player";
 import "./components/offset-relative-to";
@@ -54,12 +56,15 @@ import "./components/pinch-to-move";
 import "./components/pitch-yaw-rotator";
 import "./components/auto-scale-cannon-physics-body";
 import "./components/position-at-box-shape-border";
+import "./components/pinnable";
+import "./components/pin-networked-object-button";
 import "./components/remove-networked-object-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/gamma-factor";
 import "./components/visible-to-owner";
 import "./components/camera-tool";
 import "./components/action-to-event";
+import "./components/stop-event-propagation";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -103,6 +108,7 @@ import "./components/super-networked-interactable";
 import "./components/networked-counter";
 import "./components/event-repeater";
 import "./components/controls-shape-offset";
+import "./components/set-yxz-order";
 
 import "./components/cardboard-controls";
 
@@ -224,6 +230,11 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
 
   console.log(`Scene URL: ${sceneUrl}`);
   const environmentScene = document.querySelector("#environment-scene");
+  const objectsScene = document.querySelector("#objects-scene");
+  const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
+  const objectsEl = document.createElement("a-entity");
+  objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
+  objectsScene.appendChild(objectsEl);
 
   if (glbAsset || hasExtension) {
     const gltfEl = document.createElement("a-entity");
@@ -246,36 +257,41 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
     .querySelector("#hud-hub-entry-link")
     .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
 
-  scene.setAttribute("networked-scene", {
-    room: hub.hub_id,
-    serverURL: process.env.JANUS_SERVER,
-    debug: !!isDebug
-  });
+  // Wait for scene objects to load before connecting, so there is no race condition on network state.
+  objectsEl.addEventListener("model-loaded", async el => {
+    if (el.target !== objectsEl) return;
 
-  while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
-
-  scene.components["networked-scene"]
-    .connect()
-    .then(() => {
-      NAF.connection.adapter.reliableTransport = (clientId, dataType, data) => {
-        const payload = { dataType, data };
-
-        if (clientId) {
-          payload.clientId = clientId;
-        }
-
-        hubChannel.channel.push("naf", payload);
-      };
-    })
-    .catch(connectError => {
-      // hacky until we get return codes
-      const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
-      console.error(connectError);
-      remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
-      entryManager.exitScene();
-
-      return;
+    scene.setAttribute("networked-scene", {
+      room: hub.hub_id,
+      serverURL: process.env.JANUS_SERVER,
+      debug: !!isDebug
     });
+
+    while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
+
+    scene.components["networked-scene"]
+      .connect()
+      .then(() => {
+        NAF.connection.adapter.reliableTransport = (clientId, dataType, data) => {
+          const payload = { dataType, data };
+
+          if (clientId) {
+            payload.clientId = clientId;
+          }
+
+          hubChannel.channel.push("naf", payload);
+        };
+      })
+      .catch(connectError => {
+        // hacky until we get return codes
+        const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+        console.error(connectError);
+        remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
+        entryManager.exitScene();
+
+        return;
+      });
+  });
 }
 
 async function runBotMode(scene, entryManager) {
@@ -308,6 +324,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const scene = document.querySelector("a-scene");
+  scene.removeAttribute("keyboard-shortcuts"); // Remove F and ESC hotkeys from aframe
+
   const hubChannel = new HubChannel(store);
   const entryManager = new SceneEntryManager(hubChannel);
   entryManager.init();
@@ -316,7 +334,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   window.APP.scene = scene;
 
+  scene.addEventListener("enter-vr", () => {
+    document.body.classList.add("vr-mode");
+
+    if (!scene.is("entered")) {
+      // If VR headset is activated, refreshing page will fire vrdisplayactivate
+      // which puts A-Frame in VR mode, so exit VR mode whenever it is attempted
+      // to be entered and we haven't entered the room yet.
+      scene.exitVR();
+    }
+  });
+
+  scene.addEventListener("exit-vr", () => document.body.classList.remove("vr-mode"));
+
   registerNetworkSchemas();
+
   remountUI({
     hubChannel,
     linkChannel,
@@ -325,6 +357,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     exitScene: entryManager.exitScene,
     initialIsSubscribed: subscriptions.isSubscribed()
   });
+
+  scene.addEventListener("action_focus_chat", () => document.querySelector(".chat-focus-target").focus());
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 
@@ -431,7 +465,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         presenceLogEntries.splice(presenceLogEntries.indexOf(entry), 1);
         remountUI({ presenceLogEntries });
       }, 5000);
-    }, entryManager.hasEntered() ? 10000 : 30000); // Fade out things faster once entered.
+    }, 20000);
   };
 
   let isInitialSync = true;
@@ -502,8 +536,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubPhxChannel.on("message", ({ session_id, type, body }) => {
     const userInfo = hubPhxPresence.state[session_id];
     if (!userInfo) return;
+    const maySpawn = scene.is("entered");
 
-    addToPresenceLog({ name: userInfo.metas[0].profile.displayName, type, body });
+    addToPresenceLog({ name: userInfo.metas[0].profile.displayName, type, body, maySpawn });
   });
 
   linkChannel.setSocket(socket);

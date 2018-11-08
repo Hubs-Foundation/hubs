@@ -22,7 +22,7 @@ pushd "$DIR/.."
 
 rm /usr/bin/env
 ln -s "$(hab pkg path core/coreutils)/bin/env" /usr/bin/env
-hab pkg install -b core/coreutils core/bash core/node core/git core/aws-cli core/python2
+hab pkg install -b core/coreutils core/bash core/node10 core/git core/aws-cli core/python2
 
 npm ci --verbose --no-progress
 npm rebuild node-sass # HACK sometimes node-sass build fails

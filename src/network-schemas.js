@@ -111,7 +111,8 @@ function registerNetworkSchemas() {
       {
         component: "media-pager",
         property: "index"
-      }
+      },
+      "pinnable"
     ]
   });
 

@@ -83,6 +83,7 @@ function createVideoEl(src) {
   const videoEl = document.createElement("video");
   videoEl.setAttribute("playsinline", "");
   videoEl.setAttribute("webkit-playsinline", "");
+  videoEl.preload = "auto";
   videoEl.loop = true;
   videoEl.crossOrigin = "anonymous";
   videoEl.src = src;
@@ -230,13 +231,25 @@ AFRAME.registerComponent("media-video", {
 
   init() {
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
-    this.togglePlayingIfOwner = this.togglePlayingIfOwner.bind(this);
+
+    this._grabStart = this._grabStart.bind(this);
+    this._grabEnd = this._grabEnd.bind(this);
 
     this.lastUpdate = 0;
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
       this.updatePlaybackState();
+
+      // For scene-owned videos, take ownership after a random delay if nobody
+      // else has so there is a timekeeper.
+      if (NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
+        setTimeout(() => {
+          if (NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
+            NAF.utils.takeOwnership(this.networkedEl);
+          }
+        }, 2000 + Math.floor(Math.random() * 2000));
+      }
     });
 
     // from a-sound
@@ -252,12 +265,27 @@ AFRAME.registerComponent("media-video", {
 
   // aframe component play, unrelated to video
   play() {
-    this.el.addEventListener("click", this.togglePlayingIfOwner);
+    this.el.addEventListener("grab-start", this._grabStart);
+    this.el.addEventListener("grab-end", this._grabEnd);
   },
 
   // aframe component pause, unrelated to video
   pause() {
-    this.el.removeEventListener("click", this.togglePlayingIfOwner);
+    this.el.removeEventListener("grab-start", this._grabStart);
+    this.el.removeEventListener("grab-end", this._grabEnd);
+  },
+
+  _grabStart() {
+    if (!this.el.components.grabbable || this.el.components.grabbable.data.maxGrabbers === 0) return;
+
+    this.grabStartPosition = this.el.object3D.position.clone();
+  },
+
+  _grabEnd() {
+    if (this.grabStartPosition && this.grabStartPosition.distanceToSquared(this.el.object3D.position) < 0.01 * 0.01) {
+      this.togglePlayingIfOwner();
+      this.grabStartPosition = null;
+    }
   },
 
   togglePlayingIfOwner() {
