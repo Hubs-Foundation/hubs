@@ -44,8 +44,6 @@ AFRAME.registerComponent("super-networked-interactable", {
     this._onGrabStart = this._onGrabStart.bind(this);
     this._onGrabEnd = this._onGrabEnd.bind(this);
     this._onOwnershipLost = this._onOwnershipLost.bind(this);
-    this._onPinned = this._onPinned.bind(this);
-    this._onUnpinned = this._onUnpinned.bind(this);
     this._syncCounterRegistration = this._syncCounterRegistration.bind(this);
     this.el.addEventListener("grab-start", this._onGrabStart);
     this.el.addEventListener("grab-end", this._onGrabEnd);
