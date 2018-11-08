@@ -241,7 +241,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: "/var/cursorScalePenTipWheel" },
       dest: { value: paths.actions.cursor.scalePenTip },
-      xform: xforms.scale(0.12)
+      xform: xforms.scale(0.03)
     },
     {
       src: { value: paths.device.mouse.buttonRight },
