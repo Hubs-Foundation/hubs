@@ -454,7 +454,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 200
     },
     {
-      src: null,
+      src: {},
       dest: { value: ensureFrozenViaButtons },
       root: rootForFrozenOverrideWhenHolding,
       priority: 100,
@@ -571,7 +571,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       xform: xforms.any
     },
     {
-      src: null,
+      src: {},
       dest: { value: ensureFrozenViaButtons },
       root: rootForFrozenOverrideWhenHolding,
       priority: 100,
@@ -641,7 +641,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       xform: xforms.any
     },
     {
-      src: null,
+      src: {},
       dest: { value: ensureFrozenViaButtons },
       root: rootForFrozenOverrideWhenHolding,
       priority: 100,
