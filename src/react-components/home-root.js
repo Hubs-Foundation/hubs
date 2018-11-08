@@ -17,8 +17,9 @@ import styles from "../assets/stylesheets/index.scss";
 
 import HubCreatePanel from "./hub-create-panel.js";
 import AuthDialog from "./auth-dialog.js";
-import ReportDialog from "./report-dialog.js";
 import JoinUsDialog from "./join-us-dialog.js";
+import ReportDialog from "./report-dialog.js";
+import SignInDialog from "./sign-in-dialog.js";
 import UpdatesDialog from "./updates-dialog.js";
 import DialogContainer from "./dialog-container.js";
 
@@ -28,6 +29,7 @@ class HomeRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
     sceneId: PropTypes.string,
+    authChannel: PropTypes.object,
     authVerify: PropTypes.bool,
     authTopic: PropTypes.string,
     authToken: PropTypes.string,
@@ -40,12 +42,17 @@ class HomeRoot extends Component {
   state = {
     environments: [],
     dialog: null,
+    signedIn: null,
     mailingListEmail: "",
     mailingListPrivacy: false
   };
 
+  constructor(props) {
+    super(props);
+    this.state.signedIn = props.authChannel.authenticated();
+  }
+
   componentDidMount() {
-    this.closeDialog = this.closeDialog.bind(this);
     if (this.props.authVerify) {
       this.showAuthDialog(true);
       this.verifyAuth().then(this.showAuthDialog);
@@ -76,8 +83,14 @@ class HomeRoot extends Component {
     channel.push("auth_verified", { token: this.props.authToken });
   }
 
+  showDialog = (DialogClass, props = {}) => {
+    this.setState({
+      dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
+    });
+  };
+
   showAuthDialog = verifying => {
-    this.setState({ dialog: <AuthDialog verifying={verifying} authOrigin={this.props.authOrigin} /> });
+    this.showDialog(AuthDialog, { closable: false, verifying, authOrigin: this.props.authOrigin });
   };
 
   loadHomeVideo = () => {
@@ -86,33 +99,40 @@ class HomeRoot extends Component {
     playVideoWithStopOnBlur(videoEl);
   };
 
-  closeDialog() {
+  closeDialog = () => {
     this.setState({ dialog: null });
-  }
+  };
 
-  showJoinUsDialog() {
-    this.setState({ dialog: <JoinUsDialog onClose={this.closeDialog} /> });
-  }
+  showJoinUsDialog = () => this.showDialog(JoinUsDialog);
 
-  showReportDialog() {
-    this.setState({ dialog: <ReportDialog onClose={this.closeDialog} /> });
-  }
+  showReportDialog = () => this.showDialog(ReportDialog);
 
-  showUpdatesDialog() {
-    this.setState({
-      dialog: <UpdatesDialog onClose={this.closeDialog} onSubmittedEmail={() => this.showEmailSubmittedDialog()} />
+  showUpdatesDialog = () =>
+    this.showDialog(UpdatesDialog, {
+      onSubmittedEmail: () => {
+        this.showDialog(
+          <DialogContainer>Great! Please check your e-mail to confirm your subscription.</DialogContainer>
+        );
+      }
     });
-  }
 
-  showEmailSubmittedDialog() {
-    this.setState({
-      dialog: (
-        <DialogContainer onClose={this.closeDialog}>
-          Great! Please check your e-mail to confirm your subscription.
-        </DialogContainer>
-      )
+  showSignInDialog = () => {
+    this.showDialog(SignInDialog, {
+      message: "Signing in gives you the ability to moderate, edit, and save rooms.",
+      onSignIn: async email => {
+        const { authComplete } = await this.props.authChannel.startAuthentication(email);
+        this.showDialog(SignInDialog, { authStarted: true });
+        await authComplete;
+        this.setState({ signedIn: true });
+        this.closeDialog();
+      }
     });
-  }
+  };
+
+  signOut = () => {
+    this.props.authChannel.removeCredentials();
+    this.setState({ signedIn: false });
+  };
 
   loadEnvironmentFromScene = async () => {
     let sceneUrlBase = "/api/v1/scenes";
@@ -154,7 +174,7 @@ class HomeRoot extends Component {
     Promise.all(environmentLoads).then(() => this.setState({ environments }));
   };
 
-  onDialogLinkClicked = trigger => {
+  onLinkClicked = trigger => {
     return e => {
       e.preventDefault();
       e.stopPropagation();
@@ -185,6 +205,11 @@ class HomeRoot extends Component {
                     Spoke
                   </a>
                 </div>
+                {this.state.signedIn ? (
+                  <a onClick={this.onLinkClicked(this.signOut)}>Sign Out</a>
+                ) : (
+                  <a onClick={this.onLinkClicked(this.showSignInDialog)}>Sign In</a>
+                )}
               </div>
             </div>
             <div className={styles.heroContent}>
@@ -239,7 +264,7 @@ class HomeRoot extends Component {
                     className={styles.link}
                     rel="noopener noreferrer"
                     href="#"
-                    onClick={this.onDialogLinkClicked(this.showJoinUsDialog.bind(this))}
+                    onClick={this.onLinkClicked(this.showJoinUsDialog)}
                   >
                     <FormattedMessage id="home.join_us" />
                   </a>
@@ -247,7 +272,7 @@ class HomeRoot extends Component {
                     className={styles.link}
                     rel="noopener noreferrer"
                     href="#"
-                    onClick={this.onDialogLinkClicked(this.showUpdatesDialog.bind(this))}
+                    onClick={this.onLinkClicked(this.showUpdatesDialog)}
                   >
                     <FormattedMessage id="home.get_updates" />
                   </a>
@@ -255,7 +280,7 @@ class HomeRoot extends Component {
                     className={styles.link}
                     rel="noopener noreferrer"
                     href="#"
-                    onClick={this.onDialogLinkClicked(this.showReportDialog.bind(this))}
+                    onClick={this.onLinkClicked(this.showReportDialog)}
                   >
                     <FormattedMessage id="home.report_issue" />
                   </a>
