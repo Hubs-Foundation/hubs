@@ -19,6 +19,9 @@ AFRAME.registerComponent("pinnable", {
     // Fire pinned events when page changes so we can persist the page.
     this.el.addEventListener("pager-page-changed", this._fireEvents);
 
+    // Fire pinned events when video state changes so we can persist the page.
+    this.el.addEventListener("owned-video-state-changed", this._fireEvents);
+
     // Hack: need to wait for the initial grabbable and stretchable components
     // to show up from the template before applying.
     this.el.addEventListener("componentinitialized", this._allowApplyOnceComponentsReady);
