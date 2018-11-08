@@ -19,6 +19,7 @@ export const SCHEMA = {
       properties: {
         displayName: { type: "string", pattern: "^[A-Za-z0-9-]{3,32}$" },
         avatarId: { type: "string" },
+        email: { type: "string" },
         credentials: { type: "string" }
       }
     },

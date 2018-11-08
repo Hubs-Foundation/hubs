@@ -29,7 +29,7 @@ export default class AuthChannel {
 
     const authComplete = new Promise(resolve =>
       channel.on("auth_credentials", async ({ credentials }) => {
-        this.store.update({ profile: { credentials } });
+        this.store.update({ profile: { email, credentials } });
         resolve();
       })
     );
