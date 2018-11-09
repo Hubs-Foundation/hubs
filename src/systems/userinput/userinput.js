@@ -26,8 +26,8 @@ import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
 
 function intersection(setA, setB) {
-  var _intersection = new Set();
-  for (var elem of setB) {
+  const _intersection = new Set();
+  for (const elem of setB) {
     if (setA.has(elem)) {
       _intersection.add(elem);
     }
