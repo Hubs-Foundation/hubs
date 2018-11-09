@@ -81,11 +81,12 @@ class SceneUI extends Component {
 
     const toAttributionSpan = a => {
       if (a.url) {
-        const source = a.url.indexOf("sketchfab.com")
-          ? "on Sketchfab"
-          : a.url.indexOf("poly.google.com")
-            ? "on Google Poly"
-            : "";
+        const source =
+          a.url.indexOf("sketchfab.com") >= 0
+            ? "on Sketchfab"
+            : a.url.indexOf("poly.google.com") >= 0
+              ? "on Google Poly"
+              : "";
 
         return (
           <span key={a.url}>
