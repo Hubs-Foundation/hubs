@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
 import LinkDialogHeader from "../assets/images/link_dialog_header.svg";
+import { WithHoverSound } from "./wrap-with-audio";
 
 import styles from "../assets/stylesheets/link-dialog.scss";
 
@@ -17,9 +18,11 @@ export default class LinkDialog extends Component {
 
     return (
       <div className={styles.dialog}>
-        <div className={styles.close} onClick={() => this.props.onClose()}>
-          <span>×</span>
-        </div>
+        <WithHoverSound>
+          <div className={styles.close} onClick={() => this.props.onClose()}>
+            <span>×</span>
+          </div>
+        </WithHoverSound>
         <div>
           {!linkCode && (
             <div>
@@ -41,9 +44,11 @@ export default class LinkDialog extends Component {
               <div>
                 <FormattedMessage id="link.in_your_browser" />
               </div>
-              <a href="https://hub.link" className={styles.domain} target="_blank" rel="noopener noreferrer">
-                hub.link
-              </a>
+              <WithHoverSound>
+                <a href="https://hub.link" className={styles.domain} target="_blank" rel="noopener noreferrer">
+                  hub.link
+                </a>
+              </WithHoverSound>
               <div>
                 <FormattedMessage id="link.enter_code" />
               </div>
@@ -59,9 +64,11 @@ export default class LinkDialog extends Component {
               <div className={styles.keepOpen}>
                 <FormattedMessage id="link.do_not_close" />
               </div>
-              <button className={styles.closeButton} onClick={() => this.props.onClose()}>
-                <FormattedMessage id="link.cancel" />
-              </button>
+              <WithHoverSound>
+                <button className={styles.closeButton} onClick={() => this.props.onClose()}>
+                  <FormattedMessage id="link.cancel" />
+                </button>
+              </WithHoverSound>
             </div>
           )}
         </div>
