@@ -5,47 +5,41 @@ import { addSetsToBindings } from "./utils";
 
 // vars
 const v = s => `/vars/daydream/${s}`;
-const touchpad = v("touchpad");
-const touchpadPressed = v("touchpadPressed");
-const touchpadReleased = v("touchpadReleased");
+const touchpad = v("touchpad/axis");
+const touchpadRising = v("touchpad/rising");
+const touchpadFalling = v("touchpad/falling");
+const touchpadPressed = v("touchpad/pressed");
 const dpadNorth = v("dpad/north");
 const dpadSouth = v("dpad/south");
 const dpadEast = v("dpad/east");
 const dpadWest = v("dpad/west");
 const dpadCenter = v("dpad/center");
-const vec2zero = "/vars/vec2zero";
 const brushSizeDelta = v("brushSizeDelta");
 const cursorModDelta = v("cursorModDelta");
-const dpadSouthDrop = v("dpad/southDrop");
-const dpadCenterDrop = v("dpad/centerDrop");
-
-// roots
-const dpadEastRoot = "daydreamDpadEast";
-const dpadWestRoot = "daydreamDpadWest";
-const dpadCenterRoot = "daydreamDpadCenter";
-const touchpadFallingRoot = "daydreamTouchpadFalling";
-const cursorModDeltaRoot = "daydreamCursorModDeltaRoot";
+const dpadSouthDrop = v("dropSouth");
+const dpadCenterDrop = v("dropCenter");
 
 const grabBinding = [
   {
-    src: { value: dpadCenter, bool: touchpadPressed },
+    src: { value: dpadCenter, bool: touchpadRising },
     dest: { value: paths.actions.cursor.grab },
     xform: xforms.copyIfTrue,
-    root: dpadCenterRoot,
-    priority: 200
+    priority: 100
   }
 ];
 
 const dropOnCenterOrSouth = [
   {
-    src: { value: dpadCenter, bool: touchpadPressed },
+    src: { value: dpadCenter, bool: touchpadRising },
     dest: { value: dpadCenterDrop },
-    xform: xforms.copyIfTrue
+    xform: xforms.copyIfTrue,
+    priority: 100
   },
   {
-    src: { value: dpadSouth, bool: touchpadPressed },
+    src: { value: dpadSouth, bool: touchpadRising },
     dest: { value: dpadSouthDrop },
-    xform: xforms.copyIfTrue
+    xform: xforms.copyIfTrue,
+    priority: 100
   },
   {
     src: [dpadCenterDrop, dpadSouthDrop],
@@ -68,15 +62,22 @@ export const daydreamUserBindings = addSetsToBindings({
       src: {
         value: paths.device.daydream.button("touchpad").pressed
       },
-      dest: { value: touchpadPressed },
+      dest: { value: touchpadRising },
       xform: xforms.rising
     },
     {
       src: {
         value: paths.device.daydream.button("touchpad").pressed
       },
-      dest: { value: touchpadReleased },
+      dest: { value: touchpadFalling },
       xform: xforms.falling
+    },
+    {
+      src: {
+        value: paths.device.daydream.button("touchpad").pressed
+      },
+      dest: { value: touchpadPressed },
+      xform: xforms.copy
     },
     {
       src: {
@@ -94,40 +95,30 @@ export const daydreamUserBindings = addSetsToBindings({
     {
       src: {
         value: dpadEast,
-        bool: touchpadPressed
+        bool: touchpadRising
       },
       dest: {
         value: paths.actions.snapRotateRight
       },
-      xform: xforms.copyIfTrue,
-      root: dpadEastRoot,
-      priority: 100
+      xform: xforms.copyIfTrue
     },
     {
       src: {
         value: dpadWest,
-        bool: touchpadPressed
+        bool: touchpadRising
       },
       dest: {
         value: paths.actions.snapRotateLeft
       },
-      xform: xforms.copyIfTrue,
-      root: dpadWestRoot,
-      priority: 100
+      xform: xforms.copyIfTrue
     },
     {
       src: {
         value: dpadCenter,
-        bool: touchpadPressed
+        bool: touchpadRising
       },
       dest: { value: paths.actions.rightHand.startTeleport },
-      xform: xforms.copyIfTrue,
-      root: dpadCenterRoot,
-      priority: 100
-    },
-    {
-      dest: { value: vec2zero },
-      xform: xforms.always([0, -0.2])
+      xform: xforms.copyIfTrue
     },
     {
       src: { value: paths.device.daydream.pose },
@@ -146,11 +137,9 @@ export const daydreamUserBindings = addSetsToBindings({
 
   [sets.cursorHoldingInteractable]: [
     {
-      src: { value: paths.device.daydream.button("touchpad").pressed },
+      src: { value: touchpadFalling },
       dest: { value: paths.actions.cursor.drop },
-      xform: xforms.falling,
-      root: touchpadFallingRoot,
-      priority: 100
+      xform: xforms.copy
     },
     {
       src: {
@@ -163,36 +152,30 @@ export const daydreamUserBindings = addSetsToBindings({
     {
       src: { value: cursorModDelta },
       dest: { value: paths.actions.cursor.modDelta },
-      xform: xforms.copy,
-      root: cursorModDeltaRoot,
-      priority: 100
+      xform: xforms.copy
     }
   ],
 
   [sets.rightHandTeleporting]: [
     {
-      src: { value: paths.device.daydream.button("touchpad").pressed },
+      src: { value: touchpadFalling },
       dest: { value: paths.actions.rightHand.stopTeleport },
-      xform: xforms.falling,
-      root: touchpadFallingRoot,
-      priority: 100
+      xform: xforms.copy
     }
   ],
 
   [sets.cursorHoldingPen]: [
     {
-      src: { value: dpadNorth, bool: touchpadPressed },
+      src: { value: dpadNorth, bool: touchpadRising },
       dest: { value: paths.actions.cursor.startDrawing },
       xform: xforms.copyIfTrue,
-      root: dpadCenterRoot,
-      priority: 300
+      priority: 100
     },
     {
-      src: { value: touchpadReleased },
+      src: { value: touchpadFalling },
       dest: { value: paths.actions.cursor.stopDrawing },
       xform: xforms.copy,
-      root: touchpadFallingRoot,
-      priority: 300
+      priority: 100
     },
     {
       src: {
@@ -205,38 +188,36 @@ export const daydreamUserBindings = addSetsToBindings({
     {
       src: {
         value: brushSizeDelta,
-        bool: paths.device.daydream.button("touchpad").pressed
+        bool: touchpadPressed
       },
       dest: { value: paths.actions.cursor.scalePenTip },
-      xform: xforms.copyIfFalse
+      xform: xforms.copyIfFalse,
+      priority: 100
     },
     {
-      src: { value: dpadEast, bool: touchpadPressed },
+      src: { value: dpadEast, bool: touchpadRising },
       dest: {
         value: paths.actions.cursor.penPrevColor
       },
       xform: xforms.copyIfTrue,
-      root: dpadEastRoot,
-      priority: 200
+      priority: 100
     },
     {
-      src: { value: dpadWest, bool: touchpadPressed },
+      src: { value: dpadWest, bool: touchpadRising },
       dest: {
         value: paths.actions.cursor.penNextColor
       },
       xform: xforms.copyIfTrue,
-      root: dpadWestRoot,
-      priority: 200
+      priority: 100
     },
     {
       src: {
         value: cursorModDelta,
-        bool: paths.device.daydream.button("touchpad").pressed
+        bool: touchpadPressed
       },
       dest: { value: paths.actions.cursor.modDelta },
       xform: xforms.copyIfFalse,
-      root: cursorModDeltaRoot,
-      priority: 200
+      priority: 100
     },
     ...dropOnCenterOrSouth
   ],
@@ -245,21 +226,19 @@ export const daydreamUserBindings = addSetsToBindings({
     // Don't drop on touchpad release
     {
       src: {
-        value: paths.device.daydream.button("touchpad").pressed
+        value: touchpadFalling
       },
       xform: xforms.noop,
-      root: touchpadFallingRoot,
-      priority: 300
+      priority: 100
     },
     {
       src: {
         value: dpadNorth,
-        bool: touchpadPressed
+        bool: touchpadRising
       },
       dest: { value: paths.actions.cursor.takeSnapshot },
       xform: xforms.copyIfTrue,
-      root: dpadCenterRoot,
-      priority: 300
+      priority: 100
     },
     ...dropOnCenterOrSouth
   ]

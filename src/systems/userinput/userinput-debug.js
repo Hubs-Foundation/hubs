@@ -32,7 +32,7 @@ AFRAME.registerSystem("userinput-debug", {
           sortedBindings[i],
           "\n",
           "dest: ",
-          Object.values(sortedBindings[i].dest),
+          sortedBindings[i].dest && Object.values(sortedBindings[i].dest),
           "\n",
           "active: ",
           actives[i],
