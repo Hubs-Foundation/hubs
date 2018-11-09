@@ -520,7 +520,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: [leftGripRisingGrab, leftTriggerRisingGrab],
+      src: [leftGripRisingGrab ],
       dest: { value: paths.actions.leftHand.grab },
       xform: xforms.any,
       priority: 2
@@ -606,7 +606,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: [rightGripRisingGrab, rightTriggerRisingGrab],
+      src: [rightGripRisingGrab ],
       dest: { value: paths.actions.cursor.grab },
       xform: xforms.any,
       priority: 2
@@ -634,7 +634,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: [cursorDrop1, cursorDrop2],
+      src: [cursorDrop1 ],
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.any,
       priority: 2
@@ -678,7 +678,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: [rightGripRisingGrab, rightTriggerRisingGrab],
+      src: [rightGripRisingGrab, ],
       dest: { value: paths.actions.rightHand.grab },
       xform: xforms.any,
       priority: 2
@@ -701,7 +701,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: [rightHandDrop1, rightHandDrop2],
+      src: [rightHandDrop2],
       dest: { value: paths.actions.rightHand.drop },
       xform: xforms.any,
       priority: 2
