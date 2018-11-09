@@ -328,5 +328,13 @@ export const keyboardMouseUserBindings = {
       dest: { value: paths.actions.cursor.grab },
       xform: xforms.rising
     }
+  ],
+
+  [sets.cursorHoveringOnUI]: [
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: paths.actions.cursor.grab },
+      xform: xforms.rising
+    }
   ]
 };

@@ -154,7 +154,7 @@
                     set-yxz-order
                     pinnable
                 >
-                    <a-entity class="interactable-ui" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end">
+                    <a-entity class="ui interactable-ui" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end">
                         <a-entity class="freeze-menu" visible-while-frozen="withinDistance: 3;">
                             <a-entity mixin="rounded-text-action-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned; uiSelector:.interactable-ui" position="0 0.125 0.01"> </a-entity>
                             <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
@@ -171,7 +171,7 @@
                     super-networked-interactable="counter: #pen-counter;"
                     body="type: dynamic; shape: none; mass: 1;"
                     grabbable="maxGrabbers: 1"
-                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
+                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
                     hoverable
                     scale="0.5 0.5 0.5"
                 >
@@ -185,7 +185,7 @@
                         segments-width="16"
                         segments-height="12"
                     ></a-sphere>
-                    <a-entity class="delete-button" visible-while-frozen="withinDistance: 3;">
+                    <a-entity class="ui delete-button" visible-while-frozen="withinDistance: 3;">
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
                         <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
@@ -207,7 +207,7 @@
                     set-yxz-order
                     auto-scale-cannon-physics-body
                 >
-                    <a-entity class="delete-button" visible-while-frozen="withinDistance: 3;">
+                    <a-entity class="ui delete-button" visible-while-frozen="withinDistance: 3;">
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
                         <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
@@ -221,7 +221,7 @@
             </template>
 
             <template id="paging-toolbar">
-                <a-entity class="paging-toolbar" visible-to-owner>
+                <a-entity class="ui paging-toolbar" visible-to-owner>
                     <a-entity class="prev-button" position="-0.3 0 0">
                         <a-entity mixin="rounded-text-button" slice9="width: 0.2"> </a-entity>
                         <a-entity text=" value:<; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
