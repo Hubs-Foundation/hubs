@@ -16,11 +16,10 @@ AFRAME.registerSystem("userinput-debug", {
       console.log("activeSets", userinput.activeSets);
       console.log("frame", userinput.frame);
       console.log("xformStates", userinput.xformStates);
-      const { sortedBindings, actives, masked, xformStates } = userinput;
+      const { sortedBindings, actives, masked } = userinput;
       for (const i in sortedBindings) {
         const sb = [];
         if (masked[i].length > 0) {
-          const xform = xformStates[sortedBindings[i]];
           for (const j of masked[i]) {
             sb.push(JSON.stringify(sortedBindings[j]));
           }

@@ -13,8 +13,6 @@ const k = name => {
   return `/keyboard-mouse-user/keyboard-var/${name}`;
 };
 
-const dropWithRMBorEscBindings = [];
-
 export const keyboardMouseUserBindings = addSetsToBindings({
   [sets.global]: [
     {

@@ -26,7 +26,7 @@ import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
 
 const satisfiesPath = (binding, path) => {
-    return Object.values(binding.dest) && Object.values(binding.dest).indexOf(path) !== -1;
+  return Object.values(binding.dest) && Object.values(binding.dest).indexOf(path) !== -1;
 };
 
 const satisfyPath = (bindings, path) => {
@@ -69,17 +69,17 @@ function dependencySort(mappings) {
   return sorted;
 }
 
-function computeDepsDAG(bindings) {
-  const dag = [];
-  for (const row in bindings) {
-    for (const col in bindings) {
-      for (const path of bindings[row].src) {
-        dag[Number(row) * bindings.length + Number(col)] = satisfiesPath(bindings[col], path) ? 1 : 0;
-      }
-    }
-  }
-  return dag;
-}
+//function computeDepsDAG(bindings) {
+//  const dag = [];
+//  for (const row in bindings) {
+//    for (const col in bindings) {
+//      for (const path of bindings[row].src) {
+//        dag[Number(row) * bindings.length + Number(col)] = satisfiesPath(bindings[col], path) ? 1 : 0;
+//      }
+//    }
+//  }
+//  return dag;
+//}
 
 function canMask(masker, masked) {
   if (masker.priority === undefined) {
@@ -106,10 +106,8 @@ function computeMasks(bindings) {
   for (const row in bindings) {
     for (const col in bindings) {
       let ColCanMaskRow = false;
-      for (const path of Object.values(bindings[row].src)) {
-        if (canMask(bindings[col], bindings[row])) {
-          ColCanMaskRow = true;
-        }
+      if (canMask(bindings[col], bindings[row])) {
+        ColCanMaskRow = true;
       }
       masks[Number(row) * bindings.length + Number(col)] = ColCanMaskRow;
     }
@@ -135,7 +133,7 @@ function computeExecutionStrategy(sortedBindings, masks, activeSets) {
   const masked = [];
   for (const row in sortedBindings) {
     for (const col in sortedBindings) {
-      let rowMask = masked[row] || [];
+      const rowMask = masked[row] || [];
       if (masks[Number(row) * sortedBindings.length + Number(col)] && isActive(sortedBindings[col], activeSets)) {
         rowMask.push(col);
       }
