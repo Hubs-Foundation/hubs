@@ -42,6 +42,8 @@ AFRAME.registerComponent("camera-tool", {
 
   init() {
     this.stateAdded = this.stateAdded.bind(this);
+    this._grabStart = this._grabStart.bind(this);
+    this._grabEnd = this._grabEnd.bind(this);
 
     this.lastUpdate = performance.now();
 
@@ -94,14 +96,31 @@ AFRAME.registerComponent("camera-tool", {
 
   play() {
     this.el.addEventListener("stateadded", this.stateAdded);
+    this.el.addEventListener("grab-start", this._grabStart);
+    this.el.addEventListener("grab-end", this._grabEnd);
   },
 
   pause() {
     this.el.removeEventListener("stateadded", this.stateAdded);
+    this.el.removeEventListener("grab-start", this._grabStart);
+    this.el.removeEventListener("grab-end", this._grabEnd);
   },
 
   stateAdded(evt) {
     if (evt.detail === "activated") {
+      this.takeSnapshotNextTick = true;
+    }
+  },
+
+  _grabStart() {
+    if (!this.el.components.grabbable || this.el.components.grabbable.data.maxGrabbers === 0) return;
+
+    this.grabStartPosition = this.el.object3D.position.clone();
+  },
+
+  _grabEnd() {
+    if (this.grabStartPosition && this.grabStartPosition.distanceToSquared(this.el.object3D.position) < 0.01 * 0.01) {
+      this.grabStartPosition = null;
       this.takeSnapshotNextTick = true;
     }
   },
