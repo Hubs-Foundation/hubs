@@ -11,7 +11,9 @@ export const WithHoverSound = ({ sound, children }) => {
       {context => {
         return React.cloneElement(children, {
           onMouseEnter: e => {
-            context.playSound(sound || hudHoverSound);
+            if (context && context.playSound) {
+              context.playSound(sound || hudHoverSound);
+            }
             children.props.onMouseEnter && children.props.onMouseEnter(e);
           }
         });
