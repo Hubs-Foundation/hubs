@@ -69,18 +69,6 @@ function dependencySort(mappings) {
   return sorted;
 }
 
-//function computeDepsDAG(bindings) {
-//  const dag = [];
-//  for (const row in bindings) {
-//    for (const col in bindings) {
-//      for (const path of bindings[row].src) {
-//        dag[Number(row) * bindings.length + Number(col)] = satisfiesPath(bindings[col], path) ? 1 : 0;
-//      }
-//    }
-//  }
-//  return dag;
-//}
-
 function canMask(masker, masked) {
   if (masker.priority === undefined) {
     console.warn("priority undefined", masker);
