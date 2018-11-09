@@ -88,6 +88,16 @@ const leftGripFallingWhileHoldingPen = v("leftGripFallingWhileHoldingPen");
 export const viveUserBindings = addSetsToBindings({
   [sets.global]: [
     {
+      src: [ensureFrozenViaDpad, ensureFrozenViaKeyboard],
+      dest: { value: paths.actions.ensureFrozen },
+      xform: xforms.any
+    },
+    {
+      src: [thawViaDpad, thawViaKeyboard],
+      dest: { value: paths.actions.thaw },
+      xform: xforms.any
+    },
+    {
       src: {
         value: lButton("grip").pressed
       },
@@ -937,18 +947,6 @@ export const viveUserBindings = addSetsToBindings({
       dest: { value: paths.noop },
       xform: xforms.falling,
       priority: 3
-    }
-  ],
-  [sets.globalPost]: [
-    {
-      src: [ensureFrozenViaDpad, ensureFrozenViaKeyboard],
-      dest: { value: paths.actions.ensureFrozen },
-      xform: xforms.any
-    },
-    {
-      src: [thawViaDpad, thawViaKeyboard],
-      dest: { value: paths.actions.thaw },
-      xform: xforms.any
     }
   ]
 });

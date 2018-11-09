@@ -32,6 +32,7 @@ export class AppAwareMouseDevice {
     }
 
     const buttonLeft = frame[paths.device.mouse.buttonLeft];
+    const buttonRight = frame[paths.device.mouse.buttonRight];
     if (buttonLeft && !this.prevButtonLeft) {
       const rawIntersections = [];
       this.cursorController.raycaster.intersectObjects(this.cursorController.targets, true, rawIntersections);
@@ -50,7 +51,7 @@ export class AppAwareMouseDevice {
       this.clickedOnAnything = false;
     }
 
-    if (!this.clickedOnAnything && buttonLeft) {
+    if ((!this.clickedOnAnything && buttonLeft) || buttonRight) {
       frame[paths.device.smartMouse.cameraDelta] = frame[paths.device.mouse.movementXY];
     }
 

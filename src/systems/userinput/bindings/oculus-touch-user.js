@@ -73,6 +73,16 @@ const rightTriggerPressed2 = v("rightTriggerPressed2");
 export const oculusTouchUserBindings = addSetsToBindings({
   [sets.global]: [
     {
+      src: [ensureFrozenViaButtons, ensureFrozenViaKeyboard],
+      dest: { value: paths.actions.ensureFrozen },
+      xform: xforms.any
+    },
+    {
+      src: [thawViaButtons, thawViaKeyboard],
+      dest: { value: paths.actions.thaw },
+      xform: xforms.any
+    },
+    {
       src: {
         value: leftButton("grip").pressed
       },
@@ -781,30 +791,12 @@ export const oculusTouchUserBindings = addSetsToBindings({
   ],
 
   [sets.rightHandHoveringOnNothing]: [],
-  [sets.globalPost]: [
-    {
-      src: [ensureFrozenViaButtons, ensureFrozenViaKeyboard],
-      dest: { value: paths.actions.ensureFrozen },
-      xform: xforms.any
-    },
-    {
-      src: [thawViaButtons, thawViaKeyboard],
-      dest: { value: paths.actions.thaw },
-      xform: xforms.any
-    }
-  ],
   [sets.inputFocused]: [
     {
       src: { value: "/device/keyboard" },
       dest: { value: paths.noop },
       xform: xforms.noop,
       priority: 1000
-    },
-    {
-      src: { value: "/device/keyboard/l" },
-      dest: { value: paths.actions.logDebugFrame },
-      xform: xforms.rising,
-      priority: 1100
     }
   ]
 });

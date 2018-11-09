@@ -341,12 +341,6 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: { value: paths.noop },
       xform: xforms.noop,
       priority: 1000
-    },
-    {
-      src: { value: "/device/keyboard/l" },
-      dest: { value: paths.actions.logDebugFrame },
-      xform: xforms.rising,
-      priority: 1100
     }
   ]
 });

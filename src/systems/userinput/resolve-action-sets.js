@@ -98,24 +98,18 @@ export function resolveActionSets() {
     cursorHand.has("hover-start") &&
     cursorHand.get("hover-start").matches(".pen, .pen *");
   const cursorHoldingInteractable =
-    cursorController.enabled &&
     !rightHandTeleporting &&
     cursorHand.has("grab-start") &&
     cursorHand.get("grab-start").matches(".interactable, .interactable *");
   const cursorHoldingPen =
-    cursorController.enabled &&
-    !rightHandTeleporting &&
-    cursorHand.has("grab-start") &&
-    cursorHand.get("grab-start").matches(".pen, .pen *");
+    !rightHandTeleporting && cursorHand.has("grab-start") && cursorHand.get("grab-start").matches(".pen, .pen *");
 
   const cursorHoldingCamera =
-    cursorController.enabled &&
     !rightTeleporter.active &&
     cursorHand.has("grab-start") &&
     cursorHand.get("grab-start").matches(".icamera, .icamera *");
 
   const cursorHoveringOnNothing =
-    cursorController.enabled &&
     !rightHandTeleporting &&
     !rightHandHovering &&
     !rightHandGrabbing &&

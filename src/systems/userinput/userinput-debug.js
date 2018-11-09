@@ -7,7 +7,7 @@ AFRAME.registerSystem("userinput-debug", {
       return;
     }
     const userinput = AFRAME.scenes[0].systems.userinput;
-    if (userinput.get(paths.actions.logDebugFrame) || userinput.get(paths.actions.log)) {
+    if (userinput.get(paths.actions.logDebugFrame)) {
       console.log(userinput);
       console.log("sorted", userinput.sortedBindings);
       console.log("actives", userinput.actives);

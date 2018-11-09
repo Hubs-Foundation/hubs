@@ -156,7 +156,7 @@ AFRAME.registerSystem("userinput", {
   init() {
     this.frame = {};
 
-    this.activeSets = new Set([sets.global, sets.globalPost]);
+    this.activeSets = new Set([sets.global]);
     this.pendingSetChanges = [];
     this.xformStates = new Map();
     this.activeDevices = new Set([new MouseDevice(), new AppAwareMouseDevice(), new KeyboardDevice(), new HudDevice()]);
