@@ -162,5 +162,8 @@ export function resolveActionSets() {
   userinput.toggleSet(sets.cursorHoldingPen, cursorHoldingPen);
   userinput.toggleSet(sets.cursorHoldingCamera, cursorHoldingCamera);
   userinput.toggleSet(sets.cursorHoldingInteractable, cursorHoldingInteractable);
-  userinput.toggleSet(sets.inputFocused, document.activeElement.nodeName === "INPUT");
+  userinput.toggleSet(
+    sets.inputFocused,
+    document.activeElement.nodeName === "INPUT" || document.activeElement.nodeName === "TEXTAREA"
+  );
 }

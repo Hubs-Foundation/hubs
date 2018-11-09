@@ -26,7 +26,7 @@ import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
 
 const satisfiesPath = (binding, path) => {
-  return Object.values(binding.dest).indexOf(path) !== -1;
+    return Object.values(binding.dest) && Object.values(binding.dest).indexOf(path) !== -1;
 };
 
 const satisfyPath = (bindings, path) => {

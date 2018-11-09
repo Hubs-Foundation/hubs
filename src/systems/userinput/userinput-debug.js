@@ -1,6 +1,11 @@
 import { paths } from "./paths";
 AFRAME.registerSystem("userinput-debug", {
+  active: true,
+
   tick() {
+    if (!this.active) {
+      return;
+    }
     const userinput = AFRAME.scenes[0].systems.userinput;
     if (userinput.get(paths.actions.logDebugFrame) || userinput.get(paths.actions.log)) {
       console.log(userinput);
