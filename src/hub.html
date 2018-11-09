@@ -80,6 +80,8 @@
             <a-asset-item id="sound_asset-hud_click"                      src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-toggle_mute"                    src="./assets/sfx/Fs_Mute.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-toggle_freeze"                  src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-freeze"                         src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-thaw"                           src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-toggle_space_bubble"            src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-spawn_pen"                      src="./assets/sfx/PenSpawn.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-increase_pen_radius"            src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -434,8 +436,12 @@
                 set-yxz-order
                 sound__teleport_start="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2;"
                 scene-sound__teleport_start="on: right-teleport_down;"
+                sound__teleport_start2="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2;"
+                scene-sound__teleport_start2="on: left-teleport_down;"
                 sound__teleport_end="positional: false; src: #sound_asset-teleport_end; on: nothing; poolSize: 2;"
                 scene-sound__teleport_end="on: right-teleport_up;"
+                sound__teleport_end2="positional: false; src: #sound_asset-teleport_end; on: nothing; poolSize: 2;"
+                scene-sound__teleport_end2="on: left-teleport_up;"
                 sound__snap_rotate_left="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
                 scene-sound__snap_rotate_left="on: snap_rotate_left;"
                 sound__snap_rotate_right="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
@@ -448,6 +454,10 @@
                 scene-sound__hud_action_mute="on: action_mute;"
                 sound__hud_action_freeze="positional: false; src: #sound_asset-toggle_freeze; on: nothing; poolSize: 2;"
                 scene-sound__hud_action_freeze="on: action_freeze;"
+                sound__action_freeze="positional: false; src: #sound_asset-freeze; on: nothing; poolSize: 2;"
+                scene-sound__action_freeze="on: play_freeze_sound;"
+                sound__action_thaw="positional: false; src: #sound_asset-thaw; on: nothing; poolSize: 2;"
+                scene-sound__action_thaw="on: play_thaw_sound;"
                 sound__hud_action_space_bubble="positional: false; src: #sound_asset-toggle_space_bubble; on: nothing; poolSize: 2;"
                 scene-sound__hud_action_space_bubble="on: action_space_bubble;"
                 sound__hud_spawn_pen="positional: false; src: #sound_asset-spawn_pen; on: nothing; poolSize: 2;"
