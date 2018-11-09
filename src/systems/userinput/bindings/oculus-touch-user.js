@@ -15,8 +15,16 @@ const scaledLeftJoyX = `${name}left/scaledJoyX`;
 const scaledLeftJoyY = `${name}left/scaledJoyY`;
 const rightGripFalling = "${name}right/GripFalling";
 const rightTriggerFalling = `${name}right/TriggerFalling`;
+const cursorDrop2 = `${name}right/cursorDrop2`;
+const cursorDrop1 = `${name}right/cursorDrop1`;
+const rightHandDrop2 = `${name}right/rightHandDrop2`;
+const rightHandDrop1 = `${name}right/rightHandDrop1`;
 const rightGripRising = `${name}right/GripRising`;
 const rightTriggerRising = `${name}right/TriggerRising`;
+const rightGripRisingGrab = `${name}right/grip/RisingGrab`;
+const rightTriggerRisingGrab = `${name}right/trigger/RisingGrab`;
+const leftGripRisingGrab = `${name}left/grip/RisingGrab`;
+const leftTriggerRisingGrab = `${name}left/trigger/RisingGrab`;
 const leftGripFalling = `${name}left/GripFalling`;
 const leftGripRising = `${name}left/GripRising`;
 const leftTriggerRising = `${name}left/TriggerRising`;
@@ -417,10 +425,22 @@ export const oculusTouchUserBindings = {
   [sets.leftHandHoveringOnInteractable]: [
     {
       src: { value: leftButton("grip").pressed },
-      dest: { value: paths.actions.leftHand.grab },
+      dest: { value: leftGripRisingGrab },
       xform: xforms.rising,
       root: leftGripRising,
       priority: 200
+    },
+    {
+      src: { value: leftButton("trigger").pressed },
+      dest: { value: leftTriggerRisingGrab },
+      xform: xforms.rising,
+      root: leftTriggerRising,
+      priority: 200
+    },
+    {
+      src: [leftGripRisingGrab, leftTriggerRisingGrab],
+      dest: { value: paths.actions.leftHand.grab },
+      xform: xforms.any
     }
   ],
 
@@ -503,10 +523,22 @@ export const oculusTouchUserBindings = {
   [sets.cursorHoveringOnInteractable]: [
     {
       src: { value: rightButton("grip").pressed },
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: rightGripRisingGrab },
       xform: xforms.rising,
       root: rightGripRising,
       priority: 200
+    },
+    {
+      src: { value: rightButton("trigger").pressed },
+      dest: { value: rightTriggerRisingGrab },
+      xform: xforms.rising,
+      root: rightTriggerRising,
+      priority: 200
+    },
+    {
+      src: [rightGripRisingGrab, rightTriggerRisingGrab],
+      dest: { value: paths.actions.cursor.grab },
+      xform: xforms.any
     }
   ],
 
@@ -518,10 +550,24 @@ export const oculusTouchUserBindings = {
     },
     {
       src: { value: rightButton("grip").pressed },
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: cursorDrop1 },
       xform: xforms.falling,
       root: rightGripFalling,
       priority: 200
+    },
+    {
+      src: { value: rightButton("trigger").pressed },
+      dest: {
+        value: cursorDrop2
+      },
+      xform: xforms.falling,
+      root: rightTriggerFalling,
+      priority: 200
+    },
+    {
+      src: [cursorDrop1, cursorDrop2],
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.any
     },
     {
       src: null,
@@ -552,20 +598,46 @@ export const oculusTouchUserBindings = {
   [sets.rightHandHoveringOnInteractable]: [
     {
       src: { value: rightButton("grip").pressed },
-      dest: { value: paths.actions.rightHand.grab },
+      dest: { value: rightGripRisingGrab },
       xform: xforms.rising,
       root: rightGripRising,
       priority: 200
+    },
+    {
+      src: { value: rightButton("trigger").pressed },
+      dest: { value: rightTriggerRisingGrab },
+      xform: xforms.rising,
+      root: rightTriggerRising,
+      priority: 200
+    },
+    {
+      src: [rightGripRisingGrab, rightTriggerRisingGrab],
+      dest: { value: paths.actions.rightHand.grab },
+      xform: xforms.any
     }
   ],
 
   [sets.rightHandHoldingInteractable]: [
     {
       src: { value: rightButton("grip").pressed },
-      dest: { value: paths.actions.rightHand.drop },
+      dest: { value: rightHandDrop1 },
       xform: xforms.falling,
       root: rightGripFalling,
       priority: 200
+    },
+    {
+      src: { value: rightButton("trigger").pressed },
+      dest: {
+        value: rightHandDrop2
+      },
+      xform: xforms.falling,
+      root: rightTriggerFalling,
+      priority: 200
+    },
+    {
+      src: [rightHandDrop1, rightHandDrop2],
+      dest: { value: paths.actions.rightHand.drop },
+      xform: xforms.any
     },
     {
       src: null,
