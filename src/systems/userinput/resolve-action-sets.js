@@ -71,11 +71,18 @@ export function resolveActionSets() {
   // Cursor
   cursorController.enabled = !(rightHandTeleporting || rightHandHovering || rightHandGrabbing);
 
+  const cursorHoveringOnUI =
+    cursorController.enabled &&
+    !rightHandTeleporting &&
+    !rightHandHovering &&
+    !rightHandGrabbing &&
+    (cursorHand.has("hover-start") && cursorHand.get("hover-start").matches(".ui, .ui *"));
   const cursorHoveringOnInteractable =
     cursorController.enabled &&
     !rightHandTeleporting &&
     !rightHandHovering &&
     !rightHandGrabbing &&
+    !cursorHoveringOnUI &&
     cursorHand.has("hover-start") &&
     cursorHand.get("hover-start").matches(".interactable, .interactable *");
   const cursorHoveringOnCamera =
@@ -83,18 +90,14 @@ export function resolveActionSets() {
     !rightTeleporter.active &&
     !rightHandHovering &&
     !rightHandGrabbing &&
+    !cursorHoveringOnUI &&
     (cursorHand.has("hover-start") && cursorHand.get("hover-start").matches(".icamera, .icamera *"));
-  const cursorHoveringOnUI =
-    cursorController.enabled &&
-    !rightHandTeleporting &&
-    !rightHandHovering &&
-    !rightHandGrabbing &&
-    (cursorHand.has("hover-start") && cursorHand.get("hover-start").matches(".ui, .ui *"));
   const cursorHoveringOnPen =
     cursorController.enabled &&
     !rightHandTeleporting &&
     !rightHandHovering &&
     !rightHandGrabbing &&
+    !cursorHoveringOnUI &&
     cursorHand.has("hover-start") &&
     cursorHand.get("hover-start").matches(".pen, .pen *");
   const cursorHoldingInteractable =

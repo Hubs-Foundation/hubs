@@ -342,5 +342,13 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.noop,
       priority: 1000
     }
+  ],
+
+  [sets.cursorHoveringOnUI]: [
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: paths.actions.cursor.grab },
+      xform: xforms.rising
+    }
   ]
 });

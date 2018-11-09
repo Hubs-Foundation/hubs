@@ -115,7 +115,6 @@ import "./components/cardboard-controls";
 import "./components/cursor-controller";
 
 import "./components/nav-mesh-helper";
-import "./systems/tunnel-effect";
 
 import "./components/tools/pen";
 import "./components/tools/networked-drawing";
