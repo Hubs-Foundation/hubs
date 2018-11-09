@@ -472,8 +472,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hubPhxPresence.onSync(() => {
     remountUI({ presences: hubPhxPresence.state });
-    const occupantCount = Object.values(hubPhxPresence.state).filter(v => v.metas[0] && v.metas[0].presence === "room")
-      .length;
+    const occupantCount = Object.entries(hubPhxPresence.state).length;
     vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
 
     if (!isInitialSync) return;
