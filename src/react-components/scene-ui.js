@@ -107,7 +107,7 @@ class SceneUI extends Component {
       if (!this.props.sceneAttributions.extras) {
         attributions = (
           <span>
-            <span>by {this.props.sceneAttributions.creator}</span>&nbsp;
+            <span>{this.props.sceneAttributions.creator ? `by ${this.props.sceneAttributions.creator}` : ""}</span>&nbsp;
             <br />
             {this.props.sceneAttributions.content && this.props.sceneAttributions.content.map(toAttributionSpan)}
           </span>
