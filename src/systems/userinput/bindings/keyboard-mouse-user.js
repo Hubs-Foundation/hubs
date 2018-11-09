@@ -92,6 +92,16 @@ export const keyboardMouseUserBindings = {
       priority: 100
     },
     {
+      src: { value: paths.device.keyboard.key(" ") },
+      dest: { value: paths.actions.ensureFrozen },
+      xform: xforms.copy
+    },
+    {
+      src: { value: paths.device.keyboard.key(" ") },
+      dest: { value: paths.actions.thaw },
+      xform: xforms.falling
+    },
+    {
       src: { value: paths.device.hud.penButton },
       dest: { value: paths.actions.spawnPen },
       xform: xforms.rising
@@ -127,6 +137,15 @@ export const keyboardMouseUserBindings = {
       },
       dest: {
         value: paths.actions.muteMic
+      },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        value: paths.device.keyboard.key("t")
+      },
+      dest: {
+        value: paths.actions.focusChat
       },
       xform: xforms.rising
     },

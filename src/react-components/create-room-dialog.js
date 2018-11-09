@@ -7,6 +7,7 @@ const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
 
 export default class CreateRoomDialog extends Component {
   static propTypes = {
+    includeScenePrompt: PropTypes.bool,
     onCustomScene: PropTypes.func,
     onClose: PropTypes.func
   };
@@ -26,7 +27,12 @@ export default class CreateRoomDialog extends Component {
     return (
       <DialogContainer title="Create a Room" onClose={onClose} {...other}>
         <div>
-          <div>Choose a name and GLTF URL for your room&apos;s scene:</div>
+          {this.props.includeScenePrompt ? (
+            <div>Choose a name and GLTF URL for your room&apos;s scene:</div>
+          ) : (
+            <div>Choose a name for your room:</div>
+          )}
+
           <form onSubmit={onCustomSceneClicked}>
             <div className="custom-scene-form">
               <input
@@ -39,17 +45,19 @@ export default class CreateRoomDialog extends Component {
                 onChange={e => this.setState({ customRoomName: e.target.value })}
                 required
               />
-              <input
-                type="url"
-                placeholder="URL to Scene GLTF or GLB (Optional)"
-                className="custom-scene-form__link_field"
-                value={this.state.customSceneUrl}
-                onChange={e => this.setState({ customSceneUrl: e.target.value })}
-              />
+              {this.props.includeScenePrompt && (
+                <input
+                  type="url"
+                  placeholder="URL to Scene GLTF or GLB (Optional)"
+                  className="custom-scene-form__link_field"
+                  value={this.state.customSceneUrl}
+                  onChange={e => this.setState({ customSceneUrl: e.target.value })}
+                />
+              )}
               <div className="custom-scene-form__buttons">
                 <WithHoverSound>
                   <button className="custom-scene-form__action-button">
-                    <span>create</span>
+                    <span>Create Room</span>
                   </button>
                 </WithHoverSound>
               </div>

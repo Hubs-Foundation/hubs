@@ -16,12 +16,33 @@ const attributionHostnames = {
 
 const DEFAULT_OBJECT_URL = "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf";
 const isMobile = AFRAME.utils.device.isMobile();
-const instructions = "Paste a URL or upload a file.";
-const desktopTips = "Tip: You can paste links directly into Hubs with Ctrl+V";
-const mobileInstructions = <div>{instructions}</div>;
+const instructions = "Paste a URL to an image, video, model, or upload a file.";
+const desktopTips = "Tip: You can paste media directly into Hubs with Ctrl+V";
+const references = (
+  <span>
+    For models, try{" "}
+    <a href="https://sketchfab.com/search?features=downloadable&type=models" target="_blank" rel="noopener noreferrer">
+      Sketchfab
+    </a>,{" "}
+    <a href="http://poly.google.com/" target="_blank" rel="noopener noreferrer">
+      Google Poly
+    </a>, or our{" "}
+    <a href="https://sketchfab.com/mozillareality" target="_blank" rel="noopener noreferrer">
+      collection
+    </a>.
+  </span>
+);
+
+const mobileInstructions = (
+  <div>
+    <p>{instructions}</p>
+    <p>{references}</p>
+  </div>
+);
 const desktopInstructions = (
   <div>
     <p>{instructions}</p>
+    <p>{references}</p>
     <p>{desktopTips}</p>
   </div>
 );

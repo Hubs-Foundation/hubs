@@ -366,7 +366,23 @@ AFRAME.registerComponent("gltf-model-plus", {
         }
       }
 
+      // The call to setObject3D below recursively clobbers any `el` backreferences to entities
+      // in the entire inflated entity graph to point to `object3DToSet`.
+      //
+      // We don't want those overwritten, since lots of code assumes `object3d.el` points to the relevant
+      // A-Frame entity for that three.js object, so we back them up and re-wire them here. If we didn't do
+      // this, all the `el` properties on these object3ds would point to the `object3DToSet` which is either
+      // the model or the root GLTF inflated entity.
+      const rewires = [];
+
+      object3DToSet.traverse(o => {
+        const el = o.el;
+        if (el) rewires.push(() => (o.el = el));
+      });
+
       this.el.setObject3D("mesh", object3DToSet);
+
+      rewires.forEach(f => f());
 
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {

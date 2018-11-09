@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import copy from "copy-to-clipboard";
 import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
+import { share } from "../utils/share";
 
 import { WithHoverSound } from "./wrap-with-audio";
 import styles from "../assets/stylesheets/invite-dialog.scss";
@@ -26,11 +27,11 @@ export default class InviteDialog extends Component {
     shareButtonActive: false
   };
 
-  shareClicked = link => {
+  shareClicked = url => {
     this.setState({ shareButtonActive: true });
-    setTimeout(() => this.setState({ shareButtonActive: false }), 5000);
-
-    navigator.share({ title: "Join me now in #hubs!", url: link });
+    share({ url, title: "Join me now in #hubs!" }).then(() => {
+      this.setState({ shareButtonActive: false });
+    });
   };
 
   copyClicked = link => {
@@ -46,11 +47,6 @@ export default class InviteDialog extends Component {
     const entryCodeString = pad(entryCode, 6);
     const shortLinkText = `hub.link/${this.props.hubId}`;
     const shortLink = "https://" + shortLinkText;
-
-    const tweetText = `Join me now in #hubs!`;
-    const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(shortLink)}&text=${encodeURIComponent(
-      tweetText
-    )}`;
 
     return (
       <div className={styles.dialog}>
@@ -99,9 +95,9 @@ export default class InviteDialog extends Component {
           {this.props.allowShare &&
             !navigator.share && (
               <WithHoverSound>
-                <a href={tweetLink} className={styles.linkButton} target="_blank" rel="noopener noreferrer">
+                <button className={styles.linkButton} onClick={this.shareClicked.bind(this, shortLink)}>
                   <FormattedMessage id="invite.tweet" />
-                </a>
+                </button>
               </WithHoverSound>
             )}
         </div>

@@ -72,3 +72,29 @@ AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentNa
   // nav-mesh-helper will query for it later.
   el.setAttribute("nav-mesh");
 });
+
+AFRAME.GLTFModelPlus.registerComponent("pinnable", "pinnable");
+
+AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
+  if (componentData.id) {
+    el.setAttribute("networked", {
+      template: "#interactable-media",
+      owner: "scene",
+      networkId: componentData.id
+    });
+  }
+
+  el.setAttribute("media-loader", { src: componentData.src, resize: true, resolve: true });
+
+  if (componentData.pageIndex) {
+    el.setAttribute("media-pager", { index: componentData.pageIndex });
+  }
+
+  if (componentData.paused !== undefined) {
+    el.setAttribute("media-video", { videoPaused: componentData.paused });
+  }
+
+  if (componentData.time) {
+    el.setAttribute("media-video", { time: componentData.time });
+  }
+});

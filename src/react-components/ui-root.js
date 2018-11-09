@@ -9,7 +9,7 @@ import MovingAverage from "moving-average";
 import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
-import { AudioContext, WithHoverSound } from "./wrap-with-audio";
+import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
 
 import { lang, messages } from "../utils/i18n";
 import AutoExitWarning from "./auto-exit-warning";
@@ -31,6 +31,7 @@ import CreateObjectDialog from "./create-object-dialog.js";
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
 import TwoDHUD from "./2d-hud";
+import { spawnChatMessage } from "./chat-message";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -466,7 +467,7 @@ class UIRoot extends Component {
     if (!this.props.forcedVREntryType || !this.props.forcedVREntryType.endsWith("_now")) {
       this.goToEntryStep(ENTRY_STEPS.audio_setup);
     } else {
-      setTimeout(this.onAudioReadyButton, 3000); // Need to wait otherwise input doesn't work :/
+      this.onAudioReadyButton();
     }
   };
 
@@ -727,6 +728,9 @@ class UIRoot extends Component {
   };
 
   renderEntryStartPanel = () => {
+    const textRows = this.state.pendingMessage.split("\n").length;
+    const pendingMessageTextareaHeight = textRows * 28 + "px";
+    const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
     const hasPush = navigator.serviceWorker && "PushManager" in window;
 
     return (
@@ -742,12 +746,21 @@ class UIRoot extends Component {
           </WithHoverSound>
 
           <form onSubmit={this.sendMessage}>
-            <div className={styles.messageEntry}>
-              <input
-                className={styles.messageEntryInput}
+            <div className={styles.messageEntry} style={{ height: pendingMessageFieldHeight }}>
+              <textarea
+                className={classNames([styles.messageEntryInput, "chat-focus-target"])}
                 value={this.state.pendingMessage}
+                rows={textRows}
+                style={{ height: pendingMessageTextareaHeight }}
                 onFocus={e => e.target.select()}
                 onChange={e => this.setState({ pendingMessage: e.target.value })}
+                onKeyDown={e => {
+                  if (e.keyCode === 13 && !e.shiftKey) {
+                    this.sendMessage(e);
+                  } else if (e.keyCode === 27) {
+                    e.target.blur();
+                  }
+                }}
                 placeholder="Send a message..."
               />
               <WithHoverSound>
@@ -1062,9 +1075,12 @@ class UIRoot extends Component {
     const entryFinished = this.state.entryStep === ENTRY_STEPS.finished;
     const showVREntryButton = entryFinished && this.props.availableVREntryTypes.isInHMD;
 
+    const textRows = this.state.pendingMessage.split("\n").length;
+    const pendingMessageTextareaHeight = textRows * 28 + "px";
+    const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
     return (
-      <IntlProvider locale={lang} messages={messages}>
-        <AudioContext.Provider value={this.state.audioContext}>
+      <ReactAudioContext.Provider value={this.state.audioContext}>
+        <IntlProvider locale={lang} messages={messages}>
           <div className={styles.ui}>
             {this.state.dialog}
 
@@ -1074,22 +1090,40 @@ class UIRoot extends Component {
 
             {(!entryFinished || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
-                <PresenceLog entries={this.props.presenceLogEntries || []} />
+                <PresenceLog entries={this.props.presenceLogEntries || []} hubId={this.props.hubId} />
                 <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
               </div>
             )}
 
-            {entryFinished && <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} />}
+            {entryFinished && (
+              <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} hubId={this.props.hubId} />
+            )}
             {entryFinished && (
               <form onSubmit={this.sendMessage}>
-                <div className={styles.messageEntryInRoom}>
-                  <input
-                    className={classNames([styles.messageEntryInput, styles.messageEntryInputInRoom])}
+                <div className={styles.messageEntryInRoom} style={{ height: pendingMessageFieldHeight }}>
+                  <textarea
+                    style={{ height: pendingMessageTextareaHeight }}
+                    className={classNames([
+                      styles.messageEntryInput,
+                      styles.messageEntryInputInRoom,
+                      "chat-focus-target"
+                    ])}
                     value={this.state.pendingMessage}
+                    rows={textRows}
                     onFocus={e => e.target.select()}
                     onChange={e => {
                       e.stopPropagation();
                       this.setState({ pendingMessage: e.target.value });
+                    }}
+                    onKeyDown={e => {
+                      if (e.keyCode === 13 && !e.shiftKey) {
+                        this.sendMessage(e);
+                      } else if (e.keyCode === 13 && e.shiftKey && e.ctrlKey) {
+                        spawnChatMessage(e.target.value);
+                        this.setState({ pendingMessage: "" });
+                      } else if (e.keyCode === 27) {
+                        e.target.blur();
+                      }
                     }}
                     placeholder="Send a message..."
                   />
@@ -1098,6 +1132,19 @@ class UIRoot extends Component {
                     type="submit"
                     value="send"
                   />
+                  <WithHoverSound>
+                    <button
+                      className={classNames([styles.messageEntrySpawn])}
+                      onClick={() => {
+                        if (this.state.pendingMessage.length > 0) {
+                          spawnChatMessage(this.state.pendingMessage);
+                          this.setState({ pendingMessage: "" });
+                        } else {
+                          this.showCreateObjectDialog();
+                        }
+                      }}
+                    />
+                  </WithHoverSound>
                 </div>
               </form>
             )}
@@ -1169,18 +1216,16 @@ class UIRoot extends Component {
               </button>
             </WithHoverSound>
 
-            <WithHoverSound>
-              <div
-                onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
-                className={classNames({
-                  [styles.presenceInfo]: true,
-                  [styles.presenceInfoSelected]: this.state.showPresenceList
-                })}
-              >
-                <FontAwesomeIcon icon={faUsers} />
-                <span className={styles.occupantCount}>{this.occupantCount()}</span>
-              </div>
-            </WithHoverSound>
+            <div
+              onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
+              className={classNames({
+                [styles.presenceInfo]: true,
+                [styles.presenceInfoSelected]: this.state.showPresenceList
+              })}
+            >
+              <FontAwesomeIcon icon={faUsers} />
+              <span className={styles.occupantCount}>{this.occupantCount()}</span>
+            </div>
 
             {this.state.showPresenceList && (
               <PresenceList presences={this.props.presences} sessionId={this.props.sessionId} />
@@ -1217,8 +1262,8 @@ class UIRoot extends Component {
               </div>
             ) : null}
           </div>
-        </AudioContext.Provider>
-      </IntlProvider>
+        </IntlProvider>
+      </ReactAudioContext.Provider>
     );
   }
 }

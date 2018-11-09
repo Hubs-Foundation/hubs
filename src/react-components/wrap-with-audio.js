@@ -1,13 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-export const AudioContext = React.createContext({});
+export const ReactAudioContext = React.createContext({});
 
 export const hudHoverSound = "play_sound-hud_hover_start";
 
 export const WithHoverSound = ({ sound, children }) => {
   return (
-    <AudioContext.Consumer>
+    <ReactAudioContext.Consumer>
       {context => {
         return React.cloneElement(children, {
           onMouseEnter: e => {
@@ -16,7 +16,7 @@ export const WithHoverSound = ({ sound, children }) => {
           }
         });
       }}
-    </AudioContext.Consumer>
+    </ReactAudioContext.Consumer>
   );
 };
 

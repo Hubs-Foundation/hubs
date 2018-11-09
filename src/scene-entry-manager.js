@@ -1,6 +1,7 @@
 import qsTruthy from "./utils/qs_truthy";
 import screenfull from "screenfull";
 import nextTick from "./utils/next-tick";
+import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
 
 const playerHeight = 1.6;
 const isBotMode = qsTruthy("bot");
@@ -213,12 +214,34 @@ export default class SceneEntryManager {
       spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
     });
 
+    this.scene.addEventListener("pinned", e => {
+      const el = e.detail.el;
+      const networkId = el.components.networked.data.networkId;
+      const gltfNode = pinnedEntityToGltf(el);
+      el.setAttribute("networked", { persistent: true });
+
+      this.hubChannel.pin(networkId, gltfNode);
+    });
+
+    this.scene.addEventListener("unpinned", e => {
+      const el = e.detail.el;
+      const components = el.components;
+      const networked = components.networked;
+
+      if (!networked || !networked.data || !NAF.utils.isMine(el)) return;
+
+      const networkId = components.networked.data.networkId;
+      el.setAttribute("networked", { persistent: false });
+
+      this.hubChannel.unpin(networkId);
+    });
+
     this.scene.addEventListener("object_spawned", e => {
       this.hubChannel.sendObjectSpawnedEvent(e.detail.objectType);
     });
 
     document.addEventListener("paste", e => {
-      if (e.target.nodeName === "INPUT" && document.activeElement === e.target) return;
+      if (e.target.matches("input, textarea") && document.activeElement === e.target) return;
 
       const url = e.clipboardData.getData("text");
       const files = e.clipboardData.files && e.clipboardData.files;
@@ -259,7 +282,6 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("photo_taken", e => {
-      console.log(e);
       this.hubChannel.sendMessage({ src: e.detail }, "spawn");
     });
   };

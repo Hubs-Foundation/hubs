@@ -15,16 +15,8 @@ const scaledLeftJoyX = `${name}left/scaledJoyX`;
 const scaledLeftJoyY = `${name}left/scaledJoyY`;
 const rightGripFalling = "${name}right/GripFalling";
 const rightTriggerFalling = `${name}right/TriggerFalling`;
-const cursorDrop2 = `${name}right/cursorDrop2`;
-const cursorDrop1 = `${name}right/cursorDrop1`;
-const rightHandDrop2 = `${name}right/rightHandDrop2`;
-const rightHandDrop1 = `${name}right/rightHandDrop1`;
 const rightGripRising = `${name}right/GripRising`;
 const rightTriggerRising = `${name}right/TriggerRising`;
-const rightGripRisingGrab = `${name}right/grip/RisingGrab`;
-const rightTriggerRisingGrab = `${name}right/trigger/RisingGrab`;
-const leftGripRisingGrab = `${name}left/grip/RisingGrab`;
-const leftTriggerRisingGrab = `${name}left/trigger/RisingGrab`;
 const leftGripFalling = `${name}left/GripFalling`;
 const leftGripRising = `${name}left/GripRising`;
 const leftTriggerRising = `${name}left/TriggerRising`;
@@ -57,6 +49,16 @@ const rightTouchSnapRight = `${name}/right/snap-right`;
 const rightTouchSnapLeft = `${name}/right/snap-left`;
 const keyboardSnapRight = `${name}/keyboard/snap-right`;
 const keyboardSnapLeft = `${name}/keyboard/snap-left`;
+
+const rootForFrozenOverrideWhenHolding = "rootForFrozenOverrideWhenHolding";
+
+const lowerButtons = `${name}buttons/lower`;
+
+const ensureFrozenViaButtons = `${name}buttons/ensureFrozen`;
+const ensureFrozenViaKeyboard = `${name}keyboard/ensureFrozen`;
+
+const thawViaButtons = `${name}buttons/thaw`;
+const thawViaKeyboard = `${name}keyboard/thaw`;
 
 export const oculusTouchUserBindings = {
   [sets.global]: [
@@ -183,6 +185,32 @@ export const oculusTouchUserBindings = {
       xform: xforms.any
     },
     {
+      src: { value: paths.device.keyboard.key(" ") },
+      dest: { value: ensureFrozenViaKeyboard },
+      xform: xforms.copy
+    },
+    {
+      src: [leftButton("x").pressed, rightButton("a").pressed],
+      dest: { value: lowerButtons },
+      xform: xforms.any
+    },
+    {
+      src: { value: lowerButtons },
+      dest: { value: ensureFrozenViaButtons },
+      root: rootForFrozenOverrideWhenHolding,
+      xform: xforms.copy
+    },
+    {
+      src: { value: lowerButtons },
+      dest: { value: thawViaButtons },
+      xform: xforms.falling
+    },
+    {
+      src: { value: paths.device.keyboard.key(" ") },
+      dest: { value: thawViaKeyboard },
+      xform: xforms.falling
+    },
+    {
       src: {
         value: rightDpadWest
       },
@@ -249,6 +277,33 @@ export const oculusTouchUserBindings = {
     },
     {
       src: {
+        value: paths.device.keyboard.key("t")
+      },
+      dest: {
+        value: paths.actions.focusChat
+      },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        value: paths.device.keyboard.key("l")
+      },
+      dest: {
+        value: paths.actions.logDebugFrame
+      },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        value: paths.device.keyboard.key("m")
+      },
+      dest: {
+        value: paths.actions.muteMic
+      },
+      xform: xforms.rising
+    },
+    {
+      src: {
         first: wasd_vec2,
         second: arrows_vec2
       },
@@ -277,7 +332,7 @@ export const oculusTouchUserBindings = {
     },
     {
       src: {
-        value: leftButton("x").pressed
+        value: leftButton("y").pressed
       },
       dest: {
         value: leftBoost
@@ -286,7 +341,7 @@ export const oculusTouchUserBindings = {
     },
     {
       src: {
-        value: rightButton("a").pressed
+        value: rightButton("b").pressed
       },
       dest: {
         value: rightBoost
@@ -362,22 +417,10 @@ export const oculusTouchUserBindings = {
   [sets.leftHandHoveringOnInteractable]: [
     {
       src: { value: leftButton("grip").pressed },
-      dest: { value: leftGripRisingGrab },
+      dest: { value: paths.actions.leftHand.grab },
       xform: xforms.rising,
       root: leftGripRising,
       priority: 200
-    },
-    {
-      src: { value: leftButton("trigger").pressed },
-      dest: { value: leftTriggerRisingGrab },
-      xform: xforms.rising,
-      root: leftTriggerRising,
-      priority: 200
-    },
-    {
-      src: [leftGripRisingGrab, leftTriggerRisingGrab],
-      dest: { value: paths.actions.leftHand.grab },
-      xform: xforms.any
     }
   ],
 
@@ -388,6 +431,13 @@ export const oculusTouchUserBindings = {
       xform: xforms.falling,
       root: leftGripFalling,
       priority: 200
+    },
+    {
+      src: null,
+      dest: { value: ensureFrozenViaButtons },
+      root: rootForFrozenOverrideWhenHolding,
+      priority: 100,
+      xform: xforms.always(false)
     }
   ],
 
@@ -453,22 +503,10 @@ export const oculusTouchUserBindings = {
   [sets.cursorHoveringOnInteractable]: [
     {
       src: { value: rightButton("grip").pressed },
-      dest: { value: rightGripRisingGrab },
+      dest: { value: paths.actions.cursor.grab },
       xform: xforms.rising,
       root: rightGripRising,
       priority: 200
-    },
-    {
-      src: { value: rightButton("trigger").pressed },
-      dest: { value: rightTriggerRisingGrab },
-      xform: xforms.rising,
-      root: rightTriggerRising,
-      priority: 200
-    },
-    {
-      src: [rightGripRisingGrab, rightTriggerRisingGrab],
-      dest: { value: paths.actions.cursor.grab },
-      xform: xforms.any
     }
   ],
 
@@ -480,24 +518,17 @@ export const oculusTouchUserBindings = {
     },
     {
       src: { value: rightButton("grip").pressed },
-      dest: { value: cursorDrop1 },
+      dest: { value: paths.actions.cursor.drop },
       xform: xforms.falling,
       root: rightGripFalling,
       priority: 200
     },
     {
-      src: { value: rightButton("trigger").pressed },
-      dest: {
-        value: cursorDrop2
-      },
-      xform: xforms.falling,
-      root: rightTriggerFalling,
-      priority: 200
-    },
-    {
-      src: [cursorDrop1, cursorDrop2],
-      dest: { value: paths.actions.cursor.drop },
-      xform: xforms.any
+      src: null,
+      dest: { value: ensureFrozenViaButtons },
+      root: rootForFrozenOverrideWhenHolding,
+      priority: 100,
+      xform: xforms.always(false)
     }
   ],
 
@@ -521,46 +552,27 @@ export const oculusTouchUserBindings = {
   [sets.rightHandHoveringOnInteractable]: [
     {
       src: { value: rightButton("grip").pressed },
-      dest: { value: rightGripRisingGrab },
+      dest: { value: paths.actions.rightHand.grab },
       xform: xforms.rising,
       root: rightGripRising,
       priority: 200
-    },
-    {
-      src: { value: rightButton("trigger").pressed },
-      dest: { value: rightTriggerRisingGrab },
-      xform: xforms.rising,
-      root: rightTriggerRising,
-      priority: 200
-    },
-    {
-      src: [rightGripRisingGrab, rightTriggerRisingGrab],
-      dest: { value: paths.actions.rightHand.grab },
-      xform: xforms.any
     }
   ],
 
   [sets.rightHandHoldingInteractable]: [
     {
       src: { value: rightButton("grip").pressed },
-      dest: { value: rightHandDrop1 },
+      dest: { value: paths.actions.rightHand.drop },
       xform: xforms.falling,
       root: rightGripFalling,
       priority: 200
     },
     {
-      src: { value: rightButton("trigger").pressed },
-      dest: {
-        value: rightHandDrop2
-      },
-      xform: xforms.falling,
-      root: rightTriggerFalling,
-      priority: 200
-    },
-    {
-      src: [rightHandDrop1, rightHandDrop2],
-      dest: { value: paths.actions.rightHand.drop },
-      xform: xforms.any
+      src: null,
+      dest: { value: ensureFrozenViaButtons },
+      root: rootForFrozenOverrideWhenHolding,
+      priority: 100,
+      xform: xforms.always(false)
     }
   ],
   [sets.rightHandHoveringOnPen]: [],
@@ -664,5 +676,17 @@ export const oculusTouchUserBindings = {
     }
   ],
 
-  [sets.rightHandHoveringOnNothing]: []
+  [sets.rightHandHoveringOnNothing]: [],
+  [sets.globalPost]: [
+    {
+      src: [ensureFrozenViaButtons, ensureFrozenViaKeyboard],
+      dest: { value: paths.actions.ensureFrozen },
+      xform: xforms.any
+    },
+    {
+      src: [thawViaButtons, thawViaKeyboard],
+      dest: { value: paths.actions.thaw },
+      xform: xforms.any
+    }
+  ]
 };

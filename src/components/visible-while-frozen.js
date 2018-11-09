@@ -4,12 +4,51 @@
  * @component visible-while-frozen
  */
 AFRAME.registerComponent("visible-while-frozen", {
+  schema: {
+    withinDistance: { type: "number" }
+  },
+
   init() {
+    this.updateVisibility = this.updateVisibility.bind(this);
+    this.camWorldPos = new THREE.Vector3();
+    this.objWorldPos = new THREE.Vector3();
+    this.cam = this.el.sceneEl.camera.el.object3D;
     this.onStateChange = evt => {
       if (!evt.detail === "frozen") return;
-      this.el.setAttribute("visible", this.el.sceneEl.is("frozen"));
+      this.updateVisibility();
     };
-    this.el.setAttribute("visible", this.el.sceneEl.is("frozen"));
+    this.updateVisibility();
+  },
+
+  tick() {
+    if (!this.data.withinDistance) return;
+
+    const isFrozen = this.el.sceneEl.is("frozen");
+    const isVisible = this.el.getAttribute("visible");
+    if (!isFrozen && !isVisible) return;
+
+    this.updateVisibility();
+  },
+
+  updateVisibility() {
+    const isFrozen = this.el.sceneEl.is("frozen");
+
+    let isWithinDistance = true;
+
+    if (this.data.withinDistance !== undefined) {
+      this.cam.getWorldPosition(this.camWorldPos);
+      this.objWorldPos.copy(this.el.object3D.position);
+      this.el.object3D.localToWorld(this.objWorldPos);
+
+      isWithinDistance =
+        this.camWorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance;
+    }
+
+    const shouldBeVisible = isFrozen && isWithinDistance;
+
+    if (this.el.getAttribute("visible") !== shouldBeVisible) {
+      this.el.setAttribute("visible", shouldBeVisible);
+    }
   },
 
   play() {

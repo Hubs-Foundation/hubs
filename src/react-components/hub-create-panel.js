@@ -256,6 +256,7 @@ class HubCreatePanel extends Component {
         </form>
         {this.state.showCustomSceneDialog && (
           <CreateRoomDialog
+            includeScenePrompt={true}
             onClose={() => this.setState({ showCustomSceneDialog: false })}
             onCustomScene={(name, url) => {
               this.setState({ showCustomSceneDialog: false, name: name, customSceneUrl: url }, () => this.createHub());
