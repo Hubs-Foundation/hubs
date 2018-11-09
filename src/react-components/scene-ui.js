@@ -93,13 +93,15 @@ class SceneUI extends Component {
           <span key={a.url}>
             <a href={a.url} target="_blank" rel="noopener noreferrer">
               {a.name} by {a.author} {source}
-            </a>&nbsp;
+            </a>
+            &nbsp;
           </span>
         );
       } else {
         return (
           <span key={`${a.name} ${a.author}`}>
-            {a.name} by {a.author}&nbsp;
+            {a.name} by {a.author}
+            &nbsp;
           </span>
         );
       }
@@ -109,7 +111,8 @@ class SceneUI extends Component {
       if (!this.props.sceneAttributions.extras) {
         attributions = (
           <span>
-            <span>{this.props.sceneAttributions.creator ? `by ${this.props.sceneAttributions.creator}` : ""}</span>&nbsp;
+            <span>{this.props.sceneAttributions.creator ? `by ${this.props.sceneAttributions.creator}` : ""}</span>
+            &nbsp;
             <br />
             {this.props.sceneAttributions.content && this.props.sceneAttributions.content.map(toAttributionSpan)}
           </span>
@@ -149,7 +152,10 @@ class SceneUI extends Component {
                   </button>
                 </WithHoverSound>
                 <WithHoverSound>
-                  <button className={styles.optionsButton} onClick={() => this.setState({ showCustomRoomDialog: true })}>
+                  <button
+                    className={styles.optionsButton}
+                    onClick={() => this.setState({ showCustomRoomDialog: true })}
+                  >
                     <FontAwesomeIcon icon={faEllipsisH} />
                   </button>
                 </WithHoverSound>
