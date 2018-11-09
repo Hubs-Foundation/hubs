@@ -25,6 +25,16 @@ import { resolveActionSets } from "./resolve-action-sets";
 import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
 
+function intersection(setA, setB) {
+  var _intersection = new Set();
+  for (var elem of setB) {
+    if (setA.has(elem)) {
+      _intersection.add(elem);
+    }
+  }
+  return _intersection;
+}
+
 const satisfiesPath = (binding, path) => {
   return Object.values(binding.dest) && Object.values(binding.dest).indexOf(path) !== -1;
 };
@@ -142,6 +152,7 @@ AFRAME.registerSystem("userinput", {
   init() {
     this.frame = {};
 
+    this.prevActiveSets = new Set();
     this.activeSets = new Set([sets.global]);
     this.pendingSetChanges = [];
     this.xformStates = new Map();
@@ -256,11 +267,17 @@ AFRAME.registerSystem("userinput", {
       this.masks = computeMasks(this.sortedBindings);
     }
 
+    this.prevActiveSets.clear();
+    for (const item of this.activeSets) {
+      this.prevActiveSets.add(item);
+    }
     resolveActionSets();
     for (const { set, value } of this.pendingSetChanges) {
       this.activeSets[value ? "add" : "delete"](set);
     }
-    const activeSetsChanged = this.pendingSetChanges.length; // TODO: correct this
+    const activeSetsChanged =
+      this.prevActiveSets.size !== this.activeSets.size ||
+      intersection(this.prevActiveSets, this.activeSets).size !== this.activeSets.size;
     this.pendingSetChanges.length = 0;
     if (registeredMappingsChanged || activeSetsChanged || (!this.actives && !this.masked)) {
       this.prevActives = this.actives;

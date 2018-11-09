@@ -948,5 +948,13 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.falling,
       priority: 3
     }
+  ],
+  [sets.inputFocused]: [
+    {
+      src: { value: "/device/keyboard" },
+      dest: { value: paths.noop },
+      xform: xforms.noop,
+      priority: 1000
+    }
   ]
 });
