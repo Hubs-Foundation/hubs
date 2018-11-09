@@ -81,11 +81,12 @@ class SceneUI extends Component {
 
     const toAttributionSpan = a => {
       if (a.url) {
-        const source = a.url.indexOf("sketchfab.com")
-          ? "on Sketchfab"
-          : a.url.indexOf("poly.google.com")
-            ? "on Google Poly"
-            : "";
+        const source =
+          a.url.indexOf("sketchfab.com") >= 0
+            ? "on Sketchfab"
+            : a.url.indexOf("poly.google.com") >= 0
+              ? "on Google Poly"
+              : "";
 
         return (
           <span key={a.url}>
@@ -107,7 +108,7 @@ class SceneUI extends Component {
       if (!this.props.sceneAttributions.extras) {
         attributions = (
           <span>
-            <span>by {this.props.sceneAttributions.creator}</span>&nbsp;
+            <span>{this.props.sceneAttributions.creator ? `by ${this.props.sceneAttributions.creator}` : ""}</span>&nbsp;
             <br />
             {this.props.sceneAttributions.content && this.props.sceneAttributions.content.map(toAttributionSpan)}
           </span>

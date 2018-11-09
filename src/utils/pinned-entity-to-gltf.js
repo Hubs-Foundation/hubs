@@ -25,6 +25,11 @@ export default function pinnedEntityToGltf(el) {
     if (components["media-pager"]) {
       gltfComponents.media.pageIndex = components["media-pager"].data.index;
     }
+
+    if (components["media-video"] && components["media-video"].data.videoPaused) {
+      gltfComponents.media.paused = true;
+      gltfComponents.media.time = components["media-video"].data.time;
+    }
   }
 
   gltfComponents.pinnable = { pinned: true };
