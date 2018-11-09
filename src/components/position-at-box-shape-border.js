@@ -60,13 +60,16 @@ AFRAME.registerComponent("position-at-box-shape-border", {
       if (!this.target) {
         this.targetEl = this.el.querySelector(this.data.target);
         this.target = this.targetEl.object3D;
+
         if (!this.target) return;
+
+        if (this.targetEl.getAttribute("visible") === false) {
+          this.target.scale.setScalar(0.01); // To avoid "pop" of gigantic button first time
+          return;
+        }
       }
 
-      if (this.targetEl.getAttribute("visible") === false) {
-        this.target.scale.setScalar(0.01); // To avoid "pop" of gigantic button
-        return;
-      }
+      if (this.targetEl.getAttribute("visible") === false) return;
 
       if (!this.el.getObject3D("mesh")) {
         return;
