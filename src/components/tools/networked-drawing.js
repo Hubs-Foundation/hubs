@@ -105,7 +105,7 @@ AFRAME.registerComponent("networked-drawing", {
     this.scene.remove(this.drawing);
   },
 
-  tick() {
+  tick(t) {
     const connected = NAF.connection.isConnected() && this.networkedEl;
     const isMine = connected && NAF.utils.isMine(this.networkedEl);
 
@@ -144,7 +144,7 @@ AFRAME.registerComponent("networked-drawing", {
       }
     }
 
-    this._deleteLines();
+    this._deleteExpiredLines(t);
   },
 
   _broadcastDrawing: (() => {
@@ -193,12 +193,11 @@ AFRAME.registerComponent("networked-drawing", {
     };
   })(),
 
-  _deleteLines() {
+  _deleteExpiredLines(time) {
     const length = this.networkBufferHistory.length;
     if (length > 0) {
-      const now = Date.now();
-      const time = this.networkBufferHistory[0].time;
-      if (length > this.data.maxLines || time + this.data.maxDrawTimeout <= now) {
+      const drawTime = this.networkBufferHistory[0].time;
+      if (length > this.data.maxLines || drawTime + this.data.maxDrawTimeout <= time) {
         const datum = this.networkBufferHistory[0];
         if (length > 1) {
           datum.idxLength += 2 - (this.segments % 2);
@@ -389,7 +388,7 @@ AFRAME.registerComponent("networked-drawing", {
     const datum = {
       networkBufferCount: this.networkBufferCount,
       idxLength: this.vertexCount - 1,
-      time: Date.now()
+      time: this.el.sceneEl.clock.elapsedTime * 1000
     };
     this.networkBufferHistory.push(datum);
     this.vertexCount = 0;
