@@ -71,11 +71,9 @@ function dependencySort(mappings) {
 
 function canMask(masker, masked) {
   if (masker.priority === undefined) {
-    console.warn("priority undefined", masker);
     masker.priority = 0;
   }
   if (masked.priority === undefined) {
-    console.warn("priority undefined", masked);
     masked.priority = 0;
   }
   if (masked.priority >= masker.priority) return false;

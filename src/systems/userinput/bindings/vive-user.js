@@ -712,7 +712,7 @@ export const viveUserBindings = addSetsToBindings({
       priority: 1
     },
     {
-      src: [rGripRisingGrab ],
+      src: [rGripRisingGrab],
       dest: { value: paths.actions.cursor.grab },
       xform: xforms.any
     }
@@ -742,7 +742,7 @@ export const viveUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: [cursorDrop1 ],
+      src: [cursorDrop1],
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.any
     },
@@ -823,7 +823,7 @@ export const viveUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: [rGripRisingGrab ],
+      src: [rGripRisingGrab],
       dest: { value: paths.actions.rightHand.grab },
       xform: xforms.any
     }
