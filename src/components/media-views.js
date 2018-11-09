@@ -231,6 +231,7 @@ AFRAME.registerComponent("media-video", {
 
   init() {
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
+    this.tryUpdateVideoPlaybackState = this.tryUpdateVideoPlaybackState.bind(this);
 
     this._grabStart = this._grabStart.bind(this);
     this._grabEnd = this._grabEnd.bind(this);
@@ -290,7 +291,7 @@ AFRAME.registerComponent("media-video", {
 
   togglePlayingIfOwner() {
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl) && this.video) {
-      this.data.videoPaused ? this.video.play() : this.video.pause();
+      this.tryUpdateVideoPlaybackState(!this.data.videoPaused);
     }
   },
 
@@ -306,6 +307,10 @@ AFRAME.registerComponent("media-video", {
 
   onPauseStateChange() {
     this.el.setAttribute("media-video", "videoPaused", this.video.paused);
+
+    if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
+      this.el.emit("owned-video-state-changed");
+    }
   },
 
   async updateTexture(src) {
@@ -353,9 +358,39 @@ AFRAME.registerComponent("media-video", {
   updatePlaybackState(force) {
     if (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && this.video)) {
       if (Math.abs(this.data.time - this.video.currentTime) > this.data.syncTolerance) {
-        this.video.currentTime = this.data.time;
+        this.tryUpdateVideoPlaybackState(this.data.videoPaused, this.data.time);
+      } else {
+        this.tryUpdateVideoPlaybackState(this.data.videoPaused);
       }
-      this.data.videoPaused ? this.video.pause() : this.video.play();
+    }
+  },
+
+  tryUpdateVideoPlaybackState(pause, currentTime) {
+    if (this._playbackStateChangeTimeout) {
+      clearTimeout(this._playbackStateChangeTimeout);
+    }
+
+    if (pause) {
+      this.video.pause();
+
+      if (currentTime) {
+        this.video.currentTime = currentTime;
+      }
+    } else {
+      // Need to deal with the fact play() may fail if user has not interacted with browser yet.
+      this.video
+        .play()
+        .then(() => {
+          if (currentTime) {
+            this.video.currentTime = currentTime;
+          }
+        })
+        .catch(() => {
+          this._playbackStateChangeTimeout = setTimeout(
+            () => this.tryUpdateVideoPlaybackState(pause, currentTime),
+            1000
+          );
+        });
     }
   },
 
