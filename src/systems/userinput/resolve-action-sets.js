@@ -21,17 +21,10 @@ export function resolveActionSets() {
     leftHandState.has("hover-start") &&
     leftHandState.get("hover-start").matches(".icamera, .icamera *");
   const leftHandHoldingInteractable =
-    !leftTeleporter.active &&
-    leftHandState.has("grab-start") &&
-    leftHandState.get("grab-start").matches(".interactable, .interactable *");
-  const leftHandHoldingPen =
-    !leftTeleporter.active &&
-    leftHandState.has("grab-start") &&
-    leftHandState.get("grab-start").matches(".pen, .pen *");
+    leftHandState.has("grab-start") && leftHandState.get("grab-start").matches(".interactable, .interactable *");
+  const leftHandHoldingPen = leftHandState.has("grab-start") && leftHandState.get("grab-start").matches(".pen, .pen *");
   const leftHandHoldingCamera =
-    !leftTeleporter.active &&
-    leftHandState.has("grab-start") &&
-    leftHandState.get("grab-start").matches(".icamera, .icamera *");
+    leftHandState.has("grab-start") && leftHandState.get("grab-start").matches(".icamera, .icamera *");
   const leftHandHovering = !leftTeleporter.active && leftHandState.has("hover-start");
   const leftHandHoveringOnNothing = !leftHandHovering && !leftHandState.has("grab-start");
   const leftHandTeleporting = leftTeleporter.active;
@@ -58,17 +51,12 @@ export function resolveActionSets() {
     rightHandState.has("hover-start") &&
     rightHandState.get("hover-start").matches(".icamera, .icamera *");
   const rightHandHoldingInteractable =
-    !rightHandTeleporting &&
     !cursorGrabbing &&
     rightHandState.has("grab-start") &&
     rightHandState.get("grab-start").matches(".interactable, .interactable *");
   const rightHandHoldingPen =
-    !rightHandTeleporting &&
-    !cursorGrabbing &&
-    rightHandState.has("grab-start") &&
-    rightHandState.get("grab-start").matches(".pen, .pen *");
+    !cursorGrabbing && rightHandState.has("grab-start") && rightHandState.get("grab-start").matches(".pen, .pen *");
   const rightHandHoldingCamera =
-    !rightTeleporter.active &&
     !cursorGrabbing &&
     rightHandState.has("grab-start") &&
     rightHandState.get("grab-start").matches(".icamera, .icamera *");

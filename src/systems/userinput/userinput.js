@@ -300,7 +300,6 @@ AFRAME.registerSystem("userinput", {
         bindingExistedLastFrame = j > -1 && this.prevActives[j] && this.prevMasked[j].length === 0;
       }
       if (!bindingExistedLastFrame) {
-        console.log("deleting xform state for ", binding);
         this.xformStates.delete(binding);
       }
 
