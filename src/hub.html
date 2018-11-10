@@ -72,13 +72,13 @@
             <a-asset-item id="sound_asset-teleport_end"                   src="./assets/sfx/D_teleportEnd.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-snap_rotate"                    src="./assets/sfx/quickTurn.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-media_loaded"                   src="./assets/sfx/A_bendUp.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-hud_hover_start"                src="./assets/sfx/Eb_blip.wav"  response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-hud_hover_start"                src="./assets/sfx/tap_mellow.wav"  response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-hover"                          src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="DISABLED_sound_asset-hover_off"             src="./assets/sfx/tap_mellow.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-cursor_distance_change_blocked" src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-cursor_distance_changed"        src="./assets/sfx/tap_mellow.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-hud_click"                      src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-toggle_mute"                    src="./assets/sfx/Fs_Mute.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-toggle_mute"                    src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-toggle_freeze"                  src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-freeze"                         src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-thaw"                           src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -447,7 +447,7 @@
                 sound__snap_rotate_right="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
                 scene-sound__snap_rotate_right="on: snap_rotate_right;"
                 sound__model_loaded="positional: false; src: #sound_asset-media_loaded; on: nothing; poolSize: 2;"
-                scene-sound__model_loaded="on: model-loaded;"
+                scene-sound__model_loaded="on: object_spawned;"
                 sound__image_loaded="positional: false; src: #sound_asset-media_loaded; on: nothing; poolSize: 2;"
                 scene-sound__image_loaded="on: image-loaded;"
                 sound__hud_action_mute="positional: false; src: #sound_asset-toggle_mute; on: nothing; poolSize: 2;"
@@ -463,7 +463,6 @@
                 sound__hud_spawn_pen="positional: false; src: #sound_asset-spawn_pen; on: nothing; poolSize: 2;"
                 scene-sound__hud_spawn_pen="on: spawn_pen;"
                 sound__hud_hover_start="positional: false; src: #sound_asset-hud_hover_start; on: nothing; poolSize: 5;"
-                scene-sound__hud_hover_start="on: play_sound-hud_hover_start;"
                 sound__hud_click="positional: false; src: #sound_asset-hud_click; on: nothing; poolSize: 1;"
                 scene-sound__hud_click="on: hud_click;"
                 sound__cursor_distance_changed="positional: false; src: #sound_asset-cursor_distance_changed; on: nothing; poolSize: 1;"
