@@ -3,6 +3,7 @@ const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
 const MAX_WARNINGS = 10;
+const PI_2 = Math.PI / 2;
 
 /**
  * Avatar movement controller that listens to move, rotate and teleportation events and moves the avatar accordingly.
@@ -16,7 +17,8 @@ AFRAME.registerComponent("character-controller", {
     easing: { default: 10 },
     pivot: { type: "selector" },
     snapRotationDegrees: { default: THREE.Math.DEG2RAD * 45 },
-    rotationSpeed: { default: -3 }
+    rotationSpeed: { default: -3 },
+    fly: { default: true }
   },
 
   init: function() {
@@ -140,7 +142,7 @@ AFRAME.registerComponent("character-controller", {
       rotationInvMatrix.makeRotationAxis(rotationAxis, -root.rotation.y);
       pivotRotationMatrix.makeRotationAxis(rotationAxis, pivot.rotation.y);
       pivotRotationInvMatrix.makeRotationAxis(rotationAxis, -pivot.rotation.y);
-      this.updateVelocity(deltaSeconds);
+      this.updateVelocity(deltaSeconds, pivot);
       this.accelerationInput.set(0, 0, 0);
 
       const boost = userinput.get(paths.actions.boost) ? 2 : 1;
@@ -178,7 +180,7 @@ AFRAME.registerComponent("character-controller", {
 
       this.pendingSnapRotationMatrix.identity(); // Revert to identity
 
-      if (this.velocity.lengthSq() > EPS) {
+      if (this.velocity.lengthSq() > EPS && !this.data.fly) {
         this.setPositionOnNavMesh(startPos, root.position, root);
       }
     };
@@ -221,13 +223,14 @@ AFRAME.registerComponent("character-controller", {
     pathfinder.clampStep(position, navPosition, this.navNode, this.navZone, this.navGroup, object3D.position);
   },
 
-  updateVelocity: function(dt) {
+  updateVelocity: function(dt, pivot) {
     const data = this.data;
     const velocity = this.velocity;
 
     // If FPS too low, reset velocity.
     if (dt > MAX_DELTA) {
       velocity.x = 0;
+      velocity.y = 0;
       velocity.z = 0;
       return;
     }
@@ -236,17 +239,24 @@ AFRAME.registerComponent("character-controller", {
     if (velocity.x !== 0) {
       velocity.x -= velocity.x * data.easing * dt;
     }
-    if (velocity.z !== 0) {
-      velocity.z -= velocity.z * data.easing * dt;
-    }
     if (velocity.y !== 0) {
       velocity.y -= velocity.y * data.easing * dt;
+    }
+    if (velocity.z !== 0) {
+      velocity.z -= velocity.z * data.easing * dt;
     }
 
     const dvx = data.groundAcc * dt * this.accelerationInput.x;
     const dvz = data.groundAcc * dt * -this.accelerationInput.z;
     velocity.x += dvx;
-    velocity.z += dvz;
+
+    if (this.data.fly) {
+      const pitch = pivot.rotation.x / PI_2;
+      velocity.y += dvz * -pitch;
+      velocity.z += dvz * (1.0 - pitch);
+    } else {
+      velocity.z += dvz;
+    }
 
     const decay = 0.7;
     this.accelerationInput.x = this.accelerationInput.x * decay;
@@ -255,7 +265,7 @@ AFRAME.registerComponent("character-controller", {
     if (Math.abs(velocity.x) < CLAMP_VELOCITY) {
       velocity.x = 0;
     }
-    if (Math.abs(velocity.y) < CLAMP_VELOCITY) {
+    if (this.data.fly && Math.abs(velocity.y) < CLAMP_VELOCITY) {
       velocity.y = 0;
     }
     if (Math.abs(velocity.z) < CLAMP_VELOCITY) {
