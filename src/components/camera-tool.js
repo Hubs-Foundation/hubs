@@ -125,7 +125,7 @@ AFRAME.registerComponent("camera-tool", {
   },
 
   tock: (function() {
-    const tempScale = new THREE.Vector3();
+    const tempHeadScale = new THREE.Vector3();
 
     return function tock() {
       const sceneEl = this.el.sceneEl;
@@ -138,11 +138,22 @@ AFRAME.registerComponent("camera-tool", {
         this.playerHead = headEl && headEl.object3D;
       }
 
+      if (!this.playerHud) {
+        const hudEl = document.getElementById("player-hud");
+        this.playerHud = hudEl && hudEl.object3D;
+      }
+
       if (this.takeSnapshotNextTick || this.updateRenderTargetNextTick) {
         if (this.playerHead) {
-          tempScale.copy(this.playerHead.scale);
+          tempHeadScale.copy(this.playerHead.scale);
           this.playerHead.scale.set(1, 1, 1);
         }
+
+        if (this.playerHud) {
+          tempHeadScale.copy(this.playerHud.scale);
+          this.playerHud.scale.set(0.001, 0.001, 0.001);
+        }
+
         const tmpVRFlag = renderer.vr.enabled;
         const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
         delete sceneEl.object3D.onAfterRender;
@@ -160,7 +171,10 @@ AFRAME.registerComponent("camera-tool", {
         renderer.vr.enabled = tmpVRFlag;
         sceneEl.object3D.onAfterRender = tmpOnAfterRender;
         if (this.playerHead) {
-          this.playerHead.scale.copy(tempScale);
+          this.playerHead.scale.copy(tempHeadScale);
+        }
+        if (this.playerHud) {
+          this.playerHud.scale.copy(tempHeadScale);
         }
         this.lastUpdate = now;
         this.updateRenderTargetNextTick = false;

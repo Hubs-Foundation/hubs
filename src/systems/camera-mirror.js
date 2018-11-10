@@ -20,7 +20,8 @@ AFRAME.registerSystem("camera-mirror", {
     this.mirrorCamera.rotation.set(0, Math.PI, 0);
     el.setObject3D("mirror-camera", this.mirrorCamera);
 
-    const tempScale = new THREE.Vector3();
+    const tempHeadScale = new THREE.Vector3();
+    const tempHudScale = new THREE.Vector3();
 
     const renderer = this.el.renderer;
 
@@ -29,28 +30,38 @@ AFRAME.registerSystem("camera-mirror", {
     }
 
     const headEl = document.getElementById("player-head");
+    const hudEl = document.getElementById("player-hud");
     const playerHead = headEl && headEl.object3D;
+    const playerHud = hudEl && hudEl.object3D;
     document.body.classList.add("mirrored-camera");
 
     this.el.sceneEl.renderer.render = (scene, camera, renderTarget) => {
-      const wasVREnabled = this.el.renderer.vr.enabled;
+      const wasVREnabled = renderer.vr.enabled;
 
       if (wasVREnabled) {
-        this.directRenderFunc.call(this.el.renderer, scene, camera, renderTarget);
+        this.directRenderFunc.call(renderer, scene, camera, renderTarget);
       }
 
       if (playerHead) {
-        tempScale.copy(playerHead.scale);
+        tempHeadScale.copy(playerHead.scale);
         playerHead.scale.set(1, 1, 1);
       }
-      this.el.renderer.vr.enabled = false;
+
+      if (playerHud) {
+        tempHudScale.copy(playerHud.scale);
+        playerHud.scale.set(0.001, 0.001, 0.001);
+      }
+      renderer.vr.enabled = false;
       const tmpOnAfterRender = this.el.object3D.onAfterRender;
       delete this.el.object3D.onAfterRender;
-      this.directRenderFunc.call(this.el.renderer, scene, this.mirrorCamera);
+      this.directRenderFunc.call(renderer, scene, this.mirrorCamera);
       this.el.object3D.onAfterRender = tmpOnAfterRender;
-      this.el.renderer.vr.enabled = wasVREnabled;
+      renderer.vr.enabled = wasVREnabled;
       if (playerHead) {
-        playerHead.scale.copy(tempScale);
+        playerHead.scale.copy(tempHeadScale);
+      }
+      if (playerHud) {
+        playerHud.scale.copy(tempHudScale);
       }
     };
   },
