@@ -36,10 +36,19 @@ export function connectToReticulum(debug = false) {
   return socket;
 }
 
-export function getReticulumFetchUrl(path) {
+const resolverLink = document.createElement("a");
+export function getReticulumFetchUrl(path, absolute = false) {
   if (process.env.RETICULUM_SERVER) {
     return `https://${process.env.RETICULUM_SERVER}${path}`;
+  } else if (absolute) {
+    resolverLink.href = path;
+    return resolverLink.href;
   } else {
     return path;
   }
+}
+
+export function getLandingPageForPhoto(photoUrl) {
+  const parsedUrl = new URL(photoUrl);
+  return getReticulumFetchUrl(parsedUrl.pathname.replace(".png", ".html") + parsedUrl.search, true);
 }

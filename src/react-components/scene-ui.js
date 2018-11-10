@@ -8,6 +8,10 @@ import hubLogo from "../assets/images/hub-preview-white.png";
 import spokeLogo from "../assets/images/spoke_logo_black.png";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { generateHubName } from "../utils/name-generation";
+import { WithHoverSound } from "./wrap-with-audio";
+import CreateRoomDialog from "./create-room-dialog.js";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEllipsisH } from "@fortawesome/free-solid-svg-icons/faEllipsisH";
 
 import { lang, messages } from "../utils/i18n";
 
@@ -20,12 +24,13 @@ class SceneUI extends Component {
     sceneId: PropTypes.string,
     sceneName: PropTypes.string,
     sceneDescription: PropTypes.string,
-    sceneAttribution: PropTypes.string,
+    sceneAttributions: PropTypes.object,
     sceneScreenshotURL: PropTypes.string
   };
 
   state = {
-    showScreenshot: false
+    showScreenshot: false,
+    showCustomRoomDialog: false
   };
 
   constructor(props) {
@@ -48,7 +53,7 @@ class SceneUI extends Component {
   }
 
   createRoom = async () => {
-    const payload = { hub: { name: generateHubName(), scene_id: this.props.sceneId } };
+    const payload = { hub: { name: this.state.customRoomName || generateHubName(), scene_id: this.props.sceneId } };
     const createUrl = getReticulumFetchUrl("/api/v1/hubs");
 
     const res = await fetch(createUrl, {
@@ -73,6 +78,51 @@ class SceneUI extends Component {
       tweetText
     )}`;
 
+    let attributions;
+
+    const toAttributionSpan = a => {
+      if (a.url) {
+        const source =
+          a.url.indexOf("sketchfab.com") >= 0
+            ? "on Sketchfab"
+            : a.url.indexOf("poly.google.com") >= 0
+              ? "on Google Poly"
+              : "";
+
+        return (
+          <span key={a.url}>
+            <a href={a.url} target="_blank" rel="noopener noreferrer">
+              {a.name} by {a.author} {source}
+            </a>
+            &nbsp;
+          </span>
+        );
+      } else {
+        return (
+          <span key={`${a.name} ${a.author}`}>
+            {a.name} by {a.author}
+            &nbsp;
+          </span>
+        );
+      }
+    };
+
+    if (this.props.sceneAttributions) {
+      if (!this.props.sceneAttributions.extras) {
+        attributions = (
+          <span>
+            <span>{this.props.sceneAttributions.creator ? `by ${this.props.sceneAttributions.creator}` : ""}</span>
+            &nbsp;
+            <br />
+            {this.props.sceneAttributions.content && this.props.sceneAttributions.content.map(toAttributionSpan)}
+          </span>
+        );
+      } else {
+        // Legacy
+        attributions = <span>{this.props.sceneAttributions.extras}</span>;
+      }
+    }
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.ui}>
@@ -87,26 +137,42 @@ class SceneUI extends Component {
           <div className={styles.whiteOverlay} />
           <div className={styles.grid}>
             <div className={styles.mainPanel}>
-              <a href="/" className={styles.logo}>
-                <img src={hubLogo} />
-              </a>
+              <WithHoverSound>
+                <a href="/" className={styles.logo}>
+                  <img src={hubLogo} />
+                </a>
+              </WithHoverSound>
               <div className={styles.logoTagline}>
                 <FormattedMessage id="scene.logo_tagline" />
               </div>
-              <button onClick={this.createRoom}>
-                <FormattedMessage id="scene.create_button" />
-              </button>
-              <a href={tweetLink} rel="noopener noreferrer" target="_blank" className={styles.tweetButton}>
-                <img src="../assets/images/twitter.svg" />
-                <div>
-                  <FormattedMessage id="scene.tweet_button" />
-                </div>
-              </a>
+              <div className={styles.createButtons}>
+                <WithHoverSound>
+                  <button className={styles.createButton} onClick={this.createRoom}>
+                    <FormattedMessage id="scene.create_button" />
+                  </button>
+                </WithHoverSound>
+                <WithHoverSound>
+                  <button
+                    className={styles.optionsButton}
+                    onClick={() => this.setState({ showCustomRoomDialog: true })}
+                  >
+                    <FontAwesomeIcon icon={faEllipsisH} />
+                  </button>
+                </WithHoverSound>
+              </div>
+              <WithHoverSound>
+                <a href={tweetLink} rel="noopener noreferrer" target="_blank" className={styles.tweetButton}>
+                  <img src="../assets/images/twitter.svg" />
+                  <div>
+                    <FormattedMessage id="scene.tweet_button" />
+                  </div>
+                </a>
+              </WithHoverSound>
             </div>
           </div>
           <div className={styles.info}>
             <div className={styles.name}>{this.props.sceneName}</div>
-            <div className={styles.attribution}>{this.props.sceneAttribution}</div>
+            <div className={styles.attribution}>{attributions}</div>
           </div>
           <div className={styles.spoke}>
             <div className={styles.madeWith}>made with</div>
@@ -114,6 +180,15 @@ class SceneUI extends Component {
               <img src={spokeLogo} />
             </a>
           </div>
+          {this.state.showCustomRoomDialog && (
+            <CreateRoomDialog
+              includeScenePrompt={false}
+              onClose={() => this.setState({ showCustomRoomDialog: false })}
+              onCustomScene={name => {
+                this.setState({ showCustomRoomDialog: false, customRoomName: name }, () => this.createRoom());
+              }}
+            />
+          )}
         </div>
       </IntlProvider>
     );

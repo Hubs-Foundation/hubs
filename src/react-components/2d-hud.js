@@ -5,6 +5,7 @@ import cx from "classnames";
 const { detect } = require("detect-browser");
 import styles from "../assets/stylesheets/2d-hud.scss";
 import uiStyles from "../assets/stylesheets/ui-root.scss";
+import { WithHoverSound } from "./wrap-with-audio";
 
 const browser = detect();
 
@@ -75,35 +76,39 @@ class TopHUD extends Component {
     };
 
     return (
-      <div
-        className={cx(styles.iconButton, styles[`share_${primaryVideoShareType}`], {
-          [styles.active]: this.props.videoShareMediaSource === primaryVideoShareType,
-          [styles.videoShare]: true
-        })}
-        title={this.props.videoShareMediaSource !== null ? "Stop sharing" : `Share ${primaryVideoShareType}`}
-        onClick={() => {
-          if (!this.state.showVideoShareOptions) {
-            this.handleVideoShareClicked(primaryVideoShareType);
-          }
-        }}
-        onMouseOver={showExtrasOnHover}
-      >
-        {videoShareExtraOptionTypes.length > 0 && (
-          <div className={cx(styles.videoShareExtraOptions)} onMouseOut={hideExtrasOnOut}>
-            {videoShareExtraOptionTypes.map(type => (
-              <div
-                key={type}
-                className={cx(styles.iconButton, styles[`share_${type}`], {
-                  [styles.active]: this.props.videoShareMediaSource === type
-                })}
-                title={this.props.videoShareMediaSource === type ? "Stop sharing" : `Share ${type}`}
-                onClick={() => this.handleVideoShareClicked(type)}
-                onMouseOver={showExtrasOnHover}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      <WithHoverSound>
+        <div
+          className={cx(styles.iconButton, styles[`share_${primaryVideoShareType}`], {
+            [styles.active]: this.props.videoShareMediaSource === primaryVideoShareType,
+            [styles.videoShare]: true
+          })}
+          title={this.props.videoShareMediaSource !== null ? "Stop sharing" : `Share ${primaryVideoShareType}`}
+          onClick={() => {
+            if (!this.state.showVideoShareOptions) {
+              this.handleVideoShareClicked(primaryVideoShareType);
+            }
+          }}
+          onMouseOver={showExtrasOnHover}
+        >
+          {videoShareExtraOptionTypes.length > 0 && (
+            <div className={cx(styles.videoShareExtraOptions)} onMouseOut={hideExtrasOnOut}>
+              {videoShareExtraOptionTypes.map(type => (
+                <WithHoverSound>
+                  <div
+                    key={type}
+                    className={cx(styles.iconButton, styles[`share_${type}`], {
+                      [styles.active]: this.props.videoShareMediaSource === type
+                    })}
+                    title={this.props.videoShareMediaSource === type ? "Stop sharing" : `Share ${type}`}
+                    onClick={() => this.handleVideoShareClicked(type)}
+                    onMouseOver={showExtrasOnHover}
+                  />
+                </WithHoverSound>
+              ))}
+            </div>
+          )}
+        </div>
+      </WithHoverSound>
     );
   };
 
@@ -114,28 +119,36 @@ class TopHUD extends Component {
       <div className={cx(styles.container, styles.top, styles.unselectable, uiStyles.uiInteractive)}>
         <div className={cx(uiStyles.uiInteractive, styles.panel)}>
           {videoSharingButtons}
-          <div
-            className={cx(styles.iconButton, styles.mute, { [styles.active]: this.props.muted })}
-            title={this.props.muted ? "Unmute Mic" : "Mute Mic"}
-            onClick={this.props.onToggleMute}
-          />
-          <div
-            className={cx(styles.iconButton, styles.freeze, {
-              [styles.active]: this.props.frozen
-            })}
-            title={this.props.frozen ? "Resume" : "Pause"}
-            onClick={this.props.onToggleFreeze}
-          />
-          <div
-            className={cx(styles.iconButton, styles.spawn_pen)}
-            title={"Drawing Pen"}
-            onClick={this.props.onSpawnPen}
-          />
-          <div
-            className={cx(styles.iconButton, styles.spawn_camera)}
-            title={"Camera"}
-            onClick={this.props.onSpawnCamera}
-          />
+          <WithHoverSound>
+            <div
+              className={cx(styles.iconButton, styles.mute, { [styles.active]: this.props.muted })}
+              title={this.props.muted ? "Unmute Mic" : "Mute Mic"}
+              onClick={this.props.onToggleMute}
+            />
+          </WithHoverSound>
+          <WithHoverSound>
+            <div
+              className={cx(styles.iconButton, styles.freeze, {
+                [styles.active]: this.props.frozen
+              })}
+              title={this.props.frozen ? "Resume" : "Pause"}
+              onClick={this.props.onToggleFreeze}
+            />
+          </WithHoverSound>
+          <WithHoverSound>
+            <div
+              className={cx(styles.iconButton, styles.spawn_pen)}
+              title={"Drawing Pen"}
+              onClick={this.props.onSpawnPen}
+            />
+          </WithHoverSound>
+          <WithHoverSound>
+            <div
+              className={cx(styles.iconButton, styles.spawn_camera)}
+              title={"Camera"}
+              onClick={this.props.onSpawnCamera}
+            />
+          </WithHoverSound>
         </div>
       </div>
     );
@@ -166,11 +179,13 @@ const BottomHUD = ({ onCreateObject, showPhotoPicker, onMediaPicked }) => (
       <div />
     )}
     <div>
-      <div
-        className={cx(uiStyles.uiInteractive, styles.iconButton, styles.large, styles.createObject)}
-        title={"Create Object"}
-        onClick={onCreateObject}
-      />
+      <WithHoverSound>
+        <div
+          className={cx(uiStyles.uiInteractive, styles.iconButton, styles.large, styles.createObject)}
+          title={"Create Object"}
+          onClick={onCreateObject}
+        />
+      </WithHoverSound>
     </div>
   </div>
 );

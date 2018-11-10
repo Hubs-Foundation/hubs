@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { resolveURL, extractUrlBase } from "../utils/resolveURL";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import CreateRoomDialog from "./create-room-dialog.js";
+import { WithHoverSound } from "./wrap-with-audio";
 
 import default_scene_preview_thumbnail from "../assets/images/default_thumbnail.png";
 import styles from "../assets/stylesheets/hub-create.scss";
@@ -186,10 +187,12 @@ class HubCreatePanel extends Component {
                       {environmentAuthor &&
                         environmentAuthor.name &&
                         (environmentAuthor.url ? (
-                          <a href={environmentAuthor.url} rel="noopener noreferrer" className={styles.author}>
-                            <FormattedMessage id="home.environment_author_by" />
-                            <span>{environmentAuthor.name}</span>
-                          </a>
+                          <WithHoverSound>
+                            <a href={environmentAuthor.url} rel="noopener noreferrer" className={styles.author}>
+                              <FormattedMessage id="home.environment_author_by" />
+                              <span>{environmentAuthor.name}</span>
+                            </a>
+                          </WithHoverSound>
                         ) : (
                           <span className={styles.author}>
                             <FormattedMessage id="home.environment_author_by" />
@@ -199,9 +202,15 @@ class HubCreatePanel extends Component {
                       {environmentAuthor &&
                         environmentAuthor.organization &&
                         (environmentAuthor.organization.url ? (
-                          <a href={environmentAuthor.organization.url} rel="noopener noreferrer" className={styles.org}>
-                            <span>{environmentAuthor.organization.name}</span>
-                          </a>
+                          <WithHoverSound>
+                            <a
+                              href={environmentAuthor.organization.url}
+                              rel="noopener noreferrer"
+                              className={styles.org}
+                            >
+                              <span>{environmentAuthor.organization.name}</span>
+                            </a>
+                          </WithHoverSound>
                         ) : (
                           <span className={styles.org}>
                             <span>{environmentAuthor.organization.name}</span>
@@ -209,32 +218,45 @@ class HubCreatePanel extends Component {
                         ))}
                     </div>
                     <div className={styles.footer}>
-                      <button onClick={this.showCustomSceneDialog} className={styles.customButton}>
-                        <FormattedMessage id="home.room_create_options" />
-                      </button>
+                      <WithHoverSound>
+                        <button onClick={this.showCustomSceneDialog} className={styles.customButton}>
+                          <FormattedMessage id="home.room_create_options" />
+                        </button>
+                      </WithHoverSound>
                     </div>
                   </div>
                   <div className={styles.controls}>
-                    <button className={styles.prev} type="button" tabIndex="1" onClick={this.setToPreviousEnvironment}>
-                      <FontAwesomeIcon icon={faAngleLeft} />
-                    </button>
-
-                    <button className={styles.next} type="button" tabIndex="2" onClick={this.setToNextEnvironment}>
-                      <FontAwesomeIcon icon={faAngleRight} />
-                    </button>
+                    <WithHoverSound>
+                      <button
+                        className={styles.prev}
+                        type="button"
+                        tabIndex="1"
+                        onClick={this.setToPreviousEnvironment}
+                      >
+                        <FontAwesomeIcon icon={faAngleLeft} />
+                      </button>
+                    </WithHoverSound>
+                    <WithHoverSound>
+                      <button className={styles.next} type="button" tabIndex="2" onClick={this.setToNextEnvironment}>
+                        <FontAwesomeIcon icon={faAngleRight} />
+                      </button>
+                    </WithHoverSound>
                   </div>
                 </div>
               </div>
               <div className={styles.container}>
-                <button type="submit" tabIndex="5" className={styles.submitButton}>
-                  <FormattedMessage id="home.room_create_button" />
-                </button>
+                <WithHoverSound>
+                  <button type="submit" tabIndex="5" className={styles.submitButton}>
+                    <FormattedMessage id="home.room_create_button" />
+                  </button>
+                </WithHoverSound>
               </div>
             </div>
           </div>
         </form>
         {this.state.showCustomSceneDialog && (
           <CreateRoomDialog
+            includeScenePrompt={true}
             onClose={() => this.setState({ showCustomSceneDialog: false })}
             onCustomScene={(name, url) => {
               this.setState({ showCustomSceneDialog: false, name: name, customSceneUrl: url }, () => this.createHub());

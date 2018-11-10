@@ -21,6 +21,7 @@ import ReportDialog from "./report-dialog.js";
 import JoinUsDialog from "./join-us-dialog.js";
 import UpdatesDialog from "./updates-dialog.js";
 import DialogContainer from "./dialog-container.js";
+import { WithHoverSound } from "./wrap-with-audio";
 
 addLocaleData([...en]);
 
@@ -173,17 +174,29 @@ class HomeRoot extends Component {
         <div className={styles.home}>
           <div className={mainContentClassNames}>
             <div className={styles.headerContent}>
-              <div className={styles.titleAndNav}>
+              <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
+                <WithHoverSound>
+                  <div className={styles.hubs}>hubs</div>
+                </WithHoverSound>
+                <WithHoverSound>
+                  <div className={styles.preview}>preview</div>
+                </WithHoverSound>
                 <div className={styles.links}>
-                  <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
-                    <FormattedMessage id="home.source_link" />
-                  </a>
-                  <a href="https://discord.gg/XzrGUY8" rel="noreferrer noopener">
-                    <FormattedMessage id="home.community_link" />
-                  </a>
-                  <a href="/spoke" rel="noreferrer noopener">
-                    Spoke
-                  </a>
+                  <WithHoverSound>
+                    <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
+                      <FormattedMessage id="home.source_link" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a href="https://discord.gg/XzrGUY8" rel="noreferrer noopener">
+                      <FormattedMessage id="home.community_link" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a href="/spoke" rel="noreferrer noopener">
+                      Spoke
+                    </a>
+                  </WithHoverSound>
                 </div>
               </div>
             </div>
@@ -219,62 +232,76 @@ class HomeRoot extends Component {
               </div>
               {this.state.environments.length > 1 && (
                 <div>
-                  <div className={styles.joinButton}>
-                    <a href="/link">
-                      <FormattedMessage id="home.join_room" />
-                    </a>
-                  </div>
-                  <div className={styles.spokeButton}>
-                    <a href="/spoke">
-                      <FormattedMessage id="home.create_with_spoke" />
-                    </a>
-                  </div>
+                  <WithHoverSound>
+                    <div className={styles.joinButton}>
+                      <a href="/link">
+                        <FormattedMessage id="home.join_room" />
+                      </a>
+                    </div>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <div className={styles.spokeButton}>
+                      <a href="/spoke">
+                        <FormattedMessage id="home.create_with_spoke" />
+                      </a>
+                    </div>
+                  </WithHoverSound>
                 </div>
               )}
             </div>
             <div className={styles.footerContent}>
               <div className={styles.links}>
                 <div className={styles.top}>
-                  <a
-                    className={styles.link}
-                    rel="noopener noreferrer"
-                    href="#"
-                    onClick={this.onDialogLinkClicked(this.showJoinUsDialog.bind(this))}
-                  >
-                    <FormattedMessage id="home.join_us" />
-                  </a>
-                  <a
-                    className={styles.link}
-                    rel="noopener noreferrer"
-                    href="#"
-                    onClick={this.onDialogLinkClicked(this.showUpdatesDialog.bind(this))}
-                  >
-                    <FormattedMessage id="home.get_updates" />
-                  </a>
-                  <a
-                    className={styles.link}
-                    rel="noopener noreferrer"
-                    href="#"
-                    onClick={this.onDialogLinkClicked(this.showReportDialog.bind(this))}
-                  >
-                    <FormattedMessage id="home.report_issue" />
-                  </a>
-                  <a
-                    className={styles.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
-                  >
-                    <FormattedMessage id="home.terms_of_use" />
-                  </a>
-                  <a
-                    className={styles.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
-                  >
-                    <FormattedMessage id="home.privacy_notice" />
-                  </a>
+                  <WithHoverSound>
+                    <a
+                      className={styles.link}
+                      rel="noopener noreferrer"
+                      href="#"
+                      onClick={this.onDialogLinkClicked(this.showJoinUsDialog.bind(this))}
+                    >
+                      <FormattedMessage id="home.join_us" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a
+                      className={styles.link}
+                      rel="noopener noreferrer"
+                      href="#"
+                      onClick={this.onDialogLinkClicked(this.showUpdatesDialog.bind(this))}
+                    >
+                      <FormattedMessage id="home.get_updates" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a
+                      className={styles.link}
+                      rel="noopener noreferrer"
+                      href="#"
+                      onClick={this.onDialogLinkClicked(this.showReportDialog.bind(this))}
+                    >
+                      <FormattedMessage id="home.report_issue" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
+                    >
+                      <FormattedMessage id="home.terms_of_use" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+                    >
+                      <FormattedMessage id="home.privacy_notice" />
+                    </a>
+                  </WithHoverSound>
 
                   <img className={styles.mozLogo} src={mozLogo} />
                 </div>

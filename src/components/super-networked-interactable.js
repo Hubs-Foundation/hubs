@@ -35,7 +35,7 @@ AFRAME.registerComponent("super-networked-interactable", {
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
-      this._syncCounterRegistration(networkedEl);
+      this._syncCounterRegistration();
       if (!NAF.utils.isMine(networkedEl)) {
         this.el.setAttribute("body", { type: "static" });
       }
@@ -44,13 +44,11 @@ AFRAME.registerComponent("super-networked-interactable", {
     this._onGrabStart = this._onGrabStart.bind(this);
     this._onGrabEnd = this._onGrabEnd.bind(this);
     this._onOwnershipLost = this._onOwnershipLost.bind(this);
-    this._onPinned = this._onPinned.bind(this);
-    this._onUnpinned = this._onUnpinned.bind(this);
     this._syncCounterRegistration = this._syncCounterRegistration.bind(this);
     this.el.addEventListener("grab-start", this._onGrabStart);
     this.el.addEventListener("grab-end", this._onGrabEnd);
-    this.el.addEventListener("pinned", this._onPinned);
-    this.el.addEventListener("unpinned", this._onUnpinned);
+    this.el.addEventListener("pinned", this._syncCounterRegistration);
+    this.el.addEventListener("unpinned", this._syncCounterRegistration);
     this.el.addEventListener("ownership-lost", this._onOwnershipLost);
     this.system.addComponent(this);
   },
@@ -71,7 +69,7 @@ AFRAME.registerComponent("super-networked-interactable", {
     if (this.networkedEl && !NAF.utils.isMine(this.networkedEl)) {
       if (NAF.utils.takeOwnership(this.networkedEl)) {
         this.el.setAttribute("body", { type: "dynamic" });
-        this._syncCounterRegistration(this.networkedEl);
+        this._syncCounterRegistration();
       } else {
         this.el.emit("grab-end", { hand: this.hand });
         this.hand = null;
@@ -91,14 +89,6 @@ AFRAME.registerComponent("super-networked-interactable", {
     this._syncCounterRegistration();
   },
 
-  _onPinned: function() {
-    this._syncCounterRegistration();
-  },
-
-  _onUnpinned: function() {
-    this._syncCounterRegistration();
-  },
-
   _changeScale: function(delta) {
     if (delta && this.el.is("grabbed") && this.el.components.hasOwnProperty("stretchable")) {
       this.currentScale.addScalar(delta).clampScalar(this.data.minScale, this.data.maxScale);
@@ -109,7 +99,7 @@ AFRAME.registerComponent("super-networked-interactable", {
 
   _syncCounterRegistration: function() {
     const el = this.networkedEl;
-    if (!el) return;
+    if (!el || !el.components["networked"]) return;
 
     const isPinned = el.components["pinnable"] && el.components["pinnable"].data.pinned;
 

@@ -3,7 +3,7 @@ AFRAME.registerComponent("pin-networked-object-button", {
     // Selector for root of all UI that needs to be clickable when pinned
     uiSelector: { type: "string" },
 
-    // Selector for label to change when pinned/unpinned
+    // Selector for label to change when pinned/unpinned, must be sibling of this components element
     labelSelector: { type: "string" },
 
     // Selector for items to hide iff pinned
@@ -12,18 +12,11 @@ AFRAME.registerComponent("pin-networked-object-button", {
 
   init() {
     this._updateUI = this._updateUI.bind(this);
-    this.el.sceneEl.addEventListener("stateadded", this._updateUI);
-    this.el.sceneEl.addEventListener("stateremoved", this._updateUI);
+    this._updateUIOnStateChange = this._updateUIOnStateChange.bind(this);
+    this.el.sceneEl.addEventListener("stateadded", this._updateUIOnStateChange);
+    this.el.sceneEl.addEventListener("stateremoved", this._updateUIOnStateChange);
 
-    let uiElSearch = this.el;
-
-    do {
-      uiElSearch = uiElSearch.parentNode;
-      this.uiEl = uiElSearch.querySelector(this.data.uiSelector);
-    } while (uiElSearch && !this.uiEl);
-
-    this.uiEl = uiElSearch.querySelector(this.data.uiSelector);
-    this.labelEl = this.uiEl.querySelector(this.data.labelSelector);
+    this.labelEl = this.el.parentNode.querySelector(this.data.labelSelector);
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.targetEl = networkedEl;
@@ -37,7 +30,7 @@ AFRAME.registerComponent("pin-networked-object-button", {
       if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) return;
 
       const wasPinned = this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned;
-      this.targetEl.setAttribute("pinnable", { pinned: !wasPinned });
+      this.targetEl.setAttribute("pinnable", "pinned", !wasPinned);
     };
   },
 
@@ -50,8 +43,8 @@ AFRAME.registerComponent("pin-networked-object-button", {
   },
 
   remove() {
-    this.el.sceneEl.removeEventListener("stateadded", this._updateUI);
-    this.el.sceneEl.removeEventListener("stateremoved", this._updateUI);
+    this.el.sceneEl.removeEventListener("stateadded", this._updateUIOnStateChange);
+    this.el.sceneEl.removeEventListener("stateremoved", this._updateUIOnStateChange);
 
     if (this.targetEl) {
       this.targetEl.removeEventListener("pinned", this._updateUI);
@@ -59,10 +52,15 @@ AFRAME.registerComponent("pin-networked-object-button", {
     }
   },
 
-  _updateUI() {
-    const isPinned = this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned;
+  _updateUIOnStateChange(e) {
+    if (e.detail !== "frozen") return;
+    this._updateUI();
+  },
 
-    this.labelEl.setAttribute("text", { value: isPinned ? "un-pin" : "pin" });
+  _updateUI() {
+    const isPinned = this.targetEl.getAttribute("pinnable") && this.targetEl.getAttribute("pinnable").pinned;
+
+    this.labelEl.setAttribute("text", "value", isPinned ? "un-pin" : "pin");
 
     this.el.parentNode.querySelectorAll(this.data.hideWhenPinnedSelector).forEach(hideEl => {
       hideEl.setAttribute("visible", !isPinned);

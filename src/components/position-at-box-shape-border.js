@@ -54,14 +54,27 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     const camWorldPos = new THREE.Vector3();
     const targetPosition = new THREE.Vector3();
     const pointOnBoxFace = new THREE.Vector3();
+    const tempParentWorldScale = new THREE.Vector3();
+
     return function() {
       if (!this.target) {
-        this.target = this.el.querySelector(this.data.target).object3D;
+        this.targetEl = this.el.querySelector(this.data.target);
+        this.target = this.targetEl.object3D;
+
         if (!this.target) return;
+
+        if (this.targetEl.getAttribute("visible") === false) {
+          this.target.scale.setScalar(0.01); // To avoid "pop" of gigantic button first time
+          return;
+        }
       }
+
+      if (this.targetEl.getAttribute("visible") === false) return;
+
       if (!this.el.getObject3D("mesh")) {
         return;
       }
+
       if (!this.halfExtents || this.mesh !== this.el.getObject3D("mesh") || this.shape !== this.el.components.shape) {
         this.mesh = this.el.getObject3D("mesh");
         if (this.el.components.shape) {
@@ -102,7 +115,14 @@ AFRAME.registerComponent("position-at-box-shape-border", {
 
       this.target.position.copy(targetPosition.copy(targetDir).multiplyScalar(targetHalfExtent));
       this.target.rotation.set(0, targetRotation, 0);
-      this.target.scale.setScalar(this.halfExtents[inverseHalfExtents[targetHalfExtentStr]] * 4);
+
+      tempParentWorldScale.setFromMatrixScale(this.target.parent.matrixWorld);
+
+      const distance = Math.sqrt(minSquareDistance);
+      const scale = this.halfExtents[inverseHalfExtents[targetHalfExtentStr]] * distance;
+      const targetScale = Math.min(2.0, Math.max(0.5, scale * tempParentWorldScale.x));
+
+      this.target.scale.setScalar(targetScale / tempParentWorldScale.x);
     };
   })()
 });

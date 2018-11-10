@@ -33,6 +33,8 @@ import "./components/virtual-gamepad-controls";
 import "./components/ik-controller";
 import "./components/hand-controls2";
 import "./components/character-controller";
+import "./components/hoverable-visuals";
+import "./components/hover-visuals";
 import "./components/haptic-feedback";
 import "./components/offset-relative-to";
 import "./components/player-info";
@@ -60,8 +62,11 @@ import "./components/destroy-at-extreme-distances";
 import "./components/gamma-factor";
 import "./components/visible-to-owner";
 import "./components/camera-tool";
+import "./components/scene-sound";
+import "./components/emit-state-change";
 import "./components/action-to-event";
 import "./components/emit-scene-event-on-remove";
+import "./components/stop-event-propagation";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -252,7 +257,9 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
     .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
 
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
-  objectsEl.addEventListener("model-loaded", async () => {
+  objectsEl.addEventListener("model-loaded", async el => {
+    if (el.target !== objectsEl) return;
+
     scene.setAttribute("networked-scene", {
       room: hub.hub_id,
       serverURL: process.env.JANUS_SERVER,
@@ -325,6 +332,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   const linkChannel = new LinkChannel(store);
 
   window.APP.scene = scene;
+
+  scene.addEventListener("enter-vr", () => {
+    document.body.classList.add("vr-mode");
+
+    if (!scene.is("entered")) {
+      // If VR headset is activated, refreshing page will fire vrdisplayactivate
+      // which puts A-Frame in VR mode, so exit VR mode whenever it is attempted
+      // to be entered and we haven't entered the room yet.
+      scene.exitVR();
+    }
+  });
+
+  scene.addEventListener("exit-vr", () => document.body.classList.remove("vr-mode"));
 
   registerNetworkSchemas();
 
@@ -444,7 +464,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         presenceLogEntries.splice(presenceLogEntries.indexOf(entry), 1);
         remountUI({ presenceLogEntries });
       }, 5000);
-    }, entryManager.hasEntered() ? 10000 : 30000); // Fade out things faster once entered.
+    }, 20000);
   };
 
   let isInitialSync = true;

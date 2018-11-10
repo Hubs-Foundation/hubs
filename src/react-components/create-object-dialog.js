@@ -7,6 +7,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import styles from "../assets/stylesheets/create-object-dialog.scss";
 import cx from "classnames";
 import DialogContainer from "./dialog-container.js";
+import { WithHoverSound } from "./wrap-with-audio";
 
 const attributionHostnames = {
   "giphy.com": giphyLogo,
@@ -15,12 +16,33 @@ const attributionHostnames = {
 
 const DEFAULT_OBJECT_URL = "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf";
 const isMobile = AFRAME.utils.device.isMobile();
-const instructions = "Paste a URL or upload a file.";
-const desktopTips = "Tip: You can paste links directly into Hubs with Ctrl+V";
-const mobileInstructions = <div>{instructions}</div>;
+const instructions = "Paste a URL to an image, video, model, or upload a file.";
+const desktopTips = "Tip: You can paste media directly into Hubs with Ctrl+V";
+const references = (
+  <span>
+    For models, try{" "}
+    <a href="https://sketchfab.com/search?features=downloadable&type=models" target="_blank" rel="noopener noreferrer">
+      Sketchfab
+    </a>,{" "}
+    <a href="http://poly.google.com/" target="_blank" rel="noopener noreferrer">
+      Google Poly
+    </a>, or our{" "}
+    <a href="https://sketchfab.com/mozillareality" target="_blank" rel="noopener noreferrer">
+      collection
+    </a>.
+  </span>
+);
+
+const mobileInstructions = (
+  <div>
+    <p>{instructions}</p>
+    <p>{references}</p>
+  </div>
+);
 const desktopInstructions = (
   <div>
     <p>{instructions}</p>
+    <p>{references}</p>
     <p>{desktopTips}</p>
   </div>
 );
@@ -87,14 +109,18 @@ export default class CreateObjectDialog extends Component {
     const { onCreate, onClose, ...other } = this.props; // eslint-disable-line no-unused-vars
 
     const cancelButton = (
-      <label className={cx(styles.smallButton, styles.cancelIcon)} onClick={this.reset}>
-        <FontAwesomeIcon icon={faTimes} />
-      </label>
+      <WithHoverSound>
+        <label className={cx(styles.smallButton, styles.cancelIcon)} onClick={this.reset}>
+          <FontAwesomeIcon icon={faTimes} />
+        </label>
+      </WithHoverSound>
     );
     const uploadButton = (
-      <label htmlFor={fileInputId} className={cx(styles.smallButton, styles.uploadIcon)}>
-        <FontAwesomeIcon icon={faPaperclip} />
-      </label>
+      <WithHoverSound>
+        <label htmlFor={fileInputId} className={cx(styles.smallButton, styles.uploadIcon)}>
+          <FontAwesomeIcon icon={faPaperclip} />
+        </label>
+      </WithHoverSound>
     );
     const filenameLabel = <label className={cx(styles.leftSideOfInput)}>{this.state.fileName}</label>;
     const urlInput = (
@@ -108,7 +134,7 @@ export default class CreateObjectDialog extends Component {
     );
 
     return (
-      <DialogContainer title="Create Object" onClose={onClose} {...other}>
+      <DialogContainer title="Create Object" onClose={this.props.onClose} {...other}>
         <div>
           {isMobile ? mobileInstructions : desktopInstructions}
           <form onSubmit={this.onCreateClicked}>
@@ -125,9 +151,11 @@ export default class CreateObjectDialog extends Component {
                 {this.state.url || this.state.fileName ? cancelButton : uploadButton}
               </div>
               <div className={styles.buttons}>
-                <button className={styles.actionButton}>
-                  <span>Create</span>
-                </button>
+                <WithHoverSound>
+                  <button className={styles.actionButton}>
+                    <span>Create</span>
+                  </button>
+                </WithHoverSound>
               </div>
               {this.state.attributionImage ? (
                 <div>

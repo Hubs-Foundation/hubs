@@ -7,7 +7,14 @@
 @import 'entry';
 @import 'audio';
 @import 'info-dialog';
-@import 'shared';
+
+body.vr-mode {
+  a-scene {
+    .a-canvas {
+      width: 200% !important;
+    }
+  }
+}
 
 .a-enter-vr, .a-orientation-modal {
   display: none;

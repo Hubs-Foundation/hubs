@@ -184,7 +184,7 @@ export default class SceneEntryManager {
       spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
     });
 
-    this.scene.addEventListener("object_pinned", e => {
+    this.scene.addEventListener("pinned", e => {
       const el = e.detail.el;
       const networkId = el.components.networked.data.networkId;
       const gltfNode = pinnedEntityToGltf(el);
@@ -195,7 +195,7 @@ export default class SceneEntryManager {
       this.hubChannel.pin(networkId, gltfNode);
     });
 
-    this.scene.addEventListener("object_unpinned", e => {
+    this.scene.addEventListener("unpinned", e => {
       const el = e.detail.el;
       const components = el.components;
       const networked = components.networked;
@@ -213,7 +213,7 @@ export default class SceneEntryManager {
     });
 
     document.addEventListener("paste", e => {
-      if (e.matches("input, textarea") && document.activeElement === e.target) return;
+      if (e.target.matches("input, textarea") && document.activeElement === e.target) return;
 
       const url = e.clipboardData.getData("text");
       const files = e.clipboardData.files && e.clipboardData.files;

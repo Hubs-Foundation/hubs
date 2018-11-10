@@ -74,6 +74,8 @@ void main() {
 `;
 
 export default class MobileStandardMaterial extends THREE.ShaderMaterial {
+  type = "MobileStandardMaterial";
+  isMobileStandardMaterial = true;
   static fromStandardMaterial(material) {
     const parameters = {
       vertexShader: VERTEX_SHADER,
@@ -106,5 +108,8 @@ export default class MobileStandardMaterial extends THREE.ShaderMaterial {
     mobileMaterial.emissiveMap = material.emissiveMap;
 
     return mobileMaterial;
+  }
+  clone() {
+    return MobileStandardMaterial.fromStandardMaterial(this);
   }
 }
