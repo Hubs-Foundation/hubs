@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import copy from "copy-to-clipboard";
 import DialogContainer from "./dialog-container.js";
+import { WithHoverSound } from "./wrap-with-audio";
 
 export default class SafariDialog extends Component {
   state = {
@@ -27,9 +28,11 @@ export default class SafariDialog extends Component {
               className="invite-form__link_field"
             />
             <div className="invite-form__buttons">
-              <button className="invite-form__action-button" onClick={onCopyClicked}>
-                <span>{this.state.copyLinkButtonText}</span>
-              </button>
+              <WithHoverSound>
+                <button className="invite-form__action-button" onClick={onCopyClicked}>
+                  <span>{this.state.copyLinkButtonText}</span>
+                </button>
+              </WithHoverSound>
             </div>
           </div>
         </div>

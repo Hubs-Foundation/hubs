@@ -8,6 +8,7 @@ import hubLogo from "../assets/images/hub-preview-white.png";
 import spokeLogo from "../assets/images/spoke_logo_black.png";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { generateHubName } from "../utils/name-generation";
+import { WithHoverSound } from "./wrap-with-audio";
 import CreateRoomDialog from "./create-room-dialog.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisH } from "@fortawesome/free-solid-svg-icons/faEllipsisH";
@@ -92,13 +93,15 @@ class SceneUI extends Component {
           <span key={a.url}>
             <a href={a.url} target="_blank" rel="noopener noreferrer">
               {a.name} by {a.author} {source}
-            </a>&nbsp;
+            </a>
+            &nbsp;
           </span>
         );
       } else {
         return (
           <span key={`${a.name} ${a.author}`}>
-            {a.name} by {a.author}&nbsp;
+            {a.name} by {a.author}
+            &nbsp;
           </span>
         );
       }
@@ -108,7 +111,8 @@ class SceneUI extends Component {
       if (!this.props.sceneAttributions.extras) {
         attributions = (
           <span>
-            <span>{this.props.sceneAttributions.creator ? `by ${this.props.sceneAttributions.creator}` : ""}</span>&nbsp;
+            <span>{this.props.sceneAttributions.creator ? `by ${this.props.sceneAttributions.creator}` : ""}</span>
+            &nbsp;
             <br />
             {this.props.sceneAttributions.content && this.props.sceneAttributions.content.map(toAttributionSpan)}
           </span>
@@ -133,26 +137,37 @@ class SceneUI extends Component {
           <div className={styles.whiteOverlay} />
           <div className={styles.grid}>
             <div className={styles.mainPanel}>
-              <a href="/" className={styles.logo}>
-                <img src={hubLogo} />
-              </a>
+              <WithHoverSound>
+                <a href="/" className={styles.logo}>
+                  <img src={hubLogo} />
+                </a>
+              </WithHoverSound>
               <div className={styles.logoTagline}>
                 <FormattedMessage id="scene.logo_tagline" />
               </div>
               <div className={styles.createButtons}>
-                <button className={styles.createButton} onClick={this.createRoom}>
-                  <FormattedMessage id="scene.create_button" />
-                </button>
-                <button className={styles.optionsButton} onClick={() => this.setState({ showCustomRoomDialog: true })}>
-                  <FontAwesomeIcon icon={faEllipsisH} />
-                </button>
+                <WithHoverSound>
+                  <button className={styles.createButton} onClick={this.createRoom}>
+                    <FormattedMessage id="scene.create_button" />
+                  </button>
+                </WithHoverSound>
+                <WithHoverSound>
+                  <button
+                    className={styles.optionsButton}
+                    onClick={() => this.setState({ showCustomRoomDialog: true })}
+                  >
+                    <FontAwesomeIcon icon={faEllipsisH} />
+                  </button>
+                </WithHoverSound>
               </div>
-              <a href={tweetLink} rel="noopener noreferrer" target="_blank" className={styles.tweetButton}>
-                <img src="../assets/images/twitter.svg" />
-                <div>
-                  <FormattedMessage id="scene.tweet_button" />
-                </div>
-              </a>
+              <WithHoverSound>
+                <a href={tweetLink} rel="noopener noreferrer" target="_blank" className={styles.tweetButton}>
+                  <img src="../assets/images/twitter.svg" />
+                  <div>
+                    <FormattedMessage id="scene.tweet_button" />
+                  </div>
+                </a>
+              </WithHoverSound>
             </div>
           </div>
           <div className={styles.info}>

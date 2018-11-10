@@ -38,8 +38,10 @@ AFRAME.registerComponent("freeze-controller", {
     window.APP.store.update({ activity: { hasFoundFreeze: true } });
     NAF.connection.adapter.toggleFreeze();
     if (NAF.connection.adapter.frozen) {
+      this.el.emit("play_freeze_sound");
       this.el.addState("frozen");
     } else {
+      this.el.emit("play_thaw_sound");
       this.el.removeState("frozen");
     }
   }
