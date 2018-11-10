@@ -6,6 +6,7 @@ import styles from "../assets/stylesheets/profile.scss";
 import classNames from "classnames";
 import hubLogo from "../assets/images/hub-preview-white.png";
 import { WithHoverSound } from "./wrap-with-audio";
+import { avatars } from "../assets/avatars/avatars";
 
 class ProfileEntryPanel extends Component {
   static propTypes = {
@@ -18,7 +19,7 @@ class ProfileEntryPanel extends Component {
   constructor(props) {
     super(props);
     const { displayName, avatarId } = this.props.store.state.profile;
-    this.state = { displayName, avatarId };
+    this.state = { displayName, avatarId, customMode: avatarId && avatarId.startsWith("http") };
     this.props.store.addEventListener("statechanged", this.storeUpdated);
   }
 
@@ -39,7 +40,8 @@ class ProfileEntryPanel extends Component {
         hasChangedName: hasChangedNowOrPreviously
       },
       profile: {
-        ...this.state
+        displayName: this.state.displayName,
+        avatarId: this.state.avatarId
       }
     });
     this.props.finished();
@@ -94,20 +96,46 @@ class ProfileEntryPanel extends Component {
               title={formatMessage({ id: "profile.display_name.validation_warning" })}
               ref={inp => (this.nameInput = inp)}
             />
-            <div className={styles.avatarSelectorContainer}>
-              <div className="loading-panel">
-                <div className="loader-wrap">
-                  <div className="loader">
-                    <div className="loader-center" />
-                  </div>
+            {this.state.customMode ? (
+              <div className={styles.avatarSelectorContainer}>
+                <label htmlFor="#custom-avatar-url" className={styles.title}>
+                  Avatar GLTF/GLB{" "}
+                </label>
+                <input
+                  id="custom-avatar-url"
+                  type="url"
+                  className={styles.formFieldText}
+                  value={this.state.avatarId}
+                  onChange={e => this.setState({ avatarId: e.target.value })}
+                />
+                <div className={styles.links}>
+                  <a onClick={() => this.setState({ customMode: false, avatarId: "botdefault" })}>cancel</a>
                 </div>
               </div>
-              <iframe
-                className={styles.avatarSelector}
-                src={`/avatar-selector.html#avatar_id=${this.state.avatarId}`}
-                ref={ifr => (this.avatarSelector = ifr)}
-              />
-            </div>
+            ) : (
+              <div className={styles.avatarSelectorContainer}>
+                <div className="loading-panel">
+                  <div className="loader-wrap">
+                    <div className="loader">
+                      <div className="loader-center" />
+                    </div>
+                  </div>
+                </div>
+                <iframe
+                  className={styles.avatarSelector}
+                  src={`/avatar-selector.html#avatar_id=${this.state.avatarId}`}
+                  ref={ifr => (this.avatarSelector = ifr)}
+                />
+                <a
+                  className="custom-url-link"
+                  onClick={() =>
+                    this.setState({ customMode: true, avatarId: avatars.find(a => a.id === this.state.avatarId).model })
+                  }
+                >
+                  options
+                </a>
+              </div>
+            )}
             <WithHoverSound>
               <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
             </WithHoverSound>

@@ -137,10 +137,10 @@ export default class SceneEntryManager {
   };
 
   _updatePlayerRigWithProfile = () => {
-    const displayName = this.store.state.profile.displayName;
+    const { avatarId, displayName } = this.store.state.profile;
     this.playerRig.setAttribute("player-info", {
       displayName,
-      avatarSrc: "#" + (this.store.state.profile.avatarId || "botdefault")
+      avatarSrc: avatarId && avatarId.startsWith("http") ? avatarId : `#${avatarId || "botdefault"}`
     });
     const hudController = this.playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });
