@@ -5,6 +5,7 @@ import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
 import { share } from "../utils/share";
 
+import { WithHoverSound } from "./wrap-with-audio";
 import styles from "../assets/stylesheets/invite-dialog.scss";
 
 function pad(num, size) {
@@ -50,14 +51,18 @@ export default class InviteDialog extends Component {
     return (
       <div className={styles.dialog}>
         <div className={styles.attachPoint} />
-        <div className={styles.close} onClick={() => this.props.onClose()}>
-          <span>×</span>
-        </div>
+        <WithHoverSound>
+          <div className={styles.close} onClick={() => this.props.onClose()}>
+            <span>×</span>
+          </div>
+        </WithHoverSound>
         <div>
           <FormattedMessage id="invite.enter_via" />
-          <a href="https://hub.link" target="_blank" className={styles.hubLinkLink} rel="noopener noreferrer">
-            hub.link
-          </a>
+          <WithHoverSound>
+            <a href="https://hub.link" target="_blank" className={styles.hubLinkLink} rel="noopener noreferrer">
+              hub.link
+            </a>
+          </WithHoverSound>
           <FormattedMessage id="invite.and_enter_code" />
         </div>
         <div className={styles.code}>
@@ -74,20 +79,26 @@ export default class InviteDialog extends Component {
           <input type="text" readOnly onFocus={e => e.target.select()} value={shortLinkText} />
         </div>
         <div className={styles.buttons}>
-          <button className={styles.linkButton} onClick={this.copyClicked.bind(this, shortLink)}>
-            <span>{this.state.copyButtonActive ? "copied!" : "copy"}</span>
-          </button>
+          <WithHoverSound>
+            <button className={styles.linkButton} onClick={this.copyClicked.bind(this, shortLink)}>
+              <span>{this.state.copyButtonActive ? "copied!" : "copy"}</span>
+            </button>
+          </WithHoverSound>
           {this.props.allowShare &&
             navigator.share && (
-              <button className={styles.linkButton} onClick={this.shareClicked.bind(this, shortLink)}>
-                <span>{this.state.shareButtonActive ? "sharing..." : "share"}</span>
-              </button>
+              <WithHoverSound>
+                <button className={styles.linkButton} onClick={this.shareClicked.bind(this, shortLink)}>
+                  <span>{this.state.shareButtonActive ? "sharing..." : "share"}</span>
+                </button>
+              </WithHoverSound>
             )}
           {this.props.allowShare &&
             !navigator.share && (
-              <button className={styles.linkButton} onClick={this.shareClicked.bind(this, shortLink)}>
-                <FormattedMessage id="invite.tweet" />
-              </button>
+              <WithHoverSound>
+                <button className={styles.linkButton} onClick={this.shareClicked.bind(this, shortLink)}>
+                  <FormattedMessage id="invite.tweet" />
+                </button>
+              </WithHoverSound>
             )}
         </div>
       </div>
