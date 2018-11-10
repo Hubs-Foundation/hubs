@@ -679,12 +679,12 @@ class UIRoot extends Component {
         <div>
           <FormattedMessage id={exitSubtitleId} />
           <p />
-          {this.props.roomUnavailableReason && (
+          {this.props.roomUnavailableReason !== "left" && (
             <div>
               You can also{" "}
               <WithHoverSound>
-                <a href="/">create a new room</a>.
-              </WithHoverSound>
+                <a href="/">create a new room</a>
+              </WithHoverSound>.
             </div>
           )}
         </div>
@@ -1209,7 +1209,7 @@ class UIRoot extends Component {
             )}
 
             <WithHoverSound>
-              <button onClick={() => this.showHelpDialog()} className={styles.helpIcon}>
+              <button onClick={() => this.showHelpDialog()} className={classNames([styles.helpIcon, "help-button"])}>
                 <i>
                   <FontAwesomeIcon icon={faQuestion} />
                 </i>

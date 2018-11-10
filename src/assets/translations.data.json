@@ -51,6 +51,7 @@
     "audio.granted-next": "Next",
     "exit.subtitle.exited": "Your session has ended. Refresh your browser to start a new one.",
     "exit.subtitle.closed": "This room is no longer available.",
+    "exit.subtitle.left": "You have left the room.",
     "exit.subtitle.full": "This room is full, please try again later.",
     "exit.subtitle.connect_error": "Unable to connect to this room, please try again later.",
     "exit.subtitle.version_mismatch": "The version you deployed is not available yet. Your browser will refresh in 5 seconds.",
