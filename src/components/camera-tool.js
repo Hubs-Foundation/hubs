@@ -100,10 +100,53 @@ AFRAME.registerComponent("camera-tool", {
     this.el.removeEventListener("stateadded", this.stateAdded);
   },
 
+  remove() {
+    if (this.mirrorCamera) {
+      document.body.classList.remove("mirrored-camera");
+    }
+
+    this.el.sceneEl.renderer.render = this.directRenderFunc;
+  },
+
   stateAdded(evt) {
     if (evt.detail === "activated") {
       this.takeSnapshotNextTick = true;
     }
+  },
+
+  enableCameraMirror() {
+    if (this.mirrorCamera) return;
+    if (!this.el.sceneEl.renderer.vr.enabled) return;
+
+    this.mirrorCamera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 30000);
+    this.el.setObject3D("mirror-camera", this.mirrorCamera);
+    this.mirrorCamera.rotation.set(0, Math.PI, 0);
+
+    this.renderer = this.el.sceneEl.renderer;
+
+    // This overrides the render routine to use the mirrored camera
+    this.directRenderFunc = this.el.sceneEl.renderer.render;
+    const tempScale = new THREE.Vector3();
+    document.body.classList.add("mirrored-camera");
+
+    this.el.sceneEl.renderer.render = (scene, camera, renderTarget) => {
+      const sceneEl = this.el.sceneEl;
+
+      this.directRenderFunc.call(sceneEl.renderer, scene, camera, renderTarget);
+      if (this.playerHead) {
+        tempScale.copy(this.playerHead.scale);
+        this.playerHead.scale.set(1, 1, 1);
+      }
+      sceneEl.renderer.vr.enabled = false;
+      const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
+      delete sceneEl.object3D.onAfterRender;
+      this.directRenderFunc.call(sceneEl.renderer, scene, this.mirrorCamera);
+      sceneEl.object3D.onAfterRender = tmpOnAfterRender;
+      sceneEl.renderer.vr.enabled = true;
+      if (this.playerHead) {
+        this.playerHead.scale.copy(tempScale);
+      }
+    };
   },
 
   tick() {
@@ -137,7 +180,14 @@ AFRAME.registerComponent("camera-tool", {
         const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
         delete sceneEl.object3D.onAfterRender;
         renderer.vr.enabled = false;
-        renderer.render(sceneEl.object3D, this.camera, this.renderTarget, true);
+
+        // Use the direct, non mirrored render function if available
+        if (this.directRenderFunc) {
+          this.directRenderFunc.call(renderer, sceneEl.object3D, this.camera, this.renderTarget, true);
+        } else {
+          renderer.render(sceneEl.object3D, this.camera, this.renderTarget, true);
+        }
+
         renderer.vr.enabled = tmpVRFlag;
         sceneEl.object3D.onAfterRender = tmpOnAfterRender;
         if (this.playerHead) {
