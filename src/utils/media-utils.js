@@ -115,6 +115,15 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
   ["model-loaded", "video-loaded", "image-loaded"].forEach(eventName => {
     entity.addEventListener(eventName, () => {
       clearTimeout(fireLoadingTimeout);
+
+      entity.setAttribute("animation__spawn-start", {
+        property: "scale",
+        dur: 300,
+        from: { x: 0.5, y: 0.5, z: 0.5 },
+        to: { x: 1.0, y: 1.0, z: 1.0 },
+        easing: "easeOutElastic"
+      });
+
       scene.emit("media-loaded", { src: src });
     });
   });

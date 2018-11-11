@@ -67,6 +67,7 @@ import "./components/scene-sound";
 import "./components/emit-state-change";
 import "./components/action-to-event";
 import "./components/stop-event-propagation";
+import "./components/animation";
 
 import ReactDOM from "react-dom";
 import React from "react";
