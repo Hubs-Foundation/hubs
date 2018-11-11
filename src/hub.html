@@ -71,8 +71,8 @@
             <a-asset-item id="sound_asset-teleport_start"                 src="./assets/sfx/D_teleportStart.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-teleport_end"                   src="./assets/sfx/quickTurn.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-snap_rotate"                    src="./assets/sfx/quickTurn.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-media_loaded"                   src="./assets/sfx/pop.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-media_loading"                  src="./assets/sfx/A_bendUp.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-media_loaded"                   src="./assets/sfx/A_bendUp.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-media_loading"                  src="./assets/sfx/suspense.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-hud_hover_start"                src="./assets/sfx/tap_mellow.wav"  response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-grab"                           src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-grab_off"                       src="./assets/sfx/tap_mellow.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -452,8 +452,8 @@
                 scene-sound__snap_rotate_right="on: snap_rotate_right;"
                 sound__media_loaded="positional: false; src: #sound_asset-media_loaded; on: nothing; poolSize: 2;"
                 scene-sound__media_loaded="on: media-loaded;"
-                sound__media_loading="positional: false; src: #sound_asset-media_loading; on: nothing; poolSize: 2;"
-                scene-sound__media_loading="on: media-loading;"
+                sound__media_loading="positional: false; src: #sound_asset-media_loading; on: nothing; poolSize: 2; loop: true; "
+                scene-sound__media_loading="on: media-loading; off: media-loaded;"
                 sound__hud_action_mute="positional: false; src: #sound_asset-toggle_mute; on: nothing; poolSize: 2;"
                 scene-sound__hud_action_mute="on: action_mute;"
                 sound__hud_action_freeze="positional: false; src: #sound_asset-toggle_freeze; on: nothing; poolSize: 2;"
