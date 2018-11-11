@@ -1,6 +1,8 @@
 import uuid from "uuid/v4";
 import { Socket } from "phoenix";
 
+import Store from "../storage/store";
+
 export function connectToReticulum(debug = false) {
   const qs = new URLSearchParams(location.search);
 
@@ -51,4 +53,13 @@ export function getReticulumFetchUrl(path, absolute = false) {
 export function getLandingPageForPhoto(photoUrl) {
   const parsedUrl = new URL(photoUrl);
   return getReticulumFetchUrl(parsedUrl.pathname.replace(".png", ".html") + parsedUrl.search, true);
+}
+
+export async function postWithAuth(apiEndpoint, payload) {
+  const headers = { "content-type": "application/json" };
+  const store = new Store();
+  if (store.state && store.state.profile.credentials) {
+    headers.authorization = `bearer ${store.state.profile.credentials}`;
+  }
+  return fetch(getReticulumFetchUrl(apiEndpoint), { method: "POST", headers, body: JSON.stringify(payload) });
 }
