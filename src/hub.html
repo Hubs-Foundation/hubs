@@ -72,10 +72,11 @@
             <a-asset-item id="sound_asset-teleport_end"                   src="./assets/sfx/D_teleportEnd.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-snap_rotate"                    src="./assets/sfx/quickTurn.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-media_loaded"                   src="./assets/sfx/pop.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-media_loading"                   src="./assets/sfx/A_bendUp.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-media_loading"                  src="./assets/sfx/A_bendUp.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-hud_hover_start"                src="./assets/sfx/tap_mellow.wav"  response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-hover"                          src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="DISABLED_sound_asset-hover_off"             src="./assets/sfx/tap_mellow.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-grab"                           src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-grab_off"                       src="./assets/sfx/tap_mellow.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-pinned"                         src="./assets/sfx/tack.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-cursor_distance_change_blocked" src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-cursor_distance_changed"        src="./assets/sfx/tap_mellow.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-hud_click"                      src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -175,10 +176,12 @@
                     destroy-at-extreme-distances
                     set-yxz-order
                     pinnable
-                    sound__hover="src: #sound_asset-hover; on: hovered; poolSize: 1;"
-                    sound__hoveroff ="src: #sound_asset-hover_off; on: unhovered; poolSize: 1;"
-                    emit-state-change__hovered="state: hovered; transform: rising; event: hovered;"
-                    emit-state-change__unhovered="state: hovered; transform: falling; event: unhovered;"
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1;"
+                    sound__pinned ="src: #sound_asset-pinned; on: pinned; poolSize: 1;"
+                    emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
+                    emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
+                    emit-state-change__pinned="state: pinned; transform: rising; event: pinned;"
                 >
                     <a-entity class="interactable-ui" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end">
                         <a-entity class="freeze-menu" visible-while-frozen="withinDistance: 3;">
@@ -206,10 +209,10 @@
                     sound__stop_draw="src: #sound_asset-stop_draw; on: stop_draw; poolSize: 2;"
                     sound__increase_pen_radius="src: #sound_asset-increase_pen_radius; on: increase_pen_radius; poolSize: 2;"
                     sound__decrease_pen_radius="src: #sound_asset-decrease_pen_radius; on: decrease_pen_radius; poolSize: 2;"
-                    sound__hover="src: #sound_asset-hover; on: hovered; poolSize: 1;"
-                    sound__hoveroff ="src: #sound_asset-hover_off; on: unhovered; poolSize: 1;"
-                    emit-state-change__hovered="state: hovered; transform: rising; event: hovered;"
-                    emit-state-change__unhovered="state: hovered; transform: falling; event: unhovered;"
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1;"
+                    emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
+                    emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
                 >
                     <a-sphere
                         id="pen"
