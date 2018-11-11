@@ -175,12 +175,6 @@ class HomeRoot extends Component {
           <div className={mainContentClassNames}>
             <div className={styles.headerContent}>
               <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
-                <WithHoverSound>
-                  <div className={styles.hubs}>hubs</div>
-                </WithHoverSound>
-                <WithHoverSound>
-                  <div className={styles.preview}>preview</div>
-                </WithHoverSound>
                 <div className={styles.links}>
                   <WithHoverSound>
                     <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
