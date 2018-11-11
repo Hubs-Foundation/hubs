@@ -108,6 +108,17 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
   entity.setAttribute("media-loader", { resize, resolve, src: typeof src === "string" ? src : "" });
   scene.appendChild(entity);
 
+  const fireLoadingTimeout = setTimeout(() => {
+    scene.emit("media-loading", { src: src });
+  }, 100);
+
+  ["model-loaded", "video-loaded", "image-loaded"].forEach(eventName => {
+    entity.addEventListener(eventName, () => {
+      clearTimeout(fireLoadingTimeout);
+      scene.emit("media-loaded", { src: src });
+    });
+  });
+
   const orientation = new Promise(function(resolve) {
     if (src instanceof File) {
       getOrientation(src, x => {
