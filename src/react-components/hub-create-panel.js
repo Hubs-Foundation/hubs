@@ -6,7 +6,7 @@ import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { resolveURL, extractUrlBase } from "../utils/resolveURL";
-import { getReticulumFetchUrl } from "../utils/phoenix-utils";
+import { postWithAuth } from "../utils/phoenix-utils";
 import CreateRoomDialog from "./create-room-dialog.js";
 
 import default_scene_preview_thumbnail from "../assets/images/default_thumbnail.png";
@@ -98,14 +98,7 @@ class HubCreatePanel extends Component {
       payload.hub.default_environment_gltf_bundle_url = sceneUrl;
     }
 
-    const createUrl = getReticulumFetchUrl("/api/v1/hubs");
-
-    const res = await fetch(createUrl, {
-      body: JSON.stringify(payload),
-      headers: { "content-type": "application/json" },
-      method: "POST"
-    });
-
+    const res = await postWithAuth("/api/v1/hubs", payload);
     const hub = await res.json();
 
     if (!process.env.RETICULUM_SERVER || document.location.host === process.env.RETICULUM_SERVER) {
