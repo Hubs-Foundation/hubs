@@ -52,7 +52,7 @@ AFRAME.registerComponent("pinnable", {
         dur: 100,
         from: { x: currentScale.x, y: currentScale.y, z: currentScale.z },
         to: { x: currentScale.x * 1.1, y: currentScale.y * 1.1, z: currentScale.z * 1.1 },
-        easing: "easeInOutElastic"
+        easing: "easeOutElastic"
       });
 
       this.el.setAttribute("animation__pin-end", {
@@ -61,7 +61,7 @@ AFRAME.registerComponent("pinnable", {
         dur: 100,
         from: { x: currentScale.x * 1.1, y: currentScale.y * 1.1, z: currentScale.z * 1.1 },
         to: { x: currentScale.x, y: currentScale.y, z: currentScale.z },
-        easing: "easeInOutElastic"
+        easing: "easeOutElastic"
       });
     } else {
       this.el.emit("unpinned", { el: this.el });
