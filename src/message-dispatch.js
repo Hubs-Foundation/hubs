@@ -77,6 +77,7 @@ export default class MessageDispatch {
         break;
       case "duck":
         spawnChatMessage(DUCK_URL);
+        this.scene.emit("quack");
         break;
     }
   };
