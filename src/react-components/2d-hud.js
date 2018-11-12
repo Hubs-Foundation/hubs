@@ -93,7 +93,7 @@ class TopHUD extends Component {
           {videoShareExtraOptionTypes.length > 0 && (
             <div className={cx(styles.videoShareExtraOptions)} onMouseOut={hideExtrasOnOut}>
               {videoShareExtraOptionTypes.map(type => (
-                <WithHoverSound>
+                <WithHoverSound key={type}>
                   <div
                     key={type}
                     className={cx(styles.iconButton, styles[`share_${type}`], {
