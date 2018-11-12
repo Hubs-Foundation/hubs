@@ -116,6 +116,7 @@
     "commands.bigger": "Increase your avatar's size.",
     "commands.smaller": "Decrease your avatar's size.",
     "commands.help": "Show help.",
-    "commands.leave": "Disconnect from the room."
+    "commands.leave": "Disconnect from the room.",
+    "commands.duck": "The duck tested well. Quack."
   }
 }

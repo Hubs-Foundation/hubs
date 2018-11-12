@@ -9,7 +9,7 @@ export default class ChatCommandHelp extends Component {
   };
 
   render() {
-    const commands = ["help", "leave", "fly", "bigger", "smaller"];
+    const commands = ["help", "leave", "fly", "bigger", "smaller", "duck"];
 
     return (
       <div className={styles.commandHelp}>
