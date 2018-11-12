@@ -437,6 +437,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     presenceLogEntries.push(entry);
     remountUI({ presenceLogEntries });
+    scene.emit(`presence-log-${entry.type}`);
 
     // Fade out and then remove
     setTimeout(() => {

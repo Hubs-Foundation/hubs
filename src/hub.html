@@ -70,7 +70,7 @@
             <a-asset-item id="specialquack"                               src="./assets/sfx/specialquack.mp3"   response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-teleport_start"                 src="./assets/sfx/teleportArc.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-teleport_end"                   src="./assets/sfx/quickTurn.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-snap_rotate"                    src="./assets/sfx/quickTurn.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-snap_rotate"                    src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-media_loaded"                   src="./assets/sfx/A_bendUp.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-media_loading"                  src="./assets/sfx/suspense.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-hud_hover_start"                src="./assets/sfx/tick.wav"  response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -94,6 +94,7 @@
             <a-asset-item id="sound_asset-stop_draw"                      src="./assets/sfx/tick.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-camera_tool_took_snapshot"      src="./assets/sfx/PicSnapHey.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-welcome"                        src="./assets/sfx/welcome.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-chat"                           src="./assets/sfx/pop.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
 
             <!-- Templates -->
             <template id="video-template">
@@ -478,6 +479,8 @@
                 scene-sound__camera_tool_took_snapshot="on: camera_tool_took_snapshot;"
                 sound__welcome="positional: false; src: #sound_asset-welcome; on: nothing; poolSize: 2;"
                 scene-sound__welcome="on: entered;"
+                sound__log_chat_message="positional: false; src: #sound_asset-chat; on: nothing; poolSize: 2;"
+                scene-sound__log_chat_message="on: presence-log-chat;"
             >
                 <a-entity
                     id="gaze-teleport"
