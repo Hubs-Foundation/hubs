@@ -434,7 +434,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
       subscriptions.setHubChannel(hubChannel);
       subscriptions.setSubscribed(data.subscriptions.web_push);
-      remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
+      remountUI({ initialIsSubscribed: subscriptions.isSubscribed(), roles: data.roles });
       await handleHubChannelJoined(entryManager, hubChannel, data);
     })
     .receive("error", res => {
