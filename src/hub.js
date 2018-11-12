@@ -59,6 +59,7 @@ import "./components/position-at-box-shape-border";
 import "./components/pinnable";
 import "./components/pin-networked-object-button";
 import "./components/remove-networked-object-button";
+import "./components/camera-focus-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/gamma-factor";
 import "./components/visible-to-owner";
@@ -83,6 +84,7 @@ import "./systems/nav";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/exit-on-blur";
+import "./systems/cameras";
 import "./systems/userinput/userinput";
 
 import "./gltf-component-mappings";

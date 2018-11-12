@@ -88,6 +88,12 @@ AFRAME.registerComponent("camera-tool", {
       selfieScreen.scale.set(-2, 2, 2);
       this.el.setObject3D("selfieScreen", selfieScreen);
 
+      this.cameraSystem = this.el.sceneEl.systems.cameras;
+
+      if (this.cameraSystem) {
+        this.cameraSystem.register(this.el);
+      }
+
       this.updateRenderTargetNextTick = true;
     });
   },
@@ -100,10 +106,36 @@ AFRAME.registerComponent("camera-tool", {
     this.el.removeEventListener("stateadded", this.stateAdded);
   },
 
+  remove() {
+    if (this.cameraSystem) {
+      this.cameraSystem.deregister(this.el);
+    }
+  },
+
   stateAdded(evt) {
     if (evt.detail === "activated") {
       this.takeSnapshotNextTick = true;
     }
+  },
+
+  focus(el, track) {
+    this.lookAt(el);
+
+    if (track) {
+      this.trackTarget = el;
+
+      this.trackTarget.addEventListener("componentremoved", e => {
+        if (e.detail.name === "position" && e.target === this.trackTarget) {
+          this.trackTarget = null;
+        }
+      });
+    }
+  },
+
+  lookAt(el) {
+    const targetPos = new THREE.Vector3();
+    targetPos.setFromMatrixPosition(el.object3D.matrixWorld);
+    this.el.object3D.lookAt(targetPos);
   },
 
   tick() {
@@ -113,6 +145,10 @@ AFRAME.registerComponent("camera-tool", {
       if (AFRAME.scenes[0].systems.userinput.get(paths.takeSnapshot)) {
         this.takeSnapshotNextTick = true;
       }
+    }
+
+    if (this.trackTarget) {
+      this.lookAt(this.trackTarget);
     }
   },
 
