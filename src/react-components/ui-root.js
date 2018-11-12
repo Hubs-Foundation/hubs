@@ -1102,7 +1102,9 @@ class UIRoot extends Component {
             {entryFinished && (
               <form onSubmit={this.sendMessage}>
                 <div className={styles.messageEntryInRoom} style={{ height: pendingMessageFieldHeight }}>
-                  {this.state.pendingMessage === "/" && <ChatCommandHelp />}
+                  {this.state.pendingMessage.startsWith("/") && (
+                    <ChatCommandHelp matchingPrefix={this.state.pendingMessage.substring(1)} />
+                  )}
                   <textarea
                     style={{ height: pendingMessageTextareaHeight }}
                     className={classNames([

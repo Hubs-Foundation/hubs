@@ -19,6 +19,7 @@
     margin: 4px;
 
     display: flex;
+    justify-content: space-between;
 
     :local(.command) {
       font-weight: bold;
