@@ -71,10 +71,6 @@ export default class MessageDispatch {
         this.entryManager.exitScene();
         this.remountUI({ roomUnavailableReason: "left" });
         break;
-      case "help":
-        // HACK for now, non-trivial to properly send this into React
-        document.querySelector(".help-button").click();
-        break;
       case "duck":
         spawnChatMessage(DUCK_URL);
         this.scene.emit("quack");
