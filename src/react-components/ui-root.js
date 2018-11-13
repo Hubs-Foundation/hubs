@@ -92,7 +92,6 @@ class UIRoot extends Component {
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
     hubName: PropTypes.string,
-    roles: PropTypes.object,
     isSupportAvailable: PropTypes.bool,
     presenceLogEntries: PropTypes.array,
     presences: PropTypes.object,
@@ -754,9 +753,7 @@ class UIRoot extends Component {
 
     return (
       <div className={entryStyles.entryPanel}>
-        <div className={entryStyles.name}>
-          {this.props.hubName} {this.props.roles.is_host ? "(host)" : ""}
-        </div>
+        <div className={entryStyles.name}>{this.props.hubName}</div>
 
         <div className={entryStyles.center}>
           <WithHoverSound>
