@@ -69,11 +69,6 @@ AFRAME.registerComponent("position-at-box-shape-border", {
         }
       }
 
-      if (this.targetEl.getAttribute("visible") === false) {
-        this.prevScale = null;
-        return;
-      }
-
       if (!this.el.getObject3D("mesh")) {
         return;
       }
@@ -124,11 +119,11 @@ AFRAME.registerComponent("position-at-box-shape-border", {
       const distance = Math.sqrt(minSquareDistance);
       const scale = this.halfExtents[inverseHalfExtents[targetHalfExtentStr]] * distance;
       const targetScale = Math.min(2.0, Math.max(0.5, scale * tempParentWorldScale.x));
+      const finalScale = targetScale / tempParentWorldScale.x;
 
-      if (!this.prevScale && Math.abs(this.prevScale - targetScale) > 0.01) {
-        const finalScale = targetScale / tempParentWorldScale.x;
-        this.target.scale.setScalar(finalScale);
+      const isVisible = this.targetEl.getAttribute("visible");
 
+      if (isVisible && !this.wasVisible) {
         this.targetEl.removeAttribute("animation__show");
 
         this.targetEl.setAttribute("animation__show", {
@@ -138,9 +133,11 @@ AFRAME.registerComponent("position-at-box-shape-border", {
           to: { x: finalScale, y: finalScale, z: finalScale },
           easing: "easeOutElastic"
         });
-
-        this.prevScale = targetScale;
+      } else {
+        this.target.scale.setScalar(finalScale);
       }
+
+      this.wasVisible = isVisible;
     };
   })()
 });

@@ -128,8 +128,8 @@
                         <template data-name="Chest">
                             <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
                                 <a-entity billboard>
-                                    <a-entity mixin="rounded-text-button" block-button visible-while-frozen="withinDistance: 3;" ui-class-while-frozen position="0 0 .35"> </a-entity>
-                                    <a-entity visible-while-frozen="withinDistance: 3;" text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
+                                    <a-entity mixin="rounded-text-button" block-button visible-while-frozen="withinDistance: 10;" ui-class-while-frozen position="0 0 .35"> </a-entity>
+                                    <a-entity visible-while-frozen="withinDistance: 10;" text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
                                 </a-entity>
                             </a-entity>
                         </template>
@@ -186,7 +186,7 @@
                     emit-state-change__pinned="state: pinned; transform: rising; event: pinned;"
                 >
                     <a-entity class="interactable-ui" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end">
-                        <a-entity class="freeze-menu" visible-while-frozen="withinDistance: 3;">
+                        <a-entity class="freeze-menu" visible-while-frozen="withinDistance: 10;">
                             <a-entity mixin="rounded-text-action-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned; uiSelector:.interactable-ui" position="0 0.125 0.01"> </a-entity>
                             <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
                             <a-entity mixin="rounded-text-button" class="hide-when-pinned" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
@@ -226,7 +226,7 @@
                         segments-width="16"
                         segments-height="12"
                     ></a-sphere>
-                    <a-entity class="delete-button" visible-while-frozen="withinDistance: 3;">
+                    <a-entity class="delete-button" visible-while-frozen="withinDistance: 10;">
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
                         <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
@@ -249,7 +249,7 @@
                     set-yxz-order
                     auto-scale-cannon-physics-body
                 >
-                    <a-entity class="delete-button" visible-while-frozen="withinDistance: 3;">
+                    <a-entity class="delete-button" visible-while-frozen="withinDistance: 10;">
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
                         <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
