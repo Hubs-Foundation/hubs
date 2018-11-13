@@ -126,7 +126,7 @@ function isActive(binding, sets) {
 
 function computeExecutionStrategy(sortedBindings, masks, activeSets) {
   const actives = [];
-  for (const row in sortedBindings) {
+  for (let row = 0; row < sortedBindings.length; row++) {
     actives[row] = isActive(sortedBindings[row], activeSets);
   }
 
