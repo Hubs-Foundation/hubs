@@ -9,27 +9,32 @@ import GearVREntryImg from "../assets/images/gearvr_entry.svg";
 import DaydreamEntryImg from "../assets/images/daydream_entry.svg";
 import DeviceEntryImg from "../assets/images/device_entry.svg";
 import styles from "../assets/stylesheets/entry.scss";
+import { WithHoverSound } from "./wrap-with-audio";
 
-const EntryButton = props => (
-  <button className={styles.entryButton} onClick={props.onClick}>
-    <img src={props.iconSrc} className={styles.icon} />
-    <div className={styles.label}>
-      <div className={styles.contents}>
-        <span>
-          <FormattedMessage id={props.prefixMessageId} />
-        </span>
-        <span className={styles.bolded}>
-          <FormattedMessage id={props.mediumMessageId} />
-        </span>
-        {props.subtitle && (
-          <div className={styles.subtitle}>
-            <FormattedMessage id={props.subtitle} />
+const EntryButton = props => {
+  return (
+    <WithHoverSound>
+      <button className={styles.entryButton} onClick={props.onClick}>
+        <img src={props.iconSrc} className={styles.icon} />
+        <div className={styles.label}>
+          <div className={styles.contents}>
+            <span>
+              <FormattedMessage id={props.prefixMessageId} />
+            </span>
+            <span className={styles.bolded}>
+              <FormattedMessage id={props.mediumMessageId} />
+            </span>
+            {props.subtitle && (
+              <div className={styles.subtitle}>
+                <FormattedMessage id={props.subtitle} />
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </div>
-  </button>
-);
+        </div>
+      </button>
+    </WithHoverSound>
+  );
+};
 
 EntryButton.propTypes = {
   onClick: PropTypes.func,

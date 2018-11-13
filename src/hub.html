@@ -66,10 +66,34 @@
             <a-asset-item id="botrobert" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotRobert_Avatar-e9554880f3.gltf"></a-asset-item>
             <a-asset-item id="botwoody" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotWoody_Avatar-0140485a23.gltf"></a-asset-item>
 
-            <a-asset-item id="quack" src="./assets/sfx/quack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="specialquack" src="./assets/sfx/specialquack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
-
-            <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
+            <a-asset-item id="quack"                                      src="./assets/sfx/quack.mp3"          response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="specialquack"                               src="./assets/sfx/specialquack.mp3"   response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-teleport_start"                 src="./assets/sfx/teleportArc.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-teleport_end"                   src="./assets/sfx/quickTurn.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-snap_rotate"                    src="./assets/sfx/quickTurn.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-media_loaded"                   src="./assets/sfx/A_bendUp.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-media_loading"                  src="./assets/sfx/suspense.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-hud_hover_start"                src="./assets/sfx/tick.wav"  response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-grab"                           src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-grab_off"                       src="./assets/sfx/tick.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-pinned"                         src="./assets/sfx/tack.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-cursor_distance_change_blocked" src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-cursor_distance_changed"        src="./assets/sfx/tick.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-hud_click"                      src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-toggle_mute"                    src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-toggle_freeze"                  src="./assets/sfx/Eb_blip.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-freeze"                         src="./assets/sfx/Eb_blip.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-thaw"                           src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-toggle_space_bubble"            src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-spawn_pen"                      src="./assets/sfx/PenSpawn.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-increase_pen_radius"            src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-decrease_pen_radius"            src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-next_pen_color"                 src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-prev_pen_color"                 src="./assets/sfx/tick.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-start_draw"                     src="./assets/sfx/PenDraw1.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-stop_draw"                      src="./assets/sfx/tick.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-camera_tool_took_snapshot"      src="./assets/sfx/PicSnapHey.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-welcome"                        src="./assets/sfx/welcome.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
 
             <!-- Templates -->
             <template id="video-template">
@@ -104,8 +128,8 @@
                         <template data-name="Chest">
                             <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
                                 <a-entity billboard>
-                                    <a-entity mixin="rounded-text-button" block-button visible-while-frozen ui-class-while-frozen position="0 0 .35"> </a-entity>
-                                    <a-entity visible-while-frozen text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
+                                    <a-entity mixin="rounded-text-button" block-button visible-while-frozen="withinDistance: 10;" ui-class-while-frozen position="0 0 .35"> </a-entity>
+                                    <a-entity visible-while-frozen="withinDistance: 10;" text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
                                 </a-entity>
                             </a-entity>
                         </template>
@@ -143,19 +167,26 @@
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
                     body="type: dynamic; shape: none; mass: 1;"
+                    animation__spawn="property: scale; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeInQuad"
                     grabbable
                     stretchable="useWorldPosition: true; usePhysics: never"
                     hoverable
                     hoverable-visuals="cursorController: #cursor-controller"
                     auto-scale-cannon-physics-body
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
-                    position-at-box-shape-border="target:.freeze-menu"
+                    position-at-box-shape-border="target:.freeze-menu;"
                     destroy-at-extreme-distances
                     set-yxz-order
                     pinnable
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1;"
+                    sound__pinned ="src: #sound_asset-pinned; on: pinned; poolSize: 1;"
+                    emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
+                    emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
+                    emit-state-change__pinned="state: pinned; transform: rising; event: pinned;"
                 >
                     <a-entity class="interactable-ui" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end">
-                        <a-entity class="freeze-menu" visible-while-frozen>
+                        <a-entity class="freeze-menu" visible-while-frozen="withinDistance: 10;">
                             <a-entity mixin="rounded-text-action-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned; uiSelector:.interactable-ui" position="0 0.125 0.01"> </a-entity>
                             <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
                             <a-entity mixin="rounded-text-button" class="hide-when-pinned" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
@@ -174,6 +205,16 @@
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     hoverable
                     scale="0.5 0.5 0.5"
+                    sound__next_pen_color="src: #sound_asset-next_pen_color; on: next_pen_color; poolSize: 2;"
+                    sound__prev_pen_color="src: #sound_asset-prev_pen_color; on: prev_pen_color; poolSize: 2;"
+                    sound__start_draw="src: #sound_asset-start_draw; on: start_draw; poolSize: 2;"
+                    sound__stop_draw="src: #sound_asset-stop_draw; on: stop_draw; poolSize: 2;"
+                    sound__increase_pen_radius="src: #sound_asset-increase_pen_radius; on: increase_pen_radius; poolSize: 2;"
+                    sound__decrease_pen_radius="src: #sound_asset-decrease_pen_radius; on: decrease_pen_radius; poolSize: 2;"
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1;"
+                    emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
+                    emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
                 >
                     <a-sphere
                         id="pen"
@@ -185,7 +226,7 @@
                         segments-width="16"
                         segments-height="12"
                     ></a-sphere>
-                    <a-entity class="delete-button" visible-while-frozen>
+                    <a-entity class="delete-button" visible-while-frozen="withinDistance: 10;">
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
                         <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
@@ -199,6 +240,7 @@
                     hoverable
                     stretchable
                     camera-tool
+                    animation__spawn="property: scale; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeInQuad"
                     body="type: dynamic; shape: none; mass: 1;"
                     shape="shape: box; halfExtents: 0.22 0.145 0.1; offset: 0 0.02 0"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
@@ -207,7 +249,7 @@
                     set-yxz-order
                     auto-scale-cannon-physics-body
                 >
-                    <a-entity class="delete-button" visible-while-frozen>
+                    <a-entity class="delete-button" visible-while-frozen="withinDistance: 10;">
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
                         <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
@@ -257,8 +299,8 @@
                     haptic:#player-right-controller;
                     textHoverColor: #fff;
                     textColor: #fff;
-                    backgroundHoverColor: #ff0434;
-                    backgroundColor: #ff3464;"
+                    backgroundHoverColor: #cc0515;
+                    backgroundColor: #ff0520;"
                 slice9="
                     width: 0.45;
                     height: 0.2;
@@ -347,16 +389,47 @@
                 vr-mode-toggle-playing__hud-controller
             >
                 <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="30 0 0">
-                    <a-rounded height="0.08" width="0.5" color="#000000" position="-0.20 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
-                    <a-entity id="hud-hub-entry-link" text=" value:; width:1.1; align:center;" position="0.05 0.165 0"></a-entity>
-                    <a-rounded height="0.13" width="0.59" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
-                    <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover" scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="ui hud mic" material="alphaTest:0.1;" hoverable></a-image>
-                    <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover" scale="0.2 0.2 0.2" position="0 0 0.005" class="ui hud freeze" hoverable></a-image>
-                    <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="ui hud penhud" material="alphaTest:0.1;" hoverable></a-image>
-                    <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #spawn-camera; hoverImage: #spawn-camera-hover; activeImage: #spawn-camera; activeHoverImage: #spawn-camera-hover" scale="0.1 0.1 0.1" position="0.28 0 0.001" class="ui hud cameraBtn" material="alphaTest:0.1;" hoverable></a-image>
-                    <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
-                        <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" ></a-entity>
-                    </a-rounded>
+                <a-rounded height="0.08" width="0.5" color="#000000" position="-0.20 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
+                <a-entity id="hud-hub-entry-link" text=" value:; width:1.1; align:center;" position="0.05 0.165 0"></a-entity>
+                <a-rounded height="0.13" width="0.59" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
+                <a-image
+                    icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover"
+                    scale="0.1 0.1 0.1"
+                    position="-0.17 0 0.001"
+                    class="ui hud mic"
+                    material="alphaTest:0.1;"
+                    hoverable
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                ></a-image>
+                <a-image
+                    icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover"
+                    scale="0.2 0.2 0.2"
+                    position="0 0 0.005"
+                    class="ui hud freeze"
+                    hoverable
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                ></a-image>
+                <a-image
+                    icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover"
+                    scale="0.1 0.1 0.1"
+                    position="0.17 0 0.001"
+                    class="ui hud penhud"
+                    material="alphaTest:0.1;"
+                    hoverable
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                ></a-image>
+                <a-image
+                    icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #spawn-camera; hoverImage: #spawn-camera-hover; activeImage: #spawn-camera; activeHoverImage: #spawn-camera-hover"
+                    scale="0.1 0.1 0.1"
+                    position="0.28 0 0.001"
+                    class="ui hud cameraBtn"
+                    material="alphaTest:0.1;"
+                    hoverable
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                ></a-image>
+                <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
+                    <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" ></a-entity>
+                </a-rounded>
                 </a-entity>
             </a-entity>
 
@@ -368,6 +441,45 @@
                 rotation
                 pitch-yaw-rotator
                 set-yxz-order
+                sound__teleport_start="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2; loop: true;"
+                scene-sound__teleport_start="on: right-teleport_down; off: right-teleport_up;"
+                sound__teleport_start2="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2; loop: true;"
+                scene-sound__teleport_start2="on: left-teleport_down; off: left-teleport_up;"
+                sound__teleport_end="positional: false; src: #sound_asset-teleport_end; on: nothing; poolSize: 2;"
+                scene-sound__teleport_end="on: right-teleport_up;"
+                sound__teleport_end2="positional: false; src: #sound_asset-teleport_end; on: nothing; poolSize: 2;"
+                scene-sound__teleport_end2="on: left-teleport_up;"
+                sound__snap_rotate_left="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
+                scene-sound__snap_rotate_left="on: snap_rotate_left;"
+                sound__snap_rotate_right="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
+                scene-sound__snap_rotate_right="on: snap_rotate_right;"
+                sound__media_loaded="positional: false; src: #sound_asset-media_loaded; on: nothing; poolSize: 2;"
+                scene-sound__media_loaded="on: media-loaded;"
+                sound__media_loading="positional: false; src: #sound_asset-media_loading; on: nothing; poolSize: 2; loop: true; "
+                scene-sound__media_loading="on: media-loading; off: media-loaded;"
+                sound__hud_action_mute="positional: false; src: #sound_asset-toggle_mute; on: nothing; poolSize: 2;"
+                scene-sound__hud_action_mute="on: action_mute;"
+                sound__hud_action_freeze="positional: false; src: #sound_asset-toggle_freeze; on: nothing; poolSize: 2;"
+                scene-sound__hud_action_freeze="on: action_freeze;"
+                sound__action_freeze="positional: false; src: #sound_asset-freeze; on: nothing; poolSize: 2;"
+                scene-sound__action_freeze="on: play_freeze_sound;"
+                sound__action_thaw="positional: false; src: #sound_asset-thaw; on: nothing; poolSize: 2;"
+                scene-sound__action_thaw="on: play_thaw_sound;"
+                sound__hud_action_space_bubble="positional: false; src: #sound_asset-toggle_space_bubble; on: nothing; poolSize: 2;"
+                scene-sound__hud_action_space_bubble="on: action_space_bubble;"
+                sound__hud_spawn_pen="positional: false; src: #sound_asset-spawn_pen; on: nothing; poolSize: 2;"
+                scene-sound__hud_spawn_pen="on: spawn_pen;"
+                sound__hud_hover_start="positional: false; src: #sound_asset-hud_hover_start; on: nothing; poolSize: 5;"
+                sound__hud_click="positional: false; src: #sound_asset-hud_click; on: nothing; poolSize: 1;"
+                scene-sound__hud_click="on: hud_click;"
+                sound__cursor_distance_changed="positional: false; src: #sound_asset-cursor_distance_changed; on: nothing; poolSize: 1;"
+                scene-sound__cursor_distance_changed="on: cursor-distance-changed;"
+                sound__cursor_distance_change_blocked="positional: false; src: #sound_asset-cursor_distance_change_blocked; on: nothing; poolSize: 1;"
+                scene-sound__cursor_distance_change_blocked="on: cursor-distance-change-blocked;"
+                sound__camera_tool_took_snapshot="positional: false; src: #sound_asset-camera_tool_took_snapshot; on: nothing; poolSize: 1;"
+                scene-sound__camera_tool_took_snapshot="on: camera_tool_took_snapshot;"
+                sound__welcome="positional: false; src: #sound_asset-welcome; on: nothing; poolSize: 2;"
+                scene-sound__welcome="on: entered;"
             >
                 <a-entity
                     id="gaze-teleport"

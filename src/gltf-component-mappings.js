@@ -80,6 +80,7 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
     el.setAttribute("networked", {
       template: "#interactable-media",
       owner: "scene",
+      persistent: true,
       networkId: componentData.id
     });
   }
@@ -88,5 +89,13 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
 
   if (componentData.pageIndex) {
     el.setAttribute("media-pager", { index: componentData.pageIndex });
+  }
+
+  if (componentData.paused !== undefined) {
+    el.setAttribute("media-video", { videoPaused: componentData.paused });
+  }
+
+  if (componentData.time) {
+    el.setAttribute("media-video", { time: componentData.time });
   }
 });

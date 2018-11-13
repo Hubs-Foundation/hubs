@@ -35,7 +35,7 @@ AFRAME.registerComponent("super-networked-interactable", {
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
-      this._syncCounterRegistration(networkedEl);
+      this._syncCounterRegistration();
       if (!NAF.utils.isMine(networkedEl)) {
         this.el.setAttribute("body", { type: "static" });
       }
@@ -69,7 +69,7 @@ AFRAME.registerComponent("super-networked-interactable", {
     if (this.networkedEl && !NAF.utils.isMine(this.networkedEl)) {
       if (NAF.utils.takeOwnership(this.networkedEl)) {
         this.el.setAttribute("body", { type: "dynamic" });
-        this._syncCounterRegistration(this.networkedEl);
+        this._syncCounterRegistration();
       } else {
         this.el.emit("grab-end", { hand: this.hand });
         this.hand = null;
@@ -99,7 +99,7 @@ AFRAME.registerComponent("super-networked-interactable", {
 
   _syncCounterRegistration: function() {
     const el = this.networkedEl;
-    if (!el) return;
+    if (!el || !el.components["networked"]) return;
 
     const isPinned = el.components["pinnable"] && el.components["pinnable"].data.pinned;
 

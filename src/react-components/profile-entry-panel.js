@@ -5,6 +5,7 @@ import { SCHEMA } from "../storage/store";
 import styles from "../assets/stylesheets/profile.scss";
 import classNames from "classnames";
 import hubLogo from "../assets/images/hub-preview-white.png";
+import { WithHoverSound } from "./wrap-with-audio";
 
 class ProfileEntryPanel extends Component {
   static propTypes = {
@@ -107,18 +108,29 @@ class ProfileEntryPanel extends Component {
                 ref={ifr => (this.avatarSelector = ifr)}
               />
             </div>
-            <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
+            <WithHoverSound>
+              <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
+            </WithHoverSound>
             <div className={styles.links}>
-              <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
-                <FormattedMessage id="profile.terms_of_use" />
-              </a>
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
-              >
-                <FormattedMessage id="profile.privacy_notice" />
-              </a>
+              <WithHoverSound>
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
+                >
+                  <FormattedMessage id="profile.terms_of_use" />
+                </a>
+              </WithHoverSound>
+
+              <WithHoverSound>
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+                >
+                  <FormattedMessage id="profile.privacy_notice" />
+                </a>
+              </WithHoverSound>
             </div>
           </div>
         </form>

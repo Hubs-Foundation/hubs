@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import DialogContainer from "./dialog-container.js";
 import PropTypes from "prop-types";
+import { WithHoverSound } from "./wrap-with-audio";
 
 export default class InviteTeamDialog extends Component {
   static propTypes = {
@@ -30,9 +31,11 @@ export default class InviteTeamDialog extends Component {
           </div>
           <div className="invite-team-form">
             <div className="invite-team-form__buttons">
-              <button className="invite-team-form__action-button" onClick={this.inviteClicked}>
-                <span>{this.state.inviteButtonText}</span>
-              </button>
+              <WithHoverSound>
+                <button className="invite-team-form__action-button" onClick={this.inviteClicked}>
+                  <span>{this.state.inviteButtonText}</span>
+                </button>
+              </WithHoverSound>
             </div>
           </div>
         </div>

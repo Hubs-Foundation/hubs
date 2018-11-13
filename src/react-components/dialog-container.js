@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import { WithHoverSound } from "./wrap-with-audio";
 
 export default class DialogContainer extends Component {
   static propTypes = {
@@ -47,9 +48,11 @@ export default class DialogContainer extends Component {
             <div className="dialog__box__contents">
               {this.props.closable &&
                 this.props.onClose && (
-                  <button className="dialog__box__contents__close" onClick={this.props.onClose}>
-                    <span>×</span>
-                  </button>
+                  <WithHoverSound>
+                    <button className="dialog__box__contents__close" onClick={this.props.onClose}>
+                      <span>×</span>
+                    </button>
+                  </WithHoverSound>
                 )}
               <div className="dialog__box__contents__title">{this.props.title}</div>
               <div className="dialog__box__contents__body">{this.props.children}</div>

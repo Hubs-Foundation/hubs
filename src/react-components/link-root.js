@@ -8,6 +8,7 @@ import classNames from "classnames";
 import styles from "../assets/stylesheets/link.scss";
 import { disableiOSZoom } from "../utils/disable-ios-zoom";
 import HeadsetIcon from "../assets/images/generic_vr_entry.svg";
+import { WithHoverSound } from "./wrap-with-audio";
 
 const MAX_DIGITS = 6;
 const MAX_LETTERS = 4;
@@ -187,9 +188,11 @@ class LinkRoot extends Component {
                 {!this.state.isAlphaMode &&
                   this.props.showHeadsetLinkOption && (
                     <span>
-                      <a href="#" onClick={() => this.toggleMode()}>
-                        <FormattedMessage id="link.linking_a_headset" />
-                      </a>
+                      <WithHoverSound>
+                        <a href="#" onClick={() => this.toggleMode()}>
+                          <FormattedMessage id="link.linking_a_headset" />
+                        </a>
+                      </WithHoverSound>
                     </span>
                   )}
               </div>
@@ -200,53 +203,61 @@ class LinkRoot extends Component {
                 ? ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
                 : [1, 2, 3, 4, 5, 6, 7, 8, 9]
               ).map((d, i) => (
-                <button
-                  disabled={this.state.entered.length === this.maxAllowedChars()}
-                  key={`char_${i}`}
-                  className={styles.keypadButton}
-                  onClick={() => {
-                    if (!hasTouchEvents) this.addToEntry(d);
-                  }}
-                  onTouchStart={() => this.addToEntry(d)}
-                >
-                  {d}
-                </button>
+                <WithHoverSound key={`char_${i}`}>
+                  <button
+                    disabled={this.state.entered.length === this.maxAllowedChars()}
+                    className={styles.keypadButton}
+                    key={`char_${i}`}
+                    onClick={() => {
+                      if (!hasTouchEvents) this.addToEntry(d);
+                    }}
+                    onTouchStart={() => this.addToEntry(d)}
+                  >
+                    {d}
+                  </button>
+                </WithHoverSound>
               ))}
               {this.props.showHeadsetLinkOption ? (
-                <button
-                  className={classNames(styles.keypadButton, styles.keypadToggleMode)}
-                  onTouchStart={() => this.toggleMode()}
-                  onClick={() => {
-                    if (!hasTouchEvents) this.toggleMode();
-                  }}
-                >
-                  {this.state.isAlphaMode ? "123" : "ABC"}
-                </button>
+                <WithHoverSound>
+                  <button
+                    className={classNames(styles.keypadButton, styles.keypadToggleMode)}
+                    onTouchStart={() => this.toggleMode()}
+                    onClick={() => {
+                      if (!hasTouchEvents) this.toggleMode();
+                    }}
+                  >
+                    {this.state.isAlphaMode ? "123" : "ABC"}
+                  </button>
+                </WithHoverSound>
               ) : (
                 <div />
               )}
               {!this.state.isAlphaMode && (
+                <WithHoverSound>
+                  <button
+                    disabled={this.state.entered.length === this.maxAllowedChars()}
+                    className={classNames(styles.keypadButton, styles.keypadZeroButton)}
+                    onTouchStart={() => this.addToEntry(0)}
+                    onClick={() => {
+                      if (!hasTouchEvents) this.addToEntry(0);
+                    }}
+                  >
+                    0
+                  </button>
+                </WithHoverSound>
+              )}
+              <WithHoverSound>
                 <button
-                  disabled={this.state.entered.length === this.maxAllowedChars()}
-                  className={classNames(styles.keypadButton, styles.keypadZeroButton)}
-                  onTouchStart={() => this.addToEntry(0)}
+                  disabled={this.state.entered.length === 0 || this.state.entered.length === this.maxAllowedChars()}
+                  className={classNames(styles.keypadButton, styles.keypadBackspace)}
+                  onTouchStart={() => this.removeChar()}
                   onClick={() => {
-                    if (!hasTouchEvents) this.addToEntry(0);
+                    if (!hasTouchEvents) this.removeChar();
                   }}
                 >
-                  0
+                  ⌫
                 </button>
-              )}
-              <button
-                disabled={this.state.entered.length === 0 || this.state.entered.length === this.maxAllowedChars()}
-                className={classNames(styles.keypadButton, styles.keypadBackspace)}
-                onTouchStart={() => this.removeChar()}
-                onClick={() => {
-                  if (!hasTouchEvents) this.removeChar();
-                }}
-              >
-                ⌫
-              </button>
+              </WithHoverSound>
             </div>
 
             <div className={styles.footer}>
@@ -256,11 +267,15 @@ class LinkRoot extends Component {
                     className={styles.linkHeadsetFooterLink}
                     style={{ visibility: this.state.isAlphaMode ? "hidden" : "visible" }}
                   >
-                    <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
+                    <WithHoverSound>
+                      <img onClick={() => this.toggleMode()} src={HeadsetIcon} className={styles.headsetIcon} />
+                    </WithHoverSound>
                     <span>
-                      <a href="#" onClick={() => this.toggleMode()}>
-                        <FormattedMessage id="link.linking_a_headset" />
-                      </a>
+                      <WithHoverSound>
+                        <a href="#" onClick={() => this.toggleMode()}>
+                          <FormattedMessage id="link.linking_a_headset" />
+                        </a>
+                      </WithHoverSound>
                     </span>
                   </div>
                 )}

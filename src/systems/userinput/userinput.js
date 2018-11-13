@@ -99,9 +99,11 @@ AFRAME.registerSystem("userinput", {
       const inVRMode = this.el.sceneEl.is("vr-mode");
 
       if (inVRMode) {
+        console.log("Using VR bindings.");
         disableNonGamepadBindings();
         this.registeredMappings.add(connectedGamepadBindings);
       } else {
+        console.log("Using Non-VR bindings.");
         enableNonGamepadBindings();
         this.registeredMappings.delete(connectedGamepadBindings);
       }

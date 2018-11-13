@@ -63,8 +63,11 @@ import "./components/destroy-at-extreme-distances";
 import "./components/gamma-factor";
 import "./components/visible-to-owner";
 import "./components/camera-tool";
+import "./components/scene-sound";
+import "./components/emit-state-change";
 import "./components/action-to-event";
 import "./components/stop-event-propagation";
+import "./components/animation";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -342,6 +345,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // If VR headset is activated, refreshing page will fire vrdisplayactivate
       // which puts A-Frame in VR mode, so exit VR mode whenever it is attempted
       // to be entered and we haven't entered the room yet.
+      console.log("Pre-emptively exiting VR mode.");
       scene.exitVR();
     }
   });
