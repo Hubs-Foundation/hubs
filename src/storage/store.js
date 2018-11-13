@@ -18,9 +18,16 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         displayName: { type: "string", pattern: "^[A-Za-z0-9-]{3,32}$" },
-        avatarId: { type: "string" },
-        email: { type: "string" },
-        credentials: { type: "string" }
+        avatarId: { type: "string" }
+      }
+    },
+
+    credentials: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        token: { type: "string" },
+        email: { type: "string" }
       }
     },
 
@@ -47,6 +54,7 @@ export const SCHEMA = {
 
   properties: {
     profile: { $ref: "#/definitions/profile" },
+    credentials: { $ref: "#/definitions/credentials" },
     activity: { $ref: "#/definitions/activity" },
     settings: { $ref: "#/definitions/settings" }
   },
@@ -68,6 +76,7 @@ export default class Store extends EventTarget {
     this.update({
       activity: {},
       settings: {},
+      credentials: {},
       profile: { ...generateDefaultProfile(), ...(this.state.profile || {}) }
     });
 

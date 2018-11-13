@@ -22,9 +22,13 @@ export function connectToReticulum(debug = false) {
   const socketUrl = `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}/socket`;
   console.log(`Phoenix Socket URL: ${socketUrl}`);
 
+  const store = new Store();
   const socketSettings = {
     params: { session_id: uuid() }
   };
+  if (store.state.credentials.token) {
+    socketSettings.params.token = store.state.credentials.token;
+  }
 
   if (debug) {
     socketSettings.logger = (kind, msg, data) => {
@@ -58,8 +62,8 @@ export function getLandingPageForPhoto(photoUrl) {
 export async function postWithAuth(apiEndpoint, payload) {
   const headers = { "content-type": "application/json" };
   const store = new Store();
-  if (store.state && store.state.profile.credentials) {
-    headers.authorization = `bearer ${store.state.profile.credentials}`;
+  if (store.state && store.state.credentials.token) {
+    headers.authorization = `bearer ${store.state.credentials.token}`;
   }
   return fetch(getReticulumFetchUrl(apiEndpoint), { method: "POST", headers, body: JSON.stringify(payload) });
 }

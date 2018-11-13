@@ -697,7 +697,7 @@ class UIRoot extends Component {
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>
-          {this.props.hubName} {this.props.roles.isHost ? "(host)" : ""}
+          {this.props.hubName} {this.props.roles.is_host ? "(host)" : ""}
         </div>
 
         <div className={entryStyles.center}>

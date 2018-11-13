@@ -11,11 +11,11 @@ export default class AuthChannel {
   };
 
   removeCredentials = () => {
-    return this.store.update({ profile: { credentials: "" } });
+    return this.store.update({ credentials: { token: "", email: "" } });
   };
 
   authenticated = () => {
-    return !!this.store.state.profile.credentials;
+    return !!this.store.state.credentials.token;
   };
 
   async startAuthentication(email) {
@@ -29,7 +29,7 @@ export default class AuthChannel {
 
     const authComplete = new Promise(resolve =>
       channel.on("auth_credentials", async ({ credentials }) => {
-        this.store.update({ profile: { email, credentials } });
+        this.store.update({ credentials: { email, token: credentials } });
         resolve();
       })
     );
