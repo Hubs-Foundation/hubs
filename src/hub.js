@@ -80,6 +80,7 @@ import { proxiedUrlFor } from "./utils/media-utils";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
+import { spawnChatMessage } from "./react-components/chat-message";
 
 import "./systems/nav";
 import "./systems/personal-space-bubble";
@@ -551,4 +552,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   linkChannel.setSocket(socket);
+
+  setInterval(() => {
+    spawnChatMessage(
+      "```Hello asdjf sdkfadsfadsfadsfadf\nalkdsf dsflsafadsfadsfadfsj\n asdf dsf adf adf sdkfadsfafd\n lasdfadsfadsfldsfldsfja\n asdkf sdfjadsadsfadsf\n aldf sdjf sdkfasdf ```"
+    );
+  }, 5000);
 });
