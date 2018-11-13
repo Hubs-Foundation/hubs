@@ -16,7 +16,7 @@ export default class ChatCommandHelp extends Component {
         {commands.map(
           c =>
             (this.props.matchingPrefix === "" || c.startsWith(this.props.matchingPrefix)) && (
-              <div className={styles.entry}>
+              <div className={styles.entry} key={c}>
                 <div className={styles.command}>/{c}</div>
                 <div>
                   <FormattedMessage id={`commands.${c}`} />
