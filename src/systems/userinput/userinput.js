@@ -139,7 +139,8 @@ AFRAME.registerSystem("userinput", {
         this.registeredMappings.delete(isMobile ? touchscreenUserBindings : keyboardMouseUserBindings);
         // add mappings for all active VR input devices
         for (const activeDevice of this.activeDevices) {
-          this.registeredMappings.add(vrGamepadMappings.get(activeDevice.constructor));
+          const mapping = vrGamepadMappings.get(activeDevice.constructor);
+          mapping && this.registeredMappings.add(mapping);
         }
       } else {
         console.log("Using Non-VR bindings.");
