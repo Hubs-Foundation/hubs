@@ -11,6 +11,7 @@ AFRAME.registerSystem("userinput-debug", {
       console.log(userinput);
       console.log("sorted", userinput.sortedBindings);
       console.log("actives", userinput.actives);
+      console.log("masks", userinput.masks);
       console.log("masked", userinput.masked);
       console.log("devices", userinput.activeDevices);
       console.log("activeSets", userinput.activeSets);
@@ -25,24 +26,26 @@ AFRAME.registerSystem("userinput-debug", {
           }
         }
 
-        console.log(
-          "binding: ",
-          i,
-          "\n",
-          sortedBindings[i],
-          "\n",
-          "dest: ",
-          sortedBindings[i].dest && Object.values(sortedBindings[i].dest),
-          "\n",
-          "active: ",
-          actives[i],
-          "\n",
-          "maskedBy: ",
-          masked[i],
-          "\n",
-          sb.join("\n"),
-          "\n"
-        );
+        if (this.logBindings) {
+          console.log(
+            "binding: ",
+            i,
+            "\n",
+            sortedBindings[i],
+            "\n",
+            "dest: ",
+            sortedBindings[i].dest && Object.values(sortedBindings[i].dest),
+            "\n",
+            "active: ",
+            actives[i],
+            "\n",
+            "maskedBy: ",
+            masked[i],
+            "\n",
+            sb.join("\n"),
+            "\n"
+          );
+        }
       }
     }
   }

@@ -686,18 +686,12 @@ export const oculusTouchUserBindings = addSetsToBindings({
 
   [sets.rightHandHoldingInteractable]: [
     {
-      src: { value: rightButton("grip").pressed },
-      dest: { value: paths.actions.rightHand.drop },
-      xform: xforms.falling,
-      priority: 2
-    },
-    {
       src: { value: rightGripPressed2 },
       dest: {
         value: rightHandDrop2
       },
       xform: xforms.falling,
-      priority: 2
+      priority: 3
     },
     {
       src: [rightHandDrop2],

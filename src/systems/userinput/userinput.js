@@ -36,7 +36,12 @@ function intersection(setA, setB) {
 }
 
 const satisfiesPath = (binding, path) => {
-  return Object.values(binding.dest) && Object.values(binding.dest).indexOf(path) !== -1;
+  for (const key in binding.dest) {
+    if (binding.dest[key].indexOf(path) !== -1) {
+      return true;
+    }
+  }
+  return false;
 };
 
 const satisfyPath = (bindings, path) => {
@@ -99,21 +104,20 @@ function canMask(masker, masked) {
 
 function computeMasks(bindings) {
   const masks = [];
-  for (const row in bindings) {
-    for (const col in bindings) {
-      let ColCanMaskRow = false;
+  for (let row = 0; row < bindings.length; row++) {
+    for (let col = 0; col < bindings.length; col++) {
+      masks[row] = masks[row] || [];
       if (canMask(bindings[col], bindings[row])) {
-        ColCanMaskRow = true;
+        masks[row].push(col);
       }
-      masks[Number(row) * bindings.length + Number(col)] = ColCanMaskRow;
     }
   }
   return masks;
 }
 
 function isActive(binding, sets) {
-  for (const s of binding.sets) {
-    if (sets.has(s)) {
+  for (let i = 0; i < binding.sets.length; i++) {
+    if (sets.has(binding.sets[i])) {
       return true;
     }
   }
@@ -127,13 +131,12 @@ function computeExecutionStrategy(sortedBindings, masks, activeSets) {
   }
 
   const masked = [];
-  for (const row in sortedBindings) {
-    for (const col in sortedBindings) {
-      const rowMask = masked[row] || [];
-      if (masks[Number(row) * sortedBindings.length + Number(col)] && isActive(sortedBindings[col], activeSets)) {
-        rowMask.push(col);
+  for (let row = 0; row < sortedBindings.length; row++) {
+    for (let col = 0; col < sortedBindings.length; col++) {
+      masked[row] = masked[row] || [];
+      if (masks[row].indexOf(col) !== -1 && isActive(sortedBindings[col], activeSets)) {
+        masked[row].push(col);
       }
-      masked[row] = rowMask;
     }
   }
 
@@ -294,7 +297,7 @@ AFRAME.registerSystem("userinput", {
       device.write(this.frame);
     }
 
-    for (const i in this.sortedBindings) {
+    for (let i = 0; i < this.sortedBindings.length; i++) {
       if (!this.actives[i] || this.masked[i].length > 0) continue;
 
       const binding = this.sortedBindings[i];

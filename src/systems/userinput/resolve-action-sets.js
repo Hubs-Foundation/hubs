@@ -1,12 +1,20 @@
 import { sets } from "./sets";
 
+let rightHandState;
+let leftHandState;
+let cursorHand;
+let leftTeleporter;
+let rightTeleporter;
+let cursorController;
+
 export function resolveActionSets() {
-  const rightHandState = document.querySelector("#player-right-controller").components["super-hands"].state;
-  const leftHandState = document.querySelector("#player-left-controller").components["super-hands"].state;
-  const cursorHand = document.querySelector("#cursor").components["super-hands"].state;
-  const leftTeleporter = document.querySelector("#player-left-controller").components["teleport-controls"];
-  const rightTeleporter = document.querySelector("#player-right-controller").components["teleport-controls"];
-  const cursorController = document.querySelector("#cursor-controller").components["cursor-controller"];
+  rightHandState = rightHandState || document.querySelector("#player-right-controller").components["super-hands"].state;
+  leftHandState = leftHandState || document.querySelector("#player-left-controller").components["super-hands"].state;
+  cursorHand = cursorHand || document.querySelector("#cursor").components["super-hands"].state;
+  leftTeleporter = leftTeleporter || document.querySelector("#player-left-controller").components["teleport-controls"];
+  rightTeleporter =
+    rightTeleporter || document.querySelector("#player-right-controller").components["teleport-controls"];
+  cursorController = cursorController || document.querySelector("#cursor-controller").components["cursor-controller"];
 
   const leftHandHoveringOnInteractable =
     !leftTeleporter.active &&
