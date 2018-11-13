@@ -475,9 +475,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const hubPhxPresence = new Presence(hubPhxChannel);
 
   let isInitialSync = true;
+  const vrHudPresenceCount = document.querySelector("#hud-presence-count");
 
   hubPhxPresence.onSync(() => {
     remountUI({ presences: hubPhxPresence.state });
+    const occupantCount = Object.entries(hubPhxPresence.state).length;
+    vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
 
     if (!isInitialSync) return;
     // Wire up join/leave event handlers after initial sync.
