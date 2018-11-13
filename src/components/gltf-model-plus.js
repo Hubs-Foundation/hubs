@@ -87,7 +87,7 @@ function cloneGltf(gltf) {
 /// or templates associated with any of their nodes.)
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
-const inflateEntities = function(node, templates, isRoot) {
+const inflateEntities = function(node, templates, isRoot, scale) {
   // inflate subtrees first so that we can determine whether or not this node needs to be inflated
   const childEntities = [];
   const children = node.children.slice(0); // setObject3D mutates the node's parent, so we have to copy
@@ -136,10 +136,11 @@ const inflateEntities = function(node, templates, isRoot) {
     z: node.rotation.z * THREE.Math.RAD2DEG
   });
   el.setAttribute("scale", {
-    x: node.scale.x,
-    y: node.scale.y,
-    z: node.scale.z
+    x: node.scale.x * (scale !== undefined ? scale : 1),
+    y: node.scale.y * (scale !== undefined ? scale : 1),
+    z: node.scale.z * (scale !== undefined ? scale : 1)
   });
+
   node.matrixAutoUpdate = false;
   node.matrix.identity();
 
@@ -284,7 +285,8 @@ AFRAME.registerComponent("gltf-model-plus", {
     src: { type: "string" },
     contentType: { type: "string" },
     useCache: { default: true },
-    inflate: { default: false }
+    inflate: { default: false },
+    scale: { type: "number", default: 1 }
   },
 
   init() {
@@ -354,7 +356,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       }
 
       let object3DToSet = this.model;
-      if (this.data.inflate && (this.inflatedEl = inflateEntities(this.model, this.templates, true))) {
+      if (this.data.inflate && (this.inflatedEl = inflateEntities(this.model, this.templates, true, this.data.scale))) {
         this.el.appendChild(this.inflatedEl);
         object3DToSet = this.inflatedEl.object3D;
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more

@@ -195,7 +195,8 @@ AFRAME.registerComponent("media-loader", {
         this.el.setAttribute("gltf-model-plus", {
           src: accessibleUrl,
           contentType: contentType,
-          inflate: true
+          inflate: true,
+          scale: 0.0001
         });
       } else {
         throw new Error(`Unsupported content type: ${contentType}`);
