@@ -126,6 +126,7 @@ AFRAME.registerComponent("camera-tool", {
 
   tock: (function() {
     const tempHeadScale = new THREE.Vector3();
+    const tempHudScale = new THREE.Vector3();
 
     return function tock() {
       const sceneEl = this.el.sceneEl;
@@ -150,7 +151,7 @@ AFRAME.registerComponent("camera-tool", {
         }
 
         if (this.playerHud) {
-          tempHeadScale.copy(this.playerHud.scale);
+          tempHudScale.copy(this.playerHud.scale);
           this.playerHud.scale.set(0.001, 0.001, 0.001);
         }
 
@@ -174,7 +175,7 @@ AFRAME.registerComponent("camera-tool", {
           this.playerHead.scale.copy(tempHeadScale);
         }
         if (this.playerHud) {
-          this.playerHud.scale.copy(tempHeadScale);
+          this.playerHud.scale.copy(tempHudScale);
         }
         this.lastUpdate = now;
         this.updateRenderTargetNextTick = false;
