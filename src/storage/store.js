@@ -69,14 +69,17 @@ export default class Store extends EventTarget {
     if (localStorage.getItem(LOCAL_STORE_KEY) === null) {
       localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify({}));
     }
+    this.update({
+      activity: {},
+      settings: {},
+      credentials: {},
+      profile: {}
+    });
   }
 
   // Initializes store with any default bits
   init = () => {
     this.update({
-      activity: {},
-      settings: {},
-      credentials: {},
       profile: { ...generateDefaultProfile(), ...(this.state.profile || {}) }
     });
 
