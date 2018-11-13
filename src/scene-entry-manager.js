@@ -98,10 +98,6 @@ export default class SceneEntryManager {
       });
     })();
 
-    // HACK - A-Frame calls getVRDisplays at module load, we want to do it here to
-    // force gamepads to become live if they were not active at launch.
-    navigator.getVRDisplays();
-
     this.scene.addState("entered");
   };
 
