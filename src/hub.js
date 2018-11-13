@@ -77,6 +77,7 @@ import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { proxiedUrlFor } from "./utils/media-utils";
+import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
 
@@ -213,7 +214,7 @@ function remountUI(props) {
   mountUI(uiProps);
 }
 
-async function handleHubChannelJoined(entryManager, hubChannel, data) {
+async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
 
   if (NAF.connection.isConnected()) {
@@ -251,7 +252,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
     hubId: hub.hub_id,
     hubName: hub.name,
     hubEntryCode: hub.entry_code,
-    onSendMessage: hubChannel.sendMessage
+    onSendMessage: messageDispatch.dispatch
   });
 
   document
@@ -431,32 +432,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
 
-  hubPhxChannel
-    .join()
-    .receive("ok", async data => {
-      hubChannel.setPhoenixChannel(hubPhxChannel);
-      subscriptions.setHubChannel(hubChannel);
-      subscriptions.setSubscribed(data.subscriptions.web_push);
-      remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
-      await handleHubChannelJoined(entryManager, hubChannel, data);
-    })
-    .receive("error", res => {
-      if (res.reason === "closed") {
-        entryManager.exitScene();
-        remountUI({ roomUnavailableReason: "closed" });
-      }
-
-      console.error(res);
-    });
-
-  const hubPhxPresence = new Presence(hubPhxChannel);
   const presenceLogEntries = [];
-
   const addToPresenceLog = entry => {
     entry.key = Date.now().toString();
 
     presenceLogEntries.push(entry);
     remountUI({ presenceLogEntries });
+    scene.emit(`presence-log-${entry.type}`);
 
     // Fade out and then remove
     setTimeout(() => {
@@ -469,6 +451,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       }, 5000);
     }, 20000);
   };
+
+  const messageDispatch = new MessageDispatch(scene, entryManager, hubChannel, addToPresenceLog, remountUI);
+
+  hubPhxChannel
+    .join()
+    .receive("ok", async data => {
+      hubChannel.setPhoenixChannel(hubPhxChannel);
+      subscriptions.setHubChannel(hubChannel);
+      subscriptions.setSubscribed(data.subscriptions.web_push);
+      remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
+      await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
+    })
+    .receive("error", res => {
+      if (res.reason === "closed") {
+        entryManager.exitScene();
+        remountUI({ roomUnavailableReason: "closed" });
+      }
+
+      console.error(res);
+    });
+
+  const hubPhxPresence = new Presence(hubPhxChannel);
 
   let isInitialSync = true;
 

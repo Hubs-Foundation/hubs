@@ -56,7 +56,7 @@ export default class PresenceLog extends Component {
             maySpawn={e.maySpawn}
           />
         );
-      case "spawn": {
+      case "spawn":
         return (
           <PhotoMessage
             key={e.key}
@@ -67,7 +67,12 @@ export default class PresenceLog extends Component {
             hubId={this.props.hubId}
           />
         );
-      }
+      case "log":
+        return (
+          <div key={e.key} className={classNames(entryClasses)}>
+            {e.body}
+          </div>
+        );
     }
   };
 
