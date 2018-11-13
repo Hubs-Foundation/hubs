@@ -158,6 +158,9 @@ AFRAME.registerSystem("userinput", {
       gamepad && gamepadConnected({ gamepad });
     }
 
+    this.el.sceneEl.addEventListener("enter-vr", updateBindingsForVRMode);
+    this.el.sceneEl.addEventListener("exit-vr", updateBindingsForVRMode);
+
     this.el.sceneEl.addEventListener("stateadded", evt => {
       if (evt.detail === "entered") {
         updateBindingsForVRMode();
