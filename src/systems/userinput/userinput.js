@@ -196,6 +196,7 @@ AFRAME.registerSystem("userinput", {
       console.log("frame", this.frame);
       console.log("sets", this.activeSets);
       console.log("bindings", this.activeBindings);
+      console.log("mappings", this.registeredMappings);
       console.log("devices", this.activeDevices);
       console.log("xformStates", this.xformStates);
     }
