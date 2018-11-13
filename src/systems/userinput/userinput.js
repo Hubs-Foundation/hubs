@@ -80,7 +80,7 @@ AFRAME.registerSystem("userinput", {
     const gamepadConnected = e => {
       let gamepadDevice;
       for (const activeDevice of this.activeDevices) {
-        if (activeDevice.gamepad && activeDevice.gamepad === e.gamepad) {
+        if (activeDevice.gamepad && activeDevice.gamepad.index === e.gamepad.index) {
           console.warn("connected already fired for gamepad", e.gamepad);
           return; // multiple connect events without a disconnect event
         }
@@ -108,20 +108,27 @@ AFRAME.registerSystem("userinput", {
       this.activeDevices.add(gamepadDevice);
     };
 
+    const vrGamepadMappings = new Map();
+    vrGamepadMappings.set(ViveControllerDevice, viveUserBindings);
+    vrGamepadMappings.set(OculusTouchControllerDevice, oculusTouchUserBindings);
+    vrGamepadMappings.set(OculusGoControllerDevice, oculusGoUserBindings);
+    vrGamepadMappings.set(DaydreamControllerDevice, daydreamUserBindings);
+
+    const nonVRGamepadMappings = new Map();
+    nonVRGamepadMappings.set(XboxControllerDevice, xboxControllerUserBindings);
+    nonVRGamepadMappings.set(GamepadDevice, gamepadBindings);
+
     const gamepadDisconnected = e => {
       for (const device of this.activeDevices) {
-        if (device.gamepad === e.gamepad) {
+        if (device.gamepad && device.gamepad.index === e.gamepad.index) {
+          this.registeredMappings.delete(
+            vrGamepadMappings.get(device.constructor) || nonVRGamepadMappings.get(device.constructor)
+          );
           this.activeDevices.delete(device);
           return;
         }
       }
     };
-
-    const vrDeviceMappings = new Map();
-    vrDeviceMappings.set(ViveControllerDevice, viveUserBindings);
-    vrDeviceMappings.set(OculusTouchControllerDevice, oculusTouchUserBindings);
-    vrDeviceMappings.set(OculusGoControllerDevice, oculusGoUserBindings);
-    vrDeviceMappings.set(DaydreamControllerDevice, daydreamUserBindings);
 
     const updateBindingsForVRMode = () => {
       const inVRMode = this.el.sceneEl.is("vr-mode");
@@ -132,15 +139,13 @@ AFRAME.registerSystem("userinput", {
         this.registeredMappings.delete(isMobile ? touchscreenUserBindings : keyboardMouseUserBindings);
         // add mappings for all active VR input devices
         for (const activeDevice of this.activeDevices) {
-          const mapping = vrDeviceMappings.get(activeDevice.constructor);
-          mapping && this.registeredMappings.add(mapping);
+          this.registeredMappings.add(vrGamepadMappings.get(activeDevice.constructor));
         }
       } else {
         console.log("Using Non-VR bindings.");
         // remove mappings for all active VR input devices
         for (const activeDevice of this.activeDevices) {
-          const mapping = vrDeviceMappings.get(activeDevice.constructor);
-          mapping && this.registeredMappings.delete(mapping);
+          this.registeredMappings.delete(vrGamepadMappings.get(activeDevice.constructor));
         }
         this.registeredMappings.add(isMobile ? touchscreenUserBindings : keyboardMouseUserBindings);
       }
