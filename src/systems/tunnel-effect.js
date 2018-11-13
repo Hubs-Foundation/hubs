@@ -158,6 +158,8 @@ AFRAME.registerSystem("tunneleffect", {
    * use the render func of the effect composer when we need the postprocessing
    */
   _bindRenderFunc: function() {
-    this.scene.renderer.render = this.postProcessingRenderFunc;
+    if (this.postProcessingRenderFunc) {
+      this.scene.renderer.render = this.postProcessingRenderFunc;
+    }
   }
 });
