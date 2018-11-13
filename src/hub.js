@@ -63,8 +63,11 @@ import "./components/destroy-at-extreme-distances";
 import "./components/gamma-factor";
 import "./components/visible-to-owner";
 import "./components/camera-tool";
+import "./components/scene-sound";
+import "./components/emit-state-change";
 import "./components/action-to-event";
 import "./components/stop-event-propagation";
+import "./components/animation";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -74,6 +77,7 @@ import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { proxiedUrlFor } from "./utils/media-utils";
+import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
 
@@ -114,7 +118,6 @@ import "./components/cardboard-controls";
 import "./components/cursor-controller";
 
 import "./components/nav-mesh-helper";
-import "./systems/tunnel-effect";
 
 import "./components/tools/pen";
 import "./components/tools/networked-drawing";
@@ -211,7 +214,7 @@ function remountUI(props) {
   mountUI(uiProps);
 }
 
-async function handleHubChannelJoined(entryManager, hubChannel, data) {
+async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
 
   if (NAF.connection.isConnected()) {
@@ -249,7 +252,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
     hubId: hub.hub_id,
     hubName: hub.name,
     hubEntryCode: hub.entry_code,
-    onSendMessage: hubChannel.sendMessage
+    onSendMessage: messageDispatch.dispatch
   });
 
   document
@@ -340,6 +343,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // If VR headset is activated, refreshing page will fire vrdisplayactivate
       // which puts A-Frame in VR mode, so exit VR mode whenever it is attempted
       // to be entered and we haven't entered the room yet.
+      console.log("Pre-emptively exiting VR mode.");
       scene.exitVR();
     }
   });
@@ -428,32 +432,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
 
-  hubPhxChannel
-    .join()
-    .receive("ok", async data => {
-      hubChannel.setPhoenixChannel(hubPhxChannel);
-      subscriptions.setHubChannel(hubChannel);
-      subscriptions.setSubscribed(data.subscriptions.web_push);
-      remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
-      await handleHubChannelJoined(entryManager, hubChannel, data);
-    })
-    .receive("error", res => {
-      if (res.reason === "closed") {
-        entryManager.exitScene();
-        remountUI({ roomUnavailableReason: "closed" });
-      }
-
-      console.error(res);
-    });
-
-  const hubPhxPresence = new Presence(hubPhxChannel);
   const presenceLogEntries = [];
-
   const addToPresenceLog = entry => {
     entry.key = Date.now().toString();
 
     presenceLogEntries.push(entry);
     remountUI({ presenceLogEntries });
+    scene.emit(`presence-log-${entry.type}`);
 
     // Fade out and then remove
     setTimeout(() => {
@@ -467,10 +452,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 20000);
   };
 
+  const messageDispatch = new MessageDispatch(scene, entryManager, hubChannel, addToPresenceLog, remountUI);
+
+  hubPhxChannel
+    .join()
+    .receive("ok", async data => {
+      hubChannel.setPhoenixChannel(hubPhxChannel);
+      subscriptions.setHubChannel(hubChannel);
+      subscriptions.setSubscribed(data.subscriptions.web_push);
+      remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
+      await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
+    })
+    .receive("error", res => {
+      if (res.reason === "closed") {
+        entryManager.exitScene();
+        remountUI({ roomUnavailableReason: "closed" });
+      }
+
+      console.error(res);
+    });
+
+  const hubPhxPresence = new Presence(hubPhxChannel);
+
   let isInitialSync = true;
+  const vrHudPresenceCount = document.querySelector("#hud-presence-count");
 
   hubPhxPresence.onSync(() => {
     remountUI({ presences: hubPhxPresence.state });
+    const occupantCount = Object.entries(hubPhxPresence.state).length;
+    vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
 
     if (!isInitialSync) return;
     // Wire up join/leave event handlers after initial sync.

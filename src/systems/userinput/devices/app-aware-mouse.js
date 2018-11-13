@@ -1,3 +1,4 @@
+import { sets } from "../sets";
 import { paths } from "../paths";
 import { Pose } from "../pose";
 
@@ -35,9 +36,13 @@ export class AppAwareMouseDevice {
       const rawIntersections = [];
       this.cursorController.raycaster.intersectObjects(this.cursorController.targets, true, rawIntersections);
       const intersection = rawIntersections.find(x => x.object.el);
+      const userinput = AFRAME.scenes[0].systems.userinput;
       this.clickedOnAnything =
-        intersection &&
-        intersection.object.el.matches(".pen, .pen *, .video, .video *, .interactable, .interactable *");
+        (intersection &&
+          intersection.object.el.matches(".pen, .pen *, .video, .video *, .interactable, .interactable *")) ||
+        userinput.activeSets.has(sets.cursorHoldingPen) ||
+        userinput.activeSets.has(sets.cursorHoldingInteractable) ||
+        userinput.activeSets.has(sets.cursorHoldingCamera);
     }
     this.prevButtonLeft = buttonLeft;
 

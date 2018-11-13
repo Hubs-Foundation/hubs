@@ -4,26 +4,35 @@ import cx from "classnames";
 
 import styles from "../assets/stylesheets/2d-hud.scss";
 import uiStyles from "../assets/stylesheets/ui-root.scss";
+import { WithHoverSound } from "./wrap-with-audio";
 
 const TopHUD = ({ muted, frozen, onToggleMute, onToggleFreeze, onSpawnPen, onSpawnCamera }) => (
   <div className={cx(styles.container, styles.top, styles.unselectable)}>
     <div className={cx(uiStyles.uiInteractive, styles.panel, styles.left)}>
-      <div
-        className={cx(styles.iconButton, styles.mute, { [styles.active]: muted })}
-        title={muted ? "Unmute Mic" : "Mute Mic"}
-        onClick={onToggleMute}
-      />
+      <WithHoverSound>
+        <div
+          className={cx(styles.iconButton, styles.mute, { [styles.active]: muted })}
+          title={muted ? "Unmute Mic" : "Mute Mic"}
+          onClick={onToggleMute}
+        />
+      </WithHoverSound>
     </div>
-    <div
-      className={cx(uiStyles.uiInteractive, styles.iconButton, styles.large, styles.freeze, {
-        [styles.active]: frozen
-      })}
-      title={frozen ? "Resume" : "Pause"}
-      onClick={onToggleFreeze}
-    />
+    <WithHoverSound>
+      <div
+        className={cx(uiStyles.uiInteractive, styles.iconButton, styles.large, styles.freeze, {
+          [styles.active]: frozen
+        })}
+        title={frozen ? "Resume" : "Pause"}
+        onClick={onToggleFreeze}
+      />
+    </WithHoverSound>
     <div className={cx(uiStyles.uiInteractive, styles.panel, styles.right)}>
-      <div className={cx(styles.iconButton, styles.spawn_pen)} title={"Drawing Pen"} onClick={onSpawnPen} />
-      <div className={cx(styles.iconButton, styles.spawn_camera)} title={"Camera"} onClick={onSpawnCamera} />
+      <WithHoverSound>
+        <div className={cx(styles.iconButton, styles.spawn_pen)} title={"Drawing Pen"} onClick={onSpawnPen} />
+      </WithHoverSound>
+      <WithHoverSound>
+        <div className={cx(styles.iconButton, styles.spawn_camera)} title={"Camera"} onClick={onSpawnCamera} />
+      </WithHoverSound>
     </div>
   </div>
 );
@@ -61,11 +70,13 @@ const BottomHUD = ({ onCreateObject, showPhotoPicker, onMediaPicked }) => (
       <div />
     )}
     <div>
-      <div
-        className={cx(uiStyles.uiInteractive, styles.iconButton, styles.large, styles.createObject)}
-        title={"Create Object"}
-        onClick={onCreateObject}
-      />
+      <WithHoverSound>
+        <div
+          className={cx(uiStyles.uiInteractive, styles.iconButton, styles.large, styles.createObject)}
+          title={"Create Object"}
+          onClick={onCreateObject}
+        />
+      </WithHoverSound>
     </div>
   </div>
 );

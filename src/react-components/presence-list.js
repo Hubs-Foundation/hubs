@@ -6,6 +6,7 @@ import PhoneImage from "../assets/images/presence_phone.png";
 import DesktopImage from "../assets/images/presence_desktop.png";
 import HMDImage from "../assets/images/presence_vr.png";
 import { FormattedMessage } from "react-intl";
+import { WithHoverSound } from "./wrap-with-audio";
 
 export default class PresenceList extends Component {
   static propTypes = {
@@ -21,22 +22,24 @@ export default class PresenceList extends Component {
     const image = context && context.mobile ? PhoneImage : context && context.hmd ? HMDImage : DesktopImage;
 
     return (
-      <div className={styles.row} key={sessionId}>
-        <div className={styles.device}>
-          <img src={image} />
+      <WithHoverSound key={sessionId}>
+        <div className={styles.row}>
+          <div className={styles.device}>
+            <img src={image} />
+          </div>
+          <div
+            className={classNames({
+              [styles.displayName]: true,
+              [styles.selfDisplayName]: sessionId === this.props.sessionId
+            })}
+          >
+            {profile && profile.displayName}
+          </div>
+          <div className={styles.presence}>
+            <FormattedMessage id={`presence.in_${meta.presence}`} />
+          </div>
         </div>
-        <div
-          className={classNames({
-            [styles.displayName]: true,
-            [styles.selfDisplayName]: sessionId === this.props.sessionId
-          })}
-        >
-          {profile && profile.displayName}
-        </div>
-        <div className={styles.presence}>
-          <FormattedMessage id={`presence.in_${meta.presence}`} />
-        </div>
-      </div>
+      </WithHoverSound>
     );
   };
 

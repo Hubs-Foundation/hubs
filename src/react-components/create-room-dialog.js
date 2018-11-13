@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import DialogContainer from "./dialog-container.js";
+import { WithHoverSound } from "./wrap-with-audio";
 
 const HUB_NAME_PATTERN = "^[A-Za-z0-9-'\":!@#$%^&*(),.?~ ]{4,64}$";
 
@@ -54,9 +55,11 @@ export default class CreateRoomDialog extends Component {
                 />
               )}
               <div className="custom-scene-form__buttons">
-                <button className="custom-scene-form__action-button">
-                  <span>Create Room</span>
-                </button>
+                <WithHoverSound>
+                  <button className="custom-scene-form__action-button">
+                    <span>Create Room</span>
+                  </button>
+                </WithHoverSound>
               </div>
             </div>
           </form>
