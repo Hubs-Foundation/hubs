@@ -44,7 +44,8 @@ class SpokeLanding extends Component {
       platform: getPlatform(),
       downloadClicked: false,
       downloadLinkForCurrentPlatform: {},
-      showPlayer: false
+      showPlayer: false,
+      playerVideoId: "WmQKZJPhV7s"
     };
   }
 
@@ -189,9 +190,20 @@ class SpokeLanding extends Component {
                         <FormattedMessage id="spoke.browse_all_versions" />
                       </a>
                     )}
-                  <button className={styles.playButton} onClick={() => this.setState({ showPlayer: true })}>
-                    <FormattedMessage id="spoke.play_button" />
-                  </button>
+                  <div className={styles.tutorialButtons}>
+                    <button
+                      className={styles.playButton}
+                      onClick={() => this.setState({ showPlayer: true, playerVideoId: "WmQKZJPhV7s" })}
+                    >
+                      <FormattedMessage id="spoke.beginner_tutorial_button" />
+                    </button>
+                    <button
+                      className={styles.playButton}
+                      onClick={() => this.setState({ showPlayer: true, playerVideoId: "1Yg5x4Plz_4" })}
+                    >
+                      <FormattedMessage id="spoke.advanced_tutorial_button" />
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className={styles.heroVideo}>
@@ -210,7 +222,7 @@ class SpokeLanding extends Component {
                 <YouTube
                   className={styles.playerVideo}
                   opts={{ rel: 0 }}
-                  videoId="WmQKZJPhV7s"
+                  videoId={this.state.playerVideoId}
                   onReady={e => e.target.playVideo()}
                 />
                 {platform !== "unsupported" && (

@@ -166,8 +166,15 @@ body {
   @extend %action-button;
   background-color: $darker-grey;
   margin: auto;
-  margin-top: 64px;
   padding: 0px 82px;
+}
+
+:local(.tutorial-buttons) {
+  margin-top: 64px;
+
+  button {
+    margin: 32px auto;
+  }
 }
 
 :local(.close-video) {
