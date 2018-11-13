@@ -22,8 +22,8 @@ export default class PresenceList extends Component {
     const image = context && context.mobile ? PhoneImage : context && context.hmd ? HMDImage : DesktopImage;
 
     return (
-      <WithHoverSound>
-        <div className={styles.row} key={sessionId}>
+      <WithHoverSound key={sessionId}>
+        <div className={styles.row}>
           <div className={styles.device}>
             <img src={image} />
           </div>

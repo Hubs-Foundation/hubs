@@ -51,6 +51,9 @@ export default class SceneEntryManager {
     }
 
     if (enterInVR) {
+      // HACK - A-Frame calls getVRDisplays at module load, we want to do it here to
+      // force gamepads to become live.
+      navigator.getVRDisplays();
       this.scene.enterVR();
     } else if (AFRAME.utils.device.isMobile()) {
       document.body.addEventListener("touchend", requestFullscreen);
@@ -74,6 +77,8 @@ export default class SceneEntryManager {
       this._runBot(mediaStream);
       return;
     }
+
+    this.scene.setAttribute("motion-capture-replayer", "enabled", false);
 
     if (mediaStream) {
       NAF.connection.adapter.setLocalMediaStream(mediaStream);

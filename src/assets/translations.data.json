@@ -51,6 +51,7 @@
     "audio.granted-next": "Next",
     "exit.subtitle.exited": "Your session has ended. Refresh your browser to start a new one.",
     "exit.subtitle.closed": "This room is no longer available.",
+    "exit.subtitle.left": "You have left the room.",
     "exit.subtitle.full": "This room is full, please try again later.",
     "exit.subtitle.connect_error": "Unable to connect to this room, please try again later.",
     "exit.subtitle.version_mismatch": "The version you deployed is not available yet. Your browser will refresh in 5 seconds.",
@@ -59,6 +60,7 @@
     "autoexit.subtitle": "You have started another session.",
     "autoexit.cancel": "CANCEL",
     "presence.entered_room": "entered the room.",
+    "presence.entered_lobby": "entered the lobby.",
     "presence.join_lobby": "joined the lobby.",
     "presence.leave": "left.",
     "presence.name_change": "is now known as",
@@ -110,6 +112,12 @@
     "spoke.download_unsupported": "View Releases",
     "spoke.browse_all_versions": "Browse All Versions",
     "spoke.close": "Close",
-    "spoke.play_button": "Learn Spoke in 5 Minutes"
+    "spoke.play_button": "Learn Spoke in 5 Minutes",
+    "commands.fly": "Toggle fly mode.",
+    "commands.bigger": "Increase your avatar's size.",
+    "commands.smaller": "Decrease your avatar's size.",
+    "commands.help": "Show help.",
+    "commands.leave": "Disconnect from the room.",
+    "commands.duck": "The duck tested well. Quack."
   }
 }
