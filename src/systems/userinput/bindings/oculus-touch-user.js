@@ -492,7 +492,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     {
       src: { value: rightTriggerPressed2 },
       dest: { value: paths.actions.cursor.grab },
-      xform: xforms.rising,
+      xform: xforms.falling,
       priority: 2
     }
   ],

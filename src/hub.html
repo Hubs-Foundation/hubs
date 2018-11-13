@@ -189,7 +189,7 @@
                     emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
                     emit-state-change__pinned="state: pinned; transform: rising; event: pinned;"
                 >
-                    <a-entity class="ui" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end">
+                    <a-entity class="ui interactable-ui" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end">
                         <a-entity class="freeze-menu" visible-while-frozen="withinDistance: 10;">
                             <a-entity mixin="rounded-text-action-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned; uiSelector:.interactable-ui" position="0 0.125 0.01"> </a-entity>
                             <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
@@ -206,7 +206,7 @@
                     super-networked-interactable="counter: #pen-counter;"
                     body="type: dynamic; shape: none; mass: 1;"
                     grabbable="maxGrabbers: 1"
-                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
+                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit:0;"
                     hoverable
                     scale="0.5 0.5 0.5"
                     sound__next_pen_color="src: #sound_asset-next_pen_color; on: next_pen_color; poolSize: 2;"
