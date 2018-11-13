@@ -97,7 +97,12 @@ class UIRoot extends Component {
     presences: PropTypes.object,
     sessionId: PropTypes.string,
     subscriptions: PropTypes.object,
-    initialIsSubscribed: PropTypes.bool
+    initialIsSubscribed: PropTypes.bool,
+    showSignInDialog: PropTypes.bool,
+    signInMessageId: PropTypes.string,
+    signInCompleteMessageId: PropTypes.string,
+    signInCompleteContinueTextId: PropTypes.string,
+    onContinueAfterSignIn: PropTypes.func
   };
 
   state = {
@@ -106,7 +111,7 @@ class UIRoot extends Component {
     dialog: null,
     showInviteDialog: false,
     showLinkDialog: false,
-    showPresenceList: true,
+    showPresenceList: false,
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
@@ -140,6 +145,33 @@ class UIRoot extends Component {
     showProfileEntry: false,
     pendingMessage: ""
   };
+
+  constructor(props) {
+    super(props);
+    console.log("BPDEBUG ui root constructor");
+    if (this.props.showSignInDialog) {
+      this.state.dialog = (
+        <SignInDialog
+          message={messages[this.props.signInMessageId]}
+          onSignIn={async email => {
+            const { authComplete } = await this.props.authChannel.startAuthentication(email);
+            this.showDialog(SignInDialog, { authStarted: true });
+            await authComplete;
+            this.setState({ signedIn: true });
+            this.showDialog(SignInDialog, {
+              authComplete: true,
+              message: messages[this.props.signInCompleteMessageId],
+              continueText: messages[this.props.signInCompleteContinueTextId],
+              onContinue: () => {
+                this.closeDialog();
+                this.props.onContinueAfterSignIn();
+              }
+            });
+          }}
+        />
+      );
+    }
+  }
 
   componentDidUpdate() {
     if (this.props.authChannel) {

@@ -18,8 +18,9 @@ function requestFullscreen() {
 }
 
 export default class SceneEntryManager {
-  constructor(hubChannel) {
+  constructor(hubChannel, authChannel) {
     this.hubChannel = hubChannel;
+    this.authChannel = authChannel;
     this.store = window.APP.store;
     this.scene = document.querySelector("a-scene");
     this.cursorController = document.querySelector("#cursor-controller");
@@ -217,12 +218,17 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("pinned", e => {
-      const el = e.detail.el;
-      const networkId = el.components.networked.data.networkId;
-      const gltfNode = pinnedEntityToGltf(el);
-      el.setAttribute("networked", { persistent: true });
+      if (this.authChannel.authenticated) {
+        const el = e.detail.el;
+        const networkId = el.components.networked.data.networkId;
+        const gltfNode = pinnedEntityToGltf(el);
+        el.setAttribute("networked", { persistent: true });
 
-      this.hubChannel.pin(networkId, gltfNode);
+        this.hubChannel.pin(networkId, gltfNode);
+      } else {
+        this.scene.exitVR();
+        this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete");
+      }
     });
 
     this.scene.addEventListener("unpinned", e => {
