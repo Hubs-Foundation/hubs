@@ -390,8 +390,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
 
     if (AFRAME.utils.device.getVRDisplay().displayName.indexOf("Cardboard") >= 0) {
-      // HACK - Oculus Go sometimes reports Cardboard as the primary VR display on startup
-      // and that is cached by A-Frame, so we need to resolve that before entering as well.
+      // HACK - The polyfill reports Cardboard as the primary VR display on startup
+      // out ahead of Oculus Go on Oculus Browser 5.5.0. This display is cached by A-Frame,
+      // so we need to resolve that and get the real VRDisplay before entering as well.
       const displays = await navigator.getVRDisplays();
       const vrDisplay = displays.length && displays[0];
       AFRAME.utils.device.getVRDisplay = () => vrDisplay;
