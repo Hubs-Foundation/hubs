@@ -59,6 +59,7 @@
     "autoexit.subtitle": "You have started another session.",
     "autoexit.cancel": "CANCEL",
     "presence.entered_room": "entered the room.",
+    "presence.entered_lobby": "entered the lobby.",
     "presence.join_lobby": "joined the lobby.",
     "presence.leave": "left.",
     "presence.name_change": "is now known as",
