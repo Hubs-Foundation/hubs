@@ -1,16 +1,22 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import styles from "../assets/stylesheets/presence-list.scss";
+import { FormattedMessage } from "react-intl";
 import classNames from "classnames";
+
+import styles from "../assets/stylesheets/presence-list.scss";
 import PhoneImage from "../assets/images/presence_phone.png";
 import DesktopImage from "../assets/images/presence_desktop.png";
 import HMDImage from "../assets/images/presence_vr.png";
-import { FormattedMessage } from "react-intl";
+import maskEmail from "../utils/mask-email";
 
 export default class PresenceList extends Component {
   static propTypes = {
     presences: PropTypes.object,
-    sessionId: PropTypes.string
+    sessionId: PropTypes.string,
+    signedIn: PropTypes.bool,
+    email: PropTypes.string,
+    onSignIn: PropTypes.func,
+    onSignOut: PropTypes.func
   };
 
   domForPresence = ([sessionId, data]) => {
@@ -53,6 +59,22 @@ export default class PresenceList extends Component {
             {Object.entries(this.props.presences || {})
               .filter(([k]) => k !== this.props.sessionId)
               .map(this.domForPresence)}
+          </div>
+          <div className={styles.signIn}>
+            {this.props.signedIn ? (
+              <div>
+                <span>
+                  <FormattedMessage id="sign-in.as" /> {maskEmail(this.props.email)}
+                </span>{" "}
+                <a onClick={this.props.onSignOut}>
+                  <FormattedMessage id="sign-in.out" />
+                </a>
+              </div>
+            ) : (
+              <a onClick={this.props.onSignIn}>
+                <FormattedMessage id="sign-in.in" />
+              </a>
+            )}
           </div>
         </div>
       </div>

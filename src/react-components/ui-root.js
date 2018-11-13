@@ -20,13 +20,16 @@ import {
   SafariEntryButton
 } from "./entry-buttons.js";
 import ProfileEntryPanel from "./profile-entry-panel";
-import HelpDialog from "./help-dialog.js";
-import SafariDialog from "./safari-dialog.js";
-import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
-import InviteTeamDialog from "./invite-team-dialog.js";
-import InviteDialog from "./invite-dialog.js";
-import LinkDialog from "./link-dialog.js";
+
 import CreateObjectDialog from "./create-object-dialog.js";
+import HelpDialog from "./help-dialog.js";
+import InviteDialog from "./invite-dialog.js";
+import InviteTeamDialog from "./invite-team-dialog.js";
+import LinkDialog from "./link-dialog.js";
+import SafariDialog from "./safari-dialog.js";
+import SignInDialog from "./sign-in-dialog.js";
+import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
+
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
 import TwoDHUD from "./2d-hud";
@@ -78,6 +81,7 @@ class UIRoot extends Component {
     isBotMode: PropTypes.bool,
     store: PropTypes.object,
     scene: PropTypes.object,
+    authChannel: PropTypes.object,
     hubChannel: PropTypes.object,
     linkChannel: PropTypes.object,
     hubEntryCode: PropTypes.number,
@@ -102,7 +106,7 @@ class UIRoot extends Component {
     dialog: null,
     showInviteDialog: false,
     showLinkDialog: false,
-    showPresenceList: false,
+    showPresenceList: true,
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
@@ -136,6 +140,15 @@ class UIRoot extends Component {
     showProfileEntry: false,
     pendingMessage: ""
   };
+
+  componentDidUpdate() {
+    if (this.props.authChannel) {
+      const { authenticated } = this.props.authChannel;
+      if (authenticated !== this.state.signedIn) {
+        this.setState({ signedIn: authenticated });
+      }
+    }
+  }
 
   componentDidMount() {
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
@@ -556,24 +569,39 @@ class UIRoot extends Component {
     this.setState({ dialog: null });
   };
 
-  showHelpDialog = () => {
-    this.setState({ dialog: <HelpDialog onClose={this.closeDialog} /> });
+  showDialog = (DialogClass, props = {}) => {
+    this.setState({
+      dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
+    });
   };
 
-  showSafariDialog = () => {
-    this.setState({ dialog: <SafariDialog onClose={this.closeDialog} /> });
+  showHelpDialog = () => this.showDialog(HelpDialog);
+
+  showSafariDialog = () => this.showDialog(SafariDialog);
+
+  showInviteTeamDialog = () => this.showDialog(InviteTeamDialog, { hubChannel: this.props.hubChannel });
+
+  showCreateObjectDialog = () => this.showDialog(CreateObjectDialog, { onCreate: this.createObject });
+
+  showWebVRRecommendDialog = () => this.showDialog(WebVRRecommendDialog);
+
+  showSignInDialog = () => {
+    this.showDialog(SignInDialog, {
+      message: messages["sign-in.prompt"],
+      onSignIn: async email => {
+        const { authComplete } = await this.props.authChannel.startAuthentication(email);
+        this.showDialog(SignInDialog, { authStarted: true });
+        await authComplete;
+        this.setState({ signedIn: true });
+        this.closeDialog();
+      }
+    });
   };
 
-  showInviteTeamDialog = () => {
-    this.setState({ dialog: <InviteTeamDialog hubChannel={this.props.hubChannel} onClose={this.closeDialog} /> });
-  };
-
-  showCreateObjectDialog = () => {
-    this.setState({ dialog: <CreateObjectDialog onCreate={this.createObject} onClose={this.closeDialog} /> });
-  };
-
-  showWebVRRecommendDialog = () => {
-    this.setState({ dialog: <WebVRRecommendDialog onClose={this.closeDialog} /> });
+  signOut = () => {
+    this.props.authChannel.removeCredentials();
+    // TODO BP - should randomize avatar and display name on sign out.
+    this.setState({ signedIn: false });
   };
 
   onMiniInviteClicked = () => {
@@ -1158,7 +1186,14 @@ class UIRoot extends Component {
           </div>
 
           {this.state.showPresenceList && (
-            <PresenceList presences={this.props.presences} sessionId={this.props.sessionId} />
+            <PresenceList
+              presences={this.props.presences}
+              sessionId={this.props.sessionId}
+              signedIn={this.state.signedIn}
+              email={this.props.store.state.credentials.email}
+              onSignIn={this.showSignInDialog}
+              onSignOut={this.signOut}
+            />
           )}
 
           {this.state.entryStep === ENTRY_STEPS.finished ? (

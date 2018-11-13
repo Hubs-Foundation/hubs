@@ -12,6 +12,7 @@ import mozLogo from "../assets/images/moz-logo-black.png";
 import classNames from "classnames";
 import { ENVIRONMENT_URLS } from "../assets/environments/environments";
 import { connectToReticulum } from "../utils/phoenix-utils";
+import maskEmail from "../utils/mask-email";
 
 import styles from "../assets/stylesheets/index.scss";
 
@@ -29,6 +30,7 @@ class HomeRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
     sceneId: PropTypes.string,
+    store: PropTypes.object,
     authChannel: PropTypes.object,
     authVerify: PropTypes.bool,
     authTopic: PropTypes.string,
@@ -49,7 +51,8 @@ class HomeRoot extends Component {
 
   constructor(props) {
     super(props);
-    this.state.signedIn = props.authChannel.authenticated();
+    this.state.signedIn = props.authChannel.authenticated;
+    this.state.email = props.store.state.credentials.email;
   }
 
   componentDidMount() {
@@ -118,12 +121,12 @@ class HomeRoot extends Component {
 
   showSignInDialog = () => {
     this.showDialog(SignInDialog, {
-      message: "Signing in gives you the ability to moderate, edit, and save rooms.",
+      message: messages["sign-in.prompt"],
       onSignIn: async email => {
         const { authComplete } = await this.props.authChannel.startAuthentication(email);
         this.showDialog(SignInDialog, { authStarted: true });
         await authComplete;
-        this.setState({ signedIn: true });
+        this.setState({ signedIn: true, email });
         this.closeDialog();
       }
     });
@@ -206,10 +209,21 @@ class HomeRoot extends Component {
                     Spoke
                   </a>
                 </div>
+              </div>
+              <div className={styles.signIn}>
                 {this.state.signedIn ? (
-                  <a onClick={this.onLinkClicked(this.signOut)}>Sign Out</a>
+                  <div>
+                    <span>
+                      <FormattedMessage id="sign-in.as" /> {maskEmail(this.state.email)}
+                    </span>{" "}
+                    <a onClick={this.onLinkClicked(this.signOut)}>
+                      <FormattedMessage id="sign-in.out" />
+                    </a>
+                  </div>
                 ) : (
-                  <a onClick={this.onLinkClicked(this.showSignInDialog)}>Sign In</a>
+                  <a onClick={this.onLinkClicked(this.showSignInDialog)}>
+                    <FormattedMessage id="sign-in.in" />
+                  </a>
                 )}
               </div>
             </div>

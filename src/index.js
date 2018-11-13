@@ -15,7 +15,6 @@ const { pathname } = document.location;
 const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathname.substring(1).split("/")[1]);
 
 const store = new Store();
-store.init();
 const authChannel = new AuthChannel(store);
 authChannel.setSocket(connectToReticulum());
 
@@ -23,6 +22,7 @@ const root = (
   <HomeRoot
     initialEnvironment={qs.get("initial_environment")}
     sceneId={sceneId || ""}
+    store={store}
     authChannel={authChannel}
     authVerify={qs.has("auth_topic")}
     authTopic={qs.get("auth_topic")}

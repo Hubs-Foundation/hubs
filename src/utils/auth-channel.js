@@ -14,9 +14,9 @@ export default class AuthChannel {
     return this.store.update({ credentials: { token: "", email: "" } });
   };
 
-  authenticated = () => {
+  get authenticated() {
     return !!this.store.state.credentials.token;
-  };
+  }
 
   async startAuthentication(email) {
     const channel = this.socket.channel(`auth:${uuid()}`);
