@@ -77,37 +77,6 @@ AFRAME.registerSystem("userinput", {
     this.registeredMappings = new Set([keyboardDebuggingBindings]);
     this.xformStates = new Map();
 
-    const gamepadConnected = e => {
-      let gamepadDevice;
-      for (const activeDevice of this.activeDevices) {
-        if (activeDevice.gamepad && activeDevice.gamepad.index === e.gamepad.index) {
-          console.warn("connected already fired for gamepad", e.gamepad);
-          return; // multiple connect events without a disconnect event
-        }
-      }
-      if (e.gamepad.id === "OpenVR Gamepad") {
-        gamepadDevice = new ViveControllerDevice(e.gamepad);
-        this.registeredMappings.add(viveUserBindings);
-      } else if (e.gamepad.id.startsWith("Oculus Touch")) {
-        gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
-        this.registeredMappings.add(oculusTouchUserBindings);
-      } else if (e.gamepad.id === "Oculus Go Controller") {
-        gamepadDevice = new OculusGoControllerDevice(e.gamepad);
-        this.registeredMappings.add(oculusGoUserBindings);
-      } else if (e.gamepad.id === "Daydream Controller") {
-        gamepadDevice = new DaydreamControllerDevice(e.gamepad);
-        this.registeredMappings.add(daydreamUserBindings);
-      } else if (e.gamepad.id.includes("Xbox")) {
-        gamepadDevice = new XboxControllerDevice(e.gamepad);
-        this.registeredMappings.add(xboxControllerUserBindings);
-      } else {
-        gamepadDevice = new GamepadDevice(e.gamepad);
-        this.registeredMappings.add(gamepadBindings);
-      }
-
-      this.activeDevices.add(gamepadDevice);
-    };
-
     const vrGamepadMappings = new Map();
     vrGamepadMappings.set(ViveControllerDevice, viveUserBindings);
     vrGamepadMappings.set(OculusTouchControllerDevice, oculusTouchUserBindings);
@@ -117,18 +86,6 @@ AFRAME.registerSystem("userinput", {
     const nonVRGamepadMappings = new Map();
     nonVRGamepadMappings.set(XboxControllerDevice, xboxControllerUserBindings);
     nonVRGamepadMappings.set(GamepadDevice, gamepadBindings);
-
-    const gamepadDisconnected = e => {
-      for (const device of this.activeDevices) {
-        if (device.gamepad && device.gamepad.index === e.gamepad.index) {
-          this.registeredMappings.delete(
-            vrGamepadMappings.get(device.constructor) || nonVRGamepadMappings.get(device.constructor)
-          );
-          this.activeDevices.delete(device);
-          return;
-        }
-      }
-    };
 
     const updateBindingsForVRMode = () => {
       const inVRMode = this.el.sceneEl.is("vr-mode");
@@ -150,6 +107,52 @@ AFRAME.registerSystem("userinput", {
         }
         this.registeredMappings.add(isMobile ? touchscreenUserBindings : keyboardMouseUserBindings);
       }
+
+      for (const activeDevice of this.activeDevices) {
+        const mapping = nonVRGamepadMappings.get(activeDevice.constructor);
+        mapping && this.registeredMappings.add(mapping);
+      }
+    };
+
+    const gamepadConnected = e => {
+      let gamepadDevice;
+      for (const activeDevice of this.activeDevices) {
+        if (activeDevice.gamepad && activeDevice.gamepad.index === e.gamepad.index) {
+          console.warn("connected already fired for gamepad", e.gamepad);
+          return; // multiple connect events without a disconnect event
+        }
+      }
+      if (e.gamepad.id === "OpenVR Gamepad") {
+        gamepadDevice = new ViveControllerDevice(e.gamepad);
+      } else if (e.gamepad.id.startsWith("Oculus Touch")) {
+        gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
+      } else if (e.gamepad.id === "Oculus Go Controller") {
+        gamepadDevice = new OculusGoControllerDevice(e.gamepad);
+      } else if (e.gamepad.id === "Daydream Controller") {
+        gamepadDevice = new DaydreamControllerDevice(e.gamepad);
+      } else if (e.gamepad.id.includes("Xbox")) {
+        gamepadDevice = new XboxControllerDevice(e.gamepad);
+      } else {
+        gamepadDevice = new GamepadDevice(e.gamepad);
+      }
+
+      this.activeDevices.add(gamepadDevice);
+
+      updateBindingsForVRMode();
+    };
+
+    const gamepadDisconnected = e => {
+      for (const device of this.activeDevices) {
+        if (device.gamepad && device.gamepad.index === e.gamepad.index) {
+          this.registeredMappings.delete(
+            vrGamepadMappings.get(device.constructor) || nonVRGamepadMappings.get(device.constructor)
+          );
+          this.activeDevices.delete(device);
+          return;
+        }
+      }
+
+      updateBindingsForVRMode();
     };
 
     window.addEventListener("gamepadconnected", gamepadConnected, false);
@@ -160,12 +163,6 @@ AFRAME.registerSystem("userinput", {
 
     this.el.sceneEl.addEventListener("enter-vr", updateBindingsForVRMode);
     this.el.sceneEl.addEventListener("exit-vr", updateBindingsForVRMode);
-
-    this.el.sceneEl.addEventListener("stateadded", evt => {
-      if (evt.detail === "entered") {
-        updateBindingsForVRMode();
-      }
-    });
 
     updateBindingsForVRMode();
   },
