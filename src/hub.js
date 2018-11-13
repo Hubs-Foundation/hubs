@@ -388,6 +388,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (availableVREntryTypes.isInHMD) {
     remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
+
+    if (/Oculus/.test(navigator.userAgent)) {
+      // HACK - The polyfill reports Cardboard as the primary VR display on startup out ahead of Oculus Go on Oculus Browser 5.5.0 beta. This display is cached by A-Frame,
+      // so we need to resolve that and get the real VRDisplay before entering as well.
+      const displays = await navigator.getVRDisplays();
+      const vrDisplay = displays.length && displays[0];
+      AFRAME.utils.device.getVRDisplay = () => vrDisplay;
+    }
   } else {
     remountUI({ availableVREntryTypes });
   }
