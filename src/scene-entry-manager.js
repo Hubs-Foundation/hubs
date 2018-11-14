@@ -10,7 +10,7 @@ const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
-import { addMedia } from "./utils/media-utils";
+import { addMedia, proxiedUrlFor } from "./utils/media-utils";
 import { ObjectContentOrigins } from "./object-types";
 
 function requestFullscreen() {
@@ -140,7 +140,7 @@ export default class SceneEntryManager {
     const { avatarId, displayName } = this.store.state.profile;
     this.playerRig.setAttribute("player-info", {
       displayName,
-      avatarSrc: avatarId && avatarId.startsWith("http") ? avatarId : `#${avatarId || "botdefault"}`
+      avatarSrc: avatarId && avatarId.startsWith("http") ? proxiedUrlFor(avatarId) : `#${avatarId || "botdefault"}`
     });
     const hudController = this.playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });

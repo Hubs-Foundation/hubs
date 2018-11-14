@@ -98,9 +98,7 @@ class ProfileEntryPanel extends Component {
             />
             {this.state.customMode ? (
               <div className={styles.avatarSelectorContainer}>
-                <label htmlFor="#custom-avatar-url" className={styles.title}>
-                  Avatar GLTF/GLB{" "}
-                </label>
+                <label htmlFor="#custom-avatar-url">Avatar GLTF/GLB </label>
                 <input
                   id="custom-avatar-url"
                   type="url"
@@ -132,7 +130,7 @@ class ProfileEntryPanel extends Component {
                     this.setState({ customMode: true, avatarId: avatars.find(a => a.id === this.state.avatarId).model })
                   }
                 >
-                  options
+                  custom url
                 </a>
               </div>
             )}
