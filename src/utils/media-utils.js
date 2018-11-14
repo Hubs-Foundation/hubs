@@ -117,8 +117,11 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
       clearTimeout(fireLoadingTimeout);
 
       if (!entity.classList.contains("pen")) {
+        entity.object3D.scale.setScalar(0.5);
+
         entity.setAttribute("animation__spawn-start", {
           property: "scale",
+          delay: 50,
           dur: 300,
           from: { x: 0.5, y: 0.5, z: 0.5 },
           to: { x: 1.0, y: 1.0, z: 1.0 },

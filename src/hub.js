@@ -78,6 +78,7 @@ import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { proxiedUrlFor } from "./utils/media-utils";
+import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
 
@@ -86,6 +87,7 @@ import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/exit-on-blur";
 import "./systems/userinput/userinput";
+import "./systems/userinput/userinput-debug";
 
 import "./gltf-component-mappings";
 
@@ -118,7 +120,6 @@ import "./components/cardboard-controls";
 import "./components/cursor-controller";
 
 import "./components/nav-mesh-helper";
-import "./systems/tunnel-effect";
 
 import "./components/tools/pen";
 import "./components/tools/networked-drawing";
@@ -215,7 +216,7 @@ function remountUI(props) {
   mountUI(uiProps);
 }
 
-async function handleHubChannelJoined(entryManager, hubChannel, data) {
+async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
 
   if (NAF.connection.isConnected()) {
@@ -253,7 +254,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
     hubId: hub.hub_id,
     hubName: hub.name,
     hubEntryCode: hub.entry_code,
-    onSendMessage: hubChannel.sendMessage
+    onSendMessage: messageDispatch.dispatch
   });
 
   document
@@ -408,6 +409,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (availableVREntryTypes.isInHMD) {
     remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
+
+    if (/Oculus/.test(navigator.userAgent)) {
+      // HACK - The polyfill reports Cardboard as the primary VR display on startup out ahead of Oculus Go on Oculus Browser 5.5.0 beta. This display is cached by A-Frame,
+      // so we need to resolve that and get the real VRDisplay before entering as well.
+      const displays = await navigator.getVRDisplays();
+      const vrDisplay = displays.length && displays[0];
+      AFRAME.utils.device.getVRDisplay = () => vrDisplay;
+    }
   } else {
     remountUI({ availableVREntryTypes });
   }
@@ -452,32 +461,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
 
-  hubPhxChannel
-    .join()
-    .receive("ok", async data => {
-      hubChannel.setPhoenixChannel(hubPhxChannel);
-      subscriptions.setHubChannel(hubChannel);
-      subscriptions.setSubscribed(data.subscriptions.web_push);
-      remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
-      await handleHubChannelJoined(entryManager, hubChannel, data);
-    })
-    .receive("error", res => {
-      if (res.reason === "closed") {
-        entryManager.exitScene();
-        remountUI({ roomUnavailableReason: "closed" });
-      }
-
-      console.error(res);
-    });
-
-  const hubPhxPresence = new Presence(hubPhxChannel);
   const presenceLogEntries = [];
-
   const addToPresenceLog = entry => {
     entry.key = Date.now().toString();
 
     presenceLogEntries.push(entry);
     remountUI({ presenceLogEntries });
+    scene.emit(`presence-log-${entry.type}`);
 
     // Fade out and then remove
     setTimeout(() => {
@@ -491,10 +481,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 20000);
   };
 
+  const messageDispatch = new MessageDispatch(scene, entryManager, hubChannel, addToPresenceLog, remountUI);
+
+  hubPhxChannel
+    .join()
+    .receive("ok", async data => {
+      hubChannel.setPhoenixChannel(hubPhxChannel);
+      subscriptions.setHubChannel(hubChannel);
+      subscriptions.setSubscribed(data.subscriptions.web_push);
+      remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
+      await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
+    })
+    .receive("error", res => {
+      if (res.reason === "closed") {
+        entryManager.exitScene();
+        remountUI({ roomUnavailableReason: "closed" });
+      }
+
+      console.error(res);
+    });
+
+  const hubPhxPresence = new Presence(hubPhxChannel);
+
   let isInitialSync = true;
+  const vrHudPresenceCount = document.querySelector("#hud-presence-count");
 
   hubPhxPresence.onSync(() => {
     remountUI({ presences: hubPhxPresence.state });
+    const occupantCount = Object.entries(hubPhxPresence.state).length;
+    vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
 
     if (!isInitialSync) return;
     // Wire up join/leave event handlers after initial sync.

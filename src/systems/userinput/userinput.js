@@ -1,4 +1,3 @@
-import { paths } from "./paths";
 import { sets } from "./sets";
 
 import { MouseDevice } from "./devices/mouse";
@@ -22,36 +21,128 @@ import { viveUserBindings } from "./bindings/vive-user";
 import { xboxControllerUserBindings } from "./bindings/xbox-controller-user";
 import { daydreamUserBindings } from "./bindings/daydream-user";
 
-import { updateActionSetsBasedOnSuperhands } from "./resolve-action-sets";
+import { resolveActionSets } from "./resolve-action-sets";
 import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
 
-const priorityMap = new Map();
-function prioritizeBindings(registeredMappings, activeSets) {
-  const activeBindings = new Set();
-  priorityMap.clear();
-  for (const mapping of registeredMappings) {
+function intersection(setA, setB) {
+  const _intersection = new Set();
+  for (const elem of setB) {
+    if (setA.has(elem)) {
+      _intersection.add(elem);
+    }
+  }
+  return _intersection;
+}
+
+const satisfiesPath = (binding, path) => {
+  for (const key in binding.dest) {
+    if (binding.dest[key].indexOf(path) !== -1) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const satisfyPath = (bindings, path) => {
+  for (const binding of bindings) {
+    if (satisfiesPath(binding, path)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const satisfiedBy = (binding, bindings) => {
+  for (const path of Object.values(binding.src)) {
+    if (path.startsWith("/device/")) continue;
+    if (!satisfyPath(bindings, path)) return false;
+  }
+  return true;
+};
+
+function dependencySort(mappings) {
+  const unsorted = [];
+  for (const mapping of mappings) {
     for (const setName in mapping) {
-      if (!activeSets.has(setName) || !mapping[setName]) continue;
       for (const binding of mapping[setName]) {
-        const { root, priority } = binding;
-        const prevBinding = priorityMap.get(root);
-        if (!root || !priority) {
-          activeBindings.add(binding);
-        } else if (!prevBinding) {
-          activeBindings.add(binding);
-          priorityMap.set(root, binding);
-        } else if (priority > prevBinding.priority) {
-          activeBindings.delete(priorityMap.get(root));
-          activeBindings.add(binding);
-          priorityMap.set(root, binding);
-        } else if (prevBinding.priority === priority) {
-          console.error("equal priorities on same root", binding, priorityMap.get(root));
-        }
+        unsorted.push(binding);
       }
     }
   }
-  return activeBindings;
+
+  const sorted = [];
+  while (unsorted.length > 0) {
+    const binding = unsorted.shift();
+    if (satisfiedBy(binding, sorted)) {
+      sorted.push(binding);
+    } else {
+      unsorted.push(binding);
+    }
+  }
+
+  return sorted;
+}
+
+function canMask(masker, masked) {
+  if (masker.priority === undefined) {
+    masker.priority = 0;
+  }
+  if (masked.priority === undefined) {
+    masked.priority = 0;
+  }
+  if (masked.priority >= masker.priority) return false;
+  for (const maskerKey in masker.src) {
+    const maskerPath = masker.src[maskerKey];
+    for (const maskedKey in masked.src) {
+      const maskedPath = masked.src[maskedKey];
+      if (maskedPath.indexOf(maskerPath) !== -1) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function computeMasks(bindings) {
+  const masks = [];
+  for (let row = 0; row < bindings.length; row++) {
+    for (let col = 0; col < bindings.length; col++) {
+      masks[row] = masks[row] || [];
+      if (canMask(bindings[col], bindings[row])) {
+        masks[row].push(col);
+      }
+    }
+  }
+  return masks;
+}
+
+function isActive(binding, sets) {
+  for (let i = 0; i < binding.sets.length; i++) {
+    if (sets.has(binding.sets[i])) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function computeExecutionStrategy(sortedBindings, masks, activeSets) {
+  const actives = [];
+  for (let row = 0; row < sortedBindings.length; row++) {
+    actives[row] = isActive(sortedBindings[row], activeSets);
+  }
+
+  const masked = [];
+  for (let row = 0; row < sortedBindings.length; row++) {
+    for (let col = 0; col < sortedBindings.length; col++) {
+      masked[row] = masked[row] || [];
+      if (masks[row].indexOf(col) !== -1 && isActive(sortedBindings[col], activeSets)) {
+        masked[row].push(col);
+      }
+    }
+  }
+
+  return { actives, masked };
 }
 
 AFRAME.registerSystem("userinput", {
@@ -66,122 +157,158 @@ AFRAME.registerSystem("userinput", {
   init() {
     this.frame = {};
 
-    this.activeSets = new Set([sets.global, sets.globalPost]);
+    this.prevActiveSets = new Set();
+    this.activeSets = new Set([sets.global]);
     this.pendingSetChanges = [];
+    this.xformStates = new Map();
     this.activeDevices = new Set([new MouseDevice(), new AppAwareMouseDevice(), new KeyboardDevice(), new HudDevice()]);
 
+    if (AFRAME.utils.device.isMobile()) {
+      this.activeDevices.add(new AppAwareTouchscreenDevice());
+    }
+
     this.registeredMappings = new Set([keyboardDebuggingBindings]);
-    this.xformStates = new Map();
+    this.registeredMappingsChanged = true;
 
-    let connectedGamepadBindings;
+    const vrGamepadMappings = new Map();
+    vrGamepadMappings.set(ViveControllerDevice, viveUserBindings);
+    vrGamepadMappings.set(OculusTouchControllerDevice, oculusTouchUserBindings);
+    vrGamepadMappings.set(OculusGoControllerDevice, oculusGoUserBindings);
+    vrGamepadMappings.set(DaydreamControllerDevice, daydreamUserBindings);
 
-    const appAwareTouchscreenDevice = new AppAwareTouchscreenDevice();
-
-    const disableNonGamepadBindings = () => {
-      if (AFRAME.utils.device.isMobile()) {
-        this.activeDevices.delete(appAwareTouchscreenDevice);
-        this.registeredMappings.delete(touchscreenUserBindings);
-      } else {
-        this.registeredMappings.delete(keyboardMouseUserBindings);
-      }
-    };
-
-    const enableNonGamepadBindings = () => {
-      if (AFRAME.utils.device.isMobile()) {
-        this.activeDevices.add(appAwareTouchscreenDevice);
-        this.registeredMappings.add(touchscreenUserBindings);
-      } else {
-        this.registeredMappings.add(keyboardMouseUserBindings);
-      }
-    };
+    const nonVRGamepadMappings = new Map();
+    nonVRGamepadMappings.set(XboxControllerDevice, xboxControllerUserBindings);
+    nonVRGamepadMappings.set(GamepadDevice, gamepadBindings);
 
     const updateBindingsForVRMode = () => {
       const inVRMode = this.el.sceneEl.is("vr-mode");
+      const isMobile = AFRAME.utils.device.isMobile();
 
       if (inVRMode) {
         console.log("Using VR bindings.");
-        disableNonGamepadBindings();
-        this.registeredMappings.add(connectedGamepadBindings);
+        this.registeredMappings.delete(isMobile ? touchscreenUserBindings : keyboardMouseUserBindings);
+        // add mappings for all active VR input devices
+        for (const activeDevice of this.activeDevices) {
+          const mapping = vrGamepadMappings.get(activeDevice.constructor);
+          mapping && this.registeredMappings.add(mapping);
+        }
       } else {
         console.log("Using Non-VR bindings.");
-        enableNonGamepadBindings();
-        this.registeredMappings.delete(connectedGamepadBindings);
+        // remove mappings for all active VR input devices
+        for (const activeDevice of this.activeDevices) {
+          this.registeredMappings.delete(vrGamepadMappings.get(activeDevice.constructor));
+        }
+        this.registeredMappings.add(isMobile ? touchscreenUserBindings : keyboardMouseUserBindings);
       }
+
+      for (const activeDevice of this.activeDevices) {
+        const mapping = nonVRGamepadMappings.get(activeDevice.constructor);
+        mapping && this.registeredMappings.add(mapping);
+      }
+
+      this.registeredMappingsChanged = true;
     };
+
+    const gamepadConnected = e => {
+      let gamepadDevice;
+      for (const activeDevice of this.activeDevices) {
+        if (activeDevice.gamepad && activeDevice.gamepad.index === e.gamepad.index) {
+          console.warn("connected already fired for gamepad", e.gamepad);
+          return; // multiple connect events without a disconnect event
+        }
+      }
+      if (e.gamepad.id === "OpenVR Gamepad") {
+        gamepadDevice = new ViveControllerDevice(e.gamepad);
+      } else if (e.gamepad.id.startsWith("Oculus Touch")) {
+        gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
+      } else if (e.gamepad.id === "Oculus Go Controller") {
+        gamepadDevice = new OculusGoControllerDevice(e.gamepad);
+      } else if (e.gamepad.id === "Daydream Controller") {
+        gamepadDevice = new DaydreamControllerDevice(e.gamepad);
+      } else if (e.gamepad.id.includes("Xbox")) {
+        gamepadDevice = new XboxControllerDevice(e.gamepad);
+      } else {
+        gamepadDevice = new GamepadDevice(e.gamepad);
+      }
+
+      this.activeDevices.add(gamepadDevice);
+
+      updateBindingsForVRMode();
+    };
+
+    const gamepadDisconnected = e => {
+      for (const device of this.activeDevices) {
+        if (device.gamepad && device.gamepad.index === e.gamepad.index) {
+          this.registeredMappings.delete(
+            vrGamepadMappings.get(device.constructor) || nonVRGamepadMappings.get(device.constructor)
+          );
+          this.activeDevices.delete(device);
+          return;
+        }
+      }
+
+      updateBindingsForVRMode();
+    };
+
+    window.addEventListener("gamepadconnected", gamepadConnected, false);
+    window.addEventListener("gamepaddisconnected", gamepadDisconnected, false);
+    for (const gamepad of navigator.getGamepads()) {
+      gamepad && gamepadConnected({ gamepad });
+    }
+
     this.el.sceneEl.addEventListener("enter-vr", updateBindingsForVRMode);
     this.el.sceneEl.addEventListener("exit-vr", updateBindingsForVRMode);
+
     updateBindingsForVRMode();
-
-    window.addEventListener(
-      "gamepadconnected",
-      e => {
-        let gamepadDevice;
-        const entered = this.el.sceneEl.is("entered");
-        for (let i = 0; i < this.activeDevices.length; i++) {
-          const activeDevice = this.activeDevices[i];
-          if (activeDevice.gamepad && activeDevice.gamepad === e.gamepad) {
-            console.warn("ignoring gamepad", e.gamepad);
-            return; // multiple connect events without a disconnect event
-          }
-        }
-        if (e.gamepad.id === "OpenVR Gamepad") {
-          gamepadDevice = new ViveControllerDevice(e.gamepad);
-          connectedGamepadBindings = viveUserBindings;
-        } else if (e.gamepad.id.startsWith("Oculus Touch")) {
-          gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
-          connectedGamepadBindings = oculusTouchUserBindings;
-        } else if (e.gamepad.id === "Oculus Go Controller") {
-          gamepadDevice = new OculusGoControllerDevice(e.gamepad);
-          connectedGamepadBindings = oculusGoUserBindings;
-        } else if (e.gamepad.id === "Daydream Controller") {
-          gamepadDevice = new DaydreamControllerDevice(e.gamepad);
-          connectedGamepadBindings = daydreamUserBindings;
-        } else if (e.gamepad.id.includes("Xbox")) {
-          gamepadDevice = new XboxControllerDevice(e.gamepad);
-          connectedGamepadBindings = xboxControllerUserBindings;
-        } else {
-          gamepadDevice = new GamepadDevice(e.gamepad);
-          connectedGamepadBindings = gamepadBindings;
-        }
-
-        if (entered) {
-          this.registeredMappings.add(connectedGamepadBindings);
-        }
-
-        this.activeDevices.add(gamepadDevice);
-      },
-      false
-    );
-    window.addEventListener(
-      "gamepaddisconnected",
-      e => {
-        for (const device of this.activeDevices) {
-          if (device.gamepad === e.gamepad) {
-            this.activeDevices.delete(device);
-            return;
-          }
-        }
-      },
-      false
-    );
   },
 
   tick() {
-    updateActionSetsBasedOnSuperhands();
+    const registeredMappingsChanged = this.registeredMappingsChanged;
+    if (registeredMappingsChanged) {
+      this.registeredMappingsChanged = false;
+      this.prevSortedBindings = this.sortedBindings;
+      this.sortedBindings = dependencySort(this.registeredMappings);
+      if (!this.prevSortedBindings) {
+        this.prevSortedBindings = this.sortedBindings;
+      }
+      this.masks = computeMasks(this.sortedBindings);
+    }
 
+    this.prevActiveSets.clear();
+    for (const item of this.activeSets) {
+      this.prevActiveSets.add(item);
+    }
+    resolveActionSets();
     for (const { set, value } of this.pendingSetChanges) {
       this.activeSets[value ? "add" : "delete"](set);
     }
+    const activeSetsChanged =
+      this.prevActiveSets.size !== this.activeSets.size ||
+      intersection(this.prevActiveSets, this.activeSets).size !== this.activeSets.size;
     this.pendingSetChanges.length = 0;
+    if (registeredMappingsChanged || activeSetsChanged || (!this.actives && !this.masked)) {
+      this.prevActives = this.actives;
+      this.prevMasked = this.masked;
+      const { actives, masked } = computeExecutionStrategy(this.sortedBindings, this.masks, this.activeSets);
+      this.actives = actives;
+      this.masked = masked;
+    }
 
     this.frame = {};
     for (const device of this.activeDevices) {
       device.write(this.frame);
     }
 
-    const activeBindings = prioritizeBindings(this.registeredMappings, this.activeSets);
-    for (const binding of activeBindings) {
-      const bindingExistedLastFrame = this.activeBindings && this.activeBindings.has(binding);
+    for (let i = 0; i < this.sortedBindings.length; i++) {
+      if (!this.actives[i] || this.masked[i].length > 0) continue;
+
+      const binding = this.sortedBindings[i];
+
+      let bindingExistedLastFrame = true;
+      if (!registeredMappingsChanged && activeSetsChanged && this.prevSortedBindings) {
+        const j = this.prevSortedBindings.indexOf(binding);
+        bindingExistedLastFrame = j > -1 && this.prevActives[j] && this.prevMasked[j].length === 0;
+      }
       if (!bindingExistedLastFrame) {
         this.xformStates.delete(binding);
       }
@@ -193,14 +320,7 @@ AFRAME.registerSystem("userinput", {
       }
     }
 
-    this.activeBindings = activeBindings;
-
-    if (this.frame[paths.actions.logDebugFrame] || this.frame[paths.actions.log]) {
-      console.log("frame", this.frame);
-      console.log("sets", this.activeSets);
-      console.log("bindings", this.activeBindings);
-      console.log("devices", this.activeDevices);
-      console.log("xformStates", this.xformStates);
-    }
+    this.prevSortedBindings = this.sortedBindings;
+    this.prevFrame = this.frame;
   }
 });
