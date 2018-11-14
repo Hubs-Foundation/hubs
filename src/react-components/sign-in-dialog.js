@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import DialogContainer from "./dialog-container.js";
+
+import styles from "../assets/stylesheets/sign-in-dialog.scss";
+import DialogContainer from "./dialog-container";
 
 export default class SignInDialog extends Component {
   static propTypes = {
@@ -40,17 +42,19 @@ export default class SignInDialog extends Component {
       );
     } else {
       contents = (
-        <form onSubmit={this.onSubmit}>
+        <form onSubmit={this.onSubmit} className={styles.signInForm}>
           <span>{this.props.message}</span>
           <br />
           <input
             name="email"
             type="email"
+            required
             placeholder="Your email address"
             value={this.state.email}
             onChange={e => this.setState({ email: e.target.value })}
+            className={styles.emailField}
           />
-          <button type="submit">Next</button>
+          <button type="submit" className={styles.nextButton}>next</button>
         </form>
       );
     }

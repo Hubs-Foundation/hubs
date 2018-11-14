@@ -82,11 +82,7 @@
 }
 
 .invite-form, .invite-team-form, .add-media-form, .custom-scene-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  margin: 0;
+  @extend %centered-flex-column;
 
   &__buttons {
     display: flex;
@@ -100,16 +96,7 @@
   }
 
   &__link_field {
-    @extend %rounded-border;
-    @extend %default-font;
-    color: black;
-    font-size: 1.2em;
-    background-color: transparent;
-    line-height: 2.0em;
-    padding-left: 1.25em;
-    padding-right: 1.25em;
-    margin: 0.5em 0;
-    width: 100%;
+    @extend %input-field;
   }
 
   &__action-button {
@@ -143,16 +130,7 @@
   }
 
   &__email_field {
-    @extend %rounded-border;
-    @extend %default-font;
-    color: black;
-    font-size: 1.2em;
-    background-color: transparent;
-    line-height: 2.5em;
-    padding-left: 1.25em;
-    padding-right: 1.25em;
-    margin: 0.5em 0;
-    width: 100%;
+    @extend %input-field;
   }
 
   &__submit {

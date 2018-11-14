@@ -1,0 +1,13 @@
+@import 'shared';
+
+:local(.sign-in-form) {
+  @extend %centered-flex-column;
+}
+
+:local(.email-field) {
+  @extend %input-field;
+}
+
+:local(.next-button) {
+  @extend %action-button;
+}
