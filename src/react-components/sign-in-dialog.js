@@ -35,9 +35,11 @@ export default class SignInDialog extends Component {
       );
     } else if (this.props.authComplete) {
       contents = (
-        <div>
+        <div className={styles.signInComplete}>
           <p>{this.props.message}</p>
-          <button onClick={this.props.onContinue}>{this.props.continueText}</button>
+          <button onClick={this.props.onContinue} className={styles.continueButton}>
+            {this.props.continueText}
+          </button>
         </div>
       );
     } else {
@@ -54,7 +56,9 @@ export default class SignInDialog extends Component {
             onChange={e => this.setState({ email: e.target.value })}
             className={styles.emailField}
           />
-          <button type="submit" className={styles.nextButton}>next</button>
+          <button type="submit" className={styles.nextButton}>
+            next
+          </button>
         </form>
       );
     }

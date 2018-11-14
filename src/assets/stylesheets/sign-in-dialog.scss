@@ -1,6 +1,6 @@
 @import 'shared';
 
-:local(.sign-in-form) {
+:local(.sign-in-form), :local(.sign-in-complete) {
   @extend %centered-flex-column;
 }
 
@@ -8,6 +8,6 @@
   @extend %input-field;
 }
 
-:local(.next-button) {
+:local(.next-button), :local(.continue-button) {
   @extend %action-button;
 }
