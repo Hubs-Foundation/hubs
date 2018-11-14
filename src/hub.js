@@ -332,8 +332,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);
   const entryManager = new SceneEntryManager(hubChannel, authChannel);
-  entryManager.onRequestAuthentication = (messageId, signInCompleteMessageId) => {
-    remountUI({ showSignInDialog: true, signInMessageId: messageId, signInCompleteMessageId });
+  entryManager.onRequestAuthentication = (
+    signInMessageId,
+    signInCompleteMessageId,
+    signInContinueTextId,
+    onContinueAfterSignIn
+  ) => {
+    remountUI({
+      showSignInDialog: true,
+      signInMessageId,
+      signInCompleteMessageId,
+      signInContinueTextId,
+      onContinueAfterSignIn: () => {
+        remountUI({ showSignInDialog: false });
+        onContinueAfterSignIn();
+      }
+    });
   };
   entryManager.init();
 

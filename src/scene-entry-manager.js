@@ -26,6 +26,7 @@ export default class SceneEntryManager {
     this.cursorController = document.querySelector("#cursor-controller");
     this.playerRig = document.querySelector("#player-rig");
     this._entered = false;
+    this.onRequestAuthentication = () => {};
   }
 
   init = () => {
@@ -197,6 +198,14 @@ export default class SceneEntryManager {
     });
   };
 
+  _pinElement = el => {
+    const networkId = el.components.networked.data.networkId;
+    const gltfNode = pinnedEntityToGltf(el);
+    el.setAttribute("networked", { persistent: true });
+
+    this.hubChannel.pin(networkId, gltfNode);
+  };
+
   _setupMedia = () => {
     const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
@@ -219,15 +228,16 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("pinned", e => {
       if (this.authChannel.authenticated) {
-        const el = e.detail.el;
-        const networkId = el.components.networked.data.networkId;
-        const gltfNode = pinnedEntityToGltf(el);
-        el.setAttribute("networked", { persistent: true });
-
-        this.hubChannel.pin(networkId, gltfNode);
+        this._pinElement(e.detail.el);
       } else {
-        this.scene.exitVR();
-        this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete");
+        const wasInVR = this.scene.is("vr-mode");
+        if (wasInVR) this.scene.exitVR();
+        const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
+        this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete", continueTextId, () => {
+          if (wasInVR) this.scene.enterVR();
+        });
+        // UI pins the entity optimistically, so we undo that here.
+        e.detail.el.setAttribute("pinnable", "pinned", false);
       }
     });
 

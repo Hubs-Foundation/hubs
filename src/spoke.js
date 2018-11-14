@@ -222,7 +222,7 @@ class SpokeLanding extends Component {
                   </a>
                 )}
                 <a onClick={() => this.setState({ showPlayer: false })} className={styles.closeVideo}>
-                  <FormattedMessage id="spoke.close" />
+                  <FormattedMessage id="dialog.close" />
                 </a>
               </div>
             </div>

@@ -7,7 +7,9 @@ export default class SignInDialog extends Component {
     authStarted: PropTypes.bool,
     authComplete: PropTypes.bool,
     onSignIn: PropTypes.func,
-    message: PropTypes.string
+    onContinue: PropTypes.func,
+    message: PropTypes.string,
+    continueText: PropTypes.string
   };
 
   state = {
@@ -30,7 +32,12 @@ export default class SignInDialog extends Component {
         </p>
       );
     } else if (this.props.authComplete) {
-      contents = <p>{this.props.message}</p>;
+      contents = (
+        <div>
+          <p>{this.props.message}</p>
+          <button onClick={this.props.onContinue}>{this.props.continueText}</button>
+        </div>
+      );
     } else {
       contents = (
         <form onSubmit={this.onSubmit}>
@@ -47,6 +54,7 @@ export default class SignInDialog extends Component {
         </form>
       );
     }
+
     return (
       <DialogContainer title="Sign In" {...this.props}>
         {contents}

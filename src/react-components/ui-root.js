@@ -101,7 +101,7 @@ class UIRoot extends Component {
     showSignInDialog: PropTypes.bool,
     signInMessageId: PropTypes.string,
     signInCompleteMessageId: PropTypes.string,
-    signInCompleteContinueTextId: PropTypes.string,
+    signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func
   };
 
@@ -143,42 +143,48 @@ class UIRoot extends Component {
     exited: false,
 
     showProfileEntry: false,
-    pendingMessage: ""
+    pendingMessage: "",
+
+    signedIn: false
   };
 
-  constructor(props) {
-    super(props);
-    console.log("BPDEBUG ui root constructor");
-    if (this.props.showSignInDialog) {
-      this.state.dialog = (
-        <SignInDialog
-          message={messages[this.props.signInMessageId]}
-          onSignIn={async email => {
-            const { authComplete } = await this.props.authChannel.startAuthentication(email);
-            this.showDialog(SignInDialog, { authStarted: true });
-            await authComplete;
-            this.setState({ signedIn: true });
-            this.showDialog(SignInDialog, {
-              authComplete: true,
-              message: messages[this.props.signInCompleteMessageId],
-              continueText: messages[this.props.signInCompleteContinueTextId],
-              onContinue: () => {
-                this.closeDialog();
-                this.props.onContinueAfterSignIn();
-              }
-            });
-          }}
-        />
-      );
-    }
-  }
-
-  componentDidUpdate() {
-    if (this.props.authChannel) {
-      const { authenticated } = this.props.authChannel;
+  componentDidUpdate(prevProps) {
+    const {
+      showSignInDialog,
+      signInMessageId,
+      authChannel,
+      signInCompleteMessageId,
+      signInContinueTextId,
+      onContinueAfterSignIn
+    } = this.props;
+    if (authChannel) {
+      const { authenticated } = authChannel;
       if (authenticated !== this.state.signedIn) {
         this.setState({ signedIn: authenticated });
       }
+    }
+    if (prevProps.showSignInDialog !== showSignInDialog && showSignInDialog) {
+      const closeAndContinue = () => {
+        this.closeDialog();
+        onContinueAfterSignIn();
+      };
+      this.showDialog(SignInDialog, {
+        message: messages[signInMessageId],
+        onSignIn: async email => {
+          const { authComplete } = await authChannel.startAuthentication(email);
+          this.showDialog(SignInDialog, { authStarted: true, onClose: closeAndContinue });
+          await authComplete;
+          this.setState({ signedIn: true });
+          this.showDialog(SignInDialog, {
+            authComplete: true,
+            message: messages[signInCompleteMessageId],
+            continueText: messages[signInContinueTextId],
+            onClose: closeAndContinue,
+            onContinue: closeAndContinue
+          });
+        },
+        onClose: closeAndContinue
+      });
     }
   }
 
@@ -1234,7 +1240,7 @@ class UIRoot extends Component {
               {showVREntryButton && (
                 <WithHoverSound>
                   <button onClick={() => this.props.scene.enterVR()}>
-                    <FormattedMessage id="entry.return-to-vr" />
+                    <FormattedMessage id="entry.enter-in-vr" />
                   </button>
                 </WithHoverSound>
               )}
