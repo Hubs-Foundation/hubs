@@ -105,7 +105,12 @@ export default class HubChannel {
   };
 
   pin = (id, gltfNode) => {
-    this.channel.push("pin", { id, gltf_node: gltfNode });
+    const { token } = this.store.state.credentials;
+    const payload = { id, gltf_node: gltfNode };
+    if (token) {
+      payload.token = token;
+    }
+    this.channel.push("pin", payload);
   };
 
   unpin = id => {

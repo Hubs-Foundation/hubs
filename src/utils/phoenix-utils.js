@@ -1,8 +1,6 @@
 import uuid from "uuid/v4";
 import { Socket } from "phoenix";
 
-import Store from "../storage/store";
-
 export function connectToReticulum(debug = false) {
   const qs = new URLSearchParams(location.search);
 
@@ -22,13 +20,9 @@ export function connectToReticulum(debug = false) {
   const socketUrl = `${socketProtocol}//${socketHost}${socketPort ? `:${socketPort}` : ""}/socket`;
   console.log(`Phoenix Socket URL: ${socketUrl}`);
 
-  const store = new Store();
   const socketSettings = {
     params: { session_id: uuid() }
   };
-  if (store.state.credentials.token) {
-    socketSettings.params.token = store.state.credentials.token;
-  }
 
   if (debug) {
     socketSettings.logger = (kind, msg, data) => {

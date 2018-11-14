@@ -233,11 +233,17 @@ export default class SceneEntryManager {
         const wasInVR = this.scene.is("vr-mode");
         if (wasInVR) this.scene.exitVR();
         const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
+
         this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete", continueTextId, () => {
+          if (this.authChannel.authenticated) {
+            this._pinElement(e.detail.el);
+          } else {
+            // UI pins the entity optimistically, so we undo that here.
+            e.detail.el.setAttribute("pinnable", "pinned", false);
+          }
+
           if (wasInVR) this.scene.enterVR();
         });
-        // UI pins the entity optimistically, so we undo that here.
-        e.detail.el.setAttribute("pinnable", "pinned", false);
       }
     });
 
