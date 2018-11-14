@@ -149,14 +149,7 @@ class UIRoot extends Component {
   };
 
   componentDidUpdate(prevProps) {
-    const {
-      showSignInDialog,
-      signInMessageId,
-      authChannel,
-      signInCompleteMessageId,
-      signInContinueTextId,
-      onContinueAfterSignIn
-    } = this.props;
+    const { authChannel, showSignInDialog } = this.props;
     if (authChannel) {
       const { authenticated } = authChannel;
       if (authenticated !== this.state.signedIn) {
@@ -164,27 +157,7 @@ class UIRoot extends Component {
       }
     }
     if (prevProps.showSignInDialog !== showSignInDialog && showSignInDialog) {
-      const closeAndContinue = () => {
-        this.closeDialog();
-        onContinueAfterSignIn();
-      };
-      this.showDialog(SignInDialog, {
-        message: messages[signInMessageId],
-        onSignIn: async email => {
-          const { authComplete } = await authChannel.startAuthentication(email);
-          this.showDialog(SignInDialog, { authStarted: true, onClose: closeAndContinue });
-          await authComplete;
-          this.setState({ signedIn: true });
-          this.showDialog(SignInDialog, {
-            authComplete: true,
-            message: messages[signInCompleteMessageId],
-            continueText: messages[signInContinueTextId],
-            onClose: closeAndContinue,
-            onContinue: closeAndContinue
-          });
-        },
-        onClose: closeAndContinue
-      });
+      this.showContextualSignInDialog();
     }
   }
 
@@ -212,6 +185,42 @@ class UIRoot extends Component {
     this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
     this.props.scene.removeEventListener("exit", this.exit);
   }
+
+  showContextualSignInDialog = () => {
+    const {
+      signInMessageId,
+      authChannel,
+      signInCompleteMessageId,
+      signInContinueTextId,
+      onContinueAfterSignIn
+    } = this.props;
+
+    const closeAndContinue = () => {
+      this.closeDialog();
+      onContinueAfterSignIn();
+    };
+
+    this.showDialog(SignInDialog, {
+      message: messages[signInMessageId],
+      onSignIn: async email => {
+        const { authComplete } = await authChannel.startAuthentication(email);
+
+        this.showDialog(SignInDialog, { authStarted: true, onClose: closeAndContinue });
+
+        await authComplete;
+
+        this.setState({ signedIn: true });
+        this.showDialog(SignInDialog, {
+          authComplete: true,
+          message: messages[signInCompleteMessageId],
+          continueText: messages[signInContinueTextId],
+          onClose: closeAndContinue,
+          onContinue: closeAndContinue
+        });
+      },
+      onClose: closeAndContinue
+    });
+  };
 
   updateSubscribedState = () => {
     const isSubscribed = this.props.subscriptions && this.props.subscriptions.isSubscribed();
@@ -639,8 +648,11 @@ class UIRoot extends Component {
       message: messages["sign-in.prompt"],
       onSignIn: async email => {
         const { authComplete } = await this.props.authChannel.startAuthentication(email);
+
         this.showDialog(SignInDialog, { authStarted: true });
+
         await authComplete;
+
         this.setState({ signedIn: true });
         this.closeDialog();
       }
