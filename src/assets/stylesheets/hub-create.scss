@@ -13,6 +13,10 @@
     width: 90%;
     height: 300px;
   }
+
+  @media (max-width: 350px) {
+    height: 250px;
+  }
 }
 
 :local(.create-panel) {
@@ -33,6 +37,10 @@
     @media (max-width: 520px) {
       width: 90%;
       height: 300px;
+    }
+
+    @media (max-width: 350px) {
+      height: 250px;
     }
 
     :local(.name) {
@@ -75,6 +83,11 @@
 
     :local(.submit-button) {
       @extend %big-action-button;
+
+      @media (max-width: 350px) {
+        font-size: 16px;
+        padding: 9px 24px;
+      }
     }
 
     :local(.container) {
@@ -203,6 +216,10 @@
 
             svg {
               filter: drop-shadow(0 0 1px #777);
+
+              @media (max-width: 520px) {
+                font-size: 48pt;
+              }
             }
           }
 

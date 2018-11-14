@@ -104,6 +104,7 @@ body {
   min-height: 100%;
   z-index: -1;
   overflow: hidden;
+  opacity: 0.3;
 }
 
 :local(.hero-content) {
@@ -112,12 +113,9 @@ body {
   flex-direction: column;
   justify-content: center;
   position: relative;
-  min-height: 740px;
   padding: 2em 0;
-  background-color: rgba(255, 255, 255, 0.7);
 
   @media (max-width: 768px) {
-    min-height: 680px;
     padding: 0;
     padding-bottom: 64px;
     order: -1;
@@ -126,9 +124,14 @@ body {
   :local(.attribution) {
     position: absolute;
     right: 12px;
-    bottom: 12px;
+    top: 12px;
     color: $dark-grey;
     opacity: 0.8;
+
+    @media (max-width: 768px) {
+      bottom: 12px;
+      top: auto;
+    }
 
     a {
       font-weight: bold;
@@ -142,7 +145,12 @@ body {
     align-items: center;
 
     :local(.logo) {
-      width: 350px;
+      max-width: 350px;
+
+      img {
+        width: 100%;
+        height: auto;
+      }
     }
 
     padding: 2em;
@@ -188,17 +196,26 @@ body {
       background: $spoke-action-color;
     }
   }
+
+  :local(.join-button), :local(.spoke-button) {
+    a {
+      @media (max-width: 350px) {
+        font-size: 0.75em;
+        height: 32px;
+      }
+    }
+  }
 }
 
 :local(.footer-content) {
   padding: 2.25em;
-  background-color: white;
   min-height: 80px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
 
   @media (max-width: 768px) {
+    background-color: white;
     padding: 0 0 2em 0;
     margin: 0;
     justify-content: center;
@@ -226,9 +243,10 @@ body {
     :local(.top) {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-end;
 
       @media (max-width: 768px) {
+        align-items: center;
         flex-direction: column;
       }
     }
