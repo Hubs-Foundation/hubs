@@ -75,6 +75,19 @@ AFRAME.registerComponent("media-loader", {
     this.el.removeAttribute("media-pager");
     this.el.removeAttribute("media-video");
     this.el.setAttribute("media-image", { src: "error" });
+    setTimeout(() => {
+      this.el.setAttribute("animation__remove", {
+        property: "scale",
+        dur: 200,
+        to: { x: 0.01, y: 0.01, z: 0.01 },
+        easing: "easeInQuad"
+      });
+      this.el.addEventListener("animationcomplete", () => {
+        this.el.sceneEl.emit("removing-error-image");
+        this.el.parentNode.removeChild(this.el);
+      });
+    }, 2000);
+
     clearTimeout(this.showLoaderTimeout);
     delete this.showLoaderTimeout;
   },

@@ -440,7 +440,7 @@ module.exports.Component = registerComponent("animation", {
         value = anim.animatables[0].target.aframeProperty;
 
         // Need to do a last value check for animation timeline since all the tweening
-        // begins simultaenously even if the value has not changed. Also better for perf
+        // begins simultaneously even if the value has not changed. Also better for perf
         // anyways.
         if (value === lastValue) {
           return;
