@@ -17,8 +17,8 @@ import styles from "../assets/stylesheets/index.scss";
 
 import HubCreatePanel from "./hub-create-panel.js";
 import AuthDialog from "./auth-dialog.js";
-import JoinUsDialog from "./join-us-dialog.js";
 import ReportDialog from "./report-dialog.js";
+import JoinUsDialog from "./join-us-dialog.js";
 import UpdatesDialog from "./updates-dialog.js";
 import DialogContainer from "./dialog-container.js";
 import { WithHoverSound } from "./wrap-with-audio";
@@ -46,6 +46,7 @@ class HomeRoot extends Component {
   };
 
   componentDidMount() {
+    this.closeDialog = this.closeDialog.bind(this);
     if (this.props.authVerify) {
       this.showAuthDialog(true);
       this.verifyAuth().then(this.showAuthDialog);
@@ -76,14 +77,8 @@ class HomeRoot extends Component {
     channel.push("auth_verified", { token: this.props.authToken });
   }
 
-  showDialog = (DialogClass, props = {}) => {
-    this.setState({
-      dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
-    });
-  };
-
   showAuthDialog = verifying => {
-    this.showDialog(AuthDialog, { closable: false, verifying, authOrigin: this.props.authOrigin });
+    this.setState({ dialog: <AuthDialog verifying={verifying} authOrigin={this.props.authOrigin} /> });
   };
 
   loadHomeVideo = () => {
@@ -92,22 +87,33 @@ class HomeRoot extends Component {
     playVideoWithStopOnBlur(videoEl);
   };
 
-  closeDialog = () => {
+  closeDialog() {
     this.setState({ dialog: null });
-  };
+  }
 
-  showJoinUsDialog = () => this.showDialog(JoinUsDialog);
+  showJoinUsDialog() {
+    this.setState({ dialog: <JoinUsDialog onClose={this.closeDialog} /> });
+  }
 
-  showReportDialog = () => this.showDialog(ReportDialog);
+  showReportDialog() {
+    this.setState({ dialog: <ReportDialog onClose={this.closeDialog} /> });
+  }
 
-  showUpdatesDialog = () =>
-    this.showDialog(UpdatesDialog, {
-      onSubmittedEmail: () => {
-        this.showDialog(
-          <DialogContainer>Great! Please check your e-mail to confirm your subscription.</DialogContainer>
-        );
-      }
+  showUpdatesDialog() {
+    this.setState({
+      dialog: <UpdatesDialog onClose={this.closeDialog} onSubmittedEmail={() => this.showEmailSubmittedDialog()} />
     });
+  }
+
+  showEmailSubmittedDialog() {
+    this.setState({
+      dialog: (
+        <DialogContainer onClose={this.closeDialog}>
+          Great! Please check your e-mail to confirm your subscription.
+        </DialogContainer>
+      )
+    });
+  }
 
   loadEnvironmentFromScene = async () => {
     let sceneUrlBase = "/api/v1/scenes";
@@ -149,7 +155,7 @@ class HomeRoot extends Component {
     Promise.all(environmentLoads).then(() => this.setState({ environments }));
   };
 
-  onLinkClicked = trigger => {
+  onDialogLinkClicked = trigger => {
     return e => {
       e.preventDefault();
       e.stopPropagation();
@@ -245,7 +251,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       rel="noopener noreferrer"
                       href="#"
-                      onClick={this.onLinkClicked(this.showJoinUsDialog)}
+                      onClick={this.onDialogLinkClicked(this.showJoinUsDialog.bind(this))}
                     >
                       <FormattedMessage id="home.join_us" />
                     </a>
@@ -255,7 +261,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       rel="noopener noreferrer"
                       href="#"
-                      onClick={this.onLinkClicked(this.showUpdatesDialog)}
+                      onClick={this.onDialogLinkClicked(this.showUpdatesDialog.bind(this))}
                     >
                       <FormattedMessage id="home.get_updates" />
                     </a>
@@ -265,7 +271,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       rel="noopener noreferrer"
                       href="#"
-                      onClick={this.onLinkClicked(this.showReportDialog)}
+                      onClick={this.onDialogLinkClicked(this.showReportDialog.bind(this))}
                     >
                       <FormattedMessage id="home.report_issue" />
                     </a>
