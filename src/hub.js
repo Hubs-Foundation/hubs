@@ -68,6 +68,7 @@ import "./components/emit-state-change";
 import "./components/action-to-event";
 import "./components/stop-event-propagation";
 import "./components/animation";
+import "./components/follow-entity";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -80,7 +81,7 @@ import { proxiedUrlFor } from "./utils/media-utils";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
-import { spawnChatMessage } from "./react-components/chat-message";
+import { createInWorldChatMessage } from "./react-components/chat-message";
 
 import "./systems/nav";
 import "./systems/personal-space-bubble";
@@ -562,8 +563,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   linkChannel.setSocket(socket);
 
   setInterval(() => {
-    spawnChatMessage(
-      "```Hello asdjf sdkfadsfadsfadsfadf\nalkdsf dsflsafadsfadsfadfsj\n asdf dsf adf adf sdkfadsfafd\n lasdfadsfadsfldsfldsfja\n asdkf sdfjadsadsfadsf\n aldf sdjf sdkfasdf ```"
-    );
+    createInWorldChatMessage("hello :heart:", AFRAME.utils.device.isMobile());
+
+    setTimeout(() => {
+      createInWorldChatMessage(
+        "This is some long text. Will it wrapn? I don't know but I sure hope so. That would be neat.",
+        AFRAME.utils.device.isMobile()
+      );
+    }, 2000);
   }, 5000);
 });
