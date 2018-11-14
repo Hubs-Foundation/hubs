@@ -92,8 +92,10 @@ function canMask(masker, masked) {
     masked.priority = 0;
   }
   if (masked.priority >= masker.priority) return false;
-  for (const maskerPath of Object.values(masker.src)) {
-    for (const maskedPath of Object.values(masked.src)) {
+  for (const maskerKey in masker.src) {
+    const maskerPath = masker.src[maskerKey];
+    for (const maskedKey in masked.src) {
+      const maskedPath = masked.src[maskedKey];
       if (maskedPath.indexOf(maskerPath) !== -1) {
         return true;
       }
