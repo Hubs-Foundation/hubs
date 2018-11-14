@@ -149,19 +149,27 @@ export async function createInWorldChatMessage(body, lowResolution) {
     property: "position",
     dur: 15000,
     from: { x: 0, y: 0, z: 0 },
-    to: { x: 0, y: 0, z: -0.05 },
+    to: { x: 0, y: 0.05, z: -0.05 },
     easing: "easeOutQuad"
   });
 
-  //meshEntity.setAttribute("animation__opacity", {
-  //  property: "meshMaterial.opacity",
-  //  isRawProperty: true,
-  //  delay: 3000,
-  //  dur: 13000,
-  //  from: 1.0,
-  //  to: 0.0,
-  //  easing: "easeInQuad"
-  //});
+  entity.setAttribute("animation__spawn", {
+    property: "scale",
+    dur: 200,
+    from: { x: 0.1, y: 0.1, z: 0.1 },
+    to: { x: 1, y: 1, z: 1 },
+    easing: "easeOutElastic"
+  });
+
+  meshEntity.setAttribute("animation__opacity", {
+    property: "meshMaterial.opacity",
+    isRawProperty: true,
+    delay: 3000,
+    dur: 13000,
+    from: 1.0,
+    to: 0.0,
+    easing: "easeInQuad"
+  });
 
   meshEntity.addEventListener("animationcomplete__opacity", () => {
     entity.parentNode.removeChild(entity);
@@ -191,7 +199,7 @@ export async function spawnChatMessage(body, lowResolution) {
     return;
   }
 
-  const blob = await renderChatMessage(body, false);
+  const blob = await renderChatMessage(body, false, lowResolution);
   document.querySelector("a-scene").emit("add_media", new File([blob], "message.png", { type: "image/png" }));
 }
 
