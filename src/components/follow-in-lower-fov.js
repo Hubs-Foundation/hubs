@@ -2,7 +2,7 @@ AFRAME.registerComponent("follow-in-lower-fov", {
   schema: {
     target: { type: "selector" },
     offset: { type: "vec3" },
-    speed: { type: "number", default: 0.005 }
+    speed: { type: "number", default: 0.003 }
   },
 
   init() {
@@ -14,6 +14,7 @@ AFRAME.registerComponent("follow-in-lower-fov", {
     this.snappedQ = new THREE.Quaternion();
     this.snappedXForm = new THREE.Matrix4();
     this.snappedXFormWorld = new THREE.Matrix4();
+    this.tempVector = new THREE.Vector3();
   },
 
   tick(t, dt) {
@@ -47,7 +48,16 @@ AFRAME.registerComponent("follow-in-lower-fov", {
       );
     }
 
+    this.snappedRot.set(-0.7, target.rotation.y, 0, target.rotation.order);
+    this.snappedQ.setFromEuler(this.snappedRot);
+    this.snappedXForm.compose(
+      target.position,
+      this.snappedQ,
+      target.scale
+    );
+    this.snappedXFormWorld.multiplyMatrices(target.parent.matrixWorld, this.snappedXForm);
+    this.snappedXFormWorld.decompose(this.tempVector, obj.quaternion, this.tempVector);
     // TODO mask out local X, Z rotation
-    target.getWorldQuaternion(obj.quaternion);
+    //target.getWorldQuaternion(obj.quaternion);
   }
 });
