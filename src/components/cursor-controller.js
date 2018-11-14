@@ -98,7 +98,11 @@ AFRAME.registerComponent("cursor-controller", {
       const rightHandPose = userinput.get(paths.actions.rightHand.pose);
 
       this.data.cursor.object3D.visible = this.enabled && !!cursorPose;
-      this.el.setAttribute("line", "visible", this.enabled && !!rightHandPose);
+      const lineVisible = !!(this.enabled && rightHandPose);
+
+      if (this.el.getAttribute("line").visible !== lineVisible) {
+        this.el.setAttribute("line", "visible", lineVisible);
+      }
 
       if (!this.enabled || !cursorPose) {
         return;
@@ -129,11 +133,12 @@ AFRAME.registerComponent("cursor-controller", {
       cameraPos.y = cursor.object3D.position.y;
       cursor.object3D.lookAt(cameraPos);
 
-      this.data.cursor.setAttribute(
-        "material",
-        "color",
-        intersection || isGrabbing ? cursorColorHovered : cursorColorUnhovered
-      );
+      const cursorColor = intersection || isGrabbing ? cursorColorHovered : cursorColorUnhovered;
+
+      if (this.data.cursor.getAttribute("material").color !== cursorColor) {
+        this.data.cursor.setAttribute("material", "color", cursorColor);
+      }
+
       if (this.el.components.line.data.visible) {
         this.el.setAttribute("line", {
           start: cursorPose.position.clone(),

@@ -61,6 +61,8 @@ AFRAME.registerComponent("pin-networked-object-button", {
     const isPinned = this.targetEl.getAttribute("pinnable") && this.targetEl.getAttribute("pinnable").pinned;
 
     this.labelEl.setAttribute("text", "value", isPinned ? "un-pin" : "pin");
+    this.el.setAttribute("text-button", "backgroundColor", isPinned ? "#fff" : "#ff0520");
+    this.el.setAttribute("text-button", "backgroundHoverColor", isPinned ? "#aaa" : "#cc0515");
 
     this.el.parentNode.querySelectorAll(this.data.hideWhenPinnedSelector).forEach(hideEl => {
       hideEl.setAttribute("visible", !isPinned);

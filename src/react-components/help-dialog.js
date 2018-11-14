@@ -19,8 +19,8 @@ export default class HelpDialog extends Component {
           </p>
           <p>When in a room, other avatars can see and hear you.</p>
           <p>
-            Use your controller&apos;s action button to teleport from place to place. If it has a trigger, use it to
-            pick up objects.
+            Use your controller&apos;s action button to teleport from place to place. If it has a grip, use it to pick
+            up objects.
           </p>
           <p>
             In VR, <b>look up</b> to find your menu.
@@ -29,7 +29,7 @@ export default class HelpDialog extends Component {
             The <b>Mic Toggle</b> mutes your mic.
           </p>
           <p>
-            The <b>Pause/Resume Toggle</b> pauses all other avatars and lets you block others or remove objects.
+            The <b>Pause Toggle</b> pauses all other avatars and lets you block others or pin or remove objects.
           </p>
           <p className="dialog__box__contents__links">
             <WithHoverSound>

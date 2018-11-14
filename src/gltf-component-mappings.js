@@ -34,11 +34,10 @@ AFRAME.GLTFModelPlus.registerComponent(
   "shape",
   (() => {
     const euler = new THREE.Euler();
-    const orientation = new THREE.Quaternion();
     return (el, componentName, componentData) => {
       const { scale, rotation } = componentData;
       euler.set(rotation.x, rotation.y, rotation.z);
-      orientation.setFromEuler(euler);
+      const orientation = new THREE.Quaternion().setFromEuler(euler);
       el.setAttribute(componentName, {
         shape: "box",
         offset: componentData.position,
@@ -80,6 +79,7 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
     el.setAttribute("networked", {
       template: "#interactable-media",
       owner: "scene",
+      persistent: true,
       networkId: componentData.id
     });
   }
