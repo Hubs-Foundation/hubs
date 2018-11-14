@@ -36,6 +36,7 @@ export default class MessageDispatch {
     }
 
     const playerRig = document.querySelector("#player-rig");
+    const cursor = document.querySelector("#cursor");
     const scales = [0.0625, 0.125, 0.25, 0.5, 1.0, 1.5, 3, 5, 7.5, 12.5];
     const curScale = playerRig.object3D.scale;
 
@@ -53,6 +54,7 @@ export default class MessageDispatch {
         for (let i = 0; i < scales.length; i++) {
           if (scales[i] > curScale.x) {
             playerRig.object3D.scale.set(scales[i], scales[i], scales[i]);
+            cursor.object3D.scale.set(scales[i], scales[i], scales[i]);
             break;
           }
         }
@@ -62,6 +64,7 @@ export default class MessageDispatch {
         for (let i = scales.length - 1; i >= 0; i--) {
           if (curScale.x > scales[i]) {
             playerRig.object3D.scale.set(scales[i], scales[i], scales[i]);
+            cursor.object3D.scale.set(scales[i], scales[i], scales[i]);
             break;
           }
         }
