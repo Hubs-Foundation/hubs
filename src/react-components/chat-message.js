@@ -135,8 +135,7 @@ export async function createInWorldChatMessage(body, lowResolution) {
   entity.appendChild(meshEntity);
   entity.setAttribute("follow-entity", {
     target: "#player-camera",
-    offset: { x: 0, y: 0, z: -1 },
-    fixedY: 0.7
+    offset: { x: 0, y: 0.0, z: -0.8 }
   });
 
   await nextTick();
@@ -150,19 +149,19 @@ export async function createInWorldChatMessage(body, lowResolution) {
     property: "position",
     dur: 15000,
     from: { x: 0, y: 0, z: 0 },
-    to: { x: 0, y: 0.4, z: -0.4 },
+    to: { x: 0, y: 0, z: -0.05 },
     easing: "easeOutQuad"
   });
 
-  meshEntity.setAttribute("animation__opacity", {
-    property: "meshMaterial.opacity",
-    isRawProperty: true,
-    delay: 3000,
-    dur: 13000,
-    from: 1.0,
-    to: 0.0,
-    easing: "easeInQuad"
-  });
+  //meshEntity.setAttribute("animation__opacity", {
+  //  property: "meshMaterial.opacity",
+  //  isRawProperty: true,
+  //  delay: 3000,
+  //  dur: 13000,
+  //  from: 1.0,
+  //  to: 0.0,
+  //  easing: "easeInQuad"
+  //});
 
   meshEntity.addEventListener("animationcomplete__opacity", () => {
     entity.parentNode.removeChild(entity);
