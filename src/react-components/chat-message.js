@@ -138,12 +138,8 @@ export async function createInWorldChatMessage(body, lowResolution) {
     offset: { x: 0, y: 0.0, z: -0.8 }
   });
 
-  await nextTick();
-
   const textureLoader = new THREE.TextureLoader();
   const blobUrl = URL.createObjectURL(blob);
-  meshEntity.object3D.position.set(0, 0, 0);
-  meshEntity.object3D.rotation.set(0, 0, 0);
 
   meshEntity.setAttribute("animation__float", {
     property: "position",

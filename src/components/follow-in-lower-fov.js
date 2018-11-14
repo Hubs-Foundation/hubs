@@ -20,15 +20,10 @@ AFRAME.registerComponent("follow-in-lower-fov", {
   tick(t, dt) {
     const obj = this.el.object3D;
     const target = this.data.target.object3D;
-    this.snappedRot.set(-Math.PI / 4, target.rotation.y, target.rotation.z, target.rotation.order);
 
-    this.snappedQ.setFromEuler(this.snappedRot);
-    this.snappedXForm.compose(
-      target.position,
-      this.snappedQ,
-      target.scale
-    );
-    this.snappedXFormWorld.multiplyMatrices(target.parent.matrixWorld, this.snappedXForm);
+    // Compute position + rotation by projecting offset along a downward ray in target space,
+    // and mask out Z rotation.
+    this._applyMaskedTargetRotation(-Math.PI / 4, target.rotation.y, 0, this.snappedXFormWorld);
 
     this.targetPos.copy(this.offset);
     this.targetPos.applyMatrix4(this.snappedXFormWorld);
@@ -41,23 +36,30 @@ AFRAME.registerComponent("follow-in-lower-fov", {
       obj.position.copy(this.targetPos);
       this.started = true;
     } else {
+      const t = this.data.speed * dt;
+
       obj.position.set(
-        obj.position.x + (this.targetPos.x - obj.position.x) * this.data.speed * dt,
-        obj.position.y + (this.targetPos.y - obj.position.y) * this.data.speed * dt,
-        obj.position.z + (this.targetPos.z - obj.position.z) * this.data.speed * dt
+        obj.position.x + (this.targetPos.x - obj.position.x) * t,
+        obj.position.y + (this.targetPos.y - obj.position.y) * t,
+        obj.position.z + (this.targetPos.z - obj.position.z) * t
       );
     }
 
-    this.snappedRot.set(-0.7, target.rotation.y, 0, target.rotation.order);
+    // Compute orientation by applying rotation up to face target and mask out X, Z axes
+    this.snappedXFormWorld.decompose(this.tempVector, obj.quaternion, this.tempVector);
+  },
+
+  _applyMaskedTargetRotation(x, y, z, to) {
+    const target = this.data.target.object3D;
+    this.snappedRot.set(x, y, z, target.rotation.order);
     this.snappedQ.setFromEuler(this.snappedRot);
+
     this.snappedXForm.compose(
       target.position,
       this.snappedQ,
       target.scale
     );
-    this.snappedXFormWorld.multiplyMatrices(target.parent.matrixWorld, this.snappedXForm);
-    this.snappedXFormWorld.decompose(this.tempVector, obj.quaternion, this.tempVector);
-    // TODO mask out local X, Z rotation
-    //target.getWorldQuaternion(obj.quaternion);
+
+    to.multiplyMatrices(target.parent.matrixWorld, this.snappedXForm);
   }
 });
