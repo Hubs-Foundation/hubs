@@ -1,6 +1,7 @@
 import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
+import { addSetsToBindings } from "./utils";
 
 const zero = "/vars/touchscreen/zero";
 const forward = "/vars/touchscreen/pinchDeltaForward";
@@ -13,7 +14,7 @@ const gyroCamDelta = "vars/gyro/gyroCameraDelta";
 const gyroCamDeltaXScaled = "vars/gyro/gyroCameraDelta/x/scaled";
 const gyroCamDeltaYScaled = "vars/gyro/gyroCameraDelta/y/scaled";
 
-export const touchscreenUserBindings = {
+export const touchscreenUserBindings = addSetsToBindings({
   [sets.global]: [
     {
       src: { value: paths.device.touchscreen.pinch.delta },
@@ -21,6 +22,7 @@ export const touchscreenUserBindings = {
       xform: xforms.scale(0.25)
     },
     {
+      src: {},
       dest: { value: zero },
       xform: xforms.always(0)
     },
@@ -80,16 +82,12 @@ export const touchscreenUserBindings = {
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
       dest: { value: paths.actions.cursor.grab },
-      xform: xforms.copy,
-      root: "touchscreen.isTouchingGrabbable",
-      priority: 100
+      xform: xforms.copy
     },
     {
       src: { value: paths.device.hud.penButton },
       dest: { value: paths.actions.spawnPen },
-      xform: xforms.rising,
-      root: "hud.penButton",
-      priority: 100
+      xform: xforms.rising
     }
   ],
   [sets.cursorHoldingInteractable]: [
@@ -97,8 +95,7 @@ export const touchscreenUserBindings = {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.falling,
-      root: "touchscreen.cursorDrop",
-      priority: 100
+      priority: 1
     }
   ],
 
@@ -106,27 +103,21 @@ export const touchscreenUserBindings = {
   [sets.cursorHoldingPen]: [
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
-      dest: { value: paths.noop },
-      xform: xforms.noop,
-      root: "touchscreen.cursorDrop",
-      priority: 200
-    },
-    {
-      src: { value: paths.device.touchscreen.isTouchingGrabbable },
       dest: { value: paths.actions.cursor.startDrawing },
-      xform: xforms.risingWithFrameDelay(5)
+      xform: xforms.risingWithFrameDelay(5),
+      priority: 2
     },
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
       dest: { value: paths.actions.cursor.stopDrawing },
-      xform: xforms.falling
+      xform: xforms.falling,
+      priority: 2
     },
     {
       src: { value: paths.device.hud.penButton },
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.rising,
-      root: "hud.penButton",
-      priority: 200
+      priority: 1
     }
   ]
-};
+});
