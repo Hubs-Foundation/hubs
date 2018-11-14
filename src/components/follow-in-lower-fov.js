@@ -9,27 +9,28 @@ AFRAME.registerComponent("follow-in-lower-fov", {
     this.targetPos = new THREE.Vector3();
     this.offset = new THREE.Vector3();
     this.offset.copy(this.data.offset);
+
+    this.snappedRot = new THREE.Euler();
+    this.snappedQ = new THREE.Quaternion();
+    this.snappedXForm = new THREE.Matrix4();
+    this.snappedXFormWorld = new THREE.Matrix4();
   },
 
   tick(t, dt) {
     const obj = this.el.object3D;
     const target = this.data.target.object3D;
+    this.snappedRot.set(-Math.PI / 4, target.rotation.y, target.rotation.z, target.rotation.order);
 
-    const snappedRot = new THREE.Euler(-Math.PI / 4, target.rotation.y, 0, target.rotation.order);
-
-    const snappedQ = new THREE.Quaternion();
-    snappedQ.setFromEuler(snappedRot);
-    const snappedXForm = new THREE.Matrix4();
-    const snappedXFormWorld = new THREE.Matrix4();
-    snappedXForm.compose(
+    this.snappedQ.setFromEuler(this.snappedRot);
+    this.snappedXForm.compose(
       target.position,
-      snappedQ,
+      this.snappedQ,
       target.scale
     );
-    snappedXFormWorld.multiplyMatrices(target.parent.matrixWorld, snappedXForm);
+    this.snappedXFormWorld.multiplyMatrices(target.parent.matrixWorld, this.snappedXForm);
 
     this.targetPos.copy(this.offset);
-    this.targetPos.applyMatrix4(snappedXFormWorld);
+    this.targetPos.applyMatrix4(this.snappedXFormWorld);
 
     if (obj.parent) {
       obj.parent.worldToLocal(this.targetPos);
@@ -46,6 +47,7 @@ AFRAME.registerComponent("follow-in-lower-fov", {
       );
     }
 
+    // TODO mask out local X, Z rotation
     target.getWorldQuaternion(obj.quaternion);
   }
 });
