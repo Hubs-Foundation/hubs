@@ -224,31 +224,36 @@ AFRAME.registerComponent("media-pager", {
     this.toolbar = null;
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
-    this.el.addEventListener("image-loaded", async e => {
-      // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
-      // request for the same page to read out the max-content-index header
-      this.maxIndex = await fetchMaxContentIndex(e.detail.src);
-      // if this is the first image we ever loaded, set up the UI
-      if (this.toolbar == null) {
-        const template = document.getElementById("paging-toolbar");
-        this.el.querySelector(".interactable-ui").appendChild(document.importNode(template.content, true));
-        this.toolbar = this.el.querySelector(".paging-toolbar");
-        // we have to wait a tick for the attach callbacks to get fired for the elements in a template
-        setTimeout(() => {
-          this.nextButton = this.el.querySelector(".next-button [text-button]");
-          this.prevButton = this.el.querySelector(".prev-button [text-button]");
-          this.pageLabel = this.el.querySelector(".page-label");
 
-          this.nextButton.addEventListener("grab-start", this.onNext);
-          this.prevButton.addEventListener("grab-start", this.onPrev);
+    // we kind of have to deal with the "empty case" for this component, because networked-aframe
+    // will instantiate a null version of it for all media objects thanks to how it handles component schemas
+    if (this.data.src) {
+      this.el.addEventListener("image-loaded", async e => {
+        // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
+        // request for the same page to read out the max-content-index header
+        this.maxIndex = await fetchMaxContentIndex(e.detail.src);
+        // if this is the first image we ever loaded, set up the UI
+        if (this.toolbar == null) {
+          const template = document.getElementById("paging-toolbar");
+          this.el.querySelector(".interactable-ui").appendChild(document.importNode(template.content, true));
+          this.toolbar = this.el.querySelector(".paging-toolbar");
+          // we have to wait a tick for the attach callbacks to get fired for the elements in a template
+          setTimeout(() => {
+            this.nextButton = this.el.querySelector(".next-button [text-button]");
+            this.prevButton = this.el.querySelector(".prev-button [text-button]");
+            this.pageLabel = this.el.querySelector(".page-label");
 
+            this.nextButton.addEventListener("grab-start", this.onNext);
+            this.prevButton.addEventListener("grab-start", this.onPrev);
+
+            this.update();
+            this.el.emit("preview-loaded");
+          }, 0);
+        } else {
           this.update();
-          this.el.emit("preview-loaded");
-        }, 0);
-      } else {
-        this.update();
-      }
-    });
+        }
+      });
+    }
   },
 
   update() {
