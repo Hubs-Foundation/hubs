@@ -133,7 +133,7 @@ export async function createInWorldChatMessage(body, lowResolution) {
   document.querySelector("a-scene").appendChild(entity);
 
   entity.appendChild(meshEntity);
-  entity.setAttribute("follow-entity", {
+  entity.setAttribute("follow-in-lower-fov", {
     target: "#player-camera",
     offset: { x: 0, y: 0.0, z: -0.8 }
   });
