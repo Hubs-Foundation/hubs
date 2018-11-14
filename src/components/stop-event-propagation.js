@@ -1,6 +1,5 @@
 const handler = e => {
   e.stopPropagation();
-  e.preventDefault();
 };
 
 AFRAME.registerComponent("stop-event-propagation", {
