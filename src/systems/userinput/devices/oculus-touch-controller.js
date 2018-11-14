@@ -66,10 +66,10 @@ export class OculusTouchControllerDevice {
       frame[this.path.axis(axis.name)] = frame[paths.device.gamepad(this.gamepad.index).axis(axis.axisId)];
     });
 
-    const rayObject = document.querySelector(this.selector).object3D;
-    rayObject.updateMatrixWorld();
-    this.rayObjectRotation.setFromRotationMatrix(rayObject.matrixWorld);
-    this.pose.position.setFromMatrixPosition(rayObject.matrixWorld);
+    this.rayObject = this.rayObject || document.querySelector(this.selector).object3D;
+    this.rayObject.updateMatrixWorld();
+    this.rayObjectRotation.setFromRotationMatrix(this.rayObject.matrixWorld);
+    this.pose.position.setFromMatrixPosition(this.rayObject.matrixWorld);
     this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
     this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
     frame[this.path.pose] = this.pose;
