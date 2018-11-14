@@ -6,7 +6,7 @@ import en from "react-intl/locale-data/en";
 import styles from "../assets/stylesheets/scene-ui.scss";
 import hubLogo from "../assets/images/hub-preview-white.png";
 import spokeLogo from "../assets/images/spoke_logo_black.png";
-import { postWithAuth } from "../utils/phoenix-utils";
+import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { generateHubName } from "../utils/name-generation";
 import { WithHoverSound } from "./wrap-with-audio";
 import CreateRoomDialog from "./create-room-dialog.js";
@@ -54,8 +54,14 @@ class SceneUI extends Component {
 
   createRoom = async () => {
     const payload = { hub: { name: this.state.customRoomName || generateHubName(), scene_id: this.props.sceneId } };
+    const createUrl = getReticulumFetchUrl("/api/v1/hubs");
 
-    const res = await postWithAuth("/api/v1/hubs", payload);
+    const res = await fetch(createUrl, {
+      body: JSON.stringify(payload),
+      headers: { "content-type": "application/json" },
+      method: "POST"
+    });
+
     const hub = await res.json();
 
     if (!process.env.RETICULUM_SERVER || document.location.host === process.env.RETICULUM_SERVER) {
