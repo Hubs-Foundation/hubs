@@ -4,7 +4,7 @@
   width: 690px;
   height: 460px;
 
-  @media (max-width: 768px) , (max-height: 715px) {
+  @media (max-width: 768px), (max-height: 480px) {
     width: 525px;
     height: 350px;
   }
@@ -29,7 +29,7 @@
     width: 690px;
     height: 460px;
 
-    @media (max-width: 768px) , (max-height: 715px) {
+    @media (max-width: 768px) {
       width: 525px;
       height: 350px;
     }
@@ -40,6 +40,11 @@
     }
 
     @media (max-width: 350px) {
+      height: 250px;
+    }
+
+    @media (max-height: 480px) {
+      width: 375px;
       height: 250px;
     }
 
@@ -68,7 +73,7 @@
         color: white;
       }
 
-      @media (max-width: 768px) , (max-height: 715px) {
+      @media (max-width: 768px), (max-height: 480px) {
         min-width: auto;
         font-size: 1.5em;
         width: 100%;
@@ -84,9 +89,10 @@
     :local(.submit-button) {
       @extend %big-action-button;
 
-      @media (max-width: 350px) {
+      @media (max-width: 350px), (max-height: 480px) {
         font-size: 16px;
         padding: 9px 24px;
+        width: auto;
       }
     }
 
@@ -111,7 +117,7 @@
       overflow: hidden;
       pointer-events: none;
 
-      @media (max-width: 768px) , (max-height: 715px) {
+      @media (max-width: 768px), (max-height: 480px) {
         width: 100%;
       }
 
@@ -153,7 +159,7 @@
             border: none;
             pointer-events: auto;
 
-            @media (max-width: 520px) {
+            @media (max-width: 520px), (max-height: 480px) {
               display: none;
             }
           }
@@ -176,7 +182,7 @@
               color: $light-text;
               font-size: 1.4em;
 
-              @media (max-width: 520px) {
+              @media (max-width: 520px), (max-height: 480px) {
                 display: none;
               }
             }
@@ -186,7 +192,7 @@
               font-size: 1.0em;
               display: inline;
 
-              @media (max-width: 520px) {
+              @media (max-width: 520px), (max-height: 480px) {
                 display: none;
               }
             }
@@ -217,7 +223,7 @@
             svg {
               filter: drop-shadow(0 0 1px #777);
 
-              @media (max-width: 520px) {
+              @media (max-width: 520px), (max-height: 480px) {
                 font-size: 48pt;
               }
             }

@@ -41,7 +41,7 @@ body {
   height: 65px;
   display: flex;
 
-  @media (max-width: 768px) {
+  @media (max-width: 768px), (max-height: 480px) {
     height: auto;
     min-height: auto;
     padding: 1em 0;
@@ -50,7 +50,7 @@ body {
   :local(.title-and-nav) {
     display: flex;
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 480px) {
       justify-content: center;
     }
 
@@ -62,7 +62,7 @@ body {
       display: flex;
       align-items: center;
 
-      @media (max-width: 768px) {
+      @media (max-width: 768px), (max-height: 480px) {
         flex-direction: column;
       }
 
@@ -74,7 +74,7 @@ body {
         font-size: 1.4em;
         text-decoration: none;
         
-        @media (max-width: 768px) {
+        @media (max-width: 768px), (max-height: 480px) {
           margin-top: 0.5em;
         }
       }
@@ -116,7 +116,7 @@ body {
   position: relative;
   padding: 2em 0;
 
-  @media (max-width: 768px) {
+  @media (max-width: 768px), (max-height: 480px) {
     padding: 0;
     padding-bottom: 64px;
     order: -1;
@@ -130,7 +130,7 @@ body {
     opacity: 0.8;
     font-size: 12px;
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 480px) {
       bottom: 12px;
       top: auto;
     }
@@ -145,6 +145,11 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: 2em;
+
+    @media (max-height: 480px) {
+      padding: 1em;
+    }
 
     :local(.logo) {
       max-width: 350px;
@@ -155,8 +160,6 @@ body {
       }
     }
 
-    padding: 2em;
-
     :local(.title) {
       text-align: center;
       font-size: 1.5em;
@@ -164,6 +167,10 @@ body {
 
       @media (max-width: 768px) {
         font-size: 1em;
+      }
+
+      @media (max-height: 480px) {
+        display: none;
       }
     }
   }
@@ -173,7 +180,7 @@ body {
     padding-bottom: 2vw;
     position: relative;
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (max-height: 480px) {
       padding: 0.5em;
     }
   }
@@ -201,7 +208,7 @@ body {
 
   :local(.join-button), :local(.spoke-button) {
     a {
-      @media (max-width: 350px) {
+      @media (max-width: 350px), (max-height: 480px) {
         font-size: 0.75em;
         height: 32px;
       }
@@ -216,7 +223,7 @@ body {
   align-items: center;
   justify-content: flex-end;
 
-  @media (max-width: 768px) {
+  @media (max-width: 768px), (max-height: 480px) {
     background-color: white;
     padding: 0 0 2em 0;
     margin: 0;
@@ -234,7 +241,7 @@ body {
       height: 49px;
       margin-left: 18px;
 
-      @media (max-width: 768px) {
+      @media (max-width: 768px), (max-height: 480px) {
         width: 113px;
         height: 32px;
         margin: 0;
@@ -247,7 +254,7 @@ body {
       justify-content: space-between;
       align-items: flex-end;
 
-      @media (max-width: 768px) {
+      @media (max-width: 768px), (max-height: 480px) {
         align-items: center;
         flex-direction: column;
       }
@@ -258,7 +265,7 @@ body {
       font-weight: bold;
       margin: 0 18px;
 
-      @media (max-width: 768px) {
+      @media (max-width: 768px), (max-height: 480px) {
         margin-top: 18px;
       }
     }
