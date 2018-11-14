@@ -12,7 +12,6 @@ import mozLogo from "../assets/images/moz-logo-black.png";
 import classNames from "classnames";
 import { ENVIRONMENT_URLS } from "../assets/environments/environments";
 import { connectToReticulum } from "../utils/phoenix-utils";
-import maskEmail from "../utils/mask-email";
 
 import styles from "../assets/stylesheets/index.scss";
 
@@ -20,7 +19,6 @@ import HubCreatePanel from "./hub-create-panel.js";
 import AuthDialog from "./auth-dialog.js";
 import JoinUsDialog from "./join-us-dialog.js";
 import ReportDialog from "./report-dialog.js";
-import SignInDialog from "./sign-in-dialog.js";
 import UpdatesDialog from "./updates-dialog.js";
 import DialogContainer from "./dialog-container.js";
 import { WithHoverSound } from "./wrap-with-audio";
@@ -31,8 +29,6 @@ class HomeRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
     sceneId: PropTypes.string,
-    store: PropTypes.object,
-    authChannel: PropTypes.object,
     authVerify: PropTypes.bool,
     authTopic: PropTypes.string,
     authToken: PropTypes.string,
@@ -45,16 +41,9 @@ class HomeRoot extends Component {
   state = {
     environments: [],
     dialog: null,
-    signedIn: null,
     mailingListEmail: "",
     mailingListPrivacy: false
   };
-
-  constructor(props) {
-    super(props);
-    this.state.signedIn = props.authChannel.authenticated;
-    this.state.email = props.store.state.credentials.email;
-  }
 
   componentDidMount() {
     if (this.props.authVerify) {
@@ -119,25 +108,6 @@ class HomeRoot extends Component {
         );
       }
     });
-
-  showSignInDialog = () => {
-    this.showDialog(SignInDialog, {
-      message: messages["sign-in.prompt"],
-      onSignIn: async email => {
-        const { authComplete } = await this.props.authChannel.startAuthentication(email);
-        this.showDialog(SignInDialog, { authStarted: true });
-        await authComplete;
-        this.setState({ signedIn: true, email });
-        this.closeDialog();
-      }
-    });
-  };
-
-  signOut = () => {
-    this.props.authChannel.removeCredentials();
-    // TODO BP - should randomize avatar and display name on sign out.
-    this.setState({ signedIn: false });
-  };
 
   loadEnvironmentFromScene = async () => {
     let sceneUrlBase = "/api/v1/scenes";
@@ -216,22 +186,6 @@ class HomeRoot extends Component {
                     </a>
                   </WithHoverSound>
                 </div>
-              </div>
-              <div className={styles.signIn}>
-                {this.state.signedIn ? (
-                  <div>
-                    <span>
-                      <FormattedMessage id="sign-in.as" /> {maskEmail(this.state.email)}
-                    </span>{" "}
-                    <a onClick={this.onLinkClicked(this.signOut)}>
-                      <FormattedMessage id="sign-in.out" />
-                    </a>
-                  </div>
-                ) : (
-                  <a onClick={this.onLinkClicked(this.showSignInDialog)}>
-                    <FormattedMessage id="sign-in.in" />
-                  </a>
-                )}
               </div>
             </div>
             <div className={styles.heroContent}>
