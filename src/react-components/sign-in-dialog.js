@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import { FormattedMessage } from "react-intl";
 
 import styles from "../assets/stylesheets/sign-in-dialog.scss";
 import DialogContainer from "./dialog-container";
@@ -29,8 +30,7 @@ export default class SignInDialog extends Component {
     if (this.props.authStarted) {
       contents = (
         <p>
-          Email sent!<br />
-          Waiting for you to click the link in the email...
+          <FormattedMessage id="sign-in.auth-started" values={{ br: <br /> }} />
         </p>
       );
     } else if (this.props.authComplete) {
@@ -46,7 +46,6 @@ export default class SignInDialog extends Component {
       contents = (
         <form onSubmit={this.onSubmit} className={styles.signInForm}>
           <span>{this.props.message}</span>
-          <br />
           <input
             name="email"
             type="email"
@@ -56,6 +55,16 @@ export default class SignInDialog extends Component {
             onChange={e => this.setState({ email: e.target.value })}
             className={styles.emailField}
           />
+          <p className={styles.terms}>
+            By proceeding, you agree to the{" "}
+            <a rel="noopener noreferrer" target="_blank" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
+              terms of use
+            </a>{" "}
+            and{" "}
+            <a rel="noopener noreferrer" target="_blank" href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md">
+              privacy notice
+            </a>.
+          </p>
           <button type="submit" className={styles.nextButton}>
             next
           </button>

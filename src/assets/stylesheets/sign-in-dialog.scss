@@ -11,3 +11,7 @@
 :local(.next-button), :local(.continue-button) {
   @extend %action-button;
 }
+
+:local(.terms) {
+  font-size: 7pt;
+}
