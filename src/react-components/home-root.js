@@ -195,6 +195,12 @@ class HomeRoot extends Component {
               </div>
             </div>
             <div className={styles.heroContent}>
+              <div className={styles.videoContainer}>
+                <video playsInline muted loop autoPlay className={styles.backgroundVideo} id="background-video">
+                  <source src={homeVideoWebM} type="video/webm" />
+                  <source src={homeVideoMp4} type="video/mp4" />
+                </video>
+              </div>
               <div className={styles.attribution}>
                 Medieval Fantasy Book by{" "}
                 <a
@@ -302,10 +308,6 @@ class HomeRoot extends Component {
               </div>
             </div>
           </div>
-          <video playsInline muted loop autoPlay className={styles.backgroundVideo} id="background-video">
-            <source src={homeVideoWebM} type="video/webm" />
-            <source src={homeVideoMp4} type="video/mp4" />
-          </video>
           {this.state.dialog}
         </div>
       </IntlProvider>

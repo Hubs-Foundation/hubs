@@ -200,6 +200,10 @@
             pointer-events: auto;
             cursor: pointer;
             padding: 0;
+
+            svg {
+              filter: drop-shadow(0 0 1px #777);
+            }
           }
 
           :local(.prev) {

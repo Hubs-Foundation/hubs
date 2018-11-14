@@ -14,44 +14,23 @@ body {
   padding: 0;
   background-color: white;
   color: black;
-}
-
-.home-root {
   @extend %default-font;
-
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
 }
 
 :local(.home) {
-  position: absolute;
   display: flex;
-  width: 100%;
-  height: 100%;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 :local(.main-content) {
-  width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
-  z-index: 2;
+  flex: 1;
 
   &:local(.noninteractive) {
     pointer-events: none;
   }
-}
-
-:local(.background-video) {
-  position: fixed;
-  top: 0;
-  left: 0;
-  opacity: 0.3;
-  min-width: 100%;
-  min-height: 100%;
-  z-index: 1;
 }
 
 :local(.header-content) {
@@ -61,14 +40,14 @@ body {
   height: 65px;
   display: flex;
 
-  @media (max-width: 768px), (max-height: 715px) {
-    display: none;
+  @media (max-width: 768px) {
+    height: auto;
+    min-height: auto;
+    padding: 1em 0;
   }
 
   :local(.title-and-nav) {
     display: flex;
-    width: $header-section-width;
-    cursor: pointer;
 
     @media (max-width: 768px) {
       justify-content: center;
@@ -78,73 +57,82 @@ body {
       flex: 1 1 $header-section-width;
     }
 
-    :local(.name) {
-      width: 200px;
-    }
-
-    :local(.hubs) {
-      font-size: 2.5em;
-      font-weight: bold;
-      pointer-events: none;
-    }
-
-    :local(.preview) {
-      color: $grey-text;
-      margin-left: 10px;
-      margin-right: 20px;
-      pointer-events: none;
-    }
-
     :local(.links) {
       display: flex;
       align-items: center;
 
+      @media (max-width: 768px) {
+        flex-direction: column;
+      }
+
       a {
-        margin: 0px 32px 0px 0px;
+        display: flex;
+        margin: 0 16px;
         color: black;
         font-weight: bold;
         font-size: 1.4em;
         text-decoration: none;
-      }
-
-      a:first-child {
-        margin-left: 16px;
+        
+        @media (max-width: 768px) {
+          margin-top: 0.5em;
+        }
       }
     }
   }
 }
 
+:local(.video-container) {
+  position: absolute;
+  z-index: -1;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
+  overflow: hidden;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  background-image: none;
+}
+
+:local(.background-video) {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 100%;
+  min-height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
 :local(.hero-content) {
-  flex: 10;
-  min-height: 740px;
   display: flex;
+  flex: 1;
   flex-direction: column;
   justify-content: center;
   position: relative;
+  min-height: 740px;
+  padding: 2em 0;
+  background-color: rgba(255, 255, 255, 0.7);
 
   @media (max-width: 768px) {
-    padding: 0px;
-    min-height: 490px;
-  }
-
-  @media (max-height: 715px) {
-    justify-content: flex-start;
+    min-height: 680px;
+    padding: 0;
+    padding-bottom: 64px;
+    order: -1;
   }
 
   :local(.attribution) {
     position: absolute;
     right: 12px;
-    top: 12px;
-    color: white;
+    bottom: 12px;
+    color: $dark-grey;
     opacity: 0.8;
 
     a {
       font-weight: bold;
-      color: white;
-    }
-
-    @media (max-width: 768px) {
-      display: none;
+      color: $dark-grey;
     }
   }
 
@@ -164,8 +152,8 @@ body {
       font-size: 1.5em;
       font-weight: bold;
 
-      @media (max-height: 715px) {
-        display: none;
+      @media (max-width: 768px) {
+        font-size: 1em;
       }
     }
   }
@@ -204,17 +192,17 @@ body {
 
 :local(.footer-content) {
   padding: 1em 2.25em;
-  margin: 24px;
-
-  @media (max-width: 768px) {
-    padding: 1em;
-    margin: 0;
-  }
-
+  background-color: white;
   min-height: 80px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
+
+  @media (max-width: 768px) {
+    padding: 0 0 2em 0;
+    margin: 0;
+    justify-content: center;
+  }
 
   :local(.links) {
     text-align: center;
@@ -231,13 +219,18 @@ body {
         width: 113px;
         height: 32px;
         margin: 0;
+        margin-top: 18px;
       }
     }
 
     :local(.top) {
       display: flex;
       justify-content: space-between;
-      align-items: flex-end;
+      align-items: center;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+      }
     }
 
     :local(.link) {
@@ -246,7 +239,7 @@ body {
       margin: 0 18px;
 
       @media (max-width: 768px) {
-        display: none;
+        margin-top: 18px;
       }
     }
 
