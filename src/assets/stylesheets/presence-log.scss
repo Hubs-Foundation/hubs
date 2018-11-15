@@ -187,6 +187,15 @@
     padding: 0;
     margin: 0;
   }
+
+  :local(.message-wrap) {
+    flex-direction: column;
+  }
+
+  :local(.message-source) {
+    font-size: 0.7em;
+    color: $dark-grey;
+  }
 }
 
 :local(.emoji) {

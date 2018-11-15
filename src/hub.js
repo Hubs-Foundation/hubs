@@ -563,11 +563,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   linkChannel.setSocket(socket);
 
   setInterval(() => {
-    createInWorldChatMessage("hello :heart:", AFRAME.utils.device.isMobile());
+    createInWorldChatMessage("hello :heart:", "Greg", AFRAME.utils.device.isMobile());
 
     setTimeout(() => {
       createInWorldChatMessage(
         "This is some long text. Will it wrapn? I don't know but I sure hope so. That would be neat.",
+        "Another guy",
         AFRAME.utils.device.isMobile()
       );
     }, 2000);

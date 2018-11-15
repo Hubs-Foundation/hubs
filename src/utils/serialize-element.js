@@ -177,6 +177,10 @@ export default function serializeElement(el) {
       cssTexts[i] = e.style.cssText;
       for (let ii = 0; ii < computedStyle.length; ii++) {
         const cssPropName = computedStyle[ii];
+
+        // Skip non-standard CSS for now, because it overwrites things like color
+        if (cssPropName.startsWith("-webkit")) continue;
+
         if (computedStyle[cssPropName] !== defaultStyle[cssPropName]) {
           e.style[cssPropName] = computedStyle[cssPropName];
         }

@@ -40,9 +40,10 @@ const wordWrap = body => {
   return outWords.join(" ");
 };
 
-const messageBodyDom = body => {
+const messageBodyDom = (body, from) => {
   // Support wrapping text in ` to get monospace, and multiline.
   const multiLine = body.split("\n").length > 1;
+  const wrapStyle = multiLine ? styles.messageWrapMulti : styles.messageWrap;
   const mono = body.startsWith("`") && body.endsWith("`");
   const messageBodyClasses = {
     [styles.messageBody]: true,
@@ -57,13 +58,20 @@ const messageBodyDom = body => {
   const cleanedBody = (mono ? body.substring(1, body.length - 1) : body).trim();
 
   return (
-    <div className={classNames(messageBodyClasses)}>
-      <Linkify properties={{ target: "_blank", rel: "noopener referrer" }}>{toEmojis(cleanedBody)}</Linkify>
+    <div className={wrapStyle}>
+      {from && (
+        <div className={styles.messageSource}>
+          <b>{from}</b>:
+        </div>
+      )}
+      <div className={classNames(messageBodyClasses)}>
+        <Linkify properties={{ target: "_blank", rel: "noopener referrer" }}>{toEmojis(cleanedBody)}</Linkify>
+      </div>
     </div>
   );
 };
 
-export function renderChatMessage(body, lowResolution) {
+export function renderChatMessage(body, from, lowResolution) {
   const isOneLine = body.split("\n").length === 1;
   const context = messageCanvas.getContext("2d");
   const emoji = toEmojis(body);
@@ -86,7 +94,7 @@ export function renderChatMessage(body, lowResolution) {
         [styles.presenceLogEmoji]: isEmoji
       })}
     >
-      {messageBodyDom(body)}
+      {messageBodyDom(body, from)}
     </div>
   );
 
@@ -125,8 +133,8 @@ export function renderChatMessage(body, lowResolution) {
   });
 }
 
-export async function createInWorldChatMessage(body, lowResolution) {
-  const blob = await renderChatMessage(body, lowResolution);
+export async function createInWorldChatMessage(body, from, lowResolution) {
+  const blob = await renderChatMessage(body, from, lowResolution);
   const entity = document.createElement("a-entity");
   const meshEntity = document.createElement("a-entity");
 
@@ -187,7 +195,7 @@ export async function createInWorldChatMessage(body, lowResolution) {
   });
 }
 
-export async function spawnChatMessage(body, lowResolution) {
+export async function spawnChatMessage(body, from) {
   if (body.length === 0) return;
 
   if (body.match(urlRegex)) {
@@ -195,7 +203,7 @@ export async function spawnChatMessage(body, lowResolution) {
     return;
   }
 
-  const blob = await renderChatMessage(body, false, lowResolution);
+  const blob = await renderChatMessage(body, from, false);
   document.querySelector("a-scene").emit("add_media", new File([blob], "message.png", { type: "image/png" }));
 }
 
@@ -210,12 +218,7 @@ export default function ChatMessage(props) {
           onClick={() => spawnChatMessage(props.body)}
         />
       )}
-      <div className={isOneLine ? styles.messageWrap : styles.messageWrapMulti}>
-        <div className={styles.messageSource}>
-          <b>{props.name}</b>:
-        </div>
-        {messageBodyDom(props.body)}
-      </div>
+      {messageBodyDom(props.body, props.name)}
     </div>
   );
 }
