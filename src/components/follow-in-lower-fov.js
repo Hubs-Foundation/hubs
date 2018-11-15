@@ -45,7 +45,6 @@ AFRAME.registerComponent("follow-in-lower-fov", {
       );
     }
 
-    // Compute orientation by applying rotation up to face target and mask out X, Z axes
     this.snappedXFormWorld.decompose(this.tempVector, obj.quaternion, this.tempVector);
   },
 
