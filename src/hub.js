@@ -88,6 +88,7 @@ import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/exit-on-blur";
 import "./systems/userinput/userinput";
+import "./systems/userinput/userinput-debug";
 
 import "./gltf-component-mappings";
 

@@ -1,12 +1,20 @@
 import { sets } from "./sets";
 
-export function updateActionSetsBasedOnSuperhands() {
-  const rightHandState = document.querySelector("#player-right-controller").components["super-hands"].state;
-  const leftHandState = document.querySelector("#player-left-controller").components["super-hands"].state;
-  const cursorHand = document.querySelector("#cursor").components["super-hands"].state;
-  const leftTeleporter = document.querySelector("#player-left-controller").components["teleport-controls"];
-  const rightTeleporter = document.querySelector("#player-right-controller").components["teleport-controls"];
-  const cursorController = document.querySelector("#cursor-controller").components["cursor-controller"];
+let rightHandState;
+let leftHandState;
+let cursorHand;
+let leftTeleporter;
+let rightTeleporter;
+let cursorController;
+
+export function resolveActionSets() {
+  rightHandState = rightHandState || document.querySelector("#player-right-controller").components["super-hands"].state;
+  leftHandState = leftHandState || document.querySelector("#player-left-controller").components["super-hands"].state;
+  cursorHand = cursorHand || document.querySelector("#cursor").components["super-hands"].state;
+  leftTeleporter = leftTeleporter || document.querySelector("#player-left-controller").components["teleport-controls"];
+  rightTeleporter =
+    rightTeleporter || document.querySelector("#player-right-controller").components["teleport-controls"];
+  cursorController = cursorController || document.querySelector("#cursor-controller").components["cursor-controller"];
 
   const leftHandHoveringOnInteractable =
     !leftTeleporter.active &&
@@ -21,17 +29,10 @@ export function updateActionSetsBasedOnSuperhands() {
     leftHandState.has("hover-start") &&
     leftHandState.get("hover-start").matches(".icamera, .icamera *");
   const leftHandHoldingInteractable =
-    !leftTeleporter.active &&
-    leftHandState.has("grab-start") &&
-    leftHandState.get("grab-start").matches(".interactable, .interactable *");
-  const leftHandHoldingPen =
-    !leftTeleporter.active &&
-    leftHandState.has("grab-start") &&
-    leftHandState.get("grab-start").matches(".pen, .pen *");
+    leftHandState.has("grab-start") && leftHandState.get("grab-start").matches(".interactable, .interactable *");
+  const leftHandHoldingPen = leftHandState.has("grab-start") && leftHandState.get("grab-start").matches(".pen, .pen *");
   const leftHandHoldingCamera =
-    !leftTeleporter.active &&
-    leftHandState.has("grab-start") &&
-    leftHandState.get("grab-start").matches(".icamera, .icamera *");
+    leftHandState.has("grab-start") && leftHandState.get("grab-start").matches(".icamera, .icamera *");
   const leftHandHovering = !leftTeleporter.active && leftHandState.has("hover-start");
   const leftHandHoveringOnNothing = !leftHandHovering && !leftHandState.has("grab-start");
   const leftHandTeleporting = leftTeleporter.active;
@@ -58,17 +59,12 @@ export function updateActionSetsBasedOnSuperhands() {
     rightHandState.has("hover-start") &&
     rightHandState.get("hover-start").matches(".icamera, .icamera *");
   const rightHandHoldingInteractable =
-    !rightHandTeleporting &&
     !cursorGrabbing &&
     rightHandState.has("grab-start") &&
     rightHandState.get("grab-start").matches(".interactable, .interactable *");
   const rightHandHoldingPen =
-    !rightHandTeleporting &&
-    !cursorGrabbing &&
-    rightHandState.has("grab-start") &&
-    rightHandState.get("grab-start").matches(".pen, .pen *");
+    !cursorGrabbing && rightHandState.has("grab-start") && rightHandState.get("grab-start").matches(".pen, .pen *");
   const rightHandHoldingCamera =
-    !rightTeleporter.active &&
     !cursorGrabbing &&
     rightHandState.has("grab-start") &&
     rightHandState.get("grab-start").matches(".icamera, .icamera *");
@@ -83,11 +79,18 @@ export function updateActionSetsBasedOnSuperhands() {
   // Cursor
   cursorController.enabled = !(rightHandTeleporting || rightHandHovering || rightHandGrabbing);
 
+  const cursorHoveringOnUI =
+    cursorController.enabled &&
+    !rightHandTeleporting &&
+    !rightHandHovering &&
+    !rightHandGrabbing &&
+    (cursorHand.has("hover-start") && cursorHand.get("hover-start").matches(".ui, .ui *"));
   const cursorHoveringOnInteractable =
     cursorController.enabled &&
     !rightHandTeleporting &&
     !rightHandHovering &&
     !rightHandGrabbing &&
+    !cursorHoveringOnUI &&
     cursorHand.has("hover-start") &&
     cursorHand.get("hover-start").matches(".interactable, .interactable *");
   const cursorHoveringOnCamera =
@@ -95,39 +98,29 @@ export function updateActionSetsBasedOnSuperhands() {
     !rightTeleporter.active &&
     !rightHandHovering &&
     !rightHandGrabbing &&
+    !cursorHoveringOnUI &&
     (cursorHand.has("hover-start") && cursorHand.get("hover-start").matches(".icamera, .icamera *"));
-  const cursorHoveringOnUI =
-    cursorController.enabled &&
-    !rightHandTeleporting &&
-    !rightHandHovering &&
-    !rightHandGrabbing &&
-    (cursorHand.has("hover-start") && cursorHand.get("hover-start").matches(".ui, .ui *"));
   const cursorHoveringOnPen =
     cursorController.enabled &&
     !rightHandTeleporting &&
     !rightHandHovering &&
     !rightHandGrabbing &&
+    !cursorHoveringOnUI &&
     cursorHand.has("hover-start") &&
     cursorHand.get("hover-start").matches(".pen, .pen *");
   const cursorHoldingInteractable =
-    cursorController.enabled &&
     !rightHandTeleporting &&
     cursorHand.has("grab-start") &&
     cursorHand.get("grab-start").matches(".interactable, .interactable *");
   const cursorHoldingPen =
-    cursorController.enabled &&
-    !rightHandTeleporting &&
-    cursorHand.has("grab-start") &&
-    cursorHand.get("grab-start").matches(".pen, .pen *");
+    !rightHandTeleporting && cursorHand.has("grab-start") && cursorHand.get("grab-start").matches(".pen, .pen *");
 
   const cursorHoldingCamera =
-    cursorController.enabled &&
     !rightTeleporter.active &&
     cursorHand.has("grab-start") &&
     cursorHand.get("grab-start").matches(".icamera, .icamera *");
 
   const cursorHoveringOnNothing =
-    cursorController.enabled &&
     !rightHandTeleporting &&
     !rightHandHovering &&
     !rightHandGrabbing &&
@@ -162,4 +155,8 @@ export function updateActionSetsBasedOnSuperhands() {
   userinput.toggleSet(sets.cursorHoldingPen, cursorHoldingPen);
   userinput.toggleSet(sets.cursorHoldingCamera, cursorHoldingCamera);
   userinput.toggleSet(sets.cursorHoldingInteractable, cursorHoldingInteractable);
+  userinput.toggleSet(
+    sets.inputFocused,
+    document.activeElement.nodeName === "INPUT" || document.activeElement.nodeName === "TEXTAREA"
+  );
 }

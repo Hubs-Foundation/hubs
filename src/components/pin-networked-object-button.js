@@ -1,8 +1,5 @@
 AFRAME.registerComponent("pin-networked-object-button", {
   schema: {
-    // Selector for root of all UI that needs to be clickable when pinned
-    uiSelector: { type: "string" },
-
     // Selector for label to change when pinned/unpinned, must be sibling of this components element
     labelSelector: { type: "string" },
 
