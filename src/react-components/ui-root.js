@@ -1148,18 +1148,20 @@ class UIRoot extends Component {
                 [styles.inviteContainerInverted]: this.state.showInviteDialog
               })}
             >
-              {!showVREntryButton && (
-                <WithHoverSound>
-                  <button
-                    className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entryFinished })}
-                    onClick={() => this.toggleInviteDialog()}
-                  >
-                    <FormattedMessage id="entry.invite-others-nag" />
-                  </button>
-                </WithHoverSound>
-              )}
+              {!showVREntryButton &&
+                !this.state.videoShareMediaSource && (
+                  <WithHoverSound>
+                    <button
+                      className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entryFinished })}
+                      onClick={() => this.toggleInviteDialog()}
+                    >
+                      <FormattedMessage id="entry.invite-others-nag" />
+                    </button>
+                  </WithHoverSound>
+                )}
               {!showVREntryButton &&
                 this.occupantCount() > 1 &&
+                !this.state.videoShareMediaSource &&
                 entryFinished && (
                   <WithHoverSound>
                     <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>

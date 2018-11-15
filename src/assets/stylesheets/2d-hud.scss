@@ -36,6 +36,44 @@
   background-color: $hud-panel-background;
   border-radius: 30px;
 
+  :local(.video-share-notify) {
+    position: absolute;
+    left: -12px;
+    top: 52px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 28px;
+    border: 0;
+    pointer-events: auto;
+    z-index: 2;
+    width: 223px;
+
+    @media(max-width: 465px) {
+      width: 207px;
+    }
+
+    @media(max-width: 420px) {
+      width: 189px;
+    }
+
+    font-size: 0.8em;
+    color: white;
+    padding: 12px 24px;
+    background-color: $bright-blue;
+    text-align: center;
+
+    :local(.attach-point) {
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-bottom: 5px solid $bright-blue;
+      position: absolute;
+      top: -5px;
+      left: 29px;
+    }
+  }
+
   :local(.video-share-extra-options) {
     position: absolute;
     top: -6px;

@@ -6,6 +6,7 @@ const { detect } = require("detect-browser");
 import styles from "../assets/stylesheets/2d-hud.scss";
 import uiStyles from "../assets/stylesheets/ui-root.scss";
 import { WithHoverSound } from "./wrap-with-audio";
+import { FormattedMessage } from "react-intl";
 
 const browser = detect();
 
@@ -90,6 +91,12 @@ class TopHUD extends Component {
           }}
           onMouseOver={showExtrasOnHover}
         >
+          {this.props.videoShareMediaSource !== null && (
+            <div className={cx(styles.videoShareNotify)}>
+              <div className={cx(styles.attachPoint)} />
+              <FormattedMessage id="video_share.notify" />
+            </div>
+          )}
           {videoShareExtraOptionTypes.length > 0 && (
             <div className={cx(styles.videoShareExtraOptions)} onMouseOut={hideExtrasOnOut}>
               {videoShareExtraOptionTypes.map(type => (
