@@ -1123,7 +1123,7 @@ class UIRoot extends Component {
                       if (e.keyCode === 13 && !e.shiftKey) {
                         this.sendMessage(e);
                       } else if (e.keyCode === 13 && e.shiftKey && e.ctrlKey) {
-                        spawnChatMessage(e.target.value, false);
+                        spawnChatMessage(e.target.value);
                         this.setState({ pendingMessage: "" });
                       } else if (e.keyCode === 27) {
                         e.target.blur();
@@ -1141,7 +1141,7 @@ class UIRoot extends Component {
                       className={classNames([styles.messageEntrySpawn])}
                       onClick={() => {
                         if (this.state.pendingMessage.length > 0) {
-                          spawnChatMessage(this.state.pendingMessage, false);
+                          spawnChatMessage(this.state.pendingMessage);
                           this.setState({ pendingMessage: "" });
                         } else {
                           this.showCreateObjectDialog();

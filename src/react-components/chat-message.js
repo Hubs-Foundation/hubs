@@ -12,7 +12,7 @@ const emojiRegex = /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udb
 const urlRegex = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)$/;
 
 // Hacky word wrapping, needed because the SVG conversion doesn't properly deal
-// with wrapping in Chrome for some reason. (The CSS white-space is set to pre)
+// with wrapping in Firefox for some reason. (The CSS white-space is set to pre)
 const wordWrap = body => {
   const maxCharsPerLine = 40;
   const words = body.split(" ");

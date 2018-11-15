@@ -564,7 +564,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       createInWorldLogMessage(incomingMessage);
     }
 
-    addToPresenceLog({ name: userInfo.metas[0].profile.displayName, type, body, maySpawn });
+    addToPresenceLog(incomingMessage);
   });
 
   linkChannel.setSocket(socket);
