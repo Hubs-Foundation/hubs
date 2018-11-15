@@ -168,9 +168,6 @@
 :local(.iconButton.share_camera) {
   background-image: url(../hud/share_camera_off.png);
 }
-:local(.iconButton.share_camera:hover) {
-  background-image: url(../hud/share_camera_off-hover.png);
-}
 :local(.iconButton.share_camera.active) {
   background-image: url(../hud/share_camera_on.png);
 }
@@ -180,9 +177,6 @@
 
 :local(.iconButton.share_screen) {
   background-image: url(../hud/share_screen_off.png);
-}
-:local(.iconButton.share_screen:hover) {
-  background-image: url(../hud/share_screen_off-hover.png);
 }
 :local(.iconButton.share_screen.active) {
   background-image: url(../hud/share_screen_on.png);
@@ -194,12 +188,24 @@
 :local(.iconButton.share_window) {
   background-image: url(../hud/share_window_off.png);
 }
-:local(.iconButton.share_window:hover) {
-  background-image: url(../hud/share_window_off-hover.png);
-}
 :local(.iconButton.share_window.active) {
   background-image: url(../hud/share_window_on.png);
 }
 :local(.iconButton.share_window.active:hover) {
   background-image: url(../hud/share_window_on-hover.png);
 }
+
+// On mobile, since hover is fired on tap, this can make user think they are streaming,
+// so don't show hover states for now on the share buttons :P
+//
+// @media(hover) query doesn't seem to do the trick.
+/*:local(.iconButton.share_window:hover) {
+  background-image: url(../hud/share_window_off-hover.png);
+}
+:local(.iconButton.share_screen:hover) {
+  background-image: url(../hud/share_screen_off-hover.png);
+}
+:local(.iconButton.share_camera:hover) {
+  background-image: url(../hud/share_camera_off-hover.png);
+}
+ */
