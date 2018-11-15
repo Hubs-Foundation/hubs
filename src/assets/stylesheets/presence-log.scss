@@ -171,6 +171,7 @@
     border-radius: 16px;
     line-height: 18px;
     margin: 0;
+    max-width: 100%;
 
     :local(.message-body) {
       margin-left: 0;
