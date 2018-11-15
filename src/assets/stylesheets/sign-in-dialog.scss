@@ -6,6 +6,7 @@
 
 :local(.email-field) {
   @extend %input-field;
+  margin: 1.5em 0 0.5em 0;
 }
 
 :local(.next-button), :local(.continue-button) {
@@ -14,4 +15,5 @@
 
 :local(.terms) {
   font-size: 7pt;
+  margin-bottom: 32px;
 }
