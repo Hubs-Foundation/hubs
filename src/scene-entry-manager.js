@@ -10,7 +10,7 @@ const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
-import { addMedia } from "./utils/media-utils";
+import { addMedia, proxiedUrlFor } from "./utils/media-utils";
 import { ObjectContentOrigins } from "./object-types";
 
 function requestFullscreen() {
@@ -51,6 +51,9 @@ export default class SceneEntryManager {
     }
 
     if (enterInVR) {
+      // HACK - A-Frame calls getVRDisplays at module load, we want to do it here to
+      // force gamepads to become live.
+      navigator.getVRDisplays();
       this.scene.enterVR();
     } else if (AFRAME.utils.device.isMobile()) {
       document.body.addEventListener("touchend", requestFullscreen);
@@ -73,6 +76,8 @@ export default class SceneEntryManager {
       this._runBot(mediaStream);
       return;
     }
+
+    this.scene.setAttribute("motion-capture-replayer", "enabled", false);
 
     if (mediaStream) {
       NAF.connection.adapter.setLocalMediaStream(mediaStream);
@@ -136,10 +141,10 @@ export default class SceneEntryManager {
   };
 
   _updatePlayerRigWithProfile = () => {
-    const displayName = this.store.state.profile.displayName;
+    const { avatarId, displayName } = this.store.state.profile;
     this.playerRig.setAttribute("player-info", {
       displayName,
-      avatarSrc: "#" + (this.store.state.profile.avatarId || "botdefault")
+      avatarSrc: avatarId && avatarId.startsWith("http") ? proxiedUrlFor(avatarId) : `#${avatarId || "botdefault"}`
     });
     const hudController = this.playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });

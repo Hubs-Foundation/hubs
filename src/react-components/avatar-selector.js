@@ -167,7 +167,7 @@ class AvatarSelector extends Component {
           </a-entity>
 
           <a-entity position="0 1.5 -5.6" rotation="-10 180 0">
-            <a-entity camera="" />
+            <a-entity camera="far: 1;" />
           </a-entity>
 
           <a-entity

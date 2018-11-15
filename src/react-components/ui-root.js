@@ -32,6 +32,7 @@ import CreateObjectDialog from "./create-object-dialog.js";
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
 import TwoDHUD from "./2d-hud";
+import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
@@ -675,12 +676,12 @@ class UIRoot extends Component {
         <div>
           <FormattedMessage id={exitSubtitleId} />
           <p />
-          {this.props.roomUnavailableReason && (
+          {this.props.roomUnavailableReason !== "left" && (
             <div>
               You can also{" "}
               <WithHoverSound>
-                <a href="/">create a new room</a>.
-              </WithHoverSound>
+                <a href="/">create a new room</a>
+              </WithHoverSound>.
             </div>
           )}
         </div>
@@ -1089,6 +1090,9 @@ class UIRoot extends Component {
             {entryFinished && (
               <form onSubmit={this.sendMessage}>
                 <div className={styles.messageEntryInRoom} style={{ height: pendingMessageFieldHeight }}>
+                  {this.state.pendingMessage.startsWith("/") && (
+                    <ChatCommandHelp matchingPrefix={this.state.pendingMessage.substring(1)} />
+                  )}
                   <textarea
                     style={{ height: pendingMessageTextareaHeight }}
                     className={classNames([
@@ -1197,7 +1201,7 @@ class UIRoot extends Component {
             )}
 
             <WithHoverSound>
-              <button onClick={() => this.showHelpDialog()} className={styles.helpIcon}>
+              <button onClick={() => this.showHelpDialog()} className={classNames([styles.helpIcon, "help-button"])}>
                 <i>
                   <FontAwesomeIcon icon={faQuestion} />
                 </i>

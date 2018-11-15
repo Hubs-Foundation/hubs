@@ -35,6 +35,7 @@
     "aframe-rounded": "^1.0.3",
     "aframe-slice9-component": "^1.0.0",
     "aframe-teleport-controls": "github:mozillareality/aframe-teleport-controls#hubs/master",
+    "animejs": "^2.2.0",
     "classnames": "^2.2.5",
     "copy-to-clipboard": "^3.0.8",
     "deepmerge": "^2.1.1",
