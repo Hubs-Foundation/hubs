@@ -79,20 +79,28 @@ async function createGIFTexture(url) {
  * @param {string} src - Url to a video file.
  * @returns {Element} Video element.
  */
-function createVideoEl(src) {
+async function createVideoEl(src) {
   const videoEl = document.createElement("video");
   videoEl.setAttribute("playsinline", "");
   videoEl.setAttribute("webkit-playsinline", "");
   videoEl.preload = "auto";
   videoEl.loop = true;
   videoEl.crossOrigin = "anonymous";
-  videoEl.src = src;
+
+  if (!src.startsWith("hubs://")) {
+    videoEl.src = src;
+  } else {
+    const streamClientId = src.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
+    const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
+    videoEl.srcObject = new MediaStream(stream.getVideoTracks());
+  }
+
   return videoEl;
 }
 
 function createVideoTexture(url) {
-  return new Promise((resolve, reject) => {
-    const videoEl = createVideoEl(url);
+  return new Promise(async (resolve, reject) => {
+    const videoEl = await createVideoEl(url);
 
     const texture = new THREE.VideoTexture(videoEl);
     texture.minFilter = THREE.LinearFilter;
@@ -324,15 +332,18 @@ AFRAME.registerComponent("media-video", {
         return;
       }
 
-      texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
-      this.video = texture.image;
+      if (!src.startsWith("hubs://")) {
+        // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
+        texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
 
+        const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+        sound.setNodeSource(texture.audioSource);
+        this.el.setObject3D("sound", sound);
+      }
+
+      this.video = texture.image;
       this.video.addEventListener("pause", this.onPauseStateChange);
       this.video.addEventListener("play", this.onPauseStateChange);
-
-      const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-      sound.setNodeSource(texture.audioSource);
-      this.el.setObject3D("sound", sound);
     } catch (e) {
       console.error("Error loading video", this.data.src, e);
       texture = errorTexture;

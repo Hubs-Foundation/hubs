@@ -20,7 +20,14 @@ export default function pinnedEntityToGltf(el) {
   if (!equalArray(scale, [1, 1, 1])) gltfNode.scale = scale;
 
   if (components["media-loader"]) {
-    gltfComponents.media = { src: components["media-loader"].data.src, id: networkId };
+    const mediaSrc = components["media-loader"].data.src;
+
+    if (mediaSrc.startsWith("hubs://") && mediaSrc.endsWith("/video")) {
+      // Do not persist hubs client video urls
+      return null;
+    }
+
+    gltfComponents.media = { src: mediaSrc, id: networkId };
 
     if (components["media-pager"]) {
       gltfComponents.media.pageIndex = components["media-pager"].data.index;
