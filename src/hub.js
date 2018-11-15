@@ -81,7 +81,7 @@ import { proxiedUrlFor } from "./utils/media-utils";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
-import { createInWorldChatMessage } from "./react-components/chat-message";
+import { createInWorldLogMessage } from "./react-components/chat-message";
 
 import "./systems/nav";
 import "./systems/personal-space-bubble";
@@ -557,20 +557,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!userInfo) return;
     const maySpawn = scene.is("entered");
 
+    const incomingMessage = { name: userInfo.metas[0].profile.displayName, type, body, maySpawn };
+
+    if (scene.is("vr-mode")) {
+      createInWorldLogMessage(incomingMessage);
+    }
+
     addToPresenceLog({ name: userInfo.metas[0].profile.displayName, type, body, maySpawn });
   });
 
   linkChannel.setSocket(socket);
-
-  setInterval(() => {
-    createInWorldChatMessage("hello :heart:", "Greg", AFRAME.utils.device.isMobile());
-
-    setTimeout(() => {
-      createInWorldChatMessage(
-        "This is some long text. Will it wrapn? I don't know but I sure hope so. That would be neat.",
-        "Another guy",
-        AFRAME.utils.device.isMobile()
-      );
-    }, 2000);
-  }, 5000);
 });

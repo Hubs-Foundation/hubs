@@ -56,6 +56,10 @@
       flex-direction: column;
     }
 
+    :local(.message-source) {
+      font-weight: bold;
+    }
+
     a {
       color: $action-color;
     }
@@ -193,8 +197,10 @@
   }
 
   :local(.message-source) {
+    font-weight: normal;
     font-size: 0.7em;
-    color: $dark-grey;
+    white-space: nowrap;
+    color: $light-text;
   }
 }
 
