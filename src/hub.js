@@ -128,6 +128,7 @@ import "./components/tools/drawing-manager";
 
 import registerNetworkSchemas from "./network-schemas";
 import registerTelemetry from "./telemetry";
+import { warmSerializeElement } from "./utils/serialize-element";
 
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
@@ -308,6 +309,8 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  warmSerializeElement();
+
   const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
 

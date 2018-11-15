@@ -154,14 +154,18 @@ function getDefaultStyleByTagName(tagName) {
   return defaultStylesByTagName[tagName];
 }
 
+export function warmSerializeElement() {
+  for (let i = 0; i < tagNames.length; i++) {
+    if (!noStyleTags[tagNames[i]]) {
+      defaultStylesByTagName[tagNames[i]] = computeDefaultStyleByTagName(tagNames[i]);
+    }
+  }
+}
+
 export default function serializeElement(el) {
   if (Object.keys(defaultStylesByTagName).length === 0) {
     // Precompute the lookup tables.
-    for (let i = 0; i < tagNames.length; i++) {
-      if (!noStyleTags[tagNames[i]]) {
-        defaultStylesByTagName[tagNames[i]] = computeDefaultStyleByTagName(tagNames[i]);
-      }
-    }
+    warmSerializeElement();
   }
 
   if (el.nodeType !== Node.ELEMENT_NODE) {
