@@ -196,7 +196,7 @@ AFRAME.registerComponent("media-loader", {
           src: accessibleUrl,
           contentType: contentType,
           inflate: true,
-          modelToWorldScale: 0.0001
+          modelToWorldScale: this.data.resize ? 0.0001 : 1.0
         });
       } else {
         throw new Error(`Unsupported content type: ${contentType}`);
