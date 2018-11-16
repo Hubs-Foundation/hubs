@@ -17,15 +17,6 @@ export const keyboardMouseUserBindings = addSetsToBindings({
   [sets.global]: [
     {
       src: {
-        value: paths.device.keyboard.key("b")
-      },
-      dest: {
-        value: paths.actions.toggleScreenShare
-      },
-      xform: xforms.rising
-    },
-    {
-      src: {
         w: paths.device.keyboard.key("arrowup"),
         a: paths.device.keyboard.key("arrowleft"),
         s: paths.device.keyboard.key("arrowdown"),

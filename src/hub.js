@@ -36,7 +36,6 @@ import "./components/character-controller";
 import "./components/hoverable-visuals";
 import "./components/hover-visuals";
 import "./components/haptic-feedback";
-import "./components/networked-video-player";
 import "./components/offset-relative-to";
 import "./components/player-info";
 import "./components/debug";
@@ -66,6 +65,7 @@ import "./components/camera-tool";
 import "./components/scene-sound";
 import "./components/emit-state-change";
 import "./components/action-to-event";
+import "./components/emit-scene-event-on-remove";
 import "./components/stop-event-propagation";
 import "./components/animation";
 import "./components/follow-in-lower-fov";
@@ -194,7 +194,6 @@ function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
-  const enableScreenSharing = qsTruthy("enable_screen_sharing");
 
   ReactDOM.render(
     <UIRoot
@@ -204,7 +203,6 @@ function mountUI(props = {}) {
         concurrentLoadDetector,
         disableAutoExitOnConcurrentLoad,
         forcedVREntryType,
-        enableScreenSharing,
         store,
         ...props
       }}

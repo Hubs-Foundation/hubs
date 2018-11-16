@@ -209,15 +209,6 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: {
-        value: paths.device.keyboard.key("b")
-      },
-      dest: {
-        value: paths.actions.toggleScreenShare
-      },
-      xform: xforms.rising
-    },
-    {
-      src: {
         x: lAxis("joyX"),
         y: lAxis("joyY")
       },

@@ -120,6 +120,7 @@
     "commands.smaller": "Decrease your avatar's size.",
     "commands.help": "Show help.",
     "commands.leave": "Disconnect from the room.",
-    "commands.duck": "The duck tested well. Quack."
+    "commands.duck": "The duck tested well. Quack.",
+    "video_share.notify": "Select again to un-share video."
   }
 }
