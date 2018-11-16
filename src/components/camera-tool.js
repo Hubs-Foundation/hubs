@@ -88,6 +88,9 @@ AFRAME.registerComponent("camera-tool", {
       selfieScreen.scale.set(-2, 2, 2);
       this.el.setObject3D("selfieScreen", selfieScreen);
 
+      this.cameraSystem = this.el.sceneEl.systems["camera-tools"];
+      this.cameraSystem.register(this.el);
+
       this.updateRenderTargetNextTick = true;
     });
   },
@@ -101,6 +104,7 @@ AFRAME.registerComponent("camera-tool", {
   },
 
   remove() {
+    this.cameraSystem.deregister(this.el);
     this.el.sceneEl.systems["camera-mirror"].unmirrorCameraAtEl(this.el);
   },
 
@@ -109,6 +113,22 @@ AFRAME.registerComponent("camera-tool", {
       this.takeSnapshotNextTick = true;
     }
   },
+
+  focus(el, track) {
+    this.lookAt(el);
+
+    if (track) {
+      this.trackTarget = el;
+    }
+  },
+
+  lookAt: (function() {
+    const targetPos = new THREE.Vector3();
+    return function(el) {
+      targetPos.setFromMatrixPosition(el.object3D.matrixWorld);
+      this.el.object3D.lookAt(targetPos);
+    };
+  })(),
 
   mirror() {
     this.el.sceneEl.systems["camera-mirror"].mirrorCameraAtEl(this.el);
@@ -136,6 +156,15 @@ AFRAME.registerComponent("camera-tool", {
       const sceneEl = this.el.sceneEl;
       const renderer = this.renderer || sceneEl.renderer;
       const now = performance.now();
+
+      // Perform lookAt in tock so it will re-orient after grabs, etc.
+      if (this.trackTarget) {
+        if (this.trackTarget.parentNode) {
+          this.lookAt(this.trackTarget);
+        } else {
+          this.trackTarget = null; // Target removed
+        }
+      }
 
       if (!this.playerHead) {
         const headEl = document.getElementById("player-head");

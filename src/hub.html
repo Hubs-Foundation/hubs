@@ -189,6 +189,12 @@
                         <a-entity class="freeze-menu" visible-while-frozen="withinDistance: 10;">
                             <a-entity mixin="rounded-text-action-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned;" position="0 0.125 0.01"> </a-entity>
                             <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
+                            <a-entity mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.01">
+                                <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" camera-focus-button="track: true" position="0.25 0.375 0.01">
+                                <a-entity text=" value:track; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
                             <a-entity mixin="rounded-text-button" class="hide-when-pinned" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
                             <a-entity text=" value:remove; width:1.75; align:center;" class="hide-when-pinned" text-raycast-hack position="0 -0.125 0.02"></a-entity>
                         </a-entity>
