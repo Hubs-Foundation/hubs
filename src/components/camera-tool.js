@@ -100,10 +100,18 @@ AFRAME.registerComponent("camera-tool", {
     this.el.removeEventListener("stateadded", this.stateAdded);
   },
 
+  remove() {
+    this.el.sceneEl.systems["camera-mirror"].unmirrorCameraAtEl(this.el);
+  },
+
   stateAdded(evt) {
     if (evt.detail === "activated") {
       this.takeSnapshotNextTick = true;
     }
+  },
+
+  mirror() {
+    this.el.sceneEl.systems["camera-mirror"].mirrorCameraAtEl(this.el);
   },
 
   tick() {
@@ -117,7 +125,9 @@ AFRAME.registerComponent("camera-tool", {
   },
 
   tock: (function() {
-    const tempScale = new THREE.Vector3();
+    const tempHeadScale = new THREE.Vector3();
+    const tempHudScale = new THREE.Vector3();
+
     return function tock() {
       const sceneEl = this.el.sceneEl;
       const renderer = this.renderer || sceneEl.renderer;
@@ -128,20 +138,36 @@ AFRAME.registerComponent("camera-tool", {
         this.playerHead = headEl && headEl.object3D;
       }
 
+      if (!this.playerHud) {
+        const hudEl = document.getElementById("player-hud");
+        this.playerHud = hudEl && hudEl.object3D;
+      }
+
       if (this.takeSnapshotNextTick || this.updateRenderTargetNextTick) {
         if (this.playerHead) {
-          tempScale.copy(this.playerHead.scale);
+          tempHeadScale.copy(this.playerHead.scale);
           this.playerHead.scale.set(1, 1, 1);
         }
+
+        if (this.playerHud) {
+          tempHudScale.copy(this.playerHud.scale);
+          this.playerHud.scale.set(0.001, 0.001, 0.001);
+        }
+
         const tmpVRFlag = renderer.vr.enabled;
         const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
         delete sceneEl.object3D.onAfterRender;
         renderer.vr.enabled = false;
+
         renderer.render(sceneEl.object3D, this.camera, this.renderTarget, true);
+
         renderer.vr.enabled = tmpVRFlag;
         sceneEl.object3D.onAfterRender = tmpOnAfterRender;
         if (this.playerHead) {
-          this.playerHead.scale.copy(tempScale);
+          this.playerHead.scale.copy(tempHeadScale);
+        }
+        if (this.playerHud) {
+          this.playerHud.scale.copy(tempHudScale);
         }
         this.lastUpdate = now;
         this.updateRenderTargetNextTick = false;

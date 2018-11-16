@@ -246,13 +246,15 @@
                     shape="shape: box; halfExtents: 0.22 0.145 0.1; offset: 0 0.02 0"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     super-networked-interactable="counter: #camera-counter;"
-                    position-at-box-shape-border="target:.delete-button"
+                    position-at-box-shape-border="target:.camera-menu"
                     set-yxz-order
                     auto-scale-cannon-physics-body
                 >
-                    <a-entity class="ui delete-button" visible-while-frozen="withinDistance: 10;" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end" stop-event-propagation__stretch-start="event: stretch-start" stop-event-propagation__stretch-end="event: stretch-end">
-                        <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
-                        <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    <a-entity class="ui camera-menu" visible-while-frozen="withinDistance: 10;" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end" stop-event-propagation__stretch-start="event: stretch-start" stop-event-propagation__stretch-end="event: stretch-end">
+                        <a-entity mixin="rounded-text-action-button" mirror-camera-button position="0 0.125 0.01"> </a-entity>
+                        <a-entity text=" value:view; width:2.5; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
+                        <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
+                        <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 -0.125 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>
@@ -426,7 +428,7 @@
                     icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #spawn-camera; hoverImage: #spawn-camera-hover; activeImage: #spawn-camera; activeHoverImage: #spawn-camera-hover"
                     scale="0.1 0.1 0.1"
                     position="0.28 0 0.001"
-                    class="ui hud cameraBtn"
+                    class="ui hud camera-btn"
                     material="alphaTest:0.1;"
                     hoverable
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"

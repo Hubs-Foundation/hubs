@@ -54,6 +54,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.copy
     },
     {
+      src: { value: paths.device.keyboard.key("Escape") },
+      dest: { value: paths.actions.camera.exitMirror },
+      xform: xforms.falling
+    },
+    {
       src: { value: paths.device.keyboard.key("q") },
       dest: { value: paths.actions.snapRotateLeft },
       xform: xforms.rising

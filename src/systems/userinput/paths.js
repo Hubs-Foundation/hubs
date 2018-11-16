@@ -60,6 +60,8 @@ paths.actions.leftHand.takeSnapshot = "/actions/leftHandTakeSnapshot";
 paths.actions.leftHand.thumb = "/actions/leftHand/thumbDown";
 paths.actions.leftHand.index = "/actions/leftHand/indexDown";
 paths.actions.leftHand.middleRingPinky = "/actions/leftHand/middleRingPinkyDown";
+paths.actions.camera = {};
+paths.actions.camera.exitMirror = "/actions/cameraExitMirror";
 
 paths.device = {};
 paths.device.mouse = {};
