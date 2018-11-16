@@ -251,8 +251,8 @@
                     auto-scale-cannon-physics-body
                 >
                     <a-entity class="ui camera-menu" visible-while-frozen="withinDistance: 10;" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end" stop-event-propagation__stretch-start="event: stretch-start" stop-event-propagation__stretch-end="event: stretch-end">
-                        <a-entity mixin="rounded-text-action-button" mirror-camera-button position="0 0.125 0.01"> </a-entity>
-                        <a-entity text=" value:mirror; width:2.5; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
+                        <a-entity mixin="rounded-text-action-button" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01"> </a-entity>
+                        <a-entity text=" value:mirror; width:2.5; align:center;" class="mirror-button-label" text-raycast-hack position="0 0.125 0.02"></a-entity>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
                         <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 -0.125 0.02"></a-entity>
                     </a-entity>

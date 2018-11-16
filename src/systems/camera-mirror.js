@@ -30,6 +30,8 @@ AFRAME.registerSystem("camera-mirror", {
     if (!this.directRenderFunc) {
       this._patchRenderFunc();
     }
+
+    this.mirrorEl.emit("mirrored", { el: this.mirrorEl });
   },
 
   unmirrorCameraAtEl(el) {
@@ -37,9 +39,16 @@ AFRAME.registerSystem("camera-mirror", {
 
     el.removeObject3D("mirror-camera");
     document.body.classList.remove("mirrored-camera");
+    const oldEl = this.mirrorEl;
 
     this.mirrorEl = null;
     this.mirrorCamera = null;
+
+    oldEl.emit("unmirrored", { el: oldEl });
+  },
+
+  getMirroredCameraEl() {
+    return this.mirrorEl;
   },
 
   _onWindowResize() {

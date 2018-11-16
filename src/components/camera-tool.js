@@ -114,6 +114,10 @@ AFRAME.registerComponent("camera-tool", {
     this.el.sceneEl.systems["camera-mirror"].mirrorCameraAtEl(this.el);
   },
 
+  unmirror() {
+    this.el.sceneEl.systems["camera-mirror"].unmirrorCameraAtEl(this.el);
+  },
+
   tick() {
     const grabber = this.el.components.grabbable.grabbers[0];
     if (grabber && !!pathsMap[grabber.id]) {
