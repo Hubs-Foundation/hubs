@@ -1,5 +1,6 @@
 export const sets = {};
 sets.global = "global";
+sets.inputFocused = "inputFocused";
 sets.cursorHoveringOnPen = "cursorHoveringOnPen";
 sets.cursorHoveringOnCamera = "cursorHoveringOnCamera";
 sets.cursorHoveringOnInteractable = "cursorHoveringOnInteractable";
@@ -24,4 +25,3 @@ sets.leftHandHoldingPen = "leftHandHoldingPen";
 sets.leftHandHoldingCamera = "leftHandHoldingCamera";
 sets.leftHandHoldingInteractable = "leftHandHoldingInteractable";
 sets.leftHandHoveringOnNothing = "leftHandHoveringOnNothing";
-sets.globalPost = "globalPost";

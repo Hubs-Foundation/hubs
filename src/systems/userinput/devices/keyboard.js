@@ -4,12 +4,13 @@ export class KeyboardDevice {
     this.keys = {};
     this.events = [];
 
-    ["keydown", "keyup", "blur", "mouseout"].map(x => document.addEventListener(x, this.events.push.bind(this.events)));
+    ["keydown", "keyup"].map(x => document.addEventListener(x, this.events.push.bind(this.events)));
+    ["blur"].map(x => window.addEventListener(x, this.events.push.bind(this.events)));
   }
 
   write(frame) {
     this.events.forEach(event => {
-      if (event.type === "blur" || event.type === "mouseout") {
+      if (event.type === "blur") {
         this.keys = {};
         return;
       }

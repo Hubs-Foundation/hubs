@@ -24,6 +24,8 @@ function b64EncodeUnicode(str) {
 }
 
 export const proxiedUrlFor = (url, index) => {
+  if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
+
   // farspark doesn't know how to read '=' base64 padding characters
   const base64Url = b64EncodeUnicode(url).replace(/=+$/g, "");
   // translate base64 + to - and / to _ for URL safety
@@ -46,6 +48,7 @@ export const resolveUrl = async (url, index) => {
 };
 
 export const guessContentType = url => {
+  if (url.startsWith("hubs://") && url.endsWith("/video")) return "video/vnd.hubs-webrtc";
   const extension = new URL(url).pathname.split(".").pop();
   return commonKnownContentTypes[extension];
 };
@@ -108,6 +111,31 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
   entity.setAttribute("media-loader", { resize, resolve, src: typeof src === "string" ? src : "" });
   scene.appendChild(entity);
 
+  const fireLoadingTimeout = setTimeout(() => {
+    scene.emit("media-loading", { src: src });
+  }, 100);
+
+  ["model-loaded", "video-loaded", "image-loaded"].forEach(eventName => {
+    entity.addEventListener(eventName, () => {
+      clearTimeout(fireLoadingTimeout);
+
+      if (!entity.classList.contains("pen")) {
+        entity.object3D.scale.setScalar(0.5);
+
+        entity.setAttribute("animation__spawn-start", {
+          property: "scale",
+          delay: 50,
+          dur: 300,
+          from: { x: 0.5, y: 0.5, z: 0.5 },
+          to: { x: 1.0, y: 1.0, z: 1.0 },
+          easing: "easeOutElastic"
+        });
+      }
+
+      scene.emit("media-loaded", { src: src });
+    });
+  });
+
   const orientation = new Promise(function(resolve) {
     if (src instanceof File) {
       getOrientation(src, x => {
@@ -127,6 +155,8 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
       .catch(() => {
         entity.setAttribute("media-loader", { src: "error" });
       });
+  } else if (src instanceof MediaStream) {
+    entity.setAttribute("media-loader", { src: `hubs://clients/${NAF.clientId}/video` });
   }
 
   if (contentOrigin) {
@@ -156,6 +186,7 @@ export function injectCustomShaderChunks(obj) {
     // hover/toggle state, so for now just skip these while we figure out a more correct
     // solution.
     if (object.el.classList.contains("ui")) return;
+    if (object.el.getAttribute("text-button")) return;
 
     object.material = object.material.clone();
     object.material.onBeforeCompile = shader => {

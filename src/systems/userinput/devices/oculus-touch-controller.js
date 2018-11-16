@@ -44,15 +44,17 @@ export class OculusTouchControllerDevice {
   write(frame) {
     if (!this.gamepad.connected) return;
 
-    this.gamepad.buttons.forEach((button, i) => {
+    for (let i = 0; i < this.gamepad.buttons.length; i++) {
       const buttonPath = paths.device.gamepad(this.gamepad.index).button(i);
+      const button = this.gamepad.buttons[i];
       frame[buttonPath.pressed] = !!button.pressed;
       frame[buttonPath.touched] = !!button.touched;
       frame[buttonPath.value] = button.value;
-    });
-    this.gamepad.axes.forEach((axis, i) => {
+    }
+    for (let i = 0; i < this.gamepad.axes.length; i++) {
+      const axis = this.gamepad.axes[i];
       frame[paths.device.gamepad(this.gamepad.index).axis(i)] = axis;
-    });
+    }
 
     this.buttonMap.forEach(button => {
       const outpath = this.path.button(button.name);
@@ -64,10 +66,10 @@ export class OculusTouchControllerDevice {
       frame[this.path.axis(axis.name)] = frame[paths.device.gamepad(this.gamepad.index).axis(axis.axisId)];
     });
 
-    const rayObject = document.querySelector(this.selector).object3D;
-    rayObject.updateMatrixWorld();
-    this.rayObjectRotation.setFromRotationMatrix(rayObject.matrixWorld);
-    this.pose.position.setFromMatrixPosition(rayObject.matrixWorld);
+    this.rayObject = this.rayObject || document.querySelector(this.selector).object3D;
+    this.rayObject.updateMatrixWorld();
+    this.rayObjectRotation.setFromRotationMatrix(this.rayObject.matrixWorld);
+    this.pose.position.setFromMatrixPosition(this.rayObject.matrixWorld);
     this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
     this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
     frame[this.path.pose] = this.pose;

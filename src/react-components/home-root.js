@@ -173,14 +173,14 @@ class HomeRoot extends Component {
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.home}>
           <div className={mainContentClassNames}>
+            <div className={styles.videoContainer}>
+              <video playsInline muted loop autoPlay className={styles.backgroundVideo} id="background-video">
+                <source src={homeVideoWebM} type="video/webm" />
+                <source src={homeVideoMp4} type="video/mp4" />
+              </video>
+            </div>
             <div className={styles.headerContent}>
               <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
-                <WithHoverSound>
-                  <div className={styles.hubs}>hubs</div>
-                </WithHoverSound>
-                <WithHoverSound>
-                  <div className={styles.preview}>preview</div>
-                </WithHoverSound>
                 <div className={styles.links}>
                   <WithHoverSound>
                     <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
@@ -212,7 +212,9 @@ class HomeRoot extends Component {
                 </a>
               </div>
               <div className={styles.container}>
-                <img className={styles.logo} src={hubLogo} />
+                <div className={styles.logo}>
+                  <img src={hubLogo} />
+                </div>
                 <div className={styles.title}>
                   <FormattedMessage id="home.hero_title" />
                 </div>
@@ -308,10 +310,6 @@ class HomeRoot extends Component {
               </div>
             </div>
           </div>
-          <video playsInline muted loop autoPlay className={styles.backgroundVideo} id="background-video">
-            <source src={homeVideoWebM} type="video/webm" />
-            <source src={homeVideoMp4} type="video/mp4" />
-          </video>
           {this.state.dialog}
         </div>
       </IntlProvider>

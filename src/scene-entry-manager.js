@@ -10,7 +10,7 @@ const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
-import { addMedia } from "./utils/media-utils";
+import { addMedia, proxiedUrlFor } from "./utils/media-utils";
 import { ObjectContentOrigins } from "./object-types";
 
 function requestFullscreen() {
@@ -51,6 +51,9 @@ export default class SceneEntryManager {
     }
 
     if (enterInVR) {
+      // HACK - A-Frame calls getVRDisplays at module load, we want to do it here to
+      // force gamepads to become live.
+      navigator.getVRDisplays();
       this.scene.enterVR();
     } else if (AFRAME.utils.device.isMobile()) {
       document.body.addEventListener("touchend", requestFullscreen);
@@ -61,9 +64,8 @@ export default class SceneEntryManager {
     }
 
     this._setupPlayerRig();
-    this._setupScreensharing(mediaStream);
     this._setupBlocking();
-    this._setupMedia();
+    this._setupMedia(mediaStream);
     this._setupCamera();
 
     if (qsTruthy("offline")) return;
@@ -74,6 +76,8 @@ export default class SceneEntryManager {
       this._runBot(mediaStream);
       return;
     }
+
+    this.scene.setAttribute("motion-capture-replayer", "enabled", false);
 
     if (mediaStream) {
       NAF.connection.adapter.setLocalMediaStream(mediaStream);
@@ -137,51 +141,14 @@ export default class SceneEntryManager {
   };
 
   _updatePlayerRigWithProfile = () => {
-    const displayName = this.store.state.profile.displayName;
+    const { avatarId, displayName } = this.store.state.profile;
     this.playerRig.setAttribute("player-info", {
       displayName,
-      avatarSrc: "#" + (this.store.state.profile.avatarId || "botdefault")
+      avatarSrc: avatarId && avatarId.startsWith("http") ? proxiedUrlFor(avatarId) : `#${avatarId || "botdefault"}`
     });
     const hudController = this.playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });
     this.scene.emit("username-changed", { username: displayName });
-  };
-
-  _setupScreensharing = mediaStream => {
-    const videoTracks = mediaStream ? mediaStream.getVideoTracks() : [];
-    let sharingScreen = videoTracks.length > 0;
-
-    const screenEntityId = `${NAF.clientId}-screen`;
-    let screenEntity = document.getElementById(screenEntityId);
-
-    if (screenEntity) {
-      screenEntity.setAttribute("visible", sharingScreen);
-    } else if (sharingScreen) {
-      screenEntity = document.createElement("a-entity");
-      screenEntity.id = screenEntityId;
-      screenEntity.setAttribute("offset-relative-to", {
-        target: "#player-camera",
-        offset: "0 0 -2",
-        on: "action_share_screen"
-      });
-      screenEntity.setAttribute("networked", { template: "#video-template" });
-      this.scene.appendChild(screenEntity);
-    }
-
-    this.scene.addEventListener("action_share_screen", () => {
-      sharingScreen = !sharingScreen;
-      if (sharingScreen) {
-        for (const track of videoTracks) {
-          mediaStream.addTrack(track);
-        }
-      } else {
-        for (const track of mediaStream.getVideoTracks()) {
-          mediaStream.removeTrack(track);
-        }
-      }
-      NAF.connection.adapter.setLocalMediaStream(mediaStream);
-      screenEntity.setAttribute("visible", sharingScreen);
-    });
   };
 
   _setupBlocking = () => {
@@ -194,10 +161,16 @@ export default class SceneEntryManager {
     });
   };
 
-  _setupMedia = () => {
+  _setupMedia = mediaStream => {
     const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
-      const { entity, orientation } = addMedia(src, "#interactable-media", contentOrigin, true, true);
+      const { entity, orientation } = addMedia(
+        src,
+        "#interactable-media",
+        contentOrigin,
+        !(src instanceof MediaStream),
+        true
+      );
 
       orientation.then(or => {
         entity.setAttribute("offset-relative-to", {
@@ -206,6 +179,8 @@ export default class SceneEntryManager {
           orientation: or
         });
       });
+
+      return entity;
     };
 
     this.scene.addEventListener("add_media", e => {
@@ -218,6 +193,8 @@ export default class SceneEntryManager {
       const el = e.detail.el;
       const networkId = el.components.networked.data.networkId;
       const gltfNode = pinnedEntityToGltf(el);
+      if (!gltfNode) return;
+
       el.setAttribute("networked", { persistent: true });
 
       this.hubChannel.pin(networkId, gltfNode);
@@ -267,6 +244,84 @@ export default class SceneEntryManager {
           spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.FILE);
         }
       }
+    });
+
+    let currentVideoShareEntity;
+    let isHandlingVideoShare = false;
+
+    const shareVideoMediaStream = async constraints => {
+      if (isHandlingVideoShare) return;
+      isHandlingVideoShare = true;
+
+      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      const videoTracks = newStream ? newStream.getVideoTracks() : [];
+
+      if (videoTracks.length > 0) {
+        newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
+        NAF.connection.adapter.setLocalMediaStream(mediaStream);
+        currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
+
+        // Wire up custom removal event which will stop the stream.
+        currentVideoShareEntity.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
+      }
+
+      this.scene.emit("share_video_enabled", { source: constraints.video.mediaSource });
+      isHandlingVideoShare = false;
+    };
+
+    this.scene.addEventListener("action_share_camera", () => {
+      shareVideoMediaStream({
+        video: {
+          mediaSource: "camera",
+          width: 720,
+          frameRate: 30
+        }
+      });
+    });
+
+    this.scene.addEventListener("action_share_window", () => {
+      shareVideoMediaStream({
+        video: {
+          mediaSource: "window",
+          // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
+          // other than your current monitor that has a different aspect ratio.
+          width: 720 * (screen.width / screen.height),
+          height: 720,
+          frameRate: 30
+        }
+      });
+    });
+
+    this.scene.addEventListener("action_share_screen", () => {
+      shareVideoMediaStream({
+        video: {
+          mediaSource: "screen",
+          // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
+          // other than your current monitor that has a different aspect ratio.
+          width: 720 * (screen.width / screen.height),
+          height: 720,
+          frameRate: 30
+        }
+      });
+    });
+
+    this.scene.addEventListener("action_end_video_sharing", () => {
+      if (isHandlingVideoShare) return;
+      isHandlingVideoShare = true;
+
+      if (currentVideoShareEntity && currentVideoShareEntity.parentNode) {
+        currentVideoShareEntity.parentNode.removeChild(currentVideoShareEntity);
+      }
+
+      for (const track of mediaStream.getVideoTracks()) {
+        mediaStream.removeTrack(track);
+      }
+
+      NAF.connection.adapter.setLocalMediaStream(mediaStream);
+      currentVideoShareEntity = null;
+
+      this.scene.emit("share_video_disabled");
+      isHandlingVideoShare = false;
     });
   };
 

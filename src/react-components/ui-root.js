@@ -24,6 +24,7 @@ import ProfileEntryPanel from "./profile-entry-panel";
 import HelpDialog from "./help-dialog.js";
 import SafariDialog from "./safari-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
+import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import LinkDialog from "./link-dialog.js";
@@ -31,6 +32,7 @@ import CreateObjectDialog from "./create-object-dialog.js";
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
 import TwoDHUD from "./2d-hud";
+import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
@@ -75,7 +77,6 @@ class UIRoot extends Component {
     concurrentLoadDetector: PropTypes.object,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
-    enableScreenSharing: PropTypes.bool,
     isBotMode: PropTypes.bool,
     store: PropTypes.object,
     scene: PropTypes.object,
@@ -110,7 +111,6 @@ class UIRoot extends Component {
     shareScreen: false,
     requestedScreen: false,
     mediaStream: null,
-    videoTrack: null,
     audioTrack: null,
     entryPanelCollapsed: false,
 
@@ -134,7 +134,8 @@ class UIRoot extends Component {
     exited: false,
 
     showProfileEntry: false,
-    pendingMessage: ""
+    pendingMessage: "",
+    videoShareMediaSource: null
   };
 
   componentDidMount() {
@@ -143,6 +144,8 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
     this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
+    this.props.scene.addEventListener("share_video_enabled", this.onShareVideoEnabled);
+    this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.addEventListener("exit", this.exit);
     const scene = this.props.scene;
     this.setState({
@@ -160,6 +163,8 @@ class UIRoot extends Component {
   componentWillUnmount() {
     this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
     this.props.scene.removeEventListener("exit", this.exit);
+    this.props.scene.removeEventListener("share_video_enabled", this.onShareVideoEnabled);
+    this.props.scene.removeEventListener("share_video_disabled", this.onShareVideoDisabled);
   }
 
   updateSubscribedState = () => {
@@ -179,6 +184,14 @@ class UIRoot extends Component {
     });
   };
 
+  onShareVideoEnabled = e => {
+    this.setState({ videoShareMediaSource: e.detail.source });
+  };
+
+  onShareVideoDisabled = () => {
+    this.setState({ videoShareMediaSource: null });
+  };
+
   toggleMute = () => {
     this.props.scene.emit("action_mute");
   };
@@ -189,6 +202,14 @@ class UIRoot extends Component {
 
   toggleSpaceBubble = () => {
     this.props.scene.emit("action_space_bubble");
+  };
+
+  shareVideo = mediaSource => {
+    this.props.scene.emit(`action_share_${mediaSource}`);
+  };
+
+  endShareVideo = () => {
+    this.props.scene.emit("action_end_video_sharing");
   };
 
   spawnPen = () => {
@@ -350,30 +371,6 @@ class UIRoot extends Component {
     return { hasAudio };
   };
 
-  setStateAndRequestScreen = async e => {
-    const checked = e.target.checked;
-    await this.setState({ requestedScreen: true, shareScreen: checked });
-    if (checked) {
-      this.fetchVideoTrack({
-        video: {
-          mediaSource: "screen",
-          // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
-          // other than your current monitor that has a different aspect ratio.
-          width: 720 * (screen.width / screen.height),
-          height: 720,
-          frameRate: 30
-        }
-      });
-    } else {
-      this.setState({ videoTrack: null });
-    }
-  };
-
-  fetchVideoTrack = async constraints => {
-    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-    this.setState({ videoTrack: mediaStream.getVideoTracks()[0] });
-  };
-
   fetchAudioTrack = async constraints => {
     if (this.state.audioTrack) {
       this.state.audioTrack.stop();
@@ -394,10 +391,6 @@ class UIRoot extends Component {
     const mediaStream = new MediaStream();
 
     await this.fetchMicDevices();
-
-    if (this.state.videoTrack) {
-      mediaStream.addTrack(this.state.videoTrack);
-    }
 
     // we should definitely have an audioTrack at this point unless they denied mic access
     if (this.state.audioTrack) {
@@ -597,6 +590,10 @@ class UIRoot extends Component {
     });
   }
 
+  showWebRTCScreenshareUnsupportedDialog = () => {
+    this.setState({ dialog: <WebRTCScreenshareUnsupportedDialog onClose={this.closeDialog} /> });
+  };
+
   onMiniInviteClicked = () => {
     const link = "https://hub.link/" + this.props.hubId;
 
@@ -679,12 +676,12 @@ class UIRoot extends Component {
         <div>
           <FormattedMessage id={exitSubtitleId} />
           <p />
-          {this.props.roomUnavailableReason && (
+          {this.props.roomUnavailableReason !== "left" && (
             <div>
               You can also{" "}
               <WithHoverSound>
-                <a href="/">create a new room</a>.
-              </WithHoverSound>
+                <a href="/">create a new room</a>
+              </WithHoverSound>.
             </div>
           )}
         </div>
@@ -799,13 +796,6 @@ class UIRoot extends Component {
   };
 
   renderDevicePanel = () => {
-    // Only screen sharing in desktop firefox since other browsers/platforms will ignore the "screen" media constraint and will attempt to share your webcam instead!
-    const isFireFox = /firefox/i.test(navigator.userAgent);
-    const isNonMobile = !AFRAME.utils.device.isMobile();
-
-    const screenSharingCheckbox =
-      this.props.enableScreenSharing && isNonMobile && isFireFox && this.renderScreensharing();
-
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.title}>
@@ -831,7 +821,6 @@ class UIRoot extends Component {
               <FormattedMessage id="entry.cardboard" />
             </div>
           )}
-          {screenSharingCheckbox}
         </div>
       </div>
     );
@@ -1101,6 +1090,9 @@ class UIRoot extends Component {
             {entryFinished && (
               <form onSubmit={this.sendMessage}>
                 <div className={styles.messageEntryInRoom} style={{ height: pendingMessageFieldHeight }}>
+                  {this.state.pendingMessage.startsWith("/") && (
+                    <ChatCommandHelp matchingPrefix={this.state.pendingMessage.substring(1)} />
+                  )}
                   <textarea
                     style={{ height: pendingMessageTextareaHeight }}
                     className={classNames([
@@ -1156,18 +1148,20 @@ class UIRoot extends Component {
                 [styles.inviteContainerInverted]: this.state.showInviteDialog
               })}
             >
-              {!showVREntryButton && (
-                <WithHoverSound>
-                  <button
-                    className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entryFinished })}
-                    onClick={() => this.toggleInviteDialog()}
-                  >
-                    <FormattedMessage id="entry.invite-others-nag" />
-                  </button>
-                </WithHoverSound>
-              )}
+              {!showVREntryButton &&
+                !this.state.videoShareMediaSource && (
+                  <WithHoverSound>
+                    <button
+                      className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entryFinished })}
+                      onClick={() => this.toggleInviteDialog()}
+                    >
+                      <FormattedMessage id="entry.invite-others-nag" />
+                    </button>
+                  </WithHoverSound>
+                )}
               {!showVREntryButton &&
                 this.occupantCount() > 1 &&
+                !this.state.videoShareMediaSource &&
                 entryFinished && (
                   <WithHoverSound>
                     <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
@@ -1209,7 +1203,7 @@ class UIRoot extends Component {
             )}
 
             <WithHoverSound>
-              <button onClick={() => this.showHelpDialog()} className={styles.helpIcon}>
+              <button onClick={() => this.showHelpDialog()} className={classNames([styles.helpIcon, "help-button"])}>
                 <i>
                   <FontAwesomeIcon icon={faQuestion} />
                 </i>
@@ -1237,11 +1231,15 @@ class UIRoot extends Component {
                   muted={this.state.muted}
                   frozen={this.state.frozen}
                   spacebubble={this.state.spacebubble}
+                  videoShareMediaSource={this.state.videoShareMediaSource}
                   onToggleMute={this.toggleMute}
                   onToggleFreeze={this.toggleFreeze}
                   onToggleSpaceBubble={this.toggleSpaceBubble}
                   onSpawnPen={this.spawnPen}
                   onSpawnCamera={() => this.props.scene.emit("action_spawn_camera")}
+                  onShareVideo={this.shareVideo}
+                  onEndShareVideo={this.endShareVideo}
+                  onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
                 />
                 {this.props.isSupportAvailable && (
                   <div className={styles.nagCornerButton}>

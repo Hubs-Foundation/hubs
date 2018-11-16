@@ -1,8 +1,5 @@
 AFRAME.registerComponent("pin-networked-object-button", {
   schema: {
-    // Selector for root of all UI that needs to be clickable when pinned
-    uiSelector: { type: "string" },
-
     // Selector for label to change when pinned/unpinned, must be sibling of this components element
     labelSelector: { type: "string" },
 
@@ -61,6 +58,8 @@ AFRAME.registerComponent("pin-networked-object-button", {
     const isPinned = this.targetEl.getAttribute("pinnable") && this.targetEl.getAttribute("pinnable").pinned;
 
     this.labelEl.setAttribute("text", "value", isPinned ? "un-pin" : "pin");
+    this.el.setAttribute("text-button", "backgroundColor", isPinned ? "#fff" : "#ff0520");
+    this.el.setAttribute("text-button", "backgroundHoverColor", isPinned ? "#aaa" : "#cc0515");
 
     this.el.parentNode.querySelectorAll(this.data.hideWhenPinnedSelector).forEach(hideEl => {
       hideEl.setAttribute("visible", !isPinned);

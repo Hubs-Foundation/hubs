@@ -119,7 +119,7 @@ body.vr-mode {
 }
 
 :local(.invite-container-below-hud) {
-  margin-top: 100px;
+  margin-top: 86px;
 }
 
 :local(.nag-corner-button) {
@@ -176,14 +176,11 @@ body.vr-mode {
   pointer-events: auto;
   cursor: pointer;
 
-  @media (min-width: 769px) and (min-height: 421px) {
-    flex: 1;
+  @media(max-width: 500px) {
+    flex-direction: column;
+    padding: 8px 8px;
   }
-  @media (max-width: 768px) , (max-height: 420px) {
-    margin: 16px 0;
-    margin-right: 0;
-    padding: 2px 8px;
-  }
+
   :local(.occupant-count) {
     margin: 0 12px;
   }
