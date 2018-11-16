@@ -115,11 +115,13 @@ AFRAME.registerComponent("camera-tool", {
   },
 
   focus(el, track) {
-    this.lookAt(el);
-
     if (track) {
       this.trackTarget = el;
+    } else {
+      this.trackTarget = null;
     }
+
+    this.lookAt(el);
   },
 
   lookAt: (function() {
