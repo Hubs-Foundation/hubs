@@ -1,6 +1,11 @@
 import { paths } from "./userinput/paths";
 
 AFRAME.registerSystem("camera-mirror", {
+  init() {
+    this._onWindowResize = this._onWindowResize.bind(this);
+    window.addEventListener("resize", this._onWindowResize, false);
+  },
+
   tick() {
     const userinput = this.el.systems.userinput;
 
@@ -35,6 +40,13 @@ AFRAME.registerSystem("camera-mirror", {
 
     this.mirrorEl = null;
     this.mirrorCamera = null;
+  },
+
+  _onWindowResize() {
+    if (!this.mirrorCamera) return;
+    this.mirrorCamera.aspect = window.innerWidth / window.innerHeight;
+    this.mirrorCamera.updateProjectionMatrix();
+    this.el.sceneEl.renderer.setSize(window.innerWidth, window.innerHeight);
   },
 
   _patchRenderFunc() {
