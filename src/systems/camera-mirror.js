@@ -20,26 +20,40 @@ AFRAME.registerSystem("camera-mirror", {
     this.mirrorCamera.rotation.set(0, Math.PI, 0);
     el.setObject3D("mirror-camera", this.mirrorCamera);
 
-    const tempHeadScale = new THREE.Vector3();
-    const tempHudScale = new THREE.Vector3();
-
-    const renderer = this.el.renderer;
+    document.body.classList.add("mirrored-camera");
 
     if (!this.directRenderFunc) {
-      this.directRenderFunc = renderer.render;
+      this._patchRenderFunc();
     }
+  },
 
+  unmirrorCameraAtEl(el) {
+    if (this.mirrorEl !== el) return;
+
+    el.removeObject3D("mirror-camera");
+    document.body.classList.remove("mirrored-camera");
+
+    this.mirrorEl = null;
+    this.mirrorCamera = null;
+  },
+
+  _patchRenderFunc() {
     const headEl = document.getElementById("player-head");
     const hudEl = document.getElementById("player-hud");
+    const tempHeadScale = new THREE.Vector3();
+    const tempHudScale = new THREE.Vector3();
+    const renderer = this.el.renderer;
     const playerHead = headEl && headEl.object3D;
     const playerHud = hudEl && hudEl.object3D;
-    document.body.classList.add("mirrored-camera");
+
+    this.directRenderFunc = renderer.render;
 
     this.el.sceneEl.renderer.render = (scene, camera, renderTarget) => {
       const wasVREnabled = renderer.vr.enabled;
 
-      if (wasVREnabled) {
+      if (wasVREnabled || renderTarget || !this.mirrorCamera) {
         this.directRenderFunc.call(renderer, scene, camera, renderTarget);
+        if (!this.mirrorCamera || renderTarget) return;
       }
 
       if (playerHead) {
@@ -64,27 +78,5 @@ AFRAME.registerSystem("camera-mirror", {
         playerHud.scale.copy(tempHudScale);
       }
     };
-  },
-
-  unmirrorCameraAtEl(el) {
-    if (this.mirrorEl !== el) return;
-
-    if (this.directRenderFunc) {
-      this.el.renderer.render = this.directRenderFunc;
-    }
-
-    el.removeObject3D("mirror-camera");
-    document.body.classList.remove("mirrored-camera");
-
-    this.mirrorEl = null;
-    this.mirrorCamera = null;
-  },
-
-  getDirectRenderFunction() {
-    if (this.directRenderFunc) {
-      return this.directRenderFunc;
-    }
-
-    return this.el.renderer.render;
   }
 });

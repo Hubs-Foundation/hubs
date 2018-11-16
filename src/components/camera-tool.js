@@ -130,7 +130,6 @@ AFRAME.registerComponent("camera-tool", {
 
     return function tock() {
       const sceneEl = this.el.sceneEl;
-      const cameraMirrorSystem = this.cameraMirrorSystem || sceneEl.systems["camera-mirror"];
       const renderer = this.renderer || sceneEl.renderer;
       const now = performance.now();
 
@@ -160,14 +159,7 @@ AFRAME.registerComponent("camera-tool", {
         delete sceneEl.object3D.onAfterRender;
         renderer.vr.enabled = false;
 
-        // Use the direct, non mirrored render function if available
-        if (cameraMirrorSystem) {
-          cameraMirrorSystem
-            .getDirectRenderFunction()
-            .call(renderer, sceneEl.object3D, this.camera, this.renderTarget, true);
-        } else {
-          renderer.render(sceneEl.object3D, this.camera, this.renderTarget, true);
-        }
+        renderer.render(sceneEl.object3D, this.camera, this.renderTarget, true);
 
         renderer.vr.enabled = tmpVRFlag;
         sceneEl.object3D.onAfterRender = tmpOnAfterRender;
