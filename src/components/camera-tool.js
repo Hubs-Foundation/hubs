@@ -88,6 +88,9 @@ AFRAME.registerComponent("camera-tool", {
       selfieScreen.scale.set(-2, 2, 2);
       this.el.setObject3D("selfieScreen", selfieScreen);
 
+      this.cameraSystem = this.el.sceneEl.systems["camera-tools"];
+      this.cameraSystem.register(this.el);
+
       this.updateRenderTargetNextTick = true;
     });
   },
@@ -100,10 +103,41 @@ AFRAME.registerComponent("camera-tool", {
     this.el.removeEventListener("stateadded", this.stateAdded);
   },
 
+  remove() {
+    this.cameraSystem.deregister(this.el);
+    this.el.sceneEl.systems["camera-mirror"].unmirrorCameraAtEl(this.el);
+  },
+
   stateAdded(evt) {
     if (evt.detail === "activated") {
       this.takeSnapshotNextTick = true;
     }
+  },
+
+  focus(el, track) {
+    if (track) {
+      this.trackTarget = el;
+    } else {
+      this.trackTarget = null;
+    }
+
+    this.lookAt(el);
+  },
+
+  lookAt: (function() {
+    const targetPos = new THREE.Vector3();
+    return function(el) {
+      targetPos.setFromMatrixPosition(el.object3D.matrixWorld);
+      this.el.object3D.lookAt(targetPos);
+    };
+  })(),
+
+  mirror() {
+    this.el.sceneEl.systems["camera-mirror"].mirrorCameraAtEl(this.el);
+  },
+
+  unmirror() {
+    this.el.sceneEl.systems["camera-mirror"].unmirrorCameraAtEl(this.el);
   },
 
   tick() {
@@ -117,31 +151,58 @@ AFRAME.registerComponent("camera-tool", {
   },
 
   tock: (function() {
-    const tempScale = new THREE.Vector3();
+    const tempHeadScale = new THREE.Vector3();
+    const tempHudScale = new THREE.Vector3();
+
     return function tock() {
       const sceneEl = this.el.sceneEl;
       const renderer = this.renderer || sceneEl.renderer;
       const now = performance.now();
+
+      // Perform lookAt in tock so it will re-orient after grabs, etc.
+      if (this.trackTarget) {
+        if (this.trackTarget.parentNode) {
+          this.lookAt(this.trackTarget);
+        } else {
+          this.trackTarget = null; // Target removed
+        }
+      }
 
       if (!this.playerHead) {
         const headEl = document.getElementById("player-head");
         this.playerHead = headEl && headEl.object3D;
       }
 
+      if (!this.playerHud) {
+        const hudEl = document.getElementById("player-hud");
+        this.playerHud = hudEl && hudEl.object3D;
+      }
+
       if (this.takeSnapshotNextTick || this.updateRenderTargetNextTick) {
         if (this.playerHead) {
-          tempScale.copy(this.playerHead.scale);
+          tempHeadScale.copy(this.playerHead.scale);
           this.playerHead.scale.set(1, 1, 1);
         }
+
+        if (this.playerHud) {
+          tempHudScale.copy(this.playerHud.scale);
+          this.playerHud.scale.set(0.001, 0.001, 0.001);
+        }
+
         const tmpVRFlag = renderer.vr.enabled;
         const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
         delete sceneEl.object3D.onAfterRender;
         renderer.vr.enabled = false;
+
         renderer.render(sceneEl.object3D, this.camera, this.renderTarget, true);
+
         renderer.vr.enabled = tmpVRFlag;
         sceneEl.object3D.onAfterRender = tmpOnAfterRender;
         if (this.playerHead) {
-          this.playerHead.scale.copy(tempScale);
+          this.playerHead.scale.copy(tempHeadScale);
+        }
+        if (this.playerHud) {
+          this.playerHud.scale.copy(tempHudScale);
         }
         this.lastUpdate = now;
         this.updateRenderTargetNextTick = false;

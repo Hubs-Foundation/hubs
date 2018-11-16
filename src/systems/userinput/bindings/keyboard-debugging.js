@@ -1,8 +1,9 @@
 import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
+import { addSetsToBindings } from "./utils";
 
-export const keyboardDebuggingBindings = {
+export const keyboardDebuggingBindings = addSetsToBindings({
   [sets.global]: [
     {
       src: {
@@ -14,4 +15,4 @@ export const keyboardDebuggingBindings = {
       xform: xforms.rising
     }
   ]
-};
+});

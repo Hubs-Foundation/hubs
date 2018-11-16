@@ -56,6 +56,11 @@
       flex-direction: column;
     }
 
+    :local(.message-source) {
+      align-self: flex-start;
+      font-weight: bold;
+    }
+
     a {
       color: $action-color;
     }
@@ -166,6 +171,7 @@
     border-radius: 16px;
     line-height: 18px;
     margin: 0;
+    max-width: 100%;
 
     :local(.message-body) {
       margin-left: 0;
@@ -186,6 +192,17 @@
     background-color: transparent;
     padding: 0;
     margin: 0;
+  }
+
+  :local(.message-wrap) {
+    flex-direction: column;
+  }
+
+  :local(.message-source) {
+    font-weight: normal;
+    font-size: 0.7em;
+    white-space: nowrap;
+    color: $light-text;
   }
 }
 

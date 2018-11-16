@@ -2,10 +2,7 @@ import { sets } from "../sets";
 import { paths } from "../paths";
 import { Pose } from "../pose";
 
-const calculateCursorPose = function(camera, coords) {
-  const cursorPose = new Pose();
-  const origin = new THREE.Vector3();
-  const direction = new THREE.Vector3();
+const calculateCursorPose = function(camera, coords, origin, direction, cursorPose) {
   origin.setFromMatrixPosition(camera.matrixWorld);
   direction
     .set(coords[0], coords[1], 0.5)
@@ -20,9 +17,19 @@ export class AppAwareMouseDevice {
   constructor() {
     this.prevButtonLeft = false;
     this.clickedOnAnything = false;
+    this.cursorPose = new Pose();
+    this.prevCursorPose = new Pose();
+    this.origin = new THREE.Vector3();
+    this.prevOrigin = new THREE.Vector3();
+    this.direction = new THREE.Vector3();
+    this.prevDirection = new THREE.Vector3();
   }
 
   write(frame) {
+    this.prevCursorPose.copy(this.cursorPose);
+    this.prevOrigin.copy(this.origin);
+    this.prevDirection.copy(this.prevDirection);
+
     if (!this.cursorController) {
       this.cursorController = document.querySelector("[cursor-controller]").components["cursor-controller"];
     }
@@ -32,6 +39,7 @@ export class AppAwareMouseDevice {
     }
 
     const buttonLeft = frame[paths.device.mouse.buttonLeft];
+    const buttonRight = frame[paths.device.mouse.buttonRight];
     if (buttonLeft && !this.prevButtonLeft) {
       const rawIntersections = [];
       this.cursorController.raycaster.intersectObjects(this.cursorController.targets, true, rawIntersections);
@@ -50,11 +58,17 @@ export class AppAwareMouseDevice {
       this.clickedOnAnything = false;
     }
 
-    if (!this.clickedOnAnything && buttonLeft) {
+    if ((!this.clickedOnAnything && buttonLeft) || buttonRight) {
       frame[paths.device.smartMouse.cameraDelta] = frame[paths.device.mouse.movementXY];
     }
 
     const coords = frame[paths.device.mouse.coords];
-    frame[paths.device.smartMouse.cursorPose] = calculateCursorPose(this.camera, coords);
+    frame[paths.device.smartMouse.cursorPose] = calculateCursorPose(
+      this.camera,
+      coords,
+      this.origin,
+      this.direction,
+      this.cursorPose
+    );
   }
 }
