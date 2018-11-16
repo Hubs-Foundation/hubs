@@ -1,6 +1,7 @@
 import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
+import { addSetsToBindings } from "./utils";
 
 const xboxUnscaledCursorScalePenTip = "foobarbazbotbooch";
 
@@ -8,7 +9,7 @@ const button = paths.device.xbox.button;
 const axis = paths.device.xbox.axis;
 const rightTriggerFalling = "/vars/xbox/rightTriggerFalling";
 
-export const xboxControllerUserBindings = {
+export const xboxControllerUserBindings = addSetsToBindings({
   [sets.cursorHoldingInteractable]: [
     {
       src: { value: button("rightTrigger").pressed },
@@ -187,4 +188,4 @@ export const xboxControllerUserBindings = {
       priority: 100
     }
   ]
-};
+});

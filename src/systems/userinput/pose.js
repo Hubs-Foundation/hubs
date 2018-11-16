@@ -19,6 +19,11 @@ export function Pose() {
         .normalize();
       this.fromOriginAndDirection(this.position, this.direction);
       return this;
+    },
+    copy: function(pose) {
+      this.position.copy(pose.position);
+      this.direction.copy(pose.direction);
+      this.orientation.copy(pose.orientation);
     }
   };
 }

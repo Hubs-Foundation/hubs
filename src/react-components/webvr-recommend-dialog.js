@@ -9,7 +9,12 @@ export default class WebVRRecommendDialog extends Component {
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
           <p>To enter Hubs with Oculus or SteamVR, you can use Firefox.</p>
           <WithHoverSound>
-            <a className="info-dialog--action-button" href="https://www.mozilla.org/firefox">
+            <a
+              className="info-dialog--action-button"
+              href="https://www.mozilla.org/firefox"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
               Download Firefox
             </a>
           </WithHoverSound>
