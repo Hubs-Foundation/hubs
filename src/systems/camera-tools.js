@@ -1,5 +1,5 @@
 // Used for tracking and managing camera tools in the scene
-AFRAME.registerSystem("cameras", {
+AFRAME.registerSystem("camera-tools", {
   init() {
     this.cameraEls = [];
   },
@@ -7,22 +7,22 @@ AFRAME.registerSystem("cameras", {
   register(el) {
     this.cameraEls.push(el);
     el.addEventListener("ownership-changed", this._onOwnershipChange);
-    this.currentCamera = null;
+    this.myCamera = null;
   },
 
   deregister(el) {
     this.cameraEls = this.cameraEls.filter(c => c !== el);
     el.removeEventListener("ownership-changed", this._onOwnershipChange);
-    this.currentCamera = null;
+    this.myCamera = null;
   },
 
-  getCurrent() {
-    if (this.currentCamera) return this.currentCamera;
-    this.currentCamera = this.cameraEls.find(NAF.utils.isMine);
-    return this.currentCamera;
+  getMyCamera() {
+    if (this.myCamera) return this.myCamera;
+    this.myCamera = this.cameraEls.find(NAF.utils.isMine);
+    return this.myCamera;
   },
 
   _onOwnershipChange() {
-    this.currentCamera = null;
+    this.myCamera = null;
   }
 });

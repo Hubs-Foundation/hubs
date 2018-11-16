@@ -88,11 +88,8 @@ AFRAME.registerComponent("camera-tool", {
       selfieScreen.scale.set(-2, 2, 2);
       this.el.setObject3D("selfieScreen", selfieScreen);
 
-      this.cameraSystem = this.el.sceneEl.systems.cameras;
-
-      if (this.cameraSystem) {
-        this.cameraSystem.register(this.el);
-      }
+      this.cameraSystem = this.el.sceneEl.systems["camera-tools"];
+      this.cameraSystem.register(this.el);
 
       this.updateRenderTargetNextTick = true;
     });
@@ -122,20 +119,16 @@ AFRAME.registerComponent("camera-tool", {
 
     if (track) {
       this.trackTarget = el;
-
-      this.trackTarget.addEventListener("componentremoved", e => {
-        if (e.detail.name === "position" && e.target === this.trackTarget) {
-          this.trackTarget = null;
-        }
-      });
     }
   },
 
-  lookAt(el) {
+  lookAt: (function() {
     const targetPos = new THREE.Vector3();
-    targetPos.setFromMatrixPosition(el.object3D.matrixWorld);
-    this.el.object3D.lookAt(targetPos);
-  },
+    return function(el) {
+      targetPos.setFromMatrixPosition(el.object3D.matrixWorld);
+      this.el.object3D.lookAt(targetPos);
+    };
+  })(),
 
   mirror() {
     this.el.sceneEl.systems["camera-mirror"].mirrorCameraAtEl(this.el);
@@ -153,10 +146,6 @@ AFRAME.registerComponent("camera-tool", {
         this.takeSnapshotNextTick = true;
       }
     }
-
-    if (this.trackTarget) {
-      this.lookAt(this.trackTarget);
-    }
   },
 
   tock: (function() {
@@ -167,6 +156,15 @@ AFRAME.registerComponent("camera-tool", {
       const sceneEl = this.el.sceneEl;
       const renderer = this.renderer || sceneEl.renderer;
       const now = performance.now();
+
+      // Perform lookAt in tock so it will re-orient after grabs, etc.
+      if (this.trackTarget) {
+        if (this.trackTarget.parentNode) {
+          this.lookAt(this.trackTarget);
+        } else {
+          this.trackTarget = null; // Target removed
+        }
+      }
 
       if (!this.playerHead) {
         const headEl = document.getElementById("player-head");

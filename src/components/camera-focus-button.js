@@ -4,25 +4,23 @@ AFRAME.registerComponent("camera-focus-button", {
   },
 
   init() {
-    this.cameraSystem = this.el.sceneEl.systems.cameras;
+    this.cameraSystem = this.el.sceneEl.systems["camera-tools"];
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.targetEl = networkedEl;
     });
 
     this.onClick = () => {
-      if (!this.cameraSystem) return;
+      const myCamera = this.cameraSystem.getMyCamera();
+      if (!myCamera) return;
 
-      const currentCamera = this.cameraSystem.getCurrent();
-      if (!currentCamera) return;
-
-      currentCamera.components["camera-tool"].focus(this.targetEl, this.data.track);
+      myCamera.components["camera-tool"].focus(this.targetEl, this.data.track);
     };
   },
 
   tick() {
     const isVisible = this.el.getAttribute("visible");
-    const shouldBeVisible = !!(this.cameraSystem && this.cameraSystem.getCurrent());
+    const shouldBeVisible = !!(this.cameraSystem && this.cameraSystem.getMyCamera());
 
     if (isVisible !== shouldBeVisible) {
       this.el.setAttribute("visible", shouldBeVisible);
