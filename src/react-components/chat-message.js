@@ -154,7 +154,7 @@ export async function createInWorldLogMessage({ name, type, body }) {
 
   meshEntity.setAttribute("animation__float", {
     property: "position",
-    dur: 15000,
+    dur: 10000,
     from: { x: 0, y: 0, z: 0 },
     to: { x: 0, y: 0.05, z: -0.05 },
     easing: "easeOutQuad"
@@ -172,7 +172,7 @@ export async function createInWorldLogMessage({ name, type, body }) {
     property: "meshMaterial.opacity",
     isRawProperty: true,
     delay: 3000,
-    dur: 13000,
+    dur: 8000,
     from: 1.0,
     to: 0.0,
     easing: "easeInQuad"
