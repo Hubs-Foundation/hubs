@@ -68,6 +68,7 @@ import "./components/action-to-event";
 import "./components/emit-scene-event-on-remove";
 import "./components/stop-event-propagation";
 import "./components/animation";
+import "./components/follow-in-lower-fov";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -80,6 +81,7 @@ import { proxiedUrlFor } from "./utils/media-utils";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
+import { createInWorldLogMessage } from "./react-components/chat-message";
 
 import "./systems/nav";
 import "./systems/personal-space-bubble";
@@ -126,6 +128,7 @@ import "./components/tools/drawing-manager";
 
 import registerNetworkSchemas from "./network-schemas";
 import registerTelemetry from "./telemetry";
+import { warmSerializeElement } from "./utils/serialize-element";
 
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
@@ -304,6 +307,8 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  warmSerializeElement();
+
   const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
 
@@ -554,7 +559,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!userInfo) return;
     const maySpawn = scene.is("entered");
 
-    addToPresenceLog({ name: userInfo.metas[0].profile.displayName, type, body, maySpawn });
+    const incomingMessage = { name: userInfo.metas[0].profile.displayName, type, body, maySpawn };
+
+    if (scene.is("vr-mode")) {
+      createInWorldLogMessage(incomingMessage);
+    }
+
+    addToPresenceLog(incomingMessage);
   });
 
   linkChannel.setSocket(socket);
