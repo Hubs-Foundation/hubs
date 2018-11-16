@@ -87,7 +87,7 @@ function cloneGltf(gltf) {
 /// or templates associated with any of their nodes.)
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
-const inflateEntities = function(node, templates, isRoot, scale) {
+const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
   // inflate subtrees first so that we can determine whether or not this node needs to be inflated
   const childEntities = [];
   const children = node.children.slice(0); // setObject3D mutates the node's parent, so we have to copy
@@ -136,9 +136,9 @@ const inflateEntities = function(node, templates, isRoot, scale) {
     z: node.rotation.z * THREE.Math.RAD2DEG
   });
   el.setAttribute("scale", {
-    x: node.scale.x * (scale !== undefined ? scale : 1),
-    y: node.scale.y * (scale !== undefined ? scale : 1),
-    z: node.scale.z * (scale !== undefined ? scale : 1)
+    x: node.scale.x * (modelToWorldScale !== undefined ? modelToWorldScale : 1),
+    y: node.scale.y * (modelToWorldScale !== undefined ? modelToWorldScale : 1),
+    z: node.scale.z * (modelToWorldScale !== undefined ? modelToWorldScale : 1)
   });
 
   node.matrixAutoUpdate = false;
@@ -286,7 +286,7 @@ AFRAME.registerComponent("gltf-model-plus", {
     contentType: { type: "string" },
     useCache: { default: true },
     inflate: { default: false },
-    scale: { type: "number", default: 1 }
+    modelToWorldScale: { type: "number", default: 1 }
   },
 
   init() {
@@ -356,7 +356,10 @@ AFRAME.registerComponent("gltf-model-plus", {
       }
 
       let object3DToSet = this.model;
-      if (this.data.inflate && (this.inflatedEl = inflateEntities(this.model, this.templates, true, this.data.scale))) {
+      if (
+        this.data.inflate &&
+        (this.inflatedEl = inflateEntities(this.model, this.templates, true, this.data.modelToWorldScale))
+      ) {
         this.el.appendChild(this.inflatedEl);
         object3DToSet = this.inflatedEl.object3D;
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
