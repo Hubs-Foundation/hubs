@@ -15,7 +15,7 @@ AFRAME.registerSystem("components-queue", {
 
     this.componentToQueue.set(component, queue);
     const removalHandler = evt => {
-      if (evt.target !== component) return;
+      if (evt.detail.name !== component.name) return;
 
       const queue = this.componentToQueue.get(component);
       this.registry.set(queue, this.registry.get(queue).filter(x => component !== x));
