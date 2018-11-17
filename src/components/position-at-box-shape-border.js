@@ -44,6 +44,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
   init() {
     this.cam = this.el.sceneEl.camera.el.object3D;
     this.halfExtents = new THREE.Vector3();
+    this.el.sceneEl.systems["components-queue"].register(this, "media-components");
   },
 
   update() {
@@ -57,6 +58,8 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     const tempParentWorldScale = new THREE.Vector3();
 
     return function() {
+      if (!this.el.sceneEl.systems["components-queue"].shouldTick(this)) return;
+
       if (!this.target) {
         this.targetEl = this.el.querySelector(this.data.target);
         this.target = this.targetEl.object3D;
