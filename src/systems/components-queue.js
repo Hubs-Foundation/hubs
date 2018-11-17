@@ -1,5 +1,8 @@
 AFRAME.registerSystem("components-queue", {
   init() {
+    // Registry a map from queue name to another map, which is a map from component object to its assigned index.
+    // Indicies range from 0 to N - 1 where N is the number of registered components in the queue.
+    // The shouldTick method returns true for the component whose index is the mod of the current frame index.
     this.registry = new Map();
     this.componentToQueue = new Map();
     this.frameIndex = 0;
