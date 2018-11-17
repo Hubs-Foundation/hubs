@@ -7,19 +7,27 @@ AFRAME.registerSystem("components-queue", {
 
   register(component, queue = component.name) {
     if (!this.registry.has(queue)) {
-      this.registry.set(queue, []);
+      this.registry.set(queue, new Map());
     }
 
-    const components = this.registry.get(queue);
-    components[components.length] = component;
-
     this.componentToQueue.set(component, queue);
+
+    const components = this.registry.get(queue);
+    components.set(component, components.size);
+
     const removalHandler = evt => {
       if (evt.detail.name !== component.name) return;
 
       const queue = this.componentToQueue.get(component);
-      this.registry.set(queue, this.registry.get(queue).filter(x => component !== x));
+      this.registry.get(queue, component).delete(component);
       this.componentToQueue.delete(component);
+
+      let i = 0;
+
+      for (const k of components.keys()) {
+        components.set(k, i++);
+      }
+
       component.el.removeEventListener("componentremoved", removalHandler);
     };
 
@@ -31,7 +39,7 @@ AFRAME.registerSystem("components-queue", {
     if (!queue) return false;
 
     const entries = this.registry.get(queue);
-    return this.frameIndex % entries.length === entries.indexOf(component);
+    return this.frameIndex % entries.size === entries.get(component);
   },
 
   tick() {
