@@ -8,7 +8,6 @@ import { paths } from "../systems/userinput/paths";
  * - Sending an event when an entity is targeted or un-targeted.
  */
 AFRAME.registerComponent("cursor-controller", {
-  dependencies: ["line"],
   schema: {
     cursor: { type: "selector" },
     camera: { type: "selector" },
@@ -37,6 +36,18 @@ AFRAME.registerComponent("cursor-controller", {
     this.raycaster = new THREE.Raycaster();
     this.dirty = true;
     this.distance = this.data.far;
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: "white",
+      opacity: 0.2,
+      transparent: true,
+      visible: false
+    });
+
+    const lineGeometry = new THREE.BufferGeometry();
+    lineGeometry.addAttribute("position", new THREE.BufferAttribute(new Float32Array(2 * 3), 3));
+
+    this.line = new THREE.Line(lineGeometry, lineMaterial);
+    this.el.setObject3D("line", this.line);
   },
 
   update: function() {
@@ -99,12 +110,7 @@ AFRAME.registerComponent("cursor-controller", {
       const rightHandPose = userinput.get(paths.actions.rightHand.pose);
 
       this.data.cursor.object3D.visible = this.enabled && !!cursorPose;
-      const lineVisible = !!(this.enabled && rightHandPose);
-      const lineComponent = this.el.components.line;
-
-      if (lineComponent.data.visible !== lineVisible) {
-        this.el.setAttribute("line", "visible", lineVisible);
-      }
+      this.line.material.visible = !!(this.enabled && rightHandPose);
 
       if (!this.enabled || !cursorPose) {
         return;
@@ -142,30 +148,21 @@ AFRAME.registerComponent("cursor-controller", {
         this.data.cursor.setAttribute("material", "color", cursorColor);
       }
 
-      if (this.el.components.line.data.visible) {
+      if (this.line.material.visible) {
         // Reach into line component for better performance
         const posePosition = cursorPose.position;
         const cursorPosition = cursor.object3D.position;
-        const start = lineComponent.data.start;
-        const end = lineComponent.data.end;
-        const positionArray = lineComponent.geometry.attributes.position.array;
+        const positionArray = this.line.geometry.attributes.position.array;
 
-        start.x = posePosition.x;
-        start.y = posePosition.y;
-        start.z = posePosition.z;
-        end.x = cursorPosition.x;
-        end.y = cursorPosition.y;
-        end.z = cursorPosition.z;
+        positionArray[0] = posePosition.x;
+        positionArray[1] = posePosition.y;
+        positionArray[2] = posePosition.z;
+        positionArray[3] = cursorPosition.x;
+        positionArray[4] = cursorPosition.y;
+        positionArray[5] = cursorPosition.z;
 
-        positionArray[0] = start.x;
-        positionArray[1] = start.y;
-        positionArray[2] = start.z;
-        positionArray[3] = end.x;
-        positionArray[4] = end.y;
-        positionArray[5] = end.z;
-
-        lineComponent.geometry.attributes.position.needsUpdate = true;
-        lineComponent.geometry.computeBoundingSphere();
+        this.line.geometry.attributes.position.needsUpdate = true;
+        this.line.geometry.computeBoundingSphere();
       }
     };
   })(),
