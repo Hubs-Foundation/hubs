@@ -35,21 +35,25 @@ THREE.PositionalAudio.prototype.updateMatrixWorld = (function() {
       Math.abs(panner.orientationX.value - this._lastOrientation.x) > Number.EPSILON ||
       Math.abs(panner.orientationY.value - this._lastOrientation.y) > Number.EPSILON ||
       Math.abs(panner.orientationZ.value - this._lastOrientation.z) > Number.EPSILON ||
-      Math.abs(listener.positionX.value - this._lastListenerPosition.x) > Number.EPSILON ||
-      Math.abs(listener.positionY.value - this._lastListenerPosition.y) > Number.EPSILON ||
-      Math.abs(listener.positionZ.value - this._lastListenerPosition.z) > Number.EPSILON
+      (!listener.positionX || Math.abs(listener.positionX.value - this._lastListenerPosition.x) > Number.EPSILON) ||
+      (!listener.positionY || Math.abs(listener.positionY.value - this._lastListenerPosition.y) > Number.EPSILON) ||
+      (!listener.positionZ || Math.abs(listener.positionZ.value - this._lastListenerPosition.z) > Number.EPSILON)
     ) {
       panner.setPosition(position.x, position.y, position.z);
       panner.setOrientation(orientation.x, orientation.y, orientation.z);
       this._lastPosition.x = panner.positionX.value;
       this._lastPosition.y = panner.positionY.value;
       this._lastPosition.z = panner.positionZ.value;
-      this._lastListenerPosition.x = listener.positionX.value;
-      this._lastListenerPosition.y = listener.positionY.value;
-      this._lastListenerPosition.z = listener.positionZ.value;
+
       this._lastOrientation.x = panner.orientationX.value;
       this._lastOrientation.y = panner.orientationY.value;
       this._lastOrientation.z = panner.orientationZ.value;
+
+      if (listener.positionX && listener.positionY && listener.positionZ) {
+        this._lastListenerPosition.x = listener.positionX.value;
+        this._lastListenerPosition.y = listener.positionY.value;
+        this._lastListenerPosition.z = listener.positionZ.value;
+      }
     }
   };
 })();
