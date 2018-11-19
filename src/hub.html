@@ -178,9 +178,9 @@
                     destroy-at-extreme-distances
                     set-yxz-order
                     pinnable
-                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1;"
-                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1;"
-                    sound__pinned ="src: #sound_asset-pinned; on: pinned; poolSize: 1;"
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false; positional: false;"
+                    sound__pinned ="src: #sound_asset-pinned; on: pinned; poolSize: 1; positional: false; positional: false;"
                     emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
                     emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
                     emit-state-change__pinned="state: pinned; transform: rising; event: pinned;"
@@ -211,14 +211,14 @@
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     hoverable
                     scale="0.5 0.5 0.5"
-                    sound__next_pen_color="src: #sound_asset-next_pen_color; on: next_pen_color; poolSize: 2;"
-                    sound__prev_pen_color="src: #sound_asset-prev_pen_color; on: prev_pen_color; poolSize: 2;"
-                    sound__start_draw="src: #sound_asset-start_draw; on: start_draw; poolSize: 2;"
-                    sound__stop_draw="src: #sound_asset-stop_draw; on: stop_draw; poolSize: 2;"
-                    sound__increase_pen_radius="src: #sound_asset-increase_pen_radius; on: increase_pen_radius; poolSize: 2;"
-                    sound__decrease_pen_radius="src: #sound_asset-decrease_pen_radius; on: decrease_pen_radius; poolSize: 2;"
-                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1;"
-                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1;"
+                    sound__next_pen_color="src: #sound_asset-next_pen_color; on: next_pen_color; poolSize: 2; positional: false;"
+                    sound__prev_pen_color="src: #sound_asset-prev_pen_color; on: prev_pen_color; poolSize: 2; positional: false;"
+                    sound__start_draw="src: #sound_asset-start_draw; on: start_draw; poolSize: 2; positional: false;"
+                    sound__stop_draw="src: #sound_asset-stop_draw; on: stop_draw; poolSize: 2; positional: false;"
+                    sound__increase_pen_radius="src: #sound_asset-increase_pen_radius; on: increase_pen_radius; poolSize: 2; positional: false;"
+                    sound__decrease_pen_radius="src: #sound_asset-decrease_pen_radius; on: decrease_pen_radius; poolSize: 2; positional: false;"
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
                     emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
                     emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
                 >
@@ -411,7 +411,7 @@
                     class="ui hud mic"
                     material="alphaTest:0.1;"
                     hoverable
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
                 ></a-image>
                 <a-image
                     icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover"
@@ -419,7 +419,7 @@
                     position="0 0 0.005"
                     class="ui hud freeze"
                     hoverable
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
                 ></a-image>
                 <a-image
                     icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover"
@@ -428,7 +428,7 @@
                     class="ui hud penhud"
                     material="alphaTest:0.1;"
                     hoverable
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
                 ></a-image>
                 <a-image
                     icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #spawn-camera; hoverImage: #spawn-camera-hover; activeImage: #spawn-camera; activeHoverImage: #spawn-camera-hover"
@@ -437,7 +437,7 @@
                     class="ui hud camera-btn"
                     material="alphaTest:0.1;"
                     hoverable
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
                 ></a-image>
                 <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
                     <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" ></a-entity>
@@ -453,48 +453,48 @@
                 rotation
                 pitch-yaw-rotator
                 set-yxz-order
-                sound__teleport_start="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2; loop: true;"
+                sound__teleport_start="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2; loop: true; positional: false;"
                 scene-sound__teleport_start="on: right-teleport_down; off: right-teleport_up;"
-                sound__teleport_start2="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2; loop: true;"
+                sound__teleport_start2="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2; loop: true; positional: false;"
                 scene-sound__teleport_start2="on: left-teleport_down; off: left-teleport_up;"
-                sound__teleport_end="positional: false; src: #sound_asset-teleport_end; on: nothing; poolSize: 2;"
+                sound__teleport_end="positional: false; src: #sound_asset-teleport_end; on: nothing; poolSize: 2; positional: false;"
                 scene-sound__teleport_end="on: right-teleport_up;"
-                sound__teleport_end2="positional: false; src: #sound_asset-teleport_end; on: nothing; poolSize: 2;"
+                sound__teleport_end2="positional: false; src: #sound_asset-teleport_end; on: nothing; poolSize: 2; positional: false;"
                 scene-sound__teleport_end2="on: left-teleport_up;"
-                sound__snap_rotate_left="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
+                sound__snap_rotate_left="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3; positional: false;"
                 scene-sound__snap_rotate_left="on: snap_rotate_left;"
-                sound__snap_rotate_right="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
+                sound__snap_rotate_right="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3; positional: false;"
                 scene-sound__snap_rotate_right="on: snap_rotate_right;"
-                sound__media_loaded="positional: false; src: #sound_asset-media_loaded; on: nothing; poolSize: 2;"
+                sound__media_loaded="positional: false; src: #sound_asset-media_loaded; on: nothing; poolSize: 2; positional: false;"
                 scene-sound__media_loaded="on: media-loaded;"
-                sound__media_loading="positional: false; src: #sound_asset-media_loading; on: nothing; poolSize: 2; loop: true; "
+                sound__media_loading="positional: false; src: #sound_asset-media_loading; on: nothing; poolSize: 2; loop: true;  positional: false;"
                 scene-sound__media_loading="on: media-loading; off: media-loaded;"
-                sound__hud_action_mute="positional: false; src: #sound_asset-toggle_mute; on: nothing; poolSize: 2;"
+                sound__hud_action_mute="positional: false; src: #sound_asset-toggle_mute; on: nothing; poolSize: 2; positional: false;"
                 scene-sound__hud_action_mute="on: action_mute;"
-                sound__hud_action_freeze="positional: false; src: #sound_asset-toggle_freeze; on: nothing; poolSize: 2;"
+                sound__hud_action_freeze="positional: false; src: #sound_asset-toggle_freeze; on: nothing; poolSize: 2; positional: false;"
                 scene-sound__hud_action_freeze="on: action_freeze;"
-                sound__action_freeze="positional: false; src: #sound_asset-freeze; on: nothing; poolSize: 2;"
+                sound__action_freeze="positional: false; src: #sound_asset-freeze; on: nothing; poolSize: 2; positional: false;"
                 scene-sound__action_freeze="on: play_freeze_sound;"
-                sound__action_thaw="positional: false; src: #sound_asset-thaw; on: nothing; poolSize: 2;"
+                sound__action_thaw="positional: false; src: #sound_asset-thaw; on: nothing; poolSize: 2; positional: false;"
                 scene-sound__action_thaw="on: play_thaw_sound;"
-                sound__hud_action_space_bubble="positional: false; src: #sound_asset-toggle_space_bubble; on: nothing; poolSize: 2;"
+                sound__hud_action_space_bubble="positional: false; src: #sound_asset-toggle_space_bubble; on: nothing; poolSize: 2; positional: false;"
                 scene-sound__hud_action_space_bubble="on: action_space_bubble;"
-                sound__hud_spawn_pen="positional: false; src: #sound_asset-spawn_pen; on: nothing; poolSize: 2;"
+                sound__hud_spawn_pen="positional: false; src: #sound_asset-spawn_pen; on: nothing; poolSize: 2; positional: false;"
                 scene-sound__hud_spawn_pen="on: spawn_pen;"
-                sound__hud_hover_start="positional: false; src: #sound_asset-hud_hover_start; on: nothing; poolSize: 5;"
+                sound__hud_hover_start="positional: false; src: #sound_asset-hud_hover_start; on: nothing; poolSize: 5;; positional: false;"
                 sound__hud_click="positional: false; src: #sound_asset-hud_click; on: nothing; poolSize: 1;"
                 scene-sound__hud_click="on: hud_click;"
-                sound__cursor_distance_changed="positional: false; src: #sound_asset-cursor_distance_changed; on: nothing; poolSize: 1;"
+                sound__cursor_distance_changed="positional: false; src: #sound_asset-cursor_distance_changed; on: nothing; poolSize: 1; positional: false;"
                 scene-sound__cursor_distance_changed="on: cursor-distance-changed;"
-                sound__cursor_distance_change_blocked="positional: false; src: #sound_asset-cursor_distance_change_blocked; on: nothing; poolSize: 1;"
+                sound__cursor_distance_change_blocked="positional: false; src: #sound_asset-cursor_distance_change_blocked; on: nothing; poolSize: 1; positional: false;"
                 scene-sound__cursor_distance_change_blocked="on: cursor-distance-change-blocked;"
-                sound__camera_tool_took_snapshot="positional: false; src: #sound_asset-camera_tool_took_snapshot; on: nothing; poolSize: 1;"
+                sound__camera_tool_took_snapshot="positional: false; src: #sound_asset-camera_tool_took_snapshot; on: nothing; poolSize: 1; positional: false;"
                 scene-sound__camera_tool_took_snapshot="on: camera_tool_took_snapshot;"
-                sound__welcome="positional: false; src: #sound_asset-welcome; on: nothing; poolSize: 2;"
+                sound__welcome="positional: false; src: #sound_asset-welcome; on: nothing; poolSize: 2; positional: false;"
                 scene-sound__welcome="on: entered;"
-                sound__log_chat_message="positional: false; src: #sound_asset-chat; on: nothing; poolSize: 2;"
+                sound__log_chat_message="positional: false; src: #sound_asset-chat; on: nothing; poolSize: 2; positional: false;"
                 scene-sound__log_chat_message="on: presence-log-chat;"
-                sound__quack="positional: false; src: #sound_asset-quack; on: nothing; poolSize: 2;"
+                sound__quack="positional: false; src: #sound_asset-quack; on: nothing; poolSize: 2; positional: false;"
                 scene-sound__quack="on: quack;"
             >
                 <a-entity
