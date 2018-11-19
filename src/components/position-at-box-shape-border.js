@@ -58,8 +58,6 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     const tempParentWorldScale = new THREE.Vector3();
 
     return function() {
-      if (!this.el.sceneEl.systems["components-queue"].shouldTick(this)) return;
-
       if (!this.target) {
         this.targetEl = this.el.querySelector(this.data.target);
         this.target = this.targetEl.object3D;
@@ -75,6 +73,11 @@ AFRAME.registerComponent("position-at-box-shape-border", {
       if (!this.el.getObject3D("mesh")) {
         return;
       }
+
+      const isVisible = this.targetEl.getAttribute("visible");
+
+      const opening = isVisible && !this.wasVisible;
+      if (!opening && !this.el.sceneEl.systems["components-queue"].shouldTick(this)) return;
 
       if (!this.halfExtents || this.mesh !== this.el.getObject3D("mesh") || this.shape !== this.el.components.shape) {
         this.mesh = this.el.getObject3D("mesh");
@@ -126,9 +129,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
       const targetScale = Math.min(2.0, Math.max(0.5, scale * tempParentWorldScale.x));
       const finalScale = targetScale / tempParentWorldScale.x;
 
-      const isVisible = this.targetEl.getAttribute("visible");
-
-      if (isVisible && !this.wasVisible) {
+      if (opening) {
         this.targetEl.removeAttribute("animation__show");
 
         this.targetEl.setAttribute("animation__show", {
