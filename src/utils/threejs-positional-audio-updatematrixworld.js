@@ -26,7 +26,7 @@ THREE.PositionalAudio.prototype.updateMatrixWorld = (function() {
     orientation.set(0, 0, 1).applyQuaternion(quaternion);
 
     // Need to update the position on this node if either the listener moves or this node moves,
-    // because otherwise there are audio artifacts.
+    // because otherwise there are audio artifacts in Chrome.
     if (
       setInitial ||
       Math.abs(panner.positionX.value - this._lastPosition.x) > Number.EPSILON ||
@@ -35,9 +35,9 @@ THREE.PositionalAudio.prototype.updateMatrixWorld = (function() {
       Math.abs(panner.orientationX.value - this._lastOrientation.x) > Number.EPSILON ||
       Math.abs(panner.orientationY.value - this._lastOrientation.y) > Number.EPSILON ||
       Math.abs(panner.orientationZ.value - this._lastOrientation.z) > Number.EPSILON ||
-      (!listener.positionX || Math.abs(listener.positionX.value - this._lastListenerPosition.x) > Number.EPSILON) ||
-      (!listener.positionY || Math.abs(listener.positionY.value - this._lastListenerPosition.y) > Number.EPSILON) ||
-      (!listener.positionZ || Math.abs(listener.positionZ.value - this._lastListenerPosition.z) > Number.EPSILON)
+      (listener.positionX && Math.abs(listener.positionX.value - this._lastListenerPosition.x) > Number.EPSILON) ||
+      (listener.positionY && Math.abs(listener.positionY.value - this._lastListenerPosition.y) > Number.EPSILON) ||
+      (listener.positionZ && Math.abs(listener.positionZ.value - this._lastListenerPosition.z) > Number.EPSILON)
     ) {
       panner.setPosition(position.x, position.y, position.z);
       panner.setOrientation(orientation.x, orientation.y, orientation.z);
