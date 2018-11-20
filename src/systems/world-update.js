@@ -81,7 +81,7 @@ AFRAME.registerSystem("world-update", {
     //
     // Unless skipParents is true, all parent matricies are updated before
     // updating this object's local and world matrix.
-    THREE.Object3D.prototype.updateMatrices = function(skipParents) {
+    THREE.Object3D.prototype.updateMatrices = function(skipParents, forceWorldUpdate) {
       if (!this.hasHadFirstMatrixUpdate) {
         if (
           !this.position.equals(zeroPos) ||
@@ -102,24 +102,26 @@ AFRAME.registerSystem("world-update", {
         if (this.matrixNeedsUpdate) this.matrixNeedsUpdate = false;
       }
 
-      if (this.parent === null) {
-        this.matrixWorld.copy(this.matrix);
-      } else {
-        if (!skipParents) {
-          this.parent.updateMatrices();
-        }
+      if (!skipParents && this.parent) {
+        this.parent.updateMatrices();
+      }
 
-        // If the matrix is unmodified, it is the identity matrix,
-        // and hence we can use the parent's world matrix directly.
-        //
-        // Note this assumes all callers will either not pass skipParents=true
-        // *or* will update the parent themselves beforehand as is done in
-        // updateMatrixWorld.
-        if (!this.matrixIsModified) {
-          this.matrixWorld = this.parent.matrixWorld;
+      if (this.matrixWorldNeedsUpdate || forceWorldUpdate) {
+        if (this.parent === null) {
+          this.matrixWorld.copy(this.matrix);
         } else {
-          this.matrixWorld = this.cachedMatrixWorld;
-          this.matrixWorld.multiplyMatrices(this.parent.matrixWorld, this.matrix);
+          // If the matrix is unmodified, it is the identity matrix,
+          // and hence we can use the parent's world matrix directly.
+          //
+          // Note this assumes all callers will either not pass skipParents=true
+          // *or* will update the parent themselves beforehand as is done in
+          // updateMatrixWorld.
+          if (!this.matrixIsModified) {
+            this.matrixWorld = this.parent.matrixWorld;
+          } else {
+            this.matrixWorld = this.cachedMatrixWorld;
+            this.matrixWorld.multiplyMatrices(this.parent.matrixWorld, this.matrix);
+          }
         }
       }
 
@@ -131,12 +133,12 @@ AFRAME.registerSystem("world-update", {
     THREE.Object3D.prototype.updateMatrixWorld = function(force) {
       if (!this.visible && !force) return;
 
-      this.updateMatrices(true); // Do not recurse upwards, since this is recursing downwards
+      this.updateMatrices(true, force); // Do not recurse upwards, since this is recursing downwards
 
       const children = this.children;
 
       for (let i = 0, l = children.length; i < l; i++) {
-        children[i].updateMatrixWorld();
+        children[i].updateMatrixWorld(force);
       }
     };
   },
