@@ -161,7 +161,7 @@ AFRAME.registerSystem("world-update", {
     const render = renderer.render;
 
     renderer.render = (scene, camera, renderTarget) => {
-      scene.updateMatrixWorld(true, true);
+      scene.updateMatrixWorld(true);
       render.call(renderer, scene, camera, renderTarget);
       this.frame++;
     };
