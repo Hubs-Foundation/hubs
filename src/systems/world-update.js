@@ -18,7 +18,7 @@ AFRAME.registerSystem("world-update", {
         target = new THREE.Vector3();
       }
 
-      this.updateMatrices(true);
+      this.updateMatrices();
 
       return target.setFromMatrixPosition(this.matrixWorld);
     };
@@ -33,7 +33,7 @@ AFRAME.registerSystem("world-update", {
           target = new THREE.Quaternion();
         }
 
-        this.updateMatrices(true);
+        this.updateMatrices();
         this.matrixWorld.decompose(position, target, scale);
 
         return target;
@@ -50,7 +50,7 @@ AFRAME.registerSystem("world-update", {
           target = new THREE.Vector3();
         }
 
-        this.updateMatrices(true);
+        this.updateMatrices();
         this.matrixWorld.decompose(position, quaternion, target);
 
         return target;
