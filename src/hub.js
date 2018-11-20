@@ -96,7 +96,6 @@ import "./systems/userinput/userinput";
 import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
 import "./systems/world-update";
-import "./systems/components-queue";
 
 import "./gltf-component-mappings";
 
