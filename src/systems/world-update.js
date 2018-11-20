@@ -33,7 +33,7 @@ AFRAME.registerSystem("world-update", {
           target = new THREE.Quaternion();
         }
 
-        this.updateMatrices(true);
+        this.updateMatrices();
         this.matrixWorld.decompose(position, target, scale);
 
         return target;
@@ -50,7 +50,7 @@ AFRAME.registerSystem("world-update", {
           target = new THREE.Vector3();
         }
 
-        this.updateMatrices(true);
+        this.updateMatrices();
         this.matrixWorld.decompose(position, quaternion, target);
 
         return target;
@@ -119,7 +119,7 @@ AFRAME.registerSystem("world-update", {
           if (!this.matrixIsModified) {
             this.matrixWorld = this.parent.matrixWorld;
           } else {
-            this.matrixWorld = this.cachedMatrixWorld;
+            if (this.matrixWorld !== this.cachedMatrixWorld) this.matrixWorld = this.cachedMatrixWorld;
             this.matrixWorld.multiplyMatrices(this.parent.matrixWorld, this.matrix);
           }
         }
@@ -131,7 +131,7 @@ AFRAME.registerSystem("world-update", {
     // Computes this object's matrices and then the recursively computes the matrices
     // of all the children.
     THREE.Object3D.prototype.updateMatrixWorld = function(force) {
-      if (!this.visible && !force) return;
+      if (!this.visible) return;
 
       this.updateMatrices(true, force); // Do not recurse upwards, since this is recursing downwards
 
