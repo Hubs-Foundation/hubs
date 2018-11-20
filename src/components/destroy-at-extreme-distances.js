@@ -10,9 +10,14 @@ AFRAME.registerComponent("destroy-at-extreme-distances", {
     zMax: { default: 1000 }
   },
 
+  init() {
+    this.el.sceneEl.systems["components-queue"].register(this, "media-components");
+  },
+
   tick: (function() {
     const pos = new THREE.Vector3();
     return function() {
+      if (!this.el.sceneEl.systems["components-queue"].shouldTick(this)) return;
       const { xMin, xMax, yMin, yMax, zMin, zMax } = this.data;
       getLastWorldPosition(this.el.object3D, pos);
 
