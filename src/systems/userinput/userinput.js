@@ -1,10 +1,12 @@
 import { sets } from "./sets";
+import { paths } from "./paths";
 
 import { MouseDevice } from "./devices/mouse";
 import { KeyboardDevice } from "./devices/keyboard";
 import { HudDevice } from "./devices/hud";
 import { XboxControllerDevice } from "./devices/xbox-controller";
 import { OculusGoControllerDevice } from "./devices/oculus-go-controller";
+import { GearVRControllerDevice } from "./devices/gear-vr-controller";
 import { OculusTouchControllerDevice } from "./devices/oculus-touch-controller";
 import { DaydreamControllerDevice } from "./devices/daydream-controller";
 import { ViveControllerDevice } from "./devices/vive-controller";
@@ -15,11 +17,14 @@ import { AppAwareTouchscreenDevice } from "./devices/app-aware-touchscreen";
 import { keyboardMouseUserBindings } from "./bindings/keyboard-mouse-user";
 import { touchscreenUserBindings } from "./bindings/touchscreen-user";
 import { keyboardDebuggingBindings } from "./bindings/keyboard-debugging";
-import { oculusGoUserBindings } from "./bindings/oculus-go-user";
 import { oculusTouchUserBindings } from "./bindings/oculus-touch-user";
 import { viveUserBindings } from "./bindings/vive-user";
 import { xboxControllerUserBindings } from "./bindings/xbox-controller-user";
 import { daydreamUserBindings } from "./bindings/daydream-user";
+
+import generate3DOFTriggerBindings from "./bindings/oculus-go-user";
+const oculusGoUserBindings = generate3DOFTriggerBindings(paths.device.oculusgo);
+const gearVRControllerUserBindings = generate3DOFTriggerBindings(paths.device.gearVRController);
 
 import { resolveActionSets } from "./resolve-action-sets";
 import { GamepadDevice } from "./devices/gamepad";
@@ -174,6 +179,7 @@ AFRAME.registerSystem("userinput", {
     vrGamepadMappings.set(ViveControllerDevice, viveUserBindings);
     vrGamepadMappings.set(OculusTouchControllerDevice, oculusTouchUserBindings);
     vrGamepadMappings.set(OculusGoControllerDevice, oculusGoUserBindings);
+    vrGamepadMappings.set(GearVRControllerDevice, gearVRControllerUserBindings);
     vrGamepadMappings.set(DaydreamControllerDevice, daydreamUserBindings);
 
     const nonVRGamepadMappings = new Map();
@@ -223,6 +229,9 @@ AFRAME.registerSystem("userinput", {
         gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
       } else if (e.gamepad.id === "Oculus Go Controller") {
         gamepadDevice = new OculusGoControllerDevice(e.gamepad);
+        // Note that FXR reports Vive Focus' controller as GearVR, so this is primarily to support that
+      } else if (e.gamepad.id === "Gear VR Controller") {
+        gamepadDevice = new GearVRControllerDevice(e.gamepad);
       } else if (e.gamepad.id === "Daydream Controller") {
         gamepadDevice = new DaydreamControllerDevice(e.gamepad);
       } else if (e.gamepad.id.includes("Xbox")) {
