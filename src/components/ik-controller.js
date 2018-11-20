@@ -184,6 +184,7 @@ AFRAME.registerComponent("ik-controller", {
     invHipsQuaternion.copy(hips.quaternion).inverse();
     head.quaternion.setFromRotationMatrix(headTransform).premultiply(invHipsQuaternion);
 
+    hips.updateMatrix();
     rootToChest.multiplyMatrices(hips.matrix, chest.matrix);
     invRootToChest.getInverse(rootToChest);
 
