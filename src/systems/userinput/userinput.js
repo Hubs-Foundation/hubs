@@ -229,6 +229,9 @@ AFRAME.registerSystem("userinput", {
         gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
       } else if (e.gamepad.id === "Oculus Go Controller") {
         gamepadDevice = new OculusGoControllerDevice(e.gamepad);
+        // For Oculus Go, to increase perf, disable all non-essential devices
+        // TODO detect if keyboard/mouse are available
+        this.activeDevices = new Set([new HudDevice()]);
         // Note that FXR reports Vive Focus' controller as GearVR, so this is primarily to support that
       } else if (e.gamepad.id === "Gear VR Controller") {
         gamepadDevice = new GearVRControllerDevice(e.gamepad);
