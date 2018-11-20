@@ -147,22 +147,8 @@ AFRAME.registerSystem("world-update", {
     const renderer = this.el.renderer;
     const render = renderer.render;
 
-    let c = 0;
-    let t = 0;
-
     renderer.render = (scene, camera, renderTarget) => {
-      const t0 = performance.now();
       scene.updateMatrixWorld(true, this.frame);
-      if (c > 250) {
-        t += performance.now() - t0;
-      }
-      if (c === 250) {
-        console.log("starting");
-      }
-      if (c === 1000) {
-        console.log((t * 1.0) / (c - 250.0));
-      }
-      c++;
       render.call(renderer, scene, camera, renderTarget);
       this.frame++;
     };
