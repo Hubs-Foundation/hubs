@@ -183,6 +183,7 @@
                     sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1;"
                     sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1;"
                     sound__pinned ="src: #sound_asset-pinned; on: pinned; poolSize: 1;"
+                    set-sounds-invisible
                     emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
                     emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
                     emit-state-change__pinned="state: pinned; transform: rising; event: pinned;"
@@ -222,6 +223,7 @@
                     sound__decrease_pen_radius="src: #sound_asset-decrease_pen_radius; on: decrease_pen_radius; poolSize: 2;"
                     sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1;"
                     sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1;"
+                    set-sounds-invisible
                     emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
                     emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
                 >
@@ -417,6 +419,7 @@
                     material="alphaTest:0.1;"
                     hoverable
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                    set-sounds-invisible
                 ></a-image>
                 <a-image
                     icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover"
@@ -425,6 +428,7 @@
                     class="ui hud freeze"
                     hoverable
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                    set-sounds-invisible
                 ></a-image>
                 <a-image
                     icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover"
@@ -434,6 +438,7 @@
                     material="alphaTest:0.1;"
                     hoverable
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                    set-sounds-invisible
                 ></a-image>
                 <a-image
                     icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #spawn-camera; hoverImage: #spawn-camera-hover; activeImage: #spawn-camera; activeHoverImage: #spawn-camera-hover"
@@ -443,6 +448,7 @@
                     material="alphaTest:0.1;"
                     hoverable
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                    set-sounds-invisible
                 ></a-image>
                 <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
                     <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" matrix-auto-update="target: text"></a-entity>
@@ -502,6 +508,7 @@
                 scene-sound__log_chat_message="on: presence-log-chat;"
                 sound__quack="positional: false; src: #sound_asset-quack; on: nothing; poolSize: 2;"
                 scene-sound__quack="on: quack;"
+                set-sounds-invisible
             >
                 <a-entity
                     id="gaze-teleport"
