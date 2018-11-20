@@ -11,6 +11,7 @@ AFRAME.registerComponent("directional-light", {
     this.light.position.set(0, 0, 0);
     this.light.target.position.set(0, 0, 1);
     this.light.add(this.light.target);
+    this.light.matrixNeedsUpdate = true;
     this.el.setObject3D("directional-light", this.light);
     this.el.sceneEl.systems.light.registerLight(el);
   },

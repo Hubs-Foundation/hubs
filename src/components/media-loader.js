@@ -42,7 +42,8 @@ AFRAME.registerComponent("media-loader", {
     const mesh = this.el.getObject3D("mesh");
     const box = getBox(this.el, mesh);
     const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
-    this.el.object3DMap.mesh.scale.multiplyScalar(scaleCoefficient);
+    this.el.object3DMap.mesh.scale.setScalar(scaleCoefficient);
+
     if (this.el.body && this.shapeAdded && this.el.body.shapes.length > 1) {
       this.el.removeAttribute("shape");
       this.shapeAdded = false;
@@ -62,6 +63,8 @@ AFRAME.registerComponent("media-loader", {
       });
       this.shapeAdded = true;
     }
+
+    mesh.matrixNeedsUpdate = true;
   },
 
   tick(t, dt) {
@@ -88,6 +91,7 @@ AFRAME.registerComponent("media-loader", {
       this.loaderMixer = new THREE.AnimationMixer(mesh);
       this.loadingClip = this.loaderMixer.clipAction(loadingObject.animations[0]);
       this.loadingClip.play();
+      mesh.matrixAutoUpdate = true;
     }
     this.el.setObject3D("mesh", mesh);
     this.hasBakedShapes = !!(this.el.body && this.el.body.shapes.length > 0);
@@ -99,6 +103,7 @@ AFRAME.registerComponent("media-loader", {
     clearTimeout(this.showLoaderTimeout);
     if (this.loaderMixer) {
       this.loadingClip.stop();
+      this.el.getObject3D("mesh").matrixAutoUpdate = false;
       delete this.loaderMixer;
     }
     delete this.showLoaderTimeout;
@@ -273,5 +278,6 @@ AFRAME.registerComponent("media-pager", {
 
   repositionToolbar() {
     this.toolbar.object3D.position.y = -this.el.getAttribute("shape").halfExtents.y - 0.2;
+    this.toolbar.object3D.matrixNeedsUpdate = true;
   }
 });

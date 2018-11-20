@@ -11,6 +11,7 @@ import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
+import "./components/teleport-controls-matrix-auto-update";
 import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
@@ -71,6 +72,7 @@ import "./components/emit-scene-event-on-remove";
 import "./components/stop-event-propagation";
 import "./components/animation";
 import "./components/follow-in-lower-fov";
+import "./components/matrix-auto-update";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -93,6 +95,8 @@ import "./systems/camera-tools";
 import "./systems/userinput/userinput";
 import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
+import "./systems/world-update";
+import "./systems/components-queue";
 
 import "./gltf-component-mappings";
 
@@ -109,6 +113,7 @@ const store = window.APP.store;
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 
+THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
 import "aframe-physics-system";
@@ -187,6 +192,8 @@ function setupLobbyCamera() {
     const cameraPos = camera.object3D.position;
     camera.object3D.position.set(cameraPos.x, 2.5, cameraPos.z);
   }
+
+  camera.object3D.updateMatrix();
 
   camera.setAttribute("scene-preview-camera", "positionOnly: true; duration: 60");
   camera.components["pitch-yaw-rotator"].set(camera.object3D.rotation.x, camera.object3D.rotation.y);
@@ -334,6 +341,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const scene = document.querySelector("a-scene");
+  scene.object3D.autoUpdate = false;
   scene.removeAttribute("keyboard-shortcuts"); // Remove F and ESC hotkeys from aframe
 
   const hubChannel = new HubChannel(store);

@@ -278,6 +278,8 @@ AFRAME.registerComponent("skybox", {
         this.sky.scale.set(distance, distance, distance);
       }
     }
+
+    this.el.object3D.matrixNeedsUpdate = true;
   },
 
   remove() {

@@ -94,6 +94,7 @@ AFRAME.registerComponent("super-networked-interactable", {
       this.currentScale.addScalar(delta).clampScalar(this.data.minScale, this.data.maxScale);
       this.el.setAttribute("scale", this.currentScale);
       this.el.components["stretchable"].stretchBody(this.el, this.currentScale);
+      this.el.object3D.matrixNeedsUpdate = true;
     }
   },
 
