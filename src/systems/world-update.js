@@ -64,6 +64,8 @@ AFRAME.registerSystem("world-update", {
         this.scale
       );
 
+      this.matrixWorldNeedsUpdate = true;
+
       if (!this.matrixIsModified) {
         this.matrixIsModified = true;
 
@@ -77,6 +79,8 @@ AFRAME.registerSystem("world-update", {
     THREE.Object3D.prototype.applyMatrix = function(matrix) {
       this.matrix.multiplyMatrices(matrix, this.matrix);
       this.matrix.decompose(this.position, this.quaternion, this.scale);
+
+      this.matrixWorldNeedsUpdate = true;
 
       if (!this.matrixIsModified) {
         this.matrixIsModified = true;
@@ -92,11 +96,17 @@ AFRAME.registerSystem("world-update", {
     // and this.worldMatrix reflects the updated world matrix, taking into account
     // parent matrices.
     //
-    // Unless skipParents is true, all parent matricies are updated before
+    // forceLocalUpdate - Forces the local matrix to be updated regardless of if it has not
+    // been marked dirty.
+    //
+    // forceWorldUpdate - Forces the world matrix to be updated regardless of if the local matrix
+    // has been updated since the last update.
+    //
+    // skipParents - unless true, all parent matricies are updated before
     // updating this object's local and world matrix.
     //
     // Returns true if the world matrix was updated
-    THREE.Object3D.prototype.updateMatrices = function(forceLocalUpdate, skipParents) {
+    THREE.Object3D.prototype.updateMatrices = function(forceLocalUpdate, forceWorldUpdate, skipParents) {
       if (!this.hasHadFirstMatrixUpdate) {
         if (
           !this.position.equals(zeroPos) ||
@@ -118,40 +128,52 @@ AFRAME.registerSystem("world-update", {
       }
 
       if (!skipParents && this.parent) {
-        this.parent.updateMatrices();
+        this.parent.updateMatrices(false, forceWorldUpdate, false);
       }
 
-      if (this.parent === null) {
-        this.matrixWorld.copy(this.matrix);
-      } else {
-        // If the matrix is unmodified, it is the identity matrix,
-        // and hence we can use the parent's world matrix directly.
-        //
-        // Note this assumes all callers will either not pass skipParents=true
-        // *or* will update the parent themselves beforehand as is done in
-        // updateMatrixWorld.
-        if (!this.matrixIsModified) {
-          this.matrixWorld = this.parent.matrixWorld;
+      if (this.matrixWorldNeedsUpdate || forceWorldUpdate) {
+        if (this.parent === null) {
+          this.matrixWorld.copy(this.matrix);
         } else {
-          // Once matrixIsModified === true, this.matrixWorld has been updated to be a local
-          // copy, not a reference to this.parent.matrixWorld (see updateMatrix/applymatrix)
-          this.matrixWorld.multiplyMatrices(this.parent.matrixWorld, this.matrix);
+          // If the matrix is unmodified, it is the identity matrix,
+          // and hence we can use the parent's world matrix directly.
+          //
+          // Note this assumes all callers will either not pass skipParents=true
+          // *or* will update the parent themselves beforehand as is done in
+          // updateMatrixWorld.
+          if (!this.matrixIsModified) {
+            this.matrixWorld = this.parent.matrixWorld;
+          } else {
+            // Once matrixIsModified === true, this.matrixWorld has been updated to be a local
+            // copy, not a reference to this.parent.matrixWorld (see updateMatrix/applymatrix)
+            this.matrixWorld.multiplyMatrices(this.parent.matrixWorld, this.matrix);
+          }
         }
+
+        this.matrixWorldNeedsUpdate = false;
+
+        return true;
       }
+
+      return false;
     };
 
-    // Computes this object's matrices and then the recursively computes the matrices
-    // of all the children.
-    THREE.Object3D.prototype.updateMatrixWorld = function(forceAll) {
-      if (!this.visible && !forceAll) return;
+    // Computes this object's matrices and then the recursively computes the matrices of all the children.
+    //
+    // forceWorldUpdate - If true and the object is visible, will force the world matrix to be updated for
+    // this node and all of its children.
+    //
+    // includeInvisible - If true, does not ignore non-visible objects.
+    THREE.Object3D.prototype.updateMatrixWorld = function(forceWorldUpdate, includeInvisible) {
+      if (!this.visible && !includeInvisible) return;
 
       // Do not recurse upwards, since this is recursing downwards
-      this.updateMatrices(false, true);
+      const forceChildrenWorldUpdate = this.updateMatrices(false, forceWorldUpdate, true);
 
       const children = this.children;
 
       for (let i = 0, l = children.length; i < l; i++) {
-        children[i].updateMatrixWorld();
+        children[i].updateMatrixWorld(forceChildrenWorldUpdate, includeInvisible);
       }
     };
   },
@@ -161,7 +183,7 @@ AFRAME.registerSystem("world-update", {
     const render = renderer.render;
 
     renderer.render = (scene, camera, renderTarget) => {
-      scene.updateMatrixWorld(true);
+      scene.updateMatrixWorld();
       render.call(renderer, scene, camera, renderTarget);
       this.frame++;
     };
