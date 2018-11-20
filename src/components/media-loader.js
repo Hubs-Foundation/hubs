@@ -103,7 +103,6 @@ AFRAME.registerComponent("media-loader", {
     clearTimeout(this.showLoaderTimeout);
     if (this.loaderMixer) {
       this.loadingClip.stop();
-      this.el.getObject3D("mesh").matrixAutoUpdate = false;
       delete this.loaderMixer;
     }
     delete this.showLoaderTimeout;
