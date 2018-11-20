@@ -60,7 +60,7 @@ export default class SceneEntryManager {
       isCardboard =
         AFRAME.utils.device
           .getVRDisplay()
-          .name.toLowerCase()
+          .displayName.toLowerCase()
           .indexOf("cardboard") >= 0;
 
       this.scene.enterVR();
