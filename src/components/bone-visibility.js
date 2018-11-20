@@ -16,7 +16,7 @@ AFRAME.registerComponent("bone-visibility", {
       }
 
       this.lastVisible = visible;
-      this.el.object3D.updateMatrices(true);
+      this.el.object3D.updateMatrices(true, true);
       this.el.object3D.updateMatrixWorld(true);
     }
   }

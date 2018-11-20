@@ -80,14 +80,14 @@ AFRAME.registerSystem("camera-mirror", {
       if (playerHead) {
         tempHeadScale.copy(playerHead.scale);
         playerHead.scale.set(1, 1, 1);
-        playerHead.updateMatrices(true);
+        playerHead.updateMatrices(true, true);
         playerHead.updateMatrixWorld(true);
       }
 
       if (playerHud) {
         tempHudScale.copy(playerHud.scale);
         playerHud.scale.set(0.001, 0.001, 0.001);
-        playerHud.updateMatrices(true);
+        playerHud.updateMatrices(true, true);
         playerHud.updateMatrixWorld(true);
       }
       renderer.vr.enabled = false;
