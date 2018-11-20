@@ -180,9 +180,9 @@
                     set-yxz-order
                     pinnable
                     matrix-auto-update
-                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1;"
-                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1;"
-                    sound__pinned ="src: #sound_asset-pinned; on: pinned; poolSize: 1;"
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
+                    sound__pinned ="src: #sound_asset-pinned; on: pinned; poolSize: 1; positional: false;"
                     emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
                     emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
                     emit-state-change__pinned="state: pinned; transform: rising; event: pinned;"
@@ -214,14 +214,14 @@
                     hoverable
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
-                    sound__next_pen_color="src: #sound_asset-next_pen_color; on: next_pen_color; poolSize: 2;"
-                    sound__prev_pen_color="src: #sound_asset-prev_pen_color; on: prev_pen_color; poolSize: 2;"
+                    sound__next_pen_color="src: #sound_asset-next_pen_color; on: next_pen_color; poolSize: 2; positional: false;"
+                    sound__prev_pen_color="src: #sound_asset-prev_pen_color; on: prev_pen_color; poolSize: 2; positional: false;"
                     sound__start_draw="src: #sound_asset-start_draw; on: start_draw; poolSize: 2;"
-                    sound__stop_draw="src: #sound_asset-stop_draw; on: stop_draw; poolSize: 2;"
-                    sound__increase_pen_radius="src: #sound_asset-increase_pen_radius; on: increase_pen_radius; poolSize: 2;"
-                    sound__decrease_pen_radius="src: #sound_asset-decrease_pen_radius; on: decrease_pen_radius; poolSize: 2;"
-                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1;"
-                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1;"
+                    sound__stop_draw="src: #sound_asset-stop_draw; on: stop_draw; poolSize: 2; positional: false;"
+                    sound__increase_pen_radius="src: #sound_asset-increase_pen_radius; on: increase_pen_radius; poolSize: 2; positional: false;"
+                    sound__decrease_pen_radius="src: #sound_asset-decrease_pen_radius; on: decrease_pen_radius; poolSize: 2; positional: false;"
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
                     emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
                     emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
                 >
@@ -415,7 +415,7 @@
                     class="ui hud mic"
                     material="alphaTest:0.1;"
                     hoverable
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
                 ></a-image>
                 <a-image
                     icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover"
@@ -423,7 +423,7 @@
                     position="0 0 0.005"
                     class="ui hud freeze"
                     hoverable
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
                 ></a-image>
                 <a-image
                     icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover"
@@ -432,7 +432,7 @@
                     class="ui hud penhud"
                     material="alphaTest:0.1;"
                     hoverable
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
                 ></a-image>
                 <a-image
                     icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #spawn-camera; hoverImage: #spawn-camera-hover; activeImage: #spawn-camera; activeHoverImage: #spawn-camera-hover"
@@ -441,7 +441,7 @@
                     class="ui hud camera-btn"
                     material="alphaTest:0.1;"
                     hoverable
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
                 ></a-image>
                 <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
                     <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" matrix-auto-update="target: text"></a-entity>
