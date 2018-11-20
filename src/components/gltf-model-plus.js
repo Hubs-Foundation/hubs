@@ -143,6 +143,7 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
 
   node.matrixAutoUpdate = false;
   node.matrix.identity();
+  node.matrix.decompose(node.position, node.rotation, node.scale);
 
   el.setObject3D(node.type.toLowerCase(), node);
   if (entityComponents && "nav-mesh" in entityComponents) {
@@ -160,6 +161,7 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
     // preserved under the group (but not the node). Otherwise `clipArray` will be
     // `null` in `THREE.AnimationClip.findByName`.
     node.parent.animations = node.animations;
+    node.matrixAutoUpdate = true;
   }
 
   if (entityComponents) {

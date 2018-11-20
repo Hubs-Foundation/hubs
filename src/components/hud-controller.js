@@ -65,7 +65,9 @@ AFRAME.registerComponent("hud-controller", {
 
     // Reorient the hud only if the user is looking away from the hud, for right now this arbitrarily means the hud is 1/2 way animated away
     // TODO: come up with better huristics for this that maybe account for the user turning away from the hud "too far", also animate the position so that it doesnt just snap.
-    if (yawDif >= yawCutoff || pitch < lookCutoff - animRange / 2) {
+    const hudOutOfView = yawDif >= yawCutoff || pitch < lookCutoff - animRange / 2;
+
+    if (hudOutOfView) {
       this.lookDir.set(0, 0, -1);
       this.lookDir.applyQuaternion(head.quaternion);
       this.lookDir.add(head.position);
@@ -75,8 +77,11 @@ AFRAME.registerComponent("hud-controller", {
       hud.rotation.x = 0;
       hud.rotation.z = 0;
     }
+
+    hud.visible = !hudOutOfView;
     hud.position.y = (this.isYLocked ? this.lockedHeadPositionY : head.position.y) + offset + (1 - t) * offset;
     hud.rotation.x = (1 - t) * THREE.Math.DEG2RAD * 90;
+    hud.matrixNeedsUpdate = true;
 
     // update the app mode when the HUD locks on or off
     // TODO: this assumes full control over current app mode reguardless of what else might be manipulating it, this is obviously wrong

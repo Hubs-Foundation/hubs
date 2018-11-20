@@ -1,3 +1,5 @@
+import { getLastWorldPosition } from "../utils/three-utils";
+
 AFRAME.registerComponent("destroy-at-extreme-distances", {
   schema: {
     xMin: { default: -1000 },
@@ -12,10 +14,12 @@ AFRAME.registerComponent("destroy-at-extreme-distances", {
     const pos = new THREE.Vector3();
     return function() {
       const { xMin, xMax, yMin, yMax, zMin, zMax } = this.data;
-      this.el.object3D.getWorldPosition(pos);
-      this.el.parentNode === this.el.sceneEl
-        ? pos.copy(this.el.object3D.position)
-        : this.el.object3D.getWorldPosition(pos);
+      getLastWorldPosition(this.el.object3D, pos);
+
+      if (this.el.parentNode === this.el.sceneEl) {
+        pos.copy(this.el.object3D.position);
+      }
+
       if (pos.x < xMin || pos.x > xMax || pos.y < yMin || pos.y > yMax || pos.z < zMin || pos.z > zMax) {
         this.el.parentNode.removeChild(this.el);
       }

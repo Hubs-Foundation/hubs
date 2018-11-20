@@ -100,16 +100,16 @@
             <a-asset-item id="sound_asset-chat"                           src="./assets/sfx/pop.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
 
             <template id="remote-avatar-template">
-                <a-entity networked-avatar ik-root player-info>
-                    <a-entity class="camera"></a-entity>
+                <a-entity networked-avatar ik-root player-info matrix-auto-update>
+                    <a-entity class="camera" matrix-auto-update></a-entity>
 
-                    <a-entity class="left-controller"></a-entity>
+                    <a-entity class="left-controller" matrix-auto-update></a-entity>
 
-                    <a-entity class="right-controller"></a-entity>
+                    <a-entity class="right-controller" matrix-auto-update></a-entity>
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
                         <template data-name="RootScene">
-                            <a-entity ik-controller hand-pose__left hand-pose__right space-invader-mesh="meshName: Bot_Skinned"></a-entity>
+                            <a-entity ik-controller hand-pose__left hand-pose__right space-invader-mesh="meshName: Bot_Skinned" matrix-auto-update></a-entity>
                         </template>
 
                         <template data-name="Neck">
@@ -125,7 +125,7 @@
                         </template>
 
                         <template data-name="Chest">
-                            <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
+                            <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility matrix-auto-update>
                                 <a-entity billboard>
                                     <a-entity mixin="rounded-text-button" block-button visible-while-frozen="withinDistance: 10;" ui-class-while-frozen position="0 0 .35"> </a-entity>
                                     <a-entity visible-while-frozen="withinDistance: 10;" text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
@@ -139,6 +139,7 @@
                                 networked-audio-analyser
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
+                                matrix-auto-update
                             >
                                 <a-cylinder
                                     static-body
@@ -151,11 +152,11 @@
                         </template>
 
                         <template data-name="LeftHand">
-                            <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
+                            <a-entity personal-space-invader="radius: 0.1" bone-visibility matrix-auto-update></a-entity>
                         </template>
 
                         <template data-name="RightHand">
-                            <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
+                            <a-entity personal-space-invader="radius: 0.1" bone-visibility matrix-auto-update></a-entity>
                         </template>
                     </a-entity>
                 </a-entity>
@@ -178,6 +179,7 @@
                     destroy-at-extreme-distances
                     set-yxz-order
                     pinnable
+                    matrix-auto-update
                     sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1;"
                     sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1;"
                     sound__pinned ="src: #sound_asset-pinned; on: pinned; poolSize: 1;"
@@ -210,6 +212,7 @@
                     grabbable="maxGrabbers: 1"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     hoverable
+                    matrix-auto-update
                     scale="0.5 0.5 0.5"
                     sound__next_pen_color="src: #sound_asset-next_pen_color; on: next_pen_color; poolSize: 2;"
                     sound__prev_pen_color="src: #sound_asset-prev_pen_color; on: prev_pen_color; poolSize: 2;"
@@ -246,6 +249,7 @@
                     hoverable
                     stretchable
                     camera-tool
+                    matrix-auto-update
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
                     scale="0.5 0.5 0.5"
                     body="type: dynamic; shape: none; mass: 1;"
@@ -400,9 +404,9 @@
                 <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="30 0 0">
                     <a-rounded height="0.08" width="0.2" color="#000000" position="-0.30 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
                     <a-image scale="0.07 0.06 0.06" position="-0.23 0.165 0.001" src="#presence-count" material="alphaTest:0.1;"></a-image>
-                    <a-entity id="hud-presence-count" text="value:; width:1.1; align:center;" position="-0.155 0.165 0"></a-entity>
+                    <a-entity id="hud-presence-count" text="value:; width:1.1; align:center;" position="-0.155 0.165 0" matrix-auto-update="target: text;"></a-entity>
                     <a-rounded height="0.08" width="0.5" color="#000000" position="-0.08 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
-                    <a-entity id="hud-hub-entry-link" text="value:; width:1.1; align:center;" position="0.17 0.165 0"></a-entity>
+                    <a-entity id="hud-hub-entry-link" text="value:; width:1.1; align:center;" position="0.17 0.165 0" matrix-auto-update="target: text;"></a-entity>
                     <a-rounded height="0.13" width="0.59" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
                 <a-image
                     icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover"
@@ -440,7 +444,7 @@
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
                 ></a-image>
                 <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
-                    <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" ></a-entity>
+                    <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" matrix-auto-update="target: text"></a-entity>
                 </a-rounded>
                 </a-entity>
             </a-entity>
@@ -453,6 +457,7 @@
                 rotation
                 pitch-yaw-rotator
                 set-yxz-order
+                matrix-auto-update
                 sound__teleport_start="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2; loop: true;"
                 scene-sound__teleport_start="on: right-teleport_down; off: right-teleport_up;"
                 sound__teleport_start2="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2; loop: true;"
@@ -530,6 +535,7 @@
                     hitOpacity: 0.3;
                     missOpacity: 0.1;
                     curveShootingSpeed: 12;"
+                teleport-controls-matrix-auto-update
                 haptic-feedback
                 body="type: static; shape: none;"
                 mixin="controller-super-hands"
@@ -575,25 +581,26 @@
                         hand-pose__right
                         hand-pose-controller__left="networkedAvatar:#player-rig;eventSrc:#player-left-controller"
                         hand-pose-controller__right="networkedAvatar:#player-rig;eventSrc:#player-right-controller"
+                        matrix-auto-update
                     ></a-entity>
                 </template>
 
                 <template data-name="Neck">
-                    <a-entity>
+                    <a-entity matrix-auto-update>
                         <a-entity class="nametag" visible="false" text ></a-entity>
                     </a-entity>
                 </template>
 
                 <template data-name="Head">
-                    <a-entity id="player-head" visible="false" bone-visibility></a-entity>
+                    <a-entity id="player-head" visible="false" bone-visibility matrix-auto-update></a-entity>
                 </template>
 
                 <template data-name="LeftHand">
-                    <a-entity bone-visibility hover-visuals="hand: left; controller: #player-left-controller"></a-entity>
+                    <a-entity bone-visibility hover-visuals="hand: left; controller: #player-left-controller" matrix-auto-update></a-entity>
                 </template>
 
                 <template data-name="RightHand">
-                    <a-entity bone-visibility hover-visuals="hand: right; controller: #player-right-controller"></a-entity>
+                    <a-entity bone-visibility hover-visuals="hand: right; controller: #player-right-controller" matrix-auto-update></a-entity>
                 </template>
 
             </a-entity>

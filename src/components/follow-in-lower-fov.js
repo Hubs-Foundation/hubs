@@ -46,6 +46,7 @@ AFRAME.registerComponent("follow-in-lower-fov", {
     }
 
     this.snappedXFormWorld.decompose(this.tempVector, obj.quaternion, this.tempVector);
+    obj.matrixNeedsUpdate = true;
   },
 
   _applyMaskedTargetRotation(x, y, z, to) {

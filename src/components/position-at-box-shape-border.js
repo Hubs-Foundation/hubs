@@ -1,4 +1,5 @@
 import { getBox } from "../utils/auto-box-collider.js";
+import { getLastWorldPosition } from "../utils/three-utils";
 
 const PI = Math.PI;
 const HALF_PI = PI / 2;
@@ -89,7 +90,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
             .multiplyScalar(0.51 / this.el.object3D.scale.x);
         }
       }
-      this.cam.getWorldPosition(camWorldPos);
+      getLastWorldPosition(this.cam, camWorldPos);
 
       let minSquareDistance = Infinity;
       let targetDir = this.dirs[0].dir;
@@ -138,6 +139,8 @@ AFRAME.registerComponent("position-at-box-shape-border", {
       } else {
         this.target.scale.setScalar(finalScale);
       }
+
+      this.target.matrixNeedsUpdate = true;
 
       this.wasVisible = isVisible;
     };

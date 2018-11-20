@@ -1,4 +1,6 @@
 import { paths } from "../systems/userinput/paths";
+import { getLastWorldPosition } from "../utils/three-utils";
+
 /**
  * Manages targeting and physical cursor location. Has the following responsibilities:
  *
@@ -129,9 +131,10 @@ AFRAME.registerComponent("cursor-controller", {
       }
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);
       // The cursor will always be oriented towards the player about its Y axis, so objects held by the cursor will rotate towards the player.
-      camera.object3D.getWorldPosition(cameraPos);
+      getLastWorldPosition(camera.object3D, cameraPos);
       cameraPos.y = cursor.object3D.position.y;
       cursor.object3D.lookAt(cameraPos);
+      cursor.object3D.matrixNeedsUpdate = true;
 
       const cursorColor = intersection || isGrabbing ? cursorColorHovered : cursorColorUnhovered;
 

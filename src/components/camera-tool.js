@@ -73,6 +73,7 @@ AFRAME.registerComponent("camera-tool", {
     cameraModelPromise.then(model => {
       const mesh = model.scene.clone();
       mesh.scale.set(2, 2, 2);
+      mesh.matrixNeedsUpdate = true;
       this.el.setObject3D("mesh", mesh);
 
       const width = 0.28;
@@ -81,11 +82,13 @@ AFRAME.registerComponent("camera-tool", {
       const screen = new THREE.Mesh(geometry, material);
       screen.rotation.set(0, Math.PI, 0);
       screen.position.set(0, 0, -0.042);
+      screen.matrixNeedsUpdate = true;
       this.el.setObject3D("screen", screen);
 
       const selfieScreen = new THREE.Mesh(geometry, material);
       selfieScreen.position.set(0, 0.4, 0);
       selfieScreen.scale.set(-2, 2, 2);
+      selfieScreen.matrixNeedsUpdate = true;
       this.el.setObject3D("selfieScreen", selfieScreen);
 
       this.cameraSystem = this.el.sceneEl.systems["camera-tools"];
@@ -129,6 +132,7 @@ AFRAME.registerComponent("camera-tool", {
     return function(el) {
       targetPos.setFromMatrixPosition(el.object3D.matrixWorld);
       this.el.object3D.lookAt(targetPos);
+      this.el.object3D.matrixNeedsUpdate = true;
     };
   })(),
 
@@ -182,11 +186,15 @@ AFRAME.registerComponent("camera-tool", {
         if (this.playerHead) {
           tempHeadScale.copy(this.playerHead.scale);
           this.playerHead.scale.set(1, 1, 1);
+          this.playerHead.updateMatrices(true);
+          this.playerHead.updateMatrixWorld(true);
         }
 
         if (this.playerHud) {
           tempHudScale.copy(this.playerHud.scale);
           this.playerHud.scale.set(0.001, 0.001, 0.001);
+          this.playerHud.updateMatrices(true);
+          this.playerHud.updateMatrixWorld(true);
         }
 
         const tmpVRFlag = renderer.vr.enabled;
@@ -200,9 +208,13 @@ AFRAME.registerComponent("camera-tool", {
         sceneEl.object3D.onAfterRender = tmpOnAfterRender;
         if (this.playerHead) {
           this.playerHead.scale.copy(tempHeadScale);
+          this.playerHead.updateMatrices(true);
+          this.playerHead.updateMatrixWorld(true);
         }
         if (this.playerHud) {
           this.playerHud.scale.copy(tempHudScale);
+          this.playerHud.updateMatrices(true);
+          this.playerHud.updateMatrixWorld(true);
         }
         this.lastUpdate = now;
         this.updateRenderTargetNextTick = false;
@@ -227,6 +239,7 @@ AFRAME.registerComponent("camera-tool", {
           orientation.then(() => {
             entity.object3D.position.copy(this.el.object3D.position).add(new THREE.Vector3(0, -0.5, 0));
             entity.object3D.rotation.copy(this.el.object3D.rotation);
+            entity.object3D.matrixNeedsUpdate = true;
             sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
           });
         });

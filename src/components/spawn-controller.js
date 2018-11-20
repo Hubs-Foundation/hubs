@@ -1,3 +1,5 @@
+import { getLastWorldPosition } from "../utils/three-utils";
+
 /**
  * Used on a player-rig to move the player to a random spawn point on entry.
  * @namespace avatar
@@ -23,8 +25,10 @@ AFRAME.registerComponent("spawn-controller", {
     const spawnPointIndex = Math.round((spawnPoints.length - 1) * Math.random());
     const spawnPoint = spawnPoints[spawnPointIndex];
 
-    spawnPoint.object3D.getWorldPosition(this.el.object3D.position);
+    getLastWorldPosition(spawnPoint.object3D, this.el.object3D.position);
+
     this.el.object3D.rotation.copy(spawnPoint.object3D.rotation);
+    this.el.object3D.matrixNeedsUpdate = true;
   }
 });
 

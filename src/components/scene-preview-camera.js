@@ -56,6 +56,8 @@ AFRAME.registerComponent("scene-preview-camera", {
       this.el.object3D.rotation.setFromQuaternion(newRot);
     }
 
+    this.el.object3D.matrixNeedsUpdate = true;
+
     if (t >= 0.9999) {
       this.ranOnePass = true;
       this.backwards = !this.backwards;
