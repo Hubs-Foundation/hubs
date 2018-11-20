@@ -186,14 +186,14 @@ AFRAME.registerComponent("camera-tool", {
         if (this.playerHead) {
           tempHeadScale.copy(this.playerHead.scale);
           this.playerHead.scale.set(1, 1, 1);
-          this.playerHead.updateMatrices(true, true);
+          this.playerHead.updateMatrices(true);
           this.playerHead.updateMatrixWorld(true);
         }
 
         if (this.playerHud) {
           tempHudScale.copy(this.playerHud.scale);
           this.playerHud.scale.set(0.001, 0.001, 0.001);
-          this.playerHud.updateMatrices(true, true);
+          this.playerHud.updateMatrices(true);
           this.playerHud.updateMatrixWorld(true);
         }
 
@@ -208,12 +208,12 @@ AFRAME.registerComponent("camera-tool", {
         sceneEl.object3D.onAfterRender = tmpOnAfterRender;
         if (this.playerHead) {
           this.playerHead.scale.copy(tempHeadScale);
-          this.playerHead.updateMatrices(true, true);
+          this.playerHead.updateMatrices(true);
           this.playerHead.updateMatrixWorld(true);
         }
         if (this.playerHud) {
           this.playerHud.scale.copy(tempHudScale);
-          this.playerHud.updateMatrices(true, true);
+          this.playerHud.updateMatrices(true);
           this.playerHud.updateMatrixWorld(true);
         }
         this.lastUpdate = now;
