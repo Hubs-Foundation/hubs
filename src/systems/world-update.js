@@ -57,9 +57,12 @@ AFRAME.registerSystem("world-update", {
       };
     })();
 
-    const updateMatrix = THREE.Object3D.prototype.updateMatrix;
     THREE.Object3D.prototype.updateMatrix = function() {
-      updateMatrix.apply(this, arguments);
+      this.matrix.compose(
+        this.position,
+        this.quaternion,
+        this.scale
+      );
 
       if (!this.matrixIsModified) {
         this.matrixIsModified = true;
@@ -71,9 +74,9 @@ AFRAME.registerSystem("world-update", {
       }
     };
 
-    const applyMatrix = THREE.Object3D.prototype.applyMatrix;
-    THREE.Object3D.prototype.applyMatrix = function() {
-      applyMatrix.apply(this, arguments);
+    THREE.Object3D.prototype.applyMatrix = function(matrix) {
+      this.matrix.multiplyMatrices(matrix, this.matrix);
+      this.matrix.decompose(this.position, this.quaternion, this.scale);
 
       if (!this.matrixIsModified) {
         this.matrixIsModified = true;
@@ -108,7 +111,6 @@ AFRAME.registerSystem("world-update", {
         }
 
         this.hasHadFirstMatrixUpdate = true;
-        this.matrixWorldNeedsUpdate = true;
         this.cachedMatrixWorld = this.matrixWorld;
       } else if (this.matrixNeedsUpdate || this.matrixAutoUpdate || forceLocalUpdate) {
         this.updateMatrix();
@@ -136,8 +138,6 @@ AFRAME.registerSystem("world-update", {
           this.matrixWorld.multiplyMatrices(this.parent.matrixWorld, this.matrix);
         }
       }
-
-      this.matrixWorldNeedsUpdate = false;
     };
 
     // Computes this object's matrices and then the recursively computes the matrices
