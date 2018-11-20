@@ -18,7 +18,7 @@ AFRAME.registerSystem("world-update", {
         target = new THREE.Vector3();
       }
 
-      this.updateMatrices();
+      this.updateMatrices(true);
 
       return target.setFromMatrixPosition(this.matrixWorld);
     };
@@ -57,21 +57,34 @@ AFRAME.registerSystem("world-update", {
       };
     })();
 
-    const updateMatrix = THREE.Object3D.prototype.updateMatrix;
     THREE.Object3D.prototype.updateMatrix = function() {
-      updateMatrix.apply(this, arguments);
+      this.matrix.compose(
+        this.position,
+        this.quaternion,
+        this.scale
+      );
 
       if (!this.matrixIsModified) {
         this.matrixIsModified = true;
+
+        if (this.cachedMatrixWorld) {
+          this.cachedMatrixWorld.copy(this.matrixWorld);
+          this.matrixWorld = this.cachedMatrixWorld;
+        }
       }
     };
 
-    const applyMatrix = THREE.Object3D.prototype.applyMatrix;
-    THREE.Object3D.prototype.applyMatrix = function() {
-      applyMatrix.apply(this, arguments);
+    THREE.Object3D.prototype.applyMatrix = function(matrix) {
+      this.matrix.multiplyMatrices(matrix, this.matrix);
+      this.matrix.decompose(this.position, this.quaternion, this.scale);
 
       if (!this.matrixIsModified) {
         this.matrixIsModified = true;
+
+        if (this.cachedMatrixWorld) {
+          this.cachedMatrixWorld.copy(this.matrixWorld);
+          this.matrixWorld = this.cachedMatrixWorld;
+        }
       }
     };
 
@@ -81,7 +94,9 @@ AFRAME.registerSystem("world-update", {
     //
     // Unless skipParents is true, all parent matricies are updated before
     // updating this object's local and world matrix.
-    THREE.Object3D.prototype.updateMatrices = function(skipParents, forceWorldUpdate) {
+    //
+    // Returns true if the world matrix was updated
+    THREE.Object3D.prototype.updateMatrices = function(forceLocalUpdate, skipParents) {
       if (!this.hasHadFirstMatrixUpdate) {
         if (
           !this.position.equals(zeroPos) ||
@@ -97,7 +112,7 @@ AFRAME.registerSystem("world-update", {
 
         this.hasHadFirstMatrixUpdate = true;
         this.cachedMatrixWorld = this.matrixWorld;
-      } else if (this.matrixNeedsUpdate || this.matrixAutoUpdate) {
+      } else if (this.matrixNeedsUpdate || this.matrixAutoUpdate || forceLocalUpdate) {
         this.updateMatrix();
         if (this.matrixNeedsUpdate) this.matrixNeedsUpdate = false;
       }
@@ -106,39 +121,37 @@ AFRAME.registerSystem("world-update", {
         this.parent.updateMatrices();
       }
 
-      if (this.matrixWorldNeedsUpdate || forceWorldUpdate) {
-        if (this.parent === null) {
-          this.matrixWorld.copy(this.matrix);
+      if (this.parent === null) {
+        this.matrixWorld.copy(this.matrix);
+      } else {
+        // If the matrix is unmodified, it is the identity matrix,
+        // and hence we can use the parent's world matrix directly.
+        //
+        // Note this assumes all callers will either not pass skipParents=true
+        // *or* will update the parent themselves beforehand as is done in
+        // updateMatrixWorld.
+        if (!this.matrixIsModified) {
+          this.matrixWorld = this.parent.matrixWorld;
         } else {
-          // If the matrix is unmodified, it is the identity matrix,
-          // and hence we can use the parent's world matrix directly.
-          //
-          // Note this assumes all callers will either not pass skipParents=true
-          // *or* will update the parent themselves beforehand as is done in
-          // updateMatrixWorld.
-          if (!this.matrixIsModified) {
-            this.matrixWorld = this.parent.matrixWorld;
-          } else {
-            this.matrixWorld = this.cachedMatrixWorld;
-            this.matrixWorld.multiplyMatrices(this.parent.matrixWorld, this.matrix);
-          }
+          // Once matrixIsModified === true, this.matrixWorld has been updated to be a local
+          // copy, not a reference to this.parent.matrixWorld (see updateMatrix/applymatrix)
+          this.matrixWorld.multiplyMatrices(this.parent.matrixWorld, this.matrix);
         }
       }
-
-      return this.matrixWorld;
     };
 
     // Computes this object's matrices and then the recursively computes the matrices
     // of all the children.
-    THREE.Object3D.prototype.updateMatrixWorld = function(force) {
-      if (!this.visible && !force) return;
+    THREE.Object3D.prototype.updateMatrixWorld = function(forceAll) {
+      if (!this.visible && !forceAll) return;
 
-      this.updateMatrices(true, force); // Do not recurse upwards, since this is recursing downwards
+      // Do not recurse upwards, since this is recursing downwards
+      this.updateMatrices(false, true);
 
       const children = this.children;
 
       for (let i = 0, l = children.length; i < l; i++) {
-        children[i].updateMatrixWorld(force);
+        children[i].updateMatrixWorld();
       }
     };
   },
@@ -148,7 +161,7 @@ AFRAME.registerSystem("world-update", {
     const render = renderer.render;
 
     renderer.render = (scene, camera, renderTarget) => {
-      scene.updateMatrixWorld(true, this.frame);
+      scene.updateMatrixWorld(true, true);
       render.call(renderer, scene, camera, renderTarget);
       this.frame++;
     };

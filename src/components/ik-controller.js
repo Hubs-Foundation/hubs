@@ -202,6 +202,7 @@ AFRAME.registerComponent("ik-controller", {
     const handHiddenByPersonalSpace = spaceInvader && spaceInvader.invading;
 
     handObject3D.visible = !handHiddenByPersonalSpace && controllerObject3D.visible;
+
     if (controllerObject3D.visible) {
       handMatrix.multiplyMatrices(this.invRootToChest, controllerObject3D.matrix);
 
