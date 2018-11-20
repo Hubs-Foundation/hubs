@@ -4,9 +4,9 @@ export function getBox(entity, boxRoot) {
 
   rotation.copy(entity.object3D.rotation);
   entity.object3D.rotation.set(0, 0, 0);
-  entity.matrixNeedsUpdate = true;
 
-  entity.object3D.updateMatrixWorld(true);
+  entity.object3D.updateMatrices(true);
+  boxRoot.updateMatrices(true);
 
   box.setFromObject(boxRoot);
 

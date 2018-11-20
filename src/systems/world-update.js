@@ -81,7 +81,7 @@ AFRAME.registerSystem("world-update", {
     //
     // Unless skipParents is true, all parent matricies are updated before
     // updating this object's local and world matrix.
-    THREE.Object3D.prototype.updateMatrices = function(skipParents, forceWorldUpdate) {
+    THREE.Object3D.prototype.updateMatrices = function(forceLocalUpdate, forceWorldUpdate, skipParents) {
       if (!this.hasHadFirstMatrixUpdate) {
         if (
           !this.position.equals(zeroPos) ||
@@ -97,7 +97,7 @@ AFRAME.registerSystem("world-update", {
 
         this.hasHadFirstMatrixUpdate = true;
         this.cachedMatrixWorld = this.matrixWorld;
-      } else if (this.matrixNeedsUpdate || this.matrixAutoUpdate) {
+      } else if (this.matrixNeedsUpdate || this.matrixAutoUpdate || forceLocalUpdate) {
         this.updateMatrix();
         if (this.matrixNeedsUpdate) this.matrixNeedsUpdate = false;
       }
@@ -133,7 +133,7 @@ AFRAME.registerSystem("world-update", {
     THREE.Object3D.prototype.updateMatrixWorld = function(force) {
       if (!this.visible) return;
 
-      this.updateMatrices(true, force); // Do not recurse upwards, since this is recursing downwards
+      this.updateMatrices(false, force, true); // Do not recurse upwards, since this is recursing downwards
 
       const children = this.children;
 
@@ -147,10 +147,34 @@ AFRAME.registerSystem("world-update", {
     const renderer = this.el.renderer;
     const render = renderer.render;
 
+    let c = 0;
+    let t = 0;
+
     renderer.render = (scene, camera, renderTarget) => {
+      const t0 = performance.now();
       scene.updateMatrixWorld(true, this.frame);
+      if (c > 250) {
+        t += performance.now() - t0;
+      }
+      if (c === 250) {
+        console.log("starting");
+      }
+      if (c === 1000) {
+        console.log((t * 1.0) / (c - 250.0));
+      }
+      c++;
       render.call(renderer, scene, camera, renderTarget);
       this.frame++;
     };
   }
 });
+
+/*
+ * scene with 5 ducks
+ *
+ * full optimizations - 0.211 0.221 0.219 0.224 0.218 0.204
+ * hold out identity optimization - 0.264 0.259 0.260
+ * hold out visibility optimization - 0.252 0.283 0.247
+ * non-auto matrix update, no identity optimization, no visibility optimization - 0.418 0.426 0.397
+ * baseline (auto matrix update, default updateMatrixWorld) 0.388 0.407 0.438
+ */
