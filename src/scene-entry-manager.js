@@ -50,13 +50,26 @@ export default class SceneEntryManager {
       NAF.connection.adapter.session.options.verbose = true;
     }
 
+    let isCardboard = false;
+
     if (enterInVR) {
       // HACK - A-Frame calls getVRDisplays at module load, we want to do it here to
       // force gamepads to become live.
       navigator.getVRDisplays();
+
+      isCardboard =
+        !AFRAME.utils.device
+          .getVRDisplay()
+          .name.toLowerCase()
+          .indexOf("cardboard") >= 0;
+
       this.scene.enterVR();
     } else if (AFRAME.utils.device.isMobile()) {
       document.body.addEventListener("touchend", requestFullscreen);
+    }
+
+    if (!isCardboard) {
+      this.playerRig.removeAttribute("cardboard-controls");
     }
 
     if (isMobile || qsTruthy("mobile")) {
@@ -77,6 +90,7 @@ export default class SceneEntryManager {
       return;
     }
 
+    this.scene.systems["motion-capture-replayer"].remove();
     this.scene.setAttribute("motion-capture-replayer", "enabled", false);
 
     if (mediaStream) {

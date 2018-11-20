@@ -223,6 +223,10 @@ AFRAME.registerSystem("userinput", {
         gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
       } else if (e.gamepad.id === "Oculus Go Controller") {
         gamepadDevice = new OculusGoControllerDevice(e.gamepad);
+
+        // For Oculus Go, to increase perf, disable all non-essential devices
+        // TODO detect if keyboard/mouse are available
+        this.activeDevices = new Set([new HudDevice()]);
       } else if (e.gamepad.id === "Daydream Controller") {
         gamepadDevice = new DaydreamControllerDevice(e.gamepad);
       } else if (e.gamepad.id.includes("Xbox")) {
