@@ -63,6 +63,11 @@ AFRAME.registerSystem("world-update", {
 
       if (!this.matrixIsModified) {
         this.matrixIsModified = true;
+
+        if (this.cachedMatrixWorld) {
+          this.cachedMatrixWorld.copy(this.matrixWorld);
+          this.matrixWorld = this.cachedMatrixWorld;
+        }
       }
     };
 
@@ -72,6 +77,11 @@ AFRAME.registerSystem("world-update", {
 
       if (!this.matrixIsModified) {
         this.matrixIsModified = true;
+
+        if (this.cachedMatrixWorld) {
+          this.cachedMatrixWorld.copy(this.matrixWorld);
+          this.matrixWorld = this.cachedMatrixWorld;
+        }
       }
     };
 
@@ -119,7 +129,6 @@ AFRAME.registerSystem("world-update", {
           if (!this.matrixIsModified) {
             this.matrixWorld = this.parent.matrixWorld;
           } else {
-            if (this.matrixWorld !== this.cachedMatrixWorld) this.matrixWorld = this.cachedMatrixWorld;
             this.matrixWorld.multiplyMatrices(this.parent.matrixWorld, this.matrix);
           }
         }
