@@ -8,7 +8,6 @@ AFRAME.GLTFModelPlus.registerComponent("css-class", "css-class");
 AFRAME.GLTFModelPlus.registerComponent("interactable", "css-class", (el, componentName) => {
   el.setAttribute(componentName, "interactable");
 });
-AFRAME.GLTFModelPlus.registerComponent("scene-shadow", "scene-shadow");
 AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner");
 AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
 AFRAME.GLTFModelPlus.registerComponent("media-loader", "media-loader");
