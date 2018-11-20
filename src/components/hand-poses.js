@@ -25,6 +25,11 @@ AFRAME.registerComponent("hand-pose", {
     this.pose = 0;
     this.animatePose = this.animatePose.bind(this);
     const mixerEl = findAncestorWithComponent(this.el, "animation-mixer");
+    if (!mixerEl) {
+      console.warn("Avatar does not have an animation mixer, disabling hand animations");
+      this.el.removeAttribute("hand-pose");
+      return;
+    }
     this.mixer = mixerEl.components["animation-mixer"].mixer;
     const suffix = this.id == "left" ? "_L" : "_R";
     this.from = this.to = this.mixer.clipAction(POSES.open + suffix);
