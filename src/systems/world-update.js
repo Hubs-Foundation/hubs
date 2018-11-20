@@ -129,6 +129,8 @@ AFRAME.registerSystem("world-update", {
           if (!this.matrixIsModified) {
             this.matrixWorld = this.parent.matrixWorld;
           } else {
+            // Once matrixIsModified === true, this.matrixWorld has been updated to be a local
+            // copy, not a reference to this.parent.matrixWorld (see updateMatrix/applyMatrix)
             this.matrixWorld.multiplyMatrices(this.parent.matrixWorld, this.matrix);
           }
         }
