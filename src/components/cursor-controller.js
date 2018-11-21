@@ -88,6 +88,7 @@ AFRAME.registerComponent("cursor-controller", {
   tick: (() => {
     const rawIntersections = [];
     const cameraPos = new THREE.Vector3();
+
     return function() {
       if (this.dirty) {
         // app aware devices cares about this.targets so we must update it even if cursor is not enabled
@@ -101,8 +102,9 @@ AFRAME.registerComponent("cursor-controller", {
 
       this.data.cursor.object3D.visible = this.enabled && !!cursorPose;
       const lineVisible = !!(this.enabled && rightHandPose);
+      const lineComponent = this.el.components.line;
 
-      if (this.el.getAttribute("line").visible !== lineVisible) {
+      if (lineComponent.data.visible !== lineVisible) {
         this.el.setAttribute("line", "visible", lineVisible);
       }
 
@@ -134,19 +136,39 @@ AFRAME.registerComponent("cursor-controller", {
       getLastWorldPosition(camera.object3D, cameraPos);
       cameraPos.y = cursor.object3D.position.y;
       cursor.object3D.lookAt(cameraPos);
+      cursor.object3D.scale.setScalar(Math.pow(this.distance, 0.315) * 0.75);
       cursor.object3D.matrixNeedsUpdate = true;
 
       const cursorColor = intersection || isGrabbing ? cursorColorHovered : cursorColorUnhovered;
 
-      if (this.data.cursor.getAttribute("material").color !== cursorColor) {
+      if (this.data.cursor.components.material.data.color !== cursorColor) {
         this.data.cursor.setAttribute("material", "color", cursorColor);
       }
 
       if (this.el.components.line.data.visible) {
-        this.el.setAttribute("line", {
-          start: cursorPose.position.clone(),
-          end: cursor.object3D.position.clone()
-        });
+        // Reach into line component for better performance
+        const posePosition = cursorPose.position;
+        const cursorPosition = cursor.object3D.position;
+        const start = lineComponent.data.start;
+        const end = lineComponent.data.end;
+        const positionArray = lineComponent.geometry.attributes.position.array;
+
+        start.x = posePosition.x;
+        start.y = posePosition.y;
+        start.z = posePosition.z;
+        end.x = cursorPosition.x;
+        end.y = cursorPosition.y;
+        end.z = cursorPosition.z;
+
+        positionArray[0] = start.x;
+        positionArray[1] = start.y;
+        positionArray[2] = start.z;
+        positionArray[3] = end.x;
+        positionArray[4] = end.y;
+        positionArray[5] = end.z;
+
+        lineComponent.geometry.attributes.position.needsUpdate = true;
+        lineComponent.geometry.computeBoundingSphere();
       }
     };
   })(),
