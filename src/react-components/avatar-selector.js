@@ -125,7 +125,7 @@ class AvatarSelector extends Component {
     this.scene.addEventListener("loaded", () => {
       this.scene.setAttribute("renderer", { gammaOutput: true, sortObjects: true, physicallyCorrectLights: true });
       this.scene.setAttribute("gamma-factor", "");
-      this.scene.setAttribute("shadow", { type: "pcfsoft" });
+      this.scene.setAttribute("shadow", { type: "pcfsoft", enabled: window.APP.quality !== "low" });
     });
   }
 
