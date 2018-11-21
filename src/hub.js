@@ -18,6 +18,11 @@ import "webrtc-adapter";
 import "aframe-slice9-component";
 import "aframe-motion-capture-components";
 import "./utils/audio-context-fix";
+<<<<<<< Updated upstream
+=======
+import "./utils/threejs-positional-audio-updatematrixworld";
+import "./utils/threejs-world-update";
+>>>>>>> Stashed changes
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
@@ -95,7 +100,7 @@ import "./systems/camera-tools";
 import "./systems/userinput/userinput";
 import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
-import "./systems/world-update";
+import "./systems/components-queue";
 
 import "./gltf-component-mappings";
 
@@ -340,7 +345,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const scene = document.querySelector("a-scene");
-  scene.object3D.autoUpdate = false;
   scene.removeAttribute("keyboard-shortcuts"); // Remove F and ESC hotkeys from aframe
 
   const hubChannel = new HubChannel(store);
