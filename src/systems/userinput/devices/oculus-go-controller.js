@@ -42,7 +42,7 @@ export class OculusGoControllerDevice {
         this.rayObject = document.querySelector(this.selector).object3D;
       }
       if (this.rayObject.updateMatricies) {
-        this.rayObject.updateMatricies(false);
+        this.rayObject.updateMatricies();
       } else {
         this.rayObject.updateMatrixWorld();
       }
