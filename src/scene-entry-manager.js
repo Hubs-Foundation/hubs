@@ -90,8 +90,8 @@ export default class SceneEntryManager {
       return;
     }
 
-    this.scene.systems["motion-capture-replayer"].remove();
     this.scene.setAttribute("motion-capture-replayer", "enabled", false);
+    this.scene.systems["motion-capture-replayer"].remove();
 
     if (mediaStream) {
       NAF.connection.adapter.setLocalMediaStream(mediaStream);
