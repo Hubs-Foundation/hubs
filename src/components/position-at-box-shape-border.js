@@ -67,6 +67,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
 
         if (this.targetEl.getAttribute("visible") === false) {
           this.target.scale.setScalar(0.01); // To avoid "pop" of gigantic button first time
+          this.target.matrixNeedsUpdate = true;
           return;
         }
       }

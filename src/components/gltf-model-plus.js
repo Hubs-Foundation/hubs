@@ -161,7 +161,6 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
     // preserved under the group (but not the node). Otherwise `clipArray` will be
     // `null` in `THREE.AnimationClip.findByName`.
     node.parent.animations = node.animations;
-    node.matrixAutoUpdate = true;
   }
 
   if (entityComponents) {

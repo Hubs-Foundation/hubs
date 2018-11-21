@@ -192,6 +192,7 @@ AFRAME.registerComponent("camera-tool", {
 
         if (this.playerHud) {
           tempHudScale.copy(this.playerHud.scale);
+          // TODO visible
           this.playerHud.scale.set(0.001, 0.001, 0.001);
           this.playerHud.updateMatrices(true, true);
           this.playerHud.updateMatrixWorld(true, true);

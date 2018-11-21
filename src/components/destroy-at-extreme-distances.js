@@ -21,10 +21,6 @@ AFRAME.registerComponent("destroy-at-extreme-distances", {
       const { xMin, xMax, yMin, yMax, zMin, zMax } = this.data;
       getLastWorldPosition(this.el.object3D, pos);
 
-      if (this.el.parentNode === this.el.sceneEl) {
-        pos.copy(this.el.object3D.position);
-      }
-
       if (pos.x < xMin || pos.x > xMax || pos.y < yMin || pos.y > yMax || pos.z < zMin || pos.z > zMax) {
         this.el.parentNode.removeChild(this.el);
       }
