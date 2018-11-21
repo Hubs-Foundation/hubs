@@ -143,7 +143,7 @@ AFRAME.registerComponent("super-spawner", {
     await waitForEvent("body-loaded", entity);
 
     getLastWorldPosition(hand.object3D, entity.object3D.position);
-    entity.matrixNeedsUpdate = true;
+    entity.object3D.matrixNeedsUpdate = true;
 
     if (!using6DOF) {
       for (let i = 0; i < this.data.grabEvents.length; i++) {
