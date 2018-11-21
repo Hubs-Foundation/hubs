@@ -93,7 +93,7 @@ AFRAME.registerSystem("world-update", {
     };
 
     // By the end of this function this.matrix reflects the updated local matrix
-    // and this.worldMatrix reflects the updated world matrix, taking into account
+    // and this.matrixWorld reflects the updated world matrix, taking into account
     // parent matrices.
     //
     // forceLocalUpdate - Forces the local matrix to be updated regardless of if it has not
@@ -102,10 +102,11 @@ AFRAME.registerSystem("world-update", {
     // forceWorldUpdate - Forces the world matrix to be updated regardless of if the local matrix
     // has been updated since the last update.
     //
-    // skipParents - unless true, all parent matricies are updated before
-    // updating this object's local and world matrix.
+    // skipParents - unless true, all parent matricies are updated before updating this object's
+    // local and world matrix.
     //
-    // Returns true if the world matrix was updated
+    // Returns true if the world matrix was updated.
+    //
     THREE.Object3D.prototype.updateMatrices = function(forceLocalUpdate, forceWorldUpdate, skipParents) {
       if (!this.hasHadFirstMatrixUpdate) {
         if (
@@ -145,7 +146,7 @@ AFRAME.registerSystem("world-update", {
             this.matrixWorld = this.parent.matrixWorld;
           } else {
             // Once matrixIsModified === true, this.matrixWorld has been updated to be a local
-            // copy, not a reference to this.parent.matrixWorld (see updateMatrix/applymatrix)
+            // copy, not a reference to this.parent.matrixWorld (see updateMatrix/applyMatrix)
             this.matrixWorld.multiplyMatrices(this.parent.matrixWorld, this.matrix);
           }
         }
