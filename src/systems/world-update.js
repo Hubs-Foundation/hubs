@@ -120,7 +120,8 @@ AFRAME.registerSystem("world-update", {
       }
 
       if (!skipParents && this.parent) {
-        this.matrixWorldNeedsUpdate = this.parent.updateMatrices(false, forceWorldUpdate, false);
+        this.matrixWorldNeedsUpdate =
+          this.matrixWorldNeedsUpdate || this.parent.updateMatrices(false, forceWorldUpdate, false);
       }
 
       if (this.matrixWorldNeedsUpdate || forceWorldUpdate) {
