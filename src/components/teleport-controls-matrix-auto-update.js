@@ -1,9 +1,25 @@
 AFRAME.registerComponent("teleport-controls-matrix-auto-update", {
+  init: function() {
+    this.teleportControls = this.el.components["teleport-controls"];
+    this._updateMatrixNeedsUpdate = this._updateMatrixNeedsUpdate.bind(this);
+  },
+
+  play: function() {
+    this.el.sceneEl.addEventListener("teleported", this._updateMatrixNeedsUpdate);
+  },
+
+  pause: function() {
+    this.el.sceneEl.removeEventListener("teleported", this._updateMatrixNeedsUpdate);
+  },
+
   tick: function() {
-    const teleportControls = this.el.components["teleport-controls"];
-    if (this.lastHitEntity !== teleportControls.hitEntity) {
-      document.querySelectorAll(".hitEntity").forEach(o => o.object3D.traverse(x => (x.matrixAutoUpdate = true)));
-      this.lastHitEntity = teleportControls.hitEntity;
+    if (this.lastHitEntity !== this.teleportControls.hitEntity) {
+      this.teleportControls.hitEntity.object3D.traverse(o => (o.matrixAutoUpdate = true));
+      this.lastHitEntity = this.teleportControls.hitEntity;
     }
+  },
+
+  _updateMatrixNeedsUpdate: function() {
+    this.teleportControls.data.cameraRig.matrixNeedsUpdate = true;
   }
 });
