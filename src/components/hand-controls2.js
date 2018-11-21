@@ -138,7 +138,10 @@ AFRAME.registerComponent("hand-controls2", {
       this.el.emit("hand-pose", { previous: this.pose, current: pose });
       this.pose = pose;
     }
-    this.el.setAttribute("visible", hasPose);
+
+    if (this.el.getAttribute("visible") !== hasPose) {
+      this.el.setAttribute("visible", hasPose);
+    }
   },
 
   // Show controller when connected
