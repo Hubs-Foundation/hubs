@@ -156,7 +156,6 @@ AFRAME.registerComponent("camera-tool", {
 
   tock: (function() {
     const tempHeadScale = new THREE.Vector3();
-    const tempHudScale = new THREE.Vector3();
 
     return function tock() {
       const sceneEl = this.el.sceneEl;
@@ -191,11 +190,7 @@ AFRAME.registerComponent("camera-tool", {
         }
 
         if (this.playerHud) {
-          tempHudScale.copy(this.playerHud.scale);
-          // TODO visible
-          this.playerHud.scale.set(0.001, 0.001, 0.001);
-          this.playerHud.updateMatrices(true, true);
-          this.playerHud.updateMatrixWorld(true, true);
+          this.playerHud.visible = false;
         }
 
         const tmpVRFlag = renderer.vr.enabled;
@@ -213,9 +208,7 @@ AFRAME.registerComponent("camera-tool", {
           this.playerHead.updateMatrixWorld(true, true);
         }
         if (this.playerHud) {
-          this.playerHud.scale.copy(tempHudScale);
-          this.playerHud.updateMatrices(true, true);
-          this.playerHud.updateMatrixWorld(true, true);
+          this.playerHud.visible = true;
         }
         this.lastUpdate = now;
         this.updateRenderTargetNextTick = false;
