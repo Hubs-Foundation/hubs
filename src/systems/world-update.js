@@ -113,6 +113,7 @@ AFRAME.registerSystem("world-update", {
         }
 
         this.hasHadFirstMatrixUpdate = true;
+        this.matrixWorldNeedsUpdate = true;
         this.cachedMatrixWorld = this.matrixWorld;
       } else if (this.matrixNeedsUpdate || this.matrixAutoUpdate || forceLocalUpdate) {
         this.updateMatrix();
