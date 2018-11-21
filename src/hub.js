@@ -18,11 +18,7 @@ import "webrtc-adapter";
 import "aframe-slice9-component";
 import "aframe-motion-capture-components";
 import "./utils/audio-context-fix";
-<<<<<<< Updated upstream
-=======
-import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
->>>>>>> Stashed changes
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
