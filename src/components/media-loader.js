@@ -91,7 +91,6 @@ AFRAME.registerComponent("media-loader", {
       this.loaderMixer = new THREE.AnimationMixer(mesh);
       this.loadingClip = this.loaderMixer.clipAction(loadingObject.animations[0]);
       this.loadingClip.play();
-      mesh.matrixAutoUpdate = true;
     }
     this.el.setObject3D("mesh", mesh);
     this.hasBakedShapes = !!(this.el.body && this.el.body.shapes.length > 0);

@@ -12,6 +12,23 @@ AFRAME.registerSystem("world-update", {
   },
 
   _patchThreeJS: function() {
+    // Patch animation system
+    const bindingSetters = THREE.PropertyBinding.prototype.SetterByBindingTypeAndVersioning;
+    const Versioning = THREE.PropertyBinding.prototype.Versioning;
+
+    // For all binding types, monkey patch the setters that require world matrix
+    // updates to also flip matrixNeedsUpdate
+    for (let i = 0; i < bindingSetters.length; i++) {
+      const setter = bindingSetters[i][Versioning.MatrixWorldNeedsUpdate];
+      if (!setter) continue;
+
+      bindingSetters[i][Versioning.MatrixWorldNeedsUpdate] = function() {
+        const v = setter.apply(this, arguments);
+        this.targetObject.matrixNeedsUpdate = true;
+        return v;
+      };
+    }
+
     THREE.Object3D.prototype.getWorldPosition = function(target) {
       if (target === undefined) {
         console.warn("THREE.Object3D: .getWorldPosition() target is now required");

@@ -109,7 +109,7 @@
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
                         <template data-name="RootScene">
-                            <a-entity ik-controller hand-pose__left hand-pose__right space-invader-mesh="meshName: Bot_Skinned" matrix-auto-update></a-entity>
+                            <a-entity ik-controller hand-pose__left hand-pose__right space-invader-mesh="meshName: Bot_Skinned"></a-entity>
                         </template>
 
                         <template data-name="Neck">
@@ -125,7 +125,7 @@
                         </template>
 
                         <template data-name="Chest">
-                            <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility matrix-auto-update>
+                            <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
                                 <a-entity billboard>
                                     <a-entity mixin="rounded-text-button" block-button visible-while-frozen="withinDistance: 10;" ui-class-while-frozen position="0 0 .35"> </a-entity>
                                     <a-entity visible-while-frozen="withinDistance: 10;" text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
@@ -139,7 +139,6 @@
                                 networked-audio-analyser
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
-                                matrix-auto-update
                             >
                                 <a-cylinder
                                     static-body
@@ -152,11 +151,11 @@
                         </template>
 
                         <template data-name="LeftHand">
-                            <a-entity personal-space-invader="radius: 0.1" bone-visibility matrix-auto-update></a-entity>
+                            <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
                         </template>
 
                         <template data-name="RightHand">
-                            <a-entity personal-space-invader="radius: 0.1" bone-visibility matrix-auto-update></a-entity>
+                            <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
                         </template>
                     </a-entity>
                 </a-entity>
@@ -396,7 +395,6 @@
             ik-root
             player-info
             cardboard-controls
-            matrix-auto-update
         >
             <a-entity
                 id="player-hud"
@@ -523,6 +521,7 @@
                         hitOpacity: 0.3;
                         missOpacity: 0.1;
                         curveShootingSpeed: 12;"
+                    teleport-controls-matrix-auto-update
                     action-to-event__start-teleport="path: /actions/startTeleport; event: gaze-teleport_down"
                     action-to-event__stop-teleport="path: /actions/stopTeleport; event: gaze-teleport_up"
                 ></a-entity>
@@ -570,6 +569,7 @@
                     hitOpacity: 0.3;
                     missOpacity: 0.1;
                     curveShootingSpeed: 12;"
+                teleport-controls-matrix-auto-update
                 haptic-feedback
                 body="type: static; shape: none;"
                 mixin="controller-super-hands"
@@ -589,26 +589,25 @@
                         hand-pose__right
                         hand-pose-controller__left="networkedAvatar:#player-rig;eventSrc:#player-left-controller"
                         hand-pose-controller__right="networkedAvatar:#player-rig;eventSrc:#player-right-controller"
-                        matrix-auto-update
                     ></a-entity>
                 </template>
 
                 <template data-name="Neck">
-                    <a-entity matrix-auto-update>
+                    <a-entity>
                         <a-entity class="nametag" visible="false" text ></a-entity>
                     </a-entity>
                 </template>
 
                 <template data-name="Head">
-                    <a-entity id="player-head" visible="false" bone-visibility matrix-auto-update></a-entity>
+                    <a-entity id="player-head" visible="false" bone-visibility></a-entity>
                 </template>
 
                 <template data-name="LeftHand">
-                    <a-entity bone-visibility hover-visuals="hand: left; controller: #player-left-controller" matrix-auto-update></a-entity>
+                    <a-entity bone-visibility hover-visuals="hand: left; controller: #player-left-controller"></a-entity>
                 </template>
 
                 <template data-name="RightHand">
-                    <a-entity bone-visibility hover-visuals="hand: right; controller: #player-right-controller" matrix-auto-update></a-entity>
+                    <a-entity bone-visibility hover-visuals="hand: right; controller: #player-right-controller"></a-entity>
                 </template>
 
             </a-entity>

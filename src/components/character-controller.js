@@ -183,6 +183,8 @@ AFRAME.registerComponent("character-controller", {
       if (this.velocity.lengthSq() > EPS && !this.data.fly) {
         this.setPositionOnNavMesh(startPos, root.position, root);
       }
+
+      root.matrixNeedsUpdate = true;
     };
   })(),
 

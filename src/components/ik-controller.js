@@ -87,42 +87,34 @@ AFRAME.registerComponent("ik-controller", {
   update(oldData) {
     if (this.data.leftEye !== oldData.leftEye) {
       this.leftEye = this.el.object3D.getObjectByName(this.data.leftEye);
-      this.leftEye.matrixAutoUpdate = true;
     }
 
     if (this.data.rightEye !== oldData.rightEye) {
       this.rightEye = this.el.object3D.getObjectByName(this.data.rightEye);
-      this.rightEye.matrixAutoUpdate = true;
     }
 
     if (this.data.head !== oldData.head) {
       this.head = this.el.object3D.getObjectByName(this.data.head);
-      this.head.matrixAutoUpdate = true;
     }
 
     if (this.data.neck !== oldData.neck) {
       this.neck = this.el.object3D.getObjectByName(this.data.neck);
-      this.neck.matrixAutoUpdate = true;
     }
 
     if (this.data.leftHand !== oldData.leftHand) {
       this.leftHand = this.el.object3D.getObjectByName(this.data.leftHand);
-      this.leftHand.matrixAutoUpdate = true;
     }
 
     if (this.data.rightHand !== oldData.rightHand) {
       this.rightHand = this.el.object3D.getObjectByName(this.data.rightHand);
-      this.rightHand.matrixAutoUpdate = true;
     }
 
     if (this.data.chest !== oldData.chest) {
       this.chest = this.el.object3D.getObjectByName(this.data.chest);
-      this.chest.matrixAutoUpdate = true;
     }
 
     if (this.data.hips !== oldData.hips) {
       this.hips = this.el.object3D.getObjectByName(this.data.hips);
-      this.hips.matrixAutoUpdate = true;
     }
 
     // Set middleEye's position to be right in the middle of the left and right eyes.
@@ -142,10 +134,12 @@ AFRAME.registerComponent("ik-controller", {
       return;
     }
 
+    const root = this.ikRoot.el.object3D;
     const { camera, leftController, rightController } = this.ikRoot;
     const {
       hips,
       head,
+      neck,
       chest,
       cameraForward,
       headTransform,
@@ -188,6 +182,11 @@ AFRAME.registerComponent("ik-controller", {
     rootToChest.multiplyMatrices(hips.matrix, chest.matrix);
     invRootToChest.getInverse(rootToChest);
 
+    root.matrixNeedsUpdate = true;
+    neck.matrixNeedsUpdate = true;
+    head.matrixNeedsUpdate = true;
+    chest.matrixNeedsUpdate = true;
+
     this.updateHand(this.hands.left, leftHand, leftController, true);
     this.updateHand(this.hands.right, rightHand, rightController, false);
   },
@@ -217,6 +216,7 @@ AFRAME.registerComponent("ik-controller", {
 
       handObject3D.position.setFromMatrixPosition(handMatrix);
       handObject3D.rotation.setFromRotationMatrix(handMatrix);
+      handObject3D.matrixNeedsUpdate = true;
     }
   }
 });
