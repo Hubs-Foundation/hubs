@@ -87,6 +87,7 @@ AFRAME.registerSystem("camera-mirror", {
       if (playerHud) {
         tempHudScale.copy(playerHud.scale);
         playerHud.scale.set(0.001, 0.001, 0.001);
+        // TODO visible
         playerHud.updateMatrices(true, true);
         playerHud.updateMatrixWorld(true, true);
       }

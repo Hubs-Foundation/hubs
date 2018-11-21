@@ -18,6 +18,7 @@ AFRAME.registerSystem("world-update", {
         target = new THREE.Vector3();
       }
 
+      // New function, defined below (used instead of updateMatrixWorld)
       this.updateMatrices();
 
       return target.setFromMatrixPosition(this.matrixWorld);
@@ -33,6 +34,7 @@ AFRAME.registerSystem("world-update", {
           target = new THREE.Quaternion();
         }
 
+        // New function, defined below (used instead of updateMatrixWorld)
         this.updateMatrices();
         this.matrixWorld.decompose(position, target, scale);
 
@@ -50,6 +52,7 @@ AFRAME.registerSystem("world-update", {
           target = new THREE.Vector3();
         }
 
+        // New function, defined below (used instead of updateMatrixWorld)
         this.updateMatrices();
         this.matrixWorld.decompose(position, quaternion, target);
 
@@ -57,39 +60,27 @@ AFRAME.registerSystem("world-update", {
       };
     })();
 
-    THREE.Object3D.prototype.updateMatrix = function() {
-      this.matrix.compose(
-        this.position,
-        this.quaternion,
-        this.scale
-      );
+    const handleMatrixModification = o => {
+      if (!o.matrixIsModified) {
+        o.matrixIsModified = true;
 
-      this.matrixWorldNeedsUpdate = true;
-
-      if (!this.matrixIsModified) {
-        this.matrixIsModified = true;
-
-        if (this.cachedMatrixWorld) {
-          this.cachedMatrixWorld.copy(this.matrixWorld);
-          this.matrixWorld = this.cachedMatrixWorld;
+        if (o.cachedMatrixWorld) {
+          o.cachedMatrixWorld.copy(o.matrixWorld);
+          o.matrixWorld = o.cachedMatrixWorld;
         }
       }
     };
 
-    THREE.Object3D.prototype.applyMatrix = function(matrix) {
-      this.matrix.multiplyMatrices(matrix, this.matrix);
-      this.matrix.decompose(this.position, this.quaternion, this.scale);
+    const updateMatrix = THREE.Object3D.prototype.updateMatrix;
+    THREE.Object3D.prototype.updateMatrix = function() {
+      updateMatrix.apply(this, arguments);
+      handleMatrixModification(this);
+    };
 
-      this.matrixWorldNeedsUpdate = true;
-
-      if (!this.matrixIsModified) {
-        this.matrixIsModified = true;
-
-        if (this.cachedMatrixWorld) {
-          this.cachedMatrixWorld.copy(this.matrixWorld);
-          this.matrixWorld = this.cachedMatrixWorld;
-        }
-      }
+    const applyMatrix = THREE.Object3D.prototype.applyMatrix;
+    THREE.Object3D.prototype.applyMatrix = function() {
+      applyMatrix.apply(this, arguments);
+      handleMatrixModification(this);
     };
 
     // By the end of this function this.matrix reflects the updated local matrix
@@ -129,7 +120,7 @@ AFRAME.registerSystem("world-update", {
       }
 
       if (!skipParents && this.parent) {
-        this.parent.updateMatrices(false, forceWorldUpdate, false);
+        this.matrixWorldNeedsUpdate = this.parent.updateMatrices(false, forceWorldUpdate, false);
       }
 
       if (this.matrixWorldNeedsUpdate || forceWorldUpdate) {
