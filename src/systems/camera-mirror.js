@@ -62,7 +62,6 @@ AFRAME.registerSystem("camera-mirror", {
     const headEl = document.getElementById("player-head");
     const hudEl = document.getElementById("player-hud");
     const tempHeadScale = new THREE.Vector3();
-    const tempHudScale = new THREE.Vector3();
     const renderer = this.el.renderer;
     const playerHead = headEl && headEl.object3D;
     const playerHud = hudEl && hudEl.object3D;
@@ -85,11 +84,7 @@ AFRAME.registerSystem("camera-mirror", {
       }
 
       if (playerHud) {
-        tempHudScale.copy(playerHud.scale);
-        playerHud.scale.set(0.001, 0.001, 0.001);
-        // TODO visible
-        playerHud.updateMatrices(true, true);
-        playerHud.updateMatrixWorld(true, true);
+        playerHud.visible = false;
       }
       renderer.vr.enabled = false;
       const tmpOnAfterRender = this.el.object3D.onAfterRender;
@@ -103,9 +98,7 @@ AFRAME.registerSystem("camera-mirror", {
         playerHead.updateMatrixWorld(true);
       }
       if (playerHud) {
-        playerHud.scale.copy(tempHudScale);
-        playerHud.updateMatrices(true, true);
-        playerHud.updateMatrixWorld(true);
+        playerHud.visible = true;
       }
     };
   }
