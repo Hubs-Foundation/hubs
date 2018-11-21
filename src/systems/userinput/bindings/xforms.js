@@ -41,9 +41,8 @@ export const xforms = {
     frame[dest.value] = true;
   },
   rising: function rising(frame, src, dest, prevState) {
-    const srcValue = src.value;
-    frame[dest.value] = frame[srcValue] && prevState === false;
-    return !!frame[srcValue];
+    frame[dest.value] = frame[src.value] && prevState === false;
+    return !!frame[src.value];
   },
   risingWithFrameDelay: function(n) {
     return function risingWithFrameDelay(frame, src, dest, state = { values: new Array(n) }) {
@@ -54,9 +53,8 @@ export const xforms = {
     };
   },
   falling: function falling(frame, src, dest, prevState) {
-    const srcValue = src.value;
-    frame[dest.value] = !frame[srcValue] && prevState;
-    return !!frame[srcValue];
+    frame[dest.value] = !frame[src.value] && prevState;
+    return !!frame[src.value];
   },
   vec2Zero: function(frame, _, dest) {
     frame[dest.value] = zeroVec2;
@@ -73,15 +71,12 @@ export const xforms = {
   },
   vec2dpad: function(deadzoneRadius, invertX = false, invertY = false) {
     const deadzoneRadiusSquared = deadzoneRadius * deadzoneRadius;
-    const xMultiplier = invertX ? -1 : 1;
-    const yMultiplier = invertY ? -1 : 1;
 
     return function vec2dpad(frame, src, dest) {
-      const value = frame[src.value];
-      if (!value) return;
-      const [x, y] = value;
+      if (!frame[src.value]) return;
+      const [x, y] = frame[src.value];
       const inCenter = x * x + y * y < deadzoneRadiusSquared;
-      const direction = inCenter ? "center" : angleTo4Direction(Math.atan2(x * xMultiplier, y * yMultiplier));
+      const direction = inCenter ? "center" : angleTo4Direction(Math.atan2(invertX ? -x : x, invertY ? -y : y));
       frame[dest[direction]] = true;
     };
   },
