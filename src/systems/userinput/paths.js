@@ -140,7 +140,26 @@ paths.device.oculusgo = {
     axisX: `${oculusgo}axis/touchpadX`,
     axisY: `${oculusgo}axis/touchpadY`
   },
-  pose: `${oculusgo}pose`
+  pose: `${oculusgo}pose`,
+  v: name => {
+    return `/vars/oculusgo/${name}`;
+  }
+};
+
+const gearVRController = "/device/gearVRController/";
+paths.device.gearVRController = {
+  button: buttonName => ({
+    pressed: `${gearVRController}button/${buttonName}/pressed`,
+    touched: `${gearVRController}button/${buttonName}/touched`,
+    value: `${gearVRController}button/${buttonName}/value`
+  }),
+  axis: axisName => {
+    return `${gearVRController}axis/${axisName}`;
+  },
+  pose: `${gearVRController}pose`,
+  v: name => {
+    return `/vars/gearVRController/${name}`;
+  }
 };
 
 const daydream = "/device/daydream/";
