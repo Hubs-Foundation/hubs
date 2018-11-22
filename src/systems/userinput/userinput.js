@@ -24,6 +24,7 @@ import { daydreamUserBindings } from "./bindings/daydream-user";
 import { resolveActionSets } from "./resolve-action-sets";
 import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
+import { detectInHMD } from "../../utils/vr-caps-detect";
 
 function intersection(setA, setB) {
   const _intersection = new Set();
@@ -161,10 +162,15 @@ AFRAME.registerSystem("userinput", {
     this.activeSets = new Set([sets.global]);
     this.pendingSetChanges = [];
     this.xformStates = new Map();
-    this.activeDevices = new Set([new MouseDevice(), new AppAwareMouseDevice(), new KeyboardDevice(), new HudDevice()]);
+    this.activeDevices = new Set([new HudDevice()]);
 
-    if (AFRAME.utils.device.isMobile()) {
+    if (!AFRAME.utils.device.isMobile()) {
+      this.activeDevices.add(new MouseDevice());
+      this.activeDevices.add(new AppAwareMouseDevice());
+      this.activeDevices.add(new KeyboardDevice());
+    } else if (!detectInHMD()) {
       this.activeDevices.add(new AppAwareTouchscreenDevice());
+      this.activeDevices.add(new KeyboardDevice());
     }
 
     this.registeredMappings = new Set([keyboardDebuggingBindings]);
@@ -223,10 +229,6 @@ AFRAME.registerSystem("userinput", {
         gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
       } else if (e.gamepad.id === "Oculus Go Controller") {
         gamepadDevice = new OculusGoControllerDevice(e.gamepad);
-
-        // For Oculus Go, to increase perf, disable all non-essential devices
-        // TODO detect if keyboard/mouse are available
-        this.activeDevices = new Set([new HudDevice()]);
       } else if (e.gamepad.id === "Daydream Controller") {
         gamepadDevice = new DaydreamControllerDevice(e.gamepad);
       } else if (e.gamepad.id.includes("Xbox")) {
