@@ -105,8 +105,6 @@ THREE.Object3D.prototype.applyMatrix = function() {
 // skipParents - unless true, all parent matricies are updated before updating this object's
 // local and world matrix.
 //
-// Returns true if the world matrix was updated.
-//
 THREE.Object3D.prototype.updateMatrices = function(forceLocalUpdate, forceWorldUpdate, skipParents) {
   if (!this.hasHadFirstMatrixUpdate) {
     if (
@@ -130,8 +128,8 @@ THREE.Object3D.prototype.updateMatrices = function(forceLocalUpdate, forceWorldU
   }
 
   if (!skipParents && this.parent) {
-    this.matrixWorldNeedsUpdate =
-      this.matrixWorldNeedsUpdate || this.parent.updateMatrices(false, forceWorldUpdate, false);
+    this.parent.updateMatrices(false, forceWorldUpdate, false);
+    this.matrixWorldNeedsUpdate = this.matrixWorldNeedsUpdate || this.parent.childrenNeedMatrixWorldUpdate;
   }
 
   if (this.matrixWorldNeedsUpdate || forceWorldUpdate) {
@@ -153,12 +151,9 @@ THREE.Object3D.prototype.updateMatrices = function(forceLocalUpdate, forceWorldU
       }
     }
 
+    this.childrenNeedMatrixWorldUpdate = true;
     this.matrixWorldNeedsUpdate = false;
-
-    return true;
   }
-
-  return false;
 };
 
 // Computes this object's matrices and then the recursively computes the matrices of all the children.
@@ -171,11 +166,14 @@ THREE.Object3D.prototype.updateMatrixWorld = function(forceWorldUpdate, includeI
   if (!this.visible && !includeInvisible) return;
 
   // Do not recurse upwards, since this is recursing downwards
-  const forceChildrenWorldUpdate = this.updateMatrices(false, forceWorldUpdate, true);
+  this.updateMatrices(false, forceWorldUpdate, true);
 
   const children = this.children;
+  const forceChildrenWorldUpdate = this.childrenNeedMatrixWorldUpdate || forceWorldUpdate;
 
   for (let i = 0, l = children.length; i < l; i++) {
     children[i].updateMatrixWorld(forceChildrenWorldUpdate, includeInvisible);
   }
+
+  if (this.childrenNeedMatrixWorldUpdate) this.childrenNeedMatrixWorldUpdate = false;
 };
