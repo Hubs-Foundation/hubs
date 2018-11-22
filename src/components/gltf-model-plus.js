@@ -365,7 +365,6 @@ AFRAME.registerComponent("gltf-model-plus", {
         (this.inflatedEl = inflateEntities(this.model, this.templates, true, this.data.modelToWorldScale))
       ) {
         this.el.appendChild(this.inflatedEl);
-        this.el.object3D.matrixNeedsUpdate = true; // Not totally sure why this is necessary
 
         object3DToSet = this.inflatedEl.object3D;
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
