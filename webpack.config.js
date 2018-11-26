@@ -76,10 +76,13 @@ module.exports = (env, argv) => ({
   devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
   devServer: {
     https: createHTTPSConfig(),
-    host: "0.0.0.0",
-    public: "hubs.local:8080",
+    host: "10.0.0.192",
+    public: "10.0.0.192:8080",
+    headers: {
+      "Access-Control-Allow-Origin": "*"
+    },
     useLocalIp: true,
-    allowedHosts: ["hubs.local"],
+    allowedHosts: ["10.0.0.192"],
     before: function(app) {
       // be flexible with people accessing via a local reticulum on another port
       app.use(cors({ origin: /hubs\.local(:\d*)?$/ }));

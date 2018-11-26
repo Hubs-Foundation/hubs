@@ -104,11 +104,16 @@ export default class HubChannel {
     this.channel.push("message", { body, type });
   };
 
-  pin = (id, gltfNode) => {
+  pin = (id, gltfNode, fileId, fileToken, promotionToken) => {
     const { token } = this.store.state.credentials;
     const payload = { id, gltf_node: gltfNode };
     if (token) {
       payload.token = token;
+    }
+    if (fileId && promotionToken) {
+      payload.file_id = fileId;
+      payload.file_token = fileToken;
+      payload.promotion_token = promotionToken;
     }
     this.channel.push("pin", payload);
   };

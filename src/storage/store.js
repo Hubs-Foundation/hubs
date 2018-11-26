@@ -47,6 +47,14 @@ export const SCHEMA = {
       properties: {
         lastUsedMicDeviceId: { type: "string" }
       }
+    },
+
+    uploadPromotionTokens: {
+      type: "array",
+      items: {
+        fileId: { type: "string" },
+        promotionTokens: { type: "string" }
+      }
     }
   },
 
@@ -56,7 +64,8 @@ export const SCHEMA = {
     profile: { $ref: "#/definitions/profile" },
     credentials: { $ref: "#/definitions/credentials" },
     activity: { $ref: "#/definitions/activity" },
-    settings: { $ref: "#/definitions/settings" }
+    settings: { $ref: "#/definitions/settings" },
+    uploadPromotionTokens: { $ref: "#/definitions/uploadPromotionTokens" }
   },
 
   additionalProperties: false
@@ -73,7 +82,8 @@ export default class Store extends EventTarget {
       activity: {},
       settings: {},
       credentials: {},
-      profile: {}
+      profile: {},
+      uploadPromotionTokens: []
     });
   }
 
@@ -99,10 +109,10 @@ export default class Store extends EventTarget {
 
   update(newState) {
     const finalState = merge(this.state, newState);
-    const isValid = validator.validate(finalState, SCHEMA).valid;
+    const result = validator.validate(finalState, SCHEMA);
 
-    if (!isValid) {
-      throw new Error(`Write of ${JSON.stringify(finalState)} to store failed schema validation.`);
+    if (!result.valid) {
+      throw new Error(`Write of ${JSON.stringify(finalState)} to store failed schema validation. ${result}`);
     }
 
     localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(finalState));

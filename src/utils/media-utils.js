@@ -53,6 +53,7 @@ export const guessContentType = url => {
 export const upload = file => {
   const formData = new FormData();
   formData.append("media", file);
+  formData.append("with_promotion_token", true);
   return fetch(mediaAPIEndpoint, {
     method: "POST",
     body: formData
@@ -147,9 +148,14 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
       .then(response => {
         const srcUrl = new URL(response.raw);
         srcUrl.searchParams.set("token", response.meta.access_token);
-        entity.setAttribute("media-loader", { resolve: false, src: srcUrl.href });
+        entity.setAttribute("media-loader", { resolve: false, src: srcUrl.href, fileId: response.file_id });
+        const { store } = window.APP;
+        store.update({
+          uploadPromotionTokens: [{ fileId: response.file_id, promotionToken: response.meta.promotion_token }]
+        });
       })
-      .catch(() => {
+      .catch(e => {
+        console.log("addMedia upload failed", e);
         entity.setAttribute("media-loader", { src: "error" });
       });
   }
