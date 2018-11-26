@@ -118,8 +118,16 @@ export default class HubChannel {
     this.channel.push("pin", payload);
   };
 
-  unpin = id => {
-    this.channel.push("unpin", { id });
+  unpin = (id, fileId) => {
+    const { token } = this.store.state.credentials;
+    const payload = { id };
+    if (token) {
+      payload.token = token;
+    }
+    if (fileId) {
+      payload.file_id = fileId;
+    }
+    this.channel.push("unpin", payload);
   };
 
   requestSupport = () => {

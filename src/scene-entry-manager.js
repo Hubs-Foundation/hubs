@@ -240,6 +240,7 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("pinned", e => {
+      if (!NAF.utils.isMine(e.detail.el)) return;
       if (this.authChannel.authenticated) {
         this._pinElement(e.detail.el);
       } else {
@@ -270,7 +271,9 @@ export default class SceneEntryManager {
       const networkId = components.networked.data.networkId;
       el.setAttribute("networked", { persistent: false });
 
-      this.hubChannel.unpin(networkId);
+      const { fileId } = el.components["media-loader"].data;
+
+      this.hubChannel.unpin(networkId, fileId);
     });
 
     this.scene.addEventListener("object_spawned", e => {
