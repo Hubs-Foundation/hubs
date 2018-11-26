@@ -60,6 +60,8 @@ function createHTTPSConfig() {
   }
 }
 
+const host = "10.252.28.105";
+
 module.exports = (env, argv) => ({
   entry: {
     index: path.join(__dirname, "src", "index.js"),
@@ -76,13 +78,13 @@ module.exports = (env, argv) => ({
   devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
   devServer: {
     https: createHTTPSConfig(),
-    host: "10.0.0.192",
-    public: "10.0.0.192:8080",
+    host,
+    public: `${host}:8080`,
     headers: {
       "Access-Control-Allow-Origin": "*"
     },
     useLocalIp: true,
-    allowedHosts: ["10.0.0.192"],
+    allowedHosts: [host],
     before: function(app) {
       // be flexible with people accessing via a local reticulum on another port
       app.use(cors({ origin: /hubs\.local(:\d*)?$/ }));
