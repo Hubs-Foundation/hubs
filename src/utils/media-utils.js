@@ -149,8 +149,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
         const srcUrl = new URL(response.raw);
         srcUrl.searchParams.set("token", response.meta.access_token);
         entity.setAttribute("media-loader", { resolve: false, src: srcUrl.href, fileId: response.file_id });
-        const { store } = window.APP;
-        store.update({
+        window.APP.store.update({
           uploadPromotionTokens: [{ fileId: response.file_id, promotionToken: response.meta.promotion_token }]
         });
       })
