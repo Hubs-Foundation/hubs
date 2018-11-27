@@ -98,3 +98,25 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
     el.setAttribute("media-video", { time: componentData.time });
   }
 });
+
+AFRAME.GLTFModelPlus.registerComponent("image", "image", (el, componentName, componentData) => {
+  el.setAttribute("networked", {
+    template: "#interactable-media",
+    owner: "scene",
+    persistent: true,
+    networkId: componentData.src // TODO: Add a networkId in Spoke
+  });
+
+  el.setAttribute("media-loader", { src: componentData.src, resize: true, resolve: true });
+});
+
+AFRAME.GLTFModelPlus.registerComponent("video", "video", (el, componentName, componentData) => {
+  el.setAttribute("networked", {
+    template: "#interactable-media",
+    owner: "scene",
+    persistent: true,
+    networkId: componentData.src // TODO: Add a networkId in Spoke
+  });
+
+  el.setAttribute("media-loader", { src: componentData.src, resize: true, resolve: true });
+});
