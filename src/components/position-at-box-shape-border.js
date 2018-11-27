@@ -43,42 +43,57 @@ AFRAME.registerComponent("position-at-box-shape-border", {
 
   init() {
     this.cam = this.el.sceneEl.camera.el.object3D;
+    this._updateBox = this._updateBox.bind(this);
     this.halfExtents = new THREE.Vector3();
-    this.el.sceneEl.systems["components-queue"].register(this, "media-components");
+    this.el.sceneEl.systems["frame-scheduler"].schedule(this._updateBox, "media-components");
+  },
+
+  remove() {
+    this.el.sceneEl.systems["frame-scheduler"].unschedule(this._updateBox, "media-components");
   },
 
   update() {
     this.dirs = this.data.dirs.map(d => dirs[d]);
   },
 
-  tick: (function() {
+  tick() {
+    if (!this.target) {
+      this.targetEl = this.el.querySelector(this.data.target);
+      this.target = this.targetEl.object3D;
+
+      if (!this.target) return;
+
+      this.targetEl.addEventListener("animationcomplete", () => {
+        this.targetEl.removeAttribute("animation__show");
+      });
+
+      if (this.targetEl.getAttribute("visible") === false) {
+        this.target.scale.setScalar(0.01); // To avoid "pop" of gigantic button first time
+        return;
+      }
+    }
+
+    if (!this.el.getObject3D("mesh")) {
+      return;
+    }
+
+    const isVisible = this.targetEl.getAttribute("visible");
+    const opening = isVisible && !this.wasVisible;
+
+    if (opening) {
+      this._updateBox(true);
+    }
+
+    this.wasVisible = isVisible;
+  },
+
+  _updateBox: (function() {
     const camWorldPos = new THREE.Vector3();
     const targetPosition = new THREE.Vector3();
     const pointOnBoxFace = new THREE.Vector3();
     const tempParentWorldScale = new THREE.Vector3();
 
-    return function() {
-      if (!this.target) {
-        this.targetEl = this.el.querySelector(this.data.target);
-        this.target = this.targetEl.object3D;
-
-        if (!this.target) return;
-
-        if (this.targetEl.getAttribute("visible") === false) {
-          this.target.scale.setScalar(0.01); // To avoid "pop" of gigantic button first time
-          return;
-        }
-      }
-
-      if (!this.el.getObject3D("mesh")) {
-        return;
-      }
-
-      const isVisible = this.targetEl.getAttribute("visible");
-
-      const opening = isVisible && !this.wasVisible;
-      if (!opening && !this.el.sceneEl.systems["components-queue"].shouldTick(this)) return;
-
+    return function(animate) {
       if (!this.halfExtents || this.mesh !== this.el.getObject3D("mesh") || this.shape !== this.el.components.shape) {
         this.mesh = this.el.getObject3D("mesh");
         this.shape = this.el.components.shape;
@@ -129,7 +144,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
       const targetScale = Math.min(2.0, Math.max(0.5, scale * tempParentWorldScale.x));
       const finalScale = targetScale / tempParentWorldScale.x;
 
-      if (opening) {
+      if (animate) {
         this.targetEl.removeAttribute("animation__show");
 
         this.targetEl.setAttribute("animation__show", {
@@ -139,11 +154,9 @@ AFRAME.registerComponent("position-at-box-shape-border", {
           to: { x: finalScale, y: finalScale, z: finalScale },
           easing: "easeOutElastic"
         });
-      } else {
+      } else if (!this.targetEl.getAttribute("animation__show")) {
         this.target.scale.setScalar(finalScale);
       }
-
-      this.wasVisible = isVisible;
     };
   })()
 });
