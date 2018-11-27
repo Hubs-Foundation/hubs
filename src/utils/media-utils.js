@@ -121,6 +121,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
 
       if (!entity.classList.contains("pen")) {
         entity.object3D.scale.setScalar(0.5);
+        entity.matrixNeedsUpdate = true;
 
         entity.setAttribute("animation__spawn-start", {
           property: "scale",

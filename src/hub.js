@@ -11,12 +11,15 @@ import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
+import "./components/teleport-controls-matrix-auto-update";
 import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
 import "aframe-motion-capture-components";
 import "./utils/audio-context-fix";
+import "./utils/threejs-positional-audio-updatematrixworld";
+import "./utils/threejs-world-update";
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
@@ -71,6 +74,7 @@ import "./components/emit-scene-event-on-remove";
 import "./components/stop-event-propagation";
 import "./components/animation";
 import "./components/follow-in-lower-fov";
+import "./components/matrix-auto-update";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -93,6 +97,7 @@ import "./systems/camera-tools";
 import "./systems/userinput/userinput";
 import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
+import "./systems/frame-scheduler";
 
 import "./gltf-component-mappings";
 
@@ -109,6 +114,7 @@ const store = window.APP.store;
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 
+THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
 import "aframe-physics-system";
@@ -119,6 +125,7 @@ import "./components/networked-counter";
 import "./components/event-repeater";
 import "./components/controls-shape-offset";
 import "./components/set-yxz-order";
+import "./components/set-sounds-invisible";
 
 import "./components/cardboard-controls";
 
@@ -182,11 +189,12 @@ function setupLobbyCamera() {
     camera.object3D.position.copy(previewCamera.position);
     camera.object3D.rotation.copy(previewCamera.rotation);
     camera.object3D.rotation.reorder("YXZ");
-    camera.object3D.updateMatrix();
   } else {
     const cameraPos = camera.object3D.position;
     camera.object3D.position.set(cameraPos.x, 2.5, cameraPos.z);
   }
+
+  camera.object3D.matrixNeedsUpdate = true;
 
   camera.setAttribute("scene-preview-camera", "positionOnly: true; duration: 60");
   camera.components["pitch-yaw-rotator"].set(camera.object3D.rotation.x, camera.object3D.rotation.y);

@@ -118,6 +118,7 @@ paths.device.xbox = {
 
 const oculusgo = "/device/oculusgo/";
 paths.device.oculusgo = {
+  // TODO remove these in favor of the direct accessors
   button: buttonName => ({
     pressed: `${oculusgo}button/${buttonName}/pressed`,
     touched: `${oculusgo}button/${buttonName}/touched`,
@@ -125,6 +126,19 @@ paths.device.oculusgo = {
   }),
   axis: axisName => {
     return `${oculusgo}axis/${axisName}`;
+  },
+  //
+  trigger: {
+    pressed: `${oculusgo}button/trigger/pressed`,
+    touched: `${oculusgo}button/trigger/touched`,
+    value: `${oculusgo}button/trigger/value`
+  },
+  touchpad: {
+    pressed: `${oculusgo}button/touchpad/pressed`,
+    touched: `${oculusgo}button/touchpad/touched`,
+    value: `${oculusgo}button/touchpad/value`,
+    axisX: `${oculusgo}axis/touchpadX`,
+    axisY: `${oculusgo}axis/touchpadY`
   },
   pose: `${oculusgo}pose`,
   v: name => {

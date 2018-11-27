@@ -71,6 +71,7 @@ export const xforms = {
   },
   vec2dpad: function(deadzoneRadius, invertX = false, invertY = false) {
     const deadzoneRadiusSquared = deadzoneRadius * deadzoneRadius;
+
     return function vec2dpad(frame, src, dest) {
       if (!frame[src.value]) return;
       const [x, y] = frame[src.value];

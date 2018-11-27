@@ -1,4 +1,6 @@
 import { paths } from "../systems/userinput/paths";
+import { getLastWorldPosition } from "../utils/three-utils";
+
 /**
  * Manages targeting and physical cursor location. Has the following responsibilities:
  *
@@ -8,7 +10,6 @@ import { paths } from "../systems/userinput/paths";
  * - Sending an event when an entity is targeted or un-targeted.
  */
 AFRAME.registerComponent("cursor-controller", {
-  dependencies: ["line"],
   schema: {
     cursor: { type: "selector" },
     camera: { type: "selector" },
@@ -37,6 +38,18 @@ AFRAME.registerComponent("cursor-controller", {
     this.raycaster = new THREE.Raycaster();
     this.dirty = true;
     this.distance = this.data.far;
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: "white",
+      opacity: 0.2,
+      transparent: true,
+      visible: false
+    });
+
+    const lineGeometry = new THREE.BufferGeometry();
+    lineGeometry.addAttribute("position", new THREE.BufferAttribute(new Float32Array(2 * 3), 3));
+
+    this.line = new THREE.Line(lineGeometry, lineMaterial);
+    this.el.setObject3D("line", this.line);
   },
 
   update: function() {
@@ -86,6 +99,7 @@ AFRAME.registerComponent("cursor-controller", {
   tick: (() => {
     const rawIntersections = [];
     const cameraPos = new THREE.Vector3();
+
     return function() {
       if (this.dirty) {
         // app aware devices cares about this.targets so we must update it even if cursor is not enabled
@@ -98,11 +112,7 @@ AFRAME.registerComponent("cursor-controller", {
       const rightHandPose = userinput.get(paths.actions.rightHand.pose);
 
       this.data.cursor.object3D.visible = this.enabled && !!cursorPose;
-      const lineVisible = !!(this.enabled && rightHandPose);
-
-      if (this.el.getAttribute("line").visible !== lineVisible) {
-        this.el.setAttribute("line", "visible", lineVisible);
-      }
+      this.line.material.visible = !!(this.enabled && rightHandPose);
 
       if (!this.enabled || !cursorPose) {
         return;
@@ -129,21 +139,33 @@ AFRAME.registerComponent("cursor-controller", {
       }
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);
       // The cursor will always be oriented towards the player about its Y axis, so objects held by the cursor will rotate towards the player.
-      camera.object3D.getWorldPosition(cameraPos);
+      getLastWorldPosition(camera.object3D, cameraPos);
       cameraPos.y = cursor.object3D.position.y;
       cursor.object3D.lookAt(cameraPos);
+      cursor.object3D.scale.setScalar(Math.pow(this.distance, 0.315) * 0.75);
+      cursor.object3D.matrixNeedsUpdate = true;
 
       const cursorColor = intersection || isGrabbing ? cursorColorHovered : cursorColorUnhovered;
 
-      if (this.data.cursor.getAttribute("material").color !== cursorColor) {
+      if (this.data.cursor.components.material.data.color !== cursorColor) {
         this.data.cursor.setAttribute("material", "color", cursorColor);
       }
 
-      if (this.el.components.line.data.visible) {
-        this.el.setAttribute("line", {
-          start: cursorPose.position.clone(),
-          end: cursor.object3D.position.clone()
-        });
+      if (this.line.material.visible) {
+        // Reach into line component for better performance
+        const posePosition = cursorPose.position;
+        const cursorPosition = cursor.object3D.position;
+        const positionArray = this.line.geometry.attributes.position.array;
+
+        positionArray[0] = posePosition.x;
+        positionArray[1] = posePosition.y;
+        positionArray[2] = posePosition.z;
+        positionArray[3] = cursorPosition.x;
+        positionArray[4] = cursorPosition.y;
+        positionArray[5] = cursorPosition.z;
+
+        this.line.geometry.attributes.position.needsUpdate = true;
+        this.line.geometry.computeBoundingSphere();
       }
     };
   })(),

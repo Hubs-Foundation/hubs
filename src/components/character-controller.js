@@ -183,6 +183,8 @@ AFRAME.registerComponent("character-controller", {
       if (this.velocity.lengthSq() > EPS && !this.data.fly) {
         this.setPositionOnNavMesh(startPos, root.position, root);
       }
+
+      root.matrixNeedsUpdate = true;
     };
   })(),
 
@@ -212,6 +214,7 @@ AFRAME.registerComponent("character-controller", {
     }
     this._setNavNode(end);
     this.navNode = pathfinder.clampStep(start, end, this.navNode, this.navZone, this.navGroup, object3D.position);
+    object3D.matrixNeedsUpdate = true;
   },
 
   resetPositionOnNavMesh: function(position, navPosition, object3D) {
@@ -221,6 +224,7 @@ AFRAME.registerComponent("character-controller", {
     this.navNode = null;
     this._setNavNode(navPosition);
     pathfinder.clampStep(position, navPosition, this.navNode, this.navZone, this.navGroup, object3D.position);
+    object3D.matrixNeedsUpdate = true;
   },
 
   updateVelocity: function(dt, pivot) {

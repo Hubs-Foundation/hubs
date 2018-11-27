@@ -513,6 +513,7 @@ module.exports.Component = registerComponent("animation", {
           lastValue.z = value.z;
 
           el.object3D[data.property].set(value.x, value.y, value.z);
+          el.object3D.matrixNeedsUpdate = true;
         };
       })();
       return;

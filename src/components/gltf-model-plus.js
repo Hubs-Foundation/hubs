@@ -143,6 +143,8 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
 
   node.matrixAutoUpdate = false;
   node.matrix.identity();
+  node.matrix.decompose(node.position, node.rotation, node.scale);
+  el.object3D.matrixNeedsUpdate = true;
 
   el.setObject3D(node.type.toLowerCase(), node);
   if (entityComponents && "nav-mesh" in entityComponents) {
@@ -256,6 +258,8 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   const envMap = await CachedEnvMapTexture;
 
   gltf.scene.traverse(object => {
+    object.matrixAutoUpdate = false;
+
     if (object.material && object.material.type === "MeshStandardMaterial") {
       if (preferredTechnique === "KHR_materials_unlit") {
         object.material = MobileStandardMaterial.fromStandardMaterial(object.material);
@@ -361,6 +365,7 @@ AFRAME.registerComponent("gltf-model-plus", {
         (this.inflatedEl = inflateEntities(this.model, this.templates, true, this.data.modelToWorldScale))
       ) {
         this.el.appendChild(this.inflatedEl);
+
         object3DToSet = this.inflatedEl.object3D;
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
         // Wait one tick for the appended custom elements to be connected before attaching templates
