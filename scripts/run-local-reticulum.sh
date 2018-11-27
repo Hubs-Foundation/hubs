@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
-HOST=hubs.local
-BASE_ASSETS_PATH="https://$HOST:8080/" RETICULUM_SERVER="$HOST:4000" npm start
+BASE_ASSETS_PATH=https://hubs.local:8080/ RETICULUM_SERVER=hubs.local:4000 npm start
