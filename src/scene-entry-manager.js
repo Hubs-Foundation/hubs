@@ -18,9 +18,8 @@ function requestFullscreen() {
 }
 
 export default class SceneEntryManager {
-  constructor(hubChannel, authChannel) {
+  constructor(hubChannel) {
     this.hubChannel = hubChannel;
-    this.authChannel = authChannel;
     this.store = window.APP.store;
     this.scene = document.querySelector("a-scene");
     this.cursorController = document.querySelector("#cursor-controller");
@@ -243,7 +242,7 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("pinned", e => {
       if (!NAF.utils.isMine(e.detail.el)) return;
-      if (this.authChannel.authenticated) {
+      if (this.hubChannel.signedIn) {
         this._pinElement(e.detail.el);
       } else {
         const wasInVR = this.scene.is("vr-mode");
@@ -251,7 +250,7 @@ export default class SceneEntryManager {
         const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
 
         this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete", continueTextId, () => {
-          if (this.authChannel.authenticated) {
+          if (this.hubChannel.signedIn) {
             this._pinElement(e.detail.el);
           } else {
             // UI pins the entity optimistically, so we undo that here.

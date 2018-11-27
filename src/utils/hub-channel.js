@@ -12,6 +12,11 @@ function isSameDay(da, db) {
 export default class HubChannel {
   constructor(store) {
     this.store = store;
+    this._signedIn = false;
+  }
+
+  get signedIn() {
+    return this._signedIn;
   }
 
   setPhoenixChannel = channel => {
@@ -104,12 +109,32 @@ export default class HubChannel {
     this.channel.push("message", { body, type });
   };
 
+  signIn = token => {
+    return new Promise((resolve, reject) => {
+      this.channel
+        .push("sign_in", { token })
+        .receive("ok", () => {
+          this._signedIn = true;
+          resolve();
+        })
+        .receive("error", reject);
+    });
+  };
+
+  signOut = () => {
+    return new Promise((resolve, reject) => {
+      this.channel
+        .push("sign_out")
+        .receive("ok", () => {
+          this._signedIn = false;
+          resolve();
+        })
+        .receive("error", reject);
+    });
+  };
+
   pin = (id, gltfNode, fileId, fileToken, promotionToken) => {
-    const { token } = this.store.state.credentials;
     const payload = { id, gltf_node: gltfNode };
-    if (token) {
-      payload.token = token;
-    }
     if (fileId && promotionToken) {
       payload.file_id = fileId;
       payload.file_token = fileToken;
@@ -119,11 +144,7 @@ export default class HubChannel {
   };
 
   unpin = (id, fileId) => {
-    const { token } = this.store.state.credentials;
     const payload = { id };
-    if (token) {
-      payload.token = token;
-    }
     if (fileId) {
       payload.file_id = fileId;
     }

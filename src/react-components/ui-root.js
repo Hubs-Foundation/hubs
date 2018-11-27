@@ -150,11 +150,11 @@ class UIRoot extends Component {
   };
 
   componentDidUpdate(prevProps) {
-    const { authChannel, showSignInDialog } = this.props;
-    if (authChannel) {
-      const { authenticated } = authChannel;
-      if (authenticated !== this.state.signedIn) {
-        this.setState({ signedIn: authenticated });
+    const { hubChannel, showSignInDialog } = this.props;
+    if (hubChannel) {
+      const { signedIn } = hubChannel;
+      if (signedIn !== this.state.signedIn) {
+        this.setState({ signedIn });
       }
     }
     if (prevProps.showSignInDialog !== showSignInDialog && showSignInDialog) {
@@ -204,7 +204,7 @@ class UIRoot extends Component {
     this.showDialog(SignInDialog, {
       message: messages[signInMessageId],
       onSignIn: async email => {
-        const { authComplete } = await authChannel.startAuthentication(email);
+        const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
 
         this.showDialog(SignInDialog, { authStarted: true, onClose: closeAndContinue });
 
@@ -648,7 +648,7 @@ class UIRoot extends Component {
     this.showDialog(SignInDialog, {
       message: messages["sign-in.prompt"],
       onSignIn: async email => {
-        const { authComplete } = await this.props.authChannel.startAuthentication(email);
+        const { authComplete } = await this.props.authChannel.startAuthentication(email, this.props.hubChannel);
 
         this.showDialog(SignInDialog, { authStarted: true });
 
@@ -660,8 +660,8 @@ class UIRoot extends Component {
     });
   };
 
-  signOut = () => {
-    this.props.authChannel.removeCredentials();
+  signOut = async () => {
+    await this.props.authChannel.signOut(this.props.hubChannel);
     this.setState({ signedIn: false });
   };
 

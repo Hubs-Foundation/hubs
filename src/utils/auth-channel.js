@@ -10,15 +10,12 @@ export default class AuthChannel {
     this.socket = socket;
   };
 
-  removeCredentials = () => {
-    return this.store.update({ credentials: { token: "", email: "" } });
+  signOut = async hubChannel => {
+    await hubChannel.signOut();
+    this.store.update({ credentials: { token: "", email: "" } });
   };
 
-  get authenticated() {
-    return !!this.store.state.credentials.token;
-  }
-
-  async startAuthentication(email) {
+  async startAuthentication(email, hubChannel) {
     const channel = this.socket.channel(`auth:${uuid()}`);
     await new Promise((resolve, reject) =>
       channel
@@ -28,8 +25,9 @@ export default class AuthChannel {
     );
 
     const authComplete = new Promise(resolve =>
-      channel.on("auth_credentials", async ({ credentials }) => {
-        this.store.update({ credentials: { email, token: credentials } });
+      channel.on("auth_credentials", async ({ credentials: token }) => {
+        this.store.update({ credentials: { email, token } });
+        await hubChannel.signIn(token);
         resolve();
       })
     );

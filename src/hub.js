@@ -332,7 +332,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);
-  const entryManager = new SceneEntryManager(hubChannel, authChannel);
+  const entryManager = new SceneEntryManager(hubChannel);
   entryManager.onRequestAuthentication = (
     signInMessageId,
     signInCompleteMessageId,
@@ -487,6 +487,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     .join()
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
+
+      const { token } = store.state.credentials;
+      if (token) {
+        await hubChannel.signIn(token);
+      }
+
       subscriptions.setHubChannel(hubChannel);
       subscriptions.setSubscribed(data.subscriptions.web_push);
       remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
