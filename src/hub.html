@@ -117,6 +117,7 @@
                                 <a-entity
                                     class="nametag"
                                     billboard
+                                    matrix-auto-update
                                     text="side: double; align: center; color: #ddd"
                                     position="0 1 0"
                                     scale="6 6 6"
@@ -126,8 +127,8 @@
 
                         <template data-name="Chest">
                             <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
-                                <a-entity billboard>
-                                    <a-entity mixin="rounded-text-button" block-button visible-while-frozen="withinDistance: 10;" ui-class-while-frozen position="0 0 .35"> </a-entity>
+                                <a-entity billboard matrix-auto-update visible-while-frozen="withinDistance: 10;">
+                                    <a-entity mixin="rounded-text-button" block-button ui-class-while-frozen position="0 0 .35"> </a-entity>
                                     <a-entity visible-while-frozen="withinDistance: 10;" text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
                                 </a-entity>
                             </a-entity>
