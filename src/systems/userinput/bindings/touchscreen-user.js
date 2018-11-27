@@ -99,6 +99,20 @@ export const touchscreenUserBindings = addSetsToBindings({
     }
   ],
 
+  [sets.cursorHoldingCamera]: [
+    {
+      src: { value: paths.device.touchscreen.isTouchingGrabbable },
+      dest: { value: paths.actions.cursor.takeSnapshot },
+      xform: xforms.falling,
+      priority: 2
+    },
+    {
+      src: { value: paths.device.hud.cameraButton },
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.rising,
+      priority: 1
+    }
+  ],
   [sets.cursorHoveringOnPen]: [],
   [sets.cursorHoldingPen]: [
     {

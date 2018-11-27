@@ -216,6 +216,11 @@ class UIRoot extends Component {
     this.props.scene.emit("penButtonPressed");
   };
 
+  spawnCamera = () => {
+    this.props.scene.emit("action_spawn_camera");
+    this.props.scene.emit("cameraButtonPressed");
+  };
+
   onSubscribeChanged = async () => {
     if (!this.props.subscriptions) return;
 
@@ -681,7 +686,8 @@ class UIRoot extends Component {
               You can also{" "}
               <WithHoverSound>
                 <a href="/">create a new room</a>
-              </WithHoverSound>.
+              </WithHoverSound>
+              .
             </div>
           )}
         </div>
@@ -1236,7 +1242,7 @@ class UIRoot extends Component {
                   onToggleFreeze={this.toggleFreeze}
                   onToggleSpaceBubble={this.toggleSpaceBubble}
                   onSpawnPen={this.spawnPen}
-                  onSpawnCamera={() => this.props.scene.emit("action_spawn_camera")}
+                  onSpawnCamera={this.spawnCamera}
                   onShareVideo={this.shareVideo}
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}

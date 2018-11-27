@@ -341,6 +341,26 @@ export default class SceneEntryManager {
 
   _setupCamera = () => {
     this.scene.addEventListener("action_spawn_camera", () => {
+      const cameras = document.querySelectorAll(".icamera");
+      let despawnCamera = false;
+      for (let i = 0; i < cameras.length; i++) {
+        const camera = cameras[i];
+        if (NAF.utils.isMine(camera)) {
+          camera.setAttribute("animation__remove", {
+            property: "scale",
+            dur: 200,
+            to: { x: 0.01, y: 0.01, z: 0.01 },
+            easing: "easeInQuad"
+          });
+          camera.addEventListener("animationcomplete", () => {
+            camera.parentNode.removeChild(camera);
+          });
+          console.log("despawning", camera);
+          despawnCamera = true;
+          break;
+        }
+      }
+      if (despawnCamera) return;
       const entity = document.createElement("a-entity");
       entity.setAttribute("networked", { template: "#interactable-camera" });
       entity.setAttribute("offset-relative-to", {

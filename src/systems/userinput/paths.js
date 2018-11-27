@@ -88,6 +88,7 @@ paths.device.gyro.averageDeltaX = "/device/gyro/averageDeltaX";
 paths.device.gyro.averageDeltaY = "/device/gyro/averageDeltaY";
 paths.device.hud = {};
 paths.device.hud.penButton = "/device/hud/penButton";
+paths.device.hud.cameraButton = "/device/hud/cameraButton";
 
 paths.device.keyboard = {
   key: key => {

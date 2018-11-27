@@ -4,12 +4,22 @@ export class HudDevice {
   constructor() {
     this.events = [];
     document.querySelector("a-scene").addEventListener("penButtonPressed", this.events.push.bind(this.events));
+    document.querySelector("a-scene").addEventListener("cameraButtonPressed", this.events.push.bind(this.events));
   }
 
   write(frame) {
-    frame[paths.device.hud.penButton] = this.events.length !== 0;
+    let pen = false;
+    let camera = false;
     while (this.events.length) {
-      this.events.pop();
+      const e = this.events.pop();
+      if (e.type === "penButtonPressed") {
+        pen = true;
+      }
+      if (e.type === "cameraButtonPressed") {
+        camera = true;
+      }
     }
+    frame[paths.device.hud.cameraButton] = camera;
+    frame[paths.device.hud.penButton] = pen;
   }
 }
