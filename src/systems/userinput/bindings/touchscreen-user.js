@@ -103,7 +103,7 @@ export const touchscreenUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
       dest: { value: paths.actions.cursor.takeSnapshot },
-      xform: xforms.falling,
+      xform: xforms.riseAndFallInNFrames(5),
       priority: 2
     },
     {

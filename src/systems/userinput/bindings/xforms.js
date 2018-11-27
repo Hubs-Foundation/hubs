@@ -56,6 +56,26 @@ export const xforms = {
     frame[dest.value] = !frame[src.value] && prevState;
     return !!frame[src.value];
   },
+  riseAndFallInNFrames: function(n) {
+    return function riseAndFall(frame, src, dest, prevState = { bool: false, framesLeftInWindow: 0 }) {
+      if (prevState.framesLeftInWindow === 0) {
+        const rising = frame[src.value] && !prevState.bool;
+        if (rising) {
+          prevState.framesLeftInWindow = n;
+        }
+      } else {
+        console.log("window open:", prevState.framesLeftInWindow);
+        prevState.framesLeftInWindow = prevState.framesLeftInWindow - 1;
+        const falling = !frame[src.value];
+        frame[dest.value] = falling;
+        if (falling) {
+          prevState.framesLeftInWindow = 0;
+        }
+      }
+      prevState.bool = frame[src.value];
+      return prevState;
+    };
+  },
   vec2Zero: function(frame, _, dest) {
     frame[dest.value] = zeroVec2;
   },
