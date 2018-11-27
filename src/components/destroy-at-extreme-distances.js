@@ -11,13 +11,17 @@ AFRAME.registerComponent("destroy-at-extreme-distances", {
   },
 
   init() {
-    this.el.sceneEl.systems["components-queue"].register(this, "media-components");
+    this._checkForDestroy = this._checkForDestroy.bind(this);
+    this.el.sceneEl.systems["frame-scheduler"].schedule(this._checkForDestroy, "media-components");
   },
 
-  tick: (function() {
+  remove() {
+    this.el.sceneEl.systems["frame-scheduler"].unschedule(this._checkForDestroy, "media-components");
+  },
+
+  _checkForDestroy: (function() {
     const pos = new THREE.Vector3();
     return function() {
-      if (!this.el.sceneEl.systems["components-queue"].shouldTick(this)) return;
       const { xMin, xMax, yMin, yMax, zMin, zMax } = this.data;
       getLastWorldPosition(this.el.object3D, pos);
 
