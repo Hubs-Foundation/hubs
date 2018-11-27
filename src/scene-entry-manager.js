@@ -203,16 +203,18 @@ export default class SceneEntryManager {
 
   _pinElement = el => {
     const { networkId } = el.components.networked.data;
+
     const { fileId, src } = el.components["media-loader"].data;
+
     let fileToken, promotionToken;
     if (fileId) {
       fileToken = new URL(src).searchParams.get("token");
-      console.log(this.store.state.uploadPromotionTokens);
       const storedPromotionToken = this.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
       if (storedPromotionToken) {
         promotionToken = storedPromotionToken.promotionToken;
       }
     }
+
     const gltfNode = pinnedEntityToGltf(el);
     el.setAttribute("networked", { persistent: true });
 
