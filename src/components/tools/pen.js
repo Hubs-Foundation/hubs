@@ -19,6 +19,7 @@ const pathsMap = {
   cursor: {
     startDrawing: paths.actions.cursor.startDrawing,
     stopDrawing: paths.actions.cursor.stopDrawing,
+    undoDrawing: paths.actions.cursor.undoDrawing,
     penNextColor: paths.actions.cursor.penNextColor,
     penPrevColor: paths.actions.cursor.penPrevColor,
     scalePenTip: paths.actions.cursor.scalePenTip
@@ -113,6 +114,9 @@ AFRAME.registerComponent("pen", {
       if (userinput.get(paths.stopDrawing)) {
         this._endDraw();
       }
+      if (userinput.get(paths.undoDrawing)) {
+        this._undoDraw();
+      }
       const penScaleMod = userinput.get(paths.scalePenTip);
       if (penScaleMod) {
         this._changeRadius(penScaleMod);
@@ -174,6 +178,13 @@ AFRAME.registerComponent("pen", {
       this.currentDrawing.endDraw(this.worldPosition, this.direction, this.normal);
       this.drawingManager.returnDrawing(this);
       this.currentDrawing = null;
+    }
+  },
+
+  _undoDraw() {
+    const drawing = this.drawingManager.getDrawing(this);
+    if (drawing) {
+      drawing.undoDraw();
     }
   },
 

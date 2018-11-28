@@ -162,7 +162,12 @@ AFRAME.registerComponent("networked-drawing", {
     const direction = new THREE.Vector3();
     const normal = new THREE.Vector3();
     return function() {
-      const head = this.networkBuffer[0];
+      let head = this.networkBuffer[0];
+      if (head === "-") {
+        this._undoDraw();
+        this.networkBuffer.shift();
+        head = this.networkBuffer[0];
+      }
       let didWork = false;
       while (head != null && this.networkBuffer.length >= 10) {
         position.set(this.networkBuffer[0], this.networkBuffer[1], this.networkBuffer[2]);
@@ -213,6 +218,37 @@ AFRAME.registerComponent("networked-drawing", {
           this.networkBuffer.splice(0, datum.networkBufferCount);
           this.bufferIndex -= datum.networkBufferCount;
         }
+      }
+    }
+  },
+
+  undoDraw() {
+    if (!NAF.connection.isConnected() || this.drawStarted) {
+      return;
+    }
+    this._undoDraw();
+    this._pushToNetworkBuffer("-");
+  },
+
+  _undoDraw() {
+    const length = this.networkBufferHistory.length;
+    if (length > 0) {
+      const datum = this.networkBufferHistory.pop();
+      this.idx.position = 0;
+      this.idx.uv = 0;
+      this.idx.normal = 0;
+      this.idx.color = 0;
+      if (length > 1) {
+        datum.idxLength += 2 - (this.segments % 2);
+        this.idx.position = this.sharedBuffer.idx.position - datum.idxLength;
+        this.idx.uv = this.sharedBuffer.idx.uv - datum.idxLength;
+        this.idx.normal = this.sharedBuffer.idx.normal - datum.idxLength;
+        this.idx.color = this.sharedBuffer.idx.color - datum.idxLength;
+      }
+      this.sharedBuffer.remove(this.idx, this.sharedBuffer.idx);
+      if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
+        this.networkBuffer.splice(this.networkBuffer.length - datum.networkBufferCount, datum.networkBufferCount);
+        this.bufferIndex -= datum.networkBufferCount;
       }
     }
   },

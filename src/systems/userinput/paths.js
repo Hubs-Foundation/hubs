@@ -23,6 +23,7 @@ paths.actions.cursor.drop = "/actions/cursorDrop";
 paths.actions.cursor.modDelta = "/actions/cursorModDelta";
 paths.actions.cursor.startDrawing = "/actions/cursorStartDrawing";
 paths.actions.cursor.stopDrawing = "/actions/cursorStopDrawing";
+paths.actions.cursor.undoDrawing = "/actions/cursorUndoDrawing";
 paths.actions.cursor.penNextColor = "/actions/cursorPenNextColor";
 paths.actions.cursor.penPrevColor = "/actions/cursorPenPrevColor";
 paths.actions.cursor.scalePenTip = "/actions/cursorScalePenTip";
