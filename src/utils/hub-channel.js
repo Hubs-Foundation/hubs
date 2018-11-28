@@ -117,7 +117,10 @@ export default class HubChannel {
           this._signedIn = true;
           resolve();
         })
-        .receive("error", reject);
+        .receive("error", err => {
+          console.error("sign in failed", err);
+          reject();
+        });
     });
   };
 
