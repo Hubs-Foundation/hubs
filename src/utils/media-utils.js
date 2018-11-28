@@ -53,7 +53,7 @@ export const guessContentType = url => {
 export const upload = file => {
   const formData = new FormData();
   formData.append("media", file);
-  formData.append("with_promotion_token", true);
+  formData.append("promotion_token", "with_token");
   return fetch(mediaAPIEndpoint, {
     method: "POST",
     body: formData
