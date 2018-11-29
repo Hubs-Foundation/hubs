@@ -2,10 +2,10 @@
   "en": {
     "auth.verifying": "Verifying...",
     "auth.verified-title": "E-Mail Verified!",
-    "auth.verified": "Your email has been verified! {br} You can now close this browser tab and return to Hubs.",
-    "auth.spoke-verified": "You email has been verified! {br} You can now close this browser tab and return to Spoke.",
+    "auth.verified": "Your email has been verified!\nYou can now close this browser tab and return to Hubs.",
+    "auth.spoke-verified": "You email has been verified!\nYou can now close this browser tab and return to Spoke.",
     "sign-in.prompt": "Sign in to pin objects in rooms.",
-    "sign-in.auth-started": "Email sent! {br} Waiting for you to click on the link in the email...",
+    "sign-in.auth-started": "Email sent!\nWaiting for you to click on the link in the email...",
     "sign-in.pin": "You'll need to sign in to pin objects.",
     "sign-in.pin-complete": "You are now signed in.",
     "sign-in.as": "Signed in as",

@@ -30,7 +30,7 @@ export default class SignInDialog extends Component {
     if (this.props.authStarted) {
       contents = (
         <p>
-          <FormattedMessage id="sign-in.auth-started" values={{ br: <br /> }} />
+          <FormattedMessage className="preformatted" id="sign-in.auth-started" />
         </p>
       );
     } else if (this.props.authComplete) {
