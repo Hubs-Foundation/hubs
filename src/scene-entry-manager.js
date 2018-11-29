@@ -10,7 +10,7 @@ const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
-import { addMedia, proxiedUrlFor } from "./utils/media-utils";
+import { addMedia, proxiedUrlFor, getPromotionTokenForFile } from "./utils/media-utils";
 import { ObjectContentOrigins } from "./object-types";
 
 function requestFullscreen() {
@@ -184,7 +184,7 @@ export default class SceneEntryManager {
     let fileAccessToken, promotionToken;
     if (fileId) {
       fileAccessToken = new URL(src).searchParams.get("token");
-      const storedPromotionToken = this.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
+      const storedPromotionToken = getPromotionTokenForFile(fileId);
       if (storedPromotionToken) {
         promotionToken = storedPromotionToken.promotionToken;
       }
@@ -193,6 +193,7 @@ export default class SceneEntryManager {
     const gltfNode = pinnedEntityToGltf(el);
     if (!gltfNode) return;
     el.setAttribute("networked", { persistent: true });
+    el.setAttribute("media-loader", { fileIsOwned: true });
 
     this.hubChannel.pin(networkId, gltfNode, fileId, fileAccessToken, promotionToken);
   };

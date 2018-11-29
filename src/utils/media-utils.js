@@ -243,3 +243,7 @@ export function injectCustomShaderChunks(obj) {
 
   return shaderUniforms;
 }
+
+export function getPromotionTokenForFile(fileId) {
+  return window.APP.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
+}

@@ -24,6 +24,7 @@ const boundingBox = new THREE.Box3();
 AFRAME.registerComponent("media-loader", {
   schema: {
     fileId: { type: "string" },
+    fileIsOwned: { type: "boolean" },
     src: { type: "string" },
     resize: { default: false },
     resolve: { default: false },
@@ -143,7 +144,7 @@ AFRAME.registerComponent("media-loader", {
       }
 
       // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
-      accessibleUrl = proxiedUrlFor(canonicalUrl);
+      accessibleUrl = canonicalUrl;
 
       // if the component creator didn't know the content type, we didn't get it from reticulum, and
       // we don't think we can infer it from the extension, we need to make a HEAD request to find it out
