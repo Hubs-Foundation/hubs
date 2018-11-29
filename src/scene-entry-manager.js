@@ -226,7 +226,6 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("pinned", e => {
-      if (!NAF.utils.isMine(e.detail.el)) return;
       if (this.hubChannel.signedIn) {
         this._pinElement(e.detail.el);
       } else {

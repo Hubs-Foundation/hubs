@@ -71,6 +71,7 @@ AFRAME.registerComponent("super-networked-interactable", {
         this.el.setAttribute("body", { type: "dynamic" });
         this._syncCounterRegistration();
       } else {
+        this.el.emit("grab-end", { hand: this.hand });
         this.hand = null;
       }
     }
@@ -83,6 +84,7 @@ AFRAME.registerComponent("super-networked-interactable", {
 
   _onOwnershipLost: function() {
     this.el.setAttribute("body", { type: "static" });
+    this.el.emit("grab-end", { hand: this.hand });
     this.hand = null;
     this._syncCounterRegistration();
   },
