@@ -10,6 +10,7 @@ import { GearVRControllerDevice } from "./devices/gear-vr-controller";
 import { OculusTouchControllerDevice } from "./devices/oculus-touch-controller";
 import { DaydreamControllerDevice } from "./devices/daydream-controller";
 import { ViveControllerDevice } from "./devices/vive-controller";
+import { GyroDevice } from "./devices/gyro";
 
 import { AppAwareMouseDevice } from "./devices/app-aware-mouse";
 import { AppAwareTouchscreenDevice } from "./devices/app-aware-touchscreen";
@@ -176,6 +177,7 @@ AFRAME.registerSystem("userinput", {
     } else if (!detectInHMD()) {
       this.activeDevices.add(new AppAwareTouchscreenDevice());
       this.activeDevices.add(new KeyboardDevice());
+      this.activeDevices.add(new GyroDevice());
     }
 
     this.registeredMappings = new Set([keyboardDebuggingBindings]);
