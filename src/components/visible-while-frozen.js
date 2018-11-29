@@ -36,10 +36,18 @@ AFRAME.registerComponent("visible-while-frozen", {
     const isFrozen = this.el.sceneEl.is("frozen");
 
     let isWithinDistance = true;
+    const isVisible = this.el.getAttribute("visible");
 
     if (this.data.withinDistance !== undefined) {
       getLastWorldPosition(this.cam, this.camWorldPos);
       this.objWorldPos.copy(this.el.object3D.position);
+
+      if (!isVisible && isFrozen) {
+        // Edge case, if the object is not visible, and the scene isFrozen, force a
+        // matrix update every frame since the main matrix update loop will not do it.
+        this.el.object3D.updateMatrices(true, true);
+      }
+
       this.el.object3D.localToWorld(this.objWorldPos);
 
       isWithinDistance =
@@ -48,7 +56,7 @@ AFRAME.registerComponent("visible-while-frozen", {
 
     const shouldBeVisible = isFrozen && isWithinDistance;
 
-    if (this.el.getAttribute("visible") !== shouldBeVisible) {
+    if (isVisible !== shouldBeVisible) {
       this.el.setAttribute("visible", shouldBeVisible);
     }
   },
