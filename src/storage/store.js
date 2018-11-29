@@ -52,8 +52,12 @@ export const SCHEMA = {
     uploadPromotionTokens: {
       type: "array",
       items: {
-        fileId: { type: "string" },
-        promotionTokens: { type: "string" }
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          fileId: { type: "string" },
+          promotionToken: { type: "string" }
+        }
       }
     }
   },
