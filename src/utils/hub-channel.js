@@ -136,11 +136,11 @@ export default class HubChannel {
     });
   };
 
-  pin = (id, gltfNode, fileId, fileToken, promotionToken) => {
+  pin = (id, gltfNode, fileId, fileAccessToken, promotionToken) => {
     const payload = { id, gltf_node: gltfNode };
     if (fileId && promotionToken) {
       payload.file_id = fileId;
-      payload.file_token = fileToken;
+      payload.file_access_token = fileAccessToken;
       payload.promotion_token = promotionToken;
     }
     this.channel.push("pin", payload);

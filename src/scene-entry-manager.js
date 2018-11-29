@@ -205,9 +205,9 @@ export default class SceneEntryManager {
 
     const { fileId, src } = el.components["media-loader"].data;
 
-    let fileToken, promotionToken;
+    let fileAccessToken, promotionToken;
     if (fileId) {
-      fileToken = new URL(src).searchParams.get("token");
+      fileAccessToken = new URL(src).searchParams.get("token");
       const storedPromotionToken = this.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
       if (storedPromotionToken) {
         promotionToken = storedPromotionToken.promotionToken;
@@ -217,7 +217,7 @@ export default class SceneEntryManager {
     const gltfNode = pinnedEntityToGltf(el);
     el.setAttribute("networked", { persistent: true });
 
-    this.hubChannel.pin(networkId, gltfNode, fileId, fileToken, promotionToken);
+    this.hubChannel.pin(networkId, gltfNode, fileId, fileAccessToken, promotionToken);
   };
 
   _setupMedia = () => {
