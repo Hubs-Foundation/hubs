@@ -254,6 +254,16 @@ export default function generate3DOFTriggerBindings(device) {
         },
         xform: xforms.copyIfTrue,
         priority: 200
+      },
+      {
+        src: {
+          value: dpadNorth,
+          bool: touchpadRising
+        },
+        dest: {
+          value: paths.actions.cursor.undoDrawing
+        },
+        xform: xforms.copyIfTrue
       }
     ],
 

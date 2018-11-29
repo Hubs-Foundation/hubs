@@ -687,6 +687,12 @@ export const viveUserBindings = addSetsToBindings({
       },
       dest: { value: paths.actions.leftHand.scalePenTip },
       xform: xforms.touch_axis_scroll(0.1)
+    },
+    {
+      src: { value: lButton("top").pressed },
+      dest: { value: paths.actions.leftHand.undoDrawing },
+      xform: xforms.copy,
+      priorty: 2
     }
   ],
 
@@ -798,6 +804,12 @@ export const viveUserBindings = addSetsToBindings({
       },
       xform: xforms.copyIfTrue,
       priority: 2
+    },
+    {
+      src: { value: rButton("top").pressed },
+      dest: { value: paths.actions.cursor.undoDrawing },
+      xform: xforms.copy,
+      priorty: 2
     }
   ],
 
@@ -898,6 +910,12 @@ export const viveUserBindings = addSetsToBindings({
       },
       dest: { value: paths.actions.rightHand.scalePenTip },
       xform: xforms.touch_axis_scroll(0.1)
+    },
+    {
+      src: { value: rButton("top").pressed },
+      dest: { value: paths.actions.rightHand.undoDrawing },
+      xform: xforms.copy,
+      priorty: 2
     }
   ],
 
