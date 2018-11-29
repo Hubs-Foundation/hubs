@@ -109,10 +109,12 @@ export default class Store extends EventTarget {
 
   update(newState) {
     const finalState = merge(this.state, newState);
-    const result = validator.validate(finalState, SCHEMA);
+    const { valid } = validator.validate(finalState, SCHEMA);
 
-    if (!result.valid) {
-      throw new Error(`Write of ${JSON.stringify(finalState)} to store failed schema validation. ${result}`);
+    if (!valid) {
+      // Intentionally not including details about the state or validation result here, since we don't want to leak
+      // sensitive data in the error message.
+      throw new Error(`Write to store failed schema validation.`);
     }
 
     localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(finalState));
