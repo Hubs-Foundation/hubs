@@ -44,6 +44,7 @@ AFRAME.registerComponent("media-loader", {
     const box = getBox(this.el, mesh);
     const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
     this.el.object3DMap.mesh.scale.multiplyScalar(scaleCoefficient);
+
     if (this.el.body && this.shapeAdded && this.el.body.shapes.length > 1) {
       this.el.removeAttribute("shape");
       this.shapeAdded = false;
@@ -63,6 +64,8 @@ AFRAME.registerComponent("media-loader", {
       });
       this.shapeAdded = true;
     }
+
+    mesh.matrixNeedsUpdate = true;
   },
 
   tick(t, dt) {
@@ -196,7 +199,8 @@ AFRAME.registerComponent("media-loader", {
         this.el.setAttribute("gltf-model-plus", {
           src: accessibleUrl,
           contentType: contentType,
-          inflate: true
+          inflate: true,
+          modelToWorldScale: this.data.resize ? 0.0001 : 1.0
         });
       } else {
         throw new Error(`Unsupported content type: ${contentType}`);
@@ -273,5 +277,6 @@ AFRAME.registerComponent("media-pager", {
 
   repositionToolbar() {
     this.toolbar.object3D.position.y = -this.el.getAttribute("shape").halfExtents.y - 0.2;
+    this.toolbar.object3D.matrixNeedsUpdate = true;
   }
 });

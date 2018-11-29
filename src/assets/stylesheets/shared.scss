@@ -176,10 +176,11 @@ $spoke-action-color: $bright-blue;
   -webkit-appearance: none;
   width: 2em;
   height: 2em;
-  border: 3px solid #aaa;
+  border: 1px solid #e2e2e2;
+  background-color: white;
   border-radius: 6px;
   vertical-align: sub;
-  margin: 0 0.6em
+  margin: 0 0.7em
 }
 
 %checkbox-checked {

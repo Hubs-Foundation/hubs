@@ -17,15 +17,6 @@ export const keyboardMouseUserBindings = addSetsToBindings({
   [sets.global]: [
     {
       src: {
-        value: paths.device.keyboard.key("b")
-      },
-      dest: {
-        value: paths.actions.toggleScreenShare
-      },
-      xform: xforms.rising
-    },
-    {
-      src: {
         w: paths.device.keyboard.key("arrowup"),
         a: paths.device.keyboard.key("arrowleft"),
         s: paths.device.keyboard.key("arrowdown"),
@@ -61,6 +52,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       src: { value: paths.device.keyboard.key("shift") },
       dest: { value: paths.actions.boost },
       xform: xforms.copy
+    },
+    {
+      src: { value: paths.device.keyboard.key("Escape") },
+      dest: { value: paths.actions.camera.exitMirror },
+      xform: xforms.falling
     },
     {
       src: { value: paths.device.keyboard.key("q") },

@@ -1,3 +1,5 @@
+import { getLastWorldPosition } from "../utils/three-utils";
+
 /**
  * Toggles the visibility of this entity when the scene is frozen.
  * @namespace ui
@@ -36,7 +38,7 @@ AFRAME.registerComponent("visible-while-frozen", {
     let isWithinDistance = true;
 
     if (this.data.withinDistance !== undefined) {
-      this.cam.getWorldPosition(this.camWorldPos);
+      getLastWorldPosition(this.cam, this.camWorldPos);
       this.objWorldPos.copy(this.el.object3D.position);
       this.el.object3D.localToWorld(this.objWorldPos);
 

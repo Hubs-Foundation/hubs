@@ -62,5 +62,6 @@ AFRAME.registerComponent("scale-audio-feedback", {
 
     const scale = Math.min(maxScale, minScale + (maxScale - minScale) * audioAnalyser.volume * 8);
     this.el.object3D.scale.setScalar(scale);
+    this.el.object3D.matrixNeedsUpdate = true;
   }
 });

@@ -16,16 +16,22 @@ AFRAME.registerSystem("exit-on-blur", {
     window.addEventListener("focus", this.onFocus);
     this.el.addEventListener("enter-vr", this.onEnterVR);
 
+    this.lastTimeoutCheck = 0;
     this.exitTimeout = null;
   },
 
-  tick() {
+  tick(t) {
     // This is a hack to detect when an Oculus Go user has taken off the headset and the headset has
     // entered standby mode. Currently Oculus Browser is not emitting a blur, vrdisplaydeactivate,
     // vrdisplayblur, visibilitychange, or vrdisplaypresentchange event, so we wait 15 seconds after
     // the last requestAnimationFrame callback to determine if the headset has gone into standby mode.
     // We also check that you have entered VR so that this timeout does not occur in the setup UI.
-    if (this.isOculusBrowser && this.enteredVR) {
+    if (
+      this.isOculusBrowser &&
+      this.enteredVR &&
+      (this.lastTimeoutCheck === 0 || t - this.lastTimeoutCheck >= 1000.0) // Don't do this clear every frame, slow.
+    ) {
+      this.lastTimeoutCheck = t;
       clearTimeout(this.exitTimeout);
       this.exitTimeout = setTimeout(this.onTimeout, 15 * 1000);
     }

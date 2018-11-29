@@ -193,15 +193,6 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: {
-        value: paths.device.keyboard.key("b")
-      },
-      dest: {
-        value: paths.actions.toggleScreenShare
-      },
-      xform: xforms.rising
-    },
-    {
-      src: {
         x: leftAxis("joyX"),
         y: leftAxis("joyY")
       },

@@ -12,7 +12,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.mic = this.el.querySelector(".mic");
     this.freeze = this.el.querySelector(".freeze");
     this.pen = this.el.querySelector(".penhud");
-    this.cameraBtn = this.el.querySelector(".cameraBtn");
+    this.cameraBtn = this.el.querySelector(".camera-btn");
     this.background = this.el.querySelector(".bg");
     const renderOrder = window.APP.RENDER_ORDER;
     this.mic.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;

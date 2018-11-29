@@ -11,12 +11,15 @@ import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
+import "./components/teleport-controls-matrix-auto-update";
 import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
 import "aframe-motion-capture-components";
 import "./utils/audio-context-fix";
+import "./utils/threejs-positional-audio-updatematrixworld";
+import "./utils/threejs-world-update";
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
@@ -36,7 +39,6 @@ import "./components/character-controller";
 import "./components/hoverable-visuals";
 import "./components/hover-visuals";
 import "./components/haptic-feedback";
-import "./components/networked-video-player";
 import "./components/offset-relative-to";
 import "./components/player-info";
 import "./components/debug";
@@ -59,6 +61,8 @@ import "./components/position-at-box-shape-border";
 import "./components/pinnable";
 import "./components/pin-networked-object-button";
 import "./components/remove-networked-object-button";
+import "./components/camera-focus-button";
+import "./components/mirror-camera-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/gamma-factor";
 import "./components/visible-to-owner";
@@ -66,8 +70,11 @@ import "./components/camera-tool";
 import "./components/scene-sound";
 import "./components/emit-state-change";
 import "./components/action-to-event";
+import "./components/emit-scene-event-on-remove";
 import "./components/stop-event-propagation";
 import "./components/animation";
+import "./components/follow-in-lower-fov";
+import "./components/matrix-auto-update";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -81,13 +88,17 @@ import { proxiedUrlFor } from "./utils/media-utils";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
+import { createInWorldLogMessage } from "./react-components/chat-message";
 
 import "./systems/nav";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/exit-on-blur";
+import "./systems/camera-tools";
 import "./systems/userinput/userinput";
+import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
+import "./systems/frame-scheduler";
 
 import "./gltf-component-mappings";
 
@@ -104,6 +115,7 @@ const store = window.APP.store;
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 
+THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
 import "aframe-physics-system";
@@ -114,6 +126,7 @@ import "./components/networked-counter";
 import "./components/event-repeater";
 import "./components/controls-shape-offset";
 import "./components/set-yxz-order";
+import "./components/set-sounds-invisible";
 
 import "./components/cardboard-controls";
 
@@ -127,6 +140,7 @@ import "./components/tools/drawing-manager";
 
 import registerNetworkSchemas from "./network-schemas";
 import registerTelemetry from "./telemetry";
+import { warmSerializeElement } from "./utils/serialize-element";
 
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
@@ -176,11 +190,12 @@ function setupLobbyCamera() {
     camera.object3D.position.copy(previewCamera.position);
     camera.object3D.rotation.copy(previewCamera.rotation);
     camera.object3D.rotation.reorder("YXZ");
-    camera.object3D.updateMatrix();
   } else {
     const cameraPos = camera.object3D.position;
     camera.object3D.position.set(cameraPos.x, 2.5, cameraPos.z);
   }
+
+  camera.object3D.matrixNeedsUpdate = true;
 
   camera.setAttribute("scene-preview-camera", "positionOnly: true; duration: 60");
   camera.components["pitch-yaw-rotator"].set(camera.object3D.rotation.x, camera.object3D.rotation.y);
@@ -192,7 +207,6 @@ function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
-  const enableScreenSharing = qsTruthy("enable_screen_sharing");
 
   ReactDOM.render(
     <UIRoot
@@ -202,7 +216,6 @@ function mountUI(props = {}) {
         concurrentLoadDetector,
         disableAutoExitOnConcurrentLoad,
         forcedVREntryType,
-        enableScreenSharing,
         store,
         ...props
       }}
@@ -307,6 +320,8 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  warmSerializeElement();
+
   const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
 
@@ -582,7 +597,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!userInfo) return;
     const maySpawn = scene.is("entered");
 
-    addToPresenceLog({ name: userInfo.metas[0].profile.displayName, type, body, maySpawn });
+    const incomingMessage = { name: userInfo.metas[0].profile.displayName, type, body, maySpawn };
+
+    if (scene.is("vr-mode")) {
+      createInWorldLogMessage(incomingMessage);
+    }
+
+    addToPresenceLog(incomingMessage);
   });
 
   authChannel.setSocket(socket);

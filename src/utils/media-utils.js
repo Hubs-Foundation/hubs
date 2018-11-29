@@ -24,6 +24,8 @@ function b64EncodeUnicode(str) {
 }
 
 export const proxiedUrlFor = (url, index) => {
+  if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
+
   // farspark doesn't know how to read '=' base64 padding characters
   const base64Url = b64EncodeUnicode(url).replace(/=+$/g, "");
   // translate base64 + to - and / to _ for URL safety
@@ -46,6 +48,7 @@ export const resolveUrl = async (url, index) => {
 };
 
 export const guessContentType = url => {
+  if (url.startsWith("hubs://") && url.endsWith("/video")) return "video/vnd.hubs-webrtc";
   const extension = new URL(url).pathname.split(".").pop();
   return commonKnownContentTypes[extension];
 };
@@ -119,6 +122,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
 
       if (!entity.classList.contains("pen")) {
         entity.object3D.scale.setScalar(0.5);
+        entity.matrixNeedsUpdate = true;
 
         entity.setAttribute("animation__spawn-start", {
           property: "scale",
@@ -157,6 +161,8 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
         console.log("addMedia upload failed", e);
         entity.setAttribute("media-loader", { src: "error" });
       });
+  } else if (src instanceof MediaStream) {
+    entity.setAttribute("media-loader", { src: `hubs://clients/${NAF.clientId}/video` });
   }
 
   if (contentOrigin) {

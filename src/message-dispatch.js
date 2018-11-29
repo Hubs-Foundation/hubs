@@ -53,6 +53,7 @@ export default class MessageDispatch {
         for (let i = 0; i < scales.length; i++) {
           if (scales[i] > curScale.x) {
             playerRig.object3D.scale.set(scales[i], scales[i], scales[i]);
+            playerRig.object3D.matrixNeedsUpdate = true;
             break;
           }
         }

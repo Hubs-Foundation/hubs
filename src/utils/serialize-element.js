@@ -154,14 +154,18 @@ function getDefaultStyleByTagName(tagName) {
   return defaultStylesByTagName[tagName];
 }
 
+export function warmSerializeElement() {
+  for (let i = 0; i < tagNames.length; i++) {
+    if (!noStyleTags[tagNames[i]]) {
+      defaultStylesByTagName[tagNames[i]] = computeDefaultStyleByTagName(tagNames[i]);
+    }
+  }
+}
+
 export default function serializeElement(el) {
   if (Object.keys(defaultStylesByTagName).length === 0) {
     // Precompute the lookup tables.
-    for (let i = 0; i < tagNames.length; i++) {
-      if (!noStyleTags[tagNames[i]]) {
-        defaultStylesByTagName[tagNames[i]] = computeDefaultStyleByTagName(tagNames[i]);
-      }
-    }
+    warmSerializeElement();
   }
 
   if (el.nodeType !== Node.ELEMENT_NODE) {
@@ -177,6 +181,10 @@ export default function serializeElement(el) {
       cssTexts[i] = e.style.cssText;
       for (let ii = 0; ii < computedStyle.length; ii++) {
         const cssPropName = computedStyle[ii];
+
+        // Skip non-standard CSS for now, because it overwrites things like color
+        if (cssPropName.startsWith("-webkit")) continue;
+
         if (computedStyle[cssPropName] !== defaultStyle[cssPropName]) {
           e.style[cssPropName] = computedStyle[cssPropName];
         }

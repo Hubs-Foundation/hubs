@@ -1,6 +1,7 @@
 export const paths = {};
 paths.noop = "/noop";
 paths.actions = {};
+paths.actions.log = "/actions/log";
 paths.actions.toggleScreenShare = "/actions/toggleScreenShare";
 paths.actions.snapRotateLeft = "/actions/snapRotateLeft";
 paths.actions.snapRotateRight = "/actions/snapRotateRight";
@@ -59,6 +60,8 @@ paths.actions.leftHand.takeSnapshot = "/actions/leftHandTakeSnapshot";
 paths.actions.leftHand.thumb = "/actions/leftHand/thumbDown";
 paths.actions.leftHand.index = "/actions/leftHand/indexDown";
 paths.actions.leftHand.middleRingPinky = "/actions/leftHand/middleRingPinkyDown";
+paths.actions.camera = {};
+paths.actions.camera.exitMirror = "/actions/cameraExitMirror";
 
 paths.device = {};
 paths.device.mouse = {};
@@ -115,6 +118,7 @@ paths.device.xbox = {
 
 const oculusgo = "/device/oculusgo/";
 paths.device.oculusgo = {
+  // TODO remove these in favor of the direct accessors
   button: buttonName => ({
     pressed: `${oculusgo}button/${buttonName}/pressed`,
     touched: `${oculusgo}button/${buttonName}/touched`,
@@ -123,7 +127,39 @@ paths.device.oculusgo = {
   axis: axisName => {
     return `${oculusgo}axis/${axisName}`;
   },
-  pose: `${oculusgo}pose`
+  //
+  trigger: {
+    pressed: `${oculusgo}button/trigger/pressed`,
+    touched: `${oculusgo}button/trigger/touched`,
+    value: `${oculusgo}button/trigger/value`
+  },
+  touchpad: {
+    pressed: `${oculusgo}button/touchpad/pressed`,
+    touched: `${oculusgo}button/touchpad/touched`,
+    value: `${oculusgo}button/touchpad/value`,
+    axisX: `${oculusgo}axis/touchpadX`,
+    axisY: `${oculusgo}axis/touchpadY`
+  },
+  pose: `${oculusgo}pose`,
+  v: name => {
+    return `/vars/oculusgo/${name}`;
+  }
+};
+
+const gearVRController = "/device/gearVRController/";
+paths.device.gearVRController = {
+  button: buttonName => ({
+    pressed: `${gearVRController}button/${buttonName}/pressed`,
+    touched: `${gearVRController}button/${buttonName}/touched`,
+    value: `${gearVRController}button/${buttonName}/value`
+  }),
+  axis: axisName => {
+    return `${gearVRController}axis/${axisName}`;
+  },
+  pose: `${gearVRController}pose`,
+  v: name => {
+    return `/vars/gearVRController/${name}`;
+  }
 };
 
 const daydream = "/device/daydream/";

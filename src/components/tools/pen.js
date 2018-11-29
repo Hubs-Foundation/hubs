@@ -1,4 +1,5 @@
 import { paths } from "../../systems/userinput/paths";
+import { getLastWorldPosition } from "../../utils/three-utils";
 
 const pathsMap = {
   "player-right-controller": {
@@ -101,6 +102,9 @@ AFRAME.registerComponent("pen", {
   tick(t, dt) {
     const grabber = this.el.parentNode.components.grabbable.grabbers[0];
     const userinput = AFRAME.scenes[0].systems.userinput;
+
+    getLastWorldPosition(this.el.object3D, this.worldPosition);
+
     if (grabber && pathsMap[grabber.id]) {
       const paths = pathsMap[grabber.id];
       if (userinput.get(paths.startDrawing)) {
@@ -120,8 +124,6 @@ AFRAME.registerComponent("pen", {
         this._changeColor(-1);
       }
     }
-
-    this.el.object3D.getWorldPosition(this.worldPosition);
 
     if (!almostEquals(0.005, this.worldPosition, this.lastPosition)) {
       this.direction.subVectors(this.worldPosition, this.lastPosition).normalize();
@@ -158,7 +160,6 @@ AFRAME.registerComponent("pen", {
   _startDraw() {
     this.currentDrawing = this.drawingManager.getDrawing(this);
     if (this.currentDrawing) {
-      this.el.object3D.getWorldPosition(this.worldPosition);
       this._getNormal(this.normal, this.worldPosition, this.direction);
       this.el.emit("start_draw");
       this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal, this.data.color, this.data.radius);
@@ -169,7 +170,6 @@ AFRAME.registerComponent("pen", {
     if (this.currentDrawing) {
       this.el.emit("stop_draw");
       this.timeSinceLastDraw = 0;
-      this.el.object3D.getWorldPosition(this.worldPosition);
       this._getNormal(this.normal, this.worldPosition, this.direction);
       this.currentDrawing.endDraw(this.worldPosition, this.direction, this.normal);
       this.drawingManager.returnDrawing(this);
