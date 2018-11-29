@@ -42,8 +42,8 @@ AFRAME.registerComponent("visible-while-frozen", {
       getLastWorldPosition(this.cam, this.camWorldPos);
       this.objWorldPos.copy(this.el.object3D.position);
 
-      if (!isVisible && isFrozen) {
-        // Edge case, if the object is not visible, and the scene isFrozen, force a
+      if (!isVisible) {
+        // Edge case, if the object is not visible force a
         // matrix update every frame since the main matrix update loop will not do it.
         this.el.object3D.updateMatrices(true, true);
       }
