@@ -26,8 +26,8 @@ export const SCHEMA = {
       type: "object",
       additionalProperties: false,
       properties: {
-        token: { type: "string" },
-        email: { type: "string" }
+        token: { type: ["null", "string"] },
+        email: { type: ["null", "string"] }
       }
     },
 

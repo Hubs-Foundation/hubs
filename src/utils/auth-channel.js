@@ -12,7 +12,7 @@ export default class AuthChannel {
 
   signOut = async hubChannel => {
     await hubChannel.signOut();
-    this.store.update({ credentials: { token: "", email: "" } });
+    this.store.update({ credentials: { token: null, email: null } });
   };
 
   async startAuthentication(email, hubChannel) {
