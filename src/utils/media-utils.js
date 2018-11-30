@@ -158,7 +158,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
         });
       })
       .catch(e => {
-        console.log("addMedia upload failed", e);
+        console.error("Media upload failed", e);
         entity.setAttribute("media-loader", { src: "error" });
       });
   } else if (src instanceof MediaStream) {
