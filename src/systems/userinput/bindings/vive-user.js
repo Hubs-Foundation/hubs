@@ -623,13 +623,13 @@ export const viveUserBindings = addSetsToBindings({
       src: { value: leftTriggerPressed2 },
       dest: { value: paths.actions.leftHand.startDrawing },
       xform: xforms.rising,
-      priorty: 2
+      priority: 2
     },
     {
       src: { value: leftTriggerPressed2 },
       dest: { value: lTriggerFallingStopDrawing },
       xform: xforms.falling,
-      priorty: 2
+      priority: 2
     },
     {
       src: { value: leftGripPressed2 },
@@ -691,8 +691,8 @@ export const viveUserBindings = addSetsToBindings({
     {
       src: { value: lButton("top").pressed },
       dest: { value: paths.actions.leftHand.undoDrawing },
-      xform: xforms.copy,
-      priorty: 2
+      xform: xforms.rising,
+      priority: 2
     }
   ],
 
@@ -808,8 +808,8 @@ export const viveUserBindings = addSetsToBindings({
     {
       src: { value: rButton("top").pressed },
       dest: { value: paths.actions.cursor.undoDrawing },
-      xform: xforms.copy,
-      priorty: 2
+      xform: xforms.rising,
+      priority: 2
     }
   ],
 
@@ -914,8 +914,8 @@ export const viveUserBindings = addSetsToBindings({
     {
       src: { value: rButton("top").pressed },
       dest: { value: paths.actions.rightHand.undoDrawing },
-      xform: xforms.copy,
-      priorty: 2
+      xform: xforms.rising,
+      priority: 2
     }
   ],
 

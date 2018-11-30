@@ -76,10 +76,10 @@ export default function generate3DOFTriggerBindings(device) {
           west: dpadWest,
           center: dpadCenter
         },
-        xform: xforms.vec2dpad(0.8)
+        xform: xforms.vec2dpad(0.3)
       },
       {
-        src: [dpadNorth, dpadSouth, dpadCenter],
+        src: [dpadSouth],
         dest: { value: dpadCenterStrip },
         xform: xforms.any
       },
@@ -263,7 +263,8 @@ export default function generate3DOFTriggerBindings(device) {
         dest: {
           value: paths.actions.cursor.undoDrawing
         },
-        xform: xforms.copyIfTrue
+        xform: xforms.copyIfTrue,
+        priority: 200
       }
     ],
 

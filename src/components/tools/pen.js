@@ -5,6 +5,7 @@ const pathsMap = {
   "player-right-controller": {
     startDrawing: paths.actions.rightHand.startDrawing,
     stopDrawing: paths.actions.rightHand.stopDrawing,
+    undoDrawing: paths.actions.rightHand.undoDrawing,
     penNextColor: paths.actions.rightHand.penNextColor,
     penPrevColor: paths.actions.rightHand.penPrevColor,
     scalePenTip: paths.actions.rightHand.scalePenTip
@@ -12,6 +13,7 @@ const pathsMap = {
   "player-left-controller": {
     startDrawing: paths.actions.leftHand.startDrawing,
     stopDrawing: paths.actions.leftHand.stopDrawing,
+    undoDrawing: paths.actions.leftHand.undoDrawing,
     penNextColor: paths.actions.leftHand.penNextColor,
     penPrevColor: paths.actions.leftHand.penPrevColor,
     scalePenTip: paths.actions.leftHand.scalePenTip
