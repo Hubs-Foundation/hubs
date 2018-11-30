@@ -175,6 +175,7 @@ AFRAME.registerComponent("media-loader", {
         // 1. we pass the canonical URL to the pager so it can easily make subresource URLs
         // 2. we don't remove the media-image component -- media-pager uses that internally
         this.el.setAttribute("media-pager", { src: canonicalUrl });
+        this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
         this.el.addEventListener("preview-loaded", this.onMediaLoaded, { once: true });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
       } else if (
