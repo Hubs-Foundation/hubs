@@ -205,7 +205,7 @@ AFRAME.registerComponent("networked-drawing", {
       if (length > this.data.maxLines || drawTime + this.data.maxDrawTimeout <= time) {
         const datum = this.networkBufferHistory[0];
         if (length > 1) {
-          datum.idxLength += 2 - (this.segments % 2);
+          datum.idxLength += 2 - (this.segments % 2); //account for extra verts added for degenerate triangles
           this.networkBufferHistory[1].idxLength -= 2 - (this.segments % 2);
         }
         this.idx.position = datum.idxLength;
@@ -218,37 +218,6 @@ AFRAME.registerComponent("networked-drawing", {
           this.networkBuffer.splice(0, datum.networkBufferCount);
           this.bufferIndex -= datum.networkBufferCount;
         }
-      }
-    }
-  },
-
-  undoDraw() {
-    if (!NAF.connection.isConnected() || this.drawStarted) {
-      return;
-    }
-    this._undoDraw();
-    this._pushToNetworkBuffer("-");
-  },
-
-  _undoDraw() {
-    const length = this.networkBufferHistory.length;
-    if (length > 0) {
-      const datum = this.networkBufferHistory.pop();
-      this.idx.position = 0;
-      this.idx.uv = 0;
-      this.idx.normal = 0;
-      this.idx.color = 0;
-      if (length > 1) {
-        datum.idxLength += 2 - (this.segments % 2);
-        this.idx.position = this.sharedBuffer.idx.position - datum.idxLength;
-        this.idx.uv = this.sharedBuffer.idx.uv - datum.idxLength;
-        this.idx.normal = this.sharedBuffer.idx.normal - datum.idxLength;
-        this.idx.color = this.sharedBuffer.idx.color - datum.idxLength;
-      }
-      this.sharedBuffer.remove(this.idx, this.sharedBuffer.idx);
-      if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
-        this.networkBuffer.splice(this.networkBuffer.length - datum.networkBufferCount, datum.networkBufferCount);
-        this.bufferIndex -= datum.networkBufferCount;
       }
     }
   },
@@ -385,6 +354,37 @@ AFRAME.registerComponent("networked-drawing", {
       this.lastPoint.copy(position);
     };
   })(),
+
+  undoDraw() {
+    if (!NAF.connection.isConnected() || this.drawStarted) {
+      return;
+    }
+    this._undoDraw();
+    this._pushToNetworkBuffer("-");
+  },
+
+  _undoDraw() {
+    const length = this.networkBufferHistory.length;
+    if (length > 0) {
+      const datum = this.networkBufferHistory.pop();
+      this.idx.position = 0;
+      this.idx.uv = 0;
+      this.idx.normal = 0;
+      this.idx.color = 0;
+      if (length > 1) {
+        datum.idxLength += 1 - (this.segments % 2); //account for extra verts added for degenerate triangles
+        this.idx.position = this.sharedBuffer.idx.position - datum.idxLength;
+        this.idx.uv = this.sharedBuffer.idx.uv - datum.idxLength;
+        this.idx.normal = this.sharedBuffer.idx.normal - datum.idxLength;
+        this.idx.color = this.sharedBuffer.idx.color - datum.idxLength;
+      }
+      this.sharedBuffer.remove(this.idx, this.sharedBuffer.idx);
+      if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
+        this.networkBuffer.splice(this.networkBuffer.length - datum.networkBufferCount, datum.networkBufferCount);
+        this.bufferIndex -= datum.networkBufferCount;
+      }
+    }
+  },
 
   endDraw(position, direction, normal) {
     this._endDraw(position, direction, normal);
