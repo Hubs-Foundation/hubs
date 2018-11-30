@@ -164,7 +164,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       xform: xforms.copy
     },
     {
-      src: [rightButton("x").touched, rightButton("y").touched, rightButton("thumbStick").touched],
+      src: [rightButton("a").touched, rightButton("b").touched, rightButton("thumbStick").touched],
       dest: {
         value: paths.actions.rightHand.thumb
       },
