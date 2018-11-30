@@ -93,6 +93,7 @@ class LinkRoot extends Component {
             this.props.store.update({ activity: { hasChangedName: true }, profile: response.profile });
           }
         }
+        this.props.store.update({ credentials: response.credentials });
 
         if (response.path) {
           window.location.href = response.path;

@@ -78,7 +78,7 @@ class HomeRoot extends Component {
   }
 
   showAuthDialog = verifying => {
-    this.setState({ dialog: <AuthDialog verifying={verifying} authOrigin={this.props.authOrigin} /> });
+    this.setState({ dialog: <AuthDialog closable="false" verifying={verifying} authOrigin={this.props.authOrigin} /> });
   };
 
   loadHomeVideo = () => {

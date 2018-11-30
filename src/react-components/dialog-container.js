@@ -6,7 +6,12 @@ export default class DialogContainer extends Component {
   static propTypes = {
     title: PropTypes.node,
     children: PropTypes.node.isRequired,
-    onClose: PropTypes.func
+    onClose: PropTypes.func,
+    closable: PropTypes.bool
+  };
+
+  static defaultProps = {
+    closable: true
   };
 
   constructor(props) {
@@ -24,13 +29,13 @@ export default class DialogContainer extends Component {
   }
 
   onKeyDown(e) {
-    if (e.key === "Escape") {
+    if (this.props.closable && e.key === "Escape") {
       this.props.onClose();
     }
   }
 
   onContainerClicked = e => {
-    if (e.currentTarget === e.target) {
+    if (this.props.closable && e.currentTarget === e.target) {
       this.props.onClose();
     }
   };
@@ -41,13 +46,14 @@ export default class DialogContainer extends Component {
         <div className="dialog" onClick={this.onContainerClicked}>
           <div className="dialog__box">
             <div className="dialog__box__contents">
-              {this.props.onClose && (
-                <WithHoverSound>
-                  <button className="dialog__box__contents__close" onClick={this.props.onClose}>
-                    <span>×</span>
-                  </button>
-                </WithHoverSound>
-              )}
+              {this.props.closable &&
+                this.props.onClose && (
+                  <WithHoverSound>
+                    <button className="dialog__box__contents__close" onClick={this.props.onClose}>
+                      <span>×</span>
+                    </button>
+                  </WithHoverSound>
+                )}
               <div className="dialog__box__contents__title">{this.props.title}</div>
               <div className="dialog__box__contents__body">{this.props.children}</div>
               <div className="dialog__box__contents__button-container" />

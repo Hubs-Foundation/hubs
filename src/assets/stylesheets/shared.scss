@@ -44,10 +44,31 @@ $spoke-action-color: $bright-blue;
   border-radius: 10px;
 }
 
+%centered-flex-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 0;
+}
+
 %form-field-on-white {
   border: 1px solid #e2e2e2;
   background-color: white;
   border-radius: 10px;
+}
+
+%input-field {
+  @extend %rounded-border;
+  @extend %default-font;
+  color: black;
+  font-size: 1.2em;
+  background-color: transparent;
+  line-height: 2.0em;
+  padding-left: 1.25em;
+  padding-right: 1.25em;
+  margin: 0.5em 0;
+  width: 100%;
 }
 
 %big-action-button {

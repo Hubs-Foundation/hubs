@@ -10,7 +10,7 @@ const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
-import { addMedia, proxiedUrlFor } from "./utils/media-utils";
+import { addMedia, proxiedUrlFor, getPromotionTokenForFile } from "./utils/media-utils";
 import { ObjectContentOrigins } from "./object-types";
 
 function requestFullscreen() {
@@ -25,6 +25,7 @@ export default class SceneEntryManager {
     this.cursorController = document.querySelector("#cursor-controller");
     this.playerRig = document.querySelector("#player-rig");
     this._entered = false;
+    this.onRequestAuthentication = () => {};
   }
 
   init = () => {
@@ -175,6 +176,28 @@ export default class SceneEntryManager {
     });
   };
 
+  _pinElement = el => {
+    const { networkId } = el.components.networked.data;
+
+    const { fileId, src } = el.components["media-loader"].data;
+
+    let fileAccessToken, promotionToken;
+    if (fileId) {
+      fileAccessToken = new URL(src).searchParams.get("token");
+      const storedPromotionToken = getPromotionTokenForFile(fileId);
+      if (storedPromotionToken) {
+        promotionToken = storedPromotionToken.promotionToken;
+      }
+    }
+
+    const gltfNode = pinnedEntityToGltf(el);
+    if (!gltfNode) return;
+    el.setAttribute("networked", { persistent: true });
+    el.setAttribute("media-loader", { fileIsOwned: true });
+
+    this.hubChannel.pin(networkId, gltfNode, fileId, fileAccessToken, promotionToken);
+  };
+
   _setupMedia = mediaStream => {
     const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
@@ -204,14 +227,24 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("pinned", e => {
-      const el = e.detail.el;
-      const networkId = el.components.networked.data.networkId;
-      const gltfNode = pinnedEntityToGltf(el);
-      if (!gltfNode) return;
+      if (this.hubChannel.signedIn) {
+        this._pinElement(e.detail.el);
+      } else {
+        const wasInVR = this.scene.is("vr-mode");
+        if (wasInVR) this.scene.exitVR();
+        const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
 
-      el.setAttribute("networked", { persistent: true });
+        this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete", continueTextId, () => {
+          if (this.hubChannel.signedIn) {
+            this._pinElement(e.detail.el);
+          } else {
+            // UI pins the entity optimistically, so we undo that here.
+            e.detail.el.setAttribute("pinnable", "pinned", false);
+          }
 
-      this.hubChannel.pin(networkId, gltfNode);
+          if (wasInVR) this.scene.enterVR();
+        });
+      }
     });
 
     this.scene.addEventListener("unpinned", e => {
@@ -224,7 +257,9 @@ export default class SceneEntryManager {
       const networkId = components.networked.data.networkId;
       el.setAttribute("networked", { persistent: false });
 
-      this.hubChannel.unpin(networkId);
+      const { fileId } = el.components["media-loader"].data;
+
+      this.hubChannel.unpin(networkId, fileId);
     });
 
     this.scene.addEventListener("object_spawned", e => {

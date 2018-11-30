@@ -56,6 +56,7 @@ export const guessContentType = url => {
 export const upload = file => {
   const formData = new FormData();
   formData.append("media", file);
+  formData.append("promotion_mode", "with_token");
   return fetch(mediaAPIEndpoint, {
     method: "POST",
     body: formData
@@ -108,7 +109,13 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
   const entity = document.createElement("a-entity");
   entity.id = "interactable-media-" + interactableId++;
   entity.setAttribute("networked", { template: template });
-  entity.setAttribute("media-loader", { resize, resolve, src: typeof src === "string" ? src : "" });
+  const needsToBeUploaded = src instanceof File;
+  entity.setAttribute("media-loader", {
+    resize,
+    resolve,
+    src: typeof src === "string" ? src : "",
+    fileIsOwned: !needsToBeUploaded
+  });
   scene.appendChild(entity);
 
   const fireLoadingTimeout = setTimeout(() => {
@@ -138,7 +145,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
   });
 
   const orientation = new Promise(function(resolve) {
-    if (src instanceof File) {
+    if (needsToBeUploaded) {
       getOrientation(src, x => {
         resolve(x);
       });
@@ -146,14 +153,18 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
       resolve(1);
     }
   });
-  if (src instanceof File) {
+  if (needsToBeUploaded) {
     upload(src)
       .then(response => {
         const srcUrl = new URL(response.raw);
         srcUrl.searchParams.set("token", response.meta.access_token);
-        entity.setAttribute("media-loader", { resolve: false, src: srcUrl.href });
+        entity.setAttribute("media-loader", { resolve: false, src: srcUrl.href, fileId: response.file_id });
+        window.APP.store.update({
+          uploadPromotionTokens: [{ fileId: response.file_id, promotionToken: response.meta.promotion_token }]
+        });
       })
-      .catch(() => {
+      .catch(e => {
+        console.error("Media upload failed", e);
         entity.setAttribute("media-loader", { src: "error" });
       });
   } else if (src instanceof MediaStream) {
@@ -237,4 +248,8 @@ export function injectCustomShaderChunks(obj) {
   });
 
   return shaderUniforms;
+}
+
+export function getPromotionTokenForFile(fileId) {
+  return window.APP.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
 }

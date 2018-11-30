@@ -23,6 +23,8 @@ const boundingBox = new THREE.Box3();
 
 AFRAME.registerComponent("media-loader", {
   schema: {
+    fileId: { type: "string" },
+    fileIsOwned: { type: "boolean" },
     src: { type: "string" },
     resize: { default: false },
     resolve: { default: false },
