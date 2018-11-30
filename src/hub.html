@@ -398,9 +398,10 @@
         >
             <a-entity
                 id="player-hud"
-                hud-controller="head: #player-camera;"
+                vr-mode-toggle-class="class: ui"
                 vr-mode-toggle-visibility
                 vr-mode-toggle-playing__hud-controller
+                hud-controller="head: #player-camera;"
             >
                 <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="30 0 0">
                     <a-rounded height="0.08" width="0.2" color="#000000" position="-0.30 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
@@ -413,7 +414,7 @@
                     icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover"
                     scale="0.1 0.1 0.1"
                     position="-0.17 0 0.001"
-                    class="ui hud mic"
+                    class="hud mic"
                     material="alphaTest:0.1;"
                     hoverable
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
@@ -423,7 +424,7 @@
                     icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover"
                     scale="0.2 0.2 0.2"
                     position="0 0 0.005"
-                    class="ui hud freeze"
+                    class="hud freeze"
                     hoverable
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
                     set-sounds-invisible
@@ -432,7 +433,7 @@
                     icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover"
                     scale="0.1 0.1 0.1"
                     position="0.17 0 0.001"
-                    class="ui hud penhud"
+                    class="hud penhud"
                     material="alphaTest:0.1;"
                     hoverable
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
@@ -442,7 +443,7 @@
                     icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #spawn-camera; hoverImage: #spawn-camera-hover; activeImage: #spawn-camera; activeHoverImage: #spawn-camera-hover"
                     scale="0.1 0.1 0.1"
                     position="0.28 0 0.001"
-                    class="ui hud camera-btn"
+                    class="hud camera-btn"
                     material="alphaTest:0.1;"
                     hoverable
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
