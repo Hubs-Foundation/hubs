@@ -398,10 +398,10 @@
         >
             <a-entity
                 id="player-hud"
+                hud-controller="head: #player-camera;"
                 vr-mode-toggle-class="class: ui"
                 vr-mode-toggle-visibility
                 vr-mode-toggle-playing__hud-controller
-                hud-controller="head: #player-camera;"
             >
                 <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="30 0 0">
                     <a-rounded height="0.08" width="0.2" color="#000000" position="-0.30 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
