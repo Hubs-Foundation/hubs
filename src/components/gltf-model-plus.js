@@ -258,7 +258,8 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   const envMap = await CachedEnvMapTexture;
 
   gltf.scene.traverse(object => {
-    object.matrixAutoUpdate = false;
+    // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
+    object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
 
     if (object.material && object.material.type === "MeshStandardMaterial") {
       if (preferredTechnique === "KHR_materials_unlit") {
