@@ -109,7 +109,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
   const entity = document.createElement("a-entity");
   entity.id = "interactable-media-" + interactableId++;
   entity.setAttribute("networked", { template: template });
-  entity.setAttribute("media-loader", { resize, resolve, src: typeof src === "string" ? src : "" });
+  entity.setAttribute("media-loader", { resize, resolve, src: typeof src === "string" ? src : "", fileIsOwned: true });
   scene.appendChild(entity);
 
   const fireLoadingTimeout = setTimeout(() => {
