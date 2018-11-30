@@ -21,14 +21,17 @@ import {
   SafariEntryButton
 } from "./entry-buttons.js";
 import ProfileEntryPanel from "./profile-entry-panel";
-import HelpDialog from "./help-dialog.js";
-import SafariDialog from "./safari-dialog.js";
-import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
-import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
-import InviteTeamDialog from "./invite-team-dialog.js";
-import InviteDialog from "./invite-dialog.js";
-import LinkDialog from "./link-dialog.js";
+
 import CreateObjectDialog from "./create-object-dialog.js";
+import HelpDialog from "./help-dialog.js";
+import InviteDialog from "./invite-dialog.js";
+import InviteTeamDialog from "./invite-team-dialog.js";
+import LinkDialog from "./link-dialog.js";
+import SafariDialog from "./safari-dialog.js";
+import SignInDialog from "./sign-in-dialog.js";
+import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
+import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
+
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
 import TwoDHUD from "./2d-hud";
@@ -80,6 +83,7 @@ class UIRoot extends Component {
     isBotMode: PropTypes.bool,
     store: PropTypes.object,
     scene: PropTypes.object,
+    authChannel: PropTypes.object,
     hubChannel: PropTypes.object,
     linkChannel: PropTypes.object,
     hubEntryCode: PropTypes.number,
@@ -94,7 +98,12 @@ class UIRoot extends Component {
     presences: PropTypes.object,
     sessionId: PropTypes.string,
     subscriptions: PropTypes.object,
-    initialIsSubscribed: PropTypes.bool
+    initialIsSubscribed: PropTypes.bool,
+    showSignInDialog: PropTypes.bool,
+    signInMessageId: PropTypes.string,
+    signInCompleteMessageId: PropTypes.string,
+    signInContinueTextId: PropTypes.string,
+    onContinueAfterSignIn: PropTypes.func
   };
 
   state = {
@@ -135,8 +144,22 @@ class UIRoot extends Component {
 
     showProfileEntry: false,
     pendingMessage: "",
+    signedIn: false,
     videoShareMediaSource: null
   };
+
+  componentDidUpdate(prevProps) {
+    const { hubChannel, showSignInDialog } = this.props;
+    if (hubChannel) {
+      const { signedIn } = hubChannel;
+      if (signedIn !== this.state.signedIn) {
+        this.setState({ signedIn });
+      }
+    }
+    if (prevProps.showSignInDialog !== showSignInDialog && showSignInDialog) {
+      this.showContextualSignInDialog();
+    }
+  }
 
   componentDidMount() {
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
@@ -166,6 +189,42 @@ class UIRoot extends Component {
     this.props.scene.removeEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.removeEventListener("share_video_disabled", this.onShareVideoDisabled);
   }
+
+  showContextualSignInDialog = () => {
+    const {
+      signInMessageId,
+      authChannel,
+      signInCompleteMessageId,
+      signInContinueTextId,
+      onContinueAfterSignIn
+    } = this.props;
+
+    const closeAndContinue = () => {
+      this.closeDialog();
+      onContinueAfterSignIn();
+    };
+
+    this.showDialog(SignInDialog, {
+      message: messages[signInMessageId],
+      onSignIn: async email => {
+        const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
+
+        this.showDialog(SignInDialog, { authStarted: true, onClose: closeAndContinue });
+
+        await authComplete;
+
+        this.setState({ signedIn: true });
+        this.showDialog(SignInDialog, {
+          authComplete: true,
+          message: messages[signInCompleteMessageId],
+          continueText: messages[signInContinueTextId],
+          onClose: closeAndContinue,
+          onContinue: closeAndContinue
+        });
+      },
+      onClose: closeAndContinue
+    });
+  };
 
   updateSubscribedState = () => {
     const isSubscribed = this.props.subscriptions && this.props.subscriptions.isSubscribed();
@@ -560,35 +619,42 @@ class UIRoot extends Component {
     this.setState({ dialog: null });
   };
 
-  showHelpDialog() {
+  showDialog = (DialogClass, props = {}) => {
     this.setState({
-      dialog: <HelpDialog onClose={this.closeDialog} />
+      dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
     });
-  }
+  };
 
-  showSafariDialog() {
-    this.setState({
-      dialog: <SafariDialog onClose={this.closeDialog} />
-    });
-  }
+  showHelpDialog = () => this.showDialog(HelpDialog);
 
-  showInviteTeamDialog() {
-    this.setState({
-      dialog: <InviteTeamDialog hubChannel={this.props.hubChannel} onClose={this.closeDialog} />
-    });
-  }
+  showSafariDialog = () => this.showDialog(SafariDialog);
 
-  showCreateObjectDialog() {
-    this.setState({
-      dialog: <CreateObjectDialog onCreate={this.createObject} onClose={this.closeDialog} />
-    });
-  }
+  showInviteTeamDialog = () => this.showDialog(InviteTeamDialog, { hubChannel: this.props.hubChannel });
 
-  showWebVRRecommendDialog() {
-    this.setState({
-      dialog: <WebVRRecommendDialog onClose={this.closeDialog} />
+  showCreateObjectDialog = () => this.showDialog(CreateObjectDialog, { onCreate: this.createObject });
+
+  showWebVRRecommendDialog = () => this.showDialog(WebVRRecommendDialog);
+
+  showSignInDialog = () => {
+    this.showDialog(SignInDialog, {
+      message: messages["sign-in.prompt"],
+      onSignIn: async email => {
+        const { authComplete } = await this.props.authChannel.startAuthentication(email, this.props.hubChannel);
+
+        this.showDialog(SignInDialog, { authStarted: true });
+
+        await authComplete;
+
+        this.setState({ signedIn: true });
+        this.closeDialog();
+      }
     });
-  }
+  };
+
+  signOut = async () => {
+    await this.props.authChannel.signOut(this.props.hubChannel);
+    this.setState({ signedIn: false });
+  };
 
   showWebRTCScreenshareUnsupportedDialog = () => {
     this.setState({ dialog: <WebRTCScreenshareUnsupportedDialog onClose={this.closeDialog} /> });
@@ -1178,7 +1244,7 @@ class UIRoot extends Component {
               {showVREntryButton && (
                 <WithHoverSound>
                   <button onClick={() => this.props.scene.enterVR()}>
-                    <FormattedMessage id="entry.return-to-vr" />
+                    <FormattedMessage id="entry.enter-in-vr" />
                   </button>
                 </WithHoverSound>
               )}
@@ -1222,7 +1288,14 @@ class UIRoot extends Component {
             </div>
 
             {this.state.showPresenceList && (
-              <PresenceList presences={this.props.presences} sessionId={this.props.sessionId} />
+              <PresenceList
+                presences={this.props.presences}
+                sessionId={this.props.sessionId}
+                signedIn={this.state.signedIn}
+                email={this.props.store.state.credentials.email}
+                onSignIn={this.showSignInDialog}
+                onSignOut={this.signOut}
+              />
             )}
 
             {this.state.entryStep === ENTRY_STEPS.finished ? (
