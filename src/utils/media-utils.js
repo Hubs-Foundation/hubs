@@ -126,7 +126,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
     entity.addEventListener(eventName, () => {
       clearTimeout(fireLoadingTimeout);
 
-      if (!entity.classList.contains("pen")) {
+      if (!entity.classList.contains("pen") && !entity.getAttribute("animation__spawn-start")) {
         entity.object3D.scale.setScalar(0.5);
         entity.matrixNeedsUpdate = true;
 
