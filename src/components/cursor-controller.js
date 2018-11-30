@@ -75,11 +75,23 @@ AFRAME.registerComponent("cursor-controller", {
     this.dirty = true;
   },
 
+  isVisible: function(obj) {
+    let o = obj;
+
+    while (o) {
+      if (!o.visible) return false;
+      o = o.parent;
+    }
+
+    return true;
+  },
+
   populateEntities: function(selector, target) {
     target.length = 0;
     const els = this.data.objects ? this.el.sceneEl.querySelectorAll(this.data.objects) : this.el.sceneEl.children;
     for (let i = 0; i < els.length; i++) {
-      if (els[i].object3D) {
+      const obj = els[i].object3D;
+      if (obj && this.isVisible(obj)) {
         target.push(els[i].object3D);
       }
     }
