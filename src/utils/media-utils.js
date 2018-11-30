@@ -109,7 +109,13 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
   const entity = document.createElement("a-entity");
   entity.id = "interactable-media-" + interactableId++;
   entity.setAttribute("networked", { template: template });
-  entity.setAttribute("media-loader", { resize, resolve, src: typeof src === "string" ? src : "", fileIsOwned: true });
+  const needsToBeUploaded = src instanceof File;
+  entity.setAttribute("media-loader", {
+    resize,
+    resolve,
+    src: typeof src === "string" ? src : "",
+    fileIsOwned: !needsToBeUploaded
+  });
   scene.appendChild(entity);
 
   const fireLoadingTimeout = setTimeout(() => {
@@ -139,7 +145,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
   });
 
   const orientation = new Promise(function(resolve) {
-    if (src instanceof File) {
+    if (needsToBeUploaded) {
       getOrientation(src, x => {
         resolve(x);
       });
@@ -147,7 +153,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
       resolve(1);
     }
   });
-  if (src instanceof File) {
+  if (needsToBeUploaded) {
     upload(src)
       .then(response => {
         const srcUrl = new URL(response.raw);
