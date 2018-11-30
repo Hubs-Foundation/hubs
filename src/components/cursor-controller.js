@@ -92,7 +92,7 @@ AFRAME.registerComponent("cursor-controller", {
     for (let i = 0; i < els.length; i++) {
       const obj = els[i].object3D;
       if (obj && this.isVisible(obj)) {
-        target.push(els[i].object3D);
+        target.push(obj);
       }
     }
   },
