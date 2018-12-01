@@ -254,7 +254,10 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.any
     },
     {
-      src: { value: paths.device.keyboard.key("u") },
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("z")
+      },
       dest: { value: paths.actions.cursor.undoDrawing },
       xform: xforms.rising
     }

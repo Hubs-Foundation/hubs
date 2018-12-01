@@ -152,6 +152,13 @@ AFRAME.registerComponent("networked-drawing", {
     return function() {
       copyArray.length = 0;
       copyData(this.networkBuffer, copyArray, this.bufferIndex, this.networkBuffer.length - 1);
+
+      //remove undo's from networkBuffer after they've been sent so that
+      //newly joining clients don't get them
+      let index = -1;
+      while ((index = this.networkBuffer.indexOf("-")) != -1) {
+        this.networkBuffer.splice(index, 1);
+      }
       this.bufferIndex = this.networkBuffer.length;
       NAF.connection.broadcastDataGuaranteed(this.drawingId, { type: MSG_BUFFER_DATA, buffer: copyArray });
     };
@@ -458,7 +465,11 @@ AFRAME.registerComponent("networked-drawing", {
   })(),
 
   _pushToNetworkBuffer(val) {
-    ++this.networkBufferCount;
+    //don't increment networkBufferCount if undo, because the undo character
+    //will be removed in tick() on the next frame
+    if (val !== "-") {
+      ++this.networkBufferCount;
+    }
     this.networkBuffer.push(val);
   },
 

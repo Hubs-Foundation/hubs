@@ -79,7 +79,7 @@ export default function generate3DOFTriggerBindings(device) {
         xform: xforms.vec2dpad(0.3)
       },
       {
-        src: [dpadSouth],
+        src: [dpadCenter, dpadSouth],
         dest: { value: dpadCenterStrip },
         xform: xforms.any
       },
