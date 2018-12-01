@@ -1,4 +1,3 @@
-import { addMedia } from "../utils/media-utils";
 import { ObjectTypes } from "../object-types";
 import { paths } from "../systems/userinput/paths";
 
@@ -216,19 +215,25 @@ AFRAME.registerComponent("camera-tool", {
         }
         renderer.readRenderTargetPixels(this.renderTarget, 0, 0, width, height, this.snapPixels);
         pixelsToPNG(this.snapPixels, width, height).then(file => {
-          const { entity, orientation } = addMedia(file, "#interactable-media", undefined, true);
+          const entity = document.createElement("a-entity");
+          entity.setAttribute("spawned-media", { src: file });
           entity.addEventListener(
-            "media_resolved",
-            () => {
-              this.el.emit("photo_taken", entity.components["media-loader"].data.src);
+            "media-uploaded",
+            e => {
+              sceneEl.emit("photo_taken", e.detail.url);
             },
             { once: true }
           );
-          orientation.then(() => {
-            entity.object3D.position.copy(this.el.object3D.position).add(new THREE.Vector3(0, -0.5, 0));
-            entity.object3D.rotation.copy(this.el.object3D.rotation);
-            sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
-          });
+          entity.addEventListener(
+            "media-spawned",
+            () => {
+              entity.object3D.position.copy(this.el.object3D.position).add(new THREE.Vector3(0, -0.5, 0));
+              entity.object3D.rotation.copy(this.el.object3D.rotation);
+              sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
+            },
+            { once: true }
+          );
+          sceneEl.appendChild(entity);
         });
         sceneEl.emit("camera_tool_took_snapshot");
         this.takeSnapshotNextTick = false;

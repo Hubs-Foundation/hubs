@@ -1,4 +1,5 @@
 import nextTick from "../utils/next-tick";
+import { guessContentType, proxiedUrlFor, resolveUrl, fetchContentType } from "../utils/media-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import MobileStandardMaterial from "../materials/MobileStandardMaterial";
 import cubeMapPosX from "../assets/images/cubemap/posx.jpg";
@@ -166,7 +167,7 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
     for (const prop in entityComponents) {
       if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
         const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-        inflator(el, componentName, entityComponents[prop]);
+        inflator(el, componentName, entityComponents[prop], entityComponents);
       }
     }
   }
@@ -283,6 +284,8 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
 AFRAME.registerComponent("gltf-model-plus", {
   schema: {
     src: { type: "string" },
+    resolve: { type: "boolean", default: true },
+    resize: { type: "boolean", default: false },
     contentType: { type: "string" },
     useCache: { default: true },
     inflate: { default: false },
@@ -308,9 +311,24 @@ AFRAME.registerComponent("gltf-model-plus", {
   },
 
   async loadModel(src, contentType, technique, useCache) {
+    let resolvedContentType = contentType;
+    let accessibleUrl = src;
+
+    // Resolve the image url / content type from the media API
+    if (this.data.resolve) {
+      const result = await resolveUrl(src);
+      const canonicalUrl = result.origin;
+      accessibleUrl = proxiedUrlFor(canonicalUrl);
+
+      resolvedContentType =
+        (result.meta && result.meta.expected_content_type) ||
+        guessContentType(canonicalUrl) ||
+        (await fetchContentType(accessibleUrl));
+    }
+
     if (useCache) {
       if (!GLTFCache[src]) {
-        GLTFCache[src] = await loadGLTF(src, contentType, technique);
+        GLTFCache[src] = await loadGLTF(accessibleUrl, resolvedContentType, technique);
       }
 
       return cloneGltf(GLTFCache[src]);
@@ -335,6 +353,17 @@ AFRAME.registerComponent("gltf-model-plus", {
           console.warn("gltf-model-plus set to an empty source, unloading inflated model.");
           this.removeInflatedEl();
         }
+        return;
+      }
+
+      this.el.setAttribute("loading-indicator", "");
+      this.el.setAttribute("shape", {
+        shape: "box",
+        halfExtents: { x: 1, y: 1, z: 1 }
+      });
+
+      if (src === "error") {
+        this.el.setAttribute("media-image", "error");
         return;
       }
 
@@ -388,6 +417,8 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.el.setObject3D("mesh", object3DToSet);
 
       rewires.forEach(f => f());
+
+      this.el.removeAttribute("loading-indicator", "");
 
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {

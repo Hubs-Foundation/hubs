@@ -1,5 +1,4 @@
 import { paths } from "../systems/userinput/paths";
-import { addMedia } from "../utils/media-utils";
 import { waitForEvent } from "../utils/async-utils";
 import { ObjectContentOrigins } from "../object-types";
 
@@ -12,22 +11,12 @@ let nextGrabId = 0;
 AFRAME.registerComponent("super-spawner", {
   schema: {
     /**
-     * Source of the media asset the spawner will spawn when grabbed. This can be a gltf, video, or image, or a url that the reticiulm media API can resolve to a gltf, video, or image.
+     * Source of the media asset the spawner will spawn when grabbed. This can be a gltf, video, or image, or a url that the reticulm media API can resolve to a gltf, video, or image.
      */
     src: { default: "" },
 
     /**
-     * Whether to use the Reticulum media resolution API to interpret the src URL (e.g. find a video URL for Youtube videos.)
-     */
-    resolve: { default: false },
-
-    /**
-     * The template to use for this object
-     */
-    template: { default: "" },
-
-    /**
-     * Spawn the object at a custom position, rather than at the center of the spanwer.
+     * Spawn the object at a custom position, rather than at the center of the spawner.
      */
     useCustomSpawnPosition: { default: false },
     spawnPosition: { type: "vec3" },
@@ -51,7 +40,7 @@ AFRAME.registerComponent("super-spawner", {
     releaseEvents: { default: ["cursor-release", "primary_hand_release"] },
 
     /**
-     * The spawner will become invisible and ungrabbable for this ammount of time after being grabbed. This can prevent rapidly spawning objects.
+     * The spawner will become invisible and ungrabbable for this amount of time after being grabbed. This can prevent rapidly spawning objects.
      */
     spawnCooldown: { default: 1 },
 
@@ -128,8 +117,9 @@ AFRAME.registerComponent("super-spawner", {
       return;
     }
 
-    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve).entity;
-
+    const entity = document.createElement("a-entity");
+    entity.setAttribute("spawned-media", { src: this.data.src, contentOrigin: ObjectContentOrigins.SPAWNER });
+    this.el.sceneEl.appendChild(entity);
     hand.object3D.getWorldPosition(entity.object3D.position);
     hand.object3D.getWorldQuaternion(entity.object3D.quaternion);
     if (this.data.useCustomSpawnScale) {
@@ -161,7 +151,9 @@ AFRAME.registerComponent("super-spawner", {
     const thisGrabId = nextGrabId++;
     this.heldEntities.set(hand, thisGrabId);
 
-    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve).entity;
+    const entity = document.createElement("a-entity");
+    entity.setAttribute("spawned-media", { src: this.data.src, contentOrigin: ObjectContentOrigins.SPAWNER });
+    this.el.sceneEl.appendChild(entity);
 
     entity.object3D.position.copy(
       this.data.useCustomSpawnPosition ? this.data.spawnPosition : this.el.object3D.position

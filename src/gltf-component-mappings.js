@@ -1,4 +1,5 @@
 import "./components/gltf-model-plus";
+import { guessContentType, resolveUrl, fetchContentType } from "./utils/media-utils";
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
@@ -11,7 +12,6 @@ AFRAME.GLTFModelPlus.registerComponent("interactable", "css-class", (el, compone
 AFRAME.GLTFModelPlus.registerComponent("scene-shadow", "scene-shadow");
 AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner");
 AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
-AFRAME.GLTFModelPlus.registerComponent("media-loader", "media-loader");
 AFRAME.GLTFModelPlus.registerComponent("body", "body");
 AFRAME.GLTFModelPlus.registerComponent("hide-when-quality", "hide-when-quality");
 AFRAME.GLTFModelPlus.registerComponent("light", "light");
@@ -74,49 +74,92 @@ AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentNa
 
 AFRAME.GLTFModelPlus.registerComponent("pinnable", "pinnable");
 
-AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
-  if (componentData.id) {
+function mediaImageInflator(el, componentName, componentData, components) {
+  if (components.networked) {
     el.setAttribute("networked", {
-      template: "#interactable-media",
+      template: components.interactable ? "#interactble-media-image" : "#media-image",
       owner: "scene",
       persistent: true,
-      networkId: componentData.id
+      networkId: components.networked.id
     });
   }
 
-  el.setAttribute("media-loader", { src: componentData.src, resize: true, resolve: true });
+  el.setAttribute("media-image", componentData);
+}
 
-  if (componentData.pageIndex) {
-    el.setAttribute("media-pager", { index: componentData.pageIndex });
+AFRAME.GLTFModelPlus.registerComponent("image", "media-image", mediaImageInflator);
+
+function mediaVideoInflator(el, componentName, componentData, components) {
+  if (components.networked) {
+    el.setAttribute("networked", {
+      template: components.interactable ? "#interactble-media-video" : "#media-video",
+      owner: "scene",
+      persistent: true,
+      networkId: components.networked.id
+    });
   }
 
-  if (componentData.paused !== undefined) {
-    el.setAttribute("media-video", { videoPaused: componentData.paused });
+  el.setAttribute("media-video", componentData);
+}
+
+AFRAME.GLTFModelPlus.registerComponent("video", "media-video", mediaVideoInflator);
+
+function mediaPdfInflator(el, componentName, componentData, components) {
+  if (components.networked) {
+    el.setAttribute("networked", {
+      template: components.interactable ? "#interactble-media-pdf" : "#media-pdf",
+      owner: "scene",
+      persistent: true,
+      networkId: components.networked.id
+    });
   }
 
-  if (componentData.time) {
-    el.setAttribute("media-video", { time: componentData.time });
+  el.setAttribute("media-pager", componentData);
+}
+
+AFRAME.GLTFModelPlus.registerComponent("pdf", "media-pager", mediaPdfInflator);
+
+function mediaGltfInflator(el, componentName, componentData, components) {
+  if (components.networked) {
+    el.setAttribute("networked", {
+      template: components.interactable ? "#interactble-media-gltf" : "#media-gltf",
+      owner: "scene",
+      persistent: true,
+      networkId: components.networked.id
+    });
   }
-});
 
-AFRAME.GLTFModelPlus.registerComponent("image", "image", (el, componentName, componentData) => {
-  el.setAttribute("networked", {
-    template: "#interactable-media",
-    owner: "scene",
-    persistent: true,
-    networkId: componentData.src // TODO: Add a networkId in Spoke
-  });
+  el.setAttribute("gltf-model-plus", componentData);
+}
 
-  el.setAttribute("media-loader", { src: componentData.src, resize: true, resolve: true });
-});
+AFRAME.GLTFModelPlus.registerComponent("model", "gltf-model-plus", mediaGltfInflator);
 
-AFRAME.GLTFModelPlus.registerComponent("video", "video", (el, componentName, componentData) => {
-  el.setAttribute("networked", {
-    template: "#interactable-media",
-    owner: "scene",
-    persistent: true,
-    networkId: componentData.src // TODO: Add a networkId in Spoke
-  });
+AFRAME.GLTFModelPlus.registerComponent("media", "media", async (el, componentName, componentData, components) => {
+  const { src, pageIndex, paused, time } = componentData;
 
-  el.setAttribute("media-loader", { src: componentData.src, resize: true, resolve: true });
+  const result = await resolveUrl(componentData.src);
+  const canonicalUrl = result.origin;
+  const contentType =
+    (result.meta && result.meta.expected_content_type) ||
+    guessContentType(canonicalUrl) ||
+    (await fetchContentType(componentData.src));
+
+  if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
+    mediaVideoInflator(
+      el,
+      "media-video",
+      { src, videoPaused: paused === undefined ? false : paused, time },
+      components
+    );
+  } else if (contentType.startsWith("image/")) {
+    mediaImageInflator(el, "media-image", { src }, components);
+  } else if (contentType.startsWith("application/pdf")) {
+    mediaPdfInflator(el, "media-pdf", { src, pageIndex }, components);
+  } else if (
+    contentType.includes("application/octet-stream") ||
+    contentType.includes("x-zip-compressed") ||
+    contentType.startsWith("model/gltf")
+  ) {
+    mediaPdfInflator(el, "media-gltf", { src }, components);
+  }
 });

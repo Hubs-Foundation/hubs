@@ -2,6 +2,7 @@ import qsTruthy from "./utils/qs_truthy";
 import screenfull from "screenfull";
 import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
+import { proxiedUrlFor } from "./utils/media-utils";
 
 const playerHeight = 1.6;
 const isBotMode = qsTruthy("bot");
@@ -9,8 +10,6 @@ const isMobile = AFRAME.utils.device.isMobile();
 const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
-
-import { addMedia, proxiedUrlFor } from "./utils/media-utils";
 import { ObjectContentOrigins } from "./object-types";
 
 function requestFullscreen() {
@@ -164,23 +163,9 @@ export default class SceneEntryManager {
   _setupMedia = mediaStream => {
     const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
-      const { entity, orientation } = addMedia(
-        src,
-        "#interactable-media",
-        contentOrigin,
-        !(src instanceof MediaStream),
-        true
-      );
-
-      orientation.then(or => {
-        entity.setAttribute("offset-relative-to", {
-          target: "#player-camera",
-          offset,
-          orientation: or
-        });
-      });
-
-      return entity;
+      const entity = document.createElement("a-entity");
+      entity.setAttribute("spawned-media", { src, contentOrigin, offset });
+      this.scene.appendChild(entity);
     };
 
     this.scene.addEventListener("add_media", e => {

@@ -1,4 +1,3 @@
-import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 
@@ -63,111 +62,49 @@ export const upload = file => {
 };
 
 // https://stackoverflow.com/questions/7584794/accessing-jpeg-exif-rotation-data-in-javascript-on-the-client-side/32490603#32490603
-function getOrientation(file, callback) {
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const view = new DataView(e.target.result);
-    if (view.getUint16(0, false) != 0xffd8) {
-      return callback(-2);
-    }
-    const length = view.byteLength;
-    let offset = 2;
-    while (offset < length) {
-      if (view.getUint16(offset + 2, false) <= 8) return callback(-1);
-      const marker = view.getUint16(offset, false);
-      offset += 2;
-      if (marker == 0xffe1) {
-        if (view.getUint32((offset += 2), false) != 0x45786966) {
-          return callback(-1);
+export function getOrientation(src) {
+  return new Promise(function(resolve) {
+    if (src instanceof File) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const view = new DataView(e.target.result);
+        if (view.getUint16(0, false) != 0xffd8) {
+          return resolve(-2);
         }
+        const length = view.byteLength;
+        let offset = 2;
+        while (offset < length) {
+          if (view.getUint16(offset + 2, false) <= 8) return resolve(-1);
+          const marker = view.getUint16(offset, false);
+          offset += 2;
+          if (marker == 0xffe1) {
+            if (view.getUint32((offset += 2), false) != 0x45786966) {
+              return resolve(-1);
+            }
 
-        const little = view.getUint16((offset += 6), false) == 0x4949;
-        offset += view.getUint32(offset + 4, little);
-        const tags = view.getUint16(offset, little);
-        offset += 2;
-        for (let i = 0; i < tags; i++) {
-          if (view.getUint16(offset + i * 12, little) == 0x0112) {
-            return callback(view.getUint16(offset + i * 12 + 8, little));
+            const little = view.getUint16((offset += 6), false) == 0x4949;
+            offset += view.getUint32(offset + 4, little);
+            const tags = view.getUint16(offset, little);
+            offset += 2;
+            for (let i = 0; i < tags; i++) {
+              if (view.getUint16(offset + i * 12, little) == 0x0112) {
+                return resolve(view.getUint16(offset + i * 12 + 8, little));
+              }
+            }
+          } else if ((marker & 0xff00) != 0xff00) {
+            break;
+          } else {
+            offset += view.getUint16(offset, false);
           }
         }
-      } else if ((marker & 0xff00) != 0xff00) {
-        break;
-      } else {
-        offset += view.getUint16(offset, false);
-      }
-    }
-    return callback(-1);
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-let interactableId = 0;
-export const addMedia = (src, template, contentOrigin, resolve = false, resize = false) => {
-  const scene = AFRAME.scenes[0];
-
-  const entity = document.createElement("a-entity");
-  entity.id = "interactable-media-" + interactableId++;
-  entity.setAttribute("networked", { template: template });
-  entity.setAttribute("media-loader", { resize, resolve, src: typeof src === "string" ? src : "" });
-  scene.appendChild(entity);
-
-  const fireLoadingTimeout = setTimeout(() => {
-    scene.emit("media-loading", { src: src });
-  }, 100);
-
-  ["model-loaded", "video-loaded", "image-loaded"].forEach(eventName => {
-    entity.addEventListener(eventName, () => {
-      clearTimeout(fireLoadingTimeout);
-
-      if (!entity.classList.contains("pen")) {
-        entity.object3D.scale.setScalar(0.5);
-
-        entity.setAttribute("animation__spawn-start", {
-          property: "scale",
-          delay: 50,
-          dur: 300,
-          from: { x: 0.5, y: 0.5, z: 0.5 },
-          to: { x: 1.0, y: 1.0, z: 1.0 },
-          easing: "easeOutElastic"
-        });
-      }
-
-      scene.emit("media-loaded", { src: src });
-    });
-  });
-
-  const orientation = new Promise(function(resolve) {
-    if (src instanceof File) {
-      getOrientation(src, x => {
-        resolve(x);
-      });
+        return resolve(-1);
+      };
+      reader.readAsArrayBuffer(src);
     } else {
       resolve(1);
     }
   });
-  if (src instanceof File) {
-    upload(src)
-      .then(response => {
-        const srcUrl = new URL(response.raw);
-        srcUrl.searchParams.set("token", response.meta.access_token);
-        entity.setAttribute("media-loader", { resolve: false, src: srcUrl.href });
-      })
-      .catch(() => {
-        entity.setAttribute("media-loader", { src: "error" });
-      });
-  } else if (src instanceof MediaStream) {
-    entity.setAttribute("media-loader", { src: `hubs://clients/${NAF.clientId}/video` });
-  }
-
-  if (contentOrigin) {
-    entity.addEventListener("media_resolved", ({ detail }) => {
-      const objectType = objectTypeForOriginAndContentType(contentOrigin, detail.contentType);
-      scene.emit("object_spawned", { objectType });
-    });
-  }
-
-  return { entity, orientation };
-};
+}
 
 export function injectCustomShaderChunks(obj) {
   const vertexRegex = /\bskinning_vertex\b/;
@@ -237,3 +174,11 @@ export function injectCustomShaderChunks(obj) {
 
   return shaderUniforms;
 }
+
+export const fetchContentType = url => {
+  return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
+};
+
+export const fetchMaxContentIndex = url => {
+  return fetch(url).then(r => parseInt(r.headers.get("x-max-content-index")));
+};

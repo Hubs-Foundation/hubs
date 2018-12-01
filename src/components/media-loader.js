@@ -1,5 +1,11 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
-import { guessContentType, proxiedUrlFor, resolveUrl, injectCustomShaderChunks } from "../utils/media-utils";
+import {
+  guessContentType,
+  proxiedUrlFor,
+  resolveUrl,
+  fetchContentType,
+  injectCustomShaderChunks
+} from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
 
 import "three/examples/js/loaders/GLTFLoader";
@@ -10,14 +16,6 @@ let loadingObject;
 gltfLoader.load(loadingObjectSrc, gltf => {
   loadingObject = gltf;
 });
-
-const fetchContentType = url => {
-  return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
-};
-
-const fetchMaxContentIndex = url => {
-  return fetch(url).then(r => parseInt(r.headers.get("x-max-content-index")));
-};
 
 const boundingBox = new THREE.Box3();
 
@@ -205,73 +203,5 @@ AFRAME.registerComponent("media-loader", {
       console.error("Error adding media", e);
       this.onError();
     }
-  }
-});
-
-AFRAME.registerComponent("media-pager", {
-  schema: {
-    src: { type: "string" },
-    index: { default: 0 }
-  },
-
-  init() {
-    this.toolbar = null;
-    this.onNext = this.onNext.bind(this);
-    this.onPrev = this.onPrev.bind(this);
-    this.el.addEventListener("image-loaded", async e => {
-      // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
-      // request for the same page to read out the max-content-index header
-      this.maxIndex = await fetchMaxContentIndex(e.detail.src);
-      // if this is the first image we ever loaded, set up the UI
-      if (this.toolbar == null) {
-        const template = document.getElementById("paging-toolbar");
-        this.el.querySelector(".interactable-ui").appendChild(document.importNode(template.content, true));
-        this.toolbar = this.el.querySelector(".paging-toolbar");
-        // we have to wait a tick for the attach callbacks to get fired for the elements in a template
-        setTimeout(() => {
-          this.nextButton = this.el.querySelector(".next-button [text-button]");
-          this.prevButton = this.el.querySelector(".prev-button [text-button]");
-          this.pageLabel = this.el.querySelector(".page-label");
-
-          this.nextButton.addEventListener("grab-start", this.onNext);
-          this.prevButton.addEventListener("grab-start", this.onPrev);
-
-          this.update();
-          this.el.emit("preview-loaded");
-        }, 0);
-      } else {
-        this.update();
-      }
-    });
-  },
-
-  update() {
-    if (!this.data.src) return;
-    const pageSrc = proxiedUrlFor(this.data.src, this.data.index);
-    this.el.setAttribute("media-image", { src: pageSrc, contentType: "image/png" });
-    if (this.pageLabel) {
-      this.pageLabel.setAttribute("text", "value", `${this.data.index + 1}/${this.maxIndex + 1}`);
-      this.repositionToolbar();
-    }
-  },
-
-  remove() {
-    if (this.toolbar) {
-      this.toolbar.parentNode.removeChild(this.toolbar);
-    }
-  },
-
-  onNext() {
-    this.el.setAttribute("media-pager", "index", Math.min(this.data.index + 1, this.maxIndex));
-    this.el.emit("pager-page-changed");
-  },
-
-  onPrev() {
-    this.el.setAttribute("media-pager", "index", Math.max(this.data.index - 1, 0));
-    this.el.emit("pager-page-changed");
-  },
-
-  repositionToolbar() {
-    this.toolbar.object3D.position.y = -this.el.getAttribute("shape").halfExtents.y - 0.2;
   }
 });

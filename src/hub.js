@@ -50,7 +50,10 @@ import "./components/visible-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
 import "./components/avatar-replay";
-import "./components/media-views";
+import "./components/media-image";
+import "./components/media-pager";
+import "./components/media-video";
+import "./components/spawned-media";
 import "./components/pinch-to-move";
 import "./components/pitch-yaw-rotator";
 import "./components/auto-scale-cannon-physics-body";
@@ -71,6 +74,7 @@ import "./components/emit-scene-event-on-remove";
 import "./components/stop-event-propagation";
 import "./components/animation";
 import "./components/follow-in-lower-fov";
+import "./components/loading-indicator";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -85,6 +89,7 @@ import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
 import { createInWorldLogMessage } from "./react-components/chat-message";
 
+import "./systems/texture-cache";
 import "./systems/nav";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";

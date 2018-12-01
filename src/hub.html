@@ -161,7 +161,146 @@
                 </a-entity>
             </template>
 
-            <template id="interactable-media">
+            <template id="media-image">
+                <a-entity media-image ></a-entity>
+            </template>
+
+            <template id="media-video">
+                <a-entity media-video ></a-entity>
+            </template>
+
+            <template id="media-pdf">
+                <a-entit media-pager ></a-entity>
+            </template>
+
+            <template id="media-gltf">
+                <a-entity gltf-model-plus ></a-entity>
+            </template>
+
+            <template id="interactable-media-image">
+                <a-entity
+                    class="interactable"
+                    super-networked-interactable="counter: #media-counter;"
+                    body="type: dynamic; shape: none; mass: 1;"
+                    scale="0.5 0.5 0.5"
+                    animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeInQuad"
+                    grabbable
+                    stretchable="useWorldPosition: true; usePhysics: never"
+                    hoverable
+                    hoverable-visuals="cursorController: #cursor-controller"
+                    auto-scale-cannon-physics-body
+                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
+                    position-at-box-shape-border="target:.freeze-menu;"
+                    destroy-at-extreme-distances
+                    set-yxz-order
+                    pinnable
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1;"
+                    sound__pinned ="src: #sound_asset-pinned; on: pinned; poolSize: 1;"
+                    emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
+                    emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
+                    emit-state-change__pinned="state: pinned; transform: rising; event: pinned;"
+                >
+                    <a-entity class="ui interactable-ui" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end" stop-event-propagation__stretch-start="event: stretch-start" stop-event-propagation__stretch-end="event: stretch-end">
+                        <a-entity class="freeze-menu" visible-while-frozen="withinDistance: 10;">
+                            <a-entity mixin="rounded-text-action-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned;" position="0 0.125 0.01"> </a-entity>
+                            <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
+                            <a-entity mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.01">
+                                <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" camera-focus-button="track: true" position="0.25 0.375 0.01">
+                                <a-entity text=" value:track; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" class="hide-when-pinned" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
+                            <a-entity text=" value:remove; width:1.75; align:center;" class="hide-when-pinned" text-raycast-hack position="0 -0.125 0.02"></a-entity>
+                        </a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="interactable-media-video">
+                <a-entity
+                    class="interactable"
+                    super-networked-interactable="counter: #media-counter;"
+                    body="type: dynamic; shape: none; mass: 1;"
+                    scale="0.5 0.5 0.5"
+                    animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeInQuad"
+                    grabbable
+                    stretchable="useWorldPosition: true; usePhysics: never"
+                    hoverable
+                    hoverable-visuals="cursorController: #cursor-controller"
+                    auto-scale-cannon-physics-body
+                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
+                    position-at-box-shape-border="target:.freeze-menu;"
+                    destroy-at-extreme-distances
+                    set-yxz-order
+                    pinnable
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1;"
+                    sound__pinned ="src: #sound_asset-pinned; on: pinned; poolSize: 1;"
+                    emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
+                    emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
+                    emit-state-change__pinned="state: pinned; transform: rising; event: pinned;"
+                >
+                    <a-entity class="ui interactable-ui" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end" stop-event-propagation__stretch-start="event: stretch-start" stop-event-propagation__stretch-end="event: stretch-end">
+                        <a-entity class="freeze-menu" visible-while-frozen="withinDistance: 10;">
+                            <a-entity mixin="rounded-text-action-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned;" position="0 0.125 0.01"> </a-entity>
+                            <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
+                            <a-entity mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.01">
+                                <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" camera-focus-button="track: true" position="0.25 0.375 0.01">
+                                <a-entity text=" value:track; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" class="hide-when-pinned" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
+                            <a-entity text=" value:remove; width:1.75; align:center;" class="hide-when-pinned" text-raycast-hack position="0 -0.125 0.02"></a-entity>
+                        </a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="interactable-media-pdf">
+                <a-entity
+                    class="interactable"
+                    super-networked-interactable="counter: #media-counter;"
+                    body="type: dynamic; shape: none; mass: 1;"
+                    scale="0.5 0.5 0.5"
+                    animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeInQuad"
+                    grabbable
+                    stretchable="useWorldPosition: true; usePhysics: never"
+                    hoverable
+                    hoverable-visuals="cursorController: #cursor-controller"
+                    auto-scale-cannon-physics-body
+                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
+                    position-at-box-shape-border="target:.freeze-menu;"
+                    destroy-at-extreme-distances
+                    set-yxz-order
+                    pinnable
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1;"
+                    sound__pinned ="src: #sound_asset-pinned; on: pinned; poolSize: 1;"
+                    emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
+                    emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
+                    emit-state-change__pinned="state: pinned; transform: rising; event: pinned;"
+                >
+                    <a-entity class="ui interactable-ui" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end" stop-event-propagation__stretch-start="event: stretch-start" stop-event-propagation__stretch-end="event: stretch-end">
+                        <a-entity class="freeze-menu" visible-while-frozen="withinDistance: 10;">
+                            <a-entity mixin="rounded-text-action-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned;" position="0 0.125 0.01"> </a-entity>
+                            <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
+                            <a-entity mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.01">
+                                <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" camera-focus-button="track: true" position="0.25 0.375 0.01">
+                                <a-entity text=" value:track; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" class="hide-when-pinned" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
+                            <a-entity text=" value:remove; width:1.75; align:center;" class="hide-when-pinned" text-raycast-hack position="0 -0.125 0.02"></a-entity>
+                        </a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="interactable-media-gltf">
                 <a-entity
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"

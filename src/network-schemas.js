@@ -73,7 +73,27 @@ function registerNetworkSchemas() {
   });
 
   NAF.schemas.add({
-    template: "#interactable-media",
+    template: "#media-image",
+    components: ["media-image"]
+  });
+
+  NAF.schemas.add({
+    template: "#media-video",
+    components: ["media-video"]
+  });
+
+  NAF.schemas.add({
+    template: "#media-pdf",
+    components: ["media-pager"]
+  });
+
+  NAF.schemas.add({
+    template: "#media-gltf",
+    components: ["gltf-model-plus"]
+  });
+
+  NAF.schemas.add({
+    template: "#interactable-media-image",
     components: [
       {
         component: "position",
@@ -84,20 +104,62 @@ function registerNetworkSchemas() {
         requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       "scale",
-      "media-loader",
+      "pinnable",
+      "media-image"
+    ]
+  });
+
+  NAF.schemas.add({
+    template: "#interactable-media-video",
+    components: [
       {
-        component: "media-video",
-        property: "time"
+        component: "position",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
-        component: "media-video",
-        property: "videoPaused"
+        component: "rotation",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
+      },
+      "scale",
+      "pinnable",
+      "media-video"
+    ]
+  });
+
+  NAF.schemas.add({
+    template: "#interactable-media-pdf",
+    components: [
+      {
+        component: "position",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
-        component: "media-pager",
-        property: "index"
+        component: "rotation",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
-      "pinnable"
+      "scale",
+      "pinnable",
+      "media-pager"
+    ]
+  });
+
+  NAF.schemas.add({
+    template: "#interactable-media-gltf",
+    components: [
+      {
+        component: "position",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
+      {
+        component: "rotation",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
+      },
+      "scale",
+      "pinnable",
+      {
+        component: "gltf-model-plus",
+        property: "src"
+      }
     ]
   });
 
