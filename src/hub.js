@@ -79,6 +79,7 @@ import "./components/matrix-auto-update";
 import ReactDOM from "react-dom";
 import React from "react";
 import UIRoot from "./react-components/ui-root";
+import AuthChannel from "./utils/auth-channel";
 import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
@@ -344,8 +345,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   const scene = document.querySelector("a-scene");
   scene.removeAttribute("keyboard-shortcuts"); // Remove F and ESC hotkeys from aframe
 
+  const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);
   const entryManager = new SceneEntryManager(hubChannel);
+  entryManager.onRequestAuthentication = (
+    signInMessageId,
+    signInCompleteMessageId,
+    signInContinueTextId,
+    onContinueAfterSignIn
+  ) => {
+    remountUI({
+      showSignInDialog: true,
+      signInMessageId,
+      signInCompleteMessageId,
+      signInContinueTextId,
+      onContinueAfterSignIn: () => {
+        remountUI({ showSignInDialog: false });
+        onContinueAfterSignIn();
+      }
+    });
+  };
   entryManager.init();
 
   const linkChannel = new LinkChannel(store);
@@ -369,6 +388,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   registerNetworkSchemas();
 
   remountUI({
+    authChannel,
     hubChannel,
     linkChannel,
     subscriptions,
@@ -482,6 +502,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     .join()
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
+
+      const { token } = store.state.credentials;
+      if (token) {
+        await hubChannel.signIn(token);
+      }
+
       subscriptions.setHubChannel(hubChannel);
       subscriptions.setSubscribed(data.subscriptions.web_push);
       remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
@@ -580,5 +606,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     addToPresenceLog(incomingMessage);
   });
 
+  authChannel.setSocket(socket);
   linkChannel.setSocket(socket);
 });
