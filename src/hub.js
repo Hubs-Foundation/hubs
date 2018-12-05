@@ -151,18 +151,6 @@ const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
 const isDebug = qsTruthy("debug");
 
-setInterval(() => {
-  document.querySelector("a-scene").object3D.traverse(o => {
-    if (o.near) {
-      const camComponent = o.el.components["camera"];
-
-      if (camComponent && !camComponent.data.active) {
-        console.log(o);
-      }
-    }
-  });
-}, 100);
-
 if (!isBotMode && !isTelemetryDisabled) {
   registerTelemetry();
 }
