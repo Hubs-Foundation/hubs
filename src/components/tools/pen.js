@@ -5,6 +5,7 @@ const pathsMap = {
   "player-right-controller": {
     startDrawing: paths.actions.rightHand.startDrawing,
     stopDrawing: paths.actions.rightHand.stopDrawing,
+    undoDrawing: paths.actions.rightHand.undoDrawing,
     penNextColor: paths.actions.rightHand.penNextColor,
     penPrevColor: paths.actions.rightHand.penPrevColor,
     scalePenTip: paths.actions.rightHand.scalePenTip
@@ -12,6 +13,7 @@ const pathsMap = {
   "player-left-controller": {
     startDrawing: paths.actions.leftHand.startDrawing,
     stopDrawing: paths.actions.leftHand.stopDrawing,
+    undoDrawing: paths.actions.leftHand.undoDrawing,
     penNextColor: paths.actions.leftHand.penNextColor,
     penPrevColor: paths.actions.leftHand.penPrevColor,
     scalePenTip: paths.actions.leftHand.scalePenTip
@@ -19,6 +21,7 @@ const pathsMap = {
   cursor: {
     startDrawing: paths.actions.cursor.startDrawing,
     stopDrawing: paths.actions.cursor.stopDrawing,
+    undoDrawing: paths.actions.cursor.undoDrawing,
     penNextColor: paths.actions.cursor.penNextColor,
     penPrevColor: paths.actions.cursor.penPrevColor,
     scalePenTip: paths.actions.cursor.scalePenTip
@@ -113,6 +116,9 @@ AFRAME.registerComponent("pen", {
       if (userinput.get(paths.stopDrawing)) {
         this._endDraw();
       }
+      if (userinput.get(paths.undoDrawing)) {
+        this._undoDraw();
+      }
       const penScaleMod = userinput.get(paths.scalePenTip);
       if (penScaleMod) {
         this._changeRadius(penScaleMod);
@@ -174,6 +180,13 @@ AFRAME.registerComponent("pen", {
       this.currentDrawing.endDraw(this.worldPosition, this.direction, this.normal);
       this.drawingManager.returnDrawing(this);
       this.currentDrawing = null;
+    }
+  },
+
+  _undoDraw() {
+    const drawing = this.drawingManager.getDrawing(this);
+    if (drawing) {
+      drawing.undoDraw();
     }
   },
 

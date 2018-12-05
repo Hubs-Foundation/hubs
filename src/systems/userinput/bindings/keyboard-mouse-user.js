@@ -252,6 +252,14 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       src: [dropWithRMB, dropWithEsc],
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.any
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("z")
+      },
+      dest: { value: paths.actions.cursor.undoDrawing },
+      xform: xforms.rising
     }
   ],
 

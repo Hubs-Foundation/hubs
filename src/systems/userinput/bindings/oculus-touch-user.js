@@ -164,7 +164,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       xform: xforms.copy
     },
     {
-      src: [rightButton("x").touched, rightButton("y").touched, rightButton("thumbStick").touched],
+      src: [rightButton("a").touched, rightButton("b").touched, rightButton("thumbStick").touched],
       dest: {
         value: paths.actions.rightHand.thumb
       },
@@ -579,6 +579,12 @@ export const oculusTouchUserBindings = addSetsToBindings({
       dest: { value: paths.actions.leftHand.scalePenTip },
       xform: xforms.scale(-0.005),
       priority: 1
+    },
+    {
+      src: { value: leftButton("y").pressed },
+      dest: { value: paths.actions.leftHand.undoDrawing },
+      xform: xforms.rising,
+      priority: 1
     }
   ],
 
@@ -651,6 +657,12 @@ export const oculusTouchUserBindings = addSetsToBindings({
       dest: { value: paths.actions.cursor.stopDrawing },
       xform: xforms.falling,
       priority: 3
+    },
+    {
+      src: { value: rightButton("b").pressed },
+      dest: { value: paths.actions.cursor.undoDrawing },
+      xform: xforms.rising,
+      priority: 1
     }
   ],
 
@@ -742,6 +754,12 @@ export const oculusTouchUserBindings = addSetsToBindings({
       dest: { value: paths.actions.rightHand.drop },
       xform: xforms.falling,
       priority: 3
+    },
+    {
+      src: { value: rightButton("b").pressed },
+      dest: { value: paths.actions.rightHand.undoDrawing },
+      xform: xforms.rising,
+      priority: 1
     }
   ],
 

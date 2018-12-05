@@ -66,8 +66,8 @@ export const xboxControllerUserBindings = addSetsToBindings({
     },
     {
       src: { value: button("y").pressed },
-      dest: { value: paths.noop },
-      xform: xforms.noop,
+      dest: { value: paths.actions.cursor.undoDrawing },
+      xform: xforms.rising,
       root: "xbox/y",
       priority: 200
     },
