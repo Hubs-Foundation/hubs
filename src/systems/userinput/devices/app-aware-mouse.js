@@ -36,9 +36,6 @@ export class AppAwareMouseDevice {
 
     if (!this.camera) {
       this.camera = document.querySelector("#player-camera").components.camera.camera;
-
-      // Camera not ready yet?
-      if (!this.camera) return;
     }
 
     const buttonLeft = frame[paths.device.mouse.buttonLeft];
