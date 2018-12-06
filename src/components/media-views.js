@@ -351,7 +351,7 @@ AFRAME.registerComponent("media-video", {
       this.video.addEventListener("pause", this.onPauseStateChange);
       this.video.addEventListener("play", this.onPauseStateChange);
     } catch (e) {
-      console.error("Error loading video", this.data.src, e.toString());
+      console.error("Error loading video", this.data.src, e);
       texture = errorTexture;
     }
 
