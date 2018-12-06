@@ -320,6 +320,52 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const showLog = qsTruthy("log");
+  if (showLog) {
+    const debugLog = document.getElementById("debug-log-log");
+    const debugLogInp = document.getElementById("debug-log-inp");
+    const debugLogBut = document.getElementById("debug-log-but");
+    debugLogBut.onclick = () => {
+      eval(debugLogInp.value);
+    };
+    const origConsoleLog = console.log;
+    const origConsoleError = console.error;
+    const origConsoleWarn = console.warn;
+    const log = function(className, objs) {
+      let entry;
+      if (debugLog.childNodes.length > 10) {
+        entry = debugLog.firstChild;
+      } else {
+        entry = document.createElement("div");
+        entry.classList.add("entry");
+      }
+      entry.classList.remove("warn", "error");
+      entry.classList.add(className);
+      entry.textContent = Array.from(objs)
+        .map(JSON.stringify)
+        .join();
+      debugLog.append(entry);
+    };
+    console.warn = function() {
+      origConsoleWarn.apply(null, arguments);
+      log("warn", arguments);
+    };
+    console.error = function() {
+      origConsoleError.apply(null, arguments);
+      log("error", arguments);
+    };
+    console.log = function() {
+      origConsoleLog.apply(null, arguments);
+      log("log", arguments);
+    };
+    window.onunhandledrejection = e => log("error", [e.reason.message, e.reason.code, e.reason.name]);
+    window.onerror = e => log("error", [e]);
+  }
+  window.addEventListener("touchend", () => {
+    if (window.bpvid) {
+      //window.bpvid.play();
+    }
+  });
   warmSerializeElement();
 
   const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
