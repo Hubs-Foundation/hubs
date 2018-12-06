@@ -1,9 +1,10 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
-import { guessContentType, proxiedUrlFor, resolveUrl } from "../utils/media-utils";
+import { guessContentType, proxiedUrlFor, resolveUrl, injectCustomShaderChunks } from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
 
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
+
 const gltfLoader = new THREE.GLTFLoader();
 let loadingObject;
 gltfLoader.load(loadingObjectSrc, gltf => {
@@ -18,8 +19,12 @@ const fetchMaxContentIndex = url => {
   return fetch(url).then(r => parseInt(r.headers.get("x-max-content-index")));
 };
 
+const boundingBox = new THREE.Box3();
+
 AFRAME.registerComponent("media-loader", {
   schema: {
+    fileId: { type: "string" },
+    fileIsOwned: { type: "boolean" },
     src: { type: "string" },
     resize: { default: false },
     resolve: { default: false },
@@ -30,6 +35,7 @@ AFRAME.registerComponent("media-loader", {
     this.onError = this.onError.bind(this);
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
+    this.onMediaLoaded = this.onMediaLoaded.bind(this);
     this.shapeAdded = false;
   },
 
@@ -48,6 +54,7 @@ AFRAME.registerComponent("media-loader", {
     };
     center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
     mesh.position.sub(center);
+    mesh.matrixNeedsUpdate = true;
   },
 
   tick(t, dt) {
@@ -89,6 +96,20 @@ AFRAME.registerComponent("media-loader", {
     delete this.showLoaderTimeout;
   },
 
+  setupHoverableVisuals() {
+    const hoverableVisuals = this.el.components["hoverable-visuals"];
+    if (hoverableVisuals) {
+      hoverableVisuals.uniforms = injectCustomShaderChunks(this.el.object3D);
+      boundingBox.setFromObject(this.el.object3DMap.mesh);
+      boundingBox.getBoundingSphere(hoverableVisuals.boundingSphere);
+    }
+  },
+
+  onMediaLoaded() {
+    this.clearLoadingTimeout();
+    this.setupHoverableVisuals();
+  },
+
   async update(oldData) {
     try {
       const { src } = this.data;
@@ -124,13 +145,13 @@ AFRAME.registerComponent("media-loader", {
       if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-image");
-        this.el.addEventListener("video-loaded", this.clearLoadingTimeout, { once: true });
+        this.el.addEventListener("video-loaded", this.onMediaLoaded, { once: true });
         this.el.setAttribute("media-video", { src: accessibleUrl });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
       } else if (contentType.startsWith("image/")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
-        this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
+        this.el.addEventListener("image-loaded", this.onMediaLoaded, { once: true });
         this.el.removeAttribute("media-pager");
         this.el.setAttribute("media-image", { src: accessibleUrl, contentType });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
@@ -141,7 +162,8 @@ AFRAME.registerComponent("media-loader", {
         // 1. we pass the canonical URL to the pager so it can easily make subresource URLs
         // 2. we don't remove the media-image component -- media-pager uses that internally
         this.el.setAttribute("media-pager", { src: canonicalUrl });
-        this.el.addEventListener("preview-loaded", this.clearLoadingTimeout, { once: true });
+        this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
+        this.el.addEventListener("preview-loaded", this.onMediaLoaded, { once: true });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
       } else if (
         contentType.includes("application/octet-stream") ||
@@ -156,6 +178,7 @@ AFRAME.registerComponent("media-loader", {
           () => {
             this.clearLoadingTimeout();
             this.setShapeAndScale(this.data.resize);
+            this.setupHoverableVisuals();
             addAnimationComponents(this.el);
           },
           { once: true }
@@ -164,7 +187,8 @@ AFRAME.registerComponent("media-loader", {
         this.el.setAttribute("gltf-model-plus", {
           src: accessibleUrl,
           contentType: contentType,
-          inflate: true
+          inflate: true,
+          modelToWorldScale: this.data.resize ? 0.0001 : 1.0
         });
       } else {
         throw new Error(`Unsupported content type: ${contentType}`);
@@ -193,7 +217,7 @@ AFRAME.registerComponent("media-pager", {
       // if this is the first image we ever loaded, set up the UI
       if (this.toolbar == null) {
         const template = document.getElementById("paging-toolbar");
-        this.el.appendChild(document.importNode(template.content, true));
+        this.el.querySelector(".interactable-ui").appendChild(document.importNode(template.content, true));
         this.toolbar = this.el.querySelector(".paging-toolbar");
         // we have to wait a tick for the attach callbacks to get fired for the elements in a template
         setTimeout(() => {
@@ -201,8 +225,8 @@ AFRAME.registerComponent("media-pager", {
           this.prevButton = this.el.querySelector(".prev-button [text-button]");
           this.pageLabel = this.el.querySelector(".page-label");
 
-          this.nextButton.addEventListener("click", this.onNext);
-          this.prevButton.addEventListener("click", this.onPrev);
+          this.nextButton.addEventListener("grab-start", this.onNext);
+          this.prevButton.addEventListener("grab-start", this.onPrev);
 
           this.update();
           this.el.emit("preview-loaded");
@@ -225,19 +249,22 @@ AFRAME.registerComponent("media-pager", {
 
   remove() {
     if (this.toolbar) {
-      this.el.removeChild(this.toolbar);
+      this.toolbar.parentNode.removeChild(this.toolbar);
     }
   },
 
   onNext() {
     this.el.setAttribute("media-pager", "index", Math.min(this.data.index + 1, this.maxIndex));
+    this.el.emit("pager-page-changed");
   },
 
   onPrev() {
     this.el.setAttribute("media-pager", "index", Math.max(this.data.index - 1, 0));
+    this.el.emit("pager-page-changed");
   },
 
   repositionToolbar() {
     this.toolbar.object3D.position.y = -this.el.getAttribute("shape").halfExtents.y - 0.2;
+    this.toolbar.object3D.matrixNeedsUpdate = true;
   }
 });

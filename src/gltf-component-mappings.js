@@ -34,11 +34,10 @@ AFRAME.GLTFModelPlus.registerComponent(
   "shape",
   (() => {
     const euler = new THREE.Euler();
-    const orientation = new THREE.Quaternion();
     return (el, componentName, componentData) => {
       const { scale, rotation } = componentData;
       euler.set(rotation.x, rotation.y, rotation.z);
-      orientation.setFromEuler(euler);
+      const orientation = new THREE.Quaternion().setFromEuler(euler);
       el.setAttribute(componentName, {
         shape: "box",
         offset: componentData.position,
@@ -71,4 +70,31 @@ AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentNa
   // There isn't actually an a-frame nav-mesh component, but we want to tag this el as a nav-mesh since
   // nav-mesh-helper will query for it later.
   el.setAttribute("nav-mesh");
+});
+
+AFRAME.GLTFModelPlus.registerComponent("pinnable", "pinnable");
+
+AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
+  if (componentData.id) {
+    el.setAttribute("networked", {
+      template: "#interactable-media",
+      owner: "scene",
+      persistent: true,
+      networkId: componentData.id
+    });
+  }
+
+  el.setAttribute("media-loader", { src: componentData.src, resize: true, resolve: true, fileIsOwned: true });
+
+  if (componentData.pageIndex) {
+    el.setAttribute("media-pager", { index: componentData.pageIndex });
+  }
+
+  if (componentData.paused !== undefined) {
+    el.setAttribute("media-video", { videoPaused: componentData.paused });
+  }
+
+  if (componentData.time) {
+    el.setAttribute("media-video", { time: componentData.time });
+  }
 });

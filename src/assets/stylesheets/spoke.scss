@@ -1,7 +1,6 @@
 @import 'shared';
 @import 'loader';
 
-$spoke-action-color: #2F80ED;
 $breakpoint: 1280px;
 $mobile-breakpoint-width: 450px;
 
@@ -167,8 +166,15 @@ body {
   @extend %action-button;
   background-color: $darker-grey;
   margin: auto;
-  margin-top: 64px;
   padding: 0px 82px;
+}
+
+:local(.tutorial-buttons) {
+  margin-top: 64px;
+
+  button {
+    margin: 32px auto;
+  }
 }
 
 :local(.close-video) {

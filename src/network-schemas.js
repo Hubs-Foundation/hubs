@@ -73,21 +73,6 @@ function registerNetworkSchemas() {
   });
 
   NAF.schemas.add({
-    template: "#video-template",
-    components: [
-      {
-        component: "position",
-        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
-      },
-      {
-        component: "rotation",
-        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
-      },
-      "visible"
-    ]
-  });
-
-  NAF.schemas.add({
     template: "#interactable-media",
     components: [
       {
@@ -111,7 +96,8 @@ function registerNetworkSchemas() {
       {
         component: "media-pager",
         property: "index"
-      }
+      },
+      "pinnable"
     ]
   });
 

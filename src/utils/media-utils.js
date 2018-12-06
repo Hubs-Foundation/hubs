@@ -1,5 +1,7 @@
 import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
+import mediaHighlightFrag from "./media-highlight-frag.glsl";
+
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
 const commonKnownContentTypes = {
@@ -22,6 +24,8 @@ function b64EncodeUnicode(str) {
 }
 
 export const proxiedUrlFor = (url, index) => {
+  if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
+
   // farspark doesn't know how to read '=' base64 padding characters
   const base64Url = b64EncodeUnicode(url).replace(/=+$/g, "");
   // translate base64 + to - and / to _ for URL safety
@@ -44,6 +48,7 @@ export const resolveUrl = async (url, index) => {
 };
 
 export const guessContentType = url => {
+  if (url.startsWith("hubs://") && url.endsWith("/video")) return "video/vnd.hubs-webrtc";
   const extension = new URL(url).pathname.split(".").pop();
   return commonKnownContentTypes[extension];
 };
@@ -51,6 +56,7 @@ export const guessContentType = url => {
 export const upload = file => {
   const formData = new FormData();
   formData.append("media", file);
+  formData.append("promotion_mode", "with_token");
   return fetch(mediaAPIEndpoint, {
     method: "POST",
     body: formData
@@ -103,11 +109,43 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
   const entity = document.createElement("a-entity");
   entity.id = "interactable-media-" + interactableId++;
   entity.setAttribute("networked", { template: template });
-  entity.setAttribute("media-loader", { resize, resolve, src: typeof src === "string" ? src : "" });
+  const needsToBeUploaded = src instanceof File;
+  entity.setAttribute("media-loader", {
+    resize,
+    resolve,
+    src: typeof src === "string" ? src : "",
+    fileIsOwned: !needsToBeUploaded
+  });
   scene.appendChild(entity);
 
+  const fireLoadingTimeout = setTimeout(() => {
+    scene.emit("media-loading", { src: src });
+  }, 100);
+
+  ["model-loaded", "video-loaded", "image-loaded"].forEach(eventName => {
+    entity.addEventListener(eventName, () => {
+      clearTimeout(fireLoadingTimeout);
+
+      if (!entity.classList.contains("pen") && !entity.getAttribute("animation__spawn-start")) {
+        entity.object3D.scale.setScalar(0.5);
+        entity.matrixNeedsUpdate = true;
+
+        entity.setAttribute("animation__spawn-start", {
+          property: "scale",
+          delay: 50,
+          dur: 300,
+          from: { x: 0.5, y: 0.5, z: 0.5 },
+          to: { x: 1.0, y: 1.0, z: 1.0 },
+          easing: "easeOutElastic"
+        });
+      }
+
+      scene.emit("media-loaded", { src: src });
+    });
+  });
+
   const orientation = new Promise(function(resolve) {
-    if (src instanceof File) {
+    if (needsToBeUploaded) {
       getOrientation(src, x => {
         resolve(x);
       });
@@ -115,16 +153,22 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
       resolve(1);
     }
   });
-  if (src instanceof File) {
+  if (needsToBeUploaded) {
     upload(src)
       .then(response => {
         const srcUrl = new URL(response.raw);
         srcUrl.searchParams.set("token", response.meta.access_token);
-        entity.setAttribute("media-loader", { resolve: false, src: srcUrl.href });
+        entity.setAttribute("media-loader", { resolve: false, src: srcUrl.href, fileId: response.file_id });
+        window.APP.store.update({
+          uploadPromotionTokens: [{ fileId: response.file_id, promotionToken: response.meta.promotion_token }]
+        });
       })
-      .catch(() => {
+      .catch(e => {
+        console.error("Media upload failed", e);
         entity.setAttribute("media-loader", { src: "error" });
       });
+  } else if (src instanceof MediaStream) {
+    entity.setAttribute("media-loader", { src: `hubs://clients/${NAF.clientId}/video` });
   }
 
   if (contentOrigin) {
@@ -136,3 +180,76 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
 
   return { entity, orientation };
 };
+
+export function injectCustomShaderChunks(obj) {
+  const vertexRegex = /\bskinning_vertex\b/;
+  const fragRegex = /\bgl_FragColor\b/;
+  const validMaterials = ["MeshStandardMaterial", "MeshBasicMaterial", "MobileStandardMaterial"];
+
+  const shaderUniforms = new Map();
+
+  obj.traverse(object => {
+    if (!object.material || !validMaterials.includes(object.material.type)) {
+      return;
+    }
+
+    // HACK, this routine inadvertently leaves the A-Frame shaders wired to the old, dark
+    // material, so maps cannot be updated at runtime. This breaks UI elements who have
+    // hover/toggle state, so for now just skip these while we figure out a more correct
+    // solution.
+    if (object.el.classList.contains("ui")) return;
+    if (object.el.getAttribute("text-button")) return;
+
+    object.material = object.material.clone();
+    object.material.onBeforeCompile = shader => {
+      if (!vertexRegex.test(shader.vertexShader)) return;
+
+      shader.uniforms.hubs_EnableSweepingEffect = { value: false };
+      shader.uniforms.hubs_SweepParams = { value: [0, 0] };
+      shader.uniforms.hubs_InteractorOnePos = { value: [0, 0, 0] };
+      shader.uniforms.hubs_InteractorTwoPos = { value: [0, 0, 0] };
+      shader.uniforms.hubs_HighlightInteractorOne = { value: false };
+      shader.uniforms.hubs_HighlightInteractorTwo = { value: false };
+      shader.uniforms.hubs_Time = { value: 0 };
+
+      const vchunk = `
+        if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo) {
+          vec4 wt = modelMatrix * vec4(transformed, 1);
+
+          // Used in the fragment shader below.
+          hubs_WorldPosition = wt.xyz;
+        }
+      `;
+
+      const vlines = shader.vertexShader.split("\n");
+      const vindex = vlines.findIndex(line => vertexRegex.test(line));
+      vlines.splice(vindex + 1, 0, vchunk);
+      vlines.unshift("varying vec3 hubs_WorldPosition;");
+      vlines.unshift("uniform bool hubs_HighlightInteractorOne;");
+      vlines.unshift("uniform bool hubs_HighlightInteractorTwo;");
+      shader.vertexShader = vlines.join("\n");
+
+      const flines = shader.fragmentShader.split("\n");
+      const findex = flines.findIndex(line => fragRegex.test(line));
+      flines.splice(findex + 1, 0, mediaHighlightFrag);
+      flines.unshift("varying vec3 hubs_WorldPosition;");
+      flines.unshift("uniform bool hubs_EnableSweepingEffect;");
+      flines.unshift("uniform vec2 hubs_SweepParams;");
+      flines.unshift("uniform bool hubs_HighlightInteractorOne;");
+      flines.unshift("uniform vec3 hubs_InteractorOnePos;");
+      flines.unshift("uniform bool hubs_HighlightInteractorTwo;");
+      flines.unshift("uniform vec3 hubs_InteractorTwoPos;");
+      flines.unshift("uniform float hubs_Time;");
+      shader.fragmentShader = flines.join("\n");
+
+      shaderUniforms.set(object.material.uuid, shader.uniforms);
+    };
+    object.material.needsUpdate = true;
+  });
+
+  return shaderUniforms;
+}
+
+export function getPromotionTokenForFile(fileId) {
+  return window.APP.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
+}

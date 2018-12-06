@@ -1,6 +1,8 @@
+import { paths } from "../systems/userinput/paths";
 import { addMedia } from "../utils/media-utils";
 import { waitForEvent } from "../utils/async-utils";
 import { ObjectContentOrigins } from "../object-types";
+import { getLastWorldPosition, getLastWorldQuaternion } from "../utils/three-utils";
 
 let nextGrabId = 0;
 /**
@@ -84,6 +86,8 @@ AFRAME.registerComponent("super-spawner", {
     this.onSpawnEvent = this.onSpawnEvent.bind(this);
 
     this.sceneEl = document.querySelector("a-scene");
+
+    this.el.setAttribute("hoverable-visuals", { cursorController: "#cursor-controller", enableSweepingEffect: false });
   },
 
   play() {
@@ -114,7 +118,10 @@ AFRAME.registerComponent("super-spawner", {
   },
 
   async onSpawnEvent() {
-    const controllerCount = this.el.sceneEl.components["input-configurator"].controllerQueue.length;
+    const userinput = AFRAME.scenes[0].systems.userinput;
+    const leftPose = userinput.get(paths.actions.leftHand.pose);
+    const rightPose = userinput.get(paths.actions.rightHand.pose);
+    const controllerCount = leftPose && rightPose ? 2 : leftPose || rightPose ? 1 : 0;
     const using6DOF = controllerCount > 1 && this.el.sceneEl.is("vr-mode");
     const hand = using6DOF ? this.data.superHand : this.data.cursorSuperHand;
 
@@ -124,8 +131,9 @@ AFRAME.registerComponent("super-spawner", {
 
     const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve).entity;
 
-    hand.object3D.getWorldPosition(entity.object3D.position);
-    hand.object3D.getWorldQuaternion(entity.object3D.quaternion);
+    getLastWorldPosition(hand.object3D, entity.object3D.position);
+    getLastWorldQuaternion(hand.object3D, entity.object3D.quaternion);
+
     if (this.data.useCustomSpawnScale) {
       entity.object3D.scale.copy(this.data.spawnScale);
     }
@@ -134,7 +142,8 @@ AFRAME.registerComponent("super-spawner", {
 
     await waitForEvent("body-loaded", entity);
 
-    hand.object3D.getWorldPosition(entity.object3D.position);
+    getLastWorldPosition(hand.object3D, entity.object3D.position);
+    entity.object3D.matrixNeedsUpdate = true;
 
     if (!using6DOF) {
       for (let i = 0; i < this.data.grabEvents.length; i++) {
@@ -164,8 +173,7 @@ AFRAME.registerComponent("super-spawner", {
       this.data.useCustomSpawnRotation ? this.data.spawnRotation : this.el.object3D.rotation
     );
     entity.object3D.scale.copy(this.data.useCustomSpawnScale ? this.data.spawnScale : this.el.object3D.scale);
-
-    this.activateCooldown();
+    entity.object3D.matrixNeedsUpdate = true;
 
     await waitForEvent("body-loaded", entity);
 
@@ -179,6 +187,8 @@ AFRAME.registerComponent("super-spawner", {
         hand.emit(this.data.grabEvents[i], { targetEntity: entity });
       }
     }
+
+    this.activateCooldown();
   },
 
   onGrabEnd(e) {

@@ -134,10 +134,12 @@ AFRAME.registerComponent("ik-controller", {
       return;
     }
 
+    const root = this.ikRoot.el.object3D;
     const { camera, leftController, rightController } = this.ikRoot;
     const {
       hips,
       head,
+      neck,
       chest,
       cameraForward,
       headTransform,
@@ -180,11 +182,16 @@ AFRAME.registerComponent("ik-controller", {
     rootToChest.multiplyMatrices(hips.matrix, chest.matrix);
     invRootToChest.getInverse(rootToChest);
 
-    this.updateHand(this.hands.left, leftHand, leftController);
-    this.updateHand(this.hands.right, rightHand, rightController);
+    root.matrixNeedsUpdate = true;
+    neck.matrixNeedsUpdate = true;
+    head.matrixNeedsUpdate = true;
+    chest.matrixNeedsUpdate = true;
+
+    this.updateHand(this.hands.left, leftHand, leftController, true);
+    this.updateHand(this.hands.right, rightHand, rightController, false);
   },
 
-  updateHand(handState, handObject3D, controller) {
+  updateHand(handState, handObject3D, controller, isLeft) {
     const hand = handObject3D.el;
     const handMatrix = handObject3D.matrix;
     const controllerObject3D = controller.object3D;
@@ -195,19 +202,21 @@ AFRAME.registerComponent("ik-controller", {
     const handHiddenByPersonalSpace = spaceInvader && spaceInvader.invading;
 
     handObject3D.visible = !handHiddenByPersonalSpace && controllerObject3D.visible;
+
     if (controllerObject3D.visible) {
       handMatrix.multiplyMatrices(this.invRootToChest, controllerObject3D.matrix);
 
       const handControls = controller.components["hand-controls2"];
 
       if (handControls) {
-        handMatrix.multiply(handControls.getControllerOffset());
+        handMatrix.multiply(isLeft ? handControls.getLeftControllerOffset() : handControls.getRightControllerOffset());
       }
 
       handMatrix.multiply(handState.rotation);
 
       handObject3D.position.setFromMatrixPosition(handMatrix);
       handObject3D.rotation.setFromRotationMatrix(handMatrix);
+      handObject3D.matrixNeedsUpdate = true;
     }
   }
 });

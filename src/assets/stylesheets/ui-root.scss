@@ -14,6 +14,7 @@
     @extend %fa-icon-button;
     pointer-events: auto;
     position: absolute;
+    z-index: 1;
     top: 0px;
     right: 14px;
 
@@ -28,6 +29,12 @@
       width: 36px;
       height: 36px;
     }
+  }
+}
+
+body.vr-mode {
+  :local(.ui) {
+    pointer-events: auto;
   }
 }
 
@@ -75,7 +82,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  pointer-events: auto;
 
   button {
     @extend %action-button;
@@ -113,11 +119,12 @@
 }
 
 :local(.invite-container-below-hud) {
-  margin-top: 100px;
+  margin-top: 86px;
 }
 
 :local(.nag-corner-button) {
   position: absolute;
+  z-index: 1;
   bottom: 42px;
   width: 100%;
   display: flex;
@@ -154,6 +161,7 @@
   @extend %unselectable;
   text-align: right;
   position: absolute;
+  z-index: 1;
   top: 0;
   left: 16px;
   margin: 16px 0;
@@ -168,14 +176,11 @@
   pointer-events: auto;
   cursor: pointer;
 
-  @media (min-width: 769px) and (min-height: 421px) {
-    flex: 1;
+  @media(max-width: 500px) {
+    flex-direction: column;
+    padding: 8px 8px;
   }
-  @media (max-width: 768px) , (max-height: 420px) {
-    margin: 16px 0;
-    margin-right: 0;
-    padding: 2px 8px;
-  }
+
   :local(.occupant-count) {
     margin: 0 12px;
   }
@@ -204,10 +209,12 @@
   -moz-appearance: none;
   -webkit-appearance: none;
   outline-style: none;
+  overflow: hidden;
+  resize: none;
   background-color: transparent;
   color: black;
   padding: 8px 1.25em;
-  line-height: 2em;
+  line-height: 28px;
   font-size: 1.1em;
   width: 100%;
   border: 0px;
@@ -224,9 +231,11 @@
 :local(.message-entry-submit) {
   @extend %action-button;
   position: absolute;
-  right: 12px;
+  right: 10px;
   height: 32px;
   min-width: 80px;
+  bottom: 8px;
+  border-radius: 10px;
 }
 
 :local(.message-entry-in-room) {
@@ -235,6 +244,7 @@
   }
 
   position: absolute;
+  z-index: 2;
   left: 16px;
   bottom: 20px;
   width: 33%;
@@ -246,11 +256,29 @@
   border-radius: 16px;
   pointer-events: auto;
   opacity: 0.3;
-  transition: opacity 0.25s linear;
+  transition: opacity 0.15s linear;
 
   :local(.message-entry-input-in-room) {
     color: white;
     padding: 8px 1.25em;
+    margin-left: 32px;
+  }
+
+  :local(.message-entry-spawn) {
+    @extend %action-button;
+    position: absolute;
+    left: 12px;
+    height: 32px;
+    width: 32px;
+    bottom: 8px;
+    min-width: auto;
+    background-size: 90%;
+    background-image: url(../spawn_message.png);
+    background-position-x: 1px;
+    background-position-y: 1px;
+    padding: 0;
+    border-radius: 16px;
+    visibility: hidden;
   }
 
   :local(.message-entry-submit-in-room) {
@@ -259,11 +287,15 @@
   }
 }
 
-:local(.message-entry-in-room):hover {
+:local(.message-entry-in-room):focus-within {
   opacity: 1.0;
-  transition: opacity 0.25s linear;
+  transition: opacity 0.15s linear;
 
   :local(.message-entry-submit-in-room) {
+    visibility: visible;
+  }
+
+  :local(.message-entry-spawn) {
     visibility: visible;
   }
 }

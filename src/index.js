@@ -1,6 +1,7 @@
-import "./assets/stylesheets/index.scss";
 import React from "react";
 import ReactDOM from "react-dom";
+
+import "./assets/stylesheets/index.scss";
 import registerTelemetry from "./telemetry";
 import HomeRoot from "./react-components/home-root";
 

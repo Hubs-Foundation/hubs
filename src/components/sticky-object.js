@@ -1,3 +1,5 @@
+import { getLastWorldPosition, getLastWorldQuaternion } from "../utils/three-utils";
+
 /* global THREE, CANNON, AFRAME */
 AFRAME.registerComponent("sticky-object", {
   dependencies: ["ammo-body"],
@@ -5,7 +7,7 @@ AFRAME.registerComponent("sticky-object", {
   schema: {
     autoLockOnLoad: { default: false },
     autoLockOnRelease: { default: false },
-    autoLockSpeedLimit: { default: 0.25 }
+    autoLockSpeedLimit: { default: 0.5 } // Set to 0 to always autolock on release
   },
 
   init() {
@@ -61,6 +63,8 @@ AFRAME.registerComponent("sticky-object", {
   },
 
   _onGrab() {
+    if (!this.el.components.grabbable || this.el.components.grabbable.data.maxGrabbers === 0) return;
+
     this.setLocked(false);
     // this.el.body.collisionResponse = false;
   },
@@ -81,8 +85,8 @@ AFRAME.registerComponent("sticky-object-zone", {
     // TODO: position/rotation/impulse need to get updated if the sticky-object-zone moves
     this.worldQuaternion = new THREE.Quaternion();
     this.worldPosition = new THREE.Vector3();
-    this.el.object3D.getWorldQuaternion(this.worldQuaternion);
-    this.el.object3D.getWorldPosition(this.worldPosition);
+    getLastWorldPosition(this.el.object3D, this.worldPosition);
+    getLastWorldQuaternion(this.el.object3D, this.worldQuaternion);
 
     const dir = new THREE.Vector3(0, 0, 5).applyQuaternion(this.el.object3D.quaternion);
     this.bootImpulsePosition = new CANNON.Vec3(0, 0, 0);
@@ -116,6 +120,7 @@ AFRAME.registerComponent("sticky-object-zone", {
     stickyObject.setLocked(true);
     stickyObject.el.object3D.position.copy(this.worldPosition);
     stickyObject.el.object3D.quaternion.copy(this.worldQuaternion);
+    stickyObject.el.object3D.matrixNeedsUpdate = true;
     stickyObject.el.body.collisionResponse = false;
     stickyObject.stuckTo = this;
 

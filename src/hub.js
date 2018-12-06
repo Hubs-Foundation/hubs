@@ -11,27 +11,20 @@ import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-teleport-controls";
-import "aframe-input-mapping-component";
+import "./components/teleport-controls-matrix-auto-update";
 import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
 import "aframe-motion-capture-components";
 import "./utils/audio-context-fix";
+import "./utils/threejs-positional-audio-updatematrixworld";
+import "./utils/threejs-world-update";
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
-
-import trackpad_dpad4 from "./behaviours/trackpad-dpad4";
-import trackpad_scrolling from "./behaviours/trackpad-scrolling";
-import joystick_dpad4 from "./behaviours/joystick-dpad4";
-import msft_mr_axis_with_deadzone from "./behaviours/msft-mr-axis-with-deadzone";
-import { PressedMove } from "./activators/pressedmove";
-import { ReverseY } from "./activators/reversey";
 import { Presence } from "phoenix";
-
-import "./activators/shortpress";
 
 import "./components/scene-components";
 import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
@@ -43,8 +36,9 @@ import "./components/virtual-gamepad-controls";
 import "./components/ik-controller";
 import "./components/hand-controls2";
 import "./components/character-controller";
+import "./components/hoverable-visuals";
+import "./components/hover-visuals";
 import "./components/haptic-feedback";
-import "./components/networked-video-player";
 import "./components/offset-relative-to";
 import "./components/player-info";
 import "./components/debug";
@@ -61,31 +55,50 @@ import "./components/networked-avatar";
 import "./components/avatar-replay";
 import "./components/media-views";
 import "./components/pinch-to-move";
-import "./components/look-on-mobile";
 import "./components/pitch-yaw-rotator";
-import "./components/input-configurator";
 import "./components/auto-scale-cannon-physics-body";
 import "./components/position-at-box-shape-border";
+import "./components/pinnable";
+import "./components/pin-networked-object-button";
 import "./components/remove-networked-object-button";
+import "./components/camera-focus-button";
+import "./components/mirror-camera-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/gamma-factor";
 import "./components/visible-to-owner";
 import "./components/camera-tool";
+import "./components/scene-sound";
+import "./components/emit-state-change";
+import "./components/action-to-event";
+import "./components/emit-scene-event-on-remove";
+import "./components/stop-event-propagation";
+import "./components/animation";
+import "./components/follow-in-lower-fov";
+import "./components/matrix-auto-update";
 
 import ReactDOM from "react-dom";
 import React from "react";
 import UIRoot from "./react-components/ui-root";
+import AuthChannel from "./utils/auth-channel";
 import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { proxiedUrlFor } from "./utils/media-utils";
+import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
+import Subscriptions from "./subscriptions";
+import { createInWorldLogMessage } from "./react-components/chat-message";
 
 import "./systems/nav";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
 import "./systems/exit-on-blur";
+import "./systems/camera-tools";
+import "./systems/userinput/userinput";
+import "./systems/camera-mirror";
+import "./systems/userinput/userinput-debug";
+import "./systems/frame-scheduler";
 
 import "./gltf-component-mappings";
 
@@ -102,6 +115,7 @@ const store = window.APP.store;
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
 
+THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
 import "aframe-physics-system";
@@ -111,22 +125,22 @@ import "./components/super-networked-interactable";
 import "./components/networked-counter";
 import "./components/event-repeater";
 import "./components/controls-shape-offset";
-import "./components/grabbable-toggle";
+import "./components/set-yxz-order";
+import "./components/set-sounds-invisible";
 
 import "./components/cardboard-controls";
 
 import "./components/cursor-controller";
 
 import "./components/nav-mesh-helper";
-import "./systems/tunnel-effect";
 
 import "./components/tools/pen";
 import "./components/tools/networked-drawing";
 import "./components/tools/drawing-manager";
 
 import registerNetworkSchemas from "./network-schemas";
-import { config as inputConfig } from "./input-mappings";
 import registerTelemetry from "./telemetry";
+import { warmSerializeElement } from "./utils/serialize-element";
 
 import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
@@ -143,16 +157,7 @@ if (!isBotMode && !isTelemetryDisabled) {
 
 disableiOSZoom();
 
-AFRAME.registerInputBehaviour("trackpad_dpad4", trackpad_dpad4);
-AFRAME.registerInputBehaviour("trackpad_scrolling", trackpad_scrolling);
-AFRAME.registerInputBehaviour("joystick_dpad4", joystick_dpad4);
-AFRAME.registerInputBehaviour("msft_mr_axis_with_deadzone", msft_mr_axis_with_deadzone);
-AFRAME.registerInputActivator("pressedmove", PressedMove);
-AFRAME.registerInputActivator("reverseY", ReverseY);
-AFRAME.registerInputMappings(inputConfig, true);
-
 const concurrentLoadDetector = new ConcurrentLoadDetector();
-
 concurrentLoadDetector.start();
 
 store.init();
@@ -185,11 +190,12 @@ function setupLobbyCamera() {
     camera.object3D.position.copy(previewCamera.position);
     camera.object3D.rotation.copy(previewCamera.rotation);
     camera.object3D.rotation.reorder("YXZ");
-    camera.object3D.updateMatrix();
   } else {
     const cameraPos = camera.object3D.position;
     camera.object3D.position.set(cameraPos.x, 2.5, cameraPos.z);
   }
+
+  camera.object3D.matrixNeedsUpdate = true;
 
   camera.setAttribute("scene-preview-camera", "positionOnly: true; duration: 60");
   camera.components["pitch-yaw-rotator"].set(camera.object3D.rotation.x, camera.object3D.rotation.y);
@@ -201,7 +207,6 @@ function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
-  const enableScreenSharing = qsTruthy("enable_screen_sharing");
 
   ReactDOM.render(
     <UIRoot
@@ -211,7 +216,6 @@ function mountUI(props = {}) {
         concurrentLoadDetector,
         disableAutoExitOnConcurrentLoad,
         forcedVREntryType,
-        enableScreenSharing,
         store,
         ...props
       }}
@@ -225,7 +229,7 @@ function remountUI(props) {
   mountUI(uiProps);
 }
 
-async function handleHubChannelJoined(entryManager, hubChannel, data) {
+async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
 
   if (NAF.connection.isConnected()) {
@@ -243,6 +247,11 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
 
   console.log(`Scene URL: ${sceneUrl}`);
   const environmentScene = document.querySelector("#environment-scene");
+  const objectsScene = document.querySelector("#objects-scene");
+  const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
+  const objectsEl = document.createElement("a-entity");
+  objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
+  objectsScene.appendChild(objectsEl);
 
   if (glbAsset || hasExtension) {
     const gltfEl = document.createElement("a-entity");
@@ -258,43 +267,48 @@ async function handleHubChannelJoined(entryManager, hubChannel, data) {
     hubId: hub.hub_id,
     hubName: hub.name,
     hubEntryCode: hub.entry_code,
-    onSendMessage: hubChannel.sendMessage
+    onSendMessage: messageDispatch.dispatch
   });
 
   document
     .querySelector("#hud-hub-entry-link")
     .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
 
-  scene.setAttribute("networked-scene", {
-    room: hub.hub_id,
-    serverURL: process.env.JANUS_SERVER,
-    debug: !!isDebug
-  });
+  // Wait for scene objects to load before connecting, so there is no race condition on network state.
+  objectsEl.addEventListener("model-loaded", async el => {
+    if (el.target !== objectsEl) return;
 
-  while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
-
-  scene.components["networked-scene"]
-    .connect()
-    .then(() => {
-      NAF.connection.adapter.reliableTransport = (clientId, dataType, data) => {
-        const payload = { dataType, data };
-
-        if (clientId) {
-          payload.clientId = clientId;
-        }
-
-        hubChannel.channel.push("naf", payload);
-      };
-    })
-    .catch(connectError => {
-      // hacky until we get return codes
-      const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
-      console.error(connectError);
-      remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
-      entryManager.exitScene();
-
-      return;
+    scene.setAttribute("networked-scene", {
+      room: hub.hub_id,
+      serverURL: process.env.JANUS_SERVER,
+      debug: !!isDebug
     });
+
+    while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
+
+    scene.components["networked-scene"]
+      .connect()
+      .then(() => {
+        NAF.connection.adapter.reliableTransport = (clientId, dataType, data) => {
+          const payload = { dataType, data };
+
+          if (clientId) {
+            payload.clientId = clientId;
+          }
+
+          hubChannel.channel.push("naf", payload);
+        };
+      })
+      .catch(connectError => {
+        // hacky until we get return codes
+        const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
+        console.error(connectError);
+        remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
+        entryManager.exitScene();
+
+        return;
+      });
+  });
 }
 
 async function runBotMode(scene, entryManager) {
@@ -306,17 +320,84 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  warmSerializeElement();
+
+  const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
+  console.log(`Hub ID: ${hubId}`);
+
+  const subscriptions = new Subscriptions(hubId);
+
+  if (navigator.serviceWorker) {
+    try {
+      navigator.serviceWorker
+        .register("/hub.service.js")
+        .then(() => {
+          navigator.serviceWorker.ready
+            .then(registration => subscriptions.setRegistration(registration))
+            .catch(() => subscriptions.setRegistrationFailed());
+        })
+        .catch(() => subscriptions.setRegistrationFailed());
+    } catch (e) {
+      subscriptions.setRegistrationFailed();
+    }
+  }
+
   const scene = document.querySelector("a-scene");
+  scene.removeAttribute("keyboard-shortcuts"); // Remove F and ESC hotkeys from aframe
+
+  const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);
   const entryManager = new SceneEntryManager(hubChannel);
+  entryManager.onRequestAuthentication = (
+    signInMessageId,
+    signInCompleteMessageId,
+    signInContinueTextId,
+    onContinueAfterSignIn
+  ) => {
+    remountUI({
+      showSignInDialog: true,
+      signInMessageId,
+      signInCompleteMessageId,
+      signInContinueTextId,
+      onContinueAfterSignIn: () => {
+        remountUI({ showSignInDialog: false });
+        onContinueAfterSignIn();
+      }
+    });
+  };
   entryManager.init();
 
   const linkChannel = new LinkChannel(store);
 
   window.APP.scene = scene;
 
+  scene.addEventListener("enter-vr", () => {
+    document.body.classList.add("vr-mode");
+
+    if (!scene.is("entered")) {
+      // If VR headset is activated, refreshing page will fire vrdisplayactivate
+      // which puts A-Frame in VR mode, so exit VR mode whenever it is attempted
+      // to be entered and we haven't entered the room yet.
+      console.log("Pre-emptively exiting VR mode.");
+      scene.exitVR();
+    }
+  });
+
+  scene.addEventListener("exit-vr", () => document.body.classList.remove("vr-mode"));
+
   registerNetworkSchemas();
-  remountUI({ hubChannel, linkChannel, enterScene: entryManager.enterScene, exitScene: entryManager.exitScene });
+
+  remountUI({
+    authChannel,
+    hubChannel,
+    linkChannel,
+    subscriptions,
+    enterScene: entryManager.enterScene,
+    exitScene: entryManager.exitScene,
+    initialIsSubscribed: subscriptions.isSubscribed()
+  });
+
+  scene.addEventListener("action_focus_chat", () => document.querySelector(".chat-focus-target").focus());
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 
@@ -343,6 +424,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (availableVREntryTypes.isInHMD) {
     remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
+
+    if (/Oculus/.test(navigator.userAgent)) {
+      // HACK - The polyfill reports Cardboard as the primary VR display on startup out ahead of Oculus Go on Oculus Browser 5.5.0 beta. This display is cached by A-Frame,
+      // so we need to resolve that and get the real VRDisplay before entering as well.
+      const displays = await navigator.getVRDisplays();
+      const vrDisplay = displays.length && displays[0];
+      AFRAME.utils.device.getVRDisplay = () => vrDisplay;
+    }
   } else {
     remountUI({ availableVREntryTypes });
   }
@@ -364,10 +453,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Connect to reticulum over phoenix channels to get hub info.
-  const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
-  console.log(`Hub ID: ${hubId}`);
-
   const socket = connectToReticulum(isDebug);
   remountUI({ sessionId: socket.params().session_id });
 
@@ -377,14 +462,56 @@ document.addEventListener("DOMContentLoaded", async () => {
     hmd: availableVREntryTypes.isInHMD
   };
 
-  const joinPayload = { profile: store.state.profile, context };
+  // Reticulum global channel
+  const retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
+  retPhxChannel
+    .join()
+    .receive("ok", async data => subscriptions.setVapidPublicKey(data.vapid_public_key))
+    .receive("error", res => {
+      subscriptions.setVapidPublicKey(null);
+      console.error(res);
+    });
+
+  const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
+  const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
+
+  const presenceLogEntries = [];
+  const addToPresenceLog = entry => {
+    entry.key = Date.now().toString();
+
+    presenceLogEntries.push(entry);
+    remountUI({ presenceLogEntries });
+    scene.emit(`presence-log-${entry.type}`);
+
+    // Fade out and then remove
+    setTimeout(() => {
+      entry.expired = true;
+      remountUI({ presenceLogEntries });
+
+      setTimeout(() => {
+        presenceLogEntries.splice(presenceLogEntries.indexOf(entry), 1);
+        remountUI({ presenceLogEntries });
+      }, 5000);
+    }, 20000);
+  };
+
+  const messageDispatch = new MessageDispatch(scene, entryManager, hubChannel, addToPresenceLog, remountUI);
 
   hubPhxChannel
     .join()
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
-      await handleHubChannelJoined(entryManager, hubChannel, data);
+
+      const { token } = store.state.credentials;
+      if (token) {
+        await hubChannel.signIn(token);
+      }
+
+      subscriptions.setHubChannel(hubChannel);
+      subscriptions.setSubscribed(data.subscriptions.web_push);
+      remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
+      await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
     })
     .receive("error", res => {
       if (res.reason === "closed") {
@@ -396,30 +523,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
   const hubPhxPresence = new Presence(hubPhxChannel);
-  const presenceLogEntries = [];
-
-  const addToPresenceLog = entry => {
-    entry.key = Date.now().toString();
-
-    presenceLogEntries.push(entry);
-    remountUI({ presenceLogEntries });
-
-    // Fade out and then remove
-    setTimeout(() => {
-      entry.expired = true;
-      remountUI({ presenceLogEntries });
-
-      setTimeout(() => {
-        presenceLogEntries.splice(presenceLogEntries.indexOf(entry), 1);
-        remountUI({ presenceLogEntries });
-      }, 5000);
-    }, entryManager.hasEntered() ? 10000 : 30000); // Fade out things faster once entered.
-  };
 
   let isInitialSync = true;
+  const vrHudPresenceCount = document.querySelector("#hud-presence-count");
 
   hubPhxPresence.onSync(() => {
     remountUI({ presences: hubPhxPresence.state });
+    const occupantCount = Object.entries(hubPhxPresence.state).length;
+    vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
 
     if (!isInitialSync) return;
     // Wire up join/leave event handlers after initial sync.
@@ -481,15 +592,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     NAF.connection.adapter.onData(data);
   });
 
-  hubPhxChannel.on("message", data => {
-    const userInfo = hubPhxPresence.state[data.session_id];
+  hubPhxChannel.on("message", ({ session_id, type, body }) => {
+    const userInfo = hubPhxPresence.state[session_id];
     if (!userInfo) return;
+    const maySpawn = scene.is("entered");
 
-    addToPresenceLog({ type: "message", name: userInfo.metas[0].profile.displayName, body: data.body });
+    const incomingMessage = { name: userInfo.metas[0].profile.displayName, type, body, maySpawn };
+
+    if (scene.is("vr-mode")) {
+      createInWorldLogMessage(incomingMessage);
+    }
+
+    addToPresenceLog(incomingMessage);
   });
 
-  // Reticulum global channel
-  const retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
-  retPhxChannel.join().receive("error", res => console.error(res));
+  authChannel.setSocket(socket);
   linkChannel.setSocket(socket);
 });

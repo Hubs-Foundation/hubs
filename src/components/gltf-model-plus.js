@@ -87,7 +87,7 @@ function cloneGltf(gltf) {
 /// or templates associated with any of their nodes.)
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
-const inflateEntities = function(node, templates, isRoot) {
+const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
   // inflate subtrees first so that we can determine whether or not this node needs to be inflated
   const childEntities = [];
   const children = node.children.slice(0); // setObject3D mutates the node's parent, so we have to copy
@@ -136,12 +136,15 @@ const inflateEntities = function(node, templates, isRoot) {
     z: node.rotation.z * THREE.Math.RAD2DEG
   });
   el.setAttribute("scale", {
-    x: node.scale.x,
-    y: node.scale.y,
-    z: node.scale.z
+    x: node.scale.x * (modelToWorldScale !== undefined ? modelToWorldScale : 1),
+    y: node.scale.y * (modelToWorldScale !== undefined ? modelToWorldScale : 1),
+    z: node.scale.z * (modelToWorldScale !== undefined ? modelToWorldScale : 1)
   });
+
   node.matrixAutoUpdate = false;
   node.matrix.identity();
+  node.matrix.decompose(node.position, node.rotation, node.scale);
+  el.object3D.matrixNeedsUpdate = true;
 
   el.setObject3D(node.type.toLowerCase(), node);
   if (entityComponents && "nav-mesh" in entityComponents) {
@@ -255,6 +258,9 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   const envMap = await CachedEnvMapTexture;
 
   gltf.scene.traverse(object => {
+    // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
+    object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
+
     if (object.material && object.material.type === "MeshStandardMaterial") {
       if (preferredTechnique === "KHR_materials_unlit") {
         object.material = MobileStandardMaterial.fromStandardMaterial(object.material);
@@ -284,7 +290,8 @@ AFRAME.registerComponent("gltf-model-plus", {
     src: { type: "string" },
     contentType: { type: "string" },
     useCache: { default: true },
-    inflate: { default: false }
+    inflate: { default: false },
+    modelToWorldScale: { type: "number", default: 1 }
   },
 
   init() {
@@ -354,8 +361,12 @@ AFRAME.registerComponent("gltf-model-plus", {
       }
 
       let object3DToSet = this.model;
-      if (this.data.inflate && (this.inflatedEl = inflateEntities(this.model, this.templates, true))) {
+      if (
+        this.data.inflate &&
+        (this.inflatedEl = inflateEntities(this.model, this.templates, true, this.data.modelToWorldScale))
+      ) {
         this.el.appendChild(this.inflatedEl);
+
         object3DToSet = this.inflatedEl.object3D;
         // TODO: Still don't fully understand the lifecycle here and how it differs between browsers, we should dig in more
         // Wait one tick for the appended custom elements to be connected before attaching templates
@@ -366,7 +377,23 @@ AFRAME.registerComponent("gltf-model-plus", {
         }
       }
 
+      // The call to setObject3D below recursively clobbers any `el` backreferences to entities
+      // in the entire inflated entity graph to point to `object3DToSet`.
+      //
+      // We don't want those overwritten, since lots of code assumes `object3d.el` points to the relevant
+      // A-Frame entity for that three.js object, so we back them up and re-wire them here. If we didn't do
+      // this, all the `el` properties on these object3ds would point to the `object3DToSet` which is either
+      // the model or the root GLTF inflated entity.
+      const rewires = [];
+
+      object3DToSet.traverse(o => {
+        const el = o.el;
+        if (el) rewires.push(() => (o.el = el));
+      });
+
       this.el.setObject3D("mesh", object3DToSet);
+
+      rewires.forEach(f => f());
 
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {

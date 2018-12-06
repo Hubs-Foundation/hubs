@@ -4,6 +4,7 @@ import "./assets/stylesheets/scene.scss";
 
 import "aframe";
 import "./utils/logging";
+import "./utils/threejs-world-update";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
@@ -82,7 +83,7 @@ const onReady = async () => {
     if (previewCamera) {
       camera.object3D.position.copy(previewCamera.position);
       camera.object3D.rotation.copy(previewCamera.rotation);
-      camera.object3D.updateMatrix();
+      camera.object3D.matrixNeedsUpdate = true;
     }
 
     camera.setAttribute("scene-preview-camera", "");
@@ -102,7 +103,7 @@ const onReady = async () => {
   remountUI({
     sceneName: sceneInfo.name,
     sceneDescription: sceneInfo.description,
-    sceneAttribution: sceneInfo.attribution,
+    sceneAttributions: sceneInfo.attributions,
     sceneScreenshotURL: sceneInfo.screenshot_url
   });
 };

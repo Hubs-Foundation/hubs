@@ -60,6 +60,9 @@ function createHTTPSConfig() {
   }
 }
 
+const defaultHostName = "hubs.local";
+const host = process.env.HOST_IP || defaultHostName;
+
 module.exports = (env, argv) => ({
   entry: {
     index: path.join(__dirname, "src", "index.js"),
@@ -76,9 +79,13 @@ module.exports = (env, argv) => ({
   devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
   devServer: {
     https: createHTTPSConfig(),
-    host: "0.0.0.0",
+    host: process.env.HOST_IP || "0.0.0.0",
+    public: `${host}:8080`,
     useLocalIp: true,
-    allowedHosts: ["hubs.local"],
+    allowedHosts: [host],
+    headers: {
+      "Access-Control-Allow-Origin": "*"
+    },
     before: function(app) {
       // be flexible with people accessing via a local reticulum on another port
       app.use(cors({ origin: /hubs\.local(:\d*)?$/ }));
@@ -153,6 +160,10 @@ module.exports = (env, argv) => ({
             context: path.join(__dirname, "src")
           }
         }
+      },
+      {
+        test: /\.(glsl)$/,
+        use: { loader: "raw-loader" }
       }
     ]
   },
@@ -238,6 +249,12 @@ module.exports = (env, argv) => ({
       {
         from: "src/assets/images/hub-preview.png",
         to: "hub-preview.png"
+      }
+    ]),
+    new CopyWebpackPlugin([
+      {
+        from: "src/hub.service.js",
+        to: "hub.service.js"
       }
     ]),
     // Extract required css and add a content hash.

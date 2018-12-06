@@ -1,7 +1,7 @@
 import qsTruthy from "./utils/qs_truthy";
 import screenfull from "screenfull";
-import { inGameActions } from "./input-mappings";
 import nextTick from "./utils/next-tick";
+import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
 
 const playerHeight = 1.6;
 const isBotMode = qsTruthy("bot");
@@ -10,7 +10,7 @@ const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
-import { addMedia } from "./utils/media-utils";
+import { addMedia, proxiedUrlFor, getPromotionTokenForFile } from "./utils/media-utils";
 import { ObjectContentOrigins } from "./object-types";
 
 function requestFullscreen() {
@@ -25,11 +25,12 @@ export default class SceneEntryManager {
     this.cursorController = document.querySelector("#cursor-controller");
     this.playerRig = document.querySelector("#player-rig");
     this._entered = false;
+    this.onRequestAuthentication = () => {};
   }
 
   init = () => {
     this.whenSceneLoaded(() => {
-      this.cursorController.components["cursor-controller"].disable();
+      this.cursorController.components["cursor-controller"].enabled = false;
     });
   };
 
@@ -50,22 +51,35 @@ export default class SceneEntryManager {
       NAF.connection.adapter.session.options.verbose = true;
     }
 
+    let isCardboard = false;
+
     if (enterInVR) {
+      // HACK - A-Frame calls getVRDisplays at module load, we want to do it here to
+      // force gamepads to become live.
+      navigator.getVRDisplays();
+
+      isCardboard =
+        AFRAME.utils.device
+          .getVRDisplay()
+          .displayName.toLowerCase()
+          .indexOf("cardboard") >= 0;
+
       this.scene.enterVR();
     } else if (AFRAME.utils.device.isMobile()) {
       document.body.addEventListener("touchend", requestFullscreen);
     }
 
-    AFRAME.registerInputActions(inGameActions, "default");
+    if (!isCardboard) {
+      this.playerRig.removeAttribute("cardboard-controls");
+    }
 
     if (isMobile || qsTruthy("mobile")) {
       this.playerRig.setAttribute("virtual-gamepad-controls", {});
     }
 
     this._setupPlayerRig();
-    this._setupScreensharing(mediaStream);
     this._setupBlocking();
-    this._setupMedia();
+    this._setupMedia(mediaStream);
     this._setupCamera();
 
     if (qsTruthy("offline")) return;
@@ -77,6 +91,9 @@ export default class SceneEntryManager {
       return;
     }
 
+    this.scene.setAttribute("motion-capture-replayer", "enabled", false);
+    this.scene.systems["motion-capture-replayer"].remove();
+
     if (mediaStream) {
       NAF.connection.adapter.setLocalMediaStream(mediaStream);
     }
@@ -84,9 +101,7 @@ export default class SceneEntryManager {
     this.scene.classList.remove("hand-cursor");
     this.scene.classList.add("no-cursor");
 
-    const cursor = this.cursorController.components["cursor-controller"];
-    cursor.enable();
-    cursor.setCursorVisibility(true);
+    this.cursorController.components["cursor-controller"].enabled = true;
     this._entered = true;
 
     // Delay sending entry event telemetry until VR display is presenting.
@@ -99,6 +114,8 @@ export default class SceneEntryManager {
         this.store.update({ activity: { lastEnteredAt: new Date().toISOString() } });
       });
     })();
+
+    this.scene.addState("entered");
   };
 
   whenSceneLoaded = callback => {
@@ -139,51 +156,14 @@ export default class SceneEntryManager {
   };
 
   _updatePlayerRigWithProfile = () => {
-    const displayName = this.store.state.profile.displayName;
+    const { avatarId, displayName } = this.store.state.profile;
     this.playerRig.setAttribute("player-info", {
       displayName,
-      avatarSrc: "#" + (this.store.state.profile.avatarId || "botdefault")
+      avatarSrc: avatarId && avatarId.startsWith("http") ? proxiedUrlFor(avatarId) : `#${avatarId || "botdefault"}`
     });
     const hudController = this.playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });
     this.scene.emit("username-changed", { username: displayName });
-  };
-
-  _setupScreensharing = mediaStream => {
-    const videoTracks = mediaStream ? mediaStream.getVideoTracks() : [];
-    let sharingScreen = videoTracks.length > 0;
-
-    const screenEntityId = `${NAF.clientId}-screen`;
-    let screenEntity = document.getElementById(screenEntityId);
-
-    if (screenEntity) {
-      screenEntity.setAttribute("visible", sharingScreen);
-    } else if (sharingScreen) {
-      screenEntity = document.createElement("a-entity");
-      screenEntity.id = screenEntityId;
-      screenEntity.setAttribute("offset-relative-to", {
-        target: "#player-camera",
-        offset: "0 0 -2",
-        on: "action_share_screen"
-      });
-      screenEntity.setAttribute("networked", { template: "#video-template" });
-      this.scene.appendChild(screenEntity);
-    }
-
-    this.scene.addEventListener("action_share_screen", () => {
-      sharingScreen = !sharingScreen;
-      if (sharingScreen) {
-        for (const track of videoTracks) {
-          mediaStream.addTrack(track);
-        }
-      } else {
-        for (const track of mediaStream.getVideoTracks()) {
-          mediaStream.removeTrack(track);
-        }
-      }
-      NAF.connection.adapter.setLocalMediaStream(mediaStream);
-      screenEntity.setAttribute("visible", sharingScreen);
-    });
   };
 
   _setupBlocking = () => {
@@ -196,10 +176,38 @@ export default class SceneEntryManager {
     });
   };
 
-  _setupMedia = () => {
+  _pinElement = el => {
+    const { networkId } = el.components.networked.data;
+
+    const { fileId, src } = el.components["media-loader"].data;
+
+    let fileAccessToken, promotionToken;
+    if (fileId) {
+      fileAccessToken = new URL(src).searchParams.get("token");
+      const storedPromotionToken = getPromotionTokenForFile(fileId);
+      if (storedPromotionToken) {
+        promotionToken = storedPromotionToken.promotionToken;
+      }
+    }
+
+    const gltfNode = pinnedEntityToGltf(el);
+    if (!gltfNode) return;
+    el.setAttribute("networked", { persistent: true });
+    el.setAttribute("media-loader", { fileIsOwned: true });
+
+    this.hubChannel.pin(networkId, gltfNode, fileId, fileAccessToken, promotionToken);
+  };
+
+  _setupMedia = mediaStream => {
     const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
-      const { entity, orientation } = addMedia(src, "#interactable-media", contentOrigin, true, true);
+      const { entity, orientation } = addMedia(
+        src,
+        "#interactable-media",
+        contentOrigin,
+        !(src instanceof MediaStream),
+        true
+      );
 
       orientation.then(or => {
         entity.setAttribute("offset-relative-to", {
@@ -208,6 +216,8 @@ export default class SceneEntryManager {
           orientation: or
         });
       });
+
+      return entity;
     };
 
     this.scene.addEventListener("add_media", e => {
@@ -216,12 +226,48 @@ export default class SceneEntryManager {
       spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
     });
 
+    this.scene.addEventListener("pinned", e => {
+      if (this.hubChannel.signedIn) {
+        this._pinElement(e.detail.el);
+      } else {
+        const wasInVR = this.scene.is("vr-mode");
+        if (wasInVR) this.scene.exitVR();
+        const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
+
+        this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete", continueTextId, () => {
+          if (this.hubChannel.signedIn) {
+            this._pinElement(e.detail.el);
+          } else {
+            // UI pins the entity optimistically, so we undo that here.
+            e.detail.el.setAttribute("pinnable", "pinned", false);
+          }
+
+          if (wasInVR) this.scene.enterVR();
+        });
+      }
+    });
+
+    this.scene.addEventListener("unpinned", e => {
+      const el = e.detail.el;
+      const components = el.components;
+      const networked = components.networked;
+
+      if (!networked || !networked.data || !NAF.utils.isMine(el)) return;
+
+      const networkId = components.networked.data.networkId;
+      el.setAttribute("networked", { persistent: false });
+
+      const { fileId } = el.components["media-loader"].data;
+
+      this.hubChannel.unpin(networkId, fileId);
+    });
+
     this.scene.addEventListener("object_spawned", e => {
       this.hubChannel.sendObjectSpawnedEvent(e.detail.objectType);
     });
 
     document.addEventListener("paste", e => {
-      if (e.target.nodeName === "INPUT" && document.activeElement === e.target) return;
+      if (e.target.matches("input, textarea") && document.activeElement === e.target) return;
 
       const url = e.clipboardData.getData("text");
       const files = e.clipboardData.files && e.clipboardData.files;
@@ -248,6 +294,84 @@ export default class SceneEntryManager {
         }
       }
     });
+
+    let currentVideoShareEntity;
+    let isHandlingVideoShare = false;
+
+    const shareVideoMediaStream = async constraints => {
+      if (isHandlingVideoShare) return;
+      isHandlingVideoShare = true;
+
+      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      const videoTracks = newStream ? newStream.getVideoTracks() : [];
+
+      if (videoTracks.length > 0) {
+        newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
+        NAF.connection.adapter.setLocalMediaStream(mediaStream);
+        currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
+
+        // Wire up custom removal event which will stop the stream.
+        currentVideoShareEntity.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
+      }
+
+      this.scene.emit("share_video_enabled", { source: constraints.video.mediaSource });
+      isHandlingVideoShare = false;
+    };
+
+    this.scene.addEventListener("action_share_camera", () => {
+      shareVideoMediaStream({
+        video: {
+          mediaSource: "camera",
+          width: 720,
+          frameRate: 30
+        }
+      });
+    });
+
+    this.scene.addEventListener("action_share_window", () => {
+      shareVideoMediaStream({
+        video: {
+          mediaSource: "window",
+          // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
+          // other than your current monitor that has a different aspect ratio.
+          width: 720 * (screen.width / screen.height),
+          height: 720,
+          frameRate: 30
+        }
+      });
+    });
+
+    this.scene.addEventListener("action_share_screen", () => {
+      shareVideoMediaStream({
+        video: {
+          mediaSource: "screen",
+          // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
+          // other than your current monitor that has a different aspect ratio.
+          width: 720 * (screen.width / screen.height),
+          height: 720,
+          frameRate: 30
+        }
+      });
+    });
+
+    this.scene.addEventListener("action_end_video_sharing", () => {
+      if (isHandlingVideoShare) return;
+      isHandlingVideoShare = true;
+
+      if (currentVideoShareEntity && currentVideoShareEntity.parentNode) {
+        currentVideoShareEntity.parentNode.removeChild(currentVideoShareEntity);
+      }
+
+      for (const track of mediaStream.getVideoTracks()) {
+        mediaStream.removeTrack(track);
+      }
+
+      NAF.connection.adapter.setLocalMediaStream(mediaStream);
+      currentVideoShareEntity = null;
+
+      this.scene.emit("share_video_disabled");
+      isHandlingVideoShare = false;
+    });
   };
 
   _setupCamera = () => {
@@ -259,6 +383,10 @@ export default class SceneEntryManager {
         offset: { x: 0, y: 0, z: -1.5 }
       });
       this.scene.appendChild(entity);
+    });
+
+    this.scene.addEventListener("photo_taken", e => {
+      this.hubChannel.sendMessage({ src: e.detail }, "spawn");
     });
   };
 

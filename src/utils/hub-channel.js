@@ -12,6 +12,11 @@ function isSameDay(da, db) {
 export default class HubChannel {
   constructor(store) {
     this.store = store;
+    this._signedIn = false;
+  }
+
+  get signedIn() {
+    return this._signedIn;
   }
 
   setPhoenixChannel = channel => {
@@ -91,9 +96,62 @@ export default class HubChannel {
     this.channel.push("events:profile_updated", { profile: this.store.state.profile });
   };
 
-  sendMessage = body => {
-    if (body === "") return;
-    this.channel.push("message", { body });
+  subscribe = subscription => {
+    this.channel.push("subscribe", { subscription });
+  };
+
+  unsubscribe = subscription => {
+    return new Promise(resolve => this.channel.push("unsubscribe", { subscription }).receive("ok", resolve));
+  };
+
+  sendMessage = (body, type = "chat") => {
+    if (!body) return;
+    this.channel.push("message", { body, type });
+  };
+
+  signIn = token => {
+    return new Promise((resolve, reject) => {
+      this.channel
+        .push("sign_in", { token })
+        .receive("ok", () => {
+          this._signedIn = true;
+          resolve();
+        })
+        .receive("error", err => {
+          console.error("sign in failed", err);
+          reject();
+        });
+    });
+  };
+
+  signOut = () => {
+    return new Promise((resolve, reject) => {
+      this.channel
+        .push("sign_out")
+        .receive("ok", () => {
+          this._signedIn = false;
+          resolve();
+        })
+        .receive("error", reject);
+    });
+  };
+
+  pin = (id, gltfNode, fileId, fileAccessToken, promotionToken) => {
+    const payload = { id, gltf_node: gltfNode };
+    if (fileId && promotionToken) {
+      payload.file_id = fileId;
+      payload.file_access_token = fileAccessToken;
+      payload.promotion_token = promotionToken;
+    }
+    this.channel.push("pin", payload);
+  };
+
+  unpin = (id, fileId) => {
+    const payload = { id };
+    if (fileId) {
+      payload.file_id = fileId;
+    }
+    this.channel.push("unpin", payload);
   };
 
   requestSupport = () => {

@@ -9,6 +9,7 @@ import MovingAverage from "moving-average";
 import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
+import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
 
 import { lang, messages } from "../utils/i18n";
 import AutoExitWarning from "./auto-exit-warning";
@@ -20,16 +21,22 @@ import {
   SafariEntryButton
 } from "./entry-buttons.js";
 import ProfileEntryPanel from "./profile-entry-panel";
-import HelpDialog from "./help-dialog.js";
-import SafariDialog from "./safari-dialog.js";
-import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
-import InviteTeamDialog from "./invite-team-dialog.js";
-import InviteDialog from "./invite-dialog.js";
-import LinkDialog from "./link-dialog.js";
+
 import CreateObjectDialog from "./create-object-dialog.js";
+import HelpDialog from "./help-dialog.js";
+import InviteDialog from "./invite-dialog.js";
+import InviteTeamDialog from "./invite-team-dialog.js";
+import LinkDialog from "./link-dialog.js";
+import SafariDialog from "./safari-dialog.js";
+import SignInDialog from "./sign-in-dialog.js";
+import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
+import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
+
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
 import TwoDHUD from "./2d-hud";
+import ChatCommandHelp from "./chat-command-help";
+import { spawnChatMessage } from "./chat-message";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -73,10 +80,10 @@ class UIRoot extends Component {
     concurrentLoadDetector: PropTypes.object,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
-    enableScreenSharing: PropTypes.bool,
     isBotMode: PropTypes.bool,
     store: PropTypes.object,
     scene: PropTypes.object,
+    authChannel: PropTypes.object,
     hubChannel: PropTypes.object,
     linkChannel: PropTypes.object,
     hubEntryCode: PropTypes.number,
@@ -89,7 +96,14 @@ class UIRoot extends Component {
     isSupportAvailable: PropTypes.bool,
     presenceLogEntries: PropTypes.array,
     presences: PropTypes.object,
-    sessionId: PropTypes.string
+    sessionId: PropTypes.string,
+    subscriptions: PropTypes.object,
+    initialIsSubscribed: PropTypes.bool,
+    showSignInDialog: PropTypes.bool,
+    signInMessageId: PropTypes.string,
+    signInCompleteMessageId: PropTypes.string,
+    signInContinueTextId: PropTypes.string,
+    onContinueAfterSignIn: PropTypes.func
   };
 
   state = {
@@ -106,7 +120,6 @@ class UIRoot extends Component {
     shareScreen: false,
     requestedScreen: false,
     mediaStream: null,
-    videoTrack: null,
     audioTrack: null,
     entryPanelCollapsed: false,
 
@@ -130,8 +143,23 @@ class UIRoot extends Component {
     exited: false,
 
     showProfileEntry: false,
-    pendingMessage: ""
+    pendingMessage: "",
+    signedIn: false,
+    videoShareMediaSource: null
   };
+
+  componentDidUpdate(prevProps) {
+    const { hubChannel, showSignInDialog } = this.props;
+    if (hubChannel) {
+      const { signedIn } = hubChannel;
+      if (signedIn !== this.state.signedIn) {
+        this.setState({ signedIn });
+      }
+    }
+    if (prevProps.showSignInDialog !== showSignInDialog && showSignInDialog) {
+      this.showContextualSignInDialog();
+    }
+  }
 
   componentDidMount() {
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
@@ -139,13 +167,69 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
     this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
+    this.props.scene.addEventListener("share_video_enabled", this.onShareVideoEnabled);
+    this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.addEventListener("exit", this.exit);
+    const scene = this.props.scene;
+    this.setState({
+      audioContext: {
+        playSound: sound => {
+          scene.emit(sound);
+        },
+        onMouseLeave: () => {
+          //          scene.emit("play_sound-hud_mouse_leave");
+        }
+      }
+    });
   }
 
   componentWillUnmount() {
     this.props.scene.removeEventListener("loaded", this.onSceneLoaded);
     this.props.scene.removeEventListener("exit", this.exit);
+    this.props.scene.removeEventListener("share_video_enabled", this.onShareVideoEnabled);
+    this.props.scene.removeEventListener("share_video_disabled", this.onShareVideoDisabled);
   }
+
+  showContextualSignInDialog = () => {
+    const {
+      signInMessageId,
+      authChannel,
+      signInCompleteMessageId,
+      signInContinueTextId,
+      onContinueAfterSignIn
+    } = this.props;
+
+    const closeAndContinue = () => {
+      this.closeDialog();
+      onContinueAfterSignIn();
+    };
+
+    this.showDialog(SignInDialog, {
+      message: messages[signInMessageId],
+      onSignIn: async email => {
+        const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
+
+        this.showDialog(SignInDialog, { authStarted: true, onClose: closeAndContinue });
+
+        await authComplete;
+
+        this.setState({ signedIn: true });
+        this.showDialog(SignInDialog, {
+          authComplete: true,
+          message: messages[signInCompleteMessageId],
+          continueText: messages[signInContinueTextId],
+          onClose: closeAndContinue,
+          onContinue: closeAndContinue
+        });
+      },
+      onClose: closeAndContinue
+    });
+  };
+
+  updateSubscribedState = () => {
+    const isSubscribed = this.props.subscriptions && this.props.subscriptions.isSubscribed();
+    this.setState({ isSubscribed });
+  };
 
   onSceneLoaded = () => {
     this.setState({ sceneLoaded: true });
@@ -157,6 +241,14 @@ class UIRoot extends Component {
     this.setState({
       [e.detail]: this.props.scene.is(e.detail)
     });
+  };
+
+  onShareVideoEnabled = e => {
+    this.setState({ videoShareMediaSource: e.detail.source });
+  };
+
+  onShareVideoDisabled = () => {
+    this.setState({ videoShareMediaSource: null });
   };
 
   toggleMute = () => {
@@ -171,8 +263,23 @@ class UIRoot extends Component {
     this.props.scene.emit("action_space_bubble");
   };
 
+  shareVideo = mediaSource => {
+    this.props.scene.emit(`action_share_${mediaSource}`);
+  };
+
+  endShareVideo = () => {
+    this.props.scene.emit("action_end_video_sharing");
+  };
+
   spawnPen = () => {
-    this.props.scene.emit("spawn_pen");
+    this.props.scene.emit("penButtonPressed");
+  };
+
+  onSubscribeChanged = async () => {
+    if (!this.props.subscriptions) return;
+
+    await this.props.subscriptions.toggle();
+    this.updateSubscribedState();
   };
 
   handleStartEntry = () => {
@@ -323,30 +430,6 @@ class UIRoot extends Component {
     return { hasAudio };
   };
 
-  setStateAndRequestScreen = async e => {
-    const checked = e.target.checked;
-    await this.setState({ requestedScreen: true, shareScreen: checked });
-    if (checked) {
-      this.fetchVideoTrack({
-        video: {
-          mediaSource: "screen",
-          // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
-          // other than your current monitor that has a different aspect ratio.
-          width: 720 * (screen.width / screen.height),
-          height: 720,
-          frameRate: 30
-        }
-      });
-    } else {
-      this.setState({ videoTrack: null });
-    }
-  };
-
-  fetchVideoTrack = async constraints => {
-    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-    this.setState({ videoTrack: mediaStream.getVideoTracks()[0] });
-  };
-
   fetchAudioTrack = async constraints => {
     if (this.state.audioTrack) {
       this.state.audioTrack.stop();
@@ -367,10 +450,6 @@ class UIRoot extends Component {
     const mediaStream = new MediaStream();
 
     await this.fetchMicDevices();
-
-    if (this.state.videoTrack) {
-      mediaStream.addTrack(this.state.videoTrack);
-    }
 
     // we should definitely have an audioTrack at this point unless they denied mic access
     if (this.state.audioTrack) {
@@ -440,7 +519,7 @@ class UIRoot extends Component {
     if (!this.props.forcedVREntryType || !this.props.forcedVREntryType.endsWith("_now")) {
       this.goToEntryStep(ENTRY_STEPS.audio_setup);
     } else {
-      setTimeout(this.onAudioReadyButton, 3000); // Need to wait otherwise input doesn't work :/
+      this.onAudioReadyButton();
     }
   };
 
@@ -540,24 +619,45 @@ class UIRoot extends Component {
     this.setState({ dialog: null });
   };
 
-  showHelpDialog = () => {
-    this.setState({ dialog: <HelpDialog onClose={this.closeDialog} /> });
+  showDialog = (DialogClass, props = {}) => {
+    this.setState({
+      dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
+    });
   };
 
-  showSafariDialog = () => {
-    this.setState({ dialog: <SafariDialog onClose={this.closeDialog} /> });
+  showHelpDialog = () => this.showDialog(HelpDialog);
+
+  showSafariDialog = () => this.showDialog(SafariDialog);
+
+  showInviteTeamDialog = () => this.showDialog(InviteTeamDialog, { hubChannel: this.props.hubChannel });
+
+  showCreateObjectDialog = () => this.showDialog(CreateObjectDialog, { onCreate: this.createObject });
+
+  showWebVRRecommendDialog = () => this.showDialog(WebVRRecommendDialog);
+
+  showSignInDialog = () => {
+    this.showDialog(SignInDialog, {
+      message: messages["sign-in.prompt"],
+      onSignIn: async email => {
+        const { authComplete } = await this.props.authChannel.startAuthentication(email, this.props.hubChannel);
+
+        this.showDialog(SignInDialog, { authStarted: true });
+
+        await authComplete;
+
+        this.setState({ signedIn: true });
+        this.closeDialog();
+      }
+    });
   };
 
-  showInviteTeamDialog = () => {
-    this.setState({ dialog: <InviteTeamDialog hubChannel={this.props.hubChannel} onClose={this.closeDialog} /> });
+  signOut = async () => {
+    await this.props.authChannel.signOut(this.props.hubChannel);
+    this.setState({ signedIn: false });
   };
 
-  showCreateObjectDialog = () => {
-    this.setState({ dialog: <CreateObjectDialog onCreate={this.createObject} onClose={this.closeDialog} /> });
-  };
-
-  showWebVRRecommendDialog = () => {
-    this.setState({ dialog: <WebVRRecommendDialog onClose={this.closeDialog} /> });
+  showWebRTCScreenshareUnsupportedDialog = () => {
+    this.setState({ dialog: <WebRTCScreenshareUnsupportedDialog onClose={this.closeDialog} /> });
   };
 
   onMiniInviteClicked = () => {
@@ -592,16 +692,23 @@ class UIRoot extends Component {
       subtitle = (
         <div>
           Sorry, this room is no longer available.
-          <p />
-          A room may be closed if we receive reports that it violates our{" "}
-          <a target="_blank" rel="noreferrer noopener" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
-            Terms of Use
-          </a>.
-          <br />
-          If you have questions, contact us at <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>.
-          <p />
+          <p />A room may be closed if we receive reports that it violates our{" "}
+          <WithHoverSound>
+            <a target="_blank" rel="noreferrer noopener" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
+              Terms of Use
+            </a>
+          </WithHoverSound>
+          .<br />
+          If you have questions, contact us at{" "}
+          <WithHoverSound>
+            <a href="mailto:hubs@mozilla.com">hubs@mozilla.com</a>
+          </WithHoverSound>
+          .<p />
           If you&apos;d like to run your own server, hubs&apos;s source code is available on{" "}
-          <a href="https://github.com/mozilla/hubs">GitHub</a>.
+          <WithHoverSound>
+            <a href="https://github.com/mozilla/hubs">GitHub</a>
+          </WithHoverSound>
+          .
         </div>
       );
     } else if (this.props.platformUnsupportedReason === "no_data_channels") {
@@ -609,15 +716,23 @@ class UIRoot extends Component {
       subtitle = (
         <div>
           Your browser does not support{" "}
-          <a
-            href="https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createDataChannel#Browser_compatibility"
-            rel="noreferrer noopener"
-          >
-            WebRTC Data Channels
-          </a>, which is required to use Hubs.<br />If you&quot;d like to use Hubs with Oculus or SteamVR, you can{" "}
-          <a href="https://www.mozilla.org/firefox" rel="noreferrer noopener">
-            Download Firefox
-          </a>.
+          <WithHoverSound>
+            <a
+              href="https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createDataChannel#Browser_compatibility"
+              rel="noreferrer noopener"
+            >
+              WebRTC Data Channels
+            </a>
+          </WithHoverSound>
+          , which is required to use Hubs.
+          <br />
+          If you&quot;d like to use Hubs with Oculus or SteamVR, you can{" "}
+          <WithHoverSound>
+            <a href="https://www.mozilla.org/firefox" rel="noreferrer noopener">
+              Download Firefox
+            </a>
+          </WithHoverSound>
+          .
         </div>
       );
     } else {
@@ -627,9 +742,12 @@ class UIRoot extends Component {
         <div>
           <FormattedMessage id={exitSubtitleId} />
           <p />
-          {this.props.roomUnavailableReason && (
+          {this.props.roomUnavailableReason !== "left" && (
             <div>
-              You can also <a href="/">create a new room</a>.
+              You can also{" "}
+              <WithHoverSound>
+                <a href="/">create a new room</a>
+              </WithHoverSound>.
             </div>
           )}
         </div>
@@ -673,50 +791,77 @@ class UIRoot extends Component {
   };
 
   renderEntryStartPanel = () => {
+    const textRows = this.state.pendingMessage.split("\n").length;
+    const pendingMessageTextareaHeight = textRows * 28 + "px";
+    const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
+    const hasPush = navigator.serviceWorker && "PushManager" in window;
+
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>{this.props.hubName}</div>
 
         <div className={entryStyles.center}>
-          <div onClick={() => this.setState({ showProfileEntry: true })} className={entryStyles.profileName}>
-            <img src="../assets/images/account.svg" className={entryStyles.profileIcon} />
-            <div title={this.props.store.state.profile.displayName}>{this.props.store.state.profile.displayName}</div>
-          </div>
+          <WithHoverSound>
+            <div onClick={() => this.setState({ showProfileEntry: true })} className={entryStyles.profileName}>
+              <img src="../assets/images/account.svg" className={entryStyles.profileIcon} />
+              <div title={this.props.store.state.profile.displayName}>{this.props.store.state.profile.displayName}</div>
+            </div>
+          </WithHoverSound>
 
           <form onSubmit={this.sendMessage}>
-            <div className={styles.messageEntry}>
-              <input
-                className={styles.messageEntryInput}
+            <div className={styles.messageEntry} style={{ height: pendingMessageFieldHeight }}>
+              <textarea
+                className={classNames([styles.messageEntryInput, "chat-focus-target"])}
                 value={this.state.pendingMessage}
+                rows={textRows}
+                style={{ height: pendingMessageTextareaHeight }}
                 onFocus={e => e.target.select()}
                 onChange={e => this.setState({ pendingMessage: e.target.value })}
+                onKeyDown={e => {
+                  if (e.keyCode === 13 && !e.shiftKey) {
+                    this.sendMessage(e);
+                  } else if (e.keyCode === 27) {
+                    e.target.blur();
+                  }
+                }}
                 placeholder="Send a message..."
               />
-              <input className={styles.messageEntrySubmit} type="submit" value="send" />
+              <WithHoverSound>
+                <input className={styles.messageEntrySubmit} type="submit" value="send" />
+              </WithHoverSound>
             </div>
           </form>
         </div>
 
+        {hasPush && (
+          <div className={entryStyles.subscribe}>
+            <input
+              id="subscribe"
+              type="checkbox"
+              onChange={this.onSubscribeChanged}
+              checked={this.state.isSubscribed === undefined ? this.props.initialIsSubscribed : this.state.isSubscribed}
+            />
+            <label htmlFor="subscribe">
+              <FormattedMessage id="entry.notify_me" />
+            </label>
+          </div>
+        )}
+
         <div className={entryStyles.buttonContainer}>
-          <button
-            className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
-            onClick={() => this.handleStartEntry()}
-          >
-            <FormattedMessage id="entry.enter-room" />
-          </button>
+          <WithHoverSound>
+            <button
+              className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
+              onClick={() => this.handleStartEntry()}
+            >
+              <FormattedMessage id="entry.enter-room" />
+            </button>
+          </WithHoverSound>
         </div>
       </div>
     );
   };
 
   renderDevicePanel = () => {
-    // Only screen sharing in desktop firefox since other browsers/platforms will ignore the "screen" media constraint and will attempt to share your webcam instead!
-    const isFireFox = /firefox/i.test(navigator.userAgent);
-    const isNonMobile = !AFRAME.utils.device.isMobile();
-
-    const screenSharingCheckbox =
-      this.props.enableScreenSharing && isNonMobile && isFireFox && this.renderScreensharing();
-
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.title}>
@@ -742,7 +887,6 @@ class UIRoot extends Component {
               <FormattedMessage id="entry.cardboard" />
             </div>
           )}
-          {screenSharingCheckbox}
         </div>
       </div>
     );
@@ -778,20 +922,26 @@ class UIRoot extends Component {
           </div>
           <div className="mic-grant-panel__button-container">
             {this.state.entryStep == ENTRY_STEPS.mic_grant ? (
-              <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
-                <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
-              </button>
+              <WithHoverSound>
+                <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
+                  <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
+                </button>
+              </WithHoverSound>
             ) : (
-              <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
-                <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
-              </button>
+              <WithHoverSound>
+                <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
+                  <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
+                </button>
+              </WithHoverSound>
             )}
           </div>
-        </div>
-        <div className="mic-grant-panel__next-container">
-          <button className={classNames("mic-grant-panel__next")} onClick={this.onMicGrantButton}>
-            <FormattedMessage id="audio.granted-next" />
-          </button>
+          <div className="mic-grant-panel__next-container">
+            <WithHoverSound>
+              <button className={classNames("mic-grant-panel__next")} onClick={this.onMicGrantButton}>
+                <FormattedMessage id="audio.granted-next" />
+              </button>
+            </WithHoverSound>
+          </div>
         </div>
       </div>
     );
@@ -840,38 +990,43 @@ class UIRoot extends Component {
                 />
               )}
             </div>
-            <div className="audio-setup-panel__levels__icon" onClick={this.playTestTone}>
-              <img
-                src="../assets/images/level_background.png"
-                srcSet="../assets/images/level_background@2x.png 2x"
-                className="audio-setup-panel__levels__icon-part"
-              />
-              <img
-                src="../assets/images/level_fill.png"
-                srcSet="../assets/images/level_fill@2x.png 2x"
-                className="audio-setup-panel__levels__icon-part"
-                style={speakerClip}
-              />
-              <img
-                src="../assets/images/speaker_level.png"
-                srcSet="../assets/images/speaker_level@2x.png 2x"
-                className="audio-setup-panel__levels__icon-part"
-              />
-            </div>
+            <WithHoverSound>
+              <div className="audio-setup-panel__levels__icon" onClick={this.playTestTone}>
+                <img
+                  src="../assets/images/level_background.png"
+                  srcSet="../assets/images/level_background@2x.png 2x"
+                  className="audio-setup-panel__levels__icon-part"
+                />
+                <img
+                  src="../assets/images/level_fill.png"
+                  srcSet="../assets/images/level_fill@2x.png 2x"
+                  className="audio-setup-panel__levels__icon-part"
+                  style={speakerClip}
+                />
+                <img
+                  src="../assets/images/speaker_level.png"
+                  srcSet="../assets/images/speaker_level@2x.png 2x"
+                  className="audio-setup-panel__levels__icon-part"
+                />
+              </div>
+            </WithHoverSound>
           </div>
           {this.state.audioTrack && (
             <div className="audio-setup-panel__device-chooser">
-              <select
-                className="audio-setup-panel__device-chooser__dropdown"
-                value={this.selectedMicDeviceId()}
-                onChange={this.micDeviceChanged}
-              >
-                {this.state.micDevices.map(d => (
-                  <option key={d.deviceId} value={d.deviceId}>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{d.label}
-                  </option>
-                ))}
-              </select>
+              <WithHoverSound>
+                <select
+                  className="audio-setup-panel__device-chooser__dropdown"
+                  value={this.selectedMicDeviceId()}
+                  onChange={this.micDeviceChanged}
+                >
+                  {this.state.micDevices.map(d => (
+                    <option key={d.deviceId} value={d.deviceId}>
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+              </WithHoverSound>
               <img
                 className="audio-setup-panel__device-chooser__mic-icon"
                 src="../assets/images/mic_small.png"
@@ -898,9 +1053,11 @@ class UIRoot extends Component {
           )}
         </div>
         <div className="audio-setup-panel__enter-button-container">
-          <button className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
-            <FormattedMessage id="audio.enter-now" />
-          </button>
+          <WithHoverSound>
+            <button className="audio-setup-panel__enter-button" onClick={this.onAudioReadyButton}>
+              <FormattedMessage id="audio.enter-now" />
+            </button>
+          </WithHoverSound>
         </div>
       </div>
     );
@@ -930,11 +1087,13 @@ class UIRoot extends Component {
       dialogContents = (
         <div className={entryStyles.entryDialog}>
           <div>&nbsp;</div>
-          <button onClick={() => this.setState({ entryPanelCollapsed: false })} className={entryStyles.expand}>
-            <i>
-              <FontAwesomeIcon icon={faChevronUp} />
-            </i>
-          </button>
+          <WithHoverSound>
+            <button onClick={() => this.setState({ entryPanelCollapsed: false })} className={entryStyles.expand}>
+              <i>
+                <FontAwesomeIcon icon={faChevronUp} />
+              </i>
+            </button>
+          </WithHoverSound>
         </div>
       );
     } else {
@@ -946,11 +1105,13 @@ class UIRoot extends Component {
       ) : (
         <div className={entryStyles.entryDialog}>
           {!this.state.entryPanelCollapsed && (
-            <button onClick={() => this.setState({ entryPanelCollapsed: true })} className={entryStyles.collapse}>
-              <i>
-                <FontAwesomeIcon icon={faChevronDown} />
-              </i>
-            </button>
+            <WithHoverSound>
+              <button onClick={() => this.setState({ entryPanelCollapsed: true })} className={entryStyles.collapse}>
+                <i>
+                  <FontAwesomeIcon icon={faChevronDown} />
+                </i>
+              </button>
+            </WithHoverSound>
           )}
           {startPanel}
           {devicePanel}
@@ -969,149 +1130,211 @@ class UIRoot extends Component {
     const entryFinished = this.state.entryStep === ENTRY_STEPS.finished;
     const showVREntryButton = entryFinished && this.props.availableVREntryTypes.isInHMD;
 
+    const textRows = this.state.pendingMessage.split("\n").length;
+    const pendingMessageTextareaHeight = textRows * 28 + "px";
+    const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
     return (
-      <IntlProvider locale={lang} messages={messages}>
-        <div className={styles.ui}>
-          {this.state.dialog}
+      <ReactAudioContext.Provider value={this.state.audioContext}>
+        <IntlProvider locale={lang} messages={messages}>
+          <div className={styles.ui}>
+            {this.state.dialog}
 
-          {this.state.showProfileEntry && (
-            <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store} />
-          )}
+            {this.state.showProfileEntry && (
+              <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store} />
+            )}
 
-          {(!entryFinished || this.isWaitingForAutoExit()) && (
-            <div className={styles.uiDialog}>
-              <PresenceLog entries={this.props.presenceLogEntries || []} />
-              <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
-            </div>
-          )}
-
-          {entryFinished && <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} />}
-          {entryFinished && (
-            <form onSubmit={this.sendMessage}>
-              <div className={styles.messageEntryInRoom}>
-                <input
-                  className={classNames([styles.messageEntryInput, styles.messageEntryInputInRoom])}
-                  value={this.state.pendingMessage}
-                  onFocus={e => e.target.select()}
-                  onChange={e => {
-                    e.stopPropagation();
-                    this.setState({ pendingMessage: e.target.value });
-                  }}
-                  placeholder="Send a message..."
-                />
-                <input
-                  className={classNames([styles.messageEntrySubmit, styles.messageEntrySubmitInRoom])}
-                  type="submit"
-                  value="send"
-                />
+            {(!entryFinished || this.isWaitingForAutoExit()) && (
+              <div className={styles.uiDialog}>
+                <PresenceLog entries={this.props.presenceLogEntries || []} hubId={this.props.hubId} />
+                <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
               </div>
-            </form>
-          )}
-
-          <div
-            className={classNames({
-              [styles.inviteContainer]: true,
-              [styles.inviteContainerBelowHud]: entryFinished,
-              [styles.inviteContainerInverted]: this.state.showInviteDialog
-            })}
-          >
-            {!showVREntryButton && (
-              <button
-                className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entryFinished })}
-                onClick={() => this.toggleInviteDialog()}
-              >
-                <FormattedMessage id="entry.invite-others-nag" />
-              </button>
             )}
-            {!showVREntryButton &&
-              this.occupantCount() > 1 &&
-              entryFinished && (
-                <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
-                  <span>
-                    {this.state.miniInviteActivated
-                      ? navigator.share
-                        ? "sharing..."
-                        : "copied!"
-                      : "hub.link/" + this.props.hubId}
-                  </span>
-                </button>
-              )}
-            {showVREntryButton && (
-              <button onClick={() => this.props.scene.enterVR()}>
-                <FormattedMessage id="entry.return-to-vr" />
-              </button>
+
+            {entryFinished && (
+              <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} hubId={this.props.hubId} />
             )}
-            {this.state.showInviteDialog && (
-              <InviteDialog
-                allowShare={!this.props.availableVREntryTypes.isInHMD}
-                entryCode={this.props.hubEntryCode}
-                hubId={this.props.hubId}
-                onClose={() => this.setState({ showInviteDialog: false })}
-              />
-            )}
-          </div>
-
-          {this.state.showLinkDialog && (
-            <LinkDialog
-              linkCode={this.state.linkCode}
-              onClose={() => {
-                this.state.linkCodeCancel();
-                this.setState({ showLinkDialog: false, linkCode: null, linkCodeCancel: null });
-              }}
-            />
-          )}
-
-          <button onClick={() => this.showHelpDialog()} className={styles.helpIcon}>
-            <i>
-              <FontAwesomeIcon icon={faQuestion} />
-            </i>
-          </button>
-
-          <div
-            onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
-            className={classNames({
-              [styles.presenceInfo]: true,
-              [styles.presenceInfoSelected]: this.state.showPresenceList
-            })}
-          >
-            <FontAwesomeIcon icon={faUsers} />
-            <span className={styles.occupantCount}>{this.occupantCount()}</span>
-          </div>
-
-          {this.state.showPresenceList && (
-            <PresenceList presences={this.props.presences} sessionId={this.props.sessionId} />
-          )}
-
-          {this.state.entryStep === ENTRY_STEPS.finished ? (
-            <div>
-              <TwoDHUD.TopHUD
-                muted={this.state.muted}
-                frozen={this.state.frozen}
-                spacebubble={this.state.spacebubble}
-                onToggleMute={this.toggleMute}
-                onToggleFreeze={this.toggleFreeze}
-                onToggleSpaceBubble={this.toggleSpaceBubble}
-                onSpawnPen={this.spawnPen}
-                onSpawnCamera={() => this.props.scene.emit("action_spawn_camera")}
-              />
-              {this.props.isSupportAvailable && (
-                <div className={styles.nagCornerButton}>
-                  <button onClick={() => this.showInviteTeamDialog()}>
-                    <FormattedMessage id="entry.invite-team-nag" />
-                  </button>
+            {entryFinished && (
+              <form onSubmit={this.sendMessage}>
+                <div className={styles.messageEntryInRoom} style={{ height: pendingMessageFieldHeight }}>
+                  {this.state.pendingMessage.startsWith("/") && (
+                    <ChatCommandHelp matchingPrefix={this.state.pendingMessage.substring(1)} />
+                  )}
+                  <textarea
+                    style={{ height: pendingMessageTextareaHeight }}
+                    className={classNames([
+                      styles.messageEntryInput,
+                      styles.messageEntryInputInRoom,
+                      "chat-focus-target"
+                    ])}
+                    value={this.state.pendingMessage}
+                    rows={textRows}
+                    onFocus={e => e.target.select()}
+                    onChange={e => {
+                      e.stopPropagation();
+                      this.setState({ pendingMessage: e.target.value });
+                    }}
+                    onKeyDown={e => {
+                      if (e.keyCode === 13 && !e.shiftKey) {
+                        this.sendMessage(e);
+                      } else if (e.keyCode === 13 && e.shiftKey && e.ctrlKey) {
+                        spawnChatMessage(e.target.value);
+                        this.setState({ pendingMessage: "" });
+                      } else if (e.keyCode === 27) {
+                        e.target.blur();
+                      }
+                    }}
+                    placeholder="Send a message..."
+                  />
+                  <input
+                    className={classNames([styles.messageEntrySubmit, styles.messageEntrySubmitInRoom])}
+                    type="submit"
+                    value="send"
+                  />
+                  <WithHoverSound>
+                    <button
+                      className={classNames([styles.messageEntrySpawn])}
+                      onClick={() => {
+                        if (this.state.pendingMessage.length > 0) {
+                          spawnChatMessage(this.state.pendingMessage);
+                          this.setState({ pendingMessage: "" });
+                        } else {
+                          this.showCreateObjectDialog();
+                        }
+                      }}
+                    />
+                  </WithHoverSound>
                 </div>
+              </form>
+            )}
+
+            <div
+              className={classNames({
+                [styles.inviteContainer]: true,
+                [styles.inviteContainerBelowHud]: entryFinished,
+                [styles.inviteContainerInverted]: this.state.showInviteDialog
+              })}
+            >
+              {!showVREntryButton &&
+                !this.state.videoShareMediaSource && (
+                  <WithHoverSound>
+                    <button
+                      className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entryFinished })}
+                      onClick={() => this.toggleInviteDialog()}
+                    >
+                      <FormattedMessage id="entry.invite-others-nag" />
+                    </button>
+                  </WithHoverSound>
+                )}
+              {!showVREntryButton &&
+                this.occupantCount() > 1 &&
+                !this.state.videoShareMediaSource &&
+                entryFinished && (
+                  <WithHoverSound>
+                    <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
+                      <span>
+                        {this.state.miniInviteActivated
+                          ? navigator.share
+                            ? "sharing..."
+                            : "copied!"
+                          : "hub.link/" + this.props.hubId}
+                      </span>
+                    </button>
+                  </WithHoverSound>
+                )}
+              {showVREntryButton && (
+                <WithHoverSound>
+                  <button onClick={() => this.props.scene.enterVR()}>
+                    <FormattedMessage id="entry.enter-in-vr" />
+                  </button>
+                </WithHoverSound>
               )}
-              {!this.isWaitingForAutoExit() && (
-                <TwoDHUD.BottomHUD
-                  onCreateObject={() => this.showCreateObjectDialog()}
-                  showPhotoPicker={AFRAME.utils.device.isMobile()}
-                  onMediaPicked={this.createObject}
+              {this.state.showInviteDialog && (
+                <InviteDialog
+                  allowShare={!this.props.availableVREntryTypes.isInHMD}
+                  entryCode={this.props.hubEntryCode}
+                  hubId={this.props.hubId}
+                  onClose={() => this.setState({ showInviteDialog: false })}
                 />
               )}
             </div>
-          ) : null}
-        </div>
-      </IntlProvider>
+
+            {this.state.showLinkDialog && (
+              <LinkDialog
+                linkCode={this.state.linkCode}
+                onClose={() => {
+                  this.state.linkCodeCancel();
+                  this.setState({ showLinkDialog: false, linkCode: null, linkCodeCancel: null });
+                }}
+              />
+            )}
+
+            <WithHoverSound>
+              <button onClick={() => this.showHelpDialog()} className={classNames([styles.helpIcon, "help-button"])}>
+                <i>
+                  <FontAwesomeIcon icon={faQuestion} />
+                </i>
+              </button>
+            </WithHoverSound>
+
+            <div
+              onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
+              className={classNames({
+                [styles.presenceInfo]: true,
+                [styles.presenceInfoSelected]: this.state.showPresenceList
+              })}
+            >
+              <FontAwesomeIcon icon={faUsers} />
+              <span className={styles.occupantCount}>{this.occupantCount()}</span>
+            </div>
+
+            {this.state.showPresenceList && (
+              <PresenceList
+                presences={this.props.presences}
+                sessionId={this.props.sessionId}
+                signedIn={this.state.signedIn}
+                email={this.props.store.state.credentials.email}
+                onSignIn={this.showSignInDialog}
+                onSignOut={this.signOut}
+              />
+            )}
+
+            {this.state.entryStep === ENTRY_STEPS.finished ? (
+              <div>
+                <TwoDHUD.TopHUD
+                  muted={this.state.muted}
+                  frozen={this.state.frozen}
+                  spacebubble={this.state.spacebubble}
+                  videoShareMediaSource={this.state.videoShareMediaSource}
+                  onToggleMute={this.toggleMute}
+                  onToggleFreeze={this.toggleFreeze}
+                  onToggleSpaceBubble={this.toggleSpaceBubble}
+                  onSpawnPen={this.spawnPen}
+                  onSpawnCamera={() => this.props.scene.emit("action_spawn_camera")}
+                  onShareVideo={this.shareVideo}
+                  onEndShareVideo={this.endShareVideo}
+                  onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
+                />
+                {this.props.isSupportAvailable && (
+                  <div className={styles.nagCornerButton}>
+                    <WithHoverSound>
+                      <button onClick={() => this.showInviteTeamDialog()}>
+                        <FormattedMessage id="entry.invite-team-nag" />
+                      </button>
+                    </WithHoverSound>
+                  </div>
+                )}
+                {!this.isWaitingForAutoExit() && (
+                  <TwoDHUD.BottomHUD
+                    onCreateObject={() => this.showCreateObjectDialog()}
+                    showPhotoPicker={AFRAME.utils.device.isMobile()}
+                    onMediaPicked={this.createObject}
+                  />
+                )}
+              </div>
+            ) : null}
+          </div>
+        </IntlProvider>
+      </ReactAudioContext.Provider>
     );
   }
 }

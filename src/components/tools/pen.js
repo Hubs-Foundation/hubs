@@ -1,3 +1,32 @@
+import { paths } from "../../systems/userinput/paths";
+import { getLastWorldPosition } from "../../utils/three-utils";
+
+const pathsMap = {
+  "player-right-controller": {
+    startDrawing: paths.actions.rightHand.startDrawing,
+    stopDrawing: paths.actions.rightHand.stopDrawing,
+    undoDrawing: paths.actions.rightHand.undoDrawing,
+    penNextColor: paths.actions.rightHand.penNextColor,
+    penPrevColor: paths.actions.rightHand.penPrevColor,
+    scalePenTip: paths.actions.rightHand.scalePenTip
+  },
+  "player-left-controller": {
+    startDrawing: paths.actions.leftHand.startDrawing,
+    stopDrawing: paths.actions.leftHand.stopDrawing,
+    undoDrawing: paths.actions.leftHand.undoDrawing,
+    penNextColor: paths.actions.leftHand.penNextColor,
+    penPrevColor: paths.actions.leftHand.penPrevColor,
+    scalePenTip: paths.actions.leftHand.scalePenTip
+  },
+  cursor: {
+    startDrawing: paths.actions.cursor.startDrawing,
+    stopDrawing: paths.actions.cursor.stopDrawing,
+    undoDrawing: paths.actions.cursor.undoDrawing,
+    penNextColor: paths.actions.cursor.penNextColor,
+    penPrevColor: paths.actions.cursor.penPrevColor,
+    scalePenTip: paths.actions.cursor.scalePenTip
+  }
+};
 /**
  * Pen tool
  * A tool that allows drawing on networked-drawing components.
@@ -41,9 +70,6 @@ AFRAME.registerComponent("pen", {
   },
 
   init() {
-    this._stateAdded = this._stateAdded.bind(this);
-    this._stateRemoved = this._stateRemoved.bind(this);
-
     this.timeSinceLastDraw = 0;
 
     this.lastPosition = new THREE.Vector3();
@@ -65,14 +91,6 @@ AFRAME.registerComponent("pen", {
   play() {
     this.drawingManager = document.querySelector(this.data.drawingManager).components["drawing-manager"];
     this.drawingManager.createDrawing();
-
-    this.el.parentNode.addEventListener("stateadded", this._stateAdded);
-    this.el.parentNode.addEventListener("stateremoved", this._stateRemoved);
-  },
-
-  pause() {
-    this.el.parentNode.removeEventListener("stateadded", this._stateAdded);
-    this.el.parentNode.removeEventListener("stateremoved", this._stateRemoved);
   },
 
   update(prevData) {
@@ -85,7 +103,33 @@ AFRAME.registerComponent("pen", {
   },
 
   tick(t, dt) {
-    this.el.object3D.getWorldPosition(this.worldPosition);
+    const grabber = this.el.parentNode.components.grabbable.grabbers[0];
+    const userinput = AFRAME.scenes[0].systems.userinput;
+
+    getLastWorldPosition(this.el.object3D, this.worldPosition);
+
+    if (grabber && pathsMap[grabber.id]) {
+      const paths = pathsMap[grabber.id];
+      if (userinput.get(paths.startDrawing)) {
+        this._startDraw();
+      }
+      if (userinput.get(paths.stopDrawing)) {
+        this._endDraw();
+      }
+      if (userinput.get(paths.undoDrawing)) {
+        this._undoDraw();
+      }
+      const penScaleMod = userinput.get(paths.scalePenTip);
+      if (penScaleMod) {
+        this._changeRadius(penScaleMod);
+      }
+      if (userinput.get(paths.penNextColor)) {
+        this._changeColor(1);
+      }
+      if (userinput.get(paths.penPrevColor)) {
+        this._changeColor(-1);
+      }
+    }
 
     if (!almostEquals(0.005, this.worldPosition, this.lastPosition)) {
       this.direction.subVectors(this.worldPosition, this.lastPosition).normalize();
@@ -104,6 +148,10 @@ AFRAME.registerComponent("pen", {
 
       this.timeSinceLastDraw = time % this.data.drawFrequency;
     }
+
+    if (this.currentDrawing && !grabber) {
+      this._endDraw();
+    }
   },
 
   //helper function to get normal of direction of drawing cross direction to camera
@@ -118,21 +166,27 @@ AFRAME.registerComponent("pen", {
   _startDraw() {
     this.currentDrawing = this.drawingManager.getDrawing(this);
     if (this.currentDrawing) {
-      this.el.object3D.getWorldPosition(this.worldPosition);
       this._getNormal(this.normal, this.worldPosition, this.direction);
-
+      this.el.emit("start_draw");
       this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal, this.data.color, this.data.radius);
     }
   },
 
   _endDraw() {
     if (this.currentDrawing) {
+      this.el.emit("stop_draw");
       this.timeSinceLastDraw = 0;
-      this.el.object3D.getWorldPosition(this.worldPosition);
       this._getNormal(this.normal, this.worldPosition, this.direction);
       this.currentDrawing.endDraw(this.worldPosition, this.direction, this.normal);
       this.drawingManager.returnDrawing(this);
       this.currentDrawing = null;
+    }
+  },
+
+  _undoDraw() {
+    const drawing = this.drawingManager.getDrawing(this);
+    if (drawing) {
+      drawing.undoDraw();
     }
   },
 
@@ -145,44 +199,5 @@ AFRAME.registerComponent("pen", {
   _changeRadius(mod) {
     this.data.radius = Math.max(this.data.minRadius, Math.min(this.data.radius + mod, this.data.maxRadius));
     this.el.setAttribute("radius", this.data.radius);
-  },
-
-  _stateAdded(evt) {
-    switch (evt.detail) {
-      case "activated":
-        this._startDraw();
-        break;
-      case "colorNext":
-        this._changeColor(1);
-        break;
-      case "colorPrev":
-        this._changeColor(-1);
-        break;
-      case "radiusUp":
-        this._changeRadius(this.data.minRadius);
-        break;
-      case "radiusDown":
-        this._changeRadius(-this.data.minRadius);
-        break;
-      case "grabbed":
-        this.grabbed = true;
-        break;
-      default:
-        break;
-    }
-  },
-
-  _stateRemoved(evt) {
-    switch (evt.detail) {
-      case "activated":
-        this._endDraw();
-        break;
-      case "grabbed":
-        this.grabbed = false;
-        this._endDraw();
-        break;
-      default:
-        break;
-    }
   }
 });

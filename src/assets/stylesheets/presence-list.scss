@@ -10,14 +10,19 @@
   top: -5px;
   left: 44px;
 
-  @media(max-width: 768px), (max-height: 420px) {
-    left: 34px;
+  @media(max-width: 500px) {
+    left: 22px;
   }
 }
 
 :local(.presence-list) {
   position: absolute;
   top: 72px;
+
+  @media(max-width: 500px) {
+    top: 96px;
+  }
+
   left: 16px;
   bottom: 0;
   z-index: 5;
@@ -79,4 +84,17 @@
   flex: 1;
   white-space: nowrap;
   text-align: right;
+}
+
+:local(.sign-in) {
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid grey;
+  padding-top: 0.5em;
+  a {
+    text-decoration: underline;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 24px;
+  }
 }

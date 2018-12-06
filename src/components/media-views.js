@@ -79,19 +79,28 @@ async function createGIFTexture(url) {
  * @param {string} src - Url to a video file.
  * @returns {Element} Video element.
  */
-function createVideoEl(src) {
+async function createVideoEl(src) {
   const videoEl = document.createElement("video");
   videoEl.setAttribute("playsinline", "");
   videoEl.setAttribute("webkit-playsinline", "");
+  videoEl.preload = "auto";
   videoEl.loop = true;
   videoEl.crossOrigin = "anonymous";
-  videoEl.src = src;
+
+  if (!src.startsWith("hubs://")) {
+    videoEl.src = src;
+  } else {
+    const streamClientId = src.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
+    const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
+    videoEl.srcObject = new MediaStream(stream.getVideoTracks());
+  }
+
   return videoEl;
 }
 
 function createVideoTexture(url) {
-  return new Promise((resolve, reject) => {
-    const videoEl = createVideoEl(url);
+  return new Promise(async (resolve, reject) => {
+    const videoEl = await createVideoEl(url);
 
     const texture = new THREE.VideoTexture(videoEl);
     texture.minFilter = THREE.LinearFilter;
@@ -230,13 +239,26 @@ AFRAME.registerComponent("media-video", {
 
   init() {
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
-    this.togglePlayingIfOwner = this.togglePlayingIfOwner.bind(this);
+    this.tryUpdateVideoPlaybackState = this.tryUpdateVideoPlaybackState.bind(this);
+
+    this._grabStart = this._grabStart.bind(this);
+    this._grabEnd = this._grabEnd.bind(this);
 
     this.lastUpdate = 0;
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
       this.updatePlaybackState();
+
+      // For scene-owned videos, take ownership after a random delay if nobody
+      // else has so there is a timekeeper.
+      if (NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
+        setTimeout(() => {
+          if (NAF.utils.getNetworkOwner(this.networkedEl) === "scene") {
+            NAF.utils.takeOwnership(this.networkedEl);
+          }
+        }, 2000 + Math.floor(Math.random() * 2000));
+      }
     });
 
     // from a-sound
@@ -252,17 +274,32 @@ AFRAME.registerComponent("media-video", {
 
   // aframe component play, unrelated to video
   play() {
-    this.el.addEventListener("click", this.togglePlayingIfOwner);
+    this.el.addEventListener("grab-start", this._grabStart);
+    this.el.addEventListener("grab-end", this._grabEnd);
   },
 
   // aframe component pause, unrelated to video
   pause() {
-    this.el.removeEventListener("click", this.togglePlayingIfOwner);
+    this.el.removeEventListener("grab-start", this._grabStart);
+    this.el.removeEventListener("grab-end", this._grabEnd);
+  },
+
+  _grabStart() {
+    if (!this.el.components.grabbable || this.el.components.grabbable.data.maxGrabbers === 0) return;
+
+    this.grabStartPosition = this.el.object3D.position.clone();
+  },
+
+  _grabEnd() {
+    if (this.grabStartPosition && this.grabStartPosition.distanceToSquared(this.el.object3D.position) < 0.01 * 0.01) {
+      this.togglePlayingIfOwner();
+      this.grabStartPosition = null;
+    }
   },
 
   togglePlayingIfOwner() {
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl) && this.video) {
-      this.data.videoPaused ? this.video.play() : this.video.pause();
+      this.tryUpdateVideoPlaybackState(!this.data.videoPaused);
     }
   },
 
@@ -278,6 +315,10 @@ AFRAME.registerComponent("media-video", {
 
   onPauseStateChange() {
     this.el.setAttribute("media-video", "videoPaused", this.video.paused);
+
+    if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
+      this.el.emit("owned-video-state-changed");
+    }
   },
 
   async updateTexture(src) {
@@ -291,15 +332,18 @@ AFRAME.registerComponent("media-video", {
         return;
       }
 
-      texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
-      this.video = texture.image;
+      if (!src.startsWith("hubs://")) {
+        // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
+        texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
 
+        const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+        sound.setNodeSource(texture.audioSource);
+        this.el.setObject3D("sound", sound);
+      }
+
+      this.video = texture.image;
       this.video.addEventListener("pause", this.onPauseStateChange);
       this.video.addEventListener("play", this.onPauseStateChange);
-
-      const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-      sound.setNodeSource(texture.audioSource);
-      this.el.setObject3D("sound", sound);
     } catch (e) {
       console.error("Error loading video", this.data.src, e);
       texture = errorTexture;
@@ -325,9 +369,39 @@ AFRAME.registerComponent("media-video", {
   updatePlaybackState(force) {
     if (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && this.video)) {
       if (Math.abs(this.data.time - this.video.currentTime) > this.data.syncTolerance) {
-        this.video.currentTime = this.data.time;
+        this.tryUpdateVideoPlaybackState(this.data.videoPaused, this.data.time);
+      } else {
+        this.tryUpdateVideoPlaybackState(this.data.videoPaused);
       }
-      this.data.videoPaused ? this.video.pause() : this.video.play();
+    }
+  },
+
+  tryUpdateVideoPlaybackState(pause, currentTime) {
+    if (this._playbackStateChangeTimeout) {
+      clearTimeout(this._playbackStateChangeTimeout);
+    }
+
+    if (pause) {
+      this.video.pause();
+
+      if (currentTime) {
+        this.video.currentTime = currentTime;
+      }
+    } else {
+      // Need to deal with the fact play() may fail if user has not interacted with browser yet.
+      this.video
+        .play()
+        .then(() => {
+          if (currentTime) {
+            this.video.currentTime = currentTime;
+          }
+        })
+        .catch(() => {
+          this._playbackStateChangeTimeout = setTimeout(
+            () => this.tryUpdateVideoPlaybackState(pause, currentTime),
+            1000
+          );
+        });
     }
   },
 

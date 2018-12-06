@@ -76,6 +76,8 @@ AFRAME.registerComponent("offset-relative-to", {
           break;
       }
 
+      obj.matrixNeedsUpdate = true;
+
       if (this.data.selfDestruct) {
         if (this.data.on) {
           this.el.sceneEl.removeEventListener(this.data.on, this.updateOffset);

@@ -10,10 +10,12 @@ $light-grey: lightgrey;
 $dark-grey: rgba(128, 128, 128, 1.0);
 $darker-grey: rgba(64, 64, 64, 1.0);
 $darkest-grey: rgba(32, 32, 32, 1.0);
+$bright-blue: #2F80ED;
 $action-color: #FF3464;
 $action-color-light: #FF74A4;
 $action-color-transparent: rgba(255, 52, 100, 0.9);
 $hud-panel-background: rgba(79, 79, 79, 0.45);
+$spoke-action-color: $bright-blue;
 
 %unselectable {
   -moz-user-select: none;
@@ -42,10 +44,31 @@ $hud-panel-background: rgba(79, 79, 79, 0.45);
   border-radius: 10px;
 }
 
+%centered-flex-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 0;
+}
+
 %form-field-on-white {
   border: 1px solid #e2e2e2;
   background-color: white;
   border-radius: 10px;
+}
+
+%input-field {
+  @extend %rounded-border;
+  @extend %default-font;
+  color: black;
+  font-size: 1.2em;
+  background-color: transparent;
+  line-height: 2.0em;
+  padding-left: 1.25em;
+  padding-right: 1.25em;
+  margin: 0.5em 0;
+  width: 100%;
 }
 
 %big-action-button {
@@ -154,15 +177,15 @@ $hud-panel-background: rgba(79, 79, 79, 0.45);
   width: 2em;
   height: 2em;
   border: 1px solid #e2e2e2;
-  border-radius: 9px;
+  background-color: white;
+  border-radius: 6px;
   vertical-align: sub;
-  margin: 0 0.6em
+  margin: 0 0.7em
 }
 
 %checkbox-checked {
-  border: 9px double #aaa;
-  outline: 9px solid #aaa;
-  outline-offset: -18px;
+  outline: 9px solid $action-color;
+  outline-offset: -15px;
 }
 
 %background-agnostic {
