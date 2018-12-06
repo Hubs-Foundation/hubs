@@ -39,38 +39,3 @@ body.mirrored-camera {
 .webxr-realities, .webxr-sessions {
   @extend %unselectable
 }
-
-#debug-log {
-  position: absolute;
-  top: 12em;
-  background: white;
-  opacity: 0.7;
-  font-family: monospace;
-  font-size: 11px;
-  width: 100%;
-
-  #debug-log-inp {
-    width: 80%;
-  }
-  #debug-log-log {
-    .entry {
-      border: 1px solid grey;
-      margin: 0.2em;
-      padding: 0.2em;
-
-      &.error { background-color: pink; }
-      &.warn { background-color: orange; }
-    }
-
-    .entry:nth-child(2n+1) {
-      background-color: grey;
-    }
-  }
-}
-
-.media-video {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  width: 100px;
-}
