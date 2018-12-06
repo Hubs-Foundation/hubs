@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/mozilla/hubs.svg?branch=master)](https://travis-ci.org/mozilla/hubs)
 
-A prototype client demonstrating a multi-user experience in WebVR. Built with
-[A-Frame](https://github.com/aframevr/aframe/)
+The client-side code for https://hubs.mozilla.com/, a multi-user experience in WebVR. Built with
+[A-Frame](https://github.com/aframevr/aframe/).
 
 ## Getting Started
 
@@ -13,6 +13,10 @@ cd hubs
 npm ci
 npm start
 ```
+
+Then visit https://localhost:8080
+
+Note: When running the Hubs client locally, you will still connect to the development versions of our [Janus WebRTC](https://github.com/mozilla/janus-plugin-sfu) and [reticulum](https://github.com/mozilla/reticulum) servers. 
 
 ## Building Static Files
 
