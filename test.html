@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title></title>
+		<script>
+			const errors = [];
+			const origConsoleLog = console.log;
+			const origConsoleError = console.error;
+			const origConsoleWarn = console.warn;
+			const log = function(className, objs) {
+				if (!window.debugLog) {
+					errors.push(objs);
+					return;
+				}
+			  let entry;
+			  if (debugLog.childNodes.length > 10) {
+				entry = debugLog.firstChild;
+			  } else {
+				entry = document.createElement("div");
+				entry.classList.add("entry");
+			  }
+			  entry.classList.remove("warn", "error");
+			  entry.classList.add(className);
+			  entry.textContent = Array.from(objs).map(JSON.stringify).join();
+			  debugLog.append(entry);
+			};
+			window.onerror = e => log("error", [e]);
+			window.onunhandledrejection = e => console.log("error", [e.reason.message, e.reason.code, e.reason.name]);
+			console.warn = function() {
+			  origConsoleWarn.apply(null, arguments);
+			  log("warn", arguments);
+			};
+			console.error = function() {
+			  origConsoleError.apply(null, arguments);
+			  log("error", arguments);
+			};
+			console.log = function() {
+			  origConsoleLog.apply(null, arguments);
+			  log("log", arguments);
+			};
+		</script>
+	</head>
+	<body>
+		<div id="debugLog"></div>
+		<video id="vid" autoplay muted width="300" controls src="https://farspark.reticulum.io/0/raw/0/0/0/0/aHR0cHM6Ly9yMS0tLXNuLW40djdzbmVlLmdvb2dsZXZpZGVvLmNvbS92aWRlb3BsYXliYWNrP210PTE1NDQwNDMwODgmc3BhcmFtcz1kdXIlMkNlaSUyQ2lkJTJDaW5pdGN3bmRicHMlMkNpcCUyQ2lwYml0cyUyQ2l0YWclMkNsbXQlMkNtaW1lJTJDbW0lMkNtbiUyQ21zJTJDbXYlMkNwbCUyQ3JhdGVieXBhc3MlMkNyZXF1aXJlc3NsJTJDc291cmNlJTJDZXhwaXJlJm12PW0mbXM9YXUlMkNyZHUmaXA9NTQuMjQxLjUzLjYyJml0YWc9MjImbG10PTE1NDM5NTkyMjUzMTAxMTEmYz1XRUImZXhwaXJlPTE1NDQwNjQ3OTAmbW09MzElMkMyOSZpcGJpdHM9MCZkdXI9MTM4LjM2NyZtbj1zbi1uNHY3c25lZSUyQ3NuLW40djdrbmx6JmlkPW8tQUxjYjZKaEVnRlFEdUhXTjZzUDJwQjllNkxEelFtZUZ4aWs2dzZ4YVhYQ0Umc291cmNlPXlvdXR1YmUmbWltZT12aWRlbyUyRm1wNCZrZXk9eXQ2JnJlcXVpcmVzc2w9eWVzJmluaXRjd25kYnBzPTIzMTM3NTAmdHhwPTU1MzU0MzImcmF0ZWJ5cGFzcz15ZXMmZWk9dFRvSVhQZjZOY2ZCa2diUzNMVG9BdyZzaWduYXR1cmU9QTIzQTkyOTgwNDZBRjYzM0Y2RUI1MzExNTk5Q0RDOEM3NTA0MTAzMy4wRjE1MEFCQjg5N0YwQjIwMkQ5QTJGODIzNkM5NTcwMTc5M0E3QUREJmZ2aXA9MSZwbD0yMg"></video>
+		<video id="vid2" autoplay muted width="300" controls src="https://farspark.reticulum.io/0/raw/0/0/0/0/aHR0cHM6Ly9yMS0tLXNuLW40djdzbmVlLmdvb2dsZXZpZGVvLmNvbS92aWRlb3BsYXliYWNrP210PTE1NDQwNDMwODgmc3BhcmFtcz1kdXIlMkNlaSUyQ2lkJTJDaW5pdGN3bmRicHMlMkNpcCUyQ2lwYml0cyUyQ2l0YWclMkNsbXQlMkNtaW1lJTJDbW0lMkNtbiUyQ21zJTJDbXYlMkNwbCUyQ3JhdGVieXBhc3MlMkNyZXF1aXJlc3NsJTJDc291cmNlJTJDZXhwaXJlJm12PW0mbXM9YXUlMkNyZHUmaXA9NTQuMjQxLjUzLjYyJml0YWc9MjImbG10PTE1NDM5NTkyMjUzMTAxMTEmYz1XRUImZXhwaXJlPTE1NDQwNjQ3OTAmbW09MzElMkMyOSZpcGJpdHM9MCZkdXI9MTM4LjM2NyZtbj1zbi1uNHY3c25lZSUyQ3NuLW40djdrbmx6JmlkPW8tQUxjYjZKaEVnRlFEdUhXTjZzUDJwQjllNkxEelFtZUZ4aWs2dzZ4YVhYQ0Umc291cmNlPXlvdXR1YmUmbWltZT12aWRlbyUyRm1wNCZrZXk9eXQ2JnJlcXVpcmVzc2w9eWVzJmluaXRjd25kYnBzPTIzMTM3NTAmdHhwPTU1MzU0MzImcmF0ZWJ5cGFzcz15ZXMmZWk9dFRvSVhQZjZOY2ZCa2diUzNMVG9BdyZzaWduYXR1cmU9QTIzQTkyOTgwNDZBRjYzM0Y2RUI1MzExNTk5Q0RDOEM3NTA0MTAzMy4wRjE1MEFCQjg5N0YwQjIwMkQ5QTJGODIzNkM5NTcwMTc5M0E3QUREJmZ2aXA9MSZwbD0yMg"></video>
+		<button id="play">play</button>
+		<button id="add">add</button>
+		<script>
+			vid.onerror = e => log("error", [vid.error.message, vid.error.code]);
+			const debugLog = document.getElementById("debugLog");
+			for (const objs of errors) {
+				log("error", objs);
+			}
+add.onclick=()=>{
+	const frag = document.createElement('div');
+	frag.innerHTML = `
+		<video id="vid" autoplay muted width="300" controls src="https://farspark.reticulum.io/0/raw/0/0/0/0/aHR0cHM6Ly9yMS0tLXNuLW40djdzbmVlLmdvb2dsZXZpZGVvLmNvbS92aWRlb3BsYXliYWNrP210PTE1NDQwNDMwODgmc3BhcmFtcz1kdXIlMkNlaSUyQ2lkJTJDaW5pdGN3bmRicHMlMkNpcCUyQ2lwYml0cyUyQ2l0YWclMkNsbXQlMkNtaW1lJTJDbW0lMkNtbiUyQ21zJTJDbXYlMkNwbCUyQ3JhdGVieXBhc3MlMkNyZXF1aXJlc3NsJTJDc291cmNlJTJDZXhwaXJlJm12PW0mbXM9YXUlMkNyZHUmaXA9NTQuMjQxLjUzLjYyJml0YWc9MjImbG10PTE1NDM5NTkyMjUzMTAxMTEmYz1XRUImZXhwaXJlPTE1NDQwNjQ3OTAmbW09MzElMkMyOSZpcGJpdHM9MCZkdXI9MTM4LjM2NyZtbj1zbi1uNHY3c25lZSUyQ3NuLW40djdrbmx6JmlkPW8tQUxjYjZKaEVnRlFEdUhXTjZzUDJwQjllNkxEelFtZUZ4aWs2dzZ4YVhYQ0Umc291cmNlPXlvdXR1YmUmbWltZT12aWRlbyUyRm1wNCZrZXk9eXQ2JnJlcXVpcmVzc2w9eWVzJmluaXRjd25kYnBzPTIzMTM3NTAmdHhwPTU1MzU0MzImcmF0ZWJ5cGFzcz15ZXMmZWk9dFRvSVhQZjZOY2ZCa2diUzNMVG9BdyZzaWduYXR1cmU9QTIzQTkyOTgwNDZBRjYzM0Y2RUI1MzExNTk5Q0RDOEM3NTA0MTAzMy4wRjE1MEFCQjg5N0YwQjIwMkQ5QTJGODIzNkM5NTcwMTc5M0E3QUREJmZ2aXA9MSZwbD0yMg"></video>
+		`;
+	document.body.appendChild(frag);
+};
+play.ontouchstart=() => {
+	document.querySelectorAll('video').forEach(vid => {
+		vid.muted = false;
+	});
+	//setTimeout(() => {
+	//	vid.play();
+	//}, 2000);
+};
+		</script>
+	</body>
+</html>

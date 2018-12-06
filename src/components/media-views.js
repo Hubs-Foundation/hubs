@@ -83,9 +83,15 @@ async function createVideoEl(src) {
   const videoEl = document.createElement("video");
   videoEl.setAttribute("playsinline", "");
   videoEl.setAttribute("webkit-playsinline", "");
+  videoEl.autoplay = true;
+  videoEl.muted = AFRAME.utils.device.isIOS();
+  //videoEl.controls = true;
   videoEl.preload = "auto";
   videoEl.loop = true;
   videoEl.crossOrigin = "anonymous";
+  //videoEl.className = "media-video";
+  //document.body.appendChild(videoEl);
+  window.bpvid = videoEl;
 
   if (!src.startsWith("hubs://")) {
     videoEl.src = src;
@@ -287,6 +293,10 @@ AFRAME.registerComponent("media-video", {
   _grabStart() {
     if (!this.el.components.grabbable || this.el.components.grabbable.data.maxGrabbers === 0) return;
 
+    if (this.video && this.video.muted && !this.video.paused) {
+      this.video.muted = false;
+    }
+
     this.grabStartPosition = this.el.object3D.position.clone();
   },
 
@@ -345,7 +355,13 @@ AFRAME.registerComponent("media-video", {
       this.video.addEventListener("pause", this.onPauseStateChange);
       this.video.addEventListener("play", this.onPauseStateChange);
     } catch (e) {
-      console.error("Error loading video", this.data.src, e);
+      console.error(
+        "Error loading video",
+        this.data.src,
+        e.toString(),
+        e.detail,
+        e.reason && [e.reason.code, e.reason.message, e.reason.type]
+      );
       texture = errorTexture;
     }
 
@@ -396,7 +412,8 @@ AFRAME.registerComponent("media-video", {
             this.video.currentTime = currentTime;
           }
         })
-        .catch(() => {
+        .catch(e => {
+          console.error(e.toString(), e.detail, e.reason && [e.reason.message, e.reason.code, e.reason.type]);
           this._playbackStateChangeTimeout = setTimeout(
             () => this.tryUpdateVideoPlaybackState(pause, currentTime),
             1000
