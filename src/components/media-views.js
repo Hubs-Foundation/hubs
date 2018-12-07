@@ -73,6 +73,8 @@ async function createGIFTexture(url) {
   });
 }
 
+const isIOS = AFRAME.utils.device.isIOS();
+
 /**
  * Create video element to be used as a texture.
  *
@@ -83,8 +85,11 @@ async function createVideoEl(src) {
   const videoEl = document.createElement("video");
   videoEl.setAttribute("playsinline", "");
   videoEl.setAttribute("webkit-playsinline", "");
+  // iOS Safari requires the autoplay attribute, or it won't play the video at all.
   videoEl.autoplay = true;
-  videoEl.muted = AFRAME.utils.device.isIOS();
+  // iOS Safari will not play videos without user interaction. We mute the video so that it can autoplay and then
+  // allow the user to unmute it with an interaction in the unmute-video-button component.
+  videoEl.muted = isIOS;
   videoEl.preload = "auto";
   videoEl.loop = true;
   videoEl.crossOrigin = "anonymous";
@@ -113,7 +118,7 @@ function createVideoTexture(url) {
 
     // If iOS and video is HLS, do some hacks.
     if (
-      AFRAME.utils.device.isIOS() &&
+      isIOS &&
       AFRAME.utils.material.isHLS(
         videoEl.src || videoEl.getAttribute("src"),
         videoEl.type || videoEl.getAttribute("type")
@@ -350,6 +355,15 @@ AFRAME.registerComponent("media-video", {
       this.video = texture.image;
       this.video.addEventListener("pause", this.onPauseStateChange);
       this.video.addEventListener("play", this.onPauseStateChange);
+
+      if (isIOS) {
+        const template = document.getElementById("video-unmute");
+        this.el.appendChild(document.importNode(template.content, true));
+        this.el.setAttribute("position-at-box-shape-border__unmute-ui", {
+          target: ".unmute-ui",
+          dirs: ["forward", "back"]
+        });
+      }
     } catch (e) {
       console.error("Error loading video", this.data.src, e);
       texture = errorTexture;

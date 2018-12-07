@@ -1,7 +1,7 @@
 /**
  * Toggles the visibility of this entity based on networked ownership
  * @namespace ui
- * @component visible-while-frozen
+ * @component visible-to-owner
  */
 AFRAME.registerComponent("visible-to-owner", {
   init() {

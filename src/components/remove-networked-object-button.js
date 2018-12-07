@@ -10,7 +10,7 @@ AFRAME.registerComponent("remove-networked-object-button", {
         easing: "easeInQuad"
       });
 
-      this.el.parentNode.removeAttribute("visible-while-frozen");
+      this.el.parentNode.removeAttribute("visibility-while-frozen");
       this.el.parentNode.setAttribute("visible", false);
 
       this.targetEl.addEventListener("animationcomplete", () => {
