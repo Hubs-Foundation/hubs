@@ -65,7 +65,7 @@ export default class SceneEntryManager {
           .indexOf("cardboard") >= 0;
 
       this.scene.enterVR();
-    } else if (AFRAME.utils.device.isMobile()) {
+    } else if (AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isIOS()) {
       document.body.addEventListener("touchend", requestFullscreen);
     }
 
