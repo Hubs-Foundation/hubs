@@ -23,15 +23,21 @@ function b64EncodeUnicode(str) {
   return btoa(encodeURIComponent(str).replace(CHAR_RE, (_, p1) => String.fromCharCode("0x" + p1)));
 }
 
-export const proxiedUrlFor = (url, index) => {
+export const proxiedUrlFor = (url, index, contentType) => {
   if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
 
   // farspark doesn't know how to read '=' base64 padding characters
   const base64Url = b64EncodeUnicode(url).replace(/=+$/g, "");
-  // translate base64 + to - and / to _ for URL safety
-  const encodedUrl = base64Url.replace(/\+/g, "-").replace(/\//g, "_");
-  const method = index != null ? "extract" : "raw";
-  return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${encodedUrl}`;
+
+  if (index != null) {
+    // translate base64 + to - and / to _ for URL safety
+    const encodedUrl = base64Url.replace(/\+/g, "-").replace(/\//g, "_");
+    const method = index != null ? "extract" : "raw";
+    return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${encodedUrl}`;
+  } else {
+    const encodedUrl = encodeURIComponent(url);
+    return `https://${process.env.CORS_PROXY_SERVER}/${encodedUrl}`;
+  }
 };
 
 const resolveUrlCache = new Map();

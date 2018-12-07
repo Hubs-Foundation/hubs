@@ -38,9 +38,10 @@ pipeline {
           def janusServer = env.JANUS_SERVER
           def reticulumServer = env.RETICULUM_SERVER
           def farsparkServer = env.FARSPARK_SERVER
+          def corsProxyServer = env.CORS_PROXY_SERVER
           def slackURL = env.SLACK_URL
 
-          def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh \\\"${baseAssetsPath}\\\" \\\"${assetBundleServer}\\\" \\\"${janusServer}\\\" \\\"${reticulumServer}\\\" \\\"${farsparkServer}\\\" \\\"${targetS3Url}\\\" \\\"${env.BUILD_NUMBER}\\\" \\\"${env.GIT_COMMIT}\\\""
+          def habCommand = "sudo /usr/bin/hab-docker-studio -k mozillareality run /bin/bash scripts/hab-build-and-push.sh \\\"${baseAssetsPath}\\\" \\\"${assetBundleServer}\\\" \\\"${janusServer}\\\" \\\"${reticulumServer}\\\" \\\"${farsparkServer}\\\" \\\"${corsProxyServer}\\\" \\\"${targetS3Url}\\\" \\\"${env.BUILD_NUMBER}\\\" \\\"${env.GIT_COMMIT}\\\""
           sh "/usr/bin/script --return -c ${shellString(habCommand)} /dev/null"
 
           def gitMessage = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'[%an] %s'").trim()
