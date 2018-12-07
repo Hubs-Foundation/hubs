@@ -1,3 +1,5 @@
+import "./utils/debug-log";
+
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
