@@ -23,7 +23,7 @@ function b64EncodeUnicode(str) {
   return btoa(encodeURIComponent(str).replace(CHAR_RE, (_, p1) => String.fromCharCode("0x" + p1)));
 }
 
-export const proxiedUrlFor = (url, index, contentType) => {
+export const proxiedUrlFor = (url, index) => {
   if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
 
   // farspark doesn't know how to read '=' base64 padding characters
@@ -51,6 +51,27 @@ export const resolveUrl = async (url, index) => {
   }).then(r => r.json());
   resolveUrlCache.set(cacheKey, resolved);
   return resolved;
+};
+
+export const getCustomGLTFParserURLResolver = gltfUrl => (url, path) => {
+  if (typeof url !== "string" || url === "") return "";
+  if (/^(https?:)?\/\//i.test(url)) return url;
+  if (/^data:.*,.*$/i.test(url)) return url;
+  if (/^blob:.*$/i.test(url)) return url;
+
+  // For absolute paths with a CORS proxied gltf URL, re-write the url properly to be proxied
+  const corsProxyPrefix = `https://${process.env.CORS_PROXY_SERVER}/`;
+
+  if (gltfUrl.startsWith(corsProxyPrefix)) {
+    const originalUrl = decodeURIComponent(gltfUrl.substring(corsProxyPrefix.length));
+    const originalUrlParts = originalUrl.split("/");
+
+    // Drop the .gltf filename
+    const assetUrl = originalUrlParts.slice(0, originalUrlParts.length - 1).join("/") + "/" + url;
+    return corsProxyPrefix + encodeURIComponent(assetUrl);
+  }
+
+  return path + url;
 };
 
 export const guessContentType = url => {
