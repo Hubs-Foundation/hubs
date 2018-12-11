@@ -29,7 +29,7 @@ export const proxiedUrlFor = (url, index) => {
   // farspark doesn't know how to read '=' base64 padding characters
   const base64Url = b64EncodeUnicode(url).replace(/=+$/g, "");
 
-  if (index != null) {
+  if (index != null || !process.env.CORS_PROXY_SERVER) {
     // translate base64 + to - and / to _ for URL safety
     const encodedUrl = base64Url.replace(/\+/g, "-").replace(/\//g, "_");
     const method = index != null ? "extract" : "raw";
