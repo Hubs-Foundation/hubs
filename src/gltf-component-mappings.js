@@ -112,7 +112,6 @@ function mediaInflator(el, componentName, componentData, components) {
   const mediaOptions = {};
 
   if (componentName === "video") {
-    mediaOptions.controls = componentData.controls || true;
     mediaOptions.videoPaused = !componentData.autoPlay;
   }
 
