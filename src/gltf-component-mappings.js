@@ -109,10 +109,20 @@ function mediaInflator(el, componentName, componentData, components) {
     });
   }
 
-  // TODO: Any validation of possible mediaOptions properties.
-  const { src, ...mediaOptions } = componentData;
+  const mediaOptions = {};
 
-  el.setAttribute("media-loader", { src, resize: true, resolve: true, fileIsOwned: true, mediaOptions });
+  if (componentName === "video") {
+    mediaOptions.controls = componentData.controls || true;
+    mediaOptions.videoPaused = !componentData.autoPlay;
+  }
+
+  el.setAttribute("media-loader", {
+    src: componentData.src,
+    resize: true,
+    resolve: true,
+    fileIsOwned: true,
+    mediaOptions
+  });
 }
 
 AFRAME.GLTFModelPlus.registerComponent("image", "image", mediaInflator);
