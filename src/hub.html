@@ -168,6 +168,18 @@
                     body="type: static; shape: none; mass: 1;"
                     scale="0.5 0.5 0.5"
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeInQuad"
+                    auto-scale-cannon-physics-body
+                    set-sounds-invisible
+                >
+                </a-entity>
+            </template>
+
+            <template id="static-controlled-media">
+                <a-entity
+                    class="interactable"
+                    body="type: static; shape: none; mass: 1;"
+                    scale="0.5 0.5 0.5"
+                    animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeInQuad"
                     grabbable
                     hoverable
                     hoverable-visuals="cursorController: #cursor-controller"

@@ -102,7 +102,7 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
 function mediaInflator(el, componentName, componentData, components) {
   if (components.networked) {
     el.setAttribute("networked", {
-      template: "#static-media",
+      template: componentData.controls ? "#static-controlled-media" : "#static-media",
       owner: "scene",
       persistent: true,
       networkId: components.networked.id

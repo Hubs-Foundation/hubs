@@ -110,6 +110,18 @@ function registerNetworkSchemas() {
       {
         component: "media-video",
         property: "time"
+      }
+    ]
+  });
+
+  NAF.schemas.add({
+    template: "#static-controlled-media",
+    components: [
+      // TODO: Optimize checking mediaOptions with requiresNetworkUpdate.
+      "media-loader",
+      {
+        component: "media-video",
+        property: "time"
       },
       {
         component: "media-video",
