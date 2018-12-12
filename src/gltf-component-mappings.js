@@ -113,6 +113,19 @@ function mediaInflator(el, componentName, componentData, components) {
 
   if (componentName === "video") {
     mediaOptions.videoPaused = !componentData.autoPlay;
+    mediaOptions.volume = componentData.volume;
+    mediaOptions.loop = componentData.loop;
+    mediaOptions.audioType = componentData.audioType;
+
+    if (componentData.audioType === "pannernode") {
+      mediaOptions.distanceModel = componentData.distanceModel;
+      mediaOptions.rolloffFactor = componentData.rolloffFactor;
+      mediaOptions.refDistance = componentData.refDistance;
+      mediaOptions.maxDistance = componentData.maxDistance;
+      mediaOptions.coneInnerAngle = componentData.coneInnerAngle;
+      mediaOptions.coneOuterAngle = componentData.coneOuterAngle;
+      mediaOptions.coneOuterGain = componentData.coneOuterGain;
+    }
   }
 
   el.setAttribute("media-loader", {

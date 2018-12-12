@@ -84,7 +84,6 @@ async function createVideoEl(src) {
   videoEl.setAttribute("playsinline", "");
   videoEl.setAttribute("webkit-playsinline", "");
   videoEl.preload = "auto";
-  videoEl.loop = true;
   videoEl.crossOrigin = "anonymous";
 
   if (!src.startsWith("hubs://")) {
@@ -231,8 +230,18 @@ errorImage.onload = () => {
 AFRAME.registerComponent("media-video", {
   schema: {
     src: { type: "string" },
-    time: { type: "number" },
+    volume: { type: "number", default: 0.5 },
+    loop: { type: "boolean", default: true },
+    audioType: { type: "string", default: "pannernode" },
+    distanceModel: { type: "string", default: "inverse" },
+    rolloffFactor: { type: "number", default: 1 },
+    refDistance: { type: "number", default: 1 },
+    maxDistance: { type: "number", default: 10000 },
+    coneInnerAngle: { type: "number", default: 360 },
+    coneOuterAngle: { type: "number", default: 0 },
+    coneOuterGain: { type: "number", default: 0 },
     videoPaused: { type: "boolean" },
+    time: { type: "number" },
     tickRate: { default: 1000 }, // ms interval to send time interval updates
     syncTolerance: { default: 2 }
   },
@@ -336,12 +345,29 @@ AFRAME.registerComponent("media-video", {
         // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
         texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
 
-        const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-        sound.setNodeSource(texture.audioSource);
-        this.el.setObject3D("sound", sound);
+        let audio;
+
+        if (this.data.audioType === "pannernode") {
+          audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+          audio.setDistanceModel(this.data.distanceModel);
+          audio.setRolloffFactor(this.data.rolloffFactor);
+          audio.setRefDistance(this.data.refDistance);
+          audio.setMaxDistance(this.data.maxDistance);
+          audio.panner.coneInnerAngle = this.data.coneInnerAngle;
+          audio.panner.coneOuterAngle = this.data.coneOuterAngle;
+          audio.panner.coneOuterGain = this.data.coneOuterGain;
+        } else {
+          audio = new THREE.Audio(this.el.sceneEl.audioListener);
+        }
+
+        audio.gain.gain.value = this.data.volume;
+
+        audio.setNodeSource(texture.audioSource);
+        this.el.setObject3D("sound", audio);
       }
 
       this.video = texture.image;
+      this.video.loop = this.data.loop;
       this.video.addEventListener("pause", this.onPauseStateChange);
       this.video.addEventListener("play", this.onPauseStateChange);
     } catch (e) {
