@@ -1,0 +1,84 @@
+@import 'shared';
+@import 'loader';
+
+body {
+  margin: 0;
+  padding: 0;
+  @extend %default-font;
+}
+
+html, body, #ui-root, .container {
+  height: 100%;
+}
+#ui-root > div {
+  display: flex;
+  flex-direction: column;
+}
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 65px;
+  flex-shrink: 0;
+}
+.logo {
+  height: 3em;
+  margin-left: 1.5em;
+  vertical-align: middle;
+}
+
+.main {
+  background: linear-gradient(to bottom, #ecfaff 0, white 30em);
+  display: flex;
+  justify-content: center;
+  flex: 1;
+}
+
+.content {
+  padding: 1em;
+  width: 40em;
+  display: flex;
+  flex-direction: column;
+}
+
+.loader-wrap {
+  align-self: center;
+}
+
+h1 {
+  text-align: center;
+}
+
+.note:nth-child(2) .date {
+  margin-top: 1em;
+}
+.date, .date-blank, .title {
+  display: inline-block;
+  margin: 0;
+}
+.title {
+  @media (max-width: 768px) {
+    display: block;
+  }
+}
+
+.date, .date-blank {
+  font-size: 12pt;
+  width: 120px;
+}
+.date {
+  margin-top: 2em;
+}
+
+.body {
+  margin-left: 120px;
+  @media (max-width: 768px) {
+    margin-left: 0;
+  }
+  img { width: 100%; }
+}

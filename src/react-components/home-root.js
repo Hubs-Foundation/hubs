@@ -183,6 +183,11 @@ class HomeRoot extends Component {
               <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
                 <div className={styles.links}>
                   <WithHoverSound>
+                    <a href="/whats-new">
+                      <FormattedMessage id="home.whats_new_link" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
                     <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
                       <FormattedMessage id="home.source_link" />
                     </a>
