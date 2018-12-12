@@ -98,3 +98,22 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
     el.setAttribute("media-video", { time: componentData.time });
   }
 });
+
+function mediaInflator(el, componentName, componentData, components) {
+  if (components.networked) {
+    el.setAttribute("networked", {
+      template: "#static-media",
+      owner: "scene",
+      persistent: true,
+      networkId: components.networked.id
+    });
+  }
+
+  // TODO: Any validation of possible mediaOptions properties.
+  const { src, ...mediaOptions } = componentData;
+
+  el.setAttribute("media-loader", { src, resize: true, resolve: true, fileIsOwned: true, mediaOptions });
+}
+
+AFRAME.GLTFModelPlus.registerComponent("image", "image", mediaInflator);
+AFRAME.GLTFModelPlus.registerComponent("video", "video", mediaInflator);

@@ -168,7 +168,7 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
     for (const prop in entityComponents) {
       if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
         const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-        inflator(el, componentName, entityComponents[prop]);
+        inflator(el, componentName, entityComponents[prop], entityComponents);
       }
     }
   }

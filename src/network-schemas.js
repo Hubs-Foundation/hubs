@@ -84,6 +84,7 @@ function registerNetworkSchemas() {
         requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       "scale",
+      // TODO: Optimize checking mediaOptions with requiresNetworkUpdate.
       "media-loader",
       {
         component: "media-video",
@@ -98,6 +99,26 @@ function registerNetworkSchemas() {
         property: "index"
       },
       "pinnable"
+    ]
+  });
+
+  NAF.schemas.add({
+    template: "#static-media",
+    components: [
+      // TODO: Optimize checking mediaOptions with requiresNetworkUpdate.
+      "media-loader",
+      {
+        component: "media-video",
+        property: "time"
+      },
+      {
+        component: "media-video",
+        property: "videoPaused"
+      },
+      {
+        component: "media-pager",
+        property: "index"
+      }
     ]
   });
 

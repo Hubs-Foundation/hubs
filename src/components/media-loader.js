@@ -28,7 +28,18 @@ AFRAME.registerComponent("media-loader", {
     src: { type: "string" },
     resize: { default: false },
     resolve: { default: false },
-    contentType: { default: null }
+    contentType: { default: null },
+    mediaOptions: {
+      default: {},
+      parse: value => {
+        if (typeof value === "object") {
+          return value;
+        }
+
+        return JSON.parse(value);
+      },
+      stringify: JSON.stringify
+    }
   },
 
   init() {
@@ -159,25 +170,34 @@ AFRAME.registerComponent("media-loader", {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-image");
         this.el.addEventListener("video-loaded", this.onMediaLoaded, { once: true });
-        this.el.setAttribute("media-video", { src: accessibleUrl });
-        this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+        this.el.setAttribute("media-video", Object.assign({}, this.data.mediaOptions, { src: accessibleUrl }));
+        if (this.el.components["position-at-box-shape-border"]) {
+          this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+        }
       } else if (contentType.startsWith("image/")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
         this.el.addEventListener("image-loaded", this.onMediaLoaded, { once: true });
         this.el.removeAttribute("media-pager");
-        this.el.setAttribute("media-image", { src: accessibleUrl, contentType });
-        this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+        this.el.setAttribute(
+          "media-image",
+          Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, contentType })
+        );
+        if (this.el.components["position-at-box-shape-border"]) {
+          this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+        }
       } else if (contentType.startsWith("application/pdf")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
         // two small differences:
         // 1. we pass the canonical URL to the pager so it can easily make subresource URLs
         // 2. we don't remove the media-image component -- media-pager uses that internally
-        this.el.setAttribute("media-pager", { src: canonicalUrl });
+        this.el.setAttribute("media-pager", Object.assign({}, this.data.mediaOptions, { src: canonicalUrl }));
         this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
         this.el.addEventListener("preview-loaded", this.onMediaLoaded, { once: true });
-        this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+        if (this.el.components["position-at-box-shape-border"]) {
+          this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+        }
       } else if (
         contentType.includes("application/octet-stream") ||
         contentType.includes("x-zip-compressed") ||
@@ -198,12 +218,15 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
-        this.el.setAttribute("gltf-model-plus", {
-          src: accessibleUrl,
-          contentType: contentType,
-          inflate: true,
-          modelToWorldScale: this.data.resize ? 0.0001 : 1.0
-        });
+        this.el.setAttribute(
+          "gltf-model-plus",
+          Object.assign({}, this.data.mediaOptions, {
+            src: accessibleUrl,
+            contentType: contentType,
+            inflate: true,
+            modelToWorldScale: this.data.resize ? 0.0001 : 1.0
+          })
+        );
       } else {
         throw new Error(`Unsupported content type: ${contentType}`);
       }
