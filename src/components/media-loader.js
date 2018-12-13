@@ -31,13 +31,7 @@ AFRAME.registerComponent("media-loader", {
     contentType: { default: null },
     mediaOptions: {
       default: {},
-      parse: value => {
-        if (typeof value === "object") {
-          return value;
-        }
-
-        return JSON.parse(value);
-      },
+      parse: v => (typeof v === "object" ? JSON.parse(v) : v),
       stringify: JSON.stringify
     }
   },
