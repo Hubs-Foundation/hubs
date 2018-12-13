@@ -126,17 +126,6 @@ function createVideoTexture(url) {
   });
 }
 
-function createPlaneMesh(texture) {
-  const material = new THREE.MeshBasicMaterial();
-  material.side = THREE.DoubleSide;
-  material.transparent = true;
-  material.map = texture;
-  material.needsUpdate = true;
-
-  const geometry = new THREE.PlaneGeometry();
-  return new THREE.Mesh(geometry, material);
-}
-
 function fitToTexture(el, texture) {
   const ratio =
     (texture.image.videoHeight || texture.image.height || 1.0) /
@@ -330,7 +319,58 @@ AFRAME.registerComponent("media-video", {
     }
   },
 
-  async updateTexture(src) {
+  updatePlaybackState(force) {
+    if (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && this.video)) {
+      if (Math.abs(this.data.time - this.video.currentTime) > this.data.syncTolerance) {
+        this.tryUpdateVideoPlaybackState(this.data.videoPaused, this.data.time);
+      } else {
+        this.tryUpdateVideoPlaybackState(this.data.videoPaused);
+      }
+    }
+  },
+
+  tryUpdateVideoPlaybackState(pause, currentTime) {
+    if (this._playbackStateChangeTimeout) {
+      clearTimeout(this._playbackStateChangeTimeout);
+    }
+
+    if (pause) {
+      this.video.pause();
+
+      if (currentTime) {
+        this.video.currentTime = currentTime;
+      }
+    } else {
+      // Need to deal with the fact play() may fail if user has not interacted with browser yet.
+      this.video
+        .play()
+        .then(() => {
+          if (currentTime) {
+            this.video.currentTime = currentTime;
+          }
+        })
+        .catch(() => {
+          this._playbackStateChangeTimeout = setTimeout(
+            () => this.tryUpdateVideoPlaybackState(pause, currentTime),
+            1000
+          );
+        });
+    }
+  },
+
+  async update(oldData) {
+    const { src } = this.data;
+
+    this.updatePlaybackState();
+
+    if (!src || src === oldData.src) return;
+
+    this.remove();
+    if (this.mesh && this.mesh.material) {
+      this.mesh.material.map = null;
+      this.mesh.material.needsUpdate = true;
+    }
+
     let texture;
     try {
       texture = await createVideoTexture(src);
@@ -375,76 +415,36 @@ AFRAME.registerComponent("media-video", {
       texture = errorTexture;
     }
 
-    if (!this.mesh) {
-      this.mesh = createPlaneMesh(texture);
+    const projection = this.data.projection;
+
+    if (projection !== oldData.projection) {
+      const material = new THREE.MeshBasicMaterial();
+
+      let geometry;
+
+      if (projection === "equirectangular") {
+        geometry = new THREE.SphereBufferGeometry(1, 64, 32);
+        // invert the geometry on the x-axis so that all of the faces point inward
+        geometry.scale(-1, 1, 1);
+      } else {
+        geometry = new THREE.PlaneGeometry();
+        material.side = THREE.DoubleSide;
+      }
+
+      this.mesh = new THREE.Mesh(geometry, material);
       this.el.setObject3D("mesh", this.mesh);
-    } else {
-      const { material } = this.mesh;
-      material.map = texture;
-      material.needsUpdate = true;
-      this.mesh.needsUpdate = true;
     }
 
-    fitToTexture(this.el, texture);
+    this.mesh.material.map = texture;
+    this.mesh.material.needsUpdate = true;
+
+    if (projection === "flat") {
+      fitToTexture(this.el, texture);
+    }
 
     this.updatePlaybackState(true);
 
     this.el.emit("video-loaded");
-  },
-
-  updatePlaybackState(force) {
-    if (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && this.video)) {
-      if (Math.abs(this.data.time - this.video.currentTime) > this.data.syncTolerance) {
-        this.tryUpdateVideoPlaybackState(this.data.videoPaused, this.data.time);
-      } else {
-        this.tryUpdateVideoPlaybackState(this.data.videoPaused);
-      }
-    }
-  },
-
-  tryUpdateVideoPlaybackState(pause, currentTime) {
-    if (this._playbackStateChangeTimeout) {
-      clearTimeout(this._playbackStateChangeTimeout);
-    }
-
-    if (pause) {
-      this.video.pause();
-
-      if (currentTime) {
-        this.video.currentTime = currentTime;
-      }
-    } else {
-      // Need to deal with the fact play() may fail if user has not interacted with browser yet.
-      this.video
-        .play()
-        .then(() => {
-          if (currentTime) {
-            this.video.currentTime = currentTime;
-          }
-        })
-        .catch(() => {
-          this._playbackStateChangeTimeout = setTimeout(
-            () => this.tryUpdateVideoPlaybackState(pause, currentTime),
-            1000
-          );
-        });
-    }
-  },
-
-  update(oldData) {
-    const { src } = this.data;
-
-    this.updatePlaybackState();
-
-    if (!src || src === oldData.src) return;
-
-    this.remove();
-    if (this.mesh && this.mesh.material) {
-      this.mesh.material.map = null;
-      this.mesh.material.needsUpdate = true;
-    }
-
-    this.updateTexture(src);
   },
 
   tick() {
