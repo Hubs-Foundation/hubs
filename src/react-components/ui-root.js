@@ -567,7 +567,8 @@ class UIRoot extends Component {
   };
 
   onAudioReadyButton = () => {
-    if (AFRAME.utils.device.isMobile() && !this.state.enterInVR && screenfull.enabled) {
+    // Disable full screen on iOS, since Safari's fullscreen mode does not let you prevent native pinch-to-zoom gestures.
+    if (AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isIOS() && !this.state.enterInVR && screenfull.enabled) {
       screenfull.request();
     }
 

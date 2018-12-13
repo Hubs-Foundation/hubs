@@ -1,3 +1,5 @@
+import "./utils/debug-log";
+
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
@@ -49,7 +51,7 @@ import "./components/freeze-controller";
 import "./components/icon-button";
 import "./components/text-button";
 import "./components/block-button";
-import "./components/visible-while-frozen";
+import "./components/visibility-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
 import "./components/avatar-replay";
@@ -63,6 +65,7 @@ import "./components/pin-networked-object-button";
 import "./components/remove-networked-object-button";
 import "./components/camera-focus-button";
 import "./components/mirror-camera-button";
+import "./components/unmute-video-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/gamma-factor";
 import "./components/visible-to-owner";
