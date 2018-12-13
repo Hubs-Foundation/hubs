@@ -174,7 +174,6 @@
                     stretchable="useWorldPosition: true; usePhysics: never"
                     hoverable
                     hoverable-visuals="cursorController: #cursor-controller"
-                    auto-scale-cannon-physics-body
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
                     position-at-box-shape-border="target:.freeze-menu;"
                     destroy-at-extreme-distances
@@ -261,7 +260,6 @@
                     super-networked-interactable="counter: #camera-counter;"
                     position-at-box-shape-border="target:.camera-menu"
                     set-yxz-order
-                    auto-scale-cannon-physics-body
                 >
                     <a-entity class="ui camera-menu" visible-while-frozen="withinDistance: 10;" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end" stop-event-propagation__stretch-start="event: stretch-start" stop-event-propagation__stretch-end="event: stretch-end">
                         <a-entity mixin="rounded-text-action-button" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01"> </a-entity>
@@ -368,7 +366,7 @@
             radius="0.02"
             segments-width="9"
             segments-height="9"
-            ammo-body="shape: sphere; sphereRadius: 0.5; type: kinematic; collisionFlags: 4;"
+            ammo-body="shape: sphere; sphereRadius: 0.5; type: kinematic; collisionFlags: 4; autoUpdateScale: false;"
             super-hands="
                 colliderEvent: raycaster-intersection;
                 colliderEndEvent: raycaster-intersection-cleared;

@@ -31,7 +31,7 @@
     "aframe-inspector": "^0.8.3",
     "aframe-motion-capture-components": "github:mozillareality/aframe-motion-capture-components#1ca616fa67b627e447b23b35a09da175d8387668",
     "aframe-physics-extras": "github:mozillareality/aframe-physics-extras#bugfix/physics-collider-world",
-    "aframe-physics-system": "github:mozillareality/aframe-physics-system#e2d3a69a5135ec778bfc1d74c8a472273b4159d9",
+    "aframe-physics-system": "github:mozillareality/aframe-physics-system#3cca5da92b947529ea5cee608e9d86e01c91244f",
     "aframe-rounded": "^1.0.3",
     "aframe-slice9-component": "^1.0.0",
     "aframe-teleport-controls": "github:mozillareality/aframe-teleport-controls#hubs/master",

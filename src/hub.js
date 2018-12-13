@@ -56,7 +56,6 @@ import "./components/avatar-replay";
 import "./components/media-views";
 import "./components/pinch-to-move";
 import "./components/pitch-yaw-rotator";
-import "./components/auto-scale-cannon-physics-body";
 import "./components/position-at-box-shape-border";
 import "./components/pinnable";
 import "./components/pin-networked-object-button";

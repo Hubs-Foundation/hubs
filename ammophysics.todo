@@ -4,13 +4,17 @@ ammo physics TODO:
 ** Figure out why btFixedConstraint is unstable when cursor is scaled small
 ** Constraints are still jumpy when first created
 ** Velocity based constraints (https://pybullet.org/Bullet/phpBB3/viewtopic.php?f=9&t=11270&p=38281&hilit=rigid+constraint#p38281)
-** implement constraints for hands
-
-* enable stretchable
-
-* object delete causes crash
-
-* generated trimeshes for collision for environments with nested transforms are wrong sometimes
+*** implement constraints for hands
+*** enable stretchable
 
 * enable changing between dynamic and kinematic
 ** sticky-object
+
+* object delete causes crash, sometimes
+
+* generated trimeshes for collision for environments with nested transforms are wrong sometimes
+
+* basic aframe primitives probably not working correctly
+** object scaling issues
+** trimeshes
+
