@@ -461,6 +461,7 @@ AFRAME.registerComponent("media-video", {
 AFRAME.registerComponent("media-image", {
   schema: {
     src: { type: "string" },
+    projection: { type: "string", default: "flat" },
     contentType: { type: "string" }
   },
 
@@ -474,8 +475,9 @@ AFRAME.registerComponent("media-image", {
       const { src, contentType } = this.data;
       if (!src) return;
 
-      if (this.mesh && this.mesh.map) {
+      if (this.mesh && this.mesh.map && src !== oldData.src) {
         this.mesh.material.map = null;
+        this.mesh.material.map.dispose();
         this.mesh.material.needsUpdate = true;
         if (this.mesh.map !== errorTexture) {
           textureCache.release(oldData.src);
@@ -508,17 +510,32 @@ AFRAME.registerComponent("media-image", {
       texture = errorTexture;
     }
 
-    if (!this.mesh) {
-      this.mesh = createPlaneMesh(texture);
+    const projection = this.data.projection;
+
+    if (projection !== oldData.projection) {
+      const material = new THREE.MeshBasicMaterial();
+
+      let geometry;
+
+      if (projection === "equirectangular") {
+        geometry = new THREE.SphereBufferGeometry(1, 64, 32);
+        // invert the geometry on the x-axis so that all of the faces point inward
+        geometry.scale(-1, 1, 1);
+      } else {
+        geometry = new THREE.PlaneGeometry();
+        material.side = THREE.DoubleSide;
+      }
+
+      this.mesh = new THREE.Mesh(geometry, material);
       this.el.setObject3D("mesh", this.mesh);
-    } else {
-      const { material } = this.mesh;
-      material.map = texture;
-      material.needsUpdate = true;
-      this.mesh.needsUpdate = true;
     }
 
-    fitToTexture(this.el, texture);
+    this.mesh.material.map = texture;
+    this.mesh.material.needsUpdate = true;
+
+    if (projection === "flat") {
+      fitToTexture(this.el, texture);
+    }
 
     this.el.emit("image-loaded", { src: this.data.src });
   }

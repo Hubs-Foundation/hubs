@@ -109,7 +109,9 @@ function mediaInflator(el, componentName, componentData, components) {
     });
   }
 
-  const mediaOptions = {};
+  const mediaOptions = {
+    projection: componentData.projection
+  };
 
   if (componentName === "video") {
     mediaOptions.videoPaused = !componentData.autoPlay;
