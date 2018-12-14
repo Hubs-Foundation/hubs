@@ -11,6 +11,10 @@ function fromCamelCase(str) {
 function pretty(str) {
   const words = fromCamelCase(str)
     .replace(/keyboard-var/, "keyboard")
+    .replace(/vive-var/, "keyboard")
+    .replace(/pressed2/, "pressed")
+    .replace(/joy y2/, "joy y")
+    .replace(/_vec2/, "")
     .replace(/rising/, "pressed")
     .replace(/falling/, "released")
     .split("/")
@@ -19,13 +23,8 @@ function pretty(str) {
   return words.join(" ");
 }
 
-function quoteLast(sentence) {
-  const words = sentence.split(" ");
-  return `${words[0]} "${words.slice(1).join(" ")}"`;
-}
-
-function rightPad(str, len) {
-  return str + new Array(Math.max(0, len - str.length)).join(" ");
+function prettyXform(xform) {
+  return capitalize(fromCamelCase(xform.replace("falling", "released")));
 }
 
 function getSources(src) {
@@ -36,23 +35,37 @@ function getSources(src) {
   }
 }
 
-const excludeXforms = ["copy", "rising", "any", "max_vec2", "compose_vec2", "scale"];
+const excludeXforms = [
+  "always",
+  "any",
+  "compose_vec2",
+  "copy",
+  "copyIfTrue",
+  "max_vec2",
+  "normalize_vec2",
+  "rising",
+  "risingWithFrameDelay",
+  "scale",
+  "touch_axis_scroll"
+];
 
 function getPaths(set, dest) {
   const paths = [];
   for (const binding of set) {
     if (!(binding.dest && binding.dest.value)) continue;
     if (!binding.src) continue;
+
     if (binding.dest.value === dest) {
-      if (!excludeXforms.includes(binding.xform.name)) paths.push(binding.xform.name);
+      if (!excludeXforms.includes(binding.xform.name)) paths.push(prettyXform(binding.xform.name));
       for (const src of getSources(binding.src)) {
         const subPaths = getPaths(set, src);
         if (subPaths) paths.push(subPaths);
       }
     }
   }
+
   if (paths.length === 0) {
-    return pretty(dest)
+    return pretty(dest);
   }
   if (paths.length === 1 && typeof paths[0] === "string") {
     return paths[0];
@@ -81,15 +94,34 @@ const exclude = [
   paths.actions.thaw
 ];
 
+function quoteLast(sentence) {
+  const words = sentence.split(" ");
+  if (words.length < 2) return words[0];
+  return `${words[0]} "${words.slice(1).join(" ")}"`;
+}
+
+function formatSource(source, indent) {
+  if (typeof source === "string") return indent + quoteLast(source);
+  if (source.every(x => typeof x === "string")) return source.map(x => indent + "  " + quoteLast(x)).join("\n");
+  return source.map(x => formatSource(x, indent + "  ")).join("\n") + "\n";
+}
+
 function formatSources(sources) {
+  const indent = "      ";
   if (sources.length === 1 && typeof sources[0] === "string") {
-    return "      " + sources[0];
+    return indent + quoteLast(sources[0]);
+  } else if (typeof sources === "string") {
+    return indent + quoteLast(sources);
   } else {
-    return JSON.stringify(sources, null, 2)
-      .split("\n")
-      .map(x => "      " + x)
-      .join("\n");
+    return sources.map(x => formatSource(x, indent)).join("\n");
   }
+}
+
+function flatten(arr) {
+  if (arr.length === 1) {
+    return flatten(arr[0]);
+  }
+  return arr;
 }
 
 function printSet(set) {
@@ -99,10 +131,10 @@ function printSet(set) {
     if (!dest.includes("/actions/") || exclude.includes(dest)) continue;
     if (!binding.src) continue;
     console.log(
-      "\n    " + pretty(binding.dest.value),
+      "\n    [" + pretty(binding.dest.value) + "]",
       "\n" +
-        (excludeXforms.includes(binding.xform.name) ? "" : "      " + binding.xform.name + "\n") +
-        formatSources(getSources(binding.src).map(src => getPaths(set, src)))
+        (excludeXforms.includes(binding.xform.name) ? "" : "      " + prettyXform(binding.xform.name) + "\n") +
+        formatSources(flatten(getSources(binding.src).map(src => flatten(getPaths(set, src)))))
     );
   }
 }
@@ -115,43 +147,23 @@ function printBindings(bindingsName, bindings) {
   }
 }
 
-/*/
 import { touchscreenUserBindings } from "../msrc/src/systems/userinput/bindings/touchscreen-user";
-printBindings("touchscreenUserBindings", touchscreenUserBindings);
-//*/
-
-/*/
 import { keyboardMouseUserBindings } from "../msrc/src/systems/userinput/bindings/keyboard-mouse-user";
-printBindings("keyboardMouseUserBindings", keyboardMouseUserBindings);
-//*/
-
-//*/
 import { oculusTouchUserBindings } from "../msrc/src/systems/userinput/bindings/oculus-touch-user";
-printBindings("oculusTouchUserBindings", oculusTouchUserBindings);
-//*/
-
-/*/
 import { viveUserBindings } from "../msrc/src/systems/userinput/bindings/vive-user";
-printBindings("viveUserBindings", viveUserBindings);
-//*/
-
 import generate3DOFTriggerBindings from "../msrc/src/systems/userinput/bindings/oculus-go-user";
-/*/
-const oculusGoUserBindings = generate3DOFTriggerBindings(paths.device.oculusgo);
-printBindings("oculusGoUserBindings", oculusGoUserBindings);
-//*/
-
-/*/
 import { daydreamUserBindings } from "../msrc/src/systems/userinput/bindings/daydream-user";
-printBindings("daydreamUserBindings", daydreamUserBindings);
-//*/
-
-/*/
 import { xboxControllerUserBindings } from "../msrc/src/systems/userinput/bindings/xbox-controller-user";
-printBindings("xboxControllerUserBindings", xboxControllerUserBindings);
-//*/
-
-/*/
+const oculusGoUserBindings = generate3DOFTriggerBindings(paths.device.oculusgo);
 const gearVRControllerUserBindings = generate3DOFTriggerBindings(paths.device.gearVRController);
-printBindings("gearVRControllerUserBindings", gearVRControllerUserBindings);
-//*/
+
+[
+  ["touchscreenUserBindings", touchscreenUserBindings],
+  ["keyboardMouseUserBindings", keyboardMouseUserBindings],
+  ["oculusTouchUserBindings", oculusTouchUserBindings],
+  ["viveUserBindings", viveUserBindings],
+  ["oculusGoUserBindings", oculusGoUserBindings],
+  ["daydreamUserBindings", daydreamUserBindings],
+  ["gearVRControllerUserBindings", gearVRControllerUserBindings],
+  ["xboxControllerUserBindings", xboxControllerUserBindings]
+].forEach(([name, bindings]) => printBindings(name, bindings));
