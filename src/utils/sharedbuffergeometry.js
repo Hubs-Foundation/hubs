@@ -3,7 +3,6 @@ export default class SharedBufferGeometry {
     this.material = material;
     this.primitiveMode = primitiveMode;
 
-    console.log("maxBufferSize", maxBufferSize);
     this.maxBufferSize = maxBufferSize;
     this.geometries = [];
     this.current = null;

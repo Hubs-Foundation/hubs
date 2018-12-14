@@ -60,6 +60,27 @@ function createHTTPSConfig() {
   }
 }
 
+const defaultHostName = "hubs.local";
+const host = process.env.HOST_IP || defaultHostName;
+
+function matchRegex({ include, exclude }) {
+  return (module, chunks) => {
+    if (
+      module.nameForCondition &&
+      include.test(module.nameForCondition()) &&
+      !exclude.test(module.nameForCondition())
+    ) {
+      return true;
+    }
+    for (const chunk of chunks) {
+      if (chunk.name && include.test(chunk.name) && !exclude.test(chunk.name)) {
+        return true;
+      }
+    }
+    return false;
+  };
+}
+
 module.exports = (env, argv) => ({
   entry: {
     index: path.join(__dirname, "src", "index.js"),
@@ -67,6 +88,7 @@ module.exports = (env, argv) => ({
     scene: path.join(__dirname, "src", "scene.js"),
     link: path.join(__dirname, "src", "link.js"),
     spoke: path.join(__dirname, "src", "spoke.js"),
+    "whats-new": path.join(__dirname, "src", "whats-new.js"),
     "avatar-selector": path.join(__dirname, "src", "avatar-selector.js")
   },
   output: {
@@ -76,10 +98,13 @@ module.exports = (env, argv) => ({
   devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
   devServer: {
     https: createHTTPSConfig(),
-    host: "0.0.0.0",
-    public: "hubs.local:8080",
+    host: process.env.HOST_IP || "0.0.0.0",
+    public: `${host}:8080`,
     useLocalIp: true,
-    allowedHosts: ["hubs.local"],
+    allowedHosts: [host],
+    headers: {
+      "Access-Control-Allow-Origin": "*"
+    },
     before: function(app) {
       // be flexible with people accessing via a local reticulum on another port
       app.use(cors({ origin: /hubs\.local(:\d*)?$/ }));
@@ -174,7 +199,10 @@ module.exports = (env, argv) => ({
           chunks: "all"
         },
         vendors: {
-          test: /([\\/]node_modules[\\/]|[\\/]vendor[\\/])/,
+          test: matchRegex({
+            include: /([\\/]node_modules[\\/]|[\\/]vendor[\\/])/,
+            exclude: /[\\/]node_modules[\\/]markdown-it[\\/]/
+          }),
           priority: 50,
           name: "vendor",
           chunks: "all"
@@ -226,6 +254,12 @@ module.exports = (env, argv) => ({
       filename: "spoke.html",
       template: path.join(__dirname, "src", "spoke.html"),
       chunks: ["vendor", "spoke"]
+    }),
+    new HTMLWebpackPlugin({
+      filename: "whats-new.html",
+      template: path.join(__dirname, "src", "whats-new.html"),
+      chunks: ["vendor", "whats-new"],
+      inject: "head"
     }),
     new HTMLWebpackPlugin({
       filename: "avatar-selector.html",

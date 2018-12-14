@@ -23,6 +23,8 @@ const boundingBox = new THREE.Box3();
 
 AFRAME.registerComponent("media-loader", {
   schema: {
+    fileId: { type: "string" },
+    fileIsOwned: { type: "boolean" },
     src: { type: "string" },
     resize: { default: false },
     resolve: { default: false },
@@ -43,6 +45,7 @@ AFRAME.registerComponent("media-loader", {
     const box = getBox(this.el, mesh);
     const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
     this.el.object3DMap.mesh.scale.multiplyScalar(scaleCoefficient);
+
     if (this.el.body && this.shapeAdded && this.el.body.shapes.length > 1) {
       this.el.removeAttribute("shape");
       this.shapeAdded = false;
@@ -62,6 +65,8 @@ AFRAME.registerComponent("media-loader", {
       });
       this.shapeAdded = true;
     }
+
+    mesh.matrixNeedsUpdate = true;
   },
 
   tick(t, dt) {
@@ -170,6 +175,7 @@ AFRAME.registerComponent("media-loader", {
         // 1. we pass the canonical URL to the pager so it can easily make subresource URLs
         // 2. we don't remove the media-image component -- media-pager uses that internally
         this.el.setAttribute("media-pager", { src: canonicalUrl });
+        this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
         this.el.addEventListener("preview-loaded", this.onMediaLoaded, { once: true });
         this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
       } else if (
@@ -273,5 +279,6 @@ AFRAME.registerComponent("media-pager", {
 
   repositionToolbar() {
     this.toolbar.object3D.position.y = -this.el.getAttribute("shape").halfExtents.y - 0.2;
+    this.toolbar.object3D.matrixNeedsUpdate = true;
   }
 });

@@ -152,6 +152,13 @@ AFRAME.registerComponent("networked-drawing", {
     return function() {
       copyArray.length = 0;
       copyData(this.networkBuffer, copyArray, this.bufferIndex, this.networkBuffer.length - 1);
+
+      //remove undo's from networkBuffer after they've been sent so that
+      //newly joining clients don't get them
+      let index = -1;
+      while ((index = this.networkBuffer.indexOf("-")) != -1) {
+        this.networkBuffer.splice(index, 1);
+      }
       this.bufferIndex = this.networkBuffer.length;
       NAF.connection.broadcastDataGuaranteed(this.drawingId, { type: MSG_BUFFER_DATA, buffer: copyArray });
     };
@@ -162,7 +169,12 @@ AFRAME.registerComponent("networked-drawing", {
     const direction = new THREE.Vector3();
     const normal = new THREE.Vector3();
     return function() {
-      const head = this.networkBuffer[0];
+      let head = this.networkBuffer[0];
+      if (head === "-") {
+        this._undoDraw();
+        this.networkBuffer.shift();
+        head = this.networkBuffer[0];
+      }
       let didWork = false;
       while (head != null && this.networkBuffer.length >= 10) {
         position.set(this.networkBuffer[0], this.networkBuffer[1], this.networkBuffer[2]);
@@ -200,7 +212,7 @@ AFRAME.registerComponent("networked-drawing", {
       if (length > this.data.maxLines || drawTime + this.data.maxDrawTimeout <= time) {
         const datum = this.networkBufferHistory[0];
         if (length > 1) {
-          datum.idxLength += 2 - (this.segments % 2);
+          datum.idxLength += 2 - (this.segments % 2); //account for extra verts added for degenerate triangles
           this.networkBufferHistory[1].idxLength -= 2 - (this.segments % 2);
         }
         this.idx.position = datum.idxLength;
@@ -350,6 +362,37 @@ AFRAME.registerComponent("networked-drawing", {
     };
   })(),
 
+  undoDraw() {
+    if (!NAF.connection.isConnected() || this.drawStarted) {
+      return;
+    }
+    this._undoDraw();
+    this._pushToNetworkBuffer("-");
+  },
+
+  _undoDraw() {
+    const length = this.networkBufferHistory.length;
+    if (length > 0) {
+      const datum = this.networkBufferHistory.pop();
+      this.idx.position = 0;
+      this.idx.uv = 0;
+      this.idx.normal = 0;
+      this.idx.color = 0;
+      if (length > 1) {
+        datum.idxLength += 1 - (this.segments % 2); //account for extra verts added for degenerate triangles
+        this.idx.position = this.sharedBuffer.idx.position - datum.idxLength;
+        this.idx.uv = this.sharedBuffer.idx.uv - datum.idxLength;
+        this.idx.normal = this.sharedBuffer.idx.normal - datum.idxLength;
+        this.idx.color = this.sharedBuffer.idx.color - datum.idxLength;
+      }
+      this.sharedBuffer.remove(this.idx, this.sharedBuffer.idx);
+      if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
+        this.networkBuffer.splice(this.networkBuffer.length - datum.networkBufferCount, datum.networkBufferCount);
+        this.bufferIndex -= datum.networkBufferCount;
+      }
+    }
+  },
+
   endDraw(position, direction, normal) {
     this._endDraw(position, direction, normal);
     this._updateBuffer();
@@ -422,7 +465,11 @@ AFRAME.registerComponent("networked-drawing", {
   })(),
 
   _pushToNetworkBuffer(val) {
-    ++this.networkBufferCount;
+    //don't increment networkBufferCount if undo, because the undo character
+    //will be removed in tick() on the next frame
+    if (val !== "-") {
+      ++this.networkBufferCount;
+    }
     this.networkBuffer.push(val);
   },
 

@@ -255,6 +255,7 @@ THREE.Water = function(geometry, options) {
 
     mirrorCamera.far = camera.far; // Used in WebGLBackground
 
+    mirrorCamera.matrixNeedsUpdate = true;
     mirrorCamera.updateMatrixWorld();
     mirrorCamera.projectionMatrix.copy(camera.projectionMatrix);
 

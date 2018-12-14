@@ -1,3 +1,5 @@
+import { getPromotionTokenForFile } from "../utils/media-utils";
+
 AFRAME.registerComponent("pin-networked-object-button", {
   schema: {
     // Selector for label to change when pinned/unpinned, must be sibling of this components element
@@ -55,6 +57,12 @@ AFRAME.registerComponent("pin-networked-object-button", {
   },
 
   _updateUI() {
+    const { fileIsOwned, fileId } = this.targetEl.components["media-loader"].data;
+    const canPin = !!(fileIsOwned || (fileId && getPromotionTokenForFile(fileId)));
+    this.el.setAttribute("visible", canPin);
+    this.labelEl.setAttribute("visible", canPin);
+    if (!canPin) return;
+
     const isPinned = this.targetEl.getAttribute("pinnable") && this.targetEl.getAttribute("pinnable").pinned;
 
     this.labelEl.setAttribute("text", "value", isPinned ? "un-pin" : "pin");

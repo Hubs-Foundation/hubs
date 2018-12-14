@@ -1,9 +1,11 @@
 import { paths } from "../../systems/userinput/paths";
+import { getLastWorldPosition } from "../../utils/three-utils";
 
 const pathsMap = {
   "player-right-controller": {
     startDrawing: paths.actions.rightHand.startDrawing,
     stopDrawing: paths.actions.rightHand.stopDrawing,
+    undoDrawing: paths.actions.rightHand.undoDrawing,
     penNextColor: paths.actions.rightHand.penNextColor,
     penPrevColor: paths.actions.rightHand.penPrevColor,
     scalePenTip: paths.actions.rightHand.scalePenTip
@@ -11,6 +13,7 @@ const pathsMap = {
   "player-left-controller": {
     startDrawing: paths.actions.leftHand.startDrawing,
     stopDrawing: paths.actions.leftHand.stopDrawing,
+    undoDrawing: paths.actions.leftHand.undoDrawing,
     penNextColor: paths.actions.leftHand.penNextColor,
     penPrevColor: paths.actions.leftHand.penPrevColor,
     scalePenTip: paths.actions.leftHand.scalePenTip
@@ -18,6 +21,7 @@ const pathsMap = {
   cursor: {
     startDrawing: paths.actions.cursor.startDrawing,
     stopDrawing: paths.actions.cursor.stopDrawing,
+    undoDrawing: paths.actions.cursor.undoDrawing,
     penNextColor: paths.actions.cursor.penNextColor,
     penPrevColor: paths.actions.cursor.penPrevColor,
     scalePenTip: paths.actions.cursor.scalePenTip
@@ -101,6 +105,9 @@ AFRAME.registerComponent("pen", {
   tick(t, dt) {
     const grabber = this.el.parentNode.components.grabbable.grabbers[0];
     const userinput = AFRAME.scenes[0].systems.userinput;
+
+    getLastWorldPosition(this.el.object3D, this.worldPosition);
+
     if (grabber && pathsMap[grabber.id]) {
       const paths = pathsMap[grabber.id];
       if (userinput.get(paths.startDrawing)) {
@@ -108,6 +115,9 @@ AFRAME.registerComponent("pen", {
       }
       if (userinput.get(paths.stopDrawing)) {
         this._endDraw();
+      }
+      if (userinput.get(paths.undoDrawing)) {
+        this._undoDraw();
       }
       const penScaleMod = userinput.get(paths.scalePenTip);
       if (penScaleMod) {
@@ -120,8 +130,6 @@ AFRAME.registerComponent("pen", {
         this._changeColor(-1);
       }
     }
-
-    this.el.object3D.getWorldPosition(this.worldPosition);
 
     if (!almostEquals(0.005, this.worldPosition, this.lastPosition)) {
       this.direction.subVectors(this.worldPosition, this.lastPosition).normalize();
@@ -158,7 +166,6 @@ AFRAME.registerComponent("pen", {
   _startDraw() {
     this.currentDrawing = this.drawingManager.getDrawing(this);
     if (this.currentDrawing) {
-      this.el.object3D.getWorldPosition(this.worldPosition);
       this._getNormal(this.normal, this.worldPosition, this.direction);
       this.el.emit("start_draw");
       this.currentDrawing.startDraw(this.worldPosition, this.direction, this.normal, this.data.color, this.data.radius);
@@ -169,11 +176,17 @@ AFRAME.registerComponent("pen", {
     if (this.currentDrawing) {
       this.el.emit("stop_draw");
       this.timeSinceLastDraw = 0;
-      this.el.object3D.getWorldPosition(this.worldPosition);
       this._getNormal(this.normal, this.worldPosition, this.direction);
       this.currentDrawing.endDraw(this.worldPosition, this.direction, this.normal);
       this.drawingManager.returnDrawing(this);
       this.currentDrawing = null;
+    }
+  },
+
+  _undoDraw() {
+    const drawing = this.drawingManager.getDrawing(this);
+    if (drawing) {
+      drawing.undoDraw();
     }
   },
 

@@ -78,7 +78,7 @@ class HomeRoot extends Component {
   }
 
   showAuthDialog = verifying => {
-    this.setState({ dialog: <AuthDialog verifying={verifying} authOrigin={this.props.authOrigin} /> });
+    this.setState({ dialog: <AuthDialog closable="false" verifying={verifying} authOrigin={this.props.authOrigin} /> });
   };
 
   loadHomeVideo = () => {
@@ -182,6 +182,11 @@ class HomeRoot extends Component {
             <div className={styles.headerContent}>
               <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
                 <div className={styles.links}>
+                  <WithHoverSound>
+                    <a href="/whats-new">
+                      <FormattedMessage id="home.whats_new_link" />
+                    </a>
+                  </WithHoverSound>
                   <WithHoverSound>
                     <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
                       <FormattedMessage id="home.source_link" />

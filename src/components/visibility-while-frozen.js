@@ -1,11 +1,14 @@
+import { getLastWorldPosition } from "../utils/three-utils";
+
 /**
  * Toggles the visibility of this entity when the scene is frozen.
  * @namespace ui
- * @component visible-while-frozen
+ * @component visibility-while-frozen
  */
-AFRAME.registerComponent("visible-while-frozen", {
+AFRAME.registerComponent("visibility-while-frozen", {
   schema: {
-    withinDistance: { type: "number" }
+    withinDistance: { type: "number" },
+    visible: { type: "boolean", default: true }
   },
 
   init() {
@@ -34,9 +37,16 @@ AFRAME.registerComponent("visible-while-frozen", {
     const isFrozen = this.el.sceneEl.is("frozen");
 
     let isWithinDistance = true;
+    const isVisible = this.el.object3D.visible;
 
     if (this.data.withinDistance !== undefined) {
-      this.cam.getWorldPosition(this.camWorldPos);
+      if (!isVisible) {
+        // Edge case, if the object is not visible force a matrix update
+        // since the main matrix update loop will not do it.
+        this.el.object3D.updateMatrices(true, true);
+      }
+
+      getLastWorldPosition(this.cam, this.camWorldPos);
       this.objWorldPos.copy(this.el.object3D.position);
       this.el.object3D.localToWorld(this.objWorldPos);
 
@@ -44,9 +54,9 @@ AFRAME.registerComponent("visible-while-frozen", {
         this.camWorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance;
     }
 
-    const shouldBeVisible = isFrozen && isWithinDistance;
+    const shouldBeVisible = ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) && isWithinDistance;
 
-    if (this.el.getAttribute("visible") !== shouldBeVisible) {
+    if (isVisible !== shouldBeVisible) {
       this.el.setAttribute("visible", shouldBeVisible);
     }
   },

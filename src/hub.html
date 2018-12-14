@@ -101,12 +101,12 @@
             <a-asset-item id="sound_asset-chat"                           src="./assets/sfx/pop.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
 
             <template id="remote-avatar-template">
-                <a-entity networked-avatar ik-root player-info>
-                    <a-entity class="camera"></a-entity>
+                <a-entity networked-avatar ik-root player-info matrix-auto-update>
+                    <a-entity class="camera" matrix-auto-update></a-entity>
 
-                    <a-entity class="left-controller"></a-entity>
+                    <a-entity class="left-controller" matrix-auto-update></a-entity>
 
-                    <a-entity class="right-controller"></a-entity>
+                    <a-entity class="right-controller" matrix-auto-update></a-entity>
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
                         <template data-name="RootScene">
@@ -118,6 +118,7 @@
                                 <a-entity
                                     class="nametag"
                                     billboard
+                                    matrix-auto-update
                                     text="side: double; align: center; color: #ddd"
                                     position="0 1 0"
                                     scale="6 6 6"
@@ -127,9 +128,9 @@
 
                         <template data-name="Chest">
                             <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
-                                <a-entity billboard>
-                                    <a-entity mixin="rounded-text-button" block-button visible-while-frozen="withinDistance: 10;" ui-class-while-frozen position="0 0 .35"> </a-entity>
-                                    <a-entity visible-while-frozen="withinDistance: 10;" text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
+                                <a-entity billboard matrix-auto-update visibility-while-frozen="withinDistance: 10;">
+                                    <a-entity hoverable mixin="rounded-text-button" block-button ui-class-while-frozen position="0 0 .35"> </a-entity>
+                                    <a-entity visibility-while-frozen="withinDistance: 10;" text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
                                 </a-entity>
                             </a-entity>
                         </template>
@@ -179,15 +180,17 @@
                     destroy-at-extreme-distances
                     set-yxz-order
                     pinnable
-                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1;"
-                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1;"
-                    sound__pinned ="src: #sound_asset-pinned; on: pinned; poolSize: 1;"
+                    matrix-auto-update
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
+                    sound__pinned ="src: #sound_asset-pinned; on: pinned; poolSize: 1; positional: false;"
+                    set-sounds-invisible
                     emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
                     emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
                     emit-state-change__pinned="state: pinned; transform: rising; event: pinned;"
                 >
-                    <a-entity class="ui interactable-ui" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end" stop-event-propagation__stretch-start="event: stretch-start" stop-event-propagation__stretch-end="event: stretch-end">
-                        <a-entity class="freeze-menu" visible-while-frozen="withinDistance: 10;">
+                    <a-entity class="ui interactable-ui" mixin="button-container">
+                        <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 10;">
                             <a-entity mixin="rounded-text-action-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned;" position="0 0.125 0.01"> </a-entity>
                             <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
                             <a-entity mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.01">
@@ -211,15 +214,17 @@
                     grabbable="maxGrabbers: 1"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     hoverable
+                    matrix-auto-update
                     scale="0.5 0.5 0.5"
-                    sound__next_pen_color="src: #sound_asset-next_pen_color; on: next_pen_color; poolSize: 2;"
-                    sound__prev_pen_color="src: #sound_asset-prev_pen_color; on: prev_pen_color; poolSize: 2;"
+                    sound__next_pen_color="src: #sound_asset-next_pen_color; on: next_pen_color; poolSize: 2; positional: false;"
+                    sound__prev_pen_color="src: #sound_asset-prev_pen_color; on: prev_pen_color; poolSize: 2; positional: false;"
                     sound__start_draw="src: #sound_asset-start_draw; on: start_draw; poolSize: 2;"
-                    sound__stop_draw="src: #sound_asset-stop_draw; on: stop_draw; poolSize: 2;"
-                    sound__increase_pen_radius="src: #sound_asset-increase_pen_radius; on: increase_pen_radius; poolSize: 2;"
-                    sound__decrease_pen_radius="src: #sound_asset-decrease_pen_radius; on: decrease_pen_radius; poolSize: 2;"
-                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1;"
-                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1;"
+                    sound__stop_draw="src: #sound_asset-stop_draw; on: stop_draw; poolSize: 2; positional: false;"
+                    sound__increase_pen_radius="src: #sound_asset-increase_pen_radius; on: increase_pen_radius; poolSize: 2; positional: false;"
+                    sound__decrease_pen_radius="src: #sound_asset-decrease_pen_radius; on: decrease_pen_radius; poolSize: 2; positional: false;"
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
+                    set-sounds-invisible
                     emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
                     emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
                 >
@@ -233,7 +238,7 @@
                         segments-width="16"
                         segments-height="12"
                     ></a-sphere>
-                    <a-entity class="ui delete-button" visible-while-frozen="withinDistance: 10;" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end" stop-event-propagation__stretch-start="event: stretch-start" stop-event-propagation__stretch-end="event: stretch-end">
+                    <a-entity class="ui delete-button" visibility-while-frozen="withinDistance: 10;" mixin="button-container">
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
                         <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
@@ -247,6 +252,7 @@
                     hoverable
                     stretchable
                     camera-tool
+                    matrix-auto-update
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
                     scale="0.5 0.5 0.5"
                     body="type: dynamic; shape: none; mass: 1;"
@@ -257,7 +263,7 @@
                     set-yxz-order
                     auto-scale-cannon-physics-body
                 >
-                    <a-entity class="ui camera-menu" visible-while-frozen="withinDistance: 10;" stop-event-propagation__grab-start="event: grab-start" stop-event-propagation__grab-end="event: grab-end" stop-event-propagation__stretch-start="event: stretch-start" stop-event-propagation__stretch-end="event: stretch-end">
+                    <a-entity class="ui camera-menu" visibility-while-frozen="withinDistance: 10;" mixin="button-container">
                         <a-entity mixin="rounded-text-action-button" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01"> </a-entity>
                         <a-entity text=" value:mirror; width:2.5; align:center;" class="mirror-button-label" text-raycast-hack position="0 0.125 0.02"></a-entity>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
@@ -282,6 +288,20 @@
                     <a-entity class="next-button" position="0.3 0 0">
                         <a-entity mixin="rounded-text-button" slice9="width: 0.2"> </a-entity>
                         <a-entity text=" value:>; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="video-unmute">
+                <a-entity 
+                    class="ui unmute-ui"
+                    position="0 0 0.1"
+                    visibility-while-frozen="visible: false; withinDistance: 10;"
+                    mixin="button-container"
+                >
+                    <a-entity class="unmute-button">
+                        <a-entity mixin="rounded-text-button" slice9="width: 0.4" unmute-video-button> </a-entity>
+                        <a-entity text=" value:un-mute; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>
@@ -322,6 +342,13 @@
                     src: #action-button"
             ></a-mixin>
 
+            <a-mixin id="button-container"
+                stop-event-propagation__grab-start="event: grab-start"
+                stop-event-propagation__grab-end="event: grab-end"
+                stop-event-propagation__stretch-start="event: stretch-start"
+                stop-event-propagation__stretch-end="event: stretch-end"
+            ></a-mixin>
+
             <a-mixin id="controller-super-hands"
                 super-hands="
                     colliderEvent: collisions;
@@ -356,7 +383,6 @@
                 cursor: #cursor;
                 camera: #player-camera;
                 objects: .collidable, .interactable, .ui;"
-            line="visible: false; color: white; opacity: 0.2;"
         ></a-entity>
 
         <a-sphere
@@ -401,9 +427,9 @@
                 <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="30 0 0">
                     <a-rounded height="0.08" width="0.2" color="#000000" position="-0.30 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
                     <a-image scale="0.07 0.06 0.06" position="-0.23 0.165 0.001" src="#presence-count" material="alphaTest:0.1;"></a-image>
-                    <a-entity id="hud-presence-count" text="value:; width:1.1; align:center;" position="-0.155 0.165 0"></a-entity>
+                    <a-entity id="hud-presence-count" text="value:; width:1.1; align:center;" position="-0.155 0.165 0" matrix-auto-update="target: text;"></a-entity>
                     <a-rounded height="0.08" width="0.5" color="#000000" position="-0.08 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
-                    <a-entity id="hud-hub-entry-link" text="value:; width:1.1; align:center;" position="0.17 0.165 0"></a-entity>
+                    <a-entity id="hud-hub-entry-link" text="value:; width:1.1; align:center;" position="0.17 0.165 0" matrix-auto-update="target: text;"></a-entity>
                     <a-rounded height="0.13" width="0.59" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
                 <a-image
                     icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover"
@@ -412,7 +438,8 @@
                     class="ui hud mic"
                     material="alphaTest:0.1;"
                     hoverable
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
+                    set-sounds-invisible
                 ></a-image>
                 <a-image
                     icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover"
@@ -420,7 +447,8 @@
                     position="0 0 0.005"
                     class="ui hud freeze"
                     hoverable
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
+                    set-sounds-invisible
                 ></a-image>
                 <a-image
                     icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover"
@@ -429,7 +457,8 @@
                     class="ui hud penhud"
                     material="alphaTest:0.1;"
                     hoverable
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
+                    set-sounds-invisible
                 ></a-image>
                 <a-image
                     icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #spawn-camera; hoverImage: #spawn-camera-hover; activeImage: #spawn-camera; activeHoverImage: #spawn-camera-hover"
@@ -438,10 +467,11 @@
                     class="ui hud camera-btn"
                     material="alphaTest:0.1;"
                     hoverable
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5;"
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
+                    set-sounds-invisible
                 ></a-image>
                 <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
-                    <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" ></a-entity>
+                    <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" matrix-auto-update="target: text"></a-entity>
                 </a-rounded>
                 </a-entity>
             </a-entity>
@@ -454,6 +484,7 @@
                 rotation
                 pitch-yaw-rotator
                 set-yxz-order
+                matrix-auto-update
                 sound__teleport_start="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2; loop: true;"
                 scene-sound__teleport_start="on: right-teleport_down; off: right-teleport_up;"
                 sound__teleport_start2="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2; loop: true;"
@@ -497,6 +528,7 @@
                 scene-sound__log_chat_message="on: presence-log-chat;"
                 sound__quack="positional: false; src: #sound_asset-quack; on: nothing; poolSize: 2;"
                 scene-sound__quack="on: quack;"
+                set-sounds-invisible
             >
                 <a-entity
                     id="gaze-teleport"
@@ -511,6 +543,7 @@
                         hitOpacity: 0.3;
                         missOpacity: 0.1;
                         curveShootingSpeed: 12;"
+                    teleport-controls-matrix-auto-update
                     action-to-event__start-teleport="path: /actions/startTeleport; event: gaze-teleport_down"
                     action-to-event__stop-teleport="path: /actions/stopTeleport; event: gaze-teleport_up"
                 ></a-entity>
@@ -531,6 +564,7 @@
                     hitOpacity: 0.3;
                     missOpacity: 0.1;
                     curveShootingSpeed: 12;"
+                teleport-controls-matrix-auto-update
                 haptic-feedback
                 body="type: static; shape: none;"
                 mixin="controller-super-hands"
@@ -557,6 +591,7 @@
                     hitOpacity: 0.3;
                     missOpacity: 0.1;
                     curveShootingSpeed: 12;"
+                teleport-controls-matrix-auto-update
                 haptic-feedback
                 body="type: static; shape: none;"
                 mixin="controller-super-hands"

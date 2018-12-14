@@ -62,6 +62,7 @@ export default class LinkChannel {
               if (this.store.state.activity.hasChangedName) {
                 data.profile = { ...this.store.state.profile };
               }
+              data.credentials = { ...this.store.state.credentials };
 
               generatePublicKeyAndEncryptedObject(incoming.public_key, data).then(
                 ({ publicKeyString, encryptedData }) => {

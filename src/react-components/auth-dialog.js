@@ -20,9 +20,9 @@ class AuthDialog extends Component {
         {verifying ? (
           <FormattedMessage id="auth.verifying" />
         ) : authOrigin === "spoke" ? (
-          <FormattedMessage id="auth.spoke-verified" values={{ br: <br /> }} />
+          <FormattedMessage className="preformatted" id="auth.spoke-verified" />
         ) : (
-          <FormattedMessage id="auth.verified" />
+          <FormattedMessage className="preformatted" id="auth.verified" />
         )}
       </DialogContainer>
     );

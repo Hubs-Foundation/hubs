@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/mozilla/hubs.svg?branch=master)](https://travis-ci.org/mozilla/hubs)
 
-A prototype client demonstrating a multi-user experience in WebVR. Built with
-[A-Frame](https://github.com/aframevr/aframe/)
+The client-side code for https://hubs.mozilla.com/, a multi-user experience in WebVR. Built with
+[A-Frame](https://github.com/aframevr/aframe/).
 
 ## Getting Started
 
@@ -13,6 +13,10 @@ cd hubs
 npm ci
 npm start
 ```
+
+Then visit https://localhost:8080
+
+Note: When running the Hubs client locally, you will still connect to the development versions of our [Janus WebRTC](https://github.com/mozilla/janus-plugin-sfu) and [reticulum](https://github.com/mozilla/reticulum) servers. 
 
 ## Building Static Files
 
@@ -59,6 +63,7 @@ This will allow the CSP checks to pass that are served up by Reticulum so you ca
 - `disable_telemetry` - If `true` disables Sentry telemetry.
 - `log_filter` - A `debug` style filter for setting the logging level.
 - `debug` - If `true` performs verbose logging of Janus and NAF traffic.
+- `debug_log` - If `true`, enables an on-screen debug log and console. Useful for debugging on mobile devices.
 - `disableTunnel` - Tunnel vision is on by default. Disable the tunnel vision by this parameter.
 
 ## Additional Resources

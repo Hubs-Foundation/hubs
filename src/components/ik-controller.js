@@ -134,10 +134,12 @@ AFRAME.registerComponent("ik-controller", {
       return;
     }
 
+    const root = this.ikRoot.el.object3D;
     const { camera, leftController, rightController } = this.ikRoot;
     const {
       hips,
       head,
+      neck,
       chest,
       cameraForward,
       headTransform,
@@ -180,6 +182,11 @@ AFRAME.registerComponent("ik-controller", {
     rootToChest.multiplyMatrices(hips.matrix, chest.matrix);
     invRootToChest.getInverse(rootToChest);
 
+    root.matrixNeedsUpdate = true;
+    neck.matrixNeedsUpdate = true;
+    head.matrixNeedsUpdate = true;
+    chest.matrixNeedsUpdate = true;
+
     this.updateHand(this.hands.left, leftHand, leftController, true);
     this.updateHand(this.hands.right, rightHand, rightController, false);
   },
@@ -195,6 +202,7 @@ AFRAME.registerComponent("ik-controller", {
     const handHiddenByPersonalSpace = spaceInvader && spaceInvader.invading;
 
     handObject3D.visible = !handHiddenByPersonalSpace && controllerObject3D.visible;
+
     if (controllerObject3D.visible) {
       handMatrix.multiplyMatrices(this.invRootToChest, controllerObject3D.matrix);
 
@@ -208,6 +216,7 @@ AFRAME.registerComponent("ik-controller", {
 
       handObject3D.position.setFromMatrixPosition(handMatrix);
       handObject3D.rotation.setFromRotationMatrix(handMatrix);
+      handObject3D.matrixNeedsUpdate = true;
     }
   }
 });
