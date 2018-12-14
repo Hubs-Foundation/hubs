@@ -530,6 +530,7 @@ AFRAME.registerComponent("media-image", {
     }
 
     this.mesh.material.map = texture;
+    this.mesh.material.transparent = texture.format === THREE.RGBAFormat;
     this.mesh.material.needsUpdate = true;
 
     if (projection === "flat") {
