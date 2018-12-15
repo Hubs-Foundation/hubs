@@ -187,8 +187,8 @@ export const daydreamUserBindings = addSetsToBindings({
     },
     {
       src: {
-        bool: touchpadPressed,
-        value: brushSizeDelta
+        value: brushSizeDelta,
+        bool: touchpadPressed
       },
       dest: { value: paths.actions.cursor.scalePenTip },
       xform: xforms.copyIfFalse,
@@ -212,8 +212,8 @@ export const daydreamUserBindings = addSetsToBindings({
     },
     {
       src: {
-        bool: touchpadPressed,
-        value: cursorModDelta
+        value: cursorModDelta,
+        bool: touchpadPressed
       },
       dest: { value: paths.actions.cursor.modDelta },
       xform: xforms.copyIfFalse,
