@@ -59,16 +59,18 @@ export const getCustomGLTFParserURLResolver = gltfUrl => (url, path) => {
   if (/^data:.*,.*$/i.test(url)) return url;
   if (/^blob:.*$/i.test(url)) return url;
 
-  // For absolute paths with a CORS proxied gltf URL, re-write the url properly to be proxied
-  const corsProxyPrefix = `https://${process.env.CORS_PROXY_SERVER}/`;
+  if (process.env.CORS_PROXY_SERVER) {
+    // For absolute paths with a CORS proxied gltf URL, re-write the url properly to be proxied
+    const corsProxyPrefix = `https://${process.env.CORS_PROXY_SERVER}/`;
 
-  if (gltfUrl.startsWith(corsProxyPrefix)) {
-    const originalUrl = decodeURIComponent(gltfUrl.substring(corsProxyPrefix.length));
-    const originalUrlParts = originalUrl.split("/");
+    if (gltfUrl.startsWith(corsProxyPrefix)) {
+      const originalUrl = decodeURIComponent(gltfUrl.substring(corsProxyPrefix.length));
+      const originalUrlParts = originalUrl.split("/");
 
-    // Drop the .gltf filename
-    const assetUrl = originalUrlParts.slice(0, originalUrlParts.length - 1).join("/") + "/" + url;
-    return corsProxyPrefix + encodeURIComponent(assetUrl);
+      // Drop the .gltf filename
+      const assetUrl = originalUrlParts.slice(0, originalUrlParts.length - 1).join("/") + "/" + url;
+      return corsProxyPrefix + encodeURIComponent(assetUrl);
+    }
   }
 
   return path + url;
