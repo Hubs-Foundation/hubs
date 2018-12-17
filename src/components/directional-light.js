@@ -48,6 +48,10 @@ AFRAME.registerComponent("directional-light", {
   },
 
   tick() {
+    if (window.APP && window.APP.quality === "low") {
+      return;
+    }
+
     resizeShadowCameraFrustum(this.light, this.el.sceneEl.object3D);
   },
 
