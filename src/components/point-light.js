@@ -11,6 +11,7 @@ AFRAME.registerComponent("point-light", {
     const el = this.el;
     this.light = new THREE.PointLight();
     this.light.decay = 2;
+    this.light.shadow.camera.matrixAutoUpdate = true;
     this.el.setObject3D("point-light", this.light);
     this.el.sceneEl.systems.light.registerLight(el);
   },
