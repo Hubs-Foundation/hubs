@@ -1,3 +1,5 @@
+import resizeShadowCameraFrustum from "../utils/resizeShadowCameraFrustum";
+
 AFRAME.registerComponent("directional-light", {
   schema: {
     color: { type: "color" },
@@ -43,6 +45,10 @@ AFRAME.registerComponent("directional-light", {
         light.shadow.map = null;
       }
     }
+  },
+
+  tick() {
+    resizeShadowCameraFrustum(this.light, this.el.sceneEl.object3D);
   },
 
   remove: function() {
