@@ -145,7 +145,6 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
   node.matrixAutoUpdate = false;
   node.matrix.identity();
   node.matrix.decompose(node.position, node.rotation, node.scale);
-  el.object3D.matrixNeedsUpdate = true;
 
   el.setObject3D(node.type.toLowerCase(), node);
   if (entityComponents && "nav-mesh" in entityComponents) {
@@ -392,6 +391,8 @@ AFRAME.registerComponent("gltf-model-plus", {
         const el = o.el;
         if (el) rewires.push(() => (o.el = el));
       });
+
+      object3DToSet.traverse(o => (o.matrixNeedsUpdate = true));
 
       this.el.setObject3D("mesh", object3DToSet);
 
