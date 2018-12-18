@@ -229,11 +229,11 @@ AFRAME.registerComponent("media-pager", {
     // will instantiate a null version of it for all media objects thanks to how it handles component schemas
     if (this.data.src) {
       this.el.addEventListener("image-loaded", async e => {
-        // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
-        // request for the same page to read out the max-content-index header
-        this.maxIndex = await fetchMaxContentIndex(e.detail.src);
         // if this is the first image we ever loaded, set up the UI
         if (this.toolbar == null) {
+          // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
+          // request for the same page to read out the max-content-index header
+          this.maxIndex = await fetchMaxContentIndex(e.detail.src);
           const template = document.getElementById("paging-toolbar");
           this.el.querySelector(".interactable-ui").appendChild(document.importNode(template.content, true));
           this.toolbar = this.el.querySelector(".paging-toolbar");
