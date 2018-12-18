@@ -237,6 +237,7 @@ AFRAME.registerComponent("media-video", {
     coneOuterAngle: { type: "number", default: 0 },
     coneOuterGain: { type: "number", default: 0 },
     videoPaused: { type: "boolean" },
+    projection: { type: "string", default: "flat" },
     time: { type: "number" },
     tickRate: { default: 1000 }, // ms interval to send time interval updates
     syncTolerance: { default: 2 }
