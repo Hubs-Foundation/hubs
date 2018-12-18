@@ -326,8 +326,10 @@ async function runBotMode(scene, entryManager) {
 document.addEventListener("DOMContentLoaded", async () => {
   warmSerializeElement();
 
-  // HACK: On iOS, if mic permission is not granted, subscriber webrtc negotiation fails.
-  if (detectOS(navigator.userAgent) === "iOS") {
+  // HACK: On iOS & MacOS, if mic permission is not granted, subscriber webrtc negotiation fails.
+  const detectedOS = detectOS(navigator.userAgent);
+
+  if (detectedOS === "iOS" || detectedOS === "Mac OS") {
     await navigator.mediaDevices.getUserMedia({ audio: true });
   }
 
