@@ -275,7 +275,7 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
 
   if (fileMap) {
     // The GLTF is now cached as a THREE object, we can get rid of the original blobs
-    Object.keys(fileMap).forEach(URL.revokeObjectURL);
+    Object.values(fileMap).forEach(URL.revokeObjectURL);
   }
 
   return gltf;
