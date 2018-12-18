@@ -253,6 +253,10 @@ AFRAME.registerComponent("media-video", {
 
     this.lastUpdate = 0;
 
+    // we kind of have to deal with the "empty case" for this component, because networked-aframe
+    // will instantiate a null version of it for all media objects thanks to how it handles component schemas
+    if (!this.data.src) return;
+
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
       this.updatePlaybackState();
