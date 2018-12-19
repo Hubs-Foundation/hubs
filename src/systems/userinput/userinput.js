@@ -10,6 +10,7 @@ import { GearVRControllerDevice } from "./devices/gear-vr-controller";
 import { OculusTouchControllerDevice } from "./devices/oculus-touch-controller";
 import { DaydreamControllerDevice } from "./devices/daydream-controller";
 import { ViveControllerDevice } from "./devices/vive-controller";
+import { WindowsMixedRealityControllerDevice } from "./devices/windows-mixed-reality-controller";
 import { GyroDevice } from "./devices/gyro";
 
 import { AppAwareMouseDevice } from "./devices/app-aware-mouse";
@@ -20,6 +21,7 @@ import { touchscreenUserBindings } from "./bindings/touchscreen-user";
 import { keyboardDebuggingBindings } from "./bindings/keyboard-debugging";
 import { oculusTouchUserBindings } from "./bindings/oculus-touch-user";
 import { viveUserBindings } from "./bindings/vive-user";
+import { wmrUserBindings } from "./bindings/wmr-user";
 import { xboxControllerUserBindings } from "./bindings/xbox-controller-user";
 import { daydreamUserBindings } from "./bindings/daydream-user";
 
@@ -184,6 +186,7 @@ AFRAME.registerSystem("userinput", {
     this.registeredMappingsChanged = true;
 
     const vrGamepadMappings = new Map();
+    vrGamepadMappings.set(WindowsMixedRealityControllerDevice, wmrUserBindings);
     vrGamepadMappings.set(ViveControllerDevice, viveUserBindings);
     vrGamepadMappings.set(OculusTouchControllerDevice, oculusTouchUserBindings);
     vrGamepadMappings.set(OculusGoControllerDevice, oculusGoUserBindings);
@@ -224,6 +227,7 @@ AFRAME.registerSystem("userinput", {
     };
 
     const gamepadConnected = e => {
+      console.log("BPDEBUG gamepadConnected", e.gamepad.id);
       let gamepadDevice;
       for (const activeDevice of this.activeDevices) {
         if (activeDevice.gamepad && activeDevice.gamepad.index === e.gamepad.index) {
@@ -235,6 +239,8 @@ AFRAME.registerSystem("userinput", {
         gamepadDevice = new ViveControllerDevice(e.gamepad);
       } else if (e.gamepad.id.startsWith("Oculus Touch")) {
         gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
+      } else if (e.gamepad.id.startsWith("Windows Mixed Reality")) {
+        gamepadDevice = new WindowsMixedRealityControllerDevice(e.gamepad);
       } else if (e.gamepad.id === "Oculus Go Controller") {
         gamepadDevice = new OculusGoControllerDevice(e.gamepad);
         // Note that FXR reports Vive Focus' controller as GearVR, so this is primarily to support that

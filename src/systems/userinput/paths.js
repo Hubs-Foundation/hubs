@@ -227,3 +227,27 @@ paths.device.vive.right = {
   },
   pose: `/device/vive/right/pose`
 };
+
+paths.device.wmr = {};
+paths.device.wmr.left = {
+  button: buttonName => ({
+    pressed: `/device/wmr/left/button/${buttonName}/pressed`,
+    touched: `/device/wmr/left/button/${buttonName}/touched`,
+    value: `/device/wmr/left/button/${buttonName}/value`
+  }),
+  axis: axisName => {
+    return `/device/wmr/left/axis/${axisName}`;
+  },
+  pose: `/device/wmr/left/pose`
+};
+paths.device.wmr.right = {
+  button: buttonName => ({
+    pressed: `/device/wmr/right/button/${buttonName}/pressed`,
+    touched: `/device/wmr/right/button/${buttonName}/touched`,
+    value: `/device/wmr/right/button/${buttonName}/value`
+  }),
+  axis: axisName => {
+    return `/device/wmr/right/axis/${axisName}`;
+  },
+  pose: `/device/wmr/right/pose`
+};
