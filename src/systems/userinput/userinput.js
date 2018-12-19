@@ -21,7 +21,7 @@ import { touchscreenUserBindings } from "./bindings/touchscreen-user";
 import { keyboardDebuggingBindings } from "./bindings/keyboard-debugging";
 import { oculusTouchUserBindings } from "./bindings/oculus-touch-user";
 import { viveUserBindings } from "./bindings/vive-user";
-import { wmrUserBindings } from "./bindings/wmr-user";
+import { wmrUserBindings } from "./bindings/windows-mixed-reality-user";
 import { xboxControllerUserBindings } from "./bindings/xbox-controller-user";
 import { daydreamUserBindings } from "./bindings/daydream-user";
 
@@ -239,7 +239,7 @@ AFRAME.registerSystem("userinput", {
         gamepadDevice = new ViveControllerDevice(e.gamepad);
       } else if (e.gamepad.id.startsWith("Oculus Touch")) {
         gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
-      } else if (e.gamepad.id.startsWith("Windows Mixed Reality")) {
+      } else if (e.gamepad.id.startsWith("Spatial Controller")) {
         gamepadDevice = new WindowsMixedRealityControllerDevice(e.gamepad);
       } else if (e.gamepad.id === "Oculus Go Controller") {
         gamepadDevice = new OculusGoControllerDevice(e.gamepad);

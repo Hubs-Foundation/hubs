@@ -39,3 +39,13 @@ body.mirrored-camera {
 .webxr-realities, .webxr-sessions {
   @extend %unselectable
 }
+
+#userinput-frame {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  background: white;
+  white-space: pre;
+  font-family: monospace;
+  font-size: 8pt;
+}

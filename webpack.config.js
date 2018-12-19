@@ -60,7 +60,7 @@ function createHTTPSConfig() {
   }
 }
 
-const defaultHostName = "hubs.local";
+const defaultHostName = "localhost";
 const host = process.env.HOST_IP || defaultHostName;
 
 function matchRegex({ include, exclude }) {

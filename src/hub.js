@@ -619,4 +619,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   authChannel.setSocket(socket);
   linkChannel.setSocket(socket);
+
+  const userinputFrame = document.getElementById("userinput-frame");
+  const replacer = (k, v) => {
+    if (typeof v === "number") {
+      return `${v >= 0 ? "+" : ""}${v.toFixed(3)}`;
+    }
+    return v;
+  };
+  setInterval(() => {
+    const paths = [];
+    const { frame } = scene.systems.userinput;
+    for (const key in frame) {
+      if (!frame.hasOwnProperty(key)) continue;
+      if (!key.startsWith("/actions/")) continue;
+      let val = JSON.stringify(frame[key], replacer);
+      if (val) val = val.replace(/{"(\w{3,})":/g, "{\n  \"$1\":").replace(/,"(\w{3,})":/g, ",\n  \"$1\":");
+      paths.push(`${key} -> ${val}`);
+    }
+    userinputFrame.textContent = paths.join("\n")
+  }, 100);
 });
