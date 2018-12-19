@@ -10,11 +10,13 @@ AFRAME.registerComponent("clone-media-button", {
     this.onClick = () => {
       const { src, resize } = this.targetEl.components["media-loader"].data;
       const { entity } = addMedia(src, "#interactable-media", ObjectContentOrigins.URL, true, resize);
-      entity.object3D.position.copy(this.targetEl.object3D.position);
-      entity.object3D.rotation.copy(this.targetEl.object3D.rotation);
-      entity.object3D.scale.copy(this.targetEl.object3D.scale);
+
       entity.object3D.matrixNeedsUpdate = true;
-      entity.object3D.matrixWorldNeedsUpdate = true;
+
+      entity.setAttribute("offset-relative-to", {
+        target: "#player-camera",
+        offset: { x: 0, y: 0, z: -1.5 }
+      });
     };
   },
 
