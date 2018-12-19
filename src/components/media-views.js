@@ -442,7 +442,7 @@ AFRAME.registerComponent("media-video", {
 
     const projection = this.data.projection;
 
-    if (projection !== oldData.projection) {
+    if (!this.mesh || projection !== oldData.projection) {
       const material = new THREE.MeshBasicMaterial();
 
       let geometry;
@@ -536,7 +536,7 @@ AFRAME.registerComponent("media-image", {
 
     const projection = this.data.projection;
 
-    if (projection !== oldData.projection) {
+    if (!this.mesh || projection !== oldData.projection) {
       const material = new THREE.MeshBasicMaterial();
 
       let geometry;
