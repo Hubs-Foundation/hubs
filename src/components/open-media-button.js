@@ -1,4 +1,4 @@
-const hubsRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/(\w+)\/?\S*/g;
+const hubsRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/(\w+)\/?\S*/;
 const isHubsUrl = hubsRegex.test.bind(hubsRegex);
 
 AFRAME.registerComponent("open-media-button", {
