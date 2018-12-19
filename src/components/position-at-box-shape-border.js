@@ -79,9 +79,9 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     const isVisible = this.targetEl.getAttribute("visible");
     const opening = isVisible && !this.wasVisible;
     const scaleChanged =
-      this.el.object3D.scale.x !== this.previousTargetScaleX ||
-      this.el.object3D.scale.y !== this.previousTargetScaleY ||
-      this.el.object3D.scale.z !== this.previousTargetScaleZ;
+      this.el.object3D.scale.x !== this.previousScaleX ||
+      this.el.object3D.scale.y !== this.previousScaleY ||
+      this.el.object3D.scale.z !== this.previousScaleZ;
     const isAnimating = this.targetEl.getAttribute("animation__show");
 
     // If the target is being shown or the scale changed while the opening animation is being run,
@@ -91,9 +91,9 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     }
 
     this.wasVisible = isVisible;
-    this.previousTargetScaleX = this.el.object3D.scale.x;
-    this.previousTargetScaleY = this.el.object3D.scale.y;
-    this.previousTargetScaleZ = this.el.object3D.scale.z;
+    this.previousScaleX = this.el.object3D.scale.x;
+    this.previousScaleY = this.el.object3D.scale.y;
+    this.previousScaleZ = this.el.object3D.scale.z;
   },
 
   _updateBox: (function() {
