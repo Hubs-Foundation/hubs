@@ -102,22 +102,32 @@ function penBindings(hand, forCursor) {
   ];
 }
 
-export const wmrUserBindings = addSetsToBindings({
-  [sets.global]: [
+function handPoseBindings(hand) {
+  const padTouched = paths.device.wmr[hand].button("touchpad").touched;
+  const triggerPressed = paths.device.wmr[hand].button("trigger").pressed;
+  const gripPressed = paths.device.wmr[hand].button("grip").pressed;
+  const actions = paths.actions[hand + "Hand"];
+  return [
     {
-      src: {
-        value: paths.device.keyboard.key("l")
-      },
-      dest: {
-        value: paths.actions.logDebugFrame
-      },
-      xform: xforms.rising
-    },
-    {
-      src: { value: paths.device.wmr.right.pose },
-      dest: { value: paths.actions.cursor.pose },
+      src: { value: padTouched },
+      dest: { value: actions.thumb },
       xform: xforms.copy
     },
+    {
+      src: { value: triggerPressed },
+      dest: { value: actions.index },
+      xform: xforms.copy
+    },
+    {
+      src: { value: gripPressed },
+      dest: { value: actions.middleRingPinky },
+      xform: xforms.copy
+    }
+  ];
+}
+
+export const wmrUserBindings = addSetsToBindings({
+  [sets.global]: [
     {
       src: { value: paths.device.wmr.left.pose },
       dest: { value: paths.actions.leftHand.pose },
@@ -125,9 +135,16 @@ export const wmrUserBindings = addSetsToBindings({
     },
     {
       src: { value: paths.device.wmr.right.pose },
+      dest: { value: paths.actions.cursor.pose },
+      xform: xforms.copy
+    },
+    {
+      src: { value: paths.device.wmr.right.pose },
       dest: { value: paths.actions.rightHand.pose },
       xform: xforms.copy
     },
+    ...handPoseBindings("left"),
+    ...handPoseBindings("right"),
     {
       src: {
         x: paths.device.wmr.right.axis("joyX"),
@@ -158,6 +175,24 @@ export const wmrUserBindings = addSetsToBindings({
     {
       src: { value: rJoyEast },
       dest: { value: paths.actions.snapRotateRight },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        value: paths.device.keyboard.key("m")
+      },
+      dest: {
+        value: paths.actions.muteMic
+      },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        value: paths.device.keyboard.key("t")
+      },
+      dest: {
+        value: paths.actions.focusChat
+      },
       xform: xforms.rising
     }
   ],
