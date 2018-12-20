@@ -6,14 +6,14 @@ import { addSetsToBindings } from "./utils";
 const v = name => {
   return `/wmr-user/wmr-var/${name}`;
 };
+const k = name => {
+  return `/wmr-user/keyboard-var/${name}`;
+};
 
 const lGripPressed = paths.device.wmr.left.button("grip").pressed;
 const rGripPressed = paths.device.wmr.right.button("grip").pressed;
 
-const rJoy = v("right/joy");
 const rJoyNorth = v("right/joy/north");
-const rJoyWest = v("right/joy/west");
-const rJoyEast = v("right/joy/East");
 const rPadPressedY = v("right/pad/pressed/y");
 
 function dpadVariables(hand) {
@@ -164,9 +164,6 @@ function freezeBindings(hand) {
 }
 
 function characterAccelerationBindings() {
-  const k = name => {
-    return `/wmr-user/keyboard-var/${name}`;
-  };
   const wasd_vec2 = k("wasd_vec2");
   const arrows_vec2 = k("arrows_vec2");
   const keyboardCharacterAcceleration = k("characterAcceleration");
@@ -240,6 +237,71 @@ function characterAccelerationBindings() {
   ];
 }
 
+function teleportationAndRotationBindings() {
+  const rJoy = v("right/joy");
+  const rJoyWest = v("right/joy/west");
+  const rJoyEast = v("right/joy/East");
+  const rJoyWestRising = v("right/joy/west/rising");
+  const rJoyEastRising = v("right/joy/east/rising");
+  const keyboardQRising = k("q/rising");
+  const keyboardERising = k("e/rising");
+  return [
+    {
+      src: {
+        x: paths.device.wmr.right.axis("joyX"),
+        y: paths.device.wmr.right.axis("joyY")
+      },
+      dest: { value: rJoy },
+      xform: xforms.compose_vec2
+    },
+    {
+      src: { value: rJoy },
+      dest: {
+        north: rJoyNorth,
+        west: rJoyWest,
+        east: rJoyEast
+      },
+      xform: xforms.vec2dpad(0.2, false, false)
+    },
+    {
+      src: { value: rJoyNorth },
+      dest: { value: paths.actions.rightHand.startTeleport },
+      xform: xforms.rising
+    },
+    ...characterAccelerationBindings(),
+    {
+      src: { value: rJoyWest },
+      dest: { value: rJoyWestRising },
+      xform: xforms.rising
+    },
+    {
+      src: { value: rJoyEast },
+      dest: { value: rJoyEastRising },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("q") },
+      dest: { value: keyboardQRising },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("e") },
+      dest: { value: keyboardERising },
+      xform: xforms.rising
+    },
+    {
+      src: [rJoyWestRising, keyboardQRising],
+      dest: { value: paths.actions.snapRotateLeft },
+      xform: xforms.any
+    },
+    {
+      src: [rJoyEastRising, keyboardERising],
+      dest: { value: paths.actions.snapRotateRight },
+      xform: xforms.any
+    }
+  ];
+}
+
 export const wmrUserBindings = addSetsToBindings({
   [sets.global]: [
     {
@@ -266,39 +328,7 @@ export const wmrUserBindings = addSetsToBindings({
     },
     ...freezeBindings("left"),
     ...freezeBindings("right"),
-    {
-      src: {
-        x: paths.device.wmr.right.axis("joyX"),
-        y: paths.device.wmr.right.axis("joyY")
-      },
-      dest: { value: rJoy },
-      xform: xforms.compose_vec2
-    },
-    {
-      src: { value: rJoy },
-      dest: {
-        north: rJoyNorth,
-        west: rJoyWest,
-        east: rJoyEast
-      },
-      xform: xforms.vec2dpad(0.2, false, false)
-    },
-    {
-      src: { value: rJoyNorth },
-      dest: { value: paths.actions.rightHand.startTeleport },
-      xform: xforms.rising
-    },
-    ...characterAccelerationBindings(),
-    {
-      src: { value: rJoyWest },
-      dest: { value: paths.actions.snapRotateLeft },
-      xform: xforms.rising
-    },
-    {
-      src: { value: rJoyEast },
-      dest: { value: paths.actions.snapRotateRight },
-      xform: xforms.rising
-    },
+    ...teleportationAndRotationBindings(),
     {
       src: {
         value: paths.device.keyboard.key("m")
