@@ -79,6 +79,8 @@ import "./components/stop-event-propagation";
 import "./components/animation";
 import "./components/follow-in-lower-fov";
 import "./components/matrix-auto-update";
+import "./components/clone-media-button";
+import "./components/open-media-button";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -355,6 +357,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const scene = document.querySelector("a-scene");
   scene.removeAttribute("keyboard-shortcuts"); // Remove F and ESC hotkeys from aframe
+  scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
 
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);

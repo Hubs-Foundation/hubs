@@ -72,6 +72,21 @@ async function grantedMicLabels() {
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
+import webmTone from "../assets/sfx/tone.webm";
+import mp3Tone from "../assets/sfx/tone.mp3";
+import oggTone from "../assets/sfx/tone.ogg";
+import wavTone from "../assets/sfx/tone.wav";
+const toneClip = document.createElement("audio");
+if (toneClip.canPlayType("audio/webm")) {
+  toneClip.src = webmTone;
+} else if (toneClip.canPlayType("audio/mpeg")) {
+  toneClip.src = mp3Tone;
+} else if (toneClip.canPlayType("audio/ogg")) {
+  toneClip.src = oggTone;
+} else {
+  toneClip.src = wavTone;
+}
+
 class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
@@ -305,7 +320,6 @@ class UIRoot extends Component {
   };
 
   playTestTone = () => {
-    const toneClip = document.querySelector("#test-tone");
     toneClip.currentTime = 0;
     toneClip.play();
     clearTimeout(this.testToneTimeout);
@@ -317,7 +331,6 @@ class UIRoot extends Component {
   };
 
   stopTestTone = () => {
-    const toneClip = document.querySelector("#test-tone");
     toneClip.pause();
     toneClip.currentTime = 0;
     this.setState({ tonePlaying: false });

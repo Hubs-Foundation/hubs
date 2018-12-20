@@ -26,7 +26,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.2",
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
-    "aframe": "github:mozillareality/aframe#bugfix/oculus-go-controller-reconnect-pre-e0c8ff7",
+    "aframe": "github:mozillareality/aframe#28d57fb2b2bdfc5ec410ceda28e76902325e39e8",
     "aframe-billboard-component": "^1.0.0",
     "aframe-inspector": "^0.8.3",
     "aframe-motion-capture-components": "github:mozillareality/aframe-motion-capture-components#1ca616fa67b627e447b23b35a09da175d8387668",

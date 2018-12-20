@@ -91,7 +91,6 @@ async function createVideoEl(src) {
   // allow the user to unmute it with an interaction in the unmute-video-button component.
   videoEl.muted = isIOS;
   videoEl.preload = "auto";
-  videoEl.loop = true;
   videoEl.crossOrigin = "anonymous";
 
   if (!src.startsWith("hubs://")) {
@@ -132,17 +131,6 @@ function createVideoTexture(url) {
       texture.needsCorrectionFlipY = true;
     }
   });
-}
-
-function createPlaneMesh(texture) {
-  const material = new THREE.MeshBasicMaterial();
-  material.side = THREE.DoubleSide;
-  material.transparent = true;
-  material.map = texture;
-  material.needsUpdate = true;
-
-  const geometry = new THREE.PlaneGeometry();
-  return new THREE.Mesh(geometry, material);
 }
 
 function fitToTexture(el, texture) {
@@ -238,8 +226,19 @@ errorImage.onload = () => {
 AFRAME.registerComponent("media-video", {
   schema: {
     src: { type: "string" },
-    time: { type: "number" },
+    volume: { type: "number", default: 0.5 },
+    loop: { type: "boolean", default: true },
+    audioType: { type: "string", default: "pannernode" },
+    distanceModel: { type: "string", default: "inverse" },
+    rolloffFactor: { type: "number", default: 1 },
+    refDistance: { type: "number", default: 1 },
+    maxDistance: { type: "number", default: 10000 },
+    coneInnerAngle: { type: "number", default: 360 },
+    coneOuterAngle: { type: "number", default: 0 },
+    coneOuterGain: { type: "number", default: 0 },
     videoPaused: { type: "boolean" },
+    projection: { type: "string", default: "flat" },
+    time: { type: "number" },
     tickRate: { default: 1000 }, // ms interval to send time interval updates
     syncTolerance: { default: 2 }
   },
@@ -336,60 +335,6 @@ AFRAME.registerComponent("media-video", {
     }
   },
 
-  async updateTexture(src) {
-    let texture;
-    try {
-      texture = await createVideoTexture(src);
-
-      // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
-      if (this.data.src !== src) {
-        disposeTexture(texture);
-        return;
-      }
-
-      if (!src.startsWith("hubs://")) {
-        // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
-        texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
-
-        const sound = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-        sound.setNodeSource(texture.audioSource);
-        this.el.setObject3D("sound", sound);
-      }
-
-      this.video = texture.image;
-      this.video.addEventListener("pause", this.onPauseStateChange);
-      this.video.addEventListener("play", this.onPauseStateChange);
-
-      if (isIOS) {
-        const template = document.getElementById("video-unmute");
-        this.el.appendChild(document.importNode(template.content, true));
-        this.el.setAttribute("position-at-box-shape-border__unmute-ui", {
-          target: ".unmute-ui",
-          dirs: ["forward", "back"]
-        });
-      }
-    } catch (e) {
-      console.error("Error loading video", this.data.src, e);
-      texture = errorTexture;
-    }
-
-    if (!this.mesh) {
-      this.mesh = createPlaneMesh(texture);
-      this.el.setObject3D("mesh", this.mesh);
-    } else {
-      const { material } = this.mesh;
-      material.map = texture;
-      material.needsUpdate = true;
-      this.mesh.needsUpdate = true;
-    }
-
-    fitToTexture(this.el, texture);
-
-    this.updatePlaybackState(true);
-
-    this.el.emit("video-loaded");
-  },
-
   updatePlaybackState(force) {
     if (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && this.video)) {
       if (Math.abs(this.data.time - this.video.currentTime) > this.data.syncTolerance) {
@@ -429,7 +374,7 @@ AFRAME.registerComponent("media-video", {
     }
   },
 
-  update(oldData) {
+  async update(oldData) {
     const { src } = this.data;
 
     this.updatePlaybackState();
@@ -442,7 +387,89 @@ AFRAME.registerComponent("media-video", {
       this.mesh.material.needsUpdate = true;
     }
 
-    this.updateTexture(src);
+    let texture;
+    try {
+      texture = await createVideoTexture(src);
+
+      // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
+      if (this.data.src !== src) {
+        disposeTexture(texture);
+        return;
+      }
+
+      if (!src.startsWith("hubs://")) {
+        // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
+        texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
+
+        let audio;
+
+        if (this.data.audioType === "pannernode") {
+          audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+          audio.setDistanceModel(this.data.distanceModel);
+          audio.setRolloffFactor(this.data.rolloffFactor);
+          audio.setRefDistance(this.data.refDistance);
+          audio.setMaxDistance(this.data.maxDistance);
+          audio.panner.coneInnerAngle = this.data.coneInnerAngle;
+          audio.panner.coneOuterAngle = this.data.coneOuterAngle;
+          audio.panner.coneOuterGain = this.data.coneOuterGain;
+        } else {
+          audio = new THREE.Audio(this.el.sceneEl.audioListener);
+        }
+
+        audio.gain.gain.value = this.data.volume;
+
+        audio.setNodeSource(texture.audioSource);
+        this.el.setObject3D("sound", audio);
+      }
+
+      this.video = texture.image;
+      this.video.loop = this.data.loop;
+      this.video.addEventListener("pause", this.onPauseStateChange);
+      this.video.addEventListener("play", this.onPauseStateChange);
+
+      if (isIOS) {
+        const template = document.getElementById("video-unmute");
+        this.el.appendChild(document.importNode(template.content, true));
+        this.el.setAttribute("position-at-box-shape-border__unmute-ui", {
+          target: ".unmute-ui",
+          dirs: ["forward", "back"]
+        });
+      }
+    } catch (e) {
+      console.error("Error loading video", this.data.src, e);
+      texture = errorTexture;
+    }
+
+    const projection = this.data.projection;
+
+    if (!this.mesh || projection !== oldData.projection) {
+      const material = new THREE.MeshBasicMaterial();
+
+      let geometry;
+
+      if (projection === "360-equirectangular") {
+        geometry = new THREE.SphereBufferGeometry(1, 64, 32);
+        // invert the geometry on the x-axis so that all of the faces point inward
+        geometry.scale(-1, 1, 1);
+      } else {
+        geometry = new THREE.PlaneGeometry();
+        material.side = THREE.DoubleSide;
+      }
+
+      this.mesh = new THREE.Mesh(geometry, material);
+      this.el.setObject3D("mesh", this.mesh);
+    }
+
+    this.mesh.material.map = texture;
+    this.mesh.material.needsUpdate = true;
+
+    if (projection === "flat") {
+      fitToTexture(this.el, texture);
+    }
+
+    this.updatePlaybackState(true);
+
+    this.el.emit("video-loaded");
   },
 
   tick() {
@@ -459,6 +486,7 @@ AFRAME.registerComponent("media-video", {
 AFRAME.registerComponent("media-image", {
   schema: {
     src: { type: "string" },
+    projection: { type: "string", default: "flat" },
     contentType: { type: "string" }
   },
 
@@ -472,7 +500,7 @@ AFRAME.registerComponent("media-image", {
       const { src, contentType } = this.data;
       if (!src) return;
 
-      if (this.mesh && this.mesh.map) {
+      if (this.mesh && this.mesh.map && src !== oldData.src) {
         this.mesh.material.map = null;
         this.mesh.material.needsUpdate = true;
         if (this.mesh.map !== errorTexture) {
@@ -506,17 +534,33 @@ AFRAME.registerComponent("media-image", {
       texture = errorTexture;
     }
 
-    if (!this.mesh) {
-      this.mesh = createPlaneMesh(texture);
+    const projection = this.data.projection;
+
+    if (!this.mesh || projection !== oldData.projection) {
+      const material = new THREE.MeshBasicMaterial();
+
+      let geometry;
+
+      if (projection === "360-equirectangular") {
+        geometry = new THREE.SphereBufferGeometry(1, 64, 32);
+        // invert the geometry on the x-axis so that all of the faces point inward
+        geometry.scale(-1, 1, 1);
+      } else {
+        geometry = new THREE.PlaneGeometry();
+        material.side = THREE.DoubleSide;
+      }
+
+      this.mesh = new THREE.Mesh(geometry, material);
       this.el.setObject3D("mesh", this.mesh);
-    } else {
-      const { material } = this.mesh;
-      material.map = texture;
-      material.needsUpdate = true;
-      this.mesh.needsUpdate = true;
     }
 
-    fitToTexture(this.el, texture);
+    this.mesh.material.map = texture;
+    this.mesh.material.transparent = texture.format === THREE.RGBAFormat;
+    this.mesh.material.needsUpdate = true;
+
+    if (projection === "flat") {
+      fitToTexture(this.el, texture);
+    }
 
     this.el.emit("image-loaded", { src: this.data.src });
   }

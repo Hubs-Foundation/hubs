@@ -8,7 +8,6 @@ AFRAME.GLTFModelPlus.registerComponent("css-class", "css-class");
 AFRAME.GLTFModelPlus.registerComponent("interactable", "css-class", (el, componentName) => {
   el.setAttribute(componentName, "interactable");
 });
-AFRAME.GLTFModelPlus.registerComponent("scene-shadow", "scene-shadow");
 AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner");
 AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
 AFRAME.GLTFModelPlus.registerComponent("media-loader", "media-loader");
@@ -98,3 +97,46 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
     el.setAttribute("media-video", { time: componentData.time });
   }
 });
+
+function mediaInflator(el, componentName, componentData, components) {
+  if (components.networked) {
+    el.setAttribute("networked", {
+      template: componentData.controls ? "#static-controlled-media" : "#static-media",
+      owner: "scene",
+      persistent: true,
+      networkId: components.networked.id
+    });
+  }
+
+  const mediaOptions = {
+    projection: componentData.projection
+  };
+
+  if (componentName === "video") {
+    mediaOptions.videoPaused = !componentData.autoPlay;
+    mediaOptions.volume = componentData.volume;
+    mediaOptions.loop = componentData.loop;
+    mediaOptions.audioType = componentData.audioType;
+
+    if (componentData.audioType === "pannernode") {
+      mediaOptions.distanceModel = componentData.distanceModel;
+      mediaOptions.rolloffFactor = componentData.rolloffFactor;
+      mediaOptions.refDistance = componentData.refDistance;
+      mediaOptions.maxDistance = componentData.maxDistance;
+      mediaOptions.coneInnerAngle = componentData.coneInnerAngle;
+      mediaOptions.coneOuterAngle = componentData.coneOuterAngle;
+      mediaOptions.coneOuterGain = componentData.coneOuterGain;
+    }
+  }
+
+  el.setAttribute("media-loader", {
+    src: componentData.src,
+    resize: true,
+    resolve: true,
+    fileIsOwned: true,
+    mediaOptions
+  });
+}
+
+AFRAME.GLTFModelPlus.registerComponent("image", "image", mediaInflator);
+AFRAME.GLTFModelPlus.registerComponent("video", "video", mediaInflator);
