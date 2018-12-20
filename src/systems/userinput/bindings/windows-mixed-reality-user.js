@@ -151,9 +151,9 @@ function freezeBindings(hand) {
   const padPressed = paths.device.wmr[hand].button("touchpad").pressed;
   return [
     {
-      src: { value: padPressed },
+      src: [paths.device.keyboard.key(" "), padPressed],
       dest: { value: paths.actions.ensureFrozen },
-      xform: xforms.copy
+      xform: xforms.any
     },
     {
       src: { value: padPressed },
@@ -182,6 +182,11 @@ export const wmrUserBindings = addSetsToBindings({
     },
     ...handPoseBindings("left"),
     ...handPoseBindings("right"),
+    {
+      src: { value: paths.device.keyboard.key(" ") },
+      dest: { value: paths.actions.thaw },
+      xform: xforms.falling
+    },
     ...freezeBindings("left"),
     ...freezeBindings("right"),
     {
