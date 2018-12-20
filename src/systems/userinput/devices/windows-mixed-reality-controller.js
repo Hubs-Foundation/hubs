@@ -25,9 +25,10 @@ export class WindowsMixedRealityControllerDevice {
       { name: "joyX", axisId: 2 },
       { name: "joyY", axisId: 3 }
     ];
-    const hand = gamepad.index === 0 ? "left" : "right";
-    this.path = paths.device.wmr[hand];
-    this.selector = `#player-${hand}-controller`;
+    this.path = paths.device.wmr[gamepad.hand || "right"];
+    if (gamepad.hand) {
+      this.selector = `#player-${gamepad.hand}-controller`;
+    }
   }
   write(frame) {
     if (!this.gamepad.connected) return;
@@ -41,6 +42,12 @@ export class WindowsMixedRealityControllerDevice {
     }
     for (const axis of this.axisMap) {
       frame[this.path.axis(axis.name)] = this.gamepad.axes[axis.axisId];
+    }
+
+    if (!this.selector) {
+      if (!this.gamepad.hand) return;
+      this.path = paths.device.wmr[this.gamepad.hand];
+      this.selector = `#player-${this.gamepad.hand}-controller`;
     }
 
     this.rayObject = this.rayObject || document.querySelector(this.selector).object3D;
