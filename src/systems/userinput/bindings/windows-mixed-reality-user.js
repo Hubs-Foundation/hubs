@@ -246,6 +246,19 @@ function characterAccelerationBindings() {
   ];
 }
 
+function holdingCameraBindings(hand, forCursor) {
+  const triggerPressed = paths.device.wmr[hand].button("trigger").pressed;
+  const actions = paths.actions[forCursor ? "cursor" : hand + "Hand"];
+  return [
+    neverFrozenBinding,
+    {
+      src: { value: triggerPressed },
+      dest: { value: actions.takeSnapshot },
+      xform: xforms.rising
+    }
+  ];
+}
+
 function teleportationAndRotationBindings() {
   const rJoy = v("right/joy");
   const rJoyWest = v("right/joy/west");
@@ -450,9 +463,9 @@ export const wmrUserBindings = addSetsToBindings({
   [sets.cursorHoveringOnCamera]: [],
   [sets.rightHandHoveringOnCamera]: [],
 
-  [sets.leftHandHoldingCamera]: [neverFrozenBinding],
-  [sets.cursorHoldingCamera]: [neverFrozenBinding],
-  [sets.rightHandHoldingCamera]: [neverFrozenBinding],
+  [sets.leftHandHoldingCamera]: holdingCameraBindings("left"),
+  [sets.cursorHoldingCamera]: holdingCameraBindings("right", true),
+  [sets.rightHandHoldingCamera]: holdingCameraBindings("right"),
 
   [sets.inputFocused]: []
 });
