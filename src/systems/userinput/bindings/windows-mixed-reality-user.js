@@ -163,6 +163,83 @@ function freezeBindings(hand) {
   ];
 }
 
+function characterAccelerationBindings() {
+  const k = name => {
+    return `/wmr-user/keyboard-var/${name}`;
+  };
+  const wasd_vec2 = k("wasd_vec2");
+  const arrows_vec2 = k("arrows_vec2");
+  const keyboardCharacterAcceleration = k("characterAcceleration");
+  const lJoyXDeadzoned = v("left/joy/x/deadzoned");
+  const lJoyYDeadzoned = v("left/joy/y/deadzoned");
+  const lJoyXScaled = v("left/joy/x/scaled");
+  const lJoyYScaled = v("left/joy/y/scaled");
+  const lCharacterAcceleration = v("left/characterAcceleration");
+  return [
+    {
+      src: {
+        w: paths.device.keyboard.key("arrowup"),
+        a: paths.device.keyboard.key("arrowleft"),
+        s: paths.device.keyboard.key("arrowdown"),
+        d: paths.device.keyboard.key("arrowright")
+      },
+      dest: { vec2: arrows_vec2 },
+      xform: xforms.wasd_to_vec2
+    },
+    {
+      src: {
+        w: paths.device.keyboard.key("w"),
+        a: paths.device.keyboard.key("a"),
+        s: paths.device.keyboard.key("s"),
+        d: paths.device.keyboard.key("d")
+      },
+      dest: { vec2: wasd_vec2 },
+      xform: xforms.wasd_to_vec2
+    },
+    {
+      src: {
+        first: wasd_vec2,
+        second: arrows_vec2
+      },
+      dest: { value: keyboardCharacterAcceleration },
+      xform: xforms.max_vec2
+    },
+    {
+      src: { value: paths.device.wmr.left.axis("joyX") },
+      dest: { value: lJoyXDeadzoned },
+      xform: xforms.deadzone(0.1)
+    },
+    {
+      src: { value: lJoyXDeadzoned },
+      dest: { value: lJoyXScaled },
+      xform: xforms.scale(1.5) // horizontal character speed modifier
+    },
+    {
+      src: { value: paths.device.wmr.left.axis("joyY") },
+      dest: { value: lJoyYDeadzoned },
+      xform: xforms.deadzone(0.1)
+    },
+    {
+      src: { value: lJoyYDeadzoned },
+      dest: { value: lJoyYScaled },
+      xform: xforms.scale(-1.5) // vertical character speed modifier
+    },
+    {
+      src: { x: lJoyXScaled, y: lJoyYScaled },
+      dest: { value: lCharacterAcceleration },
+      xform: xforms.compose_vec2
+    },
+    {
+      src: {
+        first: lCharacterAcceleration,
+        second: keyboardCharacterAcceleration
+      },
+      dest: { value: paths.actions.characterAcceleration },
+      xform: xforms.max_vec2
+    }
+  ];
+}
+
 export const wmrUserBindings = addSetsToBindings({
   [sets.global]: [
     {
@@ -211,6 +288,7 @@ export const wmrUserBindings = addSetsToBindings({
       dest: { value: paths.actions.rightHand.startTeleport },
       xform: xforms.rising
     },
+    ...characterAccelerationBindings(),
     {
       src: { value: rJoyWest },
       dest: { value: paths.actions.snapRotateLeft },

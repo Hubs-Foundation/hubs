@@ -21,6 +21,11 @@ export const xforms = {
       }
     };
   },
+  deadzone: function(deadzoneSize) {
+    return function deadzone(frame, src, dest) {
+      frame[dest.value] = Math.abs(frame[src.value]) < deadzoneSize ? 0 : frame[src.value];
+    };
+  },
   split_vec2: function(frame, src, dest) {
     if (frame[src.value] !== undefined) {
       frame[dest.x] = frame[src.value][0];
