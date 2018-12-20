@@ -233,6 +233,15 @@ function characterAccelerationBindings() {
       },
       dest: { value: paths.actions.characterAcceleration },
       xform: xforms.max_vec2
+    },
+    {
+      src: [
+        paths.device.wmr.left.button("trigger").pressed,
+        paths.device.wmr.right.button("trigger").pressed,
+        paths.device.keyboard.key("shift")
+      ],
+      dest: { value: paths.actions.boost },
+      xform: xforms.any
     }
   ];
 }
