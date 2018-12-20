@@ -22,7 +22,7 @@ AFRAME.registerComponent("log-events", {
       }
       return x;
     };
-    console.info(`listen-to-events: ${this.el.id} ${e.type} ${JSON.stringify(e.detail, replacer)}`);
+    console.info(`log-events: ${this.el.id} ${e.type} ${JSON.stringify(e.detail, replacer)}`);
   }
 });
 
