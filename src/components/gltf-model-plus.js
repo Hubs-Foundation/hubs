@@ -450,7 +450,7 @@ AFRAME.registerComponent("gltf-model-plus", {
           // and if there are too many it's too painful and large to tolerate doing it (at least until
           // we put this in a web worker)
           if (triCount > 1000 && triCount < 1000000) {
-            console.log(`Created BVH for geometry with ${geo.index.array.length} nodes.`);
+            console.log(`Created BVH for geometry with ${triCount} triangles.`);
             geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 20 });
 	        geo.setIndex(geo.boundsTree.index);
             console.log("Finished creating BVH.");
