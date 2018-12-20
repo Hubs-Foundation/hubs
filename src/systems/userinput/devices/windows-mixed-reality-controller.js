@@ -50,10 +50,10 @@ export class WindowsMixedRealityControllerDevice {
       frame[outpath.pressed] = !!frame[gamepadButton.pressed];
       frame[outpath.touched] = !!frame[gamepadButton.touched];
       frame[outpath.value] = frame[gamepadButton.value];
-    };
+    }
     for (const axis of this.axisMap) {
       frame[this.path.axis(axis.name)] = frame[paths.device.gamepad(this.gamepad.index).axis(axis.axisId)];
-    };
+    }
 
     this.rayObject = this.rayObject || document.querySelector(this.selector).object3D;
     this.rayObject.updateMatrixWorld();

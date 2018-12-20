@@ -58,7 +58,7 @@ function penBindings(hand, forCursor) {
       dest: { value: actions.stopDrawing },
       xform: xforms.falling
     },
-    { 
+    {
       src: { value: padPressed },
       dest: { value: padRising },
       xform: xforms.rising
@@ -79,7 +79,7 @@ function penBindings(hand, forCursor) {
       xform: xforms.touch_axis_scroll(0.1)
     },
     {
-      src: [ padRising, padCenter ],
+      src: [padRising, padCenter],
       dest: { value: actions.undoDrawing },
       xform: xforms.all
     }
@@ -197,7 +197,7 @@ export const wmrUserBindings = addSetsToBindings({
   ],
   [sets.cursorHoldingInteractable]: [
     {
-      src: { 
+      src: {
         bool: paths.device.wmr.right.button("touchpad").pressed,
         value: paths.device.wmr.right.axis("padY")
       },

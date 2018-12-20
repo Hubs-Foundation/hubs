@@ -12,7 +12,7 @@ export const xforms = {
       if (frame[src.value]) {
         frame[dest.value] = value;
       }
-    }
+    };
   },
   scale: function(scalar) {
     return function scale(frame, src, dest) {
