@@ -32,27 +32,15 @@ export class WindowsMixedRealityControllerDevice {
   write(frame) {
     if (!this.gamepad.connected) return;
 
-    // TODO BP: Why are we doing this intermediate index path copy, instead of copying directly to the named path?
-    for (let i = 0; i < this.gamepad.buttons.length; i++) {
-      const buttonPath = paths.device.gamepad(this.gamepad.index).button(i);
-      const button = this.gamepad.buttons[i];
-      frame[buttonPath.pressed] = !!button.pressed;
-      frame[buttonPath.touched] = !!button.touched;
-      frame[buttonPath.value] = button.value;
-    }
-    for (let i = 0; i < this.gamepad.axes.length; i++) {
-      frame[paths.device.gamepad(this.gamepad.index).axis(i)] = this.gamepad.axes[i];
-    }
-
     for (const button of this.buttonMap) {
       const outpath = this.path.button(button.name);
-      const gamepadButton = paths.device.gamepad(this.gamepad.index).button(button.buttonId);
-      frame[outpath.pressed] = !!frame[gamepadButton.pressed];
-      frame[outpath.touched] = !!frame[gamepadButton.touched];
-      frame[outpath.value] = frame[gamepadButton.value];
+      const gamepadButton = this.gamepad.buttons[button.buttonId];
+      frame[outpath.pressed] = !!gamepadButton.pressed;
+      frame[outpath.touched] = !!gamepadButton.touched;
+      frame[outpath.value] = gamepadButton.value;
     }
     for (const axis of this.axisMap) {
-      frame[this.path.axis(axis.name)] = frame[paths.device.gamepad(this.gamepad.index).axis(axis.axisId)];
+      frame[this.path.axis(axis.name)] = this.gamepad.axes[axis.axisId];
     }
 
     this.rayObject = this.rayObject || document.querySelector(this.selector).object3D;
