@@ -89,6 +89,7 @@ export const xforms = {
       const [x, y] = frame[src.value];
       const inCenter = x * x + y * y < deadzoneRadiusSquared;
       const direction = inCenter ? "center" : angleTo4Direction(Math.atan2(invertX ? -x : x, invertY ? -y : y));
+      if (!dest[direction]) return;
       frame[dest[direction]] = true;
     };
   },
