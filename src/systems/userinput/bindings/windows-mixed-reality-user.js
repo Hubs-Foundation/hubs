@@ -487,5 +487,12 @@ export const wmrUserBindings = addSetsToBindings({
   [sets.cursorHoldingCamera]: holdingCameraBindings("right", true),
   [sets.rightHandHoldingCamera]: holdingCameraBindings("right"),
 
-  [sets.inputFocused]: []
+  [sets.inputFocused]: [
+    {
+      src: { value: "/device/keyboard" },
+      dest: { value: paths.noop },
+      xform: xforms.noop,
+      priority: 1000
+    }
+  ]
 });
