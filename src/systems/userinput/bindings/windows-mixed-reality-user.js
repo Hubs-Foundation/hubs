@@ -14,7 +14,6 @@ const lGripPressed = paths.device.wmr.left.button("grip").pressed;
 const rGripPressed = paths.device.wmr.right.button("grip").pressed;
 
 const rJoyNorth = v("right/joy/north");
-const rPadPressedY = v("right/pad/pressed/y");
 
 function dpadVariables(hand) {
   return {
@@ -246,6 +245,39 @@ function characterAccelerationBindings() {
   ];
 }
 
+function cursorModDeltaBindings() {
+  const { padNorth, padSouth } = dpadVariables("right");
+  const rPadNorthOrSouth = v("right/pad/northOrSouth");
+  const rPadNorthOrSouthPressed = v("right/pad/northOrSouth/pressed");
+  const rPadNorthOrSouthPressedY = v("right/pad/northOrSouthpressed/y");
+  return [
+    ...dpadBindings("right"),
+    {
+      src: [padNorth, padSouth],
+      dest: { value: rPadNorthOrSouth },
+      xform: xforms.any
+    },
+    {
+      src: [rPadNorthOrSouth, paths.device.wmr.right.button("touchpad").pressed],
+      dest: { value: rPadNorthOrSouthPressed },
+      xform: xforms.all
+    },
+    {
+      src: {
+        bool: rPadNorthOrSouthPressed,
+        value: paths.device.wmr.right.axis("padY")
+      },
+      dest: { value: rPadNorthOrSouthPressedY },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: rPadNorthOrSouthPressedY },
+      dest: { value: paths.actions.cursor.modDelta },
+      xform: xforms.scale(0.1)
+    }
+  ];
+}
+
 function holdingCameraBindings(hand, forCursor) {
   const triggerPressed = paths.device.wmr[hand].button("trigger").pressed;
   const actions = paths.actions[forCursor ? "cursor" : hand + "Hand"];
@@ -423,19 +455,7 @@ export const wmrUserBindings = addSetsToBindings({
   ],
   [sets.cursorHoldingInteractable]: [
     neverFrozenBinding,
-    {
-      src: {
-        bool: paths.device.wmr.right.button("touchpad").pressed,
-        value: paths.device.wmr.right.axis("padY")
-      },
-      dest: { value: rPadPressedY },
-      xform: xforms.copyIfTrue
-    },
-    {
-      src: { value: rPadPressedY },
-      dest: { value: paths.actions.cursor.modDelta },
-      xform: xforms.scale(0.1)
-    },
+    ...cursorModDeltaBindings(),
     {
       src: { value: rGripPressed },
       dest: { value: paths.actions.cursor.drop },
