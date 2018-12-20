@@ -155,8 +155,7 @@ export const xforms = {
   },
   touch_axis_scroll(scale = 1) {
     return function(frame, src, dest, state = { value: 0, touching: false }) {
-      frame[dest.value] =
-        !state.touching || !frame[src.touching] ? 0 : scale * (frame[src.value] + 1 - (state.value + 1));
+      frame[dest.value] = state.touching && frame[src.touching] ? scale * (frame[src.value] - state.value) : 0;
       state.value = frame[src.value];
       state.touching = frame[src.touching];
       return state;

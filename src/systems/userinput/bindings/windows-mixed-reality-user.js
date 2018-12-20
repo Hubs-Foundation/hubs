@@ -25,8 +25,12 @@ function penBindings(hand, forCursor) {
   const pad = v(hand + "/pad");
   const padWest = v(hand + "/pad/west");
   const padEast = v(hand + "/pad/east");
+  const padNorth = v(hand + "/pad/north");
+  const padSouth = v(hand + "/pad/south");
   const padCenter = v(hand + "/pad/center");
   const padRising = v(hand + "/pad/rising");
+  const padCenterStrip = v(hand + "/pad/centerStrip");
+  const padCenterStripTouched = v(hand + "/pad/centerStrip/touched");
 
   const actions = paths.actions[forCursor ? "cursor" : hand + "Hand"];
 
@@ -44,6 +48,8 @@ function penBindings(hand, forCursor) {
       dest: {
         west: padWest,
         east: padEast,
+        north: padNorth,
+        south: padSouth,
         center: padCenter
       },
       xform: xforms.vec2dpad(0.5, false, false)
@@ -74,9 +80,19 @@ function penBindings(hand, forCursor) {
       xform: xforms.copyIfTrue
     },
     {
-      src: { value: padY, touched: padTouched },
+      src: [padNorth, padCenter, padSouth],
+      dest: { value: padCenterStrip },
+      xform: xforms.any
+    },
+    {
+      src: [padCenterStrip, padTouched],
+      dest: { value: padCenterStripTouched },
+      xform: xforms.all
+    },
+    {
+      src: { value: padY, touching: padCenterStripTouched },
       dest: { value: actions.scalePenTip },
-      xform: xforms.touch_axis_scroll(0.1)
+      xform: xforms.touch_axis_scroll(-0.05)
     },
     {
       src: [padRising, padCenter],
