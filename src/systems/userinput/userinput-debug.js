@@ -7,6 +7,24 @@ AFRAME.registerSystem("userinput-debug", {
       return;
     }
     const userinput = AFRAME.scenes[0].systems.userinput;
+    const userinputFrame = document.getElementById("userinput-frame");
+    const replacer = (k, v) => {
+      if (typeof v === "number") {
+        return `${v >= 0 ? "+" : ""}${v.toFixed(3)}`;
+      }
+      return v;
+    };
+    const pathsOutput = [];
+    const { frame } = userinput;
+    for (const key in frame) {
+      if (!frame.hasOwnProperty(key)) continue;
+      if (!(["/wmr-user", "/actions/"].some(x => key.startsWith(x)))) continue;
+      //if (!(["/device/"].some(x => key.startsWith(x)))) continue;
+      let val = JSON.stringify(frame[key], replacer);
+      if (val) val = val.replace(/{"(\w{3,})":/g, "{\n  \"$1\":").replace(/,"(\w{3,})":/g, ",\n  \"$1\":");
+      pathsOutput.push(`${key} -> ${val}`);
+    }
+    userinputFrame.textContent = pathsOutput.join("\n")
     if (userinput.get(paths.actions.logDebugFrame)) {
       console.log(userinput);
       console.log("sorted", userinput.sortedBindings);

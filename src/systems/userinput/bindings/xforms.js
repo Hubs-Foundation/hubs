@@ -7,6 +7,13 @@ export const xforms = {
   copy: function(frame, src, dest) {
     frame[dest.value] = frame[src.value];
   },
+  valueIfTrue: function(value) {
+    return function(frame, src, dest) {
+      if (frame[src.value]) {
+        frame[dest.value] = value;
+      }
+    }
+  },
   scale: function(scalar) {
     return function scale(frame, src, dest) {
       if (frame[src.value] !== undefined) {
@@ -127,6 +134,15 @@ export const xforms = {
         frame[dest.value] = [vec2[0] / l, vec2[1] / l];
       }
     }
+  },
+  all: function(frame, src, dest) {
+    for (const path in src) {
+      if (!frame[src[path]]) {
+        frame[dest.value] = false;
+        return;
+      }
+    }
+    frame[dest.value] = true;
   },
   any: function(frame, src, dest) {
     for (const path in src) {
