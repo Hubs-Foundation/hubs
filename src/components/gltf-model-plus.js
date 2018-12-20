@@ -9,6 +9,41 @@ import cubeMapPosZ from "../assets/images/cubemap/posz.jpg";
 import cubeMapNegZ from "../assets/images/cubemap/negz.jpg";
 import { getCustomGLTFParserURLResolver } from "../utils/media-utils";
 
+/* WIP: changing threejs-fast-raycast to make this easier to use */
+import MeshBVH from '../../node_modules/threejs-fast-raycast/src/MeshBVH.js';
+
+const ray = new THREE.Ray();
+const inverseMatrix = new THREE.Matrix4();
+const origRaycast = THREE.Mesh.prototype.raycast;
+
+THREE.Mesh.prototype.raycast = function ( raycaster, intersects ) {
+
+	if ( this.geometry.boundsTree ) {
+
+		if ( this.material === undefined ) return;
+
+		inverseMatrix.getInverse( this.matrixWorld );
+		ray.copy( raycaster.ray ).applyMatrix4( inverseMatrix );
+
+		if ( raycaster.firstHitOnly === true ) {
+
+			const res = this.geometry.boundsTree.raycastFirst( this, raycaster, ray );
+			if ( res ) intersects.push( res );
+
+		} else {
+
+			this.geometry.boundsTree.raycast( this, raycaster, ray, intersects );
+
+		}
+
+	} else {
+
+		origRaycast.call( this, raycaster, intersects );
+
+	}
+
+};
+
 const GLTFCache = {};
 let CachedEnvMapTexture = null;
 
@@ -405,6 +440,23 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.el.setObject3D("mesh", object3DToSet);
 
       rewires.forEach(f => f());
+
+      // generate acceleration structures for raycasting against
+      object3DToSet.traverse(obj => {
+        if (obj.isMesh && obj.geometry.isBufferGeometry) {
+          const geo = obj.geometry;
+          const triCount = geo.index ? (geo.index.count / 3) : (geo.attributes.position.count / 3);
+          // only bother using memory and time making a BVH if there are a reasonable number of tris,
+          // and if there are too many it's too painful and large to tolerate doing it (at least until
+          // we put this in a web worker)
+          if (triCount > 1000 && triCount < 1000000) {
+            console.log(`Created BVH for geometry with ${geo.index.array.length} nodes.`);
+            geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 20 });
+	        geo.setIndex(geo.boundsTree.index);
+            console.log("Finished creating BVH.");
+          }
+        }
+      });
 
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {

@@ -63,6 +63,7 @@
     "three": "github:mozillareality/three.js#4c144a360a073abb6c4a6fe7d1c03ba76b110573",
     "three-pathfinding": "github:mozillareality/three-pathfinding#hubs/master",
     "three-to-cannon": "1.3.0",
+    "threejs-fast-raycast": "github:mquander/threejs-fast-raycast#package-metadata",
     "uuid": "^3.2.1",
     "webrtc-adapter": "^6.0.2"
   },
