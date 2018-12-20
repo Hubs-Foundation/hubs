@@ -91,7 +91,6 @@ AFRAME.registerComponent("super-networked-interactable", {
 
   _changeScale: function(delta) {
     if (delta && this.el.is("grabbed") && this.el.components.hasOwnProperty("stretchable")) {
-      console.log("BPDEBUG _changeScale", delta);
       this.currentScale.addScalar(delta).clampScalar(this.data.minScale, this.data.maxScale);
       this.el.setAttribute("scale", this.currentScale);
       this.el.components["stretchable"].stretchBody(this.el, this.currentScale);

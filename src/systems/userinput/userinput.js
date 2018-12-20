@@ -227,7 +227,6 @@ AFRAME.registerSystem("userinput", {
     };
 
     const gamepadConnected = e => {
-      console.log("BPDEBUG gamepadConnected", e.gamepad.id);
       let gamepadDevice;
       for (const activeDevice of this.activeDevices) {
         if (activeDevice.gamepad && activeDevice.gamepad.index === e.gamepad.index) {
