@@ -155,7 +155,7 @@ AFRAME.registerComponent("personal-space-invader", {
     if (this.data.useMaterial) {
       const mesh = findInvaderMesh(this.el);
       if (mesh) {
-        this.targetMaterial = mesh.material;
+        this.targetMesh = mesh;
       }
     }
     this.invading = false;
@@ -180,9 +180,9 @@ AFRAME.registerComponent("personal-space-invader", {
   },
 
   setInvading(invading) {
-    if (this.targetMaterial) {
-      this.targetMaterial.opacity = invading ? this.data.invadingOpacity : 1;
-      this.targetMaterial.transparent = invading;
+    if (this.targetMesh && this.targetMesh.material) {
+      this.targetMesh.material.opacity = invading ? this.data.invadingOpacity : 1;
+      this.targetMesh.material.transparent = invading;
     } else {
       this.el.object3D.visible = !invading;
     }
