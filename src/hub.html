@@ -102,8 +102,8 @@
                     <a-entity class="right-controller" matrix-auto-update></a-entity>
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
-                        <template data-name="RootScene">
-                            <a-entity ik-controller hand-pose__left hand-pose__right space-invader-mesh="meshName: Bot_Skinned"></a-entity>
+                        <template data-name="AvatarRoot">
+                            <a-entity ik-controller hand-pose__left hand-pose__right space-invader-mesh="meshName: AvatarMesh"></a-entity>
                         </template>
 
                         <template data-name="Neck">
@@ -119,7 +119,7 @@
                             </a-entity>
                         </template>
 
-                        <template data-name="Chest">
+                        <template data-name="Spine">
                             <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
                                 <a-entity billboard matrix-auto-update visibility-while-frozen="withinDistance: 10;">
                                     <a-entity hoverable mixin="rounded-text-button" block-button ui-class-while-frozen position="0 0 .35"> </a-entity>
@@ -630,7 +630,7 @@
             </a-entity>
 
             <a-entity gltf-model-plus="inflate: true;" class="model">
-                <template data-name="RootScene">
+                <template data-name="AvatarRoot">
                     <a-entity
                         ik-controller
                         hand-pose__left

@@ -89,6 +89,15 @@ function cloneGltf(gltf) {
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
 const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
+  // TODO: Remove this once we update the legacy avatars to the new node names
+  if (node.name === "Chest") {
+    node.name = "Spine";
+  } else if (node.name === "Root Scene") {
+    node.name = "AvatarRoot";
+  } else if (node.name === "Bot_Skinned") {
+    node.name = "AvatarMesh";
+  }
+
   // inflate subtrees first so that we can determine whether or not this node needs to be inflated
   const childEntities = [];
   const children = node.children.slice(0); // setObject3D mutates the node's parent, so we have to copy
