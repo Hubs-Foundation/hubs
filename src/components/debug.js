@@ -1,3 +1,8 @@
+/**
+ * Logs all events dispatched on an entity
+ * @namespace debug
+ * @component log-events
+ */
 AFRAME.registerComponent("log-events", {
   init: function() {
     const el = this.el;
@@ -26,6 +31,11 @@ AFRAME.registerComponent("log-events", {
   }
 });
 
+/**
+ * Logs all life cycle phases on an entity.
+ * @namespace debug
+ * @component lifecycle-checker
+ */
 AFRAME.registerComponent("lifecycle-checker", {
   schema: {
     name: { type: "string" },
