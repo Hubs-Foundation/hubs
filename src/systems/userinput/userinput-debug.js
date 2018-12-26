@@ -18,7 +18,7 @@ AFRAME.registerSystem("userinput-debug", {
       const { frame } = userinput;
       for (const key in frame) {
         if (!frame.hasOwnProperty(key)) continue;
-        if (!["/wmr-user", "/actions/"].some(x => key.startsWith(x))) continue;
+        if (!["/actions/"].some(x => key.startsWith(x))) continue;
         let val = JSON.stringify(frame[key], replacer);
         if (val) val = val.replace(/{"(\w{3,})":/g, '{\n  "$1":').replace(/,"(\w{3,})":/g, ',\n  "$1":');
         pathsOutput.push(`${key} -> ${val}`);
