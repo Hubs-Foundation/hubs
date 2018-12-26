@@ -3,11 +3,44 @@ AFRAME.registerSystem("userinput-debug", {
   active: true,
 
   tick() {
-    if (!this.active) {
-      return;
-    }
+    if (!this.active) return;
+
     const userinput = AFRAME.scenes[0].systems.userinput;
+
+    if (this.userinputFrameStatus) {
+      const replacer = (k, v) => {
+        if (typeof v === "number") {
+          return `${v >= 0 ? "+" : ""}${v.toFixed(3)}`;
+        }
+        return v;
+      };
+      const pathsOutput = [];
+      const { frame } = userinput;
+      for (const key in frame) {
+        if (!frame.hasOwnProperty(key)) continue;
+        if (!["/actions/"].some(x => key.startsWith(x))) continue;
+        let val = JSON.stringify(frame[key], replacer);
+        if (val) val = val.replace(/{"(\w{3,})":/g, '{\n  "$1":').replace(/,"(\w{3,})":/g, ',\n  "$1":');
+        pathsOutput.push(`${key} -> ${val}`);
+      }
+      this.userinputFrameStatus.textContent = pathsOutput.join("\n");
+    }
+
     if (userinput.get(paths.actions.logDebugFrame)) {
+      if (!this.userinputFrameStatus) {
+        this.userinputFrameStatus = document.createElement("div");
+        this.userinputFrameStatus.id = "userinput-frame-status";
+        this.userinputFrameStatus.style = `
+          position: absolute;
+          left: 0; bottom: 0;
+          background: white;
+          white-space: pre;
+          font-family: monospace;
+          font-size: 8pt;
+        `;
+        document.body.append(this.userinputFrameStatus);
+      }
+
       console.log(userinput);
       console.log("sorted", userinput.sortedBindings);
       console.log("actives", userinput.actives);

@@ -227,3 +227,38 @@ paths.device.vive.right = {
   },
   pose: `/device/vive/right/pose`
 };
+
+function button(device, side, name) {
+  return {
+    pressed: `${device}${side}/button/${name}/pressed`,
+    touched: `${device}${side}/button/${name}/touched`,
+    value: `${device}${side}/button/${name}/value`
+  };
+}
+
+function axes(device, side, name) {
+  return {
+    axisX: `${device}${side}/axis/${name}X`,
+    axisY: `${device}${side}/axis/${name}Y`
+  };
+}
+
+function wmrController(side) {
+  const wmr = "/device/wmr/";
+  return {
+    touchpad: {
+      ...button(wmr, side, "touchpad"),
+      ...axes(wmr, side, "touchpad")
+    },
+    trigger: button(wmr, side, "trigger"),
+    grip: button(wmr, side, "grip"),
+    menu: button(wmr, side, "menu"),
+    joystick: axes(wmr, side, "joystick"),
+    pose: `${wmr}${side}/pose`
+  };
+}
+paths.device.wmr = {};
+paths.device.wmr.v = name => `/vars/wmr/${name}`;
+paths.device.wmr.k = name => `/vars/wmr/keyboard/${name}`;
+paths.device.wmr.left = wmrController("left");
+paths.device.wmr.right = wmrController("right");

@@ -28,7 +28,12 @@ AFRAME.registerComponent("media-loader", {
     src: { type: "string" },
     resize: { default: false },
     resolve: { default: false },
-    contentType: { default: null }
+    contentType: { default: null },
+    mediaOptions: {
+      default: {},
+      parse: v => (typeof v === "object" ? v : JSON.parse(v)),
+      stringify: JSON.stringify
+    }
   },
 
   init() {
@@ -144,7 +149,7 @@ AFRAME.registerComponent("media-loader", {
       }
 
       // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
-      accessibleUrl = proxiedUrlFor(canonicalUrl);
+      accessibleUrl = proxiedUrlFor(canonicalUrl, null);
 
       // if the component creator didn't know the content type, we didn't get it from reticulum, and
       // we don't think we can infer it from the extension, we need to make a HEAD request to find it out
@@ -159,25 +164,34 @@ AFRAME.registerComponent("media-loader", {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-image");
         this.el.addEventListener("video-loaded", this.onMediaLoaded, { once: true });
-        this.el.setAttribute("media-video", { src: accessibleUrl });
-        this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+        this.el.setAttribute("media-video", Object.assign({}, this.data.mediaOptions, { src: accessibleUrl }));
+        if (this.el.components["position-at-box-shape-border"]) {
+          this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+        }
       } else if (contentType.startsWith("image/")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
         this.el.addEventListener("image-loaded", this.onMediaLoaded, { once: true });
         this.el.removeAttribute("media-pager");
-        this.el.setAttribute("media-image", { src: accessibleUrl, contentType });
-        this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+        this.el.setAttribute(
+          "media-image",
+          Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, contentType })
+        );
+        if (this.el.components["position-at-box-shape-border"]) {
+          this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+        }
       } else if (contentType.startsWith("application/pdf")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
         // two small differences:
         // 1. we pass the canonical URL to the pager so it can easily make subresource URLs
         // 2. we don't remove the media-image component -- media-pager uses that internally
-        this.el.setAttribute("media-pager", { src: canonicalUrl });
+        this.el.setAttribute("media-pager", Object.assign({}, this.data.mediaOptions, { src: canonicalUrl }));
         this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
         this.el.addEventListener("preview-loaded", this.onMediaLoaded, { once: true });
-        this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+        if (this.el.components["position-at-box-shape-border"]) {
+          this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+        }
       } else if (
         contentType.includes("application/octet-stream") ||
         contentType.includes("x-zip-compressed") ||
@@ -198,12 +212,15 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
-        this.el.setAttribute("gltf-model-plus", {
-          src: accessibleUrl,
-          contentType: contentType,
-          inflate: true,
-          modelToWorldScale: this.data.resize ? 0.0001 : 1.0
-        });
+        this.el.setAttribute(
+          "gltf-model-plus",
+          Object.assign({}, this.data.mediaOptions, {
+            src: accessibleUrl,
+            contentType: contentType,
+            inflate: true,
+            modelToWorldScale: this.data.resize ? 0.0001 : 1.0
+          })
+        );
       } else {
         throw new Error(`Unsupported content type: ${contentType}`);
       }
@@ -224,31 +241,36 @@ AFRAME.registerComponent("media-pager", {
     this.toolbar = null;
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
-    this.el.addEventListener("image-loaded", async e => {
-      // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
-      // request for the same page to read out the max-content-index header
-      this.maxIndex = await fetchMaxContentIndex(e.detail.src);
-      // if this is the first image we ever loaded, set up the UI
-      if (this.toolbar == null) {
-        const template = document.getElementById("paging-toolbar");
-        this.el.querySelector(".interactable-ui").appendChild(document.importNode(template.content, true));
-        this.toolbar = this.el.querySelector(".paging-toolbar");
-        // we have to wait a tick for the attach callbacks to get fired for the elements in a template
-        setTimeout(() => {
-          this.nextButton = this.el.querySelector(".next-button [text-button]");
-          this.prevButton = this.el.querySelector(".prev-button [text-button]");
-          this.pageLabel = this.el.querySelector(".page-label");
 
-          this.nextButton.addEventListener("grab-start", this.onNext);
-          this.prevButton.addEventListener("grab-start", this.onPrev);
+    // we kind of have to deal with the "empty case" for this component, because networked-aframe
+    // will instantiate a null version of it for all media objects thanks to how it handles component schemas
+    if (this.data.src) {
+      this.el.addEventListener("image-loaded", async e => {
+        // if this is the first image we ever loaded, set up the UI
+        if (this.toolbar == null) {
+          // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
+          // request for the same page to read out the max-content-index header
+          this.maxIndex = await fetchMaxContentIndex(e.detail.src);
+          const template = document.getElementById("paging-toolbar");
+          this.el.querySelector(".interactable-ui").appendChild(document.importNode(template.content, true));
+          this.toolbar = this.el.querySelector(".paging-toolbar");
+          // we have to wait a tick for the attach callbacks to get fired for the elements in a template
+          setTimeout(() => {
+            this.nextButton = this.el.querySelector(".next-button [text-button]");
+            this.prevButton = this.el.querySelector(".prev-button [text-button]");
+            this.pageLabel = this.el.querySelector(".page-label");
 
+            this.nextButton.addEventListener("grab-start", this.onNext);
+            this.prevButton.addEventListener("grab-start", this.onPrev);
+
+            this.update();
+            this.el.emit("preview-loaded");
+          }, 0);
+        } else {
           this.update();
-          this.el.emit("preview-loaded");
-        }, 0);
-      } else {
-        this.update();
-      }
-    });
+        }
+      });
+    }
   },
 
   update() {

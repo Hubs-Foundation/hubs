@@ -13,16 +13,10 @@
 </head>
 
 <body>
-    <audio id="test-tone">
-        <source src="./assets/sfx/tone.webm" type="audio/webm"/>
-        <source src="./assets/sfx/tone.mp3" type="audio/mpeg"/>
-        <source src="./assets/sfx/tone.ogg" type="audio/ogg"/>
-        <source src="./assets/sfx/tone.wav" type="audio/wav"/>
-    </audio>
-
     <a-scene
         class="grab-cursor"
         renderer="antialias: true; gammaOutput: true; sortObjects: true; physicallyCorrectLights: true;"
+        shadow="type: pcfsoft"
         gamma-factor
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         physics="gravity: -6; debug: false;"
@@ -108,8 +102,8 @@
                     <a-entity class="right-controller" matrix-auto-update></a-entity>
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
-                        <template data-name="RootScene">
-                            <a-entity ik-controller hand-pose__left hand-pose__right space-invader-mesh="meshName: Bot_Skinned"></a-entity>
+                        <template data-name="AvatarRoot">
+                            <a-entity ik-controller hand-pose__left hand-pose__right space-invader-mesh="meshName: AvatarMesh"></a-entity>
                         </template>
 
                         <template data-name="Neck">
@@ -125,7 +119,7 @@
                             </a-entity>
                         </template>
 
-                        <template data-name="Chest">
+                        <template data-name="Spine">
                             <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
                                 <a-entity billboard matrix-auto-update visibility-while-frozen="withinDistance: 10;">
                                     <a-entity hoverable mixin="rounded-text-button" block-button ui-class-while-frozen position="0 0 .35"> </a-entity>
@@ -159,6 +153,33 @@
                             <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
                         </template>
                     </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="static-media">
+                <a-entity
+                    body="type: static; shape: none; mass: 1;"
+                    auto-scale-cannon-physics-body
+                    set-sounds-invisible
+                >
+                </a-entity>
+            </template>
+
+            <template id="static-controlled-media">
+                <a-entity
+                    class="interactable"
+                    super-networked-interactable="counter: #media-counter;"
+                    body="type: static; shape: none; mass: 1;"
+                    grabbable
+                    hoverable
+                    hoverable-visuals="cursorController: #cursor-controller"
+                    auto-scale-cannon-physics-body
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
+                    set-sounds-invisible
+                    emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
+                    emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
+                >
                 </a-entity>
             </template>
 
@@ -200,6 +221,12 @@
                             </a-entity>
                             <a-entity mixin="rounded-text-button" class="hide-when-pinned" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
                             <a-entity text=" value:remove; width:1.75; align:center;" class="hide-when-pinned" text-raycast-hack position="0 -0.125 0.02"></a-entity>
+                            <a-entity mixin="rounded-text-button" open-media-button position="0.25 -0.375 0.01">
+                                <a-entity text="value:open link; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" clone-media-button position="-0.25 -0.375 0.01">
+                                <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
                         </a-entity>
                     </a-entity>
                 </a-entity>
@@ -603,7 +630,7 @@
             </a-entity>
 
             <a-entity gltf-model-plus="inflate: true;" class="model">
-                <template data-name="RootScene">
+                <template data-name="AvatarRoot">
                     <a-entity
                         ik-controller
                         hand-pose__left

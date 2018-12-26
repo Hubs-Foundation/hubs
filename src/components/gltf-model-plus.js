@@ -7,6 +7,7 @@ import cubeMapPosY from "../assets/images/cubemap/posy.jpg";
 import cubeMapNegY from "../assets/images/cubemap/negy.jpg";
 import cubeMapPosZ from "../assets/images/cubemap/posz.jpg";
 import cubeMapNegZ from "../assets/images/cubemap/negz.jpg";
+import { getCustomGLTFParserURLResolver } from "../utils/media-utils";
 
 const GLTFCache = {};
 let CachedEnvMapTexture = null;
@@ -88,6 +89,15 @@ function cloneGltf(gltf) {
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
 const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
+  // TODO: Remove this once we update the legacy avatars to the new node names
+  if (node.name === "Chest") {
+    node.name = "Spine";
+  } else if (node.name === "Root Scene") {
+    node.name = "AvatarRoot";
+  } else if (node.name === "Bot_Skinned") {
+    node.name = "AvatarMesh";
+  }
+
   // inflate subtrees first so that we can determine whether or not this node needs to be inflated
   const childEntities = [];
   const children = node.children.slice(0); // setObject3D mutates the node's parent, so we have to copy
@@ -168,7 +178,7 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
     for (const prop in entityComponents) {
       if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
         const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-        inflator(el, componentName, entityComponents[prop]);
+        inflator(el, componentName, entityComponents[prop], entityComponents);
       }
     }
   }
@@ -220,6 +230,7 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   }
 
   const gltfLoader = new THREE.GLTFLoader();
+  gltfLoader.customURLResolver = getCustomGLTFParserURLResolver(gltfUrl);
   gltfLoader.setLazy(true);
 
   const { parser } = await new Promise((resolve, reject) => gltfLoader.load(gltfUrl, resolve, onProgress, reject));
