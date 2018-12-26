@@ -138,18 +138,37 @@ function handPoseBindings(hand) {
   ];
 }
 
-function freezeBindings(hand) {
-  const padPressed = paths.device.wmr[hand].touchpad.pressed;
+function freezeBindings() {
+  const leftPadPressed = paths.device.wmr.left.touchpad.pressed;
+  const rightPadPressed = paths.device.wmr.right.touchpad.pressed;
+  const leftPadFalling = paths.device.wmr.v("left/touchpad/falling");
+  const rightPadFalling = paths.device.wmr.v("right/touchpad/falling");
+  const keyboardSaceFalling = paths.device.wmr.k("space/falling");
   return [
     {
-      src: [paths.device.keyboard.key(" "), padPressed],
+      src: [paths.device.keyboard.key(" "), leftPadPressed, rightPadPressed],
       dest: { value: paths.actions.ensureFrozen },
       xform: xforms.any
     },
     {
-      src: { value: padPressed },
-      dest: { value: paths.actions.thaw },
+      src: { value: paths.device.keyboard.key(" ") },
+      dest: { value: keyboardSaceFalling },
       xform: xforms.falling
+    },
+    {
+      src: { value: leftPadPressed },
+      dest: { value: leftPadFalling },
+      xform: xforms.falling
+    },
+    {
+      src: { value: rightPadPressed },
+      dest: { value: rightPadFalling },
+      xform: xforms.falling
+    },
+    {
+      src: [keyboardSaceFalling, leftPadFalling, rightPadFalling],
+      dest: { value: paths.actions.thaw },
+      xform: xforms.any
     }
   ];
 }
@@ -365,13 +384,7 @@ export const wmrUserBindings = addSetsToBindings({
     },
     ...handPoseBindings("left"),
     ...handPoseBindings("right"),
-    {
-      src: { value: paths.device.keyboard.key(" ") },
-      dest: { value: paths.actions.thaw },
-      xform: xforms.falling
-    },
-    ...freezeBindings("left"),
-    ...freezeBindings("right"),
+    ...freezeBindings(),
     ...teleportationAndRotationBindings(),
     ...characterAccelerationBindings(),
     {
