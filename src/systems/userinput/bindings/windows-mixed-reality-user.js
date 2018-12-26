@@ -3,32 +3,25 @@ import { sets } from "../sets";
 import { xforms } from "./xforms";
 import { addSetsToBindings } from "./utils";
 
-const v = name => {
-  return `/wmr-user/wmr-var/${name}`;
-};
-const k = name => {
-  return `/wmr-user/keyboard-var/${name}`;
-};
-
 const lGripPressed = paths.device.wmr.left.grip.pressed;
 const rGripPressed = paths.device.wmr.right.grip.pressed;
 
-const rJoyNorth = v("right/joy/north");
+const rJoyNorth = paths.device.wmr.v("right/joy/north");
 
 function dpadVariables(hand) {
   return {
-    padWest: v(hand + "/pad/west"),
-    padEast: v(hand + "/pad/east"),
-    padNorth: v(hand + "/pad/north"),
-    padSouth: v(hand + "/pad/south"),
-    padCenter: v(hand + "/pad/center"),
-    padCenterStrip: v(hand + "/pad/centerStrip")
+    padWest: paths.device.wmr.v(hand + "/pad/west"),
+    padEast: paths.device.wmr.v(hand + "/pad/east"),
+    padNorth: paths.device.wmr.v(hand + "/pad/north"),
+    padSouth: paths.device.wmr.v(hand + "/pad/south"),
+    padCenter: paths.device.wmr.v(hand + "/pad/center"),
+    padCenterStrip: paths.device.wmr.v(hand + "/pad/centerStrip")
   };
 }
 
 function dpadBindings(hand) {
   const { padWest, padEast, padNorth, padSouth, padCenter, padCenterStrip } = dpadVariables(hand);
-  const pad = v(hand + "/pad");
+  const pad = paths.device.wmr.v(hand + "/pad");
   return [
     {
       src: {
@@ -69,8 +62,8 @@ function penBindings(hand, forCursor) {
   const padPressed = paths.device.wmr[hand].touchpad.pressed;
   const padTouched = paths.device.wmr[hand].touchpad.touched;
 
-  const padRising = v(hand + "/pad/rising");
-  const padCenterStripTouched = v(hand + "/pad/centerStrip/touched");
+  const padRising = paths.device.wmr.v(hand + "/pad/rising");
+  const padCenterStripTouched = paths.device.wmr.v(hand + "/pad/centerStrip/touched");
   const { padWest, padEast, padCenter, padCenterStrip } = dpadVariables(hand);
 
   const actions = paths.actions[forCursor ? "cursor" : hand + "Hand"];
@@ -162,14 +155,14 @@ function freezeBindings(hand) {
 }
 
 function characterAccelerationBindings() {
-  const wasd_vec2 = k("wasd_vec2");
-  const arrows_vec2 = k("arrows_vec2");
-  const keyboardCharacterAcceleration = k("characterAcceleration");
-  const lJoyXDeadzoned = v("left/joy/x/deadzoned");
-  const lJoyYDeadzoned = v("left/joy/y/deadzoned");
-  const lJoyXScaled = v("left/joy/x/scaled");
-  const lJoyYScaled = v("left/joy/y/scaled");
-  const lCharacterAcceleration = v("left/characterAcceleration");
+  const wasd_vec2 = paths.device.wmr.k("wasd_vec2");
+  const arrows_vec2 = paths.device.wmr.k("arrows_vec2");
+  const keyboardCharacterAcceleration = paths.device.wmr.k("characterAcceleration");
+  const lJoyXDeadzoned = paths.device.wmr.v("left/joy/x/deadzoned");
+  const lJoyYDeadzoned = paths.device.wmr.v("left/joy/y/deadzoned");
+  const lJoyXScaled = paths.device.wmr.v("left/joy/x/scaled");
+  const lJoyYScaled = paths.device.wmr.v("left/joy/y/scaled");
+  const lCharacterAcceleration = paths.device.wmr.v("left/characterAcceleration");
   return [
     {
       src: {
@@ -246,9 +239,9 @@ function characterAccelerationBindings() {
 
 function cursorModDeltaBindings() {
   const { padNorth, padSouth } = dpadVariables("right");
-  const rPadNorthOrSouth = v("right/pad/northOrSouth");
-  const rPadNorthOrSouthPressed = v("right/pad/northOrSouth/pressed");
-  const rPadNorthOrSouthPressedY = v("right/pad/northOrSouthpressed/y");
+  const rPadNorthOrSouth = paths.device.wmr.v("right/pad/northOrSouth");
+  const rPadNorthOrSouthPressed = paths.device.wmr.v("right/pad/northOrSouth/pressed");
+  const rPadNorthOrSouthPressedY = paths.device.wmr.v("right/pad/northOrSouthpressed/y");
   return [
     ...dpadBindings("right"),
     {
@@ -290,13 +283,13 @@ function holdingCameraBindings(hand, forCursor) {
 }
 
 function teleportationAndRotationBindings() {
-  const rJoy = v("right/joy");
-  const rJoyWest = v("right/joy/west");
-  const rJoyEast = v("right/joy/East");
-  const rJoyWestRising = v("right/joy/west/rising");
-  const rJoyEastRising = v("right/joy/east/rising");
-  const keyboardQRising = k("q/rising");
-  const keyboardERising = k("e/rising");
+  const rJoy = paths.device.wmr.v("right/joy");
+  const rJoyWest = paths.device.wmr.v("right/joy/west");
+  const rJoyEast = paths.device.wmr.v("right/joy/East");
+  const rJoyWestRising = paths.device.wmr.v("right/joy/west/rising");
+  const rJoyEastRising = paths.device.wmr.v("right/joy/east/rising");
+  const keyboardQRising = paths.device.wmr.k("q/rising");
+  const keyboardERising = paths.device.wmr.k("e/rising");
   return [
     {
       src: {

@@ -258,5 +258,7 @@ function wmrController(side) {
   };
 }
 paths.device.wmr = {};
+paths.device.wmr.v = name => `/vars/wmr/${name}`;
+paths.device.wmr.k = name => `/vars/wmr/keyboard/${name}`;
 paths.device.wmr.left = wmrController("left");
 paths.device.wmr.right = wmrController("right");
