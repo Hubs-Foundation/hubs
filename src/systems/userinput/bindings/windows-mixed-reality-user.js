@@ -313,7 +313,6 @@ function teleportationAndRotationBindings() {
       dest: { value: paths.actions.rightHand.startTeleport },
       xform: xforms.rising
     },
-    ...characterAccelerationBindings(),
     {
       src: { value: rJoyWest },
       dest: { value: rJoyWestRising },
@@ -374,6 +373,7 @@ export const wmrUserBindings = addSetsToBindings({
     ...freezeBindings("left"),
     ...freezeBindings("right"),
     ...teleportationAndRotationBindings(),
+    ...characterAccelerationBindings(),
     {
       src: {
         value: paths.device.keyboard.key("m")
