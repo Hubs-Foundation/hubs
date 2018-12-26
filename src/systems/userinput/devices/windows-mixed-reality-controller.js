@@ -10,22 +10,9 @@ export class WindowsMixedRealityControllerDevice {
     // in chrome it still won't unless you enter vr.
     navigator.getVRDisplays();
 
-    this.buttonMap = [
-      { name: "touchpad", buttonId: 0 },
-      { name: "trigger", buttonId: 1 },
-      { name: "grip", buttonId: 2 },
-      { name: "menu", buttonId: 3 }
-    ];
-
     this.gamepad = gamepad;
     this.pose = new Pose();
-    this.axisMap = [
-      { name: "padX", axisId: 0 },
-      { name: "padY", axisId: 1 },
-      { name: "joyX", axisId: 2 },
-      { name: "joyY", axisId: 3 }
-    ];
-    this.path = paths.device.wmr[gamepad.hand || "right"];
+
     if (gamepad.hand) {
       this.selector = `#player-${gamepad.hand}-controller`;
     }
@@ -33,20 +20,31 @@ export class WindowsMixedRealityControllerDevice {
   write(frame) {
     if (!this.gamepad.connected) return;
 
-    for (const button of this.buttonMap) {
-      const outpath = this.path.button(button.name);
-      const gamepadButton = this.gamepad.buttons[button.buttonId];
-      frame[outpath.pressed] = !!gamepadButton.pressed;
-      frame[outpath.touched] = !!gamepadButton.touched;
-      frame[outpath.value] = gamepadButton.value;
-    }
-    for (const axis of this.axisMap) {
-      frame[this.path.axis(axis.name)] = this.gamepad.axes[axis.axisId];
-    }
+    const path = paths.device.wmr[this.gamepad.hand || "right"];
+
+    frame[path.touchpad.pressed] = this.gamepad.buttons[0].pressed;
+    frame[path.touchpad.touched] = this.gamepad.buttons[0].touched;
+    frame[path.touchpad.value] = this.gamepad.buttons[0].value;
+
+    frame[path.trigger.pressed] = this.gamepad.buttons[1].pressed;
+    frame[path.trigger.touched] = this.gamepad.buttons[1].touched;
+    frame[path.trigger.value] = this.gamepad.buttons[1].value;
+
+    frame[path.grip.pressed] = this.gamepad.buttons[2].pressed;
+    frame[path.grip.touched] = this.gamepad.buttons[2].touched;
+    frame[path.grip.value] = this.gamepad.buttons[2].value;
+
+    frame[path.menu.pressed] = this.gamepad.buttons[3].pressed;
+    frame[path.menu.touched] = this.gamepad.buttons[3].touched;
+    frame[path.menu.value] = this.gamepad.buttons[3].value;
+
+    frame[path.touchpad.axisX] = this.gamepad.axes[0];
+    frame[path.touchpad.axisY] = this.gamepad.axes[1];
+    frame[path.joystick.axisX] = this.gamepad.axes[2];
+    frame[path.joystick.axisY] = this.gamepad.axes[3];
 
     if (!this.selector) {
       if (!this.gamepad.hand) return;
-      this.path = paths.device.wmr[this.gamepad.hand];
       this.selector = `#player-${this.gamepad.hand}-controller`;
     }
 
@@ -57,6 +55,6 @@ export class WindowsMixedRealityControllerDevice {
     this.pose.position.setFromMatrixPosition(this.rayObject.matrixWorld);
     this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
     this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
-    frame[this.path.pose] = this.pose;
+    frame[path.pose] = this.pose;
   }
 }

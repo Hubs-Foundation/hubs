@@ -10,8 +10,8 @@ const k = name => {
   return `/wmr-user/keyboard-var/${name}`;
 };
 
-const lGripPressed = paths.device.wmr.left.button("grip").pressed;
-const rGripPressed = paths.device.wmr.right.button("grip").pressed;
+const lGripPressed = paths.device.wmr.left.grip.pressed;
+const rGripPressed = paths.device.wmr.right.grip.pressed;
 
 const rJoyNorth = v("right/joy/north");
 
@@ -27,14 +27,13 @@ function dpadVariables(hand) {
 }
 
 function dpadBindings(hand) {
-  const padY = paths.device.wmr[hand].axis("padY");
   const { padWest, padEast, padNorth, padSouth, padCenter, padCenterStrip } = dpadVariables(hand);
   const pad = v(hand + "/pad");
   return [
     {
       src: {
-        x: paths.device.wmr[hand].axis("padX"),
-        y: padY
+        x: paths.device.wmr[hand].touchpad.axisX,
+        y: paths.device.wmr[hand].touchpad.axisY
       },
       dest: { value: pad },
       xform: xforms.compose_vec2
@@ -65,10 +64,10 @@ const neverFrozenBinding = {
 };
 
 function penBindings(hand, forCursor) {
-  const padY = paths.device.wmr[hand].axis("padY");
-  const triggerPressed = paths.device.wmr[hand].button("trigger").pressed;
-  const padPressed = paths.device.wmr[hand].button("touchpad").pressed;
-  const padTouched = paths.device.wmr[hand].button("touchpad").touched;
+  const padY = paths.device.wmr[hand].touchpad.axisY;
+  const triggerPressed = paths.device.wmr[hand].trigger.pressed;
+  const padPressed = paths.device.wmr[hand].touchpad.pressed;
+  const padTouched = paths.device.wmr[hand].touchpad.touched;
 
   const padRising = v(hand + "/pad/rising");
   const padCenterStripTouched = v(hand + "/pad/centerStrip/touched");
@@ -123,9 +122,9 @@ function penBindings(hand, forCursor) {
 }
 
 function handPoseBindings(hand) {
-  const padTouched = paths.device.wmr[hand].button("touchpad").touched;
-  const triggerPressed = paths.device.wmr[hand].button("trigger").pressed;
-  const gripPressed = paths.device.wmr[hand].button("grip").pressed;
+  const padTouched = paths.device.wmr[hand].touchpad.touched;
+  const triggerPressed = paths.device.wmr[hand].trigger.pressed;
+  const gripPressed = paths.device.wmr[hand].grip.pressed;
   const actions = paths.actions[hand + "Hand"];
   return [
     {
@@ -147,7 +146,7 @@ function handPoseBindings(hand) {
 }
 
 function freezeBindings(hand) {
-  const padPressed = paths.device.wmr[hand].button("touchpad").pressed;
+  const padPressed = paths.device.wmr[hand].touchpad.pressed;
   return [
     {
       src: [paths.device.keyboard.key(" "), padPressed],
@@ -201,7 +200,7 @@ function characterAccelerationBindings() {
       xform: xforms.max_vec2
     },
     {
-      src: { value: paths.device.wmr.left.axis("joyX") },
+      src: { value: paths.device.wmr.left.joystick.axisX },
       dest: { value: lJoyXDeadzoned },
       xform: xforms.deadzone(0.1)
     },
@@ -211,7 +210,7 @@ function characterAccelerationBindings() {
       xform: xforms.scale(1.5) // horizontal character speed modifier
     },
     {
-      src: { value: paths.device.wmr.left.axis("joyY") },
+      src: { value: paths.device.wmr.left.joystick.axisY },
       dest: { value: lJoyYDeadzoned },
       xform: xforms.deadzone(0.1)
     },
@@ -235,8 +234,8 @@ function characterAccelerationBindings() {
     },
     {
       src: [
-        paths.device.wmr.left.button("trigger").pressed,
-        paths.device.wmr.right.button("trigger").pressed,
+        paths.device.wmr.left.trigger.pressed,
+        paths.device.wmr.right.trigger.pressed,
         paths.device.keyboard.key("shift")
       ],
       dest: { value: paths.actions.boost },
@@ -258,14 +257,14 @@ function cursorModDeltaBindings() {
       xform: xforms.any
     },
     {
-      src: [rPadNorthOrSouth, paths.device.wmr.right.button("touchpad").pressed],
+      src: [rPadNorthOrSouth, paths.device.wmr.right.touchpad.pressed],
       dest: { value: rPadNorthOrSouthPressed },
       xform: xforms.all
     },
     {
       src: {
         bool: rPadNorthOrSouthPressed,
-        value: paths.device.wmr.right.axis("padY")
+        value: paths.device.wmr.right.touchpad.axisY
       },
       dest: { value: rPadNorthOrSouthPressedY },
       xform: xforms.copyIfTrue
@@ -279,12 +278,11 @@ function cursorModDeltaBindings() {
 }
 
 function holdingCameraBindings(hand, forCursor) {
-  const triggerPressed = paths.device.wmr[hand].button("trigger").pressed;
   const actions = paths.actions[forCursor ? "cursor" : hand + "Hand"];
   return [
     neverFrozenBinding,
     {
-      src: { value: triggerPressed },
+      src: { value: paths.device.wmr[hand].trigger.pressed },
       dest: { value: actions.takeSnapshot },
       xform: xforms.rising
     }
@@ -302,8 +300,8 @@ function teleportationAndRotationBindings() {
   return [
     {
       src: {
-        x: paths.device.wmr.right.axis("joyX"),
-        y: paths.device.wmr.right.axis("joyY")
+        x: paths.device.wmr.right.joystick.axisX,
+        y: paths.device.wmr.right.joystick.axisY
       },
       dest: { value: rJoy },
       xform: xforms.compose_vec2
@@ -417,7 +415,7 @@ export const wmrUserBindings = addSetsToBindings({
 
   [sets.cursorHoveringOnUI]: [
     {
-      src: { value: paths.device.wmr.right.button("trigger").pressed },
+      src: { value: paths.device.wmr.right.trigger.pressed },
       dest: { value: paths.actions.cursor.grab },
       xform: xforms.rising
     }
