@@ -182,11 +182,15 @@ AFRAME.registerComponent("super-spawner", {
       if (this.data.centerSpawnedObject) {
         entity.body.position.copy(hand.object3D.position);
       }
+
       for (let i = 0; i < this.data.grabEvents.length; i++) {
         hand.emit(this.data.releaseEvents[i]);
         hand.emit(this.data.grabEvents[i], { targetEntity: entity });
       }
     }
+
+    // Call syncToPhysics so that updated transforms aren't immediately overwritten
+    entity.components["ammo-body"].syncToPhysics();
 
     this.activateCooldown();
   },
@@ -199,6 +203,7 @@ AFRAME.registerComponent("super-spawner", {
 
   activateCooldown() {
     if (this.data.spawnCooldown > 0) {
+      //TODO: set collision flags on ammo body
       this.el.setAttribute("visible", false);
       this.el.classList.remove("interactable");
       this.cooldownTimeout = setTimeout(() => {
