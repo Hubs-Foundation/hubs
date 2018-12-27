@@ -1,3 +1,10 @@
+import { injectCustomShaderChunks } from "../utils/media-utils";
+
+/**
+ * Sets player info state, including avatar choice and display name.
+ * @namespace avatar
+ * @component player-info
+ */
 AFRAME.registerComponent("player-info", {
   schema: {
     displayName: { type: "string" },
@@ -27,5 +34,10 @@ AFRAME.registerComponent("player-info", {
     if (this.data.avatarSrc && modelEl) {
       modelEl.setAttribute("gltf-model-plus", "src", this.data.avatarSrc);
     }
+
+    const uniforms = injectCustomShaderChunks(this.el.object3D);
+    this.el.querySelectorAll("[hover-visuals]").forEach(el => {
+      el.components["hover-visuals"].uniforms = uniforms;
+    });
   }
 });

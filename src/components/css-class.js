@@ -1,7 +1,12 @@
+/**
+ * Sets the CSS class on an entity.
+ * @component css-class
+ */
 AFRAME.registerComponent("css-class", {
   schema: {
     type: "string"
   },
+  multiple: true,
   init() {
     this.el.classList.add(this.data);
   },

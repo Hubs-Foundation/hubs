@@ -1,5 +1,5 @@
 import { Validator } from "jsonschema";
-import merge from "lodash/merge";
+import merge from "deepmerge";
 
 const LOCAL_STORE_KEY = "___hubs_store";
 const STORE_STATE_CACHE_KEY = Symbol();
@@ -22,6 +22,15 @@ export const SCHEMA = {
       }
     },
 
+    credentials: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        token: { type: ["null", "string"] },
+        email: { type: ["null", "string"] }
+      }
+    },
+
     activity: {
       type: "object",
       additionalProperties: false,
@@ -38,6 +47,18 @@ export const SCHEMA = {
       properties: {
         lastUsedMicDeviceId: { type: "string" }
       }
+    },
+
+    uploadPromotionTokens: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          fileId: { type: "string" },
+          promotionToken: { type: "string" }
+        }
+      }
     }
   },
 
@@ -45,8 +66,10 @@ export const SCHEMA = {
 
   properties: {
     profile: { $ref: "#/definitions/profile" },
+    credentials: { $ref: "#/definitions/credentials" },
     activity: { $ref: "#/definitions/activity" },
-    settings: { $ref: "#/definitions/settings" }
+    settings: { $ref: "#/definitions/settings" },
+    uploadPromotionTokens: { $ref: "#/definitions/uploadPromotionTokens" }
   },
 
   additionalProperties: false
@@ -59,13 +82,18 @@ export default class Store extends EventTarget {
     if (localStorage.getItem(LOCAL_STORE_KEY) === null) {
       localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify({}));
     }
+    this.update({
+      activity: {},
+      settings: {},
+      credentials: {},
+      profile: {},
+      uploadPromotionTokens: []
+    });
   }
 
   // Initializes store with any default bits
   init = () => {
     this.update({
-      activity: {},
-      settings: {},
       profile: { ...generateDefaultProfile(), ...(this.state.profile || {}) }
     });
 
@@ -85,10 +113,12 @@ export default class Store extends EventTarget {
 
   update(newState) {
     const finalState = merge(this.state, newState);
-    const isValid = validator.validate(finalState, SCHEMA).valid;
+    const { valid } = validator.validate(finalState, SCHEMA);
 
-    if (!isValid) {
-      throw new Error(`Write of ${JSON.stringify(finalState)} to store failed schema validation.`);
+    if (!valid) {
+      // Intentionally not including details about the state or validation result here, since we don't want to leak
+      // sensitive data in the error message.
+      throw new Error(`Write to store failed schema validation.`);
     }
 
     localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(finalState));

@@ -1,24 +1,36 @@
+import { paths } from "../systems/userinput/paths";
 const CLAMP_VELOCITY = 0.01;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
+const MAX_WARNINGS = 10;
+const PI_2 = Math.PI / 2;
 
-// Does not have any type of collisions yet.
+/**
+ * Avatar movement controller that listens to move, rotate and teleportation events and moves the avatar accordingly.
+ * The controller accounts for playspace offset and orientation and depends on the nav mesh system for translation.
+ * @namespace avatar
+ * @component character-controller
+ */
 AFRAME.registerComponent("character-controller", {
   schema: {
     groundAcc: { default: 5.5 },
     easing: { default: 10 },
     pivot: { type: "selector" },
     snapRotationDegrees: { default: THREE.Math.DEG2RAD * 45 },
-    rotationSpeed: { default: -3 }
+    rotationSpeed: { default: -3 },
+    fly: { default: false }
   },
 
   init: function() {
-    this.navGroup;
-    this.navNode;
+    this.navZone = "character";
+    this.navGroup = null;
+    this.navNode = null;
     this.velocity = new THREE.Vector3(0, 0, 0);
     this.accelerationInput = new THREE.Vector3(0, 0, 0);
     this.pendingSnapRotationMatrix = new THREE.Matrix4();
     this.angularVelocity = 0; // Scalar value because we only allow rotation around Y
+    this._withinWarningLimit = true;
+    this._warningCount = 0;
     this.setAccelerationInput = this.setAccelerationInput.bind(this);
     this.snapRotateLeft = this.snapRotateLeft.bind(this);
     this.snapRotateRight = this.snapRotateRight.bind(this);
@@ -35,8 +47,6 @@ AFRAME.registerComponent("character-controller", {
     const eventSrc = this.el.sceneEl;
     eventSrc.addEventListener("move", this.setAccelerationInput);
     eventSrc.addEventListener("rotateY", this.setAngularVelocity);
-    eventSrc.addEventListener("snap_rotate_left", this.snapRotateLeft);
-    eventSrc.addEventListener("snap_rotate_right", this.snapRotateRight);
     eventSrc.addEventListener("teleported", this.handleTeleport);
   },
 
@@ -44,8 +54,6 @@ AFRAME.registerComponent("character-controller", {
     const eventSrc = this.el.sceneEl;
     eventSrc.removeEventListener("move", this.setAccelerationInput);
     eventSrc.removeEventListener("rotateY", this.setAngularVelocity);
-    eventSrc.removeEventListener("snap_rotate_left", this.snapRotateLeft);
-    eventSrc.removeEventListener("snap_rotate_right", this.snapRotateRight);
     eventSrc.removeEventListener("teleported", this.handleTeleport);
     this.reset();
   },
@@ -68,14 +76,18 @@ AFRAME.registerComponent("character-controller", {
 
   snapRotateLeft: function() {
     this.pendingSnapRotationMatrix.copy(this.leftRotationMatrix);
+    this.el.emit("snap_rotate_left");
   },
 
   snapRotateRight: function() {
     this.pendingSnapRotationMatrix.copy(this.rightRotationMatrix);
+    this.el.emit("snap_rotate_right");
   },
 
   handleTeleport: function(event) {
-    this.setPositionOnNavMesh(event.detail.oldPosition, event.detail.newPosition, this.el.object3D, true);
+    const position = event.detail.newPosition;
+    const navPosition = event.detail.hitPoint;
+    this.resetPositionOnNavMesh(position, navPosition, this.el.object3D);
   },
 
   tick: (function() {
@@ -93,6 +105,7 @@ AFRAME.registerComponent("character-controller", {
     const startScale = new THREE.Vector3();
 
     return function(t, dt) {
+      if (!this.el.sceneEl.is("entered")) return;
       const deltaSeconds = dt / 1000;
       const root = this.el.object3D;
       const pivot = this.data.pivot.object3D;
@@ -105,6 +118,22 @@ AFRAME.registerComponent("character-controller", {
       // Other aframe components like teleport-controls set position/rotation/scale, not the matrix, so we need to make sure to compose them back into the matrix
       root.updateMatrix();
 
+      const userinput = AFRAME.scenes[0].systems.userinput;
+      if (userinput.get(paths.actions.snapRotateLeft)) {
+        this.snapRotateLeft();
+      }
+      if (userinput.get(paths.actions.snapRotateRight)) {
+        this.snapRotateRight();
+      }
+      const acc = userinput.get(paths.actions.characterAcceleration);
+      if (acc) {
+        this.accelerationInput.set(
+          this.accelerationInput.x + acc[0],
+          this.accelerationInput.y + 0,
+          this.accelerationInput.z + acc[1]
+        );
+      }
+
       pivotPos.copy(pivot.position);
       pivotPos.applyMatrix4(root.matrix);
       trans.setPosition(pivotPos);
@@ -113,62 +142,99 @@ AFRAME.registerComponent("character-controller", {
       rotationInvMatrix.makeRotationAxis(rotationAxis, -root.rotation.y);
       pivotRotationMatrix.makeRotationAxis(rotationAxis, pivot.rotation.y);
       pivotRotationInvMatrix.makeRotationAxis(rotationAxis, -pivot.rotation.y);
-      this.updateVelocity(deltaSeconds);
-      move.makeTranslation(this.velocity.x * distance, this.velocity.y * distance, this.velocity.z * distance);
+      this.updateVelocity(deltaSeconds, pivot);
+      this.accelerationInput.set(0, 0, 0);
+
+      const boost = userinput.get(paths.actions.boost) ? 2 : 1;
+      move.makeTranslation(
+        this.velocity.x * distance * boost,
+        this.velocity.y * distance * boost,
+        this.velocity.z * distance * boost
+      );
       yawMatrix.makeRotationAxis(rotationAxis, rotationDelta);
 
       // Translate to middle of playspace (player rig)
-      root.applyMatrix(transInv);
+      root.matrix.premultiply(transInv);
       // Zero playspace (player rig) rotation
-      root.applyMatrix(rotationInvMatrix);
+      root.matrix.premultiply(rotationInvMatrix);
       // Zero pivot (camera/head) rotation
-      root.applyMatrix(pivotRotationInvMatrix);
+      root.matrix.premultiply(pivotRotationInvMatrix);
       // Apply joystick translation
-      root.applyMatrix(move);
+      root.matrix.premultiply(move);
       // Apply joystick yaw rotation
-      root.applyMatrix(yawMatrix);
+      root.matrix.premultiply(yawMatrix);
       // Apply snap rotation if necessary
-      root.applyMatrix(this.pendingSnapRotationMatrix);
+      root.matrix.premultiply(this.pendingSnapRotationMatrix);
       // Reapply pivot (camera/head) rotation
-      root.applyMatrix(pivotRotationMatrix);
+      root.matrix.premultiply(pivotRotationMatrix);
       // Reapply playspace (player rig) rotation
-      root.applyMatrix(rotationMatrix);
+      root.matrix.premultiply(rotationMatrix);
       // Reapply playspace (player rig) translation
-      root.applyMatrix(trans);
+      root.matrix.premultiply(trans);
+      // update pos/rot/scale
+      root.matrix.decompose(root.position, root.quaternion, root.scale);
 
-      // TODO: the above matrix trnsfomraitons introduce some floating point erros in scale, this reverts them to avoid spamming network with fake scale updates
+      // TODO: the above matrix trnsfomraitons introduce some floating point errors in scale, this reverts them to
+      // avoid spamming network with fake scale updates
       root.scale.copy(startScale);
 
       this.pendingSnapRotationMatrix.identity(); // Revert to identity
 
-      if (this.velocity.lengthSq() > EPS) {
+      if (this.velocity.lengthSq() > EPS && !this.data.fly) {
         this.setPositionOnNavMesh(startPos, root.position, root);
       }
+
+      root.matrixNeedsUpdate = true;
     };
   })(),
 
-  setPositionOnNavMesh: function(startPosition, endPosition, object3D, resetPosition = false) {
-    const nav = this.el.sceneEl.systems.nav;
-    if (nav.navMesh) {
-      if (!this.navGroup || resetPosition) {
-        this.navGroup = nav.getGroup(endPosition);
-      }
-
-      if (!this.navNode || resetPosition) {
-        this.navNode = nav.getNode(endPosition, this.navGroup) || this.navNode;
-      }
-
-      this.navNode = nav.clampStep(startPosition, endPosition, this.navGroup, this.navNode, object3D.position);
+  _warnWithWarningLimit: function(msg) {
+    if (!this._withinWarningLimit) return;
+    this._warningCount++;
+    if (this._warningCount > MAX_WARNINGS) {
+      this._withinWarningLimit = false;
+      msg = "Warning count exceeded. Will not log further warnings";
     }
+    console.warn("character-controller", msg);
   },
 
-  updateVelocity: function(dt) {
+  _setNavNode: function(pos) {
+    if (this.navNode !== null) return;
+    const { pathfinder } = this.el.sceneEl.systems.nav;
+    this.navNode =
+      pathfinder.getClosestNode(pos, this.navZone, this.navGroup, true) ||
+      pathfinder.getClosestNode(pos, this.navZone, this.navGroup);
+  },
+
+  setPositionOnNavMesh: function(start, end, object3D) {
+    const { pathfinder } = this.el.sceneEl.systems.nav;
+    if (!(this.navZone in pathfinder.zones)) return;
+    if (this.navGroup === null) {
+      this.navGroup = pathfinder.getGroup(this.navZone, end, true, true);
+    }
+    this._setNavNode(end);
+    this.navNode = pathfinder.clampStep(start, end, this.navNode, this.navZone, this.navGroup, object3D.position);
+    object3D.matrixNeedsUpdate = true;
+  },
+
+  resetPositionOnNavMesh: function(position, navPosition, object3D) {
+    const { pathfinder } = this.el.sceneEl.systems.nav;
+    if (!(this.navZone in pathfinder.zones)) return;
+    this.navGroup = pathfinder.getGroup(this.navZone, navPosition, true, true);
+    this.navNode = null;
+    this._setNavNode(navPosition);
+    pathfinder.clampStep(position, navPosition, this.navNode, this.navZone, this.navGroup, object3D.position);
+    object3D.matrixNeedsUpdate = true;
+  },
+
+  updateVelocity: function(dt, pivot) {
     const data = this.data;
     const velocity = this.velocity;
 
     // If FPS too low, reset velocity.
     if (dt > MAX_DELTA) {
       velocity.x = 0;
+      velocity.y = 0;
       velocity.z = 0;
       return;
     }
@@ -177,17 +243,24 @@ AFRAME.registerComponent("character-controller", {
     if (velocity.x !== 0) {
       velocity.x -= velocity.x * data.easing * dt;
     }
-    if (velocity.z !== 0) {
-      velocity.z -= velocity.z * data.easing * dt;
-    }
     if (velocity.y !== 0) {
       velocity.y -= velocity.y * data.easing * dt;
+    }
+    if (velocity.z !== 0) {
+      velocity.z -= velocity.z * data.easing * dt;
     }
 
     const dvx = data.groundAcc * dt * this.accelerationInput.x;
     const dvz = data.groundAcc * dt * -this.accelerationInput.z;
     velocity.x += dvx;
-    velocity.z += dvz;
+
+    if (this.data.fly) {
+      const pitch = pivot.rotation.x / PI_2;
+      velocity.y += dvz * -pitch;
+      velocity.z += dvz * (1.0 - pitch);
+    } else {
+      velocity.z += dvz;
+    }
 
     const decay = 0.7;
     this.accelerationInput.x = this.accelerationInput.x * decay;
@@ -196,7 +269,7 @@ AFRAME.registerComponent("character-controller", {
     if (Math.abs(velocity.x) < CLAMP_VELOCITY) {
       velocity.x = 0;
     }
-    if (Math.abs(velocity.y) < CLAMP_VELOCITY) {
+    if (this.data.fly && Math.abs(velocity.y) < CLAMP_VELOCITY) {
       velocity.y = 0;
     }
     if (Math.abs(velocity.z) < CLAMP_VELOCITY) {

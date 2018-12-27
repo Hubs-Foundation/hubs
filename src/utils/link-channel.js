@@ -24,9 +24,8 @@ export default class LinkChannel {
     return new Promise(resolve => {
       const onFinished = new Promise(finished => {
         const step = () => {
-          const code = Math.floor(Math.random() * 9999)
-            .toString()
-            .padStart(4, "0");
+          const getLetter = () => "ABCDEFGHI"[Math.floor(Math.random() * 9)];
+          const code = `${getLetter()}${getLetter()}${getLetter()}${getLetter()}`;
 
           // Only respond to one link_request in this channel.
           let readyToSend = false;
@@ -63,6 +62,7 @@ export default class LinkChannel {
               if (this.store.state.activity.hasChangedName) {
                 data.profile = { ...this.store.state.profile };
               }
+              data.credentials = { ...this.store.state.credentials };
 
               generatePublicKeyAndEncryptedObject(incoming.public_key, data).then(
                 ({ publicKeyString, encryptedData }) => {
@@ -109,7 +109,7 @@ export default class LinkChannel {
           if (numOccupants === 1) {
             // Great, only sender is in topic, request link
             channel.push("link_request", {
-              reply_to_session_id: this.socket.params.session_id,
+              reply_to_session_id: this.socket.params().session_id,
               public_key: publicKeyString
             });
 

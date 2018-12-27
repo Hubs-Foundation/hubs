@@ -17,6 +17,11 @@ const unbindAllEvents = function(elements, events, f) {
   }
 };
 
+/**
+ * Toggles the microphone on the current network connection based on the given events.
+ * @namespace network
+ * @component mute-mic
+ */
 AFRAME.registerComponent("mute-mic", {
   schema: {
     eventSrc: { type: "selectorAll" },

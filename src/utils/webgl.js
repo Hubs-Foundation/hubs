@@ -16,20 +16,21 @@ function checkFloatTextureSupport() {
   renderer.dispose();
   return result;
 }
-const supportsFloatTextures = checkFloatTextureSupport();
 
 export function patchWebGLRenderingContext() {
-  const originalGetExtension = WebGLRenderingContext.prototype.getExtension;
-  function patchedGetExtension(name) {
+  if (/Android.+Firefox/.test(navigator.userAgent)) {
     // It appears that Galaxy S6 devices falsely report that they support
     // OES_texture_float in Firefox. This workaround disables float textures
     // for those devices.
     // See https://github.com/mozilla/hubs/issues/32 and
     // https://bugzilla.mozilla.org/show_bug.cgi?id=1338656
-    if (name === "OES_texture_float" && /Android.+Firefox/.test(navigator.userAgent) && !supportsFloatTextures) {
-      return null;
-    }
-    return originalGetExtension.call(this, name);
+    const originalGetExtension = WebGLRenderingContext.prototype.getExtension;
+    const supportsFloatTextures = checkFloatTextureSupport();
+    WebGLRenderingContext.prototype.getExtension = function patchedGetExtension(name) {
+      if (name === "OES_texture_float" && !supportsFloatTextures) {
+        return null;
+      }
+      return originalGetExtension.call(this, name);
+    };
   }
-  WebGLRenderingContext.prototype.getExtension = patchedGetExtension;
 }

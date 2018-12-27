@@ -1,4 +1,8 @@
 /* global CANNON */
+/**
+ * Floats a duck based on its scale.
+ * @component duck
+ */
 AFRAME.registerComponent("duck", {
   schema: {
     initialForce: { default: 0 },
@@ -34,6 +38,7 @@ AFRAME.registerComponent("duck", {
         const z = Math.sin(angle);
         this.force.set(x, force, z);
         this.position.set(x * 0.01, 0, z * 0.01);
+        this.el.object3D.matrixNeedsUpdate = true;
         this.el.body.applyForce(this.force, this.position);
       }
     }

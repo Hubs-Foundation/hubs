@@ -1,0 +1,82 @@
+@import 'shared';
+
+:local(.add-media-form) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 0;
+}
+
+:local(.action-button) {
+  @extend %unselectable;
+  @extend %bottom-action-button;
+  margin-left: 6px;
+  margin-right: 6px;
+  appearance: none;
+  width: 128px;
+  text-align: center;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+}
+
+:local(.buttons) {
+  @extend %unselectable;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+:local(.small-button) {
+  @extend %unselectable;
+  margin-left: 0.25em;
+  font-size: 2em;
+  align-self: center;
+}
+
+:local(.cancel-icon) {
+  color: $darkest-grey;
+  cursor: pointer;
+
+  &:hover {
+    color: #FF3D7F
+  }
+}
+
+:local(.upload-icon) {
+  color: $action-color;
+  cursor: pointer;
+
+  &:hover {
+    color: $action-color-light;
+  }
+}
+
+:local(.input-border) {
+  display: flex;
+  @extend %rounded-border;
+  @extend %default-font;
+  margin: 1em;
+  padding: 0.5em 0.75em;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+:local(.left-side-of-input) {
+  @extend %default-font;
+  flex-grow: 1;
+  border: none;
+  white-space: nowrap;
+  background: transparent;
+  color: black;
+  font-size: 1.2em;
+  align-self: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+:local(.hide-file-input) {
+  visibility: hidden;
+  position: absolute;
+}

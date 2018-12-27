@@ -1,0 +1,171 @@
+@import 'shared';
+
+:local(.ui) {
+  @extend %default-font;
+
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  position: absolute;
+  pointer-events: none;
+  color: white;
+}
+
+:local(.whiteOverlay) {
+  background-color: rgba(255, 255, 255, 0.2);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+:local(.grid) {
+  display: grid;
+  grid-template-columns: 1fr 20px minmax(200px, 400px) 20px 1fr;
+  grid-template-rows: 1fr 3fr 1fr;
+  width: 100%;
+  height: 100%;
+}
+
+:local(.mainPanel) {
+  grid-column: 3;
+  grid-row: 2;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  pointer-events: auto;
+
+}
+
+:local(.logoTagline) {
+  @extend %background-agnostic;
+  font-weight: bold;
+  text-align: center;
+  font-size: 1.2em;
+  margin-bottom: 32px;
+}
+
+:local(.tweetButton) {
+  @extend %action-button;
+  margin-top: 12px;
+  background-color: #1b95e0;
+  align-self: center;
+  padding-right: 32px;
+  display: flex;
+  flex-direction: row;
+
+  img {
+    width: 42px;
+    height: 42px;
+    margin-right: 6px;
+  }
+}
+
+:local(.logo) {
+  width: 100%;
+  display: block;
+
+  img {
+    width: 100%;
+  }
+}
+
+:local(.info) {
+  position: absolute;
+  color: black;
+  text-shadow: 0px 0px 10px #888;
+  bottom: 12px;
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+:local(.name) {
+  font-weight: bold;
+  font-size: 1.6em;
+}
+
+:local(.attribution) {
+  font-size: 1.0em;
+  white-space: wrap;
+
+  a {
+    font-size: 0.8em;
+    color: black;
+    pointer-events: auto;
+  }
+}
+
+:local(.screenshot) {
+  position: absolute;
+  width: 115%;
+  height: 115%;
+  top: -40px;
+  left: -40px;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
+
+  background-color: black;
+  filter: blur(10px);
+}
+
+:local(.screenshotHidden) {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 0.5s, opacity 0.5s linear;
+}
+
+:local(.spoke) {
+  @media(max-width: 768px) {
+    display: none;
+  }
+
+  pointer-events: auto;
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  font-size: 0.8em;
+  font-weight: bold;
+
+  :local(.madeWith) {
+    color: black;
+    text-shadow: 0px 0px 4px #333;
+    margin-left: 4px;
+    position: absolute;
+    top: 0px;
+    left: 0;
+  }
+
+  img {
+    width: 200px;
+  }
+}
+
+:local(.createButtons) {
+  position: relative;
+  display: flex;
+}
+
+:local(.createButton) {
+  @extend %action-button;
+  width: 100%;
+  border: 0;
+}
+
+:local(.optionsButton) {
+  @extend %fa-icon-button;
+  @extend %fa-icon-big;
+  position: absolute;
+  right: 10px;
+  top: -12px;
+  color: white;
+}

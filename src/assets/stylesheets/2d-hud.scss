@@ -1,12 +1,31 @@
+@import 'shared';
+
 :local(.container) {
   position: absolute;
-  top: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 80px;
   width: 100%;
-  user-select: none;
+  pointer-events: none;
+
+  &:local(.top) {
+    top: 10px;
+    height: 80px;
+  }
+
+  &:local(.column) {
+    flex-direction: column;
+    bottom: 0;
+    z-index: 1;
+  }
+}
+
+:local(.bottom) {
+  margin-bottom: 20px;
+}
+
+:local(.hide) {
+  display: none;
 }
 
 :local(.panel) {
@@ -14,36 +33,110 @@
   justify-content: space-around;
   align-items: center;
   padding: 5px;
-  background-color: rgba(#4F4F4F, 0.45);
+  background-color: $hud-panel-background;
+  border-radius: 30px;
+
+  :local(.video-share-notify) {
+    position: absolute;
+    left: -12px;
+    top: 52px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 28px;
+    border: 0;
+    pointer-events: auto;
+    z-index: 2;
+    width: 223px;
+
+    @media(max-width: 465px) {
+      width: 207px;
+    }
+
+    @media(max-width: 420px) {
+      width: 189px;
+    }
+
+    font-size: 0.8em;
+    color: white;
+    padding: 12px 24px;
+    background-color: $bright-blue;
+    text-align: center;
+
+    :local(.attach-point) {
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-bottom: 5px solid $bright-blue;
+      position: absolute;
+      top: -5px;
+      left: 29px;
+    }
+  }
+
+  :local(.video-share-extra-options) {
+    position: absolute;
+    top: -6px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 28px;
+    padding: 3px 3px 6px 3px;
+    background-color: rgba(72, 72, 72, 0.2);
+    border: 2px solid rgba(72, 72, 72, 0.3);
+    pointer-events: auto;
+    z-index: 1;
+
+    :local(.iconButton) {
+      margin-top: 4px;
+    }
+
+    :local(.iconButton):first-child {
+      margin-top: 1px;
+    }
+  }
 }
 
-:local(.panel.left) {
-  border-bottom-left-radius: 30px;
-  border-top-left-radius: 30px;
-  padding-left: 5px;
-  padding-right: 45px;
-  margin-right: -40px;
-}
-
-:local(.panel.right) {
-  border-bottom-right-radius: 30px;
+:local(.panel.up) {
   border-top-right-radius: 30px;
-  padding-right: 5px;
-  padding-left: 45px;
-  margin-left: -40px;
+  border-top-left-radius: 30px;
+  padding-top: 5px;
+  padding-bottom: 45px;
+  margin-bottom: -40px;
 }
 
 :local(.iconButton) {
   width: 40px;
   height: 40px;
   background-size: 100%;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
+  margin: 0px 6px;
+
+  @media(max-width: 465px) {
+    margin: 0px 4px;
+  }
+
+  @media(max-width: 420px) {
+    margin: 0px 2px;
+  }
+}
+
+:local(.iconButton.small) {
+  width: 30px;
+  height: 30px;
 }
 
 :local(.iconButton.large) {
   width: 80px;
   height: 80px;
   z-index: 1;
+}
+
+:local(.iconButton.video-share) {
+  position: relative;
 }
 
 :local(.iconButton.mute) {
@@ -72,6 +165,20 @@
   background-image: url(../hud/bubble_on-hover.png);
 }
 
+:local(.iconButton.spawn_pen) {
+  background-image: url(../hud/spawn_pen.png);
+}
+:local(.iconButton.spawn_pen:hover) {
+  background-image: url(../hud/spawn_pen-hover.png);
+}
+
+:local(.iconButton.spawn_camera) {
+  background-image: url(../hud/spawn_camera.png);
+}
+:local(.iconButton.spawn_camera:hover) {
+  background-image: url(../hud/spawn_camera-hover.png);
+}
+
 :local(.iconButton.freeze) {
   background-image: url(../hud/freeze_off.png);
 }
@@ -84,3 +191,59 @@
 :local(.iconButton.freeze.active:hover) {
   background-image: url(../hud/freeze_on-hover.png);
 }
+
+:local(.iconButton.create-object) {
+  background-image: url(../hud/create_object.png);
+}
+:local(.iconButton.create-object:hover) {
+  background-image: url(../hud/create_object-hover.png);
+}
+
+:local(.iconButton.mobile-media-picker) {
+  background-image: url(../hud/spawn_photo.png);
+}
+
+:local(.iconButton.share_camera) {
+  background-image: url(../hud/share_camera_off.png);
+}
+:local(.iconButton.share_camera.active) {
+  background-image: url(../hud/share_camera_on.png);
+}
+:local(.iconButton.share_camera.active:hover) {
+  background-image: url(../hud/share_camera_on-hover.png);
+}
+
+:local(.iconButton.share_screen) {
+  background-image: url(../hud/share_screen_off.png);
+}
+:local(.iconButton.share_screen.active) {
+  background-image: url(../hud/share_screen_on.png);
+}
+:local(.iconButton.share_screen.active:hover) {
+  background-image: url(../hud/share_screen_on-hover.png);
+}
+
+:local(.iconButton.share_window) {
+  background-image: url(../hud/share_window_off.png);
+}
+:local(.iconButton.share_window.active) {
+  background-image: url(../hud/share_window_on.png);
+}
+:local(.iconButton.share_window.active:hover) {
+  background-image: url(../hud/share_window_on-hover.png);
+}
+
+// On mobile, since hover is fired on tap, this can make user think they are streaming,
+// so don't show hover states for now on the share buttons :P
+//
+// @media(hover) query doesn't seem to do the trick.
+/*:local(.iconButton.share_window:hover) {
+  background-image: url(../hud/share_window_off-hover.png);
+}
+:local(.iconButton.share_screen:hover) {
+  background-image: url(../hud/share_screen_off-hover.png);
+}
+:local(.iconButton.share_camera:hover) {
+  background-image: url(../hud/share_camera_off-hover.png);
+}
+ */

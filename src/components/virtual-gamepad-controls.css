@@ -6,20 +6,20 @@
 
 :local(.touchZone.left) {
   left: 0;
-  right: 50%;
+  right: 55%;
 }
 
 :local(.touchZone.right) {
-  left: 50%;
+  left: 55%;
   right: 0;
 }
 
 :local(.mockJoystickContainer) {
   position: absolute;
-  height: 20vh;
+  height: 0;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: 10vh;
   display: flex;
   align-items: center;
   justify-content: space-around;

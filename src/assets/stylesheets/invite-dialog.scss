@@ -1,0 +1,127 @@
+@import 'shared.scss';
+
+:local(.dialog) {
+  background-color: $action-color-transparent;
+  border-radius: 12px;
+  box-shadow: 0px 5px 30px 1px #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+  padding: 14px;
+  text-align: center;
+  position: relative;
+  font-size: 1.0em;
+  color: white;
+  pointer-events: auto;
+  z-index: 3;
+  
+  a {
+    color: white;
+    text-decoration: underline;
+    font-weight: bold;
+  }
+
+  :local(.link-button) {
+    @extend %action-button;
+    @extend %action-button-selected;
+    min-width: auto;
+    margin-top: 4px;
+    flex: 1;
+
+    @media (max-height: 370px) {
+      display: none;
+    }
+  }
+}
+
+:local(.close) {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  right: 12px;
+  font-size: 2.0em;
+  top: 0px;
+  cursor: pointer;
+}
+
+:local(.attach-point) {
+  width: 0; 
+  height: 0; 
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid $action-color;
+  position: absolute;
+  top: -5px;
+}
+
+:local(.code) {
+  color: black;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 2.0em;
+  display: flex;
+  margin: 12px;
+}
+
+:local(.keep-open) {
+  font-size: 0.8em;
+}
+
+:local(.domain) {
+  input {
+    @extend %default-font;
+    font-weight: bold;
+    text-decoration: none;
+    color: black;
+    text-align: center;
+    background-color: white;
+    border: 1px solid #e2e2e2;
+    border-radius: 12px;
+    margin: 12px;
+    font-size: 1.8em;
+    padding: 14px;
+    display: block;
+    width: 295px;
+  }
+}
+
+
+:local(.digit) {
+  padding: 0 8px;
+  margin: 2px;
+  background-color: white;
+  border: 1px solid #e2e2e2;
+  border-radius: 12px;
+  width: 32px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:local(.digit_2) {
+  margin-right: 8px;
+}
+
+:local(.digit_3) {
+  margin-left: 8px;
+}
+
+:local(.code-loading-panel) {
+  background: none;
+}
+
+:local(.hub-link-link) {
+  font-size: 1.2em;
+}
+
+:local(.buttons) {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+
+  button, a {
+    margin: 0 12px;
+  }
+}

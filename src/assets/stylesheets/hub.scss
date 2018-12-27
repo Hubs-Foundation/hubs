@@ -8,18 +8,34 @@
 @import 'audio';
 @import 'info-dialog';
 
+body.vr-mode {
+  a-scene {
+    .a-canvas {
+      width: 200% !important;
+    }
+  }
+}
+
+body.mirrored-camera {
+  a-scene {
+    .a-canvas {
+      width: 100% !important;
+    }
+  }
+}
+
 .a-enter-vr, .a-orientation-modal {
   display: none;
 }
 
-.a-canvas.a-grab-cursor:hover {
-  cursor: none;
+.grab-cursor {
+  cursor: grab;
 }
 
-.a-canvas.a-grab-cursor:active {
+.no-cursor {
   cursor: none;
 }
 
 .webxr-realities, .webxr-sessions {
-  user-select: none;
+  @extend %unselectable
 }

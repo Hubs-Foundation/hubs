@@ -1,5 +1,7 @@
 /**
  * Toggles the position of 2 bones into "on" and "off" positions to indicate mute state.
+ * @namespace avatar
+ * @component bone-mute-state-indicator
  */
 AFRAME.registerComponent("bone-mute-state-indicator", {
   schema: {
@@ -40,5 +42,7 @@ AFRAME.registerComponent("bone-mute-state-indicator", {
     const muted = this.el.sceneEl.is("muted");
     this.mutedBone.position.y = muted ? this.data.onPos : this.data.offPos;
     this.unmutedBone.position.y = !muted ? this.data.onPos : this.data.offPos;
+    this.mutedBone.matrixNeedsUpdate = true;
+    this.unmutedBone.matrixNeedsUpdate = true;
   }
 });

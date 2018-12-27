@@ -1,8 +1,22 @@
-import moment from "moment-timezone";
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
+
+function isSameMonth(da, db) {
+  return da.getFullYear() == db.getFullYear() && da.getMonth() == db.getMonth();
+}
+
+function isSameDay(da, db) {
+  return isSameMonth(da, db) && da.getDate() == db.getDate();
+}
 
 export default class HubChannel {
   constructor(store) {
     this.store = store;
+    this._signedIn = false;
+  }
+
+  get signedIn() {
+    return this._signedIn;
   }
 
   setPhoenixChannel = channel => {
@@ -52,20 +66,96 @@ export default class HubChannel {
       return entryTimingFlags;
     }
 
-    const lastEntered = moment(storedLastEnteredAt);
-    const lastEnteredPst = moment(lastEntered).tz("America/Los_Angeles");
-    const nowPst = moment().tz("America/Los_Angeles");
-    const dayWindowAgo = moment().subtract(1, "day");
-    const monthWindowAgo = moment().subtract(1, "month");
+    const now = new Date();
+    const lastEntered = new Date(storedLastEnteredAt);
+    const msSinceLastEntered = now - lastEntered;
 
-    entryTimingFlags.isNewDaily =
-      lastEnteredPst.dayOfYear() !== nowPst.dayOfYear() || lastEnteredPst.year() !== nowPst.year();
-    entryTimingFlags.isNewMonthly =
-      lastEnteredPst.month() !== nowPst.month() || lastEnteredPst.year() !== nowPst.year();
-    entryTimingFlags.isNewDayWindow = lastEntered.isBefore(dayWindowAgo);
-    entryTimingFlags.isNewMonthWindow = lastEntered.isBefore(monthWindowAgo);
+    // note that new daily and new monthly is based on client local time
+    entryTimingFlags.isNewDaily = !isSameDay(now, lastEntered);
+    entryTimingFlags.isNewMonthly = !isSameMonth(now, lastEntered);
+    entryTimingFlags.isNewDayWindow = msSinceLastEntered > MS_PER_DAY;
+    entryTimingFlags.isNewMonthWindow = msSinceLastEntered > MS_PER_MONTH;
 
     return entryTimingFlags;
+  };
+
+  sendObjectSpawnedEvent = objectType => {
+    if (!this.channel) {
+      console.warn("No phoenix channel initialized before object spawn.");
+      return;
+    }
+
+    const spawnEvent = {
+      object_type: objectType
+    };
+
+    this.channel.push("events:object_spawned", spawnEvent);
+  };
+
+  sendProfileUpdate = () => {
+    this.channel.push("events:profile_updated", { profile: this.store.state.profile });
+  };
+
+  subscribe = subscription => {
+    this.channel.push("subscribe", { subscription });
+  };
+
+  unsubscribe = subscription => {
+    return new Promise(resolve => this.channel.push("unsubscribe", { subscription }).receive("ok", resolve));
+  };
+
+  sendMessage = (body, type = "chat") => {
+    if (!body) return;
+    this.channel.push("message", { body, type });
+  };
+
+  signIn = token => {
+    return new Promise((resolve, reject) => {
+      this.channel
+        .push("sign_in", { token })
+        .receive("ok", () => {
+          this._signedIn = true;
+          resolve();
+        })
+        .receive("error", err => {
+          console.error("sign in failed", err);
+          reject();
+        });
+    });
+  };
+
+  signOut = () => {
+    return new Promise((resolve, reject) => {
+      this.channel
+        .push("sign_out")
+        .receive("ok", () => {
+          this._signedIn = false;
+          resolve();
+        })
+        .receive("error", reject);
+    });
+  };
+
+  pin = (id, gltfNode, fileId, fileAccessToken, promotionToken) => {
+    const payload = { id, gltf_node: gltfNode };
+    if (fileId && promotionToken) {
+      payload.file_id = fileId;
+      payload.file_access_token = fileAccessToken;
+      payload.promotion_token = promotionToken;
+    }
+    this.channel.push("pin", payload);
+  };
+
+  unpin = (id, fileId) => {
+    const payload = { id };
+    if (fileId) {
+      payload.file_id = fileId;
+    }
+    this.channel.push("unpin", payload);
+  };
+
+  requestSupport = () => {
+    this.channel.push("events:request_support", {});
   };
 
   disconnect = () => {

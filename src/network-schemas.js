@@ -1,10 +1,20 @@
 function registerNetworkSchemas() {
-  const positionRequiresUpdate = (oldData, newData) => {
-    return !NAF.utils.almostEqualVec3(oldData, newData, 0.001);
-  };
+  const vectorRequiresUpdate = epsilon => {
+    return () => {
+      let prev = null;
 
-  const rotationRequiresUpdate = (oldData, newData) => {
-    return !NAF.utils.almostEqualVec3(oldData, newData, 0.5);
+      return curr => {
+        if (prev === null) {
+          prev = new THREE.Vector3(curr.x, curr.y, curr.z);
+          return true;
+        } else if (!NAF.utils.almostEqualVec3(prev, curr, epsilon)) {
+          prev.copy(curr);
+          return true;
+        }
+
+        return false;
+      };
+    };
   };
 
   NAF.schemas.add({
@@ -12,12 +22,11 @@ function registerNetworkSchemas() {
     components: [
       {
         component: "position",
-        requiresNetworkUpdate: positionRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
         component: "rotation",
-        lerp: false,
-        requiresNetworkUpdate: rotationRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       "scale",
       "player-info",
@@ -25,22 +34,22 @@ function registerNetworkSchemas() {
       {
         selector: ".camera",
         component: "position",
-        requiresNetworkUpdate: positionRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
         selector: ".camera",
         component: "rotation",
-        requiresNetworkUpdate: rotationRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       {
         selector: ".left-controller",
         component: "position",
-        requiresNetworkUpdate: positionRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
         selector: ".left-controller",
         component: "rotation",
-        requiresNetworkUpdate: rotationRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       {
         selector: ".left-controller",
@@ -49,12 +58,12 @@ function registerNetworkSchemas() {
       {
         selector: ".right-controller",
         component: "position",
-        requiresNetworkUpdate: positionRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
         selector: ".right-controller",
         component: "rotation",
-        requiresNetworkUpdate: rotationRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
       {
         selector: ".right-controller",
@@ -64,30 +73,111 @@ function registerNetworkSchemas() {
   });
 
   NAF.schemas.add({
-    template: "#video-template",
+    template: "#interactable-media",
     components: [
       {
-        component: "position"
+        component: "position",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
-        component: "rotation"
+        component: "rotation",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
-      "visible"
+      "scale",
+      // TODO: Optimize checking mediaOptions with requiresNetworkUpdate.
+      "media-loader",
+      {
+        component: "media-video",
+        property: "time"
+      },
+      {
+        component: "media-video",
+        property: "videoPaused"
+      },
+      {
+        component: "media-pager",
+        property: "index"
+      },
+      "pinnable"
     ]
   });
 
   NAF.schemas.add({
-    template: "#interactable-template",
+    template: "#static-media",
+    components: [
+      // TODO: Optimize checking mediaOptions with requiresNetworkUpdate.
+      "media-loader",
+      {
+        component: "media-video",
+        property: "time"
+      }
+    ]
+  });
+
+  NAF.schemas.add({
+    template: "#static-controlled-media",
+    components: [
+      // TODO: Optimize checking mediaOptions with requiresNetworkUpdate.
+      "media-loader",
+      {
+        component: "media-video",
+        property: "time"
+      },
+      {
+        component: "media-video",
+        property: "videoPaused"
+      },
+      {
+        component: "media-pager",
+        property: "index"
+      }
+    ]
+  });
+
+  NAF.schemas.add({
+    template: "#interactable-drawing",
     components: [
       {
         component: "position",
-        requiresNetworkUpdate: positionRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
         component: "rotation",
-        requiresNetworkUpdate: rotationRequiresUpdate
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
       },
-      "scale"
+      "scale",
+      "networked-drawing"
+    ]
+  });
+
+  NAF.schemas.add({
+    template: "#interactable-camera",
+    components: ["position", "rotation"]
+  });
+
+  NAF.schemas.add({
+    template: "#pen-interactable",
+    components: [
+      {
+        component: "position",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)
+      },
+      {
+        component: "rotation",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.5)
+      },
+      "scale",
+      "media-loader",
+      {
+        selector: "#pen",
+        component: "pen",
+        property: "radius"
+      },
+      {
+        selector: "#pen",
+        component: "pen",
+        property: "color"
+      }
     ]
   });
 }

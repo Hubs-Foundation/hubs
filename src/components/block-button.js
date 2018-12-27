@@ -1,3 +1,8 @@
+/**
+ * Registers a click handler and invokes the block method on the NAF adapter for the owner associated with its entity.
+ * @namespace network
+ * @component block-button
+ */
 AFRAME.registerComponent("block-button", {
   init() {
     this.onClick = () => {
@@ -9,11 +14,11 @@ AFRAME.registerComponent("block-button", {
   },
 
   play() {
-    this.el.addEventListener("click", this.onClick);
+    this.el.addEventListener("grab-start", this.onClick);
   },
 
   pause() {
-    this.el.removeEventListener("click", this.onClick);
+    this.el.removeEventListener("grab-start", this.onClick);
   },
 
   block(clientId) {

@@ -2,20 +2,24 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
 import { SCHEMA } from "../storage/store";
+import styles from "../assets/stylesheets/profile.scss";
+import classNames from "classnames";
+import hubLogo from "../assets/images/hub-preview-white.png";
+import { WithHoverSound } from "./wrap-with-audio";
+import { avatars } from "../assets/avatars/avatars";
 
 class ProfileEntryPanel extends Component {
   static propTypes = {
     store: PropTypes.object,
     messages: PropTypes.object,
     finished: PropTypes.func,
-    htmlPrefix: PropTypes.string,
     intl: PropTypes.object
   };
 
   constructor(props) {
     super(props);
     const { displayName, avatarId } = this.props.store.state.profile;
-    this.state = { displayName, avatarId };
+    this.state = { displayName, avatarId, customMode: avatarId && avatarId.startsWith("http") };
     this.props.store.addEventListener("statechanged", this.storeUpdated);
   }
 
@@ -36,7 +40,8 @@ class ProfileEntryPanel extends Component {
         hasChangedName: hasChangedNowOrPreviously
       },
       profile: {
-        ...this.state
+        displayName: this.state.displayName,
+        avatarId: this.state.avatarId
       }
     });
     this.props.finished();
@@ -73,55 +78,89 @@ class ProfileEntryPanel extends Component {
     const { formatMessage } = this.props.intl;
 
     return (
-      <div className="profile-entry">
-        <form onSubmit={this.saveStateAndFinish} className="profile-entry__form">
-          <div className="profile-entry__box profile-entry__box--darkened">
-            <label htmlFor="#profile-entry-display-name" className="profile-entry__subtitle">
+      <div className={styles.profileEntry}>
+        <form onSubmit={this.saveStateAndFinish} className={styles.form}>
+          <div className={classNames([styles.box, styles.darkened])}>
+            <label htmlFor="#profile-entry-display-name" className={styles.title}>
               <FormattedMessage id="profile.header" />
             </label>
-            <label>
-              <input
-                id="profile-entry-display-name"
-                className="profile-entry__form-field-text"
-                value={this.state.displayName}
-                onFocus={e => e.target.select()}
-                onChange={e => this.setState({ displayName: e.target.value })}
-                required
-                spellCheck="false"
-                pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
-                title={formatMessage({ id: "profile.display_name.validation_warning" })}
-                ref={inp => (this.nameInput = inp)}
-              />
-            </label>
-            <div className="profile-entry__avatar-selector-container">
-              <div className="loading-panel">
-                <div className="loader-wrap">
-                  <div className="loader">
-                    <div className="loader-center" />
-                  </div>
+            <input
+              id="profile-entry-display-name"
+              className={styles.formFieldText}
+              value={this.state.displayName}
+              onFocus={e => e.target.select()}
+              onChange={e => this.setState({ displayName: e.target.value })}
+              required
+              spellCheck="false"
+              pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
+              title={formatMessage({ id: "profile.display_name.validation_warning" })}
+              ref={inp => (this.nameInput = inp)}
+            />
+            {this.state.customMode ? (
+              <div className={styles.avatarSelectorContainer}>
+                <label htmlFor="#custom-avatar-url">Avatar GLTF/GLB </label>
+                <input
+                  id="custom-avatar-url"
+                  type="url"
+                  className={styles.formFieldText}
+                  value={this.state.avatarId}
+                  onChange={e => this.setState({ avatarId: e.target.value })}
+                />
+                <div className={styles.links}>
+                  <a onClick={() => this.setState({ customMode: false, avatarId: "botdefault" })}>cancel</a>
                 </div>
               </div>
-              <iframe
-                className="profile-entry__avatar-selector"
-                src={`/${this.props.htmlPrefix}avatar-selector.html#avatar_id=${this.state.avatarId}`}
-                ref={ifr => (this.avatarSelector = ifr)}
-              />
-            </div>
-            <input className="profile-entry__form-submit" type="submit" value={formatMessage({ id: "profile.save" })} />
-            <div className="profile-entry__box__links">
-              <a target="_blank" rel="noopener noreferrer" href="https://github.com/mozilla/hubs/blob/master/TERMS.md">
-                <FormattedMessage id="profile.terms_of_use" />
-              </a>
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
-              >
-                <FormattedMessage id="profile.privacy_notice" />
-              </a>
+            ) : (
+              <div className={styles.avatarSelectorContainer}>
+                <div className="loading-panel">
+                  <div className="loader-wrap">
+                    <div className="loader">
+                      <div className="loader-center" />
+                    </div>
+                  </div>
+                </div>
+                <iframe
+                  className={styles.avatarSelector}
+                  src={`/avatar-selector.html#avatar_id=${this.state.avatarId}`}
+                  ref={ifr => (this.avatarSelector = ifr)}
+                />
+                <a
+                  className="custom-url-link"
+                  onClick={() =>
+                    this.setState({ customMode: true, avatarId: avatars.find(a => a.id === this.state.avatarId).model })
+                  }
+                >
+                  custom url
+                </a>
+              </div>
+            )}
+            <WithHoverSound>
+              <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
+            </WithHoverSound>
+            <div className={styles.links}>
+              <WithHoverSound>
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
+                >
+                  <FormattedMessage id="profile.terms_of_use" />
+                </a>
+              </WithHoverSound>
+
+              <WithHoverSound>
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+                >
+                  <FormattedMessage id="profile.privacy_notice" />
+                </a>
+              </WithHoverSound>
             </div>
           </div>
         </form>
+        <img className={styles.logo} src={hubLogo} />
       </div>
     );
   }

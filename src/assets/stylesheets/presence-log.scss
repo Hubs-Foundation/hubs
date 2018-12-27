@@ -1,0 +1,213 @@
+@import 'shared.scss';
+
+:local(.presence-log) {
+  align-self: flex-start;
+  flex: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  margin-top: 90px;
+  overflow: hidden;
+  width: 100%;
+
+  :local(.presence-log-entry) {
+    @extend %default-font;
+    pointer-events: auto;
+
+    user-select: text;
+    -moz-user-select: text;
+    -webkit-user-select: text;
+    -ms-user-select: text;
+
+    background-color: $white-transparent;
+    margin: 8px 64px 8px 16px;
+    font-size: 0.8em;
+    padding: 8px 16px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+
+    :local(.message-body) {
+      margin-left: 4px;
+      white-space: pre;
+    }
+
+    :local(.message-body-multi) {
+      margin-left: 0px;
+    }
+
+    :local(.message-body-mono) {
+      font-family: monospace;
+      font-size: 14px;
+    }
+
+    :local(.message-wrap) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    :local(.message-wrap-multi) {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    :local(.message-source) {
+      align-self: flex-start;
+      font-weight: bold;
+    }
+
+    a {
+      color: $action-color;
+    }
+
+    @media (max-width: 1000px) {
+      max-width: 75%;
+    }
+
+    :local(.icon-button) {
+      appearance: none;
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      outline-style: none;
+      width: 24px;
+      height: 24px;
+      background-size: 20px;
+      background-position: center;
+      background-repeat: no-repeat;
+      border: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      align-self: flex-start;
+      cursor: pointer;
+      margin-right: 6px;
+      border-radius: 12px;
+      background-color: transparent;
+
+      &:hover {
+        background-color: $action-color;
+      }
+    }
+
+    :local(.spawn-message) {
+      background-image: url(../spawn_message.png);
+    }
+
+    // TODO replace these icons with share button
+    :local(.share) {
+      background-image: url(../share_message.png);
+    }
+
+    &:local(.media) {
+      display: flex;
+      align-items: center;
+      min-height: 35px;
+
+      :local(.mediaBody) {
+        display: flex;
+        flex-direction: column;
+      }
+
+      img {
+        height: 35px;
+        margin-left: 8px;
+        border: 2px solid rgba(255,255,255,0.15);
+        display: block;
+        border-radius: 5px;
+      }
+    }
+  }
+
+  :local(.expired) {
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: visibility 0s 0.5s, opacity 0.5s linear, transform 0.5s;
+  }
+
+  :local(.presence-log-entry-with-button) {
+    padding: 8px 18px 8px 10px;
+  }
+}
+
+:local(.presence-log-in-room) {
+  position: absolute;
+  bottom: 165px;
+  z-index: 1;
+
+  :local(.presence-log-entry) {
+    background-color: $hud-panel-background;
+    color: $light-text;
+    min-height: 18px;
+
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+
+    a {
+      color: white;
+    }
+  }
+}
+
+:local(.presence-log-spawn) {
+  position: absolute;
+  top: 0;
+  z-index: -10;
+  width: auto;
+  margin: 0;
+
+  :local(.presence-log-entry) {
+    background-color: black;
+    color: white;
+    min-height: 18px;
+    padding: 8px 16px;
+    border-radius: 16px;
+    line-height: 18px;
+    margin: 0;
+    max-width: 100%;
+
+    :local(.message-body) {
+      margin-left: 0;
+    }
+
+    a {
+      color: white;
+    }
+  }
+
+  :local(.presence-log-entry-one-line) {
+    font-weight: bold;
+    line-height: 19px;
+    text-align: center;
+  }
+
+  :local(.presence-log-emoji) {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+  }
+
+  :local(.message-wrap) {
+    flex-direction: column;
+  }
+
+  :local(.message-source) {
+    font-weight: normal;
+    font-size: 0.7em;
+    white-space: nowrap;
+    color: $light-text;
+  }
+}
+
+:local(.emoji) {
+  // Undo annoying CSS in emoji plugin
+  margin: auto !important;
+  vertical-align: 0em !important;
+}

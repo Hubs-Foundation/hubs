@@ -4,68 +4,140 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 
 import { lang, messages } from "../utils/i18n";
+import { playVideoWithStopOnBlur } from "../utils/video-utils.js";
 import homeVideoWebM from "../assets/video/home.webm";
 import homeVideoMp4 from "../assets/video/home.mp4";
+import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
+import mozLogo from "../assets/images/moz-logo-black.png";
 import classNames from "classnames";
 import { ENVIRONMENT_URLS } from "../assets/environments/environments";
+import { connectToReticulum } from "../utils/phoenix-utils";
+
+import styles from "../assets/stylesheets/index.scss";
 
 import HubCreatePanel from "./hub-create-panel.js";
-import InfoDialog from "./info-dialog.js";
+import AuthDialog from "./auth-dialog.js";
+import ReportDialog from "./report-dialog.js";
+import JoinUsDialog from "./join-us-dialog.js";
+import UpdatesDialog from "./updates-dialog.js";
+import DialogContainer from "./dialog-container.js";
+import { WithHoverSound } from "./wrap-with-audio";
 
 addLocaleData([...en]);
 
 class HomeRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
-    dialogType: PropTypes.symbol
+    sceneId: PropTypes.string,
+    authVerify: PropTypes.bool,
+    authTopic: PropTypes.string,
+    authToken: PropTypes.string,
+    authOrigin: PropTypes.string,
+    listSignup: PropTypes.bool,
+    report: PropTypes.bool,
+    initialEnvironment: PropTypes.string
   };
 
   state = {
     environments: [],
-    dialogType: null,
+    dialog: null,
     mailingListEmail: "",
     mailingListPrivacy: false
   };
 
   componentDidMount() {
-    this.loadEnvironments();
-    this.setState({ dialogType: this.props.dialogType });
+    this.closeDialog = this.closeDialog.bind(this);
+    if (this.props.authVerify) {
+      this.showAuthDialog(true);
+      this.verifyAuth().then(this.showAuthDialog);
+      return;
+    }
+    if (this.props.sceneId) {
+      this.loadEnvironmentFromScene();
+    } else {
+      this.loadEnvironments();
+    }
     this.loadHomeVideo();
+    if (this.props.listSignup) {
+      this.showUpdatesDialog();
+    } else if (this.props.report) {
+      this.showReportDialog();
+    }
   }
+
+  async verifyAuth() {
+    const socket = connectToReticulum();
+    const channel = socket.channel(this.props.authTopic);
+    await new Promise((resolve, reject) =>
+      channel
+        .join()
+        .receive("ok", resolve)
+        .receive("error", reject)
+    );
+    channel.push("auth_verified", { token: this.props.authToken });
+  }
+
+  showAuthDialog = verifying => {
+    this.setState({ dialog: <AuthDialog closable="false" verifying={verifying} authOrigin={this.props.authOrigin} /> });
+  };
 
   loadHomeVideo = () => {
     const videoEl = document.querySelector("#background-video");
-    function initVideo() {
-      videoEl.playbackRate = 0.75;
-      videoEl.play();
-      function toggleVideo() {
-        // Play the video if the window/tab is visible.
-        if (!("hasFocus" in document)) {
-          return;
-        }
-        if (document.hasFocus()) {
-          videoEl.play();
-        } else {
-          videoEl.pause();
-        }
-      }
-      document.addEventListener("visibilitychange", toggleVideo);
-      window.addEventListener("focus", toggleVideo);
-      window.addEventListener("blur", toggleVideo);
-    }
-    if (videoEl.readyState >= videoEl.HAVE_FUTURE_DATA) {
-      initVideo();
-    } else {
-      videoEl.addEventListener("canplay", initVideo);
-    }
+    videoEl.playbackRate = 0.9;
+    playVideoWithStopOnBlur(videoEl);
   };
 
-  showDialog = dialogType => {
-    return e => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.setState({ dialogType });
-    };
+  closeDialog() {
+    this.setState({ dialog: null });
+  }
+
+  showJoinUsDialog() {
+    this.setState({ dialog: <JoinUsDialog onClose={this.closeDialog} /> });
+  }
+
+  showReportDialog() {
+    this.setState({ dialog: <ReportDialog onClose={this.closeDialog} /> });
+  }
+
+  showUpdatesDialog() {
+    this.setState({
+      dialog: <UpdatesDialog onClose={this.closeDialog} onSubmittedEmail={() => this.showEmailSubmittedDialog()} />
+    });
+  }
+
+  showEmailSubmittedDialog() {
+    this.setState({
+      dialog: (
+        <DialogContainer onClose={this.closeDialog}>
+          Great! Please check your e-mail to confirm your subscription.
+        </DialogContainer>
+      )
+    });
+  }
+
+  loadEnvironmentFromScene = async () => {
+    let sceneUrlBase = "/api/v1/scenes";
+    if (process.env.RETICULUM_SERVER) {
+      sceneUrlBase = `https://${process.env.RETICULUM_SERVER}${sceneUrlBase}`;
+    }
+    const sceneInfoUrl = `${sceneUrlBase}/${this.props.sceneId}`;
+    const resp = await fetch(sceneInfoUrl).then(r => r.json());
+    const scene = resp.scenes[0];
+    const attribution = scene.attribution && scene.attribution.split("\n").join(", ");
+    const authors = attribution && [{ organization: { name: attribution } }];
+    // Transform the scene info into a an environment bundle structure.
+    this.setState({
+      environments: [
+        {
+          scene_id: this.props.sceneId,
+          meta: {
+            title: scene.name,
+            authors,
+            images: [{ type: "preview-thumbnail", srcset: scene.screenshot_url }]
+          }
+        }
+      ]
+    });
   };
 
   loadEnvironments = () => {
@@ -83,69 +155,58 @@ class HomeRoot extends Component {
     Promise.all(environmentLoads).then(() => this.setState({ environments }));
   };
 
+  onDialogLinkClicked = trigger => {
+    return e => {
+      e.preventDefault();
+      e.stopPropagation();
+      trigger();
+    };
+  };
+
   render() {
     const mainContentClassNames = classNames({
-      "main-content": true,
-      "main-content--noninteractive": !!this.state.dialogType
+      [styles.mainContent]: true,
+      [styles.noninteractive]: !!this.state.dialog
     });
-    const dialogTypes = InfoDialog.dialogTypes;
 
     return (
       <IntlProvider locale={lang} messages={messages}>
-        <div className="home">
+        <div className={styles.home}>
           <div className={mainContentClassNames}>
-            <div className="header-content">
-              <div className="header-content__title">
-                <img className="header-content__title__name" src="../assets/images/logo.svg" />
-                <div className="header-content__title__preview">preview</div>
-              </div>
-              <div className="header-content__entry-code">
-                <a className="header-content__entry-code__link" href="/link" rel="nofollow">
-                  <FormattedMessage id="home.have_entry_code" />
-                </a>
-              </div>
-              <div className="header-content__experiment">
-                <div className="header-content__experiment__container">
-                  <img src="../assets/images/webvr_cube.svg" className="header-content__experiment__icon" />
-                  <div className="header-content__experiment__info">
-                    <div className="header-content__experiment__info__header">
-                      <span>
-                        <FormattedMessage id="home.webvr_disclaimer_pre" />
-                      </span>
-                      <span style={{ fontWeight: "bold" }}>WebVR</span>
-                      <span>
-                        <FormattedMessage id="home.webvr_disclaimer_post" />
-                      </span>
-                      <span>
-                        <a rel="noopener noreferrer" target="_blank" href="https://blog.mozvr.com">
-                          <FormattedMessage id="home.webvr_disclaimer_mr_team" />
-                        </a>
-                      </span>
-                    </div>
-
-                    <div>
-                      <a
-                        className="header-content__experiment__info__link"
-                        rel="noopener noreferrer"
-                        target="_blank"
-                        href="https://github.com/mozilla/hubs"
-                      >
-                        <FormattedMessage id="home.view_source" />
-                      </a>
-                    </div>
-                  </div>
+            <div className={styles.videoContainer}>
+              <video playsInline muted loop autoPlay className={styles.backgroundVideo} id="background-video">
+                <source src={homeVideoWebM} type="video/webm" />
+                <source src={homeVideoMp4} type="video/mp4" />
+              </video>
+            </div>
+            <div className={styles.headerContent}>
+              <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
+                <div className={styles.links}>
+                  <WithHoverSound>
+                    <a href="/whats-new">
+                      <FormattedMessage id="home.whats_new_link" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a href="https://github.com/mozilla/hubs" rel="noreferrer noopener">
+                      <FormattedMessage id="home.source_link" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a href="https://discord.gg/XzrGUY8" rel="noreferrer noopener">
+                      <FormattedMessage id="home.community_link" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a href="/spoke" rel="noreferrer noopener">
+                      Spoke
+                    </a>
+                  </WithHoverSound>
                 </div>
               </div>
             </div>
-            <div className="header-subtitle">
-              <div>
-                <a className="header-subtitle__link" href="/link" rel="nofollow">
-                  <FormattedMessage id="home.have_entry_code" />
-                </a>
-              </div>
-            </div>
-            <div className="hero-content">
-              <div className="hero-content__attribution">
+            <div className={styles.heroContent}>
+              <div className={styles.attribution}>
                 Medieval Fantasy Book by{" "}
                 <a
                   target="_blank"
@@ -155,82 +216,106 @@ class HomeRoot extends Component {
                   Pixel
                 </a>
               </div>
-              <div className="hero-content__container">
-                <div className="hero-content__container__title">
+              <div className={styles.container}>
+                <div className={styles.logo}>
+                  <img src={hubLogo} />
+                </div>
+                <div className={styles.title}>
                   <FormattedMessage id="home.hero_title" />
                 </div>
-                <div className="hero-content__container__subtitle">
-                  <FormattedMessage id="home.hero_subtitle" />
-                </div>
-              </div>
-              <div className="hero-content__create">
-                {this.state.environments.length > 0 && <HubCreatePanel environments={this.state.environments} />}
-              </div>
-            </div>
-            <div className="footer-content">
-              <div className="footer-content__links">
-                <div className="footer-content__links__top">
-                  <a
-                    className="footer-content__links__link"
-                    rel="noopener noreferrer"
-                    href="#"
-                    onClick={this.showDialog(dialogTypes.slack)}
-                  >
-                    <FormattedMessage id="home.join_us" />
-                  </a>
-                  <a
-                    className="footer-content__links__link"
-                    rel="noopener noreferrer"
-                    href="#"
-                    onClick={this.showDialog(dialogTypes.updates)}
-                  >
-                    <FormattedMessage id="home.get_updates" />
-                  </a>
-                  <a
-                    className="footer-content__links__link"
-                    rel="noopener noreferrer"
-                    href="#"
-                    onClick={this.showDialog(dialogTypes.report)}
-                  >
-                    <FormattedMessage id="home.report_issue" />
-                  </a>
-                  <a
-                    className="footer-content__links__link"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
-                  >
-                    <FormattedMessage id="home.terms_of_use" />
-                  </a>
-                  <a
-                    className="footer-content__links__link"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
-                  >
-                    <FormattedMessage id="home.privacy_notice" />
-                  </a>
-                </div>
-                <div className="footer-content__links__bottom">
-                  <div>
-                    <FormattedMessage id="home.made_with_love" />
-                    <span style={{ fontWeight: "bold", color: "white" }}>Mozilla</span>
+                {this.state.environments.length === 0 && (
+                  <div className="loader-wrap">
+                    <div className="loader">
+                      <div className="loader-center" />
+                    </div>
                   </div>
+                )}
+              </div>
+              <div className={styles.create}>
+                <HubCreatePanel
+                  initialEnvironment={this.props.initialEnvironment}
+                  environments={this.state.environments}
+                />
+              </div>
+              {this.state.environments.length > 1 && (
+                <div>
+                  <WithHoverSound>
+                    <div className={styles.joinButton}>
+                      <a href="/link">
+                        <FormattedMessage id="home.join_room" />
+                      </a>
+                    </div>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <div className={styles.spokeButton}>
+                      <a href="/spoke">
+                        <FormattedMessage id="home.create_with_spoke" />
+                      </a>
+                    </div>
+                  </WithHoverSound>
+                </div>
+              )}
+            </div>
+            <div className={styles.footerContent}>
+              <div className={styles.links}>
+                <div className={styles.top}>
+                  <WithHoverSound>
+                    <a
+                      className={styles.link}
+                      rel="noopener noreferrer"
+                      href="#"
+                      onClick={this.onDialogLinkClicked(this.showJoinUsDialog.bind(this))}
+                    >
+                      <FormattedMessage id="home.join_us" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a
+                      className={styles.link}
+                      rel="noopener noreferrer"
+                      href="#"
+                      onClick={this.onDialogLinkClicked(this.showUpdatesDialog.bind(this))}
+                    >
+                      <FormattedMessage id="home.get_updates" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a
+                      className={styles.link}
+                      rel="noopener noreferrer"
+                      href="#"
+                      onClick={this.onDialogLinkClicked(this.showReportDialog.bind(this))}
+                    >
+                      <FormattedMessage id="home.report_issue" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
+                    >
+                      <FormattedMessage id="home.terms_of_use" />
+                    </a>
+                  </WithHoverSound>
+                  <WithHoverSound>
+                    <a
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+                    >
+                      <FormattedMessage id="home.privacy_notice" />
+                    </a>
+                  </WithHoverSound>
+
+                  <img className={styles.mozLogo} src={mozLogo} />
                 </div>
               </div>
             </div>
           </div>
-          <video playsInline muted loop className="background-video" id="background-video">
-            <source src={homeVideoWebM} type="video/webm" />
-            <source src={homeVideoMp4} type="video/mp4" />
-          </video>
-          {this.state.dialogType && (
-            <InfoDialog
-              dialogType={this.state.dialogType}
-              onCloseDialog={() => this.setState({ dialogType: null })}
-              onSubmittedEmail={() => this.setState({ dialogType: dialogTypes.email_submitted })}
-            />
-          )}
+          {this.state.dialog}
         </div>
       </IntlProvider>
     );

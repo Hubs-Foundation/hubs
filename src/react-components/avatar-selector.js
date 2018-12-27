@@ -1,12 +1,10 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl } from "react-intl";
-import FontAwesomeIcon from "@fortawesome/react-fontawesome";
-import faAngleLeft from "@fortawesome/fontawesome-free-solid/faAngleLeft";
-import faAngleRight from "@fortawesome/fontawesome-free-solid/faAngleRight";
-
-// TODO: we should make a bundle for avatar picker with it's own geometry, for now just use the indoor part of the meting room
-const meetingSpace = "https://asset-bundles-prod.reticulum.io/rooms/meetingroom/MeetingSpace1_mesh-d48250ebc6.gltf";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
+import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
+import { WithHoverSound } from "./wrap-with-audio";
 
 class AvatarSelector extends Component {
   static propTypes = {
@@ -18,7 +16,7 @@ class AvatarSelector extends Component {
   static getAvatarIndex = (props, offset = 0) => {
     const currAvatarIndex = props.avatars.findIndex(avatar => avatar.id === props.avatarId);
     const numAvatars = props.avatars.length;
-    return ((currAvatarIndex + offset) % numAvatars + numAvatars) % numAvatars;
+    return (((currAvatarIndex + offset) % numAvatars) + numAvatars) % numAvatars;
   };
   static nextAvatarIndex = props => AvatarSelector.getAvatarIndex(props, -1);
   static previousAvatarIndex = props => AvatarSelector.getAvatarIndex(props, 1);
@@ -52,7 +50,7 @@ class AvatarSelector extends Component {
     ];
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Push new avatar indices onto the array if necessary.
     this.setState(state => {
       const numAvatars = nextProps.avatars.length;
@@ -122,18 +120,23 @@ class AvatarSelector extends Component {
     }
   }
 
+  componentDidMount() {
+    // <a-scene> component not initialized until scene element mounted and loaded.
+    this.scene.addEventListener("loaded", () => {
+      this.scene.setAttribute("renderer", { gammaOutput: true, sortObjects: true, physicallyCorrectLights: true });
+      this.scene.setAttribute("gamma-factor", "");
+      this.scene.setAttribute("shadow", { type: "pcfsoft", enabled: window.APP.quality !== "low" });
+    });
+  }
+
   render() {
     const avatarAssets = this.props.avatars.map(avatar => (
       <a-asset-item id={avatar.id} key={avatar.id} response-type="arraybuffer" src={`${avatar.model}`} />
     ));
     const avatarData = this.state.avatarIndices.map(i => [this.props.avatars[i], i]);
     const avatarEntities = avatarData.map(([avatar, i]) => (
-      <a-entity key={avatar.id} rotation={`0 ${360 * -i / this.props.avatars.length} 0`}>
-        <a-entity position="0 0 5" gltf-model-plus={`src: #${avatar.id}`} inflate="true">
-          <template data-selector=".RootScene">
-            <a-entity animation-mixer="" />
-          </template>
-
+      <a-entity key={avatar.id} rotation={`0 ${(360 * -i) / this.props.avatars.length} 0`}>
+        <a-entity position="0 0 5" gltf-model-plus={`src: #${avatar.id}; inflate: true`}>
           <a-animation
             attribute="rotation"
             dur="12000"
@@ -144,17 +147,14 @@ class AvatarSelector extends Component {
       </a-entity>
     ));
 
-    const rotationFromIndex = index => (360 * index / this.props.avatars.length + 180) % 360;
+    const rotationFromIndex = index => ((360 * index) / this.props.avatars.length + 180) % 360;
     const initialRotation = rotationFromIndex(this.state.initialAvatarIndex);
     const toRotation = rotationFromIndex(this.getAvatarIndex());
 
     return (
       <div className="avatar-selector">
         <a-scene vr-mode-ui="enabled: false" ref={sce => (this.scene = sce)}>
-          <a-assets>
-            {avatarAssets}
-            <a-asset-item id="meeting-space1-mesh" response-type="arraybuffer" src={meetingSpace} />
-          </a-assets>
+          <a-assets>{avatarAssets}</a-assets>
 
           <a-entity rotation={`0 ${initialRotation} 0`}>
             <a-animation
@@ -168,7 +168,7 @@ class AvatarSelector extends Component {
           </a-entity>
 
           <a-entity position="0 1.5 -5.6" rotation="-10 180 0">
-            <a-entity camera="" />
+            <a-entity camera="far: 1;" />
           </a-entity>
 
           <a-entity
@@ -177,14 +177,17 @@ class AvatarSelector extends Component {
             position="0 5 -15"
           />
           <a-entity hide-when-quality="low" light="type: ambient; color: #FFF" />
-          <a-entity id="meeting-space" gltf-model-plus="src: #meeting-space1-mesh" position="0 0 0" />
         </a-scene>
-        <button className="avatar-selector__previous-button" onClick={this.emitChangeToPrevious}>
-          <FontAwesomeIcon icon={faAngleLeft} />
-        </button>
-        <button className="avatar-selector__next-button" onClick={this.emitChangeToNext}>
-          <FontAwesomeIcon icon={faAngleRight} />
-        </button>
+        <WithHoverSound>
+          <button className="avatar-selector__previous-button" onClick={this.emitChangeToPrevious}>
+            <FontAwesomeIcon icon={faAngleLeft} />
+          </button>
+        </WithHoverSound>
+        <WithHoverSound>
+          <button className="avatar-selector__next-button" onClick={this.emitChangeToNext}>
+            <FontAwesomeIcon icon={faAngleRight} />
+          </button>
+        </WithHoverSound>
       </div>
     );
   }

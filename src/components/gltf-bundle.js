@@ -1,3 +1,8 @@
+/**
+ * Instantiates GLTF models as specified in a bundle JSON.
+ * @namespace gltf
+ * @component gltf-bundle
+ */
 AFRAME.registerComponent("gltf-bundle", {
   schema: {
     src: { default: "" }
@@ -23,7 +28,7 @@ AFRAME.registerComponent("gltf-bundle", {
 
       const src = new URL(asset.src, this.baseURL).href;
       const gltfEl = document.createElement("a-entity");
-      gltfEl.setAttribute("gltf-model-plus", { src, inflate: true });
+      gltfEl.setAttribute("gltf-model-plus", { src, useCache: false, inflate: true });
       loaded.push(new Promise(resolve => gltfEl.addEventListener("model-loaded", resolve)));
       this.el.appendChild(gltfEl);
     }

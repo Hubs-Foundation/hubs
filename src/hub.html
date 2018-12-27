@@ -2,44 +2,35 @@
 <html>
 
 <head>
-    <!-- DO NOT REMOVE/EDIT THIS COMMENT - HUB_META_TAGS -->
+    <!-- DO NOT REMOVE/EDIT THIS COMMENT - META_TAGS -->
 
     <meta charset="utf-8">
-    <meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="<%= ORIGIN_TRIAL_EXPIRES %>" content="<%= ORIGIN_TRIAL_TOKEN %>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <link rel="shortcut icon" type="image/png" href="/favicon.ico">
     <title>Get together | Hubs by Mozilla</title>
-    <link href="https://fonts.googleapis.com/css?family=Zilla+Slab:300,300i,400,400i,700" rel="stylesheet">
-
-    <% if(NODE_ENV === "production") { %>
-        <script src="https://cdn.rawgit.com/aframevr/aframe/3e7a4b3/dist/aframe-master.min.js" integrity="sha384-LQXa4VjhYucs9sVd5yQ3OhBXRea0jrvbHJA8CYLgTnvzxF5uvyhabSo1mX4tT2c6" crossorigin="anonymous"></script>
-    <% } else { %>
-        <script src="https://cdn.rawgit.com/aframevr/aframe/3e7a4b3/dist/aframe-master.js" integrity="sha384-EaMOuyBOi9ERV/lVDwQgz/yFWBDWPsIju5Co6oCZZHXuvbLBO81yPWn80q0BbBn3" crossorigin="anonymous"></script>
-    <% } %>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700" rel="stylesheet">
 </head>
 
-<body data-html-prefix="<%= HTML_PREFIX %>">
-    <audio id="bot-recording" loop muted crossorigin="anonymous" src="./assets/avatars/bot-recording.mp3"></audio>
-
-    <audio id="test-tone">
-        <source src="./assets/sfx/tone.webm" type="audio/webm"/>
-        <source src="./assets/sfx/tone.mp3" type="audio/mpeg"/>
-        <source src="./assets/sfx/tone.ogg" type="audio/ogg"/>
-        <source src="./assets/sfx/tone.wav" type="audio/wav"/>
-    </audio>
-
+<body>
     <a-scene
-        renderer="antialias: true"
+        class="grab-cursor"
+        renderer="antialias: true; gammaOutput: true; sortObjects: true; physicallyCorrectLights: true;"
+        shadow="type: pcfsoft"
+        gamma-factor
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
-        physics="gravity: -6;"
+        physics="gravity: -6; debug: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         freeze-controller="toggleEvent: action_freeze"
         personal-space-bubble="debug: false;"
         vr-mode-ui="enabled: false"
+        stats-plus="false"
+        action-to-event__mute="path: /actions/muteMic; event: action_mute;"
+        action-to-event__focus_chat="path: /actions/focusChat; event: action_focus_chat;"
     >
 
         <a-assets>
+            <img id="action-button" crossorigin="anonymous" src="./assets/hud/action_button.9.png">
             <img id="tooltip" crossorigin="anonymous" src="./assets/hud/tooltip.9.png">
             <img id="mute-off" crossorigin="anonymous" src="./assets/hud/mute_off.png">
             <img id="mute-off-hover" crossorigin="anonymous" src="./assets/hud/mute_off-hover.png">
@@ -53,10 +44,16 @@
             <img id="freeze-off-hover" crossorigin="anonymous" src="./assets/hud/freeze_off-hover.png">
             <img id="freeze-on" crossorigin="anonymous" src="./assets/hud/freeze_on.png">
             <img id="freeze-on-hover" crossorigin="anonymous" src="./assets/hud/freeze_on-hover.png">
+            <img id="spawn-pen" crossorigin="anonymous" src="./assets/hud/spawn_pen.png">
+            <img id="spawn-pen-hover" crossorigin="anonymous" src="./assets/hud/spawn_pen-hover.png">
+            <img id="spawn-camera" crossorigin="anonymous" src="./assets/hud/spawn_camera.png">
+            <img id="spawn-camera-hover" crossorigin="anonymous" src="./assets/hud/spawn_camera-hover.png">
+            <img id="presence-count" crossorigin="anonymous" src="./assets/hud/presence-count.png">
+            <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
 
             <a-asset-item id="botdefault" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDefault_Avatar-9f71f8ff22.gltf"></a-asset-item>
             <a-asset-item id="botbobo" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotBobo_Avatar-f9740a010b.gltf"></a-asset-item>
-            <a-asset-item id="botdom" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDom_Avatar-6aa1b5d781.gltf"></a-asset-item>
+            <a-asset-item id="botdom" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDom_Avatar-0c48bf15a5.gltf"></a-asset-item>
             <a-asset-item id="botgreg" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotGreg_Avatar-98d39797bb.gltf"></a-asset-item>
             <a-asset-item id="botguest" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotGuest_Avatar-78cd857332.gltf"></a-asset-item>
             <a-asset-item id="botjim" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotJim_Avatar-d28005a687.gltf"></a-asset-item>
@@ -65,173 +62,386 @@
             <a-asset-item id="botrobert" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotRobert_Avatar-e9554880f3.gltf"></a-asset-item>
             <a-asset-item id="botwoody" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotWoody_Avatar-0140485a23.gltf"></a-asset-item>
 
-            <a-asset-item id="watch-model" response-type="arraybuffer" src="./assets/hud/watch.glb"></a-asset-item>
-            <a-asset-item id="interactable-duck" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf"></a-asset-item>
-
-            <a-asset-item id="quack" src="./assets/sfx/quack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="specialquack" src="./assets/sfx/specialquack.mp3" response-type="arraybuffer" preload="auto"></a-asset-item>
-
-            <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
-
-            <!-- Templates -->
-
-            <template id="video-template">
-                <a-entity class="video" geometry="primitive: plane;" material="side: double; shader: flat;" networked-video-player></a-entity>
-            </template>
+            <a-asset-item id="quack"                                      src="./assets/sfx/quack.mp3"          response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="specialquack"                               src="./assets/sfx/specialquack.mp3"   response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-quack"                          src="./assets/sfx/quack.mp3"          response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-teleport_start"                 src="./assets/sfx/teleportArc.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-teleport_end"                   src="./assets/sfx/quickTurn.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-snap_rotate"                    src="./assets/sfx/tap_mellow.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-media_loaded"                   src="./assets/sfx/A_bendUp.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-media_loading"                  src="./assets/sfx/suspense.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-hud_hover_start"                src="./assets/sfx/tick.wav"  response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-grab"                           src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-grab_off"                       src="./assets/sfx/tick.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-pinned"                         src="./assets/sfx/tack.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-cursor_distance_change_blocked" src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-cursor_distance_changed"        src="./assets/sfx/tick.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-hud_click"                      src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-toggle_mute"                    src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-toggle_freeze"                  src="./assets/sfx/Eb_blip.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-freeze"                         src="./assets/sfx/Eb_blip.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-thaw"                           src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-toggle_space_bubble"            src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-spawn_pen"                      src="./assets/sfx/PenSpawn.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-increase_pen_radius"            src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-decrease_pen_radius"            src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-next_pen_color"                 src="./assets/sfx/tick.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-prev_pen_color"                 src="./assets/sfx/tick.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-start_draw"                     src="./assets/sfx/PenDraw1.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-stop_draw"                      src="./assets/sfx/tick.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-camera_tool_took_snapshot"      src="./assets/sfx/PicSnapHey.wav" response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-welcome"                        src="./assets/sfx/welcome.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
+            <a-asset-item id="sound_asset-chat"                           src="./assets/sfx/pop.wav"     response-type="arraybuffer" preload="auto"></a-asset-item>
 
             <template id="remote-avatar-template">
-                <a-entity networked-avatar ik-root player-info>
-                    <a-entity class="camera"></a-entity>
+                <a-entity networked-avatar ik-root player-info matrix-auto-update>
+                    <a-entity class="camera" matrix-auto-update></a-entity>
 
-                    <a-entity class="left-controller"></a-entity>
+                    <a-entity class="left-controller" matrix-auto-update></a-entity>
 
-                    <a-entity class="right-controller"></a-entity>
+                    <a-entity class="right-controller" matrix-auto-update></a-entity>
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
-                        <template data-selector=".RootScene">
-                            <a-entity ik-controller hand-pose__left hand-pose__right animation-mixer space-invader-mesh="meshSelector: .Bot_Skinned"></a-entity>
+                        <template data-name="AvatarRoot">
+                            <a-entity ik-controller hand-pose__left hand-pose__right space-invader-mesh="meshName: AvatarMesh"></a-entity>
                         </template>
 
-                        <template data-selector=".Neck">
+                        <template data-name="Neck">
                             <a-entity>
                                 <a-entity
-                                   class="nametag"
-                                   billboard
-                                   text="side: double; align: center; color: #ddd"
-                                   position="0 1 0"
-                                   scale="6 6 6"
-                               ></a-entity>
+                                    class="nametag"
+                                    billboard
+                                    matrix-auto-update
+                                    text="side: double; align: center; color: #ddd"
+                                    position="0 1 0"
+                                    scale="6 6 6"
+                                ></a-entity>
                             </a-entity>
                         </template>
 
-                        <template data-selector=".Chest">
-                            <a-entity>
-                              <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility> </a-entity>
-                              <a-entity billboard>
-                                  <a-entity
-                                      block-button
-                                      visible-while-frozen
-                                      ui-class-while-frozen
-                                      text-button="haptic:#player-right-controller;
-                                                   textHoverColor: #fff;
-                                                   textColor: #fff;
-                                                   backgroundHoverColor: #ea4b54;
-                                                   backgroundColor: #fff;"
-                                      slice9="width: 0.45;
-                                                   height: 0.2;
-                                                   left: 53;
-                                                   top: 53;
-                                                   right: 10;
-                                                   bottom: 10;
-                                                   opacity: 1.3;
-                                                   src: #tooltip"
-                                      position="0 0 .35">
-                                  </a-entity>
-                                  <a-entity
-                                      visible-while-frozen
-                                      text="value:Block;
-                                            width:2.5;
-                                            align:center;"
-                                      position="0 0 0.36"></a-entity>
-                              </a-entity>
+                        <template data-name="Spine">
+                            <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
+                                <a-entity billboard matrix-auto-update visibility-while-frozen="withinDistance: 10;">
+                                    <a-entity hoverable mixin="rounded-text-button" block-button ui-class-while-frozen position="0 0 .35"> </a-entity>
+                                    <a-entity visibility-while-frozen="withinDistance: 10;" text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
+                                </a-entity>
                             </a-entity>
                         </template>
 
-                        <template data-selector=".Head">
+                        <template data-name="Head">
                             <a-entity
                                 networked-audio-source
                                 networked-audio-analyser
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
                             >
-                            <a-cylinder
-                                static-body
-                                radius="0.13"
-                                height="0.2"
-                                position="0 0.07 0.05"
-                                visible="false"
-                            ></a-cylinder>
+                                <a-cylinder
+                                    static-body
+                                    radius="0.13"
+                                    height="0.2"
+                                    position="0 0.07 0.05"
+                                    visible="false"
+                                ></a-cylinder>
                             </a-entity>
                         </template>
 
-                        <template data-selector=".LeftHand">
+                        <template data-name="LeftHand">
                             <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
                         </template>
 
-                        <template data-selector=".RightHand">
+                        <template data-name="RightHand">
                             <a-entity personal-space-invader="radius: 0.1" bone-visibility></a-entity>
                         </template>
                     </a-entity>
                 </a-entity>
             </template>
 
-            <template id="interactable-template">
+            <template id="static-media">
                 <a-entity
-                    gltf-model-plus="src: #interactable-duck; inflate: true;"
+                    body="type: static; shape: none; mass: 1;"
+                    auto-scale-cannon-physics-body
+                    set-sounds-invisible
+                >
+                </a-entity>
+            </template>
+
+            <template id="static-controlled-media">
+                <a-entity
                     class="interactable"
-                    super-networked-interactable="counter: #counter; mass: 1;"
-                    body="type: dynamic; shape: none; mass: 1;"
+                    super-networked-interactable="counter: #media-counter;"
+                    body="type: static; shape: none; mass: 1;"
                     grabbable
-                    stretchable="useWorldPosition: true;"
                     hoverable
-                    duck
+                    hoverable-visuals="cursorController: #cursor-controller"
+                    auto-scale-cannon-physics-body
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
+                    set-sounds-invisible
+                    emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
+                    emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
+                >
+                </a-entity>
+            </template>
+
+            <template id="interactable-media">
+                <a-entity
+                    class="interactable"
+                    super-networked-interactable="counter: #media-counter;"
+                    body="type: dynamic; shape: none; mass: 1;"
+                    scale="0.5 0.5 0.5"
+                    animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeInQuad"
+                    grabbable
+                    stretchable="useWorldPosition: true; usePhysics: never"
+                    hoverable
+                    hoverable-visuals="cursorController: #cursor-controller"
+                    auto-scale-cannon-physics-body
+                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
+                    position-at-box-shape-border="target:.freeze-menu;"
+                    destroy-at-extreme-distances
+                    set-yxz-order
+                    pinnable
+                    matrix-auto-update
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
+                    sound__pinned ="src: #sound_asset-pinned; on: pinned; poolSize: 1; positional: false;"
+                    set-sounds-invisible
+                    emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
+                    emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
+                    emit-state-change__pinned="state: pinned; transform: rising; event: pinned;"
+                >
+                    <a-entity class="ui interactable-ui" mixin="button-container">
+                        <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 10;">
+                            <a-entity mixin="rounded-text-action-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned;" position="0 0.125 0.01"> </a-entity>
+                            <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
+                            <a-entity mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.01">
+                                <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" camera-focus-button="track: true" position="0.25 0.375 0.01">
+                                <a-entity text=" value:track; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" class="hide-when-pinned" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
+                            <a-entity text=" value:remove; width:1.75; align:center;" class="hide-when-pinned" text-raycast-hack position="0 -0.125 0.02"></a-entity>
+                            <a-entity mixin="rounded-text-button" open-media-button position="0.25 -0.375 0.01">
+                                <a-entity text="value:open link; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" clone-media-button position="-0.25 -0.375 0.01">
+                                <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                        </a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="pen-interactable">
+                <a-entity
+                    class="pen interactable"
+                    super-networked-interactable="counter: #pen-counter;"
+                    body="type: dynamic; shape: none; mass: 1;"
+                    grabbable="maxGrabbers: 1"
+                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
+                    hoverable
+                    matrix-auto-update
+                    scale="0.5 0.5 0.5"
+                    sound__next_pen_color="src: #sound_asset-next_pen_color; on: next_pen_color; poolSize: 2; positional: false;"
+                    sound__prev_pen_color="src: #sound_asset-prev_pen_color; on: prev_pen_color; poolSize: 2; positional: false;"
+                    sound__start_draw="src: #sound_asset-start_draw; on: start_draw; poolSize: 2;"
+                    sound__stop_draw="src: #sound_asset-stop_draw; on: stop_draw; poolSize: 2; positional: false;"
+                    sound__increase_pen_radius="src: #sound_asset-increase_pen_radius; on: increase_pen_radius; poolSize: 2; positional: false;"
+                    sound__decrease_pen_radius="src: #sound_asset-decrease_pen_radius; on: decrease_pen_radius; poolSize: 2; positional: false;"
+                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
+                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
+                    set-sounds-invisible
+                    emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
+                    emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
+                >
+                    <a-sphere
+                        id="pen"
+                        scale="1.5, 1.5, 1.5"
+                        position="0 -0.18 0"
+                        radius="0.02"
+                        color="#FF0033"
+                        pen="camera: #player-camera; drawingManager: #drawing-manager"
+                        segments-width="16"
+                        segments-height="12"
+                    ></a-sphere>
+                    <a-entity class="ui delete-button" visibility-while-frozen="withinDistance: 10;" mixin="button-container">
+                        <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
+                        <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="interactable-camera">
+                <a-entity
+                    class="interactable icamera"
+                    grabbable
+                    hoverable
+                    stretchable
+                    camera-tool
+                    matrix-auto-update
+                    animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
+                    scale="0.5 0.5 0.5"
+                    body="type: dynamic; shape: none; mass: 1;"
+                    shape="shape: box; halfExtents: 0.22 0.145 0.1; offset: 0 0.02 0"
+                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
+                    super-networked-interactable="counter: #camera-counter;"
+                    position-at-box-shape-border="target:.camera-menu"
+                    set-yxz-order
+                    auto-scale-cannon-physics-body
+                >
+                    <a-entity class="ui camera-menu" visibility-while-frozen="withinDistance: 10;" mixin="button-container">
+                        <a-entity mixin="rounded-text-action-button" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01"> </a-entity>
+                        <a-entity text=" value:mirror; width:2.5; align:center;" class="mirror-button-label" text-raycast-hack position="0 0.125 0.02"></a-entity>
+                        <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
+                        <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 -0.125 0.02"></a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="interactable-drawing">
+                <a-entity
+                    networked-drawing
                 ></a-entity>
             </template>
 
-            <a-mixin id="super-hands"
+            <template id="paging-toolbar">
+                <a-entity class="ui paging-toolbar" visible-to-owner>
+                    <a-entity class="prev-button" position="-0.3 0 0">
+                        <a-entity mixin="rounded-text-button" slice9="width: 0.2"> </a-entity>
+                        <a-entity text=" value:<; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    </a-entity>
+                    <a-entity class="page-label" text="width:2; align:center;" text-raycast-hack></a-entity>
+                    <a-entity class="next-button" position="0.3 0 0">
+                        <a-entity mixin="rounded-text-button" slice9="width: 0.2"> </a-entity>
+                        <a-entity text=" value:>; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="video-unmute">
+                <a-entity 
+                    class="ui unmute-ui"
+                    position="0 0 0.1"
+                    visibility-while-frozen="visible: false; withinDistance: 10;"
+                    mixin="button-container"
+                >
+                    <a-entity class="unmute-button">
+                        <a-entity mixin="rounded-text-button" slice9="width: 0.4" unmute-video-button> </a-entity>
+                        <a-entity text=" value:un-mute; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <a-mixin id="rounded-text-button"
+                text-button="
+                    haptic:#player-right-controller;
+                    textHoverColor: #fff;
+                    textColor: #fff;
+                    backgroundHoverColor: #aaa;
+                    backgroundColor: #fff;"
+                slice9="
+                    width: 0.45;
+                    height: 0.2;
+                    left: 64;
+                    top: 64;
+                    right: 66;
+                    bottom: 66;
+                    opacity: 1.0;
+                    src: #action-button"
+            ></a-mixin>
+
+            <a-mixin id="rounded-text-action-button"
+                text-button="
+                    haptic:#player-right-controller;
+                    textHoverColor: #fff;
+                    textColor: #fff;
+                    backgroundHoverColor: #cc0515;
+                    backgroundColor: #ff0520;"
+                slice9="
+                    width: 0.45;
+                    height: 0.2;
+                    left: 64;
+                    top: 64;
+                    right: 66;
+                    bottom: 66;
+                    opacity: 1.0;
+                    src: #action-button"
+            ></a-mixin>
+
+            <a-mixin id="button-container"
+                stop-event-propagation__grab-start="event: grab-start"
+                stop-event-propagation__grab-end="event: grab-end"
+                stop-event-propagation__stretch-start="event: stretch-start"
+                stop-event-propagation__stretch-end="event: stretch-end"
+            ></a-mixin>
+
+            <a-mixin id="controller-super-hands"
                 super-hands="
-                    colliderEvent: collisions; colliderEventProperty: els;
-                    colliderEndEvent: collisions; colliderEndEventProperty: clearedEls;
-                    grabStartButtons: action_grab; grabEndButtons: action_release;
-                    stretchStartButtons: action_grab; stretchEndButtons: action_release;
-                    dragDropStartButtons: action_grab; dragDropEndButtons: action_release;"
+                    colliderEvent: collisions;
+                    colliderEventProperty: els;
+                    colliderEndEvent: collisions;
+                    colliderEndEventProperty: clearedEls;
+                    grabStartButtons: primary_hand_grab, secondary_hand_grab;
+                    grabEndButtons: primary_hand_release, secondary_hand_release;
+                    stretchStartButtons: primary_hand_grab, secondary_hand_grab;
+                    stretchEndButtons: primary_hand_release, secondary_hand_release;
+                    dragDropStartButtons: hand_grab, secondary_hand_grab;
+                    dragDropEndButtons: hand_release, secondary_hand_release;
+                    activateStartButtons: secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
+                    activateEndButtons: secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
                 collision-filter="collisionForces: false"
                 physics-collider
             ></a-mixin>
         </a-assets>
 
         <!-- Interactables -->
-        <a-entity id="counter" networked-counter="max: 3; ttl: 120"></a-entity>
+        <a-entity id="media-counter" networked-counter="max: 10;"></a-entity>
+
+        <a-entity id="pen-counter" networked-counter="max: 10;"></a-entity>
+
+        <a-entity id="camera-counter" networked-counter="max: 1;"></a-entity>
+
+        <a-entity id="drawing-manager" drawing-manager></a-entity>
 
         <a-entity
             id="cursor-controller"
             cursor-controller="
                 cursor: #cursor;
                 camera: #player-camera;
-                playerRig: #player-rig;
-                physicalHandSelector: #player-right-controller;
-                gazeTeleportControls: #gaze-teleport;"
-            raycaster="objects: .collidable, .interactable, .ui; far: 3;"
-            line="visible: false; color: white; opacity: 0.2;"
+                objects: .collidable, .interactable, .ui;"
         ></a-entity>
 
         <a-sphere
             id="cursor"
             material="depthTest: false; opacity:0.9;"
             radius="0.02"
+            segments-width="9"
+            segments-height="9"
             static-body="shape: sphere;"
             collision-filter="collisionForces: false"
             super-hands="
-                colliderEvent: raycaster-intersection; colliderEventProperty: els;
-                colliderEndEvent: raycaster-intersection-cleared; colliderEndEventProperty: clearedEls;
-                grabStartButtons: cursor-grab; grabEndButtons: cursor-release;
-                stretchStartButtons: cursor-grab; stretchEndButtons: cursor-release;
-                dragDropStartButtons: cursor-grab; dragDropEndButtons: cursor-release;"
-            segments-height="9"
-            segments-width="9"
-            event-repeater="events: raycaster-intersection, raycaster-intersection-cleared; eventSource: #cursor-controller"
+                colliderEvent: raycaster-intersection;
+                colliderEndEvent: raycaster-intersection-cleared;
+                grabStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
+                grabEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
+                stretchStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
+                stretchEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
+                dragDropStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
+                dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
+                activateStartButtons: secondary-cursor-grab, secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
+                activateEndButtons: secondary-cursor-release, secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
+            action-to-event__grab="path: /actions/cursorGrab; event: cursor-grab"
+            action-to-event__drop="path: /actions/cursorDrop; event: cursor-release"
         ></a-sphere>
 
         <!-- Player Rig -->
         <a-entity
             id="player-rig"
-            networked="template: #remote-avatar-template; attachTemplateToLocal: false;"
-            spawn-controller="loadedEvent: bundleloaded; target: #environment-root"
+            spawn-controller="loadedEvent: entered; target: #player-rig"
             wasd-to-analog2d
             character-controller="pivot: #player-camera"
             ik-root
             player-info
-            networked-avatar
             cardboard-controls
         >
             <a-entity
@@ -241,13 +451,54 @@
                 vr-mode-toggle-playing__hud-controller
             >
                 <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="30 0 0">
-                    <a-rounded height="0.13" width="0.48" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
-                    <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover" scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="ui hud mic" material="alphaTest:0.1;"></a-image>
-                    <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover" scale="0.2 0.2 0.2" position="0 0 0.005" class="ui hud freeze"></a-image>
-                    <a-image icon-button="tooltip: #hud-tooltip; tooltipText: Enable Bubble; activeTooltipText: Disable Bubble; image: #bubble-off; hoverImage: #bubble-off-hover; activeImage: #bubble-on; activeHoverImage: #bubble-on-hover" scale="0.1 0.1 0.1" position="0.17 0 0.001" class="ui hud bubble" material="alphaTest:0.1;"></a-image>
-                    <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
-                        <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" ></a-entity>
-                    </a-rounded>
+                    <a-rounded height="0.08" width="0.2" color="#000000" position="-0.30 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
+                    <a-image scale="0.07 0.06 0.06" position="-0.23 0.165 0.001" src="#presence-count" material="alphaTest:0.1;"></a-image>
+                    <a-entity id="hud-presence-count" text="value:; width:1.1; align:center;" position="-0.155 0.165 0" matrix-auto-update="target: text;"></a-entity>
+                    <a-rounded height="0.08" width="0.5" color="#000000" position="-0.08 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
+                    <a-entity id="hud-hub-entry-link" text="value:; width:1.1; align:center;" position="0.17 0.165 0" matrix-auto-update="target: text;"></a-entity>
+                    <a-rounded height="0.13" width="0.59" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
+                <a-image
+                    icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover"
+                    scale="0.1 0.1 0.1"
+                    position="-0.17 0 0.001"
+                    class="ui hud mic"
+                    material="alphaTest:0.1;"
+                    hoverable
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
+                    set-sounds-invisible
+                ></a-image>
+                <a-image
+                    icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover"
+                    scale="0.2 0.2 0.2"
+                    position="0 0 0.005"
+                    class="ui hud freeze"
+                    hoverable
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
+                    set-sounds-invisible
+                ></a-image>
+                <a-image
+                    icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #spawn-pen; hoverImage: #spawn-pen-hover; activeImage: #spawn-pen; activeHoverImage: #spawn-pen-hover"
+                    scale="0.1 0.1 0.1"
+                    position="0.17 0 0.001"
+                    class="ui hud penhud"
+                    material="alphaTest:0.1;"
+                    hoverable
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
+                    set-sounds-invisible
+                ></a-image>
+                <a-image
+                    icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #spawn-camera; hoverImage: #spawn-camera-hover; activeImage: #spawn-camera; activeHoverImage: #spawn-camera-hover"
+                    scale="0.1 0.1 0.1"
+                    position="0.28 0 0.001"
+                    class="ui hud camera-btn"
+                    material="alphaTest:0.1;"
+                    hoverable
+                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
+                    set-sounds-invisible
+                ></a-image>
+                <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
+                    <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" matrix-auto-update="target: text"></a-entity>
+                </a-rounded>
                 </a-entity>
             </a-entity>
 
@@ -255,21 +506,72 @@
                 id="player-camera"
                 class="camera"
                 camera
-                position="0 1.6 0"
-                personal-space-bubble="radius: 0.4"
+                personal-space-bubble="radius: 0.4;"
+                rotation
+                pitch-yaw-rotator
+                set-yxz-order
+                matrix-auto-update
+                sound__teleport_start="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2; loop: true;"
+                scene-sound__teleport_start="on: right-teleport_down; off: right-teleport_up;"
+                sound__teleport_start2="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2; loop: true;"
+                scene-sound__teleport_start2="on: left-teleport_down; off: left-teleport_up;"
+                sound__teleport_end="positional: false; src: #sound_asset-teleport_end; on: nothing; poolSize: 2;"
+                scene-sound__teleport_end="on: right-teleport_up;"
+                sound__teleport_end2="positional: false; src: #sound_asset-teleport_end; on: nothing; poolSize: 2;"
+                scene-sound__teleport_end2="on: left-teleport_up;"
+                sound__snap_rotate_left="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
+                scene-sound__snap_rotate_left="on: snap_rotate_left;"
+                sound__snap_rotate_right="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
+                scene-sound__snap_rotate_right="on: snap_rotate_right;"
+                sound__media_loaded="positional: false; src: #sound_asset-media_loaded; on: nothing; poolSize: 2;"
+                scene-sound__media_loaded="on: media-loaded;"
+                sound__media_loading="positional: false; src: #sound_asset-media_loading; on: nothing; poolSize: 2; loop: true; "
+                scene-sound__media_loading="on: media-loading; off: media-loaded;"
+                sound__hud_action_mute="positional: false; src: #sound_asset-toggle_mute; on: nothing; poolSize: 2;"
+                scene-sound__hud_action_mute="on: action_mute;"
+                sound__hud_action_freeze="positional: false; src: #sound_asset-toggle_freeze; on: nothing; poolSize: 2;"
+                scene-sound__hud_action_freeze="on: action_freeze;"
+                sound__action_freeze="positional: false; src: #sound_asset-freeze; on: nothing; poolSize: 2;"
+                scene-sound__action_freeze="on: play_freeze_sound;"
+                sound__action_thaw="positional: false; src: #sound_asset-thaw; on: nothing; poolSize: 2;"
+                scene-sound__action_thaw="on: play_thaw_sound;"
+                sound__hud_action_space_bubble="positional: false; src: #sound_asset-toggle_space_bubble; on: nothing; poolSize: 2;"
+                scene-sound__hud_action_space_bubble="on: action_space_bubble;"
+                sound__hud_spawn_pen="positional: false; src: #sound_asset-spawn_pen; on: nothing; poolSize: 2;"
+                scene-sound__hud_spawn_pen="on: spawn_pen;"
+                sound__hud_hover_start="positional: false; src: #sound_asset-hud_hover_start; on: nothing; poolSize: 5;"
+                sound__hud_click="positional: false; src: #sound_asset-hud_click; on: nothing; poolSize: 1;"
+                scene-sound__hud_click="on: hud_click;"
+                sound__cursor_distance_changed="positional: false; src: #sound_asset-cursor_distance_changed; on: nothing; poolSize: 1;"
+                scene-sound__cursor_distance_changed="on: cursor-distance-changed;"
+                sound__cursor_distance_change_blocked="positional: false; src: #sound_asset-cursor_distance_change_blocked; on: nothing; poolSize: 1;"
+                scene-sound__cursor_distance_change_blocked="on: cursor-distance-change-blocked;"
+                sound__camera_tool_took_snapshot="positional: false; src: #sound_asset-camera_tool_took_snapshot; on: nothing; poolSize: 1;"
+                scene-sound__camera_tool_took_snapshot="on: camera_tool_took_snapshot;"
+                sound__welcome="positional: false; src: #sound_asset-welcome; on: nothing; poolSize: 2;"
+                scene-sound__welcome="on: entered;"
+                sound__log_chat_message="positional: false; src: #sound_asset-chat; on: nothing; poolSize: 2;"
+                scene-sound__log_chat_message="on: presence-log-chat;"
+                sound__quack="positional: false; src: #sound_asset-quack; on: nothing; poolSize: 2;"
+                scene-sound__quack="on: quack;"
+                set-sounds-invisible
             >
                 <a-entity
                     id="gaze-teleport"
                     position = "0.15 0 0"
                     teleport-controls="
-                    cameraRig: #player-rig;
-                    teleportOrigin: #player-camera;
-                    button: cursor-teleport_;
-                    collisionEntities: [nav-mesh];
-                    drawIncrementally: true;
-                    incrementalDrawMs: 600;
-                    hitOpacity: 0.3;
-                    missOpacity: 0.2;"
+                        cameraRig: #player-rig;
+                        teleportOrigin: #player-camera;
+                        button: gaze-teleport_;
+                        collisionEntities: [nav-mesh];
+                        drawIncrementally: true;
+                        incrementalDrawMs: 300;
+                        hitOpacity: 0.3;
+                        missOpacity: 0.1;
+                        curveShootingSpeed: 12;"
+                    teleport-controls-matrix-auto-update
+                    action-to-event__start-teleport="path: /actions/startTeleport; event: gaze-teleport_down"
+                    action-to-event__stop-teleport="path: /actions/stopTeleport; event: gaze-teleport_up"
                 ></a-entity>
             </a-entity>
 
@@ -281,16 +583,22 @@
                 teleport-controls="
                     cameraRig: #player-rig;
                     teleportOrigin: #player-camera;
-                    button: cursor-teleport_;
+                    button: left-teleport_;
                     collisionEntities: [nav-mesh];
                     drawIncrementally: true;
-                    incrementalDrawMs: 600;
+                    incrementalDrawMs: 300;
                     hitOpacity: 0.3;
-                    missOpacity: 0.2;"
+                    missOpacity: 0.1;
+                    curveShootingSpeed: 12;"
+                teleport-controls-matrix-auto-update
                 haptic-feedback
                 body="type: static; shape: none;"
-                mixin="super-hands"
+                mixin="controller-super-hands"
                 controls-shape-offset
+                action-to-event__a="path: /actions/leftHandStartTeleport; event: left-teleport_down;"
+                action-to-event__b="path: /actions/leftHandStopTeleport; event: left-teleport_up;"
+                action-to-event__c="path: /actions/leftHandGrab; event: primary_hand_grab;"
+                action-to-event__d="path: /actions/leftHandDrop; event: primary_hand_release;"
             >
             </a-entity>
 
@@ -302,24 +610,29 @@
                 teleport-controls="
                     cameraRig: #player-rig;
                     teleportOrigin: #player-camera;
-                    button: cursor-teleport_;
+                    button: right-teleport_;
                     collisionEntities: [nav-mesh];
                     drawIncrementally: true;
-                    incrementalDrawMs: 600;
+                    incrementalDrawMs: 300;
                     hitOpacity: 0.3;
-                    missOpacity: 0.2;"
+                    missOpacity: 0.1;
+                    curveShootingSpeed: 12;"
+                teleport-controls-matrix-auto-update
                 haptic-feedback
                 body="type: static; shape: none;"
-                mixin="super-hands"
+                mixin="controller-super-hands"
                 controls-shape-offset
-            ></a-entity>
+                action-to-event__a="path: /actions/rightHandStartTeleport; event: right-teleport_down;"
+                action-to-event__b="path: /actions/rightHandStopTeleport; event: right-teleport_up;"
+                action-to-event__c="path: /actions/rightHandGrab; event: primary_hand_grab;"
+                action-to-event__d="path: /actions/rightHandDrop; event: primary_hand_release;"
+            >
+            </a-entity>
 
-            <a-entity gltf-model-plus="inflate: true;"
-                      class="model">
-                <template data-selector=".RootScene">
+            <a-entity gltf-model-plus="inflate: true;" class="model">
+                <template data-name="AvatarRoot">
                     <a-entity
                         ik-controller
-                        animation-mixer
                         hand-pose__left
                         hand-pose__right
                         hand-pose-controller__left="networkedAvatar:#player-rig;eventSrc:#player-left-controller"
@@ -327,22 +640,22 @@
                     ></a-entity>
                 </template>
 
-                <template data-selector=".Neck">
+                <template data-name="Neck">
                     <a-entity>
                         <a-entity class="nametag" visible="false" text ></a-entity>
                     </a-entity>
                 </template>
 
-                <template data-selector=".Head">
-                    <a-entity visible="false" bone-visibility></a-entity>
+                <template data-name="Head">
+                    <a-entity id="player-head" visible="false" bone-visibility></a-entity>
                 </template>
 
-                <template data-selector=".LeftHand">
-                    <a-entity bone-visibility></a-entity>
+                <template data-name="LeftHand">
+                    <a-entity bone-visibility hover-visuals="hand: left; controller: #player-left-controller"></a-entity>
                 </template>
 
-                <template data-selector=".RightHand">
-                    <a-entity bone-visibility></a-entity>
+                <template data-name="RightHand">
+                    <a-entity bone-visibility hover-visuals="hand: right; controller: #player-right-controller"></a-entity>
                 </template>
 
             </a-entity>
@@ -353,7 +666,25 @@
             id="environment-root"
             nav-mesh-helper
             static-body="shape: none;"
+        >
+            <a-entity id="environment-scene"></a-entity>
+        </a-entity>
+
+        <!-- Objects -->
+        <a-entity id="objects-root">
+            <a-entity id="objects-scene"></a-entity>
+        </a-entity>
+
+        <a-entity
+            action-to-event="path: /actions/spawnPen; event: spawn_pen"
+            super-spawner="
+                template: #pen-interactable;
+                src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf;
+                spawnEvent: spawn_pen;
+                superHand: #player-right-controller;
+                cursorSuperHand: #cursor;"
         ></a-entity>
+
     </a-scene>
 
     <div id="ui-root"></div>

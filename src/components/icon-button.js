@@ -1,3 +1,8 @@
+/**
+ * A button with an image, tooltip, hover states and haptics.
+ * @namespace ui
+ * @component icon-button
+ */
 AFRAME.registerComponent("icon-button", {
   schema: {
     image: { type: "string" },
@@ -34,15 +39,15 @@ AFRAME.registerComponent("icon-button", {
 
   play() {
     this.updateButtonState();
-    this.el.addEventListener("mouseover", this.onHover);
-    this.el.addEventListener("mouseout", this.onHoverOut);
-    this.el.addEventListener("click", this.onClick);
+    this.el.addEventListener("hover-start", this.onHover);
+    this.el.addEventListener("hover-end", this.onHoverOut);
+    this.el.addEventListener("grab-start", this.onClick);
   },
 
   pause() {
-    this.el.removeEventListener("mouseover", this.onHover);
-    this.el.removeEventListener("mouseout", this.onHoverOut);
-    this.el.removeEventListener("click", this.onClick);
+    this.el.removeEventListener("hover-start", this.onHover);
+    this.el.removeEventListener("hover-end", this.onHoverOut);
+    this.el.removeEventListener("grab-start", this.onClick);
   },
 
   update() {

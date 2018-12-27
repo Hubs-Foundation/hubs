@@ -1,3 +1,8 @@
+/**
+ * A button with text and haptics
+ * @namespace ui
+ * @component text-button
+ */
 AFRAME.registerComponent("text-button", {
   schema: {
     haptic: { type: "selector" },
@@ -33,13 +38,13 @@ AFRAME.registerComponent("text-button", {
     this.updateButtonState();
     this.el.addEventListener("mouseover", this.onHover);
     this.el.addEventListener("mouseout", this.onHoverOut);
-    this.el.addEventListener("click", this.onClick);
+    this.el.addEventListener("grab-start", this.onClick);
   },
 
   pause() {
     this.el.removeEventListener("mouseover", this.onHover);
     this.el.removeEventListener("mouseout", this.onHoverOut);
-    this.el.removeEventListener("click", this.onClick);
+    this.el.removeEventListener("grab-start", this.onClick);
   },
 
   update() {
@@ -50,5 +55,14 @@ AFRAME.registerComponent("text-button", {
     const hovering = this.hovering;
     this.el.setAttribute("slice9", "color", hovering ? this.data.backgroundHoverColor : this.data.backgroundColor);
     this.textEl.setAttribute("text", "color", hovering ? this.data.textHoverColor : this.data.textColor);
+  }
+});
+
+const noop = function() {};
+// TODO: this should ideally be fixed upstream somehow but its pretty tricky since text is just a geometry not a different type of Object3D, and Object3D is what handles raycast checks.
+AFRAME.registerComponent("text-raycast-hack", {
+  dependencies: ["text"],
+  init() {
+    this.el.getObject3D("text").raycast = noop;
   }
 });
