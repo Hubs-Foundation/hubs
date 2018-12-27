@@ -137,10 +137,13 @@ export default class HubChannel {
   };
 
   getHost = () => {
-    return new Promise(resolve => {
-      this.channel.push("get_host").receive("ok", res => {
-        resolve(res.host);
-      });
+    return new Promise((resolve, reject) => {
+      this.channel
+        .push("get_host")
+        .receive("ok", res => {
+          resolve(res.host);
+        })
+        .receive("error", reject);
     });
   };
 
