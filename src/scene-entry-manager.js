@@ -257,7 +257,8 @@ export default class SceneEntryManager {
       const networkId = components.networked.data.networkId;
       el.setAttribute("networked", { persistent: false });
 
-      const { fileId } = el.components["media-loader"].data;
+      const mediaLoader = components["media-loader"];
+      const fileId = mediaLoader.data && mediaLoader.data.fileId;
 
       this.hubChannel.unpin(networkId, fileId);
     });
