@@ -8,28 +8,8 @@ import cubeMapNegY from "../assets/images/cubemap/negy.jpg";
 import cubeMapPosZ from "../assets/images/cubemap/posz.jpg";
 import cubeMapNegZ from "../assets/images/cubemap/negz.jpg";
 import { getCustomGLTFParserURLResolver } from "../utils/media-utils";
-
-/* WIP: changing threejs-fast-raycast to make this easier to use */
-import MeshBVH from "../../node_modules/threejs-fast-raycast/src/MeshBVH.js";
-
-const ray = new THREE.Ray();
-const inverseMatrix = new THREE.Matrix4();
-const origRaycast = THREE.Mesh.prototype.raycast;
-
-THREE.Mesh.prototype.raycast = function(raycaster, intersects) {
-  if (this.geometry.boundsTree) {
-    inverseMatrix.getInverse(this.matrixWorld);
-    ray.copy(raycaster.ray).applyMatrix4(inverseMatrix);
-    if (raycaster.firstHitOnly === true) {
-      const res = this.geometry.boundsTree.raycastFirst(this, raycaster, ray);
-      if (res) intersects.push(res);
-    } else {
-      this.geometry.boundsTree.raycast(this, raycaster, ray, intersects);
-    }
-  } else {
-    origRaycast.call(this, raycaster, intersects);
-  }
-};
+import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
+THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const GLTFCache = {};
 let CachedEnvMapTexture = null;
