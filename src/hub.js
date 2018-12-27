@@ -303,8 +303,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
               const currentServerURL = NAF.connection.adapter.serverUrl;
               const newHubHost = await hubChannel.getHost();
-              const newServerURL = `wss://${newHubHost}?foo`;
-              console.log(newServerURL);
+              const newServerURL = `wss://${newHubHost}`;
 
               if (currentServerURL !== newServerURL) {
                 console.log("Connecting to new Janus server " + newServerURL);
