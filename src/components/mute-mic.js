@@ -50,33 +50,27 @@ AFRAME.registerComponent("mute-mic", {
   },
 
   onToggle: function() {
+    if (!NAF.connection.adapter) return;
     if (this.el.is("muted")) {
-      if (NAF.connection.adapter) {
-        NAF.connection.adapter.enableMicrophone(true);
-      }
+      NAF.connection.adapter.enableMicrophone(true);
       this.el.removeState("muted");
     } else {
-      if (NAF.connection.adapter) {
-        NAF.connection.adapter.enableMicrophone(false);
-      }
+      NAF.connection.adapter.enableMicrophone(false);
       this.el.addState("muted");
     }
   },
 
   onMute: function() {
+    if (!NAF.connection.adapter) return;
     if (!this.el.is("muted")) {
-      if (NAF.connection.adapter) {
-        NAF.connection.adapter.enableMicrophone(false);
-      }
+      NAF.connection.adapter.enableMicrophone(false);
       this.el.addState("muted");
     }
   },
 
   onUnmute: function() {
     if (this.el.is("muted")) {
-      if (NAF.connection.adapter) {
-        NAF.connection.adapter.enableMicrophone(true);
-      }
+      NAF.connection.adapter.enableMicrophone(true);
       this.el.removeState("muted");
     }
   }
