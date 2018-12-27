@@ -252,6 +252,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   const hasExtension = /\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl);
 
   console.log(`Scene URL: ${sceneUrl}`);
+  console.log(`Janus host: ${hub.host}`);
   const environmentScene = document.querySelector("#environment-scene");
   const objectsScene = document.querySelector("#objects-scene");
   const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
@@ -286,15 +287,42 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
     scene.setAttribute("networked-scene", {
       room: hub.hub_id,
-      serverURL: process.env.JANUS_SERVER,
+      serverURL: `wss://${hub.host}`,
       debug: !!isDebug
     });
 
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
-
     scene.components["networked-scene"]
       .connect()
       .then(() => {
+        // When reconnecting, update the server URL if necessary
+        NAF.connection.adapter.setReconnectionListeners(
+          () => {
+            const step = async () => {
+              if (!NAF.connection.adapter.isDisconnected()) return;
+
+              const currentServerURL = NAF.connection.adapter.serverUrl;
+              const newHubHost = await hubChannel.getHost();
+              const newServerURL = `wss://${newHubHost}?foo`;
+              console.log(newServerURL);
+
+              if (currentServerURL !== newServerURL) {
+                console.log("Connecting to new Janus server " + newServerURL);
+                scene.setAttribute("networked-scene", { serverURL: newServerURL });
+                NAF.connection.adapter.serverUrl = newServerURL;
+              }
+
+              // Keep polling for new host in case it did not roll over yet.
+              // Note that we don't need to explicitly connect, because we're in the reconnect loop.
+              setTimeout(step, 1000);
+            };
+
+            step();
+          },
+          null,
+          null
+        );
+
         NAF.connection.adapter.reliableTransport = (clientId, dataType, data) => {
           const payload = { dataType, data };
 

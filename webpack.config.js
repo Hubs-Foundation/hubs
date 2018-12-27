@@ -294,7 +294,6 @@ module.exports = (env, argv) => ({
     new webpack.DefinePlugin({
       "process.env": JSON.stringify({
         NODE_ENV: argv.mode,
-        JANUS_SERVER: process.env.JANUS_SERVER,
         RETICULUM_SERVER: process.env.RETICULUM_SERVER,
         FARSPARK_SERVER: process.env.FARSPARK_SERVER,
         CORS_PROXY_SERVER: process.env.CORS_PROXY_SERVER,
