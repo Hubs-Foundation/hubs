@@ -5,8 +5,13 @@ import { addSetsToBindings } from "./utils";
 
 const lGripPressed = paths.device.wmr.left.grip.pressed;
 const rGripPressed = paths.device.wmr.right.grip.pressed;
+const rTriggerPressed = paths.device.wmr.right.trigger.pressed;
 
 const rJoyNorth = paths.device.wmr.v("right/joy/north");
+const rGripRising = paths.device.wmr.v("right/grip/rising");
+const rTriggerRising = paths.device.wmr.v("right/trigger/rising");
+const rGripFalling = paths.device.wmr.v("right/grip/falling");
+const rTriggerFalling = paths.device.wmr.v("right/trigger/falling");
 
 function dpadVariables(hand) {
   return {
@@ -421,7 +426,7 @@ export const wmrUserBindings = addSetsToBindings({
 
   [sets.cursorHoveringOnUI]: [
     {
-      src: { value: paths.device.wmr.right.trigger.pressed },
+      src: { value: rTriggerPressed },
       dest: { value: paths.actions.cursor.grab },
       xform: xforms.rising
     }
@@ -437,8 +442,18 @@ export const wmrUserBindings = addSetsToBindings({
   [sets.cursorHoveringOnInteractable]: [
     {
       src: { value: rGripPressed },
-      dest: { value: paths.actions.cursor.grab },
+      dest: { value: rGripRising },
       xform: xforms.rising
+    },
+    {
+      src: { value: rTriggerPressed },
+      dest: { value: rTriggerRising },
+      xform: xforms.rising
+    },
+    {
+      src: [rGripRising, rTriggerRising],
+      dest: { value: paths.actions.cursor.grab },
+      xform: xforms.any
     }
   ],
   [sets.rightHandHoveringOnInteractable]: [
@@ -462,8 +477,18 @@ export const wmrUserBindings = addSetsToBindings({
     ...cursorModDeltaBindings(),
     {
       src: { value: rGripPressed },
-      dest: { value: paths.actions.cursor.drop },
+      dest: { value: rGripFalling },
       xform: xforms.falling
+    },
+    {
+      src: { value: rTriggerPressed },
+      dest: { value: rTriggerFalling },
+      xform: xforms.falling
+    },
+    {
+      src: [rGripFalling, rTriggerFalling],
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.any
     }
   ],
   [sets.rightHandHoldingInteractable]: [
