@@ -136,6 +136,17 @@ export default class HubChannel {
     });
   };
 
+  getHost = () => {
+    return new Promise((resolve, reject) => {
+      this.channel
+        .push("get_host")
+        .receive("ok", res => {
+          resolve(res.host);
+        })
+        .receive("error", reject);
+    });
+  };
+
   pin = (id, gltfNode, fileId, fileAccessToken, promotionToken) => {
     const payload = { id, gltf_node: gltfNode };
     if (fileId && promotionToken) {
