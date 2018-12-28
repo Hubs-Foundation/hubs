@@ -295,12 +295,14 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     scene.components["networked-scene"]
       .connect()
       .then(() => {
+        let newHostPollInterval = null;
+
         // When reconnecting, update the server URL if necessary
         NAF.connection.adapter.setReconnectionListeners(
           () => {
-            const step = async () => {
-              if (!NAF.connection.adapter.isDisconnected()) return;
+            if (newHostPollInterval) return;
 
+            newHostPollInterval = setInterval(async () => {
               const currentServerURL = NAF.connection.adapter.serverUrl;
               const newHubHost = await hubChannel.getHost();
               const newServerURL = `wss://${newHubHost}`;
@@ -310,15 +312,12 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
                 scene.setAttribute("networked-scene", { serverURL: newServerURL });
                 NAF.connection.adapter.serverUrl = newServerURL;
               }
-
-              // Keep polling for new host in case it did not roll over yet.
-              // Note that we don't need to explicitly connect, because we're in the reconnect loop.
-              setTimeout(step, 1000);
-            };
-
-            step();
+            }, 1000);
           },
-          null,
+          () => {
+            clearInterval(newHostPollInterval);
+            newHostPollInterval = null;
+          },
           null
         );
 
