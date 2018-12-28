@@ -360,7 +360,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch(e) {
+    } catch (e) {
       remountUI({ showSafariMicDialog: true });
       return;
     }
