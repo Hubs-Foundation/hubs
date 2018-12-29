@@ -5,9 +5,10 @@ export ASSET_BUNDLE_SERVER=$2
 export RETICULUM_SERVER=$3
 export FARSPARK_SERVER=$4
 export CORS_PROXY_SERVER=$5
-export TARGET_S3_URL=$6
-export BUILD_NUMBER=$7
-export GIT_COMMIT=$8
+export NON_CORS_PROXY_DOMAINS=$6
+export TARGET_S3_URL=$7
+export BUILD_NUMBER=$8
+export GIT_COMMIT=$9
 export BUILD_VERSION="${BUILD_NUMBER} (${GIT_COMMIT})"
 
 # To build + push to S3 run:
