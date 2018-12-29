@@ -2,6 +2,7 @@ import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 
+const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
 const commonKnownContentTypes = {
@@ -25,6 +26,14 @@ function b64EncodeUnicode(str) {
 
 export const proxiedUrlFor = (url, index) => {
   if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
+
+  // Skip known domains that do not require CORS proxying.
+  try {
+    const parsedUrl = new URL(url);
+    if (nonCorsProxyDomains.find(domain => parsedUrl.hostname.endsWith(domain))) return url;
+  } catch (e) {
+    // Ignore
+  }
 
   // farspark doesn't know how to read '=' base64 padding characters
   const base64Url = b64EncodeUnicode(url).replace(/=+$/g, "");
