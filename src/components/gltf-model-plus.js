@@ -53,6 +53,9 @@ function cloneSkinnedMesh(source) {
 
   parallelTraverse(source, clone, function(sourceNode, clonedNode) {
     cloneLookup.set(sourceNode, clonedNode);
+    if (sourceNode.isMesh && sourceNode.geometry.boundsTree) {
+      clonedNode.geometry.boundsTree = sourceNode.geometry.boundsTree;
+    }
   });
 
   source.traverse(function(sourceMesh) {
@@ -410,7 +413,8 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       // generate acceleration structures for raycasting against
       object3DToSet.traverse(obj => {
-        if (obj.isMesh && obj.geometry.isBufferGeometry) {
+        // note that we might already have a bounds tree if this was a clone of an object with one
+        if (obj.isMesh && obj.geometry.isBufferGeometry && !obj.geometry.boundsTree) {
           const geo = obj.geometry;
           const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
           // only bother using memory and time making a BVH if there are a reasonable number of tris,
