@@ -239,44 +239,47 @@ AFRAME.registerComponent("media-pager", {
 
   init() {
     this.toolbar = null;
+    this.imageSrc = null;
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
 
-    // we kind of have to deal with the "empty case" for this component, because networked-aframe
-    // will instantiate a null version of it for all media objects thanks to how it handles component schemas
-    if (this.data.src) {
-      this.el.addEventListener("image-loaded", async e => {
-        // if this is the first image we ever loaded, set up the UI
-        if (this.toolbar == null) {
-          // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
-          // request for the same page to read out the max-content-index header
-          this.maxIndex = await fetchMaxContentIndex(e.detail.src);
-          const template = document.getElementById("paging-toolbar");
-          this.el.querySelector(".interactable-ui").appendChild(document.importNode(template.content, true));
-          this.toolbar = this.el.querySelector(".paging-toolbar");
-          // we have to wait a tick for the attach callbacks to get fired for the elements in a template
-          setTimeout(() => {
-            this.nextButton = this.el.querySelector(".next-button [text-button]");
-            this.prevButton = this.el.querySelector(".prev-button [text-button]");
-            this.pageLabel = this.el.querySelector(".page-label");
-
-            this.nextButton.addEventListener("grab-start", this.onNext);
-            this.prevButton.addEventListener("grab-start", this.onPrev);
-
-            this.update();
-            this.el.emit("preview-loaded");
-          }, 0);
-        } else {
-          this.update();
-        }
-      });
-    }
+    this.el.addEventListener("image-loaded", async e => {
+      this.imageSrc = e.detail.src;
+      await this._ensureUI();
+      this.update();
+    });
   },
 
-  update() {
+  async _ensureUI() {
+    if (this.toolbar || !this.imageSrc) return;
+    // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
+    // request for the same page to read out the max-content-index header
+    this.maxIndex = await fetchMaxContentIndex(this.imageSrc);
+    const template = document.getElementById("paging-toolbar");
+    this.el.querySelector(".interactable-ui").appendChild(document.importNode(template.content, true));
+    this.toolbar = this.el.querySelector(".paging-toolbar");
+    // we have to wait a tick for the attach callbacks to get fired for the elements in a template
+    setTimeout(() => {
+      this.nextButton = this.el.querySelector(".next-button [text-button]");
+      this.prevButton = this.el.querySelector(".prev-button [text-button]");
+      this.pageLabel = this.el.querySelector(".page-label");
+
+      this.nextButton.addEventListener("grab-start", this.onNext);
+      this.prevButton.addEventListener("grab-start", this.onPrev);
+
+      this.update();
+      this.el.emit("preview-loaded");
+    }, 0);
+  },
+
+  async update() {
     if (!this.data.src) return;
+
     const pageSrc = proxiedUrlFor(this.data.src, this.data.index);
     this.el.setAttribute("media-image", { src: pageSrc, contentType: "image/png" });
+
+    await this._ensureUI();
+
     if (this.pageLabel) {
       this.pageLabel.setAttribute("text", "value", `${this.data.index + 1}/${this.maxIndex + 1}`);
       this.repositionToolbar();
