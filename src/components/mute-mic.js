@@ -50,6 +50,7 @@ AFRAME.registerComponent("mute-mic", {
   },
 
   onToggle: function() {
+    if (!NAF.connection.adapter) return;
     if (this.el.is("muted")) {
       NAF.connection.adapter.enableMicrophone(true);
       this.el.removeState("muted");
@@ -60,6 +61,7 @@ AFRAME.registerComponent("mute-mic", {
   },
 
   onMute: function() {
+    if (!NAF.connection.adapter) return;
     if (!this.el.is("muted")) {
       NAF.connection.adapter.enableMicrophone(false);
       this.el.addState("muted");
