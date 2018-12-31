@@ -28,6 +28,7 @@ import InviteDialog from "./invite-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
 import LinkDialog from "./link-dialog.js";
 import SafariDialog from "./safari-dialog.js";
+import SafariMicDialog from "./safari-mic-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
@@ -118,7 +119,8 @@ class UIRoot extends Component {
     signInMessageId: PropTypes.string,
     signInCompleteMessageId: PropTypes.string,
     signInContinueTextId: PropTypes.string,
-    onContinueAfterSignIn: PropTypes.func
+    onContinueAfterSignIn: PropTypes.func,
+    showSafariMicDialog: PropTypes.bool
   };
 
   state = {
@@ -162,6 +164,13 @@ class UIRoot extends Component {
     signedIn: false,
     videoShareMediaSource: null
   };
+
+  constructor(props) {
+    super(props);
+    if (props.showSafariMicDialog) {
+      this.state.dialog = <SafariMicDialog closable={false} />;
+    }
+  }
 
   componentDidUpdate(prevProps) {
     const { hubChannel, showSignInDialog } = this.props;
@@ -1079,7 +1088,9 @@ class UIRoot extends Component {
 
   render() {
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
-    const isLoading = !this.props.environmentSceneLoaded || !this.props.availableVREntryTypes || !this.props.hubId;
+    const isLoading =
+      !this.props.showSafariMicDialog &&
+      (!this.props.environmentSceneLoaded || !this.props.availableVREntryTypes || !this.props.hubId);
 
     if (isExited) return this.renderExitedPane();
     if (isLoading) return this.renderLoader();

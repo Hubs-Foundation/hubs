@@ -22,7 +22,7 @@ import "aframe-motion-capture-components";
 import "./utils/audio-context-fix";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
-import { detectOS } from "detect-browser";
+import { detectOS, detect } from "detect-browser";
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
@@ -354,11 +354,16 @@ async function runBotMode(scene, entryManager) {
 document.addEventListener("DOMContentLoaded", async () => {
   warmSerializeElement();
 
-  // HACK: On iOS & MacOS, if mic permission is not granted, subscriber webrtc negotiation fails.
+  // HACK: On Safari for iOS & MacOS, if mic permission is not granted, subscriber webrtc negotiation fails.
   const detectedOS = detectOS(navigator.userAgent);
-
-  if (detectedOS === "iOS" || detectedOS === "Mac OS") {
-    await navigator.mediaDevices.getUserMedia({ audio: true });
+  const browser = detect();
+  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
+      remountUI({ showSafariMicDialog: true });
+      return;
+    }
   }
 
   const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
