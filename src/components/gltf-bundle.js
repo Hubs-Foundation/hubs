@@ -1,3 +1,4 @@
+// DEPRECATED
 /**
  * Instantiates GLTF models as specified in a bundle JSON.
  * @namespace gltf
