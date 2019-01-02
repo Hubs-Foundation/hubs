@@ -4,7 +4,9 @@ AFRAME.registerComponent("point-light", {
     intensity: { default: 1.0 },
     range: { default: 0 },
     castShadow: { default: true },
-    shadowMapResolution: { default: [512, 512] }
+    shadowMapResolution: { default: [512, 512] },
+    shadowBias: { default: 0 },
+    shadowRadius: { default: 1 }
   },
 
   init() {
@@ -33,6 +35,14 @@ AFRAME.registerComponent("point-light", {
 
     if (this.data.castShadow !== prevData.castShadow) {
       light.castShadow = this.data.castShadow;
+    }
+
+    if (this.data.shadowBias !== prevData.shadowBias) {
+      light.shadow.bias = this.data.shadowBias;
+    }
+
+    if (this.data.shadowRadius !== prevData.shadowRadius) {
+      light.shadow.radius = this.data.radius;
     }
 
     const [width, height] = this.data.shadowMapResolution;
