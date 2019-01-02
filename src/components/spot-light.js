@@ -52,7 +52,7 @@ AFRAME.registerComponent("spot-light", {
       light.shadow.bias = this.data.shadowBias;
     }
 
-    if (this.data.radius !== prevData.radius) {
+    if (this.data.shadowRadius !== prevData.shadowRadius) {
       light.shadow.radius = this.data.radius;
     }
 
