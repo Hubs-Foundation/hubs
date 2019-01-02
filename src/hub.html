@@ -30,6 +30,7 @@
         personal-space-bubble="debug: false;"
         vr-mode-ui="enabled: false"
         stats-plus="false"
+        rotate-selected-object
         action-to-event__mute="path: /actions/muteMic; event: action_mute;"
         action-to-event__focus_chat="path: /actions/focusChat; event: action_focus_chat;"
     >
@@ -231,6 +232,18 @@
                             </a-entity>
                             <a-entity mixin="rounded-text-button" clone-media-button position="-0.25 -0.375 0.01">
                                 <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" rotate-object-button position="0.70 -0.375 0.01">
+                                <a-entity text="value:rotate; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" rotate-object-on-axis-button="axis: 0 1 0" position="1.25 -0.375 0.01">
+                                <a-entity text="value:UP; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" rotate-object-on-axis-button="axis: 1 0 0" position="1.75 -0.375 0.01">
+                                <a-entity text="value:RIGHT; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" rotate-object-on-axis-button="axis: 0 0 1" position="2.25 -0.375 0.01">
+                                <a-entity text="value:FORWARD; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
                         </a-entity>
                     </a-entity>

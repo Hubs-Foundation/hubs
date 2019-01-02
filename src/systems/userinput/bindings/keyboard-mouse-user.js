@@ -154,6 +154,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       },
       xform: xforms.falling,
       priority: 100
+    },
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.falling
     }
   ],
 
@@ -337,6 +342,12 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: { value: paths.actions.cursor.grab },
       xform: xforms.rising,
       priority: 1
+    },
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.falling,
+      priority: 1
     }
   ],
   [sets.inputFocused]: [
@@ -353,6 +364,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.actions.cursor.grab },
       xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.falling
     }
   ]
 });
