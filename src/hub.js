@@ -278,13 +278,14 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     gltfEl.addEventListener("model-loaded", () => environmentScene.emit("bundleloaded"));
     environmentScene.appendChild(gltfEl);
   } else {
-    // TODO kill bundles
+    // Deprecated
     environmentScene.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
   }
 
   remountUI({
     hubId: hub.hub_id,
     hubName: hub.name,
+    hubScene: hub.scene,
     hubEntryCode: hub.entry_code,
     onSendMessage: messageDispatch.dispatch
   });
