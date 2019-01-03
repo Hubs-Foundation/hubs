@@ -80,6 +80,19 @@ body {
       }
     }
   }
+
+  :local(.sign-in) {
+    flex: 3;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+
+    a {
+      text-decoration: underline;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  }
 }
 
 :local(.video-container) {
