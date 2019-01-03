@@ -204,7 +204,7 @@ class HomeRoot extends Component {
     Promise.all(environmentLoads).then(() => this.setState({ environments }));
   };
 
-  onDialogLinkClicked = trigger => {
+  onLinkClicked = trigger => {
     return e => {
       e.preventDefault();
       e.stopPropagation();
@@ -329,7 +329,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       rel="noopener noreferrer"
                       href="#"
-                      onClick={this.onDialogLinkClicked(this.showJoinUsDialog.bind(this))}
+                      onClick={this.onLinkClicked(this.showJoinUsDialog.bind(this))}
                     >
                       <FormattedMessage id="home.join_us" />
                     </a>
@@ -339,7 +339,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       rel="noopener noreferrer"
                       href="#"
-                      onClick={this.onDialogLinkClicked(this.showUpdatesDialog.bind(this))}
+                      onClick={this.onLinkClicked(this.showUpdatesDialog.bind(this))}
                     >
                       <FormattedMessage id="home.get_updates" />
                     </a>
@@ -349,7 +349,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       rel="noopener noreferrer"
                       href="#"
-                      onClick={this.onDialogLinkClicked(this.showReportDialog.bind(this))}
+                      onClick={this.onLinkClicked(this.showReportDialog.bind(this))}
                     >
                       <FormattedMessage id="home.report_issue" />
                     </a>
