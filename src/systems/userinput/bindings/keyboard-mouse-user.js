@@ -339,6 +339,13 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       priority: 1
     }
   ],
+  [sets.cursorHoveringOnVideo]: [
+    {
+      src: { value: paths.device.mouse.wheel },
+      dest: { value: paths.actions.cursor.adjustMediaVolume },
+      xform: xforms.scale(0.3)
+    }
+  ],
   [sets.inputFocused]: [
     {
       src: { value: "/device/keyboard" },

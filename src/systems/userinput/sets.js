@@ -5,6 +5,7 @@ sets.cursorHoveringOnPen = "cursorHoveringOnPen";
 sets.cursorHoveringOnCamera = "cursorHoveringOnCamera";
 sets.cursorHoveringOnInteractable = "cursorHoveringOnInteractable";
 sets.cursorHoveringOnUI = "cursorHoveringOnUI";
+sets.cursorHoveringOnVideo = "cursorHoveringOnVideo";
 sets.cursorHoveringOnNothing = "cursorHoveringOnNothing";
 sets.cursorHoldingPen = "cursorHoldingPen";
 sets.cursorHoldingCamera = "cursorHoldingCamera";

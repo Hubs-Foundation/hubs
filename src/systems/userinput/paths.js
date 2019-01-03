@@ -28,6 +28,7 @@ paths.actions.cursor.penNextColor = "/actions/cursorPenNextColor";
 paths.actions.cursor.penPrevColor = "/actions/cursorPenPrevColor";
 paths.actions.cursor.scalePenTip = "/actions/cursorScalePenTip";
 paths.actions.cursor.scaleGrabbedGrabbable = "/actions/cursorScaleGrabbedGrabbable";
+paths.actions.cursor.adjustMediaVolume = "/actions/cursor/adjustMediaVolume";
 paths.actions.cursor.takeSnapshot = "/actions/cursorTakeSnapshot";
 paths.actions.rightHand = {};
 paths.actions.rightHand.pose = "/actions/rightHandPose";
