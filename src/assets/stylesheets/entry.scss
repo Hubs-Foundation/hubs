@@ -34,7 +34,7 @@
 
 :local(.entry-button) {
   @extend %action-button;
-  width: 272px;
+  width: 290px;
   display: flex;
   text-align: left;
   flex-direction: row;
@@ -72,6 +72,18 @@
     font-size: 0.8em;
     font-weight: normal;
     color: $light-text;
+  }
+}
+
+:local(.entry-button-secondary) {
+  @extend %action-button-secondary;
+
+  :local(.label) {
+    color: $action-color;
+  }
+
+  :local(.subtitle) {
+    color: $action-color;
   }
 }
 

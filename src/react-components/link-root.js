@@ -7,7 +7,7 @@ import { lang, messages } from "../utils/i18n";
 import classNames from "classnames";
 import styles from "../assets/stylesheets/link.scss";
 import { disableiOSZoom } from "../utils/disable-ios-zoom";
-import HeadsetIcon from "../assets/images/generic_vr_entry.svg";
+import HeadsetIcon from "../assets/images/generic_vr_headset.svg";
 import { WithHoverSound } from "./wrap-with-audio";
 
 const MAX_DIGITS = 6;

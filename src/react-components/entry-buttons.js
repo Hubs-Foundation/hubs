@@ -10,11 +10,15 @@ import DaydreamEntryImg from "../assets/images/daydream_entry.svg";
 import DeviceEntryImg from "../assets/images/device_entry.svg";
 import styles from "../assets/stylesheets/entry.scss";
 import { WithHoverSound } from "./wrap-with-audio";
+import cx from "classnames";
 
 const EntryButton = props => {
   return (
     <WithHoverSound>
-      <button className={styles.entryButton} onClick={props.onClick}>
+      <button
+        className={cx([{ [styles.entryButton]: true, [styles.entryButtonSecondary]: props.secondary }])}
+        onClick={props.onClick}
+      >
         <img src={props.iconSrc} className={styles.icon} />
         <div className={styles.label}>
           <div className={styles.contents}>
@@ -39,6 +43,7 @@ const EntryButton = props => {
 EntryButton.propTypes = {
   onClick: PropTypes.func,
   iconSrc: PropTypes.string,
+  secondary: PropTypes.bool,
   prefixMessageId: PropTypes.string,
   mediumMessageId: PropTypes.string,
   subtitle: PropTypes.string,
