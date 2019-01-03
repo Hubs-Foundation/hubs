@@ -1,3 +1,5 @@
+import "./utils/debug-log";
+
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
 import "./assets/stylesheets/hub.scss";
@@ -20,6 +22,7 @@ import "aframe-motion-capture-components";
 import "./utils/audio-context-fix";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
+import { detectOS, detect } from "detect-browser";
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
@@ -49,7 +52,7 @@ import "./components/freeze-controller";
 import "./components/icon-button";
 import "./components/text-button";
 import "./components/block-button";
-import "./components/visible-while-frozen";
+import "./components/visibility-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
 import "./components/avatar-replay";
@@ -62,6 +65,7 @@ import "./components/pin-networked-object-button";
 import "./components/remove-networked-object-button";
 import "./components/camera-focus-button";
 import "./components/mirror-camera-button";
+import "./components/unmute-video-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/gamma-factor";
 import "./components/visible-to-owner";
@@ -74,6 +78,8 @@ import "./components/stop-event-propagation";
 import "./components/animation";
 import "./components/follow-in-lower-fov";
 import "./components/matrix-auto-update";
+import "./components/clone-media-button";
+import "./components/open-media-button";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -245,6 +251,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   const hasExtension = /\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl);
 
   console.log(`Scene URL: ${sceneUrl}`);
+  console.log(`Janus host: ${hub.host}`);
   const environmentScene = document.querySelector("#environment-scene");
   const objectsScene = document.querySelector("#objects-scene");
   const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
@@ -279,15 +286,40 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
     scene.setAttribute("networked-scene", {
       room: hub.hub_id,
-      serverURL: process.env.JANUS_SERVER,
+      serverURL: `wss://${hub.host}`,
       debug: !!isDebug
     });
 
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
-
     scene.components["networked-scene"]
       .connect()
       .then(() => {
+        let newHostPollInterval = null;
+
+        // When reconnecting, update the server URL if necessary
+        NAF.connection.adapter.setReconnectionListeners(
+          () => {
+            if (newHostPollInterval) return;
+
+            newHostPollInterval = setInterval(async () => {
+              const currentServerURL = NAF.connection.adapter.serverUrl;
+              const newHubHost = await hubChannel.getHost();
+              const newServerURL = `wss://${newHubHost}`;
+
+              if (currentServerURL !== newServerURL) {
+                console.log("Connecting to new Janus server " + newServerURL);
+                scene.setAttribute("networked-scene", { serverURL: newServerURL });
+                NAF.connection.adapter.serverUrl = newServerURL;
+              }
+            }, 1000);
+          },
+          () => {
+            clearInterval(newHostPollInterval);
+            newHostPollInterval = null;
+          },
+          null
+        );
+
         NAF.connection.adapter.reliableTransport = (clientId, dataType, data) => {
           const payload = { dataType, data };
 
@@ -321,6 +353,18 @@ async function runBotMode(scene, entryManager) {
 document.addEventListener("DOMContentLoaded", async () => {
   warmSerializeElement();
 
+  // HACK: On Safari for iOS & MacOS, if mic permission is not granted, subscriber webrtc negotiation fails.
+  const detectedOS = detectOS(navigator.userAgent);
+  const browser = detect();
+  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
+      remountUI({ showSafariMicDialog: true });
+      return;
+    }
+  }
+
   const hubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
   console.log(`Hub ID: ${hubId}`);
 
@@ -343,6 +387,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const scene = document.querySelector("a-scene");
   scene.removeAttribute("keyboard-shortcuts"); // Remove F and ESC hotkeys from aframe
+  scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
 
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);

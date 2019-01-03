@@ -25,13 +25,13 @@ AFRAME.registerComponent("hand-pose", {
     this.pose = 0;
     this.animatePose = this.animatePose.bind(this);
     const mixerEl = findAncestorWithComponent(this.el, "animation-mixer");
-    if (!mixerEl) {
-      console.warn("Avatar does not have an animation mixer, disabling hand animations");
+    const suffix = this.id == "left" ? "_L" : "_R";
+    this.mixer = mixerEl && mixerEl.components["animation-mixer"].mixer;
+    if (!this.mixer || !this.mixer.clipAction(POSES.open + suffix)) {
+      console.warn("Avatar does not an 'allOpen' animation, disabling hand animations");
       this.el.removeAttribute("hand-pose");
       return;
     }
-    this.mixer = mixerEl.components["animation-mixer"].mixer;
-    const suffix = this.id == "left" ? "_L" : "_R";
     this.from = this.to = this.mixer.clipAction(POSES.open + suffix);
     this.from.play();
 

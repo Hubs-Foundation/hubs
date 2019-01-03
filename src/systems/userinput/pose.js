@@ -1,9 +1,12 @@
-const forward = new THREE.Vector3(0, 0, -1);
+const THREE = typeof window !== "undefined" && window.THREE;
+const Vector3 = (THREE && THREE.Vector3) || function() {};
+const Quaternion = (THREE && THREE.Quaternion) || function() {};
+const forward = typeof window !== "undefined" && window.THREE && new THREE.Vector3(0, 0, -1);
 export function Pose() {
   return {
-    position: new THREE.Vector3(),
-    direction: new THREE.Vector3(),
-    orientation: new THREE.Quaternion(),
+    position: new Vector3(),
+    direction: new Vector3(),
+    orientation: new Quaternion(),
     fromOriginAndDirection: function(origin, direction) {
       this.position = origin;
       this.direction = direction;

@@ -37,6 +37,7 @@ const inverseHalfExtents = {
 };
 
 AFRAME.registerComponent("position-at-box-shape-border", {
+  multiple: true,
   schema: {
     target: { type: "string" },
     dirs: { default: ["left", "right", "forward", "back"] }
@@ -66,11 +67,9 @@ AFRAME.registerComponent("position-at-box-shape-border", {
         this.targetEl.removeAttribute("animation__show");
       });
 
-      if (this.targetEl.getAttribute("visible") === false) {
-        this.target.scale.setScalar(0.01); // To avoid "pop" of gigantic button first time
-        this.target.matrixNeedsUpdate = true;
-        return;
-      }
+      this.target.scale.setScalar(0.01); // To avoid "pop" of gigantic button first time
+      this.target.matrixNeedsUpdate = true;
+      return;
     }
 
     if (!this.el.getObject3D("mesh")) {
@@ -79,12 +78,22 @@ AFRAME.registerComponent("position-at-box-shape-border", {
 
     const isVisible = this.targetEl.getAttribute("visible");
     const opening = isVisible && !this.wasVisible;
+    const scaleChanged =
+      this.el.object3D.scale.x !== this.previousScaleX ||
+      this.el.object3D.scale.y !== this.previousScaleY ||
+      this.el.object3D.scale.z !== this.previousScaleZ;
+    const isAnimating = this.targetEl.getAttribute("animation__show");
 
-    if (opening) {
+    // If the target is being shown or the scale changed while the opening animation is being run,
+    // we need to start or re-start the animation.
+    if (opening || (scaleChanged && isAnimating)) {
       this._updateBox(true);
     }
 
     this.wasVisible = isVisible;
+    this.previousScaleX = this.el.object3D.scale.x;
+    this.previousScaleY = this.el.object3D.scale.y;
+    this.previousScaleZ = this.el.object3D.scale.z;
   },
 
   _updateBox: (function() {

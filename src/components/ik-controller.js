@@ -45,7 +45,7 @@ AFRAME.registerComponent("ik-controller", {
     neck: { type: "string", default: "Neck" },
     leftHand: { type: "string", default: "LeftHand" },
     rightHand: { type: "string", default: "RightHand" },
-    chest: { type: "string", default: "Chest" },
+    chest: { type: "string", default: "Spine" },
     hips: { type: "string", default: "Hips" },
     rotationSpeed: { default: 5 }
   },

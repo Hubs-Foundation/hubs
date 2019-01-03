@@ -65,7 +65,7 @@ export default class SceneEntryManager {
           .indexOf("cardboard") >= 0;
 
       this.scene.enterVR();
-    } else if (AFRAME.utils.device.isMobile()) {
+    } else if (AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isIOS()) {
       document.body.addEventListener("touchend", requestFullscreen);
     }
 
@@ -257,7 +257,8 @@ export default class SceneEntryManager {
       const networkId = components.networked.data.networkId;
       el.setAttribute("networked", { persistent: false });
 
-      const { fileId } = el.components["media-loader"].data;
+      const mediaLoader = components["media-loader"];
+      const fileId = mediaLoader.data && mediaLoader.data.fileId;
 
       this.hubChannel.unpin(networkId, fileId);
     });

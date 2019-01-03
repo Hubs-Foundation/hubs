@@ -3,11 +3,12 @@ import { getLastWorldPosition } from "../utils/three-utils";
 /**
  * Toggles the visibility of this entity when the scene is frozen.
  * @namespace ui
- * @component visible-while-frozen
+ * @component visibility-while-frozen
  */
-AFRAME.registerComponent("visible-while-frozen", {
+AFRAME.registerComponent("visibility-while-frozen", {
   schema: {
-    withinDistance: { type: "number" }
+    withinDistance: { type: "number" },
+    visible: { type: "boolean", default: true }
   },
 
   init() {
@@ -53,7 +54,7 @@ AFRAME.registerComponent("visible-while-frozen", {
         this.camWorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance;
     }
 
-    const shouldBeVisible = isFrozen && isWithinDistance;
+    const shouldBeVisible = ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) && isWithinDistance;
 
     if (isVisible !== shouldBeVisible) {
       this.el.setAttribute("visible", shouldBeVisible);

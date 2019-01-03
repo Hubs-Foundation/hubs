@@ -13,7 +13,6 @@ import "./loop-animation";
 import "./media-loader";
 import "./point-light";
 import "./quack";
-import "./scene-shadow";
 import "./scene-preview-camera";
 import "./skybox";
 import "./spawn-controller";

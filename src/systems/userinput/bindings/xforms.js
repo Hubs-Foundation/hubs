@@ -14,6 +14,11 @@ export const xforms = {
       }
     };
   },
+  deadzone: function(deadzoneSize) {
+    return function deadzone(frame, src, dest) {
+      frame[dest.value] = Math.abs(frame[src.value]) < deadzoneSize ? 0 : frame[src.value];
+    };
+  },
   split_vec2: function(frame, src, dest) {
     if (frame[src.value] !== undefined) {
       frame[dest.x] = frame[src.value][0];
@@ -77,6 +82,7 @@ export const xforms = {
       const [x, y] = frame[src.value];
       const inCenter = x * x + y * y < deadzoneRadiusSquared;
       const direction = inCenter ? "center" : angleTo4Direction(Math.atan2(invertX ? -x : x, invertY ? -y : y));
+      if (!dest[direction]) return;
       frame[dest[direction]] = true;
     };
   },
@@ -128,6 +134,15 @@ export const xforms = {
       }
     }
   },
+  all: function(frame, src, dest) {
+    for (const path in src) {
+      if (!frame[src[path]]) {
+        frame[dest.value] = false;
+        return;
+      }
+    }
+    frame[dest.value] = true;
+  },
   any: function(frame, src, dest) {
     for (const path in src) {
       if (frame[src[path]]) {
@@ -138,9 +153,8 @@ export const xforms = {
     frame[dest.value] = false;
   },
   touch_axis_scroll(scale = 1) {
-    return function(frame, src, dest, state = { value: 0, touching: false }) {
-      frame[dest.value] =
-        !state.touching || !frame[src.touching] ? 0 : scale * (frame[src.value] + 1 - (state.value + 1));
+    return function touch_axis_scroll(frame, src, dest, state = { value: 0, touching: false }) {
+      frame[dest.value] = state.touching && frame[src.touching] ? scale * (frame[src.value] - state.value) : 0;
       state.value = frame[src.value];
       state.touching = frame[src.touching];
       return state;

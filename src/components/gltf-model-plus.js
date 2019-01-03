@@ -7,6 +7,9 @@ import cubeMapPosY from "../assets/images/cubemap/posy.jpg";
 import cubeMapNegY from "../assets/images/cubemap/negy.jpg";
 import cubeMapPosZ from "../assets/images/cubemap/posz.jpg";
 import cubeMapNegZ from "../assets/images/cubemap/negz.jpg";
+import { getCustomGLTFParserURLResolver } from "../utils/media-utils";
+import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
+THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const GLTFCache = {};
 let CachedEnvMapTexture = null;
@@ -50,6 +53,9 @@ function cloneSkinnedMesh(source) {
 
   parallelTraverse(source, clone, function(sourceNode, clonedNode) {
     cloneLookup.set(sourceNode, clonedNode);
+    if (sourceNode.isMesh && sourceNode.geometry.boundsTree) {
+      clonedNode.geometry.boundsTree = sourceNode.geometry.boundsTree;
+    }
   });
 
   source.traverse(function(sourceMesh) {
@@ -88,6 +94,15 @@ function cloneGltf(gltf) {
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
 const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
+  // TODO: Remove this once we update the legacy avatars to the new node names
+  if (node.name === "Chest") {
+    node.name = "Spine";
+  } else if (node.name === "Root Scene") {
+    node.name = "AvatarRoot";
+  } else if (node.name === "Bot_Skinned") {
+    node.name = "AvatarMesh";
+  }
+
   // inflate subtrees first so that we can determine whether or not this node needs to be inflated
   const childEntities = [];
   const children = node.children.slice(0); // setObject3D mutates the node's parent, so we have to copy
@@ -168,7 +183,7 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
     for (const prop in entityComponents) {
       if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
         const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-        inflator(el, componentName, entityComponents[prop]);
+        inflator(el, componentName, entityComponents[prop], entityComponents);
       }
     }
   }
@@ -220,6 +235,7 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   }
 
   const gltfLoader = new THREE.GLTFLoader();
+  gltfLoader.customURLResolver = getCustomGLTFParserURLResolver(gltfUrl);
   gltfLoader.setLazy(true);
 
   const { parser } = await new Promise((resolve, reject) => gltfLoader.load(gltfUrl, resolve, onProgress, reject));
@@ -394,6 +410,24 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.el.setObject3D("mesh", object3DToSet);
 
       rewires.forEach(f => f());
+
+      // generate acceleration structures for raycasting against
+      object3DToSet.traverse(obj => {
+        // note that we might already have a bounds tree if this was a clone of an object with one
+        if (obj.isMesh && obj.geometry.isBufferGeometry && !obj.geometry.boundsTree) {
+          const geo = obj.geometry;
+          const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
+          // only bother using memory and time making a BVH if there are a reasonable number of tris,
+          // and if there are too many it's too painful and large to tolerate doing it (at least until
+          // we put this in a web worker)
+          if (triCount > 1000 && triCount < 1000000) {
+            console.log(`Created BVH for geometry with ${triCount} triangles.`);
+            geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 20 });
+            geo.setIndex(geo.boundsTree.index);
+            console.log("Finished creating BVH.");
+          }
+        }
+      });
 
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {

@@ -2,6 +2,7 @@ import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 
+const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
 const commonKnownContentTypes = {
@@ -26,12 +27,26 @@ function b64EncodeUnicode(str) {
 export const proxiedUrlFor = (url, index) => {
   if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
 
+  // Skip known domains that do not require CORS proxying.
+  try {
+    const parsedUrl = new URL(url);
+    if (nonCorsProxyDomains.find(domain => parsedUrl.hostname.endsWith(domain))) return url;
+  } catch (e) {
+    // Ignore
+  }
+
   // farspark doesn't know how to read '=' base64 padding characters
   const base64Url = b64EncodeUnicode(url).replace(/=+$/g, "");
-  // translate base64 + to - and / to _ for URL safety
-  const encodedUrl = base64Url.replace(/\+/g, "-").replace(/\//g, "_");
-  const method = index != null ? "extract" : "raw";
-  return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${encodedUrl}`;
+
+  if (index != null || !process.env.CORS_PROXY_SERVER) {
+    // translate base64 + to - and / to _ for URL safety
+    const encodedUrl = base64Url.replace(/\+/g, "-").replace(/\//g, "_");
+    const method = index != null ? "extract" : "raw";
+    return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${encodedUrl}`;
+  } else {
+    const encodedUrl = encodeURIComponent(url);
+    return `https://${process.env.CORS_PROXY_SERVER}/${encodedUrl}`;
+  }
 };
 
 const resolveUrlCache = new Map();
@@ -45,6 +60,29 @@ export const resolveUrl = async (url, index) => {
   }).then(r => r.json());
   resolveUrlCache.set(cacheKey, resolved);
   return resolved;
+};
+
+export const getCustomGLTFParserURLResolver = gltfUrl => (url, path) => {
+  if (typeof url !== "string" || url === "") return "";
+  if (/^(https?:)?\/\//i.test(url)) return url;
+  if (/^data:.*,.*$/i.test(url)) return url;
+  if (/^blob:.*$/i.test(url)) return url;
+
+  if (process.env.CORS_PROXY_SERVER) {
+    // For absolute paths with a CORS proxied gltf URL, re-write the url properly to be proxied
+    const corsProxyPrefix = `https://${process.env.CORS_PROXY_SERVER}/`;
+
+    if (gltfUrl.startsWith(corsProxyPrefix)) {
+      const originalUrl = decodeURIComponent(gltfUrl.substring(corsProxyPrefix.length));
+      const originalUrlParts = originalUrl.split("/");
+
+      // Drop the .gltf filename
+      const assetUrl = originalUrlParts.slice(0, originalUrlParts.length - 1).join("/") + "/" + url;
+      return corsProxyPrefix + encodeURIComponent(assetUrl);
+    }
+  }
+
+  return path + url;
 };
 
 export const guessContentType = url => {
@@ -198,6 +236,7 @@ export function injectCustomShaderChunks(obj) {
     // hover/toggle state, so for now just skip these while we figure out a more correct
     // solution.
     if (object.el.classList.contains("ui")) return;
+    if (object.el.classList.contains("hud")) return;
     if (object.el.getAttribute("text-button")) return;
 
     object.material = object.material.clone();

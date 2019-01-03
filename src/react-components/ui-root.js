@@ -28,6 +28,7 @@ import InviteDialog from "./invite-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
 import LinkDialog from "./link-dialog.js";
 import SafariDialog from "./safari-dialog.js";
+import SafariMicDialog from "./safari-mic-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
@@ -72,6 +73,21 @@ async function grantedMicLabels() {
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
+import webmTone from "../assets/sfx/tone.webm";
+import mp3Tone from "../assets/sfx/tone.mp3";
+import oggTone from "../assets/sfx/tone.ogg";
+import wavTone from "../assets/sfx/tone.wav";
+const toneClip = document.createElement("audio");
+if (toneClip.canPlayType("audio/webm")) {
+  toneClip.src = webmTone;
+} else if (toneClip.canPlayType("audio/mpeg")) {
+  toneClip.src = mp3Tone;
+} else if (toneClip.canPlayType("audio/ogg")) {
+  toneClip.src = oggTone;
+} else {
+  toneClip.src = wavTone;
+}
+
 class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
@@ -103,7 +119,8 @@ class UIRoot extends Component {
     signInMessageId: PropTypes.string,
     signInCompleteMessageId: PropTypes.string,
     signInContinueTextId: PropTypes.string,
-    onContinueAfterSignIn: PropTypes.func
+    onContinueAfterSignIn: PropTypes.func,
+    showSafariMicDialog: PropTypes.bool
   };
 
   state = {
@@ -147,6 +164,13 @@ class UIRoot extends Component {
     signedIn: false,
     videoShareMediaSource: null
   };
+
+  constructor(props) {
+    super(props);
+    if (props.showSafariMicDialog) {
+      this.state.dialog = <SafariMicDialog closable={false} />;
+    }
+  }
 
   componentDidUpdate(prevProps) {
     const { hubChannel, showSignInDialog } = this.props;
@@ -305,7 +329,6 @@ class UIRoot extends Component {
   };
 
   playTestTone = () => {
-    const toneClip = document.querySelector("#test-tone");
     toneClip.currentTime = 0;
     toneClip.play();
     clearTimeout(this.testToneTimeout);
@@ -317,7 +340,6 @@ class UIRoot extends Component {
   };
 
   stopTestTone = () => {
-    const toneClip = document.querySelector("#test-tone");
     toneClip.pause();
     toneClip.currentTime = 0;
     this.setState({ tonePlaying: false });
@@ -567,7 +589,8 @@ class UIRoot extends Component {
   };
 
   onAudioReadyButton = () => {
-    if (AFRAME.utils.device.isMobile() && !this.state.enterInVR && screenfull.enabled) {
+    // Disable full screen on iOS, since Safari's fullscreen mode does not let you prevent native pinch-to-zoom gestures.
+    if (AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isIOS() && !this.state.enterInVR && screenfull.enabled) {
       screenfull.request();
     }
 
@@ -1065,7 +1088,9 @@ class UIRoot extends Component {
 
   render() {
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
-    const isLoading = !this.props.environmentSceneLoaded || !this.props.availableVREntryTypes || !this.props.hubId;
+    const isLoading =
+      !this.props.showSafariMicDialog &&
+      (!this.props.environmentSceneLoaded || !this.props.availableVREntryTypes || !this.props.hubId);
 
     if (isExited) return this.renderExitedPane();
     if (isLoading) return this.renderLoader();
