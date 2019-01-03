@@ -375,7 +375,6 @@ AFRAME.registerComponent("media-video", {
       delete this._playbackStateChangeTimeout;
     }
 
-    console.log("Updating time", currentTime);
     if (currentTime !== undefined) {
       this.video.currentTime = currentTime;
     }
@@ -500,7 +499,6 @@ AFRAME.registerComponent("media-video", {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const volumeMod = userinput.get(paths.actions.cursor.adjustMediaVolume);
     if (volumeMod) {
-      console.log(volumeMod);
       this.el.setAttribute("media-video", "volume", THREE.Math.clamp(this.data.volume + volumeMod, 0, 1));
     }
   }
