@@ -53,11 +53,10 @@ class HomeRoot extends Component {
   constructor(props) {
     super(props);
     this.state.signedIn = props.authChannel.authenticated;
-    this.state.email = props.store.state.credentials.email;
+    this.state.email = props.authChannel.email;
   }
 
   componentDidMount() {
-    this.closeDialog = this.closeDialog.bind(this);
     if (this.props.authVerify) {
       this.showAuthDialog(true);
       this.verifyAuth().then(this.showAuthDialog);
@@ -88,8 +87,14 @@ class HomeRoot extends Component {
     channel.push("auth_verified", { token: this.props.authToken });
   }
 
+  showDialog = (DialogClass, props = {}) => {
+    this.setState({
+      dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
+    });
+  };
+
   showAuthDialog = verifying => {
-    this.setState({ dialog: <AuthDialog closable="false" verifying={verifying} authOrigin={this.props.authOrigin} /> });
+    this.showDialog(AuthDialog, { closable: false, verifying, authOrigin: this.props.authOrigin });
   };
 
   loadHomeVideo = () => {
@@ -98,33 +103,22 @@ class HomeRoot extends Component {
     playVideoWithStopOnBlur(videoEl);
   };
 
-  closeDialog() {
+  closeDialog = () => {
     this.setState({ dialog: null });
-  }
+  };
 
-  showJoinUsDialog() {
-    this.setState({ dialog: <JoinUsDialog onClose={this.closeDialog} /> });
-  }
+  showJoinUsDialog = () => this.showDialog(JoinUsDialog);
 
-  showReportDialog() {
-    this.setState({ dialog: <ReportDialog onClose={this.closeDialog} /> });
-  }
+  showReportDialog = () => this.showDialog(ReportDialog);
 
-  showUpdatesDialog() {
-    this.setState({
-      dialog: <UpdatesDialog onClose={this.closeDialog} onSubmittedEmail={() => this.showEmailSubmittedDialog()} />
+  showUpdatesDialog = () =>
+    this.showDialog(UpdatesDialog, {
+      onSubmittedEmail: () => {
+        this.showDialog(
+          <DialogContainer>Great! Please check your e-mail to confirm your subscription.</DialogContainer>
+        );
+      }
     });
-  }
-
-  showEmailSubmittedDialog() {
-    this.setState({
-      dialog: (
-        <DialogContainer onClose={this.closeDialog}>
-          Great! Please check your e-mail to confirm your subscription.
-        </DialogContainer>
-      )
-    });
-  }
 
   showSignInDialog = () => {
     this.showDialog(SignInDialog, {
@@ -140,26 +134,7 @@ class HomeRoot extends Component {
   };
 
   signOut = () => {
-    this.props.authChannel.removeCredentials();
-    // TODO BP - should randomize avatar and display name on sign out.
-    this.setState({ signedIn: false });
-  };
-
-  showSignInDialog = () => {
-    this.showDialog(SignInDialog, {
-      message: messages["sign-in.prompt"],
-      onSignIn: async email => {
-        const { authComplete } = await this.props.authChannel.startAuthentication(email);
-        this.showDialog(SignInDialog, { authStarted: true });
-        await authComplete;
-        this.setState({ signedIn: true, email });
-        this.closeDialog();
-      }
-    });
-  };
-
-  signOut = () => {
-    this.props.authChannel.removeCredentials();
+    this.props.authChannel.signOut();
     // TODO BP - should randomize avatar and display name on sign out.
     this.setState({ signedIn: false });
   };
@@ -329,7 +304,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       rel="noopener noreferrer"
                       href="#"
-                      onClick={this.onLinkClicked(this.showJoinUsDialog.bind(this))}
+                      onClick={this.onLinkClicked(this.showJoinUsDialog)}
                     >
                       <FormattedMessage id="home.join_us" />
                     </a>
@@ -339,7 +314,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       rel="noopener noreferrer"
                       href="#"
-                      onClick={this.onLinkClicked(this.showUpdatesDialog.bind(this))}
+                      onClick={this.onLinkClicked(this.showUpdatesDialog)}
                     >
                       <FormattedMessage id="home.get_updates" />
                     </a>
@@ -349,7 +324,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       rel="noopener noreferrer"
                       href="#"
-                      onClick={this.onLinkClicked(this.showReportDialog.bind(this))}
+                      onClick={this.onLinkClicked(this.showReportDialog)}
                     >
                       <FormattedMessage id="home.report_issue" />
                     </a>
