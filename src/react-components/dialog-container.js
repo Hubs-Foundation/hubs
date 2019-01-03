@@ -7,7 +7,8 @@ export default class DialogContainer extends Component {
     title: PropTypes.node,
     children: PropTypes.node.isRequired,
     onClose: PropTypes.func,
-    closable: PropTypes.bool
+    closable: PropTypes.bool,
+    wide: PropTypes.bool
   };
 
   static defaultProps = {
@@ -44,7 +45,7 @@ export default class DialogContainer extends Component {
     return (
       <div className="dialog-overlay">
         <div className="dialog" onClick={this.onContainerClicked}>
-          <div className="dialog__box">
+          <div className={`dialog__box ${this.props.wide ? "dialog__wide" : ""} `}>
             <div className="dialog__box__contents">
               {this.props.closable &&
                 this.props.onClose && (
