@@ -145,6 +145,25 @@ class HomeRoot extends Component {
     this.setState({ signedIn: false });
   };
 
+  showSignInDialog = () => {
+    this.showDialog(SignInDialog, {
+      message: messages["sign-in.prompt"],
+      onSignIn: async email => {
+        const { authComplete } = await this.props.authChannel.startAuthentication(email);
+        this.showDialog(SignInDialog, { authStarted: true });
+        await authComplete;
+        this.setState({ signedIn: true, email });
+        this.closeDialog();
+      }
+    });
+  };
+
+  signOut = () => {
+    this.props.authChannel.removeCredentials();
+    // TODO BP - should randomize avatar and display name on sign out.
+    this.setState({ signedIn: false });
+  };
+
   loadEnvironmentFromScene = async () => {
     let sceneUrlBase = "/api/v1/scenes";
     if (process.env.RETICULUM_SERVER) {
