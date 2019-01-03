@@ -140,6 +140,12 @@ $semi-bold: 600;
   height: 48px;
 }
 
+%action-button-secondary {
+  @extend %action-button;
+  background-color: white;
+  color: $action-color;
+}
+
 %action-button-selected {
   background: white;
   color: $action-color;
