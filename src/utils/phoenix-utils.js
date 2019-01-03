@@ -52,3 +52,12 @@ export function getLandingPageForPhoto(photoUrl) {
   const parsedUrl = new URL(photoUrl);
   return getReticulumFetchUrl(parsedUrl.pathname.replace(".png", ".html") + parsedUrl.search, true);
 }
+
+export async function postWithAuth(apiEndpoint, payload) {
+  const headers = { "content-type": "application/json" };
+  const store = new Store();
+  if (store.state && store.state.credentials.token) {
+    headers.authorization = `bearer ${store.state.credentials.token}`;
+  }
+  return fetch(getReticulumFetchUrl(apiEndpoint), { method: "POST", headers, body: JSON.stringify(payload) });
+}
