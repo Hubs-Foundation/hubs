@@ -1,3 +1,8 @@
+import { detectInHMD } from "../utils/vr-caps-detect";
+import { detect } from "detect-browser";
+
+const browser = detect();
+
 /**
  * Emits an "exit" event when a user has stopped using the app for a certain period of time
  * @system exit-on-blur
@@ -10,6 +15,8 @@ AFRAME.registerSystem("exit-on-blur", {
     this.onEnterVR = this.onEnterVR.bind(this);
 
     this.isOculusBrowser = navigator.userAgent.match(/Oculus/);
+    this.isInMobileHMD = detectInHMD();
+    this.isFirefox = browser.name === "firefox";
     this.enteredVR = false;
 
     window.addEventListener("blur", this.onBlur);
@@ -42,7 +49,8 @@ AFRAME.registerSystem("exit-on-blur", {
   },
 
   onBlur() {
-    if (this.el.isMobile) {
+    // On Firefox mobile, there is a bug where the mic stays hot *and* the user is not notified, so we want to forcibly exit.
+    if (this.el.isMobile && (this.isFirefox || this.isInMobileHMD)) {
       clearTimeout(this.exitTimeout);
       this.exitTimeout = setTimeout(this.onTimeout, 30 * 1000);
     }
