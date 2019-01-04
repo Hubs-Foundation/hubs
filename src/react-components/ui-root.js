@@ -205,7 +205,6 @@ class UIRoot extends Component {
         }
       }
     });
-    setTimeout(() => this.showRoomInfoDialog(), 2000);
   }
 
   componentWillUnmount() {

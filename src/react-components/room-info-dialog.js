@@ -45,43 +45,6 @@ export default class RoomInfoDialog extends Component {
     let attributions = null;
     let creator = null;
 
-    // TODO remove
-    this.props.scene.attributions = {
-      content: [
-        {
-          url: "https://sketchfab.com/models/128d863ab5c8467f80939cabe8b3fc34",
-          name: "Model Demo 1",
-          author: "A Cool Guy"
-        },
-        {
-          url: "https://sketchfab.com/models/128d863ab5c8467f80939cabe8b3fc33",
-          name: "Another super super super super long model name here",
-          author: "Another author"
-        },
-        {
-          url: "https://sketchfab.com/models/128d863ab5c8467f80939cabe8b3fc34",
-          name: "Model Demo 1",
-          author: "A Cool Guy"
-        },
-        {
-          url: "https://sketchfab.com/models/128d863ab5c8467f80939cabe8b3fc33",
-          name: "Another long model name here",
-          author: "Another author"
-        },
-        {
-          url: "https://sketchfab.com/models/128d863ab5c8467f80939cabe8b3fc34",
-          name: "Model Demo 1",
-          author: "A Cool Guy"
-        },
-        {
-          url: "https://sketchfab.com/models/128d863ab5c8467f80939cabe8b3fc33",
-          name: "Another long model name here",
-          author: "Another author"
-        }
-      ],
-      creator: "Creator Dude Here Really long name it keeps going what what"
-    };
-
     if (this.props.scene.attributions) {
       creator = this.props.scene.attributions.creator;
       attributions = (
