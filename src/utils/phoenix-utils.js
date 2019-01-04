@@ -1,6 +1,8 @@
 import uuid from "uuid/v4";
 import { Socket } from "phoenix";
 
+import Store from "../storage/store";
+
 export function connectToReticulum(debug = false) {
   const qs = new URLSearchParams(location.search);
 

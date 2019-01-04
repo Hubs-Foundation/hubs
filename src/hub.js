@@ -519,6 +519,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
   const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
+  const { token } = store.state.credentials;
+  if (token) {
+    joinPayload.token = token;
+  }
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
 
   const presenceLogEntries = [];
@@ -547,12 +551,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     .join()
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
-
-      const { token } = store.state.credentials;
-      if (token) {
-        await hubChannel.signIn(token);
-      }
-
       subscriptions.setHubChannel(hubChannel);
       subscriptions.setSubscribed(data.subscriptions.web_push);
       remountUI({ initialIsSubscribed: subscriptions.isSubscribed(), roles: data.roles });
