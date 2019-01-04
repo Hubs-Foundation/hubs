@@ -1121,7 +1121,6 @@ class UIRoot extends Component {
 
     const audioSetupPanel = this.state.entryStep === ENTRY_STEPS.audio_setup && this.renderAudioSetupPanel();
 
-    // Dialog is empty if coll
     const dialogContents = this.isWaitingForAutoExit() ? (
       <AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />
     ) : (

@@ -34,11 +34,11 @@ const farsparkEncodeUrl = url => {
 };
 
 export const scaledThumbnailUrlFor = (url, width, height) => {
-  if (process.env.FARSPARK_SERVER && process.env.NODE_ENV === "production") {
-    return `https://${process.env.FARSPARK_SERVER}/thumbnail/${farsparkEncodeUrl(url)}?w=${width}&h=${height}`;
-  } else {
+  if (process.env.RETICULUM_SERVER && process.env.RETICULUM_SERVER.includes("hubs.local")) {
     return url;
   }
+
+  return `https://${process.env.FARSPARK_SERVER}/thumbnail/${farsparkEncodeUrl(url)}?w=${width}&h=${height}`;
 };
 
 export const proxiedUrlFor = (url, index) => {
