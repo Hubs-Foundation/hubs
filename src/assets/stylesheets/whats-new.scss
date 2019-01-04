@@ -61,6 +61,9 @@ h1 {
   display: inline-block;
   margin: 0;
 }
+.title a:link, .title a:active .title a:hover, .title a:visited {
+  color: black;
+}
 .title {
   @media (max-width: 768px) {
     display: block;
