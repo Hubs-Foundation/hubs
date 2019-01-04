@@ -84,7 +84,7 @@ import "./components/open-media-button";
 
 import ReactDOM from "react-dom";
 import React from "react";
-import { HashRouter, BrowserRouter, Route, Link } from "react-router-dom";
+import { HashRouter, BrowserRouter, Route } from "react-router-dom";
 import UIRoot from "./react-components/ui-root";
 import AuthChannel from "./utils/auth-channel";
 import HubChannel from "./utils/hub-channel";
@@ -231,7 +231,6 @@ function mountUI(props = {}) {
       <Route
         render={routeProps => (
           <UIRoot
-            {...routeProps}
             {...{
               scene,
               isBotMode,
@@ -239,7 +238,8 @@ function mountUI(props = {}) {
               disableAutoExitOnConcurrentLoad,
               forcedVREntryType,
               store,
-              ...props
+              ...props,
+              ...routeProps
             }}
           />
         )}

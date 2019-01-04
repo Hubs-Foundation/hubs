@@ -126,11 +126,11 @@ class UIRoot extends Component {
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
-    location: PropTypes.object
+    location: PropTypes.object,
+    history: PropTypes.object
   };
 
   state = {
-    entryStep: ENTRY_STEPS.start,
     enterInVR: false,
     dialog: null,
     showInviteDialog: false,
@@ -311,9 +311,7 @@ class UIRoot extends Component {
   };
 
   handleStartEntry = () => {
-    if (!this.props.forcedVREntryType) {
-      this.goToEntryStep(ENTRY_STEPS.device);
-    } else if (this.props.forcedVREntryType.startsWith("daydream")) {
+    if (this.props.forcedVREntryType.startsWith("daydream")) {
       this.enterDaydream();
     } else if (this.props.forcedVREntryType.startsWith("vr")) {
       this.enterVR();
@@ -408,7 +406,7 @@ class UIRoot extends Component {
       await this.setMediaStreamToDefault();
       this.beginOrSkipAudioSetup();
     } else {
-      this.goToEntryStep(ENTRY_STEPS.mic_grant);
+      this.props.history.push("/mic_grant");
     }
   };
 
@@ -517,11 +515,11 @@ class UIRoot extends Component {
   };
 
   onMicGrantButton = async () => {
-    if (this.state.entryStep == ENTRY_STEPS.mic_grant) {
+    if (this.props.location.pathname === "/mic_grant") {
       const { hasAudio } = await this.setMediaStreamToDefault();
 
       if (hasAudio) {
-        this.goToEntryStep(ENTRY_STEPS.mic_granted);
+        this.props.history.push("/mic_granted");
       } else {
         this.beginOrSkipAudioSetup();
       }
