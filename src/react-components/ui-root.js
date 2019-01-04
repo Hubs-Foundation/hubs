@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
+import { Route, Link } from "react-router-dom";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
@@ -55,6 +56,9 @@ const ENTRY_STEPS = {
   audio_setup: "audio_setup",
   finished: "finished"
 };
+
+// This needs to be updated as we add modal routes.
+const MODAL_ROUTER_PATHS = ["/profile"];
 
 // This is a list of regexes that match the microphone labels of HMDs.
 //
@@ -121,7 +125,8 @@ class UIRoot extends Component {
     signInCompleteMessageId: PropTypes.string,
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
-    showSafariMicDialog: PropTypes.bool
+    showSafariMicDialog: PropTypes.bool,
+    location: PropTypes.object
   };
 
   state = {
@@ -159,7 +164,6 @@ class UIRoot extends Component {
 
     exited: false,
 
-    showProfileEntry: false,
     pendingMessage: "",
     signedIn: false,
     videoShareMediaSource: null
@@ -307,12 +311,6 @@ class UIRoot extends Component {
   };
 
   handleStartEntry = () => {
-    const promptForNameAndAvatarBeforeEntry = !this.props.store.state.activity.hasChangedName;
-
-    if (promptForNameAndAvatarBeforeEntry) {
-      this.setState({ showProfileEntry: true });
-    }
-
     if (!this.props.forcedVREntryType) {
       this.goToEntryStep(ENTRY_STEPS.device);
     } else if (this.props.forcedVREntryType.startsWith("daydream")) {
@@ -533,7 +531,6 @@ class UIRoot extends Component {
   };
 
   onProfileFinished = () => {
-    this.setState({ showProfileEntry: false });
     this.props.hubChannel.sendProfileUpdate();
   };
 
@@ -821,6 +818,7 @@ class UIRoot extends Component {
     const pendingMessageTextareaHeight = textRows * 28 + "px";
     const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
     const hasPush = navigator.serviceWorker && "PushManager" in window;
+    const promptForNameAndAvatarBeforeEntry = !this.props.store.state.activity.hasChangedName;
 
     return (
       <div className={entryStyles.entryPanel}>
@@ -837,10 +835,10 @@ class UIRoot extends Component {
 
         <div className={entryStyles.center}>
           <WithHoverSound>
-            <div onClick={() => this.setState({ showProfileEntry: true })} className={entryStyles.profileName}>
+            <Link to="/profile" className={entryStyles.profileName}>
               <img src="../assets/images/account.svg" className={entryStyles.profileIcon} />
               <div title={this.props.store.state.profile.displayName}>{this.props.store.state.profile.displayName}</div>
-            </div>
+            </Link>
           </WithHoverSound>
 
           <form onSubmit={this.sendMessage}>
@@ -884,12 +882,16 @@ class UIRoot extends Component {
 
         <div className={entryStyles.buttonContainer}>
           <WithHoverSound>
-            <button
+            <Link
+              to={
+                promptForNameAndAvatarBeforeEntry
+                  ? { pathname: "/profile", state: { postPushPath: "/device" } }
+                  : "/device"
+              }
               className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
-              onClick={() => this.handleStartEntry()}
             >
               <FormattedMessage id="entry.enter-room" />
-            </button>
+            </Link>
           </WithHoverSound>
         </div>
       </div>
@@ -1102,6 +1104,10 @@ class UIRoot extends Component {
     );
   };
 
+  isInModal = () => {
+    return !!MODAL_ROUTER_PATHS.find(p => this.props.location.pathname.startsWith(p));
+  };
+
   render() {
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
     const isLoading =
@@ -1136,7 +1142,7 @@ class UIRoot extends Component {
     const dialogBoxContentsClassNames = classNames({
       [styles.uiInteractive]: !this.state.dialog,
       [styles.uiDialogBoxContents]: true,
-      [styles.backgrounded]: this.state.showProfileEntry
+      [styles.backgrounded]: this.isInModal()
     });
 
     const entryFinished = this.state.entryStep === ENTRY_STEPS.finished;
@@ -1145,15 +1151,19 @@ class UIRoot extends Component {
     const textRows = this.state.pendingMessage.split("\n").length;
     const pendingMessageTextareaHeight = textRows * 28 + "px";
     const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
+
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
           <div className={styles.ui}>
             {this.state.dialog}
 
-            {this.state.showProfileEntry && (
-              <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store} />
-            )}
+            <Route
+              path="/profile"
+              render={props => (
+                <ProfileEntryPanel {...props} finished={this.onProfileFinished} store={this.props.store} />
+              )}
+            />
 
             {(!entryFinished || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>

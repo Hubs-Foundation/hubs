@@ -84,6 +84,7 @@ import "./components/open-media-button";
 
 import ReactDOM from "react-dom";
 import React from "react";
+import { HashRouter, BrowserRouter, Route, Link } from "react-router-dom";
 import UIRoot from "./react-components/ui-root";
 import AuthChannel from "./utils/auth-channel";
 import HubChannel from "./utils/hub-channel";
@@ -214,18 +215,36 @@ function mountUI(props = {}) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
 
+  const Router =
+    process.env.RETICULUM_SERVER && process.env.RETICULUM_SERVER !== document.location.host
+      ? HashRouter
+      : BrowserRouter;
+
+  // Hub ID and slug are the basename
+  const routerBaseName = document.location.pathname
+    .split("/")
+    .slice(0, 3)
+    .join("/");
+
   ReactDOM.render(
-    <UIRoot
-      {...{
-        scene,
-        isBotMode,
-        concurrentLoadDetector,
-        disableAutoExitOnConcurrentLoad,
-        forcedVREntryType,
-        store,
-        ...props
-      }}
-    />,
+    <Router basename={Router === HashRouter ? "" : routerBaseName}>
+      <Route
+        render={routeProps => (
+          <UIRoot
+            {...routeProps}
+            {...{
+              scene,
+              isBotMode,
+              concurrentLoadDetector,
+              disableAutoExitOnConcurrentLoad,
+              forcedVREntryType,
+              store,
+              ...props
+            }}
+          />
+        )}
+      />
+    </Router>,
     document.getElementById("ui-root")
   );
 }

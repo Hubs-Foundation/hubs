@@ -57,6 +57,8 @@
     "react-infinite-scroller": "^1.2.2",
     "react-intl": "^2.4.0",
     "react-linkify": "^0.2.2",
+    "react-router": "^4.3.1",
+    "react-router-dom": "^4.3.1",
     "react-youtube": "^7.8.0",
     "screenfull": "^3.3.2",
     "super-hands": "github:mozillareality/aframe-super-hands-component#feature/drawing",

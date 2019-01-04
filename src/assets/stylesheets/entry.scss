@@ -120,7 +120,7 @@
     @extend %default-font;
     font-size: 1.1em;
     color: $action-color;
-    cursor: pointer;
+    text-decoration: none;
     font-weight: bold;
     display: flex;
     align-items: center;

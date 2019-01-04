@@ -13,7 +13,9 @@ class ProfileEntryPanel extends Component {
     store: PropTypes.object,
     messages: PropTypes.object,
     finished: PropTypes.func,
-    intl: PropTypes.object
+    intl: PropTypes.object,
+    history: PropTypes.object,
+    location: PropTypes.object
   };
 
   constructor(props) {
@@ -44,7 +46,14 @@ class ProfileEntryPanel extends Component {
         avatarId: this.state.avatarId
       }
     });
+
     this.props.finished();
+    this.props.history.goBack();
+
+    // We may need to go to a new path after saving.
+    if (this.props.location.state.postPushPath) {
+      this.props.history.push(this.props.location.state.postPushPath);
+    }
   };
 
   stopPropagation = e => {
