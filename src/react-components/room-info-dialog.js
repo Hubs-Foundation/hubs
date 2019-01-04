@@ -3,8 +3,6 @@ import PropTypes from "prop-types";
 import DialogContainer from "./dialog-container.js";
 import styles from "../assets/stylesheets/room-info-dialog.scss";
 import { scaledThumbnailUrlFor } from "../utils/media-utils";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 
 export default class RoomInfoDialog extends Component {
   static propTypes = {
