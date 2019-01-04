@@ -245,7 +245,6 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   }
 
   const hub = data.hubs[0];
-  console.log(hub);
 
   let sceneUrl;
   let isLegacyBundle; // Deprecated
@@ -258,7 +257,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     const defaultSpaceTopic = hub.topics[0];
     const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");
     const bundleAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle");
-    const sceneUrl = (glbAsset || bundleAsset).src;
+    sceneUrl = (glbAsset || bundleAsset).src;
     const hasExtension = /\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl);
     isLegacyBundle = !(glbAsset || hasExtension);
   }
