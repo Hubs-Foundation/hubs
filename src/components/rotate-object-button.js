@@ -73,7 +73,7 @@ AFRAME.registerSystem("rotate-selected-object", {
       depthTest: false,
       depthWrite: false,
       transparent: true,
-      linewidth: 30,
+      linewidth: 300,
       fog: false
     });
     var matInvisible = gizmoMaterial.clone();
@@ -178,10 +178,6 @@ AFRAME.registerSystem("rotate-selected-object", {
       ]
     };
 
-    this.helperRotate = {
-      AXIS: [[new THREE.Line(lineGeometry, matHelper.clone()), [-1e3, 0, 0], null, [1e6, 1, 1], "helper"]]
-    };
-
     this.pickerRotate = {
       X: [
         [
@@ -239,7 +235,6 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.gizmo.el = this.el;
     this.el.sceneEl.object3D.add(this.gizmo);
     this.gizmo.add(setupGizmo(this.pickerRotate, this.el));
-    this.gizmo.add(setupGizmo(this.helperRotate, null));
     this.gizmo.add(setupGizmo(this.gizmoRotate, null));
     this.gizmo.scale.set(0.5, 0.5, 0.5);
 
@@ -296,7 +291,6 @@ AFRAME.registerSystem("rotate-selected-object", {
       AFRAME.scenes[0].object3D.add(this.plane);
     }
     this.plane.position.copy(this.center);
-    this.plane.lookAt(this.raycaster.ray.origin);
     this.plane.matrixNeedsUpdate = true;
 
     this.gizmo.position.copy(this.center);
@@ -347,6 +341,9 @@ AFRAME.registerSystem("rotate-selected-object", {
         return;
       }
     }
+    if (!userinput.get(paths.device.mouse.buttonLeft)) {
+      return;
+    }
 
     this.intersections.length = 0;
     const far = this.raycaster.far;
@@ -365,7 +362,12 @@ AFRAME.registerSystem("rotate-selected-object", {
     );
     this.target.matrixNeedsUpdate = true;
     this.gizmo.quaternion.copy(this.target.quaternion);
+    this.target.getWorldPosition(this.gizmo.position);
     this.gizmo.matrixNeedsUpdate = true;
+
+    this.plane.position.copy(this.gizmo.position);
+    this.plane.quaternion.copy(document.querySelector("#player-camera").object3D.quaternion);
+    this.plane.matrixNeedsUpdate = true;
   }
 });
 
