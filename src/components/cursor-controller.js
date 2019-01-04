@@ -83,16 +83,38 @@ AFRAME.registerComponent("cursor-controller", {
         target.push(els[i].object3D);
       }
     }
+
+    if (AFRAME.scenes[0] && AFRAME.scenes[0].systems["rotate-selected-object"]) {
+      const gizmo = AFRAME.scenes[0].systems["rotate-selected-object"].gizmo;
+      for (let i = 0; i < gizmo.children.length; i++) {
+        if (gizmo.children[i].el) {
+          target.push(gizmo.children[i]);
+        }
+        for (let j = 0; j < gizmo.children[i].children.length; j++) {
+          if (gizmo.children[i].children[j].el) {
+            target.push(gizmo.children[i].children[j]);
+          }
+        }
+      }
+    } else {
+      console.log("no gizmo");
+    }
   },
 
   emitIntersectionEvents: function(prevIntersection, currIntersection) {
     // if we are now intersecting something, and previously we were intersecting nothing or something else
     if (currIntersection && (!prevIntersection || currIntersection.object.el !== prevIntersection.object.el)) {
-      this.data.cursor.emit("raycaster-intersection", { el: currIntersection.object.el });
+      this.data.cursor.emit("raycaster-intersection", {
+        el: currIntersection.object.el,
+        intersection: currIntersection
+      });
     }
     // if we were intersecting something, but now we are intersecting nothing or something else
     if (prevIntersection && (!currIntersection || currIntersection.object.el !== prevIntersection.object.el)) {
-      this.data.cursor.emit("raycaster-intersection-cleared", { el: prevIntersection.object.el });
+      this.data.cursor.emit("raycaster-intersection-cleared", {
+        el: prevIntersection.object.el,
+        intersection: currIntersection
+      });
     }
   },
 
