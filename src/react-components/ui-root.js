@@ -32,6 +32,7 @@ import SafariMicDialog from "./safari-mic-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
+import RoomInfoDialog from "./room-info-dialog.js";
 
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
@@ -42,8 +43,7 @@ import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons/faChevronDown";
-import { faChevronUp } from "@fortawesome/free-solid-svg-icons/faChevronUp";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 
 addLocaleData([...en]);
 
@@ -109,6 +109,7 @@ class UIRoot extends Component {
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
     hubName: PropTypes.string,
+    hubScene: PropTypes.object,
     isSupportAvailable: PropTypes.bool,
     presenceLogEntries: PropTypes.array,
     presences: PropTypes.object,
@@ -138,7 +139,6 @@ class UIRoot extends Component {
     requestedScreen: false,
     mediaStream: null,
     audioTrack: null,
-    entryPanelCollapsed: false,
 
     toneInterval: null,
     tonePlaying: false,
@@ -658,6 +658,9 @@ class UIRoot extends Component {
 
   showWebVRRecommendDialog = () => this.showDialog(WebVRRecommendDialog);
 
+  showRoomInfoDialog = () =>
+    this.showDialog(RoomInfoDialog, { scene: this.props.hubScene, hubName: this.props.hubName });
+
   showSignInDialog = () => {
     this.showDialog(SignInDialog, {
       message: messages["sign-in.prompt"],
@@ -821,7 +824,16 @@ class UIRoot extends Component {
 
     return (
       <div className={entryStyles.entryPanel}>
-        <div className={entryStyles.name}>{this.props.hubName}</div>
+        <div className={entryStyles.name}>
+          <span>{this.props.hubName}</span>
+          {this.props.hubScene && (
+            <span onClick={() => this.showRoomInfoDialog()} className={entryStyles.collapse}>
+              <i>
+                <FontAwesomeIcon icon={faInfoCircle} />
+              </i>
+            </span>
+          )}
+        </div>
 
         <div className={entryStyles.center}>
           <WithHoverSound>
@@ -1109,46 +1121,16 @@ class UIRoot extends Component {
 
     const audioSetupPanel = this.state.entryStep === ENTRY_STEPS.audio_setup && this.renderAudioSetupPanel();
 
-    // Dialog is empty if coll
-    let dialogContents = null;
-
-    if (this.state.entryPanelCollapsed && !this.isWaitingForAutoExit()) {
-      dialogContents = (
-        <div className={entryStyles.entryDialog}>
-          <div>&nbsp;</div>
-          <WithHoverSound>
-            <button onClick={() => this.setState({ entryPanelCollapsed: false })} className={entryStyles.expand}>
-              <i>
-                <FontAwesomeIcon icon={faChevronUp} />
-              </i>
-            </button>
-          </WithHoverSound>
-        </div>
-      );
-    } else {
-      dialogContents = this.isWaitingForAutoExit() ? (
-        <AutoExitWarning
-          secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
-          onCancel={this.endAutoExitTimer}
-        />
-      ) : (
-        <div className={entryStyles.entryDialog}>
-          {!this.state.entryPanelCollapsed && (
-            <WithHoverSound>
-              <button onClick={() => this.setState({ entryPanelCollapsed: true })} className={entryStyles.collapse}>
-                <i>
-                  <FontAwesomeIcon icon={faChevronDown} />
-                </i>
-              </button>
-            </WithHoverSound>
-          )}
-          {startPanel}
-          {devicePanel}
-          {micPanel}
-          {audioSetupPanel}
-        </div>
-      );
-    }
+    const dialogContents = this.isWaitingForAutoExit() ? (
+      <AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />
+    ) : (
+      <div className={entryStyles.entryDialog}>
+        {startPanel}
+        {devicePanel}
+        {micPanel}
+        {audioSetupPanel}
+      </div>
+    );
 
     const dialogBoxContentsClassNames = classNames({
       [styles.uiInteractive]: !this.state.dialog,

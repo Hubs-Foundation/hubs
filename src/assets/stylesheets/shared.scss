@@ -3,7 +3,7 @@ $white-transparent: rgba(255, 255, 255, 0.90);
 $dark-transparent: rgba(0, 0, 0, 0.4);
 $darker-transparent: rgba(0, 0, 0, 0.6);
 $darkest-transparent: rgba(0, 0, 0, 0.9);
-$grey-text: rgba(192, 192, 192, 1.0);
+$grey-text: rgba(127, 127, 127, 1.0);
 $dark-grey-text: rgba(64, 64, 64, 1.0);
 $light-text: rgba(240, 240, 240, 1.0);
 $light-grey: lightgrey;
@@ -16,6 +16,7 @@ $action-color-light: #FF74A4;
 $action-color-transparent: rgba(255, 52, 100, 0.9);
 $hud-panel-background: rgba(79, 79, 79, 0.45);
 $spoke-action-color: $bright-blue;
+$semi-bold: 600;
 
 %unselectable {
   -moz-user-select: none;

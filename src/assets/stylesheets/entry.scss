@@ -6,29 +6,16 @@
   align-items: center;
   height: 100%;
   position: relative;
+}
 
-  :local(.collapse) {
-    @extend %fa-icon-button;
-    color: black;
-    position: absolute;
-    top: 0px;
-    right: 12px;
-    width: 32px;
-    height: 32px;
-  }
+:local(.collapse) {
+  @extend %fa-icon-button;
+  color: $action-color;
+  display: inline;
+  margin-left: 10px;
 
-  :local(.expand) {
-    @extend %fa-icon-button;
-    color: white;
-    position: absolute;
-    top: -64px;
-    right: 12px;
-    width: 38px;
-    height: 38px;
-    padding-left: 1px;
-    padding-bottom: 1px;
-    background-color: $action-color;
-    border-radius: 19px;
+  i {
+    font-size: 1.2em;
   }
 }
 
