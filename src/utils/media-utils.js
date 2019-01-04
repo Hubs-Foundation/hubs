@@ -35,7 +35,7 @@ const farsparkEncodeUrl = url => {
 
 export const scaledThumbnailUrlFor = (url, width, height) => {
   if (process.env.FARSPARK_SERVER && process.env.NODE_ENV === "production") {
-    return `https://${process.env.FARSPARK_SERVER}/thumbnail/${farsparkEncodeUrl(url)}?w=${width}&height=${height}`;
+    return `https://${process.env.FARSPARK_SERVER}/thumbnail/${farsparkEncodeUrl(url)}?w=${width}&h=${height}`;
   } else {
     return url;
   }
