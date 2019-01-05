@@ -50,7 +50,17 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 addLocaleData([...en]);
 
 // This needs to be updated as we add modal routes.
-const MODAL_ROUTER_PATHS = ["/profile"];
+const MODAL_ROUTER_PATHS = [
+  "/profile",
+  "/link",
+  "/help",
+  "/safari",
+  "/support",
+  "/create",
+  "/webvr",
+  "/webrtc-screenshare",
+  "/info"
+];
 
 // This is a list of regexes that match the microphone labels of HMDs.
 //
@@ -258,17 +268,17 @@ class UIRoot extends Component {
       onContinueAfterSignIn();
     };
 
-    this.showDialog(SignInDialog, {
+    this.showNonHistoriedDialog(SignInDialog, {
       message: messages[signInMessageId],
       onSignIn: async email => {
         const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
 
-        this.showDialog(SignInDialog, { authStarted: true, onClose: closeAndContinue });
+        this.showNonHistoriedDialog(SignInDialog, { authStarted: true, onClose: closeAndContinue });
 
         await authComplete;
 
         this.setState({ signedIn: true });
-        this.showDialog(SignInDialog, {
+        this.showNonHistoriedDialog(SignInDialog, {
           authComplete: true,
           message: messages[signInCompleteMessageId],
           continueText: messages[signInContinueTextId],
@@ -442,7 +452,7 @@ class UIRoot extends Component {
     if (this.props.forcedVREntryType || this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.maybe) {
       await this.performDirectEntryFlow(true);
     } else {
-      this.showWebVRRecommendDialog();
+      this.props.history.push("/webvr");
     }
   };
 
@@ -658,36 +668,37 @@ class UIRoot extends Component {
     this.props.scene.emit("add_media", media);
   };
 
-  closeDialog = () => {
-    this.setState({ dialog: null });
+  closeDialog = success => {
+    if (this.state.dialog) {
+      this.setState({ dialog: null });
+    } else {
+      // If dialog was successful (eg user hit "OK") then move forward in history, o/w go back.
+      //
+      // This makes it so if you create an object, back will re-show the create object dialog,
+      // but if you cancel, it will not.
+      if (success) {
+        this.props.history.push("/");
+      } else {
+        this.props.history.goBack();
+      }
+    }
   };
 
-  showDialog = (DialogClass, props = {}) => {
+  showNonHistoriedDialog = (DialogClass, props = {}) => {
     this.setState({
       dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
     });
   };
 
-  showHelpDialog = () => this.showDialog(HelpDialog);
-
-  showSafariDialog = () => this.showDialog(SafariDialog);
-
-  showInviteTeamDialog = () => this.showDialog(InviteTeamDialog, { hubChannel: this.props.hubChannel });
-
-  showCreateObjectDialog = () => this.showDialog(CreateObjectDialog, { onCreate: this.createObject });
-
-  showWebVRRecommendDialog = () => this.showDialog(WebVRRecommendDialog);
-
-  showRoomInfoDialog = () =>
-    this.showDialog(RoomInfoDialog, { scene: this.props.hubScene, hubName: this.props.hubName });
+  renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
 
   showSignInDialog = () => {
-    this.showDialog(SignInDialog, {
+    this.showNonHistoriedDialog(SignInDialog, {
       message: messages["sign-in.prompt"],
       onSignIn: async email => {
         const { authComplete } = await this.props.authChannel.startAuthentication(email, this.props.hubChannel);
 
-        this.showDialog(SignInDialog, { authStarted: true });
+        this.showNonHistoriedDialog(SignInDialog, { authStarted: true });
 
         await authComplete;
 
@@ -703,7 +714,7 @@ class UIRoot extends Component {
   };
 
   showWebRTCScreenshareUnsupportedDialog = () => {
-    this.setState({ dialog: <WebRTCScreenshareUnsupportedDialog onClose={this.closeDialog} /> });
+    this.props.history.push("/webrtc-screenshare");
   };
 
   onMiniInviteClicked = () => {
@@ -848,11 +859,11 @@ class UIRoot extends Component {
         <div className={entryStyles.name}>
           <span>{this.props.hubName}</span>
           {this.props.hubScene && (
-            <span onClick={() => this.showRoomInfoDialog()} className={entryStyles.collapse}>
+            <Link to="/info" className={entryStyles.infoButton}>
               <i>
                 <FontAwesomeIcon icon={faInfoCircle} />
               </i>
-            </span>
+            </Link>
           )}
         </div>
 
@@ -948,7 +959,9 @@ class UIRoot extends Component {
             isInHMD={this.props.availableVREntryTypes.isInHMD}
           />
           {this.props.availableVREntryTypes.safari === VR_DEVICE_AVAILABILITY.maybe && (
-            <SafariEntryButton onClick={this.showSafariDialog} />
+            <Link to="/safari">
+              <SafariEntryButton onClick={this.showSafariDialog} />
+            </Link>
           )}
           {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
             <TwoDEntryButton onClick={this.enter2D} />
@@ -1176,7 +1189,7 @@ class UIRoot extends Component {
     );
 
     const dialogBoxContentsClassNames = classNames({
-      [styles.uiInteractive]: !this.state.dialog,
+      [styles.uiInteractive]: !this.isInModal(),
       [styles.uiDialogBoxContents]: true,
       [styles.backgrounded]: this.isInModal()
     });
@@ -1198,6 +1211,25 @@ class UIRoot extends Component {
               render={props => (
                 <ProfileEntryPanel {...props} finished={this.onProfileFinished} store={this.props.store} />
               )}
+            />
+
+            <Route path="/help" render={() => this.renderDialog(HelpDialog)} />
+            <Route path="/safari" render={() => this.renderDialog(SafariDialog)} />
+            <Route
+              path="/support"
+              render={() => this.renderDialog(InviteTeamDialog, { hubChannel: this.props.hubChannel })}
+            />
+            <Route
+              path="/create"
+              render={() => this.renderDialog(CreateObjectDialog, { onCreate: this.createObject })}
+            />
+            <Route path="/webvr" render={() => this.renderDialog(WebVRRecommendDialog)} />
+            <Route path="/webrtc-screenshare" render={() => this.renderDialog(WebRTCScreenshareUnsupportedDialog)} />
+            <Route
+              path="/info"
+              render={() =>
+                this.renderDialog(RoomInfoDialog, { scene: this.props.hubScene, hubName: this.props.hubName })
+              }
             />
 
             {(!this.state.entered || this.isWaitingForAutoExit()) && (
@@ -1255,7 +1287,7 @@ class UIRoot extends Component {
                           spawnChatMessage(this.state.pendingMessage);
                           this.setState({ pendingMessage: "" });
                         } else {
-                          this.showCreateObjectDialog();
+                          this.props.history.push("/create");
                         }
                       }}
                     />
@@ -1330,11 +1362,13 @@ class UIRoot extends Component {
             />
 
             <WithHoverSound>
-              <button onClick={() => this.showHelpDialog()} className={classNames([styles.helpIcon, "help-button"])}>
-                <i>
-                  <FontAwesomeIcon icon={faQuestion} />
-                </i>
-              </button>
+              <Link to="/help">
+                <button className={classNames([styles.helpIcon, "help-button"])}>
+                  <i>
+                    <FontAwesomeIcon icon={faQuestion} />
+                  </i>
+                </button>
+              </Link>
             </WithHoverSound>
 
             <div
@@ -1375,18 +1409,19 @@ class UIRoot extends Component {
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
                 />
-                {this.props.isSupportAvailable && (
+                {(this.props.isSupportAvailable || true) && (
                   <div className={styles.nagCornerButton}>
                     <WithHoverSound>
-                      <button onClick={() => this.showInviteTeamDialog()}>
-                        <FormattedMessage id="entry.invite-team-nag" />
-                      </button>
+                      <Link to="/support">
+                        <button>
+                          <FormattedMessage id="entry.invite-team-nag" />
+                        </button>
+                      </Link>
                     </WithHoverSound>
                   </div>
                 )}
                 {!this.isWaitingForAutoExit() && (
                   <TwoDHUD.BottomHUD
-                    onCreateObject={() => this.showCreateObjectDialog()}
                     showPhotoPicker={AFRAME.utils.device.isMobile()}
                     onMediaPicked={this.createObject}
                   />

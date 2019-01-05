@@ -102,7 +102,7 @@ export default class CreateObjectDialog extends Component {
   onCreateClicked = e => {
     e.preventDefault();
     this.props.onCreate(this.state.file || this.state.url || DEFAULT_OBJECT_URL);
-    this.props.onClose();
+    this.props.onClose(true);
   };
 
   render() {

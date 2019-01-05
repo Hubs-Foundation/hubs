@@ -50,7 +50,7 @@ export default class DialogContainer extends Component {
               {this.props.closable &&
                 this.props.onClose && (
                   <WithHoverSound>
-                    <button className="dialog__box__contents__close" onClick={this.props.onClose}>
+                    <button className="dialog__box__contents__close" onClick={() => this.props.onClose()}>
                       <span>×</span>
                     </button>
                   </WithHoverSound>
