@@ -68,7 +68,7 @@ async function grantedMicLabels() {
 }
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
-const ENTRY_FLOW_PATHS = ["/device", "/audio", "/mic_grant", "/mic_granted"];
+const ENTRY_FLOW_PATHS = ["/device", "/audio", "/mic_grant", "/mic_granted", "/link"];
 
 import webmTone from "../assets/sfx/tone.webm";
 import mp3Tone from "../assets/sfx/tone.mp3";
@@ -129,7 +129,6 @@ class UIRoot extends Component {
     lastEntryStepPath: null,
     dialog: null,
     showInviteDialog: false,
-    showLinkDialog: false,
     showPresenceList: false,
     linkCode: null,
     linkCodeCancel: null,
@@ -338,6 +337,8 @@ class UIRoot extends Component {
   };
 
   handleForceEntry = () => {
+    if (!this.props.forcedVREntryType) return;
+
     if (this.props.forcedVREntryType.startsWith("daydream")) {
       this.enterDaydream();
     } else if (this.props.forcedVREntryType.startsWith("vr")) {
@@ -639,10 +640,10 @@ class UIRoot extends Component {
   };
 
   attemptLink = async () => {
-    this.setState({ showLinkDialog: true });
+    this.props.history.push("/link");
     const { code, cancel, onFinished } = await this.props.linkChannel.generateCode();
     this.setState({ linkCode: code, linkCodeCancel: cancel });
-    onFinished.then(() => this.setState({ showLinkDialog: false, linkCode: null, linkCodeCancel: null }));
+    onFinished.then(() => this.setState({ log: false, linkCode: null, linkCodeCancel: null }));
   };
 
   showInviteDialog = () => {
@@ -1314,15 +1315,19 @@ class UIRoot extends Component {
               )}
             </div>
 
-            {this.state.showLinkDialog && (
-              <LinkDialog
-                linkCode={this.state.linkCode}
-                onClose={() => {
-                  this.state.linkCodeCancel();
-                  this.setState({ showLinkDialog: false, linkCode: null, linkCodeCancel: null });
-                }}
-              />
-            )}
+            <Route
+              path="/link"
+              render={() => (
+                <LinkDialog
+                  linkCode={this.state.linkCode}
+                  onClose={() => {
+                    this.state.linkCodeCancel();
+                    this.setState({ linkCode: null, linkCodeCancel: null });
+                    this.props.history.goBack();
+                  }}
+                />
+              )}
+            />
 
             <WithHoverSound>
               <button onClick={() => this.showHelpDialog()} className={classNames([styles.helpIcon, "help-button"])}>
