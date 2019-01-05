@@ -204,3 +204,18 @@
     }
   }
 }
+
+:local(.back) {
+  @extend %fa-icon-button;
+
+  display: flex;
+  position: absolute;
+  top: 12px;
+  left: 26px;
+  font-size: 1.0em;
+  font-weight: bold;
+
+  i {
+    margin-right: 18px;
+  }
+}

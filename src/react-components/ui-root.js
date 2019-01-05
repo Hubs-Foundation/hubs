@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
-import { Route, Link } from "react-router-dom";
+import { Route, Switch, Link } from "react-router-dom";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
@@ -45,17 +45,9 @@ import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 
 addLocaleData([...en]);
-
-const ENTRY_STEPS = {
-  start: "start",
-  device: "device",
-  mic_grant: "mic_grant",
-  mic_granted: "mic_granted",
-  audio_setup: "audio_setup",
-  finished: "finished"
-};
 
 // This needs to be updated as we add modal routes.
 const MODAL_ROUTER_PATHS = ["/profile"];
@@ -76,6 +68,7 @@ async function grantedMicLabels() {
 }
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
+const ENTRY_FLOW_PATHS = ["/device", "/audio", "/mic_grant", "/mic_granted"];
 
 import webmTone from "../assets/sfx/tone.webm";
 import mp3Tone from "../assets/sfx/tone.mp3";
@@ -132,6 +125,8 @@ class UIRoot extends Component {
 
   state = {
     enterInVR: false,
+    entered: false,
+    lastEntryStepPath: null,
     dialog: null,
     showInviteDialog: false,
     showLinkDialog: false,
@@ -199,6 +194,36 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.addEventListener("exit", this.exit);
     const scene = this.props.scene;
+
+    let preEntryHistoryLength = 0;
+
+    // If we landed on the page with a path in the middle of the entry flow (eg we refreshed the
+    // page on the audio setup dialog) then reset the history entry to /.
+    //
+    // Note this isn't perfect, if we refresh the page mid-entry flow and then hit back, we end
+    // up in a bad state unless we were on the first step. But this seems reasonable enough for now.
+    if (ENTRY_FLOW_PATHS.find(x => x === this.props.history.location.pathname)) {
+      this.props.history.replace("/");
+    }
+
+    // Hacky technique to skip over the entry flow history entries when we've entered the room.
+    //
+    // This makes it so if we are in the room and hit back in the browser, we go to the page
+    // we were on before the entry flow, not back into the entry flow.
+    this.props.history.listen((newLocation, action) => {
+      if (!this.state.entered) {
+        preEntryHistoryLength++;
+        return;
+      }
+
+      // Going back through entry flow, skip over it.
+      if (action === "POP" && newLocation.pathname === this.state.lastEntryStepPath) {
+        setTimeout(() => {
+          for (let i = 0; i < preEntryHistoryLength; i++) this.props.history.goBack();
+        }, 0);
+      }
+    });
+
     this.setState({
       audioContext: {
         playSound: sound => {
@@ -318,10 +343,6 @@ class UIRoot extends Component {
     } else if (this.props.forcedVREntryType.startsWith("2d")) {
       this.enter2D();
     }
-  };
-
-  goToEntryStep = entryStep => {
-    this.setState({ entryStep: entryStep, showInviteDialog: false });
   };
 
   playTestTone = () => {
@@ -534,7 +555,7 @@ class UIRoot extends Component {
 
   beginOrSkipAudioSetup = () => {
     if (!this.props.forcedVREntryType || !this.props.forcedVREntryType.endsWith("_now")) {
-      this.goToEntryStep(ENTRY_STEPS.audio_setup);
+      this.props.history.push("/audio");
     } else {
       this.onAudioReadyButton();
     }
@@ -611,7 +632,8 @@ class UIRoot extends Component {
       clearInterval(this.state.micUpdateInterval);
     }
 
-    this.goToEntryStep(ENTRY_STEPS.finished);
+    this.setState({ entered: true, lastEntryStepPath: this.props.history.location.pathname, showInviteDialog: false });
+    this.props.history.push("/");
   };
 
   attemptLink = async () => {
@@ -899,6 +921,13 @@ class UIRoot extends Component {
   renderDevicePanel = () => {
     return (
       <div className={entryStyles.entryPanel}>
+        <div onClick={() => this.props.history.goBack()} className={entryStyles.back}>
+          <i>
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </i>
+          Back
+        </div>
+
         <div className={entryStyles.title}>
           <FormattedMessage id="entry.choose-device" />
         </div>
@@ -945,31 +974,34 @@ class UIRoot extends Component {
     );
   };
 
-  renderMicPanel = () => {
+  renderMicPanel = granted => {
     return (
       <div className="mic-grant-panel">
+        <div onClick={() => this.props.history.goBack()} className={entryStyles.back}>
+          <i>
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </i>
+          Back
+        </div>
+
         <div className="mic-grant-panel__grant-container">
           <div className="mic-grant-panel__title">
-            <FormattedMessage
-              id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-title" : "audio.granted-title"}
-            />
+            <FormattedMessage id={granted ? "audio.granted-title" : "audio.grant-title"} />
           </div>
           <div className="mic-grant-panel__subtitle">
-            <FormattedMessage
-              id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-subtitle" : "audio.granted-subtitle"}
-            />
+            <FormattedMessage id={granted ? "audio.granted-subtitle" : "audio.grant-subtitle"} />
           </div>
           <div className="mic-grant-panel__button-container">
-            {this.state.entryStep == ENTRY_STEPS.mic_grant ? (
+            {granted ? (
               <WithHoverSound>
                 <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
-                  <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
+                  <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
                 </button>
               </WithHoverSound>
             ) : (
               <WithHoverSound>
                 <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
-                  <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
+                  <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
                 </button>
               </WithHoverSound>
             )}
@@ -995,6 +1027,13 @@ class UIRoot extends Component {
     const subtitleId = AFRAME.utils.device.isMobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
     return (
       <div className="audio-setup-panel">
+        <div onClick={() => this.props.history.goBack()} className={entryStyles.back}>
+          <i>
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </i>
+          Back
+        </div>
+
         <div>
           <div className="audio-setup-panel__title">
             <FormattedMessage id="audio.title" />
@@ -1116,24 +1155,20 @@ class UIRoot extends Component {
     if (isLoading) return this.renderLoader();
     if (this.props.isBotMode) return this.renderBotMode();
 
-    const startPanel = this.state.entryStep === ENTRY_STEPS.start && this.renderEntryStartPanel();
-    const devicePanel = this.state.entryStep === ENTRY_STEPS.device && this.renderDevicePanel();
-
-    const micPanel =
-      (this.state.entryStep === ENTRY_STEPS.mic_grant || this.state.entryStep === ENTRY_STEPS.mic_granted) &&
-      this.renderMicPanel();
-
-    const audioSetupPanel = this.state.entryStep === ENTRY_STEPS.audio_setup && this.renderAudioSetupPanel();
+    const entered = this.state.entered;
 
     // Dialog is empty if coll
-    const dialogContents = this.isWaitingForAutoExit() ? (
+    const entryDialog = this.isWaitingForAutoExit() ? (
       <AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />
     ) : (
       <div className={entryStyles.entryDialog}>
-        {startPanel}
-        {devicePanel}
-        {micPanel}
-        {audioSetupPanel}
+        <Switch>
+          <Route path="/device">{this.renderDevicePanel()}</Route>
+          <Route path="/mic_grant">{this.renderMicPanel(false)}</Route>
+          <Route path="/mic_granted">{this.renderMicPanel(true)}</Route>
+          <Route path="/audio">{this.renderAudioSetupPanel()}</Route>
+          <Route path="/">{this.renderEntryStartPanel()}</Route>
+        </Switch>
       </div>
     );
 
@@ -1143,8 +1178,7 @@ class UIRoot extends Component {
       [styles.backgrounded]: this.isInModal()
     });
 
-    const entryFinished = this.state.entryStep === ENTRY_STEPS.finished;
-    const showVREntryButton = entryFinished && this.props.availableVREntryTypes.isInHMD;
+    const showVREntryButton = entered && this.props.availableVREntryTypes.isInHMD;
 
     const textRows = this.state.pendingMessage.split("\n").length;
     const pendingMessageTextareaHeight = textRows * 28 + "px";
@@ -1163,17 +1197,17 @@ class UIRoot extends Component {
               )}
             />
 
-            {(!entryFinished || this.isWaitingForAutoExit()) && (
+            {(!this.state.entered || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
                 <PresenceLog entries={this.props.presenceLogEntries || []} hubId={this.props.hubId} />
-                <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
+                <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
               </div>
             )}
 
-            {entryFinished && (
+            {entered && (
               <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} hubId={this.props.hubId} />
             )}
-            {entryFinished && (
+            {entered && (
               <form onSubmit={this.sendMessage}>
                 <div className={styles.messageEntryInRoom} style={{ height: pendingMessageFieldHeight }}>
                   {this.state.pendingMessage.startsWith("/") && (
@@ -1230,7 +1264,7 @@ class UIRoot extends Component {
             <div
               className={classNames({
                 [styles.inviteContainer]: true,
-                [styles.inviteContainerBelowHud]: entryFinished,
+                [styles.inviteContainerBelowHud]: entered,
                 [styles.inviteContainerInverted]: this.state.showInviteDialog
               })}
             >
@@ -1238,7 +1272,7 @@ class UIRoot extends Component {
                 !this.state.videoShareMediaSource && (
                   <WithHoverSound>
                     <button
-                      className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entryFinished })}
+                      className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
                       onClick={() => this.toggleInviteDialog()}
                     >
                       <FormattedMessage id="entry.invite-others-nag" />
@@ -1248,7 +1282,7 @@ class UIRoot extends Component {
               {!showVREntryButton &&
                 this.occupantCount() > 1 &&
                 !this.state.videoShareMediaSource &&
-                entryFinished && (
+                entered && (
                   <WithHoverSound>
                     <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
                       <span>
@@ -1318,7 +1352,7 @@ class UIRoot extends Component {
               />
             )}
 
-            {this.state.entryStep === ENTRY_STEPS.finished ? (
+            {entered ? (
               <div>
                 <TwoDHUD.TopHUD
                   muted={this.state.muted}
