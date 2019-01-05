@@ -163,6 +163,16 @@ export default function generate3DOFTriggerBindings(device) {
 
     [sets.cursorHoveringOnInteractable]: [grabBinding],
     [sets.cursorHoveringOnUI]: [grabBinding],
+    [sets.cursorHoveringOnVideo]: [
+      {
+        src: {
+          value: device.axis("touchpadY"),
+          touching: device.button("touchpad").touched
+        },
+        dest: { value: paths.actions.cursor.adjustMediaVolume },
+        xform: xforms.touch_axis_scroll(-0.001)
+      }
+    ],
 
     [sets.cursorHoldingInteractable]: [
       {
