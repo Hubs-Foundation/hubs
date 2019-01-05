@@ -50,7 +50,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 addLocaleData([...en]);
 
 // This needs to be updated as we add modal routes.
-const MODAL_ROUTER_PATHS = [
+const MODAL_ROUTES = [
   "/profile",
   "/link",
   "/help",
@@ -1160,7 +1160,7 @@ class UIRoot extends Component {
   };
 
   isInModal = () => {
-    return !!MODAL_ROUTER_PATHS.find(p => this.props.location.pathname.startsWith(p));
+    return !!MODAL_ROUTES.find(p => this.props.location.pathname.startsWith(p));
   };
 
   render() {
