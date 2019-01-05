@@ -13,12 +13,11 @@ export default class RoomInfoDialog extends Component {
   render() {
     const toAttributionDiv = (a, i) => {
       if (a.url) {
-        const source =
-          a.url.indexOf("sketchfab.com") >= 0
-            ? "on Sketchfab"
-            : a.url.indexOf("poly.google.com") >= 0
-              ? "on Google Poly"
-              : "";
+        const source = a.url.includes("sketchfab.com")
+          ? "on Sketchfab"
+          : a.url.includes("poly.google.com")
+            ? "on Google Poly"
+            : "";
 
         return (
           <div className={styles.attribution} key={`${a.url} ${i}`}>

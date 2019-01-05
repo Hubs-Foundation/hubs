@@ -1173,7 +1173,6 @@ class UIRoot extends Component {
 
     const entered = this.state.entered;
 
-    // Dialog is empty if coll
     const entryDialog = this.isWaitingForAutoExit() ? (
       <AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />
     ) : (
