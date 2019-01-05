@@ -62,6 +62,8 @@ const MODAL_ROUTER_PATHS = [
   "/info"
 ];
 
+const ENTRY_FLOW_ROUTES = ["/device", "/audio", "/mic_grant", "/mic_granted", "/link"];
+
 // This is a list of regexes that match the microphone labels of HMDs.
 //
 // If entering VR mode, and if any of these regexes match an audio device,
@@ -78,7 +80,6 @@ async function grantedMicLabels() {
 }
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
-const ENTRY_FLOW_PATHS = ["/device", "/audio", "/mic_grant", "/mic_granted", "/link"];
 
 import webmTone from "../assets/sfx/tone.webm";
 import mp3Tone from "../assets/sfx/tone.mp3";
@@ -211,7 +212,7 @@ class UIRoot extends Component {
     //
     // Note this isn't perfect, if we refresh the page mid-entry flow and then hit back, we end
     // up in a bad state unless we were on the first step. But this seems reasonable enough for now.
-    if (ENTRY_FLOW_PATHS.find(x => x === this.props.history.location.pathname)) {
+    if (ENTRY_FLOW_ROUTES.find(x => x === this.props.history.location.pathname)) {
       this.props.history.replace("/");
     }
 
