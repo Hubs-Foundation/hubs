@@ -35,14 +35,17 @@ AFRAME.registerComponent("controls-shape-offset", {
       position.add(this.data.additionalOffset);
       quaternion.conjugate();
 
-      const shape = {
+      this.el.setAttribute("ammo-body", {
         shape: "box",
+        type: "kinematic",
         halfExtents: { x: 0.03, y: 0.04, z: 0.05 },
+        offset: position,
         orientation: quaternion,
-        offset: position
-      };
-
-      this.el.setAttribute("shape", shape);
+        addCollideEventListener: true,
+        collisionFlags: 4,
+        autoUpdateScale: false,
+        autoGenerateShape: false
+      });
     }
   },
 

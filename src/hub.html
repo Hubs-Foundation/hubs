@@ -419,7 +419,7 @@
             radius="0.02"
             segments-width="9"
             segments-height="9"
-            ammo-body="shape: sphere; type: kinematic; collisionFlags: 4; autoUpdateScale: false;"
+            ammo-body="shape: sphere; type: kinematic; collisionFlags: 4; autoUpdateScale: false; autoGenerateShape: false;"
             super-hands="
                 colliderEvent: raycaster-intersection;
                 colliderEndEvent: raycaster-intersection-cleared;
@@ -594,7 +594,6 @@
                     curveShootingSpeed: 12;"
                 teleport-controls-matrix-auto-update
                 haptic-feedback
-                ammo-body="type: kinematic; shape: sphere; addCollideEventListener: true; collisionFlags: 4;"
                 mixin="controller-super-hands"
                 controls-shape-offset
                 action-to-event__a="path: /actions/leftHandStartTeleport; event: left-teleport_down;"
@@ -621,7 +620,6 @@
                     curveShootingSpeed: 12;"
                 teleport-controls-matrix-auto-update
                 haptic-feedback
-                ammo-body="type: kinematic; shape: sphere; addCollideEventListener: true; collisionFlags: 4;"
                 mixin="controller-super-hands"
                 controls-shape-offset
                 action-to-event__a="path: /actions/rightHandStartTeleport; event: right-teleport_down;"
