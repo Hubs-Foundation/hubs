@@ -1409,7 +1409,7 @@ class UIRoot extends Component {
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
                 />
-                {(this.props.isSupportAvailable || true) && (
+                {this.props.isSupportAvailable && (
                   <div className={styles.nagCornerButton}>
                     <WithHoverSound>
                       <Link to="/support">
