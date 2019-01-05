@@ -246,7 +246,7 @@ class UIRoot extends Component {
       }
     });
 
-    this.handleForceEntry();
+    setTimeout(() => this.handleForceEntry(), 1000);
   }
 
   componentWillUnmount() {
