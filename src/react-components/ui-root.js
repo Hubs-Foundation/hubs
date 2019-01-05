@@ -216,10 +216,11 @@ class UIRoot extends Component {
       this.props.history.replace("/");
     }
 
-    // Hacky technique to skip over the entry flow history entries when we've entered the room.
+    // Hacky technique to skip over the entry flow history entries when we've entered the room and
+    // hit the back button.
     //
-    // This makes it so if we are in the room and hit back in the browser, we go to the page
-    // we were on before the entry flow, not back into the entry flow.
+    // This makes it so if we are in the room and hit back in the browser, we go to the URL
+    // the browser was on before the entry flow, not back into the entry flow.
     this.props.history.listen((newLocation, action) => {
       if (!this.state.entered) {
         preEntryHistoryLength++;
