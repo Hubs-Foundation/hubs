@@ -40,6 +40,7 @@
     "entry.return-to-vr": "Return to VR",
     "entry.enter-in-vr": "Enter in VR",
     "entry.lobby": "Lobby",
+    "entry.back": "Back",
     "entry.notify_me": "Notify me when others are here",
     "profile.save": "Accept",
     "profile.display_name.validation_warning": "Alphanumerics and hyphens. At least 3 characters, no more than 32",

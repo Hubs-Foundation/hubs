@@ -941,7 +941,7 @@ class UIRoot extends Component {
           <i>
             <FontAwesomeIcon icon={faArrowLeft} />
           </i>
-          Back
+          <FormattedMessage id="entry.back" />
         </div>
 
         <div className={entryStyles.title}>
@@ -999,7 +999,7 @@ class UIRoot extends Component {
           <i>
             <FontAwesomeIcon icon={faArrowLeft} />
           </i>
-          Back
+          <FormattedMessage id="entry.back" />
         </div>
 
         <div className="mic-grant-panel__grant-container">
@@ -1049,7 +1049,7 @@ class UIRoot extends Component {
           <i>
             <FontAwesomeIcon icon={faArrowLeft} />
           </i>
-          Back
+          <FormattedMessage id="entry.back" />
         </div>
 
         <div>
