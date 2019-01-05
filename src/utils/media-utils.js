@@ -89,7 +89,7 @@ export const getCustomGLTFParserURLResolver = gltfUrl => (url, path) => {
 
       // Drop the .gltf filename
       const assetUrl = originalUrlParts.slice(0, originalUrlParts.length - 1).join("/") + "/" + url;
-      return corsProxyPrefix + encodeURIComponent(assetUrl);
+      return corsProxyPrefix + assetUrl;
     }
   }
 
