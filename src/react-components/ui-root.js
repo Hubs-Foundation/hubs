@@ -234,6 +234,8 @@ class UIRoot extends Component {
         }
       }
     });
+
+    this.handleForceEntry();
   }
 
   componentWillUnmount() {
@@ -335,7 +337,7 @@ class UIRoot extends Component {
     this.updateSubscribedState();
   };
 
-  handleStartEntry = () => {
+  handleForceEntry = () => {
     if (this.props.forcedVREntryType.startsWith("daydream")) {
       this.enterDaydream();
     } else if (this.props.forcedVREntryType.startsWith("vr")) {
@@ -436,7 +438,7 @@ class UIRoot extends Component {
   };
 
   enterVR = async () => {
-    if (this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.maybe) {
+    if (this.props.forcedVREntryType || this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.maybe) {
       await this.performDirectEntryFlow(true);
     } else {
       this.showWebVRRecommendDialog();
