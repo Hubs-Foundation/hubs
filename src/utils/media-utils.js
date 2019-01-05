@@ -56,7 +56,7 @@ export const proxiedUrlFor = (url, index) => {
     const method = index != null ? "extract" : "raw";
     return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${farsparkEncodeUrl(url)}`;
   } else {
-    return `https://${process.env.CORS_PROXY_SERVER}/${encodeURIComponent(url)}`;
+    return `https://${process.env.CORS_PROXY_SERVER}/${url}`;
   }
 };
 
