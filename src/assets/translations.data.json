@@ -127,6 +127,8 @@
     "commands.fly": "Toggle fly mode.",
     "commands.grow": "Increase your avatar's size.",
     "commands.shrink": "Decrease your avatar's size.",
+    "commands.scene": "Change the scene.",
+    "commands.rename": "Rename the room.",
     "commands.help": "Show help.",
     "commands.leave": "Disconnect from the room.",
     "commands.duck": "The duck tested well. Quack.",

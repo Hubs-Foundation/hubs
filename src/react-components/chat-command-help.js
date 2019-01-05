@@ -9,7 +9,7 @@ export default class ChatCommandHelp extends Component {
   };
 
   render() {
-    const commands = ["help", "leave", "fly", "grow", "shrink", "duck"];
+    const commands = ["help", "leave", "fly", "grow", "shrink", "duck", "scene <scene url>", "rename <new name>"];
 
     return (
       <div className={styles.commandHelp}>
@@ -19,7 +19,7 @@ export default class ChatCommandHelp extends Component {
               <div className={styles.entry} key={c}>
                 <div className={styles.command}>/{c}</div>
                 <div>
-                  <FormattedMessage id={`commands.${c}`} />
+                  <FormattedMessage id={`commands.${c.split(" ")[0]}`} />
                 </div>
               </div>
             )

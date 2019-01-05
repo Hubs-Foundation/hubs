@@ -96,6 +96,14 @@ export default class HubChannel {
     this.channel.push("events:profile_updated", { profile: this.store.state.profile });
   };
 
+  updateScene = url => {
+    this.channel.push("update_scene", { url });
+  };
+
+  rename = name => {
+    this.channel.push("rename", { name });
+  };
+
   subscribe = subscription => {
     this.channel.push("subscribe", { subscription });
   };

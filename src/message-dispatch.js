@@ -13,14 +13,15 @@ export default class MessageDispatch {
 
   dispatch = message => {
     if (message.startsWith("/")) {
-      this.dispatchCommand(message.substring(1));
+      const commandParts = message.substring(1).split(" ");
+      this.dispatchCommand(commandParts[0], commandParts[1]);
       document.activeElement.blur(); // Commands should blur
     } else {
       this.hubChannel.sendMessage(message);
     }
   };
 
-  dispatchCommand = command => {
+  dispatchCommand = (command, arg) => {
     const entered = this.scene.is("entered");
 
     switch (command) {
@@ -75,6 +76,12 @@ export default class MessageDispatch {
       case "duck":
         spawnChatMessage(DUCK_URL);
         this.scene.emit("quack");
+        break;
+      case "scene":
+        this.hubChannel.updateScene(arg);
+        break;
+      case "rename":
+        this.hubChannel.rename(arg);
         break;
     }
   };
