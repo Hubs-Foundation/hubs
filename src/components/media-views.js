@@ -360,12 +360,18 @@ AFRAME.registerComponent("media-video", {
   },
 
   updatePlaybackState(force) {
+    // Only update playback posiiton for videos you don't own
     if (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && this.video)) {
       if (Math.abs(this.data.time - this.video.currentTime) > this.data.syncTolerance) {
         this.tryUpdateVideoPlaybackState(this.data.videoPaused, this.data.time);
       } else {
         this.tryUpdateVideoPlaybackState(this.data.videoPaused);
       }
+    }
+
+    // Volume is local, always update it
+    if (this.audio) {
+      this.audio.gain.gain.value = this.data.volume;
     }
   },
 
@@ -377,10 +383,6 @@ AFRAME.registerComponent("media-video", {
 
     if (currentTime !== undefined) {
       this.video.currentTime = currentTime;
-    }
-
-    if (this.audio) {
-      this.audio.gain.gain.value = this.data.volume;
     }
 
     if (pause) {
