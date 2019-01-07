@@ -294,6 +294,29 @@ function cursorModDeltaBindings() {
   ];
 }
 
+function cursorMediaVolumeModBindings() {
+  const hand = "right";
+  const padY = paths.device.wmr[hand].touchpad.axisY;
+  const padTouched = paths.device.wmr[hand].touchpad.touched;
+
+  const padCenterStripTouched = paths.device.wmr.v(hand + "/pad/centerStrip/touched");
+  const { padCenterStrip } = dpadVariables(hand);
+
+  return [
+    ...dpadBindings(hand),
+    {
+      src: [padCenterStrip, padTouched],
+      dest: { value: padCenterStripTouched },
+      xform: xforms.all
+    },
+    {
+      src: { value: padY, touching: padCenterStripTouched },
+      dest: { value: paths.actions.cursor.mediaVolumeMod },
+      xform: xforms.touch_axis_scroll(-0.05)
+    }
+  ];
+}
+
 function holdingCameraBindings(hand, forCursor) {
   const actions = paths.actions[forCursor ? "cursor" : hand + "Hand"];
   return [
@@ -431,6 +454,8 @@ export const wmrUserBindings = addSetsToBindings({
       xform: xforms.rising
     }
   ],
+
+  [sets.cursorHoveringOnVideo]: [...cursorMediaVolumeModBindings()],
 
   [sets.leftHandHoveringOnInteractable]: [
     {
