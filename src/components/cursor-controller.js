@@ -83,22 +83,6 @@ AFRAME.registerComponent("cursor-controller", {
         target.push(els[i].object3D);
       }
     }
-
-    if (AFRAME.scenes[0] && AFRAME.scenes[0].systems["rotate-selected-object"]) {
-      const gizmo = AFRAME.scenes[0].systems["rotate-selected-object"].gizmo;
-      for (let i = 0; i < gizmo.children.length; i++) {
-        if (gizmo.children[i].el) {
-          target.push(gizmo.children[i]);
-        }
-        for (let j = 0; j < gizmo.children[i].children.length; j++) {
-          if (gizmo.children[i].children[j].el) {
-            target.push(gizmo.children[i].children[j]);
-          }
-        }
-      }
-    } else {
-      console.log("no gizmo");
-    }
   },
 
   emitIntersectionEvents: function(prevIntersection, currIntersection) {

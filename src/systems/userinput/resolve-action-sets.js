@@ -85,6 +85,12 @@ export function resolveActionSets() {
     !rightHandHovering &&
     !rightHandGrabbing &&
     (cursorHand.has("hover-start") && cursorHand.get("hover-start").matches(".ui, .ui *"));
+    const cursorHoldingUI =
+          cursorController.enabled &&
+          !rightHandTeleporting &&
+        !rightHandHovering &&
+        !rightHandGrabbing &&
+        (cursorHand.has("grab-start") && cursorHand.get("grab-start").matches(".ui, .ui *"));
   const cursorHoveringOnInteractable =
     cursorController.enabled &&
     !rightHandTeleporting &&
@@ -155,6 +161,7 @@ export function resolveActionSets() {
   userinput.toggleSet(sets.cursorHoldingPen, cursorHoldingPen);
   userinput.toggleSet(sets.cursorHoldingCamera, cursorHoldingCamera);
   userinput.toggleSet(sets.cursorHoldingInteractable, cursorHoldingInteractable);
+  userinput.toggleSet(sets.cursorHoldingUI, cursorHoldingUI);
   userinput.toggleSet(
     sets.inputFocused,
     document.activeElement.nodeName === "INPUT" || document.activeElement.nodeName === "TEXTAREA"
