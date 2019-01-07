@@ -78,6 +78,10 @@
       }
     }
   }
+
+  &__wide {
+    max-width: 640px;
+  }
 }
 
 .dialog__box__contents__body p:first-child {

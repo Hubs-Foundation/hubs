@@ -2,6 +2,8 @@ import nextTick from "../utils/next-tick";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import MobileStandardMaterial from "../materials/MobileStandardMaterial";
 import { getCustomGLTFParserURLResolver } from "../utils/media-utils";
+import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
+THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const GLTFCache = {};
 
@@ -44,6 +46,9 @@ function cloneSkinnedMesh(source) {
 
   parallelTraverse(source, clone, function(sourceNode, clonedNode) {
     cloneLookup.set(sourceNode, clonedNode);
+    if (sourceNode.isMesh && sourceNode.geometry.boundsTree) {
+      clonedNode.geometry.boundsTree = sourceNode.geometry.boundsTree;
+    }
   });
 
   source.traverse(function(sourceMesh) {
@@ -392,6 +397,24 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.el.setObject3D("mesh", object3DToSet);
 
       rewires.forEach(f => f());
+
+      // generate acceleration structures for raycasting against
+      object3DToSet.traverse(obj => {
+        // note that we might already have a bounds tree if this was a clone of an object with one
+        if (obj.isMesh && obj.geometry.isBufferGeometry && !obj.geometry.boundsTree) {
+          const geo = obj.geometry;
+          const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
+          // only bother using memory and time making a BVH if there are a reasonable number of tris,
+          // and if there are too many it's too painful and large to tolerate doing it (at least until
+          // we put this in a web worker)
+          if (triCount > 1000 && triCount < 1000000) {
+            console.log(`Created BVH for geometry with ${triCount} triangles.`);
+            geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 20 });
+            geo.setIndex(geo.boundsTree.index);
+            console.log("Finished creating BVH.");
+          }
+        }
+      });
 
       this.el.emit("model-loaded", { format: "gltf", model: this.model });
     } catch (e) {
