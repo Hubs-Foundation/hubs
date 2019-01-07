@@ -1,16 +1,9 @@
 import nextTick from "../utils/next-tick";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import MobileStandardMaterial from "../materials/MobileStandardMaterial";
-import cubeMapPosX from "../assets/images/cubemap/posx.jpg";
-import cubeMapNegX from "../assets/images/cubemap/negx.jpg";
-import cubeMapPosY from "../assets/images/cubemap/posy.jpg";
-import cubeMapNegY from "../assets/images/cubemap/negy.jpg";
-import cubeMapPosZ from "../assets/images/cubemap/posz.jpg";
-import cubeMapNegZ from "../assets/images/cubemap/negz.jpg";
 import { getCustomGLTFParserURLResolver } from "../utils/media-utils";
 
 const GLTFCache = {};
-let CachedEnvMapTexture = null;
 
 function inflateComponent(el, componentName, componentData) {
   if (!AFRAME.components[componentName]) {
@@ -213,13 +206,6 @@ function getFilesFromSketchfabZip(src) {
   });
 }
 
-async function loadEnvMap() {
-  const urls = [cubeMapPosX, cubeMapNegX, cubeMapPosY, cubeMapNegY, cubeMapPosZ, cubeMapNegZ];
-  const texture = await new THREE.CubeTextureLoader().load(urls);
-  texture.format = THREE.RGBFormat;
-  return texture;
-}
-
 async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   let gltfUrl = src;
   let fileMap;
@@ -251,10 +237,6 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
     }
   }
 
-  if (!CachedEnvMapTexture) {
-    CachedEnvMapTexture = loadEnvMap();
-  }
-
   const gltf = await new Promise((resolve, reject) =>
     parser.parse(
       (scene, scenes, cameras, animations, json) => {
@@ -266,8 +248,6 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
     )
   );
 
-  const envMap = await CachedEnvMapTexture;
-
   gltf.scene.traverse(object => {
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
     object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
@@ -275,9 +255,6 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
     if (object.material && object.material.type === "MeshStandardMaterial") {
       if (preferredTechnique === "KHR_materials_unlit") {
         object.material = MobileStandardMaterial.fromStandardMaterial(object.material);
-      } else {
-        object.material.envMap = envMap;
-        object.material.needsUpdate = true;
       }
     }
   });
@@ -400,6 +377,16 @@ AFRAME.registerComponent("gltf-model-plus", {
       object3DToSet.traverse(o => {
         const el = o.el;
         if (el) rewires.push(() => (o.el = el));
+      });
+
+      const environmentMapComponent = this.el.sceneEl.components["environment-map"];
+      const envMap = environmentMapComponent ? environmentMapComponent.environmentMap : null;
+
+      object3DToSet.traverse(object => {
+        if (object.material && object.material.isMeshStandardMaterial) {
+          object.material.envMap = envMap;
+          object.material.needsUpdate = true;
+        }
       });
 
       this.el.setObject3D("mesh", object3DToSet);
