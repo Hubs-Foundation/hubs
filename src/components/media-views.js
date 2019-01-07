@@ -499,7 +499,7 @@ AFRAME.registerComponent("media-video", {
     }
 
     const userinput = AFRAME.scenes[0].systems.userinput;
-    const volumeMod = userinput.get(paths.actions.cursor.adjustMediaVolume);
+    const volumeMod = userinput.get(paths.actions.cursor.mediaVolumeMod);
     if (volumeMod) {
       this.el.setAttribute("media-video", "volume", THREE.Math.clamp(this.data.volume + volumeMod, 0, 1));
     }

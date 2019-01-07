@@ -570,7 +570,7 @@ export const viveUserBindings = addSetsToBindings({
         value: rAxis("joyY"),
         touching: rButton("touchpad").touched
       },
-      dest: { value: paths.actions.cursor.adjustMediaVolume },
+      dest: { value: paths.actions.cursor.mediaVolumeMod },
       xform: xforms.touch_axis_scroll(0.001)
     }
   ],
