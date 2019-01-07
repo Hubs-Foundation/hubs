@@ -381,10 +381,10 @@
 
             <a-mixin id="controller-super-hands"
                 super-hands="
-                    colliderEvent: collisions;
-                    colliderEventProperty: els;
-                    colliderEndEvent: collisions;
-                    colliderEndEventProperty: clearedEls;
+                    colliderEvent: collide;
+                    colliderEventProperty: targetEl;
+                    colliderEndEvent: collide-end;
+                    colliderEndEventProperty: targetEl;
                     grabStartButtons: primary_hand_grab, secondary_hand_grab;
                     grabEndButtons: primary_hand_release, secondary_hand_release;
                     stretchStartButtons: primary_hand_grab, secondary_hand_grab;

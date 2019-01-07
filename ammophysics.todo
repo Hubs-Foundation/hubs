@@ -4,12 +4,15 @@ ammo physics TODO:
 
 * maybe don't even use aframe-physics-system?
 
-* Constraints are wonky (https://pybullet.org/Bullet/phpBB3/viewtopic.php?f=9&t=3598)
-** Figure out why btFixedConstraint is unstable when cursor is scaled small
-** Constraints are still jumpy when first created
-** Velocity based constraints (https://pybullet.org/Bullet/phpBB3/viewtopic.php?f=9&t=11270&p=38281&hilit=rigid+constraint#p38281)
-*** implement constraints for hands
-*** enable stretchable
+//* Constraints are wonky (https://pybullet.org/Bullet/phpBB3/viewtopic.php?f=9&t=3598)
+//** Figure out why btFixedConstraint is unstable when cursor is scaled small
+//** Constraints are still jumpy when first created
+//** Velocity based constraints 
+//*** implement constraints for hands
+//*** cursor constraint rotation?
+//*** enable stretchable
+
+* verify camera and pen objects
 
 * collision with environments (trimeshes) and other shapes sometimes dont register (ccd?)
 
@@ -30,7 +33,7 @@ ammo physics TODO:
 Future TODO:
 
 * replace navmeshes with capsule/player colliders
-* velocity based constraints
+* velocity based constraints (https://pybullet.org/Bullet/phpBB3/viewtopic.php?f=9&t=11270&p=38281&hilit=rigid+constraint#p38281)
 * use ammo raycaster instead of three raycaster
 * worker support
 * dynamic trimesh colliders (btTriangleMeshShape)
