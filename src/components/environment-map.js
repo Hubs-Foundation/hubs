@@ -32,10 +32,13 @@ AFRAME.registerComponent("environment-map", {
 
   updateEnvironmentMap(environmentMap) {
     this.environmentMap = environmentMap;
+    this.apply(this.el.object3D);
+  },
 
-    this.el.object3D.traverse(object => {
+  apply(object3D) {
+    object3D.traverse(object => {
       if (object.material && object.material.isMeshStandardMaterial) {
-        object.material.envMap = environmentMap;
+        object.material.envMap = this.environmentMap;
         object.material.needsUpdate = true;
       }
     });

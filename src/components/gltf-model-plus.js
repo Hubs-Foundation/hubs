@@ -385,14 +385,10 @@ AFRAME.registerComponent("gltf-model-plus", {
       });
 
       const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-      const envMap = environmentMapComponent ? environmentMapComponent.environmentMap : null;
 
-      object3DToSet.traverse(object => {
-        if (object.material && object.material.isMeshStandardMaterial) {
-          object.material.envMap = envMap;
-          object.material.needsUpdate = true;
-        }
-      });
+      if (environmentMapComponent) {
+        environmentMapComponent.apply(object3DToSet);
+      }
 
       this.el.setObject3D("mesh", object3DToSet);
 
