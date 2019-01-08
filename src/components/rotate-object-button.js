@@ -1,5 +1,45 @@
 import { paths } from "../systems/userinput/paths";
 
+AFRAME.registerComponent("rotate-object-like-a-puppet-button", {
+  schema: {
+    double: { default: false }
+  },
+  init() {
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      this.targetEl = networkedEl;
+    });
+
+    this.onGrabStart = e => {
+      if (!this.targetEl) {
+        return;
+      }
+      this.hand = e.detail.hand;
+      this.hand.emit("haptic_pulse", { intensity: "high" });
+      if (!NAF.utils.isMine(this.targetEl)) {
+        if (!NAF.utils.takeOwnership(this.targetEl)) {
+          return;
+        }
+      }
+      if (this.targetEl.components.body) {
+        this.targetEl.setAttribute("body", { type: "static" });
+      }
+      AFRAME.scenes[0].systems["rotate-selected-object"].startPuppeting(
+        this.targetEl.object3D,
+        this.hand,
+        this.data.double
+      );
+    };
+  },
+
+  play() {
+    this.el.addEventListener("grab-start", this.onGrabStart);
+  },
+
+  pause() {
+    this.el.removeEventListener("grab-start", this.onGrabStart);
+  }
+});
+
 AFRAME.registerComponent("reset-object-orientation-button", {
   init() {
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
@@ -108,7 +148,31 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.planarDifference = new THREE.Vector3();
     this.up = new THREE.Vector3(0, 1, 0);
 
+    this.initialPuppetHandQuaternion = new THREE.Quaternion();
+    this.initialPuppetObjQuaternion = new THREE.Quaternion();
+    this.puppetHandQuaternion = new THREE.Quaternion();
+    this.puppetObjQuaternion = new THREE.Quaternion();
+    this.puppetDeltaQuaternion = new THREE.Quaternion();
+
     this.el.object3D.add(this.plane);
+  },
+
+  startPuppeting(target, hand, double) {
+    this.double = double;
+    this.hand = hand;
+    if (this.hand.id === "cursor" || this.hand.id === "player-right-controller") {
+      this.posePath = paths.actions.rightHand.pose;
+    } else if (this.hand.id === "player-left-controller") {
+      this.posePath = paths.actions.leftHand.pose;
+    }
+
+    this.target = target;
+    const userinput = this.el.systems.userinput;
+    this.initialPuppetHandQuaternion.copy(userinput.get(paths.actions.rayObjectRotation));
+    target.matrixWorld.decompose(this.v, this.initialPuppetObjQuaternion, this.v);
+    this.puppetHandQuaternion.copy(userinput.get(paths.actions.rayObjectRotation));
+    target.matrixWorld.decompose(this.v, this.puppetObjQuaternion, this.v);
+    this.puppetingInProgress = true;
   },
 
   startRotating(target, axis) {
@@ -138,6 +202,7 @@ AFRAME.registerSystem("rotate-selected-object", {
 
   stopRotating() {
     this.rotationInProgress = false;
+    this.puppetingInProgress = false;
   },
 
   reset(object3D) {
@@ -157,73 +222,86 @@ AFRAME.registerSystem("rotate-selected-object", {
   },
 
   tick() {
-    this.plane.material.visible = this.rotationInProgress;
-    if (!this.rotationInProgress) {
+    this.plane.material.visible = this.rotationInProgress || this.puppetingInProgress;
+    if (!this.rotationInProgress && !this.puppetingInProgress) {
       return;
     }
     if (this.el.systems.userinput.get(paths.actions.cursor.drop)) {
       this.stopRotating();
     }
 
-    this.camera.matrixWorld.decompose(this.v, this.plane.quaternion, this.v);
-    this.target.getWorldPosition(this.plane.position);
-    this.plane.matrixNeedsUpdate = true;
-    this.plane.updateMatrixWorld(true);
+    if (this.rotationInProgress) {
+      this.camera.matrixWorld.decompose(this.v, this.plane.quaternion, this.v);
+      this.target.getWorldPosition(this.plane.position);
+      this.plane.matrixNeedsUpdate = true;
+      this.plane.updateMatrixWorld(true);
 
-    this.intersections.length = 0;
-    const far = this.raycaster.far;
-    this.raycaster.far = 1000;
-    this.plane.raycast(this.raycaster, this.intersections);
-    this.raycaster.far = far;
-    const intersection = this.intersections[0]; // point
-    if (!intersection) return;
+      this.intersections.length = 0;
+      const far = this.raycaster.far;
+      this.raycaster.far = 1000;
+      this.plane.raycast(this.raycaster, this.intersections);
+      this.raycaster.far = far;
+      const intersection = this.intersections[0]; // point
+      if (!intersection) return;
 
-    this.camera.getWorldPosition(this.eye);
-    this.target.getWorldPosition(this.obj);
-    this.objectToEye.copy(this.obj).sub(this.eye);
-    this.planeNormal.copy(this.objectToEye).normalize();
+      this.camera.getWorldPosition(this.eye);
+      this.target.getWorldPosition(this.obj);
+      this.objectToEye.copy(this.obj).sub(this.eye);
+      this.planeNormal.copy(this.objectToEye).normalize();
 
-    const useFreeRotate = this.axis.x === 0 && this.axis.y === 0 && this.axis.z === 0;
-    if (useFreeRotate) {
-      this.planarDifference.copy(intersection.point).sub(this.prevIntersection.point);
-      const differenceInPlane = this.planarDifference.projectOnPlane(this.planeNormal);
-      if (differenceInPlane.lengthSq() < 0.0001) {
-        return;
+      const useFreeRotate = this.axis.x === 0 && this.axis.y === 0 && this.axis.z === 0;
+      if (useFreeRotate) {
+        this.planarDifference.copy(intersection.point).sub(this.prevIntersection.point);
+        const differenceInPlane = this.planarDifference.projectOnPlane(this.planeNormal);
+        if (differenceInPlane.lengthSq() < 0.0001) {
+          return;
+        }
+        this.right = this.right || new THREE.Vector3(1, 0, 0);
+        this.right.set(1, 0, 0);
+        this.up.set(0, 1, 0);
+        this.cameraWorldQuaternion = new THREE.Quaternion();
+        this.objectWorldQuaternion = new THREE.Quaternion();
+        this.camera.matrixWorld.decompose(this.v, this.cameraWorldQuaternion, this.v);
+        this.target.matrixWorld.decompose(this.v, this.objectWorldQuaternion, this.v);
+        const sensitivity = 2;
+        this.q.setFromAxisAngle(
+          this.right.applyQuaternion(this.cameraWorldQuaternion),
+          -differenceInPlane.y * sensitivity
+        );
+        this.target.quaternion.multiplyQuaternions(this.q, this.target.quaternion);
+        this.objectForward = new THREE.Vector3(1, 0, 0).applyQuaternion(this.objectWorldQuaternion);
+        this.q.setFromAxisAngle(this.up.applyQuaternion(this.cameraWorldQuaternion), differenceInPlane.x * sensitivity);
+        this.target.quaternion.multiplyQuaternions(this.q, this.target.quaternion);
+      } else {
+        this.planarDifference.copy(intersection.point).sub(this.initialIntersection.point);
+        const differenceInPlane = this.planarDifference.projectOnPlane(this.planeNormal);
+        if (differenceInPlane.lengthSq() < 0.01) {
+          return;
+        }
+        const rotationAngle = (10 * differenceInPlane.x) / this.obj.distanceTo(this.eye);
+        const rotationSnap = Math.PI / 8;
+        const snappedRotation = Math.round(rotationAngle / rotationSnap) * rotationSnap;
+
+        this.target.quaternion.copy(
+          this.newOrientation
+            .copy(this.initialOrientation)
+            .multiply(this.deltaQuaternion.setFromAxisAngle(this.axis, snappedRotation))
+        );
       }
-      this.right = this.right || new THREE.Vector3(1, 0, 0);
-      this.right.set(1, 0, 0);
-      this.up.set(0, 1, 0);
-      this.cameraWorldQuaternion = new THREE.Quaternion();
-      this.objectWorldQuaternion = new THREE.Quaternion();
-      this.camera.matrixWorld.decompose(this.v, this.cameraWorldQuaternion, this.v);
-      this.target.matrixWorld.decompose(this.v, this.objectWorldQuaternion, this.v);
-      const sensitivity = 2;
-      this.q.setFromAxisAngle(
-        this.right.applyQuaternion(this.cameraWorldQuaternion),
-        -differenceInPlane.y * sensitivity
-      );
-      this.target.quaternion.multiplyQuaternions(this.q, this.target.quaternion);
-      this.objectForward = new THREE.Vector3(1, 0, 0).applyQuaternion(this.objectWorldQuaternion);
-      this.q.setFromAxisAngle(this.up.applyQuaternion(this.cameraWorldQuaternion), differenceInPlane.x * sensitivity);
-      this.target.quaternion.multiplyQuaternions(this.q, this.target.quaternion);
-    } else {
-      this.planarDifference.copy(intersection.point).sub(this.initialIntersection.point);
-      const differenceInPlane = this.planarDifference.projectOnPlane(this.planeNormal);
-      if (differenceInPlane.lengthSq() < 0.01) {
-        return;
-      }
-      const rotationAngle = (10 * differenceInPlane.x) / this.obj.distanceTo(this.eye);
-      const rotationSnap = Math.PI / 8;
-      const snappedRotation = Math.round(rotationAngle / rotationSnap) * rotationSnap;
 
-      this.target.quaternion.copy(
-        this.newOrientation
-          .copy(this.initialOrientation)
-          .multiply(this.deltaQuaternion.setFromAxisAngle(this.axis, snappedRotation))
-      );
+      this.target.matrixNeedsUpdate = true;
+      this.prevIntersection = intersection;
+    } else if (this.puppetingInProgress) {
+      const userinput = this.el.systems.userinput;
+      this.puppetHandQuaternion.copy(userinput.get(paths.actions.rayObjectRotation));
+      this.puppetDeltaQuaternion
+        .copy(this.puppetHandQuaternion)
+        .premultiply(this.initialPuppetHandQuaternion.clone().inverse());
+      this.target.quaternion.multiplyQuaternions(this.initialPuppetObjQuaternion, this.puppetDeltaQuaternion);
+      if (this.double) {
+        this.target.quaternion.multiply(this.puppetDeltaQuaternion);
+      }
+      this.target.matrixNeedsUpdate = true;
     }
-
-    this.target.matrixNeedsUpdate = true;
-    this.prevIntersection = intersection;
   }
 });
