@@ -236,6 +236,7 @@ AFRAME.registerComponent("skybox", {
     this.skyScene.add(this.cubeCamera);
 
     // HACK: Render environment map on next frame to avoid bug where the render target texture is black.
+    this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
     requestAnimationFrame(this.updateEnvironmentMap);
   },
 
@@ -290,7 +291,7 @@ AFRAME.registerComponent("skybox", {
     this.updateEnvironmentMap();
   },
 
-  updateEnvironmentMap: () => {
+  updateEnvironmentMap() {
     const environmentMapComponent = this.el.sceneEl.components["environment-map"];
 
     if (environmentMapComponent) {

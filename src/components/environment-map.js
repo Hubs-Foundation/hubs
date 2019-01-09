@@ -20,13 +20,15 @@ AFRAME.registerComponent("environment-map", {
   init() {
     this.environmentMap = null;
 
+    this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
+
     if (this.data.loadDefault) {
       // Used in the avatar selector scene because there is no skybox.
       createDefaultEnvironmentMap().then(this.updateEnvironmentMap);
     }
   },
 
-  updateEnvironmentMap: environmentMap => {
+  updateEnvironmentMap(environmentMap) {
     this.environmentMap = environmentMap;
     this.applyEnvironmentMap(this.el.object3D);
   },
