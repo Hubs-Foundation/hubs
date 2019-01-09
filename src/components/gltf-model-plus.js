@@ -387,7 +387,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       const environmentMapComponent = this.el.sceneEl.components["environment-map"];
 
       if (environmentMapComponent) {
-        environmentMapComponent.apply(object3DToSet);
+        environmentMapComponent.applyEnvironmentMap(object3DToSet);
       }
 
       this.el.setObject3D("mesh", object3DToSet);
