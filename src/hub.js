@@ -498,6 +498,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   environmentScene.addEventListener("bundleloaded", () => {
     remountUI({ environmentSceneLoaded: true });
 
+    // Re-bind the teleporter controls collision meshes in case the scene changed.
+    document
+      .querySelectorAll("a-entity[teleport-controls]")
+      .forEach(x => x.components["teleport-controls"].queryCollisionEntities());
+
     for (const modelEl of environmentScene.children) {
       addAnimationComponents(modelEl);
     }
