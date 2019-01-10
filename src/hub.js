@@ -156,6 +156,8 @@ import qsTruthy from "./utils/qs_truthy";
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
 const isDebug = qsTruthy("debug");
+const loadingEnvironmentURL =
+  "https://hubs-proxy.com/https://uploads-prod.reticulum.io/files/58c034aa-ff17-4d3c-a6cc-c9095bb4822c.glb";
 
 if (!isBotMode && !isTelemetryDisabled) {
   registerTelemetry();
@@ -253,19 +255,11 @@ function remountUI(props) {
   mountUI(uiProps);
 }
 
-async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
-  const scene = document.querySelector("a-scene");
-
-  if (NAF.connection.isConnected()) {
-    // Send complete sync on phoenix re-join.
-    NAF.connection.entities.completeSync(null, true);
-    return;
-  }
-
-  const hub = data.hubs[0];
-
+async function updateEnvironmentForHub(hub) {
   let sceneUrl;
   let isLegacyBundle; // Deprecated
+
+  const environmentScene = document.querySelector("#environment-scene");
 
   if (hub.scene) {
     isLegacyBundle = false;
@@ -279,19 +273,10 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     isLegacyBundle = !(glbAsset || hasExtension);
   }
 
-  console.log(`Janus host: ${hub.host}`);
-  const environmentScene = document.querySelector("#environment-scene");
-  const objectsScene = document.querySelector("#objects-scene");
-  const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
-  const objectsEl = document.createElement("a-entity");
-  objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
-  objectsScene.appendChild(objectsEl);
-
   if (isLegacyBundle) {
     // Deprecated
     const res = await fetch(sceneUrl);
     const data = await res.json();
-    console.log(data);
     const baseURL = new URL(THREE.LoaderUtils.extractUrlBase(sceneUrl), window.location.href);
     sceneUrl = new URL(data.assets[0].src, baseURL).href;
   } else {
@@ -299,9 +284,52 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   }
 
   console.log(`Scene URL: ${sceneUrl}`);
-  const environmentEl = document.createElement("a-entity");
-  environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
-  environmentScene.appendChild(environmentEl);
+
+  let environmentEl = null;
+
+  if (environmentScene.childNodes.length === 0) {
+    const environmentEl = document.createElement("a-entity");
+    environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
+    environmentScene.appendChild(environmentEl);
+  } else {
+    // Change environment
+    environmentEl = environmentScene.childNodes[0];
+
+    const onLoad = () => {
+      environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
+      environmentEl.removeEventListener("model-loaded", onLoad);
+    };
+
+    // Clear the three.js image cache an unload the environment, then on next tick load the loading environment
+    THREE.Cache.clear();
+
+    environmentEl.setAttribute("gltf-model-plus", { src: null });
+    await nextTick();
+
+    environmentEl.addEventListener("model-loaded", onLoad);
+    environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironmentURL });
+  }
+}
+
+async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
+  const scene = document.querySelector("a-scene");
+
+  if (NAF.connection.isConnected()) {
+    // Send complete sync on phoenix re-join.
+    NAF.connection.entities.completeSync(null, true);
+    return;
+  }
+
+  const hub = data.hubs[0];
+
+  console.log(`Janus host: ${hub.host}`);
+  const objectsScene = document.querySelector("#objects-scene");
+  const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
+  const objectsEl = document.createElement("a-entity");
+  objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
+  objectsScene.appendChild(objectsEl);
+
+  await updateEnvironmentForHub(hub);
 
   remountUI({
     hubId: hub.hub_id,
@@ -516,19 +544,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const environmentScene = document.querySelector("#environment-scene");
-
-  environmentScene.addEventListener("model-loaded", () => {
-    remountUI({ environmentSceneLoaded: true });
-
-    for (const modelEl of environmentScene.children) {
-      addAnimationComponents(modelEl);
-    }
-
+  const onFirstEnvironmentLoad = () => {
     setupLobbyCamera();
 
     // Replace renderer with a noop renderer to reduce bot resource usage.
     if (isBotMode) {
       runBotMode(scene, entryManager);
+    }
+
+    environmentScene.removeEventListener("model-loaded", onFirstEnvironmentLoad);
+  };
+
+  environmentScene.addEventListener("model-loaded", onFirstEnvironmentLoad);
+
+  environmentScene.addEventListener("model-loaded", () => {
+    // This is re-entrant if the environment scene is changed.
+    remountUI({ environmentSceneLoaded: true });
+
+    for (const modelEl of environmentScene.children) {
+      addAnimationComponents(modelEl);
     }
   });
 
