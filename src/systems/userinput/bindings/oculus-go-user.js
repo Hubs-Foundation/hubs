@@ -170,7 +170,7 @@ export default function generate3DOFTriggerBindings(device) {
           touching: device.button("touchpad").touched
         },
         dest: { value: paths.actions.cursor.mediaVolumeMod },
-        xform: xforms.touch_axis_scroll(-0.001)
+        xform: xforms.touch_axis_scroll(-0.1)
       }
     ],
 

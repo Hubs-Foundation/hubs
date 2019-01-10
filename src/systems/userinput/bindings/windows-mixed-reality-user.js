@@ -312,7 +312,7 @@ function cursorMediaVolumeModBindings() {
     {
       src: { value: padY, touching: padCenterStripTouched },
       dest: { value: paths.actions.cursor.mediaVolumeMod },
-      xform: xforms.touch_axis_scroll(-0.05)
+      xform: xforms.touch_axis_scroll(-0.1)
     }
   ];
 }
