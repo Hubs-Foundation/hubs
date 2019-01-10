@@ -488,6 +488,14 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
+  [sets.cursorHoveringOnVideo]: [
+    {
+      src: { value: rightAxis("joyY") },
+      dest: { value: paths.actions.cursor.mediaVolumeMod },
+      xform: xforms.scale(-0.001)
+    }
+  ],
+
   [sets.cursorHoveringOnNothing]: [
     {
       src: { value: rightTriggerPressed2 },
