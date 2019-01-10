@@ -241,8 +241,8 @@
                 <a-entity
                     class="pen interactable"
                     super-networked-interactable="counter: #pen-counter;"
-                    ammo-body="type: dynamic; shape: cylinder; mass: 1;"
-                    grabbable="maxGrabbers: 1"
+                    ammo-body="type: dynamic; shape: box; mass: 0.001;"
+                    grabbable="maxGrabbers: 1; constraintComponentName: ammo-constraint;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     hoverable
                     matrix-auto-update
@@ -279,15 +279,14 @@
             <template id="interactable-camera">
                 <a-entity
                     class="interactable icamera"
-                    grabbable
+                    grabbable="constraintComponentName: ammo-constraint;"
                     hoverable
                     stretchable
                     camera-tool
                     matrix-auto-update
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
                     scale="0.5 0.5 0.5"
-                    ammo-body="type: dynamic; shape: box; mass: 1;"
-                    shape="shape: box; halfExtents: 0.22 0.145 0.1; offset: 0 0.02 0"
+                    ammo-body="type: dynamic; shape: box; mass: 0.001; autoGenerateShape: false; halfExtents: 0.22 0.145 0.1; offset: 0 0.02 0;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     super-networked-interactable="counter: #camera-counter;"
                     position-at-box-shape-border="target:.camera-menu"
