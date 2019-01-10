@@ -46,7 +46,6 @@ import "./components/offset-relative-to";
 import "./components/player-info";
 import "./components/debug";
 import "./components/hand-poses";
-import "./components/gltf-bundle";
 import "./components/hud-controller";
 import "./components/freeze-controller";
 import "./components/icon-button";
@@ -272,7 +271,6 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     isLegacyBundle = false;
     sceneUrl = hub.scene.model_url;
   } else {
-    // Deprecated
     const defaultSpaceTopic = hub.topics[0];
     const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");
     const bundleAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle");
@@ -281,7 +279,6 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     isLegacyBundle = !(glbAsset || hasExtension);
   }
 
-  console.log(`Scene URL: ${sceneUrl}`);
   console.log(`Janus host: ${hub.host}`);
   const environmentScene = document.querySelector("#environment-scene");
   const objectsScene = document.querySelector("#objects-scene");
@@ -290,15 +287,21 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
   objectsScene.appendChild(objectsEl);
 
-  if (!isLegacyBundle) {
-    const gltfEl = document.createElement("a-entity");
-    gltfEl.setAttribute("gltf-model-plus", { src: proxiedUrlFor(sceneUrl), useCache: false, inflate: true });
-    gltfEl.addEventListener("model-loaded", () => environmentScene.emit("bundleloaded"));
-    environmentScene.appendChild(gltfEl);
-  } else {
+  if (isLegacyBundle) {
     // Deprecated
-    environmentScene.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
+    const res = await fetch(sceneUrl);
+    const data = await res.json();
+    console.log(data);
+    const baseURL = new URL(THREE.LoaderUtils.extractUrlBase(sceneUrl), window.location.href);
+    sceneUrl = new URL(data.assets[0].src, baseURL).href;
+  } else {
+    sceneUrl = proxiedUrlFor(sceneUrl);
   }
+
+  console.log(`Scene URL: ${sceneUrl}`);
+  const environmentEl = document.createElement("a-entity");
+  environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
+  environmentScene.appendChild(environmentEl);
 
   remountUI({
     hubId: hub.hub_id,
@@ -514,7 +517,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const environmentScene = document.querySelector("#environment-scene");
 
-  environmentScene.addEventListener("bundleloaded", () => {
+  environmentScene.addEventListener("model-loaded", () => {
     remountUI({ environmentSceneLoaded: true });
 
     for (const modelEl of environmentScene.children) {
