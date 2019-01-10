@@ -490,18 +490,18 @@ AFRAME.registerComponent("media-video", {
   },
 
   tick() {
+    const userinput = this.el.sceneEl.systems.userinput;
+    const volumeMod = userinput.get(paths.actions.cursor.mediaVolumeMod);
+    if (volumeMod) {
+      this.el.setAttribute("media-video", "volume", THREE.Math.clamp(this.data.volume + volumeMod, 0, 1));
+    }
+
     if (this.data.videoPaused || !this.video || !this.networkedEl || !NAF.utils.isMine(this.networkedEl)) return;
 
     const now = performance.now();
     if (now - this.lastUpdate > this.data.tickRate) {
       this.el.setAttribute("media-video", "time", this.video.currentTime);
       this.lastUpdate = now;
-    }
-
-    const userinput = AFRAME.scenes[0].systems.userinput;
-    const volumeMod = userinput.get(paths.actions.cursor.mediaVolumeMod);
-    if (volumeMod) {
-      this.el.setAttribute("media-video", "volume", THREE.Math.clamp(this.data.volume + volumeMod, 0, 1));
     }
   }
 });
