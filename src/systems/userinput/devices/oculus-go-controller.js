@@ -6,7 +6,7 @@ export class OculusGoControllerDevice {
     this.gamepad = gamepad;
     this.rayObjectRotation = new THREE.Quaternion();
     this.pose = new Pose();
-      this.q = new THREE.Quaternion();
+    this.q = new THREE.Quaternion();
   }
 
   write(frame) {
