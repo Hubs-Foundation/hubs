@@ -255,6 +255,20 @@ function remountUI(props) {
   mountUI(uiProps);
 }
 
+async function updateUIForHub(hub) {
+  remountUI({
+    hubId: hub.hub_id,
+    hubName: hub.name,
+    hubScene: hub.scene,
+    hubEntryCode: hub.entry_code
+  });
+
+  document
+    .querySelector("#hud-hub-entry-link")
+    .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
+}
+
+// Sets or changes the environment, returns true if the environment was changed, false if its the first update.
 async function updateEnvironmentForHub(hub) {
   let sceneUrl;
   let isLegacyBundle; // Deprecated
@@ -291,23 +305,22 @@ async function updateEnvironmentForHub(hub) {
     const environmentEl = document.createElement("a-entity");
     environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
     environmentScene.appendChild(environmentEl);
+    return false;
   } else {
     // Change environment
     environmentEl = environmentScene.childNodes[0];
 
-    const onLoad = () => {
-      environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
-      environmentEl.removeEventListener("model-loaded", onLoad);
-    };
-
-    // Clear the three.js image cache an unload the environment, then on next tick load the loading environment
+    // Clear the three.js image cache and load the loading environment before switching to the new one.
     THREE.Cache.clear();
 
-    environmentEl.setAttribute("gltf-model-plus", { src: null });
-    await nextTick();
+    const onLoadingEnvironmentReady = () => {
+      environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
+      environmentEl.removeEventListener("model-loaded", onLoadingEnvironmentReady);
+    };
 
-    environmentEl.addEventListener("model-loaded", onLoad);
+    environmentEl.addEventListener("model-loaded", onLoadingEnvironmentReady);
     environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironmentURL });
+    return true;
   }
 }
 
@@ -329,19 +342,10 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
   objectsScene.appendChild(objectsEl);
 
-  await updateEnvironmentForHub(hub);
+  updateEnvironmentForHub(hub);
+  updateUIForHub(hub);
 
-  remountUI({
-    hubId: hub.hub_id,
-    hubName: hub.name,
-    hubScene: hub.scene,
-    hubEntryCode: hub.entry_code,
-    onSendMessage: messageDispatch.dispatch
-  });
-
-  document
-    .querySelector("#hud-hub-entry-link")
-    .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
+  remountUI({ onSendMessage: messageDispatch.dispatch });
 
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   objectsEl.addEventListener("model-loaded", async el => {
@@ -717,6 +721,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     addToPresenceLog(incomingMessage);
+  });
+
+  hubPhxChannel.on("hub_changed", ({ session_id, hubs }) => {
+    const hub = hubs[0];
+    const userInfo = hubPhxPresence.state[session_id];
+
+    const changed = updateEnvironmentForHub(hub);
+    updateUIForHub(hub);
+
+    if (changed && hub.scene) {
+      addToPresenceLog({
+        type: "scene_changed",
+        name: userInfo.metas[0].profile.displayName,
+        sceneName: hub.scene.name
+      });
+    }
   });
 
   authChannel.setSocket(socket);

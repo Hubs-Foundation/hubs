@@ -73,6 +73,8 @@
     "presence.join_lobby": "joined the lobby.",
     "presence.leave": "left.",
     "presence.name_change": "is now known as",
+    "presence.scene_change": "changed the scene to",
+    "presence.hub_name_change": "changed the name of the room to",
     "presence.in_lobby": "Lobby",
     "presence.in_room": "In Room",
     "home.room_create_options": "options",

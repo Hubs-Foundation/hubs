@@ -97,9 +97,7 @@ export default class HubChannel {
   };
 
   updateScene = url => {
-    this.channel.push("update_scene", { url }).receive("ok", res => {
-      console.log(res);
-    });
+    this.channel.push("update_scene", { url });
   };
 
   rename = name => {
