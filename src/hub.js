@@ -748,7 +748,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             window.history.state && window.history.state.title ? window.history.state.title : document.title;
           const state = window.history.state ? window.history.state.state : null;
           const url = document.location.toString().replace(`${hub.hub_id}/${oldSlug}`, `${hub.hub_id}/${hub.slug}`);
-          console.log("old: " + oldSlug + " new: " + hub.slug);
 
           window.history.replaceState(state, title, url);
         }
