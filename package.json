@@ -42,6 +42,7 @@
     "detect-browser": "^2.1.0",
     "event-target-shim": "^3.0.1",
     "form-urlencoded": "^2.0.4",
+    "hls.js": "^0.12.2",
     "jsonschema": "^1.2.2",
     "jszip": "^3.1.5",
     "markdown-it": "^8.4.2",

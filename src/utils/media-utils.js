@@ -3,6 +3,9 @@ import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 
 const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
+if (process.env.CORS_PROXY_SERVER) {
+  nonCorsProxyDomains.push(process.env.CORS_PROXY_SERVER);
+}
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
 const commonKnownContentTypes = {

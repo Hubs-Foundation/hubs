@@ -145,6 +145,10 @@ AFRAME.registerComponent("media-loader", {
       if (this.data.resolve) {
         const result = await resolveUrl(src);
         canonicalUrl = result.origin;
+        // handle protocol relative urls
+        if (canonicalUrl.startsWith("//")) {
+          canonicalUrl = location.protocol + canonicalUrl;
+        }
         contentType = (result.meta && result.meta.expected_content_type) || contentType;
       }
 
@@ -160,7 +164,11 @@ AFRAME.registerComponent("media-loader", {
         this.el.emit("media_resolved", { src, raw: accessibleUrl, contentType });
       }
 
-      if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
+      if (
+        contentType.startsWith("video/") ||
+        contentType.startsWith("audio/") ||
+        AFRAME.utils.material.isHLS(canonicalUrl, contentType)
+      ) {
         const parsedUrl = new URL(src);
         const qsTime = parseInt(parsedUrl.searchParams.get("t"));
         const hashTime = parseInt(new URLSearchParams(parsedUrl.hash.substring(1)).get("t"));
@@ -170,7 +178,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener("video-loaded", this.onMediaLoaded, { once: true });
         this.el.setAttribute(
           "media-video",
-          Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, time: startTime })
+          Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, time: startTime, contentType })
         );
         if (this.el.components["position-at-box-shape-border"]) {
           this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
