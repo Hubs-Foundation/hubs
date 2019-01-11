@@ -37,7 +37,7 @@ AFRAME.registerComponent("super-networked-interactable", {
       this.networkedEl = networkedEl;
       this._syncCounterRegistration();
       if (!NAF.utils.isMine(networkedEl)) {
-        this.el.setAttribute("ammo-body", { type: "kinematic" });
+        this.el.setAttribute("ammo-body", { type: "kinematic", addCollideEventListener: true });
       } else {
         this.counter.register(networkedEl);
       }
@@ -95,7 +95,6 @@ AFRAME.registerComponent("super-networked-interactable", {
     if (delta && this.el.is("grabbed") && this.el.components.hasOwnProperty("stretchable")) {
       this.currentScale.addScalar(delta).clampScalar(this.data.minScale, this.data.maxScale);
       this.el.setAttribute("scale", this.currentScale);
-      this.el.components["stretchable"].stretchBody(this.el, this.currentScale);
       this.el.object3D.matrixNeedsUpdate = true;
     }
   },
