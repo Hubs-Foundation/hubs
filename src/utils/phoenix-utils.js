@@ -1,5 +1,6 @@
 import uuid from "uuid/v4";
 import { Socket } from "phoenix";
+import { generateHubName } from "../utils/name-generation";
 
 import Store from "../storage/store";
 
@@ -55,11 +56,38 @@ export function getLandingPageForPhoto(photoUrl) {
   return getReticulumFetchUrl(parsedUrl.pathname.replace(".png", ".html") + parsedUrl.search, true);
 }
 
-export async function postWithAuth(apiEndpoint, payload) {
+export async function createAndRedirectToNewHub(name, sceneId, sceneUrl, replace) {
+  const createUrl = getReticulumFetchUrl("/api/v1/hubs");
+  const payload = { hub: { name: name || generateHubName() } };
+
+  if (sceneId) {
+    payload.hub.scene_id = sceneId;
+  } else {
+    payload.hub.default_environment_gltf_bundle_url = sceneUrl;
+  }
+
   const headers = { "content-type": "application/json" };
   const store = new Store();
   if (store.state && store.state.credentials.token) {
     headers.authorization = `bearer ${store.state.credentials.token}`;
   }
-  return fetch(getReticulumFetchUrl(apiEndpoint), { method: "POST", headers, body: JSON.stringify(payload) });
+
+  const res = await fetch(createUrl, {
+    body: JSON.stringify(payload),
+    headers,
+    method: "POST"
+  });
+
+  const hub = await res.json();
+  let url = hub.url;
+
+  if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
+    url = `/hub.html?hub_id=${hub.hub_id}`;
+  }
+
+  if (replace) {
+    document.location.replace(url);
+  } else {
+    document.location = url;
+  }
 }

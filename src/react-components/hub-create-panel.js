@@ -6,7 +6,7 @@ import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { resolveURL, extractUrlBase } from "../utils/resolveURL";
-import { postWithAuth } from "../utils/phoenix-utils";
+import { postWithAuth, createAndRedirectToNewHub } from "../utils/phoenix-utils";
 import CreateRoomDialog from "./create-room-dialog.js";
 import { WithHoverSound } from "./wrap-with-audio";
 
@@ -88,25 +88,16 @@ class HubCreatePanel extends Component {
 
     const environment = this.props.environments[this.state.environmentIndex];
 
-    const payload = {
-      hub: { name: this.state.name }
-    };
+    let sceneId = null;
+    let sceneUrl = null;
 
     if (!this.state.customSceneUrl && environment.scene_id) {
-      payload.hub.scene_id = environment.scene_id;
+      sceneId = environment.scene_id;
     } else {
-      const sceneUrl = this.state.customSceneUrl || environment.bundle_url;
-      payload.hub.default_environment_gltf_bundle_url = sceneUrl;
+      sceneUrl = this.state.customSceneUrl || environment.bundle_url;
     }
 
-    const res = await postWithAuth("/api/v1/hubs", payload);
-    const hub = await res.json();
-
-    if (!process.env.RETICULUM_SERVER || document.location.host === process.env.RETICULUM_SERVER) {
-      document.location = hub.url;
-    } else {
-      document.location = `/hub.html?hub_id=${hub.hub_id}`;
-    }
+    createAndRedirectToNewHub(this.state.name, sceneId, sceneUrl);
   };
 
   isHubNameValid = () => {

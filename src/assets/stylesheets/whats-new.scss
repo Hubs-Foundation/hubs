@@ -41,7 +41,7 @@ html, body, #ui-root, .container {
 
 .content {
   padding: 1em;
-  width: 40em;
+  width: 45em;
   display: flex;
   flex-direction: column;
 }
@@ -60,6 +60,9 @@ h1 {
 .date, .date-blank, .title {
   display: inline-block;
   margin: 0;
+}
+.title a:link, .title a:active .title a:hover, .title a:visited {
+  color: black;
 }
 .title {
   @media (max-width: 768px) {

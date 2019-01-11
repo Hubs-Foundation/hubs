@@ -9,7 +9,7 @@
 
     <link rel="shortcut icon" type="image/png" href="/favicon.ico">
     <title>Get together | Hubs by Mozilla</title>
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700" rel="stylesheet">
     <script>
         // HACK Chrome on iOS breaks completely if we don't do this because a-frame's webvr-polyfill doesn't recognize
         // Google Chrome on iOS correctly. We can remove this when we upgrade a-frame past 0.8.2.
@@ -32,6 +32,7 @@
         stats-plus="false"
         action-to-event__mute="path: /actions/muteMic; event: action_mute;"
         action-to-event__focus_chat="path: /actions/focusChat; event: action_focus_chat;"
+        environment-map="loadDefault: false"
     >
 
         <a-assets>
@@ -163,7 +164,7 @@
 
             <template id="static-media">
                 <a-entity
-                    body="type: static; shape: none; mass: 1;"
+                    body="type: static; shape: none; mass: 0;"
                     auto-scale-cannon-physics-body
                     set-sounds-invisible
                 >
@@ -174,7 +175,7 @@
                 <a-entity
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
-                    body="type: static; shape: none; mass: 1;"
+                    body="type: static; shape: none; mass: 0;"
                     grabbable
                     hoverable
                     hoverable-visuals="cursorController: #cursor-controller"
@@ -231,6 +232,13 @@
                             </a-entity>
                             <a-entity mixin="rounded-text-button" clone-media-button position="-0.25 -0.375 0.01">
                                 <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+
+                            <a-entity class="video-seek-back-button" mixin="rounded-text-button" position="-0.4 0 0.01" slice9="width: 0.2" visible="false">
+                                <a-entity text="value: <; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity class="video-seek-forward-button" mixin="rounded-text-button" position="0.4 0 0.01" slice9="width: 0.2" visible="false">
+                                <a-entity text="value: >; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
                         </a-entity>
                     </a-entity>

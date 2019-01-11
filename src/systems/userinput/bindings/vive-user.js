@@ -564,6 +564,17 @@ export const viveUserBindings = addSetsToBindings({
     }
   ],
 
+  [sets.cursorHoveringOnVideo]: [
+    {
+      src: {
+        value: rAxis("joyY"),
+        touching: rButton("touchpad").touched
+      },
+      dest: { value: paths.actions.cursor.mediaVolumeMod },
+      xform: xforms.touch_axis_scroll(0.1)
+    }
+  ],
+
   [sets.leftHandHoveringOnInteractable]: [
     {
       src: { value: leftGripPressed2 },

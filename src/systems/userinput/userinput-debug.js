@@ -1,4 +1,6 @@
 import { paths } from "./paths";
+import qsTruthy from "../../utils/qs_truthy";
+
 AFRAME.registerSystem("userinput-debug", {
   active: true,
 
@@ -27,7 +29,7 @@ AFRAME.registerSystem("userinput-debug", {
     }
 
     if (userinput.get(paths.actions.logDebugFrame)) {
-      if (!this.userinputFrameStatus) {
+      if (qsTruthy("userinput_debug") && !this.userinputFrameStatus) {
         this.userinputFrameStatus = document.createElement("div");
         this.userinputFrameStatus.id = "userinput-frame-status";
         this.userinputFrameStatus.style = `

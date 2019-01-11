@@ -20,3 +20,4 @@ import "./spot-light";
 import "./sticky-object";
 import "./super-spawner";
 import "./water";
+import "./environment-map";
