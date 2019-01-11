@@ -244,11 +244,22 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   }
 
   const hub = data.hubs[0];
-  const defaultSpaceTopic = hub.topics[0];
-  const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");
-  const bundleAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle");
-  const sceneUrl = (glbAsset || bundleAsset).src;
-  const hasExtension = /\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl);
+
+  let sceneUrl;
+  let isLegacyBundle; // Deprecated
+
+  if (hub.scene) {
+    isLegacyBundle = false;
+    sceneUrl = hub.scene.model_url;
+  } else {
+    // Deprecated
+    const defaultSpaceTopic = hub.topics[0];
+    const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");
+    const bundleAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle");
+    sceneUrl = (glbAsset || bundleAsset).src;
+    const hasExtension = /\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl);
+    isLegacyBundle = !(glbAsset || hasExtension);
+  }
 
   console.log(`Scene URL: ${sceneUrl}`);
   console.log(`Janus host: ${hub.host}`);
@@ -259,19 +270,20 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
   objectsScene.appendChild(objectsEl);
 
-  if (glbAsset || hasExtension) {
+  if (!isLegacyBundle) {
     const gltfEl = document.createElement("a-entity");
     gltfEl.setAttribute("gltf-model-plus", { src: proxiedUrlFor(sceneUrl), useCache: false, inflate: true });
     gltfEl.addEventListener("model-loaded", () => environmentScene.emit("bundleloaded"));
     environmentScene.appendChild(gltfEl);
   } else {
-    // TODO kill bundles
+    // Deprecated
     environmentScene.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
   }
 
   remountUI({
     hubId: hub.hub_id,
     hubName: hub.name,
+    hubScene: hub.scene,
     hubEntryCode: hub.entry_code,
     onSendMessage: messageDispatch.dispatch
   });
@@ -636,12 +648,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     NAF.connection.adapter.onData(data);
   });
 
-  hubPhxChannel.on("message", ({ session_id, type, body }) => {
-    const userInfo = hubPhxPresence.state[session_id];
-    if (!userInfo) return;
+  hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
+    const getAuthor = () => {
+      const userInfo = hubPhxPresence.state[session_id];
+      if (from) {
+        return from;
+      } else if (userInfo) {
+        return userInfo.metas[0].profile.displayName;
+      } else {
+        return "Mystery user";
+      }
+    };
+
+    const name = getAuthor();
     const maySpawn = scene.is("entered");
 
-    const incomingMessage = { name: userInfo.metas[0].profile.displayName, type, body, maySpawn };
+    const incomingMessage = { name, type, body, maySpawn };
 
     if (scene.is("vr-mode")) {
       createInWorldLogMessage(incomingMessage);

@@ -36,7 +36,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.setDirty = this.setDirty.bind(this);
     this.targets = [];
     this.raycaster = new THREE.Raycaster();
-    this.raycaster.firstHitOnly = true; // flag specific to threejs-fast-raycast
+    this.raycaster.firstHitOnly = true; // flag specific to three-mesh-bvh
     this.dirty = true;
     this.distance = this.data.far;
     const lineMaterial = new THREE.LineBasicMaterial({

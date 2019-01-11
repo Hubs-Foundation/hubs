@@ -95,7 +95,9 @@ class WhatsNew extends Component {
                 return (
                   <div key={i} className="note">
                     <h2 className={note.merged_at ? "date" : "date-blank"}>{formatDate(note.merged_at)}</h2>
-                    <h2 className="title">{note.title}</h2>
+                    <h2 className="title">
+                      <a href={note.html_url}>{note.title}</a>
+                    </h2>
                     {/* Setting HTML generated directly by markdownit, which is safe by default:
                       https://github.com/markdown-it/markdown-it/blob/master/docs/security.md */}
                     <p className="body" dangerouslySetInnerHTML={{ __html: note.body }} />

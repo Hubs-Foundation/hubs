@@ -142,10 +142,17 @@ AFRAME.registerComponent("media-loader", {
       }
 
       if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
+        const parsedUrl = new URL(src);
+        const qsTime = parseInt(parsedUrl.searchParams.get("t"));
+        const hashTime = parseInt(new URLSearchParams(parsedUrl.hash.substring(1)).get("t"));
+        const startTime = hashTime || qsTime || 0;
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-image");
         this.el.addEventListener("video-loaded", this.onMediaLoaded, { once: true });
-        this.el.setAttribute("media-video", Object.assign({}, this.data.mediaOptions, { src: accessibleUrl }));
+        this.el.setAttribute(
+          "media-video",
+          Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, time: startTime })
+        );
         if (this.el.components["position-at-box-shape-border"]) {
           this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
         }
