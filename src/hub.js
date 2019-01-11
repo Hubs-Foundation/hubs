@@ -559,7 +559,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   environmentScene.addEventListener("model-loaded", onFirstEnvironmentLoad);
 
   environmentScene.addEventListener("model-loaded", () => {
-    // This is re-entrant if the environment scene is changed.
+    // This will be run every time the environment is changed (including the first load.)
     remountUI({ environmentSceneLoaded: true });
 
     for (const modelEl of environmentScene.children) {
