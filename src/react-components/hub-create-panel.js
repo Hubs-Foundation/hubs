@@ -6,7 +6,7 @@ import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { resolveURL, extractUrlBase } from "../utils/resolveURL";
-import { postWithAuth, createAndRedirectToNewHub } from "../utils/phoenix-utils";
+import { createAndRedirectToNewHub } from "../utils/phoenix-utils";
 import CreateRoomDialog from "./create-room-dialog.js";
 import { WithHoverSound } from "./wrap-with-audio";
 
