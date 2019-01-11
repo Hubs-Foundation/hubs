@@ -268,7 +268,6 @@ async function updateUIForHub(hub) {
     .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
 }
 
-// Sets or changes the environment, returns true if the environment was changed, false if its the first update.
 async function updateEnvironmentForHub(hub) {
   let sceneUrl;
   let isLegacyBundle; // Deprecated
@@ -305,7 +304,6 @@ async function updateEnvironmentForHub(hub) {
     const environmentEl = document.createElement("a-entity");
     environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
     environmentScene.appendChild(environmentEl);
-    return false;
   } else {
     // Change environment
     environmentEl = environmentScene.childNodes[0];
@@ -320,7 +318,6 @@ async function updateEnvironmentForHub(hub) {
 
     environmentEl.addEventListener("model-loaded", onLoadingEnvironmentReady);
     environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironmentURL });
-    return true;
   }
 }
 
@@ -723,18 +720,44 @@ document.addEventListener("DOMContentLoaded", async () => {
     addToPresenceLog(incomingMessage);
   });
 
-  hubPhxChannel.on("hub_changed", ({ session_id, hubs }) => {
+  hubPhxChannel.on("hub_refresh", ({ session_id, hubs, stale_fields }) => {
     const hub = hubs[0];
     const userInfo = hubPhxPresence.state[session_id];
 
-    const changed = updateEnvironmentForHub(hub);
     updateUIForHub(hub);
 
-    if (changed && hub.scene) {
+    if (stale_fields.includes("scene")) {
+      updateEnvironmentForHub(hub);
+
       addToPresenceLog({
         type: "scene_changed",
         name: userInfo.metas[0].profile.displayName,
-        sceneName: hub.scene.name
+        sceneName: hub.scene ? hub.scene.name : "a custom URL"
+      });
+    }
+
+    if (stale_fields.includes("name")) {
+      // Re-write the slug in the browser history
+      if (window.history && window.history.replaceState) {
+        const pathParts = document.location.pathname.split("/");
+
+        if (pathParts.length >= 3 && pathParts[1] === hub.hub_id) {
+          const oldSlug = pathParts[2];
+
+          const title =
+            window.history.state && window.history.state.title ? window.history.state.title : document.title;
+          const state = window.history.state ? window.history.state.state : null;
+          const url = document.location.toString().replace(`${hub.hub_id}/${oldSlug}`, `${hub.hub_id}/${hub.slug}`);
+          console.log("old: " + oldSlug + " new: " + hub.slug);
+
+          window.history.replaceState(state, title, url);
+        }
+      }
+
+      addToPresenceLog({
+        type: "hub_name_changed",
+        name: userInfo.metas[0].profile.displayName,
+        hubName: hub.name
       });
     }
   });

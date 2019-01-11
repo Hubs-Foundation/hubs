@@ -14,14 +14,14 @@ export default class MessageDispatch {
   dispatch = message => {
     if (message.startsWith("/")) {
       const commandParts = message.substring(1).split(" ");
-      this.dispatchCommand(commandParts[0], commandParts[1]);
+      this.dispatchCommand(commandParts[0], ...commandParts.slice(1));
       document.activeElement.blur(); // Commands should blur
     } else {
       this.hubChannel.sendMessage(message);
     }
   };
 
-  dispatchCommand = (command, arg) => {
+  dispatchCommand = (command, ...args) => {
     const entered = this.scene.is("entered");
 
     switch (command) {
@@ -78,10 +78,10 @@ export default class MessageDispatch {
         this.scene.emit("quack");
         break;
       case "scene":
-        this.hubChannel.updateScene(arg);
+        this.hubChannel.updateScene(args[0]);
         break;
       case "rename":
-        this.hubChannel.rename(arg);
+        this.hubChannel.rename(args.join(" "));
         break;
     }
   };

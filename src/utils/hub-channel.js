@@ -101,7 +101,7 @@ export default class HubChannel {
   };
 
   rename = name => {
-    this.channel.push("rename", { name });
+    this.channel.push("update_hub", { name });
   };
 
   subscribe = subscription => {
