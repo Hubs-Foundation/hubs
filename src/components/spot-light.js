@@ -53,7 +53,7 @@ AFRAME.registerComponent("spot-light", {
     }
 
     if (this.data.shadowRadius !== prevData.shadowRadius) {
-      light.shadow.radius = this.data.radius;
+      light.shadow.radius = this.data.shadowRadius;
     }
 
     const [width, height] = this.data.shadowMapResolution;
