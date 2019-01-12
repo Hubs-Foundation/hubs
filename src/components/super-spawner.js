@@ -144,6 +144,8 @@ AFRAME.registerComponent("super-spawner", {
 
     getLastWorldPosition(hand.object3D, entity.object3D.position);
     entity.object3D.matrixNeedsUpdate = true;
+    // Call syncToPhysics so that updated transforms aren't immediately overwritten
+    entity.components["ammo-body"].syncToPhysics();
 
     if (!using6DOF) {
       for (let i = 0; i < this.data.grabEvents.length; i++) {
