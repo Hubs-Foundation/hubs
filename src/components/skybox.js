@@ -1,3 +1,6 @@
+import "three/examples/js/pmrem/PMREMGenerator";
+import "three/examples/js/pmrem/PMREMCubeUVPacker";
+
 /**
  * @author zz85 / https://github.com/zz85
  *
@@ -295,11 +298,17 @@ AFRAME.registerComponent("skybox", {
     const environmentMapComponent = this.el.sceneEl.components["environment-map"];
 
     if (environmentMapComponent) {
+      const renderer = this.el.sceneEl.renderer;
       this.skyScene.add(this.sky);
-      this.cubeCamera.update(this.el.sceneEl.renderer, this.skyScene);
+      this.cubeCamera.update(renderer, this.skyScene);
       this.el.setObject3D("mesh", this.sky);
-
-      environmentMapComponent.updateEnvironmentMap(this.cubeCamera.renderTarget.texture);
+      const pmremGenerator = new THREE.PMREMGenerator(this.cubeCamera.renderTarget.texture);
+      pmremGenerator.update(renderer);
+      const pmremCubeUVPacker = new THREE.PMREMCubeUVPacker(pmremGenerator.cubeLods);
+      pmremCubeUVPacker.update(renderer);
+      environmentMapComponent.updateEnvironmentMap(pmremCubeUVPacker.CubeUVRenderTarget.texture);
+      pmremGenerator.dispose();
+      pmremCubeUVPacker.dispose();
     }
   },
 
