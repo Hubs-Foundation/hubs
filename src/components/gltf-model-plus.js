@@ -1,18 +1,11 @@
 import nextTick from "../utils/next-tick";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import MobileStandardMaterial from "../materials/MobileStandardMaterial";
-import cubeMapPosX from "../assets/images/cubemap/posx.jpg";
-import cubeMapNegX from "../assets/images/cubemap/negx.jpg";
-import cubeMapPosY from "../assets/images/cubemap/posy.jpg";
-import cubeMapNegY from "../assets/images/cubemap/negy.jpg";
-import cubeMapPosZ from "../assets/images/cubemap/posz.jpg";
-import cubeMapNegZ from "../assets/images/cubemap/negz.jpg";
 import { getCustomGLTFParserURLResolver } from "../utils/media-utils";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const GLTFCache = {};
-let CachedEnvMapTexture = null;
 
 function inflateComponent(el, componentName, componentData) {
   if (!AFRAME.components[componentName]) {
@@ -218,13 +211,6 @@ function getFilesFromSketchfabZip(src) {
   });
 }
 
-async function loadEnvMap() {
-  const urls = [cubeMapPosX, cubeMapNegX, cubeMapPosY, cubeMapNegY, cubeMapPosZ, cubeMapNegZ];
-  const texture = await new THREE.CubeTextureLoader().load(urls);
-  texture.format = THREE.RGBFormat;
-  return texture;
-}
-
 async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
   let gltfUrl = src;
   let fileMap;
@@ -256,10 +242,6 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
     }
   }
 
-  if (!CachedEnvMapTexture) {
-    CachedEnvMapTexture = loadEnvMap();
-  }
-
   const gltf = await new Promise((resolve, reject) =>
     parser.parse(
       (scene, scenes, cameras, animations, json) => {
@@ -271,8 +253,6 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
     )
   );
 
-  const envMap = await CachedEnvMapTexture;
-
   gltf.scene.traverse(object => {
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
     object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
@@ -280,9 +260,6 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
     if (object.material && object.material.type === "MeshStandardMaterial") {
       if (preferredTechnique === "KHR_materials_unlit") {
         object.material = MobileStandardMaterial.fromStandardMaterial(object.material);
-      } else {
-        object.material.envMap = envMap;
-        object.material.needsUpdate = true;
       }
     }
   });
@@ -407,6 +384,12 @@ AFRAME.registerComponent("gltf-model-plus", {
         if (el) rewires.push(() => (o.el = el));
       });
 
+      const environmentMapComponent = this.el.sceneEl.components["environment-map"];
+
+      if (environmentMapComponent) {
+        environmentMapComponent.applyEnvironmentMap(object3DToSet);
+      }
+
       this.el.setObject3D("mesh", object3DToSet);
 
       rewires.forEach(f => f());
@@ -421,10 +404,8 @@ AFRAME.registerComponent("gltf-model-plus", {
           // and if there are too many it's too painful and large to tolerate doing it (at least until
           // we put this in a web worker)
           if (triCount > 1000 && triCount < 1000000) {
-            console.log(`Created BVH for geometry with ${triCount} triangles.`);
             geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 20 });
             geo.setIndex(geo.boundsTree.index);
-            console.log("Finished creating BVH.");
           }
         }
       });

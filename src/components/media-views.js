@@ -1,5 +1,9 @@
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
+import { paths } from "../systems/userinput/paths";
+import HLS from "hls.js";
+import { proxiedUrlFor } from "../utils/media-utils";
+import { buildAbsoluteURL } from "url-toolkit";
 
 class GIFTexture extends THREE.Texture {
   constructor(frames, delays, disposals) {
@@ -81,7 +85,7 @@ const isIOS = AFRAME.utils.device.isIOS();
  * @param {string} src - Url to a video file.
  * @returns {Element} Video element.
  */
-async function createVideoEl(src) {
+async function createVideoEl() {
   const videoEl = document.createElement("video");
   videoEl.setAttribute("playsinline", "");
   videoEl.setAttribute("webkit-playsinline", "");
@@ -93,43 +97,84 @@ async function createVideoEl(src) {
   videoEl.preload = "auto";
   videoEl.crossOrigin = "anonymous";
 
-  if (!src.startsWith("hubs://")) {
-    videoEl.src = src;
-  } else {
-    const streamClientId = src.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
-    const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
-    videoEl.srcObject = new MediaStream(stream.getVideoTracks());
-  }
-
   return videoEl;
 }
 
-function createVideoTexture(url) {
+function createVideoTexture(url, contentType) {
   return new Promise(async (resolve, reject) => {
-    const videoEl = await createVideoEl(url);
+    const videoEl = await createVideoEl();
 
     const texture = new THREE.VideoTexture(videoEl);
     texture.minFilter = THREE.LinearFilter;
     texture.encoding = THREE.sRGBEncoding;
 
-    videoEl.addEventListener("loadedmetadata", () => resolve(texture), { once: true });
-    videoEl.onerror = reject;
+    if (url.startsWith("hubs://")) {
+      const streamClientId = url.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
+      const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
+      videoEl.srcObject = new MediaStream(stream.getVideoTracks());
+      // If hls.js is supported we always use it as it gives us better events
+    } else if (AFRAME.utils.material.isHLS(url, contentType)) {
+      if (HLS.isSupported()) {
+        const corsProxyPrefix = `https://${process.env.CORS_PROXY_SERVER}/`;
+        const baseUrl = url.startsWith(corsProxyPrefix) ? url.substring(corsProxyPrefix.length) : url;
+        const hls = new HLS({
+          xhrSetup: (xhr, u) => {
+            if (u.startsWith(corsProxyPrefix)) {
+              u = u.substring(corsProxyPrefix.length);
+            }
 
-    // If iOS and video is HLS, do some hacks.
-    if (
-      isIOS &&
-      AFRAME.utils.material.isHLS(
-        videoEl.src || videoEl.getAttribute("src"),
-        videoEl.type || videoEl.getAttribute("type")
-      )
-    ) {
-      // Actually BGRA. Tell shader to correct later.
-      texture.format = THREE.RGBAFormat;
-      texture.needsCorrectionBGRA = true;
-      // Apparently needed for HLS. Tell shader to correct later.
-      texture.flipY = false;
-      texture.needsCorrectionFlipY = true;
+            // HACK HLS.js resolves relative urls internally, but our CORS proxying screws it up. Resolve relative to the original unproxied url.
+            // TODO extend HLS.js to allow overriding of its internal resolving instead
+            if (!u.startsWith("http")) {
+              u = buildAbsoluteURL(baseUrl, u.startsWith("/") ? u : `/${u}`);
+            }
+
+            xhr.open("GET", proxiedUrlFor(u));
+          }
+        });
+        texture.hls = hls;
+        hls.loadSource(url);
+        hls.attachMedia(videoEl);
+        hls.on(HLS.Events.ERROR, function(event, data) {
+          console.error(event, data);
+          if (data.fatal) {
+            switch (data.type) {
+              case HLS.ErrorTypes.NETWORK_ERROR:
+                // try to recover network error
+                hls.startLoad();
+                break;
+              case HLS.ErrorTypes.MEDIA_ERROR:
+                hls.recoverMediaError();
+                break;
+              default:
+                reject(event);
+                return;
+            }
+          }
+        });
+        // If not, see if native support will work
+      } else if (videoEl.canPlayType(contentType)) {
+        videoEl.src = url;
+        videoEl.onerror = reject;
+
+        // HACK aframe iOS HLS video hacks
+        if (isIOS) {
+          // Actually BGRA. Tell shader to correct later.
+          texture.format = THREE.RGBAFormat;
+          texture.needsCorrectionBGRA = true;
+          // Apparently needed for HLS. Tell shader to correct later.
+          texture.flipY = false;
+          texture.needsCorrectionFlipY = true;
+        }
+      } else {
+        reject("HLS unsupported");
+      }
+    } else {
+      videoEl.src = url;
+      videoEl.onerror = reject;
     }
+
+    videoEl.addEventListener("loadedmetadata", () => resolve(texture), { once: true });
   });
 }
 
@@ -172,6 +217,11 @@ function disposeTexture(texture) {
     video.src = "";
     video.load();
   }
+
+  if (texture.hls) {
+    texture.hls.destroy();
+  }
+
   texture.dispose();
 }
 
@@ -226,6 +276,7 @@ errorImage.onload = () => {
 AFRAME.registerComponent("media-video", {
   schema: {
     src: { type: "string" },
+    contentType: { type: "string" },
     volume: { type: "number", default: 0.5 },
     loop: { type: "boolean", default: true },
     audioType: { type: "string", default: "pannernode" },
@@ -249,12 +300,13 @@ AFRAME.registerComponent("media-video", {
 
     this._grabStart = this._grabStart.bind(this);
     this._grabEnd = this._grabEnd.bind(this);
+    this.seekForward = this.seekForward.bind(this);
+    this.seekBack = this.seekBack.bind(this);
 
     this.lastUpdate = 0;
 
-    // we kind of have to deal with the "empty case" for this component, because networked-aframe
-    // will instantiate a null version of it for all media objects thanks to how it handles component schemas
-    if (!this.data.src) return;
+    this.seekForwardButton = this.el.querySelector(".video-seek-forward-button");
+    this.seekBackButton = this.el.querySelector(".video-seek-back-button");
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
@@ -286,12 +338,34 @@ AFRAME.registerComponent("media-video", {
   play() {
     this.el.addEventListener("grab-start", this._grabStart);
     this.el.addEventListener("grab-end", this._grabEnd);
+    this.seekForwardButton.addEventListener("grab-start", this.seekForward);
+    this.seekBackButton.addEventListener("grab-start", this.seekBack);
+    this.seekForwardButton.object3D.visible = !this.videoIsLive;
+    this.seekBackButton.object3D.visible = !this.videoIsLive;
   },
 
   // aframe component pause, unrelated to video
   pause() {
     this.el.removeEventListener("grab-start", this._grabStart);
     this.el.removeEventListener("grab-end", this._grabEnd);
+    this.seekForwardButton.removeEventListener("grab-start", this.seekForward);
+    this.seekBackButton.removeEventListener("grab-start", this.seekBack);
+    this.seekForwardButton.object3D.visible = false;
+    this.seekBackButton.object3D.visible = false;
+  },
+
+  seekForward() {
+    if ((!this.videoIsLive && NAF.utils.isMine(this.networkedEl)) || NAF.utils.takeOwnership(this.networkedEl)) {
+      this.video.currentTime += 30;
+      this.el.setAttribute("media-video", "time", this.video.currentTime);
+    }
+  },
+
+  seekBack() {
+    if ((!this.videoIsLive && NAF.utils.isMine(this.networkedEl)) || NAF.utils.takeOwnership(this.networkedEl)) {
+      this.video.currentTime -= 10;
+      this.el.setAttribute("media-video", "time", this.video.currentTime);
+    }
   },
 
   _grabStart() {
@@ -336,6 +410,7 @@ AFRAME.registerComponent("media-video", {
   },
 
   updatePlaybackState(force) {
+    // Only update playback posiiton for videos you don't own
     if (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && this.video)) {
       if (Math.abs(this.data.time - this.video.currentTime) > this.data.syncTolerance) {
         this.tryUpdateVideoPlaybackState(this.data.videoPaused, this.data.time);
@@ -343,34 +418,30 @@ AFRAME.registerComponent("media-video", {
         this.tryUpdateVideoPlaybackState(this.data.videoPaused);
       }
     }
+
+    // Volume is local, always update it
+    if (this.audio) {
+      this.audio.gain.gain.value = this.data.volume;
+    }
   },
 
   tryUpdateVideoPlaybackState(pause, currentTime) {
     if (this._playbackStateChangeTimeout) {
       clearTimeout(this._playbackStateChangeTimeout);
+      delete this._playbackStateChangeTimeout;
+    }
+
+    if (!this.videoIsLive && currentTime !== undefined) {
+      this.video.currentTime = currentTime;
     }
 
     if (pause) {
       this.video.pause();
-
-      if (currentTime) {
-        this.video.currentTime = currentTime;
-      }
     } else {
       // Need to deal with the fact play() may fail if user has not interacted with browser yet.
-      this.video
-        .play()
-        .then(() => {
-          if (currentTime) {
-            this.video.currentTime = currentTime;
-          }
-        })
-        .catch(() => {
-          this._playbackStateChangeTimeout = setTimeout(
-            () => this.tryUpdateVideoPlaybackState(pause, currentTime),
-            1000
-          );
-        });
+      this.video.play().catch(() => {
+        this._playbackStateChangeTimeout = setTimeout(() => this.tryUpdateVideoPlaybackState(pause, currentTime), 1000);
+      });
     }
   },
 
@@ -389,7 +460,7 @@ AFRAME.registerComponent("media-video", {
 
     let texture;
     try {
-      texture = await createVideoTexture(src);
+      texture = await createVideoTexture(src, this.data.contentType);
 
       // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
       if (this.data.src !== src) {
@@ -401,25 +472,33 @@ AFRAME.registerComponent("media-video", {
         // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
         texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
 
-        let audio;
-
         if (this.data.audioType === "pannernode") {
-          audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-          audio.setDistanceModel(this.data.distanceModel);
-          audio.setRolloffFactor(this.data.rolloffFactor);
-          audio.setRefDistance(this.data.refDistance);
-          audio.setMaxDistance(this.data.maxDistance);
-          audio.panner.coneInnerAngle = this.data.coneInnerAngle;
-          audio.panner.coneOuterAngle = this.data.coneOuterAngle;
-          audio.panner.coneOuterGain = this.data.coneOuterGain;
+          this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+          this.audio.setDistanceModel(this.data.distanceModel);
+          this.audio.setRolloffFactor(this.data.rolloffFactor);
+          this.audio.setRefDistance(this.data.refDistance);
+          this.audio.setMaxDistance(this.data.maxDistance);
+          this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
+          this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
+          this.audio.panner.coneOuterGain = this.data.coneOuterGain;
         } else {
-          audio = new THREE.Audio(this.el.sceneEl.audioListener);
+          this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
         }
 
-        audio.gain.gain.value = this.data.volume;
+        this.audio.setNodeSource(texture.audioSource);
+        this.el.setObject3D("sound", this.audio);
+      }
 
-        audio.setNodeSource(texture.audioSource);
-        this.el.setObject3D("sound", audio);
+      if (texture.hls) {
+        const updateLiveState = () => {
+          this.videoIsLive = texture.hls.levels[texture.hls.currentLevel].details.live;
+          this.seekForwardButton.object3D.visible = !this.videoIsLive;
+          this.seekBackButton.object3D.visible = !this.videoIsLive;
+        };
+        texture.hls.on(HLS.Events.LEVEL_SWITCHED, updateLiveState);
+        if (texture.hls.currentLevel >= 0) {
+          updateLiveState();
+        }
       }
 
       this.video = texture.image;
@@ -473,7 +552,21 @@ AFRAME.registerComponent("media-video", {
   },
 
   tick() {
-    if (this.data.videoPaused || !this.video || !this.networkedEl || !NAF.utils.isMine(this.networkedEl)) return;
+    const userinput = this.el.sceneEl.systems.userinput;
+    const volumeMod = userinput.get(paths.actions.cursor.mediaVolumeMod);
+    if (volumeMod) {
+      this.el.setAttribute("media-video", "volume", THREE.Math.clamp(this.data.volume + volumeMod, 0, 1));
+    }
+
+    if (
+      this.data.videoPaused ||
+      this.videoIsLive ||
+      !this.video ||
+      !this.networkedEl ||
+      !NAF.utils.isMine(this.networkedEl)
+    ) {
+      return;
+    }
 
     const now = performance.now();
     if (now - this.lastUpdate > this.data.tickRate) {

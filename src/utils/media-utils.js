@@ -3,6 +3,9 @@ import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 
 const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
+if (process.env.CORS_PROXY_SERVER) {
+  nonCorsProxyDomains.push(process.env.CORS_PROXY_SERVER);
+}
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
 const commonKnownContentTypes = {
@@ -56,7 +59,7 @@ export const proxiedUrlFor = (url, index) => {
     const method = index != null ? "extract" : "raw";
     return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${farsparkEncodeUrl(url)}`;
   } else {
-    return `https://${process.env.CORS_PROXY_SERVER}/${encodeURIComponent(url)}`;
+    return `https://${process.env.CORS_PROXY_SERVER}/${url}`;
   }
 };
 
@@ -89,7 +92,7 @@ export const getCustomGLTFParserURLResolver = gltfUrl => (url, path) => {
 
       // Drop the .gltf filename
       const assetUrl = originalUrlParts.slice(0, originalUrlParts.length - 1).join("/") + "/" + url;
-      return corsProxyPrefix + encodeURIComponent(assetUrl);
+      return corsProxyPrefix + assetUrl;
     }
   }
 
