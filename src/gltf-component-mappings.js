@@ -140,3 +140,27 @@ function mediaInflator(el, componentName, componentData, components) {
 
 AFRAME.GLTFModelPlus.registerComponent("image", "image", mediaInflator);
 AFRAME.GLTFModelPlus.registerComponent("video", "video", mediaInflator);
+
+AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName, componentData) => {
+  el.setAttribute("media-loader", {
+    src: componentData.src,
+    resolve: true,
+    fileIsOwned: true
+  });
+  el.setAttribute("css-class", "interactable");
+  el.setAttribute("super-spawner", {
+    src: componentData.src,
+    resolve: true,
+    resize: true,
+    template: "#interactable-media"
+  });
+  el.setAttribute("body", {
+    mass: 0,
+    type: "static",
+    shape: "none"
+  });
+  el.setAttribute("collision-filter", {
+    collisionForces: false
+  });
+  el.setAttribute("hoverable", "");
+});
