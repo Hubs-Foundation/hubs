@@ -10,13 +10,7 @@ import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
-import {
-  pushHistoryState,
-  replaceHistoryState,
-  clearHistoryState,
-  popToBeginningOfHubHistory,
-  navigateToPriorPage
-} from "../utils/history";
+import { pushHistoryState, clearHistoryState, popToBeginningOfHubHistory, navigateToPriorPage } from "../utils/history";
 import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
 
@@ -719,7 +713,6 @@ class UIRoot extends Component {
   };
 
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
-  replaceHistoryState = (k, v) => replaceHistoryState(this.props.history, k, v);
 
   renderExitedPane = () => {
     let subtitle = null;
@@ -1222,7 +1215,7 @@ class UIRoot extends Component {
                   {...props}
                   finished={() => {
                     this.onProfileFinished();
-                    this.replaceHistoryState("entry_step", "device");
+                    this.pushHistoryState("entry_step", "device");
                   }}
                   store={this.props.store}
                 />
