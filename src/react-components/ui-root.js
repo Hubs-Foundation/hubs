@@ -12,6 +12,7 @@ import entryStyles from "../assets/stylesheets/entry.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
 import {
   pushHistoryState,
+  replaceHistoryState,
   clearHistoryState,
   popToBeginningOfHubHistory,
   navigateToPageBeforeBeginningOfAllHistory
@@ -557,6 +558,7 @@ class UIRoot extends Component {
   };
 
   onProfileFinished = () => {
+    this.closeDialog();
     this.props.hubChannel.sendProfileUpdate();
   };
 
@@ -915,7 +917,7 @@ class UIRoot extends Component {
         <div className={entryStyles.buttonContainer}>
           <WithHoverSound>
             <StateLink
-              stateKey={promptForNameAndAvatarBeforeEntry ? "overlay" : "entry_step"}
+              stateKey="entry_step"
               stateValue={promptForNameAndAvatarBeforeEntry ? "profile" : "device"}
               history={this.props.history}
               className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
@@ -1220,6 +1222,21 @@ class UIRoot extends Component {
               history={this.props.history}
               render={props => (
                 <ProfileEntryPanel {...props} finished={this.onProfileFinished} store={this.props.store} />
+              )}
+            />
+            <StateRoute
+              stateKey="entry_step"
+              stateValue="profile"
+              history={this.props.history}
+              render={props => (
+                <ProfileEntryPanel
+                  {...props}
+                  finished={() => {
+                    this.onProfileFinished();
+                    replaceHistoryState(this.props.history, "entry_step", "device");
+                  }}
+                  store={this.props.store}
+                />
               )}
             />
             <StateRoute

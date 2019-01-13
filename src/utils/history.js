@@ -39,7 +39,7 @@ export function pushHistoryState(history, k, v) {
 }
 
 export function clearHistoryState(history) {
-  pushOrUpdateHistoryState(history, true);
+  pushOrUpdateHistoryState(history, false);
 }
 
 // This will pop the browser history to the first entry that was for this hubs room,
