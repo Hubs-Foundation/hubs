@@ -198,27 +198,12 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("exit", this.exit);
     const scene = this.props.scene;
 
-    let isNavigatingToPriorPage = false;
-
-    this.props.history.listen((location, action) => {
+    const unsubscribe = this.props.history.listen((location, action) => {
       const state = location.state;
 
-      // Keep track of the previous history entry, so we can allow the close button
-      // in modals to just replace the top of the stack (so no forward button to go
-      // back into the dialog.)
-      if (action !== "REPLACE") {
-        this.previousHistoryEntry = this.currentHistoryEntry;
-      }
-
-      this.currentHistoryEntry = {
-        pathname: location.pathname,
-        title: location.title,
-        state
-      };
-
       // If we just hit back into the entry flow, just go back to the page before the room landing page.
-      if (action === "POP" && state && state.entry_step && this.state.entered && !isNavigatingToPriorPage) {
-        isNavigatingToPriorPage = true;
+      if (action === "POP" && state && state.entry_step && this.state.entered) {
+        unsubscribe();
         navigateToPriorPage(this.props.history);
         return;
       }
@@ -226,7 +211,7 @@ class UIRoot extends Component {
 
     // If we refreshed the page with any state history (eg if we were in the entry flow
     // or had a modal/overlay open) just reset everything to the beginning of the flow by
-    // erasing all history that was accumulated for this room.
+    // erasing all history that was accumulated for this room (including across refreshes.)
     if (this.props.history.location.state) {
       popToBeginningOfHubHistory(this.props.history);
     }
@@ -671,7 +656,7 @@ class UIRoot extends Component {
     if (this.state.dialog) {
       this.setState({ dialog: null });
     } else {
-      this.props.history.replace(this.previousHistoryEntry);
+      this.props.history.goBack();
     }
   };
 
@@ -1413,7 +1398,7 @@ class UIRoot extends Component {
                   onClose={() => {
                     this.state.linkCodeCancel();
                     this.setState({ linkCode: null, linkCodeCancel: null });
-                    this.props.history.replace(this.previousHistoryEntry);
+                    this.props.history.goBack();
                   }}
                 />
               )}

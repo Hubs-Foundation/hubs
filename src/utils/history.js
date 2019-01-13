@@ -54,15 +54,11 @@ export function popToBeginningOfHubHistory(history, navigateToPriorPage) {
   // After the go() completes, we push a duplicate history entry onto the stack
   // in order to wipe out forward history. We also optionally go back -2 if we wanted
   // to go back to the prior page.
-  let unsubscribe = null;
-
-  const finalizer = () => {
+  const unsubscribe = history.listen(() => {
     unsubscribe();
     history.push({ pathname: history.location.pathname, state: { __historyLength: 0, __duplicate: true } });
     if (navigateToPriorPage) history.go(-2); // Go back to history entry before beginning.
-  };
-
-  unsubscribe = history.listen(finalizer);
+  });
 
   history.go(-len);
 }
