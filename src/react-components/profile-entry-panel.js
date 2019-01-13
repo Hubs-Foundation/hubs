@@ -13,8 +13,7 @@ class ProfileEntryPanel extends Component {
     store: PropTypes.object,
     messages: PropTypes.object,
     finished: PropTypes.func,
-    intl: PropTypes.object,
-    location: PropTypes.object
+    intl: PropTypes.object
   };
 
   constructor(props) {
@@ -45,7 +44,6 @@ class ProfileEntryPanel extends Component {
         avatarId: this.state.avatarId
       }
     });
-
     this.props.finished();
   };
 
