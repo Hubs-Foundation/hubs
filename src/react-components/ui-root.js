@@ -544,7 +544,7 @@ class UIRoot extends Component {
   };
 
   onMicGrantButton = async () => {
-    if (this.props.location.pathname === "/mic_grant") {
+    if (this.props.location.state && this.props.location.state.entry_step === "mic_grant") {
       const { hasAudio } = await this.setMediaStreamToDefault();
 
       if (hasAudio) {
