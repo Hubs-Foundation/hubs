@@ -731,6 +731,7 @@ class UIRoot extends Component {
   };
 
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
+  replaceHistoryState = (k, v) => replaceHistoryState(this.props.history, k, v);
 
   renderExitedPane = () => {
     let subtitle = null;
@@ -1233,7 +1234,7 @@ class UIRoot extends Component {
                   {...props}
                   finished={() => {
                     this.onProfileFinished();
-                    replaceHistoryState(this.props.history, "entry_step", "device");
+                    this.replaceHistoryState("entry_step", "device");
                   }}
                   store={this.props.store}
                 />
