@@ -1214,8 +1214,12 @@ class UIRoot extends Component {
                 <ProfileEntryPanel
                   {...props}
                   finished={() => {
+                    const unsubscribe = this.props.history.listen(() => {
+                      unsubscribe();
+                      this.pushHistoryState("entry_step", "device");
+                    });
+
                     this.onProfileFinished();
-                    this.pushHistoryState("entry_step", "device");
                   }}
                   store={this.props.store}
                 />
