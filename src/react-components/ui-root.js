@@ -15,7 +15,7 @@ import {
   replaceHistoryState,
   clearHistoryState,
   popToBeginningOfHubHistory,
-  navigateToPageBeforeBeginningOfAllHistory
+  navigateToPriorPage
 } from "../utils/history";
 import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
@@ -198,12 +198,7 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("exit", this.exit);
     const scene = this.props.scene;
 
-    // If we refreshed the page with any state history (eg if we were in the entry flow
-    // or had a modal/overlay open) just reset everything to the beginning of the flow by
-    // erasing all history that was accumulated for this room.
-    if (this.props.history.location.state) {
-      popToBeginningOfHubHistory(this.props.history);
-    }
+    let isNavigatingToPriorPage = false;
 
     this.props.history.listen((location, action) => {
       const state = location.state;
@@ -222,11 +217,19 @@ class UIRoot extends Component {
       };
 
       // If we just hit back into the entry flow, just go back to the page before the room landing page.
-      if (action === "POP" && state && state.entry_step && this.state.entered) {
-        navigateToPageBeforeBeginningOfAllHistory(this.props.history);
+      if (action === "POP" && state && state.entry_step && this.state.entered && !isNavigatingToPriorPage) {
+        isNavigatingToPriorPage = true;
+        navigateToPriorPage(this.props.history);
         return;
       }
     });
+
+    // If we refreshed the page with any state history (eg if we were in the entry flow
+    // or had a modal/overlay open) just reset everything to the beginning of the flow by
+    // erasing all history that was accumulated for this room.
+    if (this.props.history.location.state) {
+      popToBeginningOfHubHistory(this.props.history);
+    }
 
     this.setState({
       audioContext: {

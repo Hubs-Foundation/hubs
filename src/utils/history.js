@@ -45,25 +45,29 @@ export function clearHistoryState(history) {
 // This will pop the browser history to the first entry that was for this hubs room,
 // and then push a duplicate entry onto the history stack in order to wipe out forward
 // history.
-export function popToBeginningOfHubHistory(history) {
+export function popToBeginningOfHubHistory(history, navigateToPriorPage) {
   if (!history.location.state || history.location.state.__historyLength === undefined) return;
 
   const len = history.location.state.__historyLength;
   if (len === 0) return;
 
-  history.go(-len);
+  // After the go() completes, we push a duplicate history entry onto the stack
+  // in order to wipe out forward history. We also optionally go back -2 if we wanted
+  // to go back to the prior page.
+  let unsubscribe = null;
 
-  // Push a duplicate entry to wipe out forward history
-  //
-  // Note this entry is tagged as "duplicate" so we can identify it on the next push, which will let
-  // us effectively remove the duplicate if there's an opportunity to do so.
-  history.push({ pathname: history.location.pathname, state: { __historyLength: 0, __duplicate: true } });
+  const finalizer = () => {
+    unsubscribe();
+    history.push({ pathname: history.location.pathname, state: { __historyLength: 0, __duplicate: true } });
+    if (navigateToPriorPage) history.go(-2); // Go back to history entry before beginning.
+  };
+
+  unsubscribe = history.listen(finalizer);
+
+  history.go(-len);
 }
 
 // This will pop the browser history to the entry before the first entry for this hubs room.
-export function navigateToPageBeforeBeginningOfAllHistory(history) {
-  popToBeginningOfHubHistory(history);
-
-  // Go back two entries, since we push a duplicate root entry to wipe out forward history
-  history.go(-2);
+export function navigateToPriorPage(history) {
+  popToBeginningOfHubHistory(history, true);
 }
