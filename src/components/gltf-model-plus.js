@@ -86,7 +86,7 @@ function cloneGltf(gltf) {
 /// or templates associated with any of their nodes.)
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
-const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
+const inflateEntities = function(node, templates, isRoot, modelToWorldScale = 1) {
   // TODO: Remove this once we update the legacy avatars to the new node names
   if (node.name === "Chest") {
     node.name = "Spine";
@@ -133,20 +133,14 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
 
   // Copy over the object's transform to the THREE.Group and reset the actual transform of the Object3D
   // all updates to the object should be done through the THREE.Group wrapper
-  const object3D = el.object3D;
-
-  object3D.position.copy(node.position);
-  object3D.rotation.copy(node.rotation);
-  object3D.scale.set(
-    node.scale.x * (modelToWorldScale !== undefined ? modelToWorldScale : 1),
-    node.scale.y * (modelToWorldScale !== undefined ? modelToWorldScale : 1),
-    node.scale.z * (modelToWorldScale !== undefined ? modelToWorldScale : 1)
-  );
+  el.object3D.position.copy(node.position);
+  el.object3D.rotation.copy(node.rotation);
+  el.object3D.scale.copy(node.scale).multiplyScalar(modelToWorldScale);
+  el.object3D.matrixNeedsUpdate = true;
 
   node.matrixAutoUpdate = false;
   node.matrix.identity();
   node.matrix.decompose(node.position, node.rotation, node.scale);
-  el.object3D.matrixNeedsUpdate = true;
 
   el.setObject3D(node.type.toLowerCase(), node);
   if (entityComponents && "nav-mesh" in entityComponents) {
