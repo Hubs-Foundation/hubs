@@ -23,6 +23,11 @@ AFRAME.registerComponent("super-spawner", {
     resolve: { default: false },
 
     /**
+     * Whether to resize the media on load.
+     */
+    resize: { default: false },
+
+    /**
      * The template to use for this object
      */
     template: { default: "" },
@@ -166,7 +171,13 @@ AFRAME.registerComponent("super-spawner", {
     const thisGrabId = nextGrabId++;
     this.heldEntities.set(hand, thisGrabId);
 
-    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve).entity;
+    const entity = addMedia(
+      this.data.src,
+      this.data.template,
+      ObjectContentOrigins.SPAWNER,
+      this.data.resolve,
+      this.data.resize
+    ).entity;
 
     entity.object3D.position.copy(
       this.data.useCustomSpawnPosition ? this.data.spawnPosition : this.el.object3D.position

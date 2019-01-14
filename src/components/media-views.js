@@ -136,7 +136,6 @@ function createVideoTexture(url, contentType) {
         hls.loadSource(url);
         hls.attachMedia(videoEl);
         hls.on(HLS.Events.ERROR, function(event, data) {
-          console.error(event, data);
           if (data.fatal) {
             switch (data.type) {
               case HLS.ErrorTypes.NETWORK_ERROR:
@@ -156,16 +155,6 @@ function createVideoTexture(url, contentType) {
       } else if (videoEl.canPlayType(contentType)) {
         videoEl.src = url;
         videoEl.onerror = reject;
-
-        // HACK aframe iOS HLS video hacks
-        if (isIOS) {
-          // Actually BGRA. Tell shader to correct later.
-          texture.format = THREE.RGBAFormat;
-          texture.needsCorrectionBGRA = true;
-          // Apparently needed for HLS. Tell shader to correct later.
-          texture.flipY = false;
-          texture.needsCorrectionFlipY = true;
-        }
       } else {
         reject("HLS unsupported");
       }
@@ -174,7 +163,7 @@ function createVideoTexture(url, contentType) {
       videoEl.onerror = reject;
     }
 
-    videoEl.addEventListener("loadedmetadata", () => resolve(texture), { once: true });
+    videoEl.addEventListener("canplay", () => resolve(texture), { once: true });
   });
 }
 
@@ -489,6 +478,11 @@ AFRAME.registerComponent("media-video", {
         this.el.setObject3D("sound", this.audio);
       }
 
+      this.video = texture.image;
+      this.video.loop = this.data.loop;
+      this.video.addEventListener("pause", this.onPauseStateChange);
+      this.video.addEventListener("play", this.onPauseStateChange);
+
       if (texture.hls) {
         const updateLiveState = () => {
           this.videoIsLive = texture.hls.levels[texture.hls.currentLevel].details.live;
@@ -499,12 +493,11 @@ AFRAME.registerComponent("media-video", {
         if (texture.hls.currentLevel >= 0) {
           updateLiveState();
         }
+      } else {
+        this.videoIsLive = this.video.duration === Infinity;
+        this.seekForwardButton.object3D.visible = !this.videoIsLive;
+        this.seekBackButton.object3D.visible = !this.videoIsLive;
       }
-
-      this.video = texture.image;
-      this.video.loop = this.data.loop;
-      this.video.addEventListener("pause", this.onPauseStateChange);
-      this.video.addEventListener("play", this.onPauseStateChange);
 
       if (isIOS) {
         const template = document.getElementById("video-unmute");
