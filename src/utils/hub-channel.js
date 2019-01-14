@@ -12,7 +12,7 @@ function isSameDay(da, db) {
 export default class HubChannel {
   constructor(store) {
     this.store = store;
-    this._signedIn = false;
+    this._signedIn = !!this.store.state.credentials.token;
   }
 
   get signedIn() {

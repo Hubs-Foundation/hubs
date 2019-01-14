@@ -231,6 +231,13 @@ AFRAME.registerComponent("skybox", {
   init() {
     this.sky = new THREE.Sky();
     this.el.setObject3D("mesh", this.sky);
+    this.skyScene = new THREE.Scene();
+    this.cubeCamera = new THREE.CubeCamera(1, 100000, 512);
+    this.skyScene.add(this.cubeCamera);
+
+    // HACK: Render environment map on next frame to avoid bug where the render target texture is black.
+    this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
+    requestAnimationFrame(this.updateEnvironmentMap);
   },
 
   update(oldData) {
@@ -279,6 +286,20 @@ AFRAME.registerComponent("skybox", {
       }
 
       this.el.object3D.matrixNeedsUpdate = true;
+    }
+
+    this.updateEnvironmentMap();
+  },
+
+  updateEnvironmentMap() {
+    const environmentMapComponent = this.el.sceneEl.components["environment-map"];
+
+    if (environmentMapComponent) {
+      this.skyScene.add(this.sky);
+      this.cubeCamera.update(this.el.sceneEl.renderer, this.skyScene);
+      this.el.setObject3D("mesh", this.sky);
+
+      environmentMapComponent.updateEnvironmentMap(this.cubeCamera.renderTarget.texture);
     }
   },
 

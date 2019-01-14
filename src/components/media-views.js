@@ -1,5 +1,6 @@
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
+import { paths } from "../systems/userinput/paths";
 
 class GIFTexture extends THREE.Texture {
   constructor(frames, delays, disposals) {
@@ -249,12 +250,13 @@ AFRAME.registerComponent("media-video", {
 
     this._grabStart = this._grabStart.bind(this);
     this._grabEnd = this._grabEnd.bind(this);
+    this.seekForward = this.seekForward.bind(this);
+    this.seekBack = this.seekBack.bind(this);
 
     this.lastUpdate = 0;
 
-    // we kind of have to deal with the "empty case" for this component, because networked-aframe
-    // will instantiate a null version of it for all media objects thanks to how it handles component schemas
-    if (!this.data.src) return;
+    this.seekForwardButton = this.el.querySelector(".video-seek-forward-button");
+    this.seekBackButton = this.el.querySelector(".video-seek-back-button");
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
@@ -286,12 +288,34 @@ AFRAME.registerComponent("media-video", {
   play() {
     this.el.addEventListener("grab-start", this._grabStart);
     this.el.addEventListener("grab-end", this._grabEnd);
+    this.seekForwardButton.addEventListener("grab-start", this.seekForward);
+    this.seekBackButton.addEventListener("grab-start", this.seekBack);
+    this.seekForwardButton.object3D.visible = true;
+    this.seekBackButton.object3D.visible = true;
   },
 
   // aframe component pause, unrelated to video
   pause() {
     this.el.removeEventListener("grab-start", this._grabStart);
     this.el.removeEventListener("grab-end", this._grabEnd);
+    this.seekForwardButton.removeEventListener("grab-start", this.seekForward);
+    this.seekBackButton.removeEventListener("grab-start", this.seekBack);
+    this.seekForwardButton.object3D.visible = false;
+    this.seekBackButton.object3D.visible = false;
+  },
+
+  seekForward() {
+    if (NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl)) {
+      this.video.currentTime += 30;
+      this.el.setAttribute("media-video", "time", this.video.currentTime);
+    }
+  },
+
+  seekBack() {
+    if (NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl)) {
+      this.video.currentTime -= 10;
+      this.el.setAttribute("media-video", "time", this.video.currentTime);
+    }
   },
 
   _grabStart() {
@@ -336,6 +360,7 @@ AFRAME.registerComponent("media-video", {
   },
 
   updatePlaybackState(force) {
+    // Only update playback posiiton for videos you don't own
     if (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && this.video)) {
       if (Math.abs(this.data.time - this.video.currentTime) > this.data.syncTolerance) {
         this.tryUpdateVideoPlaybackState(this.data.videoPaused, this.data.time);
@@ -343,34 +368,30 @@ AFRAME.registerComponent("media-video", {
         this.tryUpdateVideoPlaybackState(this.data.videoPaused);
       }
     }
+
+    // Volume is local, always update it
+    if (this.audio) {
+      this.audio.gain.gain.value = this.data.volume;
+    }
   },
 
   tryUpdateVideoPlaybackState(pause, currentTime) {
     if (this._playbackStateChangeTimeout) {
       clearTimeout(this._playbackStateChangeTimeout);
+      delete this._playbackStateChangeTimeout;
+    }
+
+    if (currentTime !== undefined) {
+      this.video.currentTime = currentTime;
     }
 
     if (pause) {
       this.video.pause();
-
-      if (currentTime) {
-        this.video.currentTime = currentTime;
-      }
     } else {
       // Need to deal with the fact play() may fail if user has not interacted with browser yet.
-      this.video
-        .play()
-        .then(() => {
-          if (currentTime) {
-            this.video.currentTime = currentTime;
-          }
-        })
-        .catch(() => {
-          this._playbackStateChangeTimeout = setTimeout(
-            () => this.tryUpdateVideoPlaybackState(pause, currentTime),
-            1000
-          );
-        });
+      this.video.play().catch(() => {
+        this._playbackStateChangeTimeout = setTimeout(() => this.tryUpdateVideoPlaybackState(pause, currentTime), 1000);
+      });
     }
   },
 
@@ -401,25 +422,21 @@ AFRAME.registerComponent("media-video", {
         // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
         texture.audioSource = this.el.sceneEl.audioListener.context.createMediaElementSource(texture.image);
 
-        let audio;
-
         if (this.data.audioType === "pannernode") {
-          audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-          audio.setDistanceModel(this.data.distanceModel);
-          audio.setRolloffFactor(this.data.rolloffFactor);
-          audio.setRefDistance(this.data.refDistance);
-          audio.setMaxDistance(this.data.maxDistance);
-          audio.panner.coneInnerAngle = this.data.coneInnerAngle;
-          audio.panner.coneOuterAngle = this.data.coneOuterAngle;
-          audio.panner.coneOuterGain = this.data.coneOuterGain;
+          this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+          this.audio.setDistanceModel(this.data.distanceModel);
+          this.audio.setRolloffFactor(this.data.rolloffFactor);
+          this.audio.setRefDistance(this.data.refDistance);
+          this.audio.setMaxDistance(this.data.maxDistance);
+          this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
+          this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
+          this.audio.panner.coneOuterGain = this.data.coneOuterGain;
         } else {
-          audio = new THREE.Audio(this.el.sceneEl.audioListener);
+          this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
         }
 
-        audio.gain.gain.value = this.data.volume;
-
-        audio.setNodeSource(texture.audioSource);
-        this.el.setObject3D("sound", audio);
+        this.audio.setNodeSource(texture.audioSource);
+        this.el.setObject3D("sound", this.audio);
       }
 
       this.video = texture.image;
@@ -473,6 +490,12 @@ AFRAME.registerComponent("media-video", {
   },
 
   tick() {
+    const userinput = this.el.sceneEl.systems.userinput;
+    const volumeMod = userinput.get(paths.actions.cursor.mediaVolumeMod);
+    if (volumeMod) {
+      this.el.setAttribute("media-video", "volume", THREE.Math.clamp(this.data.volume + volumeMod, 0, 1));
+    }
+
     if (this.data.videoPaused || !this.video || !this.networkedEl || !NAF.utils.isMine(this.networkedEl)) return;
 
     const now = performance.now();

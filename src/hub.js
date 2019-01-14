@@ -588,6 +588,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
   const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
+  const { token } = store.state.credentials;
+  if (token) {
+    joinPayload.auth_token = token;
+  }
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
 
   const presenceLogEntries = [];
@@ -616,15 +620,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     .join()
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
-
-      const { token } = store.state.credentials;
-      if (token) {
-        await hubChannel.signIn(token);
-      }
-
       subscriptions.setHubChannel(hubChannel);
       subscriptions.setSubscribed(data.subscriptions.web_push);
-      remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
+      remountUI({ initialIsSubscribed: subscriptions.isSubscribed(), isOwner: data.is_owner });
       await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
     })
     .receive("error", res => {
@@ -706,12 +704,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     NAF.connection.adapter.onData(data);
   });
 
-  hubPhxChannel.on("message", ({ session_id, type, body }) => {
-    const userInfo = hubPhxPresence.state[session_id];
-    if (!userInfo) return;
+  hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
+    const getAuthor = () => {
+      const userInfo = hubPhxPresence.state[session_id];
+      if (from) {
+        return from;
+      } else if (userInfo) {
+        return userInfo.metas[0].profile.displayName;
+      } else {
+        return "Mystery user";
+      }
+    };
+
+    const name = getAuthor();
     const maySpawn = scene.is("entered");
 
-    const incomingMessage = { name: userInfo.metas[0].profile.displayName, type, body, maySpawn };
+    const incomingMessage = { name, type, body, maySpawn };
 
     if (scene.is("vr-mode")) {
       createInWorldLogMessage(incomingMessage);
