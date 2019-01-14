@@ -533,7 +533,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
   const { token } = store.state.credentials;
   if (token) {
-    joinPayload.token = token;
+    joinPayload.auth_token = token;
   }
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
 
