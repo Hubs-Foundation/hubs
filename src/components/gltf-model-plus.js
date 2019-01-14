@@ -133,21 +133,15 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
 
   // Copy over the object's transform to the THREE.Group and reset the actual transform of the Object3D
   // all updates to the object should be done through the THREE.Group wrapper
-  el.setAttribute("position", {
-    x: node.position.x,
-    y: node.position.y,
-    z: node.position.z
-  });
-  el.setAttribute("rotation", {
-    x: node.rotation.x * THREE.Math.RAD2DEG,
-    y: node.rotation.y * THREE.Math.RAD2DEG,
-    z: node.rotation.z * THREE.Math.RAD2DEG
-  });
-  el.setAttribute("scale", {
-    x: node.scale.x * (modelToWorldScale !== undefined ? modelToWorldScale : 1),
-    y: node.scale.y * (modelToWorldScale !== undefined ? modelToWorldScale : 1),
-    z: node.scale.z * (modelToWorldScale !== undefined ? modelToWorldScale : 1)
-  });
+  const object3D = el.object3D;
+
+  object3D.position.copy(node.position);
+  object3D.rotation.copy(node.rotation);
+  object3D.scale.set(
+    node.scale.x * (modelToWorldScale !== undefined ? modelToWorldScale : 1),
+    node.scale.y * (modelToWorldScale !== undefined ? modelToWorldScale : 1),
+    node.scale.z * (modelToWorldScale !== undefined ? modelToWorldScale : 1)
+  );
 
   node.matrixAutoUpdate = false;
   node.matrix.identity();
