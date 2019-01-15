@@ -233,15 +233,29 @@
                             <a-entity mixin="rounded-text-button" clone-media-button position="-0.25 -0.375 0.01">
                                 <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
-                            <a-entity mixin="rounded-text-button" exist-if-threedof="existIf3DOF: true" rotate-object-like-a-puppet-button="double: true" position="0.3 0.0 0.01" slice9="width: 0.20">
-                                <a-entity text="value:rotate; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
-                            </a-entity>
-                            <a-entity mixin="rounded-text-button" exist-if-threedof="existIf3DOF: false" rotate-object-on-axis-button="axis: 0 0 0" position="0.3 0.0 0.01" slice9="width: 0.20">
-                                <a-entity text="value:rotate; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
-                            </a-entity>
-                            <a-entity mixin="rounded-text-button" reset-object-orientation-button position="0.3 -0.20 0.01" slice9="width: 0.25">
-                                <a-entity text="value:reset; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
-                            </a-entity>
+                            <a-entity mixin="">
+
+                            <a-image
+                                exist-if-threedof="existIf3DOF: true"
+                                rotate-object-like-a-puppet-button="double:true" position="0.50 0.0 0.01" 
+                                icon-button="tooltip: #hud-tooltip; tooltipText: Rotate; activeTooltipText: Rotate; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover"
+                                scale="0.1 0.1 0.1"
+                                material="alphaTest:0.1;"
+                                hoverable
+                                sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
+                                set-sounds-invisible
+                            ></a-image>
+
+                            <a-image
+                                exist-if-threedof="existIf3DOF: false"
+                                rotate-object-on-axis-button="dualAxis:true" position="0.30 0.0 0.01" 
+                                icon-button="tooltip: #hud-tooltip; tooltipText: Rotate; activeTooltipText: Rotate; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover"
+                                scale="0.1 0.1 0.1"
+                                material="alphaTest:0.1;"
+                                hoverable
+                                sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
+                                set-sounds-invisible
+                            ></a-image>
                         </a-entity>
                     </a-entity>
                 </a-entity>

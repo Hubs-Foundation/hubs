@@ -41,10 +41,7 @@ export class DaydreamControllerDevice {
       }
       this.rayObject.updateMatrixWorld();
       this.rayObjectRotation.setFromRotationMatrix(this.rayObject.matrixWorld);
-      this.pose.position.setFromMatrixPosition(this.rayObject.matrixWorld);
-      this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
-      this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
-      frame[paths.device.daydream.pose] = this.pose;
+      frame[paths.device.daydream.pose] = 1;
     }
   }
 }
