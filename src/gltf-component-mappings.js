@@ -151,7 +151,6 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
   el.setAttribute("super-spawner", {
     src: componentData.src,
     resolve: true,
-    resize: true,
     template: "#interactable-media"
   });
   el.setAttribute("body", {
