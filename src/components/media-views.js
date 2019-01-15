@@ -287,15 +287,26 @@ AFRAME.registerComponent("media-video", {
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
     this.tryUpdateVideoPlaybackState = this.tryUpdateVideoPlaybackState.bind(this);
 
-    this._grabStart = this._grabStart.bind(this);
-    this._grabEnd = this._grabEnd.bind(this);
     this.seekForward = this.seekForward.bind(this);
     this.seekBack = this.seekBack.bind(this);
+    this.togglePlaying = this.togglePlaying.bind(this);
 
     this.lastUpdate = 0;
 
-    this.seekForwardButton = this.el.querySelector(".video-seek-forward-button");
-    this.seekBackButton = this.el.querySelector(".video-seek-back-button");
+    this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", dirs: ["forward", "back"] });
+    this.el.components["hover-menu__video"].getHoverMenu().then(menu => {
+      this.hoverMenu = menu;
+
+      this.playPauseButton = this.el.querySelector(".video-playpause-button");
+      this.seekForwardButton = this.el.querySelector(".video-seek-forward-button");
+      this.seekBackButton = this.el.querySelector(".video-seek-back-button");
+
+      this.playPauseButton.addEventListener("grab-start", this.togglePlaying);
+      this.seekForwardButton.addEventListener("grab-start", this.seekForward);
+      this.seekBackButton.addEventListener("grab-start", this.seekBack);
+
+      this.updatePlaybackState();
+    });
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
@@ -323,26 +334,6 @@ AFRAME.registerComponent("media-video", {
     });
   },
 
-  // aframe component play, unrelated to video
-  play() {
-    this.el.addEventListener("grab-start", this._grabStart);
-    this.el.addEventListener("grab-end", this._grabEnd);
-    this.seekForwardButton.addEventListener("grab-start", this.seekForward);
-    this.seekBackButton.addEventListener("grab-start", this.seekBack);
-    this.seekForwardButton.object3D.visible = !this.videoIsLive;
-    this.seekBackButton.object3D.visible = !this.videoIsLive;
-  },
-
-  // aframe component pause, unrelated to video
-  pause() {
-    this.el.removeEventListener("grab-start", this._grabStart);
-    this.el.removeEventListener("grab-end", this._grabEnd);
-    this.seekForwardButton.removeEventListener("grab-start", this.seekForward);
-    this.seekBackButton.removeEventListener("grab-start", this.seekBack);
-    this.seekForwardButton.object3D.visible = false;
-    this.seekBackButton.object3D.visible = false;
-  },
-
   seekForward() {
     if ((!this.videoIsLive && NAF.utils.isMine(this.networkedEl)) || NAF.utils.takeOwnership(this.networkedEl)) {
       this.video.currentTime += 30;
@@ -357,25 +348,8 @@ AFRAME.registerComponent("media-video", {
     }
   },
 
-  _grabStart() {
-    if (!this.el.components.grabbable || this.el.components.grabbable.data.maxGrabbers === 0) return;
-
-    if (this.video && this.video.muted && !this.video.paused) {
-      this.video.muted = false;
-    }
-
-    this.grabStartPosition = this.el.object3D.position.clone();
-  },
-
-  _grabEnd() {
-    if (this.grabStartPosition && this.grabStartPosition.distanceToSquared(this.el.object3D.position) < 0.01 * 0.01) {
-      this.togglePlayingIfOwner();
-      this.grabStartPosition = null;
-    }
-  },
-
-  togglePlayingIfOwner() {
-    if (this.networkedEl && NAF.utils.isMine(this.networkedEl) && this.video) {
+  togglePlaying() {
+    if (this.networkedEl && (NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl))) {
       this.tryUpdateVideoPlaybackState(!this.data.videoPaused);
     }
   },
@@ -388,6 +362,11 @@ AFRAME.registerComponent("media-video", {
       this.video.removeEventListener("pause", this.onPauseStateChange);
       this.video.removeEventListener("play", this.onPauseStateChange);
     }
+    if (this.hoverMenu) {
+      this.playPauseButton.removeEventListener("grab-start", this.togglePlaying);
+      this.seekForwardButton.removeEventListener("grab-start", this.seekForward);
+      this.seekBackButton.removeEventListener("grab-start", this.seekBack);
+    }
   },
 
   onPauseStateChange() {
@@ -399,6 +378,12 @@ AFRAME.registerComponent("media-video", {
   },
 
   updatePlaybackState(force) {
+    if (this.hoverMenu) {
+      this.playPauseButton.object3D.visible = !!this.video;
+      this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
+      this.seekBackButton.object3D.visible = !!this.video && !this.videoIsLive;
+    }
+
     // Only update playback posiiton for videos you don't own
     if (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && this.video)) {
       if (Math.abs(this.data.time - this.video.currentTime) > this.data.syncTolerance) {
@@ -426,8 +411,10 @@ AFRAME.registerComponent("media-video", {
 
     if (pause) {
       this.video.pause();
+      this.playPauseButton.querySelector("[text]").setAttribute("text", "value", "play");
     } else {
       // Need to deal with the fact play() may fail if user has not interacted with browser yet.
+      this.playPauseButton.querySelector("[text]").setAttribute("text", "value", "pause");
       this.video.play().catch(() => {
         this._playbackStateChangeTimeout = setTimeout(() => this.tryUpdateVideoPlaybackState(pause, currentTime), 1000);
       });

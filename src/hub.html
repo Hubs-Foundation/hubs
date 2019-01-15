@@ -200,7 +200,7 @@
                     hoverable-visuals="cursorController: #cursor-controller"
                     auto-scale-cannon-physics-body
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
-                    position-at-box-shape-border="target:.freeze-menu;"
+                    position-at-box-shape-border__freeze="target:.freeze-menu;"
                     destroy-at-extreme-distances
                     set-yxz-order
                     pinnable
@@ -230,13 +230,6 @@
                             </a-entity>
                             <a-entity mixin="rounded-text-button" clone-media-button position="-0.25 -0.375 0.01">
                                 <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
-                            </a-entity>
-
-                            <a-entity class="video-seek-back-button" mixin="rounded-text-button" position="-0.4 0 0.01" slice9="width: 0.2" visible="false">
-                                <a-entity text="value: <; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
-                            </a-entity>
-                            <a-entity class="video-seek-forward-button" mixin="rounded-text-button" position="0.4 0 0.01" slice9="width: 0.2" visible="false">
-                                <a-entity text="value: >; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
                         </a-entity>
                     </a-entity>
@@ -325,6 +318,20 @@
                     <a-entity class="next-button" position="0.3 0 0">
                         <a-entity mixin="rounded-text-button" slice9="width: 0.2"> </a-entity>
                         <a-entity text=" value:>; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="video-hover-menu">
+                <a-entity class="ui interactable-ui video-toolbar" mixin="button-container">
+                    <a-entity class="video-seek-back-button" mixin="rounded-text-button" position="-0.3 0 0.01" scale="0.6 0.6 0.6" slice9="width: 0.2; opacity: 0.8;" visible="false">
+                        <a-entity text="value: <; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    </a-entity>
+                    <a-entity class="video-playpause-button" mixin="rounded-text-button" position="0 0 0.01" scale="1 1 1" slice9="width: 0.2; opacity: 0.8;" visible="false">
+                        <a-entity text="value: ||; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    </a-entity>
+                    <a-entity class="video-seek-forward-button" mixin="rounded-text-button" position="0.3 0 0.01" scale="0.6 0.6 0.6" slice9="width: 0.2; opacity: 0.8;" visible="false">
+                        <a-entity text="value: >; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>
