@@ -179,16 +179,15 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
       clearTimeout(fireLoadingTimeout);
 
       if (!entity.classList.contains("pen") && !entity.getAttribute("animation__spawn-start")) {
-        entity.object3D.scale.setScalar(0.5);
         entity.matrixNeedsUpdate = true;
 
         entity.setAttribute("animation__spawn-start", {
           property: "scale",
           delay: 50,
-          dur: 300,
+          dur: 200,
           from: { x: 0.5, y: 0.5, z: 0.5 },
-          to: { x: 1.0, y: 1.0, z: 1.0 },
-          easing: "easeOutElastic"
+          to: { x: entity.object3D.scale.x, y: entity.object3D.scale.y, z: entity.object3D.scale.z },
+          easing: "easeInQuad"
         });
       }
 

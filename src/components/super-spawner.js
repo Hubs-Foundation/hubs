@@ -202,6 +202,9 @@ AFRAME.registerComponent("super-spawner", {
       }
     }
 
+    entity.object3D.scale.copy(this.data.useCustomSpawnScale ? this.data.spawnScale : this.el.object3D.scale);
+    entity.object3D.matrixNeedsUpdate = true;
+
     // Call syncToPhysics so that updated transforms aren't immediately overwritten
     entity.components["ammo-body"].syncToPhysics();
 

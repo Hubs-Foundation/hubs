@@ -151,16 +151,13 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
   el.setAttribute("super-spawner", {
     src: componentData.src,
     resolve: true,
-    resize: true,
     template: "#interactable-media"
   });
-  el.setAttribute("body", {
+  el.setAttribute("ammo-body", {
     mass: 0,
     type: "static",
-    shape: "none"
-  });
-  el.setAttribute("collision-filter", {
-    collisionForces: false
+    shape: "hull",
+    collisionFlags: 4
   });
   el.setAttribute("hoverable", "");
 });
