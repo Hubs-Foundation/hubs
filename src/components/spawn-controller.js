@@ -8,6 +8,8 @@ import { getLastWorldPosition } from "../utils/three-utils";
 AFRAME.registerComponent("spawn-controller", {
   schema: {
     target: { type: "selector" },
+    camera: { type: "selector", default: "#player-camera" },
+    playerHeight: { default: 1.6 },
     loadedEvent: { type: "string" }
   },
   init() {
@@ -22,13 +24,31 @@ AFRAME.registerComponent("spawn-controller", {
       return;
     }
 
+    const camera = this.data.camera;
     const spawnPointIndex = Math.round((spawnPoints.length - 1) * Math.random());
     const spawnPoint = spawnPoints[spawnPointIndex];
 
     getLastWorldPosition(spawnPoint.object3D, this.el.object3D.position);
-
     this.el.object3D.rotation.copy(spawnPoint.object3D.rotation);
+
+    if (this.el.sceneEl.is("vr-mode")) {
+      // Rotate the player rig such that the vr-camera faces forward.
+      this.el.object3D.rotation.y -= this.data.camera.object3D.rotation.y;
+    } else {
+      // Reset the camera transform in 2D mode.
+      camera.object3D.position.set(0, this.data.playerHeight, 0);
+      camera.object3D.rotation.set(0, 0, 0);
+      camera.object3D.matrixNeedsUpdate = true;
+    }
+
+    // Camera faces -Z direction. Flip rotation on Y axis to face the correct direction.
+    this.el.object3D.rotation.y += Math.PI;
     this.el.object3D.matrixNeedsUpdate = true;
+
+    // Reset pitch-yaw-rotator after any scene-preview-camera rotation.
+    if (camera.components["pitch-yaw-rotator"]) {
+      camera.components["pitch-yaw-rotator"].set(camera.object3D.rotation.x, camera.object3D.rotation.y);
+    }
   }
 });
 
