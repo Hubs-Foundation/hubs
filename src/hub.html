@@ -50,6 +50,10 @@
             <img id="freeze-off-hover" crossorigin="anonymous" src="./assets/hud/freeze_off-hover.png">
             <img id="freeze-on" crossorigin="anonymous" src="./assets/hud/freeze_on.png">
             <img id="freeze-on-hover" crossorigin="anonymous" src="./assets/hud/freeze_on-hover.png">
+            <img id="globe-off" crossorigin="anonymous" src="./assets/hud/globe_off.png">
+            <img id="globe-off-hover" crossorigin="anonymous" src="./assets/hud/globe_off-hover.png">
+            <img id="globe-on-hover" crossorigin="anonymous" src="./assets/hud/globe_on-hover.png">
+            <img id="globe-on" crossorigin="anonymous" src="./assets/hud/globe_on.png">
             <img id="spawn-pen" crossorigin="anonymous" src="./assets/hud/spawn_pen.png">
             <img id="spawn-pen-hover" crossorigin="anonymous" src="./assets/hud/spawn_pen-hover.png">
             <img id="spawn-camera" crossorigin="anonymous" src="./assets/hud/spawn_camera.png">
@@ -233,11 +237,11 @@
                             <a-entity mixin="rounded-text-button" clone-media-button position="-0.25 -0.375 0.01">
                                 <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
-                            <a-entity mixin="">
 
                             <a-image
                                 exist-if-threedof="existIf3DOF: true"
                                 rotate-object-like-a-puppet-button="double:true" position="0.50 0.0 0.01" 
+                                class="hud"
                                 icon-button="tooltip: #hud-tooltip; tooltipText: Rotate; activeTooltipText: Rotate; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover"
                                 scale="0.1 0.1 0.1"
                                 material="alphaTest:0.1;"
@@ -249,7 +253,8 @@
                             <a-image
                                 exist-if-threedof="existIf3DOF: false"
                                 rotate-object-on-axis-button="dualAxis:true" position="0.30 0.0 0.01" 
-                                icon-button="tooltip: #hud-tooltip; tooltipText: Rotate; activeTooltipText: Rotate; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover"
+                                icon-button="tooltip: #hud-tooltip; tooltipText: Rotate; activeTooltipText: Rotate; image: #globe-off; hoverImage: #globe-off-hover; activeImage: #globe-on; activeHoverImage: #globe-on-hover"
+                                class="hud"
                                 scale="0.1 0.1 0.1"
                                 material="alphaTest:0.1;"
                                 hoverable

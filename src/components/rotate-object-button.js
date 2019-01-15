@@ -409,6 +409,14 @@ AFRAME.registerSystem("rotate-selected-object", {
       this.hand.object3D.getWorldQuaternion(this.Cc);
       this.Cd.multiplyQuaternions(this.Cc, this.Ci.clone().inverse());
       this.Oc.copy(this.Oi).premultiply(this.Cd);
+      //this.euler = new THREE.Euler().setFromQuaternion(this.Oc);
+      //const snap = Math.PI / 12;
+      //this.euler.set(
+      //  Math.round(this.euler.x / snap) * snap,
+      //  Math.round(this.euler.y / snap) * snap,
+      //  Math.round(this.euler.z / snap) * snap
+      //);
+      //this.q.setFromEuler(this.euler);
       this.target.quaternion.copy(this.Oc);
       this.target.matrixNeedsUpdate = true;
     }
