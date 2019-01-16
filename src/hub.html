@@ -239,9 +239,8 @@
                             </a-entity>
 
                             <a-image
+                                rotate-button="mode: puppet; exponent: 1" position="0.50 0.0 0.01"
                                 exist-if-threedof="existIf3DOF: true"
-                                rotate-button="mode: puppet; doublePuppet: true" position="0.50 0.0 0.01" 
-                                class="hud"
                                 icon-button="tooltip: #hud-tooltip; tooltipText: Rotate; activeTooltipText: Rotate; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover"
                                 scale="0.1 0.1 0.1"
                                 material="alphaTest:0.1;"
@@ -251,10 +250,8 @@
                             ></a-image>
 
                             <a-image
-                                exist-if-threedof="existIf3DOF: false"
-                                rotate-button="mode: free;" position="0.50 0.0 0.01"
+                                rotate-button="mode: free;" position="0.50 0.-0.15 0.01"
                                 icon-button="tooltip: #hud-tooltip; tooltipText: Rotate; activeTooltipText: Rotate; image: #globe-off; hoverImage: #globe-off-hover; activeImage: #globe-on; activeHoverImage: #globe-on-hover"
-                                class="hud"
                                 scale="0.1 0.1 0.1"
                                 material="alphaTest:0.1;"
                                 hoverable
@@ -262,7 +259,7 @@
                                 set-sounds-invisible
                             ></a-image>
                             <a-image
-                                rotate-button="mode: reset;" position="0.50 -0.2 0.01"
+                                rotate-button="mode: reset;" position="0.50 -0.3 0.01"
                                 icon-button="tooltip: #hud-tooltip; tooltipText: Rotate; activeTooltipText: Rotate; image: #globe-off; hoverImage: #globe-off-hover; activeImage: #globe-on; activeHoverImage: #globe-on-hover"
                                 class="hud"
                                 scale="0.1 0.1 0.1"
