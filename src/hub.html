@@ -240,7 +240,7 @@
 
                             <a-image
                                 exist-if-threedof="existIf3DOF: true"
-                                rotate-object-like-a-puppet-button="double:true" position="0.50 0.0 0.01" 
+                                rotate-button="mode: puppet; doublePuppet: true" position="0.50 0.0 0.01" 
                                 class="hud"
                                 icon-button="tooltip: #hud-tooltip; tooltipText: Rotate; activeTooltipText: Rotate; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover"
                                 scale="0.1 0.1 0.1"
@@ -252,7 +252,17 @@
 
                             <a-image
                                 exist-if-threedof="existIf3DOF: false"
-                                rotate-object-on-axis-button="dualAxis:true" position="0.30 0.0 0.01" 
+                                rotate-button="mode: free;" position="0.50 0.0 0.01"
+                                icon-button="tooltip: #hud-tooltip; tooltipText: Rotate; activeTooltipText: Rotate; image: #globe-off; hoverImage: #globe-off-hover; activeImage: #globe-on; activeHoverImage: #globe-on-hover"
+                                class="hud"
+                                scale="0.1 0.1 0.1"
+                                material="alphaTest:0.1;"
+                                hoverable
+                                sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
+                                set-sounds-invisible
+                            ></a-image>
+                            <a-image
+                                rotate-button="mode: reset;" position="0.50 -0.2 0.01"
                                 icon-button="tooltip: #hud-tooltip; tooltipText: Rotate; activeTooltipText: Rotate; image: #globe-off; hoverImage: #globe-off-hover; activeImage: #globe-on; activeHoverImage: #globe-on-hover"
                                 class="hud"
                                 scale="0.1 0.1 0.1"
