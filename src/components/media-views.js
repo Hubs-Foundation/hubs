@@ -424,7 +424,7 @@ AFRAME.registerComponent("media-video", {
     }
 
     if (this.hoverMenu) {
-      this.playPauseButton.querySelector("[text]").setAttribute("text", "value", pause ? "|>" : "||");
+      this.playPauseButton.setAttribute("icon-button", "active", pause);
     }
 
     if (pause) {
