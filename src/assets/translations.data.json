@@ -48,6 +48,8 @@
     "profile.avatar-selector.loading": "Loading Avatars...",
     "profile.terms_of_use": "Terms of Use",
     "profile.privacy_notice": "Privacy Notice",
+    "media-browser.header-scenes": "Choose a Scene",
+    "media-browser.back": "Back",
     "audio.title": "Audio Setup",
     "audio.subtitle-desktop": "Confirm HMD speaker output",
     "audio.subtitle-mobile": "Earphones are recommended",

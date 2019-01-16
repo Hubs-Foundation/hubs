@@ -24,6 +24,7 @@ import {
   SafariEntryButton
 } from "./entry-buttons.js";
 import ProfileEntryPanel from "./profile-entry-panel";
+import MediaBrowser from "./media-browser";
 
 import CreateObjectDialog from "./create-object-dialog.js";
 import HelpDialog from "./help-dialog.js";
@@ -61,6 +62,209 @@ addLocaleData([...en]);
 // then we rely upon the user to select the proper mic.
 const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
 
+const MEDIA_QUERY_RESULT = {
+  meta: {
+    total_pages: 1,
+    total_entries: 13,
+    page_size: 20,
+    page: 1
+  },
+  entries: [
+    {
+      type: "scene",
+      name: "WatWat",
+      images: {
+        preview: "https://hubs.local:4000/files/e28ee49c-9173-4ba8-bb6c-8b1f02f9d1af.png"
+      },
+      id: "jsfd36y5jg",
+      description: null,
+      attributions: {
+        extras: "Duck by Poly by Google"
+      }
+    },
+    {
+      type: "scene",
+      name: "Test",
+      images: {
+        preview: "https://hubs.local:4000/files/c9c6e5a4-fa49-4413-9b24-6940dc12fa38.png"
+      },
+      id: "qhnz32b4lp",
+      description: null,
+      attributions: {
+        extras: null
+      }
+    },
+    {
+      type: "scene",
+      name: "Test",
+      images: {
+        preview: "https://hubs.local:4000/files/4f0e7b88-ee14-471d-beeb-39f99e7dd83b.png"
+      },
+      id: "5Ks7azA",
+      description: null,
+      attributions: {
+        extras: null
+      }
+    },
+    {
+      type: "scene",
+      name: "test",
+      images: {
+        preview: "https://hubs.local:4000/files/48471a27-374a-4e44-adca-572069d82645.png"
+      },
+      id: "30v9Sod",
+      description: null,
+      attributions: {
+        extras: null
+      }
+    },
+    {
+      type: "scene",
+      name: "test",
+      images: {
+        preview: "https://hubs.local:4000/files/c5ecaea8-1af7-4867-9c48-db5ad1099240.jpg"
+      },
+      id: "HjAlvYs",
+      description: null,
+      attributions: null
+    },
+    {
+      type: "scene",
+      name: "test Scene",
+      images: {
+        preview: "https://hubs.local:4000/files/bb8bf9d9-8a4c-4c7a-913f-9025aafadace.jpg"
+      },
+      id: "tQM4kck",
+      description: null,
+      attributions: null
+    },
+    {
+      type: "scene",
+      name: "hatalsdjf",
+      images: {
+        preview: "https://hubs.local:4000/files/6e235ee2-d761-4971-8eb3-45b770813d0d.jpg"
+      },
+      id: "cEU8u2X",
+      description: null,
+      attributions: {
+        creator: "Guy Guy",
+        content: [
+          {
+            name: "Top Hat",
+            author: "mcnubbin"
+          }
+        ]
+      }
+    },
+    {
+      type: "scene",
+      name: "hatttt",
+      images: {
+        preview: "https://hubs.local:4000/files/c893467f-f4ae-4d19-9959-947dbf86e49c.jpg"
+      },
+      id: "RCVMUF4",
+      description: null,
+      attributions: {
+        creator: "Guy Guy",
+        content: [
+          {
+            name: "Top Hat",
+            author: "mcnubbin"
+          },
+          {
+            name: "Duck",
+            author: "Luvarv"
+          }
+        ]
+      }
+    },
+    {
+      type: "scene",
+      name: "test2 Scene",
+      images: {
+        preview: "https://hubs.local:4000/files/143eb96f-e7fa-4e3f-b5aa-c13b5607fed8.jpg"
+      },
+      id: "GMfQkql",
+      description: null,
+      attributions: {
+        creator: "Guy Guy2",
+        content: [
+          {
+            name: "Top Hat",
+            author: "mcnubbin"
+          }
+        ]
+      }
+    },
+    {
+      type: "scene",
+      name: "truck2",
+      images: {
+        preview: "https://hubs.local:4000/files/59de1e7d-56d7-4ec7-a899-40fa04b35e73.jpg"
+      },
+      id: "LQ5b3K2",
+      description: null,
+      attributions: {
+        creator: "Guy Guy3",
+        content: [
+          {
+            url: "https://sketchfab.com/models/53eb70801f7a4a8699875d6880725fe2",
+            name: "Low Poly Open Cargo Truck",
+            author: "koken0"
+          },
+          {
+            url: "https://sketchfab.com/models/7973f8361bc742349d1bf69193cfe482",
+            name: "Low poly truck",
+            author: "Nick"
+          }
+        ]
+      }
+    },
+    {
+      type: "scene",
+      name: "WatWat2",
+      images: {
+        preview: "https://hubs.local:4000/files/dafe7bee-7447-4b11-96e4-86f2b931fa71.jpg"
+      },
+      id: "id69kW3",
+      description: null,
+      attributions: {
+        creator: "Guy Guy3",
+        content: [
+          {
+            name: "Duck",
+            author: "Poly"
+          }
+        ]
+      }
+    },
+    {
+      type: "scene",
+      name: "test",
+      images: {
+        preview: "https://hubs.local:4000/files/45b2350a-404d-4c42-80a9-2376d6932428.jpg"
+      },
+      id: "zD7ViUB",
+      description: null,
+      attributions: {
+        creator: "Guy Guy3",
+        content: []
+      }
+    },
+    {
+      type: "scene",
+      name: "lkjfoo",
+      images: {
+        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+      },
+      id: "xkrv5ym4xy",
+      description: null,
+      attributions: {
+        extras: null
+      }
+    }
+  ]
+};
 async function grantedMicLabels() {
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
   return mediaDevices.filter(d => d.label && d.kind === "audioinput").map(d => d.label);
@@ -222,6 +426,9 @@ class UIRoot extends Component {
     });
 
     setTimeout(() => this.handleForceEntry(), 2000);
+    setTimeout(() => {
+      this.pushHistoryState("overlay", "media");
+    }, 1000);
   }
 
   componentWillUnmount() {
@@ -1205,6 +1412,12 @@ class UIRoot extends Component {
               render={props => (
                 <ProfileEntryPanel {...props} finished={this.onProfileFinished} store={this.props.store} />
               )}
+            />
+            <StateRoute
+              stateKey="overlay"
+              stateValue="media"
+              history={this.props.history}
+              render={props => <MediaBrowser {...props} result={MEDIA_QUERY_RESULT} />}
             />
             <StateRoute
               stateKey="entry_step"
