@@ -292,7 +292,13 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   if (!isLegacyBundle) {
     const gltfEl = document.createElement("a-entity");
     gltfEl.setAttribute("gltf-model-plus", { src: proxiedUrlFor(sceneUrl), useCache: false, inflate: true });
-    gltfEl.addEventListener("model-loaded", () => environmentScene.emit("bundleloaded"));
+    gltfEl.addEventListener(
+      "model-loaded",
+      () => {
+        environmentScene.emit("bundleloaded");
+      },
+      { once: true }
+    );
     environmentScene.appendChild(gltfEl);
   } else {
     // Deprecated
