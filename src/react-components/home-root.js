@@ -52,7 +52,7 @@ class HomeRoot extends Component {
 
   constructor(props) {
     super(props);
-    this.state.signedIn = props.authChannel.authenticated;
+    this.state.signedIn = props.authChannel.signedIn;
     this.state.email = props.authChannel.email;
   }
 

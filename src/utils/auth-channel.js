@@ -4,7 +4,7 @@ export default class AuthChannel {
   constructor(store) {
     this.store = store;
     this.socket = null;
-    this._authenticated = !!this.store.state.credentials.token;
+    this._signedIn = !!this.store.state.credentials.token;
   }
 
   setSocket = socket => {
@@ -15,8 +15,8 @@ export default class AuthChannel {
     return this.store.state.credentials.email;
   }
 
-  get authenticated() {
-    return this._authenticated;
+  get signedIn() {
+    return this._signedIn;
   }
 
   signOut = async hubChannel => {
@@ -24,7 +24,7 @@ export default class AuthChannel {
       await hubChannel.signOut();
     }
     this.store.update({ credentials: { token: null, email: null } });
-    this._authenticated = false;
+    this._signedIn = false;
   };
 
   async startAuthentication(email, hubChannel) {
@@ -42,7 +42,7 @@ export default class AuthChannel {
         if (hubChannel) {
           await hubChannel.signIn(token);
         }
-        this._authenticated = true;
+        this._signedIn = true;
         resolve();
       })
     );
