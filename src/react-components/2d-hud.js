@@ -7,7 +7,7 @@ import styles from "../assets/stylesheets/2d-hud.scss";
 import uiStyles from "../assets/stylesheets/ui-root.scss";
 import { WithHoverSound } from "./wrap-with-audio";
 import { FormattedMessage } from "react-intl";
-import { Link } from "react-router-dom";
+import StateLink from "./state-link";
 
 const browser = detect();
 
@@ -163,7 +163,7 @@ class TopHUD extends Component {
   }
 }
 
-const BottomHUD = ({ showPhotoPicker, onMediaPicked }) => (
+const BottomHUD = ({ showPhotoPicker, onMediaPicked, history }) => (
   <div className={cx(styles.container, styles.column, styles.bottom, styles.unselectable)}>
     {showPhotoPicker ? (
       <div className={cx(uiStyles.uiInteractive, styles.panel, styles.up)}>
@@ -188,9 +188,11 @@ const BottomHUD = ({ showPhotoPicker, onMediaPicked }) => (
     )}
     <div>
       <WithHoverSound>
-        <Link
+        <StateLink
           className={cx(uiStyles.uiInteractive, styles.iconButton, styles.large, styles.createObject)}
-          to="/create"
+          stateKey="modal"
+          stateValue="create"
+          history={history}
           title={"Create Object"}
         />
       </WithHoverSound>
@@ -200,7 +202,8 @@ const BottomHUD = ({ showPhotoPicker, onMediaPicked }) => (
 
 BottomHUD.propTypes = {
   showPhotoPicker: PropTypes.bool,
-  onMediaPicked: PropTypes.func
+  onMediaPicked: PropTypes.func,
+  history: PropTypes.object
 };
 
 export default { TopHUD, BottomHUD };

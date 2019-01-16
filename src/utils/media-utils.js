@@ -3,6 +3,9 @@ import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 
 const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
+if (process.env.CORS_PROXY_SERVER) {
+  nonCorsProxyDomains.push(process.env.CORS_PROXY_SERVER);
+}
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
 const commonKnownContentTypes = {
@@ -176,16 +179,13 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
       clearTimeout(fireLoadingTimeout);
 
       if (!entity.classList.contains("pen") && !entity.getAttribute("animation__spawn-start")) {
-        entity.object3D.scale.setScalar(0.5);
-        entity.matrixNeedsUpdate = true;
-
         entity.setAttribute("animation__spawn-start", {
           property: "scale",
-          delay: 50,
-          dur: 300,
-          from: { x: 0.5, y: 0.5, z: 0.5 },
-          to: { x: 1.0, y: 1.0, z: 1.0 },
-          easing: "easeOutElastic"
+          delay: 0,
+          dur: 200,
+          from: { x: entity.object3D.scale.x / 4, y: entity.object3D.scale.y / 4, z: entity.object3D.scale.z / 4 },
+          to: { x: entity.object3D.scale.x, y: entity.object3D.scale.y, z: entity.object3D.scale.z },
+          easing: "easeInQuad"
         });
       }
 
