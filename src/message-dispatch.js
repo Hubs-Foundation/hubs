@@ -39,6 +39,7 @@ export default class MessageDispatch {
     const playerRig = document.querySelector("#player-rig");
     const scales = [0.0625, 0.125, 0.25, 0.5, 1.0, 1.5, 3, 5, 7.5, 12.5];
     const curScale = playerRig.object3D.scale;
+    let err;
 
     switch (command) {
       case "fly":
@@ -78,10 +79,16 @@ export default class MessageDispatch {
         this.scene.emit("quack");
         break;
       case "scene":
-        this.hubChannel.updateScene(args[0]);
+        err = this.hubChannel.updateScene(args[0]);
+        if (err === "unauthorized") {
+          this.addToPresenceLog({ type: "log", body: "You do not have permission to change the scene." });
+        }
         break;
       case "rename":
-        this.hubChannel.rename(args.join(" "));
+        err = this.hubChannel.rename(args.join(" "));
+        if (err === "unauthorized") {
+          this.addToPresenceLog({ type: "log", body: "You do not have permission to rename this room." });
+        }
         break;
     }
   };

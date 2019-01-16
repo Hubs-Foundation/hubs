@@ -117,7 +117,6 @@ class UIRoot extends Component {
     platformUnsupportedReason: PropTypes.string,
     hubId: PropTypes.string,
     hubName: PropTypes.string,
-    isOwner: PropTypes.bool,
     hubScene: PropTypes.object,
     isSupportAvailable: PropTypes.bool,
     presenceLogEntries: PropTypes.array,

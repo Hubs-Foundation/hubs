@@ -620,9 +620,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     .join()
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
+      hubChannel.setPermissionsFromToken(data.perms_token);
       subscriptions.setHubChannel(hubChannel);
       subscriptions.setSubscribed(data.subscriptions.web_push);
-      remountUI({ initialIsSubscribed: subscriptions.isSubscribed(), isOwner: data.is_owner });
+      remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
       await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
     })
     .receive("error", res => {
