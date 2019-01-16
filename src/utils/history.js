@@ -56,7 +56,10 @@ export function popToBeginningOfHubHistory(history, navigateToPriorPage) {
   // to go back to the prior page.
   const unsubscribe = history.listen(() => {
     unsubscribe();
-    history.push({ pathname: history.location.pathname, state: { __historyLength: 0, __duplicate: true } });
+    history.push({
+      pathname: history.location.pathname + history.location.search,
+      state: { __historyLength: 0, __duplicate: true }
+    });
     if (navigateToPriorPage) history.go(-2); // Go back to history entry before beginning.
   });
 
