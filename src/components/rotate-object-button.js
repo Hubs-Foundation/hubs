@@ -116,87 +116,79 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.hand = hand.id === "cursor" ? document.querySelector("#player-right-controller").object3D : hand.object3D;
     this.mode = data.mode;
     this.camera = this.camera || document.querySelector("#player-camera").object3D;
-    switch (this.mode) {
-      case ROTATE_MODE.AXIS:
-        this.axis.copy(data.axis);
-        this.active = true;
-      case ROTATE_MODE.FREE:
-      case ROTATE_MODE.GARY:
-        const { plane, normal, intersections, Pi, Pp, Pc, PiPc, PpPc, XYi } = this.planarInfo;
-        const v = this.v;
-        const q = this.q;
+    if (this.mode === ROTATE_MODE.AXIS) {
+      this.axis.copy(data.axis);
+    }
+    if (this.mode === ROTATE_MODE.AXIS || this.mode === ROTATE_MODE.FREE || this.mode === ROTATE_MODE.GARY) {
+      const { plane, intersections, Pi, Pp } = this.planarInfo;
+      const v = this.v;
+      const q = this.q;
 
-        this.camera.matrixWorld.decompose(v, plane.quaternion, v);
-        this.o.matrixWorld.decompose(plane.position, q, v);
-        plane.matrixNeedsUpdate = true;
-        plane.updateMatrixWorld(true);
+      this.camera.matrixWorld.decompose(v, plane.quaternion, v);
+      this.o.matrixWorld.decompose(plane.position, q, v);
+      plane.matrixNeedsUpdate = true;
+      plane.updateMatrixWorld(true);
 
-        this.raycaster =
-          this.raycaster || document.querySelector("#cursor-controller").components["cursor-controller"].raycaster;
-        intersections.length = 0;
-        const far = this.raycaster.far;
-        this.raycaster.far = 1000;
-        plane.raycast(this.raycaster, intersections);
-        this.raycaster.far = far;
-        this.active = !!intersections[0];
-        if (!this.active) {
-          return;
-        }
+      this.raycaster =
+        this.raycaster || document.querySelector("#cursor-controller").components["cursor-controller"].raycaster;
+      intersections.length = 0;
+      const far = this.raycaster.far;
+      this.raycaster.far = 1000;
+      plane.raycast(this.raycaster, intersections);
+      this.raycaster.far = far;
+      this.active = !!intersections[0];
+      if (!this.active) {
+        return;
+      }
 
-        Pi.copy(intersections[0].point);
-        Pp.copy(Pi);
+      Pi.copy(intersections[0].point);
+      Pp.copy(Pi);
 
-        this.camera.matrixWorld.decompose(this.v, this.cameraWorldQuaternion, this.v);
-        this.o.matrixWorld.decompose(this.v, this.objectWorldQuaternion, this.v);
+      this.camera.matrixWorld.decompose(this.v, this.cameraWorldQuaternion, this.v);
+      this.o.matrixWorld.decompose(this.v, this.objectWorldQuaternion, this.v);
 
-        this.v.set(0, 0, -1).applyQuaternion(this.cameraWorldQuaternion);
-        this.v2.set(0, 0, -1).applyQuaternion(this.objectWorldQuaternion);
-        this.sign = this.v.dot(this.v2) > 0 ? 1 : -1;
+      this.v.set(0, 0, -1).applyQuaternion(this.cameraWorldQuaternion);
+      this.v2.set(0, 0, -1).applyQuaternion(this.objectWorldQuaternion);
+      this.sign = this.v.dot(this.v2) > 0 ? 1 : -1;
 
-        this.v.set(0, 1, 0); //.applyQuaternion(this.cameraWorldQuaternion);
-        this.v2.set(0, 1, 0).applyQuaternion(this.objectWorldQuaternion);
-        this.sign2 = this.v.dot(this.v2) > 0 ? 1 : -1;
+      this.v.set(0, 1, 0); //.applyQuaternion(this.cameraWorldQuaternion);
+      this.v2.set(0, 1, 0).applyQuaternion(this.objectWorldQuaternion);
+      this.sign2 = this.v.dot(this.v2) > 0 ? 1 : -1;
 
-        this.dyAll = 0;
-        this.dyStore = 0;
-        this.dyApplied = 0;
-        this.dzAll = 0;
-        this.dzStore = 0;
-        this.dzApplied = 0;
-        break;
-      case ROTATE_MODE.RESET:
-        // Project the line from your eye to the object onto the XZ plane.
-        // Place the object at eye level along the projected line, rotating it to face you.
-        // TODO: This could instead be "inspect", which either moves the object to you OR moves you it
-        //       optimizing for to a comfortable viewing transform.
-        this.active = false;
-        const { eye, obj, eyeToObj, resetTarget } = this.resetInfo;
-        this.camera.getWorldPosition(eye);
-        this.o.getWorldPosition(obj);
-        eyeToObj.copy(obj).sub(eye);
-        this.up.set(0, 1, 0);
-        this.v
-          .copy(eyeToObj)
-          .projectOnPlane(this.up)
-          .normalize();
-        resetTarget.copy(obj).sub(this.v);
+      this.dyAll = 0;
+      this.dyStore = 0;
+      this.dyApplied = 0;
+      this.dzAll = 0;
+      this.dzStore = 0;
+      this.dzApplied = 0;
+    } else if (this.mode === ROTATE_MODE.RESET) {
+      // Project the line from your eye to the object onto the XZ plane.
+      // Place the object at eye level along the projected line, rotating it to face you.
+      // TODO: This could instead be "inspect", which either moves the object to you OR moves you it
+      //       optimizing for to a comfortable viewing transform.
+      this.active = false;
+      const { eye, obj, eyeToObj, resetTarget } = this.resetInfo;
+      this.camera.getWorldPosition(eye);
+      this.o.getWorldPosition(obj);
+      eyeToObj.copy(obj).sub(eye);
+      this.up.set(0, 1, 0);
+      this.v
+        .copy(eyeToObj)
+        .projectOnPlane(this.up)
+        .normalize();
+      resetTarget.copy(obj).sub(this.v);
 
-        this.o.lookAt(resetTarget);
-        this.o.position.y = eye.y;
-        this.o.matrixNeedsUpdate = true;
-        this.active = false;
-        break;
-      case ROTATE_MODE.PUPPET:
-        this.active = true;
-        this.puppet.exponent = data.exponent;
-        const { Ci, Ci_inverse, Oi } = this.puppet;
-        this.hand.getWorldQuaternion(Ci);
-        Ci_inverse.copy(Ci).inverse();
-        this.o.getWorldQuaternion(Oi);
-        break;
-      default:
-        // should never get to here
-        break;
+      this.o.lookAt(resetTarget);
+      this.o.position.y = eye.y;
+      this.o.matrixNeedsUpdate = true;
+      this.active = false;
+    } else if (this.mode === ROTATE_MODE.PUPPET) {
+      this.active = true;
+      this.puppet.exponent = data.exponent;
+      const { Ci, Ci_inverse, Oi } = this.puppet;
+      this.hand.getWorldQuaternion(Ci);
+      Ci_inverse.copy(Ci).inverse();
+      this.o.getWorldQuaternion(Oi);
     }
   },
 
@@ -209,7 +201,7 @@ AFRAME.registerSystem("rotate-selected-object", {
       return;
     }
 
-    const { plane, normal, intersections, Pi, Pp, Pc, PiPc, PpPc, XYi, resetTarget } = this.planarInfo;
+    const { plane, normal, intersections, Pi, Pp, Pc, PiPc, PpPc, XYi } = this.planarInfo;
 
     this.camera.matrixNeedsUpdate = true;
     this.camera.updateMatrixWorld(true);
@@ -228,7 +220,7 @@ AFRAME.registerSystem("rotate-selected-object", {
       // restricting the angles using Math.floor, and converting back to a quaternion.
       // TODO The quaternion's exponential varies with the "reactivity" of the object under the action of the controller. I know that for the natural numbers, the effect is to apply the "whole" action of the quaternion rather than a part, so I make a special case for exponent == 2.
       // TODO: After sensitivity via exponential, would like to know how to adjust it on a per-axis basis. (But which axes?)
-      const { Cc, Cd, Ci, Ci_inverse, Oi, Oc, exponent } = this.puppet;
+      const { Cc, Cd, Ci_inverse, Oi, Oc, exponent } = this.puppet;
       this.hand.updateMatrixWorld(true);
       this.hand.getWorldQuaternion(Cc);
       Cd.copy(Ci_inverse).premultiply(Cc);
