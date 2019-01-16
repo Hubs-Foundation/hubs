@@ -322,16 +322,20 @@
                 </a-entity>
             </template>
 
+            <!-- TODO: All of these positions are assuming 16:9 - need to actually reposition based on video resolution -->
             <template id="video-hover-menu">
                 <a-entity class="ui interactable-ui video-toolbar" mixin="button-container">
-                    <a-entity class="video-seek-back-button" mixin="rounded-text-button" position="-0.3 0 0.01" scale="0.6 0.6 0.6" slice9="width: 0.2; opacity: 0.8;" visible="false">
-                        <a-entity text="value: <; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    <a-entity class="video-time-label" text="value: 0; anchor: right; align: right;" text-raycast-hack position="0.485 -0.25 -0.015"></a-entity>
+                    <a-entity class="video-volume-label" text="value: 0%; anchor: right; align: right;" text-raycast-hack position="0.485 0.25 -0.015" visible="false"></a-entity>
+
+                    <a-entity class="video-seek-back-button" mixin="rounded-text-button" position="-0.3 0 0" scale="0.6 0.6 0.6" slice9="width: 0.2; opacity: 0.8;" visible="false">
+                        <a-entity text="value: -10; width:1.75; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
-                    <a-entity class="video-playpause-button" mixin="rounded-text-button" position="0 0 0.01" scale="1 1 1" slice9="width: 0.2; opacity: 0.8;" visible="false">
-                        <a-entity text="value: ||; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    <a-entity class="video-playpause-button" mixin="rounded-text-button" position="0 0 0" scale="1 1 1" slice9="width: 0.2; opacity: 0.8;" visible="false">
+                        <a-entity text="width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
-                    <a-entity class="video-seek-forward-button" mixin="rounded-text-button" position="0.3 0 0.01" scale="0.6 0.6 0.6" slice9="width: 0.2; opacity: 0.8;" visible="false">
-                        <a-entity text="value: >; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    <a-entity class="video-seek-forward-button" mixin="rounded-text-button" position="0.3 0 0" scale="0.6 0.6 0.6" slice9="width: 0.2; opacity: 0.8;" visible="false">
+                        <a-entity text="value: +30; anchor: center; width:1.75; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>

@@ -343,7 +343,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.mouse.wheel },
       dest: { value: paths.actions.cursor.mediaVolumeMod },
-      xform: xforms.scale(0.3)
+      xform: xforms.scale(-0.3)
     }
   ],
   [sets.inputFocused]: [
