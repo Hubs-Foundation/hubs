@@ -18,7 +18,7 @@ function pushOrUpdateHistoryState(history, replace, k, v) {
     state[k] = v;
   }
 
-  const pathname = history.location.pathname === "/" ? "" : history.location.pathname;
+  const pathname = (history.location.pathname === "/" ? "" : history.location.pathname) + history.location.search;
 
   // If popToBeginningOfHubHistory was previously used, there is a duplicate entry
   // at the top of the history stack (which was needed to wipe out forward history)
