@@ -18,7 +18,7 @@ function pushOrUpdateHistoryState(history, replace, k, v) {
     state[k] = v;
   }
 
-  const pathname = history.location.pathname === "/" ? "" : history.location.pathname;
+  const pathname = (history.location.pathname === "/" ? "" : history.location.pathname) + history.location.search;
 
   // If popToBeginningOfHubHistory was previously used, there is a duplicate entry
   // at the top of the history stack (which was needed to wipe out forward history)
@@ -56,7 +56,10 @@ export function popToBeginningOfHubHistory(history, navigateToPriorPage) {
   // to go back to the prior page.
   const unsubscribe = history.listen(() => {
     unsubscribe();
-    history.push({ pathname: history.location.pathname, state: { __historyLength: 0, __duplicate: true } });
+    history.push({
+      pathname: history.location.pathname + history.location.search,
+      state: { __historyLength: 0, __duplicate: true }
+    });
     if (navigateToPriorPage) history.go(-2); // Go back to history entry before beginning.
   });
 
