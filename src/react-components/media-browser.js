@@ -49,10 +49,37 @@ class MediaBrowser extends Component {
           <div className={styles.title}>
             <FormattedMessage id="media-browser.header-scenes" />
           </div>
+
+          <div className={styles.body}>
+            <div className={styles.tiles}>{this.props.result.entries.map(this.entryToTile)}</div>
+          </div>
         </div>
       </div>
     );
   }
+
+  entryToTile = entry => {
+    const imageSrc = entry.images.preview;
+
+    const creator = entry.attributions && entry.attributions.creator;
+
+    return (
+      <div className={styles.tile}>
+        <div className={styles.image}>
+          <img src={imageSrc} />
+        </div>
+        <div className={styles.info}>
+          <div className={styles.name}>{entry.name}</div>
+          {creator && (
+            <div className={styles.creator}>
+              <FormattedMessage id="media-browser.creator-prefix" />
+              {creator}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
 }
 
 export default injectIntl(MediaBrowser);

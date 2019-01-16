@@ -46,9 +46,27 @@
 
   :local(.header) {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     width: 100%;
     margin: 24px;
+    min-height: fit-content;
+  }
+
+  :local(.body) {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+
+    :local(.tiles) {
+      margin: 16px 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+
+      :local(.tile) {
+        width: 244px;
+        height: 350px;
+      }
+    }
   }
 
   :local(.narrow-title) {
@@ -59,9 +77,11 @@
     text-align: center;
     flex: 10;
     font-size: 1.2em;
+    justify-content: center;
+    min-height: fit-content;
 
     @media (max-width: 768px) {
-      display: block;
+      display: flex;
     }
   }
 
@@ -73,6 +93,7 @@
     justify-content: center;
     text-align: center;
     flex: 10;
+    min-height: fit-content;
 
     @media (min-width: 769px) {
       display: flex;
@@ -82,6 +103,7 @@
   :local(.back) {
     @extend %fa-icon-button;
 
+    margin: 0;
     display: flex;
     font-size: 1.0em;
     font-weight: bold;
