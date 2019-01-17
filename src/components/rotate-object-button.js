@@ -316,21 +316,19 @@ AFRAME.registerComponent("exist-if-threedof", {
     existIf3DOF: { default: true }
   },
   init() {
-    window.setTimeout(() => {
-      let threeDOF = false;
-      for (const device of AFRAME.scenes[0].systems.userinput.activeDevices) {
-        if (
-          device.gamepad &&
-          (device.gamepad.id === "Oculus Go Controller" ||
-            device.gamepad.id === "Gear VR Controller" ||
-            device.gamepad.id === "Daydream Controller")
-        ) {
-          threeDOF = true;
-        }
+    let threeDOF = false;
+    for (const device of AFRAME.scenes[0].systems.userinput.activeDevices) {
+      if (
+        device.gamepad &&
+        (device.gamepad.id === "Oculus Go Controller" ||
+          device.gamepad.id === "Gear VR Controller" ||
+          device.gamepad.id === "Daydream Controller")
+      ) {
+        threeDOF = true;
       }
-      if (threeDOF !== this.data.existIf3DOF) {
-        this.el.parentNode.removeChild(this.el);
-      }
-    }, 5000);
+    }
+    if (threeDOF !== this.data.existIf3DOF) {
+      this.el.parentNode.removeChild(this.el);
+    }
   }
 });
