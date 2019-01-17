@@ -58,13 +58,13 @@ class MediaBrowser extends Component {
     );
   }
 
-  entryToTile = entry => {
+  entryToTile = (entry, idx) => {
     const imageSrc = entry.images.preview;
 
     const creator = entry.attributions && entry.attributions.creator;
 
     return (
-      <div className={styles.tile}>
+      <div className={styles.tile} key={`${entry.id}_${idx}`}>
         <div className={styles.image}>
           <img src={imageSrc} />
         </div>

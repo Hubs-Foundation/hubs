@@ -64,9 +64,9 @@ const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
 
 const MEDIA_QUERY_RESULT = {
   meta: {
-    total_pages: 1,
-    total_entries: 13,
-    page_size: 20,
+    total_pages: 3,
+    total_entries: 72,
+    page_size: 24,
     page: 1
   },
   entries: [
@@ -261,6 +261,149 @@ const MEDIA_QUERY_RESULT = {
       attributions: {
         creator: "Guy Guy3",
         content: []
+      }
+    },
+    {
+      type: "scene",
+      url: "https://hubs.local:4000/scenes/tKjQdCL/test",
+      name: "lkjfoo",
+      images: {
+        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+      },
+      id: "xkrv5ym4xy",
+      description: null,
+      attributions: {
+        extras: null
+      }
+    },
+    {
+      type: "scene",
+      url: "https://hubs.local:4000/scenes/tKjQdCL/test",
+      name: "lkjfoo",
+      images: {
+        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+      },
+      id: "xkrv5ym4xy",
+      description: null,
+      attributions: {
+        extras: null
+      }
+    },
+    {
+      type: "scene",
+      url: "https://hubs.local:4000/scenes/tKjQdCL/test",
+      name: "lkjfoo",
+      images: {
+        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+      },
+      id: "xkrv5ym4xy",
+      description: null,
+      attributions: {
+        extras: null
+      }
+    },
+    {
+      type: "scene",
+      url: "https://hubs.local:4000/scenes/tKjQdCL/test",
+      name: "lkjfoo",
+      images: {
+        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+      },
+      id: "xkrv5ym4xy",
+      description: null,
+      attributions: {
+        extras: null
+      }
+    },
+    {
+      type: "scene",
+      url: "https://hubs.local:4000/scenes/tKjQdCL/test",
+      name: "lkjfoo",
+      images: {
+        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+      },
+      id: "xkrv5ym4xy",
+      description: null,
+      attributions: {
+        extras: null
+      }
+    },
+    {
+      type: "scene",
+      url: "https://hubs.local:4000/scenes/tKjQdCL/test",
+      name: "lkjfoo",
+      images: {
+        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+      },
+      id: "xkrv5ym4xy",
+      description: null,
+      attributions: {
+        extras: null
+      }
+    },
+    {
+      type: "scene",
+      url: "https://hubs.local:4000/scenes/tKjQdCL/test",
+      name: "lkjfoo",
+      images: {
+        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+      },
+      id: "xkrv5ym4xy",
+      description: null,
+      attributions: {
+        extras: null
+      }
+    },
+    {
+      type: "scene",
+      url: "https://hubs.local:4000/scenes/tKjQdCL/test",
+      name: "lkjfoo",
+      images: {
+        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+      },
+      id: "xkrv5ym4xy",
+      description: null,
+      attributions: {
+        extras: null
+      }
+    },
+    {
+      type: "scene",
+      url: "https://hubs.local:4000/scenes/tKjQdCL/test",
+      name: "lkjfoo",
+      images: {
+        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+      },
+      id: "xkrv5ym4xy",
+      description: null,
+      attributions: {
+        extras: null
+      }
+    },
+    {
+      type: "scene",
+      url: "https://hubs.local:4000/scenes/tKjQdCL/test",
+      name: "lkjfoo",
+      images: {
+        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+      },
+      id: "xkrv5ym4xy",
+      description: null,
+      attributions: {
+        extras: null
+      }
+    },
+    {
+      type: "scene",
+      url: "https://hubs.local:4000/scenes/tKjQdCL/test",
+      name: "lkjfoo",
+      images: {
+        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+      },
+      id: "xkrv5ym4xy",
+      description: null,
+      attributions: {
+        extras: null
       }
     },
     {
