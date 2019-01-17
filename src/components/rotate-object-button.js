@@ -37,13 +37,18 @@ AFRAME.registerComponent("rotate-button", {
       this.system.rotate(this.targetEl.object3D, hand, this.data);
       e.preventDefault();
     };
+    this.onGrabEnd = e => {
+      e.preventDefault();
+    };
   },
   update() {},
   play() {
     this.el.addEventListener("grab-start", this.onGrabStart);
+    this.el.addEventListener("grab-end", this.onGrabEnd);
   },
   pause() {
     this.el.removeEventListener("grab-start", this.onGrabStart);
+    this.el.removeEventListener("grab-end", this.onGrabEnd);
   }
 });
 
