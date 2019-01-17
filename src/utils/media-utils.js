@@ -3,6 +3,9 @@ import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 
 const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
+if (process.env.CORS_PROXY_SERVER) {
+  nonCorsProxyDomains.push(process.env.CORS_PROXY_SERVER);
+}
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 
 const commonKnownContentTypes = {
@@ -24,6 +27,23 @@ function b64EncodeUnicode(str) {
   return btoa(encodeURIComponent(str).replace(CHAR_RE, (_, p1) => String.fromCharCode("0x" + p1)));
 }
 
+const farsparkEncodeUrl = url => {
+  // farspark doesn't know how to read '=' base64 padding characters
+  // translate base64 + to - and / to _ for URL safety
+  return b64EncodeUnicode(url)
+    .replace(/=+$/g, "")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_");
+};
+
+export const scaledThumbnailUrlFor = (url, width, height) => {
+  if (process.env.RETICULUM_SERVER && process.env.RETICULUM_SERVER.includes("hubs.local")) {
+    return url;
+  }
+
+  return `https://${process.env.FARSPARK_SERVER}/thumbnail/${farsparkEncodeUrl(url)}?w=${width}&h=${height}`;
+};
+
 export const proxiedUrlFor = (url, index) => {
   if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
 
@@ -35,17 +55,11 @@ export const proxiedUrlFor = (url, index) => {
     // Ignore
   }
 
-  // farspark doesn't know how to read '=' base64 padding characters
-  const base64Url = b64EncodeUnicode(url).replace(/=+$/g, "");
-
   if (index != null || !process.env.CORS_PROXY_SERVER) {
-    // translate base64 + to - and / to _ for URL safety
-    const encodedUrl = base64Url.replace(/\+/g, "-").replace(/\//g, "_");
     const method = index != null ? "extract" : "raw";
-    return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${encodedUrl}`;
+    return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${farsparkEncodeUrl(url)}`;
   } else {
-    const encodedUrl = encodeURIComponent(url);
-    return `https://${process.env.CORS_PROXY_SERVER}/${encodedUrl}`;
+    return `https://${process.env.CORS_PROXY_SERVER}/${url}`;
   }
 };
 
@@ -78,7 +92,7 @@ export const getCustomGLTFParserURLResolver = gltfUrl => (url, path) => {
 
       // Drop the .gltf filename
       const assetUrl = originalUrlParts.slice(0, originalUrlParts.length - 1).join("/") + "/" + url;
-      return corsProxyPrefix + encodeURIComponent(assetUrl);
+      return corsProxyPrefix + assetUrl;
     }
   }
 
@@ -165,16 +179,13 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
       clearTimeout(fireLoadingTimeout);
 
       if (!entity.classList.contains("pen") && !entity.getAttribute("animation__spawn-start")) {
-        entity.object3D.scale.setScalar(0.5);
-        entity.matrixNeedsUpdate = true;
-
         entity.setAttribute("animation__spawn-start", {
           property: "scale",
-          delay: 50,
-          dur: 300,
-          from: { x: 0.5, y: 0.5, z: 0.5 },
-          to: { x: 1.0, y: 1.0, z: 1.0 },
-          easing: "easeOutElastic"
+          delay: 0,
+          dur: 200,
+          from: { x: entity.object3D.scale.x / 4, y: entity.object3D.scale.y / 4, z: entity.object3D.scale.z / 4 },
+          to: { x: entity.object3D.scale.x, y: entity.object3D.scale.y, z: entity.object3D.scale.z },
+          easing: "easeInQuad"
         });
       }
 

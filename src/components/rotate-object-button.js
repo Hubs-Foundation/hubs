@@ -35,6 +35,7 @@ AFRAME.registerComponent("rotate-button", {
       }
       this.system = this.system || AFRAME.scenes[0].systems["rotate-selected-object"];
       this.system.rotate(this.targetEl.object3D, hand, this.data);
+      e.preventDefault();
     };
   },
   update() {},

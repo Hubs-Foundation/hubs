@@ -1,3 +1,6 @@
+import "three/examples/js/pmrem/PMREMGenerator";
+import "three/examples/js/pmrem/PMREMCubeUVPacker";
+
 /**
  * @author zz85 / https://github.com/zz85
  *
@@ -231,6 +234,13 @@ AFRAME.registerComponent("skybox", {
   init() {
     this.sky = new THREE.Sky();
     this.el.setObject3D("mesh", this.sky);
+    this.skyScene = new THREE.Scene();
+    this.cubeCamera = new THREE.CubeCamera(1, 100000, 512);
+    this.skyScene.add(this.cubeCamera);
+
+    // HACK: Render environment map on next frame to avoid bug where the render target texture is black.
+    this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
+    requestAnimationFrame(this.updateEnvironmentMap);
   },
 
   update(oldData) {
@@ -279,6 +289,26 @@ AFRAME.registerComponent("skybox", {
       }
 
       this.el.object3D.matrixNeedsUpdate = true;
+    }
+
+    this.updateEnvironmentMap();
+  },
+
+  updateEnvironmentMap() {
+    const environmentMapComponent = this.el.sceneEl.components["environment-map"];
+
+    if (environmentMapComponent) {
+      const renderer = this.el.sceneEl.renderer;
+      this.skyScene.add(this.sky);
+      this.cubeCamera.update(renderer, this.skyScene);
+      this.el.setObject3D("mesh", this.sky);
+      const pmremGenerator = new THREE.PMREMGenerator(this.cubeCamera.renderTarget.texture);
+      pmremGenerator.update(renderer);
+      const pmremCubeUVPacker = new THREE.PMREMCubeUVPacker(pmremGenerator.cubeLods);
+      pmremCubeUVPacker.update(renderer);
+      environmentMapComponent.updateEnvironmentMap(pmremCubeUVPacker.CubeUVRenderTarget.texture);
+      pmremGenerator.dispose();
+      pmremCubeUVPacker.dispose();
     }
   },
 

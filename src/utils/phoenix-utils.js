@@ -1,5 +1,6 @@
 import uuid from "uuid/v4";
 import { Socket } from "phoenix";
+import { generateHubName } from "../utils/name-generation";
 
 export function connectToReticulum(debug = false) {
   const qs = new URLSearchParams(location.search);
@@ -51,4 +52,34 @@ export function getReticulumFetchUrl(path, absolute = false) {
 export function getLandingPageForPhoto(photoUrl) {
   const parsedUrl = new URL(photoUrl);
   return getReticulumFetchUrl(parsedUrl.pathname.replace(".png", ".html") + parsedUrl.search, true);
+}
+
+export async function createAndRedirectToNewHub(name, sceneId, sceneUrl, replace) {
+  const createUrl = getReticulumFetchUrl("/api/v1/hubs");
+  const payload = { hub: { name: name || generateHubName() } };
+
+  if (sceneId) {
+    payload.hub.scene_id = sceneId;
+  } else {
+    payload.hub.default_environment_gltf_bundle_url = sceneUrl;
+  }
+
+  const res = await fetch(createUrl, {
+    body: JSON.stringify(payload),
+    headers: { "content-type": "application/json" },
+    method: "POST"
+  });
+
+  const hub = await res.json();
+  let url = hub.url;
+
+  if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
+    url = `/hub.html?hub_id=${hub.hub_id}`;
+  }
+
+  if (replace) {
+    document.location.replace(url);
+  } else {
+    document.location = url;
+  }
 }
