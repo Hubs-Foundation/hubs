@@ -73,7 +73,7 @@ const MEDIA_QUERY_RESULT = {
     {
       type: "scene",
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
-      name: "WatWat",
+      name: "WatWat asldkfj asdlfkj asdflkja dfkjasdflkjdffdlkjfd",
       images: {
         preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
@@ -112,7 +112,7 @@ const MEDIA_QUERY_RESULT = {
     {
       type: "scene",
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
-      name: "test",
+      name: "WatWat asldkfj asdlfkj asdflkja dfkjasdflkjdffdlkjfd",
       images: {
         preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
@@ -154,7 +154,7 @@ const MEDIA_QUERY_RESULT = {
       id: "cEU8u2X",
       description: null,
       attributions: {
-        creator: "Guy Guy",
+        creator: "Guy Guy sdjd fKDJF dfsjks dfksjd FDkj dfk",
         content: [
           {
             name: "Top Hat",

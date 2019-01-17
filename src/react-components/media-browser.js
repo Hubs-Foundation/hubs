@@ -74,7 +74,7 @@ class MediaBrowser extends Component {
           {creator && (
             <div className={styles.creator}>
               <FormattedMessage id="media-browser.creator-prefix" />
-              {creator}
+              &nbsp;{creator}
             </div>
           )}
         </div>
