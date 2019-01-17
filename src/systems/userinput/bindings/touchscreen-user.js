@@ -27,6 +27,11 @@ export const touchscreenUserBindings = addSetsToBindings({
       xform: xforms.always(0)
     },
     {
+      src: {},
+      dest: { value: paths.actions.hideCursorLine },
+      xform: xforms.always(true)
+    },
+    {
       src: { x: zero, y: forward },
       dest: { value: paths.actions.characterAcceleration },
       xform: xforms.compose_vec2

@@ -76,6 +76,7 @@ function getPaths(set, dest) {
 const exclude = [
   paths.actions.cameraDelta,
   paths.actions.cursor.stopDrawing,
+  paths.actions.cursor.hideLine,
   paths.actions.leftHand.index,
   paths.actions.leftHand.middleRingPinky,
   paths.actions.leftHand.pose,

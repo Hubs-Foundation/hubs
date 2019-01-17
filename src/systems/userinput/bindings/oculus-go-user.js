@@ -158,13 +158,6 @@ export default function generate3DOFTriggerBindings(device) {
         src: { value: device.button("trigger").pressed },
         dest: { value: paths.actions.rightHand.middleRingPinky },
         xform: xforms.copy
-      },
-      {
-        src: {
-          value: triggerFalling
-        },
-        dest: { value: paths.actions.cursor.drop },
-        xform: xforms.copy
       }
     ],
 

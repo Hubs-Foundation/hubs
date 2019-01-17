@@ -89,17 +89,11 @@ AFRAME.registerComponent("cursor-controller", {
   emitIntersectionEvents: function(prevIntersection, currIntersection) {
     // if we are now intersecting something, and previously we were intersecting nothing or something else
     if (currIntersection && (!prevIntersection || currIntersection.object.el !== prevIntersection.object.el)) {
-      this.data.cursor.emit("raycaster-intersection", {
-        el: currIntersection.object.el,
-        intersection: currIntersection
-      });
+      this.data.cursor.emit("raycaster-intersection", { el: currIntersection.object.el });
     }
     // if we were intersecting something, but now we are intersecting nothing or something else
     if (prevIntersection && (!currIntersection || currIntersection.object.el !== prevIntersection.object.el)) {
-      this.data.cursor.emit("raycaster-intersection-cleared", {
-        el: prevIntersection.object.el,
-        intersection: currIntersection
-      });
+      this.data.cursor.emit("raycaster-intersection-cleared", { el: prevIntersection.object.el });
     }
   },
 
@@ -116,10 +110,9 @@ AFRAME.registerComponent("cursor-controller", {
 
       const userinput = AFRAME.scenes[0].systems.userinput;
       const cursorPose = userinput.get(paths.actions.cursor.pose);
-      const rightHandPose = userinput.get(paths.actions.rightHand.pose);
 
       this.data.cursor.object3D.visible = this.enabled && !!cursorPose;
-      this.line.material.visible = !!(this.enabled && rightHandPose);
+      this.line.material.visible = !!(this.enabled && !userinput.get(paths.actions.cursor.hideLine));
 
       if (!this.enabled || !cursorPose) {
         return;
