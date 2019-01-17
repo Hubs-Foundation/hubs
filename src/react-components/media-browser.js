@@ -7,6 +7,7 @@ import classNames from "classnames";
 import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
+import { scaledThumbnailUrlFor } from "../utils/media-utils";
 
 class MediaBrowser extends Component {
   static propTypes = {
@@ -66,7 +67,7 @@ class MediaBrowser extends Component {
     return (
       <div className={styles.tile} key={`${entry.id}_${idx}`}>
         <div className={styles.image}>
-          <img src={imageSrc} />
+          <img src={scaledThumbnailUrlFor(imageSrc, 244, 350)} />
         </div>
         <div className={styles.info}>
           <div className={styles.name}>{entry.name}</div>

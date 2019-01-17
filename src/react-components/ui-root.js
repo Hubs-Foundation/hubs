@@ -75,7 +75,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "WatWat",
       images: {
-        preview: "https://hubs.local:4000/files/e28ee49c-9173-4ba8-bb6c-8b1f02f9d1af.png"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "jsfd36y5jg",
       description: null,
@@ -88,7 +88,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "Test",
       images: {
-        preview: "https://hubs.local:4000/files/c9c6e5a4-fa49-4413-9b24-6940dc12fa38.png"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "qhnz32b4lp",
       description: null,
@@ -101,7 +101,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "Test",
       images: {
-        preview: "https://hubs.local:4000/files/4f0e7b88-ee14-471d-beeb-39f99e7dd83b.png"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "5Ks7azA",
       description: null,
@@ -114,7 +114,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "test",
       images: {
-        preview: "https://hubs.local:4000/files/48471a27-374a-4e44-adca-572069d82645.png"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "30v9Sod",
       description: null,
@@ -127,7 +127,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "test",
       images: {
-        preview: "https://hubs.local:4000/files/c5ecaea8-1af7-4867-9c48-db5ad1099240.jpg"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "HjAlvYs",
       description: null,
@@ -138,7 +138,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "test Scene",
       images: {
-        preview: "https://hubs.local:4000/files/bb8bf9d9-8a4c-4c7a-913f-9025aafadace.jpg"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "tQM4kck",
       description: null,
@@ -149,7 +149,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "hatalsdjf",
       images: {
-        preview: "https://hubs.local:4000/files/6e235ee2-d761-4971-8eb3-45b770813d0d.jpg"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "cEU8u2X",
       description: null,
@@ -168,7 +168,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "hatttt",
       images: {
-        preview: "https://hubs.local:4000/files/c893467f-f4ae-4d19-9959-947dbf86e49c.jpg"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "RCVMUF4",
       description: null,
@@ -191,7 +191,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "test2 Scene",
       images: {
-        preview: "https://hubs.local:4000/files/143eb96f-e7fa-4e3f-b5aa-c13b5607fed8.jpg"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "GMfQkql",
       description: null,
@@ -210,7 +210,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "truck2",
       images: {
-        preview: "https://hubs.local:4000/files/59de1e7d-56d7-4ec7-a899-40fa04b35e73.jpg"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "LQ5b3K2",
       description: null,
@@ -235,7 +235,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "WatWat2",
       images: {
-        preview: "https://hubs.local:4000/files/dafe7bee-7447-4b11-96e4-86f2b931fa71.jpg"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "id69kW3",
       description: null,
@@ -254,7 +254,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "test",
       images: {
-        preview: "https://hubs.local:4000/files/45b2350a-404d-4c42-80a9-2376d6932428.jpg"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "zD7ViUB",
       description: null,
@@ -268,7 +268,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "lkjfoo",
       images: {
-        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "xkrv5ym4xy",
       description: null,
@@ -281,7 +281,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "lkjfoo",
       images: {
-        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "xkrv5ym4xy",
       description: null,
@@ -294,7 +294,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "lkjfoo",
       images: {
-        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "xkrv5ym4xy",
       description: null,
@@ -307,7 +307,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "lkjfoo",
       images: {
-        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "xkrv5ym4xy",
       description: null,
@@ -320,7 +320,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "lkjfoo",
       images: {
-        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "xkrv5ym4xy",
       description: null,
@@ -333,7 +333,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "lkjfoo",
       images: {
-        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "xkrv5ym4xy",
       description: null,
@@ -346,7 +346,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "lkjfoo",
       images: {
-        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "xkrv5ym4xy",
       description: null,
@@ -359,7 +359,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "lkjfoo",
       images: {
-        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "xkrv5ym4xy",
       description: null,
@@ -372,7 +372,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "lkjfoo",
       images: {
-        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "xkrv5ym4xy",
       description: null,
@@ -385,7 +385,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "lkjfoo",
       images: {
-        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "xkrv5ym4xy",
       description: null,
@@ -398,7 +398,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "lkjfoo",
       images: {
-        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "xkrv5ym4xy",
       description: null,
@@ -411,7 +411,7 @@ const MEDIA_QUERY_RESULT = {
       url: "https://hubs.local:4000/scenes/tKjQdCL/test",
       name: "lkjfoo",
       images: {
-        preview: "https://hubs.local:4000/files/33ffffd7-c145-47fa-845a-f91b338c0b4c.png"
+        preview: "https://uploads-prod.reticulum.io/files/34952949-e452-4e2f-a798-3963159a4e62.jpg"
       },
       id: "xkrv5ym4xy",
       description: null,
@@ -1555,10 +1555,16 @@ class UIRoot extends Component {
     const pendingMessageTextareaHeight = textRows * 28 + "px";
     const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
 
+    const rootStyles = {
+      [styles.ui]: true,
+      "ui-root": true,
+      "in-modal-or-overlay": this.isInModalOrOverlay()
+    };
+
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
-          <div className={styles.ui}>
+          <div className={classNames(rootStyles)}>
             {this.state.dialog}
 
             <StateRoute
