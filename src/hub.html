@@ -238,8 +238,11 @@
                             </a-entity>
 
                             <a-image
+                                class="ui interactable-ui"
                                 exist-if-threedof="existIf3DOF: true"
-                                rotate-button="mode: puppet; exponent: 1" position="0.50 0.0 0.01"
+                                rotate-button
+                                rotate-button-selector
+                                position="0.50 0.0 0.01"
                                 icon-button="tooltip: #hud-tooltip; tooltipText: Rotate; activeTooltipText: Rotate; image: #globe-off; hoverImage: #globe-off-hover; activeImage: #globe-on; activeHoverImage: #globe-on-hover"
                                 scale="0.1 0.1 0.1"
                                 material="alphaTest:0.1;"
@@ -248,16 +251,7 @@
                                 set-sounds-invisible
                             ></a-image>
 
-                            <a-image
-                                exist-if-threedof="existIf3DOF: false"
-                                rotate-button="mode: free;" position="0.50 -0.15 0.01"
-                                icon-button="tooltip: #hud-tooltip; tooltipText: Rotate; activeTooltipText: Rotate; image: #globe-off; hoverImage: #globe-off-hover; activeImage: #globe-on; activeHoverImage: #globe-on-hover"
-                                scale="0.1 0.1 0.1"
-                                material="alphaTest:0.1;"
-                                hoverable
-                                sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
-                                set-sounds-invisible
-                            ></a-image>
+
                             <a-entity class="video-seek-back-button" mixin="rounded-text-button" position="-0.4 0 0.01" slice9="width: 0.2" visible="false">
                                 <a-entity text="value: <; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>

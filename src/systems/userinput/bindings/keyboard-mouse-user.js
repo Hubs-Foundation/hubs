@@ -330,7 +330,14 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       priority: 2
     }
   ],
-
+  [sets.cursorHoldingUI]: [
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.falling,
+      priority: 3
+    }
+  ],
   [sets.cursorHoveringOnInteractable]: [
     {
       src: { value: paths.device.mouse.buttonLeft },

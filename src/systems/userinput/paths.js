@@ -18,7 +18,6 @@ paths.actions.muteMic = "/actions/muteMic";
 paths.actions.focusChat = "/actions/focusChat";
 paths.actions.rayObjectRotation = "/actions/rayObjectRotation";
 paths.actions.cursor = {};
-paths.actions.cursor.hideLine = "/actions/cursor/hideLine";
 paths.actions.cursor.pose = "/actions/cursorPose";
 paths.actions.cursor.grab = "/actions/cursorGrab";
 paths.actions.cursor.drop = "/actions/cursorDrop";
