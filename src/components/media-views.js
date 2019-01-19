@@ -553,12 +553,18 @@ AFRAME.registerComponent("media-video", {
 
     const userinput = this.el.sceneEl.systems.userinput;
     const volumeMod = userinput.get(paths.actions.cursor.mediaVolumeMod);
-    if (volumeMod) {
+    if (this.el.is("hovered") && volumeMod) {
       this.el.setAttribute("media-video", "volume", THREE.Math.clamp(this.data.volume + volumeMod, 0, 1));
-      this.volumeLabel.setAttribute("text", "value", `VOL: ${Math.round(this.data.volume * 100)}%`);
+      this.volumeLabel.setAttribute(
+        "text",
+        "value",
+        this.data.volume === 0 ? "MUTE" : `VOL: ${Math.round(this.data.volume * 100)}%`
+      );
       this.volumeLabel.object3D.visible = true;
       clearTimeout(this.hideVolumeLabelTimeout);
-      this.hideVolumeLabelTimeout = setTimeout(() => (this.volumeLabel.object3D.visible = false), 1000);
+      if (this.data.volume) {
+        this.hideVolumeLabelTimeout = setTimeout(() => (this.volumeLabel.object3D.visible = false), 1000);
+      }
     }
 
     if (this.hoverMenu.object3D.visible && !this.videoIsLive) {

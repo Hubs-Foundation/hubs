@@ -2,7 +2,8 @@ AFRAME.registerComponent("hover-menu", {
   multiple: true,
   schema: {
     template: { type: "selector" },
-    dirs: { type: "array" }
+    dirs: { type: "array" },
+    dim: { default: true }
   },
 
   async init() {
@@ -46,6 +47,9 @@ AFRAME.registerComponent("hover-menu", {
   applyHoverState() {
     if (!this.menu) return;
     this.menu.object3D.visible = !this.el.sceneEl.is("frozen") && this.hovering;
+    if (this.data.dim && this.el.object3DMap.mesh && this.el.object3DMap.mesh.material) {
+      this.el.object3DMap.mesh.material.color.setScalar(this.menu.object3D.visible ? 0.5 : 1);
+    }
   },
 
   play() {
