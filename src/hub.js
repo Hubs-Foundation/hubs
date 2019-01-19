@@ -123,8 +123,17 @@ const isMobile = AFRAME.utils.device.isMobile();
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
-import "aframe-physics-system";
-import "aframe-physics-extras";
+const Ammo = require("ammo.js/builds/ammo.wasm.js");
+const AmmoWasm = require("ammo.js/builds/ammo.wasm.wasm");
+window.Ammo = Ammo.bind(undefined, {
+  locateFile(path) {
+    if (path.endsWith(".wasm")) {
+      return AmmoWasm;
+    }
+    return path;
+  }
+});
+require("aframe-physics-system");
 import "super-hands";
 import "./components/super-networked-interactable";
 import "./components/networked-counter";

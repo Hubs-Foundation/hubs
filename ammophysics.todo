@@ -12,21 +12,30 @@ ammo physics TODO:
 //*** cursor constraint rotation?
 //*** enable stretchable
 
-* verify camera and pen objects
+//* verify camera and pen objects
 
-* collision with environments (trimeshes) and other shapes sometimes dont register (ccd?)
 
-* enable changing between dynamic and kinematic
+//* collision with environments (trimeshes) and other shapes sometimes dont register (ccd?) - only seems to occur when debug mode is on, so maybe framerate related
 
-* re-enable sticky-object
+//* enable changing between dynamic and kinematic
 
-* object delete causes crash, sometimes
+//* re-enable sticky-object
 
-* generated trimeshes for collision for environments with nested transforms are wrong sometimes
+//* object delete causes crash, sometimes
 
-* basic aframe (and/or aframe primitives) implementation not working correctly
-** object scaling issues
-** trimeshes/hulls
+VERIFY: 
+
+//* generated trimeshes for collision for environments with nested transforms are wrong sometimes ?
+
+---
+
+PUNT:
+
+*constraint "springiness"?
+
+//* basic aframe (and/or aframe primitives) implementation not working correctly
+//** object scaling issues
+//** trimeshes/hulls
 
 ---
 

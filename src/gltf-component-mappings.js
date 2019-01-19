@@ -3,7 +3,6 @@ import "./components/gltf-model-plus";
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
 AFRAME.GLTFModelPlus.registerComponent("sound", "sound");
-AFRAME.GLTFModelPlus.registerComponent("collision-filter", "collision-filter");
 AFRAME.GLTFModelPlus.registerComponent("css-class", "css-class");
 AFRAME.GLTFModelPlus.registerComponent("interactable", "css-class", (el, componentName) => {
   el.setAttribute(componentName, "interactable");
@@ -11,7 +10,16 @@ AFRAME.GLTFModelPlus.registerComponent("interactable", "css-class", (el, compone
 AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner");
 AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
 AFRAME.GLTFModelPlus.registerComponent("media-loader", "media-loader");
-AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body");
+AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body", (el, componentName, componentData) => {
+  //This is only required for migration of old environments with super-spawners
+  //will no longer be needed when spawners are added via Spoke instead.
+  el.setAttribute("ammo-body", {
+    mass: 0,
+    type: "static",
+    shape: "hull",
+    collisionFlags: 4
+  });
+});
 AFRAME.GLTFModelPlus.registerComponent("hide-when-quality", "hide-when-quality");
 AFRAME.GLTFModelPlus.registerComponent("light", "light");
 AFRAME.GLTFModelPlus.registerComponent("ambient-light", "ambient-light");

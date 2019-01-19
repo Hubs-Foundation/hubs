@@ -33,7 +33,6 @@ const isMobile = AFRAME.utils.device.isMobile();
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
 import "aframe-physics-system";
-import "aframe-physics-extras";
 import "./components/event-repeater";
 import "./components/controls-shape-offset";
 

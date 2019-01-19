@@ -169,7 +169,8 @@ module.exports = (env, argv) => ({
         })
       },
       {
-        test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|svg|webm)$/,
+        test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|svg|webm|wasm)$/,
+        type: "javascript/auto",
         use: {
           loader: "file-loader",
           options: {
