@@ -10,7 +10,7 @@ AFRAME.GLTFModelPlus.registerComponent("interactable", "css-class", (el, compone
 AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner");
 AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
 AFRAME.GLTFModelPlus.registerComponent("media-loader", "media-loader");
-AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body", (el, componentName, componentData) => {
+AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body", el => {
   //This is only required for migration of old environments with super-spawners
   //will no longer be needed when spawners are added via Spoke instead.
   el.setAttribute("ammo-body", {

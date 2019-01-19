@@ -88,8 +88,8 @@ AFRAME.registerComponent("sticky-object-zone", {
     getLastWorldPosition(this.el.object3D, this.worldPosition);
     getLastWorldQuaternion(this.el.object3D, this.worldQuaternion);
 
-    const dir = new THREE.Vector3(0, 0, 5).applyQuaternion(this.el.object3D.quaternion);
     //TODO: support this with ammo
+    // const dir = new THREE.Vector3(0, 0, 5).applyQuaternion(this.el.object3D.quaternion);
     // this.bootImpulsePosition = new CANNON.Vec3(0, 0, 0);
     // this.bootImpulse = new CANNON.Vec3();
     // this.bootImpulse.copy(dir);
@@ -126,9 +126,9 @@ AFRAME.registerComponent("sticky-object-zone", {
     stickyObject.stuckTo = this;
 
     if (this.stuckObject && NAF.utils.isMine(this.stuckObject.el)) {
-      const el = this.stuckObject.el;
-      this._unstickObject();
       //TODO: support this with ammo
+      // const el = this.stuckObject.el;
+      this._unstickObject();
       // el.body.applyImpulse(this.bootImpulse, this.bootImpulsePosition);
     }
 
