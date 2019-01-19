@@ -169,8 +169,7 @@ module.exports = (env, argv) => ({
         })
       },
       {
-        test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|svg|webm|wasm)$/,
-        type: "javascript/auto",
+        test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|svg|webm)$/,
         use: {
           loader: "file-loader",
           options: {
@@ -178,6 +177,17 @@ module.exports = (env, argv) => ({
             name: "[path][name]-[hash].[ext]",
             // Make asset paths relative to /src
             context: path.join(__dirname, "src")
+          }
+        }
+      },
+      {
+        test: /\.(wasm)$/,
+        type: "javascript/auto",
+        use: {
+          loader: "file-loader",
+          options: {
+            outputPath: "assets/wasm",
+            name: "[name]-[hash].[ext]"
           }
         }
       },
