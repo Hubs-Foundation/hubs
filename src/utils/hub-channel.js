@@ -137,8 +137,14 @@ export default class HubChannel {
           resolve();
         })
         .receive("error", err => {
-          console.error("sign in failed", err);
-          reject();
+          if (err.reason === "invalid_token") {
+            console.warn("sign in failed", err);
+            // Token expired or invalid TODO purge from storage if possible
+            resolve();
+          } else {
+            console.error("sign in failed", err);
+            reject();
+          }
         });
     });
   };
