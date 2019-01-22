@@ -1,3 +1,5 @@
+import { forEachMaterial } from "../utils/material-utils";
+
 const invaderPos = new AFRAME.THREE.Vector3();
 const bubblePos = new AFRAME.THREE.Vector3();
 
@@ -181,8 +183,10 @@ AFRAME.registerComponent("personal-space-invader", {
 
   setInvading(invading) {
     if (this.targetMesh && this.targetMesh.material) {
-      this.targetMesh.material.opacity = invading ? this.data.invadingOpacity : 1;
-      this.targetMesh.material.transparent = invading;
+      forEachMaterial(this.targetMesh, material => {
+        material.opacity = invading ? this.data.invadingOpacity : 1;
+        material.transparent = invading;
+      });
     } else {
       this.el.object3D.visible = !invading;
     }

@@ -1,4 +1,5 @@
 import nextTick from "../utils/next-tick";
+import { forEachMaterial } from "../utils/material-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import MobileStandardMaterial from "../materials/MobileStandardMaterial";
 import { getCustomGLTFParserURLResolver } from "../utils/media-utils";
@@ -245,11 +246,11 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
     object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
 
-    if (object.material && object.material.type === "MeshStandardMaterial") {
-      if (preferredTechnique === "KHR_materials_unlit") {
+    forEachMaterial(object, material => {
+      if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
         object.material = MobileStandardMaterial.fromStandardMaterial(object.material);
       }
-    }
+    });
   });
 
   if (fileMap) {
