@@ -416,6 +416,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   scene.removeAttribute("keyboard-shortcuts"); // Remove F and ESC hotkeys from aframe
   scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
 
+  scene.addEventListener("loaded", () => {
+    const physicsSystem = scene.systems.physics;
+    physicsSystem.setDebug(isDebug || physicsSystem.data.debug);
+  });
+
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);
   const entryManager = new SceneEntryManager(hubChannel);

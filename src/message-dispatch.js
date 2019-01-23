@@ -76,6 +76,10 @@ export default class MessageDispatch {
         spawnChatMessage(DUCK_URL);
         this.scene.emit("quack");
         break;
+      case "debug":
+        const physicsSystem = document.querySelector("a-scene").systems.physics;
+        physicsSystem.setDebug(!physicsSystem.debug);
+        break;
     }
   };
 }
