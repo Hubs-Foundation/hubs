@@ -401,7 +401,7 @@ AFRAME.registerComponent("media-video", {
       this.seekBackButton.object3D.visible = !!this.video && !this.videoIsLive;
     }
 
-    // Only update playback posiiton for videos you don't own
+    // Only update playback position for videos you don't own
     if (force || (this.networkedEl && !NAF.utils.isMine(this.networkedEl) && this.video)) {
       if (Math.abs(this.data.time - this.video.currentTime) > this.data.syncTolerance) {
         this.tryUpdateVideoPlaybackState(this.data.videoPaused, this.data.time);
