@@ -36,6 +36,10 @@ AFRAME.registerComponent("character-controller", {
     this.snapRotateRight = this.snapRotateRight.bind(this);
     this.setAngularVelocity = this.setAngularVelocity.bind(this);
     this.handleTeleport = this.handleTeleport.bind(this);
+    this.el.sceneEl.addEventListener("nav-mesh-loaded", () => {
+      this.navGroup = null;
+      this.navNode = null;
+    });
   },
 
   update: function() {
