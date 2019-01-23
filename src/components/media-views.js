@@ -307,6 +307,9 @@ AFRAME.registerComponent("media-video", {
 
     this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", dirs: ["forward", "back"] });
     this.el.components["hover-menu__video"].getHoverMenu().then(menu => {
+      // If we got removed while waiting, do nothing.
+      if (!this.el.parentNode) return;
+
       this.hoverMenu = menu;
 
       this.playPauseButton = this.el.querySelector(".video-playpause-button");
