@@ -575,7 +575,7 @@ AFRAME.registerComponent("media-video", {
       );
     }
 
-    // If a none live video is currently playing and we own it, send out time updates
+    // If a non-live video is currently playing and we own it, send out time updates
     if (!this.data.videoPaused && !this.videoIsLive && this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
       const now = performance.now();
       if (now - this.lastUpdate > this.data.tickRate) {
