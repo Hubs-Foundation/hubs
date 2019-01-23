@@ -492,7 +492,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     {
       src: { value: rightAxis("joyY") },
       dest: { value: paths.actions.cursor.mediaVolumeMod },
-      xform: xforms.scale(-0.001)
+      xform: xforms.scale(-0.01)
     }
   ],
 
