@@ -80,6 +80,7 @@ import "./components/follow-in-lower-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
+import "./components/hover-menu";
 
 import ReactDOM from "react-dom";
 import React from "react";
