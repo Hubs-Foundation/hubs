@@ -46,7 +46,6 @@ import "./components/offset-relative-to";
 import "./components/player-info";
 import "./components/debug";
 import "./components/hand-poses";
-import "./components/gltf-bundle";
 import "./components/hud-controller";
 import "./components/freeze-controller";
 import "./components/icon-button";
@@ -85,6 +84,7 @@ import "./components/hover-menu";
 
 import ReactDOM from "react-dom";
 import React from "react";
+import { BrowserRouter, Route } from "react-router-dom";
 import UIRoot from "./react-components/ui-root";
 import AuthChannel from "./utils/auth-channel";
 import HubChannel from "./utils/hub-channel";
@@ -157,6 +157,8 @@ import qsTruthy from "./utils/qs_truthy";
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
 const isDebug = qsTruthy("debug");
+const loadingEnvironmentURL =
+  "https://hubs-proxy.com/https://uploads-prod.reticulum.io/files/58c034aa-ff17-4d3c-a6cc-c9095bb4822c.glb";
 
 if (!isBotMode && !isTelemetryDisabled) {
   registerTelemetry();
@@ -215,18 +217,35 @@ function mountUI(props = {}) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
 
+  // Hub ID and slug are the basename
+  let routerBaseName = document.location.pathname
+    .split("/")
+    .slice(0, 3)
+    .join("/");
+
+  if (document.location.pathname.includes("hub.html")) {
+    routerBaseName = "";
+  }
+
   ReactDOM.render(
-    <UIRoot
-      {...{
-        scene,
-        isBotMode,
-        concurrentLoadDetector,
-        disableAutoExitOnConcurrentLoad,
-        forcedVREntryType,
-        store,
-        ...props
-      }}
-    />,
+    <BrowserRouter basename={routerBaseName}>
+      <Route
+        render={routeProps => (
+          <UIRoot
+            {...{
+              scene,
+              isBotMode,
+              concurrentLoadDetector,
+              disableAutoExitOnConcurrentLoad,
+              forcedVREntryType,
+              store,
+              ...props,
+              ...routeProps
+            }}
+          />
+        )}
+      />
+    </BrowserRouter>,
     document.getElementById("ui-root")
   );
 }
@@ -234,6 +253,72 @@ function mountUI(props = {}) {
 function remountUI(props) {
   uiProps = { ...uiProps, ...props };
   mountUI(uiProps);
+}
+
+async function updateUIForHub(hub) {
+  remountUI({
+    hubId: hub.hub_id,
+    hubName: hub.name,
+    hubScene: hub.scene,
+    hubEntryCode: hub.entry_code
+  });
+
+  document
+    .querySelector("#hud-hub-entry-link")
+    .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
+}
+
+async function updateEnvironmentForHub(hub) {
+  let sceneUrl;
+  let isLegacyBundle; // Deprecated
+
+  const environmentScene = document.querySelector("#environment-scene");
+
+  if (hub.scene) {
+    isLegacyBundle = false;
+    sceneUrl = hub.scene.model_url;
+  } else {
+    const defaultSpaceTopic = hub.topics[0];
+    const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");
+    const bundleAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle");
+    sceneUrl = (glbAsset || bundleAsset).src;
+    const hasExtension = /\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl);
+    isLegacyBundle = !(glbAsset || hasExtension);
+  }
+
+  if (isLegacyBundle) {
+    // Deprecated
+    const res = await fetch(sceneUrl);
+    const data = await res.json();
+    const baseURL = new URL(THREE.LoaderUtils.extractUrlBase(sceneUrl), window.location.href);
+    sceneUrl = new URL(data.assets[0].src, baseURL).href;
+  } else {
+    sceneUrl = proxiedUrlFor(sceneUrl);
+  }
+
+  console.log(`Scene URL: ${sceneUrl}`);
+
+  let environmentEl = null;
+
+  if (environmentScene.childNodes.length === 0) {
+    const environmentEl = document.createElement("a-entity");
+    environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
+    environmentScene.appendChild(environmentEl);
+  } else {
+    // Change environment
+    environmentEl = environmentScene.childNodes[0];
+
+    // Clear the three.js image cache and load the loading environment before switching to the new one.
+    THREE.Cache.clear();
+
+    const onLoadingEnvironmentReady = () => {
+      environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
+      environmentEl.removeEventListener("model-loaded", onLoadingEnvironmentReady);
+    };
+
+    environmentEl.addEventListener("model-loaded", onLoadingEnvironmentReady);
+    environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironmentURL });
+  }
 }
 
 async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
@@ -247,58 +332,17 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
   const hub = data.hubs[0];
 
-  let sceneUrl;
-  let isLegacyBundle; // Deprecated
-
-  if (hub.scene) {
-    isLegacyBundle = false;
-    sceneUrl = hub.scene.model_url;
-  } else {
-    // Deprecated
-    const defaultSpaceTopic = hub.topics[0];
-    const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");
-    const bundleAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle");
-    sceneUrl = (glbAsset || bundleAsset).src;
-    const hasExtension = /\.gltf/i.test(sceneUrl) || /\.glb/i.test(sceneUrl);
-    isLegacyBundle = !(glbAsset || hasExtension);
-  }
-
-  console.log(`Scene URL: ${sceneUrl}`);
   console.log(`Janus host: ${hub.host}`);
-  const environmentScene = document.querySelector("#environment-scene");
   const objectsScene = document.querySelector("#objects-scene");
   const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
   const objectsEl = document.createElement("a-entity");
   objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
   objectsScene.appendChild(objectsEl);
 
-  if (!isLegacyBundle) {
-    const gltfEl = document.createElement("a-entity");
-    gltfEl.setAttribute("gltf-model-plus", { src: proxiedUrlFor(sceneUrl), useCache: false, inflate: true });
-    gltfEl.addEventListener(
-      "model-loaded",
-      () => {
-        environmentScene.emit("bundleloaded");
-      },
-      { once: true }
-    );
-    environmentScene.appendChild(gltfEl);
-  } else {
-    // Deprecated
-    environmentScene.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
-  }
+  updateEnvironmentForHub(hub);
+  updateUIForHub(hub);
 
-  remountUI({
-    hubId: hub.hub_id,
-    hubName: hub.name,
-    hubScene: hub.scene,
-    hubEntryCode: hub.entry_code,
-    onSendMessage: messageDispatch.dispatch
-  });
-
-  document
-    .querySelector("#hud-hub-entry-link")
-    .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
+  remountUI({ onSendMessage: messageDispatch.dispatch });
 
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   objectsEl.addEventListener("model-loaded", async el => {
@@ -501,19 +545,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const environmentScene = document.querySelector("#environment-scene");
-
-  environmentScene.addEventListener("bundleloaded", () => {
-    remountUI({ environmentSceneLoaded: true });
-
-    for (const modelEl of environmentScene.children) {
-      addAnimationComponents(modelEl);
-    }
-
+  const onFirstEnvironmentLoad = () => {
     setupLobbyCamera();
 
     // Replace renderer with a noop renderer to reduce bot resource usage.
     if (isBotMode) {
       runBotMode(scene, entryManager);
+    }
+
+    environmentScene.removeEventListener("model-loaded", onFirstEnvironmentLoad);
+  };
+
+  environmentScene.addEventListener("model-loaded", onFirstEnvironmentLoad);
+
+  environmentScene.addEventListener("model-loaded", () => {
+    // This will be run every time the environment is changed (including the first load.)
+    remountUI({ environmentSceneLoaded: true });
+
+    for (const modelEl of environmentScene.children) {
+      addAnimationComponents(modelEl);
     }
   });
 
@@ -538,6 +588,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
   const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
+  const { token } = store.state.credentials;
+  if (token) {
+    joinPayload.auth_token = token;
+  }
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
 
   const presenceLogEntries = [];
@@ -566,12 +620,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     .join()
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
-
-      const { token } = store.state.credentials;
-      if (token) {
-        await hubChannel.signIn(token);
-      }
-
+      hubChannel.setPermissionsFromToken(data.perms_token);
       subscriptions.setHubChannel(hubChannel);
       subscriptions.setSubscribed(data.subscriptions.web_push);
       remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
@@ -678,6 +727,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     addToPresenceLog(incomingMessage);
+  });
+
+  hubPhxChannel.on("hub_refresh", ({ session_id, hubs, stale_fields }) => {
+    const hub = hubs[0];
+    const userInfo = hubPhxPresence.state[session_id];
+
+    updateUIForHub(hub);
+
+    if (stale_fields.includes("scene")) {
+      updateEnvironmentForHub(hub);
+
+      addToPresenceLog({
+        type: "scene_changed",
+        name: userInfo.metas[0].profile.displayName,
+        sceneName: hub.scene ? hub.scene.name : "a custom URL"
+      });
+    }
+
+    if (stale_fields.includes("name")) {
+      // Re-write the slug in the browser history
+      if (window.history && window.history.replaceState) {
+        const pathParts = document.location.pathname.split("/");
+
+        if (pathParts.length >= 3 && pathParts[1] === hub.hub_id) {
+          const oldSlug = pathParts[2];
+
+          const title =
+            window.history.state && window.history.state.title ? window.history.state.title : document.title;
+          const state = window.history.state ? window.history.state.state : null;
+          const url = document.location.toString().replace(`${hub.hub_id}/${oldSlug}`, `${hub.hub_id}/${hub.slug}`);
+
+          window.history.replaceState(state, title, url);
+        }
+      }
+
+      addToPresenceLog({
+        type: "hub_name_changed",
+        name: userInfo.metas[0].profile.displayName,
+        hubName: hub.name
+      });
+    }
   });
 
   authChannel.setSocket(socket);

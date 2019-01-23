@@ -2,6 +2,8 @@ import uuid from "uuid/v4";
 import { Socket } from "phoenix";
 import { generateHubName } from "../utils/name-generation";
 
+import Store from "../storage/store";
+
 export function connectToReticulum(debug = false) {
   const qs = new URLSearchParams(location.search);
 
@@ -64,9 +66,15 @@ export async function createAndRedirectToNewHub(name, sceneId, sceneUrl, replace
     payload.hub.default_environment_gltf_bundle_url = sceneUrl;
   }
 
+  const headers = { "content-type": "application/json" };
+  const store = new Store();
+  if (store.state && store.state.credentials.token) {
+    headers.authorization = `bearer ${store.state.credentials.token}`;
+  }
+
   const res = await fetch(createUrl, {
     body: JSON.stringify(payload),
-    headers: { "content-type": "application/json" },
+    headers,
     method: "POST"
   });
 
