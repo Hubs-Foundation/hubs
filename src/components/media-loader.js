@@ -180,8 +180,8 @@ AFRAME.registerComponent("media-loader", {
           "media-video",
           Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, time: startTime, contentType })
         );
-        if (this.el.components["position-at-box-shape-border"]) {
-          this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+        if (this.el.components["position-at-box-shape-border__freeze"]) {
+          this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
         }
       } else if (contentType.startsWith("image/")) {
         this.el.removeAttribute("gltf-model-plus");
