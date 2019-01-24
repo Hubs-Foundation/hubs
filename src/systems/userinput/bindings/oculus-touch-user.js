@@ -617,6 +617,15 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
+  [sets.cursorHoldingUI]: [
+    {
+      src: { value: rightTriggerPressed2 },
+      dest: { value: cursorDrop2 },
+      xform: xforms.falling,
+      priority: 5
+    }
+  ],
+
   [sets.cursorHoldingInteractable]: [
     {
       src: { value: rightAxis("joyY") },
@@ -630,15 +639,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 3
     },
     {
-      src: { value: rightTriggerPressed2 },
-      dest: {
-        value: cursorDrop2
-      },
-      xform: xforms.falling,
-      priority: 2
-    },
-    {
-      src: [cursorDrop1],
+      src: [cursorDrop1, cursorDrop2],
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.any,
       priority: 2

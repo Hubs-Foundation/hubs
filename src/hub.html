@@ -30,6 +30,7 @@
         personal-space-bubble="debug: false;"
         vr-mode-ui="enabled: false"
         stats-plus="false"
+        rotate-selected-object
         action-to-event__mute="path: /actions/muteMic; event: action_mute;"
         action-to-event__focus_chat="path: /actions/focusChat; event: action_focus_chat;"
         environment-map="loadDefault: false"
@@ -240,6 +241,18 @@
                             <a-entity mixin="rounded-text-button" clone-media-button position="-0.25 -0.375 0.01">
                                 <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
+                            <a-entity scale="0.5 0.5 1" mixin="rounded-text-button" rotate-button rotate-button-selector position="-0.6  0.06 0.01">
+                                <a-entity text="value:rotate; width:2.80; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity  scale="0.5 0.5 1" mixin="rounded-text-button" rotate-button="mode: reset;" position="-0.6 -0.06 0.01">
+                                <a-entity text="value:align; width:2.60; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity class="video-seek-back-button" mixin="rounded-text-button" position="-0.4 0 0.01" slice9="width: 0.2" visible="false">
+                                <a-entity text="value: <; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity class="video-seek-forward-button" mixin="rounded-text-button" position="0.4 0 0.01" slice9="width: 0.2" visible="false">
+                                <a-entity text="value: >; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
                         </a-entity>
                     </a-entity>
                 </a-entity>
@@ -302,11 +315,17 @@
                     set-yxz-order
                     auto-scale-cannon-physics-body
                 >
-                    <a-entity class="ui camera-menu" visibility-while-frozen="withinDistance: 10;" mixin="button-container">
+                    <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 10;" mixin="button-container" >
                         <a-entity mixin="rounded-text-action-button" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01"> </a-entity>
                         <a-entity text=" value:mirror; width:2.5; align:center;" class="mirror-button-label" text-raycast-hack position="0 0.125 0.02"></a-entity>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
                         <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 -0.125 0.02"></a-entity>
+                        <a-entity scale="0.5 0.5 1" mixin="rounded-text-button" rotate-button rotate-button-selector position="-0.6  0.06 0.01">
+                            <a-entity text="value:rotate; width:2.80; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                        </a-entity>
+                        <a-entity  scale="0.5 0.5 1" mixin="rounded-text-button" rotate-button="mode: reset;" position="-0.6 -0.06 0.01">
+                            <a-entity text="value:align; width:2.60; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                        </a-entity>
                     </a-entity>
                 </a-entity>
             </template>
