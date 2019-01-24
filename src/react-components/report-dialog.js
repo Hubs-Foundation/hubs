@@ -23,7 +23,7 @@ export default class ReportDialog extends Component {
           <p>
             You can also find us on{" "}
             <WithHoverSound>
-              <a href="https://discord.gg/XzrGUY8" target="_blank" rel="noopener noreferrer">
+              <a href="https://discord.gg/wHmY4nd" target="_blank" rel="noopener noreferrer">
                 Discord
               </a>
             </WithHoverSound>
