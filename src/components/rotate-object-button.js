@@ -86,7 +86,7 @@ AFRAME.registerSystem("rotate-selected-object", {
       plane: new THREE.Mesh(
         new THREE.PlaneBufferGeometry(100000, 100000, 2, 2),
         new THREE.MeshBasicMaterial({
-          visible: true,
+          visible: false,
           wireframe: true,
           side: THREE.DoubleSide,
           transparent: true,
@@ -283,9 +283,6 @@ AFRAME.registerSystem("rotate-selected-object", {
   },
 
   tick() {
-    this.planarInfo.plane.material.visible =
-      this.active && (this.mode === ROTATE_MODE.CURSOR || this.mode === ROTATE_MODE.AXIS);
-
     if (!this.active) {
       this.active = false;
       return;
