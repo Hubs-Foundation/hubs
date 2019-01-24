@@ -76,3 +76,4 @@ This will allow the CSP checks to pass that are served up by Reticulum so you ca
 * [Hubs-Ops](https://github.com/mozilla/hubs-ops) - Infrastructure as code + management tools for running necessary backend services on AWS.
 
 [![Waffle.io - Columns and their card count](https://badge.waffle.io/mozilla/socialmr.svg?columns=all)](http://waffle.io/mozilla/socialmr)
+
