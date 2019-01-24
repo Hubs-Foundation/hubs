@@ -16,6 +16,7 @@ paths.actions.ensureFrozen = "/actions/ensureFrozen";
 paths.actions.thaw = "/actions/thaw";
 paths.actions.muteMic = "/actions/muteMic";
 paths.actions.focusChat = "/actions/focusChat";
+paths.actions.rotateModifier = "/actions/rotateModifier";
 paths.actions.rayObjectRotation = "/actions/rayObjectRotation";
 paths.actions.cursor = {};
 paths.actions.cursor.pose = "/actions/cursorPose";

@@ -336,6 +336,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.falling,
       priority: 3
+    },
+    {
+      src: { value: paths.device.keyboard.key("shift") },
+      dest: { value: paths.actions.rotateModifier },
+      xform: xforms.copy
     }
   ],
   [sets.cursorHoveringOnInteractable]: [
