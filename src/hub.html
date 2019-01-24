@@ -237,21 +237,12 @@
                                 <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
 
-                            <a-image
-                                class="ui interactable-ui"
-                                exist-if-threedof="existIf3DOF: true"
-                                rotate-button
-                                rotate-button-selector
-                                position="0.50 0.0 0.01"
-                                icon-button="tooltip: #hud-tooltip; tooltipText: Rotate; activeTooltipText: Rotate; image: #globe-off; hoverImage: #globe-off-hover; activeImage: #globe-on; activeHoverImage: #globe-on-hover"
-                                scale="0.1 0.1 0.1"
-                                material="alphaTest:0.1;"
-                                hoverable
-                                sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
-                                set-sounds-invisible
-                            ></a-image>
-
-
+                            <a-entity scale="0.5 0.5 1" mixin="rounded-text-button" rotate-button rotate-button-selector position="-0.6  0.06 0.01">
+                                <a-entity text="value:rotate; width:2.80; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity  scale="0.5 0.5 1" mixin="rounded-text-button" rotate-button="mode: reset;" position="-0.6 -0.06 0.01">
+                                <a-entity text="value:align; width:2.60; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
                             <a-entity class="video-seek-back-button" mixin="rounded-text-button" position="-0.4 0 0.01" slice9="width: 0.2" visible="false">
                                 <a-entity text="value: <; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>

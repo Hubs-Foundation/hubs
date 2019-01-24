@@ -120,9 +120,16 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.target = target;
     this.hand = hand.id === "cursor" ? document.querySelector("#player-right-controller").object3D : hand.object3D;
     this.mode = data.mode;
+
+    if (this.mode === ROTATE_MODE.RESET) {
+      this.alignInFront();
+      return;
+    }
+
     if (this.mode === ROTATE_MODE.AXIS) {
       this.axis.copy(data.axis);
     }
+
     if (this.mode === ROTATE_MODE.AXIS || this.mode === ROTATE_MODE.FREE || this.mode === ROTATE_MODE.GARY) {
       const { plane, intersections, Pp } = this.planarInfo;
       const v = this.v;
@@ -164,32 +171,33 @@ AFRAME.registerSystem("rotate-selected-object", {
       this.dzAll = 0;
       this.dzStore = 0;
       this.dzApplied = 0;
-    } else if (this.mode === ROTATE_MODE.RESET) {
-      // Project the line from your eye to the object onto the XZ plane.
-      // Place the object at eye level along the projected line, rotating it to face you.
-      this.active = false;
-      const { eye, obj, eyeToObj, resetTarget } = this.resetInfo;
-      this.el.camera.getWorldPosition(eye);
-      this.target.getWorldPosition(obj);
-      eyeToObj.copy(obj).sub(eye);
-      this.v2.set(0, 1, 0);
-      this.v
-        .copy(eyeToObj)
-        .projectOnPlane(this.v2)
-        .normalize();
-      resetTarget.copy(obj).sub(this.v);
-
-      this.target.lookAt(resetTarget);
-      this.target.position.y = eye.y;
-      this.target.matrixNeedsUpdate = true;
-      this.active = false;
     } else if (this.mode === ROTATE_MODE.PUPPET) {
       this.active = true;
-      const { Ci, Ci_inverse, Oi } = this.puppet;
-      this.hand.getWorldQuaternion(Ci);
-      Ci_inverse.copy(Ci).inverse();
-      this.target.getWorldQuaternion(Oi);
+      this.target.getWorldQuaternion(this.puppet.Oi);
+      this.hand.getWorldQuaternion(this.puppet.Ci);
+      this.puppet.Ci_inverse.copy(this.puppet.Ci).inverse();
     }
+  },
+
+  alignInFront() {
+    // Project the line from your eye to the object onto the XZ plane.
+    // Place the object at eye level along the projected line, rotating it to face you.
+    this.active = false;
+    const { eye, obj, eyeToObj, resetTarget } = this.resetInfo;
+    this.el.camera.getWorldPosition(eye);
+    this.target.getWorldPosition(obj);
+    eyeToObj.copy(obj).sub(eye);
+    this.v2.set(0, 1, 0);
+    this.v
+      .copy(eyeToObj)
+      .projectOnPlane(this.v2)
+      .normalize();
+    resetTarget.copy(obj).sub(this.v);
+
+    this.target.lookAt(resetTarget);
+    this.target.position.y = eye.y;
+    this.target.matrixNeedsUpdate = true;
+    this.active = false;
   },
 
   tick() {
@@ -232,14 +240,17 @@ AFRAME.registerSystem("rotate-selected-object", {
 
     Pc.copy(intersection.point);
     PpPc.copy(Pc).sub(Pp);
+    const SENSITIVITY = 10;
     XYi.copy(PpPc)
       .projectOnPlane(normal)
       .applyQuaternion(this.q.copy(plane.quaternion).inverse())
-      .multiplyScalar(5 / cameraToPlaneDistance);
+      .multiplyScalar(SENSITIVITY / cameraToPlaneDistance);
     if (this.mode === ROTATE_MODE.FREE || this.mode === ROTATE_MODE.GARY) {
-      const boost = AFRAME.scenes[0].systems.userinput.get(paths.actions.boost);
+      const boost = AFRAME.scenes[0].systems.userinput.get(paths.actions.swapFR);
       this.dualAxis = !boost;
       this.gary = boost;
+        if (this.dualAxis){
+        }
 
       const stepLength = Math.PI / 6;
       this.dyAll = this.dyStore + XYi.y;
@@ -279,9 +290,9 @@ AFRAME.registerComponent("rotate-button-selector", {
   tick() {
     const mode = this.el.components["rotate-button"].data.mode;
     const hand = AFRAME.scenes[0].systems.userinput.get(paths.actions.rightHand.pose);
-    if (mode === "puppet" && !hand) {
+    if (!hand) {
       this.el.setAttribute("rotate-button", "mode", "free");
-    } else if ((mode === "free" || mode === "gary") && !!hand) {
+    } else {
       this.el.setAttribute("rotate-button", "mode", "puppet");
     }
   }
