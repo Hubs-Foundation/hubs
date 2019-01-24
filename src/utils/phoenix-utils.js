@@ -72,13 +72,26 @@ export async function createAndRedirectToNewHub(name, sceneId, sceneUrl, replace
     headers.authorization = `bearer ${store.state.credentials.token}`;
   }
 
-  const res = await fetch(createUrl, {
+  let res = await fetch(createUrl, {
     body: JSON.stringify(payload),
     headers,
     method: "POST"
-  });
+  }).then(r => r.json());
 
-  const hub = await res.json();
+  if (res.error === "invalid_token") {
+    // Clear the invalid token from store.
+    store.update({ credentials: { token: null, email: null } });
+
+    // Create hub anonymously
+    delete headers.authorization;
+    res = await fetch(createUrl, {
+      body: JSON.stringify(payload),
+      headers,
+      method: "POST"
+    }).then(r => r.json());
+  }
+
+  const hub = res;
   let url = hub.url;
 
   if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
