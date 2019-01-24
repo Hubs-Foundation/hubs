@@ -216,7 +216,7 @@ class HomeRoot extends Component {
                     </a>
                   </WithHoverSound>
                   <WithHoverSound>
-                    <a href="https://discord.gg/XzrGUY8" rel="noreferrer noopener">
+                    <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
                       <FormattedMessage id="home.community_link" />
                     </a>
                   </WithHoverSound>
