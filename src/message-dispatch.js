@@ -13,14 +13,15 @@ export default class MessageDispatch {
 
   dispatch = message => {
     if (message.startsWith("/")) {
-      this.dispatchCommand(message.substring(1));
+      const commandParts = message.substring(1).split(" ");
+      this.dispatchCommand(commandParts[0], ...commandParts.slice(1));
       document.activeElement.blur(); // Commands should blur
     } else {
       this.hubChannel.sendMessage(message);
     }
   };
 
-  dispatchCommand = command => {
+  dispatchCommand = (command, ...args) => {
     const entered = this.scene.is("entered");
 
     switch (command) {
@@ -38,6 +39,7 @@ export default class MessageDispatch {
     const playerRig = document.querySelector("#player-rig");
     const scales = [0.0625, 0.125, 0.25, 0.5, 1.0, 1.5, 3, 5, 7.5, 12.5];
     const curScale = playerRig.object3D.scale;
+    let err;
 
     switch (command) {
       case "fly":
@@ -75,6 +77,18 @@ export default class MessageDispatch {
       case "duck":
         spawnChatMessage(DUCK_URL);
         this.scene.emit("quack");
+        break;
+      case "scene":
+        err = this.hubChannel.updateScene(args[0]);
+        if (err === "unauthorized") {
+          this.addToPresenceLog({ type: "log", body: "You do not have permission to change the scene." });
+        }
+        break;
+      case "rename":
+        err = this.hubChannel.rename(args.join(" "));
+        if (err === "unauthorized") {
+          this.addToPresenceLog({ type: "log", body: "You do not have permission to rename this room." });
+        }
         break;
     }
   };

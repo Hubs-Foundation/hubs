@@ -12,13 +12,15 @@ import mozLogo from "../assets/images/moz-logo-black.png";
 import classNames from "classnames";
 import { ENVIRONMENT_URLS } from "../assets/environments/environments";
 import { connectToReticulum } from "../utils/phoenix-utils";
+import maskEmail from "../utils/mask-email";
 
 import styles from "../assets/stylesheets/index.scss";
 
 import HubCreatePanel from "./hub-create-panel.js";
 import AuthDialog from "./auth-dialog.js";
-import ReportDialog from "./report-dialog.js";
 import JoinUsDialog from "./join-us-dialog.js";
+import ReportDialog from "./report-dialog.js";
+import SignInDialog from "./sign-in-dialog.js";
 import UpdatesDialog from "./updates-dialog.js";
 import DialogContainer from "./dialog-container.js";
 import { WithHoverSound } from "./wrap-with-audio";
@@ -29,6 +31,8 @@ class HomeRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
     sceneId: PropTypes.string,
+    store: PropTypes.object,
+    authChannel: PropTypes.object,
     authVerify: PropTypes.bool,
     authTopic: PropTypes.string,
     authToken: PropTypes.string,
@@ -41,12 +45,18 @@ class HomeRoot extends Component {
   state = {
     environments: [],
     dialog: null,
+    signedIn: null,
     mailingListEmail: "",
     mailingListPrivacy: false
   };
 
+  constructor(props) {
+    super(props);
+    this.state.signedIn = props.authChannel.signedIn;
+    this.state.email = props.authChannel.email;
+  }
+
   componentDidMount() {
-    this.closeDialog = this.closeDialog.bind(this);
     if (this.props.authVerify) {
       this.showAuthDialog(true);
       this.verifyAuth().then(this.showAuthDialog);
@@ -77,8 +87,14 @@ class HomeRoot extends Component {
     channel.push("auth_verified", { token: this.props.authToken });
   }
 
+  showDialog = (DialogClass, props = {}) => {
+    this.setState({
+      dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
+    });
+  };
+
   showAuthDialog = verifying => {
-    this.setState({ dialog: <AuthDialog closable="false" verifying={verifying} authOrigin={this.props.authOrigin} /> });
+    this.showDialog(AuthDialog, { closable: false, verifying, authOrigin: this.props.authOrigin });
   };
 
   loadHomeVideo = () => {
@@ -87,33 +103,40 @@ class HomeRoot extends Component {
     playVideoWithStopOnBlur(videoEl);
   };
 
-  closeDialog() {
+  closeDialog = () => {
     this.setState({ dialog: null });
-  }
+  };
 
-  showJoinUsDialog() {
-    this.setState({ dialog: <JoinUsDialog onClose={this.closeDialog} /> });
-  }
+  showJoinUsDialog = () => this.showDialog(JoinUsDialog);
 
-  showReportDialog() {
-    this.setState({ dialog: <ReportDialog onClose={this.closeDialog} /> });
-  }
+  showReportDialog = () => this.showDialog(ReportDialog);
 
-  showUpdatesDialog() {
-    this.setState({
-      dialog: <UpdatesDialog onClose={this.closeDialog} onSubmittedEmail={() => this.showEmailSubmittedDialog()} />
+  showUpdatesDialog = () =>
+    this.showDialog(UpdatesDialog, {
+      onSubmittedEmail: () => {
+        this.showDialog(
+          <DialogContainer>Great! Please check your e-mail to confirm your subscription.</DialogContainer>
+        );
+      }
     });
-  }
 
-  showEmailSubmittedDialog() {
-    this.setState({
-      dialog: (
-        <DialogContainer onClose={this.closeDialog}>
-          Great! Please check your e-mail to confirm your subscription.
-        </DialogContainer>
-      )
+  showSignInDialog = () => {
+    this.showDialog(SignInDialog, {
+      message: messages["sign-in.prompt"],
+      onSignIn: async email => {
+        const { authComplete } = await this.props.authChannel.startAuthentication(email);
+        this.showDialog(SignInDialog, { authStarted: true });
+        await authComplete;
+        this.setState({ signedIn: true, email });
+        this.closeDialog();
+      }
     });
-  }
+  };
+
+  signOut = () => {
+    this.props.authChannel.signOut();
+    this.setState({ signedIn: false });
+  };
 
   loadEnvironmentFromScene = async () => {
     let sceneUrlBase = "/api/v1/scenes";
@@ -155,7 +178,7 @@ class HomeRoot extends Component {
     Promise.all(environmentLoads).then(() => this.setState({ environments }));
   };
 
-  onDialogLinkClicked = trigger => {
+  onLinkClicked = trigger => {
     return e => {
       e.preventDefault();
       e.stopPropagation();
@@ -203,6 +226,22 @@ class HomeRoot extends Component {
                     </a>
                   </WithHoverSound>
                 </div>
+              </div>
+              <div className={styles.signIn}>
+                {this.state.signedIn ? (
+                  <div>
+                    <span>
+                      <FormattedMessage id="sign-in.as" /> {maskEmail(this.state.email)}
+                    </span>{" "}
+                    <a onClick={this.onLinkClicked(this.signOut)}>
+                      <FormattedMessage id="sign-in.out" />
+                    </a>
+                  </div>
+                ) : (
+                  <a onClick={this.onLinkClicked(this.showSignInDialog)}>
+                    <FormattedMessage id="sign-in.in" />
+                  </a>
+                )}
               </div>
             </div>
             <div className={styles.heroContent}>
@@ -264,7 +303,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       rel="noopener noreferrer"
                       href="#"
-                      onClick={this.onDialogLinkClicked(this.showJoinUsDialog.bind(this))}
+                      onClick={this.onLinkClicked(this.showJoinUsDialog)}
                     >
                       <FormattedMessage id="home.join_us" />
                     </a>
@@ -274,7 +313,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       rel="noopener noreferrer"
                       href="#"
-                      onClick={this.onDialogLinkClicked(this.showUpdatesDialog.bind(this))}
+                      onClick={this.onLinkClicked(this.showUpdatesDialog)}
                     >
                       <FormattedMessage id="home.get_updates" />
                     </a>
@@ -284,7 +323,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       rel="noopener noreferrer"
                       href="#"
-                      onClick={this.onDialogLinkClicked(this.showReportDialog.bind(this))}
+                      onClick={this.onLinkClicked(this.showReportDialog)}
                     >
                       <FormattedMessage id="home.report_issue" />
                     </a>

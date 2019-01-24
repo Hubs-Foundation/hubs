@@ -7,6 +7,9 @@ const ROTATE_MODE = {
   RESET: "reset"
 };
 
+const cameraWorldQuaternion = new THREE.Quaternion();
+const objectWorldQuaternion = new THREE.Quaternion();
+
 AFRAME.registerComponent("rotate-button", {
   schema: {
     mode: {
@@ -59,11 +62,11 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.active = false;
 
     this.puppet = {
-      Ci: new THREE.Quaternion(),
-      Ci_inverse: new THREE.Quaternion(),
-      Oi: new THREE.Quaternion(),
-      Cc: new THREE.Quaternion(),
-      Cd: new THREE.Quaternion()
+      initialControllerOrientation: new THREE.Quaternion(),
+      initialControllerOrientation_inverse: new THREE.Quaternion(),
+      initialObjectOrientation: new THREE.Quaternion(),
+      currentControllerOrientation: new THREE.Quaternion(),
+      controllerOrientationDelta: new THREE.Quaternion()
     };
 
     this.planarInfo = {
@@ -79,10 +82,10 @@ AFRAME.registerSystem("rotate-selected-object", {
       ),
       normal: new THREE.Vector3(),
       intersections: [],
-      Pp: new THREE.Vector3(),
-      Pc: new THREE.Vector3(),
-      PpPc: new THREE.Vector3(),
-      XYi: new THREE.Vector3()
+      previousPointOnPlane: new THREE.Vector3(),
+      currentPointOnPlane: new THREE.Vector3(),
+      deltaOnPlane: new THREE.Vector3(),
+      finalProjectedVec: new THREE.Vector3()
     };
 
     this.v = new THREE.Vector3();
@@ -98,13 +101,11 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.dyApplied = 0;
 
     this.resetInfo = {
-      obj: new THREE.Vector3(),
-      eye: new THREE.Vector3(),
-      eyeToObj: new THREE.Vector3(),
-      resetTarget: new THREE.Vector3()
+      targetPos: new THREE.Vector3(),
+      cameraPos: new THREE.Vector3(),
+      lookDir: new THREE.Vector3(),
+      lookPoint: new THREE.Vector3()
     };
-    this.cameraWorldQuaternion = new THREE.Quaternion();
-    this.objectWorldQuaternion = new THREE.Quaternion();
 
     this.axis = new THREE.Vector3();
 
@@ -130,10 +131,10 @@ AFRAME.registerSystem("rotate-selected-object", {
     }
 
     if (this.mode === ROTATE_MODE.AXIS || this.mode === ROTATE_MODE.CURSOR) {
-      const { plane, intersections, Pp } = this.planarInfo;
+      const { plane, intersections, previousPointOnPlane } = this.planarInfo;
 
-      this.el.camera.getWorldQuaternion(this.cameraWorldQuaternion);
-      plane.quaternion.copy(this.cameraWorldQuaternion);
+      this.el.camera.getWorldQuaternion(cameraWorldQuaternion);
+      plane.quaternion.copy(cameraWorldQuaternion);
       this.target.getWorldPosition(plane.position);
       plane.matrixNeedsUpdate = true;
       plane.updateMatrixWorld(true);
@@ -150,16 +151,16 @@ AFRAME.registerSystem("rotate-selected-object", {
         return;
       }
 
-      Pp.copy(intersections[0].point);
+      previousPointOnPlane.copy(intersections[0].point);
 
-      this.target.getWorldQuaternion(this.objectWorldQuaternion);
+      this.target.getWorldQuaternion(objectWorldQuaternion);
 
-      this.v.set(0, 0, -1).applyQuaternion(this.cameraWorldQuaternion);
-      this.v2.set(0, 0, -1).applyQuaternion(this.objectWorldQuaternion);
+      this.v.set(0, 0, -1).applyQuaternion(cameraWorldQuaternion);
+      this.v2.set(0, 0, -1).applyQuaternion(objectWorldQuaternion);
       this.sign = this.v.dot(this.v2) > 0 ? 1 : -1;
 
       this.v.set(0, 1, 0); //.applyQuaternion(this.cameraWorldQuaternion);
-      this.v2.set(0, 1, 0).applyQuaternion(this.objectWorldQuaternion);
+      this.v2.set(0, 1, 0).applyQuaternion(objectWorldQuaternion);
       this.sign2 = this.v.dot(this.v2) > 0 ? 1 : -1;
 
       this.dyAll = 0;
@@ -170,9 +171,9 @@ AFRAME.registerSystem("rotate-selected-object", {
       this.dxApplied = 0;
     } else if (this.mode === ROTATE_MODE.PUPPET) {
       this.active = true;
-      this.target.getWorldQuaternion(this.puppet.Oi);
-      this.hand.getWorldQuaternion(this.puppet.Ci);
-      this.puppet.Ci_inverse.copy(this.puppet.Ci).inverse();
+      this.target.getWorldQuaternion(this.puppet.initialObjectOrientation);
+      this.hand.getWorldQuaternion(this.puppet.initialControllerOrientation);
+      this.puppet.initialControllerOrientation_inverse.copy(this.puppet.initialControllerOrientation).inverse();
     }
   },
 
@@ -180,36 +181,49 @@ AFRAME.registerSystem("rotate-selected-object", {
     // Project the line from your eye to the object onto the XZ plane.
     // Place the object at eye level along the projected line, rotating it to face you.
     this.active = false;
-    const { eye, obj, eyeToObj, resetTarget } = this.resetInfo;
-    this.el.camera.getWorldPosition(eye);
-    this.target.getWorldPosition(obj);
-    eyeToObj.copy(obj).sub(eye);
+    const { cameraPos, targetPos, lookDir, lookPoint } = this.resetInfo;
+    this.el.camera.getWorldPosition(cameraPos);
+    this.target.getWorldPosition(targetPos);
+    lookDir.copy(targetPos).sub(cameraPos);
     this.v2.set(0, 1, 0);
     this.v
-      .copy(eyeToObj)
+      .copy(lookDir)
       .projectOnPlane(this.v2)
       .normalize();
-    resetTarget.copy(obj).sub(this.v);
+    lookPoint.copy(targetPos).sub(this.v);
 
-    this.target.lookAt(resetTarget);
-    this.target.position.y = eye.y;
+    this.target.lookAt(lookPoint);
+    this.target.position.y = cameraPos.y;
     this.target.matrixNeedsUpdate = true;
     this.active = false;
   },
 
   puppetingTick() {
     // Find controller delta as a quaternion, then apply it to the object, snapping in fixed increments if desired:
-    // Snap to fixed angle increments by converting Cc to an Euler,
+    // Snap to fixed angle increments by converting to an Euler,
     // restricting the angles using Math.floor, and converting back to a quaternion.
-    const { Cc, Cd, Ci_inverse, Oi } = this.puppet;
-    this.hand.getWorldQuaternion(Cc);
-    Cd.copy(Ci_inverse).premultiply(Cc);
-    this.target.quaternion.copy(Oi).premultiply(Cd);
+    const {
+      currentControllerOrientation,
+      controllerOrientationDelta,
+      initialControllerOrientation_inverse,
+      initialObjectOrientation
+    } = this.puppet;
+    this.hand.getWorldQuaternion(currentControllerOrientation);
+    controllerOrientationDelta.copy(initialControllerOrientation_inverse).premultiply(currentControllerOrientation);
+    this.target.quaternion.copy(initialObjectOrientation).premultiply(controllerOrientationDelta);
     this.target.matrixNeedsUpdate = true;
   },
 
   cursorTick() {
-    const { plane, normal, intersections, Pp, Pc, PpPc, XYi } = this.planarInfo;
+    const {
+      plane,
+      normal,
+      intersections,
+      previousPointOnPlane,
+      currentPointOnPlane,
+      deltaOnPlane,
+      finalProjectedVec
+    } = this.planarInfo;
 
     this.target.getWorldPosition(plane.position);
     this.el.camera.getWorldQuaternion(plane.quaternion);
@@ -226,10 +240,11 @@ AFRAME.registerSystem("rotate-selected-object", {
 
     normal.set(0, 0, -1).applyQuaternion(plane.quaternion);
 
-    Pc.copy(intersection.point);
-    PpPc.copy(Pc).sub(Pp);
+    currentPointOnPlane.copy(intersection.point);
+    deltaOnPlane.copy(currentPointOnPlane).sub(previousPointOnPlane);
     const SENSITIVITY = 10;
-    XYi.copy(PpPc)
+    finalProjectedVec
+      .copy(deltaOnPlane)
       .projectOnPlane(normal)
       .applyQuaternion(this.q.copy(plane.quaternion).inverse())
       .multiplyScalar(SENSITIVITY / cameraToPlaneDistance);
@@ -237,20 +252,20 @@ AFRAME.registerSystem("rotate-selected-object", {
       const modify = AFRAME.scenes[0].systems.userinput.get(paths.actions.rotateModifier);
 
       const stepLength = Math.PI / 6;
-      this.dyAll = this.dyStore + XYi.y;
+      this.dyAll = this.dyStore + finalProjectedVec.y;
       this.dyApplied = modify ? this.dyAll : Math.round(this.dyAll / stepLength) * stepLength;
       this.dyStore = this.dyAll - this.dyApplied;
 
-      this.dxAll = this.dxStore + XYi.x;
+      this.dxAll = this.dxStore + finalProjectedVec.x;
       this.dxApplied = modify ? this.dxAll : Math.round(this.dxAll / stepLength) * stepLength;
       this.dxStore = this.dxAll - this.dxApplied;
 
-      this.target.getWorldQuaternion(this.objectWorldQuaternion);
-      this.v.set(1, 0, 0).applyQuaternion(modify ? this.cameraWorldQuaternion : this.objectWorldQuaternion);
+      this.target.getWorldQuaternion(objectWorldQuaternion);
+      this.v.set(1, 0, 0).applyQuaternion(modify ? cameraWorldQuaternion : objectWorldQuaternion);
       this.q.setFromAxisAngle(this.v, modify ? -this.dyApplied : this.sign2 * this.sign * -this.dyApplied);
 
       if (modify) {
-        this.v.set(0, 1, 0).applyQuaternion(this.cameraWorldQuaternion);
+        this.v.set(0, 1, 0).applyQuaternion(cameraWorldQuaternion);
       } else {
         this.v.set(0, 1, 0);
       }
@@ -259,14 +274,14 @@ AFRAME.registerSystem("rotate-selected-object", {
       this.target.quaternion.premultiply(this.q).premultiply(this.q2);
     } else if (this.mode === ROTATE_MODE.AXIS) {
       const rotationSnap = Math.PI / 8;
-      this.dxAll = this.dxStore + XYi.x;
+      this.dxAll = this.dxStore + finalProjectedVec.x;
       this.dxApplied = Math.round(this.dxAll / rotationSnap) * rotationSnap;
       this.dxStore = this.dxAll - this.dxApplied;
 
       this.target.quaternion.multiply(this.q.setFromAxisAngle(this.axis, -this.sign * this.dxApplied));
     }
 
-    Pp.copy(Pc);
+    previousPointOnPlane.copy(currentPointOnPlane);
   },
 
   tick() {

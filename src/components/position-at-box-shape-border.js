@@ -40,7 +40,9 @@ AFRAME.registerComponent("position-at-box-shape-border", {
   multiple: true,
   schema: {
     target: { type: "string" },
-    dirs: { default: ["left", "right", "forward", "back"] }
+    dirs: { default: ["left", "right", "forward", "back"] },
+    animate: { default: true },
+    scale: { default: true }
   },
 
   init() {
@@ -87,7 +89,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     // If the target is being shown or the scale changed while the opening animation is being run,
     // we need to start or re-start the animation.
     if (opening || (scaleChanged && isAnimating)) {
-      this._updateBox(true);
+      this._updateBox(this.data.animate);
     }
 
     this.wasVisible = isVisible;
@@ -151,7 +153,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
       const distance = Math.sqrt(minSquareDistance);
       const scale = this.halfExtents[inverseHalfExtents[targetHalfExtentStr]] * distance;
       const targetScale = Math.min(2.0, Math.max(0.5, scale * tempParentWorldScale.x));
-      const finalScale = targetScale / tempParentWorldScale.x;
+      const finalScale = this.data.scale ? targetScale / tempParentWorldScale.x : 1;
 
       if (animate) {
         this.targetEl.removeAttribute("animation__show");

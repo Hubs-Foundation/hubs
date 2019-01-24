@@ -62,6 +62,15 @@
             <img id="presence-count" crossorigin="anonymous" src="./assets/hud/presence-count.png">
             <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
 
+            <img id="video-seek-back" crossorigin="anonymous" src="./assets/video-overlay/seek_back.png">
+            <img id="video-seek-back-hover" crossorigin="anonymous" src="./assets/video-overlay/seek_back-hover.png">
+            <img id="video-seek-forward" crossorigin="anonymous" src="./assets/video-overlay/seek_fwd.png">
+            <img id="video-seek-forward-hover" crossorigin="anonymous" src="./assets/video-overlay/seek_fwd-hover.png">
+            <img id="video-play" crossorigin="anonymous" src="./assets/video-overlay/play.png">
+            <img id="video-play-hover" crossorigin="anonymous" src="./assets/video-overlay/play-hover.png">
+            <img id="video-pause" crossorigin="anonymous" src="./assets/video-overlay/pause.png">
+            <img id="video-pause-hover" crossorigin="anonymous" src="./assets/video-overlay/pause-hover.png">
+
             <a-asset-item id="botdefault" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDefault_Avatar-9f71f8ff22.gltf"></a-asset-item>
             <a-asset-item id="botbobo" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotBobo_Avatar-f9740a010b.gltf"></a-asset-item>
             <a-asset-item id="botdom" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDom_Avatar-0c48bf15a5.gltf"></a-asset-item>
@@ -205,7 +214,7 @@
                     hoverable-visuals="cursorController: #cursor-controller"
                     auto-scale-cannon-physics-body
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
-                    position-at-box-shape-border="target:.freeze-menu;"
+                    position-at-box-shape-border__freeze="target:.freeze-menu;"
                     destroy-at-extreme-distances
                     set-yxz-order
                     pinnable
@@ -236,7 +245,6 @@
                             <a-entity mixin="rounded-text-button" clone-media-button position="-0.25 -0.375 0.01">
                                 <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
-
                             <a-entity scale="0.5 0.5 1" mixin="rounded-text-button" rotate-button rotate-button-selector position="-0.6  0.06 0.01">
                                 <a-entity text="value:rotate; width:2.80; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
@@ -337,6 +345,35 @@
                         <a-entity mixin="rounded-text-button" slice9="width: 0.2"> </a-entity>
                         <a-entity text=" value:>; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
+                </a-entity>
+            </template>
+
+            <!-- TODO: All of these positions are assuming 16:9 - need to actually reposition based on video resolution -->
+            <template id="video-hover-menu">
+                <a-entity class="ui interactable-ui video-toolbar" mixin="button-container" visible="false">
+                    <a-entity class="video-time-label" text="value: 0; anchor: right; align: right;" text-raycast-hack position="0.485 -0.25 -0.015"></a-entity>
+                    <a-entity class="video-volume-label" text="value: 0%; anchor: right; align: right;" text-raycast-hack position="0.485 0.25 -0.015" visible="false"></a-entity>
+                    <a-image
+                        icon-button="image: #video-seek-back; hoverImage: #video-seek-back-hover;"
+                        scale="0.1 0.1 0.1"
+                        position="-0.3 0 0"
+                        class="ui video-seek-back-button"
+                        visible="false"
+                    ></a-image>
+                    <a-image
+                        icon-button="image: #video-pause; hoverImage: #video-pause-hover; activeImage: #video-play; activeHoverImage: #video-play-hover"
+                        scale="0.2 0.2 0.2"
+                        position="0 0 0"
+                        class="ui video-playpause-button"
+                        visible="false"
+                    ></a-image>
+                    <a-image
+                        icon-button="image: #video-seek-forward; hoverImage: #video-seek-forward-hover;"
+                        scale="0.1 0.1 0.1"
+                        position="0.3 0 0"
+                        class="ui video-seek-forward-button"
+                        visible="false"
+                    ></a-image>
                 </a-entity>
             </template>
 
