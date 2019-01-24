@@ -726,6 +726,17 @@ export const viveUserBindings = addSetsToBindings({
     }
   ],
 
+  [sets.cursorHoldingUI]: [
+    {
+      src: { value: rightTriggerPressed2 },
+      dest: {
+        value: cursorDrop2
+      },
+      xform: xforms.falling,
+      priority: 4
+    }
+  ],
+
   [sets.cursorHoldingInteractable]: [
     {
       src: {
@@ -742,15 +753,7 @@ export const viveUserBindings = addSetsToBindings({
       priority: 1
     },
     {
-      src: { value: rightTriggerPressed2 },
-      dest: {
-        value: cursorDrop2
-      },
-      xform: xforms.falling,
-      priority: 2
-    },
-    {
-      src: [cursorDrop1],
+      src: [cursorDrop1, cursorDrop2],
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.any
     },
