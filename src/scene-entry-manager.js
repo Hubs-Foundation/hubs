@@ -438,7 +438,7 @@ export default class SceneEntryManager {
       audioInput = document.querySelector("#bot-audio-input");
       dataInput = document.querySelector("#bot-data-input");
       await nextTick();
-    } while (!audioInput && !dataInput);
+    } while (!audioInput || !dataInput);
 
     audioInput.onchange = () => {
       audioEl.loop = true;
