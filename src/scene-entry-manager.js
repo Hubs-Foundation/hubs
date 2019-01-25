@@ -18,8 +18,9 @@ function requestFullscreen() {
 }
 
 export default class SceneEntryManager {
-  constructor(hubChannel) {
+  constructor(hubChannel, authChannel) {
     this.hubChannel = hubChannel;
+    this.authChannel = authChannel;
     this.store = window.APP.store;
     this.scene = document.querySelector("a-scene");
     this.cursorController = document.querySelector("#cursor-controller");
@@ -176,7 +177,7 @@ export default class SceneEntryManager {
     });
   };
 
-  _pinElement = el => {
+  _pinElement = async el => {
     const { networkId } = el.components.networked.data;
 
     const { fileId, src } = el.components["media-loader"].data;
@@ -195,7 +196,46 @@ export default class SceneEntryManager {
     el.setAttribute("networked", { persistent: true });
     el.setAttribute("media-loader", { fileIsOwned: true });
 
-    this.hubChannel.pin(networkId, gltfNode, fileId, fileAccessToken, promotionToken);
+    try {
+      await this.hubChannel.pin(networkId, gltfNode, fileId, fileAccessToken, promotionToken);
+    } catch (e) {
+      if (e.reason === "invalid_token") {
+        await this.authChannel.signOut(this.hubChannel);
+        this._signInAndPinElement(el);
+      } else {
+        console.warn("Pin failed for unknown reason", e);
+      }
+    }
+  };
+
+  _signInAndPinElement = el => {
+    if (this.hubChannel.signedIn) {
+      this._pinElement(el);
+    } else {
+      const wasInVR = this.scene.is("vr-mode");
+      if (wasInVR) this.scene.exitVR();
+      const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
+
+      this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete", continueTextId, async () => {
+        let pinningFailed = false;
+        if (this.hubChannel.signedIn) {
+          try {
+            await this._pinElement(el);
+          } catch (e) {
+            pinningFailed = true;
+          }
+        } else {
+          pinningFailed = true;
+        }
+
+        if (pinningFailed) {
+          // UI pins the entity optimistically, so we undo that here.
+          el.setAttribute("pinnable", "pinned", false);
+        }
+
+        if (wasInVR) this.scene.enterVR();
+      });
+    }
   };
 
   _setupMedia = mediaStream => {
@@ -227,24 +267,7 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("pinned", e => {
-      if (this.hubChannel.signedIn) {
-        this._pinElement(e.detail.el);
-      } else {
-        const wasInVR = this.scene.is("vr-mode");
-        if (wasInVR) this.scene.exitVR();
-        const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
-
-        this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete", continueTextId, () => {
-          if (this.hubChannel.signedIn) {
-            this._pinElement(e.detail.el);
-          } else {
-            // UI pins the entity optimistically, so we undo that here.
-            e.detail.el.setAttribute("pinnable", "pinned", false);
-          }
-
-          if (wasInVR) this.scene.enterVR();
-        });
-      }
+      this._signInAndPinElement(e.detail.el);
     });
 
     this.scene.addEventListener("unpinned", e => {
