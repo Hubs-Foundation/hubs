@@ -68,6 +68,12 @@ const objectTypeMimePrefixLookupMap = {
     ObjectTypes.SPAWNER_MODEL
   ],
   "video/": [ObjectTypes.URL_VIDEO, ObjectTypes.FILE_VIDEO, ObjectTypes.CLIPBOARD_VIDEO, ObjectTypes.SPAWNER_VIDEO],
+  "application/vnd.apple.mpegurl": [
+    ObjectTypes.URL_VIDEO,
+    ObjectTypes.FILE_VIDEO,
+    ObjectTypes.CLIPBOARD_VIDEO,
+    ObjectTypes.SPAWNER_VIDEO
+  ],
   "audio/": [ObjectTypes.URL_AUDIO, ObjectTypes.FILE_AUDIO, ObjectTypes.CLIPBOARD_AUDIO, ObjectTypes.SPAWNER_AUDIO],
   "application/pdf": [ObjectTypes.URL_PDF, ObjectTypes.FILE_PDF, ObjectTypes.CLIPBOARD_PDF, ObjectTypes.SPAWNER_PDF]
 };
