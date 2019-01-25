@@ -322,6 +322,7 @@ AFRAME.registerComponent("media-video", {
       this.seekForwardButton.addEventListener("grab-start", this.seekForward);
       this.seekBackButton.addEventListener("grab-start", this.seekBack);
 
+      this.updateHoverMenuBasedOnLiveState();
       this.updatePlaybackState();
     });
 
@@ -492,9 +493,7 @@ AFRAME.registerComponent("media-video", {
       if (texture.hls) {
         const updateLiveState = () => {
           this.videoIsLive = texture.hls.levels[texture.hls.currentLevel].details.live;
-          this.seekForwardButton.object3D.visible = !this.videoIsLive;
-          this.seekBackButton.object3D.visible = !this.videoIsLive;
-          this.timeLabel.setAttribute("text", "value", "LIVE");
+          this.updateHoverMenuBasedOnLiveState();
         };
         texture.hls.on(HLS.Events.LEVEL_SWITCHED, updateLiveState);
         if (texture.hls.currentLevel >= 0) {
@@ -502,8 +501,7 @@ AFRAME.registerComponent("media-video", {
         }
       } else {
         this.videoIsLive = this.video.duration === Infinity;
-        this.seekForwardButton.object3D.visible = !this.videoIsLive;
-        this.seekBackButton.object3D.visible = !this.videoIsLive;
+        this.updateHoverMenuBasedOnLiveState();
       }
 
       if (isIOS) {
@@ -549,6 +547,17 @@ AFRAME.registerComponent("media-video", {
     this.updatePlaybackState(true);
 
     this.el.emit("video-loaded");
+  },
+
+  updateHoverMenuBasedOnLiveState() {
+    if (!this.hoverMenu) return;
+
+    this.seekForwardButton.object3D.visible = !this.videoIsLive;
+    this.seekBackButton.object3D.visible = !this.videoIsLive;
+
+    if (this.videoIsLive) {
+      this.timeLabel.setAttribute("text", "value", "LIVE");
+    }
   },
 
   tick() {
