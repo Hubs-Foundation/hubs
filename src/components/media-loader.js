@@ -1,6 +1,7 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import { guessContentType, proxiedUrlFor, resolveUrl, injectCustomShaderChunks } from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
+import qsTruthy from "../utils/qs_truthy";
 
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
@@ -90,7 +91,7 @@ AFRAME.registerComponent("media-loader", {
   },
 
   tick(t, dt) {
-    if (this.loaderMixer && this.loadApproved) {
+    if (this.loaderMixer && (this.loadApproved || !qsTruthy("delayLoading"))) {
       this.loaderMixer.update(dt / 1000);
     }
   },
@@ -150,7 +151,11 @@ AFRAME.registerComponent("media-loader", {
       if (src !== oldData.src && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
       }
-      if (!this.loadApproved && !(this.el.parentNode && this.el.parentNode.id === "environment-scene")) {
+      if (
+        qsTruthy("delayLoading") &&
+        !this.loadApproved &&
+        !(this.el.parentNode && this.el.parentNode.id === "environment-scene")
+      ) {
         this.needsUpdate = true;
         return;
       }
