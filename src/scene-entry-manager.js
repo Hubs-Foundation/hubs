@@ -430,7 +430,16 @@ export default class SceneEntryManager {
     });
 
     const audioEl = document.createElement("audio");
-    const audioInput = document.querySelector("#bot-audio-input");
+    let audioInput;
+    let dataInput;
+
+    // Wait for startup to render form
+    do {
+      audioInput = document.querySelector("#bot-audio-input");
+      dataInput = document.querySelector("#bot-data-input");
+      await nextTick();
+    } while (!audioInput && !dataInput);
+
     audioInput.onchange = () => {
       audioEl.loop = true;
       audioEl.muted = true;
@@ -438,7 +447,6 @@ export default class SceneEntryManager {
       audioEl.src = URL.createObjectURL(audioInput.files[0]);
       document.body.appendChild(audioEl);
     };
-    const dataInput = document.querySelector("#bot-data-input");
     dataInput.onchange = () => {
       const url = URL.createObjectURL(dataInput.files[0]);
       this.playerRig.setAttribute("avatar-replay", { recordingUrl: url });
