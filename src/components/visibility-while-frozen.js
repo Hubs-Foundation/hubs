@@ -28,6 +28,7 @@ AFRAME.registerComponent("visibility-while-frozen", {
 
     const isFrozen = this.el.sceneEl.is("frozen");
     const isVisible = this.el.getAttribute("visible");
+    const isRotating = AFRAME.scenes[0].systems["rotate-selected-object"].rotating;
     if (!isFrozen && !isVisible) return;
 
     this.updateVisibility();
@@ -54,10 +55,9 @@ AFRAME.registerComponent("visibility-while-frozen", {
         this.camWorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance;
     }
 
+    const isRotating = AFRAME.scenes[0].systems["rotate-selected-object"].rotating;
     const shouldBeVisible =
-      ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) &&
-      isWithinDistance &&
-      !AFRAME.scenes[0].systems["rotate-selected-object"].active;
+      ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) && isWithinDistance && !isRotating;
 
     if (isVisible !== shouldBeVisible) {
       this.el.setAttribute("visible", shouldBeVisible);

@@ -35,8 +35,8 @@
         action-to-event__focus_chat="path: /actions/focusChat; event: action_focus_chat;"
         environment-map="loadDefault: false"
     >
-
         <a-assets>
+            <img id="rotation-symbol" crossorigin="anonymous" src="./assets/rotation.png">
             <img id="action-button" crossorigin="anonymous" src="./assets/hud/action_button.9.png">
             <img id="tooltip" crossorigin="anonymous" src="./assets/hud/tooltip.9.png">
             <img id="mute-off" crossorigin="anonymous" src="./assets/hud/mute_off.png">
@@ -493,7 +493,15 @@
                 activateEndButtons: secondary-cursor-release, secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
             action-to-event__grab="path: /actions/cursorGrab; event: cursor-grab"
             action-to-event__drop="path: /actions/cursorDrop; event: cursor-release"
-        ></a-sphere>
+        >
+            <a-image
+                icon-button="image: #rotation-symbol"
+                scale="0.1 0.1 0.1"
+                position="0.0 0 0.001"
+                class="hud"
+                visible-if-rotating
+            ></a-image>
+        </a-sphere>
 
         <!-- Player Rig -->
         <a-entity

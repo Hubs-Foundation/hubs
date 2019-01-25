@@ -65,7 +65,7 @@ AFRAME.registerSystem("rotate-selected-object", {
   init() {
     this.target = null;
     this.mode = null;
-    this.active = false;
+    this.rotating = false;
     this.axis = new THREE.Vector3();
 
     this.dxAll = 0;
@@ -105,32 +105,8 @@ AFRAME.registerSystem("rotate-selected-object", {
   },
 
   stopRotate() {
-    this.active = false;
+    this.rotating = false;
   },
-
-  alignInFront: (function() {
-    const targetPos = new THREE.Vector3();
-    const cameraPos = new THREE.Vector3();
-    const lookDir = new THREE.Vector3();
-    const lookPoint = new THREE.Vector3();
-    return function alignInFront() {
-      // Project the line from your eye to the object onto the XZ plane.
-      // Place the object at eye level along the projected line, rotating it to face you.
-      this.active = false;
-      this.el.camera.getWorldPosition(cameraPos);
-      this.target.getWorldPosition(targetPos);
-      lookDir.copy(targetPos).sub(cameraPos);
-      v2.set(0, 1, 0);
-      v.copy(lookDir)
-        .projectOnPlane(v2)
-        .normalize();
-      lookPoint.copy(targetPos).sub(v);
-
-      this.target.lookAt(lookPoint);
-      this.target.position.y = cameraPos.y;
-      this.target.matrixNeedsUpdate = true;
-    };
-  })(),
 
   startPlaneCasting() {
     const { plane, intersections, previousPointOnPlane } = this.planarInfo;
@@ -148,8 +124,8 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.raycaster.far = 1000;
     plane.raycast(this.raycaster, intersections);
     this.raycaster.far = far;
-    this.active = !!intersections[0];
-    if (!this.active) {
+    this.rotating = !!intersections[0];
+    if (!this.rotating) {
       return;
     }
 
@@ -177,7 +153,7 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.target = target;
     this.hand = hand.id === "cursor" ? document.querySelector("#player-right-controller").object3D : hand.object3D;
     this.mode = data.mode;
-    this.active = true;
+    this.rotating = true;
 
     if (this.mode === ROTATE_MODE.ALIGN) {
       return;
@@ -282,15 +258,15 @@ AFRAME.registerSystem("rotate-selected-object", {
   },
 
   tick() {
-    if (!this.active) {
+    if (!this.rotating) {
       return;
     }
 
-      if (this.mode === ROTATE_MODE.ALIGN){
-        this.el.camera.getWorldPosition(CAMERA_WORLD_POSITION);
-        this.target.lookAt(CAMERA_WORLD_POSITION);
-        return;
-      }
+    if (this.mode === ROTATE_MODE.ALIGN) {
+      this.el.camera.getWorldPosition(CAMERA_WORLD_POSITION);
+      this.target.lookAt(CAMERA_WORLD_POSITION);
+      return;
+    }
 
     if (this.mode === ROTATE_MODE.PUPPET) {
       this.puppetingTick();
@@ -307,6 +283,24 @@ AFRAME.registerComponent("rotate-button-selector", {
       this.el.setAttribute("rotate-button", "mode", ROTATE_MODE.CURSOR);
     } else {
       this.el.setAttribute("rotate-button", "mode", ROTATE_MODE.PUPPET);
+    }
+  }
+});
+
+const FORWARD = new THREE.Vector3(0, 0, 1);
+const TWO_PI = 2 * Math.PI;
+AFRAME.registerComponent("visible-if-rotating", {
+  init() {},
+  tick(t) {
+    const shouldBeVisible = AFRAME.scenes[0].systems["rotate-selected-object"].rotating;
+    const visibleNeedsUpdate = this.el.getAttribute("visible") !== shouldBeVisible;
+    if (visibleNeedsUpdate) {
+      this.el.setAttribute("visible", AFRAME.scenes[0].systems["rotate-selected-object"].rotating);
+    }
+
+    if (shouldBeVisible) {
+      this.el.object3D.quaternion.setFromAxisAngle(FORWARD, TWO_PI * Math.sin(t / 1000.0));
+      this.el.object3D.matrixNeedsUpdate = true;
     }
   }
 });
