@@ -180,7 +180,12 @@ export default class HubChannel {
       payload.file_access_token = fileAccessToken;
       payload.promotion_token = promotionToken;
     }
-    this.channel.push("pin", payload);
+    return new Promise((resolve, reject) => {
+      this.channel
+        .push("pin", payload)
+        .receive("ok", resolve)
+        .receive("error", reject);
+    });
   };
 
   unpin = (id, fileId) => {

@@ -456,7 +456,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);
-  const entryManager = new SceneEntryManager(hubChannel);
+  const entryManager = new SceneEntryManager(hubChannel, authChannel);
   entryManager.onRequestAuthentication = (
     signInMessageId,
     signInCompleteMessageId,
