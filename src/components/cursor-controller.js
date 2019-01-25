@@ -105,7 +105,6 @@ AFRAME.registerComponent("cursor-controller", {
     near: { default: 0.06 },
     cursorColorHovered: { default: "#2F80ED" },
     cursorColorUnhovered: { default: "#FFFFFF" },
-    cursorColorRotating: { default: "#FF0000" },
     rayObject: { type: "selector" },
     objects: { default: "" }
   },
