@@ -4,11 +4,12 @@ const ROTATE_MODE = {
   AXIS: "axis",
   PUPPET: "puppet",
   CURSOR: "cursor",
-  RESET: "reset"
+  ALIGN: "align"
 };
 
-const STEP_LENGTH = Math.PI / 6;
+const STEP_LENGTH = Math.PI / 10;
 const CAMERA_WORLD_QUATERNION = new THREE.Quaternion();
+const CAMERA_WORLD_POSITION = new THREE.Vector3();
 const TARGET_WORLD_QUATERNION = new THREE.Quaternion();
 const v = new THREE.Vector3();
 const v2 = new THREE.Vector3();
@@ -128,7 +129,6 @@ AFRAME.registerSystem("rotate-selected-object", {
       this.target.lookAt(lookPoint);
       this.target.position.y = cameraPos.y;
       this.target.matrixNeedsUpdate = true;
-      this.active = false;
     };
   })(),
 
@@ -177,14 +177,13 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.target = target;
     this.hand = hand.id === "cursor" ? document.querySelector("#player-right-controller").object3D : hand.object3D;
     this.mode = data.mode;
+    this.active = true;
 
-    if (this.mode === ROTATE_MODE.RESET) {
-      this.alignInFront();
+    if (this.mode === ROTATE_MODE.ALIGN) {
       return;
     }
 
     if (this.mode === ROTATE_MODE.PUPPET) {
-      this.active = true;
       this.target.getWorldQuaternion(this.puppet.initialObjectOrientation);
       this.hand.getWorldQuaternion(this.puppet.initialControllerOrientation);
       this.puppet.initialControllerOrientation_inverse.copy(this.puppet.initialControllerOrientation).inverse();
@@ -284,9 +283,14 @@ AFRAME.registerSystem("rotate-selected-object", {
 
   tick() {
     if (!this.active) {
-      this.active = false;
       return;
     }
+
+      if (this.mode === ROTATE_MODE.ALIGN){
+        this.el.camera.getWorldPosition(CAMERA_WORLD_POSITION);
+        this.target.lookAt(CAMERA_WORLD_POSITION);
+        return;
+      }
 
     if (this.mode === ROTATE_MODE.PUPPET) {
       this.puppetingTick();
