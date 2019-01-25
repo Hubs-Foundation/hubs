@@ -43,6 +43,21 @@ AFRAME.registerComponent("media-loader", {
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
     this.shapeAdded = false;
     this.hasBakedShapes = false;
+
+    this.onHover = e => {
+      if (this.needsUpdate) {
+        this.loadApproved = true;
+        this.update(this.data);
+        e.preventDefault();
+      }
+    };
+  },
+  play() {
+    this.el.addEventListener("hover-start", this.onHover);
+  },
+
+  pause() {
+    this.el.addEventListener("hover-start", this.onHover);
   },
 
   setShapeAndScale(resize) {
@@ -75,7 +90,7 @@ AFRAME.registerComponent("media-loader", {
   },
 
   tick(t, dt) {
-    if (this.loaderMixer) {
+    if (this.loaderMixer && this.loadApproved) {
       this.loaderMixer.update(dt / 1000);
     }
   },
@@ -134,6 +149,10 @@ AFRAME.registerComponent("media-loader", {
 
       if (src !== oldData.src && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
+      }
+      if (!this.loadApproved && !(this.el.parentNode && this.el.parentNode.id === "environment-scene")) {
+        this.needsUpdate = true;
+        return;
       }
 
       if (!src) return;
