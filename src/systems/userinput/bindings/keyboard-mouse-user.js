@@ -330,13 +330,32 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       priority: 2
     }
   ],
-
+  [sets.cursorHoldingUI]: [
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.falling,
+      priority: 3
+    },
+    {
+      src: { value: paths.device.keyboard.key("shift") },
+      dest: { value: paths.actions.rotateModifier },
+      xform: xforms.copy
+    }
+  ],
   [sets.cursorHoveringOnInteractable]: [
     {
       src: { value: paths.device.mouse.buttonLeft },
       dest: { value: paths.actions.cursor.grab },
       xform: xforms.rising,
       priority: 1
+    }
+  ],
+  [sets.cursorHoveringOnVideo]: [
+    {
+      src: { value: paths.device.mouse.wheel },
+      dest: { value: paths.actions.cursor.mediaVolumeMod },
+      xform: xforms.scale(-0.3)
     }
   ],
   [sets.inputFocused]: [

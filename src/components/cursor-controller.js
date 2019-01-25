@@ -13,7 +13,7 @@ AFRAME.registerComponent("cursor-controller", {
   schema: {
     cursor: { type: "selector" },
     camera: { type: "selector" },
-    far: { default: 3 },
+    far: { default: 4 },
     near: { default: 0.06 },
     cursorColorHovered: { default: "#2F80ED" },
     cursorColorUnhovered: { default: "#FFFFFF" },
@@ -36,7 +36,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.setDirty = this.setDirty.bind(this);
     this.targets = [];
     this.raycaster = new THREE.Raycaster();
-    this.raycaster.firstHitOnly = true; // flag specific to threejs-fast-raycast
+    this.raycaster.firstHitOnly = true; // flag specific to three-mesh-bvh
     this.dirty = true;
     this.distance = this.data.far;
     const lineMaterial = new THREE.LineBasicMaterial({

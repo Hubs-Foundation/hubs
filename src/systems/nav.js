@@ -16,5 +16,6 @@ AFRAME.registerSystem("nav", {
     const geometry = new THREE.Geometry().fromBufferGeometry(mesh.geometry);
     geometry.applyMatrix(mesh.matrixWorld);
     this.pathfinder.setZoneData(zone, Pathfinding.createZone(geometry));
+    this.el.sceneEl.emit("nav-mesh-loaded");
   }
 });
