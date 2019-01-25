@@ -28,7 +28,6 @@ AFRAME.registerComponent("visibility-while-frozen", {
 
     const isFrozen = this.el.sceneEl.is("frozen");
     const isVisible = this.el.getAttribute("visible");
-    const isRotating = AFRAME.scenes[0].systems["rotate-selected-object"].rotating;
     if (!isFrozen && !isVisible) return;
 
     this.updateVisibility();
