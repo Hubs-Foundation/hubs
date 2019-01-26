@@ -92,14 +92,14 @@ const contentOriginSuffixLookupMap = {
 // the ObjectType, if any, for that content.
 export function objectTypeForOriginAndContentType(contentOrigin, contentType) {
   for (const prefix in objectTypeMimePrefixLookupMap) {
-    if (contentType.startsWith(prefix)) {
+    if (contentType.toLowerCase().startsWith(prefix)) {
       const types = objectTypeMimePrefixLookupMap[prefix];
       return objectTypeForOrigin(contentOrigin, ...types);
     }
   }
 
   for (const suffix in contentOriginSuffixLookupMap) {
-    if (contentOrigin.endsWith(suffix)) {
+    if (contentOrigin.toLowerCase().endsWith(suffix)) {
       const types = contentOriginSuffixLookupMap[suffix];
       return objectTypeForOrigin(contentOrigin, ...types);
     }
