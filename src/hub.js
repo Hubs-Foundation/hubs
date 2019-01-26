@@ -324,8 +324,14 @@ async function updateEnvironmentForHub(hub) {
 
 async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
+  const isRejoin = NAF.connection.isConnected();
 
-  if (NAF.connection.isConnected()) {
+  if (isRejoin) {
+    // Slight hack, to ensure correct presence state we need to re-send the entry event
+    // on re-join. Ideally this would be updated into the channel socket state but this
+    // would require significant changes to the hub channel events and socket management.
+    hubChannel.sendEntryEvent();
+
     // Send complete sync on phoenix re-join.
     NAF.connection.entities.completeSync(null, true);
     return;
