@@ -68,17 +68,42 @@ const objectTypeMimePrefixLookupMap = {
     ObjectTypes.SPAWNER_MODEL
   ],
   "video/": [ObjectTypes.URL_VIDEO, ObjectTypes.FILE_VIDEO, ObjectTypes.CLIPBOARD_VIDEO, ObjectTypes.SPAWNER_VIDEO],
+  "application/vnd.apple.mpegurl": [
+    ObjectTypes.URL_VIDEO,
+    ObjectTypes.FILE_VIDEO,
+    ObjectTypes.CLIPBOARD_VIDEO,
+    ObjectTypes.SPAWNER_VIDEO
+  ],
+  "application/x-mpegurl": [
+    ObjectTypes.URL_VIDEO,
+    ObjectTypes.FILE_VIDEO,
+    ObjectTypes.CLIPBOARD_VIDEO,
+    ObjectTypes.SPAWNER_VIDEO
+  ],
   "audio/": [ObjectTypes.URL_AUDIO, ObjectTypes.FILE_AUDIO, ObjectTypes.CLIPBOARD_AUDIO, ObjectTypes.SPAWNER_AUDIO],
   "application/pdf": [ObjectTypes.URL_PDF, ObjectTypes.FILE_PDF, ObjectTypes.CLIPBOARD_PDF, ObjectTypes.SPAWNER_PDF]
 };
 
+const srcSuffixLookupMap = {
+  ".m3u8": [ObjectTypes.URL_VIDEO, ObjectTypes.FILE_VIDEO, ObjectTypes.CLIPBOARD_VIDEO, ObjectTypes.SPAWNER_VIDEO]
+};
+
 // Given an content origin and the resolved mime type of a piece of content, return
 // the ObjectType, if any, for that content.
-export function objectTypeForOriginAndContentType(contentOrigin, contentType) {
+export function objectTypeForOriginAndContentType(contentOrigin, contentType, src) {
   for (const prefix in objectTypeMimePrefixLookupMap) {
-    if (contentType.startsWith(prefix)) {
+    if (contentType.toLowerCase().startsWith(prefix)) {
       const types = objectTypeMimePrefixLookupMap[prefix];
       return objectTypeForOrigin(contentOrigin, ...types);
+    }
+  }
+
+  if (src) {
+    for (const suffix in srcSuffixLookupMap) {
+      if (src.toLowerCase().endsWith(suffix)) {
+        const types = srcSuffixLookupMap[suffix];
+        return objectTypeForOrigin(contentOrigin, ...types);
+      }
     }
   }
 

@@ -223,7 +223,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
 
   if (contentOrigin) {
     entity.addEventListener("media_resolved", ({ detail }) => {
-      const objectType = objectTypeForOriginAndContentType(contentOrigin, detail.contentType);
+      const objectType = objectTypeForOriginAndContentType(contentOrigin, detail.contentType, detail.src);
       scene.emit("object_spawned", { objectType });
     });
   }
