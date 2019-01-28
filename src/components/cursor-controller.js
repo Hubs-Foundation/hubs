@@ -1,4 +1,5 @@
 import { paths } from "../systems/userinput/paths";
+import { sets } from "../systems/userinput/sets";
 import { getLastWorldPosition } from "../utils/three-utils";
 
 // Color code from https://codepen.io/njmcode/pen/axoyD/
@@ -82,8 +83,8 @@ const _interpolateHSL = function(color1, color2, factor) {
 function rotatingColor(t) {
   const STEP_LENGTH = 0.05;
   const color = _interpolateHSL(
-    [205, 136, 175],
-    [44, 0, 27],
+    [47, 255, 200],
+    [23, 64, 118],
     0.5 + 0.5 * Math.floor(Math.sin(t / 1000.0) / STEP_LENGTH) * STEP_LENGTH
   );
   return r2h(color);
@@ -223,7 +224,7 @@ AFRAME.registerComponent("cursor-controller", {
       const { cursor, near, far, camera, cursorColorHovered, cursorColorUnhovered } = this.data;
 
       const cursorModDelta = userinput.get(paths.actions.cursor.modDelta);
-      if (isGrabbing && cursorModDelta) {
+      if (isGrabbing && !userinput.activeSets.has(sets.cursorHoldingUI) && cursorModDelta) {
         this.distance = THREE.Math.clamp(this.distance - cursorModDelta, near, far);
       }
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);
