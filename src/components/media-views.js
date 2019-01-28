@@ -579,7 +579,7 @@ AFRAME.registerComponent("media-video", {
       }
     }
 
-    if (this.hoverMenu.object3D.visible && !this.videoIsLive) {
+    if (this.hoverMenu && this.hoverMenu.object3D.visible && !this.videoIsLive) {
       this.timeLabel.setAttribute(
         "text",
         "value",

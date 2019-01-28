@@ -35,8 +35,8 @@
         action-to-event__focus_chat="path: /actions/focusChat; event: action_focus_chat;"
         environment-map="loadDefault: false"
     >
-
         <a-assets>
+            <img id="rotation-symbol" crossorigin="anonymous" src="./assets/rotation.png">
             <img id="action-button" crossorigin="anonymous" src="./assets/hud/action_button.9.png">
             <img id="tooltip" crossorigin="anonymous" src="./assets/hud/tooltip.9.png">
             <img id="mute-off" crossorigin="anonymous" src="./assets/hud/mute_off.png">
@@ -241,11 +241,11 @@
                             <a-entity mixin="rounded-text-button" clone-media-button position="-0.25 -0.375 0.01">
                                 <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
-                            <a-entity scale="0.5 0.5 1" mixin="rounded-text-button" rotate-button rotate-button-selector position="-0.6  0.06 0.01">
-                                <a-entity text="value:rotate; width:2.80; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            <a-entity scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button rotate-button-selector position="-0.6  0.12 0.01">
+                                <a-entity text="value:rotate; width:1.40; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
-                            <a-entity  scale="0.5 0.5 1" mixin="rounded-text-button" rotate-button="mode: reset;" position="-0.6 -0.06 0.01">
-                                <a-entity text="value:align; width:2.60; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            <a-entity  scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button="mode: align;" position="-0.6 -0.12 0.01">
+                                <a-entity text="value:align; width:1.30; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
                         </a-entity>
                     </a-entity>
@@ -487,7 +487,15 @@
                 activateEndButtons: secondary-cursor-release, secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
             action-to-event__grab="path: /actions/cursorGrab; event: cursor-grab"
             action-to-event__drop="path: /actions/cursorDrop; event: cursor-release"
-        ></a-sphere>
+        >
+            <a-image
+                icon-button="image: #rotation-symbol"
+                scale="0.1 0.1 0.1"
+                position="0.0 0 0"
+                class="hud"
+                visible-if-rotating
+            ></a-image>
+        </a-sphere>
 
         <!-- Player Rig -->
         <a-entity
