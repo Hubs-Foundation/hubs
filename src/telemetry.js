@@ -24,7 +24,6 @@ export default function registerTelemetry(trackedPage, trackedTitle) {
       ga("set", "title", trackedTitle);
     }
 
-    console.log(ga);
     ga("send", "pageview");
   }
 }
