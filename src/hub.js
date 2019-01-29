@@ -162,7 +162,7 @@ const loadingEnvironmentURL =
   "https://hubs-proxy.com/https://uploads-prod.reticulum.io/files/58c034aa-ff17-4d3c-a6cc-c9095bb4822c.glb";
 
 if (!isBotMode && !isTelemetryDisabled) {
-  registerTelemetry();
+  registerTelemetry("/hub", "Room Landing Page");
 }
 
 disableiOSZoom();
