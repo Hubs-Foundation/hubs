@@ -356,6 +356,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     });
 
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
+
     scene.components["networked-scene"]
       .connect()
       .then(() => {
@@ -622,6 +623,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
       hubChannel.setPermissionsFromToken(data.perms_token);
+      scene.addEventListener("adapter-ready", ({ detail: adapter }) => adapter.setJoinToken(data.perms_token));
       subscriptions.setHubChannel(hubChannel);
       subscriptions.setSubscribed(data.subscriptions.web_push);
       remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
