@@ -168,11 +168,10 @@
                 <a-entity
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
-                    body="type: static; shape: none; mass: 0;"
-                    grabbable
+                    ammo-body="type: static; shape: hull; mass: 1;"
+                    grabbable="constraintComponentName: ammo-constraint"
                     hoverable
                     hoverable-visuals="cursorController: #cursor-controller"
-                    auto-scale-cannon-physics-body
                     sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
                     sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
                     set-sounds-invisible
@@ -182,11 +181,12 @@
                 </a-entity>
             </template>
 
+
             <template id="interactable-media">
                 <a-entity
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
-                    ammo-body="type: dynamic; shape: hull; mass: 1;"
+                    ammo-body="type: dynamic; shape: hull; mass: 1; recenter: true;"
                     grabbable="constraintComponentName: ammo-constraint"
                     stretchable="useWorldPosition: true; usePhysics: never"
                     hoverable

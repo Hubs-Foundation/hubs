@@ -17,7 +17,8 @@ AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body", el => {
     mass: 0,
     type: "static",
     shape: "hull",
-    collisionFlags: 4
+    collisionFlags: 4,
+    recenter: true
   });
 });
 AFRAME.GLTFModelPlus.registerComponent("hide-when-quality", "hide-when-quality");
@@ -165,7 +166,8 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
     mass: 0,
     type: "static",
     shape: "hull",
-    collisionFlags: 4
+    collisionFlags: 4,
+    recenter: true
   });
   el.setAttribute("hoverable", "");
 });
