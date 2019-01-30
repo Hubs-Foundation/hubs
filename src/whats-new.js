@@ -2,9 +2,12 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import InfiniteScroll from "react-infinite-scroller";
 import markdownit from "markdown-it";
+import registerTelemetry from "./telemetry";
 
 import "./assets/stylesheets/whats-new.scss";
 import hubsLogo from "./assets/images/hub-preview-light-no-shadow.png";
+
+registerTelemetry("/whats-new", "Hubs What's New");
 
 function formatDate(value) {
   return value && new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
