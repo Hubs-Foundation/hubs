@@ -27,7 +27,7 @@ import AvatarSelector from "./react-components/avatar-selector";
 
 addLocaleData([...en]);
 
-registerTelemetry();
+registerTelemetry("/avatars", "Hubs Avatar Picker");
 
 function getHashArg(arg) {
   return new URLSearchParams(location.hash.replace(/^#/, "?")).get(arg);

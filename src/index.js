@@ -9,7 +9,7 @@ import { createAndRedirectToNewHub, connectToReticulum } from "./utils/phoenix-u
 import Store from "./storage/store";
 
 const qs = new URLSearchParams(location.search);
-registerTelemetry();
+registerTelemetry("/home", "Hubs Home Page");
 
 const { pathname } = document.location;
 const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathname.substring(1).split("/")[1]);
