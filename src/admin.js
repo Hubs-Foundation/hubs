@@ -11,6 +11,7 @@ import { connectToReticulum } from "./utils/phoenix-utils";
 import { App } from "./App";
 import { Admin, Resource, ListGuesser } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
+import { SceneList } from "./react-components/admin/scenes";
 
 window.APP = new App();
 const store = window.APP.store;
@@ -22,8 +23,7 @@ store.init();
 class AdminUI extends Component {
   static propTypes = {
     dataProvider: PropTypes.func,
-    authProvider: PropTypes.func,
-    authRefreshSaga: PropTypes.func
+    authProvider: PropTypes.func
   };
 
   constructor(props) {
@@ -32,12 +32,9 @@ class AdminUI extends Component {
 
   render() {
     return (
-      <Admin
-        dataProvider={this.props.dataProvider}
-        customSagas={[this.props.authRefreshSaga]}
-        authProvider={this.props.authProvider}
-      >
-        <Resource name="scenes" list={ListGuesser} />
+      <Admin dataProvider={this.props.dataProvider} authProvider={this.props.authProvider}>
+        <Resource name="scenes" list={SceneList} />
+        <Resource name="accounts" />
       </Admin>
     );
   }
@@ -46,16 +43,20 @@ class AdminUI extends Component {
 const mountUI = retPhxChannel => {
   const dataProvider = postgrestClient("//" + process.env.POSTGREST_SERVER);
   const authProvider = postgrestAuthenticatior.createAuthProvider(retPhxChannel);
-  const authRefreshSaga = postgrestAuthenticatior.createAuthRefreshSaga(3 * 60);
 
   ReactDOM.render(
-    <AdminUI dataProvider={dataProvider} authProvider={authProvider} authRefreshSaga={authRefreshSaga} />,
+    <AdminUI dataProvider={dataProvider} authProvider={authProvider} />,
     document.getElementById("ui-root")
   );
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
   const socket = connectToReticulum();
+
+  // Refresh perms regularly
+  setInterval(() => {
+    postgrestAuthenticatior.refreshToken();
+  }, 60000);
 
   // Reticulum global channel
   const retPhxChannel = socket.channel(`ret`, { hub_id: "admin", token: store.state.credentials.token });

@@ -1,12 +1,51 @@
-import { queryParameters, fetchJson } from "ra-core/lib/util/fetch";
+import { queryParameters } from "ra-core/lib/util/fetch";
+import HttpError from "ra-core/lib/util/HttpError";
 import { GET_LIST, GET_ONE, GET_MANY, GET_MANY_REFERENCE, CREATE, UPDATE, DELETE, DELETE_MANY } from "react-admin";
 import { AUTH_LOGIN, AUTH_LOGOUT, AUTH_ERROR } from "react-admin";
 import { fork, cancel, cancelled, takeEvery } from "redux-saga/effects";
 import { delay } from "redux-saga";
 import jwt_decode from "jwt-decode";
 import { USER_LOGIN_SUCCESS, USER_LOGOUT } from "ra-core/esm/actions";
+import json2ParseBigint from "./json_parse_bigint";
 
 const localStorageKey = "__hubs_admin_token";
+
+// Custom fetchJson routing to ensure bigint precision
+const fetchJson = (url, options) => {
+  const requestHeaders =
+    options.headers ||
+    new Headers({
+      Accept: "application/json"
+    });
+  if (!requestHeaders.has("Content-Type") && !(options && options.body && options.body instanceof FormData)) {
+    requestHeaders.set("Content-Type", "application/json");
+  }
+  if (options.user && options.user.authenticated && options.user.token) {
+    requestHeaders.set("Authorization", options.user.token);
+  }
+
+  return fetch(url, { ...options, headers: requestHeaders })
+    .then(response =>
+      response.text().then(text => ({
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+        body: text
+      }))
+    )
+    .then(({ status, statusText, headers, body }) => {
+      let json;
+      try {
+        json = json2ParseBigint(body);
+      } catch (e) {
+        // not json, no big deal
+      }
+      if (status < 200 || status >= 300) {
+        return Promise.reject(new HttpError((json && json.message) || statusText, status, json));
+      }
+      return Promise.resolve({ status, headers, body, json });
+    });
+};
 
 /**
  * Maps admin-on-rest queries to a postgrest API
@@ -221,10 +260,8 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
 };
 
 let retPhxChannel;
-let moduleSecondsBeforeExpiry;
-let moduleRefreshTask;
 
-const refreshToken = function() {
+export const refreshToken = function() {
   return new Promise((resolve, reject) => {
     retPhxChannel
       .push("refresh_perms_token")
@@ -237,23 +274,6 @@ const refreshToken = function() {
         reject();
       });
   });
-};
-
-const refreshTokenFunction = function*(delayInMs, previousToken) {
-  let tokenToRefresh = previousToken;
-
-  try {
-    while (true) {
-      yield delay(delayInMs);
-      const newToken = yield Promise.resolve(refreshToken(tokenToRefresh));
-      yield localStorage.setItem(localStorageKey, newToken);
-      tokenToRefresh = newToken;
-    }
-  } finally {
-    if (yield cancelled()) {
-      // fade away
-    }
-  }
 };
 
 const createAuthProvider = channel => {
@@ -283,35 +303,9 @@ const createAuthProvider = channel => {
   };
 };
 
-/*
- * TODO work out how to kick off a refresh timer after a
- * hard reload when user is already logged in
- */
-const handleLoginSuccess = function*() {
-  const token = yield localStorage.getItem(localStorageKey);
-  const decodedToken = jwt_decode(token);
-  const expirySeconds = Math.round((decodedToken.exp * 1000 - Date.now()) / 1000);
-  const refreshDelayInMs = (expirySeconds - moduleSecondsBeforeExpiry) * 1000;
-  moduleRefreshTask = yield fork(refreshTokenFunction, refreshDelayInMs, token);
-};
-
-const handleLogout = function*() {
-  yield cancel(moduleRefreshTask);
-};
-
-const createAuthRefreshSaga = secondsBeforeExpiry => {
-  moduleSecondsBeforeExpiry = secondsBeforeExpiry;
-
-  return function*() {
-    yield takeEvery(USER_LOGIN_SUCCESS, handleLoginSuccess);
-
-    yield takeEvery(USER_LOGOUT, handleLogout);
-  };
-};
-
 const postgrestAuthenticatior = {
   createAuthProvider,
-  createAuthRefreshSaga
+  refreshToken
 };
 
 export { postgrestClient, postgrestAuthenticatior };
