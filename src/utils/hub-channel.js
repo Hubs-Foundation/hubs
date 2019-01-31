@@ -203,7 +203,7 @@ export default class HubChannel {
   fetchPermissions = () => {
     return new Promise((resolve, reject) => {
       this.channel
-        .push("get_perms_token")
+        .push("refresh_perms_token")
         .receive("ok", res => {
           this.setPermissionsFromToken(res.perms_token);
           resolve({ permsToken: res.perms_token, permissions: this._permissions });
