@@ -51,6 +51,8 @@ import "./components/freeze-controller";
 import "./components/icon-button";
 import "./components/text-button";
 import "./components/block-button";
+import "./components/kick-button";
+import "./components/visible-if-permitted";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
@@ -101,6 +103,7 @@ import { createInWorldLogMessage } from "./react-components/chat-message";
 import "./systems/nav";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
+import "./systems/permissions";
 import "./systems/exit-on-blur";
 import "./systems/camera-tools";
 import "./systems/userinput/userinput";
@@ -480,6 +483,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const linkChannel = new LinkChannel(store);
 
   window.APP.scene = scene;
+  window.APP.hubChannel = hubChannel;
 
   scene.addEventListener("enter-vr", () => {
     document.body.classList.add("vr-mode");
@@ -623,7 +627,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
       hubChannel.setPermissionsFromToken(data.perms_token);
-      scene.addEventListener("adapter-ready", ({ detail: adapter }) => adapter.setJoinToken(data.perms_token));
+      scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
+        adapter.setClientId(socket.params().session_id);
+        adapter.setJoinToken(data.perms_token);
+      });
       subscriptions.setHubChannel(hubChannel);
       subscriptions.setSubscribed(data.subscriptions.web_push);
       remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });

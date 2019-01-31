@@ -80,6 +80,7 @@ export default class SceneEntryManager {
 
     this._setupPlayerRig();
     this._setupBlocking();
+    this._setupKicking();
     this._setupMedia(mediaStream);
     this._setupCamera();
 
@@ -165,6 +166,12 @@ export default class SceneEntryManager {
     const hudController = this.playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });
     this.scene.emit("username-changed", { username: displayName });
+  };
+
+  _setupKicking = () => {
+    document.body.addEventListener("kicked", ev => {
+      NAF.connection.entities.removeEntitiesOfClient(ev.detail.clientId);
+    });
   };
 
   _setupBlocking = () => {
