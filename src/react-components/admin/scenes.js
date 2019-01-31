@@ -1,4 +1,6 @@
 import React from "react";
+import { SceneLink, OwnedFileImage } from "./fields";
+
 import {
   List,
   Edit,
@@ -15,11 +17,6 @@ import {
   DateField,
   BooleanField
 } from "react-admin";
-
-const FooField = ({ source, record = {} }) => {
-  console.log(record);
-  return <span>{record[source]}</span>;
-};
 
 export const SceneCreate = props => (
   <Create {...props}>
@@ -83,23 +80,18 @@ export const SceneEdit = props => (
 
 export const SceneList = props => (
   <List {...props}>
-    <Datagrid rowClick="edit">
-      <TextField source="id" />
-      <ReferenceField source="account_id" reference="accounts">
-        <TextField source="id" />
+    <Datagrid>
+      <ReferenceField source="screenshot_owned_file_id" reference="owned_files" linkType={false}>
+        <OwnedFileImage source="owned_file_uuid" />
       </ReferenceField>
-      <TextField source="scene_sid" />
-      <TextField source="slug" />
       <TextField source="name" />
-      <TextField source="description" />
-      <TextField source="state" />
-      <DateField source="inserted_at" />
-      <DateField source="updated_at" />
-      <TextField source="attribution" />
+      <SceneLink source="scene_sid" />
       <BooleanField source="allow_remixing" />
       <BooleanField source="allow_promotion" />
-      <TextField source="attributions.content" />
       <TextField source="reviewed_at" />
+      <DateField source="inserted_at" />
+      <DateField source="updated_at" />
+      <TextField source="state" />
     </Datagrid>
   </List>
 );
