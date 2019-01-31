@@ -88,6 +88,7 @@ module.exports = (env, argv) => ({
     scene: path.join(__dirname, "src", "scene.js"),
     link: path.join(__dirname, "src", "link.js"),
     spoke: path.join(__dirname, "src", "spoke.js"),
+    admin: path.join(__dirname, "src", "admin.js"),
     "whats-new": path.join(__dirname, "src", "whats-new.js"),
     "avatar-selector": path.join(__dirname, "src", "avatar-selector.js")
   },
@@ -267,6 +268,11 @@ module.exports = (env, argv) => ({
       chunks: ["vendor", "engine", "avatar-selector"],
       inject: "head"
     }),
+    new HTMLWebpackPlugin({
+      filename: "admin.html",
+      template: path.join(__dirname, "src", "admin.html"),
+      chunks: ["vendor", "admin"]
+    }),
     new CopyWebpackPlugin([
       {
         from: "src/assets/images/favicon.ico",
@@ -302,7 +308,8 @@ module.exports = (env, argv) => ({
         EXTRA_ENVIRONMENTS: process.env.EXTRA_ENVIRONMENTS,
         BUILD_VERSION: process.env.BUILD_VERSION,
         SENTRY_DSN: process.env.SENTRY_DSN,
-        GA_TRACKING_ID: process.env.GA_TRACKING_ID
+        GA_TRACKING_ID: process.env.GA_TRACKING_ID,
+        POSTGREST_SERVER: process.env.POSTGREST_SERVER
       })
     })
   ]
