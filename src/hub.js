@@ -574,6 +574,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   const socket = connectToReticulum(isDebug);
+
+  socket.onClose(() => {
+    // The socket should only close of the server has explicitly killed it.
+    entryManager.exitScene();
+    remountUI({ roomUnavailableReason: "left" });
+  });
+
   remountUI({ sessionId: socket.params().session_id });
 
   // Hub local channel
