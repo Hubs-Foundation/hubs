@@ -6,6 +6,8 @@ import { delay } from "redux-saga";
 import jwt_decode from "jwt-decode";
 import { USER_LOGIN_SUCCESS, USER_LOGOUT } from "ra-core/esm/actions";
 
+const localStorageKey = "__hubs_admin_token";
+
 /**
  * Maps admin-on-rest queries to a postgrest API
  *
@@ -69,6 +71,8 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
     let url = "";
     const options = {};
     options.headers = new Headers();
+    const token = localStorage.getItem(localStorageKey);
+    options.headers.set("Authorization", `Bearer ${token}`);
 
     switch (type) {
       case GET_LIST: {
@@ -216,75 +220,23 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
   };
 };
 
-let moduleLoginUrl;
-let moduleRefreshUrl;
+let retPhxChannel;
 let moduleSecondsBeforeExpiry;
 let moduleRefreshTask;
 
-const createAuthProvider = loginUrl => {
-  moduleLoginUrl = loginUrl;
-
-  return (type, params) => {
-    if (type === AUTH_LOGIN) {
-      const { username, password } = params;
-      const request = new Request(moduleLoginUrl, {
-        method: "POST",
-        body: JSON.stringify({ email: username, password }),
-        headers: new Headers({
-          "Content-Type": "application/json",
-          Accept: "application/vnd.pgrst.object+json"
-        })
+const refreshToken = function() {
+  return new Promise((resolve, reject) => {
+    retPhxChannel
+      .push("refresh_perms_token")
+      .receive("ok", ({ perms_token }) => {
+        localStorage.setItem(localStorageKey, perms_token);
+        resolve(perms_token);
+      })
+      .receive("error", err => {
+        console.error("failed to fetch perms", err);
+        reject();
       });
-      return fetch(request)
-        .then(response => {
-          if (response.status < 200 || response.status >= 300) {
-            throw new Error(response.statusText);
-          }
-          return response.json();
-        })
-        .then(({ token }) => {
-          localStorage.setItem("token", token);
-        });
-    }
-
-    if (type === AUTH_LOGOUT) {
-      localStorage.removeItem("token");
-      return Promise.resolve();
-    }
-
-    if (type === AUTH_ERROR) {
-      const status = params.status;
-      if (status === 401 || status === 403) {
-        localStorage.removeItem("token");
-        return Promise.reject();
-      }
-      return Promise.resolve();
-    }
-
-    return Promise.resolve();
-  };
-};
-
-const refreshToken = function(token) {
-  const request = new Request(moduleRefreshUrl, {
-    method: "GET",
-    headers: new Headers({
-      Authorization: `Bearer ${token}`
-    })
   });
-
-  return fetch(request)
-    .then(response => {
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error(response.statusText);
-      }
-      return response.json();
-    })
-    .then(token => {
-      // comes back as JSON-encoded plain string
-      localStorage.setItem("token", token);
-      return token;
-    });
 };
 
 const refreshTokenFunction = function*(delayInMs, previousToken) {
@@ -294,7 +246,7 @@ const refreshTokenFunction = function*(delayInMs, previousToken) {
     while (true) {
       yield delay(delayInMs);
       const newToken = yield Promise.resolve(refreshToken(tokenToRefresh));
-      yield localStorage.setItem("token", newToken);
+      yield localStorage.setItem(localStorageKey, newToken);
       tokenToRefresh = newToken;
     }
   } finally {
@@ -304,12 +256,39 @@ const refreshTokenFunction = function*(delayInMs, previousToken) {
   }
 };
 
+const createAuthProvider = channel => {
+  retPhxChannel = channel;
+
+  return async (type, params) => {
+    if (type === AUTH_LOGIN) {
+      const token = await refreshToken();
+      return token;
+    }
+
+    if (type === AUTH_LOGOUT) {
+      localStorage.removeItem(localStorageKey);
+      return Promise.resolve();
+    }
+
+    if (type === AUTH_ERROR) {
+      const status = params.status;
+      if (status === 401 || status === 403) {
+        localStorage.removeItem(localStorageKey);
+        return Promise.reject();
+      }
+      return Promise.resolve();
+    }
+
+    return Promise.resolve();
+  };
+};
+
 /*
  * TODO work out how to kick off a refresh timer after a
  * hard reload when user is already logged in
  */
 const handleLoginSuccess = function*() {
-  const token = yield localStorage.getItem("token");
+  const token = yield localStorage.getItem(localStorageKey);
   const decodedToken = jwt_decode(token);
   const expirySeconds = Math.round((decodedToken.exp * 1000 - Date.now()) / 1000);
   const refreshDelayInMs = (expirySeconds - moduleSecondsBeforeExpiry) * 1000;
@@ -320,8 +299,7 @@ const handleLogout = function*() {
   yield cancel(moduleRefreshTask);
 };
 
-const createAuthRefreshSaga = (refreshUrl, secondsBeforeExpiry) => {
-  moduleRefreshUrl = refreshUrl;
+const createAuthRefreshSaga = secondsBeforeExpiry => {
   moduleSecondsBeforeExpiry = secondsBeforeExpiry;
 
   return function*() {
