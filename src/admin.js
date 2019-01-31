@@ -11,7 +11,7 @@ import { connectToReticulum } from "./utils/phoenix-utils";
 import { App } from "./App";
 import { Admin, Resource, ListGuesser, EditGuesser } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
-import { SceneList, SceneEdit } from "./react-components/admin/scenes";
+import { SceneList, SceneEdit, SceneCreate } from "./react-components/admin/scenes";
 
 window.APP = new App();
 const store = window.APP.store;
@@ -33,7 +33,7 @@ class AdminUI extends Component {
   render() {
     return (
       <Admin dataProvider={this.props.dataProvider} authProvider={this.props.authProvider}>
-        <Resource name="scenes" list={SceneList} edit={SceneEdit} />
+        <Resource name="scenes" list={SceneList} edit={SceneEdit} create={SceneCreate} />
         <Resource name="accounts" />
         <Resource name="owned_files" />
       </Admin>
