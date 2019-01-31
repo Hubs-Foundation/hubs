@@ -2,10 +2,6 @@ import { queryParameters } from "ra-core/lib/util/fetch";
 import HttpError from "ra-core/lib/util/HttpError";
 import { GET_LIST, GET_ONE, GET_MANY, GET_MANY_REFERENCE, CREATE, UPDATE, DELETE, DELETE_MANY } from "react-admin";
 import { AUTH_LOGIN, AUTH_LOGOUT, AUTH_ERROR } from "react-admin";
-import { fork, cancel, cancelled, takeEvery } from "redux-saga/effects";
-import { delay } from "redux-saga";
-import jwt_decode from "jwt-decode";
-import { USER_LOGIN_SUCCESS, USER_LOGOUT } from "ra-core/esm/actions";
 import json2ParseBigint from "./json_parse_bigint";
 
 const localStorageKey = "__hubs_admin_token";
@@ -155,6 +151,7 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
         url = `${apiUrl}/${resource}?id=eq.${params.id}`;
         options.method = "PATCH";
         options.headers.set("Accept", "application/vnd.pgrst.object+json");
+        options.headers.set("Prefer", "return=representation");
         options.body = JSON.stringify(params.data);
         break;
       }
