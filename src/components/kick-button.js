@@ -1,8 +1,3 @@
-/**
- * Registers a click handler and invokes the kick method on the NAF adapter for the owner associated with its entity.
- * @namespace network
- * @component kick-button
- */
 AFRAME.registerComponent("kick-button", {
   init() {
     this.onClick = () => {
