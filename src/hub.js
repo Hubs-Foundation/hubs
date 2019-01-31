@@ -575,10 +575,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const socket = connectToReticulum(isDebug);
 
-  socket.onClose(() => {
-    // The socket should only close of the server has explicitly killed it.
-    entryManager.exitScene();
-    remountUI({ roomUnavailableReason: "left" });
+  socket.onClose(e => {
+    // The socket should close normally if the server has explicitly killed it.
+    const NORMAL_CLOSURE = 1000;
+    if (e.code === NORMAL_CLOSURE) {
+      entryManager.exitScene();
+      remountUI({ roomUnavailableReason: "kicked" });
+    }
   });
 
   remountUI({ sessionId: socket.params().session_id });
