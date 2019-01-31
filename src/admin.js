@@ -9,9 +9,9 @@ import PropTypes from "prop-types";
 //import classNames from "classnames";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { App } from "./App";
-import { Admin, Resource, ListGuesser } from "react-admin";
+import { Admin, Resource, ListGuesser, EditGuesser } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
-import { SceneList } from "./react-components/admin/scenes";
+import { SceneList, SceneEdit } from "./react-components/admin/scenes";
 
 window.APP = new App();
 const store = window.APP.store;
@@ -33,8 +33,9 @@ class AdminUI extends Component {
   render() {
     return (
       <Admin dataProvider={this.props.dataProvider} authProvider={this.props.authProvider}>
-        <Resource name="scenes" list={SceneList} />
+        <Resource name="scenes" list={SceneList} edit={SceneEdit} />
         <Resource name="accounts" />
+        <Resource name="owned_files" />
       </Admin>
     );
   }
