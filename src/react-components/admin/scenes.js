@@ -15,8 +15,15 @@ import {
   TextField,
   ReferenceField,
   DateField,
-  BooleanField
+  BooleanField,
+  Filter
 } from "react-admin";
+
+const SceneFilter = props => (
+  <Filter {...props}>
+    <TextInput label="Search" source="name" alwaysOn />
+  </Filter>
+);
 
 export const SceneCreate = props => (
   <Create {...props}>
@@ -79,7 +86,7 @@ export const SceneEdit = props => (
 );
 
 export const SceneList = props => (
-  <List {...props}>
+  <List {...props} filters={<SceneFilter />}>
     <Datagrid>
       <ReferenceField source="screenshot_owned_file_id" reference="owned_files" linkType={false}>
         <OwnedFileImage source="owned_file_uuid" />

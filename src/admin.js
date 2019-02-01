@@ -6,10 +6,10 @@ import "./utils/logging";
 import ReactDOM from "react-dom";
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-//import classNames from "classnames";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { App } from "./App";
-import { Admin, Resource, ListGuesser, EditGuesser } from "react-admin";
+import { Admin, Resource, ListGuesser } from "react-admin";
+//import { EditGuesser, CreateGuesser } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
 import { SceneList, SceneEdit, SceneCreate } from "./react-components/admin/scenes";
 
@@ -36,6 +36,7 @@ class AdminUI extends Component {
         <Resource name="scenes" list={SceneList} edit={SceneEdit} create={SceneCreate} />
         <Resource name="accounts" />
         <Resource name="owned_files" />
+        <Resource name="hubs_metrics" list={ListGuesser} />
       </Admin>
     );
   }
@@ -70,9 +71,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     .receive("error", res => {
       console.error(res);
     });
-
-  /*hubPhxChannel.on("naf", data => {
-    if (!NAF.connection.adapter) return;
-    NAF.connection.adapter.onData(data);
-  });*/
 });
