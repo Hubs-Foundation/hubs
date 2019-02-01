@@ -11,7 +11,8 @@ import { App } from "./App";
 import { Admin, Resource, ListGuesser } from "react-admin";
 //import { EditGuesser, CreateGuesser } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
-import { SceneList, SceneEdit, SceneCreate } from "./react-components/admin/scenes";
+import { SceneList, SceneEdit } from "./react-components/admin/scenes";
+import { AccountList, AccountEdit } from "./react-components/admin/accounts";
 
 window.APP = new App();
 const store = window.APP.store;
@@ -33,8 +34,8 @@ class AdminUI extends Component {
   render() {
     return (
       <Admin dataProvider={this.props.dataProvider} authProvider={this.props.authProvider}>
-        <Resource name="scenes" list={SceneList} edit={SceneEdit} create={SceneCreate} />
-        <Resource name="accounts" />
+        <Resource name="scenes" list={SceneList} edit={SceneEdit} />
+        <Resource name="accounts" list={AccountList} edit={AccountEdit} />
         <Resource name="owned_files" />
         <Resource name="hubs_metrics" list={ListGuesser} />
       </Admin>
