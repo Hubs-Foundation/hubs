@@ -1,4 +1,4 @@
-//* eslint-disable *//
+/* eslint-disable */
 //Modified version of json parser to auto-coerce bigints to strings
 //
 /*
