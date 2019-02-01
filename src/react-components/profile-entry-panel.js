@@ -56,6 +56,13 @@ class ProfileEntryPanel extends Component {
       return;
     }
     this.setState({ avatarId: e.data.avatarId });
+
+    // Send it back down to cause avatar picker UI to update.
+    this.sendAvatarStateToIframe();
+  };
+
+  sendAvatarStateToIframe = () => {
+    this.avatarSelector.contentWindow.postMessage({ avatarId: this.state.avatarId }, location.origin);
   };
 
   componentDidMount() {
@@ -121,8 +128,18 @@ class ProfileEntryPanel extends Component {
                 </div>
                 <iframe
                   className={styles.avatarSelector}
-                  src={`/avatar-selector.html#avatar_id=${this.state.avatarId}`}
-                  ref={ifr => (this.avatarSelector = ifr)}
+                  src={`/avatar-selector.html`}
+                  ref={ifr => {
+                    if (this.avatarSelector === ifr) return;
+
+                    this.avatarSelector = ifr;
+
+                    if (this.avatarSelector) {
+                      this.avatarSelector.onload = () => {
+                        this.sendAvatarStateToIframe();
+                      };
+                    }
+                  }}
                 />
                 <a
                   className="custom-url-link"
