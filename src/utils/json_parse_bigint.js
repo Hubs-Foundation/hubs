@@ -1,4 +1,5 @@
-// Modified version of json parser to auto-coerce bigints to strings
+//* eslint-disable *//
+//Modified version of json parser to auto-coerce bigints to strings
 //
 /*
     json_parse.js
