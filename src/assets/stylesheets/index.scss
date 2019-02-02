@@ -162,10 +162,11 @@ body {
 
     @media (max-height: 480px) {
       padding: 1em;
+      padding-bottom: 0;
     }
 
     :local(.logo) {
-      max-width: 350px;
+      max-width: 250px;
 
       img {
         width: 100%;
@@ -198,33 +199,14 @@ body {
     }
   }
 
-  :local(.join-button) {
+  :local(.have-code) {
     display: flex;
     justify-content: center;
 
-    a {
+    a { 
       margin-top: 8px;
-      @extend %action-button;
-    }
-  }
-
-  :local(.spoke-button) {
-    display: flex;
-    justify-content: center;
-
-    a {
-      margin-top: 16px;
-      @extend %action-button;
-      background: $spoke-action-color;
-    }
-  }
-
-  :local(.join-button), :local(.spoke-button) {
-    a {
-      @media (max-width: 350px), (max-height: 480px) {
-        font-size: 0.75em;
-        height: 32px;
-      }
+      color: black;
+      font-weight: bold;
     }
   }
 }

@@ -279,16 +279,9 @@ class HomeRoot extends Component {
               {this.state.environments.length > 1 && (
                 <div>
                   <WithHoverSound>
-                    <div className={styles.joinButton}>
+                    <div className={styles.haveCode}>
                       <a href="/link">
-                        <FormattedMessage id="home.join_room" />
-                      </a>
-                    </div>
-                  </WithHoverSound>
-                  <WithHoverSound>
-                    <div className={styles.spokeButton}>
-                      <a href="/spoke">
-                        <FormattedMessage id="home.create_with_spoke" />
+                        <FormattedMessage id="home.have_code" />
                       </a>
                     </div>
                   </WithHoverSound>
