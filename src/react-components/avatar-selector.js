@@ -179,6 +179,16 @@ class AvatarSelector extends Component {
           />
           <a-entity hide-when-quality="low" light="type: ambient; color: #FFF" />
         </a-scene>
+        <WithHoverSound>
+          <button className="avatar-selector__previous-button" onClick={this.emitChangeToPrevious}>
+            <FontAwesomeIcon icon={faAngleLeft} />
+          </button>
+        </WithHoverSound>
+        <WithHoverSound>
+          <button className="avatar-selector__next-button" onClick={this.emitChangeToNext}>
+            <FontAwesomeIcon icon={faAngleRight} />
+          </button>
+        </WithHoverSound>
       </div>
     );
   }
