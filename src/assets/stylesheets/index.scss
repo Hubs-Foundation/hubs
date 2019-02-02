@@ -45,17 +45,19 @@ body {
     height: auto;
     min-height: auto;
     padding: 1em 0;
+    flex-direction: column;
   }
 
   :local(.title-and-nav) {
     display: flex;
 
-    @media (max-width: 768px), (max-height: 480px) {
-      justify-content: center;
-    }
-
     @media (max-width: 1024px) {
       flex: 1 1 $header-section-width;
+    }
+
+    @media (max-width: 768px), (max-height: 480px) {
+      justify-content: center;
+      flex: 1;
     }
 
     :local(.links) {
@@ -73,6 +75,7 @@ body {
         font-weight: bold;
         font-size: 1.4em;
         text-decoration: none;
+        white-space: nowrap;
         
         @media (max-width: 768px), (max-height: 480px) {
           margin-top: 0.5em;
@@ -86,6 +89,12 @@ body {
     display: flex;
     align-items: center;
     justify-content: end;
+
+    @media (max-width: 768px), (max-height: 480px) {
+      flex: 1;
+      justify-content: center;
+      margin-top: 1em;
+    }
 
     a {
       text-decoration: underline;
