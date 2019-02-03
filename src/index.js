@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { HashRouter as Router, Route, Link } from "react-router-dom";
 
 import "./assets/stylesheets/index.scss";
 import registerTelemetry from "./telemetry";
@@ -29,7 +30,8 @@ const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathna
   const authChannel = new AuthChannel(store);
   authChannel.setSocket(connectToReticulum());
 
-  const root = (
+  function root(){
+    return (
     <HomeRoot
       initialEnvironment={qs.get("initial_environment")}
       sceneId={sceneId || ""}
@@ -42,6 +44,13 @@ const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathna
       listSignup={qs.has("list_signup")}
       report={qs.has("report")}
     />
+  );}
+  const test=(
+    <Router>
+      <div>
+        <Route exact path="/" component={root} />
+      </div>
+    </Router>
   );
-  ReactDOM.render(root, document.getElementById("home-root"));
+  ReactDOM.render(test, document.getElementById("home-root"));
 })();
