@@ -8,6 +8,7 @@ import HomeRoot from "./react-components/home-root";
 import AuthChannel from "./utils/auth-channel";
 import { createAndRedirectToNewHub, connectToReticulum } from "./utils/phoenix-utils";
 import Store from "./storage/store";
+import DialogContainer from "./react-components/dialog-container";
 
 const qs = new URLSearchParams(location.search);
 registerTelemetry("/home", "Hubs Home Page");
@@ -30,27 +31,35 @@ const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathna
   const authChannel = new AuthChannel(store);
   authChannel.setSocket(connectToReticulum());
 
-  function root(){
+  function root() {
     return (
-    <HomeRoot
-      initialEnvironment={qs.get("initial_environment")}
-      sceneId={sceneId || ""}
-      store={store}
-      authChannel={authChannel}
-      authVerify={qs.has("auth_topic")}
-      authTopic={qs.get("auth_topic")}
-      authToken={qs.get("auth_token")}
-      authOrigin={qs.get("auth_origin")}
-      listSignup={qs.has("list_signup")}
-      report={qs.has("report")}
-    />
-  );}
-  const test=(
+      <HomeRoot
+        initialEnvironment={qs.get("initial_environment")}
+        sceneId={sceneId || ""}
+        store={store}
+        authChannel={authChannel}
+        authVerify={qs.has("auth_topic")}
+        authTopic={qs.get("auth_topic")}
+        authToken={qs.get("auth_token")}
+        authOrigin={qs.get("auth_origin")}
+        listSignup={qs.has("list_signup")}
+        report={qs.has("report")}
+      />
+    );
+  }
+  function Test() {
+    return function() {
+      <DialogContainer props="Test" />;
+    };
+  }
+  // var Test= new DialogContainer();
+  const router = (
     <Router>
       <div>
         <Route exact path="/" component={root} />
+        <Route exact path="/main" render={props => <DialogContainer {...props} />} />
       </div>
     </Router>
   );
-  ReactDOM.render(test, document.getElementById("home-root"));
+  ReactDOM.render(router, document.getElementById("home-root"));
 })();
