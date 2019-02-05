@@ -1,5 +1,9 @@
 /* eslint-disable */
-//Modified version of json parser to auto-coerce bigints to strings
+// Modified version of json parser to auto-coerce bigints to strings.
+// Forked from the JSON2 parser from Doug Crockford.
+//
+// Patch on line 140 to return large numbers that would overflow 
+// as strings.
 //
 /*
     json_parse.js
@@ -115,13 +119,16 @@ export default (function() {
         string += ch;
         next();
       }
+      let isInteger = true;
       if (ch === ".") {
+        isInteger = false;
         string += ".";
         while (next() && ch >= "0" && ch <= "9") {
           string += ch;
         }
       }
       if (ch === "e" || ch === "E") {
+        isInteger = false;
         string += ch;
         next();
         if (ch === "-" || ch === "+") {
@@ -134,7 +141,8 @@ export default (function() {
         }
       }
 
-      if (string.length > 15) {
+      // gfodor: patch to return large integers as strings
+      if (isInteger && string.length > 15) {
         return string;
       }
 

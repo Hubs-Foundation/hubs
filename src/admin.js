@@ -43,10 +43,10 @@ class AdminUI extends Component {
   }
 }
 
-const mountUI = retPhxChannel => {
+const mountUI = async retPhxChannel => {
   const dataProvider = postgrestClient("//" + process.env.POSTGREST_SERVER);
   const authProvider = postgrestAuthenticatior.createAuthProvider(retPhxChannel);
-  postgrestAuthenticatior.refreshToken();
+  await postgrestAuthenticatior.refreshToken();
 
   ReactDOM.render(
     <AdminUI dataProvider={dataProvider} authProvider={authProvider} />,

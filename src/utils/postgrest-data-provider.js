@@ -4,7 +4,7 @@ import { GET_LIST, GET_ONE, GET_MANY, GET_MANY_REFERENCE, CREATE, UPDATE, DELETE
 import { AUTH_LOGIN, AUTH_LOGOUT, AUTH_ERROR } from "react-admin";
 import json2ParseBigint from "./json_parse_bigint";
 
-const localStorageKey = "__hubs_admin_token";
+let currentPermsToken = null;
 
 // Custom fetchJson routing to ensure bigint precision
 const fetchJson = (url, options) => {
@@ -34,12 +34,15 @@ const fetchJson = (url, options) => {
       try {
         json = json2ParseBigint(body);
       } catch (e) {
-        // not json, no big deal
+        // not json
+        console.warn(e);
       }
+
       if (status < 200 || status >= 300) {
-        return Promise.reject(new HttpError((json && json.message) || statusText, status, json));
+        throw new HttpError((json && json.message) || statusText, status, json);
       }
-      return Promise.resolve({ status, headers, body, json });
+
+      return { status, headers, body, json };
     });
 };
 
@@ -106,8 +109,7 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
     let url = "";
     const options = {};
     options.headers = new Headers();
-    const token = localStorage.getItem(localStorageKey);
-    options.headers.set("Authorization", `Bearer ${token}`);
+    options.headers.set("Authorization", `Bearer ${currentPermsToken}`);
 
     switch (type) {
       case GET_LIST: {
@@ -263,7 +265,7 @@ export const refreshToken = function() {
     retPhxChannel
       .push("refresh_perms_token")
       .receive("ok", ({ perms_token }) => {
-        localStorage.setItem(localStorageKey, perms_token);
+        currentPermsToken = perms_token;
         resolve(perms_token);
       })
       .receive("error", err => {
@@ -283,14 +285,14 @@ const createAuthProvider = channel => {
     }
 
     if (type === AUTH_LOGOUT) {
-      localStorage.removeItem(localStorageKey);
+      currentPermsToken = null;
       return Promise.resolve();
     }
 
     if (type === AUTH_ERROR) {
       const status = params.status;
       if (status === 401 || status === 403) {
-        localStorage.removeItem(localStorageKey);
+        currentPermsToken = null;
         return Promise.reject();
       }
       return Promise.resolve();

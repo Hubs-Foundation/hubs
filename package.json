@@ -46,7 +46,6 @@
     "hls.js": "^0.12.2",
     "jsonschema": "^1.2.2",
     "jszip": "^3.1.5",
-    "jwt-decode": "^2.2.0",
     "markdown-it": "^8.4.2",
     "moving-average": "^1.0.0",
     "naf-janus-adapter": "^1.0.0",
