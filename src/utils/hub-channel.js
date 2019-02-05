@@ -1,4 +1,4 @@
-import jsonwebtoken from "jsonwebtoken";
+import jwtDecode from "jwt-decode";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
@@ -32,7 +32,7 @@ export default class HubChannel {
 
   setPermissionsFromToken = token => {
     // Note: token is not verified.
-    this._permissions = jsonwebtoken.decode(token);
+    this._permissions = jwtDecode(token);
   };
 
   sendEntryEvent = async () => {
