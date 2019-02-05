@@ -80,6 +80,7 @@ export default class SceneEntryManager {
 
     this._setupPlayerRig();
     this._setupBlocking();
+    this._setupKicking();
     this._setupMedia(mediaStream);
     this._setupCamera();
 
@@ -167,6 +168,22 @@ export default class SceneEntryManager {
     this.scene.emit("username-changed", { username: displayName });
   };
 
+  _setupKicking = () => {
+    document.body.addEventListener("kicked", ({ detail }) => {
+      const { clientId } = detail;
+      const { entities } = NAF.connection.entities;
+      for (const id in entities) {
+        const entity = entities[id];
+        if (NAF.utils.getNetworkOwner(entity) === clientId && entity.components.networked.data.persistent) {
+          NAF.utils.takeOwnership(entity);
+          this._unpinElement(entity);
+          entity.parentNode.removeChild(entity);
+        }
+      }
+      NAF.connection.entities.removeEntitiesOfClient(clientId);
+    });
+  };
+
   _setupBlocking = () => {
     document.body.addEventListener("blocked", ev => {
       NAF.connection.entities.removeEntitiesOfClient(ev.detail.clientId);
@@ -238,6 +255,21 @@ export default class SceneEntryManager {
     }
   };
 
+  _unpinElement = el => {
+    const components = el.components;
+    const networked = components.networked;
+
+    if (!networked || !networked.data || !NAF.utils.isMine(el)) return;
+
+    const networkId = components.networked.data.networkId;
+    el.setAttribute("networked", { persistent: false });
+
+    const mediaLoader = components["media-loader"];
+    const fileId = mediaLoader.data && mediaLoader.data.fileId;
+
+    this.hubChannel.unpin(networkId, fileId);
+  };
+
   _setupMedia = mediaStream => {
     const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
@@ -271,19 +303,7 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("unpinned", e => {
-      const el = e.detail.el;
-      const components = el.components;
-      const networked = components.networked;
-
-      if (!networked || !networked.data || !NAF.utils.isMine(el)) return;
-
-      const networkId = components.networked.data.networkId;
-      el.setAttribute("networked", { persistent: false });
-
-      const mediaLoader = components["media-loader"];
-      const fileId = mediaLoader.data && mediaLoader.data.fileId;
-
-      this.hubChannel.unpin(networkId, fileId);
+      this._unpinElement(e.detail.el);
     });
 
     this.scene.addEventListener("object_spawned", e => {

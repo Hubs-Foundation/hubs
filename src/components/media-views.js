@@ -1,7 +1,7 @@
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
 import { paths } from "../systems/userinput/paths";
-import HLS from "hls.js";
+import HLS from "hls.js/dist/hls.light.js";
 import { proxiedUrlFor } from "../utils/media-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 
