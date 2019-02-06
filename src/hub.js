@@ -87,6 +87,7 @@ import "./components/hover-menu";
 
 import ReactDOM from "react-dom";
 import React from "react";
+import jwtDecode from "jwt-decode";
 import { BrowserRouter, Route } from "react-router-dom";
 import UIRoot from "./react-components/ui-root";
 import AuthChannel from "./utils/auth-channel";
@@ -612,6 +613,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
   const { token } = store.state.credentials;
   if (token) {
+    console.log(`Logged into account ${jwtDecode(token).sub}`);
     joinPayload.auth_token = token;
   }
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
