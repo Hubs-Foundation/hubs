@@ -558,6 +558,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const environmentScene = document.querySelector("#environment-scene");
+
   const onFirstEnvironmentLoad = () => {
     setupLobbyCamera();
 
@@ -574,6 +575,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   environmentScene.addEventListener("model-loaded", () => {
     // This will be run every time the environment is changed (including the first load.)
     remountUI({ environmentSceneLoaded: true });
+
+    // Re-bind the teleporter controls collision meshes in case the scene changed.
+    document
+      .querySelectorAll("a-entity[teleport-controls]")
+      .forEach(x => x.components["teleport-controls"].queryCollisionEntities());
 
     for (const modelEl of environmentScene.children) {
       addAnimationComponents(modelEl);
