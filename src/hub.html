@@ -20,9 +20,8 @@
 <body>
     <a-scene
         class="grab-cursor"
-        renderer="antialias: true; gammaOutput: true; sortObjects: true; physicallyCorrectLights: true;"
+        renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true;"
         shadow="type: pcfsoft"
-        gamma-factor
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         physics="gravity: -6; debug: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"

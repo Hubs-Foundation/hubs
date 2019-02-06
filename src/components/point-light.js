@@ -16,13 +16,17 @@ AFRAME.registerComponent("point-light", {
     this.light.shadow.camera.matrixAutoUpdate = true;
     this.el.setObject3D("point-light", this.light);
     this.el.sceneEl.systems.light.registerLight(el);
+    this.rendererSystem = this.el.sceneEl.systems.renderer;
+    el.setObject3D("cameraHelper", new THREE.CameraHelper(this.light.shadow.camera));
   },
 
   update(prevData) {
     const light = this.light;
 
     if (this.data.color !== prevData.color) {
-      light.color.set(this.data.color);
+      const color = new THREE.Color(this.data.color);
+      this.rendererSystem.applyColorCorrection(color);
+      light.color.copy(color);
     }
 
     if (this.data.intensity !== prevData.intensity) {
@@ -51,10 +55,15 @@ AFRAME.registerComponent("point-light", {
     if (width !== prevWidth || height !== prevHeight) {
       light.shadow.mapSize.set(width, height);
 
-      if (light.shadow.map) {
-        light.shadow.map.dispose();
-        light.shadow.map = null;
-      }
+      // if (light.shadow.map) {
+      //   light.shadow.map.dispose();
+      //   light.shadow.map = null;
+      // }
+    }
+
+    const cameraHelper = this.el.getObject3D("cameraHelper");
+    if (cameraHelper) {
+      cameraHelper.update();
     }
   },
 

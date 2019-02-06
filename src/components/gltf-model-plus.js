@@ -209,11 +209,11 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
     gltfUrl = fileMap["scene.gtlf"];
   }
 
-  const gltfLoader = new THREE.GLTFLoader();
-  gltfLoader.customURLResolver = getCustomGLTFParserURLResolver(gltfUrl);
-  gltfLoader.setLazy(true);
+  const loadingManager = new THREE.LoadingManager();
+  loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
+  const gltfLoader = new THREE.GLTFLoader(loadingManager);
 
-  const { parser } = await new Promise((resolve, reject) => gltfLoader.load(gltfUrl, resolve, onProgress, reject));
+  const parser = await new Promise((resolve, reject) => gltfLoader.createParser(gltfUrl, resolve, onProgress, reject));
 
   const materials = parser.json.materials;
   if (materials) {
