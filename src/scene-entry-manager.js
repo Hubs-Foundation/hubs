@@ -18,8 +18,9 @@ function requestFullscreen() {
 }
 
 export default class SceneEntryManager {
-  constructor(hubChannel) {
+  constructor(hubChannel, authChannel) {
     this.hubChannel = hubChannel;
+    this.authChannel = authChannel;
     this.store = window.APP.store;
     this.scene = document.querySelector("a-scene");
     this.cursorController = document.querySelector("#cursor-controller");
@@ -79,6 +80,7 @@ export default class SceneEntryManager {
 
     this._setupPlayerRig();
     this._setupBlocking();
+    this._setupKicking();
     this._setupMedia(mediaStream);
     this._setupCamera();
 
@@ -166,6 +168,22 @@ export default class SceneEntryManager {
     this.scene.emit("username-changed", { username: displayName });
   };
 
+  _setupKicking = () => {
+    document.body.addEventListener("kicked", ({ detail }) => {
+      const { clientId } = detail;
+      const { entities } = NAF.connection.entities;
+      for (const id in entities) {
+        const entity = entities[id];
+        if (NAF.utils.getNetworkOwner(entity) === clientId && entity.components.networked.data.persistent) {
+          NAF.utils.takeOwnership(entity);
+          this._unpinElement(entity);
+          entity.parentNode.removeChild(entity);
+        }
+      }
+      NAF.connection.entities.removeEntitiesOfClient(clientId);
+    });
+  };
+
   _setupBlocking = () => {
     document.body.addEventListener("blocked", ev => {
       NAF.connection.entities.removeEntitiesOfClient(ev.detail.clientId);
@@ -176,7 +194,7 @@ export default class SceneEntryManager {
     });
   };
 
-  _pinElement = el => {
+  _pinElement = async el => {
     const { networkId } = el.components.networked.data;
 
     const { fileId, src } = el.components["media-loader"].data;
@@ -195,7 +213,61 @@ export default class SceneEntryManager {
     el.setAttribute("networked", { persistent: true });
     el.setAttribute("media-loader", { fileIsOwned: true });
 
-    this.hubChannel.pin(networkId, gltfNode, fileId, fileAccessToken, promotionToken);
+    try {
+      await this.hubChannel.pin(networkId, gltfNode, fileId, fileAccessToken, promotionToken);
+    } catch (e) {
+      if (e.reason === "invalid_token") {
+        await this.authChannel.signOut(this.hubChannel);
+        this._signInAndPinElement(el);
+      } else {
+        console.warn("Pin failed for unknown reason", e);
+      }
+    }
+  };
+
+  _signInAndPinElement = el => {
+    if (this.hubChannel.signedIn) {
+      this._pinElement(el);
+    } else {
+      const wasInVR = this.scene.is("vr-mode");
+      if (wasInVR) this.scene.exitVR();
+      const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
+
+      this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete", continueTextId, async () => {
+        let pinningFailed = false;
+        if (this.hubChannel.signedIn) {
+          try {
+            await this._pinElement(el);
+          } catch (e) {
+            pinningFailed = true;
+          }
+        } else {
+          pinningFailed = true;
+        }
+
+        if (pinningFailed) {
+          // UI pins the entity optimistically, so we undo that here.
+          el.setAttribute("pinnable", "pinned", false);
+        }
+
+        if (wasInVR) this.scene.enterVR();
+      });
+    }
+  };
+
+  _unpinElement = el => {
+    const components = el.components;
+    const networked = components.networked;
+
+    if (!networked || !networked.data || !NAF.utils.isMine(el)) return;
+
+    const networkId = components.networked.data.networkId;
+    el.setAttribute("networked", { persistent: false });
+
+    const mediaLoader = components["media-loader"];
+    const fileId = mediaLoader.data && mediaLoader.data.fileId;
+
+    this.hubChannel.unpin(networkId, fileId);
   };
 
   _setupMedia = mediaStream => {
@@ -227,40 +299,11 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("pinned", e => {
-      if (this.hubChannel.signedIn) {
-        this._pinElement(e.detail.el);
-      } else {
-        const wasInVR = this.scene.is("vr-mode");
-        if (wasInVR) this.scene.exitVR();
-        const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
-
-        this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete", continueTextId, () => {
-          if (this.hubChannel.signedIn) {
-            this._pinElement(e.detail.el);
-          } else {
-            // UI pins the entity optimistically, so we undo that here.
-            e.detail.el.setAttribute("pinnable", "pinned", false);
-          }
-
-          if (wasInVR) this.scene.enterVR();
-        });
-      }
+      this._signInAndPinElement(e.detail.el);
     });
 
     this.scene.addEventListener("unpinned", e => {
-      const el = e.detail.el;
-      const components = el.components;
-      const networked = components.networked;
-
-      if (!networked || !networked.data || !NAF.utils.isMine(el)) return;
-
-      const networkId = components.networked.data.networkId;
-      el.setAttribute("networked", { persistent: false });
-
-      const mediaLoader = components["media-loader"];
-      const fileId = mediaLoader.data && mediaLoader.data.fileId;
-
-      this.hubChannel.unpin(networkId, fileId);
+      this._unpinElement(e.detail.el);
     });
 
     this.scene.addEventListener("object_spawned", e => {
@@ -407,7 +450,16 @@ export default class SceneEntryManager {
     });
 
     const audioEl = document.createElement("audio");
-    const audioInput = document.querySelector("#bot-audio-input");
+    let audioInput;
+    let dataInput;
+
+    // Wait for startup to render form
+    do {
+      audioInput = document.querySelector("#bot-audio-input");
+      dataInput = document.querySelector("#bot-data-input");
+      await nextTick();
+    } while (!audioInput || !dataInput);
+
     audioInput.onchange = () => {
       audioEl.loop = true;
       audioEl.muted = true;
@@ -415,7 +467,6 @@ export default class SceneEntryManager {
       audioEl.src = URL.createObjectURL(audioInput.files[0]);
       document.body.appendChild(audioEl);
     };
-    const dataInput = document.querySelector("#bot-data-input");
     dataInput.onchange = () => {
       const url = URL.createObjectURL(dataInput.files[0]);
       this.playerRig.setAttribute("avatar-replay", { recordingUrl: url });

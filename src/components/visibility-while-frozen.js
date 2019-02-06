@@ -54,7 +54,9 @@ AFRAME.registerComponent("visibility-while-frozen", {
         this.camWorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance;
     }
 
-    const shouldBeVisible = ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) && isWithinDistance;
+    const isRotating = AFRAME.scenes[0].systems["rotate-selected-object"].rotating;
+    const shouldBeVisible =
+      ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) && isWithinDistance && !isRotating;
 
     if (isVisible !== shouldBeVisible) {
       this.el.setAttribute("visible", shouldBeVisible);

@@ -46,12 +46,13 @@ import "./components/offset-relative-to";
 import "./components/player-info";
 import "./components/debug";
 import "./components/hand-poses";
-import "./components/gltf-bundle";
 import "./components/hud-controller";
 import "./components/freeze-controller";
 import "./components/icon-button";
 import "./components/text-button";
 import "./components/block-button";
+import "./components/kick-button";
+import "./components/visible-if-permitted";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
@@ -81,9 +82,12 @@ import "./components/follow-in-lower-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
+import "./components/rotate-object-button";
+import "./components/hover-menu";
 
 import ReactDOM from "react-dom";
 import React from "react";
+import jwtDecode from "jwt-decode";
 import { BrowserRouter, Route } from "react-router-dom";
 import UIRoot from "./react-components/ui-root";
 import AuthChannel from "./utils/auth-channel";
@@ -100,6 +104,7 @@ import { createInWorldLogMessage } from "./react-components/chat-message";
 import "./systems/nav";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
+import "./systems/permissions";
 import "./systems/exit-on-blur";
 import "./systems/camera-tools";
 import "./systems/userinput/userinput";
@@ -157,9 +162,11 @@ import qsTruthy from "./utils/qs_truthy";
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
 const isDebug = qsTruthy("debug");
+const loadingEnvironmentURL =
+  "https://hubs-proxy.com/https://uploads-prod.reticulum.io/files/58c034aa-ff17-4d3c-a6cc-c9095bb4822c.glb";
 
 if (!isBotMode && !isTelemetryDisabled) {
-  registerTelemetry();
+  registerTelemetry("/hub", "Room Landing Page");
 }
 
 disableiOSZoom();
@@ -253,25 +260,29 @@ function remountUI(props) {
   mountUI(uiProps);
 }
 
-async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
-  const scene = document.querySelector("a-scene");
+async function updateUIForHub(hub) {
+  remountUI({
+    hubId: hub.hub_id,
+    hubName: hub.name,
+    hubScene: hub.scene,
+    hubEntryCode: hub.entry_code
+  });
 
-  if (NAF.connection.isConnected()) {
-    // Send complete sync on phoenix re-join.
-    NAF.connection.entities.completeSync(null, true);
-    return;
-  }
+  document
+    .querySelector("#hud-hub-entry-link")
+    .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
+}
 
-  const hub = data.hubs[0];
-
+async function updateEnvironmentForHub(hub) {
   let sceneUrl;
   let isLegacyBundle; // Deprecated
+
+  const environmentScene = document.querySelector("#environment-scene");
 
   if (hub.scene) {
     isLegacyBundle = false;
     sceneUrl = hub.scene.model_url;
   } else {
-    // Deprecated
     const defaultSpaceTopic = hub.topics[0];
     const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");
     const bundleAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "gltf_bundle");
@@ -280,36 +291,69 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     isLegacyBundle = !(glbAsset || hasExtension);
   }
 
+  if (isLegacyBundle) {
+    // Deprecated
+    const res = await fetch(sceneUrl);
+    const data = await res.json();
+    const baseURL = new URL(THREE.LoaderUtils.extractUrlBase(sceneUrl), window.location.href);
+    sceneUrl = new URL(data.assets[0].src, baseURL).href;
+  } else {
+    sceneUrl = proxiedUrlFor(sceneUrl);
+  }
+
   console.log(`Scene URL: ${sceneUrl}`);
+
+  let environmentEl = null;
+
+  if (environmentScene.childNodes.length === 0) {
+    const environmentEl = document.createElement("a-entity");
+    environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
+    environmentScene.appendChild(environmentEl);
+  } else {
+    // Change environment
+    environmentEl = environmentScene.childNodes[0];
+
+    // Clear the three.js image cache and load the loading environment before switching to the new one.
+    THREE.Cache.clear();
+
+    const onLoadingEnvironmentReady = () => {
+      environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
+      environmentEl.removeEventListener("model-loaded", onLoadingEnvironmentReady);
+    };
+
+    environmentEl.addEventListener("model-loaded", onLoadingEnvironmentReady);
+    environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironmentURL });
+  }
+}
+
+async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
+  const scene = document.querySelector("a-scene");
+  const isRejoin = NAF.connection.isConnected();
+
+  if (isRejoin) {
+    // Slight hack, to ensure correct presence state we need to re-send the entry event
+    // on re-join. Ideally this would be updated into the channel socket state but this
+    // would require significant changes to the hub channel events and socket management.
+    hubChannel.sendEntryEvent();
+
+    // Send complete sync on phoenix re-join.
+    NAF.connection.entities.completeSync(null, true);
+    return;
+  }
+
+  const hub = data.hubs[0];
+
   console.log(`Janus host: ${hub.host}`);
-  const environmentScene = document.querySelector("#environment-scene");
   const objectsScene = document.querySelector("#objects-scene");
   const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
   const objectsEl = document.createElement("a-entity");
   objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
   objectsScene.appendChild(objectsEl);
 
-  if (!isLegacyBundle) {
-    const gltfEl = document.createElement("a-entity");
-    gltfEl.setAttribute("gltf-model-plus", { src: proxiedUrlFor(sceneUrl), useCache: false, inflate: true });
-    gltfEl.addEventListener("model-loaded", () => environmentScene.emit("bundleloaded"));
-    environmentScene.appendChild(gltfEl);
-  } else {
-    // Deprecated
-    environmentScene.setAttribute("gltf-bundle", `src: ${sceneUrl}`);
-  }
+  updateEnvironmentForHub(hub);
+  updateUIForHub(hub);
 
-  remountUI({
-    hubId: hub.hub_id,
-    hubName: hub.name,
-    hubScene: hub.scene,
-    hubEntryCode: hub.entry_code,
-    onSendMessage: messageDispatch.dispatch
-  });
-
-  document
-    .querySelector("#hud-hub-entry-link")
-    .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
+  remountUI({ onSendMessage: messageDispatch.dispatch });
 
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   objectsEl.addEventListener("model-loaded", async el => {
@@ -322,6 +366,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     });
 
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
+
     scene.components["networked-scene"]
       .connect()
       .then(() => {
@@ -422,7 +467,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);
-  const entryManager = new SceneEntryManager(hubChannel);
+  const entryManager = new SceneEntryManager(hubChannel, authChannel);
   entryManager.onRequestAuthentication = (
     signInMessageId,
     signInCompleteMessageId,
@@ -445,6 +490,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const linkChannel = new LinkChannel(store);
 
   window.APP.scene = scene;
+  window.APP.hubChannel = hubChannel;
 
   scene.addEventListener("enter-vr", () => {
     document.body.classList.add("vr-mode");
@@ -513,22 +559,44 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const environmentScene = document.querySelector("#environment-scene");
 
-  environmentScene.addEventListener("bundleloaded", () => {
-    remountUI({ environmentSceneLoaded: true });
-
-    for (const modelEl of environmentScene.children) {
-      addAnimationComponents(modelEl);
-    }
-
+  const onFirstEnvironmentLoad = () => {
     setupLobbyCamera();
 
     // Replace renderer with a noop renderer to reduce bot resource usage.
     if (isBotMode) {
       runBotMode(scene, entryManager);
     }
+
+    environmentScene.removeEventListener("model-loaded", onFirstEnvironmentLoad);
+  };
+
+  environmentScene.addEventListener("model-loaded", onFirstEnvironmentLoad);
+
+  environmentScene.addEventListener("model-loaded", () => {
+    // This will be run every time the environment is changed (including the first load.)
+    remountUI({ environmentSceneLoaded: true });
+
+    // Re-bind the teleporter controls collision meshes in case the scene changed.
+    document
+      .querySelectorAll("a-entity[teleport-controls]")
+      .forEach(x => x.components["teleport-controls"].queryCollisionEntities());
+
+    for (const modelEl of environmentScene.children) {
+      addAnimationComponents(modelEl);
+    }
   });
 
   const socket = connectToReticulum(isDebug);
+
+  socket.onClose(e => {
+    // The socket should close normally if the server has explicitly killed it.
+    const NORMAL_CLOSURE = 1000;
+    if (e.code === NORMAL_CLOSURE) {
+      entryManager.exitScene();
+      remountUI({ roomUnavailableReason: "kicked" });
+    }
+  });
+
   remountUI({ sessionId: socket.params().session_id });
 
   // Hub local channel
@@ -549,6 +617,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
   const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
+  const { token } = store.state.credentials;
+  if (token) {
+    console.log(`Logged into account ${jwtDecode(token).sub}`);
+    joinPayload.auth_token = token;
+  }
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
 
   const presenceLogEntries = [];
@@ -577,12 +650,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     .join()
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
-
-      const { token } = store.state.credentials;
-      if (token) {
-        await hubChannel.signIn(token);
-      }
-
+      hubChannel.setPermissionsFromToken(data.perms_token);
+      scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
+        adapter.setClientId(socket.params().session_id);
+        adapter.setJoinToken(data.perms_token);
+      });
       subscriptions.setHubChannel(hubChannel);
       subscriptions.setSubscribed(data.subscriptions.web_push);
       remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
@@ -689,6 +761,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     addToPresenceLog(incomingMessage);
+  });
+
+  hubPhxChannel.on("hub_refresh", ({ session_id, hubs, stale_fields }) => {
+    const hub = hubs[0];
+    const userInfo = hubPhxPresence.state[session_id];
+
+    updateUIForHub(hub);
+
+    if (stale_fields.includes("scene")) {
+      updateEnvironmentForHub(hub);
+
+      addToPresenceLog({
+        type: "scene_changed",
+        name: userInfo.metas[0].profile.displayName,
+        sceneName: hub.scene ? hub.scene.name : "a custom URL"
+      });
+    }
+
+    if (stale_fields.includes("name")) {
+      // Re-write the slug in the browser history
+      if (window.history && window.history.replaceState) {
+        const pathParts = document.location.pathname.split("/");
+
+        if (pathParts.length >= 3 && pathParts[1] === hub.hub_id) {
+          const oldSlug = pathParts[2];
+
+          const title =
+            window.history.state && window.history.state.title ? window.history.state.title : document.title;
+          const state = window.history.state ? window.history.state.state : null;
+          const url = document.location.toString().replace(`${hub.hub_id}/${oldSlug}`, `${hub.hub_id}/${hub.slug}`);
+
+          window.history.replaceState(state, title, url);
+        }
+      }
+
+      addToPresenceLog({
+        type: "hub_name_changed",
+        name: userInfo.metas[0].profile.displayName,
+        hubName: hub.name
+      });
+    }
   });
 
   authChannel.setSocket(socket);

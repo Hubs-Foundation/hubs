@@ -11,7 +11,7 @@ export default class HelpDialog extends Component {
           <p style={{ textAlign: "center" }}>
             Join the Hubs community on{" "}
             <WithHoverSound>
-              <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/XzrGUY8">
+              <a target="_blank" rel="noopener noreferrer" href="https://discord.gg/wHmY4nd">
                 Discord
               </a>
             </WithHoverSound>

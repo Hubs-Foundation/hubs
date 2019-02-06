@@ -1,3 +1,5 @@
+import { forEachMaterial } from "../utils/material-utils";
+
 AFRAME.registerComponent("gamma-factor", {
   schema: {
     gammaFactor: { type: "number", default: 2.2 }
@@ -26,18 +28,10 @@ AFRAME.registerComponent("gamma-factor", {
       return;
     }
 
-    sceneEl.object3D.traverse(function(node) {
-      if (!node.isMesh) {
-        return;
-      }
-
-      if (Array.isArray(node.material)) {
-        node.material.forEach(function(material) {
-          material.needsUpdate = true;
-        });
-      } else {
-        node.material.needsUpdate = true;
-      }
+    sceneEl.object3D.traverse(node => {
+      forEachMaterial(node, material => {
+        material.needsUpdate = true;
+      });
     });
   }
 });

@@ -213,11 +213,21 @@
   @extend %fa-icon-button;
 
   display: flex;
-  position: absolute;
-  top: 12px;
-  left: 26px;
   font-size: 1.0em;
   font-weight: bold;
+
+  @media (max-width: 768px) {
+    align-self: flex-start;
+    padding-left: 1.5em;
+    padding-bottom: 0.5em;
+    margin: 0;
+  }
+
+  @media (min-width: 768px) {
+    position: absolute;
+    top: 12px;
+    left: 26px;
+  }
 
   i {
     margin-right: 18px;

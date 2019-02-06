@@ -1134,7 +1134,7 @@ class UIRoot extends Component {
         <div>
           <FormattedMessage id={exitSubtitleId} />
           <p />
-          {this.props.roomUnavailableReason !== "left" && (
+          {!["left", "kicked"].includes(this.props.roomUnavailableReason) && (
             <div>
               You can also{" "}
               <WithHoverSound>

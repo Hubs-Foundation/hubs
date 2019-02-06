@@ -46,6 +46,18 @@ export default class PresenceLog extends Component {
             <b>{e.oldName}</b>&nbsp;<FormattedMessage id="presence.name_change" />&nbsp;<b>{e.newName}</b>.
           </div>
         );
+      case "scene_changed":
+        return (
+          <div key={e.key} className={classNames(entryClasses)}>
+            <b>{e.name}</b>&nbsp;<FormattedMessage id="presence.scene_change" />&nbsp;<b>{e.sceneName}</b>.
+          </div>
+        );
+      case "hub_name_changed":
+        return (
+          <div key={e.key} className={classNames(entryClasses)}>
+            <b>{e.name}</b>&nbsp;<FormattedMessage id="presence.hub_name_change" />&nbsp;<b>{e.hubName}</b>.
+          </div>
+        );
       case "chat":
         return (
           <ChatMessage

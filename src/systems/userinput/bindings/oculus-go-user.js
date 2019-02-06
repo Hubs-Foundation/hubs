@@ -24,6 +24,14 @@ export default function generate3DOFTriggerBindings(device) {
     xform: xforms.copy,
     priority: 200
   };
+  const dropBinding = {
+    src: {
+      value: triggerFalling
+    },
+    dest: { value: paths.actions.cursor.drop },
+    xform: xforms.copy,
+    priority: 200
+  };
 
   return addSetsToBindings({
     [sets.global]: [
@@ -123,7 +131,6 @@ export default function generate3DOFTriggerBindings(device) {
         xform: xforms.copyIfTrue,
         priority: 100
       },
-
       {
         src: {
           value: triggerRising
@@ -143,7 +150,6 @@ export default function generate3DOFTriggerBindings(device) {
         dest: { value: paths.actions.rightHand.pose },
         xform: xforms.copy
       },
-
       {
         src: { value: device.button("touchpad").touched },
         dest: { value: paths.actions.rightHand.thumb },
@@ -163,6 +169,7 @@ export default function generate3DOFTriggerBindings(device) {
 
     [sets.cursorHoveringOnInteractable]: [grabBinding],
     [sets.cursorHoveringOnUI]: [grabBinding],
+    [sets.cursorHoldingUI]: [dropBinding],
     [sets.cursorHoveringOnVideo]: [
       {
         src: {

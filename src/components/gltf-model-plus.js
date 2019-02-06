@@ -1,4 +1,5 @@
 import nextTick from "../utils/next-tick";
+import { forEachMaterial } from "../utils/material-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import MobileStandardMaterial from "../materials/MobileStandardMaterial";
 import { getCustomGLTFParserURLResolver } from "../utils/media-utils";
@@ -86,7 +87,7 @@ function cloneGltf(gltf) {
 /// or templates associated with any of their nodes.)
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
-const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
+const inflateEntities = function(node, templates, isRoot, modelToWorldScale = 1) {
   // TODO: Remove this once we update the legacy avatars to the new node names
   if (node.name === "Chest") {
     node.name = "Spine";
@@ -133,26 +134,14 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale) {
 
   // Copy over the object's transform to the THREE.Group and reset the actual transform of the Object3D
   // all updates to the object should be done through the THREE.Group wrapper
-  el.setAttribute("position", {
-    x: node.position.x,
-    y: node.position.y,
-    z: node.position.z
-  });
-  el.setAttribute("rotation", {
-    x: node.rotation.x * THREE.Math.RAD2DEG,
-    y: node.rotation.y * THREE.Math.RAD2DEG,
-    z: node.rotation.z * THREE.Math.RAD2DEG
-  });
-  el.setAttribute("scale", {
-    x: node.scale.x * (modelToWorldScale !== undefined ? modelToWorldScale : 1),
-    y: node.scale.y * (modelToWorldScale !== undefined ? modelToWorldScale : 1),
-    z: node.scale.z * (modelToWorldScale !== undefined ? modelToWorldScale : 1)
-  });
+  el.object3D.position.copy(node.position);
+  el.object3D.rotation.copy(node.rotation);
+  el.object3D.scale.copy(node.scale).multiplyScalar(modelToWorldScale);
+  el.object3D.matrixNeedsUpdate = true;
 
   node.matrixAutoUpdate = false;
   node.matrix.identity();
   node.matrix.decompose(node.position, node.rotation, node.scale);
-  el.object3D.matrixNeedsUpdate = true;
 
   el.setObject3D(node.type.toLowerCase(), node);
   if (entityComponents && "nav-mesh" in entityComponents) {
@@ -257,11 +246,11 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
     object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
 
-    if (object.material && object.material.type === "MeshStandardMaterial") {
-      if (preferredTechnique === "KHR_materials_unlit") {
+    forEachMaterial(object, material => {
+      if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
         object.material = MobileStandardMaterial.fromStandardMaterial(object.material);
       }
-    }
+    });
   });
 
   if (fileMap) {
@@ -397,15 +386,23 @@ AFRAME.registerComponent("gltf-model-plus", {
       // generate acceleration structures for raycasting against
       object3DToSet.traverse(obj => {
         // note that we might already have a bounds tree if this was a clone of an object with one
-        if (obj.isMesh && obj.geometry.isBufferGeometry && !obj.geometry.boundsTree) {
-          const geo = obj.geometry;
-          const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
-          // only bother using memory and time making a BVH if there are a reasonable number of tris,
-          // and if there are too many it's too painful and large to tolerate doing it (at least until
-          // we put this in a web worker)
-          if (triCount > 1000 && triCount < 1000000) {
-            geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 20 });
-            geo.setIndex(geo.boundsTree.index);
+        const hasBufferGeometry = obj.isMesh && obj.geometry.isBufferGeometry;
+        const hasBoundsTree = hasBufferGeometry && obj.geometry.boundsTree;
+        if (hasBufferGeometry && !hasBoundsTree) {
+          // we can't currently build a BVH for geometries with groups, because the groups rely on the
+          // existing ordering of the index, which we kill as a result of building the tree
+          if (obj.geometry.groups && obj.geometry.groups.length) {
+            console.warn("BVH construction not supported for geometry with groups; raycasting may suffer.");
+          } else {
+            const geo = obj.geometry;
+            const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
+            // only bother using memory and time making a BVH if there are a reasonable number of tris,
+            // and if there are too many it's too painful and large to tolerate doing it (at least until
+            // we put this in a web worker)
+            if (triCount > 1000 && triCount < 1000000) {
+              geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 30 });
+              geo.setIndex(geo.boundsTree.index);
+            }
           }
         }
       });
@@ -421,6 +418,18 @@ AFRAME.registerComponent("gltf-model-plus", {
   removeInflatedEl() {
     if (this.inflatedEl) {
       this.inflatedEl.parentNode.removeChild(this.inflatedEl);
+
+      this.inflatedEl.object3D.traverse(x => {
+        if (x.material) {
+          x.material.dispose();
+        }
+
+        if (x.geometry) {
+          x.geometry.dispose();
+          x.geometry.boundsTree = null;
+        }
+      });
+
       delete this.inflatedEl;
     }
   }

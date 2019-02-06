@@ -7,8 +7,10 @@ export FARSPARK_SERVER=$4
 export CORS_PROXY_SERVER=$5
 export NON_CORS_PROXY_DOMAINS=$6
 export TARGET_S3_URL=$7
-export BUILD_NUMBER=$8
-export GIT_COMMIT=$9
+export SENTRY_DSN=$8
+export GA_TRACKING_ID=$9
+export BUILD_NUMBER=${10}
+export GIT_COMMIT=${11}
 export BUILD_VERSION="${BUILD_NUMBER} (${GIT_COMMIT})"
 
 # To build + push to S3 run:

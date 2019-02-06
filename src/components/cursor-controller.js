@@ -1,5 +1,94 @@
 import { paths } from "../systems/userinput/paths";
+import { sets } from "../systems/userinput/sets";
 import { getLastWorldPosition } from "../utils/three-utils";
+
+// Color code from https://codepen.io/njmcode/pen/axoyD/
+// Converts a #ffffff hex string into an [r,g,b] array
+
+// Inverse of the above
+const r2h = function(rgb) {
+  return "#" + ((1 << 24) + (rgb[0] << 16) + (rgb[1] << 8) + rgb[2]).toString(16).slice(1);
+};
+
+const rgb2hsl = function(color) {
+  const r = color[0] / 255;
+  const g = color[1] / 255;
+  const b = color[2] / 255;
+
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b);
+  let h, s;
+  const l = (max + min) / 2;
+
+  if (max == min) {
+    h = s = 0; // achromatic
+  } else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
+    }
+    h /= 6;
+  }
+
+  return [h, s, l];
+};
+
+const hue2rgb = function(p, q, t) {
+  if (t < 0) t += 1;
+  if (t > 1) t -= 1;
+  if (t < 1 / 6) return p + (q - p) * 6 * t;
+  if (t < 1 / 2) return q;
+  if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+  return p;
+};
+
+const hsl2rgb = function(color) {
+  let l = color[2];
+
+  if (color[1] == 0) {
+    l = Math.round(l * 255);
+    return [l, l, l];
+  } else {
+    const s = color[1];
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    const r = hue2rgb(p, q, color[0] + 1 / 3);
+    const g = hue2rgb(p, q, color[0]);
+    const b = hue2rgb(p, q, color[0] - 1 / 3);
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+  }
+};
+
+const _interpolateHSL = function(color1, color2, factor) {
+  if (arguments.length < 3) {
+    factor = 0.5;
+  }
+  const hsl1 = rgb2hsl(color1);
+  const hsl2 = rgb2hsl(color2);
+  for (let i = 0; i < 3; i++) {
+    hsl1[i] += factor * (hsl2[i] - hsl1[i]);
+  }
+  return hsl2rgb(hsl1);
+};
+
+function rotatingColor(t) {
+  const STEP_LENGTH = 0.05;
+  const color = _interpolateHSL(
+    [47, 255, 200],
+    [23, 64, 118],
+    0.5 + 0.5 * Math.floor(Math.sin(t / 1000.0) / STEP_LENGTH) * STEP_LENGTH
+  );
+  return r2h(color);
+}
 
 /**
  * Manages targeting and physical cursor location. Has the following responsibilities:
@@ -13,7 +102,7 @@ AFRAME.registerComponent("cursor-controller", {
   schema: {
     cursor: { type: "selector" },
     camera: { type: "selector" },
-    far: { default: 3 },
+    far: { default: 4 },
     near: { default: 0.06 },
     cursorColorHovered: { default: "#2F80ED" },
     cursorColorUnhovered: { default: "#FFFFFF" },
@@ -101,7 +190,7 @@ AFRAME.registerComponent("cursor-controller", {
     const rawIntersections = [];
     const cameraPos = new THREE.Vector3();
 
-    return function() {
+    return function(t) {
       if (this.dirty) {
         // app aware devices cares about this.targets so we must update it even if cursor is not enabled
         this.populateEntities(this.data.objects, this.targets);
@@ -135,7 +224,7 @@ AFRAME.registerComponent("cursor-controller", {
       const { cursor, near, far, camera, cursorColorHovered, cursorColorUnhovered } = this.data;
 
       const cursorModDelta = userinput.get(paths.actions.cursor.modDelta);
-      if (isGrabbing && cursorModDelta) {
+      if (isGrabbing && !userinput.activeSets.has(sets.cursorHoldingUI) && cursorModDelta) {
         this.distance = THREE.Math.clamp(this.distance - cursorModDelta, near, far);
       }
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);
@@ -146,7 +235,11 @@ AFRAME.registerComponent("cursor-controller", {
       cursor.object3D.scale.setScalar(Math.pow(this.distance, 0.315) * 0.75);
       cursor.object3D.matrixNeedsUpdate = true;
 
-      const cursorColor = intersection || isGrabbing ? cursorColorHovered : cursorColorUnhovered;
+      const cursorColor = AFRAME.scenes[0].systems["rotate-selected-object"].rotating
+        ? rotatingColor(t)
+        : intersection || isGrabbing
+          ? cursorColorHovered
+          : cursorColorUnhovered;
 
       if (this.data.cursor.components.material.data.color !== cursorColor) {
         this.data.cursor.setAttribute("material", "color", cursorColor);

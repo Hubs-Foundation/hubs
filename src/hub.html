@@ -15,6 +15,16 @@
         // Google Chrome on iOS correctly. We can remove this when we upgrade a-frame past 0.8.2.
         if (!window.WebVRConfig) { window.WebVRConfig = {}; }
     </script>
+    <!-- Google Analytics -->
+    <!-- NOTE GA tracking is disabled by default. You'll need to set the GA_TRACKING_ID build variable to enable it. -->
+    <script>
+    if (navigator.doNotTrack !== "1") {
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    }
+    </script>
 </head>
 
 <body>
@@ -30,12 +40,13 @@
         personal-space-bubble="debug: false;"
         vr-mode-ui="enabled: false"
         stats-plus="false"
+        rotate-selected-object
         action-to-event__mute="path: /actions/muteMic; event: action_mute;"
         action-to-event__focus_chat="path: /actions/focusChat; event: action_focus_chat;"
         environment-map="loadDefault: false"
     >
-
         <a-assets>
+            <img id="rotation-symbol" crossorigin="anonymous" src="./assets/rotation.png">
             <img id="action-button" crossorigin="anonymous" src="./assets/hud/action_button.9.png">
             <img id="tooltip" crossorigin="anonymous" src="./assets/hud/tooltip.9.png">
             <img id="mute-off" crossorigin="anonymous" src="./assets/hud/mute_off.png">
@@ -56,6 +67,15 @@
             <img id="spawn-camera-hover" crossorigin="anonymous" src="./assets/hud/spawn_camera-hover.png">
             <img id="presence-count" crossorigin="anonymous" src="./assets/hud/presence-count.png">
             <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
+
+            <img id="video-seek-back" crossorigin="anonymous" src="./assets/video-overlay/seek_back.png">
+            <img id="video-seek-back-hover" crossorigin="anonymous" src="./assets/video-overlay/seek_back-hover.png">
+            <img id="video-seek-forward" crossorigin="anonymous" src="./assets/video-overlay/seek_fwd.png">
+            <img id="video-seek-forward-hover" crossorigin="anonymous" src="./assets/video-overlay/seek_fwd-hover.png">
+            <img id="video-play" crossorigin="anonymous" src="./assets/video-overlay/play.png">
+            <img id="video-play-hover" crossorigin="anonymous" src="./assets/video-overlay/play-hover.png">
+            <img id="video-pause" crossorigin="anonymous" src="./assets/video-overlay/pause.png">
+            <img id="video-pause-hover" crossorigin="anonymous" src="./assets/video-overlay/pause-hover.png">
 
             <a-asset-item id="botdefault" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotDefault_Avatar-9f71f8ff22.gltf"></a-asset-item>
             <a-asset-item id="botbobo" response-type="arraybuffer" src="https://asset-bundles-prod.reticulum.io/bots/BotBobo_Avatar-f9740a010b.gltf"></a-asset-item>
@@ -129,7 +149,9 @@
                             <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
                                 <a-entity billboard matrix-auto-update visibility-while-frozen="withinDistance: 10;">
                                     <a-entity hoverable mixin="rounded-text-button" block-button ui-class-while-frozen position="0 0 .35"> </a-entity>
-                                    <a-entity visibility-while-frozen="withinDistance: 10;" text="value:Block; width:2.5; align:center;" position="0 0 0.36"></a-entity>
+                                    <a-entity text="value:Hide; width:2.5; align:center;" position="0 0 0.36"></a-entity>
+                                    <a-entity hoverable mixin="rounded-text-button" visible-if-permitted="kick_users" kick-button ui-class-while-frozen position="0 -0.25 .35"> </a-entity>
+                                    <a-entity text="value:Kick; width:2.5; align:center;"  visible-if-permitted="kick_users" position="0 -0.25 0.36"></a-entity>
                                 </a-entity>
                             </a-entity>
                         </template>
@@ -194,15 +216,13 @@
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
                     body="type: dynamic; shape: none; mass: 1;"
-                    scale="0.5 0.5 0.5"
-                    animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeInQuad"
                     grabbable
                     stretchable="useWorldPosition: true; usePhysics: never"
                     hoverable
                     hoverable-visuals="cursorController: #cursor-controller"
                     auto-scale-cannon-physics-body
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
-                    position-at-box-shape-border="target:.freeze-menu;"
+                    position-at-box-shape-border__freeze="target:.freeze-menu;"
                     destroy-at-extreme-distances
                     set-yxz-order
                     pinnable
@@ -233,12 +253,11 @@
                             <a-entity mixin="rounded-text-button" clone-media-button position="-0.25 -0.375 0.01">
                                 <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
-
-                            <a-entity class="video-seek-back-button" mixin="rounded-text-button" position="-0.4 0 0.01" slice9="width: 0.2" visible="false">
-                                <a-entity text="value: <; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            <a-entity scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button rotate-button-selector position="-0.6  0.12 0.01">
+                                <a-entity text="value:rotate; width:1.40; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
-                            <a-entity class="video-seek-forward-button" mixin="rounded-text-button" position="0.4 0 0.01" slice9="width: 0.2" visible="false">
-                                <a-entity text="value: >; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            <a-entity  scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button="mode: align;" position="-0.6 -0.12 0.01">
+                                <a-entity text="value:align; width:1.30; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
                         </a-entity>
                     </a-entity>
@@ -302,11 +321,17 @@
                     set-yxz-order
                     auto-scale-cannon-physics-body
                 >
-                    <a-entity class="ui camera-menu" visibility-while-frozen="withinDistance: 10;" mixin="button-container">
+                    <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 10;" mixin="button-container" >
                         <a-entity mixin="rounded-text-action-button" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01"> </a-entity>
                         <a-entity text=" value:mirror; width:2.5; align:center;" class="mirror-button-label" text-raycast-hack position="0 0.125 0.02"></a-entity>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
                         <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 -0.125 0.02"></a-entity>
+                        <a-entity scale="0.5 0.5 1" mixin="rounded-text-button" rotate-button rotate-button-selector position="-0.6  0.06 0.01">
+                            <a-entity text="value:rotate; width:2.80; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                        </a-entity>
+                        <a-entity  scale="0.5 0.5 1" mixin="rounded-text-button" rotate-button="mode: reset;" position="-0.6 -0.06 0.01">
+                            <a-entity text="value:align; width:2.60; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                        </a-entity>
                     </a-entity>
                 </a-entity>
             </template>
@@ -328,6 +353,35 @@
                         <a-entity mixin="rounded-text-button" slice9="width: 0.2"> </a-entity>
                         <a-entity text=" value:>; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                     </a-entity>
+                </a-entity>
+            </template>
+
+            <!-- TODO: All of these positions are assuming 16:9 - need to actually reposition based on video resolution -->
+            <template id="video-hover-menu">
+                <a-entity class="ui interactable-ui video-toolbar" mixin="button-container" visible="false">
+                    <a-entity class="video-time-label" text="value: 0; anchor: right; align: right;" text-raycast-hack position="0.485 -0.25 -0.015"></a-entity>
+                    <a-entity class="video-volume-label" text="value: 0%; anchor: right; align: right;" text-raycast-hack position="0.485 0.25 -0.015" visible="false"></a-entity>
+                    <a-image
+                        icon-button="image: #video-seek-back; hoverImage: #video-seek-back-hover;"
+                        scale="0.1 0.1 0.1"
+                        position="-0.3 0 0"
+                        class="ui video-seek-back-button"
+                        visible="false"
+                    ></a-image>
+                    <a-image
+                        icon-button="image: #video-pause; hoverImage: #video-pause-hover; activeImage: #video-play; activeHoverImage: #video-play-hover"
+                        scale="0.2 0.2 0.2"
+                        position="0 0 0"
+                        class="ui video-playpause-button"
+                        visible="false"
+                    ></a-image>
+                    <a-image
+                        icon-button="image: #video-seek-forward; hoverImage: #video-seek-forward-hover;"
+                        scale="0.1 0.1 0.1"
+                        position="0.3 0 0"
+                        class="ui video-seek-forward-button"
+                        visible="false"
+                    ></a-image>
                 </a-entity>
             </template>
 
@@ -445,7 +499,15 @@
                 activateEndButtons: secondary-cursor-release, secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
             action-to-event__grab="path: /actions/cursorGrab; event: cursor-grab"
             action-to-event__drop="path: /actions/cursorDrop; event: cursor-release"
-        ></a-sphere>
+        >
+            <a-image
+                icon-button="image: #rotation-symbol"
+                scale="0.1 0.1 0.1"
+                position="0.0 0 0"
+                class="hud"
+                visible-if-rotating
+            ></a-image>
+        </a-sphere>
 
         <!-- Player Rig -->
         <a-entity
