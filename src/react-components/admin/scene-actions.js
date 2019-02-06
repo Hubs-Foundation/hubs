@@ -20,7 +20,7 @@ export const sceneApproveNew = scene => ({
       model_owned_file_id: scene.model_owned_file_id,
       scene_owned_file_id: scene.scene_owned_file_id,
       screenshot_owned_file_id: scene.screenshot_owned_file_id,
-      order: -1,
+      order: 10000, // Start at end of listings
       state: "active",
       inserted_at: new Date(),
       updated_at: new Date()
@@ -59,4 +59,28 @@ export const sceneReviewed = id => ({
     resource: "scenes",
     refresh: true
   }
+});
+
+export const SCENE_LISTING_FEATURE = "SCENE_LISTING_FEATURE";
+export const sceneListingFeature = (id, listing) => ({
+  type: SCENE_LISTING_FEATURE,
+  payload: {
+    id,
+    data: {
+      tags: { tags: [...(listing.tags.tags || []), "featured"] }
+    }
+  },
+  meta: { fetch: UPDATE, resource: "scene_listings", refresh: true }
+});
+
+export const SCENE_LISTING_UNFEATURE = "SCENE_LISTING_UNFEATURE";
+export const sceneListingUnfeature = (id, listing) => ({
+  type: SCENE_LISTING_UNFEATURE,
+  payload: {
+    id,
+    data: {
+      tags: { tags: [...(listing.tags.tags || []).filter(x => x !== "featured")] }
+    }
+  },
+  meta: { fetch: UPDATE, resource: "scene_listings", refresh: true }
 });

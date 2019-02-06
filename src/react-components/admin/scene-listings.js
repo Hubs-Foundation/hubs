@@ -1,5 +1,6 @@
 import React from "react";
 import { SceneLink, OwnedFileImage } from "./fields";
+import FeatureSceneListingButton from "./feature-scene-listing-button";
 
 import {
   List,
@@ -19,7 +20,7 @@ import {
 const SceneListingFilter = props => (
   <Filter {...props}>
     <TextInput label="Search Name" source="name" alwaysOn />
-    <TextInput label="Search SID" source="scene_sid" alwaysOn />
+    <TextInput label="Search SID" source="scene_listing_sid" alwaysOn />
   </Filter>
 );
 
@@ -48,6 +49,7 @@ export const SceneListingList = props => (
       <DateField source="inserted_at" />
       <DateField source="updated_at" />
       <TextField source="state" />
+      <FeatureSceneListingButton />
       <EditButton />
     </Datagrid>
   </List>

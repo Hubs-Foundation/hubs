@@ -25,7 +25,7 @@ OwnedFileImage.propTypes = {
 };
 
 export const SceneLink = withStyles(styles)(({ source, record = {}, classes }) => {
-  const src = getReticulumFetchUrl(`/scenes/${record.scene_sid}`);
+  const src = getReticulumFetchUrl(`/scenes/${record.scene_sid || record.scene_listing_sid}`);
   return (
     <a href={src} className={classes.sceneLink} target="_blank" rel="noopener noreferrer">
       {record[source]}
