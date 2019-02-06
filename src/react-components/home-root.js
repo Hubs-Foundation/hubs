@@ -11,8 +11,9 @@ import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import mozLogo from "../assets/images/moz-logo-black.png";
 import classNames from "classnames";
 import { ENVIRONMENT_URLS } from "../assets/environments/environments";
-import { connectToReticulum } from "../utils/phoenix-utils";
+import { createAndRedirectToNewHub, connectToReticulum } from "../utils/phoenix-utils";
 import maskEmail from "../utils/mask-email";
+import qsTruthy from "../utils/qs_truthy";
 
 import styles from "../assets/stylesheets/index.scss";
 
@@ -187,13 +188,38 @@ class HomeRoot extends Component {
     };
   };
 
+  launchTour = () => {
+    createAndRedirectToNewHub(
+      "Hubs Tour",
+      // TODO BP placeholder tour scene
+      // "chjVRLh", // dev
+      "d2SF68V", // prod
+      null,
+      false
+    );
+  };
+
+  showCreateDialog = () => {
+    this.showDialog(
+      props => (
+        <DialogContainer title="Choose a Scene" {...props}>
+          <HubCreatePanel {...props} />
+        </DialogContainer>
+      ),
+      {
+        initialEnvironment: this.props.initialEnvironment,
+        environments: this.state.environments
+      }
+    );
+  };
+
   render() {
     const mainContentClassNames = classNames({
       [styles.mainContent]: true,
       [styles.noninteractive]: !!this.state.dialog
     });
 
-    const isOculusBrowser = /Oculus/.test(navigator.userAgent);
+    const isOculusBrowser = /Oculus/.test(navigator.userAgent) && qsTruthy("enable_ftue");
 
     return (
       <IntlProvider locale={lang} messages={messages}>
@@ -284,10 +310,13 @@ class HomeRoot extends Component {
                 </div>
                 {isOculusBrowser ? (
                   <div className={styles.ctaButtons}>
-                    <button className={classNames(styles.primaryButton, styles.ctaButton)}>
+                    <button
+                      className={classNames(styles.primaryButton, styles.ctaButton)}
+                      onClick={this.showCreateDialog}
+                    >
                       <FormattedMessage id="home.create_a_room" />
                     </button>
-                    <button className={classNames(styles.secondaryButton, styles.ctaButton)}>
+                    <button className={classNames(styles.secondaryButton, styles.ctaButton)} onClick={this.launchTour}>
                       <FormattedMessage id="home.take_a_tour" />
                     </button>
                   </div>
