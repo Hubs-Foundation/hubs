@@ -15,6 +15,7 @@
   "scripts": {
     "start": "webpack-dev-server --mode=development",
     "build": "rimraf ./dist && webpack --mode=production",
+    "bundle-analyzer": "webpack-dev-server --mode=production --env.BUNDLE_ANALYZER",
     "doc": "node ./scripts/doc/build.js",
     "prettier": "prettier --write '*.js' 'src/**/*.js'",
     "lint:js": "eslint '*.js' 'scripts/**/*.js' 'src/**/*.js'",
@@ -26,7 +27,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.2",
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
-    "aframe": "github:mozillareality/aframe#hubs/dev-9.0",
+    "aframe": "github:mozillareality/aframe#5c4333188503ca4804b7c767e5f4794e02bb6622",
     "aframe-billboard-component": "^1.0.0",
     "aframe-inspector": "^0.8.3",
     "aframe-motion-capture-components": "github:mozillareality/aframe-motion-capture-components#aframe090",
@@ -63,7 +64,7 @@
     "react-youtube": "^7.8.0",
     "screenfull": "^3.3.2",
     "super-hands": "github:mozillareality/aframe-super-hands-component#feature/drawing",
-    "three": "github:mozillareality/three.js#hubs/three-v101-and-prs",
+    "three": "github:mozillareality/three.js#967ee13719cea7c8ddb0ae524d70ef53b12964d8",
     "three-mesh-bvh": "github:mquander/three-mesh-bvh#global-three",
     "three-pathfinding": "github:mozillareality/three-pathfinding#hubs/master",
     "three-to-cannon": "1.3.0",
@@ -105,6 +106,7 @@
     "stylelint-scss": "^3.2.0",
     "url-loader": "^1.0.1",
     "webpack": "^4.16.2",
+    "webpack-bundle-analyzer": "^3.0.3",
     "webpack-cli": "^2.0.9",
     "webpack-dev-server": "^3.1.7",
     "worker-loader": "^2.0.0"
