@@ -16,7 +16,7 @@ import {
 
 const AccountFilter = props => (
   <Filter {...props}>
-    <TextInput label="Search ID" source="text_id" alwaysOn />
+    <TextInput label="Search ID" source="_text_id" alwaysOn />
   </Filter>
 );
 
