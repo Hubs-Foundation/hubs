@@ -22,7 +22,7 @@ export const FeaturedSceneListingList = props => (
       </ReferenceField>
       <TextField source="order" />
       <SceneLink source="scene_listing_sid" />
-      <ReferenceField source="scene_listing_id" reference="scene_listings">
+      <ReferenceField label="Listing" source="id" reference="scene_listings">
         <TextField source="name" />
       </ReferenceField>
       <TextField source="description" />

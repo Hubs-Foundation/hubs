@@ -1,5 +1,6 @@
 import React from "react";
 import { SceneLink, OwnedFileImage } from "./fields";
+import ApproveSceneButton from "./approve-scene-button";
 
 import {
   List,
@@ -50,6 +51,7 @@ export const SceneList = props => (
       <DateField source="updated_at" />
       <TextField source="state" />
       <EditButton />
+      <ApproveSceneButton />
     </Datagrid>
   </List>
 );
