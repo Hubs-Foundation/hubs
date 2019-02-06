@@ -3,3 +3,4 @@ export const waitForEvent = function(eventName, eventObj) {
     eventObj.addEventListener(eventName, resolve, { once: true });
   });
 };
+

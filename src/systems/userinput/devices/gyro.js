@@ -50,11 +50,17 @@ export class GyroDevice {
     this.prevY = this.hmdEuler.y;
     this.dXBuffer = new CircularBuffer(6);
     this.dYBuffer = new CircularBuffer(6);
-    this.vrDisplay = window.webvrpolyfill.getPolyfillDisplays()[0];
-    this.frameData = new window.webvrpolyfill.constructor.VRFrameData();
+    this.hasPolyfill = window.webvrpolyfill;
+    if (this.hasPolyfill) {
+      this.vrDisplay = window.webvrpolyfill.getPolyfillDisplays()[0];
+      this.frameData = new window.webvrpolyfill.constructor.VRFrameData();
+    }
   }
 
   write(frame) {
+    if (!this.hasPolyfill) {
+      return;
+    }
     const hmdEuler = this.hmdEuler;
     this.vrDisplay.getFrameData(this.frameData);
     if (this.frameData.pose.orientation !== null) {
