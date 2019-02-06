@@ -300,15 +300,15 @@ class HomeRoot extends Component {
                   </div>
                 )}
               </div>
-              <div className={styles.heroPanel}>
-                {isOculusBrowser && (
+              <div className={classNames(styles.heroPanel, styles.rightPanel)}>
+                {/*isOculusBrowser && (
                   <div className={styles.heroVideo}>
                     <video playsInline muted loop autoPlay>
                       <source src={homeVideoWebM} type="video/webm" />
                       <source src={homeVideoMp4} type="video/mp4" />
                     </video>
                   </div>
-                )}
+                )*/}
                 {(isOculusBrowser || this.state.environments.length > 1) && (
                   <div>
                     <WithHoverSound>

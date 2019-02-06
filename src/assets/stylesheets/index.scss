@@ -222,7 +222,7 @@ body {
 }
 
 :local(.oculus-browser-hero) {
-  flex-direction: row;
+  flex-direction: column;
   flex: 450px;
   background-image: url('../images/home-hero-background.jpg');
   background-size: cover;
@@ -271,6 +271,9 @@ body {
       margin-right: 1em;
     }
   }
+  :local(.rightPanel) {
+    flex: 0;
+  }
   :local(.hero-video) {
     flex: 1;
     display: flex;
@@ -281,6 +284,7 @@ body {
   :local(.have-code) {
     justify-content: flex-end;
     font-size: 14pt;
+    margin-top: -2em;
   }
 }
 
