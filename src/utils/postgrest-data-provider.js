@@ -110,6 +110,16 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
     const options = {};
     options.headers = new Headers();
     options.headers.set("Authorization", `Bearer ${currentPermsToken}`);
+    const stripReadOnlyColumns = json => {
+      const newJson = {};
+
+      for (const k of Object.keys(json)) {
+        if (k.startsWith("_")) continue;
+        newJson[k] = json[k];
+      }
+
+      return newJson;
+    };
 
     switch (type) {
       case GET_LIST: {
@@ -154,7 +164,7 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
         options.method = "PATCH";
         options.headers.set("Accept", "application/vnd.pgrst.object+json");
         options.headers.set("Prefer", "return=representation");
-        options.body = JSON.stringify(params.data);
+        options.body = JSON.stringify(stripReadOnlyColumns(params.data));
         break;
       }
 
@@ -163,7 +173,7 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
         options.headers.set("Accept", "application/vnd.pgrst.object+json");
         options.headers.set("Prefer", "return=representation");
         options.method = "POST";
-        options.body = JSON.stringify(params.data);
+        options.body = JSON.stringify(stripReadOnlyColumns(params.data));
         break;
       }
 
