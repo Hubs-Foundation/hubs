@@ -7,7 +7,7 @@ import {
   SimpleForm,
   TextInput,
   EditButton,
-  BooleanInput,
+  SelectInput,
   Datagrid,
   TextField,
   ReferenceField,
@@ -28,9 +28,7 @@ export const SceneListingEdit = props => (
     <SimpleForm>
       <TextInput source="name" />
       <TextInput source="description" />
-      <TextInput source="state" />
-      <BooleanInput source="allow_remixing" />
-      <BooleanInput source="allow_promotion" />
+      <SelectInput source="state" choices={[{ id: "active", name: "active" }, { id: "delisted", name: "delisted" }]} />
     </SimpleForm>
   </Edit>
 );
@@ -42,9 +40,10 @@ export const SceneListingList = props => (
         <OwnedFileImage source="owned_file_uuid" />
       </ReferenceField>
       <TextField source="name" />
-      <SceneLink source="scene_sid" />
-      <BooleanField source="allow_remixing" />
-      <BooleanField source="allow_promotion" />
+      <TextField source="description" />
+      <SceneLink source="scene_listing_sid" />
+      <BooleanField source="_allow_remixing" />
+      <BooleanField source="_allow_promotion" />
       <TextField source="reviewed_at" />
       <DateField source="inserted_at" />
       <DateField source="updated_at" />

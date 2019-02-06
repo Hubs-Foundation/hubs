@@ -1,11 +1,16 @@
 import { CREATE, UPDATE } from "react-admin";
 
+function randomString(len) {
+  const p = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  return [...Array(len)].reduce(a => a + p[~~(Math.random() * p.length)], "");
+}
+
 export const SCENE_APPROVE_NEW = "SCENE_APPROVE_NEW";
 export const sceneApproveNew = scene => ({
   type: SCENE_APPROVE_NEW,
   payload: {
     data: {
-      scene_listing_sid: scene.scene_sid,
+      scene_listing_sid: randomString(7),
       scene_id: scene.id,
       slug: scene.slug,
       name: scene.name,
