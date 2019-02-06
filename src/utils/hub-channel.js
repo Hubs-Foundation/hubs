@@ -1,4 +1,4 @@
-import jsonwebtoken from "jsonwebtoken";
+import jwtDecode from "jwt-decode";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
@@ -22,13 +22,17 @@ export default class HubChannel {
     return this._signedIn;
   }
 
+  get permissions() {
+    return this._permissions;
+  }
+
   setPhoenixChannel = channel => {
     this.channel = channel;
   };
 
   setPermissionsFromToken = token => {
     // Note: token is not verified.
-    this._permissions = jsonwebtoken.decode(token);
+    this._permissions = jwtDecode(token);
   };
 
   sendEntryEvent = async () => {
@@ -194,6 +198,22 @@ export default class HubChannel {
       payload.file_id = fileId;
     }
     this.channel.push("unpin", payload);
+  };
+
+  fetchPermissions = () => {
+    return new Promise((resolve, reject) => {
+      this.channel
+        .push("refresh_perms_token")
+        .receive("ok", res => {
+          this.setPermissionsFromToken(res.perms_token);
+          resolve({ permsToken: res.perms_token, permissions: this._permissions });
+        })
+        .receive("error", reject);
+    });
+  };
+
+  kick = sessionId => {
+    this.channel.push("kick", { session_id: sessionId });
   };
 
   requestSupport = () => {

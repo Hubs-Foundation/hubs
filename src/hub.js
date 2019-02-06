@@ -51,6 +51,8 @@ import "./components/freeze-controller";
 import "./components/icon-button";
 import "./components/text-button";
 import "./components/block-button";
+import "./components/kick-button";
+import "./components/visible-if-permitted";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
@@ -100,6 +102,7 @@ import { createInWorldLogMessage } from "./react-components/chat-message";
 import "./systems/nav";
 import "./systems/personal-space-bubble";
 import "./systems/app-mode";
+import "./systems/permissions";
 import "./systems/exit-on-blur";
 import "./systems/camera-tools";
 import "./systems/userinput/userinput";
@@ -161,7 +164,7 @@ const loadingEnvironmentURL =
   "https://hubs-proxy.com/https://uploads-prod.reticulum.io/files/58c034aa-ff17-4d3c-a6cc-c9095bb4822c.glb";
 
 if (!isBotMode && !isTelemetryDisabled) {
-  registerTelemetry();
+  registerTelemetry("/hub", "Room Landing Page");
 }
 
 disableiOSZoom();
@@ -361,6 +364,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     });
 
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
+
     scene.components["networked-scene"]
       .connect()
       .then(() => {
@@ -484,6 +488,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const linkChannel = new LinkChannel(store);
 
   window.APP.scene = scene;
+  window.APP.hubChannel = hubChannel;
 
   scene.addEventListener("enter-vr", () => {
     document.body.classList.add("vr-mode");
@@ -574,6 +579,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   const socket = connectToReticulum(isDebug);
+
+  socket.onClose(e => {
+    // The socket should close normally if the server has explicitly killed it.
+    const NORMAL_CLOSURE = 1000;
+    if (e.code === NORMAL_CLOSURE) {
+      entryManager.exitScene();
+      remountUI({ roomUnavailableReason: "kicked" });
+    }
+  });
+
   remountUI({ sessionId: socket.params().session_id });
 
   // Hub local channel
@@ -627,6 +642,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
       hubChannel.setPermissionsFromToken(data.perms_token);
+      scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
+        adapter.setClientId(socket.params().session_id);
+        adapter.setJoinToken(data.perms_token);
+      });
       subscriptions.setHubChannel(hubChannel);
       subscriptions.setSubscribed(data.subscriptions.web_push);
       remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });

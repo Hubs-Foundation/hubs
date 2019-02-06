@@ -14,7 +14,7 @@ import YouTube from "react-youtube";
 
 import registerTelemetry from "./telemetry";
 
-registerTelemetry();
+registerTelemetry("/spoke", "Spoke Landing Page");
 
 import en from "react-intl/locale-data/en";
 import { lang, messages } from "./utils/i18n";
