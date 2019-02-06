@@ -219,13 +219,14 @@ class HomeRoot extends Component {
       [styles.noninteractive]: !!this.state.dialog
     });
 
-    const isOculusBrowser = /Oculus/.test(navigator.userAgent) && qsTruthy("enable_ftue");
+    const useOculusBrowserFTUE = /Oculus/.test(navigator.userAgent) && qsTruthy("enable_ftue");
+    const showFTUEVideo = false;
 
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.home}>
           <div className={mainContentClassNames}>
-            {!isOculusBrowser && (
+            {!useOculusBrowserFTUE && (
               <div className={styles.videoContainer}>
                 <video playsInline muted loop autoPlay className={styles.backgroundVideo} id="background-video">
                   <source src={homeVideoWebM} type="video/webm" />
@@ -275,7 +276,9 @@ class HomeRoot extends Component {
                 )}
               </div>
             </div>
-            <div className={classNames({ [styles.heroContent]: true, [styles.oculusBrowserHero]: isOculusBrowser })}>
+            <div
+              className={classNames({ [styles.heroContent]: true, [styles.oculusBrowserHero]: useOculusBrowserFTUE })}
+            >
               <div className={styles.attribution}>
                 Medieval Fantasy Book by{" "}
                 <a
@@ -294,12 +297,12 @@ class HomeRoot extends Component {
                   <div className={styles.title}>
                     <FormattedMessage id="home.hero_title" />
                   </div>
-                  {isOculusBrowser && (
+                  {useOculusBrowserFTUE && (
                     <div className={styles.blurb}>
                       <FormattedMessage id="home.hero_blurb" />
                     </div>
                   )}
-                  {!isOculusBrowser &&
+                  {!useOculusBrowserFTUE &&
                     this.state.environments.length === 0 && (
                       <div className="loader-wrap">
                         <div className="loader">
@@ -308,7 +311,7 @@ class HomeRoot extends Component {
                       </div>
                     )}
                 </div>
-                {isOculusBrowser ? (
+                {useOculusBrowserFTUE ? (
                   <div className={styles.ctaButtons}>
                     <button
                       className={classNames(styles.primaryButton, styles.ctaButton)}
@@ -330,15 +333,16 @@ class HomeRoot extends Component {
                 )}
               </div>
               <div className={classNames(styles.heroPanel, styles.rightPanel)}>
-                {/*isOculusBrowser && (
-                  <div className={styles.heroVideo}>
-                    <video playsInline muted loop autoPlay>
-                      <source src={homeVideoWebM} type="video/webm" />
-                      <source src={homeVideoMp4} type="video/mp4" />
-                    </video>
-                  </div>
-                )*/}
-                {(isOculusBrowser || this.state.environments.length > 1) && (
+                {useOculusBrowserFTUE &&
+                  showFTUEVideo && (
+                    <div className={styles.heroVideo}>
+                      <video playsInline muted loop autoPlay>
+                        <source src={homeVideoWebM} type="video/webm" />
+                        <source src={homeVideoMp4} type="video/mp4" />
+                      </video>
+                    </div>
+                  )}
+                {(useOculusBrowserFTUE || this.state.environments.length > 1) && (
                   <div>
                     <WithHoverSound>
                       <div className={styles.haveCode}>
