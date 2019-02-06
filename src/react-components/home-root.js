@@ -99,6 +99,7 @@ class HomeRoot extends Component {
 
   loadHomeVideo = () => {
     const videoEl = document.querySelector("#background-video");
+    if (!videoEl) return;
     videoEl.playbackRate = 0.9;
     playVideoWithStopOnBlur(videoEl);
   };
@@ -192,16 +193,20 @@ class HomeRoot extends Component {
       [styles.noninteractive]: !!this.state.dialog
     });
 
+    const isOculusBrowser = /Oculus/.test(navigator.userAgent);
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.home}>
           <div className={mainContentClassNames}>
-            <div className={styles.videoContainer}>
-              <video playsInline muted loop autoPlay className={styles.backgroundVideo} id="background-video">
-                <source src={homeVideoWebM} type="video/webm" />
-                <source src={homeVideoMp4} type="video/mp4" />
-              </video>
-            </div>
+            {!isOculusBrowser && (
+              <div className={styles.videoContainer}>
+                <video playsInline muted loop autoPlay className={styles.backgroundVideo} id="background-video">
+                  <source src={homeVideoWebM} type="video/webm" />
+                  <source src={homeVideoMp4} type="video/mp4" />
+                </video>
+              </div>
+            )}
             <div className={styles.headerContent}>
               <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
                 <div className={styles.links}>
@@ -244,7 +249,7 @@ class HomeRoot extends Component {
                 )}
               </div>
             </div>
-            <div className={styles.heroContent}>
+            <div className={classNames({ [styles.heroContent]: true, [styles.oculusBrowserHero]: isOculusBrowser })}>
               <div className={styles.attribution}>
                 Medieval Fantasy Book by{" "}
                 <a
@@ -255,38 +260,67 @@ class HomeRoot extends Component {
                   Pixel
                 </a>
               </div>
-              <div className={styles.container}>
-                <div className={styles.logo}>
-                  <img src={hubLogo} />
-                </div>
-                <div className={styles.title}>
-                  <FormattedMessage id="home.hero_title" />
-                </div>
-                {this.state.environments.length === 0 && (
-                  <div className="loader-wrap">
-                    <div className="loader">
-                      <div className="loader-center" />
+              <div className={styles.heroPanel}>
+                <div className={styles.container}>
+                  <div className={styles.logo}>
+                    <img src={hubLogo} />
+                  </div>
+                  <div className={styles.title}>
+                    <FormattedMessage id="home.hero_title" />
+                  </div>
+                  {isOculusBrowser && (
+                    <div className={styles.blurb}>
+                      <FormattedMessage id="home.hero_blurb" />
                     </div>
+                  )}
+                  {!isOculusBrowser &&
+                    this.state.environments.length === 0 && (
+                      <div className="loader-wrap">
+                        <div className="loader">
+                          <div className="loader-center" />
+                        </div>
+                      </div>
+                    )}
+                </div>
+                {isOculusBrowser ? (
+                  <div className={styles.ctaButtons}>
+                    <button className={classNames(styles.primaryButton, styles.ctaButton)}>
+                      <FormattedMessage id="home.create_a_room" />
+                    </button>
+                    <button className={classNames(styles.secondaryButton, styles.ctaButton)}>
+                      <FormattedMessage id="home.take_a_tour" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className={styles.create}>
+                    <HubCreatePanel
+                      initialEnvironment={this.props.initialEnvironment}
+                      environments={this.state.environments}
+                    />
                   </div>
                 )}
               </div>
-              <div className={styles.create}>
-                <HubCreatePanel
-                  initialEnvironment={this.props.initialEnvironment}
-                  environments={this.state.environments}
-                />
+              <div className={styles.heroPanel}>
+                {isOculusBrowser && (
+                  <div className={styles.heroVideo}>
+                    <video playsInline muted loop autoPlay>
+                      <source src={homeVideoWebM} type="video/webm" />
+                      <source src={homeVideoMp4} type="video/mp4" />
+                    </video>
+                  </div>
+                )}
+                {(isOculusBrowser || this.state.environments.length > 1) && (
+                  <div>
+                    <WithHoverSound>
+                      <div className={styles.haveCode}>
+                        <a href="/link">
+                          <FormattedMessage id="home.have_code" />
+                        </a>
+                      </div>
+                    </WithHoverSound>
+                  </div>
+                )}
               </div>
-              {this.state.environments.length > 1 && (
-                <div>
-                  <WithHoverSound>
-                    <div className={styles.haveCode}>
-                      <a href="/link">
-                        <FormattedMessage id="home.have_code" />
-                      </a>
-                    </div>
-                  </WithHoverSound>
-                </div>
-              )}
             </div>
             <div className={styles.footerContent}>
               <div className={styles.links}>
