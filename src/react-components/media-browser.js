@@ -11,21 +11,32 @@ import { scaledThumbnailUrlFor } from "../utils/media-utils";
 
 class MediaBrowser extends Component {
   static propTypes = {
-    result: PropTypes.object,
+    mediaSearchStore: PropTypes.object,
     history: PropTypes.object,
     intl: PropTypes.object
   };
 
+  state = { result: { entries: [] } };
+
   constructor(props) {
     super(props);
+    props.mediaSearchStore.addEventListener("statechanged", this.storeUpdated);
   }
 
   componentDidMount() {}
 
-  componentWillUnmount() {}
+  componentWillUnmount() {
+    this.props.mediaSearchStore.removeEventListener("statechanged", this.storeUpdated);
+  }
+
+  storeUpdated = () => {
+    console.log("updated");
+    console.log(this.props.mediaSearchStore.result);
+    this.setState({ result: this.props.mediaSearchStore.result });
+  };
 
   render() {
-    const { formatMessage } = this.props.intl;
+    //const { formatMessage } = this.props.intl;
 
     return (
       <div className={styles.mediaBrowser}>
@@ -52,7 +63,7 @@ class MediaBrowser extends Component {
           </div>
 
           <div className={styles.body}>
-            <div className={styles.tiles}>{this.props.result.entries.map(this.entryToTile)}</div>
+            <div className={styles.tiles}>{this.state.result.entries.map(this.entryToTile)}</div>
           </div>
         </div>
       </div>

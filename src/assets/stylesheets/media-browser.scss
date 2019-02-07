@@ -36,7 +36,7 @@
   :local(.box) {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     flex: 1 1 100%;
     height: 100%;
@@ -139,7 +139,6 @@
     width: 100%;
     color: black;
     text-align: center;
-    flex: 10;
     font-size: 1.2em;
     justify-content: center;
     min-height: fit-content;
@@ -157,7 +156,6 @@
     color: black;
     justify-content: center;
     text-align: center;
-    flex: 10;
     min-height: fit-content;
     white-space: nowrap;
 

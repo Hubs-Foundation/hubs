@@ -123,6 +123,7 @@ window.APP.RENDER_ORDER = {
   CURSOR: 3
 };
 const store = window.APP.store;
+const mediaSearchStore = window.APP.mediaSearchStore;
 
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
@@ -244,6 +245,7 @@ function mountUI(props = {}) {
               disableAutoExitOnConcurrentLoad,
               forcedVREntryType,
               store,
+              mediaSearchStore,
               ...props,
               ...routeProps
             }}
