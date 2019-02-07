@@ -16,11 +16,10 @@ class MediaBrowser extends Component {
     intl: PropTypes.object
   };
 
-  state = { result: { entries: [] } };
-
   constructor(props) {
     super(props);
     props.mediaSearchStore.addEventListener("statechanged", this.storeUpdated);
+    this.state = { result: this.props.mediaSearchStore.result };
   }
 
   componentDidMount() {}

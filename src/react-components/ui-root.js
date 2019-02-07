@@ -10,7 +10,13 @@ import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
-import { pushHistoryState, clearHistoryState, popToBeginningOfHubHistory, navigateToPriorPage } from "../utils/history";
+import {
+  pushHistoryState,
+  replaceHistoryState,
+  clearHistoryState,
+  popToBeginningOfHubHistory,
+  navigateToPriorPage
+} from "../utils/history";
 import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
 
@@ -226,10 +232,8 @@ class UIRoot extends Component {
     setTimeout(() => this.handleForceEntry(), 2000);
     setTimeout(() => {
       this.pushHistoryState("overlay", "media");
+      this.replaceHistoryState("media_query", { source: "scene_listings", filter: "featured" });
     }, 1000);
-    setTimeout(() => {
-      this.props.mediaSearchStore.update({ source: "scene_listings", filter: "featured" });
-    }, 3000);
   }
 
   componentWillUnmount() {
@@ -721,6 +725,7 @@ class UIRoot extends Component {
   };
 
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
+  replaceHistoryState = (k, v) => replaceHistoryState(this.props.history, k, v);
 
   renderExitedPane = () => {
     let subtitle = null;
