@@ -169,18 +169,22 @@ export default class SceneEntryManager {
   };
 
   _setupKicking = () => {
+    // This event is only received by the kicker
     document.body.addEventListener("kicked", ({ detail }) => {
-      const { clientId } = detail;
+      const { clientId: kickedClientId } = detail;
       const { entities } = NAF.connection.entities;
       for (const id in entities) {
         const entity = entities[id];
-        if (NAF.utils.getNetworkOwner(entity) === clientId && entity.components.networked.data.persistent) {
-          NAF.utils.takeOwnership(entity);
+        if (NAF.utils.getCreator(entity) !== kickedClientId) continue;
+
+        if (entity.components.networked.data.persistent) {
+          NAF.utils.takeOwnership(entity)
           this._unpinElement(entity);
           entity.parentNode.removeChild(entity);
+        } else {
+          NAF.entities.removeEntity(id);
         }
       }
-      NAF.connection.entities.removeEntitiesOfClient(clientId);
     });
   };
 
