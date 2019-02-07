@@ -8,7 +8,9 @@ import HomeRoot from "./react-components/home-root";
 import AuthChannel from "./utils/auth-channel";
 import { createAndRedirectToNewHub, connectToReticulum } from "./utils/phoenix-utils";
 import Store from "./storage/store";
-import DialogContainer from "./react-components/dialog-container";
+import JoinUsDialog from "./react-components/join-us-dialog";
+import UpdatesDialog from "./react-components/updates-dialog";
+import ReportDialog from "./react-components/report-dialog";
 
 const qs = new URLSearchParams(location.search);
 registerTelemetry("/home", "Hubs Home Page");
@@ -47,17 +49,13 @@ const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathna
       />
     );
   }
-  function Test() {
-    return function() {
-      <DialogContainer props="Test" />;
-    };
-  }
-  // var Test= new DialogContainer();
   const router = (
     <Router>
       <div>
         <Route exact path="/" component={root} />
-        <Route exact path="/main" render={props => <DialogContainer {...props} />} />
+        <Route path="/joinus" render={() => <JoinUsDialog />} />
+        <Route path="/update" render={() => <UpdatesDialog />} />
+        <Route path="/report" render={() => <ReportDialog />} />
       </div>
     </Router>
   );
