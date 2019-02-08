@@ -9,6 +9,7 @@ import MovingAverage from "moving-average";
 import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
+import { Route } from "react-router";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
 import {
   pushHistoryState,
@@ -67,6 +68,8 @@ addLocaleData([...en]);
 // Note that this doesn't have to be exhaustive: if no devices match any regex
 // then we rely upon the user to select the proper mic.
 const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
+
+const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 
 async function grantedMicLabels() {
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
@@ -171,9 +174,12 @@ class UIRoot extends Component {
 
   constructor(props) {
     super(props);
+
     if (props.showSafariMicDialog) {
       this.state.dialog = <SafariMicDialog closable={false} />;
     }
+
+    props.mediaSearchStore.setHistory(props.history);
   }
 
   componentDidUpdate(prevProps) {
@@ -214,7 +220,9 @@ class UIRoot extends Component {
     // If we refreshed the page with any state history (eg if we were in the entry flow
     // or had a modal/overlay open) just reset everything to the beginning of the flow by
     // erasing all history that was accumulated for this room (including across refreshes.)
-    if (this.props.history.location.state) {
+    // (We don't do this for the media browser case, since we want to be able to share
+    // links to the browser pages)
+    if (this.props.history.location.state && !this.props.history.location.pathname.startsWith("/media")) {
       popToBeginningOfHubHistory(this.props.history);
     }
 
@@ -230,10 +238,6 @@ class UIRoot extends Component {
     });
 
     setTimeout(() => this.handleForceEntry(), 2000);
-    setTimeout(() => {
-      this.pushHistoryState("overlay", "media");
-      this.replaceHistoryState("media_query", { source: "scene_listings", filter: "featured" });
-    }, 1000);
   }
 
   componentWillUnmount() {
@@ -1151,6 +1155,13 @@ class UIRoot extends Component {
   };
 
   isInModalOrOverlay = () => {
+    if (
+      this.state.entered &&
+      IN_ROOM_MODAL_ROUTER_PATHS.find(x => this.props.history.location.pathname.startsWith(x))
+    ) {
+      return true;
+    }
+
     return !!(
       (this.props.history &&
         this.props.history.location.state &&
@@ -1225,12 +1236,12 @@ class UIRoot extends Component {
                 <ProfileEntryPanel {...props} finished={this.onProfileFinished} store={this.props.store} />
               )}
             />
-            <StateRoute
-              stateKey="overlay"
-              stateValue="media"
-              history={this.props.history}
-              render={props => <MediaBrowser {...props} mediaSearchStore={this.props.mediaSearchStore} />}
-            />
+            {this.state.entered && (
+              <Route
+                path="/media"
+                render={props => <MediaBrowser {...props} mediaSearchStore={this.props.mediaSearchStore} />}
+              />
+            )}
             <StateRoute
               stateKey="entry_step"
               stateValue="profile"

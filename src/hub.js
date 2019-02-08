@@ -646,7 +646,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 20000);
   };
 
-  const messageDispatch = new MessageDispatch(scene, entryManager, hubChannel, addToPresenceLog, remountUI);
+  const messageDispatch = new MessageDispatch(
+    scene,
+    entryManager,
+    hubChannel,
+    addToPresenceLog,
+    remountUI,
+    mediaSearchStore
+  );
 
   hubPhxChannel
     .join()

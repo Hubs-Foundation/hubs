@@ -164,28 +164,19 @@
     }
   }
 
-  :local(.back) {
+  :local(.header-left) {
     @extend %fa-icon-button;
 
     margin: 0 0 0 32px;
     display: flex;
-    font-size: 1.2em;
-    font-weight: bold;
     width: 100px;
-    i {
-      margin-right: 18px;
-    }
 
     @media (max-width: 700px) {
       width: 50px;
-
-      label {
-        display: none;
-      }
     }
   }
 
-  :local(.help) {
+  :local(.header-right) {
     margin: 0 32px 0 0;
     width: 100px;
 

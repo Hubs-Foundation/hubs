@@ -1,34 +1,37 @@
 import { EventTarget } from "event-target-shim";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
-import createHistory from "history/createBrowserHistory";
-
-const history = createHistory();
+import { pushHistoryPath } from "../utils/history";
 
 export default class MediaSearchStore extends EventTarget {
   constructor() {
     super();
 
     this.requestIndex = 0;
-    this.update();
+  }
 
-    history.listen(() => {
-      this.update();
+  setHistory(history) {
+    this.history = history;
+
+    this.update(this.history.location);
+
+    this.history.listen(location => {
+      this.update(location);
     });
   }
 
-  update = async () => {
-    if (!history.location.state || !history.location.state.media_query) return;
+  update = async location => {
+    const pathname = location.pathname;
+    if (!pathname.startsWith("/media")) return;
+    let source = pathname.substring(7);
 
-    const searchParams = new URLSearchParams();
-    console.log(history.location.state);
-
-    for (const [k, v] of Object.entries(history.location.state.media_query)) {
-      searchParams.set(k, v);
+    if (source === "scenes") {
+      source = "scene_listings"; // /scenes more ergonomic but API uses scene_listings
     }
 
     this.requestIndex++;
     const currentRequestIndex = this.requestIndex;
-    const url = getReticulumFetchUrl(`/api/v1/media/search?${searchParams.toString()}`);
+    const searchParams = new URLSearchParams(location.search);
+    const url = getReticulumFetchUrl(`/api/v1/media/search?${searchParams.toString()}&source=${source}`);
     if (this.lastSavedUrl === url) return;
 
     const res = await fetch(url);
@@ -37,5 +40,36 @@ export default class MediaSearchStore extends EventTarget {
     this.result = await res.json();
     this.lastFetchedUrl = url;
     this.dispatchEvent(new CustomEvent("statechanged"));
+  };
+
+  pageNavigate = delta => {
+    const location = this.history.location;
+    const searchParams = new URLSearchParams(location.search);
+    const currentPage = +(searchParams.get("page") || 1);
+    searchParams.set("page", currentPage + delta);
+    pushHistoryPath(this.history, location.pathname, searchParams.toString());
+  };
+
+  filterQueryNavigate = (filter, query) => {
+    const location = this.history.location;
+    const searchParams = new URLSearchParams(location.search);
+
+    if (query) {
+      searchParams.set("q", query);
+    } else {
+      searchParams.delete("q");
+    }
+
+    if (filter) {
+      searchParams.set("filter", filter);
+    } else {
+      searchParams.delete("filter");
+    }
+
+    pushHistoryPath(this.history, location.pathname, searchParams.toString());
+  };
+
+  sourceNavigate = source => {
+    pushHistoryPath(this.history, `/media/${source}`);
   };
 }
