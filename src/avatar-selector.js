@@ -33,7 +33,8 @@ function getHashArg(arg) {
 }
 
 window.APP = new App();
-window.APP.quality = getHashArg("quality") || AFRAME.utils.device.isMobile() ? "low" : "high";
+window.APP.quality =
+  getHashArg("quality") || (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo()) ? "low" : "high";
 
 function postAvatarIdToParent(newAvatarId) {
   window.parent.postMessage({ avatarId: newAvatarId }, location.origin);

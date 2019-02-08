@@ -50,12 +50,14 @@ EntryButton.propTypes = {
   isInHMD: PropTypes.bool
 };
 
+const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo();
+
 export const TwoDEntryButton = props => {
   const entryButtonProps = {
     ...props,
-    iconSrc: AFRAME.utils.device.isMobile() ? MobileScreenEntryImg : DesktopScreenEntryImg,
+    iconSrc: isMobile ? MobileScreenEntryImg : DesktopScreenEntryImg,
     prefixMessageId: "entry.screen-prefix",
-    mediumMessageId: AFRAME.utils.device.isMobile() ? "entry.mobile-screen" : "entry.desktop-screen"
+    mediumMessageId: isMobile ? "entry.mobile-screen" : "entry.desktop-screen"
   };
 
   return <EntryButton {...entryButtonProps} />;
@@ -67,7 +69,7 @@ export const GenericEntryButton = props => {
     iconSrc: GenericVREntryImg,
     prefixMessageId: "entry.generic-prefix",
     mediumMessageId: "entry.generic-medium",
-    subtitle: AFRAME.utils.device.isMobile() ? null : "entry.generic-subtitle-desktop"
+    subtitle: isMobile ? null : "entry.generic-subtitle-desktop"
   };
 
   return <EntryButton {...entryButtonProps} />;
@@ -110,13 +112,13 @@ export const DeviceEntryButton = props => {
   const entryButtonProps = {
     ...props,
     iconSrc: DeviceEntryImg,
-    prefixMessageId: AFRAME.utils.device.isMobile() ? "entry.device-prefix-mobile" : "entry.device-prefix-desktop",
+    prefixMessageId: isMobile ? "entry.device-prefix-mobile" : "entry.device-prefix-desktop",
     mediumMessageId: "entry.device-medium"
   };
 
   entryButtonProps.subtitle = entryButtonProps.isInHMD
     ? "entry.device-subtitle-vr"
-    : AFRAME.utils.device.isMobile()
+    : isMobile
       ? "entry.device-subtitle-mobile"
       : "entry.device-subtitle-desktop";
 

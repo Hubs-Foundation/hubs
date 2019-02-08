@@ -123,7 +123,7 @@ window.APP.RENDER_ORDER = {
 const store = window.APP.store;
 
 const qs = new URLSearchParams(location.search);
-const isMobile = AFRAME.utils.device.isMobile();
+const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo();
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";

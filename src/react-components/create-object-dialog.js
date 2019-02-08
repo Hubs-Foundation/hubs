@@ -15,7 +15,7 @@ const attributionHostnames = {
 };
 
 const DEFAULT_OBJECT_URL = "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf";
-const isMobile = AFRAME.utils.device.isMobile();
+const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo();
 const instructions = "Paste a URL to an image, video, model, or upload a file.";
 const desktopTips = "Tip: You can paste media directly into Hubs with Ctrl+V";
 const references = (
