@@ -12,7 +12,8 @@ class MediaBrowser extends Component {
   static propTypes = {
     mediaSearchStore: PropTypes.object,
     history: PropTypes.object,
-    intl: PropTypes.object
+    intl: PropTypes.object,
+    onMediaSearchResultEntrySelected: PropTypes.func
   };
 
   state = { query: "" };
@@ -52,6 +53,24 @@ class MediaBrowser extends Component {
     this.setState({ query });
   };
 
+  handleEntryClicked = entry => {
+    if (!this.props.onMediaSearchResultEntrySelected) return;
+    this.props.onMediaSearchResultEntrySelected(entry);
+    this.close();
+  };
+
+  close = () => {
+    const location = this.props.history.location;
+    const searchParams = new URLSearchParams(location.search);
+
+    // Strip browsing query params
+    searchParams.delete("q");
+    searchParams.delete("filter");
+    searchParams.delete("page");
+
+    pushHistoryPath(this.props.history, "/", searchParams.toString());
+  };
+
   render() {
     //const { formatMessage } = this.props.intl;
     const hasNext = this.state.result && this.state.result.meta.page < this.state.result.meta.total_pages;
@@ -70,7 +89,7 @@ class MediaBrowser extends Component {
               <img src={hubLogo} />
             </div>
             <div className={styles.headerRight}>
-              <button onClick={() => pushHistoryPath(this.props.history, "/")}>
+              <button onClick={() => this.close()}>
                 <span>×</span>
               </button>
             </div>
@@ -104,7 +123,7 @@ class MediaBrowser extends Component {
     const creator = entry.attributions && entry.attributions.creator;
 
     return (
-      <div className={styles.tile} key={`${entry.id}_${idx}`}>
+      <div onClick={() => this.handleEntryClicked(entry)} className={styles.tile} key={`${entry.id}_${idx}`}>
         <div className={styles.image}>
           <img src={scaledThumbnailUrlFor(imageSrc, 244, 350)} />
         </div>

@@ -128,6 +128,7 @@ class UIRoot extends Component {
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
+    onMediaSearchResultEntrySelected: PropTypes.func,
     location: PropTypes.object,
     history: PropTypes.object
   };
@@ -1239,7 +1240,13 @@ class UIRoot extends Component {
             {this.state.entered && (
               <Route
                 path="/media"
-                render={props => <MediaBrowser {...props} mediaSearchStore={this.props.mediaSearchStore} />}
+                render={props => (
+                  <MediaBrowser
+                    {...props}
+                    mediaSearchStore={this.props.mediaSearchStore}
+                    onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
+                  />
+                )}
               />
             )}
             <StateRoute

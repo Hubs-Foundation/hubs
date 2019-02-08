@@ -355,7 +355,10 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   updateEnvironmentForHub(hub);
   updateUIForHub(hub);
 
-  remountUI({ onSendMessage: messageDispatch.dispatch });
+  remountUI({
+    onSendMessage: messageDispatch.dispatch,
+    onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry)
+  });
 
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   objectsEl.addEventListener("model-loaded", async el => {
