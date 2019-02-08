@@ -418,6 +418,18 @@ AFRAME.registerComponent("gltf-model-plus", {
   removeInflatedEl() {
     if (this.inflatedEl) {
       this.inflatedEl.parentNode.removeChild(this.inflatedEl);
+
+      this.inflatedEl.object3D.traverse(x => {
+        if (x.material) {
+          x.material.dispose();
+        }
+
+        if (x.geometry) {
+          x.geometry.dispose();
+          x.geometry.boundsTree = null;
+        }
+      });
+
       delete this.inflatedEl;
     }
   }

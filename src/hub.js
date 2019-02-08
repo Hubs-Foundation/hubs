@@ -86,6 +86,7 @@ import "./components/hover-menu";
 
 import ReactDOM from "react-dom";
 import React from "react";
+import jwtDecode from "jwt-decode";
 import { BrowserRouter, Route } from "react-router-dom";
 import UIRoot from "./react-components/ui-root";
 import AuthChannel from "./utils/auth-channel";
@@ -556,6 +557,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const environmentScene = document.querySelector("#environment-scene");
+
   const onFirstEnvironmentLoad = () => {
     setupLobbyCamera();
 
@@ -572,6 +574,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   environmentScene.addEventListener("model-loaded", () => {
     // This will be run every time the environment is changed (including the first load.)
     remountUI({ environmentSceneLoaded: true });
+
+    // Re-bind the teleporter controls collision meshes in case the scene changed.
+    document
+      .querySelectorAll("a-entity[teleport-controls]")
+      .forEach(x => x.components["teleport-controls"].queryCollisionEntities());
 
     for (const modelEl of environmentScene.children) {
       addAnimationComponents(modelEl);
@@ -611,6 +618,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
   const { token } = store.state.credentials;
   if (token) {
+    console.log(`Logged into account ${jwtDecode(token).sub}`);
     joinPayload.auth_token = token;
   }
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);

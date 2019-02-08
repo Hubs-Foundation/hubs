@@ -46,7 +46,13 @@ AFRAME.registerComponent("networked-audio-analyser", {
 AFRAME.registerComponent("scale-audio-feedback", {
   schema: {
     minScale: { default: 1 },
-    maxScale: { default: 1.5 }
+    maxScale: { default: 2 }
+  },
+
+  init() {
+    this._playerCamera = document.getElementById("player-camera").object3D;
+    this._playerCameraWorldPosition = new THREE.Vector3();
+    this._worldPosition = new THREE.Vector3();
   },
 
   tick() {
@@ -60,8 +66,15 @@ AFRAME.registerComponent("scale-audio-feedback", {
 
     if (!audioAnalyser) return;
 
-    const scale = Math.min(maxScale, minScale + (maxScale - minScale) * audioAnalyser.volume * 8);
-    this.el.object3D.scale.setScalar(scale);
-    this.el.object3D.matrixNeedsUpdate = true;
+    const { object3D } = this.el;
+
+    this._playerCameraWorldPosition.setFromMatrixPosition(this._playerCamera.matrixWorld);
+    this._worldPosition.setFromMatrixPosition(object3D.matrixWorld);
+    const distance = this._worldPosition.distanceTo(this._playerCameraWorldPosition) / 10;
+
+    const scale = Math.min(maxScale, minScale + (maxScale - minScale) * audioAnalyser.volume * 8 * distance);
+
+    object3D.scale.setScalar(scale);
+    object3D.matrixNeedsUpdate = true;
   }
 });

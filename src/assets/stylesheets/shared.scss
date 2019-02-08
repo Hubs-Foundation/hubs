@@ -92,7 +92,7 @@ $semi-bold: 600;
     padding: 18px 48px;
   }
 
-  background: #FF3464;
+  background: $action-color;
   color: white;
   display: flex;
   align-items: center;
@@ -129,7 +129,7 @@ $semi-bold: 600;
   border-radius: 28px;
   padding: 0px 18px;
 
-  background: #FF3464;
+  background: $action-color;
   font-size: 1em;
   color: white;
   display: flex;
@@ -153,7 +153,7 @@ $semi-bold: 600;
 
 %bottom-action-button {
   @extend %bottom-button;
-  background: #FF3464;
+  background: $action-color;
 }
 
 %top-title {
