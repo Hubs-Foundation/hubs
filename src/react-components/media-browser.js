@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
-//import { SCHEMA } from "../storage/store";
 import styles from "../assets/stylesheets/media-browser.scss";
 import classNames from "classnames";
 import { scaledThumbnailUrlFor } from "../utils/media-utils";
