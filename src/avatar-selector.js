@@ -15,7 +15,6 @@ import "three/examples/js/loaders/GLTFLoader";
 import "./components/animation-mixer";
 import "./components/audio-feedback";
 import "./components/loop-animation";
-import "./components/gamma-factor";
 import "./components/scene-sound";
 import "./components/environment-map";
 import "./gltf-component-mappings";

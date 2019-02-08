@@ -69,7 +69,6 @@ import "./components/camera-focus-button";
 import "./components/mirror-camera-button";
 import "./components/unmute-video-button";
 import "./components/destroy-at-extreme-distances";
-import "./components/gamma-factor";
 import "./components/visible-to-owner";
 import "./components/camera-tool";
 import "./components/scene-sound";
