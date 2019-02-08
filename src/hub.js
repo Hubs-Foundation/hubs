@@ -278,6 +278,7 @@ async function updateEnvironmentForHub(hub) {
   let isLegacyBundle; // Deprecated
 
   const environmentScene = document.querySelector("#environment-scene");
+  const scene = document.querySelector("a-scene");
 
   if (hub.scene) {
     isLegacyBundle = false;
@@ -308,6 +309,7 @@ async function updateEnvironmentForHub(hub) {
   if (environmentScene.childNodes.length === 0) {
     const environmentEl = document.createElement("a-entity");
     environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
+
     environmentScene.appendChild(environmentEl);
   } else {
     // Change environment
@@ -317,8 +319,19 @@ async function updateEnvironmentForHub(hub) {
     THREE.Cache.clear();
 
     const onLoadingEnvironmentReady = () => {
-      environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
       environmentEl.removeEventListener("model-loaded", onLoadingEnvironmentReady);
+
+      if (scene.is("entered")) {
+        // We've already entered, so move to new spawn point
+        const spawnWhenEnvironmentReady = () => {
+          environmentEl.removeEventListener("model-loaded", spawnWhenEnvironmentReady);
+          document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint();
+        };
+
+        environmentEl.addEventListener("model-loaded", spawnWhenEnvironmentReady);
+      }
+
+      environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
     };
 
     environmentEl.addEventListener("model-loaded", onLoadingEnvironmentReady);
