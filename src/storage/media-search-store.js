@@ -2,6 +2,8 @@ import { EventTarget } from "event-target-shim";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { pushHistoryPath } from "../utils/history";
 
+// This class is responsible for fetching and storing media search results and provides a
+// convenience API for performing history updates relevant to search navigation.
 export default class MediaSearchStore extends EventTarget {
   constructor() {
     super();

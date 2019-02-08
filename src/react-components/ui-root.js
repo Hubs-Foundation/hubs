@@ -11,13 +11,7 @@ import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import { Route } from "react-router";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
-import {
-  pushHistoryState,
-  replaceHistoryState,
-  clearHistoryState,
-  popToBeginningOfHubHistory,
-  navigateToPriorPage
-} from "../utils/history";
+import { pushHistoryState, clearHistoryState, popToBeginningOfHubHistory, navigateToPriorPage } from "../utils/history";
 import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
 
@@ -221,8 +215,9 @@ class UIRoot extends Component {
     // If we refreshed the page with any state history (eg if we were in the entry flow
     // or had a modal/overlay open) just reset everything to the beginning of the flow by
     // erasing all history that was accumulated for this room (including across refreshes.)
-    // (We don't do this for the media browser case, since we want to be able to share
-    // links to the browser pages)
+    //
+    // We don't do this for the media browser case, since we want to be able to share
+    // links to the browser pages
     if (this.props.history.location.state && !this.props.history.location.pathname.startsWith("/media")) {
       popToBeginningOfHubHistory(this.props.history);
     }
@@ -730,7 +725,6 @@ class UIRoot extends Component {
   };
 
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
-  replaceHistoryState = (k, v) => replaceHistoryState(this.props.history, k, v);
 
   renderExitedPane = () => {
     let subtitle = null;
