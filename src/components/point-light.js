@@ -3,6 +3,7 @@ AFRAME.registerComponent("point-light", {
     color: { type: "color" },
     intensity: { default: 1.0 },
     range: { default: 0 },
+    decay: { default: 2 },
     castShadow: { default: true },
     shadowMapResolution: { default: [512, 512] },
     shadowBias: { default: 0 },
@@ -12,7 +13,6 @@ AFRAME.registerComponent("point-light", {
   init() {
     const el = this.el;
     this.light = new THREE.PointLight();
-    this.light.decay = 2;
     this.light.shadow.camera.matrixAutoUpdate = true;
     this.el.setObject3D("point-light", this.light);
     this.el.sceneEl.systems.light.registerLight(el);
@@ -35,6 +35,10 @@ AFRAME.registerComponent("point-light", {
 
     if (this.data.range !== prevData.range) {
       light.distance = this.data.range;
+    }
+
+    if (this.data.decay !== prevData.decay) {
+      light.decay = this.data.decay;
     }
 
     if (this.data.castShadow !== prevData.castShadow) {

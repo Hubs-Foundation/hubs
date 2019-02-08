@@ -13,12 +13,30 @@ AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
 AFRAME.GLTFModelPlus.registerComponent("media-loader", "media-loader");
 AFRAME.GLTFModelPlus.registerComponent("body", "body");
 AFRAME.GLTFModelPlus.registerComponent("hide-when-quality", "hide-when-quality");
-AFRAME.GLTFModelPlus.registerComponent("light", "light");
+AFRAME.GLTFModelPlus.registerComponent("light", "light", (el, componentName, componentData) => {
+  if (componentData.distance === 0) {
+    componentData.decay = 0;
+  }
+  el.setAttribute(componentName, componentData);
+  if (componentData.castShadow) {
+    // HACK: component.light isn't set until one frame after setArrtibute
+    setTimeout(() => {
+      el.components.light.light.shadow.camera.matrixNeedsUpdate = true;
+    }, 0);
+  }
+});
 AFRAME.GLTFModelPlus.registerComponent("ambient-light", "ambient-light");
 AFRAME.GLTFModelPlus.registerComponent("directional-light", "directional-light");
 AFRAME.GLTFModelPlus.registerComponent("hemisphere-light", "hemisphere-light");
-AFRAME.GLTFModelPlus.registerComponent("point-light", "point-light");
-AFRAME.GLTFModelPlus.registerComponent("spot-light", "spot-light");
+function decayMigration(el, componentName, componentData) {
+  if (componentData.range === 0) {
+    componentData.decay = 0;
+  }
+  el.setAttribute(componentName, componentData);
+}
+AFRAME.GLTFModelPlus.registerComponent("point-light", "point-light", decayMigration);
+AFRAME.GLTFModelPlus.registerComponent("spot-light", "spot-light", decayMigration);
+
 AFRAME.GLTFModelPlus.registerComponent("skybox", "skybox");
 AFRAME.GLTFModelPlus.registerComponent("layers", "layers");
 AFRAME.GLTFModelPlus.registerComponent("shadow", "shadow");
