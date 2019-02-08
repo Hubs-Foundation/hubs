@@ -178,7 +178,7 @@ export default class SceneEntryManager {
         if (NAF.utils.getCreator(entity) !== kickedClientId) continue;
 
         if (entity.components.networked.data.persistent) {
-          NAF.utils.takeOwnership(entity)
+          NAF.utils.takeOwnership(entity);
           this._unpinElement(entity);
           entity.parentNode.removeChild(entity);
         } else {
