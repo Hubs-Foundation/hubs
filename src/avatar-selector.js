@@ -27,7 +27,7 @@ import AvatarSelector from "./react-components/avatar-selector";
 
 addLocaleData([...en]);
 
-registerTelemetry();
+registerTelemetry("/avatars", "Hubs Avatar Picker");
 
 function getHashArg(arg) {
   return new URLSearchParams(location.hash.replace(/^#/, "?")).get(arg);
@@ -40,8 +40,7 @@ function postAvatarIdToParent(newAvatarId) {
   window.parent.postMessage({ avatarId: newAvatarId }, location.origin);
 }
 
-function mountUI() {
-  const avatarId = getHashArg("avatar_id");
+function mountUI(avatarId) {
   ReactDOM.render(
     <IntlProvider locale={lang} messages={messages}>
       <AvatarSelector {...{ avatars, avatarId, onChange: postAvatarIdToParent }} />
@@ -50,5 +49,18 @@ function mountUI() {
   );
 }
 
-window.addEventListener("hashchange", mountUI);
-document.addEventListener("DOMContentLoaded", mountUI);
+window.addEventListener("message", e => {
+  if (e.source !== window.parent) {
+    return;
+  }
+
+  const avatarId = e.data.avatarId;
+
+  if (document.readyState === "complete") {
+    mountUI(avatarId);
+  } else {
+    document.addEventListener("DOMContentLoaded", () => {
+      mountUI(avatarId);
+    });
+  }
+});

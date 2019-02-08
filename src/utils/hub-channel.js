@@ -1,3 +1,5 @@
+import jwtDecode from "jwt-decode";
+
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
 
@@ -12,15 +14,25 @@ function isSameDay(da, db) {
 export default class HubChannel {
   constructor(store) {
     this.store = store;
-    this._signedIn = false;
+    this._signedIn = !!this.store.state.credentials.token;
+    this._permissions = {};
   }
 
   get signedIn() {
     return this._signedIn;
   }
 
+  get permissions() {
+    return this._permissions;
+  }
+
   setPhoenixChannel = channel => {
     this.channel = channel;
+  };
+
+  setPermissionsFromToken = token => {
+    // Note: token is not verified.
+    this._permissions = jwtDecode(token);
   };
 
   sendEntryEvent = async () => {
@@ -96,6 +108,16 @@ export default class HubChannel {
     this.channel.push("events:profile_updated", { profile: this.store.state.profile });
   };
 
+  updateScene = url => {
+    if (!this._permissions.update_hub) return "unauthorized";
+    this.channel.push("update_scene", { url });
+  };
+
+  rename = name => {
+    if (!this._permissions.update_hub) return "unauthorized";
+    this.channel.push("update_hub", { name });
+  };
+
   subscribe = subscription => {
     this.channel.push("subscribe", { subscription });
   };
@@ -113,7 +135,8 @@ export default class HubChannel {
     return new Promise((resolve, reject) => {
       this.channel
         .push("sign_in", { token })
-        .receive("ok", () => {
+        .receive("ok", ({ perms_token }) => {
+          this.setPermissionsFromToken(perms_token);
           this._signedIn = true;
           resolve();
         })
@@ -135,6 +158,7 @@ export default class HubChannel {
       this.channel
         .push("sign_out")
         .receive("ok", () => {
+          this._permissions = {};
           this._signedIn = false;
           resolve();
         })
@@ -160,7 +184,12 @@ export default class HubChannel {
       payload.file_access_token = fileAccessToken;
       payload.promotion_token = promotionToken;
     }
-    this.channel.push("pin", payload);
+    return new Promise((resolve, reject) => {
+      this.channel
+        .push("pin", payload)
+        .receive("ok", resolve)
+        .receive("error", reject);
+    });
   };
 
   unpin = (id, fileId) => {
@@ -169,6 +198,22 @@ export default class HubChannel {
       payload.file_id = fileId;
     }
     this.channel.push("unpin", payload);
+  };
+
+  fetchPermissions = () => {
+    return new Promise((resolve, reject) => {
+      this.channel
+        .push("refresh_perms_token")
+        .receive("ok", res => {
+          this.setPermissionsFromToken(res.perms_token);
+          resolve({ permsToken: res.perms_token, permissions: this._permissions });
+        })
+        .receive("error", reject);
+    });
+  };
+
+  kick = sessionId => {
+    this.channel.push("kick", { session_id: sessionId });
   };
 
   requestSupport = () => {

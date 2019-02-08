@@ -10,6 +10,9 @@ import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
+import { pushHistoryState, clearHistoryState, popToBeginningOfHubHistory, navigateToPriorPage } from "../utils/history";
+import StateLink from "./state-link.js";
+import StateRoute from "./state-route.js";
 
 import { lang, messages } from "../utils/i18n";
 import AutoExitWarning from "./auto-exit-warning";
@@ -44,17 +47,9 @@ import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 
 addLocaleData([...en]);
-
-const ENTRY_STEPS = {
-  start: "start",
-  device: "device",
-  mic_grant: "mic_grant",
-  mic_granted: "mic_granted",
-  audio_setup: "audio_setup",
-  finished: "finished"
-};
 
 // This is a list of regexes that match the microphone labels of HMDs.
 //
@@ -121,15 +116,17 @@ class UIRoot extends Component {
     signInCompleteMessageId: PropTypes.string,
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
-    showSafariMicDialog: PropTypes.bool
+    showSafariMicDialog: PropTypes.bool,
+    location: PropTypes.object,
+    history: PropTypes.object
   };
 
   state = {
-    entryStep: ENTRY_STEPS.start,
     enterInVR: false,
+    entered: false,
+    lastEntryStepPath: null,
     dialog: null,
     showInviteDialog: false,
-    showLinkDialog: false,
     showPresenceList: false,
     linkCode: null,
     linkCodeCancel: null,
@@ -159,7 +156,6 @@ class UIRoot extends Component {
 
     exited: false,
 
-    showProfileEntry: false,
     pendingMessage: "",
     signedIn: false,
     videoShareMediaSource: null
@@ -195,6 +191,25 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.addEventListener("exit", this.exit);
     const scene = this.props.scene;
+
+    const unsubscribe = this.props.history.listen((location, action) => {
+      const state = location.state;
+
+      // If we just hit back into the entry flow, just go back to the page before the room landing page.
+      if (action === "POP" && state && state.entry_step && this.state.entered) {
+        unsubscribe();
+        navigateToPriorPage(this.props.history);
+        return;
+      }
+    });
+
+    // If we refreshed the page with any state history (eg if we were in the entry flow
+    // or had a modal/overlay open) just reset everything to the beginning of the flow by
+    // erasing all history that was accumulated for this room (including across refreshes.)
+    if (this.props.history.location.state) {
+      popToBeginningOfHubHistory(this.props.history);
+    }
+
     this.setState({
       audioContext: {
         playSound: sound => {
@@ -205,6 +220,8 @@ class UIRoot extends Component {
         }
       }
     });
+
+    setTimeout(() => this.handleForceEntry(), 2000);
   }
 
   componentWillUnmount() {
@@ -228,17 +245,17 @@ class UIRoot extends Component {
       onContinueAfterSignIn();
     };
 
-    this.showDialog(SignInDialog, {
+    this.showNonHistoriedDialog(SignInDialog, {
       message: messages[signInMessageId],
       onSignIn: async email => {
         const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
 
-        this.showDialog(SignInDialog, { authStarted: true, onClose: closeAndContinue });
+        this.showNonHistoriedDialog(SignInDialog, { authStarted: true, onClose: closeAndContinue });
 
         await authComplete;
 
         this.setState({ signedIn: true });
-        this.showDialog(SignInDialog, {
+        this.showNonHistoriedDialog(SignInDialog, {
           authComplete: true,
           message: messages[signInCompleteMessageId],
           continueText: messages[signInContinueTextId],
@@ -306,26 +323,16 @@ class UIRoot extends Component {
     this.updateSubscribedState();
   };
 
-  handleStartEntry = () => {
-    const promptForNameAndAvatarBeforeEntry = !this.props.store.state.activity.hasChangedName;
+  handleForceEntry = () => {
+    if (!this.props.forcedVREntryType) return;
 
-    if (promptForNameAndAvatarBeforeEntry) {
-      this.setState({ showProfileEntry: true });
-    }
-
-    if (!this.props.forcedVREntryType) {
-      this.goToEntryStep(ENTRY_STEPS.device);
-    } else if (this.props.forcedVREntryType.startsWith("daydream")) {
+    if (this.props.forcedVREntryType.startsWith("daydream")) {
       this.enterDaydream();
     } else if (this.props.forcedVREntryType.startsWith("vr")) {
       this.enterVR();
     } else if (this.props.forcedVREntryType.startsWith("2d")) {
       this.enter2D();
     }
-  };
-
-  goToEntryStep = entryStep => {
-    this.setState({ entryStep: entryStep, showInviteDialog: false });
   };
 
   playTestTone = () => {
@@ -410,7 +417,7 @@ class UIRoot extends Component {
       await this.setMediaStreamToDefault();
       this.beginOrSkipAudioSetup();
     } else {
-      this.goToEntryStep(ENTRY_STEPS.mic_grant);
+      this.pushHistoryState("entry_step", "mic_grant");
     }
   };
 
@@ -419,10 +426,10 @@ class UIRoot extends Component {
   };
 
   enterVR = async () => {
-    if (this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.maybe) {
+    if (this.props.forcedVREntryType || this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.maybe) {
       await this.performDirectEntryFlow(true);
     } else {
-      this.showWebVRRecommendDialog();
+      this.pushHistoryState("modal", "webvr");
     }
   };
 
@@ -519,11 +526,11 @@ class UIRoot extends Component {
   };
 
   onMicGrantButton = async () => {
-    if (this.state.entryStep == ENTRY_STEPS.mic_grant) {
+    if (this.props.location.state && this.props.location.state.entry_step === "mic_grant") {
       const { hasAudio } = await this.setMediaStreamToDefault();
 
       if (hasAudio) {
-        this.goToEntryStep(ENTRY_STEPS.mic_granted);
+        this.pushHistoryState("entry_step", "mic_granted");
       } else {
         this.beginOrSkipAudioSetup();
       }
@@ -533,13 +540,13 @@ class UIRoot extends Component {
   };
 
   onProfileFinished = () => {
-    this.setState({ showProfileEntry: false });
+    this.closeDialog();
     this.props.hubChannel.sendProfileUpdate();
   };
 
   beginOrSkipAudioSetup = () => {
     if (!this.props.forcedVREntryType || !this.props.forcedVREntryType.endsWith("_now")) {
-      this.goToEntryStep(ENTRY_STEPS.audio_setup);
+      this.pushHistoryState("entry_step", "audio");
     } else {
       this.onAudioReadyButton();
     }
@@ -616,14 +623,15 @@ class UIRoot extends Component {
       clearInterval(this.state.micUpdateInterval);
     }
 
-    this.goToEntryStep(ENTRY_STEPS.finished);
+    this.setState({ entered: true, lastEntryStepPath: this.props.history.location.pathname, showInviteDialog: false });
+    clearHistoryState(this.props.history);
   };
 
   attemptLink = async () => {
-    this.setState({ showLinkDialog: true });
+    this.pushHistoryState("overlay", "link");
     const { code, cancel, onFinished } = await this.props.linkChannel.generateCode();
     this.setState({ linkCode: code, linkCodeCancel: cancel });
-    onFinished.then(() => this.setState({ showLinkDialog: false, linkCode: null, linkCodeCancel: null }));
+    onFinished.then(() => this.setState({ log: false, linkCode: null, linkCodeCancel: null }));
   };
 
   showInviteDialog = () => {
@@ -639,35 +647,28 @@ class UIRoot extends Component {
   };
 
   closeDialog = () => {
-    this.setState({ dialog: null });
+    if (this.state.dialog) {
+      this.setState({ dialog: null });
+    } else {
+      this.props.history.goBack();
+    }
   };
 
-  showDialog = (DialogClass, props = {}) => {
+  showNonHistoriedDialog = (DialogClass, props = {}) => {
     this.setState({
       dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
     });
   };
 
-  showHelpDialog = () => this.showDialog(HelpDialog);
-
-  showSafariDialog = () => this.showDialog(SafariDialog);
-
-  showInviteTeamDialog = () => this.showDialog(InviteTeamDialog, { hubChannel: this.props.hubChannel });
-
-  showCreateObjectDialog = () => this.showDialog(CreateObjectDialog, { onCreate: this.createObject });
-
-  showWebVRRecommendDialog = () => this.showDialog(WebVRRecommendDialog);
-
-  showRoomInfoDialog = () =>
-    this.showDialog(RoomInfoDialog, { scene: this.props.hubScene, hubName: this.props.hubName });
+  renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
 
   showSignInDialog = () => {
-    this.showDialog(SignInDialog, {
+    this.showNonHistoriedDialog(SignInDialog, {
       message: messages["sign-in.prompt"],
       onSignIn: async email => {
         const { authComplete } = await this.props.authChannel.startAuthentication(email, this.props.hubChannel);
 
-        this.showDialog(SignInDialog, { authStarted: true });
+        this.showNonHistoriedDialog(SignInDialog, { authStarted: true });
 
         await authComplete;
 
@@ -683,7 +684,7 @@ class UIRoot extends Component {
   };
 
   showWebRTCScreenshareUnsupportedDialog = () => {
-    this.setState({ dialog: <WebRTCScreenshareUnsupportedDialog onClose={this.closeDialog} /> });
+    this.pushHistoryState("modal", "webrtc-screenshare");
   };
 
   onMiniInviteClicked = () => {
@@ -710,6 +711,8 @@ class UIRoot extends Component {
   occupantCount = () => {
     return this.props.presences ? Object.entries(this.props.presences).length : 0;
   };
+
+  pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
   renderExitedPane = () => {
     let subtitle = null;
@@ -768,7 +771,7 @@ class UIRoot extends Component {
         <div>
           <FormattedMessage id={exitSubtitleId} />
           <p />
-          {this.props.roomUnavailableReason !== "left" && (
+          {!["left", "kicked"].includes(this.props.roomUnavailableReason) && (
             <div>
               You can also{" "}
               <WithHoverSound>
@@ -821,26 +824,37 @@ class UIRoot extends Component {
     const pendingMessageTextareaHeight = textRows * 28 + "px";
     const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
     const hasPush = navigator.serviceWorker && "PushManager" in window;
+    const promptForNameAndAvatarBeforeEntry = !this.props.store.state.activity.hasChangedName;
 
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>
           <span>{this.props.hubName}</span>
           {this.props.hubScene && (
-            <span onClick={() => this.showRoomInfoDialog()} className={entryStyles.collapse}>
+            <StateLink
+              stateKey="modal"
+              stateValue="info"
+              history={this.props.history}
+              className={entryStyles.infoButton}
+            >
               <i>
                 <FontAwesomeIcon icon={faInfoCircle} />
               </i>
-            </span>
+            </StateLink>
           )}
         </div>
 
         <div className={entryStyles.center}>
           <WithHoverSound>
-            <div onClick={() => this.setState({ showProfileEntry: true })} className={entryStyles.profileName}>
+            <StateLink
+              stateKey="overlay"
+              stateValue="profile"
+              history={this.props.history}
+              className={entryStyles.profileName}
+            >
               <img src="../assets/images/account.svg" className={entryStyles.profileIcon} />
               <div title={this.props.store.state.profile.displayName}>{this.props.store.state.profile.displayName}</div>
-            </div>
+            </StateLink>
           </WithHoverSound>
 
           <form onSubmit={this.sendMessage}>
@@ -884,12 +898,14 @@ class UIRoot extends Component {
 
         <div className={entryStyles.buttonContainer}>
           <WithHoverSound>
-            <button
+            <StateLink
+              stateKey="entry_step"
+              stateValue={promptForNameAndAvatarBeforeEntry ? "profile" : "device"}
+              history={this.props.history}
               className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
-              onClick={() => this.handleStartEntry()}
             >
               <FormattedMessage id="entry.enter-room" />
-            </button>
+            </StateLink>
           </WithHoverSound>
         </div>
       </div>
@@ -899,6 +915,13 @@ class UIRoot extends Component {
   renderDevicePanel = () => {
     return (
       <div className={entryStyles.entryPanel}>
+        <div onClick={() => this.props.history.goBack()} className={entryStyles.back}>
+          <i>
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </i>
+          <FormattedMessage id="entry.back" />
+        </div>
+
         <div className={entryStyles.title}>
           <FormattedMessage id="entry.choose-device" />
         </div>
@@ -916,7 +939,9 @@ class UIRoot extends Component {
             isInHMD={this.props.availableVREntryTypes.isInHMD}
           />
           {this.props.availableVREntryTypes.safari === VR_DEVICE_AVAILABILITY.maybe && (
-            <SafariEntryButton onClick={this.showSafariDialog} />
+            <StateLink stateKey="modal" stateValue="safari" history={this.props.history}>
+              <SafariEntryButton onClick={this.showSafariDialog} />
+            </StateLink>
           )}
           {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
             <TwoDEntryButton onClick={this.enter2D} />
@@ -945,31 +970,34 @@ class UIRoot extends Component {
     );
   };
 
-  renderMicPanel = () => {
+  renderMicPanel = granted => {
     return (
       <div className="mic-grant-panel">
+        <div onClick={() => this.props.history.goBack()} className={entryStyles.back}>
+          <i>
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </i>
+          <FormattedMessage id="entry.back" />
+        </div>
+
         <div className="mic-grant-panel__grant-container">
           <div className="mic-grant-panel__title">
-            <FormattedMessage
-              id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-title" : "audio.granted-title"}
-            />
+            <FormattedMessage id={granted ? "audio.granted-title" : "audio.grant-title"} />
           </div>
           <div className="mic-grant-panel__subtitle">
-            <FormattedMessage
-              id={this.state.entryStep == ENTRY_STEPS.mic_grant ? "audio.grant-subtitle" : "audio.granted-subtitle"}
-            />
+            <FormattedMessage id={granted ? "audio.granted-subtitle" : "audio.grant-subtitle"} />
           </div>
           <div className="mic-grant-panel__button-container">
-            {this.state.entryStep == ENTRY_STEPS.mic_grant ? (
+            {granted ? (
               <WithHoverSound>
                 <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
-                  <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
+                  <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
                 </button>
               </WithHoverSound>
             ) : (
               <WithHoverSound>
                 <button className="mic-grant-panel__button" onClick={this.onMicGrantButton}>
-                  <img src="../assets/images/mic_granted.png" srcSet="../assets/images/mic_granted@2x.png 2x" />
+                  <img src="../assets/images/mic_denied.png" srcSet="../assets/images/mic_denied@2x.png 2x" />
                 </button>
               </WithHoverSound>
             )}
@@ -995,6 +1023,13 @@ class UIRoot extends Component {
     const subtitleId = AFRAME.utils.device.isMobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
     return (
       <div className="audio-setup-panel">
+        <div onClick={() => this.props.history.goBack()} className={entryStyles.back}>
+          <i>
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </i>
+          <FormattedMessage id="entry.back" />
+        </div>
+
         <div>
           <div className="audio-setup-panel__title">
             <FormattedMessage id="audio.title" />
@@ -1102,6 +1137,15 @@ class UIRoot extends Component {
     );
   };
 
+  isInModalOrOverlay = () => {
+    return !!(
+      (this.props.history &&
+        this.props.history.location.state &&
+        (this.props.history.location.state.modal || this.props.history.location.state.overlay)) ||
+      this.state.dialog
+    );
+  };
+
   render() {
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
     const isLoading =
@@ -1112,59 +1156,131 @@ class UIRoot extends Component {
     if (isLoading) return this.renderLoader();
     if (this.props.isBotMode) return this.renderBotMode();
 
-    const startPanel = this.state.entryStep === ENTRY_STEPS.start && this.renderEntryStartPanel();
-    const devicePanel = this.state.entryStep === ENTRY_STEPS.device && this.renderDevicePanel();
+    const entered = this.state.entered;
 
-    const micPanel =
-      (this.state.entryStep === ENTRY_STEPS.mic_grant || this.state.entryStep === ENTRY_STEPS.mic_granted) &&
-      this.renderMicPanel();
-
-    const audioSetupPanel = this.state.entryStep === ENTRY_STEPS.audio_setup && this.renderAudioSetupPanel();
-
-    const dialogContents = this.isWaitingForAutoExit() ? (
+    const entryDialog = this.isWaitingForAutoExit() ? (
       <AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />
     ) : (
       <div className={entryStyles.entryDialog}>
-        {startPanel}
-        {devicePanel}
-        {micPanel}
-        {audioSetupPanel}
+        <StateRoute stateKey="entry_step" stateValue="device" history={this.props.history}>
+          {this.renderDevicePanel()}
+        </StateRoute>
+        <StateRoute stateKey="entry_step" stateValue="mic_grant" history={this.props.history}>
+          {this.renderMicPanel(false)}
+        </StateRoute>
+        <StateRoute stateKey="entry_step" stateValue="mic_granted" history={this.props.history}>
+          {this.renderMicPanel(true)}
+        </StateRoute>
+        <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
+          {this.renderAudioSetupPanel()}
+        </StateRoute>
+        <StateRoute stateKey="entry_step" stateValue="" history={this.props.history}>
+          {this.renderEntryStartPanel()}
+        </StateRoute>
       </div>
     );
 
     const dialogBoxContentsClassNames = classNames({
-      [styles.uiInteractive]: !this.state.dialog,
+      [styles.uiInteractive]: !this.isInModalOrOverlay(),
       [styles.uiDialogBoxContents]: true,
-      [styles.backgrounded]: this.state.showProfileEntry
+      [styles.backgrounded]: this.isInModalOrOverlay()
     });
 
-    const entryFinished = this.state.entryStep === ENTRY_STEPS.finished;
-    const showVREntryButton = entryFinished && this.props.availableVREntryTypes.isInHMD;
+    const showVREntryButton = entered && this.props.availableVREntryTypes.isInHMD;
 
     const textRows = this.state.pendingMessage.split("\n").length;
     const pendingMessageTextareaHeight = textRows * 28 + "px";
     const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
+
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
           <div className={styles.ui}>
             {this.state.dialog}
 
-            {this.state.showProfileEntry && (
-              <ProfileEntryPanel finished={this.onProfileFinished} store={this.props.store} />
-            )}
+            <StateRoute
+              stateKey="overlay"
+              stateValue="profile"
+              history={this.props.history}
+              render={props => (
+                <ProfileEntryPanel {...props} finished={this.onProfileFinished} store={this.props.store} />
+              )}
+            />
+            <StateRoute
+              stateKey="entry_step"
+              stateValue="profile"
+              history={this.props.history}
+              render={props => (
+                <ProfileEntryPanel
+                  {...props}
+                  finished={() => {
+                    const unsubscribe = this.props.history.listen(() => {
+                      unsubscribe();
+                      this.pushHistoryState("entry_step", "device");
+                    });
 
-            {(!entryFinished || this.isWaitingForAutoExit()) && (
+                    this.onProfileFinished();
+                  }}
+                  store={this.props.store}
+                />
+              )}
+            />
+            <StateRoute
+              stateKey="modal"
+              stateValue="help"
+              history={this.props.history}
+              render={() => this.renderDialog(HelpDialog)}
+            />
+            <StateRoute
+              stateKey="modal"
+              stateValue="safari"
+              history={this.props.history}
+              render={() => this.renderDialog(SafariDialog)}
+            />
+            <StateRoute
+              stateKey="modal"
+              stateValue="support"
+              history={this.props.history}
+              render={() => this.renderDialog(InviteTeamDialog, { hubChannel: this.props.hubChannel })}
+            />
+            <StateRoute
+              stateKey="modal"
+              stateValue="create"
+              history={this.props.history}
+              render={() => this.renderDialog(CreateObjectDialog, { onCreate: this.createObject })}
+            />
+            <StateRoute
+              stateKey="modal"
+              stateValue="webvr"
+              history={this.props.history}
+              render={() => this.renderDialog(WebVRRecommendDialog)}
+            />
+            <StateRoute
+              stateKey="modal"
+              stateValue="webrtc-screenshare"
+              history={this.props.history}
+              render={() => this.renderDialog(WebRTCScreenshareUnsupportedDialog)}
+            />
+            <StateRoute
+              stateKey="modal"
+              stateValue="info"
+              history={this.props.history}
+              render={() =>
+                this.renderDialog(RoomInfoDialog, { scene: this.props.hubScene, hubName: this.props.hubName })
+              }
+            />
+
+            {(!this.state.entered || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
                 <PresenceLog entries={this.props.presenceLogEntries || []} hubId={this.props.hubId} />
-                <div className={dialogBoxContentsClassNames}>{dialogContents}</div>
+                <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
               </div>
             )}
 
-            {entryFinished && (
+            {entered && (
               <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} hubId={this.props.hubId} />
             )}
-            {entryFinished && (
+            {entered && (
               <form onSubmit={this.sendMessage}>
                 <div className={styles.messageEntryInRoom} style={{ height: pendingMessageFieldHeight }}>
                   {this.state.pendingMessage.startsWith("/") && (
@@ -1209,7 +1325,7 @@ class UIRoot extends Component {
                           spawnChatMessage(this.state.pendingMessage);
                           this.setState({ pendingMessage: "" });
                         } else {
-                          this.showCreateObjectDialog();
+                          this.pushHistoryState("modal", "create");
                         }
                       }}
                     />
@@ -1221,7 +1337,7 @@ class UIRoot extends Component {
             <div
               className={classNames({
                 [styles.inviteContainer]: true,
-                [styles.inviteContainerBelowHud]: entryFinished,
+                [styles.inviteContainerBelowHud]: entered,
                 [styles.inviteContainerInverted]: this.state.showInviteDialog
               })}
             >
@@ -1229,7 +1345,7 @@ class UIRoot extends Component {
                 !this.state.videoShareMediaSource && (
                   <WithHoverSound>
                     <button
-                      className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entryFinished })}
+                      className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
                       onClick={() => this.toggleInviteDialog()}
                     >
                       <FormattedMessage id="entry.invite-others-nag" />
@@ -1239,7 +1355,7 @@ class UIRoot extends Component {
               {!showVREntryButton &&
                 this.occupantCount() > 1 &&
                 !this.state.videoShareMediaSource &&
-                entryFinished && (
+                entered && (
                   <WithHoverSound>
                     <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
                       <span>
@@ -1269,22 +1385,30 @@ class UIRoot extends Component {
               )}
             </div>
 
-            {this.state.showLinkDialog && (
-              <LinkDialog
-                linkCode={this.state.linkCode}
-                onClose={() => {
-                  this.state.linkCodeCancel();
-                  this.setState({ showLinkDialog: false, linkCode: null, linkCodeCancel: null });
-                }}
-              />
-            )}
+            <StateRoute
+              stateKey="overlay"
+              stateValue="link"
+              history={this.props.history}
+              render={() => (
+                <LinkDialog
+                  linkCode={this.state.linkCode}
+                  onClose={() => {
+                    this.state.linkCodeCancel();
+                    this.setState({ linkCode: null, linkCodeCancel: null });
+                    this.props.history.goBack();
+                  }}
+                />
+              )}
+            />
 
             <WithHoverSound>
-              <button onClick={() => this.showHelpDialog()} className={classNames([styles.helpIcon, "help-button"])}>
-                <i>
-                  <FontAwesomeIcon icon={faQuestion} />
-                </i>
-              </button>
+              <StateLink stateKey="modal" stateValue="help" history={this.props.history}>
+                <button className={classNames([styles.helpIcon, "help-button"])}>
+                  <i>
+                    <FontAwesomeIcon icon={faQuestion} />
+                  </i>
+                </button>
+              </StateLink>
             </WithHoverSound>
 
             <div
@@ -1309,7 +1433,7 @@ class UIRoot extends Component {
               />
             )}
 
-            {this.state.entryStep === ENTRY_STEPS.finished ? (
+            {entered ? (
               <div>
                 <TwoDHUD.TopHUD
                   muted={this.state.muted}
@@ -1328,17 +1452,19 @@ class UIRoot extends Component {
                 {this.props.isSupportAvailable && (
                   <div className={styles.nagCornerButton}>
                     <WithHoverSound>
-                      <button onClick={() => this.showInviteTeamDialog()}>
-                        <FormattedMessage id="entry.invite-team-nag" />
-                      </button>
+                      <StateLink stateKey="modal" stateValue="support" history={this.props.history}>
+                        <button>
+                          <FormattedMessage id="entry.invite-team-nag" />
+                        </button>
+                      </StateLink>
                     </WithHoverSound>
                   </div>
                 )}
                 {!this.isWaitingForAutoExit() && (
                   <TwoDHUD.BottomHUD
-                    onCreateObject={() => this.showCreateObjectDialog()}
                     showPhotoPicker={AFRAME.utils.device.isMobile()}
                     onMediaPicked={this.createObject}
+                    history={this.props.history}
                   />
                 )}
               </div>

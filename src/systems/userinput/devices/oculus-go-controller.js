@@ -6,6 +6,7 @@ export class OculusGoControllerDevice {
     this.gamepad = gamepad;
     this.rayObjectRotation = new THREE.Quaternion();
     this.pose = new Pose();
+    this.q = new THREE.Quaternion();
   }
 
   write(frame) {
@@ -28,6 +29,8 @@ export class OculusGoControllerDevice {
       } else {
         this.rayObject.updateMatrixWorld();
       }
+      this.rayObject.getWorldQuaternion(this.q);
+      frame[paths.actions.rayObjectRotation] = this.q;
       const rayMatrixWorld = this.rayObject.matrixWorld;
       this.rayObjectRotation.setFromRotationMatrix(rayMatrixWorld);
       this.pose.position.setFromMatrixPosition(rayMatrixWorld);

@@ -11,14 +11,17 @@ import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import mozLogo from "../assets/images/moz-logo-black.png";
 import classNames from "classnames";
 import { ENVIRONMENT_URLS } from "../assets/environments/environments";
-import { connectToReticulum } from "../utils/phoenix-utils";
+import { createAndRedirectToNewHub, connectToReticulum } from "../utils/phoenix-utils";
+import maskEmail from "../utils/mask-email";
+import qsTruthy from "../utils/qs_truthy";
 
 import styles from "../assets/stylesheets/index.scss";
 
 import HubCreatePanel from "./hub-create-panel.js";
 import AuthDialog from "./auth-dialog.js";
-import ReportDialog from "./report-dialog.js";
 import JoinUsDialog from "./join-us-dialog.js";
+import ReportDialog from "./report-dialog.js";
+import SignInDialog from "./sign-in-dialog.js";
 import UpdatesDialog from "./updates-dialog.js";
 import DialogContainer from "./dialog-container.js";
 import { WithHoverSound } from "./wrap-with-audio";
@@ -29,6 +32,8 @@ class HomeRoot extends Component {
   static propTypes = {
     intl: PropTypes.object,
     sceneId: PropTypes.string,
+    store: PropTypes.object,
+    authChannel: PropTypes.object,
     authVerify: PropTypes.bool,
     authTopic: PropTypes.string,
     authToken: PropTypes.string,
@@ -41,12 +46,18 @@ class HomeRoot extends Component {
   state = {
     environments: [],
     dialog: null,
+    signedIn: null,
     mailingListEmail: "",
     mailingListPrivacy: false
   };
 
+  constructor(props) {
+    super(props);
+    this.state.signedIn = props.authChannel.signedIn;
+    this.state.email = props.authChannel.email;
+  }
+
   componentDidMount() {
-    this.closeDialog = this.closeDialog.bind(this);
     if (this.props.authVerify) {
       this.showAuthDialog(true);
       this.verifyAuth().then(this.showAuthDialog);
@@ -77,43 +88,57 @@ class HomeRoot extends Component {
     channel.push("auth_verified", { token: this.props.authToken });
   }
 
+  showDialog = (DialogClass, props = {}) => {
+    this.setState({
+      dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
+    });
+  };
+
   showAuthDialog = verifying => {
-    this.setState({ dialog: <AuthDialog closable="false" verifying={verifying} authOrigin={this.props.authOrigin} /> });
+    this.showDialog(AuthDialog, { closable: false, verifying, authOrigin: this.props.authOrigin });
   };
 
   loadHomeVideo = () => {
     const videoEl = document.querySelector("#background-video");
+    if (!videoEl) return;
     videoEl.playbackRate = 0.9;
     playVideoWithStopOnBlur(videoEl);
   };
 
-  closeDialog() {
+  closeDialog = () => {
     this.setState({ dialog: null });
-  }
+  };
 
-  showJoinUsDialog() {
-    this.setState({ dialog: <JoinUsDialog onClose={this.closeDialog} /> });
-  }
+  showJoinUsDialog = () => this.showDialog(JoinUsDialog);
 
-  showReportDialog() {
-    this.setState({ dialog: <ReportDialog onClose={this.closeDialog} /> });
-  }
+  showReportDialog = () => this.showDialog(ReportDialog);
 
-  showUpdatesDialog() {
-    this.setState({
-      dialog: <UpdatesDialog onClose={this.closeDialog} onSubmittedEmail={() => this.showEmailSubmittedDialog()} />
+  showUpdatesDialog = () =>
+    this.showDialog(UpdatesDialog, {
+      onSubmittedEmail: () => {
+        this.showDialog(
+          <DialogContainer>Great! Please check your e-mail to confirm your subscription.</DialogContainer>
+        );
+      }
     });
-  }
 
-  showEmailSubmittedDialog() {
-    this.setState({
-      dialog: (
-        <DialogContainer onClose={this.closeDialog}>
-          Great! Please check your e-mail to confirm your subscription.
-        </DialogContainer>
-      )
+  showSignInDialog = () => {
+    this.showDialog(SignInDialog, {
+      message: messages["sign-in.prompt"],
+      onSignIn: async email => {
+        const { authComplete } = await this.props.authChannel.startAuthentication(email);
+        this.showDialog(SignInDialog, { authStarted: true });
+        await authComplete;
+        this.setState({ signedIn: true, email });
+        this.closeDialog();
+      }
     });
-  }
+  };
+
+  signOut = () => {
+    this.props.authChannel.signOut();
+    this.setState({ signedIn: false });
+  };
 
   loadEnvironmentFromScene = async () => {
     let sceneUrlBase = "/api/v1/scenes";
@@ -155,12 +180,37 @@ class HomeRoot extends Component {
     Promise.all(environmentLoads).then(() => this.setState({ environments }));
   };
 
-  onDialogLinkClicked = trigger => {
+  onLinkClicked = trigger => {
     return e => {
       e.preventDefault();
       e.stopPropagation();
       trigger();
     };
+  };
+
+  launchTour = () => {
+    createAndRedirectToNewHub(
+      "Hubs Tour",
+      // TODO BP placeholder tour scene
+      // "chjVRLh", // dev
+      "d2SF68V", // prod
+      null,
+      false
+    );
+  };
+
+  showCreateDialog = () => {
+    this.showDialog(
+      props => (
+        <DialogContainer title="Choose a Scene" {...props}>
+          <HubCreatePanel {...props} />
+        </DialogContainer>
+      ),
+      {
+        initialEnvironment: this.props.initialEnvironment,
+        environments: this.state.environments
+      }
+    );
   };
 
   render() {
@@ -169,16 +219,21 @@ class HomeRoot extends Component {
       [styles.noninteractive]: !!this.state.dialog
     });
 
+    const useOculusBrowserFTUE = /Oculus/.test(navigator.userAgent) && qsTruthy("enable_ftue");
+    const showFTUEVideo = false;
+
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className={styles.home}>
           <div className={mainContentClassNames}>
-            <div className={styles.videoContainer}>
-              <video playsInline muted loop autoPlay className={styles.backgroundVideo} id="background-video">
-                <source src={homeVideoWebM} type="video/webm" />
-                <source src={homeVideoMp4} type="video/mp4" />
-              </video>
-            </div>
+            {!useOculusBrowserFTUE && (
+              <div className={styles.videoContainer}>
+                <video playsInline muted loop autoPlay className={styles.backgroundVideo} id="background-video">
+                  <source src={homeVideoWebM} type="video/webm" />
+                  <source src={homeVideoMp4} type="video/mp4" />
+                </video>
+              </div>
+            )}
             <div className={styles.headerContent}>
               <div className={styles.titleAndNav} onClick={() => (document.location = "/")}>
                 <div className={styles.links}>
@@ -193,7 +248,7 @@ class HomeRoot extends Component {
                     </a>
                   </WithHoverSound>
                   <WithHoverSound>
-                    <a href="https://discord.gg/XzrGUY8" rel="noreferrer noopener">
+                    <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
                       <FormattedMessage id="home.community_link" />
                     </a>
                   </WithHoverSound>
@@ -204,8 +259,26 @@ class HomeRoot extends Component {
                   </WithHoverSound>
                 </div>
               </div>
+              <div className={styles.signIn}>
+                {this.state.signedIn ? (
+                  <div>
+                    <span>
+                      <FormattedMessage id="sign-in.as" /> {maskEmail(this.state.email)}
+                    </span>{" "}
+                    <a onClick={this.onLinkClicked(this.signOut)}>
+                      <FormattedMessage id="sign-in.out" />
+                    </a>
+                  </div>
+                ) : (
+                  <a onClick={this.onLinkClicked(this.showSignInDialog)}>
+                    <FormattedMessage id="sign-in.in" />
+                  </a>
+                )}
+              </div>
             </div>
-            <div className={styles.heroContent}>
+            <div
+              className={classNames({ [styles.heroContent]: true, [styles.oculusBrowserHero]: useOculusBrowserFTUE })}
+            >
               <div className={styles.attribution}>
                 Medieval Fantasy Book by{" "}
                 <a
@@ -216,45 +289,71 @@ class HomeRoot extends Component {
                   Pixel
                 </a>
               </div>
-              <div className={styles.container}>
-                <div className={styles.logo}>
-                  <img src={hubLogo} />
-                </div>
-                <div className={styles.title}>
-                  <FormattedMessage id="home.hero_title" />
-                </div>
-                {this.state.environments.length === 0 && (
-                  <div className="loader-wrap">
-                    <div className="loader">
-                      <div className="loader-center" />
+              <div className={styles.heroPanel}>
+                <div className={styles.container}>
+                  <div className={styles.logo}>
+                    <img src={hubLogo} />
+                  </div>
+                  <div className={styles.title}>
+                    <FormattedMessage id="home.hero_title" />
+                  </div>
+                  {useOculusBrowserFTUE && (
+                    <div className={styles.blurb}>
+                      <FormattedMessage id="home.hero_blurb" />
                     </div>
+                  )}
+                  {!useOculusBrowserFTUE &&
+                    this.state.environments.length === 0 && (
+                      <div className="loader-wrap">
+                        <div className="loader">
+                          <div className="loader-center" />
+                        </div>
+                      </div>
+                    )}
+                </div>
+                {useOculusBrowserFTUE ? (
+                  <div className={styles.ctaButtons}>
+                    <button
+                      className={classNames(styles.primaryButton, styles.ctaButton)}
+                      onClick={this.showCreateDialog}
+                    >
+                      <FormattedMessage id="home.create_a_room" />
+                    </button>
+                    <button className={classNames(styles.secondaryButton, styles.ctaButton)} onClick={this.launchTour}>
+                      <FormattedMessage id="home.take_a_tour" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className={styles.create}>
+                    <HubCreatePanel
+                      initialEnvironment={this.props.initialEnvironment}
+                      environments={this.state.environments}
+                    />
                   </div>
                 )}
               </div>
-              <div className={styles.create}>
-                <HubCreatePanel
-                  initialEnvironment={this.props.initialEnvironment}
-                  environments={this.state.environments}
-                />
+              <div className={classNames(styles.heroPanel, styles.rightPanel)}>
+                {useOculusBrowserFTUE &&
+                  showFTUEVideo && (
+                    <div className={styles.heroVideo}>
+                      <video playsInline muted loop autoPlay>
+                        <source src={homeVideoWebM} type="video/webm" />
+                        <source src={homeVideoMp4} type="video/mp4" />
+                      </video>
+                    </div>
+                  )}
+                {(useOculusBrowserFTUE || this.state.environments.length > 1) && (
+                  <div>
+                    <WithHoverSound>
+                      <div className={styles.haveCode}>
+                        <a href="/link">
+                          <FormattedMessage id="home.have_code" />
+                        </a>
+                      </div>
+                    </WithHoverSound>
+                  </div>
+                )}
               </div>
-              {this.state.environments.length > 1 && (
-                <div>
-                  <WithHoverSound>
-                    <div className={styles.joinButton}>
-                      <a href="/link">
-                        <FormattedMessage id="home.join_room" />
-                      </a>
-                    </div>
-                  </WithHoverSound>
-                  <WithHoverSound>
-                    <div className={styles.spokeButton}>
-                      <a href="/spoke">
-                        <FormattedMessage id="home.create_with_spoke" />
-                      </a>
-                    </div>
-                  </WithHoverSound>
-                </div>
-              )}
             </div>
             <div className={styles.footerContent}>
               <div className={styles.links}>
@@ -264,7 +363,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       rel="noopener noreferrer"
                       href="#"
-                      onClick={this.onDialogLinkClicked(this.showJoinUsDialog.bind(this))}
+                      onClick={this.onLinkClicked(this.showJoinUsDialog)}
                     >
                       <FormattedMessage id="home.join_us" />
                     </a>
@@ -274,7 +373,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       rel="noopener noreferrer"
                       href="#"
-                      onClick={this.onDialogLinkClicked(this.showUpdatesDialog.bind(this))}
+                      onClick={this.onLinkClicked(this.showUpdatesDialog)}
                     >
                       <FormattedMessage id="home.get_updates" />
                     </a>
@@ -284,7 +383,7 @@ class HomeRoot extends Component {
                       className={styles.link}
                       rel="noopener noreferrer"
                       href="#"
-                      onClick={this.onDialogLinkClicked(this.showReportDialog.bind(this))}
+                      onClick={this.onLinkClicked(this.showReportDialog)}
                     >
                       <FormattedMessage id="home.report_issue" />
                     </a>

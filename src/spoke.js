@@ -14,7 +14,7 @@ import YouTube from "react-youtube";
 
 import registerTelemetry from "./telemetry";
 
-registerTelemetry();
+registerTelemetry("/spoke", "Spoke Landing Page");
 
 import en from "react-intl/locale-data/en";
 import { lang, messages } from "./utils/i18n";
@@ -135,7 +135,7 @@ class SpokeLanding extends Component {
               <a href="https://github.com/mozillareality/spoke" rel="noopener noreferrer">
                 <FormattedMessage id="home.source_link" />
               </a>
-              <a href="https://discord.gg/XzrGUY8" rel="noreferrer noopener">
+              <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
                 <FormattedMessage id="home.community_link" />
               </a>
               <a href="/" rel="noreferrer noopener">
@@ -179,7 +179,7 @@ class SpokeLanding extends Component {
                       </p>
 
                       <p>
-                        You can also <a href="https://discord.gg/XzrGUY8/">join our community</a> on Discord.
+                        You can also <a href="https://discord.gg/wHmY4nd">join our community</a> on Discord.
                       </p>
                     </div>
                   )}

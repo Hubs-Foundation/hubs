@@ -38,8 +38,6 @@ import "./components/controls-shape-offset";
 
 import registerTelemetry from "./telemetry";
 
-registerTelemetry();
-
 disableiOSZoom();
 
 function mountUI(scene, props = {}) {
@@ -93,6 +91,12 @@ const onReady = async () => {
 
   const res = await fetch(getReticulumFetchUrl(`/api/v1/scenes/${sceneId}`)).then(r => r.json());
   const sceneInfo = res.scenes[0];
+
+  if (sceneInfo.allow_promotion) {
+    registerTelemetry(`/scene/${sceneId}`, `Hubs Scene: ${sceneInfo.title}`);
+  } else {
+    registerTelemetry("/scene", "Hubs Non-Promotable Scene Page");
+  }
 
   const modelUrl = sceneInfo.model_url;
   console.log(`Scene Model URL: ${modelUrl}`);

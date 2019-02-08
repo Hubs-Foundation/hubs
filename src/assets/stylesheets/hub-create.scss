@@ -28,6 +28,8 @@
     position: relative;
     width: 690px;
     height: 460px;
+    display: flex;
+    flex-direction: column;
 
     @media (max-width: 768px) {
       width: 525px;
@@ -45,7 +47,7 @@
 
     @media (max-height: 480px) {
       width: 375px;
-      height: 250px;
+      height: 300px;
     }
 
     :local(.name) {
@@ -97,17 +99,15 @@
     }
 
     :local(.container) {
-      position: absolute;
       width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      bottom: 5%;
+      margin-top: 1em;
     }
 
     :local(.environment) {
-      position: absolute;
       top: 0px;
       left: 0px;
       width: 700px;
@@ -131,7 +131,6 @@
           width: 100%;
           height: 100%;
           object-fit: cover;
-          position: absolute;
           filter: contrast(0.9) brightness(1.1);
         }
 

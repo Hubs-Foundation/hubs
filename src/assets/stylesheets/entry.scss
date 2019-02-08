@@ -8,7 +8,7 @@
   position: relative;
 }
 
-:local(.collapse) {
+:local(.info-button) {
   @extend %fa-icon-button;
   color: $action-color;
   display: inline;
@@ -85,6 +85,10 @@
   height: 100%;
   width: 100%;
 
+  a {
+    text-decoration: none;
+  }
+
   :local(.title) {
     @extend %top-title;
     @extend %glass-text;
@@ -120,7 +124,7 @@
     @extend %default-font;
     font-size: 1.1em;
     color: $action-color;
-    cursor: pointer;
+    text-decoration: none;
     font-weight: bold;
     display: flex;
     align-items: center;
@@ -202,5 +206,30 @@
     label {
       margin-right: 8px;
     }
+  }
+}
+
+:local(.back) {
+  @extend %fa-icon-button;
+
+  display: flex;
+  font-size: 1.0em;
+  font-weight: bold;
+
+  @media (max-width: 768px) {
+    align-self: flex-start;
+    padding-left: 1.5em;
+    padding-bottom: 0.5em;
+    margin: 0;
+  }
+
+  @media (min-width: 768px) {
+    position: absolute;
+    top: 12px;
+    left: 26px;
+  }
+
+  i {
+    margin-right: 18px;
   }
 }

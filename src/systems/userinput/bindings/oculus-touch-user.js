@@ -12,6 +12,8 @@ const rightButton = paths.device.rightOculusTouch.button;
 const rightAxis = paths.device.rightOculusTouch.axis;
 const rightPose = paths.device.rightOculusTouch.pose;
 
+const leftJoyXDeadzoned = `${name}left/joy/x/deadzoned`;
+const leftJoyYDeadzoned = `${name}left/joy/y/deadzoned`;
 const scaledLeftJoyX = `${name}left/scaledJoyX`;
 const scaledLeftJoyY = `${name}left/scaledJoyY`;
 const cursorDrop2 = `${name}right/cursorDrop2`;
@@ -318,19 +320,39 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: {
+        value: leftAxis("joyY")
+      },
+      dest: {
+        value: leftJoyYDeadzoned
+      },
+      xform: xforms.deadzone(0.1)
+    },
+    {
+      src: {
+        value: leftJoyYDeadzoned
+      },
+      dest: {
+        value: scaledLeftJoyY
+      },
+      xform: xforms.scale(-1.5) // horizontal character speed modifier
+    },
+    {
+      src: {
         value: leftAxis("joyX")
+      },
+      dest: {
+        value: leftJoyXDeadzoned
+      },
+      xform: xforms.deadzone(0.1)
+    },
+    {
+      src: {
+        value: leftJoyXDeadzoned
       },
       dest: {
         value: scaledLeftJoyX
       },
       xform: xforms.scale(1.5) // horizontal character speed modifier
-    },
-    {
-      src: {
-        value: leftAxis("joyY")
-      },
-      dest: { value: scaledLeftJoyY },
-      xform: xforms.scale(-1.5) // vertical character speed modifier
     },
     {
       src: {
@@ -384,7 +406,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
         override: "/device/overrides/foo"
       },
       dest: { value: paths.actions.characterAcceleration },
-      xform: xforms.normalize_vec2
+      xform: xforms.copy
     },
     {
       src: { value: paths.device.keyboard.key("shift") },
@@ -492,7 +514,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     {
       src: { value: rightAxis("joyY") },
       dest: { value: paths.actions.cursor.mediaVolumeMod },
-      xform: xforms.scale(-0.001)
+      xform: xforms.scale(-0.01)
     }
   ],
 
@@ -617,6 +639,15 @@ export const oculusTouchUserBindings = addSetsToBindings({
     }
   ],
 
+  [sets.cursorHoldingUI]: [
+    {
+      src: { value: rightTriggerPressed2 },
+      dest: { value: cursorDrop2 },
+      xform: xforms.falling,
+      priority: 5
+    }
+  ],
+
   [sets.cursorHoldingInteractable]: [
     {
       src: { value: rightAxis("joyY") },
@@ -630,15 +661,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 3
     },
     {
-      src: { value: rightTriggerPressed2 },
-      dest: {
-        value: cursorDrop2
-      },
-      xform: xforms.falling,
-      priority: 2
-    },
-    {
-      src: [cursorDrop1],
+      src: [cursorDrop1, cursorDrop2],
       dest: { value: paths.actions.cursor.drop },
       xform: xforms.any,
       priority: 2

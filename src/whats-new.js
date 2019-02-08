@@ -2,9 +2,12 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import InfiniteScroll from "react-infinite-scroller";
 import markdownit from "markdown-it";
+import registerTelemetry from "./telemetry";
 
 import "./assets/stylesheets/whats-new.scss";
 import hubsLogo from "./assets/images/hub-preview-light-no-shadow.png";
+
+registerTelemetry("/whats-new", "Hubs What's New");
 
 function formatDate(value) {
   return value && new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
@@ -94,10 +97,12 @@ class WhatsNew extends Component {
               {this.state.notes.map((note, i) => {
                 return (
                   <div key={i} className="note">
-                    <h2 className={note.merged_at ? "date" : "date-blank"}>{formatDate(note.merged_at)}</h2>
-                    <h2 className="title">
-                      <a href={note.html_url}>{note.title}</a>
-                    </h2>
+                    <div className="note-header">
+                      <h2 className={note.merged_at ? "date" : "date-blank"}>{formatDate(note.merged_at)}</h2>
+                      <h2 className="title">
+                        <a href={note.html_url}>{note.title}</a>
+                      </h2>
+                    </div>
                     {/* Setting HTML generated directly by markdownit, which is safe by default:
                       https://github.com/markdown-it/markdown-it/blob/master/docs/security.md */}
                     <p className="body" dangerouslySetInnerHTML={{ __html: note.body }} />

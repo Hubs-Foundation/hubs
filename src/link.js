@@ -8,7 +8,7 @@ import { connectToReticulum } from "./utils/phoenix-utils";
 import Store from "./storage/store";
 import { detectInHMD } from "./utils/vr-caps-detect.js";
 
-registerTelemetry();
+registerTelemetry("/link", "Hubs Device Link");
 
 const socket = connectToReticulum();
 const store = new Store();

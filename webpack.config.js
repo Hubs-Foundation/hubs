@@ -88,6 +88,7 @@ module.exports = (env, argv) => ({
     scene: path.join(__dirname, "src", "scene.js"),
     link: path.join(__dirname, "src", "link.js"),
     spoke: path.join(__dirname, "src", "spoke.js"),
+    admin: path.join(__dirname, "src", "admin.js"),
     "whats-new": path.join(__dirname, "src", "whats-new.js"),
     "avatar-selector": path.join(__dirname, "src", "avatar-selector.js")
   },
@@ -203,10 +204,10 @@ module.exports = (env, argv) => ({
     minimizer: [new UglifyJsPlugin({ sourceMap: true, uglifyOptions: { compress: { collapse_vars: false } } })],
     splitChunks: {
       cacheGroups: {
-        engine: {
-          test: /([\\/]src[\\/]workers|[\\/]node_modules[\\/](aframe|cannon|three\.js))/,
-          priority: 100,
-          name: "engine",
+        admindeps: {
+          test: /[\\/]node_modules[\\/](@material-ui|material-ui|jss-|ra-|react-admin|react-autosuggest|react-jss|react-redux|react-router-redux|react-themable|redux|redux-|theming)/,
+          priority: 150,
+          name: "admindeps",
           chunks: "all"
         },
         vendors: {
@@ -216,6 +217,12 @@ module.exports = (env, argv) => ({
           }),
           priority: 50,
           name: "vendor",
+          chunks: "all"
+        },
+        engine: {
+          test: /([\\/]src[\\/]workers|[\\/]node_modules[\\/](aframe|cannon|three))/,
+          priority: 100,
+          name: "engine",
           chunks: "all"
         }
       }
@@ -278,6 +285,11 @@ module.exports = (env, argv) => ({
       chunks: ["vendor", "engine", "avatar-selector"],
       inject: "head"
     }),
+    new HTMLWebpackPlugin({
+      filename: "admin.html",
+      template: path.join(__dirname, "src", "admin.html"),
+      chunks: ["vendor", "admindeps", "admin"]
+    }),
     new CopyWebpackPlugin([
       {
         from: "src/assets/images/favicon.ico",
@@ -311,7 +323,10 @@ module.exports = (env, argv) => ({
         NON_CORS_PROXY_DOMAINS: process.env.NON_CORS_PROXY_DOMAINS,
         ASSET_BUNDLE_SERVER: process.env.ASSET_BUNDLE_SERVER,
         EXTRA_ENVIRONMENTS: process.env.EXTRA_ENVIRONMENTS,
-        BUILD_VERSION: process.env.BUILD_VERSION
+        BUILD_VERSION: process.env.BUILD_VERSION,
+        SENTRY_DSN: process.env.SENTRY_DSN,
+        GA_TRACKING_ID: process.env.GA_TRACKING_ID,
+        POSTGREST_SERVER: process.env.POSTGREST_SERVER
       })
     })
   ],

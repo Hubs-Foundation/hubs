@@ -45,17 +45,19 @@ body {
     height: auto;
     min-height: auto;
     padding: 1em 0;
+    flex-direction: column;
   }
 
   :local(.title-and-nav) {
     display: flex;
 
-    @media (max-width: 768px), (max-height: 480px) {
-      justify-content: center;
-    }
-
     @media (max-width: 1024px) {
       flex: 1 1 $header-section-width;
+    }
+
+    @media (max-width: 768px), (max-height: 480px) {
+      justify-content: center;
+      flex: 1;
     }
 
     :local(.links) {
@@ -73,11 +75,31 @@ body {
         font-weight: bold;
         font-size: 1.4em;
         text-decoration: none;
+        white-space: nowrap;
         
         @media (max-width: 768px), (max-height: 480px) {
           margin-top: 0.5em;
         }
       }
+    }
+  }
+
+  :local(.sign-in) {
+    flex: 3;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    @media (max-width: 768px), (max-height: 480px) {
+      flex: 1;
+      justify-content: center;
+      margin-top: 1em;
+    }
+
+    a {
+      text-decoration: underline;
+      font-weight: bold;
+      cursor: pointer;
     }
   }
 }
@@ -149,10 +171,11 @@ body {
 
     @media (max-height: 480px) {
       padding: 1em;
+      padding-bottom: 0;
     }
 
     :local(.logo) {
-      max-width: 350px;
+      max-width: 250px;
 
       img {
         width: 100%;
@@ -185,34 +208,83 @@ body {
     }
   }
 
-  :local(.join-button) {
+  :local(.have-code) {
     display: flex;
     justify-content: center;
 
-    a {
+    a { 
       margin-top: 8px;
-      @extend %action-button;
+      color: black;
+      font-weight: bold;
     }
   }
 
-  :local(.spoke-button) {
+}
+
+:local(.oculus-browser-hero) {
+  flex-direction: column;
+  flex: 450px;
+  background-image: url('../images/home-hero-background.jpg');
+  background-size: cover;
+  padding: 1.5em;
+
+  :local(.attribution) {
+    display: none;
+  }
+  :local(.container) {
+    padding: 0;
+
+    :local(.logo) {
+      align-self: flex-start;
+      margin-left: -25px;
+      margin-bottom: -12px;
+    }
+    :local(.title) {
+      display: block;
+      align-self: flex-start;
+    }
+    :local(.blurb) {
+      white-space: pre;
+      font-size: 17pt;
+      margin: 0.5em 0;
+      margin-bottom: 1em;
+      align-self: flex-start;
+    }
+  }
+  :local(.hero-panel) {
+    flex: 1;
     display: flex;
+    flex-direction: column;
     justify-content: center;
-
-    a {
-      margin-top: 16px;
+  }
+  :local(.cta-buttons) {
+    display: flex;
+    :local(.primary-button) {
       @extend %action-button;
-      background: $spoke-action-color;
+    }
+    :local(.secondary-button) {
+      @extend %action-button-secondary;
+    }
+    :local(.cta-button) {
+      font-size: 14pt;
+      width: 10em;
+      margin-right: 1em;
     }
   }
-
-  :local(.join-button), :local(.spoke-button) {
-    a {
-      @media (max-width: 350px), (max-height: 480px) {
-        font-size: 0.75em;
-        height: 32px;
-      }
+  :local(.rightPanel) {
+    flex: 0;
+  }
+  :local(.hero-video) {
+    flex: 1;
+    display: flex;
+    :local(video) {
+      width: 100%;
     }
+  }
+  :local(.have-code) {
+    justify-content: flex-end;
+    font-size: 14pt;
+    margin-top: -2em;
   }
 }
 
