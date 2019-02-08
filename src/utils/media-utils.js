@@ -303,3 +303,31 @@ export function injectCustomShaderChunks(obj) {
 export function getPromotionTokenForFile(fileId) {
   return window.APP.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
 }
+
+exports.traverseMeshesAndAddShapes = (function() {
+  const matrix = new THREE.Matrix4();
+  const inverse = new THREE.Matrix4();
+  const pos = new THREE.Vector3();
+  const quat = new THREE.Quaternion();
+  const scale = new THREE.Vector3();
+  return function(el, type, margin) {
+    let i = 0;
+    const meshRoot = el.object3DMap.mesh;
+    inverse.getInverse(meshRoot.matrixWorld);
+    meshRoot.traverse(o => {
+      if (o.type === "Mesh" && (!THREE.Sky || o.__proto__ != THREE.Sky.prototype)) {
+        matrix.multiplyMatrices(inverse, o.matrixWorld);
+        matrix.decompose(pos, quat, scale);
+        el.setAttribute("ammo-shape__" + i, {
+          type: type,
+          margin: margin,
+          mergeGeometry: false,
+          offset: { x: pos.x * meshRoot.scale.x, y: pos.y * meshRoot.scale.y, z: pos.z * meshRoot.scale.z },
+          orientation: { x: quat.x, y: quat.y, z: quat.z, w: quat.w }
+        });
+        el.components["ammo-shape__" + i].setMesh(o);
+        i++;
+      }
+    });
+  };
+})();

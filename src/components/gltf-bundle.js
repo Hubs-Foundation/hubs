@@ -1,3 +1,5 @@
+import { traverseMeshesAndAddShapes } from "../utils/media-utils";
+
 // DEPRECATED
 /**
  * Instantiates GLTF models as specified in a bundle JSON.
@@ -30,10 +32,22 @@ AFRAME.registerComponent("gltf-bundle", {
       const src = new URL(asset.src, this.baseURL).href;
       const gltfEl = document.createElement("a-entity");
       gltfEl.setAttribute("gltf-model-plus", { src, useCache: false, inflate: true });
-      loaded.push(new Promise(resolve => gltfEl.addEventListener("model-loaded", resolve)));
+      loaded.push(
+        new Promise(resolve =>
+          gltfEl.addEventListener("model-loaded", e => {
+            resolve(gltfEl);
+          })
+        )
+      );
       this.el.appendChild(gltfEl);
     }
 
-    Promise.all(loaded).then(() => this.el.emit("bundleloaded"));
+    Promise.all(loaded).then(gltfEls => {
+      for (var i = 0; i < gltfEls.length; i++) {
+        const gltfEl = gltfEls[i];
+        traverseMeshesAndAddShapes(gltfEl, "mesh", 0.1);
+      }
+      this.el.emit("bundleloaded");
+    });
   }
 });

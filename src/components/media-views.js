@@ -174,9 +174,13 @@ function fitToTexture(el, texture) {
   const width = Math.min(1.0, 1.0 / ratio);
   const height = Math.min(1.0, ratio);
   el.object3DMap.mesh.scale.set(width, height, 1);
-  el.setAttribute("shape", {
-    shape: "box",
-    halfExtents: { x: width / 2, y: height / 2, z: 0.05 }
+  el.setAttribute("ammo-shape", {
+    autoGenerateShape: false,
+    type: "box",
+    halfExtents: { x: width / 2, y: height / 2, z: 0.05 },
+    margin: 0.1,
+    recenter: true,
+    mergeGeometry: true
   });
 }
 

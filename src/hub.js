@@ -286,6 +286,9 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
       "model-loaded",
       () => {
         environmentScene.emit("bundleloaded");
+        if (!gltfEl.getAttribute("ammo-shape")) {
+          gltfEl.setAttribute("ammo-shape", { type: "mesh", mergeGeometry: true });
+        }
       },
       { once: true }
     );

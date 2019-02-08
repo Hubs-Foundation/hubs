@@ -21,6 +21,7 @@ AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body", el => {
     recenter: true
   });
 });
+AFRAME.GLTFModelPlus.registerComponent("ammo-shape", "ammo-loader");
 AFRAME.GLTFModelPlus.registerComponent("hide-when-quality", "hide-when-quality");
 AFRAME.GLTFModelPlus.registerComponent("light", "light");
 AFRAME.GLTFModelPlus.registerComponent("ambient-light", "ambient-light");

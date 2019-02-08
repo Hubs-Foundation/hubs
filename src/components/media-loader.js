@@ -41,19 +41,31 @@ AFRAME.registerComponent("media-loader", {
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
-    this.shapeAdded = false;
   },
 
-  setShapeAndScale(resize) {
-    const mesh = this.el.getObject3D("mesh");
-    const box = getBox(this.el, mesh);
-    const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
-    mesh.scale.multiplyScalar(scaleCoefficient);
-    const center = new THREE.Vector3();
-    const { min, max } = box;
-    center.addVectors(min, max).multiplyScalar(0.5);
-    mesh.position.sub(center);
-    mesh.matrixNeedsUpdate = true;
+  setScale: (() => {
+    return function(resize) {
+      const mesh = this.el.getObject3D("mesh");
+      const box = getBox(this.el, mesh);
+      const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
+      mesh.scale.multiplyScalar(scaleCoefficient);
+      mesh.matrixNeedsUpdate = true;
+    };
+  })(),
+
+  addShape(type, id) {
+    this.el.setAttribute("ammo-shape__" + id, {
+      autoGenerateShape: true,
+      type: type,
+      recenter: true,
+      mergeGeometry: true
+    });
+  },
+
+  removeShape(id) {
+    if (this.el.getAttribute("ammo-shape__" + id)) {
+      this.el.removeAttribute("ammo-shape__" + id);
+    }
   },
 
   tick(t, dt) {
@@ -82,8 +94,9 @@ AFRAME.registerComponent("media-loader", {
       this.loadingClip.play();
     }
     this.el.setObject3D("mesh", mesh);
-    this.setShapeAndScale(true);
+    this.setScale(true);
     delete this.showLoaderTimeout;
+    this.addShape("box", "loader");
   },
 
   clearLoadingTimeout() {
@@ -93,6 +106,7 @@ AFRAME.registerComponent("media-loader", {
       delete this.loaderMixer;
     }
     delete this.showLoaderTimeout;
+    this.removeShape("loader");
   },
 
   setupHoverableVisuals() {
@@ -199,9 +213,10 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "model-loaded",
           () => {
-            this.clearLoadingTimeout();
-            this.setShapeAndScale(this.data.resize);
-            this.setupHoverableVisuals();
+            this.setScale(this.data.resize);
+            this.onMediaLoaded();
+            this.addShape("hull", "hull");
+            //TODO: maybe use media-utils traverseMeshesAndAddShapes
             addAnimationComponents(this.el);
           },
           { once: true }

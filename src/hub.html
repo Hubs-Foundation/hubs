@@ -140,7 +140,8 @@
                                 networked-audio-analyser
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
-                                ammo-body="type: kinematic; shape: cylinder; autoGenerateShape: false; halfExtents: 0.11 0.10 0.11; offset: 0 0.06 0.04;"
+                                ammo-body="type: kinematic;"
+                                ammo-shape="type: cylinder; autoGenerateShape: false; halfExtents: 0.11 0.10 0.11; offset: 0 0.06 0.04;"
                             ></a-entity>
                         </template>
 
@@ -157,8 +158,7 @@
 
             <template id="static-media">
                 <a-entity
-                    body="type: static; shape: none; mass: 0;"
-                    auto-scale-cannon-physics-body
+                    ammo-body="type: static; mass: 1;"
                     set-sounds-invisible
                 >
                 </a-entity>
@@ -168,7 +168,7 @@
                 <a-entity
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
-                    ammo-body="type: static; shape: hull; mass: 1;"
+                    ammo-body="type: static; mass: 1;"
                     grabbable="constraintComponentName: ammo-constraint"
                     hoverable
                     hoverable-visuals="cursorController: #cursor-controller"
@@ -181,12 +181,11 @@
                 </a-entity>
             </template>
 
-
             <template id="interactable-media">
                 <a-entity
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
-                    ammo-body="type: dynamic; shape: hull; mass: 1; recenter: true;"
+                    ammo-body="type: dynamic; mass: 1;"
                     grabbable="constraintComponentName: ammo-constraint"
                     stretchable="useWorldPosition: true; usePhysics: never"
                     hoverable
@@ -239,7 +238,8 @@
                 <a-entity
                     class="pen interactable"
                     super-networked-interactable="counter: #pen-counter;"
-                    ammo-body="type: dynamic; shape: cylinder; mass: 0.001;"
+                    ammo-body="type: dynamic; mass: 0.001; loadedEvent: model-loaded;"
+                    ammo-shape="type: cylinder; autoGenerateShape: false; halfExtents: 0.02 0.1 0.02;"
                     grabbable="maxGrabbers: 1; constraintComponentName: ammo-constraint;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     hoverable
@@ -282,7 +282,8 @@
                     stretchable
                     camera-tool
                     matrix-auto-update
-                    ammo-body="type: dynamic; shape: box; mass: 0.001; autoGenerateShape: false; halfExtents: 0.22 0.145 0.1; offset: 0 0.02 0;"
+                    ammo-body="type: dynamic; mass: 0.001;"
+                    ammo-shape="type: box; autoGenerateShape: false; halfExtents: 0.22 0.145 0.1; offset: 0 0.02 0;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     super-networked-interactable="counter: #camera-counter;"
                     position-at-box-shape-border="target:.camera-menu"
@@ -414,7 +415,8 @@
             radius="0.02"
             segments-width="9"
             segments-height="9"
-            ammo-body="shape: sphere; type: kinematic; collisionFlags: 4; autoUpdateScale: false; autoGenerateShape: false;"
+            ammo-body="type: kinematic; collisionFlags: 4; autoUpdateScale: false;"
+            ammo-shape="type: sphere; sphereRadius: 0.02; autoGenerateShape: false;"
             super-hands="
                 colliderEvent: raycaster-intersection;
                 colliderEndEvent: raycaster-intersection-cleared;
@@ -659,7 +661,7 @@
         <!-- Environment -->
         <a-entity
             id="environment-root"
-            ammo-body="type: static; mass: 0; shape: mesh; margin: 0.1;"
+            ammo-body="type: static; mass: 0;"
             nav-mesh-helper
         >
             <a-entity id="environment-scene"></a-entity>
