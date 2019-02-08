@@ -4,9 +4,12 @@ import { injectIntl, FormattedMessage } from "react-intl";
 //import { SCHEMA } from "../storage/store";
 import styles from "../assets/stylesheets/media-browser.scss";
 import classNames from "classnames";
-import hubLogo from "../assets/images/hub-preview-light-no-shadow.png";
 import { scaledThumbnailUrlFor } from "../utils/media-utils";
 import { pushHistoryPath } from "../utils/history";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
+import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
+import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 class MediaBrowser extends Component {
   static propTypes = {
@@ -41,6 +44,8 @@ class MediaBrowser extends Component {
   };
 
   handleQueryUpdated = query => {
+    this.setState({ result: null });
+
     if (this._sendQueryTimeout) {
       clearTimeout(this._sendQueryTimeout);
     }
@@ -71,46 +76,66 @@ class MediaBrowser extends Component {
     pushHistoryPath(this.props.history, "/", searchParams.toString());
   };
 
+  handlePager = delta => {
+    this.setState({ result: null });
+    this.props.mediaSearchStore.pageNavigate(delta);
+    this.browserDiv.scrollTop = 0;
+  };
+
   render() {
-    //const { formatMessage } = this.props.intl;
+    const { formatMessage } = this.props.intl;
     const hasNext = this.state.result && this.state.result.meta.page < this.state.result.meta.total_pages;
 
     const hasPrevious = this.state.result && this.state.result.meta.page > 1;
 
     return (
-      <div className={styles.mediaBrowser}>
+      <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
         <div className={classNames([styles.box, styles.darkened])}>
           <div className={styles.header}>
             <div className={styles.headerLeft} />
-            <div className={styles.narrowTitle}>
-              <FormattedMessage id="media-browser.header-scenes" />
-            </div>
-            <div className={styles.logo}>
-              <img src={hubLogo} />
+            <div className={styles.headerCenter}>
+              <div className={styles.search}>
+                <i>
+                  <FontAwesomeIcon icon={faSearch} />
+                </i>
+                <input
+                  type="text"
+                  placeholder={formatMessage({
+                    id: `media-browser.search-placeholder.${this.state.result ? this.state.result.meta.source : "base"}`
+                  })}
+                  value={this.state.query}
+                  onChange={e => this.handleQueryUpdated(e.target.value)}
+                />
+              </div>
             </div>
             <div className={styles.headerRight}>
-              <button onClick={() => this.close()}>
+              <a onClick={() => this.close()}>
                 <span>×</span>
-              </button>
+              </a>
             </div>
-          </div>
-          <div className={styles.title}>
-            <FormattedMessage id="media-browser.header-scenes" />
           </div>
 
           <div className={styles.body}>
-            <div className={styles.pager}>
-              {hasPrevious && <a onClick={() => this.props.mediaSearchStore.pageNavigate(-1)}>Previous</a>}
-              {hasNext && <a onClick={() => this.props.mediaSearchStore.pageNavigate(1)}>Next</a>}
-            </div>
-            <input
-              type="text"
-              placeholder="Search"
-              value={this.state.query}
-              onChange={e => this.handleQueryUpdated(e.target.value)}
-              required
-            />
-            <div className={styles.tiles}>{this.state.result && this.state.result.entries.map(this.entryToTile)}</div>
+            {this.state.result && <div className={styles.tiles}>{this.state.result.entries.map(this.entryToTile)}</div>}
+
+            {this.state.result &&
+              (hasNext || hasPrevious) && (
+                <div className={styles.pager}>
+                  <a
+                    className={classNames({ [styles.previousPage]: true, [styles.pagerButtonDisabled]: !hasPrevious })}
+                    onClick={() => this.handlePager(-1)}
+                  >
+                    <FontAwesomeIcon icon={faAngleLeft} />
+                  </a>
+                  <div className={styles.pageNumber}>{this.state.result.meta.page}</div>
+                  <a
+                    className={classNames({ [styles.nextPage]: true, [styles.pagerButtonDisabled]: !hasNext })}
+                    onClick={() => this.handlePager(1)}
+                  >
+                    <FontAwesomeIcon icon={faAngleRight} />
+                  </a>
+                </div>
+              )}
           </div>
         </div>
       </div>

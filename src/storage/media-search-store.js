@@ -66,6 +66,8 @@ export default class MediaSearchStore extends EventTarget {
       searchParams.delete("filter");
     }
 
+    searchParams.delete("page");
+
     pushHistoryPath(this.history, location.pathname, searchParams.toString());
   };
 
