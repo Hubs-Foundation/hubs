@@ -218,6 +218,74 @@ body {
       font-weight: bold;
     }
   }
+
+}
+
+:local(.oculus-browser-hero) {
+  flex-direction: column;
+  flex: 450px;
+  background-image: url('../images/home-hero-background.jpg');
+  background-size: cover;
+  padding: 1.5em;
+
+  :local(.attribution) {
+    display: none;
+  }
+  :local(.container) {
+    padding: 0;
+
+    :local(.logo) {
+      align-self: flex-start;
+      margin-left: -25px;
+      margin-bottom: -12px;
+    }
+    :local(.title) {
+      display: block;
+      align-self: flex-start;
+    }
+    :local(.blurb) {
+      white-space: pre;
+      font-size: 17pt;
+      margin: 0.5em 0;
+      margin-bottom: 1em;
+      align-self: flex-start;
+    }
+  }
+  :local(.hero-panel) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  :local(.cta-buttons) {
+    display: flex;
+    :local(.primary-button) {
+      @extend %action-button;
+    }
+    :local(.secondary-button) {
+      @extend %action-button-secondary;
+    }
+    :local(.cta-button) {
+      font-size: 14pt;
+      width: 10em;
+      margin-right: 1em;
+    }
+  }
+  :local(.rightPanel) {
+    flex: 0;
+  }
+  :local(.hero-video) {
+    flex: 1;
+    display: flex;
+    :local(video) {
+      width: 100%;
+    }
+  }
+  :local(.have-code) {
+    justify-content: flex-end;
+    font-size: 14pt;
+    margin-top: -2em;
+  }
 }
 
 :local(.footer-content) {
