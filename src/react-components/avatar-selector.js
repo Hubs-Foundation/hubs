@@ -98,6 +98,28 @@ class AvatarSelector extends Component {
     });
   }
 
+  componentDidUpdate(prevProps) {
+    if (this.props.avatarId !== prevProps.avatarId) {
+      // HACK - animation ought to restart the animation when the `to` attribute changes, but it doesn't
+      // so we need to force it here.
+      const currRot = this.animation.getAttribute("rotation");
+      const currY = currRot.y;
+      const toRot = this.animation
+        .getAttribute("animation")
+        .to.split(" ")
+        .map(Number);
+      const toY = toRot[1];
+      const step = 360.0 / this.props.avatars.length;
+      const brokenlyBigRotation = Math.abs(toY - currY) > 3 * step;
+      let fromY = currY;
+      if (brokenlyBigRotation) {
+        // Rotation in Y wrapped around 360. Adjust the "from" to prevent a dramatic rotation
+        fromY = currY < toY ? currY + 360 : currY - 360;
+      }
+      this.animation.setAttribute("animation", "from", `${currRot.x} ${fromY} ${currRot.z}`);
+    }
+  }
+
   componentDidMount() {
     // <a-scene> component not initialized until scene element mounted and loaded.
     this.scene.addEventListener("loaded", () => {
@@ -121,7 +143,7 @@ class AvatarSelector extends Component {
       <a-entity key={avatar.id} rotation={`0 ${(360 * -i) / this.props.avatars.length} 0`}>
         <a-entity
           position="0 0 5"
-          gltf-model-plus={`src: #${avatar.id}; inflate: true`}
+          gltf-model-plus={`src: #${avatar.id}`}
           animation={`property: rotation; dur: 12000; from: 0.5 0.5 0.5; to: 0 ${
             this.getAvatarIndex() === i ? 360 : 0
           } 0; loop: true;`}
@@ -139,6 +161,7 @@ class AvatarSelector extends Component {
           <a-assets>{avatarAssets}</a-assets>
 
           <a-entity
+            ref={anm => (this.animation = anm)}
             rotation={`0 ${initialRotation} 0`}
             animation={`property: rotation; dur: 2000; easing: easeOutQuad; to: 0 ${toRotation} 0;`}
           >
