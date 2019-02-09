@@ -14,9 +14,8 @@ AFRAME.registerComponent("ambient-light", {
 
   update(prevData) {
     if (this.data.color !== prevData.color) {
-      const color = new THREE.Color(this.data.color);
-      this.rendererSystem.applyColorCorrection(color);
-      this.light.color.copy(color);
+      this.light.color.set(this.data.color);
+      this.rendererSystem.applyColorCorrection(this.light.color);
     }
 
     if (this.data.intensity !== prevData.intensity) {
