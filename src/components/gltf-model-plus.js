@@ -320,7 +320,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       if (!src) {
         if (this.inflatedEl) {
           console.warn("gltf-model-plus set to an empty source, unloading inflated model.");
-          this.removeInflatedEl();
+          this.disposeLastInflatedEl();
         }
         return;
       }
@@ -332,7 +332,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       if (src != this.lastSrc) return;
 
       // If we had inflated something already before, clean that up
-      this.removeInflatedEl();
+      this.disposeLastInflatedEl();
 
       this.model = gltf.scene || gltf.scenes[0];
       this.model.animations = gltf.animations;
@@ -340,8 +340,6 @@ AFRAME.registerComponent("gltf-model-plus", {
       if (gltf.animations.length > 0) {
         this.el.setAttribute("animation-mixer", {});
         this.el.components["animation-mixer"].initMixer(gltf.animations);
-      } else {
-        this.el.removeAttribute("animation-mixer");
       }
 
       let object3DToSet = this.model;
@@ -417,7 +415,7 @@ AFRAME.registerComponent("gltf-model-plus", {
     }
   },
 
-  removeInflatedEl() {
+  disposeLastInflatedEl() {
     if (this.inflatedEl) {
       this.inflatedEl.parentNode.removeChild(this.inflatedEl);
 
@@ -433,6 +431,8 @@ AFRAME.registerComponent("gltf-model-plus", {
       });
 
       delete this.inflatedEl;
+
+      this.el.removeAttribute("animation-mixer");
     }
   }
 });
