@@ -11,10 +11,10 @@ AFRAME.registerComponent("spawn-controller", {
     loadedEvent: { type: "string" }
   },
   init() {
-    this.onLoad = this.onLoad.bind(this);
-    this.data.target.addEventListener(this.data.loadedEvent, this.onLoad);
+    this.moveToSpawnPoint = this.moveToSpawnPoint.bind(this);
+    this.data.target.addEventListener(this.data.loadedEvent, this.moveToSpawnPoint);
   },
-  onLoad() {
+  moveToSpawnPoint() {
     const spawnPoints = document.querySelectorAll("[spawn-point]");
 
     if (spawnPoints.length === 0) {
