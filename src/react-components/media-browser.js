@@ -84,9 +84,8 @@ class MediaBrowser extends Component {
 
   render() {
     const { formatMessage } = this.props.intl;
-    const hasNext = this.state.result && this.state.result.meta.page < this.state.result.meta.total_pages;
-
-    const hasPrevious = this.state.result && this.state.result.meta.page > 1;
+    const hasNext = !!this.state.result.meta.next_cursor;
+    const hasPrevious = true;
 
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
@@ -144,7 +143,6 @@ class MediaBrowser extends Component {
 
   entryToTile = (entry, idx) => {
     const imageSrc = entry.images.preview;
-
     const creator = entry.attributions && entry.attributions.creator;
 
     return (
@@ -152,15 +150,27 @@ class MediaBrowser extends Component {
         <div className={styles.image}>
           <img src={scaledThumbnailUrlFor(imageSrc, 244, 350)} />
         </div>
-        <div className={styles.info}>
-          <div className={styles.name}>{entry.name}</div>
-          {creator && (
-            <div className={styles.creator}>
-              <FormattedMessage id="media-browser.creator-prefix" />
-              &nbsp;{creator}
-            </div>
-          )}
-        </div>
+        {!entry.type.endsWith("_image") && (
+          <div className={styles.info}>
+            <div className={styles.name}>{entry.name}</div>
+            {creator &&
+              !creator.name && (
+                <div className={styles.creator}>
+                  <FormattedMessage id="media-browser.creator-prefix" />
+                  &nbsp;{creator}
+                </div>
+              )}
+            {creator &&
+              creator.name && (
+                <div className={styles.creator}>
+                  <FormattedMessage id="media-browser.creator-prefix" />
+                  &nbsp;<a href={creator.url} target="_blank" rel="noopener noreferrer">
+                    {creator.name}
+                  </a>
+                </div>
+              )}
+          </div>
+        )}
       </div>
     );
   };
