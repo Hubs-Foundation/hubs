@@ -568,7 +568,7 @@ class UIRoot extends Component {
   };
 
   shouldShowHmdMicWarning = () => {
-    if (AFRAME.utils.device.isMobile()) return false;
+    if (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo()) return false;
     if (!this.state.enterInVR) return false;
     if (!this.hasHmdMicrophone()) return false;
 
@@ -597,7 +597,12 @@ class UIRoot extends Component {
 
   onAudioReadyButton = () => {
     // Disable full screen on iOS, since Safari's fullscreen mode does not let you prevent native pinch-to-zoom gestures.
-    if (AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isIOS() && !this.state.enterInVR && screenfull.enabled) {
+    if (
+      (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo()) &&
+      !AFRAME.utils.device.isIOS() &&
+      !this.state.enterInVR &&
+      screenfull.enabled
+    ) {
       screenfull.request();
     }
 
@@ -1019,8 +1024,9 @@ class UIRoot extends Component {
     const micClip = {
       clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)`
     };
+    const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo();
     const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
-    const subtitleId = AFRAME.utils.device.isMobile() ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
+    const subtitleId = isMobile ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
     return (
       <div className="audio-setup-panel">
         <div onClick={() => this.props.history.goBack()} className={entryStyles.back}>
@@ -1035,7 +1041,7 @@ class UIRoot extends Component {
             <FormattedMessage id="audio.title" />
           </div>
           <div className="audio-setup-panel__subtitle">
-            {(AFRAME.utils.device.isMobile() || this.state.enterInVR) && <FormattedMessage id={subtitleId} />}
+            {(isMobile || this.state.enterInVR) && <FormattedMessage id={subtitleId} />}
           </div>
           <div className="audio-setup-panel__levels">
             <div className="audio-setup-panel__levels__icon">
