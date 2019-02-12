@@ -112,7 +112,7 @@
       }
 
       :local(.tile) {
-        margin: 8px;
+        margin: 16px 8px;
         cursor: pointer;
 
         :local(.info) {
@@ -126,13 +126,28 @@
             white-space: nowrap;
           }
 
-          :local(.creator) {
+          :local(.attribution) {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             font-size: 0.8em;
             font-weight: bold;
-            color: $grey-text;
+            color: $dark-grey-text;
             text-overflow: ellipsis;
             overflow: hidden;
             white-space: nowrap;
+          }
+
+          :local(.creator) {
+            a {
+              color: $dark-grey-text;
+            }
+          }
+
+          :local(.publisher) {
+            a {
+              color: $dark-grey-text;
+            }
           }
         }
 

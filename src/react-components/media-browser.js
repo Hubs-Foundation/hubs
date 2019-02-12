@@ -8,7 +8,14 @@ import { pushHistoryPath } from "../utils/history";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
+import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+const PUBLISHER_FOR_ENTRY_TYPE = {
+  sketchfab_model: "Sketchfab",
+  poly_model: "Google Poly",
+  twitch_stream: "Twitch"
+};
 
 class MediaBrowser extends Component {
   static propTypes = {
@@ -84,7 +91,7 @@ class MediaBrowser extends Component {
 
   render() {
     const { formatMessage } = this.props.intl;
-    const hasNext = !!this.state.result.meta.next_cursor;
+    const hasNext = this.state.result && !!this.state.result.meta.next_cursor;
     const hasPrevious = true;
 
     return (
@@ -154,35 +161,47 @@ class MediaBrowser extends Component {
     const imageAspect = isImage ? entry.images.preview.width / entry.images.preview.height : 16.0 / 9.0;
     const imageWidth = Math.floor(imageAspect * imageHeight);
 
+    const publisherName =
+      (entry.attributions.publisher && entry.attributions.publisher.url) || PUBLISHER_FOR_ENTRY_TYPE[entry.type];
+
     return (
-      <div
-        style={{ width: `${imageWidth}px` }}
-        onClick={() => this.handleEntryClicked(entry)}
-        className={styles.tile}
-        key={`${entry.id}_${idx}`}
-      >
-        <div className={styles.image} style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}>
+      <div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`${entry.id}_${idx}`}>
+        <div
+          onClick={() => this.handleEntryClicked(entry)}
+          className={styles.image}
+          style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
+        >
           <img src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)} />
         </div>
         {!entry.type.endsWith("_image") && (
           <div className={styles.info}>
-            <div className={styles.name}>{entry.name}</div>
-            {creator &&
-              !creator.name && (
-                <div className={styles.creator}>
-                  <FormattedMessage id="media-browser.creator-prefix" />
-                  &nbsp;{creator}
-                </div>
-              )}
-            {creator &&
-              creator.name && (
-                <div className={styles.creator}>
-                  <FormattedMessage id="media-browser.creator-prefix" />
-                  &nbsp;<a href={creator.url} target="_blank" rel="noopener noreferrer">
-                    {creator.name}
+            <div className={styles.name} onClick={() => this.handleEntryClicked(entry)}>
+              {entry.name}
+            </div>
+            <div className={styles.attribution}>
+              <div className={styles.creator}>
+                <FormattedMessage id={`media-browser.creator-prefix.${entry.type}`} />
+                {creator && !creator.name && <span>{creator}</span>}
+                {creator && creator.name && !creator.url && <span>{creator.name}</span>}
+                {creator &&
+                  creator.name &&
+                  creator.url && (
+                    <a href={creator.url} target="_blank" rel="noopener noreferrer">
+                      {creator.name}
+                    </a>
+                  )}
+              </div>
+              {publisherName && (
+                <div className={styles.publisher}>
+                  <i>
+                    <FontAwesomeIcon icon={faExternalLinkAlt} />
+                  </i>
+                  &nbsp;<a href={entry.url} target="_blank" rel="noopener noreferrer">
+                    {publisherName}
                   </a>
                 </div>
               )}
+            </div>
           </div>
         )}
       </div>
