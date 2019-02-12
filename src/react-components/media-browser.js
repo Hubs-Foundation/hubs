@@ -86,7 +86,6 @@ class MediaBrowser extends Component {
     const { formatMessage } = this.props.intl;
     const hasNext = !!this.state.result.meta.next_cursor;
     const hasPrevious = true;
-    const flowResult = this.state.result && ["bing_images", "tenor"].includes(this.state.result.meta.source);
 
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
@@ -116,11 +115,7 @@ class MediaBrowser extends Component {
           </div>
 
           <div className={styles.body}>
-            {this.state.result && (
-              <div className={classNames({ [styles.tiles]: !flowResult, [styles.flowTiles]: flowResult })}>
-                {this.state.result.entries.map(this.entryToTile)}
-              </div>
-            )}
+            {this.state.result && <div className={styles.tiles}>{this.state.result.entries.map(this.entryToTile)}</div>}
 
             {this.state.result &&
               (hasNext || hasPrevious) && (
@@ -149,16 +144,23 @@ class MediaBrowser extends Component {
   entryToTile = (entry, idx) => {
     const imageSrc = entry.images.preview.url;
     const creator = entry.attributions && entry.attributions.creator;
-    const isFlowImage = ["bing_image", "tenor_image"].includes(entry.type);
+    const isImage = entry.type.endsWith("_image");
 
     // Doing breakpointing here, so we can have proper image placeholder based upon dynamic aspect ratio
     const clientWidth = window.innerWidth;
-    const imageHeight = clientWidth < 1079 ? (clientWidth < 321 ? 100 : 125) : 285;
-    const imageAspect = entry.images.preview.width / entry.images.preview.height;
-    const imageWidth = Math.floor(isFlowImage ? imageAspect * imageHeight : 244);
+    const imageHeight = clientWidth < 1079 ? (clientWidth < 321 ? 100 : 125) : 200;
+
+    // Aspect ratio can vary per image if its an image result, o/w assume 720p
+    const imageAspect = isImage ? entry.images.preview.width / entry.images.preview.height : 16.0 / 9.0;
+    const imageWidth = Math.floor(imageAspect * imageHeight);
 
     return (
-      <div onClick={() => this.handleEntryClicked(entry)} className={styles.tile} key={`${entry.id}_${idx}`}>
+      <div
+        style={{ width: `${imageWidth}px` }}
+        onClick={() => this.handleEntryClicked(entry)}
+        className={styles.tile}
+        key={`${entry.id}_${idx}`}
+      >
         <div className={styles.image} style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}>
           <img src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)} />
         </div>

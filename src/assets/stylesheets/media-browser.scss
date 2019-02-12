@@ -101,25 +101,17 @@
     width: 100%;
 
     :local(.tiles) {
-      margin: 24px 0 0 0;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-
-      @media (max-width: 1590px) {
-        grid-template-columns: 1fr 1fr 1fr 1fr;
-      }
+      margin: 24px 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
 
       @media (min-width: 700px) {
         margin-top: 24px;
       }
 
-      @media (max-width: 701px) {
-        grid-template-columns: 1fr 1fr;
-      }
-
       :local(.tile) {
-        width: 244px;
-        height: 350px;
         margin: 8px;
         cursor: pointer;
 
@@ -146,53 +138,7 @@
 
         :local(.image) {
           width: 100%;
-          height: 285px;
 
-          @media (max-width: 1079px) {
-            height: 181px;
-          }
-
-          @media (max-width: 321px) {
-            height: 149px;
-          }
-
-          img {
-            border-radius: 12px;
-            width: 100%;
-            height: 100%;
-            filter: brightness(1.1) contrast(1.1);
-          }
-        }
-
-        @media (max-width: 1079px) {
-          width: 155px;
-          height: 224px;
-        }
-
-        @media (max-width: 321px) {
-          width: 124px;
-          height: 195px;
-        }
-      }
-    }
-
-    :local(.flow-tiles) {
-      margin: 24px 8px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-
-      @media (min-width: 700px) {
-        margin-top: 24px;
-      }
-
-      :local(.tile) {
-        margin: 8px;
-        cursor: pointer;
-
-        :local(.image) {
-          width: 100%;
           img {
             border-radius: 12px;
             width: 100%;
