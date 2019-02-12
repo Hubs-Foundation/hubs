@@ -54,11 +54,10 @@ AFRAME.GLTFModelPlus.registerComponent("water", "water");
 AFRAME.GLTFModelPlus.registerComponent("scale-audio-feedback", "scale-audio-feedback");
 AFRAME.GLTFModelPlus.registerComponent("animation-mixer", "animation-mixer");
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
-AFRAME.GLTFModelPlus.registerComponent("shape", "shape");
 AFRAME.GLTFModelPlus.registerComponent("heightfield", "heightfield");
 AFRAME.GLTFModelPlus.registerComponent(
   "box-collider",
-  "shape",
+  "ammo-shape",
   (() => {
     const euler = new THREE.Euler();
     return (el, componentName, componentData) => {
@@ -66,7 +65,9 @@ AFRAME.GLTFModelPlus.registerComponent(
       euler.set(rotation.x, rotation.y, rotation.z);
       const orientation = new THREE.Quaternion().setFromEuler(euler);
       el.setAttribute(componentName, {
-        shape: "box",
+        type: "box",
+        autoGenerateShape: false,
+        mergeGeometry: false,
         offset: componentData.position,
         halfExtents: { x: scale.x / 2, y: scale.y / 2, z: scale.z / 2 },
         orientation

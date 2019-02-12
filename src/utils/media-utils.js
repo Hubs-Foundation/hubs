@@ -317,7 +317,9 @@ exports.traverseMeshesAndAddShapes = (function() {
   const pos = new THREE.Vector3();
   const quat = new THREE.Quaternion();
   const scale = new THREE.Vector3();
+  const shapePrefix = "ammo-shape__env";
   return function(el, type, margin) {
+    const shapes = [];
     let i = 0;
     const meshRoot = el.object3DMap.mesh;
     inverse.getInverse(meshRoot.matrixWorld);
@@ -325,16 +327,19 @@ exports.traverseMeshesAndAddShapes = (function() {
       if (o.type === "Mesh" && (!THREE.Sky || o.__proto__ != THREE.Sky.prototype)) {
         matrix.multiplyMatrices(inverse, o.matrixWorld);
         matrix.decompose(pos, quat, scale);
-        el.setAttribute("ammo-shape__" + i, {
+        el.setAttribute(shapePrefix + i, {
           type: type,
           margin: margin,
           mergeGeometry: false,
           offset: { x: pos.x * meshRoot.scale.x, y: pos.y * meshRoot.scale.y, z: pos.z * meshRoot.scale.z },
           orientation: { x: quat.x, y: quat.y, z: quat.z, w: quat.w }
         });
-        el.components["ammo-shape__" + i].setMesh(o);
+        el.components[shapePrefix + i].setMesh(o);
+        shapes.push(shapePrefix + i);
+        console.log("adding", el.components[shapePrefix + i]);
         i++;
       }
     });
+    return shapes;
   };
 })();

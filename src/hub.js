@@ -279,6 +279,7 @@ async function updateUIForHub(hub) {
     .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
 }
 
+let shapes = null;
 async function updateEnvironmentForHub(hub) {
   let sceneUrl;
   let isLegacyBundle; // Deprecated
@@ -322,7 +323,7 @@ async function updateEnvironmentForHub(hub) {
       "model-loaded",
       () => {
         //TODO: check if the environment was made with spoke to determine if a shape should be added
-        traverseMeshesAndAddShapes(environmentEl, "mesh", 0.1);
+        shapes = traverseMeshesAndAddShapes(environmentEl, "mesh", 0.1);
       },
       { once: true }
     );
@@ -341,7 +342,11 @@ async function updateEnvironmentForHub(hub) {
           environmentEl.addEventListener(
             "model-loaded",
             () => {
-              traverseMeshesAndAddShapes(environmentEl, "mesh", 0.1);
+              while (shapes.length > 0) {
+                console.log("removing", shapes[0]);
+                environmentEl.removeAttribute(shapes.pop());
+              }
+              shapes = traverseMeshesAndAddShapes(environmentEl, "mesh", 0.1);
               document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint();
             },
             { once: true }
