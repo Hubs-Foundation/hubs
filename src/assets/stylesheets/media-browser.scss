@@ -30,8 +30,9 @@
       height: 50px;
 
       @media(max-width: 700px) {
-        width: 325px;
+        flex: 10;
         height: 35px;
+        width: auto;
       }
 
       border: 2px solid $light-grey;
@@ -57,7 +58,6 @@
         resize: none;
         background-color: transparent;
         color: black;
-        padding: 8px 1.25em;
         line-height: 28px;
         font-size: 1.1em;
         width: 100%;
@@ -82,11 +82,15 @@
     flex: 1 1 100%;
     height: 100%;
     max-width: 1680px;
+
+    @media (max-width: 700px) {
+      width: 100%;
+    }
   }
 
   :local(.header) {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     width: 100%;
     margin: 32px;
     margin-bottom: 24px;
@@ -95,10 +99,6 @@
 
   :local(.body) {
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
 
     :local(.tiles) {
       margin: 24px 0 0 0;
@@ -176,6 +176,33 @@
       }
     }
 
+    :local(.flow-tiles) {
+      margin: 24px 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+
+      @media (min-width: 700px) {
+        margin-top: 24px;
+      }
+
+      :local(.tile) {
+        margin: 8px;
+        cursor: pointer;
+
+        :local(.image) {
+          width: 100%;
+          img {
+            border-radius: 12px;
+            width: 100%;
+            height: 100%;
+            filter: brightness(1.1) contrast(1.1);
+          }
+        }
+      }
+    }
+
     :local(.pager) {
       display: flex;
       justify-content: center;
@@ -216,6 +243,7 @@
 
     @media (max-width: 700px) {
       width: 50px;
+      height: 35px;
     }
   }
 
@@ -228,10 +256,6 @@
     font-size: 1.5em;
 
     a {
-      @media(max-width: 700px) {
-        display: none;
-      }
-
       font-weight: bold;
       font-size: 1.8em;
       color: black;
@@ -239,6 +263,7 @@
 
     @media (max-width: 700px) {
       width: 50px;
+      height: 35px;
     }
   }
 }
