@@ -100,11 +100,14 @@ class AvatarSelector extends Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.avatarId !== prevProps.avatarId) {
-      // HACK - a-animation ought to restart the animation when the `to` attribute changes, but it doesn't
+      // HACK - animation ought to restart the animation when the `to` attribute changes, but it doesn't
       // so we need to force it here.
-      const currRot = this.animation.parentNode.getAttribute("rotation");
+      const currRot = this.animation.getAttribute("rotation");
       const currY = currRot.y;
-      const toRot = this.animation.getAttribute("to").split(" ");
+      const toRot = this.animation
+        .getAttribute("animation")
+        .to.split(" ")
+        .map(Number);
       const toY = toRot[1];
       const step = 360.0 / this.props.avatars.length;
       const brokenlyBigRotation = Math.abs(toY - currY) > 3 * step;
@@ -113,18 +116,19 @@ class AvatarSelector extends Component {
         // Rotation in Y wrapped around 360. Adjust the "from" to prevent a dramatic rotation
         fromY = currY < toY ? currY + 360 : currY - 360;
       }
-      this.animation.setAttribute("from", `${currRot.x} ${fromY} ${currRot.z}`);
-      this.animation.stop();
-      this.animation.handleMixinUpdate();
-      this.animation.start();
+      this.animation.setAttribute("animation", "from", `${currRot.x} ${fromY} ${currRot.z}`);
     }
   }
 
   componentDidMount() {
     // <a-scene> component not initialized until scene element mounted and loaded.
     this.scene.addEventListener("loaded", () => {
-      this.scene.setAttribute("renderer", { gammaOutput: true, sortObjects: true, physicallyCorrectLights: true });
-      this.scene.setAttribute("gamma-factor", "");
+      this.scene.setAttribute("renderer", {
+        gammaOutput: true,
+        sortObjects: true,
+        physicallyCorrectLights: true,
+        colorManagement: true
+      });
       this.scene.setAttribute("shadow", { type: "pcfsoft", enabled: window.APP.quality !== "low" });
       this.scene.setAttribute("environment-map", "");
     });
@@ -137,14 +141,13 @@ class AvatarSelector extends Component {
     const avatarData = this.state.avatarIndices.map(i => [this.props.avatars[i], i]);
     const avatarEntities = avatarData.map(([avatar, i]) => (
       <a-entity key={avatar.id} rotation={`0 ${(360 * -i) / this.props.avatars.length} 0`}>
-        <a-entity position="0 0 5" gltf-model-plus={`src: #${avatar.id}; inflate: true`}>
-          <a-animation
-            attribute="rotation"
-            dur="12000"
-            to={`0 ${this.getAvatarIndex() === i ? 360 : 0} 0`}
-            repeat="indefinite"
-          />
-        </a-entity>
+        <a-entity
+          position="0 0 5"
+          gltf-model-plus={`src: #${avatar.id}`}
+          animation={`property: rotation; dur: 12000; from: 0.5 0.5 0.5; to: 0 ${
+            this.getAvatarIndex() === i ? 360 : 0
+          } 0; loop: true;`}
+        />
       </a-entity>
     ));
 
@@ -157,14 +160,11 @@ class AvatarSelector extends Component {
         <a-scene vr-mode-ui="enabled: false" ref={sce => (this.scene = sce)}>
           <a-assets>{avatarAssets}</a-assets>
 
-          <a-entity rotation={`0 ${initialRotation} 0`}>
-            <a-animation
-              ref={anm => (this.animation = anm)}
-              attribute="rotation"
-              dur="2000"
-              easing="ease-out"
-              to={`0 ${toRotation} 0`}
-            />
+          <a-entity
+            ref={anm => (this.animation = anm)}
+            rotation={`0 ${initialRotation} 0`}
+            animation={`property: rotation; dur: 2000; easing: easeOutQuad; to: 0 ${toRotation} 0;`}
+          >
             {avatarEntities}
           </a-entity>
 

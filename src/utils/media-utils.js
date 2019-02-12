@@ -81,7 +81,7 @@ export const resolveUrl = async (url, index) => {
   return resolved;
 };
 
-export const getCustomGLTFParserURLResolver = gltfUrl => (url, path) => {
+export const getCustomGLTFParserURLResolver = gltfUrl => url => {
   if (typeof url !== "string" || url === "") return "";
   if (/^(https?:)?\/\//i.test(url)) return url;
   if (/^data:.*,.*$/i.test(url)) return url;
@@ -96,12 +96,13 @@ export const getCustomGLTFParserURLResolver = gltfUrl => (url, path) => {
       const originalUrlParts = originalUrl.split("/");
 
       // Drop the .gltf filename
-      const assetUrl = originalUrlParts.slice(0, originalUrlParts.length - 1).join("/") + "/" + url;
+      const path = new URL(url).pathname;
+      const assetUrl = originalUrlParts.slice(0, originalUrlParts.length - 1).join("/") + "/" + path;
       return corsProxyPrefix + assetUrl;
     }
   }
 
-  return path + url;
+  return url;
 };
 
 export const guessContentType = url => {
