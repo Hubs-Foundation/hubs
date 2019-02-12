@@ -45,7 +45,7 @@ class TopHUD extends Component {
   };
 
   buildVideoSharingButtons = () => {
-    const isMobile = AFRAME.utils.device.isMobile();
+    const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo();
 
     const videoShareExtraOptionTypes = [];
     const primaryVideoShareType =

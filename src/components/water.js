@@ -172,7 +172,7 @@ AFRAME.registerComponent("water", {
       fog: false
     };
 
-    if (AFRAME.utils.device.isMobile() || this.data.forceMobile) {
+    if (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo() || this.data.forceMobile) {
       this.water = new MobileWater(waterGeometry, waterConfig);
     } else {
       this.water = new THREE.Water(waterGeometry, waterConfig);

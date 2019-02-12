@@ -12,6 +12,7 @@ const HTMLWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 function createHTTPSConfig() {
   // Generate certs for the local webpack-dev-server.
@@ -229,6 +230,9 @@ module.exports = (env, argv) => ({
     }
   },
   plugins: [
+    new BundleAnalyzerPlugin({
+      analyzerMode: env && env.BUNDLE_ANALYZER ? "server" : "disabled"
+    }),
     // Each output page needs a HTMLWebpackPlugin entry
     new HTMLWebpackPlugin({
       filename: "index.html",

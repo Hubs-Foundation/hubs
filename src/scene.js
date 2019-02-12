@@ -28,7 +28,7 @@ import { App } from "./App";
 window.APP = new App();
 
 const qs = new URLSearchParams(location.search);
-const isMobile = AFRAME.utils.device.isMobile();
+const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo();
 
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 

@@ -16,16 +16,18 @@ AFRAME.registerComponent("directional-light", {
     this.light.position.set(0, 0, 0);
     this.light.target.position.set(0, 0, 1);
     this.light.add(this.light.target);
-    this.light.matrixNeedsUpdate = true;
     this.el.setObject3D("directional-light", this.light);
     this.el.sceneEl.systems.light.registerLight(el);
+    this.rendererSystem = this.el.sceneEl.systems.renderer;
   },
 
   update(prevData) {
     const light = this.light;
 
     if (this.data.color !== prevData.color) {
-      light.color.set(this.data.color);
+      const color = new THREE.Color(this.data.color);
+      this.rendererSystem.applyColorCorrection(color);
+      light.color.copy(color);
     }
 
     if (this.data.intensity !== prevData.intensity) {
@@ -55,6 +57,8 @@ AFRAME.registerComponent("directional-light", {
         light.shadow.map = null;
       }
     }
+
+    this.light.shadow.camera.matrixNeedsUpdate = true;
   },
 
   tick() {

@@ -209,11 +209,11 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
     gltfUrl = fileMap["scene.gtlf"];
   }
 
-  const gltfLoader = new THREE.GLTFLoader();
-  gltfLoader.customURLResolver = getCustomGLTFParserURLResolver(gltfUrl);
-  gltfLoader.setLazy(true);
+  const loadingManager = new THREE.LoadingManager();
+  loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
+  const gltfLoader = new THREE.GLTFLoader(loadingManager);
 
-  const { parser } = await new Promise((resolve, reject) => gltfLoader.load(gltfUrl, resolve, onProgress, reject));
+  const parser = await new Promise((resolve, reject) => gltfLoader.createParser(gltfUrl, resolve, onProgress, reject));
 
   const materials = parser.json.materials;
   if (materials) {
@@ -320,7 +320,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       if (!src) {
         if (this.inflatedEl) {
           console.warn("gltf-model-plus set to an empty source, unloading inflated model.");
-          this.removeInflatedEl();
+          this.disposeLastInflatedEl();
         }
         return;
       }
@@ -332,7 +332,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       if (src != this.lastSrc) return;
 
       // If we had inflated something already before, clean that up
-      this.removeInflatedEl();
+      this.disposeLastInflatedEl();
 
       this.model = gltf.scene || gltf.scenes[0];
       this.model.animations = gltf.animations;
@@ -415,7 +415,7 @@ AFRAME.registerComponent("gltf-model-plus", {
     }
   },
 
-  removeInflatedEl() {
+  disposeLastInflatedEl() {
     if (this.inflatedEl) {
       this.inflatedEl.parentNode.removeChild(this.inflatedEl);
 
@@ -431,6 +431,8 @@ AFRAME.registerComponent("gltf-model-plus", {
       });
 
       delete this.inflatedEl;
+
+      this.el.removeAttribute("animation-mixer");
     }
   }
 });

@@ -15,7 +15,6 @@ import "three/examples/js/loaders/GLTFLoader";
 import "./components/animation-mixer";
 import "./components/audio-feedback";
 import "./components/loop-animation";
-import "./components/gamma-factor";
 import "./components/scene-sound";
 import "./components/environment-map";
 import "./gltf-component-mappings";
@@ -34,7 +33,8 @@ function getHashArg(arg) {
 }
 
 window.APP = new App();
-window.APP.quality = getHashArg("quality") || AFRAME.utils.device.isMobile() ? "low" : "high";
+window.APP.quality =
+  getHashArg("quality") || (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo()) ? "low" : "high";
 
 function postAvatarIdToParent(newAvatarId) {
   window.parent.postMessage({ avatarId: newAvatarId }, location.origin);
