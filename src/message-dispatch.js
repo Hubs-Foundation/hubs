@@ -77,9 +77,9 @@ export default class MessageDispatch {
       case "duck":
         spawnChatMessage(DUCK_URL);
         if (Math.random() < 0.01) {
-          this.el.emit("specialquack");
+          this.scene.emit("specialquack");
         } else {
-          this.el.emit("quack");
+          this.scene.emit("quack");
         }
         break;
       case "debug":
