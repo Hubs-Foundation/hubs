@@ -20,15 +20,17 @@ const PUBLISHER_FOR_ENTRY_TYPE = {
 };
 
 const PRIVACY_POLICY_LINKS = {
-  bing_videos: "https://privacy.microsoft.com/en-us/privacystatement",
-  bing_images: "https://privacy.microsoft.com/en-us/privacystatement",
-  tenor: "https://tenor.com/legal-privacy",
+  videos: "https://privacy.microsoft.com/en-us/privacystatement",
+  images: "https://privacy.microsoft.com/en-us/privacystatement",
+  gifs: "https://tenor.com/legal-privacy",
   sketchfab: "https://sketchfab.com/privacy",
   poly: "https://sketchfab.com/privacy",
   twitch: "https://www.twitch.tv/p/legal/privacy-policy/"
 };
 
 const SOURCES = ["videos", "images", "gifs", "scenes", "sketchfab", "poly", "twitch"];
+
+const TEST_FACETS = [];
 
 class MediaBrowser extends Component {
   static propTypes = {
@@ -133,7 +135,6 @@ class MediaBrowser extends Component {
     const hasPrevious = searchParams.get("cursor");
     const urlSource = this.props.history.location.pathname.substring(7);
     const apiSource = this.state.result && this.state.result.meta.source;
-    const isAttributableEngine = this.state.result && apiSource !== "scene_listings";
     const isVariable = this.state.result && ["bing_images", "tenor"].includes(apiSource);
 
     return (
@@ -155,21 +156,29 @@ class MediaBrowser extends Component {
                 <input
                   type="text"
                   placeholder={formatMessage({
-                    id: `media-browser.search-placeholder.${this.state.result ? apiSource : "base"}`
+                    id: `media-browser.search-placeholder.${urlSource}`
                   })}
                   value={this.state.query}
                   onChange={e => this.handleQueryUpdated(e.target.value)}
                 />
               </div>
               <div className={styles.engineAttribution}>
-                {isAttributableEngine && (
+                {urlSource !== "scenes" && (
                   <div className={styles.engineAttributionContents}>
-                    <FormattedMessage id={`media-browser.powered_by.${apiSource}`} />
-                    {PRIVACY_POLICY_LINKS[apiSource] && (
-                      <a href={PRIVACY_POLICY_LINKS[apiSource]} target="_blank" rel="noreferrer noopener">
+                    <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
+                    {PRIVACY_POLICY_LINKS[urlSource] && (
+                      <a href={PRIVACY_POLICY_LINKS[urlSource]} target="_blank" rel="noreferrer noopener">
                         <FormattedMessage id="media-browser.privacy_policy" />
                       </a>
                     )}
+                  </div>
+                )}
+                {urlSource === "scenes" && (
+                  <div className={styles.engineAttributionContents}>
+                    <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
+                    <a href="/spoke" target="_blank" rel="noreferrer noopener">
+                      <FormattedMessage id="media-browser.spoke" />
+                    </a>
                   </div>
                 )}
               </div>
