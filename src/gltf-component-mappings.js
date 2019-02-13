@@ -145,6 +145,8 @@ function mediaInflator(el, componentName, componentData, components) {
       mediaOptions.coneOuterAngle = componentData.coneOuterAngle;
       mediaOptions.coneOuterGain = componentData.coneOuterGain;
     }
+
+    el.setAttribute("video-pause-state", { paused: mediaOptions.videoPaused });
   }
 
   el.setAttribute("media-loader", {
@@ -157,7 +159,13 @@ function mediaInflator(el, componentName, componentData, components) {
 }
 
 AFRAME.GLTFModelPlus.registerComponent("image", "image", mediaInflator);
-AFRAME.GLTFModelPlus.registerComponent("video", "video", mediaInflator);
+AFRAME.GLTFModelPlus.registerComponent("video", "video", mediaInflator, (name, property, value) => {
+  if (property === "paused") {
+    return { name: "video-pause-state", property, value };
+  } else {
+    return null;
+  }
+});
 
 AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName, componentData) => {
   el.setAttribute("media-loader", {
@@ -180,4 +188,72 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
     collisionForces: false
   });
   el.setAttribute("hoverable", "");
+});
+
+function propertyMapper(componentKey, componentProperty, componentValue) {
+  const mappedComponent = AFRAME.GLTFModelPlus.components[componentKey];
+
+  if (!mappedComponent) {
+    return null;
+  }
+
+  const componentName = mappedComponent.componentName;
+
+  if (mappedComponent.propertyMapper) {
+    return mappedComponent.propertyMapper(componentName, componentProperty, componentValue);
+  }
+
+  const componentSchema = AFRAME.components[componentName].schema;
+
+  if (typeof componentValue === "object") {
+    if (!componentSchema[componentProperty] || !componentSchema[componentProperty].public) {
+      return null;
+    }
+  }
+
+  return { name: componentName, property: componentProperty, value: componentValue };
+}
+
+AFRAME.GLTFModelPlus.registerComponent("trigger-volume", "trigger-volume", (el, componentName, componentData) => {
+  const {
+    size,
+    target,
+    enterComponent,
+    enterProperty,
+    enterValue,
+    leaveComponent,
+    leaveProperty,
+    leaveValue
+  } = componentData;
+
+  const enterAction = propertyMapper(enterComponent, enterProperty, enterValue);
+
+  if (!enterAction) {
+    console.warn(
+      `GLTFModelPlus: enterComponent "${enterComponent}" on trigger-volume has an invalid property "${enterProperty}". Skipping...`
+    );
+    return;
+  }
+
+  const leaveAction = propertyMapper(leaveComponent, leaveProperty, leaveValue);
+
+  if (!leaveAction) {
+    console.warn(
+      `GLTFModelPlus: leaveComponent "${leaveComponent}" on trigger-volume has an invalid property "${leaveProperty}". Skipping...`
+    );
+  }
+
+  const targetSelector = "." + target.replace(/[^\w-]/g, "");
+
+  // Filter out scope and colliders properties.
+  el.setAttribute("trigger-volume", {
+    size,
+    target: targetSelector,
+    enterComponent: enterAction.name,
+    enterProperty: enterAction.property,
+    enterValue: enterAction.value,
+    leaveComponent: leaveAction.name,
+    leaveProperty: leaveAction.property,
+    leaveValue: leaveAction.value
+  });
 });
