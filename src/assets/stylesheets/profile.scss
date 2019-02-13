@@ -30,6 +30,43 @@
     }
   }
 
+  :local(.tabs) {
+    display: flex;
+    width: 100%;
+
+    a {
+      padding: 8px;
+      text-align: center;
+      flex: 1;
+      &.selected {
+        font-weight: bold;
+        text-decoration: underline;
+      }
+    }
+  }
+
+  :local(.file-input-row) {
+    label {
+      display: flex;
+      align-items: center;
+      margin: 5px 0;
+    }
+    input {
+      display: none;
+    }
+    .img-box {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      margin-right: 5px;
+      background: #eaeaea;
+      overflow: hidden;
+    }
+    img {
+      width: 100%;
+    }
+  }
+
   :local(.avatar-selector-container) {
     flex: 1;
     position: relative;

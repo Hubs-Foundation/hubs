@@ -1,6 +1,7 @@
 import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
+import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 const playerHeight = 1.6;
 const isBotMode = qsTruthy("bot");
@@ -153,9 +154,15 @@ export default class SceneEntryManager {
 
   _updatePlayerRigWithProfile = () => {
     const { avatarId, displayName } = this.store.state.profile;
+    const avatarSrc =
+      avatarId && avatarId.startsWith("http")
+        ? proxiedUrlFor(avatarId)
+        : !avatarId || avatarId.startsWith("#")
+          ? `#${avatarId || "botdefault"}`
+          : getReticulumFetchUrl(`/api/v1/avatars/${avatarId}/avatar.gltf`);
     this.playerRig.setAttribute("player-info", {
       displayName,
-      avatarSrc: avatarId && avatarId.startsWith("http") ? proxiedUrlFor(avatarId) : `#${avatarId || "botdefault"}`
+      avatarSrc
     });
     const hudController = this.playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });
