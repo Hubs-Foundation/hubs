@@ -4,7 +4,7 @@ import { injectIntl, FormattedMessage } from "react-intl";
 import styles from "../assets/stylesheets/media-browser.scss";
 import classNames from "classnames";
 import { scaledThumbnailUrlFor } from "../utils/media-utils";
-import { pushHistoryPath } from "../utils/history";
+import { pushHistoryPath, pushHistoryState } from "../utils/history";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
@@ -73,7 +73,7 @@ class MediaBrowser extends Component {
     this.close();
   };
 
-  close = () => {
+  getSearchClearedSearchParams = () => {
     const location = this.props.history.location;
     const searchParams = new URLSearchParams(location.search);
 
@@ -82,6 +82,17 @@ class MediaBrowser extends Component {
     searchParams.delete("filter");
     searchParams.delete("page");
 
+    return searchParams;
+  };
+
+  showCreateObject = () => {
+    const searchParams = this.getSearchClearedSearchParams();
+    pushHistoryPath(this.props.history, "/", searchParams.toString());
+    pushHistoryState(this.props.history, "modal", "create");
+  };
+
+  close = () => {
+    const searchParams = this.getSearchClearedSearchParams();
     pushHistoryPath(this.props.history, "/", searchParams.toString());
   };
 
