@@ -45,10 +45,10 @@ AFRAME.registerComponent("trigger-volume", {
       const collidingLastFrame = this.collidingLastFrame[object3D.id];
 
       if (isColliding && !collidingLastFrame) {
-        const target = this.data.scope.querySelector(this.data.target);
+        const target = this.data.scope.object3D.getObjectByName(this.data.target).el;
         target.setAttribute(this.data.enterComponent, this.data.enterProperty, this.data.enterValue);
       } else if (!isColliding && collidingLastFrame) {
-        const target = this.data.scope.querySelector(this.data.target);
+        const target = this.data.scope.object3D.getObjectByName(this.data.target).el;
         target.setAttribute(this.data.leaveComponent, this.data.leaveProperty, this.data.leaveValue);
       }
 

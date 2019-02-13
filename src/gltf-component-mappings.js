@@ -243,12 +243,10 @@ AFRAME.GLTFModelPlus.registerComponent("trigger-volume", "trigger-volume", (el, 
     );
   }
 
-  const targetSelector = "." + target.replace(/[^\w-]/g, "");
-
   // Filter out scope and colliders properties.
   el.setAttribute("trigger-volume", {
     size,
-    target: targetSelector,
+    target,
     enterComponent: enterAction.name,
     enterProperty: enterAction.property,
     enterValue: enterAction.value,
