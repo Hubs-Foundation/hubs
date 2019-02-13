@@ -1,7 +1,7 @@
 AFRAME.registerComponent("trigger-volume", {
   schema: {
-    colliders: { type: "selectorAll", default: "#player-rig" },
-    scope: { type: "selector", default: "#environment-root" },
+    colliders: { type: "selectorAll" },
+    scope: { type: "selector" },
     size: { type: "vec3", default: { x: 1, y: 1, z: 1 } },
     target: { type: "string" },
     enterComponent: { type: "string" },

@@ -87,7 +87,7 @@ function cloneGltf(gltf) {
 /// or templates associated with any of their nodes.)
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
-const inflateEntities = function(node, templates, isRoot, modelToWorldScale = 1) {
+const inflateEntities = function(rootEl, node, templates, isRoot, modelToWorldScale = 1) {
   // TODO: Remove this once we update the legacy avatars to the new node names
   if (node.name === "Chest") {
     node.name = "Spine";
@@ -101,7 +101,7 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale = 1)
   const childEntities = [];
   const children = node.children.slice(0); // setObject3D mutates the node's parent, so we have to copy
   for (const child of children) {
-    const el = inflateEntities(child, templates);
+    const el = inflateEntities(rootEl, child, templates);
     if (el) {
       childEntities.push(el);
     }
@@ -165,7 +165,7 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale = 1)
     for (const prop in entityComponents) {
       if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
         const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-        inflator(el, componentName, entityComponents[prop], entityComponents);
+        inflator(el, componentName, entityComponents[prop], entityComponents, rootEl);
       }
     }
   }
@@ -345,7 +345,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       let object3DToSet = this.model;
       if (
         this.data.inflate &&
-        (this.inflatedEl = inflateEntities(this.model, this.templates, true, this.data.modelToWorldScale))
+        (this.inflatedEl = inflateEntities(this.el, this.model, this.templates, true, this.data.modelToWorldScale))
       ) {
         this.el.appendChild(this.inflatedEl);
 

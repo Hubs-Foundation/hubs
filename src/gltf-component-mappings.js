@@ -214,44 +214,50 @@ function propertyMapper(componentKey, componentProperty, componentValue) {
   return { name: componentName, property: componentProperty, value: componentValue };
 }
 
-AFRAME.GLTFModelPlus.registerComponent("trigger-volume", "trigger-volume", (el, componentName, componentData) => {
-  const {
-    size,
-    target,
-    enterComponent,
-    enterProperty,
-    enterValue,
-    leaveComponent,
-    leaveProperty,
-    leaveValue
-  } = componentData;
+AFRAME.GLTFModelPlus.registerComponent(
+  "trigger-volume",
+  "trigger-volume",
+  (el, componentName, componentData, components, rootEl) => {
+    const {
+      size,
+      target,
+      enterComponent,
+      enterProperty,
+      enterValue,
+      leaveComponent,
+      leaveProperty,
+      leaveValue
+    } = componentData;
 
-  const enterAction = propertyMapper(enterComponent, enterProperty, enterValue);
+    const enterAction = propertyMapper(enterComponent, enterProperty, enterValue);
 
-  if (!enterAction) {
-    console.warn(
-      `GLTFModelPlus: enterComponent "${enterComponent}" on trigger-volume has an invalid property "${enterProperty}". Skipping...`
-    );
-    return;
+    if (!enterAction) {
+      console.warn(
+        `GLTFModelPlus: enterComponent "${enterComponent}" on trigger-volume has an invalid property "${enterProperty}". Skipping...`
+      );
+      return;
+    }
+
+    const leaveAction = propertyMapper(leaveComponent, leaveProperty, leaveValue);
+
+    if (!leaveAction) {
+      console.warn(
+        `GLTFModelPlus: leaveComponent "${leaveComponent}" on trigger-volume has an invalid property "${leaveProperty}". Skipping...`
+      );
+    }
+
+    // Filter out scope and colliders properties.
+    el.setAttribute("trigger-volume", {
+      colliders: "#player-rig",
+      scope: rootEl,
+      size,
+      target,
+      enterComponent: enterAction.name,
+      enterProperty: enterAction.property,
+      enterValue: enterAction.value,
+      leaveComponent: leaveAction.name,
+      leaveProperty: leaveAction.property,
+      leaveValue: leaveAction.value
+    });
   }
-
-  const leaveAction = propertyMapper(leaveComponent, leaveProperty, leaveValue);
-
-  if (!leaveAction) {
-    console.warn(
-      `GLTFModelPlus: leaveComponent "${leaveComponent}" on trigger-volume has an invalid property "${leaveProperty}". Skipping...`
-    );
-  }
-
-  // Filter out scope and colliders properties.
-  el.setAttribute("trigger-volume", {
-    size,
-    target,
-    enterComponent: enterAction.name,
-    enterProperty: enterAction.property,
-    enterValue: enterAction.value,
-    leaveComponent: leaveAction.name,
-    leaveProperty: leaveAction.property,
-    leaveValue: leaveAction.value
-  });
-});
+);
