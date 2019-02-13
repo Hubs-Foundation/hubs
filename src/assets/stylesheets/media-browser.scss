@@ -21,8 +21,32 @@
   :local(.header-center) {
     flex: 10;
     justify-content: center;
-    display: flex;
     align-items: center;
+    display: flex;
+    flex-direction: column;
+
+    :local(.engine-attribution) {
+      width: 450px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+
+      @media(max-width: 1060px) {
+        flex: 10;
+        width: auto;
+        max-width: 450px;
+      }
+
+      :local(.engine-attribution-contents) {
+        font-size: 0.8em;
+        color: $grey-text;
+        margin-top: 4px;
+
+        a {
+          color: $grey-text;
+        }
+      }
+    }
 
     :local(.search) {
       display: flex;

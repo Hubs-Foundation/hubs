@@ -19,6 +19,15 @@ const PUBLISHER_FOR_ENTRY_TYPE = {
   twitch_stream: "Twitch"
 };
 
+const PRIVACY_POLICY_LINKS = {
+  bing_videos: "https://privacy.microsoft.com/en-us/privacystatement",
+  bing_images: "https://privacy.microsoft.com/en-us/privacystatement",
+  tenor: "https://tenor.com/legal-privacy",
+  sketchfab: "https://sketchfab.com/privacy",
+  poly: "https://sketchfab.com/privacy",
+  twitch: "https://www.twitch.tv/p/legal/privacy-policy/"
+};
+
 class MediaBrowser extends Component {
   static propTypes = {
     mediaSearchStore: PropTypes.object,
@@ -107,7 +116,9 @@ class MediaBrowser extends Component {
     const hasNext = this.state.result && !!this.state.result.meta.next_cursor;
     const searchParams = new URLSearchParams(this.props.history.location.search);
     const hasPrevious = searchParams.get("cursor");
-    const isVariable = this.state.result && ["bing_images", "tenor"].includes(this.state.result.meta.source);
+    const source = this.state.result && this.state.result.meta.source;
+    const isAttributableEngine = this.state.result && source !== "scene_listings";
+    const isVariable = this.state.result && ["bing_images", "tenor"].includes(source);
 
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
@@ -128,12 +139,24 @@ class MediaBrowser extends Component {
                 <input
                   type="text"
                   placeholder={formatMessage({
-                    id: `media-browser.search-placeholder.${this.state.result ? this.state.result.meta.source : "base"}`
+                    id: `media-browser.search-placeholder.${this.state.result ? source : "base"}`
                   })}
                   value={this.state.query}
                   onChange={e => this.handleQueryUpdated(e.target.value)}
                 />
               </div>
+              {isAttributableEngine && (
+                <div className={styles.engineAttribution}>
+                  <div className={styles.engineAttributionContents}>
+                    <FormattedMessage id={`media-browser.powered_by.${source}`} />
+                    {PRIVACY_POLICY_LINKS[source] && (
+                      <a href={PRIVACY_POLICY_LINKS[source]} target="_blank" rel="noreferrer noopener">
+                        <FormattedMessage id="media-browser.privacy_policy" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
             <div className={styles.headerRight}>
               <a onClick={() => this.showCreateObject()} className={styles.createButton}>
@@ -144,7 +167,7 @@ class MediaBrowser extends Component {
               <a onClick={() => this.showCreateObject()} className={styles.createLink}>
                 <FormattedMessage
                   id={`media-browser.add_custom_${
-                    this.state.result && this.state.result.meta.source === "scene_listings" ? "scene" : "object"
+                    this.state.result && source === "scene_listings" ? "scene" : "object"
                   }`}
                 />
               </a>

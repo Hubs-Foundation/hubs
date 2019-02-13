@@ -88,6 +88,12 @@ export default class MediaSearchStore extends EventTarget {
       searchParams.delete("filter");
     }
 
+    if (filter) {
+      searchParams.set("cursor", filter);
+    } else {
+      searchParams.delete("cursor");
+    }
+
     pushHistoryPath(this.history, location.pathname, searchParams.toString());
   };
 
