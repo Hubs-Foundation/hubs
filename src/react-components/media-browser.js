@@ -107,6 +107,7 @@ class MediaBrowser extends Component {
     const hasNext = this.state.result && !!this.state.result.meta.next_cursor;
     const searchParams = new URLSearchParams(this.props.history.location.search);
     const hasPrevious = searchParams.get("cursor");
+    const isVariable = this.state.result && ["bing_images", "tenor"].includes(this.state.result.meta.source);
 
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
@@ -151,7 +152,11 @@ class MediaBrowser extends Component {
           </div>
 
           <div className={styles.body}>
-            {this.state.result && <div className={styles.tiles}>{this.state.result.entries.map(this.entryToTile)}</div>}
+            {this.state.result && (
+              <div className={classNames({ [styles.tiles]: true, [styles.tilesVariable]: isVariable })}>
+                {this.state.result.entries.map(this.entryToTile)}
+              </div>
+            )}
 
             {this.state.result &&
               (hasNext || hasPrevious) && (
@@ -188,10 +193,10 @@ class MediaBrowser extends Component {
 
     // Aspect ratio can vary per image if its an image result, o/w assume 720p
     const imageAspect = isImage ? entry.images.preview.width / entry.images.preview.height : 16.0 / 9.0;
-    const imageWidth = Math.floor(imageAspect * imageHeight);
+    const imageWidth = Math.floor(Math.max(imageAspect * imageHeight, imageHeight * 0.85));
 
     const publisherName =
-      (entry.attributions.publisher && entry.attributions.publisher.url) || PUBLISHER_FOR_ENTRY_TYPE[entry.type];
+      (entry.attributions.publisher && entry.attributions.publisher.name) || PUBLISHER_FOR_ENTRY_TYPE[entry.type];
 
     return (
       <div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`${entry.id}_${idx}`}>
