@@ -45,11 +45,17 @@ AFRAME.registerComponent("trigger-volume", {
       const collidingLastFrame = this.collidingLastFrame[object3D.id];
 
       if (isColliding && !collidingLastFrame) {
-        const target = this.data.scope.object3D.getObjectByName(this.data.target).el;
-        target.setAttribute(this.data.enterComponent, this.data.enterProperty, this.data.enterValue);
+        const target = this.data.scope.object3D.getObjectByName(this.data.target);
+        if (!target || !target.el) {
+          console.warn(`trigger-volume: Couldn't find node: "${this.data.target}"`);
+        }
+        target.el.setAttribute(this.data.enterComponent, this.data.enterProperty, this.data.enterValue);
       } else if (!isColliding && collidingLastFrame) {
-        const target = this.data.scope.object3D.getObjectByName(this.data.target).el;
-        target.setAttribute(this.data.leaveComponent, this.data.leaveProperty, this.data.leaveValue);
+        const target = this.data.scope.object3D.getObjectByName(this.data.target);
+        if (!target || !target.el) {
+          console.warn(`trigger-volume: Couldn't find node: "${this.data.target}"`);
+        }
+        target.el.setAttribute(this.data.leaveComponent, this.data.leaveProperty, this.data.leaveValue);
       }
 
       this.collidingLastFrame[object3D.id] = isColliding;
