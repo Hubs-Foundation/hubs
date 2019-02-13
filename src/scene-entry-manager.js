@@ -423,8 +423,13 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("action_selected_media_result_entry", e => {
       const entry = e.detail;
-      this.hubChannel.updateScene(entry.url);
-      // For now, assume entry is a scene
+
+      if (entry.type === "scene_listing") {
+        // TODO spawn in space when no rights
+        this.hubChannel.updateScene(entry.url);
+      } else {
+        spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
+      }
     });
   };
 
