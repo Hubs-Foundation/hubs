@@ -336,7 +336,6 @@ exports.traverseMeshesAndAddShapes = (function() {
         });
         el.components[shapePrefix + i].setMesh(o);
         shapes.push(shapePrefix + i);
-        console.log("adding", el.components[shapePrefix + i]);
         i++;
       }
     });

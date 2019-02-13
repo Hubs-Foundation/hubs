@@ -343,7 +343,6 @@ async function updateEnvironmentForHub(hub) {
             "model-loaded",
             () => {
               while (shapes.length > 0) {
-                console.log("removing", shapes[0]);
                 environmentEl.removeAttribute(shapes.pop());
               }
               shapes = traverseMeshesAndAddShapes(environmentEl, "mesh", 0.1);
