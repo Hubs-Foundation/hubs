@@ -63,12 +63,10 @@ export default class MediaSearchStore extends EventTarget {
 
   pageNavigate = delta => {
     if (delta == -1) {
-      this.history.pop();
+      this.history.goBack();
     } else {
       const location = this.history.location;
       const searchParams = new URLSearchParams(location.search);
-      const currentPage = +(searchParams.get("page") || 1);
-      searchParams.set("page", currentPage + delta);
       searchParams.set("cursor", this.nextCursor);
       pushHistoryPath(this.history, location.pathname, searchParams.toString());
     }
@@ -89,8 +87,6 @@ export default class MediaSearchStore extends EventTarget {
     } else {
       searchParams.delete("filter");
     }
-
-    searchParams.delete("page");
 
     pushHistoryPath(this.history, location.pathname, searchParams.toString());
   };

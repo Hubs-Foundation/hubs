@@ -8,7 +8,7 @@ import { pushHistoryPath, pushHistoryState } from "../utils/history";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
-import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploadAlt";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -80,7 +80,7 @@ class MediaBrowser extends Component {
     // Strip browsing query params
     searchParams.delete("q");
     searchParams.delete("filter");
-    searchParams.delete("page");
+    searchParams.delete("cursor");
 
     return searchParams;
   };
@@ -105,7 +105,8 @@ class MediaBrowser extends Component {
   render() {
     const { formatMessage } = this.props.intl;
     const hasNext = this.state.result && !!this.state.result.meta.next_cursor;
-    const hasPrevious = true;
+    const searchParams = new URLSearchParams(this.props.history.location.search);
+    const hasPrevious = searchParams.get("cursor");
 
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
@@ -136,7 +137,7 @@ class MediaBrowser extends Component {
             <div className={styles.headerRight}>
               <a onClick={() => this.showCreateObject()} className={styles.createButton}>
                 <i>
-                  <FontAwesomeIcon icon={faPlus} />
+                  <FontAwesomeIcon icon={faCloudUploadAlt} />
                 </i>
               </a>
               <a onClick={() => this.showCreateObject()} className={styles.createLink}>

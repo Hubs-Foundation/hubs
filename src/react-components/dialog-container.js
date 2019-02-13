@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { WithHoverSound } from "./wrap-with-audio";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default class DialogContainer extends Component {
   static propTypes = {
@@ -51,7 +53,9 @@ export default class DialogContainer extends Component {
                 this.props.onClose && (
                   <WithHoverSound>
                     <button className="dialog__box__contents__close" onClick={() => this.props.onClose()}>
-                      <span>×</span>
+                      <i>
+                        <FontAwesomeIcon icon={faTimes} />
+                      </i>
                     </button>
                   </WithHoverSound>
                 )}
