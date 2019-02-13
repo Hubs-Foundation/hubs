@@ -28,6 +28,12 @@ const PRIVACY_POLICY_LINKS = {
   twitch: "https://www.twitch.tv/p/legal/privacy-policy/"
 };
 
+const DEFAULT_FILTERS = {
+  gifs: "trending",
+  sketchfab: "featured",
+  scenes: "featured"
+};
+
 const SOURCES = ["videos", "images", "gifs", "scenes", "sketchfab", "poly", "twitch"];
 
 class MediaBrowser extends Component {
@@ -104,11 +110,10 @@ class MediaBrowser extends Component {
     const newSearchParams = this.getSearchClearedSearchParams();
     if (currentQuery) {
       newSearchParams.set("q", currentQuery);
-    }
-
-    // Default tenor to trending
-    if (source === "gifs") {
-      newSearchParams.set("filter", "trending");
+    } else {
+      if (DEFAULT_FILTERS[source]) {
+        newSearchParams.set("filter", DEFAULT_FILTERS[source]);
+      }
     }
 
     pushHistoryPath(this.props.history, `/media/${source}`, newSearchParams.toString());
