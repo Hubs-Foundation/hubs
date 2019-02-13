@@ -30,8 +30,6 @@ const PRIVACY_POLICY_LINKS = {
 
 const SOURCES = ["videos", "images", "gifs", "scenes", "sketchfab", "poly", "twitch"];
 
-const TEST_FACETS = [];
-
 class MediaBrowser extends Component {
   static propTypes = {
     mediaSearchStore: PropTypes.object,
@@ -40,18 +38,12 @@ class MediaBrowser extends Component {
     onMediaSearchResultEntrySelected: PropTypes.func
   };
 
-  state = { query: "" };
+  state = { query: "", facets: [] };
 
   constructor(props) {
     super(props);
-    props.mediaSearchStore.addEventListener("statechanged", this.storeUpdated);
-
-    const searchParams = new URLSearchParams(props.history.location.search);
-
-    this.state = {
-      result: this.props.mediaSearchStore.result,
-      query: searchParams.get("q") || ""
-    };
+    this.state = this.getStoreAndHistoryState(props);
+    this.props.mediaSearchStore.addEventListener("statechanged", this.storeUpdated);
   }
 
   componentDidMount() {}
@@ -61,7 +53,25 @@ class MediaBrowser extends Component {
   }
 
   storeUpdated = () => {
-    this.setState({ result: this.props.mediaSearchStore.result });
+    this.setState(this.getStoreAndHistoryState(this.props));
+  };
+
+  getStoreAndHistoryState = props => {
+    const searchParams = new URLSearchParams(props.history.location.search);
+    const result = props.mediaSearchStore.result;
+
+    const newState = { result, query: searchParams.get("q") || "" };
+    const urlSource = this.props.history.location.pathname.substring(7);
+
+    if (result && result.suggestions && result.suggestions.length > 0) {
+      newState.facets = result.suggestions.map(s => {
+        return { text: s, params: { q: s } };
+      });
+    } else {
+      newState.facets = this.getDefaultFacetsForSource(urlSource);
+    }
+
+    return newState;
   };
 
   handleQueryUpdated = query => {
@@ -97,6 +107,56 @@ class MediaBrowser extends Component {
     }
 
     pushHistoryPath(this.props.history, `/media/${source}`, newSearchParams.toString());
+  };
+
+  getDefaultFacetsForSource = source => {
+    if (source === "sketchfab") {
+      return [
+        { text: "Animals", params: { filter: "animals-pets" } },
+        { text: "Architecture", params: { filter: "architecture" } },
+        { text: "Art", params: { filter: "art-abstract" } },
+        { text: "Vehicles", params: { filter: "cars-vehicles" } },
+        { text: "Characters", params: { filter: "characters-creatures" } },
+        { text: "Culture", params: { filter: "cultural-heritage-history" } },
+        { text: "Gadgets", params: { filter: "electronics-gadgets" } },
+        { text: "Fashion", params: { filter: "fashion-style" } },
+        { text: "Food", params: { filter: "food-drink" } },
+        { text: "Furniture", params: { filter: "furniture-home" } },
+        { text: "Music", params: { filter: "music" } },
+        { text: "Nature", params: { filter: "nature-plants" } },
+        { text: "News", params: { filter: "news-politics" } },
+        { text: "People", params: { filter: "people" } },
+        { text: "Places", params: { filter: "places-travel" } },
+        { text: "Science", params: { filter: "science-technology" } },
+        { text: "Sports", params: { filter: "sports-fitness" } },
+        { text: "Weapons", params: { filter: "weapons-military" } }
+      ];
+    } else if (source === "poly") {
+      return [
+        { text: "Animals", params: { filter: "animals" } },
+        { text: "Architecture", params: { filter: "architecture" } },
+        { text: "Art", params: { filter: "art" } },
+        { text: "Food", params: { filter: "food" } },
+        { text: "Nature", params: { filter: "nature" } },
+        { text: "Objects", params: { filter: "objects" } },
+        { text: "People", params: { filter: "people" } },
+        { text: "Scenes", params: { filter: "scenes" } },
+        { text: "Technology", params: { filter: "technology" } },
+        { text: "Transport", params: { filter: "transport" } }
+      ];
+    }
+    // TODO
+    return [];
+  };
+
+  handleFacetClicked = facet => {
+    const searchParams = this.getSearchClearedSearchParams();
+
+    for (const [k, v] of Object.entries(facet.params)) {
+      searchParams.set(k, v);
+    }
+
+    pushHistoryPath(this.props.history, this.props.history.location.pathname, searchParams.toString());
   };
 
   getSearchClearedSearchParams = () => {
@@ -214,6 +274,17 @@ class MediaBrowser extends Component {
               <FontAwesomeIcon icon={faAngleRight} />
             </div>
           </div>
+
+          {this.state.facets &&
+            this.state.facets.length > 0 && (
+              <div className={styles.facets}>
+                {this.state.facets.map((s, i) => (
+                  <a onClick={() => this.handleFacetClicked(s)} key={i} className={styles.facet}>
+                    {s.text}
+                  </a>
+                ))}
+              </div>
+            )}
 
           <div className={styles.body}>
             {this.state.result && (
