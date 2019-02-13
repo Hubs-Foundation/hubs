@@ -248,6 +248,10 @@ class MediaBrowser extends Component {
                     <a href="/spoke" target="_blank" rel="noreferrer noopener">
                       <FormattedMessage id="media-browser.spoke" />
                     </a>
+                    |
+                    <a target="_blank" rel="noopener noreferrer" href="/?report">
+                      <FormattedMessage id="media-browser.report_issue" />
+                    </a>
                   </div>
                 )}
               </div>
