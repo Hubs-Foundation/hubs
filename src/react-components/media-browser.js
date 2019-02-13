@@ -106,6 +106,11 @@ class MediaBrowser extends Component {
       newSearchParams.set("q", currentQuery);
     }
 
+    // Default tenor to trending
+    if (source === "gifs") {
+      newSearchParams.set("filter", "trending");
+    }
+
     pushHistoryPath(this.props.history, `/media/${source}`, newSearchParams.toString());
   };
 
@@ -141,7 +146,6 @@ class MediaBrowser extends Component {
         { text: "Objects", params: { filter: "objects" } },
         { text: "People", params: { filter: "people" } },
         { text: "Scenes", params: { filter: "scenes" } },
-        { text: "Technology", params: { filter: "technology" } },
         { text: "Transport", params: { filter: "transport" } }
       ];
     }
