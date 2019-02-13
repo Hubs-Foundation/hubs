@@ -8,6 +8,8 @@ import { pushHistoryPath } from "../utils/history";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
+import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -98,7 +100,13 @@ class MediaBrowser extends Component {
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
         <div className={classNames([styles.box, styles.darkened])}>
           <div className={styles.header}>
-            <div className={styles.headerLeft} />
+            <div className={styles.headerLeft}>
+              <a onClick={() => this.close()}>
+                <i>
+                  <FontAwesomeIcon icon={faTimes} />
+                </i>
+              </a>
+            </div>
             <div className={styles.headerCenter}>
               <div className={styles.search}>
                 <i>
@@ -115,8 +123,17 @@ class MediaBrowser extends Component {
               </div>
             </div>
             <div className={styles.headerRight}>
-              <a onClick={() => this.close()}>
-                <span>×</span>
+              <a onClick={() => this.showCreateObject()} className={styles.createButton}>
+                <i>
+                  <FontAwesomeIcon icon={faPlus} />
+                </i>
+              </a>
+              <a onClick={() => this.showCreateObject()} className={styles.createLink}>
+                <FormattedMessage
+                  id={`media-browser.add_custom_${
+                    this.state.result && this.state.result.meta.source === "scene_listings" ? "scene" : "object"
+                  }`}
+                />
               </a>
             </div>
           </div>
@@ -155,7 +172,7 @@ class MediaBrowser extends Component {
 
     // Doing breakpointing here, so we can have proper image placeholder based upon dynamic aspect ratio
     const clientWidth = window.innerWidth;
-    const imageHeight = clientWidth < 1079 ? (clientWidth < 321 ? 100 : 125) : 200;
+    const imageHeight = clientWidth < 1079 ? (clientWidth < 768 ? 75 : 150) : 200;
 
     // Aspect ratio can vary per image if its an image result, o/w assume 720p
     const imageAspect = isImage ? entry.images.preview.width / entry.images.preview.height : 16.0 / 9.0;
@@ -180,7 +197,6 @@ class MediaBrowser extends Component {
             </div>
             <div className={styles.attribution}>
               <div className={styles.creator}>
-                <FormattedMessage id={`media-browser.creator-prefix.${entry.type}`} />
                 {creator && !creator.name && <span>{creator}</span>}
                 {creator && creator.name && !creator.url && <span>{creator.name}</span>}
                 {creator &&

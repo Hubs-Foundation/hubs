@@ -29,10 +29,14 @@
       width: 450px;
       height: 50px;
 
-      @media(max-width: 700px) {
+      @media(max-width: 1060px) {
         flex: 10;
-        height: 35px;
         width: auto;
+        max-width: 450px;
+      }
+
+      @media(max-width: 700px) {
+        height: 35px;
       }
 
       border: 2px solid $light-grey;
@@ -128,6 +132,12 @@
 
           :local(.attribution) {
             display: flex;
+
+            @media (max-width: 700px) {
+              flex-direction: column;
+              align-items: flex-start;
+            }
+
             align-items: center;
             justify-content: space-between;
             font-size: 0.8em;
@@ -139,14 +149,26 @@
           }
 
           :local(.creator) {
+            font-weight: normal;
+
             a {
               color: $dark-grey-text;
+              font-weight: normal;
             }
           }
 
           :local(.publisher) {
+            i {
+              color: $light-grey;
+            }
+
             a {
               color: $dark-grey-text;
+              font-weight: normal;
+
+              @media (min-width: 700px) {
+                color: $grey-text;
+              }
             }
           }
         }
@@ -196,11 +218,10 @@
   }
 
   :local(.header-left) {
-    @extend %fa-icon-button;
-
     margin: 0 0 0 32px;
     display: flex;
-    width: 100px;
+    width: 250px;
+    font-size: 1.6em;
 
     @media (max-width: 700px) {
       width: 50px;
@@ -210,16 +231,29 @@
 
   :local(.header-right) {
     margin: 0 32px 0 0;
-    width: 100px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    font-size: 1.5em;
+    width: 250px;
+    font-size: 1.6em;
 
-    a {
+    :local(.create-button) {
       font-weight: bold;
-      font-size: 1.8em;
-      color: black;
+      color: $action-color;
+
+      @media (min-width: 700px) {
+        margin-right: 12px;
+      }
+    }
+
+    :local(.create-link) {
+      font-weight: bold;
+      font-size: 0.8em;
+      color: $action-color;
+
+      @media (max-width: 700px) {
+        display: none;
+      }
     }
 
     @media (max-width: 700px) {
