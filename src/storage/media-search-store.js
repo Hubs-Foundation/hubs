@@ -32,6 +32,9 @@ export default class MediaSearchStore extends EventTarget {
   }
 
   update = async location => {
+    this.result = null;
+    this.dispatchEvent(new CustomEvent("statechanged"));
+
     const pathname = location.pathname;
     if (!pathname.startsWith("/media")) return;
     const urlSource = pathname.substring(7);

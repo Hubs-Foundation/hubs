@@ -28,6 +28,8 @@ const PRIVACY_POLICY_LINKS = {
   twitch: "https://www.twitch.tv/p/legal/privacy-policy/"
 };
 
+const SOURCES = ["videos", "images", "gifs", "scenes", "sketchfab", "poly", "twitch"];
+
 class MediaBrowser extends Component {
   static propTypes = {
     mediaSearchStore: PropTypes.object,
@@ -82,6 +84,19 @@ class MediaBrowser extends Component {
     this.close();
   };
 
+  handleSourceClicked = source => {
+    const location = this.props.history.location;
+    const searchParams = new URLSearchParams(location.search);
+    const currentQuery = searchParams.get("q");
+
+    const newSearchParams = this.getSearchClearedSearchParams();
+    if (currentQuery) {
+      newSearchParams.set("q", currentQuery);
+    }
+
+    pushHistoryPath(this.props.history, `/media/${source}`, newSearchParams.toString());
+  };
+
   getSearchClearedSearchParams = () => {
     const location = this.props.history.location;
     const searchParams = new URLSearchParams(location.search);
@@ -116,9 +131,10 @@ class MediaBrowser extends Component {
     const hasNext = this.state.result && !!this.state.result.meta.next_cursor;
     const searchParams = new URLSearchParams(this.props.history.location.search);
     const hasPrevious = searchParams.get("cursor");
-    const source = this.state.result && this.state.result.meta.source;
-    const isAttributableEngine = this.state.result && source !== "scene_listings";
-    const isVariable = this.state.result && ["bing_images", "tenor"].includes(source);
+    const urlSource = this.props.history.location.pathname.substring(7);
+    const apiSource = this.state.result && this.state.result.meta.source;
+    const isAttributableEngine = this.state.result && apiSource !== "scene_listings";
+    const isVariable = this.state.result && ["bing_images", "tenor"].includes(apiSource);
 
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
@@ -139,24 +155,24 @@ class MediaBrowser extends Component {
                 <input
                   type="text"
                   placeholder={formatMessage({
-                    id: `media-browser.search-placeholder.${this.state.result ? source : "base"}`
+                    id: `media-browser.search-placeholder.${this.state.result ? apiSource : "base"}`
                   })}
                   value={this.state.query}
                   onChange={e => this.handleQueryUpdated(e.target.value)}
                 />
               </div>
-              {isAttributableEngine && (
-                <div className={styles.engineAttribution}>
+              <div className={styles.engineAttribution}>
+                {isAttributableEngine && (
                   <div className={styles.engineAttributionContents}>
-                    <FormattedMessage id={`media-browser.powered_by.${source}`} />
-                    {PRIVACY_POLICY_LINKS[source] && (
-                      <a href={PRIVACY_POLICY_LINKS[source]} target="_blank" rel="noreferrer noopener">
+                    <FormattedMessage id={`media-browser.powered_by.${apiSource}`} />
+                    {PRIVACY_POLICY_LINKS[apiSource] && (
+                      <a href={PRIVACY_POLICY_LINKS[apiSource]} target="_blank" rel="noreferrer noopener">
                         <FormattedMessage id="media-browser.privacy_policy" />
                       </a>
                     )}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
             <div className={styles.headerRight}>
               <a onClick={() => this.showCreateObject()} className={styles.createButton}>
@@ -167,10 +183,26 @@ class MediaBrowser extends Component {
               <a onClick={() => this.showCreateObject()} className={styles.createLink}>
                 <FormattedMessage
                   id={`media-browser.add_custom_${
-                    this.state.result && source === "scene_listings" ? "scene" : "object"
+                    this.state.result && apiSource === "scene_listings" ? "scene" : "object"
                   }`}
                 />
               </a>
+            </div>
+          </div>
+
+          <div className={styles.nav}>
+            {SOURCES.map(s => (
+              <a
+                onClick={() => this.handleSourceClicked(s)}
+                key={s}
+                className={classNames({ [styles.navSource]: true, [styles.navSourceSelected]: urlSource === s })}
+              >
+                <FormattedMessage id={`media-browser.nav_title.${s}`} />
+              </a>
+            ))}
+            <div className={styles.navRightPad}>&nbsp;</div>
+            <div className={styles.navScrollArrow}>
+              <FontAwesomeIcon icon={faAngleRight} />
             </div>
           </div>
 
