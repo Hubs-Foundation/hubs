@@ -124,6 +124,11 @@
 
           :local(.name) {
             font-size: 1.2em;
+
+            @media(max-width: 700px) {
+              font-size: 1.1em;
+            }
+
             font-weight: $semi-bold;
             text-overflow: ellipsis;
             overflow: hidden;
@@ -159,7 +164,7 @@
 
           :local(.publisher) {
             i {
-              color: $light-grey;
+              color: $dark-grey;
             }
 
             a {

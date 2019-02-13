@@ -172,7 +172,7 @@ class MediaBrowser extends Component {
 
     // Doing breakpointing here, so we can have proper image placeholder based upon dynamic aspect ratio
     const clientWidth = window.innerWidth;
-    const imageHeight = clientWidth < 1079 ? (clientWidth < 768 ? 75 : 150) : 200;
+    const imageHeight = clientWidth < 1079 ? (clientWidth < 768 ? (clientWidth < 400 ? 85 : 100) : 150) : 200;
 
     // Aspect ratio can vary per image if its an image result, o/w assume 720p
     const imageAspect = isImage ? entry.images.preview.width / entry.images.preview.height : 16.0 / 9.0;
