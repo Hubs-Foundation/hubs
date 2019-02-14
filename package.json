@@ -29,7 +29,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
     "aframe": "github:mozillareality/aframe#ccbf0a6a5b6ae02bd94dd49578e0995022a03a58",
-    "aframe-billboard-component": "^1.0.0",
+    "aframe-billboard-component": "^2.0.0",
     "aframe-inspector": "^0.8.3",
     "aframe-motion-capture-components": "github:mozillareality/aframe-motion-capture-components#aframe090",
     "aframe-physics-extras": "github:mozillareality/aframe-physics-extras#bugfix/physics-collider-world",
