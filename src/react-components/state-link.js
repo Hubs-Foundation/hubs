@@ -37,7 +37,7 @@ class StateLink extends React.Component {
   }
 
   render() {
-    const { innerRef, replace, stateKey, stateValue, ...rest } = this.props; // eslint-disable-line no-unused-vars
+    const { innerRef, replace, stateKey, stateValue, history, ...rest } = this.props; // eslint-disable-line no-unused-vars
     return <a {...rest} onClick={event => this.handleClick(event, this.props.history)} href="#" ref={innerRef} />;
   }
 }
