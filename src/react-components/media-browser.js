@@ -39,6 +39,40 @@ const DEFAULT_FILTERS = {
 
 const SOURCES = ["videos", "images", "gifs", "scenes", "sketchfab", "poly", "twitch"];
 
+const DEFAULT_FACETS = {
+  sketchfab: [
+    { text: "Animals", params: { filter: "animals-pets" } },
+    { text: "Architecture", params: { filter: "architecture" } },
+    { text: "Art", params: { filter: "art-abstract" } },
+    { text: "Vehicles", params: { filter: "cars-vehicles" } },
+    { text: "Characters", params: { filter: "characters-creatures" } },
+    { text: "Culture", params: { filter: "cultural-heritage-history" } },
+    { text: "Gadgets", params: { filter: "electronics-gadgets" } },
+    { text: "Fashion", params: { filter: "fashion-style" } },
+    { text: "Food", params: { filter: "food-drink" } },
+    { text: "Furniture", params: { filter: "furniture-home" } },
+    { text: "Music", params: { filter: "music" } },
+    { text: "Nature", params: { filter: "nature-plants" } },
+    { text: "News", params: { filter: "news-politics" } },
+    { text: "People", params: { filter: "people" } },
+    { text: "Places", params: { filter: "places-travel" } },
+    { text: "Science", params: { filter: "science-technology" } },
+    { text: "Sports", params: { filter: "sports-fitness" } },
+    { text: "Weapons", params: { filter: "weapons-military" } }
+  ],
+  poly: [
+    { text: "Animals", params: { filter: "animals" } },
+    { text: "Architecture", params: { filter: "architecture" } },
+    { text: "Art", params: { filter: "art" } },
+    { text: "Food", params: { filter: "food" } },
+    { text: "Nature", params: { filter: "nature" } },
+    { text: "Objects", params: { filter: "objects" } },
+    { text: "People", params: { filter: "people" } },
+    { text: "Scenes", params: { filter: "scenes" } },
+    { text: "Transport", params: { filter: "transport" } }
+  ]
+};
+
 class MediaBrowser extends Component {
   static propTypes = {
     mediaSearchStore: PropTypes.object,
@@ -77,7 +111,7 @@ class MediaBrowser extends Component {
         return { text: s, params: { q: s } };
       });
     } else {
-      newState.facets = this.getDefaultFacetsForSource(urlSource);
+      newState.facets = DEFAULT_FACETS[urlSource] || [];
     }
 
     return newState;
@@ -120,45 +154,6 @@ class MediaBrowser extends Component {
     }
 
     pushHistoryPath(this.props.history, `/media/${source}`, newSearchParams.toString());
-  };
-
-  getDefaultFacetsForSource = source => {
-    if (source === "sketchfab") {
-      return [
-        { text: "Animals", params: { filter: "animals-pets" } },
-        { text: "Architecture", params: { filter: "architecture" } },
-        { text: "Art", params: { filter: "art-abstract" } },
-        { text: "Vehicles", params: { filter: "cars-vehicles" } },
-        { text: "Characters", params: { filter: "characters-creatures" } },
-        { text: "Culture", params: { filter: "cultural-heritage-history" } },
-        { text: "Gadgets", params: { filter: "electronics-gadgets" } },
-        { text: "Fashion", params: { filter: "fashion-style" } },
-        { text: "Food", params: { filter: "food-drink" } },
-        { text: "Furniture", params: { filter: "furniture-home" } },
-        { text: "Music", params: { filter: "music" } },
-        { text: "Nature", params: { filter: "nature-plants" } },
-        { text: "News", params: { filter: "news-politics" } },
-        { text: "People", params: { filter: "people" } },
-        { text: "Places", params: { filter: "places-travel" } },
-        { text: "Science", params: { filter: "science-technology" } },
-        { text: "Sports", params: { filter: "sports-fitness" } },
-        { text: "Weapons", params: { filter: "weapons-military" } }
-      ];
-    } else if (source === "poly") {
-      return [
-        { text: "Animals", params: { filter: "animals" } },
-        { text: "Architecture", params: { filter: "architecture" } },
-        { text: "Art", params: { filter: "art" } },
-        { text: "Food", params: { filter: "food" } },
-        { text: "Nature", params: { filter: "nature" } },
-        { text: "Objects", params: { filter: "objects" } },
-        { text: "People", params: { filter: "people" } },
-        { text: "Scenes", params: { filter: "scenes" } },
-        { text: "Transport", params: { filter: "transport" } }
-      ];
-    }
-    // TODO
-    return [];
   };
 
   handleFacetClicked = facet => {
