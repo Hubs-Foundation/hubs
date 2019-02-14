@@ -69,7 +69,6 @@ import "./components/camera-focus-button";
 import "./components/mirror-camera-button";
 import "./components/unmute-video-button";
 import "./components/destroy-at-extreme-distances";
-import "./components/gamma-factor";
 import "./components/visible-to-owner";
 import "./components/camera-tool";
 import "./components/scene-sound";
@@ -77,7 +76,6 @@ import "./components/emit-state-change";
 import "./components/action-to-event";
 import "./components/emit-scene-event-on-remove";
 import "./components/stop-event-propagation";
-import "./components/animation";
 import "./components/follow-in-lower-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
@@ -126,7 +124,7 @@ const store = window.APP.store;
 const mediaSearchStore = window.APP.mediaSearchStore;
 
 const qs = new URLSearchParams(location.search);
-const isMobile = AFRAME.utils.device.isMobile();
+const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo();
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";

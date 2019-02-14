@@ -372,21 +372,6 @@ AFRAME.registerComponent("media-video", {
     }
   },
 
-  remove() {
-    if (this.mesh && this.mesh.material) {
-      disposeTexture(this.mesh.material.map);
-    }
-    if (this.video) {
-      this.video.removeEventListener("pause", this.onPauseStateChange);
-      this.video.removeEventListener("play", this.onPauseStateChange);
-    }
-    if (this.hoverMenu) {
-      this.playPauseButton.removeEventListener("grab-start", this.togglePlaying);
-      this.seekForwardButton.removeEventListener("grab-start", this.seekForward);
-      this.seekBackButton.removeEventListener("grab-start", this.seekBack);
-    }
-  },
-
   onPauseStateChange() {
     this.el.setAttribute("media-video", "videoPaused", this.video.paused);
 
@@ -448,7 +433,7 @@ AFRAME.registerComponent("media-video", {
 
     if (!src || src === oldData.src) return;
 
-    this.remove();
+    this.cleanUp();
     if (this.mesh && this.mesh.material) {
       this.mesh.material.map = null;
       this.mesh.material.needsUpdate = true;
@@ -594,6 +579,26 @@ AFRAME.registerComponent("media-video", {
         this.el.setAttribute("media-video", "time", this.video.currentTime);
         this.lastUpdate = now;
       }
+    }
+  },
+
+  cleanUp() {
+    if (this.mesh && this.mesh.material) {
+      disposeTexture(this.mesh.material.map);
+    }
+  },
+
+  remove() {
+    this.cleanUp();
+
+    if (this.video) {
+      this.video.removeEventListener("pause", this.onPauseStateChange);
+      this.video.removeEventListener("play", this.onPauseStateChange);
+    }
+    if (this.hoverMenu) {
+      this.playPauseButton.removeEventListener("grab-start", this.togglePlaying);
+      this.seekForwardButton.removeEventListener("grab-start", this.seekForward);
+      this.seekBackButton.removeEventListener("grab-start", this.seekBack);
     }
   }
 });
