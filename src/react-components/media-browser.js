@@ -12,6 +12,9 @@ import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploa
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import qsTruthy from "../utils/qs_truthy";
+
+const allowContentSearch = qsTruthy("content_search");
 
 const PUBLISHER_FOR_ENTRY_TYPE = {
   sketchfab_model: "Sketchfab",
@@ -272,21 +275,23 @@ class MediaBrowser extends Component {
             </div>
           </div>
 
-          <div className={styles.nav}>
-            {SOURCES.map(s => (
-              <a
-                onClick={() => this.handleSourceClicked(s)}
-                key={s}
-                className={classNames({ [styles.navSource]: true, [styles.navSourceSelected]: urlSource === s })}
-              >
-                <FormattedMessage id={`media-browser.nav_title.${s}`} />
-              </a>
-            ))}
-            <div className={styles.navRightPad}>&nbsp;</div>
-            <div className={styles.navScrollArrow}>
-              <FontAwesomeIcon icon={faAngleRight} />
+          {allowContentSearch && (
+            <div className={styles.nav}>
+              {SOURCES.map(s => (
+                <a
+                  onClick={() => this.handleSourceClicked(s)}
+                  key={s}
+                  className={classNames({ [styles.navSource]: true, [styles.navSourceSelected]: urlSource === s })}
+                >
+                  <FormattedMessage id={`media-browser.nav_title.${s}`} />
+                </a>
+              ))}
+              <div className={styles.navRightPad}>&nbsp;</div>
+              <div className={styles.navScrollArrow}>
+                <FontAwesomeIcon icon={faAngleRight} />
+              </div>
             </div>
-          </div>
+          )}
 
           {this.state.facets &&
             this.state.facets.length > 0 && (
