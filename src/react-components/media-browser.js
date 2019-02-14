@@ -202,7 +202,7 @@ class MediaBrowser extends Component {
     const hasPrevious = searchParams.get("cursor");
     const urlSource = this.props.history.location.pathname.substring(7);
     const apiSource = this.state.result && this.state.result.meta.source;
-    const isVariable = this.state.result && ["bing_images", "tenor"].includes(apiSource);
+    const isVariableWidth = this.state.result && ["bing_images", "tenor"].includes(apiSource);
 
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
@@ -301,7 +301,7 @@ class MediaBrowser extends Component {
 
           <div className={styles.body}>
             {this.state.result && (
-              <div className={classNames({ [styles.tiles]: true, [styles.tilesVariable]: isVariable })}>
+              <div className={classNames({ [styles.tiles]: true, [styles.tilesVariable]: isVariableWidth })}>
                 {this.state.result.entries.map(this.entryToTile)}
               </div>
             )}
