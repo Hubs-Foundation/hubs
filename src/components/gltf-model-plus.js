@@ -420,12 +420,15 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.inflatedEl.parentNode.removeChild(this.inflatedEl);
 
       this.inflatedEl.object3D.traverse(x => {
-        if (x.material) {
+        if (x.material && x.material.dispose) {
           x.material.dispose();
         }
 
         if (x.geometry) {
-          x.geometry.dispose();
+          if (x.geometry.dispose) {
+            x.geometry.dispose();
+          }
+
           x.geometry.boundsTree = null;
         }
       });
