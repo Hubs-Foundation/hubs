@@ -1,7 +1,11 @@
 :local(.touchZone) {
   position: absolute;
-  height: 20vh;
+  height: 30vh;
   bottom: 0;
+
+  @media(orientation: portrait) {
+    display: none;
+  }
 }
 
 :local(.touchZone.left) {
@@ -19,7 +23,7 @@
   height: 0;
   left: 0;
   right: 0;
-  bottom: 20vh;
+  bottom: 15vh;
   display: flex;
   align-items: center;
   justify-content: space-around;
