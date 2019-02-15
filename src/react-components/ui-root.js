@@ -45,6 +45,7 @@ import TwoDHUD from "./2d-hud";
 import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
@@ -893,7 +894,11 @@ class UIRoot extends Component {
                 placeholder="Send a message..."
               />
               <WithHoverSound>
-                <input className={styles.messageEntrySubmit} type="submit" value="send" />
+                <button className={styles.messageEntrySubmit} type="submit">
+                  <i>
+                    <FontAwesomeIcon icon={faPaperPlane} />
+                  </i>
+                </button>
               </WithHoverSound>
             </div>
           </form>
@@ -1223,6 +1228,8 @@ class UIRoot extends Component {
       "in-modal-or-overlay": this.isInModalOrOverlay()
     };
 
+    const isMobile = AFRAME.utils.device.isMobile();
+
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
@@ -1325,7 +1332,10 @@ class UIRoot extends Component {
             )}
             {entered && (
               <form onSubmit={this.sendMessage}>
-                <div className={styles.messageEntryInRoom} style={{ height: pendingMessageFieldHeight }}>
+                <div
+                  className={classNames({ [styles.messageEntryInRoom]: true, [styles.messageEntryOnMobile]: isMobile })}
+                  style={{ height: pendingMessageFieldHeight }}
+                >
                   {this.state.pendingMessage.startsWith("/") && (
                     <ChatCommandHelp matchingPrefix={this.state.pendingMessage.substring(1)} />
                   )}
@@ -1355,11 +1365,14 @@ class UIRoot extends Component {
                     }}
                     placeholder="Send a message..."
                   />
-                  <input
-                    className={classNames([styles.messageEntrySubmit, styles.messageEntrySubmitInRoom])}
+                  <button
                     type="submit"
-                    value="send"
-                  />
+                    className={classNames([styles.messageEntrySubmit, styles.messageEntrySubmitInRoom])}
+                  >
+                    <i>
+                      <FontAwesomeIcon icon={faPaperPlane} />
+                    </i>
+                  </button>
                   <WithHoverSound>
                     <button
                       className={classNames([styles.messageEntrySpawn])}
@@ -1502,13 +1515,6 @@ class UIRoot extends Component {
                       </StateLink>
                     </WithHoverSound>
                   </div>
-                )}
-                {!this.isWaitingForAutoExit() && (
-                  <TwoDHUD.BottomHUD
-                    showPhotoPicker={AFRAME.utils.device.isMobile()}
-                    onMediaPicked={this.createObject}
-                    history={this.props.history}
-                  />
                 )}
               </div>
             ) : null}

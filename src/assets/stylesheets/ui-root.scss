@@ -229,25 +229,31 @@ body.vr-mode {
 }
 
 :local(.message-entry-submit) {
-  @extend %action-button;
+  color: $action-color;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
+  background-color: white;
   position: absolute;
   right: 10px;
-  height: 32px;
-  min-width: 80px;
-  bottom: 8px;
-  border-radius: 10px;
+  min-width: 40px;
+  height: 100%;
+  bottom: 0px;
+  border: 0px;
+  font-size: 1.5em;
+  cursor: pointer;
 }
 
 :local(.message-entry-in-room) {
-  @media(max-width: 900px) {
-    display:none;
-  }
-
   position: absolute;
   z-index: 2;
-  left: 16px;
   bottom: 20px;
-  width: 33%;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  width: 95%;
+  max-width: 700px;
   height: 48px;
   display: flex;
   justify-content: center;
@@ -255,7 +261,7 @@ body.vr-mode {
   background-color: $darker-grey;
   border-radius: 16px;
   pointer-events: auto;
-  opacity: 0.3;
+  opacity: 0.66;
   transition: opacity 0.15s linear;
 
   :local(.message-entry-input-in-room) {
@@ -292,6 +298,7 @@ body.vr-mode {
   transition: opacity 0.15s linear;
 
   :local(.message-entry-submit-in-room) {
+    background-color: transparent;
     visibility: visible;
   }
 
@@ -299,3 +306,11 @@ body.vr-mode {
     visibility: visible;
   }
 }
+
+:local(.message-entry-on-mobile) {
+  // Hide chatbox for joysticks
+  @media (orientation: landscape) {
+    display: none;
+  }
+}
+
