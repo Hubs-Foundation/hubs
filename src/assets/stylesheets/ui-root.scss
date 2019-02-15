@@ -212,7 +212,7 @@ body.vr-mode {
   overflow: hidden;
   resize: none;
   background-color: transparent;
-  color: $darkest-transparent;
+  color: black;
   padding: 8px 1.25em;
   line-height: 28px;
   font-size: 1.1em;
@@ -223,7 +223,7 @@ body.vr-mode {
 }
 
 :local(.message-entry-input)::placeholder{
-  color: $light-grey;
+  color: black;
   font-weight: 300;
   font-style: italic;
 }
@@ -252,10 +252,11 @@ body.vr-mode {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: $action-color;
+  background-color: white;
+  border: 1px solid #e2e2e2;
   border-radius: 16px;
   pointer-events: auto;
-  opacity: 0.9;
+  opacity: 0.5;
   transition: opacity 0.15s linear;
 
   :local(.message-entry-input-in-room) {
