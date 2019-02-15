@@ -2,7 +2,7 @@
 // This component gets around that by calling .togglePlaying() to play/pause the video based on a property change.
 AFRAME.registerComponent("video-pause-state", {
   schema: {
-    paused: { default: false, public: true }
+    paused: { default: false }
   },
 
   init() {

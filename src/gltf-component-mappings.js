@@ -190,34 +190,55 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
   el.setAttribute("hoverable", "");
 });
 
-function propertyMapper(componentKey, componentProperty, componentValue) {
-  const mappedComponent = AFRAME.GLTFModelPlus.components[componentKey];
-
-  if (!mappedComponent) {
-    return null;
-  }
-
-  const componentName = mappedComponent.componentName;
-
-  if (mappedComponent.propertyMapper) {
-    return mappedComponent.propertyMapper(componentName, componentProperty, componentValue);
-  }
-
-  const componentSchema = AFRAME.components[componentName].schema;
-
-  if (typeof componentValue === "object") {
-    if (!componentSchema[componentProperty] || !componentSchema[componentProperty].public) {
-      return null;
+const publicComponents = {
+  video: {
+    mappedComponent: "video-pause-state",
+    publicProperties: {
+      paused: {
+        mappedProperty: "paused",
+        getMappedValue(value) {
+          return !!value;
+        }
+      }
+    }
+  },
+  "animation-loop": {
+    mappedComponent: "animation-loop",
+    publicProperties: {
+      paused: {
+        mappedProperty: "paused",
+        getMappedValue(value) {
+          return !!value;
+        }
+      }
     }
   }
+};
 
-  return { name: componentName, property: componentProperty, value: componentValue };
+function getSanitizedComponentMapping(inputComponent, inputProperty) {
+  const publicComponent = publicComponents[inputComponent];
+
+  if (!publicComponent) {
+    throw new Error(`Component "${inputComponent}" is not public.`);
+  }
+
+  const publicProperty = publicComponent.publicProperties[inputProperty];
+
+  if (!publicProperty) {
+    throw new Error(`Component "${inputComponent}"'s property "${inputProperty}" is not public.`);
+  }
+
+  return {
+    mappedComponent: publicComponent.mappedComponent,
+    mappedProperty: publicProperty.mappedProperty,
+    getMappedValue: publicProperty.getMappedValue
+  };
 }
 
 AFRAME.GLTFModelPlus.registerComponent(
   "trigger-volume",
   "trigger-volume",
-  (el, componentName, componentData, components, rootEl) => {
+  (el, componentName, componentData, components, indexToEntityMap) => {
     const {
       size,
       target,
@@ -229,35 +250,33 @@ AFRAME.GLTFModelPlus.registerComponent(
       leaveValue
     } = componentData;
 
-    const enterAction = propertyMapper(enterComponent, enterProperty, enterValue);
+    let enterComponentMapping, leaveComponentMapping, targetEntity;
 
-    if (!enterAction) {
-      console.warn(
-        `GLTFModelPlus: enterComponent "${enterComponent}" on trigger-volume has an invalid property "${enterProperty}". Skipping...`
-      );
+    try {
+      enterComponentMapping = getSanitizedComponentMapping(enterComponent, enterProperty);
+      leaveComponentMapping = getSanitizedComponentMapping(leaveComponent, leaveProperty);
+
+      targetEntity = indexToEntityMap[target];
+
+      if (!targetEntity) {
+        throw new Error(`Couldn't find target entity with index: ${target}.`);
+      }
+    } catch (e) {
+      console.warn(`Error inflating gltf component "trigger-volume": ${e.message}`);
       return;
-    }
-
-    const leaveAction = propertyMapper(leaveComponent, leaveProperty, leaveValue);
-
-    if (!leaveAction) {
-      console.warn(
-        `GLTFModelPlus: leaveComponent "${leaveComponent}" on trigger-volume has an invalid property "${leaveProperty}". Skipping...`
-      );
     }
 
     // Filter out scope and colliders properties.
     el.setAttribute("trigger-volume", {
-      colliders: "#player-rig",
-      scope: rootEl,
+      colliders: "#player-camera",
       size,
-      target,
-      enterComponent: enterAction.name,
-      enterProperty: enterAction.property,
-      enterValue: enterAction.value,
-      leaveComponent: leaveAction.name,
-      leaveProperty: leaveAction.property,
-      leaveValue: leaveAction.value
+      target: targetEntity,
+      enterComponent: enterComponentMapping.mappedComponent,
+      enterProperty: enterComponentMapping.mappedProperty,
+      enterValue: enterComponentMapping.getMappedValue(enterValue),
+      leaveComponent: leaveComponentMapping.mappedComponent,
+      leaveProperty: leaveComponentMapping.mappedProperty,
+      leaveValue: leaveComponentMapping.getMappedValue(leaveValue)
     });
   }
 );
