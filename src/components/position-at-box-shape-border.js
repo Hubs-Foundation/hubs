@@ -32,11 +32,6 @@ const dirs = {
   }
 };
 
-const inverseHalfExtents = {
-  x: "z",
-  z: "x"
-};
-
 AFRAME.registerComponent("position-at-box-shape-border", {
   multiple: true,
   schema: {
