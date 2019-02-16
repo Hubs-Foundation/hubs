@@ -244,6 +244,14 @@ body.vr-mode {
   cursor: pointer;
 }
 
+:local(.message-entry-button-in-room) {
+  color: $dark-grey;
+}
+
+:local(.message-entry-button-in-room):hover {
+  color: $action-color;
+}
+
 :local(.message-entry-submit) {
   right: 15px;
 }
