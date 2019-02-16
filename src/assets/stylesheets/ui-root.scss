@@ -228,7 +228,7 @@ body.vr-mode {
   font-style: italic;
 }
 
-:local(.message-entry-submit) {
+:local(.message-entry-button) {
   color: $action-color;
   appearance: none;
   -moz-appearance: none;
@@ -236,13 +236,24 @@ body.vr-mode {
   outline-style: none;
   background-color: white;
   position: absolute;
-  right: 10px;
   min-width: 40px;
   height: 100%;
   bottom: 0px;
   border: 0px;
   font-size: 1.5em;
   cursor: pointer;
+}
+
+:local(.message-entry-submit) {
+  right: 15px;
+}
+
+:local(.message-entry-upload) {
+  margin-bottom: 1px;
+  right: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 :local(.message-entry-in-room) {
@@ -284,12 +295,11 @@ body.vr-mode {
     background-position-y: 1px;
     padding: 0;
     border-radius: 16px;
-    visibility: hidden;
   }
 
-  :local(.message-entry-submit-in-room) {
+  :local(.message-entry-button-in-room) {
     border: 0;
-    visibility: hidden;
+    background-color: transparent;
   }
 }
 
@@ -297,13 +307,12 @@ body.vr-mode {
   opacity: 1.0;
   transition: opacity 0.15s linear;
 
-  :local(.message-entry-submit-in-room) {
+  :local(.message-entry-button-in-room) {
+    border: 0;
     background-color: transparent;
-    visibility: visible;
   }
 
   :local(.message-entry-spawn) {
-    visibility: visible;
   }
 }
 

@@ -46,6 +46,8 @@ import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
+import { faCamera } from "@fortawesome/free-solid-svg-icons/faCamera";
+import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
@@ -894,7 +896,7 @@ class UIRoot extends Component {
                 placeholder="Send a message..."
               />
               <WithHoverSound>
-                <button className={styles.messageEntrySubmit} type="submit">
+                <button className={classNames([styles.messageEntryButton, styles.messageEntrySubmit])} type="submit">
                   <i>
                     <FontAwesomeIcon icon={faPaperPlane} />
                   </i>
@@ -1376,9 +1378,38 @@ class UIRoot extends Component {
                     }}
                     placeholder="Send a message..."
                   />
+                  <input
+                    id="message-entry-media-input"
+                    type="file"
+                    style={{ display: "none" }}
+                    accept={isMobile ? "image/*" : "*"}
+                    multiple
+                    onChange={e => {
+                      for (const file of e.target.files) {
+                        this.createObject(file);
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor="message-entry-media-input"
+                    title={"Upload"}
+                    className={classNames([
+                      styles.messageEntryButton,
+                      styles.messageEntryButtonInRoom,
+                      styles.messageEntryUpload
+                    ])}
+                  >
+                    <i>
+                      <FontAwesomeIcon icon={isMobile ? faCamera : faPlus} />
+                    </i>
+                  </label>
                   <button
                     type="submit"
-                    className={classNames([styles.messageEntrySubmit, styles.messageEntrySubmitInRoom])}
+                    className={classNames([
+                      styles.messageEntryButton,
+                      styles.messageEntryButtonInRoom,
+                      styles.messageEntrySubmit
+                    ])}
                   >
                     <i>
                       <FontAwesomeIcon icon={faPaperPlane} />
