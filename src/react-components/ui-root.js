@@ -1225,10 +1225,12 @@ class UIRoot extends Component {
     const rootStyles = {
       [styles.ui]: true,
       "ui-root": true,
-      "in-modal-or-overlay": this.isInModalOrOverlay()
+      "in-modal-or-overlay": this.isInModalOrOverlay(),
+      [styles.messageEntryOnTop]: this.state.messageEntryOnTop
     };
 
     const isMobile = AFRAME.utils.device.isMobile();
+    const presenceLogEntries = this.props.presenceLogEntries || [];
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1322,13 +1324,18 @@ class UIRoot extends Component {
 
             {(!this.state.entered || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
-                <PresenceLog entries={this.props.presenceLogEntries || []} hubId={this.props.hubId} />
+                <PresenceLog entries={presenceLogEntries} hubId={this.props.hubId} />
                 <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
               </div>
             )}
 
             {entered && (
-              <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} hubId={this.props.hubId} />
+              <PresenceLog
+                onTop={this.state.messageEntryOnTop}
+                inRoom={true}
+                entries={presenceLogEntries}
+                hubId={this.props.hubId}
+              />
             )}
             {entered && (
               <form onSubmit={this.sendMessage}>
@@ -1348,7 +1355,11 @@ class UIRoot extends Component {
                     ])}
                     value={this.state.pendingMessage}
                     rows={textRows}
-                    onFocus={e => e.target.select()}
+                    onFocus={e => {
+                      this.setState({ messageEntryOnTop: isMobile });
+                      e.target.select();
+                    }}
+                    onBlur={() => this.setState({ messageEntryOnTop: false })}
                     onChange={e => {
                       e.stopPropagation();
                       this.setState({ pendingMessage: e.target.value });
@@ -1478,19 +1489,20 @@ class UIRoot extends Component {
               <span className={styles.occupantCount}>{this.occupantCount()}</span>
             </div>
 
-            {this.state.showPresenceList && (
-              <PresenceList
-                presences={this.props.presences}
-                sessionId={this.props.sessionId}
-                signedIn={this.state.signedIn}
-                email={this.props.store.state.credentials.email}
-                onSignIn={this.showSignInDialog}
-                onSignOut={this.signOut}
-              />
-            )}
+            {this.state.showPresenceList &&
+              !this.state.messageEntryOnTop && (
+                <PresenceList
+                  presences={this.props.presences}
+                  sessionId={this.props.sessionId}
+                  signedIn={this.state.signedIn}
+                  email={this.props.store.state.credentials.email}
+                  onSignIn={this.showSignInDialog}
+                  onSignOut={this.signOut}
+                />
+              )}
 
             {entered ? (
-              <div>
+              <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
                   muted={this.state.muted}
                   frozen={this.state.frozen}

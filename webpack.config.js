@@ -61,7 +61,7 @@ function createHTTPSConfig() {
   }
 }
 
-const defaultHostName = "hubs.local";
+const defaultHostName = "192.168.1.69";
 const host = process.env.HOST_IP || defaultHostName;
 
 function matchRegex({ include, exclude }) {

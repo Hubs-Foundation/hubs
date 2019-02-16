@@ -55,7 +55,7 @@ AFRAME.registerSystem("exit-on-blur", {
   },
 
   onTimeout() {
-    this.el.dispatchEvent(new CustomEvent("exit"));
+    // this.el.dispatchEvent(new CustomEvent("exit"));
   },
 
   remove() {
