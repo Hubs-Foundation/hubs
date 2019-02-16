@@ -192,11 +192,8 @@
   background-image: url(../hud/freeze_on-hover.png);
 }
 
-:local(.iconButton.create-object) {
-  background-image: url(../hud/create_object.png);
-}
-:local(.iconButton.create-object:hover) {
-  background-image: url(../hud/create_object-hover.png);
+:local(.iconButton.spawn) {
+  background-image: url(../hud/spawn.png);
 }
 
 :local(.iconButton.mobile-media-picker) {

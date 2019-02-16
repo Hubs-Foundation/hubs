@@ -16,6 +16,7 @@ class TopHUD extends Component {
     muted: PropTypes.bool,
     frozen: PropTypes.bool,
     videoShareMediaSource: PropTypes.string,
+    history: PropTypes.object,
     onToggleMute: PropTypes.func,
     onToggleFreeze: PropTypes.func,
     onSpawnPen: PropTypes.func,
@@ -135,12 +136,12 @@ class TopHUD extends Component {
             />
           </WithHoverSound>
           <WithHoverSound>
-            <div
-              className={cx(styles.iconButton, styles.freeze, {
-                [styles.active]: this.props.frozen
-              })}
-              title={this.props.frozen ? "Resume" : "Pause"}
-              onClick={this.props.onToggleFreeze}
+            <StateLink
+              className={cx(uiStyles.uiInteractive, styles.iconButton, styles.spawn)}
+              title={"Create"}
+              stateKey="modal"
+              stateValue="create"
+              history={this.props.history}
             />
           </WithHoverSound>
           <WithHoverSound>
@@ -163,47 +164,4 @@ class TopHUD extends Component {
   }
 }
 
-const BottomHUD = ({ showPhotoPicker, onMediaPicked, history }) => (
-  <div className={cx(styles.container, styles.column, styles.bottom, styles.unselectable)}>
-    {showPhotoPicker ? (
-      <div className={cx(uiStyles.uiInteractive, styles.panel, styles.up)}>
-        <input
-          id="media-picker-input"
-          className={cx(styles.hide)}
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={e => {
-            for (const file of e.target.files) {
-              onMediaPicked(file);
-            }
-          }}
-        />
-        <label htmlFor="media-picker-input">
-          <div className={cx(styles.iconButton, styles.mobileMediaPicker)} title={"Pick Media"} />
-        </label>
-      </div>
-    ) : (
-      <div />
-    )}
-    <div>
-      <WithHoverSound>
-        <StateLink
-          className={cx(uiStyles.uiInteractive, styles.iconButton, styles.large, styles.createObject)}
-          stateKey="modal"
-          stateValue="create"
-          history={history}
-          title={"Create Object"}
-        />
-      </WithHoverSound>
-    </div>
-  </div>
-);
-
-BottomHUD.propTypes = {
-  showPhotoPicker: PropTypes.bool,
-  onMediaPicked: PropTypes.func,
-  history: PropTypes.object
-};
-
-export default { TopHUD, BottomHUD };
+export default { TopHUD };

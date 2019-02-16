@@ -1535,6 +1535,7 @@ class UIRoot extends Component {
             {entered ? (
               <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
+                  history={this.props.history}
                   muted={this.state.muted}
                   frozen={this.state.frozen}
                   spacebubble={this.state.spacebubble}
