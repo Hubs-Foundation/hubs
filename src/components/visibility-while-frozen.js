@@ -17,10 +17,16 @@ AFRAME.registerComponent("visibility-while-frozen", {
     this.camWorldPos = new THREE.Vector3();
     this.objWorldPos = new THREE.Vector3();
     this.cam = this.el.sceneEl.camera.el.object3D;
-    this.hoverable = this.el;
 
-    while (this.hoverable && !this.hoverable.getAttribute("hoverable")) {
-      this.hoverable = this.hoverable.parentNode;
+    let hoverableSearch = this.el;
+
+    while (hoverableSearch && hoverableSearch.getAttribute) {
+      if (hoverableSearch.getAttribute("hoverable")) {
+        this.hoverable = hoverableSearch;
+        break;
+      }
+
+      hoverableSearch = hoverableSearch.parentNode;
     }
 
     this.onStateChange = evt => {
@@ -62,13 +68,13 @@ AFRAME.registerComponent("visibility-while-frozen", {
     }
 
     const isRotating = AFRAME.scenes[0].systems["rotate-selected-object"].rotating;
-    const passesHoverCheck = !this.data.requireHover || (this.hoverable && this.hoverable.is("hovered")) || isVisible;
 
-    const shouldBeVisible =
-      ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) &&
-      isWithinDistance &&
-      !isRotating &&
-      passesHoverCheck;
+    let shouldBeVisible =
+      ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) && isWithinDistance && !isRotating;
+
+    if (this.data.requireHover) {
+      shouldBeVisible = shouldBeVisible && ((this.hoverable && this.hoverable.is("hovered")) || isVisible);
+    }
 
     if (isVisible !== shouldBeVisible) {
       this.el.setAttribute("visible", shouldBeVisible);
