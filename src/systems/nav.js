@@ -8,7 +8,7 @@ AFRAME.registerSystem("nav", {
   loadMesh: function(mesh, zone) {
     this.el.object3D.updateMatrixWorld();
 
-    if (this.mesh) {
+    if (this.mesh && this.mesh.geometry && this.mesh.geometry.dispose) {
       this.mesh.geometry.dispose();
     }
 
