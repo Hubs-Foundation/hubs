@@ -85,8 +85,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     // If the target is being shown or the scale changed while the opening animation is being run,
     // we need to start or re-start the animation.
     if (opening || (scaleChanged && isAnimating)) {
-      this.halfExtents = null;
-      this._updateBox(this.data.animate);
+      this._updateBox(this.data.animate, true);
     }
 
     this.wasVisible = isVisible;
@@ -104,8 +103,8 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     const tempParentWorldScale = new THREE.Vector3();
     const boxFaceNormal = new THREE.Vector3();
 
-    return function(animate) {
-      if (!this.halfExtents || this.mesh !== this.el.getObject3D("mesh") || this.shape !== this.el.components.shape) {
+    return function(animate, force) {
+      if (force || this.mesh !== this.el.getObject3D("mesh") || this.shape !== this.el.components.shape) {
         this.mesh = this.el.getObject3D("mesh");
         this.shape = this.el.components.shape;
 
