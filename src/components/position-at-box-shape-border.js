@@ -85,6 +85,7 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     // If the target is being shown or the scale changed while the opening animation is being run,
     // we need to start or re-start the animation.
     if (opening || (scaleChanged && isAnimating)) {
+      this.halfExtents = null;
       this._updateBox(this.data.animate);
     }
 
