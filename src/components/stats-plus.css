@@ -14,7 +14,7 @@
   font-family: monospace;
   cursor: pointer;
   position: absolute;
-  top: 50px; 
+  bottom: 0px;
   right: 6px;
   padding: 8px 12px;
   color: #aaa;

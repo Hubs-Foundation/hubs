@@ -41,16 +41,17 @@ import RoomInfoDialog from "./room-info-dialog.js";
 
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
+import SettingsMenu from "./settings-menu.js";
 import TwoDHUD from "./2d-hud";
 import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
+import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
 import { faCamera } from "@fortawesome/free-solid-svg-icons/faCamera";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 
@@ -137,6 +138,7 @@ class UIRoot extends Component {
     dialog: null,
     showInviteDialog: false,
     showPresenceList: false,
+    showSettingsMenu: false,
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
@@ -1499,15 +1501,15 @@ class UIRoot extends Component {
               )}
             />
 
-            <WithHoverSound>
-              <StateLink stateKey="modal" stateValue="help" history={this.props.history}>
-                <button className={classNames([styles.helpIcon, "help-button"])}>
-                  <i>
-                    <FontAwesomeIcon icon={faQuestion} />
-                  </i>
-                </button>
-              </StateLink>
-            </WithHoverSound>
+            <div
+              onClick={() => this.setState({ showSettingsMenu: !this.state.showSettingsMenu })}
+              className={classNames({
+                [styles.settingsInfo]: true,
+                [styles.settingsInfoSelected]: this.state.showSettingsMenu
+              })}
+            >
+              <FontAwesomeIcon icon={faBars} />
+            </div>
 
             <div
               onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
@@ -1531,6 +1533,8 @@ class UIRoot extends Component {
                   onSignOut={this.signOut}
                 />
               )}
+
+            {this.state.showSettingsMenu && !this.state.messageEntryOnTop && <SettingsMenu />}
 
             {entered ? (
               <div className={styles.topHud}>
