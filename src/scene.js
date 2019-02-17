@@ -16,9 +16,9 @@ import "./systems/nav";
 
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
-import ReactDOM from "react-dom";
-import React from "react";
-import SceneUI from "./react-components/scene-ui";
+// import ReactDOM from "react-dom";
+// import React from "react";
+// import SceneUI from "./react-components/scene-ui";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 
 import "./gltf-component-mappings";
@@ -42,15 +42,15 @@ import registerTelemetry from "./telemetry";
 disableiOSZoom();
 
 function mountUI(scene, props = {}) {
-  ReactDOM.render(
-    <SceneUI
-      {...{
-        scene,
-        ...props
-      }}
-    />,
-    document.getElementById("ui-root")
-  );
+  // ReactDOM.render(
+  //   <SceneUI
+  //     {...{
+  //       scene,
+  //       ...props
+  //     }}
+  //   />,
+  //   document.getElementById("ui-root")
+  // );
 }
 
 const onReady = async () => {
