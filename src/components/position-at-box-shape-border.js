@@ -103,8 +103,8 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     const tempParentWorldScale = new THREE.Vector3();
     const boxFaceNormal = new THREE.Vector3();
 
-    return function(animate, force) {
-      if (force || this.mesh !== this.el.getObject3D("mesh") || this.shape !== this.el.components.shape) {
+    return function(animate, forceNewExtents) {
+      if (forceNewExtents || this.mesh !== this.el.getObject3D("mesh") || this.shape !== this.el.components.shape) {
         this.mesh = this.el.getObject3D("mesh");
         this.shape = this.el.components.shape;
 
