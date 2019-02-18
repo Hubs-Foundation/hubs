@@ -54,10 +54,12 @@
 
   a {
     color: black;
+    text-decoration-color: $dark-grey;
   }
 
   :local(.list-item-link) {
     text-decoration: underline;
+    text-decoration-color: $dark-grey;
     cursor: pointer;
   }
 }

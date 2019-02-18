@@ -118,17 +118,21 @@
     width: 100%;
   }
 
-  :local(.profile-name) {
+  :local(.choose-scene) {
     margin-top: 4px;
     margin-bottom: 32px;
     @extend %default-font;
     font-size: 1.1em;
     color: $action-color;
     text-decoration: none;
+    cursor: pointer;
     font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
+    i {
+      margin-right: 8px;
+    }
   }
 
   :local(.profile-icon) {

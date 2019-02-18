@@ -46,6 +46,7 @@ import TwoDHUD from "./2d-hud";
 import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
+import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
 import { faCamera } from "@fortawesome/free-solid-svg-icons/faCamera";
@@ -869,15 +870,15 @@ class UIRoot extends Component {
 
         <div className={entryStyles.center}>
           <WithHoverSound>
-            <StateLink
-              stateKey="overlay"
-              stateValue="profile"
-              history={this.props.history}
-              className={entryStyles.profileName}
+            <div
+              className={entryStyles.chooseScene}
+              onClick={() => this.props.mediaSearchStore.sourceNavigate("scenes", null, false)}
             >
-              <img src="../assets/images/account.svg" className={entryStyles.profileIcon} />
-              <div title={this.props.store.state.profile.displayName}>{this.props.store.state.profile.displayName}</div>
-            </StateLink>
+              <i>
+                <FontAwesomeIcon icon={faImage} />
+              </i>
+              <FormattedMessage id="entry.change-scene" />
+            </div>
           </WithHoverSound>
 
           <form onSubmit={this.sendMessage}>
@@ -1527,6 +1528,7 @@ class UIRoot extends Component {
             {this.state.showPresenceList &&
               !this.state.messageEntryOnTop && (
                 <PresenceList
+                  history={this.props.history}
                   presences={this.props.presences}
                   sessionId={this.props.sessionId}
                   signedIn={this.state.signedIn}
