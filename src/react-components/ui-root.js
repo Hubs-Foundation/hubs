@@ -1350,7 +1350,7 @@ class UIRoot extends Component {
                   style={{ height: pendingMessageFieldHeight }}
                 >
                   {this.state.pendingMessage.startsWith("/") && (
-                    <ChatCommandHelp matchingPrefix={this.state.pendingMessage.substring(1)} />
+                    <ChatCommandHelp onTop={this.state.messageEntryOnTop} matchingPrefix={this.state.pendingMessage.substring(1)} />
                   )}
                   <textarea
                     style={{ height: pendingMessageTextareaHeight }}
