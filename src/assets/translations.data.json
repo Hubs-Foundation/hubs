@@ -165,6 +165,10 @@
     "commands.help": "Show help.",
     "commands.leave": "Disconnect from the room.",
     "commands.duck": "The duck tested well. Quack.",
+    "settings.change_avatar": "Set Name & Avatar...",
+    "settings.change_scene": "Choose Scene...",
+    "settings.controls": "Controls",
+    "settings.help": "Help",
     "video_share.notify": "Select again to un-share video."
   }
 }

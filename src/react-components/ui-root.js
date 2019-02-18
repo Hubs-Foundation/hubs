@@ -1534,7 +1534,8 @@ class UIRoot extends Component {
                 />
               )}
 
-            {this.state.showSettingsMenu && !this.state.messageEntryOnTop && <SettingsMenu />}
+            {this.state.showSettingsMenu &&
+              !this.state.messageEntryOnTop && <SettingsMenu history={this.props.history} />}
 
             {entered ? (
               <div className={styles.topHud}>

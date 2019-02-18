@@ -31,7 +31,7 @@ const PRIVACY_POLICY_LINKS = {
   twitch: "https://www.twitch.tv/p/legal/privacy-policy/"
 };
 
-const DEFAULT_FILTERS = {
+export const DEFAULT_FILTERS = {
   gifs: "trending",
   sketchfab: "featured",
   scenes: "featured"

@@ -17,10 +17,6 @@
   border-right: 5px solid transparent;
   border-bottom: 5px solid $white-transparent;
   position: absolute;
-
-  @media(max-width: 500px) {
-    left: 22px;
-  }
 }
 
 :local(.contents) {
@@ -49,17 +45,15 @@
   margin: 6px 0;
 }
 
-:local(.device) {
-  width: 32px;
-  height: 32px;
-  position: relative;
-  margin: 0px 12px 0px 0px;
+:local(.list-item) {
+  flex: 10;
+  white-space: nowrap;
+  margin-right: 24px;
+  max-width: 45vw;
+  overflow: hidden;
 
-  img {
-    position: absolute;
-    left: 2px;
-    width: 32px;
-    height: 32px;
+  a {
+    color: black;
   }
 }
 

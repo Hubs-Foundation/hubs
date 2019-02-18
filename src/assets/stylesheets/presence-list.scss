@@ -10,14 +10,10 @@
   @extend %attach-point;
   top: -5px;
   right: 44px;
-}
 
-:local(.display-name) {
-  flex: 10;
-  white-space: nowrap;
-  margin-right: 24px;
-  max-width: 45vw;
-  overflow: hidden;
+  @media(max-width: 500px) {
+    right: 22px;
+  }
 }
 
 :local(.self-display-name) {
@@ -42,3 +38,18 @@
     margin-left: 24px;
   }
 }
+
+:local(.icon) {
+  width: 32px;
+  height: 32px;
+  position: relative;
+  margin: 0px 12px 0px 0px;
+
+  img {
+    position: absolute;
+    left: 2px;
+    width: 32px;
+    height: 32px;
+  }
+}
+

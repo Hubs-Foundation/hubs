@@ -30,12 +30,12 @@ export default class PresenceList extends Component {
     return (
       <WithHoverSound key={sessionId}>
         <div className={styles.row}>
-          <div className={styles.device}>
+          <div className={styles.icon}>
             <img src={image} />
           </div>
           <div
             className={classNames({
-              [styles.displayName]: true,
+              [styles.listItem]: true,
               [styles.selfDisplayName]: sessionId === this.props.sessionId
             })}
           >
