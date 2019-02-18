@@ -41,11 +41,10 @@ export default class MediaSearchStore extends EventTarget {
     this.result = null;
     this.dispatchEvent(new CustomEvent("statechanged"));
 
-    const pathname = location.pathname;
-    const urlParams = new URLSearchParams(location.search);
+    const urlSource = this.getUrlMediaSource(location);
+    if (!urlSource) return;
 
-    if (!pathname.startsWith("/media") && !urlParams.get("media_source")) return;
-    const urlSource = urlParams.get("media_source") || pathname.substring(7);
+    const urlParams = new URLSearchParams(location.search);
 
     this.requestIndex++;
     const currentRequestIndex = this.requestIndex;
@@ -107,7 +106,7 @@ export default class MediaSearchStore extends EventTarget {
     pushHistoryPath(this.history, location.pathname, searchParams.toString());
   };
 
-  sourceNavigate = (source, searchParams) => {
+  sourceNavigate = (source, searchParams, mediaNav) => {
     if (!searchParams) {
       searchParams = new URLSearchParams(this.history.location.search);
 
@@ -116,11 +115,23 @@ export default class MediaSearchStore extends EventTarget {
       }
     }
 
+    if (mediaNav !== undefined) {
+      searchParams.set("media_nav", mediaNav);
+    }
+
     if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
       searchParams.set("media_source", source);
       pushHistoryPath(this.history, this.history.location.pathname, searchParams.toString());
     } else {
       pushHistoryPath(this.history, `/media/${source}`, searchParams.toString());
     }
+  };
+
+  getUrlMediaSource = location => {
+    const { pathname, search } = location;
+    const urlParams = new URLSearchParams(search);
+
+    if (!pathname.startsWith("/media") && !urlParams.get("media_source")) return null;
+    return urlParams.get("media_source") || pathname.substring(7);
   };
 }

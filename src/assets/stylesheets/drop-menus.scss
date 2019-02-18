@@ -55,5 +55,10 @@
   a {
     color: black;
   }
+
+  :local(.list-item-link) {
+    text-decoration: underline;
+    cursor: pointer;
+  }
 }
 

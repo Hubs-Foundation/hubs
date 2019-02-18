@@ -76,7 +76,7 @@ class MediaBrowser extends Component {
     onMediaSearchResultEntrySelected: PropTypes.func
   };
 
-  state = { query: "", facets: [] };
+  state = { query: "", facets: [], showNav: true };
 
   constructor(props) {
     super(props);
@@ -100,6 +100,7 @@ class MediaBrowser extends Component {
 
     const newState = { result, query: searchParams.get("q") || "" };
     const urlSource = searchParams.get("media_source") || this.props.history.location.pathname.substring(7);
+    newState.showNav = !!(searchParams.get("media_nav") !== "false");
 
     if (result && result.suggestions && result.suggestions.length > 0) {
       newState.facets = result.suggestions.map(s => {
@@ -170,19 +171,24 @@ class MediaBrowser extends Component {
     searchParams.delete("filter");
     searchParams.delete("cursor");
     searchParams.delete("media_source");
+    searchParams.delete("media_nav");
 
     return searchParams;
   };
 
+  pushExitMediaBrowserHistory = () => {
+    const { pathname } = this.props.history.location;
+    const hasMediaPath = pathname.startsWith("/media");
+    pushHistoryPath(this.props.history, hasMediaPath ? "/" : pathname, this.getSearchClearedSearchParams().toString());
+  };
+
   showCreateObject = () => {
-    const searchParams = this.getSearchClearedSearchParams();
-    pushHistoryPath(this.props.history, "/", searchParams.toString());
+    this.pushExitMediaBrowserHistory();
     pushHistoryState(this.props.history, "modal", "create");
   };
 
   close = () => {
-    const searchParams = this.getSearchClearedSearchParams();
-    pushHistoryPath(this.props.history, "/", searchParams.toString());
+    this.pushExitMediaBrowserHistory();
   };
 
   handlePager = delta => {
@@ -266,23 +272,24 @@ class MediaBrowser extends Component {
             </div>
           </div>
 
-          {allowContentSearch && (
-            <div className={styles.nav}>
-              {SOURCES.map(s => (
-                <a
-                  onClick={() => this.handleSourceClicked(s)}
-                  key={s}
-                  className={classNames({ [styles.navSource]: true, [styles.navSourceSelected]: urlSource === s })}
-                >
-                  <FormattedMessage id={`media-browser.nav_title.${s}`} />
-                </a>
-              ))}
-              <div className={styles.navRightPad}>&nbsp;</div>
-              <div className={styles.navScrollArrow}>
-                <FontAwesomeIcon icon={faAngleRight} />
+          {allowContentSearch &&
+            this.state.showNav && (
+              <div className={styles.nav}>
+                {SOURCES.map(s => (
+                  <a
+                    onClick={() => this.handleSourceClicked(s)}
+                    key={s}
+                    className={classNames({ [styles.navSource]: true, [styles.navSourceSelected]: urlSource === s })}
+                  >
+                    <FormattedMessage id={`media-browser.nav_title.${s}`} />
+                  </a>
+                ))}
+                <div className={styles.navRightPad}>&nbsp;</div>
+                <div className={styles.navScrollArrow}>
+                  <FontAwesomeIcon icon={faAngleRight} />
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {this.state.facets &&
             this.state.facets.length > 0 && (

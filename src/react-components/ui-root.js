@@ -1238,9 +1238,10 @@ class UIRoot extends Component {
     const isMobile = AFRAME.utils.device.isMobile();
     const presenceLogEntries = this.props.presenceLogEntries || [];
 
-    const showMediaBrowser =
-      this.props.history.location.pathname.startsWith("/media") ||
-      new URLSearchParams(this.props.history.location.search).get("media_source");
+    const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);
+
+    // Allow scene picker pre-entry, otherwise wait until entry
+    const showMediaBrowser = mediaSource && (mediaSource === "scenes" || this.state.entered);
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1256,14 +1257,13 @@ class UIRoot extends Component {
                 <ProfileEntryPanel {...props} finished={this.onProfileFinished} store={this.props.store} />
               )}
             />
-            {this.state.entered &&
-              showMediaBrowser && (
-                <MediaBrowser
-                  history={this.props.history}
-                  mediaSearchStore={this.props.mediaSearchStore}
-                  onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
-                />
-              )}
+            {showMediaBrowser && (
+              <MediaBrowser
+                history={this.props.history}
+                mediaSearchStore={this.props.mediaSearchStore}
+                onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
+              />
+            )}
             <StateRoute
               stateKey="entry_step"
               stateValue="profile"

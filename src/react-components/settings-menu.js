@@ -82,9 +82,12 @@ export default class SettingsMenu extends Component {
                 </i>
               </div>
               <div className={styles.listItem}>
-                <a href="#" onClick={() => this.props.mediaSearchStore.sourceNavigate("scenes")}>
+                <div
+                  className={styles.listItemLink}
+                  onClick={() => this.props.mediaSearchStore.sourceNavigate("scenes", null, false)}
+                >
                   <FormattedMessage id="settings.change_scene" />
-                </a>
+                </div>
               </div>
             </div>
           </div>
