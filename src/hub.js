@@ -803,6 +803,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     if (stale_fields.includes("name")) {
+      const titleParts = document.title.split(" | "); // Assumes title has | trailing site name
+      titleParts[0] = hub.name;
+      document.title = titleParts.join(" | ");
+
       // Re-write the slug in the browser history
       if (window.history && window.history.replaceState) {
         const pathParts = document.location.pathname.split("/");

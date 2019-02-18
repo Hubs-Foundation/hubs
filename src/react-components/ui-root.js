@@ -34,6 +34,7 @@ import LinkDialog from "./link-dialog.js";
 import SafariDialog from "./safari-dialog.js";
 import SafariMicDialog from "./safari-mic-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
+import RenameRoomDialog from "./rename-room-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
@@ -868,17 +869,19 @@ class UIRoot extends Component {
         </div>
 
         <div className={entryStyles.center}>
-          <WithHoverSound>
-            <div
-              className={entryStyles.chooseScene}
-              onClick={() => this.props.mediaSearchStore.sourceNavigate("scenes", null, false)}
-            >
-              <i>
-                <FontAwesomeIcon icon={faImage} />
-              </i>
-              <FormattedMessage id="entry.change-scene" />
-            </div>
-          </WithHoverSound>
+          {this.props.hubChannel.permissions.update_hub && (
+            <WithHoverSound>
+              <div
+                className={entryStyles.chooseScene}
+                onClick={() => this.props.mediaSearchStore.sourceNavigate("scenes", null, false)}
+              >
+                <i>
+                  <FontAwesomeIcon icon={faImage} />
+                </i>
+                <FormattedMessage id="entry.change-scene" />
+              </div>
+            </WithHoverSound>
+          )}
 
           <form onSubmit={this.sendMessage}>
             <div className={styles.messageEntry} style={{ height: pendingMessageFieldHeight }}>
@@ -1285,6 +1288,14 @@ class UIRoot extends Component {
             />
             <StateRoute
               stateKey="modal"
+              stateValue="rename_room"
+              history={this.props.history}
+              render={() =>
+                this.renderDialog(RenameRoomDialog, { onRename: name => this.props.hubChannel.rename(name) })
+              }
+            />
+            <StateRoute
+              stateKey="modal"
               stateValue="help"
               history={this.props.history}
               render={() => this.renderDialog(HelpDialog)}
@@ -1542,7 +1553,11 @@ class UIRoot extends Component {
 
             {this.state.showSettingsMenu &&
               !this.state.messageEntryOnTop && (
-                <SettingsMenu history={this.props.history} mediaSearchStore={this.props.mediaSearchStore} />
+                <SettingsMenu
+                  history={this.props.history}
+                  mediaSearchStore={this.props.mediaSearchStore}
+                  hubChannel={this.props.hubChannel}
+                />
               )}
 
             {entered ? (
