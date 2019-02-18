@@ -23,7 +23,8 @@ import styles from "../assets/stylesheets/settings-menu.scss";
 
 export default class SettingsMenu extends Component {
   static propTypes = {
-    history: PropTypes.object
+    history: PropTypes.object,
+    mediaSearchStore: PropTypes.object
   };
 
   domForItem = ([sessionId, data]) => {
@@ -81,10 +82,7 @@ export default class SettingsMenu extends Component {
                 </i>
               </div>
               <div className={styles.listItem}>
-                <a
-                  href="#"
-                  onClick={() => pushHistoryPath(this.props.history, `/media/scenes?filter=${DEFAULT_FILTERS.scenes}`)}
-                >
+                <a href="#" onClick={() => this.props.mediaSearchStore.sourceNavigate("scenes")}>
                   <FormattedMessage id="settings.change_scene" />
                 </a>
               </div>

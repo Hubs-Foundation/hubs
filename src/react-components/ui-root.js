@@ -68,6 +68,7 @@ addLocaleData([...en]);
 const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
 
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
+const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
 
 async function grantedMicLabels() {
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
@@ -1167,7 +1168,8 @@ class UIRoot extends Component {
   isInModalOrOverlay = () => {
     if (
       this.state.entered &&
-      IN_ROOM_MODAL_ROUTER_PATHS.find(x => this.props.history.location.pathname.startsWith(x))
+      (IN_ROOM_MODAL_ROUTER_PATHS.find(x => this.props.history.location.pathname.startsWith(x)) ||
+        IN_ROOM_MODAL_QUERY_VARS.find(x => new URLSearchParams(this.props.history.location.search).get(x)))
     ) {
       return true;
     }
@@ -1236,6 +1238,10 @@ class UIRoot extends Component {
     const isMobile = AFRAME.utils.device.isMobile();
     const presenceLogEntries = this.props.presenceLogEntries || [];
 
+    const showMediaBrowser =
+      this.props.history.location.pathname.startsWith("/media") ||
+      new URLSearchParams(this.props.history.location.search).get("media_source");
+
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
@@ -1250,18 +1256,14 @@ class UIRoot extends Component {
                 <ProfileEntryPanel {...props} finished={this.onProfileFinished} store={this.props.store} />
               )}
             />
-            {this.state.entered && (
-              <Route
-                path="/media"
-                render={props => (
-                  <MediaBrowser
-                    {...props}
-                    mediaSearchStore={this.props.mediaSearchStore}
-                    onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
-                  />
-                )}
-              />
-            )}
+            {this.state.entered &&
+              showMediaBrowser && (
+                <MediaBrowser
+                  history={this.props.history}
+                  mediaSearchStore={this.props.mediaSearchStore}
+                  onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
+                />
+              )}
             <StateRoute
               stateKey="entry_step"
               stateValue="profile"
@@ -1535,7 +1537,9 @@ class UIRoot extends Component {
               )}
 
             {this.state.showSettingsMenu &&
-              !this.state.messageEntryOnTop && <SettingsMenu history={this.props.history} />}
+              !this.state.messageEntryOnTop && (
+                <SettingsMenu history={this.props.history} mediaSearchStore={this.props.mediaSearchStore} />
+              )}
 
             {entered ? (
               <div className={styles.topHud}>

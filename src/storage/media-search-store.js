@@ -12,6 +12,12 @@ const URL_SOURCE_TO_TO_API_SOURCE = {
   twitch: "twitch"
 };
 
+export const MEDIA_SOURCE_DEFAULT_FILTERS = {
+  gifs: "trending",
+  sketchfab: "featured",
+  scenes: "featured"
+};
+
 // This class is responsible for fetching and storing media search results and provides a
 // convenience API for performing history updates relevant to search navigation.
 export default class MediaSearchStore extends EventTarget {
@@ -36,12 +42,13 @@ export default class MediaSearchStore extends EventTarget {
     this.dispatchEvent(new CustomEvent("statechanged"));
 
     const pathname = location.pathname;
-    if (!pathname.startsWith("/media")) return;
-    const urlSource = pathname.substring(7);
+    const urlParams = new URLSearchParams(location.search);
+
+    if (!pathname.startsWith("/media") && !urlParams.get("media_source")) return;
+    const urlSource = urlParams.get("media_source") || pathname.substring(7);
 
     this.requestIndex++;
     const currentRequestIndex = this.requestIndex;
-    const urlParams = new URLSearchParams(location.search);
     const searchParams = new URLSearchParams();
 
     for (const param of ["q", "filter", "cursor"]) {
@@ -100,7 +107,20 @@ export default class MediaSearchStore extends EventTarget {
     pushHistoryPath(this.history, location.pathname, searchParams.toString());
   };
 
-  sourceNavigate = source => {
-    pushHistoryPath(this.history, `/media/${source}`);
+  sourceNavigate = (source, searchParams) => {
+    if (!searchParams) {
+      searchParams = new URLSearchParams(this.history.location.search);
+
+      if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {
+        searchParams.set("filter", MEDIA_SOURCE_DEFAULT_FILTERS[source]);
+      }
+    }
+
+    if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
+      searchParams.set("media_source", source);
+      pushHistoryPath(this.history, this.history.location.pathname, searchParams.toString());
+    } else {
+      pushHistoryPath(this.history, `/media/${source}`, searchParams.toString());
+    }
   };
 }
