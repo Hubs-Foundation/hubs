@@ -9,7 +9,6 @@ import MovingAverage from "moving-average";
 import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
-import { Route } from "react-router";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
 import { pushHistoryState, clearHistoryState, popToBeginningOfHubHistory, navigateToPriorPage } from "../utils/history";
 import StateLink from "./state-link.js";
