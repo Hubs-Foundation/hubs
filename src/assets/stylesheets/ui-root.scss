@@ -277,10 +277,9 @@ body.vr-mode {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: $darker-grey;
+  background-color: rgba(64, 64, 64, 0.55);
   border-radius: 16px;
   pointer-events: auto;
-  opacity: 0.66;
   transition: opacity 0.15s linear;
 
   :local(.message-entry-input-in-room) {
@@ -312,8 +311,8 @@ body.vr-mode {
 }
 
 :local(.message-entry-in-room):focus-within {
-  opacity: 1.0;
-  transition: opacity 0.15s linear;
+  transition: background-color 0.15s linear;
+  background-color: $darker-grey;
 
   :local(.message-entry-button-in-room) {
     border: 0;
