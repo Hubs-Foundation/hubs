@@ -55,6 +55,7 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
+import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 
 addLocaleData([...en]);
 
@@ -854,6 +855,18 @@ class UIRoot extends Component {
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>
           <span>{this.props.hubName}</span>
+          {this.props.hubChannel.permissions.update_hub && (
+            <StateLink
+              stateKey="modal"
+              stateValue="rename_room"
+              history={this.props.history}
+              className={entryStyles.editButton}
+            >
+              <i>
+                <FontAwesomeIcon icon={faPencilAlt} />
+              </i>
+            </StateLink>
+          )}
           {this.props.hubScene && (
             <StateLink
               stateKey="modal"

@@ -8,11 +8,24 @@
   position: relative;
 }
 
-:local(.info-button) {
+:local(.edit-button) {
   @extend %fa-icon-button;
   color: $action-color;
   display: inline;
   margin-left: 10px;
+
+  i {
+    font-size: 1.0em;
+  }
+}
+
+:local(.info-button) {
+  @extend %fa-icon-button;
+  color: $action-color;
+  display: inline;
+  position: absolute;
+  top: 0px;
+  right: 24px;
 
   i {
     font-size: 1.2em;
@@ -103,6 +116,10 @@
     margin-bottom: 4px;
     margin-right: 8px;
     margin-left: 8px;
+
+    span {
+      margin-left: 24px;
+    }
   }
 
   :local(.lobby) {
