@@ -47,6 +47,51 @@ export default class SettingsMenu extends Component {
                 </div>
               </div>
             </div>
+            <div className={classNames([styles.bottomLinks])}>
+              <a
+                className={classNames([styles.bottomLink, styles.bottomLinkMain])}
+                href="https://github.com/mozilla/hubs/wiki/Hubs-Features"
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                <FormattedMessage id="settings.features" />
+              </a>
+              <a
+                className={classNames([styles.bottomLink, styles.bottomLinkMain])}
+                href="https://github.com/mozilla/hubs/wiki/Hubs-Controls"
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                <FormattedMessage id="settings.controls" />
+              </a>
+              <a
+                className={classNames([styles.bottomLink, styles.bottomLinkMain])}
+                href="https://discord.gg/wHmY4nd"
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                <FormattedMessage id="settings.community" />
+              </a>
+              <a className={styles.bottomLink} href="/?report" target="_blank" rel="noreferrer noopener">
+                <FormattedMessage id="settings.report" />
+              </a>
+              <a
+                className={styles.bottomLink}
+                href="https://github.com/mozilla/hubs/blob/master/TERMS.md"
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                <FormattedMessage id="settings.terms" />
+              </a>
+              <a
+                className={styles.bottomLink}
+                href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                <FormattedMessage id="settings.privacy" />
+              </a>
+            </div>
           </div>
         </div>
       </div>

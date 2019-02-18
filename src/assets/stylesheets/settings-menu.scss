@@ -10,10 +10,6 @@
   @extend %attach-point;
   top: -5px;
   left: 16px;
-
-  @media(max-width: 500px) {
-    left: 8px;
-  }
 }
 
 :local(.settings-row) {
@@ -40,3 +36,49 @@
   }
 }
 
+:local(.bottom-links) {
+  font-size: 0.8em;
+  border-top: 1px solid $light-grey;
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 33% 33% 33%;
+  padding-top: 12px;
+  font-weight: normal;
+
+  a {
+    color: black;
+  }
+
+  :local(.bottom-link) {
+    margin: 2px 12px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    white-space: nowrap;
+    text-decoration-color: $dark-grey;
+  }
+
+  :local(.bottom-link-main) {
+    font-weight: bold;
+  }
+
+  :local(.bottom-link-icon) {
+    width: 14px;
+    height: 14px;
+    position: relative;
+    margin: 0px 12px 0px 0px;
+    font-size: 1.0em;
+
+    img {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+    }
+
+    // Hack for fontawesome icons, because other images are sqauare
+    i {
+      position: absolute;
+      top: -3px;
+    }
+  }
+}

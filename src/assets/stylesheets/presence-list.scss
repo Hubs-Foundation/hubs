@@ -25,8 +25,11 @@
 :local(.sign-in) {
   display: flex;
   justify-content: center;
-  border-top: 1px solid grey;
-  padding-top: 0.5em;
+  border-top: 1px solid $light-grey;
+  margin-top: 12px;
+  padding-top: 12px;
+  font-size: 0.8em;
+
   a {
     text-decoration: underline;
     text-decoration-color: $dark-grey;
@@ -37,16 +40,16 @@
 }
 
 :local(.icon) {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   position: relative;
   margin: 0px 12px 0px 0px;
 
   img {
     position: absolute;
     left: 2px;
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
   }
 }
 
