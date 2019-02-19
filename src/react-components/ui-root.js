@@ -1570,6 +1570,7 @@ class UIRoot extends Component {
                   history={this.props.history}
                   mediaSearchStore={this.props.mediaSearchStore}
                   hubChannel={this.props.hubChannel}
+                  hubScene={this.props.hubScene}
                 />
               )}
 

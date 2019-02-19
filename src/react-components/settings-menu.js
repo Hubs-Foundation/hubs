@@ -6,6 +6,7 @@ import StateLink from "./state-link.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 
 import styles from "../assets/stylesheets/settings-menu.scss";
 
@@ -13,6 +14,7 @@ export default class SettingsMenu extends Component {
   static propTypes = {
     history: PropTypes.object,
     mediaSearchStore: PropTypes.object,
+    hubScene: PropTypes.object,
     hubChannel: PropTypes.object
   };
 
@@ -20,6 +22,8 @@ export default class SettingsMenu extends Component {
     const rowClasses = classNames([styles.row, styles.settingsRow]);
     const rowHeader = classNames([styles.row, styles.settingsRow, styles.rowHeader]);
     const showRoomSettings = !!this.props.hubChannel.permissions.update_hub;
+    const showRoomInfo = !!this.props.hubScene;
+    const showRoomSection = showRoomSettings || showRoomInfo;
 
     // Draw self first
     return (
@@ -40,7 +44,7 @@ export default class SettingsMenu extends Component {
                 </StateLink>
               </div>
             </div>
-            {showRoomSettings && (
+            {showRoomSection && (
               <div className={rowHeader}>
                 <FormattedMessage id="settings.row-room" />
               </div>
@@ -72,6 +76,20 @@ export default class SettingsMenu extends Component {
                 <div className={styles.listItem}>
                   <StateLink stateKey="modal" stateValue="rename_room" history={this.props.history}>
                     <FormattedMessage id="settings.rename-room" />
+                  </StateLink>
+                </div>
+              </div>
+            )}
+            {showRoomInfo && (
+              <div className={rowClasses}>
+                <div className={styles.icon}>
+                  <i>
+                    <FontAwesomeIcon icon={faInfoCircle} />
+                  </i>
+                </div>
+                <div className={styles.listItem}>
+                  <StateLink stateKey="modal" stateValue="info" history={this.props.history}>
+                    <FormattedMessage id="settings.room-info" />
                   </StateLink>
                 </div>
               </div>
