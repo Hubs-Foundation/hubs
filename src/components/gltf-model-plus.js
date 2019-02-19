@@ -4,6 +4,7 @@ import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import MobileStandardMaterial from "../materials/MobileStandardMaterial";
 import { getCustomGLTFParserURLResolver } from "../utils/media-utils";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
+import "three/examples/js/loaders/KTXLoader";
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const GLTFCache = {};
