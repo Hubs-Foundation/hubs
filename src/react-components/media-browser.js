@@ -12,7 +12,6 @@ import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploa
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MEDIA_SOURCE_DEFAULT_FILTERS } from "../storage/media-search-store";
 import qsTruthy from "../utils/qs_truthy";
 
 const allowContentSearch = qsTruthy("content_search");
@@ -32,7 +31,7 @@ const PRIVACY_POLICY_LINKS = {
   twitch: "https://www.twitch.tv/p/legal/privacy-policy/"
 };
 
-const SOURCES = ["videos", "images", "gifs", "scenes", "sketchfab", "poly", "twitch"];
+export const SOURCES = ["videos", "images", "gifs", "scenes", "sketchfab", "poly", "twitch"];
 
 const DEFAULT_FACETS = {
   sketchfab: [
@@ -136,20 +135,7 @@ class MediaBrowser extends Component {
   };
 
   handleSourceClicked = source => {
-    const location = this.props.history.location;
-    const searchParams = new URLSearchParams(location.search);
-    const currentQuery = searchParams.get("q");
-
-    const newSearchParams = this.getSearchClearedSearchParams();
-    if (currentQuery) {
-      newSearchParams.set("q", currentQuery);
-    } else {
-      if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {
-        newSearchParams.set("filter", MEDIA_SOURCE_DEFAULT_FILTERS[source]);
-      }
-    }
-
-    this.props.mediaSearchStore.sourceNavigate(source, newSearchParams);
+    this.props.mediaSearchStore.sourceNavigate(source);
   };
 
   handleFacetClicked = facet => {

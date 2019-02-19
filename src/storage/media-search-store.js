@@ -106,17 +106,18 @@ export default class MediaSearchStore extends EventTarget {
     pushHistoryPath(this.history, location.pathname, searchParams.toString());
   };
 
-  sourceNavigate = (source, searchParams, mediaNav) => {
-    if (!searchParams) {
-      searchParams = new URLSearchParams(this.history.location.search);
+  sourceNavigate = (source, hideNav) => {
+    const currentQuery = new URLSearchParams(this.history.location.search);
+    const searchParams = new URLSearchParams();
 
-      if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {
-        searchParams.set("filter", MEDIA_SOURCE_DEFAULT_FILTERS[source]);
-      }
+    if (currentQuery.get("q")) {
+      searchParams.set("q", currentQuery.get("q"));
+    } else if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {
+      searchParams.set("filter", MEDIA_SOURCE_DEFAULT_FILTERS[source]);
     }
 
-    if (mediaNav !== undefined) {
-      searchParams.set("media_nav", mediaNav);
+    if (hideNav) {
+      searchParams.set("media_nav", "false");
     }
 
     if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {

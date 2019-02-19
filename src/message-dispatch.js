@@ -26,13 +26,6 @@ export default class MessageDispatch {
   dispatchCommand = (command, ...args) => {
     const entered = this.scene.is("entered");
 
-    switch (command) {
-      case "help":
-        // HACK for now, non-trivial to properly send this into React
-        document.querySelector(".help-button").click();
-        return;
-    }
-
     if (!entered) {
       this.addToPresenceLog({ type: "log", body: "You must enter the room to use this command." });
       return;
