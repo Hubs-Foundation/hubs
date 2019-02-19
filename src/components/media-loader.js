@@ -1,5 +1,11 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
-import { guessContentType, proxiedUrlFor, resolveUrl, injectCustomShaderChunks } from "../utils/media-utils";
+import {
+  generateMeshBVH,
+  guessContentType,
+  proxiedUrlFor,
+  resolveUrl,
+  injectCustomShaderChunks
+} from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
 
 import "three/examples/js/loaders/GLTFLoader";
@@ -17,6 +23,16 @@ const fetchContentType = url => {
 
 const fetchMaxContentIndex = url => {
   return fetch(url).then(r => parseInt(r.headers.get("x-max-content-index")));
+};
+
+const getNumMeshes = sceneRoot => {
+  let meshes = 0;
+  sceneRoot.traverse(o => {
+    if (o.isMesh && (!THREE.Sky || o.__proto__ != THREE.Sky.prototype)) {
+      meshes++;
+    }
+  });
+  return meshes;
 };
 
 const boundingBox = new THREE.Box3();
@@ -54,10 +70,12 @@ AFRAME.registerComponent("media-loader", {
   })(),
 
   addShape(type, id) {
+    const numMeshes = getNumMeshes(this.el.object3DMap.mesh);
+    const recenter = !this.el.components["animation-mixer"] && numMeshes === 1;
     this.el.setAttribute("ammo-shape__" + id, {
       autoGenerateShape: true,
       type: type,
-      recenter: true,
+      recenter: recenter,
       mergeGeometry: true
     });
   },
@@ -79,8 +97,7 @@ AFRAME.registerComponent("media-loader", {
     this.el.removeAttribute("media-pager");
     this.el.removeAttribute("media-video");
     this.el.setAttribute("media-image", { src: "error" });
-    clearTimeout(this.showLoaderTimeout);
-    delete this.showLoaderTimeout;
+    this.clearLoadingTimeout();
   },
 
   showLoader() {
@@ -121,6 +138,9 @@ AFRAME.registerComponent("media-loader", {
   onMediaLoaded() {
     this.clearLoadingTimeout();
     this.setupHoverableVisuals();
+    if (!this.el.components["animation-mixer"]) {
+      generateMeshBVH(this.el.object3D);
+    }
   },
 
   async update(oldData) {
@@ -214,9 +234,10 @@ AFRAME.registerComponent("media-loader", {
           "model-loaded",
           () => {
             this.setScale(this.data.resize);
-            this.onMediaLoaded();
             this.addShape("hull", "hull");
+            this.onMediaLoaded();
             //TODO: maybe use media-utils traverseMeshesAndAddShapes
+            // traverseMeshesAndAddShapes(this.el, "hull", 0.01);
             addAnimationComponents(this.el);
           },
           { once: true }

@@ -92,7 +92,7 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
-import { traverseMeshesAndAddShapes, proxiedUrlFor } from "./utils/media-utils";
+import { generateMeshBVH, traverseMeshesAndAddShapes, proxiedUrlFor } from "./utils/media-utils";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
@@ -324,6 +324,7 @@ async function updateEnvironmentForHub(hub) {
       () => {
         //TODO: check if the environment was made with spoke to determine if a shape should be added
         shapes = traverseMeshesAndAddShapes(environmentEl, "mesh", 0.1);
+        generateMeshBVH(environmentEl.object3D);
       },
       { once: true }
     );
@@ -346,6 +347,7 @@ async function updateEnvironmentForHub(hub) {
                 environmentEl.removeAttribute(shapes.pop());
               }
               shapes = traverseMeshesAndAddShapes(environmentEl, "mesh", 0.1);
+              generateMeshBVH(environmentEl.object3D);
               document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint();
             },
             { once: true }

@@ -2,6 +2,8 @@ import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
+import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
+THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
 if (process.env.CORS_PROXY_SERVER) {
@@ -311,6 +313,31 @@ export function getPromotionTokenForFile(fileId) {
   return window.APP.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
 }
 
+export function generateMeshBVH(object3D) {
+  object3D.traverse(obj => {
+    // note that we might already have a bounds tree if this was a clone of an object with one
+    const hasBufferGeometry = obj.isMesh && obj.geometry.isBufferGeometry;
+    const hasBoundsTree = hasBufferGeometry && obj.geometry.boundsTree;
+    if (hasBufferGeometry && !hasBoundsTree) {
+      // we can't currently build a BVH for geometries with groups, because the groups rely on the
+      // existing ordering of the index, which we kill as a result of building the tree
+      if (obj.geometry.groups && obj.geometry.groups.length) {
+        console.warn("BVH construction not supported for geometry with groups; raycasting may suffer.");
+      } else {
+        const geo = obj.geometry;
+        const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
+        // only bother using memory and time making a BVH if there are a reasonable number of tris,
+        // and if there are too many it's too painful and large to tolerate doing it (at least until
+        // we put this in a web worker)
+        if (triCount > 1000 && triCount < 1000000) {
+          geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 30 });
+          geo.setIndex(geo.boundsTree.index);
+        }
+      }
+    }
+  });
+}
+
 exports.traverseMeshesAndAddShapes = (function() {
   const matrix = new THREE.Matrix4();
   const inverse = new THREE.Matrix4();
@@ -324,7 +351,8 @@ exports.traverseMeshesAndAddShapes = (function() {
     const meshRoot = el.object3DMap.mesh;
     inverse.getInverse(meshRoot.matrixWorld);
     meshRoot.traverse(o => {
-      if (o.type === "Mesh" && (!THREE.Sky || o.__proto__ != THREE.Sky.prototype)) {
+      if (o.isMesh && (!THREE.Sky || o.__proto__ != THREE.Sky.prototype)) {
+        o.updateMatrices();
         matrix.multiplyMatrices(inverse, o.matrixWorld);
         matrix.decompose(pos, quat, scale);
         el.setAttribute(shapePrefix + i, {

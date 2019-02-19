@@ -177,7 +177,7 @@ function fitToTexture(el, texture) {
   el.setAttribute("ammo-shape", {
     autoGenerateShape: false,
     type: "box",
-    halfExtents: { x: width / 2, y: height / 2, z: 0.05 },
+    halfExtents: { x: 0.5, y: 0.5, z: 0.02 },
     margin: 0.1,
     recenter: true,
     mergeGeometry: true

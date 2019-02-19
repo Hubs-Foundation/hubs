@@ -258,8 +258,7 @@
                 <a-entity
                     class="pen interactable"
                     super-networked-interactable="counter: #pen-counter;"
-                    ammo-body="type: dynamic; mass: 0.001; loadedEvent: model-loaded;"
-                    ammo-shape="type: cylinder; autoGenerateShape: false; halfExtents: 0.02 0.1 0.02;"
+                    ammo-body="type: dynamic; mass: 0.001;"
                     grabbable="maxGrabbers: 1; constraintComponentName: ammo-constraint;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     hoverable
@@ -303,7 +302,7 @@
                     camera-tool
                     matrix-auto-update
                     ammo-body="type: dynamic; mass: 0.001;"
-                    ammo-shape="type: box; autoGenerateShape: false; halfExtents: 0.22 0.145 0.1; offset: 0 0.02 0;"
+                    ammo-shape="type: box; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.11 0.07 0.05; offset: 0 0.02 0;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     super-networked-interactable="counter: #camera-counter;"
                     position-at-box-shape-border="target:.camera-menu"
