@@ -44,6 +44,11 @@ export default class MediaSearchStore extends EventTarget {
     const urlSource = this.getUrlMediaSource(location);
     if (!urlSource) return;
 
+    if (!this.previousSource || this.previousSource !== urlSource) {
+      this.dispatchEvent(new CustomEvent("sourcechanged"));
+      this.previousSource = urlSource;
+    }
+
     const urlParams = new URLSearchParams(location.search);
 
     this.requestIndex++;
@@ -106,12 +111,25 @@ export default class MediaSearchStore extends EventTarget {
     pushHistoryPath(this.history, location.pathname, searchParams.toString());
   };
 
-  sourceNavigate = (source, hideNav) => {
-    const currentQuery = new URLSearchParams(this.history.location.search);
-    const searchParams = new URLSearchParams();
+  getSearchClearedSearchParams = location => {
+    const searchParams = new URLSearchParams(location.search);
 
-    if (currentQuery.get("q")) {
-      searchParams.set("q", currentQuery.get("q"));
+    // Strip browsing query params
+    searchParams.delete("q");
+    searchParams.delete("filter");
+    searchParams.delete("cursor");
+    searchParams.delete("media_source");
+    searchParams.delete("media_nav");
+
+    return searchParams;
+  };
+
+  sourceNavigate = (source, hideNav) => {
+    const currentQuery = new URLSearchParams(this.history.location.search).get("q");
+    const searchParams = this.getSearchClearedSearchParams(this.history.location);
+
+    if (currentQuery) {
+      searchParams.set("q", currentQuery);
     } else if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {
       searchParams.set("filter", MEDIA_SOURCE_DEFAULT_FILTERS[source]);
     }
@@ -134,5 +152,17 @@ export default class MediaSearchStore extends EventTarget {
 
     if (!pathname.startsWith("/media") && !urlParams.get("media_source")) return null;
     return urlParams.get("media_source") || pathname.substring(7);
+  };
+
+  pushExitMediaBrowserHistory = history => {
+    if (!history) history = this.history;
+
+    const { pathname } = history.location;
+    const hasMediaPath = pathname.startsWith("/media");
+    pushHistoryPath(
+      history,
+      hasMediaPath ? "/" : pathname,
+      this.getSearchClearedSearchParams(history.location).toString()
+    );
   };
 }

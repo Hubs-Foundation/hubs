@@ -81,16 +81,24 @@ class MediaBrowser extends Component {
     super(props);
     this.state = this.getStoreAndHistoryState(props);
     this.props.mediaSearchStore.addEventListener("statechanged", this.storeUpdated);
+    this.props.mediaSearchStore.addEventListener("sourcechanged", this.sourceChanged);
   }
 
   componentDidMount() {}
 
   componentWillUnmount() {
     this.props.mediaSearchStore.removeEventListener("statechanged", this.storeUpdated);
+    this.props.mediaSearchStore.removeEventListener("sourcechanged", this.sourceChanged);
   }
 
   storeUpdated = () => {
     this.setState(this.getStoreAndHistoryState(this.props));
+  };
+
+  sourceChanged = () => {
+    if (this.inputRef) {
+      this.inputRef.focus();
+    }
   };
 
   getStoreAndHistoryState = props => {
@@ -149,23 +157,11 @@ class MediaBrowser extends Component {
   };
 
   getSearchClearedSearchParams = () => {
-    const location = this.props.history.location;
-    const searchParams = new URLSearchParams(location.search);
-
-    // Strip browsing query params
-    searchParams.delete("q");
-    searchParams.delete("filter");
-    searchParams.delete("cursor");
-    searchParams.delete("media_source");
-    searchParams.delete("media_nav");
-
-    return searchParams;
+    return this.props.mediaSearchStore.getSearchClearedSearchParams(this.props.history.location);
   };
 
   pushExitMediaBrowserHistory = () => {
-    const { pathname } = this.props.history.location;
-    const hasMediaPath = pathname.startsWith("/media");
-    pushHistoryPath(this.props.history, hasMediaPath ? "/" : pathname, this.getSearchClearedSearchParams().toString());
+    this.props.mediaSearchStore.pushExitMediaBrowserHistory(this.props.history);
   };
 
   showCreateObject = () => {
@@ -210,9 +206,21 @@ class MediaBrowser extends Component {
                 </i>
                 <input
                   type="text"
+                  autoFocus
+                  ref={r => (this.inputRef = r)}
                   placeholder={formatMessage({
                     id: `media-browser.search-placeholder.${urlSource}`
                   })}
+                  onFocus={e => e.target.select()}
+                  onKeyDown={e => {
+                    if (e.keyCode === 13 && e.shiftKey) {
+                      if (this.state.result && this.state.result.entries.length > 0) {
+                        this.handleEntryClicked(this.state.result.entries[0]);
+                      }
+                    } else if (e.keyCode === 27 || e.keyCode === 13) {
+                      e.target.blur();
+                    }
+                  }}
                   value={this.state.query}
                   onChange={e => this.handleQueryUpdated(e.target.value)}
                 />
