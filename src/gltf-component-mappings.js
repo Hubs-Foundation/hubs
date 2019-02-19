@@ -1,4 +1,5 @@
 import "./components/gltf-model-plus";
+import { getSanitizedComponentMapping } from "./utils/component-mappings";
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
@@ -215,26 +216,6 @@ const publicComponents = {
   }
 };
 
-function getSanitizedComponentMapping(inputComponent, inputProperty) {
-  const publicComponent = publicComponents[inputComponent];
-
-  if (!publicComponent) {
-    throw new Error(`Component "${inputComponent}" is not public.`);
-  }
-
-  const publicProperty = publicComponent.publicProperties[inputProperty];
-
-  if (!publicProperty) {
-    throw new Error(`Component "${inputComponent}"'s property "${inputProperty}" is not public.`);
-  }
-
-  return {
-    mappedComponent: publicComponent.mappedComponent,
-    mappedProperty: publicProperty.mappedProperty,
-    getMappedValue: publicProperty.getMappedValue
-  };
-}
-
 AFRAME.GLTFModelPlus.registerComponent(
   "trigger-volume",
   "trigger-volume",
@@ -253,8 +234,8 @@ AFRAME.GLTFModelPlus.registerComponent(
     let enterComponentMapping, leaveComponentMapping, targetEntity;
 
     try {
-      enterComponentMapping = getSanitizedComponentMapping(enterComponent, enterProperty);
-      leaveComponentMapping = getSanitizedComponentMapping(leaveComponent, leaveProperty);
+      enterComponentMapping = getSanitizedComponentMapping(enterComponent, enterProperty, publicComponents);
+      leaveComponentMapping = getSanitizedComponentMapping(leaveComponent, leaveProperty, publicComponents);
 
       targetEntity = indexToEntityMap[target];
 
