@@ -142,6 +142,7 @@ class UIRoot extends Component {
     requestedScreen: false,
     mediaStream: null,
     audioTrack: null,
+    numAudioTracks: 0,
 
     toneInterval: null,
     tonePlaying: false,
@@ -233,7 +234,9 @@ class UIRoot extends Component {
       }
     });
 
-    setTimeout(() => this.handleForceEntry(), 2000);
+    if (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now")) {
+      setTimeout(() => this.handleForceEntry(), 2000);
+    }
   }
 
   componentWillUnmount() {
@@ -478,11 +481,14 @@ class UIRoot extends Component {
 
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      this.setState({ audioTrack: mediaStream.getAudioTracks()[0] });
+      this.setState({
+        audioTrack: mediaStream.getAudioTracks()[0],
+        numAudioTracks: mediaStream.getAudioTracks().length
+      });
       return true;
     } catch (e) {
       // Error fetching audio track, most likely a permission denial.
-      this.setState({ audioTrack: null });
+      this.setState({ audioTrack: null, numAudioTracks: 0 });
       return false;
     }
   };
@@ -557,10 +563,13 @@ class UIRoot extends Component {
   };
 
   beginOrSkipAudioSetup = () => {
-    if (!this.props.forcedVREntryType || !this.props.forcedVREntryType.endsWith("_now")) {
-      this.pushHistoryState("entry_step", "audio");
-    } else {
+    const skipAudioSetup =
+      this.state.numAudioTracks <= 1 || (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"));
+
+    if (skipAudioSetup) {
       this.onAudioReadyButton();
+    } else {
+      this.pushHistoryState("entry_step", "audio");
     }
   };
 
@@ -915,14 +924,23 @@ class UIRoot extends Component {
 
         <div className={entryStyles.buttonContainer}>
           <WithHoverSound>
-            <StateLink
-              stateKey="entry_step"
-              stateValue={promptForNameAndAvatarBeforeEntry ? "profile" : "device"}
-              history={this.props.history}
-              className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
-            >
-              <FormattedMessage id="entry.enter-room" />
-            </StateLink>
+            {promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType ? (
+              <StateLink
+                stateKey="entry_step"
+                stateValue={promptForNameAndAvatarBeforeEntry ? "profile" : "device"}
+                history={this.props.history}
+                className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
+              >
+                <FormattedMessage id="entry.enter-room" />
+              </StateLink>
+            ) : (
+              <button
+                onClick={() => this.handleForceEntry()}
+                className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
+              >
+                <FormattedMessage id="entry.enter-room" />
+              </button>
+            )}
           </WithHoverSound>
         </div>
       </div>
@@ -1259,7 +1277,12 @@ class UIRoot extends Component {
                   finished={() => {
                     const unsubscribe = this.props.history.listen(() => {
                       unsubscribe();
-                      this.pushHistoryState("entry_step", "device");
+
+                      if (this.props.forcedVREntryType) {
+                        this.handleForceEntry();
+                      } else {
+                        this.pushHistoryState("entry_step", "device");
+                      }
                     });
 
                     this.onProfileFinished();
