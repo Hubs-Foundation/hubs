@@ -38,7 +38,11 @@ const farsparkEncodeUrl = url => {
 };
 
 export const scaledThumbnailUrlFor = (url, width, height) => {
-  if (process.env.RETICULUM_SERVER && process.env.RETICULUM_SERVER.includes("hubs.local")) {
+  if (
+    process.env.RETICULUM_SERVER &&
+    process.env.RETICULUM_SERVER.includes("hubs.local") &&
+    url.includes("hubs.local")
+  ) {
     return url;
   }
 
