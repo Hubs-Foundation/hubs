@@ -13,6 +13,8 @@ AFRAME.registerComponent("text-button", {
   },
 
   init() {
+    // TODO: This is a bit of a hack to deal with position "component" not setting matrixNeedsUpdate. Come up with a better solution.
+    this.el.object3D.matrixNeedsUpdate = true;
     this.onHover = () => {
       this.hovering = true;
       this.updateButtonState();
