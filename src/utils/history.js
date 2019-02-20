@@ -8,17 +8,23 @@
 //
 // Also maintains a length key that can be used to find the length of the history chain
 // (across refreshes) for the current room.
-function pushOrUpdateHistoryState(history, replace, k, v) {
+function pushOrUpdateHistory(history, replace, k, v, newPathname, newSearch) {
   let state = {};
   const newLength = ((history.location.state && history.location.state.__historyLength) || 0) + (replace ? 0 : 1);
 
-  if (k) {
+  if (k || newPathname || newSearch) {
     state = history.location.state ? { ...history.location.state } : {};
     delete state.__duplicate;
-    state[k] = v;
+
+    if (k) {
+      state[k] = v;
+    }
   }
 
-  const pathname = (history.location.pathname === "/" ? "" : history.location.pathname) + history.location.search;
+  const pathname =
+    newPathname !== undefined ? newPathname : history.location.pathname === "/" ? "" : history.location.pathname;
+
+  const search = newSearch !== undefined ? newSearch : history.location.search;
 
   // If popToBeginningOfHubHistory was previously used, there is a duplicate entry
   // at the top of the history stack (which was needed to wipe out forward history)
@@ -27,19 +33,23 @@ function pushOrUpdateHistoryState(history, replace, k, v) {
   const method = replace || isDuplicate ? history.replace : history.push;
   state.__historyLength = newLength;
 
-  method({ pathname, state });
+  method({ pathname, search, state });
 }
 
 export function replaceHistoryState(history, k, v) {
-  pushOrUpdateHistoryState(history, true, k, v);
+  pushOrUpdateHistory(history, true, k, v);
 }
 
 export function pushHistoryState(history, k, v) {
-  pushOrUpdateHistoryState(history, false, k, v);
+  pushOrUpdateHistory(history, false, k, v);
+}
+
+export function pushHistoryPath(history, path, search) {
+  pushOrUpdateHistory(history, false, null, null, path, search);
 }
 
 export function clearHistoryState(history) {
-  pushOrUpdateHistoryState(history, false);
+  pushOrUpdateHistory(history, false);
 }
 
 // This will pop the browser history to the first entry that was for this hubs room,
@@ -57,7 +67,8 @@ export function popToBeginningOfHubHistory(history, navigateToPriorPage) {
   const unsubscribe = history.listen(() => {
     unsubscribe();
     history.push({
-      pathname: history.location.pathname + history.location.search,
+      pathname: history.location.pathname,
+      search: history.location.search,
       state: { __historyLength: 0, __duplicate: true }
     });
     if (navigateToPriorPage) history.go(-2); // Go back to history entry before beginning.

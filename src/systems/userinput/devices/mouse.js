@@ -20,8 +20,18 @@ export class MouseDevice {
     const canvas = document.querySelector("canvas");
     ["mousedown", "wheel"].map(x => canvas.addEventListener(x, queueEvent));
     ["mousemove", "mouseup"].map(x => window.addEventListener(x, queueEvent));
+
+    let uiRoot = null;
+
     document.addEventListener("wheel", e => {
-      e.preventDefault();
+      if (!uiRoot) {
+        uiRoot = document.querySelector(".ui-root");
+      }
+
+      // Do not capture wheel events if they are being sent to an modal/overlay
+      if (uiRoot && !uiRoot.classList.contains("in-modal-or-overlay")) {
+        e.preventDefault();
+      }
     });
   }
 

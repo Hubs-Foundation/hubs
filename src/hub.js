@@ -82,6 +82,7 @@ import "./components/clone-media-button";
 import "./components/open-media-button";
 import "./components/rotate-object-button";
 import "./components/hover-menu";
+import "./components/animation";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -121,6 +122,7 @@ window.APP.RENDER_ORDER = {
   CURSOR: 3
 };
 const store = window.APP.store;
+const mediaSearchStore = window.APP.mediaSearchStore;
 
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo();
@@ -242,6 +244,7 @@ function mountUI(props = {}) {
               disableAutoExitOnConcurrentLoad,
               forcedVREntryType,
               store,
+              mediaSearchStore,
               ...props,
               ...routeProps
             }}
@@ -364,7 +367,10 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   updateEnvironmentForHub(hub);
   updateUIForHub(hub);
 
-  remountUI({ onSendMessage: messageDispatch.dispatch });
+  remountUI({
+    onSendMessage: messageDispatch.dispatch,
+    onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry)
+  });
 
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   objectsEl.addEventListener("model-loaded", async el => {
@@ -655,7 +661,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 20000);
   };
 
-  const messageDispatch = new MessageDispatch(scene, entryManager, hubChannel, addToPresenceLog, remountUI);
+  const messageDispatch = new MessageDispatch(
+    scene,
+    entryManager,
+    hubChannel,
+    addToPresenceLog,
+    remountUI,
+    mediaSearchStore
+  );
 
   hubPhxChannel
     .join()
