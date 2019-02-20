@@ -619,17 +619,24 @@ class UIRoot extends Component {
     return this.micDeviceIdForMicLabel(this.selectedMicLabel());
   };
 
-  onAudioReadyButton = () => {
+  shouldShowFullScreen = () => {
     // Disable full screen on iOS, since Safari's fullscreen mode does not let you prevent native pinch-to-zoom gestures.
-    if (
+    return (
       (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo()) &&
       !AFRAME.utils.device.isIOS() &&
       !this.state.enterInVR &&
       screenfull.enabled
-    ) {
+    );
+  };
+
+  showFullScreenIfAvailable = () => {
+    if (this.shouldShowFullScreen()) {
       screenfull.request();
     }
+  };
 
+  onAudioReadyButton = () => {
+    this.showFullScreenIfAvailable();
     this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.props.hubId);
 
     const mediaStream = this.state.mediaStream;
@@ -1374,36 +1381,6 @@ class UIRoot extends Component {
                       matchingPrefix={this.state.pendingMessage.substring(1)}
                     />
                   )}
-                  <textarea
-                    style={{ height: pendingMessageTextareaHeight }}
-                    className={classNames([
-                      styles.messageEntryInput,
-                      styles.messageEntryInputInRoom,
-                      "chat-focus-target"
-                    ])}
-                    value={this.state.pendingMessage}
-                    rows={textRows}
-                    onFocus={e => {
-                      this.setState({ messageEntryOnTop: isMobile });
-                      e.target.select();
-                    }}
-                    onBlur={() => this.setState({ messageEntryOnTop: false })}
-                    onChange={e => {
-                      e.stopPropagation();
-                      this.setState({ pendingMessage: e.target.value });
-                    }}
-                    onKeyDown={e => {
-                      if (e.keyCode === 13 && !e.shiftKey) {
-                        this.sendMessage(e);
-                      } else if (e.keyCode === 13 && e.shiftKey && e.ctrlKey) {
-                        spawnChatMessage(e.target.value);
-                        this.setState({ pendingMessage: "" });
-                      } else if (e.keyCode === 27) {
-                        e.target.blur();
-                      }
-                    }}
-                    placeholder="Send a message..."
-                  />
                   <input
                     id="message-entry-media-input"
                     type="file"
@@ -1429,6 +1406,69 @@ class UIRoot extends Component {
                       <FontAwesomeIcon icon={isMobile ? faCamera : faPlus} />
                     </i>
                   </label>
+                  <textarea
+                    style={{ height: pendingMessageTextareaHeight }}
+                    className={classNames([
+                      styles.messageEntryInput,
+                      styles.messageEntryInputInRoom,
+                      "chat-focus-target"
+                    ])}
+                    value={this.state.pendingMessage}
+                    rows={textRows}
+                    onFocus={e => {
+                      this.setState({ messageEntryOnTop: isMobile });
+
+                      if (screenfull.isFullscreen) {
+                        // This will prevent focus, but its the only way to avoid getting into a
+                        // weird "firefox reports full screen but actually not". You end up having to tap
+                        // twice to ultimately get the focus.
+                        //
+                        // We need to keep track of a bit here so that we don't re-full screen when
+                        // the text box is blurred by the browser.
+
+                        this.isExitingFullscreenDueToFocus = true;
+                        screenfull.exit();
+                      }
+
+                      e.target.select();
+                    }}
+                    onBlur={() => {
+                      // This is the incidental blur event when exiting fullscreen mode on mobile
+                      if (this.isExitingFullscreenDueToFocus) {
+                        this.isExitingFullscreenDueToFocus = false;
+                        return;
+                      }
+
+                      this.setState({ messageEntryOnTop: false });
+                      this.showFullScreenIfAvailable();
+                    }}
+                    onChange={e => {
+                      e.stopPropagation();
+                      this.setState({ pendingMessage: e.target.value });
+                    }}
+                    onKeyDown={e => {
+                      if (e.keyCode === 13 && !e.shiftKey) {
+                        this.sendMessage(e);
+                      } else if (e.keyCode === 13 && e.shiftKey && e.ctrlKey) {
+                        spawnChatMessage(e.target.value);
+                        this.setState({ pendingMessage: "" });
+                      } else if (e.keyCode === 27) {
+                        e.target.blur();
+                      }
+                    }}
+                    placeholder="Send a message..."
+                  />
+                  <button
+                    className={classNames([styles.messageEntrySpawn])}
+                    onClick={() => {
+                      if (this.state.pendingMessage.length > 0) {
+                        spawnChatMessage(this.state.pendingMessage);
+                        this.setState({ pendingMessage: "" });
+                      } else {
+                        this.pushHistoryState("modal", "create");
+                      }
+                    }}
+                  />
                   <button
                     type="submit"
                     className={classNames([
@@ -1441,19 +1481,6 @@ class UIRoot extends Component {
                       <FontAwesomeIcon icon={faPaperPlane} />
                     </i>
                   </button>
-                  <WithHoverSound>
-                    <button
-                      className={classNames([styles.messageEntrySpawn])}
-                      onClick={() => {
-                        if (this.state.pendingMessage.length > 0) {
-                          spawnChatMessage(this.state.pendingMessage);
-                          this.setState({ pendingMessage: "" });
-                        } else {
-                          this.pushHistoryState("modal", "create");
-                        }
-                      }}
-                    />
-                  </WithHoverSound>
                 </div>
               </form>
             )}
