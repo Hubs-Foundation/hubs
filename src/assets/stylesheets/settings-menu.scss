@@ -62,24 +62,4 @@
   :local(.bottom-link-main) {
     font-weight: bold;
   }
-
-  :local(.bottom-link-icon) {
-    width: 14px;
-    height: 14px;
-    position: relative;
-    margin: 0px 12px 0px 0px;
-    font-size: 1.0em;
-
-    img {
-      position: absolute;
-      width: 14px;
-      height: 14px;
-    }
-
-    // Hack for fontawesome icons, because other images are sqauare
-    i {
-      position: absolute;
-      top: -3px;
-    }
-  }
 }
