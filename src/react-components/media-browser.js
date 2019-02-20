@@ -27,7 +27,7 @@ const PRIVACY_POLICY_LINKS = {
   images: "https://privacy.microsoft.com/en-us/privacystatement",
   gifs: "https://tenor.com/legal-privacy",
   sketchfab: "https://sketchfab.com/privacy",
-  poly: "https://sketchfab.com/privacy",
+  poly: "https://policies.google.com/privacy",
   twitch: "https://www.twitch.tv/p/legal/privacy-policy/"
 };
 

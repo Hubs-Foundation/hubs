@@ -1,4 +1,5 @@
 import "./components/gltf-model-plus";
+import { getSanitizedComponentMapping } from "./utils/component-mappings";
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
@@ -145,6 +146,8 @@ function mediaInflator(el, componentName, componentData, components) {
       mediaOptions.coneOuterAngle = componentData.coneOuterAngle;
       mediaOptions.coneOuterGain = componentData.coneOuterGain;
     }
+
+    el.setAttribute("video-pause-state", { paused: mediaOptions.videoPaused });
   }
 
   el.setAttribute("media-loader", {
@@ -157,7 +160,13 @@ function mediaInflator(el, componentName, componentData, components) {
 }
 
 AFRAME.GLTFModelPlus.registerComponent("image", "image", mediaInflator);
-AFRAME.GLTFModelPlus.registerComponent("video", "video", mediaInflator);
+AFRAME.GLTFModelPlus.registerComponent("video", "video", mediaInflator, (name, property, value) => {
+  if (property === "paused") {
+    return { name: "video-pause-state", property, value };
+  } else {
+    return null;
+  }
+});
 
 AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName, componentData) => {
   el.setAttribute("media-loader", {
@@ -181,3 +190,74 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
   });
   el.setAttribute("hoverable", "");
 });
+
+const publicComponents = {
+  video: {
+    mappedComponent: "video-pause-state",
+    publicProperties: {
+      paused: {
+        mappedProperty: "paused",
+        getMappedValue(value) {
+          return !!value;
+        }
+      }
+    }
+  },
+  "loop-animation": {
+    mappedComponent: "loop-animation",
+    publicProperties: {
+      paused: {
+        mappedProperty: "paused",
+        getMappedValue(value) {
+          return !!value;
+        }
+      }
+    }
+  }
+};
+
+AFRAME.GLTFModelPlus.registerComponent(
+  "trigger-volume",
+  "trigger-volume",
+  (el, componentName, componentData, components, indexToEntityMap) => {
+    const {
+      size,
+      target,
+      enterComponent,
+      enterProperty,
+      enterValue,
+      leaveComponent,
+      leaveProperty,
+      leaveValue
+    } = componentData;
+
+    let enterComponentMapping, leaveComponentMapping, targetEntity;
+
+    try {
+      enterComponentMapping = getSanitizedComponentMapping(enterComponent, enterProperty, publicComponents);
+      leaveComponentMapping = getSanitizedComponentMapping(leaveComponent, leaveProperty, publicComponents);
+
+      targetEntity = indexToEntityMap[target];
+
+      if (!targetEntity) {
+        throw new Error(`Couldn't find target entity with index: ${target}.`);
+      }
+    } catch (e) {
+      console.warn(`Error inflating gltf component "trigger-volume": ${e.message}`);
+      return;
+    }
+
+    // Filter out scope and colliders properties.
+    el.setAttribute("trigger-volume", {
+      colliders: "#player-camera",
+      size,
+      target: targetEntity,
+      enterComponent: enterComponentMapping.mappedComponent,
+      enterProperty: enterComponentMapping.mappedProperty,
+      enterValue: enterComponentMapping.getMappedValue(enterValue),
+      leaveComponent: leaveComponentMapping.mappedComponent,
+      leaveProperty: leaveComponentMapping.mappedProperty,
+      leaveValue: leaveComponentMapping.getMappedValue(leaveValue)
+    });
+  }
+);
