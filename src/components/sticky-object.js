@@ -59,13 +59,13 @@ AFRAME.registerComponent("sticky-object", {
       this.setLocked(true);
     }
 
-    this.el.setAttribute("ammo-body", { collisionFilterMask: 1 });
+    this.el.setAttribute("ammo-body", { collisionFilterGroup: 1 });
   },
 
   _onGrab() {
     if (!this.el.components.grabbable || this.el.components.grabbable.data.maxGrabbers === 0) return;
 
-    this.el.setAttribute("ammo-body", { collisionFilterMask: this.locked ? 0 : 1 });
+    this.el.setAttribute("ammo-body", { collisionFilterGroup: this.locked ? 2 : 1 });
     this.setLocked(false);
   },
 

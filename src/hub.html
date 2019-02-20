@@ -469,7 +469,7 @@
             radius="0.02"
             segments-width="9"
             segments-height="9"
-            ammo-body="type: kinematic; collisionFlags: 4; autoUpdateScale: false;"
+            ammo-body="type: kinematic; collisionFlags: 4; collisionFilterMask: 3; autoUpdateScale: false;"
             ammo-shape="type: sphere; sphereRadius: 0.02; autoGenerateShape: false;"
             super-hands="
                 colliderEvent: raycaster-intersection;
@@ -655,7 +655,7 @@
                 teleport-controls-matrix-auto-update
                 haptic-feedback
                 mixin="controller-super-hands"
-                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4;"
+                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3;"
                 controls-shape-offset
                 action-to-event__a="path: /actions/leftHandStartTeleport; event: left-teleport_down;"
                 action-to-event__b="path: /actions/leftHandStopTeleport; event: left-teleport_up;"
@@ -683,7 +683,7 @@
                 teleport-controls-matrix-auto-update
                 haptic-feedback
                 mixin="controller-super-hands"
-                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4;"
+                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3;"
                 controls-shape-offset
                 action-to-event__a="path: /actions/rightHandStartTeleport; event: right-teleport_down;"
                 action-to-event__b="path: /actions/rightHandStopTeleport; event: right-teleport_up;"
