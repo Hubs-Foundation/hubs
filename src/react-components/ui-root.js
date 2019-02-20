@@ -9,6 +9,7 @@ import MovingAverage from "moving-average";
 import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
+import { Route } from "react-router";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
 import { pushHistoryState, clearHistoryState, popToBeginningOfHubHistory, navigateToPriorPage } from "../utils/history";
 import StateLink from "./state-link.js";
@@ -24,6 +25,7 @@ import {
   SafariEntryButton
 } from "./entry-buttons.js";
 import ProfileEntryPanel from "./profile-entry-panel";
+import MediaBrowser from "./media-browser";
 
 import CreateObjectDialog from "./create-object-dialog.js";
 import HelpDialog from "./help-dialog.js";
@@ -61,6 +63,8 @@ addLocaleData([...en]);
 // then we rely upon the user to select the proper mic.
 const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
 
+const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
+
 async function grantedMicLabels() {
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
   return mediaDevices.filter(d => d.label && d.kind === "audioinput").map(d => d.label);
@@ -93,6 +97,7 @@ class UIRoot extends Component {
     forcedVREntryType: PropTypes.string,
     isBotMode: PropTypes.bool,
     store: PropTypes.object,
+    mediaSearchStore: PropTypes.object,
     scene: PropTypes.object,
     authChannel: PropTypes.object,
     hubChannel: PropTypes.object,
@@ -117,6 +122,7 @@ class UIRoot extends Component {
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
+    onMediaSearchResultEntrySelected: PropTypes.func,
     location: PropTypes.object,
     history: PropTypes.object
   };
@@ -163,9 +169,12 @@ class UIRoot extends Component {
 
   constructor(props) {
     super(props);
+
     if (props.showSafariMicDialog) {
       this.state.dialog = <SafariMicDialog closable={false} />;
     }
+
+    props.mediaSearchStore.setHistory(props.history);
   }
 
   componentDidUpdate(prevProps) {
@@ -206,7 +215,10 @@ class UIRoot extends Component {
     // If we refreshed the page with any state history (eg if we were in the entry flow
     // or had a modal/overlay open) just reset everything to the beginning of the flow by
     // erasing all history that was accumulated for this room (including across refreshes.)
-    if (this.props.history.location.state) {
+    //
+    // We don't do this for the media browser case, since we want to be able to share
+    // links to the browser pages
+    if (this.props.history.location.state && !this.props.history.location.pathname.startsWith("/media")) {
       popToBeginningOfHubHistory(this.props.history);
     }
 
@@ -1144,6 +1156,13 @@ class UIRoot extends Component {
   };
 
   isInModalOrOverlay = () => {
+    if (
+      this.state.entered &&
+      IN_ROOM_MODAL_ROUTER_PATHS.find(x => this.props.history.location.pathname.startsWith(x))
+    ) {
+      return true;
+    }
+
     return !!(
       (this.props.history &&
         this.props.history.location.state &&
@@ -1198,10 +1217,16 @@ class UIRoot extends Component {
     const pendingMessageTextareaHeight = textRows * 28 + "px";
     const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
 
+    const rootStyles = {
+      [styles.ui]: true,
+      "ui-root": true,
+      "in-modal-or-overlay": this.isInModalOrOverlay()
+    };
+
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
-          <div className={styles.ui}>
+          <div className={classNames(rootStyles)}>
             {this.state.dialog}
 
             <StateRoute
@@ -1212,6 +1237,18 @@ class UIRoot extends Component {
                 <ProfileEntryPanel {...props} finished={this.onProfileFinished} store={this.props.store} />
               )}
             />
+            {this.state.entered && (
+              <Route
+                path="/media"
+                render={props => (
+                  <MediaBrowser
+                    {...props}
+                    mediaSearchStore={this.props.mediaSearchStore}
+                    onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
+                  />
+                )}
+              />
+            )}
             <StateRoute
               stateKey="entry_step"
               stateValue="profile"

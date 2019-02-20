@@ -11,7 +11,6 @@ const cors = require("cors");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 function createHTTPSConfig() {
@@ -201,8 +200,6 @@ module.exports = (env, argv) => ({
   },
 
   optimization: {
-    // necessary due to https://github.com/visionmedia/debug/issues/547
-    minimizer: [new UglifyJsPlugin({ sourceMap: true, uglifyOptions: { compress: { collapse_vars: false } } })],
     splitChunks: {
       cacheGroups: {
         admindeps: {

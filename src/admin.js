@@ -12,6 +12,9 @@ import { Admin, Resource, ListGuesser } from "react-admin";
 //import { EditGuesser, CreateGuesser } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
 import { SceneList, SceneEdit } from "./react-components/admin/scenes";
+import { SceneListingList, SceneListingEdit } from "./react-components/admin/scene-listings";
+import { FeaturedSceneListingList, FeaturedSceneListingEdit } from "./react-components/admin/featured-scene-listings";
+import { PendingSceneList } from "./react-components/admin/pending-scenes";
 import { AccountList, AccountEdit } from "./react-components/admin/accounts";
 
 window.APP = new App();
@@ -35,8 +38,11 @@ class AdminUI extends Component {
     return (
       <Admin dataProvider={this.props.dataProvider} authProvider={this.props.authProvider}>
         <Resource name="scenes" list={SceneList} edit={SceneEdit} />
+        <Resource name="scene_listings" list={SceneListingList} edit={SceneListingEdit} />
         <Resource name="accounts" list={AccountList} edit={AccountEdit} />
         <Resource name="owned_files" />
+        <Resource name="featured_scene_listings" list={FeaturedSceneListingList} edit={FeaturedSceneListingEdit} />
+        <Resource name="pending_scenes" list={PendingSceneList} />
         <Resource name="hubs_metrics" list={ListGuesser} />
       </Admin>
     );

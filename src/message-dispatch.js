@@ -1,14 +1,16 @@
 import { spawnChatMessage } from "./react-components/chat-message";
+
 const DUCK_URL = "https://asset-bundles-prod.reticulum.io/interactables/Ducky/DuckyMesh-438ff8e022.gltf";
 
 // Handles user-entered messages
 export default class MessageDispatch {
-  constructor(scene, entryManager, hubChannel, addToPresenceLog, remountUI) {
+  constructor(scene, entryManager, hubChannel, addToPresenceLog, remountUI, mediaSearchStore) {
     this.scene = scene;
     this.entryManager = entryManager;
     this.hubChannel = hubChannel;
     this.addToPresenceLog = addToPresenceLog;
     this.remountUI = remountUI;
+    this.mediaSearchStore = mediaSearchStore;
   }
 
   dispatch = message => {
@@ -87,10 +89,16 @@ export default class MessageDispatch {
         physicsSystem.setDebug(!physicsSystem.debug);
         break;
       case "scene":
-        err = this.hubChannel.updateScene(args[0]);
-        if (err === "unauthorized") {
-          this.addToPresenceLog({ type: "log", body: "You do not have permission to change the scene." });
+        if (args[0]) {
+          err = this.hubChannel.updateScene(args[0]);
+
+          if (err === "unauthorized") {
+            this.addToPresenceLog({ type: "log", body: "You do not have permission to change the scene." });
+          }
+        } else {
+          this.mediaSearchStore.sourceNavigate("scenes");
         }
+
         break;
       case "rename":
         err = this.hubChannel.rename(args.join(" "));

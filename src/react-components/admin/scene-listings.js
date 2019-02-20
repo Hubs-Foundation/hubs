@@ -1,6 +1,6 @@
 import React from "react";
 import { SceneLink, OwnedFileImage } from "./fields";
-import ApproveSceneButton from "./approve-scene-button";
+import FeatureSceneListingButton from "./feature-scene-listing-button";
 
 import {
   List,
@@ -8,7 +8,7 @@ import {
   SimpleForm,
   TextInput,
   EditButton,
-  BooleanInput,
+  SelectInput,
   Datagrid,
   TextField,
   ReferenceField,
@@ -17,41 +17,40 @@ import {
   Filter
 } from "react-admin";
 
-const SceneFilter = props => (
+const SceneListingFilter = props => (
   <Filter {...props}>
     <TextInput label="Search Name" source="name" alwaysOn />
-    <TextInput label="Search SID" source="scene_sid" alwaysOn />
+    <TextInput label="Search SID" source="scene_listing_sid" alwaysOn />
   </Filter>
 );
 
-export const SceneEdit = props => (
+export const SceneListingEdit = props => (
   <Edit {...props}>
     <SimpleForm>
       <TextInput source="name" />
       <TextInput source="description" />
-      <TextInput source="state" />
-      <BooleanInput source="allow_remixing" />
-      <BooleanInput source="allow_promotion" />
+      <SelectInput source="state" choices={[{ id: "active", name: "active" }, { id: "delisted", name: "delisted" }]} />
     </SimpleForm>
   </Edit>
 );
 
-export const SceneList = props => (
-  <List {...props} filters={<SceneFilter />}>
+export const SceneListingList = props => (
+  <List {...props} filters={<SceneListingFilter />}>
     <Datagrid>
       <ReferenceField source="screenshot_owned_file_id" reference="owned_files" linkType={false}>
         <OwnedFileImage source="owned_file_uuid" />
       </ReferenceField>
       <TextField source="name" />
-      <SceneLink source="scene_sid" />
-      <BooleanField source="allow_remixing" />
-      <BooleanField source="allow_promotion" />
+      <TextField source="description" />
+      <SceneLink source="scene_listing_sid" />
+      <BooleanField source="_allow_remixing" />
+      <BooleanField source="_allow_promotion" />
       <TextField source="reviewed_at" />
       <DateField source="inserted_at" />
       <DateField source="updated_at" />
       <TextField source="state" />
+      <FeatureSceneListingButton />
       <EditButton />
-      <ApproveSceneButton />
     </Datagrid>
   </List>
 );
