@@ -21,8 +21,21 @@
     "lint:js": "eslint '*.js' 'scripts/**/*.js' 'src/**/*.js'",
     "lint:html": "htmlhint 'src/**/*.html' && node scripts/indent-linter.js 'src/**/*.html'",
     "lint": "npm run lint:js && npm run lint:html",
-    "test": "npm run lint && npm run build",
+    "test": "npm run lint && npm run test:unit && npm run build",
+    "test:unit": "ava",
     "stats": "rimraf ./dist && webpack --mode=production --json"
+  },
+  "ava": {
+    "files": [
+      "./test/unit"
+    ],
+    "sources": [
+      "src/**/*.js"
+    ],
+    "require": [
+      "babel-register",
+      "esm"
+    ]
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.2",
@@ -33,7 +46,7 @@
     "aframe-inspector": "^0.8.3",
     "aframe-motion-capture-components": "github:mozillareality/aframe-motion-capture-components#aframe090",
     "aframe-physics-extras": "github:mozillareality/aframe-physics-extras#bugfix/physics-collider-world",
-    "aframe-physics-system": "github:mozillareality/aframe-physics-system#ecc5c9c533d6d9c71f8d6453ab961ed074d44b1c",
+    "aframe-physics-system": "github:mozillareality/aframe-physics-system#93b1dfe64c00587a9d09e1a8071750e75f340815",
     "aframe-rounded": "^1.0.3",
     "aframe-slice9-component": "^1.0.0",
     "aframe-teleport-controls": "github:mozillareality/aframe-teleport-controls#hubs/master",
@@ -74,6 +87,7 @@
     "webrtc-adapter": "^6.0.2"
   },
   "devDependencies": {
+    "ava": "^0.25.0",
     "babel-core": "^6.26.0",
     "babel-eslint": "8",
     "babel-loader": "^7.1.3",
@@ -91,6 +105,7 @@
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-prettier": "^2.6.2",
     "eslint-plugin-react": "^7.10.0",
+    "esm": "^3.2.5",
     "extract-text-webpack-plugin": "4.0.0-alpha.0",
     "file-loader": "^1.1.10",
     "html-loader": "^0.5.5",
@@ -109,9 +124,9 @@
     "stylelint-config-recommended-scss": "^3.2.0",
     "stylelint-scss": "^3.2.0",
     "url-loader": "^1.0.1",
-    "webpack": "^4.16.2",
+    "webpack": "^4.29.3",
     "webpack-bundle-analyzer": "^3.0.3",
-    "webpack-cli": "^2.0.9",
+    "webpack-cli": "^3.2.3",
     "webpack-dev-server": "^3.1.7",
     "worker-loader": "^2.0.0"
   }
