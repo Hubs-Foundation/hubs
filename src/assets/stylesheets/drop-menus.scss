@@ -45,6 +45,19 @@
   margin: 6px 0;
 }
 
+:local(.row-header) {
+  margin-top: 18px;
+  margin-bottom: 4px;
+  color: $dark-grey;
+  font-weight: normal;
+  text-transform: uppercase;
+  font-size: 0.8em;
+}
+
+:local(.row-header):first-child {
+  margin-top: 4px;
+}
+
 :local(.list-item) {
   flex: 10;
   white-space: nowrap;
