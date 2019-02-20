@@ -4,7 +4,7 @@
   bottom: 0;
 
   @media(orientation: portrait) {
-    display: none;
+    height: 20vh;
   }
 }
 

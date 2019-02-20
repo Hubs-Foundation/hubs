@@ -8,7 +8,7 @@ THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const GLTFCache = {};
 
-function inflateComponent(el, componentName, componentData) {
+function defaultInflator(el, componentName, componentData) {
   if (!AFRAME.components[componentName]) {
     throw new Error(`Inflator failed. "${componentName}" component does not exist.`);
   }
@@ -25,7 +25,7 @@ AFRAME.GLTFModelPlus = {
   // eslint-disable-next-line no-unused-vars
   components: {},
   registerComponent(componentKey, componentName, inflator) {
-    inflator = inflator || inflateComponent;
+    inflator = inflator || defaultInflator;
     AFRAME.GLTFModelPlus.components[componentKey] = { inflator, componentName };
   }
 };
@@ -81,13 +81,23 @@ function cloneGltf(gltf) {
   };
 }
 
+function getHubsComponents(node) {
+  const hubsComponents = node.userData.gltfExtensions && node.userData.gltfExtensions.HUBS_components;
+
+  // We can remove support for legacy components when our environment, avatar and interactable models are
+  // updated to match Spoke output.
+  const legacyComponents = node.userData.components;
+
+  return hubsComponents || legacyComponents;
+}
+
 /// Walks the tree of three.js objects starting at the given node, using the GLTF data
 /// and template data to construct A-Frame entities and components when necessary.
 /// (It's unnecessary to construct entities for subtrees that have no component data
 /// or templates associated with any of their nodes.)
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
-const inflateEntities = function(node, templates, isRoot, modelToWorldScale = 1) {
+const inflateEntities = function(indexToEntityMap, node, templates, isRoot, modelToWorldScale = 1) {
   // TODO: Remove this once we update the legacy avatars to the new node names
   if (node.name === "Chest") {
     node.name = "Spine";
@@ -101,19 +111,13 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale = 1)
   const childEntities = [];
   const children = node.children.slice(0); // setObject3D mutates the node's parent, so we have to copy
   for (const child of children) {
-    const el = inflateEntities(child, templates);
+    const el = inflateEntities(indexToEntityMap, child, templates);
     if (el) {
       childEntities.push(el);
     }
   }
 
-  const hubsComponents = node.userData.gltfExtensions && node.userData.gltfExtensions.HUBS_components;
-
-  // We can remove support for legacy components when our environment, avatar and interactable models are
-  // updated to match Spoke output.
-  const legacyComponents = node.userData.components;
-
-  const entityComponents = hubsComponents || legacyComponents;
+  const entityComponents = getHubsComponents(node);
 
   const nodeHasBehavior = !!entityComponents || node.name in templates;
   if (!nodeHasBehavior && !childEntities.length && !isRoot) {
@@ -161,17 +165,29 @@ const inflateEntities = function(node, templates, isRoot, modelToWorldScale = 1)
     node.parent.animations = node.animations;
   }
 
-  if (entityComponents) {
-    for (const prop in entityComponents) {
-      if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
-        const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-        inflator(el, componentName, entityComponents[prop], entityComponents);
-      }
-    }
+  const gltfIndex = node.userData.gltfIndex;
+  if (gltfIndex !== undefined) {
+    indexToEntityMap[gltfIndex] = el;
   }
 
   return el;
 };
+
+function inflateComponents(inflatedEntity, indexToEntityMap) {
+  inflatedEntity.object3D.traverse(object3D => {
+    const entityComponents = getHubsComponents(object3D);
+    const el = object3D.el;
+
+    if (entityComponents && el) {
+      for (const prop in entityComponents) {
+        if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
+          const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
+          inflator(el, componentName, entityComponents[prop], entityComponents, indexToEntityMap);
+        }
+      }
+    }
+  });
+}
 
 function attachTemplate(root, name, templateRoot) {
   const targetEls = root.querySelectorAll("." + name);
@@ -228,6 +244,20 @@ async function loadGLTF(src, contentType, preferredTechnique, onProgress) {
         const altMaterialIndex = material.extensions.MOZ_alt_materials[preferredTechnique];
         materials[i] = materials[altMaterialIndex];
       }
+    }
+  }
+
+  const nodes = parser.json.nodes;
+
+  if (nodes) {
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+
+      if (!node.extras) {
+        node.extras = {};
+      }
+
+      node.extras.gltfIndex = i;
     }
   }
 
@@ -342,10 +372,18 @@ AFRAME.registerComponent("gltf-model-plus", {
         this.el.components["animation-mixer"].initMixer(gltf.animations);
       }
 
+      const indexToEntityMap = {};
+
       let object3DToSet = this.model;
       if (
         this.data.inflate &&
-        (this.inflatedEl = inflateEntities(this.model, this.templates, true, this.data.modelToWorldScale))
+        (this.inflatedEl = inflateEntities(
+          indexToEntityMap,
+          this.model,
+          this.templates,
+          true,
+          this.data.modelToWorldScale
+        ))
       ) {
         this.el.appendChild(this.inflatedEl);
 
@@ -354,6 +392,9 @@ AFRAME.registerComponent("gltf-model-plus", {
         // Wait one tick for the appended custom elements to be connected before attaching templates
         await nextTick();
         if (src != this.lastSrc) return; // TODO: there must be a nicer pattern for this
+
+        inflateComponents(this.inflatedEl, indexToEntityMap);
+
         for (const name in this.templates) {
           attachTemplate(this.el, name, this.templates[name]);
         }

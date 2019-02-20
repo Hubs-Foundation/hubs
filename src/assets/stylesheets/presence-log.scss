@@ -95,12 +95,12 @@
     }
 
     :local(.spawn-message) {
-      background-image: url(../spawn_message.png);
+      background-image: url(../images/spawn_message.png);
     }
 
     // TODO replace these icons with share button
     :local(.share) {
-      background-image: url(../share_message.png);
+      background-image: url(../images/share_message.png);
     }
 
     &:local(.media) {
