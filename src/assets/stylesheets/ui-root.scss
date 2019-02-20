@@ -9,27 +9,6 @@
   left: 0;
   position: absolute;
   pointer-events: none;
-
-  :local(.help-icon) {
-    @extend %fa-icon-button;
-    pointer-events: auto;
-    position: absolute;
-    z-index: 1;
-    top: 0px;
-    right: 14px;
-
-    i {
-      background: white;
-      border-radius: 36px;
-      display: inline-block;
-      font-size: 22px;
-      vertical-align: sub;
-      line-height: 34px;
-      border: 0;
-      width: 36px;
-      height: 36px;
-    }
-  }
 }
 
 body.vr-mode {
@@ -163,7 +142,7 @@ body.vr-mode {
   position: absolute;
   z-index: 1;
   top: 0;
-  left: 16px;
+  right: 16px;
   margin: 16px 0;
   display: flex;
   align-items: center;
@@ -187,6 +166,30 @@ body.vr-mode {
 }
 
 :local(.presence-info-selected) {
+  color: $action-color;
+}
+
+:local(.settings-info) {
+  @extend %unselectable;
+  text-align: right;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 16px;
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3em;
+  background-color: white;
+  border-radius: 24px;
+  font-weight: bold;
+  padding: 10px 12px;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+:local(.settings-info-selected) {
   color: $action-color;
 }
 
@@ -219,7 +222,7 @@ body.vr-mode {
   width: 100%;
   border: 0px;
   height: 32px;
-  margin-right: 100px;
+  flex: 10;
 }
 
 :local(.message-entry-input)::placeholder{
@@ -228,74 +231,110 @@ body.vr-mode {
   font-style: italic;
 }
 
-:local(.message-entry-submit) {
-  @extend %action-button;
-  position: absolute;
-  right: 10px;
-  height: 32px;
-  min-width: 80px;
-  bottom: 8px;
-  border-radius: 10px;
+:local(.message-entry-button) {
+  color: $action-color;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
+  background-color: white;
+  min-width: 40px;
+  height: 100%;
+  bottom: 0px;
+  border: 0px;
+  font-size: 1.5em;
+  cursor: pointer;
+  margin: 0px 10px;
+}
+
+:local(.message-entry-button-in-room) {
+  color: $dark-grey;
+}
+
+:local(.message-entry-button-in-room):hover {
+  color: $action-color;
+}
+
+:local(.message-entry-upload) {
+  margin-bottom: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 :local(.message-entry-in-room) {
-  @media(max-width: 900px) {
-    display:none;
-  }
-
   position: absolute;
   z-index: 2;
-  left: 16px;
   bottom: 20px;
-  width: 33%;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  width: 95%;
+  max-width: 700px;
   height: 48px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: $darker-grey;
+  background-color: rgba(64, 64, 64, 0.55);
   border-radius: 16px;
   pointer-events: auto;
-  opacity: 0.3;
   transition: opacity 0.15s linear;
 
   :local(.message-entry-input-in-room) {
     color: white;
-    padding: 8px 1.25em;
-    margin-left: 32px;
+    padding: 8px 0px;
+    margin-left: 4px;
   }
 
   :local(.message-entry-spawn) {
     @extend %action-button;
-    position: absolute;
-    left: 12px;
+    background-color: transparent;
     height: 32px;
     width: 32px;
     bottom: 8px;
     min-width: auto;
-    background-size: 90%;
-    background-image: url(../spawn_message.png);
-    background-position-x: 1px;
-    background-position-y: 1px;
+    background-size: 100%;
+    background-image: url(../images/spawn_message_dark.png);
+    background-repeat: no-repeat;
     padding: 0;
-    border-radius: 16px;
-    visibility: hidden;
   }
 
-  :local(.message-entry-submit-in-room) {
+  :local(.message-entry-spawn):hover {
+    background-image: url(../images/spawn_message_dark-hover.png);
+  }
+
+  :local(.message-entry-button-in-room) {
     border: 0;
-    visibility: hidden;
+    background-color: transparent;
+    margin-right: 10px;
   }
 }
 
 :local(.message-entry-in-room):focus-within {
-  opacity: 1.0;
-  transition: opacity 0.15s linear;
+  transition: background-color 0.15s linear;
+  background-color: $darker-grey;
 
-  :local(.message-entry-submit-in-room) {
-    visibility: visible;
-  }
-
-  :local(.message-entry-spawn) {
-    visibility: visible;
+  :local(.message-entry-button-in-room) {
+    border: 0;
+    background-color: transparent;
   }
 }
+
+:local(.message-entry-on-mobile) {
+  // Hide chatbox for joysticks
+  @media (orientation: landscape) {
+    display: none;
+  }
+}
+
+:local(.message-entry-on-top) {
+  :local(.invite-container), :local(.top-hud), :local(.presence-info), :local(.settings-info) {
+    display: none;
+  }
+
+  :local(.message-entry-in-room) {
+    top: 20px;
+    bottom: auto;
+  }
+}
+

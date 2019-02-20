@@ -1,83 +1,19 @@
 @import 'shared.scss';
-
-:local(.attach-point) {
-  width: 0; 
-  height: 0; 
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-bottom: 5px solid $white-transparent;
-  position: absolute;
-  top: -5px;
-  left: 44px;
-
-  @media(max-width: 500px) {
-    left: 22px;
-  }
-}
+@import 'drop-menus.scss';
 
 :local(.presence-list) {
-  position: absolute;
-  top: 72px;
+  @extend %drop-menu;
+  right: 16px;
+}
+
+:local(.attach-point) {
+  @extend %attach-point;
+  top: -5px;
+  right: 44px;
 
   @media(max-width: 500px) {
-    top: 96px;
+    right: 22px;
   }
-
-  left: 16px;
-  bottom: 0;
-  z-index: 5;
-}
-
-:local(.contents) {
-  background-color: white;
-  border-radius: 12px;
-  padding: 12px 18px;
-  min-width: 260px;
-  max-height: 75%;
-  overflow-y: auto;
-  pointer-events: auto;
-}
-
-:local(.rows) {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-:local(.row) {
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  font-weight: bold;
-  justify-content: space-between;
-  align-items: center;
-  margin: 6px 0;
-}
-
-:local(.device) {
-  width: 32px;
-  height: 32px;
-  position: relative;
-  margin: 0px 12px 0px 0px;
-
-  img {
-    position: absolute;
-    left: 2px;
-    width: 32px;
-    height: 32px;
-  }
-}
-
-:local(.display-name) {
-  flex: 10;
-  white-space: nowrap;
-  margin-right: 24px;
-  max-width: 45vw;
-  overflow: hidden;
-}
-
-:local(.self-display-name) {
-  text-decoration: underline;
 }
 
 :local(.presence) {
@@ -89,12 +25,43 @@
 :local(.sign-in) {
   display: flex;
   justify-content: center;
-  border-top: 1px solid grey;
-  padding-top: 0.5em;
+  border-top: 1px solid $light-grey;
+  margin-top: 12px;
+  padding-top: 12px;
+  font-size: 0.8em;
+
   a {
     text-decoration: underline;
+    text-decoration-color: $dark-grey;
     font-weight: bold;
     cursor: pointer;
     margin-left: 24px;
+  }
+}
+
+:local(.icon) {
+  width: 24px;
+  height: 24px;
+  position: relative;
+  margin: 0px 12px 0px 0px;
+
+  img {
+    position: absolute;
+    left: 2px;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+:local(.self) {
+  text-decoration: none;
+
+  i {
+    margin-left: 8px;
+    color: $dark-grey;
+  }
+
+  i:hover {
+    color: $action-color;
   }
 }

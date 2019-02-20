@@ -9,7 +9,6 @@ import MovingAverage from "moving-average";
 import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
-import { Route } from "react-router";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
 import { pushHistoryState, clearHistoryState, popToBeginningOfHubHistory, navigateToPriorPage } from "../utils/history";
 import StateLink from "./state-link.js";
@@ -41,13 +40,18 @@ import RoomInfoDialog from "./room-info-dialog.js";
 
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
+import SettingsMenu from "./settings-menu.js";
 import TwoDHUD from "./2d-hud";
 import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
+import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
+import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
+import { faCamera } from "@fortawesome/free-solid-svg-icons/faCamera";
+import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 
@@ -64,6 +68,7 @@ addLocaleData([...en]);
 const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
 
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
+const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
 
 async function grantedMicLabels() {
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
@@ -134,6 +139,7 @@ class UIRoot extends Component {
     dialog: null,
     showInviteDialog: false,
     showPresenceList: false,
+    showSettingsMenu: false,
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
@@ -142,6 +148,7 @@ class UIRoot extends Component {
     requestedScreen: false,
     mediaStream: null,
     audioTrack: null,
+    numAudioTracks: 0,
 
     toneInterval: null,
     tonePlaying: false,
@@ -233,7 +240,9 @@ class UIRoot extends Component {
       }
     });
 
-    setTimeout(() => this.handleForceEntry(), 2000);
+    if (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now")) {
+      setTimeout(() => this.handleForceEntry(), 2000);
+    }
   }
 
   componentWillUnmount() {
@@ -478,11 +487,14 @@ class UIRoot extends Component {
 
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      this.setState({ audioTrack: mediaStream.getAudioTracks()[0] });
+      this.setState({
+        audioTrack: mediaStream.getAudioTracks()[0],
+        numAudioTracks: mediaStream.getAudioTracks().length
+      });
       return true;
     } catch (e) {
       // Error fetching audio track, most likely a permission denial.
-      this.setState({ audioTrack: null });
+      this.setState({ audioTrack: null, numAudioTracks: 0 });
       return false;
     }
   };
@@ -557,10 +569,13 @@ class UIRoot extends Component {
   };
 
   beginOrSkipAudioSetup = () => {
-    if (!this.props.forcedVREntryType || !this.props.forcedVREntryType.endsWith("_now")) {
-      this.pushHistoryState("entry_step", "audio");
-    } else {
+    const skipAudioSetup =
+      this.state.numAudioTracks <= 1 || (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"));
+
+    if (skipAudioSetup) {
       this.onAudioReadyButton();
+    } else {
+      this.pushHistoryState("entry_step", "audio");
     }
   };
 
@@ -607,17 +622,24 @@ class UIRoot extends Component {
     return this.micDeviceIdForMicLabel(this.selectedMicLabel());
   };
 
-  onAudioReadyButton = () => {
+  shouldShowFullScreen = () => {
     // Disable full screen on iOS, since Safari's fullscreen mode does not let you prevent native pinch-to-zoom gestures.
-    if (
+    return (
       (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo()) &&
       !AFRAME.utils.device.isIOS() &&
       !this.state.enterInVR &&
       screenfull.enabled
-    ) {
+    );
+  };
+
+  showFullScreenIfAvailable = () => {
+    if (this.shouldShowFullScreen()) {
       screenfull.request();
     }
+  };
 
+  onAudioReadyButton = () => {
+    this.showFullScreenIfAvailable();
     this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.props.hubId);
 
     const mediaStream = this.state.mediaStream;
@@ -863,15 +885,15 @@ class UIRoot extends Component {
 
         <div className={entryStyles.center}>
           <WithHoverSound>
-            <StateLink
-              stateKey="overlay"
-              stateValue="profile"
-              history={this.props.history}
-              className={entryStyles.profileName}
+            <div
+              className={entryStyles.chooseScene}
+              onClick={() => this.props.mediaSearchStore.sourceNavigate("scenes", null, false)}
             >
-              <img src="../assets/images/account.svg" className={entryStyles.profileIcon} />
-              <div title={this.props.store.state.profile.displayName}>{this.props.store.state.profile.displayName}</div>
-            </StateLink>
+              <i>
+                <FontAwesomeIcon icon={faImage} />
+              </i>
+              <FormattedMessage id="entry.change-scene" />
+            </div>
           </WithHoverSound>
 
           <form onSubmit={this.sendMessage}>
@@ -893,7 +915,11 @@ class UIRoot extends Component {
                 placeholder="Send a message..."
               />
               <WithHoverSound>
-                <input className={styles.messageEntrySubmit} type="submit" value="send" />
+                <button className={classNames([styles.messageEntryButton, styles.messageEntrySubmit])} type="submit">
+                  <i>
+                    <FontAwesomeIcon icon={faPaperPlane} />
+                  </i>
+                </button>
               </WithHoverSound>
             </div>
           </form>
@@ -915,14 +941,23 @@ class UIRoot extends Component {
 
         <div className={entryStyles.buttonContainer}>
           <WithHoverSound>
-            <StateLink
-              stateKey="entry_step"
-              stateValue={promptForNameAndAvatarBeforeEntry ? "profile" : "device"}
-              history={this.props.history}
-              className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
-            >
-              <FormattedMessage id="entry.enter-room" />
-            </StateLink>
+            {promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType ? (
+              <StateLink
+                stateKey="entry_step"
+                stateValue={promptForNameAndAvatarBeforeEntry ? "profile" : "device"}
+                history={this.props.history}
+                className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
+              >
+                <FormattedMessage id="entry.enter-room" />
+              </StateLink>
+            ) : (
+              <button
+                onClick={() => this.handleForceEntry()}
+                className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
+              >
+                <FormattedMessage id="entry.enter-room" />
+              </button>
+            )}
           </WithHoverSound>
         </div>
       </div>
@@ -1158,7 +1193,8 @@ class UIRoot extends Component {
   isInModalOrOverlay = () => {
     if (
       this.state.entered &&
-      IN_ROOM_MODAL_ROUTER_PATHS.find(x => this.props.history.location.pathname.startsWith(x))
+      (IN_ROOM_MODAL_ROUTER_PATHS.find(x => this.props.history.location.pathname.startsWith(x)) ||
+        IN_ROOM_MODAL_QUERY_VARS.find(x => new URLSearchParams(this.props.history.location.search).get(x)))
     ) {
       return true;
     }
@@ -1220,8 +1256,17 @@ class UIRoot extends Component {
     const rootStyles = {
       [styles.ui]: true,
       "ui-root": true,
-      "in-modal-or-overlay": this.isInModalOrOverlay()
+      "in-modal-or-overlay": this.isInModalOrOverlay(),
+      [styles.messageEntryOnTop]: this.state.messageEntryOnTop
     };
+
+    const isMobile = AFRAME.utils.device.isMobile();
+    const presenceLogEntries = this.props.presenceLogEntries || [];
+
+    const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);
+
+    // Allow scene picker pre-entry, otherwise wait until entry
+    const showMediaBrowser = mediaSource && (mediaSource === "scenes" || this.state.entered);
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1237,16 +1282,11 @@ class UIRoot extends Component {
                 <ProfileEntryPanel {...props} finished={this.onProfileFinished} store={this.props.store} />
               )}
             />
-            {this.state.entered && (
-              <Route
-                path="/media"
-                render={props => (
-                  <MediaBrowser
-                    {...props}
-                    mediaSearchStore={this.props.mediaSearchStore}
-                    onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
-                  />
-                )}
+            {showMediaBrowser && (
+              <MediaBrowser
+                history={this.props.history}
+                mediaSearchStore={this.props.mediaSearchStore}
+                onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
               />
             )}
             <StateRoute
@@ -1259,7 +1299,12 @@ class UIRoot extends Component {
                   finished={() => {
                     const unsubscribe = this.props.history.listen(() => {
                       unsubscribe();
-                      this.pushHistoryState("entry_step", "device");
+
+                      if (this.props.forcedVREntryType) {
+                        this.handleForceEntry();
+                      } else {
+                        this.pushHistoryState("entry_step", "device");
+                      }
                     });
 
                     this.onProfileFinished();
@@ -1315,20 +1360,56 @@ class UIRoot extends Component {
 
             {(!this.state.entered || this.isWaitingForAutoExit()) && (
               <div className={styles.uiDialog}>
-                <PresenceLog entries={this.props.presenceLogEntries || []} hubId={this.props.hubId} />
+                <PresenceLog entries={presenceLogEntries} hubId={this.props.hubId} />
                 <div className={dialogBoxContentsClassNames}>{entryDialog}</div>
               </div>
             )}
 
             {entered && (
-              <PresenceLog inRoom={true} entries={this.props.presenceLogEntries || []} hubId={this.props.hubId} />
+              <PresenceLog
+                onTop={this.state.messageEntryOnTop}
+                inRoom={true}
+                entries={presenceLogEntries}
+                hubId={this.props.hubId}
+              />
             )}
             {entered && (
               <form onSubmit={this.sendMessage}>
-                <div className={styles.messageEntryInRoom} style={{ height: pendingMessageFieldHeight }}>
+                <div
+                  className={classNames({ [styles.messageEntryInRoom]: true, [styles.messageEntryOnMobile]: isMobile })}
+                  style={{ height: pendingMessageFieldHeight }}
+                >
                   {this.state.pendingMessage.startsWith("/") && (
-                    <ChatCommandHelp matchingPrefix={this.state.pendingMessage.substring(1)} />
+                    <ChatCommandHelp
+                      onTop={this.state.messageEntryOnTop}
+                      matchingPrefix={this.state.pendingMessage.substring(1)}
+                    />
                   )}
+                  <input
+                    id="message-entry-media-input"
+                    type="file"
+                    style={{ display: "none" }}
+                    accept={isMobile ? "image/*" : "*"}
+                    multiple
+                    onChange={e => {
+                      for (const file of e.target.files) {
+                        this.createObject(file);
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor="message-entry-media-input"
+                    title={"Upload"}
+                    className={classNames([
+                      styles.messageEntryButton,
+                      styles.messageEntryButtonInRoom,
+                      styles.messageEntryUpload
+                    ])}
+                  >
+                    <i>
+                      <FontAwesomeIcon icon={isMobile ? faCamera : faPlus} />
+                    </i>
+                  </label>
                   <textarea
                     style={{ height: pendingMessageTextareaHeight }}
                     className={classNames([
@@ -1338,7 +1419,33 @@ class UIRoot extends Component {
                     ])}
                     value={this.state.pendingMessage}
                     rows={textRows}
-                    onFocus={e => e.target.select()}
+                    onFocus={e => {
+                      this.setState({ messageEntryOnTop: isMobile });
+
+                      if (screenfull.isFullscreen) {
+                        // This will prevent focus, but its the only way to avoid getting into a
+                        // weird "firefox reports full screen but actually not". You end up having to tap
+                        // twice to ultimately get the focus.
+                        //
+                        // We need to keep track of a bit here so that we don't re-full screen when
+                        // the text box is blurred by the browser.
+
+                        this.isExitingFullscreenDueToFocus = true;
+                        screenfull.exit();
+                      }
+
+                      e.target.select();
+                    }}
+                    onBlur={() => {
+                      // This is the incidental blur event when exiting fullscreen mode on mobile
+                      if (this.isExitingFullscreenDueToFocus) {
+                        this.isExitingFullscreenDueToFocus = false;
+                        return;
+                      }
+
+                      this.setState({ messageEntryOnTop: false });
+                      this.showFullScreenIfAvailable();
+                    }}
                     onChange={e => {
                       e.stopPropagation();
                       this.setState({ pendingMessage: e.target.value });
@@ -1355,24 +1462,29 @@ class UIRoot extends Component {
                     }}
                     placeholder="Send a message..."
                   />
-                  <input
-                    className={classNames([styles.messageEntrySubmit, styles.messageEntrySubmitInRoom])}
-                    type="submit"
-                    value="send"
+                  <button
+                    className={classNames([styles.messageEntrySpawn])}
+                    onClick={() => {
+                      if (this.state.pendingMessage.length > 0) {
+                        spawnChatMessage(this.state.pendingMessage);
+                        this.setState({ pendingMessage: "" });
+                      } else {
+                        this.pushHistoryState("modal", "create");
+                      }
+                    }}
                   />
-                  <WithHoverSound>
-                    <button
-                      className={classNames([styles.messageEntrySpawn])}
-                      onClick={() => {
-                        if (this.state.pendingMessage.length > 0) {
-                          spawnChatMessage(this.state.pendingMessage);
-                          this.setState({ pendingMessage: "" });
-                        } else {
-                          this.pushHistoryState("modal", "create");
-                        }
-                      }}
-                    />
-                  </WithHoverSound>
+                  <button
+                    type="submit"
+                    className={classNames([
+                      styles.messageEntryButton,
+                      styles.messageEntryButtonInRoom,
+                      styles.messageEntrySubmit
+                    ])}
+                  >
+                    <i>
+                      <FontAwesomeIcon icon={faPaperPlane} />
+                    </i>
+                  </button>
                 </div>
               </form>
             )}
@@ -1444,15 +1556,15 @@ class UIRoot extends Component {
               )}
             />
 
-            <WithHoverSound>
-              <StateLink stateKey="modal" stateValue="help" history={this.props.history}>
-                <button className={classNames([styles.helpIcon, "help-button"])}>
-                  <i>
-                    <FontAwesomeIcon icon={faQuestion} />
-                  </i>
-                </button>
-              </StateLink>
-            </WithHoverSound>
+            <div
+              onClick={() => this.setState({ showSettingsMenu: !this.state.showSettingsMenu })}
+              className={classNames({
+                [styles.settingsInfo]: true,
+                [styles.settingsInfoSelected]: this.state.showSettingsMenu
+              })}
+            >
+              <FontAwesomeIcon icon={faBars} />
+            </div>
 
             <div
               onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
@@ -1465,20 +1577,28 @@ class UIRoot extends Component {
               <span className={styles.occupantCount}>{this.occupantCount()}</span>
             </div>
 
-            {this.state.showPresenceList && (
-              <PresenceList
-                presences={this.props.presences}
-                sessionId={this.props.sessionId}
-                signedIn={this.state.signedIn}
-                email={this.props.store.state.credentials.email}
-                onSignIn={this.showSignInDialog}
-                onSignOut={this.signOut}
-              />
-            )}
+            {this.state.showPresenceList &&
+              !this.state.messageEntryOnTop && (
+                <PresenceList
+                  history={this.props.history}
+                  presences={this.props.presences}
+                  sessionId={this.props.sessionId}
+                  signedIn={this.state.signedIn}
+                  email={this.props.store.state.credentials.email}
+                  onSignIn={this.showSignInDialog}
+                  onSignOut={this.signOut}
+                />
+              )}
+
+            {this.state.showSettingsMenu &&
+              !this.state.messageEntryOnTop && (
+                <SettingsMenu history={this.props.history} mediaSearchStore={this.props.mediaSearchStore} />
+              )}
 
             {entered ? (
-              <div>
+              <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
+                  history={this.props.history}
                   muted={this.state.muted}
                   frozen={this.state.frozen}
                   spacebubble={this.state.spacebubble}
@@ -1502,13 +1622,6 @@ class UIRoot extends Component {
                       </StateLink>
                     </WithHoverSound>
                   </div>
-                )}
-                {!this.isWaitingForAutoExit() && (
-                  <TwoDHUD.BottomHUD
-                    showPhotoPicker={AFRAME.utils.device.isMobile()}
-                    onMediaPicked={this.createObject}
-                    history={this.props.history}
-                  />
                 )}
               </div>
             ) : null}

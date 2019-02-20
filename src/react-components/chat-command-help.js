@@ -1,11 +1,13 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/chat-command-help.scss";
+import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
 
 export default class ChatCommandHelp extends Component {
   static propTypes = {
-    matchingPrefix: PropTypes.string
+    matchingPrefix: PropTypes.string,
+    onTop: PropTypes.bool
   };
 
   render() {
@@ -22,7 +24,7 @@ export default class ChatCommandHelp extends Component {
     ];
 
     return (
-      <div className={styles.commandHelp}>
+      <div className={classNames({ [styles.commandHelp]: true, [styles.commandHelpOnTop]: this.props.onTop })}>
         {commands.map(
           c =>
             (this.props.matchingPrefix === "" ||

@@ -1,7 +1,11 @@
 :local(.touchZone) {
   position: absolute;
-  height: 20vh;
+  height: 30vh;
   bottom: 0;
+
+  @media(orientation: portrait) {
+    height: 20vh;
+  }
 }
 
 :local(.touchZone.left) {
@@ -19,10 +23,14 @@
   height: 0;
   left: 0;
   right: 0;
-  bottom: 10vh;
+  bottom: 15vh;
   display: flex;
   align-items: center;
   justify-content: space-around;
+
+  @media (orientation: portrait) {
+    display: none;
+  }
 }
 
 :local(.mockJoystick) {

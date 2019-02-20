@@ -81,6 +81,7 @@ import "./components/clone-media-button";
 import "./components/open-media-button";
 import "./components/rotate-object-button";
 import "./components/hover-menu";
+import "./components/animation";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -395,6 +396,13 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   remountUI({
     onSendMessage: messageDispatch.dispatch,
     onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry)
+  });
+
+  scene.addEventListener("action_selected_media_result_entry", e => {
+    const entry = e.detail;
+    if (entry.type !== "scene_listing") return;
+
+    hubChannel.updateScene(entry.url);
   });
 
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
