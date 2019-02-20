@@ -170,6 +170,19 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
     src: typeof src === "string" ? src : "",
     fileIsOwned: !needsToBeUploaded
   });
+
+  const [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
+  entity.object3D.scale.set(sx / 2, sy / 2, sz / 2);
+
+  entity.setAttribute("animation__loader_spawn-start", {
+    property: "scale",
+    delay: 50,
+    dur: 200,
+    from: { x: sx / 2, y: sy / 2, z: sz / 2 },
+    to: { x: sx, y: sy, z: sz },
+    easing: "easeInQuad"
+  });
+
   scene.appendChild(entity);
 
   const fireLoadingTimeout = setTimeout(() => {
@@ -180,14 +193,19 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
     entity.addEventListener(eventName, () => {
       clearTimeout(fireLoadingTimeout);
 
+      entity.removeAttribute("animation__loader_spawn-start");
+      const [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
+      entity.object3D.scale.set(sx / 2, sy / 2, sz / 2);
+      entity.object3D.matrixNeedsUpdate = true;
+
       if (!entity.classList.contains("pen") && !entity.getAttribute("animation__spawn-start")) {
         entity.setAttribute("animation__spawn-start", {
           property: "scale",
-          delay: 0,
-          dur: 200,
-          from: { x: entity.object3D.scale.x / 4, y: entity.object3D.scale.y / 4, z: entity.object3D.scale.z / 4 },
-          to: { x: entity.object3D.scale.x, y: entity.object3D.scale.y, z: entity.object3D.scale.z },
-          easing: "easeInQuad"
+          delay: 50,
+          dur: 300,
+          from: { x: sx / 2, y: sy / 2, z: sz / 2 },
+          to: { x: sx, y: sy, z: sz },
+          easing: "easeOutElastic"
         });
       }
 
