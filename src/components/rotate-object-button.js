@@ -280,9 +280,13 @@ AFRAME.registerComponent("rotate-button-selector", {
   tick() {
     const hand = AFRAME.scenes[0].systems.userinput.get(paths.actions.rightHand.pose);
     if (!hand) {
-      this.el.setAttribute("rotate-button", "mode", ROTATE_MODE.CURSOR);
+      if (this.el.components["rotate-button"].data.mode !== ROTATE_MODE.CURSOR) {
+        this.el.setAttribute("rotate-button", "mode", ROTATE_MODE.CURSOR);
+      }
     } else {
-      this.el.setAttribute("rotate-button", "mode", ROTATE_MODE.PUPPET);
+      if (this.el.components["rotate-button"].data.mode !== ROTATE_MODE.PUPPET) {
+        this.el.setAttribute("rotate-button", "mode", ROTATE_MODE.PUPPET);
+      }
     }
   }
 });
