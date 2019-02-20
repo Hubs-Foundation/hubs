@@ -1,11 +1,16 @@
 const { Vector3, Quaternion, Matrix4, Euler } = THREE;
 
 function quaternionAlmostEquals(epsilon, u, v) {
+  // Note: q and -q represent same rotation
   return (
-    (Math.abs(u.x - v.x) < epsilon || Math.abs(-u.x - v.x) < epsilon) &&
-    (Math.abs(u.y - v.y) < epsilon || Math.abs(-u.y - v.y) < epsilon) &&
-    (Math.abs(u.z - v.z) < epsilon || Math.abs(-u.z - v.z) < epsilon) &&
-    (Math.abs(u.w - v.w) < epsilon || Math.abs(-u.w - v.w) < epsilon)
+    (Math.abs(u.x - v.x) < epsilon &&
+      Math.abs(u.y - v.y) < epsilon &&
+      Math.abs(u.z - v.z) < epsilon &&
+      Math.abs(u.w - v.w) < epsilon) ||
+    (Math.abs(-u.x - v.x) < epsilon &&
+      Math.abs(-u.y - v.y) < epsilon &&
+      Math.abs(-u.z - v.z) < epsilon &&
+      Math.abs(-u.w - v.w) < epsilon)
   );
 }
 
