@@ -13,6 +13,7 @@ AFRAME.registerComponent("networked-counter", {
 
   init() {
     this.registeredEls = new Map();
+    this.el.object3D.visible = false;
   },
 
   remove() {
