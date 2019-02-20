@@ -10,7 +10,13 @@ import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
-import { pushHistoryState, clearHistoryState, popToBeginningOfHubHistory, navigateToPriorPage } from "../utils/history";
+import {
+  pushHistoryState,
+  clearHistoryState,
+  popToBeginningOfHubHistory,
+  navigateToPriorPage,
+  sluglessPath
+} from "../utils/history";
 import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
 
@@ -137,7 +143,6 @@ class UIRoot extends Component {
   state = {
     enterInVR: false,
     entered: false,
-    lastEntryStepPath: null,
     dialog: null,
     showInviteDialog: false,
     showPresenceList: false,
@@ -226,7 +231,7 @@ class UIRoot extends Component {
     //
     // We don't do this for the media browser case, since we want to be able to share
     // links to the browser pages
-    if (this.props.history.location.state && !this.props.history.location.pathname.startsWith("/media")) {
+    if (this.props.history.location.state && !sluglessPath(this.props.history.location).startsWith("/media")) {
       popToBeginningOfHubHistory(this.props.history);
     }
 
@@ -648,7 +653,7 @@ class UIRoot extends Component {
       clearInterval(this.state.micUpdateInterval);
     }
 
-    this.setState({ entered: true, lastEntryStepPath: this.props.history.location.pathname, showInviteDialog: false });
+    this.setState({ entered: true, showInviteDialog: false });
     clearHistoryState(this.props.history);
   };
 
@@ -1184,7 +1189,7 @@ class UIRoot extends Component {
   isInModalOrOverlay = () => {
     if (
       this.state.entered &&
-      (IN_ROOM_MODAL_ROUTER_PATHS.find(x => this.props.history.location.pathname.startsWith(x)) ||
+      (IN_ROOM_MODAL_ROUTER_PATHS.find(x => sluglessPath(this.props.history.location).startsWith(x)) ||
         IN_ROOM_MODAL_QUERY_VARS.find(x => new URLSearchParams(this.props.history.location.search).get(x)))
     ) {
       return true;
