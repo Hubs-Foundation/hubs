@@ -65,7 +65,7 @@ export default class MediaSearchStore extends EventTarget {
   };
 
   pageNavigate = delta => {
-    if (delta == -1) {
+    if (delta === -1) {
       this.history.goBack();
     } else {
       const location = this.history.location;
