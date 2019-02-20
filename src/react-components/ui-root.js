@@ -201,10 +201,10 @@ class UIRoot extends Component {
     this.props.scene.addEventListener(
       "didConnectToNetworkedScene",
       () => {
-        console.log("HI");
         const i = window.setInterval(() => {
-          if (this.state.loadingNum === 0) {
+          if (loadingNum === 0) {
             window.clearInterval(i);
+            AFRAME.scenes[0].renderer.compileAndUploadMaterials(AFRAME.scenes[0].object3D, AFRAME.scenes[0].camera);
             this.setState({ hideLoader: true });
           }
         }, 1000);
@@ -313,12 +313,10 @@ class UIRoot extends Component {
 
   incrementLoadingNum = () => {
     loadingNum = loadingNum + 1;
-    console.log("INCREMENT", this.state.loadingNum);
     this.setState({ loadingNum: loadingNum });
   };
   decrementLoadingNum = () => {
     loadingNum = loadingNum - 1;
-    console.log("DECREMENT", this.state.loadingNum);
     this.setState({ loadingNum: loadingNum });
   };
 
@@ -1214,10 +1212,8 @@ class UIRoot extends Component {
 
   render() {
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
-    const isLoading =
-      !this.state.hideLoader &&
-      (!this.props.showSafariMicDialog &&
-        (!this.props.environmentSceneLoaded || !this.props.availableVREntryTypes || !this.props.hubId));
+
+    const isLoading = !this.state.hideLoader;
 
     if (isExited) return this.renderExitedPane();
     if (isLoading) return this.renderLoader();

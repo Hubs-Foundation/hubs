@@ -79,7 +79,7 @@
     "react-youtube": "^7.8.0",
     "screenfull": "^3.3.2",
     "super-hands": "github:mozillareality/aframe-super-hands-component#feature/drawing",
-    "three": "github:mozillareality/three.js#4232a02680995013a4ce8a40ec0a982bc71c8c6b",
+    "three": "github:mozillareality/three.js#f3115d3239d1aa045a64a1c82cf459e5cf694dad",
     "three-mesh-bvh": "github:mquander/three-mesh-bvh#global-three",
     "three-pathfinding": "github:mozillareality/three-pathfinding#hubs/master",
     "three-to-cannon": "1.3.0",

@@ -150,7 +150,7 @@ export default class SceneEntryManager {
     document.body.removeEventListener("touchend", requestFullscreen);
   };
 
-  _setupPlayerRig = async () => {
+  _setupPlayerRig = () => {
     this._updatePlayerRigWithProfile();
     this.store.addEventListener("statechanged", this._updatePlayerRigWithProfile);
 
@@ -481,7 +481,7 @@ export default class SceneEntryManager {
     do {
       audioInput = document.querySelector("#bot-audio-input");
       dataInput = document.querySelector("#bot-data-input");
-      await AFRAME.scenes[0].systems.nextframe.nextFrame();
+      await nextTick();
     } while (!audioInput || !dataInput);
 
     audioInput.onchange = () => {
