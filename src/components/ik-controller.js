@@ -102,10 +102,12 @@ AFRAME.registerComponent("ik-controller", {
     };
 
     this.isInView = true;
-
-    this.el.sceneEl.systems["frame-scheduler"].schedule(this._runScheduledWork, "ik");
+    this.hasConvergedHips = false;
+    this.lastCameraTransform = new THREE.Matrix4();
     this.cameraMirrorSystem = this.el.sceneEl.systems["camera-mirror"];
     this.playerCamera = document.querySelector("#player-camera").getObject3D("camera");
+
+    this.el.sceneEl.systems["frame-scheduler"].schedule(this._runScheduledWork, "ik");
   },
 
   remove() {
@@ -155,9 +157,6 @@ AFRAME.registerComponent("ik-controller", {
       .addVectors(this.chest.position, this.neck.position)
       .add(this.head.position)
       .negate();
-
-    this.lastCameraTransform = new THREE.Matrix4();
-    this.hasConvergedHips = false;
   },
 
   tick(time, dt) {
@@ -293,7 +292,6 @@ AFRAME.registerComponent("ik-controller", {
       const mirrorCamera = this.cameraMirrorSystem.mirrorCamera;
 
       const camera = this.ikRoot.camera.object3D;
-      camera.updateMatrices(true, true);
       camera.getWorldPosition(cameraWorld);
 
       this.isInView =
