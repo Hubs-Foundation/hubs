@@ -426,14 +426,11 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("action_selected_media_result_entry", e => {
+      // TODO spawn in space when no rights
       const entry = e.detail;
+      if (entry.type === "scene_listing") return;
 
-      if (entry.type === "scene_listing") {
-        // TODO spawn in space when no rights
-        this.hubChannel.updateScene(entry.url);
-      } else {
-        spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
-      }
+      spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
     });
   };
 

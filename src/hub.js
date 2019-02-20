@@ -372,6 +372,13 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry)
   });
 
+  scene.addEventListener("action_selected_media_result_entry", e => {
+    const entry = e.detail;
+    if (entry.type !== "scene_listing") return;
+
+    hubChannel.updateScene(entry.url);
+  });
+
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   objectsEl.addEventListener("model-loaded", async el => {
     if (el.target !== objectsEl) return;

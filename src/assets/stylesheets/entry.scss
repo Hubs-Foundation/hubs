@@ -8,15 +8,38 @@
   position: relative;
 }
 
+:local(.edit-button) {
+  @extend %fa-icon-button;
+  color: $light-grey;
+  display: inline;
+  position: absolute;
+  top: 0px;
+  right: 24px;
+
+  i {
+    font-size: 1.0em;
+  }
+}
+
+:local(.edit-button):hover {
+  color: $action-color;
+}
+
 :local(.info-button) {
   @extend %fa-icon-button;
-  color: $action-color;
+  color: $light-grey;
   display: inline;
-  margin-left: 10px;
+  position: absolute;
+  top: 0px;
+  left: 24px;
 
   i {
     font-size: 1.2em;
   }
+}
+
+:local(.info-button):hover {
+  color: $action-color;
 }
 
 :local(.entry-button) {
@@ -118,17 +141,21 @@
     width: 100%;
   }
 
-  :local(.profile-name) {
+  :local(.choose-scene) {
     margin-top: 4px;
     margin-bottom: 32px;
     @extend %default-font;
     font-size: 1.1em;
     color: $action-color;
     text-decoration: none;
+    cursor: pointer;
     font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
+    i {
+      margin-right: 8px;
+    }
   }
 
   :local(.profile-icon) {

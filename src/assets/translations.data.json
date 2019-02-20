@@ -13,6 +13,7 @@
     "sign-in.out": "Sign Out",
     "entry.enter-room-title": "Lobby",
     "entry.enter-room": "Enter Room",
+    "entry.change-scene": "Choose a Scene",
     "entry.screen-prefix": "Enter on ",
     "entry.desktop-screen": "Screen",
     "entry.mobile-screen": "Phone",
@@ -165,6 +166,16 @@
     "commands.help": "Show help.",
     "commands.leave": "Disconnect from the room.",
     "commands.duck": "The duck tested well. Quack.",
+    "settings.change_avatar": "Set Name & Avatar",
+    "settings.change_scene": "Choose a Scene",
+    "settings.features": "Features",
+    "settings.controls": "Controls",
+    "settings.community": "Join Discord",
+    "settings.report": "Report Issue",
+    "settings.terms": "Terms of Use",
+    "settings.privacy": "Privacy Notice",
+    "settings.controls": "Controls",
+    "settings.help": "Help",
     "video_share.notify": "Select again to un-share video."
   }
 }

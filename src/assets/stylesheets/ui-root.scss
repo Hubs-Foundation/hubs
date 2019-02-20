@@ -9,27 +9,6 @@
   left: 0;
   position: absolute;
   pointer-events: none;
-
-  :local(.help-icon) {
-    @extend %fa-icon-button;
-    pointer-events: auto;
-    position: absolute;
-    z-index: 1;
-    top: 0px;
-    right: 14px;
-
-    i {
-      background: white;
-      border-radius: 36px;
-      display: inline-block;
-      font-size: 22px;
-      vertical-align: sub;
-      line-height: 34px;
-      border: 0;
-      width: 36px;
-      height: 36px;
-    }
-  }
 }
 
 body.vr-mode {
@@ -163,7 +142,7 @@ body.vr-mode {
   position: absolute;
   z-index: 1;
   top: 0;
-  left: 16px;
+  right: 16px;
   margin: 16px 0;
   display: flex;
   align-items: center;
@@ -187,6 +166,30 @@ body.vr-mode {
 }
 
 :local(.presence-info-selected) {
+  color: $action-color;
+}
+
+:local(.settings-info) {
+  @extend %unselectable;
+  text-align: right;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 16px;
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3em;
+  background-color: white;
+  border-radius: 24px;
+  font-weight: bold;
+  padding: 10px 12px;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+:local(.settings-info-selected) {
   color: $action-color;
 }
 
@@ -325,7 +328,7 @@ body.vr-mode {
 }
 
 :local(.message-entry-on-top) {
-  :local(.invite-container), :local(.top-hud), :local(.presence-info), :local(.help-icon), :local(.settings-icon) {
+  :local(.invite-container), :local(.top-hud), :local(.presence-info), :local(.settings-info) {
     display: none;
   }
 

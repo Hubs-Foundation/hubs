@@ -9,7 +9,6 @@ import MovingAverage from "moving-average";
 import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
-import { Route } from "react-router";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
 import { pushHistoryState, clearHistoryState, popToBeginningOfHubHistory, navigateToPriorPage } from "../utils/history";
 import StateLink from "./state-link.js";
@@ -41,16 +40,18 @@ import RoomInfoDialog from "./room-info-dialog.js";
 
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
+import SettingsMenu from "./settings-menu.js";
 import TwoDHUD from "./2d-hud";
 import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
+import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
+import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
 import { faCamera } from "@fortawesome/free-solid-svg-icons/faCamera";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 
@@ -67,6 +68,7 @@ addLocaleData([...en]);
 const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
 
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
+const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
 
 async function grantedMicLabels() {
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
@@ -137,6 +139,7 @@ class UIRoot extends Component {
     dialog: null,
     showInviteDialog: false,
     showPresenceList: false,
+    showSettingsMenu: false,
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
@@ -882,15 +885,15 @@ class UIRoot extends Component {
 
         <div className={entryStyles.center}>
           <WithHoverSound>
-            <StateLink
-              stateKey="overlay"
-              stateValue="profile"
-              history={this.props.history}
-              className={entryStyles.profileName}
+            <div
+              className={entryStyles.chooseScene}
+              onClick={() => this.props.mediaSearchStore.sourceNavigate("scenes", null, false)}
             >
-              <img src="../assets/images/account.svg" className={entryStyles.profileIcon} />
-              <div title={this.props.store.state.profile.displayName}>{this.props.store.state.profile.displayName}</div>
-            </StateLink>
+              <i>
+                <FontAwesomeIcon icon={faImage} />
+              </i>
+              <FormattedMessage id="entry.change-scene" />
+            </div>
           </WithHoverSound>
 
           <form onSubmit={this.sendMessage}>
@@ -1190,7 +1193,8 @@ class UIRoot extends Component {
   isInModalOrOverlay = () => {
     if (
       this.state.entered &&
-      IN_ROOM_MODAL_ROUTER_PATHS.find(x => this.props.history.location.pathname.startsWith(x))
+      (IN_ROOM_MODAL_ROUTER_PATHS.find(x => this.props.history.location.pathname.startsWith(x)) ||
+        IN_ROOM_MODAL_QUERY_VARS.find(x => new URLSearchParams(this.props.history.location.search).get(x)))
     ) {
       return true;
     }
@@ -1259,6 +1263,11 @@ class UIRoot extends Component {
     const isMobile = AFRAME.utils.device.isMobile();
     const presenceLogEntries = this.props.presenceLogEntries || [];
 
+    const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);
+
+    // Allow scene picker pre-entry, otherwise wait until entry
+    const showMediaBrowser = mediaSource && (mediaSource === "scenes" || this.state.entered);
+
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
@@ -1273,16 +1282,11 @@ class UIRoot extends Component {
                 <ProfileEntryPanel {...props} finished={this.onProfileFinished} store={this.props.store} />
               )}
             />
-            {this.state.entered && (
-              <Route
-                path="/media"
-                render={props => (
-                  <MediaBrowser
-                    {...props}
-                    mediaSearchStore={this.props.mediaSearchStore}
-                    onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
-                  />
-                )}
+            {showMediaBrowser && (
+              <MediaBrowser
+                history={this.props.history}
+                mediaSearchStore={this.props.mediaSearchStore}
+                onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
               />
             )}
             <StateRoute
@@ -1552,15 +1556,15 @@ class UIRoot extends Component {
               )}
             />
 
-            <WithHoverSound>
-              <StateLink stateKey="modal" stateValue="help" history={this.props.history}>
-                <button className={classNames([styles.helpIcon, "help-button"])}>
-                  <i>
-                    <FontAwesomeIcon icon={faQuestion} />
-                  </i>
-                </button>
-              </StateLink>
-            </WithHoverSound>
+            <div
+              onClick={() => this.setState({ showSettingsMenu: !this.state.showSettingsMenu })}
+              className={classNames({
+                [styles.settingsInfo]: true,
+                [styles.settingsInfoSelected]: this.state.showSettingsMenu
+              })}
+            >
+              <FontAwesomeIcon icon={faBars} />
+            </div>
 
             <div
               onClick={() => this.setState({ showPresenceList: !this.state.showPresenceList })}
@@ -1576,6 +1580,7 @@ class UIRoot extends Component {
             {this.state.showPresenceList &&
               !this.state.messageEntryOnTop && (
                 <PresenceList
+                  history={this.props.history}
                   presences={this.props.presences}
                   sessionId={this.props.sessionId}
                   signedIn={this.state.signedIn}
@@ -1583,6 +1588,11 @@ class UIRoot extends Component {
                   onSignIn={this.showSignInDialog}
                   onSignOut={this.signOut}
                 />
+              )}
+
+            {this.state.showSettingsMenu &&
+              !this.state.messageEntryOnTop && (
+                <SettingsMenu history={this.props.history} mediaSearchStore={this.props.mediaSearchStore} />
               )}
 
             {entered ? (

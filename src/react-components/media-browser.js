@@ -12,6 +12,7 @@ import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploa
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { MEDIA_SOURCE_DEFAULT_FILTERS } from "../storage/media-search-store";
 import qsTruthy from "../utils/qs_truthy";
 
 const allowContentSearch = qsTruthy("content_search");
@@ -29,12 +30,6 @@ const PRIVACY_POLICY_LINKS = {
   sketchfab: "https://sketchfab.com/privacy",
   poly: "https://policies.google.com/privacy",
   twitch: "https://www.twitch.tv/p/legal/privacy-policy/"
-};
-
-const DEFAULT_FILTERS = {
-  gifs: "trending",
-  sketchfab: "featured",
-  scenes: "featured"
 };
 
 const SOURCES = ["videos", "images", "gifs", "scenes", "sketchfab", "poly", "twitch"];
@@ -81,7 +76,7 @@ class MediaBrowser extends Component {
     onMediaSearchResultEntrySelected: PropTypes.func
   };
 
-  state = { query: "", facets: [] };
+  state = { query: "", facets: [], showNav: true };
 
   constructor(props) {
     super(props);
@@ -104,7 +99,8 @@ class MediaBrowser extends Component {
     const result = props.mediaSearchStore.result;
 
     const newState = { result, query: searchParams.get("q") || "" };
-    const urlSource = this.props.history.location.pathname.substring(7);
+    const urlSource = searchParams.get("media_source") || this.props.history.location.pathname.substring(7);
+    newState.showNav = !!(searchParams.get("media_nav") !== "false");
 
     if (result && result.suggestions && result.suggestions.length > 0) {
       newState.facets = result.suggestions.map(s => {
@@ -148,12 +144,12 @@ class MediaBrowser extends Component {
     if (currentQuery) {
       newSearchParams.set("q", currentQuery);
     } else {
-      if (DEFAULT_FILTERS[source]) {
-        newSearchParams.set("filter", DEFAULT_FILTERS[source]);
+      if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {
+        newSearchParams.set("filter", MEDIA_SOURCE_DEFAULT_FILTERS[source]);
       }
     }
 
-    pushHistoryPath(this.props.history, `/media/${source}`, newSearchParams.toString());
+    this.props.mediaSearchStore.sourceNavigate(source, newSearchParams);
   };
 
   handleFacetClicked = facet => {
@@ -174,19 +170,25 @@ class MediaBrowser extends Component {
     searchParams.delete("q");
     searchParams.delete("filter");
     searchParams.delete("cursor");
+    searchParams.delete("media_source");
+    searchParams.delete("media_nav");
 
     return searchParams;
   };
 
+  pushExitMediaBrowserHistory = () => {
+    const { pathname } = this.props.history.location;
+    const hasMediaPath = pathname.startsWith("/media");
+    pushHistoryPath(this.props.history, hasMediaPath ? "/" : pathname, this.getSearchClearedSearchParams().toString());
+  };
+
   showCreateObject = () => {
-    const searchParams = this.getSearchClearedSearchParams();
-    pushHistoryPath(this.props.history, "/", searchParams.toString());
+    this.pushExitMediaBrowserHistory();
     pushHistoryState(this.props.history, "modal", "create");
   };
 
   close = () => {
-    const searchParams = this.getSearchClearedSearchParams();
-    pushHistoryPath(this.props.history, "/", searchParams.toString());
+    this.pushExitMediaBrowserHistory();
   };
 
   handlePager = delta => {
@@ -200,7 +202,7 @@ class MediaBrowser extends Component {
     const hasNext = this.state.result && !!this.state.result.meta.next_cursor;
     const searchParams = new URLSearchParams(this.props.history.location.search);
     const hasPrevious = searchParams.get("cursor");
-    const urlSource = this.props.history.location.pathname.substring(7);
+    const urlSource = searchParams.get("media_source") || this.props.history.location.pathname.substring(7);
     const apiSource = this.state.result && this.state.result.meta.source;
     const isVariableWidth = this.state.result && ["bing_images", "tenor"].includes(apiSource);
 
@@ -270,23 +272,24 @@ class MediaBrowser extends Component {
             </div>
           </div>
 
-          {allowContentSearch && (
-            <div className={styles.nav}>
-              {SOURCES.map(s => (
-                <a
-                  onClick={() => this.handleSourceClicked(s)}
-                  key={s}
-                  className={classNames({ [styles.navSource]: true, [styles.navSourceSelected]: urlSource === s })}
-                >
-                  <FormattedMessage id={`media-browser.nav_title.${s}`} />
-                </a>
-              ))}
-              <div className={styles.navRightPad}>&nbsp;</div>
-              <div className={styles.navScrollArrow}>
-                <FontAwesomeIcon icon={faAngleRight} />
+          {allowContentSearch &&
+            this.state.showNav && (
+              <div className={styles.nav}>
+                {SOURCES.map(s => (
+                  <a
+                    onClick={() => this.handleSourceClicked(s)}
+                    key={s}
+                    className={classNames({ [styles.navSource]: true, [styles.navSourceSelected]: urlSource === s })}
+                  >
+                    <FormattedMessage id={`media-browser.nav_title.${s}`} />
+                  </a>
+                ))}
+                <div className={styles.navRightPad}>&nbsp;</div>
+                <div className={styles.navScrollArrow}>
+                  <FontAwesomeIcon icon={faAngleRight} />
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {this.state.facets &&
             this.state.facets.length > 0 && (
