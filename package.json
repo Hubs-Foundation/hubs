@@ -124,9 +124,9 @@
     "stylelint-config-recommended-scss": "^3.2.0",
     "stylelint-scss": "^3.2.0",
     "url-loader": "^1.0.1",
-    "webpack": "^4.16.2",
+    "webpack": "^4.29.3",
     "webpack-bundle-analyzer": "^3.0.3",
-    "webpack-cli": "^2.0.9",
+    "webpack-cli": "^3.2.3",
     "webpack-dev-server": "^3.1.7",
     "worker-loader": "^2.0.0"
   }
