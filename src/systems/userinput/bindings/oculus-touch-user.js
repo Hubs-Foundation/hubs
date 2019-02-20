@@ -447,6 +447,111 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: {
+        value: paths.device.keyboard.key("/")
+      },
+      dest: {
+        value: paths.actions.focusChatCommand
+      },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("Escape") },
+      dest: { value: paths.actions.mediaExit },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("!")
+      },
+      dest: { value: "/var/shift+1" },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+1" },
+      dest: { value: paths.actions.mediaSearch1 },
+      xform: xforms.copy
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("@")
+      },
+      dest: { value: "/var/shift+2" },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+2" },
+      dest: { value: paths.actions.mediaSearch2 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("#")
+      },
+      dest: { value: "/var/shift+3" },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+3" },
+      dest: { value: paths.actions.mediaSearch3 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("$")
+      },
+      dest: { value: "/var/shift+4" },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+4" },
+      dest: { value: paths.actions.mediaSearch4 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("%")
+      },
+      dest: { value: "/var/shift+5" },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+5" },
+      dest: { value: paths.actions.mediaSearch5 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("^")
+      },
+      dest: { value: "/var/shift+6" },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+6" },
+      dest: { value: paths.actions.mediaSearch6 },
+      xform: xforms.rising
+    },
+    {
+      src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("&")
+      },
+      dest: { value: "/var/shift+7" },
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+7" },
+      dest: { value: paths.actions.mediaSearch7 },
+      xform: xforms.rising
+    },
+    {
+      src: {
         value: paths.device.keyboard.key("l")
       },
       dest: {
