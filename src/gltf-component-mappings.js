@@ -203,8 +203,8 @@ const publicComponents = {
       }
     }
   },
-  "animation-loop": {
-    mappedComponent: "animation-loop",
+  "loop-animation": {
+    mappedComponent: "loop-animation",
     publicProperties: {
       paused: {
         mappedProperty: "paused",
