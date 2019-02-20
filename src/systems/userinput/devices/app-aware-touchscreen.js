@@ -37,6 +37,11 @@ export class AppAwareTouchscreenDevice {
     this.raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 3);
     this.assignments = [];
     this.pinch = { initialDistance: 0, currentDistance: 0, delta: 0 };
+
+    // When touches appear, this timestamps and then watches for the high water mark of # of touches
+    this.pendingTap = { maxTouchCount: 0, startedAt: 0 };
+    this.tapIndexToWriteNextFrame = 0;
+
     this.events = [];
     ["touchstart", "touchend", "touchmove", "touchcancel"].map(x =>
       document.querySelector("canvas").addEventListener(x, this.events.push.bind(this.events))
@@ -46,49 +51,57 @@ export class AppAwareTouchscreenDevice {
   end(touch) {
     if (!touchIsAssigned(touch, this.assignments)) {
       console.warn("touch does not have a job", touch);
-      return;
-    }
+    } else {
+      const assignment = findByTouch(touch, this.assignments);
+      switch (assignment.job) {
+        case MOVE_CURSOR_JOB:
+        case MOVE_CAMERA_JOB:
+          unassign(assignment.touch, assignment.job, this.assignments);
+          break;
+        case FIRST_PINCHER_JOB:
+          unassign(assignment.touch, assignment.job, this.assignments);
+          this.pinch = { initialDistance: 0, currentDistance: 0, delta: 0 };
 
-    const assignment = findByTouch(touch, this.assignments);
-    switch (assignment.job) {
-      case MOVE_CURSOR_JOB:
-      case MOVE_CAMERA_JOB:
-        unassign(assignment.touch, assignment.job, this.assignments);
-        break;
-      case FIRST_PINCHER_JOB:
-        unassign(assignment.touch, assignment.job, this.assignments);
-        this.pinch = { initialDistance: 0, currentDistance: 0, delta: 0 };
-
-        if (jobIsAssigned(SECOND_PINCHER_JOB, this.assignments)) {
-          const second = findByJob(SECOND_PINCHER_JOB, this.assignments);
-          unassign(second.touch, second.job, this.assignments);
-          if (jobIsAssigned(MOVE_CAMERA_JOB, this.assignments)) {
-            // reassign secondPincher to firstPincher
-            const first = assign(second.touch, FIRST_PINCHER_JOB, this.assignments);
-            first.clientX = second.clientX;
-            first.clientY = second.clientY;
-          } else {
-            // reassign secondPincher to moveCamera
-            const cameraMover = assign(second.touch, MOVE_CAMERA_JOB, this.assignments);
-            cameraMover.clientX = second.clientX;
-            cameraMover.clientY = second.clientY;
+          if (jobIsAssigned(SECOND_PINCHER_JOB, this.assignments)) {
+            const second = findByJob(SECOND_PINCHER_JOB, this.assignments);
+            unassign(second.touch, second.job, this.assignments);
+            if (jobIsAssigned(MOVE_CAMERA_JOB, this.assignments)) {
+              // reassign secondPincher to firstPincher
+              const first = assign(second.touch, FIRST_PINCHER_JOB, this.assignments);
+              first.clientX = second.clientX;
+              first.clientY = second.clientY;
+            } else {
+              // reassign secondPincher to moveCamera
+              const cameraMover = assign(second.touch, MOVE_CAMERA_JOB, this.assignments);
+              cameraMover.clientX = second.clientX;
+              cameraMover.clientY = second.clientY;
+              cameraMover.delta = [0, 0];
+            }
+          }
+          break;
+        case SECOND_PINCHER_JOB:
+          unassign(assignment.touch, assignment.job, this.assignments);
+          this.pinch = { initialDistance: 0, currentDistance: 0, delta: 0 };
+          if (jobIsAssigned(FIRST_PINCHER_JOB, this.assignments) && !jobIsAssigned(MOVE_CAMERA_JOB, this.assignments)) {
+            //reassign firstPincher to moveCamera
+            const first = findByJob(FIRST_PINCHER_JOB, this.assignments);
+            unassign(first.touch, first.job, this.assignments);
+            const cameraMover = assign(first.touch, MOVE_CAMERA_JOB, this.assignments);
+            cameraMover.clientX = first.clientX;
+            cameraMover.clientY = first.clientY;
             cameraMover.delta = [0, 0];
           }
-        }
-        break;
-      case SECOND_PINCHER_JOB:
-        unassign(assignment.touch, assignment.job, this.assignments);
-        this.pinch = { initialDistance: 0, currentDistance: 0, delta: 0 };
-        if (jobIsAssigned(FIRST_PINCHER_JOB, this.assignments) && !jobIsAssigned(MOVE_CAMERA_JOB, this.assignments)) {
-          //reassign firstPincher to moveCamera
-          const first = findByJob(FIRST_PINCHER_JOB, this.assignments);
-          unassign(first.touch, first.job, this.assignments);
-          const cameraMover = assign(first.touch, MOVE_CAMERA_JOB, this.assignments);
-          cameraMover.clientX = first.clientX;
-          cameraMover.clientY = first.clientY;
-          cameraMover.delta = [0, 0];
-        }
-        break;
+          break;
+      }
+    }
+
+    // Touches cleared, determine what to do with pending tap
+    if (this.assignments.length === 0) {
+      if (this.pendingTap.maxTouchCount > 0 && performance.now() - this.pendingTap.startedAt <= 125) {
+        this.tapIndexToWriteNextFrame = this.pendingTap.maxTouchCount;
+      }
+
+      this.pendingTap = { maxTouchCount: 0 };
     }
   }
 
@@ -144,18 +157,12 @@ export class AppAwareTouchscreenDevice {
         -(touch.clientY / window.innerHeight) * 2 + 1
       );
       assignment.isFirstFrame = true;
-      return;
-    }
-
-    if (!jobIsAssigned(MOVE_CAMERA_JOB, this.assignments)) {
+    } else if (!jobIsAssigned(MOVE_CAMERA_JOB, this.assignments)) {
       const assignment = assign(touch, MOVE_CAMERA_JOB, this.assignments);
       assignment.clientX = touch.clientX;
       assignment.clientY = touch.clientY;
       assignment.delta = [0, 0];
-      return;
-    }
-
-    if (!jobIsAssigned(SECOND_PINCHER_JOB, this.assignments)) {
+    } else if (!jobIsAssigned(SECOND_PINCHER_JOB, this.assignments)) {
       let first;
       if (jobIsAssigned(FIRST_PINCHER_JOB, this.assignments)) {
         first = findByJob(FIRST_PINCHER_JOB, this.assignments);
@@ -178,10 +185,15 @@ export class AppAwareTouchscreenDevice {
         currentDistance: initialDistance,
         delta: 0
       };
-      return;
+    } else {
+      console.warn("no job suitable for touch", touch);
     }
 
-    console.warn("no job suitable for touch", touch);
+    if (this.pendingTap.maxTouchCount === 0 && this.assignments.length > 0) {
+      this.pendingTap.startedAt = performance.now();
+    }
+
+    this.pendingTap.maxTouchCount = Math.max(this.pendingTap.maxTouchCount, this.assignments.length);
   }
 
   process(event) {
@@ -240,5 +252,16 @@ export class AppAwareTouchscreenDevice {
     frame[path.pinch.delta] = this.pinch.delta;
     frame[path.pinch.initialDistance] = this.pinch.initialDistance;
     frame[path.pinch.currentDistance] = this.pinch.currentDistance;
+
+    if (this.tapIndexToWriteNextFrame) {
+      // write to tap-X path if we had an X-fingered tap
+      const path = paths.device.touchscreen[`tap${this.tapIndexToWriteNextFrame}`];
+
+      if (path) {
+        frame[path] = true;
+      }
+    }
+
+    this.tapIndexToWriteNextFrame = 0;
   }
 }
