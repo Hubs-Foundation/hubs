@@ -256,7 +256,7 @@ AFRAME.registerComponent("ik-controller", {
     handObject3D.visible = !handHiddenByPersonalSpace && controllerObject3D.visible;
 
     // Optimization: skip IK update if not in view and not forced by frame scheduler
-    if (controllerObject3D.visible && (isInView || this.forceIkUpdate)) {
+    if (controllerObject3D.visible && (isInView || this.forceIkUpdate || this.data.alwaysUpdate)) {
       handMatrix.multiplyMatrices(this.invRootToChest, controllerObject3D.matrix);
 
       const handControls = controller.components["hand-controls2"];
