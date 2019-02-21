@@ -620,6 +620,8 @@ AFRAME.registerComponent("media-image", {
       const { src, contentType } = this.data;
       if (!src) return;
 
+      this.el.emit("image-loading");
+
       if (this.mesh && this.mesh.map && src !== oldData.src) {
         this.mesh.material.map = null;
         this.mesh.material.needsUpdate = true;

@@ -100,6 +100,7 @@ if (toneClip.canPlayType("audio/webm")) {
   toneClip.src = wavTone;
 }
 
+let loadingNum = 0;
 class UIRoot extends Component {
   static propTypes = {
     enterScene: PropTypes.func,
@@ -151,6 +152,11 @@ class UIRoot extends Component {
     linkCodeCancel: null,
     miniInviteActivated: false,
 
+    hideLoader: false,
+    didConnectToNetworkedScene: false,
+    loadingText: "Loading objects...",
+    loadingNum: 0,
+
     shareScreen: false,
     requestedScreen: false,
     mediaStream: null,
@@ -183,7 +189,6 @@ class UIRoot extends Component {
 
   constructor(props) {
     super(props);
-
     if (props.showSafariMicDialog) {
       this.state.dialog = <SafariMicDialog closable={false} />;
     }
@@ -205,8 +210,21 @@ class UIRoot extends Component {
   }
 
   componentDidMount() {
+    window.uiroot = this;
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
     this.micLevelMovingAverage = MovingAverage(100);
+    this.props.scene.addEventListener(
+      "didConnectToNetworkedScene",
+      () => {
+        this.setState({ didConnectToNetworkedScene: true });
+      },
+      { once: true }
+    );
+    this.props.scene.addEventListener("model-loading", this.incrementLoadingNum);
+    this.props.scene.addEventListener("image-loading", this.incrementLoadingNum);
+    this.props.scene.addEventListener("model-loaded", this.decrementLoadingNum);
+    this.props.scene.addEventListener("image-loaded", this.decrementLoadingNum);
+    this.props.scene.addEventListener("model-error", this.decrementLoadingNum);
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
     this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
@@ -302,6 +320,24 @@ class UIRoot extends Component {
 
   onSceneLoaded = () => {
     this.setState({ sceneLoaded: true });
+  };
+
+  incrementLoadingNum = () => {
+    if (this.loadingTimeout) window.clearTimeout(this.loadingTimeout);
+    this.loadingTimeout = null;
+
+    loadingNum = loadingNum + 1;
+    this.setState({ loadingNum: loadingNum });
+  };
+  decrementLoadingNum = () => {
+    loadingNum = loadingNum - 1;
+    this.setState({ loadingNum: loadingNum });
+
+    if (this.loadingTimeout) window.clearTimeout(this.loadingTimeout);
+    this.loadingTimeout = window.setTimeout(() => {
+      AFRAME.scenes[0].renderer.compileAndUploadMaterials(AFRAME.scenes[0].object3D, AFRAME.scenes[0].camera);
+      this.setState({ hideLoader: true });
+    }, 1000);
   };
 
   // TODO: we need to come up with a cleaner way to handle the shared state between aframe and react than emmitting events and setting state on the scene
@@ -821,7 +857,8 @@ class UIRoot extends Component {
               You can also{" "}
               <WithHoverSound>
                 <a href="/">create a new room</a>
-              </WithHoverSound>.
+              </WithHoverSound>
+              .
             </div>
           )}
         </div>
@@ -859,6 +896,12 @@ class UIRoot extends Component {
           </div>
 
           <img className="loading-panel__logo" src="../assets/images/hub-preview-light-no-shadow.png" />
+
+          <h4 className={this.state.loadingNum === 0 ? "loadedText" : "loadingText"}>
+            {this.state.loadingNum === 0
+              ? "Joining lobby..."
+              : `Loading ${this.state.loadingNum} object${this.state.loadingNum > 1 ? "s" : ""}...`}
+          </h4>
         </div>
       </IntlProvider>
     );
@@ -1229,9 +1272,8 @@ class UIRoot extends Component {
 
   render() {
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
-    const isLoading =
-      !this.props.showSafariMicDialog &&
-      (!this.props.environmentSceneLoaded || !this.props.availableVREntryTypes || !this.props.hubId);
+
+    const isLoading = !this.state.hideLoader || !this.state.didConnectToNetworkedScene;
 
     if (isExited) return this.renderExitedPane();
     if (isLoading) return this.renderLoader();

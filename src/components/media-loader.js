@@ -90,6 +90,10 @@ AFRAME.registerComponent("media-loader", {
   },
 
   showLoader() {
+    if (this.el.object3DMap.mesh) {
+      this.clearLoadingTimeout();
+      return;
+    }
     const useFancyLoader = !!loadingObject;
     const mesh = useFancyLoader
       ? loadingObject.scene.clone()

@@ -111,7 +111,9 @@ import "./systems/userinput/userinput";
 import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
 import "./systems/frame-scheduler";
+import "./systems/next-frame";
 import "./systems/ui-hotkeys";
+
 
 import "./gltf-component-mappings";
 
@@ -394,12 +396,12 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     });
 
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
-
     scene.components["networked-scene"]
       .connect()
       .then(() => {
         let newHostPollInterval = null;
 
+        scene.emit("didConnectToNetworkedScene");
         // When reconnecting, update the server URL if necessary
         NAF.connection.adapter.setReconnectionListeners(
           () => {
@@ -544,6 +546,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     enterScene: entryManager.enterScene,
     exitScene: entryManager.exitScene,
     initialIsSubscribed: subscriptions.isSubscribed()
+  });
+
+  scene.addEventListener("action_focus_chat", () => {
+    const chatFocusTarget = document.querySelector(".chat-focus-target");
+    chatFocusTarget && chatFocusTarget.focus();
   });
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
