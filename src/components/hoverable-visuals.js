@@ -26,6 +26,7 @@ AFRAME.registerComponent("hoverable-visuals", {
     if (!this.uniforms || !this.uniforms.size) return;
 
     const { hoverers } = this.el.components["hoverable"];
+    const isFrozen = this.el.sceneEl.is("frozen");
 
     let interactorOne, interactorTwo;
     for (const hoverer of hoverers) {
@@ -47,7 +48,7 @@ AFRAME.registerComponent("hoverable-visuals", {
       interactorTwo.matrixWorld.toArray(interactorTwoTransform);
     }
 
-    if (interactorOne || interactorTwo) {
+    if (interactorOne || interactorTwo || isFrozen) {
       const worldY = this.el.object3D.matrixWorld.elements[13];
       const scaledRadius = this.el.object3D.scale.y * this.boundingSphere.radius;
       this.sweepParams[0] = worldY - scaledRadius;
@@ -56,6 +57,7 @@ AFRAME.registerComponent("hoverable-visuals", {
 
     for (const uniform of this.uniforms.values()) {
       uniform.hubs_EnableSweepingEffect.value = this.data.enableSweepingEffect;
+      uniform.hubs_IsFrozen.value = isFrozen;
       uniform.hubs_SweepParams.value = this.sweepParams;
 
       uniform.hubs_HighlightInteractorOne.value = !!interactorOne;
@@ -68,7 +70,7 @@ AFRAME.registerComponent("hoverable-visuals", {
       uniform.hubs_InteractorTwoPos.value[1] = interactorTwoTransform[13];
       uniform.hubs_InteractorTwoPos.value[2] = interactorTwoTransform[14];
 
-      if (interactorOne || interactorTwo) {
+      if (interactorOne || interactorTwo || isFrozen) {
         uniform.hubs_Time.value = time;
       }
     }
