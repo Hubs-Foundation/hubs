@@ -1,5 +1,7 @@
 import { paths } from "./userinput/paths";
 import { SOURCES } from "../react-components/media-browser";
+import qsTruthy from "../utils/qs_truthy";
+const allowContentSearch = qsTruthy("content_search");
 
 // Every frame, looks for input paths that trigger UI-relevant events and handles them.
 AFRAME.registerSystem("ui-hotkeys", {
@@ -9,10 +11,7 @@ AFRAME.registerSystem("ui-hotkeys", {
 
   tick: function() {
     if (!this.userinput) {
-      const scene = AFRAME.scenes[0];
-      if (!scene) return;
-
-      this.userinput = scene.systems.userinput;
+      this.userinput = this.el.systems.userinput;
     }
 
     if (this.userinput.get(paths.actions.focusChat)) {
@@ -28,7 +27,7 @@ AFRAME.registerSystem("ui-hotkeys", {
     }
 
     for (let i = 1; i <= 7; i++) {
-      if (this.userinput.get(`/actions/mediaSearch${i}`)) {
+      if (this.userinput.get(`/actions/mediaSearch${i}`) && allowContentSearch) {
         this.mediaSearchStore.sourceNavigate(SOURCES[i - 1]);
       }
     }

@@ -926,9 +926,9 @@ class UIRoot extends Component {
                 onFocus={e => e.target.select()}
                 onChange={e => this.setState({ pendingMessage: e.target.value })}
                 onKeyDown={e => {
-                  if (e.keyCode === 13 && !e.shiftKey) {
+                  if (e.key === "Enter" && !e.shiftKey) {
                     this.sendMessage(e);
-                  } else if (e.keyCode === 27) {
+                  } else if (e.key === "Escape") {
                     e.target.blur();
                   }
                 }}
@@ -1479,12 +1479,12 @@ class UIRoot extends Component {
                       this.setState({ pendingMessage: e.target.value });
                     }}
                     onKeyDown={e => {
-                      if (e.keyCode === 13 && !e.shiftKey) {
+                      if (e.key === "Enter" && !e.shiftKey) {
                         this.sendMessage(e);
-                      } else if (e.keyCode === 13 && e.shiftKey && e.ctrlKey) {
+                      } else if (e.key === "Enter" && e.shiftKey && e.ctrlKey) {
                         spawnChatMessage(e.target.value);
                         this.setState({ pendingMessage: "" });
-                      } else if (e.keyCode === 27) {
+                      } else if (e.key === "Escape") {
                         e.target.blur();
                       }
                     }}

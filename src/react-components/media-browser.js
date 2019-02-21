@@ -219,11 +219,11 @@ class MediaBrowser extends Component {
                   })}
                   onFocus={e => e.target.select()}
                   onKeyDown={e => {
-                    if (e.keyCode === 13 && e.shiftKey) {
+                    if (e.key === "Enter" && e.shiftKey) {
                       if (this.state.result && this.state.result.entries.length > 0) {
                         this.handleEntryClicked(this.state.result.entries[0]);
                       }
-                    } else if (e.keyCode === 27 || e.keyCode === 13) {
+                    } else if (e.key === "Escape" || e.key === "Enter") {
                       e.target.blur();
                     }
                   }}
