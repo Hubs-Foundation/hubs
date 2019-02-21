@@ -1,6 +1,6 @@
 import { EventTarget } from "event-target-shim";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
-import { pushHistoryPath } from "../utils/history";
+import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 
 const URL_SOURCE_TO_TO_API_SOURCE = {
   scenes: "scene_listings",
@@ -76,7 +76,7 @@ export default class MediaSearchStore extends EventTarget {
   };
 
   pageNavigate = delta => {
-    if (delta == -1) {
+    if (delta === -1) {
       this.history.goBack();
     } else {
       const location = this.history.location;
@@ -142,13 +142,14 @@ export default class MediaSearchStore extends EventTarget {
       searchParams.set("media_source", source);
       pushHistoryPath(this.history, this.history.location.pathname, searchParams.toString());
     } else {
-      pushHistoryPath(this.history, `/media/${source}`, searchParams.toString());
+      pushHistoryPath(this.history, withSlug(this.history.location, `/media/${source}`), searchParams.toString());
     }
   };
 
   getUrlMediaSource = location => {
-    const { pathname, search } = location;
+    const { search } = location;
     const urlParams = new URLSearchParams(search);
+    const pathname = sluglessPath(location);
 
     if (!pathname.startsWith("/media") && !urlParams.get("media_source")) return null;
     return urlParams.get("media_source") || pathname.substring(7);

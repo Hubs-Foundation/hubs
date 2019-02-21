@@ -10,7 +10,13 @@ import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
-import { pushHistoryState, clearHistoryState, popToBeginningOfHubHistory, navigateToPriorPage } from "../utils/history";
+import {
+  pushHistoryState,
+  clearHistoryState,
+  popToBeginningOfHubHistory,
+  navigateToPriorPage,
+  sluglessPath
+} from "../utils/history";
 import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
 
@@ -137,7 +143,6 @@ class UIRoot extends Component {
   state = {
     enterInVR: false,
     entered: false,
-    lastEntryStepPath: null,
     dialog: null,
     showInviteDialog: false,
     showPresenceList: false,
@@ -150,6 +155,7 @@ class UIRoot extends Component {
     requestedScreen: false,
     mediaStream: null,
     audioTrack: null,
+    numAudioTracks: 0,
 
     toneInterval: null,
     tonePlaying: false,
@@ -226,7 +232,7 @@ class UIRoot extends Component {
     //
     // We don't do this for the media browser case, since we want to be able to share
     // links to the browser pages
-    if (this.props.history.location.state && !this.props.history.location.pathname.startsWith("/media")) {
+    if (this.props.history.location.state && !sluglessPath(this.props.history.location).startsWith("/media")) {
       popToBeginningOfHubHistory(this.props.history);
     }
 
@@ -241,7 +247,9 @@ class UIRoot extends Component {
       }
     });
 
-    setTimeout(() => this.handleForceEntry(), 2000);
+    if (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now")) {
+      setTimeout(() => this.handleForceEntry(), 2000);
+    }
   }
 
   componentWillUnmount() {
@@ -486,11 +494,14 @@ class UIRoot extends Component {
 
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      this.setState({ audioTrack: mediaStream.getAudioTracks()[0] });
+      this.setState({
+        audioTrack: mediaStream.getAudioTracks()[0],
+        numAudioTracks: mediaStream.getAudioTracks().length
+      });
       return true;
     } catch (e) {
       // Error fetching audio track, most likely a permission denial.
-      this.setState({ audioTrack: null });
+      this.setState({ audioTrack: null, numAudioTracks: 0 });
       return false;
     }
   };
@@ -565,10 +576,12 @@ class UIRoot extends Component {
   };
 
   beginOrSkipAudioSetup = () => {
-    if (!this.props.forcedVREntryType || !this.props.forcedVREntryType.endsWith("_now")) {
-      this.pushHistoryState("entry_step", "audio");
-    } else {
+    const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
+
+    if (skipAudioSetup) {
       this.onAudioReadyButton();
+    } else {
+      this.pushHistoryState("entry_step", "audio");
     }
   };
 
@@ -615,17 +628,24 @@ class UIRoot extends Component {
     return this.micDeviceIdForMicLabel(this.selectedMicLabel());
   };
 
-  onAudioReadyButton = () => {
+  shouldShowFullScreen = () => {
     // Disable full screen on iOS, since Safari's fullscreen mode does not let you prevent native pinch-to-zoom gestures.
-    if (
+    return (
       (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo()) &&
       !AFRAME.utils.device.isIOS() &&
       !this.state.enterInVR &&
       screenfull.enabled
-    ) {
+    );
+  };
+
+  showFullScreenIfAvailable = () => {
+    if (this.shouldShowFullScreen()) {
       screenfull.request();
     }
+  };
 
+  onAudioReadyButton = () => {
+    this.showFullScreenIfAvailable();
     this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.props.hubId);
 
     const mediaStream = this.state.mediaStream;
@@ -648,7 +668,7 @@ class UIRoot extends Component {
       clearInterval(this.state.micUpdateInterval);
     }
 
-    this.setState({ entered: true, lastEntryStepPath: this.props.history.location.pathname, showInviteDialog: false });
+    this.setState({ entered: true, showInviteDialog: false });
     clearHistoryState(this.props.history);
   };
 
@@ -941,14 +961,23 @@ class UIRoot extends Component {
 
         <div className={entryStyles.buttonContainer}>
           <WithHoverSound>
-            <StateLink
-              stateKey="entry_step"
-              stateValue={promptForNameAndAvatarBeforeEntry ? "profile" : "device"}
-              history={this.props.history}
-              className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
-            >
-              <FormattedMessage id="entry.enter-room" />
-            </StateLink>
+            {promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType ? (
+              <StateLink
+                stateKey="entry_step"
+                stateValue={promptForNameAndAvatarBeforeEntry ? "profile" : "device"}
+                history={this.props.history}
+                className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
+              >
+                <FormattedMessage id="entry.enter-room" />
+              </StateLink>
+            ) : (
+              <button
+                onClick={() => this.handleForceEntry()}
+                className={classNames([entryStyles.actionButton, entryStyles.wideButton])}
+              >
+                <FormattedMessage id="entry.enter-room" />
+              </button>
+            )}
           </WithHoverSound>
         </div>
       </div>
@@ -1184,7 +1213,7 @@ class UIRoot extends Component {
   isInModalOrOverlay = () => {
     if (
       this.state.entered &&
-      (IN_ROOM_MODAL_ROUTER_PATHS.find(x => this.props.history.location.pathname.startsWith(x)) ||
+      (IN_ROOM_MODAL_ROUTER_PATHS.find(x => sluglessPath(this.props.history.location).startsWith(x)) ||
         IN_ROOM_MODAL_QUERY_VARS.find(x => new URLSearchParams(this.props.history.location.search).get(x)))
     ) {
       return true;
@@ -1290,7 +1319,12 @@ class UIRoot extends Component {
                   finished={() => {
                     const unsubscribe = this.props.history.listen(() => {
                       unsubscribe();
-                      this.pushHistoryState("entry_step", "device");
+
+                      if (this.props.forcedVREntryType) {
+                        this.handleForceEntry();
+                      } else {
+                        this.pushHistoryState("entry_step", "device");
+                      }
                     });
 
                     this.onProfileFinished();
@@ -1379,36 +1413,6 @@ class UIRoot extends Component {
                       matchingPrefix={this.state.pendingMessage.substring(1)}
                     />
                   )}
-                  <textarea
-                    style={{ height: pendingMessageTextareaHeight }}
-                    className={classNames([
-                      styles.messageEntryInput,
-                      styles.messageEntryInputInRoom,
-                      "chat-focus-target"
-                    ])}
-                    value={this.state.pendingMessage}
-                    rows={textRows}
-                    onFocus={e => {
-                      this.setState({ messageEntryOnTop: isMobile });
-                      e.target.select();
-                    }}
-                    onBlur={() => this.setState({ messageEntryOnTop: false })}
-                    onChange={e => {
-                      e.stopPropagation();
-                      this.setState({ pendingMessage: e.target.value });
-                    }}
-                    onKeyDown={e => {
-                      if (e.keyCode === 13 && !e.shiftKey) {
-                        this.sendMessage(e);
-                      } else if (e.keyCode === 13 && e.shiftKey && e.ctrlKey) {
-                        spawnChatMessage(e.target.value);
-                        this.setState({ pendingMessage: "" });
-                      } else if (e.keyCode === 27) {
-                        e.target.blur();
-                      }
-                    }}
-                    placeholder="Send a message..."
-                  />
                   <input
                     id="message-entry-media-input"
                     type="file"
@@ -1434,6 +1438,69 @@ class UIRoot extends Component {
                       <FontAwesomeIcon icon={isMobile ? faCamera : faPlus} />
                     </i>
                   </label>
+                  <textarea
+                    style={{ height: pendingMessageTextareaHeight }}
+                    className={classNames([
+                      styles.messageEntryInput,
+                      styles.messageEntryInputInRoom,
+                      "chat-focus-target"
+                    ])}
+                    value={this.state.pendingMessage}
+                    rows={textRows}
+                    onFocus={e => {
+                      this.setState({ messageEntryOnTop: isMobile });
+
+                      if (screenfull.isFullscreen) {
+                        // This will prevent focus, but its the only way to avoid getting into a
+                        // weird "firefox reports full screen but actually not". You end up having to tap
+                        // twice to ultimately get the focus.
+                        //
+                        // We need to keep track of a bit here so that we don't re-full screen when
+                        // the text box is blurred by the browser.
+
+                        this.isExitingFullscreenDueToFocus = true;
+                        screenfull.exit();
+                      }
+
+                      e.target.select();
+                    }}
+                    onBlur={() => {
+                      // This is the incidental blur event when exiting fullscreen mode on mobile
+                      if (this.isExitingFullscreenDueToFocus) {
+                        this.isExitingFullscreenDueToFocus = false;
+                        return;
+                      }
+
+                      this.setState({ messageEntryOnTop: false });
+                      this.showFullScreenIfAvailable();
+                    }}
+                    onChange={e => {
+                      e.stopPropagation();
+                      this.setState({ pendingMessage: e.target.value });
+                    }}
+                    onKeyDown={e => {
+                      if (e.keyCode === 13 && !e.shiftKey) {
+                        this.sendMessage(e);
+                      } else if (e.keyCode === 13 && e.shiftKey && e.ctrlKey) {
+                        spawnChatMessage(e.target.value);
+                        this.setState({ pendingMessage: "" });
+                      } else if (e.keyCode === 27) {
+                        e.target.blur();
+                      }
+                    }}
+                    placeholder="Send a message..."
+                  />
+                  <button
+                    className={classNames([styles.messageEntrySpawn])}
+                    onClick={() => {
+                      if (this.state.pendingMessage.length > 0) {
+                        spawnChatMessage(this.state.pendingMessage);
+                        this.setState({ pendingMessage: "" });
+                      } else {
+                        this.pushHistoryState("modal", "create");
+                      }
+                    }}
+                  />
                   <button
                     type="submit"
                     className={classNames([
@@ -1446,19 +1513,6 @@ class UIRoot extends Component {
                       <FontAwesomeIcon icon={faPaperPlane} />
                     </i>
                   </button>
-                  <WithHoverSound>
-                    <button
-                      className={classNames([styles.messageEntrySpawn])}
-                      onClick={() => {
-                        if (this.state.pendingMessage.length > 0) {
-                          spawnChatMessage(this.state.pendingMessage);
-                          this.setState({ pendingMessage: "" });
-                        } else {
-                          this.pushHistoryState("modal", "create");
-                        }
-                      }}
-                    />
-                  </WithHoverSound>
                 </div>
               </form>
             )}

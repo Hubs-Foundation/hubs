@@ -4,7 +4,7 @@ import { injectIntl, FormattedMessage } from "react-intl";
 import styles from "../assets/stylesheets/media-browser.scss";
 import classNames from "classnames";
 import { scaledThumbnailUrlFor } from "../utils/media-utils";
-import { pushHistoryPath, pushHistoryState } from "../utils/history";
+import { pushHistoryPath, pushHistoryState, sluglessPath, withSlug } from "../utils/history";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
@@ -27,7 +27,7 @@ const PRIVACY_POLICY_LINKS = {
   images: "https://privacy.microsoft.com/en-us/privacystatement",
   gifs: "https://tenor.com/legal-privacy",
   sketchfab: "https://sketchfab.com/privacy",
-  poly: "https://sketchfab.com/privacy",
+  poly: "https://policies.google.com/privacy",
   twitch: "https://www.twitch.tv/p/legal/privacy-policy/"
 };
 
@@ -106,7 +106,7 @@ class MediaBrowser extends Component {
     const result = props.mediaSearchStore.result;
 
     const newState = { result, query: searchParams.get("q") || "" };
-    const urlSource = searchParams.get("media_source") || this.props.history.location.pathname.substring(7);
+    const urlSource = searchParams.get("media_source") || sluglessPath(this.props.history.location).substring(7);
     newState.showNav = !!(searchParams.get("media_nav") !== "false");
 
     if (result && result.suggestions && result.suggestions.length > 0) {
@@ -161,7 +161,13 @@ class MediaBrowser extends Component {
   };
 
   pushExitMediaBrowserHistory = () => {
-    this.props.mediaSearchStore.pushExitMediaBrowserHistory(this.props.history);
+    const { pathname } = this.props.history.location;
+    const hasMediaPath = sluglessPath(this.props.history.location).startsWith("/media");
+    pushHistoryPath(
+      this.props.history,
+      hasMediaPath ? withSlug(this.props.history.location, "/") : pathname,
+      this.getSearchClearedSearchParams().toString()
+    );
   };
 
   showCreateObject = () => {
@@ -184,7 +190,7 @@ class MediaBrowser extends Component {
     const hasNext = this.state.result && !!this.state.result.meta.next_cursor;
     const searchParams = new URLSearchParams(this.props.history.location.search);
     const hasPrevious = searchParams.get("cursor");
-    const urlSource = searchParams.get("media_source") || this.props.history.location.pathname.substring(7);
+    const urlSource = searchParams.get("media_source") || sluglessPath(this.props.history.location).substring(7);
     const apiSource = this.state.result && this.state.result.meta.source;
     const isVariableWidth = this.state.result && ["bing_images", "tenor"].includes(apiSource);
 
