@@ -105,6 +105,10 @@
 }
 
 :local(.iconButton) {
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
   width: 40px;
   height: 40px;
   background-size: 100%;
@@ -114,6 +118,7 @@
   align-items: center;
   cursor: pointer;
   margin: 0px 6px;
+  border: 0;
 
   @media(max-width: 465px) {
     margin: 0px 4px;

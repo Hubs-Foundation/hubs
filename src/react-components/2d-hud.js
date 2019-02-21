@@ -8,6 +8,9 @@ import uiStyles from "../assets/stylesheets/ui-root.scss";
 import { WithHoverSound } from "./wrap-with-audio";
 import { FormattedMessage } from "react-intl";
 import StateLink from "./state-link";
+import qsTruthy from "../utils/qs_truthy";
+
+const allowContentSearch = qsTruthy("content_search");
 
 const browser = detect();
 
@@ -23,7 +26,8 @@ class TopHUD extends Component {
     onSpawnCamera: PropTypes.func,
     onShareVideo: PropTypes.func,
     onEndShareVideo: PropTypes.func,
-    onShareVideoNotCapable: PropTypes.func
+    onShareVideoNotCapable: PropTypes.func,
+    mediaSearchStore: PropTypes.object
   };
 
   state = {
@@ -135,7 +139,12 @@ class TopHUD extends Component {
               onClick={this.props.onToggleMute}
             />
           </WithHoverSound>
-          <WithHoverSound>
+          {allowContentSearch ? (
+            <button
+              className={cx(uiStyles.uiInteractive, styles.iconButton, styles.spawn)}
+              onClick={() => this.props.mediaSearchStore.sourceNavigateToDefaultSource()}
+            />
+          ) : (
             <StateLink
               className={cx(uiStyles.uiInteractive, styles.iconButton, styles.spawn)}
               title={"Create"}
@@ -143,7 +152,7 @@ class TopHUD extends Component {
               stateValue="create"
               history={this.props.history}
             />
-          </WithHoverSound>
+          )}
           <WithHoverSound>
             <div
               className={cx(styles.iconButton, styles.spawn_pen)}

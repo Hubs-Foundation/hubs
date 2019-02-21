@@ -111,6 +111,7 @@ import "./systems/userinput/userinput";
 import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
 import "./systems/frame-scheduler";
+import "./systems/ui-hotkeys";
 
 import "./gltf-component-mappings";
 
@@ -544,8 +545,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     exitScene: entryManager.exitScene,
     initialIsSubscribed: subscriptions.isSubscribed()
   });
-
-  scene.addEventListener("action_focus_chat", () => document.querySelector(".chat-focus-target").focus());
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 
