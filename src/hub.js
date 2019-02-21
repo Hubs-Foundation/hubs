@@ -114,7 +114,6 @@ import "./systems/frame-scheduler";
 import "./systems/next-frame";
 import "./systems/ui-hotkeys";
 
-
 import "./gltf-component-mappings";
 
 import { App } from "./App";
