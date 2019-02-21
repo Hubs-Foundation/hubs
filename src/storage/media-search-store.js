@@ -2,6 +2,8 @@ import { EventTarget } from "event-target-shim";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 
+export const SOURCES = ["videos", "images", "gifs", "scenes", "sketchfab", "poly", "twitch"];
+
 const URL_SOURCE_TO_TO_API_SOURCE = {
   scenes: "scene_listings",
   images: "bing_images",
@@ -122,6 +124,10 @@ export default class MediaSearchStore extends EventTarget {
     searchParams.delete("media_nav");
 
     return searchParams;
+  };
+
+  sourceNavigateToDefaultSource = () => {
+    this.sourceNavigate(SOURCES[0]);
   };
 
   sourceNavigate = (source, hideNav) => {

@@ -12,6 +12,7 @@ import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploa
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { SOURCES } from "../storage/media-search-store";
 import qsTruthy from "../utils/qs_truthy";
 
 const allowContentSearch = qsTruthy("content_search");
@@ -30,8 +31,6 @@ const PRIVACY_POLICY_LINKS = {
   poly: "https://policies.google.com/privacy",
   twitch: "https://www.twitch.tv/p/legal/privacy-policy/"
 };
-
-export const SOURCES = ["videos", "images", "gifs", "scenes", "sketchfab", "poly", "twitch"];
 
 const DEFAULT_FACETS = {
   sketchfab: [
