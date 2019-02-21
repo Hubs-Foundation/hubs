@@ -21,3 +21,5 @@ import "./sticky-object";
 import "./super-spawner";
 import "./water";
 import "./environment-map";
+import "./trigger-volume";
+import "./video-pause-state";

@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <link rel="shortcut icon" type="image/png" href="/favicon.ico">
-    <title>Get together | Hubs by Mozilla</title>
+    <title>Room | Hubs by Mozilla</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700" rel="stylesheet">
     <script>
         // HACK Chrome on iOS breaks completely if we don't do this because a-frame's webvr-polyfill doesn't recognize
@@ -41,7 +41,6 @@
         stats-plus="false"
         rotate-selected-object
         action-to-event__mute="path: /actions/muteMic; event: action_mute;"
-        action-to-event__focus_chat="path: /actions/focusChat; event: action_focus_chat;"
         environment-map="loadDefault: false"
     >
         <a-assets>
@@ -709,7 +708,7 @@
             <a-entity gltf-model-plus="inflate: true;" class="model">
                 <template data-name="AvatarRoot">
                     <a-entity
-                        ik-controller
+                        ik-controller="alwaysUpdate: true"
                         hand-pose__left
                         hand-pose__right
                         hand-pose-controller__left="networkedAvatar:#player-rig;eventSrc:#player-left-controller"

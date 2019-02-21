@@ -37,4 +37,8 @@ AFRAME.registerComponent("spawn-controller", {
  * @namespace environment
  * @component spawn-point
  */
-AFRAME.registerComponent("spawn-point", {});
+AFRAME.registerComponent("spawn-point", {
+  init() {
+    this.el.object3D.visible = false;
+  }
+});

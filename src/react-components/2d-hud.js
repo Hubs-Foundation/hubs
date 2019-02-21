@@ -8,6 +8,9 @@ import uiStyles from "../assets/stylesheets/ui-root.scss";
 import { WithHoverSound } from "./wrap-with-audio";
 import { FormattedMessage } from "react-intl";
 import StateLink from "./state-link";
+import qsTruthy from "../utils/qs_truthy";
+
+const allowContentSearch = qsTruthy("content_search");
 
 const browser = detect();
 
@@ -16,13 +19,15 @@ class TopHUD extends Component {
     muted: PropTypes.bool,
     frozen: PropTypes.bool,
     videoShareMediaSource: PropTypes.string,
+    history: PropTypes.object,
     onToggleMute: PropTypes.func,
     onToggleFreeze: PropTypes.func,
     onSpawnPen: PropTypes.func,
     onSpawnCamera: PropTypes.func,
     onShareVideo: PropTypes.func,
     onEndShareVideo: PropTypes.func,
-    onShareVideoNotCapable: PropTypes.func
+    onShareVideoNotCapable: PropTypes.func,
+    mediaSearchStore: PropTypes.object
   };
 
   state = {
@@ -134,15 +139,20 @@ class TopHUD extends Component {
               onClick={this.props.onToggleMute}
             />
           </WithHoverSound>
-          <WithHoverSound>
-            <div
-              className={cx(styles.iconButton, styles.freeze, {
-                [styles.active]: this.props.frozen
-              })}
-              title={this.props.frozen ? "Resume" : "Pause"}
-              onClick={this.props.onToggleFreeze}
+          {allowContentSearch ? (
+            <button
+              className={cx(uiStyles.uiInteractive, styles.iconButton, styles.spawn)}
+              onClick={() => this.props.mediaSearchStore.sourceNavigateToDefaultSource()}
             />
-          </WithHoverSound>
+          ) : (
+            <StateLink
+              className={cx(uiStyles.uiInteractive, styles.iconButton, styles.spawn)}
+              title={"Create"}
+              stateKey="modal"
+              stateValue="create"
+              history={this.props.history}
+            />
+          )}
           <WithHoverSound>
             <div
               className={cx(styles.iconButton, styles.spawn_pen)}
@@ -163,47 +173,4 @@ class TopHUD extends Component {
   }
 }
 
-const BottomHUD = ({ showPhotoPicker, onMediaPicked, history }) => (
-  <div className={cx(styles.container, styles.column, styles.bottom, styles.unselectable)}>
-    {showPhotoPicker ? (
-      <div className={cx(uiStyles.uiInteractive, styles.panel, styles.up)}>
-        <input
-          id="media-picker-input"
-          className={cx(styles.hide)}
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={e => {
-            for (const file of e.target.files) {
-              onMediaPicked(file);
-            }
-          }}
-        />
-        <label htmlFor="media-picker-input">
-          <div className={cx(styles.iconButton, styles.mobileMediaPicker)} title={"Pick Media"} />
-        </label>
-      </div>
-    ) : (
-      <div />
-    )}
-    <div>
-      <WithHoverSound>
-        <StateLink
-          className={cx(uiStyles.uiInteractive, styles.iconButton, styles.large, styles.createObject)}
-          stateKey="modal"
-          stateValue="create"
-          history={history}
-          title={"Create Object"}
-        />
-      </WithHoverSound>
-    </div>
-  </div>
-);
-
-BottomHUD.propTypes = {
-  showPhotoPicker: PropTypes.bool,
-  onMediaPicked: PropTypes.func,
-  history: PropTypes.object
-};
-
-export default { TopHUD, BottomHUD };
+export default { TopHUD };
