@@ -38,7 +38,11 @@ const farsparkEncodeUrl = url => {
 };
 
 export const scaledThumbnailUrlFor = (url, width, height) => {
-  if (process.env.RETICULUM_SERVER && process.env.RETICULUM_SERVER.includes("hubs.local")) {
+  if (
+    process.env.RETICULUM_SERVER &&
+    process.env.RETICULUM_SERVER.includes("hubs.local") &&
+    url.includes("hubs.local")
+  ) {
     return url;
   }
 
@@ -170,6 +174,19 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
     src: typeof src === "string" ? src : "",
     fileIsOwned: !needsToBeUploaded
   });
+
+  const [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
+  entity.object3D.scale.set(sx / 2, sy / 2, sz / 2);
+
+  entity.setAttribute("animation__loader_spawn-start", {
+    property: "scale",
+    delay: 50,
+    dur: 200,
+    from: { x: sx / 2, y: sy / 2, z: sz / 2 },
+    to: { x: sx, y: sy, z: sz },
+    easing: "easeInQuad"
+  });
+
   scene.appendChild(entity);
 
   const fireLoadingTimeout = setTimeout(() => {
@@ -180,14 +197,19 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
     entity.addEventListener(eventName, () => {
       clearTimeout(fireLoadingTimeout);
 
+      entity.removeAttribute("animation__loader_spawn-start");
+      const [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
+      entity.object3D.scale.set(sx / 2, sy / 2, sz / 2);
+      entity.object3D.matrixNeedsUpdate = true;
+
       if (!entity.classList.contains("pen") && !entity.getAttribute("animation__spawn-start")) {
         entity.setAttribute("animation__spawn-start", {
           property: "scale",
-          delay: 0,
-          dur: 200,
-          from: { x: entity.object3D.scale.x / 4, y: entity.object3D.scale.y / 4, z: entity.object3D.scale.z / 4 },
-          to: { x: entity.object3D.scale.x, y: entity.object3D.scale.y, z: entity.object3D.scale.z },
-          easing: "easeInQuad"
+          delay: 50,
+          dur: 300,
+          from: { x: sx / 2, y: sy / 2, z: sz / 2 },
+          to: { x: sx, y: sy, z: sz },
+          easing: "easeOutElastic"
         });
       }
 
@@ -259,6 +281,7 @@ export function injectCustomShaderChunks(obj) {
       newMaterial.onBeforeCompile = shader => {
         if (!vertexRegex.test(shader.vertexShader)) return;
 
+        shader.uniforms.hubs_IsFrozen = { value: false };
         shader.uniforms.hubs_EnableSweepingEffect = { value: false };
         shader.uniforms.hubs_SweepParams = { value: [0, 0] };
         shader.uniforms.hubs_InteractorOnePos = { value: [0, 0, 0] };
@@ -268,7 +291,7 @@ export function injectCustomShaderChunks(obj) {
         shader.uniforms.hubs_Time = { value: 0 };
 
         const vchunk = `
-        if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo) {
+        if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo || hubs_IsFrozen) {
           vec4 wt = modelMatrix * vec4(transformed, 1);
 
           // Used in the fragment shader below.
@@ -280,6 +303,7 @@ export function injectCustomShaderChunks(obj) {
         const vindex = vlines.findIndex(line => vertexRegex.test(line));
         vlines.splice(vindex + 1, 0, vchunk);
         vlines.unshift("varying vec3 hubs_WorldPosition;");
+        vlines.unshift("uniform bool hubs_IsFrozen;");
         vlines.unshift("uniform bool hubs_HighlightInteractorOne;");
         vlines.unshift("uniform bool hubs_HighlightInteractorTwo;");
         shader.vertexShader = vlines.join("\n");
@@ -288,6 +312,7 @@ export function injectCustomShaderChunks(obj) {
         const findex = flines.findIndex(line => fragRegex.test(line));
         flines.splice(findex + 1, 0, mediaHighlightFrag);
         flines.unshift("varying vec3 hubs_WorldPosition;");
+        flines.unshift("uniform bool hubs_IsFrozen;");
         flines.unshift("uniform bool hubs_EnableSweepingEffect;");
         flines.unshift("uniform vec2 hubs_SweepParams;");
         flines.unshift("uniform bool hubs_HighlightInteractorOne;");

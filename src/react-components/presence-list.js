@@ -8,11 +8,15 @@ import PhoneImage from "../assets/images/presence_phone.png";
 import DesktopImage from "../assets/images/presence_desktop.png";
 import HMDImage from "../assets/images/presence_vr.png";
 import maskEmail from "../utils/mask-email";
+import StateLink from "./state-link.js";
 import { WithHoverSound } from "./wrap-with-audio";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 
 export default class PresenceList extends Component {
   static propTypes = {
     presences: PropTypes.object,
+    history: PropTypes.object,
     sessionId: PropTypes.string,
     signedIn: PropTypes.bool,
     email: PropTypes.string,
@@ -30,16 +34,24 @@ export default class PresenceList extends Component {
     return (
       <WithHoverSound key={sessionId}>
         <div className={styles.row}>
-          <div className={styles.device}>
+          <div className={styles.icon}>
             <img src={image} />
           </div>
           <div
             className={classNames({
-              [styles.displayName]: true,
-              [styles.selfDisplayName]: sessionId === this.props.sessionId
+              [styles.listItem]: true
             })}
           >
-            {profile && profile.displayName}
+            {sessionId === this.props.sessionId ? (
+              <StateLink className={styles.self} stateKey="overlay" stateValue="profile" history={this.props.history}>
+                {profile && profile.displayName}
+                <i>
+                  <FontAwesomeIcon icon={faPencilAlt} />
+                </i>
+              </StateLink>
+            ) : (
+              profile && profile.displayName
+            )}
           </div>
           <div className={styles.presence}>
             <FormattedMessage id={`presence.in_${meta.presence}`} />

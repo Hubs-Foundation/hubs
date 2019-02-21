@@ -22,7 +22,7 @@
     -ms-user-select: text;
 
     background-color: $white-transparent;
-    margin: 8px 64px 8px 16px;
+    margin: 0px 64px 8px 0px;
     font-size: 0.8em;
     padding: 8px 16px;
     border-radius: 20px;
@@ -95,12 +95,12 @@
     }
 
     :local(.spawn-message) {
-      background-image: url(../spawn_message.png);
+      background-image: url(../images/spawn_message.png);
     }
 
     // TODO replace these icons with share button
     :local(.share) {
-      background-image: url(../share_message.png);
+      background-image: url(../images/share_message.png);
     }
 
     &:local(.media) {
@@ -137,8 +137,13 @@
 
 :local(.presence-log-in-room) {
   position: absolute;
-  bottom: 165px;
+  bottom: 64px;
   z-index: 1;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  width: 95%;
+  max-width: 700px;
 
   :local(.presence-log-entry) {
     background-color: $hud-panel-background;
@@ -154,6 +159,13 @@
       color: white;
     }
   }
+}
+
+:local(.presence-log-on-top) {
+  bottom: auto;
+  top: 64px;
+  margin-top: 12px;
+  flex-direction: reverse;
 }
 
 :local(.presence-log-spawn) {

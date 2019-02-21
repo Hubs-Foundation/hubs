@@ -22,6 +22,11 @@ export const touchscreenUserBindings = addSetsToBindings({
       xform: xforms.scale(0.25)
     },
     {
+      src: { value: paths.device.touchscreen.tap2 },
+      dest: { value: paths.actions.toggleFreeze },
+      xform: xforms.copy
+    },
+    {
       src: {},
       dest: { value: zero },
       xform: xforms.always(0)
