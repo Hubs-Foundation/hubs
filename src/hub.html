@@ -709,7 +709,7 @@
             <a-entity gltf-model-plus="inflate: true;" class="model">
                 <template data-name="AvatarRoot">
                     <a-entity
-                        ik-controller
+                        ik-controller="alwaysUpdate: true"
                         hand-pose__left
                         hand-pose__right
                         hand-pose-controller__left="networkedAvatar:#player-rig;eventSrc:#player-left-controller"
