@@ -8,6 +8,7 @@ import en from "react-intl/locale-data/en";
 import MovingAverage from "moving-average";
 import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
+import loaderStyles from "../assets/stylesheets/loader.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
 import {
@@ -154,7 +155,6 @@ class UIRoot extends Component {
 
     hideLoader: false,
     didConnectToNetworkedScene: false,
-    loadingText: "Loading objects...",
     loadingNum: 0,
 
     shareScreen: false,
@@ -889,19 +889,26 @@ class UIRoot extends Component {
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className="loading-panel">
-          <div className="loader-wrap">
+          <img className="loading-panel__logo" src="../assets/images/hub-preview-light-no-shadow.png" />
+
+          <h4 className={loaderStyles.loadingText}>
+            {this.state.loadingNum === 0 ? (
+              <FormattedMessage id="loader.joining_lobby" />
+            ) : (
+              <div>
+                <FormattedMessage id="loader.loading" />
+                {this.state.loadingNum}&nbsp;
+                <FormattedMessage id={`loader.object${this.state.loadingNum > 1 ? "s" : ""}`} />
+                ...
+              </div>
+            )}
+          </h4>
+
+          <div className="loader-wrap loader-bottom">
             <div className="loader">
               <div className="loader-center" />
             </div>
           </div>
-
-          <img className="loading-panel__logo" src="../assets/images/hub-preview-light-no-shadow.png" />
-
-          <h4 className={this.state.loadingNum === 0 ? "loadedText" : "loadingText"}>
-            {this.state.loadingNum === 0
-              ? "Joining lobby..."
-              : `Loading ${this.state.loadingNum} object${this.state.loadingNum > 1 ? "s" : ""}...`}
-          </h4>
         </div>
       </IntlProvider>
     );

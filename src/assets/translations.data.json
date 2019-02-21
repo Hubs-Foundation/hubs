@@ -182,6 +182,10 @@
     "settings.help": "Help",
     "settings.row-profile": "Profile",
     "settings.row-room": "Room",
-    "video_share.notify": "Select again to un-share video."
+    "video_share.notify": "Select again to un-share video.",
+    "loader.joining_lobby": "Joining lobby...",
+    "loader.loading": "Loading ",
+    "loader.object": "object",
+    "loader.objects": "objects"
   }
 }
