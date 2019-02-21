@@ -1,5 +1,5 @@
 import { paths } from "./userinput/paths";
-import { SOURCES } from "../react-components/media-browser";
+import { SOURCES } from "../storage/media-search-store";
 import qsTruthy from "../utils/qs_truthy";
 const allowContentSearch = qsTruthy("content_search");
 
