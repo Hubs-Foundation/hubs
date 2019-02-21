@@ -1,5 +1,7 @@
 import { getLastWorldPosition } from "../utils/three-utils";
 
+const isMobile = AFRAME.utils.device.isMobile();
+
 /**
  * Toggles the visibility of this entity when the scene is frozen.
  * @namespace ui
@@ -9,7 +11,7 @@ AFRAME.registerComponent("visibility-while-frozen", {
   schema: {
     withinDistance: { type: "number" },
     visible: { type: "boolean", default: true },
-    requireHover: { type: "boolean", default: true }
+    requireHoverOnNonMobile: { type: "boolean", default: true }
   },
 
   init() {
@@ -72,7 +74,7 @@ AFRAME.registerComponent("visibility-while-frozen", {
     let shouldBeVisible =
       ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) && isWithinDistance && !isRotating;
 
-    if (this.data.requireHover) {
+    if (this.data.requireHoverOnNonMobile && !isMobile) {
       shouldBeVisible = shouldBeVisible && ((this.hoverable && this.hoverable.is("hovered")) || isVisible);
     }
 
