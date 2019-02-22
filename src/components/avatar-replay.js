@@ -23,10 +23,12 @@ AFRAME.registerComponent("avatar-replay", {
   },
 
   init: function() {
+    console.log("avatar replay init");
     this.modelLoaded = new Promise(resolve => this.el.addEventListener("model-loaded", resolve));
   },
 
   update: function() {
+    console.log("avatar replay updated: " + this.data.recordingUrl);
     const { camera, leftController, rightController, recordingUrl } = this.data;
     if (!recordingUrl) {
       return;

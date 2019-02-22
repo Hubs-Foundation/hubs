@@ -459,6 +459,10 @@ export default class SceneEntryManager {
   _runBot = async mediaStream => {
     console.log("Running bot");
 
+    if (!this.playerRig) {
+      console.log("No player rig, error");
+    }
+
     this.playerRig.setAttribute("avatar-replay", {
       camera: "#player-camera",
       leftController: "#player-left-controller",
@@ -484,6 +488,7 @@ export default class SceneEntryManager {
       document.body.appendChild(audioEl);
     };
     dataInput.onchange = () => {
+      console.log("Recording selected, setting attribute");
       const url = URL.createObjectURL(dataInput.files[0]);
       this.playerRig.setAttribute("avatar-replay", { recordingUrl: url });
     };
