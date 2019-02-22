@@ -335,7 +335,9 @@ class UIRoot extends Component {
 
     if (this.loadingTimeout) window.clearTimeout(this.loadingTimeout);
     this.loadingTimeout = window.setTimeout(() => {
-      AFRAME.scenes[0].renderer.compileAndUploadMaterials(AFRAME.scenes[0].object3D, AFRAME.scenes[0].camera);
+      if (!this.props.isBotMode) {
+        AFRAME.scenes[0].renderer.compileAndUploadMaterials(AFRAME.scenes[0].object3D, AFRAME.scenes[0].camera);
+      }
       this.setState({ hideLoader: true });
     }, 1000);
   };

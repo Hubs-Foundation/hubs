@@ -1,5 +1,7 @@
 import "three/examples/js/pmrem/PMREMGenerator";
 import "three/examples/js/pmrem/PMREMCubeUVPacker";
+import qsTruthy from "../utils/qs_truthy";
+const isBotMode = qsTruthy("bot");
 
 /**
  * @author zz85 / https://github.com/zz85
@@ -297,7 +299,7 @@ AFRAME.registerComponent("skybox", {
   updateEnvironmentMap() {
     const environmentMapComponent = this.el.sceneEl.components["environment-map"];
 
-    if (environmentMapComponent) {
+    if (environmentMapComponent && !isBotMode) {
       const renderer = this.el.sceneEl.renderer;
       this.skyScene.add(this.sky);
       this.cubeCamera.update(renderer, this.skyScene);
