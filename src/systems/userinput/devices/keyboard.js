@@ -6,6 +6,7 @@ export class KeyboardDevice {
 
     ["keydown", "keyup"].map(x =>
       document.addEventListener(x, e => {
+        if (!e.key) return;
         this.events.push(e);
 
         // Block browser hotkeys for chat command and media browser
