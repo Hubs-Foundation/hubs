@@ -473,6 +473,7 @@ export default class SceneEntryManager {
     let audioInput;
     let dataInput;
 
+    console.log("Waiting for input fields");
     // Wait for startup to render form
     do {
       audioInput = document.querySelector("#bot-audio-input");
@@ -480,6 +481,7 @@ export default class SceneEntryManager {
       await nextTick();
     } while (!audioInput || !dataInput);
 
+    console.log("Input fields ready");
     audioInput.onchange = () => {
       audioEl.loop = true;
       audioEl.muted = true;
