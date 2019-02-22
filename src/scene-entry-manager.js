@@ -502,7 +502,13 @@ export default class SceneEntryManager {
       this.playerRig.setAttribute("avatar-replay", { recordingUrl: url });
     };
     await new Promise(resolve => audioEl.addEventListener("canplay", resolve));
-    mediaStream.addTrack(audioEl.captureStream().getAudioTracks()[0]);
+    mediaStream.addTrack(
+      audioEl.captureStream
+        ? audioEl.captureStream().getAudioTracks()[0]
+        : audioEl.mozCaptureStream
+          ? audioEl.mozCaptureStream().getAudioTracks()[0]
+          : null
+    );
     NAF.connection.adapter.setLocalMediaStream(mediaStream);
     audioEl.play();
   };
