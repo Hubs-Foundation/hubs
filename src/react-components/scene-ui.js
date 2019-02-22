@@ -5,12 +5,13 @@ import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
 import en from "react-intl/locale-data/en";
 import styles from "../assets/stylesheets/scene-ui.scss";
 import hubLogo from "../assets/images/hub-preview-white.png";
-import spokeLogo from "../assets/images/spoke_logo_black.png";
 import { createAndRedirectToNewHub } from "../utils/phoenix-utils";
 import { WithHoverSound } from "./wrap-with-audio";
 import CreateRoomDialog from "./create-room-dialog.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisH } from "@fortawesome/free-solid-svg-icons/faEllipsisH";
+import "react-infinite-scroller";
+import "markdown-it";
 
 import { lang, messages } from "../utils/i18n";
 
@@ -159,9 +160,6 @@ class SceneUI extends Component {
           </div>
           <div className={styles.spoke}>
             <div className={styles.madeWith}>made with</div>
-            <a href="/spoke">
-              <img src={spokeLogo} />
-            </a>
           </div>
           {this.state.showCustomRoomDialog && (
             <CreateRoomDialog
