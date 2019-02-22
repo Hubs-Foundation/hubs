@@ -67,12 +67,6 @@ export default class SceneEntryManager {
           .indexOf("cardboard") >= 0;
 
       this.scene.enterVR();
-    } else if (AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isIOS()) {
-      document.body.addEventListener("touchend", () => {
-        if (!document.activeElement && !["INPUT", "TEXTAREA"].includes(document.activeElement.nodeName)) {
-          requestFullscreen();
-        }
-      });
     }
 
     if (!isCardboard) {

@@ -51,6 +51,7 @@ import SettingsMenu from "./settings-menu.js";
 import TwoDHUD from "./2d-hud";
 import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
+import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
@@ -288,6 +289,7 @@ class UIRoot extends Component {
 
     const closeAndContinue = () => {
       this.closeDialog();
+      showFullScreenIfWasFullScreen();
       onContinueAfterSignIn();
     };
 
@@ -674,14 +676,11 @@ class UIRoot extends Component {
     );
   };
 
-  showFullScreenIfAvailable = () => {
-    if (this.shouldShowFullScreen()) {
-      screenfull.request();
-    }
-  };
-
   onAudioReadyButton = () => {
-    this.showFullScreenIfAvailable();
+    if (!this.state.enterVR) {
+      showFullScreenIfAvailable();
+    }
+
     this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.props.hubId);
 
     const mediaStream = this.state.mediaStream;
@@ -728,6 +727,8 @@ class UIRoot extends Component {
   };
 
   closeDialog = () => {
+    showFullScreenIfWasFullScreen();
+
     if (this.state.dialog) {
       this.setState({ dialog: null });
     } else {
@@ -966,7 +967,9 @@ class UIRoot extends Component {
                 value={this.state.pendingMessage}
                 rows={textRows}
                 style={{ height: pendingMessageTextareaHeight }}
-                onFocus={e => e.target.select()}
+                onFocus={e => {
+                  if (!isMobile) e.target.select();
+                }}
                 onChange={e => this.setState({ pendingMessage: e.target.value })}
                 onKeyDown={e => {
                   if (e.key === "Enter" && !e.shiftKey) {
@@ -1504,7 +1507,7 @@ class UIRoot extends Component {
                         screenfull.exit();
                       }
 
-                      e.target.select();
+                      if (!isMobile) e.target.select();
                     }}
                     onBlur={() => {
                       // This is the incidental blur event when exiting fullscreen mode on mobile
@@ -1514,7 +1517,7 @@ class UIRoot extends Component {
                       }
 
                       this.setState({ messageEntryOnTop: false });
-                      this.showFullScreenIfAvailable();
+                      showFullScreenIfWasFullScreen();
                     }}
                     onChange={e => {
                       e.stopPropagation();
