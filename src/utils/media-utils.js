@@ -178,7 +178,6 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
   });
 
   const [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
-  entity.object3D.scale.set(sx / 2, sy / 2, sz / 2);
 
   entity.setAttribute("animation__loader_spawn-start", {
     property: "scale",

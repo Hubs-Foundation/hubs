@@ -194,10 +194,6 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
     type: "static",
     collisionFlags: 4
   });
-  el.setAttribute("ammo-shape", {
-    type: "hull",
-    recenter: true
-  });
   el.setAttribute("hoverable", "");
 });
 

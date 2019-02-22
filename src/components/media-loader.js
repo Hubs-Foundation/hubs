@@ -59,15 +59,13 @@ AFRAME.registerComponent("media-loader", {
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
   },
 
-  setScale: (() => {
-    return function(resize) {
-      const mesh = this.el.getObject3D("mesh");
-      const box = getBox(this.el, mesh);
-      const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
-      mesh.scale.multiplyScalar(scaleCoefficient);
-      mesh.matrixNeedsUpdate = true;
-    };
-  })(),
+  setScale: function(resize) {
+    const mesh = this.el.getObject3D("mesh");
+    const box = getBox(this.el, mesh);
+    const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
+    mesh.scale.multiplyScalar(scaleCoefficient);
+    mesh.matrixNeedsUpdate = true;
+  },
 
   addShape(type, id) {
     const numMeshes = getNumMeshes(this.el.object3DMap.mesh);
