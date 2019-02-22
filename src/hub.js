@@ -451,7 +451,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   if (!isBotMode) {
     objectsEl.addEventListener("model-loaded", connectToSceneOnObjectElReady);
   } else {
-    connectToSceneOnObjectElReady(objectEl);
+    connectToSceneOnObjectElReady(objectsEl);
   }
 }
 
