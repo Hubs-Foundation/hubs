@@ -127,7 +127,8 @@ class AvatarSelector extends Component {
         gammaOutput: true,
         sortObjects: true,
         physicallyCorrectLights: true,
-        colorManagement: true
+        colorManagement: true,
+        webgl2: true
       });
       this.scene.setAttribute("shadow", { type: "pcfsoft", enabled: window.APP.quality !== "low" });
       this.scene.setAttribute("environment-map", "");

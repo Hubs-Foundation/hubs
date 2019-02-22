@@ -17,7 +17,8 @@ const commonKnownContentTypes = {
   jpeg: "image/jpeg",
   pdf: "application/pdf",
   mp4: "video/mp4",
-  mp3: "audio/mpeg"
+  mp3: "audio/mpeg",
+  pvr: "image/pvr"
 };
 
 // thanks to https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
@@ -111,8 +112,30 @@ export const guessContentType = url => {
   return commonKnownContentTypes[extension];
 };
 
+export function guessFileType(file) {
+  const parts = file.name.split(".");
+
+  if (parts.length > 0) {
+    const extension = parts.pop();
+    return commonKnownContentTypes[extension];
+  }
+
+  return undefined;
+}
+
 export const upload = file => {
   const formData = new FormData();
+
+  if (!file.type) {
+    const contentType = guessFileType(file);
+
+    if (contentType) {
+      file = new File([file], file.name, {
+        type: contentType
+      });
+    }
+  }
+
   formData.append("media", file);
   formData.append("promotion_mode", "with_token");
   return fetch(mediaAPIEndpoint, {

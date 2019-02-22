@@ -4,6 +4,7 @@ import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js/dist/hls.light.js";
 import { proxiedUrlFor } from "../utils/media-utils";
 import { buildAbsoluteURL } from "url-toolkit";
+import "three/examples/js/loaders/PVRLoader";
 
 class GIFTexture extends THREE.Texture {
   constructor(frames, delays, disposals) {
@@ -185,6 +186,24 @@ textureLoader.setCrossOrigin("anonymous");
 function createImageTexture(url) {
   return new Promise((resolve, reject) => {
     textureLoader.load(
+      url,
+      texture => {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.minFilter = THREE.LinearFilter;
+        resolve(texture);
+      },
+      null,
+      function(xhr) {
+        reject(`'${url}' could not be fetched (Error code: ${xhr.status}; Response: ${xhr.statusText})`);
+      }
+    );
+  });
+}
+
+const pvrLoader = new THREE.PVRLoader();
+function createPVRTexture(url) {
+  return new Promise((resolve, reject) => {
+    pvrLoader.load(
       url,
       texture => {
         texture.encoding = THREE.sRGBEncoding;
@@ -637,6 +656,8 @@ AFRAME.registerComponent("media-image", {
           texture = errorTexture;
         } else if (contentType.includes("image/gif")) {
           texture = await createGIFTexture(src);
+        } else if (contentType === "image/pvr") {
+          texture = await createPVRTexture(src);
         } else if (contentType.startsWith("image/")) {
           texture = await createImageTexture(src);
         } else {
