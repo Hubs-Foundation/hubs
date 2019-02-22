@@ -159,7 +159,6 @@ export default class SceneEntryManager {
     if (avatarScale) {
       this.playerRig.setAttribute("scale", { x: avatarScale, y: avatarScale, z: avatarScale });
     }
-
   };
 
   _updatePlayerRigWithProfile = () => {
