@@ -101,8 +101,10 @@ if (toneClip.canPlayType("audio/webm")) {
   toneClip.src = wavTone;
 }
 
-let loadingNum = 0;
 class UIRoot extends Component {
+  doneWithInitialLoad = false;
+  willCompileAndUploadMaterials = false;
+
   static propTypes = {
     enterScene: PropTypes.func,
     exitScene: PropTypes.func,
@@ -153,9 +155,11 @@ class UIRoot extends Component {
     linkCodeCancel: null,
     miniInviteActivated: false,
 
-    hideLoader: false,
     didConnectToNetworkedScene: false,
+    noMoreLoadingUpdates: false,
+    hideLoader: false,
     loadingNum: 0,
+    loadedNum: 0,
 
     shareScreen: false,
     requestedScreen: false,
@@ -207,10 +211,23 @@ class UIRoot extends Component {
     if (prevProps.showSignInDialog !== showSignInDialog && showSignInDialog) {
       this.showContextualSignInDialog();
     }
+    if (!this.willCompileAndUploadMaterials && this.state.noMoreLoadingUpdates) {
+      this.willCompileAndUploadMaterials = true;
+      // We want to ensure that react and the browser have had the chance to render / update.
+      // See https://stackoverflow.com/a/34999925 , although our solution flipped setTimeout and requestAnimationFrame
+      window.requestAnimationFrame(() => {
+        window.setTimeout(() => {
+          if (!this.props.isBotMode) {
+            this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
+          }
+
+          this.setState({ hideLoader: true });
+        }, 0);
+      });
+    }
   }
 
   componentDidMount() {
-    window.uiroot = this;
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
     this.micLevelMovingAverage = MovingAverage(100);
     this.props.scene.addEventListener(
@@ -220,11 +237,11 @@ class UIRoot extends Component {
       },
       { once: true }
     );
-    this.props.scene.addEventListener("model-loading", this.incrementLoadingNum);
-    this.props.scene.addEventListener("image-loading", this.incrementLoadingNum);
-    this.props.scene.addEventListener("model-loaded", this.decrementLoadingNum);
-    this.props.scene.addEventListener("image-loaded", this.decrementLoadingNum);
-    this.props.scene.addEventListener("model-error", this.decrementLoadingNum);
+    this.props.scene.addEventListener("model-loading", this.onObjectLoading);
+    this.props.scene.addEventListener("image-loading", this.onObjectLoading);
+    this.props.scene.addEventListener("model-loaded", this.onObjectLoaded);
+    this.props.scene.addEventListener("image-loaded", this.onObjectLoaded);
+    this.props.scene.addEventListener("model-error", this.onObjectLoaded);
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
     this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
@@ -322,25 +339,28 @@ class UIRoot extends Component {
     this.setState({ sceneLoaded: true });
   };
 
-  incrementLoadingNum = () => {
-    if (this.loadingTimeout) window.clearTimeout(this.loadingTimeout);
-    this.loadingTimeout = null;
+  onObjectLoading = () => {
+    if (!this.doneWithInitialLoad && this.loadingTimeout) {
+      window.clearTimeout(this.loadingTimeout);
+      this.loadingTimeout = null;
+    }
 
-    loadingNum = loadingNum + 1;
-    this.setState({ loadingNum: loadingNum });
+    this.setState(state => {
+      return { loadingNum: state.loadingNum + 1 };
+    });
   };
-  decrementLoadingNum = () => {
-    loadingNum = loadingNum - 1;
-    this.setState({ loadingNum: loadingNum });
 
-    if (this.loadingTimeout) window.clearTimeout(this.loadingTimeout);
+  onObjectLoaded = () => {
+    this.setState(state => {
+      return { loadedNum: state.loadedNum + 1 };
+    });
+
+    if (!this.doneWithInitialLoad && this.loadingTimeout) window.clearTimeout(this.loadingTimeout);
+
     this.loadingTimeout = window.setTimeout(() => {
-      if (!this.props.isBotMode) {
-        AFRAME.scenes[0].renderer.compileAndUploadMaterials(AFRAME.scenes[0].object3D, AFRAME.scenes[0].camera);
-      }
-      console.log("Loading complete, starting UI...");
-      this.setState({ hideLoader: true });
-    }, 1000);
+      this.doneWithInitialLoad = true;
+      this.setState({ noMoreLoadingUpdates: true });
+    }, 1500);
   };
 
   // TODO: we need to come up with a cleaner way to handle the shared state between aframe and react than emmitting events and setting state on the scene
@@ -889,23 +909,25 @@ class UIRoot extends Component {
   };
 
   renderLoader = () => {
+    const nomore = (
+      <h4 style={{ color: "green" }}>
+        <FormattedMessage id="loader.entering_lobby" />
+      </h4>
+    );
+    const usual = (
+      <h4 className={loaderStyles.loadingText}>
+        <FormattedMessage id="loader.loading" />
+        {this.state.loadedNum} / {this.state.loadingNum}{" "}
+        <FormattedMessage id={this.state.loadingNum !== 1 ? "loader.objects" : "loader.object"} />
+        ...
+      </h4>
+    );
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className="loading-panel">
           <img className="loading-panel__logo" src="../assets/images/hub-preview-light-no-shadow.png" />
 
-          <h4 className={loaderStyles.loadingText}>
-            {this.state.loadingNum === 0 ? (
-              <FormattedMessage id="loader.joining_lobby" />
-            ) : (
-              <div>
-                <FormattedMessage id="loader.loading" />
-                {this.state.loadingNum}&nbsp;
-                <FormattedMessage id={`loader.object${this.state.loadingNum > 1 ? "s" : ""}`} />
-                ...
-              </div>
-            )}
-          </h4>
+          {this.state.noMoreLoadingUpdates ? nomore : usual}
 
           <div className="loader-wrap loader-bottom">
             <div className="loader">
