@@ -335,10 +335,14 @@ class UIRoot extends Component {
 
     if (this.loadingTimeout) window.clearTimeout(this.loadingTimeout);
     this.loadingTimeout = window.setTimeout(() => {
-      if (!this.props.isBotMode) {
-        AFRAME.scenes[0].renderer.compileAndUploadMaterials(AFRAME.scenes[0].object3D, AFRAME.scenes[0].camera);
+      if (!this.state.hideLoader) {
+        if (!this.props.isBotMode) {
+          AFRAME.scenes[0].renderer.compileAndUploadMaterials(AFRAME.scenes[0].object3D, AFRAME.scenes[0].camera);
+        }
+
+        console.log("Loading complete, starting UI...");
       }
-      console.log("Loading complete, starting UI...");
+
       this.setState({ hideLoader: true });
     }, 1000);
   };
