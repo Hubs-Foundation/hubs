@@ -366,7 +366,10 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
   const objectsEl = document.createElement("a-entity");
   objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
-  objectsScene.appendChild(objectsEl);
+
+  if (!isBotMode) {
+    objectsScene.appendChild(objectsEl);
+  }
 
   updateEnvironmentForHub(hub);
   updateUIForHub(hub);
