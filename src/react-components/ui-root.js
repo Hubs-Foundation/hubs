@@ -640,7 +640,7 @@ class UIRoot extends Component {
   };
 
   shouldShowHmdMicWarning = () => {
-    if ( || AFRAME.utils.device.isOculusGo()) return false;
+    if (isMobile || AFRAME.utils.device.isOculusGo()) return false;
     if (!this.state.enterInVR) return false;
     if (!this.hasHmdMicrophone()) return false;
 
