@@ -22,6 +22,10 @@ AFRAME.registerComponent("avatar-replay", {
     recordingUrl: { type: "string" }
   },
 
+  init: function() {
+    this.modelLoaded = new Promise(resolve => this.el.addEventListener("model-loaded", resolve));
+  },
+
   update: function() {
     const { camera, leftController, rightController, recordingUrl } = this.data;
     if (!recordingUrl) {
@@ -33,7 +37,7 @@ AFRAME.registerComponent("avatar-replay", {
     this._setupController(leftController);
     this._setupController(rightController);
 
-    this.dataLoaded = fetchRecording.then(([recording]) => {
+    this.dataLoaded = Promise.all([fetchRecording, this.modelLoaded]).then(([recording]) => {
       const cameraReplayer = camera.components["motion-capture-replayer"];
       cameraReplayer.startReplaying(recording.camera);
       const leftControllerReplayer = leftController.components["motion-capture-replayer"];
