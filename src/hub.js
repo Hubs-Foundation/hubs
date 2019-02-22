@@ -387,9 +387,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   });
 
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
-  const connectToSceneOnObjectElReady = async el => {
-    if (el.target !== objectsEl) return;
-
+  const connectToScene = async () => {
     scene.setAttribute("networked-scene", {
       room: hub.hub_id,
       serverURL: `wss://${hub.host}`,
@@ -449,9 +447,12 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   };
 
   if (!isBotMode) {
-    objectsEl.addEventListener("model-loaded", connectToSceneOnObjectElReady);
+    objectsEl.addEventListener("model-loaded", async el => {
+      if (el.target !== objectsEl) return;
+      connectToScene();
+    });
   } else {
-    connectToSceneOnObjectElReady(objectsEl);
+    connectToScene();
   }
 }
 
