@@ -482,7 +482,6 @@ export default class SceneEntryManager {
       document.body.appendChild(audioEl);
     };
 
-
     if (audioInput.files && audioInput.files.length > 0) {
       getAudio();
     } else {
