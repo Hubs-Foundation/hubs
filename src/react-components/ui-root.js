@@ -84,6 +84,7 @@ async function grantedMicLabels() {
   return mediaDevices.filter(d => d.label && d.kind === "audioinput").map(d => d.label);
 }
 
+const isMobile = AFRAME.utils.device.isMobile();
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
 import webmTone from "../assets/sfx/tone.webm";
@@ -639,7 +640,7 @@ class UIRoot extends Component {
   };
 
   shouldShowHmdMicWarning = () => {
-    if (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo()) return false;
+    if ( || AFRAME.utils.device.isOculusGo()) return false;
     if (!this.state.enterInVR) return false;
     if (!this.hasHmdMicrophone()) return false;
 
@@ -669,7 +670,7 @@ class UIRoot extends Component {
   shouldShowFullScreen = () => {
     // Disable full screen on iOS, since Safari's fullscreen mode does not let you prevent native pinch-to-zoom gestures.
     return (
-      (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo()) &&
+      (isMobile || AFRAME.utils.device.isOculusGo()) &&
       !AFRAME.utils.device.isIOS() &&
       !this.state.enterInVR &&
       screenfull.enabled
@@ -1137,9 +1138,9 @@ class UIRoot extends Component {
     const micClip = {
       clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)`
     };
-    const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo();
+    const isMobileOrGo = isMobile || AFRAME.utils.device.isOculusGo();
     const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
-    const subtitleId = isMobile ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
+    const subtitleId = isMobileOrGo ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
     return (
       <div className="audio-setup-panel">
         <div onClick={() => this.props.history.goBack()} className={entryStyles.back}>
@@ -1154,7 +1155,7 @@ class UIRoot extends Component {
             <FormattedMessage id="audio.title" />
           </div>
           <div className="audio-setup-panel__subtitle">
-            {(isMobile || this.state.enterInVR) && <FormattedMessage id={subtitleId} />}
+            {(isMobileOrGo || this.state.enterInVR) && <FormattedMessage id={subtitleId} />}
           </div>
           <div className="audio-setup-panel__levels">
             <div className="audio-setup-panel__levels__icon">
@@ -1325,7 +1326,6 @@ class UIRoot extends Component {
       [styles.messageEntryOnTop]: this.state.messageEntryOnTop
     };
 
-    const isMobile = AFRAME.utils.device.isMobile();
     const presenceLogEntries = this.props.presenceLogEntries || [];
 
     const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);
