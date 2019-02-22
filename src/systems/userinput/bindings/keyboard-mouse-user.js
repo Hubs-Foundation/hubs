@@ -371,6 +371,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
         value: paths.device.keyboard.key("z")
       },
       dest: { value: paths.actions.cursor.undoDrawing },
+      priority: 1001,
       xform: xforms.rising
     }
   ],
