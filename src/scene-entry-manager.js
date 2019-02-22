@@ -474,17 +474,32 @@ export default class SceneEntryManager {
       await nextTick();
     } while (!audioInput || !dataInput);
 
-    audioInput.onchange = () => {
+    const getAudio = () => {
       audioEl.loop = true;
       audioEl.muted = true;
       audioEl.crossorigin = "anonymous";
       audioEl.src = URL.createObjectURL(audioInput.files[0]);
       document.body.appendChild(audioEl);
     };
-    dataInput.onchange = () => {
+
+
+    if (audioInput.files && audioInput.files.length > 0) {
+      getAudio();
+    } else {
+      audioInput.onchange = getAudio;
+    }
+
+    const getRecording = () => {
       const url = URL.createObjectURL(dataInput.files[0]);
       this.playerRig.setAttribute("avatar-replay", { recordingUrl: url });
     };
+
+    if (dataInput.files && dataInput.files.length > 0) {
+      getRecording();
+    } else {
+      dataInput.onchange = getRecording;
+    }
+
     await new Promise(resolve => audioEl.addEventListener("canplay", resolve));
     mediaStream.addTrack(
       audioEl.captureStream
