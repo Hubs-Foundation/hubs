@@ -52,10 +52,10 @@
     color: black;
     margin: 2px 12px;
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
     white-space: nowrap;
-    text-decoration-color: $dark-grey;
+    text-decoration: none;
     font-weight: bold;
   }
 }
@@ -68,7 +68,7 @@
   font-weight: normal;
 
   a {
-    color: black;
+    color: $dark-grey;
     margin: 2px 12px;
     display: flex;
     justify-content: flex-start;
