@@ -22,8 +22,8 @@ AFRAME.registerComponent("visibility-while-frozen", {
 
     let hoverableSearch = this.el;
 
-    while (hoverableSearch && hoverableSearch.getAttribute) {
-      if (hoverableSearch.getAttribute("hoverable")) {
+    while (hoverableSearch !== document) {
+      if (hoverableSearch.getAttribute("hoverable") !== null) {
         this.hoverable = hoverableSearch;
         break;
       }
