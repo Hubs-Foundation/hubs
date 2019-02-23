@@ -6,6 +6,7 @@ import registerTelemetry from "./telemetry";
 
 import "./assets/stylesheets/whats-new.scss";
 import hubsLogo from "./assets/images/hub-preview-light-no-shadow.png";
+import hubsLogo2 from "./assets/images/test.png";
 
 registerTelemetry("/whats-new", "Hubs What's New");
 
@@ -89,6 +90,7 @@ class WhatsNew extends Component {
           <div className="header">
             <a href="/">
               <img className="logo" src={hubsLogo} />
+              <img className="logo" src={hubsLogo2} />
             </a>
           </div>
           <div className="main">
