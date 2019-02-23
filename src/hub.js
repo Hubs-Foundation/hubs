@@ -366,7 +366,10 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
   const objectsEl = document.createElement("a-entity");
   objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
-  objectsScene.appendChild(objectsEl);
+
+  if (!isBotMode) {
+    objectsScene.appendChild(objectsEl);
+  }
 
   updateEnvironmentForHub(hub);
   updateUIForHub(hub);
@@ -384,9 +387,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   });
 
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
-  objectsEl.addEventListener("model-loaded", async el => {
-    if (el.target !== objectsEl) return;
-
+  const connectToScene = async () => {
     scene.setAttribute("networked-scene", {
       room: hub.hub_id,
       serverURL: `wss://${hub.host}`,
@@ -443,7 +444,16 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
         return;
       });
-  });
+  };
+
+  if (!isBotMode) {
+    objectsEl.addEventListener("model-loaded", async el => {
+      if (el.target !== objectsEl) return;
+      connectToScene();
+    });
+  } else {
+    connectToScene();
+  }
 }
 
 async function runBotMode(scene, entryManager) {
