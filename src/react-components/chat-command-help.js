@@ -11,17 +11,7 @@ export default class ChatCommandHelp extends Component {
   };
 
   render() {
-    const commands = [
-      "help",
-      "leave",
-      "fly",
-      "grow",
-      "shrink",
-      "duck",
-      "debug",
-      "scene <scene url>",
-      "rename <new name>"
-    ];
+    const commands = ["leave", "fly", "grow", "shrink", "duck", "debug", "scene <scene url>", "rename <new name>"];
 
     return (
       <div className={classNames({ [styles.commandHelp]: true, [styles.commandHelpOnTop]: this.props.onTop })}>

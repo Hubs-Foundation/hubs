@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <link rel="shortcut icon" type="image/png" href="/favicon.ico">
-    <title>Get together | Hubs by Mozilla</title>
+    <title>Room | Hubs by Mozilla</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700" rel="stylesheet">
     <script>
         // HACK Chrome on iOS breaks completely if we don't do this because a-frame's webvr-polyfill doesn't recognize
@@ -29,6 +29,7 @@
 
 <body>
     <a-scene
+        nextframe
         class="grab-cursor"
         renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true;"
         shadow="type: pcfsoft"
@@ -41,7 +42,6 @@
         stats-plus="false"
         rotate-selected-object
         action-to-event__mute="path: /actions/muteMic; event: action_mute;"
-        action-to-event__focus_chat="path: /actions/focusChat; event: action_focus_chat;"
         environment-map="loadDefault: false"
     >
         <a-assets>
@@ -146,7 +146,7 @@
 
                         <template data-name="Spine">
                             <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
-                                <a-entity billboard matrix-auto-update visibility-while-frozen="withinDistance: 10;">
+                                <a-entity billboard matrix-auto-update visibility-while-frozen="withinDistance: 10; requireHoverOnNonMobile: false;">
                                     <a-entity hoverable mixin="rounded-text-button" block-button ui-class-while-frozen position="0 0 .35"> </a-entity>
                                     <a-entity text="value:Hide; width:2.5; align:center;" position="0 0 0.36"></a-entity>
                                     <a-entity hoverable mixin="rounded-text-button" visible-if-permitted="kick_users" kick-button ui-class-while-frozen position="0 -0.25 .35"> </a-entity>
@@ -376,7 +376,7 @@
                 <a-entity
                     class="ui unmute-ui"
                     position="0 0 0.1"
-                    visibility-while-frozen="visible: false; withinDistance: 10;"
+                    visibility-while-frozen="visible: false; withinDistance: 10; requireHoverOnNonMobile: false;"
                     mixin="button-container"
                 >
                     <a-entity class="unmute-button">
@@ -695,7 +695,7 @@
             <a-entity gltf-model-plus="inflate: true;" class="model">
                 <template data-name="AvatarRoot">
                     <a-entity
-                        ik-controller
+                        ik-controller="alwaysUpdate: true"
                         hand-pose__left
                         hand-pose__right
                         hand-pose-controller__left="networkedAvatar:#player-rig;eventSrc:#player-left-controller"

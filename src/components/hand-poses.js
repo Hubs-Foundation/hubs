@@ -36,7 +36,13 @@ AFRAME.registerComponent("hand-pose", {
     this.from.play();
 
     const getNetworkedAvatar = el => {
-      const networkedAvatar = el.components["networked-avatar"];
+      if (!el) {
+        window.setTimeout(() => {
+          getNetworkedAvatar(this.el);
+        }, 1000);
+        return;
+      }
+      const networkedAvatar = el.components && el.components["networked-avatar"];
       if (networkedAvatar) {
         return networkedAvatar;
       }

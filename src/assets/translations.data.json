@@ -11,6 +11,8 @@
     "sign-in.as": "Signed in as",
     "sign-in.in": "Sign In",
     "sign-in.out": "Sign Out",
+    "rename-room.message": "Enter the new name for the room.",
+    "rename-room.rename": "Rename Room",
     "entry.enter-room-title": "Lobby",
     "entry.enter-room": "Enter Room",
     "entry.change-scene": "Choose a Scene",
@@ -167,8 +169,10 @@
     "commands.leave": "Disconnect from the room.",
     "commands.duck": "The duck tested well. Quack.",
     "commands.debug": "Toggle physics debug rendering.",
-    "settings.change_avatar": "Set Name & Avatar",
-    "settings.change_scene": "Choose a Scene",
+    "settings.change-avatar": "Set Name & Avatar",
+    "settings.change-scene": "Choose a Scene",
+    "settings.rename-room": "Set Room Name",
+    "settings.room-info": "Room & Scene Info",
     "settings.features": "Features",
     "settings.controls": "Controls",
     "settings.community": "Join Discord",
@@ -177,6 +181,12 @@
     "settings.privacy": "Privacy Notice",
     "settings.controls": "Controls",
     "settings.help": "Help",
-    "video_share.notify": "Select again to un-share video."
+    "settings.row-profile": "Profile",
+    "settings.row-room": "Room",
+    "video_share.notify": "Select again to un-share video.",
+    "loader.entering_lobby": "Entering lobby...",
+    "loader.loading": "Loading ",
+    "loader.object": "object",
+    "loader.objects": "objects"
   }
 }

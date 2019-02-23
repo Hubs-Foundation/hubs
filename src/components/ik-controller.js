@@ -62,7 +62,8 @@ AFRAME.registerComponent("ik-controller", {
     rightHand: { type: "string", default: "RightHand" },
     chest: { type: "string", default: "Spine" },
     hips: { type: "string", default: "Hips" },
-    rotationSpeed: { default: 5 }
+    rotationSpeed: { default: 5 },
+    alwaysUpdate: { type: "boolean", default: false }
   },
 
   init() {
@@ -175,7 +176,11 @@ AFRAME.registerComponent("ik-controller", {
     // then the avatar does not need any IK this frame.
     //
     // Update in-view avatars every frame, and update out-of-view avatars via frame scheduler.
-    if (this.forceIkUpdate || (this.isInView && (hasNewCameraTransform || !this.hasConvergedHips))) {
+    if (
+      this.data.alwaysUpdate ||
+      this.forceIkUpdate ||
+      (this.isInView && (hasNewCameraTransform || !this.hasConvergedHips))
+    ) {
       if (hasNewCameraTransform) {
         this.lastCameraTransform.copy(camera.object3D.matrix);
       }
@@ -251,7 +256,7 @@ AFRAME.registerComponent("ik-controller", {
     handObject3D.visible = !handHiddenByPersonalSpace && controllerObject3D.visible;
 
     // Optimization: skip IK update if not in view and not forced by frame scheduler
-    if (controllerObject3D.visible && (isInView || this.forceIkUpdate)) {
+    if (controllerObject3D.visible && (isInView || this.forceIkUpdate || this.data.alwaysUpdate)) {
       handMatrix.multiplyMatrices(this.invRootToChest, controllerObject3D.matrix);
 
       const handControls = controller.components["hand-controls2"];

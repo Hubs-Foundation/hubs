@@ -1,5 +1,7 @@
 import { getLastWorldPosition } from "../utils/three-utils";
 
+const isMobile = AFRAME.utils.device.isMobile();
+
 /**
  * Toggles the visibility of this entity when the scene is frozen.
  * @namespace ui
@@ -8,7 +10,8 @@ import { getLastWorldPosition } from "../utils/three-utils";
 AFRAME.registerComponent("visibility-while-frozen", {
   schema: {
     withinDistance: { type: "number" },
-    visible: { type: "boolean", default: true }
+    visible: { type: "boolean", default: true },
+    requireHoverOnNonMobile: { type: "boolean", default: true }
   },
 
   init() {
@@ -16,6 +19,18 @@ AFRAME.registerComponent("visibility-while-frozen", {
     this.camWorldPos = new THREE.Vector3();
     this.objWorldPos = new THREE.Vector3();
     this.cam = this.el.sceneEl.camera.el.object3D;
+
+    let hoverableSearch = this.el;
+
+    while (hoverableSearch !== document) {
+      if (hoverableSearch.getAttribute("hoverable") !== null) {
+        this.hoverable = hoverableSearch;
+        break;
+      }
+
+      hoverableSearch = hoverableSearch.parentNode;
+    }
+
     this.onStateChange = evt => {
       if (!evt.detail === "frozen") return;
       this.updateVisibility();
@@ -55,8 +70,13 @@ AFRAME.registerComponent("visibility-while-frozen", {
     }
 
     const isRotating = AFRAME.scenes[0].systems["rotate-selected-object"].rotating;
-    const shouldBeVisible =
+
+    let shouldBeVisible =
       ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) && isWithinDistance && !isRotating;
+
+    if (this.data.requireHoverOnNonMobile && !isMobile) {
+      shouldBeVisible = shouldBeVisible && ((this.hoverable && this.hoverable.is("hovered")) || isVisible);
+    }
 
     if (isVisible !== shouldBeVisible) {
       this.el.setAttribute("visible", shouldBeVisible);

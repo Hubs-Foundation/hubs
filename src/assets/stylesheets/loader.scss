@@ -1,8 +1,18 @@
+@import 'shared';
+
 .loader-wrap {
   pointer-events: none;
   position: relative;
   width: 100px;
   height: 90px;
+}
+
+.loader-bottom {
+  position: fixed;
+  bottom: 8px;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  left: 50%;
 }
 
 .loading-panel {
@@ -23,7 +33,7 @@
 .loading-panel__logo {
   width: 247px;
   height: 57px;
-  margin: 20px 0;
+  margin: 20px 0 10px 0;
 }
 
 .loader-center,
@@ -88,4 +98,11 @@
     height: 3.5em;
     top: -0.75em;
   }
+}
+
+:local(.loading-text) {
+  font-weight: normal;
+  font-size: 0.8em;
+  color: $darker-grey;
+  margin-top: 0;
 }

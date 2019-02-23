@@ -2,6 +2,11 @@
 // need to be used to manipulate history state so we can deal with edge cases around
 // entry back button and refreshes once entered.
 //
+// These functions also transparently deal with the room slug, so incoming calls can ignore
+// dealing with it, and provides APIs for getting the non-slug part of the path.
+//
+// The slug cannot be part of the basename for history, because the slug changes intra-session
+// if the room is renamed.
 
 // This pushes/replaces a new k, v pair into the history, while maintaining all the other
 // keys, or clears state if k if null.
@@ -34,10 +39,6 @@ function pushOrUpdateHistory(history, replace, k, v, newPathname, newSearch) {
   state.__historyLength = newLength;
 
   method({ pathname, search, state });
-}
-
-export function replaceHistoryState(history, k, v) {
-  pushOrUpdateHistory(history, true, k, v);
 }
 
 export function pushHistoryState(history, k, v) {
@@ -80,4 +81,17 @@ export function popToBeginningOfHubHistory(history, navigateToPriorPage) {
 // This will pop the browser history to the entry before the first entry for this hubs room.
 export function navigateToPriorPage(history) {
   popToBeginningOfHubHistory(history, true);
+}
+
+// Returns the part of the pathname that does not include the slug
+export function sluglessPath(location) {
+  const parts = location.pathname.split("/");
+  return `/${parts.slice(2).join("/")}`;
+}
+
+// Returns a new path that includes the current slug as a prefix to the
+// provided path.
+export function withSlug(location, path) {
+  const parts = location.pathname.split("/");
+  return `/${parts[1]}${path}`;
 }

@@ -86,7 +86,8 @@ import "./components/animation";
 import ReactDOM from "react-dom";
 import React from "react";
 import jwtDecode from "jwt-decode";
-import { BrowserRouter, Route } from "react-router-dom";
+import { Router, Route } from "react-router-dom";
+import { createBrowserHistory } from "history";
 import UIRoot from "./react-components/ui-root";
 import AuthChannel from "./utils/auth-channel";
 import HubChannel from "./utils/hub-channel";
@@ -109,6 +110,7 @@ import "./systems/userinput/userinput";
 import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
 import "./systems/frame-scheduler";
+import "./systems/ui-hotkeys";
 
 import "./gltf-component-mappings";
 
@@ -225,23 +227,25 @@ function setupLobbyCamera() {
 
 let uiProps = {};
 
+// Hub ID and slug are the basename
+let routerBaseName = document.location.pathname
+  .split("/")
+  .slice(0, 2)
+  .join("/");
+
+if (document.location.pathname.includes("hub.html")) {
+  routerBaseName = "";
+}
+
+const history = createBrowserHistory({ basename: routerBaseName });
+
 function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
 
-  // Hub ID and slug are the basename
-  let routerBaseName = document.location.pathname
-    .split("/")
-    .slice(0, 3)
-    .join("/");
-
-  if (document.location.pathname.includes("hub.html")) {
-    routerBaseName = "";
-  }
-
   ReactDOM.render(
-    <BrowserRouter basename={routerBaseName}>
+    <Router history={history}>
       <Route
         render={routeProps => (
           <UIRoot
@@ -259,7 +263,7 @@ function mountUI(props = {}) {
           />
         )}
       />
-    </BrowserRouter>,
+    </Router>,
     document.getElementById("ui-root")
   );
 }
@@ -388,7 +392,10 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
   const objectsEl = document.createElement("a-entity");
   objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
-  objectsScene.appendChild(objectsEl);
+
+  if (!isBotMode) {
+    objectsScene.appendChild(objectsEl);
+  }
 
   updateEnvironmentForHub(hub);
   updateUIForHub(hub);
@@ -406,9 +413,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   });
 
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
-  objectsEl.addEventListener("model-loaded", async el => {
-    if (el.target !== objectsEl) return;
-
+  const connectToScene = async () => {
     scene.setAttribute("networked-scene", {
       room: hub.hub_id,
       serverURL: `wss://${hub.host}`,
@@ -416,12 +421,12 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     });
 
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
-
     scene.components["networked-scene"]
       .connect()
       .then(() => {
         let newHostPollInterval = null;
 
+        scene.emit("didConnectToNetworkedScene");
         // When reconnecting, update the server URL if necessary
         NAF.connection.adapter.setReconnectionListeners(
           () => {
@@ -465,7 +470,16 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
         return;
       });
-  });
+  };
+
+  if (!isBotMode) {
+    objectsEl.addEventListener("model-loaded", async el => {
+      if (el.target !== objectsEl) return;
+      connectToScene();
+    });
+  } else {
+    connectToScene();
+  }
 }
 
 async function runBotMode(scene, entryManager) {
@@ -573,7 +587,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     initialIsSubscribed: subscriptions.isSubscribed()
   });
 
-  scene.addEventListener("action_focus_chat", () => document.querySelector(".chat-focus-target").focus());
+  scene.addEventListener("action_focus_chat", () => {
+    const chatFocusTarget = document.querySelector(".chat-focus-target");
+    chatFocusTarget && chatFocusTarget.focus();
+  });
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 
@@ -842,21 +859,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     if (stale_fields.includes("name")) {
+      const titleParts = document.title.split(" | "); // Assumes title has | trailing site name
+      titleParts[0] = hub.name;
+      document.title = titleParts.join(" | ");
+
       // Re-write the slug in the browser history
-      if (window.history && window.history.replaceState) {
-        const pathParts = document.location.pathname.split("/");
+      const pathParts = history.location.pathname.split("/");
+      const oldSlug = pathParts[1];
+      const { search, state } = history.location;
+      const pathname = history.location.pathname.replace(`/${oldSlug}`, `/${hub.slug}`);
 
-        if (pathParts.length >= 3 && pathParts[1] === hub.hub_id) {
-          const oldSlug = pathParts[2];
-
-          const title =
-            window.history.state && window.history.state.title ? window.history.state.title : document.title;
-          const state = window.history.state ? window.history.state.state : null;
-          const url = document.location.toString().replace(`${hub.hub_id}/${oldSlug}`, `${hub.hub_id}/${hub.slug}`);
-
-          window.history.replaceState(state, title, url);
-        }
-      }
+      history.replace({ pathname, search, state });
 
       addToPresenceLog({
         type: "hub_name_changed",

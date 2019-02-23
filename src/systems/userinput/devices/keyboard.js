@@ -4,7 +4,33 @@ export class KeyboardDevice {
     this.keys = {};
     this.events = [];
 
-    ["keydown", "keyup"].map(x => document.addEventListener(x, this.events.push.bind(this.events)));
+    ["keydown", "keyup"].map(x =>
+      document.addEventListener(x, e => {
+        if (!e.key) return;
+        this.events.push(e);
+
+        // Block browser hotkeys for chat command and media browser
+        if (
+          (e.type === "keydown" &&
+            e.key === "/" &&
+            !["TEXTAREA", "INPUT"].includes(document.activeElement && document.activeElement.nodeName)) ||
+          (e.ctrlKey &&
+            (e.key === "1" ||
+              e.key === "2" ||
+              e.key === "3" ||
+              e.key === "4" ||
+              e.key === "5" ||
+              e.key === "6" ||
+              e.key === "7" ||
+              e.key === "8" ||
+              e.key === "9" ||
+              e.key === "0"))
+        ) {
+          e.preventDefault();
+          return false;
+        }
+      })
+    );
     ["blur"].map(x => window.addEventListener(x, this.events.push.bind(this.events)));
   }
 

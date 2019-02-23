@@ -1,6 +1,8 @@
 import { EventTarget } from "event-target-shim";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
-import { pushHistoryPath } from "../utils/history";
+import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
+
+export const SOURCES = ["videos", "images", "gifs", "scenes", "sketchfab", "poly", "twitch"];
 
 const URL_SOURCE_TO_TO_API_SOURCE = {
   scenes: "scene_listings",
@@ -43,6 +45,11 @@ export default class MediaSearchStore extends EventTarget {
 
     const urlSource = this.getUrlMediaSource(location);
     if (!urlSource) return;
+
+    if (!this.previousSource || this.previousSource !== urlSource) {
+      this.dispatchEvent(new CustomEvent("sourcechanged"));
+      this.previousSource = urlSource;
+    }
 
     const urlParams = new URLSearchParams(location.search);
 
@@ -106,32 +113,63 @@ export default class MediaSearchStore extends EventTarget {
     pushHistoryPath(this.history, location.pathname, searchParams.toString());
   };
 
-  sourceNavigate = (source, searchParams, mediaNav) => {
-    if (!searchParams) {
-      searchParams = new URLSearchParams(this.history.location.search);
+  getSearchClearedSearchParams = location => {
+    const searchParams = new URLSearchParams(location.search);
 
-      if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {
-        searchParams.set("filter", MEDIA_SOURCE_DEFAULT_FILTERS[source]);
-      }
+    // Strip browsing query params
+    searchParams.delete("q");
+    searchParams.delete("filter");
+    searchParams.delete("cursor");
+    searchParams.delete("media_source");
+    searchParams.delete("media_nav");
+
+    return searchParams;
+  };
+
+  sourceNavigateToDefaultSource = () => {
+    this.sourceNavigate(SOURCES[0]);
+  };
+
+  sourceNavigate = (source, hideNav) => {
+    const currentQuery = new URLSearchParams(this.history.location.search).get("q");
+    const searchParams = this.getSearchClearedSearchParams(this.history.location);
+
+    if (currentQuery) {
+      searchParams.set("q", currentQuery);
+    } else if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {
+      searchParams.set("filter", MEDIA_SOURCE_DEFAULT_FILTERS[source]);
     }
 
-    if (mediaNav !== undefined) {
-      searchParams.set("media_nav", mediaNav);
+    if (hideNav) {
+      searchParams.set("media_nav", "false");
     }
 
     if (process.env.RETICULUM_SERVER && document.location.host !== process.env.RETICULUM_SERVER) {
       searchParams.set("media_source", source);
       pushHistoryPath(this.history, this.history.location.pathname, searchParams.toString());
     } else {
-      pushHistoryPath(this.history, `/media/${source}`, searchParams.toString());
+      pushHistoryPath(this.history, withSlug(this.history.location, `/media/${source}`), searchParams.toString());
     }
   };
 
   getUrlMediaSource = location => {
-    const { pathname, search } = location;
+    const { search } = location;
     const urlParams = new URLSearchParams(search);
+    const pathname = sluglessPath(location);
 
     if (!pathname.startsWith("/media") && !urlParams.get("media_source")) return null;
     return urlParams.get("media_source") || pathname.substring(7);
+  };
+
+  pushExitMediaBrowserHistory = history => {
+    if (!history) history = this.history;
+
+    const { pathname } = history.location;
+    const hasMediaPath = pathname.startsWith("/media");
+    pushHistoryPath(
+      history,
+      hasMediaPath ? "/" : pathname,
+      this.getSearchClearedSearchParams(history.location).toString()
+    );
   };
 }

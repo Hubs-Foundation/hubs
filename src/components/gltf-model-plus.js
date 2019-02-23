@@ -353,6 +353,7 @@ AFRAME.registerComponent("gltf-model-plus", {
         return;
       }
 
+      this.el.emit("model-loading");
       const gltf = await this.loadModel(src, contentType, this.preferredTechnique, this.data.useCache);
 
       // If we started loading something else already

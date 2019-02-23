@@ -4,7 +4,7 @@ import { injectIntl, FormattedMessage } from "react-intl";
 import styles from "../assets/stylesheets/media-browser.scss";
 import classNames from "classnames";
 import { scaledThumbnailUrlFor } from "../utils/media-utils";
-import { pushHistoryPath, pushHistoryState } from "../utils/history";
+import { pushHistoryPath, pushHistoryState, sluglessPath, withSlug } from "../utils/history";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
@@ -12,7 +12,7 @@ import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploa
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MEDIA_SOURCE_DEFAULT_FILTERS } from "../storage/media-search-store";
+import { SOURCES } from "../storage/media-search-store";
 import qsTruthy from "../utils/qs_truthy";
 
 const allowContentSearch = qsTruthy("content_search");
@@ -31,8 +31,6 @@ const PRIVACY_POLICY_LINKS = {
   poly: "https://policies.google.com/privacy",
   twitch: "https://www.twitch.tv/p/legal/privacy-policy/"
 };
-
-const SOURCES = ["videos", "images", "gifs", "scenes", "sketchfab", "poly", "twitch"];
 
 const DEFAULT_FACETS = {
   sketchfab: [
@@ -82,16 +80,24 @@ class MediaBrowser extends Component {
     super(props);
     this.state = this.getStoreAndHistoryState(props);
     this.props.mediaSearchStore.addEventListener("statechanged", this.storeUpdated);
+    this.props.mediaSearchStore.addEventListener("sourcechanged", this.sourceChanged);
   }
 
   componentDidMount() {}
 
   componentWillUnmount() {
     this.props.mediaSearchStore.removeEventListener("statechanged", this.storeUpdated);
+    this.props.mediaSearchStore.removeEventListener("sourcechanged", this.sourceChanged);
   }
 
   storeUpdated = () => {
     this.setState(this.getStoreAndHistoryState(this.props));
+  };
+
+  sourceChanged = () => {
+    if (this.inputRef) {
+      this.inputRef.focus();
+    }
   };
 
   getStoreAndHistoryState = props => {
@@ -99,7 +105,7 @@ class MediaBrowser extends Component {
     const result = props.mediaSearchStore.result;
 
     const newState = { result, query: searchParams.get("q") || "" };
-    const urlSource = searchParams.get("media_source") || this.props.history.location.pathname.substring(7);
+    const urlSource = searchParams.get("media_source") || sluglessPath(this.props.history.location).substring(7);
     newState.showNav = !!(searchParams.get("media_nav") !== "false");
 
     if (result && result.suggestions && result.suggestions.length > 0) {
@@ -136,20 +142,7 @@ class MediaBrowser extends Component {
   };
 
   handleSourceClicked = source => {
-    const location = this.props.history.location;
-    const searchParams = new URLSearchParams(location.search);
-    const currentQuery = searchParams.get("q");
-
-    const newSearchParams = this.getSearchClearedSearchParams();
-    if (currentQuery) {
-      newSearchParams.set("q", currentQuery);
-    } else {
-      if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {
-        newSearchParams.set("filter", MEDIA_SOURCE_DEFAULT_FILTERS[source]);
-      }
-    }
-
-    this.props.mediaSearchStore.sourceNavigate(source, newSearchParams);
+    this.props.mediaSearchStore.sourceNavigate(source);
   };
 
   handleFacetClicked = facet => {
@@ -163,23 +156,17 @@ class MediaBrowser extends Component {
   };
 
   getSearchClearedSearchParams = () => {
-    const location = this.props.history.location;
-    const searchParams = new URLSearchParams(location.search);
-
-    // Strip browsing query params
-    searchParams.delete("q");
-    searchParams.delete("filter");
-    searchParams.delete("cursor");
-    searchParams.delete("media_source");
-    searchParams.delete("media_nav");
-
-    return searchParams;
+    return this.props.mediaSearchStore.getSearchClearedSearchParams(this.props.history.location);
   };
 
   pushExitMediaBrowserHistory = () => {
     const { pathname } = this.props.history.location;
-    const hasMediaPath = pathname.startsWith("/media");
-    pushHistoryPath(this.props.history, hasMediaPath ? "/" : pathname, this.getSearchClearedSearchParams().toString());
+    const hasMediaPath = sluglessPath(this.props.history.location).startsWith("/media");
+    pushHistoryPath(
+      this.props.history,
+      hasMediaPath ? withSlug(this.props.history.location, "/") : pathname,
+      this.getSearchClearedSearchParams().toString()
+    );
   };
 
   showCreateObject = () => {
@@ -202,7 +189,7 @@ class MediaBrowser extends Component {
     const hasNext = this.state.result && !!this.state.result.meta.next_cursor;
     const searchParams = new URLSearchParams(this.props.history.location.search);
     const hasPrevious = searchParams.get("cursor");
-    const urlSource = searchParams.get("media_source") || this.props.history.location.pathname.substring(7);
+    const urlSource = searchParams.get("media_source") || sluglessPath(this.props.history.location).substring(7);
     const apiSource = this.state.result && this.state.result.meta.source;
     const isVariableWidth = this.state.result && ["bing_images", "tenor"].includes(apiSource);
 
@@ -224,9 +211,21 @@ class MediaBrowser extends Component {
                 </i>
                 <input
                   type="text"
+                  autoFocus
+                  ref={r => (this.inputRef = r)}
                   placeholder={formatMessage({
                     id: `media-browser.search-placeholder.${urlSource}`
                   })}
+                  onFocus={e => e.target.select()}
+                  onKeyDown={e => {
+                    if (e.key === "Enter" && e.shiftKey) {
+                      if (this.state.result && this.state.result.entries.length > 0) {
+                        this.handleEntryClicked(this.state.result.entries[0]);
+                      }
+                    } else if (e.key === "Escape" || e.key === "Enter") {
+                      e.target.blur();
+                    }
+                  }}
                   value={this.state.query}
                   onChange={e => this.handleQueryUpdated(e.target.value)}
                 />

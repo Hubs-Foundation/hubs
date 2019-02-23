@@ -8,9 +8,16 @@ import en from "react-intl/locale-data/en";
 import MovingAverage from "moving-average";
 import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
+import loaderStyles from "../assets/stylesheets/loader.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
-import { pushHistoryState, clearHistoryState, popToBeginningOfHubHistory, navigateToPriorPage } from "../utils/history";
+import {
+  pushHistoryState,
+  clearHistoryState,
+  popToBeginningOfHubHistory,
+  navigateToPriorPage,
+  sluglessPath
+} from "../utils/history";
 import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
 
@@ -34,6 +41,7 @@ import LinkDialog from "./link-dialog.js";
 import SafariDialog from "./safari-dialog.js";
 import SafariMicDialog from "./safari-mic-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
+import RenameRoomDialog from "./rename-room-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
@@ -54,6 +62,7 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
+import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 
 addLocaleData([...en]);
 
@@ -93,6 +102,9 @@ if (toneClip.canPlayType("audio/webm")) {
 }
 
 class UIRoot extends Component {
+  doneWithInitialLoad = false;
+  willCompileAndUploadMaterials = false;
+
   static propTypes = {
     enterScene: PropTypes.func,
     exitScene: PropTypes.func,
@@ -135,7 +147,6 @@ class UIRoot extends Component {
   state = {
     enterInVR: false,
     entered: false,
-    lastEntryStepPath: null,
     dialog: null,
     showInviteDialog: false,
     showPresenceList: false,
@@ -143,6 +154,12 @@ class UIRoot extends Component {
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
+
+    didConnectToNetworkedScene: false,
+    noMoreLoadingUpdates: false,
+    hideLoader: false,
+    loadingNum: 0,
+    loadedNum: 0,
 
     shareScreen: false,
     requestedScreen: false,
@@ -176,7 +193,6 @@ class UIRoot extends Component {
 
   constructor(props) {
     super(props);
-
     if (props.showSafariMicDialog) {
       this.state.dialog = <SafariMicDialog closable={false} />;
     }
@@ -195,11 +211,37 @@ class UIRoot extends Component {
     if (prevProps.showSignInDialog !== showSignInDialog && showSignInDialog) {
       this.showContextualSignInDialog();
     }
+    if (!this.willCompileAndUploadMaterials && this.state.noMoreLoadingUpdates) {
+      this.willCompileAndUploadMaterials = true;
+      // We want to ensure that react and the browser have had the chance to render / update.
+      // See https://stackoverflow.com/a/34999925 , although our solution flipped setTimeout and requestAnimationFrame
+      window.requestAnimationFrame(() => {
+        window.setTimeout(() => {
+          if (!this.props.isBotMode) {
+            this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
+          }
+
+          this.setState({ hideLoader: true });
+        }, 0);
+      });
+    }
   }
 
   componentDidMount() {
     this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
     this.micLevelMovingAverage = MovingAverage(100);
+    this.props.scene.addEventListener(
+      "didConnectToNetworkedScene",
+      () => {
+        this.setState({ didConnectToNetworkedScene: true });
+      },
+      { once: true }
+    );
+    this.props.scene.addEventListener("model-loading", this.onObjectLoading);
+    this.props.scene.addEventListener("image-loading", this.onObjectLoading);
+    this.props.scene.addEventListener("model-loaded", this.onObjectLoaded);
+    this.props.scene.addEventListener("image-loaded", this.onObjectLoaded);
+    this.props.scene.addEventListener("model-error", this.onObjectLoaded);
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
     this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
@@ -225,7 +267,7 @@ class UIRoot extends Component {
     //
     // We don't do this for the media browser case, since we want to be able to share
     // links to the browser pages
-    if (this.props.history.location.state && !this.props.history.location.pathname.startsWith("/media")) {
+    if (this.props.history.location.state && !sluglessPath(this.props.history.location).startsWith("/media")) {
       popToBeginningOfHubHistory(this.props.history);
     }
 
@@ -295,6 +337,30 @@ class UIRoot extends Component {
 
   onSceneLoaded = () => {
     this.setState({ sceneLoaded: true });
+  };
+
+  onObjectLoading = () => {
+    if (!this.doneWithInitialLoad && this.loadingTimeout) {
+      window.clearTimeout(this.loadingTimeout);
+      this.loadingTimeout = null;
+    }
+
+    this.setState(state => {
+      return { loadingNum: state.loadingNum + 1 };
+    });
+  };
+
+  onObjectLoaded = () => {
+    this.setState(state => {
+      return { loadedNum: state.loadedNum + 1 };
+    });
+
+    if (!this.doneWithInitialLoad && this.loadingTimeout) window.clearTimeout(this.loadingTimeout);
+
+    this.loadingTimeout = window.setTimeout(() => {
+      this.doneWithInitialLoad = true;
+      this.setState({ noMoreLoadingUpdates: true });
+    }, 1500);
   };
 
   // TODO: we need to come up with a cleaner way to handle the shared state between aframe and react than emmitting events and setting state on the scene
@@ -569,8 +635,7 @@ class UIRoot extends Component {
   };
 
   beginOrSkipAudioSetup = () => {
-    const skipAudioSetup =
-      this.state.numAudioTracks <= 1 || (this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now"));
+    const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
 
     if (skipAudioSetup) {
       this.onAudioReadyButton();
@@ -662,7 +727,7 @@ class UIRoot extends Component {
       clearInterval(this.state.micUpdateInterval);
     }
 
-    this.setState({ entered: true, lastEntryStepPath: this.props.history.location.pathname, showInviteDialog: false });
+    this.setState({ entered: true, showInviteDialog: false });
     clearHistoryState(this.props.history);
   };
 
@@ -815,7 +880,8 @@ class UIRoot extends Component {
               You can also{" "}
               <WithHoverSound>
                 <a href="/">create a new room</a>
-              </WithHoverSound>.
+              </WithHoverSound>
+              .
             </div>
           )}
         </div>
@@ -843,16 +909,31 @@ class UIRoot extends Component {
   };
 
   renderLoader = () => {
+    const nomore = (
+      <h4 style={{ color: "green" }}>
+        <FormattedMessage id="loader.entering_lobby" />
+      </h4>
+    );
+    const usual = (
+      <h4 className={loaderStyles.loadingText}>
+        <FormattedMessage id="loader.loading" />
+        {this.state.loadedNum} / {this.state.loadingNum}{" "}
+        <FormattedMessage id={this.state.loadingNum !== 1 ? "loader.objects" : "loader.object"} />
+        ...
+      </h4>
+    );
     return (
       <IntlProvider locale={lang} messages={messages}>
         <div className="loading-panel">
-          <div className="loader-wrap">
+          <img className="loading-panel__logo" src="../assets/images/hub-preview-light-no-shadow.png" />
+
+          {this.state.noMoreLoadingUpdates ? nomore : usual}
+
+          <div className="loader-wrap loader-bottom">
             <div className="loader">
               <div className="loader-center" />
             </div>
           </div>
-
-          <img className="loading-panel__logo" src="../assets/images/hub-preview-light-no-shadow.png" />
         </div>
       </IntlProvider>
     );
@@ -869,6 +950,18 @@ class UIRoot extends Component {
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>
           <span>{this.props.hubName}</span>
+          {this.props.hubChannel.permissions.update_hub && (
+            <StateLink
+              stateKey="modal"
+              stateValue="rename_room"
+              history={this.props.history}
+              className={entryStyles.editButton}
+            >
+              <i>
+                <FontAwesomeIcon icon={faPencilAlt} />
+              </i>
+            </StateLink>
+          )}
           {this.props.hubScene && (
             <StateLink
               stateKey="modal"
@@ -884,17 +977,19 @@ class UIRoot extends Component {
         </div>
 
         <div className={entryStyles.center}>
-          <WithHoverSound>
-            <div
-              className={entryStyles.chooseScene}
-              onClick={() => this.props.mediaSearchStore.sourceNavigate("scenes", null, false)}
-            >
-              <i>
-                <FontAwesomeIcon icon={faImage} />
-              </i>
-              <FormattedMessage id="entry.change-scene" />
-            </div>
-          </WithHoverSound>
+          {this.props.hubChannel.permissions.update_hub && (
+            <WithHoverSound>
+              <div
+                className={entryStyles.chooseScene}
+                onClick={() => this.props.mediaSearchStore.sourceNavigate("scenes", true)}
+              >
+                <i>
+                  <FontAwesomeIcon icon={faImage} />
+                </i>
+                <FormattedMessage id="entry.change-scene" />
+              </div>
+            </WithHoverSound>
+          )}
 
           <form onSubmit={this.sendMessage}>
             <div className={styles.messageEntry} style={{ height: pendingMessageFieldHeight }}>
@@ -906,9 +1001,9 @@ class UIRoot extends Component {
                 onFocus={e => e.target.select()}
                 onChange={e => this.setState({ pendingMessage: e.target.value })}
                 onKeyDown={e => {
-                  if (e.keyCode === 13 && !e.shiftKey) {
+                  if (e.key === "Enter" && !e.shiftKey) {
                     this.sendMessage(e);
-                  } else if (e.keyCode === 27) {
+                  } else if (e.key === "Escape") {
                     e.target.blur();
                   }
                 }}
@@ -1193,7 +1288,7 @@ class UIRoot extends Component {
   isInModalOrOverlay = () => {
     if (
       this.state.entered &&
-      (IN_ROOM_MODAL_ROUTER_PATHS.find(x => this.props.history.location.pathname.startsWith(x)) ||
+      (IN_ROOM_MODAL_ROUTER_PATHS.find(x => sluglessPath(this.props.history.location).startsWith(x)) ||
         IN_ROOM_MODAL_QUERY_VARS.find(x => new URLSearchParams(this.props.history.location.search).get(x)))
     ) {
       return true;
@@ -1209,9 +1304,8 @@ class UIRoot extends Component {
 
   render() {
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
-    const isLoading =
-      !this.props.showSafariMicDialog &&
-      (!this.props.environmentSceneLoaded || !this.props.availableVREntryTypes || !this.props.hubId);
+
+    const isLoading = !this.state.hideLoader || !this.state.didConnectToNetworkedScene;
 
     if (isExited) return this.renderExitedPane();
     if (isLoading) return this.renderLoader();
@@ -1312,6 +1406,14 @@ class UIRoot extends Component {
                   store={this.props.store}
                 />
               )}
+            />
+            <StateRoute
+              stateKey="modal"
+              stateValue="rename_room"
+              history={this.props.history}
+              render={() =>
+                this.renderDialog(RenameRoomDialog, { onRename: name => this.props.hubChannel.rename(name) })
+              }
             />
             <StateRoute
               stateKey="modal"
@@ -1451,12 +1553,12 @@ class UIRoot extends Component {
                       this.setState({ pendingMessage: e.target.value });
                     }}
                     onKeyDown={e => {
-                      if (e.keyCode === 13 && !e.shiftKey) {
+                      if (e.key === "Enter" && !e.shiftKey) {
                         this.sendMessage(e);
-                      } else if (e.keyCode === 13 && e.shiftKey && e.ctrlKey) {
+                      } else if (e.key === "Enter" && e.shiftKey && e.ctrlKey) {
                         spawnChatMessage(e.target.value);
                         this.setState({ pendingMessage: "" });
-                      } else if (e.keyCode === 27) {
+                      } else if (e.key === "Escape") {
                         e.target.blur();
                       }
                     }}
@@ -1592,13 +1694,19 @@ class UIRoot extends Component {
 
             {this.state.showSettingsMenu &&
               !this.state.messageEntryOnTop && (
-                <SettingsMenu history={this.props.history} mediaSearchStore={this.props.mediaSearchStore} />
+                <SettingsMenu
+                  history={this.props.history}
+                  mediaSearchStore={this.props.mediaSearchStore}
+                  hubChannel={this.props.hubChannel}
+                  hubScene={this.props.hubScene}
+                />
               )}
 
             {entered ? (
               <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
                   history={this.props.history}
+                  mediaSearchStore={this.props.mediaSearchStore}
                   muted={this.state.muted}
                   frozen={this.state.frozen}
                   spacebubble={this.state.spacebubble}
