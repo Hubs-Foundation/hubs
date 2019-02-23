@@ -46,3 +46,4 @@ const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathna
   ReactDOM.render(root, document.getElementById("home-root"));
 })();
 
+
