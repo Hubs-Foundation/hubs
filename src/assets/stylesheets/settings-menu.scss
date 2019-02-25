@@ -55,8 +55,8 @@
     justify-content: center;
     align-items: center;
     white-space: nowrap;
-    text-decoration: none;
     font-weight: bold;
+    text-decoration-color: $dark-grey;
   }
 }
 
@@ -74,6 +74,6 @@
     justify-content: flex-start;
     align-items: center;
     white-space: nowrap;
-    text-decoration-color: $dark-grey;
+    text-decoration: none;
   }
 }
