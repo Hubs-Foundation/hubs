@@ -1,5 +1,4 @@
 import qsTruthy from "./utils/qs_truthy";
-import screenfull from "screenfull";
 import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
 
