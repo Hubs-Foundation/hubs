@@ -362,7 +362,7 @@ export function generateMeshBVH(object3D) {
   });
 }
 
-exports.traverseMeshesAndAddShapes = (function() {
+export const traverseMeshesAndAddShapes = (function() {
   const matrix = new THREE.Matrix4();
   const inverse = new THREE.Matrix4();
   const pos = new THREE.Vector3();
