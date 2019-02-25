@@ -4,7 +4,8 @@ import {
   proxiedUrlFor,
   resolveUrl,
   injectCustomShaderChunks,
-  isHubsDestinationUrl
+  isHubsRoomUrl,
+  isHubsSceneUrl
 } from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
 
@@ -200,7 +201,9 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "image-loaded",
           () => {
-            if (isHubsDestinationUrl(src)) {
+            const mayChangeScene = !!window.APP.getPermissions().update_hub;
+
+            if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#hubs-destination-hover-menu",
                 dirs: ["forward", "back"]

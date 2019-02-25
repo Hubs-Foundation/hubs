@@ -510,6 +510,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);
+
+  // hacky - we want to access permissions from throughout our A-Frame behaviors and code
+  window.APP.getPermissions = () => hubChannel.permissions;
+
   const entryManager = new SceneEntryManager(hubChannel, authChannel);
   entryManager.onRequestAuthentication = (
     signInMessageId,
