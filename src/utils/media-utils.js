@@ -199,9 +199,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
       entity.removeAttribute("animation__loader_spawn-start");
       const [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
 
-      if (entity.classList.contains("pen")) {
-        entity.object3D.scale.set(sx, sy, sz);
-      } else if (!entity.getAttribute("animation__spawn-start")) {
+      if (!entity.getAttribute("animation__spawn-start")) {
         entity.setAttribute("animation__spawn-start", {
           property: "scale",
           delay: 50,
@@ -211,8 +209,6 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
           easing: "easeOutElastic"
         });
       }
-
-      entity.object3D.matrixNeedsUpdate = true;
 
       scene.emit("media-loaded", { src: src });
     });
