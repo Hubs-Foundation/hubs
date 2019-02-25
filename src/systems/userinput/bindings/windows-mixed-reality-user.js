@@ -161,6 +161,11 @@ function freezeBindings() {
       xform: xforms.falling
     },
     {
+      src: { value: paths.device.keyboard.key("Tab") },
+      dest: { value: paths.actions.toggleFreeze },
+      xform: xforms.rising
+    },
+    {
       src: { value: leftPadPressed },
       dest: { value: leftPadFalling },
       xform: xforms.falling
