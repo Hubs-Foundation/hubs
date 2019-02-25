@@ -7,6 +7,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import styles from "../assets/stylesheets/create-object-dialog.scss";
 import cx from "classnames";
 import DialogContainer from "./dialog-container.js";
+import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { WithHoverSound } from "./wrap-with-audio";
 
 const attributionHostnames = {
@@ -127,6 +128,8 @@ export default class CreateObjectDialog extends Component {
       <input
         className={cx(styles.leftSideOfInput)}
         placeholder="Image/Video/glTF URL"
+        onFocus={e => handleTextFieldFocus(e.target)}
+        onBlur={() => handleTextFieldBlur()}
         onChange={this.onUrlChange}
         type="url"
         value={this.state.url}

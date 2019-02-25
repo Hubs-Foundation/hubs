@@ -1,5 +1,4 @@
 import qsTruthy from "./utils/qs_truthy";
-import screenfull from "screenfull";
 import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
 
@@ -12,10 +11,6 @@ const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ex
 
 import { addMedia, proxiedUrlFor, getPromotionTokenForFile } from "./utils/media-utils";
 import { ObjectContentOrigins } from "./object-types";
-
-function requestFullscreen() {
-  if (screenfull.enabled && !screenfull.isFullscreen) screenfull.request();
-}
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel) {
@@ -66,12 +61,6 @@ export default class SceneEntryManager {
           .indexOf("cardboard") >= 0;
 
       this.scene.enterVR();
-    } else if (AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isIOS()) {
-      document.body.addEventListener("touchend", () => {
-        if (!document.activeElement && !["INPUT", "TEXTAREA"].includes(document.activeElement.nodeName)) {
-          requestFullscreen();
-        }
-      });
     }
 
     if (!isCardboard) {
@@ -147,7 +136,6 @@ export default class SceneEntryManager {
       this.scene.renderer.setAnimationLoop(null); // Stop animation loop, TODO A-Frame should do this
     }
     document.body.removeChild(this.scene);
-    document.body.removeEventListener("touchend", requestFullscreen);
   };
 
   _setupPlayerRig = () => {

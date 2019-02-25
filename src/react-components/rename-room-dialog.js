@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
+import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 
 import styles from "../assets/stylesheets/rename-room-dialog.scss";
 import DialogContainer from "./dialog-container";
@@ -38,6 +39,8 @@ export default class RenameRoomDialog extends Component {
             minLength={5}
             placeholder="Room name"
             value={this.state.name}
+            onFocus={e => handleTextFieldFocus(e.target)}
+            onBlur={() => handleTextFieldBlur()}
             onChange={e => this.setState({ name: e.target.value })}
             className={styles.nameField}
           />
