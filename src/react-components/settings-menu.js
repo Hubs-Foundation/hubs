@@ -102,7 +102,7 @@ export default class SettingsMenu extends Component {
                 </i>
               </div>
               <div className={styles.listItem}>
-                <a href="/" target="_blank" rel="noreferrer noopener">
+                <a href="/">
                   <FormattedMessage id="settings.create-room" />
                 </a>
               </div>
