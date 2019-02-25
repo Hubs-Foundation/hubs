@@ -4,7 +4,7 @@ import { injectIntl, FormattedMessage } from "react-intl";
 import styles from "../assets/stylesheets/media-browser.scss";
 import classNames from "classnames";
 import { scaledThumbnailUrlFor } from "../utils/media-utils";
-import { pushHistoryPath, pushHistoryState, sluglessPath, withSlug } from "../utils/history";
+import { pushHistoryPath, pushHistoryState, sluglessPath } from "../utils/history";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
@@ -13,9 +13,6 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SOURCES } from "../storage/media-search-store";
-import qsTruthy from "../utils/qs_truthy";
-
-const allowContentSearch = qsTruthy("content_search");
 
 const PUBLISHER_FOR_ENTRY_TYPE = {
   sketchfab_model: "Sketchfab",
@@ -160,13 +157,7 @@ class MediaBrowser extends Component {
   };
 
   pushExitMediaBrowserHistory = () => {
-    const { pathname } = this.props.history.location;
-    const hasMediaPath = sluglessPath(this.props.history.location).startsWith("/media");
-    pushHistoryPath(
-      this.props.history,
-      hasMediaPath ? withSlug(this.props.history.location, "/") : pathname,
-      this.getSearchClearedSearchParams().toString()
-    );
+    this.props.mediaSearchStore.pushExitMediaBrowserHistory();
   };
 
   showCreateObject = () => {
@@ -271,24 +262,23 @@ class MediaBrowser extends Component {
             </div>
           </div>
 
-          {allowContentSearch &&
-            this.state.showNav && (
-              <div className={styles.nav}>
-                {SOURCES.map(s => (
-                  <a
-                    onClick={() => this.handleSourceClicked(s)}
-                    key={s}
-                    className={classNames({ [styles.navSource]: true, [styles.navSourceSelected]: urlSource === s })}
-                  >
-                    <FormattedMessage id={`media-browser.nav_title.${s}`} />
-                  </a>
-                ))}
-                <div className={styles.navRightPad}>&nbsp;</div>
-                <div className={styles.navScrollArrow}>
-                  <FontAwesomeIcon icon={faAngleRight} />
-                </div>
+          {this.state.showNav && (
+            <div className={styles.nav}>
+              {SOURCES.map(s => (
+                <a
+                  onClick={() => this.handleSourceClicked(s)}
+                  key={s}
+                  className={classNames({ [styles.navSource]: true, [styles.navSourceSelected]: urlSource === s })}
+                >
+                  <FormattedMessage id={`media-browser.nav_title.${s}`} />
+                </a>
+              ))}
+              <div className={styles.navRightPad}>&nbsp;</div>
+              <div className={styles.navScrollArrow}>
+                <FontAwesomeIcon icon={faAngleRight} />
               </div>
-            )}
+            </div>
+          )}
 
           {this.state.facets &&
             this.state.facets.length > 0 && (

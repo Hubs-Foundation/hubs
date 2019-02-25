@@ -165,11 +165,12 @@ export default class MediaSearchStore extends EventTarget {
     if (!history) history = this.history;
 
     const { pathname } = history.location;
-    const hasMediaPath = pathname.startsWith("/media");
+    const hasMediaPath = sluglessPath(history.location).startsWith("/media");
     pushHistoryPath(
       history,
-      hasMediaPath ? "/" : pathname,
+      hasMediaPath ? withSlug(history.location, "/") : pathname,
       this.getSearchClearedSearchParams(history.location).toString()
     );
+    this.dispatchEvent(new CustomEvent("media-exit"));
   };
 }
