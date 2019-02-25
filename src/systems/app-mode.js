@@ -1,4 +1,4 @@
-/* global AFRAME, console, setTimeout, clearTimeout */
+/* global AFRAME, console */
 
 export const AppModes = Object.freeze({ DEFAULT: "default", HUD: "hud" });
 

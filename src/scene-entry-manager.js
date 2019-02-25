@@ -1,5 +1,4 @@
 import qsTruthy from "./utils/qs_truthy";
-import screenfull from "screenfull";
 import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
 
@@ -13,14 +12,11 @@ const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ex
 import { addMedia, proxiedUrlFor, getPromotionTokenForFile } from "./utils/media-utils";
 import { ObjectContentOrigins } from "./object-types";
 
-function requestFullscreen() {
-  if (screenfull.enabled && !screenfull.isFullscreen) screenfull.request();
-}
-
 export default class SceneEntryManager {
-  constructor(hubChannel, authChannel) {
+  constructor(hubChannel, authChannel, availableVREntryTypes) {
     this.hubChannel = hubChannel;
     this.authChannel = authChannel;
+    this.availableVREntryTypes = availableVREntryTypes;
     this.store = window.APP.store;
     this.scene = document.querySelector("a-scene");
     this.cursorController = document.querySelector("#cursor-controller");
@@ -66,12 +62,6 @@ export default class SceneEntryManager {
           .indexOf("cardboard") >= 0;
 
       this.scene.enterVR();
-    } else if (AFRAME.utils.device.isMobile() && !AFRAME.utils.device.isIOS()) {
-      document.body.addEventListener("touchend", () => {
-        if (!document.activeElement && !["INPUT", "TEXTAREA"].includes(document.activeElement.nodeName)) {
-          requestFullscreen();
-        }
-      });
     }
 
     if (!isCardboard) {
@@ -147,7 +137,6 @@ export default class SceneEntryManager {
       this.scene.renderer.setAnimationLoop(null); // Stop animation loop, TODO A-Frame should do this
     }
     document.body.removeChild(this.scene);
-    document.body.removeEventListener("touchend", requestFullscreen);
   };
 
   _setupPlayerRig = () => {
@@ -238,7 +227,17 @@ export default class SceneEntryManager {
       this._pinElement(el);
     } else {
       const wasInVR = this.scene.is("vr-mode");
-      if (wasInVR) this.scene.exitVR();
+
+      if (wasInVR) {
+        if (this.availableVREntryTypes.isInHMD) {
+          // Immersive browser, exit VR.
+          this.scene.exitVR();
+        } else {
+          // Non-immersive browser, show notice
+          document.querySelector(".vr-notice").setAttribute("visible", true);
+        }
+      }
+
       const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
 
       this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete", continueTextId, async () => {
@@ -258,7 +257,13 @@ export default class SceneEntryManager {
           el.setAttribute("pinnable", "pinned", false);
         }
 
-        if (wasInVR) this.scene.enterVR();
+        if (wasInVR) {
+          document.querySelector(".vr-notice").setAttribute("visible", false);
+
+          if (this.availableVREntryTypes.isInHMD) {
+            this.scene.enterVR();
+          }
+        }
       });
     }
   };

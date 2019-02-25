@@ -10,7 +10,7 @@
   "head-script-disabled": false,
   "href-abs-or-rel": false,
   "id-class-ad-disabled": false,
-  "id-class-value": "dash",
+  "id-class-value": false,
   "id-unique": true,
   "inline-script-disabled": false,
   "inline-style-disabled": true,

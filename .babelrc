@@ -1,7 +1,7 @@
 {
   "presets": [
-    "react",
-    ["env", {
+    "@babel/react",
+    ["@babel/env", {
       "exclude": ["transform-regenerator"],
       "targets": {
         "browsers": [
@@ -21,13 +21,14 @@
           "not op_mini all",
         ]
       },
-      "useBuiltins": true
+      // false = do not polyfill stuff unneccessarily
+      "useBuiltIns": false
     }]
   ],
   "plugins": [
     [ "react-intl", { "messagesDir": "./public/messages", "enforceDescriptions": false } ],
     "transform-react-jsx-img-import",
-    "transform-class-properties",
-    "transform-object-rest-spread"
+    "@babel/proposal-class-properties",
+    "@babel/proposal-object-rest-spread"
   ]
 }

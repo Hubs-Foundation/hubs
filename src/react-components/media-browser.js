@@ -13,6 +13,8 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SOURCES } from "../storage/media-search-store";
+import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
+import { showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import qsTruthy from "../utils/qs_truthy";
 
 const allowContentSearch = qsTruthy("content_search");
@@ -175,6 +177,7 @@ class MediaBrowser extends Component {
   };
 
   close = () => {
+    showFullScreenIfWasFullScreen();
     this.pushExitMediaBrowserHistory();
   };
 
@@ -216,7 +219,8 @@ class MediaBrowser extends Component {
                   placeholder={formatMessage({
                     id: `media-browser.search-placeholder.${urlSource}`
                   })}
-                  onFocus={e => e.target.select()}
+                  onFocus={e => handleTextFieldFocus(e.target)}
+                  onBlur={() => handleTextFieldBlur()}
                   onKeyDown={e => {
                     if (e.key === "Enter" && e.shiftKey) {
                       if (this.state.result && this.state.result.entries.length > 0) {
@@ -302,11 +306,9 @@ class MediaBrowser extends Component {
             )}
 
           <div className={styles.body}>
-            {this.state.result && (
-              <div className={classNames({ [styles.tiles]: true, [styles.tilesVariable]: isVariableWidth })}>
-                {this.state.result.entries.map(this.entryToTile)}
-              </div>
-            )}
+            <div className={classNames({ [styles.tiles]: true, [styles.tilesVariable]: isVariableWidth })}>
+              {this.state.result && this.state.result.entries.map(this.entryToTile)}
+            </div>
 
             {this.state.result &&
               (hasNext || hasPrevious) && (

@@ -121,17 +121,17 @@
   :local(.header) {
     display: flex;
     align-items: flex-start;
-    width: 100%;
+    width: 100vw;
     margin: 32px;
     margin-bottom: 24px;
-    min-height: fit-content;
+    height: 77px;
   }
 
   :local(.nav) {
-    width: 100%;
+    width: 100vw;
     display: flex;
     position: relative;
-    min-height: fit-content;
+    min-height: 38px;
     border-bottom: 1px solid $light-grey;
     white-space: nowrap;
     padding-left: 12px;
@@ -180,7 +180,7 @@
   }
 
   :local(.facets) {
-    width: 100%;
+    width: 100vw;
     display: flex;
     position: relative;
     height: 44px;
@@ -207,7 +207,7 @@
       margin: 0 8px;
       text-align: center;
       min-width: auto;
-      min-height: fit-content;
+      min-height: 44px;
       white-space: nowrap;
 
       @media(max-width: 768px) {
@@ -239,7 +239,7 @@
 
 
   :local(.body) {
-    width: 100%;
+    width: 100vw;
 
     :local(.tiles) {
       margin: 8px 8px 24px 8px;
