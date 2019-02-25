@@ -357,7 +357,7 @@
 
             <!-- TODO: All of these positions are assuming 16:9 - need to actually reposition based on video resolution -->
             <template id="video-hover-menu">
-                <a-entity class="ui interactable-ui video-toolbar" mixin="button-container" visible="false">
+                <a-entity class="ui interactable-ui hover-container" mixin="button-container" visible="false">
                     <a-entity class="video-time-label" text="value: 0; anchor: right; align: right;" text-raycast-hack position="0.485 -0.25 -0.015"></a-entity>
                     <a-entity class="video-volume-label" text="value: 0%; anchor: right; align: right;" text-raycast-hack position="0.485 0.25 -0.015" visible="false"></a-entity>
                     <a-image
@@ -385,7 +385,7 @@
             </template>
 
             <template id="hubs-destination-hover-menu">
-                <a-entity class="ui interactable-ui video-toolbar" mixin="button-container" visible="false">
+                <a-entity class="ui interactable-ui hover-container" mixin="button-container" visible="false">
                     <a-entity mixin="rounded-text-action-button ui" open-media-button position="0 -0.125 0.01">
                         <a-entity text="value:value; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
