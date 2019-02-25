@@ -59,6 +59,8 @@ AFRAME.registerComponent("position-at-box-shape-border", {
   tick() {
     if (!this.target) {
       this.targetEl = this.el.querySelector(this.data.target);
+      if (!this.targetEl) return;
+
       this.target = this.targetEl.object3D;
 
       this.targetEl.addEventListener("animationcomplete", () => {
@@ -120,6 +122,9 @@ AFRAME.registerComponent("position-at-box-shape-border", {
             .multiplyScalar(0.51 / this.el.object3D.scale.x);
         }
       }
+
+      if (!this.target) return;
+
       getLastWorldPosition(this.cam, camWorldPos);
 
       let targetSquareDistance = Infinity;

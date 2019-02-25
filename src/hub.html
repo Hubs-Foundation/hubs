@@ -64,6 +64,8 @@
             <img id="spawn-pen-hover" crossorigin="anonymous" src="./assets/hud/spawn_pen-hover.png">
             <img id="spawn-camera" crossorigin="anonymous" src="./assets/hud/spawn_camera.png">
             <img id="spawn-camera-hover" crossorigin="anonymous" src="./assets/hud/spawn_camera-hover.png">
+            <img id="snap-camera" crossorigin="anonymous" src="./assets/images/snap_camera.png">
+            <img id="snap-camera-hover" crossorigin="anonymous" src="./assets/images/snap_camera-hover.png">
             <img id="presence-count" crossorigin="anonymous" src="./assets/hud/presence-count.png">
             <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
 
@@ -309,6 +311,7 @@
                     hoverable
                     stretchable
                     camera-tool
+                    hover-menu="template: #camera-hover-menu; dirs: forward, back;"
                     matrix-auto-update
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
                     scale="0.5 0.5 0.5"
@@ -316,7 +319,7 @@
                     shape="shape: box; halfExtents: 0.22 0.145 0.1; offset: 0 0.02 0"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     super-networked-interactable="counter: #camera-counter;"
-                    position-at-box-shape-border="target:.camera-menu"
+                    position-at-box-shape-border__freeze="target: .camera-menu"
                     set-yxz-order
                     auto-scale-cannon-physics-body
                 >
@@ -333,6 +336,20 @@
                         </a-entity>
                     </a-entity>
                 </a-entity>
+            </template>
+
+            <template id="camera-hover-menu">
+                <a-entity class="ui interactable-ui hover-container camera-snap-menu" mixin="button-container">
+                <a-image
+                    icon-button="image: #snap-camera; hoverImage: #snap-camera-hover; activeImage: #snap-camera; activeHoverImage: #snap-camera-hover"
+                    snap-camera-button
+                    class="ui"
+                    scale="0.2 0.1 0.1"
+                    position="0.0 -0.145 0.0"
+                    material="alphaTest:0.1;"
+                    hoverable
+                ></a-image>
+                    </a-entity>
             </template>
 
             <template id="interactable-drawing">
