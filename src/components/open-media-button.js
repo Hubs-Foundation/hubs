@@ -1,7 +1,4 @@
-const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/scenes\/(\w+)\/?\S*/;
-const hubsRoomRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/(\w+)\/?\S*/;
-const isHubsSceneUrl = hubsSceneRegex.test.bind(hubsSceneRegex);
-const isHubsRoomUrl = url => !isHubsSceneUrl(url) && hubsRoomRegex.test(url);
+import { isHubsSceneUrl, isHubsRoomUrl } from "../utils/media-utils";
 
 AFRAME.registerComponent("open-media-button", {
   init() {

@@ -384,6 +384,14 @@
                 </a-entity>
             </template>
 
+            <template id="hubs-destination-hover-menu">
+                <a-entity class="ui interactable-ui video-toolbar" mixin="button-container" visible="false">
+                    <a-entity mixin="rounded-text-action-button ui" open-media-button position="0 -0.125 0.01">
+                        <a-entity text="value:value; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
             <template id="video-unmute">
                 <a-entity
                     class="ui unmute-ui"

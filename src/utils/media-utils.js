@@ -334,3 +334,9 @@ export function injectCustomShaderChunks(obj) {
 export function getPromotionTokenForFile(fileId) {
   return window.APP.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
 }
+
+const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/scenes\/(\w+)\/?\S*/;
+const hubsRoomRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/(\w+)\/?\S*/;
+export const isHubsSceneUrl = hubsSceneRegex.test.bind(hubsSceneRegex);
+export const isHubsRoomUrl = url => !isHubsSceneUrl(url) && hubsRoomRegex.test(url);
+export const isHubsDestinationUrl = url => isHubsSceneUrl(url) || isHubsRoomUrl(url);
