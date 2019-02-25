@@ -18,9 +18,10 @@ function requestFullscreen() {
 }
 
 export default class SceneEntryManager {
-  constructor(hubChannel, authChannel) {
+  constructor(hubChannel, authChannel, availableVREntryTypes) {
     this.hubChannel = hubChannel;
     this.authChannel = authChannel;
+    this.availableVREntryTypes = availableVREntryTypes;
     this.store = window.APP.store;
     this.scene = document.querySelector("a-scene");
     this.cursorController = document.querySelector("#cursor-controller");
@@ -238,7 +239,17 @@ export default class SceneEntryManager {
       this._pinElement(el);
     } else {
       const wasInVR = this.scene.is("vr-mode");
-      if (wasInVR) this.scene.exitVR();
+
+      if (wasInVR) {
+        if (this.availableVREntryTypes.isInHMD) {
+          // Immersive browser, exit VR.
+          this.scene.exitVR();
+        } else {
+          // Non-immersive browser, show notice
+          document.querySelector(".vr-notice").setAttribute("visible", true);
+        }
+      }
+
       const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
 
       this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete", continueTextId, async () => {
@@ -258,7 +269,13 @@ export default class SceneEntryManager {
           el.setAttribute("pinnable", "pinned", false);
         }
 
-        if (wasInVR) this.scene.enterVR();
+        if (wasInVR) {
+          document.querySelector(".vr-notice").setAttribute("visible", false);
+
+          if (this.availableVREntryTypes.isInHMD) {
+            this.scene.enterVR();
+          }
+        }
       });
     }
   };

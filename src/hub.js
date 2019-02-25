@@ -505,7 +505,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);
-  const entryManager = new SceneEntryManager(hubChannel, authChannel);
+  const availableVREntryTypes = await getAvailableVREntryTypes();
+  const entryManager = new SceneEntryManager(hubChannel, authChannel, availableVREntryTypes);
   entryManager.onRequestAuthentication = (
     signInMessageId,
     signInCompleteMessageId,
@@ -581,8 +582,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
   }
-
-  const availableVREntryTypes = await getAvailableVREntryTypes();
 
   if (availableVREntryTypes.isInHMD) {
     remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
