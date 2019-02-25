@@ -3,7 +3,7 @@ AFRAME.registerComponent("follow-in-lower-fov", {
     target: { type: "selector" },
     offset: { type: "vec3" },
     speed: { type: "number", default: 0.003 },
-    angle: { type: "number", default: Math.PI / 4 }
+    angle: { type: "number", default: 45 }
   },
 
   init() {
@@ -26,7 +26,12 @@ AFRAME.registerComponent("follow-in-lower-fov", {
 
     // Compute position + rotation by projecting offset along a downward ray in target space,
     // and mask out Z rotation.
-    this._applyMaskedTargetRotation(-this.data.angle, target.rotation.y, 0, this.snappedXFormWorld);
+    this._applyMaskedTargetRotation(
+      -this.data.angle * THREE.Math.DEG2RAD,
+      target.rotation.y,
+      0,
+      this.snappedXFormWorld
+    );
 
     this.targetPos.copy(this.offset);
     this.targetPos.applyMatrix4(this.snappedXFormWorld);
