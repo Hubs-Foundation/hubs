@@ -13,10 +13,6 @@ const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ex
 import { addMedia, proxiedUrlFor, getPromotionTokenForFile } from "./utils/media-utils";
 import { ObjectContentOrigins } from "./object-types";
 
-function requestFullscreen() {
-  if (screenfull.enabled && !screenfull.isFullscreen) screenfull.request();
-}
-
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel) {
     this.hubChannel = hubChannel;
@@ -145,7 +141,6 @@ export default class SceneEntryManager {
       this.scene.renderer.setAnimationLoop(null); // Stop animation loop, TODO A-Frame should do this
     }
     document.body.removeChild(this.scene);
-    document.body.removeEventListener("touchend", requestFullscreen);
   };
 
   _setupPlayerRig = () => {

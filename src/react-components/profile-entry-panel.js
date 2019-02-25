@@ -7,9 +7,7 @@ import classNames from "classnames";
 import hubLogo from "../assets/images/hub-preview-white.png";
 import { WithHoverSound } from "./wrap-with-audio";
 import { avatars } from "../assets/avatars/avatars";
-import screenfull from "screenfull";
-
-const isMobile = AFRAME.utils.device.isMobile();
+import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 
 class ProfileEntryPanel extends Component {
   static propTypes = {
@@ -98,17 +96,8 @@ class ProfileEntryPanel extends Component {
               id="profile-entry-display-name"
               className={styles.formFieldText}
               value={this.state.displayName}
-              onFocus={e => {
-                if (screenfull.isFullscreen) {
-                  // If a text field is focused outside of full screen mode,
-                  // Firefox mobile can end up getting into a weird half-fullscreen
-                  // mode that results in further requests to go full screen
-                  // to fail.
-                  screenfull.exit();
-                }
-
-                if (!isMobile) e.target.select();
-              }}
+              onFocus={e => handleTextFieldFocus(e.target)}
+              onBlur={() => handleTextFieldBlur()}
               onChange={e => this.setState({ displayName: e.target.value })}
               required
               spellCheck="false"

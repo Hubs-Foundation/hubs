@@ -13,11 +13,10 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SOURCES } from "../storage/media-search-store";
+import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { showFullScreenIfWasFullScreen } from "../utils/fullscreen";
-import screenfull from "screenfull";
 import qsTruthy from "../utils/qs_truthy";
 
-const isMobile = AFRAME.utils.device.isMobile();
 const allowContentSearch = qsTruthy("content_search");
 
 const PUBLISHER_FOR_ENTRY_TYPE = {
@@ -220,17 +219,8 @@ class MediaBrowser extends Component {
                   placeholder={formatMessage({
                     id: `media-browser.search-placeholder.${urlSource}`
                   })}
-                  onFocus={e => {
-                    if (screenfull.isFullscreen) {
-                      // If a text field is focused outside of full screen mode,
-                      // Firefox mobile can end up getting into a weird half-fullscreen
-                      // mode that results in further requests to go full screen
-                      // to fail.
-                      screenfull.exit();
-                    }
-
-                    if (!isMobile) e.target.select();
-                  }}
+                  onFocus={e => handleTextFieldFocus(e.target)}
+                  onBlur={() => handleTextFieldBlur()}
                   onKeyDown={e => {
                     if (e.key === "Enter" && e.shiftKey) {
                       if (this.state.result && this.state.result.entries.length > 0) {

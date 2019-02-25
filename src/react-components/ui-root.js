@@ -52,6 +52,7 @@ import TwoDHUD from "./2d-hud";
 import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
+import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
@@ -968,9 +969,8 @@ class UIRoot extends Component {
                 value={this.state.pendingMessage}
                 rows={textRows}
                 style={{ height: pendingMessageTextareaHeight }}
-                onFocus={e => {
-                  if (!isMobile) e.target.select();
-                }}
+                onFocus={e => handleTextFieldFocus(e.target)}
+                onBlur={() => handleTextFieldBlur()}
                 onChange={e => this.setState({ pendingMessage: e.target.value })}
                 onKeyDown={e => {
                   if (e.key === "Enter" && !e.shiftKey) {
@@ -1493,31 +1493,12 @@ class UIRoot extends Component {
                     value={this.state.pendingMessage}
                     rows={textRows}
                     onFocus={e => {
+                      handleTextFieldFocus(e.target);
                       this.setState({ messageEntryOnTop: isMobile });
-
-                      if (screenfull.isFullscreen) {
-                        // This will prevent focus, but its the only way to avoid getting into a
-                        // weird "firefox reports full screen but actually not". You end up having to tap
-                        // twice to ultimately get the focus.
-                        //
-                        // We need to keep track of a bit here so that we don't re-full screen when
-                        // the text box is blurred by the browser.
-
-                        this.isExitingFullscreenDueToFocus = true;
-                        screenfull.exit();
-                      }
-
-                      if (!isMobile) e.target.select();
                     }}
                     onBlur={() => {
-                      // This is the incidental blur event when exiting fullscreen mode on mobile
-                      if (this.isExitingFullscreenDueToFocus) {
-                        this.isExitingFullscreenDueToFocus = false;
-                        return;
-                      }
-
+                      handleTextFieldBlur();
                       this.setState({ messageEntryOnTop: false });
-                      showFullScreenIfWasFullScreen();
                     }}
                     onChange={e => {
                       e.stopPropagation();
