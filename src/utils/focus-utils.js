@@ -1,5 +1,4 @@
 import screenfull from "screenfull";
-const isMobile = AFRAME.utils.device.isMobile();
 import { showFullScreenIfWasFullScreen } from "./fullscreen";
 
 let isExitingFullscreenDueToFocus = false;
@@ -9,6 +8,8 @@ let isExitingFullscreenDueToFocus = false;
 // - On non-mobile platforms, selects the value on focus
 // - If full screen, exits/enters full screen because of firefox full screen issues
 export function handleTextFieldFocus(target) {
+  const isMobile = AFRAME.utils.device.isMobile();
+
   if (screenfull.isFullscreen) {
     // This will prevent focus, but its the only way to avoid getting into a
     // weird "firefox reports full screen but actually not". You end up having to tap
