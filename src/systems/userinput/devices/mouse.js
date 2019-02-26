@@ -7,6 +7,18 @@ const modeMod = {
   [WheelEvent.DOM_DELTA_PAGE]: 2
 };
 
+const isInModal = (() => {
+  let uiRoot = null;
+
+  return function() {
+    if (!uiRoot) {
+      uiRoot = document.querySelector(".ui-root");
+    }
+
+    return uiRoot && uiRoot.classList.contains("in-modal-or-overlay");
+  };
+})();
+
 export class MouseDevice {
   constructor() {
     this.events = [];
@@ -21,15 +33,9 @@ export class MouseDevice {
     ["mousedown", "wheel"].map(x => canvas.addEventListener(x, queueEvent));
     ["mousemove", "mouseup"].map(x => window.addEventListener(x, queueEvent));
 
-    let uiRoot = null;
-
     document.addEventListener("wheel", e => {
-      if (!uiRoot) {
-        uiRoot = document.querySelector(".ui-root");
-      }
-
       // Do not capture wheel events if they are being sent to an modal/overlay
-      if (uiRoot && !uiRoot.classList.contains("in-modal-or-overlay")) {
+      if (!isInModal()) {
         e.preventDefault();
       }
     });
@@ -78,5 +84,7 @@ export class MouseDevice {
 }
 
 window.oncontextmenu = e => {
-  e.preventDefault();
+  if (!isInModal()) {
+    e.preventDefault();
+  }
 };

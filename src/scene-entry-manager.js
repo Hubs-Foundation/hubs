@@ -18,6 +18,7 @@ export default class SceneEntryManager {
     this.authChannel = authChannel;
     this.availableVREntryTypes = availableVREntryTypes;
     this.store = window.APP.store;
+    this.mediaSearchStore = window.APP.mediaSearchStore;
     this.scene = document.querySelector("a-scene");
     this.cursorController = document.querySelector("#cursor-controller");
     this.playerRig = document.querySelector("#player-rig");
@@ -226,18 +227,9 @@ export default class SceneEntryManager {
     if (this.hubChannel.signedIn) {
       this._pinElement(el);
     } else {
+      this.handleExitTo2DInterstitial();
+
       const wasInVR = this.scene.is("vr-mode");
-
-      if (wasInVR) {
-        if (this.availableVREntryTypes.isInHMD) {
-          // Immersive browser, exit VR.
-          this.scene.exitVR();
-        } else {
-          // Non-immersive browser, show notice
-          document.querySelector(".vr-notice").setAttribute("visible", true);
-        }
-      }
-
       const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
 
       this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete", continueTextId, async () => {
@@ -257,13 +249,7 @@ export default class SceneEntryManager {
           el.setAttribute("pinnable", "pinned", false);
         }
 
-        if (wasInVR) {
-          document.querySelector(".vr-notice").setAttribute("visible", false);
-
-          if (this.availableVREntryTypes.isInHMD) {
-            this.scene.enterVR();
-          }
-        }
+        this.handleReEntryToVRFrom2DInterstitial();
       });
     }
   };
@@ -281,6 +267,31 @@ export default class SceneEntryManager {
     const fileId = mediaLoader.data && mediaLoader.data.fileId;
 
     this.hubChannel.unpin(networkId, fileId);
+  };
+
+  handleExitTo2DInterstitial = () => {
+    if (!this.scene.is("vr-mode")) return;
+
+    this._in2DInterstitial = true;
+
+    if (this.availableVREntryTypes.isInHMD) {
+      // Immersive browser, exit VR.
+      this.scene.exitVR();
+    } else {
+      // Non-immersive browser, show notice
+      document.querySelector(".vr-notice").setAttribute("visible", true);
+    }
+  };
+
+  handleReEntryToVRFrom2DInterstitial = () => {
+    if (!this._in2DInterstitial) return;
+    this._in2DInterstitial = false;
+
+    document.querySelector(".vr-notice").setAttribute("visible", false);
+
+    if (this.availableVREntryTypes.isInHMD) {
+      this.scene.enterVR();
+    }
   };
 
   _setupMedia = mediaStream => {
@@ -321,6 +332,11 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("object_spawned", e => {
       this.hubChannel.sendObjectSpawnedEvent(e.detail.objectType);
+    });
+
+    this.scene.addEventListener("action_spawn", () => {
+      this.handleExitTo2DInterstitial();
+      window.APP.mediaSearchStore.sourceNavigateToDefaultSource();
     });
 
     document.addEventListener("paste", e => {
@@ -435,7 +451,17 @@ export default class SceneEntryManager {
       const entry = e.detail;
       if (entry.type === "scene_listing" && this.hubChannel.permissions.update_hub) return;
 
-      spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
+      // If user has HMD lifted up, delay spawning for now. eventually show a modal
+      const delaySpawn = this._in2DInterstitial && !this.availableVREntryTypes.isInHMD;
+      setTimeout(() => {
+        spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
+      }, delaySpawn ? 3000 : 0);
+
+      this.handleReEntryToVRFrom2DInterstitial();
+    });
+
+    this.mediaSearchStore.addEventListener("media-exit", () => {
+      this.handleReEntryToVRFrom2DInterstitial();
     });
   };
 

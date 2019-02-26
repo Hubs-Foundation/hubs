@@ -122,15 +122,24 @@
     display: flex;
     align-items: flex-start;
     width: 100vw;
+    max-width: 1720px;
     margin: 32px;
     margin-bottom: 24px;
     height: 77px;
+    min-height: 77px;
+
+    @media(max-width: 768px) {
+      height: 55px;
+      min-height: 55px;
+    }
   }
 
   :local(.nav) {
     width: 100vw;
+    max-width: 1720px;
     display: flex;
     position: relative;
+    height: 38px;
     min-height: 38px;
     border-bottom: 1px solid $light-grey;
     white-space: nowrap;
@@ -181,6 +190,7 @@
 
   :local(.facets) {
     width: 100vw;
+    max-width: 1720px;
     display: flex;
     position: relative;
     height: 44px;
@@ -240,6 +250,7 @@
 
   :local(.body) {
     width: 100vw;
+    max-width: 1720px;
 
     :local(.tiles) {
       margin: 8px 8px 24px 8px;
@@ -270,6 +281,9 @@
             text-overflow: ellipsis;
             overflow: hidden;
             white-space: nowrap;
+            color: black;
+            text-decoration: none;
+            display: block;
           }
 
           :local(.attribution) {
@@ -317,8 +331,10 @@
 
         :local(.image) {
           width: 100%;
+          display: block;
 
           img {
+            background-color: $light-grey;
             border-radius: 12px;
             width: 100%;
             height: 100%;
