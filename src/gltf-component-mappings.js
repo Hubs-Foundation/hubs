@@ -1,5 +1,6 @@
 import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
+import { isHubsDestinationUrl } from "./utils/media-utils";
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
@@ -119,8 +120,10 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
 
 function mediaInflator(el, componentName, componentData, components) {
   if (components.networked) {
+    const isControlled = componentData.controls || isHubsDestinationUrl(componentData.src);
+
     el.setAttribute("networked", {
-      template: componentData.controls ? "#static-controlled-media" : "#static-media",
+      template: isControlled ? "#static-controlled-media" : "#static-media",
       owner: "scene",
       persistent: true,
       networkId: components.networked.id
