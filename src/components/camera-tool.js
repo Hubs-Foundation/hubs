@@ -4,6 +4,7 @@ import { paths } from "../systems/userinput/paths";
 
 import cameraModelSrc from "../assets/camera_tool.glb";
 
+const MIN_MS_BETWEEN_SHOTS = 1000;
 const cameraModelPromise = new Promise(resolve => new THREE.GLTFLoader().load(cameraModelSrc, resolve));
 
 const pathsMap = {
@@ -221,30 +222,34 @@ AFRAME.registerComponent("camera-tool", {
       }
 
       if (this.takeSnapshotNextTick) {
-        const width = this.renderTarget.width;
-        const height = this.renderTarget.height;
-        if (!this.snapPixels) {
-          this.snapPixels = new Uint8Array(width * height * 4);
-        }
-        renderer.readRenderTargetPixels(this.renderTarget, 0, 0, width, height, this.snapPixels);
-        pixelsToPNG(this.snapPixels, width, height).then(file => {
-          const { entity, orientation } = addMedia(file, "#interactable-media", undefined, true);
-          entity.object3D.position.copy(this.el.object3D.position).add(new THREE.Vector3(0, -0.5, 0));
-          entity.object3D.rotation.copy(this.el.object3D.rotation);
-          entity.object3D.matrixNeedsUpdate = true;
+        if (!this.lastSnapshotTime || performance.now() - this.lastSnapshotTime > MIN_MS_BETWEEN_SHOTS) {
+          this.lastSnapshotTime = performance.now();
+          const width = this.renderTarget.width;
+          const height = this.renderTarget.height;
+          if (!this.snapPixels) {
+            this.snapPixels = new Uint8Array(width * height * 4);
+          }
+          renderer.readRenderTargetPixels(this.renderTarget, 0, 0, width, height, this.snapPixels);
+          pixelsToPNG(this.snapPixels, width, height).then(file => {
+            const { entity, orientation } = addMedia(file, "#interactable-media", undefined, true);
+            entity.object3D.position.copy(this.el.object3D.position).add(new THREE.Vector3(0, -0.5, 0));
+            entity.object3D.rotation.copy(this.el.object3D.rotation);
+            entity.object3D.matrixNeedsUpdate = true;
 
-          entity.addEventListener(
-            "media_resolved",
-            () => {
-              this.el.emit("photo_taken", entity.components["media-loader"].data.src);
-            },
-            { once: true }
-          );
-          orientation.then(() => {
-            sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
+            entity.addEventListener(
+              "media_resolved",
+              () => {
+                this.el.emit("photo_taken", entity.components["media-loader"].data.src);
+              },
+              { once: true }
+            );
+            orientation.then(() => {
+              sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
+            });
           });
-        });
-        sceneEl.emit("camera_tool_took_snapshot");
+          sceneEl.emit("camera_tool_took_snapshot");
+        }
+
         this.takeSnapshotNextTick = false;
       }
     };
