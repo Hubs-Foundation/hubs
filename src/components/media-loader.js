@@ -201,7 +201,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "image-loaded",
           () => {
-            const mayChangeScene = !!window.APP.getPermissions().update_hub;
+            const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
 
             if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
               this.el.setAttribute("hover-menu__hubs-item", {
