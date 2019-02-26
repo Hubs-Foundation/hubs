@@ -26,7 +26,7 @@ AFRAME.registerSystem("ui-hotkeys", {
 
     for (let i = 1; i <= 7; i++) {
       if (this.userinput.get(`/actions/mediaSearch${i}`)) {
-        this.mediaSearchStore.sourceNavigate(SOURCES[i - 1], false, true);
+        this.mediaSearchStore.sourceNavigate(SOURCES[i - 1]);
       }
     }
   },

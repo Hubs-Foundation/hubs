@@ -131,7 +131,7 @@ export default class MediaSearchStore extends EventTarget {
     return searchParams;
   };
 
-  stashLastSearchParams = location => {
+  _stashLastSearchParams = location => {
     const searchParams = new URLSearchParams(location.search);
     this._stashedParams = {};
     this._stashedSource = this.getUrlMediaSource(location);
@@ -145,11 +145,19 @@ export default class MediaSearchStore extends EventTarget {
     }
   };
 
-  sourceNavigateToDefaultSource = () => {
-    this.sourceNavigate(this._stashedSource ? this._stashedSource : SOURCES[0], false, true);
+  sourceNavigate = source => {
+    this._sourceNavigate(source, false, true);
   };
 
-  sourceNavigate = (source, hideNav, useLastStashedParams) => {
+  sourceNavigateToDefaultSource = () => {
+    this._sourceNavigate(this._stashedSource ? this._stashedSource : SOURCES[0], false, true);
+  };
+
+  sourceNavigateWithNoNav = source => {
+    this._sourceNavigate(source, true, false);
+  };
+
+  _sourceNavigate = (source, hideNav, useLastStashedParams) => {
     const currentQuery = new URLSearchParams(this.history.location.search).get("q");
     const searchParams = this.getSearchClearedSearchParams(this.history.location);
 
@@ -201,7 +209,7 @@ export default class MediaSearchStore extends EventTarget {
   pushExitMediaBrowserHistory = history => {
     if (!history) history = this.history;
 
-    this.stashLastSearchParams(history.location);
+    this._stashLastSearchParams(history.location);
 
     const { pathname } = history.location;
     const hasMediaPath = sluglessPath(history.location).startsWith("/media");

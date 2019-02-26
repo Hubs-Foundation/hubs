@@ -125,12 +125,8 @@ class MediaBrowser extends Component {
       clearTimeout(this._sendQueryTimeout);
     }
 
-    const lastQuery = query;
-
     // Don't update search on every keystroke, but buffer for some ms.
     this._sendQueryTimeout = setTimeout(() => {
-      if (query !== lastQuery) return;
-
       // Drop filter for now, so entering text drops into "search all" mode
       this.props.mediaSearchStore.filterQueryNavigate("", query);
     }, 500);
