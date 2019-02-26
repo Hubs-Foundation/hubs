@@ -59,7 +59,10 @@ AFRAME.registerComponent("position-at-box-shape-border", {
   tick() {
     if (!this.target) {
       this.targetEl = this.el.querySelector(this.data.target);
-      if (!this.targetEl) return;
+      if (!this.targetEl) {
+        console.warn(`Race condition on position-at-box-shape-border on selector ${this.data.target}`);
+        return;
+      }
 
       this.target = this.targetEl.object3D;
 

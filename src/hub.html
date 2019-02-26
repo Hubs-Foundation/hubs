@@ -343,7 +343,7 @@
                         <a-entity text="value:; width:1; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                         <a-image
                             icon-button="image: #snap-camera; hoverImage: #snap-camera;"
-                            scale="0.125 0.1 0.125"
+                            scale="0.225 0.225 0.225"
                             position="0 0.005 0.01"
                         ></a-image>
                     </a-entity>
@@ -595,7 +595,7 @@
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
                     set-sounds-invisible
                 ></a-image>
-                <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
+                <a-rounded visible="false" vr-mode-toggle-visibility id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
                     <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" matrix-auto-update="target: text"></a-entity>
                 </a-rounded>
                 </a-entity>
