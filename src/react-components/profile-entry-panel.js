@@ -30,7 +30,7 @@ class AvatarEditor extends Component {
       metalic_map: undefined,
       roughness_map: undefined,
 
-      ao_metalic_roughness_map: undefined
+      orm_map: undefined
     };
   }
 
@@ -96,7 +96,7 @@ class AvatarEditor extends Component {
       });
     }
 
-    const filesToUpload = ["gltf", "bin", "base_map", "emissive_map", "normal_map", "ao_metalic_roughness_map"].filter(
+    const filesToUpload = ["gltf", "bin", "base_map", "emissive_map", "normal_map", "orm_map"].filter(
       k => !!this.inputFiles[k]
     );
 
@@ -119,11 +119,11 @@ class AvatarEditor extends Component {
     this.setState({ uploading: false });
   };
 
-  fileField = (name, title, accept, disabled = false) => (
-    <div className={styles.fileInputRow} key={name}>
+  fileField = (name, label, accept, disabled = false, title) => (
+    <div className={styles.fileInputRow} key={name} title={title}>
       <label htmlFor={`avatar-file_${name}`}>
         <div className="img-box">{this.state.avatar.files[name] && <img src={this.state.avatar.files[name]} />}</div>
-        <span>{title}</span>
+        <span>{label}</span>
       </label>
       <input
         id={`avatar-file_${name}`}
@@ -213,15 +213,15 @@ class AvatarEditor extends Component {
 
         {/* {this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")} */}
 
-        {this.fileField("base_map", "Base Map", "images/*")}
-        {this.fileField("emissive_map", "Emissive Map", "images/*")}
-        {this.fileField("normal_map", "Normal Map", "images/*")}
+        {this.fileField("base_map", "Base Map", "image/*")}
+        {this.fileField("emissive_map", "Emissive Map", "image/*")}
+        {this.fileField("normal_map", "Normal Map", "image/*")}
 
-        {this.fileField("ao_metalic_roughness_map", "AO+Metalic+Roughness Map", "images/*")}
+        {this.fileField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
 
         {/* {this.fileField("ao_map", "AO Map", "images/\*", true)} */}
-        {/* {this.fileField("metalic_map", "Metalic Map", "images/\*", true)} */}
-        {/* {this.fileField("roughness_map", "Roughness Map", "images/\*", true)} */}
+        {/* {this.fileField("metallic_map", "Metallic Map", "image/\*", true)} */}
+        {/* {this.fileField("roughness_map", "Roughness Map", "image/\*", true)} */}
 
         <button onClick={this.uploadAvatar} disabled={this.state.uploading}>
           {this.state.uploading ? "Uploading..." : "Upload"}
