@@ -11,21 +11,20 @@ export function resolveActionSets() {
   rightHandState = rightHandState || document.querySelector("#player-right-controller").components["super-hands"].state;
   leftHandState = leftHandState || document.querySelector("#player-left-controller").components["super-hands"].state;
   cursorHand = cursorHand || document.querySelector("#cursor").components["super-hands"].state;
-  leftTeleporter = leftTeleporter || document.querySelector("#player-left-controller").components["teleport-controls"];
-  rightTeleporter =
-    rightTeleporter || document.querySelector("#player-right-controller").components["teleport-controls"];
+  leftTeleporter = leftTeleporter || document.querySelector("#player-left-controller").components["teleporter"];
+  rightTeleporter = rightTeleporter || document.querySelector("#player-right-controller").components["teleporter"];
   cursorController = cursorController || document.querySelector("#cursor-controller").components["cursor-controller"];
 
   const leftHandHoveringOnInteractable =
-    !leftTeleporter.active &&
+    !leftTeleporter.isTeleporting &&
     leftHandState.has("hover-start") &&
     leftHandState.get("hover-start").matches(".interactable, .interactable *");
   const leftHandHoveringOnPen =
-    !leftTeleporter.active &&
+    !leftTeleporter.isTeleporting &&
     leftHandState.has("hover-start") &&
     leftHandState.get("hover-start").matches(".pen, .pen *");
   const leftHandHoveringOnCamera =
-    !leftTeleporter.active &&
+    !leftTeleporter.isTeleporting &&
     leftHandState.has("hover-start") &&
     leftHandState.get("hover-start").matches(".icamera, .icamera *");
   const leftHandHoldingInteractable =
@@ -33,13 +32,13 @@ export function resolveActionSets() {
   const leftHandHoldingPen = leftHandState.has("grab-start") && leftHandState.get("grab-start").matches(".pen, .pen *");
   const leftHandHoldingCamera =
     leftHandState.has("grab-start") && leftHandState.get("grab-start").matches(".icamera, .icamera *");
-  const leftHandHovering = !leftTeleporter.active && leftHandState.has("hover-start");
+  const leftHandHovering = !leftTeleporter.isTeleporting && leftHandState.has("hover-start");
   const leftHandHoveringOnNothing = !leftHandHovering && !leftHandState.has("grab-start");
-  const leftHandTeleporting = leftTeleporter.active;
+  const leftHandTeleporting = leftTeleporter.isTeleporting;
 
   const cursorGrabbing = cursorHand.has("grab-start");
 
-  const rightHandTeleporting = rightTeleporter.active;
+  const rightHandTeleporting = rightTeleporter.isTeleporting;
   const rightHandHovering = !rightHandTeleporting && !cursorGrabbing && rightHandState.has("hover-start");
   const rightHandGrabbing = !rightHandTeleporting && !cursorGrabbing && rightHandState.has("grab-start");
 
@@ -54,7 +53,7 @@ export function resolveActionSets() {
     rightHandState.has("hover-start") &&
     rightHandState.get("hover-start").matches(".pen, .pen *");
   const rightHandHoveringOnCamera =
-    !rightTeleporter.active &&
+    !rightTeleporter.isTeleporting &&
     !cursorGrabbing &&
     rightHandState.has("hover-start") &&
     rightHandState.get("hover-start").matches(".icamera, .icamera *");
@@ -106,7 +105,7 @@ export function resolveActionSets() {
     !rightHandTeleporting && cursorHand.has("grab-start") && cursorHand.get("grab-start").matches(".pen, .pen *");
 
   const cursorHoldingCamera =
-    !rightTeleporter.active &&
+    !rightTeleporter.isTeleporting &&
     cursorHand.has("grab-start") &&
     cursorHand.get("grab-start").matches(".icamera, .icamera *");
 
