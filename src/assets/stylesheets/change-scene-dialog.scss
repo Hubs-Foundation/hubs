@@ -1,6 +1,6 @@
 @import 'shared';
 
-:local(.add-media-form) {
+:local(.change-scene-button) {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -13,11 +13,8 @@
   @extend %bottom-action-button;
   margin-left: 6px;
   margin-right: 6px;
-  appearance: none;
   width: 128px;
   text-align: center;
-  -moz-appearance: none;
-  -webkit-appearance: none;
 }
 
 :local(.buttons) {
@@ -28,36 +25,11 @@
   align-items: center;
 }
 
-:local(.small-button) {
-  @extend %unselectable;
-  margin-left: 0.25em;
-  font-size: 2em;
-  align-self: center;
-}
-
-:local(.cancel-icon) {
-  color: $darkest-grey;
-  cursor: pointer;
-
-  &:hover {
-    color: #FF3D7F
-  }
-}
-
-:local(.upload-icon) {
-  color: $action-color;
-  cursor: pointer;
-
-  &:hover {
-    color: $action-color-light;
-  }
-}
-
 :local(.input-border) {
   display: flex;
   @extend %rounded-border;
   @extend %default-font;
-  margin: 1em;
+  margin: 12px 0px;
   padding: 0.5em 0.75em;
   width: 100%;
   box-sizing: border-box;
@@ -75,9 +47,4 @@
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
-}
-
-:local(.hide-file-input) {
-  visibility: hidden;
-  position: absolute;
 }
