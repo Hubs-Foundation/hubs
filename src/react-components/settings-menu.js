@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
+import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 
 import styles from "../assets/stylesheets/settings-menu.scss";
 
@@ -94,32 +95,37 @@ export default class SettingsMenu extends Component {
                 </div>
               </div>
             )}
-            <div className={classNames([styles.bottomLinks])}>
-              <a
-                className={classNames([styles.bottomLink, styles.bottomLinkMain])}
-                href="https://github.com/mozilla/hubs/wiki/Hubs-Features"
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                <FormattedMessage id="settings.features" />
+            <div className={rowClasses}>
+              <div className={styles.icon}>
+                <i>
+                  <FontAwesomeIcon icon={faPlus} />
+                </i>
+              </div>
+              <div className={styles.listItem}>
+                <a href="/">
+                  <FormattedMessage id="settings.create-room" />
+                </a>
+              </div>
+            </div>
+            <div className={classNames([styles.bottomLinksMain])}>
+              <a href="/whats-new" target="_blank" rel="noreferrer noopener">
+                <FormattedMessage id="settings.whats-new" />
               </a>
-              <a
-                className={classNames([styles.bottomLink, styles.bottomLinkMain])}
-                href="https://github.com/mozilla/hubs/wiki/Hubs-Controls"
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                <FormattedMessage id="settings.controls" />
+              <a href="/spoke" target="_blank" rel="noreferrer noopener">
+                <FormattedMessage id="settings.create-scene" />
               </a>
-              <a
-                className={classNames([styles.bottomLink, styles.bottomLinkMain])}
-                href="https://discord.gg/wHmY4nd"
-                target="_blank"
-                rel="noreferrer noopener"
-              >
+              <a href="https://discord.gg/wHmY4nd" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.community" />
               </a>
-              <a className={styles.bottomLink} href="/?report" target="_blank" rel="noreferrer noopener">
+            </div>
+            <div className={classNames([styles.bottomLinks])}>
+              <a href="https://github.com/mozilla/hubs/wiki/Hubs-Features" target="_blank" rel="noreferrer noopener">
+                <FormattedMessage id="settings.features" />
+              </a>
+              <a href="https://github.com/mozilla/hubs/wiki/Hubs-Controls" target="_blank" rel="noreferrer noopener">
+                <FormattedMessage id="settings.controls" />
+              </a>
+              <a href="/?report" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.report" />
               </a>
               <a
