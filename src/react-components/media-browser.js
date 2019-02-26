@@ -171,9 +171,9 @@ class MediaBrowser extends Component {
     );
   };
 
-  showCreateObject = () => {
+  showCustomMediaDialog = source => {
     this.pushExitMediaBrowserHistory();
-    pushHistoryState(this.props.history, "modal", "create");
+    pushHistoryState(this.props.history, "modal", source === "scene_listings" ? "change_scene" : "create");
   };
 
   close = () => {
@@ -260,12 +260,12 @@ class MediaBrowser extends Component {
               </div>
             </div>
             <div className={styles.headerRight}>
-              <a onClick={() => this.showCreateObject()} className={styles.createButton}>
+              <a onClick={() => this.showCustomMediaDialog(apiSource)} className={styles.createButton}>
                 <i>
                   <FontAwesomeIcon icon={faCloudUploadAlt} />
                 </i>
               </a>
-              <a onClick={() => this.showCreateObject()} className={styles.createLink}>
+              <a onClick={() => this.showCustomMediaDialog(apiSource)} className={styles.createLink}>
                 <FormattedMessage
                   id={`media-browser.add_custom_${
                     this.state.result && apiSource === "scene_listings" ? "scene" : "object"

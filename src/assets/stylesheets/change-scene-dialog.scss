@@ -1,6 +1,6 @@
 @import 'shared';
 
-:local(.add-media-form) {
+:local(.change-scene-button) {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -28,31 +28,6 @@
   align-items: center;
 }
 
-:local(.small-button) {
-  @extend %unselectable;
-  margin-left: 0.25em;
-  font-size: 2em;
-  align-self: center;
-}
-
-:local(.cancel-icon) {
-  color: $darkest-grey;
-  cursor: pointer;
-
-  &:hover {
-    color: #FF3D7F
-  }
-}
-
-:local(.upload-icon) {
-  color: $action-color;
-  cursor: pointer;
-
-  &:hover {
-    color: $action-color-light;
-  }
-}
-
 :local(.input-border) {
   display: flex;
   @extend %rounded-border;
@@ -75,9 +50,4 @@
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
-}
-
-:local(.hide-file-input) {
-  visibility: hidden;
-  position: absolute;
 }
