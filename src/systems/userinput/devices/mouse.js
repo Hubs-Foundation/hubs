@@ -83,7 +83,7 @@ export class MouseDevice {
   }
 }
 
-window.oncontextmenu = (e) => {
+window.oncontextmenu = e => {
   if (!isInModal()) {
     e.preventDefault();
   }
