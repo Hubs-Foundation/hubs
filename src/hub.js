@@ -52,7 +52,6 @@ import "./components/icon-button";
 import "./components/text-button";
 import "./components/block-button";
 import "./components/kick-button";
-import "./components/snap-camera-button";
 import "./components/visible-if-permitted";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";

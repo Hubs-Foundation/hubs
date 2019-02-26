@@ -311,7 +311,6 @@
                     hoverable
                     stretchable
                     camera-tool
-                    hover-menu="template: #camera-hover-menu; dirs: forward, back;"
                     matrix-auto-update
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
                     scale="0.5 0.5 0.5"
@@ -340,7 +339,7 @@
 
             <template id="camera-hover-menu">
                 <a-entity class="ui interactable-ui hover-container camera-snap-menu" mixin="button-container">
-                    <a-entity mixin="rounded-text-action-button" snap-camera-button position="0 -0.145 0.0" scale="0.75 0.75 0.75">
+                    <a-entity class="snap-button" mixin="rounded-text-action-button" position="0 -0.145 0.0" scale="0.75 0.75 0.75">
                         <a-entity text="value:; width:1; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                         <a-image
                             icon-button="image: #snap-camera; hoverImage: #snap-camera;"
