@@ -45,7 +45,7 @@
     "aframe-billboard-component": "^2.0.0",
     "aframe-inspector": "^0.8.3",
     "aframe-motion-capture-components": "github:mozillareality/aframe-motion-capture-components#aframe090",
-    "aframe-physics-system": "github:mozillareality/aframe-physics-system#451b64e40388a05bb5e42ce0440edc5dc95925d2",
+    "aframe-physics-system": "github:mozillareality/aframe-physics-system#3cad7123de453482d230e89f620206430947dbc4",
     "aframe-rounded": "^1.0.3",
     "aframe-slice9-component": "^1.0.0",
     "aframe-teleport-controls": "github:mozillareality/aframe-teleport-controls#hubs/master",
