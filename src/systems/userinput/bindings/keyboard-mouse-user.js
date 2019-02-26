@@ -384,25 +384,9 @@ export const keyboardMouseUserBindings = addSetsToBindings({
   [sets.cursorHoldingCamera]: [
     {
       src: { value: paths.device.mouse.buttonLeft },
-      dest: { value: paths.actions.cursor.takeSnapshot },
-      xform: xforms.rising,
-      priority: 3
-    },
-    {
-      src: { value: paths.device.mouse.buttonRight },
-      dest: { value: dropWithRMB },
-      xform: xforms.falling,
-      priority: 200
-    },
-    {
-      src: { value: paths.device.keyboard.key("Escape") },
-      dest: { value: dropWithEsc },
-      xform: xforms.falling
-    },
-    {
-      src: [dropWithRMB, dropWithEsc],
       dest: { value: paths.actions.cursor.drop },
-      xform: xforms.any
+      xform: xforms.falling,
+      priority: 2
     }
   ],
 

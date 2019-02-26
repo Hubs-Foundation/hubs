@@ -46,6 +46,7 @@
     >
         <a-assets>
             <img id="rotation-symbol" crossorigin="anonymous" src="./assets/rotation.png">
+            <img id="button" crossorigin="anonymous" src="./assets/hud/button.9.png">
             <img id="action-button" crossorigin="anonymous" src="./assets/hud/action_button.9.png">
             <img id="tooltip" crossorigin="anonymous" src="./assets/hud/tooltip.9.png">
             <img id="mute-off" crossorigin="anonymous" src="./assets/hud/mute_off.png">
@@ -64,6 +65,7 @@
             <img id="spawn-pen-hover" crossorigin="anonymous" src="./assets/hud/spawn_pen-hover.png">
             <img id="spawn-camera" crossorigin="anonymous" src="./assets/hud/spawn_camera.png">
             <img id="spawn-camera-hover" crossorigin="anonymous" src="./assets/hud/spawn_camera-hover.png">
+            <img id="snap-camera" crossorigin="anonymous" src="./assets/images/snap_camera.png">
             <img id="presence-count" crossorigin="anonymous" src="./assets/hud/presence-count.png">
             <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
 
@@ -316,7 +318,7 @@
                     shape="shape: box; halfExtents: 0.22 0.145 0.1; offset: 0 0.02 0"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     super-networked-interactable="counter: #camera-counter;"
-                    position-at-box-shape-border="target:.camera-menu"
+                    position-at-box-shape-border__freeze="target: .camera-menu"
                     set-yxz-order
                     auto-scale-cannon-physics-body
                 >
@@ -331,6 +333,19 @@
                         <a-entity  scale="0.5 0.5 1" mixin="rounded-text-button" rotate-button="mode: reset;" position="-0.6 -0.06 0.01">
                             <a-entity text="value:align; width:2.60; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                         </a-entity>
+                    </a-entity>
+                </a-entity>
+            </template>
+
+            <template id="camera-hover-menu">
+                <a-entity class="ui interactable-ui hover-container camera-snap-menu" mixin="button-container">
+                    <a-entity class="snap-button" mixin="rounded-text-action-button" position="0 -0.145 0.0" scale="0.75 0.75 0.75">
+                        <a-entity text="value:; width:1; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                        <a-image
+                            icon-button="image: #snap-camera; hoverImage: #snap-camera;"
+                            scale="0.225 0.225 0.225"
+                            position="0 0.005 0.01"
+                        ></a-image>
                     </a-entity>
                 </a-entity>
             </template>
@@ -421,7 +436,7 @@
                     right: 66;
                     bottom: 66;
                     opacity: 1.0;
-                    src: #action-button"
+                    src: #button"
             ></a-mixin>
 
             <a-mixin id="rounded-text-action-button"
@@ -429,8 +444,9 @@
                     haptic:#player-right-controller;
                     textHoverColor: #fff;
                     textColor: #fff;
-                    backgroundHoverColor: #cc0515;
-                    backgroundColor: #ff0520;"
+                    backgroundColor: #ee0a25;
+                    backgroundHoverColor: #ff2a45;
+                    "
                 slice9="
                     width: 0.45;
                     height: 0.2;
@@ -579,7 +595,7 @@
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
                     set-sounds-invisible
                 ></a-image>
-                <a-rounded visible="false" id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
+                <a-rounded visible="false" vr-mode-toggle-visibility id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
                     <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" matrix-auto-update="target: text"></a-entity>
                 </a-rounded>
                 </a-entity>
