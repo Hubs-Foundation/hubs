@@ -922,10 +922,11 @@ class UIRoot extends Component {
         <FormattedMessage id="loader.entering_lobby" />
       </h4>
     );
+    const progress = this.state.loadingNum === 0 ? " " : `${this.state.loadedNum} / ${this.state.loadingNum} `;
     const usual = (
       <h4 className={loaderStyles.loadingText}>
         <FormattedMessage id="loader.loading" />
-        {this.state.loadedNum} / {this.state.loadingNum}{" "}
+        {progress}
         <FormattedMessage id={this.state.loadingNum !== 1 ? "loader.objects" : "loader.object"} />
         ...
       </h4>
