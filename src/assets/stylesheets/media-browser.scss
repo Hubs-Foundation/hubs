@@ -270,6 +270,9 @@
             text-overflow: ellipsis;
             overflow: hidden;
             white-space: nowrap;
+            color: black;
+            text-decoration: none;
+            display: block;
           }
 
           :local(.attribution) {

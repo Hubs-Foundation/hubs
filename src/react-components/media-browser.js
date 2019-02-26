@@ -134,10 +134,11 @@ class MediaBrowser extends Component {
     this.setState({ query });
   };
 
-  handleEntryClicked = entry => {
+  handleEntryClicked = (evt, entry) => {
     if (!this.props.onMediaSearchResultEntrySelected) return;
     this.props.onMediaSearchResultEntrySelected(entry);
     this.close();
+    evt.preventDefault();
   };
 
   handleSourceClicked = source => {
@@ -215,7 +216,7 @@ class MediaBrowser extends Component {
                   onKeyDown={e => {
                     if (e.key === "Enter" && e.shiftKey) {
                       if (this.state.result && this.state.result.entries.length > 0) {
-                        this.handleEntryClicked(this.state.result.entries[0]);
+                        this.handleEntryClicked(e, this.state.result.entries[0]);
                       }
                     } else if (e.key === "Escape" || e.key === "Enter") {
                       e.target.blur();
@@ -342,18 +343,27 @@ class MediaBrowser extends Component {
 
     return (
       <div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`${entry.id}_${idx}`}>
-        <div
-          onClick={() => this.handleEntryClicked(entry)}
+        <a
+          href={entry.url}
+          target="_blank"
+          rel="noreferrer noopener"
+          onClick={e => this.handleEntryClicked(e, entry)}
           className={styles.image}
           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
         >
           <img src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)} />
-        </div>
+        </a>
         {!entry.type.endsWith("_image") && (
           <div className={styles.info}>
-            <div className={styles.name} onClick={() => this.handleEntryClicked(entry)}>
+            <a
+              href={entry.url}
+              target="_blank"
+              rel="noreferrer noopener"
+              className={styles.name}
+              onClick={e => this.handleEntryClicked(e, entry)}
+            >
               {entry.name}
-            </div>
+            </a>
             <div className={styles.attribution}>
               <div className={styles.creator}>
                 {creator && !creator.name && <span>{creator}</span>}
