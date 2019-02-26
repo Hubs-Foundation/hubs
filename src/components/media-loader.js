@@ -1,10 +1,12 @@
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import {
-  generateMeshBVH,
   guessContentType,
   proxiedUrlFor,
   resolveUrl,
-  injectCustomShaderChunks
+  injectCustomShaderChunks,
+  isHubsRoomUrl,
+  isHubsSceneUrl,
+  generateMeshBVH
 } from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
 
@@ -203,14 +205,29 @@ AFRAME.registerComponent("media-loader", {
       } else if (contentType.startsWith("image/")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
-        this.el.addEventListener("image-loaded", this.onMediaLoaded, { once: true });
         this.el.removeAttribute("media-pager");
+        this.el.addEventListener(
+          "image-loaded",
+          () => {
+            const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
+
+            if (isHubsRoomUrl(src) || (isHubsSceneUrl(src) && mayChangeScene)) {
+              this.el.setAttribute("hover-menu__hubs-item", {
+                template: "#hubs-destination-hover-menu",
+                dirs: ["forward", "back"]
+              });
+            }
+            this.onMediaLoaded();
+          },
+          { once: true }
+        );
         this.el.setAttribute(
           "media-image",
           Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, contentType })
         );
-        if (this.el.components["position-at-box-shape-border"]) {
-          this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+
+        if (this.el.components["position-at-box-shape-border__freeze"]) {
+          this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
         }
       } else if (contentType.startsWith("application/pdf")) {
         this.el.removeAttribute("gltf-model-plus");
@@ -221,8 +238,8 @@ AFRAME.registerComponent("media-loader", {
         this.el.setAttribute("media-pager", Object.assign({}, this.data.mediaOptions, { src: canonicalUrl }));
         this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
         this.el.addEventListener("preview-loaded", this.onMediaLoaded, { once: true });
-        if (this.el.components["position-at-box-shape-border"]) {
-          this.el.setAttribute("position-at-box-shape-border", { dirs: ["forward", "back"] });
+        if (this.el.components["position-at-box-shape-border__freeze"]) {
+          this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
         }
       } else if (
         contentType.includes("application/octet-stream") ||

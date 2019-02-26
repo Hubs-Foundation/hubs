@@ -913,7 +913,7 @@ class UIRoot extends Component {
 
   renderLoader = () => {
     const nomore = (
-      <h4 style={{ color: "green" }}>
+      <h4 className={loaderStyles.loadingText}>
         <FormattedMessage id="loader.entering_lobby" />
       </h4>
     );

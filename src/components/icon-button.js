@@ -17,6 +17,7 @@ AFRAME.registerComponent("icon-button", {
   },
 
   init() {
+    this.el.object3D.matrixNeedsUpdate = true;
     this.onHover = () => {
       this.hovering = true;
       this.updateButtonState();

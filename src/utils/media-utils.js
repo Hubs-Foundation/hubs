@@ -392,3 +392,9 @@ export const traverseMeshesAndAddShapes = (function() {
     return shapes;
   };
 })();
+
+const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/scenes\/(\w+)\/?\S*/;
+const hubsRoomRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/(\w+)\/?\S*/;
+export const isHubsSceneUrl = hubsSceneRegex.test.bind(hubsSceneRegex);
+export const isHubsRoomUrl = url => !isHubsSceneUrl(url) && hubsRoomRegex.test(url);
+

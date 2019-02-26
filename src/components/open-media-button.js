@@ -1,5 +1,4 @@
-const hubsRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/(\w+)\/?\S*/;
-const isHubsUrl = hubsRegex.test.bind(hubsRegex);
+import { isHubsSceneUrl, isHubsRoomUrl } from "../utils/media-utils";
 
 AFRAME.registerComponent("open-media-button", {
   init() {
@@ -7,12 +6,22 @@ AFRAME.registerComponent("open-media-button", {
 
     this.updateSrc = () => {
       this.src = this.targetEl.components["media-loader"].data.src;
-      this.label.setAttribute("text", "value", isHubsUrl(this.src) ? "visit" : "open link");
+
+      let label = "open link";
+
+      if (isHubsSceneUrl(this.src)) {
+        label = "use scene";
+      } else if (isHubsRoomUrl(this.src)) {
+        label = "visit room";
+      }
+
+      this.label.setAttribute("text", "value", label);
     };
 
     this.onClick = () => {
-      const directNavigate = isHubsUrl(this.src);
-      if (directNavigate) {
+      if (isHubsSceneUrl(this.src)) {
+        this.el.sceneEl.emit("scene_media_selected", this.src);
+      } else if (isHubsRoomUrl(this.src)) {
         location.href = this.src;
       } else {
         window.open(this.src);
