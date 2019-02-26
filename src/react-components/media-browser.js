@@ -138,6 +138,7 @@ class MediaBrowser extends Component {
     if (!this.props.onMediaSearchResultEntrySelected) return;
     this.props.onMediaSearchResultEntrySelected(entry);
     this.close();
+    return false;
   };
 
   handleSourceClicked = source => {
@@ -342,18 +343,27 @@ class MediaBrowser extends Component {
 
     return (
       <div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`${entry.id}_${idx}`}>
-        <div
+        <a
+          href={entry.url}
+          target="_blank"
+          rel="noreferrer noopener"
           onClick={() => this.handleEntryClicked(entry)}
           className={styles.image}
           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
         >
           <img src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)} />
-        </div>
+        </a>
         {!entry.type.endsWith("_image") && (
           <div className={styles.info}>
-            <div className={styles.name} onClick={() => this.handleEntryClicked(entry)}>
+            <a
+              href={entry.url}
+              target="_blank"
+              rel="noreferrer noopener"
+              className={styles.name}
+              onClick={() => this.handleEntryClicked(entry)}
+            >
               {entry.name}
-            </div>
+            </a>
             <div className={styles.attribution}>
               <div className={styles.creator}>
                 {creator && !creator.name && <span>{creator}</span>}
