@@ -284,6 +284,7 @@
                     set-sounds-invisible
                     emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
                     emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
+                    position-at-box-shape-border="target:.pen-menu"
                 >
                     <a-sphere
                         id="pen"
@@ -295,9 +296,9 @@
                         segments-width="16"
                         segments-height="12"
                     ></a-sphere>
-                    <a-entity class="ui delete-button" visibility-while-frozen="withinDistance: 10;" mixin="button-container">
-                        <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0"> </a-entity>
-                        <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                    <a-entity class="ui delete-button pen-menu" visibility-while-frozen="withinDistance: 10;" mixin="button-container" >
+                        <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0.1"> </a-entity>
+                        <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 0 0.11"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>
