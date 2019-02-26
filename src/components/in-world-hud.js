@@ -19,7 +19,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.freeze.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
     this.pen.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
     this.cameraBtn.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
-    this.background.object3DMap.mesh.renderORder = renderOrder.HUD_BACKGROUND;
+    this.background.object3DMap.mesh.renderOrder = renderOrder.HUD_BACKGROUND;
 
     this.updateButtonStates = () => {
       this.mic.setAttribute("icon-button", "active", this.el.sceneEl.is("muted"));

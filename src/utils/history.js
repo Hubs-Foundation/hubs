@@ -45,6 +45,10 @@ export function pushHistoryState(history, k, v) {
   pushOrUpdateHistory(history, false, k, v);
 }
 
+export function replaceHistoryState(history, k, v) {
+  pushOrUpdateHistory(history, true, k, v);
+}
+
 export function pushHistoryPath(history, path, search) {
   pushOrUpdateHistory(history, false, null, null, path, search);
 }
