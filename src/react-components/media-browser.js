@@ -125,8 +125,12 @@ class MediaBrowser extends Component {
       clearTimeout(this._sendQueryTimeout);
     }
 
+    const lastQuery = query;
+
     // Don't update search on every keystroke, but buffer for some ms.
     this._sendQueryTimeout = setTimeout(() => {
+      if (query !== lastQuery) return;
+
       // Drop filter for now, so entering text drops into "search all" mode
       this.props.mediaSearchStore.filterQueryNavigate("", query);
     }, 500);
@@ -145,7 +149,7 @@ class MediaBrowser extends Component {
   };
 
   handleFacetClicked = facet => {
-    const searchParams = this.getSearchClearedSearchParams();
+    const searchParams = this.getSearchClearedSearchParams(true);
 
     for (const [k, v] of Object.entries(facet.params)) {
       searchParams.set(k, v);
@@ -154,8 +158,8 @@ class MediaBrowser extends Component {
     pushHistoryPath(this.props.history, this.props.history.location.pathname, searchParams.toString());
   };
 
-  getSearchClearedSearchParams = () => {
-    return this.props.mediaSearchStore.getSearchClearedSearchParams(this.props.history.location);
+  getSearchClearedSearchParams = keepSource => {
+    return this.props.mediaSearchStore.getSearchClearedSearchParams(this.props.history.location, keepSource);
   };
 
   pushExitMediaBrowserHistory = () => {
