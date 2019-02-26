@@ -1388,6 +1388,7 @@ class UIRoot extends Component {
               <MediaBrowser
                 history={this.props.history}
                 mediaSearchStore={this.props.mediaSearchStore}
+                hubChannel={this.props.hubChannel}
                 onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
               />
             )}
