@@ -24,7 +24,7 @@ AFRAME.registerComponent("hover-menu", {
       setTimeout(() => {
         this.menu = menu;
         this.el.setAttribute("position-at-box-shape-border", {
-          target: ".video-toolbar",
+          target: ".hover-container",
           dirs: this.data.dirs,
           animate: false,
           scale: false

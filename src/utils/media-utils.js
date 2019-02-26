@@ -198,10 +198,8 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
 
       entity.removeAttribute("animation__loader_spawn-start");
       const [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
-      entity.object3D.scale.set(sx / 2, sy / 2, sz / 2);
-      entity.object3D.matrixNeedsUpdate = true;
 
-      if (!entity.classList.contains("pen") && !entity.getAttribute("animation__spawn-start")) {
+      if (!entity.getAttribute("animation__spawn-start")) {
         entity.setAttribute("animation__spawn-start", {
           property: "scale",
           delay: 50,
@@ -334,3 +332,8 @@ export function injectCustomShaderChunks(obj) {
 export function getPromotionTokenForFile(fileId) {
   return window.APP.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
 }
+
+const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/scenes\/(\w+)\/?\S*/;
+const hubsRoomRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/(\w+)\/?\S*/;
+export const isHubsSceneUrl = hubsSceneRegex.test.bind(hubsSceneRegex);
+export const isHubsRoomUrl = url => !isHubsSceneUrl(url) && hubsRoomRegex.test(url);

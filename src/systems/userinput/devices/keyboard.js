@@ -9,7 +9,7 @@ export class KeyboardDevice {
         if (!e.key) return;
         this.events.push(e);
 
-        // Block browser hotkeys for chat command and media browser
+        // Block browser hotkeys for chat command, media browser and freeze
         if (
           (e.type === "keydown" &&
             e.key === "/" &&
@@ -24,7 +24,8 @@ export class KeyboardDevice {
               e.key === "7" ||
               e.key === "8" ||
               e.key === "9" ||
-              e.key === "0"))
+              e.key === "0")) ||
+          e.key === "Tab"
         ) {
           e.preventDefault();
           return false;

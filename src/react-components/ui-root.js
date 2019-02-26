@@ -52,6 +52,8 @@ import SettingsMenu from "./settings-menu.js";
 import TwoDHUD from "./2d-hud";
 import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
+import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
+import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
@@ -84,6 +86,7 @@ async function grantedMicLabels() {
   return mediaDevices.filter(d => d.label && d.kind === "audioinput").map(d => d.label);
 }
 
+const isMobile = AFRAME.utils.device.isMobile();
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
 import webmTone from "../assets/sfx/tone.webm";
@@ -305,6 +308,7 @@ class UIRoot extends Component {
 
     const closeAndContinue = () => {
       this.closeDialog();
+      showFullScreenIfWasFullScreen();
       onContinueAfterSignIn();
     };
 
@@ -660,7 +664,7 @@ class UIRoot extends Component {
   };
 
   shouldShowHmdMicWarning = () => {
-    if (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo()) return false;
+    if (isMobile || AFRAME.utils.device.isOculusGo()) return false;
     if (!this.state.enterInVR) return false;
     if (!this.hasHmdMicrophone()) return false;
 
@@ -690,21 +694,18 @@ class UIRoot extends Component {
   shouldShowFullScreen = () => {
     // Disable full screen on iOS, since Safari's fullscreen mode does not let you prevent native pinch-to-zoom gestures.
     return (
-      (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo()) &&
+      (isMobile || AFRAME.utils.device.isOculusGo()) &&
       !AFRAME.utils.device.isIOS() &&
       !this.state.enterInVR &&
       screenfull.enabled
     );
   };
 
-  showFullScreenIfAvailable = () => {
-    if (this.shouldShowFullScreen()) {
-      screenfull.request();
-    }
-  };
-
   onAudioReadyButton = () => {
-    this.showFullScreenIfAvailable();
+    if (!this.state.enterVR) {
+      showFullScreenIfAvailable();
+    }
+
     this.props.enterScene(this.state.mediaStream, this.state.enterInVR, this.props.hubId);
 
     const mediaStream = this.state.mediaStream;
@@ -751,6 +752,8 @@ class UIRoot extends Component {
   };
 
   closeDialog = () => {
+    showFullScreenIfWasFullScreen();
+
     if (this.state.dialog) {
       this.setState({ dialog: null });
     } else {
@@ -910,7 +913,7 @@ class UIRoot extends Component {
 
   renderLoader = () => {
     const nomore = (
-      <h4 style={{ color: "green" }}>
+      <h4 className={loaderStyles.loadingText}>
         <FormattedMessage id="loader.entering_lobby" />
       </h4>
     );
@@ -998,7 +1001,8 @@ class UIRoot extends Component {
                 value={this.state.pendingMessage}
                 rows={textRows}
                 style={{ height: pendingMessageTextareaHeight }}
-                onFocus={e => e.target.select()}
+                onFocus={e => handleTextFieldFocus(e.target)}
+                onBlur={() => handleTextFieldBlur()}
                 onChange={e => this.setState({ pendingMessage: e.target.value })}
                 onKeyDown={e => {
                   if (e.key === "Enter" && !e.shiftKey) {
@@ -1166,9 +1170,9 @@ class UIRoot extends Component {
     const micClip = {
       clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)`
     };
-    const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo();
+    const isMobileOrGo = isMobile || AFRAME.utils.device.isOculusGo();
     const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
-    const subtitleId = isMobile ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
+    const subtitleId = isMobileOrGo ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
     return (
       <div className="audio-setup-panel">
         <div onClick={() => this.props.history.goBack()} className={entryStyles.back}>
@@ -1183,7 +1187,7 @@ class UIRoot extends Component {
             <FormattedMessage id="audio.title" />
           </div>
           <div className="audio-setup-panel__subtitle">
-            {(isMobile || this.state.enterInVR) && <FormattedMessage id={subtitleId} />}
+            {(isMobileOrGo || this.state.enterInVR) && <FormattedMessage id={subtitleId} />}
           </div>
           <div className="audio-setup-panel__levels">
             <div className="audio-setup-panel__levels__icon">
@@ -1354,7 +1358,6 @@ class UIRoot extends Component {
       [styles.messageEntryOnTop]: this.state.messageEntryOnTop
     };
 
-    const isMobile = AFRAME.utils.device.isMobile();
     const presenceLogEntries = this.props.presenceLogEntries || [];
 
     const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);
@@ -1522,31 +1525,12 @@ class UIRoot extends Component {
                     value={this.state.pendingMessage}
                     rows={textRows}
                     onFocus={e => {
+                      handleTextFieldFocus(e.target);
                       this.setState({ messageEntryOnTop: isMobile });
-
-                      if (screenfull.isFullscreen) {
-                        // This will prevent focus, but its the only way to avoid getting into a
-                        // weird "firefox reports full screen but actually not". You end up having to tap
-                        // twice to ultimately get the focus.
-                        //
-                        // We need to keep track of a bit here so that we don't re-full screen when
-                        // the text box is blurred by the browser.
-
-                        this.isExitingFullscreenDueToFocus = true;
-                        screenfull.exit();
-                      }
-
-                      e.target.select();
                     }}
                     onBlur={() => {
-                      // This is the incidental blur event when exiting fullscreen mode on mobile
-                      if (this.isExitingFullscreenDueToFocus) {
-                        this.isExitingFullscreenDueToFocus = false;
-                        return;
-                      }
-
+                      handleTextFieldBlur();
                       this.setState({ messageEntryOnTop: false });
-                      this.showFullScreenIfAvailable();
                     }}
                     onChange={e => {
                       e.stopPropagation();

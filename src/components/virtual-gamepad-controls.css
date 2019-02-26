@@ -1,10 +1,11 @@
 :local(.touchZone) {
   position: absolute;
-  height: 30vh;
+  height: 20vh;
   bottom: 0;
 
-  @media(orientation: portrait) {
-    height: 20vh;
+  /* Orientation selector fails here when keyboard pops up on shorter screens */
+  @media(min-aspect-ratio: 15/9) {
+    height: 30vh;
   }
 }
 
@@ -24,12 +25,13 @@
   left: 0;
   right: 0;
   bottom: 15vh;
-  display: flex;
   align-items: center;
   justify-content: space-around;
+  display: none;
 
-  @media (orientation: portrait) {
-    display: none;
+  /* Orientation selector fails here when keyboard pops up on shorter screens */
+  @media (min-aspect-ratio: 15/9) {
+    display: flex;
   }
 }
 

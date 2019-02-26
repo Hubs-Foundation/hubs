@@ -322,7 +322,8 @@ body.vr-mode {
 
 :local(.message-entry-on-mobile) {
   // Hide chatbox for joysticks
-  @media (orientation: landscape) {
+  // Orientation selector fails here when keyboard pops up on shorter screens
+  @media (min-aspect-ratio: 15/9) {
     display: none;
   }
 }

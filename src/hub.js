@@ -83,6 +83,7 @@ import "./components/open-media-button";
 import "./components/rotate-object-button";
 import "./components/hover-menu";
 import "./components/animation";
+import "./components/disable-frustum-culling";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -383,8 +384,13 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   scene.addEventListener("action_selected_media_result_entry", e => {
     const entry = e.detail;
     if (entry.type !== "scene_listing") return;
+    if (!hubChannel.permissions.update_hub) return;
 
     hubChannel.updateScene(entry.url);
+  });
+
+  scene.addEventListener("scene_media_selected", e => {
+    hubChannel.updateScene(e.detail);
   });
 
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
