@@ -540,6 +540,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   scene.addEventListener("enter-vr", () => {
     document.body.classList.add("vr-mode");
 
+    // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
     if (!isMobile || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
       document.body.classList.add("vr-mode-stretch");
     }
