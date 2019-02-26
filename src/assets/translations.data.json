@@ -189,6 +189,7 @@
     "loader.entering_lobby": "Entering lobby...",
     "loader.loading": "Loading ",
     "loader.object": "object",
-    "loader.objects": "objects"
+    "loader.objects": "objects",
+    "change-scene-dialog.change-scene": "Change Scene"
   }
 }

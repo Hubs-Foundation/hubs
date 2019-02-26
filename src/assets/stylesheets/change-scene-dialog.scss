@@ -13,11 +13,8 @@
   @extend %bottom-action-button;
   margin-left: 6px;
   margin-right: 6px;
-  appearance: none;
   width: 128px;
   text-align: center;
-  -moz-appearance: none;
-  -webkit-appearance: none;
 }
 
 :local(.buttons) {
@@ -32,7 +29,7 @@
   display: flex;
   @extend %rounded-border;
   @extend %default-font;
-  margin: 1em;
+  margin: 12px 0px;
   padding: 0.5em 0.75em;
   width: 100%;
   box-sizing: border-box;

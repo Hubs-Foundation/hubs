@@ -4,7 +4,7 @@ import styles from "../assets/stylesheets/change-scene-dialog.scss";
 import cx from "classnames";
 import DialogContainer from "./dialog-container.js";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
-import { WithHoverSound } from "./wrap-with-audio";
+import { FormattedMessage } from "react-intl";
 
 export default class ChangeSceneDialog extends Component {
   state = {
@@ -38,10 +38,10 @@ export default class ChangeSceneDialog extends Component {
   };
 
   render() {
-    const { onChange, onClose, ...other } = this.props; // eslint-disable-line no-unused-vars
+    const { onChange, onClose } = this.props; // eslint-disable-line no-unused-vars
 
     return (
-      <DialogContainer title="Custom Scene" onClose={this.props.onClose} {...other}>
+      <DialogContainer title="Custom Scene" onClose={this.props.onClose}>
         <div>
           <div>
             <p>
@@ -75,11 +75,9 @@ export default class ChangeSceneDialog extends Component {
                 />
               </div>
               <div className={styles.buttons}>
-                <WithHoverSound>
-                  <button className={styles.actionButton}>
-                    <span>Change Scene</span>
-                  </button>
-                </WithHoverSound>
+                <button className={styles.actionButton}>
+                  <FormattedMessage id="change-scene-dialog.change-scene" />
+                </button>
               </div>
             </div>
           </form>
