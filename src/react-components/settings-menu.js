@@ -60,7 +60,7 @@ export default class SettingsMenu extends Component {
                 <div className={styles.listItem}>
                   <div
                     className={styles.listItemLink}
-                    onClick={() => this.props.mediaSearchStore.sourceNavigate("scenes", true)}
+                    onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes")}
                   >
                     <FormattedMessage id="settings.change-scene" />
                   </div>

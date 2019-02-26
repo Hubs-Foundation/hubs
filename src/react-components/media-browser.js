@@ -146,7 +146,7 @@ class MediaBrowser extends Component {
   };
 
   handleFacetClicked = facet => {
-    const searchParams = this.getSearchClearedSearchParams();
+    const searchParams = this.getSearchClearedSearchParams(true);
 
     for (const [k, v] of Object.entries(facet.params)) {
       searchParams.set(k, v);
@@ -155,8 +155,8 @@ class MediaBrowser extends Component {
     pushHistoryPath(this.props.history, this.props.history.location.pathname, searchParams.toString());
   };
 
-  getSearchClearedSearchParams = () => {
-    return this.props.mediaSearchStore.getSearchClearedSearchParams(this.props.history.location);
+  getSearchClearedSearchParams = keepSource => {
+    return this.props.mediaSearchStore.getSearchClearedSearchParams(this.props.history.location, keepSource);
   };
 
   pushExitMediaBrowserHistory = () => {
