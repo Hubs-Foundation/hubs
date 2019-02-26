@@ -12,7 +12,7 @@ AFRAME.registerComponent("open-media-button", {
       if (isHubsSceneUrl(this.src)) {
         label = "use scene";
       } else if (isHubsRoomUrl(this.src)) {
-        label = "visit";
+        label = "visit room";
       }
 
       this.label.setAttribute("text", "value", label);
