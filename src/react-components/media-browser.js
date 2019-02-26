@@ -73,6 +73,7 @@ class MediaBrowser extends Component {
     mediaSearchStore: PropTypes.object,
     history: PropTypes.object,
     intl: PropTypes.object,
+    hubChannel: PropTypes.object,
     onMediaSearchResultEntrySelected: PropTypes.func
   };
 
@@ -171,9 +172,9 @@ class MediaBrowser extends Component {
     );
   };
 
-  showCreateObject = () => {
+  showCustomMediaDialog = source => {
     this.pushExitMediaBrowserHistory();
-    pushHistoryState(this.props.history, "modal", "create");
+    pushHistoryState(this.props.history, "modal", source === "scene_listings" ? "change_scene" : "create");
   };
 
   close = () => {
@@ -195,6 +196,7 @@ class MediaBrowser extends Component {
     const urlSource = searchParams.get("media_source") || sluglessPath(this.props.history.location).substring(7);
     const apiSource = this.state.result && this.state.result.meta.source;
     const isVariableWidth = this.state.result && ["bing_images", "tenor"].includes(apiSource);
+    const showCustomOption = apiSource !== "scene_listings" || this.props.hubChannel.permissions.update_hub;
 
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
@@ -260,18 +262,22 @@ class MediaBrowser extends Component {
               </div>
             </div>
             <div className={styles.headerRight}>
-              <a onClick={() => this.showCreateObject()} className={styles.createButton}>
-                <i>
-                  <FontAwesomeIcon icon={faCloudUploadAlt} />
-                </i>
-              </a>
-              <a onClick={() => this.showCreateObject()} className={styles.createLink}>
-                <FormattedMessage
-                  id={`media-browser.add_custom_${
-                    this.state.result && apiSource === "scene_listings" ? "scene" : "object"
-                  }`}
-                />
-              </a>
+              {showCustomOption && (
+                <a onClick={() => this.showCustomMediaDialog(apiSource)} className={styles.createButton}>
+                  <i>
+                    <FontAwesomeIcon icon={faCloudUploadAlt} />
+                  </i>
+                </a>
+              )}
+              {showCustomOption && (
+                <a onClick={() => this.showCustomMediaDialog(apiSource)} className={styles.createLink}>
+                  <FormattedMessage
+                    id={`media-browser.add_custom_${
+                      this.state.result && apiSource === "scene_listings" ? "scene" : "object"
+                    }`}
+                  />
+                </a>
+              )}
             </div>
           </div>
 

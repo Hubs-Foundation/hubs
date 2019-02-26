@@ -34,6 +34,7 @@ import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowser from "./media-browser";
 
 import CreateObjectDialog from "./create-object-dialog.js";
+import ChangeSceneDialog from "./change-scene-dialog.js";
 import HelpDialog from "./help-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
@@ -751,6 +752,10 @@ class UIRoot extends Component {
     this.props.scene.emit("add_media", media);
   };
 
+  changeScene = url => {
+    this.props.hubChannel.updateScene(url);
+  };
+
   closeDialog = () => {
     showFullScreenIfWasFullScreen();
 
@@ -1383,6 +1388,7 @@ class UIRoot extends Component {
               <MediaBrowser
                 history={this.props.history}
                 mediaSearchStore={this.props.mediaSearchStore}
+                hubChannel={this.props.hubChannel}
                 onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
               />
             )}
@@ -1441,6 +1447,12 @@ class UIRoot extends Component {
               stateValue="create"
               history={this.props.history}
               render={() => this.renderDialog(CreateObjectDialog, { onCreate: this.createObject })}
+            />
+            <StateRoute
+              stateKey="modal"
+              stateValue="change_scene"
+              history={this.props.history}
+              render={() => this.renderDialog(ChangeSceneDialog, { onChange: this.changeScene })}
             />
             <StateRoute
               stateKey="modal"
