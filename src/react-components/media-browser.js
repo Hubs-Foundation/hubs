@@ -134,11 +134,11 @@ class MediaBrowser extends Component {
     this.setState({ query });
   };
 
-  handleEntryClicked = entry => {
+  handleEntryClicked = (evt, entry) => {
     if (!this.props.onMediaSearchResultEntrySelected) return;
     this.props.onMediaSearchResultEntrySelected(entry);
     this.close();
-    return false;
+    evt.preventDefault();
   };
 
   handleSourceClicked = source => {
@@ -216,7 +216,7 @@ class MediaBrowser extends Component {
                   onKeyDown={e => {
                     if (e.key === "Enter" && e.shiftKey) {
                       if (this.state.result && this.state.result.entries.length > 0) {
-                        this.handleEntryClicked(this.state.result.entries[0]);
+                        this.handleEntryClicked(e, this.state.result.entries[0]);
                       }
                     } else if (e.key === "Escape" || e.key === "Enter") {
                       e.target.blur();
@@ -347,7 +347,7 @@ class MediaBrowser extends Component {
           href={entry.url}
           target="_blank"
           rel="noreferrer noopener"
-          onClick={() => this.handleEntryClicked(entry)}
+          onClick={e => this.handleEntryClicked(e, entry)}
           className={styles.image}
           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
         >
@@ -360,7 +360,7 @@ class MediaBrowser extends Component {
               target="_blank"
               rel="noreferrer noopener"
               className={styles.name}
-              onClick={() => this.handleEntryClicked(entry)}
+              onClick={e => this.handleEntryClicked(e, entry)}
             >
               {entry.name}
             </a>
