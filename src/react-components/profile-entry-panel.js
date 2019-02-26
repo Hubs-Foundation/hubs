@@ -101,10 +101,12 @@ class AvatarEditor extends Component {
 
     if (this.inputFiles.glb) {
       const gltfLoader = new THREE.GLTFLoader();
-      gltfLoader.setLazy(true);
       const gltfUrl = URL.createObjectURL(this.inputFiles.glb);
       const onProgress = console.log;
-      const { parser } = await new Promise((resolve, reject) => gltfLoader.load(gltfUrl, resolve, onProgress, reject));
+      const parser = await new Promise((resolve, reject) =>
+        gltfLoader.createParser(gltfUrl, resolve, onProgress, reject)
+      );
+      URL.revokeObjectURL(gltfUrl);
 
       const { content, body } = parser.extensions.KHR_binary_glTF;
       this.inputFiles.gltf = new File([content], "file.gltf", {
