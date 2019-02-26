@@ -136,7 +136,6 @@ export default class MediaSearchStore extends EventTarget {
     this._stashedParams = {};
     this._stashedSource = this.getUrlMediaSource(location);
 
-    // Strip browsing query params
     for (const param of SEARCH_CONTEXT_PARAMS) {
       const value = searchParams.get(param);
 
@@ -147,11 +146,7 @@ export default class MediaSearchStore extends EventTarget {
   };
 
   sourceNavigateToDefaultSource = () => {
-    this.sourceNavigate(
-      this._stashedSource ? this._stashedSource : SOURCES[0],
-      false,
-      true
-    );
+    this.sourceNavigate(this._stashedSource ? this._stashedSource : SOURCES[0], false, true);
   };
 
   sourceNavigate = (source, hideNav, useLastStashedParams) => {
