@@ -1011,7 +1011,7 @@ class UIRoot extends Component {
                     e.target.blur();
                   }
                 }}
-                placeholder="Send a message..."
+                placeholder="Send to room..."
               />
               <WithHoverSound>
                 <button className={classNames([styles.messageEntryButton, styles.messageEntrySubmit])} type="submit">
@@ -1215,17 +1215,22 @@ class UIRoot extends Component {
                   className="audio-setup-panel__levels__icon-part"
                 />
               )}
+              {this.state.audioTrack && (
+                <div className="audio-setup-panel__levels__test_label">
+                  <FormattedMessage id="audio.talk_to_test" />
+                </div>
+              )}
             </div>
             <WithHoverSound>
-              <div className="audio-setup-panel__levels__icon" onClick={this.playTestTone}>
+              <div className="audio-setup-panel__levels__icon_clickable" onClick={this.playTestTone}>
                 <img
-                  src="../assets/images/level_background.png"
-                  srcSet="../assets/images/level_background@2x.png 2x"
+                  src="../assets/images/level_action_background.png"
+                  srcSet="../assets/images/level_action_background@2x.png 2x"
                   className="audio-setup-panel__levels__icon-part"
                 />
                 <img
-                  src="../assets/images/level_fill.png"
-                  srcSet="../assets/images/level_fill@2x.png 2x"
+                  src="../assets/images/level_action_fill.png"
+                  srcSet="../assets/images/level_action_fill@2x.png 2x"
                   className="audio-setup-panel__levels__icon-part"
                   style={speakerClip}
                 />
@@ -1234,24 +1239,29 @@ class UIRoot extends Component {
                   srcSet="../assets/images/speaker_level@2x.png 2x"
                   className="audio-setup-panel__levels__icon-part"
                 />
+                <div className="audio-setup-panel__levels__test_label">
+                  <FormattedMessage id="audio.click_to_test" />
+                </div>
               </div>
             </WithHoverSound>
           </div>
           {this.state.audioTrack && (
             <div className="audio-setup-panel__device-chooser">
               <WithHoverSound>
-                <select
-                  className="audio-setup-panel__device-chooser__dropdown"
-                  value={this.selectedMicDeviceId()}
-                  onChange={this.micDeviceChanged}
-                >
-                  {this.state.micDevices.map(d => (
-                    <option key={d.deviceId} value={d.deviceId}>
-                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                      {d.label}
-                    </option>
-                  ))}
-                </select>
+                {this.state.micDevices.length > 1 && (
+                  <select
+                    className="audio-setup-panel__device-chooser__dropdown"
+                    value={this.selectedMicDeviceId()}
+                    onChange={this.micDeviceChanged}
+                  >
+                    {this.state.micDevices.map(d => (
+                      <option key={d.deviceId} value={d.deviceId}>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        {d.label}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </WithHoverSound>
               <img
                 className="audio-setup-panel__device-chooser__mic-icon"
@@ -1546,7 +1556,7 @@ class UIRoot extends Component {
                         e.target.blur();
                       }
                     }}
-                    placeholder="Send a message..."
+                    placeholder="Send to room..."
                   />
                   <button
                     className={classNames([styles.messageEntrySpawn])}
