@@ -324,6 +324,7 @@
 
         :local(.image) {
           width: 100%;
+          display: block;
 
           img {
             background-color: $light-grey;
