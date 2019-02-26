@@ -15,6 +15,14 @@ import { upload } from "../utils/media-utils";
 const BOT_PARENT_AVATAR = "zqXoGT5";
 
 class AvatarEditor extends Component {
+  static propTypes = {
+    store: PropTypes.object,
+    onSignIn: PropTypes.func,
+    onSignOut: PropTypes.func,
+    signedIn: PropTypes.bool,
+    onAvatarChanged: PropTypes.func
+  };
+
   constructor(props) {
     super(props);
     this.state = {};
@@ -34,8 +42,19 @@ class AvatarEditor extends Component {
     };
   }
 
-  componentDidMount = async () => {
-    console.log(this.props.store.state);
+  componentDidMount = () => {
+    if (this.props.signedIn && !this.state.avatar) {
+      return this.getPersonalAvatar();
+    }
+  };
+
+  componentDidUpdate = () => {
+    if (this.props.signedIn && !this.state.avatar) {
+      return this.getPersonalAvatar();
+    }
+  };
+
+  getPersonalAvatar = async () => {
     const { personalAvatarId } = this.props.store.state.profile;
     const avatar = await (personalAvatarId
       ? this.getAvatar(personalAvatarId)
@@ -148,6 +167,14 @@ class AvatarEditor extends Component {
   );
 
   render() {
+    if (!this.props.signedIn) {
+      return (
+        <a onClick={this.props.onSignIn}>
+          <FormattedMessage id="sign-in.in" />
+        </a>
+      );
+    }
+
     if (!this.state.avatar) {
       return <div>Loading...</div>;
     }
@@ -236,7 +263,10 @@ class ProfileEntryPanel extends Component {
     store: PropTypes.object,
     messages: PropTypes.object,
     finished: PropTypes.func,
-    intl: PropTypes.object
+    intl: PropTypes.object,
+    onSignIn: PropTypes.func,
+    onSignOut: PropTypes.func,
+    signedIn: PropTypes.bool
   };
 
   constructor(props) {
@@ -368,7 +398,13 @@ class ProfileEntryPanel extends Component {
                     </div>
                   </div>
                 ) : (
-                  <AvatarEditor store={this.props.store} onAvatarChanged={avatarId => this.setState({ avatarId })} />
+                  <AvatarEditor
+                    signedIn={this.props.signedIn}
+                    onSignIn={this.props.onSignIn}
+                    onSignOut={this.props.onSignOut}
+                    store={this.props.store}
+                    onAvatarChanged={avatarId => this.setState({ avatarId })}
+                  />
                 )}
               </div>
             ) : (

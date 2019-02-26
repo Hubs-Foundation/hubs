@@ -1382,7 +1382,14 @@ class UIRoot extends Component {
               stateValue="profile"
               history={this.props.history}
               render={props => (
-                <ProfileEntryPanel {...props} finished={this.onProfileFinished} store={this.props.store} />
+                <ProfileEntryPanel
+                  {...props}
+                  signedIn={this.state.signedIn}
+                  onSignIn={this.showSignInDialog}
+                  onSignOut={this.signOut}
+                  finished={this.onProfileFinished}
+                  store={this.props.store}
+                />
               )}
             />
             {showMediaBrowser && (
