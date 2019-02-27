@@ -1251,23 +1251,21 @@ class UIRoot extends Component {
               </div>
             </WithHoverSound>
           </div>
-          {this.state.audioTrack && (
+          {this.state.audioTrack && this.state.micDevices.length > 1 ? (
             <div className="audio-setup-panel__device-chooser">
               <WithHoverSound>
-                {
-                  <select
-                    className="audio-setup-panel__device-chooser__dropdown"
-                    value={this.selectedMicDeviceId()}
-                    onChange={this.micDeviceChanged}
-                  >
-                    {this.state.micDevices.map(d => (
-                      <option key={d.deviceId} value={d.deviceId}>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        {d.label}
-                      </option>
-                    ))}
-                  </select>
-                }
+                <select
+                  className="audio-setup-panel__device-chooser__dropdown"
+                  value={this.selectedMicDeviceId()}
+                  onChange={this.micDeviceChanged}
+                >
+                  {this.state.micDevices.map(d => (
+                    <option key={d.deviceId} value={d.deviceId}>
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
               </WithHoverSound>
               <img
                 className="audio-setup-panel__device-chooser__mic-icon"
@@ -1280,6 +1278,8 @@ class UIRoot extends Component {
                 srcSet="../assets/images/dropdown_arrow@2x.png 2x"
               />
             </div>
+          ) : (
+            <div />
           )}
           {this.shouldShowHmdMicWarning() && (
             <div className="audio-setup-panel__hmd-mic-warning">
