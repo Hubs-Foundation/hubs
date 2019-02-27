@@ -10,7 +10,7 @@
 
 :local(.edit-button) {
   @extend %fa-icon-button;
-  color: $light-grey;
+  color: $dark-grey;
   display: inline;
   position: absolute;
   top: 0px;
@@ -27,7 +27,7 @@
 
 :local(.info-button) {
   @extend %fa-icon-button;
-  color: $light-grey;
+  color: $dark-grey;
   display: inline;
   position: absolute;
   top: 0px;

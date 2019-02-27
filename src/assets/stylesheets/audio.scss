@@ -82,7 +82,22 @@
       position:relative;
       width: 111px;
       height: 111px;
+    }
+
+    &__icon_clickable {
+      position:relative;
+      width: 111px;
+      height: 111px;
       cursor: pointer;
+    }
+
+    &__test_label {
+      position: absolute;
+      width: 111px;
+      text-align: center;
+      font-size: 0.8em;
+      bottom: 12px;
+      color: white;
     }
 
     &__icon-part {
