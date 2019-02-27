@@ -127,7 +127,7 @@ const store = window.APP.store;
 const mediaSearchStore = window.APP.mediaSearchStore;
 
 const qs = new URLSearchParams(location.search);
-const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo();
+const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";

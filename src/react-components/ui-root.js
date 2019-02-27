@@ -664,7 +664,7 @@ class UIRoot extends Component {
   };
 
   shouldShowHmdMicWarning = () => {
-    if (isMobile || AFRAME.utils.device.isOculusGo()) return false;
+    if (isMobile || AFRAME.utils.device.isMobileVR()) return false;
     if (!this.state.enterInVR) return false;
     if (!this.hasHmdMicrophone()) return false;
 
@@ -694,7 +694,7 @@ class UIRoot extends Component {
   shouldShowFullScreen = () => {
     // Disable full screen on iOS, since Safari's fullscreen mode does not let you prevent native pinch-to-zoom gestures.
     return (
-      (isMobile || AFRAME.utils.device.isOculusGo()) &&
+      (isMobile || AFRAME.utils.device.isMobileVR()) &&
       !AFRAME.utils.device.isIOS() &&
       !this.state.enterInVR &&
       screenfull.enabled
@@ -1170,7 +1170,7 @@ class UIRoot extends Component {
     const micClip = {
       clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)`
     };
-    const isMobileOrGo = isMobile || AFRAME.utils.device.isOculusGo();
+    const isMobileOrGo = isMobile || AFRAME.utils.device.isMobileVR();
     const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
     const subtitleId = isMobileOrGo ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
     return (

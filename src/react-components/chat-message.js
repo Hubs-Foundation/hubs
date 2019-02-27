@@ -137,7 +137,7 @@ function renderChatMessage(body, from, allowEmojiRender, lowResolution) {
 export async function createInWorldLogMessage({ name, type, body }) {
   if (type !== "chat") return;
 
-  const lowResolution = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo();
+  const lowResolution = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
   const blob = await renderChatMessage(body, name, false, lowResolution);
   const entity = document.createElement("a-entity");
   const meshEntity = document.createElement("a-entity");
