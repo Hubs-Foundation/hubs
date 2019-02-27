@@ -157,7 +157,7 @@ import registerNetworkSchemas from "./network-schemas";
 import registerTelemetry from "./telemetry";
 import { warmSerializeElement } from "./utils/serialize-element";
 
-import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
+import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
 import qsTruthy from "./utils/qs_truthy";
@@ -540,6 +540,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   scene.addEventListener("enter-vr", () => {
     document.body.classList.add("vr-mode");
+
+    // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
+    if (!isMobile || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
+      document.body.classList.add("vr-mode-stretch");
+    }
 
     if (!scene.is("entered")) {
       // If VR headset is activated, refreshing page will fire vrdisplayactivate

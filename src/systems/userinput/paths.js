@@ -98,6 +98,7 @@ paths.device.touchscreen.pinch = {};
 paths.device.touchscreen.pinch.delta = "/device/touchscreen/pinch/delta";
 paths.device.touchscreen.pinch.initialDistance = "/device/touchscreen/pinch/initialDistance";
 paths.device.touchscreen.pinch.currentDistance = "/device/touchscreen/pinch/currentDistance";
+paths.device.touchscreen.isTouching = "/device/touchscreen/isTouching";
 paths.device.touchscreen.isTouchingGrabbable = "/device/touchscreen/isTouchingGrabbable";
 paths.device.touchscreen.tap1 = "/device/touchscreen/tap1";
 paths.device.touchscreen.tap2 = "/device/touchscreen/tap2";

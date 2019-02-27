@@ -1084,6 +1084,11 @@ class UIRoot extends Component {
         </div>
 
         <div className={entryStyles.buttonContainer}>
+          {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
+            <div className={entryStyles.secondary} onClick={this.enterVR}>
+              <FormattedMessage id="entry.cardboard" />
+            </div>
+          )}
           {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
             <GenericEntryButton secondary={true} onClick={this.enterVR} />
           )}
@@ -1102,11 +1107,6 @@ class UIRoot extends Component {
           )}
           {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
             <TwoDEntryButton onClick={this.enter2D} />
-          )}
-          {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
-            <div className={entryStyles.secondary} onClick={this.enterVR}>
-              <FormattedMessage id="entry.cardboard" />
-            </div>
           )}
         </div>
       </div>
