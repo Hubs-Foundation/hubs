@@ -107,23 +107,20 @@ AFRAME.registerComponent("position-at-box-shape-border", {
     const boxCenter = new THREE.Vector3();
     const tempParentWorldScale = new THREE.Vector3();
     const boxFaceNormal = new THREE.Vector3();
+    const min = new THREE.Vector3(0.001, 0.001, 0.001);
 
     return function(animate, forceNewExtents) {
-      if (forceNewExtents || this.mesh !== this.el.getObject3D("mesh") || this.shape !== this.el.components.shape) {
+      if (forceNewExtents || this.mesh !== this.el.getObject3D("mesh")) {
         this.mesh = this.el.getObject3D("mesh");
-        this.shape = this.el.components.shape;
 
-        if (this.el.components.shape) {
-          this.shape = this.el.components.shape;
-          this.halfExtents.copy(this.shape.data.halfExtents);
-        } else {
-          const box = getBox(this.el, this.mesh);
-          this.halfExtents = box.min
-            .clone()
-            .negate()
-            .add(box.max)
-            .multiplyScalar(0.51 / this.el.object3D.scale.x);
-        }
+        const box = getBox(this.el, this.mesh);
+        this.halfExtents = box.min
+          .clone()
+          .negate()
+          .add(box.max)
+          .multiplyScalar(0.65);
+
+        this.halfExtents.max(min);
       }
 
       if (!this.target) return;
