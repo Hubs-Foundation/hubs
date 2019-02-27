@@ -41,17 +41,8 @@ const TIPS = {
     ]
   },
   mobile: {
-    top: ["pen_mode", "video_share_mode", "mute_mode"],
-    bottom: [
-      "look",
-      "locomotion",
-      "spawn_menu",
-      "object_grab",
-      "freeze_gesture",
-      "menu_hover",
-      "unfreeze_gesture",
-      "object_pin"
-    ]
+    top: ["pen_mode", "video_share_mode", "freeze_mode", "mute_mode"],
+    bottom: ["look", "locomotion", "spawn_menu", "object_grab", "freeze_gesture", "menu_hover", "object_pin"]
   },
   standalone: { top: [], bottom: [] }
 };
@@ -132,12 +123,6 @@ const VALIDATORS = {
     if (scene.is("frozen") && userinput.activeSets.has(sets.cursorHoveringOnInteractable)) return FINISH;
     return scene.is("frozen") ? INVALID : VALID;
   },
-  unfreeze_gesture: function(userinput, scene, mediaCounter) {
-    if (mediaCounter.count() === 0) return INVALID;
-    if (userinput.activeSets.has(sets.cursorHoldingInteractable)) return INVALID;
-    if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
-    return scene.is("frozen") ? VALID : FINISH;
-  },
   menu_hover: function(userinput, scene, mediaCounter) {
     if (mediaCounter.count() === 0) return INVALID;
     if (!scene.is("frozen")) return INVALID;
@@ -189,17 +174,17 @@ const VALIDATORS = {
     if (!userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
     return VALID;
   },
+  freeze_mode: function(userinput, scene) {
+    return scene.is("frozen") ? VALID : INVALID;
+  },
   video_share_mode: function(userinput, scene) {
-    if (!scene.is("sharing_video")) return INVALID;
-    return VALID;
+    return scene.is("sharing_video") ? VALID : INVALID;
   },
   mirror_mode: function(userinput, scene) {
-    if (!scene.is("mirroring")) return INVALID;
-    return VALID;
+    return scene.is("mirroring") ? VALID : INVALID;
   },
   mute_mode: function(userinput, scene) {
-    if (!scene.is("muted")) return INVALID;
-    return VALID;
+    return scene.is("muted") ? VALID : INVALID;
   }
 };
 
