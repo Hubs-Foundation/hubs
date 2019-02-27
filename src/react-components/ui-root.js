@@ -1254,7 +1254,7 @@ class UIRoot extends Component {
           {this.state.audioTrack && (
             <div className="audio-setup-panel__device-chooser">
               <WithHoverSound>
-                {this.state.micDevices.length > 1 && (
+                {
                   <select
                     className="audio-setup-panel__device-chooser__dropdown"
                     value={this.selectedMicDeviceId()}
@@ -1267,7 +1267,7 @@ class UIRoot extends Component {
                       </option>
                     ))}
                   </select>
-                )}
+                }
               </WithHoverSound>
               <img
                 className="audio-setup-panel__device-chooser__mic-icon"
