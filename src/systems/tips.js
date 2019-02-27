@@ -24,24 +24,27 @@ const LOCAL_STORAGE_KEY = "__hubs_finished_tips";
 
 const TIPS = {
   desktop: {
-    top: ["mirror_mode", "pen_mode", "video_share_mode"],
+    top: ["mirror_mode", "pen_mode", "video_share_mode", "mute_mode"],
     bottom: [
       "look",
       "locomotion",
       "turning",
       "spawn_menu",
       "freeze_gesture",
-      "menu_hover",
       "object_grab",
-      "object_pin",
       "object_zoom",
       "object_scale",
+      "menu_hover",
+      "object_pin",
       "pen_color",
       "pen_size"
     ]
   },
-  mobile: {},
-  standalone: {}
+  mobile: {
+    top: ["pen_mode", "video_share_mode", "mute_mode"],
+    bottom: []
+  },
+  standalone: { top: [], bottom: [] }
 };
 
 let localStorageCache = null;
@@ -115,6 +118,7 @@ const VALIDATORS = {
     if (scene.is("frozen")) return INVALID;
     if (mediaCounter.count() === 0) return INVALID;
     if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
+    if (userinput.activeSets.has(sets.cursorHoldingCamera)) return INVALID;
     if (userinput.activeSets.has(sets.cursorHoldingInteractable)) return FINISH;
     return VALID;
   },
@@ -125,11 +129,15 @@ const VALIDATORS = {
     return VALID;
   },
   object_zoom: function(userinput) {
+    if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
+    if (userinput.activeSets.has(sets.cursorHoldingCamera)) return INVALID;
     if (!userinput.activeSets.has(sets.cursorHoldingInteractable)) return INVALID;
     if (userinput.get(paths.actions.cursor.modDelta)) return FINISH;
     return VALID;
   },
   object_scale: function(userinput) {
+    if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
+    if (userinput.activeSets.has(sets.cursorHoldingCamera)) return INVALID;
     if (!userinput.activeSets.has(sets.cursorHoldingInteractable)) return INVALID;
     if (userinput.get(paths.actions.cursor.scaleGrabbedGrabbable)) return FINISH;
     return VALID;
@@ -156,6 +164,10 @@ const VALIDATORS = {
   },
   mirror_mode: function(userinput, scene) {
     if (!scene.is("mirroring")) return INVALID;
+    return VALID;
+  },
+  mute_mode: function(userinput, scene) {
+    if (!scene.is("muted")) return INVALID;
     return VALID;
   }
 };

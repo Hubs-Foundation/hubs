@@ -55,6 +55,7 @@ import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
+import { markTipScopeFinished } from "../systems/tips.js";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";

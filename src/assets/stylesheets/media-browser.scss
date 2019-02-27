@@ -135,7 +135,7 @@
   }
 
   :local(.nav) {
-    width: 100vw;
+    width: 95vw;
     max-width: 1720px;
     display: flex;
     position: relative;
@@ -144,6 +144,7 @@
     border-bottom: 1px solid $light-grey;
     white-space: nowrap;
     padding-left: 12px;
+    margin: 0 12px;
 
     @media(max-width: 768px) {
       overflow-x: scroll;
@@ -249,7 +250,7 @@
 
 
   :local(.body) {
-    width: 95vw;
+    width: 100vw;
     max-width: 1720px;
 
     :local(.tiles) {

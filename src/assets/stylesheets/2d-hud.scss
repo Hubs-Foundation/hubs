@@ -41,7 +41,7 @@
     @extend %tip-bubble;
     top: 60px;
 
-    width: 223px;
+    width: 350px;
 
     @media(max-width: 465px) {
       width: 207px;
@@ -62,11 +62,39 @@
     }
 
     :local(.attach_video_share_mode) {
-      left: 29px;
+      left: 90px;
+
+      @media(max-width: 465px) {
+        left: 27px;
+      }
+
+      @media(max-width: 420px) {
+        left: 26px;
+      }
     }
 
     :local(.attach_pen_mode) {
-      right: 78px;
+      right: 139px;
+
+      @media(max-width: 465px) {
+        right: 76px;
+      }
+
+      @media(max-width: 420px) {
+        right: 71px;
+      }
+    }
+
+    :local(.attach_mute_mode) {
+      left: 139px;
+
+      @media(max-width: 465px) {
+        left: 76px;
+      }
+
+      @media(max-width: 420px) {
+        left: 71px;
+      }
     }
   }
 
