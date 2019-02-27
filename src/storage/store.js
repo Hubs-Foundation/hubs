@@ -37,7 +37,8 @@ export const SCHEMA = {
       properties: {
         hasFoundFreeze: { type: "boolean" },
         hasChangedName: { type: "boolean" },
-        lastEnteredAt: { type: "string" }
+        lastEnteredAt: { type: "string" },
+        hasPinned: { type: "boolean" }
       }
     },
 

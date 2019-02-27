@@ -144,6 +144,7 @@ class UIRoot extends Component {
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
+    activeTips: PropTypes.object,
     location: PropTypes.object,
     history: PropTypes.object
   };
@@ -1718,6 +1719,7 @@ class UIRoot extends Component {
                   frozen={this.state.frozen}
                   spacebubble={this.state.spacebubble}
                   videoShareMediaSource={this.state.videoShareMediaSource}
+                  activeTip={this.props.activeTips && this.props.activeTips.top}
                   onToggleMute={this.toggleMute}
                   onToggleFreeze={this.toggleFreeze}
                   onToggleSpaceBubble={this.toggleSpaceBubble}

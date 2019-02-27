@@ -113,6 +113,7 @@ import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
 import "./systems/frame-scheduler";
 import "./systems/ui-hotkeys";
+import "./systems/tips";
 
 import "./gltf-component-mappings";
 
