@@ -243,3 +243,21 @@ $semi-bold: 600;
 %fa-icon-button-text {
   margin-left: 16px;
 }
+
+%tip-bubble {
+  position: absolute;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  border-radius: 28px;
+  border: 0;
+  pointer-events: auto;
+  z-index: 2;
+  font-size: 0.8em;
+  color: white;
+  padding: 12px 24px;
+  background-color: $bright-blue;
+  text-align: center;
+}

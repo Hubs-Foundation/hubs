@@ -111,19 +111,19 @@ export default class SettingsMenu extends Component {
               <a href="/whats-new" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.whats-new" />
               </a>
-              <a href="/spoke" target="_blank" rel="noreferrer noopener">
-                <FormattedMessage id="settings.create-scene" />
+              <a href="https://github.com/mozilla/hubs/wiki/Hubs-Controls" target="_blank" rel="noreferrer noopener">
+                <FormattedMessage id="settings.controls" />
               </a>
-              <a href="https://discord.gg/wHmY4nd" target="_blank" rel="noreferrer noopener">
-                <FormattedMessage id="settings.community" />
-              </a>
-            </div>
-            <div className={classNames([styles.bottomLinks])}>
               <a href="https://github.com/mozilla/hubs/wiki/Hubs-Features" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.features" />
               </a>
-              <a href="https://github.com/mozilla/hubs/wiki/Hubs-Controls" target="_blank" rel="noreferrer noopener">
-                <FormattedMessage id="settings.controls" />
+            </div>
+            <div className={classNames([styles.bottomLinks])}>
+              <a href="https://discord.gg/wHmY4nd" target="_blank" rel="noreferrer noopener">
+                <FormattedMessage id="settings.community" />
+              </a>
+              <a href="/spoke" target="_blank" rel="noreferrer noopener">
+                <FormattedMessage id="settings.create-scene" />
               </a>
               <a href="/?report" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.report" />

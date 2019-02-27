@@ -567,12 +567,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     subscriptions,
     enterScene: entryManager.enterScene,
     exitScene: entryManager.exitScene,
-    initialIsSubscribed: subscriptions.isSubscribed()
+    initialIsSubscribed: subscriptions.isSubscribed(),
+    activeTips: scene.systems.tips.activeTips
   });
 
   scene.addEventListener("action_focus_chat", () => {
     const chatFocusTarget = document.querySelector(".chat-focus-target");
     chatFocusTarget && chatFocusTarget.focus();
+  });
+
+  scene.addEventListener("tips_changed", e => {
+    remountUI({ activeTips: e.detail });
   });
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));

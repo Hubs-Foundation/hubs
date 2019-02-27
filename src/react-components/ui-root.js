@@ -1502,6 +1502,20 @@ class UIRoot extends Component {
                 hubId={this.props.hubId}
               />
             )}
+            {entered &&
+              this.props.activeTips.bottom && (
+                <div className={styles.bottomTip}>
+                  {this.props.activeTips.bottom.endsWith(".spawn_menu") ? (
+                    <div className={styles.spawnTip}>
+                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}-pre`} />
+                      <div className={classNames(styles.spawnTipIcon)} />
+                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}-post`} />
+                    </div>
+                  ) : (
+                    <FormattedMessage id={`tips.${this.props.activeTips.bottom}`} />
+                  )}
+                </div>
+              )}
             {entered && (
               <form onSubmit={this.sendMessage}>
                 <div
@@ -1607,7 +1621,7 @@ class UIRoot extends Component {
               })}
             >
               {!showVREntryButton &&
-                !this.state.videoShareMediaSource && (
+                !this.props.activeTips.top && (
                   <WithHoverSound>
                     <button
                       className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
@@ -1619,7 +1633,7 @@ class UIRoot extends Component {
                 )}
               {!showVREntryButton &&
                 this.occupantCount() > 1 &&
-                !this.state.videoShareMediaSource &&
+                !this.props.activeTips.top &&
                 entered && (
                   <WithHoverSound>
                     <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>

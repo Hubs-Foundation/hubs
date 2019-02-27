@@ -1,5 +1,6 @@
 import { sets } from "./userinput/sets";
 import { paths } from "./userinput/paths";
+import { detectInHMD } from "../utils/vr-caps-detect";
 
 // The output of this system is activeTips which shows, if any, the tips to show at the top
 // and bottom of the screen. There are named tips (eg locomotion) that each have validators.
@@ -25,7 +26,9 @@ const TIPS = {
   desktop: {
     top: ["pen_mode", "video_share_mode"],
     bottom: [
+      "look",
       "locomotion",
+      "turning",
       "spawn_menu",
       "freeze_gesture",
       "menu_hover",
@@ -36,15 +39,62 @@ const TIPS = {
       "pen_color",
       "pen_size"
     ]
+  },
+  mobile: {},
+  standalone: {}
+};
+
+let localStorageCache = null;
+
+const isMobile = AFRAME.utils.device.isMobile();
+
+const tipPlatform = () => {
+  if (detectInHMD()) return "standalone";
+  return isMobile ? "mobile" : "desktop";
+};
+
+const platformTips = () => {
+  return TIPS[tipPlatform()];
+};
+
+const isTipFinished = tip => {
+  if (!localStorageCache) {
+    localStorageCache = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+  }
+
+  return !!(localStorageCache[tip] && localStorageCache[tip].finished);
+};
+
+export const markTipFinished = tip => {
+  const storeData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+  storeData[tip] = { finished: true };
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(storeData));
+  localStorageCache = null;
+};
+
+export const markTipScopeFinished = scope => {
+  const tips = platformTips[scope];
+
+  for (let i = 0; i < tips.length; i++) {
+    const tip = tips[i];
+    markTipFinished(tip);
   }
 };
 
 const VALIDATORS = {
+  look: function(userinput) {
+    const cameraDelta = userinput.get(paths.device.smartMouse.cameraDelta);
+    return cameraDelta ? FINISH : VALID;
+  },
   locomotion: function(userinput) {
     const accel = userinput.get(paths.actions.characterAcceleration);
 
     // User moved
-    return accel[0] !== 0 || accel[1] !== 0 ? FINISH : VALID;
+    return accel && (accel[0] !== 0 || accel[1] !== 0) ? FINISH : VALID;
+  },
+  turning: function(userinput) {
+    if (userinput.get(paths.actions.snapRotateLeft) || userinput.get(paths.actions.snapRotateRight)) return FINISH;
+    return VALID;
   },
   spawn_menu: function(userinput, scene, mediaCounter) {
     if (mediaCounter.count() === 0) return VALID;
@@ -65,12 +115,17 @@ const VALIDATORS = {
     if (scene.is("frozen")) return INVALID;
     if (mediaCounter.count() === 0) return INVALID;
     if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
+    if (userinput.activeSets.has(sets.cursorHoldingInteractable)) return FINISH;
     return VALID;
   },
   object_pin: function(userinput, scene, mediaCounter, store) {
     if (!scene.is("frozen")) return INVALID;
     if (mediaCounter.count() === 0) return INVALID;
-    if (!userinput.activeSets.has(sets.cursorHoveringOnInteractable)) return INVALID;
+    if (
+      !userinput.activeSets.has(sets.cursorHoveringOnInteractable) &&
+      !userinput.activeSets.has(sets.cursorHoveringOnUI)
+    )
+      return INVALID;
     if (store && store.state.activity.hasPinned) return FINISH;
     return VALID;
   },
@@ -108,11 +163,9 @@ const VALIDATORS = {
 
 AFRAME.registerSystem("tips", {
   init: function() {
-    this.activeTips = { bottom: {} };
+    this.activeTips = {};
     this._finishedScopes = {};
     this._performStep = this._performStep.bind(this);
-    this._markFinished = this._markFinished.bind(this);
-    this._isFinished = this._isFinished.bind(this);
 
     if (localStorage.getItem(LOCAL_STORAGE_KEY) === null) {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({}));
@@ -136,65 +189,39 @@ AFRAME.registerSystem("tips", {
       if (!this._mediaCounter) return;
     }
 
-    const tips = this._platformTips();
+    const tips = platformTips();
+
+    const prevTop = this.activeTips.top;
+    const prevBottom = this.activeTips.bottom;
 
     this._performStep(tips.top, "top");
+    this._performStep(tips.bottom, "bottom");
 
-    if (!this._finishedScopes.bottom) {
-      this._performStep(tips.bottom, "bottom");
+    if (prevTop !== this.activeTips.top || prevBottom !== this.activeTips.bottom) {
+      this.el.emit("tips_changed", this.activeTips);
     }
-
-    if (this._tickCount % 60 === 0) {
-      console.log(this.activeTips);
-    }
-  },
-
-  markScopeFinished: function(scope) {
-    const tips = this._platformTips[scope];
-
-    for (let i = 0; i < tips.length; i++) {
-      const tip = tips[i];
-      this._markFinished(tip);
-    }
-  },
-
-  _platformTips: function() {
-    return TIPS.desktop;
-  },
-
-  _markFinished: function(tip) {
-    const storeData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
-    storeData[tip] = { finished: true };
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(storeData));
-    this._localStorageCache = null;
-  },
-
-  _isFinished: function(tip) {
-    if (!this._localStorageCache) {
-      this._localStorageCache = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
-    }
-
-    return !!(this._localStorageCache[tip] && this._localStorageCache[tip].finished);
   },
 
   _performStep: function(tips, scope) {
-    const scene = AFRAME.scenes[0];
     this.activeTips[scope] = null;
+    if (this._finishedScopes[scope]) return;
+
+    const scene = AFRAME.scenes[0];
     let finishCount = 0;
 
     for (let i = 0; i < tips.length; i++) {
       const tip = tips[i];
-      if (this._isFinished(tip)) {
+      if (isTipFinished(tip)) {
         finishCount++;
         continue;
       }
 
       switch (VALIDATORS[tip](this._userinput, scene, this._mediaCounter, window.APP.store)) {
         case FINISH:
-          this._markFinished(tip);
+          markTipFinished(tip);
           break;
         case VALID:
-          this.activeTips[scope] = tip;
+          this.activeTips[scope] = `${tipPlatform()}.${tip}`;
           break;
       }
 

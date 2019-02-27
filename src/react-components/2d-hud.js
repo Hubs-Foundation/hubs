@@ -15,6 +15,7 @@ class TopHUD extends Component {
     muted: PropTypes.bool,
     frozen: PropTypes.bool,
     videoShareMediaSource: PropTypes.string,
+    activeTip: PropTypes.string,
     history: PropTypes.object,
     onToggleMute: PropTypes.func,
     onToggleFreeze: PropTypes.func,
@@ -93,12 +94,6 @@ class TopHUD extends Component {
           }}
           onMouseOver={showExtrasOnHover}
         >
-          {this.props.videoShareMediaSource !== null && (
-            <div className={cx(styles.videoShareNotify)}>
-              <div className={cx(styles.attachPoint)} />
-              <FormattedMessage id="video_share.notify" />
-            </div>
-          )}
           {videoShareExtraOptionTypes.length > 0 && (
             <div className={cx(styles.videoShareExtraOptions)} onMouseOut={hideExtrasOnOut}>
               {videoShareExtraOptionTypes.map(type => (
@@ -127,6 +122,12 @@ class TopHUD extends Component {
     return (
       <div className={cx(styles.container, styles.top, styles.unselectable, uiStyles.uiInteractive)}>
         <div className={cx(uiStyles.uiInteractive, styles.panel)}>
+          {this.props.activeTip && (
+            <div className={cx(styles.topTip)}>
+              <div className={cx([styles.attachPoint, styles[`attach_${this.props.activeTip.split(".")[1]}`]])} />
+              <FormattedMessage id={`tips.${this.props.activeTip}`} />
+            </div>
+          )}
           {videoSharingButtons}
           <WithHoverSound>
             <div
