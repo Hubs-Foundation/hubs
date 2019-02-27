@@ -193,7 +193,7 @@
     "tips.desktop.locomotion": "Great! Now, use the W A S D keys to move. Hold shift to run.",
     "tips.desktop.turning": "Perfect. Use the Q and E keys to rotate.",
     "tips.desktop.spawn_menu-pre": "To create objects, click the ",
-    "tips.desktop.spawn_menu-post": "button at the top of the screen.",
+    "tips.desktop.spawn_menu-post": "button at the top of the screen, or press Ctrl 1 through 7.",
     "tips.desktop.freeze_gesture": "Press and hold spacebar to show object menus.",
     "tips.desktop.menu_hover": "Now, point the cursor at an object to show the menu.",
     "tips.desktop.object_grab": "Click and drag the object to move it. Or, flick to throw it!",
