@@ -188,6 +188,7 @@
     "settings.row-room": "Room",
     "tips.desktop.video_share_mode": "Select again to un-share video.",
     "tips.desktop.pen_mode": "Press ESC or right click to drop pen. Ctrl-Z to undo.",
+    "tips.desktop.mirror_mode": "Press ESC to end camera mirroring.",
     "tips.desktop.look": "Welcome to Hubs! 👋 Click and drag to look around.",
     "tips.desktop.locomotion": "Great! Now, use the W A S D keys to move. Hold shift to run.",
     "tips.desktop.turning": "Perfect. Use the Q and E keys to rotate.",
