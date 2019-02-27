@@ -1,3 +1,4 @@
+import "./animation";
 import "./ambient-light";
 import "./animation-mixer";
 import "./audio-feedback";
