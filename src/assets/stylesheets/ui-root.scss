@@ -345,6 +345,13 @@ body.vr-mode {
   width: auto;
   padding: 4px 24px 4px 12px;
 
+  @media(max-width: 768px) {
+    left: 50%;
+    width: 80%;
+    -webkit-transform: auto;
+    transform: auto;
+  }
+
   :local(.tip-cancel) {
     color: $light-blue;
     appearance: none;

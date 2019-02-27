@@ -42,7 +42,16 @@ const TIPS = {
   },
   mobile: {
     top: ["pen_mode", "video_share_mode", "mute_mode"],
-    bottom: []
+    bottom: [
+      "look",
+      "locomotion",
+      "spawn_menu",
+      "object_grab",
+      "freeze_gesture",
+      "menu_hover",
+      "unfreeze_gesture",
+      "object_pin"
+    ]
   },
   standalone: { top: [], bottom: [] }
 };
@@ -94,7 +103,9 @@ export const resetTips = () => {
 const VALIDATORS = {
   look: function(userinput) {
     if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
-    const cameraDelta = userinput.get(paths.device.smartMouse.cameraDelta);
+    const cameraDelta = userinput.get(
+      isMobile ? paths.device.touchscreen.touchCameraDelta : paths.device.smartMouse.cameraDelta
+    );
     return cameraDelta ? FINISH : VALID;
   },
   locomotion: function(userinput) {
@@ -120,6 +131,12 @@ const VALIDATORS = {
     if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
     if (scene.is("frozen") && userinput.activeSets.has(sets.cursorHoveringOnInteractable)) return FINISH;
     return scene.is("frozen") ? INVALID : VALID;
+  },
+  unfreeze_gesture: function(userinput, scene, mediaCounter) {
+    if (mediaCounter.count() === 0) return INVALID;
+    if (userinput.activeSets.has(sets.cursorHoldingInteractable)) return INVALID;
+    if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
+    return scene.is("frozen") ? VALID : FINISH;
   },
   menu_hover: function(userinput, scene, mediaCounter) {
     if (mediaCounter.count() === 0) return INVALID;

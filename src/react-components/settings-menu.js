@@ -131,14 +131,6 @@ export default class SettingsMenu extends Component {
               <a href="/whats-new" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.whats-new" />
               </a>
-              <a href="https://github.com/mozilla/hubs/wiki/Hubs-Controls" target="_blank" rel="noreferrer noopener">
-                <FormattedMessage id="settings.controls" />
-              </a>
-              <a href="https://github.com/mozilla/hubs/wiki/Hubs-Features" target="_blank" rel="noreferrer noopener">
-                <FormattedMessage id="settings.features" />
-              </a>
-            </div>
-            <div className={classNames([styles.bottomLinks])}>
               <button
                 onClick={e => {
                   e.preventDefault();
@@ -148,6 +140,14 @@ export default class SettingsMenu extends Component {
               >
                 <FormattedMessage id="settings.tips" />
               </button>
+              <a href="https://github.com/mozilla/hubs/wiki/Hubs-Controls" target="_blank" rel="noreferrer noopener">
+                <FormattedMessage id="settings.controls" />
+              </a>
+            </div>
+            <div className={classNames([styles.bottomLinks])}>
+              <a href="https://github.com/mozilla/hubs/wiki/Hubs-Features" target="_blank" rel="noreferrer noopener">
+                <FormattedMessage id="settings.features" />
+              </a>
               <a href="https://discord.gg/wHmY4nd" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.community" />
               </a>
