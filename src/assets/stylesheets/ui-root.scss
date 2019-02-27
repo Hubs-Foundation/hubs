@@ -310,7 +310,7 @@ body.vr-mode {
   }
 }
 
-:local(.message-entry-in-room):focus-within {
+:local(.message-entry-in-room):focus-within, :local(.message-entry-in-room):hover {
   transition: background-color 0.15s linear;
   background-color: $darker-grey;
 
@@ -323,7 +323,7 @@ body.vr-mode {
 :local(.message-entry-on-mobile) {
   // Hide chatbox for joysticks
   // Orientation selector fails here when keyboard pops up on shorter screens
-  @media (min-aspect-ratio: 4/3) {
+  @media (min-aspect-ratio: 15/9) {
     display: none;
   }
 }

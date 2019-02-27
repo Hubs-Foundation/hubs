@@ -236,7 +236,14 @@ export class AppAwareTouchscreenDevice {
     }
 
     const path = paths.device.touchscreen;
-    if (jobIsAssigned(MOVE_CURSOR_JOB, this.assignments)) {
+    const hasCursorJob = jobIsAssigned(MOVE_CURSOR_JOB, this.assignments);
+    const hasCameraJob = jobIsAssigned(MOVE_CAMERA_JOB, this.assignments);
+
+    if (hasCursorJob || hasCameraJob) {
+      frame[path.isTouching] = true;
+    }
+
+    if (hasCursorJob) {
       const assignment = findByJob(MOVE_CURSOR_JOB, this.assignments);
       frame[path.cursorPose] = assignment.cursorPose;
       // If you touch a grabbable, we want to wait 1 frame before admitting it to anyone else, because we
@@ -245,7 +252,7 @@ export class AppAwareTouchscreenDevice {
       assignment.isFirstFrame = false;
     }
 
-    if (jobIsAssigned(MOVE_CAMERA_JOB, this.assignments)) {
+    if (hasCameraJob) {
       frame[path.touchCameraDelta] = findByJob(MOVE_CAMERA_JOB, this.assignments).delta;
     }
 

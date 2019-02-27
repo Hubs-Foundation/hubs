@@ -4,7 +4,7 @@ import { injectIntl, FormattedMessage } from "react-intl";
 import styles from "../assets/stylesheets/media-browser.scss";
 import classNames from "classnames";
 import { scaledThumbnailUrlFor } from "../utils/media-utils";
-import { pushHistoryPath, pushHistoryState, sluglessPath, withSlug } from "../utils/history";
+import { pushHistoryPath, pushHistoryState, sluglessPath } from "../utils/history";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
 import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
@@ -15,9 +15,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SOURCES } from "../storage/media-search-store";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { showFullScreenIfWasFullScreen } from "../utils/fullscreen";
-import qsTruthy from "../utils/qs_truthy";
-
-const allowContentSearch = qsTruthy("content_search");
 
 const PUBLISHER_FOR_ENTRY_TYPE = {
   sketchfab_model: "Sketchfab",
@@ -73,6 +70,7 @@ class MediaBrowser extends Component {
     mediaSearchStore: PropTypes.object,
     history: PropTypes.object,
     intl: PropTypes.object,
+    hubChannel: PropTypes.object,
     onMediaSearchResultEntrySelected: PropTypes.func
   };
 
@@ -137,10 +135,11 @@ class MediaBrowser extends Component {
     this.setState({ query });
   };
 
-  handleEntryClicked = entry => {
+  handleEntryClicked = (evt, entry) => {
     if (!this.props.onMediaSearchResultEntrySelected) return;
     this.props.onMediaSearchResultEntrySelected(entry);
     this.close();
+    evt.preventDefault();
   };
 
   handleSourceClicked = source => {
@@ -148,7 +147,7 @@ class MediaBrowser extends Component {
   };
 
   handleFacetClicked = facet => {
-    const searchParams = this.getSearchClearedSearchParams();
+    const searchParams = this.getSearchClearedSearchParams(true);
 
     for (const [k, v] of Object.entries(facet.params)) {
       searchParams.set(k, v);
@@ -157,23 +156,17 @@ class MediaBrowser extends Component {
     pushHistoryPath(this.props.history, this.props.history.location.pathname, searchParams.toString());
   };
 
-  getSearchClearedSearchParams = () => {
-    return this.props.mediaSearchStore.getSearchClearedSearchParams(this.props.history.location);
+  getSearchClearedSearchParams = keepSource => {
+    return this.props.mediaSearchStore.getSearchClearedSearchParams(this.props.history.location, keepSource);
   };
 
   pushExitMediaBrowserHistory = () => {
-    const { pathname } = this.props.history.location;
-    const hasMediaPath = sluglessPath(this.props.history.location).startsWith("/media");
-    pushHistoryPath(
-      this.props.history,
-      hasMediaPath ? withSlug(this.props.history.location, "/") : pathname,
-      this.getSearchClearedSearchParams().toString()
-    );
+    this.props.mediaSearchStore.pushExitMediaBrowserHistory();
   };
 
-  showCreateObject = () => {
+  showCustomMediaDialog = source => {
     this.pushExitMediaBrowserHistory();
-    pushHistoryState(this.props.history, "modal", "create");
+    pushHistoryState(this.props.history, "modal", source === "scene_listings" ? "change_scene" : "create");
   };
 
   close = () => {
@@ -195,6 +188,7 @@ class MediaBrowser extends Component {
     const urlSource = searchParams.get("media_source") || sluglessPath(this.props.history.location).substring(7);
     const apiSource = this.state.result && this.state.result.meta.source;
     const isVariableWidth = this.state.result && ["bing_images", "tenor"].includes(apiSource);
+    const showCustomOption = apiSource !== "scene_listings" || this.props.hubChannel.permissions.update_hub;
 
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
@@ -224,7 +218,7 @@ class MediaBrowser extends Component {
                   onKeyDown={e => {
                     if (e.key === "Enter" && e.shiftKey) {
                       if (this.state.result && this.state.result.entries.length > 0) {
-                        this.handleEntryClicked(this.state.result.entries[0]);
+                        this.handleEntryClicked(e, this.state.result.entries[0]);
                       }
                     } else if (e.key === "Escape" || e.key === "Enter") {
                       e.target.blur();
@@ -260,39 +254,42 @@ class MediaBrowser extends Component {
               </div>
             </div>
             <div className={styles.headerRight}>
-              <a onClick={() => this.showCreateObject()} className={styles.createButton}>
-                <i>
-                  <FontAwesomeIcon icon={faCloudUploadAlt} />
-                </i>
-              </a>
-              <a onClick={() => this.showCreateObject()} className={styles.createLink}>
-                <FormattedMessage
-                  id={`media-browser.add_custom_${
-                    this.state.result && apiSource === "scene_listings" ? "scene" : "object"
-                  }`}
-                />
-              </a>
+              {showCustomOption && (
+                <a onClick={() => this.showCustomMediaDialog(apiSource)} className={styles.createButton}>
+                  <i>
+                    <FontAwesomeIcon icon={faCloudUploadAlt} />
+                  </i>
+                </a>
+              )}
+              {showCustomOption && (
+                <a onClick={() => this.showCustomMediaDialog(apiSource)} className={styles.createLink}>
+                  <FormattedMessage
+                    id={`media-browser.add_custom_${
+                      this.state.result && apiSource === "scene_listings" ? "scene" : "object"
+                    }`}
+                  />
+                </a>
+              )}
             </div>
           </div>
 
-          {allowContentSearch &&
-            this.state.showNav && (
-              <div className={styles.nav}>
-                {SOURCES.map(s => (
-                  <a
-                    onClick={() => this.handleSourceClicked(s)}
-                    key={s}
-                    className={classNames({ [styles.navSource]: true, [styles.navSourceSelected]: urlSource === s })}
-                  >
-                    <FormattedMessage id={`media-browser.nav_title.${s}`} />
-                  </a>
-                ))}
-                <div className={styles.navRightPad}>&nbsp;</div>
-                <div className={styles.navScrollArrow}>
-                  <FontAwesomeIcon icon={faAngleRight} />
-                </div>
+          {this.state.showNav && (
+            <div className={styles.nav}>
+              {SOURCES.map(s => (
+                <a
+                  onClick={() => this.handleSourceClicked(s)}
+                  key={s}
+                  className={classNames({ [styles.navSource]: true, [styles.navSourceSelected]: urlSource === s })}
+                >
+                  <FormattedMessage id={`media-browser.nav_title.${s}`} />
+                </a>
+              ))}
+              <div className={styles.navRightPad}>&nbsp;</div>
+              <div className={styles.navScrollArrow}>
+                <FontAwesomeIcon icon={faAngleRight} />
               </div>
-            )}
+            </div>
+          )}
 
           {this.state.facets &&
             this.state.facets.length > 0 && (
@@ -352,18 +349,27 @@ class MediaBrowser extends Component {
 
     return (
       <div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`${entry.id}_${idx}`}>
-        <div
-          onClick={() => this.handleEntryClicked(entry)}
+        <a
+          href={entry.url}
+          target="_blank"
+          rel="noreferrer noopener"
+          onClick={e => this.handleEntryClicked(e, entry)}
           className={styles.image}
           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
         >
           <img src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)} />
-        </div>
+        </a>
         {!entry.type.endsWith("_image") && (
           <div className={styles.info}>
-            <div className={styles.name} onClick={() => this.handleEntryClicked(entry)}>
+            <a
+              href={entry.url}
+              target="_blank"
+              rel="noreferrer noopener"
+              className={styles.name}
+              onClick={e => this.handleEntryClicked(e, entry)}
+            >
               {entry.name}
-            </div>
+            </a>
             <div className={styles.attribution}>
               <div className={styles.creator}>
                 {creator && !creator.name && <span>{creator}</span>}
