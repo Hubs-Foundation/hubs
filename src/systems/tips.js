@@ -93,32 +93,38 @@ export const resetTips = () => {
 
 const VALIDATORS = {
   look: function(userinput) {
+    if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
     const cameraDelta = userinput.get(paths.device.smartMouse.cameraDelta);
     return cameraDelta ? FINISH : VALID;
   },
   locomotion: function(userinput) {
+    if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
     const accel = userinput.get(paths.actions.characterAcceleration);
 
     // User moved
     return accel && (accel[0] !== 0 || accel[1] !== 0) ? FINISH : VALID;
   },
   turning: function(userinput) {
+    if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
     if (userinput.get(paths.actions.snapRotateLeft) || userinput.get(paths.actions.snapRotateRight)) return FINISH;
     return VALID;
   },
   spawn_menu: function(userinput, scene, mediaCounter) {
+    if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
     if (mediaCounter.count() === 0) return VALID;
     return FINISH;
   },
   freeze_gesture: function(userinput, scene, mediaCounter) {
     if (mediaCounter.count() === 0) return INVALID;
     if (userinput.activeSets.has(sets.cursorHoldingInteractable)) return INVALID;
+    if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
     if (scene.is("frozen") && userinput.activeSets.has(sets.cursorHoveringOnInteractable)) return FINISH;
     return scene.is("frozen") ? INVALID : VALID;
   },
   menu_hover: function(userinput, scene, mediaCounter) {
     if (mediaCounter.count() === 0) return INVALID;
     if (!scene.is("frozen")) return INVALID;
+    if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
     if (scene.is("frozen") && userinput.activeSets.has(sets.cursorHoveringOnInteractable)) return FINISH;
     return VALID;
   },
