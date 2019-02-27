@@ -30,10 +30,10 @@ const TIPS = {
       "locomotion",
       "turning",
       "spawn_menu",
-      "freeze_gesture",
       "object_grab",
       "object_zoom",
       "object_scale",
+      "freeze_gesture",
       "menu_hover",
       "object_pin",
       "pen_color",
@@ -48,6 +48,7 @@ const TIPS = {
 };
 
 let localStorageCache = null;
+let finishedScopes = {}; // Optimization, lets system skip scopes altogether once finished.
 
 const isMobile = AFRAME.utils.device.isMobile();
 
@@ -61,7 +62,7 @@ const platformTips = () => {
 };
 
 const isTipFinished = tip => {
-  if (!localStorageCache) {
+  if (localStorageCache === null) {
     localStorageCache = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
   }
 
@@ -76,12 +77,18 @@ export const markTipFinished = tip => {
 };
 
 export const markTipScopeFinished = scope => {
-  const tips = platformTips[scope];
+  const tips = platformTips()[scope];
 
   for (let i = 0; i < tips.length; i++) {
     const tip = tips[i];
     markTipFinished(tip);
   }
+};
+
+export const resetTips = () => {
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({}));
+  localStorageCache = null;
+  finishedScopes = {};
 };
 
 const VALIDATORS = {
@@ -105,6 +112,7 @@ const VALIDATORS = {
   },
   freeze_gesture: function(userinput, scene, mediaCounter) {
     if (mediaCounter.count() === 0) return INVALID;
+    if (userinput.activeSets.has(sets.cursorHoldingInteractable)) return INVALID;
     if (scene.is("frozen") && userinput.activeSets.has(sets.cursorHoveringOnInteractable)) return FINISH;
     return scene.is("frozen") ? INVALID : VALID;
   },
@@ -214,10 +222,10 @@ AFRAME.registerSystem("tips", {
   },
 
   _performStep: function(tips, scope) {
-    this.activeTips[scope] = null;
-    if (this._finishedScopes[scope]) return;
+    if (finishedScopes[scope]) return;
 
     const scene = AFRAME.scenes[0];
+    let chosenTip = null;
     let finishCount = 0;
 
     for (let i = 0; i < tips.length; i++) {
@@ -232,16 +240,18 @@ AFRAME.registerSystem("tips", {
           markTipFinished(tip);
           break;
         case VALID:
-          this.activeTips[scope] = `${tipPlatform()}.${tip}`;
+          chosenTip = `${tipPlatform()}.${tip}`;
           break;
       }
 
-      if (this.activeTips[scope]) break;
+      if (chosenTip) break;
     }
 
+    this.activeTips[scope] = chosenTip;
+
     if (finishCount === tips.length) {
-      // Optimization: Tips are completed for this scope.
-      this._finishedScopes[scope] = true;
+      // Optimization: Tips are completed for this scope, no need to re-walk.
+      finishedScopes[scope] = true;
     }
   }
 });

@@ -62,6 +62,7 @@ import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
 import { faCamera } from "@fortawesome/free-solid-svg-icons/faCamera";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
@@ -1506,6 +1507,11 @@ class UIRoot extends Component {
             {entered &&
               this.props.activeTips.bottom && (
                 <div className={styles.bottomTip}>
+                  <button className={styles.tipCancel} onClick={() => markTipScopeFinished("bottom")}>
+                    <i>
+                      <FontAwesomeIcon icon={faTimes} />
+                    </i>
+                  </button>
                   {this.props.activeTips.bottom.endsWith(".spawn_menu") ? (
                     <div className={styles.spawnTip}>
                       <FormattedMessage id={`tips.${this.props.activeTips.bottom}-pre`} />
@@ -1513,7 +1519,9 @@ class UIRoot extends Component {
                       <FormattedMessage id={`tips.${this.props.activeTips.bottom}-post`} />
                     </div>
                   ) : (
-                    <FormattedMessage id={`tips.${this.props.activeTips.bottom}`} />
+                    <div className={styles.tip}>
+                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}`} />
+                    </div>
                   )}
                 </div>
               )}
@@ -1720,6 +1728,7 @@ class UIRoot extends Component {
                 <SettingsMenu
                   history={this.props.history}
                   mediaSearchStore={this.props.mediaSearchStore}
+                  hideSettings={() => this.setState({ showSettingsMenu: false })}
                   hubChannel={this.props.hubChannel}
                   hubScene={this.props.hubScene}
                 />

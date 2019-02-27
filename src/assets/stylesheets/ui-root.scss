@@ -343,8 +343,28 @@ body.vr-mode {
   @extend %tip-bubble;
   bottom: 80px;
   width: auto;
+  padding: 4px 24px 4px 12px;
+
+  :local(.tip-cancel) {
+    color: $light-blue;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    cursor: pointer;
+    border: none;
+    outline-style: none;
+    width: 32px;
+    height: 32px;
+    margin-right: 2px;
+  }
+
+  :local(.tip) {
+    flex: 10;
+  }
 
   :local(.spawn-tip) {
+    flex: 10;
     display: flex;
     flex-direction: row;
     justify-content: space-around;
