@@ -12,6 +12,7 @@ patchWebGLRenderingContext();
 import "./assets/stylesheets/avatar-selector.scss";
 import "three/examples/js/loaders/GLTFLoader";
 
+import "./components/animation";
 import "./components/animation-mixer";
 import "./components/audio-feedback";
 import "./components/loop-animation";

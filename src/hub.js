@@ -82,7 +82,6 @@ import "./components/clone-media-button";
 import "./components/open-media-button";
 import "./components/rotate-object-button";
 import "./components/hover-menu";
-import "./components/animation";
 import "./components/disable-frustum-culling";
 
 import ReactDOM from "react-dom";
