@@ -95,7 +95,8 @@ export default class MobileStandardMaterial extends THREE.ShaderMaterial {
       opacity: material.opacity,
       transparent: material.transparent,
       skinning: material.skinning,
-      morphTargets: material.morphTargets
+      morphTargets: material.morphTargets,
+      vertexColors: material.vertexColors
     };
 
     const mobileMaterial = new MobileStandardMaterial(parameters);
