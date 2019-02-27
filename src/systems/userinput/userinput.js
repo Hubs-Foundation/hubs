@@ -173,7 +173,7 @@ AFRAME.registerSystem("userinput", {
     this.xformStates = new Map();
     this.activeDevices = new Set([new HudDevice()]);
 
-    if (!(AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo())) {
+    if (!(AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR())) {
       this.activeDevices.add(new MouseDevice());
       this.activeDevices.add(new AppAwareMouseDevice());
       this.activeDevices.add(new KeyboardDevice());

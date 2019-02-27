@@ -50,7 +50,7 @@ EntryButton.propTypes = {
   isInHMD: PropTypes.bool
 };
 
-const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo();
+const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
 
 export const TwoDEntryButton = props => {
   const entryButtonProps = {
