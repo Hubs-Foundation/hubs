@@ -121,11 +121,6 @@ const VALIDATORS = {
   object_pin: function(userinput, scene, mediaCounter, store) {
     if (!scene.is("frozen")) return INVALID;
     if (mediaCounter.count() === 0) return INVALID;
-    if (
-      !userinput.activeSets.has(sets.cursorHoveringOnInteractable) &&
-      !userinput.activeSets.has(sets.cursorHoveringOnUI)
-    )
-      return INVALID;
     if (store && store.state.activity.hasPinned) return FINISH;
     return VALID;
   },
