@@ -12,6 +12,7 @@ patchWebGLRenderingContext();
 import "./assets/stylesheets/avatar-selector.scss";
 import "three/examples/js/loaders/GLTFLoader";
 
+import "./components/animation";
 import "./components/animation-mixer";
 import "./components/audio-feedback";
 import "./components/loop-animation";
@@ -34,7 +35,7 @@ function getHashArg(arg) {
 
 window.APP = new App();
 window.APP.quality =
-  getHashArg("quality") || (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo()) ? "low" : "high";
+  getHashArg("quality") || (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR()) ? "low" : "high";
 
 function postAvatarIdToParent(newAvatarId) {
   window.parent.postMessage({ avatarId: newAvatarId }, location.origin);

@@ -24,6 +24,7 @@ import { viveUserBindings } from "./bindings/vive-user";
 import { wmrUserBindings } from "./bindings/windows-mixed-reality-user";
 import { xboxControllerUserBindings } from "./bindings/xbox-controller-user";
 import { daydreamUserBindings } from "./bindings/daydream-user";
+import { cardboardUserBindings } from "./bindings/cardboard-user";
 
 import generate3DOFTriggerBindings from "./bindings/oculus-go-user";
 const oculusGoUserBindings = generate3DOFTriggerBindings(paths.device.oculusgo);
@@ -32,7 +33,7 @@ const gearVRControllerUserBindings = generate3DOFTriggerBindings(paths.device.ge
 import { resolveActionSets } from "./resolve-action-sets";
 import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
-import { detectInHMD } from "../../utils/vr-caps-detect";
+import { detectInHMD, getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "../../utils/vr-caps-detect";
 
 function intersection(setA, setB) {
   const _intersection = new Set();
@@ -172,7 +173,7 @@ AFRAME.registerSystem("userinput", {
     this.xformStates = new Map();
     this.activeDevices = new Set([new HudDevice()]);
 
-    if (!(AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo())) {
+    if (!(AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR())) {
       this.activeDevices.add(new MouseDevice());
       this.activeDevices.add(new AppAwareMouseDevice());
       this.activeDevices.add(new KeyboardDevice());
@@ -208,6 +209,16 @@ AFRAME.registerSystem("userinput", {
         for (const activeDevice of this.activeDevices) {
           const mapping = vrGamepadMappings.get(activeDevice.constructor);
           mapping && this.registeredMappings.add(mapping);
+        }
+
+        // Handle cardboard by looking of VR device caps
+        if (isMobile) {
+          getAvailableVREntryTypes().then(availableVREntryTypes => {
+            if (availableVREntryTypes.cardboard === VR_DEVICE_AVAILABILITY.yes) {
+              this.registeredMappings.add(cardboardUserBindings);
+              this.registeredMappingsChanged = true;
+            }
+          });
         }
       } else {
         console.log("Using Non-VR bindings.");

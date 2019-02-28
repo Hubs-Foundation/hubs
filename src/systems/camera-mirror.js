@@ -17,7 +17,7 @@ AFRAME.registerSystem("camera-mirror", {
   // Adds a camera under el, and starts mirroring
   mirrorCameraAtEl(el) {
     // TODO probably should explicitly check for immersive mode here.
-    if (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo()) return;
+    if (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR()) return;
     if (this.mirrorEl && this.mirrorEl !== el) this.unmirrorCameraAtEl(this.mirrorEl);
 
     this.mirrorEl = el;
