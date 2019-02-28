@@ -13,12 +13,21 @@ function distance(x1, y1, x2, y2) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-function shouldMoveCursor(touch, raycaster) {
-  const cursorController = document.querySelector("[cursor-controller]").components["cursor-controller"];
-  const isCursorGrabbing = cursorController.data.cursor.components["super-hands"].state.has("grab-start");
-  if (isCursorGrabbing) {
-    return true;
-  }
+const getCursorController = (() => {
+  let cursorController = null;
+
+  return function() {
+    if (!cursorController) {
+      cursorController = document.querySelector("[cursor-controller]").components["cursor-controller"];
+    }
+
+    return cursorController;
+  };
+})();
+
+function getTouchIntersection(touch, raycaster) {
+  const cursorController = getCursorController();
+
   const rawIntersections = [];
   raycaster.setFromCamera(
     {
@@ -28,8 +37,25 @@ function shouldMoveCursor(touch, raycaster) {
     document.querySelector("#player-camera").components.camera.camera
   );
   raycaster.intersectObjects(cursorController.targets, true, rawIntersections);
-  const intersection = rawIntersections.find(x => x.object.el);
+  return rawIntersections.find(x => x.object.el);
+}
+
+function shouldMoveCursor(touch, raycaster) {
+  const cursorController = getCursorController();
+  const isCursorGrabbing = cursorController.data.cursor.components["super-hands"].state.has("grab-start");
+  if (isCursorGrabbing) {
+    return true;
+  }
+  const intersection = getTouchIntersection(touch, raycaster);
   return intersection && intersection.object.el.matches(".interactable, .interactable *");
+}
+
+// We delay all first start touches unless the user is on the UI.
+//
+// This mitigates issues where the user is about to put a second finger down.
+function shouldDelayStartTouch(touch, raycaster) {
+  const intersection = getTouchIntersection(touch, raycaster);
+  return !intersection || !intersection.object.el.matches(".ui, .ui *");
 }
 
 export class AppAwareTouchscreenDevice {
@@ -50,11 +76,8 @@ export class AppAwareTouchscreenDevice {
 
   end(touch) {
     if (this.pendingFirstTouch) {
-      // The original start was buffered and never processed, so just clear the timeout and retunr.
-      console.log("clearing pending touch");
-      clearTimeout(this.firstTouchTimeout);
-      this.firstTouchTimeout = null;
-      this.pendingFirstTouch = null;
+      // The original start was buffered and never processed, so just clear the timeout and return.
+      this.clearPendingFirstTouch();
       return;
     }
 
@@ -116,9 +139,7 @@ export class AppAwareTouchscreenDevice {
 
   move(touch) {
     if (this.pendingFirstTouch) {
-      // There was a pending un-flushed first touch, so we should assign it now to the
-      // first pincher and clear the pending work to process it otherwise.
-      assign(this.pendingFirstTouch, FIRST_PINCHER_JOB, this.assignments);
+      this.processTouchStart(this.pendingFirstTouch);
       this.clearPendingFirstTouch();
     }
 
@@ -159,16 +180,6 @@ export class AppAwareTouchscreenDevice {
     }
   }
 
-  forcePendingFirstTouch() {
-    if (this.pendingFirstTouch) {
-      console.log("Flush pending touch");
-      // We had a buffered first touch, but just got a second
-      // touch (two+ fingers down), so just flush the first touch now.
-      this.processTouchStart(this.pendingFirstTouch);
-      this.clearPendingFirstTouch();
-    }
-  }
-
   clearPendingFirstTouch() {
     clearTimeout(this.firstTouchTimeout);
     this.pendingFirstTouch = null;
@@ -176,13 +187,19 @@ export class AppAwareTouchscreenDevice {
   }
 
   start(touch) {
-    let delayTouch = true; // TODO if over UI, never delay
+    let delayTouch = shouldDelayStartTouch(touch, this.raycaster);
 
     if (this.pendingFirstTouch) {
       delayTouch = false;
-    }
 
-    this.forcePendingFirstTouch();
+      // There was a pending un-flushed first touch, so we should assign it now to the
+      // first pincher and clear the pending work to process it otherwise.
+      const job = assign(this.pendingFirstTouch, FIRST_PINCHER_JOB, this.assignments);
+      job.clientX = this.pendingFirstTouch.clientX;
+      job.clientY = this.pendingFirstTouch.clientY;
+
+      this.clearPendingFirstTouch();
+    }
 
     if (delayTouch) {
       this.pendingFirstTouch = touch;
@@ -190,7 +207,7 @@ export class AppAwareTouchscreenDevice {
       this.firstTouchTimeout = setTimeout(() => {
         this.processTouchStart(this.pendingFirstTouch);
         this.pendingFirstTouch = null;
-      }, 1000);
+      }, 150);
     } else {
       this.processTouchStart(touch);
     }
@@ -202,7 +219,13 @@ export class AppAwareTouchscreenDevice {
       return;
     }
 
-    if (!jobIsAssigned(MOVE_CURSOR_JOB, this.assignments) && shouldMoveCursor(touch, this.raycaster)) {
+    const hasFirstPinch = jobIsAssigned(FIRST_PINCHER_JOB, this.assignments);
+
+    if (
+      !hasFirstPinch &&
+      !jobIsAssigned(MOVE_CURSOR_JOB, this.assignments) &&
+      shouldMoveCursor(touch, this.raycaster)
+    ) {
       const assignment = assign(touch, MOVE_CURSOR_JOB, this.assignments);
       assignment.cursorPose = new Pose().fromCameraProjection(
         document.querySelector("#player-camera").components.camera.camera,
@@ -210,7 +233,7 @@ export class AppAwareTouchscreenDevice {
         -(touch.clientY / window.innerHeight) * 2 + 1
       );
       assignment.isFirstFrame = true;
-    } else if (!jobIsAssigned(MOVE_CAMERA_JOB, this.assignments)) {
+    } else if (!hasFirstPinch && !jobIsAssigned(MOVE_CAMERA_JOB, this.assignments)) {
       const assignment = assign(touch, MOVE_CAMERA_JOB, this.assignments);
       assignment.clientX = touch.clientX;
       assignment.clientY = touch.clientY;
