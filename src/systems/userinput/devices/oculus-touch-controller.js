@@ -1,6 +1,8 @@
 import { paths } from "../paths";
 import { Pose } from "../pose";
 
+const ONES = new THREE.Vector3(1, 1, 1);
+
 export const leftOculusTouchButtonMap = [
   { name: "thumbStick", buttonId: 0 },
   { name: "trigger", buttonId: 1 },
@@ -38,9 +40,21 @@ export class OculusTouchControllerDevice {
     this.pose = new Pose();
     this.buttonMap = buttonMaps[gamepad.hand];
     this.axisMap = [{ name: "joyX", axisId: 0 }, { name: "joyY", axisId: 1 }];
+    this.sittingToStandingMatrix = new THREE.Matrix4().makeTranslation(0, 1.6, 0);
+    navigator.getVRDisplays().then(d => {
+      const m = d[0].stageParameters.sittingToStandingTransform;
+      for (let i = 0; i < 16; i++) {
+        this.sittingToStandingMatrix.elements[i] = m[i];
+      }
+    });
+    this.matrix = new THREE.Matrix4();
     this.path = devicePaths[gamepad.hand];
     this.selector = `#player-${gamepad.hand}-controller`;
+
+    this.position = new THREE.Vector3();
+    this.orientation = new THREE.Quaternion();
   }
+
   write(frame) {
     if (!this.gamepad.connected) return;
 
@@ -73,5 +87,14 @@ export class OculusTouchControllerDevice {
     this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
     this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
     frame[this.path.pose] = this.pose;
+    if (this.gamepad.pose.position && this.gamepad.pose.orientation) {
+      frame[this.path.matrix] = this.matrix
+        .compose(
+          this.position.fromArray(this.gamepad.pose.position),
+          this.orientation.fromArray(this.gamepad.pose.orientation),
+          ONES
+        )
+        .premultiply(this.sittingToStandingMatrix);
+    }
   }
 }

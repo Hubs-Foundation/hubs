@@ -72,33 +72,6 @@ AFRAME.registerComponent("hand-controls2", {
 
   init() {
     this.pose = POSES.open;
-    this.el.setAttribute("visible", false);
-
-    this.connectedController = null;
-
-    this.onControllerConnected = this.onControllerConnected.bind(this);
-    this.onControllerDisconnected = this.onControllerDisconnected.bind(this);
-    this.el.addEventListener("controllerconnected", this.onControllerConnected);
-    this.el.addEventListener("controllerdisconnected", this.onControllerDisconnected);
-  },
-
-  update(prevData) {
-    const el = this.el;
-    const hand = this.data;
-
-    const controlConfiguration = {
-      hand: hand,
-      model: false
-    };
-
-    if (hand !== prevData) {
-      el.setAttribute("vive-controls", controlConfiguration);
-      el.setAttribute("oculus-touch-controls", controlConfiguration);
-      el.setAttribute("oculus-go-controls", controlConfiguration);
-      el.setAttribute("windows-motion-controls", controlConfiguration);
-      el.setAttribute("daydream-controls", controlConfiguration);
-      el.setAttribute("gearvr-controls", controlConfiguration);
-    }
   },
 
   poseForFingers(thumb, index, middleRingPinky) {
@@ -127,8 +100,13 @@ AFRAME.registerComponent("hand-controls2", {
   tick() {
     const hand = this.data;
     const userinput = AFRAME.scenes[0].systems.userinput;
+    const shouldBeVisible = userinput.get(
+      hand === "left" ? paths.actions.leftHand.matrix : paths.actions.rightHand.matrix
+    );
+    if (this.el.object3D.visible !== shouldBeVisible) {
+      this.el.setAttribute("visible", shouldBeVisible);
+    }
     const subpath = hand === "left" ? paths.actions.leftHand : paths.actions.rightHand;
-    const hasPose = userinput.get(subpath.pose);
     const thumb = userinput.get(subpath.thumb);
     const index = userinput.get(subpath.index);
     const middleRingPinky = userinput.get(subpath.middleRingPinky);
@@ -137,19 +115,5 @@ AFRAME.registerComponent("hand-controls2", {
       this.el.emit("hand-pose", { previous: this.pose, current: pose });
       this.pose = pose;
     }
-
-    this.el.object3D.visible = !!hasPose;
-  },
-
-  // Show controller when connected
-  onControllerConnected(e) {
-    this.connectedController = e.detail.name;
-    this.el.setAttribute("visible", true);
-  },
-
-  // Hide controller on disconnect
-  onControllerDisconnected() {
-    this.connectedController = null;
-    this.el.setAttribute("visible", false);
   }
 });

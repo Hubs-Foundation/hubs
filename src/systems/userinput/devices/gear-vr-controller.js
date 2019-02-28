@@ -1,5 +1,8 @@
 import { paths } from "../paths";
 import { Pose } from "../pose";
+import { applyArmModel } from "../arm-model.js";
+
+const ONES = new THREE.Vector3(1, 1, 1);
 
 export class GearVRControllerDevice {
   constructor(gamepad) {
@@ -10,6 +13,16 @@ export class GearVRControllerDevice {
     this.rayObjectRotation = new THREE.Quaternion();
     this.selector = `#player-${gamepad.hand}-controller`;
     this.pose = new Pose();
+    this.sittingToStandingMatrix = new THREE.Matrix4().makeTranslation(0, 1.6, 0);
+    navigator.getVRDisplays().then(d => {
+      const m = d[0].stageParameters.sittingToStandingTransform;
+      for (let i = 0; i < 16; i++) {
+        this.sittingToStandingMatrix.elements[i] = m[i];
+      }
+    });
+
+    this.matrix = new THREE.Matrix4();
+    this.orientation = new THREE.Quaternion();
   }
 
   write(frame) {
@@ -45,6 +58,16 @@ export class GearVRControllerDevice {
       this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
       this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
       frame[paths.device.gearVRController.pose] = this.pose;
+      // TODO: hand arm model
+      if (this.gamepad.pose.orientation) {
+        frame[paths.device.gearVRController.matrix] = this.matrix
+          .compose(
+            applyArmModel(this.gamepad, this.gamepad.hand, this.headObject3D, 1.6),
+            this.orientation.fromArray(this.gamepad.pose.orientation),
+            ONES
+          )
+          .premultiply(this.sittingToStandingMatrix);
+      }
     }
   }
 }

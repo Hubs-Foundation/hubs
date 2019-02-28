@@ -672,6 +672,7 @@
             <a-entity
                 id="player-left-controller"
                 class="left-controller"
+                copy-matrix="path: /actions/leftHand/matrix"
                 hand-controls2="left"
                 teleporter="start: /actions/leftHand/startTeleport; confirm: /actions/leftHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
@@ -687,6 +688,7 @@
             <a-entity
                 id="player-right-controller"
                 class="right-controller"
+                copy-matrix="path: /actions/rightHand/matrix"
                 hand-controls2="right"
                 teleporter="start: /actions/rightHand/startTeleport; confirm: /actions/rightHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update

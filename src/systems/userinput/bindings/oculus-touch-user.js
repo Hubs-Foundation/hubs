@@ -74,6 +74,24 @@ const rightTriggerPressed2 = v("rightTriggerPressed2");
 export const oculusTouchUserBindings = addSetsToBindings({
   [sets.global]: [
     {
+      src: {
+        value: paths.device.leftOculusTouch.matrix
+      },
+      dest: {
+        value: paths.actions.leftHand.matrix
+      },
+      xform: xforms.copy
+    },
+    {
+      src: {
+        value: paths.device.rightOculusTouch.matrix
+      },
+      dest: {
+        value: paths.actions.rightHand.matrix
+      },
+      xform: xforms.copy
+    },
+    {
       src: [ensureFrozenViaButtons, ensureFrozenViaKeyboard],
       dest: { value: paths.actions.ensureFrozen },
       xform: xforms.any
