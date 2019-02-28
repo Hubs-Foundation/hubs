@@ -36,9 +36,7 @@ export class OculusGoControllerDevice {
       if (!this.rayObject) {
         this.rayObject = document.querySelector(`#player-${this.gamepad.hand}-controller`).object3D;
       }
-      if (this.rayObject.updateMatrices) {
-        this.rayObject.updateMatrices();
-      }
+      this.rayObject.updateMatrices();
       this.rayObject.getWorldQuaternion(this.q);
       frame[paths.actions.rayObjectRotation] = this.q;
       const rayMatrixWorld = this.rayObject.matrixWorld;
