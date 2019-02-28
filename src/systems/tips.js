@@ -45,7 +45,7 @@ const TIPS = {
   },
   mobile: {
     top: ["pen_mode", "video_share_mode", "freeze_mode", "mute_mode"],
-    bottom: ["look", "locomotion", "spawn_menu", "object_grab", "freeze_gesture", "menu_hover", "object_pin", "invite"]
+    bottom: ["look", "locomotion", "spawn_menu", "object_grab", "freeze_gesture", "object_pin", "invite"]
   },
   standalone: { top: [], bottom: [] }
 };
