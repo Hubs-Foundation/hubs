@@ -41,7 +41,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.2",
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
-    "aframe": "github:mozillareality/aframe#a76a90574a3ad3ea4dd166aa3a4de89751e14789",
+    "aframe": "github:mozillareality/aframe#afa764e5f515784e7349f834a53142bcadcd0ffe",
     "aframe-billboard-component": "^2.0.0",
     "aframe-inspector": "^0.8.3",
     "aframe-motion-capture-components": "github:mozillareality/aframe-motion-capture-components#aframe090",
