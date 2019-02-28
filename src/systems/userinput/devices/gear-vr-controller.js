@@ -58,7 +58,7 @@ export class GearVRControllerDevice {
       this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
       this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
       frame[paths.device.gearVRController.pose] = this.pose;
-      // TODO: hand arm model
+      this.headObject3D = this.headObject3D || document.querySelector("#player-camera").object3D;
       if (this.gamepad.pose.orientation) {
         frame[paths.device.gearVRController.matrix] = this.matrix
           .compose(

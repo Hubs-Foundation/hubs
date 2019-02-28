@@ -48,7 +48,6 @@ export class OculusGoControllerDevice {
 
       this.headObject3D = this.headObject3D || document.querySelector("#player-camera").object3D;
 
-      // TODO: hand arm model
       if (this.gamepad.pose.orientation) {
         frame[paths.device.oculusgo.matrix] = this.matrix
           .compose(

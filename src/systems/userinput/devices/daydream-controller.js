@@ -61,7 +61,6 @@ export class DaydreamControllerDevice {
 
       this.headObject3D = this.headObject3D || document.querySelector("#player-camera").object3D;
 
-      // TODO: hand arm model
       if (this.gamepad.pose.orientation) {
         frame[paths.device.device.matrix] = this.matrix
           .compose(
