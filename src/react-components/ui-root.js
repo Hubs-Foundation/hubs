@@ -34,6 +34,7 @@ import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowser from "./media-browser";
 
 import CreateObjectDialog from "./create-object-dialog.js";
+import ChangeSceneDialog from "./change-scene-dialog.js";
 import HelpDialog from "./help-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
@@ -664,7 +665,7 @@ class UIRoot extends Component {
   };
 
   shouldShowHmdMicWarning = () => {
-    if (isMobile || AFRAME.utils.device.isOculusGo()) return false;
+    if (isMobile || AFRAME.utils.device.isMobileVR()) return false;
     if (!this.state.enterInVR) return false;
     if (!this.hasHmdMicrophone()) return false;
 
@@ -694,7 +695,7 @@ class UIRoot extends Component {
   shouldShowFullScreen = () => {
     // Disable full screen on iOS, since Safari's fullscreen mode does not let you prevent native pinch-to-zoom gestures.
     return (
-      (isMobile || AFRAME.utils.device.isOculusGo()) &&
+      (isMobile || AFRAME.utils.device.isMobileVR()) &&
       !AFRAME.utils.device.isIOS() &&
       !this.state.enterInVR &&
       screenfull.enabled
@@ -749,6 +750,10 @@ class UIRoot extends Component {
 
   createObject = media => {
     this.props.scene.emit("add_media", media);
+  };
+
+  changeScene = url => {
+    this.props.hubChannel.updateScene(url);
   };
 
   closeDialog = () => {
@@ -917,10 +922,11 @@ class UIRoot extends Component {
         <FormattedMessage id="loader.entering_lobby" />
       </h4>
     );
+    const progress = this.state.loadingNum === 0 ? " " : `${this.state.loadedNum} / ${this.state.loadingNum} `;
     const usual = (
       <h4 className={loaderStyles.loadingText}>
         <FormattedMessage id="loader.loading" />
-        {this.state.loadedNum} / {this.state.loadingNum}{" "}
+        {progress}
         <FormattedMessage id={this.state.loadingNum !== 1 ? "loader.objects" : "loader.object"} />
         ...
       </h4>
@@ -984,7 +990,7 @@ class UIRoot extends Component {
             <WithHoverSound>
               <div
                 className={entryStyles.chooseScene}
-                onClick={() => this.props.mediaSearchStore.sourceNavigate("scenes", true)}
+                onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes")}
               >
                 <i>
                   <FontAwesomeIcon icon={faImage} />
@@ -1011,7 +1017,7 @@ class UIRoot extends Component {
                     e.target.blur();
                   }
                 }}
-                placeholder="Send a message..."
+                placeholder="Send to room..."
               />
               <WithHoverSound>
                 <button className={classNames([styles.messageEntryButton, styles.messageEntrySubmit])} type="submit">
@@ -1078,6 +1084,11 @@ class UIRoot extends Component {
         </div>
 
         <div className={entryStyles.buttonContainer}>
+          {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
+            <div className={entryStyles.secondary} onClick={this.enterVR}>
+              <FormattedMessage id="entry.cardboard" />
+            </div>
+          )}
           {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
             <GenericEntryButton secondary={true} onClick={this.enterVR} />
           )}
@@ -1096,11 +1107,6 @@ class UIRoot extends Component {
           )}
           {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
             <TwoDEntryButton onClick={this.enter2D} />
-          )}
-          {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
-            <div className={entryStyles.secondary} onClick={this.enterVR}>
-              <FormattedMessage id="entry.cardboard" />
-            </div>
           )}
         </div>
       </div>
@@ -1170,7 +1176,7 @@ class UIRoot extends Component {
     const micClip = {
       clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)`
     };
-    const isMobileOrGo = isMobile || AFRAME.utils.device.isOculusGo();
+    const isMobileOrGo = isMobile || AFRAME.utils.device.isMobileVR();
     const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
     const subtitleId = isMobileOrGo ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
     return (
@@ -1215,17 +1221,22 @@ class UIRoot extends Component {
                   className="audio-setup-panel__levels__icon-part"
                 />
               )}
+              {this.state.audioTrack && (
+                <div className="audio-setup-panel__levels__test_label">
+                  <FormattedMessage id="audio.talk_to_test" />
+                </div>
+              )}
             </div>
             <WithHoverSound>
-              <div className="audio-setup-panel__levels__icon" onClick={this.playTestTone}>
+              <div className="audio-setup-panel__levels__icon_clickable" onClick={this.playTestTone}>
                 <img
-                  src="../assets/images/level_background.png"
-                  srcSet="../assets/images/level_background@2x.png 2x"
+                  src="../assets/images/level_action_background.png"
+                  srcSet="../assets/images/level_action_background@2x.png 2x"
                   className="audio-setup-panel__levels__icon-part"
                 />
                 <img
-                  src="../assets/images/level_fill.png"
-                  srcSet="../assets/images/level_fill@2x.png 2x"
+                  src="../assets/images/level_action_fill.png"
+                  srcSet="../assets/images/level_action_fill@2x.png 2x"
                   className="audio-setup-panel__levels__icon-part"
                   style={speakerClip}
                 />
@@ -1234,10 +1245,13 @@ class UIRoot extends Component {
                   srcSet="../assets/images/speaker_level@2x.png 2x"
                   className="audio-setup-panel__levels__icon-part"
                 />
+                <div className="audio-setup-panel__levels__test_label">
+                  <FormattedMessage id="audio.click_to_test" />
+                </div>
               </div>
             </WithHoverSound>
           </div>
-          {this.state.audioTrack && (
+          {this.state.audioTrack && this.state.micDevices.length > 1 ? (
             <div className="audio-setup-panel__device-chooser">
               <WithHoverSound>
                 <select
@@ -1264,6 +1278,8 @@ class UIRoot extends Component {
                 srcSet="../assets/images/dropdown_arrow@2x.png 2x"
               />
             </div>
+          ) : (
+            <div />
           )}
           {this.shouldShowHmdMicWarning() && (
             <div className="audio-setup-panel__hmd-mic-warning">
@@ -1383,6 +1399,7 @@ class UIRoot extends Component {
               <MediaBrowser
                 history={this.props.history}
                 mediaSearchStore={this.props.mediaSearchStore}
+                hubChannel={this.props.hubChannel}
                 onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
               />
             )}
@@ -1441,6 +1458,12 @@ class UIRoot extends Component {
               stateValue="create"
               history={this.props.history}
               render={() => this.renderDialog(CreateObjectDialog, { onCreate: this.createObject })}
+            />
+            <StateRoute
+              stateKey="modal"
+              stateValue="change_scene"
+              history={this.props.history}
+              render={() => this.renderDialog(ChangeSceneDialog, { onChange: this.changeScene })}
             />
             <StateRoute
               stateKey="modal"
@@ -1546,7 +1569,7 @@ class UIRoot extends Component {
                         e.target.blur();
                       }
                     }}
-                    placeholder="Send a message..."
+                    placeholder="Send to room..."
                   />
                   <button
                     className={classNames([styles.messageEntrySpawn])}

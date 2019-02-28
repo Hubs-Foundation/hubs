@@ -20,6 +20,8 @@ export const MEDIA_SOURCE_DEFAULT_FILTERS = {
   scenes: "featured"
 };
 
+const SEARCH_CONTEXT_PARAMS = ["q", "filter", "cursor"];
+
 // This class is responsible for fetching and storing media search results and provides a
 // convenience API for performing history updates relevant to search navigation.
 export default class MediaSearchStore extends EventTarget {
@@ -57,7 +59,7 @@ export default class MediaSearchStore extends EventTarget {
     const currentRequestIndex = this.requestIndex;
     const searchParams = new URLSearchParams();
 
-    for (const param of ["q", "filter", "cursor"]) {
+    for (const param of SEARCH_CONTEXT_PARAMS) {
       if (!urlParams.get(param)) continue;
       searchParams.set(param, urlParams.get(param));
     }
@@ -113,32 +115,75 @@ export default class MediaSearchStore extends EventTarget {
     pushHistoryPath(this.history, location.pathname, searchParams.toString());
   };
 
-  getSearchClearedSearchParams = location => {
+  getSearchClearedSearchParams = (location, keepSource) => {
     const searchParams = new URLSearchParams(location.search);
 
     // Strip browsing query params
     searchParams.delete("q");
     searchParams.delete("filter");
     searchParams.delete("cursor");
-    searchParams.delete("media_source");
     searchParams.delete("media_nav");
+
+    if (!keepSource) {
+      searchParams.delete("media_source");
+    }
 
     return searchParams;
   };
 
-  sourceNavigateToDefaultSource = () => {
-    this.sourceNavigate(SOURCES[0]);
+  _stashLastSearchParams = location => {
+    const searchParams = new URLSearchParams(location.search);
+    this._stashedParams = {};
+    this._stashedSource = this.getUrlMediaSource(location);
+
+    for (const param of SEARCH_CONTEXT_PARAMS) {
+      const value = searchParams.get(param);
+
+      if (value) {
+        this._stashedParams[param] = value;
+      }
+    }
   };
 
-  sourceNavigate = (source, hideNav) => {
+  sourceNavigate = source => {
+    this._sourceNavigate(source, false, true);
+  };
+
+  sourceNavigateToDefaultSource = () => {
+    this._sourceNavigate(this._stashedSource ? this._stashedSource : SOURCES[0], false, true);
+  };
+
+  sourceNavigateWithNoNav = source => {
+    this._sourceNavigate(source, true, false);
+  };
+
+  _sourceNavigate = (source, hideNav, useLastStashedParams) => {
     const currentQuery = new URLSearchParams(this.history.location.search).get("q");
     const searchParams = this.getSearchClearedSearchParams(this.history.location);
 
     if (currentQuery) {
       searchParams.set("q", currentQuery);
-    } else if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {
-      searchParams.set("filter", MEDIA_SOURCE_DEFAULT_FILTERS[source]);
+    } else {
+      if (useLastStashedParams && this._stashedParams) {
+        for (const param of SEARCH_CONTEXT_PARAMS) {
+          const value = this._stashedParams[param];
+
+          // Only q param is compatible across sources, so keep it if is stashed.
+          const useValue = param === "q" || this._stashedSource === source;
+
+          if (value && useValue) {
+            searchParams.set(param, value);
+          }
+        }
+      } else {
+        if (MEDIA_SOURCE_DEFAULT_FILTERS[source]) {
+          searchParams.set("filter", MEDIA_SOURCE_DEFAULT_FILTERS[source]);
+        }
+      }
     }
+
+    this._stashedParams = {};
+    this._stashedSource = null;
 
     if (hideNav) {
       searchParams.set("media_nav", "false");
@@ -164,12 +209,15 @@ export default class MediaSearchStore extends EventTarget {
   pushExitMediaBrowserHistory = history => {
     if (!history) history = this.history;
 
+    this._stashLastSearchParams(history.location);
+
     const { pathname } = history.location;
-    const hasMediaPath = pathname.startsWith("/media");
+    const hasMediaPath = sluglessPath(history.location).startsWith("/media");
     pushHistoryPath(
       history,
-      hasMediaPath ? "/" : pathname,
+      hasMediaPath ? withSlug(history.location, "/") : pathname,
       this.getSearchClearedSearchParams(history.location).toString()
     );
+    this.dispatchEvent(new CustomEvent("media-exit"));
   };
 }

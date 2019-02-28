@@ -89,7 +89,7 @@ export default class MessageDispatch {
             this.addToPresenceLog({ type: "log", body: "You do not have permission to change the scene." });
           }
         } else {
-          this.mediaSearchStore.sourceNavigate("scenes");
+          this.mediaSearchStore.sourceNavigateWithNoNav("scenes");
         }
 
         break;

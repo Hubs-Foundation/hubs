@@ -31,7 +31,7 @@
     <a-scene
         nextframe
         class="grab-cursor"
-        renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true;"
+        renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false;"
         shadow="type: pcfsoft"
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         physics="gravity: -9.8; debug: false; driver: ammo; debugDrawMode: 1;"
@@ -57,15 +57,14 @@
             <img id="bubble-off-hover" crossorigin="anonymous" src="./assets/hud/bubble_off-hover.png">
             <img id="bubble-on" crossorigin="anonymous" src="./assets/hud/bubble_on.png">
             <img id="bubble-on-hover" crossorigin="anonymous" src="./assets/hud/bubble_on-hover.png">
-            <img id="freeze-off" crossorigin="anonymous" src="./assets/hud/freeze_off.png">
-            <img id="freeze-off-hover" crossorigin="anonymous" src="./assets/hud/freeze_off-hover.png">
-            <img id="freeze-on" crossorigin="anonymous" src="./assets/hud/freeze_on.png">
-            <img id="freeze-on-hover" crossorigin="anonymous" src="./assets/hud/freeze_on-hover.png">
+            <img id="spawn" crossorigin="anonymous" src="./assets/hud/spawn.png">
+            <img id="spawn-hover" crossorigin="anonymous" src="./assets/hud/spawn-hover.png">
             <img id="spawn-pen" crossorigin="anonymous" src="./assets/hud/spawn_pen.png">
             <img id="spawn-pen-hover" crossorigin="anonymous" src="./assets/hud/spawn_pen-hover.png">
             <img id="spawn-camera" crossorigin="anonymous" src="./assets/hud/spawn_camera.png">
             <img id="spawn-camera-hover" crossorigin="anonymous" src="./assets/hud/spawn_camera-hover.png">
             <img id="snap-camera" crossorigin="anonymous" src="./assets/images/snap_camera.png">
+            <img id="camera" crossorigin="anonymous" src="./assets/images/camera.png">
             <img id="presence-count" crossorigin="anonymous" src="./assets/hud/presence-count.png">
             <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
 
@@ -232,10 +231,20 @@
                             <a-entity mixin="rounded-text-action-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned;" position="0 0.125 0.01"> </a-entity>
                             <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
                             <a-entity mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.01">
-                                <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                                <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
+                                <a-image
+                                    icon-button="image: #camera; hoverImage: #camera;"
+                                    scale="0.165 0.165 0.165"
+                                    position="-0.105 0.005 0.01"
+                                ></a-image>
                             </a-entity>
                             <a-entity mixin="rounded-text-button" camera-focus-button="track: true" position="0.25 0.375 0.01">
-                                <a-entity text=" value:track; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                                <a-entity text=" value:track; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
+                                <a-image
+                                    icon-button="image: #camera; hoverImage: #camera;"
+                                    scale="0.165 0.165 0.165"
+                                    position="-0.105 0.005 0.01"
+                                ></a-image>
                             </a-entity>
                             <a-entity mixin="rounded-text-button" class="hide-when-pinned" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
                             <a-entity text=" value:remove; width:1.75; align:center;" class="hide-when-pinned" text-raycast-hack position="0 -0.125 0.02"></a-entity>
@@ -554,10 +563,10 @@
                     set-sounds-invisible
                 ></a-image>
                 <a-image
-                    icon-button="tooltip: #hud-tooltip; tooltipText: Pause; activeTooltipText: Resume; image: #freeze-off; hoverImage: #freeze-off-hover; activeImage: #freeze-on; activeHoverImage: #freeze-on-hover"
+                    icon-button="tooltip: #hud-tooltip; tooltipText: Create; activeTooltipText: Resume; image: #spawn; hoverImage: #spawn-hover;"
                     scale="0.2 0.2 0.2"
                     position="0 0 0.005"
-                    class="hud freeze"
+                    class="hud spawn"
                     hoverable
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
                     set-sounds-invisible

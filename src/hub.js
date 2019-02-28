@@ -81,7 +81,6 @@ import "./components/clone-media-button";
 import "./components/open-media-button";
 import "./components/rotate-object-button";
 import "./components/hover-menu";
-import "./components/animation";
 import "./components/disable-frustum-culling";
 
 import ReactDOM from "react-dom";
@@ -127,7 +126,7 @@ const store = window.APP.store;
 const mediaSearchStore = window.APP.mediaSearchStore;
 
 const qs = new URLSearchParams(location.search);
-const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo();
+const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
@@ -165,7 +164,7 @@ import registerNetworkSchemas from "./network-schemas";
 import registerTelemetry from "./telemetry";
 import { warmSerializeElement } from "./utils/serialize-element";
 
-import { getAvailableVREntryTypes } from "./utils/vr-caps-detect.js";
+import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
 import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
 
 import qsTruthy from "./utils/qs_truthy";
@@ -403,7 +402,8 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
   remountUI({
     onSendMessage: messageDispatch.dispatch,
-    onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry)
+    onMediaSearchResultEntrySelected: entry => scene.emit("action_selected_media_result_entry", entry),
+    onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry)
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {
@@ -570,6 +570,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   scene.addEventListener("enter-vr", () => {
     document.body.classList.add("vr-mode");
+
+    // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
+    if (!isMobile || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
+      document.body.classList.add("vr-mode-stretch");
+    }
 
     if (!scene.is("entered")) {
       // If VR headset is activated, refreshing page will fire vrdisplayactivate

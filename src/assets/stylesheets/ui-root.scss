@@ -310,7 +310,7 @@ body.vr-mode {
   }
 }
 
-:local(.message-entry-in-room):focus-within {
+:local(.message-entry-in-room):focus-within, :local(.message-entry-in-room):hover {
   transition: background-color 0.15s linear;
   background-color: $darker-grey;
 

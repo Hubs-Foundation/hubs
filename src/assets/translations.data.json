@@ -79,6 +79,8 @@
     "media-browser.nav_title.poly": "Google Poly",
     "media-browser.nav_title.twitch": "Twitch",
     "audio.title": "Audio Setup",
+    "audio.talk_to_test": "talk",
+    "audio.click_to_test": "click",
     "audio.subtitle-desktop": "Confirm HMD speaker output",
     "audio.subtitle-mobile": "Earphones are recommended",
     "audio.enter-now": "Enter Now",
@@ -190,6 +192,7 @@
     "loader.entering_lobby": "Entering lobby...",
     "loader.loading": "Loading ",
     "loader.object": "object",
-    "loader.objects": "objects"
+    "loader.objects": "objects",
+    "change-scene-dialog.change-scene": "Change Scene"
   }
 }
