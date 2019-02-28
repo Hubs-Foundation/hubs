@@ -5,7 +5,7 @@ AFRAME.registerComponent("set-active-camera", {
     const cameraSystem = this.el.sceneEl.systems.camera;
     const currentActiveCamera = cameraSystem.activeCameraEl;
 
-    if (currentActiveCamera && currentActiveCamera !== this.el) {
+    if (currentActiveCamera !== this.el) {
       cameraSystem.setActiveCamera(this.el);
 
       // Also A-Frame fails to delete the default camera :P
