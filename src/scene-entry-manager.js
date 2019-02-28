@@ -1,7 +1,6 @@
 import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
-import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 const playerHeight = 1.6;
 const isBotMode = qsTruthy("bot");
@@ -12,6 +11,10 @@ const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ex
 
 import { addMedia, proxiedUrlFor, getPromotionTokenForFile } from "./utils/media-utils";
 import { ObjectContentOrigins } from "./object-types";
+
+import { getAvatarSrc } from "./assets/avatars/avatars";
+
+let avatarCachebuster = 0;
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, availableVREntryTypes) {
@@ -154,15 +157,9 @@ export default class SceneEntryManager {
 
   _updatePlayerRigWithProfile = () => {
     const { avatarId, displayName } = this.store.state.profile;
-    const avatarSrc =
-      avatarId && avatarId.startsWith("http")
-        ? proxiedUrlFor(avatarId)
-        : !avatarId || avatarId.startsWith("#")
-          ? `#${avatarId || "botdefault"}`
-          : getReticulumFetchUrl(`/api/v1/avatars/${avatarId}/avatar.gltf`);
     this.playerRig.setAttribute("player-info", {
       displayName,
-      avatarSrc
+      avatarSrc: getAvatarSrc(avatarId, avatarCachebuster++)
     });
     const hudController = this.playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });

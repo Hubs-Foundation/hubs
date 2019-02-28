@@ -67,6 +67,11 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 
+import qsTruthy from "../utils/qs_truthy";
+// TODO temp feature flags
+const customSkinEnabled = qsTruthy("customSkin");
+const advancedAvatarEditor = qsTruthy("advancedAvatarEditor");
+
 addLocaleData([...en]);
 
 // This is a list of regexes that match the microphone labels of HMDs.
@@ -1389,6 +1394,8 @@ class UIRoot extends Component {
                   onSignOut={this.signOut}
                   finished={this.onProfileFinished}
                   store={this.props.store}
+                  customSkinEnabled={customSkinEnabled}
+                  advanced={advancedAvatarEditor}
                 />
               )}
             />

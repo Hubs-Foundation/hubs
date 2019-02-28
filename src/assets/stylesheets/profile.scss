@@ -18,6 +18,20 @@
     cursor: pointer;
   }
 
+  :local(.info) {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 16px;
+    color: $grey-text;
+    margin-top: 40px;
+
+    a {
+      color: $dark-grey-text;
+      margin-left: 5px;
+    }
+  }
+
   :local(.logo) {
     width: 150px;
     position: absolute;
@@ -73,6 +87,15 @@
     width: 95%;
     text-align: center;
     margin: 16px;
+
+    &.avatar-editor {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      .form-body {
+        flex: 1;
+      }
+    }
 
     .loading-panel {
       background: transparent;
