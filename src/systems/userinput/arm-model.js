@@ -8,9 +8,7 @@ export const applyArmModel = (function() {
   const deltaControllerPosition = new THREE.Vector3();
   const controllerQuaternion = new THREE.Quaternion();
   const controllerPosition = new THREE.Vector3();
-  return function applyArmModel(gamepad, hand, headObject3D, userHeight) {
-    const controller = gamepad;
-    const pose = controller.pose;
+  return function applyArmModel(gamepadPose, hand, headObject3D, userHeight) {
     headObject3D.updateMatrices();
     controllerPosition.copy(headObject3D.position);
     controllerPosition.y = controllerPosition.y - userHeight;
@@ -24,7 +22,7 @@ export const applyArmModel = (function() {
     controllerPosition.add(deltaControllerPosition);
     deltaControllerPosition.set(FOREARM.x, FOREARM.y, FOREARM.z);
     deltaControllerPosition.multiplyScalar(userHeight);
-    controllerQuaternion.fromArray(pose.orientation);
+    controllerQuaternion.fromArray(gamepadPose.orientation);
     controllerEuler.setFromQuaternion(controllerQuaternion);
     controllerEuler.set(controllerEuler.x, controllerEuler.y, 0);
     deltaControllerPosition.applyEuler(controllerEuler);

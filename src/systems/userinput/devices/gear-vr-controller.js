@@ -58,7 +58,7 @@ export class GearVRControllerDevice {
       if (this.gamepad.pose.orientation) {
         frame[paths.device.gearVRController.matrix] = this.matrix
           .compose(
-            applyArmModel(this.gamepad, this.gamepad.hand, this.headObject3D, 1.6),
+            applyArmModel(this.gamepad.pose, this.gamepad.hand, this.headObject3D, 1.6),
             this.orientation.fromArray(this.gamepad.pose.orientation),
             ONES
           )
