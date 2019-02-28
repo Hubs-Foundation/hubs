@@ -374,7 +374,7 @@ body.vr-mode {
     flex: 10;
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
     
     :local(.spawn-tip-icon) {

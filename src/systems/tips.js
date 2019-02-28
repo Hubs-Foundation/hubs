@@ -5,17 +5,19 @@ import { detectInHMD } from "../utils/vr-caps-detect";
 // The output of this system is activeTips which shows, if any, the tips to show at the top
 // and bottom of the screen. There are named tips (eg locomotion) that each have validators.
 //
-// Each frame we run all the validators and take the first tip (by order) which is VALID
-// any tip that returns FINISHED will no longer be considered.
+// Each frame we run all the non-finished validators and take the first tip (by order)
+// which is VALID. Any tip that returns FINISHED will no longer be considered without
+// a local storage reset.
 
 // Validators can return these values:
 //
-// INVALID - Input or store activity flags incicate tip is not valid to show
-// VALID - Input or store activity flags indicate tip is valid to show
-// FINISH - Input or store activity flags indicate tip should always be INVALID going forward
+// INVALID - Tip is not valid to show
+// VALID - Tip is valid to show
+// FINISH - Tip should always be assumed INVALID going forward
 //
-// Once a validator returns FINISH, that tip will no longer ever be run or tip seen for this
-// local storage context.
+//
+// Tips have "scope", which is a certain context within which the validators are run (right now,
+// just the top of bottom of the screen.) They are also platform-local.
 const INVALID = 0;
 const VALID = 1;
 const FINISH = 2;
