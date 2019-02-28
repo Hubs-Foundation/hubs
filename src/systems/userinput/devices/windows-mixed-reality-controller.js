@@ -1,6 +1,11 @@
 import { paths } from "../paths";
 import { Pose } from "../pose";
 const ONES = new THREE.Vector3(1, 1, 1);
+const HAND_OFFSET = new THREE.Matrix4().compose(
+  new THREE.Vector3(0, -0.017, 0.13),
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(-40 * THREE.Math.DEG2RAD, 0, 0)),
+  new THREE.Vector3(1, 1, 1)
+);
 
 export class WindowsMixedRealityControllerDevice {
   constructor(gamepad) {
@@ -76,7 +81,8 @@ export class WindowsMixedRealityControllerDevice {
           this.orientation.fromArray(this.gamepad.pose.orientation),
           ONES
         )
-        .premultiply(this.sittingToStandingMatrix);
+        .premultiply(this.sittingToStandingMatrix)
+        .multiply(HAND_OFFSET);
     }
   }
 }

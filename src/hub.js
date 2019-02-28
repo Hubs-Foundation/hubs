@@ -139,7 +139,6 @@ import "super-hands";
 import "./components/super-networked-interactable";
 import "./components/networked-counter";
 import "./components/event-repeater";
-import "./components/controls-shape-offset";
 import "./components/set-yxz-order";
 import "./components/set-sounds-invisible";
 

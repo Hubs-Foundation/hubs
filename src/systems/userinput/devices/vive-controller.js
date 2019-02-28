@@ -2,6 +2,11 @@ import { paths } from "../paths";
 import { Pose } from "../pose";
 
 const ONES = new THREE.Vector3(1, 1, 1);
+const HAND_OFFSET = new THREE.Matrix4().compose(
+  new THREE.Vector3(0, 0, 0.13),
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(-40 * THREE.Math.DEG2RAD, 0, 0)),
+  new THREE.Vector3(1, 1, 1)
+);
 
 export class ViveControllerDevice {
   constructor(gamepad) {
@@ -35,6 +40,7 @@ export class ViveControllerDevice {
       }
     });
 
+    this.matrix = new THREE.Matrix4();
     this.position = new THREE.Vector3();
     this.orientation = new THREE.Quaternion();
   }
@@ -87,7 +93,8 @@ export class ViveControllerDevice {
           this.orientation.fromArray(this.gamepad.pose.orientation),
           ONES
         )
-        .premultiply(this.sittingToStandingMatrix);
+        .premultiply(this.sittingToStandingMatrix)
+        .multiply(HAND_OFFSET);
     }
   }
 }

@@ -3,6 +3,7 @@ import { Pose } from "../pose";
 import { applyArmModel } from "../arm-model.js";
 
 const ONES = new THREE.Vector3(1, 1, 1);
+const HAND_OFFSET = new THREE.Matrix4().makeTranslation(0, 0, -0.04);
 
 export class DaydreamControllerDevice {
   constructor(gamepad) {
@@ -68,7 +69,8 @@ export class DaydreamControllerDevice {
             this.orientation.fromArray(this.gamepad.pose.orientation),
             ONES
           )
-          .premultiply(this.sittingToStandingMatrix);
+          .premultiply(this.sittingToStandingMatrix)
+          .multiply(HAND_OFFSET);
       }
     }
   }
