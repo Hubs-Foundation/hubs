@@ -120,20 +120,6 @@ class AvatarSelector extends Component {
     }
   }
 
-  componentDidMount() {
-    // <a-scene> component not initialized until scene element mounted and loaded.
-    this.scene.addEventListener("loaded", () => {
-      this.scene.setAttribute("renderer", {
-        gammaOutput: true,
-        sortObjects: true,
-        physicallyCorrectLights: true,
-        colorManagement: true
-      });
-      this.scene.setAttribute("shadow", { type: "pcfsoft", enabled: window.APP.quality !== "low" });
-      this.scene.setAttribute("environment-map", "");
-    });
-  }
-
   render() {
     const avatarAssets = this.props.avatars.map(avatar => (
       <a-asset-item id={avatar.id} key={avatar.id} response-type="arraybuffer" src={`${avatar.model}`} />
@@ -157,8 +143,27 @@ class AvatarSelector extends Component {
 
     return (
       <div className="avatar-selector">
-        <a-scene vr-mode-ui="enabled: false" ref={sce => (this.scene = sce)}>
+        <a-scene
+          vr-mode-ui="enabled: false"
+          light="defaultLightsEnabled: false"
+          ref={sce => (this.scene = sce)}
+          background="color: #aaa"
+          environment-map=""
+          renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; gammaOutput: true;"
+        >
           <a-assets>{avatarAssets}</a-assets>
+
+          <a-entity
+            skybox="
+            turbidity: 20;
+            rayleigh: 0.03;
+            luminance: 0.175;
+            mieCoefficient: 0.004;
+            mieDirectionalG: 0.098;
+            azimuth: 0.37;
+            inclination: 0.14;
+          "
+          />
 
           <a-entity
             ref={anm => (this.animation = anm)}
@@ -169,15 +174,19 @@ class AvatarSelector extends Component {
           </a-entity>
 
           <a-entity position="0 1.5 -5.6" rotation="-10 180 0">
-            <a-entity camera="far: 1;" />
+            <a-entity camera="far: 1.5;" />
           </a-entity>
 
           <a-entity
             hide-when-quality="low"
-            light="type: directional; color: #F9FFCE; intensity: 0.6"
-            position="0 5 -15"
+            light="type: directional; color: #fdf5c2; intensity: 12"
+            position="0 10 -15"
           />
-          <a-entity hide-when-quality="low" light="type: ambient; color: #FFF" />
+
+          <a-entity
+            hide-when-quality="low"
+            light="type: hemisphere; color: #b1e3ff; groundColor: #b1e3ff; intensity: 1.5;"
+          />
         </a-scene>
         <WithHoverSound>
           <button className="avatar-selector__previous-button" onClick={this.emitChangeToPrevious}>

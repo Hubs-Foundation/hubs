@@ -229,7 +229,7 @@ AFRAME.registerComponent("skybox", {
     mieCoefficient: { type: "number", default: 0.005 },
     mieDirectionalG: { type: "number", default: 0.8 },
     inclination: { type: "number", default: 0 },
-    azimuth: { type: "number", default: 0 },
+    azimuth: { type: "number", default: 0.15 },
     distance: { type: "number", default: 8000 }
   },
 
@@ -242,7 +242,7 @@ AFRAME.registerComponent("skybox", {
 
     // HACK: Render environment map on next frame to avoid bug where the render target texture is black.
     this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
-    requestAnimationFrame(this.updateEnvironmentMap);
+    requestAnimationFrame(() => setTimeout(this.updateEnvironmentMap), 0);
   },
 
   update(oldData) {
