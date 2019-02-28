@@ -1,5 +1,6 @@
 import { paths } from "../paths";
 import { Pose } from "../pose";
+import { copySittingToStandingTransform } from "./copy-sitting-to-standing-transform";
 const ONES = new THREE.Vector3(1, 1, 1);
 const HAND_OFFSET = new THREE.Matrix4().compose(
   new THREE.Vector3(0, -0.017, 0.13),
@@ -24,13 +25,7 @@ export class WindowsMixedRealityControllerDevice {
     }
 
     this.sittingToStandingMatrix = new THREE.Matrix4().makeTranslation(0, 1.6, 0);
-    navigator.getVRDisplays().then(d => {
-      if (!d[0] || !d[0].stageParameters || !d[0].stageParameters.sittingToStandingTransform) return;
-      const m = d[0].stageParameters.sittingToStandingTransform;
-      for (let i = 0; i < 16; i++) {
-        this.sittingToStandingMatrix.elements[i] = m[i];
-      }
-    });
+    copySittingToStandingTransform(this.sittingToStandingMatrix);
     this.matrix = new THREE.Matrix4();
     this.position = new THREE.Vector3();
     this.orientation = new THREE.Quaternion();

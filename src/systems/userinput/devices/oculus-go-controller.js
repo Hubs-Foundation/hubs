@@ -1,6 +1,7 @@
 import { paths } from "../paths";
 import { Pose } from "../pose";
 import { applyArmModel } from "../arm-model.js";
+import { copySittingToStandingTransform } from "./copy-sitting-to-standing-transform";
 
 const ONES = new THREE.Vector3(1, 1, 1);
 
@@ -11,13 +12,7 @@ export class OculusGoControllerDevice {
     this.pose = new Pose();
     this.q = new THREE.Quaternion();
     this.sittingToStandingMatrix = new THREE.Matrix4().makeTranslation(0, 1.6, 0);
-    navigator.getVRDisplays().then(d => {
-      if (!d[0] || !d[0].stageParameters || !d[0].stageParameters.sittingToStandingTransform) return;
-      const m = d[0].stageParameters.sittingToStandingTransform;
-      for (let i = 0; i < 16; i++) {
-        this.sittingToStandingMatrix.elements[i] = m[i];
-      }
-    });
+    copySittingToStandingTransform(this.sittingToStandingMatrix);
     this.matrix = new THREE.Matrix4();
     this.orientation = new THREE.Quaternion();
   }
