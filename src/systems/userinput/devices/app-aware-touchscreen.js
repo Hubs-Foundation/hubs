@@ -49,6 +49,15 @@ export class AppAwareTouchscreenDevice {
   }
 
   end(touch) {
+    if (this.pendingFirstTouch) {
+      // The original start was buffered and never processed, so just clear the timeout and retunr.
+      console.log("clearing pending touch");
+      clearTimeout(this.firstTouchTimeout);
+      this.firstTouchTimeout = null;
+      this.pendingFirstTouch = null;
+      return;
+    }
+
     if (!touchIsAssigned(touch, this.assignments)) {
       console.warn("touch does not have a job", touch);
     } else {
@@ -106,6 +115,13 @@ export class AppAwareTouchscreenDevice {
   }
 
   move(touch) {
+    if (this.pendingFirstTouch) {
+      // There was a pending un-flushed first touch, so we should assign it now to the
+      // first pincher and clear the pending work to process it otherwise.
+      assign(this.pendingFirstTouch, FIRST_PINCHER_JOB, this.assignments);
+      this.clearPendingFirstTouch();
+    }
+
     if (!touchIsAssigned(touch, this.assignments)) {
       if (!touch.target.classList[0] || !touch.target.classList[0].startsWith("virtual-gamepad-controls")) {
         console.warn("touch does not have job", touch);
@@ -143,7 +159,44 @@ export class AppAwareTouchscreenDevice {
     }
   }
 
+  forcePendingFirstTouch() {
+    if (this.pendingFirstTouch) {
+      console.log("Flush pending touch");
+      // We had a buffered first touch, but just got a second
+      // touch (two+ fingers down), so just flush the first touch now.
+      this.processTouchStart(this.pendingFirstTouch);
+      this.clearPendingFirstTouch();
+    }
+  }
+
+  clearPendingFirstTouch() {
+    clearTimeout(this.firstTouchTimeout);
+    this.pendingFirstTouch = null;
+    this.firstTouchTimeout = null;
+  }
+
   start(touch) {
+    let delayTouch = true; // TODO if over UI, never delay
+
+    if (this.pendingFirstTouch) {
+      delayTouch = false;
+    }
+
+    this.forcePendingFirstTouch();
+
+    if (delayTouch) {
+      this.pendingFirstTouch = touch;
+
+      this.firstTouchTimeout = setTimeout(() => {
+        this.processTouchStart(this.pendingFirstTouch);
+        this.pendingFirstTouch = null;
+      }, 1000);
+    } else {
+      this.processTouchStart(touch);
+    }
+  }
+
+  processTouchStart(touch) {
     if (touchIsAssigned(touch, this.assignments)) {
       console.error("touch already has a job");
       return;
