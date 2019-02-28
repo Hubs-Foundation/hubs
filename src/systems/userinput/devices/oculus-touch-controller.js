@@ -45,6 +45,7 @@ export class OculusTouchControllerDevice {
     this.axisMap = [{ name: "joyX", axisId: 0 }, { name: "joyY", axisId: 1 }];
     this.sittingToStandingMatrix = new THREE.Matrix4().makeTranslation(0, 1.6, 0);
     navigator.getVRDisplays().then(d => {
+      if (!d[0] || !d[0].stageParameters || !d[0].stageParameters.sittingToStandingTransform) return;
       const m = d[0].stageParameters.sittingToStandingTransform;
       for (let i = 0; i < 16; i++) {
         this.sittingToStandingMatrix.elements[i] = m[i];
