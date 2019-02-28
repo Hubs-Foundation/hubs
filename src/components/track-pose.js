@@ -1,4 +1,4 @@
-AFRAME.registerComponent("copy-matrix", {
+AFRAME.registerComponent("track-pose", {
   schema: {
     path: { type: "string" }
   },
