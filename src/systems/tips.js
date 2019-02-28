@@ -36,13 +36,14 @@ const TIPS = {
       "freeze_gesture",
       "menu_hover",
       "object_pin",
+      "invite",
       "pen_color",
       "pen_size"
     ]
   },
   mobile: {
     top: ["pen_mode", "video_share_mode", "freeze_mode", "mute_mode"],
-    bottom: ["look", "locomotion", "spawn_menu", "object_grab", "freeze_gesture", "menu_hover", "object_pin"]
+    bottom: ["look", "locomotion", "spawn_menu", "object_grab", "freeze_gesture", "menu_hover", "object_pin", "invite"]
   },
   standalone: { top: [], bottom: [] }
 };
@@ -129,6 +130,12 @@ const VALIDATORS = {
     if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
     if (scene.is("frozen") && userinput.activeSets.has(sets.cursorHoveringOnInteractable)) return FINISH;
     return VALID;
+  },
+  invite: function(userinput, scene) {
+    if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
+    if (userinput.activeSets.has(sets.cursorHoldingCamera)) return INVALID;
+    if (userinput.activeSets.has(sets.cursorHoldingInteractable)) return INVALID;
+    return scene.is("copresent") ? FINISH : VALID;
   },
   object_grab: function(userinput, scene, mediaCounter) {
     if (scene.is("frozen")) return INVALID;

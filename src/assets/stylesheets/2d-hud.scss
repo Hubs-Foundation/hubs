@@ -96,6 +96,10 @@
         left: 71px;
       }
     }
+
+    :local(.attach_freeze_mode) {
+      display: none;
+    }
   }
 
   :local(.video-share-extra-options) {

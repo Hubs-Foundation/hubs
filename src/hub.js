@@ -744,6 +744,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const occupantCount = Object.entries(hubPhxPresence.state).length;
     vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
 
+    if (occupantCount > 1) {
+      scene.addState("copresent");
+    } else {
+      scene.removeState("copresent");
+    }
+
     if (!isInitialSync) return;
     // Wire up join/leave event handlers after initial sync.
     isInitialSync = false;
