@@ -169,7 +169,7 @@ export class AppAwareTouchscreenDevice {
         assignment = assign(touch, MOVE_CURSOR_JOB, this.assignments);
 
         // Grabbing objects is delayed by several frames:
-        // - We don't want the physics constraint to be applied to early, which results in crazy velocities
+        // - We don't want the physics constraint to be applied too early, which results in crazy velocities
         // - We don't want to mis-trigger grabs if the user is about to put down a second finger.
         assignment.framesUntilGrab = 2;
       } else {
