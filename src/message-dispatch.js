@@ -35,6 +35,7 @@ export default class MessageDispatch {
     const scales = [0.0625, 0.125, 0.25, 0.5, 1.0, 1.5, 3, 5, 7.5, 12.5];
     const curScale = playerRig.object3D.scale;
     let err;
+    let physicsSystem;
 
     switch (command) {
       case "fly":
@@ -78,7 +79,7 @@ export default class MessageDispatch {
         }
         break;
       case "debug":
-        const physicsSystem = document.querySelector("a-scene").systems.physics;
+        physicsSystem = document.querySelector("a-scene").systems.physics;
         physicsSystem.setDebug(!physicsSystem.debug);
         break;
       case "scene":
