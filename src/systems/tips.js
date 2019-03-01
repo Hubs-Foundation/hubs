@@ -37,6 +37,8 @@ const TIPS = {
       "object_scale",
       "freeze_gesture",
       "menu_hover",
+      "object_recenter",
+      "object_rotate",
       "object_pin",
       "invite",
       "pen_color",
@@ -45,7 +47,17 @@ const TIPS = {
   },
   mobile: {
     top: ["pen_mode", "video_share_mode", "freeze_mode", "mute_mode"],
-    bottom: ["look", "locomotion", "spawn_menu", "object_grab", "freeze_gesture", "object_pin", "invite"]
+    bottom: [
+      "look",
+      "locomotion",
+      "spawn_menu",
+      "object_grab",
+      "freeze_gesture",
+      "object_rotate",
+      "object_recenter",
+      "object_pin",
+      "invite"
+    ]
   },
   standalone: { top: [], bottom: [] }
 };
@@ -89,6 +101,7 @@ export const markTipScopeFinished = scope => {
 export const resetTips = () => {
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({}));
   localStorageCache = null;
+  window.APP.store.resetTipActivityFlags();
   finishedScopes = {};
 };
 
@@ -143,6 +156,18 @@ const VALIDATORS = {
     if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
     if (userinput.activeSets.has(sets.cursorHoldingCamera)) return INVALID;
     if (userinput.activeSets.has(sets.cursorHoldingInteractable)) return FINISH;
+    return VALID;
+  },
+  object_rotate: function(userinput, scene, mediaCounter, store) {
+    if (!scene.is("frozen")) return INVALID;
+    if (mediaCounter.count() === 0) return INVALID;
+    if (store && store.state.activity.hasRotated) return FINISH;
+    return VALID;
+  },
+  object_recenter: function(userinput, scene, mediaCounter, store) {
+    if (!scene.is("frozen")) return INVALID;
+    if (mediaCounter.count() === 0) return INVALID;
+    if (store && store.state.activity.hasRecentered) return FINISH;
     return VALID;
   },
   object_pin: function(userinput, scene, mediaCounter, store) {
