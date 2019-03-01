@@ -40,7 +40,7 @@ function getTouchIntersection(touch, raycaster) {
   return rawIntersections.find(x => x.object.el);
 }
 
-function shouldMoveCursor(touch, raycaster) {
+function isCursorOverInteractable(touch, raycaster) {
   const cursorController = getCursorController();
   const isCursorGrabbing = cursorController.data.cursor.components["super-hands"].state.has("grab-start");
   if (isCursorGrabbing) {
@@ -75,9 +75,14 @@ export class AppAwareTouchscreenDevice {
   }
 
   end(touch) {
-    if (this.pendingFirstTouch) {
-      // The original start was buffered and never processed, so just clear the timeout and return.
+    if (this.pendingFirstTouch && this.pendingFirstTouch.identifier === touch.identifier) {
+      // We were buffering the first touch waiting for a second, but that finger has lifted now
+      // so we should process both the start and end.
+      //
+      // Since we know it was a single fingered tap, we can allow the cursor to move to a non-interactable.
+      this.processTouchStart(this.pendingFirstTouch, true);
       this.clearPendingFirstTouch();
+      setTimeout(() => this.end(touch));
       return;
     }
 
@@ -138,9 +143,11 @@ export class AppAwareTouchscreenDevice {
   }
 
   move(touch) {
-    if (this.pendingFirstTouch) {
+    if (this.pendingFirstTouch && this.pendingFirstTouch.identifier === touch.identifier) {
       this.processTouchStart(this.pendingFirstTouch);
       this.clearPendingFirstTouch();
+      setTimeout(() => this.move(touch));
+      return;
     }
 
     if (!touchIsAssigned(touch, this.assignments)) {
@@ -213,7 +220,7 @@ export class AppAwareTouchscreenDevice {
     }
   }
 
-  processTouchStart(touch) {
+  processTouchStart(touch, allowMoveToNonInteractable) {
     if (touchIsAssigned(touch, this.assignments)) {
       console.error("touch already has a job");
       return;
@@ -224,7 +231,7 @@ export class AppAwareTouchscreenDevice {
     if (
       !hasFirstPinch &&
       !jobIsAssigned(MOVE_CURSOR_JOB, this.assignments) &&
-      shouldMoveCursor(touch, this.raycaster)
+      (allowMoveToNonInteractable || isCursorOverInteractable(touch, this.raycaster))
     ) {
       const assignment = assign(touch, MOVE_CURSOR_JOB, this.assignments);
       assignment.cursorPose = new Pose().fromCameraProjection(
