@@ -960,9 +960,6 @@ class UIRoot extends Component {
 
     return (
       <div className={entryStyles.entryPanel}>
-        <div className={entryStyles.header}>
-          <FormattedMessage id="entry.room" />
-        </div>
         <div className={entryStyles.name}>
           <span>{this.props.hubName}</span>
           {this.props.hubChannel.permissions.update_hub && (
@@ -989,6 +986,10 @@ class UIRoot extends Component {
               </i>
             </StateLink>
           )}
+        </div>
+
+        <div className={entryStyles.roomSubtitle}>
+          <FormattedMessage id="entry.room" />
         </div>
 
         <div className={entryStyles.center}>
