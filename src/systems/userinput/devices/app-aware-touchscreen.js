@@ -144,6 +144,7 @@ export class AppAwareTouchscreenDevice {
 
   move(touch) {
     if (this.pendingFirstTouch && this.pendingFirstTouch.identifier === touch.identifier) {
+      // If we are moving the pending first touch, process it and then this one.
       this.processTouchStart(this.pendingFirstTouch);
       this.clearPendingFirstTouch();
       setTimeout(() => this.move(touch));
