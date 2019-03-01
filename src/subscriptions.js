@@ -51,6 +51,7 @@ export default class Subscriptions {
 
     // registration becomes null if failed, non null if registered
     while (this.registration === undefined && performance.now() - startedAt < INIT_TIMEOUT_MS) await nextTick();
+    if (performance.now() - startedAt >= INIT_TIMEOUT_MS) console.warn("Service worker registration timed out.");
     if (!this.registration || !this.registration.pushManager) return null;
 
     while (this.vapidPublicKey === undefined) await nextTick();
