@@ -65,10 +65,6 @@ export default class SceneEntryManager {
       this.scene.enterVR();
     }
 
-    if (!isCardboard) {
-      this.playerRig.removeAttribute("cardboard-controls");
-    }
-
     if (isMobile || qsTruthy("mobile")) {
       this.playerRig.setAttribute("virtual-gamepad-controls", {});
     }

@@ -143,8 +143,6 @@ import "./components/event-repeater";
 import "./components/set-yxz-order";
 import "./components/set-sounds-invisible";
 
-import "./components/cardboard-controls";
-
 import "./components/cursor-controller";
 
 import "./components/nav-mesh-helper";
