@@ -67,6 +67,7 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.mode = null;
     this.rotating = false;
     this.axis = new THREE.Vector3();
+    this.store = window.APP.store;
 
     this.dxAll = 0;
     this.dxStore = 0;
@@ -156,8 +157,11 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.rotating = true;
 
     if (this.mode === ROTATE_MODE.ALIGN) {
+      this.store.update({ activity: { hasRecentered: true } });
       return;
     }
+
+    this.store.update({ activity: { hasRotated: true } });
 
     if (this.mode === ROTATE_MODE.PUPPET) {
       this.target.getWorldQuaternion(this.puppet.initialObjectOrientation);
