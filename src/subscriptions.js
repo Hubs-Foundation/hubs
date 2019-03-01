@@ -1,4 +1,5 @@
 import nextTick from "./utils/next-tick.js";
+const INIT_TIMEOUT_MS = 5000;
 
 // Manages web push subscriptions
 //
@@ -46,9 +47,11 @@ export default class Subscriptions {
 
   getCurrentEndpoint = async () => {
     if (!navigator.serviceWorker) return null;
+    const startedAt = performance.now();
 
     // registration becomes null if failed, non null if registered
-    while (this.registration === undefined) await nextTick();
+    while (this.registration === undefined && performance.now() - startedAt < INIT_TIMEOUT_MS) await nextTick();
+    if (performance.now() - startedAt >= INIT_TIMEOUT_MS) console.warn("Service worker registration timed out.");
     if (!this.registration || !this.registration.pushManager) return null;
 
     while (this.vapidPublicKey === undefined) await nextTick();

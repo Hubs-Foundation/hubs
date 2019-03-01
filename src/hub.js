@@ -503,6 +503,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (e) {
       subscriptions.setRegistrationFailed();
     }
+  } else {
+    subscriptions.setRegistrationFailed();
   }
 
   const scene = document.querySelector("a-scene");
