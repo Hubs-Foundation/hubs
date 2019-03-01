@@ -60,9 +60,7 @@ const tipPlatform = () => {
   return isMobile ? "mobile" : "desktop";
 };
 
-const platformTips = () => {
-  return TIPS[tipPlatform()];
-};
+const platformTips = TIPS[tipPlatform()];
 
 const isTipFinished = tip => {
   if (localStorageCache === null) {
@@ -80,7 +78,7 @@ export const markTipFinished = tip => {
 };
 
 export const markTipScopeFinished = scope => {
-  const tips = platformTips()[scope];
+  const tips = platformTips[scope];
 
   for (let i = 0; i < tips.length; i++) {
     const tip = tips[i];
@@ -206,15 +204,11 @@ AFRAME.registerSystem("tips", {
     if (localStorage.getItem(LOCAL_STORAGE_KEY) === null) {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({}));
     }
-
-    this._tickCount = 0;
   },
 
   tick: function() {
-    this._tickCount++;
-
     if (!this._userinput) {
-      this._userinput = AFRAME.scenes[0].systems.userinput;
+      this._userinput = this.el.systems.userinput;
 
       if (!this._userinput) return;
     }
@@ -225,7 +219,7 @@ AFRAME.registerSystem("tips", {
       if (!this._mediaCounter) return;
     }
 
-    const tips = platformTips();
+    const tips = platformTips;
 
     const prevTop = this.activeTips.top;
     const prevBottom = this.activeTips.bottom;
@@ -241,7 +235,6 @@ AFRAME.registerSystem("tips", {
   _performStep: function(tips, scope) {
     if (finishedScopes[scope]) return;
 
-    const scene = AFRAME.scenes[0];
     let chosenTip = null;
     let finishCount = 0;
 
@@ -252,7 +245,7 @@ AFRAME.registerSystem("tips", {
         continue;
       }
 
-      switch (VALIDATORS[tip](this._userinput, scene, this._mediaCounter, window.APP.store)) {
+      switch (VALIDATORS[tip](this._userinput, this.el, this._mediaCounter, window.APP.store)) {
         case FINISH:
           markTipFinished(tip);
           break;
