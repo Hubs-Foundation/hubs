@@ -87,7 +87,7 @@ export const touchscreenUserBindings = addSetsToBindings({
     {
       src: { value: paths.device.touchscreen.isTouchingGrabbable },
       dest: { value: paths.actions.cursor.grab },
-      xform: xforms.copy
+      xform: xforms.rising
     },
     {
       src: { value: paths.device.hud.penButton },
