@@ -8,7 +8,9 @@ import cubeMapNegZ from "../assets/images/cubemap/negz.jpg";
 
 async function createDefaultEnvironmentMap() {
   const urls = [cubeMapPosX, cubeMapNegX, cubeMapPosY, cubeMapNegY, cubeMapPosZ, cubeMapNegZ];
-  const texture = await new THREE.CubeTextureLoader().load(urls);
+  const texture = await new Promise((resolve, reject) =>
+    new THREE.CubeTextureLoader().load(urls, resolve, undefined, reject)
+  );
   texture.format = THREE.RGBFormat;
   return texture;
 }
