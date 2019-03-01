@@ -34,7 +34,6 @@ window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
 import "aframe-physics-system";
 import "./components/event-repeater";
-import "./components/controls-shape-offset";
 
 import registerTelemetry from "./telemetry";
 

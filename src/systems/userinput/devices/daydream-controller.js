@@ -1,5 +1,10 @@
 import { paths } from "../paths";
 import { Pose } from "../pose";
+import { applyArmModel } from "../arm-model";
+import { copySittingToStandingTransform } from "./copy-sitting-to-standing-transform";
+
+const ONES = new THREE.Vector3(1, 1, 1);
+const HAND_OFFSET = new THREE.Matrix4().makeTranslation(0, 0, -0.04);
 
 export class DaydreamControllerDevice {
   constructor(gamepad) {
@@ -10,6 +15,10 @@ export class DaydreamControllerDevice {
     this.rayObjectRotation = new THREE.Quaternion();
     this.selector = `#player-${gamepad.hand}-controller`;
     this.pose = new Pose();
+    this.sittingToStandingMatrix = new THREE.Matrix4().makeTranslation(0, 1.6, 0);
+    copySittingToStandingTransform(this.sittingToStandingMatrix);
+    this.matrix = new THREE.Matrix4();
+    this.orientation = new THREE.Quaternion();
   }
 
   write(frame) {
@@ -45,6 +54,19 @@ export class DaydreamControllerDevice {
       this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
       this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
       frame[paths.device.daydream.pose] = this.pose;
+
+      this.headObject3D = this.headObject3D || document.querySelector("#player-camera").object3D;
+
+      if (this.gamepad.pose.orientation) {
+        frame[paths.device.daydream.matrix] = this.matrix
+          .compose(
+            applyArmModel(this.gamepad.pose, this.gamepad.hand, this.headObject3D, 1.6),
+            this.orientation.fromArray(this.gamepad.pose.orientation),
+            ONES
+          )
+          .premultiply(this.sittingToStandingMatrix)
+          .multiply(HAND_OFFSET);
+      }
     }
   }
 }

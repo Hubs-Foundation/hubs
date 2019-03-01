@@ -48,7 +48,6 @@
     "aframe-physics-system": "github:mozillareality/aframe-physics-system#6ebe73473b6923f6dc54d25791cebd2cbd83c4fe",
     "aframe-rounded": "^1.0.3",
     "aframe-slice9-component": "^1.0.0",
-    "aframe-teleport-controls": "github:mozillareality/aframe-teleport-controls#hubs/master",
     "ammo.js": "github:kripken/ammo.js#ebe912c0426a47da9a11ce1ded3815da4a8d27c1",
     "classnames": "^2.2.5",
     "copy-to-clipboard": "^3.0.8",

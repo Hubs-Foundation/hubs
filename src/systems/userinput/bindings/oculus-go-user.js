@@ -36,6 +36,11 @@ export default function generate3DOFTriggerBindings(device) {
   return addSetsToBindings({
     [sets.global]: [
       {
+        src: { value: device.matrix },
+        dest: { value: paths.actions.rightHand.matrix },
+        xform: xforms.copy
+      },
+      {
         src: {
           value: device.button("trigger").pressed
         },
@@ -139,7 +144,6 @@ export default function generate3DOFTriggerBindings(device) {
         xform: xforms.copy,
         priority: 100
       },
-
       {
         src: { value: device.pose },
         dest: { value: paths.actions.cursor.pose },

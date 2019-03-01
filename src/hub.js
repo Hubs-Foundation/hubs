@@ -12,8 +12,6 @@ patchWebGLRenderingContext();
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
-import "aframe-teleport-controls";
-import "./components/teleport-controls-matrix-auto-update";
 import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
@@ -82,6 +80,9 @@ import "./components/open-media-button";
 import "./components/rotate-object-button";
 import "./components/hover-menu";
 import "./components/disable-frustum-culling";
+import "./components/teleporter";
+import "./components/set-active-camera";
+import "./components/track-pose";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -146,7 +147,6 @@ import "super-hands";
 import "./components/super-networked-interactable";
 import "./components/networked-counter";
 import "./components/event-repeater";
-import "./components/controls-shape-offset";
 import "./components/set-yxz-order";
 import "./components/set-sounds-invisible";
 
@@ -659,9 +659,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({ environmentSceneLoaded: true });
 
     // Re-bind the teleporter controls collision meshes in case the scene changed.
-    document
-      .querySelectorAll("a-entity[teleport-controls]")
-      .forEach(x => x.components["teleport-controls"].queryCollisionEntities());
+    document.querySelectorAll("a-entity[teleporter]").forEach(x => x.components["teleporter"].queryCollisionEntities());
 
     for (const modelEl of environmentScene.children) {
       addAnimationComponents(modelEl);

@@ -61,7 +61,6 @@
     - [ui-class-while-frozen](#components/ui/ui-class-while-frozen)
   - [user-input](#components/user-input)
     - [cardboard-controls](#components/user-input/cardboard-controls)
-    - [controls-shape-offset](#components/user-input/controls-shape-offset)
     - [cursor-controller](#components/user-input/cursor-controller)
     - [hand-controls2](#components/user-input/hand-controls2)
     - [haptic-feedback](#components/user-input/haptic-feedback)
@@ -337,15 +336,6 @@ Polls the Gamepad API for Cardboard Button input and emits cardboardbutton event
 
 `src/components/cardboard-controls.js`
           
-
-<a name="components/user-input/controls-shape-offset"></a>
-#### controls-shape-offset
-
-Sets the offset of the aframe-physics shape on this entity based on the current VR controller type
-
-`src/components/controls-shape-offset.js`
-          
-
 <a name="components/user-input/cursor-controller"></a>
 #### cursor-controller
 
@@ -429,7 +419,7 @@ Sets layer flags on the underlying Object3D
 <a name="components/environment/nav-mesh-helper"></a>
 #### nav-mesh-helper
 
-Initializes teleport-controls when the environment bundle has loaded.
+Initializes teleporters when the environment bundle has loaded.
 
 `src/components/nav-mesh-helper.js`
           
