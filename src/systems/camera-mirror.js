@@ -32,6 +32,7 @@ AFRAME.registerSystem("camera-mirror", {
     }
 
     this.mirrorEl.emit("mirrored", { el: this.mirrorEl });
+    this.mirrorEl.sceneEl.addState("mirroring");
   },
 
   unmirrorCameraAtEl(el) {
@@ -45,6 +46,7 @@ AFRAME.registerSystem("camera-mirror", {
     this.mirrorCamera = null;
 
     oldEl.emit("unmirrored", { el: oldEl });
+    oldEl.sceneEl.removeState("mirroring");
   },
 
   getMirroredCameraEl() {

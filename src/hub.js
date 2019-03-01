@@ -113,6 +113,7 @@ import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
 import "./systems/frame-scheduler";
 import "./systems/ui-hotkeys";
+import "./systems/tips";
 
 import "./gltf-component-mappings";
 
@@ -567,12 +568,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     subscriptions,
     enterScene: entryManager.enterScene,
     exitScene: entryManager.exitScene,
-    initialIsSubscribed: subscriptions.isSubscribed()
+    initialIsSubscribed: subscriptions.isSubscribed(),
+    activeTips: scene.systems.tips.activeTips
   });
 
   scene.addEventListener("action_focus_chat", () => {
     const chatFocusTarget = document.querySelector(".chat-focus-target");
     chatFocusTarget && chatFocusTarget.focus();
+  });
+
+  scene.addEventListener("tips_changed", e => {
+    remountUI({ activeTips: e.detail });
   });
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
@@ -736,6 +742,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({ presences: hubPhxPresence.state });
     const occupantCount = Object.entries(hubPhxPresence.state).length;
     vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
+
+    if (occupantCount > 1) {
+      scene.addState("copresent");
+    } else {
+      scene.removeState("copresent");
+    }
 
     if (!isInitialSync) return;
     // Wire up join/leave event handlers after initial sync.

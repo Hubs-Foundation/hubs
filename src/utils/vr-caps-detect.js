@@ -22,11 +22,16 @@ function isMaybeDaydreamCompatibleDevice(ua) {
 // that can be entered into as a "generic" entry flow.
 const GENERIC_ENTRY_TYPE_DEVICE_BLACKLIST = [/cardboard/i];
 
+let isInHMD = null;
 export function detectInHMD() {
-  const ua = navigator.userAgent;
-  const isFirefoxReality = /Firefox/.test(ua) && /Android/.test(ua) && window.hasNativeWebVRImplementation;
-  const isOculusBrowser = /Oculus/.test(ua);
-  return isOculusBrowser || isFirefoxReality;
+  if (isInHMD === null) {
+    const ua = navigator.userAgent;
+    const isFirefoxReality = /Firefox/.test(ua) && /Android/.test(ua) && window.hasNativeWebVRImplementation;
+    const isOculusBrowser = /Oculus/.test(ua);
+    isInHMD = isOculusBrowser || isFirefoxReality;
+  }
+
+  return isInHMD;
 }
 
 // Tries to determine VR entry compatibility regardless of the current browser.

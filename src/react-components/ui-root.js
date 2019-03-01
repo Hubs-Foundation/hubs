@@ -55,12 +55,14 @@ import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
+import { markTipScopeFinished } from "../systems/tips.js";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
 import { faCamera } from "@fortawesome/free-solid-svg-icons/faCamera";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
@@ -144,6 +146,7 @@ class UIRoot extends Component {
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
+    activeTips: PropTypes.object,
     location: PropTypes.object,
     history: PropTypes.object
   };
@@ -1501,6 +1504,27 @@ class UIRoot extends Component {
                 hubId={this.props.hubId}
               />
             )}
+            {entered &&
+              this.props.activeTips.bottom && (
+                <div className={styles.bottomTip}>
+                  <button className={styles.tipCancel} onClick={() => markTipScopeFinished("bottom")}>
+                    <i>
+                      <FontAwesomeIcon icon={faTimes} />
+                    </i>
+                  </button>
+                  {this.props.activeTips.bottom.endsWith(".spawn_menu") ? (
+                    <div className={styles.spawnTip}>
+                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}-pre`} />
+                      <div className={classNames(styles.spawnTipIcon)} />
+                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}-post`} />
+                    </div>
+                  ) : (
+                    <div className={styles.tip}>
+                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}`} />
+                    </div>
+                  )}
+                </div>
+              )}
             {entered && (
               <form onSubmit={this.sendMessage}>
                 <div
@@ -1606,7 +1630,7 @@ class UIRoot extends Component {
               })}
             >
               {!showVREntryButton &&
-                !this.state.videoShareMediaSource && (
+                !this.props.activeTips.top && (
                   <WithHoverSound>
                     <button
                       className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
@@ -1618,7 +1642,7 @@ class UIRoot extends Component {
                 )}
               {!showVREntryButton &&
                 this.occupantCount() > 1 &&
-                !this.state.videoShareMediaSource &&
+                !this.props.activeTips.top &&
                 entered && (
                   <WithHoverSound>
                     <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
@@ -1704,6 +1728,7 @@ class UIRoot extends Component {
                 <SettingsMenu
                   history={this.props.history}
                   mediaSearchStore={this.props.mediaSearchStore}
+                  hideSettings={() => this.setState({ showSettingsMenu: false })}
                   hubChannel={this.props.hubChannel}
                   hubScene={this.props.hubScene}
                 />
@@ -1718,6 +1743,7 @@ class UIRoot extends Component {
                   frozen={this.state.frozen}
                   spacebubble={this.state.spacebubble}
                   videoShareMediaSource={this.state.videoShareMediaSource}
+                  activeTip={this.props.activeTips && this.props.activeTips.top}
                   onToggleMute={this.toggleMute}
                   onToggleFreeze={this.toggleFreeze}
                   onToggleSpaceBubble={this.toggleSpaceBubble}
