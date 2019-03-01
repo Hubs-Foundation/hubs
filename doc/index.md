@@ -429,7 +429,7 @@ Sets layer flags on the underlying Object3D
 <a name="components/environment/nav-mesh-helper"></a>
 #### nav-mesh-helper
 
-Initializes teleport-controls when the environment bundle has loaded.
+Initializes teleporters when the environment bundle has loaded.
 
 `src/components/nav-mesh-helper.js`
           

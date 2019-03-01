@@ -622,13 +622,9 @@
                 matrix-auto-update
                 set-active-camera
                 sound__teleport_start="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2; loop: true;"
-                scene-sound__teleport_start="on: right-teleport_down; off: right-teleport_up;"
-                sound__teleport_start2="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2; loop: true;"
-                scene-sound__teleport_start2="on: left-teleport_down; off: left-teleport_up;"
+                scene-sound__teleport_start="on: teleport-sound-start; off: teleport-sound-stop, teleport-sound-cancel;"
                 sound__teleport_end="positional: false; src: #sound_asset-teleport_end; on: nothing; poolSize: 2;"
-                scene-sound__teleport_end="on: right-teleport_up;"
-                sound__teleport_end2="positional: false; src: #sound_asset-teleport_end; on: nothing; poolSize: 2;"
-                scene-sound__teleport_end2="on: left-teleport_up;"
+                scene-sound__teleport_end="on: teleport-sound-stop; off: teleport-sound-start"
                 sound__snap_rotate_left="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
                 scene-sound__snap_rotate_left="on: snap_rotate_left;"
                 sound__snap_rotate_right="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
@@ -669,19 +665,7 @@
                 <a-entity
                     id="gaze-teleport"
                     position = "0.15 0 0"
-                    teleport-controls="
-                        cameraRig: #player-rig;
-                        teleportOrigin: #player-camera;
-                        button: gaze-teleport_;
-                        collisionEntities: [nav-mesh];
-                        drawIncrementally: true;
-                        incrementalDrawMs: 300;
-                        hitOpacity: 0.3;
-                        missOpacity: 0.1;
-                        curveShootingSpeed: 12;"
-                    teleport-controls-matrix-auto-update
-                    action-to-event__start-teleport="path: /actions/startTeleport; event: gaze-teleport_down"
-                    action-to-event__stop-teleport="path: /actions/stopTeleport; event: gaze-teleport_up"
+                    teleporter="start: /actions/startTeleport; confirm: /actions/stopTeleport; collisionEntities: [nav-mesh];"
                 ></a-entity>
             </a-entity>
 
@@ -689,25 +673,12 @@
                 id="player-left-controller"
                 class="left-controller"
                 hand-controls2="left"
-                tracked-controls
+                teleporter="start: /actions/leftHand/startTeleport; confirm: /actions/leftHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
-                teleport-controls="
-                    cameraRig: #player-rig;
-                    teleportOrigin: #player-camera;
-                    button: left-teleport_;
-                    collisionEntities: [nav-mesh];
-                    drawIncrementally: true;
-                    incrementalDrawMs: 300;
-                    hitOpacity: 0.3;
-                    missOpacity: 0.1;
-                    curveShootingSpeed: 12;"
-                teleport-controls-matrix-auto-update
                 haptic-feedback
                 body="type: static; shape: none;"
                 mixin="controller-super-hands"
                 controls-shape-offset
-                action-to-event__a="path: /actions/leftHandStartTeleport; event: left-teleport_down;"
-                action-to-event__b="path: /actions/leftHandStopTeleport; event: left-teleport_up;"
                 action-to-event__c="path: /actions/leftHandGrab; event: primary_hand_grab;"
                 action-to-event__d="path: /actions/leftHandDrop; event: primary_hand_release;"
             >
@@ -717,25 +688,12 @@
                 id="player-right-controller"
                 class="right-controller"
                 hand-controls2="right"
-                tracked-controls
+                teleporter="start: /actions/rightHand/startTeleport; confirm: /actions/rightHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
-                teleport-controls="
-                    cameraRig: #player-rig;
-                    teleportOrigin: #player-camera;
-                    button: right-teleport_;
-                    collisionEntities: [nav-mesh];
-                    drawIncrementally: true;
-                    incrementalDrawMs: 300;
-                    hitOpacity: 0.3;
-                    missOpacity: 0.1;
-                    curveShootingSpeed: 12;"
-                teleport-controls-matrix-auto-update
                 haptic-feedback
                 body="type: static; shape: none;"
                 mixin="controller-super-hands"
                 controls-shape-offset
-                action-to-event__a="path: /actions/rightHandStartTeleport; event: right-teleport_down;"
-                action-to-event__b="path: /actions/rightHandStopTeleport; event: right-teleport_up;"
                 action-to-event__c="path: /actions/rightHandGrab; event: primary_hand_grab;"
                 action-to-event__d="path: /actions/rightHandDrop; event: primary_hand_release;"
             >
