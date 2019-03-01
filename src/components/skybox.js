@@ -240,9 +240,11 @@ AFRAME.registerComponent("skybox", {
     this.cubeCamera = new THREE.CubeCamera(1, 100000, 512);
     this.skyScene.add(this.cubeCamera);
 
-    // HACK: Render environment map on next frame to avoid bug where the render target texture is black.
     this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
-    requestAnimationFrame(() => setTimeout(this.updateEnvironmentMap), 0);
+    // HACK: Render environment map on next frame to avoid bug where the render target texture is black.
+    // EXTRA HACK: Added timeout due to additional case where texture is black in avatar-selector in Firefox.
+    // This is likely due to the custom elements attached callback being synchronous on Chrome but not Firefox.
+    requestAnimationFrame(() => setTimeout(this.updateEnvironmentMap));
   },
 
   update(oldData) {

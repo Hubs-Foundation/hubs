@@ -98,6 +98,16 @@ class AvatarSelector extends Component {
     });
   }
 
+  componentDidMount() {
+    // <a-scene> component not initialized until scene element mounted and loaded.
+    this.scene.addEventListener("loaded", () => {
+      this.scene.setAttribute("light", {
+        defaultLightsEnabled: false
+      });
+      this.scene.setAttribute("shadow", { type: "pcfsoft", enabled: window.APP.quality !== "low" });
+    });
+  }
+
   componentDidUpdate(prevProps) {
     if (this.props.avatarId !== prevProps.avatarId) {
       // HACK - animation ought to restart the animation when the `to` attribute changes, but it doesn't
@@ -145,7 +155,6 @@ class AvatarSelector extends Component {
       <div className="avatar-selector">
         <a-scene
           vr-mode-ui="enabled: false"
-          light="defaultLightsEnabled: false"
           ref={sce => (this.scene = sce)}
           background="color: #aaa"
           environment-map=""
@@ -153,17 +162,7 @@ class AvatarSelector extends Component {
         >
           <a-assets>{avatarAssets}</a-assets>
 
-          <a-entity
-            skybox="
-            turbidity: 20;
-            rayleigh: 0.03;
-            luminance: 0.175;
-            mieCoefficient: 0.004;
-            mieDirectionalG: 0.098;
-            azimuth: 0.37;
-            inclination: 0.14;
-          "
-          />
+          <a-entity skybox="turbidity: 20; rayleigh: 0.03; luminance: 0.175; mieCoefficient: 0.004; mieDirectionalG: 0.098; azimuth: 0.37; inclination: 0.14;" />
 
           <a-entity
             ref={anm => (this.animation = anm)}
