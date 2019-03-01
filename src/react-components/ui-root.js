@@ -988,6 +988,10 @@ class UIRoot extends Component {
           )}
         </div>
 
+        <div className={entryStyles.roomSubtitle}>
+          <FormattedMessage id="entry.room" />
+        </div>
+
         <div className={entryStyles.center}>
           {this.props.hubChannel.permissions.update_hub && (
             <WithHoverSound>
@@ -1004,7 +1008,13 @@ class UIRoot extends Component {
           )}
 
           <form onSubmit={this.sendMessage}>
-            <div className={styles.messageEntry} style={{ height: pendingMessageFieldHeight }}>
+            <div
+              className={classNames({
+                [styles.messageEntry]: true,
+                [styles.messageEntryDisabled]: this.occupantCount() <= 1
+              })}
+              style={{ height: pendingMessageFieldHeight }}
+            >
               <textarea
                 className={classNames([styles.messageEntryInput, "chat-focus-target"])}
                 value={this.state.pendingMessage}
@@ -1013,6 +1023,7 @@ class UIRoot extends Component {
                 onFocus={e => handleTextFieldFocus(e.target)}
                 onBlur={() => handleTextFieldBlur()}
                 onChange={e => this.setState({ pendingMessage: e.target.value })}
+                disabled={this.occupantCount() <= 1 ? true : false}
                 onKeyDown={e => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     this.sendMessage(e);
@@ -1020,10 +1031,18 @@ class UIRoot extends Component {
                     e.target.blur();
                   }
                 }}
-                placeholder="Send to room..."
+                placeholder={
+                  this.occupantCount() <= 1
+                    ? "Nobody is here yet..."
+                    : `Send message to ${this.occupantCount()} other${this.occupantCount() > 1 ? "s" : ""}...`
+                }
               />
               <WithHoverSound>
-                <button className={classNames([styles.messageEntryButton, styles.messageEntrySubmit])} type="submit">
+                <button
+                  className={classNames([styles.messageEntryButton, styles.messageEntrySubmit])}
+                  disabled={this.occupantCount() <= 1 ? true : false}
+                  type="submit"
+                >
                   <i>
                     <FontAwesomeIcon icon={faPaperPlane} />
                   </i>

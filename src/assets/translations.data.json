@@ -13,6 +13,7 @@
     "sign-in.out": "Sign Out",
     "rename-room.message": "Enter the new name for the room.",
     "rename-room.rename": "Rename Room",
+    "entry.room": "room",
     "entry.enter-room-title": "Lobby",
     "entry.enter-room": "Enter Room",
     "entry.change-scene": "Choose a Scene",
