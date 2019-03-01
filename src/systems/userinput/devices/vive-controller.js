@@ -1,5 +1,13 @@
 import { paths } from "../paths";
 import { Pose } from "../pose";
+import { copySittingToStandingTransform } from "./copy-sitting-to-standing-transform";
+
+const ONES = new THREE.Vector3(1, 1, 1);
+const HAND_OFFSET = new THREE.Matrix4().compose(
+  new THREE.Vector3(0, 0, 0.13),
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(-40 * THREE.Math.DEG2RAD, 0, 0)),
+  new THREE.Vector3(1, 1, 1)
+);
 
 export class ViveControllerDevice {
   constructor(gamepad) {
@@ -25,7 +33,14 @@ export class ViveControllerDevice {
     } else {
       this.selector = `[super-hands]#player-${gamepad.hand}-controller`;
     }
+    this.sittingToStandingMatrix = new THREE.Matrix4().makeTranslation(0, 1.6, 0);
+    copySittingToStandingTransform(this.sittingToStandingMatrix);
+
+    this.matrix = new THREE.Matrix4();
+    this.position = new THREE.Vector3();
+    this.orientation = new THREE.Quaternion();
   }
+
   write(frame) {
     if (!this.gamepad.connected) return;
 
@@ -66,5 +81,16 @@ export class ViveControllerDevice {
     this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
     this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
     frame[this.path.pose] = this.pose;
+
+    if (this.gamepad.pose.position && this.gamepad.pose.orientation) {
+      frame[this.path.matrix] = this.matrix
+        .compose(
+          this.position.fromArray(this.gamepad.pose.position),
+          this.orientation.fromArray(this.gamepad.pose.orientation),
+          ONES
+        )
+        .premultiply(this.sittingToStandingMatrix)
+        .multiply(HAND_OFFSET);
+    }
   }
 }
