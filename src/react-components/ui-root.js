@@ -960,6 +960,9 @@ class UIRoot extends Component {
 
     return (
       <div className={entryStyles.entryPanel}>
+        <div className={entryStyles.header}>
+          <FormattedMessage id="entry.room" />
+        </div>
         <div className={entryStyles.name}>
           <span>{this.props.hubName}</span>
           {this.props.hubChannel.permissions.update_hub && (
@@ -1020,7 +1023,7 @@ class UIRoot extends Component {
                     e.target.blur();
                   }
                 }}
-                placeholder="Send to room..."
+                placeholder="Send message to others..."
               />
               <WithHoverSound>
                 <button className={classNames([styles.messageEntryButton, styles.messageEntrySubmit])} type="submit">
