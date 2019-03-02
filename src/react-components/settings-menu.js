@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
+import { faCodeBranch } from "@fortawesome/free-solid-svg-icons/faCodeBranch";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 
 import styles from "../assets/stylesheets/settings-menu.scss";
@@ -25,6 +26,7 @@ export default class SettingsMenu extends Component {
     const showRoomSettings = !!this.props.hubChannel.permissions.update_hub;
     const showRoomInfo = !!this.props.hubScene;
     const showRoomSection = showRoomSettings || showRoomInfo;
+    const showRemixScene = true; // this.props.hubScene && this.props.hubScene.spoke_url;
 
     // Draw self first
     return (
@@ -77,6 +79,20 @@ export default class SettingsMenu extends Component {
                 <div className={styles.listItem}>
                   <StateLink stateKey="modal" stateValue="rename_room" history={this.props.history}>
                     <FormattedMessage id="settings.rename-room" />
+                  </StateLink>
+                </div>
+              </div>
+            )}
+            {showRemixScene && (
+              <div className={rowClasses}>
+                <div className={styles.icon}>
+                  <i>
+                    <FontAwesomeIcon icon={faCodeBranch} />
+                  </i>
+                </div>
+                <div className={styles.listItem}>
+                  <StateLink stateKey="modal" stateValue="remix-scene" history={this.props.history}>
+                    <FormattedMessage id="settings.remix-scene" />
                   </StateLink>
                 </div>
               </div>

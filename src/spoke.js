@@ -9,6 +9,7 @@ import spokeLogo from "./assets/images/spoke_logo.png";
 import spokeVideoMp4 from "./assets/video/spoke.mp4";
 import spokeVideoWebm from "./assets/video/spoke.webm";
 import YouTube from "react-youtube";
+import { getPlatform, fetchRelease, releasesLink } from "./utils/spoke-download-link";
 
 //const qs = new URLSearchParams(location.search);
 
@@ -20,20 +21,6 @@ import en from "react-intl/locale-data/en";
 import { lang, messages } from "./utils/i18n";
 
 addLocaleData([...en]);
-
-function getPlatform() {
-  const platform = window.navigator.platform;
-
-  if (["Macintosh", "MacIntel", "MacPPC", "Mac68K"].indexOf(platform) >= 0) {
-    return "macos";
-  } else if (["Win32", "Win64", "Windows"].indexOf(platform) >= 0) {
-    return "win";
-  } else if (/Linux/.test(platform) && !/\WAndroid\W/.test(navigator.userAgent)) {
-    return "linux";
-  }
-
-  return "unsupported";
-}
 
 class SpokeLanding extends Component {
   static propTypes = {};
@@ -54,57 +41,8 @@ class SpokeLanding extends Component {
     this.fetchReleases();
   }
 
-  tryGetJson = async request => {
-    const text = await request.text();
-    try {
-      return JSON.parse(text);
-    } catch (e) {
-      console.log(`JSON error parsing response from ${request.url} "${text}"`, e);
-    }
-  };
-
-  getDownloadUrlForPlatform = (assets, platform) => {
-    return assets.find(asset => asset.name.includes(platform)).downloadUrl;
-  };
-
   fetchReleases = async () => {
-    // Read-only, public access token.
-    const token = "de8cbfb4cc0281c7b731c891df431016c29b0ace";
-    const result = await fetch("https://api.github.com/graphql", {
-      timeout: 5000,
-      method: "POST",
-      headers: { authorization: `bearer ${token}` },
-      body: JSON.stringify({
-        query: `
-          {
-            repository(owner: "mozillareality", name: "spoke") {
-              releases(
-                orderBy: { field: CREATED_AT, direction: DESC },
-                first: 5
-              ) {
-                nodes {
-                  isPrerelease,
-                  isDraft,
-                  tag { name },
-                  releaseAssets(last: 3) {
-                    nodes { name, downloadUrl }
-                  }
-                },
-                pageInfo { endCursor, hasNextPage }
-              }
-            }
-          }
-        `
-      })
-    }).then(this.tryGetJson);
-
-    if (!result || !result.data) {
-      this.setState({ platform: "unsupported" });
-      return;
-    }
-
-    const releases = result.data.repository.releases;
-    const release = releases.nodes.find(release => /*!release.isPrerelease && */ !release.isDraft);
+    const release = await fetchRelease(this.state.platform);
 
     if (!release) {
       this.setState({ platform: "unsupported" });
@@ -112,8 +50,8 @@ class SpokeLanding extends Component {
     }
 
     this.setState({
-      downloadLinkForCurrentPlatform: this.getDownloadUrlForPlatform(release.releaseAssets.nodes, this.state.platform),
-      spokeVersion: release.tag.name
+      downloadLinkForCurrentPlatform: release.downloadUrl,
+      spokeVersion: release.version
     });
   };
 
@@ -124,7 +62,6 @@ class SpokeLanding extends Component {
 
   render() {
     const platform = this.state.platform;
-    const releasesLink = "https://github.com/MozillaReality/Spoke/releases/latest";
     const downloadLink = platform === "unsupported" ? releasesLink : this.state.downloadLinkForCurrentPlatform;
 
     return (

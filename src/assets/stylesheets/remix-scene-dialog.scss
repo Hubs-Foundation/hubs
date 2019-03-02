@@ -1,0 +1,15 @@
+@import 'shared';
+
+:local(.remix-scene-container) {
+  @extend %centered-flex-column;
+  margin: 8px 48px;
+}
+
+:local(.back-button), :local(.next-button), :local(.downloadButton) {
+  @extend %action-button;
+  margin-top: 8px;
+}
+
+:local(.downloadButton) > * {
+  color: white;
+}

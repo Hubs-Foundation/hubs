@@ -169,3 +169,11 @@
   top: -12px;
   color: white;
 }
+
+:local(.remixButton) {
+  @extend %action-button-secondary;
+  margin-top: 12px;
+  align-self: center;
+  display: flex;
+  flex-direction: row;
+}

@@ -9,6 +9,7 @@ import spokeLogo from "../assets/images/spoke_logo_black.png";
 import { createAndRedirectToNewHub } from "../utils/phoenix-utils";
 import { WithHoverSound } from "./wrap-with-audio";
 import CreateRoomDialog from "./create-room-dialog.js";
+import RemixSceneDialog from "./remix-scene-dialog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisH } from "@fortawesome/free-solid-svg-icons/faEllipsisH";
 
@@ -24,12 +25,14 @@ class SceneUI extends Component {
     sceneName: PropTypes.string,
     sceneDescription: PropTypes.string,
     sceneAttributions: PropTypes.object,
-    sceneScreenshotURL: PropTypes.string
+    sceneScreenshotURL: PropTypes.string,
+    spokeSceneUrl: PropTypes.string
   };
 
   state = {
     showScreenshot: false,
-    showCustomRoomDialog: false
+    showCustomRoomDialog: false,
+    showRemixSceneDialog: false
   };
 
   constructor(props) {
@@ -144,6 +147,11 @@ class SceneUI extends Component {
                 </WithHoverSound>
               </div>
               <WithHoverSound>
+                <button className={styles.remixButton} onClick={() => this.setState({ showRemixSceneDialog: true })}>
+                  <FormattedMessage id="scene.remix_button" />
+                </button>
+              </WithHoverSound>
+              <WithHoverSound>
                 <a href={tweetLink} rel="noopener noreferrer" target="_blank" className={styles.tweetButton}>
                   <img src="../assets/images/twitter.svg" />
                   <div>
@@ -170,6 +178,12 @@ class SceneUI extends Component {
               onCustomScene={name => {
                 this.setState({ showCustomRoomDialog: false, customRoomName: name }, () => this.createRoom());
               }}
+            />
+          )}
+          {this.state.showRemixSceneDialog && (
+            <RemixSceneDialog
+              spokeUrl={this.props.spokeSceneUrl}
+              onClose={() => this.setState({ showRemixSceneDialog: false })}
             />
           )}
         </div>

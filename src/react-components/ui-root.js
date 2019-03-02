@@ -43,6 +43,7 @@ import SafariDialog from "./safari-dialog.js";
 import SafariMicDialog from "./safari-mic-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
 import RenameRoomDialog from "./rename-room-dialog.js";
+import RemixSceneDialog from "./remix-scene-dialog";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
@@ -1483,6 +1484,14 @@ class UIRoot extends Component {
               history={this.props.history}
               render={() =>
                 this.renderDialog(RoomInfoDialog, { scene: this.props.hubScene, hubName: this.props.hubName })
+              }
+            />
+            <StateRoute
+              stateKey="modal"
+              stateValue="remix-scene"
+              history={this.props.history}
+              render={() =>
+                this.renderDialog(RemixSceneDialog, { spokeUrl: this.props.hubScene && this.props.hubScene.spoke_url })
               }
             />
 

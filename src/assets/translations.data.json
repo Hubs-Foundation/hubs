@@ -141,6 +141,7 @@
     "help.report_issue": "Report an Issue",
     "scene.logo_tagline": "A new way to get together",
     "scene.create_button": "Create a room with this scene",
+    "scene.remix_button": "Remix scene in Spoke",
     "scene.tweet_button": "Share on Twitter",
     "link.in_your_browser": "In your headset's browser, go to:",
     "link.enter_code": "Then, enter this one-time link code:",
@@ -187,11 +188,23 @@
     "settings.help": "Help",
     "settings.row-profile": "Profile",
     "settings.row-room": "Room",
+    "settings.remix-scene": "Remix scene in Spoke",
     "video_share.notify": "Select again to un-share video.",
     "loader.entering_lobby": "Entering lobby...",
     "loader.loading": "Loading ",
     "loader.object": "object",
     "loader.objects": "objects",
-    "change-scene-dialog.change-scene": "Change Scene"
+    "change-scene-dialog.change-scene": "Change Scene",
+    "remix-scene-dialog.spoke-description": "Remix Hubs scenes in the Spoke editor. If you don't already have Spoke installed, download it now.",
+    "remix-scene-dialog.scene-description": "Download the Spoke scene to your computer.",
+    "remix-scene-dialog.open-scene-description": "Step 1: Unzip the Spoke download if you haven't done so already.\nStep 2: Open up the Spoke executable.\nStep 3: Click on the \"Open Scenes Folder...\" in the file menu.\nStep 4: Drag and drop the .spoke file you just downloaded into the scenes folder.\nStep 5. Open the Spoke scene in the file menu.",
+    "remix-scene-dialog.back-button": "Back",
+    "remix-scene-dialog.skip-button": "Skip",
+    "remix-scene-dialog.close-button": "Close",
+    "remix-scene-dialog.download-spoke-button-macos": "Download Spoke for macOS",
+    "remix-scene-dialog.download-spoke-button-win": "Download Spoke for Windows",
+    "remix-scene-dialog.download-spoke-button-linux": "Download Spoke for Linux",
+    "remix-scene-dialog.download-spoke-button-unsupported": "Download Spoke",
+    "remix-scene-dialog.download-scene-button": "Download Scene"
   }
 }
