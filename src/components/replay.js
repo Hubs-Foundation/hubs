@@ -1,5 +1,3 @@
-const ONES = new THREE.Vector3(1, 1, 1);
-
 AFRAME.registerComponent("replay", {
   init: function() {
     this.playhead = 0;
@@ -7,7 +5,6 @@ AFRAME.registerComponent("replay", {
   },
 
   tick: function(t, dt) {
-    const o = this.el.object3D;
     let overflow = false;
     while (!overflow && this.playhead >= this.poses[this.poseIndex].timestamp) {
       this.el.setAttribute("position", this.poses[this.poseIndex].position);

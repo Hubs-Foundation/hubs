@@ -49,18 +49,10 @@ export default class SceneEntryManager {
       NAF.connection.adapter.session.options.verbose = true;
     }
 
-    let isCardboard = false;
-
     if (enterInVR) {
       // HACK - A-Frame calls getVRDisplays at module load, we want to do it here to
       // force gamepads to become live.
       navigator.getVRDisplays();
-
-      isCardboard =
-        AFRAME.utils.device
-          .getVRDisplay()
-          .displayName.toLowerCase()
-          .indexOf("cardboard") >= 0;
 
       this.scene.enterVR();
     }

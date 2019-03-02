@@ -1,5 +1,3 @@
-import { paths } from "../systems/userinput/paths";
-
 AFRAME.registerComponent("visibility-by-path", {
   schema: {
     path: { type: "string" }
