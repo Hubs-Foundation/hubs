@@ -38,7 +38,10 @@ export const SCHEMA = {
       properties: {
         hasFoundFreeze: { type: "boolean" },
         hasChangedName: { type: "boolean" },
-        lastEnteredAt: { type: "string" }
+        lastEnteredAt: { type: "string" },
+        hasPinned: { type: "boolean" },
+        hasRotated: { type: "boolean" },
+        hasRecentered: { type: "boolean" }
       }
     },
 
@@ -110,6 +113,10 @@ export default class Store extends EventTarget {
     }
 
     return this[STORE_STATE_CACHE_KEY];
+  }
+
+  resetTipActivityFlags() {
+    this.update({ activity: { hasRotated: false, hasPinned: false, hasRecentered: false } });
   }
 
   update(newState) {

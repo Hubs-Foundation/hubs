@@ -11,6 +11,7 @@ $dark-grey: rgba(128, 128, 128, 1.0);
 $darker-grey: rgba(64, 64, 64, 1.0);
 $darkest-grey: rgba(32, 32, 32, 1.0);
 $bright-blue: #2F80ED;
+$light-blue: #6FC0FD;
 $action-color: #FF3464;
 $action-color-light: #FF74A4;
 $action-color-transparent: rgba(255, 52, 100, 0.9);
@@ -242,4 +243,24 @@ $semi-bold: 600;
 
 %fa-icon-button-text {
   margin-left: 16px;
+}
+
+%tip-bubble {
+  position: absolute;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  border-radius: 28px;
+  border: 0;
+  pointer-events: auto;
+  z-index: 2;
+  font-size: 0.8em;
+  color: white;
+  padding: 12px 24px;
+  background-color: $bright-blue;
+  text-align: center;
 }

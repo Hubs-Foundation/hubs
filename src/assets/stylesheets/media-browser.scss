@@ -1,5 +1,7 @@
 @import 'shared';
 
+// Breakpoint at 801px for Oculus Browser 
+
 :local(.media-browser) {
   position: absolute;
   top: 0;
@@ -61,7 +63,7 @@
         max-width: 450px;
       }
 
-      @media(max-width: 700px) {
+      @media(max-width: 801px) {
         height: 35px;
       }
 
@@ -113,7 +115,7 @@
     height: 100%;
     max-width: 1680px;
 
-    @media (max-width: 700px) {
+    @media (max-width: 801px) {
       width: 100%;
     }
   }
@@ -128,14 +130,14 @@
     height: 77px;
     min-height: 77px;
 
-    @media(max-width: 768px) {
+    @media(max-width: 801px) {
       height: 55px;
       min-height: 55px;
     }
   }
 
   :local(.nav) {
-    width: 100vw;
+    width: 95vw;
     max-width: 1720px;
     display: flex;
     position: relative;
@@ -144,8 +146,9 @@
     border-bottom: 1px solid $light-grey;
     white-space: nowrap;
     padding-left: 12px;
+    margin: 0 12px;
 
-    @media(max-width: 768px) {
+    @media(max-width: 801px) {
       overflow-x: scroll;
     }
 
@@ -159,7 +162,7 @@
       margin: 0px 24px;
       padding-bottom: 12px;
 
-      @media(max-width: 768px) {
+      @media(max-width: 801px) {
         font-size: 1.0em;
       }
 
@@ -189,7 +192,7 @@
   }
 
   :local(.facets) {
-    width: 100vw;
+    width: 95vw;
     max-width: 1720px;
     display: flex;
     position: relative;
@@ -203,7 +206,7 @@
     overflow: hidden;
     flex-wrap: wrap;
 
-    @media(max-width: 768px) {
+    @media(max-width: 801px) {
       overflow-x: scroll;
       flex-wrap: nowrap;
     }
@@ -220,7 +223,7 @@
       min-height: 44px;
       white-space: nowrap;
 
-      @media(max-width: 768px) {
+      @media(max-width: 801px) {
         font-size: 1.0em;
       }
     }
@@ -273,7 +276,7 @@
           :local(.name) {
             font-size: 1.2em;
 
-            @media(max-width: 700px) {
+            @media(max-width: 801px) {
               font-size: 1.1em;
             }
 
@@ -289,7 +292,7 @@
           :local(.attribution) {
             display: flex;
 
-            @media (max-width: 700px) {
+            @media (max-width: 801px) {
               flex-direction: column;
               align-items: flex-start;
             }
@@ -385,7 +388,7 @@
     width: 250px;
     font-size: 1.6em;
 
-    @media (max-width: 700px) {
+    @media (max-width: 801px) {
       width: 50px;
       height: 35px;
     }
@@ -403,7 +406,7 @@
       font-weight: bold;
       color: $action-color;
 
-      @media (min-width: 700px) {
+      @media (min-width: 800px) {
         margin-right: 12px;
       }
     }
@@ -413,12 +416,12 @@
       font-size: 0.8em;
       color: $action-color;
 
-      @media (max-width: 700px) {
+      @media (max-width: 801px) {
         display: none;
       }
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 801px) {
       width: 50px;
       height: 35px;
     }

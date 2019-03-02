@@ -6,15 +6,17 @@ AFRAME.registerComponent("scene-sound", {
   schema: {
     sound: { type: "string" },
     on: { type: "string" },
-    off: { type: "string" }
+    off: { type: "array" }
   },
 
   init() {
     const sound = this.el.components[`${this.attrName.replace("scene-", "")}`];
     this.el.sceneEl.addEventListener(this.data.on, () => sound.playSound());
 
-    if (this.data.off) {
-      this.el.sceneEl.addEventListener(this.data.off, () => sound.stopSound());
+    if (this.data.off.length) {
+      for (let i = 0; i < this.data.off.length; i++) {
+        this.el.sceneEl.addEventListener(this.data.off[i], () => sound.stopSound());
+      }
     }
   }
 });

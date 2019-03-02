@@ -25,6 +25,10 @@ AFRAME.registerComponent("networked-counter", {
     this.registeredEls.clear();
   },
 
+  count() {
+    return this.registeredEls.size;
+  },
+
   register(el) {
     if (this.data.max <= 0 || this.registeredEls.has(el)) return;
 
