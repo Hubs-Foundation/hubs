@@ -134,14 +134,17 @@ AFRAME.registerComponent("super-spawner", {
       return;
     }
 
-    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve).entity;
+    const entity = addMedia(
+      this.data.src,
+      this.data.template,
+      ObjectContentOrigins.SPAWNER,
+      this.data.resolve,
+      false,
+      this.data.useCustomSpawnScale ? this.data.spawnScale : null
+    ).entity;
 
     getLastWorldPosition(hand.object3D, entity.object3D.position);
     getLastWorldQuaternion(hand.object3D, entity.object3D.quaternion);
-
-    if (this.data.useCustomSpawnScale) {
-      entity.object3D.scale.copy(this.data.spawnScale);
-    }
 
     this.activateCooldown();
 
@@ -174,7 +177,8 @@ AFRAME.registerComponent("super-spawner", {
       this.data.template,
       ObjectContentOrigins.SPAWNER,
       this.data.resolve,
-      this.data.resize
+      this.data.resize,
+      this.data.useCustomSpawnScale ? this.data.spawnScale : this.el.object3D.scale
     ).entity;
 
     entity.object3D.position.copy(
@@ -183,7 +187,6 @@ AFRAME.registerComponent("super-spawner", {
     entity.object3D.rotation.copy(
       this.data.useCustomSpawnRotation ? this.data.spawnRotation : this.el.object3D.rotation
     );
-    entity.object3D.scale.copy(this.data.useCustomSpawnScale ? this.data.spawnScale : this.el.object3D.scale);
     entity.object3D.matrixNeedsUpdate = true;
 
     await waitForEvent("body-loaded", entity);
