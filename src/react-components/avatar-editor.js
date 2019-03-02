@@ -192,9 +192,11 @@ export default class AvatarEditor extends Component {
   render() {
     if (!this.props.signedIn) {
       return (
-        <a onClick={this.props.onSignIn}>
-          <FormattedMessage id="sign-in.in" />
-        </a>
+        <div className={classNames(styles.avatarSelectorContainer, "avatar-editor")}>
+          <a onClick={this.props.onSignIn}>
+            <FormattedMessage id="sign-in.in" />
+          </a>
+        </div>
       );
     }
 
