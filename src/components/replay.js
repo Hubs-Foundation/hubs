@@ -1,0 +1,27 @@
+const ONES = new THREE.Vector3(1, 1, 1);
+
+AFRAME.registerComponent("replay", {
+  init: function() {
+    this.playhead = 0;
+    this.poseIndex = 0;
+  },
+
+  tick: function(t, dt) {
+    const o = this.el.object3D;
+    let overflow = false;
+    while (!overflow && this.playhead >= this.poses[this.poseIndex].timestamp) {
+      this.el.setAttribute("position", this.poses[this.poseIndex].position);
+      this.el.setAttribute("rotation", this.poses[this.poseIndex].rotation);
+      this.el.object3D.updateMatrix();
+      this.poseIndex += 1;
+      overflow = this.poseIndex === this.poses.length;
+    }
+
+    this.playhead += dt;
+
+    if (overflow) {
+      this.playhead = 0;
+      this.poseIndex = 0;
+    }
+  }
+});
