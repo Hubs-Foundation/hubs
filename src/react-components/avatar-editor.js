@@ -7,7 +7,7 @@ import classNames from "classnames";
 
 import styles from "../assets/stylesheets/profile.scss";
 
-const BOT_PARENT_AVATAR = "muKnhtJ";
+const BOT_PARENT_AVATAR = "xf9xkIY";
 
 export default class AvatarEditor extends Component {
   static propTypes = {
