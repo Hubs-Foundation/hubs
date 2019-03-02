@@ -9,7 +9,7 @@ const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
-import { addMedia, proxiedUrlFor, getPromotionTokenForFile } from "./utils/media-utils";
+import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import { ObjectContentOrigins } from "./object-types";
 
 import { getAvatarSrc } from "./assets/avatars/avatars";

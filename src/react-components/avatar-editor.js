@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { injectIntl, FormattedMessage } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { upload } from "../utils/media-utils";
 import classNames from "classnames";
