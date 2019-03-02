@@ -207,7 +207,7 @@ body.vr-mode {
 }
 
 :local(.message-entry-disabled) {
-  background-color: $light-grey;
+  background-color: transparent;
 }
 
 :local(.message-entry-input) {
@@ -254,7 +254,7 @@ body.vr-mode {
 
 :local(.message-entry-button):disabled {
   color: $dark-grey;
-  background-color: $light-grey;
+  background-color: transparent;
 }
 
 :local(.message-entry-button-in-room) {
