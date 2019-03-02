@@ -1034,7 +1034,7 @@ class UIRoot extends Component {
                 placeholder={
                   this.occupantCount() <= 1
                     ? "Nobody is here yet..."
-                    : `Send message to ${this.occupantCount()} other${this.occupantCount() > 1 ? "s" : ""}...`
+                    : `Send message to ${this.occupantCount() - 1} other${this.occupantCount() - 1 > 1 ? "s" : ""}...`
                 }
               />
               <WithHoverSound>
