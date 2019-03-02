@@ -14,8 +14,6 @@ import { ObjectContentOrigins } from "./object-types";
 
 import { getAvatarSrc } from "./assets/avatars/avatars";
 
-let avatarCachebuster = 0;
-
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, availableVREntryTypes) {
     this.hubChannel = hubChannel;
@@ -159,7 +157,7 @@ export default class SceneEntryManager {
     const { avatarId, displayName } = this.store.state.profile;
     this.playerRig.setAttribute("player-info", {
       displayName,
-      avatarSrc: getAvatarSrc(avatarId, avatarCachebuster++)
+      avatarSrc: getAvatarSrc(avatarId)
     });
     const hudController = this.playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });

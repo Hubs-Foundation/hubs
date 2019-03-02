@@ -5,6 +5,8 @@ import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { upload } from "../utils/media-utils";
 import classNames from "classnames";
 
+import { bumpCacheVersion } from "../assets/avatars/avatars";
+
 import styles from "../assets/stylesheets/profile.scss";
 
 const BOT_PARENT_AVATAR = "xf9xkIY";
@@ -132,6 +134,7 @@ export default class AvatarEditor extends Component {
     this.props.onAvatarChanged(avatar.avatar_id);
 
     this.setState({ uploading: false });
+    bumpCacheVersion();
     this.props.saveStateAndFinish();
   };
 
