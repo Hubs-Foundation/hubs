@@ -9,7 +9,7 @@ AFRAME.registerComponent("replay", {
     while (!overflow && this.playhead >= this.poses[this.poseIndex].timestamp) {
       this.el.setAttribute("position", this.poses[this.poseIndex].position);
       this.el.setAttribute("rotation", this.poses[this.poseIndex].rotation);
-      this.el.object3D.updateMatrix();
+      this.el.object3D.matrixNeedsUpdate = true;
       this.poseIndex += 1;
       overflow = this.poseIndex === this.poses.length;
     }
