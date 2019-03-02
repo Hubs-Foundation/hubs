@@ -49,24 +49,12 @@ export default class SceneEntryManager {
       NAF.connection.adapter.session.options.verbose = true;
     }
 
-    let isCardboard = false;
-
     if (enterInVR) {
       // HACK - A-Frame calls getVRDisplays at module load, we want to do it here to
       // force gamepads to become live.
       navigator.getVRDisplays();
 
-      isCardboard =
-        AFRAME.utils.device
-          .getVRDisplay()
-          .displayName.toLowerCase()
-          .indexOf("cardboard") >= 0;
-
       this.scene.enterVR();
-    }
-
-    if (!isCardboard) {
-      this.playerRig.removeAttribute("cardboard-controls");
     }
 
     if (isMobile || qsTruthy("mobile")) {
@@ -87,9 +75,6 @@ export default class SceneEntryManager {
       this._runBot(mediaStream);
       return;
     }
-
-    this.scene.setAttribute("motion-capture-replayer", "enabled", false);
-    this.scene.systems["motion-capture-replayer"].remove();
 
     if (mediaStream) {
       NAF.connection.adapter.setLocalMediaStream(mediaStream);
@@ -491,12 +476,6 @@ export default class SceneEntryManager {
   };
 
   _runBot = async mediaStream => {
-    this.playerRig.setAttribute("avatar-replay", {
-      camera: "#player-camera",
-      leftController: "#player-left-controller",
-      rightController: "#player-right-controller"
-    });
-
     const audioEl = document.createElement("audio");
     let audioInput;
     let dataInput;
@@ -522,9 +501,28 @@ export default class SceneEntryManager {
       audioInput.onchange = getAudio;
     }
 
+    const camera = document.querySelector("#player-camera");
+    const leftController = document.querySelector("#player-left-controller");
+    const rightController = document.querySelector("#player-right-controller");
     const getRecording = () => {
-      const url = URL.createObjectURL(dataInput.files[0]);
-      this.playerRig.setAttribute("avatar-replay", { recordingUrl: url });
+      fetch(URL.createObjectURL(dataInput.files[0]))
+        .then(resp => resp.json())
+        .then(recording => {
+          camera.setAttribute("replay", "");
+          camera.components["replay"].poses = recording.camera.poses;
+
+          leftController.setAttribute("replay", "");
+          leftController.components["replay"].poses = recording.left.poses;
+          leftController.removeAttribute("visibility-by-path");
+          leftController.removeAttribute("track-pose");
+          leftController.setAttribute("visible", true);
+
+          rightController.setAttribute("replay", "");
+          rightController.components["replay"].poses = recording.right.poses;
+          rightController.removeAttribute("visibility-by-path");
+          rightController.removeAttribute("track-pose");
+          rightController.setAttribute("visible", true);
+        });
     };
 
     if (dataInput.files && dataInput.files.length > 0) {
