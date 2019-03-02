@@ -130,6 +130,7 @@ class ProfileEntryPanel extends Component {
             store={this.props.store}
             onAvatarChanged={avatarId => this.setState({ avatarId })}
             saveStateAndFinish={this.saveStateAndFinish}
+            advanced={this.props.advanced}
           />
         );
         break;
