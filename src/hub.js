@@ -12,8 +12,6 @@ patchWebGLRenderingContext();
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
-import "aframe-teleport-controls";
-import "./components/teleport-controls-matrix-auto-update";
 import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
@@ -83,6 +81,9 @@ import "./components/open-media-button";
 import "./components/rotate-object-button";
 import "./components/hover-menu";
 import "./components/disable-frustum-culling";
+import "./components/teleporter";
+import "./components/set-active-camera";
+import "./components/track-pose";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -112,6 +113,7 @@ import "./systems/camera-mirror";
 import "./systems/userinput/userinput-debug";
 import "./systems/frame-scheduler";
 import "./systems/ui-hotkeys";
+import "./systems/tips";
 
 import "./gltf-component-mappings";
 
@@ -138,7 +140,6 @@ import "super-hands";
 import "./components/super-networked-interactable";
 import "./components/networked-counter";
 import "./components/event-repeater";
-import "./components/controls-shape-offset";
 import "./components/set-yxz-order";
 import "./components/set-sounds-invisible";
 
@@ -503,6 +504,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (e) {
       subscriptions.setRegistrationFailed();
     }
+  } else {
+    subscriptions.setRegistrationFailed();
   }
 
   const scene = document.querySelector("a-scene");
@@ -565,12 +568,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     subscriptions,
     enterScene: entryManager.enterScene,
     exitScene: entryManager.exitScene,
-    initialIsSubscribed: subscriptions.isSubscribed()
+    initialIsSubscribed: subscriptions.isSubscribed(),
+    activeTips: scene.systems.tips.activeTips
   });
 
   scene.addEventListener("action_focus_chat", () => {
     const chatFocusTarget = document.querySelector(".chat-focus-target");
     chatFocusTarget && chatFocusTarget.focus();
+  });
+
+  scene.addEventListener("tips_changed", e => {
+    remountUI({ activeTips: e.detail });
   });
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
@@ -628,9 +636,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({ environmentSceneLoaded: true });
 
     // Re-bind the teleporter controls collision meshes in case the scene changed.
-    document
-      .querySelectorAll("a-entity[teleport-controls]")
-      .forEach(x => x.components["teleport-controls"].queryCollisionEntities());
+    document.querySelectorAll("a-entity[teleporter]").forEach(x => x.components["teleporter"].queryCollisionEntities());
 
     for (const modelEl of environmentScene.children) {
       addAnimationComponents(modelEl);
@@ -736,6 +742,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({ presences: hubPhxPresence.state });
     const occupantCount = Object.entries(hubPhxPresence.state).length;
     vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
+
+    if (occupantCount > 1) {
+      scene.addState("copresent");
+    } else {
+      scene.removeState("copresent");
+    }
 
     if (!isInitialSync) return;
     // Wire up join/leave event handlers after initial sync.

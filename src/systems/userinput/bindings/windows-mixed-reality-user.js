@@ -401,6 +401,16 @@ function teleportationAndRotationBindings() {
 export const wmrUserBindings = addSetsToBindings({
   [sets.global]: [
     {
+      src: { value: paths.device.wmr.left.matrix },
+      dest: { value: paths.actions.leftHand.matrix },
+      xform: xforms.copy
+    },
+    {
+      src: { value: paths.device.wmr.right.matrix },
+      dest: { value: paths.actions.rightHand.matrix },
+      xform: xforms.copy
+    },
+    {
       src: { value: paths.device.wmr.left.pose },
       dest: { value: paths.actions.leftHand.pose },
       xform: xforms.copy

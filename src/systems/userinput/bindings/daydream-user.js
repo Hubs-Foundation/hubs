@@ -51,6 +51,11 @@ const dropOnCenterOrSouth = [
 export const daydreamUserBindings = addSetsToBindings({
   [sets.global]: [
     {
+      src: { value: paths.device.daydream.matrix },
+      dest: { value: paths.actions.rightHand.matrix },
+      xform: xforms.copy
+    },
+    {
       src: {
         x: paths.device.daydream.axis("touchpadX"),
         y: paths.device.daydream.axis("touchpadY")

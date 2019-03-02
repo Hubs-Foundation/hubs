@@ -137,7 +137,7 @@
   }
 
   :local(.nav) {
-    width: 100vw;
+    width: 95vw;
     max-width: 1720px;
     display: flex;
     position: relative;
@@ -146,6 +146,7 @@
     border-bottom: 1px solid $light-grey;
     white-space: nowrap;
     padding-left: 12px;
+    margin: 0 12px;
 
     @media(max-width: 801px) {
       overflow-x: scroll;
@@ -191,7 +192,7 @@
   }
 
   :local(.facets) {
-    width: 100vw;
+    width: 95vw;
     max-width: 1720px;
     display: flex;
     position: relative;

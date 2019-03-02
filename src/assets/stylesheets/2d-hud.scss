@@ -30,23 +30,18 @@
 
 :local(.panel) {
   display: flex;
+  position: relative;
   justify-content: space-around;
   align-items: center;
   padding: 5px;
   background-color: $hud-panel-background;
   border-radius: 30px;
 
-  :local(.video-share-notify) {
-    position: absolute;
-    left: -12px;
-    top: 52px;
-    display: flex;
-    flex-direction: column;
-    border-radius: 28px;
-    border: 0;
-    pointer-events: auto;
-    z-index: 2;
-    width: 223px;
+  :local(.top-tip) {
+    @extend %tip-bubble;
+    top: 60px;
+
+    width: 350px;
 
     @media(max-width: 465px) {
       width: 207px;
@@ -56,12 +51,6 @@
       width: 189px;
     }
 
-    font-size: 0.8em;
-    color: white;
-    padding: 12px 24px;
-    background-color: $bright-blue;
-    text-align: center;
-
     :local(.attach-point) {
       width: 0;
       height: 0;
@@ -70,7 +59,46 @@
       border-bottom: 5px solid $bright-blue;
       position: absolute;
       top: -5px;
-      left: 29px;
+    }
+
+    :local(.attach_video_share_mode) {
+      left: 90px;
+
+      @media(max-width: 465px) {
+        left: 27px;
+      }
+
+      @media(max-width: 420px) {
+        left: 26px;
+      }
+    }
+
+    :local(.attach_pen_mode) {
+      right: 143px;
+
+      @media(max-width: 465px) {
+        right: 76px;
+      }
+
+      @media(max-width: 420px) {
+        right: 71px;
+      }
+    }
+
+    :local(.attach_mute_mode) {
+      left: 143px;
+
+      @media(max-width: 465px) {
+        left: 76px;
+      }
+
+      @media(max-width: 420px) {
+        left: 71px;
+      }
+    }
+
+    :local(.attach_freeze_mode) {
+      display: none;
     }
   }
 

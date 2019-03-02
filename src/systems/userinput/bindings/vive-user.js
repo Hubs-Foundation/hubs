@@ -88,6 +88,24 @@ const leftGripFallingWhileHoldingPen = v("leftGripFallingWhileHoldingPen");
 export const viveUserBindings = addSetsToBindings({
   [sets.global]: [
     {
+      src: {
+        value: paths.device.vive.left.matrix
+      },
+      dest: {
+        value: paths.actions.leftHand.matrix
+      },
+      xform: xforms.copy
+    },
+    {
+      src: {
+        value: paths.device.vive.right.matrix
+      },
+      dest: {
+        value: paths.actions.rightHand.matrix
+      },
+      xform: xforms.copy
+    },
+    {
       src: [ensureFrozenViaDpad, ensureFrozenViaKeyboard],
       dest: { value: paths.actions.ensureFrozen },
       xform: xforms.any

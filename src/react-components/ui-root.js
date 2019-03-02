@@ -56,12 +56,14 @@ import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
+import { markTipScopeFinished } from "../systems/tips.js";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
 import { faCamera } from "@fortawesome/free-solid-svg-icons/faCamera";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
@@ -145,6 +147,7 @@ class UIRoot extends Component {
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
+    activeTips: PropTypes.object,
     location: PropTypes.object,
     history: PropTypes.object
   };
@@ -986,6 +989,10 @@ class UIRoot extends Component {
           )}
         </div>
 
+        <div className={entryStyles.roomSubtitle}>
+          <FormattedMessage id="entry.room" />
+        </div>
+
         <div className={entryStyles.center}>
           {this.props.hubChannel.permissions.update_hub && (
             <WithHoverSound>
@@ -1002,7 +1009,13 @@ class UIRoot extends Component {
           )}
 
           <form onSubmit={this.sendMessage}>
-            <div className={styles.messageEntry} style={{ height: pendingMessageFieldHeight }}>
+            <div
+              className={classNames({
+                [styles.messageEntry]: true,
+                [styles.messageEntryDisabled]: this.occupantCount() <= 1
+              })}
+              style={{ height: pendingMessageFieldHeight }}
+            >
               <textarea
                 className={classNames([styles.messageEntryInput, "chat-focus-target"])}
                 value={this.state.pendingMessage}
@@ -1011,6 +1024,7 @@ class UIRoot extends Component {
                 onFocus={e => handleTextFieldFocus(e.target)}
                 onBlur={() => handleTextFieldBlur()}
                 onChange={e => this.setState({ pendingMessage: e.target.value })}
+                disabled={this.occupantCount() <= 1 ? true : false}
                 onKeyDown={e => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     this.sendMessage(e);
@@ -1018,10 +1032,18 @@ class UIRoot extends Component {
                     e.target.blur();
                   }
                 }}
-                placeholder="Send to room..."
+                placeholder={
+                  this.occupantCount() <= 1
+                    ? "Nobody is here yet..."
+                    : `Send message to ${this.occupantCount() - 1} other${this.occupantCount() - 1 > 1 ? "s" : ""}...`
+                }
               />
               <WithHoverSound>
-                <button className={classNames([styles.messageEntryButton, styles.messageEntrySubmit])} type="submit">
+                <button
+                  className={classNames([styles.messageEntryButton, styles.messageEntrySubmit])}
+                  disabled={this.occupantCount() <= 1 ? true : false}
+                  type="submit"
+                >
                   <i>
                     <FontAwesomeIcon icon={faPaperPlane} />
                   </i>
@@ -1510,6 +1532,27 @@ class UIRoot extends Component {
                 hubId={this.props.hubId}
               />
             )}
+            {entered &&
+              this.props.activeTips.bottom && (
+                <div className={styles.bottomTip}>
+                  <button className={styles.tipCancel} onClick={() => markTipScopeFinished("bottom")}>
+                    <i>
+                      <FontAwesomeIcon icon={faTimes} />
+                    </i>
+                  </button>
+                  {this.props.activeTips.bottom.endsWith(".spawn_menu") ? (
+                    <div className={styles.spawnTip}>
+                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}-pre`} />
+                      <div className={classNames(styles.spawnTipIcon)} />
+                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}-post`} />
+                    </div>
+                  ) : (
+                    <div className={styles.tip}>
+                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}`} />
+                    </div>
+                  )}
+                </div>
+              )}
             {entered && (
               <form onSubmit={this.sendMessage}>
                 <div
@@ -1615,7 +1658,7 @@ class UIRoot extends Component {
               })}
             >
               {!showVREntryButton &&
-                !this.state.videoShareMediaSource && (
+                !this.props.activeTips.top && (
                   <WithHoverSound>
                     <button
                       className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
@@ -1627,7 +1670,7 @@ class UIRoot extends Component {
                 )}
               {!showVREntryButton &&
                 this.occupantCount() > 1 &&
-                !this.state.videoShareMediaSource &&
+                !this.props.activeTips.top &&
                 entered && (
                   <WithHoverSound>
                     <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
@@ -1713,6 +1756,7 @@ class UIRoot extends Component {
                 <SettingsMenu
                   history={this.props.history}
                   mediaSearchStore={this.props.mediaSearchStore}
+                  hideSettings={() => this.setState({ showSettingsMenu: false })}
                   hubChannel={this.props.hubChannel}
                   hubScene={this.props.hubScene}
                 />
@@ -1727,6 +1771,7 @@ class UIRoot extends Component {
                   frozen={this.state.frozen}
                   spacebubble={this.state.spacebubble}
                   videoShareMediaSource={this.state.videoShareMediaSource}
+                  activeTip={this.props.activeTips && this.props.activeTips.top}
                   onToggleMute={this.toggleMute}
                   onToggleFreeze={this.toggleFreeze}
                   onToggleSpaceBubble={this.toggleSpaceBubble}

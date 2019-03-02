@@ -213,6 +213,7 @@ export default class SceneEntryManager {
 
     try {
       await this.hubChannel.pin(networkId, gltfNode, fileId, fileAccessToken, promotionToken);
+      this.store.update({ activity: { hasPinned: true } });
     } catch (e) {
       if (e.reason === "invalid_token") {
         await this.authChannel.signOut(this.hubChannel);
@@ -388,6 +389,7 @@ export default class SceneEntryManager {
       }
 
       this.scene.emit("share_video_enabled", { source: constraints.video.mediaSource });
+      this.scene.addState("sharing_video");
       isHandlingVideoShare = false;
     };
 
@@ -443,6 +445,7 @@ export default class SceneEntryManager {
       currentVideoShareEntity = null;
 
       this.scene.emit("share_video_disabled");
+      this.scene.removeState("sharing_video");
       isHandlingVideoShare = false;
     });
 
