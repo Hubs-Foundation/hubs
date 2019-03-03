@@ -137,7 +137,7 @@ export function resolveActionSets() {
 
   userinput.toggleSet(sets.cursorHoveringOnPen, cursorHoveringOnPen);
   userinput.toggleSet(sets.cursorHoveringOnCamera, cursorHoveringOnCamera);
-  userinput.toggleSet(sets.cursorHoveringOnInteractable, cursorHoveringOnInteractable);
+//  userinput.toggleSet(sets.cursorHoveringOnInteractable, cursorHoveringOnInteractable);
   userinput.toggleSet(sets.cursorHoveringOnUI, cursorHoveringOnUI);
   userinput.toggleSet(sets.cursorHoveringOnVideo, cursorHoveringOnVideo);
   userinput.toggleSet(sets.cursorHoveringOnNothing, cursorHoveringOnNothing);

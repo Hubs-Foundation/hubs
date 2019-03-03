@@ -114,6 +114,7 @@ import "./systems/userinput/userinput-debug";
 import "./systems/frame-scheduler";
 import "./systems/ui-hotkeys";
 import "./systems/tips";
+import "./systems/interactions";
 
 import "./gltf-component-mappings";
 
