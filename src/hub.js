@@ -136,7 +136,6 @@ window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
 import "aframe-physics-system";
 import "aframe-physics-extras";
-import "super-hands";
 import "./components/super-networked-interactable";
 import "./components/networked-counter";
 import "./components/event-repeater";
