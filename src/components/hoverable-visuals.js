@@ -25,6 +25,7 @@ AFRAME.registerComponent("hoverable-visuals", {
   tick(time) {
     if (!this.uniforms || !this.uniforms.size) return;
 
+    return; // replace-super-hands
     const { hoverers } = this.el.components["hoverable"];
     const isFrozen = this.el.sceneEl.is("frozen");
 

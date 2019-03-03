@@ -112,6 +112,7 @@ AFRAME.registerComponent("super-networked-interactable", {
   },
 
   tick: function() {
+    return; // replace-super-hands
     const grabber = this.el.components.grabbable.grabbers[0];
     if (!(grabber && pathsMap[grabber.id])) return;
 

@@ -151,7 +151,7 @@ AFRAME.registerComponent("camera-tool", {
   },
 
   tick() {
-    const grabber = this.el.components.grabbable.grabbers[0];
+    const grabber = undefined; //this.el.components.grabbable.grabbers[0];
     if (grabber && !!pathsMap[grabber.id]) {
       const paths = pathsMap[grabber.id];
       if (AFRAME.scenes[0].systems.userinput.get(paths.takeSnapshot)) {

@@ -103,6 +103,7 @@ AFRAME.registerComponent("pen", {
   },
 
   tick(t, dt) {
+    return; // replace-super-hands
     const grabber = this.el.parentNode.components.grabbable.grabbers[0];
     const userinput = AFRAME.scenes[0].systems.userinput;
 
