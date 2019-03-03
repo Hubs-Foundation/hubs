@@ -1,5 +1,5 @@
 I would like to replace super-hands with a system that handles interactions.
 I want the replacement to make minimal use of aframe, so that we can eventually drop it.
-I want the replacement to make minimal use of events, both because of performance reasons and because of the additional complexity dealing with the dom brings to the problem.
+I want the replacement to make minimal use of events, both because of performance reasons and to avoid the additional complexity dealing with the DOM brings to the problem.
 
 The first attempt can be seen in ca515a116928df3d164275684e20244c8abe3ec6 . The problem I encountered in this attempt is in trying to match the three.js object deep within th duck model's hierarchy that the cursor intersects with the aframe element as defined in the `interactable-media` template. This approach feels extremely error prone and confusing, so I want to think of another.

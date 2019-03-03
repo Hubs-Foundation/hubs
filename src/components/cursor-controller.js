@@ -216,7 +216,7 @@ AFRAME.registerComponent("cursor-controller", {
         this.raycaster.ray.direction = cursorPose.direction;
         this.raycaster.intersectObjects(this.targets, true, rawIntersections);
         intersection = rawIntersections.find(x => x.object.el);
-        AFRAME.scenes[0].systems.interaction.updateCursorIntersections(intersection, this.prevIntersection, rawIntersections);
+        AFRAME.scenes[0].systems.interaction.updateCursorIntersections(rawIntersections);
 //        this.emitIntersectionEvents(this.prevIntersection, intersection);
         this.prevIntersection = intersection;
         this.distance = intersection ? intersection.distance : this.data.far;
