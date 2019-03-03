@@ -8,9 +8,9 @@ let rightTeleporter;
 let cursorController;
 
 export function resolveActionSets() {
-  rightHandState = rightHandState || document.querySelector("#player-right-controller").components["super-hands"].state;
-  leftHandState = leftHandState || document.querySelector("#player-left-controller").components["super-hands"].state;
-  cursorHand = cursorHand || document.querySelector("#cursor").components["super-hands"].state;
+  rightHandState = new Map(); //rightHandState || document.querySelector("#player-right-controller").components["super-hands"].state;
+  leftHandState = new Map(); //leftHandState || document.querySelector("#player-left-controller").components["super-hands"].state;
+  cursorHand = new Map(); //cursorHand || document.querySelector("#cursor").components["super-hands"].state;
   leftTeleporter = leftTeleporter || document.querySelector("#player-left-controller").components["teleporter"];
   rightTeleporter = rightTeleporter || document.querySelector("#player-right-controller").components["teleporter"];
   cursorController = cursorController || document.querySelector("#cursor-controller").components["cursor-controller"];

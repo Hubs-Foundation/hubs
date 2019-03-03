@@ -19,7 +19,7 @@ AFRAME.registerComponent("hover-visuals", {
     if (!this.uniforms || !this.uniforms.size) return;
 
     const elements = this.el.object3D.matrixWorld.elements;
-    const hovering = this.data.controller.components["super-hands"].state.has("hover-start");
+    const hovering = false; //this.data.controller.components["super-hands"].state.has("hover-start");
 
     for (const uniform of this.uniforms.values()) {
       if (this.data.hand === "left") {

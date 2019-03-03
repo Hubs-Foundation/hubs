@@ -27,7 +27,7 @@ const getPlayerCamera = (() => {
 
 function shouldMoveCursor(touch, raycaster) {
   const cursorController = document.querySelector("[cursor-controller]").components["cursor-controller"];
-  const isCursorGrabbing = cursorController.data.cursor.components["super-hands"].state.has("grab-start");
+  const isCursorGrabbing = false;//cursorController.data.cursor.components["super-hands"].state.has("grab-start");
   if (isCursorGrabbing) {
     return true;
   }

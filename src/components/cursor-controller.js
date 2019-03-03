@@ -209,7 +209,7 @@ AFRAME.registerComponent("cursor-controller", {
       }
 
       let intersection;
-      const isGrabbing = this.data.cursor.components["super-hands"].state.has("grab-start");
+      const isGrabbing = false; // this.data.cursor.components["super-hands"].state.has("grab-start");
       if (!isGrabbing) {
         rawIntersections.length = 0;
         this.raycaster.ray.origin = cursorPose.position;
