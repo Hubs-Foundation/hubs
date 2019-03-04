@@ -550,6 +550,7 @@
             character-controller="pivot: #player-camera"
             ik-root
             player-info
+            cardboard-controls
         >
             <a-entity
                 id="player-hud"
@@ -672,7 +673,6 @@
                 id="player-left-controller"
                 class="left-controller"
                 track-pose="path: /actions/leftHand/matrix"
-                visibility-by-path="path: /actions/leftHand/matrix"
                 hand-controls2="left"
                 teleporter="start: /actions/leftHand/startTeleport; confirm: /actions/leftHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
@@ -689,7 +689,6 @@
                 id="player-right-controller"
                 class="right-controller"
                 track-pose="path: /actions/rightHand/matrix"
-                visibility-by-path="path: /actions/rightHand/matrix"
                 hand-controls2="right"
                 teleporter="start: /actions/rightHand/startTeleport; confirm: /actions/rightHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
