@@ -50,12 +50,6 @@ AFRAME.registerComponent("hand-controls2", {
   tick() {
     const hand = this.data;
     const userinput = AFRAME.scenes[0].systems.userinput;
-    const shouldBeVisible = !!userinput.get(
-      hand === "left" ? paths.actions.leftHand.matrix : paths.actions.rightHand.matrix
-    );
-    if (this.el.object3D.visible !== shouldBeVisible) {
-      this.el.setAttribute("visible", shouldBeVisible);
-    }
     const subpath = hand === "left" ? paths.actions.leftHand : paths.actions.rightHand;
     const thumb = userinput.get(subpath.thumb);
     const index = userinput.get(subpath.index);
