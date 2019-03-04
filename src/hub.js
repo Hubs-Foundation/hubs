@@ -19,6 +19,7 @@ import "aframe-slice9-component";
 import "./utils/audio-context-fix";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
+import "./utils/create-image-bitmap-polyfill";
 import { detectOS, detect } from "detect-browser";
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
