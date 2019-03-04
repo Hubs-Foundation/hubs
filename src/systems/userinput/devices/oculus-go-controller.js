@@ -18,6 +18,8 @@ export class OculusGoControllerDevice {
   }
 
   write(frame) {
+    // Have to call navigator.getGamepads() in order for the gamepad object to update.
+    navigator.getGamepads();
     if (this.gamepad.connected) {
       frame[paths.device.oculusgo.touchpad.axisX] = this.gamepad.axes[0];
       frame[paths.device.oculusgo.touchpad.axisY] = this.gamepad.axes[1];
