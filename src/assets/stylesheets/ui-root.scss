@@ -2,6 +2,7 @@
 
 :local(.ui) {
   @extend %default-font;
+  @extend %unselectable;
 
   width: 100%;
   height: 100%;
@@ -205,6 +206,10 @@ body.vr-mode {
   border-radius: 16px;
 }
 
+:local(.message-entry-disabled) {
+  background-color: $light-grey;
+}
+
 :local(.message-entry-input) {
   @extend %default-font;
   pointer-events: auto;
@@ -245,6 +250,11 @@ body.vr-mode {
   font-size: 1.5em;
   cursor: pointer;
   margin: 0px 10px;
+}
+
+:local(.message-entry-button):disabled {
+  color: $dark-grey;
+  background-color: $light-grey;
 }
 
 :local(.message-entry-button-in-room) {

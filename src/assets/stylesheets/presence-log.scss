@@ -150,6 +150,8 @@
     color: $light-text;
     min-height: 18px;
 
+    // If this is selectable, tap holding on mobile anywhere on the screen will result
+    // in a selection.
     user-select: none;
     -moz-user-select: none;
     -webkit-user-select: none;
