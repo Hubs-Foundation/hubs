@@ -181,7 +181,7 @@
     background-image: url(../hud/mute_off-hover.png);
   }
 
-  @media (any-pointer: coarse) {
+  @media (pointer: coarse) {
     background-image: url(../hud/mute_off.png);
   }
 }
@@ -194,7 +194,7 @@
     background-image: url(../hud/mute_on-hover.png);
   }
 
-  @media (any-pointer: coarse) {
+  @media (pointer: coarse) {
     background-image: url(../hud/mute_on.png);
   }  
 }
@@ -207,7 +207,7 @@
     background-image: url(../hud/spawn_pen-hover.png);
   }
 
-  @media (any-pointer: coarse) {
+  @media (pointer: coarse) {
     background-image: url(../hud/spawn_pen.png);
   }
 }
@@ -220,7 +220,7 @@
     background-image: url(../hud/spawn_camera-hover.png);
   }
 
-  @media (any-pointer: coarse) {
+  @media (pointer: coarse) {
     background-image: url(../hud/spawn_camera.png);
   }
 }
@@ -233,7 +233,7 @@
     background-image: url(../hud/freeze_off-hover.png);
   }
 
-  @media (any-pointer: coarse) {
+  @media (pointer: coarse) {
     background-image: url(../hud/freeze_off.png);
   }
 }
@@ -245,7 +245,7 @@
     background-image: url(../hud/freeze_on-hover.png);
   }
 
-  @media (any-pointer: coarse) {
+  @media (pointer: coarse) {
     background-image: url(../hud/freeze_on.png);
   }
 }
@@ -266,7 +266,7 @@
     background-image: url(../hud/share_camera_off-hover.png);
   }
 
-  @media (any-pointer: coarse) {
+  @media (pointer: coarse) {
     background-image: url(../hud/share_camera_off.png);
   }
 }
@@ -279,7 +279,7 @@
     background-image: url(../hud/share_camera_on-hover.png);
   }
 
-  @media (any-pointer: coarse) {
+  @media (pointer: coarse) {
     background-image: url(../hud/share_camera_on.png);
   }
 }
@@ -292,7 +292,7 @@
     background-image: url(../hud/share_screen_off-hover.png);
   }
 
-  @media (any-pointer: coarse) {
+  @media (pointer: coarse) {
     background-image: url(../hud/share_screen_off.png);
   }
 }
@@ -305,7 +305,7 @@
     background-image: url(../hud/share_screen_on-hover.png);
   }
 
-  @media (any-pointer: coarse) {
+  @media (pointer: coarse) {
     background-image: url(../hud/share_screen_on-hover.png);
   }
 }
@@ -318,7 +318,7 @@
     background-image: url(../hud/share_window_off-hover.png);
   }
 
-  @media (any-pointer: coarse) {
+  @media (pointer: coarse) {
     background-image: url(../hud/share_window_off.png);
   }
 }
@@ -330,7 +330,7 @@
     background-image: url(../hud/share_window_on-hover.png);
   }
 
-  @media (any-pointer: coarse) {
+  @media (pointer: coarse) {
     background-image: url(../hud/share_window_on.png);
   }
 }
