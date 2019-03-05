@@ -70,7 +70,7 @@ export class AppAwareTouchscreenDevice {
         case MOVE_CAMERA_JOB:
           // If grab was being delayed, we should fire the initial grab to ensure
           // clicks will work.
-          if (assignment.framesUntilGrab >= 0) {
+          if (assignment.framesUntilGrab > 0) {
             assignment.framesUntilGrab = 0;
             setTimeout(() => this.end(touch));
             return;
