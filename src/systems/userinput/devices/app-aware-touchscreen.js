@@ -68,15 +68,15 @@ export class AppAwareTouchscreenDevice {
       switch (assignment.job) {
         case MOVE_CURSOR_JOB:
         case MOVE_CAMERA_JOB:
-          // If grab was being delayed, we should fire the initial grab to ensure
-          // clicks will work.
-          if (assignment.framesUntilGrab > 0) {
+          // If grab was being delayed, we should fire the initial grab and also delay the unassignment
+          // to ensure we write at least two frames with the grab down (since the action set will change)
+          // and otherwise we'd not see the falling xform.
+          if (assignment.framesUntilGrab >= -1) {
             assignment.framesUntilGrab = 0;
-            setTimeout(() => this.end(touch));
-            return;
+            assignment.framesUntilUnassign = 2;
+          } else {
+            unassign(assignment.touch, assignment.job, this.assignments);
           }
-
-          unassign(assignment.touch, assignment.job, this.assignments);
 
           break;
         case FIRST_PINCHER_JOB:
@@ -278,8 +278,17 @@ export class AppAwareTouchscreenDevice {
 
     if (hasCursorJob) {
       const assignment = findByJob(MOVE_CURSOR_JOB, this.assignments);
+
       frame[path.isTouchingGrabbable] = assignment.framesUntilGrab <= 0;
       assignment.framesUntilGrab--;
+
+      if (assignment.framesUntilUnassign >= 0) {
+        if (assignment.framesUntilUnassign === 0) {
+          unassign(assignment.touch, assignment.job, this.assignments);
+        }
+
+        assignment.framesUntilUnassign--;
+      }
     }
 
     if (hasCameraJob) {
