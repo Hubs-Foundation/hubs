@@ -103,7 +103,8 @@ AFRAME.registerComponent("cursor-controller", {
     cursor: { type: "selector" },
     camera: { type: "selector" },
     far: { default: 4 },
-    near: { default: 0.06 },
+    near: { default: 0.01 },
+    minDistance: { default: 0.18 },
     cursorColorHovered: { default: "#2F80ED" },
     cursorColorUnhovered: { default: "#FFFFFF" },
     rayObject: { type: "selector" },
@@ -221,11 +222,11 @@ AFRAME.registerComponent("cursor-controller", {
         this.distance = intersection ? intersection.distance : this.data.far;
       }
 
-      const { cursor, near, far, camera, cursorColorHovered, cursorColorUnhovered } = this.data;
+      const { cursor, minDistance, far, camera, cursorColorHovered, cursorColorUnhovered } = this.data;
 
-      const cursorModDelta = userinput.get(paths.actions.cursor.modDelta);
-      if (isGrabbing && !userinput.activeSets.has(sets.cursorHoldingUI) && cursorModDelta) {
-        this.distance = THREE.Math.clamp(this.distance - cursorModDelta, near, far);
+      const cursorModDelta = userinput.get(paths.actions.cursor.modDelta) || 0;
+      if (isGrabbing && !userinput.activeSets.has(sets.cursorHoldingUI)) {
+        this.distance = THREE.Math.clamp(this.distance - cursorModDelta, minDistance, far);
       }
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);
       // The cursor will always be oriented towards the player about its Y axis, so objects held by the cursor will rotate towards the player.
