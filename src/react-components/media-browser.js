@@ -104,7 +104,7 @@ class MediaBrowser extends Component {
     const searchParams = new URLSearchParams(props.history.location.search);
     const result = props.mediaSearchStore.result;
 
-    const newState = { result, query: searchParams.get("q") || "" };
+    const newState = { result, query: this.state.query || searchParams.get("q") || "" };
     const urlSource = searchParams.get("media_source") || sluglessPath(this.props.history.location).substring(7);
     newState.showNav = !!(searchParams.get("media_nav") !== "false");
 
