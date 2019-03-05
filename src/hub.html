@@ -503,7 +503,7 @@
             radius="0.02"
             segments-width="9"
             segments-height="9"
-            ammo-body="type: kinematic; collisionFlags: 4; collisionFilterMask: 3; autoUpdateScale: false; activationState: 4;"
+            ammo-body="type: kinematic; collisionFlags: 4; collisionFilterMask: 3; scaleAutoUpdate: false; activationState: 4;"
             ammo-shape="type: sphere; sphereRadius: 0.02; autoGenerateShape: false;"
             super-hands="
                 colliderEvent: raycaster-intersection;
@@ -665,7 +665,7 @@
                 haptic-feedback
                 mixin="controller-super-hands"
                 ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4;"
-                ammo-shape="type: box; autoGenerateShape: false; autoUpdateScale: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
+                ammo-shape="type: box; autoGenerateShape: false; scaleAutoUpdate: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 action-to-event__c="path: /actions/leftHandGrab; event: primary_hand_grab;"
                 action-to-event__d="path: /actions/leftHandDrop; event: primary_hand_release;"
             >
@@ -681,7 +681,7 @@
                 haptic-feedback
                 mixin="controller-super-hands"
                 ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4;"
-                ammo-shape="type: box; autoGenerateShape: false; autoUpdateScale: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
+                ammo-shape="type: box; autoGenerateShape: false; scaleAutoUpdate: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 action-to-event__c="path: /actions/rightHandGrab; event: primary_hand_grab;"
                 action-to-event__d="path: /actions/rightHandDrop; event: primary_hand_release;"
             >

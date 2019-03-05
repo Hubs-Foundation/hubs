@@ -45,7 +45,7 @@
     "aframe-billboard-component": "^2.0.0",
     "aframe-inspector": "^0.8.3",
     "aframe-motion-capture-components": "github:mozillareality/aframe-motion-capture-components#aframe090",
-    "aframe-physics-system": "github:mozillareality/aframe-physics-system#6ebe73473b6923f6dc54d25791cebd2cbd83c4fe",
+    "aframe-physics-system": "github:mozillareality/aframe-physics-system#de74d40f71bc07de415dc0e1fc335055019cdf6a",
     "aframe-rounded": "^1.0.3",
     "aframe-slice9-component": "^1.0.0",
     "ammo.js": "github:kripken/ammo.js#ebe912c0426a47da9a11ce1ded3815da4a8d27c1",
