@@ -539,12 +539,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.APP.hubChannel = hubChannel;
 
   scene.addEventListener("enter-vr", () => {
+    console.log("after");
     document.body.classList.add("vr-mode");
-
-    // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
-    if (!isMobile || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
-      document.body.classList.add("vr-mode-stretch");
-    }
 
     if (!scene.is("entered")) {
       // If VR headset is activated, refreshing page will fire vrdisplayactivate
@@ -552,6 +548,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       // to be entered and we haven't entered the room yet.
       console.log("Pre-emptively exiting VR mode.");
       scene.exitVR();
+    } else {
+      // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
+      if (!isMobile || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
+        document.body.classList.add("vr-mode-stretch");
+      }
     }
   });
 
