@@ -241,8 +241,14 @@ AFRAME.registerComponent("cursor-controller", {
           ? cursorColorHovered
           : cursorColorUnhovered;
 
-      if (this.data.cursor.components.material.data.color !== cursorColor) {
+      const cursorAframeMaterial = this.data.cursor.components.material;
+
+      if (cursorAframeMaterial.data.color !== cursorColor) {
+        // A-Frame resets envmap on the three material when setting any attributes on the material,
+        // since we don't update the envmap on A-Frame materials when we rewrite the environment map.
+        const envMap = cursorAframeMaterial.material.envMap;
         this.data.cursor.setAttribute("material", "color", cursorColor);
+        cursorAframeMaterial.material.envMap = envMap;
       }
 
       if (this.line.material.visible) {
