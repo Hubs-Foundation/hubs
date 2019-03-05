@@ -555,7 +555,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  scene.addEventListener("exit-vr", () => document.body.classList.remove("vr-mode"));
+  scene.addEventListener("exit-vr", () => {
+    document.body.classList.remove("vr-mode");
+    document.body.classList.remove("vr-mode-stretch");
+  });
 
   registerNetworkSchemas();
 
