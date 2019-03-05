@@ -177,7 +177,7 @@
   background-image: url(../hud/mute_off.png);
 }
 :local(.iconButton.mute:hover) {
-  @media (any-pointer: fine) {
+  @media (pointer: fine) {
     background-image: url(../hud/mute_off-hover.png);
   }
 
@@ -190,7 +190,7 @@
   background-image: url(../hud/mute_on.png);
 }
 :local(.iconButton.mute.active:hover) {
-  @media (any-pointer: fine) {
+  @media (pointer: fine) {
     background-image: url(../hud/mute_on-hover.png);
   }
 
@@ -203,7 +203,7 @@
   background-image: url(../hud/spawn_pen.png);
 }
 :local(.iconButton.spawn_pen:hover) {
-  @media (any-pointer: fine) {
+  @media (pointer: fine) {
     background-image: url(../hud/spawn_pen-hover.png);
   }
 
@@ -216,7 +216,7 @@
   background-image: url(../hud/spawn_camera.png);
 }
 :local(.iconButton.spawn_camera:hover) {
-  @media (any-pointer: fine) {
+  @media (pointer: fine) {
     background-image: url(../hud/spawn_camera-hover.png);
   }
 
@@ -229,7 +229,7 @@
   background-image: url(../hud/freeze_off.png);
 }
 :local(.iconButton.freeze:hover) {
-  @media (any-pointer: fine) {
+  @media (pointer: fine) {
     background-image: url(../hud/freeze_off-hover.png);
   }
 
@@ -241,7 +241,7 @@
   background-image: url(../hud/freeze_on.png);
 }
 :local(.iconButton.freeze.active:hover) {
-  @media (any-pointer: fine) {
+  @media (pointer: fine) {
     background-image: url(../hud/freeze_on-hover.png);
   }
 
@@ -262,7 +262,7 @@
   background-image: url(../hud/share_camera_off.png);
 }
 :local(.iconButton.share_camera:hover) {
-  @media (any-pointer: fine) {
+  @media (pointer: fine) {
     background-image: url(../hud/share_camera_off-hover.png);
   }
 
@@ -275,7 +275,7 @@
   background-image: url(../hud/share_camera_on.png);
 }
 :local(.iconButton.share_camera.active:hover) {
-  @media (any-pointer: fine) {
+  @media (pointer: fine) {
     background-image: url(../hud/share_camera_on-hover.png);
   }
 
@@ -288,7 +288,7 @@
   background-image: url(../hud/share_screen_off.png);
 }
 :local(.iconButton.share_screen:hover) {
-  @media (any-pointer: fine) {
+  @media (pointer: fine) {
     background-image: url(../hud/share_screen_off-hover.png);
   }
 
@@ -301,7 +301,7 @@
   background-image: url(../hud/share_screen_on.png);
 }
 :local(.iconButton.share_screen.active:hover) {
-  @media (any-pointer: fine) {
+  @media (pointer: fine) {
     background-image: url(../hud/share_screen_on-hover.png);
   }
 
@@ -314,7 +314,7 @@
   background-image: url(../hud/share_window_off.png);
 }
 :local(.iconButton.share_window:hover) {
-  @media (any-pointer: fine) {
+  @media (pointer: fine) {
     background-image: url(../hud/share_window_off-hover.png);
   }
 
@@ -326,7 +326,7 @@
   background-image: url(../hud/share_window_on.png);
 }
 :local(.iconButton.share_window.active:hover) {
-  @media (any-pointer: fine) {
+  @media (pointer: fine) {
     background-image: url(../hud/share_window_on-hover.png);
   }
 
