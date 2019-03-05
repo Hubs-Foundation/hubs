@@ -1,4 +1,4 @@
-AFRAME.registerComponent("follow-in-lower-fov", {
+AFRAME.registerComponent("follow-in-fov", {
   schema: {
     target: { type: "selector" },
     offset: { type: "vec3" },

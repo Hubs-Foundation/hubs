@@ -72,7 +72,7 @@ import "./components/emit-state-change";
 import "./components/action-to-event";
 import "./components/emit-scene-event-on-remove";
 import "./components/stop-event-propagation";
-import "./components/follow-in-lower-fov";
+import "./components/follow-in-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
