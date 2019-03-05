@@ -617,7 +617,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const environmentScene = document.querySelector("#environment-scene");
 
   const onFirstEnvironmentLoad = () => {
-    setupLobbyCamera();
+    if (!scene.is("entered")) {
+      setupLobbyCamera();
+    }
 
     // Replace renderer with a noop renderer to reduce bot resource usage.
     if (isBotMode) {
