@@ -89,6 +89,11 @@ body.vr-mode {
     @media (max-height: 736px) and (min-height: 325px) {
       display: flex;
     }
+
+    // Hide in landscape
+    @media (max-height: 736px) and (min-aspect-ratio: 15/9) {
+      display: none;
+    }
   }
 }
 
@@ -207,7 +212,7 @@ body.vr-mode {
 }
 
 :local(.message-entry-disabled) {
-  background-color: $light-grey;
+  background-color: rgba(255, 255, 255, 0.33);
 }
 
 :local(.message-entry-input) {
@@ -254,7 +259,7 @@ body.vr-mode {
 
 :local(.message-entry-button):disabled {
   color: $dark-grey;
-  background-color: $light-grey;
+  background-color: transparent;
 }
 
 :local(.message-entry-button-in-room) {

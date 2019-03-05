@@ -172,57 +172,82 @@
   position: relative;
 }
 
+// This roundabout pattern is the only way I can get hovers to not happen on touch devices
 :local(.iconButton.mute) {
   background-image: url(../hud/mute_off.png);
 }
 :local(.iconButton.mute:hover) {
-  background-image: url(../hud/mute_off-hover.png);
+  @media (pointer: fine) {
+    background-image: url(../hud/mute_off-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/mute_off.png);
+  }
 }
+
 :local(.iconButton.mute.active) {
   background-image: url(../hud/mute_on.png);
 }
 :local(.iconButton.mute.active:hover) {
-  background-image: url(../hud/mute_on-hover.png);
-}
+  @media (pointer: fine) {
+    background-image: url(../hud/mute_on-hover.png);
+  }
 
-:local(.iconButton.bubble) {
-  background-image: url(../hud/bubble_off.png);
-}
-:local(.iconButton.bubble:hover) {
-  background-image: url(../hud/bubble_off-hover.png);
-}
-:local(.iconButton.bubble.active) {
-  background-image: url(../hud/bubble_on.png);
-}
-:local(.iconButton.bubble.active:hover) {
-  background-image: url(../hud/bubble_on-hover.png);
+  @media (pointer: coarse) {
+    background-image: url(../hud/mute_on.png);
+  }  
 }
 
 :local(.iconButton.spawn_pen) {
   background-image: url(../hud/spawn_pen.png);
 }
 :local(.iconButton.spawn_pen:hover) {
-  background-image: url(../hud/spawn_pen-hover.png);
+  @media (pointer: fine) {
+    background-image: url(../hud/spawn_pen-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/spawn_pen.png);
+  }
 }
 
 :local(.iconButton.spawn_camera) {
   background-image: url(../hud/spawn_camera.png);
 }
 :local(.iconButton.spawn_camera:hover) {
-  background-image: url(../hud/spawn_camera-hover.png);
+  @media (pointer: fine) {
+    background-image: url(../hud/spawn_camera-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/spawn_camera.png);
+  }
 }
 
 :local(.iconButton.freeze) {
   background-image: url(../hud/freeze_off.png);
 }
 :local(.iconButton.freeze:hover) {
-  background-image: url(../hud/freeze_off-hover.png);
+  @media (pointer: fine) {
+    background-image: url(../hud/freeze_off-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/freeze_off.png);
+  }
 }
 :local(.iconButton.freeze.active) {
   background-image: url(../hud/freeze_on.png);
 }
 :local(.iconButton.freeze.active:hover) {
-  background-image: url(../hud/freeze_on-hover.png);
+  @media (pointer: fine) {
+    background-image: url(../hud/freeze_on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/freeze_on.png);
+  }
 }
 
 :local(.iconButton.spawn) {
@@ -236,44 +261,76 @@
 :local(.iconButton.share_camera) {
   background-image: url(../hud/share_camera_off.png);
 }
+:local(.iconButton.share_camera:hover) {
+  @media (pointer: fine) {
+    background-image: url(../hud/share_camera_off-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/share_camera_off.png);
+  }
+}
+
 :local(.iconButton.share_camera.active) {
   background-image: url(../hud/share_camera_on.png);
 }
 :local(.iconButton.share_camera.active:hover) {
-  background-image: url(../hud/share_camera_on-hover.png);
+  @media (pointer: fine) {
+    background-image: url(../hud/share_camera_on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/share_camera_on.png);
+  }
 }
 
 :local(.iconButton.share_screen) {
   background-image: url(../hud/share_screen_off.png);
 }
+:local(.iconButton.share_screen:hover) {
+  @media (pointer: fine) {
+    background-image: url(../hud/share_screen_off-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/share_screen_off.png);
+  }
+}
+
 :local(.iconButton.share_screen.active) {
   background-image: url(../hud/share_screen_on.png);
 }
 :local(.iconButton.share_screen.active:hover) {
-  background-image: url(../hud/share_screen_on-hover.png);
+  @media (pointer: fine) {
+    background-image: url(../hud/share_screen_on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/share_screen_on-hover.png);
+  }
 }
 
 :local(.iconButton.share_window) {
   background-image: url(../hud/share_window_off.png);
 }
+:local(.iconButton.share_window:hover) {
+  @media (pointer: fine) {
+    background-image: url(../hud/share_window_off-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/share_window_off.png);
+  }
+}
 :local(.iconButton.share_window.active) {
   background-image: url(../hud/share_window_on.png);
 }
 :local(.iconButton.share_window.active:hover) {
-  background-image: url(../hud/share_window_on-hover.png);
-}
+  @media (pointer: fine) {
+    background-image: url(../hud/share_window_on-hover.png);
+  }
 
-// On mobile, since hover is fired on tap, this can make user think they are streaming,
-// so don't show hover states for now on the share buttons :P
-//
-// @media(hover) query doesn't seem to do the trick.
-/*:local(.iconButton.share_window:hover) {
-  background-image: url(../hud/share_window_off-hover.png);
+  @media (pointer: coarse) {
+    background-image: url(../hud/share_window_on.png);
+  }
 }
-:local(.iconButton.share_screen:hover) {
-  background-image: url(../hud/share_screen_off-hover.png);
-}
-:local(.iconButton.share_camera:hover) {
-  background-image: url(../hud/share_camera_off-hover.png);
-}
- */

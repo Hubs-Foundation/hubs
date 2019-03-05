@@ -239,7 +239,9 @@ AFRAME.registerSystem("tips", {
     }
 
     if (!this._mediaCounter) {
-      this._mediaCounter = document.querySelector("#media-counter").components["networked-counter"];
+      this._mediaCounter =
+        document.querySelector("#media-counter") &&
+        document.querySelector("#media-counter").components["networked-counter"];
 
       if (!this._mediaCounter) return;
     }

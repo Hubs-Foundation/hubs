@@ -29,6 +29,7 @@
 
 <body>
     <a-scene
+        loading-screen="enabled: false"
         nextframe
         class="grab-cursor"
         renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false;"
@@ -53,10 +54,6 @@
             <img id="mute-off-hover" crossorigin="anonymous" src="./assets/hud/mute_off-hover.png">
             <img id="mute-on" crossorigin="anonymous" src="./assets/hud/mute_on.png">
             <img id="mute-on-hover" crossorigin="anonymous" src="./assets/hud/mute_on-hover.png">
-            <img id="bubble-off" crossorigin="anonymous" src="./assets/hud/bubble_off.png">
-            <img id="bubble-off-hover" crossorigin="anonymous" src="./assets/hud/bubble_off-hover.png">
-            <img id="bubble-on" crossorigin="anonymous" src="./assets/hud/bubble_on.png">
-            <img id="bubble-on-hover" crossorigin="anonymous" src="./assets/hud/bubble_on-hover.png">
             <img id="spawn" crossorigin="anonymous" src="./assets/hud/spawn.png">
             <img id="spawn-hover" crossorigin="anonymous" src="./assets/hud/spawn-hover.png">
             <img id="spawn-pen" crossorigin="anonymous" src="./assets/hud/spawn_pen.png">
@@ -158,7 +155,7 @@
 
                         <template data-name="Head">
                             <a-entity
-                                networked-audio-source
+                                networked-audio-source="rolloffFactor: 2.0;"
                                 networked-audio-analyser
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
@@ -321,8 +318,9 @@
                     set-yxz-order
                 >
                     <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 10;" mixin="button-container" >
-                        <a-entity mixin="rounded-text-action-button" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01"> </a-entity>
-                        <a-entity text=" value:mirror; width:2.5; align:center;" class="mirror-button-label" text-raycast-hack position="0 0.125 0.02"></a-entity>
+                        <a-entity mixin="rounded-text-action-button" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01">
+                            <a-entity text=" value:mirror; width:2.5; align:center;" class="mirror-button-label" text-raycast-hack position="0 0 0.02"></a-entity>
+                        </a-entity>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
                         <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 -0.125 0.02"></a-entity>
                         <a-entity scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button rotate-button-selector position="-0.7 0.06 0.01">

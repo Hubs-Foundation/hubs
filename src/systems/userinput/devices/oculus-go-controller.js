@@ -32,7 +32,9 @@ export class OculusGoControllerDevice {
 
       // TODO ideally we should just be getting pose from the gamepad
       if (!this.rayObject) {
-        this.rayObject = document.querySelector(`#player-${this.gamepad.hand}-controller`).object3D;
+        // TODO if controller is set to left hand, we still use right hand query here
+        // because otherwise things break.
+        this.rayObject = document.querySelector(`#player-${/*this.gamepad.hand*/ "right"}-controller`).object3D;
       }
       this.rayObject.updateMatrices();
       this.rayObject.getWorldQuaternion(this.q);
@@ -47,6 +49,8 @@ export class OculusGoControllerDevice {
       this.headObject3D = this.headObject3D || document.querySelector("#player-camera").object3D;
 
       if (this.gamepad.pose.orientation) {
+        // TODO if controller is set to left hand, we still draw right hand until
+        // bindings are overhauled to handle primary/secondary hands.
         frame[paths.device.oculusgo.matrix] = this.matrix
           .compose(
             applyArmModel(this.gamepad.pose, this.gamepad.hand, this.headObject3D, 1.6),
