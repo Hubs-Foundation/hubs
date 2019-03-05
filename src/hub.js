@@ -16,7 +16,6 @@ import "aframe-billboard-component";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
-import "aframe-motion-capture-components";
 import "./utils/audio-context-fix";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
@@ -54,7 +53,6 @@ import "./components/visible-if-permitted";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
-import "./components/avatar-replay";
 import "./components/media-views";
 import "./components/pinch-to-move";
 import "./components/pitch-yaw-rotator";
@@ -83,6 +81,8 @@ import "./components/disable-frustum-culling";
 import "./components/teleporter";
 import "./components/set-active-camera";
 import "./components/track-pose";
+import "./components/replay";
+import "./components/visibility-by-path";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -150,8 +150,6 @@ import "./components/networked-counter";
 import "./components/event-repeater";
 import "./components/set-yxz-order";
 import "./components/set-sounds-invisible";
-
-import "./components/cardboard-controls";
 
 import "./components/cursor-controller";
 

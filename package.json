@@ -41,7 +41,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.2",
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
-    "aframe": "github:mozillareality/aframe#afa764e5f515784e7349f834a53142bcadcd0ffe",
+    "aframe": "github:mozillareality/aframe#hubs/master",
     "aframe-billboard-component": "^2.0.0",
     "aframe-inspector": "^0.8.3",
     "aframe-motion-capture-components": "github:mozillareality/aframe-motion-capture-components#aframe090",
@@ -58,7 +58,6 @@
     "history": "^4.7.2",
     "hls.js": "^0.12.2",
     "jsonschema": "^1.2.2",
-    "jszip": "^3.1.5",
     "jwt-decode": "^2.2.0",
     "markdown-it": "^8.4.2",
     "moving-average": "^1.0.0",
@@ -83,7 +82,8 @@
     "three-pathfinding": "github:mozillareality/three-pathfinding#hubs/master",
     "three-to-cannon": "1.3.0",
     "uuid": "^3.2.1",
-    "webrtc-adapter": "^6.0.2"
+    "webrtc-adapter": "^6.0.2",
+    "zip-loader": "^1.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.3.3",
