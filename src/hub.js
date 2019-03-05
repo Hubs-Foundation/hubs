@@ -539,7 +539,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.APP.hubChannel = hubChannel;
 
   scene.addEventListener("enter-vr", () => {
-    console.log("after");
     document.body.classList.add("vr-mode");
 
     if (!scene.is("entered")) {
