@@ -1,4 +1,5 @@
 import { isHubsSceneUrl, isHubsRoomUrl } from "../utils/media-utils";
+import { guessContentType } from "../utils/media-utils";
 
 AFRAME.registerComponent("open-media-button", {
   init() {
@@ -6,6 +7,10 @@ AFRAME.registerComponent("open-media-button", {
 
     this.updateSrc = () => {
       this.src = this.targetEl.components["media-loader"].data.src;
+
+      if (guessContentType(this.src) === "video/vnd.hubs-webrtc") {
+        this.el.object3D.visible = false;
+      }
 
       let label = "open link";
 
