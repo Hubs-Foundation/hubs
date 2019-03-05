@@ -158,6 +158,7 @@ class AvatarSelector extends Component {
           ref={sce => (this.scene = sce)}
           background="color: #aaa"
           environment-map=""
+          loading-screen="enabled: false"
           renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; gammaOutput: true;"
         >
           <a-assets>{avatarAssets}</a-assets>
