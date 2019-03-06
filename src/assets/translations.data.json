@@ -8,6 +8,8 @@
     "sign-in.auth-started": "Email sent!\nWaiting for you to click on the link in the email...",
     "sign-in.pin": "You'll need to sign in to pin objects.",
     "sign-in.pin-complete": "You are now signed in.",
+    "sign-in.unpin": "You'll need to sign in to un-pin objects.",
+    "sign-in.unpin-complete": "You are now signed in.",
     "sign-in.as": "Signed in as",
     "sign-in.in": "Sign In",
     "sign-in.out": "Sign Out",
