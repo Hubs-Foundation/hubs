@@ -170,11 +170,15 @@ export class AppAwareTouchscreenDevice {
       return;
     }
 
-    if (this.assignments.length === 0) {
+    const isFirstTouch = this.assignments.length === 0;
+    const isSecondTouch = this.assignments.length === 1;
+    const isThirdTouch = this.assignments.length === 2;
+
+    if (isFirstTouch || isThirdTouch) {
       let assignment;
 
-      // First touch
-      if (shouldMoveCursor(touch, this.raycaster)) {
+      // First touch or third touch
+      if (isThirdTouch || shouldMoveCursor(touch, this.raycaster)) {
         assignment = assign(touch, MOVE_CURSOR_JOB, this.assignments);
 
         // Grabbing objects is delayed by several frames:
@@ -196,8 +200,8 @@ export class AppAwareTouchscreenDevice {
         (touch.clientX / window.innerWidth) * 2 - 1,
         -(touch.clientY / window.innerHeight) * 2 + 1
       );
-    } else if (this.assignments.length === 1) {
-      // Second touch
+    } else if (isSecondTouch) {
+      // Second touch, begin pinch and convert first touch to pincher
       const previousAssignment = this.assignments[0];
       unassign(previousAssignment.touch, previousAssignment.job, this.assignments);
       const first = assign(previousAssignment.touch, FIRST_PINCHER_JOB, this.assignments);
