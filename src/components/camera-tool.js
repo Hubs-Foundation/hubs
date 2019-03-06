@@ -195,7 +195,10 @@ AFRAME.registerComponent("camera-tool", {
           this.playerHead.updateMatrixWorld(true, true);
         }
 
+        let playerHudWasVisible = false;
+
         if (this.playerHud) {
+          playerHudWasVisible = this.playerHud.visible;
           this.playerHud.visible = false;
         }
 
@@ -214,7 +217,7 @@ AFRAME.registerComponent("camera-tool", {
           this.playerHead.updateMatrixWorld(true, true);
         }
         if (this.playerHud) {
-          this.playerHud.visible = true;
+          this.playerHud.visible = playerHudWasVisible;
         }
         this.lastUpdate = now;
         this.updateRenderTargetNextTick = false;
