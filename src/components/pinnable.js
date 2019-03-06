@@ -89,7 +89,7 @@ AFRAME.registerComponent("pinnable", {
         this.el.removeAttribute("stretchable");
       }
 
-      this.el.setAttribute("body", { type: "static" });
+      this.el.setAttribute("ammo-body", { type: "static" });
 
       if (this.el.components.grabbable.data.maxGrabbers !== 0) {
         this.prevMaxGrabbers = this.el.components.grabbable.data.maxGrabbers;
@@ -100,7 +100,7 @@ AFRAME.registerComponent("pinnable", {
       this.el.setAttribute("grabbable", { maxGrabbers: this.prevMaxGrabbers });
 
       if (!this.el.components.stretchable) {
-        this.el.setAttribute("stretchable", "");
+        this.el.setAttribute("stretchable", { useWorldPosition: true, usePhysics: "never" });
       }
     }
   }
