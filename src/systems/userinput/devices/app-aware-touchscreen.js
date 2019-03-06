@@ -174,11 +174,13 @@ export class AppAwareTouchscreenDevice {
     const isSecondTouch = this.assignments.length === 1;
     const isThirdTouch = this.assignments.length === 2;
 
-    if (isFirstTouch || isThirdTouch) {
+    const hasSecondPinch = !!findByJob(SECOND_PINCHER_JOB, this.assignments);
+
+    if (isFirstTouch || (isThirdTouch && hasSecondPinch)) {
       let assignment;
 
-      // First touch or third touch
-      if (isThirdTouch || shouldMoveCursor(touch, this.raycaster)) {
+      // First touch or third touch and other two fingers were pinching
+      if (shouldMoveCursor(touch, this.raycaster)) {
         assignment = assign(touch, MOVE_CURSOR_JOB, this.assignments);
 
         // Grabbing objects is delayed by several frames:
@@ -200,25 +202,40 @@ export class AppAwareTouchscreenDevice {
         (touch.clientX / window.innerWidth) * 2 - 1,
         -(touch.clientY / window.innerHeight) * 2 + 1
       );
-    } else if (isSecondTouch) {
-      // Second touch, begin pinch and convert first touch to pincher
-      const previousAssignment = this.assignments[0];
-      unassign(previousAssignment.touch, previousAssignment.job, this.assignments);
-      const first = assign(previousAssignment.touch, FIRST_PINCHER_JOB, this.assignments);
-      first.clientX = previousAssignment.clientX;
-      first.clientY = previousAssignment.clientY;
+    } else if (isSecondTouch || isThirdTouch) {
+      const cursorJob = findByJob(MOVE_CURSOR_JOB, this.assignments);
 
-      const second = assign(touch, SECOND_PINCHER_JOB, this.assignments);
-      second.clientX = touch.clientX;
-      second.clientY = touch.clientY;
+      if (isSecondTouch && cursorJob && cursorJob.framesUntilGrab < 0) {
+        // The second touch is happening after grab activated, so assign this touch to first pinch.
+        const first = assign(touch, FIRST_PINCHER_JOB, this.assignments);
+        first.clientX = touch.clientX;
+        first.clientY = touch.clientY;
+      } else {
+        // Second or third touch, but third touch only if not pinching
+        if (isSecondTouch) {
+          // The second touch is happening before the grab activated, so re-assign the first
+          // to the first pinch, and effectively cancel the grab.
+          const previousAssignment = this.assignments[0];
+          unassign(previousAssignment.touch, previousAssignment.job, this.assignments);
+          const first = assign(previousAssignment.touch, FIRST_PINCHER_JOB, this.assignments);
+          first.clientX = previousAssignment.clientX;
+          first.clientY = previousAssignment.clientY;
+        }
 
-      const initialDistance = distance(first.clientX, first.clientY, second.clientX, second.clientY);
+        const first = findByJob(FIRST_PINCHER_JOB, this.assignments);
+        const second = assign(touch, SECOND_PINCHER_JOB, this.assignments);
 
-      this.pinch = {
-        initialDistance,
-        currentDistance: initialDistance,
-        delta: 0
-      };
+        second.clientX = touch.clientX;
+        second.clientY = touch.clientY;
+
+        const initialDistance = distance(first.clientX, first.clientY, second.clientX, second.clientY);
+
+        this.pinch = {
+          initialDistance,
+          currentDistance: initialDistance,
+          delta: 0
+        };
+      }
     }
 
     if (this.pendingTap.maxTouchCount === 0 && this.assignments.length > 0) {
