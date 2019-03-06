@@ -201,15 +201,16 @@ AFRAME.registerComponent("cursor-controller", {
       const cursorPose = userinput.get(paths.actions.cursor.pose);
       const rightHandPose = userinput.get(paths.actions.rightHand.pose);
 
-      this.data.cursor.object3D.visible = this.enabled && !!cursorPose;
+        this.data.cursor.object3D.visible = true;//this.enabled && !!cursorPose;
       this.line.material.visible = !!(this.enabled && rightHandPose);
 
       if (!this.enabled || !cursorPose) {
         return;
       }
 
+      const interaction = AFRAME.scenes[0].systems.interaction;
       let intersection;
-      const isGrabbing = false; // this.data.cursor.components["super-hands"].state.has("grab-start");
+      const isGrabbing = !!interaction.currentlyConstrainedRoot; // this.data.cursor.components["super-hands"].state.has("grab-start");
       if (!isGrabbing) {
         rawIntersections.length = 0;
         this.raycaster.ray.origin = cursorPose.position;
@@ -217,7 +218,7 @@ AFRAME.registerComponent("cursor-controller", {
         this.raycaster.intersectObjects(this.targets, true, rawIntersections);
         intersection = rawIntersections.find(x => x.object.el);
         AFRAME.scenes[0].systems.interaction.updateCursorIntersections(rawIntersections);
-//        this.emitIntersectionEvents(this.prevIntersection, intersection);
+        //        this.emitIntersectionEvents(this.prevIntersection, intersection);
         this.prevIntersection = intersection;
         this.distance = intersection ? intersection.distance : this.data.far;
       }
@@ -230,10 +231,10 @@ AFRAME.registerComponent("cursor-controller", {
       }
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);
       // The cursor will always be oriented towards the player about its Y axis, so objects held by the cursor will rotate towards the player.
-      getLastWorldPosition(camera.object3D, cameraPos);
-      cameraPos.y = cursor.object3D.position.y;
-      cursor.object3D.lookAt(cameraPos);
-      cursor.object3D.scale.setScalar(Math.pow(this.distance, 0.315) * 0.75);
+      //camera.object3D.getWorldPosition(cameraPos);
+      //cameraPos.y = cursor.object3D.position.y;
+      //cursor.object3D.lookAt(cameraPos);
+      //cursor.object3D.scale.setScalar(Math.pow(this.distance, 0.315) * 0.75);
       cursor.object3D.matrixNeedsUpdate = true;
 
       const cursorColor = AFRAME.scenes[0].systems["rotate-selected-object"].rotating

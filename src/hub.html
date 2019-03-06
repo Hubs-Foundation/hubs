@@ -214,64 +214,9 @@
             <template id="interactable-media">
                 <a-entity
                     class="interactable"
-                    super-networked-interactable="counter: #media-counter;"
-                    body="type: dynamic; shape: none; mass: 1;"
                     aggregate-and-mark-objects="offerConstraintWhenHovered: true;"
-                    grabbable
-                    stretchable="useWorldPosition: true; usePhysics: never"
-                    hoverable
-                    hoverable-visuals="cursorController: #cursor-controller"
-                    auto-scale-cannon-physics-body
-                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
-                    position-at-box-shape-border__freeze="target:.freeze-menu;"
-                    destroy-at-extreme-distances
-                    set-yxz-order
-                    pinnable
-                    matrix-auto-update
-                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
-                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
-                    sound__pinned ="src: #sound_asset-pinned; on: pinned; poolSize: 1; positional: false;"
-                    set-sounds-invisible
-                    emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
-                    emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
-                    emit-state-change__pinned="state: pinned; transform: rising; event: pinned;"
+                    test-track
                 >
-                    <a-entity class="ui interactable-ui" mixin="button-container">
-                        <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 10;">
-                            <a-entity mixin="rounded-text-action-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned;" position="0 0.125 0.01"> </a-entity>
-                            <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
-                            <a-entity mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.01">
-                                <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
-                                <a-image
-                                    icon-button="image: #camera; hoverImage: #camera;"
-                                    scale="0.165 0.165 0.165"
-                                    position="-0.105 0.005 0.01"
-                                ></a-image>
-                            </a-entity>
-                            <a-entity mixin="rounded-text-button" camera-focus-button="track: true" position="0.25 0.375 0.01">
-                                <a-entity text=" value:track; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
-                                <a-image
-                                    icon-button="image: #camera; hoverImage: #camera;"
-                                    scale="0.165 0.165 0.165"
-                                    position="-0.105 0.005 0.01"
-                                ></a-image>
-                            </a-entity>
-                            <a-entity mixin="rounded-text-button" class="hide-when-pinned" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
-                            <a-entity text=" value:remove; width:1.75; align:center;" class="hide-when-pinned" text-raycast-hack position="0 -0.125 0.02"></a-entity>
-                            <a-entity mixin="rounded-text-button" open-media-button position="0.25 -0.375 0.01">
-                                <a-entity text="value:open link; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
-                            </a-entity>
-                            <a-entity mixin="rounded-text-button" clone-media-button position="-0.25 -0.375 0.01">
-                                <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
-                            </a-entity>
-                            <a-entity scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button rotate-button-selector position="-0.6  0.12 0.01">
-                                <a-entity text="value:rotate; width:1.50; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
-                            </a-entity>
-                            <a-entity  scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button="mode: align;" position="-0.6 -0.12 0.01">
-                                <a-entity text="value:re-center; width:1.40; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
-                            </a-entity>
-                        </a-entity>
-                    </a-entity>
                 </a-entity>
             </template>
 
@@ -280,6 +225,7 @@
                     class="pen interactable"
                     super-networked-interactable="counter: #pen-counter;"
                     body="type: dynamic; shape: none; mass: 1;"
+                    aggregate-and-mark-objects="offerConstraintWhenHovered: true; isPen: true;"
                     grabbable="maxGrabbers: 1"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     hoverable
@@ -319,6 +265,7 @@
                 <a-entity
                     class="interactable icamera"
                     grabbable
+                    aggregate-and-mark-objects="offerConstraintWhenHovered: true; isCamera: true;"
                     hoverable
                     stretchable
                     camera-tool

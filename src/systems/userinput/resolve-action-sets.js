@@ -135,16 +135,40 @@ export function resolveActionSets() {
   userinput.toggleSet(sets.rightHandTeleporting, rightHandTeleporting);
   userinput.toggleSet(sets.rightHandHoldingCamera, rightHandHoldingCamera);
 
-  userinput.toggleSet(sets.cursorHoveringOnPen, cursorHoveringOnPen);
-  userinput.toggleSet(sets.cursorHoveringOnCamera, cursorHoveringOnCamera);
-//  userinput.toggleSet(sets.cursorHoveringOnInteractable, cursorHoveringOnInteractable);
-  userinput.toggleSet(sets.cursorHoveringOnUI, cursorHoveringOnUI);
+  const interaction = AFRAME.scenes[0].systems.interaction;
+  userinput.toggleSet(
+    sets.cursorHoveringOnPen,
+    !!interaction.currentlyHoveredRoot && interaction.rootToData.get(interaction.currentlyHoveredRoot).isPen
+  );
+  userinput.toggleSet(
+    sets.cursorHoveringOnCamera,
+    !!interaction.currentlyHoveredRoot && interaction.rootToData.get(interaction.currentlyHoveredRoot).isCamera
+  );
+  userinput.toggleSet(
+    sets.cursorHoveringOnInteractable,
+    !interaction.currentlyConstrainedRoot &&
+      !!interaction.currentlyHoveredRoot &&
+      interaction.rootToData.get(interaction.currentlyHoveredRoot).offerConstraintWhenHovered
+  );
+  userinput.toggleSet(
+    sets.cursorHoveringOnUI,
+    !!interaction.currentlyHoveredRoot && interaction.rootToData.get(interaction.currentlyHoveredRoot).isUI
+  );
   userinput.toggleSet(sets.cursorHoveringOnVideo, cursorHoveringOnVideo);
-//  userinput.toggleSet(sets.cursorHoveringOnNothing, cursorHoveringOnNothing);
-  userinput.toggleSet(sets.cursorHoldingPen, cursorHoldingPen);
-  userinput.toggleSet(sets.cursorHoldingCamera, cursorHoldingCamera);
-  userinput.toggleSet(sets.cursorHoldingInteractable, cursorHoldingInteractable);
-  userinput.toggleSet(sets.cursorHoldingUI, cursorHoldingUI);
+  userinput.toggleSet(sets.cursorHoveringOnNothing, !interaction.currentlyHoveredRoot);
+  userinput.toggleSet(
+    sets.cursorHoldingPen,
+    !!interaction.currentlyConstrainedRoot && interaction.rootToData.get(interaction.currentlyConstrainedRoot).isPen
+  );
+  userinput.toggleSet(
+    sets.cursorHoldingCamera,
+    !!interaction.currentlyConstrainedRoot && interaction.rootToData.get(interaction.currentlyConstrainedRoot).isCamera
+  );
+  userinput.toggleSet(sets.cursorHoldingInteractable, !!interaction.currentlyConstrainedRoot);
+  userinput.toggleSet(
+    sets.cursorHoldingUI,
+    !!interaction.currentlyConstrainedRoot && interaction.rootToData.get(interaction.currentlyConstrainedRoot).isUI
+  );
   userinput.toggleSet(
     sets.inputFocused,
     document.activeElement.nodeName === "INPUT" || document.activeElement.nodeName === "TEXTAREA"
