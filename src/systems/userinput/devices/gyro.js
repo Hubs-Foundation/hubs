@@ -79,7 +79,7 @@ export class GyroDevice {
 
     this.prevX = hmdEuler.x;
     this.prevY = hmdEuler.y;
-    frame[paths.device.gyro.averageDeltaX] = this.averageDeltaX;
-    frame[paths.device.gyro.averageDeltaY] = this.averageDeltaY;
+    frame.setValueType(paths.device.gyro.averageDeltaX, this.averageDeltaX);
+    frame.setValueType(paths.device.gyro.averageDeltaY, this.averageDeltaY);
   }
 }
