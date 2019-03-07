@@ -81,13 +81,7 @@ const _interpolateHSL = function(color1, color2, factor) {
 };
 
 function rotatingColor(t) {
-  const STEP_LENGTH = 0.05;
-  const color = _interpolateHSL(
-    [47, 255, 200],
-    [23, 64, 118],
-    0.5 + 0.5 * Math.floor(Math.sin(t / 1000.0) / STEP_LENGTH) * STEP_LENGTH
-  );
-  return r2h(color);
+  return _interpolateHSL([150, 80, 150], [23, 64, 118], 0.5 + 0.5 * Math.sin(t / 1000.0));
 }
 
 /**
@@ -105,9 +99,6 @@ AFRAME.registerComponent("cursor-controller", {
     far: { default: 4 },
     near: { default: 0.01 },
     minDistance: { default: 0.18 },
-    cursorColorHovered: { default: "#2F80ED" },
-    cursorColorUnhovered: { default: "#FFFFFF" },
-    rayObject: { type: "selector" },
     objects: { default: "" }
   },
 
@@ -222,7 +213,7 @@ AFRAME.registerComponent("cursor-controller", {
         this.distance = intersection ? intersection.distance : this.data.far;
       }
 
-      const { cursor, minDistance, far, camera, cursorColorHovered, cursorColorUnhovered } = this.data;
+      const { cursor, minDistance, far, camera } = this.data;
 
       const cursorModDelta = userinput.get(paths.actions.cursor.modDelta) || 0;
       if (isGrabbing && !userinput.activeSets.has(sets.cursorHoldingUI)) {
@@ -239,11 +230,22 @@ AFRAME.registerComponent("cursor-controller", {
       const cursorColor = AFRAME.scenes[0].systems["rotate-selected-object"].rotating
         ? rotatingColor(t)
         : intersection || isGrabbing
-          ? cursorColorHovered
-          : cursorColorUnhovered;
+          ? [23, 64, 118]
+          : [200, 200, 200];
 
-      if (this.data.cursor.components.material.data.color !== cursorColor) {
-        this.data.cursor.setAttribute("material", "color", cursorColor);
+      if (
+        !this.cursorColor ||
+        (this.cursorColor[0] !== cursorColor[0] ||
+          this.cursorColor[1] !== cursorColor[1] ||
+          this.cursorColor[2] !== cursorColor[2])
+      ) {
+        this.cursorColor = cursorColor;
+        this.data.cursor.object3DMap.mesh.material.color.setRGB(
+          cursorColor[0] / 255,
+          cursorColor[1] / 255,
+          cursorColor[2] / 255
+        );
+        this.data.cursor.object3DMap.mesh.material.needsUpdate = true;
       }
 
       if (this.line.material.visible) {
