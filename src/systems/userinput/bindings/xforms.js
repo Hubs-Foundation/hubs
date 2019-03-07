@@ -7,7 +7,14 @@ export const xforms = {
   copy: function(frame, src, dest) {
     frame[dest.value] = frame[src.value];
   },
-  scale: function(scalar, exp = 1) {
+  scale: function(scalar) {
+    return function scale(frame, src, dest) {
+      if (frame[src.value] !== undefined) {
+        frame[dest.value] = frame[src.value] * scalar;
+      }
+    };
+  },
+  scaleExp: function(scalar, exp = 1) {
     return function scale(frame, src, dest) {
       if (frame[src.value] !== undefined) {
         if (exp === 1) {

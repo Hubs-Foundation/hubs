@@ -735,7 +735,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     {
       src: { value: leftJoyYDeadzoned },
       dest: { value: paths.actions.leftHand.scalePenTip },
-      xform: xforms.scale(-0.005),
+      xform: xforms.scaleExp(-0.005, 5),
       priority: 1
     },
     {
@@ -914,7 +914,7 @@ export const oculusTouchUserBindings = addSetsToBindings({
     {
       src: { value: rightJoyYDeadzoned },
       dest: { value: paths.actions.rightHand.scalePenTip },
-      xform: xforms.scale(-0.005, 5),
+      xform: xforms.scaleExp(-0.005, 5),
       priority: 2
     },
     {
