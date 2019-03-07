@@ -538,24 +538,34 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.APP.scene = scene;
   window.APP.hubChannel = hubChannel;
 
+  const preemptVRMode = () => {
+    // If VR headset is activated, refreshing page will fire vrdisplayactivate
+    // which puts A-Frame in VR mode, so exit VR mode whenever it is attempted
+    // to be entered and we haven't entered the room yet.
+    console.log("Pre-emptively exiting VR mode.");
+
+    if (scene.is("vr-mode") && !scene.is("entered")) {
+      scene.exitVR();
+      return true;
+    }
+  };
+
   scene.addEventListener("enter-vr", () => {
+    if (preemptVRMode()) return;
     document.body.classList.add("vr-mode");
 
     // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
     if (!isMobile || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
       document.body.classList.add("vr-mode-stretch");
     }
-
-    if (!scene.is("entered")) {
-      // If VR headset is activated, refreshing page will fire vrdisplayactivate
-      // which puts A-Frame in VR mode, so exit VR mode whenever it is attempted
-      // to be entered and we haven't entered the room yet.
-      console.log("Pre-emptively exiting VR mode.");
-      scene.exitVR();
-    }
   });
 
-  scene.addEventListener("exit-vr", () => document.body.classList.remove("vr-mode"));
+  preemptVRMode();
+
+  scene.addEventListener("exit-vr", () => {
+    document.body.classList.remove("vr-mode");
+    document.body.classList.remove("vr-mode-stretch");
+  });
 
   registerNetworkSchemas();
 
