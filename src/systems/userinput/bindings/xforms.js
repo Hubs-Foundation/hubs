@@ -7,10 +7,14 @@ export const xforms = {
   copy: function(frame, src, dest) {
     frame[dest.value] = frame[src.value];
   },
-  scale: function(scalar) {
+  scale: function(scalar, exp = 1) {
     return function scale(frame, src, dest) {
       if (frame[src.value] !== undefined) {
-        frame[dest.value] = frame[src.value] * scalar;
+        if (exp === 1) {
+          frame[dest.value] = frame[src.value] * scalar;
+        } else {
+          frame[dest.value] = Math.pow(frame[src.value], exp) * scalar;
+        }
       }
     };
   },
