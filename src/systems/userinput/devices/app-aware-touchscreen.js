@@ -223,18 +223,25 @@ export class AppAwareTouchscreenDevice {
         }
 
         const first = findByJob(FIRST_PINCHER_JOB, this.assignments);
-        const second = assign(touch, SECOND_PINCHER_JOB, this.assignments);
 
-        second.clientX = touch.clientX;
-        second.clientY = touch.clientY;
+        if (!first) {
+          const first = assign(touch, FIRST_PINCHER_JOB, this.assignments);
+          first.clientX = touch.clientX;
+          first.clientY = touch.clientY;
+          return;
+        } else {
+          const second = assign(touch, SECOND_PINCHER_JOB, this.assignments);
+          second.clientX = touch.clientX;
+          second.clientY = touch.clientY;
 
-        const initialDistance = distance(first.clientX, first.clientY, second.clientX, second.clientY);
+          const initialDistance = distance(first.clientX, first.clientY, second.clientX, second.clientY);
 
-        this.pinch = {
-          initialDistance,
-          currentDistance: initialDistance,
-          delta: 0
-        };
+          this.pinch = {
+            initialDistance,
+            currentDistance: initialDistance,
+            delta: 0
+          };
+        }
       }
     }
 
