@@ -3,13 +3,6 @@ import { sets } from "../systems/userinput/sets";
 import { getLastWorldPosition } from "../utils/three-utils";
 
 // Color code from https://codepen.io/njmcode/pen/axoyD/
-// Converts a #ffffff hex string into an [r,g,b] array
-
-// Inverse of the above
-const r2h = function(rgb) {
-  return "#" + ((1 << 24) + (rgb[0] << 16) + (rgb[1] << 8) + rgb[2]).toString(16).slice(1);
-};
-
 const rgb2hsl = function(color) {
   const r = color[0] / 255;
   const g = color[1] / 255;
@@ -80,10 +73,8 @@ const _interpolateHSL = function(color1, color2, factor) {
   return hsl2rgb(hsl1);
 };
 
-function rotatingColor(t) {
-  return _interpolateHSL([150, 80, 150], [23, 64, 118], 0.5 + 0.5 * Math.sin(t / 1000.0));
-}
-
+const HIGHLIGHT = new THREE.Color(23 / 255, 64 / 255, 118 / 255);
+const NO_HIGHLIGHT = new THREE.Color(190 / 255, 190 / 255, 190 / 255);
 /**
  * Manages targeting and physical cursor location. Has the following responsibilities:
  *
@@ -120,6 +111,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.raycaster.firstHitOnly = true; // flag specific to three-mesh-bvh
     this.dirty = true;
     this.distance = this.data.far;
+    this.color = new THREE.Color(0, 0, 0);
     const lineMaterial = new THREE.LineBasicMaterial({
       color: "white",
       opacity: 0.2,
@@ -227,24 +219,17 @@ AFRAME.registerComponent("cursor-controller", {
       cursor.object3D.scale.setScalar(Math.pow(this.distance, 0.315) * 0.75);
       cursor.object3D.matrixNeedsUpdate = true;
 
-      const cursorColor = AFRAME.scenes[0].systems["rotate-selected-object"].rotating
-        ? rotatingColor(t)
-        : intersection || isGrabbing
-          ? [23, 64, 118]
-          : [200, 200, 200];
+      if (AFRAME.scenes[0].systems["rotate-selected-object"].rotating) {
+        const rgb = _interpolateHSL([150, 80, 150], [23, 64, 118], 0.5 + 0.5 * Math.sin(t / 1000.0));
+        this.color.setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
+      } else if (intersection || isGrabbing) {
+        this.color.copy(HIGHLIGHT);
+      } else {
+        this.color.copy(NO_HIGHLIGHT);
+      }
 
-      if (
-        !this.cursorColor ||
-        (this.cursorColor[0] !== cursorColor[0] ||
-          this.cursorColor[1] !== cursorColor[1] ||
-          this.cursorColor[2] !== cursorColor[2])
-      ) {
-        this.cursorColor = cursorColor;
-        this.data.cursor.object3DMap.mesh.material.color.setRGB(
-          cursorColor[0] / 255,
-          cursorColor[1] / 255,
-          cursorColor[2] / 255
-        );
+      if (!this.data.cursor.object3DMap.mesh.material.color.equals(this.color)) {
+        this.data.cursor.object3DMap.mesh.material.color.copy(this.color);
         this.data.cursor.object3DMap.mesh.material.needsUpdate = true;
       }
 
