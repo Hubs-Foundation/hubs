@@ -50,6 +50,10 @@ export default class SceneEntryManager {
     }
 
     if (enterInVR) {
+      // This specific scene state var is used to check if the user went through the
+      // entry flow and chose VR entry, and is used to preempt VR mode on refreshes.
+      this.scene.addState("vr-entered");
+
       // HACK - A-Frame calls getVRDisplays at module load, we want to do it here to
       // force gamepads to become live.
       navigator.getVRDisplays();
