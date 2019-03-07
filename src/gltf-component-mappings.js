@@ -1,5 +1,6 @@
 import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
+const COLLISION_FLAGS = require("aframe-physics-system/src/constants").COLLISION_FLAGS;
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
@@ -17,7 +18,7 @@ AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body", el => {
   el.setAttribute("ammo-body", {
     mass: 0,
     type: "static",
-    collisionFlags: 4
+    collisionFlags: COLLISION_FLAGS.NO_CONTACT_RESPONSE
   });
 });
 AFRAME.GLTFModelPlus.registerComponent("ammo-shape", "ammo-loader");
@@ -192,7 +193,7 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
   el.setAttribute("ammo-body", {
     mass: 0,
     type: "static",
-    collisionFlags: 4
+    collisionFlags: COLLISION_FLAGS.NO_CONTACT_RESPONSE
   });
   el.setAttribute("hoverable", "");
 });

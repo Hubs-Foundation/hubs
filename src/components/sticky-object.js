@@ -1,5 +1,7 @@
 import { getLastWorldPosition, getLastWorldQuaternion } from "../utils/three-utils";
 
+//TODO: decide on what these collision filters should actuallly be called, and move these somewhere else
+const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 /* global THREE, AFRAME */
 AFRAME.registerComponent("sticky-object", {
   dependencies: ["ammo-body"],
@@ -54,18 +56,20 @@ AFRAME.registerComponent("sticky-object", {
     if (
       this.data.autoLockOnRelease &&
       (this.data.autoLockSpeedLimit === 0 ||
-        this.el.components["ammo-body"].getVelocity() < this.data.autoLockSpeedLimit)
+        this.el.components["ammo-body"].getVelocity().length() < this.data.autoLockSpeedLimit)
     ) {
       this.setLocked(true);
     }
 
-    this.el.setAttribute("ammo-body", { collisionFilterGroup: 1 });
+    this.el.setAttribute("ammo-body", { collisionFilterGroup: COLLISION_LAYERS.DYNAMIC_OBJECTS });
   },
 
   _onGrab() {
     if (!this.el.components.grabbable || this.el.components.grabbable.data.maxGrabbers === 0) return;
 
-    this.el.setAttribute("ammo-body", { collisionFilterGroup: this.locked ? 2 : 1 });
+    this.el.setAttribute("ammo-body", {
+      collisionFilterGroup: this.locked ? COLLISION_LAYERS.STICKY_OBJECTS : COLLISION_LAYERS.DYNAMIC_OBJECTS
+    });
     this.setLocked(false);
   },
 

@@ -1,4 +1,5 @@
 import { paths } from "../systems/userinput/paths";
+const ACTIVATION_STATES = require("aframe-physics-system/src/constants").ACTIVATION_STATES;
 
 const pathsMap = {
   "player-right-controller": {
@@ -72,14 +73,14 @@ AFRAME.registerComponent("super-networked-interactable", {
       if (!NAF.utils.isMine(this.networkedEl)) {
         if (NAF.utils.takeOwnership(this.networkedEl)) {
           this.el.setAttribute("ammo-body", { type: "dynamic" });
-          this.el.body.forceActivationState(4);
+          this.el.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
           this._syncCounterRegistration();
         } else {
           this.el.emit("grab-end", { hand: this.hand });
           this.hand = null;
         }
       } else {
-        this.el.body.forceActivationState(4);
+        this.el.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
       }
     }
     this.currentScale.copy(this.el.getAttribute("scale"));
@@ -87,7 +88,7 @@ AFRAME.registerComponent("super-networked-interactable", {
 
   _onGrabEnd: function(e) {
     if (e.detail.hand) e.detail.hand.emit("haptic_pulse", { intensity: "high" });
-    this.el.body.forceActivationState(1);
+    this.el.body.forceActivationState(ACTIVATION_STATES.ACTIVE_TAG);
   },
 
   _onOwnershipLost: function() {

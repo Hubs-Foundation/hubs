@@ -61,24 +61,26 @@ AFRAME.registerComponent("media-loader", {
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
   },
 
-  setScale: function(resize) {
-    const mesh = this.el.getObject3D("mesh");
-    const box = getBox(this.el, mesh);
-    const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
-    mesh.scale.multiplyScalar(scaleCoefficient);
-    mesh.matrixNeedsUpdate = true;
-  },
+  setShapeAndScale: (function() {
+    const center = new THREE.Vector3();
+    return function(resize, shapeType, shapeId) {
+      const mesh = this.el.getObject3D("mesh");
+      const box = getBox(this.el, mesh);
+      const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
+      mesh.scale.multiplyScalar(scaleCoefficient);
+      const { min, max } = box;
+      center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
+      mesh.position.sub(center);
+      mesh.matrixNeedsUpdate = true;
 
-  addShape(type, id) {
-    const numMeshes = getNumMeshes(this.el.object3DMap.mesh);
-    const recenter = !this.el.components["animation-mixer"] && numMeshes === 1;
-    this.el.setAttribute("ammo-shape__" + id, {
-      autoGenerateShape: true,
-      type: type,
-      recenter: recenter,
-      mergeGeometry: true
-    });
-  },
+      this.el.setAttribute("ammo-shape__" + shapeId, {
+        autoGenerateShape: true,
+        type: shapeType,
+        mergeGeometry: true,
+        offset: center.negate()
+      });
+    };
+  })(),
 
   removeShape(id) {
     if (this.el.getAttribute("ammo-shape__" + id)) {
@@ -115,9 +117,8 @@ AFRAME.registerComponent("media-loader", {
       this.loadingClip.play();
     }
     this.el.setObject3D("mesh", mesh);
-    this.setScale(true);
+    this.setShapeAndScale(true, "box", "loader");
     delete this.showLoaderTimeout;
-    this.addShape("box", "loader");
   },
 
   clearLoadingTimeout() {
@@ -252,11 +253,8 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "model-loaded",
           () => {
-            this.setScale(this.data.resize);
-            this.addShape("hull", "hull");
+            this.setShapeAndScale(this.data.resize, "hull", "hull");
             this.onMediaLoaded();
-            //TODO: maybe use media-utils traverseMeshesAndAddShapes
-            // traverseMeshesAndAddShapes(this.el, "hull", 0.01);
             addAnimationComponents(this.el);
           },
           { once: true }
