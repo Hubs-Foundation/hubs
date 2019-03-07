@@ -3,7 +3,7 @@ import { sets } from "../systems/userinput/sets";
 import { getLastWorldPosition } from "../utils/three-utils";
 
 // Color code from https://codepen.io/njmcode/pen/axoyD/
-const rgb2hsl = function(color) {
+const rgb2hsl = function(color, out) {
   const r = color[0] / 255;
   const g = color[1] / 255;
   const b = color[2] / 255;
@@ -32,7 +32,10 @@ const rgb2hsl = function(color) {
     h /= 6;
   }
 
-  return [h, s, l];
+  out[0] = h;
+  out[1] = s;
+  out[2] = l;
+  return out;
 };
 
 const hue2rgb = function(p, q, t) {
@@ -44,37 +47,34 @@ const hue2rgb = function(p, q, t) {
   return p;
 };
 
-const hsl2rgb = function(color) {
-  let l = color[2];
-
-  if (color[1] == 0) {
-    l = Math.round(l * 255);
-    return [l, l, l];
-  } else {
-    const s = color[1];
-    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    const p = 2 * l - q;
-    const r = hue2rgb(p, q, color[0] + 1 / 3);
-    const g = hue2rgb(p, q, color[0]);
-    const b = hue2rgb(p, q, color[0] - 1 / 3);
-    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-  }
+const hsl2rgb = function(color, out) {
+  const l = color[2];
+  const s = color[1];
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  out[0] = hue2rgb(p, q, color[0] + 1 / 3);
+  out[1] = hue2rgb(p, q, color[0]);
+  out[2] = hue2rgb(p, q, color[0] - 1 / 3);
+  return out;
 };
 
-const _interpolateHSL = function(color1, color2, factor) {
-  if (arguments.length < 3) {
-    factor = 0.5;
-  }
-  const hsl1 = rgb2hsl(color1);
-  const hsl2 = rgb2hsl(color2);
-  for (let i = 0; i < 3; i++) {
-    hsl1[i] += factor * (hsl2[i] - hsl1[i]);
-  }
-  return hsl2rgb(hsl1);
-};
+const _interpolateHSL = (function() {
+  const hsl1 = [0, 0, 0];
+  const hsl2 = [0, 0, 0];
+  return function _interpolateHSL(color1, color2, factor, out) {
+    rgb2hsl(color1, hsl1);
+    rgb2hsl(color2, hsl2);
+    for (let i = 0; i < 3; i++) {
+      hsl1[i] += factor * (hsl2[i] - hsl1[i]);
+    }
+    return hsl2rgb(hsl1, out);
+  };
+})();
 
 const HIGHLIGHT = new THREE.Color(23 / 255, 64 / 255, 118 / 255);
 const NO_HIGHLIGHT = new THREE.Color(190 / 255, 190 / 255, 190 / 255);
+const ROTATE_COLOR_1 = [150, 80, 150];
+const ROTATE_COLOR_2 = [23, 64, 118];
 /**
  * Manages targeting and physical cursor location. Has the following responsibilities:
  *
@@ -112,6 +112,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.dirty = true;
     this.distance = this.data.far;
     this.color = new THREE.Color(0, 0, 0);
+    this.rotateColor = [0, 0, 0];
     const lineMaterial = new THREE.LineBasicMaterial({
       color: "white",
       opacity: 0.2,
@@ -220,8 +221,8 @@ AFRAME.registerComponent("cursor-controller", {
       cursor.object3D.matrixNeedsUpdate = true;
 
       if (AFRAME.scenes[0].systems["rotate-selected-object"].rotating) {
-        const rgb = _interpolateHSL([150, 80, 150], [23, 64, 118], 0.5 + 0.5 * Math.sin(t / 1000.0));
-        this.color.setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
+        _interpolateHSL(ROTATE_COLOR_1, ROTATE_COLOR_2, 0.5 + 0.5 * Math.sin(t / 1000.0), this.rotateColor);
+        this.color.setRGB(this.rotateColor[0], this.rotateColor[1], this.rotateColor[2]);
       } else if (intersection || isGrabbing) {
         this.color.copy(HIGHLIGHT);
       } else {
