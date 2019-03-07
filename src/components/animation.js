@@ -4,6 +4,9 @@
 // scenario where the transform changes on an object during an animation.
 //
 // Changes are identified w comment // hubs
+//
+// Bugfix added 3/1/19 - If an animation component is removed before its delay setting, then
+// it erroneously restarts.
 
 var anime = require('animejs');
 var components = AFRAME.components; // hubs
@@ -143,6 +146,7 @@ module.exports.Component = registerComponent('animation', {
   remove: function () {
     this.pauseAnimation();
     this.removeEventListeners();
+    this.cancelDelayedStart(); // hubs
   },
 
   pause: function () {
@@ -150,6 +154,7 @@ module.exports.Component = registerComponent('animation', {
     this.pausedWasPlaying = this.animationIsPlaying;
     this.pauseAnimation();
     this.removeEventListeners();
+    this.cancelDelayedStart(); // hubs
   },
 
   /**
@@ -176,6 +181,7 @@ module.exports.Component = registerComponent('animation', {
     this.animation = anime(this.config);
 
     this.removeEventListeners();
+    this.cancelDelayedStart(); // hubs
     this.addEventListeners();
 
     // Wait for start events for animation.
@@ -183,7 +189,8 @@ module.exports.Component = registerComponent('animation', {
 
     // Delay animation.
     if (data.delay) {
-      setTimeout(this.beginAnimation, data.delay);
+      // hubs
+      this.delayTimeout = setTimeout(this.beginAnimation, data.delay);
       return;
     }
 
@@ -500,6 +507,14 @@ module.exports.Component = registerComponent('animation', {
     removeEventListeners(el, data.startEvents, this.onStartEvent);
     removeEventListeners(el, data.pauseEvents, this.pauseAnimation);
     removeEventListeners(el, data.resumeEvents, this.resumeAnimation);
+  },
+
+  // hubs
+  cancelDelayedStart: function () {
+    if (this.delayTimeout) {
+      clearTimeout(this.delayTimeout);
+      this.delayTimeout = null;
+    }
   },
 
   setColorConfig: function (from, to) {
