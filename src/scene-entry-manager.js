@@ -213,7 +213,7 @@ export default class SceneEntryManager {
     if (this.hubChannel.signedIn) {
       this._pinElement(el);
     } else {
-      this.handleExitTo2DInterstitial();
+      this.handleExitTo2DInterstitial(true);
 
       const wasInVR = this.scene.is("vr-mode");
       const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
@@ -255,7 +255,7 @@ export default class SceneEntryManager {
     this.hubChannel.unpin(networkId, fileId);
   };
 
-  handleExitTo2DInterstitial = () => {
+  handleExitTo2DInterstitial = isLower => {
     if (!this.scene.is("vr-mode")) return;
 
     this._in2DInterstitial = true;
@@ -265,7 +265,11 @@ export default class SceneEntryManager {
       this.scene.exitVR();
     } else {
       // Non-immersive browser, show notice
-      document.querySelector(".vr-notice").setAttribute("visible", true);
+      const vrNotice = document.querySelector(".vr-notice");
+      vrNotice.setAttribute("visible", true);
+      vrNotice.setAttribute("follow-in-fov", {
+        angle: isLower ? 39 : -15
+      });
     }
   };
 
@@ -321,7 +325,7 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("action_spawn", () => {
-      this.handleExitTo2DInterstitial();
+      this.handleExitTo2DInterstitial(false);
       window.APP.mediaSearchStore.sourceNavigateToDefaultSource();
     });
 
