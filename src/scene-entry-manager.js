@@ -209,34 +209,45 @@ export default class SceneEntryManager {
     }
   };
 
-  _signInAndPinElement = el => {
+  _signInAndPinOrUnpinElement = (el, pin) => {
+    const action = pin ? this._pinElement : this._unpinElement;
+    const promptIdSuffix = pin ? "pin" : "unpin";
+
     if (this.hubChannel.signedIn) {
-      this._pinElement(el);
+      action(el);
     } else {
       this.handleExitTo2DInterstitial(true);
 
       const wasInVR = this.scene.is("vr-mode");
       const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
 
-      this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete", continueTextId, async () => {
-        let pinningFailed = false;
-        if (this.hubChannel.signedIn) {
-          try {
-            await this._pinElement(el);
-          } catch (e) {
-            pinningFailed = true;
+      this.onRequestAuthentication(
+        `sign-in.${promptIdSuffix}`,
+        `sign-in.${promptIdSuffix}-complete`,
+        continueTextId,
+        async () => {
+          let actionFailed = false;
+          if (this.hubChannel.signedIn) {
+            try {
+              await action(el);
+            } catch (e) {
+              actionFailed = true;
+            }
+          } else {
+            actionFailed = true;
           }
-        } else {
-          pinningFailed = true;
-        }
 
-        if (pinningFailed) {
-          // UI pins the entity optimistically, so we undo that here.
-          el.setAttribute("pinnable", "pinned", false);
-        }
+          if (actionFailed) {
+            // UI pins/un-pins the entity optimistically, so we undo that here.
+            // Note we have to disable the sign in flow here otherwise this will recurse.
+            this._disableSignInOnPinAction = true;
+            el.setAttribute("pinnable", "pinned", !pin);
+            this._disableSignInOnPinAction = false;
+          }
 
-        this.handleReEntryToVRFrom2DInterstitial();
-      });
+          this.handleReEntryToVRFrom2DInterstitial();
+        }
+      );
     }
   };
 
@@ -313,11 +324,13 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("pinned", e => {
-      this._signInAndPinElement(e.detail.el);
+      if (this._disableSignInOnPinAction) return;
+      this._signInAndPinOrUnpinElement(e.detail.el, true);
     });
 
     this.scene.addEventListener("unpinned", e => {
-      this._unpinElement(e.detail.el);
+      if (this._disableSignInOnPinAction) return;
+      this._signInAndPinOrUnpinElement(e.detail.el, false);
     });
 
     this.scene.addEventListener("object_spawned", e => {
