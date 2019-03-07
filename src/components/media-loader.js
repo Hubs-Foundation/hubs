@@ -13,6 +13,10 @@ import { addAnimationComponents } from "../utils/animation";
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 
+const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
+  SHAPES = PHYSICS_CONSTANTS.SHAPES,
+  TYPES = PHYSICS_CONSTANTS.TYPES;
+
 const gltfLoader = new THREE.GLTFLoader();
 let loadingObject;
 gltfLoader.load(loadingObjectSrc, gltf => {
@@ -117,7 +121,7 @@ AFRAME.registerComponent("media-loader", {
       this.loadingClip.play();
     }
     this.el.setObject3D("mesh", mesh);
-    this.setShapeAndScale(true, "box", "loader");
+    this.setShapeAndScale(true, SHAPES.BOX, "loader");
     delete this.showLoaderTimeout;
   },
 
@@ -253,7 +257,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "model-loaded",
           () => {
-            this.setShapeAndScale(this.data.resize, "hull", "hull");
+            this.setShapeAndScale(this.data.resize, SHAPES.HULL, "hull");
             this.onMediaLoaded();
             addAnimationComponents(this.el);
           },

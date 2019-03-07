@@ -1,6 +1,9 @@
 import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
-const COLLISION_FLAGS = require("aframe-physics-system/src/constants").COLLISION_FLAGS;
+const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
+  COLLISION_FLAGS = PHYSICS_CONSTANTS.COLLISION_FLAGS,
+  TYPES = PHYSICS_CONSTANTS.TYPES,
+  SHAPES = PHYSICS_CONSTANTS.SHAPES;
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
@@ -17,11 +20,11 @@ AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body", el => {
   //will no longer be needed when spawners are added via Spoke instead.
   el.setAttribute("ammo-body", {
     mass: 0,
-    type: "static",
+    type: TYPES.STATIC,
     collisionFlags: COLLISION_FLAGS.NO_CONTACT_RESPONSE
   });
 });
-AFRAME.GLTFModelPlus.registerComponent("ammo-shape", "ammo-loader");
+AFRAME.GLTFModelPlus.registerComponent("ammo-shape", "ammo-shape");
 AFRAME.GLTFModelPlus.registerComponent("hide-when-quality", "hide-when-quality");
 AFRAME.GLTFModelPlus.registerComponent("light", "light", (el, componentName, componentData) => {
   if (componentData.distance === 0) {
@@ -65,7 +68,7 @@ AFRAME.GLTFModelPlus.registerComponent(
       euler.set(rotation.x, rotation.y, rotation.z);
       const orientation = new THREE.Quaternion().setFromEuler(euler);
       el.setAttribute(componentName, {
-        type: "box",
+        type: SHAPES.BOX,
         autoGenerateShape: false,
         mergeGeometry: false,
         offset: componentData.position,
@@ -192,7 +195,7 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
   });
   el.setAttribute("ammo-body", {
     mass: 0,
-    type: "static",
+    type: TYPES.STATIC,
     collisionFlags: COLLISION_FLAGS.NO_CONTACT_RESPONSE
   });
   el.setAttribute("hoverable", "");
