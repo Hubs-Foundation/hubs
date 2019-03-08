@@ -1,5 +1,5 @@
 import { paths } from "../paths";
-import {ArrayBackedSet} from "../array-backed-set";
+import { ArrayBackedSet } from "../array-backed-set";
 export class KeyboardDevice {
   constructor() {
     this.seenKeys = new ArrayBackedSet();
@@ -48,9 +48,7 @@ export class KeyboardDevice {
       this.keys[key] = event.type === "keydown";
       this.seenKeys.add(event.key);
     });
-    while (this.events.length) {
-      this.events.pop();
-    }
+    this.events.length = 0;
 
     for (let i = 0; i < this.seenKeys.items.length; i++) {
       const key = this.seenKeys.items[i];
