@@ -2,6 +2,8 @@ import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
+import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
+THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
 if (process.env.CORS_PROXY_SERVER) {
@@ -161,7 +163,7 @@ function getOrientation(file, callback) {
 }
 
 let interactableId = 0;
-export const addMedia = (src, template, contentOrigin, resolve = false, resize = false, customScale) => {
+export const addMedia = (src, template, contentOrigin, resolve = false, resize = false) => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
@@ -175,8 +177,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
     fileIsOwned: !needsToBeUploaded
   });
 
-  const scaleSource = customScale || entity.object3D.scale;
-  const [sx, sy, sz] = [scaleSource.x, scaleSource.y, scaleSource.z];
+  const [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
 
   entity.setAttribute("animation__loader_spawn-start", {
     property: "scale",
@@ -198,10 +199,12 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
       clearTimeout(fireLoadingTimeout);
 
       entity.removeAttribute("animation__loader_spawn-start");
+      const [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
 
       if (!entity.getAttribute("animation__spawn-start")) {
         entity.setAttribute("animation__spawn-start", {
           property: "scale",
+          delay: 50,
           dur: 300,
           from: { x: sx / 2, y: sy / 2, z: sz / 2 },
           to: { x: sx, y: sy, z: sz },
@@ -331,6 +334,64 @@ export function injectCustomShaderChunks(obj) {
 export function getPromotionTokenForFile(fileId) {
   return window.APP.store.state.uploadPromotionTokens.find(upload => upload.fileId === fileId);
 }
+
+export function generateMeshBVH(object3D) {
+  object3D.traverse(obj => {
+    // note that we might already have a bounds tree if this was a clone of an object with one
+    const hasBufferGeometry = obj.isMesh && obj.geometry.isBufferGeometry;
+    const hasBoundsTree = hasBufferGeometry && obj.geometry.boundsTree;
+    if (hasBufferGeometry && !hasBoundsTree) {
+      // we can't currently build a BVH for geometries with groups, because the groups rely on the
+      // existing ordering of the index, which we kill as a result of building the tree
+      if (obj.geometry.groups && obj.geometry.groups.length) {
+        console.warn("BVH construction not supported for geometry with groups; raycasting may suffer.");
+      } else {
+        const geo = obj.geometry;
+        const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
+        // only bother using memory and time making a BVH if there are a reasonable number of tris,
+        // and if there are too many it's too painful and large to tolerate doing it (at least until
+        // we put this in a web worker)
+        if (triCount > 1000 && triCount < 1000000) {
+          geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 30 });
+          geo.setIndex(geo.boundsTree.index);
+        }
+      }
+    }
+  });
+}
+
+export const traverseMeshesAndAddShapes = (function() {
+  const matrix = new THREE.Matrix4();
+  const inverse = new THREE.Matrix4();
+  const pos = new THREE.Vector3();
+  const quat = new THREE.Quaternion();
+  const scale = new THREE.Vector3();
+  const shapePrefix = "ammo-shape__env";
+  return function(el, type, margin) {
+    const shapes = [];
+    let i = 0;
+    const meshRoot = el.object3DMap.mesh;
+    inverse.getInverse(meshRoot.matrixWorld);
+    meshRoot.traverse(o => {
+      if (o.isMesh && (!THREE.Sky || o.__proto__ != THREE.Sky.prototype)) {
+        o.updateMatrices();
+        matrix.multiplyMatrices(inverse, o.matrixWorld);
+        matrix.decompose(pos, quat, scale);
+        el.setAttribute(shapePrefix + i, {
+          type: type,
+          margin: margin,
+          mergeGeometry: false,
+          offset: { x: pos.x * meshRoot.scale.x, y: pos.y * meshRoot.scale.y, z: pos.z * meshRoot.scale.z },
+          orientation: { x: quat.x, y: quat.y, z: quat.z, w: quat.w }
+        });
+        el.components[shapePrefix + i].setMesh(o);
+        shapes.push(shapePrefix + i);
+        i++;
+      }
+    });
+    return shapes;
+  };
+})();
 
 const hubsSceneRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/scenes\/(\w+)\/?\S*/;
 const hubsRoomRegex = /https?:\/\/(hubs.local(:\d+)?|(smoke-)?hubs.mozilla.com)\/(\w+)\/?\S*/;

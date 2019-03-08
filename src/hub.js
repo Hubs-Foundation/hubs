@@ -56,7 +56,6 @@ import "./components/networked-avatar";
 import "./components/media-views";
 import "./components/pinch-to-move";
 import "./components/pitch-yaw-rotator";
-import "./components/auto-scale-cannon-physics-body";
 import "./components/position-at-box-shape-border";
 import "./components/pinnable";
 import "./components/pin-networked-object-button";
@@ -96,7 +95,7 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
-import { proxiedUrlFor } from "./utils/media-utils";
+import { generateMeshBVH, traverseMeshesAndAddShapes, proxiedUrlFor } from "./utils/media-utils";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
@@ -134,8 +133,18 @@ const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileV
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
-import "aframe-physics-system";
-import "aframe-physics-extras";
+const SHAPES = require("aframe-physics-system/src/constants").SHAPES;
+const Ammo = require("ammo.js/builds/ammo.wasm.js");
+const AmmoWasm = require("ammo.js/builds/ammo.wasm.wasm");
+window.Ammo = Ammo.bind(undefined, {
+  locateFile(path) {
+    if (path.endsWith(".wasm")) {
+      return AmmoWasm;
+    }
+    return path;
+  }
+});
+require("aframe-physics-system");
 import "super-hands";
 import "./components/super-networked-interactable";
 import "./components/networked-counter";
@@ -277,6 +286,7 @@ async function updateUIForHub(hub) {
     .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
 }
 
+let shapes = null;
 async function updateEnvironmentForHub(hub) {
   let sceneUrl;
   let isLegacyBundle; // Deprecated
@@ -315,6 +325,16 @@ async function updateEnvironmentForHub(hub) {
     environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
 
     environmentScene.appendChild(environmentEl);
+
+    environmentEl.addEventListener(
+      "model-loaded",
+      () => {
+        //TODO: check if the environment was made with spoke to determine if a shape should be added
+        shapes = traverseMeshesAndAddShapes(environmentEl, SHAPES.MESH, 0.1);
+        generateMeshBVH(environmentEl.object3D);
+      },
+      { once: true }
+    );
   } else {
     // Change environment
     environmentEl = environmentScene.childNodes[0];
@@ -329,7 +349,14 @@ async function updateEnvironmentForHub(hub) {
           // We've already entered, so move to new spawn point once new environment is loaded
           environmentEl.addEventListener(
             "model-loaded",
-            () => document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint(),
+            () => {
+              while (shapes.length > 0) {
+                environmentEl.removeAttribute(shapes.pop());
+              }
+              shapes = traverseMeshesAndAddShapes(environmentEl, SHAPES.MESH, 0.1);
+              generateMeshBVH(environmentEl.object3D);
+              document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint();
+            },
             { once: true }
           );
         }
@@ -509,6 +536,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const scene = document.querySelector("a-scene");
   scene.removeAttribute("keyboard-shortcuts"); // Remove F and ESC hotkeys from aframe
   scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
+
+  scene.addEventListener("loaded", () => {
+    const physicsSystem = scene.systems.physics;
+    physicsSystem.setDebug(isDebug || physicsSystem.data.debug);
+  });
 
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);

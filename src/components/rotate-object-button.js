@@ -39,7 +39,7 @@ AFRAME.registerComponent("rotate-button", {
         return;
       }
       if (this.targetEl.components.body) {
-        this.targetEl.setAttribute("body", { type: "static" });
+        this.targetEl.setAttribute("ammo-body", { type: "static" });
       }
       this.rotateSystem = this.rotateSystem || AFRAME.scenes[0].systems["rotate-selected-object"];
       this.rotateSystem.startRotate(this.targetEl.object3D, hand, this.data);

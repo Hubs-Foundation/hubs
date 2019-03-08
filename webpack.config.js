@@ -182,6 +182,17 @@ module.exports = (env, argv) => ({
         }
       },
       {
+        test: /\.(wasm)$/,
+        type: "javascript/auto",
+        use: {
+          loader: "file-loader",
+          options: {
+            outputPath: "assets/wasm",
+            name: "[name]-[hash].[ext]"
+          }
+        }
+      },
+      {
         test: /\.(glsl)$/,
         use: { loader: "raw-loader" }
       }
@@ -319,5 +330,8 @@ module.exports = (env, argv) => ({
         POSTGREST_SERVER: process.env.POSTGREST_SERVER
       })
     })
-  ]
+  ],
+  node: {
+    fs: "empty"
+  }
 });
