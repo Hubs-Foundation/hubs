@@ -163,13 +163,6 @@
   }
 }
 
-:local(.presence-log-on-top) {
-  bottom: auto;
-  top: 64px;
-  margin-top: 12px;
-  flex-direction: reverse;
-}
-
 :local(.presence-log-spawn) {
   position: absolute;
   top: 0;

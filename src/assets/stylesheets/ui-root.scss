@@ -343,17 +343,6 @@ body.vr-mode {
   }
 }
 
-:local(.message-entry-on-top) {
-  :local(.invite-container), :local(.top-hud), :local(.presence-info), :local(.settings-info) {
-    display: none;
-  }
-
-  :local(.message-entry-in-room) {
-    top: 20px;
-    bottom: auto;
-  }
-}
-
 :local(.bottom-tip) {
   @extend %tip-bubble;
   bottom: 80px;

@@ -19,8 +19,9 @@ export function handleTextFieldFocus(target) {
     // the text box is blurred by the browser.
 
     isExitingFullscreenDueToFocus = true;
-    screenfull.exit();
-    setTimeout(() => target.focus(), 200);
+    screenfull.exit().then(() => {
+      target.focus();
+    });
   }
 
   if (!isMobile) target.select();
