@@ -80,6 +80,10 @@ paths.actions.leftHand.index = "/actions/leftHand/indexDown";
 paths.actions.leftHand.middleRingPinky = "/actions/leftHand/middleRingPinkyDown";
 paths.actions.camera = {};
 paths.actions.camera.exitMirror = "/actions/cameraExitMirror";
+paths.haptics = {};
+paths.haptics.actuators = {};
+paths.haptics.actuators.left = "/haptics/actuators/left";
+paths.haptics.actuators.right = "/haptics/actuators/right";
 
 paths.device = {};
 paths.device.mouse = {};
