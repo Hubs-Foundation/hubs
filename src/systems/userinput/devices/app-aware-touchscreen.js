@@ -7,6 +7,14 @@ const MOVE_CAMERA_JOB = "MOVE CAMERA";
 const FIRST_PINCHER_JOB = "FIRST PINCHER";
 const SECOND_PINCHER_JOB = "SECOND PINCHER";
 
+const TAP_PATHS = {
+  1: paths.device.touchscreen.tap1,
+  2: paths.device.touchscreen.tap2,
+  3: paths.device.touchscreen.tap3,
+  4: paths.device.touchscreen.tap4,
+  5: paths.device.touchscreen.tap5
+};
+
 function distance(x1, y1, x2, y2) {
   const dx = x1 - x2;
   const dy = y1 - y2;
@@ -68,15 +76,15 @@ export class AppAwareTouchscreenDevice {
       switch (assignment.job) {
         case MOVE_CURSOR_JOB:
         case MOVE_CAMERA_JOB:
-          // If grab was being delayed, we should fire the initial grab to ensure
-          // clicks will work.
-          if (assignment.framesUntilGrab >= 0) {
+          // If grab was being delayed, we should fire the initial grab and also delay the unassignment
+          // to ensure we write at least two frames with the grab down (since the action set will change)
+          // and otherwise we'd not see the falling xform.
+          if (assignment.framesUntilGrab >= -1) {
             assignment.framesUntilGrab = 0;
-            setTimeout(() => this.end(touch));
-            return;
+            assignment.framesUntilUnassign = 2;
+          } else {
+            unassign(assignment.touch, assignment.job, this.assignments);
           }
-
-          unassign(assignment.touch, assignment.job, this.assignments);
 
           break;
         case FIRST_PINCHER_JOB:
@@ -170,10 +178,16 @@ export class AppAwareTouchscreenDevice {
       return;
     }
 
-    if (this.assignments.length === 0) {
+    const isFirstTouch = this.assignments.length === 0;
+    const isSecondTouch = this.assignments.length === 1;
+    const isThirdTouch = this.assignments.length === 2;
+
+    const hasSecondPinch = !!findByJob(SECOND_PINCHER_JOB, this.assignments);
+
+    if (isFirstTouch || (isThirdTouch && hasSecondPinch)) {
       let assignment;
 
-      // First touch
+      // First touch or third touch and other two fingers were pinching
       if (shouldMoveCursor(touch, this.raycaster)) {
         assignment = assign(touch, MOVE_CURSOR_JOB, this.assignments);
 
@@ -196,25 +210,47 @@ export class AppAwareTouchscreenDevice {
         (touch.clientX / window.innerWidth) * 2 - 1,
         -(touch.clientY / window.innerHeight) * 2 + 1
       );
-    } else if (this.assignments.length === 1) {
-      // Second touch
-      const previousAssignment = this.assignments[0];
-      unassign(previousAssignment.touch, previousAssignment.job, this.assignments);
-      const first = assign(previousAssignment.touch, FIRST_PINCHER_JOB, this.assignments);
-      first.clientX = previousAssignment.clientX;
-      first.clientY = previousAssignment.clientY;
+    } else if (isSecondTouch || isThirdTouch) {
+      const cursorJob = findByJob(MOVE_CURSOR_JOB, this.assignments);
 
-      const second = assign(touch, SECOND_PINCHER_JOB, this.assignments);
-      second.clientX = touch.clientX;
-      second.clientY = touch.clientY;
+      if (isSecondTouch && cursorJob && cursorJob.framesUntilGrab < 0) {
+        // The second touch is happening after grab activated, so assign this touch to first pinch.
+        const first = assign(touch, FIRST_PINCHER_JOB, this.assignments);
+        first.clientX = touch.clientX;
+        first.clientY = touch.clientY;
+      } else {
+        // Second or third touch, but third touch only if not pinching
+        if (isSecondTouch) {
+          // The second touch is happening before the grab activated, so re-assign the first
+          // to the first pinch, and effectively cancel the grab.
+          const previousAssignment = this.assignments[0];
+          unassign(previousAssignment.touch, previousAssignment.job, this.assignments);
+          const first = assign(previousAssignment.touch, FIRST_PINCHER_JOB, this.assignments);
+          first.clientX = previousAssignment.clientX;
+          first.clientY = previousAssignment.clientY;
+        }
 
-      const initialDistance = distance(first.clientX, first.clientY, second.clientX, second.clientY);
+        const first = findByJob(FIRST_PINCHER_JOB, this.assignments);
 
-      this.pinch = {
-        initialDistance,
-        currentDistance: initialDistance,
-        delta: 0
-      };
+        if (!first) {
+          const first = assign(touch, FIRST_PINCHER_JOB, this.assignments);
+          first.clientX = touch.clientX;
+          first.clientY = touch.clientY;
+          return;
+        } else {
+          const second = assign(touch, SECOND_PINCHER_JOB, this.assignments);
+          second.clientX = touch.clientX;
+          second.clientY = touch.clientY;
+
+          const initialDistance = distance(first.clientX, first.clientY, second.clientX, second.clientY);
+
+          this.pinch = {
+            initialDistance,
+            currentDistance: initialDistance,
+            delta: 0
+          };
+        }
+      }
     }
 
     if (this.pendingTap.maxTouchCount === 0 && this.assignments.length > 0) {
@@ -280,6 +316,14 @@ export class AppAwareTouchscreenDevice {
       const assignment = findByJob(MOVE_CURSOR_JOB, this.assignments);
       frame.setValueType(path.isTouchingGrabbable, assignment.framesUntilGrab <= 0);
       assignment.framesUntilGrab--;
+
+      if (assignment.framesUntilUnassign >= 0) {
+        if (assignment.framesUntilUnassign === 0) {
+          unassign(assignment.touch, assignment.job, this.assignments);
+        }
+
+        assignment.framesUntilUnassign--;
+      }
     }
 
     if (hasCameraJob) {
@@ -293,8 +337,7 @@ export class AppAwareTouchscreenDevice {
 
     if (this.tapIndexToWriteNextFrame) {
       // write to tap-X path if we had an X-fingered tap
-      const path = paths.device.touchscreen[`tap${this.tapIndexToWriteNextFrame}`];
-
+      const path = TAP_PATHS[this.tapIndexToWriteNextFrame];
       if (path) {
         frame.setValueType(path, true);
       }

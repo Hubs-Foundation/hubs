@@ -424,7 +424,7 @@
                 >
                     <a-entity class="unmute-button">
                         <a-entity mixin="rounded-text-button" slice9="width: 0.4" unmute-video-button> </a-entity>
-                        <a-entity text=" value:un-mute; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                        <a-entity text=" value:un-mute; width:2; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>
@@ -754,11 +754,14 @@
                 src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf;
                 spawnEvent: spawn_pen;
                 superHand: #player-right-controller;
-                cursorSuperHand: #cursor;"
+                cursorSuperHand: #cursor;
+                useCustomSpawnScale: true;
+                spawnScale: 0.5, 0.5, 0.5;
+                "
         ></a-entity>
 
-        <a-entity matrix-auto-update class="vr-notice" follow-in-lower-fov="target: #player-camera; offset: 0 0 -0.8; angle: 39;" visible="false">
-            <a-entity hoverable slice9="width: 0.9; height: 0.2; left: 64; top: 64; right: 66; bottom: 66; opacity: 1.0; src: #action-button" 
+        <a-entity matrix-auto-update class="vr-notice" follow-in-fov="target: #player-camera; offset: 0 0 -0.8; angle: 39;" visible="false">
+            <a-entity hoverable slice9="width: 0.9; height: 0.2; left: 64; top: 64; right: 66; bottom: 66; opacity: 1.0; src: #button"
                 text-button="
                     textHoverColor: #fff;
                     textColor: #fff;

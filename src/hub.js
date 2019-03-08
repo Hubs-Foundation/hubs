@@ -72,7 +72,7 @@ import "./components/emit-state-change";
 import "./components/action-to-event";
 import "./components/emit-scene-event-on-remove";
 import "./components/stop-event-propagation";
-import "./components/follow-in-lower-fov";
+import "./components/follow-in-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
@@ -539,23 +539,47 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.APP.hubChannel = hubChannel;
 
   scene.addEventListener("enter-vr", () => {
+    // If VR headset is activated, refreshing page will fire vrdisplayactivate
+    // which puts A-Frame in VR mode, so exit VR mode whenever it is attempted
+    // to be entered and we haven't entered the room yet.
+    if (scene.is("vr-mode") && !scene.is("vr-entered")) {
+      console.log("Pre-emptively exiting VR mode.");
+      scene.exitVR();
+      return true;
+    }
+
     document.body.classList.add("vr-mode");
 
     // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
     if (!isMobile || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
       document.body.classList.add("vr-mode-stretch");
     }
-
-    if (!scene.is("entered")) {
-      // If VR headset is activated, refreshing page will fire vrdisplayactivate
-      // which puts A-Frame in VR mode, so exit VR mode whenever it is attempted
-      // to be entered and we haven't entered the room yet.
-      console.log("Pre-emptively exiting VR mode.");
-      scene.exitVR();
-    }
   });
 
-  scene.addEventListener("exit-vr", () => document.body.classList.remove("vr-mode"));
+  // HACK A-Frame 0.9.0 seems to fail to wire up vrdisplaypresentchange early enough
+  // to catch presentation state changes and recognize that an HMD is presenting on startup.
+  window.addEventListener(
+    "vrdisplaypresentchange",
+    () => {
+      if (scene.is("vr-entered")) return;
+      if (scene.is("vr-mode")) return;
+
+      const device = AFRAME.utils.device.getVRDisplay();
+
+      if (device && device.isPresenting) {
+        if (!scene.is("vr-mode")) {
+          console.warn("Hit A-Frame bug where VR display is presenting but A-Frame has not entered VR mode.");
+          scene.enterVR();
+        }
+      }
+    },
+    { once: true }
+  );
+
+  scene.addEventListener("exit-vr", () => {
+    document.body.classList.remove("vr-mode");
+    document.body.classList.remove("vr-mode-stretch");
+  });
 
   registerNetworkSchemas();
 
