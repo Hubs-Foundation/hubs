@@ -202,7 +202,8 @@ AFRAME.registerSystem("userinput", {
     this.activeSets = new Set([sets.global]);
     this.pendingSetChanges = [];
     this.xformStates = new Map();
-    this.activeDevices = new ArrayBackedSet().add(new HudDevice());
+    this.activeDevices = new ArrayBackedSet();
+    this.activeDevices.add(new HudDevice());
 
     if (!(AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR())) {
       this.activeDevices.add(new MouseDevice());

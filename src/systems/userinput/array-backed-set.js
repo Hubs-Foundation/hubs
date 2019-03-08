@@ -1,3 +1,4 @@
+// You might prefer to use this over a Set because iterating over a set allocates memory
 export function ArrayBackedSet() {
   return {
     items: [],
@@ -8,7 +9,6 @@ export function ArrayBackedSet() {
       if (!this.has(item)) {
         this.items.push(item);
       }
-      return this;
     },
     delete(item) {
       const index = this.items.indexOf(item);
