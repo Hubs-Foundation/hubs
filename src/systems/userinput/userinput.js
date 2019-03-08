@@ -34,6 +34,7 @@ import { resolveActionSets } from "./resolve-action-sets";
 import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
 import { detectInHMD, getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "../../utils/vr-caps-detect";
+import { ArrayBackedSet } from "./array-backed-set";
 
 function intersection(setA, setB) {
   const _intersection = new Set();
@@ -201,16 +202,16 @@ AFRAME.registerSystem("userinput", {
     this.activeSets = new Set([sets.global]);
     this.pendingSetChanges = [];
     this.xformStates = new Map();
-    this.activeDevices = [new HudDevice()];
+    this.activeDevices = new ArrayBackedSet().add(new HudDevice());
 
     if (!(AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR())) {
-      this.activeDevices.push(new MouseDevice());
-      this.activeDevices.push(new AppAwareMouseDevice());
-      this.activeDevices.push(new KeyboardDevice());
+      this.activeDevices.add(new MouseDevice());
+      this.activeDevices.add(new AppAwareMouseDevice());
+      this.activeDevices.add(new KeyboardDevice());
     } else if (!detectInHMD()) {
-      this.activeDevices.push(new AppAwareTouchscreenDevice());
-      this.activeDevices.push(new KeyboardDevice());
-      this.activeDevices.push(new GyroDevice());
+      this.activeDevices.add(new AppAwareTouchscreenDevice());
+      this.activeDevices.add(new KeyboardDevice());
+      this.activeDevices.add(new GyroDevice());
     }
 
     this.registeredMappings = new Set([keyboardDebuggingBindings]);
@@ -236,8 +237,8 @@ AFRAME.registerSystem("userinput", {
         console.log("Using VR bindings.");
         this.registeredMappings.delete(isMobile ? touchscreenUserBindings : keyboardMouseUserBindings);
         // add mappings for all active VR input devices
-        for (let i = 0; i < this.activeDevices.length; i++) {
-          const activeDevice = this.activeDevices[i];
+        for (let i = 0; i < this.activeDevices.items.length; i++) {
+          const activeDevice = this.activeDevices.items[i];
           const mapping = vrGamepadMappings.get(activeDevice.constructor);
           mapping && this.registeredMappings.add(mapping);
         }
@@ -254,15 +255,15 @@ AFRAME.registerSystem("userinput", {
       } else {
         console.log("Using Non-VR bindings.");
         // remove mappings for all active VR input devices
-        for (let i = 0; i < this.activeDevices.length; i++) {
-          const activeDevice = this.activeDevices[i];
+        for (let i = 0; i < this.activeDevices.items.length; i++) {
+          const activeDevice = this.activeDevices.items[i];
           this.registeredMappings.delete(vrGamepadMappings.get(activeDevice.constructor));
         }
         this.registeredMappings.add(isMobile ? touchscreenUserBindings : keyboardMouseUserBindings);
       }
 
-      for (let i = 0; i < this.activeDevices.length; i++) {
-        const activeDevice = this.activeDevices[i];
+      for (let i = 0; i < this.activeDevices.items.length; i++) {
+        const activeDevice = this.activeDevices.items[i];
         const mapping = nonVRGamepadMappings.get(activeDevice.constructor);
         mapping && this.registeredMappings.add(mapping);
       }
@@ -272,8 +273,8 @@ AFRAME.registerSystem("userinput", {
 
     const gamepadConnected = e => {
       let gamepadDevice;
-      for (let i = 0; i < this.activeDevices.length; i++) {
-        const activeDevice = this.activeDevices[i];
+      for (let i = 0; i < this.activeDevices.items.length; i++) {
+        const activeDevice = this.activeDevices.items[i];
         if (activeDevice.gamepad && activeDevice.gamepad.index === e.gamepad.index) {
           console.warn("connected already fired for gamepad", e.gamepad);
           return; // multiple connect events without a disconnect event
@@ -298,20 +299,19 @@ AFRAME.registerSystem("userinput", {
         gamepadDevice = new GamepadDevice(e.gamepad);
       }
 
-      this.activeDevices.push(gamepadDevice);
+      this.activeDevices.add(gamepadDevice);
 
       updateBindingsForVRMode();
     };
 
     const gamepadDisconnected = e => {
-      for (let i = 0; i < this.activeDevices.length; i++) {
-        const device = this.activeDevices[i];
+      for (let i = 0; i < this.activeDevices.items.length; i++) {
+        const device = this.activeDevices.items[i];
         if (device.gamepad && device.gamepad.index === e.gamepad.index) {
           this.registeredMappings.delete(
             vrGamepadMappings.get(device.constructor) || nonVRGamepadMappings.get(device.constructor)
           );
-          this.activeDevices[i] = this.activeDevices[this.activeDevices.length - 1];
-          this.activeDevices.pop();
+          this.activeDevices.delete(device);
           return;
         }
       }
@@ -364,8 +364,8 @@ AFRAME.registerSystem("userinput", {
       this.masked = masked;
     }
 
-    for (let i = 0; i < this.activeDevices.length; i++) {
-      this.activeDevices[i].write(this.frame);
+    for (let i = 0; i < this.activeDevices.items.length; i++) {
+      this.activeDevices.items[i].write(this.frame);
     }
 
     for (let i = 0; i < this.sortedBindings.length; i++) {
