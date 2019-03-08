@@ -57,7 +57,6 @@ AFRAME.GLTFModelPlus.registerComponent("water", "water");
 AFRAME.GLTFModelPlus.registerComponent("scale-audio-feedback", "scale-audio-feedback");
 AFRAME.GLTFModelPlus.registerComponent("animation-mixer", "animation-mixer");
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
-AFRAME.GLTFModelPlus.registerComponent("heightfield", "heightfield");
 AFRAME.GLTFModelPlus.registerComponent(
   "box-collider",
   "ammo-shape",
