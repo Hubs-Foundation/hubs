@@ -71,7 +71,7 @@ AFRAME.registerComponent("media-loader", {
         autoGenerateShape: true,
         type: shapeType,
         mergeGeometry: true,
-        offset: center.negate()
+        offset: center.negate().multiply(this.el.object3D.scale)
       });
     };
   })(),
