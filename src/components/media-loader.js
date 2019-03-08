@@ -13,9 +13,7 @@ import { addAnimationComponents } from "../utils/animation";
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 
-const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
-  SHAPES = PHYSICS_CONSTANTS.SHAPES,
-  TYPES = PHYSICS_CONSTANTS.TYPES;
+const SHAPES = require("aframe-physics-system/src/constants").SHAPES;
 
 const gltfLoader = new THREE.GLTFLoader();
 let loadingObject;
