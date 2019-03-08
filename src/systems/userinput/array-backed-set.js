@@ -22,13 +22,3 @@ export function ArrayBackedSet() {
     }
   };
 }
-
-export function countIntersectionsForArrayBackedSets(a, b) {
-  let count = 0;
-  for (let i = 0; i < a.items.length; i++) {
-    if (b.has(a.items[i])) {
-      count += 1;
-    }
-  }
-  return count;
-}
