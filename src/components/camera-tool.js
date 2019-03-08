@@ -231,9 +231,23 @@ AFRAME.registerComponent("camera-tool", {
         }
         renderer.readRenderTargetPixels(this.renderTarget, 0, 0, width, height, this.snapPixels);
         pixelsToPNG(this.snapPixels, width, height).then(file => {
-          const { entity, orientation } = addMedia(file, "#interactable-media", undefined, true);
-          entity.object3D.position.copy(this.el.object3D.position).add(new THREE.Vector3(0, -0.5, 0));
+          const { entity, orientation } = addMedia(file, "#interactable-media", undefined, false);
+
+          const pos = this.el.object3D.position;
+
+          entity.object3D.position.set(pos.x, pos.y, pos.z);
           entity.object3D.rotation.copy(this.el.object3D.rotation);
+          entity.object3D.rotateY(Math.PI);
+          entity.object3D.scale.set(0.1, 0.1, 0.1);
+
+          entity.setAttribute("animation__photo_pos", {
+            property: "position",
+            dur: 800,
+            from: { x: pos.x, y: pos.y, z: pos.z },
+            to: { x: pos.x, y: pos.y - 0.5, z: pos.z },
+            easing: "easeOutElastic"
+          });
+
           entity.object3D.matrixNeedsUpdate = true;
 
           entity.addEventListener(
