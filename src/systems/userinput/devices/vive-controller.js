@@ -8,6 +8,7 @@ const HAND_OFFSET = new THREE.Matrix4().compose(
   new THREE.Quaternion().setFromEuler(new THREE.Euler(-40 * THREE.Math.DEG2RAD, 0, 0)),
   new THREE.Vector3(1, 1, 1)
 );
+const RAY_ROTATION = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 12);
 
 export class ViveControllerDevice {
   constructor(gamepad) {
@@ -63,7 +64,10 @@ export class ViveControllerDevice {
     rayObject.updateMatrixWorld();
     this.rayObjectRotation.setFromRotationMatrix(rayObject.matrixWorld);
     this.pose.position.setFromMatrixPosition(rayObject.matrixWorld);
-    this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
+    this.pose.direction
+      .set(0, 0, -1)
+      .applyQuaternion(RAY_ROTATION)
+      .applyQuaternion(this.rayObjectRotation);
     this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
     frame.setPose(this.path.pose, this.pose);
 
