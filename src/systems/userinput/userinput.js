@@ -34,14 +34,16 @@ import { resolveActionSets } from "./resolve-action-sets";
 import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
 import { detectInHMD, getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "../../utils/vr-caps-detect";
-import { ArrayBackedSet, countIntersectionsForArrayBackedSets } from "./array-backed-set";
 
-const copyAToB = (a, b) => {
-  for (let i = 0; i < a.length; i++) {
-    b[i] = a[i];
+function intersection(setA, setB) {
+  const _intersection = new Set();
+  for (const elem of setB) {
+    if (setA.has(elem)) {
+      _intersection.add(elem);
+    }
   }
-  b.length = a.length;
-};
+  return _intersection;
+}
 
 const satisfiesPath = (binding, path) => {
   for (const key in binding.dest) {
@@ -69,32 +71,28 @@ const satisfiedBy = (binding, bindings) => {
   return true;
 };
 
-const dependencySort = (function() {
+function dependencySort(mappings) {
   const unsorted = [];
-  return function dependencySort(mappings, sorted) {
-    sorted.length = 0;
-    unsorted.length = 0;
-
-    for (const mapping of mappings) {
-      for (const setName in mapping) {
-        for (const binding of mapping[setName]) {
-          unsorted.push(binding);
-        }
-      }
-    }
-
-    while (unsorted.length > 0) {
-      const binding = unsorted.shift();
-      if (satisfiedBy(binding, sorted)) {
-        sorted.push(binding);
-      } else {
+  for (const mapping of mappings) {
+    for (const setName in mapping) {
+      for (const binding of mapping[setName]) {
         unsorted.push(binding);
       }
     }
+  }
 
-    return sorted;
-  };
-})();
+  const sorted = [];
+  while (unsorted.length > 0) {
+    const binding = unsorted.shift();
+    if (satisfiedBy(binding, sorted)) {
+      sorted.push(binding);
+    } else {
+      unsorted.push(binding);
+    }
+  }
+
+  return sorted;
+}
 
 function canMask(masker, masked) {
   if (masker.priority === undefined) {
@@ -116,7 +114,8 @@ function canMask(masker, masked) {
   return false;
 }
 
-function computeMasks(bindings, masks) {
+function computeMasks(bindings) {
+  const masks = [];
   for (let row = 0; row < bindings.length; row++) {
     for (let col = 0; col < bindings.length; col++) {
       masks[row] = masks[row] || [];
@@ -125,6 +124,7 @@ function computeMasks(bindings, masks) {
       }
     }
   }
+  return masks;
 }
 
 function isActive(binding, sets) {
@@ -136,17 +136,13 @@ function isActive(binding, sets) {
   return false;
 }
 
-function computeExecutionStrategy(sortedBindings, masks, activeSets, actives, masked) {
-  actives.length = 0;
+function computeExecutionStrategy(sortedBindings, masks, activeSets) {
+  const actives = [];
   for (let row = 0; row < sortedBindings.length; row++) {
     actives[row] = isActive(sortedBindings[row], activeSets);
   }
 
-  for (let i = 0; i < masked.length; i++) {
-    masked[i].length = 0;
-  }
-  masked.length = sortedBindings.length;
-
+  const masked = [];
   for (let row = 0; row < sortedBindings.length; row++) {
     for (let col = 0; col < sortedBindings.length; col++) {
       masked[row] = masked[row] || [];
@@ -155,11 +151,13 @@ function computeExecutionStrategy(sortedBindings, masks, activeSets, actives, ma
       }
     }
   }
+
+  return { actives, masked };
 }
 
 AFRAME.registerSystem("userinput", {
   get(path) {
-    if (!this.frame) return undefined;
+    if (!this.frame) return;
     return this.frame.get(path);
   },
 
@@ -199,25 +197,20 @@ AFRAME.registerSystem("userinput", {
       }
     };
 
-    this.activeSets = new ArrayBackedSet().add(sets.global);
-    this.prevActiveSets = new ArrayBackedSet();
+    this.prevActiveSets = new Set();
+    this.activeSets = new Set([sets.global]);
     this.pendingSetChanges = [];
     this.xformStates = new Map();
-    this.activeDevices = new ArrayBackedSet().add(new HudDevice());
-    this.prevActives = [];
-    this.prevMasked = [];
-    this.sortedBindings = [];
-    this.prevSortedBindings = [];
-    this.masks = [];
+    this.activeDevices = [new HudDevice()];
 
     if (!(AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR())) {
-      this.activeDevices.add(new MouseDevice());
-      this.activeDevices.add(new AppAwareMouseDevice());
-      this.activeDevices.add(new KeyboardDevice());
+      this.activeDevices.push(new MouseDevice());
+      this.activeDevices.push(new AppAwareMouseDevice());
+      this.activeDevices.push(new KeyboardDevice());
     } else if (!detectInHMD()) {
-      this.activeDevices.add(new AppAwareTouchscreenDevice());
-      this.activeDevices.add(new KeyboardDevice());
-      this.activeDevices.add(new GyroDevice());
+      this.activeDevices.push(new AppAwareTouchscreenDevice());
+      this.activeDevices.push(new KeyboardDevice());
+      this.activeDevices.push(new GyroDevice());
     }
 
     this.registeredMappings = new Set([keyboardDebuggingBindings]);
@@ -243,8 +236,8 @@ AFRAME.registerSystem("userinput", {
         console.log("Using VR bindings.");
         this.registeredMappings.delete(isMobile ? touchscreenUserBindings : keyboardMouseUserBindings);
         // add mappings for all active VR input devices
-        for (let i = 0; i < this.activeDevices.items.length; i++) {
-          const activeDevice = this.activeDevices.items[i];
+        for (let i = 0; i < this.activeDevices.length; i++) {
+          const activeDevice = this.activeDevices[i];
           const mapping = vrGamepadMappings.get(activeDevice.constructor);
           mapping && this.registeredMappings.add(mapping);
         }
@@ -261,15 +254,15 @@ AFRAME.registerSystem("userinput", {
       } else {
         console.log("Using Non-VR bindings.");
         // remove mappings for all active VR input devices
-        for (let i = 0; i < this.activeDevices.items.length; i++) {
-          const activeDevice = this.activeDevices.items[i];
+        for (let i = 0; i < this.activeDevices.length; i++) {
+          const activeDevice = this.activeDevices[i];
           this.registeredMappings.delete(vrGamepadMappings.get(activeDevice.constructor));
         }
         this.registeredMappings.add(isMobile ? touchscreenUserBindings : keyboardMouseUserBindings);
       }
 
-      for (let i = 0; i < this.activeDevices.items.length; i++) {
-        const activeDevice = this.activeDevices.items[i];
+      for (let i = 0; i < this.activeDevices.length; i++) {
+        const activeDevice = this.activeDevices[i];
         const mapping = nonVRGamepadMappings.get(activeDevice.constructor);
         mapping && this.registeredMappings.add(mapping);
       }
@@ -279,8 +272,8 @@ AFRAME.registerSystem("userinput", {
 
     const gamepadConnected = e => {
       let gamepadDevice;
-      for (let i = 0; i < this.activeDevices.items.length; i++) {
-        const activeDevice = this.activeDevices.items[i];
+      for (let i = 0; i < this.activeDevices.length; i++) {
+        const activeDevice = this.activeDevices[i];
         if (activeDevice.gamepad && activeDevice.gamepad.index === e.gamepad.index) {
           console.warn("connected already fired for gamepad", e.gamepad);
           return; // multiple connect events without a disconnect event
@@ -305,21 +298,21 @@ AFRAME.registerSystem("userinput", {
         gamepadDevice = new GamepadDevice(e.gamepad);
       }
 
-      this.activeDevices.add(gamepadDevice);
+      this.activeDevices.push(gamepadDevice);
 
       updateBindingsForVRMode();
     };
 
     const gamepadDisconnected = e => {
       let index = -1;
-      for (let i = 0; i < this.activeDevices.items.length; i++) {
-        const device = this.activeDevices.items[i];
+      for (let i = 0; i < this.activeDevices.length; i++) {
+        const device = this.activeDevices[i];
         if (device.gamepad && device.gamepad.index === e.gamepad.index) {
           this.registeredMappings.delete(
             vrGamepadMappings.get(device.constructor) || nonVRGamepadMappings.get(device.constructor)
           );
-          this.activeDevices.items[i] = this.activeDevices.items[this.activeDevices.items.length - 1];
-          this.activeDevices.items.pop();
+          this.activeDevices[i] = this.activeDevices[this.activeDevices.length - 1];
+          this.activeDevices.pop();
           return;
         }
       }
@@ -344,45 +337,36 @@ AFRAME.registerSystem("userinput", {
     const registeredMappingsChanged = this.registeredMappingsChanged;
     if (registeredMappingsChanged) {
       this.registeredMappingsChanged = false;
-      copyAToB(this.sortedBindings, this.prevSortedBindings);
-      dependencySort(this.registeredMappings, this.sortedBindings);
-      if (this.prevSortedBindings.length === 0) {
-        // First time
-        copyAToB(this.sortedBindings, this.prevSortedBindings);
+      this.prevSortedBindings = this.sortedBindings;
+      this.sortedBindings = dependencySort(this.registeredMappings);
+      if (!this.prevSortedBindings) {
+        this.prevSortedBindings = this.sortedBindings;
       }
-      computeMasks(this.sortedBindings, this.masks);
+      this.masks = computeMasks(this.sortedBindings);
     }
 
     this.prevActiveSets.clear();
-    for (let i = 0; i < this.activeSets.items.length; i++) {
-      const set = this.activeSets.items[i];
-      this.prevActiveSets.add(set);
+    for (const item of this.activeSets) {
+      this.prevActiveSets.add(item);
     }
     resolveActionSets();
-    for (let i = 0; i < this.pendingSetChanges.length; i++) {
-      const { set, value } = this.pendingSetChanges[i];
-      if (value) {
-        this.activeSets.add(set);
-      } else {
-        this.activeSets.delete(set);
-      }
+    for (const { set, value } of this.pendingSetChanges) {
+      this.activeSets[value ? "add" : "delete"](set);
     }
     const activeSetsChanged =
-      this.prevActiveSets.items.length !== this.activeSets.items.length ||
-      countIntersectionsForArrayBackedSets(this.prevActiveSets, this.activeSets) !== this.activeSets.items.length;
+      this.prevActiveSets.size !== this.activeSets.size ||
+      intersection(this.prevActiveSets, this.activeSets).size !== this.activeSets.size;
     this.pendingSetChanges.length = 0;
-    if (!this.actives && !this.masked) {
-      this.actives = [];
-      this.masked = [];
-      computeExecutionStrategy(this.sortedBindings, this.masks, this.activeSets, this.actives, this.masked);
-    } else if (registeredMappingsChanged || activeSetsChanged) {
-      copyAToB(this.actives, this.prevActives);
-      copyAToB(this.masked, this.prevMasked);
-      computeExecutionStrategy(this.sortedBindings, this.masks, this.activeSets, this.actives, this.masked);
+    if (registeredMappingsChanged || activeSetsChanged || (!this.actives && !this.masked)) {
+      this.prevActives = this.actives;
+      this.prevMasked = this.masked;
+      const { actives, masked } = computeExecutionStrategy(this.sortedBindings, this.masks, this.activeSets);
+      this.actives = actives;
+      this.masked = masked;
     }
 
-    for (let i = 0; i < this.activeDevices.items.length; i++) {
-      this.activeDevices.items[i].write(this.frame);
+    for (let i = 0; i < this.activeDevices.length; i++) {
+      this.activeDevices[i].write(this.frame);
     }
 
     for (let i = 0; i < this.sortedBindings.length; i++) {
