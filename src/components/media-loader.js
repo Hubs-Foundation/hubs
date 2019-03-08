@@ -31,16 +31,6 @@ const fetchMaxContentIndex = url => {
   return fetch(url).then(r => parseInt(r.headers.get("x-max-content-index")));
 };
 
-const getNumMeshes = sceneRoot => {
-  let meshes = 0;
-  sceneRoot.traverse(o => {
-    if (o.isMesh && (!THREE.Sky || o.__proto__ != THREE.Sky.prototype)) {
-      meshes++;
-    }
-  });
-  return meshes;
-};
-
 const boundingBox = new THREE.Box3();
 
 AFRAME.registerComponent("media-loader", {
