@@ -14,6 +14,17 @@ export const xforms = {
       }
     };
   },
+  scaleExp: function(scalar, exp = 1) {
+    return function scale(frame, src, dest) {
+      if (frame[src.value] !== undefined) {
+        if (exp === 1) {
+          frame[dest.value] = frame[src.value] * scalar;
+        } else {
+          frame[dest.value] = Math.pow(frame[src.value], exp) * scalar;
+        }
+      }
+    };
+  },
   deadzone: function(deadzoneSize) {
     return function deadzone(frame, src, dest) {
       frame[dest.value] = Math.abs(frame[src.value]) < deadzoneSize ? 0 : frame[src.value];

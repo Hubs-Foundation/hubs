@@ -164,7 +164,28 @@ function createVideoTexture(url, contentType) {
       videoEl.onerror = reject;
     }
 
-    videoEl.addEventListener("canplay", () => resolve(texture), { once: true });
+    let hasResolved = false;
+
+    const resolveOnce = () => {
+      if (hasResolved) return;
+      hasResolved = true;
+      resolve(texture);
+    };
+
+    videoEl.addEventListener("canplay", resolveOnce, { once: true });
+
+    // HACK: Sometimes iOS fails to fire the canplay event, so we poll for the video dimensions to appear instead.
+    if (isIOS) {
+      const poll = () => {
+        if ((texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width)) {
+          resolveOnce();
+        } else {
+          setTimeout(poll, 500);
+        }
+      };
+
+      poll();
+    }
   });
 }
 

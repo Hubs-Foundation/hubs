@@ -163,7 +163,7 @@ function getOrientation(file, callback) {
 }
 
 let interactableId = 0;
-export const addMedia = (src, template, contentOrigin, resolve = false, resize = false) => {
+export const addMedia = (src, template, contentOrigin, resolve = false, resize = false, customScale) => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
@@ -177,7 +177,8 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
     fileIsOwned: !needsToBeUploaded
   });
 
-  const [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
+  const scaleSource = customScale || entity.object3D.scale;
+  const [sx, sy, sz] = [scaleSource.x, scaleSource.y, scaleSource.z];
 
   entity.setAttribute("animation__loader_spawn-start", {
     property: "scale",
@@ -199,12 +200,10 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
       clearTimeout(fireLoadingTimeout);
 
       entity.removeAttribute("animation__loader_spawn-start");
-      const [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
 
       if (!entity.getAttribute("animation__spawn-start")) {
         entity.setAttribute("animation__spawn-start", {
           property: "scale",
-          delay: 50,
           dur: 300,
           from: { x: sx / 2, y: sy / 2, z: sz / 2 },
           to: { x: sx, y: sy, z: sz },

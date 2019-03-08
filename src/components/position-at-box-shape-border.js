@@ -134,6 +134,8 @@ AFRAME.registerComponent("position-at-box-shape-border", {
       let targetRotation = this.dirs[0].rotation;
       let targetCameraDot = -1.1;
 
+      this.el.object3D.updateMatrices();
+
       for (let i = 0; i < this.dirs.length; i++) {
         const dir = this.dirs[i].dir;
         const halfExtentStr = this.dirs[i].halfExtent;
