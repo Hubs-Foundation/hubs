@@ -504,6 +504,7 @@
             segments-height="9"
             ammo-body="type: kinematic; collisionFlags: 4; collisionFilterMask: 3; scaleAutoUpdate: false; activationState: 4;"
             ammo-shape="type: sphere; sphereRadius: 0.02; autoGenerateShape: false;"
+            haptic-feedback="path: /haptics/actuators/right"
             super-hands="
                 colliderEvent: raycaster-intersection;
                 colliderEndEvent: raycaster-intersection-cleared;
@@ -661,7 +662,7 @@
                 hand-controls2="left"
                 teleporter="start: /actions/leftHand/startTeleport; confirm: /actions/leftHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
-                haptic-feedback
+                haptic-feedback="path: /haptics/actuators/left"
                 mixin="controller-super-hands"
                 ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4;"
                 ammo-shape="type: box; autoGenerateShape: false; scaleAutoUpdate: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
@@ -678,7 +679,7 @@
                 hand-controls2="right"
                 teleporter="start: /actions/rightHand/startTeleport; confirm: /actions/rightHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
-                haptic-feedback
+                haptic-feedback="path: /haptics/actuators/right"
                 mixin="controller-super-hands"
                 ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4;"
                 ammo-shape="type: box; autoGenerateShape: false; scaleAutoUpdate: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
