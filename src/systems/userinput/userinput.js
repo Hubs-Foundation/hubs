@@ -304,7 +304,6 @@ AFRAME.registerSystem("userinput", {
     };
 
     const gamepadDisconnected = e => {
-      let index = -1;
       for (let i = 0; i < this.activeDevices.length; i++) {
         const device = this.activeDevices[i];
         if (device.gamepad && device.gamepad.index === e.gamepad.index) {

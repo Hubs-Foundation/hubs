@@ -117,7 +117,7 @@ paths.device.keyboard = {
   map: new Map(),
   key: function(k) {
     let path = this.map.get(k);
-    if (!!path) {
+    if (path) {
       return path;
     }
     path = `/device/keyboard/${k.toLowerCase()}`;
@@ -147,7 +147,6 @@ paths.device.xbox = {
   }
 };
 
-const oculusgo = "/device/oculusgo/";
 paths.device.oculusgo = {
   // TODO remove these in favor of the direct accessors
   button: buttonName => ({
