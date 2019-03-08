@@ -144,28 +144,28 @@ const oculusgo = "/device/oculusgo/";
 paths.device.oculusgo = {
   // TODO remove these in favor of the direct accessors
   button: buttonName => ({
-    pressed: `${oculusgo}button/${buttonName}/pressed`,
-    touched: `${oculusgo}button/${buttonName}/touched`,
-    value: `${oculusgo}button/${buttonName}/value`
+    pressed: `/device/oculusgo/button/${buttonName}/pressed`,
+    touched: `/device/oculusgo/button/${buttonName}/touched`,
+    value: `/device/oculusgo/button/${buttonName}/value`
   }),
   axis: axisName => {
-    return `${oculusgo}axis/${axisName}`;
+    return `/device/oculusgo/axis/${axisName}`;
   },
   //
   trigger: {
-    pressed: `${oculusgo}button/trigger/pressed`,
-    touched: `${oculusgo}button/trigger/touched`,
-    value: `${oculusgo}button/trigger/value`
+    pressed: "/device/oculusgo/button/trigger/pressed",
+    touched: "/device/oculusgo/button/trigger/touched",
+    value: "/device/oculusgo/button/trigger/value"
   },
   touchpad: {
-    pressed: `${oculusgo}button/touchpad/pressed`,
-    touched: `${oculusgo}button/touchpad/touched`,
-    value: `${oculusgo}button/touchpad/value`,
-    axisX: `${oculusgo}axis/touchpadX`,
-    axisY: `${oculusgo}axis/touchpadY`
+    pressed: "/device/oculusgo/button/touchpad/pressed",
+    touched: "/device/oculusgo/button/touchpad/touched",
+    value: "/device/oculusgo/button/touchpad/value",
+    axisX: "/device/oculusgo/axis/touchpadX",
+    axisY: "/device/oculusgo/axis/touchpadY"
   },
-  pose: `${oculusgo}pose`,
-  matrix: `${oculusgo}matrix`,
+  pose: "/device/oculusgo/pose",
+  matrix: "/device/oculusgo/matrix",
   v: name => {
     return `/vars/oculusgo/${name}`;
   }
