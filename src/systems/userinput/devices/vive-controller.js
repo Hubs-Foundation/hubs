@@ -27,11 +27,6 @@ export class ViveControllerDevice {
     this.pose = new Pose();
     this.rayObjectRotation = new THREE.Quaternion();
     this.path = paths.device.vive[gamepad.hand || "right"];
-    if (!gamepad.hand) {
-      console.warn("gamepad detected without hand specified");
-    } else {
-      this.selector = `[super-hands]#player-${gamepad.hand}-controller`;
-    }
     this.sittingToStandingMatrix = new THREE.Matrix4().makeTranslation(0, 1.6, 0);
     copySittingToStandingTransform(this.sittingToStandingMatrix);
 

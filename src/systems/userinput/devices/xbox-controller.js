@@ -32,14 +32,14 @@ export class XboxControllerDevice {
   write(frame) {
     if (this.gamepad.connected) {
       this.buttonMap.forEach(b => {
-        const path = this.path.button(b.name);
+        const path = paths.device.xbox.button(b.name);
         const button = this.gamepad.buttons[b.buttonId];
         frame.setValueType(path.pressed, !!button.pressed);
         frame.setValueType(path.touched, !!button.touched);
         frame.setValueType(path.value, button.value);
       });
       this.axisMap.forEach(axis => {
-        frame.setValueType(this.path.axis(axis.name), this.gamepad.axes[axis.axisId]);
+        frame.setValueType(paths.device.xbox.axis(axis.name), this.gamepad.axes[axis.axisId]);
       });
     }
   }

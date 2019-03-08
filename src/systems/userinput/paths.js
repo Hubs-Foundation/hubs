@@ -114,8 +114,15 @@ paths.device.hud = {};
 paths.device.hud.penButton = "/device/hud/penButton";
 
 paths.device.keyboard = {
-  key: key => {
-    return `/device/keyboard/${key.toLowerCase()}`;
+  map: new Map(),
+  key: function(k) {
+    let path = this.map.get(k);
+    if (!!path) {
+      return path;
+    }
+    path = `/device/keyboard/${k.toLowerCase()}`;
+    this.map.set(k, path);
+    return path;
   }
 };
 
