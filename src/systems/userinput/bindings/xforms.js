@@ -15,11 +15,11 @@ export const xforms = {
   },
   scaleExp: function(scalar, exp = 1) {
     return function scale(frame, src, dest) {
-      if (frame[src.value] !== undefined) {
+      if (frame.get(src.value) !== undefined) {
         if (exp === 1) {
-          frame[dest.value] = frame[src.value] * scalar;
+          frame.setValueType(dest.value, frame.get(src.value) * scalar);
         } else {
-          frame[dest.value] = Math.pow(frame[src.value], exp) * scalar;
+          frame.setValueType(dest.value, Math.pow(frame.get(src.value), exp) * scalar);
         }
       }
     };
