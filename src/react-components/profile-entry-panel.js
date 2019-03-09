@@ -147,9 +147,9 @@ class ProfileEntryPanel extends Component {
               onChange={e => this.setState({ avatarId: e.target.value })}
             />
             <div className={styles.info}>
-              Resources for creating custom avatar models can be found
+              <FormattedMessage id="profile.info" />
               <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
-                here
+                <FormattedMessage id="profile.info-link" />
               </a>
             </div>
           </div>
@@ -183,21 +183,21 @@ class ProfileEntryPanel extends Component {
                 onClick={() => this.setState({ avatarType: "legacy", avatarId: "botdefault" })}
                 className={classNames({ selected: this.state.avatarType === "legacy" })}
               >
-                Default
+                <FormattedMessage id="profile.tabs.legacy" />
               </a>
               {(this.props.customSkinEnabled || this.state.avatarType === "skinnable") && (
                 <a
                   onClick={() => this.setState({ avatarType: "skinnable", avatarId: null })}
                   className={classNames({ selected: this.state.avatarType === "skinnable" })}
                 >
-                  Custom Skin
+                  <FormattedMessage id="profile.tabs.skinnable" />
                 </a>
               )}
               <a
                 onClick={() => this.setState({ avatarType: "url", avatarId: "" })}
                 className={classNames({ selected: this.state.avatarType === "url" })}
               >
-                Custom Model
+                <FormattedMessage id="profile.tabs.url" />
               </a>
             </div>
             {panelBody}

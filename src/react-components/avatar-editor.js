@@ -231,9 +231,9 @@ export default class AvatarEditor extends Component {
           {/* {this.fileField("roughness_map", "Roughness Map", "image/\*", true)} */}
 
           <div className={styles.info}>
-            Resources for creating custom avatar skins can be found
+            <FormattedMessage id="avatar-editor.info" />
             <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
-              here
+              <FormattedMessage id="avatar-editor.info-link" />
             </a>
           </div>
         </div>
