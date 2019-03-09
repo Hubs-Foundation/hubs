@@ -55,7 +55,7 @@ import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
-import { markTipScopeFinished } from "../systems/tips.js";
+import { handleTipClose } from "../systems/tips.js";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
@@ -1526,7 +1526,10 @@ class UIRoot extends Component {
             {entered &&
               this.props.activeTips.bottom && (
                 <div className={styles.bottomTip}>
-                  <button className={styles.tipCancel} onClick={() => markTipScopeFinished("bottom")}>
+                  <button
+                    className={styles.tipCancel}
+                    onClick={() => handleTipClose(this.props.activeTips.bottom)}
+                  >
                     <i>
                       <FontAwesomeIcon icon={faTimes} />
                     </i>
