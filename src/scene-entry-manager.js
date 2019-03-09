@@ -12,6 +12,8 @@ const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ex
 import { addMedia, proxiedUrlFor, getPromotionTokenForFile } from "./utils/media-utils";
 import { ObjectContentOrigins } from "./object-types";
 
+const isIOS = AFRAME.utils.device.isIOS();
+
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, availableVREntryTypes) {
     this.hubChannel = hubChannel;
@@ -411,7 +413,7 @@ export default class SceneEntryManager {
       shareVideoMediaStream({
         video: {
           mediaSource: "camera",
-          width: 720,
+          width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
           frameRate: 30
         }
       });
