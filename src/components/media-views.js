@@ -390,12 +390,33 @@ AFRAME.registerComponent("media-video", {
   },
 
   togglePlaying() {
+    // See onPauseStateChanged for note about iOS
+    if (isIOS && this.video.paused && NAF.utils.isMine(this.networkedEl)) {
+      this.video.play();
+      return;
+    }
+
     if (this.networkedEl && (NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl))) {
       this.tryUpdateVideoPlaybackState(!this.data.videoPaused);
     }
   },
 
   onPauseStateChange() {
+    // iOS Safari will auto-pause other videos if one is manually started (not autoplayed.) So, to keep things
+    // easy to reason about, we *never* broadcast pauses from iOS.
+    //
+    // if an iOS safari user pauses and plays a video they'll pause all the other videos,
+    // which isn't great, but this check will at least ensure they don't pause those videos
+    // for all other users in the room! Of course, if they go and hit play on those videos auto-paused,
+    // they will become the timekeeper, and will seek everyone to where the video was auto-paused.
+    //
+    // This specific case will diverge the network schema and the video player state, so that
+    // this.data.videoPaused is false (so others will keep playing it) but our local player will
+    // have stopped. So we deal with this special case as well when we press the play button.
+    if (isIOS && this.video.paused && NAF.utils.isMine(this.networkedEl)) {
+      return;
+    }
+
     this.el.setAttribute("media-video", "videoPaused", this.video.paused);
 
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
