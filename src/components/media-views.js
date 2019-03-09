@@ -330,6 +330,7 @@ AFRAME.registerComponent("media-video", {
     this.togglePlaying = this.togglePlaying.bind(this);
 
     this.lastUpdate = 0;
+    this.videoMutedAt = 0;
 
     this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", dirs: ["forward", "back"] });
     this.el.components["hover-menu__video"].getHoverMenu().then(menu => {
@@ -556,6 +557,10 @@ AFRAME.registerComponent("media-video", {
     }
 
     this.updatePlaybackState(true);
+
+    if (this.video.muted) {
+      this.videoMutedAt = performance.now();
+    }
 
     this.el.emit("video-loaded");
   },
