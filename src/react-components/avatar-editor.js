@@ -9,7 +9,10 @@ import { bumpCacheVersion } from "../assets/avatars/avatars";
 
 import styles from "../assets/stylesheets/profile.scss";
 
-const BOT_PARENT_AVATAR = "xf9xkIY";
+const BOT_PARENT_AVATAR =
+  process.env.RETICULUM_SERVER === "hubs.mozilla.com" || process.env.RETICULUM_SERVER === "smoke-hubs.mozilla.com"
+    ? "gZ6gPvQ"
+    : "xf9xkIY";
 
 export default class AvatarEditor extends Component {
   static propTypes = {
@@ -173,7 +176,7 @@ export default class AvatarEditor extends Component {
         id={`avatar-${name}`}
         type="text"
         disabled={disabled}
-        value={this.state.avatar[name]}
+        value={this.state.avatar[name] || ""}
         onChange={e => this.setState({ avatar: { ...this.state.avatar, [name]: e.target.value } })}
       />
     </div>
