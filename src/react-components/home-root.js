@@ -107,19 +107,6 @@ class HomeRoot extends Component {
     this.setState({ dialog: null });
   };
 
-  showJoinUsDialog = () => this.showDialog(JoinUsDialog);
-
-  showReportDialog = () => this.showDialog(ReportDialog);
-
-  showUpdatesDialog = () =>
-    this.showDialog(UpdatesDialog, {
-      onSubmittedEmail: () => {
-        this.showDialog(
-          <DialogContainer>Great! Please check your e-mail to confirm your subscription.</DialogContainer>
-        );
-      }
-    });
-
   showSignInDialog = () => {
     this.showDialog(SignInDialog, {
       message: messages["sign-in.prompt"],
@@ -302,8 +289,7 @@ class HomeRoot extends Component {
                     <a
                       className={styles.link}
                       rel="noopener noreferrer"
-                      href="#"
-                      onClick={this.onLinkClicked(this.showJoinUsDialog)}
+                      href="/#/joinus"
                     >
                       <FormattedMessage id="home.join_us" />
                     </a>
@@ -312,8 +298,7 @@ class HomeRoot extends Component {
                     <a
                       className={styles.link}
                       rel="noopener noreferrer"
-                      href="#"
-                      onClick={this.onLinkClicked(this.showUpdatesDialog)}
+                      href="/#/update"
                     >
                       <FormattedMessage id="home.get_updates" />
                     </a>
@@ -322,8 +307,7 @@ class HomeRoot extends Component {
                     <a
                       className={styles.link}
                       rel="noopener noreferrer"
-                      href="#"
-                      onClick={this.onLinkClicked(this.showReportDialog)}
+                      href="/#/report"
                     >
                       <FormattedMessage id="home.report_issue" />
                     </a>

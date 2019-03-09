@@ -53,7 +53,7 @@ const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathna
     <Router>
       <div>
         <Route exact path="/" component={root} />
-        <Route path="/joinus" render={() => <JoinUsDialog />} />
+        <Route path="/joinus" render={() => <CloseButton><JoinUsDialog /></CloseButton>} />
         <Route path="/update" render={() => <UpdatesDialog />} />
         <Route path="/report" render={() => <ReportDialog />} />
       </div>
@@ -61,3 +61,10 @@ const sceneId = qs.get("scene_id") || (pathname.startsWith("/scenes/") && pathna
   );
   ReactDOM.render(router, document.getElementById("home-root"));
 })();
+class CloseButton extends React.Component{
+  render(){
+    return (
+      <button>CLick</button>
+    );
+  }
+}
