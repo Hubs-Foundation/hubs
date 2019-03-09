@@ -68,11 +68,11 @@ class LinkRoot extends Component {
     if (this.state.entered.length >= this.maxAllowedChars()) return;
     const newChars = `${this.state.entered}${ch}`;
 
-    if (newChars.length === this.maxAllowedChars()) {
-      this.attemptLookup(newChars);
-    }
-
-    this.setState({ entered: newChars });
+    this.setState({ entered: newChars }, () => {
+      if (this.state.entered.length === this.maxAllowedChars()) {
+        this.attemptLookup(this.state.entered);
+      }
+    });
   };
 
   removeChar = () => {
@@ -175,7 +175,11 @@ class LinkRoot extends Component {
                       this.setState({ isAlphaMode: true });
                     }
 
-                    this.setState({ entered: ev.target.value.toUpperCase() });
+                    this.setState({ entered: ev.target.value.toUpperCase() }, () => {
+                      if (this.state.entered.length === this.maxAllowedChars()) {
+                        this.attemptLookup(this.state.entered);
+                      }
+                    });
                   }}
                 />
               </div>
