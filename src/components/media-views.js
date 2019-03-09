@@ -622,6 +622,11 @@ AFRAME.registerComponent("media-video", {
   remove() {
     this.cleanUp();
 
+    const sound = this.el.getObject3D("sound");
+
+    if (sound) {
+      sound.disconnect();
+    }
     if (this.video) {
       this.video.removeEventListener("pause", this.onPauseStateChange);
       this.video.removeEventListener("play", this.onPauseStateChange);
