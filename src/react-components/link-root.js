@@ -31,8 +31,23 @@ class LinkRoot extends Component {
     failedAtLeastOnce: false
   };
 
+  buttonRefs = {};
+
   componentDidMount = () => {
     document.addEventListener("keydown", this.handleKeyDown);
+
+    // https://github.com/facebook/react/issues/9809#issuecomment-413978405
+    if (hasTouchEvents) {
+      for (const [name, ref] of Object.entries(this.buttonRefs)) {
+        if (name === "remove") {
+          ref.ontouchstart = () => this.removeChar();
+        } else if (name === "toggle") {
+          ref.ontouchstart = () => this.toggleMode();
+        } else {
+          ref.ontouchstart = () => this.addToEntry(name);
+        }
+      }
+    }
   };
 
   componentWillUnmount = () => {
@@ -215,7 +230,7 @@ class LinkRoot extends Component {
                     onClick={() => {
                       if (!hasTouchEvents) this.addToEntry(d);
                     }}
-                    onTouchStart={() => this.addToEntry(d)}
+                    ref={r => (this.buttonRefs[d.toString()] = r)}
                   >
                     {d}
                   </button>
@@ -225,7 +240,7 @@ class LinkRoot extends Component {
                 <WithHoverSound>
                   <button
                     className={classNames(styles.keypadButton, styles.keypadToggleMode)}
-                    onTouchStart={() => this.toggleMode()}
+                    ref={r => (this.buttonRefs["toggle"] = r)}
                     onClick={() => {
                       if (!hasTouchEvents) this.toggleMode();
                     }}
@@ -241,7 +256,7 @@ class LinkRoot extends Component {
                   <button
                     disabled={this.state.entered.length === this.maxAllowedChars()}
                     className={classNames(styles.keypadButton, styles.keypadZeroButton)}
-                    onTouchStart={() => this.addToEntry(0)}
+                    ref={r => (this.buttonRefs["0"] = r)}
                     onClick={() => {
                       if (!hasTouchEvents) this.addToEntry(0);
                     }}
@@ -254,7 +269,7 @@ class LinkRoot extends Component {
                 <button
                   disabled={this.state.entered.length === 0 || this.state.entered.length === this.maxAllowedChars()}
                   className={classNames(styles.keypadButton, styles.keypadBackspace)}
-                  onTouchStart={() => this.removeChar()}
+                  ref={r => (this.buttonRefs["remove"] = r)}
                   onClick={() => {
                     if (!hasTouchEvents) this.removeChar();
                   }}
