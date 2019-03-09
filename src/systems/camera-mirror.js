@@ -85,7 +85,10 @@ AFRAME.registerSystem("camera-mirror", {
         playerHead.updateMatrixWorld(true, true);
       }
 
+      let playerHudWasVisible;
+
       if (playerHud) {
+        playerHudWasVisible = playerHud.visible;
         playerHud.visible = false;
       }
       renderer.vr.enabled = false;
@@ -100,7 +103,7 @@ AFRAME.registerSystem("camera-mirror", {
         playerHead.updateMatrixWorld(true);
       }
       if (playerHud) {
-        playerHud.visible = true;
+        playerHud.visible = playerHudWasVisible;
       }
     };
   }

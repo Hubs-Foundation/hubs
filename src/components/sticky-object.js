@@ -1,8 +1,10 @@
 import { getLastWorldPosition, getLastWorldQuaternion } from "../utils/three-utils";
 
-/* global THREE, CANNON, AFRAME */
+//TODO: decide on what these collision filters should actuallly be called, and move these somewhere else
+const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
+/* global THREE, AFRAME */
 AFRAME.registerComponent("sticky-object", {
-  dependencies: ["body"],
+  dependencies: ["ammo-body"],
 
   schema: {
     autoLockOnLoad: { default: false },
@@ -39,7 +41,7 @@ AFRAME.registerComponent("sticky-object", {
     if (this.el.components.networked && !NAF.utils.isMine(this.el)) return;
 
     this.locked = locked;
-    this.el.setAttribute("body", { type: locked ? "static" : "dynamic" });
+    this.el.setAttribute("ammo-body", { type: locked ? "kinematic" : "dynamic" });
   },
 
   _onBodyLoaded() {
@@ -51,22 +53,24 @@ AFRAME.registerComponent("sticky-object", {
   _onRelease() {
     // Happens if the object is still being held by another hand
     if (this.el.is("grabbed")) return;
-
     if (
       this.data.autoLockOnRelease &&
       (this.data.autoLockSpeedLimit === 0 ||
-        this.el.body.velocity.lengthSquared() < this.data.autoLockSpeedLimit * this.data.autoLockSpeedLimit)
+        this.el.components["ammo-body"].getVelocity().length() < this.data.autoLockSpeedLimit)
     ) {
       this.setLocked(true);
     }
-    this.el.body.collisionResponse = true;
+
+    this.el.setAttribute("ammo-body", { collisionFilterGroup: COLLISION_LAYERS.DYNAMIC_OBJECTS });
   },
 
   _onGrab() {
     if (!this.el.components.grabbable || this.el.components.grabbable.data.maxGrabbers === 0) return;
 
+    this.el.setAttribute("ammo-body", {
+      collisionFilterGroup: this.locked ? COLLISION_LAYERS.STICKY_OBJECTS : COLLISION_LAYERS.DYNAMIC_OBJECTS
+    });
     this.setLocked(false);
-    this.el.body.collisionResponse = false;
   },
 
   remove() {
@@ -88,10 +92,11 @@ AFRAME.registerComponent("sticky-object-zone", {
     getLastWorldPosition(this.el.object3D, this.worldPosition);
     getLastWorldQuaternion(this.el.object3D, this.worldQuaternion);
 
-    const dir = new THREE.Vector3(0, 0, 5).applyQuaternion(this.el.object3D.quaternion);
-    this.bootImpulsePosition = new CANNON.Vec3(0, 0, 0);
-    this.bootImpulse = new CANNON.Vec3();
-    this.bootImpulse.copy(dir);
+    //TODO: support this with ammo
+    // const dir = new THREE.Vector3(0, 0, 5).applyQuaternion(this.el.object3D.quaternion);
+    // this.bootImpulsePosition = new CANNON.Vec3(0, 0, 0);
+    // this.bootImpulse = new CANNON.Vec3();
+    // this.bootImpulse.copy(dir);
 
     this._onCollisions = this._onCollisions.bind(this);
     this.el.addEventListener("collisions", this._onCollisions);
@@ -125,9 +130,10 @@ AFRAME.registerComponent("sticky-object-zone", {
     stickyObject.stuckTo = this;
 
     if (this.stuckObject && NAF.utils.isMine(this.stuckObject.el)) {
-      const el = this.stuckObject.el;
+      //TODO: support this with ammo
+      // const el = this.stuckObject.el;
       this._unstickObject();
-      el.body.applyImpulse(this.bootImpulse, this.bootImpulsePosition);
+      // el.body.applyImpulse(this.bootImpulse, this.bootImpulsePosition);
     }
 
     this.stuckObject = stickyObject;

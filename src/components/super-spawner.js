@@ -4,6 +4,8 @@ import { waitForEvent } from "../utils/async-utils";
 import { ObjectContentOrigins } from "../object-types";
 import { getLastWorldPosition, getLastWorldQuaternion } from "../utils/three-utils";
 
+const COLLISION_FLAGS = require("aframe-physics-system/src/constants").COLLISION_FLAGS;
+
 let nextGrabId = 0;
 /**
  * Spawns networked objects when grabbed or when a specified event is fired.
@@ -149,6 +151,8 @@ AFRAME.registerComponent("super-spawner", {
 
     getLastWorldPosition(hand.object3D, entity.object3D.position);
     entity.object3D.matrixNeedsUpdate = true;
+    // Call syncToPhysics so that updated transforms aren't immediately overwritten
+    entity.components["ammo-body"].syncToPhysics();
 
     if (!using6DOF) {
       for (let i = 0; i < this.data.grabEvents.length; i++) {
@@ -193,11 +197,18 @@ AFRAME.registerComponent("super-spawner", {
       if (this.data.centerSpawnedObject) {
         entity.body.position.copy(hand.object3D.position);
       }
+
       for (let i = 0; i < this.data.grabEvents.length; i++) {
         hand.emit(this.data.releaseEvents[i]);
         hand.emit(this.data.grabEvents[i], { targetEntity: entity });
       }
     }
+
+    entity.object3D.scale.copy(this.data.useCustomSpawnScale ? this.data.spawnScale : this.el.object3D.scale);
+    entity.object3D.matrixNeedsUpdate = true;
+
+    // Call syncToPhysics so that updated transforms aren't immediately overwritten
+    entity.components["ammo-body"].syncToPhysics();
 
     this.activateCooldown();
   },
@@ -212,9 +223,11 @@ AFRAME.registerComponent("super-spawner", {
     if (this.data.spawnCooldown > 0) {
       this.el.setAttribute("visible", false);
       this.el.classList.remove("interactable");
+      this.el.setAttribute("ammo-body", { collisionFlags: COLLISION_FLAGS.NO_CONTACT_RESPONSE });
       this.cooldownTimeout = setTimeout(() => {
         this.el.setAttribute("visible", true);
         this.el.classList.add("interactable");
+        this.el.setAttribute("ammo-body", { collisionFlags: COLLISION_FLAGS.STATIC_OBJECT });
         this.cooldownTimeout = null;
       }, this.data.spawnCooldown * 1000);
     }

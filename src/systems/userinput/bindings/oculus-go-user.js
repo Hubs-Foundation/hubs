@@ -5,6 +5,10 @@ import { addSetsToBindings } from "./utils";
 
 export default function generate3DOFTriggerBindings(device) {
   const touchpad = device.v("touchpad");
+  const touchpadButton = device.button("touchpad");
+  const triggerButton = device.button("trigger");
+  const touchpadX = device.axis("touchpadX");
+  const touchpadY = device.axis("touchpadY");
   const touchpadRising = device.v("touchpad/rising");
   const touchpadFalling = device.v("touchpad/falling");
   const triggerRising = device.v("trigger/rising");
@@ -42,21 +46,21 @@ export default function generate3DOFTriggerBindings(device) {
       },
       {
         src: {
-          value: device.button("trigger").pressed
+          value: triggerButton.pressed
         },
         dest: { value: triggerRising },
         xform: xforms.rising
       },
       {
         src: {
-          value: device.button("trigger").pressed
+          value: triggerButton.pressed
         },
         dest: { value: triggerFalling },
         xform: xforms.falling
       },
       {
         src: {
-          value: device.button("touchpad").pressed
+          value: touchpadButton.pressed
         },
         dest: { value: touchpadRising },
         xform: xforms.rising,
@@ -64,7 +68,7 @@ export default function generate3DOFTriggerBindings(device) {
       },
       {
         src: {
-          value: device.button("touchpad").pressed
+          value: touchpadButton.pressed
         },
         dest: { value: touchpadFalling },
         xform: xforms.falling,
@@ -72,8 +76,8 @@ export default function generate3DOFTriggerBindings(device) {
       },
       {
         src: {
-          x: device.axis("touchpadX"),
-          y: device.axis("touchpadY")
+          x: touchpadX,
+          y: touchpadY
         },
         dest: { value: touchpad },
         xform: xforms.compose_vec2
@@ -99,7 +103,7 @@ export default function generate3DOFTriggerBindings(device) {
       {
         src: {
           value: dpadCenterStrip,
-          bool: device.button("touchpad").pressed
+          bool: touchpadButton.pressed
         },
         dest: {
           value: paths.actions.ensureFrozen
@@ -155,17 +159,17 @@ export default function generate3DOFTriggerBindings(device) {
         xform: xforms.copy
       },
       {
-        src: { value: device.button("touchpad").touched },
+        src: { value: touchpadButton.touched },
         dest: { value: paths.actions.rightHand.thumb },
         xform: xforms.copy
       },
       {
-        src: { value: device.button("trigger").pressed },
+        src: { value: triggerButton.pressed },
         dest: { value: paths.actions.rightHand.index },
         xform: xforms.copy
       },
       {
-        src: { value: device.button("trigger").pressed },
+        src: { value: triggerButton.pressed },
         dest: { value: paths.actions.rightHand.middleRingPinky },
         xform: xforms.copy
       }
@@ -177,8 +181,8 @@ export default function generate3DOFTriggerBindings(device) {
     [sets.cursorHoveringOnVideo]: [
       {
         src: {
-          value: device.axis("touchpadY"),
-          touching: device.button("touchpad").touched
+          value: touchpadY,
+          touching: touchpadButton.touched
         },
         dest: { value: paths.actions.cursor.mediaVolumeMod },
         xform: xforms.touch_axis_scroll(-0.1)
@@ -196,8 +200,8 @@ export default function generate3DOFTriggerBindings(device) {
       },
       {
         src: {
-          value: device.axis("touchpadY"),
-          touching: device.button("touchpad").touched
+          value: touchpadY,
+          touching: touchpadButton.touched
         },
         dest: { value: paths.actions.cursor.modDelta },
         xform: xforms.touch_axis_scroll()
@@ -239,8 +243,8 @@ export default function generate3DOFTriggerBindings(device) {
       },
       {
         src: {
-          value: device.axis("touchpadX"),
-          touching: device.button("touchpad").touched
+          value: touchpadX,
+          touching: touchpadButton.touched
         },
         dest: { value: paths.actions.cursor.scalePenTip },
         xform: xforms.touch_axis_scroll(-0.1)

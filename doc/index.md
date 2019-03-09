@@ -1,14 +1,9 @@
 
 # Component Docs
 - Systems
-  - [app-mode](#systems/app-mode)
   - [exit-on-blur](#systems/exit-on-blur)
   - [personal-space-bubble](#systems/personal-space-bubble)
 - Components
-  - [app-mode](#components/app-mode)
-    - [app-mode-toggle-playing](#components/app-mode/app-mode-toggle-playing)
-    - [app-mode-toggle-attribute](#components/app-mode/app-mode-toggle-attribute)
-    - [app-mode-input-mappings](#components/app-mode/app-mode-input-mappings)
   - [avatar](#components/avatar)
     - [networked-audio-analyser](#components/avatar/networked-audio-analyser)
     - [scale-audio-feedback](#components/avatar/scale-audio-feedback)
@@ -71,14 +66,6 @@
     - [vr-mode-toggle-playing](#components/vr-mode/vr-mode-toggle-playing)
 
 ## Systems
-
-<a name="systems/app-mode"></a>
-#### app-mode
-
-Simple system for keeping track of a modal app state
-
-`src/systems/app-mode.js`
-    
 
 <a name="systems/exit-on-blur"></a>
 #### exit-on-blur
@@ -492,35 +479,6 @@ Toggles the interactivity of a UI entity while the scene is frozen.
 `src/components/visible-while-frozen.js`
           
     
-
-<a name="components/app-mode"></a>
-### app-mode
-      
-<a name="components/app-mode/app-mode-toggle-playing"></a>
-#### app-mode-toggle-playing
-
-Toggle the isPlaying state of a component based on app mode
-
-`src/systems/app-mode.js`
-          
-
-<a name="components/app-mode/app-mode-toggle-attribute"></a>
-#### app-mode-toggle-attribute
-
-Toggle a boolean property of a component based on app mode
-
-`src/systems/app-mode.js`
-          
-
-<a name="components/app-mode/app-mode-input-mappings"></a>
-#### app-mode-input-mappings
-
-Toggle aframe input mappings action set based on app mode
-
-`src/systems/app-mode.js`
-          
-    
-
 <a name="components/vr-mode"></a>
 ### vr-mode
       

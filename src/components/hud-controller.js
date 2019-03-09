@@ -1,5 +1,3 @@
-import { AppModes } from "../systems/app-mode.js";
-
 const TWOPI = Math.PI * 2;
 function deltaAngle(a, b) {
   const p = Math.abs(b - a) % TWOPI;
@@ -27,16 +25,9 @@ AFRAME.registerComponent("hud-controller", {
     this.lookEuler = new THREE.Euler();
   },
 
-  pause() {
-    // TODO: this assumes full control over current app mode reguardless of what else might be manipulating it, this is obviously wrong
-    const AppModeSystem = this.el.sceneEl.systems["app-mode"];
-    AppModeSystem.setMode(AppModes.DEFAULT);
-  },
-
   tick() {
     const hud = this.el.object3D;
     const head = this.data.head.object3D;
-    const sceneEl = this.el.sceneEl;
 
     const { offset, lookCutoff, animRange, yawCutoff, showTip } = this.data;
 
@@ -82,14 +73,5 @@ AFRAME.registerComponent("hud-controller", {
     hud.position.y = (this.isYLocked ? this.lockedHeadPositionY : head.position.y) + offset + (1 - t) * offset;
     hud.rotation.x = (1 - t) * THREE.Math.DEG2RAD * 90;
     hud.matrixNeedsUpdate = true;
-
-    // update the app mode when the HUD locks on or off
-    // TODO: this assumes full control over current app mode reguardless of what else might be manipulating it, this is obviously wrong
-    const AppModeSystem = sceneEl.systems["app-mode"];
-    if (pitch > lookCutoff && AppModeSystem.mode !== AppModes.HUD) {
-      AppModeSystem.setMode(AppModes.HUD);
-    } else if (pitch < lookCutoff && AppModeSystem.mode === AppModes.HUD) {
-      AppModeSystem.setMode(AppModes.DEFAULT);
-    }
   }
 });

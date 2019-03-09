@@ -1,11 +1,14 @@
 /* eslint-disable */
 
-// Modified version of A-Frame's animation component to set matrixNeedsUpdate = true in the 
+// Modified version of A-Frame's animation component to set matrixNeedsUpdate = true in the
 // scenario where the transform changes on an object during an animation.
 //
 // Changes are identified w comment // hubs
+//
+// Bugfix added 3/1/19 - If an animation component is removed before its delay setting, then
+// it erroneously restarts.
 
-var anime = require('animejs');
+var anime = require("animejs");
 var components = AFRAME.components; // hubs
 var registerComponent = AFRAME.registerComponent; // hubs
 //var THREE = require('../lib/three'); // hubs
@@ -20,12 +23,12 @@ var getComponentProperty = utils.entity.getComponentProperty;
 var setComponentProperty = utils.entity.setComponentProperty;
 var splitCache = {};
 
-var TYPE_COLOR = 'color';
-var PROP_POSITION = 'position';
-var PROP_ROTATION = 'rotation';
-var PROP_SCALE = 'scale';
-var STRING_COMPONENTS = 'components';
-var STRING_OBJECT3D = 'object3D';
+var TYPE_COLOR = "color";
+var PROP_POSITION = "position";
+var PROP_ROTATION = "rotation";
+var PROP_SCALE = "scale";
+var STRING_COMPONENTS = "components";
+var STRING_OBJECT3D = "object3D";
 
 /**
  * Animation component for A-Frame using anime.js.
@@ -48,41 +51,45 @@ var STRING_OBJECT3D = 'object3D';
  * @member {object} animation - anime.js instance.
  * @member {boolean} animationIsPlaying - Control if animation is playing.
  */
-module.exports.Component = registerComponent('animation', {
+module.exports.Component = registerComponent("animation", {
   schema: {
-    autoplay: {default: true},
-    delay: {default: 0},
-    dir: {default: ''},
-    dur: {default: 1000},
-    easing: {default: 'easeInQuad'},
-    elasticity: {default: 400},
-    enabled: {default: true},
-    from: {default: ''},
+    autoplay: { default: true },
+    delay: { default: 0 },
+    dir: { default: "" },
+    dur: { default: 1000 },
+    easing: { default: "easeInQuad" },
+    elasticity: { default: 400 },
+    enabled: { default: true },
+    from: { default: "" },
     loop: {
       default: 0,
-      parse: function (value) {
+      parse: function(value) {
         // Boolean or integer.
-        if (value === true || value === 'true') { return true; }
-        if (value === false || value === 'false') { return false; }
+        if (value === true || value === "true") {
+          return true;
+        }
+        if (value === false || value === "false") {
+          return false;
+        }
         return parseInt(value, 10);
       }
     },
-    property: {default: ''},
-    startEvents: {type: 'array'},
-    pauseEvents: {type: 'array'},
-    resumeEvents: {type: 'array'},
-    round: {default: false},
-    to: {default: ''},
-    type: {default: ''},
-    isRawProperty: {default: false}
+    property: { default: "" },
+    startEvents: { type: "array" },
+    pauseEvents: { type: "array" },
+    resumeEvents: { type: "array" },
+    round: { default: false },
+    to: { default: "" },
+    type: { default: "" },
+    isRawProperty: { default: false }
   },
 
   multiple: true,
 
-  init: function () {
+  init: function() {
     var self = this;
 
-    this.eventDetail = {name: this.attrName};
+    this.eventDetail = { name: this.attrName };
     this.time = 0;
 
     this.animation = null;
@@ -101,25 +108,29 @@ module.exports.Component = registerComponent('animation', {
     this.updateConfigForRawColor = this.updateConfigForRawColor.bind(this);
 
     this.config = {
-      complete: function () {
+      complete: function() {
         self.animationIsPlaying = false;
-        self.el.emit('animationcomplete', self.eventDetail, false);
+        self.el.emit("animationcomplete", self.eventDetail, false);
         if (self.id) {
-          self.el.emit('animationcomplete__' + self.id, self.eventDetail, false);
+          self.el.emit("animationcomplete__" + self.id, self.eventDetail, false);
         }
       }
     };
   },
 
-  update: function (oldData) {
+  update: function(oldData) {
     var config = this.config;
     var data = this.data;
 
     this.animationIsPlaying = false;
 
-    if (!this.data.enabled) { return; }
+    if (!this.data.enabled) {
+      return;
+    }
 
-    if (!data.property) { return; }
+    if (!data.property) {
+      return;
+    }
 
     // Base config.
     config.autoplay = false;
@@ -134,29 +145,35 @@ module.exports.Component = registerComponent('animation', {
     this.createAndStartAnimation();
   },
 
-  tick: function (t, dt) {
-    if (!this.animationIsPlaying) { return; }
+  tick: function(t, dt) {
+    if (!this.animationIsPlaying) {
+      return;
+    }
     this.time += dt;
     this.animation.tick(this.time);
   },
 
-  remove: function () {
+  remove: function() {
     this.pauseAnimation();
     this.removeEventListeners();
+    this.cancelDelayedStart(); // hubs
   },
 
-  pause: function () {
+  pause: function() {
     this.paused = true;
     this.pausedWasPlaying = this.animationIsPlaying;
     this.pauseAnimation();
     this.removeEventListeners();
+    this.cancelDelayedStart(); // hubs
   },
 
   /**
    * `play` handler only for resuming scene.
    */
-  play: function () {
-    if (!this.paused) { return; }
+  play: function() {
+    if (!this.paused) {
+      return;
+    }
     this.paused = false;
     this.addEventListeners();
     if (this.pausedWasPlaying) {
@@ -168,7 +185,7 @@ module.exports.Component = registerComponent('animation', {
   /**
    * Start animation from scratch.
    */
-  createAndStartAnimation: function () {
+  createAndStartAnimation: function() {
     var data = this.data;
 
     this.updateConfig();
@@ -176,14 +193,18 @@ module.exports.Component = registerComponent('animation', {
     this.animation = anime(this.config);
 
     this.removeEventListeners();
+    this.cancelDelayedStart(); // hubs
     this.addEventListeners();
 
     // Wait for start events for animation.
-    if (!data.autoplay || data.startEvents && data.startEvents.length) { return; }
+    if (!data.autoplay || (data.startEvents && data.startEvents.length)) {
+      return;
+    }
 
     // Delay animation.
     if (data.delay) {
-      setTimeout(this.beginAnimation, data.delay);
+      // hubs
+      this.delayTimeout = setTimeout(this.beginAnimation, data.delay);
       return;
     }
 
@@ -195,27 +216,29 @@ module.exports.Component = registerComponent('animation', {
    * This is before animation start (including from startEvents).
    * Set to initial state (config.from, time = 0, seekTime = 0).
    */
-  beginAnimation: function () {
+  beginAnimation: function() {
     this.updateConfig();
     this.time = 0;
     this.animationIsPlaying = true;
     this.stopRelatedAnimations();
-    this.el.emit('animationbegin', this.eventDetail, false);
+    this.el.emit("animationbegin", this.eventDetail, false);
   },
 
-  pauseAnimation: function () {
+  pauseAnimation: function() {
     this.animationIsPlaying = false;
   },
 
-  resumeAnimation: function () {
+  resumeAnimation: function() {
     this.animationIsPlaying = true;
   },
 
   /**
    * startEvents callback.
    */
-  onStartEvent: function () {
-    if (!this.data.enabled) { return; }
+  onStartEvent: function() {
+    if (!this.data.enabled) {
+      return;
+    }
 
     this.updateConfig();
     if (this.animation) {
@@ -234,7 +257,7 @@ module.exports.Component = registerComponent('animation', {
   /**
    * rawProperty: true and type: color;
    */
-  updateConfigForRawColor: function () {
+  updateConfigForRawColor: function() {
     var config = this.config;
     var data = this.data;
     var el = this.el;
@@ -246,7 +269,7 @@ module.exports.Component = registerComponent('animation', {
       return;
     }
 
-    from = data.from === '' ? getRawProperty(el, data.property) : data.from;
+    from = data.from === "" ? getRawProperty(el, data.property) : data.from;
     to = data.to;
 
     // Use r/g/b vector for color type.
@@ -257,17 +280,19 @@ module.exports.Component = registerComponent('animation', {
     this.targetsArray.length = 0;
     this.targetsArray.push(from);
     config.targets = this.targetsArray;
-    for (key in to) { config[key] = to[key]; }
+    for (key in to) {
+      config[key] = to[key];
+    }
 
-    config.update = (function () {
+    config.update = (function() {
       var lastValue = {};
-      return function (anim) {
+      return function(anim) {
         var value;
         value = anim.animatables[0].target;
         // For animation timeline.
-        if (value.r === lastValue.r &&
-            value.g === lastValue.g &&
-            value.b === lastValue.b) { return; }
+        if (value.r === lastValue.r && value.g === lastValue.g && value.b === lastValue.b) {
+          return;
+        }
 
         setRawProperty(el, data.property, value, data.type);
       };
@@ -277,7 +302,7 @@ module.exports.Component = registerComponent('animation', {
   /**
    * Stuff property into generic `property` key.
    */
-  updateConfigForDefault: function () {
+  updateConfigForDefault: function() {
     var config = this.config;
     var data = this.data;
     var el = this.el;
@@ -290,11 +315,9 @@ module.exports.Component = registerComponent('animation', {
       return;
     }
 
-    if (data.from === '') {
+    if (data.from === "") {
       // Infer from.
-      from = isRawProperty(data)
-        ? getRawProperty(el, data.property)
-        : getComponentProperty(el, data.property);
+      from = isRawProperty(data) ? getRawProperty(el, data.property) : getComponentProperty(el, data.property);
     } else {
       // Explicit from.
       from = data.from;
@@ -312,30 +335,33 @@ module.exports.Component = registerComponent('animation', {
     }
 
     // Convert booleans to integer to allow boolean flipping.
-    isBoolean = data.to === 'true' || data.to === 'false' ||
-                data.to === true || data.to === false;
+    isBoolean = data.to === "true" || data.to === "false" || data.to === true || data.to === false;
     if (isBoolean) {
-      from = data.from === 'true' || data.from === true ? 1 : 0;
-      to = data.to === 'true' || data.to === true ? 1 : 0;
+      from = data.from === "true" || data.from === true ? 1 : 0;
+      to = data.to === "true" || data.to === true ? 1 : 0;
     }
 
     this.targets.aframeProperty = from;
     config.targets = this.targets;
     config.aframeProperty = to;
-    config.update = (function () {
+    config.update = (function() {
       var lastValue;
 
-      return function (anim) {
+      return function(anim) {
         var value;
         value = anim.animatables[0].target.aframeProperty;
 
         // Need to do a last value check for animation timeline since all the tweening
         // begins simultaenously even if the value has not changed. Also better for perf
         // anyways.
-        if (value === lastValue) { return; }
+        if (value === lastValue) {
+          return;
+        }
         lastValue = value;
 
-        if (isBoolean) { value = value >= 1; }
+        if (isBoolean) {
+          value = value >= 1;
+        }
 
         if (isRawProperty(data)) {
           setRawProperty(el, data.property, value, data.type);
@@ -350,7 +376,7 @@ module.exports.Component = registerComponent('animation', {
    * Extend x/y/z/w onto the config.
    * Update vector by modifying object3D.
    */
-  updateConfigForVector: function () {
+  updateConfigForVector: function() {
     var config = this.config;
     var data = this.data;
     var el = this.el;
@@ -359,9 +385,10 @@ module.exports.Component = registerComponent('animation', {
     var to;
 
     // Parse coordinates.
-    from = data.from !== ''
-      ? utils.coordinates.parse(data.from)  // If data.from defined, use that.
-      : getComponentProperty(el, data.property);  // If data.from not defined, get on the fly.
+    from =
+      data.from !== ""
+        ? utils.coordinates.parse(data.from) // If data.from defined, use that.
+        : getComponentProperty(el, data.property); // If data.from not defined, get on the fly.
     to = utils.coordinates.parse(data.to);
 
     if (data.property === PROP_ROTATION) {
@@ -373,14 +400,15 @@ module.exports.Component = registerComponent('animation', {
     this.targetsArray.length = 0;
     this.targetsArray.push(from);
     config.targets = this.targetsArray;
-    for (key in to) { config[key] = to[key]; }
+    for (key in to) {
+      config[key] = to[key];
+    }
 
     // If animating object3D transformation, run more optimized updater.
-    if (data.property === PROP_POSITION || data.property === PROP_ROTATION ||
-        data.property === PROP_SCALE) {
-      config.update = (function () {
+    if (data.property === PROP_POSITION || data.property === PROP_ROTATION || data.property === PROP_SCALE) {
+      config.update = (function() {
         var lastValue = {};
-        return function (anim) {
+        return function(anim) {
           var value = anim.animatables[0].target;
 
           if (data.property === PROP_SCALE) {
@@ -390,9 +418,9 @@ module.exports.Component = registerComponent('animation', {
           }
 
           // For animation timeline.
-          if (value.x === lastValue.x &&
-              value.y === lastValue.y &&
-              value.z === lastValue.z) { return; }
+          if (value.x === lastValue.x && value.y === lastValue.y && value.z === lastValue.z) {
+            return;
+          }
 
           lastValue.x = value.x;
           lastValue.y = value.y;
@@ -406,16 +434,16 @@ module.exports.Component = registerComponent('animation', {
     }
 
     // Animating some vector.
-    config.update = (function () {
+    config.update = (function() {
       var lastValue = {};
-      return function (anim) {
+      return function(anim) {
         var value = anim.animations[0].target;
 
         // Animate rotation through radians.
         // For animation timeline.
-        if (value.x === lastValue.x &&
-            value.y === lastValue.y &&
-            value.z === lastValue.z) { return; }
+        if (value.x === lastValue.x && value.y === lastValue.y && value.z === lastValue.z) {
+          return;
+        }
         lastValue.x = value.x;
         lastValue.y = value.y;
         lastValue.z = value.z;
@@ -427,14 +455,14 @@ module.exports.Component = registerComponent('animation', {
   /**
    * Update the config before each run.
    */
-  updateConfig: function () {
+  updateConfig: function() {
     var propType;
 
     // Route config type.
     propType = getPropertyType(this.el, this.data.property);
     if (isRawProperty(this.data) && this.data.type === TYPE_COLOR) {
       this.updateConfigForRawColor();
-    } else if (propType === 'vec2' || propType === 'vec3' || propType === 'vec4') {
+    } else if (propType === "vec2" || propType === "vec3" || propType === "vec4") {
       this.updateConfigForVector();
     } else {
       this.updateConfigForDefault();
@@ -444,26 +472,34 @@ module.exports.Component = registerComponent('animation', {
   /**
    * Wait for component to initialize.
    */
-  waitComponentInitRawProperty: function (cb) {
+  waitComponentInitRawProperty: function(cb) {
     var componentName;
     var data = this.data;
     var el = this.el;
     var self = this;
 
-    if (data.from !== '') { return false; }
+    if (data.from !== "") {
+      return false;
+    }
 
-    if (!data.property.startsWith(STRING_COMPONENTS)) { return false; }
+    if (!data.property.startsWith(STRING_COMPONENTS)) {
+      return false;
+    }
 
     componentName = splitDot(data.property)[1];
-    if (el.components[componentName]) { return false; }
+    if (el.components[componentName]) {
+      return false;
+    }
 
-    el.addEventListener('componentinitialized', function wait (evt) {
-      if (evt.detail.name !== componentName) { return; }
+    el.addEventListener("componentinitialized", function wait(evt) {
+      if (evt.detail.name !== componentName) {
+        return;
+      }
       cb();
       // Since the config was created async, create the animation now since we missed it
       // earlier.
       self.animation = anime(self.config);
-      el.removeEventListener('componentinitialized', wait);
+      el.removeEventListener("componentinitialized", wait);
     });
     return true;
   },
@@ -473,20 +509,28 @@ module.exports.Component = registerComponent('animation', {
    * e.g., animation__mouseenter="property: material.opacity"
    *       animation__mouseleave="property: material.opacity"
    */
-  stopRelatedAnimations: function () {
+  stopRelatedAnimations: function() {
     var component;
     var componentName;
     for (componentName in this.el.components) {
       component = this.el.components[componentName];
-      if (componentName === this.attrName) { continue; }
-      if (component.name !== 'animation') { continue; }
-      if (!component.animationIsPlaying) { continue; }
-      if (component.data.property !== this.data.property) { continue; }
+      if (componentName === this.attrName) {
+        continue;
+      }
+      if (component.name !== "animation") {
+        continue;
+      }
+      if (!component.animationIsPlaying) {
+        continue;
+      }
+      if (component.data.property !== this.data.property) {
+        continue;
+      }
       component.animationIsPlaying = false;
     }
   },
 
-  addEventListeners: function () {
+  addEventListeners: function() {
     var data = this.data;
     var el = this.el;
     addEventListeners(el, data.startEvents, this.onStartEvent);
@@ -494,7 +538,7 @@ module.exports.Component = registerComponent('animation', {
     addEventListeners(el, data.resumeEvents, this.resumeAnimation);
   },
 
-  removeEventListeners: function () {
+  removeEventListeners: function() {
     var data = this.data;
     var el = this.el;
     removeEventListeners(el, data.startEvents, this.onStartEvent);
@@ -502,7 +546,15 @@ module.exports.Component = registerComponent('animation', {
     removeEventListeners(el, data.resumeEvents, this.resumeAnimation);
   },
 
-  setColorConfig: function (from, to) {
+  // hubs
+  cancelDelayedStart: function() {
+    if (this.delayTimeout) {
+      clearTimeout(this.delayTimeout);
+      this.delayTimeout = null;
+    }
+  },
+
+  setColorConfig: function(from, to) {
     colorHelperFrom.set(from);
     colorHelperTo.set(to);
     from = this.fromColor;
@@ -520,25 +572,31 @@ module.exports.Component = registerComponent('animation', {
  * Given property name, check schema to see what type we are animating.
  * We just care whether the property is a vector.
  */
-function getPropertyType (el, property) {
+function getPropertyType(el, property) {
   var component;
   var componentName;
   var split;
   var propertyName;
 
-  split = property.split('.');
+  split = property.split(".");
   componentName = split[0];
   propertyName = split[1];
   component = el.components[componentName] || components[componentName];
 
   // Primitives.
-  if (!component) { return null; }
+  if (!component) {
+    return null;
+  }
 
   // Dynamic schema. We only care about vectors anyways.
-  if (propertyName && !component.schema[propertyName]) { return null; }
+  if (propertyName && !component.schema[propertyName]) {
+    return null;
+  }
 
   // Multi-prop.
-  if (propertyName) { return component.schema[propertyName].type; }
+  if (propertyName) {
+    return component.schema[propertyName].type;
+  }
 
   // Single-prop.
   return component.schema.type;
@@ -547,27 +605,27 @@ function getPropertyType (el, property) {
 /**
  * Convert object to radians.
  */
-function toRadians (obj) {
+function toRadians(obj) {
   obj.x = THREE.Math.degToRad(obj.x);
   obj.y = THREE.Math.degToRad(obj.y);
   obj.z = THREE.Math.degToRad(obj.z);
 }
 
-function addEventListeners (el, eventNames, handler) {
+function addEventListeners(el, eventNames, handler) {
   var i;
   for (i = 0; i < eventNames.length; i++) {
     el.addEventListener(eventNames[i], handler);
   }
 }
 
-function removeEventListeners (el, eventNames, handler) {
+function removeEventListeners(el, eventNames, handler) {
   var i;
   for (i = 0; i < eventNames.length; i++) {
     el.removeEventListener(eventNames[i], handler);
   }
 }
 
-function getRawProperty (el, path) {
+function getRawProperty(el, path) {
   var i;
   var split;
   var value;
@@ -579,25 +637,27 @@ function getRawProperty (el, path) {
   return value;
 }
 
-function setRawProperty (el, path, value, type) {
+function setRawProperty(el, path, value, type) {
   var i;
   var split;
   var propertyName;
   var targetValue;
 
-  if (path.startsWith('object3D.rotation')) {
+  if (path.startsWith("object3D.rotation")) {
     value = THREE.Math.degToRad(value);
   }
 
   // Walk.
   split = splitDot(path);
   targetValue = el;
-  for (i = 0; i < split.length - 1; i++) { targetValue = targetValue[split[i]]; }
+  for (i = 0; i < split.length - 1; i++) {
+    targetValue = targetValue[split[i]];
+  }
   propertyName = split[split.length - 1];
 
   // Raw color.
   if (type === TYPE_COLOR) {
-    if ('r' in targetValue[propertyName]) {
+    if ("r" in targetValue[propertyName]) {
       targetValue[propertyName].r = value.r;
       targetValue[propertyName].g = value.g;
       targetValue[propertyName].b = value.b;
@@ -612,13 +672,14 @@ function setRawProperty (el, path, value, type) {
   targetValue[propertyName] = value;
 }
 
-function splitDot (path) {
-  if (path in splitCache) { return splitCache[path]; }
-  splitCache[path] = path.split('.');
+function splitDot(path) {
+  if (path in splitCache) {
+    return splitCache[path];
+  }
+  splitCache[path] = path.split(".");
   return splitCache[path];
 }
 
-function isRawProperty (data) {
-  return data.isRawProperty || data.property.startsWith(STRING_COMPONENTS) ||
-         data.property.startsWith(STRING_OBJECT3D);
+function isRawProperty(data) {
+  return data.isRawProperty || data.property.startsWith(STRING_COMPONENTS) || data.property.startsWith(STRING_OBJECT3D);
 }

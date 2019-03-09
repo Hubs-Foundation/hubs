@@ -35,7 +35,7 @@
         renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false;"
         shadow="type: pcfsoft"
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
-        physics="gravity: -6; debug: false;"
+        physics="gravity: -9.8; debug: false; driver: ammo; debugDrawMode: 1;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         freeze-controller="toggleEvent: action_freeze"
         personal-space-bubble="debug: false;"
@@ -159,15 +159,9 @@
                                 networked-audio-analyser
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
-                            >
-                                <a-cylinder
-                                    static-body
-                                    radius="0.13"
-                                    height="0.2"
-                                    position="0 0.07 0.05"
-                                    visible="false"
-                                ></a-cylinder>
-                            </a-entity>
+                                ammo-body="type: kinematic;"
+                                ammo-shape="type: cylinder; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.11 0.10 0.11; offset: 0 0.06 0.04;"
+                            ></a-entity>
                         </template>
 
                         <template data-name="LeftHand">
@@ -183,8 +177,7 @@
 
             <template id="static-media">
                 <a-entity
-                    body="type: static; shape: none; mass: 0;"
-                    auto-scale-cannon-physics-body
+                    ammo-body="type: static; mass: 1;"
                     set-sounds-invisible
                 >
                 </a-entity>
@@ -194,11 +187,10 @@
                 <a-entity
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
-                    body="type: static; shape: none; mass: 0;"
-                    grabbable
+                    ammo-body="type: static; mass: 1;"
+                    grabbable="constraintComponentName: ammo-constraint"
                     hoverable
                     hoverable-visuals="cursorController: #cursor-controller"
-                    auto-scale-cannon-physics-body
                     sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
                     sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
                     set-sounds-invisible
@@ -212,12 +204,11 @@
                 <a-entity
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
-                    body="type: dynamic; shape: none; mass: 1;"
-                    grabbable
+                    ammo-body="type: dynamic; mass: 1;"
+                    grabbable="constraintComponentName: ammo-constraint"
                     stretchable="useWorldPosition: true; usePhysics: never"
                     hoverable
                     hoverable-visuals="cursorController: #cursor-controller"
-                    auto-scale-cannon-physics-body
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
                     position-at-box-shape-border__freeze="target:.freeze-menu;"
                     destroy-at-extreme-distances
@@ -275,8 +266,8 @@
                 <a-entity
                     class="pen interactable"
                     super-networked-interactable="counter: #pen-counter;"
-                    body="type: dynamic; shape: none; mass: 1;"
-                    grabbable="maxGrabbers: 1"
+                    ammo-body="type: dynamic; mass: 0.001;"
+                    grabbable="maxGrabbers: 1; constraintComponentName: ammo-constraint;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     hoverable
                     matrix-auto-update
@@ -314,20 +305,18 @@
             <template id="interactable-camera">
                 <a-entity
                     class="interactable icamera"
-                    grabbable
+                    grabbable="constraintComponentName: ammo-constraint;"
                     hoverable
-                    stretchable
+                    stretchable="useWorldPosition: true; usePhysics: never"
                     camera-tool
                     matrix-auto-update
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
-                    scale="0.5 0.5 0.5"
-                    body="type: dynamic; shape: none; mass: 1;"
-                    shape="shape: box; halfExtents: 0.22 0.145 0.1; offset: 0 0.02 0"
+                    ammo-body="type: dynamic; mass: 0.001;"
+                    ammo-shape="type: box; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.11 0.07 0.05; offset: 0 0.02 0;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     super-networked-interactable="counter: #camera-counter;"
                     position-at-box-shape-border__freeze="target: .camera-menu"
                     set-yxz-order
-                    auto-scale-cannon-physics-body
                 >
                     <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 10;" mixin="button-container" >
                         <a-entity mixin="rounded-text-action-button" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01">
@@ -381,8 +370,8 @@
             <!-- TODO: All of these positions are assuming 16:9 - need to actually reposition based on video resolution -->
             <template id="video-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" mixin="button-container" visible="false">
-                    <a-entity class="video-time-label" text="value: 0; anchor: right; align: right;" text-raycast-hack position="0.485 -0.25 -0.015"></a-entity>
-                    <a-entity class="video-volume-label" text="value: 0%; anchor: right; align: right;" text-raycast-hack position="0.485 0.25 -0.015" visible="false"></a-entity>
+                    <a-entity class="video-time-label" text="value: 0; anchor: right; align: right;" text-raycast-hack position="0.485 -0.25 0.015"></a-entity>
+                    <a-entity class="video-volume-label" text="value: 0%; anchor: right; align: right;" text-raycast-hack position="0.485 0.25 0.015" visible="false"></a-entity>
                     <a-image
                         icon-button="image: #video-seek-back; hoverImage: #video-seek-back-hover;"
                         scale="0.1 0.1 0.1"
@@ -422,8 +411,8 @@
                     visibility-while-frozen="visible: false; withinDistance: 10; requireHoverOnNonMobile: false;"
                     mixin="button-container"
                 >
-                    <a-entity mixin="rounded-text-button ui" slice9="width: 0.4" unmute-video-button position="0 -0.25 0.01">
-                        <a-entity text="value:un-mute; width:2; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    <a-entity mixin="rounded-text-button" slice9="width: 0.4" unmute-video-button position="0 -0.5 0.01">
+                        <a-entity text="value:unmute; width:2; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>
@@ -474,10 +463,10 @@
 
             <a-mixin id="controller-super-hands"
                 super-hands="
-                    colliderEvent: collisions;
-                    colliderEventProperty: els;
-                    colliderEndEvent: collisions;
-                    colliderEndEventProperty: clearedEls;
+                    colliderEvent: collide;
+                    colliderEventProperty: targetEl;
+                    colliderEndEvent: collide-end;
+                    colliderEndEventProperty: targetEl;
                     grabStartButtons: primary_hand_grab, secondary_hand_grab;
                     grabEndButtons: primary_hand_release, secondary_hand_release;
                     stretchStartButtons: primary_hand_grab, secondary_hand_grab;
@@ -486,8 +475,6 @@
                     dragDropEndButtons: hand_release, secondary_hand_release;
                     activateStartButtons: secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
                     activateEndButtons: secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
-                collision-filter="collisionForces: false"
-                physics-collider
             ></a-mixin>
         </a-assets>
 
@@ -514,8 +501,9 @@
             radius="0.02"
             segments-width="9"
             segments-height="9"
-            static-body="shape: sphere;"
-            collision-filter="collisionForces: false"
+            ammo-body="type: kinematic; collisionFlags: 4; collisionFilterMask: 3; scaleAutoUpdate: false; activationState: 4;"
+            ammo-shape="type: sphere; sphereRadius: 0.02; autoGenerateShape: false;"
+            haptic-feedback="path: /haptics/actuators/right"
             super-hands="
                 colliderEvent: raycaster-intersection;
                 colliderEndEvent: raycaster-intersection-cleared;
@@ -673,10 +661,10 @@
                 hand-controls2="left"
                 teleporter="start: /actions/leftHand/startTeleport; confirm: /actions/leftHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
-                haptic-feedback
-                body="type: static; shape: none;"
+                haptic-feedback="path: /haptics/actuators/left"
                 mixin="controller-super-hands"
-                shape="shape: box; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
+                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4;"
+                ammo-shape="type: box; autoGenerateShape: false; scaleAutoUpdate: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 action-to-event__c="path: /actions/leftHandGrab; event: primary_hand_grab;"
                 action-to-event__d="path: /actions/leftHandDrop; event: primary_hand_release;"
             >
@@ -690,10 +678,10 @@
                 hand-controls2="right"
                 teleporter="start: /actions/rightHand/startTeleport; confirm: /actions/rightHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
-                haptic-feedback
-                body="type: static; shape: none;"
+                haptic-feedback="path: /haptics/actuators/right"
                 mixin="controller-super-hands"
-                shape="shape: box; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
+                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4;"
+                ammo-shape="type: box; autoGenerateShape: false; scaleAutoUpdate: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 action-to-event__c="path: /actions/rightHandGrab; event: primary_hand_grab;"
                 action-to-event__d="path: /actions/rightHandDrop; event: primary_hand_release;"
             >
@@ -735,8 +723,8 @@
         <!-- Environment -->
         <a-entity
             id="environment-root"
+            ammo-body="type: static; mass: 0;"
             nav-mesh-helper
-            static-body="shape: none;"
         >
             <a-entity id="environment-scene"></a-entity>
         </a-entity>
@@ -753,11 +741,14 @@
                 src: https://asset-bundles-prod.reticulum.io/interactables/DrawingPen/DrawingPen-34fb4aee27.gltf;
                 spawnEvent: spawn_pen;
                 superHand: #player-right-controller;
-                cursorSuperHand: #cursor;"
+                cursorSuperHand: #cursor;
+                useCustomSpawnScale: true;
+                spawnScale: 0.5, 0.5, 0.5;
+                "
         ></a-entity>
 
-        <a-entity matrix-auto-update class="vr-notice" follow-in-lower-fov="target: #player-camera; offset: 0 0 -0.8; angle: 39;" visible="false">
-            <a-entity hoverable slice9="width: 0.9; height: 0.2; left: 64; top: 64; right: 66; bottom: 66; opacity: 1.0; src: #action-button" 
+        <a-entity matrix-auto-update class="vr-notice" follow-in-fov="target: #player-camera; offset: 0 0 -0.8; angle: 39;" visible="false">
+            <a-entity hoverable slice9="width: 0.9; height: 0.2; left: 64; top: 64; right: 66; bottom: 66; opacity: 1.0; src: #button"
                 text-button="
                     textHoverColor: #fff;
                     textColor: #fff;

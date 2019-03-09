@@ -34,19 +34,21 @@ AFRAME.registerComponent("pinnable", {
     this.el.removeEventListener("componentinitialized", this._allowApplyOnceComponentsReady);
   },
 
-  update() {
+  update(oldData) {
     this._applyState();
-    this._fireEvents();
+    this._fireEvents(oldData);
   },
 
-  _fireEvents() {
+  _fireEvents(oldData) {
     // super-networked-interactable fires grab-end when a remote user takes ownership of an entity, so we need to
     // ignore that case here. We also need to guard against _fireEvents being called during entity initialization,
     // when the networked component isn't initialized yet.
     if (this.el.components.networked && this.el.components.networked.data && !NAF.utils.isMine(this.el)) return;
 
+    const pinStateChanged = !!oldData.pinned !== this.data.pinned;
+
     if (this.data.pinned) {
-      this.el.emit("pinned", { el: this.el });
+      this.el.emit("pinned", { el: this.el, changed: pinStateChanged });
 
       this.el.removeAttribute("animation__pin-start");
       this.el.removeAttribute("animation__pin-end");
@@ -69,7 +71,7 @@ AFRAME.registerComponent("pinnable", {
         easing: "easeOutElastic"
       });
     } else {
-      this.el.emit("unpinned", { el: this.el });
+      this.el.emit("unpinned", { el: this.el, changed: pinStateChanged });
     }
   },
 
@@ -89,7 +91,7 @@ AFRAME.registerComponent("pinnable", {
         this.el.removeAttribute("stretchable");
       }
 
-      this.el.setAttribute("body", { type: "static" });
+      this.el.setAttribute("ammo-body", { type: "static" });
 
       if (this.el.components.grabbable.data.maxGrabbers !== 0) {
         this.prevMaxGrabbers = this.el.components.grabbable.data.maxGrabbers;
@@ -100,7 +102,7 @@ AFRAME.registerComponent("pinnable", {
       this.el.setAttribute("grabbable", { maxGrabbers: this.prevMaxGrabbers });
 
       if (!this.el.components.stretchable) {
-        this.el.setAttribute("stretchable", "");
+        this.el.setAttribute("stretchable", { useWorldPosition: true, usePhysics: "never" });
       }
     }
   }

@@ -43,9 +43,7 @@ AFRAME.registerComponent("offset-relative-to", {
         obj.parent.worldToLocal(offsetVector);
       }
       obj.position.copy(offsetVector);
-      this.el.body && this.el.body.position.copy(obj.position);
       target.getWorldQuaternion(obj.quaternion);
-      this.el.body && this.el.body.quaternion.copy(obj.quaternion);
 
       // See doc/image_orientations.gif
       switch (this.data.orientation) {
