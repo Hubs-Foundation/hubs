@@ -142,14 +142,14 @@ class TopHUD extends Component {
           />
           <WithHoverSound>
             <div
-              className={cx(styles.iconButton, styles.spawn_pen)}
+              className={cx(styles.iconButton, styles.pen)}
               title={"Drawing Pen"}
               onClick={this.props.onSpawnPen}
             />
           </WithHoverSound>
           <WithHoverSound>
             <div
-              className={cx(styles.iconButton, styles.spawn_camera)}
+              className={cx(styles.iconButton, styles.camera)}
               title={"Camera"}
               onClick={this.props.onSpawnCamera}
             />
