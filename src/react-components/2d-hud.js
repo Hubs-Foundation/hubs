@@ -141,18 +141,10 @@ class TopHUD extends Component {
             onClick={() => this.props.mediaSearchStore.sourceNavigateToDefaultSource()}
           />
           <WithHoverSound>
-            <div
-              className={cx(styles.iconButton, styles.pen)}
-              title={"Drawing Pen"}
-              onClick={this.props.onSpawnPen}
-            />
+            <div className={cx(styles.iconButton, styles.pen)} title={"Drawing Pen"} onClick={this.props.onSpawnPen} />
           </WithHoverSound>
           <WithHoverSound>
-            <div
-              className={cx(styles.iconButton, styles.camera)}
-              title={"Camera"}
-              onClick={this.props.onSpawnCamera}
-            />
+            <div className={cx(styles.iconButton, styles.camera)} title={"Camera"} onClick={this.props.onSpawnCamera} />
           </WithHoverSound>
         </div>
       </div>
