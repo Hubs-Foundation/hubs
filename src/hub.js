@@ -388,6 +388,10 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   const hub = data.hubs[0];
 
   console.log(`Janus host: ${hub.host}`);
+
+  // Physics needs to be ready before spawning anything.
+  while (!scene.systems.physics.initialized) await nextTick();
+
   const objectsScene = document.querySelector("#objects-scene");
   const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
   const objectsEl = document.createElement("a-entity");
