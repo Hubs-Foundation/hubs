@@ -13,7 +13,7 @@ const browser = detect();
 class TopHUD extends Component {
   static propTypes = {
     muted: PropTypes.bool,
-    isHoldingPen: PropTypes.bool,
+    isCursorHoldingPen: PropTypes.bool,
     hasActiveCamera: PropTypes.bool,
     frozen: PropTypes.bool,
     videoShareMediaSource: PropTypes.string,
@@ -144,7 +144,7 @@ class TopHUD extends Component {
           />
           <WithHoverSound>
             <div
-              className={cx(styles.iconButton, styles.pen, { [styles.active]: this.props.isHoldingPen })}
+              className={cx(styles.iconButton, styles.pen, { [styles.active]: this.props.isCursorHoldingPen })}
               title={"Pen"}
               onClick={this.props.onSpawnPen}
             />
