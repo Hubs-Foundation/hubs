@@ -13,6 +13,8 @@ const browser = detect();
 class TopHUD extends Component {
   static propTypes = {
     muted: PropTypes.bool,
+    isHoldingPen: PropTypes.bool,
+    hasActiveCamera: PropTypes.bool,
     frozen: PropTypes.bool,
     videoShareMediaSource: PropTypes.string,
     activeTip: PropTypes.string,
@@ -141,10 +143,18 @@ class TopHUD extends Component {
             onClick={() => this.props.mediaSearchStore.sourceNavigateToDefaultSource()}
           />
           <WithHoverSound>
-            <div className={cx(styles.iconButton, styles.pen)} title={"Drawing Pen"} onClick={this.props.onSpawnPen} />
+            <div
+              className={cx(styles.iconButton, styles.pen, { [styles.active]: this.props.isHoldingPen })}
+              title={"Pen"}
+              onClick={this.props.onSpawnPen}
+            />
           </WithHoverSound>
           <WithHoverSound>
-            <div className={cx(styles.iconButton, styles.camera)} title={"Camera"} onClick={this.props.onSpawnCamera} />
+            <div
+              className={cx(styles.iconButton, styles.camera, { [styles.active]: this.props.hasActiveCamera })}
+              title={"Camera"}
+              onClick={this.props.onSpawnCamera}
+            />
           </WithHoverSound>
         </div>
       </div>

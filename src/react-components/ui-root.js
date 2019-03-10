@@ -145,6 +145,7 @@ class UIRoot extends Component {
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
+    hasActiveCamera: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
     activeTips: PropTypes.object,
     location: PropTypes.object,
@@ -1763,11 +1764,12 @@ class UIRoot extends Component {
                   spacebubble={this.state.spacebubble}
                   videoShareMediaSource={this.state.videoShareMediaSource}
                   activeTip={this.props.activeTips && this.props.activeTips.top}
+                  hasActiveCamera={this.props.hasActiveCamera}
                   onToggleMute={this.toggleMute}
                   onToggleFreeze={this.toggleFreeze}
                   onToggleSpaceBubble={this.toggleSpaceBubble}
                   onSpawnPen={this.spawnPen}
-                  onSpawnCamera={() => this.props.scene.emit("action_spawn_camera")}
+                  onSpawnCamera={() => this.props.scene.emit("action_toggle_camera")}
                   onShareVideo={this.shareVideo}
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}

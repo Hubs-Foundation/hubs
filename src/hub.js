@@ -635,6 +635,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({ activeTips: e.detail });
   });
 
+  scene.addEventListener("camera_toggled", () => {
+    remountUI({ hasActiveCamera: !!scene.systems["camera-tools"].getMyCamera() });
+  });
+
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 
   const platformUnsupportedReason = getPlatformUnsupportedReason();

@@ -314,6 +314,7 @@
                     stretchable="useWorldPosition: true; usePhysics: never"
                     camera-tool
                     matrix-auto-update
+                    scale="0.5 0.5 0.5"
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
                     ammo-body="type: dynamic; mass: 0.001;"
                     ammo-shape="type: box; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.11 0.07 0.05; offset: 0 0.02 0;"
@@ -339,7 +340,7 @@
             </template>
 
             <template id="camera-hover-menu">
-                <a-entity class="ui interactable-ui hover-container camera-snap-menu" mixin="button-container">
+                <a-entity class="ui interactable-ui hover-container camera-snap-menu" mixin="button-container" visible="false">
                     <a-entity class="snap-button" mixin="rounded-text-action-button" position="0 -0.145 0.0" scale="0.75 0.75 0.75">
                         <a-entity text="value:; width:1; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                         <a-image
