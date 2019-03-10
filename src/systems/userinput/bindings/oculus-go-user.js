@@ -19,7 +19,7 @@ export default function generate3DOFTriggerBindings(device) {
   const dpadWest = device.v("dpad/west");
   const dpadCenter = device.v("dpad/center");
   const dpadCenterStrip = device.v("dpad/centerStrip");
-  const dpadBottomCenterStrip = device.v("dpad/centerStrip");
+  const dpadBottomCenterStrip = device.v("dpad/bottomCenterStrip");
 
   const grabBinding = {
     src: {
@@ -97,13 +97,13 @@ export default function generate3DOFTriggerBindings(device) {
         xform: xforms.vec2dpad(0.3)
       },
       {
-        src: [dpadNorth, dpadCenter, dpadSouth],
-        dest: { value: dpadCenterStrip },
+        src: [dpadCenter, dpadSouth],
+        dest: { value: dpadBottomCenterStrip },
         xform: xforms.any
       },
       {
-        src: [dpadCenter, dpadSouth],
-        dest: { value: dpadBottomCenterStrip },
+        src: [dpadNorth, dpadBottomCenterStrip],
+        dest: { value: dpadCenterStrip },
         xform: xforms.any
       },
       {
