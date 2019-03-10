@@ -19,6 +19,7 @@ export default function generate3DOFTriggerBindings(device) {
   const dpadWest = device.v("dpad/west");
   const dpadCenter = device.v("dpad/center");
   const dpadCenterStrip = device.v("dpad/centerStrip");
+  const togglePen = "/vars/togglePen";
 
   const grabBinding = {
     src: {
@@ -254,9 +255,21 @@ export default function generate3DOFTriggerBindings(device) {
           value: dpadCenterStrip,
           bool: touchpadFalling
         },
-        dest: { value: paths.actions.cursor.drop },
+        dest: { value: togglePen },
         xform: xforms.copyIfTrue,
         priority: 300
+      },
+      {
+        src: { value: togglePen },
+        dest: { value: paths.actions.cursor.drop },
+        xform: xforms.rising,
+        priority: 200
+      },
+      {
+        src: { value: togglePen },
+        dest: { value: paths.actions.pen.remove },
+        xform: xforms.rising,
+        priority: 200
       },
       {
         src: {
