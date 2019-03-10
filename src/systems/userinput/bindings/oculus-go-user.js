@@ -96,7 +96,7 @@ export default function generate3DOFTriggerBindings(device) {
         xform: xforms.vec2dpad(0.3)
       },
       {
-        src: [dpadCenter, dpadSouth],
+        src: [dpadNorth, dpadCenter, dpadSouth],
         dest: { value: dpadCenterStrip },
         xform: xforms.any
       },
@@ -300,22 +300,6 @@ export default function generate3DOFTriggerBindings(device) {
         },
         dest: { value: paths.actions.cursor.takeSnapshot },
         xform: xforms.copy,
-        priority: 300
-      },
-      {
-        src: {
-          value: triggerFalling
-        },
-        xform: xforms.noop,
-        priority: 300
-      },
-      {
-        src: {
-          value: dpadCenterStrip,
-          bool: touchpadFalling
-        },
-        dest: { value: paths.actions.cursor.drop },
-        xform: xforms.copyIfTrue,
         priority: 300
       }
     ]
