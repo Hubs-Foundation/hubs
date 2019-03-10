@@ -1,6 +1,7 @@
 import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
+import { showFullScreenIfAvailable } from "./utils/fullscreen";
 
 const playerHeight = 1.6;
 const isBotMode = qsTruthy("bot");
@@ -278,6 +279,7 @@ export default class SceneEntryManager {
     if (this.availableVREntryTypes.isInHMD) {
       // Immersive browser, exit VR.
       this.scene.exitVR();
+      showFullScreenIfAvailable();
     } else {
       // Non-immersive browser, show notice
       const vrNotice = document.querySelector(".vr-notice");

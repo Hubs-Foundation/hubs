@@ -8,6 +8,7 @@ let isExitingFullscreenDueToFocus = false;
 // - On non-mobile platforms, selects the value on focus
 // - If full screen, exits/enters full screen because of firefox full screen issues
 export function handleTextFieldFocus(target) {
+  if (AFRAME.utils.device.isMobileVR()) return;
   const isMobile = AFRAME.utils.device.isMobile();
 
   if (screenfull.isFullscreen) {
