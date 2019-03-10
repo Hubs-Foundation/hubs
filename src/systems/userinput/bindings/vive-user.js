@@ -73,8 +73,10 @@ const keyboardBoost = k("boost");
 
 const leftGripPressed1 = v("leftGripPressed1");
 const leftGripPressed2 = v("leftGripPressed2");
+const leftGripPressed3 = v("leftGripPressed2");
 const rightGripPressed1 = v("rightGripPressed1");
 const rightGripPressed2 = v("rightGripPressed2");
+const rightGripPressed3 = v("rightGripPressed2");
 const leftTriggerPressed1 = v("leftTriggerPressed1");
 const leftTriggerPressed2 = v("leftTriggerPressed2");
 const leftTouchpadPressed1 = v("leftTouchpadPressed1");
@@ -741,6 +743,18 @@ export const viveUserBindings = addSetsToBindings({
   [sets.leftHandHoveringOnPen]: [],
   [sets.leftHandHoldingPen]: [
     {
+      src: { value: leftGripPressed3 },
+      dest: { value: paths.actions.leftHand.drop },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: { value: leftGripPressed2 },
+      dest: { value: paths.actions.leftHand.drop },
+      xform: xforms.noop,
+      priority: 2
+    },
+    {
       src: { value: leftTouchpadPressed2 },
       dest: { value: leftTouchpadFallingStopTeleport },
       xform: xforms.falling,
@@ -999,7 +1013,8 @@ export const viveUserBindings = addSetsToBindings({
     {
       src: [rHandDrop1],
       dest: { value: paths.actions.rightHand.drop },
-      xform: xforms.any
+      xform: xforms.any,
+      priority: 2
     },
     {
       src: {},
@@ -1010,6 +1025,18 @@ export const viveUserBindings = addSetsToBindings({
   ],
   [sets.rightHandHoveringOnPen]: [],
   [sets.rightHandHoldingPen]: [
+    {
+      src: [rHandDrop1],
+      dest: { value: paths.actions.rightHand.drop },
+      xform: xforms.noop,
+      priority: 1
+    },
+    {
+      src: { value: rightGripPressed3 },
+      dest: { value: paths.actions.rightHand.drop },
+      xform: xforms.rising,
+      priority: 1
+    },
     {
       src: {
         bool: rTouchpadRising,
