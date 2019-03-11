@@ -246,6 +246,7 @@ function mountUI(props = {}) {
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
   const isCursorHoldingPen = scene.systems.userinput.activeSets.has(userinputSets.cursorHoldingPen);
+  const hasActiveCamera = !!scene.systems["camera-tools"].getMyCamera();
 
   ReactDOM.render(
     <Router history={history}>
@@ -261,6 +262,7 @@ function mountUI(props = {}) {
               store,
               mediaSearchStore,
               isCursorHoldingPen,
+              hasActiveCamera,
               ...props,
               ...routeProps
             }}
@@ -639,9 +641,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({ activeTips: e.detail });
   });
 
-  scene.addEventListener("camera_toggled", () => {
-    remountUI({ hasActiveCamera: !!scene.systems["camera-tools"].getMyCamera() });
-  });
+  scene.addEventListener("camera_toggled", () => remountUI({}));
+
+  scene.addEventListener("camera_removed", () => remountUI({}));
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 

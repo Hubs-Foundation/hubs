@@ -138,6 +138,7 @@ AFRAME.registerComponent("camera-tool", {
   remove() {
     this.cameraSystem.deregister(this.el);
     this.el.sceneEl.systems["camera-mirror"].unmirrorCameraAtEl(this.el);
+    this.el.sceneEl.emit("camera_removed");
   },
 
   stateAdded(evt) {
