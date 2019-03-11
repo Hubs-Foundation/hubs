@@ -10,17 +10,21 @@ Why am I writing this? What do I hope to accomplish?
 ** ineffeciencies in group communication
 ** Stuck in a paradigm
 ** memes
+** irony of using existing communication media
 
 * vocabulary and background
 Vocabulary is important. It lets you think things.
 ** Words that add nuance (break things apart) and words that abstract detail (pull things together)
 ** Utterance
-** Channels
 ** Time
 *** Synchronous
 *** Asynchronous 
 *** Near-synchronous
+** Channels
+** Artifact
+** Artifact - channel equivalence
 ** Turn taking
+** Dynamic media, behavior
 ** Remote vs Colocated
 ** familiar and popular computer-assisted communication media
 *** Video: strengths and weaknesses
@@ -37,3 +41,17 @@ Vocabulary is important. It lets you think things.
 ** Engelbart
 ** Compendium
 ** Microsoft Teams
+** Media for Thinking the Unthinkable 
+http://worrydream.com/MediaForThinkingTheUnthinkable/
+
+* case study: hubs
+** Singularly spatial
+** Linked audio-visual channels
+** Implicitly directed utterances
+** Turn-taking
+** Time dependence
+** Artifact - channel equivalence
+** Target audience
+** Target uses
+** No directed sentiment/messaging
+** Singular view
