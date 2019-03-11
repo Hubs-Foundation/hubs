@@ -844,7 +844,7 @@ export const viveUserBindings = addSetsToBindings({
         touching: lButton("touchpad").touched
       },
       dest: { value: paths.actions.leftHand.scalePenTip },
-      xform: xforms.touch_axis_scroll(0.1)
+      xform: xforms.touch_axis_scroll(0.05)
     },
     {
       src: { value: lButton("top").pressed },
@@ -1101,7 +1101,7 @@ export const viveUserBindings = addSetsToBindings({
         touching: rButton("touchpad").touched
       },
       dest: { value: paths.actions.rightHand.scalePenTip },
-      xform: xforms.touch_axis_scroll(0.1)
+      xform: xforms.touch_axis_scroll(0.05)
     },
     {
       src: { value: rButton("top").pressed },
