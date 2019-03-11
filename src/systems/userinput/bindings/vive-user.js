@@ -916,6 +916,24 @@ export const viveUserBindings = addSetsToBindings({
 
   [sets.cursorHoldingPen]: [
     {
+      src: [cursorDrop1],
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.noop,
+      priority: 1
+    },
+    {
+      src: [cursorDrop2],
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.noop,
+      priority: 1
+    },
+    {
+      src: { value: rightGripPressed2 },
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.rising,
+      priority: 1
+    },
+    {
       src: {
         bool: rTouchpadRising,
         value: rDpadCenter
