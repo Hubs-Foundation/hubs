@@ -9,8 +9,10 @@ const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
-import { addMedia, proxiedUrlFor, getPromotionTokenForFile } from "./utils/media-utils";
+import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import { ObjectContentOrigins } from "./object-types";
+
+import { getAvatarSrc } from "./assets/avatars/avatars";
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, availableVREntryTypes) {
@@ -144,7 +146,7 @@ export default class SceneEntryManager {
     const { avatarId, displayName } = this.store.state.profile;
     this.playerRig.setAttribute("player-info", {
       displayName,
-      avatarSrc: avatarId && avatarId.startsWith("http") ? proxiedUrlFor(avatarId) : `#${avatarId || "botdefault"}`
+      avatarSrc: getAvatarSrc(avatarId)
     });
     const hudController = this.playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });
