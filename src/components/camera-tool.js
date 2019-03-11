@@ -65,8 +65,10 @@ AFRAME.registerComponent("camera-tool", {
 
   init() {
     this.stateAdded = this.stateAdded.bind(this);
+    this.onGrab = this.onGrab.bind(this);
 
     this.lastUpdate = performance.now();
+    this.localSnapCount = 0; // Counter that is used to arrange photos
 
     this.renderTarget = new THREE.WebGLRenderTarget(this.data.imageWidth, this.data.imageHeight, {
       format: THREE.RGBAFormat,
@@ -129,10 +131,12 @@ AFRAME.registerComponent("camera-tool", {
 
   play() {
     this.el.addEventListener("stateadded", this.stateAdded);
+    this.el.addEventListener("grab-start", this.onGrab);
   },
 
   pause() {
     this.el.removeEventListener("stateadded", this.stateAdded);
+    this.el.removeEventListener("grab-start", this.onGrab);
   },
 
   remove() {
@@ -173,6 +177,10 @@ AFRAME.registerComponent("camera-tool", {
     this.el.sceneEl.systems["camera-mirror"].unmirrorCameraAtEl(this.el);
   },
 
+  onGrab() {
+    this.localSnapCount = 0; // When camera is moved, reset photo arrangement algorithm
+  },
+
   tick() {
     const grabber = this.el.components.grabbable.grabbers[0];
     if (grabber && !!pathsMap[grabber.id]) {
@@ -185,6 +193,7 @@ AFRAME.registerComponent("camera-tool", {
 
   tock: (function() {
     const tempHeadScale = new THREE.Vector3();
+    const photoPos = new THREE.Vector3();
 
     return function tock() {
       const sceneEl = this.el.sceneEl;
@@ -263,11 +272,23 @@ AFRAME.registerComponent("camera-tool", {
           entity.object3D.rotateY(Math.PI);
           entity.object3D.scale.set(0.1, 0.1, 0.1);
 
+          // Generate photos in a circle around camera, starting from the bottom.
+          // Prevent z-fighting but place behind viewfinder
+          const idx = (this.localSnapCount % 6) + 3;
+
+          photoPos.set(
+            Math.cos(Math.PI * 2 * (idx / 6.0)) * 0.75,
+            Math.sin(Math.PI * 2 * (idx / 6.0)) * 0.75,
+            -0.05 + idx * 0.001
+          );
+
+          this.el.object3D.localToWorld(photoPos);
+
           entity.setAttribute("animation__photo_pos", {
             property: "position",
             dur: 800,
             from: { x: pos.x, y: pos.y, z: pos.z },
-            to: { x: pos.x, y: pos.y - 0.5, z: pos.z },
+            to: { x: photoPos.x, y: photoPos.y, z: photoPos.z },
             easing: "easeOutElastic"
           });
 
@@ -286,6 +307,7 @@ AFRAME.registerComponent("camera-tool", {
         });
         sceneEl.emit("camera_tool_took_snapshot");
         this.takeSnapshotNextTick = false;
+        this.localSnapCount++;
       }
     };
   })()
