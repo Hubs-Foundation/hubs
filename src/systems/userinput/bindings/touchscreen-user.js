@@ -13,7 +13,7 @@ const touchCamDeltaYScaled = "vars/touchscreen/touchCameraDelta/y/scaled";
 const gyroCamDelta = "vars/gyro/gyroCameraDelta";
 const gyroCamDeltaXScaled = "vars/gyro/gyroCameraDelta/x/scaled";
 const gyroCamDeltaYScaled = "vars/gyro/gyroCameraDelta/y/scaled";
-const togglePen = "/vars/togglePen";
+const togglePen = "/vars/touchscreen/togglePen";
 
 export const touchscreenUserBindings = addSetsToBindings({
   [sets.global]: [

@@ -9,7 +9,7 @@ const arrows_vec2 = "/var/mouse-and-keyboard/arrows_vec2";
 const togglePenWithRMB = "/vars/mouse-and-keyboard/drop_pen_with_RMB";
 const togglePenWithEsc = "/vars/mouse-and-keyboard/drop_pen_with_esc";
 const togglePenWithP = "/vars/mouse-and-keyboard/drop_pen_with_p";
-const togglePen = "/vars/togglePen";
+const togglePen = "/vars/mouse-and-keyboard/togglePen";
 
 const k = name => {
   return `/keyboard-mouse-user/keyboard-var/${name}`;

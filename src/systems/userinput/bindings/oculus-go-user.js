@@ -19,7 +19,7 @@ export default function generate3DOFTriggerBindings(device) {
   const dpadWest = device.v("dpad/west");
   const dpadCenter = device.v("dpad/center");
   const dpadCenterStrip = device.v("dpad/centerStrip");
-  const togglePen = "/vars/togglePen";
+  const togglePen = "/vars/oculus-go/togglePen";
 
   const grabBinding = {
     src: {
