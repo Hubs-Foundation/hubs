@@ -10,9 +10,7 @@ import { bumpCacheVersion } from "../assets/avatars/avatars";
 import styles from "../assets/stylesheets/profile.scss";
 
 const BOT_PARENT_AVATAR =
-  process.env.RETICULUM_SERVER === "hubs.mozilla.com" || process.env.RETICULUM_SERVER === "smoke-hubs.mozilla.com"
-    ? "gZ6gPvQ"
-    : "xf9xkIY";
+  location.hostname === "hubs.mozilla.com" || location.hostname === "smoke-hubs.mozilla.com" ? "gZ6gPvQ" : "xf9xkIY";
 
 export default class AvatarEditor extends Component {
   static propTypes = {
