@@ -621,7 +621,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     linkChannel,
     subscriptions,
     enterScene: entryManager.enterScene,
-    exitScene: entryManager.exitScene,
+    exitScene: reason => {
+      entryManager.exitScene();
+
+      if (reason) {
+        remountUI({ roomUnavailableReason: reason });
+      }
+    },
     initialIsSubscribed: subscriptions.isSubscribed(),
     activeTips: scene.systems.tips.activeTips
   });

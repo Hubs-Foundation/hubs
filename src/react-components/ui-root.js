@@ -471,8 +471,8 @@ class UIRoot extends Component {
     this.exit();
   };
 
-  exit = () => {
-    this.props.exitScene();
+  exit = reason => {
+    this.props.exitScene(reason);
     this.setState({ exited: true });
   };
 
@@ -881,7 +881,7 @@ class UIRoot extends Component {
       );
     } else {
       const reason = this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
-      const exitSubtitleId = `exit.subtitle.${this.state.exited ? "exited" : reason}`;
+      const exitSubtitleId = `exit.subtitle.${reason || "exited"}`;
       subtitle = (
         <div>
           <FormattedMessage id={exitSubtitleId} />
@@ -1544,153 +1544,166 @@ class UIRoot extends Component {
                   )}
                 </div>
               )}
-            {entered && (
-              <form onSubmit={this.sendMessage}>
-                <div
-                  className={classNames({ [styles.messageEntryInRoom]: true, [styles.messageEntryOnMobile]: isMobile })}
-                  style={{ height: pendingMessageFieldHeight }}
-                >
-                  {this.state.pendingMessage.startsWith("/") && (
-                    <ChatCommandHelp
-                      onTop={this.state.messageEntryOnTop}
-                      matchingPrefix={this.state.pendingMessage.substring(1)}
+            {entered &&
+              !this.state.frozen && (
+                <form onSubmit={this.sendMessage}>
+                  <div
+                    className={classNames({
+                      [styles.messageEntryInRoom]: true,
+                      [styles.messageEntryOnMobile]: isMobile
+                    })}
+                    style={{ height: pendingMessageFieldHeight }}
+                  >
+                    {this.state.pendingMessage.startsWith("/") && (
+                      <ChatCommandHelp
+                        onTop={this.state.messageEntryOnTop}
+                        matchingPrefix={this.state.pendingMessage.substring(1)}
+                      />
+                    )}
+                    <input
+                      id="message-entry-media-input"
+                      type="file"
+                      style={{ display: "none" }}
+                      accept={isMobile ? "image/*" : "*"}
+                      multiple
+                      onChange={e => {
+                        for (const file of e.target.files) {
+                          this.createObject(file);
+                        }
+                      }}
                     />
-                  )}
-                  <input
-                    id="message-entry-media-input"
-                    type="file"
-                    style={{ display: "none" }}
-                    accept={isMobile ? "image/*" : "*"}
-                    multiple
-                    onChange={e => {
-                      for (const file of e.target.files) {
-                        this.createObject(file);
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor="message-entry-media-input"
-                    title={"Upload"}
-                    className={classNames([
-                      styles.messageEntryButton,
-                      styles.messageEntryButtonInRoom,
-                      styles.messageEntryUpload
-                    ])}
-                  >
-                    <i>
-                      <FontAwesomeIcon icon={isMobile ? faCamera : faPlus} />
-                    </i>
-                  </label>
-                  <textarea
-                    style={{ height: pendingMessageTextareaHeight }}
-                    className={classNames([
-                      styles.messageEntryInput,
-                      styles.messageEntryInputInRoom,
-                      "chat-focus-target"
-                    ])}
-                    value={this.state.pendingMessage}
-                    rows={textRows}
-                    onFocus={e => {
-                      handleTextFieldFocus(e.target);
-                      this.setState({ messageEntryOnTop: isMobile });
-                    }}
-                    onBlur={() => {
-                      handleTextFieldBlur();
-                      this.setState({ messageEntryOnTop: false });
-                    }}
-                    onChange={e => {
-                      e.stopPropagation();
-                      this.setState({ pendingMessage: e.target.value });
-                    }}
-                    onKeyDown={e => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        this.sendMessage(e);
-                      } else if (e.key === "Enter" && e.shiftKey && e.ctrlKey) {
-                        spawnChatMessage(e.target.value);
-                        this.setState({ pendingMessage: "" });
-                      } else if (e.key === "Escape") {
-                        e.target.blur();
-                      }
-                    }}
-                    placeholder="Send to room..."
-                  />
-                  <button
-                    className={classNames([styles.messageEntrySpawn])}
-                    onClick={() => {
-                      if (this.state.pendingMessage.length > 0) {
-                        spawnChatMessage(this.state.pendingMessage);
-                        this.setState({ pendingMessage: "" });
-                      } else {
-                        this.pushHistoryState("modal", "create");
-                      }
-                    }}
-                  />
-                  <button
-                    type="submit"
-                    className={classNames([
-                      styles.messageEntryButton,
-                      styles.messageEntryButtonInRoom,
-                      styles.messageEntrySubmit
-                    ])}
-                  >
-                    <i>
-                      <FontAwesomeIcon icon={faPaperPlane} />
-                    </i>
-                  </button>
-                </div>
-              </form>
-            )}
-
-            <div
-              className={classNames({
-                [styles.inviteContainer]: true,
-                [styles.inviteContainerBelowHud]: entered,
-                [styles.inviteContainerInverted]: this.state.showInviteDialog
-              })}
-            >
-              {!showVREntryButton &&
-                !this.props.activeTips.top && (
-                  <WithHoverSound>
-                    <button
-                      className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
-                      onClick={() => this.toggleInviteDialog()}
+                    <label
+                      htmlFor="message-entry-media-input"
+                      title={"Upload"}
+                      className={classNames([
+                        styles.messageEntryButton,
+                        styles.messageEntryButtonInRoom,
+                        styles.messageEntryUpload
+                      ])}
                     >
-                      <FormattedMessage id="entry.invite-others-nag" />
+                      <i>
+                        <FontAwesomeIcon icon={isMobile ? faCamera : faPlus} />
+                      </i>
+                    </label>
+                    <textarea
+                      style={{ height: pendingMessageTextareaHeight }}
+                      className={classNames([
+                        styles.messageEntryInput,
+                        styles.messageEntryInputInRoom,
+                        "chat-focus-target"
+                      ])}
+                      value={this.state.pendingMessage}
+                      rows={textRows}
+                      onFocus={e => {
+                        handleTextFieldFocus(e.target);
+                        this.setState({ messageEntryOnTop: isMobile });
+                      }}
+                      onBlur={() => {
+                        handleTextFieldBlur();
+                        this.setState({ messageEntryOnTop: false });
+                      }}
+                      onChange={e => {
+                        e.stopPropagation();
+                        this.setState({ pendingMessage: e.target.value });
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          this.sendMessage(e);
+                        } else if (e.key === "Enter" && e.shiftKey && e.ctrlKey) {
+                          spawnChatMessage(e.target.value);
+                          this.setState({ pendingMessage: "" });
+                        } else if (e.key === "Escape") {
+                          e.target.blur();
+                        }
+                      }}
+                      placeholder="Send to room..."
+                    />
+                    <button
+                      className={classNames([styles.messageEntrySpawn])}
+                      onClick={() => {
+                        if (this.state.pendingMessage.length > 0) {
+                          spawnChatMessage(this.state.pendingMessage);
+                          this.setState({ pendingMessage: "" });
+                        } else {
+                          this.pushHistoryState("modal", "create");
+                        }
+                      }}
+                    />
+                    <button
+                      type="submit"
+                      className={classNames([
+                        styles.messageEntryButton,
+                        styles.messageEntryButtonInRoom,
+                        styles.messageEntrySubmit
+                      ])}
+                    >
+                      <i>
+                        <FontAwesomeIcon icon={faPaperPlane} />
+                      </i>
                     </button>
-                  </WithHoverSound>
-                )}
-              {!showVREntryButton &&
-                this.occupantCount() > 1 &&
-                !this.props.activeTips.top &&
-                entered && (
+                  </div>
+                </form>
+              )}
+
+            {entered &&
+              this.state.frozen && (
+                <button className={styles.leaveButton} onClick={() => this.exit("left")}>
+                  <FormattedMessage id="entry.leave-room" />
+                </button>
+              )}
+
+            {!this.state.frozen && (
+              <div
+                className={classNames({
+                  [styles.inviteContainer]: true,
+                  [styles.inviteContainerBelowHud]: entered,
+                  [styles.inviteContainerInverted]: this.state.showInviteDialog
+                })}
+              >
+                {!showVREntryButton &&
+                  !this.props.activeTips.top && (
+                    <WithHoverSound>
+                      <button
+                        className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
+                        onClick={() => this.toggleInviteDialog()}
+                      >
+                        <FormattedMessage id="entry.invite-others-nag" />
+                      </button>
+                    </WithHoverSound>
+                  )}
+                {!showVREntryButton &&
+                  this.occupantCount() > 1 &&
+                  !this.props.activeTips.top &&
+                  entered && (
+                    <WithHoverSound>
+                      <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
+                        <span>
+                          {this.state.miniInviteActivated
+                            ? navigator.share
+                              ? "sharing..."
+                              : "copied!"
+                            : "hub.link/" + this.props.hubId}
+                        </span>
+                      </button>
+                    </WithHoverSound>
+                  )}
+                {showVREntryButton && (
                   <WithHoverSound>
-                    <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
-                      <span>
-                        {this.state.miniInviteActivated
-                          ? navigator.share
-                            ? "sharing..."
-                            : "copied!"
-                          : "hub.link/" + this.props.hubId}
-                      </span>
+                    <button onClick={() => this.props.scene.enterVR()}>
+                      <FormattedMessage id="entry.enter-in-vr" />
                     </button>
                   </WithHoverSound>
                 )}
-              {showVREntryButton && (
-                <WithHoverSound>
-                  <button onClick={() => this.props.scene.enterVR()}>
-                    <FormattedMessage id="entry.enter-in-vr" />
-                  </button>
-                </WithHoverSound>
-              )}
-              {this.state.showInviteDialog && (
-                <InviteDialog
-                  allowShare={!this.props.availableVREntryTypes.isInHMD}
-                  entryCode={this.props.hubEntryCode}
-                  hubId={this.props.hubId}
-                  onClose={() => this.setState({ showInviteDialog: false })}
-                />
-              )}
-            </div>
+                {this.state.showInviteDialog && (
+                  <InviteDialog
+                    allowShare={!this.props.availableVREntryTypes.isInHMD}
+                    entryCode={this.props.hubEntryCode}
+                    hubId={this.props.hubId}
+                    onClose={() => this.setState({ showInviteDialog: false })}
+                  />
+                )}
+              </div>
+            )}
 
             <StateRoute
               stateKey="overlay"
@@ -1753,7 +1766,7 @@ class UIRoot extends Component {
                 />
               )}
 
-            {entered ? (
+            {entered && !this.state.frozen ? (
               <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
                   history={this.props.history}

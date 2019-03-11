@@ -354,6 +354,17 @@ body.vr-mode {
   }
 }
 
+:local(.leave-button) {
+  @extend %action-button;
+  position: absolute;
+  z-index: 10;
+  top: 24px;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
 :local(.bottom-tip) {
   @extend %tip-bubble;
   bottom: 80px;
