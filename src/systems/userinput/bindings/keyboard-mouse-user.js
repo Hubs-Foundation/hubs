@@ -102,6 +102,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       priority: 100
     },
     {
+      src: { value: paths.device.keyboard.key("c") },
+      dest: { value: paths.actions.toggleCamera },
+      xform: xforms.rising
+    },
+    {
       src: { value: paths.device.smartMouse.cursorPose },
       dest: { value: paths.actions.cursor.pose },
       xform: xforms.copy

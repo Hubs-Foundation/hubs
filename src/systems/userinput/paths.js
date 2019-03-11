@@ -19,6 +19,7 @@ paths.actions.thaw = "/actions/thaw";
 paths.actions.muteMic = "/actions/muteMic";
 paths.actions.focusChat = "/actions/focusChat";
 paths.actions.focusChatCommand = "/actions/focusChatCommand";
+paths.actions.toggleCamera = "/actions/toggleCamera";
 paths.actions.mediaExit = "/actions/mediaExit";
 paths.actions.mediaSearch1 = "/actions/mediaSearch1";
 paths.actions.mediaSearch2 = "/actions/mediaSearch2";
