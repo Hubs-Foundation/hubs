@@ -1,0 +1,39 @@
+* motivation
+Why am I writing this? What do I hope to accomplish?
+** the blind are leading the blind
+** pearls before swine
+** engelbart
+** easiness and target audience
+** survivorship bias
+** people change slowly
+** irony
+** ineffeciencies in group communication
+** Stuck in a paradigm
+** memes
+
+* vocabulary and background
+Vocabulary is important. It lets you think things.
+** Words that add nuance (break things apart) and words that abstract detail (pull things together)
+** Utterance
+** Channels
+** Time
+*** Synchronous
+*** Asynchronous 
+*** Near-synchronous
+** Turn taking
+** Remote vs Colocated
+** familiar and popular computer-assisted communication media
+*** Video: strengths and weaknesses
+*** Text: strengths and weaknesses
+*** Audio: strengths and weaknesses
+** Structure provides both meaning and affordances
+** View-structures and data-structures
+** Pseudo-threading
+** Directed utterance graphs
+** Low stakes, High stakes
+
+* references
+** Tufte
+** Engelbart
+** Compendium
+** Microsoft Teams
