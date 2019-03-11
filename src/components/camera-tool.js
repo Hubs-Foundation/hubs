@@ -174,12 +174,17 @@ AFRAME.registerComponent("camera-tool", {
   },
 
   tick() {
+    const userinput = this.el.sceneEl.systems.userinput;
     const grabber = this.el.components.grabbable.grabbers[0];
     if (grabber && !!pathsMap[grabber.id]) {
-      const paths = pathsMap[grabber.id];
-      if (AFRAME.scenes[0].systems.userinput.get(paths.takeSnapshot)) {
+      const grabberPaths = pathsMap[grabber.id];
+      if (userinput.get(grabberPaths.takeSnapshot)) {
         this.takeSnapshotNextTick = true;
       }
+    }
+
+    if (userinput.get(paths.actions.takeSnapshot)) {
+      this.takeSnapshotNextTick = true;
     }
   },
 

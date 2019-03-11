@@ -493,6 +493,11 @@ export const oculusTouchUserBindings = addSetsToBindings({
       xform: xforms.rising
     },
     {
+      src: { value: paths.device.keyboard.key("x") },
+      dest: { value: paths.actions.takeSnapshot },
+      xform: xforms.rising
+    },
+    {
       src: {
         bool: paths.device.keyboard.key("control"),
         value: paths.device.keyboard.key("1")

@@ -359,6 +359,11 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.rising
     },
     {
+      src: { value: paths.device.keyboard.key("x") },
+      dest: { value: paths.actions.takeSnapshot },
+      xform: xforms.rising
+    },
+    {
       src: { value: rButton("touchpad").pressed, bool: rDpadCenterStrip },
       dest: { value: ensureFrozenViaDpad },
       root: rootForFrozenOverrideWhenHolding,
