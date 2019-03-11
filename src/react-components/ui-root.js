@@ -46,6 +46,7 @@ import RenameRoomDialog from "./rename-room-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
+import OAuthDialog from "./oauth-dialog.js";
 
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
@@ -145,6 +146,8 @@ class UIRoot extends Component {
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
+    showOAuthDialog: PropTypes.bool,
+    oauthInfo: PropTypes.array,
     onMediaSearchResultEntrySelected: PropTypes.func,
     activeTips: PropTypes.object,
     location: PropTypes.object,
@@ -1349,6 +1352,14 @@ class UIRoot extends Component {
 
     const isLoading = !this.state.hideLoader || !this.state.didConnectToNetworkedScene;
 
+    const rootStyles = {
+      [styles.ui]: true,
+      "ui-root": true,
+      "in-modal-or-overlay": this.isInModalOrOverlay(),
+      [styles.messageEntryOnTop]: this.state.messageEntryOnTop
+    };
+
+    if (this.props.showOAuthDialog) return <div className={classNames(rootStyles)}><OAuthDialog closable={false} oauthInfo={this.props.oauthInfo} /></div>;
     if (isExited) return this.renderExitedPane();
     if (isLoading) return this.renderLoader();
     if (this.props.isBotMode) return this.renderBotMode();
@@ -1388,13 +1399,6 @@ class UIRoot extends Component {
     const textRows = this.state.pendingMessage.split("\n").length;
     const pendingMessageTextareaHeight = textRows * 28 + "px";
     const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
-
-    const rootStyles = {
-      [styles.ui]: true,
-      "ui-root": true,
-      "in-modal-or-overlay": this.isInModalOrOverlay(),
-      [styles.messageEntryOnTop]: this.state.messageEntryOnTop
-    };
 
     const presenceLogEntries = this.props.presenceLogEntries || [];
 

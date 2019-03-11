@@ -714,14 +714,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     .join()
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
+
       hubChannel.setPermissionsFromToken(data.perms_token);
+      if (!hubChannel.permissions.join_hub && data.oauth_info.length) {
+        remountUI({ oauthInfo: data.oauth_info, showOAuthDialog: true });
+      }
+
       scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
       });
       subscriptions.setHubChannel(hubChannel);
+
       subscriptions.setSubscribed(data.subscriptions.web_push);
       remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
+
       await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
     })
     .receive("error", res => {
