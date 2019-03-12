@@ -478,8 +478,8 @@ class UIRoot extends Component {
     this.exit();
   };
 
-  exit = () => {
-    this.props.exitScene();
+  exit = reason => {
+    this.props.exitScene(reason);
     this.setState({ exited: true });
   };
 
@@ -887,7 +887,7 @@ class UIRoot extends Component {
       );
     } else {
       const reason = this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
-      const exitSubtitleId = `exit.subtitle.${this.state.exited ? "exited" : reason}`;
+      const exitSubtitleId = `exit.subtitle.${reason || "exited"}`;
       subtitle = (
         <div>
           <FormattedMessage id={exitSubtitleId} />
@@ -1659,56 +1659,64 @@ class UIRoot extends Component {
               </form>
             )}
 
-            <div
-              className={classNames({
-                [styles.inviteContainer]: true,
-                [styles.inviteContainerBelowHud]: entered,
-                [styles.inviteContainerInverted]: this.state.showInviteDialog
-              })}
-            >
-              {!showVREntryButton &&
-                (!this.props.activeTips || !this.props.activeTips.top) && (
+            {this.state.frozen && (
+              <button className={styles.leaveButton} onClick={() => this.exit("left")}>
+                <FormattedMessage id="entry.leave-room" />
+              </button>
+            )}
+
+            {!this.state.frozen && (
+              <div
+                className={classNames({
+                  [styles.inviteContainer]: true,
+                  [styles.inviteContainerBelowHud]: entered,
+                  [styles.inviteContainerInverted]: this.state.showInviteDialog
+                })}
+              >
+                {!showVREntryButton &&
+                  (!this.props.activeTips || !this.props.activeTips.top) && (
+                    <WithHoverSound>
+                      <button
+                        className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
+                        onClick={() => this.toggleInviteDialog()}
+                      >
+                        <FormattedMessage id="entry.invite-others-nag" />
+                      </button>
+                    </WithHoverSound>
+                  )}
+                {!showVREntryButton &&
+                  this.occupantCount() > 1 &&
+                  (!this.props.activeTips || !this.props.activeTips.top) &&
+                  entered && (
+                    <WithHoverSound>
+                      <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
+                        <span>
+                          {this.state.miniInviteActivated
+                            ? navigator.share
+                              ? "sharing..."
+                              : "copied!"
+                            : "hub.link/" + this.props.hubId}
+                        </span>
+                      </button>
+                    </WithHoverSound>
+                  )}
+                {showVREntryButton && (
                   <WithHoverSound>
-                    <button
-                      className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
-                      onClick={() => this.toggleInviteDialog()}
-                    >
-                      <FormattedMessage id="entry.invite-others-nag" />
+                    <button onClick={() => this.props.scene.enterVR()}>
+                      <FormattedMessage id="entry.enter-in-vr" />
                     </button>
                   </WithHoverSound>
                 )}
-              {!showVREntryButton &&
-                this.occupantCount() > 1 &&
-                (!this.props.activeTips || !this.props.activeTips.top) &&
-                entered && (
-                  <WithHoverSound>
-                    <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
-                      <span>
-                        {this.state.miniInviteActivated
-                          ? navigator.share
-                            ? "sharing..."
-                            : "copied!"
-                          : "hub.link/" + this.props.hubId}
-                      </span>
-                    </button>
-                  </WithHoverSound>
+                {this.state.showInviteDialog && (
+                  <InviteDialog
+                    allowShare={!this.props.availableVREntryTypes.isInHMD}
+                    entryCode={this.props.hubEntryCode}
+                    hubId={this.props.hubId}
+                    onClose={() => this.setState({ showInviteDialog: false })}
+                  />
                 )}
-              {showVREntryButton && (
-                <WithHoverSound>
-                  <button onClick={() => this.props.scene.enterVR()}>
-                    <FormattedMessage id="entry.enter-in-vr" />
-                  </button>
-                </WithHoverSound>
-              )}
-              {this.state.showInviteDialog && (
-                <InviteDialog
-                  allowShare={!this.props.availableVREntryTypes.isInHMD}
-                  entryCode={this.props.hubEntryCode}
-                  hubId={this.props.hubId}
-                  onClose={() => this.setState({ showInviteDialog: false })}
-                />
-              )}
-            </div>
+              </div>
+            )}
 
             <StateRoute
               stateKey="overlay"
@@ -1769,7 +1777,7 @@ class UIRoot extends Component {
               />
             )}
 
-            {entered ? (
+            {entered && !this.state.frozen ? (
               <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
                   history={this.props.history}

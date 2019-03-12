@@ -18,6 +18,7 @@
     "entry.room": "room",
     "entry.enter-room-title": "Lobby",
     "entry.enter-room": "Enter Room",
+    "entry.leave-room": "Leave Room",
     "entry.change-scene": "Choose a Scene",
     "entry.screen-prefix": "Enter on ",
     "entry.desktop-screen": "Screen",

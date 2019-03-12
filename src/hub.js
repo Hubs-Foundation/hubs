@@ -245,8 +245,8 @@ function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
-  const isCursorHoldingPen = scene.systems.userinput.activeSets.has(userinputSets.cursorHoldingPen);
-  const hasActiveCamera = !!scene.systems["camera-tools"].getMyCamera();
+  const isCursorHoldingPen = scene && scene.systems.userinput.activeSets.has(userinputSets.cursorHoldingPen);
+  const hasActiveCamera = scene && !!scene.systems["camera-tools"].getMyCamera();
 
   ReactDOM.render(
     <Router history={history}>
@@ -634,7 +634,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     linkChannel,
     subscriptions,
     enterScene: entryManager.enterScene,
-    exitScene: entryManager.exitScene,
+    exitScene: reason => {
+      entryManager.exitScene();
+
+      if (reason) {
+        remountUI({ roomUnavailableReason: reason });
+      }
+    },
     initialIsSubscribed: subscriptions.isSubscribed(),
     activeTips: scene.systems.tips.activeTips
   });
