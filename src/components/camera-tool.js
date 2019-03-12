@@ -56,6 +56,9 @@ async function pixelsToPNG(pixels, width, height) {
   return new File([blob], "snap.png", { type: "image/png" });
 }
 
+// Don't show camera viewports on mobile VR to same framerate.
+const enableCameraViewport = !AFRAME.utils.device.isMobileVR();
+
 AFRAME.registerComponent("camera-tool", {
   schema: {
     previewFPS: { default: 6 },
@@ -88,7 +91,7 @@ AFRAME.registerComponent("camera-tool", {
     // Bit of a hack here to only update the renderTarget when the screens are in view and at a reduced FPS
     material.map.isVideoTexture = true;
     material.map.update = () => {
-      if (performance.now() - this.lastUpdate >= 1000 / this.data.previewFPS) {
+      if (enableCameraViewport && performance.now() - this.lastUpdate >= 1000 / this.data.previewFPS) {
         this.updateRenderTargetNextTick = true;
       }
     };
@@ -102,22 +105,24 @@ AFRAME.registerComponent("camera-tool", {
       const width = 0.28;
       const geometry = new THREE.PlaneGeometry(width, width / this.camera.aspect);
 
-      const screen = new THREE.Mesh(geometry, material);
-      screen.rotation.set(0, Math.PI, 0);
-      screen.position.set(0, 0, -0.042);
-      screen.matrixNeedsUpdate = true;
-      this.el.setObject3D("screen", screen);
+      if (enableCameraViewport) {
+        const screen = new THREE.Mesh(geometry, material);
+        screen.rotation.set(0, Math.PI, 0);
+        screen.position.set(0, 0, -0.042);
+        screen.matrixNeedsUpdate = true;
+        this.el.setObject3D("screen", screen);
 
-      const selfieScreen = new THREE.Mesh(geometry, material);
-      selfieScreen.position.set(0, 0.4, 0);
-      selfieScreen.scale.set(-2, 2, 2);
-      selfieScreen.matrixNeedsUpdate = true;
-      this.el.setObject3D("selfieScreen", selfieScreen);
+        const selfieScreen = new THREE.Mesh(geometry, material);
+        selfieScreen.position.set(0, 0.4, 0);
+        selfieScreen.scale.set(-2, 2, 2);
+        selfieScreen.matrixNeedsUpdate = true;
+        this.el.setObject3D("selfieScreen", selfieScreen);
+
+        this.updateRenderTargetNextTick = true;
+      }
 
       this.cameraSystem = this.el.sceneEl.systems["camera-tools"];
       this.cameraSystem.register(this.el);
-
-      this.updateRenderTargetNextTick = true;
     });
 
     this.el.setAttribute("hover-menu__camera", { template: "#camera-hover-menu", dirs: ["forward", "back"] });
