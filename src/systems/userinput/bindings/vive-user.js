@@ -741,6 +741,18 @@ export const viveUserBindings = addSetsToBindings({
   [sets.leftHandHoveringOnPen]: [],
   [sets.leftHandHoldingPen]: [
     {
+      src: { value: leftGripPressed2 },
+      dest: { value: paths.actions.leftHand.drop },
+      xform: xforms.rising,
+      priority: 2
+    },
+    {
+      src: { value: leftGripPressed2 },
+      dest: { value: paths.actions.leftHand.drop },
+      xform: xforms.noop,
+      priority: 2
+    },
+    {
       src: { value: leftTouchpadPressed2 },
       dest: { value: leftTouchpadFallingStopTeleport },
       xform: xforms.falling,
@@ -832,7 +844,7 @@ export const viveUserBindings = addSetsToBindings({
         touching: lButton("touchpad").touched
       },
       dest: { value: paths.actions.leftHand.scalePenTip },
-      xform: xforms.touch_axis_scroll(0.1)
+      xform: xforms.touch_axis_scroll(0.05)
     },
     {
       src: { value: lButton("top").pressed },
@@ -903,6 +915,24 @@ export const viveUserBindings = addSetsToBindings({
   [sets.cursorHoveringOnPen]: [],
 
   [sets.cursorHoldingPen]: [
+    {
+      src: [cursorDrop1],
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.noop,
+      priority: 1
+    },
+    {
+      src: [cursorDrop2],
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.noop,
+      priority: 1
+    },
+    {
+      src: { value: rightGripPressed2 },
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.rising,
+      priority: 1
+    },
     {
       src: {
         bool: rTouchpadRising,
@@ -999,7 +1029,8 @@ export const viveUserBindings = addSetsToBindings({
     {
       src: [rHandDrop1],
       dest: { value: paths.actions.rightHand.drop },
-      xform: xforms.any
+      xform: xforms.any,
+      priority: 2
     },
     {
       src: {},
@@ -1010,6 +1041,18 @@ export const viveUserBindings = addSetsToBindings({
   ],
   [sets.rightHandHoveringOnPen]: [],
   [sets.rightHandHoldingPen]: [
+    {
+      src: [rHandDrop1],
+      dest: { value: paths.actions.rightHand.drop },
+      xform: xforms.noop,
+      priority: 1
+    },
+    {
+      src: { value: rightGripPressed2 },
+      dest: { value: paths.actions.rightHand.drop },
+      xform: xforms.rising,
+      priority: 1
+    },
     {
       src: {
         bool: rTouchpadRising,
@@ -1058,7 +1101,7 @@ export const viveUserBindings = addSetsToBindings({
         touching: rButton("touchpad").touched
       },
       dest: { value: paths.actions.rightHand.scalePenTip },
-      xform: xforms.touch_axis_scroll(0.1)
+      xform: xforms.touch_axis_scroll(0.05)
     },
     {
       src: { value: rButton("top").pressed },
