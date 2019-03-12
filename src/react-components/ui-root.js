@@ -590,15 +590,16 @@ class UIRoot extends Component {
       mediaStream.addTrack(this.state.audioTrack);
 
       const AudioContext = window.AudioContext || window.webkitAudioContext;
-      const micLevelAudioContext = new AudioContext();
-      const micSource = micLevelAudioContext.createMediaStreamSource(mediaStream);
-      const analyser = micLevelAudioContext.createAnalyser();
+      this.micLevelAudioContext = new AudioContext();
+      const micSource = this.micLevelAudioContext.createMediaStreamSource(mediaStream);
+      const analyser = this.micLevelAudioContext.createAnalyser();
       analyser.fftSize = 32;
       const levels = new Uint8Array(analyser.frequencyBinCount);
 
       micSource.connect(analyser);
 
-      const micUpdateInterval = setInterval(() => {
+      clearInterval(this.micUpdateInterval);
+      this.micUpdateInterval = setInterval(() => {
         analyser.getByteTimeDomainData(levels);
         let v = 0;
         for (let x = 0; x < levels.length; x++) {
@@ -623,8 +624,6 @@ class UIRoot extends Component {
       if (micDeviceId) {
         this.props.store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
       }
-
-      this.setState({ micLevelAudioContext, micUpdateInterval });
     }
 
     this.setState({ mediaStream });
@@ -734,10 +733,10 @@ class UIRoot extends Component {
     this.stopTestTone();
     clearTimeout(this.testToneTimeout);
 
-    if (this.state.micLevelAudioContext) {
-      this.state.micLevelAudioContext.close();
-      clearInterval(this.state.micUpdateInterval);
+    if (this.micLevelAudioContext) {
+      this.micLevelAudioContext.close();
     }
+    clearInterval(this.micUpdateInterval);
 
     this.setState({ entered: true, showInviteDialog: false });
     clearHistoryState(this.props.history);
