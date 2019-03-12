@@ -9,6 +9,7 @@ const arrows_vec2 = "/var/mouse-and-keyboard/arrows_vec2";
 const togglePenWithRMB = "/vars/mouse-and-keyboard/drop_pen_with_RMB";
 const togglePenWithEsc = "/vars/mouse-and-keyboard/drop_pen_with_esc";
 const togglePenWithP = "/vars/mouse-and-keyboard/drop_pen_with_p";
+const togglePenWithHud = "/vars/mouse-and-keyboard/drop_pen_with_hud";
 const togglePen = "/vars/mouse-and-keyboard/togglePen";
 
 const k = name => {
@@ -86,7 +87,17 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.falling
     },
     {
-      src: [paths.device.hud.penButton, paths.device.keyboard.key("p")],
+      src: { value: paths.device.keyboard.key("p") },
+      dest: { value: togglePenWithP },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.hud.penButton },
+      dest: { value: togglePenWithHud },
+      xform: xforms.rising
+    },
+    {
+      src: [togglePenWithHud, togglePenWithP],
       dest: { value: togglePen },
       xform: xforms.any
     },
@@ -384,12 +395,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.rising
     },
     {
-      src: { value: paths.device.keyboard.key("p") },
-      dest: { value: togglePenWithP },
-      xform: xforms.rising
-    },
-    {
-      src: [togglePenWithRMB, togglePenWithEsc, togglePenWithP],
+      src: [togglePenWithRMB, togglePenWithEsc, togglePenWithP, togglePenWithHud],
       dest: { value: togglePen },
       xform: xforms.any
     },
