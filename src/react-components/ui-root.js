@@ -69,6 +69,11 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 
+import qsTruthy from "../utils/qs_truthy";
+// TODO temp feature flags
+const customSkinEnabled = qsTruthy("customSkin");
+const advancedAvatarEditor = qsTruthy("advancedAvatarEditor");
+
 addLocaleData([...en]);
 
 // This is a list of regexes that match the microphone labels of HMDs.
@@ -145,6 +150,8 @@ class UIRoot extends Component {
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
+    isCursorHoldingPen: PropTypes.bool,
+    hasActiveCamera: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
     activeTips: PropTypes.object,
     location: PropTypes.object,
@@ -471,8 +478,8 @@ class UIRoot extends Component {
     this.exit();
   };
 
-  exit = reason => {
-    this.props.exitScene(reason);
+  exit = () => {
+    this.props.exitScene();
     this.setState({ exited: true });
   };
 
@@ -881,7 +888,7 @@ class UIRoot extends Component {
       );
     } else {
       const reason = this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
-      const exitSubtitleId = `exit.subtitle.${reason || "exited"}`;
+      const exitSubtitleId = `exit.subtitle.${this.state.exited ? "exited" : reason}`;
       subtitle = (
         <div>
           <FormattedMessage id={exitSubtitleId} />
@@ -1414,7 +1421,16 @@ class UIRoot extends Component {
               stateValue="profile"
               history={this.props.history}
               render={props => (
-                <ProfileEntryPanel {...props} finished={this.onProfileFinished} store={this.props.store} />
+                <ProfileEntryPanel
+                  {...props}
+                  signedIn={this.state.signedIn}
+                  onSignIn={this.showSignInDialog}
+                  onSignOut={this.signOut}
+                  finished={this.onProfileFinished}
+                  store={this.props.store}
+                  customSkinEnabled={customSkinEnabled}
+                  advanced={advancedAvatarEditor}
+                />
               )}
             />
             {showMediaBrowser && (
@@ -1446,6 +1462,11 @@ class UIRoot extends Component {
                     this.onProfileFinished();
                   }}
                   store={this.props.store}
+                  signedIn={this.state.signedIn}
+                  onSignIn={this.showSignInDialog}
+                  onSignOut={this.signOut}
+                  customSkinEnabled={customSkinEnabled}
+                  advanced={advancedAvatarEditor}
                 />
               )}
             />
@@ -1544,106 +1565,103 @@ class UIRoot extends Component {
                   )}
                 </div>
               )}
-            {entered &&
-              !this.state.frozen && (
-                <form onSubmit={this.sendMessage}>
-                  <div
-                    className={classNames({
-                      [styles.messageEntryInRoom]: true,
-                      [styles.messageEntryOnMobile]: isMobile
-                    })}
-                    style={{ height: pendingMessageFieldHeight }}
+            {entered && (
+              <form onSubmit={this.sendMessage}>
+                <div
+                  className={classNames({ [styles.messageEntryInRoom]: true, [styles.messageEntryOnMobile]: isMobile })}
+                  style={{ height: pendingMessageFieldHeight }}
+                >
+                  {this.state.pendingMessage.startsWith("/") && (
+                    <ChatCommandHelp
+                      onTop={this.state.messageEntryOnTop}
+                      matchingPrefix={this.state.pendingMessage.substring(1)}
+                    />
+                  )}
+                  <input
+                    id="message-entry-media-input"
+                    type="file"
+                    style={{ display: "none" }}
+                    accept={isMobile ? "image/*" : "*"}
+                    multiple
+                    onChange={e => {
+                      for (const file of e.target.files) {
+                        this.createObject(file);
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor="message-entry-media-input"
+                    title={"Upload"}
+                    className={classNames([
+                      styles.messageEntryButton,
+                      styles.messageEntryButtonInRoom,
+                      styles.messageEntryUpload
+                    ])}
                   >
-                    {this.state.pendingMessage.startsWith("/") && (
-                      <ChatCommandHelp
-                        onTop={this.state.messageEntryOnTop}
-                        matchingPrefix={this.state.pendingMessage.substring(1)}
-                      />
-                    )}
-                    <input
-                      id="message-entry-media-input"
-                      type="file"
-                      style={{ display: "none" }}
-                      accept={isMobile ? "image/*" : "*"}
-                      multiple
-                      onChange={e => {
-                        for (const file of e.target.files) {
-                          this.createObject(file);
-                        }
-                      }}
-                    />
-                    <label
-                      htmlFor="message-entry-media-input"
-                      title={"Upload"}
-                      className={classNames([
-                        styles.messageEntryButton,
-                        styles.messageEntryButtonInRoom,
-                        styles.messageEntryUpload
-                      ])}
-                    >
-                      <i>
-                        <FontAwesomeIcon icon={isMobile ? faCamera : faPlus} />
-                      </i>
-                    </label>
-                    <textarea
-                      style={{ height: pendingMessageTextareaHeight }}
-                      className={classNames([
-                        styles.messageEntryInput,
-                        styles.messageEntryInputInRoom,
-                        "chat-focus-target"
-                      ])}
-                      value={this.state.pendingMessage}
-                      rows={textRows}
-                      onFocus={e => {
-                        handleTextFieldFocus(e.target);
-                        this.setState({ messageEntryOnTop: isMobile });
-                      }}
-                      onBlur={() => {
-                        handleTextFieldBlur();
-                        this.setState({ messageEntryOnTop: false });
-                      }}
-                      onChange={e => {
-                        e.stopPropagation();
-                        this.setState({ pendingMessage: e.target.value });
-                      }}
-                      onKeyDown={e => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          this.sendMessage(e);
-                        } else if (e.key === "Enter" && e.shiftKey && e.ctrlKey) {
-                          spawnChatMessage(e.target.value);
-                          this.setState({ pendingMessage: "" });
-                        } else if (e.key === "Escape") {
-                          e.target.blur();
-                        }
-                      }}
-                      placeholder="Send to room..."
-                    />
-                    <button
-                      className={classNames([styles.messageEntrySpawn])}
-                      onClick={() => {
-                        if (this.state.pendingMessage.length > 0) {
-                          spawnChatMessage(this.state.pendingMessage);
-                          this.setState({ pendingMessage: "" });
-                        } else {
-                          this.pushHistoryState("modal", "create");
-                        }
-                      }}
-                    />
-                    <button
-                      type="submit"
-                      className={classNames([
-                        styles.messageEntryButton,
-                        styles.messageEntryButtonInRoom,
-                        styles.messageEntrySubmit
-                      ])}
-                    >
-                      <i>
-                        <FontAwesomeIcon icon={faPaperPlane} />
-                      </i>
-                    </button>
-                  </div>
-                </form>
-              )}
+                    <i>
+                      <FontAwesomeIcon icon={isMobile ? faCamera : faPlus} />
+                    </i>
+                  </label>
+                  <textarea
+                    style={{ height: pendingMessageTextareaHeight }}
+                    className={classNames([
+                      styles.messageEntryInput,
+                      styles.messageEntryInputInRoom,
+                      "chat-focus-target"
+                    ])}
+                    value={this.state.pendingMessage}
+                    rows={textRows}
+                    onFocus={e => {
+                      handleTextFieldFocus(e.target);
+                      this.setState({ messageEntryOnTop: isMobile });
+                    }}
+                    onBlur={() => {
+                      handleTextFieldBlur();
+                      this.setState({ messageEntryOnTop: false });
+                    }}
+                    onChange={e => {
+                      e.stopPropagation();
+                      this.setState({ pendingMessage: e.target.value });
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === "Enter" && !e.ctrlKey && !e.shiftKey) {
+                        this.sendMessage(e);
+                      } else if (e.key === "Enter" && e.ctrlKey) {
+                        spawnChatMessage(e.target.value);
+                        this.setState({ pendingMessage: "" });
+                        e.target.blur();
+                      } else if (e.key === "Escape") {
+                        e.target.blur();
+                      }
+                    }}
+                    placeholder="Send to room..."
+                  />
+                  <button
+                    className={classNames([styles.messageEntrySpawn])}
+                    onClick={() => {
+                      if (this.state.pendingMessage.length > 0) {
+                        spawnChatMessage(this.state.pendingMessage);
+                        this.setState({ pendingMessage: "" });
+                      } else {
+                        this.pushHistoryState("modal", "create");
+                      }
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    className={classNames([
+                      styles.messageEntryButton,
+                      styles.messageEntryButtonInRoom,
+                      styles.messageEntrySubmit
+                    ])}
+                  >
+                    <i>
+                      <FontAwesomeIcon icon={faPaperPlane} />
+                    </i>
+                  </button>
+                </div>
+              </form>
+            )}
 
             {entered &&
               this.state.frozen && (
@@ -1705,21 +1723,23 @@ class UIRoot extends Component {
               </div>
             )}
 
-            <StateRoute
-              stateKey="overlay"
-              stateValue="link"
-              history={this.props.history}
-              render={() => (
-                <LinkDialog
-                  linkCode={this.state.linkCode}
-                  onClose={() => {
-                    this.state.linkCodeCancel();
-                    this.setState({ linkCode: null, linkCodeCancel: null });
-                    this.props.history.goBack();
-                  }}
-                />
-              )}
-            />
+            {!this.state.frozen && (
+              <StateRoute
+                stateKey="overlay"
+                stateValue="link"
+                history={this.props.history}
+                render={() => (
+                  <LinkDialog
+                    linkCode={this.state.linkCode}
+                    onClose={() => {
+                      this.state.linkCodeCancel();
+                      this.setState({ linkCode: null, linkCodeCancel: null });
+                      this.props.history.goBack();
+                    }}
+                  />
+                )}
+              />
+            )}
 
             <div
               onClick={() => this.setState({ showSettingsMenu: !this.state.showSettingsMenu })}
@@ -1776,11 +1796,13 @@ class UIRoot extends Component {
                   spacebubble={this.state.spacebubble}
                   videoShareMediaSource={this.state.videoShareMediaSource}
                   activeTip={this.props.activeTips && this.props.activeTips.top}
+                  isCursorHoldingPen={this.props.isCursorHoldingPen}
+                  hasActiveCamera={this.props.hasActiveCamera}
                   onToggleMute={this.toggleMute}
                   onToggleFreeze={this.toggleFreeze}
                   onToggleSpaceBubble={this.toggleSpaceBubble}
                   onSpawnPen={this.spawnPen}
-                  onSpawnCamera={() => this.props.scene.emit("action_spawn_camera")}
+                  onSpawnCamera={() => this.props.scene.emit("action_toggle_camera")}
                   onShareVideo={this.shareVideo}
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}

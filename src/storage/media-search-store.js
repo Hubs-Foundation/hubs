@@ -2,7 +2,7 @@ import { EventTarget } from "event-target-shim";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { pushHistoryPath, sluglessPath, withSlug } from "../utils/history";
 
-export const SOURCES = ["videos", "images", "gifs", "scenes", "sketchfab", "poly", "twitch"];
+export const SOURCES = ["videos", "sketchfab", "poly", "scenes", "gifs", "images", "twitch"];
 
 const URL_SOURCE_TO_TO_API_SOURCE = {
   scenes: "scene_listings",
@@ -182,7 +182,7 @@ export default class MediaSearchStore extends EventTarget {
       }
     }
 
-    this._stashedParams = {};
+    this._stashedParams = null;
     this._stashedSource = null;
 
     if (hideNav) {

@@ -9,8 +9,10 @@ const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
-import { addMedia, proxiedUrlFor, getPromotionTokenForFile } from "./utils/media-utils";
+import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import { ObjectContentOrigins } from "./object-types";
+
+import { getAvatarSrc } from "./assets/avatars/avatars";
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, availableVREntryTypes) {
@@ -144,7 +146,7 @@ export default class SceneEntryManager {
     const { avatarId, displayName } = this.store.state.profile;
     this.playerRig.setAttribute("player-info", {
       displayName,
-      avatarSrc: avatarId && avatarId.startsWith("http") ? proxiedUrlFor(avatarId) : `#${avatarId || "botdefault"}`
+      avatarSrc: getAvatarSrc(avatarId)
     });
     const hudController = this.playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });
@@ -483,14 +485,25 @@ export default class SceneEntryManager {
   };
 
   _setupCamera = () => {
-    this.scene.addEventListener("action_spawn_camera", () => {
-      const entity = document.createElement("a-entity");
-      entity.setAttribute("networked", { template: "#interactable-camera" });
-      entity.setAttribute("offset-relative-to", {
-        target: "#player-camera",
-        offset: { x: 0, y: 0, z: -1.5 }
-      });
-      this.scene.appendChild(entity);
+    this.scene.addEventListener("action_toggle_camera", () => {
+      const myCamera = this.scene.systems["camera-tools"].getMyCamera();
+
+      if (myCamera) {
+        myCamera.parentNode.removeChild(myCamera);
+        this.scene.removeState("camera");
+      } else {
+        const entity = document.createElement("a-entity");
+        entity.setAttribute("networked", { template: "#interactable-camera" });
+        entity.setAttribute("offset-relative-to", {
+          target: "#player-camera",
+          offset: { x: 0, y: 0, z: -1.5 }
+        });
+        this.scene.appendChild(entity);
+        this.scene.addState("camera");
+      }
+
+      // Need to wait a frame so camera is registered with system.
+      setTimeout(() => this.scene.emit("camera_toggled"));
     });
 
     this.scene.addEventListener("photo_taken", e => {
