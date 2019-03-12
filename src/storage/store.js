@@ -18,7 +18,8 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         displayName: { type: "string", pattern: "^[A-Za-z0-9-]{3,32}$" },
-        avatarId: { type: "string" }
+        avatarId: { type: "string" },
+        personalAvatarId: { type: "string" }
       }
     },
 

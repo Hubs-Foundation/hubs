@@ -69,6 +69,7 @@ import "./components/camera-tool";
 import "./components/scene-sound";
 import "./components/emit-state-change";
 import "./components/action-to-event";
+import "./components/action-to-remove";
 import "./components/emit-scene-event-on-remove";
 import "./components/stop-event-propagation";
 import "./components/follow-in-fov";
@@ -83,6 +84,7 @@ import "./components/set-active-camera";
 import "./components/track-pose";
 import "./components/replay";
 import "./components/visibility-by-path";
+import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -243,6 +245,8 @@ function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
+  const isCursorHoldingPen = scene.systems.userinput.activeSets.has(userinputSets.cursorHoldingPen);
+  const hasActiveCamera = !!scene.systems["camera-tools"].getMyCamera();
 
   ReactDOM.render(
     <Router history={history}>
@@ -257,6 +261,8 @@ function mountUI(props = {}) {
               forcedVREntryType,
               store,
               mediaSearchStore,
+              isCursorHoldingPen,
+              hasActiveCamera,
               ...props,
               ...routeProps
             }}
@@ -634,6 +640,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   scene.addEventListener("tips_changed", e => {
     remountUI({ activeTips: e.detail });
   });
+
+  scene.addEventListener("camera_toggled", () => remountUI({}));
+
+  scene.addEventListener("camera_removed", () => remountUI({}));
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 

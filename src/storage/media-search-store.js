@@ -182,7 +182,7 @@ export default class MediaSearchStore extends EventTarget {
       }
     }
 
-    this._stashedParams = {};
+    this._stashedParams = null;
     this._stashedSource = null;
 
     if (hideNav) {
