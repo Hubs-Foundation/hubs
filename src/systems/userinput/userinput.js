@@ -382,8 +382,25 @@ AFRAME.registerSystem("userinput", {
         this.xformStates.delete(binding);
       }
 
-      const { src, dest, xform } = binding;
+      const { src, dest, xform, debug } = binding;
+
+      let oldValue;
+
+      if (debug) {
+        oldValue = this.frame.get(dest.value);
+      }
+
       const newState = xform(this.frame, src, dest, this.xformStates.get(binding));
+
+      if (debug) {
+        // Note for now this only works with bindings that have { value: } sources and dests
+        console.log(
+          `${JSON.stringify(src.value)} (${src.value && JSON.stringify(this.frame.get(src.value))}) to ${JSON.stringify(
+            dest
+          )}: ${oldValue} -> ${this.frame.get(dest.value)}`
+        );
+      }
+
       if (newState !== undefined) {
         this.xformStates.set(binding, newState);
       }
