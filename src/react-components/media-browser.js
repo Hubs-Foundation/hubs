@@ -74,7 +74,7 @@ class MediaBrowser extends Component {
     onMediaSearchResultEntrySelected: PropTypes.func
   };
 
-  state = { query: "", facets: [], showNav: true, selectNextResult: true };
+  state = { query: "", facets: [], showNav: true, selectNextResult: false };
 
   constructor(props) {
     super(props);
