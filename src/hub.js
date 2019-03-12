@@ -283,7 +283,7 @@ async function updateUIForHub(hub) {
   remountUI({
     hubId: hub.hub_id,
     hubName: hub.name,
-    hubScene: hub.scene,
+    hubScene: hub.scene && hub.scene.url ? hub.scene : null,
     hubEntryCode: hub.entry_code
   });
 
@@ -302,7 +302,13 @@ async function updateEnvironmentForHub(hub) {
 
   if (hub.scene) {
     isLegacyBundle = false;
-    sceneUrl = hub.scene.model_url;
+
+    if (hub.scene.model_url) {
+      sceneUrl = hub.scene.model_url;
+    } else {
+      // delisted/removed scene
+      sceneUrl = loadingEnvironmentURL;
+    }
   } else {
     const defaultSpaceTopic = hub.topics[0];
     const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");
