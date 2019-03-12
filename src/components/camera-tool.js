@@ -91,7 +91,7 @@ AFRAME.registerComponent("camera-tool", {
     // Bit of a hack here to only update the renderTarget when the screens are in view and at a reduced FPS
     material.map.isVideoTexture = true;
     material.map.update = () => {
-      if (performance.now() - this.lastUpdate >= 1000 / this.data.previewFPS && enableCameraViewport) {
+      if (enableCameraViewport && performance.now() - this.lastUpdate >= 1000 / this.data.previewFPS) {
         this.updateRenderTargetNextTick = true;
       }
     };
