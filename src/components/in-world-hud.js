@@ -24,11 +24,13 @@ AFRAME.registerComponent("in-world-hud", {
     this.updateButtonStates = () => {
       this.mic.setAttribute("icon-button", "active", this.el.sceneEl.is("muted"));
       this.pen.setAttribute("icon-button", "active", this.el.sceneEl.is("pen"));
+      this.cameraBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("camera"));
     };
     this.updateButtonStates();
 
     this.onStateChange = evt => {
-      if (!(evt.detail === "muted" || evt.detail === "frozen" || evt.detail === "pen")) return;
+      if (!(evt.detail === "muted" || evt.detail === "frozen" || evt.detail === "pen" || evt.detail === "camera"))
+        return;
       this.updateButtonStates();
     };
 
@@ -45,7 +47,7 @@ AFRAME.registerComponent("in-world-hud", {
     };
 
     this.onCameraClick = () => {
-      this.el.emit("action_spawn_camera");
+      this.el.emit("action_toggle_camera");
     };
   },
 

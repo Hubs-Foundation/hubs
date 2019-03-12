@@ -58,26 +58,15 @@ export class OculusTouchControllerDevice {
   write(frame) {
     if (!this.gamepad.connected) return;
 
-    for (let i = 0; i < this.gamepad.buttons.length; i++) {
-      const buttonPath = paths.device.gamepad(this.gamepad.index).button(i);
-      const button = this.gamepad.buttons[i];
-      frame[buttonPath.pressed] = !!button.pressed;
-      frame[buttonPath.touched] = !!button.touched;
-      frame[buttonPath.value] = button.value;
-    }
-    for (let i = 0; i < this.gamepad.axes.length; i++) {
-      const axis = this.gamepad.axes[i];
-      frame[paths.device.gamepad(this.gamepad.index).axis(i)] = axis;
-    }
-
-    this.buttonMap.forEach(button => {
-      const outpath = this.path.button(button.name);
-      frame[outpath.pressed] = !!frame[paths.device.gamepad(this.gamepad.index).button(button.buttonId).pressed];
-      frame[outpath.touched] = !!frame[paths.device.gamepad(this.gamepad.index).button(button.buttonId).touched];
-      frame[outpath.value] = frame[paths.device.gamepad(this.gamepad.index).button(button.buttonId).value];
+    this.buttonMap.forEach(b => {
+      const path = this.path.button(b.name);
+      const button = this.gamepad.buttons[b.buttonId];
+      frame.setValueType(path.pressed, !!button.pressed);
+      frame.setValueType(path.touched, !!button.touched);
+      frame.setValueType(path.value, button.value);
     });
     this.axisMap.forEach(axis => {
-      frame[this.path.axis(axis.name)] = frame[paths.device.gamepad(this.gamepad.index).axis(axis.axisId)];
+      frame.setValueType(this.path.axis(axis.name), this.gamepad.axes[axis.axisId]);
     });
 
     this.rayObject = this.rayObject || document.querySelector(this.selector).object3D;
@@ -86,16 +75,22 @@ export class OculusTouchControllerDevice {
     this.pose.position.setFromMatrixPosition(this.rayObject.matrixWorld);
     this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
     this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
-    frame[this.path.pose] = this.pose;
+    frame.setPose(this.path.pose, this.pose);
     if (this.gamepad.pose.position && this.gamepad.pose.orientation) {
-      frame[this.path.matrix] = this.matrix
-        .compose(
-          this.position.fromArray(this.gamepad.pose.position),
-          this.orientation.fromArray(this.gamepad.pose.orientation),
-          ONES
-        )
-        .premultiply(this.sittingToStandingMatrix)
-        .multiply(this.handOffset);
+      frame.setMatrix4(
+        this.path.matrix,
+        this.matrix
+          .compose(
+            this.position.fromArray(this.gamepad.pose.position),
+            this.orientation.fromArray(this.gamepad.pose.orientation),
+            ONES
+          )
+          .premultiply(this.sittingToStandingMatrix)
+          .multiply(this.handOffset)
+      );
+    }
+    if (this.gamepad.hapticActuators && this.gamepad.hapticActuators[0]) {
+      frame.setValueType(paths.haptics.actuators[this.gamepad.hand], this.gamepad.hapticActuators[0]);
     }
   }
 }

@@ -35,26 +35,26 @@ export class WindowsMixedRealityControllerDevice {
 
     const path = paths.device.wmr[this.gamepad.hand || "right"];
 
-    frame[path.touchpad.pressed] = this.gamepad.buttons[0].pressed;
-    frame[path.touchpad.touched] = this.gamepad.buttons[0].touched;
-    frame[path.touchpad.value] = this.gamepad.buttons[0].value;
+    frame.setValueType(path.touchpad.pressed, this.gamepad.buttons[0].pressed);
+    frame.setValueType(path.touchpad.touched, this.gamepad.buttons[0].touched);
+    frame.setValueType(path.touchpad.value, this.gamepad.buttons[0].value);
 
-    frame[path.trigger.pressed] = this.gamepad.buttons[1].pressed;
-    frame[path.trigger.touched] = this.gamepad.buttons[1].touched;
-    frame[path.trigger.value] = this.gamepad.buttons[1].value;
+    frame.setValueType(path.trigger.pressed, this.gamepad.buttons[1].pressed);
+    frame.setValueType(path.trigger.touched, this.gamepad.buttons[1].touched);
+    frame.setValueType(path.trigger.value, this.gamepad.buttons[1].value);
 
-    frame[path.grip.pressed] = this.gamepad.buttons[2].pressed;
-    frame[path.grip.touched] = this.gamepad.buttons[2].touched;
-    frame[path.grip.value] = this.gamepad.buttons[2].value;
+    frame.setValueType(path.grip.pressed, this.gamepad.buttons[2].pressed);
+    frame.setValueType(path.grip.touched, this.gamepad.buttons[2].touched);
+    frame.setValueType(path.grip.value, this.gamepad.buttons[2].value);
 
-    frame[path.menu.pressed] = this.gamepad.buttons[3].pressed;
-    frame[path.menu.touched] = this.gamepad.buttons[3].touched;
-    frame[path.menu.value] = this.gamepad.buttons[3].value;
+    frame.setValueType(path.menu.pressed, this.gamepad.buttons[3].pressed);
+    frame.setValueType(path.menu.touched, this.gamepad.buttons[3].touched);
+    frame.setValueType(path.menu.value, this.gamepad.buttons[3].value);
 
-    frame[path.touchpad.axisX] = this.gamepad.axes[0];
-    frame[path.touchpad.axisY] = this.gamepad.axes[1];
-    frame[path.joystick.axisX] = this.gamepad.axes[2];
-    frame[path.joystick.axisY] = this.gamepad.axes[3];
+    frame.setValueType(path.touchpad.axisX, this.gamepad.axes[0]);
+    frame.setValueType(path.touchpad.axisY, this.gamepad.axes[1]);
+    frame.setValueType(path.joystick.axisX, this.gamepad.axes[2]);
+    frame.setValueType(path.joystick.axisY, this.gamepad.axes[3]);
 
     if (!this.selector) {
       if (!this.gamepad.hand) return;
@@ -68,17 +68,24 @@ export class WindowsMixedRealityControllerDevice {
     this.pose.position.setFromMatrixPosition(this.rayObject.matrixWorld);
     this.pose.direction.set(0, 0, -1).applyQuaternion(this.rayObjectRotation);
     this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
-    frame[path.pose] = this.pose;
+    frame.setPose(path.pose, this.pose);
 
     if (this.gamepad.pose.position && this.gamepad.pose.orientation) {
-      frame[path.matrix] = this.matrix
-        .compose(
-          this.position.fromArray(this.gamepad.pose.position),
-          this.orientation.fromArray(this.gamepad.pose.orientation),
-          ONES
-        )
-        .premultiply(this.sittingToStandingMatrix)
-        .multiply(HAND_OFFSET);
+      frame.setMatrix4(
+        path.matrix,
+        this.matrix
+          .compose(
+            this.position.fromArray(this.gamepad.pose.position),
+            this.orientation.fromArray(this.gamepad.pose.orientation),
+            ONES
+          )
+          .premultiply(this.sittingToStandingMatrix)
+          .multiply(HAND_OFFSET)
+      );
+    }
+
+    if (this.gamepad.hapticActuators && this.gamepad.hapticActuators[0]) {
+      frame.setValueType(paths.haptics.actuators[this.gamepad.hand], this.gamepad.hapticActuators[0]);
     }
   }
 }

@@ -18,10 +18,10 @@ AFRAME.registerSystem("userinput-debug", {
       };
       const pathsOutput = [];
       const { frame } = userinput;
-      for (const key in frame) {
-        if (!frame.hasOwnProperty(key)) continue;
+      for (const key in frame.values) {
+        if (!frame.get(key)) continue;
         if (!["/actions/"].some(x => key.startsWith(x))) continue;
-        let val = JSON.stringify(frame[key], replacer);
+        let val = JSON.stringify(frame.get(key), replacer);
         if (val) val = val.replace(/{"(\w{3,})":/g, '{\n  "$1":').replace(/,"(\w{3,})":/g, ',\n  "$1":');
         pathsOutput.push(`${key} -> ${val}`);
       }

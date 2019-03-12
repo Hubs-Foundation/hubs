@@ -306,10 +306,13 @@ AFRAME.registerComponent("skybox", {
       this.skyScene.add(this.sky);
       this.cubeCamera.update(renderer, this.skyScene);
       this.el.setObject3D("mesh", this.sky);
+      const vrEnabled = renderer.vr.enabled;
+      renderer.vr.enabled = false;
       const pmremGenerator = new THREE.PMREMGenerator(this.cubeCamera.renderTarget.texture);
       pmremGenerator.update(renderer);
       const pmremCubeUVPacker = new THREE.PMREMCubeUVPacker(pmremGenerator.cubeLods);
       pmremCubeUVPacker.update(renderer);
+      renderer.vr.enabled = vrEnabled;
       environmentMapComponent.updateEnvironmentMap(pmremCubeUVPacker.CubeUVRenderTarget.texture);
       pmremGenerator.dispose();
       pmremCubeUVPacker.dispose();

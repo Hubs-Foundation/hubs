@@ -1,79 +1,81 @@
 import { Pose } from "../pose";
 import { angleTo4Direction } from "../../../utils/dpad";
 
-const zeroVec2 = [0, 0];
 export const xforms = {
   noop: function() {},
   copy: function(frame, src, dest) {
-    frame[dest.value] = frame[src.value];
+    frame.setValueType(dest.value, frame.get(src.value));
   },
   scale: function(scalar) {
     return function scale(frame, src, dest) {
-      if (frame[src.value] !== undefined) {
-        frame[dest.value] = frame[src.value] * scalar;
+      if (frame.get(src.value) !== undefined) {
+        frame.setValueType(dest.value, frame.get(src.value) * scalar);
       }
     };
   },
   scaleExp: function(scalar, exp = 1) {
     return function scale(frame, src, dest) {
-      if (frame[src.value] !== undefined) {
+      if (frame.get(src.value) !== undefined) {
         if (exp === 1) {
-          frame[dest.value] = frame[src.value] * scalar;
+          frame.setValueType(dest.value, frame.get(src.value) * scalar);
         } else {
-          frame[dest.value] = Math.pow(frame[src.value], exp) * scalar;
+          frame.setValueType(dest.value, Math.pow(frame.get(src.value), exp) * scalar);
         }
       }
     };
   },
   deadzone: function(deadzoneSize) {
     return function deadzone(frame, src, dest) {
-      frame[dest.value] = Math.abs(frame[src.value]) < deadzoneSize ? 0 : frame[src.value];
+      frame.setValueType(dest.value, Math.abs(frame.get(src.value)) < deadzoneSize ? 0 : frame.get(src.value));
     };
   },
   split_vec2: function(frame, src, dest) {
-    if (frame[src.value] !== undefined) {
-      frame[dest.x] = frame[src.value][0];
-      frame[dest.y] = frame[src.value][1];
+    const value = frame.get(src.value);
+    if (value !== undefined) {
+      frame.setValueType(dest.x, value[0]);
+      frame.setValueType(dest.y, value[1]);
     }
   },
   compose_vec2: function(frame, src, dest) {
-    if (frame[src.x] !== undefined && frame[src.y] !== undefined) {
-      frame[dest.value] = [frame[src.x], frame[src.y]];
+    const x = frame.get(src.x);
+    const y = frame.get(src.y);
+    if (x !== undefined && y !== undefined) {
+      frame.setVector2(dest.value, x, y);
     }
   },
   negate: function(frame, src, dest) {
-    frame[dest.value] = -frame[src.value];
+    frame.setValueType(dest.value, -frame.get(src.value));
   },
   copyIfFalse: function(frame, src, dest) {
-    frame[dest.value] = frame[src.bool] ? undefined : frame[src.value];
+    frame.setValueType(dest.value, frame.get(src.bool) ? undefined : frame.get(src.value));
   },
   copyIfTrue: function(frame, src, dest) {
-    frame[dest.value] = frame[src.bool] ? frame[src.value] : undefined;
+    frame.setValueType(dest.value, frame.get(src.bool) ? frame.get(src.value) : undefined);
   },
   zeroIfDefined: function(frame, src, dest) {
-    frame[dest.value] = frame[src.bool] !== undefined ? 0 : frame[src.value];
+    frame.setValueType(dest.value, frame.get(src.bool) !== undefined ? 0 : frame.get(src.value));
   },
   true: function(frame, src, dest) {
-    frame[dest.value] = true;
+    frame.setValueType(dest.value, true);
   },
   rising: function rising(frame, src, dest, prevState) {
-    frame[dest.value] = frame[src.value] && prevState === false;
-    return !!frame[src.value];
+    frame.setValueType(dest.value, frame.get(src.value) && prevState === false);
+    return !!frame.get(src.value);
   },
   risingWithFrameDelay: function(n) {
     return function risingWithFrameDelay(frame, src, dest, state = { values: new Array(n) }) {
-      frame[dest.value] = state.values.shift();
-      state.values.push(frame[src.value] && !state.prev);
-      state.prev = frame[src.value];
+      frame.setValueType(dest.value, state.values.shift());
+      state.values.push(frame.get(src.value) && !state.prev);
+      state.prev = frame.get(src.value);
       return state;
     };
   },
   falling: function falling(frame, src, dest, prevState) {
-    frame[dest.value] = !frame[src.value] && prevState;
-    return !!frame[src.value];
+    frame.setValueType(dest.value, !frame.get(src.value) && prevState);
+    return !!frame.get(src.value);
   },
   vec2Zero: function(frame, _, dest) {
-    frame[dest.value] = zeroVec2;
+    frame.setVector2(dest.value, 0, 0);
   },
   poseFromCameraProjection: function() {
     let camera;
@@ -82,92 +84,101 @@ export const xforms = {
       if (!camera) {
         camera = document.querySelector("#player-camera").components.camera.camera;
       }
-      frame[dest.value] = pose.fromCameraProjection(camera, frame[src.value][0], frame[src.value][1]);
+      const value = frame.get(src.value);
+      frame.setPose(dest.value, pose.fromCameraProjection(camera, value[0], value[1]));
     };
   },
   vec2dpad: function(deadzoneRadius, invertX = false, invertY = false) {
     const deadzoneRadiusSquared = deadzoneRadius * deadzoneRadius;
 
     return function vec2dpad(frame, src, dest) {
-      if (!frame[src.value]) return;
-      const [x, y] = frame[src.value];
+      if (!frame.get(src.value)) return;
+      const [x, y] = frame.get(src.value);
       const inCenter = x * x + y * y < deadzoneRadiusSquared;
       const direction = inCenter ? "center" : angleTo4Direction(Math.atan2(invertX ? -x : x, invertY ? -y : y));
       if (!dest[direction]) return;
-      frame[dest[direction]] = true;
+      frame.setValueType(dest[direction], true);
     };
   },
   always: function(constValue) {
     return function always(frame, _, dest) {
-      frame[dest.value] = constValue;
+      frame.setValueType(dest.value, constValue);
     };
   },
   wasd_to_vec2: function(frame, { w, a, s, d }, { vec2 }) {
     let x = 0;
     let y = 0;
-    if (frame[a]) x -= 1;
-    if (frame[d]) x += 1;
-    if (frame[w]) y += 1;
-    if (frame[s]) y -= 1;
-    frame[vec2] = [x, y];
+    if (frame.get(a)) x -= 1;
+    if (frame.get(d)) x += 1;
+    if (frame.get(w)) y += 1;
+    if (frame.get(s)) y -= 1;
+    frame.setVector2(vec2, x, y);
   },
   add_vec2: function(frame, src, dest) {
-    const first = frame[src.first];
-    const second = frame[src.second];
+    const first = frame.get(src.first);
+    const second = frame.get(src.second);
     if (first && second) {
-      frame[dest.value] = [first[0] + second[0], first[1] + second[1]];
+      frame.setVector2(dest.value, first[0] + second[0], first[1] + second[1]);
     } else if (second) {
-      frame[dest.value] = second;
+      frame.setVector2(dest.value, second[0], second[1]);
     } else if (first) {
-      frame[dest.value] = first;
+      frame.setVector2(dest.value, first[0], first[1]);
     }
   },
   max_vec2: function(frame, src, dest) {
-    const first = frame[src.first];
-    const second = frame[src.second];
+    const first = frame.get(src.first);
+    const second = frame.get(src.second);
     if (first && second) {
-      frame[dest.value] =
+      const max =
         first[0] * first[0] + first[1] * first[1] > second[0] * second[0] + second[1] * second[1] ? first : second;
+      frame.setVector2(dest.value, max[0], max[1]);
     } else if (second) {
-      frame[dest.value] = second;
+      frame.setVector2(dest.value, second[0], second[1]);
     } else if (first) {
-      frame[dest.value] = first;
+      frame.setVector2(dest.value, first[0], first[1]);
     }
   },
   normalize_vec2: function(frame, src, dest) {
-    const vec2 = frame[src.value];
+    const vec2 = frame.get(src.value);
     if (vec2) {
       if (vec2[0] === 0 && vec2[0] === 0) {
-        frame[dest.value] = vec2;
+        frame.setVector2(dest.value, vec2[0], vec2[1]);
       } else {
         const l = Math.sqrt(vec2[0] * vec2[0] + vec2[1] * vec2[1]);
-        frame[dest.value] = [vec2[0] / l, vec2[1] / l];
+        frame.setVector2(dest.value, vec2[0] / l, vec2[1] / l);
       }
     }
   },
   all: function(frame, src, dest) {
     for (const path in src) {
-      if (!frame[src[path]]) {
-        frame[dest.value] = false;
+      if (!frame.get(src[path])) {
+        frame.setValueType(dest.value, false);
         return;
       }
     }
-    frame[dest.value] = true;
+    frame.setValueType(dest.value, true);
   },
   any: function(frame, src, dest) {
     for (const path in src) {
-      if (frame[src[path]]) {
-        frame[dest.value] = true;
+      if (frame.get(src[path])) {
+        frame.setValueType(dest.value, true);
         return;
       }
     }
-    frame[dest.value] = false;
+    frame.setValueType(dest.value, false);
   },
-  touch_axis_scroll(scale = 1) {
+  touch_axis_scroll(scale = 1, snap_to) {
     return function touch_axis_scroll(frame, src, dest, state = { value: 0, touching: false }) {
-      frame[dest.value] = state.touching && frame[src.touching] ? scale * (frame[src.value] - state.value) : 0;
-      state.value = frame[src.value];
-      state.touching = frame[src.touching];
+      if (snap_to === undefined || Math.abs(frame.get(src.value) - state.value) >= snap_to) {
+        frame.setValueType(
+          dest.value,
+          state.touching && frame.get(src.touching) ? scale * (frame.get(src.value) - state.value) : 0
+        );
+      }
+
+      state.value = frame.get(src.value);
+      state.touching = frame.get(src.touching);
+
       return state;
     };
   }

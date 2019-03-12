@@ -55,7 +55,7 @@ import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
-import { markTipScopeFinished } from "../systems/tips.js";
+import { handleTipClose } from "../systems/tips.js";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
@@ -68,6 +68,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+
+import qsTruthy from "../utils/qs_truthy";
+// TODO temp feature flags
+const customSkinEnabled = qsTruthy("customSkin");
+const advancedAvatarEditor = qsTruthy("advancedAvatarEditor");
 
 addLocaleData([...en]);
 
@@ -145,6 +150,8 @@ class UIRoot extends Component {
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
+    isCursorHoldingPen: PropTypes.bool,
+    hasActiveCamera: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
     activeTips: PropTypes.object,
     location: PropTypes.object,
@@ -1347,7 +1354,8 @@ class UIRoot extends Component {
   render() {
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
 
-    const isLoading = !this.state.hideLoader || !this.state.didConnectToNetworkedScene;
+    const isLoading =
+      (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) && !this.props.showSafariMicDialog;
 
     if (isExited) return this.renderExitedPane();
     if (isLoading) return this.renderLoader();
@@ -1355,27 +1363,32 @@ class UIRoot extends Component {
 
     const entered = this.state.entered;
 
-    const entryDialog = this.isWaitingForAutoExit() ? (
-      <AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />
-    ) : (
-      <div className={entryStyles.entryDialog}>
-        <StateRoute stateKey="entry_step" stateValue="device" history={this.props.history}>
-          {this.renderDevicePanel()}
-        </StateRoute>
-        <StateRoute stateKey="entry_step" stateValue="mic_grant" history={this.props.history}>
-          {this.renderMicPanel(false)}
-        </StateRoute>
-        <StateRoute stateKey="entry_step" stateValue="mic_granted" history={this.props.history}>
-          {this.renderMicPanel(true)}
-        </StateRoute>
-        <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
-          {this.renderAudioSetupPanel()}
-        </StateRoute>
-        <StateRoute stateKey="entry_step" stateValue="" history={this.props.history}>
-          {this.renderEntryStartPanel()}
-        </StateRoute>
-      </div>
-    );
+    const entryDialog =
+      this.props.availableVREntryTypes &&
+      (this.isWaitingForAutoExit() ? (
+        <AutoExitWarning
+          secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
+          onCancel={this.endAutoExitTimer}
+        />
+      ) : (
+        <div className={entryStyles.entryDialog}>
+          <StateRoute stateKey="entry_step" stateValue="device" history={this.props.history}>
+            {this.renderDevicePanel()}
+          </StateRoute>
+          <StateRoute stateKey="entry_step" stateValue="mic_grant" history={this.props.history}>
+            {this.renderMicPanel(false)}
+          </StateRoute>
+          <StateRoute stateKey="entry_step" stateValue="mic_granted" history={this.props.history}>
+            {this.renderMicPanel(true)}
+          </StateRoute>
+          <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
+            {this.renderAudioSetupPanel()}
+          </StateRoute>
+          <StateRoute stateKey="entry_step" stateValue="" history={this.props.history}>
+            {this.renderEntryStartPanel()}
+          </StateRoute>
+        </div>
+      ));
 
     const dialogBoxContentsClassNames = classNames({
       [styles.uiInteractive]: !this.isInModalOrOverlay(),
@@ -1413,7 +1426,16 @@ class UIRoot extends Component {
               stateValue="profile"
               history={this.props.history}
               render={props => (
-                <ProfileEntryPanel {...props} finished={this.onProfileFinished} store={this.props.store} />
+                <ProfileEntryPanel
+                  {...props}
+                  signedIn={this.state.signedIn}
+                  onSignIn={this.showSignInDialog}
+                  onSignOut={this.signOut}
+                  finished={this.onProfileFinished}
+                  store={this.props.store}
+                  customSkinEnabled={customSkinEnabled}
+                  advanced={advancedAvatarEditor}
+                />
               )}
             />
             {showMediaBrowser && (
@@ -1445,6 +1467,11 @@ class UIRoot extends Component {
                     this.onProfileFinished();
                   }}
                   store={this.props.store}
+                  signedIn={this.state.signedIn}
+                  onSignIn={this.showSignInDialog}
+                  onSignOut={this.signOut}
+                  customSkinEnabled={customSkinEnabled}
+                  advanced={advancedAvatarEditor}
                 />
               )}
             />
@@ -1516,9 +1543,13 @@ class UIRoot extends Component {
 
             {entered && <PresenceLog inRoom={true} entries={presenceLogEntries} hubId={this.props.hubId} />}
             {entered &&
+              this.props.activeTips &&
               this.props.activeTips.bottom && (
                 <div className={styles.bottomTip}>
-                  <button className={styles.tipCancel} onClick={() => markTipScopeFinished("bottom")}>
+                  <button
+                    className={styles.tipCancel}
+                    onClick={() => handleTipClose(this.props.activeTips.bottom, "bottom")}
+                  >
                     <i>
                       <FontAwesomeIcon icon={faTimes} />
                     </i>
@@ -1590,11 +1621,12 @@ class UIRoot extends Component {
                       this.setState({ pendingMessage: e.target.value });
                     }}
                     onKeyDown={e => {
-                      if (e.key === "Enter" && !e.shiftKey) {
+                      if (e.key === "Enter" && !e.ctrlKey && !e.shiftKey) {
                         this.sendMessage(e);
-                      } else if (e.key === "Enter" && e.shiftKey && e.ctrlKey) {
+                      } else if (e.key === "Enter" && e.ctrlKey) {
                         spawnChatMessage(e.target.value);
                         this.setState({ pendingMessage: "" });
+                        e.target.blur();
                       } else if (e.key === "Escape") {
                         e.target.blur();
                       }
@@ -1636,7 +1668,7 @@ class UIRoot extends Component {
               })}
             >
               {!showVREntryButton &&
-                !this.props.activeTips.top && (
+                (!this.props.activeTips || !this.props.activeTips.top) && (
                   <WithHoverSound>
                     <button
                       className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
@@ -1648,7 +1680,7 @@ class UIRoot extends Component {
                 )}
               {!showVREntryButton &&
                 this.occupantCount() > 1 &&
-                !this.props.activeTips.top &&
+                (!this.props.activeTips || !this.props.activeTips.top) &&
                 entered && (
                   <WithHoverSound>
                     <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
@@ -1748,11 +1780,13 @@ class UIRoot extends Component {
                   spacebubble={this.state.spacebubble}
                   videoShareMediaSource={this.state.videoShareMediaSource}
                   activeTip={this.props.activeTips && this.props.activeTips.top}
+                  isCursorHoldingPen={this.props.isCursorHoldingPen}
+                  hasActiveCamera={this.props.hasActiveCamera}
                   onToggleMute={this.toggleMute}
                   onToggleFreeze={this.toggleFreeze}
                   onToggleSpaceBubble={this.toggleSpaceBubble}
                   onSpawnPen={this.spawnPen}
-                  onSpawnCamera={() => this.props.scene.emit("action_spawn_camera")}
+                  onSpawnCamera={() => this.props.scene.emit("action_toggle_camera")}
                   onShareVideo={this.shareVideo}
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
