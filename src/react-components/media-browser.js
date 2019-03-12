@@ -16,6 +16,8 @@ import { SOURCES } from "../storage/media-search-store";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 
+const isMobile = AFRAME.utils.device.isMobile();
+
 const PUBLISHER_FOR_ENTRY_TYPE = {
   sketchfab_model: "Sketchfab",
   poly_model: "Google Poly",
@@ -245,7 +247,7 @@ class MediaBrowser extends Component {
                       } else {
                         this.close();
                       }
-                    } else if (e.key === "Escape") {
+                    } else if (e.key === "Escape" || (e.key === "Enter" && isMobile)) {
                       e.target.blur();
                     }
                   }}
