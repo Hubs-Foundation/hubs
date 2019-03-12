@@ -394,6 +394,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   const hub = data.hubs[0];
 
   console.log(`Janus host: ${hub.host}`);
+
   const objectsScene = document.querySelector("#objects-scene");
   const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
   const objectsEl = document.createElement("a-entity");
@@ -542,6 +543,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const scene = document.querySelector("a-scene");
   scene.removeAttribute("keyboard-shortcuts"); // Remove F and ESC hotkeys from aframe
   scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
+
+  // Physics needs to be ready before spawning anything.
+  while (!scene.systems.physics.initialized) await nextTick();
 
   scene.addEventListener("loaded", () => {
     const physicsSystem = scene.systems.physics;
