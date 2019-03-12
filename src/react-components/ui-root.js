@@ -1624,11 +1624,12 @@ class UIRoot extends Component {
                       this.setState({ pendingMessage: e.target.value });
                     }}
                     onKeyDown={e => {
-                      if (e.key === "Enter" && !e.shiftKey) {
+                      if (e.key === "Enter" && !e.ctrlKey && !e.shiftKey) {
                         this.sendMessage(e);
-                      } else if (e.key === "Enter" && e.shiftKey && e.ctrlKey) {
+                      } else if (e.key === "Enter" && e.ctrlKey) {
                         spawnChatMessage(e.target.value);
                         this.setState({ pendingMessage: "" });
+                        e.target.blur();
                       } else if (e.key === "Escape") {
                         e.target.blur();
                       }
