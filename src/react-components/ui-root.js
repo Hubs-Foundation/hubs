@@ -478,8 +478,8 @@ class UIRoot extends Component {
     this.exit();
   };
 
-  exit = () => {
-    this.props.exitScene();
+  exit = reason => {
+    this.props.exitScene(reason);
     this.setState({ exited: true });
   };
 
@@ -887,7 +887,7 @@ class UIRoot extends Component {
       );
     } else {
       const reason = this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
-      const exitSubtitleId = `exit.subtitle.${this.state.exited ? "exited" : reason}`;
+      const exitSubtitleId = `exit.subtitle.${reason || "exited"}`;
       subtitle = (
         <div>
           <FormattedMessage id={exitSubtitleId} />
