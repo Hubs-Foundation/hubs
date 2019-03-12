@@ -130,18 +130,22 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
 });
 
 function mediaInflator(el, componentName, componentData, components) {
+  const showControls = componentData.controls || componentName === "link";
+
   if (components.networked) {
     el.setAttribute("networked", {
-      template: componentData.controls ? "#static-controlled-media" : "#static-media",
+      template: showControls ? "#static-controlled-media" : "#static-media",
       owner: "scene",
       persistent: true,
       networkId: components.networked.id
     });
   }
 
-  const mediaOptions = {
-    projection: componentData.projection
-  };
+  const mediaOptions = {};
+
+  if (componentName === "video" || componentName === "image") {
+    mediaOptions.projection = componentData.projection;
+  }
 
   if (componentName === "video") {
     mediaOptions.videoPaused = !componentData.autoPlay;
@@ -162,8 +166,10 @@ function mediaInflator(el, componentName, componentData, components) {
     el.setAttribute("video-pause-state", { paused: mediaOptions.videoPaused });
   }
 
+  const src = componentName === "link" ? componentData.href : componentData.src;
+
   el.setAttribute("media-loader", {
-    src: componentData.src,
+    src,
     resize: true,
     resolve: true,
     fileIsOwned: true,
@@ -179,6 +185,7 @@ AFRAME.GLTFModelPlus.registerComponent("video", "video", mediaInflator, (name, p
     return null;
   }
 });
+AFRAME.GLTFModelPlus.registerComponent("link", "link", mediaInflator);
 
 AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName, componentData) => {
   el.setAttribute("media-loader", {
