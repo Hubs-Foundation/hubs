@@ -1608,6 +1608,7 @@ class UIRoot extends Component {
                       } else if (e.key === "Enter" && e.ctrlKey) {
                         spawnChatMessage(e.target.value);
                         this.setState({ pendingMessage: "" });
+                        e.target.blur();
                       } else if (e.key === "Escape") {
                         e.target.blur();
                       }
