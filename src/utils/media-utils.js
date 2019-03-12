@@ -341,20 +341,14 @@ export function generateMeshBVH(object3D) {
     const hasBufferGeometry = obj.isMesh && obj.geometry.isBufferGeometry;
     const hasBoundsTree = hasBufferGeometry && obj.geometry.boundsTree;
     if (hasBufferGeometry && !hasBoundsTree) {
-      // we can't currently build a BVH for geometries with groups, because the groups rely on the
-      // existing ordering of the index, which we kill as a result of building the tree
-      if (obj.geometry.groups && obj.geometry.groups.length) {
-        console.warn("BVH construction not supported for geometry with groups; raycasting may suffer.");
-      } else {
-        const geo = obj.geometry;
-        const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
-        // only bother using memory and time making a BVH if there are a reasonable number of tris,
-        // and if there are too many it's too painful and large to tolerate doing it (at least until
-        // we put this in a web worker)
-        if (triCount > 1000 && triCount < 1000000) {
-          geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 30 });
-          geo.setIndex(geo.boundsTree.index);
-        }
+      const geo = obj.geometry;
+      const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
+      // only bother using memory and time making a BVH if there are a reasonable number of tris,
+      // and if there are too many it's too painful and large to tolerate doing it (at least until
+      // we put this in a web worker)
+      if (triCount > 1000 && triCount < 1000000) {
+        // note that bounds tree construction creates an index as a side effect if one doesn't already exist
+        geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 30 });
       }
     }
   });
