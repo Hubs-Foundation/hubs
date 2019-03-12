@@ -92,8 +92,8 @@ export const markTipFinished = tip => {
   localStorageCache = null;
 };
 
-export const handleTipClose = fullTip => {
-  const [scope, tip] = fullTip.split(".");
+export const handleTipClose = (fullTip, scope) => {
+  const [platform, tip] = fullTip.split(".");
 
   // Invite and pinning tips should be locally cleared, others should clear all remaining tips.
   const tips = LOCAL_CLOSE_TIPS.includes(tip) ? [tip] : platformTips[scope];

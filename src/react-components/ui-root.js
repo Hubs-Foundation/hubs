@@ -1526,7 +1526,10 @@ class UIRoot extends Component {
             {entered &&
               this.props.activeTips.bottom && (
                 <div className={styles.bottomTip}>
-                  <button className={styles.tipCancel} onClick={() => handleTipClose(this.props.activeTips.bottom)}>
+                  <button
+                    className={styles.tipCancel}
+                    onClick={() => handleTipClose(this.props.activeTips.bottom, "bottom")}
+                  >
                     <i>
                       <FontAwesomeIcon icon={faTimes} />
                     </i>
