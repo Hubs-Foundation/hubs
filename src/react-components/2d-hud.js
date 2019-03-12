@@ -13,6 +13,8 @@ const browser = detect();
 class TopHUD extends Component {
   static propTypes = {
     muted: PropTypes.bool,
+    isCursorHoldingPen: PropTypes.bool,
+    hasActiveCamera: PropTypes.bool,
     frozen: PropTypes.bool,
     videoShareMediaSource: PropTypes.string,
     activeTip: PropTypes.string,
@@ -142,14 +144,14 @@ class TopHUD extends Component {
           />
           <WithHoverSound>
             <div
-              className={cx(styles.iconButton, styles.spawn_pen)}
-              title={"Drawing Pen"}
+              className={cx(styles.iconButton, styles.pen, { [styles.active]: this.props.isCursorHoldingPen })}
+              title={"Pen"}
               onClick={this.props.onSpawnPen}
             />
           </WithHoverSound>
           <WithHoverSound>
             <div
-              className={cx(styles.iconButton, styles.spawn_camera)}
+              className={cx(styles.iconButton, styles.camera, { [styles.active]: this.props.hasActiveCamera })}
               title={"Camera"}
               onClick={this.props.onSpawnCamera}
             />

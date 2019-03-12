@@ -1,5 +1,6 @@
 import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
+import { isHubsDestinationUrl } from "./utils/media-utils";
 const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
   COLLISION_FLAGS = PHYSICS_CONSTANTS.COLLISION_FLAGS,
   TYPES = PHYSICS_CONSTANTS.TYPES,
@@ -131,8 +132,10 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
 
 function mediaInflator(el, componentName, componentData, components) {
   if (components.networked) {
+    const isControlled = componentData.controls || isHubsDestinationUrl(componentData.src);
+
     el.setAttribute("networked", {
-      template: componentData.controls ? "#static-controlled-media" : "#static-media",
+      template: isControlled ? "#static-controlled-media" : "#static-media",
       owner: "scene",
       persistent: true,
       networkId: components.networked.id

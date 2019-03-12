@@ -167,14 +167,18 @@ export const xforms = {
     }
     frame.setValueType(dest.value, false);
   },
-  touch_axis_scroll(scale = 1) {
+  touch_axis_scroll(scale = 1, snap_to) {
     return function touch_axis_scroll(frame, src, dest, state = { value: 0, touching: false }) {
-      frame.setValueType(
-        dest.value,
-        state.touching && frame.get(src.touching) ? scale * (frame.get(src.value) - state.value) : 0
-      );
+      if (snap_to === undefined || Math.abs(frame.get(src.value) - state.value) >= snap_to) {
+        frame.setValueType(
+          dest.value,
+          state.touching && frame.get(src.touching) ? scale * (frame.get(src.value) - state.value) : 0
+        );
+      }
+
       state.value = frame.get(src.value);
       state.touching = frame.get(src.touching);
+
       return state;
     };
   }
