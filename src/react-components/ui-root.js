@@ -1354,7 +1354,8 @@ class UIRoot extends Component {
   render() {
     const isExited = this.state.exited || this.props.roomUnavailableReason || this.props.platformUnsupportedReason;
 
-    const isLoading = !this.state.hideLoader || !this.state.didConnectToNetworkedScene;
+    const isLoading =
+      (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) && !this.props.showSafariMicDialog;
 
     if (isExited) return this.renderExitedPane();
     if (isLoading) return this.renderLoader();
@@ -1362,27 +1363,32 @@ class UIRoot extends Component {
 
     const entered = this.state.entered;
 
-    const entryDialog = this.isWaitingForAutoExit() ? (
-      <AutoExitWarning secondsRemaining={this.state.secondsRemainingBeforeAutoExit} onCancel={this.endAutoExitTimer} />
-    ) : (
-      <div className={entryStyles.entryDialog}>
-        <StateRoute stateKey="entry_step" stateValue="device" history={this.props.history}>
-          {this.renderDevicePanel()}
-        </StateRoute>
-        <StateRoute stateKey="entry_step" stateValue="mic_grant" history={this.props.history}>
-          {this.renderMicPanel(false)}
-        </StateRoute>
-        <StateRoute stateKey="entry_step" stateValue="mic_granted" history={this.props.history}>
-          {this.renderMicPanel(true)}
-        </StateRoute>
-        <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
-          {this.renderAudioSetupPanel()}
-        </StateRoute>
-        <StateRoute stateKey="entry_step" stateValue="" history={this.props.history}>
-          {this.renderEntryStartPanel()}
-        </StateRoute>
-      </div>
-    );
+    const entryDialog =
+      this.props.availableVREntryTypes &&
+      (this.isWaitingForAutoExit() ? (
+        <AutoExitWarning
+          secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
+          onCancel={this.endAutoExitTimer}
+        />
+      ) : (
+        <div className={entryStyles.entryDialog}>
+          <StateRoute stateKey="entry_step" stateValue="device" history={this.props.history}>
+            {this.renderDevicePanel()}
+          </StateRoute>
+          <StateRoute stateKey="entry_step" stateValue="mic_grant" history={this.props.history}>
+            {this.renderMicPanel(false)}
+          </StateRoute>
+          <StateRoute stateKey="entry_step" stateValue="mic_granted" history={this.props.history}>
+            {this.renderMicPanel(true)}
+          </StateRoute>
+          <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
+            {this.renderAudioSetupPanel()}
+          </StateRoute>
+          <StateRoute stateKey="entry_step" stateValue="" history={this.props.history}>
+            {this.renderEntryStartPanel()}
+          </StateRoute>
+        </div>
+      ));
 
     const dialogBoxContentsClassNames = classNames({
       [styles.uiInteractive]: !this.isInModalOrOverlay(),
@@ -1545,6 +1551,7 @@ class UIRoot extends Component {
               />
             )}
             {entered &&
+              this.props.activeTips &&
               this.props.activeTips.bottom && (
                 <div className={styles.bottomTip}>
                   <button
@@ -1674,7 +1681,7 @@ class UIRoot extends Component {
               })}
             >
               {!showVREntryButton &&
-                !this.props.activeTips.top && (
+                (!this.props.activeTips || !this.props.activeTips.top) && (
                   <WithHoverSound>
                     <button
                       className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
@@ -1686,7 +1693,7 @@ class UIRoot extends Component {
                 )}
               {!showVREntryButton &&
                 this.occupantCount() > 1 &&
-                !this.props.activeTips.top &&
+                (!this.props.activeTips || !this.props.activeTips.top) &&
                 entered && (
                   <WithHoverSound>
                     <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
