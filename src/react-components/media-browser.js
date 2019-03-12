@@ -239,9 +239,11 @@ class MediaBrowser extends Component {
                     if (e.key === "Enter" && e.ctrlKey) {
                       if (this.state.result && this.state.result.entries.length > 0) {
                         this.handleEntryClicked(e, this.state.result.entries[0]);
-                      } else {
+                      } else if (this.state.query.trim() !== "") {
                         this.handleQueryUpdated(this.state.query, true);
                         this.setState({ selectNextResult: true });
+                      } else {
+                        this.close();
                       }
                     } else if (e.key === "Escape" || e.key === "Enter") {
                       e.target.blur();
