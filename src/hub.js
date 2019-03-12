@@ -303,6 +303,9 @@ async function updateEnvironmentForHub(hub) {
   if (hub.scene) {
     isLegacyBundle = false;
     sceneUrl = hub.scene.model_url;
+  } else if (hub.scene === null) {
+    // delisted/removed scene
+    sceneUrl = loadingEnvironmentURL;
   } else {
     const defaultSpaceTopic = hub.topics[0];
     const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");

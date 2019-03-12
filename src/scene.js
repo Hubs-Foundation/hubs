@@ -91,6 +91,12 @@ const onReady = async () => {
   const res = await fetch(getReticulumFetchUrl(`/api/v1/scenes/${sceneId}`)).then(r => r.json());
   const sceneInfo = res.scenes[0];
 
+  // Delisted/Removed
+  if (!sceneInfo) {
+    remountUI({ unavailable: true });
+    return;
+  }
+
   if (sceneInfo.allow_promotion) {
     registerTelemetry(`/scene/${sceneId}`, `Hubs Scene: ${sceneInfo.title}`);
   } else {

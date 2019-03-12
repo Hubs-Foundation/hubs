@@ -155,6 +155,7 @@
     "scene.logo_tagline": "A new way to get together",
     "scene.create_button": "Create a room with this scene",
     "scene.tweet_button": "Share on Twitter",
+    "scene.unavailable": "This scene is no longer available.",
     "link.in_your_browser": "In your headset's browser, go to:",
     "link.enter_code": "Then, enter this one-time link code:",
     "link.do_not_close": "Keep this open to use this code.",
