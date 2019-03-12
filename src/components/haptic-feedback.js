@@ -11,34 +11,16 @@ const strengthForIntensity = {
  */
 AFRAME.registerComponent("haptic-feedback", {
   schema: {
-    hapticEventName: { default: "haptic_pulse" }
+    hapticEventName: { default: "haptic_pulse" },
+    path: { type: "string" }
   },
 
   init: function() {
     this.handlePulse = this.handlePulse.bind(this);
-    this.getActuator = this.getActuator.bind(this);
-    this.getActuator().then(actuator => {
-      this.actuator = actuator;
-    });
   },
 
-  getActuator() {
-    return new Promise(resolve => {
-      const tryGetActivator = () => {
-        const trackedControls = this.el.components["tracked-controls"];
-        if (
-          trackedControls &&
-          trackedControls.controller &&
-          trackedControls.controller.hapticActuators &&
-          trackedControls.controller.hapticActuators.length
-        ) {
-          resolve(trackedControls.controller.hapticActuators[0]);
-        } else {
-          setTimeout(tryGetActivator, 1000);
-        }
-      };
-      setTimeout(tryGetActivator, 1000);
-    });
+  tick: function() {
+    this.actuator = AFRAME.scenes[0].systems.userinput.get(this.data.path);
   },
 
   play: function() {
@@ -49,20 +31,17 @@ AFRAME.registerComponent("haptic-feedback", {
   },
 
   handlePulse: function(event) {
+    if (!this.actuator) {
+      return;
+    }
     const { intensity } = event.detail;
 
     if (strengthForIntensity[intensity]) {
-      this.pulse(strengthForIntensity[intensity]);
+      this.actuator.pulse(strengthForIntensity[intensity], 15);
     } else if (Number(intensity) === intensity) {
-      this.pulse(intensity);
+      this.actuator.pulse(intensity, 15);
     } else {
       console.warn(`Invalid intensity : ${intensity}`);
-    }
-  },
-
-  pulse: function(intensity) {
-    if (this.actuator) {
-      this.actuator.pulse(intensity, 15);
     }
   }
 });

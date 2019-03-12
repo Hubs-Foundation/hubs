@@ -83,5 +83,9 @@ export class WindowsMixedRealityControllerDevice {
           .multiply(HAND_OFFSET)
       );
     }
+
+    if (this.gamepad.hapticActuators && this.gamepad.hapticActuators[0]) {
+      frame.setValueType(paths.haptics.actuators[this.gamepad.hand], this.gamepad.hapticActuators[0]);
+    }
   }
 }
