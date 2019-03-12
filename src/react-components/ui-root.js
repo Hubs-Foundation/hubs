@@ -1718,23 +1718,21 @@ class UIRoot extends Component {
               </div>
             )}
 
-            {!this.state.frozen && (
-              <StateRoute
-                stateKey="overlay"
-                stateValue="link"
-                history={this.props.history}
-                render={() => (
-                  <LinkDialog
-                    linkCode={this.state.linkCode}
-                    onClose={() => {
-                      this.state.linkCodeCancel();
-                      this.setState({ linkCode: null, linkCodeCancel: null });
-                      this.props.history.goBack();
-                    }}
-                  />
-                )}
-              />
-            )}
+            <StateRoute
+              stateKey="overlay"
+              stateValue="link"
+              history={this.props.history}
+              render={() => (
+                <LinkDialog
+                  linkCode={this.state.linkCode}
+                  onClose={() => {
+                    this.state.linkCodeCancel();
+                    this.setState({ linkCode: null, linkCodeCancel: null });
+                    this.props.history.goBack();
+                  }}
+                />
+              )}
+            />
 
             <div
               onClick={() => this.setState({ showSettingsMenu: !this.state.showSettingsMenu })}
