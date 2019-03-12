@@ -7,6 +7,18 @@ const modeMod = {
   [WheelEvent.DOM_DELTA_PAGE]: 2
 };
 
+const isInModal = (() => {
+  let uiRoot = null;
+
+  return function() {
+    if (!uiRoot) {
+      uiRoot = document.querySelector(".ui-root");
+    }
+
+    return uiRoot && uiRoot.classList.contains("in-modal-or-overlay");
+  };
+})();
+
 export class MouseDevice {
   constructor() {
     this.events = [];
@@ -21,15 +33,9 @@ export class MouseDevice {
     ["mousedown", "wheel"].map(x => canvas.addEventListener(x, queueEvent));
     ["mousemove", "mouseup"].map(x => window.addEventListener(x, queueEvent));
 
-    let uiRoot = null;
-
     document.addEventListener("wheel", e => {
-      if (!uiRoot) {
-        uiRoot = document.querySelector(".ui-root");
-      }
-
       // Do not capture wheel events if they are being sent to an modal/overlay
-      if (uiRoot && !uiRoot.classList.contains("in-modal-or-overlay")) {
+      if (!isInModal()) {
         e.preventDefault();
       }
     });
@@ -62,21 +68,23 @@ export class MouseDevice {
     this.movementXY = [0, 0]; // deltas
     this.wheel = 0; // delta
     this.events.forEach(event => {
-      this.process(event, frame);
+      this.process(event);
     });
 
     while (this.events.length) {
       this.events.pop();
     }
 
-    frame[paths.device.mouse.coords] = this.coords;
-    frame[paths.device.mouse.movementXY] = this.movementXY;
-    frame[paths.device.mouse.buttonLeft] = this.buttonLeft;
-    frame[paths.device.mouse.buttonRight] = this.buttonRight;
-    frame[paths.device.mouse.wheel] = this.wheel;
+    frame.setVector2(paths.device.mouse.coords, this.coords[0], this.coords[1]);
+    frame.setVector2(paths.device.mouse.movementXY, this.movementXY[0], this.movementXY[1]);
+    frame.setValueType(paths.device.mouse.buttonLeft, this.buttonLeft);
+    frame.setValueType(paths.device.mouse.buttonRight, this.buttonRight);
+    frame.setValueType(paths.device.mouse.wheel, this.wheel);
   }
 }
 
 window.oncontextmenu = e => {
-  e.preventDefault();
+  if (!isInModal()) {
+    e.preventDefault();
+  }
 };

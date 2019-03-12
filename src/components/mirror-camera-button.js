@@ -23,6 +23,10 @@ AFRAME.registerComponent("mirror-camera-button", {
       this.targetEl.addEventListener("unmirrored", this._updateUI);
       this._updateUI();
     });
+
+    if (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR()) {
+      this.el.object3D.visible = false;
+    }
   },
 
   play() {

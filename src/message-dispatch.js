@@ -35,6 +35,7 @@ export default class MessageDispatch {
     const scales = [0.0625, 0.125, 0.25, 0.5, 1.0, 1.5, 3, 5, 7.5, 12.5];
     const curScale = playerRig.object3D.scale;
     let err;
+    let physicsSystem;
 
     switch (command) {
       case "fly":
@@ -71,7 +72,15 @@ export default class MessageDispatch {
         break;
       case "duck":
         spawnChatMessage(DUCK_URL);
-        this.scene.emit("quack");
+        if (Math.random() < 0.01) {
+          this.scene.emit("specialquack");
+        } else {
+          this.scene.emit("quack");
+        }
+        break;
+      case "debug":
+        physicsSystem = document.querySelector("a-scene").systems.physics;
+        physicsSystem.setDebug(!physicsSystem.debug);
         break;
       case "scene":
         if (args[0]) {
@@ -81,7 +90,7 @@ export default class MessageDispatch {
             this.addToPresenceLog({ type: "log", body: "You do not have permission to change the scene." });
           }
         } else {
-          this.mediaSearchStore.sourceNavigate("scenes");
+          this.mediaSearchStore.sourceNavigateWithNoNav("scenes");
         }
 
         break;

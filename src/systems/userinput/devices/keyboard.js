@@ -1,6 +1,8 @@
 import { paths } from "../paths";
 export class KeyboardDevice {
   constructor() {
+    this.seenKeys = new Set();
+    this.keyIterator = [];
     this.keys = {};
     this.events = [];
 
@@ -37,15 +39,27 @@ export class KeyboardDevice {
 
   write(frame) {
     this.events.forEach(event => {
+      const key = event.key;
       if (event.type === "blur") {
         this.keys = {};
+        this.seenKeys.clear();
+        this.keyIterator.length = 0;
         return;
       }
-      this.keys[paths.device.keyboard.key(event.key)] = event.type === "keydown";
+      this.keys[key] = event.type === "keydown";
+      if (!this.seenKeys.has(event.key)) {
+        this.seenKeys.add(event.key);
+        this.keyIterator.push(event.key);
+      }
     });
     while (this.events.length) {
       this.events.pop();
     }
-    Object.assign(frame, this.keys);
+
+    for (let i = 0; i < this.keyIterator.length; i++) {
+      const key = this.keyIterator[i];
+      const path = paths.device.keyboard.key(key);
+      frame.setValueType(path, this.keys[key]);
+    }
   }
 }

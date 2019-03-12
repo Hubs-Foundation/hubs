@@ -10,26 +10,27 @@ AFRAME.registerComponent("in-world-hud", {
   },
   init() {
     this.mic = this.el.querySelector(".mic");
-    this.freeze = this.el.querySelector(".freeze");
+    this.spawn = this.el.querySelector(".spawn");
     this.pen = this.el.querySelector(".penhud");
     this.cameraBtn = this.el.querySelector(".camera-btn");
     this.background = this.el.querySelector(".bg");
     const renderOrder = window.APP.RENDER_ORDER;
     this.mic.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
-    this.freeze.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
+    this.spawn.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
     this.pen.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
     this.cameraBtn.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
     this.background.object3DMap.mesh.renderOrder = renderOrder.HUD_BACKGROUND;
 
     this.updateButtonStates = () => {
       this.mic.setAttribute("icon-button", "active", this.el.sceneEl.is("muted"));
-      this.freeze.setAttribute("icon-button", "active", this.el.sceneEl.is("frozen"));
       this.pen.setAttribute("icon-button", "active", this.el.sceneEl.is("pen"));
+      this.cameraBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("camera"));
     };
     this.updateButtonStates();
 
     this.onStateChange = evt => {
-      if (!(evt.detail === "muted" || evt.detail === "frozen" || evt.detail === "pen")) return;
+      if (!(evt.detail === "muted" || evt.detail === "frozen" || evt.detail === "pen" || evt.detail === "camera"))
+        return;
       this.updateButtonStates();
     };
 
@@ -37,8 +38,8 @@ AFRAME.registerComponent("in-world-hud", {
       this.el.emit("action_mute");
     };
 
-    this.onFreezeClick = () => {
-      this.el.emit("action_freeze");
+    this.onSpawnClick = () => {
+      this.el.emit("action_spawn");
     };
 
     this.onPenClick = () => {
@@ -46,7 +47,7 @@ AFRAME.registerComponent("in-world-hud", {
     };
 
     this.onCameraClick = () => {
-      this.el.emit("action_spawn_camera");
+      this.el.emit("action_toggle_camera");
     };
   },
 
@@ -55,7 +56,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.el.sceneEl.addEventListener("stateremoved", this.onStateChange);
 
     this.mic.addEventListener("mousedown", this.onMicClick);
-    this.freeze.addEventListener("mousedown", this.onFreezeClick);
+    this.spawn.addEventListener("mousedown", this.onSpawnClick);
     this.pen.addEventListener("mousedown", this.onPenClick);
     this.cameraBtn.addEventListener("mousedown", this.onCameraClick);
   },
@@ -65,7 +66,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.el.sceneEl.removeEventListener("stateremoved", this.onStateChange);
 
     this.mic.removeEventListener("mousedown", this.onMicClick);
-    this.freeze.removeEventListener("mousedown", this.onFreezeClick);
+    this.spawn.removeEventListener("mousedown", this.onSpawnClick);
     this.pen.removeEventListener("mousedown", this.onPenClick);
     this.cameraBtn.removeEventListener("mousedown", this.onCameraClick);
   }

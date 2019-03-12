@@ -18,6 +18,8 @@ paths.actions.thaw = "/actions/thaw";
 paths.actions.muteMic = "/actions/muteMic";
 paths.actions.focusChat = "/actions/focusChat";
 paths.actions.focusChatCommand = "/actions/focusChatCommand";
+paths.actions.toggleCamera = "/actions/toggleCamera";
+paths.actions.takeSnapshot = "/actions/takeSnapshot";
 paths.actions.mediaExit = "/actions/mediaExit";
 paths.actions.mediaSearch1 = "/actions/mediaSearch1";
 paths.actions.mediaSearch2 = "/actions/mediaSearch2";
@@ -42,7 +44,10 @@ paths.actions.cursor.scalePenTip = "/actions/cursorScalePenTip";
 paths.actions.cursor.scaleGrabbedGrabbable = "/actions/cursorScaleGrabbedGrabbable";
 paths.actions.cursor.mediaVolumeMod = "/actions/cursor/mediaVolumeMod";
 paths.actions.cursor.takeSnapshot = "/actions/cursorTakeSnapshot";
+paths.actions.pen = {};
+paths.actions.pen.remove = "/actions/pen/remove";
 paths.actions.rightHand = {};
+paths.actions.rightHand.matrix = "/actions/rightHand/matrix";
 paths.actions.rightHand.pose = "/actions/rightHandPose";
 paths.actions.rightHand.grab = "/actions/rightHandGrab";
 paths.actions.rightHand.drop = "/actions/rightHandDrop";
@@ -53,13 +58,14 @@ paths.actions.rightHand.undoDrawing = "/actions/rightHandUndoDrawing";
 paths.actions.rightHand.penNextColor = "/actions/rightHandPenNextColor";
 paths.actions.rightHand.penPrevColor = "/actions/rightHandPenPrevColor";
 paths.actions.rightHand.scalePenTip = "/actions/rightHandScalePenTip";
-paths.actions.rightHand.startTeleport = "/actions/rightHandStartTeleport";
-paths.actions.rightHand.stopTeleport = "/actions/rightHandStopTeleport";
+paths.actions.rightHand.startTeleport = "/actions/rightHand/startTeleport";
+paths.actions.rightHand.stopTeleport = "/actions/rightHand/stopTeleport";
 paths.actions.rightHand.takeSnapshot = "/actions/rightHandTakeSnapshot";
 paths.actions.rightHand.thumb = "/actions/rightHand/thumbDown";
 paths.actions.rightHand.index = "/actions/rightHand/indexDown";
 paths.actions.rightHand.middleRingPinky = "/actions/rightHand/middleRingPinkyDown";
 paths.actions.leftHand = {};
+paths.actions.leftHand.matrix = "/actions/leftHand/matrix";
 paths.actions.leftHand.pose = "/actions/leftHandPose";
 paths.actions.leftHand.grab = "/actions/leftHandGrab";
 paths.actions.leftHand.drop = "/actions/leftHandDrop";
@@ -70,14 +76,18 @@ paths.actions.leftHand.undoDrawing = "/actions/leftHandUndoDrawing";
 paths.actions.leftHand.penNextColor = "/actions/leftHandPenNextColor";
 paths.actions.leftHand.penPrevColor = "/actions/leftHandPenPrevColor";
 paths.actions.leftHand.scalePenTip = "/actions/leftHandScalePenTip";
-paths.actions.leftHand.startTeleport = "/actions/leftHandStartTeleport";
-paths.actions.leftHand.stopTeleport = "/actions/leftHandStopTeleport";
+paths.actions.leftHand.startTeleport = "/actions/leftHand/startTeleport";
+paths.actions.leftHand.stopTeleport = "/actions/leftHand/stopTeleport";
 paths.actions.leftHand.takeSnapshot = "/actions/leftHandTakeSnapshot";
 paths.actions.leftHand.thumb = "/actions/leftHand/thumbDown";
 paths.actions.leftHand.index = "/actions/leftHand/indexDown";
 paths.actions.leftHand.middleRingPinky = "/actions/leftHand/middleRingPinkyDown";
 paths.actions.camera = {};
 paths.actions.camera.exitMirror = "/actions/cameraExitMirror";
+paths.haptics = {};
+paths.haptics.actuators = {};
+paths.haptics.actuators.left = "/haptics/actuators/left";
+paths.haptics.actuators.right = "/haptics/actuators/right";
 
 paths.device = {};
 paths.device.mouse = {};
@@ -98,6 +108,7 @@ paths.device.touchscreen.pinch = {};
 paths.device.touchscreen.pinch.delta = "/device/touchscreen/pinch/delta";
 paths.device.touchscreen.pinch.initialDistance = "/device/touchscreen/pinch/initialDistance";
 paths.device.touchscreen.pinch.currentDistance = "/device/touchscreen/pinch/currentDistance";
+paths.device.touchscreen.isTouching = "/device/touchscreen/isTouching";
 paths.device.touchscreen.isTouchingGrabbable = "/device/touchscreen/isTouchingGrabbable";
 paths.device.touchscreen.tap1 = "/device/touchscreen/tap1";
 paths.device.touchscreen.tap2 = "/device/touchscreen/tap2";
@@ -111,8 +122,15 @@ paths.device.hud = {};
 paths.device.hud.penButton = "/device/hud/penButton";
 
 paths.device.keyboard = {
-  key: key => {
-    return `/device/keyboard/${key.toLowerCase()}`;
+  map: new Map(),
+  key: function(k) {
+    let path = this.map.get(k);
+    if (path) {
+      return path;
+    }
+    path = `/device/keyboard/${k.toLowerCase()}`;
+    this.map.set(k, path);
+    return path;
   }
 };
 
@@ -137,31 +155,31 @@ paths.device.xbox = {
   }
 };
 
-const oculusgo = "/device/oculusgo/";
 paths.device.oculusgo = {
   // TODO remove these in favor of the direct accessors
   button: buttonName => ({
-    pressed: `${oculusgo}button/${buttonName}/pressed`,
-    touched: `${oculusgo}button/${buttonName}/touched`,
-    value: `${oculusgo}button/${buttonName}/value`
+    pressed: `/device/oculusgo/button/${buttonName}/pressed`,
+    touched: `/device/oculusgo/button/${buttonName}/touched`,
+    value: `/device/oculusgo/button/${buttonName}/value`
   }),
   axis: axisName => {
-    return `${oculusgo}axis/${axisName}`;
+    return `/device/oculusgo/axis/${axisName}`;
   },
   //
   trigger: {
-    pressed: `${oculusgo}button/trigger/pressed`,
-    touched: `${oculusgo}button/trigger/touched`,
-    value: `${oculusgo}button/trigger/value`
+    pressed: "/device/oculusgo/button/trigger/pressed",
+    touched: "/device/oculusgo/button/trigger/touched",
+    value: "/device/oculusgo/button/trigger/value"
   },
   touchpad: {
-    pressed: `${oculusgo}button/touchpad/pressed`,
-    touched: `${oculusgo}button/touchpad/touched`,
-    value: `${oculusgo}button/touchpad/value`,
-    axisX: `${oculusgo}axis/touchpadX`,
-    axisY: `${oculusgo}axis/touchpadY`
+    pressed: "/device/oculusgo/button/touchpad/pressed",
+    touched: "/device/oculusgo/button/touchpad/touched",
+    value: "/device/oculusgo/button/touchpad/value",
+    axisX: "/device/oculusgo/axis/touchpadX",
+    axisY: "/device/oculusgo/axis/touchpadY"
   },
-  pose: `${oculusgo}pose`,
+  pose: "/device/oculusgo/pose",
+  matrix: "/device/oculusgo/matrix",
   v: name => {
     return `/vars/oculusgo/${name}`;
   }
@@ -178,6 +196,7 @@ paths.device.gearVRController = {
     return `${gearVRController}axis/${axisName}`;
   },
   pose: `${gearVRController}pose`,
+  matrix: `${gearVRController}matrix`,
   v: name => {
     return `/vars/gearVRController/${name}`;
   }
@@ -193,7 +212,8 @@ paths.device.daydream = {
   axis: axisName => {
     return `${daydream}axis/${axisName}`;
   },
-  pose: `${daydream}pose`
+  pose: `${daydream}pose`,
+  matrix: `${daydream}matrix`
 };
 
 const rightOculusTouch = "/device/rightOculusTouch/";
@@ -206,7 +226,8 @@ paths.device.rightOculusTouch = {
   axis: axisName => {
     return `${rightOculusTouch}axis/${axisName}`;
   },
-  pose: `${rightOculusTouch}pose`
+  pose: `${rightOculusTouch}pose`,
+  matrix: `${rightOculusTouch}matrix`
 };
 
 const leftOculusTouch = "/device/leftOculusTouch/";
@@ -219,7 +240,8 @@ paths.device.leftOculusTouch = {
   axis: axisName => {
     return `${leftOculusTouch}axis/${axisName}`;
   },
-  pose: `${leftOculusTouch}pose`
+  pose: `${leftOculusTouch}pose`,
+  matrix: `${leftOculusTouch}matrix`
 };
 
 paths.device.vive = {};
@@ -232,7 +254,8 @@ paths.device.vive.left = {
   axis: axisName => {
     return `/device/vive/left/axis/${axisName}`;
   },
-  pose: `/device/vive/left/pose`
+  pose: `/device/vive/left/pose`,
+  matrix: `/device/vive/left/matrix`
 };
 paths.device.vive.right = {
   button: buttonName => ({
@@ -243,7 +266,8 @@ paths.device.vive.right = {
   axis: axisName => {
     return `/device/vive/right/axis/${axisName}`;
   },
-  pose: `/device/vive/right/pose`
+  pose: `/device/vive/right/pose`,
+  matrix: `/device/vive/right/matrix`
 };
 
 function button(device, side, name) {
@@ -272,7 +296,8 @@ function wmrController(side) {
     grip: button(wmr, side, "grip"),
     menu: button(wmr, side, "menu"),
     joystick: axes(wmr, side, "joystick"),
-    pose: `${wmr}${side}/pose`
+    pose: `${wmr}${side}/pose`,
+    matrix: `${wmr}${side}/matrix`
   };
 }
 paths.device.wmr = {};

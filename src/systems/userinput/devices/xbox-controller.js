@@ -31,25 +31,20 @@ export class XboxControllerDevice {
 
   write(frame) {
     if (this.gamepad.connected) {
-      this.gamepad.buttons.forEach((button, i) => {
-        const buttonPath = paths.device.gamepad(this.gamepad.index).button(i);
-        frame[buttonPath.pressed] = !!button.pressed;
-        frame[buttonPath.touched] = !!button.touched;
-        frame[buttonPath.value] = button.value;
-      });
-      this.gamepad.axes.forEach((axis, i) => {
-        frame[paths.device.gamepad(this.gamepad.index).axis(i)] = axis;
-      });
-
-      this.buttonMap.forEach(button => {
-        const outpath = paths.device.xbox.button(button.name);
-        frame[outpath.pressed] = !!frame[paths.device.gamepad(this.gamepad.index).button(button.buttonId).pressed];
-        frame[outpath.touched] = !!frame[paths.device.gamepad(this.gamepad.index).button(button.buttonId).touched];
-        frame[outpath.value] = frame[paths.device.gamepad(this.gamepad.index).button(button.buttonId).value];
+      this.buttonMap.forEach(b => {
+        const path = paths.device.xbox.button(b.name);
+        const button = this.gamepad.buttons[b.buttonId];
+        frame.setValueType(path.pressed, !!button.pressed);
+        frame.setValueType(path.touched, !!button.touched);
+        frame.setValueType(path.value, button.value);
       });
       this.axisMap.forEach(axis => {
-        frame[paths.device.xbox.axis(axis.name)] = frame[paths.device.gamepad(this.gamepad.index).axis(axis.axisId)];
+        frame.setValueType(paths.device.xbox.axis(axis.name), this.gamepad.axes[axis.axisId]);
       });
+
+      if (this.gamepad.hapticActuators && this.gamepad.hapticActuators[0]) {
+        frame.setValueType(paths.haptics.actuators[this.gamepad.hand], this.gamepad.hapticActuators[0]);
+      }
     }
   }
 }

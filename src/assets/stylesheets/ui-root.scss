@@ -2,6 +2,7 @@
 
 :local(.ui) {
   @extend %default-font;
+  @extend %unselectable;
 
   width: 100%;
   height: 100%;
@@ -87,6 +88,11 @@ body.vr-mode {
 
     @media (max-height: 736px) and (min-height: 325px) {
       display: flex;
+    }
+
+    // Hide in landscape
+    @media (max-height: 736px) and (min-aspect-ratio: 15/9) {
+      display: none;
     }
   }
 }
@@ -205,6 +211,10 @@ body.vr-mode {
   border-radius: 16px;
 }
 
+:local(.message-entry-disabled) {
+  background-color: rgba(255, 255, 255, 0.33);
+}
+
 :local(.message-entry-input) {
   @extend %default-font;
   pointer-events: auto;
@@ -245,6 +255,11 @@ body.vr-mode {
   font-size: 1.5em;
   cursor: pointer;
   margin: 0px 10px;
+}
+
+:local(.message-entry-button):disabled {
+  color: $dark-grey;
+  background-color: transparent;
 }
 
 :local(.message-entry-button-in-room) {
@@ -310,7 +325,7 @@ body.vr-mode {
   }
 }
 
-:local(.message-entry-in-room):focus-within {
+:local(.message-entry-in-room):focus-within, :local(.message-entry-in-room):hover {
   transition: background-color 0.15s linear;
   background-color: $darker-grey;
 
@@ -339,3 +354,64 @@ body.vr-mode {
   }
 }
 
+:local(.bottom-tip) {
+  @extend %tip-bubble;
+  bottom: 80px;
+  width: auto;
+  padding: 4px 24px 4px 12px;
+
+  @media(max-width: 768px) {
+    left: 50%;
+    width: 80%;
+    -webkit-transform: auto;
+    transform: auto;
+  }
+
+  :local(.tip-cancel) {
+    color: $light-blue;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    cursor: pointer;
+    border: none;
+    outline-style: none;
+    width: 32px;
+    height: 32px;
+    margin-right: 2px;
+  }
+
+  :local(.tip) {
+    flex: 10;
+  }
+
+  :local(.spawn-tip) {
+    flex: 10;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    
+    :local(.spawn-tip-icon) {
+      background-image: url(../images/spawn_message.png);
+      appearance: none;
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      outline-style: none;
+      width: 28px;
+      height: 28px;
+      background-size: 30px;
+      background-position: center;
+      background-repeat: no-repeat;
+      border: 2px solid white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      align-self: flex-start;
+      cursor: pointer;
+      margin: 0 6px;
+      border-radius: 18px;
+      background-color: $action-color;
+    }
+  }
+}

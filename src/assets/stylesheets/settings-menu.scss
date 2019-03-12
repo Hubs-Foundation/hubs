@@ -47,6 +47,8 @@
   padding-top: 12px;
   padding-bottom: 12px;
   font-weight: normal;
+  justify-items: center;
+  width: 90%;
 
   a {
     color: black;
@@ -57,6 +59,28 @@
     white-space: nowrap;
     font-weight: bold;
     text-decoration-color: $dark-grey;
+  }
+
+  button {
+    @extend %default-font;
+    font-weight: bold;
+    color: black;
+    text-decoration: underline;
+    text-decoration-color: $dark-grey;
+    padding: 0;
+    margin: 2px 12px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    white-space: nowrap;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    border: none;
+    outline-style: none;
+    cursor: pointer;
+    text-align: center;
   }
 }
 

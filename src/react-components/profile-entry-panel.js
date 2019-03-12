@@ -6,21 +6,29 @@ import styles from "../assets/stylesheets/profile.scss";
 import classNames from "classnames";
 import hubLogo from "../assets/images/hub-preview-white.png";
 import { WithHoverSound } from "./wrap-with-audio";
-import { avatars } from "../assets/avatars/avatars";
+import { AVATAR_TYPES, getAvatarType } from "../assets/avatars/avatars";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
+
+import AvatarEditor from "./avatar-editor";
 
 class ProfileEntryPanel extends Component {
   static propTypes = {
     store: PropTypes.object,
     messages: PropTypes.object,
     finished: PropTypes.func,
-    intl: PropTypes.object
+    intl: PropTypes.object,
+    onSignIn: PropTypes.func,
+    onSignOut: PropTypes.func,
+    signedIn: PropTypes.bool,
+    customSkinEnabled: PropTypes.bool,
+    advanced: PropTypes.bool
   };
 
   constructor(props) {
     super(props);
     const { displayName, avatarId } = this.props.store.state.profile;
-    this.state = { displayName, avatarId, customMode: avatarId && avatarId.startsWith("http") };
+    const avatarType = getAvatarType(avatarId);
+    this.state = { displayName, avatarId, avatarType };
     this.props.store.addEventListener("statechanged", this.storeUpdated);
   }
 
@@ -30,7 +38,7 @@ class ProfileEntryPanel extends Component {
   };
 
   saveStateAndFinish = e => {
-    e.preventDefault();
+    e && e.preventDefault();
 
     const { displayName } = this.props.store.state.profile;
     const { hasChangedName } = this.props.store.state.activity;
@@ -85,6 +93,70 @@ class ProfileEntryPanel extends Component {
   render() {
     const { formatMessage } = this.props.intl;
 
+    let panelBody;
+    switch (this.state.avatarType) {
+      case AVATAR_TYPES.LEGACY:
+        panelBody = (
+          <div className={styles.avatarSelectorContainer}>
+            <div className="loading-panel">
+              <div className="loader-wrap">
+                <div className="loader">
+                  <div className="loader-center" />
+                </div>
+              </div>
+            </div>
+            <iframe
+              className={styles.avatarSelector}
+              src={`/avatar-selector.html`}
+              ref={ifr => {
+                if (this.avatarSelector === ifr) return;
+                this.avatarSelector = ifr;
+                if (this.avatarSelector) {
+                  this.avatarSelector.onload = () => {
+                    this.sendAvatarStateToIframe();
+                  };
+                }
+              }}
+            />
+          </div>
+        );
+        break;
+      case AVATAR_TYPES.SKINNABLE:
+        panelBody = (
+          <AvatarEditor
+            signedIn={this.props.signedIn}
+            onSignIn={this.props.onSignIn}
+            onSignOut={this.props.onSignOut}
+            store={this.props.store}
+            onAvatarChanged={avatarId => this.setState({ avatarId })}
+            saveStateAndFinish={this.saveStateAndFinish}
+            advanced={this.props.advanced}
+          />
+        );
+        break;
+      case AVATAR_TYPES.URL:
+        panelBody = (
+          <div className={styles.avatarSelectorContainer}>
+            <label htmlFor="#custom-avatar-url">Avatar GLTF/GLB </label>
+            <input
+              id="custom-avatar-url"
+              type="url"
+              required
+              className={styles.formFieldText}
+              value={this.state.avatarId}
+              onChange={e => this.setState({ avatarId: e.target.value })}
+            />
+            <div className={styles.info}>
+              <FormattedMessage id="profile.info" />
+              <a target="_blank" rel="noopener noreferrer" href="https://github.com/j-conrad/hubs-avatar-pipelines">
+                <FormattedMessage id="profile.info-link" />
+              </a>
+            </div>
+          </div>
+        );
+        break;
+    }
+
     return (
       <div className={styles.profileEntry}>
         <form onSubmit={this.saveStateAndFinish} className={styles.form}>
@@ -105,57 +177,35 @@ class ProfileEntryPanel extends Component {
               title={formatMessage({ id: "profile.display_name.validation_warning" })}
               ref={inp => (this.nameInput = inp)}
             />
-            {this.state.customMode ? (
-              <div className={styles.avatarSelectorContainer}>
-                <label htmlFor="#custom-avatar-url">Avatar GLTF/GLB </label>
-                <input
-                  id="custom-avatar-url"
-                  type="url"
-                  className={styles.formFieldText}
-                  value={this.state.avatarId}
-                  onChange={e => this.setState({ avatarId: e.target.value })}
-                />
-                <div className={styles.links}>
-                  <a onClick={() => this.setState({ customMode: false, avatarId: "botdefault" })}>cancel</a>
-                </div>
-              </div>
-            ) : (
-              <div className={styles.avatarSelectorContainer}>
-                <div className="loading-panel">
-                  <div className="loader-wrap">
-                    <div className="loader">
-                      <div className="loader-center" />
-                    </div>
-                  </div>
-                </div>
-                <iframe
-                  className={styles.avatarSelector}
-                  src={`/avatar-selector.html`}
-                  ref={ifr => {
-                    if (this.avatarSelector === ifr) return;
 
-                    this.avatarSelector = ifr;
-
-                    if (this.avatarSelector) {
-                      this.avatarSelector.onload = () => {
-                        this.sendAvatarStateToIframe();
-                      };
-                    }
-                  }}
-                />
+            <div className={styles.tabs}>
+              <a
+                onClick={() => this.setState({ avatarType: "legacy", avatarId: "botdefault" })}
+                className={classNames({ selected: this.state.avatarType === "legacy" })}
+              >
+                <FormattedMessage id="profile.tabs.legacy" />
+              </a>
+              {(this.props.customSkinEnabled || this.state.avatarType === "skinnable") && (
                 <a
-                  className="custom-url-link"
-                  onClick={() =>
-                    this.setState({ customMode: true, avatarId: avatars.find(a => a.id === this.state.avatarId).model })
-                  }
+                  onClick={() => this.setState({ avatarType: "skinnable", avatarId: null })}
+                  className={classNames({ selected: this.state.avatarType === "skinnable" })}
                 >
-                  custom url
+                  <FormattedMessage id="profile.tabs.skinnable" />
                 </a>
-              </div>
+              )}
+              <a
+                onClick={() => this.setState({ avatarType: "url", avatarId: "" })}
+                className={classNames({ selected: this.state.avatarType === "url" })}
+              >
+                <FormattedMessage id="profile.tabs.url" />
+              </a>
+            </div>
+            {panelBody}
+            {this.state.avatarType !== AVATAR_TYPES.SKINNABLE && (
+              <WithHoverSound>
+                <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
+              </WithHoverSound>
             )}
-            <WithHoverSound>
-              <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
-            </WithHoverSound>
             <div className={styles.links}>
               <WithHoverSound>
                 <a

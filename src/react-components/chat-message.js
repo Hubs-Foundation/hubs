@@ -137,7 +137,7 @@ function renderChatMessage(body, from, allowEmojiRender, lowResolution) {
 export async function createInWorldLogMessage({ name, type, body }) {
   if (type !== "chat") return;
 
-  const lowResolution = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo();
+  const lowResolution = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
   const blob = await renderChatMessage(body, name, false, lowResolution);
   const entity = document.createElement("a-entity");
   const meshEntity = document.createElement("a-entity");
@@ -145,7 +145,7 @@ export async function createInWorldLogMessage({ name, type, body }) {
   document.querySelector("a-scene").appendChild(entity);
 
   entity.appendChild(meshEntity);
-  entity.setAttribute("follow-in-lower-fov", {
+  entity.setAttribute("follow-in-fov", {
     target: "#player-camera",
     offset: { x: 0, y: 0.0, z: -0.8 }
   });

@@ -24,6 +24,7 @@ import { viveUserBindings } from "./bindings/vive-user";
 import { wmrUserBindings } from "./bindings/windows-mixed-reality-user";
 import { xboxControllerUserBindings } from "./bindings/xbox-controller-user";
 import { daydreamUserBindings } from "./bindings/daydream-user";
+import { cardboardUserBindings } from "./bindings/cardboard-user";
 
 import generate3DOFTriggerBindings from "./bindings/oculus-go-user";
 const oculusGoUserBindings = generate3DOFTriggerBindings(paths.device.oculusgo);
@@ -32,7 +33,8 @@ const gearVRControllerUserBindings = generate3DOFTriggerBindings(paths.device.ge
 import { resolveActionSets } from "./resolve-action-sets";
 import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
-import { detectInHMD } from "../../utils/vr-caps-detect";
+import { detectInHMD, getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "../../utils/vr-caps-detect";
+import { ArrayBackedSet } from "./array-backed-set";
 
 function intersection(setA, setB) {
   const _intersection = new Set();
@@ -156,7 +158,8 @@ function computeExecutionStrategy(sortedBindings, masks, activeSets) {
 
 AFRAME.registerSystem("userinput", {
   get(path) {
-    return this.frame && this.frame[path];
+    if (!this.frame) return;
+    return this.frame.get(path);
   },
 
   toggleSet(set, value) {
@@ -164,15 +167,44 @@ AFRAME.registerSystem("userinput", {
   },
 
   init() {
-    this.frame = {};
+    this.frame = {
+      generation: 0,
+      values: {},
+      generations: {},
+      get: function(path) {
+        if (this.generations[path] !== this.generation) return undefined;
+        return this.values[path];
+      },
+      setValueType: function(path, value) {
+        this.values[path] = value;
+        this.generations[path] = this.generation;
+      },
+      setVector2: function(path, a, b) {
+        const value = this.values[path] || [];
+        value[0] = a;
+        value[1] = b;
+        this.values[path] = value;
+        this.generations[path] = this.generation;
+      },
+      setPose: function(path, pose) {
+        this.setValueType(path, pose);
+      },
+      setMatrix4: function(path, mat4) {
+        // Should we assume the incoming mat4 is safe to store instead of copying values?
+        const value = this.values[path] || new THREE.Matrix4();
+        value.copy(mat4);
+        this.values[path] = value;
+        this.generations[path] = this.generation;
+      }
+    };
 
     this.prevActiveSets = new Set();
     this.activeSets = new Set([sets.global]);
     this.pendingSetChanges = [];
     this.xformStates = new Map();
-    this.activeDevices = new Set([new HudDevice()]);
+    this.activeDevices = new ArrayBackedSet().add(new HudDevice());
 
-    if (!(AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo())) {
+    if (!(AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR())) {
       this.activeDevices.add(new MouseDevice());
       this.activeDevices.add(new AppAwareMouseDevice());
       this.activeDevices.add(new KeyboardDevice());
@@ -205,20 +237,33 @@ AFRAME.registerSystem("userinput", {
         console.log("Using VR bindings.");
         this.registeredMappings.delete(isMobile ? touchscreenUserBindings : keyboardMouseUserBindings);
         // add mappings for all active VR input devices
-        for (const activeDevice of this.activeDevices) {
+        for (let i = 0; i < this.activeDevices.items.length; i++) {
+          const activeDevice = this.activeDevices.items[i];
           const mapping = vrGamepadMappings.get(activeDevice.constructor);
           mapping && this.registeredMappings.add(mapping);
+        }
+
+        // Handle cardboard by looking of VR device caps
+        if (isMobile) {
+          getAvailableVREntryTypes().then(availableVREntryTypes => {
+            if (availableVREntryTypes.cardboard === VR_DEVICE_AVAILABILITY.yes) {
+              this.registeredMappings.add(cardboardUserBindings);
+              this.registeredMappingsChanged = true;
+            }
+          });
         }
       } else {
         console.log("Using Non-VR bindings.");
         // remove mappings for all active VR input devices
-        for (const activeDevice of this.activeDevices) {
+        for (let i = 0; i < this.activeDevices.items.length; i++) {
+          const activeDevice = this.activeDevices.items[i];
           this.registeredMappings.delete(vrGamepadMappings.get(activeDevice.constructor));
         }
         this.registeredMappings.add(isMobile ? touchscreenUserBindings : keyboardMouseUserBindings);
       }
 
-      for (const activeDevice of this.activeDevices) {
+      for (let i = 0; i < this.activeDevices.items.length; i++) {
+        const activeDevice = this.activeDevices.items[i];
         const mapping = nonVRGamepadMappings.get(activeDevice.constructor);
         mapping && this.registeredMappings.add(mapping);
       }
@@ -228,7 +273,8 @@ AFRAME.registerSystem("userinput", {
 
     const gamepadConnected = e => {
       let gamepadDevice;
-      for (const activeDevice of this.activeDevices) {
+      for (let i = 0; i < this.activeDevices.items.length; i++) {
+        const activeDevice = this.activeDevices.items[i];
         if (activeDevice.gamepad && activeDevice.gamepad.index === e.gamepad.index) {
           console.warn("connected already fired for gamepad", e.gamepad);
           return; // multiple connect events without a disconnect event
@@ -259,7 +305,8 @@ AFRAME.registerSystem("userinput", {
     };
 
     const gamepadDisconnected = e => {
-      for (const device of this.activeDevices) {
+      for (let i = 0; i < this.activeDevices.items.length; i++) {
+        const device = this.activeDevices.items[i];
         if (device.gamepad && device.gamepad.index === e.gamepad.index) {
           this.registeredMappings.delete(
             vrGamepadMappings.get(device.constructor) || nonVRGamepadMappings.get(device.constructor)
@@ -285,6 +332,7 @@ AFRAME.registerSystem("userinput", {
   },
 
   tick() {
+    this.frame.generation += 1;
     const registeredMappingsChanged = this.registeredMappingsChanged;
     if (registeredMappingsChanged) {
       this.registeredMappingsChanged = false;
@@ -316,9 +364,8 @@ AFRAME.registerSystem("userinput", {
       this.masked = masked;
     }
 
-    this.frame = {};
-    for (const device of this.activeDevices) {
-      device.write(this.frame);
+    for (let i = 0; i < this.activeDevices.items.length; i++) {
+      this.activeDevices.items[i].write(this.frame);
     }
 
     for (let i = 0; i < this.sortedBindings.length; i++) {
@@ -343,6 +390,5 @@ AFRAME.registerSystem("userinput", {
     }
 
     this.prevSortedBindings = this.sortedBindings;
-    this.prevFrame = this.frame;
   }
 });

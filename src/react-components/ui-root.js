@@ -34,6 +34,7 @@ import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowser from "./media-browser";
 
 import CreateObjectDialog from "./create-object-dialog.js";
+import ChangeSceneDialog from "./change-scene-dialog.js";
 import HelpDialog from "./help-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
@@ -54,17 +55,24 @@ import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
+import { markTipScopeFinished } from "../systems/tips.js";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
 import { faCamera } from "@fortawesome/free-solid-svg-icons/faCamera";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+
+import qsTruthy from "../utils/qs_truthy";
+// TODO temp feature flags
+const customSkinEnabled = qsTruthy("customSkin");
+const advancedAvatarEditor = qsTruthy("advancedAvatarEditor");
 
 addLocaleData([...en]);
 
@@ -142,7 +150,10 @@ class UIRoot extends Component {
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
+    isCursorHoldingPen: PropTypes.bool,
+    hasActiveCamera: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
+    activeTips: PropTypes.object,
     location: PropTypes.object,
     history: PropTypes.object
   };
@@ -664,7 +675,7 @@ class UIRoot extends Component {
   };
 
   shouldShowHmdMicWarning = () => {
-    if (isMobile || AFRAME.utils.device.isOculusGo()) return false;
+    if (isMobile || AFRAME.utils.device.isMobileVR()) return false;
     if (!this.state.enterInVR) return false;
     if (!this.hasHmdMicrophone()) return false;
 
@@ -694,7 +705,7 @@ class UIRoot extends Component {
   shouldShowFullScreen = () => {
     // Disable full screen on iOS, since Safari's fullscreen mode does not let you prevent native pinch-to-zoom gestures.
     return (
-      (isMobile || AFRAME.utils.device.isOculusGo()) &&
+      (isMobile || AFRAME.utils.device.isMobileVR()) &&
       !AFRAME.utils.device.isIOS() &&
       !this.state.enterInVR &&
       screenfull.enabled
@@ -749,6 +760,10 @@ class UIRoot extends Component {
 
   createObject = media => {
     this.props.scene.emit("add_media", media);
+  };
+
+  changeScene = url => {
+    this.props.hubChannel.updateScene(url);
   };
 
   closeDialog = () => {
@@ -917,10 +932,11 @@ class UIRoot extends Component {
         <FormattedMessage id="loader.entering_lobby" />
       </h4>
     );
+    const progress = this.state.loadingNum === 0 ? " " : `${this.state.loadedNum} / ${this.state.loadingNum} `;
     const usual = (
       <h4 className={loaderStyles.loadingText}>
         <FormattedMessage id="loader.loading" />
-        {this.state.loadedNum} / {this.state.loadingNum}{" "}
+        {progress}
         <FormattedMessage id={this.state.loadingNum !== 1 ? "loader.objects" : "loader.object"} />
         ...
       </h4>
@@ -979,12 +995,16 @@ class UIRoot extends Component {
           )}
         </div>
 
+        <div className={entryStyles.roomSubtitle}>
+          <FormattedMessage id="entry.room" />
+        </div>
+
         <div className={entryStyles.center}>
           {this.props.hubChannel.permissions.update_hub && (
             <WithHoverSound>
               <div
                 className={entryStyles.chooseScene}
-                onClick={() => this.props.mediaSearchStore.sourceNavigate("scenes", true)}
+                onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes")}
               >
                 <i>
                   <FontAwesomeIcon icon={faImage} />
@@ -995,7 +1015,13 @@ class UIRoot extends Component {
           )}
 
           <form onSubmit={this.sendMessage}>
-            <div className={styles.messageEntry} style={{ height: pendingMessageFieldHeight }}>
+            <div
+              className={classNames({
+                [styles.messageEntry]: true,
+                [styles.messageEntryDisabled]: this.occupantCount() <= 1
+              })}
+              style={{ height: pendingMessageFieldHeight }}
+            >
               <textarea
                 className={classNames([styles.messageEntryInput, "chat-focus-target"])}
                 value={this.state.pendingMessage}
@@ -1004,6 +1030,7 @@ class UIRoot extends Component {
                 onFocus={e => handleTextFieldFocus(e.target)}
                 onBlur={() => handleTextFieldBlur()}
                 onChange={e => this.setState({ pendingMessage: e.target.value })}
+                disabled={this.occupantCount() <= 1 ? true : false}
                 onKeyDown={e => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     this.sendMessage(e);
@@ -1011,10 +1038,18 @@ class UIRoot extends Component {
                     e.target.blur();
                   }
                 }}
-                placeholder="Send a message..."
+                placeholder={
+                  this.occupantCount() <= 1
+                    ? "Nobody is here yet..."
+                    : `Send message to ${this.occupantCount() - 1} other${this.occupantCount() - 1 > 1 ? "s" : ""}...`
+                }
               />
               <WithHoverSound>
-                <button className={classNames([styles.messageEntryButton, styles.messageEntrySubmit])} type="submit">
+                <button
+                  className={classNames([styles.messageEntryButton, styles.messageEntrySubmit])}
+                  disabled={this.occupantCount() <= 1 ? true : false}
+                  type="submit"
+                >
                   <i>
                     <FontAwesomeIcon icon={faPaperPlane} />
                   </i>
@@ -1078,6 +1113,11 @@ class UIRoot extends Component {
         </div>
 
         <div className={entryStyles.buttonContainer}>
+          {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
+            <div className={entryStyles.secondary} onClick={this.enterVR}>
+              <FormattedMessage id="entry.cardboard" />
+            </div>
+          )}
           {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
             <GenericEntryButton secondary={true} onClick={this.enterVR} />
           )}
@@ -1096,11 +1136,6 @@ class UIRoot extends Component {
           )}
           {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
             <TwoDEntryButton onClick={this.enter2D} />
-          )}
-          {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
-            <div className={entryStyles.secondary} onClick={this.enterVR}>
-              <FormattedMessage id="entry.cardboard" />
-            </div>
           )}
         </div>
       </div>
@@ -1170,7 +1205,7 @@ class UIRoot extends Component {
     const micClip = {
       clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)`
     };
-    const isMobileOrGo = isMobile || AFRAME.utils.device.isOculusGo();
+    const isMobileOrGo = isMobile || AFRAME.utils.device.isMobileVR();
     const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
     const subtitleId = isMobileOrGo ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
     return (
@@ -1215,17 +1250,22 @@ class UIRoot extends Component {
                   className="audio-setup-panel__levels__icon-part"
                 />
               )}
+              {this.state.audioTrack && (
+                <div className="audio-setup-panel__levels__test_label">
+                  <FormattedMessage id="audio.talk_to_test" />
+                </div>
+              )}
             </div>
             <WithHoverSound>
-              <div className="audio-setup-panel__levels__icon" onClick={this.playTestTone}>
+              <div className="audio-setup-panel__levels__icon_clickable" onClick={this.playTestTone}>
                 <img
-                  src="../assets/images/level_background.png"
-                  srcSet="../assets/images/level_background@2x.png 2x"
+                  src="../assets/images/level_action_background.png"
+                  srcSet="../assets/images/level_action_background@2x.png 2x"
                   className="audio-setup-panel__levels__icon-part"
                 />
                 <img
-                  src="../assets/images/level_fill.png"
-                  srcSet="../assets/images/level_fill@2x.png 2x"
+                  src="../assets/images/level_action_fill.png"
+                  srcSet="../assets/images/level_action_fill@2x.png 2x"
                   className="audio-setup-panel__levels__icon-part"
                   style={speakerClip}
                 />
@@ -1234,10 +1274,13 @@ class UIRoot extends Component {
                   srcSet="../assets/images/speaker_level@2x.png 2x"
                   className="audio-setup-panel__levels__icon-part"
                 />
+                <div className="audio-setup-panel__levels__test_label">
+                  <FormattedMessage id="audio.click_to_test" />
+                </div>
               </div>
             </WithHoverSound>
           </div>
-          {this.state.audioTrack && (
+          {this.state.audioTrack && this.state.micDevices.length > 1 ? (
             <div className="audio-setup-panel__device-chooser">
               <WithHoverSound>
                 <select
@@ -1264,6 +1307,8 @@ class UIRoot extends Component {
                 srcSet="../assets/images/dropdown_arrow@2x.png 2x"
               />
             </div>
+          ) : (
+            <div />
           )}
           {this.shouldShowHmdMicWarning() && (
             <div className="audio-setup-panel__hmd-mic-warning">
@@ -1376,13 +1421,23 @@ class UIRoot extends Component {
               stateValue="profile"
               history={this.props.history}
               render={props => (
-                <ProfileEntryPanel {...props} finished={this.onProfileFinished} store={this.props.store} />
+                <ProfileEntryPanel
+                  {...props}
+                  signedIn={this.state.signedIn}
+                  onSignIn={this.showSignInDialog}
+                  onSignOut={this.signOut}
+                  finished={this.onProfileFinished}
+                  store={this.props.store}
+                  customSkinEnabled={customSkinEnabled}
+                  advanced={advancedAvatarEditor}
+                />
               )}
             />
             {showMediaBrowser && (
               <MediaBrowser
                 history={this.props.history}
                 mediaSearchStore={this.props.mediaSearchStore}
+                hubChannel={this.props.hubChannel}
                 onMediaSearchResultEntrySelected={this.props.onMediaSearchResultEntrySelected}
               />
             )}
@@ -1407,6 +1462,11 @@ class UIRoot extends Component {
                     this.onProfileFinished();
                   }}
                   store={this.props.store}
+                  signedIn={this.state.signedIn}
+                  onSignIn={this.showSignInDialog}
+                  onSignOut={this.signOut}
+                  customSkinEnabled={customSkinEnabled}
+                  advanced={advancedAvatarEditor}
                 />
               )}
             />
@@ -1444,6 +1504,12 @@ class UIRoot extends Component {
             />
             <StateRoute
               stateKey="modal"
+              stateValue="change_scene"
+              history={this.props.history}
+              render={() => this.renderDialog(ChangeSceneDialog, { onChange: this.changeScene })}
+            />
+            <StateRoute
+              stateKey="modal"
               stateValue="webvr"
               history={this.props.history}
               render={() => this.renderDialog(WebVRRecommendDialog)}
@@ -1478,6 +1544,27 @@ class UIRoot extends Component {
                 hubId={this.props.hubId}
               />
             )}
+            {entered &&
+              this.props.activeTips.bottom && (
+                <div className={styles.bottomTip}>
+                  <button className={styles.tipCancel} onClick={() => markTipScopeFinished("bottom")}>
+                    <i>
+                      <FontAwesomeIcon icon={faTimes} />
+                    </i>
+                  </button>
+                  {this.props.activeTips.bottom.endsWith(".spawn_menu") ? (
+                    <div className={styles.spawnTip}>
+                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}-pre`} />
+                      <div className={classNames(styles.spawnTipIcon)} />
+                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}-post`} />
+                    </div>
+                  ) : (
+                    <div className={styles.tip}>
+                      <FormattedMessage id={`tips.${this.props.activeTips.bottom}`} />
+                    </div>
+                  )}
+                </div>
+              )}
             {entered && (
               <form onSubmit={this.sendMessage}>
                 <div
@@ -1546,7 +1633,7 @@ class UIRoot extends Component {
                         e.target.blur();
                       }
                     }}
-                    placeholder="Send a message..."
+                    placeholder="Send to room..."
                   />
                   <button
                     className={classNames([styles.messageEntrySpawn])}
@@ -1583,7 +1670,7 @@ class UIRoot extends Component {
               })}
             >
               {!showVREntryButton &&
-                !this.state.videoShareMediaSource && (
+                !this.props.activeTips.top && (
                   <WithHoverSound>
                     <button
                       className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
@@ -1595,7 +1682,7 @@ class UIRoot extends Component {
                 )}
               {!showVREntryButton &&
                 this.occupantCount() > 1 &&
-                !this.state.videoShareMediaSource &&
+                !this.props.activeTips.top &&
                 entered && (
                   <WithHoverSound>
                     <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
@@ -1681,6 +1768,7 @@ class UIRoot extends Component {
                 <SettingsMenu
                   history={this.props.history}
                   mediaSearchStore={this.props.mediaSearchStore}
+                  hideSettings={() => this.setState({ showSettingsMenu: false })}
                   hubChannel={this.props.hubChannel}
                   hubScene={this.props.hubScene}
                 />
@@ -1695,11 +1783,14 @@ class UIRoot extends Component {
                   frozen={this.state.frozen}
                   spacebubble={this.state.spacebubble}
                   videoShareMediaSource={this.state.videoShareMediaSource}
+                  activeTip={this.props.activeTips && this.props.activeTips.top}
+                  isCursorHoldingPen={this.props.isCursorHoldingPen}
+                  hasActiveCamera={this.props.hasActiveCamera}
                   onToggleMute={this.toggleMute}
                   onToggleFreeze={this.toggleFreeze}
                   onToggleSpaceBubble={this.toggleSpaceBubble}
                   onSpawnPen={this.spawnPen}
-                  onSpawnCamera={() => this.props.scene.emit("action_spawn_camera")}
+                  onSpawnCamera={() => this.props.scene.emit("action_toggle_camera")}
                   onShareVideo={this.shareVideo}
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}

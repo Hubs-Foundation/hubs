@@ -39,7 +39,7 @@ AFRAME.registerComponent("rotate-button", {
         return;
       }
       if (this.targetEl.components.body) {
-        this.targetEl.setAttribute("body", { type: "static" });
+        this.targetEl.setAttribute("ammo-body", { type: "static" });
       }
       this.rotateSystem = this.rotateSystem || AFRAME.scenes[0].systems["rotate-selected-object"];
       this.rotateSystem.startRotate(this.targetEl.object3D, hand, this.data);
@@ -67,6 +67,7 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.mode = null;
     this.rotating = false;
     this.axis = new THREE.Vector3();
+    this.store = window.APP.store;
 
     this.dxAll = 0;
     this.dxStore = 0;
@@ -156,8 +157,11 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.rotating = true;
 
     if (this.mode === ROTATE_MODE.ALIGN) {
+      this.store.update({ activity: { hasRecentered: true } });
       return;
     }
+
+    this.store.update({ activity: { hasRotated: true } });
 
     if (this.mode === ROTATE_MODE.PUPPET) {
       this.target.getWorldQuaternion(this.puppet.initialObjectOrientation);

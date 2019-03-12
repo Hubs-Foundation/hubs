@@ -8,7 +8,7 @@
 @import 'audio';
 @import 'info-dialog';
 
-body.vr-mode {
+body.vr-mode-stretch {
   a-scene {
     .a-canvas {
       width: 200% !important;

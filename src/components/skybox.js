@@ -229,7 +229,7 @@ AFRAME.registerComponent("skybox", {
     mieCoefficient: { type: "number", default: 0.005 },
     mieDirectionalG: { type: "number", default: 0.8 },
     inclination: { type: "number", default: 0 },
-    azimuth: { type: "number", default: 0 },
+    azimuth: { type: "number", default: 0.15 },
     distance: { type: "number", default: 8000 }
   },
 
@@ -240,9 +240,11 @@ AFRAME.registerComponent("skybox", {
     this.cubeCamera = new THREE.CubeCamera(1, 100000, 512);
     this.skyScene.add(this.cubeCamera);
 
-    // HACK: Render environment map on next frame to avoid bug where the render target texture is black.
     this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
-    requestAnimationFrame(this.updateEnvironmentMap);
+    // HACK: Render environment map on next frame to avoid bug where the render target texture is black.
+    // EXTRA HACK: Added timeout due to additional case where texture is black in avatar-selector in Firefox.
+    // This is likely due to the custom elements attached callback being synchronous on Chrome but not Firefox.
+    requestAnimationFrame(() => setTimeout(this.updateEnvironmentMap));
   },
 
   update(oldData) {

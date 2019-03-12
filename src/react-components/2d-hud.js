@@ -7,18 +7,17 @@ import styles from "../assets/stylesheets/2d-hud.scss";
 import uiStyles from "../assets/stylesheets/ui-root.scss";
 import { WithHoverSound } from "./wrap-with-audio";
 import { FormattedMessage } from "react-intl";
-import StateLink from "./state-link";
-import qsTruthy from "../utils/qs_truthy";
-
-const allowContentSearch = qsTruthy("content_search");
 
 const browser = detect();
 
 class TopHUD extends Component {
   static propTypes = {
     muted: PropTypes.bool,
+    isCursorHoldingPen: PropTypes.bool,
+    hasActiveCamera: PropTypes.bool,
     frozen: PropTypes.bool,
     videoShareMediaSource: PropTypes.string,
+    activeTip: PropTypes.string,
     history: PropTypes.object,
     onToggleMute: PropTypes.func,
     onToggleFreeze: PropTypes.func,
@@ -50,7 +49,7 @@ class TopHUD extends Component {
   };
 
   buildVideoSharingButtons = () => {
-    const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo();
+    const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
 
     const videoShareExtraOptionTypes = [];
     const primaryVideoShareType =
@@ -97,12 +96,6 @@ class TopHUD extends Component {
           }}
           onMouseOver={showExtrasOnHover}
         >
-          {this.props.videoShareMediaSource !== null && (
-            <div className={cx(styles.videoShareNotify)}>
-              <div className={cx(styles.attachPoint)} />
-              <FormattedMessage id="video_share.notify" />
-            </div>
-          )}
           {videoShareExtraOptionTypes.length > 0 && (
             <div className={cx(styles.videoShareExtraOptions)} onMouseOut={hideExtrasOnOut}>
               {videoShareExtraOptionTypes.map(type => (
@@ -131,6 +124,12 @@ class TopHUD extends Component {
     return (
       <div className={cx(styles.container, styles.top, styles.unselectable, uiStyles.uiInteractive)}>
         <div className={cx(uiStyles.uiInteractive, styles.panel)}>
+          {this.props.activeTip && (
+            <div className={cx(styles.topTip)}>
+              <div className={cx([styles.attachPoint, styles[`attach_${this.props.activeTip.split(".")[1]}`]])} />
+              <FormattedMessage id={`tips.${this.props.activeTip}`} />
+            </div>
+          )}
           {videoSharingButtons}
           <WithHoverSound>
             <div
@@ -139,30 +138,20 @@ class TopHUD extends Component {
               onClick={this.props.onToggleMute}
             />
           </WithHoverSound>
-          {allowContentSearch ? (
-            <button
-              className={cx(uiStyles.uiInteractive, styles.iconButton, styles.spawn)}
-              onClick={() => this.props.mediaSearchStore.sourceNavigateToDefaultSource()}
-            />
-          ) : (
-            <StateLink
-              className={cx(uiStyles.uiInteractive, styles.iconButton, styles.spawn)}
-              title={"Create"}
-              stateKey="modal"
-              stateValue="create"
-              history={this.props.history}
-            />
-          )}
+          <button
+            className={cx(uiStyles.uiInteractive, styles.iconButton, styles.spawn)}
+            onClick={() => this.props.mediaSearchStore.sourceNavigateToDefaultSource()}
+          />
           <WithHoverSound>
             <div
-              className={cx(styles.iconButton, styles.spawn_pen)}
-              title={"Drawing Pen"}
+              className={cx(styles.iconButton, styles.pen, { [styles.active]: this.props.isCursorHoldingPen })}
+              title={"Pen"}
               onClick={this.props.onSpawnPen}
             />
           </WithHoverSound>
           <WithHoverSound>
             <div
-              className={cx(styles.iconButton, styles.spawn_camera)}
+              className={cx(styles.iconButton, styles.camera, { [styles.active]: this.props.hasActiveCamera })}
               title={"Camera"}
               onClick={this.props.onSpawnCamera}
             />

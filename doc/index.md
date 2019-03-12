@@ -1,14 +1,9 @@
 
 # Component Docs
 - Systems
-  - [app-mode](#systems/app-mode)
   - [exit-on-blur](#systems/exit-on-blur)
   - [personal-space-bubble](#systems/personal-space-bubble)
 - Components
-  - [app-mode](#components/app-mode)
-    - [app-mode-toggle-playing](#components/app-mode/app-mode-toggle-playing)
-    - [app-mode-toggle-attribute](#components/app-mode/app-mode-toggle-attribute)
-    - [app-mode-input-mappings](#components/app-mode/app-mode-input-mappings)
   - [avatar](#components/avatar)
     - [networked-audio-analyser](#components/avatar/networked-audio-analyser)
     - [scale-audio-feedback](#components/avatar/scale-audio-feedback)
@@ -61,7 +56,6 @@
     - [ui-class-while-frozen](#components/ui/ui-class-while-frozen)
   - [user-input](#components/user-input)
     - [cardboard-controls](#components/user-input/cardboard-controls)
-    - [controls-shape-offset](#components/user-input/controls-shape-offset)
     - [cursor-controller](#components/user-input/cursor-controller)
     - [hand-controls2](#components/user-input/hand-controls2)
     - [haptic-feedback](#components/user-input/haptic-feedback)
@@ -72,14 +66,6 @@
     - [vr-mode-toggle-playing](#components/vr-mode/vr-mode-toggle-playing)
 
 ## Systems
-
-<a name="systems/app-mode"></a>
-#### app-mode
-
-Simple system for keeping track of a modal app state
-
-`src/systems/app-mode.js`
-    
 
 <a name="systems/exit-on-blur"></a>
 #### exit-on-blur
@@ -337,15 +323,6 @@ Polls the Gamepad API for Cardboard Button input and emits cardboardbutton event
 
 `src/components/cardboard-controls.js`
           
-
-<a name="components/user-input/controls-shape-offset"></a>
-#### controls-shape-offset
-
-Sets the offset of the aframe-physics shape on this entity based on the current VR controller type
-
-`src/components/controls-shape-offset.js`
-          
-
 <a name="components/user-input/cursor-controller"></a>
 #### cursor-controller
 
@@ -429,7 +406,7 @@ Sets layer flags on the underlying Object3D
 <a name="components/environment/nav-mesh-helper"></a>
 #### nav-mesh-helper
 
-Initializes teleport-controls when the environment bundle has loaded.
+Initializes teleporters when the environment bundle has loaded.
 
 `src/components/nav-mesh-helper.js`
           
@@ -502,35 +479,6 @@ Toggles the interactivity of a UI entity while the scene is frozen.
 `src/components/visible-while-frozen.js`
           
     
-
-<a name="components/app-mode"></a>
-### app-mode
-      
-<a name="components/app-mode/app-mode-toggle-playing"></a>
-#### app-mode-toggle-playing
-
-Toggle the isPlaying state of a component based on app mode
-
-`src/systems/app-mode.js`
-          
-
-<a name="components/app-mode/app-mode-toggle-attribute"></a>
-#### app-mode-toggle-attribute
-
-Toggle a boolean property of a component based on app mode
-
-`src/systems/app-mode.js`
-          
-
-<a name="components/app-mode/app-mode-input-mappings"></a>
-#### app-mode-input-mappings
-
-Toggle aframe input mappings action set based on app mode
-
-`src/systems/app-mode.js`
-          
-    
-
 <a name="components/vr-mode"></a>
 ### vr-mode
       

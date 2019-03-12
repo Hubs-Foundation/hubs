@@ -18,7 +18,8 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         displayName: { type: "string", pattern: "^[A-Za-z0-9-]{3,32}$" },
-        avatarId: { type: "string" }
+        avatarId: { type: "string" },
+        personalAvatarId: { type: "string" }
       }
     },
 
@@ -37,7 +38,10 @@ export const SCHEMA = {
       properties: {
         hasFoundFreeze: { type: "boolean" },
         hasChangedName: { type: "boolean" },
-        lastEnteredAt: { type: "string" }
+        lastEnteredAt: { type: "string" },
+        hasPinned: { type: "boolean" },
+        hasRotated: { type: "boolean" },
+        hasRecentered: { type: "boolean" }
       }
     },
 
@@ -109,6 +113,10 @@ export default class Store extends EventTarget {
     }
 
     return this[STORE_STATE_CACHE_KEY];
+  }
+
+  resetTipActivityFlags() {
+    this.update({ activity: { hasRotated: false, hasPinned: false, hasRecentered: false } });
   }
 
   update(newState) {

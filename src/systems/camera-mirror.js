@@ -17,7 +17,7 @@ AFRAME.registerSystem("camera-mirror", {
   // Adds a camera under el, and starts mirroring
   mirrorCameraAtEl(el) {
     // TODO probably should explicitly check for immersive mode here.
-    if (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isOculusGo()) return;
+    if (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR()) return;
     if (this.mirrorEl && this.mirrorEl !== el) this.unmirrorCameraAtEl(this.mirrorEl);
 
     this.mirrorEl = el;
@@ -32,6 +32,7 @@ AFRAME.registerSystem("camera-mirror", {
     }
 
     this.mirrorEl.emit("mirrored", { el: this.mirrorEl });
+    this.mirrorEl.sceneEl.addState("mirroring");
   },
 
   unmirrorCameraAtEl(el) {
@@ -45,6 +46,7 @@ AFRAME.registerSystem("camera-mirror", {
     this.mirrorCamera = null;
 
     oldEl.emit("unmirrored", { el: oldEl });
+    oldEl.sceneEl.removeState("mirroring");
   },
 
   getMirroredCameraEl() {
@@ -83,7 +85,10 @@ AFRAME.registerSystem("camera-mirror", {
         playerHead.updateMatrixWorld(true, true);
       }
 
+      let playerHudWasVisible;
+
       if (playerHud) {
+        playerHudWasVisible = playerHud.visible;
         playerHud.visible = false;
       }
       renderer.vr.enabled = false;
@@ -98,7 +103,7 @@ AFRAME.registerSystem("camera-mirror", {
         playerHead.updateMatrixWorld(true);
       }
       if (playerHud) {
-        playerHud.visible = true;
+        playerHud.visible = playerHudWasVisible;
       }
     };
   }

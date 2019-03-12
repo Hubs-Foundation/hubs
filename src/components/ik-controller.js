@@ -259,12 +259,6 @@ AFRAME.registerComponent("ik-controller", {
     if (controllerObject3D.visible && (isInView || this.forceIkUpdate || this.data.alwaysUpdate)) {
       handMatrix.multiplyMatrices(this.invRootToChest, controllerObject3D.matrix);
 
-      const handControls = controller.components["hand-controls2"];
-
-      if (handControls) {
-        handMatrix.multiply(isLeft ? handControls.getLeftControllerOffset() : handControls.getRightControllerOffset());
-      }
-
       handMatrix.multiply(handState.rotation);
 
       handObject3D.position.setFromMatrixPosition(handMatrix);
