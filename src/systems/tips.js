@@ -62,6 +62,9 @@ const TIPS = {
   standalone: { top: [], bottom: [] }
 };
 
+// These tips, if closed, will only clear themselves, not all tips.
+const LOCAL_CLOSE_TIPS = ["invite", "object_pin"];
+
 let localStorageCache = null;
 let finishedScopes = {}; // Optimization, lets system skip scopes altogether once finished.
 
@@ -89,8 +92,11 @@ export const markTipFinished = tip => {
   localStorageCache = null;
 };
 
-export const markTipScopeFinished = scope => {
-  const tips = platformTips[scope];
+export const handleTipClose = (fullTip, scope) => {
+  const tip = fullTip.split(".")[1];
+
+  // Invite and pinning tips should be locally cleared, others should clear all remaining tips.
+  const tips = LOCAL_CLOSE_TIPS.includes(tip) ? [tip] : platformTips[scope];
 
   for (let i = 0; i < tips.length; i++) {
     const tip = tips[i];

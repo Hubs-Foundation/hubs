@@ -69,6 +69,7 @@ import "./components/camera-tool";
 import "./components/scene-sound";
 import "./components/emit-state-change";
 import "./components/action-to-event";
+import "./components/action-to-remove";
 import "./components/emit-scene-event-on-remove";
 import "./components/stop-event-propagation";
 import "./components/follow-in-fov";
@@ -83,6 +84,7 @@ import "./components/set-active-camera";
 import "./components/track-pose";
 import "./components/replay";
 import "./components/visibility-by-path";
+import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -243,6 +245,8 @@ function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
+  const isCursorHoldingPen = scene.systems.userinput.activeSets.has(userinputSets.cursorHoldingPen);
+  const hasActiveCamera = !!scene.systems["camera-tools"].getMyCamera();
 
   ReactDOM.render(
     <Router history={history}>
@@ -257,6 +261,8 @@ function mountUI(props = {}) {
               forcedVREntryType,
               store,
               mediaSearchStore,
+              isCursorHoldingPen,
+              hasActiveCamera,
               ...props,
               ...routeProps
             }}
@@ -297,6 +303,9 @@ async function updateEnvironmentForHub(hub) {
   if (hub.scene) {
     isLegacyBundle = false;
     sceneUrl = hub.scene.model_url;
+  } else if (hub.scene === null) {
+    // delisted/removed scene
+    sceneUrl = loadingEnvironmentURL;
   } else {
     const defaultSpaceTopic = hub.topics[0];
     const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");
@@ -388,6 +397,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   const hub = data.hubs[0];
 
   console.log(`Janus host: ${hub.host}`);
+
   const objectsScene = document.querySelector("#objects-scene");
   const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
   const objectsEl = document.createElement("a-entity");
@@ -537,6 +547,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   scene.removeAttribute("keyboard-shortcuts"); // Remove F and ESC hotkeys from aframe
   scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
 
+  // Physics needs to be ready before spawning anything.
+  while (!scene.systems.physics.initialized) await nextTick();
+
   scene.addEventListener("loaded", () => {
     const physicsSystem = scene.systems.physics;
     physicsSystem.setDebug(isDebug || physicsSystem.data.debug);
@@ -640,6 +653,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   scene.addEventListener("tips_changed", e => {
     remountUI({ activeTips: e.detail });
   });
+
+  scene.addEventListener("camera_toggled", () => remountUI({}));
+
+  scene.addEventListener("camera_removed", () => remountUI({}));
 
   pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 

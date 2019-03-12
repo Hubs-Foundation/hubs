@@ -7,7 +7,7 @@ AFRAME.registerComponent("unmute-video-button", {
       const mediaVideo = videoEl.components["media-video"];
       if (!mediaVideo || !mediaVideo.video) return;
       mediaVideo.video.muted = false;
-      this.el.parentNode.setAttribute("visible", false);
+      this.el.setAttribute("visible", false);
     };
   },
 

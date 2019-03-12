@@ -2,7 +2,6 @@ import { paths } from "../systems/userinput/paths";
 import { addMedia } from "../utils/media-utils";
 import { waitForEvent } from "../utils/async-utils";
 import { ObjectContentOrigins } from "../object-types";
-import { getLastWorldPosition, getLastWorldQuaternion } from "../utils/three-utils";
 
 const COLLISION_FLAGS = require("aframe-physics-system/src/constants").COLLISION_FLAGS;
 
@@ -81,7 +80,12 @@ AFRAME.registerComponent("super-spawner", {
     /**
      * The cursor superHand to use if an object is spawned via spawnEvent
      */
-    cursorSuperHand: { type: "selector" }
+    cursorSuperHand: { type: "selector" },
+
+    /**
+     * If true, will spawn the object at the cursor and animate it into the hand.
+     */
+    animateFromCursor: { type: "boolean" }
   },
 
   init() {
@@ -95,6 +99,7 @@ AFRAME.registerComponent("super-spawner", {
     this.sceneEl = document.querySelector("a-scene");
 
     this.el.setAttribute("hoverable-visuals", { cursorController: "#cursor-controller", enableSweepingEffect: false });
+    this.tempSpawnHandPosition = new THREE.Vector3();
   },
 
   play() {
@@ -137,9 +142,11 @@ AFRAME.registerComponent("super-spawner", {
     }
 
     const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve).entity;
+    const spawnOrigin = using6DOF && !this.data.animateFromCursor ? this.data.superHand : this.data.cursorSuperHand;
 
-    getLastWorldPosition(hand.object3D, entity.object3D.position);
-    getLastWorldQuaternion(hand.object3D, entity.object3D.quaternion);
+    spawnOrigin.object3D.getWorldPosition(entity.object3D.position);
+    hand.object3D.getWorldQuaternion(entity.object3D.quaternion);
+    entity.object3D.matrixNeedsUpdate = true;
 
     if (this.data.useCustomSpawnScale) {
       entity.object3D.scale.copy(this.data.spawnScale);
@@ -149,8 +156,23 @@ AFRAME.registerComponent("super-spawner", {
 
     await waitForEvent("body-loaded", entity);
 
-    getLastWorldPosition(hand.object3D, entity.object3D.position);
+    spawnOrigin.object3D.getWorldPosition(entity.object3D.position);
+    hand.object3D.getWorldQuaternion(entity.object3D.quaternion);
     entity.object3D.matrixNeedsUpdate = true;
+
+    if (hand !== this.data.cursorSuperHand && this.data.animateFromCursor) {
+      hand.object3D.getWorldPosition(this.tempSpawnHandPosition);
+
+      entity.setAttribute("animation__spawn-at-cursor", {
+        property: "position",
+        delay: 500,
+        dur: 1500,
+        from: { x: entity.object3D.position.x, y: entity.object3D.position.y, z: entity.object3D.position.z },
+        to: { x: this.tempSpawnHandPosition.x, y: this.tempSpawnHandPosition.y, z: this.tempSpawnHandPosition.z },
+        easing: "easeInOutBack"
+      });
+    }
+
     // Call syncToPhysics so that updated transforms aren't immediately overwritten
     entity.components["ammo-body"].syncToPhysics();
 

@@ -39,6 +39,10 @@ AFRAME.registerSystem("ui-hotkeys", {
         this.mediaSearchStore.sourceNavigate(SOURCES[i - 1]);
       }
     }
+
+    if (this.userinput.get(paths.actions.toggleCamera)) {
+      this.el.emit("action_toggle_camera");
+    }
   },
 
   focusChat: function(prefix) {

@@ -6,6 +6,16 @@ import { proxiedUrlFor } from "../utils/media-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 const SHAPES = require("aframe-physics-system/src/constants").SHAPES;
 
+const VOLUME_LABELS = [];
+for (let i = 0; i < 20; i++) {
+  let s = "|";
+  for (let j = 0; j < 20; j++) {
+    s += i >= j ? "|" : " ";
+  }
+  s += "|";
+  VOLUME_LABELS[i] = s;
+}
+
 class GIFTexture extends THREE.Texture {
   constructor(frames, delays, disposals) {
     super(document.createElement("canvas"));
@@ -327,6 +337,9 @@ AFRAME.registerComponent("media-video", {
 
     this.seekForward = this.seekForward.bind(this);
     this.seekBack = this.seekBack.bind(this);
+    this.volumeUp = this.volumeUp.bind(this);
+    this.volumeDown = this.volumeDown.bind(this);
+    this.changeVolumeBy = this.changeVolumeBy.bind(this);
     this.togglePlaying = this.togglePlaying.bind(this);
 
     this.lastUpdate = 0;
@@ -339,6 +352,8 @@ AFRAME.registerComponent("media-video", {
       this.hoverMenu = menu;
 
       this.playPauseButton = this.el.querySelector(".video-playpause-button");
+      this.volumeUpButton = this.el.querySelector(".video-volume-up-button");
+      this.volumeDownButton = this.el.querySelector(".video-volume-down-button");
       this.seekForwardButton = this.el.querySelector(".video-seek-forward-button");
       this.seekBackButton = this.el.querySelector(".video-seek-back-button");
       this.timeLabel = this.el.querySelector(".video-time-label");
@@ -347,7 +362,10 @@ AFRAME.registerComponent("media-video", {
       this.playPauseButton.addEventListener("grab-start", this.togglePlaying);
       this.seekForwardButton.addEventListener("grab-start", this.seekForward);
       this.seekBackButton.addEventListener("grab-start", this.seekBack);
+      this.volumeUpButton.addEventListener("grab-start", this.volumeUp);
+      this.volumeDownButton.addEventListener("grab-start", this.volumeDown);
 
+      this.updateVolumeLabel();
       this.updateHoverMenuBasedOnLiveState();
       this.updatePlaybackState();
     });
@@ -390,6 +408,19 @@ AFRAME.registerComponent("media-video", {
       this.video.currentTime -= 10;
       this.el.setAttribute("media-video", "time", this.video.currentTime);
     }
+  },
+
+  changeVolumeBy(v) {
+    this.el.setAttribute("media-video", "volume", THREE.Math.clamp(this.data.volume + v, 0, 1));
+    this.updateVolumeLabel();
+  },
+
+  volumeUp() {
+    this.changeVolumeBy(0.1);
+  },
+
+  volumeDown() {
+    this.changeVolumeBy(-0.1);
   },
 
   togglePlaying() {
@@ -571,23 +602,21 @@ AFRAME.registerComponent("media-video", {
     }
   },
 
+  updateVolumeLabel() {
+    this.volumeLabel.setAttribute(
+      "text",
+      "value",
+      this.data.volume === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(this.data.volume / 0.05)]
+    );
+  },
+
   tick() {
     if (!this.video) return;
 
     const userinput = this.el.sceneEl.systems.userinput;
     const volumeMod = userinput.get(paths.actions.cursor.mediaVolumeMod);
     if (this.el.is("hovered") && volumeMod) {
-      this.el.setAttribute("media-video", "volume", THREE.Math.clamp(this.data.volume + volumeMod, 0, 1));
-      this.volumeLabel.setAttribute(
-        "text",
-        "value",
-        this.data.volume === 0 ? "MUTE" : `VOL: ${Math.round(this.data.volume * 100)}%`
-      );
-      this.volumeLabel.object3D.visible = true;
-      clearTimeout(this.hideVolumeLabelTimeout);
-      if (this.data.volume) {
-        this.hideVolumeLabelTimeout = setTimeout(() => (this.volumeLabel.object3D.visible = false), 1000);
-      }
+      this.changeVolumeBy(volumeMod);
     }
 
     if (this.hoverMenu && this.hoverMenu.object3D.visible && !this.videoIsLive) {
@@ -623,6 +652,8 @@ AFRAME.registerComponent("media-video", {
     }
     if (this.hoverMenu) {
       this.playPauseButton.removeEventListener("grab-start", this.togglePlaying);
+      this.volumeUpButton.removeEventListener("grab-start", this.volumeUp);
+      this.volumeDownButton.removeEventListener("grab-start", this.volumeDown);
       this.seekForwardButton.removeEventListener("grab-start", this.seekForward);
       this.seekBackButton.removeEventListener("grab-start", this.seekBack);
     }

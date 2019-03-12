@@ -79,9 +79,8 @@ export class AppAwareTouchscreenDevice {
           // If grab was being delayed, we should fire the initial grab and also delay the unassignment
           // to ensure we write at least two frames with the grab down (since the action set will change)
           // and otherwise we'd not see the falling xform.
-          if (assignment.framesUntilGrab >= -1) {
-            assignment.framesUntilGrab = 0;
-            assignment.framesUntilUnassign = 2;
+          if (assignment.framesUntilGrab >= 0) {
+            assignment.framesUntilUnassign = assignment.framesUntilGrab + 2;
           } else {
             unassign(assignment.touch, assignment.job, this.assignments);
           }
