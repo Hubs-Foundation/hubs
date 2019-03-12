@@ -92,7 +92,7 @@ const onReady = async () => {
   const sceneInfo = res.scenes[0];
 
   // Delisted/Removed
-  if (!sceneInfo.scene_id) {
+  if (!sceneInfo) {
     remountUI({ unavailable: true });
     return;
   }
