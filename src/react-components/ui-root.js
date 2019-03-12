@@ -1405,8 +1405,7 @@ class UIRoot extends Component {
     const rootStyles = {
       [styles.ui]: true,
       "ui-root": true,
-      "in-modal-or-overlay": this.isInModalOrOverlay(),
-      [styles.messageEntryOnTop]: this.state.messageEntryOnTop
+      "in-modal-or-overlay": this.isInModalOrOverlay()
     };
 
     const presenceLogEntries = this.props.presenceLogEntries || [];
@@ -1542,14 +1541,7 @@ class UIRoot extends Component {
               </div>
             )}
 
-            {entered && (
-              <PresenceLog
-                onTop={this.state.messageEntryOnTop}
-                inRoom={true}
-                entries={presenceLogEntries}
-                hubId={this.props.hubId}
-              />
-            )}
+            {entered && <PresenceLog inRoom={true} entries={presenceLogEntries} hubId={this.props.hubId} />}
             {entered &&
               this.props.activeTips &&
               this.props.activeTips.bottom && (
@@ -1582,10 +1574,7 @@ class UIRoot extends Component {
                   style={{ height: pendingMessageFieldHeight }}
                 >
                   {this.state.pendingMessage.startsWith("/") && (
-                    <ChatCommandHelp
-                      onTop={this.state.messageEntryOnTop}
-                      matchingPrefix={this.state.pendingMessage.substring(1)}
-                    />
+                    <ChatCommandHelp matchingPrefix={this.state.pendingMessage.substring(1)} />
                   )}
                   <input
                     id="message-entry-media-input"
@@ -1623,11 +1612,9 @@ class UIRoot extends Component {
                     rows={textRows}
                     onFocus={e => {
                       handleTextFieldFocus(e.target);
-                      this.setState({ messageEntryOnTop: isMobile });
                     }}
                     onBlur={() => {
                       handleTextFieldBlur();
-                      this.setState({ messageEntryOnTop: false });
                     }}
                     onChange={e => {
                       e.stopPropagation();
@@ -1761,29 +1748,27 @@ class UIRoot extends Component {
               <span className={styles.occupantCount}>{this.occupantCount()}</span>
             </div>
 
-            {this.state.showPresenceList &&
-              !this.state.messageEntryOnTop && (
-                <PresenceList
-                  history={this.props.history}
-                  presences={this.props.presences}
-                  sessionId={this.props.sessionId}
-                  signedIn={this.state.signedIn}
-                  email={this.props.store.state.credentials.email}
-                  onSignIn={this.showSignInDialog}
-                  onSignOut={this.signOut}
-                />
-              )}
+            {this.state.showPresenceList && (
+              <PresenceList
+                history={this.props.history}
+                presences={this.props.presences}
+                sessionId={this.props.sessionId}
+                signedIn={this.state.signedIn}
+                email={this.props.store.state.credentials.email}
+                onSignIn={this.showSignInDialog}
+                onSignOut={this.signOut}
+              />
+            )}
 
-            {this.state.showSettingsMenu &&
-              !this.state.messageEntryOnTop && (
-                <SettingsMenu
-                  history={this.props.history}
-                  mediaSearchStore={this.props.mediaSearchStore}
-                  hideSettings={() => this.setState({ showSettingsMenu: false })}
-                  hubChannel={this.props.hubChannel}
-                  hubScene={this.props.hubScene}
-                />
-              )}
+            {this.state.showSettingsMenu && (
+              <SettingsMenu
+                history={this.props.history}
+                mediaSearchStore={this.props.mediaSearchStore}
+                hideSettings={() => this.setState({ showSettingsMenu: false })}
+                hubChannel={this.props.hubChannel}
+                hubScene={this.props.hubScene}
+              />
+            )}
 
             {entered ? (
               <div className={styles.topHud}>
