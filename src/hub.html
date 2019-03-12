@@ -69,6 +69,10 @@
             <img id="presence-count" crossorigin="anonymous" src="./assets/hud/presence-count.png">
             <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
 
+            <img id="video-volume-down" crossorigin="anonymous" src="./assets/video-overlay/volume_down.png">
+            <img id="video-volume-down-hover" crossorigin="anonymous" src="./assets/video-overlay/volume_down-hover.png">
+            <img id="video-volume-up" crossorigin="anonymous" src="./assets/video-overlay/volume_up.png">
+            <img id="video-volume-up-hover" crossorigin="anonymous" src="./assets/video-overlay/volume_up-hover.png">
             <img id="video-seek-back" crossorigin="anonymous" src="./assets/video-overlay/seek_back.png">
             <img id="video-seek-back-hover" crossorigin="anonymous" src="./assets/video-overlay/seek_back-hover.png">
             <img id="video-seek-forward" crossorigin="anonymous" src="./assets/video-overlay/seek_fwd.png">
@@ -376,26 +380,38 @@
             <!-- TODO: All of these positions are assuming 16:9 - need to actually reposition based on video resolution -->
             <template id="video-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" mixin="button-container" visible="false">
-                    <a-entity class="video-time-label" text="value: 0; anchor: right; align: right;" text-raycast-hack position="0.485 -0.25 0.015"></a-entity>
-                    <a-entity class="video-volume-label" text="value: 0%; anchor: right; align: right;" text-raycast-hack position="0.485 0.25 0.015" visible="false"></a-entity>
+                    <a-entity class="video-time-label" text="value: 0; anchor: center; align: center; color: #aaa;" text-raycast-hack position="0 -0.24 0" scale="0.75 0.75 0.75"></a-entity>
+                    <a-entity class="video-volume-label" text="value: 0%; anchor: center; align: center; color: #ccc; letterSpacing: 4;" text-raycast-hack position="0.0 0.175 0.015" scale="1.25 1.25 1.25"></a-entity>
+                    <a-image
+                        icon-button="image: #video-volume-down; hoverImage: #video-volume-down-hover;"
+                        scale="0.075 0.075 0.075"
+                        position="-0.275 0.175 0"
+                        class="ui video-volume-down-button"
+                    ></a-image>
+                    <a-image
+                        icon-button="image: #video-volume-up; hoverImage: #video-volume-up-hover;"
+                        scale="0.075 0.075 0.075"
+                        position="0.275 0.175 0"
+                        class="ui video-volume-up-button"
+                    ></a-image>
                     <a-image
                         icon-button="image: #video-seek-back; hoverImage: #video-seek-back-hover;"
                         scale="0.1 0.1 0.1"
-                        position="-0.3 0 0"
+                        position="-0.3 -0.125 0"
                         class="ui video-seek-back-button"
                         visible="false"
                     ></a-image>
                     <a-image
                         icon-button="image: #video-pause; hoverImage: #video-pause-hover; activeImage: #video-play; activeHoverImage: #video-play-hover"
-                        scale="0.2 0.2 0.2"
-                        position="0 0 0"
+                        scale="0.15 0.15 0.15"
+                        position="0 -0.125 0"
                         class="ui video-playpause-button"
                         visible="false"
                     ></a-image>
                     <a-image
                         icon-button="image: #video-seek-forward; hoverImage: #video-seek-forward-hover;"
                         scale="0.1 0.1 0.1"
-                        position="0.3 0 0"
+                        position="0.3 -0.125 0"
                         class="ui video-seek-forward-button"
                         visible="false"
                     ></a-image>
