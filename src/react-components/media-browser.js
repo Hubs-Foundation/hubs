@@ -245,7 +245,7 @@ class MediaBrowser extends Component {
                       } else {
                         this.close();
                       }
-                    } else if (e.key === "Escape" || e.key === "Enter") {
+                    } else if (e.key === "Escape") {
                       e.target.blur();
                     }
                   }}
