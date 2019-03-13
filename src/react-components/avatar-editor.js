@@ -4,6 +4,8 @@ import { FormattedMessage } from "react-intl";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { upload } from "../utils/media-utils";
 import classNames from "classnames";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { bumpCacheVersion } from "../assets/avatars/avatars";
 
@@ -180,7 +182,9 @@ export default class AvatarEditor extends Component {
             });
           }}
         >
-          clear
+          <i>
+            <FontAwesomeIcon icon={faTimes} />
+          </i>
         </a>
       )}
     </div>
