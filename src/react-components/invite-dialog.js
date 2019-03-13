@@ -107,7 +107,7 @@ export default class InviteDialog extends Component {
             )}
         </div>
         {this.props.isModal && (
-          <button className={styles.enterVrButton}>
+          <button className={styles.enterVrButton} onClick={() => this.props.onClose()}>
             <FormattedMessage id="entry.return-to-vr" />
           </button>
         )}

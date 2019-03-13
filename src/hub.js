@@ -286,10 +286,6 @@ async function updateUIForHub(hub) {
     hubScene: hub.scene,
     hubEntryCode: hub.entry_code
   });
-
-  document
-    .querySelector("#hud-hub-entry-link")
-    .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
 }
 
 let shapes = null;
@@ -558,7 +554,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);
   const availableVREntryTypes = await getAvailableVREntryTypes();
-  const entryManager = new SceneEntryManager(hubChannel, authChannel, availableVREntryTypes);
+  const entryManager = new SceneEntryManager(hubChannel, authChannel, availableVREntryTypes, history);
   entryManager.onRequestAuthentication = (
     signInMessageId,
     signInCompleteMessageId,
