@@ -1718,6 +1718,14 @@ class UIRoot extends Component {
               </div>
             )}
 
+            <InviteDialog
+              allowShare={!this.props.availableVREntryTypes.isInHMD}
+              entryCode={this.props.hubEntryCode}
+              hubId={this.props.hubId}
+              isModal={true}
+              onClose={() => this.setState({ showInviteDialog: false })}
+            />
+
             <StateRoute
               stateKey="overlay"
               stateValue="link"
