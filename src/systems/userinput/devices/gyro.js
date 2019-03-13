@@ -68,6 +68,9 @@ export class GyroDevice {
       hmdEuler.setFromQuaternion(this.hmdQuaternion, "YXZ");
     }
 
+    // Don't use gyro values when device is lying flat
+    if (hmdEuler.x < -Math.PI * 0.475) return;
+
     const dX = THREE.Math.RAD2DEG * difference(hmdEuler.x, this.prevX);
     const dY = THREE.Math.RAD2DEG * difference(hmdEuler.y, this.prevY);
 
@@ -79,7 +82,7 @@ export class GyroDevice {
 
     this.prevX = hmdEuler.x;
     this.prevY = hmdEuler.y;
-    frame[paths.device.gyro.averageDeltaX] = this.averageDeltaX;
-    frame[paths.device.gyro.averageDeltaY] = this.averageDeltaY;
+    frame.setValueType(paths.device.gyro.averageDeltaX, this.averageDeltaX);
+    frame.setValueType(paths.device.gyro.averageDeltaY, this.averageDeltaY);
   }
 }

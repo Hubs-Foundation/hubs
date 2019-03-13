@@ -199,30 +199,56 @@
   }  
 }
 
-:local(.iconButton.spawn_pen) {
-  background-image: url(../hud/spawn_pen.png);
+:local(.iconButton.pen) {
+  background-image: url(../hud/pen_off.png);
 }
-:local(.iconButton.spawn_pen:hover) {
+:local(.iconButton.pen:hover) {
   @media (pointer: fine) {
-    background-image: url(../hud/spawn_pen-hover.png);
+    background-image: url(../hud/pen_off-hover.png);
   }
 
   @media (pointer: coarse) {
-    background-image: url(../hud/spawn_pen.png);
+    background-image: url(../hud/pen_off.png);
   }
 }
 
-:local(.iconButton.spawn_camera) {
-  background-image: url(../hud/spawn_camera.png);
+:local(.iconButton.pen.active) {
+  background-image: url(../hud/pen_on.png);
 }
-:local(.iconButton.spawn_camera:hover) {
+:local(.iconButton.pen.active:hover) {
   @media (pointer: fine) {
-    background-image: url(../hud/spawn_camera-hover.png);
+    background-image: url(../hud/pen_on-hover.png);
   }
 
   @media (pointer: coarse) {
-    background-image: url(../hud/spawn_camera.png);
+    background-image: url(../hud/pen_on.png);
+  }  
+}
+
+:local(.iconButton.camera) {
+  background-image: url(../hud/camera_off.png);
+}
+:local(.iconButton.camera:hover) {
+  @media (pointer: fine) {
+    background-image: url(../hud/camera_off-hover.png);
   }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/camera_off.png);
+  }
+}
+
+:local(.iconButton.camera.active) {
+  background-image: url(../hud/camera_on.png);
+}
+:local(.iconButton.camera.active:hover) {
+  @media (pointer: fine) {
+    background-image: url(../hud/camera_on-hover.png);
+  }
+
+  @media (pointer: coarse) {
+    background-image: url(../hud/camera_on.png);
+  }  
 }
 
 :local(.iconButton.freeze) {

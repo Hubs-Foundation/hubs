@@ -3,14 +3,7 @@ import { sets } from "../systems/userinput/sets";
 import { getLastWorldPosition } from "../utils/three-utils";
 
 // Color code from https://codepen.io/njmcode/pen/axoyD/
-// Converts a #ffffff hex string into an [r,g,b] array
-
-// Inverse of the above
-const r2h = function(rgb) {
-  return "#" + ((1 << 24) + (rgb[0] << 16) + (rgb[1] << 8) + rgb[2]).toString(16).slice(1);
-};
-
-const rgb2hsl = function(color) {
+const rgb2hsl = function(color, out) {
   const r = color[0] / 255;
   const g = color[1] / 255;
   const b = color[2] / 255;
@@ -39,7 +32,10 @@ const rgb2hsl = function(color) {
     h /= 6;
   }
 
-  return [h, s, l];
+  out[0] = h;
+  out[1] = s;
+  out[2] = l;
+  return out;
 };
 
 const hue2rgb = function(p, q, t) {
@@ -51,45 +47,34 @@ const hue2rgb = function(p, q, t) {
   return p;
 };
 
-const hsl2rgb = function(color) {
-  let l = color[2];
-
-  if (color[1] == 0) {
-    l = Math.round(l * 255);
-    return [l, l, l];
-  } else {
-    const s = color[1];
-    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    const p = 2 * l - q;
-    const r = hue2rgb(p, q, color[0] + 1 / 3);
-    const g = hue2rgb(p, q, color[0]);
-    const b = hue2rgb(p, q, color[0] - 1 / 3);
-    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-  }
+const hsl2rgb = function(color, out) {
+  const l = color[2];
+  const s = color[1];
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  out[0] = hue2rgb(p, q, color[0] + 1 / 3);
+  out[1] = hue2rgb(p, q, color[0]);
+  out[2] = hue2rgb(p, q, color[0] - 1 / 3);
+  return out;
 };
 
-const _interpolateHSL = function(color1, color2, factor) {
-  if (arguments.length < 3) {
-    factor = 0.5;
-  }
-  const hsl1 = rgb2hsl(color1);
-  const hsl2 = rgb2hsl(color2);
-  for (let i = 0; i < 3; i++) {
-    hsl1[i] += factor * (hsl2[i] - hsl1[i]);
-  }
-  return hsl2rgb(hsl1);
-};
+const _interpolateHSL = (function() {
+  const hsl1 = [0, 0, 0];
+  const hsl2 = [0, 0, 0];
+  return function _interpolateHSL(color1, color2, factor, out) {
+    rgb2hsl(color1, hsl1);
+    rgb2hsl(color2, hsl2);
+    for (let i = 0; i < 3; i++) {
+      hsl1[i] += factor * (hsl2[i] - hsl1[i]);
+    }
+    return hsl2rgb(hsl1, out);
+  };
+})();
 
-function rotatingColor(t) {
-  const STEP_LENGTH = 0.05;
-  const color = _interpolateHSL(
-    [47, 255, 200],
-    [23, 64, 118],
-    0.5 + 0.5 * Math.floor(Math.sin(t / 1000.0) / STEP_LENGTH) * STEP_LENGTH
-  );
-  return r2h(color);
-}
-
+const HIGHLIGHT = new THREE.Color(23 / 255, 64 / 255, 118 / 255);
+const NO_HIGHLIGHT = new THREE.Color(190 / 255, 190 / 255, 190 / 255);
+const ROTATE_COLOR_1 = [150, 80, 150];
+const ROTATE_COLOR_2 = [23, 64, 118];
 /**
  * Manages targeting and physical cursor location. Has the following responsibilities:
  *
@@ -105,9 +90,6 @@ AFRAME.registerComponent("cursor-controller", {
     far: { default: 4 },
     near: { default: 0.01 },
     minDistance: { default: 0.18 },
-    cursorColorHovered: { default: "#2F80ED" },
-    cursorColorUnhovered: { default: "#FFFFFF" },
-    rayObject: { type: "selector" },
     objects: { default: "" }
   },
 
@@ -129,6 +111,8 @@ AFRAME.registerComponent("cursor-controller", {
     this.raycaster.firstHitOnly = true; // flag specific to three-mesh-bvh
     this.dirty = true;
     this.distance = this.data.far;
+    this.color = new THREE.Color(0, 0, 0);
+    this.rotateColor = [0, 0, 0];
     const lineMaterial = new THREE.LineBasicMaterial({
       color: "white",
       opacity: 0.2,
@@ -222,7 +206,7 @@ AFRAME.registerComponent("cursor-controller", {
         this.distance = intersection ? intersection.distance : this.data.far;
       }
 
-      const { cursor, minDistance, far, camera, cursorColorHovered, cursorColorUnhovered } = this.data;
+      const { cursor, minDistance, far, camera } = this.data;
 
       const cursorModDelta = userinput.get(paths.actions.cursor.modDelta) || 0;
       if (isGrabbing && !userinput.activeSets.has(sets.cursorHoldingUI)) {
@@ -236,14 +220,18 @@ AFRAME.registerComponent("cursor-controller", {
       cursor.object3D.scale.setScalar(Math.pow(this.distance, 0.315) * 0.75);
       cursor.object3D.matrixNeedsUpdate = true;
 
-      const cursorColor = AFRAME.scenes[0].systems["rotate-selected-object"].rotating
-        ? rotatingColor(t)
-        : intersection || isGrabbing
-          ? cursorColorHovered
-          : cursorColorUnhovered;
+      if (AFRAME.scenes[0].systems["rotate-selected-object"].rotating) {
+        _interpolateHSL(ROTATE_COLOR_1, ROTATE_COLOR_2, 0.5 + 0.5 * Math.sin(t / 1000.0), this.rotateColor);
+        this.color.setRGB(this.rotateColor[0], this.rotateColor[1], this.rotateColor[2]);
+      } else if (intersection || isGrabbing) {
+        this.color.copy(HIGHLIGHT);
+      } else {
+        this.color.copy(NO_HIGHLIGHT);
+      }
 
-      if (this.data.cursor.components.material.data.color !== cursorColor) {
-        this.data.cursor.setAttribute("material", "color", cursorColor);
+      if (!this.data.cursor.object3DMap.mesh.material.color.equals(this.color)) {
+        this.data.cursor.object3DMap.mesh.material.color.copy(this.color);
+        this.data.cursor.object3DMap.mesh.material.needsUpdate = true;
       }
 
       if (this.line.material.visible) {

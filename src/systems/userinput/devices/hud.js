@@ -7,7 +7,7 @@ export class HudDevice {
   }
 
   write(frame) {
-    frame[paths.device.hud.penButton] = this.events.length !== 0;
+    frame.setValueType(paths.device.hud.penButton, this.events.length !== 0);
     while (this.events.length) {
       this.events.pop();
     }

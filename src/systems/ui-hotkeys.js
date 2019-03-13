@@ -1,6 +1,16 @@
 import { paths } from "./userinput/paths";
 import { SOURCES } from "../storage/media-search-store";
 
+const MEDIA_SEARCH_PATHS = [
+  paths.actions.mediaSearch1,
+  paths.actions.mediaSearch2,
+  paths.actions.mediaSearch3,
+  paths.actions.mediaSearch4,
+  paths.actions.mediaSearch5,
+  paths.actions.mediaSearch6,
+  paths.actions.mediaSearch7
+];
+
 // Every frame, looks for input paths that trigger UI-relevant events and handles them.
 AFRAME.registerSystem("ui-hotkeys", {
   init() {
@@ -24,15 +34,20 @@ AFRAME.registerSystem("ui-hotkeys", {
       this.mediaSearchStore.pushExitMediaBrowserHistory();
     }
 
-    for (let i = 1; i <= 7; i++) {
-      if (this.userinput.get(`/actions/mediaSearch${i}`)) {
-        this.mediaSearchStore.sourceNavigate(SOURCES[i - 1]);
+    for (let i = 0; i <= 6; i++) {
+      if (this.userinput.get(MEDIA_SEARCH_PATHS[i])) {
+        this.mediaSearchStore.sourceNavigate(SOURCES[i]);
       }
+    }
+
+    if (this.userinput.get(paths.actions.toggleCamera)) {
+      this.el.emit("action_toggle_camera");
     }
   },
 
   focusChat: function(prefix) {
     const target = document.querySelector(".chat-focus-target");
+    if (!target) return;
 
     target.focus();
 

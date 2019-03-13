@@ -68,18 +68,18 @@ export class MouseDevice {
     this.movementXY = [0, 0]; // deltas
     this.wheel = 0; // delta
     this.events.forEach(event => {
-      this.process(event, frame);
+      this.process(event);
     });
 
     while (this.events.length) {
       this.events.pop();
     }
 
-    frame[paths.device.mouse.coords] = this.coords;
-    frame[paths.device.mouse.movementXY] = this.movementXY;
-    frame[paths.device.mouse.buttonLeft] = this.buttonLeft;
-    frame[paths.device.mouse.buttonRight] = this.buttonRight;
-    frame[paths.device.mouse.wheel] = this.wheel;
+    frame.setVector2(paths.device.mouse.coords, this.coords[0], this.coords[1]);
+    frame.setVector2(paths.device.mouse.movementXY, this.movementXY[0], this.movementXY[1]);
+    frame.setValueType(paths.device.mouse.buttonLeft, this.buttonLeft);
+    frame.setValueType(paths.device.mouse.buttonRight, this.buttonRight);
+    frame.setValueType(paths.device.mouse.wheel, this.wheel);
   }
 }
 
