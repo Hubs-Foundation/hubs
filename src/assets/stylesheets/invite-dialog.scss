@@ -33,6 +33,13 @@
       display: none;
     }
   }
+
+  :local(.enter-vr-button) {
+    @extend %action-button;
+    background-color: transparent;
+    position: absolute;
+    bottom: 64px;
+  }
 }
 
 :local(.modal) {
@@ -43,7 +50,10 @@
   height: 100%;
   border-radius: 0;
   margin: 0;
-  justify-content: center;
+
+  @media (min-height: 500px) {
+    justify-content: center;
+  }
 }
 
 :local(.close) {

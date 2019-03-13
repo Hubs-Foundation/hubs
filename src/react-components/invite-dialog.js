@@ -106,6 +106,11 @@ export default class InviteDialog extends Component {
               </WithHoverSound>
             )}
         </div>
+        {this.props.isModal && (
+          <button className={styles.enterVrButton}>
+            <FormattedMessage id="entry.return-to-vr" />
+          </button>
+        )}
       </div>
     );
   }
