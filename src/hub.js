@@ -658,7 +658,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   scene.addEventListener("camera_removed", () => remountUI({}));
 
-  pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
+  // pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 
   const platformUnsupportedReason = getPlatformUnsupportedReason();
 
