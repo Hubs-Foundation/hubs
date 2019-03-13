@@ -718,6 +718,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       hubChannel.setPermissionsFromToken(data.perms_token);
       if (!hubChannel.permissions.join_hub && data.oauth_info.length) {
         remountUI({ oauthInfo: data.oauth_info, showOAuthDialog: true });
+        return;
       }
 
       scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
