@@ -6,8 +6,8 @@ AFRAME.registerComponent("open-media-button", {
     this.label = this.el.querySelector("[text]");
 
     this.updateSrc = () => {
-      const src = this.src = this.targetEl.components["media-loader"].data.src;
-      const visible = src && (guessContentType(src) !== "video/vnd.hubs-webrtc");
+      const src = (this.src = this.targetEl.components["media-loader"].data.src);
+      const visible = src && guessContentType(src) !== "video/vnd.hubs-webrtc";
       this.el.object3D.visible = !!visible;
 
       if (visible) {

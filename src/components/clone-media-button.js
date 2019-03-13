@@ -4,10 +4,9 @@ import { guessContentType } from "../utils/media-utils";
 
 AFRAME.registerComponent("clone-media-button", {
   init() {
-
     this.updateSrc = () => {
-      const src = this.src = this.targetEl.components["media-loader"].data.src;
-      const visible = src && (guessContentType(src) !== "video/vnd.hubs-webrtc");
+      const src = (this.src = this.targetEl.components["media-loader"].data.src);
+      const visible = src && guessContentType(src) !== "video/vnd.hubs-webrtc";
       this.el.object3D.visible = !!visible;
     };
 
