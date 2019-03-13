@@ -294,14 +294,22 @@ AFRAME.registerComponent("camera-tool", {
           );
 
           this.el.object3D.localToWorld(photoPos);
+          entity.object3D.visible = false;
 
-          entity.setAttribute("animation__photo_pos", {
-            property: "position",
-            dur: 800,
-            from: { x: pos.x, y: pos.y, z: pos.z },
-            to: { x: photoPos.x, y: photoPos.y, z: photoPos.z },
-            easing: "easeOutElastic"
-          });
+          entity.addEventListener(
+            "image-loaded",
+            () => {
+              entity.object3D.visible = true;
+              entity.setAttribute("animation__photo_pos", {
+                property: "position",
+                dur: 800,
+                from: { x: pos.x, y: pos.y, z: pos.z },
+                to: { x: photoPos.x, y: photoPos.y, z: photoPos.z },
+                easing: "easeOutElastic"
+              });
+            },
+            { once: true }
+          );
 
           entity.object3D.matrixNeedsUpdate = true;
 
