@@ -191,21 +191,6 @@ function getPlatformUnsupportedReason() {
   return null;
 }
 
-function pollForSupportAvailability(callback) {
-  const availabilityUrl = getReticulumFetchUrl("/api/v1/support/availability");
-  let isSupportAvailable = null;
-
-  const updateIfChanged = () =>
-    fetch(availabilityUrl).then(({ ok }) => {
-      if (isSupportAvailable === ok) return;
-      isSupportAvailable = ok;
-      callback(isSupportAvailable);
-    });
-
-  updateIfChanged();
-  setInterval(updateIfChanged, 30000);
-}
-
 function setupLobbyCamera() {
   const camera = document.querySelector("#player-camera");
   const previewCamera = document.querySelector("#environment-scene").object3D.getObjectByName("scene-preview-camera");
@@ -654,8 +639,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   scene.addEventListener("camera_toggled", () => remountUI({}));
 
   scene.addEventListener("camera_removed", () => remountUI({}));
-
-  // pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 
   const platformUnsupportedReason = getPlatformUnsupportedReason();
 
