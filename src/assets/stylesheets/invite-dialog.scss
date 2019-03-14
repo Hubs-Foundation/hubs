@@ -56,10 +56,11 @@
   }
 }
 
-:local(.close) {
+:local(button.close) {
   position: absolute;
   width: 30px;
   height: 30px;
+  min-width: auto;
   left: 12px;
   font-size: 1.5em;
   top: 12px;
