@@ -196,8 +196,8 @@
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
                     ammo-body="type: static; mass: 1;"
-                    grabbable="constraintComponentName: ammo-constraint"
-                    hoverable
+                    threejs-object-descendents-aggregator
+                    offers-remote-constraint
                     hoverable-visuals="cursorController: #cursor-controller"
                     sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
                     sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
@@ -211,7 +211,8 @@
             <template id="interactable-media">
                 <a-entity
                     class="interactable"
-                    aggregate-and-mark-objects="offerConstraintWhenHovered: true;"
+                    threejs-object-descendents-aggregator
+                    offers-remote-constraint
                     ammo-body="type: dynamic; mass: 1;"
                     hoverable-visuals="cursorController: #cursor-controller"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
@@ -226,10 +227,10 @@
                 <a-entity
                     class="pen interactable"
                     super-networked-interactable="counter: #pen-counter;"
-                    aggregate-and-mark-objects="offerConstraintWhenHovered: true; isPen: true;"
+                    threejs-object-descendents-aggregator
+                    offers-remote-constraint
                     ammo-body="type: dynamic; mass: 0.001;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
-                    hoverable
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
                     sound__next_pen_color="src: #sound_asset-next_pen_color; on: next_pen_color; poolSize: 2; positional: false;"
@@ -266,8 +267,9 @@
             <template id="interactable-camera">
                 <a-entity
                     class="interactable icamera"
-                    aggregate-and-mark-objects="offerConstraintWhenHovered: true; isCamera: true;"
                     camera-tool
+                    threejs-object-descendents-aggregator
+                    offers-remote-constraint
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
