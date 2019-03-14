@@ -16,7 +16,7 @@ export function handleExitTo2DInterstitial(isLower) {
   } else {
     // Non-immersive browser, show notice
     const vrNotice = document.querySelector(".vr-notice");
-    vrNotice.setAttribute("visible", true);
+    vrNotice.object3D.visible = true;
     vrNotice.setAttribute("follow-in-fov", {
       angle: isLower ? 39 : -15
     });
@@ -27,7 +27,7 @@ export function handleReEntryToVRFrom2DInterstitial() {
   if (!isIn2DInterstitial) return;
   isIn2DInterstitial = false;
 
-  document.querySelector(".vr-notice").setAttribute("visible", false);
+  document.querySelector(".vr-notice").object3D.visible = false;
 
   if (detectInHMD()) {
     const scene = document.querySelector("a-scene");
