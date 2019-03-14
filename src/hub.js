@@ -167,7 +167,7 @@ import registerTelemetry from "./telemetry";
 import { warmSerializeElement } from "./utils/serialize-element";
 
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
-import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
+import detectConcurrentLoad from "./utils/concurrent-load-detector.js";
 
 import qsTruthy from "./utils/qs_truthy";
 
@@ -182,9 +182,7 @@ if (!isBotMode && !isTelemetryDisabled) {
 }
 
 disableiOSZoom();
-
-const concurrentLoadDetector = new ConcurrentLoadDetector();
-concurrentLoadDetector.start();
+detectConcurrentLoad();
 
 store.init();
 
@@ -256,7 +254,6 @@ function mountUI(props = {}) {
             {...{
               scene,
               isBotMode,
-              concurrentLoadDetector,
               disableAutoExitOnConcurrentLoad,
               forcedVREntryType,
               store,

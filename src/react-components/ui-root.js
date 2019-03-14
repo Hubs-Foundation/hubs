@@ -120,7 +120,6 @@ class UIRoot extends Component {
     enterScene: PropTypes.func,
     exitScene: PropTypes.func,
     onSendMessage: PropTypes.func,
-    concurrentLoadDetector: PropTypes.object,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
     isBotMode: PropTypes.bool,
@@ -242,7 +241,7 @@ class UIRoot extends Component {
   }
 
   componentDidMount() {
-    this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
+    window.addEventListener("concurrentload", this.onConcurrentLoad);
     this.micLevelMovingAverage = MovingAverage(100);
     this.props.scene.addEventListener(
       "didConnectToNetworkedScene",
