@@ -11,7 +11,6 @@ export default class PresenceLog extends Component {
   static propTypes = {
     entries: PropTypes.array,
     inRoom: PropTypes.bool,
-    onTop: PropTypes.bool,
     hubId: PropTypes.string
   };
 
@@ -92,8 +91,7 @@ export default class PresenceLog extends Component {
   render() {
     const presenceClasses = {
       [styles.presenceLog]: true,
-      [styles.presenceLogInRoom]: this.props.inRoom,
-      [styles.presenceLogOnTop]: this.props.onTop
+      [styles.presenceLogInRoom]: this.props.inRoom
     };
 
     return <div className={classNames(presenceClasses)}>{this.props.entries.map(this.domForEntry)}</div>;

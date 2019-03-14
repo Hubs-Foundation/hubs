@@ -5,12 +5,15 @@ import {
   resolveUrl,
   injectCustomShaderChunks,
   isHubsRoomUrl,
-  isHubsSceneUrl
+  isHubsSceneUrl,
+  generateMeshBVH
 } from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
 
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
+
+const SHAPES = require("aframe-physics-system/src/constants").SHAPES;
 
 const gltfLoader = new THREE.GLTFLoader();
 let loadingObject;
@@ -48,37 +51,33 @@ AFRAME.registerComponent("media-loader", {
     this.showLoader = this.showLoader.bind(this);
     this.clearLoadingTimeout = this.clearLoadingTimeout.bind(this);
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
-    this.shapeAdded = false;
-    this.hasBakedShapes = false;
   },
 
-  setShapeAndScale(resize) {
-    const mesh = this.el.getObject3D("mesh");
-    const box = getBox(this.el, mesh);
-    const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
-    this.el.object3DMap.mesh.scale.multiplyScalar(scaleCoefficient);
-
-    if (this.el.body && this.shapeAdded && this.el.body.shapes.length > 1) {
-      this.el.removeAttribute("shape");
-      this.shapeAdded = false;
-    } else if (!this.hasBakedShapes && !box.isEmpty()) {
-      const center = new THREE.Vector3();
+  setShapeAndScale: (function() {
+    const center = new THREE.Vector3();
+    return function(resize, shapeType, shapeId) {
+      const mesh = this.el.getObject3D("mesh");
+      const box = getBox(this.el, mesh);
+      const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
+      mesh.scale.multiplyScalar(scaleCoefficient);
       const { min, max } = box;
-      const halfExtents = {
-        x: (Math.abs(min.x - max.x) / 2) * scaleCoefficient,
-        y: (Math.abs(min.y - max.y) / 2) * scaleCoefficient,
-        z: (Math.abs(min.z - max.z) / 2) * scaleCoefficient
-      };
       center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
       mesh.position.sub(center);
-      this.el.setAttribute("shape", {
-        shape: "box",
-        halfExtents: halfExtents
-      });
-      this.shapeAdded = true;
-    }
+      mesh.matrixNeedsUpdate = true;
 
-    mesh.matrixNeedsUpdate = true;
+      this.el.setAttribute("ammo-shape__" + shapeId, {
+        autoGenerateShape: true,
+        type: shapeType,
+        mergeGeometry: true,
+        offset: center.negate().multiply(this.el.object3D.scale)
+      });
+    };
+  })(),
+
+  removeShape(id) {
+    if (this.el.getAttribute("ammo-shape__" + id)) {
+      this.el.removeAttribute("ammo-shape__" + id);
+    }
   },
 
   tick(t, dt) {
@@ -92,8 +91,7 @@ AFRAME.registerComponent("media-loader", {
     this.el.removeAttribute("media-pager");
     this.el.removeAttribute("media-video");
     this.el.setAttribute("media-image", { src: "error" });
-    clearTimeout(this.showLoaderTimeout);
-    delete this.showLoaderTimeout;
+    this.clearLoadingTimeout();
   },
 
   showLoader() {
@@ -111,8 +109,7 @@ AFRAME.registerComponent("media-loader", {
       this.loadingClip.play();
     }
     this.el.setObject3D("mesh", mesh);
-    this.hasBakedShapes = !!(this.el.body && this.el.body.shapes.length > 0);
-    this.setShapeAndScale(true);
+    this.setShapeAndScale(true, SHAPES.BOX, "loader");
     delete this.showLoaderTimeout;
   },
 
@@ -123,6 +120,7 @@ AFRAME.registerComponent("media-loader", {
       delete this.loaderMixer;
     }
     delete this.showLoaderTimeout;
+    this.removeShape("loader");
   },
 
   setupHoverableVisuals() {
@@ -137,6 +135,9 @@ AFRAME.registerComponent("media-loader", {
   onMediaLoaded() {
     this.clearLoadingTimeout();
     this.setupHoverableVisuals();
+    if (!this.el.components["animation-mixer"]) {
+      generateMeshBVH(this.el.object3D);
+    }
   },
 
   async update(oldData) {
@@ -244,10 +245,8 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "model-loaded",
           () => {
-            this.clearLoadingTimeout();
-            this.hasBakedShapes = !!(this.el.body && this.el.body.shapes.length > (this.shapeAdded ? 1 : 0));
-            this.setShapeAndScale(this.data.resize);
-            this.setupHoverableVisuals();
+            this.setShapeAndScale(this.data.resize, SHAPES.HULL, "hull");
+            this.onMediaLoaded();
             addAnimationComponents(this.el);
           },
           { once: true }

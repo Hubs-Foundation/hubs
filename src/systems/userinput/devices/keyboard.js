@@ -1,6 +1,8 @@
 import { paths } from "../paths";
+import { ArrayBackedSet } from "../array-backed-set";
 export class KeyboardDevice {
   constructor() {
+    this.seenKeys = new ArrayBackedSet();
     this.keys = {};
     this.events = [];
 
@@ -39,13 +41,19 @@ export class KeyboardDevice {
     this.events.forEach(event => {
       if (event.type === "blur") {
         this.keys = {};
+        this.seenKeys.clear();
         return;
       }
-      this.keys[paths.device.keyboard.key(event.key)] = event.type === "keydown";
+      const key = event.key.toLowerCase();
+      this.keys[key] = event.type === "keydown";
+      this.seenKeys.add(key);
     });
-    while (this.events.length) {
-      this.events.pop();
+    this.events.length = 0;
+
+    for (let i = 0; i < this.seenKeys.items.length; i++) {
+      const key = this.seenKeys.items[i];
+      const path = paths.device.keyboard.key(key);
+      frame.setValueType(path, this.keys[key]);
     }
-    Object.assign(frame, this.keys);
   }
 }

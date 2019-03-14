@@ -18,6 +18,20 @@
     cursor: pointer;
   }
 
+  :local(.info) {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 16px;
+    color: $grey-text;
+    margin-top: 40px;
+
+    a {
+      color: $dark-grey-text;
+      margin-left: 5px;
+    }
+  }
+
   :local(.logo) {
     width: 150px;
     position: absolute;
@@ -30,12 +44,64 @@
     }
   }
 
+  :local(.tabs) {
+    display: flex;
+    width: 100%;
+
+    a {
+      padding: 8px;
+      text-align: center;
+      flex: 1;
+      &.selected {
+        font-weight: bold;
+        text-decoration: underline;
+      }
+    }
+  }
+
+  :local(.file-input-row) {
+    display: flex;
+    align-items: center;
+    label {
+      display: flex;
+      align-items: center;
+      margin: 5px 0;
+    }
+    input {
+      display: none;
+    }
+    .img-box {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      margin-right: 5px;
+      background: #eaeaea;
+      overflow: hidden;
+    }
+    img {
+      width: 100%;
+    }
+    a {
+      margin-left: 10px;
+      color: $action-color;
+    }
+  }
+
   :local(.avatar-selector-container) {
     flex: 1;
     position: relative;
     width: 95%;
     text-align: center;
     margin: 16px;
+
+    &.avatar-editor {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      .form-body {
+        flex: 1;
+      }
+    }
 
     .loading-panel {
       background: transparent;

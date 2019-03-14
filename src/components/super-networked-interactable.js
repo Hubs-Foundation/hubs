@@ -1,4 +1,5 @@
 import { paths } from "../systems/userinput/paths";
+const ACTIVATION_STATES = require("aframe-physics-system/src/constants").ACTIVATION_STATES;
 
 const pathsMap = {
   "player-right-controller": {
@@ -37,7 +38,9 @@ AFRAME.registerComponent("super-networked-interactable", {
       this.networkedEl = networkedEl;
       this._syncCounterRegistration();
       if (!NAF.utils.isMine(networkedEl)) {
-        this.el.setAttribute("body", { type: "static" });
+        this.el.setAttribute("ammo-body", { type: "kinematic", addCollideEventListener: true });
+      } else {
+        this.counter.register(networkedEl);
       }
     });
 
@@ -66,13 +69,18 @@ AFRAME.registerComponent("super-networked-interactable", {
 
     this.hand = e.detail.hand;
     this.hand.emit("haptic_pulse", { intensity: "high" });
-    if (this.networkedEl && !NAF.utils.isMine(this.networkedEl)) {
-      if (NAF.utils.takeOwnership(this.networkedEl)) {
-        this.el.setAttribute("body", { type: "dynamic" });
-        this._syncCounterRegistration();
+    if (this.networkedEl) {
+      if (!NAF.utils.isMine(this.networkedEl)) {
+        if (NAF.utils.takeOwnership(this.networkedEl)) {
+          this.el.setAttribute("ammo-body", { type: "dynamic" });
+          this.el.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
+          this._syncCounterRegistration();
+        } else {
+          this.el.emit("grab-end", { hand: this.hand });
+          this.hand = null;
+        }
       } else {
-        this.el.emit("grab-end", { hand: this.hand });
-        this.hand = null;
+        this.el.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
       }
     }
     this.currentScale.copy(this.el.getAttribute("scale"));
@@ -80,10 +88,11 @@ AFRAME.registerComponent("super-networked-interactable", {
 
   _onGrabEnd: function(e) {
     if (e.detail.hand) e.detail.hand.emit("haptic_pulse", { intensity: "high" });
+    this.el.body.forceActivationState(ACTIVATION_STATES.ACTIVE_TAG);
   },
 
   _onOwnershipLost: function() {
-    this.el.setAttribute("body", { type: "static" });
+    this.el.setAttribute("ammo-body", { type: "kinematic" });
     this.el.emit("grab-end", { hand: this.hand });
     this.hand = null;
     this._syncCounterRegistration();
@@ -93,7 +102,6 @@ AFRAME.registerComponent("super-networked-interactable", {
     if (delta && this.el.is("grabbed") && this.el.components.hasOwnProperty("stretchable")) {
       this.currentScale.addScalar(delta).clampScalar(this.data.minScale, this.data.maxScale);
       this.el.setAttribute("scale", this.currentScale);
-      this.el.components["stretchable"].stretchBody(this.el, this.currentScale);
       this.el.object3D.matrixNeedsUpdate = true;
     }
   },

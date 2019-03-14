@@ -33,7 +33,6 @@ const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileV
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
 import "aframe-physics-system";
-import "aframe-physics-extras";
 import "./components/event-repeater";
 
 import registerTelemetry from "./telemetry";
@@ -91,6 +90,12 @@ const onReady = async () => {
 
   const res = await fetch(getReticulumFetchUrl(`/api/v1/scenes/${sceneId}`)).then(r => r.json());
   const sceneInfo = res.scenes[0];
+
+  // Delisted/Removed
+  if (!sceneInfo) {
+    remountUI({ unavailable: true });
+    return;
+  }
 
   if (sceneInfo.allow_promotion) {
     registerTelemetry(`/scene/${sceneId}`, `Hubs Scene: ${sceneInfo.title}`);

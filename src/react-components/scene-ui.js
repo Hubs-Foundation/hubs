@@ -24,7 +24,8 @@ class SceneUI extends Component {
     sceneName: PropTypes.string,
     sceneDescription: PropTypes.string,
     sceneAttributions: PropTypes.object,
-    sceneScreenshotURL: PropTypes.string
+    sceneScreenshotURL: PropTypes.string,
+    unavailable: PropTypes.bool
   };
 
   state = {
@@ -56,6 +57,20 @@ class SceneUI extends Component {
   };
 
   render() {
+    if (this.props.unavailable) {
+      return (
+        <IntlProvider locale={lang} messages={messages}>
+          <div className={styles.ui}>
+            <div className={styles.unavailable}>
+              <div>
+                <FormattedMessage id="scene.unavailable" />
+              </div>
+            </div>
+          </div>
+        </IntlProvider>
+      );
+    }
+
     const sceneUrl = [location.protocol, "//", location.host, location.pathname].join("");
     const tweetText = `${this.props.sceneName} in #hubs`;
     const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(sceneUrl)}&text=${encodeURIComponent(

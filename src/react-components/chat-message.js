@@ -145,7 +145,7 @@ export async function createInWorldLogMessage({ name, type, body }) {
   document.querySelector("a-scene").appendChild(entity);
 
   entity.appendChild(meshEntity);
-  entity.setAttribute("follow-in-lower-fov", {
+  entity.setAttribute("follow-in-fov", {
     target: "#player-camera",
     offset: { x: 0, y: 0.0, z: -0.8 }
   });

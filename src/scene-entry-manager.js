@@ -1,6 +1,7 @@
 import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
+import { showFullScreenIfAvailable } from "./utils/fullscreen";
 
 const playerHeight = 1.6;
 const isBotMode = qsTruthy("bot");
@@ -9,8 +10,11 @@ const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
-import { addMedia, proxiedUrlFor, getPromotionTokenForFile } from "./utils/media-utils";
+import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import { ObjectContentOrigins } from "./object-types";
+import { getAvatarSrc } from "./assets/avatars/avatars";
+
+const isIOS = AFRAME.utils.device.isIOS();
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, availableVREntryTypes) {
@@ -50,6 +54,10 @@ export default class SceneEntryManager {
     }
 
     if (enterInVR) {
+      // This specific scene state var is used to check if the user went through the
+      // entry flow and chose VR entry, and is used to preempt VR mode on refreshes.
+      this.scene.addState("vr-entered");
+
       // HACK - A-Frame calls getVRDisplays at module load, we want to do it here to
       // force gamepads to become live.
       navigator.getVRDisplays();
@@ -140,7 +148,7 @@ export default class SceneEntryManager {
     const { avatarId, displayName } = this.store.state.profile;
     this.playerRig.setAttribute("player-info", {
       displayName,
-      avatarSrc: avatarId && avatarId.startsWith("http") ? proxiedUrlFor(avatarId) : `#${avatarId || "botdefault"}`
+      avatarSrc: getAvatarSrc(avatarId)
     });
     const hudController = this.playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });
@@ -209,34 +217,45 @@ export default class SceneEntryManager {
     }
   };
 
-  _signInAndPinElement = el => {
+  _signInAndPinOrUnpinElement = (el, pin) => {
+    const action = pin ? this._pinElement : this._unpinElement;
+    const promptIdSuffix = pin ? "pin" : "unpin";
+
     if (this.hubChannel.signedIn) {
-      this._pinElement(el);
+      action(el);
     } else {
-      this.handleExitTo2DInterstitial();
+      this.handleExitTo2DInterstitial(true);
 
       const wasInVR = this.scene.is("vr-mode");
       const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
 
-      this.onRequestAuthentication("sign-in.pin", "sign-in.pin-complete", continueTextId, async () => {
-        let pinningFailed = false;
-        if (this.hubChannel.signedIn) {
-          try {
-            await this._pinElement(el);
-          } catch (e) {
-            pinningFailed = true;
+      this.onRequestAuthentication(
+        `sign-in.${promptIdSuffix}`,
+        `sign-in.${promptIdSuffix}-complete`,
+        continueTextId,
+        async () => {
+          let actionFailed = false;
+          if (this.hubChannel.signedIn) {
+            try {
+              await action(el);
+            } catch (e) {
+              actionFailed = true;
+            }
+          } else {
+            actionFailed = true;
           }
-        } else {
-          pinningFailed = true;
-        }
 
-        if (pinningFailed) {
-          // UI pins the entity optimistically, so we undo that here.
-          el.setAttribute("pinnable", "pinned", false);
-        }
+          if (actionFailed) {
+            // UI pins/un-pins the entity optimistically, so we undo that here.
+            // Note we have to disable the sign in flow here otherwise this will recurse.
+            this._disableSignInOnPinAction = true;
+            el.setAttribute("pinnable", "pinned", !pin);
+            this._disableSignInOnPinAction = false;
+          }
 
-        this.handleReEntryToVRFrom2DInterstitial();
-      });
+          this.handleReEntryToVRFrom2DInterstitial();
+        }
+      );
     }
   };
 
@@ -255,7 +274,7 @@ export default class SceneEntryManager {
     this.hubChannel.unpin(networkId, fileId);
   };
 
-  handleExitTo2DInterstitial = () => {
+  handleExitTo2DInterstitial = isLower => {
     if (!this.scene.is("vr-mode")) return;
 
     this._in2DInterstitial = true;
@@ -263,9 +282,14 @@ export default class SceneEntryManager {
     if (this.availableVREntryTypes.isInHMD) {
       // Immersive browser, exit VR.
       this.scene.exitVR();
+      showFullScreenIfAvailable();
     } else {
       // Non-immersive browser, show notice
-      document.querySelector(".vr-notice").setAttribute("visible", true);
+      const vrNotice = document.querySelector(".vr-notice");
+      vrNotice.setAttribute("visible", true);
+      vrNotice.setAttribute("follow-in-fov", {
+        angle: isLower ? 39 : -15
+      });
     }
   };
 
@@ -309,11 +333,21 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("pinned", e => {
-      this._signInAndPinElement(e.detail.el);
+      if (this._disableSignInOnPinAction) return;
+
+      // Don't go into pin/unpin flow if the pin state didn't actually change and this was just initialization
+      if (!e.detail.changed) return;
+
+      this._signInAndPinOrUnpinElement(e.detail.el, true);
     });
 
     this.scene.addEventListener("unpinned", e => {
-      this._unpinElement(e.detail.el);
+      if (this._disableSignInOnPinAction) return;
+
+      // Don't go into pin/unpin flow if the pin state didn't actually change and this was just initialization
+      if (!e.detail.changed) return;
+
+      this._signInAndPinOrUnpinElement(e.detail.el, false);
     });
 
     this.scene.addEventListener("object_spawned", e => {
@@ -321,7 +355,7 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("action_spawn", () => {
-      this.handleExitTo2DInterstitial();
+      this.handleExitTo2DInterstitial(false);
       window.APP.mediaSearchStore.sourceNavigateToDefaultSource();
     });
 
@@ -382,7 +416,7 @@ export default class SceneEntryManager {
       shareVideoMediaStream({
         video: {
           mediaSource: "camera",
-          width: 720,
+          width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
           frameRate: 30
         }
       });
@@ -454,14 +488,25 @@ export default class SceneEntryManager {
   };
 
   _setupCamera = () => {
-    this.scene.addEventListener("action_spawn_camera", () => {
-      const entity = document.createElement("a-entity");
-      entity.setAttribute("networked", { template: "#interactable-camera" });
-      entity.setAttribute("offset-relative-to", {
-        target: "#player-camera",
-        offset: { x: 0, y: 0, z: -1.5 }
-      });
-      this.scene.appendChild(entity);
+    this.scene.addEventListener("action_toggle_camera", () => {
+      const myCamera = this.scene.systems["camera-tools"].getMyCamera();
+
+      if (myCamera) {
+        myCamera.parentNode.removeChild(myCamera);
+        this.scene.removeState("camera");
+      } else {
+        const entity = document.createElement("a-entity");
+        entity.setAttribute("networked", { template: "#interactable-camera" });
+        entity.setAttribute("offset-relative-to", {
+          target: "#player-camera",
+          offset: { x: 0, y: 0, z: -1.5 }
+        });
+        this.scene.appendChild(entity);
+        this.scene.addState("camera");
+      }
+
+      // Need to wait a frame so camera is registered with system.
+      setTimeout(() => this.scene.emit("camera_toggled"));
     });
 
     this.scene.addEventListener("photo_taken", e => {
