@@ -1,7 +1,6 @@
 import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
-import { showFullScreenIfAvailable } from "./utils/fullscreen";
 
 const playerHeight = 1.6;
 const isBotMode = qsTruthy("bot");
@@ -11,13 +10,15 @@ const qs = new URLSearchParams(location.search);
 const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
 import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
+import { handleExitTo2DInterstitial, handleReEntryToVRFrom2DInterstitial } from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc } from "./assets/avatars/avatars";
+import { pushHistoryState } from "./utils/history";
 
 const isIOS = AFRAME.utils.device.isIOS();
 
 export default class SceneEntryManager {
-  constructor(hubChannel, authChannel, availableVREntryTypes) {
+  constructor(hubChannel, authChannel, availableVREntryTypes, history) {
     this.hubChannel = hubChannel;
     this.authChannel = authChannel;
     this.availableVREntryTypes = availableVREntryTypes;
@@ -28,6 +29,7 @@ export default class SceneEntryManager {
     this.playerRig = document.querySelector("#player-rig");
     this._entered = false;
     this.onRequestAuthentication = () => {};
+    this.history = history;
   }
 
   init = () => {
@@ -224,7 +226,7 @@ export default class SceneEntryManager {
     if (this.hubChannel.signedIn) {
       action(el);
     } else {
-      this.handleExitTo2DInterstitial(true);
+      handleExitTo2DInterstitial(true);
 
       const wasInVR = this.scene.is("vr-mode");
       const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
@@ -253,7 +255,7 @@ export default class SceneEntryManager {
             this._disableSignInOnPinAction = false;
           }
 
-          this.handleReEntryToVRFrom2DInterstitial();
+          handleReEntryToVRFrom2DInterstitial();
         }
       );
     }
@@ -272,36 +274,6 @@ export default class SceneEntryManager {
     const fileId = mediaLoader.data && mediaLoader.data.fileId;
 
     this.hubChannel.unpin(networkId, fileId);
-  };
-
-  handleExitTo2DInterstitial = isLower => {
-    if (!this.scene.is("vr-mode")) return;
-
-    this._in2DInterstitial = true;
-
-    if (this.availableVREntryTypes.isInHMD) {
-      // Immersive browser, exit VR.
-      this.scene.exitVR();
-      showFullScreenIfAvailable();
-    } else {
-      // Non-immersive browser, show notice
-      const vrNotice = document.querySelector(".vr-notice");
-      vrNotice.setAttribute("visible", true);
-      vrNotice.setAttribute("follow-in-fov", {
-        angle: isLower ? 39 : -15
-      });
-    }
-  };
-
-  handleReEntryToVRFrom2DInterstitial = () => {
-    if (!this._in2DInterstitial) return;
-    this._in2DInterstitial = false;
-
-    document.querySelector(".vr-notice").setAttribute("visible", false);
-
-    if (this.availableVREntryTypes.isInHMD) {
-      this.scene.enterVR();
-    }
   };
 
   _setupMedia = mediaStream => {
@@ -355,8 +327,13 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("action_spawn", () => {
-      this.handleExitTo2DInterstitial(false);
+      handleExitTo2DInterstitial(false);
       window.APP.mediaSearchStore.sourceNavigateToDefaultSource();
+    });
+
+    this.scene.addEventListener("action_invite", () => {
+      handleExitTo2DInterstitial(false);
+      pushHistoryState(this.history, "overlay", "invite");
     });
 
     document.addEventListener("paste", e => {
@@ -479,11 +456,11 @@ export default class SceneEntryManager {
         spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
       }, delaySpawn ? 3000 : 0);
 
-      this.handleReEntryToVRFrom2DInterstitial();
+      handleReEntryToVRFrom2DInterstitial();
     });
 
     this.mediaSearchStore.addEventListener("media-exit", () => {
-      this.handleReEntryToVRFrom2DInterstitial();
+      handleReEntryToVRFrom2DInterstitial();
     });
   };
 
