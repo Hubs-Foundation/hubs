@@ -39,8 +39,8 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.2",
-    "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/free-brands-svg-icons": "^5.7.2",
+    "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
     "aframe": "github:mozillareality/aframe#hubs/master",
     "aframe-billboard-component": "^2.0.0",
@@ -57,6 +57,7 @@
     "form-urlencoded": "^2.0.4",
     "history": "^4.7.2",
     "hls.js": "^0.12.2",
+    "js-cookie": "^2.2.0",
     "jsonschema": "^1.2.2",
     "jwt-decode": "^2.2.0",
     "markdown-it": "^8.4.2",

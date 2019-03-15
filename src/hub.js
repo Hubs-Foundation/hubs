@@ -25,6 +25,7 @@ import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
 import { Presence } from "phoenix";
+import Cookies from "js-cookie";
 
 import "./components/scene-components";
 import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
@@ -127,6 +128,7 @@ window.APP.RENDER_ORDER = {
 };
 const store = window.APP.store;
 const mediaSearchStore = window.APP.mediaSearchStore;
+const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
 
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
@@ -715,7 +717,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
 
-      hubChannel.setPermissionsFromToken(data.perms_token);
+      let permsToken;
+      const oauthFlowPermsToken = Cookies.get(OAUTH_FLOW_PERMS_TOKEN_KEY);
+      if (oauthFlowPermsToken) {
+        permsToken = oauthFlowPermsToken;
+        Cookies.remove(OAUTH_FLOW_PERMS_TOKEN_KEY);
+      } else {
+        permsToken = data.perms_token;
+      }
+      hubChannel.setPermissionsFromToken(permsToken);
       if (!hubChannel.permissions.join_hub && data.oauth_info.length) {
         remountUI({ oauthInfo: data.oauth_info, showOAuthDialog: true });
         return;
@@ -723,7 +733,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
         adapter.setClientId(socket.params().session_id);
-        adapter.setJoinToken(data.perms_token);
+        adapter.setJoinToken(permsToken);
       });
       subscriptions.setHubChannel(hubChannel);
 
