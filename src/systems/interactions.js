@@ -1,5 +1,6 @@
 import { sets } from "./userinput/sets";
 import { paths } from "./userinput/paths";
+const ACTIVATION_STATES = require("aframe-physics-system/src/constants").ACTIVATION_STATES;
 
 const THREEJS_OBJECT_DESCENDENTS = {
   uuidToEl: new Map(),
@@ -59,21 +60,21 @@ AFRAME.registerSystem("interaction", {
     return function() {
       const userinput = AFRAME.scenes[0].systems.userinput;
       if (this.rightRemoteConstraintTarget) {
-//        this.rightRemoteConstraintTarget.object3D.matrixNeedsUpdate = true;
-        this.rightRemoteConstraintTarget.object3D.updateMatrices(true);
+        this.rightRemoteConstraintTarget.object3D.matrixNeedsUpdate = true;
+        //this.rightRemoteConstraintTarget.object3D.updateMatrices(true);
 
         if (userinput.get(paths.actions.cursor.drop)) {
+          this.rightRemoteConstraintTarget.body.forceActivationState(ACTIVATION_STATES.ACTIVE_TAG);
           this.rightRemoteConstraintTarget.removeAttribute("ammo-constraint");
           this.rightRemoteConstraintTarget = null;
-          console.log("DROP");
         }
       } else {
         if (this.rightRemoteHoverTarget && this.rightRemoteHoverTarget.components["offers-remote-constraint"]) {
           const grab = userinput.get(paths.actions.cursor.grab);
           if (grab) {
             this.rightRemoteConstraintTarget = this.rightRemoteHoverTarget;
+            this.rightRemoteConstraintTarget.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
             this.rightRemoteConstraintTarget.setAttribute("ammo-constraint", { target: "#cursor" });
-            console.log("GRAB");
           }
         }
       }

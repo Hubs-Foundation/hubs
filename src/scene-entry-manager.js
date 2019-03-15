@@ -305,7 +305,8 @@ export default class SceneEntryManager {
   };
 
   _setupMedia = mediaStream => {
-    const offset = { x: 0, y: 0, z: -1.5 };
+    const offset = new THREE.Vector3(0, 0, -1.5);
+    let camera;
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
       const { entity, orientation } = addMedia(
         src,
@@ -315,13 +316,12 @@ export default class SceneEntryManager {
         true
       );
 
-      orientation.then(or => {
-        entity.setAttribute("offset-relative-to", {
-          target: "#player-camera",
-          offset,
-          orientation: or
-        });
-      });
+      offset.set(0, 0, -1.5);
+      camera = camera || document.querySelector("#player-camera").object3D;
+      camera.updateMatrices();
+      camera.localToWorld(offset);
+      entity.object3D.position.copy(offset);
+      entity.object3D.matrixNeedsUpdate = true;
 
       return entity;
     };
