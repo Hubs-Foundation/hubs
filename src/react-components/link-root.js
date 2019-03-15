@@ -35,10 +35,14 @@ class LinkRoot extends Component {
 
   componentDidMount = () => {
     document.addEventListener("keydown", this.handleKeyDown);
+    this.attachTouchEvents();
+  };
 
+  attachTouchEvents = () => {
     // https://github.com/facebook/react/issues/9809#issuecomment-413978405
     if (hasTouchEvents) {
       for (const [name, ref] of Object.entries(this.buttonRefs)) {
+        if (!ref) continue;
         if (name === "remove") {
           ref.ontouchstart = () => this.removeChar();
         } else if (name === "toggle") {
@@ -48,6 +52,10 @@ class LinkRoot extends Component {
         }
       }
     }
+  };
+
+  componentDidUpdate = () => {
+    this.attachTouchEvents();
   };
 
   componentWillUnmount = () => {
