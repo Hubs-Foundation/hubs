@@ -90,14 +90,17 @@ AFRAME.registerComponent("character-controller", {
   teleportTo: (function() {
     const rig = new THREE.Vector3();
     const head = new THREE.Vector3();
-    const deltaFromHeadToTarget = new THREE.Vector3();
+    const deltaFromHeadToTargetForHead = new THREE.Vector3();
+    const targetForHead = new THREE.Vector3();
     const targetForRig = new THREE.Vector3();
     return function teleportTo(targetWorldPosition) {
       const o = this.el.object3D;
       o.getWorldPosition(rig);
       this.data.pivot.object3D.getWorldPosition(head);
-      deltaFromHeadToTarget.copy(targetWorldPosition).sub(head);
-      targetForRig.copy(rig).add(deltaFromHeadToTarget);
+      targetForHead.copy(targetWorldPosition);
+      targetForHead.y += this.data.pivot.object3D.position.y;
+      deltaFromHeadToTargetForHead.copy(targetForHead).sub(head);
+      targetForRig.copy(rig).add(deltaFromHeadToTargetForHead);
 
       const pathfinder = this.el.sceneEl.systems.nav.pathfinder;
       this.navGroup = pathfinder.getGroup(NAV_ZONE, targetForRig, true, true);
@@ -105,8 +108,6 @@ AFRAME.registerComponent("character-controller", {
       this._setNavNode(targetForRig);
       pathfinder.clampStep(rig, targetForRig, this.navNode, NAV_ZONE, this.navGroup, o.position);
       o.matrixNeedsUpdate = true;
-      o.updateMatrices();
-      o.matrix.decompose(o.position, o.quaternion, o.scale);
     };
   })(),
 
@@ -131,6 +132,9 @@ AFRAME.registerComponent("character-controller", {
       const pivot = this.data.pivot.object3D;
       const distance = this.data.groundAcc * deltaSeconds;
       const rotationDelta = this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
+
+      pivot.updateMatrices();
+      root.updateMatrices();
 
       startScale.copy(root.scale);
       startPos.copy(root.position);
