@@ -15,7 +15,7 @@ const MAX_LETTERS = 4;
 
 addLocaleData([...en]);
 disableiOSZoom();
-const hasTouchEvents = "ontouchstart" in document.documentElement;
+const hasTouchEvents = false; //https://github.com/mozilla/hubs/issues/1079 // "ontouchstart" in document.documentElement;
 
 class LinkRoot extends Component {
   static propTypes = {
