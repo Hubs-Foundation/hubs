@@ -175,7 +175,7 @@ const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
 const isDebug = qsTruthy("debug");
 const loadingEnvironmentURL =
-  "https://hubs-proxy.com/https://uploads-prod.reticulum.io/files/61d77151-7a74-40a6-b427-0c5a350c4502.glb";
+      proxiedUrlFor("https://uploads-prod.reticulum.io/files/61d77151-7a74-40a6-b427-0c5a350c4502.glb");
 
 if (!isBotMode && !isTelemetryDisabled) {
   registerTelemetry("/hub", "Room Landing Page");
