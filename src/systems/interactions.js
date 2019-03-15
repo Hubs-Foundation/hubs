@@ -27,6 +27,7 @@ AFRAME.registerComponent("threejs-object-descendents-aggregator", {
       if (!this.descendents.has(o.uuid)) {
         this.descendents.add(o.uuid);
         o.el.addEventListener("object3dset", this.addDescendents);
+        o.el.addEventListener("added", this.addDescendents);
       }
     });
     THREEJS_OBJECT_DESCENDENTS.associate(this.el, this.descendents);
@@ -58,25 +59,23 @@ AFRAME.registerSystem("interaction", {
     return function() {
       const userinput = AFRAME.scenes[0].systems.userinput;
       if (this.rightRemoteConstraintTarget) {
+//        this.rightRemoteConstraintTarget.object3D.matrixNeedsUpdate = true;
+        this.rightRemoteConstraintTarget.object3D.updateMatrices(true);
+
         if (userinput.get(paths.actions.cursor.drop)) {
+          this.rightRemoteConstraintTarget.removeAttribute("ammo-constraint");
           this.rightRemoteConstraintTarget = null;
+          console.log("DROP");
         }
       } else {
         if (this.rightRemoteHoverTarget && this.rightRemoteHoverTarget.components["offers-remote-constraint"]) {
           const grab = userinput.get(paths.actions.cursor.grab);
           if (grab) {
             this.rightRemoteConstraintTarget = this.rightRemoteHoverTarget;
+            this.rightRemoteConstraintTarget.setAttribute("ammo-constraint", { target: "#cursor" });
+            console.log("GRAB");
           }
         }
-      }
-
-      if (this.rightRemoteConstraintTarget) {
-        this.cursor = this.cursor || document.querySelector("#cursor").object3D;
-        const o = this.rightRemoteConstraintTarget.object3D;
-        this.cursor.updateMatrices();
-        o.updateMatrices();
-        o.matrix.getInverse(o.parent.matrixWorld).multiply(this.cursor.matrixWorld);
-        o.matrixWorldNeedsUpdate = true;
       }
     };
   })()

@@ -186,7 +186,7 @@ AFRAME.registerComponent("cursor-controller", {
       const cursorPose = userinput.get(paths.actions.cursor.pose);
       const rightHandPose = userinput.get(paths.actions.rightHand.pose);
 
-        this.data.cursor.object3D.visible = true;//this.enabled && !!cursorPose;
+      this.data.cursor.object3D.visible = true; //this.enabled && !!cursorPose;
       this.line.material.visible = !!(this.enabled && rightHandPose);
 
       if (!this.enabled || !cursorPose) {
@@ -195,7 +195,7 @@ AFRAME.registerComponent("cursor-controller", {
 
       const interaction = AFRAME.scenes[0].systems.interaction;
       let intersection;
-      const isGrabbing = !!interaction.currentlyConstrainedRoot; // this.data.cursor.components["super-hands"].state.has("grab-start");
+      const isGrabbing = !!interaction.rightRemoteConstraintTarget; // this.data.cursor.components["super-hands"].state.has("grab-start");
       if (!isGrabbing) {
         rawIntersections.length = 0;
         this.raycaster.ray.origin = cursorPose.position;
@@ -221,6 +221,7 @@ AFRAME.registerComponent("cursor-controller", {
       //cursor.object3D.lookAt(cameraPos);
       //cursor.object3D.scale.setScalar(Math.pow(this.distance, 0.315) * 0.75);
       cursor.object3D.matrixNeedsUpdate = true;
+      cursor.object3D.updateMatrices();
 
       if (AFRAME.scenes[0].systems["rotate-selected-object"].rotating) {
         _interpolateHSL(ROTATE_COLOR_1, ROTATE_COLOR_2, 0.5 + 0.5 * Math.sin(t / 1000.0), this.rotateColor);

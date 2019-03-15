@@ -207,18 +207,18 @@
                 >
                 </a-entity>
             </template>
-
+/
             <template id="interactable-media">
                 <a-entity
-                    class="interactable"
                     threejs-object-descendents-aggregator
                     offers-remote-constraint
+                    super-networked-interactable="counter: #media-counter" 
+                    sticky-object="autoLockOnRelease; true; autoLockOnLoad: true;"
+                    matrix-auto-update
                     ammo-body="type: dynamic; mass: 1;"
                     hoverable-visuals="cursorController: #cursor-controller"
-                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
                     destroy-at-extreme-distances
                     set-yxz-order
-                    pinnable
                 >
                 </a-entity>
             </template>
