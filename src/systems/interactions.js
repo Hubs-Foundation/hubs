@@ -75,10 +75,6 @@ AFRAME.registerSystem("interaction", {
 
           if (this.grabbedPen) {
             this.grabbedPen.children[0].components["pen"].grabberId = null;
-            if (!didGrabEndThisFrame) {
-              this.grabbedPen.emit("grab-end", { hand: this.cursor });
-              didGrabEndThisFrame = true;
-            }
             this.grabbedPen = null;
           }
 
@@ -124,7 +120,7 @@ AFRAME.registerSystem("interaction", {
             }
 
             const isSuperSpawner = this.rightRemoteHoverTarget.components["super-spawner"];
-            if (isUI || isPen || isSuperSpawner) {
+            if (isUI || isSuperSpawner) {
               this.rightRemoteHoverTarget.emit("grab-start", { hand: this.cursor });
             }
           }
