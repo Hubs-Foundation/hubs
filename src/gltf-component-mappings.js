@@ -86,7 +86,7 @@ AFRAME.GLTFModelPlus.registerComponent("visible", "visible", (el, componentName,
   }
 });
 AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point");
-AFRAME.GLTFModelPlus.registerComponent("hoverable", "hoverable");
+AFRAME.GLTFModelPlus.registerComponent("hoverable", "is-remote-hover-target");
 AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
 AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentName, componentData) => {
   const nav = AFRAME.scenes[0].systems.nav;
