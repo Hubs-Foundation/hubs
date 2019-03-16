@@ -107,7 +107,7 @@ AFRAME.registerComponent("pen", {
 
     getLastWorldPosition(this.el.object3D, this.worldPosition);
 
-    if (this.grabberId&& pathsMap[this.grabberId]) {
+    if (this.grabberId && pathsMap[this.grabberId]) {
       const paths = pathsMap[this.grabberId];
       if (userinput.get(paths.startDrawing)) {
         this._startDraw();

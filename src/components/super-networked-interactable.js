@@ -31,8 +31,6 @@ AFRAME.registerComponent("super-networked-interactable", {
     this.system = this.el.sceneEl.systems.physics;
     this.counter = this.data.counter.components["networked-counter"];
     this.hand = null;
-    this.currentScale = new THREE.Vector3();
-    this.currentScale.copy(this.el.getAttribute("scale"));
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
@@ -44,12 +42,8 @@ AFRAME.registerComponent("super-networked-interactable", {
       }
     });
 
-    this._onGrabStart = this._onGrabStart.bind(this);
-    this._onGrabEnd = this._onGrabEnd.bind(this);
     this._onOwnershipLost = this._onOwnershipLost.bind(this);
     this._syncCounterRegistration = this._syncCounterRegistration.bind(this);
-    this.el.addEventListener("grab-start", this._onGrabStart);
-    this.el.addEventListener("grab-end", this._onGrabEnd);
     this.el.addEventListener("pinned", this._syncCounterRegistration);
     this.el.addEventListener("unpinned", this._syncCounterRegistration);
     this.el.addEventListener("ownership-lost", this._onOwnershipLost);
@@ -58,16 +52,12 @@ AFRAME.registerComponent("super-networked-interactable", {
 
   remove: function() {
     this.counter.deregister(this.el);
-    this.el.removeEventListener("grab-start", this._onGrabStart);
-    this.el.removeEventListener("grab-end", this._onGrabEnd);
     this.el.removeEventListener("ownership-lost", this._onOwnershipLost);
     this.system.removeComponent(this);
   },
 
-  _onGrabStart: function(e) {
-    if (!this.el.components.grabbable || this.el.components.grabbable.data.maxGrabbers === 0) return;
-
-    this.hand = e.detail.hand;
+  onGrabStart: function(hand) {
+    this.hand = hand;
     this.hand.emit("haptic_pulse", { intensity: "high" });
     if (this.networkedEl) {
       if (!NAF.utils.isMine(this.networkedEl)) {
@@ -83,11 +73,10 @@ AFRAME.registerComponent("super-networked-interactable", {
         this.el.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
       }
     }
-    this.currentScale.copy(this.el.getAttribute("scale"));
   },
 
-  _onGrabEnd: function(e) {
-    if (e.detail.hand) e.detail.hand.emit("haptic_pulse", { intensity: "high" });
+  onGrabEnd: function(hand) {
+    if (hand) hand.emit("haptic_pulse", { intensity: "high" });
     this.el.body.forceActivationState(ACTIVATION_STATES.ACTIVE_TAG);
   },
 
@@ -99,9 +88,9 @@ AFRAME.registerComponent("super-networked-interactable", {
   },
 
   _changeScale: function(delta) {
-    if (delta && this.el.is("grabbed") && this.el.components.hasOwnProperty("stretchable")) {
-      this.currentScale.addScalar(delta).clampScalar(this.data.minScale, this.data.maxScale);
-      this.el.setAttribute("scale", this.currentScale);
+    if (delta) {
+      this.el.object3D.updateMatrices();
+      this.el.object3D.scale.addScalar(delta).clampScalar(this.data.minScale, this.data.maxScale);
       this.el.object3D.matrixNeedsUpdate = true;
     }
   },
@@ -120,11 +109,9 @@ AFRAME.registerComponent("super-networked-interactable", {
   },
 
   tick: function() {
-    return; // replace-super-hands
-    const grabber = this.el.components.grabbable.grabbers[0];
-    if (!(grabber && pathsMap[grabber.id])) return;
+    if (!(this.grabberId && pathsMap[this.grabberId])) return;
 
     const userinput = AFRAME.scenes[0].systems.userinput;
-    this._changeScale(userinput.get(pathsMap[grabber.id].scaleGrabbedGrabbable));
+    this._changeScale(userinput.get(pathsMap[this.grabberId].scaleGrabbedGrabbable));
   }
 });

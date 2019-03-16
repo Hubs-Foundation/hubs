@@ -54,8 +54,8 @@ AFRAME.registerComponent("super-spawner", {
     /**
      * The events to emit for programmatically grabbing and releasing objects
      */
-    grabEvents: { default: ["cursor-grab", "primary_hand_grab"] },
-    releaseEvents: { default: ["cursor-release", "primary_hand_release"] },
+    grabEvents: { default: ["grab-start"] },
+    releaseEvents: { default: [] },
 
     /**
      * The spawner will become invisible and ungrabbable for this ammount of time after being grabbed. This can prevent rapidly spawning objects.
@@ -135,7 +135,7 @@ AFRAME.registerComponent("super-spawner", {
     const rightPose = userinput.get(paths.actions.rightHand.pose);
     const controllerCount = leftPose && rightPose ? 2 : leftPose || rightPose ? 1 : 0;
     const using6DOF = controllerCount > 1 && this.el.sceneEl.is("vr-mode");
-    const hand = using6DOF ? this.data.superHand : this.data.cursorSuperHand;
+    const hand = this.data.cursorSuperHand; //using6DOF ? this.data.superHand : this.data.cursorSuperHand;
 
     if (this.cooldownTimeout || !hand) {
       return;
@@ -177,9 +177,7 @@ AFRAME.registerComponent("super-spawner", {
     entity.components["ammo-body"].syncToPhysics();
 
     if (!using6DOF) {
-      for (let i = 0; i < this.data.grabEvents.length; i++) {
-        hand.emit(this.data.grabEvents[i], { targetEntity: entity });
-      }
+      AFRAME.scenes[0].systems.interaction.weWantToGrab = true;
     }
   },
 

@@ -25,6 +25,7 @@ AFRAME.registerSystem("interaction", {
     this.grabbedUI = null;
     this.grabbedPen = null;
     this.cursor = document.querySelector("#cursor");
+    this.weWantToGrab = false;
   },
   updateCursorIntersections: function(raw) {
     const hasIntersection = raw[0];
@@ -51,9 +52,11 @@ AFRAME.registerSystem("interaction", {
       const grab = userinput.get(paths.actions.cursor.grab);
       const removePen = userinput.get(paths.actions.pen.remove);
 
+      let didGrabEndThisFrame = false;
       if (drop && this.grabbedUI) {
         this.grabbedUI.emit("grab-end", { hand: this.cursor });
         this.grabbedUI = null;
+        didGrabEndThisFrame = true;
       }
 
       if (this.rightRemoteConstraintTarget) {
@@ -65,22 +68,30 @@ AFRAME.registerSystem("interaction", {
             stickyObject.onRelease();
           }
 
+          const superNetworkedInteractable = this.rightRemoteHoverTarget.components["super-networked-interactable"];
+          if (superNetworkedInteractable) {
+            superNetworkedInteractable.onGrabEnd(this.cursor);
+          }
+
           if (this.grabbedPen) {
             this.grabbedPen.children[0].components["pen"].grabberId = null;
             this.grabbedPen = null;
           }
 
-          this.rightRemoteConstraintTarget.body.forceActivationState(ACTIVATION_STATES.ACTIVE_TAG);
+          if (!didGrabEndThisFrame) {
+            this.rightRemoteConstraintTarget.emit("grab-end", { hand: this.cursor });
+            didGrabEndThisFrame = true;
+          }
           this.rightRemoteConstraintTarget.removeAttribute("ammo-constraint");
           this.rightRemoteConstraintTarget = null;
         }
       } else {
         if (this.rightRemoteHoverTarget) {
           const grab = userinput.get(paths.actions.cursor.grab);
-          if (grab) {
+          if (grab || this.weWantToGrab) {
+            this.weWantToGrab = false;
             const isUI = this.rightRemoteHoverTarget.components["is-ui"];
             if (isUI) {
-              this.rightRemoteHoverTarget.emit("grab-start", { hand: this.cursor });
               this.grabbedUI = this.rightRemoteHoverTarget;
             }
 
@@ -93,13 +104,20 @@ AFRAME.registerSystem("interaction", {
             const offersRemoteConstraint = this.rightRemoteHoverTarget.components["offers-remote-constraint"];
             if (offersRemoteConstraint) {
               this.rightRemoteConstraintTarget = this.rightRemoteHoverTarget;
-              this.rightRemoteConstraintTarget.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
               this.rightRemoteConstraintTarget.setAttribute("ammo-constraint", { target: "#cursor" });
 
               const stickyObject = this.rightRemoteHoverTarget.components["sticky-object"];
               if (stickyObject) {
                 stickyObject.onGrab();
               }
+              const superNetworkedInteractable = this.rightRemoteHoverTarget.components["super-networked-interactable"];
+              if (superNetworkedInteractable) {
+                superNetworkedInteractable.grabberId = "cursor";
+                superNetworkedInteractable.onGrabStart(this.cursor);
+              }
+            }
+            if (isUI || isPen || offersRemoteConstraint) {
+              this.rightRemoteHoverTarget.emit("grab-start", { hand: this.cursor });
             }
           }
         }
