@@ -30,7 +30,7 @@ export function resolveActionSets() {
   const rightRemoteConstraintTarget = interaction.rightRemoteConstraintTarget;
   const rightRemoteHoverTarget = !rightRemoteConstraintTarget && interaction.rightRemoteHoverTarget;
   userinput.toggleSet(sets.cursorHoveringOnNothing, !rightRemoteConstraintTarget && !rightRemoteHoverTarget);
-  userinput.toggleSet(sets.cursorHoveringOnPen, rightRemoteHoverTarget && !!rightRemoteHoverTarget.components["pen"]);
+  userinput.toggleSet(sets.cursorHoveringOnPen, rightRemoteHoverTarget && !!rightRemoteHoverTarget.components["is-pen"]);
   userinput.toggleSet(
     sets.cursorHoveringOnCamera,
     rightRemoteHoverTarget && !!rightRemoteHoverTarget.components["camera-tool"]

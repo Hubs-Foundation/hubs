@@ -23,6 +23,7 @@ AFRAME.registerSystem("interaction", {
     this.rightRemoteHoverTarget = null;
     this.rightRemoteConstraintTarget = null;
     this.grabbedUI = null;
+    this.grabbedPen = null;
     this.cursor = document.querySelector("#cursor");
   },
   updateCursorIntersections: function(raw) {
@@ -48,11 +49,13 @@ AFRAME.registerSystem("interaction", {
       const userinput = AFRAME.scenes[0].systems.userinput;
       const drop = userinput.get(paths.actions.cursor.drop);
       const grab = userinput.get(paths.actions.cursor.grab);
+      const removePen = userinput.get(paths.actions.pen.remove);
 
       if (drop && this.grabbedUI) {
         this.grabbedUI.emit("grab-end", { hand: this.cursor });
         this.grabbedUI = null;
       }
+
       if (this.rightRemoteConstraintTarget) {
         this.rightRemoteConstraintTarget.object3D.matrixNeedsUpdate = true;
 
@@ -60,6 +63,11 @@ AFRAME.registerSystem("interaction", {
           const stickyObject = this.rightRemoteConstraintTarget.components["sticky-object"];
           if (stickyObject) {
             stickyObject.onRelease();
+          }
+
+          if (this.grabbedPen) {
+            this.grabbedPen.children[0].components["pen"].grabberId = null;
+            this.grabbedPen = null;
           }
 
           this.rightRemoteConstraintTarget.body.forceActivationState(ACTIVATION_STATES.ACTIVE_TAG);
@@ -74,6 +82,12 @@ AFRAME.registerSystem("interaction", {
             if (isUI) {
               this.rightRemoteHoverTarget.emit("grab-start", { hand: this.cursor });
               this.grabbedUI = this.rightRemoteHoverTarget;
+            }
+
+            const isPen = this.rightRemoteHoverTarget.components["is-pen"];
+            if (isPen) {
+              this.rightRemoteHoverTarget.children[0].components["pen"].grabberId = "cursor";
+              this.grabbedPen = this.rightRemoteHoverTarget;
             }
 
             const offersRemoteConstraint = this.rightRemoteHoverTarget.components["offers-remote-constraint"];

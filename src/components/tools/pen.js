@@ -103,14 +103,12 @@ AFRAME.registerComponent("pen", {
   },
 
   tick(t, dt) {
-    return; // replace-super-hands
-    const grabber = this.el.parentNode.components.grabbable.grabbers[0];
     const userinput = AFRAME.scenes[0].systems.userinput;
 
     getLastWorldPosition(this.el.object3D, this.worldPosition);
 
-    if (grabber && pathsMap[grabber.id]) {
-      const paths = pathsMap[grabber.id];
+    if (this.grabberId&& pathsMap[this.grabberId]) {
+      const paths = pathsMap[this.grabberId];
       if (userinput.get(paths.startDrawing)) {
         this._startDraw();
       }
@@ -150,7 +148,7 @@ AFRAME.registerComponent("pen", {
       this.timeSinceLastDraw = time % this.data.drawFrequency;
     }
 
-    if (this.currentDrawing && !grabber) {
+    if (this.currentDrawing && !this.grabberId) {
       this._endDraw();
     }
   },
