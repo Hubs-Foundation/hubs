@@ -2,41 +2,20 @@ import { sets } from "./userinput/sets";
 import { paths } from "./userinput/paths";
 const ACTIVATION_STATES = require("aframe-physics-system/src/constants").ACTIVATION_STATES;
 
-const THREEJS_OBJECT_DESCENDENTS = {
-  uuidToEl: new Map(),
-  rootToDescendents: new Map(),
-  descendentsToRoot: new Map(),
-  associate: function(el, descendentUuids) {
-    this.uuidToEl.set(el.object3D.uuid, el);
-    this.rootToDescendents.set(el.object3D.uuid, descendentUuids);
-    for (let uuid of descendentUuids) {
-      this.descendentsToRoot.set(uuid, el.object3D.uuid);
-    }
-  }
-};
-
-AFRAME.registerComponent("threejs-object-descendents-aggregator", {
-  init: function() {
-    this.addDescendents = this.addDescendents.bind(this);
-
-    this.descendents = new Set();
-    this.addDescendents();
-  },
-
-  addDescendents: function() {
-    this.el.object3D.traverse(o => {
-      if (!this.descendents.has(o.uuid)) {
-        this.descendents.add(o.uuid);
-        o.el.addEventListener("object3dset", this.addDescendents);
-        o.el.addEventListener("added", this.addDescendents);
-      }
-    });
-    THREEJS_OBJECT_DESCENDENTS.associate(this.el, this.descendents);
-  }
-});
-
 AFRAME.registerComponent("offers-remote-constraint", {});
 AFRAME.registerComponent("is-ui", {});
+
+const THREEJS_HOVER_TARGETS = new Map();
+function findRemoteHoverTarget(o) {
+    if (!o) return null;
+    const target = THREEJS_HOVER_TARGETS.get(o.uuid);
+    return target || findRemoteHoverTarget(o.parent);
+}
+AFRAME.registerComponent("is-remote-hover-target", {
+  init: function() {
+    THREEJS_HOVER_TARGETS.set(this.el.object3D.uuid, this.el);
+  }
+});
 
 AFRAME.registerSystem("interaction", {
   init: function() {
@@ -48,12 +27,7 @@ AFRAME.registerSystem("interaction", {
       this.rightRemoteHoverTarget = null;
       return;
     }
-    const rootUuid = THREEJS_OBJECT_DESCENDENTS.descendentsToRoot.get(raw[0].object.uuid);
-    if (!rootUuid) {
-      this.rightRemoteHoverTarget = null;
-      return;
-    }
-    this.rightRemoteHoverTarget = THREEJS_OBJECT_DESCENDENTS.uuidToEl.get(rootUuid);
+    this.rightRemoteHoverTarget = findRemoteHoverTarget(raw[0].object);
   },
 
   tick: (function() {
@@ -61,7 +35,6 @@ AFRAME.registerSystem("interaction", {
       const userinput = AFRAME.scenes[0].systems.userinput;
       if (this.rightRemoteConstraintTarget) {
         this.rightRemoteConstraintTarget.object3D.matrixNeedsUpdate = true;
-        //this.rightRemoteConstraintTarget.object3D.updateMatrices(true);
 
         if (userinput.get(paths.actions.cursor.drop)) {
           this.rightRemoteConstraintTarget.body.forceActivationState(ACTIVATION_STATES.ACTIVE_TAG);
