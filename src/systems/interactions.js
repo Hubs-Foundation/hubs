@@ -75,13 +75,19 @@ AFRAME.registerSystem("interaction", {
 
           if (this.grabbedPen) {
             this.grabbedPen.children[0].components["pen"].grabberId = null;
+            if (!didGrabEndThisFrame) {
+              this.grabbedPen.emit("grab-end", { hand: this.cursor });
+              didGrabEndThisFrame = true;
+            }
             this.grabbedPen = null;
           }
 
-          if (!didGrabEndThisFrame) {
+          const isSuperSpawner = this.rightRemoteHoverTarget.components["super-spawner"];
+          if (isSuperSpawner && !didGrabEndThisFrame) {
             this.rightRemoteConstraintTarget.emit("grab-end", { hand: this.cursor });
             didGrabEndThisFrame = true;
           }
+
           this.rightRemoteConstraintTarget.removeAttribute("ammo-constraint");
           this.rightRemoteConstraintTarget = null;
         }
@@ -116,7 +122,9 @@ AFRAME.registerSystem("interaction", {
                 superNetworkedInteractable.onGrabStart(this.cursor);
               }
             }
-            if (isUI || isPen || offersRemoteConstraint) {
+
+            const isSuperSpawner = this.rightRemoteHoverTarget.components["super-spawner"];
+            if (isUI || isPen || isSuperSpawner) {
               this.rightRemoteHoverTarget.emit("grab-start", { hand: this.cursor });
             }
           }
