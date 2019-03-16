@@ -207,7 +207,7 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
     type: TYPES.STATIC,
     collisionFlags: COLLISION_FLAGS.NO_CONTACT_RESPONSE
   });
-  el.setAttribute("hoverable", "");
+  el.setAttribute("is-remote-hover-target", "");
 });
 
 const publicComponents = {
