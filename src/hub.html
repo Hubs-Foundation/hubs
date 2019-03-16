@@ -196,8 +196,7 @@
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
                     ammo-body="type: static; mass: 1;"
-                    threejs-object-descendents-aggregator
-                    offers-remote-constraint
+                    is-remote-hover-target
                     hoverable-visuals="cursorController: #cursor-controller"
                     sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
                     sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
@@ -216,11 +215,48 @@
                     offers-remote-constraint
                     destroy-at-extreme-distances
                     ammo-body="type: dynamic; mass: 1;"
-                    sticky-object="autoLockOnRelease; true; autoLockOnLoad: true;"
+                    sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
                     destroy-at-extreme-distances
                     set-yxz-order
                     matrix-auto-update
+                    position-at-box-shape-border__freeze="target:.freeze-menu;"
                 >
+                    <a-entity class="ui interactable-ui" mixin="button-container">
+                        <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 10;">
+                            <a-entity mixin="rounded-text-action-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned;" position="0 0.125 0.01"> </a-entity>
+                            <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
+                            <a-entity mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.01">
+                                <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
+                                <a-image
+                                    icon-button="image: #camera; hoverImage: #camera;"
+                                    scale="0.165 0.165 0.165"
+                                    position="-0.105 0.005 0.01"
+                                ></a-image>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" camera-focus-button="track: true" position="0.25 0.375 0.01">
+                                <a-entity text=" value:track; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
+                                <a-image
+                                    icon-button="image: #camera; hoverImage: #camera;"
+                                    scale="0.165 0.165 0.165"
+                                    position="-0.105 0.005 0.01"
+                                ></a-image>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" class="hide-when-pinned" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
+                            <a-entity text=" value:remove; width:1.75; align:center;" class="hide-when-pinned" text-raycast-hack position="0 -0.125 0.02"></a-entity>
+                            <a-entity mixin="rounded-text-button" open-media-button position="0.25 -0.375 0.01">
+                                <a-entity text="value:open link; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity mixin="rounded-text-button" clone-media-button position="-0.25 -0.375 0.01">
+                                <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button rotate-button-selector position="-0.6  0.12 0.01">
+                                <a-entity text="value:rotate; width:1.50; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                            <a-entity  scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button="mode: align;" position="-0.6 -0.12 0.01">
+                                <a-entity text="value:re-center; width:1.40; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                            </a-entity>
+                        </a-entity>
+                    </a-entity>
                 </a-entity>
             </template>
 
@@ -228,7 +264,7 @@
                 <a-entity
                     class="pen interactable"
                     super-networked-interactable="counter: #pen-counter;"
-                    threejs-object-descendents-aggregator
+                    is-remote-hover-target
                     offers-remote-constraint
                     ammo-body="type: dynamic; mass: 0.001;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
@@ -247,6 +283,7 @@
                     emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
                     action-to-remove__pen="path: /actions/pen/remove;"
                     position-at-box-shape-border="target:.pen-menu"
+                    is-pen
                 >
                     <a-sphere
                         id="pen"
@@ -269,7 +306,7 @@
                 <a-entity
                     class="interactable icamera"
                     camera-tool
-                    threejs-object-descendents-aggregator
+                    is-remote-hover-target
                     offers-remote-constraint
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
@@ -336,18 +373,24 @@
                     <a-entity class="video-time-label" text="value: 0; anchor: center; align: center; color: #aaa;" text-raycast-hack position="0 -0.24 0" scale="0.75 0.75 0.75"></a-entity>
                     <a-entity class="video-volume-label" text="value: 0%; anchor: center; align: center; color: #ccc; letterSpacing: 4;" text-raycast-hack position="0.0 0.175 0.015" scale="1.25 1.25 1.25"></a-entity>
                     <a-image
+                        is-remote-hover-target
+                        is-ui
                         icon-button="image: #video-volume-down; hoverImage: #video-volume-down-hover;"
                         scale="0.075 0.075 0.075"
                         position="-0.275 0.175 0"
                         class="ui video-volume-down-button"
                     ></a-image>
                     <a-image
+                        is-remote-hover-target
+                        is-ui
                         icon-button="image: #video-volume-up; hoverImage: #video-volume-up-hover;"
                         scale="0.075 0.075 0.075"
                         position="0.275 0.175 0"
                         class="ui video-volume-up-button"
                     ></a-image>
                     <a-image
+                        is-remote-hover-target
+                        is-ui
                         icon-button="image: #video-seek-back; hoverImage: #video-seek-back-hover;"
                         scale="0.1 0.1 0.1"
                         position="-0.3 -0.125 0"
@@ -355,6 +398,8 @@
                         visible="false"
                     ></a-image>
                     <a-image
+                        is-remote-hover-target
+                        is-ui
                         icon-button="image: #video-pause; hoverImage: #video-pause-hover; activeImage: #video-play; activeHoverImage: #video-play-hover"
                         scale="0.15 0.15 0.15"
                         position="0 -0.125 0"
@@ -362,6 +407,8 @@
                         visible="false"
                     ></a-image>
                     <a-image
+                        is-remote-hover-target
+                        is-ui
                         icon-button="image: #video-seek-forward; hoverImage: #video-seek-forward-hover;"
                         scale="0.1 0.1 0.1"
                         position="0.3 -0.125 0"
@@ -393,6 +440,8 @@
             </template>
 
             <a-mixin id="rounded-text-button"
+                is-remote-hover-target
+                is-ui
                 text-button="
                     haptic:#player-right-controller;
                     textHoverColor: #fff;
@@ -411,6 +460,8 @@
             ></a-mixin>
 
             <a-mixin id="rounded-text-action-button"
+                is-remote-hover-target
+                is-ui
                 text-button="
                     haptic:#player-right-controller;
                     textHoverColor: #fff;
@@ -526,6 +577,8 @@
                     <a-entity id="hud-hub-entry-link" text="value:; width:1.1; align:center;" position="0.17 0.165 0" matrix-auto-update="target: text;"></a-entity>
                     <a-rounded height="0.13" width="0.59" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
                 <a-image
+                    is-remote-hover-target
+                    is-ui
                     icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover"
                     scale="0.1 0.1 0.1"
                     position="-0.17 0 0.001"
@@ -536,6 +589,8 @@
                     set-sounds-invisible
                 ></a-image>
                 <a-image
+                    is-remote-hover-target
+                    is-ui
                     icon-button="tooltip: #hud-tooltip; tooltipText: Create; activeTooltipText: Resume; image: #spawn; hoverImage: #spawn-hover;"
                     scale="0.2 0.2 0.2"
                     position="0 0 0.005"
@@ -545,6 +600,8 @@
                     set-sounds-invisible
                 ></a-image>
                 <a-image
+                    is-remote-hover-target
+                    is-ui
                     icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #pen-off; hoverImage: #pen-off-hover; activeImage: #pen-on; activeHoverImage: #pen-on-hover"
                     scale="0.1 0.1 0.1"
                     position="0.17 0 0.001"
@@ -555,6 +612,8 @@
                     set-sounds-invisible
                 ></a-image>
                 <a-image
+                    is-remote-hover-target
+                    is-ui
                     icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #camera-off; hoverImage: #camera-off-hover; activeImage: #camera-on; activeHoverImage: #camera-on-hover"
                     scale="0.1 0.1 0.1"
                     position="0.28 0 0.001"

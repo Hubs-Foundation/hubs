@@ -1,10 +1,8 @@
 import { getLastWorldPosition, getLastWorldQuaternion } from "../utils/three-utils";
 
-//TODO: decide on what these collision filters should actuallly be called, and move these somewhere else
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 /* global THREE, AFRAME */
 AFRAME.registerComponent("sticky-object", {
-  dependencies: ["ammo-body"],
 
   schema: {
     autoLockOnLoad: { default: false },
@@ -13,15 +11,10 @@ AFRAME.registerComponent("sticky-object", {
   },
 
   init() {
-    this._onGrab = this._onGrab.bind(this);
-    this._onRelease = this._onRelease.bind(this);
     this._onBodyLoaded = this._onBodyLoaded.bind(this);
   },
 
   play() {
-    this.el.addEventListener("grab-start", this._onGrab);
-    this.el.addEventListener("grab-end", this._onRelease);
-
     if (this.hasSetupBodyLoaded) return;
     this.hasSetupBodyLoaded = true;
 
@@ -30,11 +23,6 @@ AFRAME.registerComponent("sticky-object", {
     } else {
       this.el.addEventListener("body-loaded", this._onBodyLoaded, { once: true });
     }
-  },
-
-  pause() {
-    this.el.removeEventListener("grab-start", this._onGrab);
-    this.el.removeEventListener("grab-end", this._onRelease);
   },
 
   setLocked(locked) {
@@ -50,9 +38,7 @@ AFRAME.registerComponent("sticky-object", {
     }
   },
 
-  _onRelease() {
-    // Happens if the object is still being held by another hand
-    if (this.el.is("grabbed")) return;
+  onRelease() {
     if (
       this.data.autoLockOnRelease &&
       (this.data.autoLockSpeedLimit === 0 ||
@@ -64,9 +50,7 @@ AFRAME.registerComponent("sticky-object", {
     this.el.setAttribute("ammo-body", { collisionFilterGroup: COLLISION_LAYERS.DYNAMIC_OBJECTS });
   },
 
-  _onGrab() {
-    if (!this.el.components.grabbable || this.el.components.grabbable.data.maxGrabbers === 0) return;
-
+  onGrab() {
     this.el.setAttribute("ammo-body", {
       collisionFilterGroup: this.locked ? COLLISION_LAYERS.STICKY_OBJECTS : COLLISION_LAYERS.DYNAMIC_OBJECTS
     });

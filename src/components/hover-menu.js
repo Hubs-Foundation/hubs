@@ -40,7 +40,13 @@ AFRAME.registerComponent("hover-menu", {
   },
 
   onHoverStateChange(e) {
-    this.hovering = e.type === "hover-start";
+    if (!e.detail === "hovered") return;
+    this.hovering = false;
+    this.el.object3D.traverse(o => {
+      if (o.el && o.el.is("hovered")) {
+        this.hovering = true;
+      }
+    });
     this.applyHoverState();
   },
 
@@ -53,15 +59,15 @@ AFRAME.registerComponent("hover-menu", {
   },
 
   play() {
-    this.el.addEventListener("hover-start", this.onHoverStateChange);
-    this.el.addEventListener("hover-end", this.onHoverStateChange);
+    this.el.parentNode.addEventListener("stateadded", this.onHoverStateChange);
+    this.el.parentNode.addEventListener("stateremoved", this.onHoverStateChange);
     this.el.sceneEl.addEventListener("stateadded", this.onFrozenStateChange);
     this.el.sceneEl.addEventListener("stateremoved", this.onFrozenStateChange);
   },
 
   pause() {
-    this.el.removeEventListener("hover-start", this.onHoverStateChange);
-    this.el.removeEventListener("hover-end", this.onHoverStateChange);
+    this.el.parentNode.removeEventListener("stateadded", this.onHoverStateChange);
+    this.el.parentNode.removeEventListener("stateremoved", this.onHoverStateChange);
     this.el.sceneEl.removeEventListener("stateadded", this.onFrozenStateChange);
     this.el.sceneEl.removeEventListener("stateremoved", this.onFrozenStateChange);
   }

@@ -23,7 +23,7 @@ AFRAME.registerComponent("visibility-while-frozen", {
     let hoverableSearch = this.el;
 
     while (hoverableSearch !== document) {
-      if (hoverableSearch.getAttribute("hoverable") !== null) {
+      if (hoverableSearch.getAttribute("is-remote-hover-target") !== null) {
         this.hoverable = hoverableSearch;
         break;
       }

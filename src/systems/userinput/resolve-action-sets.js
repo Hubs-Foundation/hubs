@@ -48,16 +48,13 @@ export function resolveActionSets() {
   userinput.toggleSet(sets.cursorHoldingInteractable, !!rightRemoteConstraintTarget);
   userinput.toggleSet(
     sets.cursorHoldingPen,
-    rightRemoteConstraintTarget && !!rightRemoteConstraintTarget.components["pen"]
+    rightRemoteConstraintTarget && !!rightRemoteConstraintTarget.components["is-pen"]
   );
   userinput.toggleSet(
     sets.cursorHoldingCamera,
     rightRemoteConstraintTarget && !!rightRemoteConstraintTarget.components["camera-tool"]
   );
-  userinput.toggleSet(
-    sets.cursorHoldingUI,
-    rightRemoteConstraintTarget && !!rightRemoteConstraintTarget.components["is-ui"]
-  );
+  userinput.toggleSet(sets.cursorHoldingUI, !!interaction.grabbedUI);
   userinput.toggleSet(
     sets.inputFocused,
     document.activeElement.nodeName === "INPUT" || document.activeElement.nodeName === "TEXTAREA"
