@@ -145,6 +145,12 @@ AFRAME.registerComponent("media-loader", {
       const { src } = this.data;
 
       if (src !== oldData.src && !this.showLoaderTimeout) {
+        this.el.setAttribute("ammo-body", {type: "dynamic", mass: 1});
+        this.el.setAttribute("ammo-shape__loader", {
+          autoGenerateShape: true,
+          type: SHAPES.BOX,
+          mergeGeometry: false
+        });
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
       }
 
