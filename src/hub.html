@@ -164,7 +164,7 @@
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
                                 ammo-body="type: kinematic;"
-                                ammo-shape="type: cylinder; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.11 0.10 0.11; offset: 0 0.06 0.04;"
+                                ammo-shape="type: cylinder; fit: manual; halfExtents: 0.11 0.10 0.11; offset: 0 0.06 0.04;"
                             ></a-entity>
                         </template>
 
@@ -318,7 +318,7 @@
                     scale="0.5 0.5 0.5"
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
                     ammo-body="type: dynamic; mass: 0.001;"
-                    ammo-shape="type: box; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.11 0.07 0.05; offset: 0 0.02 0;"
+                    ammo-shape="type: box; fit: manual; halfExtents: 0.11 0.07 0.05; offset: 0 0.02 0;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     super-networked-interactable="counter: #camera-counter;"
                     position-at-box-shape-border__freeze="target: .camera-menu"
@@ -479,9 +479,7 @@
                     stretchStartButtons: primary_hand_grab, secondary_hand_grab;
                     stretchEndButtons: primary_hand_release, secondary_hand_release;
                     dragDropStartButtons: hand_grab, secondary_hand_grab;
-                    dragDropEndButtons: hand_release, secondary_hand_release;
-                    activateStartButtons: secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
-                    activateEndButtons: secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
+                    dragDropEndButtons: hand_release, secondary_hand_release;"
             ></a-mixin>
         </a-assets>
 
@@ -519,9 +517,7 @@
                 stretchStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
                 stretchEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
                 dragDropStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
-                dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
-                activateStartButtons: secondary-cursor-grab, secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
-                activateEndButtons: secondary-cursor-release, secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
+                dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;"
             action-to-event__grab="path: /actions/cursorGrab; event: cursor-grab"
             action-to-event__drop="path: /actions/cursorDrop; event: cursor-release"
         >
@@ -670,8 +666,8 @@
                 matrix-auto-update
                 haptic-feedback="path: /haptics/actuators/left"
                 mixin="controller-super-hands"
-                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4;"
-                ammo-shape="type: box; autoGenerateShape: false; scaleAutoUpdate: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
+                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4; scaleAutoUpdate: false;"
+                ammo-shape="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 action-to-event__c="path: /actions/leftHandGrab; event: primary_hand_grab;"
                 action-to-event__d="path: /actions/leftHandDrop; event: primary_hand_release;"
             >
@@ -687,8 +683,8 @@
                 matrix-auto-update
                 haptic-feedback="path: /haptics/actuators/right"
                 mixin="controller-super-hands"
-                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4;"
-                ammo-shape="type: box; autoGenerateShape: false; scaleAutoUpdate: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
+                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4; scaleAutoUpdate: false;"
+                ammo-shape="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 action-to-event__c="path: /actions/rightHandGrab; event: primary_hand_grab;"
                 action-to-event__d="path: /actions/rightHandDrop; event: primary_hand_release;"
             >

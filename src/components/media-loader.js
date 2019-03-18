@@ -13,7 +13,7 @@ import { addAnimationComponents } from "../utils/animation";
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 
-const SHAPES = require("aframe-physics-system/src/constants").SHAPES;
+const SHAPE = require("aframe-physics-system/src/constants").SHAPE;
 
 const gltfLoader = new THREE.GLTFLoader();
 let loadingObject;
@@ -66,10 +66,7 @@ AFRAME.registerComponent("media-loader", {
       mesh.matrixNeedsUpdate = true;
 
       this.el.setAttribute("ammo-shape__" + shapeId, {
-        autoGenerateShape: true,
-        type: shapeType,
-        mergeGeometry: true,
-        offset: center.negate().multiply(this.el.object3D.scale)
+        type: shapeType
       });
     };
   })(),
@@ -109,7 +106,7 @@ AFRAME.registerComponent("media-loader", {
       this.loadingClip.play();
     }
     this.el.setObject3D("mesh", mesh);
-    this.setShapeAndScale(true, SHAPES.BOX, "loader");
+    this.setShapeAndScale(true, SHAPE.BOX, "loader");
     delete this.showLoaderTimeout;
   },
 
@@ -245,7 +242,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "model-loaded",
           () => {
-            this.setShapeAndScale(this.data.resize, SHAPES.HULL, "hull");
+            this.setShapeAndScale(this.data.resize, SHAPE.HULL, "hull");
             this.onMediaLoaded();
             addAnimationComponents(this.el);
           },

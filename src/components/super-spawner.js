@@ -3,7 +3,7 @@ import { addMedia } from "../utils/media-utils";
 import { waitForEvent } from "../utils/async-utils";
 import { ObjectContentOrigins } from "../object-types";
 
-const COLLISION_FLAGS = require("aframe-physics-system/src/constants").COLLISION_FLAGS;
+const COLLISION_FLAG = require("aframe-physics-system/src/constants").COLLISION_FLAG;
 
 let nextGrabId = 0;
 /**
@@ -245,11 +245,11 @@ AFRAME.registerComponent("super-spawner", {
     if (this.data.spawnCooldown > 0) {
       this.el.setAttribute("visible", false);
       this.el.classList.remove("interactable");
-      this.el.setAttribute("ammo-body", { collisionFlags: COLLISION_FLAGS.NO_CONTACT_RESPONSE });
+      this.el.setAttribute("ammo-body", { collisionFlags: COLLISION_FLAG.NO_CONTACT_RESPONSE });
       this.cooldownTimeout = setTimeout(() => {
         this.el.setAttribute("visible", true);
         this.el.classList.add("interactable");
-        this.el.setAttribute("ammo-body", { collisionFlags: COLLISION_FLAGS.STATIC_OBJECT });
+        this.el.setAttribute("ammo-body", { collisionFlags: COLLISION_FLAG.STATIC_OBJECT });
         this.cooldownTimeout = null;
       }, this.data.spawnCooldown * 1000);
     }

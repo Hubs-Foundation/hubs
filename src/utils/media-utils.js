@@ -22,6 +22,10 @@ const commonKnownContentTypes = {
   mp3: "audio/mpeg"
 };
 
+const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
+  SHAPE = PHYSICS_CONSTANTS.SHAPE,
+  FIT = PHYSICS_CONSTANTS.FIT;
+
 // thanks to https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
 function b64EncodeUnicode(str) {
   // first we use encodeURIComponent to get percent-encoded UTF-8, then we convert the percent-encodings
@@ -366,29 +370,73 @@ export const traverseMeshesAndAddShapes = (function() {
   const pos = new THREE.Vector3();
   const quat = new THREE.Quaternion();
   const scale = new THREE.Vector3();
-  const shapePrefix = "ammo-shape__env";
-  return function(el, type, margin) {
+  const shapePrefix = "ammo-shape__";
+  return function(el) {
+    window.sceneMeshes = [];
     const shapes = [];
-    let i = 0;
     const meshRoot = el.object3DMap.mesh;
     inverse.getInverse(meshRoot.matrixWorld);
-    meshRoot.traverse(o => {
-      if (o.isMesh && (!THREE.Sky || o.__proto__ != THREE.Sky.prototype)) {
-        o.updateMatrices();
-        matrix.multiplyMatrices(inverse, o.matrixWorld);
-        matrix.decompose(pos, quat, scale);
-        el.setAttribute(shapePrefix + i, {
-          type: type,
-          margin: margin,
-          mergeGeometry: false,
-          offset: { x: pos.x * meshRoot.scale.x, y: pos.y * meshRoot.scale.y, z: pos.z * meshRoot.scale.z },
-          orientation: { x: quat.x, y: quat.y, z: quat.z, w: quat.w }
+
+    if (meshRoot.name === "AvatarRoot") {
+      //old pre-spoke scenes
+      el.setAttribute("ammo-shape", {
+        type: SHAPE.MESH,
+        margin: 0.01,
+        fit: FIT.COMPOUND
+      });
+      shapes.push("ammo-shape");
+      return shapes;
+    }
+
+    for (let i = 0; i < meshRoot.children.length; i++) {
+      const obj = meshRoot.children[i];
+
+      //ignore floor plan for spoke scenes, and make the ground plane a box.
+      if (obj.isGroup && obj.name !== "Floor_Plan") {
+        if (obj.name === "Ground_Plane") {
+          obj.el.object3DMap.mesh = obj;
+          obj.el.setAttribute(shapePrefix + obj.name, {
+            type: SHAPE.BOX,
+            margin: 0.01,
+            fit: FIT.COMPOUND
+          });
+          shapes.push(shapePrefix + obj.name);
+          continue;
+        }
+
+        let indexCount = 0;
+        let vertexCount = 0;
+        let meshCount = 0;
+        obj.traverse(o => {
+          if (o.isMesh && (!THREE.Sky || o.__proto__ != THREE.Sky.prototype)) {
+            indexCount += o.geometry.index.count;
+            vertexCount += o.geometry.attributes.position.count;
+            meshCount++;
+          }
         });
-        el.components[shapePrefix + i].setMesh(o);
-        shapes.push(shapePrefix + i);
-        i++;
+
+        if (meshCount > 0) {
+          if (!obj.el.object3DMap.mesh) {
+            obj.el.object3DMap.mesh = obj.parent;
+          }
+
+          if (indexCount > 10000) {
+            obj.el.setAttribute(shapePrefix + obj.uuid, {
+              type: SHAPE.HULL,
+              margin: 0.01,
+              fit: FIT.COMPOUND
+            });
+          } else {
+            obj.el.setAttribute(shapePrefix + obj.uuid, {
+              type: SHAPE.MESH,
+              margin: 0.01,
+              fit: FIT.COMPOUND
+            });
+          }
+          shapes.push(shapePrefix + obj.uuid);
+        }
       }
-    });
+    }
     return shapes;
   };
 })();

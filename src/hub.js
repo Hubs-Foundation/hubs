@@ -135,7 +135,6 @@ const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileV
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
 
-const SHAPES = require("aframe-physics-system/src/constants").SHAPES;
 const Ammo = require("ammo.js/builds/ammo.wasm.js");
 const AmmoWasm = require("ammo.js/builds/ammo.wasm.wasm");
 window.Ammo = Ammo.bind(undefined, {
@@ -336,7 +335,7 @@ async function updateEnvironmentForHub(hub) {
       "model-loaded",
       () => {
         //TODO: check if the environment was made with spoke to determine if a shape should be added
-        shapes = traverseMeshesAndAddShapes(environmentEl, SHAPES.MESH, 0.1);
+        shapes = traverseMeshesAndAddShapes(environmentEl);
         generateMeshBVH(environmentEl.object3D);
       },
       { once: true }
@@ -359,7 +358,7 @@ async function updateEnvironmentForHub(hub) {
               while (shapes.length > 0) {
                 environmentEl.removeAttribute(shapes.pop());
               }
-              shapes = traverseMeshesAndAddShapes(environmentEl, SHAPES.MESH, 0.1);
+              shapes = traverseMeshesAndAddShapes(environmentEl);
               generateMeshBVH(environmentEl.object3D);
               document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint();
             },
