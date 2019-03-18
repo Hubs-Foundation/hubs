@@ -28,7 +28,6 @@ AFRAME.registerComponent("super-networked-interactable", {
   },
 
   init: function() {
-    this.system = this.el.sceneEl.systems.physics;
     this.counter = this.data.counter.components["networked-counter"];
     this.hand = null;
     this.currentScale = new THREE.Vector3();
@@ -53,7 +52,6 @@ AFRAME.registerComponent("super-networked-interactable", {
     this.el.addEventListener("pinned", this._syncCounterRegistration);
     this.el.addEventListener("unpinned", this._syncCounterRegistration);
     this.el.addEventListener("ownership-lost", this._onOwnershipLost);
-    this.system.addComponent(this);
   },
 
   remove: function() {
@@ -61,7 +59,6 @@ AFRAME.registerComponent("super-networked-interactable", {
     this.el.removeEventListener("grab-start", this._onGrabStart);
     this.el.removeEventListener("grab-end", this._onGrabEnd);
     this.el.removeEventListener("ownership-lost", this._onOwnershipLost);
-    this.system.removeComponent(this);
   },
 
   _onGrabStart: function(e) {
