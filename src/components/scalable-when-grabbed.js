@@ -8,6 +8,7 @@ const grabberToPath = {
 
 AFRAME.registerComponent("scalable-when-grabbed", {
   tick: function() {
+    return; // no grabbable component
     const grabber = this.el.components.grabbable.grabbers[0];
     if (!grabber) return;
 
