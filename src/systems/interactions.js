@@ -50,7 +50,6 @@ AFRAME.registerSystem("interaction", {
       const userinput = AFRAME.scenes[0].systems.userinput;
       const drop = userinput.get(paths.actions.cursor.drop);
       const grab = userinput.get(paths.actions.cursor.grab);
-      const removePen = userinput.get(paths.actions.pen.remove);
 
       let didGrabEndThisFrame = false;
       if (drop && this.grabbedUI) {
@@ -88,41 +87,38 @@ AFRAME.registerSystem("interaction", {
           this.rightRemoteConstraintTarget = null;
         }
       } else {
-        if (this.rightRemoteHoverTarget) {
-          const grab = userinput.get(paths.actions.cursor.grab);
-          if (grab || this.weWantToGrab) {
-            this.weWantToGrab = false;
-            const isUI = this.rightRemoteHoverTarget.components["is-ui"];
-            if (isUI) {
-              this.grabbedUI = this.rightRemoteHoverTarget;
-            }
+        if (this.rightRemoteHoverTarget && (grab || this.weWantToGrab)) {
+          this.weWantToGrab = false;
+          const isUI = this.rightRemoteHoverTarget.components["is-ui"];
+          if (isUI) {
+            this.grabbedUI = this.rightRemoteHoverTarget;
+          }
 
-            const isPen = this.rightRemoteHoverTarget.components["is-pen"];
-            if (isPen) {
-              this.rightRemoteHoverTarget.children[0].components["pen"].grabberId = "cursor";
-              this.grabbedPen = this.rightRemoteHoverTarget;
-            }
+          const isPen = this.rightRemoteHoverTarget.components["is-pen"];
+          if (isPen) {
+            this.rightRemoteHoverTarget.children[0].components["pen"].grabberId = "cursor";
+            this.grabbedPen = this.rightRemoteHoverTarget;
+          }
 
-            const offersRemoteConstraint = this.rightRemoteHoverTarget.components["offers-remote-constraint"];
-            if (offersRemoteConstraint) {
-              this.rightRemoteConstraintTarget = this.rightRemoteHoverTarget;
-              this.rightRemoteConstraintTarget.setAttribute("ammo-constraint", { target: "#cursor" });
+          const offersRemoteConstraint = this.rightRemoteHoverTarget.components["offers-remote-constraint"];
+          if (offersRemoteConstraint) {
+            this.rightRemoteConstraintTarget = this.rightRemoteHoverTarget;
+            this.rightRemoteConstraintTarget.setAttribute("ammo-constraint", { target: "#cursor" });
 
-              const stickyObject = this.rightRemoteHoverTarget.components["sticky-object"];
-              if (stickyObject) {
-                stickyObject.onGrab();
-              }
-              const superNetworkedInteractable = this.rightRemoteHoverTarget.components["super-networked-interactable"];
-              if (superNetworkedInteractable) {
-                superNetworkedInteractable.grabberId = "cursor";
-                superNetworkedInteractable.onGrabStart(this.cursor);
-              }
+            const stickyObject = this.rightRemoteHoverTarget.components["sticky-object"];
+            if (stickyObject) {
+              stickyObject.onGrab();
             }
+            const superNetworkedInteractable = this.rightRemoteHoverTarget.components["super-networked-interactable"];
+            if (superNetworkedInteractable) {
+              superNetworkedInteractable.grabberId = "cursor";
+              superNetworkedInteractable.onGrabStart(this.cursor);
+            }
+          }
 
-            const isSuperSpawner = this.rightRemoteHoverTarget.components["super-spawner"];
-            if (isUI || isSuperSpawner) {
-              this.rightRemoteHoverTarget.emit("grab-start", { hand: this.cursor });
-            }
+          const isSuperSpawner = this.rightRemoteHoverTarget.components["super-spawner"];
+          if (isUI || isSuperSpawner) {
+            this.rightRemoteHoverTarget.emit("grab-start", { hand: this.cursor });
           }
         }
       }
