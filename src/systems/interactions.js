@@ -1,6 +1,5 @@
 import { sets } from "./userinput/sets";
 import { paths } from "./userinput/paths";
-const ACTIVATION_STATES = require("aframe-physics-system/src/constants").ACTIVATION_STATES;
 
 AFRAME.registerComponent("offers-remote-constraint", {});
 AFRAME.registerComponent("is-ui", {});
