@@ -89,10 +89,7 @@ AFRAME.registerComponent("super-spawner", {
   },
 
   init() {
-    this.heldEntities = new Map();
     this.cooldownTimeout = null;
-    this.onGrabStart = this.onGrabStart.bind(this);
-    this.onGrabEnd = this.onGrabEnd.bind(this);
 
     this.onSpawnEvent = this.onSpawnEvent.bind(this);
 
@@ -103,30 +100,21 @@ AFRAME.registerComponent("super-spawner", {
   },
 
   play() {
-    this.el.addEventListener("grab-start", this.onGrabStart);
-    this.el.addEventListener("grab-end", this.onGrabEnd);
     if (this.data.spawnEvent) {
       this.sceneEl.addEventListener(this.data.spawnEvent, this.onSpawnEvent);
     }
   },
 
   pause() {
-    this.el.removeEventListener("grab-start", this.onGrabStart);
-    this.el.removeEventListener("grab-end", this.onGrabEnd);
     if (this.data.spawnEvent) {
       this.sceneEl.removeEventListener(this.data.spawnEvent, this.onSpawnEvent);
     }
-
     if (this.cooldownTimeout) {
       clearTimeout(this.cooldownTimeout);
       this.cooldownTimeout = null;
       this.el.setAttribute("visible", true);
       this.el.classList.add("interactable");
     }
-  },
-
-  remove() {
-    this.heldEntities.clear();
   },
 
   async onSpawnEvent() {
@@ -179,64 +167,6 @@ AFRAME.registerComponent("super-spawner", {
     if (!using6DOF) {
       AFRAME.scenes[0].systems.interaction.weWantToGrab = true;
     }
-  },
-
-  async onGrabStart(e) {
-    if (this.cooldownTimeout) {
-      return;
-    }
-
-    // This tells super-hands we are handling this grab. The user is now "grabbing" the spawner
-    e.preventDefault();
-
-    const hand = e.detail.hand;
-    const thisGrabId = nextGrabId++;
-    this.heldEntities.set(hand, thisGrabId);
-
-    const entity = addMedia(
-      this.data.src,
-      this.data.template,
-      ObjectContentOrigins.SPAWNER,
-      this.data.resolve,
-      this.data.resize
-    ).entity;
-
-    entity.object3D.position.copy(
-      this.data.useCustomSpawnPosition ? this.data.spawnPosition : this.el.object3D.position
-    );
-    entity.object3D.rotation.copy(
-      this.data.useCustomSpawnRotation ? this.data.spawnRotation : this.el.object3D.rotation
-    );
-    entity.object3D.scale.copy(this.data.useCustomSpawnScale ? this.data.spawnScale : this.el.object3D.scale);
-    entity.object3D.matrixNeedsUpdate = true;
-
-    await waitForEvent("body-loaded", entity);
-
-    // If we are still holding the spawner with the hand that grabbed to create this entity, release the spawner and grab the entity
-    if (this.heldEntities.get(hand) === thisGrabId) {
-      if (this.data.centerSpawnedObject) {
-        entity.body.position.copy(hand.object3D.position);
-      }
-
-      for (let i = 0; i < this.data.grabEvents.length; i++) {
-        hand.emit(this.data.releaseEvents[i]);
-        hand.emit(this.data.grabEvents[i], { targetEntity: entity });
-      }
-    }
-
-    entity.object3D.scale.copy(this.data.useCustomSpawnScale ? this.data.spawnScale : this.el.object3D.scale);
-    entity.object3D.matrixNeedsUpdate = true;
-
-    // Call syncToPhysics so that updated transforms aren't immediately overwritten
-    entity.components["ammo-body"].syncToPhysics();
-
-    this.activateCooldown();
-  },
-
-  onGrabEnd(e) {
-    this.heldEntities.delete(e.detail.hand);
-    // This tells super-hands we are handling this release
-    e.preventDefault();
   },
 
   activateCooldown() {

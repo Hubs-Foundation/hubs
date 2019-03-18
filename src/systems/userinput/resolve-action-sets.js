@@ -42,7 +42,9 @@ export function resolveActionSets() {
   );
   userinput.toggleSet(
     sets.cursorHoveringOnInteractable,
-    rightRemoteHoverTarget && !!rightRemoteHoverTarget.components["offers-remote-constraint"]
+    rightRemoteHoverTarget &&
+      (!!rightRemoteHoverTarget.components["offers-remote-constraint"] ||
+        !!rightRemoteHoverTarget.components["super-spawner"])
   );
   userinput.toggleSet(sets.cursorHoveringOnUI, rightRemoteHoverTarget && !!rightRemoteHoverTarget.components["is-ui"]);
   userinput.toggleSet(
