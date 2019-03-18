@@ -195,6 +195,7 @@
                 <a-entity
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
+                    scalable-when-grabbed
                     ammo-body="type: static; mass: 1;"
                     grabbable="constraintComponentName: ammo-constraint"
                     hoverable
@@ -212,6 +213,7 @@
                 <a-entity
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
+                    scalable-when-grabbed
                     ammo-body="type: dynamic; mass: 1;"
                     grabbable="constraintComponentName: ammo-constraint"
                     stretchable="useWorldPosition: true; usePhysics: never"
@@ -325,6 +327,7 @@
                     ammo-shape="type: box; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.11 0.07 0.05; offset: 0 0.02 0;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     super-networked-interactable="counter: #camera-counter;"
+                    scalable-when-grabbed
                     position-at-box-shape-border__freeze="target: .camera-menu"
                     set-yxz-order
                 >
