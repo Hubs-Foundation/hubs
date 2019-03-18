@@ -2,10 +2,12 @@ import { sets } from "./sets";
 
 let leftTeleporter;
 let rightTeleporter;
+let cursorController;
 
 export function resolveActionSets() {
   leftTeleporter = leftTeleporter || document.querySelector("#player-left-controller").components["teleporter"];
   rightTeleporter = rightTeleporter || document.querySelector("#player-right-controller").components["teleporter"];
+  cursorController = cursorController || document.querySelector("#cursor-controller").components["cursor-controller"];
 
   const userinput = AFRAME.scenes[0].systems.userinput;
   //  userinput.toggleSet(sets.leftHandHoveringOnInteractable, leftHandHoveringOnInteractable);
@@ -28,7 +30,7 @@ export function resolveActionSets() {
 
   const interaction = AFRAME.scenes[0].systems.interaction;
   const rightRemoteConstraintTarget = interaction.rightRemoteConstraintTarget;
-  const rightRemoteHoverTarget = !rightRemoteConstraintTarget && interaction.rightRemoteHoverTarget;
+  const rightRemoteHoverTarget = !rightRemoteConstraintTarget && cursorController.rightRemoteHoverTarget;
   userinput.toggleSet(sets.cursorHoveringOnNothing, !rightRemoteConstraintTarget && !rightRemoteHoverTarget);
   userinput.toggleSet(
     sets.cursorHoveringOnPen,

@@ -75,14 +75,19 @@ const HIGHLIGHT = new THREE.Color(23 / 255, 64 / 255, 118 / 255);
 const NO_HIGHLIGHT = new THREE.Color(190 / 255, 190 / 255, 190 / 255);
 const ROTATE_COLOR_1 = [150, 80, 150];
 const ROTATE_COLOR_2 = [23, 64, 118];
-/**
- * Manages targeting and physical cursor location. Has the following responsibilities:
- *
- * - Tracking which entities in the scene can be targeted by the cursor (`objects`).
- * - Performing a raycast per-frame or on-demand to identify which entity is being currently targeted.
- * - Updating the visual presentation and position of the `cursor` entity and `line` component per frame.
- * - Sending an event when an entity is targeted or un-targeted.
- */
+
+const THREEJS_HOVER_TARGETS = new Map();
+function findRemoteHoverTarget(o) {
+  if (!o) return null;
+  const target = THREEJS_HOVER_TARGETS.get(o.uuid);
+  return target || findRemoteHoverTarget(o.parent);
+}
+AFRAME.registerComponent("is-remote-hover-target", {
+  init: function() {
+    THREEJS_HOVER_TARGETS.set(this.el.object3D.uuid, this.el);
+  }
+});
+
 AFRAME.registerComponent("cursor-controller", {
   schema: {
     cursor: { type: "selector" },
@@ -91,6 +96,23 @@ AFRAME.registerComponent("cursor-controller", {
     near: { default: 0.01 },
     minDistance: { default: 0.18 },
     objects: { default: "" }
+  },
+
+  updateCursorIntersection: function(intersection) {
+    const hoverTarget = intersection && findRemoteHoverTarget(intersection.object);
+    if (!hoverTarget) {
+      if (this.rightRemoteHoverTarget) {
+        this.rightRemoteHoverTarget.removeState("hovered");
+        this.rightRemoteHoverTarget = null;
+      }
+      return;
+    }
+
+    if (this.rightRemoteHoverTarget && hoverTarget !== this.rightRemoteHoverTarget) {
+      this.rightRemoteHoverTarget.removeState("hovered");
+    }
+    hoverTarget.addState("hovered");
+    this.rightRemoteHoverTarget = hoverTarget;
   },
 
   init: function() {
@@ -160,17 +182,6 @@ AFRAME.registerComponent("cursor-controller", {
     }
   },
 
-  emitIntersectionEvents: function(prevIntersection, currIntersection) {
-    // if we are now intersecting something, and previously we were intersecting nothing or something else
-    if (currIntersection && (!prevIntersection || currIntersection.object.el !== prevIntersection.object.el)) {
-      this.data.cursor.emit("raycaster-intersection", { el: currIntersection.object.el });
-    }
-    // if we were intersecting something, but now we are intersecting nothing or something else
-    if (prevIntersection && (!currIntersection || currIntersection.object.el !== prevIntersection.object.el)) {
-      this.data.cursor.emit("raycaster-intersection-cleared", { el: prevIntersection.object.el });
-    }
-  },
-
   tick: (() => {
     const rawIntersections = [];
     const cameraPos = new THREE.Vector3();
@@ -195,16 +206,14 @@ AFRAME.registerComponent("cursor-controller", {
 
       const interaction = AFRAME.scenes[0].systems.interaction;
       let intersection;
-      const isGrabbing = !!interaction.rightRemoteConstraintTarget; // this.data.cursor.components["super-hands"].state.has("grab-start");
+      const isGrabbing = !!interaction.rightRemoteConstraintTarget;
       if (!isGrabbing) {
         rawIntersections.length = 0;
         this.raycaster.ray.origin = cursorPose.position;
         this.raycaster.ray.direction = cursorPose.direction;
         this.raycaster.intersectObjects(this.targets, true, rawIntersections);
-        intersection = rawIntersections.find(x => x.object.el);
-        AFRAME.scenes[0].systems.interaction.updateCursorIntersections(rawIntersections);
-        //        this.emitIntersectionEvents(this.prevIntersection, intersection);
-        this.prevIntersection = intersection;
+        intersection = rawIntersections[0];
+        this.updateCursorIntersection(intersection);
         this.distance = intersection ? intersection.distance : this.data.far;
       }
 
@@ -254,10 +263,5 @@ AFRAME.registerComponent("cursor-controller", {
         this.line.geometry.computeBoundingSphere();
       }
     };
-  })(),
-
-  remove: function() {
-    this.emitIntersectionEvents(this.prevIntersection, null);
-    delete this.prevIntersection;
-  }
+  })()
 });
