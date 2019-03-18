@@ -33,16 +33,44 @@
       display: none;
     }
   }
+
+  :local(.enter-vr-button) {
+    @extend %action-button;
+    background-color: transparent;
+    position: absolute;
+    bottom: 64px;
+  }
 }
 
-:local(.close) {
+:local(.modal) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  margin: 0;
+
+  @media (min-height: 500px) {
+    justify-content: center;
+  }
+}
+
+:local(button.close) {
   position: absolute;
   width: 30px;
   height: 30px;
-  right: 12px;
-  font-size: 2.0em;
-  top: 0px;
-  cursor: pointer;
+  min-width: auto;
+  left: 12px;
+  font-size: 1.5em;
+  top: 12px;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  outline-style: none;
+  border: 0;
+  background-color: transparent;
+  color: white;
 }
 
 :local(.attach-point) {
@@ -120,6 +148,7 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
+  max-width: 400px;
 
   button, a {
     margin: 0 12px;

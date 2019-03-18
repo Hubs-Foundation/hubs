@@ -195,6 +195,7 @@
                 <a-entity
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
+                    scalable-when-grabbed
                     ammo-body="type: static; mass: 1;"
                     is-remote-hover-target
                     hoverable-visuals="cursorController: #cursor-controller"
@@ -214,9 +215,9 @@
                     is-remote-hover-target
                     offers-remote-constraint
                     destroy-at-extreme-distances
+                    scalable-when-grabbed
                     ammo-body="type: dynamic; mass: 1;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
-                    destroy-at-extreme-distances
                     set-yxz-order
                     matrix-auto-update
                     position-at-box-shape-border__freeze="target:.freeze-menu;"
@@ -315,6 +316,7 @@
                     ammo-shape="type: box; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.11 0.07 0.05; offset: 0 0.02 0;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     super-networked-interactable="counter: #camera-counter;"
+                    scalable-when-grabbed
                     position-at-box-shape-border__freeze="target: .camera-menu"
                     set-yxz-order
                 >
@@ -570,12 +572,16 @@
                 vr-mode-toggle-playing__hud-controller
             >
                 <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="30 0 0">
+
                     <a-rounded height="0.08" width="0.2" color="#000000" position="-0.30 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
                     <a-image scale="0.07 0.06 0.06" position="-0.23 0.165 0.001" src="#presence-count" material="alphaTest:0.1;"></a-image>
                     <a-entity id="hud-presence-count" text="value:; width:1.1; align:center;" position="-0.155 0.165 0" matrix-auto-update="target: text;"></a-entity>
-                    <a-rounded height="0.08" width="0.5" color="#000000" position="-0.08 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
-                    <a-entity id="hud-hub-entry-link" text="value:; width:1.1; align:center;" position="0.17 0.165 0" matrix-auto-update="target: text;"></a-entity>
-                    <a-rounded height="0.13" width="0.59" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
+                    <a-entity class="ui interactable-ui" mixin="button-container">
+                        <a-entity class="invite-btn" position="0.17 0.165 0" scale="0.5 0.5 0.5" hoverable>
+                            <a-entity mixin="rounded-text-action-button" slice9="width: 1.0" scale="0.8 0.8 1.0"> </a-entity>
+                            <a-entity text=" value:invite; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                        </a-entity>
+                    </a-entity>
                 <a-image
                     is-remote-hover-target
                     is-ui

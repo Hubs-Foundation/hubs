@@ -54,6 +54,7 @@ import TwoDHUD from "./2d-hud";
 import ChatCommandHelp from "./chat-command-help";
 import { spawnChatMessage } from "./chat-message";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
+import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { handleTipClose } from "../systems/tips.js";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
@@ -120,7 +121,6 @@ class UIRoot extends Component {
     enterScene: PropTypes.func,
     exitScene: PropTypes.func,
     onSendMessage: PropTypes.func,
-    concurrentLoadDetector: PropTypes.object,
     disableAutoExitOnConcurrentLoad: PropTypes.bool,
     forcedVREntryType: PropTypes.string,
     isBotMode: PropTypes.bool,
@@ -242,7 +242,7 @@ class UIRoot extends Component {
   }
 
   componentDidMount() {
-    this.props.concurrentLoadDetector.addEventListener("concurrentload", this.onConcurrentLoad);
+    window.addEventListener("concurrentload", this.onConcurrentLoad);
     this.micLevelMovingAverage = MovingAverage(100);
     this.props.scene.addEventListener(
       "didConnectToNetworkedScene",
@@ -1717,6 +1717,24 @@ class UIRoot extends Component {
                 )}
               </div>
             )}
+
+            <StateRoute
+              stateKey="overlay"
+              stateValue="invite"
+              history={this.props.history}
+              render={() => (
+                <InviteDialog
+                  allowShare={!!navigator.share}
+                  entryCode={this.props.hubEntryCode}
+                  hubId={this.props.hubId}
+                  isModal={true}
+                  onClose={() => {
+                    this.props.history.goBack();
+                    handleReEntryToVRFrom2DInterstitial();
+                  }}
+                />
+              )}
+            />
 
             <StateRoute
               stateKey="overlay"

@@ -148,6 +148,7 @@ window.Ammo = Ammo.bind(undefined, {
 });
 require("aframe-physics-system");
 import "./components/super-networked-interactable";
+import "./components/scalable-when-grabbed";
 import "./components/networked-counter";
 import "./components/event-repeater";
 import "./components/set-yxz-order";
@@ -166,7 +167,7 @@ import registerTelemetry from "./telemetry";
 import { warmSerializeElement } from "./utils/serialize-element";
 
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
-import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
+import detectConcurrentLoad from "./utils/concurrent-load-detector.js";
 
 import qsTruthy from "./utils/qs_truthy";
 
@@ -181,30 +182,13 @@ if (!isBotMode && !isTelemetryDisabled) {
 }
 
 disableiOSZoom();
-
-const concurrentLoadDetector = new ConcurrentLoadDetector();
-concurrentLoadDetector.start();
+detectConcurrentLoad();
 
 store.init();
 
 function getPlatformUnsupportedReason() {
   if (typeof RTCDataChannelEvent === "undefined") return "no_data_channels";
   return null;
-}
-
-function pollForSupportAvailability(callback) {
-  const availabilityUrl = getReticulumFetchUrl("/api/v1/support/availability");
-  let isSupportAvailable = null;
-
-  const updateIfChanged = () =>
-    fetch(availabilityUrl).then(({ ok }) => {
-      if (isSupportAvailable === ok) return;
-      isSupportAvailable = ok;
-      callback(isSupportAvailable);
-    });
-
-  updateIfChanged();
-  setInterval(updateIfChanged, 30000);
 }
 
 function setupLobbyCamera() {
@@ -255,7 +239,6 @@ function mountUI(props = {}) {
             {...{
               scene,
               isBotMode,
-              concurrentLoadDetector,
               disableAutoExitOnConcurrentLoad,
               forcedVREntryType,
               store,
@@ -285,10 +268,6 @@ async function updateUIForHub(hub) {
     hubScene: hub.scene,
     hubEntryCode: hub.entry_code
   });
-
-  document
-    .querySelector("#hud-hub-entry-link")
-    .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
 }
 
 let shapes = null;
@@ -557,7 +536,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);
   const availableVREntryTypes = await getAvailableVREntryTypes();
-  const entryManager = new SceneEntryManager(hubChannel, authChannel, availableVREntryTypes);
+  const entryManager = new SceneEntryManager(hubChannel, authChannel, availableVREntryTypes, history);
   entryManager.onRequestAuthentication = (
     signInMessageId,
     signInCompleteMessageId,
@@ -656,8 +635,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   scene.addEventListener("camera_toggled", () => remountUI({}));
 
   scene.addEventListener("camera_removed", () => remountUI({}));
-
-  pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
 
   const platformUnsupportedReason = getPlatformUnsupportedReason();
 
