@@ -841,6 +841,16 @@ class UIRoot extends Component {
     return this.props.presences ? Object.entries(this.props.presences).length : 0;
   };
 
+  discordBridges = () => {
+    if (!this.props.presences) {
+      return [];
+    } else {
+      return Object.values(this.props.presences)
+        .flatMap(p => p.metas.map(m => m.context.discord))
+        .filter(ch => !!ch);
+    }
+  };
+
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
   renderExitedPane = () => {
@@ -971,6 +981,10 @@ class UIRoot extends Component {
     const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
     const hasPush = navigator.serviceWorker && "PushManager" in window;
     const promptForNameAndAvatarBeforeEntry = !this.props.store.state.activity.hasChangedName;
+    const discordBridges = this.discordBridges();
+    const messageEntryPlaceholder = discordBridges
+      ? `Send to hub (+ ${discordBridges.map(ch => "#" + ch).join(", ")})...`
+      : "Send to hub...";
 
     return (
       <div className={entryStyles.entryPanel}>
@@ -1045,11 +1059,7 @@ class UIRoot extends Component {
                     e.target.blur();
                   }
                 }}
-                placeholder={
-                  this.occupantCount() <= 1
-                    ? "Nobody is here yet..."
-                    : `Send message to ${this.occupantCount() - 1} other${this.occupantCount() - 1 > 1 ? "s" : ""}...`
-                }
+                placeholder={this.occupantCount() <= 1 ? "Nobody is here yet..." : messageEntryPlaceholder}
               />
               <WithHoverSound>
                 <button
@@ -1438,6 +1448,11 @@ class UIRoot extends Component {
     const showMediaBrowser = mediaSource && (mediaSource === "scenes" || this.state.entered);
     const hasTopTip = this.props.activeTips && this.props.activeTips.top;
 
+    const discordBridges = this.discordBridges();
+    const messageEntryPlaceholder = discordBridges
+      ? `Send to hub (+ ${discordBridges.map(ch => "#" + ch).join(", ")})...`
+      : "Send to hub...";
+
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
@@ -1656,7 +1671,7 @@ class UIRoot extends Component {
                         e.target.blur();
                       }
                     }}
-                    placeholder="Send to room..."
+                    placeholder={messageEntryPlaceholder}
                   />
                   <button
                     className={classNames([styles.messageEntrySpawn])}

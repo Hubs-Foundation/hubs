@@ -826,6 +826,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     hubPhxPresence.onJoin((sessionId, current, info) => {
       const meta = info.metas[info.metas.length - 1];
+      console.log(sessionId, current, info);
 
       if (current) {
         // Change to existing presence
