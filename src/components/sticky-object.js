@@ -1,5 +1,3 @@
-import { getLastWorldPosition, getLastWorldQuaternion } from "../utils/three-utils";
-
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 /* global THREE, AFRAME */
 AFRAME.registerComponent("sticky-object", {
@@ -64,72 +62,5 @@ AFRAME.registerComponent("sticky-object", {
       delete this.stuckTo;
       stuckTo._unstickObject();
     }
-  }
-});
-
-AFRAME.registerComponent("sticky-object-zone", {
-  dependencies: ["physics"],
-  init() {
-    // TODO: position/rotation/impulse need to get updated if the sticky-object-zone moves
-    this.worldQuaternion = new THREE.Quaternion();
-    this.worldPosition = new THREE.Vector3();
-    getLastWorldPosition(this.el.object3D, this.worldPosition);
-    getLastWorldQuaternion(this.el.object3D, this.worldQuaternion);
-
-    //TODO: support this with ammo
-    // const dir = new THREE.Vector3(0, 0, 5).applyQuaternion(this.el.object3D.quaternion);
-    // this.bootImpulsePosition = new CANNON.Vec3(0, 0, 0);
-    // this.bootImpulse = new CANNON.Vec3();
-    // this.bootImpulse.copy(dir);
-
-    this._onCollisions = this._onCollisions.bind(this);
-    this.el.addEventListener("collisions", this._onCollisions);
-  },
-
-  remove() {
-    this.el.removeEventListener("collisions", this._onCollisions);
-  },
-
-  _onCollisions(e) {
-    e.detail.els.forEach(el => {
-      const stickyObject = el.components["sticky-object"];
-      if (!stickyObject) return;
-      this._setStuckObject(stickyObject);
-    });
-    if (this.stuckObject) {
-      e.detail.clearedEls.forEach(el => {
-        if (this.stuckObject && this.stuckObject.el === el) {
-          this._unstickObject();
-        }
-      });
-    }
-  },
-
-  _setStuckObject(stickyObject) {
-    stickyObject.setLocked(true);
-    stickyObject.el.object3D.position.copy(this.worldPosition);
-    stickyObject.el.object3D.quaternion.copy(this.worldQuaternion);
-    stickyObject.el.object3D.matrixNeedsUpdate = true;
-    stickyObject.el.body.collisionResponse = false;
-    stickyObject.stuckTo = this;
-
-    if (this.stuckObject && NAF.utils.isMine(this.stuckObject.el)) {
-      //TODO: support this with ammo
-      // const el = this.stuckObject.el;
-      this._unstickObject();
-      // el.body.applyImpulse(this.bootImpulse, this.bootImpulsePosition);
-    }
-
-    this.stuckObject = stickyObject;
-  },
-
-  _unstickObject() {
-    // this condition will be false when dragging an object directly from one sticky zone to another
-    if (this.stuckObject.stuckTo === this) {
-      this.stuckObject.setLocked(false);
-      this.stuckObject.el.body.collisionResponse = true;
-      delete this.stuckObject.stuckTo;
-    }
-    delete this.stuckObject;
   }
 });
