@@ -64,7 +64,6 @@ AFRAME.registerSystem("interaction", {
     this.rightHand = this.rightHand || document.querySelector("#player-right-controller");
 
     if (this.rightHandConstraintTarget) {
-      this.rightHandConstraintTarget.object3D.matrixNeedsUpdate = true;
 
       if (rightHandDrop) {
         const stickyObject = this.rightHandConstraintTarget.components["sticky-object"];
@@ -77,9 +76,9 @@ AFRAME.registerSystem("interaction", {
           superNetworkedInteractable.onGrabEnd(this.cursor);
         }
 
-        if (this.grabbedPen) {
-          this.grabbedPen.children[0].components["pen"].grabberId = null;
-          this.grabbedPen = null;
+        if (this.penInRightHand) {
+          this.penInRightHand.children[0].components["pen"].grabberId = null;
+          this.penInRightHand = null;
         }
 
         this.rightHandConstraintTarget.removeAttribute("ammo-constraint");
@@ -173,7 +172,6 @@ AFRAME.registerSystem("interaction", {
     }
 
     if (this.rightRemoteConstraintTarget) {
-      this.rightRemoteConstraintTarget.object3D.matrixNeedsUpdate = true;
 
       if (drop) {
         const stickyObject = this.rightRemoteConstraintTarget.components["sticky-object"];

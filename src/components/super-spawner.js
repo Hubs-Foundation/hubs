@@ -95,7 +95,6 @@ AFRAME.registerComponent("super-spawner", {
 
     this.sceneEl = document.querySelector("a-scene");
 
-    this.el.setAttribute("hoverable-visuals", { cursorController: "#cursor-controller", enableSweepingEffect: false });
     this.tempSpawnHandPosition = new THREE.Vector3();
   },
 
