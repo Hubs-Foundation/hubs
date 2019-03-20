@@ -23,6 +23,7 @@ AFRAME.registerSystem("interaction", {
     this.grabbedUI = null;
     this.grabbedPen = null;
     this.cursor = document.querySelector("#cursor");
+    this.cursorController = document.querySelector("#cursor-controller");
     this.weWantToGrab = false;
   },
 
@@ -30,17 +31,11 @@ AFRAME.registerSystem("interaction", {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const drop = userinput.get(paths.actions.cursor.drop);
     const grab = userinput.get(paths.actions.cursor.grab);
-    this.cursorController =
-      this.cursorController ||
-      (document.querySelector("#cursor-controller") &&
-        document.querySelector("#cursor-controller").components["cursor-controller"]);
-    const rightRemoteHoverTarget = this.cursorController.rightRemoteHoverTarget;
+    const rightRemoteHoverTarget = this.cursorController.components["cursor-controller"].rightRemoteHoverTarget;
 
-    let didGrabEndThisFrame = false;
     if (drop && this.grabbedUI) {
       this.grabbedUI.emit("grab-end", { hand: this.cursor });
       this.grabbedUI = null;
-      didGrabEndThisFrame = true;
     }
 
     if (this.rightRemoteConstraintTarget) {
@@ -71,6 +66,7 @@ AFRAME.registerSystem("interaction", {
         const isUI = rightRemoteHoverTarget.components["is-ui"];
         if (isUI) {
           this.grabbedUI = rightRemoteHoverTarget;
+          rightRemoteHoverTarget.emit("grab-start", { hand: this.cursor });
         }
 
         const isPen = rightRemoteHoverTarget.components["is-pen"];
@@ -140,9 +136,6 @@ AFRAME.registerSystem("interaction", {
             superNetworkedInteractable.onGrabStart(this.cursor);
           }
           entity.components["ammo-body"].syncToPhysics();
-        }
-        if (isUI) {
-          rightRemoteHoverTarget.emit("grab-start", { hand: this.cursor });
         }
       }
     }
