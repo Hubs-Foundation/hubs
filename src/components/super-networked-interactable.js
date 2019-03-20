@@ -7,7 +7,6 @@ const ACTIVATION_STATES = require("aframe-physics-system/src/constants").ACTIVAT
  */
 AFRAME.registerComponent("super-networked-interactable", {
   schema: {
-    hapticsMassVelocityFactor: { default: 0.1 },
     counter: { type: "selector" }
   },
 
