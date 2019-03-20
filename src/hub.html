@@ -198,6 +198,8 @@
                     scalable-when-grabbed
                     ammo-body="type: static; mass: 1;"
                     is-remote-hover-target
+                    is-hand-collision-target
+                    offers-constraint-when-colliding
                     hoverable-visuals="cursorController: #cursor-controller"
                     sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
                     sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
@@ -213,7 +215,9 @@
                     class="interactable"
                     super-networked-interactable="counter: #media-counter" 
                     is-remote-hover-target
+                    is-hand-collision-target
                     offers-remote-constraint
+                    offers-constraint-when-colliding
                     destroy-at-extreme-distances
                     scalable-when-grabbed
                     ammo-body="type: dynamic; mass: 1;"
@@ -267,6 +271,8 @@
                     super-networked-interactable="counter: #pen-counter;"
                     is-remote-hover-target
                     offers-remote-constraint
+                    is-hand-collision-target
+                    offers-constraint-when-colliding
                     ammo-body="type: dynamic; mass: 0.001;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     matrix-auto-update

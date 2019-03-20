@@ -29,9 +29,51 @@ export function resolveActionSets() {
   //  userinput.toggleSet(sets.rightHandHoldingCamera, rightHandHoldingCamera);
 
   const interaction = AFRAME.scenes[0].systems.interaction;
+
+  const rightHandConstraintTarget = interaction.rightHandConstraintTarget;
+  const rightHandCollisionTarget = !rightHandConstraintTarget && interaction.rightHandCollisionTarget;
+  userinput.toggleSet(sets.rightHandHoveringOnNothing, !rightHandConstraintTarget && !rightHandCollisionTarget);
+  userinput.toggleSet(
+    sets.rightHandHoveringOnPen,
+    rightHandCollisionTarget && !!rightHandCollisionTarget.components["is-pen"]
+  );
+  userinput.toggleSet(
+    sets.rightHandHoveringOnCamera,
+    rightHandCollisionTarget && !!rightHandCollisionTarget.components["camera-tool"]
+  );
+  userinput.toggleSet(
+    sets.rightHandHoveringOnInteractable,
+    rightHandCollisionTarget &&
+      (!!rightHandCollisionTarget.components["offers-remote-constraint"] ||
+        !!rightHandCollisionTarget.components["super-spawner"])
+  );
+  // userinput.toggleSet(
+  //   sets.rightHandHoveringOnUI,
+  //   rightHandCollisionTarget && !!rightHandCollisionTarget.components["is-ui"]
+  // );
+  userinput.toggleSet(
+    sets.rightHandHoveringOnVideo,
+    rightHandCollisionTarget && !!rightHandCollisionTarget.components["media-video"]
+  );
+
+  userinput.toggleSet(
+    sets.rightHandHoldingPen,
+    rightHandConstraintTarget && !!rightHandConstraintTarget.components["is-pen"]
+  );
+  userinput.toggleSet(
+    sets.rightHandHoldingCamera,
+    rightHandConstraintTarget && !!rightHandConstraintTarget.components["camera-tool"]
+  );
+  // userinput.toggleSet(sets.rightHandHoldingUI, !!interaction.grabbedUI);
+  userinput.toggleSet(sets.rightHandHoldingInteractable, !!rightHandConstraintTarget);
+  userinput.toggleSet(
+    sets.inputFocused,
+    document.activeElement.nodeName === "INPUT" || document.activeElement.nodeName === "TEXTAREA"
+  );
+
   const rightRemoteConstraintTarget = interaction.rightRemoteConstraintTarget;
-  const rightRemoteHoverTarget = !rightRemoteConstraintTarget && cursorController.rightRemoteHoverTarget;
-  userinput.toggleSet(sets.cursorHoveringOnNothing, !rightRemoteConstraintTarget && !rightRemoteHoverTarget);
+  const rightRemoteHoverTarget = !rightHandConstraintTarget && !rightHandCollisionTarget && !rightRemoteConstraintTarget && cursorController.rightRemoteHoverTarget;
+  userinput.toggleSet(sets.cursorHoveringOnNothing, !rightHandConstraintTarget && !rightHandCollisionTarget && !rightRemoteConstraintTarget && !rightRemoteHoverTarget);
   userinput.toggleSet(
     sets.cursorHoveringOnPen,
     rightRemoteHoverTarget && !!rightRemoteHoverTarget.components["is-pen"]
