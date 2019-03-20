@@ -211,7 +211,6 @@ function fitToTexture(el, texture) {
     type: SHAPES.BOX,
     halfExtents: { x: 0.5, y: 0.5, z: 0.02 },
     margin: 0.1,
-    recenter: true,
     mergeGeometry: true
   });
 }
