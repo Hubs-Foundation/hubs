@@ -1393,7 +1393,7 @@ class UIRoot extends Component {
       [styles.backgrounded]: this.isInModalOrOverlay()
     });
 
-    const showVREntryButton = entered && isMobilePhoneOrVR;
+    const showVREntryButton = entered && isMobileVR;
 
     const textRows = this.state.pendingMessage.split("\n").length;
     const pendingMessageTextareaHeight = textRows * 28 + "px";
