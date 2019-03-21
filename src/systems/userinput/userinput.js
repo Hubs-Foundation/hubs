@@ -33,7 +33,7 @@ const gearVRControllerUserBindings = generate3DOFTriggerBindings(paths.device.ge
 import { resolveActionSets } from "./resolve-action-sets";
 import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
-import { detectInHMD, getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "../../utils/vr-caps-detect";
+import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "../../utils/vr-caps-detect";
 import { ArrayBackedSet } from "./array-backed-set";
 
 function intersection(setA, setB) {
@@ -204,11 +204,14 @@ AFRAME.registerSystem("userinput", {
     this.xformStates = new Map();
     this.activeDevices = new ArrayBackedSet([new HudDevice()]);
 
-    if (!(AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR())) {
+    const isMobile = AFRAME.utils.device.isMobile();
+    const isMobileVR = AFRAME.utils.device.isMobileVR();
+
+    if (!(isMobile || isMobileVR)) {
       this.activeDevices.add(new MouseDevice());
       this.activeDevices.add(new AppAwareMouseDevice());
       this.activeDevices.add(new KeyboardDevice());
-    } else if (!detectInHMD()) {
+    } else if (!isMobileVR) {
       this.activeDevices.add(new AppAwareTouchscreenDevice());
       this.activeDevices.add(new KeyboardDevice());
       this.activeDevices.add(new GyroDevice());
