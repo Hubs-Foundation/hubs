@@ -266,6 +266,7 @@ AFRAME.registerSystem("interaction", {
 
     const rightRemoteHoverTarget =
       !this.rightHandCollisionTarget && this.cursorController.components["cursor-controller"].rightRemoteHoverTarget;
+    this.rightRemoteHoverTarget = rightRemoteHoverTarget;
 
     if (this.buttonHeldByRightRemote && drop) {
       this.buttonHeldByRightRemote.el.object3D.dispatchEvent({

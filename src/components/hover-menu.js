@@ -7,11 +7,9 @@ AFRAME.registerComponent("hover-menu", {
   },
 
   async init() {
-    this.onHoverStateChange = this.onHoverStateChange.bind(this);
     this.onFrozenStateChange = this.onFrozenStateChange.bind(this);
 
-    this.hovering = this.el.parentNode.is("hovered");
-
+    this.hovering = this.isHovered();
     await this.getHoverMenu();
     this.applyHoverState();
   },
@@ -39,14 +37,27 @@ AFRAME.registerComponent("hover-menu", {
     this.applyHoverState();
   },
 
-  onHoverStateChange(e) {
-    if (!e.detail === "hovered") return;
-    this.hovering = false;
+  isHovered() {
+    const interaction = AFRAME.scenes[0].systems.interaction;
+    const rightRemoteHoverTarget = interaction.rightRemoteHoverTarget;
+    if (!rightRemoteHoverTarget) {
+      return false;
+    }
+    if (this.el.parentNode && rightRemoteHoverTarget === this.el.parentNode) {
+      return true;
+    }
+    let childOrSelfIsHovered = false;
     this.el.object3D.traverse(o => {
-      if (o.el && o.el.is("hovered")) {
-        this.hovering = true;
+      if (!o.el) return;
+      if (o.el === rightRemoteHoverTarget) {
+        childOrSelfIsHovered = true;
       }
     });
+    return childOrSelfIsHovered;
+  },
+
+  tick() {
+    this.hovering = this.isHovered();
     this.applyHoverState();
   },
 
@@ -59,15 +70,11 @@ AFRAME.registerComponent("hover-menu", {
   },
 
   play() {
-    this.el.parentNode.addEventListener("stateadded", this.onHoverStateChange);
-    this.el.parentNode.addEventListener("stateremoved", this.onHoverStateChange);
     this.el.sceneEl.addEventListener("stateadded", this.onFrozenStateChange);
     this.el.sceneEl.addEventListener("stateremoved", this.onFrozenStateChange);
   },
 
   pause() {
-    this.el.parentNode.removeEventListener("stateadded", this.onHoverStateChange);
-    this.el.parentNode.removeEventListener("stateremoved", this.onHoverStateChange);
     this.el.sceneEl.removeEventListener("stateadded", this.onFrozenStateChange);
     this.el.sceneEl.removeEventListener("stateremoved", this.onFrozenStateChange);
   }

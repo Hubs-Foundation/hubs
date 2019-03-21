@@ -153,9 +153,9 @@
                         <template data-name="Spine">
                             <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
                                 <a-entity billboard matrix-auto-update visibility-while-frozen="withinDistance: 10; requireHoverOnNonMobile: false;">
-                                    <a-entity hoverable mixin="rounded-text-button" block-button ui-class-while-frozen position="0 0 .35"> </a-entity>
+                                    <a-entity mixin="rounded-text-button" block-button ui-class-while-frozen position="0 0 .35"> </a-entity>
                                     <a-entity text="value:Hide; width:2.5; align:center;" position="0 0 0.36"></a-entity>
-                                    <a-entity hoverable mixin="rounded-text-button" visible-if-permitted="kick_users" kick-button ui-class-while-frozen position="0 -0.25 .35"> </a-entity>
+                                    <a-entity mixin="rounded-text-button" visible-if-permitted="kick_users" kick-button ui-class-while-frozen position="0 -0.25 .35"> </a-entity>
                                     <a-entity text="value:Kick; width:2.5; align:center;"  visible-if-permitted="kick_users" position="0 -0.25 0.36"></a-entity>
                                 </a-entity>
                             </a-entity>
@@ -315,6 +315,8 @@
                     camera-tool
                     is-remote-hover-target
                     offers-remote-constraint
+                    is-hand-collision-target
+                    offers-constraint-when-colliding
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
@@ -565,7 +567,7 @@
                     <a-image scale="0.07 0.06 0.06" position="-0.23 0.165 0.001" src="#presence-count" material="alphaTest:0.1;"></a-image>
                     <a-entity id="hud-presence-count" text="value:; width:1.1; align:center;" position="-0.155 0.165 0" matrix-auto-update="target: text;"></a-entity>
                     <a-entity class="ui interactable-ui">
-                        <a-entity class="invite-btn" position="0.17 0.165 0" scale="0.5 0.5 0.5" hoverable>
+                        <a-entity class="invite-btn" position="0.17 0.165 0" scale="0.5 0.5 0.5">
                             <a-entity mixin="rounded-text-action-button" slice9="width: 1.0" scale="0.8 0.8 1.0"> </a-entity>
                             <a-entity text=" value:invite; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                         </a-entity>
@@ -578,7 +580,6 @@
                     position="-0.17 0 0.001"
                     class="hud mic"
                     material="alphaTest:0.1;"
-                    hoverable
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
                     set-sounds-invisible
                 ></a-image>
@@ -589,7 +590,6 @@
                     scale="0.2 0.2 0.2"
                     position="0 0 0.005"
                     class="hud spawn"
-                    hoverable
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
                     set-sounds-invisible
                 ></a-image>
@@ -601,7 +601,6 @@
                     position="0.17 0 0.001"
                     class="hud penhud"
                     material="alphaTest:0.1;"
-                    hoverable
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
                     set-sounds-invisible
                 ></a-image>
@@ -613,7 +612,6 @@
                     position="0.28 0 0.001"
                     class="hud camera-btn"
                     material="alphaTest:0.1;"
-                    hoverable
                     sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
                     set-sounds-invisible
                 ></a-image>
@@ -775,7 +773,7 @@
         ></a-entity>
 
         <a-entity matrix-auto-update class="vr-notice" follow-in-fov="target: #player-camera; offset: 0 0 -0.8; angle: 39;" visible="false">
-            <a-entity hoverable slice9="width: 0.9; height: 0.2; left: 64; top: 64; right: 66; bottom: 66; opacity: 1.0; src: #button"
+            <a-entity slice9="width: 0.9; height: 0.2; left: 64; top: 64; right: 66; bottom: 66; opacity: 1.0; src: #button"
                 text-button="
                     textHoverColor: #fff;
                     textColor: #fff;

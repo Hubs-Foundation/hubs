@@ -102,17 +102,20 @@ AFRAME.registerComponent("cursor-controller", {
     const hoverTarget = intersection && findRemoteHoverTarget(intersection.object);
     if (!hoverTarget) {
       if (this.rightRemoteHoverTarget) {
-        this.rightRemoteHoverTarget.removeState("hovered");
+        this.rightRemoteHoverTarget.object3D.dispatchEvent({ type: "unhovered" });
         this.rightRemoteHoverTarget = null;
       }
       return;
     }
 
-    if (this.rightRemoteHoverTarget && hoverTarget !== this.rightRemoteHoverTarget) {
-      this.rightRemoteHoverTarget.removeState("hovered");
+    if (!this.rightRemoteHoverTarget) {
+      this.rightRemoteHoverTarget = hoverTarget;
+      this.rightRemoteHoverTarget.object3D.dispatchEvent({ type: "hovered" });
+    } else if (hoverTarget !== this.rightRemoteHoverTarget) {
+      this.rightRemoteHoverTarget.object3D.dispatchEvent({ type: "unhovered" });
+      this.rightRemoteHoverTarget = hoverTarget;
+      this.rightRemoteHoverTarget.object3D.dispatchEvent({ type: "hovered" });
     }
-    hoverTarget.addState("hovered");
-    this.rightRemoteHoverTarget = hoverTarget;
   },
 
   init: function() {
