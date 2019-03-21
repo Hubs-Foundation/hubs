@@ -57,11 +57,113 @@ AFRAME.registerSystem("interaction", {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const rightHandDrop = userinput.get(paths.actions.rightHand.drop);
     const rightHandGrab = userinput.get(paths.actions.rightHand.grab);
+    const leftHandDrop = userinput.get(paths.actions.leftHand.drop);
+    const leftHandGrab = userinput.get(paths.actions.leftHand.grab);
     const drop = userinput.get(paths.actions.cursor.drop);
     const grab = userinput.get(paths.actions.cursor.grab);
     this.cursor = this.cursor || document.querySelector("#cursor");
     this.cursorController = this.cursorController || document.querySelector("#cursor-controller");
     this.rightHand = this.rightHand || document.querySelector("#player-right-controller");
+    this.leftHand = this.leftHand || document.querySelector("#player-left-controller");
+
+    if (this.leftHandConstraintTarget) {
+      if (leftHandDrop) {
+        const stickyObject = this.leftHandConstraintTarget.components["sticky-object"];
+        if (stickyObject) {
+          stickyObject.onRelease();
+        }
+
+        const superNetworkedInteractable = this.leftHandConstraintTarget.components["super-networked-interactable"];
+        if (superNetworkedInteractable) {
+          superNetworkedInteractable.onGrabEnd(this.leftHand);
+        }
+
+        if (this.penInLeftHand) {
+          this.penInLeftHand.children[0].components["pen"].grabberId = null;
+          this.penInLeftHand = null;
+        }
+
+        this.leftHandConstraintTarget.removeAttribute("ammo-constraint");
+        this.leftHandConstraintTarget = null;
+      }
+    } else {
+      this.leftHandCollisionTarget =
+        !this.leftRemoteConstraintTarget && findHandCollisionTargetForBody(this.leftHand.body);
+      this.cursorController.components["cursor-controller"].enabled = !this.leftHandCollisionTarget;
+      if (this.leftHandCollisionTarget) {
+        if (leftHandGrab) {
+          const isPen = this.leftHandCollisionTarget.components["is-pen"];
+          if (isPen) {
+            this.leftHandCollisionTarget.children[0].components["pen"].grabberId = "player-left-controller";
+            this.penInLeftHand = this.leftHandCollisionTarget;
+          }
+          const offersCollisionConstraint = this.leftHandCollisionTarget.components[
+            "offers-constraint-when-colliding"
+          ];
+          const superSpawner = this.leftHandCollisionTarget.components["super-spawner"];
+          if (offersCollisionConstraint) {
+            this.leftHandConstraintTarget = this.leftHandCollisionTarget;
+            this.leftHandConstraintTarget.setAttribute("ammo-constraint", { target: "#player-left-controller" });
+
+            const stickyObject = this.leftHandCollisionTarget.components["sticky-object"];
+            if (stickyObject) {
+              stickyObject.onGrab();
+            }
+            const superNetworkedInteractable = this.leftHandCollisionTarget.components["super-networked-interactable"];
+            if (superNetworkedInteractable) {
+              superNetworkedInteractable.onGrabStart(this.leftHand);
+            }
+          } else if (superSpawner) {
+            this.leftHand.object3D.updateMatrices();
+            this.leftHand.object3D.matrix.decompose(
+              this.leftHand.object3D.position,
+              this.leftHand.object3D.quaternion,
+              this.leftHand.object3D.scale
+            );
+            const data = superSpawner.data;
+            const entity = addMedia(data.src, data.template, ObjectContentOrigins.SPAWNER, data.resolve, data.resize)
+              .entity;
+            entity.object3D.position.copy(
+              data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
+            );
+            entity.object3D.rotation.copy(
+              data.useCustomSpawnRotation ? data.spawnRotation : superSpawner.el.object3D.rotation
+            );
+            entity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : superSpawner.el.object3D.scale);
+            entity.object3D.matrixNeedsUpdate = true;
+
+            superSpawner.activateCooldown();
+            // WARNING: waitForEvent is semantically different than entity.addEventListener("body-loaded", ...)
+            // and adding a callback fn via addEventListener will not work unless the callback function
+            // wraps its code in setTimeout(()=>{...}, 0)
+            await waitForEvent("body-loaded", entity);
+            entity.object3D.position.copy(
+              data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
+            );
+            if (data.centerSpawnedObject) {
+              entity.body.position.copy(this.leftHand.object3D.position);
+            }
+            entity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : superSpawner.el.object3D.scale);
+            entity.object3D.matrixNeedsUpdate = true;
+
+            this.leftHandConstraintTarget = entity;
+            this.leftHandConstraintTarget.setAttribute("ammo-constraint", { target: "#player-left-controller" });
+            const stickyObject = this.leftHandConstraintTarget.components["sticky-object"];
+            if (stickyObject) {
+              stickyObject.onGrab();
+            }
+
+            const superNetworkedInteractable = this.leftHandConstraintTarget.components[
+              "super-networked-interactable"
+            ];
+            if (superNetworkedInteractable) {
+              superNetworkedInteractable.onGrabStart(this.leftHand);
+            }
+            entity.components["ammo-body"].syncToPhysics();
+          }
+        }
+      }
+    }
 
     if (this.rightHandConstraintTarget) {
       if (rightHandDrop) {
@@ -72,7 +174,7 @@ AFRAME.registerSystem("interaction", {
 
         const superNetworkedInteractable = this.rightHandConstraintTarget.components["super-networked-interactable"];
         if (superNetworkedInteractable) {
-          superNetworkedInteractable.onGrabEnd(this.cursor);
+          superNetworkedInteractable.onGrabEnd(this.rightHand);
         }
 
         if (this.penInRightHand) {

@@ -19,16 +19,49 @@ export function resolveActionSets() {
   //  userinput.toggleSet(sets.leftHandHoldingCamera, leftHandHoldingCamera);
   //  userinput.toggleSet(sets.leftHandTeleporting, leftHandTeleporting);
   //
-  //  userinput.toggleSet(sets.rightHandHoveringOnInteractable, rightHandHoveringOnInteractable);
-  //  userinput.toggleSet(sets.rightHandHoveringOnPen, rightHandHoveringOnPen);
-  //  userinput.toggleSet(sets.rightHandHoveringOnNothing, rightHandHoveringOnNothing);
-  //  userinput.toggleSet(sets.rightHandHoveringOnCamera, rightHandHoveringOnCamera);
-  //  userinput.toggleSet(sets.rightHandHoldingPen, rightHandHoldingPen);
-  //  userinput.toggleSet(sets.rightHandHoldingInteractable, rightHandHoldingInteractable);
-  //  userinput.toggleSet(sets.rightHandTeleporting, rightHandTeleporting);
-  //  userinput.toggleSet(sets.rightHandHoldingCamera, rightHandHoldingCamera);
 
   const interaction = AFRAME.scenes[0].systems.interaction;
+
+  const leftHandConstraintTarget = interaction.leftHandConstraintTarget;
+  const leftHandCollisionTarget = !leftHandConstraintTarget && interaction.leftHandCollisionTarget;
+  userinput.toggleSet(sets.leftHandHoveringOnNothing, !leftHandConstraintTarget && !leftHandCollisionTarget);
+  userinput.toggleSet(
+    sets.leftHandHoveringOnPen,
+    leftHandCollisionTarget && !!leftHandCollisionTarget.components["is-pen"]
+  );
+  userinput.toggleSet(
+    sets.leftHandHoveringOnCamera,
+    leftHandCollisionTarget && !!leftHandCollisionTarget.components["camera-tool"]
+  );
+  userinput.toggleSet(
+    sets.leftHandHoveringOnInteractable,
+    leftHandCollisionTarget &&
+      (!!leftHandCollisionTarget.components["offers-remote-constraint"] ||
+        !!leftHandCollisionTarget.components["super-spawner"])
+  );
+  // userinput.toggleSet(
+  //   sets.leftHandHoveringOnUI,
+  //   leftHandCollisionTarget && !!leftHandCollisionTarget.components["is-ui"]
+  // );
+  userinput.toggleSet(
+    sets.leftHandHoveringOnVideo,
+    leftHandCollisionTarget && !!leftHandCollisionTarget.components["media-video"]
+  );
+
+  userinput.toggleSet(
+    sets.leftHandHoldingPen,
+    leftHandConstraintTarget && !!leftHandConstraintTarget.components["is-pen"]
+  );
+  userinput.toggleSet(
+    sets.leftHandHoldingCamera,
+    leftHandConstraintTarget && !!leftHandConstraintTarget.components["camera-tool"]
+  );
+  // userinput.toggleSet(sets.leftHandHoldingUI, !!interaction.grabbedUI);
+  userinput.toggleSet(sets.leftHandHoldingInteractable, !!leftHandConstraintTarget);
+  userinput.toggleSet(
+    sets.inputFocused,
+    document.activeElement.nodeName === "INPUT" || document.activeElement.nodeName === "TEXTAREA"
+  );
 
   const rightHandConstraintTarget = interaction.rightHandConstraintTarget;
   const rightHandCollisionTarget = !rightHandConstraintTarget && interaction.rightHandCollisionTarget;
