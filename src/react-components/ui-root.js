@@ -96,6 +96,9 @@ async function grantedMicLabels() {
 }
 
 const isMobile = AFRAME.utils.device.isMobile();
+const isMobileVR = AFRAME.utils.device.isMobileVR();
+const isMobilePhoneOrVR = isMobile || isMobileVR;
+
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
 import webmTone from "../assets/sfx/tone.webm";
@@ -1123,11 +1126,7 @@ class UIRoot extends Component {
           {this.props.availableVREntryTypes.daydream === VR_DEVICE_AVAILABILITY.yes && (
             <DaydreamEntryButton secondary={true} onClick={this.enterDaydream} subtitle={null} />
           )}
-          <DeviceEntryButton
-            secondary={true}
-            onClick={() => this.attemptLink()}
-            isInHMD={this.props.availableVREntryTypes.isInHMD}
-          />
+          <DeviceEntryButton secondary={true} onClick={() => this.attemptLink()} isInHMD={isMobileVR} />
           {this.props.availableVREntryTypes.safari === VR_DEVICE_AVAILABILITY.maybe && (
             <StateLink stateKey="modal" stateValue="safari" history={this.props.history}>
               <SafariEntryButton onClick={this.showSafariDialog} />
@@ -1204,9 +1203,8 @@ class UIRoot extends Component {
     const micClip = {
       clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)`
     };
-    const isMobileOrGo = isMobile || AFRAME.utils.device.isMobileVR();
     const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
-    const subtitleId = isMobileOrGo ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
+    const subtitleId = isMobilePhoneOrVR ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
     return (
       <div className="audio-setup-panel">
         <div onClick={() => this.props.history.goBack()} className={entryStyles.back}>
@@ -1221,7 +1219,7 @@ class UIRoot extends Component {
             <FormattedMessage id="audio.title" />
           </div>
           <div className="audio-setup-panel__subtitle">
-            {(isMobileOrGo || this.state.enterInVR) && <FormattedMessage id={subtitleId} />}
+            {(isMobilePhoneOrVR || this.state.enterInVR) && <FormattedMessage id={subtitleId} />}
           </div>
           <div className="audio-setup-panel__levels">
             <div className="audio-setup-panel__levels__icon">
@@ -1395,7 +1393,7 @@ class UIRoot extends Component {
       [styles.backgrounded]: this.isInModalOrOverlay()
     });
 
-    const showVREntryButton = entered && this.props.availableVREntryTypes.isInHMD;
+    const showVREntryButton = entered && isMobileVR;
 
     const textRows = this.state.pendingMessage.split("\n").length;
     const pendingMessageTextareaHeight = textRows * 28 + "px";
@@ -1709,7 +1707,7 @@ class UIRoot extends Component {
                 )}
                 {this.state.showInviteDialog && (
                   <InviteDialog
-                    allowShare={!this.props.availableVREntryTypes.isInHMD}
+                    allowShare={!isMobileVR}
                     entryCode={this.props.hubEntryCode}
                     hubId={this.props.hubId}
                     onClose={() => this.setState({ showInviteDialog: false })}

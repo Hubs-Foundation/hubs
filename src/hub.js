@@ -130,10 +130,11 @@ const store = window.APP.store;
 const mediaSearchStore = window.APP.mediaSearchStore;
 
 const qs = new URLSearchParams(location.search);
-const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
+const isMobile = AFRAME.utils.device.isMobile();
+const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
-window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
+window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
 
 const SHAPES = require("aframe-physics-system/src/constants").SHAPES;
 const Ammo = require("ammo.js/builds/ammo.wasm.js");
@@ -575,7 +576,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.body.classList.add("vr-mode");
 
     // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
-    if (!isMobile || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
+    if ((!isMobile && !isMobileVR) || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
       document.body.classList.add("vr-mode-stretch");
     }
   });
@@ -656,7 +657,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  if (availableVREntryTypes.isInHMD) {
+  if (isMobileVR) {
     remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
 
     if (/Oculus/.test(navigator.userAgent)) {
@@ -714,7 +715,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Hub local channel
   const context = {
-    mobile: isMobile,
+    mobile: isMobile || isMobileVR,
     hmd: availableVREntryTypes.isInHMD
   };
 
