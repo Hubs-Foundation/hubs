@@ -28,6 +28,8 @@ export class GearVRControllerDevice {
 
   write(frame) {
     if (this.gamepad.connected) {
+      // Oculus Browser on Gear VR seems to require a call to getGamepads() for the gamepad state to update.
+      navigator.getGamepads();
       const touchpad = this.gamepad.buttons[0];
       frame.setValueType(TOUCHPAD.pressed, !!touchpad.pressed);
       frame.setValueType(TOUCHPAD.touched, !!touchpad.touched);
