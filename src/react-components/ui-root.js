@@ -981,10 +981,16 @@ class UIRoot extends Component {
     const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
     const hasPush = navigator.serviceWorker && "PushManager" in window;
     const promptForNameAndAvatarBeforeEntry = !this.props.store.state.activity.hasChangedName;
+
     const discordBridges = this.discordBridges();
-    const messageEntryPlaceholder = discordBridges
-      ? `Send to hub (+ ${discordBridges.map(ch => "#" + ch).join(", ")})...`
-      : "Send to hub...";
+    const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
+    const occupantSnippet = `${this.occupantCount() - 1} other${this.occupantCount() > 2 ? "s" : ""}`;
+    const messageEntryPlaceholder =
+      this.occupantCount() <= 1
+        ? "Nobody is here yet..."
+        : discordBridges.length
+          ? `Send message to ${occupantSnippet} and ${discordSnippet}...`
+          : `Send message to ${occupantSnippet}...`;
 
     return (
       <div className={entryStyles.entryPanel}>
@@ -1059,7 +1065,7 @@ class UIRoot extends Component {
                     e.target.blur();
                   }
                 }}
-                placeholder={this.occupantCount() <= 1 ? "Nobody is here yet..." : messageEntryPlaceholder}
+                placeholder={messageEntryPlaceholder}
               />
               <WithHoverSound>
                 <button
@@ -1449,9 +1455,7 @@ class UIRoot extends Component {
     const hasTopTip = this.props.activeTips && this.props.activeTips.top;
 
     const discordBridges = this.discordBridges();
-    const messageEntryPlaceholder = discordBridges
-      ? `Send to hub (+ ${discordBridges.map(ch => "#" + ch).join(", ")})...`
-      : "Send to hub...";
+    const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1671,7 +1675,7 @@ class UIRoot extends Component {
                         e.target.blur();
                       }
                     }}
-                    placeholder={messageEntryPlaceholder}
+                    placeholder={discordBridges.length ? `Send to room and ${discordSnippet}...` : "Send to room..."}
                   />
                   <button
                     className={classNames([styles.messageEntrySpawn])}
