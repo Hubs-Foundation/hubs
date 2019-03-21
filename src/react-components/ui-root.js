@@ -97,6 +97,7 @@ async function grantedMicLabels() {
 
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
+const isMobilePhoneOrVR = isMobile || isMobileVR;
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
@@ -1125,11 +1126,7 @@ class UIRoot extends Component {
           {this.props.availableVREntryTypes.daydream === VR_DEVICE_AVAILABILITY.yes && (
             <DaydreamEntryButton secondary={true} onClick={this.enterDaydream} subtitle={null} />
           )}
-          <DeviceEntryButton
-            secondary={true}
-            onClick={() => this.attemptLink()}
-            isInHMD={isMobileVR}
-          />
+          <DeviceEntryButton secondary={true} onClick={() => this.attemptLink()} isInHMD={isMobileVR} />
           {this.props.availableVREntryTypes.safari === VR_DEVICE_AVAILABILITY.maybe && (
             <StateLink stateKey="modal" stateValue="safari" history={this.props.history}>
               <SafariEntryButton onClick={this.showSafariDialog} />
@@ -1206,7 +1203,6 @@ class UIRoot extends Component {
     const micClip = {
       clip: `rect(${maxLevelHeight - Math.floor(this.state.micLevel * maxLevelHeight)}px, 111px, 111px, 0px)`
     };
-    const isMobilePhoneOrVR = isMobile || isMobileVR;
     const speakerClip = { clip: `rect(${this.state.tonePlaying ? 0 : maxLevelHeight}px, 111px, 111px, 0px)` };
     const subtitleId = isMobilePhoneOrVR ? "audio.subtitle-mobile" : "audio.subtitle-desktop";
     return (
