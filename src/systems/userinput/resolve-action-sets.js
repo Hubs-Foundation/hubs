@@ -10,15 +10,6 @@ export function resolveActionSets() {
   cursorController = cursorController || document.querySelector("#cursor-controller").components["cursor-controller"];
 
   const userinput = AFRAME.scenes[0].systems.userinput;
-  //  userinput.toggleSet(sets.leftHandHoveringOnInteractable, leftHandHoveringOnInteractable);
-  //  userinput.toggleSet(sets.leftHandHoveringOnPen, leftHandHoveringOnPen);
-  //  userinput.toggleSet(sets.leftHandHoveringOnCamera, leftHandHoveringOnCamera);
-  //  userinput.toggleSet(sets.leftHandHoveringOnNothing, leftHandHoveringOnNothing);
-  //  userinput.toggleSet(sets.leftHandHoldingPen, leftHandHoldingPen);
-  //  userinput.toggleSet(sets.leftHandHoldingInteractable, leftHandHoldingInteractable);
-  //  userinput.toggleSet(sets.leftHandHoldingCamera, leftHandHoldingCamera);
-  //  userinput.toggleSet(sets.leftHandTeleporting, leftHandTeleporting);
-  //
 
   const interaction = AFRAME.scenes[0].systems.interaction;
 
@@ -39,10 +30,6 @@ export function resolveActionSets() {
       (!!leftHandCollisionTarget.components["offers-remote-constraint"] ||
         !!leftHandCollisionTarget.components["super-spawner"])
   );
-  // userinput.toggleSet(
-  //   sets.leftHandHoveringOnUI,
-  //   leftHandCollisionTarget && !!leftHandCollisionTarget.components["is-ui"]
-  // );
   userinput.toggleSet(
     sets.leftHandHoveringOnVideo,
     leftHandCollisionTarget && !!leftHandCollisionTarget.components["media-video"]
@@ -56,7 +43,6 @@ export function resolveActionSets() {
     sets.leftHandHoldingCamera,
     leftHandConstraintTarget && !!leftHandConstraintTarget.components["camera-tool"]
   );
-  // userinput.toggleSet(sets.leftHandHoldingUI, !!interaction.grabbedUI);
   userinput.toggleSet(sets.leftHandHoldingInteractable, !!leftHandConstraintTarget);
   userinput.toggleSet(
     sets.inputFocused,
@@ -80,10 +66,6 @@ export function resolveActionSets() {
       (!!rightHandCollisionTarget.components["offers-remote-constraint"] ||
         !!rightHandCollisionTarget.components["super-spawner"])
   );
-  // userinput.toggleSet(
-  //   sets.rightHandHoveringOnUI,
-  //   rightHandCollisionTarget && !!rightHandCollisionTarget.components["is-ui"]
-  // );
   userinput.toggleSet(
     sets.rightHandHoveringOnVideo,
     rightHandCollisionTarget && !!rightHandCollisionTarget.components["media-video"]
@@ -97,7 +79,6 @@ export function resolveActionSets() {
     sets.rightHandHoldingCamera,
     rightHandConstraintTarget && !!rightHandConstraintTarget.components["camera-tool"]
   );
-  // userinput.toggleSet(sets.rightHandHoldingUI, !!interaction.grabbedUI);
   userinput.toggleSet(sets.rightHandHoldingInteractable, !!rightHandConstraintTarget);
   userinput.toggleSet(
     sets.inputFocused,
