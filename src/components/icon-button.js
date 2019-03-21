@@ -42,13 +42,13 @@ AFRAME.registerComponent("icon-button", {
     this.updateButtonState();
     this.el.addEventListener("hover-start", this.onHover);
     this.el.addEventListener("hover-end", this.onHoverOut);
-    this.el.addEventListener("grab-start", this.onClick);
+    this.el.object3D.addEventListener("interact", this.onClick);
   },
 
   pause() {
     this.el.removeEventListener("hover-start", this.onHover);
     this.el.removeEventListener("hover-end", this.onHoverOut);
-    this.el.removeEventListener("grab-start", this.onClick);
+    this.el.object3D.removeEventListener("interact", this.onClick);
   },
 
   update() {

@@ -27,7 +27,8 @@ AFRAME.registerComponent("is-hand-collision-target", {
 
 AFRAME.registerComponent("offers-constraint-when-colliding", {});
 AFRAME.registerComponent("offers-remote-constraint", {});
-AFRAME.registerComponent("is-ui", {});
+AFRAME.registerComponent("single-action-button", {});
+AFRAME.registerComponent("holdable-button", {});
 AFRAME.registerComponent("is-pen", {});
 
 function findHandCollisionTargetForBody(body) {
@@ -48,7 +49,6 @@ function findHandCollisionTargetForBody(body) {
 AFRAME.registerSystem("interaction", {
   init: function() {
     this.rightRemoteConstraintTarget = null;
-    this.grabbedUI = null;
     this.grabbedPen = null;
     this.weWantToGrab = false;
   },
@@ -64,7 +64,6 @@ AFRAME.registerSystem("interaction", {
     this.rightHand = this.rightHand || document.querySelector("#player-right-controller");
 
     if (this.rightHandConstraintTarget) {
-
       if (rightHandDrop) {
         const stickyObject = this.rightHandConstraintTarget.components["sticky-object"];
         if (stickyObject) {
@@ -166,13 +165,15 @@ AFRAME.registerSystem("interaction", {
     const rightRemoteHoverTarget =
       !this.rightHandCollisionTarget && this.cursorController.components["cursor-controller"].rightRemoteHoverTarget;
 
-    if (drop && this.grabbedUI) {
-      this.grabbedUI.emit("grab-end", { hand: this.cursor });
-      this.grabbedUI = null;
+    if (this.buttonHeldByRightRemote && drop) {
+      this.buttonHeldByRightRemote.el.object3D.dispatchEvent({
+        type: "holdable-button-up",
+        path: paths.actions.cursor.drop
+      });
+      this.buttonHeldByRightRemote = null;
     }
 
     if (this.rightRemoteConstraintTarget) {
-
       if (drop) {
         const stickyObject = this.rightRemoteConstraintTarget.components["sticky-object"];
         if (stickyObject) {
@@ -195,10 +196,15 @@ AFRAME.registerSystem("interaction", {
     } else {
       if (rightRemoteHoverTarget && (grab || this.weWantToGrab)) {
         this.weWantToGrab = false;
-        const isUI = rightRemoteHoverTarget.components["is-ui"];
-        if (isUI) {
-          this.grabbedUI = rightRemoteHoverTarget;
-          rightRemoteHoverTarget.emit("grab-start", { hand: this.cursor });
+        const singleActionButton = rightRemoteHoverTarget.components["single-action-button"];
+        if (singleActionButton) {
+          singleActionButton.el.object3D.dispatchEvent({ type: "interact", path: paths.actions.cursor.grab });
+        }
+
+        const holdableButton = rightRemoteHoverTarget.components["holdable-button"];
+        if (holdableButton) {
+          this.buttonHeldByRightRemote = holdableButton;
+          holdableButton.el.object3D.dispatchEvent({ type: "holdable-button-down", path: paths.actions.cursor.grab });
         }
 
         const isPen = rightRemoteHoverTarget.components["is-pen"];

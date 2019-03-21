@@ -35,7 +35,7 @@ const getPlayerCamera = (() => {
 
 function shouldMoveCursor(touch, raycaster) {
   const cursorController = document.querySelector("[cursor-controller]").components["cursor-controller"];
-  const isCursorGrabbing = false;//cursorController.data.cursor.components["super-hands"].state.has("grab-start");
+  const isCursorGrabbing = !!AFRAME.scenes[0].systems.interaction.rightRemoteConstraintTarget;
   if (isCursorGrabbing) {
     return true;
   }

@@ -360,11 +360,11 @@ AFRAME.registerComponent("media-video", {
       this.timeLabel = this.el.querySelector(".video-time-label");
       this.volumeLabel = this.el.querySelector(".video-volume-label");
 
-      this.playPauseButton.addEventListener("grab-start", this.togglePlaying);
-      this.seekForwardButton.addEventListener("grab-start", this.seekForward);
-      this.seekBackButton.addEventListener("grab-start", this.seekBack);
-      this.volumeUpButton.addEventListener("grab-start", this.volumeUp);
-      this.volumeDownButton.addEventListener("grab-start", this.volumeDown);
+      this.playPauseButton.object3D.addEventListener("interact", this.togglePlaying);
+      this.seekForwardButton.object3D.addEventListener("interact", this.seekForward);
+      this.seekBackButton.object3D.addEventListener("interact", this.seekBack);
+      this.volumeUpButton.object3D.addEventListener("interact", this.volumeUp);
+      this.volumeDownButton.object3D.addEventListener("interact", this.volumeDown);
 
       this.updateVolumeLabel();
       this.updateHoverMenuBasedOnLiveState();
@@ -685,11 +685,11 @@ AFRAME.registerComponent("media-video", {
       this.video.removeEventListener("play", this.onPauseStateChange);
     }
     if (this.hoverMenu) {
-      this.playPauseButton.removeEventListener("grab-start", this.togglePlaying);
-      this.volumeUpButton.removeEventListener("grab-start", this.volumeUp);
-      this.volumeDownButton.removeEventListener("grab-start", this.volumeDown);
-      this.seekForwardButton.removeEventListener("grab-start", this.seekForward);
-      this.seekBackButton.removeEventListener("grab-start", this.seekBack);
+      this.playPauseButton.object3D.removeEventListener("interact", this.togglePlaying);
+      this.volumeUpButton.object3D.removeEventListener("interact", this.volumeUp);
+      this.volumeDownButton.object3D.removeEventListener("interact", this.volumeDown);
+      this.seekForwardButton.object3D.removeEventListener("interact", this.seekForward);
+      this.seekBackButton.object3D.removeEventListener("interact", this.seekBack);
     }
   }
 });

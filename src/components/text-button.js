@@ -40,13 +40,13 @@ AFRAME.registerComponent("text-button", {
     this.updateButtonState();
     this.el.addEventListener("mouseover", this.onHover);
     this.el.addEventListener("mouseout", this.onHoverOut);
-    this.el.addEventListener("grab-start", this.onClick);
+    this.el.object3D.addEventListener("interact", this.onClick);
   },
 
   pause() {
     this.el.removeEventListener("mouseover", this.onHover);
     this.el.removeEventListener("mouseout", this.onHoverOut);
-    this.el.removeEventListener("grab-start", this.onClick);
+    this.el.object3D.removeEventListener("interact", this.onClick);
   },
 
   update() {

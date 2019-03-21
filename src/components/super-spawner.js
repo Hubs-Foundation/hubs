@@ -52,12 +52,6 @@ AFRAME.registerComponent("super-spawner", {
     spawnScale: { type: "vec3" },
 
     /**
-     * The events to emit for programmatically grabbing and releasing objects
-     */
-    grabEvents: { default: ["grab-start"] },
-    releaseEvents: { default: [] },
-
-    /**
      * The spawner will become invisible and ungrabbable for this ammount of time after being grabbed. This can prevent rapidly spawning objects.
      */
     spawnCooldown: { default: 1 },

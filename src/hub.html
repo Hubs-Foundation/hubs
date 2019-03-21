@@ -226,7 +226,7 @@
                     matrix-auto-update
                     position-at-box-shape-border__freeze="target:.freeze-menu;"
                 >
-                    <a-entity class="ui interactable-ui" mixin="button-container">
+                    <a-entity class="ui interactable-ui">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 10;">
                             <a-entity mixin="rounded-text-action-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned;" position="0 0.125 0.01"> </a-entity>
                             <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
@@ -254,10 +254,10 @@
                             <a-entity mixin="rounded-text-button" clone-media-button position="-0.25 -0.375 0.01">
                                 <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
-                            <a-entity scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button rotate-button-selector position="-0.6  0.12 0.01">
+                            <a-entity scale="0.8 0.8 1" mixin="rounded-holdable-text-button" rotate-button rotate-button-selector position="-0.6  0.12 0.01">
                                 <a-entity text="value:rotate; width:1.50; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
-                            <a-entity  scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button="mode: align;" position="-0.6 -0.12 0.01">
+                            <a-entity  scale="0.8 0.8 1" mixin="rounded-holdable-text-button" rotate-button="mode: align;" position="-0.6 -0.12 0.01">
                                 <a-entity text="value:re-center; width:1.40; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
                         </a-entity>
@@ -302,7 +302,7 @@
                         segments-width="16"
                         segments-height="12"
                     ></a-sphere>
-                    <a-entity class="ui delete-button pen-menu" visibility-while-frozen="withinDistance: 10;" mixin="button-container" >
+                    <a-entity class="ui delete-button pen-menu" visibility-while-frozen="withinDistance: 10;">
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 0 0.1"> </a-entity>
                         <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 0 0.11"></a-entity>
                     </a-entity>
@@ -326,16 +326,16 @@
                     position-at-box-shape-border__freeze="target: .camera-menu"
                     set-yxz-order
                 >
-                    <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 10;" mixin="button-container" >
+                    <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 10;">
                         <a-entity mixin="rounded-text-action-button" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01">
                             <a-entity text=" value:mirror; width:2.5; align:center;" class="mirror-button-label" text-raycast-hack position="0 0 0.02"></a-entity>
                         </a-entity>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
                         <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 -0.125 0.02"></a-entity>
-                        <a-entity scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button rotate-button-selector position="-0.7 0.06 0.01">
+                        <a-entity scale="0.8 0.8 1" mixin="rounded-holdable-text-button" rotate-button rotate-button-selector position="-0.7 0.06 0.01">
                             <a-entity text="value:rotate; width:2.40; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                         </a-entity>
-                        <a-entity  scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button="mode: align;" position="-0.7 -0.15 0.01">
+                        <a-entity  scale="0.8 0.8 1" mixin="rounded-holdable-text-button" rotate-button="mode: align;" position="-0.7 -0.15 0.01">
                             <a-entity text="value:re-center; width:2.2; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                         </a-entity>
                     </a-entity>
@@ -343,7 +343,7 @@
             </template>
 
             <template id="camera-hover-menu">
-                <a-entity class="ui interactable-ui hover-container camera-snap-menu" mixin="button-container" visible="false">
+                <a-entity class="ui interactable-ui hover-container camera-snap-menu" visible="false">
                     <a-entity class="snap-button" mixin="rounded-text-action-button" position="0 -0.145 0.0" scale="0.75 0.75 0.75">
                         <a-entity text="value:; width:1; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                         <a-image
@@ -377,12 +377,12 @@
 
             <!-- TODO: All of these positions are assuming 16:9 - need to actually reposition based on video resolution -->
             <template id="video-hover-menu">
-                <a-entity class="ui interactable-ui hover-container" mixin="button-container" visible="false">
+                <a-entity class="ui interactable-ui hover-container" visible="false">
                     <a-entity class="video-time-label" text="value: 0; anchor: center; align: center; color: #aaa;" text-raycast-hack position="0 -0.24 0" scale="0.75 0.75 0.75"></a-entity>
                     <a-entity class="video-volume-label" text="value: 0%; anchor: center; align: center; color: #ccc; letterSpacing: 4;" text-raycast-hack position="0.0 0.175 0.015" scale="1.25 1.25 1.25"></a-entity>
                     <a-image
                         is-remote-hover-target
-                        is-ui
+                        single-action-button
                         icon-button="image: #video-volume-down; hoverImage: #video-volume-down-hover;"
                         scale="0.075 0.075 0.075"
                         position="-0.275 0.175 0"
@@ -390,7 +390,7 @@
                     ></a-image>
                     <a-image
                         is-remote-hover-target
-                        is-ui
+                        single-action-button
                         icon-button="image: #video-volume-up; hoverImage: #video-volume-up-hover;"
                         scale="0.075 0.075 0.075"
                         position="0.275 0.175 0"
@@ -398,7 +398,7 @@
                     ></a-image>
                     <a-image
                         is-remote-hover-target
-                        is-ui
+                        single-action-button
                         icon-button="image: #video-seek-back; hoverImage: #video-seek-back-hover;"
                         scale="0.1 0.1 0.1"
                         position="-0.3 -0.125 0"
@@ -407,7 +407,7 @@
                     ></a-image>
                     <a-image
                         is-remote-hover-target
-                        is-ui
+                        single-action-button
                         icon-button="image: #video-pause; hoverImage: #video-pause-hover; activeImage: #video-play; activeHoverImage: #video-play-hover"
                         scale="0.15 0.15 0.15"
                         position="0 -0.125 0"
@@ -416,7 +416,7 @@
                     ></a-image>
                     <a-image
                         is-remote-hover-target
-                        is-ui
+                        single-action-button
                         icon-button="image: #video-seek-forward; hoverImage: #video-seek-forward-hover;"
                         scale="0.1 0.1 0.1"
                         position="0.3 -0.125 0"
@@ -427,7 +427,7 @@
             </template>
 
             <template id="hubs-destination-hover-menu">
-                <a-entity class="ui interactable-ui hover-container" mixin="button-container" visible="false">
+                <a-entity class="ui interactable-ui hover-container" visible="false">
                     <a-entity mixin="rounded-text-action-button ui" open-media-button position="0 -0.125 0.01">
                         <a-entity text="value:value; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
@@ -439,7 +439,6 @@
                     class="ui interactable-ui hover-container unmute-ui"
                     position="0 0 0.1"
                     visibility-while-frozen="visible: false; withinDistance: 10; requireHoverOnNonMobile: false;"
-                    mixin="button-container"
                 >
                     <a-entity mixin="rounded-text-button" slice9="width: 0.4" unmute-video-button position="0 -0.5 0.01">
                         <a-entity text="value:unmute; width:2; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
@@ -447,9 +446,28 @@
                 </a-entity>
             </template>
 
+            <a-mixin id="rounded-holdable-text-button"
+                     is-remote-hover-target
+                     holdable-button
+                     text-button="
+                         haptic:#player-right-controller;
+                         textHoverColor: #fff;
+                         textColor: #fff;
+                         backgroundHoverColor: #aaa;
+                         backgroundColor: #fff;"
+                     slice9="
+                         width: 0.45;
+                         height: 0.2;
+                         left: 64;
+                         top: 64;
+                         right: 66;
+                         bottom: 66;
+                         opacity: 1.0;
+                         src: #button"
+            ></a-mixin>
             <a-mixin id="rounded-text-button"
                 is-remote-hover-target
-                is-ui
+                single-action-button
                 text-button="
                     haptic:#player-right-controller;
                     textHoverColor: #fff;
@@ -469,7 +487,7 @@
 
             <a-mixin id="rounded-text-action-button"
                 is-remote-hover-target
-                is-ui
+                single-action-button
                 text-button="
                     haptic:#player-right-controller;
                     textHoverColor: #fff;
@@ -486,29 +504,6 @@
                     bottom: 66;
                     opacity: 1.0;
                     src: #action-button"
-            ></a-mixin>
-
-            <a-mixin id="button-container"
-                stop-event-propagation__grab-start="event: grab-start"
-                stop-event-propagation__grab-end="event: grab-end"
-                stop-event-propagation__stretch-start="event: stretch-start"
-                stop-event-propagation__stretch-end="event: stretch-end"
-            ></a-mixin>
-
-            <a-mixin id="controller-super-hands"
-                super-hands="
-                    colliderEvent: collide;
-                    colliderEventProperty: targetEl;
-                    colliderEndEvent: collide-end;
-                    colliderEndEventProperty: targetEl;
-                    grabStartButtons: primary_hand_grab, secondary_hand_grab;
-                    grabEndButtons: primary_hand_release, secondary_hand_release;
-                    stretchStartButtons: primary_hand_grab, secondary_hand_grab;
-                    stretchEndButtons: primary_hand_release, secondary_hand_release;
-                    dragDropStartButtons: hand_grab, secondary_hand_grab;
-                    dragDropEndButtons: hand_release, secondary_hand_release;
-                    activateStartButtons: secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
-                    activateEndButtons: secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
             ></a-mixin>
         </a-assets>
 
@@ -538,19 +533,6 @@
             ammo-body="type: kinematic; collisionFlags: 4; collisionFilterMask: 3; scaleAutoUpdate: false; activationState: 4;"
             ammo-shape="type: sphere; sphereRadius: 0.02; autoGenerateShape: false;"
             haptic-feedback="path: /haptics/actuators/right"
-            super-hands="
-                colliderEvent: raycaster-intersection;
-                colliderEndEvent: raycaster-intersection-cleared;
-                grabStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
-                grabEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
-                stretchStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
-                stretchEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
-                dragDropStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
-                dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
-                activateStartButtons: secondary-cursor-grab, secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
-                activateEndButtons: secondary-cursor-release, secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
-            action-to-event__grab="path: /actions/cursorGrab; event: cursor-grab"
-            action-to-event__drop="path: /actions/cursorDrop; event: cursor-release"
         >
             <a-image
                 icon-button="image: #rotation-symbol"
@@ -582,7 +564,7 @@
                     <a-rounded height="0.08" width="0.2" color="#000000" position="-0.30 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
                     <a-image scale="0.07 0.06 0.06" position="-0.23 0.165 0.001" src="#presence-count" material="alphaTest:0.1;"></a-image>
                     <a-entity id="hud-presence-count" text="value:; width:1.1; align:center;" position="-0.155 0.165 0" matrix-auto-update="target: text;"></a-entity>
-                    <a-entity class="ui interactable-ui" mixin="button-container">
+                    <a-entity class="ui interactable-ui">
                         <a-entity class="invite-btn" position="0.17 0.165 0" scale="0.5 0.5 0.5" hoverable>
                             <a-entity mixin="rounded-text-action-button" slice9="width: 1.0" scale="0.8 0.8 1.0"> </a-entity>
                             <a-entity text=" value:invite; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
@@ -590,7 +572,7 @@
                     </a-entity>
                 <a-image
                     is-remote-hover-target
-                    is-ui
+                    single-action-button
                     icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover"
                     scale="0.1 0.1 0.1"
                     position="-0.17 0 0.001"
@@ -602,7 +584,7 @@
                 ></a-image>
                 <a-image
                     is-remote-hover-target
-                    is-ui
+                    single-action-button
                     icon-button="tooltip: #hud-tooltip; tooltipText: Create; activeTooltipText: Resume; image: #spawn; hoverImage: #spawn-hover;"
                     scale="0.2 0.2 0.2"
                     position="0 0 0.005"
@@ -613,7 +595,7 @@
                 ></a-image>
                 <a-image
                     is-remote-hover-target
-                    is-ui
+                    single-action-button
                     icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #pen-off; hoverImage: #pen-off-hover; activeImage: #pen-on; activeHoverImage: #pen-on-hover"
                     scale="0.1 0.1 0.1"
                     position="0.17 0 0.001"
@@ -625,7 +607,7 @@
                 ></a-image>
                 <a-image
                     is-remote-hover-target
-                    is-ui
+                    single-action-button
                     icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #camera-off; hoverImage: #camera-off-hover; activeImage: #camera-on; activeHoverImage: #camera-on-hover"
                     scale="0.1 0.1 0.1"
                     position="0.28 0 0.001"
@@ -708,7 +690,6 @@
                 teleporter="start: /actions/leftHand/startTeleport; confirm: /actions/leftHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
                 haptic-feedback="path: /haptics/actuators/left"
-                mixin="controller-super-hands"
                 ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4;"
                 ammo-shape="type: box; autoGenerateShape: false; scaleAutoUpdate: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 action-to-event__c="path: /actions/leftHandGrab; event: primary_hand_grab;"
@@ -725,7 +706,6 @@
                 teleporter="start: /actions/rightHand/startTeleport; confirm: /actions/rightHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
                 haptic-feedback="path: /haptics/actuators/right"
-                mixin="controller-super-hands"
                 ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4;"
                 ammo-shape="type: box; autoGenerateShape: false; scaleAutoUpdate: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 action-to-event__c="path: /actions/rightHandGrab; event: primary_hand_grab;"

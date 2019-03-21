@@ -9,16 +9,10 @@ AFRAME.registerComponent("sticky-object", {
   },
 
   init() {
-    this._onBodyLoaded = this._onBodyLoaded.bind(this);
-  },
-
-  play() {
-    if (this.hasSetupBodyLoaded) return;
-    this.hasSetupBodyLoaded = true;
-
     if (this.el.body) {
       this._onBodyLoaded();
     } else {
+      this._onBodyLoaded = this._onBodyLoaded.bind(this);
       this.el.addEventListener("body-loaded", this._onBodyLoaded, { once: true });
     }
   },

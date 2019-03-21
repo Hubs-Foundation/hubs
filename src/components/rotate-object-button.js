@@ -33,8 +33,6 @@ AFRAME.registerComponent("rotate-button", {
       if (!this.targetEl) {
         return;
       }
-      const hand = e.detail.hand;
-      hand.emit("haptic_pulse", { intensity: "high" });
       if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) {
         return;
       }
@@ -42,22 +40,24 @@ AFRAME.registerComponent("rotate-button", {
         this.targetEl.setAttribute("ammo-body", { type: "static" });
       }
       this.rotateSystem = this.rotateSystem || AFRAME.scenes[0].systems["rotate-selected-object"];
-      this.rotateSystem.startRotate(this.targetEl.object3D, hand, this.data);
-      e.preventDefault();
+      this.rotateSystem.startRotate(
+        this.targetEl.object3D,
+        e.path === paths.actions.cursor.grab ? "cursor" : e.path === paths.actions.rightHand.grab ? "right" : "left",
+        this.data
+      );
     };
     this.onGrabEnd = e => {
       this.rotateSystem = this.rotateSystem || AFRAME.scenes[0].systems["rotate-selected-object"];
       this.rotateSystem.stopRotate();
-      e.preventDefault();
     };
   },
   play() {
-    this.el.addEventListener("grab-start", this.onGrabStart);
-    this.el.addEventListener("grab-end", this.onGrabEnd);
+    this.el.object3D.addEventListener("holdable-button-down", this.onGrabStart);
+    this.el.object3D.addEventListener("holdable-button-up", this.onGrabEnd);
   },
   pause() {
-    this.el.removeEventListener("grab-start", this.onGrabStart);
-    this.el.removeEventListener("grab-end", this.onGrabEnd);
+    this.el.object3D.removeEventListener("holdable-button-down", this.onGrabStart);
+    this.el.object3D.removeEventListener("holdable-button-up", this.onGrabEnd);
   }
 });
 
@@ -152,7 +152,10 @@ AFRAME.registerSystem("rotate-selected-object", {
 
   startRotate(target, hand, data) {
     this.target = target;
-    this.hand = hand.id === "cursor" ? document.querySelector("#player-right-controller").object3D : hand.object3D;
+    this.hand =
+      hand === "cursor" || hand === "right"
+        ? document.querySelector("#player-right-controller").object3D
+        : document.querySelector("#player-left-controller").object3D;
     this.mode = data.mode;
     this.rotating = true;
 
@@ -269,6 +272,7 @@ AFRAME.registerSystem("rotate-selected-object", {
     if (this.mode === ROTATE_MODE.ALIGN) {
       this.el.camera.getWorldPosition(CAMERA_WORLD_POSITION);
       this.target.lookAt(CAMERA_WORLD_POSITION);
+      this.rotating = false;
       return;
     }
 

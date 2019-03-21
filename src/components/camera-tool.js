@@ -67,9 +67,6 @@ AFRAME.registerComponent("camera-tool", {
   },
 
   init() {
-    this.stateAdded = this.stateAdded.bind(this);
-    this.onGrab = this.onGrab.bind(this);
-
     this.lastUpdate = performance.now();
     this.localSnapCount = 0; // Counter that is used to arrange photos
 
@@ -130,30 +127,16 @@ AFRAME.registerComponent("camera-tool", {
     this.el.setAttribute("hover-menu__camera", { template: "#camera-hover-menu", dirs: ["forward", "back"] });
     this.el.components["hover-menu__camera"].getHoverMenu().then(() => {
       this.snapButton = this.el.querySelector(".snap-button");
-      this.snapButton.addEventListener("grab-start", () => (this.takeSnapshotNextTick = true));
+      this.snapButton.object3D.addEventListener("interact", () => {
+        this.takeSnapshotNextTick = true;
+      });
     });
-  },
-
-  play() {
-    this.el.addEventListener("stateadded", this.stateAdded);
-    this.el.addEventListener("grab-start", this.onGrab);
-  },
-
-  pause() {
-    this.el.removeEventListener("stateadded", this.stateAdded);
-    this.el.removeEventListener("grab-start", this.onGrab);
   },
 
   remove() {
     this.cameraSystem.deregister(this.el);
     this.el.sceneEl.systems["camera-mirror"].unmirrorCameraAtEl(this.el);
     this.el.sceneEl.emit("camera_removed");
-  },
-
-  stateAdded(evt) {
-    if (evt.detail === "activated") {
-      this.takeSnapshotNextTick = true;
-    }
   },
 
   focus(el, track) {
@@ -183,14 +166,11 @@ AFRAME.registerComponent("camera-tool", {
     this.el.sceneEl.systems["camera-mirror"].unmirrorCameraAtEl(this.el);
   },
 
-  onGrab() {
-    this.localSnapCount = 0; // When camera is moved, reset photo arrangement algorithm
-  },
-
   tick() {
     const grabber = undefined; //this.el.components.grabbable.grabbers[0];
     const userinput = this.el.sceneEl.systems.userinput;
     if (grabber && !!pathsMap[grabber.id]) {
+      this.localSnapCount = 0; // TODO: When camera is moved, reset photo arrangement algorithm
       const grabberPaths = pathsMap[grabber.id];
       if (userinput.get(grabberPaths.takeSnapshot)) {
         this.takeSnapshotNextTick = true;

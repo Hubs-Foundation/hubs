@@ -72,8 +72,15 @@ export function resolveActionSets() {
   );
 
   const rightRemoteConstraintTarget = interaction.rightRemoteConstraintTarget;
-  const rightRemoteHoverTarget = !rightHandConstraintTarget && !rightHandCollisionTarget && !rightRemoteConstraintTarget && cursorController.rightRemoteHoverTarget;
-  userinput.toggleSet(sets.cursorHoveringOnNothing, !rightHandConstraintTarget && !rightHandCollisionTarget && !rightRemoteConstraintTarget && !rightRemoteHoverTarget);
+  const rightRemoteHoverTarget =
+    !rightHandConstraintTarget &&
+    !rightHandCollisionTarget &&
+    !rightRemoteConstraintTarget &&
+    cursorController.rightRemoteHoverTarget;
+  userinput.toggleSet(
+    sets.cursorHoveringOnNothing,
+    !rightHandConstraintTarget && !rightHandCollisionTarget && !rightRemoteConstraintTarget && !rightRemoteHoverTarget
+  );
   userinput.toggleSet(
     sets.cursorHoveringOnPen,
     rightRemoteHoverTarget && !!rightRemoteHoverTarget.components["is-pen"]
@@ -88,7 +95,13 @@ export function resolveActionSets() {
       (!!rightRemoteHoverTarget.components["offers-remote-constraint"] ||
         !!rightRemoteHoverTarget.components["super-spawner"])
   );
-  userinput.toggleSet(sets.cursorHoveringOnUI, rightRemoteHoverTarget && !!rightRemoteHoverTarget.components["is-ui"]);
+  userinput.toggleSet(
+    sets.cursorHoveringOnUI,
+    !interaction.buttonHeldByRightRemote &&
+      rightRemoteHoverTarget &&
+      (!!rightRemoteHoverTarget.components["single-action-button"] ||
+        !!rightRemoteHoverTarget.components["holdable-button"])
+  );
   userinput.toggleSet(
     sets.cursorHoveringOnVideo,
     rightRemoteHoverTarget && !!rightRemoteHoverTarget.components["media-video"]
@@ -102,7 +115,7 @@ export function resolveActionSets() {
     sets.cursorHoldingCamera,
     rightRemoteConstraintTarget && !!rightRemoteConstraintTarget.components["camera-tool"]
   );
-  userinput.toggleSet(sets.cursorHoldingUI, !!interaction.grabbedUI);
+  userinput.toggleSet(sets.cursorHoldingUI, !!interaction.buttonHeldByRightRemote);
   userinput.toggleSet(sets.cursorHoldingInteractable, !!rightRemoteConstraintTarget);
   userinput.toggleSet(
     sets.inputFocused,
