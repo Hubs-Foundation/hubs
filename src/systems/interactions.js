@@ -4,6 +4,9 @@ import { paths } from "./userinput/paths";
 import { addMedia } from "../utils/media-utils";
 import { ObjectContentOrigins } from "../object-types";
 
+const UNHOVERED_EVENT = {type: "unhovered"};
+const HOVERED_EVENT = {type: "hovered"};
+
 AFRAME.registerComponent("offers-constraint-when-colliding", {});
 AFRAME.registerComponent("offers-remote-constraint", {});
 AFRAME.registerComponent("single-action-button", {});
@@ -53,7 +56,7 @@ AFRAME.registerSystem("interaction", {
     const hoverTarget = intersection && findRemoteHoverTarget(intersection.object);
     if (!hoverTarget) {
       if (this.rightRemoteHoverTarget) {
-        this.rightRemoteHoverTarget.object3D.dispatchEvent({ type: "unhovered" });
+        this.rightRemoteHoverTarget.object3D.dispatchEvent(UNHOVERED_EVENT);
         this.rightRemoteHoverTarget = null;
       }
       return;
@@ -61,11 +64,11 @@ AFRAME.registerSystem("interaction", {
 
     if (!this.rightRemoteHoverTarget) {
       this.rightRemoteHoverTarget = hoverTarget;
-      this.rightRemoteHoverTarget.object3D.dispatchEvent({ type: "hovered" });
+      this.rightRemoteHoverTarget.object3D.dispatchEvent(HOVERED_EVENT);
     } else if (hoverTarget !== this.rightRemoteHoverTarget) {
-      this.rightRemoteHoverTarget.object3D.dispatchEvent({ type: "unhovered" });
+      this.rightRemoteHoverTarget.object3D.dispatchEvent(UNHOVERED_EVENT);
       this.rightRemoteHoverTarget = hoverTarget;
-      this.rightRemoteHoverTarget.object3D.dispatchEvent({ type: "hovered" });
+      this.rightRemoteHoverTarget.object3D.dispatchEvent(HOVERED_EVENT);
     }
   },
 
