@@ -76,18 +76,6 @@ const NO_HIGHLIGHT = new THREE.Color(190 / 255, 190 / 255, 190 / 255);
 const ROTATE_COLOR_1 = [150, 80, 150];
 const ROTATE_COLOR_2 = [23, 64, 118];
 
-const THREEJS_HOVER_TARGETS = new Map();
-function findRemoteHoverTarget(o) {
-  if (!o) return null;
-  const target = THREEJS_HOVER_TARGETS.get(o.uuid);
-  return target || findRemoteHoverTarget(o.parent);
-}
-AFRAME.registerComponent("is-remote-hover-target", {
-  init: function() {
-    THREEJS_HOVER_TARGETS.set(this.el.object3D.uuid, this.el);
-  }
-});
-
 AFRAME.registerComponent("cursor-controller", {
   schema: {
     cursor: { type: "selector" },
@@ -96,26 +84,6 @@ AFRAME.registerComponent("cursor-controller", {
     near: { default: 0.01 },
     minDistance: { default: 0.18 },
     objects: { default: "" }
-  },
-
-  updateCursorIntersection: function(intersection) {
-    const hoverTarget = intersection && findRemoteHoverTarget(intersection.object);
-    if (!hoverTarget) {
-      if (this.rightRemoteHoverTarget) {
-        this.rightRemoteHoverTarget.object3D.dispatchEvent({ type: "unhovered" });
-        this.rightRemoteHoverTarget = null;
-      }
-      return;
-    }
-
-    if (!this.rightRemoteHoverTarget) {
-      this.rightRemoteHoverTarget = hoverTarget;
-      this.rightRemoteHoverTarget.object3D.dispatchEvent({ type: "hovered" });
-    } else if (hoverTarget !== this.rightRemoteHoverTarget) {
-      this.rightRemoteHoverTarget.object3D.dispatchEvent({ type: "unhovered" });
-      this.rightRemoteHoverTarget = hoverTarget;
-      this.rightRemoteHoverTarget.object3D.dispatchEvent({ type: "hovered" });
-    }
   },
 
   init: function() {
@@ -216,7 +184,7 @@ AFRAME.registerComponent("cursor-controller", {
         this.raycaster.ray.direction = cursorPose.direction;
         this.raycaster.intersectObjects(this.targets, true, rawIntersections);
         intersection = rawIntersections[0];
-        this.updateCursorIntersection(intersection);
+        interaction.updateCursorIntersection(intersection);
         this.distance = intersection ? intersection.distance : this.data.far;
       }
 

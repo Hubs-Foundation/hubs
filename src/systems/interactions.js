@@ -5,32 +5,23 @@ import { addMedia } from "../utils/media-utils";
 import { ObjectContentOrigins } from "../object-types";
 const ACTIVATION_STATES = require("aframe-physics-system/src/constants").ACTIVATION_STATES;
 
-function logMat4(mat4) {
-  let s = "";
-  for (let i = 0; i < 16; i++) {
-    s += mat4.elements[i] + " ";
-  }
-  console.log(s);
-}
-
-const THREEJS_HAND_COLLISION_TARGETS = new Map();
-function findHandCollisionTarget(o) {
-  if (!o) return null;
-  const target = THREEJS_HAND_COLLISION_TARGETS.get(o.uuid);
-  return target || findHandCollisionTarget(o.parent);
-}
-AFRAME.registerComponent("is-hand-collision-target", {
-  init: function() {
-    THREEJS_HAND_COLLISION_TARGETS.set(this.el.object3D.uuid, this.el);
-  }
-});
-
 AFRAME.registerComponent("offers-constraint-when-colliding", {});
 AFRAME.registerComponent("offers-remote-constraint", {});
 AFRAME.registerComponent("single-action-button", {});
 AFRAME.registerComponent("holdable-button", {});
 AFRAME.registerComponent("is-pen", {});
 
+const handCollisionTargets = new Map();
+AFRAME.registerComponent("is-hand-collision-target", {
+  init: function() {
+    handCollisionTargets.set(this.el.object3D.uuid, this.el);
+  }
+});
+function findHandCollisionTarget(o) {
+  if (!o) return null;
+  const target = handCollisionTargets.get(o.uuid);
+  return target || findHandCollisionTarget(o.parent);
+}
 function findHandCollisionTargetForBody(body) {
   const driver = AFRAME.scenes[0].systems.physics.driver;
   const collisions = driver.collisions;
@@ -46,7 +37,39 @@ function findHandCollisionTargetForBody(body) {
   }
 }
 
+const remoteHoverTargets = new Map();
+function findRemoteHoverTarget(o) {
+  if (!o) return null;
+  const target = remoteHoverTargets.get(o.uuid);
+  return target || findRemoteHoverTarget(o.parent);
+}
+AFRAME.registerComponent("is-remote-hover-target", {
+  init: function() {
+    remoteHoverTargets.set(this.el.object3D.uuid, this.el);
+  }
+});
+
 AFRAME.registerSystem("interaction", {
+  updateCursorIntersection: function(intersection) {
+    const hoverTarget = intersection && findRemoteHoverTarget(intersection.object);
+    if (!hoverTarget) {
+      if (this.rightRemoteHoverTarget) {
+        this.rightRemoteHoverTarget.object3D.dispatchEvent({ type: "unhovered" });
+        this.rightRemoteHoverTarget = null;
+      }
+      return;
+    }
+
+    if (!this.rightRemoteHoverTarget) {
+      this.rightRemoteHoverTarget = hoverTarget;
+      this.rightRemoteHoverTarget.object3D.dispatchEvent({ type: "hovered" });
+    } else if (hoverTarget !== this.rightRemoteHoverTarget) {
+      this.rightRemoteHoverTarget.object3D.dispatchEvent({ type: "unhovered" });
+      this.rightRemoteHoverTarget = hoverTarget;
+      this.rightRemoteHoverTarget.object3D.dispatchEvent({ type: "hovered" });
+    }
+  },
+
   init: function() {
     this.rightRemoteConstraintTarget = null;
     this.grabbedPen = null;
@@ -262,9 +285,7 @@ AFRAME.registerSystem("interaction", {
       }
     }
 
-    const rightRemoteHoverTarget =
-      !this.rightHandCollisionTarget && this.cursorController.components["cursor-controller"].rightRemoteHoverTarget;
-    this.rightRemoteHoverTarget = rightRemoteHoverTarget;
+    const rightRemoteHoverTarget = !this.rightHandCollisionTarget && this.rightRemoteHoverTarget; // TODO: THIS IS SUPER CONFUSING
 
     if (this.buttonHeldByRightRemote && drop) {
       this.buttonHeldByRightRemote.el.object3D.dispatchEvent({
