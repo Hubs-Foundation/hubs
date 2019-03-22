@@ -1,4 +1,5 @@
 const ACTIVATION_STATES = require("aframe-physics-system/src/constants").ACTIVATION_STATES;
+import { EVENT_TYPE_CONSTRAINT_CREATION_ATTEMPT, EVENT_TYPE_CONSTRAINT_REMOVAL } from "../systems/interactions.js";
 
 /**
  * Manages ownership and haptics on an interatable
@@ -12,7 +13,6 @@ AFRAME.registerComponent("super-networked-interactable", {
 
   init: function() {
     this.counter = this.data.counter.components["networked-counter"];
-    this.hand = null;
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
@@ -29,6 +29,18 @@ AFRAME.registerComponent("super-networked-interactable", {
     this.el.addEventListener("pinned", this._syncCounterRegistration);
     this.el.addEventListener("unpinned", this._syncCounterRegistration);
     this.el.addEventListener("ownership-lost", this._onOwnershipLost);
+    this.onGrabStart = this.onGrabStart.bind(this);
+    this.onGrabEnd = this.onGrabEnd.bind(this);
+  },
+
+  play: function() {
+    this.el.object3D.addEventListener(EVENT_TYPE_CONSTRAINT_CREATION_ATTEMPT, this.onGrabStart);
+    this.el.object3D.addEventListener(EVENT_TYPE_CONSTRAINT_REMOVAL, this.onGrabEnd);
+  },
+
+  pause: function() {
+    this.el.object3D.removeEventListener(EVENT_TYPE_CONSTRAINT_CREATION_ATTEMPT, this.onGrabStart);
+    this.el.object3D.removeEventListener(EVENT_TYPE_CONSTRAINT_REMOVAL, this.onGrabEnd);
   },
 
   remove: function() {
@@ -36,9 +48,7 @@ AFRAME.registerComponent("super-networked-interactable", {
     this.el.removeEventListener("ownership-lost", this._onOwnershipLost);
   },
 
-  onGrabStart: function(hand) {
-    this.hand = hand;
-    this.hand.emit("haptic_pulse", { intensity: "high" });
+  onGrabStart: function() {
     if (this.networkedEl) {
       if (!NAF.utils.isMine(this.networkedEl)) {
         if (NAF.utils.takeOwnership(this.networkedEl)) {
@@ -46,8 +56,7 @@ AFRAME.registerComponent("super-networked-interactable", {
           this.el.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
           this._syncCounterRegistration();
         } else {
-          this.el.emit("grab-end", { hand: this.hand });
-          this.hand = null;
+          // TODO: If you can't take ownership, a constraint should not be created and we should communicate the error to the user
         }
       } else {
         this.el.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
@@ -55,15 +64,13 @@ AFRAME.registerComponent("super-networked-interactable", {
     }
   },
 
-  onGrabEnd: function(hand) {
-    if (hand) hand.emit("haptic_pulse", { intensity: "high" });
+  onGrabEnd: function() {
     this.el.body.forceActivationState(ACTIVATION_STATES.ACTIVE_TAG);
   },
 
   _onOwnershipLost: function() {
     this.el.setAttribute("ammo-body", { type: "kinematic" });
-    this.el.emit("grab-end", { hand: this.hand });
-    this.hand = null;
+    //TODO: Communicate ownership lost to interaction system
     this._syncCounterRegistration();
   },
 

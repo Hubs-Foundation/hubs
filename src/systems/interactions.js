@@ -124,12 +124,6 @@ AFRAME.registerSystem("interaction", {
     if (this.leftHandConstraintTarget) {
       if (leftHandDrop) {
         this.leftHandConstraintTarget.object3D.dispatchEvent(LEFT_HAND_CONSTRAINT_REMOVAL_EVENT);
-
-        const superNetworkedInteractable = this.leftHandConstraintTarget.components["super-networked-interactable"];
-        if (superNetworkedInteractable) {
-          superNetworkedInteractable.onGrabEnd(this.leftHand);
-        }
-
         this.leftHandConstraintTarget.removeAttribute("ammo-constraint");
         this.leftHandConstraintTarget = null;
       }
@@ -146,10 +140,6 @@ AFRAME.registerSystem("interaction", {
             this.leftHandConstraintTarget.setAttribute("ammo-constraint", { target: "#player-left-controller" });
 
             this.leftHandCollisionTarget.object3D.dispatchEvent(LEFT_HAND_CONSTRAINT_CREATION_ATTEMPT_EVENT);
-            const superNetworkedInteractable = this.leftHandCollisionTarget.components["super-networked-interactable"];
-            if (superNetworkedInteractable) {
-              superNetworkedInteractable.onGrabStart(this.leftHand);
-            }
           } else if (superSpawner) {
             this.leftHand.object3D.updateMatrices();
             this.leftHand.object3D.matrix.decompose(
@@ -187,10 +177,6 @@ AFRAME.registerSystem("interaction", {
             this.leftHandConstraintTarget.setAttribute("ammo-constraint", { target: "#player-left-controller" });
             this.leftHandCollisionTarget.object3D.dispatchEvent(LEFT_HAND_CONSTRAINT_CREATION_ATTEMPT_EVENT);
 
-            const superNetworkedInteractable = this.leftHandConstraintTarget.components["super-networked-interactable"];
-            if (superNetworkedInteractable) {
-              superNetworkedInteractable.onGrabStart(this.leftHand);
-            }
             entity.components["ammo-body"].syncToPhysics();
           }
         }
@@ -200,20 +186,12 @@ AFRAME.registerSystem("interaction", {
     if (this.rightHandConstraintTarget) {
       if (rightHandDrop) {
         this.rightHandConstraintTarget.object3D.dispatchEvent(RIGHT_HAND_CONSTRAINT_REMOVAL_EVENT);
-
-        const superNetworkedInteractable = this.rightHandConstraintTarget.components["super-networked-interactable"];
-        if (superNetworkedInteractable) {
-          superNetworkedInteractable.onGrabEnd(this.rightHand);
-        }
-
         this.rightHandConstraintTarget.removeAttribute("ammo-constraint");
         this.rightHandConstraintTarget = null;
       }
     } else {
       this.rightHandCollisionTarget =
         !this.rightRemoteConstraintTarget && findHandCollisionTargetForBody(this.rightHand.body);
-      this.cursorController.components["cursor-controller"].enabled =
-        !this.rightHandCollisionTarget && !this.rightHandTeleporter.isTeleporting;
       if (this.rightHandCollisionTarget) {
         if (rightHandGrab) {
           const offersCollisionConstraint = this.rightHandCollisionTarget.components[
@@ -225,10 +203,6 @@ AFRAME.registerSystem("interaction", {
             this.rightHandConstraintTarget.setAttribute("ammo-constraint", { target: "#player-right-controller" });
 
             this.rightHandConstraintTarget.object3D.dispatchEvent(RIGHT_HAND_CONSTRAINT_CREATION_ATTEMPT_EVENT);
-            const superNetworkedInteractable = this.rightHandCollisionTarget.components["super-networked-interactable"];
-            if (superNetworkedInteractable) {
-              superNetworkedInteractable.onGrabStart(this.rightHand);
-            }
           } else if (superSpawner) {
             this.rightHand.object3D.updateMatrices();
             this.rightHand.object3D.matrix.decompose(
@@ -266,16 +240,18 @@ AFRAME.registerSystem("interaction", {
             this.rightHandConstraintTarget.setAttribute("ammo-constraint", { target: "#player-right-controller" });
             this.rightHandConstraintTarget.object3D.dispatchEvent(RIGHT_HAND_CONSTRAINT_CREATION_ATTEMPT_EVENT);
 
-            const superNetworkedInteractable = this.rightHandConstraintTarget.components[
-              "super-networked-interactable"
-            ];
-            if (superNetworkedInteractable) {
-              superNetworkedInteractable.onGrabStart(this.rightHand);
-            }
             entity.components["ammo-body"].syncToPhysics();
           }
         }
       }
+    }
+
+    const cursorWasEnabled = this.cursorController.components["cursor-controller"].enabled;
+    const cursorShouldBeEnabled = !this.rightHandCollisionTarget && !this.rightHandTeleporter.isTeleporting;
+    this.cursorController.components["cursor-controller"].enabled = cursorShouldBeEnabled;
+    if (cursorWasEnabled && !cursorShouldBeEnabled && this.rightRemoteHoverTarget) {
+      this.rightRemoteHoverTarget.object3D.dispatchEvent(UNHOVERED_EVENT);
+      this.rightRemoteHoverTarget = null;
     }
 
     const rightRemoteHoverTarget = !this.rightHandCollisionTarget && this.rightRemoteHoverTarget; // TODO: THIS IS SUPER CONFUSING
@@ -291,12 +267,6 @@ AFRAME.registerSystem("interaction", {
     if (this.rightRemoteConstraintTarget) {
       if (drop) {
         this.rightRemoteConstraintTarget.object3D.dispatchEvent(RIGHT_REMOTE_CONSTRAINT_REMOVAL_EVENT);
-
-        const superNetworkedInteractable = this.rightRemoteConstraintTarget.components["super-networked-interactable"];
-        if (superNetworkedInteractable) {
-          superNetworkedInteractable.onGrabEnd(this.cursor);
-        }
-
         this.rightRemoteConstraintTarget.removeAttribute("ammo-constraint");
         this.rightRemoteConstraintTarget = null;
       }
@@ -321,10 +291,6 @@ AFRAME.registerSystem("interaction", {
           this.rightRemoteConstraintTarget.setAttribute("ammo-constraint", { target: "#cursor" });
 
           this.rightRemoteConstraintTarget.object3D.dispatchEvent(RIGHT_REMOTE_CONSTRAINT_CREATION_ATTEMPT_EVENT);
-          const superNetworkedInteractable = rightRemoteHoverTarget.components["super-networked-interactable"];
-          if (superNetworkedInteractable) {
-            superNetworkedInteractable.onGrabStart(this.cursor);
-          }
         } else if (superSpawner) {
           this.cursor.object3D.updateMatrices();
           this.cursor.object3D.matrix.decompose(
@@ -361,13 +327,6 @@ AFRAME.registerSystem("interaction", {
           this.rightRemoteConstraintTarget = entity;
           this.rightRemoteConstraintTarget.setAttribute("ammo-constraint", { target: "#cursor" });
           this.rightRemoteConstraintTarget.object3D.dispatchEvent(RIGHT_REMOTE_CONSTRAINT_CREATION_ATTEMPT_EVENT);
-
-          const superNetworkedInteractable = this.rightRemoteConstraintTarget.components[
-            "super-networked-interactable"
-          ];
-          if (superNetworkedInteractable) {
-            superNetworkedInteractable.onGrabStart(this.cursor);
-          }
           entity.components["ammo-body"].syncToPhysics();
         }
       }

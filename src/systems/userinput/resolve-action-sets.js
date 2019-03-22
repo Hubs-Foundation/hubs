@@ -108,7 +108,8 @@ export function resolveActionSets() {
   );
   userinput.toggleSet(
     sets.cursorHoveringOnInteractable,
-    rightRemoteHoverTarget &&
+    !interaction.buttonHeldByRightRemote &&
+      rightRemoteHoverTarget &&
       (!!rightRemoteHoverTarget.components["offers-remote-constraint"] ||
         !!rightRemoteHoverTarget.components["super-spawner"])
   );
