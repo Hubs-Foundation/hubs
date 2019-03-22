@@ -46,7 +46,7 @@ AFRAME.registerComponent("rotate-button", {
         this.data
       );
     };
-    this.onGrabEnd = e => {
+    this.onGrabEnd = () => {
       this.rotateSystem = this.rotateSystem || AFRAME.scenes[0].systems["rotate-selected-object"];
       this.rotateSystem.stopRotate();
     };

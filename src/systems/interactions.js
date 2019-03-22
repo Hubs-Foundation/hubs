@@ -1,9 +1,8 @@
-import { sets } from "./userinput/sets";
+/* global Ammo */
 import { waitForEvent } from "../utils/async-utils";
 import { paths } from "./userinput/paths";
 import { addMedia } from "../utils/media-utils";
 import { ObjectContentOrigins } from "../object-types";
-const ACTIVATION_STATES = require("aframe-physics-system/src/constants").ACTIVATION_STATES;
 
 AFRAME.registerComponent("offers-constraint-when-colliding", {});
 AFRAME.registerComponent("offers-remote-constraint", {});

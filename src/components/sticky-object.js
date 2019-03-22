@@ -1,5 +1,5 @@
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
-/* global THREE, AFRAME */
+/* global AFRAME */
 AFRAME.registerComponent("sticky-object", {
   schema: {
     autoLockOnLoad: { default: false },

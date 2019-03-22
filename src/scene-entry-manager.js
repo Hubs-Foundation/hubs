@@ -288,6 +288,8 @@ export default class SceneEntryManager {
         true
       );
 
+      console.log("TODO: Use orientation in case this is an uploaded photo from user on mobile device", orientation);
+
       //TODO: rotate to face the user
       offset.set(0, 0, -1.5);
       camera = camera || document.querySelector("#player-camera").object3D;
@@ -295,6 +297,7 @@ export default class SceneEntryManager {
       camera.localToWorld(offset);
       entity.object3D.position.copy(offset);
       entity.object3D.matrixNeedsUpdate = true;
+      entity.object3D.updateMatrices();
 
       return entity;
     };

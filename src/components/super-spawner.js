@@ -5,7 +5,6 @@ import { ObjectContentOrigins } from "../object-types";
 
 const COLLISION_FLAGS = require("aframe-physics-system/src/constants").COLLISION_FLAGS;
 
-let nextGrabId = 0;
 /**
  * Spawns networked objects when grabbed or when a specified event is fired.
  * @namespace network

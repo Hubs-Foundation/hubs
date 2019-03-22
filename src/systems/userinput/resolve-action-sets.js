@@ -51,7 +51,10 @@ export function resolveActionSets() {
 
   const rightHandConstraintTarget = interaction.rightHandConstraintTarget;
   const rightHandCollisionTarget = !rightHandConstraintTarget && interaction.rightHandCollisionTarget;
-  userinput.toggleSet(sets.rightHandHoveringOnNothing, !rightHandConstraintTarget && !rightHandCollisionTarget && !interaction.rightRemoteHoverTarget);
+  userinput.toggleSet(
+    sets.rightHandHoveringOnNothing,
+    !rightHandConstraintTarget && !rightHandCollisionTarget && !interaction.rightRemoteHoverTarget
+  );
   userinput.toggleSet(
     sets.rightHandHoveringOnPen,
     rightHandCollisionTarget && !!rightHandCollisionTarget.components["is-pen"]
