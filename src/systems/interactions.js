@@ -65,6 +65,7 @@ AFRAME.registerSystem("interaction", {
     this.cursorController = this.cursorController || document.querySelector("#cursor-controller");
     this.rightHand = this.rightHand || document.querySelector("#player-right-controller");
     this.leftHand = this.leftHand || document.querySelector("#player-left-controller");
+    this.rightHandTeleporter = this.rightHand.components["teleporter"];
 
     if (this.leftHandConstraintTarget) {
       if (leftHandDrop) {
@@ -89,7 +90,7 @@ AFRAME.registerSystem("interaction", {
     } else {
       this.leftHandCollisionTarget =
         !this.leftRemoteConstraintTarget && findHandCollisionTargetForBody(this.leftHand.body);
-      this.cursorController.components["cursor-controller"].enabled = !this.leftHandCollisionTarget;
+
       if (this.leftHandCollisionTarget) {
         if (leftHandGrab) {
           const isPen = this.leftHandCollisionTarget.components["is-pen"];
@@ -97,9 +98,7 @@ AFRAME.registerSystem("interaction", {
             this.leftHandCollisionTarget.children[0].components["pen"].grabberId = "player-left-controller";
             this.penInLeftHand = this.leftHandCollisionTarget;
           }
-          const offersCollisionConstraint = this.leftHandCollisionTarget.components[
-            "offers-constraint-when-colliding"
-          ];
+          const offersCollisionConstraint = this.leftHandCollisionTarget.components["offers-constraint-when-colliding"];
           const superSpawner = this.leftHandCollisionTarget.components["super-spawner"];
           if (offersCollisionConstraint) {
             this.leftHandConstraintTarget = this.leftHandCollisionTarget;
@@ -153,9 +152,7 @@ AFRAME.registerSystem("interaction", {
               stickyObject.onGrab();
             }
 
-            const superNetworkedInteractable = this.leftHandConstraintTarget.components[
-              "super-networked-interactable"
-            ];
+            const superNetworkedInteractable = this.leftHandConstraintTarget.components["super-networked-interactable"];
             if (superNetworkedInteractable) {
               superNetworkedInteractable.onGrabStart(this.leftHand);
             }
@@ -188,7 +185,8 @@ AFRAME.registerSystem("interaction", {
     } else {
       this.rightHandCollisionTarget =
         !this.rightRemoteConstraintTarget && findHandCollisionTargetForBody(this.rightHand.body);
-      this.cursorController.components["cursor-controller"].enabled = !this.rightHandCollisionTarget;
+      this.cursorController.components["cursor-controller"].enabled =
+        !this.rightHandCollisionTarget && !this.rightHandTeleporter.isTeleporting;
       if (this.rightHandCollisionTarget) {
         if (rightHandGrab) {
           const isPen = this.rightHandCollisionTarget.components["is-pen"];
