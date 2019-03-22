@@ -4,8 +4,38 @@ import { paths } from "./userinput/paths";
 import { addMedia } from "../utils/media-utils";
 import { ObjectContentOrigins } from "../object-types";
 
-const UNHOVERED_EVENT = {type: "unhovered"};
-const HOVERED_EVENT = {type: "hovered"};
+export const EVENT_TYPE_CONSTRAINT_CREATION_ATTEMPT = "constraint-creation-attempt";
+export const EVENT_TYPE_CONSTRAINT_REMOVAL = "constraint-removal";
+export const RIGHT_HAND_CONSTRAINER = "right-hand";
+export const LEFT_HAND_CONSTRAINER = "left-hand";
+export const RIGHT_REMOTE_CONSTRAINER = "right-hand-constrainer";
+
+const UNHOVERED_EVENT = { type: "unhovered" };
+const HOVERED_EVENT = { type: "hovered" };
+const RIGHT_HAND_CONSTRAINT_CREATION_ATTEMPT_EVENT = {
+  type: EVENT_TYPE_CONSTRAINT_CREATION_ATTEMPT,
+  constrainer: RIGHT_HAND_CONSTRAINER
+};
+const LEFT_HAND_CONSTRAINT_CREATION_ATTEMPT_EVENT = {
+  type: EVENT_TYPE_CONSTRAINT_CREATION_ATTEMPT,
+  constrainer: LEFT_HAND_CONSTRAINER
+};
+const RIGHT_REMOTE_CONSTRAINT_CREATION_ATTEMPT_EVENT = {
+  type: EVENT_TYPE_CONSTRAINT_CREATION_ATTEMPT,
+  constrainer: RIGHT_REMOTE_CONSTRAINER
+};
+const RIGHT_HAND_CONSTRAINT_REMOVAL_EVENT = {
+  type: EVENT_TYPE_CONSTRAINT_REMOVAL,
+  constrainer: RIGHT_HAND_CONSTRAINER
+};
+const LEFT_HAND_CONSTRAINT_REMOVAL_EVENT = {
+  type: EVENT_TYPE_CONSTRAINT_REMOVAL,
+  constrainer: LEFT_HAND_CONSTRAINER
+};
+const RIGHT_REMOTE_CONSTRAINT_REMOVAL_EVENT = {
+  type: EVENT_TYPE_CONSTRAINT_REMOVAL,
+  constrainer: RIGHT_REMOTE_CONSTRAINER
+};
 
 AFRAME.registerComponent("offers-constraint-when-colliding", {});
 AFRAME.registerComponent("offers-remote-constraint", {});
@@ -93,10 +123,7 @@ AFRAME.registerSystem("interaction", {
 
     if (this.leftHandConstraintTarget) {
       if (leftHandDrop) {
-        const stickyObject = this.leftHandConstraintTarget.components["sticky-object"];
-        if (stickyObject) {
-          stickyObject.onRelease();
-        }
+        this.leftHandConstraintTarget.object3D.dispatchEvent(LEFT_HAND_CONSTRAINT_REMOVAL_EVENT);
 
         const superNetworkedInteractable = this.leftHandConstraintTarget.components["super-networked-interactable"];
         if (superNetworkedInteractable) {
@@ -118,10 +145,7 @@ AFRAME.registerSystem("interaction", {
             this.leftHandConstraintTarget = this.leftHandCollisionTarget;
             this.leftHandConstraintTarget.setAttribute("ammo-constraint", { target: "#player-left-controller" });
 
-            const stickyObject = this.leftHandCollisionTarget.components["sticky-object"];
-            if (stickyObject) {
-              stickyObject.onGrab();
-            }
+            this.leftHandCollisionTarget.object3D.dispatchEvent(LEFT_HAND_CONSTRAINT_CREATION_ATTEMPT_EVENT);
             const superNetworkedInteractable = this.leftHandCollisionTarget.components["super-networked-interactable"];
             if (superNetworkedInteractable) {
               superNetworkedInteractable.onGrabStart(this.leftHand);
@@ -161,10 +185,7 @@ AFRAME.registerSystem("interaction", {
 
             this.leftHandConstraintTarget = entity;
             this.leftHandConstraintTarget.setAttribute("ammo-constraint", { target: "#player-left-controller" });
-            const stickyObject = this.leftHandConstraintTarget.components["sticky-object"];
-            if (stickyObject) {
-              stickyObject.onGrab();
-            }
+            this.leftHandCollisionTarget.object3D.dispatchEvent(LEFT_HAND_CONSTRAINT_CREATION_ATTEMPT_EVENT);
 
             const superNetworkedInteractable = this.leftHandConstraintTarget.components["super-networked-interactable"];
             if (superNetworkedInteractable) {
@@ -178,10 +199,7 @@ AFRAME.registerSystem("interaction", {
 
     if (this.rightHandConstraintTarget) {
       if (rightHandDrop) {
-        const stickyObject = this.rightHandConstraintTarget.components["sticky-object"];
-        if (stickyObject) {
-          stickyObject.onRelease();
-        }
+        this.rightHandConstraintTarget.object3D.dispatchEvent(RIGHT_HAND_CONSTRAINT_REMOVAL_EVENT);
 
         const superNetworkedInteractable = this.rightHandConstraintTarget.components["super-networked-interactable"];
         if (superNetworkedInteractable) {
@@ -206,10 +224,7 @@ AFRAME.registerSystem("interaction", {
             this.rightHandConstraintTarget = this.rightHandCollisionTarget;
             this.rightHandConstraintTarget.setAttribute("ammo-constraint", { target: "#player-right-controller" });
 
-            const stickyObject = this.rightHandCollisionTarget.components["sticky-object"];
-            if (stickyObject) {
-              stickyObject.onGrab();
-            }
+            this.rightHandConstraintTarget.object3D.dispatchEvent(RIGHT_HAND_CONSTRAINT_CREATION_ATTEMPT_EVENT);
             const superNetworkedInteractable = this.rightHandCollisionTarget.components["super-networked-interactable"];
             if (superNetworkedInteractable) {
               superNetworkedInteractable.onGrabStart(this.rightHand);
@@ -249,10 +264,7 @@ AFRAME.registerSystem("interaction", {
 
             this.rightHandConstraintTarget = entity;
             this.rightHandConstraintTarget.setAttribute("ammo-constraint", { target: "#player-right-controller" });
-            const stickyObject = this.rightHandConstraintTarget.components["sticky-object"];
-            if (stickyObject) {
-              stickyObject.onGrab();
-            }
+            this.rightHandConstraintTarget.object3D.dispatchEvent(RIGHT_HAND_CONSTRAINT_CREATION_ATTEMPT_EVENT);
 
             const superNetworkedInteractable = this.rightHandConstraintTarget.components[
               "super-networked-interactable"
@@ -278,10 +290,7 @@ AFRAME.registerSystem("interaction", {
 
     if (this.rightRemoteConstraintTarget) {
       if (drop) {
-        const stickyObject = this.rightRemoteConstraintTarget.components["sticky-object"];
-        if (stickyObject) {
-          stickyObject.onRelease();
-        }
+        this.rightRemoteConstraintTarget.object3D.dispatchEvent(RIGHT_REMOTE_CONSTRAINT_REMOVAL_EVENT);
 
         const superNetworkedInteractable = this.rightRemoteConstraintTarget.components["super-networked-interactable"];
         if (superNetworkedInteractable) {
@@ -311,10 +320,7 @@ AFRAME.registerSystem("interaction", {
           this.rightRemoteConstraintTarget = rightRemoteHoverTarget;
           this.rightRemoteConstraintTarget.setAttribute("ammo-constraint", { target: "#cursor" });
 
-          const stickyObject = rightRemoteHoverTarget.components["sticky-object"];
-          if (stickyObject) {
-            stickyObject.onGrab();
-          }
+          this.rightRemoteConstraintTarget.object3D.dispatchEvent(RIGHT_REMOTE_CONSTRAINT_CREATION_ATTEMPT_EVENT);
           const superNetworkedInteractable = rightRemoteHoverTarget.components["super-networked-interactable"];
           if (superNetworkedInteractable) {
             superNetworkedInteractable.onGrabStart(this.cursor);
@@ -354,10 +360,7 @@ AFRAME.registerSystem("interaction", {
 
           this.rightRemoteConstraintTarget = entity;
           this.rightRemoteConstraintTarget.setAttribute("ammo-constraint", { target: "#cursor" });
-          const stickyObject = this.rightRemoteConstraintTarget.components["sticky-object"];
-          if (stickyObject) {
-            stickyObject.onGrab();
-          }
+          this.rightRemoteConstraintTarget.object3D.dispatchEvent(RIGHT_REMOTE_CONSTRAINT_CREATION_ATTEMPT_EVENT);
 
           const superNetworkedInteractable = this.rightRemoteConstraintTarget.components[
             "super-networked-interactable"
