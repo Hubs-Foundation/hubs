@@ -16,6 +16,7 @@ import { getAvatarSrc } from "./assets/avatars/avatars";
 import { pushHistoryState } from "./utils/history";
 
 const isIOS = AFRAME.utils.device.isIOS();
+const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, availableVREntryTypes, history) {
@@ -455,7 +456,7 @@ export default class SceneEntryManager {
       if (entry.type === "scene_listing" && this.hubChannel.permissions.update_hub) return;
 
       // If user has HMD lifted up, delay spawning for now. eventually show a modal
-      const delaySpawn = this._in2DInterstitial && !this.availableVREntryTypes.isInHMD;
+      const delaySpawn = this._in2DInterstitial && !isMobileVR;
       setTimeout(() => {
         spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
       }, delaySpawn ? 3000 : 0);

@@ -1,7 +1,7 @@
-import { detectInHMD } from "./vr-caps-detect";
 import { showFullScreenIfAvailable } from "./fullscreen";
 
 let isIn2DInterstitial = false;
+const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 export function handleExitTo2DInterstitial(isLower) {
   const scene = document.querySelector("a-scene");
@@ -9,7 +9,7 @@ export function handleExitTo2DInterstitial(isLower) {
 
   isIn2DInterstitial = true;
 
-  if (detectInHMD()) {
+  if (isMobileVR) {
     // Immersive browser, exit VR.
     scene.exitVR();
     showFullScreenIfAvailable();
@@ -29,7 +29,7 @@ export function handleReEntryToVRFrom2DInterstitial() {
 
   document.querySelector(".vr-notice").object3D.visible = false;
 
-  if (detectInHMD()) {
+  if (isMobileVR) {
     const scene = document.querySelector("a-scene");
     scene.enterVR();
   }

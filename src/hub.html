@@ -32,7 +32,7 @@
         loading-screen="enabled: false"
         nextframe
         class="grab-cursor"
-        renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: true;"
+        renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: false;"
         shadow="type: pcfsoft"
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         physics="gravity: -9.8; debug: false; driver: ammo; debugDrawMode: 1;"
@@ -690,7 +690,7 @@
                 matrix-auto-update
                 haptic-feedback="path: /haptics/actuators/left"
                 ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4;"
-                ammo-shape="type: box; autoGenerateShape: false; scaleAutoUpdate: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
+                ammo-shape="type: box; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 action-to-event__c="path: /actions/leftHandGrab; event: primary_hand_grab;"
                 action-to-event__d="path: /actions/leftHandDrop; event: primary_hand_release;"
             >
@@ -706,7 +706,7 @@
                 matrix-auto-update
                 haptic-feedback="path: /haptics/actuators/right"
                 ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4;"
-                ammo-shape="type: box; autoGenerateShape: false; scaleAutoUpdate: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
+                ammo-shape="type: box; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 action-to-event__c="path: /actions/rightHandGrab; event: primary_hand_grab;"
                 action-to-event__d="path: /actions/rightHandDrop; event: primary_hand_release;"
             >

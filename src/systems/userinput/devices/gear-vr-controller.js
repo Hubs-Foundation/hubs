@@ -27,6 +27,8 @@ export class GearVRControllerDevice {
   }
 
   write(frame) {
+    // Chrome requires a call to getGamepads() for the gamepad state to update.
+    navigator.getGamepads();
     if (this.gamepad.connected) {
       const touchpad = this.gamepad.buttons[0];
       frame.setValueType(TOUCHPAD.pressed, !!touchpad.pressed);

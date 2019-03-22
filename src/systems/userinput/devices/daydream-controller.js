@@ -17,7 +17,7 @@ export class DaydreamControllerDevice {
     this.gamepad = gamepad;
 
     this.rayObjectRotation = new THREE.Quaternion();
-    this.selector = `#player-${gamepad.hand}-controller`;
+    this.selector = `#player-${gamepad.hand || "right"}-controller`;
     this.pose = new Pose();
     this.sittingToStandingMatrix = new THREE.Matrix4().makeTranslation(0, 1.6, 0);
     copySittingToStandingTransform(this.sittingToStandingMatrix);
@@ -26,7 +26,8 @@ export class DaydreamControllerDevice {
   }
 
   write(frame) {
-    if (this.gamepad.connected) {
+    this.gamepad = navigator.getGamepads()[0];
+    if (this.gamepad && this.gamepad.connected) {
       const button = this.gamepad.buttons[0];
       frame.setValueType(TOUCHPAD.pressed, !!button.pressed);
       frame.setValueType(TOUCHPAD.touched, !!button.touched);

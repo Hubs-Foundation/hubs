@@ -162,39 +162,6 @@ AFRAME.registerComponent("teleporter", {
     this.queryCollisionEntities();
   },
 
-  teleport: (function() {
-    const teleportOriginWorldPosition = new THREE.Vector3();
-    const newRigLocalPosition = new THREE.Vector3();
-
-    return function teleport() {
-      const rig = document.querySelector("#player-rig");
-      rig.object3D.getWorldPosition(this.rigWorldPosition);
-      this.newRigWorldPosition.copy(this.hitPoint);
-
-      // Offset the rig such that the teleportOrigin is above the hitPoint
-      const teleportOrigin = document.querySelector("#player-camera");
-      teleportOrigin.object3D.getWorldPosition(teleportOriginWorldPosition);
-      this.newRigWorldPosition.sub(teleportOriginWorldPosition).add(this.rigWorldPosition);
-
-      // Always keep the rig at the same offset off the ground after teleporting
-      this.newRigWorldPosition.y = this.rigWorldPosition.y + this.hitPoint.y - this.prevHitHeight;
-      this.prevHitHeight = this.hitPoint.y;
-
-      newRigLocalPosition.copy(this.newRigWorldPosition);
-      if (rig.object3D.parent) {
-        rig.object3D.parent.worldToLocal(newRigLocalPosition);
-      }
-      rig.setAttribute("position", newRigLocalPosition);
-      rig.object3D.matrixNeedsUpdate = true;
-      teleportOrigin.object3D.matrixNeedsUpdate = true;
-
-      this.teleportEventDetail.oldPosition = this.rigWorldPosition;
-      this.teleportEventDetail.newPosition = this.newRigWorldPosition;
-      this.teleportEventDetail.hitPoint = this.hitPoint;
-      this.el.emit("teleported", this.teleportEventDetail);
-    };
-  })(),
-
   queryCollisionEntities: function() {
     this.collisionEntities = [].slice.call(this.el.sceneEl.querySelectorAll(this.data.collisionEntities));
     this.meshes = getMeshes(this.collisionEntities);
@@ -231,7 +198,9 @@ AFRAME.registerComponent("teleporter", {
         return;
       }
 
-      this.teleport();
+      this.characterController =
+        this.characterController || document.querySelector("#player-rig").components["character-controller"];
+      this.characterController.teleportTo(this.hitPoint);
       this.playSound("teleport-sound-stop");
       return;
     }
