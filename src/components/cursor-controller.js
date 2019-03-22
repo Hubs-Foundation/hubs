@@ -196,7 +196,7 @@ AFRAME.registerComponent("cursor-controller", {
       }
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);
       // The cursor will always be oriented towards the player about its Y axis, so objects held by the cursor will rotate towards the player.
-      getLastWorldPosition(camera, cameraPos);
+      getLastWorldPosition(camera.object3D, cameraPos);
       cameraPos.y = cursor.object3D.position.y;
       cursor.object3D.lookAt(cameraPos);
       cursor.object3D.scale.setScalar(Math.pow(this.distance, 0.315) * 0.75);
