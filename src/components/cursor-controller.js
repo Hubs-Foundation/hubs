@@ -228,12 +228,11 @@ AFRAME.registerComponent("cursor-controller", {
       }
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);
       // The cursor will always be oriented towards the player about its Y axis, so objects held by the cursor will rotate towards the player.
-      //camera.object3D.getWorldPosition(cameraPos);
-      //cameraPos.y = cursor.object3D.position.y;
-      //cursor.object3D.lookAt(cameraPos);
-      //cursor.object3D.scale.setScalar(Math.pow(this.distance, 0.315) * 0.75);
+      camera.object3D.getWorldPosition(cameraPos);
+      cameraPos.y = cursor.object3D.position.y;
+      cursor.object3D.lookAt(cameraPos);
+      cursor.object3D.scale.setScalar(Math.pow(this.distance, 0.315) * 0.75);
       cursor.object3D.matrixNeedsUpdate = true;
-      cursor.object3D.updateMatrices();
 
       if (AFRAME.scenes[0].systems["rotate-selected-object"].rotating) {
         _interpolateHSL(ROTATE_COLOR_1, ROTATE_COLOR_2, 0.5 + 0.5 * Math.sin(t / 1000.0), this.rotateColor);
