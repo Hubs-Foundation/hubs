@@ -102,6 +102,44 @@ AFRAME.registerSystem("interaction", {
     }
   },
 
+  async spawnObjectRoutine(constraintObject3D, superSpawner, constraintTarget, event) {
+    constraintObject3D.updateMatrices();
+    constraintObject3D.matrix.decompose(
+      constraintObject3D.position,
+      constraintObject3D.quaternion,
+      constraintObject3D.scale
+    );
+    const data = superSpawner.data;
+    const entity = addMedia(data.src, data.template, ObjectContentOrigins.SPAWNER, data.resolve, data.resize).entity;
+    entity.object3D.position.copy(data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position);
+    entity.object3D.rotation.copy(data.useCustomSpawnRotation ? data.spawnRotation : superSpawner.el.object3D.rotation);
+    entity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : superSpawner.el.object3D.scale);
+    entity.object3D.matrixNeedsUpdate = true;
+
+    superSpawner.activateCooldown();
+    // WARNING: waitForEvent is semantically different than entity.addEventListener("body-loaded", ...)
+    // and adding a callback fn via addEventListener will not work unless the callback function
+    // wraps its code in setTimeout(()=>{...}, 0)
+    await waitForEvent("body-loaded", entity);
+    entity.object3D.position.copy(data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position);
+    if (data.centerSpawnedObject) {
+      entity.body.position.copy(constraintObject3D.position);
+    }
+    entity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : superSpawner.el.object3D.scale);
+    entity.object3D.matrixNeedsUpdate = true;
+
+    if (constraintTarget === "#player-left-controller") {
+      this.leftHandConstraintTarget = entity;
+    } else if (constraintTarget === "#player-right-controller") {
+      this.rightHandConstraintTarget = entity;
+    } else if (constraintTarget === "#cursor") {
+      this.rightRemoteConstraintTarget = entity;
+    }
+    entity.setAttribute("ammo-constraint", { target: constraintTarget });
+    entity.object3D.dispatchEvent(event);
+    entity.components["ammo-body"].syncToPhysics();
+  },
+
   init: function() {
     this.rightRemoteConstraintTarget = null;
     this.weWantToGrab = false;
@@ -141,43 +179,12 @@ AFRAME.registerSystem("interaction", {
 
             this.leftHandCollisionTarget.object3D.dispatchEvent(LEFT_HAND_CONSTRAINT_CREATION_ATTEMPT_EVENT);
           } else if (superSpawner) {
-            this.leftHand.object3D.updateMatrices();
-            this.leftHand.object3D.matrix.decompose(
-              this.leftHand.object3D.position,
-              this.leftHand.object3D.quaternion,
-              this.leftHand.object3D.scale
+            this.spawnObjectRoutine(
+              this.leftHand.object3D,
+              superSpawner,
+              "#player-left-controller",
+              LEFT_HAND_CONSTRAINT_CREATION_ATTEMPT_EVENT
             );
-            const data = superSpawner.data;
-            const entity = addMedia(data.src, data.template, ObjectContentOrigins.SPAWNER, data.resolve, data.resize)
-              .entity;
-            entity.object3D.position.copy(
-              data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
-            );
-            entity.object3D.rotation.copy(
-              data.useCustomSpawnRotation ? data.spawnRotation : superSpawner.el.object3D.rotation
-            );
-            entity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : superSpawner.el.object3D.scale);
-            entity.object3D.matrixNeedsUpdate = true;
-
-            superSpawner.activateCooldown();
-            // WARNING: waitForEvent is semantically different than entity.addEventListener("body-loaded", ...)
-            // and adding a callback fn via addEventListener will not work unless the callback function
-            // wraps its code in setTimeout(()=>{...}, 0)
-            await waitForEvent("body-loaded", entity);
-            entity.object3D.position.copy(
-              data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
-            );
-            if (data.centerSpawnedObject) {
-              entity.body.position.copy(this.leftHand.object3D.position);
-            }
-            entity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : superSpawner.el.object3D.scale);
-            entity.object3D.matrixNeedsUpdate = true;
-
-            this.leftHandConstraintTarget = entity;
-            this.leftHandConstraintTarget.setAttribute("ammo-constraint", { target: "#player-left-controller" });
-            this.leftHandCollisionTarget.object3D.dispatchEvent(LEFT_HAND_CONSTRAINT_CREATION_ATTEMPT_EVENT);
-
-            entity.components["ammo-body"].syncToPhysics();
           }
         }
       }
@@ -204,43 +211,12 @@ AFRAME.registerSystem("interaction", {
 
             this.rightHandConstraintTarget.object3D.dispatchEvent(RIGHT_HAND_CONSTRAINT_CREATION_ATTEMPT_EVENT);
           } else if (superSpawner) {
-            this.rightHand.object3D.updateMatrices();
-            this.rightHand.object3D.matrix.decompose(
-              this.rightHand.object3D.position,
-              this.rightHand.object3D.quaternion,
-              this.rightHand.object3D.scale
+            this.spawnObjectRoutine(
+              this.rightHand.object3D,
+              superSpawner,
+              "#player-right-controller",
+              RIGHT_HAND_CONSTRAINT_CREATION_ATTEMPT_EVENT
             );
-            const data = superSpawner.data;
-            const entity = addMedia(data.src, data.template, ObjectContentOrigins.SPAWNER, data.resolve, data.resize)
-              .entity;
-            entity.object3D.position.copy(
-              data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
-            );
-            entity.object3D.rotation.copy(
-              data.useCustomSpawnRotation ? data.spawnRotation : superSpawner.el.object3D.rotation
-            );
-            entity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : superSpawner.el.object3D.scale);
-            entity.object3D.matrixNeedsUpdate = true;
-
-            superSpawner.activateCooldown();
-            // WARNING: waitForEvent is semantically different than entity.addEventListener("body-loaded", ...)
-            // and adding a callback fn via addEventListener will not work unless the callback function
-            // wraps its code in setTimeout(()=>{...}, 0)
-            await waitForEvent("body-loaded", entity);
-            entity.object3D.position.copy(
-              data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
-            );
-            if (data.centerSpawnedObject) {
-              entity.body.position.copy(this.rightHand.object3D.position);
-            }
-            entity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : superSpawner.el.object3D.scale);
-            entity.object3D.matrixNeedsUpdate = true;
-
-            this.rightHandConstraintTarget = entity;
-            this.rightHandConstraintTarget.setAttribute("ammo-constraint", { target: "#player-right-controller" });
-            this.rightHandConstraintTarget.object3D.dispatchEvent(RIGHT_HAND_CONSTRAINT_CREATION_ATTEMPT_EVENT);
-
-            entity.components["ammo-body"].syncToPhysics();
           }
         }
       }
@@ -292,42 +268,12 @@ AFRAME.registerSystem("interaction", {
 
           this.rightRemoteConstraintTarget.object3D.dispatchEvent(RIGHT_REMOTE_CONSTRAINT_CREATION_ATTEMPT_EVENT);
         } else if (superSpawner) {
-          this.cursor.object3D.updateMatrices();
-          this.cursor.object3D.matrix.decompose(
-            this.cursor.object3D.position,
-            this.cursor.object3D.quaternion,
-            this.cursor.object3D.scale
+          this.spawnObjectRoutine(
+            this.cursor.object3D,
+            superSpawner,
+            "#cursor",
+            RIGHT_REMOTE_CONSTRAINT_CREATION_ATTEMPT_EVENT
           );
-          const data = superSpawner.data;
-          const entity = addMedia(data.src, data.template, ObjectContentOrigins.SPAWNER, data.resolve, data.resize)
-            .entity;
-          entity.object3D.position.copy(
-            data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
-          );
-          entity.object3D.rotation.copy(
-            data.useCustomSpawnRotation ? data.spawnRotation : superSpawner.el.object3D.rotation
-          );
-          entity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : superSpawner.el.object3D.scale);
-          entity.object3D.matrixNeedsUpdate = true;
-
-          superSpawner.activateCooldown();
-          // WARNING: waitForEvent is semantically different than entity.addEventListener("body-loaded", ...)
-          // and adding a callback fn via addEventListener will not work unless the callback function
-          // wraps its code in setTimeout(()=>{...}, 0)
-          await waitForEvent("body-loaded", entity);
-          entity.object3D.position.copy(
-            data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position
-          );
-          if (data.centerSpawnedObject) {
-            entity.body.position.copy(this.cursor.object3D.position);
-          }
-          entity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : superSpawner.el.object3D.scale);
-          entity.object3D.matrixNeedsUpdate = true;
-
-          this.rightRemoteConstraintTarget = entity;
-          this.rightRemoteConstraintTarget.setAttribute("ammo-constraint", { target: "#cursor" });
-          this.rightRemoteConstraintTarget.object3D.dispatchEvent(RIGHT_REMOTE_CONSTRAINT_CREATION_ATTEMPT_EVENT);
-          entity.components["ammo-body"].syncToPhysics();
         }
       }
     }
