@@ -3,6 +3,8 @@ import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
+import { ObjectContentOrigins } from "../object-types";
+import nextTick from "./next-tick";
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
@@ -177,13 +179,16 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
     fileIsOwned: !needsToBeUploaded
   });
 
-  const [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
+  let [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
+
+  entity.object3D.scale.set(0.001, 0.001, 0.001);
+  entity.object3D.matrixNeedsUpdate = true;
 
   entity.setAttribute("animation__loader_spawn-start", {
     property: "scale",
     delay: 50,
     dur: 200,
-    from: { x: sx / 2, y: sy / 2, z: sz / 2 },
+    from: { x: 0.001, y: 0.001, z: 0.001 },
     to: { x: sx, y: sy, z: sz },
     easing: "easeInQuad"
   });
@@ -195,22 +200,42 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
   }, 100);
 
   ["model-loaded", "video-loaded", "image-loaded"].forEach(eventName => {
-    entity.addEventListener(eventName, () => {
+    entity.addEventListener(eventName, async () => {
+      entity.object3D.visible = false;
+
       clearTimeout(fireLoadingTimeout);
 
       entity.removeAttribute("animation__loader_spawn-start");
-      const [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
+
+      if (entity.components.scale) {
+        // Wait for any pending scale component to initialize and set scale (like on the pen)
+        await nextTick();
+      }
+
+      if (contentOrigin !== ObjectContentOrigins.SPAWNER) {
+        // Spawner will have set scale previously, otherwise we set reset the scale here in case
+        // the spawner box animation did not complete.
+        entity.object3D.scale.set(sx, sy, sz);
+        entity.object3D.matrixNeedsUpdate = true;
+      }
+
+      [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
 
       if (!entity.getAttribute("animation__spawn-start")) {
+        entity.object3D.scale.set(0.001, 0.001, 0.001);
+        entity.object3D.matrixNeedsUpdate = true;
+
         entity.setAttribute("animation__spawn-start", {
           property: "scale",
           delay: 50,
-          dur: 300,
-          from: { x: sx / 2, y: sy / 2, z: sz / 2 },
+          dur: 350,
+          from: { x: 0.001, y: 0.001, z: 0.001 },
           to: { x: sx, y: sy, z: sz },
           easing: "easeOutElastic"
         });
       }
+
+      entity.object3D.visible = true;
 
       scene.emit("media-loaded", { src: src });
     });
