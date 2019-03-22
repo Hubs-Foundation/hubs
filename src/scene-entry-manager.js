@@ -288,6 +288,7 @@ export default class SceneEntryManager {
         true
       );
 
+      //TODO: rotate to face the user
       offset.set(0, 0, -1.5);
       camera = camera || document.querySelector("#player-camera").object3D;
       camera.updateMatrices();
@@ -474,10 +475,13 @@ export default class SceneEntryManager {
       } else {
         const entity = document.createElement("a-entity");
         entity.setAttribute("networked", { template: "#interactable-camera" });
-        entity.setAttribute("offset-relative-to", {
-          target: "#player-camera",
-          offset: { x: 0, y: 0, z: -1.5 }
-        });
+        //TODO: rotate to face the user
+        const offset = new THREE.Vector3(0, 0, -1.5);
+        const playerCam = document.querySelector("#player-camera").object3D;
+        playerCam.updateMatrices();
+        playerCam.localToWorld(offset);
+        entity.object3D.position.copy(offset);
+        entity.object3D.matrixNeedsUpdate = true;
         this.scene.appendChild(entity);
         this.scene.addState("camera");
       }

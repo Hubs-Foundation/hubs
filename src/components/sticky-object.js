@@ -1,14 +1,16 @@
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 /* global THREE, AFRAME */
 AFRAME.registerComponent("sticky-object", {
-
   schema: {
     autoLockOnLoad: { default: false },
     autoLockOnRelease: { default: false },
     autoLockSpeedLimit: { default: 0.5 } // Set to 0 to always autolock on release
   },
 
-  init() {
+  play() {
+    // We do this in play instead of in init because otherwise NAF.utils.isMine fails
+    if (this.hasBeenHereBefore) return;
+    this.hasBeenHereBefore = true;
     if (this.el.body) {
       this._onBodyLoaded();
     } else {
