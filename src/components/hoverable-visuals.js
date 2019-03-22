@@ -25,21 +25,18 @@ AFRAME.registerComponent("hoverable-visuals", {
   tick(time) {
     if (!this.uniforms || !this.uniforms.size) return;
 
-    return; // replace-super-hands
-    const { hoverers } = this.el.components["hoverable"];
     const isFrozen = this.el.sceneEl.is("frozen");
 
     let interactorOne, interactorTwo;
-    for (const hoverer of hoverers) {
-      if (hoverer.id === "player-left-controller") {
-        interactorOne = hoverer.object3D;
-      } else if (hoverer.id === "cursor") {
-        if (this.data.cursorController.components["cursor-controller"].enabled) {
-          interactorTwo = hoverer.object3D;
-        }
-      } else {
-        interactorTwo = hoverer.object3D;
-      }
+    const interaction = AFRAME.scenes[0].systems.interaction;
+    if (interaction.leftHandConstraintTarget === this.el) {
+      interactorOne = interaction.leftHand.object3D;
+    }
+    if (interaction.rightRemoteConstraintTarget === this.el) {
+      interactorTwo = this.data.cursorController.components["cursor-controller"].data.cursor.object3D;
+    }
+    if (interaction.rightHandConstraintTarget === this.el) {
+      interactorTwo = interaction.rightHand.object3D;
     }
 
     if (interactorOne) {
