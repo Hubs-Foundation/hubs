@@ -7,8 +7,6 @@ import classNames from "classnames";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { bumpCacheVersion } from "../assets/avatars/avatars";
-
 import styles from "../assets/stylesheets/profile.scss";
 
 const BOT_PARENT_AVATAR =
@@ -137,7 +135,6 @@ export default class AvatarEditor extends Component {
     this.props.onAvatarChanged(avatar.avatar_id);
 
     this.setState({ uploading: false });
-    bumpCacheVersion();
     this.props.saveStateAndFinish();
   };
 
