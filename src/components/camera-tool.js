@@ -189,6 +189,10 @@ AFRAME.registerComponent("camera-tool", {
     this.localSnapCount = 0; // When camera is moved, reset photo arrangement algorithm
   },
 
+  onAvatarUpdated() {
+    delete this.playerHead;
+  },
+
   tick() {
     const userinput = this.el.sceneEl.systems.userinput;
     const grabber = this.el.components.grabbable.grabbers[0];

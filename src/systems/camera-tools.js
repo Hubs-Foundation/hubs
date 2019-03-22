@@ -17,7 +17,7 @@ AFRAME.registerSystem("camera-tools", {
   },
 
   avatarUpdated() {
-    this.cameraEls.forEach(el => delete el.components["camera-tool"].playerHead);
+    this.cameraEls.forEach(el => delete el.components["camera-tool"].onAvatarUpdated());
   },
 
   getMyCamera() {
