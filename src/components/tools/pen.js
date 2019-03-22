@@ -104,6 +104,16 @@ AFRAME.registerComponent("pen", {
 
   tick(t, dt) {
     const userinput = AFRAME.scenes[0].systems.userinput;
+    const interaction = AFRAME.scenes[0].systems.interaction;
+    if (interaction.rightHandConstraintTarget === this.el.parentNode) {
+      this.grabberId = "player-right-controller";
+    } else if (interaction.leftHandConstraintTarget === this.el.parentNode) {
+      this.grabberId = "player-left-controller";
+    } else if (interaction.rightRemoteConstraintTarget === this.el.parentNode) {
+      this.grabberId = "cursor";
+    } else {
+      this.grabberId = null;
+    }
 
     getLastWorldPosition(this.el.object3D, this.worldPosition);
 

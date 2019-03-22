@@ -72,7 +72,6 @@ AFRAME.registerSystem("interaction", {
 
   init: function() {
     this.rightRemoteConstraintTarget = null;
-    this.grabbedPen = null;
     this.weWantToGrab = false;
   },
 
@@ -102,11 +101,6 @@ AFRAME.registerSystem("interaction", {
           superNetworkedInteractable.onGrabEnd(this.leftHand);
         }
 
-        if (this.penInLeftHand) {
-          this.penInLeftHand.children[0].components["pen"].grabberId = null;
-          this.penInLeftHand = null;
-        }
-
         this.leftHandConstraintTarget.removeAttribute("ammo-constraint");
         this.leftHandConstraintTarget = null;
       }
@@ -116,11 +110,6 @@ AFRAME.registerSystem("interaction", {
 
       if (this.leftHandCollisionTarget) {
         if (leftHandGrab) {
-          const isPen = this.leftHandCollisionTarget.components["is-pen"];
-          if (isPen) {
-            this.leftHandCollisionTarget.children[0].components["pen"].grabberId = "player-left-controller";
-            this.penInLeftHand = this.leftHandCollisionTarget;
-          }
           const offersCollisionConstraint = this.leftHandCollisionTarget.components["offers-constraint-when-colliding"];
           const superSpawner = this.leftHandCollisionTarget.components["super-spawner"];
           if (offersCollisionConstraint) {
@@ -197,11 +186,6 @@ AFRAME.registerSystem("interaction", {
           superNetworkedInteractable.onGrabEnd(this.rightHand);
         }
 
-        if (this.penInRightHand) {
-          this.penInRightHand.children[0].components["pen"].grabberId = null;
-          this.penInRightHand = null;
-        }
-
         this.rightHandConstraintTarget.removeAttribute("ammo-constraint");
         this.rightHandConstraintTarget = null;
       }
@@ -212,11 +196,6 @@ AFRAME.registerSystem("interaction", {
         !this.rightHandCollisionTarget && !this.rightHandTeleporter.isTeleporting;
       if (this.rightHandCollisionTarget) {
         if (rightHandGrab) {
-          const isPen = this.rightHandCollisionTarget.components["is-pen"];
-          if (isPen) {
-            this.rightHandCollisionTarget.children[0].components["pen"].grabberId = "player-right-controller";
-            this.penInRightHand = this.rightHandCollisionTarget;
-          }
           const offersCollisionConstraint = this.rightHandCollisionTarget.components[
             "offers-constraint-when-colliding"
           ];
@@ -307,11 +286,6 @@ AFRAME.registerSystem("interaction", {
           superNetworkedInteractable.onGrabEnd(this.cursor);
         }
 
-        if (this.grabbedPen) {
-          this.grabbedPen.children[0].components["pen"].grabberId = null;
-          this.grabbedPen = null;
-        }
-
         this.rightRemoteConstraintTarget.removeAttribute("ammo-constraint");
         this.rightRemoteConstraintTarget = null;
       }
@@ -327,12 +301,6 @@ AFRAME.registerSystem("interaction", {
         if (holdableButton) {
           this.buttonHeldByRightRemote = holdableButton;
           holdableButton.el.object3D.dispatchEvent({ type: "holdable-button-down", path: paths.actions.cursor.grab });
-        }
-
-        const isPen = rightRemoteHoverTarget.components["is-pen"];
-        if (isPen) {
-          rightRemoteHoverTarget.children[0].components["pen"].grabberId = "cursor";
-          this.grabbedPen = rightRemoteHoverTarget;
         }
 
         const offersRemoteConstraint = rightRemoteHoverTarget.components["offers-remote-constraint"];
