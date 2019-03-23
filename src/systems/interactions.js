@@ -155,7 +155,7 @@ AFRAME.registerSystem("interaction", {
     const leftHandDrop = userinput.get(paths.actions.leftHand.drop);
     const leftHandGrab = userinput.get(paths.actions.leftHand.grab);
     const rightRemoteDrop = userinput.get(paths.actions.cursor.drop);
-    const grab = userinput.get(paths.actions.cursor.grab);
+    const rightRemoteGrab = userinput.get(paths.actions.cursor.grab);
     this.cursor = this.cursor || document.querySelector("#cursor");
     this.cursorController = this.cursorController || document.querySelector("#cursor-controller");
     this.rightHand = this.rightHand || document.querySelector("#player-right-controller");
@@ -286,7 +286,7 @@ AFRAME.registerSystem("interaction", {
         this.rightRemoteConstraintTarget = null;
       }
     } else {
-      if (!this.rightHandCollisionTarget && this.rightRemoteHoverTarget && (grab || this.weWantToGrab)) {
+      if (!this.rightHandCollisionTarget && this.rightRemoteHoverTarget && (rightRemoteGrab || this.weWantToGrab)) {
         this.weWantToGrab = false;
         const singleActionButton = this.rightRemoteHoverTarget.components["single-action-button"];
         if (singleActionButton) {
