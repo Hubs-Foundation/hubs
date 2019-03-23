@@ -45,7 +45,6 @@
     - [mute-mic](#components/network/mute-mic)
     - [networked-counter](#components/network/networked-counter)
     - [networked-video-player](#components/network/networked-video-player)
-    - [super-networked-interactable](#components/network/super-networked-interactable)
     - [super-spawner](#components/network/super-spawner)
   - [ui](#components/ui)
     - [hud-controller](#components/ui/hud-controller)
@@ -295,15 +294,6 @@ Instantiates and plays a network video stream, setting the video as the source m
 
 `src/components/networked-video-player.js`
           
-
-<a name="components/network/super-networked-interactable"></a>
-#### super-networked-interactable
-
-Manages ownership and haptics on an interatable
-
-`src/components/super-networked-interactable.js`
-          
-
 <a name="components/network/super-spawner"></a>
 #### super-spawner
 

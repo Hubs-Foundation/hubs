@@ -194,6 +194,9 @@ AFRAME.GLTFModelPlus.registerComponent("video", "video", mediaInflator, (name, p
 });
 AFRAME.GLTFModelPlus.registerComponent("link", "link", mediaInflator);
 
+// TODO: Remove this. Check that multiple people in the room still work when you remove this.
+AFRAME.GLTFModelPlus.registerComponent("hoverable", "is-remote-hover-target");
+
 AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName, componentData) => {
   el.setAttribute("media-loader", {
     src: componentData.src,

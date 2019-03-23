@@ -151,7 +151,7 @@
                         </template>
 
                         <template data-name="Spine">
-                            <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
+                            <a-entity is-remote-hover-target personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
                                 <a-entity billboard matrix-auto-update visibility-while-frozen="withinDistance: 10; requireHoverOnNonMobile: false;">
                                     <a-entity mixin="rounded-text-button" block-button ui-class-while-frozen position="0 0 .35"> </a-entity>
                                     <a-entity text="value:Hide; width:2.5; align:center;" position="0 0 0.36"></a-entity>
@@ -194,7 +194,7 @@
             <template id="static-controlled-media">
                 <a-entity
                     class="interactable"
-                    super-networked-interactable="counter: #media-counter;"
+                    super-networked-interactable
                     scalable-when-grabbed
                     ammo-body="type: static; mass: 1;"
                     is-remote-hover-target
@@ -213,7 +213,7 @@
             <template id="interactable-media">
                 <a-entity
                     class="interactable"
-                    super-networked-interactable="counter: #media-counter" 
+                    super-networked-interactable
                     is-remote-hover-target
                     is-hand-collision-target
                     offers-remote-constraint
@@ -269,7 +269,7 @@
             <template id="pen-interactable">
                 <a-entity
                     class="pen interactable"
-                    super-networked-interactable="counter: #pen-counter;"
+                    super-networked-interactable
                     is-remote-hover-target
                     offers-remote-constraint
                     is-hand-collision-target
@@ -324,7 +324,7 @@
                     ammo-body="type: dynamic; mass: 0.001;"
                     ammo-shape="type: box; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.11 0.07 0.05; offset: 0 0.02 0;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
-                    super-networked-interactable="counter: #camera-counter;"
+                    super-networked-interactable
                     scalable-when-grabbed
                     position-at-box-shape-border__freeze="target: .camera-menu"
                     set-yxz-order

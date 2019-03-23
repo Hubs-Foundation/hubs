@@ -40,8 +40,7 @@ AFRAME.registerComponent("pinnable", {
   },
 
   _fireEvents(oldData) {
-    // super-networked-interactable fires grab-end when a remote user takes ownership of an entity, so we need to
-    // ignore that case here. We also need to guard against _fireEvents being called during entity initialization,
+    // We need to guard against _fireEvents being called during entity initialization,
     // when the networked component isn't initialized yet.
     if (this.el.components.networked && this.el.components.networked.data && !NAF.utils.isMine(this.el)) return;
 
