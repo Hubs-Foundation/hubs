@@ -16,6 +16,10 @@ AFRAME.registerSystem("camera-tools", {
     this.myCamera = null;
   },
 
+  avatarUpdated() {
+    this.cameraEls.forEach(el => delete el.components["camera-tool"].onAvatarUpdated());
+  },
+
   getMyCamera() {
     if (this.myCamera) return this.myCamera;
     this.myCamera = this.cameraEls.find(NAF.utils.isMine);

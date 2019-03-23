@@ -147,15 +147,16 @@ export default class SceneEntryManager {
     }
   };
 
-  _updatePlayerRigWithProfile = () => {
+  _updatePlayerRigWithProfile = async () => {
     const { avatarId, displayName } = this.store.state.profile;
-    this.playerRig.setAttribute("player-info", {
-      displayName,
-      avatarSrc: getAvatarSrc(avatarId)
-    });
+
     const hudController = this.playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });
+    this.playerRig.setAttribute("player-info", { displayName });
     this.scene.emit("username-changed", { username: displayName });
+
+    const avatarSrc = await getAvatarSrc(avatarId);
+    this.playerRig.setAttribute("player-info", { avatarSrc });
   };
 
   _setupKicking = () => {
