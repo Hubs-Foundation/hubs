@@ -10,7 +10,11 @@ const qs = new URLSearchParams(location.search);
 const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
 import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
-import { handleExitTo2DInterstitial, handleReEntryToVRFrom2DInterstitial } from "./utils/vr-interstitial";
+import {
+  isIn2DInterstitial,
+  handleExitTo2DInterstitial,
+  handleReEntryToVRFrom2DInterstitial
+} from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc } from "./assets/avatars/avatars";
 import { pushHistoryState } from "./utils/history";
@@ -453,7 +457,7 @@ export default class SceneEntryManager {
       if (entry.type === "scene_listing" && this.hubChannel.permissions.update_hub) return;
 
       // If user has HMD lifted up, delay spawning for now. eventually show a modal
-      const delaySpawn = this._in2DInterstitial && !isMobileVR;
+      const delaySpawn = isIn2DInterstitial() && !isMobileVR;
       setTimeout(() => {
         spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
       }, delaySpawn ? 3000 : 0);
