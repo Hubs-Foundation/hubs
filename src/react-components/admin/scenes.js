@@ -8,6 +8,7 @@ import {
   SimpleForm,
   TextInput,
   EditButton,
+  SelectInput,
   BooleanInput,
   Datagrid,
   TextField,
@@ -29,7 +30,7 @@ export const SceneEdit = props => (
     <SimpleForm>
       <TextInput source="name" />
       <TextInput source="description" />
-      <TextInput source="state" />
+      <SelectInput source="state" choices={[{ id: "active", name: "active" }, { id: "removed", name: "removed" }]} />
       <BooleanInput source="allow_remixing" />
       <BooleanInput source="allow_promotion" />
     </SimpleForm>

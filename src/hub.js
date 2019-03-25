@@ -57,7 +57,6 @@ import "./components/networked-avatar";
 import "./components/media-views";
 import "./components/pinch-to-move";
 import "./components/pitch-yaw-rotator";
-import "./components/auto-scale-cannon-physics-body";
 import "./components/position-at-box-shape-border";
 import "./components/pinnable";
 import "./components/pin-networked-object-button";
@@ -71,9 +70,10 @@ import "./components/camera-tool";
 import "./components/scene-sound";
 import "./components/emit-state-change";
 import "./components/action-to-event";
+import "./components/action-to-remove";
 import "./components/emit-scene-event-on-remove";
 import "./components/stop-event-propagation";
-import "./components/follow-in-lower-fov";
+import "./components/follow-in-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
@@ -85,6 +85,7 @@ import "./components/set-active-camera";
 import "./components/track-pose";
 import "./components/replay";
 import "./components/visibility-by-path";
+import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -97,7 +98,7 @@ import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
 import { connectToReticulum } from "./utils/phoenix-utils";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
-import { proxiedUrlFor } from "./utils/media-utils";
+import { generateMeshBVH, traverseMeshesAndAddShapes, proxiedUrlFor } from "./utils/media-utils";
 import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
@@ -131,15 +132,27 @@ const mediaSearchStore = window.APP.mediaSearchStore;
 const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
 
 const qs = new URLSearchParams(location.search);
-const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
+const isMobile = AFRAME.utils.device.isMobile();
+const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
-window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
+window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
 
-import "aframe-physics-system";
-import "aframe-physics-extras";
+const SHAPES = require("aframe-physics-system/src/constants").SHAPES;
+const Ammo = require("ammo.js/builds/ammo.wasm.js");
+const AmmoWasm = require("ammo.js/builds/ammo.wasm.wasm");
+window.Ammo = Ammo.bind(undefined, {
+  locateFile(path) {
+    if (path.endsWith(".wasm")) {
+      return AmmoWasm;
+    }
+    return path;
+  }
+});
+require("aframe-physics-system");
 import "super-hands";
 import "./components/super-networked-interactable";
+import "./components/scalable-when-grabbed";
 import "./components/networked-counter";
 import "./components/event-repeater";
 import "./components/set-yxz-order";
@@ -158,7 +171,7 @@ import registerTelemetry from "./telemetry";
 import { warmSerializeElement } from "./utils/serialize-element";
 
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
-import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
+import detectConcurrentLoad from "./utils/concurrent-load-detector.js";
 
 import qsTruthy from "./utils/qs_truthy";
 
@@ -173,30 +186,13 @@ if (!isBotMode && !isTelemetryDisabled) {
 }
 
 disableiOSZoom();
-
-const concurrentLoadDetector = new ConcurrentLoadDetector();
-concurrentLoadDetector.start();
+detectConcurrentLoad();
 
 store.init();
 
 function getPlatformUnsupportedReason() {
   if (typeof RTCDataChannelEvent === "undefined") return "no_data_channels";
   return null;
-}
-
-function pollForSupportAvailability(callback) {
-  const availabilityUrl = getReticulumFetchUrl("/api/v1/support/availability");
-  let isSupportAvailable = null;
-
-  const updateIfChanged = () =>
-    fetch(availabilityUrl).then(({ ok }) => {
-      if (isSupportAvailable === ok) return;
-      isSupportAvailable = ok;
-      callback(isSupportAvailable);
-    });
-
-  updateIfChanged();
-  setInterval(updateIfChanged, 30000);
 }
 
 function setupLobbyCamera() {
@@ -236,6 +232,8 @@ function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnConcurrentLoad = qsTruthy("allow_multi");
   const forcedVREntryType = qs.get("vr_entry_type");
+  const isCursorHoldingPen = scene && scene.systems.userinput.activeSets.has(userinputSets.cursorHoldingPen);
+  const hasActiveCamera = scene && !!scene.systems["camera-tools"].getMyCamera();
 
   ReactDOM.render(
     <Router history={history}>
@@ -245,11 +243,12 @@ function mountUI(props = {}) {
             {...{
               scene,
               isBotMode,
-              concurrentLoadDetector,
               disableAutoExitOnConcurrentLoad,
               forcedVREntryType,
               store,
               mediaSearchStore,
+              isCursorHoldingPen,
+              hasActiveCamera,
               ...props,
               ...routeProps
             }}
@@ -273,12 +272,9 @@ async function updateUIForHub(hub) {
     hubScene: hub.scene,
     hubEntryCode: hub.entry_code
   });
-
-  document
-    .querySelector("#hud-hub-entry-link")
-    .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
 }
 
+let shapes = null;
 async function updateEnvironmentForHub(hub) {
   let sceneUrl;
   let isLegacyBundle; // Deprecated
@@ -289,6 +285,9 @@ async function updateEnvironmentForHub(hub) {
   if (hub.scene) {
     isLegacyBundle = false;
     sceneUrl = hub.scene.model_url;
+  } else if (hub.scene === null) {
+    // delisted/removed scene
+    sceneUrl = loadingEnvironmentURL;
   } else {
     const defaultSpaceTopic = hub.topics[0];
     const glbAsset = defaultSpaceTopic.assets.find(a => a.asset_type === "glb");
@@ -317,6 +316,16 @@ async function updateEnvironmentForHub(hub) {
     environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
 
     environmentScene.appendChild(environmentEl);
+
+    environmentEl.addEventListener(
+      "model-loaded",
+      () => {
+        //TODO: check if the environment was made with spoke to determine if a shape should be added
+        shapes = traverseMeshesAndAddShapes(environmentEl, SHAPES.MESH, 0.1);
+        generateMeshBVH(environmentEl.object3D);
+      },
+      { once: true }
+    );
   } else {
     // Change environment
     environmentEl = environmentScene.childNodes[0];
@@ -331,7 +340,14 @@ async function updateEnvironmentForHub(hub) {
           // We've already entered, so move to new spawn point once new environment is loaded
           environmentEl.addEventListener(
             "model-loaded",
-            () => document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint(),
+            () => {
+              while (shapes.length > 0) {
+                environmentEl.removeAttribute(shapes.pop());
+              }
+              shapes = traverseMeshesAndAddShapes(environmentEl, SHAPES.MESH, 0.1);
+              generateMeshBVH(environmentEl.object3D);
+              document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint();
+            },
             { once: true }
           );
         }
@@ -363,6 +379,7 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
   const hub = data.hubs[0];
 
   console.log(`Janus host: ${hub.host}`);
+
   const objectsScene = document.querySelector("#objects-scene");
   const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
   const objectsEl = document.createElement("a-entity");
@@ -512,10 +529,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   scene.removeAttribute("keyboard-shortcuts"); // Remove F and ESC hotkeys from aframe
   scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
 
+  // Physics needs to be ready before spawning anything.
+  while (!scene.systems.physics.initialized) await nextTick();
+
+  scene.addEventListener("loaded", () => {
+    const physicsSystem = scene.systems.physics;
+    physicsSystem.setDebug(isDebug || physicsSystem.data.debug);
+  });
+
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);
   const availableVREntryTypes = await getAvailableVREntryTypes();
-  const entryManager = new SceneEntryManager(hubChannel, authChannel, availableVREntryTypes);
+  const entryManager = new SceneEntryManager(hubChannel, authChannel, availableVREntryTypes, history);
   entryManager.onRequestAuthentication = (
     signInMessageId,
     signInCompleteMessageId,
@@ -541,23 +566,47 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.APP.hubChannel = hubChannel;
 
   scene.addEventListener("enter-vr", () => {
+    // If VR headset is activated, refreshing page will fire vrdisplayactivate
+    // which puts A-Frame in VR mode, so exit VR mode whenever it is attempted
+    // to be entered and we haven't entered the room yet.
+    if (scene.is("vr-mode") && !scene.is("vr-entered")) {
+      console.log("Pre-emptively exiting VR mode.");
+      scene.exitVR();
+      return true;
+    }
+
     document.body.classList.add("vr-mode");
 
     // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
-    if (!isMobile || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
+    if ((!isMobile && !isMobileVR) || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
       document.body.classList.add("vr-mode-stretch");
-    }
-
-    if (!scene.is("entered")) {
-      // If VR headset is activated, refreshing page will fire vrdisplayactivate
-      // which puts A-Frame in VR mode, so exit VR mode whenever it is attempted
-      // to be entered and we haven't entered the room yet.
-      console.log("Pre-emptively exiting VR mode.");
-      scene.exitVR();
     }
   });
 
-  scene.addEventListener("exit-vr", () => document.body.classList.remove("vr-mode"));
+  // HACK A-Frame 0.9.0 seems to fail to wire up vrdisplaypresentchange early enough
+  // to catch presentation state changes and recognize that an HMD is presenting on startup.
+  window.addEventListener(
+    "vrdisplaypresentchange",
+    () => {
+      if (scene.is("vr-entered")) return;
+      if (scene.is("vr-mode")) return;
+
+      const device = AFRAME.utils.device.getVRDisplay();
+
+      if (device && device.isPresenting) {
+        if (!scene.is("vr-mode")) {
+          console.warn("Hit A-Frame bug where VR display is presenting but A-Frame has not entered VR mode.");
+          scene.enterVR();
+        }
+      }
+    },
+    { once: true }
+  );
+
+  scene.addEventListener("exit-vr", () => {
+    document.body.classList.remove("vr-mode");
+    document.body.classList.remove("vr-mode-stretch");
+  });
 
   registerNetworkSchemas();
 
@@ -567,7 +616,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     linkChannel,
     subscriptions,
     enterScene: entryManager.enterScene,
-    exitScene: entryManager.exitScene,
+    exitScene: reason => {
+      entryManager.exitScene();
+
+      if (reason) {
+        remountUI({ roomUnavailableReason: reason });
+      }
+    },
     initialIsSubscribed: subscriptions.isSubscribed(),
     activeTips: scene.systems.tips.activeTips
   });
@@ -581,7 +636,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({ activeTips: e.detail });
   });
 
-  pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
+  scene.addEventListener("camera_toggled", () => remountUI({}));
+
+  scene.addEventListener("camera_removed", () => remountUI({}));
 
   const platformUnsupportedReason = getPlatformUnsupportedReason();
 
@@ -602,7 +659,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  if (availableVREntryTypes.isInHMD) {
+  if (isMobileVR) {
     remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
 
     if (/Oculus/.test(navigator.userAgent)) {
@@ -660,7 +717,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Hub local channel
   const context = {
-    mobile: isMobile,
+    mobile: isMobile || isMobileVR,
     hmd: availableVREntryTypes.isInHMD
   };
 

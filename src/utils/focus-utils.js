@@ -10,7 +10,7 @@ let isExitingFullscreenDueToFocus = false;
 export function handleTextFieldFocus(target) {
   const isMobile = AFRAME.utils.device.isMobile();
 
-  if (screenfull.isFullscreen) {
+  if (screenfull.isFullscreen && !AFRAME.utils.device.isMobileVR()) {
     // This will prevent focus, but its the only way to avoid getting into a
     // weird "firefox reports full screen but actually not". You end up having to tap
     // twice to ultimately get the focus.
@@ -19,8 +19,9 @@ export function handleTextFieldFocus(target) {
     // the text box is blurred by the browser.
 
     isExitingFullscreenDueToFocus = true;
-    screenfull.exit();
-    setTimeout(() => target.focus(), 200);
+    screenfull.exit().then(() => {
+      target.focus();
+    });
   }
 
   if (!isMobile) target.select();

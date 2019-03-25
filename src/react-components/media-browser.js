@@ -16,6 +16,8 @@ import { SOURCES } from "../storage/media-search-store";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 
+const isMobile = AFRAME.utils.device.isMobile();
+
 const PUBLISHER_FOR_ENTRY_TYPE = {
   sketchfab_model: "Sketchfab",
   poly_model: "Google Poly",
@@ -74,7 +76,7 @@ class MediaBrowser extends Component {
     onMediaSearchResultEntrySelected: PropTypes.func
   };
 
-  state = { query: "", facets: [], showNav: true };
+  state = { query: "", facets: [], showNav: true, selectNextResult: false };
 
   constructor(props) {
     super(props);
@@ -91,7 +93,16 @@ class MediaBrowser extends Component {
   }
 
   storeUpdated = () => {
-    this.setState(this.getStoreAndHistoryState(this.props));
+    const newState = this.getStoreAndHistoryState(this.props);
+    this.setState(newState);
+
+    if (this.state.selectNextResult) {
+      if (newState.result && newState.result.entries.length > 0) {
+        this.selectEntry(newState.result.entries[0]);
+      } else {
+        this.close();
+      }
+    }
   };
 
   sourceChanged = () => {
@@ -119,27 +130,35 @@ class MediaBrowser extends Component {
     return newState;
   };
 
-  handleQueryUpdated = query => {
+  handleQueryUpdated = (query, forceNow) => {
     this.setState({ result: null });
 
     if (this._sendQueryTimeout) {
       clearTimeout(this._sendQueryTimeout);
     }
 
-    // Don't update search on every keystroke, but buffer for some ms.
-    this._sendQueryTimeout = setTimeout(() => {
-      // Drop filter for now, so entering text drops into "search all" mode
+    if (forceNow) {
       this.props.mediaSearchStore.filterQueryNavigate("", query);
-    }, 500);
+    } else {
+      // Don't update search on every keystroke, but buffer for some ms.
+      this._sendQueryTimeout = setTimeout(() => {
+        // Drop filter for now, so entering text drops into "search all" mode
+        this.props.mediaSearchStore.filterQueryNavigate("", query);
+      }, 500);
+    }
 
     this.setState({ query });
   };
 
   handleEntryClicked = (evt, entry) => {
+    evt.preventDefault();
+    this.selectEntry(entry);
+  };
+
+  selectEntry = entry => {
     if (!this.props.onMediaSearchResultEntrySelected) return;
     this.props.onMediaSearchResultEntrySelected(entry);
     this.close();
-    evt.preventDefault();
   };
 
   handleSourceClicked = source => {
@@ -190,6 +209,9 @@ class MediaBrowser extends Component {
     const isVariableWidth = this.state.result && ["bing_images", "tenor"].includes(apiSource);
     const showCustomOption = apiSource !== "scene_listings" || this.props.hubChannel.permissions.update_hub;
 
+    // Don't render anything if we just did a feeling lucky query and are waiting on result.
+    if (this.state.selectNextResult) return <div />;
+
     return (
       <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
         <div className={classNames([styles.box, styles.darkened])}>
@@ -216,11 +238,16 @@ class MediaBrowser extends Component {
                   onFocus={e => handleTextFieldFocus(e.target)}
                   onBlur={() => handleTextFieldBlur()}
                   onKeyDown={e => {
-                    if (e.key === "Enter" && e.shiftKey) {
+                    if (e.key === "Enter" && e.ctrlKey) {
                       if (this.state.result && this.state.result.entries.length > 0) {
                         this.handleEntryClicked(e, this.state.result.entries[0]);
+                      } else if (this.state.query.trim() !== "") {
+                        this.handleQueryUpdated(this.state.query, true);
+                        this.setState({ selectNextResult: true });
+                      } else {
+                        this.close();
                       }
-                    } else if (e.key === "Escape" || e.key === "Enter") {
+                    } else if (e.key === "Escape" || (e.key === "Enter" && isMobile)) {
                       e.target.blur();
                     }
                   }}
@@ -345,7 +372,8 @@ class MediaBrowser extends Component {
     const imageWidth = Math.floor(Math.max(imageAspect * imageHeight, imageHeight * 0.85));
 
     const publisherName =
-      (entry.attributions.publisher && entry.attributions.publisher.name) || PUBLISHER_FOR_ENTRY_TYPE[entry.type];
+      (entry.attributions && entry.attributions.publisher && entry.attributions.publisher.name) ||
+      PUBLISHER_FOR_ENTRY_TYPE[entry.type];
 
     return (
       <div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`${entry.id}_${idx}`}>

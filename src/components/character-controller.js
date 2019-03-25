@@ -5,6 +5,8 @@ const EPS = 10e-6;
 const MAX_WARNINGS = 10;
 const PI_2 = Math.PI / 2;
 
+const NAV_ZONE = "character";
+
 /**
  * Avatar movement controller that listens to move, rotate and teleportation events and moves the avatar accordingly.
  * The controller accounts for playspace offset and orientation and depends on the nav mesh system for translation.
@@ -22,7 +24,6 @@ AFRAME.registerComponent("character-controller", {
   },
 
   init: function() {
-    this.navZone = "character";
     this.navGroup = null;
     this.navNode = null;
     this.velocity = new THREE.Vector3(0, 0, 0);
@@ -35,7 +36,6 @@ AFRAME.registerComponent("character-controller", {
     this.snapRotateLeft = this.snapRotateLeft.bind(this);
     this.snapRotateRight = this.snapRotateRight.bind(this);
     this.setAngularVelocity = this.setAngularVelocity.bind(this);
-    this.handleTeleport = this.handleTeleport.bind(this);
     this.el.sceneEl.addEventListener("nav-mesh-loaded", () => {
       this.navGroup = null;
       this.navNode = null;
@@ -51,14 +51,12 @@ AFRAME.registerComponent("character-controller", {
     const eventSrc = this.el.sceneEl;
     eventSrc.addEventListener("move", this.setAccelerationInput);
     eventSrc.addEventListener("rotateY", this.setAngularVelocity);
-    eventSrc.addEventListener("teleported", this.handleTeleport);
   },
 
   pause: function() {
     const eventSrc = this.el.sceneEl;
     eventSrc.removeEventListener("move", this.setAccelerationInput);
     eventSrc.removeEventListener("rotateY", this.setAngularVelocity);
-    eventSrc.removeEventListener("teleported", this.handleTeleport);
     this.reset();
   },
 
@@ -88,11 +86,30 @@ AFRAME.registerComponent("character-controller", {
     this.el.emit("snap_rotate_right");
   },
 
-  handleTeleport: function(event) {
-    const position = event.detail.newPosition;
-    const navPosition = event.detail.hitPoint;
-    this.resetPositionOnNavMesh(position, navPosition, this.el.object3D);
-  },
+  // We assume the rig is at the root, and its local position === its world position.
+  teleportTo: (function() {
+    const rig = new THREE.Vector3();
+    const head = new THREE.Vector3();
+    const deltaFromHeadToTargetForHead = new THREE.Vector3();
+    const targetForHead = new THREE.Vector3();
+    const targetForRig = new THREE.Vector3();
+    return function teleportTo(targetWorldPosition) {
+      const o = this.el.object3D;
+      o.getWorldPosition(rig);
+      this.data.pivot.object3D.getWorldPosition(head);
+      targetForHead.copy(targetWorldPosition);
+      targetForHead.y += this.data.pivot.object3D.position.y;
+      deltaFromHeadToTargetForHead.copy(targetForHead).sub(head);
+      targetForRig.copy(rig).add(deltaFromHeadToTargetForHead);
+
+      const pathfinder = this.el.sceneEl.systems.nav.pathfinder;
+      this.navGroup = pathfinder.getGroup(NAV_ZONE, targetForRig, true, true);
+      this.navNode = null;
+      this._setNavNode(targetForRig);
+      pathfinder.clampStep(rig, targetForRig, this.navNode, NAV_ZONE, this.navGroup, o.position);
+      o.matrixNeedsUpdate = true;
+    };
+  })(),
 
   tick: (function() {
     const move = new THREE.Matrix4();
@@ -116,11 +133,11 @@ AFRAME.registerComponent("character-controller", {
       const distance = this.data.groundAcc * deltaSeconds;
       const rotationDelta = this.data.rotationSpeed * this.angularVelocity * deltaSeconds;
 
+      pivot.updateMatrices();
+      root.updateMatrices();
+
       startScale.copy(root.scale);
       startPos.copy(root.position);
-
-      // Other aframe components like teleport-controls set position/rotation/scale, not the matrix, so we need to make sure to compose them back into the matrix
-      root.updateMatrix();
 
       const userinput = AFRAME.scenes[0].systems.userinput;
       if (userinput.get(paths.actions.snapRotateLeft)) {
@@ -206,28 +223,18 @@ AFRAME.registerComponent("character-controller", {
     if (this.navNode !== null) return;
     const { pathfinder } = this.el.sceneEl.systems.nav;
     this.navNode =
-      pathfinder.getClosestNode(pos, this.navZone, this.navGroup, true) ||
-      pathfinder.getClosestNode(pos, this.navZone, this.navGroup);
+      pathfinder.getClosestNode(pos, NAV_ZONE, this.navGroup, true) ||
+      pathfinder.getClosestNode(pos, NAV_ZONE, this.navGroup);
   },
 
   setPositionOnNavMesh: function(start, end, object3D) {
     const { pathfinder } = this.el.sceneEl.systems.nav;
-    if (!(this.navZone in pathfinder.zones)) return;
+    if (!(NAV_ZONE in pathfinder.zones)) return;
     if (this.navGroup === null) {
-      this.navGroup = pathfinder.getGroup(this.navZone, end, true, true);
+      this.navGroup = pathfinder.getGroup(NAV_ZONE, end, true, true);
     }
     this._setNavNode(end);
-    this.navNode = pathfinder.clampStep(start, end, this.navNode, this.navZone, this.navGroup, object3D.position);
-    object3D.matrixNeedsUpdate = true;
-  },
-
-  resetPositionOnNavMesh: function(position, navPosition, object3D) {
-    const { pathfinder } = this.el.sceneEl.systems.nav;
-    if (!(this.navZone in pathfinder.zones)) return;
-    this.navGroup = pathfinder.getGroup(this.navZone, navPosition, true, true);
-    this.navNode = null;
-    this._setNavNode(navPosition);
-    pathfinder.clampStep(position, navPosition, this.navNode, this.navZone, this.navGroup, object3D.position);
+    this.navNode = pathfinder.clampStep(start, end, this.navNode, NAV_ZONE, this.navGroup, object3D.position);
     object3D.matrixNeedsUpdate = true;
   },
 

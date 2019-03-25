@@ -6,8 +6,11 @@ import { addSetsToBindings } from "./utils";
 const wasd_vec2 = "/var/mouse-and-keyboard/wasd_vec2";
 const keyboardCharacterAcceleration = "/var/mouse-and-keyboard/keyboardCharacterAcceleration";
 const arrows_vec2 = "/var/mouse-and-keyboard/arrows_vec2";
-const dropWithRMB = "/vars/mouse-and-keyboard/drop_with_RMB";
-const dropWithEsc = "/vars/mouse-and-keyboard/drop_with_esc";
+const togglePenWithRMB = "/vars/mouse-and-keyboard/drop_pen_with_RMB";
+const togglePenWithEsc = "/vars/mouse-and-keyboard/drop_pen_with_esc";
+const togglePenWithP = "/vars/mouse-and-keyboard/drop_pen_with_p";
+const togglePenWithHud = "/vars/mouse-and-keyboard/drop_pen_with_hud";
+const togglePen = "/vars/mouse-and-keyboard/togglePen";
 
 const k = name => {
   return `/keyboard-mouse-user/keyboard-var/${name}`;
@@ -84,8 +87,34 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.falling
     },
     {
+      src: { value: paths.device.keyboard.key("p") },
+      dest: { value: togglePenWithP },
+      xform: xforms.rising
+    },
+    {
       src: { value: paths.device.hud.penButton },
+      dest: { value: togglePenWithHud },
+      xform: xforms.rising
+    },
+    {
+      src: [togglePenWithHud, togglePenWithP],
+      dest: { value: togglePen },
+      xform: xforms.any
+    },
+    {
+      src: { value: togglePen },
       dest: { value: paths.actions.spawnPen },
+      xform: xforms.rising,
+      priority: 100
+    },
+    {
+      src: { value: paths.device.keyboard.key("c") },
+      dest: { value: paths.actions.toggleCamera },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("x") },
+      dest: { value: paths.actions.takeSnapshot },
       xform: xforms.rising
     },
     {
@@ -356,18 +385,18 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     },
     {
       src: { value: paths.device.mouse.buttonRight },
-      dest: { value: dropWithRMB },
+      dest: { value: togglePenWithRMB },
       xform: xforms.falling,
       priority: 200
     },
     {
       src: { value: paths.device.keyboard.key("Escape") },
-      dest: { value: dropWithEsc },
-      xform: xforms.falling
+      dest: { value: togglePenWithEsc },
+      xform: xforms.rising
     },
     {
-      src: [dropWithRMB, dropWithEsc],
-      dest: { value: paths.actions.cursor.drop },
+      src: [togglePenWithRMB, togglePenWithEsc, togglePenWithP, togglePenWithHud],
+      dest: { value: togglePen },
       xform: xforms.any
     },
     {
@@ -378,6 +407,18 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: { value: paths.actions.cursor.undoDrawing },
       priority: 1001,
       xform: xforms.rising
+    },
+    {
+      src: { value: togglePen },
+      dest: { value: paths.actions.cursor.drop },
+      xform: xforms.rising,
+      priority: 200
+    },
+    {
+      src: { value: togglePen },
+      dest: { value: paths.actions.pen.remove },
+      xform: xforms.rising,
+      priority: 200
     }
   ],
 

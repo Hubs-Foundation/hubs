@@ -31,13 +31,13 @@ const rightDpadCenter = `${name}rightDpad/center`;
 const rightJoy = `${name}right/joy`;
 const rightJoyY1 = `${name}right/joyY1`;
 const rightJoyY2 = `${name}right/joyY2`;
+const rightJoyYDeadzoned = `${name}left/joy/y/deadzoned`;
 const leftDpadNorth = `${name}leftDpad/north`;
 const leftDpadSouth = `${name}leftDpad/south`;
 const leftDpadEast = `${name}leftDpad/east`;
 const leftDpadWest = `${name}leftDpad/west`;
 const leftDpadCenter = `${name}leftDpad/center`;
 const leftJoy = `${name}left/joy`;
-const leftJoyY = `${name}left/joyY`;
 const oculusTouchCharacterAcceleration = `${name}characterAcceleration`;
 const keyboardCharacterAcceleration = "/var/keyboard/characterAcceleration";
 const characterAcceleration = "/var/oculus-touch/nonNormalizedCharacterAcceleration";
@@ -483,6 +483,21 @@ export const oculusTouchUserBindings = addSetsToBindings({
       xform: xforms.rising
     },
     {
+      src: { value: paths.device.keyboard.key("p") },
+      dest: { value: paths.actions.spawnPen },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("c") },
+      dest: { value: paths.actions.toggleCamera },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("x") },
+      dest: { value: paths.actions.takeSnapshot },
+      xform: xforms.rising
+    },
+    {
       src: {
         bool: paths.device.keyboard.key("control"),
         value: paths.device.keyboard.key("1")
@@ -733,16 +748,9 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: {
-        value: leftAxis("joyY")
-      },
-      dest: { value: leftJoyY },
-      xform: xforms.copy
-    },
-    {
-      src: { value: leftJoyY },
+      src: { value: leftJoyYDeadzoned },
       dest: { value: paths.actions.leftHand.scalePenTip },
-      xform: xforms.scale(-0.005),
+      xform: xforms.scaleExp(-0.005, 5),
       priority: 1
     },
     {
@@ -910,9 +918,18 @@ export const oculusTouchUserBindings = addSetsToBindings({
       priority: 2
     },
     {
-      src: { value: rightJoyY2 },
+      src: {
+        value: rightAxis("joyY")
+      },
+      dest: {
+        value: rightJoyYDeadzoned
+      },
+      xform: xforms.deadzone(0.1)
+    },
+    {
+      src: { value: rightJoyYDeadzoned },
       dest: { value: paths.actions.rightHand.scalePenTip },
-      xform: xforms.scale(-0.005),
+      xform: xforms.scaleExp(-0.005, 5),
       priority: 2
     },
     {
