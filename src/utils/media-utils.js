@@ -207,14 +207,17 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
 
       entity.removeAttribute("animation__loader_spawn-start");
 
+      // Deal with scale. The box animation may not have completed so cover all cases.
       if (entity.components.scale) {
-        // Wait for any pending scale component to initialize and set scale (like on the pen)
+        // Ensure explicit scale from scale component is set.
+        const scaleData = entity.components.scale.data;
+        entity.object3D.scale.set(scaleData.x, scaleData.y, scaleData.z);
+        entity.object3D.matrixNeedsUpdate = true;
+      } else if (contentOrigin == ObjectContentOrigins.SPAWNER) {
+        // Spawner will have set scale.
         await nextTick();
-      }
-
-      if (contentOrigin !== ObjectContentOrigins.SPAWNER) {
-        // Spawner will have set scale previously, otherwise we set reset the scale here in case
-        // the spawner box animation did not complete.
+      } else {
+        // Otherwise, ensure original scale is re-applied.
         entity.object3D.scale.set(sx, sy, sz);
         entity.object3D.matrixNeedsUpdate = true;
       }
