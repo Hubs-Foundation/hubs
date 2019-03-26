@@ -220,9 +220,7 @@ AFRAME.registerSystem("interaction", {
         this.leftHandConstraintTarget = null;
       }
     } else {
-      this.leftHandCollisionTarget =
-        !this.leftRemoteConstraintTarget && findHandCollisionTargetForBody(this.leftHand.body);
-
+      this.leftHandCollisionTarget = findHandCollisionTargetForBody(this.leftHand.body);
       if (this.leftHandCollisionTarget) {
         if (leftHandGrab) {
           const offersCollisionConstraint = this.leftHandCollisionTarget.components["offers-constraint-when-colliding"];

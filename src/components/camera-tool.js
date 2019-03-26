@@ -1,6 +1,7 @@
 import { addMedia } from "../utils/media-utils";
 import { ObjectTypes } from "../object-types";
 import { paths } from "../systems/userinput/paths";
+import { EVENT_TYPE_CONSTRAINT_CREATION_ATTEMPT } from "../systems/interactions";
 
 import cameraModelSrc from "../assets/camera_tool.glb";
 
@@ -131,6 +132,17 @@ AFRAME.registerComponent("camera-tool", {
         this.takeSnapshotNextTick = true;
       });
     });
+    this.resetSnapCount = this.resetSnapCount.bind(this);
+  },
+
+  play() {
+    this.el.object3D.addEventListener(EVENT_TYPE_CONSTRAINT_CREATION_ATTEMPT, this.resetSnapCount);
+  },
+  pause() {
+    this.el.object3D.removeEventListener(EVENT_TYPE_CONSTRAINT_CREATION_ATTEMPT, this.resetSnapCount);
+  },
+  resetSnapCount() {
+    this.localSnapCount = 0;
   },
 
   remove() {
@@ -167,11 +179,18 @@ AFRAME.registerComponent("camera-tool", {
   },
 
   tick() {
-    const grabber = undefined; //this.el.components.grabbable.grabbers[0];
+    const interaction = AFRAME.scenes[0].systems.interaction;
+    let grabberId;
+    if (interaction.rightHandConstraintTarget === this.el) {
+      grabberId = "player-right-controller";
+    } else if (interaction.leftHandConstraintTarget === this.el) {
+      grabberId = "player-left-controller";
+    } else if (interaction.rightRemoteConstraintTarget === this.el) {
+      grabberId = "cursor";
+    }
     const userinput = this.el.sceneEl.systems.userinput;
-    if (grabber && !!pathsMap[grabber.id]) {
-      this.localSnapCount = 0; // TODO: When camera is moved, reset photo arrangement algorithm
-      const grabberPaths = pathsMap[grabber.id];
+    if (grabberId) {
+      const grabberPaths = pathsMap[grabberId];
       if (userinput.get(grabberPaths.takeSnapshot)) {
         this.takeSnapshotNextTick = true;
       }
