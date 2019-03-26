@@ -13,6 +13,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.spawn = this.el.querySelector(".spawn");
     this.pen = this.el.querySelector(".penhud");
     this.cameraBtn = this.el.querySelector(".camera-btn");
+    this.inviteBtn = this.el.querySelector(".invite-btn");
     this.background = this.el.querySelector(".bg");
     const renderOrder = window.APP.RENDER_ORDER;
     this.mic.object3DMap.mesh.renderOrder = renderOrder.HUD_ICONS;
@@ -49,6 +50,10 @@ AFRAME.registerComponent("in-world-hud", {
     this.onCameraClick = () => {
       this.el.emit("action_toggle_camera");
     };
+
+    this.onInviteClick = () => {
+      this.el.emit("action_invite");
+    };
   },
 
   play() {
@@ -59,6 +64,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.spawn.addEventListener("mousedown", this.onSpawnClick);
     this.pen.addEventListener("mousedown", this.onPenClick);
     this.cameraBtn.addEventListener("mousedown", this.onCameraClick);
+    this.inviteBtn.addEventListener("grab-start", this.onInviteClick);
   },
 
   pause() {
@@ -69,5 +75,6 @@ AFRAME.registerComponent("in-world-hud", {
     this.spawn.removeEventListener("mousedown", this.onSpawnClick);
     this.pen.removeEventListener("mousedown", this.onPenClick);
     this.cameraBtn.removeEventListener("mousedown", this.onCameraClick);
+    this.inviteBtn.removeEventListener("grab-end", this.onInviteClick);
   }
 });

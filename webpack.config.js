@@ -267,7 +267,7 @@ module.exports = (env, argv) => ({
     new HTMLWebpackPlugin({
       filename: "link.html",
       template: path.join(__dirname, "src", "link.html"),
-      chunks: ["vendor", "link"]
+      chunks: ["vendor", "engine", "link"]
     }),
     new HTMLWebpackPlugin({
       filename: "spoke.html",

@@ -1,18 +1,6 @@
 import { paths } from "../systems/userinput/paths";
 const ACTIVATION_STATE = require("aframe-physics-system/src/constants").ACTIVATION_STATE;
 
-const pathsMap = {
-  "player-right-controller": {
-    scaleGrabbedGrabbable: paths.actions.rightHand.scaleGrabbedGrabbable
-  },
-  "player-left-controller": {
-    scaleGrabbedGrabbable: paths.actions.leftHand.scaleGrabbedGrabbable
-  },
-  cursor: {
-    scaleGrabbedGrabbable: paths.actions.cursor.scaleGrabbedGrabbable
-  }
-};
-
 /**
  * Manages ownership and haptics on an interatable
  * @namespace network
@@ -20,19 +8,12 @@ const pathsMap = {
  */
 AFRAME.registerComponent("super-networked-interactable", {
   schema: {
-    hapticsMassVelocityFactor: { default: 0.1 },
-    counter: { type: "selector" },
-    scrollScaleDelta: { default: 0.1 },
-    minScale: { default: 0.1 },
-    maxScale: { default: 100 }
+    counter: { type: "selector" }
   },
 
   init: function() {
-    this.system = this.el.sceneEl.systems.physics;
     this.counter = this.data.counter.components["networked-counter"];
     this.hand = null;
-    this.currentScale = new THREE.Vector3();
-    this.currentScale.copy(this.el.getAttribute("scale"));
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.networkedEl = networkedEl;
@@ -53,7 +34,6 @@ AFRAME.registerComponent("super-networked-interactable", {
     this.el.addEventListener("pinned", this._syncCounterRegistration);
     this.el.addEventListener("unpinned", this._syncCounterRegistration);
     this.el.addEventListener("ownership-lost", this._onOwnershipLost);
-    this.system.addComponent(this);
   },
 
   remove: function() {
@@ -61,7 +41,6 @@ AFRAME.registerComponent("super-networked-interactable", {
     this.el.removeEventListener("grab-start", this._onGrabStart);
     this.el.removeEventListener("grab-end", this._onGrabEnd);
     this.el.removeEventListener("ownership-lost", this._onOwnershipLost);
-    this.system.removeComponent(this);
   },
 
   _onGrabStart: function(e) {
@@ -83,7 +62,6 @@ AFRAME.registerComponent("super-networked-interactable", {
         this.el.body.forceActivationState(ACTIVATION_STATE.DISABLE_DEACTIVATION);
       }
     }
-    this.currentScale.copy(this.el.getAttribute("scale"));
   },
 
   _onGrabEnd: function(e) {
@@ -98,14 +76,6 @@ AFRAME.registerComponent("super-networked-interactable", {
     this._syncCounterRegistration();
   },
 
-  _changeScale: function(delta) {
-    if (delta && this.el.is("grabbed") && this.el.components.hasOwnProperty("stretchable")) {
-      this.currentScale.addScalar(delta).clampScalar(this.data.minScale, this.data.maxScale);
-      this.el.setAttribute("scale", this.currentScale);
-      this.el.object3D.matrixNeedsUpdate = true;
-    }
-  },
-
   _syncCounterRegistration: function() {
     const el = this.networkedEl;
     if (!el || !el.components["networked"]) return;
@@ -117,13 +87,5 @@ AFRAME.registerComponent("super-networked-interactable", {
     } else {
       this.counter.deregister(el);
     }
-  },
-
-  tick: function() {
-    const grabber = this.el.components.grabbable.grabbers[0];
-    if (!(grabber && pathsMap[grabber.id])) return;
-
-    const userinput = AFRAME.scenes[0].systems.userinput;
-    this._changeScale(userinput.get(pathsMap[grabber.id].scaleGrabbedGrabbable));
   }
 });

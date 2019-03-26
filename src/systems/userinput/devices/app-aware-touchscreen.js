@@ -7,13 +7,13 @@ const MOVE_CAMERA_JOB = "MOVE CAMERA";
 const FIRST_PINCHER_JOB = "FIRST PINCHER";
 const SECOND_PINCHER_JOB = "SECOND PINCHER";
 
-const TAP_PATHS = {
-  1: paths.device.touchscreen.tap1,
-  2: paths.device.touchscreen.tap2,
-  3: paths.device.touchscreen.tap3,
-  4: paths.device.touchscreen.tap4,
-  5: paths.device.touchscreen.tap5
-};
+const TAP_PATHS = [
+  paths.device.touchscreen.tap1,
+  paths.device.touchscreen.tap2,
+  paths.device.touchscreen.tap3,
+  paths.device.touchscreen.tap4,
+  paths.device.touchscreen.tap5
+];
 
 function distance(x1, y1, x2, y2) {
   const dx = x1 - x2;
@@ -334,12 +334,9 @@ export class AppAwareTouchscreenDevice {
     frame.setValueType(path.pinch.initialDistance, this.pinch.initialDistance);
     frame.setValueType(path.pinch.currentDistance, this.pinch.currentDistance);
 
-    if (this.tapIndexToWriteNextFrame) {
+    if (this.tapIndexToWriteNextFrame && this.tapIndexToWriteNextFrame < TAP_PATHS.length) {
       // write to tap-X path if we had an X-fingered tap
-      const path = TAP_PATHS[this.tapIndexToWriteNextFrame];
-      if (path) {
-        frame.setValueType(path, true);
-      }
+      frame.setValueType(TAP_PATHS[this.tapIndexToWriteNextFrame - 1], true);
     }
 
     this.tapIndexToWriteNextFrame = 0;

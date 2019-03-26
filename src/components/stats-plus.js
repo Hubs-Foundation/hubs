@@ -55,6 +55,7 @@ AFRAME.registerComponent("stats-plus", {
     this.lastFpsUpdate = performance.now();
     this.lastFps = 0;
     this.frameCount = 0;
+    this.inVR = scene.is("vr-mode");
 
     if (scene.isMobile) {
       this.statsEl.classList.add("rs-mobile");
@@ -82,7 +83,7 @@ AFRAME.registerComponent("stats-plus", {
       stats("rAF").tick();
       stats("FPS").frame();
       stats().update();
-    } else {
+    } else if (!this.inVR) {
       // Update the fps counter
       const now = performance.now();
       this.frameCount++;
@@ -100,6 +101,7 @@ AFRAME.registerComponent("stats-plus", {
     }
   },
   onEnterVr() {
+    this.inVR = true;
     // Hide all stats elements when entering VR on mobile
     if (this.el.sceneEl.isMobile) {
       this.statsEl.classList.add(HIDDEN_CLASS);
@@ -107,6 +109,7 @@ AFRAME.registerComponent("stats-plus", {
     }
   },
   onExitVr() {
+    this.inVR = false;
     // Revert to previous state whe exiting VR on mobile
     if (this.el.sceneEl.isMobile) {
       if (this.data) {

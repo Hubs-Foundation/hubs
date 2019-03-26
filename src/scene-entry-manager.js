@@ -10,12 +10,20 @@ const qs = new URLSearchParams(location.search);
 const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
 import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
+import {
+  isIn2DInterstitial,
+  handleExitTo2DInterstitial,
+  handleReEntryToVRFrom2DInterstitial
+} from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
-
 import { getAvatarSrc } from "./assets/avatars/avatars";
+import { pushHistoryState } from "./utils/history";
+
+const isIOS = AFRAME.utils.device.isIOS();
+const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 export default class SceneEntryManager {
-  constructor(hubChannel, authChannel, availableVREntryTypes) {
+  constructor(hubChannel, authChannel, availableVREntryTypes, history) {
     this.hubChannel = hubChannel;
     this.authChannel = authChannel;
     this.availableVREntryTypes = availableVREntryTypes;
@@ -26,6 +34,7 @@ export default class SceneEntryManager {
     this.playerRig = document.querySelector("#player-rig");
     this._entered = false;
     this.onRequestAuthentication = () => {};
+    this.history = history;
   }
 
   init = () => {
@@ -142,15 +151,16 @@ export default class SceneEntryManager {
     }
   };
 
-  _updatePlayerRigWithProfile = () => {
+  _updatePlayerRigWithProfile = async () => {
     const { avatarId, displayName } = this.store.state.profile;
-    this.playerRig.setAttribute("player-info", {
-      displayName,
-      avatarSrc: getAvatarSrc(avatarId)
-    });
+
     const hudController = this.playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });
+    this.playerRig.setAttribute("player-info", { displayName });
     this.scene.emit("username-changed", { username: displayName });
+
+    const avatarSrc = await getAvatarSrc(avatarId);
+    this.playerRig.setAttribute("player-info", { avatarSrc });
   };
 
   _setupKicking = () => {
@@ -222,7 +232,7 @@ export default class SceneEntryManager {
     if (this.hubChannel.signedIn) {
       action(el);
     } else {
-      this.handleExitTo2DInterstitial(true);
+      handleExitTo2DInterstitial(true);
 
       const wasInVR = this.scene.is("vr-mode");
       const continueTextId = wasInVR ? "entry.return-to-vr" : "dialog.close";
@@ -251,7 +261,7 @@ export default class SceneEntryManager {
             this._disableSignInOnPinAction = false;
           }
 
-          this.handleReEntryToVRFrom2DInterstitial();
+          handleReEntryToVRFrom2DInterstitial();
         }
       );
     }
@@ -270,35 +280,6 @@ export default class SceneEntryManager {
     const fileId = mediaLoader.data && mediaLoader.data.fileId;
 
     this.hubChannel.unpin(networkId, fileId);
-  };
-
-  handleExitTo2DInterstitial = isLower => {
-    if (!this.scene.is("vr-mode")) return;
-
-    this._in2DInterstitial = true;
-
-    if (this.availableVREntryTypes.isInHMD) {
-      // Immersive browser, exit VR.
-      this.scene.exitVR();
-    } else {
-      // Non-immersive browser, show notice
-      const vrNotice = document.querySelector(".vr-notice");
-      vrNotice.setAttribute("visible", true);
-      vrNotice.setAttribute("follow-in-fov", {
-        angle: isLower ? 39 : -15
-      });
-    }
-  };
-
-  handleReEntryToVRFrom2DInterstitial = () => {
-    if (!this._in2DInterstitial) return;
-    this._in2DInterstitial = false;
-
-    document.querySelector(".vr-notice").setAttribute("visible", false);
-
-    if (this.availableVREntryTypes.isInHMD) {
-      this.scene.enterVR();
-    }
   };
 
   _setupMedia = mediaStream => {
@@ -352,8 +333,13 @@ export default class SceneEntryManager {
     });
 
     this.scene.addEventListener("action_spawn", () => {
-      this.handleExitTo2DInterstitial(false);
+      handleExitTo2DInterstitial(false);
       window.APP.mediaSearchStore.sourceNavigateToDefaultSource();
+    });
+
+    this.scene.addEventListener("action_invite", () => {
+      handleExitTo2DInterstitial(false);
+      pushHistoryState(this.history, "overlay", "invite");
     });
 
     document.addEventListener("paste", e => {
@@ -413,7 +399,7 @@ export default class SceneEntryManager {
       shareVideoMediaStream({
         video: {
           mediaSource: "camera",
-          width: 720,
+          width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
           frameRate: 30
         }
       });
@@ -471,16 +457,16 @@ export default class SceneEntryManager {
       if (entry.type === "scene_listing" && this.hubChannel.permissions.update_hub) return;
 
       // If user has HMD lifted up, delay spawning for now. eventually show a modal
-      const delaySpawn = this._in2DInterstitial && !this.availableVREntryTypes.isInHMD;
+      const delaySpawn = isIn2DInterstitial() && !isMobileVR;
       setTimeout(() => {
         spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
       }, delaySpawn ? 3000 : 0);
 
-      this.handleReEntryToVRFrom2DInterstitial();
+      handleReEntryToVRFrom2DInterstitial();
     });
 
     this.mediaSearchStore.addEventListener("media-exit", () => {
-      this.handleReEntryToVRFrom2DInterstitial();
+      handleReEntryToVRFrom2DInterstitial();
     });
   };
 

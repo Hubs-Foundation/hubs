@@ -33,7 +33,7 @@ const gearVRControllerUserBindings = generate3DOFTriggerBindings(paths.device.ge
 import { resolveActionSets } from "./resolve-action-sets";
 import { GamepadDevice } from "./devices/gamepad";
 import { gamepadBindings } from "./bindings/generic-gamepad";
-import { detectInHMD, getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "../../utils/vr-caps-detect";
+import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "../../utils/vr-caps-detect";
 import { ArrayBackedSet } from "./array-backed-set";
 
 function intersection(setA, setB) {
@@ -202,13 +202,16 @@ AFRAME.registerSystem("userinput", {
     this.activeSets = new Set([sets.global]);
     this.pendingSetChanges = [];
     this.xformStates = new Map();
-    this.activeDevices = new ArrayBackedSet().add(new HudDevice());
+    this.activeDevices = new ArrayBackedSet([new HudDevice()]);
 
-    if (!(AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR())) {
+    const isMobile = AFRAME.utils.device.isMobile();
+    const isMobileVR = AFRAME.utils.device.isMobileVR();
+
+    if (!(isMobile || isMobileVR)) {
       this.activeDevices.add(new MouseDevice());
       this.activeDevices.add(new AppAwareMouseDevice());
       this.activeDevices.add(new KeyboardDevice());
-    } else if (!detectInHMD()) {
+    } else if (!isMobileVR) {
       this.activeDevices.add(new AppAwareTouchscreenDevice());
       this.activeDevices.add(new KeyboardDevice());
       this.activeDevices.add(new GyroDevice());
@@ -382,8 +385,25 @@ AFRAME.registerSystem("userinput", {
         this.xformStates.delete(binding);
       }
 
-      const { src, dest, xform } = binding;
+      const { src, dest, xform, debug } = binding;
+
+      let oldValue;
+
+      if (debug) {
+        oldValue = this.frame.get(dest.value);
+      }
+
       const newState = xform(this.frame, src, dest, this.xformStates.get(binding));
+
+      if (debug) {
+        // Note for now this only works with bindings that have { value: } sources and dests
+        console.log(
+          `${JSON.stringify(src.value)} (${src.value && JSON.stringify(this.frame.get(src.value))}) to ${JSON.stringify(
+            dest
+          )}: ${oldValue} -> ${this.frame.get(dest.value)}`
+        );
+      }
+
       if (newState !== undefined) {
         this.xformStates.set(binding, newState);
       }

@@ -3,6 +3,8 @@ import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
+import { ObjectContentOrigins } from "../object-types";
+import nextTick from "./next-tick";
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
@@ -181,13 +183,16 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
     fileIsOwned: !needsToBeUploaded
   });
 
-  const [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
+  let [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
+
+  entity.object3D.scale.set(0.001, 0.001, 0.001);
+  entity.object3D.matrixNeedsUpdate = true;
 
   entity.setAttribute("animation__loader_spawn-start", {
     property: "scale",
     delay: 50,
     dur: 200,
-    from: { x: sx / 2, y: sy / 2, z: sz / 2 },
+    from: { x: 0.001, y: 0.001, z: 0.001 },
     to: { x: sx, y: sy, z: sz },
     easing: "easeInQuad"
   });
@@ -199,22 +204,45 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
   }, 100);
 
   ["model-loaded", "video-loaded", "image-loaded"].forEach(eventName => {
-    entity.addEventListener(eventName, () => {
+    entity.addEventListener(eventName, async () => {
+      entity.object3D.visible = false;
+
       clearTimeout(fireLoadingTimeout);
 
       entity.removeAttribute("animation__loader_spawn-start");
-      const [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
+
+      // Deal with scale. The box animation may not have completed so cover all cases.
+      if (entity.components.scale) {
+        // Ensure explicit scale from scale component is set.
+        const scaleData = entity.components.scale.data;
+        entity.object3D.scale.set(scaleData.x, scaleData.y, scaleData.z);
+        entity.object3D.matrixNeedsUpdate = true;
+      } else if (contentOrigin == ObjectContentOrigins.SPAWNER) {
+        // Spawner will have set scale.
+        await nextTick();
+      } else {
+        // Otherwise, ensure original scale is re-applied.
+        entity.object3D.scale.set(sx, sy, sz);
+        entity.object3D.matrixNeedsUpdate = true;
+      }
+
+      [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
 
       if (!entity.getAttribute("animation__spawn-start")) {
+        entity.object3D.scale.set(0.001, 0.001, 0.001);
+        entity.object3D.matrixNeedsUpdate = true;
+
         entity.setAttribute("animation__spawn-start", {
           property: "scale",
           delay: 50,
-          dur: 300,
-          from: { x: sx / 2, y: sy / 2, z: sz / 2 },
+          dur: 350,
+          from: { x: 0.001, y: 0.001, z: 0.001 },
           to: { x: sx, y: sy, z: sz },
           easing: "easeOutElastic"
         });
       }
+
+      entity.object3D.visible = true;
 
       scene.emit("media-loaded", { src: src });
     });
@@ -345,20 +373,14 @@ export function generateMeshBVH(object3D) {
     const hasBufferGeometry = obj.isMesh && obj.geometry.isBufferGeometry;
     const hasBoundsTree = hasBufferGeometry && obj.geometry.boundsTree;
     if (hasBufferGeometry && !hasBoundsTree) {
-      // we can't currently build a BVH for geometries with groups, because the groups rely on the
-      // existing ordering of the index, which we kill as a result of building the tree
-      if (obj.geometry.groups && obj.geometry.groups.length) {
-        console.warn("BVH construction not supported for geometry with groups; raycasting may suffer.");
-      } else {
-        const geo = obj.geometry;
-        const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
-        // only bother using memory and time making a BVH if there are a reasonable number of tris,
-        // and if there are too many it's too painful and large to tolerate doing it (at least until
-        // we put this in a web worker)
-        if (triCount > 1000 && triCount < 1000000) {
-          geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 30 });
-          geo.setIndex(geo.boundsTree.index);
-        }
+      const geo = obj.geometry;
+      const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
+      // only bother using memory and time making a BVH if there are a reasonable number of tris,
+      // and if there are too many it's too painful and large to tolerate doing it (at least until
+      // we put this in a web worker)
+      if (triCount > 1000 && triCount < 1000000) {
+        // note that bounds tree construction creates an index as a side effect if one doesn't already exist
+        geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 30 });
       }
     }
   });

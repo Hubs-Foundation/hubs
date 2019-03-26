@@ -1,6 +1,7 @@
-export function ArrayBackedSet() {
+// You might prefer to use this over a Set because iterating over a set allocates memory
+export function ArrayBackedSet(initialItems) {
   return {
-    items: [],
+    items: initialItems || [],
     has(item) {
       return this.items.indexOf(item) !== -1;
     },
@@ -8,7 +9,6 @@ export function ArrayBackedSet() {
       if (!this.has(item)) {
         this.items.push(item);
       }
-      return this;
     },
     delete(item) {
       const index = this.items.indexOf(item);

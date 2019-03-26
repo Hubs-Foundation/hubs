@@ -16,6 +16,8 @@ import { SOURCES } from "../storage/media-search-store";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 
+const isMobile = AFRAME.utils.device.isMobile();
+
 const PUBLISHER_FOR_ENTRY_TYPE = {
   sketchfab_model: "Sketchfab",
   poly_model: "Google Poly",
@@ -74,7 +76,7 @@ class MediaBrowser extends Component {
     onMediaSearchResultEntrySelected: PropTypes.func
   };
 
-  state = { query: "", facets: [], showNav: true, selectNextResult: true };
+  state = { query: "", facets: [], showNav: true, selectNextResult: false };
 
   constructor(props) {
     super(props);
@@ -245,7 +247,7 @@ class MediaBrowser extends Component {
                       } else {
                         this.close();
                       }
-                    } else if (e.key === "Escape" || e.key === "Enter") {
+                    } else if (e.key === "Escape" || (e.key === "Enter" && isMobile)) {
                       e.target.blur();
                     }
                   }}
@@ -370,7 +372,8 @@ class MediaBrowser extends Component {
     const imageWidth = Math.floor(Math.max(imageAspect * imageHeight, imageHeight * 0.85));
 
     const publisherName =
-      (entry.attributions.publisher && entry.attributions.publisher.name) || PUBLISHER_FOR_ENTRY_TYPE[entry.type];
+      (entry.attributions && entry.attributions.publisher && entry.attributions.publisher.name) ||
+      PUBLISHER_FOR_ENTRY_TYPE[entry.type];
 
     return (
       <div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`${entry.id}_${idx}`}>
