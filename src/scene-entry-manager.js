@@ -12,7 +12,7 @@ const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ex
 import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
 import { handleExitTo2DInterstitial, handleReEntryToVRFrom2DInterstitial } from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
-import { getAvatarSrc } from "./assets/avatars/avatars";
+import { getAvatarSrc, getAvatarType } from "./assets/avatars/avatars";
 import { pushHistoryState } from "./utils/history";
 
 const isIOS = AFRAME.utils.device.isIOS();
@@ -157,6 +157,7 @@ export default class SceneEntryManager {
 
     const avatarSrc = await getAvatarSrc(avatarId);
     this.playerRig.setAttribute("player-info", { avatarSrc });
+    this.playerRig.setAttribute("ik-root", "avatarType", getAvatarType(avatarId));
   };
 
   _setupKicking = () => {
