@@ -377,16 +377,19 @@ export const traverseMeshesAndAddShapes = (function() {
     const meshRoot = el.object3DMap.mesh;
     inverse.getInverse(meshRoot.matrixWorld);
 
-    if (meshRoot.name === "AvatarRoot") {
-      //old pre-spoke scenes
-      el.setAttribute("ammo-shape", {
-        type: SHAPE.MESH,
-        margin: 0.01,
-        fit: FIT.COMPOUND
-      });
-      shapes.push("ammo-shape");
-      return shapes;
-    }
+    let vertexCount = 0;
+    meshRoot.traverse(o => {
+      if (
+        o.isMesh &&
+        (!THREE.Sky || o.__proto__ != THREE.Sky.prototype) &&
+        o.name !== "Floor_Plan" &&
+        o.name !== "Ground_Plane"
+      ) {
+        vertexCount += o.geometry.attributes.position.count;
+      }
+    });
+
+    const type = vertexCount > 100000 ? SHAPE.HULL : SHAPE.MESH;
 
     for (let i = 0; i < meshRoot.children.length; i++) {
       const obj = meshRoot.children[i];
@@ -398,43 +401,22 @@ export const traverseMeshesAndAddShapes = (function() {
           obj.el.setAttribute(shapePrefix + obj.name, {
             type: SHAPE.BOX,
             margin: 0.01,
-            fit: FIT.COMPOUND
+            fit: FIT.ALL
           });
           shapes.push(shapePrefix + obj.name);
           continue;
         }
 
-        let indexCount = 0;
-        let vertexCount = 0;
-        let meshCount = 0;
-        obj.traverse(o => {
-          if (o.isMesh && (!THREE.Sky || o.__proto__ != THREE.Sky.prototype)) {
-            indexCount += o.geometry.index.count;
-            vertexCount += o.geometry.attributes.position.count;
-            meshCount++;
-          }
-        });
-
-        if (meshCount > 0) {
-          if (!obj.el.object3DMap.mesh) {
-            obj.el.object3DMap.mesh = obj.parent;
-          }
-
-          if (indexCount > 10000) {
-            obj.el.setAttribute(shapePrefix + obj.uuid, {
-              type: SHAPE.HULL,
-              margin: 0.01,
-              fit: FIT.COMPOUND
-            });
-          } else {
-            obj.el.setAttribute(shapePrefix + obj.uuid, {
-              type: SHAPE.MESH,
-              margin: 0.01,
-              fit: FIT.COMPOUND
-            });
-          }
-          shapes.push(shapePrefix + obj.uuid);
+        if (!obj.el.object3DMap.mesh) {
+          obj.el.object3DMap.mesh = obj.parent;
         }
+
+        obj.el.setAttribute(shapePrefix + obj.uuid, {
+          type: type,
+          margin: 0.01,
+          fit: FIT.COMPOUND
+        });
+        shapes.push(shapePrefix + obj.uuid);
       }
     }
     return shapes;
