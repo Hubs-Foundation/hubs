@@ -50,22 +50,28 @@ AFRAME.registerComponent("super-networked-interactable", {
     if (this.networkedEl) {
       if (!NAF.utils.isMine(this.networkedEl)) {
         if (NAF.utils.takeOwnership(this.networkedEl)) {
-          this.el.setAttribute("ammo-body", { type: "dynamic" });
-          this.el.body.forceActivationState(ACTIVATION_STATE.DISABLE_DEACTIVATION);
+          this.el.setAttribute("ammo-body", {
+            type: "dynamic",
+            activationState: ACTIVATION_STATE.DISABLE_DEACTIVATION
+          });
           this._syncCounterRegistration();
         } else {
           this.el.emit("grab-end", { hand: this.hand });
           this.hand = null;
         }
       } else {
-        this.el.body.forceActivationState(ACTIVATION_STATE.DISABLE_DEACTIVATION);
+        this.el.setAttribute("ammo-body", {
+          activationState: ACTIVATION_STATE.DISABLE_DEACTIVATION
+        });
       }
     }
   },
 
   _onGrabEnd: function(e) {
     if (e.detail.hand) e.detail.hand.emit("haptic_pulse", { intensity: "high" });
-    this.el.body.forceActivationState(ACTIVATION_STATE.ACTIVE_TAG);
+    this.el.setAttribute("ammo-body", {
+      activationState: ACTIVATION_STATE.ACTIVE_TAG
+    });
   },
 
   _onOwnershipLost: function() {

@@ -387,6 +387,7 @@ export function generateMeshBVH(object3D) {
 }
 
 export const traverseMeshesAndAddShapes = (function() {
+  const vertexLimit = 200000;
   const inverse = new THREE.Matrix4();
   const shapePrefix = "ammo-shape__";
   return function(el) {
@@ -407,7 +408,9 @@ export const traverseMeshesAndAddShapes = (function() {
       }
     });
 
-    const type = vertexCount > 100000 ? SHAPE.HULL : SHAPE.MESH;
+    const type = vertexCount > vertexLimit ? SHAPE.HULL : SHAPE.MESH;
+
+    console.log(`traversing meshes and adding shapes for scene with ${vertexCount} vertices; using ${type} shapes`);
 
     for (let i = 0; i < meshRoot.children.length; i++) {
       const obj = meshRoot.children[i];
