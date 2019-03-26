@@ -176,6 +176,7 @@ import qsTruthy from "./utils/qs_truthy";
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
 const isDebug = qsTruthy("debug");
+const skipWebRTC = qsTruthy("skip_webrtc"); // Used for testing Hubs in non-WebRTC compliant browsers
 const loadingEnvironmentURL =
   "https://hubs-proxy.com/https://uploads-prod.reticulum.io/files/61d77151-7a74-40a6-b427-0c5a350c4502.glb";
 
@@ -189,7 +190,7 @@ detectConcurrentLoad();
 store.init();
 
 function getPlatformUnsupportedReason() {
-  if (typeof RTCDataChannelEvent === "undefined") return "no_data_channels";
+  if (!skipWebRTC && typeof RTCDataChannelEvent === "undefined") return "no_data_channels";
   return null;
 }
 
@@ -458,6 +459,11 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
         };
       })
       .catch(connectError => {
+        if (skipWebRTC) {
+          scene.emit("didConnectToNetworkedScene");
+          return;
+        }
+
         // hacky until we get return codes
         const isFull = connectError.error && connectError.error.msg.match(/\bfull\b/i);
         console.error(connectError);

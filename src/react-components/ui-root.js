@@ -91,6 +91,8 @@ const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
 
 async function grantedMicLabels() {
+  if (!navigator.mediaDevices) return [];
+
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
   return mediaDevices.filter(d => d.label && d.kind === "audioinput").map(d => d.label);
 }
@@ -663,6 +665,8 @@ class UIRoot extends Component {
 
   fetchMicDevices = () => {
     return new Promise(resolve => {
+      if (!navigator.mediaDevices) return resolve();
+
       navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
         this.setState(
           {
