@@ -39,7 +39,6 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.2",
-    "@fortawesome/free-brands-svg-icons": "^5.7.2",
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
     "aframe": "github:mozillareality/aframe#hubs/master",
