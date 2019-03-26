@@ -1,6 +1,8 @@
 const interactorOneTransform = [];
 const interactorTwoTransform = [];
 
+const boundingBox = new THREE.Box3();
+
 /**
  * Applies effects to a hoverable based on hover state.
  * @namespace interactables
@@ -17,6 +19,7 @@ AFRAME.registerComponent("hoverable-visuals", {
     this.boundingSphere = new THREE.Sphere();
 
     this.sweepParams = [0, 0];
+    this.currentObjectScale = null;
   },
   remove() {
     this.uniforms = null;
@@ -24,6 +27,20 @@ AFRAME.registerComponent("hoverable-visuals", {
   },
   tick(time) {
     if (!this.uniforms || !this.uniforms.size) return;
+
+    const currentScale = this.el.object3D.scale;
+
+    // Ensure bounding sphere is up-to-date
+    if (!this.currentObjectScale || !this.currentObjectScale.equals(currentScale)) {
+      if (!this.currentObjectScale) {
+        this.currentObjectScale = new THREE.Vector3();
+      }
+
+      this.currentObjectScale.copy(currentScale);
+
+      boundingBox.setFromObject(this.el.object3DMap.mesh);
+      boundingBox.getBoundingSphere(this.boundingSphere);
+    }
 
     const { hoverers } = this.el.components["hoverable"];
     const isFrozen = this.el.sceneEl.is("frozen");

@@ -29,8 +29,6 @@ const fetchMaxContentIndex = url => {
   return fetch(url).then(r => parseInt(r.headers.get("x-max-content-index")));
 };
 
-const boundingBox = new THREE.Box3();
-
 AFRAME.registerComponent("media-loader", {
   schema: {
     fileId: { type: "string" },
@@ -127,8 +125,6 @@ AFRAME.registerComponent("media-loader", {
     const hoverableVisuals = this.el.components["hoverable-visuals"];
     if (hoverableVisuals) {
       hoverableVisuals.uniforms = injectCustomShaderChunks(this.el.object3D);
-      boundingBox.setFromObject(this.el.object3DMap.mesh);
-      boundingBox.getBoundingSphere(hoverableVisuals.boundingSphere);
     }
   },
 
