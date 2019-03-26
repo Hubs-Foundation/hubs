@@ -387,11 +387,7 @@ export function generateMeshBVH(object3D) {
 }
 
 export const traverseMeshesAndAddShapes = (function() {
-  const matrix = new THREE.Matrix4();
   const inverse = new THREE.Matrix4();
-  const pos = new THREE.Vector3();
-  const quat = new THREE.Quaternion();
-  const scale = new THREE.Vector3();
   const shapePrefix = "ammo-shape__";
   return function(el) {
     window.sceneMeshes = [];

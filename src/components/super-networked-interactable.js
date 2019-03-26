@@ -1,4 +1,3 @@
-import { paths } from "../systems/userinput/paths";
 const ACTIVATION_STATE = require("aframe-physics-system/src/constants").ACTIVATION_STATE;
 
 /**
