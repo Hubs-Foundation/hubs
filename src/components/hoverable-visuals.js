@@ -1,8 +1,6 @@
 const interactorOneTransform = [];
 const interactorTwoTransform = [];
 
-const boundingBox = new THREE.Box3();
-
 /**
  * Applies effects to a hoverable based on hover state.
  * @namespace interactables
@@ -23,73 +21,76 @@ AFRAME.registerComponent("hoverable-visuals", {
   },
   remove() {
     this.uniforms = null;
-    this.boundingBox = null;
   },
-  tick(time) {
-    if (!this.uniforms || !this.uniforms.size) return;
+  tick: (function() {
+    const boundingBox = new THREE.Box3();
 
-    const currentScale = this.el.object3D.scale;
+    return function(time) {
+      if (!this.uniforms || !this.uniforms.size) return;
 
-    // Ensure bounding sphere is up-to-date
-    if (!this.currentObjectScale || !this.currentObjectScale.equals(currentScale)) {
-      if (!this.currentObjectScale) {
-        this.currentObjectScale = new THREE.Vector3();
+      const currentScale = this.el.object3D.scale;
+
+      // Ensure bounding sphere is up-to-date
+      if (!this.currentObjectScale || !this.currentObjectScale.equals(currentScale)) {
+        if (!this.currentObjectScale) {
+          this.currentObjectScale = new THREE.Vector3();
+        }
+
+        this.currentObjectScale.copy(currentScale);
+
+        boundingBox.setFromObject(this.el.object3DMap.mesh);
+        boundingBox.getBoundingSphere(this.boundingSphere);
       }
 
-      this.currentObjectScale.copy(currentScale);
+      const { hoverers } = this.el.components["hoverable"];
+      const isFrozen = this.el.sceneEl.is("frozen");
 
-      boundingBox.setFromObject(this.el.object3DMap.mesh);
-      boundingBox.getBoundingSphere(this.boundingSphere);
-    }
-
-    const { hoverers } = this.el.components["hoverable"];
-    const isFrozen = this.el.sceneEl.is("frozen");
-
-    let interactorOne, interactorTwo;
-    for (const hoverer of hoverers) {
-      if (hoverer.id === "player-left-controller") {
-        interactorOne = hoverer.object3D;
-      } else if (hoverer.id === "cursor") {
-        if (this.data.cursorController.components["cursor-controller"].enabled) {
+      let interactorOne, interactorTwo;
+      for (const hoverer of hoverers) {
+        if (hoverer.id === "player-left-controller") {
+          interactorOne = hoverer.object3D;
+        } else if (hoverer.id === "cursor") {
+          if (this.data.cursorController.components["cursor-controller"].enabled) {
+            interactorTwo = hoverer.object3D;
+          }
+        } else {
           interactorTwo = hoverer.object3D;
         }
-      } else {
-        interactorTwo = hoverer.object3D;
       }
-    }
 
-    if (interactorOne) {
-      interactorOne.matrixWorld.toArray(interactorOneTransform);
-    }
-    if (interactorTwo) {
-      interactorTwo.matrixWorld.toArray(interactorTwoTransform);
-    }
-
-    if (interactorOne || interactorTwo || isFrozen) {
-      const worldY = this.el.object3D.matrixWorld.elements[13];
-      const scaledRadius = this.el.object3D.scale.y * this.boundingSphere.radius;
-      this.sweepParams[0] = worldY - scaledRadius;
-      this.sweepParams[1] = worldY + scaledRadius;
-    }
-
-    for (const uniform of this.uniforms.values()) {
-      uniform.hubs_EnableSweepingEffect.value = this.data.enableSweepingEffect;
-      uniform.hubs_IsFrozen.value = isFrozen;
-      uniform.hubs_SweepParams.value = this.sweepParams;
-
-      uniform.hubs_HighlightInteractorOne.value = !!interactorOne;
-      uniform.hubs_InteractorOnePos.value[0] = interactorOneTransform[12];
-      uniform.hubs_InteractorOnePos.value[1] = interactorOneTransform[13];
-      uniform.hubs_InteractorOnePos.value[2] = interactorOneTransform[14];
-
-      uniform.hubs_HighlightInteractorTwo.value = !!interactorTwo;
-      uniform.hubs_InteractorTwoPos.value[0] = interactorTwoTransform[12];
-      uniform.hubs_InteractorTwoPos.value[1] = interactorTwoTransform[13];
-      uniform.hubs_InteractorTwoPos.value[2] = interactorTwoTransform[14];
+      if (interactorOne) {
+        interactorOne.matrixWorld.toArray(interactorOneTransform);
+      }
+      if (interactorTwo) {
+        interactorTwo.matrixWorld.toArray(interactorTwoTransform);
+      }
 
       if (interactorOne || interactorTwo || isFrozen) {
-        uniform.hubs_Time.value = time;
+        const worldY = this.el.object3D.matrixWorld.elements[13];
+        const scaledRadius = this.el.object3D.scale.y * this.boundingSphere.radius;
+        this.sweepParams[0] = worldY - scaledRadius;
+        this.sweepParams[1] = worldY + scaledRadius;
       }
-    }
-  }
+
+      for (const uniform of this.uniforms.values()) {
+        uniform.hubs_EnableSweepingEffect.value = this.data.enableSweepingEffect;
+        uniform.hubs_IsFrozen.value = isFrozen;
+        uniform.hubs_SweepParams.value = this.sweepParams;
+
+        uniform.hubs_HighlightInteractorOne.value = !!interactorOne;
+        uniform.hubs_InteractorOnePos.value[0] = interactorOneTransform[12];
+        uniform.hubs_InteractorOnePos.value[1] = interactorOneTransform[13];
+        uniform.hubs_InteractorOnePos.value[2] = interactorOneTransform[14];
+
+        uniform.hubs_HighlightInteractorTwo.value = !!interactorTwo;
+        uniform.hubs_InteractorTwoPos.value[0] = interactorTwoTransform[12];
+        uniform.hubs_InteractorTwoPos.value[1] = interactorTwoTransform[13];
+        uniform.hubs_InteractorTwoPos.value[2] = interactorTwoTransform[14];
+
+        if (interactorOne || interactorTwo || isFrozen) {
+          uniform.hubs_Time.value = time;
+        }
+      }
+    };
+  })()
 });
