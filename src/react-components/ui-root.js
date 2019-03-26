@@ -71,9 +71,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 
 import qsTruthy from "../utils/qs_truthy";
-// TODO temp feature flags
-const customSkinEnabled = qsTruthy("customSkin");
-const advancedAvatarEditor = qsTruthy("advancedAvatarEditor");
+const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
 addLocaleData([...en]);
 
@@ -1430,8 +1428,7 @@ class UIRoot extends Component {
                   onSignOut={this.signOut}
                   finished={this.onProfileFinished}
                   store={this.props.store}
-                  customSkinEnabled={customSkinEnabled}
-                  advanced={advancedAvatarEditor}
+                  debug={avatarEditorDebug}
                 />
               )}
             />
