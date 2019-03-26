@@ -82,8 +82,7 @@ AFRAME.registerComponent("cursor-controller", {
     camera: { type: "selector" },
     far: { default: 4 },
     near: { default: 0.01 },
-    minDistance: { default: 0.18 },
-    objects: { default: "" }
+    minDistance: { default: 0.18 }
   },
 
   init: function() {
@@ -97,60 +96,30 @@ AFRAME.registerComponent("cursor-controller", {
       { once: true }
     );
 
-    // raycaster state
-    this.setDirty = this.setDirty.bind(this);
-    this.targets = [];
     this.raycaster = new THREE.Raycaster();
     this.raycaster.firstHitOnly = true; // flag specific to three-mesh-bvh
-    this.dirty = true;
     this.distance = this.data.far;
     this.color = new THREE.Color(0, 0, 0);
     this.rotateColor = [0, 0, 0];
-    const lineMaterial = new THREE.LineBasicMaterial({
-      color: "white",
-      opacity: 0.2,
-      transparent: true,
-      visible: false
-    });
 
     const lineGeometry = new THREE.BufferGeometry();
     lineGeometry.addAttribute("position", new THREE.BufferAttribute(new Float32Array(2 * 3), 3));
 
-    this.line = new THREE.Line(lineGeometry, lineMaterial);
+    this.line = new THREE.Line(
+      lineGeometry,
+      new THREE.LineBasicMaterial({
+        color: "white",
+        opacity: 0.2,
+        transparent: true,
+        visible: false
+      })
+    );
     this.el.setObject3D("line", this.line);
   },
 
   update: function() {
     this.raycaster.far = this.data.far;
     this.raycaster.near = this.data.near;
-    this.setDirty();
-  },
-
-  play: function() {
-    this.observer = new MutationObserver(this.setDirty);
-    this.observer.observe(this.el.sceneEl, { childList: true, attributes: true, subtree: true });
-    this.el.sceneEl.addEventListener("object3dset", this.setDirty);
-    this.el.sceneEl.addEventListener("object3dremove", this.setDirty);
-  },
-
-  pause: function() {
-    this.observer.disconnect();
-    this.el.sceneEl.removeEventListener("object3dset", this.setDirty);
-    this.el.sceneEl.removeEventListener("object3dremove", this.setDirty);
-  },
-
-  setDirty: function() {
-    this.dirty = true;
-  },
-
-  populateEntities: function(selector, target) {
-    target.length = 0;
-    const els = this.data.objects ? this.el.sceneEl.querySelectorAll(this.data.objects) : this.el.sceneEl.children;
-    for (let i = 0; i < els.length; i++) {
-      if (els[i].object3D) {
-        target.push(els[i].object3D);
-      }
-    }
   },
 
   tick: (() => {
@@ -158,12 +127,6 @@ AFRAME.registerComponent("cursor-controller", {
     const cameraPos = new THREE.Vector3();
 
     return function(t) {
-      if (this.dirty) {
-        // app aware devices cares about this.targets so we must update it even if cursor is not enabled
-        this.populateEntities(this.data.objects, this.targets);
-        this.dirty = false;
-      }
-
       const userinput = AFRAME.scenes[0].systems.userinput;
       const cursorPose = userinput.get(paths.actions.cursor.pose);
       const rightHandPose = userinput.get(paths.actions.rightHand.pose);
@@ -182,7 +145,7 @@ AFRAME.registerComponent("cursor-controller", {
         rawIntersections.length = 0;
         this.raycaster.ray.origin = cursorPose.position;
         this.raycaster.ray.direction = cursorPose.direction;
-        this.raycaster.intersectObjects(this.targets, true, rawIntersections);
+        this.raycaster.intersectObjects(interaction.cursorTargettingSystem.targets, true, rawIntersections);
         intersection = rawIntersections[0];
         interaction.updateCursorIntersection(intersection);
         this.distance = intersection ? intersection.distance : this.data.far;
@@ -217,7 +180,6 @@ AFRAME.registerComponent("cursor-controller", {
       }
 
       if (this.line.material.visible) {
-        // Reach into line component for better performance
         const posePosition = cursorPose.position;
         const cursorPosition = cursor.object3D.position;
         const positionArray = this.line.geometry.attributes.position.array;
