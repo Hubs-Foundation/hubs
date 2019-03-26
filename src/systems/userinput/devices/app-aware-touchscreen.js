@@ -34,7 +34,6 @@ const getPlayerCamera = (() => {
 })();
 
 function shouldMoveCursor(touch, raycaster) {
-  const cursorController = document.querySelector("[cursor-controller]").components["cursor-controller"];
   const interaction = AFRAME.scenes[0].systems.interaction;
   const isCursorGrabbing = !!interaction.rightRemoteConstraintTarget;
   if (isCursorGrabbing) {
@@ -55,7 +54,7 @@ function shouldMoveCursor(touch, raycaster) {
 
 export class AppAwareTouchscreenDevice {
   constructor() {
-    this.raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 3);
+    this.raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 4);
     this.assignments = [];
     this.pinch = { initialDistance: 0, currentDistance: 0, delta: 0 };
 
