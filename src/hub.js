@@ -130,10 +130,11 @@ const store = window.APP.store;
 const mediaSearchStore = window.APP.mediaSearchStore;
 
 const qs = new URLSearchParams(location.search);
-const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
+const isMobile = AFRAME.utils.device.isMobile();
+const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
-window.APP.quality = qs.get("quality") || isMobile ? "low" : "high";
+window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
 
 const SHAPES = require("aframe-physics-system/src/constants").SHAPES;
 const Ammo = require("ammo.js/builds/ammo.wasm.js");
@@ -149,6 +150,7 @@ window.Ammo = Ammo.bind(undefined, {
 require("aframe-physics-system");
 import "super-hands";
 import "./components/super-networked-interactable";
+import "./components/scalable-when-grabbed";
 import "./components/networked-counter";
 import "./components/event-repeater";
 import "./components/set-yxz-order";
@@ -167,7 +169,7 @@ import registerTelemetry from "./telemetry";
 import { warmSerializeElement } from "./utils/serialize-element";
 
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-caps-detect.js";
-import ConcurrentLoadDetector from "./utils/concurrent-load-detector.js";
+import detectConcurrentLoad from "./utils/concurrent-load-detector.js";
 
 import qsTruthy from "./utils/qs_truthy";
 
@@ -182,30 +184,13 @@ if (!isBotMode && !isTelemetryDisabled) {
 }
 
 disableiOSZoom();
-
-const concurrentLoadDetector = new ConcurrentLoadDetector();
-concurrentLoadDetector.start();
+detectConcurrentLoad();
 
 store.init();
 
 function getPlatformUnsupportedReason() {
   if (typeof RTCDataChannelEvent === "undefined") return "no_data_channels";
   return null;
-}
-
-function pollForSupportAvailability(callback) {
-  const availabilityUrl = getReticulumFetchUrl("/api/v1/support/availability");
-  let isSupportAvailable = null;
-
-  const updateIfChanged = () =>
-    fetch(availabilityUrl).then(({ ok }) => {
-      if (isSupportAvailable === ok) return;
-      isSupportAvailable = ok;
-      callback(isSupportAvailable);
-    });
-
-  updateIfChanged();
-  setInterval(updateIfChanged, 30000);
 }
 
 function setupLobbyCamera() {
@@ -256,7 +241,6 @@ function mountUI(props = {}) {
             {...{
               scene,
               isBotMode,
-              concurrentLoadDetector,
               disableAutoExitOnConcurrentLoad,
               forcedVREntryType,
               store,
@@ -286,10 +270,6 @@ async function updateUIForHub(hub) {
     hubScene: hub.scene,
     hubEntryCode: hub.entry_code
   });
-
-  document
-    .querySelector("#hud-hub-entry-link")
-    .setAttribute("text", { value: `hub.link/${hub.entry_code}`, width: 1.1, align: "center" });
 }
 
 let shapes = null;
@@ -558,7 +538,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store);
   const availableVREntryTypes = await getAvailableVREntryTypes();
-  const entryManager = new SceneEntryManager(hubChannel, authChannel, availableVREntryTypes);
+  const entryManager = new SceneEntryManager(hubChannel, authChannel, availableVREntryTypes, history);
   entryManager.onRequestAuthentication = (
     signInMessageId,
     signInCompleteMessageId,
@@ -583,7 +563,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.APP.scene = scene;
   window.APP.hubChannel = hubChannel;
 
-  scene.addEventListener("enter-vr", () => {
+  const handleEarlyVRMode = () => {
     // If VR headset is activated, refreshing page will fire vrdisplayactivate
     // which puts A-Frame in VR mode, so exit VR mode whenever it is attempted
     // to be entered and we haven't entered the room yet.
@@ -593,13 +573,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       return true;
     }
 
+    return false;
+  };
+
+  scene.addEventListener("enter-vr", () => {
+    if (handleEarlyVRMode()) return true;
+
     document.body.classList.add("vr-mode");
 
     // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
-    if (!isMobile || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
+    if ((!isMobile && !isMobileVR) || availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.yes) {
       document.body.classList.add("vr-mode-stretch");
     }
   });
+
+  handleEarlyVRMode();
 
   // HACK A-Frame 0.9.0 seems to fail to wire up vrdisplaypresentchange early enough
   // to catch presentation state changes and recognize that an HMD is presenting on startup.
@@ -658,8 +646,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   scene.addEventListener("camera_removed", () => remountUI({}));
 
-  pollForSupportAvailability(isSupportAvailable => remountUI({ isSupportAvailable }));
-
   const platformUnsupportedReason = getPlatformUnsupportedReason();
 
   if (platformUnsupportedReason) {
@@ -679,7 +665,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  if (availableVREntryTypes.isInHMD) {
+  if (isMobileVR) {
     remountUI({ availableVREntryTypes, forcedVREntryType: "vr" });
 
     if (/Oculus/.test(navigator.userAgent)) {
@@ -737,7 +723,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Hub local channel
   const context = {
-    mobile: isMobile,
+    mobile: isMobile || isMobileVR,
     hmd: availableVREntryTypes.isInHMD
   };
 

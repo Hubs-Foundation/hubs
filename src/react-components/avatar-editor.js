@@ -4,8 +4,8 @@ import { FormattedMessage } from "react-intl";
 import { getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { upload } from "../utils/media-utils";
 import classNames from "classnames";
-
-import { bumpCacheVersion } from "../assets/avatars/avatars";
+import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import styles from "../assets/stylesheets/profile.scss";
 
@@ -117,7 +117,7 @@ export default class AvatarEditor extends Component {
     }
 
     const filesToUpload = ["gltf", "bin", "base_map", "emissive_map", "normal_map", "orm_map"].filter(
-      k => !!this.inputFiles[k]
+      k => this.inputFiles[k] !== undefined
     );
 
     this.setState({ uploading: true });
@@ -126,7 +126,7 @@ export default class AvatarEditor extends Component {
     const avatar = {
       ...this.state.avatar,
       files: fileUploads
-        .map((resp, i) => [filesToUpload[i], [resp.file_id, resp.meta.access_token, resp.meta.promotion_token]])
+        .map((resp, i) => [filesToUpload[i], resp && [resp.file_id, resp.meta.access_token, resp.meta.promotion_token]])
         .reduce((o, [k, v]) => ({ ...o, [k]: v }), {})
     };
 
@@ -135,7 +135,6 @@ export default class AvatarEditor extends Component {
     this.props.onAvatarChanged(avatar.avatar_id);
 
     this.setState({ uploading: false });
-    bumpCacheVersion();
     this.props.saveStateAndFinish();
   };
 
@@ -164,6 +163,27 @@ export default class AvatarEditor extends Component {
           });
         }}
       />
+      {this.state.avatar.files[name] && (
+        <a
+          onClick={() => {
+            this.inputFiles[name] = null;
+            URL.revokeObjectURL(this.state.avatar.files[name]);
+            this.setState({
+              avatar: {
+                ...this.state.avatar,
+                files: {
+                  ...this.state.avatar.files,
+                  [name]: null
+                }
+              }
+            });
+          }}
+        >
+          <i>
+            <FontAwesomeIcon icon={faTimes} />
+          </i>
+        </a>
+      )}
     </div>
   );
 

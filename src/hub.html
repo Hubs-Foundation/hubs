@@ -32,7 +32,7 @@
         loading-screen="enabled: false"
         nextframe
         class="grab-cursor"
-        renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: true;"
+        renderer="antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; alpha: false; webgl2: true; multiview: false;"
         shadow="type: pcfsoft"
         networked-scene="adapter: janus; audio: true; debug: true; connectOnLoad: false;"
         physics="gravity: -9.8; debug: false; driver: ammo; debugDrawMode: 1;"
@@ -195,6 +195,7 @@
                 <a-entity
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
+                    scalable-when-grabbed
                     ammo-body="type: static; mass: 1;"
                     grabbable="constraintComponentName: ammo-constraint"
                     hoverable
@@ -212,6 +213,7 @@
                 <a-entity
                     class="interactable"
                     super-networked-interactable="counter: #media-counter;"
+                    scalable-when-grabbed
                     ammo-body="type: dynamic; mass: 1;"
                     grabbable="constraintComponentName: ammo-constraint"
                     stretchable="useWorldPosition: true; usePhysics: never"
@@ -325,6 +327,7 @@
                     ammo-shape="type: box; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.11 0.07 0.05; offset: 0 0.02 0;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     super-networked-interactable="counter: #camera-counter;"
+                    scalable-when-grabbed
                     position-at-box-shape-border__freeze="target: .camera-menu"
                     set-yxz-order
                 >
@@ -494,9 +497,7 @@
                     stretchStartButtons: primary_hand_grab, secondary_hand_grab;
                     stretchEndButtons: primary_hand_release, secondary_hand_release;
                     dragDropStartButtons: hand_grab, secondary_hand_grab;
-                    dragDropEndButtons: hand_release, secondary_hand_release;
-                    activateStartButtons: secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
-                    activateEndButtons: secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
+                    dragDropEndButtons: hand_release, secondary_hand_release;"
             ></a-mixin>
         </a-assets>
 
@@ -534,9 +535,7 @@
                 stretchStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
                 stretchEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
                 dragDropStartButtons: cursor-grab, primary_hand_grab, secondary_hand_grab;
-                dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;
-                activateStartButtons: secondary-cursor-grab, secondary_hand_grab, next_color, previous_color, increase_radius, decrease_radius, scroll_up, scroll_down, scroll_left, scroll_right;
-                activateEndButtons: secondary-cursor-release, secondary_hand_release, vertical_scroll_release, horizontal_scroll_release, thumb_up;"
+                dragDropEndButtons: cursor-release, primary_hand_release, secondary_hand_release;"
             action-to-event__grab="path: /actions/cursorGrab; event: cursor-grab"
             action-to-event__drop="path: /actions/cursorDrop; event: cursor-release"
         >
@@ -566,12 +565,16 @@
                 vr-mode-toggle-playing__hud-controller
             >
                 <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="30 0 0">
+
                     <a-rounded height="0.08" width="0.2" color="#000000" position="-0.30 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
                     <a-image scale="0.07 0.06 0.06" position="-0.23 0.165 0.001" src="#presence-count" material="alphaTest:0.1;"></a-image>
                     <a-entity id="hud-presence-count" text="value:; width:1.1; align:center;" position="-0.155 0.165 0" matrix-auto-update="target: text;"></a-entity>
-                    <a-rounded height="0.08" width="0.5" color="#000000" position="-0.08 0.125 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
-                    <a-entity id="hud-hub-entry-link" text="value:; width:1.1; align:center;" position="0.17 0.165 0" matrix-auto-update="target: text;"></a-entity>
-                    <a-rounded height="0.13" width="0.59" color="#000000" position="-0.24 -0.065 0" radius="0.065" opacity="0.35" class="hud bg"></a-rounded>
+                    <a-entity class="ui interactable-ui" mixin="button-container">
+                        <a-entity class="invite-btn" position="0.17 0.165 0" scale="0.5 0.5 0.5" hoverable>
+                            <a-entity mixin="rounded-text-action-button" slice9="width: 1.0" scale="0.8 0.8 1.0"> </a-entity>
+                            <a-entity text=" value:invite; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                        </a-entity>
+                    </a-entity>
                 <a-image
                     icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover"
                     scale="0.1 0.1 0.1"
@@ -686,7 +689,7 @@
                 haptic-feedback="path: /haptics/actuators/left"
                 mixin="controller-super-hands"
                 ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4;"
-                ammo-shape="type: box; autoGenerateShape: false; scaleAutoUpdate: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
+                ammo-shape="type: box; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 action-to-event__c="path: /actions/leftHandGrab; event: primary_hand_grab;"
                 action-to-event__d="path: /actions/leftHandDrop; event: primary_hand_release;"
             >
@@ -703,7 +706,7 @@
                 haptic-feedback="path: /haptics/actuators/right"
                 mixin="controller-super-hands"
                 ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4;"
-                ammo-shape="type: box; autoGenerateShape: false; scaleAutoUpdate: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
+                ammo-shape="type: box; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 action-to-event__c="path: /actions/rightHandGrab; event: primary_hand_grab;"
                 action-to-event__d="path: /actions/rightHandDrop; event: primary_hand_release;"
             >

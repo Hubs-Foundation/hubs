@@ -60,6 +60,8 @@
   }
 
   :local(.file-input-row) {
+    display: flex;
+    align-items: center;
     label {
       display: flex;
       align-items: center;
@@ -78,6 +80,10 @@
     }
     img {
       width: 100%;
+    }
+    a {
+      margin-left: 10px;
+      color: $action-color;
     }
   }
 

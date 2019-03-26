@@ -22,18 +22,6 @@ function isMaybeDaydreamCompatibleDevice(ua) {
 // that can be entered into as a "generic" entry flow.
 const GENERIC_ENTRY_TYPE_DEVICE_BLACKLIST = [/cardboard/i];
 
-let isInHMD = null;
-export function detectInHMD() {
-  if (isInHMD === null) {
-    const ua = navigator.userAgent;
-    const isFirefoxReality = /Firefox/.test(ua) && /Android/.test(ua) && window.hasNativeWebVRImplementation;
-    const isOculusBrowser = /Oculus/.test(ua);
-    isInHMD = isOculusBrowser || isFirefoxReality;
-  }
-
-  return isInHMD;
-}
-
 // Tries to determine VR entry compatibility regardless of the current browser.
 //
 // For each VR "entry type", returns VR_DEVICE_AVAILABILITY.yes if that type can be launched into directly from this browser
@@ -53,11 +41,11 @@ export function detectInHMD() {
 // - gearvr: Oculus GearVR
 // - cardboard: Google Cardboard
 //
-// This function also detects if the user is already in a headset, and returns the isInHMD key to be `true` if so.
 export async function getAvailableVREntryTypes() {
   const ua = navigator.userAgent;
   const isSamsungBrowser = browser.name === "chrome" && /SamsungBrowser/.test(ua);
   const isMobile = AFRAME.utils.device.isMobile();
+  const isMobileVR = AFRAME.utils.device.isMobileVR();
 
   // This needs to be kept up-to-date with the latest browsers that can support VR and Hubs.
   // Checking for navigator.getVRDisplays always passes b/c of polyfill.
@@ -80,9 +68,8 @@ export async function getAvailableVREntryTypes() {
   const displays = isWebVRCapableBrowser || isCardboardCapableBrowser ? await navigator.getVRDisplays() : [];
 
   const isOculusBrowser = /Oculus/.test(ua);
-  const isInHMD = detectInHMD();
 
-  const screen = isInHMD
+  const screen = isMobileVR
     ? VR_DEVICE_AVAILABILITY.no
     : isIDevice && isUIWebView
       ? VR_DEVICE_AVAILABILITY.maybe
@@ -109,7 +96,7 @@ export async function getAvailableVREntryTypes() {
   // For daydream detection, we first check if they are on an Android compatible device, and assume they
   // may support daydream *unless* this browser has WebVR capabilities, in which case we can do better.
   let daydream =
-    isMaybeDaydreamCompatibleDevice(ua) && !isInHMD ? VR_DEVICE_AVAILABILITY.maybe : VR_DEVICE_AVAILABILITY.no;
+    isMaybeDaydreamCompatibleDevice(ua) && !isMobileVR ? VR_DEVICE_AVAILABILITY.maybe : VR_DEVICE_AVAILABILITY.no;
 
   cardboard =
     isCardboardCapableBrowser && displays.find(d => d.capabilities.canPresent && /cardboard/i.test(d.displayName))
@@ -137,5 +124,5 @@ export async function getAvailableVREntryTypes() {
     }
   }
 
-  return { screen, generic, gearvr, daydream, cardboard, isInHMD, safari };
+  return { screen, generic, gearvr, daydream, cardboard, safari };
 }
