@@ -136,7 +136,6 @@ const isMobileVR = AFRAME.utils.device.isMobileVR();
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
 
-const SHAPES = require("aframe-physics-system/src/constants").SHAPES;
 const Ammo = require("ammo.js/builds/ammo.wasm.js");
 const AmmoWasm = require("ammo.js/builds/ammo.wasm.wasm");
 window.Ammo = Ammo.bind(undefined, {
@@ -272,7 +271,6 @@ async function updateUIForHub(hub) {
   });
 }
 
-let shapes = null;
 async function updateEnvironmentForHub(hub) {
   let sceneUrl;
   let isLegacyBundle; // Deprecated
@@ -319,7 +317,7 @@ async function updateEnvironmentForHub(hub) {
       "model-loaded",
       () => {
         //TODO: check if the environment was made with spoke to determine if a shape should be added
-        shapes = traverseMeshesAndAddShapes(environmentEl, SHAPES.MESH, 0.1);
+        traverseMeshesAndAddShapes(environmentEl);
         generateMeshBVH(environmentEl.object3D);
       },
       { once: true }
@@ -339,10 +337,7 @@ async function updateEnvironmentForHub(hub) {
           environmentEl.addEventListener(
             "model-loaded",
             () => {
-              while (shapes.length > 0) {
-                environmentEl.removeAttribute(shapes.pop());
-              }
-              shapes = traverseMeshesAndAddShapes(environmentEl, SHAPES.MESH, 0.1);
+              traverseMeshesAndAddShapes(environmentEl);
               generateMeshBVH(environmentEl.object3D);
               document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint();
             },

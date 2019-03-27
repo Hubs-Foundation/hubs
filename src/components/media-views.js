@@ -4,7 +4,9 @@ import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js/dist/hls.light.js";
 import { proxiedUrlFor } from "../utils/media-utils";
 import { buildAbsoluteURL } from "url-toolkit";
-const SHAPES = require("aframe-physics-system/src/constants").SHAPES;
+const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
+  SHAPE = PHYSICS_CONSTANTS.SHAPE,
+  FIT = PHYSICS_CONSTANTS.FIT;
 
 const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {
@@ -207,11 +209,10 @@ function fitToTexture(el, texture) {
   const height = Math.min(1.0, ratio);
   el.object3DMap.mesh.scale.set(width, height, 1);
   el.setAttribute("ammo-shape", {
-    autoGenerateShape: false,
-    type: SHAPES.BOX,
+    type: SHAPE.BOX,
     halfExtents: { x: 0.5, y: 0.5, z: 0.02 },
     margin: 0.1,
-    mergeGeometry: true
+    fit: FIT.MANUAL
   });
 }
 
