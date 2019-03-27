@@ -7,9 +7,9 @@ import { buildAbsoluteURL } from "url-toolkit";
 const SHAPES = require("aframe-physics-system/src/constants").SHAPES;
 
 const VOLUME_LABELS = [];
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i <= 20; i++) {
   let s = "|";
-  for (let j = 0; j < 20; j++) {
+  for (let j = 0; j <= 20; j++) {
     s += i >= j ? "|" : " ";
   }
   s += "|";
