@@ -466,10 +466,9 @@ AFRAME.registerComponent("media-video", {
     if (this.hoverMenu) {
       this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
 
+      this.playPauseButton.object3D.visible = !!this.video;
       this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
       this.seekBackButton.object3D.visible = !!this.video && !this.videoIsLive;
-      this.playPauseButton.object3D.visible = !!this.video;
-      this.playPauseButton.object3D.visible = !!this.video;
     }
 
     // Only update playback position for videos you don't own
