@@ -1464,8 +1464,6 @@ class UIRoot extends Component {
                   signedIn={this.state.signedIn}
                   onSignIn={this.showSignInDialog}
                   onSignOut={this.signOut}
-                  customSkinEnabled={customSkinEnabled}
-                  advanced={advancedAvatarEditor}
                 />
               )}
             />
