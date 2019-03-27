@@ -18,7 +18,7 @@ export default class AvatarEditor extends Component {
     onSignIn: PropTypes.func,
     onSignOut: PropTypes.func,
     signedIn: PropTypes.bool,
-    advanced: PropTypes.bool,
+    debug: PropTypes.bool,
     onAvatarChanged: PropTypes.func,
     saveStateAndFinish: PropTypes.func
   };
@@ -26,6 +26,7 @@ export default class AvatarEditor extends Component {
   constructor(props) {
     super(props);
     this.state = {};
+    // Blank avatar, used to create base avatar
     // this.state = { avatar: { name: "Base bot avatar", files: {} } };
 
     this.inputFiles = {
@@ -108,6 +109,27 @@ export default class AvatarEditor extends Component {
       URL.revokeObjectURL(gltfUrl);
 
       const { content, body } = parser.extensions.KHR_binary_glTF;
+
+      // Inject hubs components on upload. Used to create base avatar
+      // const gltf = parser.json;
+      // Object.assign(gltf.scenes[0], {
+      //   extensions: {
+      //     HUBS_components: {
+      //       "loop-animation": {
+      //         clip: "idle_eyes"
+      //       }
+      //     }
+      //   }
+      // });
+      // Object.assign(gltf.nodes.find(n => n.name === "Head"), {
+      //   extensions: {
+      //     HUBS_components: {
+      //       "scale-audio-feedback": ""
+      //     }
+      //   }
+      // });
+      // content = JSON.stringify(gltf);
+
       this.inputFiles.gltf = new File([content], "file.gltf", {
         type: "model/gltf"
       });
@@ -228,18 +250,18 @@ export default class AvatarEditor extends Component {
       return <div>Loading...</div>;
     }
 
-    const { advanced } = this.props;
+    const { debug } = this.props;
 
     return (
       <div className={classNames(styles.avatarSelectorContainer, "avatar-editor")}>
         <div className="form-body">
-          {advanced && this.textField("avatar_id", "Avatar ID", true)}
-          {advanced && this.textField("parent_avatar_id", "Parent Avatar ID")}
-          {advanced && this.textField("name", "Name")}
-          {advanced && this.textField("description", "Description")}
-          {advanced && this.checkbox("allow_remixing", "Allow Remixing")}
-          {advanced && this.checkbox("allow_promotion", "Allow Promotion")}
-          {advanced && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
+          {debug && this.textField("avatar_id", "Avatar ID", true)}
+          {debug && this.textField("parent_avatar_id", "Parent Avatar ID")}
+          {debug && this.textField("name", "Name")}
+          {debug && this.textField("description", "Description")}
+          {debug && this.checkbox("allow_remixing", "Allow Remixing")}
+          {debug && this.checkbox("allow_promotion", "Allow Promotion")}
+          {debug && this.fileField("glb", "Avatar GLB", "model/gltf+binary,.glb")}
 
           {this.fileField("base_map", "Base Map", "image/*")}
           {this.fileField("emissive_map", "Emissive Map", "image/*")}
