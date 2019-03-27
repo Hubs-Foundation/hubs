@@ -131,13 +131,24 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
 });
 
 function mediaInflator(el, componentName, componentData, components) {
+  let isControlled = true;
+
   if (components.networked) {
     // TODO: When non-hubs links can be traversed, make all link components controlled so you can open them.
-    const isControlled =
+    isControlled =
       componentData.controls || isHubsDestinationUrl(componentData.src) || isHubsDestinationUrl(componentData.href);
 
+    const hasVolume = componentName === "video";
+
+    let templateName = "#static-interactable-media";
+
+    if (!isControlled) {
+      // Ensure volume controls are enabled on media with volume.
+      templateName = hasVolume ? "#static-controlled-media" : "#static-media";
+    }
+
     el.setAttribute("networked", {
-      template: isControlled ? "#static-controlled-media" : "#static-media",
+      template: templateName,
       owner: "scene",
       persistent: true,
       networkId: components.networked.id
@@ -155,6 +166,7 @@ function mediaInflator(el, componentName, componentData, components) {
     mediaOptions.volume = componentData.volume;
     mediaOptions.loop = componentData.loop;
     mediaOptions.audioType = componentData.audioType;
+    mediaOptions.hidePlaybackControls = !isControlled;
 
     if (componentData.audioType === "pannernode") {
       mediaOptions.distanceModel = componentData.distanceModel;

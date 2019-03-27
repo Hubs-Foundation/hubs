@@ -316,6 +316,7 @@ AFRAME.registerComponent("media-video", {
     volume: { type: "number", default: 0.5 },
     loop: { type: "boolean", default: true },
     audioType: { type: "string", default: "pannernode" },
+    hidePlaybackControls: { type: "boolean", default: false },
     distanceModel: { type: "string", default: "inverse" },
     rolloffFactor: { type: "number", default: 1 },
     refDistance: { type: "number", default: 1 },
@@ -351,6 +352,7 @@ AFRAME.registerComponent("media-video", {
 
       this.hoverMenu = menu;
 
+      this.playbackControls = this.el.querySelector(".video-playback");
       this.playPauseButton = this.el.querySelector(".video-playpause-button");
       this.volumeUpButton = this.el.querySelector(".video-volume-up-button");
       this.volumeDownButton = this.el.querySelector(".video-volume-down-button");
@@ -462,9 +464,11 @@ AFRAME.registerComponent("media-video", {
 
   updatePlaybackState(force) {
     if (this.hoverMenu) {
+      this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
+
+      this.seekForwardButton.object3D.visible = !this.videoIsLive;
+      this.seekBackButton.object3D.visible = !this.videoIsLive;
       this.playPauseButton.object3D.visible = !!this.video;
-      this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
-      this.seekBackButton.object3D.visible = !!this.video && !this.videoIsLive;
     }
 
     // Only update playback position for videos you don't own
