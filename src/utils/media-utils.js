@@ -377,7 +377,7 @@ export function generateMeshBVH(object3D) {
     // note that we might already have a bounds tree if this was a clone of an object with one
     const hasBufferGeometry = obj.isMesh && obj.geometry.isBufferGeometry;
     const hasBoundsTree = hasBufferGeometry && obj.geometry.boundsTree;
-    if (hasBufferGeometry && !hasBoundsTree) {
+    if (hasBufferGeometry && !hasBoundsTree && obj.geometry.attributes.position) {
       const geo = obj.geometry;
       const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
       // only bother using memory and time making a BVH if there are a reasonable number of tris,
