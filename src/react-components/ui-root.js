@@ -1671,12 +1671,11 @@ class UIRoot extends Component {
               </form>
             )}
 
-            {this.state.frozen &&
-              !hasTopTip && (
-                <button className={styles.leaveButton} onClick={() => this.exit("left")}>
-                  <FormattedMessage id="entry.leave-room" />
-                </button>
-              )}
+            {this.state.frozen && (
+              <button className={styles.leaveButton} onClick={() => this.exit("left")}>
+                <FormattedMessage id="entry.leave-room" />
+              </button>
+            )}
 
             {!this.state.frozen && (
               <div
@@ -1808,7 +1807,7 @@ class UIRoot extends Component {
               />
             )}
 
-            {entered && (!this.state.frozen || hasTopTip) ? (
+            {entered && (
               <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
                   history={this.props.history}
@@ -1841,7 +1840,7 @@ class UIRoot extends Component {
                   </div>
                 )}
               </div>
-            ) : null}
+            )}
           </div>
         </IntlProvider>
       </ReactAudioContext.Provider>
