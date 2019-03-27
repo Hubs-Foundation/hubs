@@ -123,10 +123,15 @@ AFRAME.registerComponent("media-loader", {
     this.removeShape("loader");
   },
 
-  setupHoverableVisuals() {
+  updateHoverableVisuals() {
     const hoverableVisuals = this.el.components["hoverable-visuals"];
+
     if (hoverableVisuals) {
-      hoverableVisuals.uniforms = injectCustomShaderChunks(this.el.object3D);
+      if (!this.injectedCustomShaderChunks) {
+        this.injectedCustomShaderChunks = true;
+        hoverableVisuals.uniforms = injectCustomShaderChunks(this.el.object3D);
+      }
+
       boundingBox.setFromObject(this.el.object3DMap.mesh);
       boundingBox.getBoundingSphere(hoverableVisuals.boundingSphere);
     }
@@ -134,7 +139,7 @@ AFRAME.registerComponent("media-loader", {
 
   onMediaLoaded() {
     this.clearLoadingTimeout();
-    this.setupHoverableVisuals();
+    this.updateHoverableVisuals();
     if (!this.el.components["animation-mixer"]) {
       generateMeshBVH(this.el.object3D);
     }

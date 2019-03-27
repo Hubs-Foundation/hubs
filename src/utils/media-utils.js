@@ -236,6 +236,10 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
           to: { x: sx, y: sy, z: sz },
           easing: "easeOutElastic"
         });
+
+        entity.addEventListener("animationcomplete", () => entity.components["media-loader"].updateHoverableVisuals(), {
+          once: true
+        });
       }
 
       entity.object3D.visible = true;
