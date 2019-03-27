@@ -56,12 +56,12 @@ AFRAME.registerSystem("interaction", {
     this.rightRemoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
   },
 
-  async spawnObjectRoutine(state, constants, superSpawner) {
-    constants.entity.object3D.updateMatrices();
-    constants.entity.object3D.matrix.decompose(
-      constants.entity.object3D.position,
-      constants.entity.object3D.quaternion,
-      constants.entity.object3D.scale
+  async spawnObjectRoutine(state, options, superSpawner) {
+    options.entity.object3D.updateMatrices();
+    options.entity.object3D.matrix.decompose(
+      options.entity.object3D.position,
+      options.entity.object3D.quaternion,
+      options.entity.object3D.scale
     );
     const data = superSpawner.data;
     const entity = addMedia(data.src, data.template, ObjectContentOrigins.SPAWNER, data.resolve, data.resize).entity;
@@ -78,7 +78,7 @@ AFRAME.registerSystem("interaction", {
     await waitForEvent("body-loaded", entity);
     entity.object3D.position.copy(data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position);
     if (data.centerSpawnedObject) {
-      entity.body.position.copy(constants.entity.object3D.position);
+      entity.body.position.copy(options.entity.object3D.position);
     }
     entity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : superSpawner.el.object3D.scale);
     entity.object3D.matrixNeedsUpdate = true;
@@ -86,13 +86,13 @@ AFRAME.registerSystem("interaction", {
     // We don't bother trying to obtain ownership because we assume we have it
     state.held.setAttribute("ammo-body", { type: "dynamic" });
     state.held.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
-    state.held.setAttribute("ammo-constraint", { target: "#" + constants.entity.id });
+    state.held.setAttribute("ammo-constraint", { target: "#" + options.entity.id });
   },
 
   init: function() {
     this.rightRemoteConstraintTarget = null;
     this.weWantToGrab = false;
-    this.constants = {
+    this.options = {
       leftHand: {
         entity: document.querySelector("#player-left-controller"),
         grabPath: paths.actions.leftHand.grab,
@@ -135,12 +135,12 @@ AFRAME.registerSystem("interaction", {
     return this.rightRemoteHoverTarget;
   },
 
-  tickInteractor(constants, state) {
+  tickInteractor(options, state) {
     const userinput = AFRAME.scenes[0].systems.userinput;
     if (state.held) {
       const networked = state.held.components["networked"];
       const lostOwnership = networked && networked.data.owner !== NAF.clientId;
-      if (userinput.get(constants.dropPath) || lostOwnership) {
+      if (userinput.get(options.dropPath) || lostOwnership) {
         state.held.removeAttribute("ammo-constraint");
         if (lostOwnership) {
           state.held.setAttribute("ammo-body", { type: "kinematic" });
@@ -149,10 +149,10 @@ AFRAME.registerSystem("interaction", {
         state.held = null;
       }
     } else {
-      state.hovered = constants.hoverFn.call(this, constants.entity.body);
+      state.hovered = options.hoverFn.call(this, options.entity.body);
       if (state.hovered) {
-        if (userinput.get(constants.grabPath)) {
-          const offersCollisionConstraint = state.hovered.components[constants.constraintOfferingComponentName];
+        if (userinput.get(options.grabPath)) {
+          const offersCollisionConstraint = state.hovered.components[options.constraintOfferingComponentName];
           const superSpawner = state.hovered.components["super-spawner"];
           if (offersCollisionConstraint) {
             if (
@@ -163,12 +163,12 @@ AFRAME.registerSystem("interaction", {
               state.held = state.hovered;
               state.held.setAttribute("ammo-body", { type: "dynamic" });
               state.held.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
-              state.held.setAttribute("ammo-constraint", { target: "#" + constants.entity.id });
+              state.held.setAttribute("ammo-constraint", { target: "#" + options.entity.id });
             } else {
               //TODO: communicate a failure to obtain network ownership
             }
           } else if (superSpawner) {
-            this.spawnObjectRoutine(state, constants, superSpawner);
+            this.spawnObjectRoutine(state, options, superSpawner);
           }
         }
       }
@@ -178,11 +178,11 @@ AFRAME.registerSystem("interaction", {
   tick2: async function() {
     const userinput = AFRAME.scenes[0].systems.userinput;
     this.cursorController = this.cursorController || document.querySelector("#cursor-controller");
-    this.rightHandTeleporter = this.constants.rightHand.entity.components["teleporter"];
+    this.rightHandTeleporter = this.options.rightHand.entity.components["teleporter"];
 
-    this.tickInteractor(this.constants.leftHand, this.state.leftHand);
+    this.tickInteractor(this.options.leftHand, this.state.leftHand);
     if (!this.state.rightRemote.held) {
-      this.tickInteractor(this.constants.rightHand, this.state.rightHand);
+      this.tickInteractor(this.options.rightHand, this.state.rightHand);
     }
 
     const rightRemoteWasEnabled = this.cursorController.components["cursor-controller"].enabled;
@@ -194,13 +194,13 @@ AFRAME.registerSystem("interaction", {
     }
 
     if (!this.state.rightHand.held && !this.state.rightHand.hovered) {
-      this.tickInteractor(this.constants.rightRemote, this.state.rightRemote);
+      this.tickInteractor(this.options.rightRemote, this.state.rightRemote);
     }
 
-    if (this.state.rightRemote.hovered && userinput.get(this.constants.rightRemote.grabPath)) {
+    if (this.state.rightRemote.hovered && userinput.get(this.options.rightRemote.grabPath)) {
       const singleActionButton = this.state.rightRemote.hovered.components["single-action-button"];
       if (singleActionButton) {
-        singleActionButton.el.object3D.dispatchEvent({ type: "interact", path: this.constants.rightRemote.grabPath });
+        singleActionButton.el.object3D.dispatchEvent({ type: "interact", path: this.options.rightRemote.grabPath });
       }
 
       const holdableButton = this.state.rightRemote.hovered.components["holdable-button"];
@@ -208,7 +208,7 @@ AFRAME.registerSystem("interaction", {
         this.state.rightRemote.held = holdableButton.el;
         holdableButton.el.object3D.dispatchEvent({
           type: "holdable-button-down",
-          path: this.constants.rightRemote.grabPath
+          path: this.options.rightRemote.grabPath
         });
       }
     }
