@@ -1,4 +1,5 @@
 import {CursorTargettingSystem} from "./cursor-targetting-system";
+import {ConstraintsSystem} from "./constraints-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -10,5 +11,6 @@ AFRAME.registerSystem("hubs-systems", {
     systems.userinput.tick2();
     this.cursorTargettingSystem.tick();
     systems.interaction.tick2();
+    this.constraintsSystem.tick();
   }
 });

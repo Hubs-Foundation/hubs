@@ -4,8 +4,6 @@ import { paths } from "./userinput/paths";
 import { addMedia } from "../utils/media-utils";
 import { ObjectContentOrigins } from "../object-types";
 
-const ACTIVATION_STATES = require("aframe-physics-system/src/constants").ACTIVATION_STATES;
-
 AFRAME.registerComponent("offers-constraint-when-colliding", {});
 AFRAME.registerComponent("offers-remote-constraint", {});
 AFRAME.registerComponent("single-action-button", {});
@@ -75,18 +73,15 @@ AFRAME.registerSystem("interaction", {
     // WARNING: waitForEvent is semantically different than entity.addEventListener("body-loaded", ...)
     // and adding a callback fn via addEventListener will not work unless the callback function
     // wraps its code in setTimeout(()=>{...}, 0)
+    state.spawning = true;
     await waitForEvent("body-loaded", entity);
+    state.spawning = false;
     entity.object3D.position.copy(data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position);
     if (data.centerSpawnedObject) {
       entity.body.position.copy(options.entity.object3D.position);
     }
     entity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : superSpawner.el.object3D.scale);
     entity.object3D.matrixNeedsUpdate = true;
-
-    // We don't bother trying to obtain ownership because we assume we have it
-    state.held.setAttribute("ammo-body", { type: "dynamic" });
-    state.held.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
-    state.held.setAttribute("ammo-constraint", { target: "#" + options.entity.id });
   },
 
   init: function() {
@@ -118,15 +113,18 @@ AFRAME.registerSystem("interaction", {
     this.state = {
       leftHand: {
         hovered: null,
-        held: null
+        held: null,
+        spawning: null,
       },
       rightHand: {
         hovered: null,
-        held: null
+        held: null,
+        spawning: null,
       },
       rightRemote: {
         hovered: null,
-        held: null
+        held: null,
+        spawning: null,
       }
     };
   },
@@ -141,11 +139,6 @@ AFRAME.registerSystem("interaction", {
       const networked = state.held.components["networked"];
       const lostOwnership = networked && networked.data.owner !== NAF.clientId;
       if (userinput.get(options.dropPath) || lostOwnership) {
-        state.held.removeAttribute("ammo-constraint");
-        if (lostOwnership) {
-          state.held.setAttribute("ammo-body", { type: "kinematic" });
-        }
-        state.held.body.forceActivationState(ACTIVATION_STATES.ACTIVE_TAG);
         state.held = null;
       }
     } else {
@@ -155,18 +148,7 @@ AFRAME.registerSystem("interaction", {
           const offersCollisionConstraint = state.hovered.components[options.constraintOfferingComponentName];
           const superSpawner = state.hovered.components["super-spawner"];
           if (offersCollisionConstraint) {
-            if (
-              !state.hovered.components["networked"] ||
-              NAF.utils.isMine(state.hovered) ||
-              NAF.utils.takeOwnership(state.hovered)
-            ) {
-              state.held = state.hovered;
-              state.held.setAttribute("ammo-body", { type: "dynamic" });
-              state.held.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
-              state.held.setAttribute("ammo-constraint", { target: "#" + options.entity.id });
-            } else {
-              //TODO: communicate a failure to obtain network ownership
-            }
+            state.held = state.hovered;
           } else if (superSpawner) {
             this.spawnObjectRoutine(state, options, superSpawner);
           }

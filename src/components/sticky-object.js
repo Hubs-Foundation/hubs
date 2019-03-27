@@ -20,9 +20,10 @@ AFRAME.registerComponent("sticky-object", {
     const heldRightRemote = interaction.state.rightRemote.held === this.el;
 
     if (
-      (this.heldLeftHand && !heldLeftHand) ||
-      (this.heldRightHand && !heldRightHand) ||
-      (this.heldRightRemote && !heldRightRemote)
+      !heldLeftHand &&
+      !heldRightHand &&
+      !heldRightRemote &&
+      (this.heldLeftHand || this.heldRightHand || this.heldRightRemote)
     ) {
       this.onRelease();
     }
@@ -32,9 +33,9 @@ AFRAME.registerComponent("sticky-object", {
     this.heldRightRemote = heldRightRemote;
 
     if (
-      (heldLeftHand && userinput.get(interaction.constants.leftHand.grabPath)) ||
-      (heldRightHand && userinput.get(interaction.constants.rightHand.grabPath)) ||
-      (heldRightRemote && userinput.get(interaction.constants.rightRemote.grabPath))
+      (heldLeftHand && userinput.get(interaction.options.leftHand.grabPath)) ||
+      (heldRightHand && userinput.get(interaction.options.rightHand.grabPath)) ||
+      (heldRightRemote && userinput.get(interaction.options.rightRemote.grabPath))
     ) {
       this.onGrab();
     }
