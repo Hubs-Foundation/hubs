@@ -13,8 +13,8 @@ export function resolveActionSets() {
 
   const interaction = AFRAME.scenes[0].systems.interaction;
 
-  const leftHandConstraintTarget = interaction.leftHandConstraintTarget;
-  const leftHandCollisionTarget = !leftHandConstraintTarget && interaction.leftHandCollisionTarget;
+  const leftHandConstraintTarget = interaction.state.leftHand.held;
+  const leftHandCollisionTarget = !leftHandConstraintTarget && interaction.state.leftHand.hovered;
   userinput.toggleSet(sets.leftHandHoveringOnNothing, !leftHandConstraintTarget && !leftHandCollisionTarget);
   userinput.toggleSet(
     sets.leftHandHoveringOnPen,
@@ -49,12 +49,9 @@ export function resolveActionSets() {
     document.activeElement.nodeName === "INPUT" || document.activeElement.nodeName === "TEXTAREA"
   );
 
-  const rightHandConstraintTarget = interaction.rightHandConstraintTarget;
-  const rightHandCollisionTarget = !rightHandConstraintTarget && interaction.rightHandCollisionTarget;
-  userinput.toggleSet(
-    sets.rightHandHoveringOnNothing,
-    !rightHandConstraintTarget && !rightHandCollisionTarget && !interaction.rightRemoteHoverTarget
-  );
+  const rightHandConstraintTarget = interaction.state.rightHand.held;
+  const rightHandCollisionTarget = !rightHandConstraintTarget && interaction.state.rightHand.hovered;
+  userinput.toggleSet(sets.rightHandHoveringOnNothing, !rightHandConstraintTarget && !rightHandCollisionTarget);
   userinput.toggleSet(
     sets.rightHandHoveringOnPen,
     rightHandCollisionTarget && !!rightHandCollisionTarget.components["is-pen"]
@@ -88,12 +85,12 @@ export function resolveActionSets() {
     document.activeElement.nodeName === "INPUT" || document.activeElement.nodeName === "TEXTAREA"
   );
 
-  const rightRemoteConstraintTarget = interaction.rightRemoteConstraintTarget;
+  const rightRemoteConstraintTarget = interaction.state.rightRemote.held;
   const rightRemoteHoverTarget =
     !rightHandConstraintTarget &&
     !rightHandCollisionTarget &&
     !rightRemoteConstraintTarget &&
-    interaction.rightRemoteHoverTarget;
+    interaction.state.rightRemote.hovered;
   userinput.toggleSet(
     sets.cursorHoveringOnNothing,
     !rightHandConstraintTarget && !rightHandCollisionTarget && !rightRemoteConstraintTarget && !rightRemoteHoverTarget
@@ -108,15 +105,13 @@ export function resolveActionSets() {
   );
   userinput.toggleSet(
     sets.cursorHoveringOnInteractable,
-    !interaction.buttonHeldByRightRemote &&
-      rightRemoteHoverTarget &&
+    rightRemoteHoverTarget &&
       (!!rightRemoteHoverTarget.components["offers-remote-constraint"] ||
         !!rightRemoteHoverTarget.components["super-spawner"])
   );
   userinput.toggleSet(
     sets.cursorHoveringOnUI,
-    !interaction.buttonHeldByRightRemote &&
-      rightRemoteHoverTarget &&
+    rightRemoteHoverTarget &&
       (!!rightRemoteHoverTarget.components["single-action-button"] ||
         !!rightRemoteHoverTarget.components["holdable-button"])
   );
@@ -133,7 +128,10 @@ export function resolveActionSets() {
     sets.cursorHoldingCamera,
     rightRemoteConstraintTarget && !!rightRemoteConstraintTarget.components["camera-tool"]
   );
-  userinput.toggleSet(sets.cursorHoldingUI, !!interaction.buttonHeldByRightRemote);
+  userinput.toggleSet(
+    sets.cursorHoldingUI,
+    rightRemoteConstraintTarget && !!rightRemoteConstraintTarget.components["holdable-button"]
+  );
   userinput.toggleSet(sets.cursorHoldingInteractable, !!rightRemoteConstraintTarget);
   userinput.toggleSet(
     sets.inputFocused,

@@ -23,13 +23,13 @@ AFRAME.registerComponent("hover-visuals", {
     for (const uniform of this.uniforms.values()) {
       if (this.data.hand === "left") {
         uniform.hubs_HighlightInteractorOne.value =
-          !!interaction.leftHandConstraintTarget || !!interaction.leftHandCollisionTarget;
+          !!interaction.state.leftHand.held || !!interaction.state.leftHand.hovered;
         uniform.hubs_InteractorOnePos.value[0] = elements[12];
         uniform.hubs_InteractorOnePos.value[1] = elements[13];
         uniform.hubs_InteractorOnePos.value[2] = elements[14];
       } else {
         uniform.hubs_HighlightInteractorTwo.value =
-          !!interaction.rightHandConstraintTarget || !!interaction.rightHandCollisionTarget;
+          !!interaction.state.rightHand.held || !!interaction.state.rightHand.hovered;
         uniform.hubs_InteractorTwoPos.value[0] = elements[12];
         uniform.hubs_InteractorTwoPos.value[1] = elements[13];
         uniform.hubs_InteractorTwoPos.value[2] = elements[14];

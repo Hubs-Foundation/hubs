@@ -4,7 +4,7 @@ AFRAME.registerComponent("scalable-when-grabbed", {
   tick: function() {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const interaction = AFRAME.scenes[0].systems.interaction;
-    if (interaction.rightRemoteConstraintTarget !== this.el) return;
+    if (interaction.state.rightRemote.held !== this.el) return;
     const deltaScale = userinput.get(paths.actions.cursor.scaleGrabbedGrabbable);
     if (!deltaScale) return;
 

@@ -1,5 +1,4 @@
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
-import { EVENT_TYPE_CONSTRAINT_CREATION_ATTEMPT, EVENT_TYPE_CONSTRAINT_REMOVAL } from "../systems/interactions.js";
 /* global AFRAME */
 AFRAME.registerComponent("sticky-object", {
   schema: {
@@ -13,9 +12,35 @@ AFRAME.registerComponent("sticky-object", {
     this.onRelease = this.onRelease.bind(this);
   },
 
+  tick() {
+    const interaction = AFRAME.scenes[0].systems.interaction;
+    const userinput = AFRAME.scenes[0].systems.userinput;
+    const heldLeftHand = interaction.state.leftHand.held === this.el;
+    const heldRightHand = interaction.state.rightHand.held === this.el;
+    const heldRightRemote = interaction.state.rightRemote.held === this.el;
+
+    if (
+      (this.heldLeftHand && !heldLeftHand) ||
+      (this.heldRightHand && !heldRightHand) ||
+      (this.heldRightRemote && !heldRightRemote)
+    ) {
+      this.onRelease();
+    }
+
+    this.heldLeftHand = heldLeftHand;
+    this.heldRightHand = heldRightHand;
+    this.heldRightRemote = heldRightRemote;
+
+    if (
+      (heldLeftHand && userinput.get(interaction.constants.leftHand.grabPath)) ||
+      (heldRightHand && userinput.get(interaction.constants.rightHand.grabPath)) ||
+      (heldRightRemote && userinput.get(interaction.constants.rightRemote.grabPath))
+    ) {
+      this.onGrab();
+    }
+  },
+
   play() {
-    this.el.object3D.addEventListener(EVENT_TYPE_CONSTRAINT_CREATION_ATTEMPT, this.onGrab);
-    this.el.object3D.addEventListener(EVENT_TYPE_CONSTRAINT_REMOVAL, this.onRelease);
     // We do this in play instead of in init because otherwise NAF.utils.isMine fails
     if (this.hasBeenHereBefore) return;
     this.hasBeenHereBefore = true;
@@ -25,11 +50,6 @@ AFRAME.registerComponent("sticky-object", {
       this._onBodyLoaded = this._onBodyLoaded.bind(this);
       this.el.addEventListener("body-loaded", this._onBodyLoaded, { once: true });
     }
-  },
-
-  pause() {
-    this.el.object3D.removeEventListener(EVENT_TYPE_CONSTRAINT_CREATION_ATTEMPT, this.onGrab);
-    this.el.object3D.removeEventListener(EVENT_TYPE_CONSTRAINT_REMOVAL, this.onRelease);
   },
 
   setLocked(locked) {

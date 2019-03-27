@@ -140,7 +140,7 @@ AFRAME.registerComponent("cursor-controller", {
 
       const interaction = AFRAME.scenes[0].systems.interaction;
       let intersection;
-      const isGrabbing = !!interaction.rightRemoteConstraintTarget;
+      const isGrabbing = !!interaction.state.rightRemote.held;
       if (!isGrabbing) {
         rawIntersections.length = 0;
         this.raycaster.ray.origin = cursorPose.position;

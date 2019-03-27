@@ -1,7 +1,6 @@
 import { addMedia } from "../utils/media-utils";
 import { ObjectTypes } from "../object-types";
 import { paths } from "../systems/userinput/paths";
-import { EVENT_TYPE_CONSTRAINT_CREATION_ATTEMPT } from "../systems/interactions";
 
 import cameraModelSrc from "../assets/camera_tool.glb";
 
@@ -135,16 +134,6 @@ AFRAME.registerComponent("camera-tool", {
     this.resetSnapCount = this.resetSnapCount.bind(this);
   },
 
-  play() {
-    this.el.object3D.addEventListener(EVENT_TYPE_CONSTRAINT_CREATION_ATTEMPT, this.resetSnapCount);
-  },
-  pause() {
-    this.el.object3D.removeEventListener(EVENT_TYPE_CONSTRAINT_CREATION_ATTEMPT, this.resetSnapCount);
-  },
-  resetSnapCount() {
-    this.localSnapCount = 0;
-  },
-
   remove() {
     this.cameraSystem.deregister(this.el);
     this.el.sceneEl.systems["camera-mirror"].unmirrorCameraAtEl(this.el);
@@ -180,15 +169,26 @@ AFRAME.registerComponent("camera-tool", {
 
   tick() {
     const interaction = AFRAME.scenes[0].systems.interaction;
+    const userinput = AFRAME.scenes[0].systems.userinput;
+    const heldLeftHand = interaction.state.leftHand.held === this.el;
+    const heldRightHand = interaction.state.rightHand.held === this.el;
+    const heldRightRemote = interaction.state.rightRemote.held === this.el;
+    if (
+      (heldLeftHand && userinput.get(interaction.constants.leftHand.grabPath)) ||
+      (heldRightHand && userinput.get(interaction.constants.rightHand.grabPath)) ||
+      (heldRightRemote && userinput.get(interaction.constants.rightRemote.grabPath))
+    ) {
+      this.localSnapCount = 0;
+    }
+
     let grabberId;
-    if (interaction.rightHandConstraintTarget === this.el) {
+    if (heldRightHand) {
       grabberId = "player-right-controller";
-    } else if (interaction.leftHandConstraintTarget === this.el) {
+    } else if (heldLeftHand) {
       grabberId = "player-left-controller";
-    } else if (interaction.rightRemoteConstraintTarget === this.el) {
+    } else if (heldRightRemote) {
       grabberId = "cursor";
     }
-    const userinput = this.el.sceneEl.systems.userinput;
     if (grabberId) {
       const grabberPaths = pathsMap[grabberId];
       if (userinput.get(grabberPaths.takeSnapshot)) {
