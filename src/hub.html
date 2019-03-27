@@ -194,19 +194,6 @@
             <template id="static-controlled-media">
                 <a-entity
                     class="interactable"
-                    ammo-body="type: static; mass: 1;"
-                    set-sounds-invisible
-                    hoverable
-                    hoverable-visuals="cursorController: #cursor-controller"
-                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
-                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
-                >
-                </a-entity>
-            </template>
-
-            <template id="static-interactable-media">
-                <a-entity
-                    class="interactable"
                     super-networked-interactable="counter: #media-counter;"
                     scalable-when-grabbed
                     ammo-body="type: static; mass: 1;"

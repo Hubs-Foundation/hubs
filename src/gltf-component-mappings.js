@@ -139,13 +139,7 @@ function mediaInflator(el, componentName, componentData, components) {
       componentData.controls || isHubsDestinationUrl(componentData.src) || isHubsDestinationUrl(componentData.href);
 
     const hasVolume = componentName === "video";
-
-    let templateName = "#static-interactable-media";
-
-    if (!isControlled) {
-      // Ensure volume controls are enabled on media with volume.
-      templateName = hasVolume ? "#static-controlled-media" : "#static-media";
-    }
+    const templateName = isControlled || hasVolume ? "#static-controlled-media" : "#static-media";
 
     el.setAttribute("networked", {
       template: templateName,
