@@ -466,8 +466,9 @@ AFRAME.registerComponent("media-video", {
     if (this.hoverMenu) {
       this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
 
-      this.seekForwardButton.object3D.visible = !this.videoIsLive;
-      this.seekBackButton.object3D.visible = !this.videoIsLive;
+      this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
+      this.seekBackButton.object3D.visible = !!this.video && !this.videoIsLive;
+      this.playPauseButton.object3D.visible = !!this.video;
       this.playPauseButton.object3D.visible = !!this.video;
     }
 
