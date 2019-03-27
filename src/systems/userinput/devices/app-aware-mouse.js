@@ -43,7 +43,7 @@ export class AppAwareMouseDevice {
     if (buttonLeft && !this.prevButtonLeft) {
       const rawIntersections = [];
       this.cursorController.raycaster.intersectObjects(
-        AFRAME.scenes[0].systems.interaction.cursorTargettingSystem.targets,
+        AFRAME.scenes[0].systems["hubs-systems"].cursorTargettingSystem.targets,
         true,
         rawIntersections
       );

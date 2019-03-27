@@ -116,6 +116,7 @@ import "./systems/frame-scheduler";
 import "./systems/ui-hotkeys";
 import "./systems/tips";
 import "./systems/interactions";
+import "./systems/hubs-systems";
 
 import "./gltf-component-mappings";
 

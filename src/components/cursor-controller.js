@@ -145,7 +145,11 @@ AFRAME.registerComponent("cursor-controller", {
         rawIntersections.length = 0;
         this.raycaster.ray.origin = cursorPose.position;
         this.raycaster.ray.direction = cursorPose.direction;
-        this.raycaster.intersectObjects(interaction.cursorTargettingSystem.targets, true, rawIntersections);
+        this.raycaster.intersectObjects(
+          AFRAME.scenes[0].systems["hubs-systems"].cursorTargettingSystem.targets,
+          true,
+          rawIntersections
+        );
         intersection = rawIntersections[0];
         interaction.updateCursorIntersection(intersection);
         this.distance = intersection ? intersection.distance : this.data.far;

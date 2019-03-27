@@ -34,8 +34,7 @@ const getPlayerCamera = (() => {
 })();
 
 function shouldMoveCursor(touch, raycaster) {
-  const interaction = AFRAME.scenes[0].systems.interaction;
-  const isCursorGrabbing = !!interaction.rightRemoteConstraintTarget;
+  const isCursorGrabbing = !!AFRAME.scenes[0].systems.interaction.rightRemoteConstraintTarget;
   if (isCursorGrabbing) {
     return true;
   }
@@ -47,7 +46,11 @@ function shouldMoveCursor(touch, raycaster) {
     },
     getPlayerCamera()
   );
-  raycaster.intersectObjects(interaction.cursorTargettingSystem.targets, true, rawIntersections);
+  raycaster.intersectObjects(
+    AFRAME.scenes[0].systems["hubs-systems"].cursorTargettingSystem.targets,
+    true,
+    rawIntersections
+  );
   const intersection = rawIntersections.find(x => x.object.el);
   return intersection && intersection.object.el.matches(".interactable, .interactable *");
 }

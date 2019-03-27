@@ -334,7 +334,7 @@ AFRAME.registerSystem("userinput", {
     updateBindingsForVRMode();
   },
 
-  tick() {
+  tick2() {
     this.frame.generation += 1;
     const registeredMappingsChanged = this.registeredMappingsChanged;
     if (registeredMappingsChanged) {
