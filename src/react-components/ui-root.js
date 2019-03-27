@@ -1424,6 +1424,7 @@ class UIRoot extends Component {
 
     // Allow scene picker pre-entry, otherwise wait until entry
     const showMediaBrowser = mediaSource && (mediaSource === "scenes" || this.state.entered);
+    const hasTopTip = this.props.activeTips && this.props.activeTips.top;
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1670,11 +1671,12 @@ class UIRoot extends Component {
               </form>
             )}
 
-            {this.state.frozen && (
-              <button className={styles.leaveButton} onClick={() => this.exit("left")}>
-                <FormattedMessage id="entry.leave-room" />
-              </button>
-            )}
+            {this.state.frozen &&
+              !hasTopTip && (
+                <button className={styles.leaveButton} onClick={() => this.exit("left")}>
+                  <FormattedMessage id="entry.leave-room" />
+                </button>
+              )}
 
             {!this.state.frozen && (
               <div
@@ -1685,7 +1687,7 @@ class UIRoot extends Component {
                 })}
               >
                 {!showVREntryButton &&
-                  (!this.props.activeTips || !this.props.activeTips.top) && (
+                  !hasTopTip && (
                     <WithHoverSound>
                       <button
                         className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
@@ -1697,7 +1699,7 @@ class UIRoot extends Component {
                   )}
                 {!showVREntryButton &&
                   this.occupantCount() > 1 &&
-                  (!this.props.activeTips || !this.props.activeTips.top) &&
+                  !hasTopTip &&
                   entered && (
                     <WithHoverSound>
                       <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
@@ -1806,7 +1808,7 @@ class UIRoot extends Component {
               />
             )}
 
-            {entered && !this.state.frozen ? (
+            {entered && (!this.state.frozen || hasTopTip) ? (
               <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
                   history={this.props.history}
