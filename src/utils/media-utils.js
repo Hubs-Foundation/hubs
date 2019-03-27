@@ -388,13 +388,16 @@ export function generateMeshBVH(object3D) {
 
 export const traverseMeshesAndAddShapes = (function() {
   const vertexLimit = 200000;
-  const inverse = new THREE.Matrix4();
   const shapePrefix = "ammo-shape__";
-  return function(el) {
-    window.sceneMeshes = [];
-    const shapes = [];
+  const shapes = [];
+  return async function(el) {
     const meshRoot = el.object3DMap.mesh;
-    inverse.getInverse(meshRoot.matrixWorld);
+    while (shapes.length > 0) {
+      const { id, entity } = shapes.pop();
+      entity.removeAttribute(id);
+    }
+
+    await nextTick();
 
     let vertexCount = 0;
     meshRoot.traverse(o => {
@@ -424,7 +427,7 @@ export const traverseMeshesAndAddShapes = (function() {
             margin: 0.01,
             fit: FIT.ALL
           });
-          shapes.push(shapePrefix + obj.name);
+          shapes.push({ id: shapePrefix + obj.name, entity: obj.el });
           continue;
         }
 
@@ -437,10 +440,9 @@ export const traverseMeshesAndAddShapes = (function() {
           margin: 0.01,
           fit: FIT.COMPOUND
         });
-        shapes.push(shapePrefix + obj.uuid);
+        shapes.push({ id: shapePrefix + obj.uuid, entity: obj.el });
       }
     }
-    return shapes;
   };
 })();
 

@@ -271,7 +271,6 @@ async function updateUIForHub(hub) {
   });
 }
 
-let shapes = null;
 async function updateEnvironmentForHub(hub) {
   let sceneUrl;
   let isLegacyBundle; // Deprecated
@@ -318,7 +317,7 @@ async function updateEnvironmentForHub(hub) {
       "model-loaded",
       () => {
         //TODO: check if the environment was made with spoke to determine if a shape should be added
-        shapes = traverseMeshesAndAddShapes(environmentEl);
+        traverseMeshesAndAddShapes(environmentEl);
         generateMeshBVH(environmentEl.object3D);
       },
       { once: true }
@@ -338,10 +337,7 @@ async function updateEnvironmentForHub(hub) {
           environmentEl.addEventListener(
             "model-loaded",
             () => {
-              while (shapes.length > 0) {
-                environmentEl.removeAttribute(shapes.pop());
-              }
-              shapes = traverseMeshesAndAddShapes(environmentEl);
+              traverseMeshesAndAddShapes(environmentEl);
               generateMeshBVH(environmentEl.object3D);
               document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint();
             },
