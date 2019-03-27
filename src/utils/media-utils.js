@@ -237,6 +237,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
           easing: "easeOutElastic"
         });
 
+        // Hoverable visauls need to be updated so the initial scale is properly taken into account.
         entity.addEventListener("animationcomplete", () => entity.components["media-loader"].updateHoverableVisuals(), {
           once: true
         });
