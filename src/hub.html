@@ -261,13 +261,13 @@
                             <a-entity mixin="rounded-text-button" clone-media-button position="-0.25 -0.375 0.01">
                                 <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
-                            <a-entity scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button rotate-button-selector position="-0.6  0.12 0.01">
+                            <a-entity scale="0.8 0.8 1" mixin="rounded-text-button" xform-button xform-button-selector position="-0.6  0.12 0.01">
                                 <a-entity text="value:rotate; width:1.50; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
-                            <a-entity  scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button="mode: align;" position="-0.6 -0.12 0.01">
+                            <a-entity  scale="0.8 0.8 1" mixin="rounded-text-button" xform-button="mode: align;" position="-0.6 -0.12 0.01">
                                 <a-entity text="value:re-center; width:1.40; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
-                        <a-entity  scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button="mode: scale;" position="-0.7 -0.36 0.01">
+                        <a-entity  scale="0.8 0.8 1" mixin="rounded-text-button" xform-button="mode: scale;" position="-0.7 -0.36 0.01">
                             <a-entity text="value:scale; width:1.40; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                         </a-entity>
                         </a-entity>
@@ -340,10 +340,10 @@
                         </a-entity>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
                         <a-entity text=" value:remove; width:2.5; align:center;" text-raycast-hack position="0 -0.125 0.02"></a-entity>
-                        <a-entity scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button rotate-button-selector position="-0.7 0.06 0.01">
+                        <a-entity scale="0.8 0.8 1" mixin="rounded-text-button" xform-button xform-button-selector position="-0.7 0.06 0.01">
                             <a-entity text="value:rotate; width:2.40; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                         </a-entity>
-                        <a-entity  scale="0.8 0.8 1" mixin="rounded-text-button" rotate-button="mode: align;" position="-0.7 -0.15 0.01">
+                        <a-entity  scale="0.8 0.8 1" mixin="rounded-text-button" xform-button="mode: align;" position="-0.7 -0.15 0.01">
                             <a-entity text="value:re-center; width:2.2; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                         </a-entity>
                     </a-entity>
@@ -547,7 +547,7 @@
                 scale="0.1 0.1 0.1"
                 position="0.0 0 0"
                 class="hud"
-                visible-if-rotating
+                visible-if-xforming
             ></a-image>
         </a-sphere>
 
