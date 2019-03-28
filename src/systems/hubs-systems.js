@@ -1,7 +1,8 @@
 import { CursorTargettingSystem } from "./cursor-targetting-system";
 import { ConstraintsSystem } from "./constraints-system";
 import { TwoPointStretchingSystem } from "./two-point-stretching-system";
-import { SingleActionButtonSystem, HoldableButtonSystem } from "./button-systems";
+import { SingleActionButtonSystem, HoldableButtonSystem, HoverButtonSystem } from "./button-systems";
+import { HoverMenuSystem } from "./hover-menu-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -10,6 +11,8 @@ AFRAME.registerSystem("hubs-systems", {
     this.twoPointStretchingSystem = new TwoPointStretchingSystem();
     this.singleActionButtonSystem = new SingleActionButtonSystem();
     this.holdableButtonSystem = new HoldableButtonSystem();
+    this.hoverButtonSystem = new HoverButtonSystem();
+    this.hoverMenuSystem = new HoverMenuSystem();
   },
 
   tick() {
@@ -21,5 +24,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.twoPointStretchingSystem.tick();
     this.singleActionButtonSystem.tick();
     this.holdableButtonSystem.tick();
+    this.hoverButtonSystem.tick();
+    this.hoverMenuSystem.tick();
   }
 });

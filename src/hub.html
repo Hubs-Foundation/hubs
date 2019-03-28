@@ -228,7 +228,7 @@
                 >
                     <a-entity class="ui interactable-ui">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 10;">
-                            <a-entity mixin="rounded-text-action-button" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned;" position="0 0.125 0.01"> </a-entity>
+                            <a-entity mixin="rounded-text-action-button" tags="singleActionButton:true;" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned;" position="0 0.125 0.01"> </a-entity>
                             <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0.125 0.02"></a-entity>
                             <a-entity mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.01">
                                 <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>
@@ -327,7 +327,7 @@
                     set-yxz-order
                 >
                     <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 10;">
-                        <a-entity mixin="rounded-text-action-button" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01">
+                        <a-entity mixin="rounded-text-action-button" tags="singleActionButton: true;" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01">
                             <a-entity text=" value:mirror; width:2.5; align:center;" class="mirror-button-label" text-raycast-hack position="0 0 0.02"></a-entity>
                         </a-entity>
                         <a-entity mixin="rounded-text-button" remove-networked-object-button position="0 -0.125 0.01"> </a-entity>
@@ -344,9 +344,10 @@
 
             <template id="camera-hover-menu">
                 <a-entity class="ui interactable-ui hover-container camera-snap-menu" visible="false">
-                    <a-entity class="snap-button" mixin="rounded-text-action-button" position="0 -0.145 0.0" scale="0.75 0.75 0.75">
+                    <a-entity class="snap-button" mixin="rounded-text-action-button" tags="singleActionButton:true;" position="0 -0.145 0.0" scale="0.75 0.75 0.75">
                         <a-entity text="value:; width:1; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                         <a-image
+                            tags="singleActionButton: true; isHoverMenuChild: true;"
                             icon-button="image: #snap-camera; hoverImage: #snap-camera;"
                             scale="0.225 0.225 0.225"
                             position="0 0.005 0.01"
@@ -382,7 +383,7 @@
                     <a-entity class="video-volume-label" text="value: 0%; anchor: center; align: center; color: #ccc; letterSpacing: 4;" text-raycast-hack position="0.0 0.175 0.015" scale="1.25 1.25 1.25"></a-entity>
                     <a-image
                         is-remote-hover-target
-                        tags="singleActionButton: true"
+                        tags="singleActionButton: true; isHoverMenuChild: true;"
                         icon-button="image: #video-volume-down; hoverImage: #video-volume-down-hover;"
                         scale="0.075 0.075 0.075"
                         position="-0.275 0.175 0"
@@ -390,7 +391,7 @@
                     ></a-image>
                     <a-image
                         is-remote-hover-target
-                        tags="singleActionButton: true"
+                        tags="singleActionButton: true; isHoverMenuChild: true;"
                         icon-button="image: #video-volume-up; hoverImage: #video-volume-up-hover;"
                         scale="0.075 0.075 0.075"
                         position="0.275 0.175 0"
@@ -398,7 +399,7 @@
                     ></a-image>
                     <a-image
                         is-remote-hover-target
-                        tags="singleActionButton: true"
+                        tags="singleActionButton: true; isHoverMenuChild: true;"
                         icon-button="image: #video-seek-back; hoverImage: #video-seek-back-hover;"
                         scale="0.1 0.1 0.1"
                         position="-0.3 -0.125 0"
@@ -407,7 +408,7 @@
                     ></a-image>
                     <a-image
                         is-remote-hover-target
-                        tags="singleActionButton: true"
+                        tags="singleActionButton: true; isHoverMenuChild: true;"
                         icon-button="image: #video-pause; hoverImage: #video-pause-hover; activeImage: #video-play; activeHoverImage: #video-play-hover"
                         scale="0.15 0.15 0.15"
                         position="0 -0.125 0"
@@ -416,7 +417,7 @@
                     ></a-image>
                     <a-image
                         is-remote-hover-target
-                        tags="singleActionButton: true"
+                        tags="singleActionButton: true; isHoverMenuChild: true;"
                         icon-button="image: #video-seek-forward; hoverImage: #video-seek-forward-hover;"
                         scale="0.1 0.1 0.1"
                         position="0.3 -0.125 0"
@@ -428,7 +429,7 @@
 
             <template id="hubs-destination-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
-                    <a-entity mixin="rounded-text-action-button ui" open-media-button position="0 -0.125 0.01">
+                    <a-entity mixin="rounded-text-action-button ui" tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.01">
                         <a-entity text="value:value; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
@@ -487,7 +488,6 @@
 
             <a-mixin id="rounded-text-action-button"
                 is-remote-hover-target
-                tags="singleActionButton: true"
                 text-button="
                     haptic:#player-right-controller;
                     textHoverColor: #fff;
@@ -563,7 +563,7 @@
                     <a-entity id="hud-presence-count" text="value:; width:1.1; align:center;" position="-0.155 0.165 0" matrix-auto-update="target: text;"></a-entity>
                     <a-entity class="ui interactable-ui">
                         <a-entity class="invite-btn" position="0.17 0.165 0" scale="0.5 0.5 0.5">
-                            <a-entity mixin="rounded-text-action-button" slice9="width: 1.0" scale="0.8 0.8 1.0"> </a-entity>
+                            <a-entity mixin="rounded-text-action-button" tags="singleActionButton: true;" slice9="width: 1.0" scale="0.8 0.8 1.0"> </a-entity>
                             <a-entity text=" value:invite; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                         </a-entity>
                     </a-entity>

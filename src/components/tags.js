@@ -4,7 +4,8 @@ AFRAME.registerComponent("tags", {
     offersRemoteConstraint: { default: false },
     singleActionButton: { default: false },
     holdableButton: { default: false },
-    isPen: { default: false }
+    isPen: { default: false },
+    isHoverMenuChild: { default: false }
   },
   update() {
     if (this.didUpdateOnce) {

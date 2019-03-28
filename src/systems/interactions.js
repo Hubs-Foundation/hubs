@@ -153,7 +153,6 @@ AFRAME.registerSystem("interaction", {
   },
 
   tick2() {
-    const userinput = AFRAME.scenes[0].systems.userinput;
     this.cursorController = this.cursorController || document.querySelector("#cursor-controller");
     this.rightHandTeleporter = this.options.rightHand.entity.components["teleporter"];
 

@@ -8,8 +8,7 @@ AFRAME.registerComponent("hover-menu", {
 
   async init() {
     this.onFrozenStateChange = this.onFrozenStateChange.bind(this);
-
-    this.hovering = this.isHovered();
+    this.hovering = false;
     await this.getHoverMenu();
     this.applyHoverState();
   },
@@ -37,27 +36,7 @@ AFRAME.registerComponent("hover-menu", {
     this.applyHoverState();
   },
 
-  isHovered() {
-    const interaction = AFRAME.scenes[0].systems.interaction;
-    const rightRemoteHoverTarget = interaction.rightRemoteHoverTarget;
-    if (!rightRemoteHoverTarget) {
-      return false;
-    }
-    if (this.el.parentNode && rightRemoteHoverTarget === this.el.parentNode) {
-      return true;
-    }
-    let childOrSelfIsHovered = false;
-    this.el.object3D.traverse(o => {
-      if (!o.el) return;
-      if (o.el === rightRemoteHoverTarget) {
-        childOrSelfIsHovered = true;
-      }
-    });
-    return childOrSelfIsHovered;
-  },
-
   tick() {
-    this.hovering = this.isHovered();
     this.applyHoverState();
   },
 
