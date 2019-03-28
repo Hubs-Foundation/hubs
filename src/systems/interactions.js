@@ -1,4 +1,4 @@
-/* global AFRAME Ammo NAF MutationObserver require */
+/* global AFRAME Ammo NAF */
 import { waitForEvent } from "../utils/async-utils";
 import { paths } from "./userinput/paths";
 import { addMedia } from "../utils/media-utils";

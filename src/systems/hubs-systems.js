@@ -8,7 +8,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.constraintsSystem = new ConstraintsSystem();
     this.twoPointStretchingSystem = new TwoPointStretchingSystem();
   },
-  tick(t, dt) {
+  tick() {
     const systems = AFRAME.scenes[0].systems;
     systems.userinput.tick2();
     this.cursorTargettingSystem.tick();

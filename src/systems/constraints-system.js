@@ -26,7 +26,6 @@ export class ConstraintsSystem {
   }
 
   tickInteractor(options, state, prevState) {
-    const userinput = AFRAME.scenes[0].systems.userinput;
     if (prevState.held === state.held) {
       if (state.held && prevState.spawning && !state.spawning) {
         state.held.setAttribute("ammo-body", { type: "dynamic" });
