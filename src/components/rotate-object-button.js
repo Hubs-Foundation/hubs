@@ -4,8 +4,11 @@ const ROTATE_MODE = {
   AXIS: "axis",
   PUPPET: "puppet",
   CURSOR: "cursor",
-  ALIGN: "align"
+  ALIGN: "align",
+  SCALE: "scale"
 };
+
+const SCALE_SENSITIVITY = 100;
 
 const STEP_LENGTH = Math.PI / 10;
 const CAMERA_WORLD_QUATERNION = new THREE.Quaternion();
@@ -159,9 +162,11 @@ AFRAME.registerSystem("rotate-selected-object", {
     if (this.mode === ROTATE_MODE.ALIGN) {
       this.store.update({ activity: { hasRecentered: true } });
       return;
+    } else if (this.mode === ROTATE_MODE.SCALE) {
+      this.store.update({ activity: { hasScaled: true } });
+    } else {
+      this.store.update({ activity: { hasRotated: true } });
     }
-
-    this.store.update({ activity: { hasRotated: true } });
 
     if (this.mode === ROTATE_MODE.PUPPET) {
       this.target.getWorldQuaternion(this.puppet.initialObjectOrientation);
@@ -193,7 +198,7 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.target.matrixNeedsUpdate = true;
   },
 
-  cursorOrAxisModeTick() {
+  cursorAxisOrScaleTick() {
     const {
       plane,
       normal,
@@ -227,7 +232,7 @@ AFRAME.registerSystem("rotate-selected-object", {
       .projectOnPlane(normal)
       .applyQuaternion(q.copy(plane.quaternion).inverse())
       .multiplyScalar(SENSITIVITY / cameraToPlaneDistance);
-    if (this.mode === ROTATE_MODE.CURSOR) {
+    if (this.mode === ROTATE_MODE.CURSOR || this.mode === ROTATE_MODE.SCALE) {
       const modify = AFRAME.scenes[0].systems.userinput.get(paths.actions.rotateModifier);
 
       this.dyAll = this.dyStore + finalProjectedVec.y;
@@ -238,24 +243,36 @@ AFRAME.registerSystem("rotate-selected-object", {
       this.dxApplied = modify ? this.dxAll : Math.round(this.dxAll / STEP_LENGTH) * STEP_LENGTH;
       this.dxStore = this.dxAll - this.dxApplied;
 
-      this.target.getWorldQuaternion(TARGET_WORLD_QUATERNION);
-      v.set(1, 0, 0).applyQuaternion(modify ? CAMERA_WORLD_QUATERNION : TARGET_WORLD_QUATERNION);
-      q.setFromAxisAngle(v, modify ? -this.dyApplied : this.sign2 * this.sign * -this.dyApplied);
+      if (this.mode === ROTATE_MODE.CURSOR) {
+        this.target.getWorldQuaternion(TARGET_WORLD_QUATERNION);
+        v.set(1, 0, 0).applyQuaternion(modify ? CAMERA_WORLD_QUATERNION : TARGET_WORLD_QUATERNION);
+        q.setFromAxisAngle(v, modify ? -this.dyApplied : this.sign2 * this.sign * -this.dyApplied);
 
-      if (modify) {
-        v.set(0, 1, 0).applyQuaternion(CAMERA_WORLD_QUATERNION);
+        if (modify) {
+          v.set(0, 1, 0).applyQuaternion(CAMERA_WORLD_QUATERNION);
+        } else {
+          v.set(0, 1, 0);
+        }
+        q2.setFromAxisAngle(v, this.dxApplied);
+
+        this.target.quaternion.premultiply(q).premultiply(q2);
       } else {
-        v.set(0, 1, 0);
-      }
-      q2.setFromAxisAngle(v, this.dxApplied);
+        const scaleFactor =
+          THREE.Math.clamp(finalProjectedVec.y + finalProjectedVec.x, -0.001, 0.001) * SCALE_SENSITIVITY;
 
-      this.target.quaternion.premultiply(q).premultiply(q2);
+        if (scaleFactor > 0 || this.target.scale.x > 0.1) {
+          this.target.scale.multiplyScalar(1.0 + scaleFactor);
+        }
+      }
+
+      this.target.matrixNeedsUpdate = true;
     } else if (this.mode === ROTATE_MODE.AXIS) {
       this.dxAll = this.dxStore + finalProjectedVec.x;
       this.dxApplied = Math.round(this.dxAll / STEP_LENGTH) * STEP_LENGTH;
       this.dxStore = this.dxAll - this.dxApplied;
 
       this.target.quaternion.multiply(q.setFromAxisAngle(this.axis, -this.sign * this.dxApplied));
+      this.target.matrixNeedsUpdate = true;
     }
 
     previousPointOnPlane.copy(currentPointOnPlane);
@@ -276,7 +293,7 @@ AFRAME.registerSystem("rotate-selected-object", {
       this.puppetingTick();
       return;
     }
-    this.cursorOrAxisModeTick();
+    this.cursorAxisOrScaleTick();
   }
 });
 

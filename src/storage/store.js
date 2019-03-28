@@ -41,7 +41,8 @@ export const SCHEMA = {
         lastEnteredAt: { type: "string" },
         hasPinned: { type: "boolean" },
         hasRotated: { type: "boolean" },
-        hasRecentered: { type: "boolean" }
+        hasRecentered: { type: "boolean" },
+        hasScaled: { type: "boolean" }
       }
     },
 
