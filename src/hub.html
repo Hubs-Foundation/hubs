@@ -157,12 +157,14 @@
 
                         <template data-name="Spine">
                             <a-entity personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
-                                <a-entity billboard matrix-auto-update visibility-while-frozen="withinDistance: 10; requireHoverOnNonMobile: false;">
-                                    <a-entity hoverable mixin="rounded-text-button" block-button ui-class-while-frozen position="0 0 .35">
-                                        <a-entity text="value:Hide; width:2.5; align:center;" position="0 0 0.01"></a-entity>
-                                    </a-entity>
-                                    <a-entity hoverable mixin="rounded-text-button" visible-if-permitted="kick_users" kick-button ui-class-while-frozen position="0 -0.25 .35">
-                                        <a-entity text="value:Kick; width:2.5; align:center;"  visible-if-permitted="kick_users" position="0 0 0.01"></a-entity>
+                                <a-entity class="ui interactable-ui" mixin="button-container">
+                                    <a-entity matrix-auto-update billboard class="freeze-menu" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;">
+                                        <a-entity hoverable grabbable mixin="rounded-text-action-button" block-button position="0 0 0.35">
+                                            <a-entity text="value:hide; width:2.5; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                                        </a-entity>
+                                        <a-entity hoverable grabbable mixin="rounded-text-button" visible-if-permitted="kick_users" kick-button position="0 -0.25 0.35">
+                                            <a-entity text="value:kick; width:2.5; align:center;" text-raycast-hack visible-if-permitted="kick_users" position="0 0 0.01"></a-entity>
+                                        </a-entity>
                                     </a-entity>
                                 </a-entity>
                             </a-entity>
