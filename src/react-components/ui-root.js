@@ -88,6 +88,10 @@ const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
 
+const LOBBY_MODAL_ROUTER_PATHS = ["/media/scenes"];
+const LOBBY_MODAL_QUERY_VARS = ["media_source"];
+const LOBBY_MODAL_QUERY_VALUES = ["scenes"];
+
 async function grantedMicLabels() {
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
   return mediaDevices.filter(d => d.label && d.kind === "audioinput").map(d => d.label);
@@ -1347,6 +1351,16 @@ class UIRoot extends Component {
       this.state.entered &&
       (IN_ROOM_MODAL_ROUTER_PATHS.find(x => sluglessPath(this.props.history.location).startsWith(x)) ||
         IN_ROOM_MODAL_QUERY_VARS.find(x => new URLSearchParams(this.props.history.location.search).get(x)))
+    ) {
+      return true;
+    }
+
+    if (
+      !this.state.entered &&
+      (LOBBY_MODAL_ROUTER_PATHS.find(x => sluglessPath(this.props.history.location).startsWith(x)) ||
+        LOBBY_MODAL_QUERY_VARS.find(
+          (x, i) => new URLSearchParams(this.props.history.location.search).get(x) === LOBBY_MODAL_QUERY_VALUES[i]
+        ))
     ) {
       return true;
     }
