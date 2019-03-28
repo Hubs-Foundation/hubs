@@ -1422,6 +1422,7 @@ class UIRoot extends Component {
 
     // Allow scene picker pre-entry, otherwise wait until entry
     const showMediaBrowser = mediaSource && (mediaSource === "scenes" || this.state.entered);
+    const hasTopTip = this.props.activeTips && this.props.activeTips.top;
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1680,7 +1681,7 @@ class UIRoot extends Component {
                 })}
               >
                 {!showVREntryButton &&
-                  (!this.props.activeTips || !this.props.activeTips.top) && (
+                  !hasTopTip && (
                     <WithHoverSound>
                       <button
                         className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
@@ -1692,7 +1693,7 @@ class UIRoot extends Component {
                   )}
                 {!showVREntryButton &&
                   this.occupantCount() > 1 &&
-                  (!this.props.activeTips || !this.props.activeTips.top) &&
+                  !hasTopTip &&
                   entered && (
                     <WithHoverSound>
                       <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
@@ -1801,7 +1802,7 @@ class UIRoot extends Component {
               />
             )}
 
-            {entered && !this.state.frozen ? (
+            {entered && (
               <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
                   history={this.props.history}
@@ -1834,7 +1835,7 @@ class UIRoot extends Component {
                   </div>
                 )}
               </div>
-            ) : null}
+            )}
           </div>
         </IntlProvider>
       </ReactAudioContext.Provider>
