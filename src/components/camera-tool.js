@@ -255,7 +255,9 @@ AFRAME.registerComponent("camera-tool", {
         delete sceneEl.object3D.onAfterRender;
         renderer.vr.enabled = false;
 
-        renderer.render(sceneEl.object3D, this.camera, this.renderTarget, true);
+        renderer.setRenderTarget(this.renderTarget);
+        renderer.render(sceneEl.object3D, this.camera);
+        renderer.setRenderTarget(null);
 
         renderer.vr.enabled = tmpVRFlag;
         sceneEl.object3D.onAfterRender = tmpOnAfterRender;
