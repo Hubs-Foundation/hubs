@@ -279,7 +279,6 @@ export default class SceneEntryManager {
 
   _setupMedia = mediaStream => {
     const offset = { x: 0, y: 0, z: -1.5 };
-    let camera;
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
       const { entity, orientation } = addMedia(
         src,
