@@ -1,138 +1,142 @@
 import { sets } from "./sets";
 
-let leftTeleporter;
-let rightTeleporter;
-let cursorController;
-
 export function resolveActionSets() {
-  leftTeleporter = leftTeleporter || document.querySelector("#player-left-controller").components["teleporter"];
-  rightTeleporter = rightTeleporter || document.querySelector("#player-right-controller").components["teleporter"];
-  cursorController = cursorController || document.querySelector("#cursor-controller").components["cursor-controller"];
-
   const userinput = AFRAME.scenes[0].systems.userinput;
+  const { leftHand, rightHand, rightRemote } = AFRAME.scenes[0].systems.interaction.state;
 
-  const interaction = AFRAME.scenes[0].systems.interaction;
-
-  const leftHandConstraintTarget = interaction.state.leftHand.held;
-  const leftHandCollisionTarget = !leftHandConstraintTarget && interaction.state.leftHand.hovered;
-  userinput.toggleSet(sets.leftHandHoveringOnNothing, !leftHandConstraintTarget && !leftHandCollisionTarget);
+  userinput.toggleSet(sets.leftHandHoveringOnNothing, !leftHand.held && !leftHand.hovered);
   userinput.toggleSet(
     sets.leftHandHoveringOnPen,
-    leftHandCollisionTarget && !!leftHandCollisionTarget.components["is-pen"]
+    !leftHand.held &&
+      leftHand.hovered &&
+      leftHand.hovered.components.tags &&
+      leftHand.hovered.components.tags.data.isPen
   );
   userinput.toggleSet(
     sets.leftHandHoveringOnCamera,
-    leftHandCollisionTarget && !!leftHandCollisionTarget.components["camera-tool"]
+    !leftHand.held && leftHand.hovered && leftHand.hovered.components["camera-tool"]
   );
   userinput.toggleSet(
     sets.leftHandHoveringOnInteractable,
-    leftHandCollisionTarget &&
-      (!!leftHandCollisionTarget.components["offers-remote-constraint"] ||
-        !!leftHandCollisionTarget.components["super-spawner"])
+    !leftHand.held &&
+      (leftHand.hovered &&
+        ((leftHand.hovered.components.tags && leftHand.hovered.components.tags.data.offersRemoteConstraint) ||
+          leftHand.hovered.components["super-spawner"]))
   );
   userinput.toggleSet(
     sets.leftHandHoveringOnVideo,
-    leftHandCollisionTarget && !!leftHandCollisionTarget.components["media-video"]
+    !leftHand.held && leftHand.hovered && leftHand.hovered.components["media-video"]
   );
-
   userinput.toggleSet(
     sets.leftHandHoldingPen,
-    leftHandConstraintTarget && !!leftHandConstraintTarget.components["is-pen"]
+    leftHand.held && leftHand.held.components.tags && leftHand.held.components.tags.isPen
   );
-  userinput.toggleSet(
-    sets.leftHandHoldingCamera,
-    leftHandConstraintTarget && !!leftHandConstraintTarget.components["camera-tool"]
-  );
-  userinput.toggleSet(sets.leftHandHoldingInteractable, !!leftHandConstraintTarget);
-  userinput.toggleSet(
-    sets.inputFocused,
-    document.activeElement.nodeName === "INPUT" || document.activeElement.nodeName === "TEXTAREA"
-  );
+  userinput.toggleSet(sets.leftHandHoldingCamera, leftHand.held && leftHand.held.components["camera-tool"]);
+  userinput.toggleSet(sets.leftHandHoldingInteractable, leftHand.held);
 
-  const rightHandConstraintTarget = interaction.state.rightHand.held;
-  const rightHandCollisionTarget = !rightHandConstraintTarget && interaction.state.rightHand.hovered;
-  userinput.toggleSet(sets.rightHandHoveringOnNothing, !rightHandConstraintTarget && !rightHandCollisionTarget);
+  userinput.toggleSet(sets.rightHandHoveringOnNothing, !rightHand.held && !rightHand.hovered);
   userinput.toggleSet(
     sets.rightHandHoveringOnPen,
-    rightHandCollisionTarget && !!rightHandCollisionTarget.components["is-pen"]
+    !rightHand.held &&
+      rightHand.hovered &&
+      rightHand.hovered.components.tags &&
+      rightHand.hovered.components.tags.data.isPen
   );
   userinput.toggleSet(
     sets.rightHandHoveringOnCamera,
-    rightHandCollisionTarget && !!rightHandCollisionTarget.components["camera-tool"]
+    !rightHand.held && rightHand.hovered && rightHand.hovered.components["camera-tool"]
   );
   userinput.toggleSet(
     sets.rightHandHoveringOnInteractable,
-    rightHandCollisionTarget &&
-      (!!rightHandCollisionTarget.components["offers-remote-constraint"] ||
-        !!rightHandCollisionTarget.components["super-spawner"])
+    !rightHand.held &&
+      (rightHand.hovered &&
+        ((rightHand.hovered.components.tags && rightHand.hovered.components.tags.data.offersRemoteConstraint) ||
+          rightHand.hovered.components["super-spawner"]))
   );
   userinput.toggleSet(
     sets.rightHandHoveringOnVideo,
-    rightHandCollisionTarget && !!rightHandCollisionTarget.components["media-video"]
+    !rightHand.held && rightHand.hovered && rightHand.hovered.components["media-video"]
   );
-
   userinput.toggleSet(
     sets.rightHandHoldingPen,
-    rightHandConstraintTarget && !!rightHandConstraintTarget.components["is-pen"]
+    rightHand.held && rightHand.held.components.tags && rightHand.held.components.tags.isPen
   );
-  userinput.toggleSet(
-    sets.rightHandHoldingCamera,
-    rightHandConstraintTarget && !!rightHandConstraintTarget.components["camera-tool"]
-  );
-  userinput.toggleSet(sets.rightHandHoldingInteractable, !!rightHandConstraintTarget);
-  userinput.toggleSet(
-    sets.inputFocused,
-    document.activeElement.nodeName === "INPUT" || document.activeElement.nodeName === "TEXTAREA"
-  );
+  userinput.toggleSet(sets.rightHandHoldingCamera, rightHand.held && rightHand.held.components["camera-tool"]);
+  userinput.toggleSet(sets.rightHandHoldingInteractable, rightHand.held);
 
-  const rightRemoteConstraintTarget = interaction.state.rightRemote.held;
-  const rightRemoteHoverTarget =
-    !rightHandConstraintTarget &&
-    !rightHandCollisionTarget &&
-    !rightRemoteConstraintTarget &&
-    interaction.state.rightRemote.hovered;
   userinput.toggleSet(
     sets.cursorHoveringOnNothing,
-    !rightHandConstraintTarget && !rightHandCollisionTarget && !rightRemoteConstraintTarget && !rightRemoteHoverTarget
+    !rightHand.held && !rightHand.hovered && !rightRemote.held && !rightRemote.hovered
   );
   userinput.toggleSet(
     sets.cursorHoveringOnPen,
-    rightRemoteHoverTarget && !!rightRemoteHoverTarget.components["is-pen"]
+    !rightHand.held &&
+      !rightHand.hovered &&
+      !rightRemote.held &&
+      rightRemote.hovered &&
+      rightRemote.hovered.components.tags &&
+      rightRemote.hovered.components.tags.data.isPen
   );
   userinput.toggleSet(
     sets.cursorHoveringOnCamera,
-    rightRemoteHoverTarget && !!rightRemoteHoverTarget.components["camera-tool"]
+
+    !rightHand.held &&
+      !rightHand.hovered &&
+      !rightRemote.held &&
+      rightRemote.hovered &&
+      rightRemote.hovered.components["camera-tool"]
   );
   userinput.toggleSet(
     sets.cursorHoveringOnInteractable,
-    rightRemoteHoverTarget &&
-      (!!rightRemoteHoverTarget.components["offers-remote-constraint"] ||
-        !!rightRemoteHoverTarget.components["super-spawner"])
+    !rightHand.held &&
+      !rightHand.hovered &&
+      !rightRemote.held &&
+      rightRemote.hovered &&
+      ((rightRemote.hovered.components.tags && rightRemote.hovered.components.tags.data.offersRemoteConstraint) ||
+        rightRemote.hovered.components["super-spawner"])
   );
   userinput.toggleSet(
     sets.cursorHoveringOnUI,
-    rightRemoteHoverTarget &&
-      (!!rightRemoteHoverTarget.components["single-action-button"] ||
-        !!rightRemoteHoverTarget.components["holdable-button"])
+    !rightHand.held &&
+      !rightHand.hovered &&
+      !rightRemote.held &&
+      rightRemote.hovered &&
+      (rightRemote.hovered.components.tags &&
+        (rightRemote.hovered.components.tags.data.singleActionButton ||
+          rightRemote.hovered.components.tags.data.holdableButton))
   );
   userinput.toggleSet(
     sets.cursorHoveringOnVideo,
-    rightRemoteHoverTarget && !!rightRemoteHoverTarget.components["media-video"]
+    !rightHand.held &&
+      !rightHand.hovered &&
+      !rightRemote.held &&
+      rightRemote.hovered &&
+      rightRemote.hovered.components["media-video"]
   );
 
   userinput.toggleSet(
     sets.cursorHoldingPen,
-    rightRemoteConstraintTarget && !!rightRemoteConstraintTarget.components["is-pen"]
+
+    !rightHand.held &&
+      !rightHand.hovered &&
+      rightRemote.held &&
+      rightRemote.held.components.tags &&
+      rightRemote.held.components.tags.data.isPen
   );
   userinput.toggleSet(
     sets.cursorHoldingCamera,
-    rightRemoteConstraintTarget && !!rightRemoteConstraintTarget.components["camera-tool"]
+    !rightHand.held && !rightHand.hovered && rightRemote.held && rightRemote.held.components["camera-tool"]
   );
   userinput.toggleSet(
     sets.cursorHoldingUI,
-    rightRemoteConstraintTarget && !!rightRemoteConstraintTarget.components["holdable-button"]
+    !rightHand.held &&
+      !rightHand.hovered &&
+      rightRemote.held &&
+      rightRemote.held.components.tags &&
+      rightRemote.held.components.tags.data.holdableButton
   );
-  userinput.toggleSet(sets.cursorHoldingInteractable, !!rightRemoteConstraintTarget);
+  userinput.toggleSet(sets.cursorHoldingInteractable, rightRemote.held);
+
   userinput.toggleSet(
     sets.inputFocused,
     document.activeElement.nodeName === "INPUT" || document.activeElement.nodeName === "TEXTAREA"

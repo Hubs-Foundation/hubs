@@ -4,12 +4,6 @@ import { paths } from "./userinput/paths";
 import { addMedia } from "../utils/media-utils";
 import { ObjectContentOrigins } from "../object-types";
 
-AFRAME.registerComponent("offers-constraint-when-colliding", {});
-AFRAME.registerComponent("offers-remote-constraint", {});
-AFRAME.registerComponent("single-action-button", {});
-AFRAME.registerComponent("holdable-button", {});
-AFRAME.registerComponent("is-pen", {});
-
 const handCollisionTargets = new Map();
 AFRAME.registerComponent("is-hand-collision-target", {
   init: function() {
@@ -21,16 +15,16 @@ function findHandCollisionTarget(o) {
   const target = handCollisionTargets.get(o.uuid);
   return target || findHandCollisionTarget(o.parent);
 }
-function findHandCollisionTargetForBody(body) {
+function findHandCollisionTargetForHand(body) {
   const driver = AFRAME.scenes[0].systems.physics.driver;
   const collisions = driver.collisions;
-  const rightHandPtr = Ammo.getPointer(body);
+  const handPtr = Ammo.getPointer(body);
   for (const key in collisions) {
     const [body0ptr, body1ptr] = collisions[key];
-    if (body0ptr === rightHandPtr) {
+    if (body0ptr === handPtr) {
       return findHandCollisionTarget(driver.els[body1ptr].object3D);
     }
-    if (body1ptr === rightHandPtr) {
+    if (body1ptr === handPtr) {
       return findHandCollisionTarget(driver.els[body0ptr].object3D);
     }
   }
@@ -47,7 +41,6 @@ AFRAME.registerComponent("is-remote-hover-target", {
     remoteHoverTargets.set(this.el.object3D.uuid, this.el);
   }
 });
-
 
 AFRAME.registerSystem("interaction", {
   updateCursorIntersection: function(intersection) {
@@ -92,21 +85,21 @@ AFRAME.registerSystem("interaction", {
         entity: document.querySelector("#player-left-controller"),
         grabPath: paths.actions.leftHand.grab,
         dropPath: paths.actions.leftHand.drop,
-        constraintOfferingComponentName: "offers-constraint-when-colliding",
-        hoverFn: findHandCollisionTargetForBody
+        constraintTag: "offersHandConstraint",
+        hoverFn: findHandCollisionTargetForHand
       },
       rightHand: {
         entity: document.querySelector("#player-right-controller"),
         grabPath: paths.actions.rightHand.grab,
         dropPath: paths.actions.rightHand.drop,
-        constraintOfferingComponentName: "offers-constraint-when-colliding",
-        hoverFn: findHandCollisionTargetForBody
+        constraintTag: "offersHandConstraint",
+        hoverFn: findHandCollisionTargetForHand
       },
       rightRemote: {
         entity: document.querySelector("#cursor"),
         grabPath: paths.actions.cursor.grab,
         dropPath: paths.actions.cursor.drop,
-        constraintOfferingComponentName: "offers-remote-constraint",
+        constraintTag: "offersRemoteConstraint",
         hoverFn: this.getRightRemoteHoverTarget
       }
     };
@@ -114,17 +107,17 @@ AFRAME.registerSystem("interaction", {
       leftHand: {
         hovered: null,
         held: null,
-        spawning: null,
+        spawning: null
       },
       rightHand: {
         hovered: null,
         held: null,
-        spawning: null,
+        spawning: null
       },
       rightRemote: {
         hovered: null,
         held: null,
-        spawning: null,
+        spawning: null
       }
     };
   },
@@ -145,9 +138,10 @@ AFRAME.registerSystem("interaction", {
       state.hovered = options.hoverFn.call(this, options.entity.body);
       if (state.hovered) {
         if (userinput.get(options.grabPath)) {
-          const offersCollisionConstraint = state.hovered.components[options.constraintOfferingComponentName];
+          const offersConstraint =
+            state.hovered.components.tags && state.hovered.components.tags.data[options.constraintTag];
           const superSpawner = state.hovered.components["super-spawner"];
-          if (offersCollisionConstraint) {
+          if (offersConstraint) {
             state.held = state.hovered;
           } else if (superSpawner) {
             this.spawnObjectRoutine(state, options, superSpawner);
@@ -180,14 +174,21 @@ AFRAME.registerSystem("interaction", {
     }
 
     if (this.state.rightRemote.hovered && userinput.get(this.options.rightRemote.grabPath)) {
-      const singleActionButton = this.state.rightRemote.hovered.components["single-action-button"];
+      const singleActionButton =
+        this.state.rightRemote.hovered.components.tags &&
+        this.state.rightRemote.hovered.components.tags.data.singleActionButton;
       if (singleActionButton) {
-        singleActionButton.el.object3D.dispatchEvent({ type: "interact", path: this.options.rightRemote.grabPath });
+        this.state.rightRemote.hovered.object3D.dispatchEvent({
+          type: "interact",
+          path: this.options.rightRemote.grabPath
+        });
       }
 
-      const holdableButton = this.state.rightRemote.hovered.components["holdable-button"];
+      const holdableButton =
+        this.state.rightRemote.hovered.components.tags &&
+        this.state.rightRemote.hovered.components.tags.data.holdableButton;
       if (holdableButton) {
-        this.state.rightRemote.held = holdableButton.el;
+        this.state.rightRemote.held = this.state.rightRemote.hovered;
         holdableButton.el.object3D.dispatchEvent({
           type: "holdable-button-down",
           path: this.options.rightRemote.grabPath

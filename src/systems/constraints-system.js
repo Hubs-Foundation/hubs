@@ -28,14 +28,14 @@ export class ConstraintsSystem {
   tickInteractor(options, state, prevState) {
     const userinput = AFRAME.scenes[0].systems.userinput;
     if (prevState.held === state.held) {
-      if (prevState.spawning && !state.spawning) {
+      if (state.held && prevState.spawning && !state.spawning) {
         state.held.setAttribute("ammo-body", { type: "dynamic" });
         state.held.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
         state.held.setAttribute("ammo-constraint__" + options.entity.id, { target: "#" + options.entity.id });
       }
       return;
     }
-    if (prevState.held && prevState.held.components[options.constraintOfferingComponentName]) {
+    if (prevState.held && prevState.held.components.tags.data[options.constraintTag]) {
       const networked = prevState.held.components["networked"];
       const lostOwnership = networked && networked.data.owner !== NAF.clientId;
       prevState.held.removeAttribute("ammo-constraint__" + options.entity.id);
@@ -59,7 +59,6 @@ export class ConstraintsSystem {
         state.held.setAttribute("ammo-constraint__" + options.entity.id, { target: "#" + options.entity.id });
       } else {
         // TODO communicate failure to obtain network ownership
-        state.held = null;
       }
     }
   }

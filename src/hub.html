@@ -199,7 +199,7 @@
                     ammo-body="type: static; mass: 1;"
                     is-remote-hover-target
                     is-hand-collision-target
-                    offers-constraint-when-colliding
+                    tags="offersHandConstraint: true; offersRemoteConstraint: true;"
                     hoverable-visuals="cursorController: #cursor-controller"
                     sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
                     sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
@@ -216,8 +216,7 @@
                     super-networked-interactable
                     is-remote-hover-target
                     is-hand-collision-target
-                    offers-remote-constraint
-                    offers-constraint-when-colliding
+                    tags="offersHandConstraint: true; offersRemoteConstraint: true;"
                     destroy-at-extreme-distances
                     scalable-when-grabbed
                     ammo-body="type: dynamic; mass: 1;"
@@ -271,9 +270,8 @@
                     class="pen interactable"
                     super-networked-interactable
                     is-remote-hover-target
-                    offers-remote-constraint
                     is-hand-collision-target
-                    offers-constraint-when-colliding
+                    tags="offersHandConstraint: true; offersRemoteConstraint: true; isPen: true;"
                     ammo-body="type: dynamic; mass: 0.001;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     matrix-auto-update
@@ -291,7 +289,7 @@
                     emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
                     action-to-remove__pen="path: /actions/pen/remove;"
                     position-at-box-shape-border="target:.pen-menu"
-                    is-pen
+
                 >
                     <a-sphere
                         id="pen"
@@ -315,9 +313,8 @@
                     class="interactable icamera"
                     camera-tool
                     is-remote-hover-target
-                    offers-remote-constraint
                     is-hand-collision-target
-                    offers-constraint-when-colliding
+                    tags="offersHandConstraint: true; offersRemoteConstraint: true;"
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
@@ -385,7 +382,7 @@
                     <a-entity class="video-volume-label" text="value: 0%; anchor: center; align: center; color: #ccc; letterSpacing: 4;" text-raycast-hack position="0.0 0.175 0.015" scale="1.25 1.25 1.25"></a-entity>
                     <a-image
                         is-remote-hover-target
-                        single-action-button
+                        tags="singleActionButton: true"
                         icon-button="image: #video-volume-down; hoverImage: #video-volume-down-hover;"
                         scale="0.075 0.075 0.075"
                         position="-0.275 0.175 0"
@@ -393,7 +390,7 @@
                     ></a-image>
                     <a-image
                         is-remote-hover-target
-                        single-action-button
+                        tags="singleActionButton: true"
                         icon-button="image: #video-volume-up; hoverImage: #video-volume-up-hover;"
                         scale="0.075 0.075 0.075"
                         position="0.275 0.175 0"
@@ -401,7 +398,7 @@
                     ></a-image>
                     <a-image
                         is-remote-hover-target
-                        single-action-button
+                        tags="singleActionButton: true"
                         icon-button="image: #video-seek-back; hoverImage: #video-seek-back-hover;"
                         scale="0.1 0.1 0.1"
                         position="-0.3 -0.125 0"
@@ -410,7 +407,7 @@
                     ></a-image>
                     <a-image
                         is-remote-hover-target
-                        single-action-button
+                        tags="singleActionButton: true"
                         icon-button="image: #video-pause; hoverImage: #video-pause-hover; activeImage: #video-play; activeHoverImage: #video-play-hover"
                         scale="0.15 0.15 0.15"
                         position="0 -0.125 0"
@@ -419,7 +416,7 @@
                     ></a-image>
                     <a-image
                         is-remote-hover-target
-                        single-action-button
+                        tags="singleActionButton: true"
                         icon-button="image: #video-seek-forward; hoverImage: #video-seek-forward-hover;"
                         scale="0.1 0.1 0.1"
                         position="0.3 -0.125 0"
@@ -451,7 +448,7 @@
 
             <a-mixin id="rounded-holdable-text-button"
                 is-remote-hover-target
-                holdable-button
+                tags="holdableButton=true;"
                 text-button="
                     haptic:#player-right-controller;
                     textHoverColor: #fff;
@@ -470,7 +467,7 @@
             ></a-mixin>
             <a-mixin id="rounded-text-button"
                 is-remote-hover-target
-                single-action-button
+                tags="singleActionButton: true"
                 text-button="
                     haptic:#player-right-controller;
                     textHoverColor: #fff;
@@ -490,7 +487,7 @@
 
             <a-mixin id="rounded-text-action-button"
                 is-remote-hover-target
-                single-action-button
+                tags="singleActionButton: true"
                 text-button="
                     haptic:#player-right-controller;
                     textHoverColor: #fff;
@@ -572,7 +569,7 @@
                     </a-entity>
                 <a-image
                     is-remote-hover-target
-                    single-action-button
+                    tags="singleActionButton: true"
                     icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover"
                     scale="0.1 0.1 0.1"
                     position="-0.17 0 0.001"
@@ -583,7 +580,7 @@
                 ></a-image>
                 <a-image
                     is-remote-hover-target
-                    single-action-button
+                    tags="singleActionButton: true"
                     icon-button="tooltip: #hud-tooltip; tooltipText: Create; activeTooltipText: Resume; image: #spawn; hoverImage: #spawn-hover;"
                     scale="0.2 0.2 0.2"
                     position="0 0 0.005"
@@ -593,7 +590,7 @@
                 ></a-image>
                 <a-image
                     is-remote-hover-target
-                    single-action-button
+                    tags="singleActionButton: true"
                     icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #pen-off; hoverImage: #pen-off-hover; activeImage: #pen-on; activeHoverImage: #pen-on-hover"
                     scale="0.1 0.1 0.1"
                     position="0.17 0 0.001"
@@ -604,7 +601,7 @@
                 ></a-image>
                 <a-image
                     is-remote-hover-target
-                    single-action-button
+                    tags="singleActionButton: true"
                     icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #camera-off; hoverImage: #camera-off-hover; activeImage: #camera-on; activeHoverImage: #camera-on-hover"
                     scale="0.1 0.1 0.1"
                     position="0.28 0 0.001"
