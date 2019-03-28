@@ -168,7 +168,7 @@
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
                                 ammo-body="type: kinematic;"
-                                ammo-shape="type: cylinder; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.11 0.10 0.11; offset: 0 0.06 0.04;"
+                                ammo-shape="type: cylinder; fit: manual; halfExtents: 0.11 0.10 0.11; offset: 0 0.06 0.04;"
                             ></a-entity>
                         </template>
 
@@ -324,7 +324,7 @@
                     scale="0.5 0.5 0.5"
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
                     ammo-body="type: dynamic; mass: 0.001;"
-                    ammo-shape="type: box; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.11 0.07 0.05; offset: 0 0.02 0;"
+                    ammo-shape="type: box; fit: manual; halfExtents: 0.11 0.07 0.05; offset: 0 0.02 0;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     super-networked-interactable="counter: #camera-counter;"
                     scalable-when-grabbed
@@ -524,8 +524,8 @@
             radius="0.02"
             segments-width="9"
             segments-height="9"
-            ammo-body="type: kinematic; collisionFlags: 4; collisionFilterMask: 3; scaleAutoUpdate: false; activationState: 4;"
-            ammo-shape="type: sphere; sphereRadius: 0.02; autoGenerateShape: false;"
+            ammo-body="type: kinematic; collisionFlags: 4; collisionFilterMask: 3; scaleAutoUpdate: false; activationState: disable_deactivation;"
+            ammo-shape="type: sphere; sphereRadius: 0.02; fit: manual;"
             haptic-feedback="path: /haptics/actuators/right"
             super-hands="
                 colliderEvent: raycaster-intersection;
@@ -688,8 +688,8 @@
                 matrix-auto-update
                 haptic-feedback="path: /haptics/actuators/left"
                 mixin="controller-super-hands"
-                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4;"
-                ammo-shape="type: box; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
+                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
+                ammo-shape="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 action-to-event__c="path: /actions/leftHandGrab; event: primary_hand_grab;"
                 action-to-event__d="path: /actions/leftHandDrop; event: primary_hand_release;"
             >
@@ -705,8 +705,8 @@
                 matrix-auto-update
                 haptic-feedback="path: /haptics/actuators/right"
                 mixin="controller-super-hands"
-                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: 4;"
-                ammo-shape="type: box; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
+                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
+                ammo-shape="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 action-to-event__c="path: /actions/rightHandGrab; event: primary_hand_grab;"
                 action-to-event__d="path: /actions/rightHandDrop; event: primary_hand_release;"
             >

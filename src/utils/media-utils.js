@@ -24,6 +24,10 @@ const commonKnownContentTypes = {
   mp3: "audio/mpeg"
 };
 
+const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
+  SHAPE = PHYSICS_CONSTANTS.SHAPE,
+  FIT = PHYSICS_CONSTANTS.FIT;
+
 // thanks to https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
 function b64EncodeUnicode(str) {
   // first we use encodeURIComponent to get percent-encoded UTF-8, then we convert the percent-encodings
@@ -236,6 +240,11 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
           to: { x: sx, y: sy, z: sz },
           easing: "easeOutElastic"
         });
+
+        // Hoverable visauls need to be updated so the initial scale is properly taken into account.
+        entity.addEventListener("animationcomplete", () => entity.components["media-loader"].updateHoverableVisuals(), {
+          once: true
+        });
       }
 
       entity.object3D.visible = true;
@@ -368,7 +377,7 @@ export function generateMeshBVH(object3D) {
     // note that we might already have a bounds tree if this was a clone of an object with one
     const hasBufferGeometry = obj.isMesh && obj.geometry.isBufferGeometry;
     const hasBoundsTree = hasBufferGeometry && obj.geometry.boundsTree;
-    if (hasBufferGeometry && !hasBoundsTree) {
+    if (hasBufferGeometry && !hasBoundsTree && obj.geometry.attributes.position) {
       const geo = obj.geometry;
       const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
       // only bother using memory and time making a BVH if there are a reasonable number of tris,
@@ -383,35 +392,62 @@ export function generateMeshBVH(object3D) {
 }
 
 export const traverseMeshesAndAddShapes = (function() {
-  const matrix = new THREE.Matrix4();
-  const inverse = new THREE.Matrix4();
-  const pos = new THREE.Vector3();
-  const quat = new THREE.Quaternion();
-  const scale = new THREE.Vector3();
-  const shapePrefix = "ammo-shape__env";
-  return function(el, type, margin) {
-    const shapes = [];
-    let i = 0;
+  const vertexLimit = 200000;
+  const shapePrefix = "ammo-shape__";
+  const shapes = [];
+  return async function(el) {
     const meshRoot = el.object3DMap.mesh;
-    inverse.getInverse(meshRoot.matrixWorld);
+    while (shapes.length > 0) {
+      const { id, entity } = shapes.pop();
+      entity.removeAttribute(id);
+    }
+
+    await nextTick();
+
+    let vertexCount = 0;
     meshRoot.traverse(o => {
-      if (o.isMesh && (!THREE.Sky || o.__proto__ != THREE.Sky.prototype)) {
-        o.updateMatrices();
-        matrix.multiplyMatrices(inverse, o.matrixWorld);
-        matrix.decompose(pos, quat, scale);
-        el.setAttribute(shapePrefix + i, {
-          type: type,
-          margin: margin,
-          mergeGeometry: false,
-          offset: { x: pos.x * meshRoot.scale.x, y: pos.y * meshRoot.scale.y, z: pos.z * meshRoot.scale.z },
-          orientation: { x: quat.x, y: quat.y, z: quat.z, w: quat.w }
-        });
-        el.components[shapePrefix + i].setMesh(o);
-        shapes.push(shapePrefix + i);
-        i++;
+      if (
+        o.isMesh &&
+        (!THREE.Sky || o.__proto__ != THREE.Sky.prototype) &&
+        o.name !== "Floor_Plan" &&
+        o.name !== "Ground_Plane"
+      ) {
+        vertexCount += o.geometry.attributes.position.count;
       }
     });
-    return shapes;
+
+    const type = vertexCount > vertexLimit ? SHAPE.HULL : SHAPE.MESH;
+
+    console.log(`traversing meshes and adding shapes for scene with ${vertexCount} vertices; using ${type} shapes`);
+
+    for (let i = 0; i < meshRoot.children.length; i++) {
+      const obj = meshRoot.children[i];
+
+      //ignore floor plan for spoke scenes, and make the ground plane a box.
+      if (obj.isGroup && obj.name !== "Floor_Plan") {
+        if (obj.name === "Ground_Plane") {
+          obj.el.object3DMap.mesh = obj;
+          obj.el.setAttribute(shapePrefix + obj.name, {
+            type: SHAPE.BOX,
+            margin: 0.01,
+            fit: FIT.ALL
+          });
+          shapes.push({ id: shapePrefix + obj.name, entity: obj.el });
+          continue;
+        }
+
+        if (!obj.el.object3DMap.mesh) {
+          obj.el.object3DMap.mesh = obj.parent;
+        }
+
+        obj.el.setAttribute(shapePrefix + obj.uuid, {
+          type: type,
+          margin: 0.01,
+          fit: FIT.COMPOUND
+        });
+        shapes.push({ id: shapePrefix + obj.uuid, entity: obj.el });
+      }
+    }
   };
 })();
 

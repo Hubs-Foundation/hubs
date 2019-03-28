@@ -3,6 +3,8 @@ import { sets } from "../sets";
 import { xforms } from "./xforms";
 import { addSetsToBindings } from "./utils";
 
+// import { Pose } from "../pose";
+
 const wasd_vec2 = "/var/mouse-and-keyboard/wasd_vec2";
 const keyboardCharacterAcceleration = "/var/mouse-and-keyboard/keyboardCharacterAcceleration";
 const arrows_vec2 = "/var/mouse-and-keyboard/arrows_vec2";
@@ -301,6 +303,30 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.falling,
       priority: 100
     }
+
+    // Helpful bindings for debugging hands in 2D
+    // {
+    //   src: {},
+    //   dest: { value: paths.actions.rightHand.matrix },
+    //   xform: xforms.always(
+    //     new THREE.Matrix4().compose(
+    //       new THREE.Vector3(0.2, 1.3, -0.8),
+    //       new THREE.Quaternion(0, 0, 0, 0),
+    //       new THREE.Vector3(1, 1, 1)
+    //     )
+    //   )
+    // },
+    // {
+    //   src: {},
+    //   dest: { value: paths.actions.leftHand.matrix },
+    //   xform: xforms.always(
+    //     new THREE.Matrix4().compose(
+    //       new THREE.Vector3(-0.2, 1.4, -0.8),
+    //       new THREE.Quaternion(0, 0, 0, 0),
+    //       new THREE.Vector3(1, 1, 1)
+    //     )
+    //   )
+    // }
   ],
 
   [sets.cursorHoldingPen]: [

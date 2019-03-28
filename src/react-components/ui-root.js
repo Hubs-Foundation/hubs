@@ -72,9 +72,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 
 import qsTruthy from "../utils/qs_truthy";
-// TODO temp feature flags
-const customSkinEnabled = qsTruthy("customSkin");
-const advancedAvatarEditor = qsTruthy("advancedAvatarEditor");
+const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
 addLocaleData([...en]);
 
@@ -181,6 +179,7 @@ class UIRoot extends Component {
     loadingNum: 0,
     loadedNum: 0,
 
+    waitingOnAudio: false,
     shareScreen: false,
     requestedScreen: false,
     mediaStream: null,
@@ -517,7 +516,7 @@ class UIRoot extends Component {
   };
 
   performDirectEntryFlow = async enterInVR => {
-    this.setState({ enterInVR });
+    this.setState({ enterInVR, waitingOnAudio: true });
 
     const hasGrantedMic = await this.hasGrantedMicPermissions();
 
@@ -527,6 +526,8 @@ class UIRoot extends Component {
     } else {
       this.pushHistoryState("entry_step", "mic_grant");
     }
+
+    this.setState({ waitingOnAudio: false });
   };
 
   enter2D = async () => {
@@ -1117,28 +1118,38 @@ class UIRoot extends Component {
           <FormattedMessage id="entry.choose-device" />
         </div>
 
-        <div className={entryStyles.buttonContainer}>
-          {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
-            <div className={entryStyles.secondary} onClick={this.enterVR}>
-              <FormattedMessage id="entry.cardboard" />
+        {!this.state.waitingOnAudio ? (
+          <div className={entryStyles.buttonContainer}>
+            {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
+              <div className={entryStyles.secondary} onClick={this.enterVR}>
+                <FormattedMessage id="entry.cardboard" />
+              </div>
+            )}
+            {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
+              <GenericEntryButton secondary={true} onClick={this.enterVR} />
+            )}
+            {this.props.availableVREntryTypes.daydream === VR_DEVICE_AVAILABILITY.yes && (
+              <DaydreamEntryButton secondary={true} onClick={this.enterDaydream} subtitle={null} />
+            )}
+            <DeviceEntryButton secondary={true} onClick={() => this.attemptLink()} isInHMD={isMobileVR} />
+            {this.props.availableVREntryTypes.safari === VR_DEVICE_AVAILABILITY.maybe && (
+              <StateLink stateKey="modal" stateValue="safari" history={this.props.history}>
+                <SafariEntryButton onClick={this.showSafariDialog} />
+              </StateLink>
+            )}
+            {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
+              <TwoDEntryButton onClick={this.enter2D} />
+            )}
+          </div>
+        ) : (
+          <div className={entryStyles.audioLoader}>
+            <div className="loader-wrap loader-mid">
+              <div className="loader">
+                <div className="loader-center" />
+              </div>
             </div>
-          )}
-          {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
-            <GenericEntryButton secondary={true} onClick={this.enterVR} />
-          )}
-          {this.props.availableVREntryTypes.daydream === VR_DEVICE_AVAILABILITY.yes && (
-            <DaydreamEntryButton secondary={true} onClick={this.enterDaydream} subtitle={null} />
-          )}
-          <DeviceEntryButton secondary={true} onClick={() => this.attemptLink()} isInHMD={isMobileVR} />
-          {this.props.availableVREntryTypes.safari === VR_DEVICE_AVAILABILITY.maybe && (
-            <StateLink stateKey="modal" stateValue="safari" history={this.props.history}>
-              <SafariEntryButton onClick={this.showSafariDialog} />
-            </StateLink>
-          )}
-          {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
-            <TwoDEntryButton onClick={this.enter2D} />
-          )}
-        </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -1439,8 +1450,7 @@ class UIRoot extends Component {
                   onSignOut={this.signOut}
                   finished={this.onProfileFinished}
                   store={this.props.store}
-                  customSkinEnabled={customSkinEnabled}
-                  advanced={advancedAvatarEditor}
+                  debug={avatarEditorDebug}
                 />
               )}
             />
@@ -1476,8 +1486,6 @@ class UIRoot extends Component {
                   signedIn={this.state.signedIn}
                   onSignIn={this.showSignInDialog}
                   onSignOut={this.signOut}
-                  customSkinEnabled={customSkinEnabled}
-                  advanced={advancedAvatarEditor}
                 />
               )}
             />

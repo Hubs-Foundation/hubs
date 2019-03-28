@@ -1,3 +1,5 @@
+const TYPE = require("aframe-physics-system/src/constants").TYPE;
+
 AFRAME.registerComponent("pinnable", {
   schema: {
     pinned: { default: false }
@@ -91,7 +93,7 @@ AFRAME.registerComponent("pinnable", {
         this.el.removeAttribute("stretchable");
       }
 
-      this.el.setAttribute("ammo-body", { type: "static" });
+      this.el.setAttribute("ammo-body", { type: TYPE.STATIC });
 
       if (this.el.components.grabbable.data.maxGrabbers !== 0) {
         this.prevMaxGrabbers = this.el.components.grabbable.data.maxGrabbers;

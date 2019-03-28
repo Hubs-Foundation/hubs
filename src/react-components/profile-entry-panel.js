@@ -20,8 +20,7 @@ class ProfileEntryPanel extends Component {
     onSignIn: PropTypes.func,
     onSignOut: PropTypes.func,
     signedIn: PropTypes.bool,
-    customSkinEnabled: PropTypes.bool,
-    advanced: PropTypes.bool
+    debug: PropTypes.bool
   };
 
   constructor(props) {
@@ -130,7 +129,7 @@ class ProfileEntryPanel extends Component {
             store={this.props.store}
             onAvatarChanged={avatarId => this.setState({ avatarId })}
             saveStateAndFinish={this.saveStateAndFinish}
-            advanced={this.props.advanced}
+            debug={this.props.debug}
           />
         );
         break;
@@ -185,14 +184,12 @@ class ProfileEntryPanel extends Component {
               >
                 <FormattedMessage id="profile.tabs.legacy" />
               </a>
-              {(this.props.customSkinEnabled || this.state.avatarType === "skinnable") && (
-                <a
-                  onClick={() => this.setState({ avatarType: "skinnable", avatarId: null })}
-                  className={classNames({ selected: this.state.avatarType === "skinnable" })}
-                >
-                  <FormattedMessage id="profile.tabs.skinnable" />
-                </a>
-              )}
+              <a
+                onClick={() => this.setState({ avatarType: "skinnable", avatarId: null })}
+                className={classNames({ selected: this.state.avatarType === "skinnable" })}
+              >
+                <FormattedMessage id="profile.tabs.skinnable" />
+              </a>
               <a
                 onClick={() => this.setState({ avatarType: "url", avatarId: "" })}
                 className={classNames({ selected: this.state.avatarType === "url" })}
