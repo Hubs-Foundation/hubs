@@ -190,14 +190,16 @@ const VALIDATORS = {
     if (store && store.state.activity.hasPinned) return FINISH;
     return VALID;
   },
-  object_zoom: function(userinput) {
+  object_zoom: function(userinput, scene) {
+    if (scene.is("frozen")) return INVALID;
     if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
     if (userinput.activeSets.has(sets.cursorHoldingCamera)) return INVALID;
     if (!userinput.activeSets.has(sets.cursorHoldingInteractable)) return INVALID;
     if (userinput.get(paths.actions.cursor.modDelta)) return FINISH;
     return VALID;
   },
-  object_scale: function(userinput) {
+  object_scale: function(userinput, scene) {
+    if (scene.is("frozen")) return INVALID;
     if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
     if (userinput.activeSets.has(sets.cursorHoldingCamera)) return INVALID;
     if (!userinput.activeSets.has(sets.cursorHoldingInteractable)) return INVALID;
