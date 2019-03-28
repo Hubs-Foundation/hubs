@@ -140,8 +140,9 @@ AFRAME.registerSystem("interaction", {
         if (userinput.get(options.grabPath)) {
           const offersConstraint =
             state.hovered.components.tags && state.hovered.components.tags.data[options.constraintTag];
+          const isHoldableButton = state.hovered.components.tags && state.hovered.components.tags.data.holdableButton;
           const superSpawner = state.hovered.components["super-spawner"];
-          if (offersConstraint) {
+          if (offersConstraint || isHoldableButton) {
             state.held = state.hovered;
           } else if (superSpawner) {
             this.spawnObjectRoutine(state, options, superSpawner);
@@ -151,7 +152,7 @@ AFRAME.registerSystem("interaction", {
     }
   },
 
-  tick2: async function() {
+  tick2() {
     const userinput = AFRAME.scenes[0].systems.userinput;
     this.cursorController = this.cursorController || document.querySelector("#cursor-controller");
     this.rightHandTeleporter = this.options.rightHand.entity.components["teleporter"];
@@ -171,29 +172,6 @@ AFRAME.registerSystem("interaction", {
 
     if (!this.state.rightHand.held && !this.state.rightHand.hovered) {
       this.tickInteractor(this.options.rightRemote, this.state.rightRemote);
-    }
-
-    if (this.state.rightRemote.hovered && userinput.get(this.options.rightRemote.grabPath)) {
-      const singleActionButton =
-        this.state.rightRemote.hovered.components.tags &&
-        this.state.rightRemote.hovered.components.tags.data.singleActionButton;
-      if (singleActionButton) {
-        this.state.rightRemote.hovered.object3D.dispatchEvent({
-          type: "interact",
-          path: this.options.rightRemote.grabPath
-        });
-      }
-
-      const holdableButton =
-        this.state.rightRemote.hovered.components.tags &&
-        this.state.rightRemote.hovered.components.tags.data.holdableButton;
-      if (holdableButton) {
-        this.state.rightRemote.held = this.state.rightRemote.hovered;
-        holdableButton.el.object3D.dispatchEvent({
-          type: "holdable-button-down",
-          path: this.options.rightRemote.grabPath
-        });
-      }
     }
   }
 });
