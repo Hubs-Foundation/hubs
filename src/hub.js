@@ -740,12 +740,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
   const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
-  const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
+  const joinPayload = {
+    profile: store.state.profile,
+    push_subscription_endpoint: pushSubscriptionEndpoint,
+    auth_token: null,
+    perms_token: null,
+    context
+  };
+
+  const oauthFlowPermsToken = Cookies.get(OAUTH_FLOW_PERMS_TOKEN_KEY);
+  if (oauthFlowPermsToken) {
+    Cookies.remove(OAUTH_FLOW_PERMS_TOKEN_KEY);
+    joinPayload.perms_token = oauthFlowPermsToken;
+  }
+
   const { token } = store.state.credentials;
   if (token) {
     console.log(`Logged into account ${jwtDecode(token).sub}`);
     joinPayload.auth_token = token;
   }
+
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
 
   const presenceLogEntries = [];
@@ -782,19 +796,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
 
-      let permsToken;
-      const oauthFlowPermsToken = Cookies.get(OAUTH_FLOW_PERMS_TOKEN_KEY);
-      if (oauthFlowPermsToken) {
-        permsToken = oauthFlowPermsToken;
-        Cookies.remove(OAUTH_FLOW_PERMS_TOKEN_KEY);
-      } else {
-        permsToken = data.perms_token;
-      }
+      const permsToken = oauthFlowPermsToken || data.perms_token;
       hubChannel.setPermissionsFromToken(permsToken);
-      if (!hubChannel.permissions.join_hub && data.oauth_info.length) {
-        remountUI({ oauthInfo: data.oauth_info, showOAuthDialog: true });
-        return;
-      }
 
       scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
         adapter.setClientId(socket.params().session_id);
@@ -811,6 +814,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (res.reason === "closed") {
         entryManager.exitScene();
         remountUI({ roomUnavailableReason: "closed" });
+      } else if (res.reason === "oauth_required") {
+        entryManager.exitScene();
+        remountUI({ oauthInfo: res.oauth_info, showOAuthDialog: true });
+      } else if (res.reason === "join_denied") {
+        entryManager.exitScene();
+        remountUI({ roomUnavailableReason: "denied" });
       }
 
       console.error(res);

@@ -106,6 +106,7 @@
     "audio.granted-next": "Next",
     "exit.subtitle.exited": "Your session has ended. Refresh your browser to start a new one.",
     "exit.subtitle.closed": "This room is no longer available.",
+    "exit.subtitle.denied": "You are not permitted to join this room. Please request permission from the room creator.",
     "exit.subtitle.kicked": "You have been kicked from the room.",
     "exit.subtitle.left": "You have left the room.",
     "exit.subtitle.full": "This room is full, please try again later.",
