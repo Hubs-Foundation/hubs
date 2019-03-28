@@ -212,7 +212,11 @@ body.vr-mode {
 }
 
 :local(.message-entry-disabled) {
-  background-color: rgba(255, 255, 255, 0.33);
+  background-color: transparent;
+
+  :local(.message-entry-button) {
+    display: none;
+  }
 }
 
 :local(.message-entry-input) {
