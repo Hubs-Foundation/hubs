@@ -278,7 +278,7 @@ export default class SceneEntryManager {
   };
 
   _setupMedia = mediaStream => {
-    const offset = new THREE.Vector3(0, 0, -1.5);
+    const offset = { x: 0, y: 0, z: -1.5 };
     let camera;
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
       const { entity, orientation } = addMedia(
@@ -288,17 +288,13 @@ export default class SceneEntryManager {
         !(src instanceof MediaStream),
         true
       );
-
-      console.log("TODO: Use orientation in case this is an uploaded photo from user on mobile device", orientation);
-
-      //TODO: rotate to face the user
-      offset.set(0, 0, -1.5);
-      camera = camera || document.querySelector("#player-camera").object3D;
-      camera.updateMatrices();
-      camera.localToWorld(offset);
-      entity.object3D.position.copy(offset);
-      entity.object3D.matrixNeedsUpdate = true;
-      entity.object3D.updateMatrices();
+      orientation.then(or => {
+        entity.setAttribute("offset-relative-to", {
+          target: "#player-camera",
+          offset,
+          orientation: or
+        });
+      });
 
       return entity;
     };
@@ -479,13 +475,10 @@ export default class SceneEntryManager {
       } else {
         const entity = document.createElement("a-entity");
         entity.setAttribute("networked", { template: "#interactable-camera" });
-        //TODO: rotate to face the user
-        const offset = new THREE.Vector3(0, 0, -1.5);
-        const playerCam = document.querySelector("#player-camera").object3D;
-        playerCam.updateMatrices();
-        playerCam.localToWorld(offset);
-        entity.object3D.position.copy(offset);
-        entity.object3D.matrixNeedsUpdate = true;
+        entity.setAttribute("offset-relative-to", {
+          target: "#player-camera",
+          offset: { x: 0, y: 0, z: -1.5 }
+        });
         this.scene.appendChild(entity);
         this.scene.addState("camera");
       }

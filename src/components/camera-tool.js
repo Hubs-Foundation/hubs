@@ -131,7 +131,6 @@ AFRAME.registerComponent("camera-tool", {
         this.takeSnapshotNextTick = true;
       });
     });
-    this.resetSnapCount = this.resetSnapCount.bind(this);
   },
 
   remove() {
