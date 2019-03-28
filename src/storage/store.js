@@ -117,7 +117,7 @@ export default class Store extends EventTarget {
   }
 
   resetTipActivityFlags() {
-    this.update({ activity: { hasRotated: false, hasPinned: false, hasRecentered: false } });
+    this.update({ activity: { hasRotated: false, hasPinned: false, hasRecentered: false, hasScaled: false } });
   }
 
   update(newState) {
