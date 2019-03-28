@@ -1574,10 +1574,15 @@ class UIRoot extends Component {
                       <FontAwesomeIcon icon={faTimes} />
                     </i>
                   </button>
-                  {this.props.activeTips.bottom.endsWith(".spawn_menu") ? (
-                    <div className={styles.spawnTip}>
+                  {[".spawn_menu", "_button"].find(x => this.props.activeTips.bottom.endsWith(x)) ? (
+                    <div className={styles.splitTip}>
                       <FormattedMessage id={`tips.${this.props.activeTips.bottom}-pre`} />
-                      <div className={classNames(styles.spawnTipIcon)} />
+                      <div
+                        className={classNames({
+                          [styles.splitTipIcon]: true,
+                          [styles[this.props.activeTips.bottom.split(".")[1] + "-icon"]]: true
+                        })}
+                      />
                       <FormattedMessage id={`tips.${this.props.activeTips.bottom}-post`} />
                     </div>
                   ) : (

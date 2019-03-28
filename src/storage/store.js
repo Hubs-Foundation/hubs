@@ -41,7 +41,8 @@ export const SCHEMA = {
         lastEnteredAt: { type: "string" },
         hasPinned: { type: "boolean" },
         hasRotated: { type: "boolean" },
-        hasRecentered: { type: "boolean" }
+        hasRecentered: { type: "boolean" },
+        hasScaled: { type: "boolean" }
       }
     },
 
@@ -116,7 +117,7 @@ export default class Store extends EventTarget {
   }
 
   resetTipActivityFlags() {
-    this.update({ activity: { hasRotated: false, hasPinned: false, hasRecentered: false } });
+    this.update({ activity: { hasRotated: false, hasPinned: false, hasRecentered: false, hasScaled: false } });
   }
 
   update(newState) {

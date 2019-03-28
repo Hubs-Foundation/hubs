@@ -36,8 +36,9 @@ const TIPS = {
       "object_scale",
       "freeze_gesture",
       "menu_hover",
-      "object_recenter",
-      "object_rotate",
+      "object_recenter_button",
+      "object_rotate_button",
+      "object_scale_button",
       "object_pin",
       "invite",
       "pen_color",
@@ -52,8 +53,9 @@ const TIPS = {
       "spawn_menu",
       "object_grab",
       "freeze_gesture",
-      "object_rotate",
-      "object_recenter",
+      "object_recenter_button",
+      "object_rotate_button",
+      "object_scale_button",
       "object_pin",
       "invite"
     ]
@@ -164,13 +166,19 @@ const VALIDATORS = {
     if (userinput.activeSets.has(sets.cursorHoldingInteractable)) return FINISH;
     return VALID;
   },
-  object_rotate: function(userinput, scene, mediaCounter, store) {
+  object_rotate_button: function(userinput, scene, mediaCounter, store) {
     if (!scene.is("frozen")) return INVALID;
     if (mediaCounter.count() === 0) return INVALID;
     if (store && store.state.activity.hasRotated) return FINISH;
     return VALID;
   },
-  object_recenter: function(userinput, scene, mediaCounter, store) {
+  object_scale_button: function(userinput, scene, mediaCounter, store) {
+    if (!scene.is("frozen")) return INVALID;
+    if (mediaCounter.count() === 0) return INVALID;
+    if (store && store.state.activity.hasScaled) return FINISH;
+    return VALID;
+  },
+  object_recenter_button: function(userinput, scene, mediaCounter, store) {
     if (!scene.is("frozen")) return INVALID;
     if (mediaCounter.count() === 0) return INVALID;
     if (store && store.state.activity.hasRecentered) return FINISH;
@@ -182,14 +190,16 @@ const VALIDATORS = {
     if (store && store.state.activity.hasPinned) return FINISH;
     return VALID;
   },
-  object_zoom: function(userinput) {
+  object_zoom: function(userinput, scene) {
+    if (scene.is("frozen")) return INVALID;
     if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
     if (userinput.activeSets.has(sets.cursorHoldingCamera)) return INVALID;
     if (!userinput.activeSets.has(sets.cursorHoldingInteractable)) return INVALID;
     if (userinput.get(paths.actions.cursor.modDelta)) return FINISH;
     return VALID;
   },
-  object_scale: function(userinput) {
+  object_scale: function(userinput, scene) {
+    if (scene.is("frozen")) return INVALID;
     if (userinput.activeSets.has(sets.cursorHoldingPen)) return INVALID;
     if (userinput.activeSets.has(sets.cursorHoldingCamera)) return INVALID;
     if (!userinput.activeSets.has(sets.cursorHoldingInteractable)) return INVALID;

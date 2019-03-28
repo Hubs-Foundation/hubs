@@ -389,15 +389,14 @@ body.vr-mode {
     flex: 10;
   }
 
-  :local(.spawn-tip) {
+  :local(.split-tip) {
     flex: 10;
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
     
-    :local(.spawn-tip-icon) {
-      background-image: url(../images/spawn_message.png);
+    :local(.split-tip-icon) {
       appearance: none;
       -moz-appearance: none;
       -webkit-appearance: none;
@@ -416,6 +415,22 @@ body.vr-mode {
       margin: 0 6px;
       border-radius: 18px;
       background-color: $action-color;
+    }
+
+    :local(.spawn_menu-icon) {
+      background-image: url(../images/spawn_message.png);
+    }
+
+    :local(.object_rotate_button-icon) {
+      background-image: url(../images/rotate.png);
+    }
+
+    :local(.object_scale_button-icon) {
+      background-image: url(../images/scale.png);
+    }
+
+    :local(.object_recenter_button-icon) {
+      background-image: url(../images/recenter.png);
     }
   }
 }

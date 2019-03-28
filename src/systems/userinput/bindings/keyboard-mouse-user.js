@@ -508,7 +508,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     },
     {
       src: { value: paths.device.keyboard.key("shift") },
-      dest: { value: paths.actions.rotateModifier },
+      dest: { value: paths.actions.transformModifier },
       xform: xforms.copy
     }
   ],
