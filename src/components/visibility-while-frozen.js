@@ -69,10 +69,10 @@ AFRAME.registerComponent("visibility-while-frozen", {
         this.camWorldPos.distanceToSquared(this.objWorldPos) < this.data.withinDistance * this.data.withinDistance;
     }
 
-    const isXforming = AFRAME.scenes[0].systems["xform-selected-object"].xforming;
+    const isTransforming = AFRAME.scenes[0].systems["transform-selected-object"].transforming;
 
     let shouldBeVisible =
-      ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) && isWithinDistance && !isXforming;
+      ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) && isWithinDistance && !isTransforming;
 
     if (this.data.requireHoverOnNonMobile && !isMobile) {
       shouldBeVisible = shouldBeVisible && ((this.hoverable && this.hoverable.is("hovered")) || isVisible);

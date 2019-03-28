@@ -1,6 +1,6 @@
 import { paths } from "../systems/userinput/paths";
 
-const XFORM_MODE = {
+const TRANSFORM_MODE = {
   AXIS: "axis",
   PUPPET: "puppet",
   CURSOR: "cursor",
@@ -21,12 +21,12 @@ const v2 = new THREE.Vector3();
 const q = new THREE.Quaternion();
 const q2 = new THREE.Quaternion();
 
-AFRAME.registerComponent("xform-button", {
+AFRAME.registerComponent("transform-button", {
   schema: {
     mode: {
       type: "string",
-      oneof: Object.values(XFORM_MODE),
-      default: XFORM_MODE.CURSOR
+      oneof: Object.values(TRANSFORM_MODE),
+      default: TRANSFORM_MODE.CURSOR
     },
     axis: { type: "vec3", default: null }
   },
@@ -46,13 +46,13 @@ AFRAME.registerComponent("xform-button", {
       if (this.targetEl.components.body) {
         this.targetEl.setAttribute("ammo-body", { type: "static" });
       }
-      this.xformSystem = this.xformSystem || AFRAME.scenes[0].systems["xform-selected-object"];
-      this.xformSystem.startXform(this.targetEl.object3D, hand, this.data);
+      this.transformSystem = this.transformSystem || AFRAME.scenes[0].systems["transform-selected-object"];
+      this.transformSystem.startTransform(this.targetEl.object3D, hand, this.data);
       e.preventDefault();
     };
     this.onGrabEnd = e => {
-      this.xformSystem = this.xformSystem || AFRAME.scenes[0].systems["xform-selected-object"];
-      this.xformSystem.stopXform();
+      this.transformSystem = this.transformSystem || AFRAME.scenes[0].systems["transform-selected-object"];
+      this.transformSystem.stopTransform();
       e.preventDefault();
     };
   },
@@ -66,11 +66,11 @@ AFRAME.registerComponent("xform-button", {
   }
 });
 
-AFRAME.registerSystem("xform-selected-object", {
+AFRAME.registerSystem("transform-selected-object", {
   init() {
     this.target = null;
     this.mode = null;
-    this.xforming = false;
+    this.transforming = false;
     this.axis = new THREE.Vector3();
     this.store = window.APP.store;
 
@@ -109,8 +109,8 @@ AFRAME.registerSystem("xform-selected-object", {
     this.el.object3D.add(this.planarInfo.plane);
   },
 
-  stopXform() {
-    this.xforming = false;
+  stopTransform() {
+    this.transforming = false;
   },
 
   startPlaneCasting() {
@@ -129,8 +129,8 @@ AFRAME.registerSystem("xform-selected-object", {
     this.raycaster.far = 1000;
     plane.raycast(this.raycaster, intersections);
     this.raycaster.far = far;
-    this.xforming = !!intersections[0];
-    if (!this.xforming) {
+    this.transforming = !!intersections[0];
+    if (!this.transforming) {
       return;
     }
 
@@ -154,29 +154,29 @@ AFRAME.registerSystem("xform-selected-object", {
     this.dxApplied = 0;
   },
 
-  startXform(target, hand, data) {
+  startTransform(target, hand, data) {
     this.target = target;
     this.hand = hand.id === "cursor" ? document.querySelector("#player-right-controller").object3D : hand.object3D;
     this.mode = data.mode;
-    this.xforming = true;
+    this.transforming = true;
 
-    if (this.mode === XFORM_MODE.ALIGN) {
+    if (this.mode === TRANSFORM_MODE.ALIGN) {
       this.store.update({ activity: { hasRecentered: true } });
       return;
-    } else if (this.mode === XFORM_MODE.SCALE) {
+    } else if (this.mode === TRANSFORM_MODE.SCALE) {
       this.store.update({ activity: { hasScaled: true } });
     } else {
       this.store.update({ activity: { hasRotated: true } });
     }
 
-    if (this.mode === XFORM_MODE.PUPPET) {
+    if (this.mode === TRANSFORM_MODE.PUPPET) {
       this.target.getWorldQuaternion(this.puppet.initialObjectOrientation);
       this.hand.getWorldQuaternion(this.puppet.initialControllerOrientation);
       this.puppet.initialControllerOrientation_inverse.copy(this.puppet.initialControllerOrientation).inverse();
       return;
     }
 
-    if (this.mode === XFORM_MODE.AXIS) {
+    if (this.mode === TRANSFORM_MODE.AXIS) {
       this.axis.copy(data.axis);
     }
 
@@ -233,8 +233,8 @@ AFRAME.registerSystem("xform-selected-object", {
       .projectOnPlane(normal)
       .applyQuaternion(q.copy(plane.quaternion).inverse())
       .multiplyScalar(SENSITIVITY / cameraToPlaneDistance);
-    if (this.mode === XFORM_MODE.CURSOR || this.mode === XFORM_MODE.SCALE) {
-      const modify = AFRAME.scenes[0].systems.userinput.get(paths.actions.xformModifier);
+    if (this.mode === TRANSFORM_MODE.CURSOR || this.mode === TRANSFORM_MODE.SCALE) {
+      const modify = AFRAME.scenes[0].systems.userinput.get(paths.actions.transformModifier);
 
       this.dyAll = this.dyStore + finalProjectedVec.y;
       this.dyApplied = modify ? this.dyAll : Math.round(this.dyAll / STEP_LENGTH) * STEP_LENGTH;
@@ -244,7 +244,7 @@ AFRAME.registerSystem("xform-selected-object", {
       this.dxApplied = modify ? this.dxAll : Math.round(this.dxAll / STEP_LENGTH) * STEP_LENGTH;
       this.dxStore = this.dxAll - this.dxApplied;
 
-      if (this.mode === XFORM_MODE.CURSOR) {
+      if (this.mode === TRANSFORM_MODE.CURSOR) {
         this.target.getWorldQuaternion(TARGET_WORLD_QUATERNION);
         v.set(1, 0, 0).applyQuaternion(modify ? CAMERA_WORLD_QUATERNION : TARGET_WORLD_QUATERNION);
         q.setFromAxisAngle(v, modify ? -this.dyApplied : this.sign2 * this.sign * -this.dyApplied);
@@ -269,7 +269,7 @@ AFRAME.registerSystem("xform-selected-object", {
       }
 
       this.target.matrixNeedsUpdate = true;
-    } else if (this.mode === XFORM_MODE.AXIS) {
+    } else if (this.mode === TRANSFORM_MODE.AXIS) {
       this.dxAll = this.dxStore + finalProjectedVec.x;
       this.dxApplied = Math.round(this.dxAll / STEP_LENGTH) * STEP_LENGTH;
       this.dxStore = this.dxAll - this.dxApplied;
@@ -282,17 +282,17 @@ AFRAME.registerSystem("xform-selected-object", {
   },
 
   tick() {
-    if (!this.xforming) {
+    if (!this.transforming) {
       return;
     }
 
-    if (this.mode === XFORM_MODE.ALIGN) {
+    if (this.mode === TRANSFORM_MODE.ALIGN) {
       this.el.camera.getWorldPosition(CAMERA_WORLD_POSITION);
       this.target.lookAt(CAMERA_WORLD_POSITION);
       return;
     }
 
-    if (this.mode === XFORM_MODE.PUPPET) {
+    if (this.mode === TRANSFORM_MODE.PUPPET) {
       this.puppetingTick();
       return;
     }
@@ -300,16 +300,16 @@ AFRAME.registerSystem("xform-selected-object", {
   }
 });
 
-AFRAME.registerComponent("xform-button-selector", {
+AFRAME.registerComponent("transform-button-selector", {
   tick() {
     const hand = AFRAME.scenes[0].systems.userinput.get(paths.actions.rightHand.pose);
     if (!hand) {
-      if (this.el.components["xform-button"].data.mode !== XFORM_MODE.CURSOR) {
-        this.el.setAttribute("xform-button", "mode", XFORM_MODE.CURSOR);
+      if (this.el.components["transform-button"].data.mode !== TRANSFORM_MODE.CURSOR) {
+        this.el.setAttribute("transform-button", "mode", TRANSFORM_MODE.CURSOR);
       }
     } else {
-      if (this.el.components["xform-button"].data.mode !== XFORM_MODE.PUPPET) {
-        this.el.setAttribute("xform-button", "mode", XFORM_MODE.PUPPET);
+      if (this.el.components["transform-button"].data.mode !== TRANSFORM_MODE.PUPPET) {
+        this.el.setAttribute("transform-button", "mode", TRANSFORM_MODE.PUPPET);
       }
     }
   }
@@ -317,13 +317,13 @@ AFRAME.registerComponent("xform-button-selector", {
 
 const FORWARD = new THREE.Vector3(0, 0, 1);
 const TWO_PI = 2 * Math.PI;
-AFRAME.registerComponent("visible-if-xforming", {
+AFRAME.registerComponent("visible-if-transforming", {
   init() {},
   tick(t) {
-    const shouldBeVisible = AFRAME.scenes[0].systems["xform-selected-object"].xforming;
+    const shouldBeVisible = AFRAME.scenes[0].systems["transform-selected-object"].transforming;
     const visibleNeedsUpdate = this.el.getAttribute("visible") !== shouldBeVisible;
     if (visibleNeedsUpdate) {
-      this.el.setAttribute("visible", AFRAME.scenes[0].systems["xform-selected-object"].xforming);
+      this.el.setAttribute("visible", AFRAME.scenes[0].systems["transform-selected-object"].transforming);
     }
 
     if (shouldBeVisible) {

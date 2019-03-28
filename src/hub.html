@@ -274,21 +274,21 @@
                             <a-entity mixin="rounded-text-button" clone-media-button position="-0.43 -0.375 0.01">
                                 <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
-                            <a-entity mixin="rounded-action-button" xform-button xform-button-selector position="-0.3 -0.125 0.01">
+                            <a-entity mixin="rounded-action-button" transform-button transform-button-selector position="-0.3 -0.125 0.01">
                                 <a-image
                                     icon-button="image: #rotate-action; hoverImage: #rotate-action;"
                                     scale="0.165 0.165 0.165"
                                     position="0 0 0.001"
                                 ></a-image>
                             </a-entity>
-                            <a-entity mixin="rounded-action-button" xform-button="mode: align;" position="0 -0.125 0.01">
+                            <a-entity mixin="rounded-action-button" transform-button="mode: align;" position="0 -0.125 0.01">
                                 <a-image
                                     icon-button="image: #recenter-action; hoverImage: #recenter-action;"
                                     scale="0.165 0.165 0.165"
                                     position="0 0 0.001"
                                 ></a-image>
                             </a-entity>
-                            <a-entity mixin="rounded-action-button" xform-button="mode: scale;" position="0.3 -0.125 0.01">
+                            <a-entity mixin="rounded-action-button" transform-button="mode: scale;" position="0.3 -0.125 0.01">
                                 <a-image
                                     icon-button="image: #scale-action; hoverImage: #scale-action;"
                                     scale="0.165 0.165 0.165"
@@ -368,14 +368,14 @@
                         <a-entity mixin="rounded-text-action-button" mirror-camera-button="labelSelector:.mirror-button-label;" position="0 0.125 0.01">
                             <a-entity text=" value:mirror; width:2.5; align:center;" class="mirror-button-label" text-raycast-hack position="0 0 0.02"></a-entity>
                         </a-entity>
-                        <a-entity mixin="rounded-action-button" xform-button="mode: align;" position="-0.15 -0.125 0.01">
+                        <a-entity mixin="rounded-action-button" transform-button="mode: align;" position="-0.15 -0.125 0.01">
                             <a-image
                                 icon-button="image: #recenter-action; hoverImage: #recenter-action;"
                                 scale="0.165 0.165 0.165"
                                 position="0 0 0.001"
                             ></a-image>
                         </a-entity>
-                        <a-entity mixin="rounded-action-button" xform-button xform-button-selector position="0.15 -0.125 0.01">
+                        <a-entity mixin="rounded-action-button" transform-button transform-button-selector position="0.15 -0.125 0.01">
                             <a-image
                                 icon-button="image: #rotate-action; hoverImage: #rotate-action;"
                                 scale="0.165 0.165 0.165"
@@ -628,7 +628,7 @@
                 scale="0.1 0.1 0.1"
                 position="0.0 0 0"
                 class="hud"
-                visible-if-xforming
+                visible-if-transforming
             ></a-image>
         </a-sphere>
 
