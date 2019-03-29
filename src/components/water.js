@@ -1,5 +1,6 @@
 import { Layers } from "./layers";
 import "../vendor/Water";
+import waterNormalMap from "../assets/waternormals.jpg";
 
 /**
  * @author jbouny / https://github.com/jbouny
@@ -138,6 +139,15 @@ function MobileWater(geometry, options) {
 MobileWater.prototype = Object.create(THREE.Mesh.prototype);
 MobileWater.prototype.constructor = THREE.Water;
 
+async function loadWaterNormals(url) {
+  const texture = await new Promise((resolve, reject) =>
+    new THREE.TextureLoader().load(url, resolve, undefined, reject)
+  );
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.needsUpdate = true;
+  return texture;
+}
+
 AFRAME.registerComponent("water", {
   schema: {
     waterColor: { type: "color", default: "#001e0f" },
@@ -147,8 +157,7 @@ AFRAME.registerComponent("water", {
     azimuth: { type: "number", default: 0 },
     distance: { type: "number", default: 1 },
     speed: { type: "number", default: 0.1 },
-    forceMobile: { type: "boolean", default: false },
-    normalMap: { type: "asset", default: "#water-normal-map" }
+    forceMobile: { type: "boolean", default: false }
   },
   init() {
     const waterMesh = this.el.getObject3D("mesh");
@@ -157,39 +166,41 @@ AFRAME.registerComponent("water", {
     // Render THREE.Water shader instead of THREE.Mesh
     waterMesh.visible = false;
 
-    const waterNormals = new THREE.Texture(this.data.normalMap);
-    waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
-    waterNormals.needsUpdate = true;
+    loadWaterNormals(waterNormalMap).then(waterNormals => {
+      const waterConfig = {
+        textureWidth: 512,
+        textureHeight: 512,
+        waterNormals: waterNormals,
+        sunDirection: this.data.sunDirection,
+        sunColor: new THREE.Color(this.data.sunColor),
+        waterColor: new THREE.Color(this.data.waterColor),
+        distortionScale: this.data.distortionScale,
+        fog: false
+      };
 
-    const waterConfig = {
-      textureWidth: 512,
-      textureHeight: 512,
-      waterNormals: waterNormals,
-      sunDirection: this.data.sunDirection,
-      sunColor: new THREE.Color(this.data.sunColor),
-      waterColor: new THREE.Color(this.data.waterColor),
-      distortionScale: this.data.distortionScale,
-      fog: false
-    };
+      if (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR() || this.data.forceMobile) {
+        this.water = new MobileWater(waterGeometry, waterConfig);
+      } else {
+        this.water = new THREE.Water(waterGeometry, waterConfig);
+        this.water.mirrorCamera.layers.set(Layers.reflection);
+      }
 
-    if (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR() || this.data.forceMobile) {
-      this.water = new MobileWater(waterGeometry, waterConfig);
-    } else {
-      this.water = new THREE.Water(waterGeometry, waterConfig);
-      this.water.mirrorCamera.layers.set(Layers.reflection);
-    }
-
-    this.el.setObject3D("water", this.water);
+      this.el.setObject3D("water", this.water);
+    });
   },
 
   update(oldData) {
-    const uniforms = this.water.material.uniforms;
-
     if (this.data.forceMobile !== oldData.forceMobile) {
       this.el.removeObject3D("water");
       this.init();
       return;
     }
+
+    if (!this.water) {
+      return;
+    }
+
+    const uniforms = this.water.material.uniforms;
 
     if (this.data.waterColor !== oldData.waterColor) {
       uniforms.waterColor.value.setStyle(this.data.waterColor);
@@ -222,7 +233,9 @@ AFRAME.registerComponent("water", {
   },
 
   tick(time) {
-    this.water.material.uniforms.time.value = (time / 1000) * this.data.speed;
+    if (this.water) {
+      this.water.material.uniforms.time.value = (time / 1000) * this.data.speed;
+    }
   },
 
   remove() {
