@@ -422,8 +422,6 @@ export const traverseMeshesAndAddShapes = (function() {
       }
     });
 
-    const type = vertexCount > vertexLimit ? SHAPE.HULL : SHAPE.MESH;
-
     console.group("traverseMeshesAndAddShapes");
 
     console.log(`scene has ${vertexCount} vertices`);
@@ -439,7 +437,7 @@ export const traverseMeshesAndAddShapes = (function() {
         fit: FIT.ALL
       });
       shapes.push({ id: shapePrefix + floorPlan.name, entity: obj.el });
-    } else {
+    } else if (vertexCount < vertexLimit) {
       for (let i = 0; i < meshRoot.children.length; i++) {
         const obj = meshRoot.children[i];
 
@@ -461,14 +459,24 @@ export const traverseMeshesAndAddShapes = (function() {
           }
 
           obj.el.setAttribute(shapePrefix + obj.uuid, {
-            type: type,
+            type: SHAPE.MESH,
             margin: 0.01,
             fit: FIT.COMPOUND
           });
           shapes.push({ id: shapePrefix + obj.uuid, entity: obj.el });
         }
       }
-      console.log(`traversing meshes and adding ${shapes.length} ${type} shapes`);
+      console.log(`traversing meshes and adding ${shapes.length} mesh shapes`);
+    } else {
+      el.setAttribute(shapePrefix + "defaultFloor", {
+        type: SHAPE.BOX,
+        margin: 0.01,
+        halfExtents: { x: 4000, y: 0.5, z: 4000 },
+        offset: { x: 0, y: -0.5, z: 0 },
+        fit: FIT.MANUAL
+      });
+      shapes.push({ id: shapePrefix + "defaultFloor", entity: el });
+      console.log(`adding default floor collision`);
     }
     console.groupEnd();
   };
