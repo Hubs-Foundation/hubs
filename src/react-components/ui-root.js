@@ -853,6 +853,8 @@ class UIRoot extends Component {
   };
 
   discordBridges = () => {
+    // TODO fix on Oculus Go
+    return [];
     if (!this.props.presences) {
       return [];
     } else {
