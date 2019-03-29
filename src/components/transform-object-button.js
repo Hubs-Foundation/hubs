@@ -1,11 +1,16 @@
 import { paths } from "../systems/userinput/paths";
 
-const ROTATE_MODE = {
+const TRANSFORM_MODE = {
   AXIS: "axis",
   PUPPET: "puppet",
   CURSOR: "cursor",
-  ALIGN: "align"
+  ALIGN: "align",
+  SCALE: "scale"
 };
+
+const SCALE_SENSITIVITY = 100;
+const MIN_SCALE = 0.1;
+const MAX_SCALE = 100;
 
 const STEP_LENGTH = Math.PI / 10;
 const CAMERA_WORLD_QUATERNION = new THREE.Quaternion();
@@ -16,12 +21,12 @@ const v2 = new THREE.Vector3();
 const q = new THREE.Quaternion();
 const q2 = new THREE.Quaternion();
 
-AFRAME.registerComponent("rotate-button", {
+AFRAME.registerComponent("transform-button", {
   schema: {
     mode: {
       type: "string",
-      oneof: Object.values(ROTATE_MODE),
-      default: ROTATE_MODE.CURSOR
+      oneof: Object.values(TRANSFORM_MODE),
+      default: TRANSFORM_MODE.CURSOR
     },
     axis: { type: "vec3", default: null }
   },
@@ -39,16 +44,16 @@ AFRAME.registerComponent("rotate-button", {
       if (this.targetEl.body) {
         this.targetEl.setAttribute("ammo-body", { type: "kinematic" });
       }
-      this.rotateSystem = this.rotateSystem || AFRAME.scenes[0].systems["rotate-selected-object"];
-      this.rotateSystem.startRotate(
+      this.transformSystem = this.transformSystem || AFRAME.scenes[0].systems["transform-selected-object"];
+      this.transformSystem.startTransform(
         this.targetEl.object3D,
         e.path === paths.actions.cursor.grab ? "cursor" : e.path === paths.actions.rightHand.grab ? "right" : "left",
         this.data
       );
     };
     this.onGrabEnd = () => {
-      this.rotateSystem = this.rotateSystem || AFRAME.scenes[0].systems["rotate-selected-object"];
-      this.rotateSystem.stopRotate();
+      this.transformSystem = this.transformSystem || AFRAME.scenes[0].systems["transform-selected-object"];
+      this.transformSystem.stopTransform();
     };
   },
   play() {
@@ -61,15 +66,14 @@ AFRAME.registerComponent("rotate-button", {
   }
 });
 
-AFRAME.registerSystem("rotate-selected-object", {
+AFRAME.registerSystem("transform-selected-object", {
   init() {
     this.target = null;
     this.mode = null;
-    this.rotating = false;
+    this.transforming = false;
     this.axis = new THREE.Vector3();
     this.store = window.APP.store;
 
-    this.dxAll = 0;
     this.dxStore = 0;
     this.dxApplied = 0;
     this.dyAll = 0;
@@ -105,8 +109,8 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.el.object3D.add(this.planarInfo.plane);
   },
 
-  stopRotate() {
-    this.rotating = false;
+  stopTransform() {
+    this.transforming = false;
   },
 
   startPlaneCasting() {
@@ -125,8 +129,8 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.raycaster.far = 1000;
     plane.raycast(this.raycaster, intersections);
     this.raycaster.far = far;
-    this.rotating = !!intersections[0];
-    if (!this.rotating) {
+    this.transforming = !!intersections[0];
+    if (!this.transforming) {
       return;
     }
 
@@ -150,30 +154,32 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.dxApplied = 0;
   },
 
-  startRotate(target, hand, data) {
+  startTransform(target, hand, data) {
     this.target = target;
     this.hand =
       hand === "cursor" || hand === "right"
         ? document.querySelector("#player-right-controller").object3D
         : document.querySelector("#player-left-controller").object3D;
     this.mode = data.mode;
-    this.rotating = true;
+    this.transforming = true;
 
-    if (this.mode === ROTATE_MODE.ALIGN) {
+    if (this.mode === TRANSFORM_MODE.ALIGN) {
       this.store.update({ activity: { hasRecentered: true } });
       return;
+    } else if (this.mode === TRANSFORM_MODE.SCALE) {
+      this.store.update({ activity: { hasScaled: true } });
+    } else {
+      this.store.update({ activity: { hasRotated: true } });
     }
 
-    this.store.update({ activity: { hasRotated: true } });
-
-    if (this.mode === ROTATE_MODE.PUPPET) {
+    if (this.mode === TRANSFORM_MODE.PUPPET) {
       this.target.getWorldQuaternion(this.puppet.initialObjectOrientation);
       this.hand.getWorldQuaternion(this.puppet.initialControllerOrientation);
       this.puppet.initialControllerOrientation_inverse.copy(this.puppet.initialControllerOrientation).inverse();
       return;
     }
 
-    if (this.mode === ROTATE_MODE.AXIS) {
+    if (this.mode === TRANSFORM_MODE.AXIS) {
       this.axis.copy(data.axis);
     }
 
@@ -196,7 +202,7 @@ AFRAME.registerSystem("rotate-selected-object", {
     this.target.matrixNeedsUpdate = true;
   },
 
-  cursorOrAxisModeTick() {
+  cursorAxisOrScaleTick() {
     const {
       plane,
       normal,
@@ -230,8 +236,8 @@ AFRAME.registerSystem("rotate-selected-object", {
       .projectOnPlane(normal)
       .applyQuaternion(q.copy(plane.quaternion).inverse())
       .multiplyScalar(SENSITIVITY / cameraToPlaneDistance);
-    if (this.mode === ROTATE_MODE.CURSOR) {
-      const modify = AFRAME.scenes[0].systems.userinput.get(paths.actions.rotateModifier);
+    if (this.mode === TRANSFORM_MODE.CURSOR || this.mode === TRANSFORM_MODE.SCALE) {
+      const modify = AFRAME.scenes[0].systems.userinput.get(paths.actions.transformModifier);
 
       this.dyAll = this.dyStore + finalProjectedVec.y;
       this.dyApplied = modify ? this.dyAll : Math.round(this.dyAll / STEP_LENGTH) * STEP_LENGTH;
@@ -241,59 +247,73 @@ AFRAME.registerSystem("rotate-selected-object", {
       this.dxApplied = modify ? this.dxAll : Math.round(this.dxAll / STEP_LENGTH) * STEP_LENGTH;
       this.dxStore = this.dxAll - this.dxApplied;
 
-      this.target.getWorldQuaternion(TARGET_WORLD_QUATERNION);
-      v.set(1, 0, 0).applyQuaternion(modify ? CAMERA_WORLD_QUATERNION : TARGET_WORLD_QUATERNION);
-      q.setFromAxisAngle(v, modify ? -this.dyApplied : this.sign2 * this.sign * -this.dyApplied);
+      if (this.mode === TRANSFORM_MODE.CURSOR) {
+        this.target.getWorldQuaternion(TARGET_WORLD_QUATERNION);
+        v.set(1, 0, 0).applyQuaternion(modify ? CAMERA_WORLD_QUATERNION : TARGET_WORLD_QUATERNION);
+        q.setFromAxisAngle(v, modify ? -this.dyApplied : this.sign2 * this.sign * -this.dyApplied);
 
-      if (modify) {
-        v.set(0, 1, 0).applyQuaternion(CAMERA_WORLD_QUATERNION);
+        if (modify) {
+          v.set(0, 1, 0).applyQuaternion(CAMERA_WORLD_QUATERNION);
+        } else {
+          v.set(0, 1, 0);
+        }
+        q2.setFromAxisAngle(v, this.dxApplied);
+
+        this.target.quaternion.premultiply(q).premultiply(q2);
       } else {
-        v.set(0, 1, 0);
-      }
-      q2.setFromAxisAngle(v, this.dxApplied);
+        const scaleFactor =
+          THREE.Math.clamp(finalProjectedVec.y + finalProjectedVec.x, -0.0005, 0.0005) * SCALE_SENSITIVITY;
 
-      this.target.quaternion.premultiply(q).premultiply(q2);
-    } else if (this.mode === ROTATE_MODE.AXIS) {
+        const newScale = this.target.scale.x * (1.0 + scaleFactor);
+
+        if (newScale > MIN_SCALE && newScale < MAX_SCALE) {
+          this.target.scale.multiplyScalar(1.0 + scaleFactor);
+        }
+      }
+
+      this.target.matrixNeedsUpdate = true;
+    } else if (this.mode === TRANSFORM_MODE.AXIS) {
       this.dxAll = this.dxStore + finalProjectedVec.x;
       this.dxApplied = Math.round(this.dxAll / STEP_LENGTH) * STEP_LENGTH;
       this.dxStore = this.dxAll - this.dxApplied;
 
       this.target.quaternion.multiply(q.setFromAxisAngle(this.axis, -this.sign * this.dxApplied));
+      this.target.matrixNeedsUpdate = true;
     }
 
     previousPointOnPlane.copy(currentPointOnPlane);
   },
 
   tick() {
-    if (!this.rotating) {
+    if (!this.transforming) {
       return;
     }
 
-    if (this.mode === ROTATE_MODE.ALIGN) {
+    if (this.mode === TRANSFORM_MODE.ALIGN) {
       this.el.camera.getWorldPosition(CAMERA_WORLD_POSITION);
       this.target.lookAt(CAMERA_WORLD_POSITION);
       this.rotating = false;
       return;
     }
 
-    if (this.mode === ROTATE_MODE.PUPPET) {
+    if (this.mode === TRANSFORM_MODE.PUPPET) {
       this.puppetingTick();
       return;
     }
-    this.cursorOrAxisModeTick();
+    this.cursorAxisOrScaleTick();
   }
 });
 
-AFRAME.registerComponent("rotate-button-selector", {
+AFRAME.registerComponent("transform-button-selector", {
   tick() {
     const hand = AFRAME.scenes[0].systems.userinput.get(paths.actions.rightHand.pose);
     if (!hand) {
-      if (this.el.components["rotate-button"].data.mode !== ROTATE_MODE.CURSOR) {
-        this.el.setAttribute("rotate-button", "mode", ROTATE_MODE.CURSOR);
+      if (this.el.components["transform-button"].data.mode !== TRANSFORM_MODE.CURSOR) {
+        this.el.setAttribute("transform-button", "mode", TRANSFORM_MODE.CURSOR);
       }
     } else {
-      if (this.el.components["rotate-button"].data.mode !== ROTATE_MODE.PUPPET) {
-        this.el.setAttribute("rotate-button", "mode", ROTATE_MODE.PUPPET);
+      if (this.el.components["transform-button"].data.mode !== TRANSFORM_MODE.PUPPET) {
+        this.el.setAttribute("transform-button", "mode", TRANSFORM_MODE.PUPPET);
       }
     }
   }
@@ -301,13 +321,13 @@ AFRAME.registerComponent("rotate-button-selector", {
 
 const FORWARD = new THREE.Vector3(0, 0, 1);
 const TWO_PI = 2 * Math.PI;
-AFRAME.registerComponent("visible-if-rotating", {
+AFRAME.registerComponent("visible-if-transforming", {
   init() {},
   tick(t) {
-    const shouldBeVisible = AFRAME.scenes[0].systems["rotate-selected-object"].rotating;
+    const shouldBeVisible = AFRAME.scenes[0].systems["transform-selected-object"].transforming;
     const visibleNeedsUpdate = this.el.getAttribute("visible") !== shouldBeVisible;
     if (visibleNeedsUpdate) {
-      this.el.setAttribute("visible", AFRAME.scenes[0].systems["rotate-selected-object"].rotating);
+      this.el.setAttribute("visible", AFRAME.scenes[0].systems["transform-selected-object"].transforming);
     }
 
     if (shouldBeVisible) {

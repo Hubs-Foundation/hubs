@@ -52,13 +52,9 @@ AFRAME.registerComponent("pinnable", {
     }
   },
 
-  isHeld(el) {
-    const { leftHand, rightHand, rightRemote } = this.el.sceneEl.systems.interaction.state;
-    return leftHand.held === el || rightHand.held === el || rightRemote.held === el;
-  },
-
   tick() {
-    const held = this.isHeld(this.el);
+    const { leftHand, rightHand, rightRemote } = this.el.sceneEl.systems.interaction.state;
+    const held = leftHand.held === this.el || rightHand.held === this.el || rightRemote.held === this.el;
     if (!held && this.wasHeld) {
       this._fireEvents(this.data);
     }

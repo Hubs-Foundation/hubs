@@ -13,7 +13,7 @@ import { addAnimationComponents } from "../utils/animation";
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 
-const SHAPES = require("aframe-physics-system/src/constants").SHAPES;
+const SHAPE = require("aframe-physics-system/src/constants").SHAPE;
 
 const gltfLoader = new THREE.GLTFLoader();
 let loadingObject;
@@ -65,11 +65,10 @@ AFRAME.registerComponent("media-loader", {
       mesh.position.sub(center);
       mesh.matrixNeedsUpdate = true;
 
-      this.el.setAttribute("ammo-shape__" + shapeId, {
-        autoGenerateShape: true,
-        type: shapeType,
-        mergeGeometry: true,
-        offset: center.negate().multiply(this.el.object3D.scale)
+      this.waitForMediaScaleReady(() => {
+        this.el.setAttribute("ammo-shape__" + shapeId, {
+          type: shapeType
+        });
       });
     };
   })(),
@@ -109,7 +108,7 @@ AFRAME.registerComponent("media-loader", {
       this.loadingClip.play();
     }
     this.el.setObject3D("mesh", mesh);
-    this.setShapeAndScale(true, SHAPES.BOX, "loader");
+    this.setShapeAndScale(true, SHAPE.BOX, "loader");
     delete this.showLoaderTimeout;
   },
 
@@ -120,21 +119,45 @@ AFRAME.registerComponent("media-loader", {
       delete this.loaderMixer;
     }
     delete this.showLoaderTimeout;
-    this.removeShape("loader");
+
+    this.waitForMediaScaleReady(() => {
+      this.removeShape("loader");
+    });
   },
 
-  setupHoverableVisuals() {
+  updateHoverableVisuals() {
     const hoverableVisuals = this.el.components["hoverable-visuals"];
+
     if (hoverableVisuals) {
-      hoverableVisuals.uniforms = injectCustomShaderChunks(this.el.object3D);
+      if (!this.injectedCustomShaderChunks) {
+        this.injectedCustomShaderChunks = true;
+        hoverableVisuals.uniforms = injectCustomShaderChunks(this.el.object3D);
+      }
+
       boundingBox.setFromObject(this.el.object3DMap.mesh);
       boundingBox.getBoundingSphere(hoverableVisuals.boundingSphere);
     }
   },
 
+  waitForMediaScaleReady(callback) {
+    if (this.el.is("media-scale-ready")) {
+      callback();
+    } else {
+      this.el.addEventListener(
+        "media-scale-ready",
+        () => {
+          callback();
+        },
+        { once: true }
+      );
+    }
+  },
+
   onMediaLoaded() {
     this.clearLoadingTimeout();
-    this.setupHoverableVisuals();
+    this.waitForMediaScaleReady(() => {
+      this.updateHoverableVisuals();
+    });
     if (!this.el.components["animation-mixer"]) {
       generateMeshBVH(this.el.object3D);
     }
@@ -245,7 +268,7 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "model-loaded",
           () => {
-            this.setShapeAndScale(this.data.resize, SHAPES.HULL, "hull");
+            this.setShapeAndScale(this.data.resize, SHAPE.HULL, "hull");
             this.onMediaLoaded();
             addAnimationComponents(this.el);
           },
@@ -343,7 +366,7 @@ AFRAME.registerComponent("media-pager", {
   },
 
   repositionToolbar() {
-    this.toolbar.object3D.position.y = -this.el.getAttribute("shape").halfExtents.y - 0.2;
+    this.toolbar.object3D.position.y = -this.el.getAttribute("ammo-shape").halfExtents.y - 0.2;
     this.toolbar.object3D.matrixNeedsUpdate = true;
   }
 });

@@ -76,7 +76,7 @@ import "./components/follow-in-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
-import "./components/rotate-object-button";
+import "./components/transform-object-button";
 import "./components/hover-menu";
 import "./components/disable-frustum-culling";
 import "./components/teleporter";
@@ -139,7 +139,6 @@ const isMobileVR = AFRAME.utils.device.isMobileVR();
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
 
-const SHAPES = require("aframe-physics-system/src/constants").SHAPES;
 const Ammo = require("ammo.js/builds/ammo.wasm.js");
 const AmmoWasm = require("ammo.js/builds/ammo.wasm.wasm");
 window.Ammo = Ammo.bind(undefined, {
@@ -275,7 +274,6 @@ async function updateUIForHub(hub) {
   });
 }
 
-let shapes = null;
 async function updateEnvironmentForHub(hub) {
   let sceneUrl;
   let isLegacyBundle; // Deprecated
@@ -322,7 +320,7 @@ async function updateEnvironmentForHub(hub) {
       "model-loaded",
       () => {
         //TODO: check if the environment was made with spoke to determine if a shape should be added
-        shapes = traverseMeshesAndAddShapes(environmentEl, SHAPES.MESH, 0.1);
+        traverseMeshesAndAddShapes(environmentEl);
         generateMeshBVH(environmentEl.object3D);
       },
       { once: true }
@@ -342,10 +340,7 @@ async function updateEnvironmentForHub(hub) {
           environmentEl.addEventListener(
             "model-loaded",
             () => {
-              while (shapes.length > 0) {
-                environmentEl.removeAttribute(shapes.pop());
-              }
-              shapes = traverseMeshesAndAddShapes(environmentEl, SHAPES.MESH, 0.1);
+              traverseMeshesAndAddShapes(environmentEl);
               generateMeshBVH(environmentEl.object3D);
               document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint();
             },
@@ -566,7 +561,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.APP.scene = scene;
   window.APP.hubChannel = hubChannel;
 
-  scene.addEventListener("enter-vr", () => {
+  const handleEarlyVRMode = () => {
     // If VR headset is activated, refreshing page will fire vrdisplayactivate
     // which puts A-Frame in VR mode, so exit VR mode whenever it is attempted
     // to be entered and we haven't entered the room yet.
@@ -576,6 +571,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       return true;
     }
 
+    return false;
+  };
+
+  scene.addEventListener("enter-vr", () => {
+    if (handleEarlyVRMode()) return true;
+
     document.body.classList.add("vr-mode");
 
     // Don't stretch canvas on cardboard, since that's drawing the actual VR view :)
@@ -583,6 +584,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.body.classList.add("vr-mode-stretch");
     }
   });
+
+  handleEarlyVRMode();
 
   // HACK A-Frame 0.9.0 seems to fail to wire up vrdisplaypresentchange early enough
   // to catch presentation state changes and recognize that an HMD is presenting on startup.
@@ -607,6 +610,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   scene.addEventListener("exit-vr", () => {
     document.body.classList.remove("vr-mode");
     document.body.classList.remove("vr-mode-stretch");
+
+    // HACK: Oculus browser pauses videos when exiting VR mode, so we need to resume them after a timeout.
+    if (/OculusBrowser/i.test(window.navigator.userAgent)) {
+      document.querySelectorAll("[media-video]").forEach(m => {
+        const video = m.components["media-video"].video;
+
+        if (!video.paused) {
+          setTimeout(() => video.play(), 1000);
+        }
+      });
+    }
   });
 
   registerNetworkSchemas();

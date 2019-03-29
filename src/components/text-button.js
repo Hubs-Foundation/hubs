@@ -27,7 +27,7 @@ AFRAME.registerComponent("text-button", {
     this.onClick = () => {
       this.emitHapticPulse();
     };
-    this.textEl = this.el.parentEl.querySelector("[text]");
+    this.textEl = this.el.querySelector("[text]");
   },
 
   emitHapticPulse() {
@@ -56,7 +56,10 @@ AFRAME.registerComponent("text-button", {
   updateButtonState() {
     const hovering = this.hovering;
     this.el.setAttribute("slice9", "color", hovering ? this.data.backgroundHoverColor : this.data.backgroundColor);
-    this.textEl.setAttribute("text", "color", hovering ? this.data.textHoverColor : this.data.textColor);
+
+    if (this.textEl) {
+      this.textEl.setAttribute("text", "color", hovering ? this.data.textHoverColor : this.data.textColor);
+    }
   }
 });
 

@@ -15,6 +15,12 @@
   left: 50%;
 }
 
+.loader-mid {
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  left: 50%;
+}
+
 .loading-panel {
   @extend %default-font;
   color: white;

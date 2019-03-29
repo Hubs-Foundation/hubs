@@ -71,9 +71,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 
 import qsTruthy from "../utils/qs_truthy";
-// TODO temp feature flags
-const customSkinEnabled = qsTruthy("customSkin");
-const advancedAvatarEditor = qsTruthy("advancedAvatarEditor");
+const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
 addLocaleData([...en]);
 
@@ -89,6 +87,10 @@ const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
 
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
+
+const LOBBY_MODAL_ROUTER_PATHS = ["/media/scenes"];
+const LOBBY_MODAL_QUERY_VARS = ["media_source"];
+const LOBBY_MODAL_QUERY_VALUES = ["scenes"];
 
 async function grantedMicLabels() {
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
@@ -178,6 +180,7 @@ class UIRoot extends Component {
     loadingNum: 0,
     loadedNum: 0,
 
+    waitingOnAudio: false,
     shareScreen: false,
     requestedScreen: false,
     mediaStream: null,
@@ -514,7 +517,7 @@ class UIRoot extends Component {
   };
 
   performDirectEntryFlow = async enterInVR => {
-    this.setState({ enterInVR });
+    this.setState({ enterInVR, waitingOnAudio: true });
 
     const hasGrantedMic = await this.hasGrantedMicPermissions();
 
@@ -524,6 +527,8 @@ class UIRoot extends Component {
     } else {
       this.pushHistoryState("entry_step", "mic_grant");
     }
+
+    this.setState({ waitingOnAudio: false });
   };
 
   enter2D = async () => {
@@ -1114,28 +1119,38 @@ class UIRoot extends Component {
           <FormattedMessage id="entry.choose-device" />
         </div>
 
-        <div className={entryStyles.buttonContainer}>
-          {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
-            <div className={entryStyles.secondary} onClick={this.enterVR}>
-              <FormattedMessage id="entry.cardboard" />
+        {!this.state.waitingOnAudio ? (
+          <div className={entryStyles.buttonContainer}>
+            {this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no && (
+              <div className={entryStyles.secondary} onClick={this.enterVR}>
+                <FormattedMessage id="entry.cardboard" />
+              </div>
+            )}
+            {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
+              <GenericEntryButton secondary={true} onClick={this.enterVR} />
+            )}
+            {this.props.availableVREntryTypes.daydream === VR_DEVICE_AVAILABILITY.yes && (
+              <DaydreamEntryButton secondary={true} onClick={this.enterDaydream} subtitle={null} />
+            )}
+            <DeviceEntryButton secondary={true} onClick={() => this.attemptLink()} isInHMD={isMobileVR} />
+            {this.props.availableVREntryTypes.safari === VR_DEVICE_AVAILABILITY.maybe && (
+              <StateLink stateKey="modal" stateValue="safari" history={this.props.history}>
+                <SafariEntryButton onClick={this.showSafariDialog} />
+              </StateLink>
+            )}
+            {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
+              <TwoDEntryButton onClick={this.enter2D} />
+            )}
+          </div>
+        ) : (
+          <div className={entryStyles.audioLoader}>
+            <div className="loader-wrap loader-mid">
+              <div className="loader">
+                <div className="loader-center" />
+              </div>
             </div>
-          )}
-          {this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no && (
-            <GenericEntryButton secondary={true} onClick={this.enterVR} />
-          )}
-          {this.props.availableVREntryTypes.daydream === VR_DEVICE_AVAILABILITY.yes && (
-            <DaydreamEntryButton secondary={true} onClick={this.enterDaydream} subtitle={null} />
-          )}
-          <DeviceEntryButton secondary={true} onClick={() => this.attemptLink()} isInHMD={isMobileVR} />
-          {this.props.availableVREntryTypes.safari === VR_DEVICE_AVAILABILITY.maybe && (
-            <StateLink stateKey="modal" stateValue="safari" history={this.props.history}>
-              <SafariEntryButton onClick={this.showSafariDialog} />
-            </StateLink>
-          )}
-          {this.props.availableVREntryTypes.screen === VR_DEVICE_AVAILABILITY.yes && (
-            <TwoDEntryButton onClick={this.enter2D} />
-          )}
-        </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -1340,6 +1355,16 @@ class UIRoot extends Component {
       return true;
     }
 
+    if (
+      !this.state.entered &&
+      (LOBBY_MODAL_ROUTER_PATHS.find(x => sluglessPath(this.props.history.location).startsWith(x)) ||
+        LOBBY_MODAL_QUERY_VARS.find(
+          (x, i) => new URLSearchParams(this.props.history.location.search).get(x) === LOBBY_MODAL_QUERY_VALUES[i]
+        ))
+    ) {
+      return true;
+    }
+
     return !!(
       (this.props.history &&
         this.props.history.location.state &&
@@ -1411,6 +1436,7 @@ class UIRoot extends Component {
 
     // Allow scene picker pre-entry, otherwise wait until entry
     const showMediaBrowser = mediaSource && (mediaSource === "scenes" || this.state.entered);
+    const hasTopTip = this.props.activeTips && this.props.activeTips.top;
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1430,8 +1456,7 @@ class UIRoot extends Component {
                   onSignOut={this.signOut}
                   finished={this.onProfileFinished}
                   store={this.props.store}
-                  customSkinEnabled={customSkinEnabled}
-                  advanced={advancedAvatarEditor}
+                  debug={avatarEditorDebug}
                 />
               )}
             />
@@ -1467,8 +1492,6 @@ class UIRoot extends Component {
                   signedIn={this.state.signedIn}
                   onSignIn={this.showSignInDialog}
                   onSignOut={this.signOut}
-                  customSkinEnabled={customSkinEnabled}
-                  advanced={advancedAvatarEditor}
                 />
               )}
             />
@@ -1551,10 +1574,15 @@ class UIRoot extends Component {
                       <FontAwesomeIcon icon={faTimes} />
                     </i>
                   </button>
-                  {this.props.activeTips.bottom.endsWith(".spawn_menu") ? (
-                    <div className={styles.spawnTip}>
+                  {[".spawn_menu", "_button"].find(x => this.props.activeTips.bottom.endsWith(x)) ? (
+                    <div className={styles.splitTip}>
                       <FormattedMessage id={`tips.${this.props.activeTips.bottom}-pre`} />
-                      <div className={classNames(styles.spawnTipIcon)} />
+                      <div
+                        className={classNames({
+                          [styles.splitTipIcon]: true,
+                          [styles[this.props.activeTips.bottom.split(".")[1] + "-icon"]]: true
+                        })}
+                      />
                       <FormattedMessage id={`tips.${this.props.activeTips.bottom}-post`} />
                     </div>
                   ) : (
@@ -1672,7 +1700,7 @@ class UIRoot extends Component {
                 })}
               >
                 {!showVREntryButton &&
-                  (!this.props.activeTips || !this.props.activeTips.top) && (
+                  !hasTopTip && (
                     <WithHoverSound>
                       <button
                         className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
@@ -1684,7 +1712,7 @@ class UIRoot extends Component {
                   )}
                 {!showVREntryButton &&
                   this.occupantCount() > 1 &&
-                  (!this.props.activeTips || !this.props.activeTips.top) &&
+                  !hasTopTip &&
                   entered && (
                     <WithHoverSound>
                       <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
@@ -1793,7 +1821,7 @@ class UIRoot extends Component {
               />
             )}
 
-            {entered && !this.state.frozen ? (
+            {entered && (
               <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
                   history={this.props.history}
@@ -1826,7 +1854,7 @@ class UIRoot extends Component {
                   </div>
                 )}
               </div>
-            ) : null}
+            )}
           </div>
         </IntlProvider>
       </ReactAudioContext.Provider>

@@ -2,9 +2,10 @@ import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { isHubsDestinationUrl } from "./utils/media-utils";
 const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
-  COLLISION_FLAGS = PHYSICS_CONSTANTS.COLLISION_FLAGS,
-  TYPES = PHYSICS_CONSTANTS.TYPES,
-  SHAPES = PHYSICS_CONSTANTS.SHAPES;
+  COLLISION_FLAG = PHYSICS_CONSTANTS.COLLISION_FLAG,
+  TYPE = PHYSICS_CONSTANTS.TYPE,
+  SHAPE = PHYSICS_CONSTANTS.SHAPE,
+  FIT = PHYSICS_CONSTANTS.FIT;
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
@@ -26,8 +27,8 @@ AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body", el => {
   //will no longer be needed when spawners are added via Spoke instead.
   el.setAttribute("ammo-body", {
     mass: 0,
-    type: TYPES.STATIC,
-    collisionFlags: COLLISION_FLAGS.NO_CONTACT_RESPONSE
+    type: TYPE.STATIC,
+    collisionFlags: COLLISION_FLAG.NO_CONTACT_RESPONSE
   });
 });
 AFRAME.GLTFModelPlus.registerComponent("ammo-shape", "ammo-shape");
@@ -73,9 +74,8 @@ AFRAME.GLTFModelPlus.registerComponent(
       euler.set(rotation.x, rotation.y, rotation.z);
       const orientation = new THREE.Quaternion().setFromEuler(euler);
       el.setAttribute(componentName, {
-        type: SHAPES.BOX,
-        autoGenerateShape: false,
-        mergeGeometry: false,
+        type: SHAPE.BOX,
+        fit: FIT.MANUAL,
         offset: componentData.position,
         halfExtents: { x: scale.x / 2, y: scale.y / 2, z: scale.z / 2 },
         orientation
@@ -211,8 +211,8 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
   });
   el.setAttribute("ammo-body", {
     mass: 0,
-    type: TYPES.STATIC,
-    collisionFlags: COLLISION_FLAGS.NO_CONTACT_RESPONSE
+    type: TYPE.STATIC,
+    collisionFlags: COLLISION_FLAG.NO_CONTACT_RESPONSE
   });
 });
 

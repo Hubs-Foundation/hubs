@@ -47,7 +47,7 @@
     "aframe-physics-system": "github:mozillareality/aframe-physics-system#hubs/ammo_driver",
     "aframe-rounded": "^1.0.3",
     "aframe-slice9-component": "^1.0.0",
-    "ammo.js": "github:kripken/ammo.js#ebe912c0426a47da9a11ce1ded3815da4a8d27c1",
+    "ammo.js": "github:mozillareality/ammo.js#hubs/master",
     "classnames": "^2.2.5",
     "copy-to-clipboard": "^3.0.8",
     "deepmerge": "^2.1.1",

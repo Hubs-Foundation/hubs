@@ -1,5 +1,7 @@
 const { Vector3, Quaternion, Matrix4, Euler } = THREE;
 
+import { AVATAR_TYPES } from "../assets/avatars/avatars";
+
 function quaternionAlmostEquals(epsilon, u, v) {
   // Note: q and -q represent same rotation
   return (
@@ -23,7 +25,8 @@ AFRAME.registerComponent("ik-root", {
   schema: {
     camera: { type: "string", default: ".camera" },
     leftController: { type: "string", default: ".left-controller" },
-    rightController: { type: "string", default: ".right-controller" }
+    rightController: { type: "string", default: ".right-controller" },
+    avatarType: { type: "string", default: AVATAR_TYPES.LEGACY }
   },
   update(oldData) {
     if (this.data.camera !== oldData.camera) {
@@ -46,6 +49,16 @@ function findIKRoot(entity) {
   }
   return entity && entity.components["ik-root"];
 }
+
+const LEGACY_HAND_ROTATIONS = {
+  left: new Matrix4().makeRotationFromEuler(new Euler(-Math.PI / 2, Math.PI / 2, 0)),
+  right: new Matrix4().makeRotationFromEuler(new Euler(Math.PI / 2, Math.PI / 2, 0))
+};
+
+const HAND_ROTATIONS = {
+  left: new Matrix4().makeRotationFromEuler(new Euler(-Math.PI / 2, Math.PI / 2, 0)),
+  right: new Matrix4().makeRotationFromEuler(new Euler(-Math.PI / 2, -Math.PI / 2, 0))
+};
 
 /**
  * Performs IK on a hip-rooted skeleton to align the hip, head and hands with camera and controller inputs.
@@ -92,15 +105,6 @@ AFRAME.registerComponent("ik-controller", {
     this.invRootToChest = new Matrix4();
 
     this.ikRoot = findIKRoot(this.el);
-
-    this.hands = {
-      left: {
-        rotation: new Matrix4().makeRotationFromEuler(new Euler(-Math.PI / 2, Math.PI / 2, 0))
-      },
-      right: {
-        rotation: new Matrix4().makeRotationFromEuler(new Euler(Math.PI / 2, Math.PI / 2, 0))
-      }
-    };
 
     this.isInView = true;
     this.hasConvergedHips = false;
@@ -238,19 +242,18 @@ AFRAME.registerComponent("ik-controller", {
 
     const { leftHand, rightHand } = this;
 
-    this.updateHand(this.hands.left, leftHand, leftController, true, this.isInView);
-    this.updateHand(this.hands.right, rightHand, rightController, false, this.isInView);
+    const handRotations = this.ikRoot.data.avatarType === AVATAR_TYPES.LEGACY ? LEGACY_HAND_ROTATIONS : HAND_ROTATIONS;
+    this.updateHand(handRotations.left, leftHand, leftController.object3D, true, this.isInView);
+    this.updateHand(handRotations.right, rightHand, rightController.object3D, false, this.isInView);
     this.forceIkUpdate = false;
   },
 
-  updateHand(handState, handObject3D, controller, isLeft, isInView) {
-    const hand = handObject3D.el;
+  updateHand(handRotation, handObject3D, controllerObject3D, isLeft, isInView) {
     const handMatrix = handObject3D.matrix;
-    const controllerObject3D = controller.object3D;
 
     // TODO: This coupling with personal-space-invader is not ideal.
     // There should be some intermediate thing managing multiple opinions about object visibility
-    const spaceInvader = hand.components["personal-space-invader"];
+    const spaceInvader = handObject3D.el.components["personal-space-invader"];
     const handHiddenByPersonalSpace = spaceInvader && spaceInvader.invading;
 
     handObject3D.visible = !handHiddenByPersonalSpace && controllerObject3D.visible;
@@ -259,7 +262,7 @@ AFRAME.registerComponent("ik-controller", {
     if (controllerObject3D.visible && (isInView || this.forceIkUpdate || this.data.alwaysUpdate)) {
       handMatrix.multiplyMatrices(this.invRootToChest, controllerObject3D.matrix);
 
-      handMatrix.multiply(handState.rotation);
+      handMatrix.multiply(handRotation);
 
       handObject3D.position.setFromMatrixPosition(handMatrix);
       handObject3D.rotation.setFromRotationMatrix(handMatrix);

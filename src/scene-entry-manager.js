@@ -10,9 +10,13 @@ const qs = new URLSearchParams(location.search);
 const aframeInspectorUrl = require("file-loader?name=assets/js/[name]-[hash].[ext]!aframe-inspector/dist/aframe-inspector.min.js");
 
 import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
-import { handleExitTo2DInterstitial, handleReEntryToVRFrom2DInterstitial } from "./utils/vr-interstitial";
+import {
+  isIn2DInterstitial,
+  handleExitTo2DInterstitial,
+  handleReEntryToVRFrom2DInterstitial
+} from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
-import { getAvatarSrc } from "./assets/avatars/avatars";
+import { getAvatarSrc, getAvatarType } from "./assets/avatars/avatars";
 import { pushHistoryState } from "./utils/history";
 
 const isIOS = AFRAME.utils.device.isIOS();
@@ -147,15 +151,17 @@ export default class SceneEntryManager {
     }
   };
 
-  _updatePlayerRigWithProfile = () => {
+  _updatePlayerRigWithProfile = async () => {
     const { avatarId, displayName } = this.store.state.profile;
-    this.playerRig.setAttribute("player-info", {
-      displayName,
-      avatarSrc: getAvatarSrc(avatarId)
-    });
+
     const hudController = this.playerRig.querySelector("[hud-controller]");
     hudController.setAttribute("hud-controller", { showTip: !this.store.state.activity.hasFoundFreeze });
+    this.playerRig.setAttribute("player-info", { displayName });
     this.scene.emit("username-changed", { username: displayName });
+
+    const avatarSrc = await getAvatarSrc(avatarId);
+    this.playerRig.setAttribute("player-info", { avatarSrc });
+    this.playerRig.setAttribute("ik-root", "avatarType", getAvatarType(avatarId));
   };
 
   _setupKicking = () => {
@@ -451,10 +457,11 @@ export default class SceneEntryManager {
       if (entry.type === "scene_listing" && this.hubChannel.permissions.update_hub) return;
 
       // If user has HMD lifted up, delay spawning for now. eventually show a modal
-      const delaySpawn = this._in2DInterstitial && !isMobileVR;
+      const spawnDelay = isIn2DInterstitial() ? (isMobileVR ? 1000 : 3000) : 0;
+
       setTimeout(() => {
         spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
-      }, delaySpawn ? 3000 : 0);
+      }, spawnDelay);
 
       handleReEntryToVRFrom2DInterstitial();
     });

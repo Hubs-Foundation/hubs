@@ -189,6 +189,10 @@
     }
   }
 
+  :local(.audio-loader) {
+    min-height: 228px;
+  }
+
   :local(.webvr-link-container) {
     text-align: center;
     margin-bottom: 24px;

@@ -81,6 +81,8 @@ AFRAME.registerComponent("camera-tool", {
 
     this.camera = new THREE.PerspectiveCamera(50, this.renderTarget.width / this.renderTarget.height, 0.1, 30000);
     this.camera.rotation.set(0, Math.PI, 0);
+    this.camera.position.set(0, 0, 0.05);
+    this.camera.matrixNeedsUpdate = true;
     this.el.setObject3D("camera", this.camera);
 
     const material = new THREE.MeshBasicMaterial({
@@ -164,6 +166,10 @@ AFRAME.registerComponent("camera-tool", {
 
   unmirror() {
     this.el.sceneEl.systems["camera-mirror"].unmirrorCameraAtEl(this.el);
+  },
+
+  onAvatarUpdated() {
+    delete this.playerHead;
   },
 
   tick() {

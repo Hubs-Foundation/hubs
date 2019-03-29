@@ -3,7 +3,7 @@ import { addMedia } from "../utils/media-utils";
 import { waitForEvent } from "../utils/async-utils";
 import { ObjectContentOrigins } from "../object-types";
 
-const COLLISION_FLAGS = require("aframe-physics-system/src/constants").COLLISION_FLAGS;
+const COLLISION_FLAG = require("aframe-physics-system/src/constants").COLLISION_FLAG;
 
 /**
  * Spawns networked objects when grabbed or when a specified event is fired.
@@ -89,6 +89,9 @@ AFRAME.registerComponent("super-spawner", {
     this.sceneEl = document.querySelector("a-scene");
 
     this.tempSpawnHandPosition = new THREE.Vector3();
+
+    //need to add this here because super-spawners don't use addMedia()
+    this.el.addState("media-scale-ready");
   },
 
   play() {
@@ -165,11 +168,11 @@ AFRAME.registerComponent("super-spawner", {
     if (this.data.spawnCooldown > 0) {
       this.el.setAttribute("visible", false);
       this.el.classList.remove("interactable");
-      this.el.setAttribute("ammo-body", { collisionFlags: COLLISION_FLAGS.NO_CONTACT_RESPONSE });
+      this.el.setAttribute("ammo-body", { collisionFlags: COLLISION_FLAG.NO_CONTACT_RESPONSE });
       this.cooldownTimeout = setTimeout(() => {
         this.el.setAttribute("visible", true);
         this.el.classList.add("interactable");
-        this.el.setAttribute("ammo-body", { collisionFlags: COLLISION_FLAGS.STATIC_OBJECT });
+        this.el.setAttribute("ammo-body", { collisionFlags: COLLISION_FLAG.STATIC_OBJECT });
         this.cooldownTimeout = null;
       }, this.data.spawnCooldown * 1000);
     }

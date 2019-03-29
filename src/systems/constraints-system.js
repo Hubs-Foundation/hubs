@@ -1,4 +1,4 @@
-const ACTIVATION_STATES = require("aframe-physics-system/src/constants").ACTIVATION_STATES;
+const ACTIVATION_STATE = require("aframe-physics-system/src/constants").ACTIVATION_STATE;
 
 function storeState(prev, curr) {
   prev.held = curr.held;
@@ -34,8 +34,10 @@ export class ConstraintsSystem {
         prevState.spawning &&
         !state.spawning
       ) {
-        state.held.setAttribute("ammo-body", { type: "dynamic" });
-        state.held.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
+        state.held.setAttribute("ammo-body", {
+          type: "dynamic",
+          activationState: ACTIVATION_STATE.DISABLE_DEACTIVATION
+        });
         state.held.setAttribute("ammo-constraint__" + options.entity.id, { target: "#" + options.entity.id });
       }
       return;
@@ -53,7 +55,7 @@ export class ConstraintsSystem {
         }
       }
       if (!hasAnotherConstraint) {
-        prevState.held.body.forceActivationState(ACTIVATION_STATES.ACTIVE_TAG);
+        prevState.held.setAttribute("ammo-body", { activationState: ACTIVATION_STATE.ACTIVE_TAG });
       }
     }
     if (
@@ -63,8 +65,10 @@ export class ConstraintsSystem {
       !state.spawning
     ) {
       if (!state.held.components["networked"] || NAF.utils.isMine(state.held) || NAF.utils.takeOwnership(state.held)) {
-        state.held.setAttribute("ammo-body", { type: "dynamic" });
-        state.held.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
+        state.held.setAttribute("ammo-body", {
+          type: "dynamic",
+          activationState: ACTIVATION_STATE.DISABLE_DEACTIVATION
+        });
         state.held.setAttribute("ammo-constraint__" + options.entity.id, { target: "#" + options.entity.id });
       } else {
         // TODO communicate failure to obtain network ownership

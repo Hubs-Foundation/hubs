@@ -372,7 +372,8 @@ class MediaBrowser extends Component {
     const imageWidth = Math.floor(Math.max(imageAspect * imageHeight, imageHeight * 0.85));
 
     const publisherName =
-      (entry.attributions.publisher && entry.attributions.publisher.name) || PUBLISHER_FOR_ENTRY_TYPE[entry.type];
+      (entry.attributions && entry.attributions.publisher && entry.attributions.publisher.name) ||
+      PUBLISHER_FOR_ENTRY_TYPE[entry.type];
 
     return (
       <div style={{ width: `${imageWidth}px` }} className={styles.tile} key={`${entry.id}_${idx}`}>

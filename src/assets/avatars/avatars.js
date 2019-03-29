@@ -56,19 +56,14 @@ export function getAvatarType(avatarId) {
   return AVATAR_TYPES.SKINNABLE;
 }
 
-// HACK Skinnable avatars are mutable. If we edit one locally we bump this so the new avatar gltf is fetched
-// TODO come up with a cleaner way to handle this
-let cacheVersion = 0;
-export function bumpCacheVersion() {
-  cacheVersion++;
-}
-
-export function getAvatarSrc(avatarId) {
+export async function getAvatarSrc(avatarId) {
   switch (getAvatarType(avatarId)) {
     case AVATAR_TYPES.LEGACY:
       return `#${avatarId}`;
     case AVATAR_TYPES.SKINNABLE:
-      return getReticulumFetchUrl(`/api/v1/avatars/${avatarId}/avatar.gltf?v=${cacheVersion}`);
+      return fetch(getReticulumFetchUrl(`/api/v1/avatars/${avatarId}`))
+        .then(r => r.json())
+        .then(({ avatars }) => avatars[0].gltf_url);
   }
   return avatarId;
 }
