@@ -151,7 +151,8 @@ window.Ammo = Ammo.bind(undefined, {
   }
 });
 require("aframe-physics-system");
-import "./components/super-networked-interactable";
+import "./components/owned-object-limiter";
+import "./components/set-unowned-body-kinematic";
 import "./components/scalable-when-grabbed";
 import "./components/networked-counter";
 import "./components/event-repeater";

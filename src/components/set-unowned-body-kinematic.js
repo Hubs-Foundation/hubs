@@ -1,5 +1,5 @@
 /* global NAF */
-AFRAME.registerComponent("super-networked-interactable", {
+AFRAME.registerComponent("set-unowned-body-kinematic", {
   play() {
     if (!this.hasBeenHereBefore) {
       // Do this in play instead of init so that the ammo-body and networked components are done
