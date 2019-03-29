@@ -34,7 +34,7 @@ const getPlayerCamera = (() => {
 })();
 
 function shouldMoveCursor(touch, raycaster) {
-  const isCursorGrabbing = !!AFRAME.scenes[0].systems.interaction.rightRemoteConstraintTarget;
+  const isCursorGrabbing = !!AFRAME.scenes[0].systems.interaction.state.rightRemote.held;
   if (isCursorGrabbing) {
     return true;
   }

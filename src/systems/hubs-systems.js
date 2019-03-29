@@ -15,11 +15,11 @@ AFRAME.registerSystem("hubs-systems", {
     this.hoverMenuSystem = new HoverMenuSystem();
   },
 
-  tick() {
+  tick(t) {
     const systems = AFRAME.scenes[0].systems;
     systems.userinput.tick2();
     this.cursorTargettingSystem.tick();
-    systems.interaction.tick2();
+    systems.interaction.tick2(t);
     this.constraintsSystem.tick();
     this.twoPointStretchingSystem.tick();
     this.singleActionButtonSystem.tick();

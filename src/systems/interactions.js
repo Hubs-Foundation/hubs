@@ -78,7 +78,6 @@ AFRAME.registerSystem("interaction", {
   },
 
   init: function() {
-    this.rightRemoteConstraintTarget = null;
     this.weWantToGrab = false;
     this.options = {
       leftHand: {
@@ -130,7 +129,7 @@ AFRAME.registerSystem("interaction", {
     const userinput = AFRAME.scenes[0].systems.userinput;
     if (state.held) {
       const networked = state.held.components["networked"];
-      const lostOwnership = networked && networked.data.owner !== NAF.clientId;
+      const lostOwnership = networked && networked.data && networked.data.owner !== NAF.clientId;
       if (userinput.get(options.dropPath) || lostOwnership) {
         state.held = null;
       }
@@ -158,7 +157,7 @@ AFRAME.registerSystem("interaction", {
     }
   },
 
-  tick2() {
+  tick2(t) {
     if (!this.el.is("entered")) return;
     this.cursorController = this.cursorController || document.querySelector("#cursor-controller");
     this.rightHandTeleporter = this.options.rightHand.entity.components["teleporter"];
@@ -168,17 +167,19 @@ AFRAME.registerSystem("interaction", {
       this.tickInteractor(this.options.rightHand, this.state.rightHand);
     }
 
-    const rightRemoteWasEnabled = this.cursorController.components["cursor-controller"].enabled;
-    const rightRemoteShouldBeEnabled =
-      !this.state.rightHand.hovered && !this.state.rightHand.held && !this.rightHandTeleporter.isTeleporting;
-    this.cursorController.components["cursor-controller"].enabled = rightRemoteShouldBeEnabled;
-    if (rightRemoteWasEnabled && !rightRemoteShouldBeEnabled) {
-      this.state.rightRemote.hovered = null;
-    }
 
     if (!this.state.rightHand.held && !this.state.rightHand.hovered) {
       this.tickInteractor(this.options.rightRemote, this.state.rightRemote);
     }
+
+    const rightRemoteWasEnabled = this.cursorController.components["cursor-controller"].enabled;
+    const rightRemoteShouldBeEnabled =
+          !this.state.rightHand.hovered && !this.state.rightHand.held && !this.rightHandTeleporter.isTeleporting;
+    this.cursorController.components["cursor-controller"].enabled = rightRemoteShouldBeEnabled;
+    if (rightRemoteWasEnabled && !rightRemoteShouldBeEnabled) {
+        this.state.rightRemote.hovered = null;
+    }
+    this.cursorController.components["cursor-controller"].tick2(t);
 
     if (this.el.systems.userinput.get(paths.actions.logInteractionState)) {
       console.log(

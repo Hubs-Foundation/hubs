@@ -121,7 +121,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.raycaster.near = this.data.near;
   },
 
-  tick: (() => {
+  tick2: (() => {
     const rawIntersections = [];
     const cameraPos = new THREE.Vector3();
 
