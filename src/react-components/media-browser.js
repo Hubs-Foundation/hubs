@@ -107,7 +107,7 @@ class MediaBrowser extends Component {
   };
 
   sourceChanged = () => {
-    if (this.inputRef) {
+    if (this.inputRef && !isMobileVR) {
       this.inputRef.focus();
     }
   };
