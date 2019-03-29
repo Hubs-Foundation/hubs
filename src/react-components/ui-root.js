@@ -170,6 +170,7 @@ class UIRoot extends Component {
     showInviteDialog: false,
     showPresenceList: false,
     showSettingsMenu: false,
+    discordTipDismissed: false,
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
@@ -269,6 +270,8 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.addEventListener("exit", this.exit);
     const scene = this.props.scene;
+
+    this.props.store.addEventListener("statechanged", this.onStoreChanged);
 
     const unsubscribe = this.props.history.listen((location, action) => {
       const state = location.state;
@@ -841,6 +844,24 @@ class UIRoot extends Component {
     return this.props.presences ? Object.entries(this.props.presences).length : 0;
   };
 
+  onStoreChanged = () => {
+    this.setState({ discordTipDismissed: this.props.store.state.confirmedDiscordRooms.includes(this.props.hubId) });
+  };
+
+  confirmDiscordBridge = () => {
+    this.props.store.update({ confirmedDiscordRooms: [this.props.hubId] });
+  };
+
+  discordBridges = () => {
+    if (!this.props.presences) {
+      return [];
+    } else {
+      return Object.values(this.props.presences)
+        .flatMap(p => p.metas.map(m => m.context.discord))
+        .filter(ch => !!ch);
+    }
+  };
+
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
   renderExitedPane = () => {
@@ -972,6 +993,16 @@ class UIRoot extends Component {
     const hasPush = navigator.serviceWorker && "PushManager" in window;
     const promptForNameAndAvatarBeforeEntry = !this.props.store.state.activity.hasChangedName;
 
+    const discordBridges = this.discordBridges();
+    const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
+    const occupantSnippet = `${this.occupantCount() - 1} other${this.occupantCount() > 2 ? "s" : ""}`;
+    const messageEntryPlaceholder =
+      this.occupantCount() <= 1
+        ? "Nobody is here yet..."
+        : discordBridges.length
+          ? `Send message to ${occupantSnippet} and ${discordSnippet}...`
+          : `Send message to ${occupantSnippet}...`;
+
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>
@@ -1045,11 +1076,7 @@ class UIRoot extends Component {
                     e.target.blur();
                   }
                 }}
-                placeholder={
-                  this.occupantCount() <= 1
-                    ? "Nobody is here yet..."
-                    : `Send message to ${this.occupantCount() - 1} other${this.occupantCount() - 1 > 1 ? "s" : ""}...`
-                }
+                placeholder={messageEntryPlaceholder}
               />
               <WithHoverSound>
                 <button
@@ -1438,6 +1465,10 @@ class UIRoot extends Component {
     const showMediaBrowser = mediaSource && (mediaSource === "scenes" || this.state.entered);
     const hasTopTip = this.props.activeTips && this.props.activeTips.top;
 
+    const discordBridges = this.discordBridges();
+    const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
+    const showDiscordTip = discordBridges.length && !this.state.discordTipDismissed;
+
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <IntlProvider locale={lang} messages={messages}>
@@ -1564,7 +1595,8 @@ class UIRoot extends Component {
             {entered && <PresenceLog inRoom={true} entries={presenceLogEntries} hubId={this.props.hubId} />}
             {entered &&
               this.props.activeTips &&
-              this.props.activeTips.bottom && (
+              this.props.activeTips.bottom &&
+              !showDiscordTip && (
                 <div className={styles.bottomTip}>
                   <button
                     className={styles.tipCancel}
@@ -1590,6 +1622,19 @@ class UIRoot extends Component {
                       <FormattedMessage id={`tips.${this.props.activeTips.bottom}`} />
                     </div>
                   )}
+                </div>
+              )}
+            {entered &&
+              showDiscordTip && (
+                <div className={styles.bottomTip}>
+                  <button className={styles.tipCancel} onClick={() => this.confirmDiscordBridge()}>
+                    <i>
+                      <FontAwesomeIcon icon={faTimes} />
+                    </i>
+                  </button>
+                  <div className={styles.tip}>
+                    {`Chat in this room is being bridged to ${discordSnippet} on Discord.`}
+                  </div>
                 </div>
               )}
             {entered && (
@@ -1656,7 +1701,7 @@ class UIRoot extends Component {
                         e.target.blur();
                       }
                     }}
-                    placeholder="Send to room..."
+                    placeholder={discordBridges.length ? `Send to room and ${discordSnippet}...` : "Send to room..."}
                   />
                   <button
                     className={classNames([styles.messageEntrySpawn])}
