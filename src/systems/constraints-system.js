@@ -45,19 +45,14 @@ export class ConstraintsSystem {
       prevState.held.components.tags &&
       prevState.held.components.tags.data[options.constraintTag]
     ) {
-      const networked = prevState.held.components["networked"];
-      const lostOwnership = networked && networked.data.owner !== NAF.clientId;
       prevState.held.removeAttribute("ammo-constraint__" + options.entity.id);
-      if (lostOwnership) {
-        prevState.held.setAttribute("ammo-body", { type: "kinematic" });
-      }
-      let hasConstraint = false;
+      let hasAnotherConstraint = false;
       for (const componentName in prevState.held.components) {
         if (componentName.startsWith("ammo-constraint")) {
-          hasConstraint = true;
+          hasAnotherConstraint = true;
         }
       }
-      if (!hasConstraint) {
+      if (!hasAnotherConstraint) {
         prevState.held.body.forceActivationState(ACTIVATION_STATES.ACTIVE_TAG);
       }
     }
