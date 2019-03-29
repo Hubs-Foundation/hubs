@@ -436,7 +436,7 @@ export const traverseMeshesAndAddShapes = (function() {
         margin: 0.01,
         fit: FIT.ALL
       });
-      shapes.push({ id: shapePrefix + floorPlan.name, entity: obj.el });
+      shapes.push({ id: shapePrefix + floorPlan.name, entity: floorPlan.el });
     } else if (vertexCount < vertexLimit) {
       for (let i = 0; i < meshRoot.children.length; i++) {
         const obj = meshRoot.children[i];
