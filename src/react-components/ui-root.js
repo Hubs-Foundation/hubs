@@ -1469,7 +1469,7 @@ class UIRoot extends Component {
 
     const discordBridges = this.discordBridges();
     const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
-    const showDiscordTip = discordBridges.length && !this.state.discordTipDismissed;
+    const showDiscordTip = discordBridges.length > 0 && !this.state.discordTipDismissed;
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
