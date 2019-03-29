@@ -306,6 +306,10 @@ AFRAME.registerComponent("media-pager", {
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
 
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      this.networkedEl = networkedEl;
+    });
+
     this.el.addEventListener("image-loaded", async e => {
       this.imageSrc = e.detail.src;
       await this._ensureUI();
@@ -368,13 +372,13 @@ AFRAME.registerComponent("media-pager", {
   },
 
   onNext() {
-    if (!NAF.utils.isMine(this.el) && !NAF.utils.takeOwnership(this.el)) return;
+    if (!NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
     this.el.setAttribute("media-pager", "index", Math.min(this.data.index + 1, this.maxIndex));
     this.el.emit("pager-page-changed");
   },
 
   onPrev() {
-    if (!NAF.utils.isMine(this.el) && !NAF.utils.takeOwnership(this.el)) return;
+    if (!NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
     this.el.setAttribute("media-pager", "index", Math.max(this.data.index - 1, 0));
     this.el.emit("pager-page-changed");
   },
