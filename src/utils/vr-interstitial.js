@@ -11,8 +11,9 @@ export function handleExitTo2DInterstitial(isLower) {
 
   if (isMobileVR) {
     // Immersive browser, exit VR.
-    scene.exitVR();
-    showFullScreenIfAvailable();
+    scene.exitVR().then(() => {
+      showFullScreenIfAvailable();
+    });
   } else {
     // Non-immersive browser, show notice
     const vrNotice = document.querySelector(".vr-notice");

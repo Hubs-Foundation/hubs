@@ -720,7 +720,7 @@ class UIRoot extends Component {
   };
 
   onAudioReadyButton = () => {
-    if (!this.state.enterVR) {
+    if (!this.state.enterInVR) {
       showFullScreenIfAvailable();
     }
 
