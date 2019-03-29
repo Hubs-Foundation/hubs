@@ -102,7 +102,7 @@ AFRAME.registerComponent("super-spawner", {
     this.tempSpawnHandPosition = new THREE.Vector3();
 
     //need to add this here because super-spawners don't use addMedia()
-    this.el.addState("media-scale-ready");
+    this.el.addState("media-spawned");
   },
 
   play() {

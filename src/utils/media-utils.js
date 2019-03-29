@@ -245,8 +245,8 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
         entity.addEventListener(
           "animationcomplete",
           () => {
-            entity.addState("media-scale-ready");
-            entity.emit("media-scale-ready");
+            entity.addState("media-spawned");
+            entity.emit("media-spawned");
           },
           {
             once: true

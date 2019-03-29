@@ -65,7 +65,7 @@ AFRAME.registerComponent("media-loader", {
       mesh.position.sub(center);
       mesh.matrixNeedsUpdate = true;
 
-      this.waitForMediaScaleReady(() => {
+      this.waitForMediaSpawned(() => {
         this.el.setAttribute("ammo-shape__" + shapeId, {
           type: shapeType
         });
@@ -120,7 +120,7 @@ AFRAME.registerComponent("media-loader", {
     }
     delete this.showLoaderTimeout;
 
-    this.waitForMediaScaleReady(() => {
+    this.waitForMediaSpawned(() => {
       this.removeShape("loader");
     });
   },
@@ -139,12 +139,12 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
-  waitForMediaScaleReady(callback) {
-    if (this.el.is("media-scale-ready")) {
+  waitForMediaSpawned(callback) {
+    if (this.el.is("media-spawned")) {
       callback();
     } else {
       this.el.addEventListener(
-        "media-scale-ready",
+        "media-spawned",
         () => {
           callback();
         },
@@ -155,7 +155,7 @@ AFRAME.registerComponent("media-loader", {
 
   onMediaLoaded() {
     this.clearLoadingTimeout();
-    this.waitForMediaScaleReady(() => {
+    this.waitForMediaSpawned(() => {
       this.updateHoverableVisuals();
     });
     if (!this.el.components["animation-mixer"]) {
@@ -314,25 +314,37 @@ AFRAME.registerComponent("media-pager", {
   },
 
   async _ensureUI() {
-    if (this.toolbar || !this.imageSrc) return;
+    if (this.hasSetupUI || !this.imageSrc) return;
+    this.hasSetupUI = true;
+
     // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
     // request for the same page to read out the max-content-index header
     this.maxIndex = await fetchMaxContentIndex(this.imageSrc);
-    const template = document.getElementById("paging-toolbar");
-    this.el.querySelector(".interactable-ui").appendChild(document.importNode(template.content, true));
-    this.toolbar = this.el.querySelector(".paging-toolbar");
-    // we have to wait a tick for the attach callbacks to get fired for the elements in a template
-    setTimeout(() => {
-      this.nextButton = this.el.querySelector(".next-button [text-button]");
-      this.prevButton = this.el.querySelector(".prev-button [text-button]");
-      this.pageLabel = this.el.querySelector(".page-label");
 
-      this.nextButton.addEventListener("grab-start", this.onNext);
-      this.prevButton.addEventListener("grab-start", this.onPrev);
+    const setupToolbar = () => {
+      const template = document.getElementById("paging-toolbar");
+      this.el.querySelector(".interactable-ui").appendChild(document.importNode(template.content, true));
+      this.toolbar = this.el.querySelector(".paging-toolbar");
 
-      this.update();
-      this.el.emit("preview-loaded");
-    }, 0);
+      // we have to wait a tick for the attach callbacks to get fired for the elements in a template
+      setTimeout(() => {
+        this.nextButton = this.el.querySelector(".next-button [text-button]");
+        this.prevButton = this.el.querySelector(".prev-button [text-button]");
+        this.pageLabel = this.el.querySelector(".page-label");
+
+        this.nextButton.addEventListener("grab-start", this.onNext);
+        this.prevButton.addEventListener("grab-start", this.onPrev);
+
+        this.update();
+        this.el.emit("preview-loaded");
+      }, 0);
+    };
+
+    if (this.el.is("media-spawned")) {
+      setupToolbar();
+    } else {
+      this.el.addEventListener("media-spawned", setupToolbar);
+    }
   },
 
   async update() {
@@ -366,7 +378,10 @@ AFRAME.registerComponent("media-pager", {
   },
 
   repositionToolbar() {
-    this.toolbar.object3D.position.y = -this.el.getAttribute("ammo-shape").halfExtents.y - 0.2;
+    const ammoShape = this.el.getAttribute("ammo-shape");
+    if (!ammoShape) return;
+
+    this.toolbar.object3D.position.y = -ammoShape.halfExtents.y - 0.2;
     this.toolbar.object3D.matrixNeedsUpdate = true;
   }
 });

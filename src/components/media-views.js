@@ -209,7 +209,7 @@ function fitToTexture(el, texture) {
   const height = Math.min(1.0, ratio);
   el.object3DMap.mesh.scale.set(width, height, 1);
   el.addEventListener(
-    "media-scale-ready",
+    "media-spawned",
     () => {
       el.setAttribute("ammo-shape", {
         type: SHAPE.BOX,

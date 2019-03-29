@@ -115,6 +115,17 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
     });
   }
 
+  ["model-loaded", "video-loaded", "image-loaded"].forEach(eventName => {
+    el.addEventListener(
+      eventName,
+      () => {
+        el.addState("media-spawned");
+        el.emit("media-spawned");
+      },
+      { once: true }
+    );
+  });
+
   el.setAttribute("media-loader", { src: componentData.src, resize: true, resolve: true, fileIsOwned: true });
 
   if (componentData.pageIndex) {

@@ -412,13 +412,13 @@
             </template>
 
             <template id="paging-toolbar">
-                <a-entity class="ui paging-toolbar" visible-to-owner>
+                <a-entity class="ui paging-toolbar" visibility-while-frozen="withinDistance: 10; requireHoverOnNonMobile: false;">
                     <a-entity class="prev-button" position="-0.3 0 0">
                         <a-entity mixin="rounded-text-button" slice9="width: 0.2">
                             <a-entity text=" value:<; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                         </a-entity>
                     </a-entity>
-                    <a-entity class="page-label" text="width:2; align:center;" text-raycast-hack></a-entity>
+                    <a-entity class="page-label" text="value: .; width:2; align:center;" text-raycast-hack></a-entity>
                     <a-entity class="next-button" position="0.3 0 0">
                         <a-entity mixin="rounded-text-button" slice9="width: 0.2">
                             <a-entity text=" value:>; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
