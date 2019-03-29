@@ -14,7 +14,6 @@ AFRAME.registerComponent("sticky-object", {
 
   tick() {
     const interaction = AFRAME.scenes[0].systems.interaction;
-    const userinput = AFRAME.scenes[0].systems.userinput;
     const heldLeftHand = interaction.state.leftHand.held === this.el;
     const heldRightHand = interaction.state.rightHand.held === this.el;
     const heldRightRemote = interaction.state.rightRemote.held === this.el;
@@ -28,17 +27,17 @@ AFRAME.registerComponent("sticky-object", {
       this.onRelease();
     }
 
-    this.heldLeftHand = heldLeftHand;
-    this.heldRightHand = heldRightHand;
-    this.heldRightRemote = heldRightRemote;
-
     if (
-      (heldLeftHand && userinput.get(interaction.options.leftHand.grabPath)) ||
-      (heldRightHand && userinput.get(interaction.options.rightHand.grabPath)) ||
-      (heldRightRemote && userinput.get(interaction.options.rightRemote.grabPath))
+      (heldLeftHand && !this.heldLeftHand) ||
+      (heldRightHand && !this.heldRightHand) ||
+      (heldRightRemote && !this.heldRightRemote)
     ) {
       this.onGrab();
     }
+
+    this.heldLeftHand = heldLeftHand;
+    this.heldRightHand = heldRightHand;
+    this.heldRightRemote = heldRightRemote;
   },
 
   play() {

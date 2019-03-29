@@ -36,8 +36,8 @@ AFRAME.registerComponent("rotate-button", {
       if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) {
         return;
       }
-      if (this.targetEl.components.body) {
-        this.targetEl.setAttribute("ammo-body", { type: "static" });
+      if (this.targetEl.body) {
+        this.targetEl.setAttribute("ammo-body", { type: "kinematic" });
       }
       this.rotateSystem = this.rotateSystem || AFRAME.scenes[0].systems["rotate-selected-object"];
       this.rotateSystem.startRotate(

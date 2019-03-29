@@ -143,7 +143,13 @@ AFRAME.registerSystem("interaction", {
           const isHoldableButton = state.hovered.components.tags && state.hovered.components.tags.data.holdableButton;
           const superSpawner = state.hovered.components["super-spawner"];
           if (offersConstraint || isHoldableButton) {
-            state.held = state.hovered;
+            if (
+              this.el.is("frozen") ||
+              !state.hovered.components.pinnable ||
+              !state.hovered.components.pinnable.data.pinned
+            ) {
+              state.held = state.hovered;
+            }
           } else if (superSpawner) {
             this.spawnObjectRoutine(state, options, superSpawner);
           }

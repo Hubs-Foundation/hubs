@@ -3,6 +3,7 @@ import { ConstraintsSystem } from "./constraints-system";
 import { TwoPointStretchingSystem } from "./two-point-stretching-system";
 import { SingleActionButtonSystem, HoldableButtonSystem, HoverButtonSystem } from "./button-systems";
 import { HoverMenuSystem } from "./hover-menu-system";
+import { PinnableDroppedSystem } from "./pinnable-dropped-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -13,6 +14,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.holdableButtonSystem = new HoldableButtonSystem();
     this.hoverButtonSystem = new HoverButtonSystem();
     this.hoverMenuSystem = new HoverMenuSystem();
+    this.pinnableDroppedSystem = new PinnableDroppedSystem();
   },
 
   tick() {
@@ -26,5 +28,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.holdableButtonSystem.tick();
     this.hoverButtonSystem.tick();
     this.hoverMenuSystem.tick();
+    this.pinnableDroppedSystem.tick();
   }
 });

@@ -27,14 +27,24 @@ export class ConstraintsSystem {
 
   tickInteractor(options, state, prevState) {
     if (prevState.held === state.held) {
-      if (state.held && prevState.spawning && !state.spawning) {
+      if (
+        state.held &&
+        state.held.components.tags &&
+        state.held.components.tags.data[options.constraintTag] &&
+        prevState.spawning &&
+        !state.spawning
+      ) {
         state.held.setAttribute("ammo-body", { type: "dynamic" });
         state.held.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
         state.held.setAttribute("ammo-constraint__" + options.entity.id, { target: "#" + options.entity.id });
       }
       return;
     }
-    if (prevState.held && prevState.held.components.tags.data[options.constraintTag]) {
+    if (
+      prevState.held &&
+      prevState.held.components.tags &&
+      prevState.held.components.tags.data[options.constraintTag]
+    ) {
       const networked = prevState.held.components["networked"];
       const lostOwnership = networked && networked.data.owner !== NAF.clientId;
       prevState.held.removeAttribute("ammo-constraint__" + options.entity.id);
@@ -51,7 +61,12 @@ export class ConstraintsSystem {
         prevState.held.body.forceActivationState(ACTIVATION_STATES.ACTIVE_TAG);
       }
     }
-    if (state.held && !state.spawning) {
+    if (
+      state.held &&
+      state.held.components.tags &&
+      state.held.components.tags.data[options.constraintTag] &&
+      !state.spawning
+    ) {
       if (!state.held.components["networked"] || NAF.utils.isMine(state.held) || NAF.utils.takeOwnership(state.held)) {
         state.held.setAttribute("ammo-body", { type: "dynamic" });
         state.held.body.forceActivationState(ACTIVATION_STATES.DISABLE_DEACTIVATION);
