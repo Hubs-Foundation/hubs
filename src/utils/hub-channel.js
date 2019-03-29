@@ -1,4 +1,5 @@
 import jwtDecode from "jwt-decode";
+import { Presence } from "phoenix";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
@@ -28,6 +29,7 @@ export default class HubChannel {
 
   setPhoenixChannel = channel => {
     this.channel = channel;
+    this.presence = new Presence(channel);
   };
 
   setPermissionsFromToken = token => {

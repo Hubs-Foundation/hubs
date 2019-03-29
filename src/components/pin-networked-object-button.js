@@ -2,6 +2,9 @@ import { getPromotionTokenForFile } from "../utils/media-utils";
 
 AFRAME.registerComponent("pin-networked-object-button", {
   schema: {
+    // Selector for label informing users about Discord bridging of pins.
+    tipSelector: { type: "string" },
+
     // Selector for label to change when pinned/unpinned, must be sibling of this components element
     labelSelector: { type: "string" },
 
@@ -15,6 +18,7 @@ AFRAME.registerComponent("pin-networked-object-button", {
     this.el.sceneEl.addEventListener("stateadded", this._updateUIOnStateChange);
     this.el.sceneEl.addEventListener("stateremoved", this._updateUIOnStateChange);
 
+    this.tipEl = this.el.parentNode.querySelector(this.data.tipSelector);
     this.labelEl = this.el.parentNode.querySelector(this.data.labelSelector);
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
@@ -25,6 +29,16 @@ AFRAME.registerComponent("pin-networked-object-button", {
       this.targetEl.addEventListener("unpinned", this._updateUI);
     });
 
+    this.onHover = () => {
+      this.hovering = true;
+      this._updateUI();
+    };
+
+    this.onHoverOut = () => {
+      this.hovering = false;
+      this._updateUI();
+    };
+
     this.onClick = () => {
       if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) return;
 
@@ -34,10 +48,14 @@ AFRAME.registerComponent("pin-networked-object-button", {
   },
 
   play() {
+    this.el.addEventListener("mouseover", this.onHover);
+    this.el.addEventListener("mouseout", this.onHoverOut);
     this.el.addEventListener("grab-start", this.onClick);
   },
 
   pause() {
+    this.el.removeEventListener("mouseover", this.onHover);
+    this.el.removeEventListener("mouseout", this.onHoverOut);
     this.el.removeEventListener("grab-start", this.onClick);
   },
 
@@ -51,6 +69,17 @@ AFRAME.registerComponent("pin-networked-object-button", {
     }
   },
 
+  _discordBridges() {
+    const presences = window.APP.hubChannel.presence.state;
+    if (!presences) {
+      return [];
+    } else {
+      return Object.values(presences)
+        .flatMap(p => p.metas.map(m => m.context.discord))
+        .filter(ch => !!ch);
+    }
+  },
+
   _updateUIOnStateChange(e) {
     if (e.detail !== "frozen") return;
     this._updateUI();
@@ -61,10 +90,12 @@ AFRAME.registerComponent("pin-networked-object-button", {
     const canPin = !!(fileIsOwned || (fileId && getPromotionTokenForFile(fileId)));
     this.el.setAttribute("visible", canPin);
     this.labelEl.setAttribute("visible", canPin);
-    if (!canPin) return;
 
     const isPinned = this.targetEl.getAttribute("pinnable") && this.targetEl.getAttribute("pinnable").pinned;
+    const discordBridges = this._discordBridges();
+    this.tipEl.setAttribute("visible", !!(canPin && !isPinned && this.hovering && discordBridges.length > 0));
 
+    if (!canPin) return;
     this.labelEl.setAttribute("text", "value", isPinned ? "un-pin" : "pin");
     this.el.setAttribute("text-button", "backgroundColor", isPinned ? "#fff" : "#ff3550");
     this.el.setAttribute("text-button", "backgroundHoverColor", isPinned ? "#bbb" : "#fc3545");
