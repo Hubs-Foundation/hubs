@@ -125,7 +125,7 @@ export default class Store extends EventTarget {
 
   resetConfirmedDiscordRooms() {
     // merge causing us some annoyance here :(
-    const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
+    const overwriteMerge = (destinationArray, sourceArray) => sourceArray;
     this.update({ confirmedDiscordRooms: [] }, { arrayMerge: overwriteMerge });
   }
 

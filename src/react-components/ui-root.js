@@ -1624,21 +1624,19 @@ class UIRoot extends Component {
                   )}
                 </div>
               )}
-            {entered && showDiscordTip && (
-              <div className={styles.bottomTip}>
-                <button
-                  className={styles.tipCancel}
-                  onClick={() => this.confirmDiscordBridge()}
-                >
-                  <i>
-                    <FontAwesomeIcon icon={faTimes} />
-                  </i>
-                </button>
-                <div className={styles.tip}>
-                  {`Chat in this room is being bridged to ${discordSnippet} on Discord.`}
+            {entered &&
+              showDiscordTip && (
+                <div className={styles.bottomTip}>
+                  <button className={styles.tipCancel} onClick={() => this.confirmDiscordBridge()}>
+                    <i>
+                      <FontAwesomeIcon icon={faTimes} />
+                    </i>
+                  </button>
+                  <div className={styles.tip}>
+                    {`Chat in this room is being bridged to ${discordSnippet} on Discord.`}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
             {entered && (
               <form onSubmit={this.sendMessage}>
                 <div
