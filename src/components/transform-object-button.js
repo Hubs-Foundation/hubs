@@ -57,10 +57,12 @@ AFRAME.registerComponent("transform-button", {
     };
   },
   play() {
+    this.el.object3D.addEventListener("interact", this.onGrabStart);
     this.el.object3D.addEventListener("holdable-button-down", this.onGrabStart);
     this.el.object3D.addEventListener("holdable-button-up", this.onGrabEnd);
   },
   pause() {
+    this.el.object3D.removeEventListener("interact", this.onGrabStart);
     this.el.object3D.removeEventListener("holdable-button-down", this.onGrabStart);
     this.el.object3D.removeEventListener("holdable-button-up", this.onGrabEnd);
   }
@@ -292,7 +294,7 @@ AFRAME.registerSystem("transform-selected-object", {
     if (this.mode === TRANSFORM_MODE.ALIGN) {
       this.el.camera.getWorldPosition(CAMERA_WORLD_POSITION);
       this.target.lookAt(CAMERA_WORLD_POSITION);
-      this.rotating = false;
+      this.transforming = false;
       return;
     }
 

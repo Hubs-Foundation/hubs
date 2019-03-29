@@ -179,5 +179,22 @@ AFRAME.registerSystem("interaction", {
     if (!this.state.rightHand.held && !this.state.rightHand.hovered) {
       this.tickInteractor(this.options.rightRemote, this.state.rightRemote);
     }
+
+    if (this.el.systems.userinput.get(paths.actions.logInteractionState)) {
+      console.log(
+        "Interaction System State\nleftHand held",
+        this.state.leftHand.held,
+        "\nleftHand hovered",
+        this.state.leftHand.hovered,
+        "\nrightHand held",
+        this.state.rightHand.held,
+        "\nrightHand hovered",
+        this.state.rightHand.hovered,
+        "\nrightRemote held",
+        this.state.rightRemote.held,
+        "\nrightRemote hovered",
+        this.state.rightRemote.hovered
+      );
+    }
   }
 });

@@ -580,6 +580,15 @@ export const viveUserBindings = addSetsToBindings({
     },
     {
       src: {
+        value: paths.device.keyboard.key("k")
+      },
+      dest: {
+        value: paths.actions.logInteractionState
+      },
+      xform: xforms.rising
+    },
+    {
+      src: {
         value: paths.device.keyboard.key("m")
       },
       dest: {

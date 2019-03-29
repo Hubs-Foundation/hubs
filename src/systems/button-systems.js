@@ -44,6 +44,14 @@ export class HoldableButtonSystem {
 function getHoverableButton(hovered) {
   if (!hovered) return null;
   if (hovered.components["icon-button"] || hovered.components["text-button"]) return hovered;
+  // TODO: fix this so that we aren't looping thru children here. I just did this to accomodate the new rounded buttons
+  if (hovered.children) {
+    for (let i = 0; i < hovered.children.length; i++) {
+      if (hovered.children[i].components["icon-button"] || hovered.children[i].components["text-button"]) {
+        return hovered.children[i];
+      }
+    }
+  }
   return null;
 }
 const HOVERED = { type: "hovered" };
