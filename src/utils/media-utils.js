@@ -204,31 +204,32 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
   }, 100);
 
   ["model-loaded", "video-loaded", "image-loaded"].forEach(eventName => {
-    entity.addEventListener(eventName, async () => {
-      entity.object3D.visible = false;
+    entity.addEventListener(
+      eventName,
+      async () => {
+        entity.object3D.visible = false;
 
-      clearTimeout(fireLoadingTimeout);
+        clearTimeout(fireLoadingTimeout);
 
-      entity.removeAttribute("animation__loader_spawn-start");
+        entity.removeAttribute("animation__loader_spawn-start");
 
-      // Deal with scale. The box animation may not have completed so cover all cases.
-      if (entity.components.scale) {
-        // Ensure explicit scale from scale component is set.
-        const scaleData = entity.components.scale.data;
-        entity.object3D.scale.set(scaleData.x, scaleData.y, scaleData.z);
-        entity.object3D.matrixNeedsUpdate = true;
-      } else if (contentOrigin == ObjectContentOrigins.SPAWNER) {
-        // Spawner will have set scale.
-        await nextTick();
-      } else {
-        // Otherwise, ensure original scale is re-applied.
-        entity.object3D.scale.set(sx, sy, sz);
-        entity.object3D.matrixNeedsUpdate = true;
-      }
+        // Deal with scale. The box animation may not have completed so cover all cases.
+        if (entity.components.scale) {
+          // Ensure explicit scale from scale component is set.
+          const scaleData = entity.components.scale.data;
+          entity.object3D.scale.set(scaleData.x, scaleData.y, scaleData.z);
+          entity.object3D.matrixNeedsUpdate = true;
+        } else if (contentOrigin == ObjectContentOrigins.SPAWNER) {
+          // Spawner will have set scale.
+          await nextTick();
+        } else {
+          // Otherwise, ensure original scale is re-applied.
+          entity.object3D.scale.set(sx, sy, sz);
+          entity.object3D.matrixNeedsUpdate = true;
+        }
 
-      [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
+        [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
 
-      if (!entity.getAttribute("animation__spawn-start")) {
         entity.object3D.scale.set(0.001, 0.001, 0.001);
         entity.object3D.matrixNeedsUpdate = true;
 
@@ -241,16 +242,23 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
           easing: "easeOutElastic"
         });
 
-        // Hoverable visauls need to be updated so the initial scale is properly taken into account.
-        entity.addEventListener("animationcomplete", () => entity.components["media-loader"].updateHoverableVisuals(), {
-          once: true
-        });
-      }
+        entity.addEventListener(
+          "animationcomplete",
+          () => {
+            entity.addState("media-scale-ready");
+            entity.emit("media-scale-ready");
+          },
+          {
+            once: true
+          }
+        );
 
-      entity.object3D.visible = true;
+        entity.object3D.visible = true;
 
-      scene.emit("media-loaded", { src: src });
-    });
+        scene.emit("media-loaded", { src: src });
+      },
+      { once: true }
+    );
   });
 
   const orientation = new Promise(function(resolve) {
@@ -395,14 +403,12 @@ export const traverseMeshesAndAddShapes = (function() {
   const vertexLimit = 200000;
   const shapePrefix = "ammo-shape__";
   const shapes = [];
-  return async function(el) {
+  return function(el) {
     const meshRoot = el.object3DMap.mesh;
     while (shapes.length > 0) {
       const { id, entity } = shapes.pop();
       entity.removeAttribute(id);
     }
-
-    await nextTick();
 
     let vertexCount = 0;
     meshRoot.traverse(o => {
@@ -418,36 +424,53 @@ export const traverseMeshesAndAddShapes = (function() {
 
     const type = vertexCount > vertexLimit ? SHAPE.HULL : SHAPE.MESH;
 
-    console.log(`traversing meshes and adding shapes for scene with ${vertexCount} vertices; using ${type} shapes`);
+    console.group("traverseMeshesAndAddShapes");
 
-    for (let i = 0; i < meshRoot.children.length; i++) {
-      const obj = meshRoot.children[i];
+    console.log(`scene has ${vertexCount} vertices`);
 
-      //ignore floor plan for spoke scenes, and make the ground plane a box.
-      if (obj.isGroup && obj.name !== "Floor_Plan") {
-        if (obj.name === "Ground_Plane") {
-          obj.el.object3DMap.mesh = obj;
-          obj.el.setAttribute(shapePrefix + obj.name, {
-            type: SHAPE.BOX,
+    const floorPlan = meshRoot.children.find(obj => {
+      return obj.name === "Floor_Plan";
+    });
+    if (vertexCount > vertexLimit && floorPlan) {
+      console.log(`vertex limit of ${vertexLimit} exceeded, using floor plan with mesh shape`);
+      floorPlan.el.setAttribute(shapePrefix + floorPlan.name, {
+        type: SHAPE.MESH,
+        margin: 0.01,
+        fit: FIT.ALL
+      });
+      shapes.push({ id: shapePrefix + floorPlan.name, entity: obj.el });
+    } else {
+      for (let i = 0; i < meshRoot.children.length; i++) {
+        const obj = meshRoot.children[i];
+
+        //ignore floor plan for spoke scenes, and make the ground plane a box.
+        if (obj.isGroup && obj.name !== "Floor_Plan") {
+          if (obj.name === "Ground_Plane") {
+            obj.el.object3DMap.mesh = obj;
+            obj.el.setAttribute(shapePrefix + obj.name, {
+              type: SHAPE.BOX,
+              margin: 0.01,
+              fit: FIT.ALL
+            });
+            shapes.push({ id: shapePrefix + obj.name, entity: obj.el });
+            continue;
+          }
+
+          if (!obj.el.object3DMap.mesh) {
+            obj.el.object3DMap.mesh = obj.parent;
+          }
+
+          obj.el.setAttribute(shapePrefix + obj.uuid, {
+            type: type,
             margin: 0.01,
-            fit: FIT.ALL
+            fit: FIT.COMPOUND
           });
-          shapes.push({ id: shapePrefix + obj.name, entity: obj.el });
-          continue;
+          shapes.push({ id: shapePrefix + obj.uuid, entity: obj.el });
         }
-
-        if (!obj.el.object3DMap.mesh) {
-          obj.el.object3DMap.mesh = obj.parent;
-        }
-
-        obj.el.setAttribute(shapePrefix + obj.uuid, {
-          type: type,
-          margin: 0.01,
-          fit: FIT.COMPOUND
-        });
-        shapes.push({ id: shapePrefix + obj.uuid, entity: obj.el });
       }
+      console.log(`traversing meshes and adding ${shapes.length} ${type} shapes`);
     }
+    console.groupEnd();
   };
 })();
 

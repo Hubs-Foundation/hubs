@@ -65,8 +65,10 @@ AFRAME.registerComponent("media-loader", {
       mesh.position.sub(center);
       mesh.matrixNeedsUpdate = true;
 
-      this.el.setAttribute("ammo-shape__" + shapeId, {
-        type: shapeType
+      this.waitForMediaScaleReady(() => {
+        this.el.setAttribute("ammo-shape__" + shapeId, {
+          type: shapeType
+        });
       });
     };
   })(),
@@ -117,7 +119,10 @@ AFRAME.registerComponent("media-loader", {
       delete this.loaderMixer;
     }
     delete this.showLoaderTimeout;
-    this.removeShape("loader");
+
+    this.waitForMediaScaleReady(() => {
+      this.removeShape("loader");
+    });
   },
 
   updateHoverableVisuals() {
@@ -134,9 +139,25 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
+  waitForMediaScaleReady(callback) {
+    if (this.el.is("media-scale-ready")) {
+      callback();
+    } else {
+      this.el.addEventListener(
+        "media-scale-ready",
+        () => {
+          callback();
+        },
+        { once: true }
+      );
+    }
+  },
+
   onMediaLoaded() {
     this.clearLoadingTimeout();
-    this.updateHoverableVisuals();
+    this.waitForMediaScaleReady(() => {
+      this.updateHoverableVisuals();
+    });
     if (!this.el.components["animation-mixer"]) {
       generateMeshBVH(this.el.object3D);
     }

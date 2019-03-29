@@ -100,6 +100,9 @@ AFRAME.registerComponent("super-spawner", {
 
     this.el.setAttribute("hoverable-visuals", { cursorController: "#cursor-controller", enableSweepingEffect: false });
     this.tempSpawnHandPosition = new THREE.Vector3();
+
+    //need to add this here because super-spawners don't use addMedia()
+    this.el.addState("media-scale-ready");
   },
 
   play() {
