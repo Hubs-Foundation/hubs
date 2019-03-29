@@ -853,14 +853,14 @@ class UIRoot extends Component {
   };
 
   discordBridges = () => {
-    // TODO fix on Oculus Go
-    return [];
     if (!this.props.presences) {
       return [];
     } else {
-      return Object.values(this.props.presences)
-        .flatMap(p => p.metas.map(m => m.context.discord))
-        .filter(ch => !!ch);
+      const channels = [];
+      for (let p of Object.values(this.props.presences)) {
+        Array.prototype.push.apply(channels, p.metas.map(m => m.context.discord).filter(ch => !!ch));
+      }
+      return channels;
     }
   };
 
