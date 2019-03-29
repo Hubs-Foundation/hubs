@@ -857,7 +857,7 @@ class UIRoot extends Component {
       return [];
     } else {
       const channels = [];
-      for (let p of Object.values(this.props.presences)) {
+      for (const p of Object.values(this.props.presences)) {
         Array.prototype.push.apply(channels, p.metas.map(m => m.context.discord).filter(ch => !!ch));
       }
       return channels;
