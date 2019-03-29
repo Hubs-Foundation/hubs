@@ -208,12 +208,18 @@ function fitToTexture(el, texture) {
   const width = Math.min(1.0, 1.0 / ratio);
   const height = Math.min(1.0, ratio);
   el.object3DMap.mesh.scale.set(width, height, 1);
-  el.setAttribute("ammo-shape", {
-    type: SHAPE.BOX,
-    halfExtents: { x: 0.5, y: 0.5, z: 0.02 },
-    margin: 0.1,
-    fit: FIT.MANUAL
-  });
+  el.addEventListener(
+    "media-scale-ready",
+    () => {
+      el.setAttribute("ammo-shape", {
+        type: SHAPE.BOX,
+        halfExtents: { x: 0.5, y: 0.5, z: 0.02 },
+        margin: 0.1,
+        fit: FIT.MANUAL
+      });
+    },
+    { once: true }
+  );
 }
 
 const textureLoader = new THREE.TextureLoader();
