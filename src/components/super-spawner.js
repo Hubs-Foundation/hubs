@@ -114,21 +114,16 @@ AFRAME.registerComponent("super-spawner", {
 
   async onSpawnEvent() {
     const userinput = AFRAME.scenes[0].systems.userinput;
-    const leftPose = userinput.get(paths.actions.leftHand.pose);
-    const rightPose = userinput.get(paths.actions.rightHand.pose);
-    const controllerCount = leftPose && rightPose ? 2 : leftPose || rightPose ? 1 : 0;
-    const using6DOF = controllerCount > 1 && this.el.sceneEl.is("vr-mode");
-    const hand = this.data.cursorSuperHand; //using6DOF ? this.data.superHand : this.data.cursorSuperHand;
 
-    if (this.cooldownTimeout || !hand) {
+    if (this.cooldownTimeout) {
       return;
     }
 
     const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve).entity;
-    const spawnOrigin = using6DOF && !this.data.animateFromCursor ? this.data.superHand : this.data.cursorSuperHand;
 
-    spawnOrigin.object3D.getWorldPosition(entity.object3D.position);
-    hand.object3D.getWorldQuaternion(entity.object3D.quaternion);
+    const cursor = document.querySelector("#cursor");
+    cursor.object3D.getWorldPosition(entity.object3D.position);
+    cursor.object3D.getWorldQuaternion(entity.object3D.quaternion);
     entity.object3D.matrixNeedsUpdate = true;
 
     if (this.data.useCustomSpawnScale) {
@@ -137,31 +132,14 @@ AFRAME.registerComponent("super-spawner", {
 
     this.activateCooldown();
 
+    AFRAME.scenes[0].systems.interaction.state.rightRemote.held = entity;
+    AFRAME.scenes[0].systems.interaction.state.rightRemote.spawning = true;
     await waitForEvent("body-loaded", entity);
-
-    spawnOrigin.object3D.getWorldPosition(entity.object3D.position);
-    hand.object3D.getWorldQuaternion(entity.object3D.quaternion);
+    AFRAME.scenes[0].systems.interaction.state.rightRemote.spawning = false;
+    cursor.object3D.getWorldPosition(entity.object3D.position);
+    cursor.object3D.getWorldQuaternion(entity.object3D.quaternion);
     entity.object3D.matrixNeedsUpdate = true;
-
-    if (hand !== this.data.cursorSuperHand && this.data.animateFromCursor) {
-      hand.object3D.getWorldPosition(this.tempSpawnHandPosition);
-
-      entity.setAttribute("animation__spawn-at-cursor", {
-        property: "position",
-        delay: 500,
-        dur: 1500,
-        from: { x: entity.object3D.position.x, y: entity.object3D.position.y, z: entity.object3D.position.z },
-        to: { x: this.tempSpawnHandPosition.x, y: this.tempSpawnHandPosition.y, z: this.tempSpawnHandPosition.z },
-        easing: "easeInOutBack"
-      });
-    }
-
-    // Call syncToPhysics so that updated transforms aren't immediately overwritten
     entity.components["ammo-body"].syncToPhysics();
-
-    if (!using6DOF) {
-      AFRAME.scenes[0].systems.interaction.weWantToGrab = true;
-    }
   },
 
   activateCooldown() {
