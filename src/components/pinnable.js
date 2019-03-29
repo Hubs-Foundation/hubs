@@ -12,10 +12,6 @@ AFRAME.registerComponent("pinnable", {
     this.el.sceneEl.addEventListener("stateadded", this._applyState);
     this.el.sceneEl.addEventListener("stateremoved", this._applyState);
 
-    // Fire pinned events when we drag and drop or scale in freeze mode,
-    // so transform gets updated.
-    this.el.addEventListener("grab-end", this._fireEvents);
-
     // Fire pinned events when page changes so we can persist the page.
     this.el.addEventListener("pager-page-changed", this._fireEvents);
 
@@ -32,6 +28,19 @@ AFRAME.registerComponent("pinnable", {
     this.el.sceneEl.removeEventListener("stateadded", this._applyState);
     this.el.sceneEl.removeEventListener("stateremoved", this._applyState);
     this.el.removeEventListener("componentinitialized", this._allowApplyOnceComponentsReady);
+  },
+
+  isHeld(el) {
+    const { leftHand, rightHand, rightRemote } = this.el.sceneEl.systems.interaction.state;
+    return leftHand.held === el || rightHand.held === el || rightRemote.held === el;
+  },
+
+  tick() {
+    const held = this.isHeld(this.el);
+    if (!held && this.wasHeld) {
+      this._fireEvents(this.data);
+    }
+    this.wasHeld = held;
   },
 
   update(oldData) {
@@ -75,7 +84,7 @@ AFRAME.registerComponent("pinnable", {
   },
 
   _allowApplyOnceComponentsReady() {
-    if (!this._allowApply && this.el.components.grabbable && this.el.components.stretchable) {
+    if (!this._allowApply) {
       this._allowApply = true;
       this._applyState();
     }
@@ -86,23 +95,7 @@ AFRAME.registerComponent("pinnable", {
     const isFrozen = this.el.sceneEl.is("frozen");
 
     if (this.data.pinned && !isFrozen) {
-      if (this.el.components.stretchable) {
-        this.el.removeAttribute("stretchable");
-      }
-
       this.el.setAttribute("ammo-body", { type: "static" });
-
-      if (this.el.components.grabbable.data.maxGrabbers !== 0) {
-        this.prevMaxGrabbers = this.el.components.grabbable.data.maxGrabbers;
-      }
-
-      this.el.setAttribute("grabbable", { maxGrabbers: 0 });
-    } else {
-      this.el.setAttribute("grabbable", { maxGrabbers: this.prevMaxGrabbers });
-
-      if (!this.el.components.stretchable) {
-        this.el.setAttribute("stretchable", { useWorldPosition: true, usePhysics: "never" });
-      }
     }
   }
 });
