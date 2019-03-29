@@ -194,10 +194,10 @@
             <template id="static-controlled-media">
                 <a-entity
                     class="interactable"
+                    ammo-body="type: static; mass: 1;"
                     owned-object-limiter="counter: #media-counter"
                     set-unowned-body-kinematic
                     scalable-when-grabbed
-                    ammo-body="type: static; mass: 1;"
                     is-remote-hover-target
                     is-hand-collision-target
                     tags="offersHandConstraint: true; offersRemoteConstraint: true;"
@@ -214,6 +214,7 @@
             <template id="interactable-media">
                 <a-entity
                     class="interactable"
+                    ammo-body="type: dynamic; mass: 1;"
                     owned-object-limiter="counter: #media-counter"
                     set-unowned-body-kinematic
                     is-remote-hover-target
@@ -221,7 +222,6 @@
                     tags="offersHandConstraint: true; offersRemoteConstraint: true;"
                     destroy-at-extreme-distances
                     scalable-when-grabbed
-                    ammo-body="type: dynamic; mass: 1;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
                     set-yxz-order
                     matrix-auto-update
@@ -270,12 +270,12 @@
             <template id="pen-interactable">
                 <a-entity
                     class="pen interactable"
+                    ammo-body="type: dynamic; mass: 0.001;"
                     owned-object-limiter="counter: #pen-counter"
                     set-unowned-body-kinematic
                     is-remote-hover-target
                     is-hand-collision-target
                     tags="offersHandConstraint: true; offersRemoteConstraint: true; isPen: true;"
-                    ammo-body="type: dynamic; mass: 0.001;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
@@ -314,6 +314,7 @@
             <template id="interactable-camera">
                 <a-entity
                     class="interactable icamera"
+                    ammo-body="type: dynamic; mass: 0.001;"
                     camera-tool
                     is-remote-hover-target
                     is-hand-collision-target
@@ -321,7 +322,6 @@
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
-                    ammo-body="type: dynamic; mass: 0.001;"
                     ammo-shape="type: box; autoGenerateShape: false; mergeGeometry: false; halfExtents: 0.11 0.07 0.05; offset: 0 0.02 0;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     owned-object-limiter="counter: #camera-counter"

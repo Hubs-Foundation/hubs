@@ -4,47 +4,16 @@ AFRAME.registerComponent("pinnable", {
   },
 
   init() {
-    this._applyState = this._applyState.bind(this);
     this._fireEvents = this._fireEvents.bind(this);
-    this._allowApplyOnceComponentsReady = this._allowApplyOnceComponentsReady.bind(this);
-    this._allowApply = false;
-
-    this.el.sceneEl.addEventListener("stateadded", this._applyState);
-    this.el.sceneEl.addEventListener("stateremoved", this._applyState);
 
     // Fire pinned events when page changes so we can persist the page.
     this.el.addEventListener("pager-page-changed", this._fireEvents);
 
     // Fire pinned events when video state changes so we can persist the page.
     this.el.addEventListener("owned-video-state-changed", this._fireEvents);
-
-    // Hack: need to wait for the initial grabbable and stretchable components
-    // to show up from the template before applying.
-    this.el.addEventListener("componentinitialized", this._allowApplyOnceComponentsReady);
-    this._allowApplyOnceComponentsReady();
-  },
-
-  remove() {
-    this.el.sceneEl.removeEventListener("stateadded", this._applyState);
-    this.el.sceneEl.removeEventListener("stateremoved", this._applyState);
-    this.el.removeEventListener("componentinitialized", this._allowApplyOnceComponentsReady);
-  },
-
-  isHeld(el) {
-    const { leftHand, rightHand, rightRemote } = this.el.sceneEl.systems.interaction.state;
-    return leftHand.held === el || rightHand.held === el || rightRemote.held === el;
-  },
-
-  tick() {
-    const held = this.isHeld(this.el);
-    if (!held && this.wasHeld) {
-      this._fireEvents(this.data);
-    }
-    this.wasHeld = held;
   },
 
   update(oldData) {
-    this._applyState();
     this._fireEvents(oldData);
   },
 
@@ -83,19 +52,16 @@ AFRAME.registerComponent("pinnable", {
     }
   },
 
-  _allowApplyOnceComponentsReady() {
-    if (!this._allowApply) {
-      this._allowApply = true;
-      this._applyState();
-    }
+  isHeld(el) {
+    const { leftHand, rightHand, rightRemote } = this.el.sceneEl.systems.interaction.state;
+    return leftHand.held === el || rightHand.held === el || rightRemote.held === el;
   },
 
-  _applyState() {
-    if (!this._allowApply) return;
-    const isFrozen = this.el.sceneEl.is("frozen");
-
-    if (this.data.pinned && !isFrozen) {
-      this.el.setAttribute("ammo-body", { type: "static" });
+  tick() {
+    const held = this.isHeld(this.el);
+    if (!held && this.wasHeld) {
+      this._fireEvents(this.data);
     }
+    this.wasHeld = held;
   }
 });
