@@ -8,7 +8,6 @@ import en from "react-intl/locale-data/en";
 import MovingAverage from "moving-average";
 import screenfull from "screenfull";
 import styles from "../assets/stylesheets/ui-root.scss";
-import loaderStyles from "../assets/stylesheets/loader.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
 import { ReactAudioContext, WithHoverSound } from "./wrap-with-audio";
 import {
@@ -22,6 +21,7 @@ import StateLink from "./state-link.js";
 import StateRoute from "./state-route.js";
 
 import { lang, messages } from "../utils/i18n";
+import Loader from "./loader";
 import AutoExitWarning from "./auto-exit-warning";
 import {
   TwoDEntryButton,
@@ -120,7 +120,6 @@ if (toneClip.canPlayType("audio/webm")) {
 }
 
 class UIRoot extends Component {
-  doneWithInitialLoad = false;
   willCompileAndUploadMaterials = false;
 
   static propTypes = {
@@ -183,8 +182,6 @@ class UIRoot extends Component {
     didConnectToNetworkedScene: false,
     noMoreLoadingUpdates: false,
     hideLoader: false,
-    loadingNum: 0,
-    loadedNum: 0,
 
     waitingOnAudio: false,
     shareScreen: false,
@@ -263,11 +260,6 @@ class UIRoot extends Component {
       },
       { once: true }
     );
-    this.props.scene.addEventListener("model-loading", this.onObjectLoading);
-    this.props.scene.addEventListener("image-loading", this.onObjectLoading);
-    this.props.scene.addEventListener("model-loaded", this.onObjectLoaded);
-    this.props.scene.addEventListener("image-loaded", this.onObjectLoaded);
-    this.props.scene.addEventListener("model-error", this.onObjectLoaded);
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
     this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
     this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
@@ -364,32 +356,12 @@ class UIRoot extends Component {
     this.setState({ isSubscribed });
   };
 
+  onLoadingFinished = () => {
+    this.setState({ noMoreLoadingUpdates: true });
+  };
+
   onSceneLoaded = () => {
     this.setState({ sceneLoaded: true });
-  };
-
-  onObjectLoading = () => {
-    if (!this.doneWithInitialLoad && this.loadingTimeout) {
-      window.clearTimeout(this.loadingTimeout);
-      this.loadingTimeout = null;
-    }
-
-    this.setState(state => {
-      return { loadingNum: state.loadingNum + 1 };
-    });
-  };
-
-  onObjectLoaded = () => {
-    this.setState(state => {
-      return { loadedNum: state.loadedNum + 1 };
-    });
-
-    if (!this.doneWithInitialLoad && this.loadingTimeout) window.clearTimeout(this.loadingTimeout);
-
-    this.loadingTimeout = window.setTimeout(() => {
-      this.doneWithInitialLoad = true;
-      this.setState({ noMoreLoadingUpdates: true });
-    }, 1500);
   };
 
   // TODO: we need to come up with a cleaner way to handle the shared state between aframe and react than emmitting events and setting state on the scene
@@ -973,38 +945,6 @@ class UIRoot extends Component {
     );
   };
 
-  renderLoader = () => {
-    const nomore = (
-      <h4 className={loaderStyles.loadingText}>
-        <FormattedMessage id="loader.entering_lobby" />
-      </h4>
-    );
-    const progress = this.state.loadingNum === 0 ? " " : `${this.state.loadedNum} / ${this.state.loadingNum} `;
-    const usual = (
-      <h4 className={loaderStyles.loadingText}>
-        <FormattedMessage id="loader.loading" />
-        {progress}
-        <FormattedMessage id={this.state.loadingNum !== 1 ? "loader.objects" : "loader.object"} />
-        ...
-      </h4>
-    );
-    return (
-      <IntlProvider locale={lang} messages={messages}>
-        <div className="loading-panel">
-          <img className="loading-panel__logo" src="../assets/images/hub-preview-light-no-shadow.png" />
-
-          {this.state.noMoreLoadingUpdates ? nomore : usual}
-
-          <div className="loader-wrap loader-bottom">
-            <div className="loader">
-              <div className="loader-center" />
-            </div>
-          </div>
-        </div>
-      </IntlProvider>
-    );
-  };
-
   renderEntryStartPanel = () => {
     const textRows = this.state.pendingMessage.split("\n").length;
     const pendingMessageTextareaHeight = textRows * 28 + "px";
@@ -1441,7 +1381,11 @@ class UIRoot extends Component {
         </div>
       );
     if (isExited) return this.renderExitedPane();
-    if (isLoading) return this.renderLoader();
+    if (isLoading) {
+      return (
+        <Loader scene={this.props.scene} finished={this.state.noMoreLoadingUpdates} onLoaded={this.onLoadingFinished} />
+      );
+    }
     if (this.props.showInterstitialPrompt) return this.renderInterstitialPrompt();
     if (this.props.isBotMode) return this.renderBotMode();
 
