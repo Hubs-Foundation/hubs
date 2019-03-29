@@ -368,11 +368,13 @@ AFRAME.registerComponent("media-pager", {
   },
 
   onNext() {
+    if (!NAF.utils.isMine(this.el) && !NAF.utils.takeOwnership(this.el)) return;
     this.el.setAttribute("media-pager", "index", Math.min(this.data.index + 1, this.maxIndex));
     this.el.emit("pager-page-changed");
   },
 
   onPrev() {
+    if (!NAF.utils.isMine(this.el) && !NAF.utils.takeOwnership(this.el)) return;
     this.el.setAttribute("media-pager", "index", Math.max(this.data.index - 1, 0));
     this.el.emit("pager-page-changed");
   },
