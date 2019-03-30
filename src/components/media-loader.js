@@ -157,9 +157,9 @@ AFRAME.registerComponent("media-loader", {
 
     const finish = () => {
       if (isModel) {
-        this.el.setAttribute("ammo-shape", { type: SHAPE.HULL });
+        el.setAttribute("ammo-shape", { type: SHAPE.HULL });
       } else {
-        this.el.setAttribute("ammo-shape", {
+        el.setAttribute("ammo-shape", {
           type: SHAPE.BOX,
           halfExtents: { x: 0.5, y: 0.5, z: 0.02 },
           margin: 0.1,
@@ -168,6 +168,12 @@ AFRAME.registerComponent("media-loader", {
       }
 
       this.updateHoverableVisuals();
+
+      const pager = el.components["media-pager"];
+
+      if (pager) {
+        pager.repositionToolbar();
+      }
     };
 
     if (this.data.animate) {
@@ -334,6 +340,10 @@ AFRAME.registerComponent("media-pager", {
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
 
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      this.networkedEl = networkedEl;
+    });
+
     this.el.addEventListener("image-loaded", async e => {
       this.imageSrc = e.detail.src;
       await this._ensureUI();
@@ -342,7 +352,9 @@ AFRAME.registerComponent("media-pager", {
   },
 
   async _ensureUI() {
-    if (this.toolbar || !this.imageSrc) return;
+    if (this.hasSetupUI || !this.imageSrc) return;
+    this.hasSetupUI = true;
+
     // unfortunately, since we loaded the page image in an img tag inside media-image, we have to make a second
     // request for the same page to read out the max-content-index header
     this.maxIndex = await fetchMaxContentIndex(this.imageSrc);
@@ -384,17 +396,22 @@ AFRAME.registerComponent("media-pager", {
   },
 
   onNext() {
+    if (!NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
     this.el.setAttribute("media-pager", "index", Math.min(this.data.index + 1, this.maxIndex));
     this.el.emit("pager-page-changed");
   },
 
   onPrev() {
+    if (!NAF.utils.isMine(this.networkedEl) && !NAF.utils.takeOwnership(this.networkedEl)) return;
     this.el.setAttribute("media-pager", "index", Math.max(this.data.index - 1, 0));
     this.el.emit("pager-page-changed");
   },
 
   repositionToolbar() {
-    this.toolbar.object3D.position.y = -this.el.getAttribute("ammo-shape").halfExtents.y - 0.2;
+    const ammoShape = this.el.getAttribute("ammo-shape");
+    if (!ammoShape) return;
+
+    this.toolbar.object3D.position.y = -ammoShape.halfExtents.y - 0.2;
     this.toolbar.object3D.matrixNeedsUpdate = true;
   }
 });
