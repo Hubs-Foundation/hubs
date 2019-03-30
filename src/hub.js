@@ -953,7 +953,7 @@ const textureLoader = new THREE.TextureLoader();
 const tileImageUri =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQAAQMAAABF07nAAAAAA1BMVEXNzc2ljC/HAAAAlUlEQVQYGe3AAQEAAACCoP6vbogwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDvBB4AAXFgfO0AAAAASUVORK5CYII=";
 
-window.foo = () => {
+window.foo = async () => {
   const el = document.createElement("div");
   const w = 1280;
   const h = 720;
@@ -989,16 +989,18 @@ window.foo = () => {
 
   messageCanvas.width = w * (scale + 0.1);
   messageCanvas.height = h * (scale + 0.1);
+  const serialized = await serializeElement(el);
+  console.log(serialized);
 
   const t0 = performance.now();
   const xhtml = encodeURIComponent(`
       <svg xmlns="http://www.w3.org/2000/svg" width="${messageCanvas.width}" height="${messageCanvas.height}">
         <foreignObject width="${objectScale}" height="${objectScale}" style="transform: scale(${scale});">
-          ${serializeElement(el)}
+          ${serialized}
         </foreignObject>
       </svg>
 `);
-  console.log(t0 - performance.now());
+  console.log(performance.now() - t0);
   const img = new Image();
 
   img.onload = async () => {

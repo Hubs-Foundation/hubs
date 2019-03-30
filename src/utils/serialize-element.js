@@ -1,7 +1,12 @@
+import nextTick from "./next-tick";
+
 // https://stackoverflow.com/questions/6209161/extract-the-current-dom-and-print-it-as-a-string-with-styles-intact
 //
 // Mapping between tag names and css default values lookup tables. This allows to exclude default values in the result.
 const defaultStylesByTagName = {};
+
+// Budget 5ms per frame to serialize elements
+const serializeFrameBudget = 5;
 
 // Styles inherited from style sheets will not be rendered for elements with these tag names
 const noStyleTags = {
@@ -162,7 +167,7 @@ export function warmSerializeElement() {
   }
 }
 
-export default function serializeElement(el) {
+export default async function serializeElement(el) {
   if (Object.keys(defaultStylesByTagName).length === 0) {
     // Precompute the lookup tables.
     warmSerializeElement();
@@ -173,7 +178,18 @@ export default function serializeElement(el) {
   }
   const cssTexts = [];
   const elements = el.querySelectorAll("*");
+
+  let t = performance.now();
+
+  // Budget 5ms per frame for serialization
   for (let i = 0; i < elements.length; i++) {
+    const t1 = performance.now();
+
+    if (t1 - t >= serializeFrameBudget) {
+      t = t1;
+      await nextTick();
+    }
+
     const e = elements[i];
     if (!noStyleTags[e.tagName]) {
       const computedStyle = getComputedStyle(e);

@@ -309,7 +309,7 @@ class MediaBrowser extends Component {
 
           <div className={styles.body}>
             <div className={classNames({ [styles.tiles]: true, [styles.tilesVariable]: isVariableWidth })}>
-              {this.state.result && this.state.result.entries.map(this.entryToTile)}
+              {this.state.result && this.state.result.entries.slice(0, 6).map(this.entryToTile)}
             </div>
 
             {this.state.result &&
@@ -362,9 +362,7 @@ class MediaBrowser extends Component {
           onClick={e => this.handleEntryClicked(e, entry)}
           className={styles.image}
           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
-        >
-          <img className="media-thumb" alt="thumb" src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)} />
-        </a>
+        />
         {!entry.type.endsWith("_image") && (
           <div className={styles.info}>
             <a
