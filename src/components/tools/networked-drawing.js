@@ -87,6 +87,7 @@ AFRAME.registerComponent("networked-drawing", {
     this.vertexCount = 0; //number of vertices added for current line (used for line deletion).
     this.networkBufferCount = 0; //number of items added to networkBuffer for current line (used for line deletion).
     this.currentPointCount = 0; //number of points added for current line (used for maxPointsPerLine).
+    this.invalidPointRead = false; //flag flipped if we read a bad point anywhere during this line
     this.lastReadPointCount = 0; //last read point count read off of the network, used for sanity checking
     this.networkBufferHistory = []; //tracks vertexCount and networkBufferCount so that lines can be deleted.
 
@@ -182,9 +183,9 @@ AFRAME.registerComponent("networked-drawing", {
 
         // This is a sanity check against the sequence number to help uncover remaining bugs.
         // If the point is out-of-order, report the error and stop drawing this line.
-        const invalidPointRead = pointCount !== this.lastReadPointCount + 1;
+        if (pointCount !== this.lastReadPointCount + 1) {
+          this.invalidPointRead = true;
 
-        if (invalidPointRead) {
           console.error(
             `Draw networking error: ID ${this.drawingId} expected point ${this.lastReadPointCount +
               1} but received ${pointCount}`
@@ -208,15 +209,16 @@ AFRAME.registerComponent("networked-drawing", {
         }
 
         if (this.networkBuffer[0] === null) {
-          if (!invalidPointRead) {
+          if (!this.invalidPointRead) {
             this._endDraw(position, direction, normal);
           }
 
           this.remoteLineStarted = false;
           this.networkBuffer.shift();
           this.lastReadPointCount = 0;
+          this.invalidPointRead = false;
         } else {
-          if (!invalidPointRead) {
+          if (!this.invalidPointRead) {
             this._draw(position, direction, normal);
             didWork = true;
           }
