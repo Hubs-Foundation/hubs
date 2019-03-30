@@ -214,8 +214,11 @@ class MediaBrowser extends Component {
     if (this.state.selectNextResult) return <div />;
 
     return (
-      <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
-        <div className={classNames([styles.box, styles.darkened])}>
+      <div
+        className={classNames({ [styles.mediaBrowser]: true, ["media-browser"]: true })}
+        ref={browserDiv => (this.browserDiv = browserDiv)}
+      >
+        <div className={classNames([styles.box, styles.darkened, "media-browser3"])}>
           <div className={styles.header}>
             <div className={styles.headerLeft}>
               <a onClick={() => this.close()}>
@@ -224,39 +227,13 @@ class MediaBrowser extends Component {
                 </i>
               </a>
             </div>
-            <div className={styles.headerCenter}>
-              <div className={styles.search}>
+            <div className={classNames([styles.headerCenter, "media-browser3"])}>
+              <div className={classNames([styles.search, "media-browser4"])}>
                 <i>
                   <FontAwesomeIcon icon={faSearch} />
                 </i>
-                <input
-                  type="text"
-                  autoFocus={!isMobileVR}
-                  ref={r => (this.inputRef = r)}
-                  placeholder={formatMessage({
-                    id: `media-browser.search-placeholder.${urlSource}`
-                  })}
-                  onFocus={e => handleTextFieldFocus(e.target)}
-                  onBlur={() => handleTextFieldBlur()}
-                  onKeyDown={e => {
-                    if (e.key === "Enter" && e.ctrlKey) {
-                      if (this.state.result && this.state.result.entries.length > 0) {
-                        this.handleEntryClicked(e, this.state.result.entries[0]);
-                      } else if (this.state.query.trim() !== "") {
-                        this.handleQueryUpdated(this.state.query, true);
-                        this.setState({ selectNextResult: true });
-                      } else {
-                        this.close();
-                      }
-                    } else if (e.key === "Escape" || (e.key === "Enter" && isMobile)) {
-                      e.target.blur();
-                    }
-                  }}
-                  value={this.state.query}
-                  onChange={e => this.handleQueryUpdated(e.target.value)}
-                />
               </div>
-              <div className={styles.engineAttribution}>
+              <div className={classNames([styles.engineAttribution, "media-browser6"])}>
                 {urlSource !== "scenes" && (
                   <div className={styles.engineAttributionContents}>
                     <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
@@ -302,7 +279,7 @@ class MediaBrowser extends Component {
           </div>
 
           {this.state.showNav && (
-            <div className={styles.nav}>
+            <div className={classNames([styles.nav, "media-browserx"])}>
               {SOURCES.map(s => (
                 <a
                   onClick={() => this.handleSourceClicked(s)}
@@ -312,7 +289,7 @@ class MediaBrowser extends Component {
                   <FormattedMessage id={`media-browser.nav_title.${s}`} />
                 </a>
               ))}
-              <div className={styles.navRightPad}>&nbsp;</div>
+              <div className={styles.navRightPad} />
               <div className={styles.navScrollArrow}>
                 <FontAwesomeIcon icon={faAngleRight} />
               </div>
@@ -386,7 +363,7 @@ class MediaBrowser extends Component {
           className={styles.image}
           style={{ width: `${imageWidth}px`, height: `${imageHeight}px` }}
         >
-          <img src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)} />
+          <img className="media-thumb" alt="thumb" src={scaledThumbnailUrlFor(imageSrc, imageWidth, imageHeight)} />
         </a>
         {!entry.type.endsWith("_image") && (
           <div className={styles.info}>
@@ -416,7 +393,7 @@ class MediaBrowser extends Component {
                   <i>
                     <FontAwesomeIcon icon={faExternalLinkAlt} />
                   </i>
-                  &nbsp;<a href={entry.url} target="_blank" rel="noopener noreferrer">
+                  <a href={entry.url} target="_blank" rel="noopener noreferrer">
                     {publisherName}
                   </a>
                 </div>

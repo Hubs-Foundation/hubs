@@ -10,6 +10,7 @@ import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
 import "three/examples/js/loaders/GLTFLoader";
+import mediaStyles from "./assets/stylesheets/media-browser.scss";
 import "networked-aframe/src/index";
 import "naf-janus-adapter";
 import "aframe-billboard-component";
@@ -170,6 +171,7 @@ import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "./utils/vr-cap
 import detectConcurrentLoad from "./utils/concurrent-load-detector.js";
 
 import qsTruthy from "./utils/qs_truthy";
+import serializeElement from "./utils/serialize-element";
 
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
@@ -944,3 +946,101 @@ document.addEventListener("DOMContentLoaded", async () => {
   authChannel.setSocket(socket);
   linkChannel.setSocket(socket);
 });
+
+const messageCanvas = document.createElement("canvas");
+const context = messageCanvas.getContext("2d");
+const textureLoader = new THREE.TextureLoader();
+const tileImageUri =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQAAQMAAABF07nAAAAAA1BMVEXNzc2ljC/HAAAAlUlEQVQYGe3AAQEAAACCoP6vbogwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDvBB4AAXFgfO0AAAAASUVORK5CYII=";
+
+window.foo = () => {
+  const el = document.createElement("div");
+  const w = 1280;
+  const h = 720;
+  el.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+  el.setAttribute("class", `${mediaStyles.mediaBrowser}`);
+  el.setAttribute(
+    "style",
+    `position: absolute; top: 0; z-index: -10; width: ${w}px; height: ${h}px; margin: 0; left: 0; justify-content: center; align-items: center; display: flex; background-color: rgba(255, 255, 255, 1.0); overflow-x: hidden; overflow-y: hidden;`
+  );
+  let html = document.querySelector(".media-browser").innerHTML;
+
+  document.querySelectorAll(".media-thumb").forEach(t => {
+    const imageUrl = t.src;
+    console.log(imageUrl);
+    // TODO replace all
+    html = html.replace(imageUrl, tileImageUri);
+  });
+
+  el.innerHTML = html;
+  document.body.appendChild(el);
+
+  // Scale by 12x
+  const objectScale = "25%";
+  const scale = 4;
+  //const objectScale = "8.33%";
+  //const scale = 12;
+
+  /*if (lowResolution) {
+    // In low res, scale by 4x
+    objectScale = "25%";
+    scale = 4;
+  }*/
+
+  messageCanvas.width = w * (scale + 0.1);
+  messageCanvas.height = h * (scale + 0.1);
+
+  const t0 = performance.now();
+  const xhtml = encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="${messageCanvas.width}" height="${messageCanvas.height}">
+        <foreignObject width="${objectScale}" height="${objectScale}" style="transform: scale(${scale});">
+          ${serializeElement(el)}
+        </foreignObject>
+      </svg>
+`);
+  console.log(t0 - performance.now());
+  const img = new Image();
+
+  img.onload = async () => {
+    console.log("load");
+    console.log(img.width);
+    console.log(img.height);
+    context.drawImage(img, 0, 0);
+    console.log("draw");
+    const blob = await new Promise(resolve => messageCanvas.toBlob(resolve));
+    console.log("blob");
+    //el.parentNode.removeChild(el);
+    const entity = document.createElement("a-entity");
+    const meshEntity = document.createElement("a-entity");
+
+    document.querySelector("a-scene").appendChild(entity);
+
+    entity.appendChild(meshEntity);
+    entity.setAttribute("follow-in-fov", {
+      target: "#player-camera",
+      offset: { x: 0, y: 0.0, z: -0.8 }
+    });
+
+    const blobUrl = URL.createObjectURL(blob);
+
+    console.log("tex");
+    textureLoader.load(blobUrl, texture => {
+      console.log("loaded");
+      const material = new THREE.MeshBasicMaterial();
+      material.transparent = true;
+      material.map = texture;
+      material.generateMipmaps = false;
+      material.needsUpdate = true;
+
+      const geometry = new THREE.PlaneGeometry();
+      const mesh = new THREE.Mesh(geometry, material);
+      meshEntity.setObject3D("mesh", mesh);
+      meshEntity.meshMaterial = material;
+      const scaleFactor = 4000.0 / 1.0;
+      meshEntity.object3DMap.mesh.scale.set(texture.image.width / scaleFactor, texture.image.height / scaleFactor, 1);
+    });
+  };
+
+  console.log("src");
+  img.src = "data:image/svg+xml," + xhtml;
+};
