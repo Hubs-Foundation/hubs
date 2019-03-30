@@ -17,15 +17,21 @@ function findHandCollisionTarget(o) {
 }
 function findHandCollisionTargetForHand(body) {
   const driver = AFRAME.scenes[0].systems.physics.driver;
-  const collisions = driver.collisions;
+  const numManifolds = driver.dispatcher.getNumManifolds();
   const handPtr = Ammo.getPointer(body);
-  for (const key in collisions) {
-    const [body0ptr, body1ptr] = collisions[key];
-    if (body0ptr === handPtr) {
-      return findHandCollisionTarget(driver.els[body1ptr].object3D);
+  for (let i = 0; i < numManifolds; i++) {
+    const persistentManifold = driver.dispatcher.getManifoldByIndexInternal(i);
+    const body0ptr = Ammo.getPointer(persistentManifold.getBody0());
+    const body1ptr = Ammo.getPointer(persistentManifold.getBody1());
+    if (handPtr !== body0ptr && handPtr !== body1ptr) {
+      continue;
     }
-    if (body1ptr === handPtr) {
-      return findHandCollisionTarget(driver.els[body0ptr].object3D);
+    const numContacts = persistentManifold.getNumContacts();
+    for (let j = 0; j < numContacts; j++) {
+      const manifoldPoint = persistentManifold.getContactPoint(j);
+      if (manifoldPoint.getDistance() <= 10e-6) {
+        return findHandCollisionTarget(driver.els.get(handPtr === body0ptr ? body1ptr : body0ptr).object3D);
+      }
     }
   }
 }
@@ -55,7 +61,8 @@ AFRAME.registerSystem("interaction", {
       options.entity.object3D.scale
     );
     const data = superSpawner.data;
-    const entity = addMedia(data.src, data.template, ObjectContentOrigins.SPAWNER, data.resolve, data.resize).entity;
+    const entity = addMedia(data.src, data.template, ObjectContentOrigins.SPAWNER, data.resolve, data.resize, false)
+      .entity;
     entity.object3D.position.copy(data.useCustomSpawnPosition ? data.spawnPosition : superSpawner.el.object3D.position);
     entity.object3D.rotation.copy(data.useCustomSpawnRotation ? data.spawnRotation : superSpawner.el.object3D.rotation);
     entity.object3D.scale.copy(data.useCustomSpawnScale ? data.spawnScale : superSpawner.el.object3D.scale);

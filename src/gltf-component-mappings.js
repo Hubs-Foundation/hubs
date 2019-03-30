@@ -119,7 +119,13 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
     });
   }
 
-  el.setAttribute("media-loader", { src: componentData.src, resize: true, resolve: true, fileIsOwned: true });
+  el.setAttribute("media-loader", {
+    src: componentData.src,
+    resize: true,
+    resolve: true,
+    fileIsOwned: true,
+    animate: false
+  });
 
   if (componentData.pageIndex) {
     el.setAttribute("media-pager", { index: componentData.pageIndex });
@@ -180,6 +186,7 @@ function mediaInflator(el, componentName, componentData, components) {
     resize: true,
     resolve: true,
     fileIsOwned: true,
+    animate: false,
     mediaOptions
   });
 }
@@ -201,7 +208,8 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
   el.setAttribute("media-loader", {
     src: componentData.src,
     resolve: true,
-    fileIsOwned: true
+    fileIsOwned: true,
+    animate: false
   });
   el.setAttribute("css-class", "interactable");
   el.setAttribute("super-spawner", {

@@ -427,13 +427,13 @@
             </template>
 
             <template id="paging-toolbar">
-                <a-entity class="ui paging-toolbar" visible-to-owner>
+                <a-entity class="ui paging-toolbar" visibility-while-frozen="withinDistance: 10; requireHoverOnNonMobile: false;">
                     <a-entity class="prev-button" position="-0.3 0 0">
                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.2">
                             <a-entity text=" value:<; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
                         </a-entity>
                     </a-entity>
-                    <a-entity class="page-label" text="width:2; align:center;" text-raycast-hack></a-entity>
+                    <a-entity class="page-label" text="value:.; width:2; align:center;" text-raycast-hack></a-entity>
                     <a-entity class="next-button" position="0.3 0 0">
                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" slice9="width: 0.2">
                             <a-entity text=" value:>; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
@@ -765,7 +765,7 @@
                 teleporter="start: /actions/leftHand/startTeleport; confirm: /actions/leftHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
                 haptic-feedback="path: /haptics/actuators/left"
-                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
+                ammo-body="type: kinematic; emitCollisionEvents: false; collisionFlags: 4; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
                 ammo-shape="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
             >
             </a-entity>
@@ -779,7 +779,7 @@
                 teleporter="start: /actions/rightHand/startTeleport; confirm: /actions/rightHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
                 haptic-feedback="path: /haptics/actuators/right"
-                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
+                ammo-body="type: kinematic; emitCollisionEvents: false; collisionFlags: 4; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
                 ammo-shape="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
             >
             </a-entity>

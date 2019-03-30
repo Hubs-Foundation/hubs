@@ -285,7 +285,6 @@ AFRAME.registerComponent("camera-tool", {
           entity.object3D.position.set(pos.x, pos.y, pos.z);
           entity.object3D.rotation.copy(this.el.object3D.rotation);
           entity.object3D.rotateY(Math.PI);
-          entity.object3D.scale.set(0.1, 0.1, 0.1);
 
           // Generate photos in a circle around camera, starting from the bottom.
           // Prevent z-fighting but place behind viewfinder

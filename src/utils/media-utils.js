@@ -3,8 +3,6 @@ import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
-import { ObjectContentOrigins } from "../object-types";
-import nextTick from "./next-tick";
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
@@ -173,7 +171,7 @@ function getOrientation(file, callback) {
 }
 
 let interactableId = 0;
-export const addMedia = (src, template, contentOrigin, resolve = false, resize = false) => {
+export const addMedia = (src, template, contentOrigin, resolve = false, resize = false, animate = true) => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
@@ -183,23 +181,12 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
   entity.setAttribute("media-loader", {
     resize,
     resolve,
+    animate,
     src: typeof src === "string" ? src : "",
     fileIsOwned: !needsToBeUploaded
   });
 
-  let [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
-
-  entity.object3D.scale.set(0.001, 0.001, 0.001);
   entity.object3D.matrixNeedsUpdate = true;
-
-  entity.setAttribute("animation__loader_spawn-start", {
-    property: "scale",
-    delay: 50,
-    dur: 200,
-    from: { x: 0.001, y: 0.001, z: 0.001 },
-    to: { x: sx, y: sy, z: sz },
-    easing: "easeInQuad"
-  });
 
   scene.appendChild(entity);
 
@@ -211,54 +198,7 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
     entity.addEventListener(
       eventName,
       async () => {
-        entity.object3D.visible = false;
-
         clearTimeout(fireLoadingTimeout);
-
-        entity.removeAttribute("animation__loader_spawn-start");
-
-        // Deal with scale. The box animation may not have completed so cover all cases.
-        if (entity.components.scale) {
-          // Ensure explicit scale from scale component is set.
-          const scaleData = entity.components.scale.data;
-          entity.object3D.scale.set(scaleData.x, scaleData.y, scaleData.z);
-          entity.object3D.matrixNeedsUpdate = true;
-        } else if (contentOrigin == ObjectContentOrigins.SPAWNER) {
-          // Spawner will have set scale.
-          await nextTick();
-        } else {
-          // Otherwise, ensure original scale is re-applied.
-          entity.object3D.scale.set(sx, sy, sz);
-          entity.object3D.matrixNeedsUpdate = true;
-        }
-
-        [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
-
-        entity.object3D.scale.set(0.001, 0.001, 0.001);
-        entity.object3D.matrixNeedsUpdate = true;
-
-        entity.setAttribute("animation__spawn-start", {
-          property: "scale",
-          delay: 50,
-          dur: 350,
-          from: { x: 0.001, y: 0.001, z: 0.001 },
-          to: { x: sx, y: sy, z: sz },
-          easing: "easeOutElastic"
-        });
-
-        entity.addEventListener(
-          "animationcomplete",
-          () => {
-            entity.addState("media-scale-ready");
-            entity.emit("media-scale-ready");
-          },
-          {
-            once: true
-          }
-        );
-
-        entity.object3D.visible = true;
-
         scene.emit("media-loaded", { src: src });
       },
       { once: true }
