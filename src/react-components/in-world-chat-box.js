@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
-import styles from "../assets/stylesheets/ui-root.scss";
+import styles from "../assets/stylesheets/message-entry.scss";
 import ChatCommandHelp from "./chat-command-help";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
 import { faCamera } from "@fortawesome/free-solid-svg-icons/faCamera";
