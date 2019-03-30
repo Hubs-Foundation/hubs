@@ -172,13 +172,6 @@ AFRAME.registerComponent("media-loader", {
       generateMeshBVH(el.object3D);
     }
 
-    if (el.components.scale) {
-      // Ensure explicit scale from scale component is set.
-      const scaleData = el.components.scale.data;
-      el.object3D.scale.set(scaleData.x, scaleData.y, scaleData.z);
-      el.object3D.matrixNeedsUpdate = true;
-    }
-
     const finish = () => {
       this.updateShape("hull");
       this.updateHoverableVisuals();
