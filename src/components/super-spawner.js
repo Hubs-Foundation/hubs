@@ -115,11 +115,11 @@ AFRAME.registerComponent("super-spawner", {
       entity.object3D.scale.copy(this.data.spawnScale);
     }
 
-    this.activateCooldown();
-
     AFRAME.scenes[0].systems.interaction.state.rightRemote.held = entity;
     AFRAME.scenes[0].systems.interaction.state.rightRemote.spawning = true;
+    this.activateCooldown();
     await waitForEvent("body-loaded", entity);
+
     AFRAME.scenes[0].systems.interaction.state.rightRemote.spawning = false;
     cursor.object3D.getWorldPosition(entity.object3D.position);
     cursor.object3D.getWorldQuaternion(entity.object3D.quaternion);
@@ -132,7 +132,7 @@ AFRAME.registerComponent("super-spawner", {
       const [sx, sy, sz] = [this.el.object3D.scale.x, this.el.object3D.scale.y, this.el.object3D.scale.z];
 
       this.el.setAttribute("visible", false);
-      //this.el.object3D.scale.set(0.001, 0.001, 0.001); // TODO: Fix spawner-cooldown scale animation
+      this.el.object3D.scale.set(0.001, 0.001, 0.001);
       this.el.object3D.matrixNeedsUpdate = true;
       this.el.classList.remove("interactable");
       this.el.setAttribute("ammo-body", { collisionFlags: COLLISION_FLAG.NO_CONTACT_RESPONSE });
@@ -141,14 +141,14 @@ AFRAME.registerComponent("super-spawner", {
         this.el.classList.add("interactable");
         this.el.setAttribute("ammo-body", { collisionFlags: COLLISION_FLAG.STATIC_OBJECT });
         this.el.removeAttribute("animation__spawner-cooldown");
-        //this.el.setAttribute("animation__spawner-cooldown", {
-        //  property: "scale",
-        //  delay: 50,
-        //  dur: 350,
-        //  from: { x: 0.001, y: 0.001, z: 0.001 },
-        //  to: { x: sx, y: sy, z: sz },
-        //  easing: "easeOutElastic"
-        //});
+        this.el.setAttribute("animation__spawner-cooldown", {
+          property: "scale",
+          delay: 50,
+          dur: 350,
+          from: { x: 0.001, y: 0.001, z: 0.001 },
+          to: { x: sx, y: sy, z: sz },
+          easing: "easeOutElastic"
+        });
 
         this.cooldownTimeout = null;
       }, this.data.spawnCooldown * 1000);
