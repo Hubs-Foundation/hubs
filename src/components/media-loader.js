@@ -13,8 +13,7 @@ import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 
 const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
-  SHAPE = PHYSICS_CONSTANTS.SHAPE,
-  FIT = PHYSICS_CONSTANTS.FIT;
+  SHAPE = PHYSICS_CONSTANTS.SHAPE;
 
 const gltfLoader = new THREE.GLTFLoader();
 let loadingObject;
@@ -133,21 +132,12 @@ AFRAME.registerComponent("media-loader", {
     this.removeShape("loader");
   },
 
-  updateShape(shapeType) {
+  updateShape(options) {
     if (this.el.getAttribute("ammo-shape")) {
       this.el.removeAttribute("ammo-shape");
     }
 
-    if (shapeType === "hull") {
-      this.el.setAttribute("ammo-shape", { type: SHAPE.HULL });
-    } else if (shapeType === "flat") {
-      this.el.setAttribute("ammo-shape", {
-        type: SHAPE.BOX,
-        halfExtents: { x: 0.5, y: 0.5, z: 0.02 },
-        margin: 0.1,
-        fit: FIT.MANUAL
-      });
-    }
+    this.el.setAttribute("ammo-shape", options);
   },
 
   updateHoverableVisuals() {
@@ -173,7 +163,7 @@ AFRAME.registerComponent("media-loader", {
     }
 
     const finish = () => {
-      this.updateShape("hull");
+      el.emit("media-spawned");
       this.updateHoverableVisuals();
     };
 
@@ -308,6 +298,7 @@ AFRAME.registerComponent("media-loader", {
           },
           { once: true }
         );
+        this.el.addEventListener("media-spawned", () => this.updateShape({ type: SHAPE.HULL }), { once: true });
         this.el.addEventListener("model-error", this.onError, { once: true });
         this.el.setAttribute(
           "gltf-model-plus",
