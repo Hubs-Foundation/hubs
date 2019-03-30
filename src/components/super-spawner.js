@@ -66,16 +66,6 @@ AFRAME.registerComponent("super-spawner", {
     spawnEvent: { type: "string" },
 
     /**
-     * The superHand to use if an object is spawned via spawnEvent
-     */
-    superHand: { type: "selector" },
-
-    /**
-     * The cursor superHand to use if an object is spawned via spawnEvent
-     */
-    cursorSuperHand: { type: "selector" },
-
-    /**
      * If true, will spawn the object at the cursor and animate it into the hand.
      */
     animateFromCursor: { type: "boolean" }

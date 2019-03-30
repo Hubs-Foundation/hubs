@@ -29,7 +29,7 @@ export function resolveActionSets() {
   );
   userinput.toggleSet(
     sets.leftHandHoldingPen,
-    leftHand.held && leftHand.held.components.tags && leftHand.held.components.tags.isPen
+    leftHand.held && leftHand.held.components.tags && leftHand.held.components.tags.data.isPen
   );
   userinput.toggleSet(sets.leftHandHoldingCamera, leftHand.held && leftHand.held.components["camera-tool"]);
   userinput.toggleSet(sets.leftHandHoldingInteractable, leftHand.held);
@@ -59,7 +59,7 @@ export function resolveActionSets() {
   );
   userinput.toggleSet(
     sets.rightHandHoldingPen,
-    rightHand.held && rightHand.held.components.tags && rightHand.held.components.tags.isPen
+    rightHand.held && rightHand.held.components.tags && rightHand.held.components.tags.data.isPen
   );
   userinput.toggleSet(sets.rightHandHoldingCamera, rightHand.held && rightHand.held.components["camera-tool"]);
   userinput.toggleSet(sets.rightHandHoldingInteractable, rightHand.held);
