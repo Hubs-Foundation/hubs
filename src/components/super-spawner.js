@@ -1,4 +1,3 @@
-import { paths } from "../systems/userinput/paths";
 import { addMedia } from "../utils/media-utils";
 import { waitForEvent } from "../utils/async-utils";
 import { ObjectContentOrigins } from "../object-types";
@@ -103,8 +102,6 @@ AFRAME.registerComponent("super-spawner", {
   },
 
   async onSpawnEvent() {
-    const userinput = AFRAME.scenes[0].systems.userinput;
-
     if (this.cooldownTimeout) {
       return;
     }

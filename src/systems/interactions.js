@@ -167,17 +167,16 @@ AFRAME.registerSystem("interaction", {
       this.tickInteractor(this.options.rightHand, this.state.rightHand);
     }
 
-
     if (!this.state.rightHand.held && !this.state.rightHand.hovered) {
       this.tickInteractor(this.options.rightRemote, this.state.rightRemote);
     }
 
     const rightRemoteWasEnabled = this.cursorController.components["cursor-controller"].enabled;
     const rightRemoteShouldBeEnabled =
-          !this.state.rightHand.hovered && !this.state.rightHand.held && !this.rightHandTeleporter.isTeleporting;
+      !this.state.rightHand.hovered && !this.state.rightHand.held && !this.rightHandTeleporter.isTeleporting;
     this.cursorController.components["cursor-controller"].enabled = rightRemoteShouldBeEnabled;
     if (rightRemoteWasEnabled && !rightRemoteShouldBeEnabled) {
-        this.state.rightRemote.hovered = null;
+      this.state.rightRemote.hovered = null;
     }
     this.cursorController.components["cursor-controller"].tick2(t);
 
