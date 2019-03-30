@@ -9,11 +9,12 @@ import {
   generateMeshBVH
 } from "../utils/media-utils";
 import { addAnimationComponents } from "../utils/animation";
-
 import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 
-const SHAPE = require("aframe-physics-system/src/constants").SHAPE;
+const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
+  SHAPE = PHYSICS_CONSTANTS.SHAPE,
+  FIT = PHYSICS_CONSTANTS.FIT;
 
 const gltfLoader = new THREE.GLTFLoader();
 let loadingObject;
@@ -39,6 +40,7 @@ AFRAME.registerComponent("media-loader", {
     resize: { default: false },
     resolve: { default: false },
     contentType: { default: null },
+    animate: { default: true },
     mediaOptions: {
       default: {},
       parse: v => (typeof v === "object" ? v : JSON.parse(v)),
@@ -53,9 +55,9 @@ AFRAME.registerComponent("media-loader", {
     this.onMediaLoaded = this.onMediaLoaded.bind(this);
   },
 
-  setShapeAndScale: (function() {
+  updateScale: (function() {
     const center = new THREE.Vector3();
-    return function(resize, shapeType, shapeId) {
+    return function(resize) {
       const mesh = this.el.getObject3D("mesh");
       const box = getBox(this.el, mesh);
       const scaleCoefficient = resize ? getScaleCoefficient(0.5, box) : 1;
@@ -64,12 +66,6 @@ AFRAME.registerComponent("media-loader", {
       center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
       mesh.position.sub(center);
       mesh.matrixNeedsUpdate = true;
-
-      this.waitForMediaScaleReady(() => {
-        this.el.setAttribute("ammo-shape__" + shapeId, {
-          type: shapeType
-        });
-      });
     };
   })(),
 
@@ -102,13 +98,25 @@ AFRAME.registerComponent("media-loader", {
     const mesh = useFancyLoader
       ? loadingObject.scene.clone()
       : new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
+    this.el.setObject3D("mesh", mesh);
+    this.updateScale(true);
     if (useFancyLoader) {
       this.loaderMixer = new THREE.AnimationMixer(mesh);
+
       this.loadingClip = this.loaderMixer.clipAction(loadingObject.animations[0]);
+      this.loadingScaleClip = this.loaderMixer.clipAction(
+        new THREE.AnimationClip(null, 1000, [
+          new THREE.VectorKeyframeTrack(".scale", [0, 0.2], [0, 0, 0, mesh.scale.x, mesh.scale.y, mesh.scale.z])
+        ])
+      );
+      setTimeout(() => {
+        if (!this.loaderMixer) return; // Animation/loader was stopped early
+        this.el.setAttribute("ammo-shape__loader", { type: SHAPE.BOX });
+      }, 200);
+
       this.loadingClip.play();
+      this.loadingScaleClip.play();
     }
-    this.el.setObject3D("mesh", mesh);
-    this.setShapeAndScale(true, SHAPE.BOX, "loader");
     delete this.showLoaderTimeout;
   },
 
@@ -116,13 +124,13 @@ AFRAME.registerComponent("media-loader", {
     clearTimeout(this.showLoaderTimeout);
     if (this.loaderMixer) {
       this.loadingClip.stop();
+      this.loadingScaleClip.stop();
       delete this.loaderMixer;
+      delete this.loadingScaleClip;
+      delete this.loadingClip;
     }
     delete this.showLoaderTimeout;
-
-    this.waitForMediaScaleReady(() => {
-      this.removeShape("loader");
-    });
+    this.removeShape("loader");
   },
 
   updateHoverableVisuals() {
@@ -139,27 +147,46 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
-  waitForMediaScaleReady(callback) {
-    if (this.el.is("media-scale-ready")) {
-      callback();
-    } else {
-      this.el.addEventListener(
-        "media-scale-ready",
-        () => {
-          callback();
-        },
-        { once: true }
-      );
-    }
-  },
-
-  onMediaLoaded() {
+  onMediaLoaded(isModel = false) {
+    const el = this.el;
     this.clearLoadingTimeout();
-    this.waitForMediaScaleReady(() => {
+
+    if (!el.components["animation-mixer"]) {
+      generateMeshBVH(el.object3D);
+    }
+
+    const finish = () => {
+      if (isModel) {
+        this.el.setAttribute("ammo-shape", { type: SHAPE.HULL });
+      } else {
+        this.el.setAttribute("ammo-shape", {
+          type: SHAPE.BOX,
+          halfExtents: { x: 0.5, y: 0.5, z: 0.02 },
+          margin: 0.1,
+          fit: FIT.MANUAL
+        });
+      }
+
       this.updateHoverableVisuals();
-    });
-    if (!this.el.components["animation-mixer"]) {
-      generateMeshBVH(this.el.object3D);
+    };
+
+    if (this.data.animate) {
+      const [sx, sy, sz] = [el.object3D.scale.x, el.object3D.scale.y, el.object3D.scale.z];
+      el.object3D.scale.set(0.001, 0.001, 0.001);
+      el.object3D.matrixNeedsUpdate = true;
+
+      el.setAttribute("animation__spawn-start", {
+        property: "scale",
+        delay: 50,
+        dur: 350,
+        from: { x: 0.001, y: 0.001, z: 0.001 },
+        to: { x: sx, y: sy, z: sz },
+        easing: "easeOutElastic"
+      });
+
+      el.addEventListener("animationcomplete", finish, { once: true });
+    } else {
+      finish();
     }
   },
 
@@ -210,7 +237,7 @@ AFRAME.registerComponent("media-loader", {
         const startTime = hashTime || qsTime || 0;
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-image");
-        this.el.addEventListener("video-loaded", this.onMediaLoaded, { once: true });
+        this.el.addEventListener("video-loaded", () => this.onMediaLoaded(), { once: true });
         this.el.setAttribute(
           "media-video",
           Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, time: startTime, contentType })
@@ -253,7 +280,8 @@ AFRAME.registerComponent("media-loader", {
         // 2. we don't remove the media-image component -- media-pager uses that internally
         this.el.setAttribute("media-pager", Object.assign({}, this.data.mediaOptions, { src: canonicalUrl }));
         this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
-        this.el.addEventListener("preview-loaded", this.onMediaLoaded, { once: true });
+        this.el.addEventListener("preview-loaded", () => this.onMediaLoaded(), { once: true });
+
         if (this.el.components["position-at-box-shape-border__freeze"]) {
           this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
         }
@@ -268,8 +296,8 @@ AFRAME.registerComponent("media-loader", {
         this.el.addEventListener(
           "model-loaded",
           () => {
-            this.setShapeAndScale(this.data.resize, SHAPE.HULL, "hull");
-            this.onMediaLoaded();
+            this.updateScale(this.data.resize);
+            this.onMediaLoaded(true);
             addAnimationComponents(this.el);
           },
           { once: true }
