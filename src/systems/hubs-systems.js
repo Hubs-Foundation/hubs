@@ -18,8 +18,8 @@ AFRAME.registerSystem("hubs-systems", {
   tick(t) {
     const systems = AFRAME.scenes[0].systems;
     systems.userinput.tick2();
-    this.cursorTargettingSystem.tick();
-    systems.interaction.tick2(t);
+    systems.interaction.tick2();
+    this.cursorTargettingSystem.tick(t);
     this.constraintsSystem.tick();
     this.twoPointStretchingSystem.tick();
     this.singleActionButtonSystem.tick();

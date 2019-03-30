@@ -78,7 +78,6 @@ AFRAME.registerSystem("interaction", {
   },
 
   init: function() {
-    this.weWantToGrab = false;
     this.options = {
       leftHand: {
         entity: document.querySelector("#player-left-controller"),
@@ -119,6 +118,8 @@ AFRAME.registerSystem("interaction", {
         spawning: null
       }
     };
+
+    this.cursorController = document.querySelector("#cursor-controller");
   },
 
   getRightRemoteHoverTarget() {
@@ -157,10 +158,10 @@ AFRAME.registerSystem("interaction", {
     }
   },
 
-  tick2(t) {
+  tick2() {
     if (!this.el.is("entered")) return;
-    this.cursorController = this.cursorController || document.querySelector("#cursor-controller");
-    this.rightHandTeleporter = this.options.rightHand.entity.components["teleporter"];
+    this.rightHandTeleporter =
+      this.rightHandTeleporter || document.querySelector("#player-right-controller").components["teleporter"];
 
     this.tickInteractor(this.options.leftHand, this.state.leftHand);
     if (!this.state.rightRemote.held) {
@@ -171,14 +172,12 @@ AFRAME.registerSystem("interaction", {
       this.tickInteractor(this.options.rightRemote, this.state.rightRemote);
     }
 
-    const rightRemoteWasEnabled = this.cursorController.components["cursor-controller"].enabled;
-    const rightRemoteShouldBeEnabled =
+    const enableRightRemote =
       !this.state.rightHand.hovered && !this.state.rightHand.held && !this.rightHandTeleporter.isTeleporting;
-    this.cursorController.components["cursor-controller"].enabled = rightRemoteShouldBeEnabled;
-    if (rightRemoteWasEnabled && !rightRemoteShouldBeEnabled) {
+    this.cursorController.components["cursor-controller"].enabled = enableRightRemote;
+    if (!enableRightRemote) {
       this.state.rightRemote.hovered = null;
     }
-    this.cursorController.components["cursor-controller"].tick2(t);
 
     if (this.el.systems.userinput.get(paths.actions.logInteractionState)) {
       console.log(
