@@ -100,9 +100,6 @@ AFRAME.registerComponent("super-spawner", {
 
     this.el.setAttribute("hoverable-visuals", { cursorController: "#cursor-controller", enableSweepingEffect: false });
     this.tempSpawnHandPosition = new THREE.Vector3();
-
-    //need to add this here because super-spawners don't use addMedia()
-    this.el.addState("media-scale-ready");
   },
 
   play() {
@@ -144,7 +141,8 @@ AFRAME.registerComponent("super-spawner", {
       return;
     }
 
-    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve).entity;
+    const entity = addMedia(this.data.src, this.data.template, ObjectContentOrigins.SPAWNER, this.data.resolve, false)
+      .entity;
     const spawnOrigin = using6DOF && !this.data.animateFromCursor ? this.data.superHand : this.data.cursorSuperHand;
 
     spawnOrigin.object3D.getWorldPosition(entity.object3D.position);
@@ -203,7 +201,8 @@ AFRAME.registerComponent("super-spawner", {
       this.data.template,
       ObjectContentOrigins.SPAWNER,
       this.data.resolve,
-      this.data.resize
+      this.data.resize,
+      false
     ).entity;
 
     entity.object3D.position.copy(
@@ -246,13 +245,27 @@ AFRAME.registerComponent("super-spawner", {
 
   activateCooldown() {
     if (this.data.spawnCooldown > 0) {
+      const [sx, sy, sz] = [this.el.object3D.scale.x, this.el.object3D.scale.y, this.el.object3D.scale.z];
+
       this.el.setAttribute("visible", false);
+      this.el.object3D.scale.set(0.001, 0.001, 0.001);
+      this.el.object3D.matrixNeedsUpdate = true;
       this.el.classList.remove("interactable");
       this.el.setAttribute("ammo-body", { collisionFlags: COLLISION_FLAG.NO_CONTACT_RESPONSE });
       this.cooldownTimeout = setTimeout(() => {
         this.el.setAttribute("visible", true);
         this.el.classList.add("interactable");
         this.el.setAttribute("ammo-body", { collisionFlags: COLLISION_FLAG.STATIC_OBJECT });
+        this.el.removeAttribute("animation__spawner-cooldown");
+        this.el.setAttribute("animation__spawner-cooldown", {
+          property: "scale",
+          delay: 50,
+          dur: 350,
+          from: { x: 0.001, y: 0.001, z: 0.001 },
+          to: { x: sx, y: sy, z: sz },
+          easing: "easeOutElastic"
+        });
+
         this.cooldownTimeout = null;
       }, this.data.spawnCooldown * 1000);
     }
