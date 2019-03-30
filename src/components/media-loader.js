@@ -13,7 +13,8 @@ import "three/examples/js/loaders/GLTFLoader";
 import loadingObjectSrc from "../assets/LoadingObject_Atom.glb";
 
 const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
-  SHAPE = PHYSICS_CONSTANTS.SHAPE;
+  SHAPE = PHYSICS_CONSTANTS.SHAPE,
+  FIT = PHYSICS_CONSTANTS.FIT;
 
 const gltfLoader = new THREE.GLTFLoader();
 let loadingObject;
@@ -132,14 +133,6 @@ AFRAME.registerComponent("media-loader", {
     this.removeShape("loader");
   },
 
-  updateShape(options) {
-    if (this.el.getAttribute("ammo-shape")) {
-      this.el.removeAttribute("ammo-shape");
-    }
-
-    this.el.setAttribute("ammo-shape", options);
-  },
-
   updateHoverableVisuals() {
     const hoverableVisuals = this.el.components["hoverable-visuals"];
 
@@ -154,7 +147,7 @@ AFRAME.registerComponent("media-loader", {
     }
   },
 
-  onMediaLoaded() {
+  onMediaLoaded(isModel = false) {
     const el = this.el;
     this.clearLoadingTimeout();
 
@@ -163,7 +156,17 @@ AFRAME.registerComponent("media-loader", {
     }
 
     const finish = () => {
-      el.emit("media-spawned");
+      if (isModel) {
+        this.el.setAttribute("ammo-shape", { type: SHAPE.HULL });
+      } else {
+        this.el.setAttribute("ammo-shape", {
+          type: SHAPE.BOX,
+          halfExtents: { x: 0.5, y: 0.5, z: 0.02 },
+          margin: 0.1,
+          fit: FIT.MANUAL
+        });
+      }
+
       this.updateHoverableVisuals();
     };
 
@@ -234,7 +237,7 @@ AFRAME.registerComponent("media-loader", {
         const startTime = hashTime || qsTime || 0;
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-image");
-        this.el.addEventListener("video-loaded", this.onMediaLoaded, { once: true });
+        this.el.addEventListener("video-loaded", () => this.onMediaLoaded(), { once: true });
         this.el.setAttribute(
           "media-video",
           Object.assign({}, this.data.mediaOptions, { src: accessibleUrl, time: startTime, contentType })
@@ -277,7 +280,8 @@ AFRAME.registerComponent("media-loader", {
         // 2. we don't remove the media-image component -- media-pager uses that internally
         this.el.setAttribute("media-pager", Object.assign({}, this.data.mediaOptions, { src: canonicalUrl }));
         this.el.addEventListener("image-loaded", this.clearLoadingTimeout, { once: true });
-        this.el.addEventListener("preview-loaded", this.onMediaLoaded, { once: true });
+        this.el.addEventListener("preview-loaded", () => this.onMediaLoaded(), { once: true });
+
         if (this.el.components["position-at-box-shape-border__freeze"]) {
           this.el.setAttribute("position-at-box-shape-border__freeze", { dirs: ["forward", "back"] });
         }
@@ -293,12 +297,11 @@ AFRAME.registerComponent("media-loader", {
           "model-loaded",
           () => {
             this.updateScale(this.data.resize);
-            this.onMediaLoaded();
+            this.onMediaLoaded(true);
             addAnimationComponents(this.el);
           },
           { once: true }
         );
-        this.el.addEventListener("media-spawned", () => this.updateShape({ type: SHAPE.HULL }), { once: true });
         this.el.addEventListener("model-error", this.onError, { once: true });
         this.el.setAttribute(
           "gltf-model-plus",
