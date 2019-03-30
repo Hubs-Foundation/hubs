@@ -47,23 +47,19 @@ import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
+import LobbyChatBox from "./lobby-chat-box.js";
+import InWorldChatBox from "./in-world-chat-box.js";
 
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
 import SettingsMenu from "./settings-menu.js";
 import TwoDHUD from "./2d-hud";
-import ChatCommandHelp from "./chat-command-help";
-import { spawnChatMessage } from "./chat-message";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleReEntryToVRFrom2DInterstitial } from "../utils/vr-interstitial";
-import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { handleTipClose } from "../systems/tips.js";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
-import { faCamera } from "@fortawesome/free-solid-svg-icons/faCamera";
-import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -212,7 +208,6 @@ class UIRoot extends Component {
 
     exited: false,
 
-    pendingMessage: "",
     signedIn: false,
     videoShareMediaSource: null
   };
@@ -839,10 +834,8 @@ class UIRoot extends Component {
     }
   };
 
-  sendMessage = e => {
-    e.preventDefault();
-    this.props.onSendMessage(this.state.pendingMessage);
-    this.setState({ pendingMessage: "" });
+  sendMessage = msg => {
+    this.props.onSendMessage(msg);
   };
 
   occupantCount = () => {
@@ -1006,21 +999,8 @@ class UIRoot extends Component {
   };
 
   renderEntryStartPanel = () => {
-    const textRows = this.state.pendingMessage.split("\n").length;
-    const pendingMessageTextareaHeight = textRows * 28 + "px";
-    const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
     const hasPush = navigator.serviceWorker && "PushManager" in window;
     const promptForNameAndAvatarBeforeEntry = !this.props.store.state.activity.hasChangedName;
-
-    const discordBridges = this.discordBridges();
-    const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
-    const occupantSnippet = `${this.occupantCount() - 1} other${this.occupantCount() > 2 ? "s" : ""}`;
-    const messageEntryPlaceholder =
-      this.occupantCount() <= 1
-        ? "Nobody is here yet..."
-        : discordBridges.length
-          ? `Send message to ${occupantSnippet} and ${discordSnippet}...`
-          : `Send message to ${occupantSnippet}...`;
 
     return (
       <div className={entryStyles.entryPanel}>
@@ -1074,45 +1054,11 @@ class UIRoot extends Component {
             </WithHoverSound>
           )}
 
-          <form onSubmit={this.sendMessage}>
-            <div
-              className={classNames({
-                [styles.messageEntry]: true,
-                [styles.messageEntryDisabled]: this.occupantCount() <= 1
-              })}
-              style={{ height: pendingMessageFieldHeight }}
-            >
-              <textarea
-                className={classNames([styles.messageEntryInput, "chat-focus-target"])}
-                value={this.state.pendingMessage}
-                rows={textRows}
-                style={{ height: pendingMessageTextareaHeight }}
-                onFocus={e => handleTextFieldFocus(e.target)}
-                onBlur={() => handleTextFieldBlur()}
-                onChange={e => this.setState({ pendingMessage: e.target.value })}
-                disabled={this.occupantCount() <= 1 ? true : false}
-                onKeyDown={e => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    this.sendMessage(e);
-                  } else if (e.key === "Escape") {
-                    e.target.blur();
-                  }
-                }}
-                placeholder={messageEntryPlaceholder}
-              />
-              <WithHoverSound>
-                <button
-                  className={classNames([styles.messageEntryButton, styles.messageEntrySubmit])}
-                  disabled={this.occupantCount() <= 1 ? true : false}
-                  type="submit"
-                >
-                  <i>
-                    <FontAwesomeIcon icon={faPaperPlane} />
-                  </i>
-                </button>
-              </WithHoverSound>
-            </div>
-          </form>
+          <LobbyChatBox
+            occupantCount={this.occupantCount()}
+            discordBridges={this.discordBridges()}
+            onSendMessage={this.sendMessage}
+          />
         </div>
 
         {hasPush && (
@@ -1482,9 +1428,11 @@ class UIRoot extends Component {
 
     const showVREntryButton = entered && isMobileVR;
 
-    const textRows = this.state.pendingMessage.split("\n").length;
-    const pendingMessageTextareaHeight = textRows * 28 + "px";
-    const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
+    const rootStyles = {
+      [styles.ui]: true,
+      "ui-root": true,
+      "in-modal-or-overlay": this.isInModalOrOverlay()
+    };
 
     const presenceLogEntries = this.props.presenceLogEntries || [];
 
@@ -1668,98 +1616,12 @@ class UIRoot extends Component {
                 </div>
               )}
             {entered && (
-              <form onSubmit={this.sendMessage}>
-                <div
-                  className={classNames({ [styles.messageEntryInRoom]: true, [styles.messageEntryOnMobile]: isMobile })}
-                  style={{ height: pendingMessageFieldHeight }}
-                >
-                  {this.state.pendingMessage.startsWith("/") && (
-                    <ChatCommandHelp matchingPrefix={this.state.pendingMessage.substring(1)} />
-                  )}
-                  <input
-                    id="message-entry-media-input"
-                    type="file"
-                    style={{ display: "none" }}
-                    accept={isMobile ? "image/*" : "*"}
-                    multiple
-                    onChange={e => {
-                      for (const file of e.target.files) {
-                        this.createObject(file);
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor="message-entry-media-input"
-                    title={"Upload"}
-                    className={classNames([
-                      styles.messageEntryButton,
-                      styles.messageEntryButtonInRoom,
-                      styles.messageEntryUpload
-                    ])}
-                  >
-                    <i>
-                      <FontAwesomeIcon icon={isMobile ? faCamera : faPlus} />
-                    </i>
-                  </label>
-                  <textarea
-                    style={{ height: pendingMessageTextareaHeight }}
-                    className={classNames([
-                      styles.messageEntryInput,
-                      styles.messageEntryInputInRoom,
-                      "chat-focus-target"
-                    ])}
-                    value={this.state.pendingMessage}
-                    rows={textRows}
-                    onFocus={e => {
-                      handleTextFieldFocus(e.target);
-                    }}
-                    onBlur={() => {
-                      handleTextFieldBlur();
-                    }}
-                    onChange={e => {
-                      e.stopPropagation();
-                      this.setState({ pendingMessage: e.target.value });
-                    }}
-                    onKeyDown={e => {
-                      if (e.key === "Enter" && !e.ctrlKey && !e.shiftKey) {
-                        this.sendMessage(e);
-                      } else if (e.key === "Enter" && e.ctrlKey) {
-                        spawnChatMessage(e.target.value);
-                        this.setState({ pendingMessage: "" });
-                        e.target.blur();
-                      } else if (e.key === "Escape") {
-                        e.target.blur();
-                      }
-                    }}
-                    placeholder={discordBridges.length ? `Send to room and ${discordSnippet}...` : "Send to room..."}
-                  />
-                  <button
-                    className={classNames([styles.messageEntrySpawn])}
-                    onClick={() => {
-                      if (this.state.pendingMessage.length > 0) {
-                        spawnChatMessage(this.state.pendingMessage);
-                        this.setState({ pendingMessage: "" });
-                      } else {
-                        this.pushHistoryState("modal", "create");
-                      }
-                    }}
-                  />
-                  <button
-                    type="submit"
-                    className={classNames([
-                      styles.messageEntryButton,
-                      styles.messageEntryButtonInRoom,
-                      styles.messageEntrySubmit
-                    ])}
-                  >
-                    <i>
-                      <FontAwesomeIcon icon={faPaperPlane} />
-                    </i>
-                  </button>
-                </div>
-              </form>
+              <InWorldChatBox
+                discordBridges={discordBridges}
+                onSendMessage={this.sendMessage}
+                onObjectCreated={this.createObject}
+              />
             )}
-
             {this.state.frozen && (
               <button className={styles.leaveButton} onClick={() => this.exit("left")}>
                 <FormattedMessage id="entry.leave-room" />
