@@ -57,19 +57,23 @@ export const scaledThumbnailUrlFor = (url, width, height) => {
   return `https://${process.env.FARSPARK_SERVER}/thumbnail/${farsparkEncodeUrl(url)}?w=${width}&h=${height}`;
 };
 
-export const proxiedUrlFor = (url, index) => {
+export const proxiedUrlFor = (url, index = null) => {
   if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
 
-  // Skip known domains that do not require CORS proxying.
-  try {
-    const parsedUrl = new URL(url);
-    if (nonCorsProxyDomains.find(domain => parsedUrl.hostname.endsWith(domain))) return url;
-  } catch (e) {
-    // Ignore
+  const hasIndex = index !== null;
+
+  if (!hasIndex) {
+    // Skip known domains that do not require CORS proxying.
+    try {
+      const parsedUrl = new URL(url);
+      if (nonCorsProxyDomains.find(domain => parsedUrl.hostname.endsWith(domain))) return url;
+    } catch (e) {
+      // Ignore
+    }
   }
 
-  if (index != null || !process.env.CORS_PROXY_SERVER) {
-    const method = index != null ? "extract" : "raw";
+  if (hasIndex || !process.env.CORS_PROXY_SERVER) {
+    const method = hasIndex ? "extract" : "raw";
     return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${farsparkEncodeUrl(url)}`;
   } else {
     return `https://${process.env.CORS_PROXY_SERVER}/${url}`;

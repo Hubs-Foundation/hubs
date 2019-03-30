@@ -67,7 +67,6 @@
             <img id="snap-camera" crossorigin="anonymous" src="./assets/images/snap_camera.png">
             <img id="camera" crossorigin="anonymous" src="./assets/images/camera.png">
             <img id="presence-count" crossorigin="anonymous" src="./assets/hud/presence-count.png">
-            <img id="water-normal-map" crossorigin="anonymous" src="./assets/waternormals.jpg">
             <img id="camera-action" crossorigin="anonymous" src="./assets/camera-action.png">
             <img id="scale-action" crossorigin="anonymous" src="./assets/scale-action.png">
             <img id="rotate-action" crossorigin="anonymous" src="./assets/rotate-action.png">
@@ -237,8 +236,25 @@
                 >
                     <a-entity class="ui interactable-ui">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 10;">
-                            <a-entity mixin="rounded-text-action-button" is-remote-hover-target tags="singleActionButton:true;" pin-networked-object-button="labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned;" position="0 0.125 0.01">
-                                <a-entity class="pin-button-label" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                            <a-entity mixin="rounded-text-action-button" is-remote-hover-target tags="singleActionButton:true" pin-networked-object-button="tipSelector:.pin-button-tip; labelSelector:.pin-button-label; hideWhenPinnedSelector:.hide-when-pinned;" position="0 0.125 0.01">
+                                <a-entity class="pin-button-label" visible="false" text=" value:pin; width:1.75; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                            </a-entity>
+                            <a-entity
+                                class="pin-button-tip"
+                                text="value:Pinning will broadcast this object to Discord.; width:1.75; align:center; color:#fff;"
+                                visible="false"
+                                text-raycast-hack
+                                slice9="
+                                    color: #0F40A9;
+                                    width: 1.8;
+                                    height: 0.2;
+                                    left: 64;
+                                    top: 64;
+                                    right: 66;
+                                    bottom: 66;
+                                    opacity: 1.0;
+                                    src: #button"
+                                position="0 0.6 0.01">
                             </a-entity>
                             <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.01">
                                 <a-entity text=" value:focus; width:1.75; align:center;" text-raycast-hack position="0.075 0 0.02"></a-entity>

@@ -24,7 +24,6 @@ import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
-import { Presence } from "phoenix";
 
 import "./components/scene-components";
 import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
@@ -178,8 +177,9 @@ import qsTruthy from "./utils/qs_truthy";
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
 const isDebug = qsTruthy("debug");
-const loadingEnvironmentURL =
-  "https://hubs-proxy.com/https://uploads-prod.reticulum.io/files/61d77151-7a74-40a6-b427-0c5a350c4502.glb";
+const loadingEnvironmentURL = proxiedUrlFor(
+  "https://uploads-prod.reticulum.io/files/61d77151-7a74-40a6-b427-0c5a350c4502.glb"
+);
 
 if (!isBotMode && !isTelemetryDisabled) {
   registerTelemetry("/hub", "Room Landing Page");
@@ -788,6 +788,77 @@ document.addEventListener("DOMContentLoaded", async () => {
     .join()
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
+
+      const hubPhxPresence = hubChannel.presence;
+      let isInitialSync = true;
+      const vrHudPresenceCount = document.querySelector("#hud-presence-count");
+
+      hubPhxPresence.onSync(() => {
+        remountUI({ presences: hubPhxPresence.state });
+        const occupantCount = Object.entries(hubPhxPresence.state).length;
+        vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
+
+        if (occupantCount > 1) {
+          scene.addState("copresent");
+        } else {
+          scene.removeState("copresent");
+        }
+
+        if (!isInitialSync) return;
+        // Wire up join/leave event handlers after initial sync.
+        isInitialSync = false;
+
+        hubPhxPresence.onJoin((sessionId, current, info) => {
+          const meta = info.metas[info.metas.length - 1];
+
+          if (current) {
+            // Change to existing presence
+            const isSelf = sessionId === socket.params().session_id;
+            const currentMeta = current.metas[0];
+
+            if (!isSelf && currentMeta.presence !== meta.presence && meta.profile.displayName) {
+              addToPresenceLog({
+                type: "entered",
+                presence: meta.presence,
+                name: meta.profile.displayName
+              });
+            }
+
+            if (currentMeta.profile && meta.profile && currentMeta.profile.displayName !== meta.profile.displayName) {
+              addToPresenceLog({
+                type: "display_name_changed",
+                oldName: currentMeta.profile.displayName,
+                newName: meta.profile.displayName
+              });
+            }
+          } else {
+            // New presence
+            const meta = info.metas[0];
+
+            if (meta.presence && meta.profile.displayName) {
+              addToPresenceLog({
+                type: "join",
+                presence: meta.presence,
+                name: meta.profile.displayName
+              });
+            }
+          }
+        });
+
+        hubPhxPresence.onLeave((sessionId, current, info) => {
+          if (current && current.metas.length > 0) return;
+
+          const meta = info.metas[0];
+
+          if (meta.profile.displayName) {
+            addToPresenceLog({
+              type: "leave",
+              name: meta.profile.displayName
+            });
+          }
+        });
+      });
+
       hubChannel.setPermissionsFromToken(data.perms_token);
       scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
         adapter.setClientId(socket.params().session_id);
@@ -807,77 +878,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error(res);
     });
 
-  const hubPhxPresence = new Presence(hubPhxChannel);
-
-  let isInitialSync = true;
-  const vrHudPresenceCount = document.querySelector("#hud-presence-count");
-
-  hubPhxPresence.onSync(() => {
-    remountUI({ presences: hubPhxPresence.state });
-    const occupantCount = Object.entries(hubPhxPresence.state).length;
-    vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
-
-    if (occupantCount > 1) {
-      scene.addState("copresent");
-    } else {
-      scene.removeState("copresent");
-    }
-
-    if (!isInitialSync) return;
-    // Wire up join/leave event handlers after initial sync.
-    isInitialSync = false;
-
-    hubPhxPresence.onJoin((sessionId, current, info) => {
-      const meta = info.metas[info.metas.length - 1];
-
-      if (current) {
-        // Change to existing presence
-        const isSelf = sessionId === socket.params().session_id;
-        const currentMeta = current.metas[0];
-
-        if (!isSelf && currentMeta.presence !== meta.presence && meta.profile.displayName) {
-          addToPresenceLog({
-            type: "entered",
-            presence: meta.presence,
-            name: meta.profile.displayName
-          });
-        }
-
-        if (currentMeta.profile && meta.profile && currentMeta.profile.displayName !== meta.profile.displayName) {
-          addToPresenceLog({
-            type: "display_name_changed",
-            oldName: currentMeta.profile.displayName,
-            newName: meta.profile.displayName
-          });
-        }
-      } else {
-        // New presence
-        const meta = info.metas[0];
-
-        if (meta.presence && meta.profile.displayName) {
-          addToPresenceLog({
-            type: "join",
-            presence: meta.presence,
-            name: meta.profile.displayName
-          });
-        }
-      }
-    });
-
-    hubPhxPresence.onLeave((sessionId, current, info) => {
-      if (current && current.metas.length > 0) return;
-
-      const meta = info.metas[0];
-
-      if (meta.profile.displayName) {
-        addToPresenceLog({
-          type: "leave",
-          name: meta.profile.displayName
-        });
-      }
-    });
-  });
-
   hubPhxChannel.on("naf", data => {
     if (!NAF.connection.adapter) return;
     NAF.connection.adapter.onData(data);
@@ -885,7 +885,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
     const getAuthor = () => {
-      const userInfo = hubPhxPresence.state[session_id];
+      const userInfo = hubChannel.presence.state[session_id];
       if (from) {
         return from;
       } else if (userInfo) {
@@ -909,7 +909,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hubPhxChannel.on("hub_refresh", ({ session_id, hubs, stale_fields }) => {
     const hub = hubs[0];
-    const userInfo = hubPhxPresence.state[session_id];
+    const userInfo = hubChannel.presence.state[session_id];
 
     updateUIForHub(hub);
 

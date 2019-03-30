@@ -17,6 +17,7 @@ import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils"
 import { showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 
 const isMobile = AFRAME.utils.device.isMobile();
+const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 const PUBLISHER_FOR_ENTRY_TYPE = {
   sketchfab_model: "Sketchfab",
@@ -106,7 +107,7 @@ class MediaBrowser extends Component {
   };
 
   sourceChanged = () => {
-    if (this.inputRef) {
+    if (this.inputRef && !isMobileVR) {
       this.inputRef.focus();
     }
   };
@@ -230,7 +231,7 @@ class MediaBrowser extends Component {
                 </i>
                 <input
                   type="text"
-                  autoFocus
+                  autoFocus={!isMobileVR}
                   ref={r => (this.inputRef = r)}
                   placeholder={formatMessage({
                     id: `media-browser.search-placeholder.${urlSource}`
