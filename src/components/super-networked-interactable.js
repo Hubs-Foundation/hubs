@@ -18,7 +18,7 @@ AFRAME.registerComponent("super-networked-interactable", {
       this.networkedEl = networkedEl;
       this._syncCounterRegistration();
       if (!NAF.utils.isMine(networkedEl)) {
-        this.el.setAttribute("ammo-body", { type: "kinematic", addCollideEventListener: true });
+        this.el.setAttribute("ammo-body", { type: "kinematic", emitCollisionEvents: true });
       } else {
         this.counter.register(networkedEl);
       }
