@@ -3,8 +3,6 @@ import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
-import { ObjectContentOrigins } from "../object-types";
-import nextTick from "./next-tick";
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
