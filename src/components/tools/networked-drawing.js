@@ -182,7 +182,7 @@ AFRAME.registerComponent("networked-drawing", {
 
         // This is a sanity check against the sequence number to help uncover remaining bugs.
         // If the point is out-of-order, report the error and stop drawing this line.
-        const invalidPointRead = pointCount !== this.lastReadPointCount + 1 || window.fail;
+        const invalidPointRead = pointCount !== this.lastReadPointCount + 1;
 
         if (invalidPointRead) {
           console.error(
