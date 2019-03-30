@@ -789,7 +789,7 @@
                 matrix-auto-update
                 haptic-feedback="path: /haptics/actuators/left"
                 mixin="controller-super-hands"
-                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
+                ammo-body="type: kinematic; emitCollisionEvents: true; collisionFlags: 4; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
                 ammo-shape="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 action-to-event__c="path: /actions/leftHandGrab; event: primary_hand_grab;"
                 action-to-event__d="path: /actions/leftHandDrop; event: primary_hand_release;"
@@ -806,7 +806,7 @@
                 matrix-auto-update
                 haptic-feedback="path: /haptics/actuators/right"
                 mixin="controller-super-hands"
-                ammo-body="type: kinematic; addCollideEventListener: true; collisionFlags: 4; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
+                ammo-body="type: kinematic; emitCollisionEvents: true; collisionFlags: 4; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
                 ammo-shape="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 action-to-event__c="path: /actions/rightHandGrab; event: primary_hand_grab;"
                 action-to-event__d="path: /actions/rightHandDrop; event: primary_hand_release;"
