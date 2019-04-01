@@ -206,7 +206,7 @@
                     scalable-when-grabbed
                     is-remote-hover-target
                     is-hand-collision-target
-                    tags="offersHandConstraint: true; offersRemoteConstraint: true;"
+                    tags="isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
                     hoverable-visuals="cursorController: #cursor-controller"
                     sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
                     sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
@@ -225,7 +225,7 @@
                     set-unowned-body-kinematic
                     is-remote-hover-target
                     is-hand-collision-target
-                    tags="offersHandConstraint: true; offersRemoteConstraint: true;"
+                    tags="isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
                     destroy-at-extreme-distances
                     scalable-when-grabbed
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true;"
@@ -285,7 +285,7 @@
                             <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" clone-media-button position="-0.43 -0.375 0.01">
                                 <a-entity text="value:clone; width:1.75; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                             </a-entity>
-                            <a-entity mixin="rounded-action-button" tags="holdableButton: true;" is-remote-hover-target transform-button transform-button-selector position="-0.3 -0.125 0.01">
+                            <a-entity mixin="rounded-action-button" tags="isHoldable: true; holdableButton: true;" is-remote-hover-target transform-button transform-button-selector position="-0.3 -0.125 0.01">
                                 <a-image
                                     icon-button="image: #rotate-action; hoverImage: #rotate-action;"
                                     scale="0.165 0.165 0.165"
@@ -299,7 +299,7 @@
                                     position="0 0 0.001"
                                 ></a-image>
                             </a-entity>
-                            <a-entity mixin="rounded-action-button" tags="holdableButton: true;" is-remote-hover-target transform-button="mode: scale;" position="0.3 -0.125 0.01">
+                            <a-entity mixin="rounded-action-button" tags="isHoldable: true; holdableButton: true;" is-remote-hover-target transform-button="mode: scale;" position="0.3 -0.125 0.01">
                                 <a-image
                                     icon-button="image: #scale-action; hoverImage: #scale-action;"
                                     scale="0.165 0.165 0.165"
@@ -319,7 +319,7 @@
                     set-unowned-body-kinematic
                     is-remote-hover-target
                     is-hand-collision-target
-                    tags="offersHandConstraint: true; offersRemoteConstraint: true; isPen: true;"
+                    tags="isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; isPen: true;"
                     sticky-object="autoLockOnRelease: true; autoLockOnLoad: true; autoLockSpeedLimit: 0;"
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
@@ -367,7 +367,7 @@
                     camera-tool
                     is-remote-hover-target
                     is-hand-collision-target
-                    tags="offersHandConstraint: true; offersRemoteConstraint: true;"
+                    tags="isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
                     matrix-auto-update
                     scale="0.5 0.5 0.5"
                     animation__spawn="property: scale; delay: 50; dur: 200; from: 0.5 0.5 0.5; to: 1 1 1; easing: easeOutQuad"
@@ -390,7 +390,7 @@
                                 position="0 0 0.001"
                             ></a-image>
                         </a-entity>
-                        <a-entity mixin="rounded-action-button" is-remote-hover-target tags="holdableButton: true;" transform-button transform-button-selector position="0.15 -0.125 0.01">
+                        <a-entity mixin="rounded-action-button" is-remote-hover-target tags="isHoldable: true; holdableButton: true;" transform-button transform-button-selector position="0.15 -0.125 0.01">
                             <a-image
                                 icon-button="image: #rotate-action; hoverImage: #rotate-action;"
                                 scale="0.165 0.165 0.165"

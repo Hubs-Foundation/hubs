@@ -109,21 +109,14 @@ AFRAME.registerSystem("interaction", {
       }
     } else {
       state.hovered = options.hoverFn.call(this, options.entity.body);
-      if (state.hovered) {
-        if (userinput.get(options.grabPath)) {
-          const offersConstraint =
-            state.hovered.components.tags && state.hovered.components.tags.data[options.constraintTag];
-          const isHoldableButton = state.hovered.components.tags && state.hovered.components.tags.data.holdableButton;
-          if (offersConstraint || isHoldableButton) {
-            if (
-              this.el.is("frozen") ||
-              !state.hovered.components.pinnable ||
-              !state.hovered.components.pinnable.data.pinned
-            ) {
-              state.held = state.hovered;
-            }
-          }
-        }
+      if (
+        state.hovered &&
+        state.hovered.components.tags &&
+        state.hovered.components.tags.data.isHoldable &&
+        userinput.get(options.grabPath) &&
+        (this.el.is("frozen") || !state.hovered.components.pinnable || !state.hovered.components.pinnable.data.pinned)
+      ) {
+        state.held = state.hovered;
       }
     }
   },

@@ -1,5 +1,6 @@
 AFRAME.registerComponent("tags", {
   schema: {
+    isHoldable: { default: false },
     offersHandConstraint: { default: false },
     offersRemoteConstraint: { default: false },
     singleActionButton: { default: false },
