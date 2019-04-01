@@ -42,7 +42,7 @@ export default class HubChannel extends EventTarget {
     const nextRefresh = new Date(this._permissions.exp * 1000 - 60 * 1000) - new Date();
     setTimeout(async () => {
       const result = await this.fetchPermissions();
-      this.dispatchEvent(new CustomEvent("permissions-refreshed"), result);
+      this.dispatchEvent(new CustomEvent("permissions-refreshed", { detail: result }));
     }, nextRefresh);
   };
 
