@@ -43,7 +43,8 @@ export const SCHEMA = {
         lastEnteredAt: { type: "string" },
         hasPinned: { type: "boolean" },
         hasRotated: { type: "boolean" },
-        hasRecentered: { type: "boolean" }
+        hasRecentered: { type: "boolean" },
+        hasScaled: { type: "boolean" }
       }
     },
 
@@ -53,6 +54,11 @@ export const SCHEMA = {
       properties: {
         lastUsedMicDeviceId: { type: "string" }
       }
+    },
+
+    confirmedDiscordRooms: {
+      type: "array",
+      items: { type: "string" }
     },
 
     uploadPromotionTokens: {
@@ -75,6 +81,7 @@ export const SCHEMA = {
     credentials: { $ref: "#/definitions/credentials" },
     activity: { $ref: "#/definitions/activity" },
     settings: { $ref: "#/definitions/settings" },
+    confirmedDiscordRooms: { $ref: "#/definitions/confirmedDiscordRooms" },
     uploadPromotionTokens: { $ref: "#/definitions/uploadPromotionTokens" }
   },
 
@@ -93,6 +100,7 @@ export default class Store extends EventTarget {
       settings: {},
       credentials: {},
       profile: {},
+      confirmedDiscordRooms: [],
       uploadPromotionTokens: []
     });
 
@@ -123,12 +131,18 @@ export default class Store extends EventTarget {
     return this[STORE_STATE_CACHE_KEY];
   }
 
-  resetTipActivityFlags() {
-    this.update({ activity: { hasRotated: false, hasPinned: false, hasRecentered: false } });
+  resetConfirmedDiscordRooms() {
+    // merge causing us some annoyance here :(
+    const overwriteMerge = (destinationArray, sourceArray) => sourceArray;
+    this.update({ confirmedDiscordRooms: [] }, { arrayMerge: overwriteMerge });
   }
 
-  update(newState) {
-    const finalState = merge(this.state, newState);
+  resetTipActivityFlags() {
+    this.update({ activity: { hasRotated: false, hasPinned: false, hasRecentered: false, hasScaled: false } });
+  }
+
+  update(newState, mergeOpts) {
+    const finalState = merge(this.state, newState, mergeOpts);
     const { valid } = validator.validate(finalState, SCHEMA);
 
     if (!valid) {

@@ -458,10 +458,11 @@ export default class SceneEntryManager {
       if (entry.type === "scene_listing" && this.hubChannel.permissions.update_hub) return;
 
       // If user has HMD lifted up, delay spawning for now. eventually show a modal
-      const delaySpawn = isIn2DInterstitial() && !isMobileVR;
+      const spawnDelay = isIn2DInterstitial() ? (isMobileVR ? 1000 : 3000) : 0;
+
       setTimeout(() => {
         spawnMediaInfrontOfPlayer(entry.url, ObjectContentOrigins.URL);
-      }, delaySpawn ? 3000 : 0);
+      }, spawnDelay);
 
       handleReEntryToVRFrom2DInterstitial();
     });

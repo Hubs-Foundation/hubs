@@ -73,8 +73,8 @@ const _interpolateHSL = (function() {
 
 const HIGHLIGHT = new THREE.Color(23 / 255, 64 / 255, 118 / 255);
 const NO_HIGHLIGHT = new THREE.Color(190 / 255, 190 / 255, 190 / 255);
-const ROTATE_COLOR_1 = [150, 80, 150];
-const ROTATE_COLOR_2 = [23, 64, 118];
+const TRANSFORM_COLOR_1 = [150, 80, 150];
+const TRANSFORM_COLOR_2 = [23, 64, 118];
 /**
  * Manages targeting and physical cursor location. Has the following responsibilities:
  *
@@ -112,7 +112,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.dirty = true;
     this.distance = this.data.far;
     this.color = new THREE.Color(0, 0, 0);
-    this.rotateColor = [0, 0, 0];
+    this.transformColor = [0, 0, 0];
     const lineMaterial = new THREE.LineBasicMaterial({
       color: "white",
       opacity: 0.2,
@@ -220,9 +220,9 @@ AFRAME.registerComponent("cursor-controller", {
       cursor.object3D.scale.setScalar(Math.pow(this.distance, 0.315) * 0.75);
       cursor.object3D.matrixNeedsUpdate = true;
 
-      if (AFRAME.scenes[0].systems["rotate-selected-object"].rotating) {
-        _interpolateHSL(ROTATE_COLOR_1, ROTATE_COLOR_2, 0.5 + 0.5 * Math.sin(t / 1000.0), this.rotateColor);
-        this.color.setRGB(this.rotateColor[0], this.rotateColor[1], this.rotateColor[2]);
+      if (AFRAME.scenes[0].systems["transform-selected-object"].transforming) {
+        _interpolateHSL(TRANSFORM_COLOR_1, TRANSFORM_COLOR_2, 0.5 + 0.5 * Math.sin(t / 1000.0), this.transformColor);
+        this.color.setRGB(this.transformColor[0], this.transformColor[1], this.transformColor[2]);
       } else if (intersection || isGrabbing) {
         this.color.copy(HIGHLIGHT);
       } else {
