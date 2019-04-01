@@ -1,6 +1,7 @@
 import { addMedia } from "../utils/media-utils";
 import { waitForEvent } from "../utils/async-utils";
 import { ObjectContentOrigins } from "../object-types";
+import { paths } from "../systems/userinput/paths";
 
 const COLLISION_FLAG = require("aframe-physics-system/src/constants").COLLISION_FLAG;
 
@@ -72,6 +73,7 @@ AFRAME.registerComponent("super-spawner", {
 
   init() {
     this.cooldownTimeout = null;
+    this.handPosition = new THREE.Vector3();
 
     this.onSpawnEvent = this.onSpawnEvent.bind(this);
 
@@ -82,13 +84,13 @@ AFRAME.registerComponent("super-spawner", {
 
   play() {
     if (this.data.spawnEvent) {
-      this.sceneEl.addEventListener(this.data.spawnEvent, this.onSpawnEvent);
+      this.el.sceneEl.addEventListener(this.data.spawnEvent, this.onSpawnEvent);
     }
   },
 
   pause() {
     if (this.data.spawnEvent) {
-      this.sceneEl.removeEventListener(this.data.spawnEvent, this.onSpawnEvent);
+      this.el.sceneEl.removeEventListener(this.data.spawnEvent, this.onSpawnEvent);
     }
     if (this.cooldownTimeout) {
       clearTimeout(this.cooldownTimeout);
@@ -115,15 +117,33 @@ AFRAME.registerComponent("super-spawner", {
       entity.object3D.scale.copy(this.data.spawnScale);
     }
 
-    AFRAME.scenes[0].systems.interaction.state.rightRemote.held = entity;
-    AFRAME.scenes[0].systems.interaction.state.rightRemote.spawning = true;
+    const userinput = AFRAME.scenes[0].systems.userinput;
+    const interaction = AFRAME.scenes[0].systems.interaction;
+    const willAnimateFromCursor = this.data.animateFromCursor && userinput.get(paths.actions.rightHand.matrix);
+    if (!willAnimateFromCursor) {
+      interaction.state.rightRemote.held = entity;
+      interaction.state.rightRemote.spawning = true;
+    }
     this.activateCooldown();
     await waitForEvent("body-loaded", entity);
 
-    AFRAME.scenes[0].systems.interaction.state.rightRemote.spawning = false;
     cursor.object3D.getWorldPosition(entity.object3D.position);
     cursor.object3D.getWorldQuaternion(entity.object3D.quaternion);
     entity.object3D.matrixNeedsUpdate = true;
+
+    if (willAnimateFromCursor) {
+      document.querySelector("#player-right-controller").object3D.getWorldPosition(this.handPosition);
+      entity.setAttribute("animation__spawn-at-cursor", {
+        property: "position",
+        delay: 500,
+        dur: 1500,
+        from: { x: entity.object3D.position.x, y: entity.object3D.position.y, z: entity.object3D.position.z },
+        to: { x: this.handPosition.x, y: this.handPosition.y, z: this.handPosition.z },
+        easing: "easeInOutBack"
+      });
+    } else {
+      interaction.state.rightRemote.spawning = false;
+    }
     entity.components["ammo-body"].syncToPhysics();
   },
 
