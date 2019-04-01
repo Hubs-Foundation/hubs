@@ -71,9 +71,10 @@ export default class MediaSearchStore extends EventTarget {
     if (this.lastSavedUrl === url) return;
 
     const res = await fetch(url);
-    this.result = await res.json();
+    const result = await res.json();
     if (this.requestIndex != currentRequestIndex) return;
 
+    this.result = result;
     this.nextCursor = this.result.meta.next_cursor;
     this.lastFetchedUrl = url;
     this.dispatchEvent(new CustomEvent("statechanged"));
