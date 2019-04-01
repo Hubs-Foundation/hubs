@@ -3,6 +3,7 @@ import { ConstraintsSystem } from "./constraints-system";
 import { TwoPointStretchingSystem } from "./two-point-stretching-system";
 import { SingleActionButtonSystem, HoldableButtonSystem, HoverButtonSystem } from "./button-systems";
 import { HoverMenuSystem } from "./hover-menu-system";
+import { SuperSpawnerSystem } from "./super-spawner-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -13,12 +14,14 @@ AFRAME.registerSystem("hubs-systems", {
     this.holdableButtonSystem = new HoldableButtonSystem();
     this.hoverButtonSystem = new HoverButtonSystem();
     this.hoverMenuSystem = new HoverMenuSystem();
+    this.superSpawnerSystem = new SuperSpawnerSystem();
   },
 
   tick(t) {
     const systems = AFRAME.scenes[0].systems;
     systems.userinput.tick2();
     systems.interaction.tick2();
+    this.superSpawnerSystem.tick();
     this.cursorTargettingSystem.tick(t);
     this.constraintsSystem.tick();
     this.twoPointStretchingSystem.tick();
