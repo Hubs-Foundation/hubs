@@ -1,5 +1,6 @@
 export class SingleActionButtonSystem {
   tick() {
+    this.didInteractThisFrame = false;
     const interaction = AFRAME.scenes[0].systems.interaction;
     const userinput = AFRAME.scenes[0].systems.userinput;
     const state = interaction.state.rightRemote;
@@ -10,6 +11,7 @@ export class SingleActionButtonSystem {
       state.hovered.components.tags &&
       state.hovered.components.tags.data.singleActionButton
     ) {
+      this.didInteractThisFrame = true;
       state.hovered.object3D.dispatchEvent({
         type: "interact",
         path: grab

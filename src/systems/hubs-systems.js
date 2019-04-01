@@ -4,6 +4,7 @@ import { TwoPointStretchingSystem } from "./two-point-stretching-system";
 import { SingleActionButtonSystem, HoldableButtonSystem, HoverButtonSystem } from "./button-systems";
 import { HoverMenuSystem } from "./hover-menu-system";
 import { SuperSpawnerSystem } from "./super-spawner-system";
+import { HapticFeedbackSystem } from "./haptic-feedback-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -15,6 +16,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.hoverButtonSystem = new HoverButtonSystem();
     this.hoverMenuSystem = new HoverMenuSystem();
     this.superSpawnerSystem = new SuperSpawnerSystem();
+    this.hapticFeedbackSystem = new HapticFeedbackSystem();
   },
 
   tick(t) {
@@ -29,5 +31,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.holdableButtonSystem.tick();
     this.hoverButtonSystem.tick();
     this.hoverMenuSystem.tick();
+    this.hapticFeedbackSystem.tick(this.twoPointStretchingSystem, this.singleActionButtonSystem.didInteractThisFrame);
   }
 });

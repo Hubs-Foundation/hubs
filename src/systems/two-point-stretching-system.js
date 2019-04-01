@@ -1,5 +1,5 @@
 /* global THREE AFRAME */
-const distanceBetweenStretchers = (() => {
+export const distanceBetweenStretchers = (() => {
   const a = new THREE.Vector3();
   const b = new THREE.Vector3();
   return function distanceBetweenStretchers(obj1, obj2) {
