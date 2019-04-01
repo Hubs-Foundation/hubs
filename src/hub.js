@@ -48,6 +48,7 @@ import "./components/icon-button";
 import "./components/text-button";
 import "./components/block-button";
 import "./components/kick-button";
+import "./components/leave-room-button";
 import "./components/visible-if-permitted";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";
@@ -646,6 +647,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   scene.addEventListener("tips_changed", e => {
     remountUI({ activeTips: e.detail });
+  });
+
+  scene.addEventListener("leave_room_requested", () => {
+    entryManager.exitScene("left");
+    remountUI({ roomUnavailableReason: "left" });
   });
 
   scene.addEventListener("camera_toggled", () => remountUI({}));

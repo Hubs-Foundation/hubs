@@ -664,7 +664,16 @@
                 vr-mode-toggle-visibility
                 vr-mode-toggle-playing__hud-controller
             >
-                <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" rotation="30 0 0">
+                <a-entity visibility-while-frozen="withinDistance: 10; requireHoverOnNonMobile: false;" rotation="30 0 0">
+                    <a-entity class="ui interactable-ui" mixin="button-container">
+                        <a-entity class="leave-btn" position="0 0.18 0" scale="0.7 0.7 0.7" hoverable leave-room-button>
+                            <a-entity mixin="rounded-text-action-button" slice9="width: 0.8" scale="0.8 0.8 1.0">
+                                <a-entity text=" value:leave room; width:2; align:center;" text-raycast-hack position="0 0 0.01"></a-entity>
+                            </a-entity>
+                        </a-entity>
+                    </a-entity>
+                </a-entity>
+                <a-entity in-world-hud="haptic:#player-right-controller;raycaster:#player-right-controller;" visibility-while-frozen="withinDistance: 10; visible: false; requireHoverOnNonMobile: false;" rotation="30 0 0">
 
                     <a-rounded height="0.08" width="0.2" color="#000000" position="-0.44 -0.045 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
                     <a-image scale="0.07 0.06 0.06" position="-0.38 -0.005 0.001" src="#presence-count" material="alphaTest:0.1;"></a-image>
@@ -676,48 +685,48 @@
                             </a-entity>
                         </a-entity>
                     </a-entity>
-                <a-image
-                    icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover"
-                    scale="0.1 0.1 0.1"
-                    position="-0.17 0 0.001"
-                    class="hud mic"
-                    material="alphaTest:0.1;"
-                    hoverable
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
-                    set-sounds-invisible
-                ></a-image>
-                <a-image
-                    icon-button="tooltip: #hud-tooltip; tooltipText: Create; activeTooltipText: Resume; image: #spawn; hoverImage: #spawn-hover;"
-                    scale="0.2 0.2 0.2"
-                    position="0 0 0.005"
-                    class="hud spawn"
-                    hoverable
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
-                    set-sounds-invisible
-                ></a-image>
-                <a-image
-                    icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #pen-off; hoverImage: #pen-off-hover; activeImage: #pen-on; activeHoverImage: #pen-on-hover"
-                    scale="0.1 0.1 0.1"
-                    position="0.17 0 0.001"
-                    class="hud penhud"
-                    material="alphaTest:0.1;"
-                    hoverable
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
-                    set-sounds-invisible
-                ></a-image>
-                <a-image
-                    icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #camera-off; hoverImage: #camera-off-hover; activeImage: #camera-on; activeHoverImage: #camera-on-hover"
-                    scale="0.1 0.1 0.1"
-                    position="0.28 0 0.001"
-                    class="hud camera-btn"
-                    material="alphaTest:0.1;"
-                    hoverable
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
-                    set-sounds-invisible
-                ></a-image>
-                <a-rounded visible="false" vr-mode-toggle-visibility id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
-                    <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" matrix-auto-update="target: text"></a-entity>
-                </a-rounded>
+                    <a-image
+                        icon-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic; image: #mute-off; hoverImage: #mute-off-hover; activeImage: #mute-on; activeHoverImage: #mute-on-hover"
+                        scale="0.1 0.1 0.1"
+                        position="-0.17 0 0.001"
+                        class="hud mic"
+                        material="alphaTest:0.1;"
+                        hoverable
+                        sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
+                        set-sounds-invisible
+                    ></a-image>
+                    <a-image
+                        icon-button="tooltip: #hud-tooltip; tooltipText: Create; activeTooltipText: Resume; image: #spawn; hoverImage: #spawn-hover;"
+                        scale="0.2 0.2 0.2"
+                        position="0 0 0.005"
+                        class="hud spawn"
+                        hoverable
+                        sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
+                        set-sounds-invisible
+                    ></a-image>
+                    <a-image
+                        icon-button="tooltip: #hud-tooltip; tooltipText: Pen; activeTooltipText: Pen; image: #pen-off; hoverImage: #pen-off-hover; activeImage: #pen-on; activeHoverImage: #pen-on-hover"
+                        scale="0.1 0.1 0.1"
+                        position="0.17 0 0.001"
+                        class="hud penhud"
+                        material="alphaTest:0.1;"
+                        hoverable
+                        sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
+                        set-sounds-invisible
+                    ></a-image>
+                    <a-image
+                        icon-button="tooltip: #hud-tooltip; tooltipText: Camera; activeTooltipText: Camera; image: #camera-off; hoverImage: #camera-off-hover; activeImage: #camera-on; activeHoverImage: #camera-on-hover"
+                        scale="0.1 0.1 0.1"
+                        position="0.28 0 0.001"
+                        class="hud camera-btn"
+                        material="alphaTest:0.1;"
+                        hoverable
+                        sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
+                        set-sounds-invisible
+                    ></a-image>
+                    <a-rounded visible="false" vr-mode-toggle-visibility id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
+                        <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" matrix-auto-update="target: text"></a-entity>
+                    </a-rounded>
                 </a-entity>
             </a-entity>
 
