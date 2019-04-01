@@ -20,7 +20,6 @@ import { getAvatarSrc, getAvatarType } from "./assets/avatars/avatars";
 import { pushHistoryState } from "./utils/history";
 
 const isIOS = AFRAME.utils.device.isIOS();
-const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, availableVREntryTypes, history) {
