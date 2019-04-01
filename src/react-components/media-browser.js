@@ -107,7 +107,7 @@ class MediaBrowser extends Component {
   };
 
   sourceChanged = () => {
-    if (this.inputRef && !isMobileVR) {
+    if (this.inputRef && !isMobile && !isMobileVR) {
       this.inputRef.focus();
     }
   };
@@ -231,7 +231,7 @@ class MediaBrowser extends Component {
                 </i>
                 <input
                   type="text"
-                  autoFocus={!isMobileVR}
+                  autoFocus={!isMobile && !isMobileVR}
                   ref={r => (this.inputRef = r)}
                   placeholder={formatMessage({
                     id: `media-browser.search-placeholder.${urlSource}`

@@ -9,6 +9,7 @@ import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { showFullScreenIfAvailable } from "../utils/fullscreen";
 
 import styles from "../assets/stylesheets/settings-menu.scss";
 
@@ -68,6 +69,7 @@ export default class SettingsMenu extends Component {
                   <div
                     className={styles.listItemLink}
                     onClick={() => {
+                      showFullScreenIfAvailable();
                       this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
                       this.props.hideSettings();
                     }}
