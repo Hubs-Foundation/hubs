@@ -252,6 +252,7 @@
     "loader.loading": "Loading ",
     "loader.object": "object",
     "loader.objects": "objects",
-    "change-scene-dialog.change-scene": "Change Scene"
+    "change-scene-dialog.change-scene": "Change Scene",
+    "interstitial.prompt": "Continue"
   }
 }

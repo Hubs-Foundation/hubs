@@ -403,6 +403,17 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
     hubChannel.updateScene(e.detail);
   });
 
+  // Handle request for user gesture
+  scene.addEventListener("2d-interstitial-gesture-required", () => {
+    remountUI({
+      showInterstitialPrompt: true,
+      onInterstitialPromptClicked: () => {
+        scene.emit("2d-interstitial-gesture-complete");
+        remountUI({ showInterstitialPrompt: false, onInterstitialPromptClicked: null });
+      }
+    });
+  });
+
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   const connectToScene = async () => {
     scene.setAttribute("networked-scene", {

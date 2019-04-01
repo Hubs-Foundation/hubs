@@ -160,7 +160,9 @@ class UIRoot extends Component {
     onMediaSearchResultEntrySelected: PropTypes.func,
     activeTips: PropTypes.object,
     location: PropTypes.object,
-    history: PropTypes.object
+    history: PropTypes.object,
+    showInterstitialPrompt: PropTypes.bool,
+    onInterstitialPromptClicked: PropTypes.func
   };
 
   state = {
@@ -866,6 +868,18 @@ class UIRoot extends Component {
 
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
+  renderInterstitialPrompt = () => {
+    return (
+      <IntlProvider locale={lang} messages={messages}>
+        <div className={styles.interstitial} onClick={() => this.props.onInterstitialPromptClicked()}>
+          <div>
+            <FormattedMessage id="interstitial.prompt" />
+          </div>
+        </div>
+      </IntlProvider>
+    );
+  };
+
   renderExitedPane = () => {
     let subtitle = null;
     if (this.props.roomUnavailableReason === "closed") {
@@ -1410,6 +1424,7 @@ class UIRoot extends Component {
 
     if (isExited) return this.renderExitedPane();
     if (isLoading) return this.renderLoader();
+    if (this.props.showInterstitialPrompt) return this.renderInterstitialPrompt();
     if (this.props.isBotMode) return this.renderBotMode();
 
     const entered = this.state.entered;
