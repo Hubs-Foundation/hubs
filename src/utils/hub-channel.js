@@ -1,4 +1,5 @@
 import jwtDecode from "jwt-decode";
+import { EventTarget } from "event-target-shim";
 import { Presence } from "phoenix";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -12,8 +13,9 @@ function isSameDay(da, db) {
   return isSameMonth(da, db) && da.getDate() == db.getDate();
 }
 
-export default class HubChannel {
+export default class HubChannel extends EventTarget {
   constructor(store) {
+    super();
     this.store = store;
     this._signedIn = !!this.store.state.credentials.token;
     this._permissions = {};
@@ -35,6 +37,13 @@ export default class HubChannel {
   setPermissionsFromToken = token => {
     // Note: token is not verified.
     this._permissions = jwtDecode(token);
+
+    // Refresh the token 1 minute before it expires.
+    const nextRefresh = new Date(this._permissions.exp * 1000 - 60 * 1000) - new Date();
+    setTimeout(async () => {
+      const result = await this.fetchPermissions();
+      this.dispatchEvent(new CustomEvent("permissions-refreshed"), result);
+    }, nextRefresh);
   };
 
   sendEntryEvent = async () => {
