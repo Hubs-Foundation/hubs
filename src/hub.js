@@ -650,6 +650,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   scene.addEventListener("leave_room_requested", () => {
+    scene.exitVR();
     entryManager.exitScene("left");
     remountUI({ roomUnavailableReason: "left" });
   });
