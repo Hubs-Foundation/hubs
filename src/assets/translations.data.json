@@ -194,6 +194,7 @@
     "settings.room-info": "Room & Scene Info",
     "settings.create-room": "New Room...",
     "settings.create-scene": "Get Spoke",
+    "settings.send-feedback": "Send Feedback",
     "settings.whats-new": "What's New",
     "settings.features": "Help",
     "settings.controls": "Controls",
@@ -252,6 +253,7 @@
     "loader.loading": "Loading ",
     "loader.object": "object",
     "loader.objects": "objects",
-    "change-scene-dialog.change-scene": "Change Scene"
+    "change-scene-dialog.change-scene": "Change Scene",
+    "feedback.prompt": "Feedback"
   }
 }
