@@ -28,6 +28,7 @@ paths.actions.mediaSearch4 = "/actions/mediaSearch4";
 paths.actions.mediaSearch5 = "/actions/mediaSearch5";
 paths.actions.mediaSearch6 = "/actions/mediaSearch6";
 paths.actions.mediaSearch7 = "/actions/mediaSearch7";
+paths.actions.mediaSearch8 = "/actions/mediaSearch8";
 paths.actions.transformModifier = "/actions/transformModifier";
 paths.actions.rayObjectRotation = "/actions/rayObjectRotation";
 paths.actions.cursor = {};

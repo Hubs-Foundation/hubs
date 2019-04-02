@@ -8,7 +8,8 @@ const MEDIA_SEARCH_PATHS = [
   paths.actions.mediaSearch4,
   paths.actions.mediaSearch5,
   paths.actions.mediaSearch6,
-  paths.actions.mediaSearch7
+  paths.actions.mediaSearch7,
+  paths.actions.mediaSearch8
 ];
 
 // Every frame, looks for input paths that trigger UI-relevant events and handles them.
