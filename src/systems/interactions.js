@@ -5,6 +5,9 @@ const handCollisionTargets = new Map();
 AFRAME.registerComponent("is-hand-collision-target", {
   init: function() {
     handCollisionTargets.set(this.el.object3D.uuid, this.el);
+  },
+  remove: function() {
+    handCollisionTargets.delete(this.el.object3D.uuid);
   }
 });
 function findHandCollisionTarget(o) {
@@ -42,6 +45,9 @@ function findRemoteHoverTarget(o) {
 AFRAME.registerComponent("is-remote-hover-target", {
   init: function() {
     remoteHoverTargets.set(this.el.object3D.uuid, this.el);
+  },
+  remove: function() {
+    remoteHoverTargets.delete(this.el.object3D.uuid);
   }
 });
 
