@@ -34,14 +34,6 @@ AFRAME.registerComponent("networked-counter", {
     }
   },
 
-  _onGrabbed(el) {
-    clearTimeout(this.timestamps.get(el).timeout);
-  },
-
-  _onReleased(el) {
-    this.timestamps.set(el, Date.now());
-  },
-
   isHeld(el) {
     const { leftHand, rightHand, rightRemote } = this.el.sceneEl.systems.interaction.state;
     return leftHand.held === el || rightHand.held === el || rightRemote.held === el;
