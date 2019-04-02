@@ -597,6 +597,20 @@ export const oculusTouchUserBindings = addSetsToBindings({
     },
     {
       src: {
+        bool: paths.device.keyboard.key("control"),
+        value: paths.device.keyboard.key("8")
+      },
+      dest: { value: "/var/shift+8" },
+      priority: 1001,
+      xform: xforms.copyIfTrue
+    },
+    {
+      src: { value: "/var/shift+8" },
+      dest: { value: paths.actions.mediaSearch8 },
+      xform: xforms.rising
+    },
+    {
+      src: {
         value: paths.device.keyboard.key("l")
       },
       dest: {

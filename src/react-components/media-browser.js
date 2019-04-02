@@ -31,6 +31,7 @@ const PRIVACY_POLICY_LINKS = {
   gifs: "https://tenor.com/legal-privacy",
   sketchfab: "https://sketchfab.com/privacy",
   poly: "https://policies.google.com/privacy",
+  youtube: "https://policies.google.com/privacy",
   twitch: "https://www.twitch.tv/p/legal/privacy-policy/"
 };
 
