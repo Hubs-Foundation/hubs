@@ -45,7 +45,6 @@
     - [mute-mic](#components/network/mute-mic)
     - [networked-counter](#components/network/networked-counter)
     - [networked-video-player](#components/network/networked-video-player)
-    - [super-networked-interactable](#components/network/super-networked-interactable)
     - [super-spawner](#components/network/super-spawner)
   - [ui](#components/ui)
     - [hud-controller](#components/ui/hud-controller)
@@ -58,7 +57,6 @@
     - [cardboard-controls](#components/user-input/cardboard-controls)
     - [cursor-controller](#components/user-input/cursor-controller)
     - [hand-controls2](#components/user-input/hand-controls2)
-    - [haptic-feedback](#components/user-input/haptic-feedback)
     - [virtual-gamepad-controls](#components/user-input/virtual-gamepad-controls)
     - [wasd-to-analog2d](#components/user-input/wasd-to-analog2d)
   - [vr-mode](#components/vr-mode)
@@ -295,15 +293,6 @@ Instantiates and plays a network video stream, setting the video as the source m
 
 `src/components/networked-video-player.js`
           
-
-<a name="components/network/super-networked-interactable"></a>
-#### super-networked-interactable
-
-Manages ownership and haptics on an interatable
-
-`src/components/super-networked-interactable.js`
-          
-
 <a name="components/network/super-spawner"></a>
 #### super-spawner
 
@@ -337,14 +326,6 @@ Controls virtual cursor behavior in various modalities to affect teleportation, 
 Converts events from various 6DoF and 3DoF controllers into hand-pose events.
 
 `src/components/hand-controls2.js`
-          
-
-<a name="components/user-input/haptic-feedback"></a>
-#### haptic-feedback
-
-Listens for haptic events and actuates hardware controllers accordingly
-
-`src/components/haptic-feedback.js`
           
 
 <a name="components/user-input/virtual-gamepad-controls"></a>
@@ -442,7 +423,7 @@ Positions the HUD and toggles app mode based on where the user is looking
 <a name="components/ui/icon-button"></a>
 #### icon-button
 
-A button with an image, tooltip, hover states and haptics.
+A button with an image, tooltip, and hover states.
 
 `src/components/icon-button.js`
           
@@ -458,7 +439,7 @@ HUD panel for muting, freezing, and space bubble controls.
 <a name="components/ui/text-button"></a>
 #### text-button
 
-A button with text and haptics
+A button with text 
 
 `src/components/text-button.js`
           

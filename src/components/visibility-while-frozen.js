@@ -23,12 +23,15 @@ AFRAME.registerComponent("visibility-while-frozen", {
     let hoverableSearch = this.el;
 
     while (hoverableSearch !== document) {
-      if (hoverableSearch.getAttribute("hoverable") !== null) {
+      if (hoverableSearch.getAttribute("is-remote-hover-target") !== null) {
         this.hoverable = hoverableSearch;
         break;
       }
 
       hoverableSearch = hoverableSearch.parentNode;
+    }
+    if (!this.hoverable) {
+      console.error("Didn't find a remote hover target.");
     }
 
     this.onStateChange = evt => {
@@ -75,7 +78,10 @@ AFRAME.registerComponent("visibility-while-frozen", {
       ((isFrozen && this.data.visible) || (!isFrozen && !this.data.visible)) && isWithinDistance && !isTransforming;
 
     if (this.data.requireHoverOnNonMobile && !isMobile) {
-      shouldBeVisible = shouldBeVisible && ((this.hoverable && this.hoverable.is("hovered")) || isVisible);
+      shouldBeVisible =
+        shouldBeVisible &&
+        ((this.hoverable && AFRAME.scenes[0].systems.interaction.state.rightRemote.hovered === this.hoverable) ||
+          isVisible);
     }
 
     if (isVisible !== shouldBeVisible) {
@@ -86,11 +92,15 @@ AFRAME.registerComponent("visibility-while-frozen", {
   play() {
     this.el.sceneEl.addEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.addEventListener("stateremoved", this.onStateChange);
+    this.hoverable.object3D.addEventListener("hovered", this.updateVisibility);
+    this.hoverable.object3D.addEventListener("unhovered", this.updateVisibility);
   },
 
   pause() {
     this.el.sceneEl.removeEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.removeEventListener("stateremoved", this.onStateChange);
+    this.hoverable.object3D.addEventListener("hovered", this.updateVisibility);
+    this.hoverable.object3D.addEventListener("unhovered", this.updateVisibility);
   }
 });
 

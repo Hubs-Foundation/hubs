@@ -7,11 +7,8 @@ AFRAME.registerComponent("hover-menu", {
   },
 
   async init() {
-    this.onHoverStateChange = this.onHoverStateChange.bind(this);
     this.onFrozenStateChange = this.onFrozenStateChange.bind(this);
-
-    this.hovering = this.el.parentNode.is("hovered");
-
+    this.hovering = false;
     await this.getHoverMenu();
     this.applyHoverState();
   },
@@ -39,8 +36,7 @@ AFRAME.registerComponent("hover-menu", {
     this.applyHoverState();
   },
 
-  onHoverStateChange(e) {
-    this.hovering = e.type === "hover-start";
+  tick() {
     this.applyHoverState();
   },
 
@@ -53,15 +49,11 @@ AFRAME.registerComponent("hover-menu", {
   },
 
   play() {
-    this.el.addEventListener("hover-start", this.onHoverStateChange);
-    this.el.addEventListener("hover-end", this.onHoverStateChange);
     this.el.sceneEl.addEventListener("stateadded", this.onFrozenStateChange);
     this.el.sceneEl.addEventListener("stateremoved", this.onFrozenStateChange);
   },
 
   pause() {
-    this.el.removeEventListener("hover-start", this.onHoverStateChange);
-    this.el.removeEventListener("hover-end", this.onHoverStateChange);
     this.el.sceneEl.removeEventListener("stateadded", this.onFrozenStateChange);
     this.el.sceneEl.removeEventListener("stateremoved", this.onFrozenStateChange);
   }

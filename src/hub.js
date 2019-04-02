@@ -37,7 +37,6 @@ import "./components/hand-controls2";
 import "./components/character-controller";
 import "./components/hoverable-visuals";
 import "./components/hover-visuals";
-import "./components/haptic-feedback";
 import "./components/offset-relative-to";
 import "./components/player-info";
 import "./components/debug";
@@ -70,7 +69,6 @@ import "./components/emit-state-change";
 import "./components/action-to-event";
 import "./components/action-to-remove";
 import "./components/emit-scene-event-on-remove";
-import "./components/stop-event-propagation";
 import "./components/follow-in-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
@@ -83,6 +81,7 @@ import "./components/set-active-camera";
 import "./components/track-pose";
 import "./components/replay";
 import "./components/visibility-by-path";
+import "./components/tags";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
@@ -114,6 +113,8 @@ import "./systems/userinput/userinput-debug";
 import "./systems/frame-scheduler";
 import "./systems/ui-hotkeys";
 import "./systems/tips";
+import "./systems/interactions";
+import "./systems/hubs-systems";
 
 import "./gltf-component-mappings";
 
@@ -146,8 +147,8 @@ window.Ammo = Ammo.bind(undefined, {
   }
 });
 require("aframe-physics-system");
-import "super-hands";
-import "./components/super-networked-interactable";
+import "./components/owned-object-limiter";
+import "./components/set-unowned-body-kinematic";
 import "./components/scalable-when-grabbed";
 import "./components/networked-counter";
 import "./components/event-repeater";

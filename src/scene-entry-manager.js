@@ -293,7 +293,6 @@ export default class SceneEntryManager {
         !(src instanceof MediaStream),
         true
       );
-
       orientation.then(or => {
         entity.setAttribute("offset-relative-to", {
           target: "#player-camera",

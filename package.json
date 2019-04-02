@@ -75,7 +75,6 @@
     "react-router-dom": "^4.3.1",
     "react-youtube": "^7.8.0",
     "screenfull": "^4.0.1",
-    "super-hands": "github:mozillareality/aframe-super-hands-component#hubs/master",
     "three": "github:mozillareality/three.js#hubs/master",
     "three-mesh-bvh": "^0.1.0",
     "three-pathfinding": "github:mozillareality/three-pathfinding#hubs/master",

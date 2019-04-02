@@ -34,8 +34,7 @@ const getPlayerCamera = (() => {
 })();
 
 function shouldMoveCursor(touch, raycaster) {
-  const cursorController = document.querySelector("[cursor-controller]").components["cursor-controller"];
-  const isCursorGrabbing = cursorController.data.cursor.components["super-hands"].state.has("grab-start");
+  const isCursorGrabbing = !!AFRAME.scenes[0].systems.interaction.state.rightRemote.held;
   if (isCursorGrabbing) {
     return true;
   }
@@ -47,14 +46,18 @@ function shouldMoveCursor(touch, raycaster) {
     },
     getPlayerCamera()
   );
-  raycaster.intersectObjects(cursorController.targets, true, rawIntersections);
+  raycaster.intersectObjects(
+    AFRAME.scenes[0].systems["hubs-systems"].cursorTargettingSystem.targets,
+    true,
+    rawIntersections
+  );
   const intersection = rawIntersections.find(x => x.object.el);
   return intersection && intersection.object.el.matches(".interactable, .interactable *");
 }
 
 export class AppAwareTouchscreenDevice {
   constructor() {
-    this.raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 3);
+    this.raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 4);
     this.assignments = [];
     this.pinch = { initialDistance: 0, currentDistance: 0, delta: 0 };
 
