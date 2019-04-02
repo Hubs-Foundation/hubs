@@ -203,11 +203,6 @@
                     ammo-body="type: static; mass: 1;"
                     is-remote-hover-target
                     hoverable-visuals="cursorController: #cursor-controller"
-                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
-                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
-                    set-sounds-invisible
-                    emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
-                    emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
                 >
                 </a-entity>
             </template>
