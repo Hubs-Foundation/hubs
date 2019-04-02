@@ -38,8 +38,8 @@ mv dist/hub.service.js dist/pages
 
 # we need to upload wasm blobs with wasm content type explicitly because, unlike all our
 # other assets, AWS's built-in MIME type dictionary doesn't know about that one
-aws s3 sync --acl public-read --cache-control "max-age=31556926" --include "*" --exclude "*.wasm" dist/assets "$TARGET_S3_URL/assets"
-aws s3 sync --acl public-read --cache-control "max-age=31556926" --exclude "*" --include "*.wasm" --content-type "application/wasm" dist/assets "$TARGET_S3_URL/assets"
+aws s3 sync --acl public-read --cache-control "max-age=31556926" --include "*" --exclude "*.wasm" dist/assets "$TARGET_S3_URL/hubs/assets"
+aws s3 sync --acl public-read --cache-control "max-age=31556926" --exclude "*" --include "*.wasm" --content-type "application/wasm" dist/assets "$TARGET_S3_URL/hubs/assets"
 
-aws s3 sync --acl public-read --cache-control "no-cache" --delete dist/pages "$TARGET_S3_URL/pages/latest"
-aws s3 sync --acl public-read --cache-control "no-cache" --delete dist/pages "$TARGET_S3_URL/pages/releases/${BUILD_NUMBER}"
+aws s3 sync --acl public-read --cache-control "no-cache" --delete dist/pages "$TARGET_S3_URL/hubs/pages/latest"
+aws s3 sync --acl public-read --cache-control "no-cache" --delete dist/pages "$TARGET_S3_URL/hubs/pages/releases/${BUILD_NUMBER}"
