@@ -1890,7 +1890,7 @@ class UIRoot extends Component {
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
                 />
                 <div className={styles.nagCornerButton}>
-                  <a href="https://forms.gle/wYyAowiQyK9EDdcDA" target="_blank" rel="noopener noreferrer">
+                  <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
                     <FormattedMessage id="feedback.prompt" />
                   </a>
                 </div>
