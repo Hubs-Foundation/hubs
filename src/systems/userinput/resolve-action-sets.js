@@ -1,6 +1,10 @@
 import { sets } from "./sets";
 
+let leftTeleporter, rightTeleporter;
+
 export function resolveActionSets() {
+  leftTeleporter = leftTeleporter || document.querySelector("#player-left-controller").components.teleporter;
+  rightTeleporter = rightTeleporter || document.querySelector("#player-right-controller").components.teleporter;
   const userinput = AFRAME.scenes[0].systems.userinput;
   const { leftHand, rightHand, rightRemote } = AFRAME.scenes[0].systems.interaction.state;
 
@@ -136,6 +140,9 @@ export function resolveActionSets() {
       rightRemote.held.components.tags.data.holdableButton
   );
   userinput.toggleSet(sets.cursorHoldingInteractable, rightRemote.held);
+
+  userinput.toggleSet(sets.leftHandTeleporting, leftTeleporter.isTeleporting);
+  userinput.toggleSet(sets.rightHandTeleporting, rightTeleporter.isTeleporting);
 
   userinput.toggleSet(
     sets.inputFocused,
