@@ -1,3 +1,4 @@
+/* global performance THREE AFRAME NAF MediaStream process setTimeout */
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
 import { paths } from "../systems/userinput/paths";
@@ -636,7 +637,7 @@ AFRAME.registerComponent("media-video", {
     const userinput = this.el.sceneEl.systems.userinput;
     const interaction = this.el.sceneEl.systems.interaction;
     const volumeMod = userinput.get(paths.actions.cursor.mediaVolumeMod);
-    if (interaction.rightRemoteHoverTarget === this.el && volumeMod) {
+    if (interaction.state.rightRemote.hovered === this.el && volumeMod) {
       this.changeVolumeBy(volumeMod);
     }
 

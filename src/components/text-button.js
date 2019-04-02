@@ -1,11 +1,10 @@
 /**
- * A button with text and haptics
+ * A button with text
  * @namespace ui
  * @component text-button
  */
 AFRAME.registerComponent("text-button", {
   schema: {
-    haptic: { type: "selector" },
     textHoverColor: { type: "string" },
     textColor: { type: "string" },
     backgroundHoverColor: { type: "string" },
@@ -18,35 +17,23 @@ AFRAME.registerComponent("text-button", {
     this.onHover = () => {
       this.hovering = true;
       this.updateButtonState();
-      this.emitHapticPulse();
     };
     this.onHoverOut = () => {
       this.hovering = false;
       this.updateButtonState();
     };
-    this.onClick = () => {
-      this.emitHapticPulse();
-    };
     this.textEl = this.el.querySelector("[text]");
-  },
-
-  emitHapticPulse() {
-    if (this.data.haptic) {
-      this.data.haptic.emit("haptic_pulse", { intensity: "low" });
-    }
   },
 
   play() {
     this.updateButtonState();
     this.el.object3D.addEventListener("hovered", this.onHover);
     this.el.object3D.addEventListener("unhovered", this.onHoverOut);
-    this.el.object3D.addEventListener("interact", this.onClick);
   },
 
   pause() {
     this.el.object3D.removeEventListener("hovered", this.onHover);
     this.el.object3D.removeEventListener("unhovered", this.onHoverOut);
-    this.el.object3D.removeEventListener("interact", this.onClick);
   },
 
   update() {

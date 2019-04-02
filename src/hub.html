@@ -515,7 +515,6 @@
 
             <a-mixin id="rounded-text-button"
                 text-button="
-                    haptic:#player-right-controller;
                     textHoverColor: #ff3464;
                     textColor: #ff3464;
                     backgroundHoverColor: #aaa;
@@ -533,7 +532,6 @@
 
             <a-mixin id="rounded-button"
                 text-button="
-                    haptic:#player-right-controller;
                     textHoverColor: #ff3464;
                     textColor: #ff3464;
                     backgroundHoverColor: #aaa;
@@ -551,7 +549,6 @@
 
             <a-mixin id="rounded-text-action-button"
                 text-button="
-                    haptic:#player-right-controller;
                     textHoverColor: #fff;
                     textColor: #fff;
                     backgroundColor: #ff3464;
@@ -570,7 +567,6 @@
 
             <a-mixin id="rounded-action-button"
                 text-button="
-                    haptic:#player-right-controller;
                     textHoverColor: #fff;
                     textColor: #fff;
                     backgroundColor: #ff3464;
@@ -610,7 +606,6 @@
             segments-height="9"
             ammo-body="type: kinematic; collisionFlags: 4; collisionFilterMask: 3; scaleAutoUpdate: false; activationState: disable_deactivation;"
             ammo-shape="type: sphere; sphereRadius: 0.02; fit: manual;"
-            haptic-feedback="path: /haptics/actuators/right"
         >
             <a-image
                 icon-button="image: #rotation-symbol"
@@ -764,7 +759,6 @@
                 hand-controls2="left"
                 teleporter="start: /actions/leftHand/startTeleport; confirm: /actions/leftHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
-                haptic-feedback="path: /haptics/actuators/left"
                 ammo-body="type: kinematic; emitCollisionEvents: false; collisionFlags: 4; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
                 ammo-shape="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
             >
@@ -778,7 +772,6 @@
                 hand-controls2="right"
                 teleporter="start: /actions/rightHand/startTeleport; confirm: /actions/rightHand/stopTeleport; collisionEntities: [nav-mesh]"
                 matrix-auto-update
-                haptic-feedback="path: /haptics/actuators/right"
                 ammo-body="type: kinematic; emitCollisionEvents: false; collisionFlags: 4; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
                 ammo-shape="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
             >

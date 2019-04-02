@@ -99,9 +99,6 @@ export class HapticFeedbackSystem {
       ? Math.max(rightHandStrength, rightRemoteStrength, stretchingStrength, buttonPressedStrength)
       : 0;
 
-    if (didClickButton) {
-      console.log(rightStrength);
-    }
     if (leftStrength && leftActuator) {
       leftActuator.pulse(leftStrength, 15);
     }

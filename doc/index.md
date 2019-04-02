@@ -57,7 +57,6 @@
     - [cardboard-controls](#components/user-input/cardboard-controls)
     - [cursor-controller](#components/user-input/cursor-controller)
     - [hand-controls2](#components/user-input/hand-controls2)
-    - [haptic-feedback](#components/user-input/haptic-feedback)
     - [virtual-gamepad-controls](#components/user-input/virtual-gamepad-controls)
     - [wasd-to-analog2d](#components/user-input/wasd-to-analog2d)
   - [vr-mode](#components/vr-mode)
@@ -329,14 +328,6 @@ Converts events from various 6DoF and 3DoF controllers into hand-pose events.
 `src/components/hand-controls2.js`
           
 
-<a name="components/user-input/haptic-feedback"></a>
-#### haptic-feedback
-
-Listens for haptic events and actuates hardware controllers accordingly
-
-`src/components/haptic-feedback.js`
-          
-
 <a name="components/user-input/virtual-gamepad-controls"></a>
 #### virtual-gamepad-controls
 
@@ -432,7 +423,7 @@ Positions the HUD and toggles app mode based on where the user is looking
 <a name="components/ui/icon-button"></a>
 #### icon-button
 
-A button with an image, tooltip, hover states and haptics.
+A button with an image, tooltip, and hover states.
 
 `src/components/icon-button.js`
           
@@ -448,7 +439,7 @@ HUD panel for muting, freezing, and space bubble controls.
 <a name="components/ui/text-button"></a>
 #### text-button
 
-A button with text and haptics
+A button with text 
 
 `src/components/text-button.js`
           
