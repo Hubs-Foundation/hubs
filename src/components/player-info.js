@@ -1,5 +1,5 @@
 import { injectCustomShaderChunks } from "../utils/media-utils";
-
+import { AVATAR_TYPES } from "../assets/avatars/avatars";
 /**
  * Sets player info state, including avatar choice and display name.
  * @namespace avatar
@@ -8,7 +8,8 @@ import { injectCustomShaderChunks } from "../utils/media-utils";
 AFRAME.registerComponent("player-info", {
   schema: {
     displayName: { type: "string" },
-    avatarSrc: { type: "string" }
+    avatarSrc: { type: "string" },
+    avatarType: { type: "string", default: AVATAR_TYPES.LEGACY }
   },
   init() {
     this.applyProperties = this.applyProperties.bind(this);
