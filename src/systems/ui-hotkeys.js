@@ -35,7 +35,7 @@ AFRAME.registerSystem("ui-hotkeys", {
       this.mediaSearchStore.pushExitMediaBrowserHistory();
     }
 
-    for (let i = 0; i <= MEDIA_SEARCH_PATHS.length; i++) {
+    for (let i = 0; i < MEDIA_SEARCH_PATHS.length; i++) {
       if (this.userinput.get(MEDIA_SEARCH_PATHS[i])) {
         this.mediaSearchStore.sourceNavigate(SOURCES[i]);
       }
