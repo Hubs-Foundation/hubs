@@ -1,0 +1,22 @@
+@import 'shared.scss';
+
+:local(.oauth-type-name) {
+  text-transform: capitalize;
+}
+:local(.oauth-icon) {
+  font-size: 32px;
+  margin-right: 0.2em;
+  margin-top: 2px;
+}
+:local(.privacy-notice) {
+  font-size: 7pt;
+}
+:local(.oauth-buttons) {
+  flex-direction: column;
+}
+:local(.oauth-button) {
+  @extend %action-button;
+  margin-top: 0.5em;
+  color: white !important;
+  flex-direction: row;
+}
