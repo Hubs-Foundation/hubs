@@ -11,7 +11,7 @@ export default class OAuthDialog extends Component {
     return (
       <DialogContainer title="Sign In" {...this.props}>
         <div>
-          <div>You&apos;ll need to sign in to access this hub.</div>
+          <div>You&apos;ll need to sign in to access this room.</div>
           <br />
           <div>We&apos;ll ask for access to your e-mail address so you can skip signing in next time.</div>
           <p className={styles.privacyNotice}>
