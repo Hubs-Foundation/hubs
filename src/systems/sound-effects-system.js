@@ -1,31 +1,42 @@
 /* global fetch */
 import TICK from "../assets/sfx/tick.mp3";
+import TELEPORT_ARC from "../assets/sfx/teleportArc.mp3";
+import QUICK_TURN from "../assets/sfx/quickTurn.mp3";
 
 function getBuffer(url, context) {
-  return new Promise(resolve => {
-    fetch(url).then(response => {
-      response.arrayBuffer().then(arrayBuffer => {
-        context.decodeAudioData(arrayBuffer).then(resolve);
-      });
-    });
-  });
+  return fetch(url)
+    .then(r => r.arrayBuffer())
+    .then(arrayBuffer => context.decodeAudioData(arrayBuffer));
 }
 
-function playSound(buffer, context) {
+function playSound(buffer, context, loop) {
   const source = context.createBufferSource();
   source.buffer = buffer;
+  source.loop = !!loop;
   source.connect(context.destination);
   source.start();
+  return source;
 }
 
-function copy(current, previous) {
-  previous.held = current.held;
-  previous.hovered = current.hovered;
+function copy(current, prev) {
+  prev.held = current.held;
+  prev.hovered = current.hovered;
+}
+
+function isUI(el) {
+  return (
+    el && el.components.tags && (el.components.tags.data.singleActionButton || el.components.tags.data.holdableButton)
+  );
 }
 
 export class SoundEffectsSystem {
   constructor() {
-    this.previousState = {
+    this.teleporters = {
+      leftHand: null,
+      rightHand: null,
+      rightRemote: null
+    };
+    this.prevInteractionState = {
       leftHand: {
         hovered: null,
         held: null
@@ -39,37 +50,74 @@ export class SoundEffectsSystem {
         held: null
       }
     };
+    this.teleporterState = {
+      leftHand: {
+        teleporting: false,
+        teleportArcSource: null
+      },
+      rightHand: {
+        teleporting: false,
+        teleportArcSource: null
+      },
+      rightRemote: {
+        teleporting: false,
+        teleportArcSource: null
+      }
+    };
     this.ctx = THREE.AudioContext.getContext();
     this.sounds = {};
     getBuffer(TICK, this.ctx).then(buffer => {
       this.sounds.tick = buffer;
     });
+    getBuffer(TELEPORT_ARC, this.ctx).then(buffer => {
+      this.sounds.teleportArc = buffer;
+    });
+    getBuffer(QUICK_TURN, this.ctx).then(buffer => {
+      this.sounds.teleportEnd = buffer;
+    });
   }
 
   soundsReady() {
-    return this.sounds.tick;
+    return this.sounds.tick && this.sounds.teleportArc && this.sounds.teleportEnd;
   }
 
-  playSounds(current, previous) {
-    if (current.held && current.held !== previous.held) {
-      playSound(this.sounds.tick, this.ctx);
+  tickTeleportSounds(teleporter, state) {
+    if (teleporter.isTeleporting && !state.teleporting) {
+      state.teleportArcSource = playSound(this.sounds.teleportArc, this.ctx, true);
+    } else if (!teleporter.isTeleporting && state.teleporting) {
+      state.teleportArcSource.stop();
+      state.teleportArcSource = null;
+      playSound(this.sounds.teleportEnd, this.ctx);
     }
-
-    if (current.hovered && current.hovered !== previous.hovered) {
-      playSound(this.sounds.tick, this.ctx);
-    }
+    state.teleporting = teleporter.isTeleporting;
   }
 
   tick() {
     if (!this.soundsReady()) return;
 
     const { leftHand, rightHand, rightRemote } = AFRAME.scenes[0].systems.interaction.state;
-    this.playSounds(leftHand, this.previousState.leftHand);
-    this.playSounds(rightHand, this.previousState.rightHand);
-    this.playSounds(rightRemote, this.previousState.rightRemote);
+    if (
+      leftHand.held !== this.prevInteractionState.leftHand.held ||
+      (isUI(leftHand.hovered) && leftHand.hovered !== this.prevInteractionState.leftHand.hovered) ||
+      rightHand.held !== this.prevInteractionState.rightHand.held ||
+      (isUI(rightHand.hovered) && rightHand.hovered !== this.prevInteractionState.rightHand.hovered) ||
+      rightRemote.held !== this.prevInteractionState.rightRemote.held ||
+      (isUI(rightRemote.hovered) && rightRemote.hovered !== this.prevInteractionState.rightRemote.hovered)
+    ) {
+      playSound(this.sounds.tick, this.ctx);
+    }
+    copy(leftHand, this.prevInteractionState.leftHand);
+    copy(rightHand, this.prevInteractionState.rightHand);
+    copy(rightRemote, this.prevInteractionState.rightRemote);
 
-    copy(leftHand, this.previousState.leftHand);
-    copy(rightHand, this.previousState.rightHand);
-    copy(rightRemote, this.previousState.rightRemote);
+    this.teleporters.leftHand =
+      this.teleporters.leftHand || document.querySelector("#player-left-controller").components.teleporter;
+    this.teleporters.rightHand =
+      this.teleporters.rightHand || document.querySelector("#player-right-controller").components.teleporter;
+    this.teleporters.rightRemote =
+      this.teleporters.rightRemote || document.querySelector("#gaze-teleport").components.teleporter;
+    this.tickTeleportSounds(this.teleporters.leftHand, this.teleporterState.leftHand);
+    this.tickTeleportSounds(this.teleporters.rightHand, this.teleporterState.rightHand);
+    this.tickTeleportSounds(this.teleporters.rightRemote, this.teleporterState.rightRemote);
   }
 }

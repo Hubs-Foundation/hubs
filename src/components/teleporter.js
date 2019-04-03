@@ -181,7 +181,6 @@ AFRAME.registerComponent("teleporter", {
       this.rayCurve.mesh.material.opacity = MISS_OPACITY;
       this.rayCurve.mesh.material.color.set(MISS_COLOR);
       this.rayCurve.mesh.material.needsUpdate = true;
-      this.playSound("teleport-sound-start");
     }
 
     if (!this.isTeleporting) {
@@ -194,14 +193,12 @@ AFRAME.registerComponent("teleporter", {
       this.rayCurve.mesh.visible = false;
 
       if (!this.hit || this.timeTeleporting < DRAW_TIME_MS) {
-        this.playSound("teleport-sound-cancel");
         return;
       }
 
       this.characterController =
         this.characterController || document.querySelector("#player-rig").components["character-controller"];
       this.characterController.teleportTo(this.hitPoint);
-      this.playSound("teleport-sound-stop");
       return;
     }
 

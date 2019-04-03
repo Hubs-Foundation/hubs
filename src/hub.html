@@ -100,8 +100,6 @@
             <a-asset-item id="quack"                                      src="./assets/sfx/quack.mp3"          response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="specialquack"                               src="./assets/sfx/specialquack.mp3"   response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-quack"                          src="./assets/sfx/quack.mp3"          response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-teleport_start"                 src="./assets/sfx/teleportArc.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
-            <a-asset-item id="sound_asset-teleport_end"                   src="./assets/sfx/quickTurn.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-snap_rotate"                    src="./assets/sfx/tap_mellow.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-media_loaded"                   src="./assets/sfx/A_bendUp.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
             <a-asset-item id="sound_asset-media_loading"                  src="./assets/sfx/suspense.mp3"     response-type="arraybuffer" preload="auto"></a-asset-item>
@@ -318,11 +316,7 @@
                     sound__stop_draw="src: #sound_asset-stop_draw; on: stop_draw; poolSize: 2; positional: false;"
                     sound__increase_pen_radius="src: #sound_asset-increase_pen_radius; on: increase_pen_radius; poolSize: 2; positional: false;"
                     sound__decrease_pen_radius="src: #sound_asset-decrease_pen_radius; on: decrease_pen_radius; poolSize: 2; positional: false;"
-                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
-                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
                     set-sounds-invisible
-                    emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
-                    emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
                     action-to-remove__pen="path: /actions/pen/remove;"
                     position-at-box-shape-border="target:.pen-menu"
 
@@ -651,8 +645,6 @@
                     position="-0.17 0 0.001"
                     class="hud mic"
                     material="alphaTest:0.1;"
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
-                    set-sounds-invisible
                 ></a-image>
                 <a-image
                     is-remote-hover-target
@@ -661,8 +653,6 @@
                     scale="0.2 0.2 0.2"
                     position="0 0 0.005"
                     class="hud spawn"
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
-                    set-sounds-invisible
                 ></a-image>
                 <a-image
                     is-remote-hover-target
@@ -672,8 +662,6 @@
                     position="0.17 0 0.001"
                     class="hud penhud"
                     material="alphaTest:0.1;"
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
-                    set-sounds-invisible
                 ></a-image>
                 <a-image
                     is-remote-hover-target
@@ -683,8 +671,6 @@
                     position="0.28 0 0.001"
                     class="hud camera-btn"
                     material="alphaTest:0.1;"
-                    sound__hud_hover_start="src: #sound_asset-hud_hover_start; on: mouseover; poolSize: 5; positional: false;"
-                    set-sounds-invisible
                 ></a-image>
                 <a-rounded visible="false" vr-mode-toggle-visibility id="hud-tooltip" height="0.08" width="0.3" color="#000000" position="-0.15 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
                     <a-entity text="value: Mute Mic; align:center;" position="0.15 0.04 0.001" matrix-auto-update="target: text"></a-entity>
@@ -702,10 +688,6 @@
                 set-yxz-order
                 matrix-auto-update
                 set-active-camera
-                sound__teleport_start="positional: false; src: #sound_asset-teleport_start; on: nothing; poolSize: 2; loop: true;"
-                scene-sound__teleport_start="on: teleport-sound-start; off: teleport-sound-stop, teleport-sound-cancel;"
-                sound__teleport_end="positional: false; src: #sound_asset-teleport_end; on: nothing; poolSize: 2;"
-                scene-sound__teleport_end="on: teleport-sound-stop; off: teleport-sound-start"
                 sound__snap_rotate_left="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
                 scene-sound__snap_rotate_left="on: snap_rotate_left;"
                 sound__snap_rotate_right="positional: false; src: #sound_asset-snap_rotate; on: nothing; poolSize: 3;"
