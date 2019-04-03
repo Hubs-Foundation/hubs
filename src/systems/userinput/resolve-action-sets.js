@@ -38,7 +38,7 @@ export function resolveActionSets() {
   userinput.toggleSet(sets.leftHandHoldingCamera, leftHand.held && leftHand.held.components["camera-tool"]);
   userinput.toggleSet(sets.leftHandHoldingInteractable, leftHand.held);
 
-  userinput.toggleSet(sets.rightHandHoveringOnNothing, !rightHand.held && !rightHand.hovered);
+  userinput.toggleSet(sets.rightHandHoveringOnNothing, !rightRemote.held && !rightRemote.hovered && !rightHand.held && !rightHand.hovered);
   userinput.toggleSet(
     sets.rightHandHoveringOnPen,
     !rightHand.held &&
