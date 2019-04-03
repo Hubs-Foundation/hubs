@@ -160,8 +160,7 @@ export default class SceneEntryManager {
     this.scene.emit("username-changed", { username: displayName });
 
     const avatarSrc = await getAvatarSrc(avatarId);
-    this.playerRig.setAttribute("player-info", { avatarSrc });
-    this.playerRig.setAttribute("ik-root", "avatarType", getAvatarType(avatarId));
+    this.playerRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
   };
 
   _setupKicking = () => {

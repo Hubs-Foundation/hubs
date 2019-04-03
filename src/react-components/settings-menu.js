@@ -151,8 +151,8 @@ export default class SettingsMenu extends Component {
               <a href="https://discord.gg/wHmY4nd" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.community" />
               </a>
-              <a href="/spoke" target="_blank" rel="noreferrer noopener">
-                <FormattedMessage id="settings.create-scene" />
+              <a target="_blank" href="https://forms.gle/1g4H5Ayd1mGWqWpV7" rel="noopener noreferrer">
+                <FormattedMessage id="settings.send-feedback" />
               </a>
               <a className={styles.bottomLink} href="/?report" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.report" />

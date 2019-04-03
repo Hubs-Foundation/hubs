@@ -109,6 +109,7 @@
     "audio.granted-next": "Next",
     "exit.subtitle.exited": "Your session has ended. Refresh your browser to start a new one.",
     "exit.subtitle.closed": "This room is no longer available.",
+    "exit.subtitle.denied": "You are not permitted to join this room. Please request permission from the room creator.",
     "exit.subtitle.kicked": "You have been kicked from the room.",
     "exit.subtitle.left": "You have left the room.",
     "exit.subtitle.full": "This room is full, please try again later.",
@@ -197,6 +198,7 @@
     "settings.room-info": "Room & Scene Info",
     "settings.create-room": "New Room...",
     "settings.create-scene": "Get Spoke",
+    "settings.send-feedback": "Send Feedback",
     "settings.whats-new": "What's New",
     "settings.features": "Help",
     "settings.controls": "Controls",
@@ -255,6 +257,7 @@
     "loader.loading": "Loading ",
     "loader.object": "object",
     "loader.objects": "objects",
-    "change-scene-dialog.change-scene": "Change Scene"
+    "change-scene-dialog.change-scene": "Change Scene",
+    "feedback.prompt": "Feedback"
   }
 }
