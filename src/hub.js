@@ -24,7 +24,7 @@ import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
-import { Presence } from "phoenix";
+import Cookies from "js-cookie";
 
 import "./components/scene-components";
 import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
@@ -38,7 +38,6 @@ import "./components/hand-controls2";
 import "./components/character-controller";
 import "./components/hoverable-visuals";
 import "./components/hover-visuals";
-import "./components/haptic-feedback";
 import "./components/offset-relative-to";
 import "./components/player-info";
 import "./components/debug";
@@ -71,12 +70,11 @@ import "./components/emit-state-change";
 import "./components/action-to-event";
 import "./components/action-to-remove";
 import "./components/emit-scene-event-on-remove";
-import "./components/stop-event-propagation";
 import "./components/follow-in-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
-import "./components/rotate-object-button";
+import "./components/transform-object-button";
 import "./components/hover-menu";
 import "./components/disable-frustum-culling";
 import "./components/teleporter";
@@ -84,6 +82,7 @@ import "./components/set-active-camera";
 import "./components/track-pose";
 import "./components/replay";
 import "./components/visibility-by-path";
+import "./components/tags";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
@@ -115,6 +114,8 @@ import "./systems/userinput/userinput-debug";
 import "./systems/frame-scheduler";
 import "./systems/ui-hotkeys";
 import "./systems/tips";
+import "./systems/interactions";
+import "./systems/hubs-systems";
 
 import "./gltf-component-mappings";
 
@@ -128,6 +129,7 @@ window.APP.RENDER_ORDER = {
 };
 const store = window.APP.store;
 const mediaSearchStore = window.APP.mediaSearchStore;
+const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
 
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
@@ -136,7 +138,6 @@ const isMobileVR = AFRAME.utils.device.isMobileVR();
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 window.APP.quality = qs.get("quality") || (isMobile || isMobileVR) ? "low" : "high";
 
-const SHAPES = require("aframe-physics-system/src/constants").SHAPES;
 const Ammo = require("ammo.js/builds/ammo.wasm.js");
 const AmmoWasm = require("ammo.js/builds/ammo.wasm.wasm");
 window.Ammo = Ammo.bind(undefined, {
@@ -148,8 +149,8 @@ window.Ammo = Ammo.bind(undefined, {
   }
 });
 require("aframe-physics-system");
-import "super-hands";
-import "./components/super-networked-interactable";
+import "./components/owned-object-limiter";
+import "./components/set-unowned-body-kinematic";
 import "./components/scalable-when-grabbed";
 import "./components/networked-counter";
 import "./components/event-repeater";
@@ -176,8 +177,9 @@ import qsTruthy from "./utils/qs_truthy";
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
 const isDebug = qsTruthy("debug");
-const loadingEnvironmentURL =
-  "https://hubs-proxy.com/https://uploads-prod.reticulum.io/files/61d77151-7a74-40a6-b427-0c5a350c4502.glb";
+const loadingEnvironmentURL = proxiedUrlFor(
+  "https://uploads-prod.reticulum.io/files/61d77151-7a74-40a6-b427-0c5a350c4502.glb"
+);
 
 if (!isBotMode && !isTelemetryDisabled) {
   registerTelemetry("/hub", "Room Landing Page");
@@ -272,7 +274,6 @@ async function updateUIForHub(hub) {
   });
 }
 
-let shapes = null;
 async function updateEnvironmentForHub(hub) {
   let sceneUrl;
   let isLegacyBundle; // Deprecated
@@ -319,7 +320,7 @@ async function updateEnvironmentForHub(hub) {
       "model-loaded",
       () => {
         //TODO: check if the environment was made with spoke to determine if a shape should be added
-        shapes = traverseMeshesAndAddShapes(environmentEl, SHAPES.MESH, 0.1);
+        traverseMeshesAndAddShapes(environmentEl);
         generateMeshBVH(environmentEl.object3D);
       },
       { once: true }
@@ -339,10 +340,7 @@ async function updateEnvironmentForHub(hub) {
           environmentEl.addEventListener(
             "model-loaded",
             () => {
-              while (shapes.length > 0) {
-                environmentEl.removeAttribute(shapes.pop());
-              }
-              shapes = traverseMeshesAndAddShapes(environmentEl, SHAPES.MESH, 0.1);
+              traverseMeshesAndAddShapes(environmentEl);
               generateMeshBVH(environmentEl.object3D);
               document.querySelector("#player-rig").components["spawn-controller"].moveToSpawnPoint();
             },
@@ -406,6 +404,17 @@ async function handleHubChannelJoined(entryManager, hubChannel, messageDispatch,
 
   scene.addEventListener("scene_media_selected", e => {
     hubChannel.updateScene(e.detail);
+  });
+
+  // Handle request for user gesture
+  scene.addEventListener("2d-interstitial-gesture-required", () => {
+    remountUI({
+      showInterstitialPrompt: true,
+      onInterstitialPromptClicked: () => {
+        scene.emit("2d-interstitial-gesture-complete");
+        remountUI({ showInterstitialPrompt: false, onInterstitialPromptClicked: null });
+      }
+    });
   });
 
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
@@ -612,6 +621,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   scene.addEventListener("exit-vr", () => {
     document.body.classList.remove("vr-mode");
     document.body.classList.remove("vr-mode-stretch");
+
+    // HACK: Oculus browser pauses videos when exiting VR mode, so we need to resume them after a timeout.
+    if (/OculusBrowser/i.test(window.navigator.userAgent)) {
+      document.querySelectorAll("[media-video]").forEach(m => {
+        const video = m.components["media-video"].video;
+
+        if (!video.paused) {
+          setTimeout(() => video.play(), 1000);
+        }
+      });
+    }
   });
 
   registerNetworkSchemas();
@@ -738,12 +758,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
   const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
-  const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
+  const joinPayload = {
+    profile: store.state.profile,
+    push_subscription_endpoint: pushSubscriptionEndpoint,
+    auth_token: null,
+    perms_token: null,
+    context
+  };
+
+  const oauthFlowPermsToken = Cookies.get(OAUTH_FLOW_PERMS_TOKEN_KEY);
+  if (oauthFlowPermsToken) {
+    Cookies.remove(OAUTH_FLOW_PERMS_TOKEN_KEY);
+    joinPayload.perms_token = oauthFlowPermsToken;
+  }
+
   const { token } = store.state.credentials;
   if (token) {
     console.log(`Logged into account ${jwtDecode(token).sub}`);
     joinPayload.auth_token = token;
   }
+
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
 
   const presenceLogEntries = [];
@@ -779,95 +813,105 @@ document.addEventListener("DOMContentLoaded", async () => {
     .join()
     .receive("ok", async data => {
       hubChannel.setPhoenixChannel(hubPhxChannel);
-      hubChannel.setPermissionsFromToken(data.perms_token);
+
+      const hubPhxPresence = hubChannel.presence;
+      let isInitialSync = true;
+      const vrHudPresenceCount = document.querySelector("#hud-presence-count");
+
+      hubPhxPresence.onSync(() => {
+        remountUI({ presences: hubPhxPresence.state });
+        const occupantCount = Object.entries(hubPhxPresence.state).length;
+        vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
+
+        if (occupantCount > 1) {
+          scene.addState("copresent");
+        } else {
+          scene.removeState("copresent");
+        }
+
+        if (!isInitialSync) return;
+        // Wire up join/leave event handlers after initial sync.
+        isInitialSync = false;
+
+        hubPhxPresence.onJoin((sessionId, current, info) => {
+          const meta = info.metas[info.metas.length - 1];
+
+          if (current) {
+            // Change to existing presence
+            const isSelf = sessionId === socket.params().session_id;
+            const currentMeta = current.metas[0];
+
+            if (!isSelf && currentMeta.presence !== meta.presence && meta.profile.displayName) {
+              addToPresenceLog({
+                type: "entered",
+                presence: meta.presence,
+                name: meta.profile.displayName
+              });
+            }
+
+            if (currentMeta.profile && meta.profile && currentMeta.profile.displayName !== meta.profile.displayName) {
+              addToPresenceLog({
+                type: "display_name_changed",
+                oldName: currentMeta.profile.displayName,
+                newName: meta.profile.displayName
+              });
+            }
+          } else {
+            // New presence
+            const meta = info.metas[0];
+
+            if (meta.presence && meta.profile.displayName) {
+              addToPresenceLog({
+                type: "join",
+                presence: meta.presence,
+                name: meta.profile.displayName
+              });
+            }
+          }
+        });
+
+        hubPhxPresence.onLeave((sessionId, current, info) => {
+          if (current && current.metas.length > 0) return;
+
+          const meta = info.metas[0];
+
+          if (meta.profile.displayName) {
+            addToPresenceLog({
+              type: "leave",
+              name: meta.profile.displayName
+            });
+          }
+        });
+      });
+
+      const permsToken = oauthFlowPermsToken || data.perms_token;
+      hubChannel.setPermissionsFromToken(permsToken);
       scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
+        hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
       });
       subscriptions.setHubChannel(hubChannel);
+
       subscriptions.setSubscribed(data.subscriptions.web_push);
       remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
+
       await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
     })
     .receive("error", res => {
       if (res.reason === "closed") {
         entryManager.exitScene();
         remountUI({ roomUnavailableReason: "closed" });
+      } else if (res.reason === "oauth_required") {
+        entryManager.exitScene();
+        remountUI({ oauthInfo: res.oauth_info, showOAuthDialog: true });
+      } else if (res.reason === "join_denied") {
+        entryManager.exitScene();
+        remountUI({ roomUnavailableReason: "denied" });
       }
 
       console.error(res);
     });
-
-  const hubPhxPresence = new Presence(hubPhxChannel);
-
-  let isInitialSync = true;
-  const vrHudPresenceCount = document.querySelector("#hud-presence-count");
-
-  hubPhxPresence.onSync(() => {
-    remountUI({ presences: hubPhxPresence.state });
-    const occupantCount = Object.entries(hubPhxPresence.state).length;
-    vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
-
-    if (occupantCount > 1) {
-      scene.addState("copresent");
-    } else {
-      scene.removeState("copresent");
-    }
-
-    if (!isInitialSync) return;
-    // Wire up join/leave event handlers after initial sync.
-    isInitialSync = false;
-
-    hubPhxPresence.onJoin((sessionId, current, info) => {
-      const meta = info.metas[info.metas.length - 1];
-
-      if (current) {
-        // Change to existing presence
-        const isSelf = sessionId === socket.params().session_id;
-        const currentMeta = current.metas[0];
-
-        if (!isSelf && currentMeta.presence !== meta.presence && meta.profile.displayName) {
-          addToPresenceLog({
-            type: "entered",
-            presence: meta.presence,
-            name: meta.profile.displayName
-          });
-        }
-
-        if (currentMeta.profile && meta.profile && currentMeta.profile.displayName !== meta.profile.displayName) {
-          addToPresenceLog({
-            type: "display_name_changed",
-            oldName: currentMeta.profile.displayName,
-            newName: meta.profile.displayName
-          });
-        }
-      } else {
-        // New presence
-        const meta = info.metas[0];
-
-        if (meta.presence && meta.profile.displayName) {
-          addToPresenceLog({
-            type: "join",
-            presence: meta.presence,
-            name: meta.profile.displayName
-          });
-        }
-      }
-    });
-
-    hubPhxPresence.onLeave((sessionId, current, info) => {
-      if (current && current.metas.length > 0) return;
-
-      const meta = info.metas[0];
-
-      if (meta.profile.displayName) {
-        addToPresenceLog({
-          type: "leave",
-          name: meta.profile.displayName
-        });
-      }
-    });
-  });
 
   hubPhxChannel.on("naf", data => {
     if (!NAF.connection.adapter) return;
@@ -876,7 +920,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
     const getAuthor = () => {
-      const userInfo = hubPhxPresence.state[session_id];
+      const userInfo = hubChannel.presence.state[session_id];
       if (from) {
         return from;
       } else if (userInfo) {
@@ -900,7 +944,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hubPhxChannel.on("hub_refresh", ({ session_id, hubs, stale_fields }) => {
     const hub = hubs[0];
-    const userInfo = hubPhxPresence.state[session_id];
+    const userInfo = hubChannel.presence.state[session_id];
 
     updateUIForHub(hub);
 

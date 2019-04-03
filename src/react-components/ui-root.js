@@ -46,6 +46,7 @@ import RenameRoomDialog from "./rename-room-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
+import OAuthDialog from "./oauth-dialog.js";
 
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
@@ -71,9 +72,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 
 import qsTruthy from "../utils/qs_truthy";
-// TODO temp feature flags
-const customSkinEnabled = qsTruthy("customSkin");
-const advancedAvatarEditor = qsTruthy("advancedAvatarEditor");
+const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
 addLocaleData([...en]);
 
@@ -89,6 +88,10 @@ const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
 
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
+
+const LOBBY_MODAL_ROUTER_PATHS = ["/media/scenes"];
+const LOBBY_MODAL_QUERY_VARS = ["media_source"];
+const LOBBY_MODAL_QUERY_VALUES = ["scenes"];
 
 async function grantedMicLabels() {
   const mediaDevices = await navigator.mediaDevices.enumerateDevices();
@@ -153,12 +156,16 @@ class UIRoot extends Component {
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
+    showOAuthDialog: PropTypes.bool,
+    oauthInfo: PropTypes.array,
     isCursorHoldingPen: PropTypes.bool,
     hasActiveCamera: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
     activeTips: PropTypes.object,
     location: PropTypes.object,
-    history: PropTypes.object
+    history: PropTypes.object,
+    showInterstitialPrompt: PropTypes.bool,
+    onInterstitialPromptClicked: PropTypes.func
   };
 
   state = {
@@ -168,6 +175,7 @@ class UIRoot extends Component {
     showInviteDialog: false,
     showPresenceList: false,
     showSettingsMenu: false,
+    discordTipDismissed: false,
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
@@ -267,6 +275,8 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.addEventListener("exit", this.exit);
     const scene = this.props.scene;
+
+    this.props.store.addEventListener("statechanged", this.onStoreChanged);
 
     const unsubscribe = this.props.history.listen((location, action) => {
       const state = location.state;
@@ -718,7 +728,7 @@ class UIRoot extends Component {
   };
 
   onAudioReadyButton = () => {
-    if (!this.state.enterVR) {
+    if (!this.state.enterInVR) {
       showFullScreenIfAvailable();
     }
 
@@ -839,7 +849,39 @@ class UIRoot extends Component {
     return this.props.presences ? Object.entries(this.props.presences).length : 0;
   };
 
+  onStoreChanged = () => {
+    this.setState({ discordTipDismissed: this.props.store.state.confirmedDiscordRooms.includes(this.props.hubId) });
+  };
+
+  confirmDiscordBridge = () => {
+    this.props.store.update({ confirmedDiscordRooms: [this.props.hubId] });
+  };
+
+  discordBridges = () => {
+    if (!this.props.presences) {
+      return [];
+    } else {
+      const channels = [];
+      for (const p of Object.values(this.props.presences)) {
+        Array.prototype.push.apply(channels, p.metas.map(m => m.context.discord).filter(ch => !!ch));
+      }
+      return channels;
+    }
+  };
+
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
+
+  renderInterstitialPrompt = () => {
+    return (
+      <IntlProvider locale={lang} messages={messages}>
+        <div className={styles.interstitial} onClick={() => this.props.onInterstitialPromptClicked()}>
+          <div>
+            <FormattedMessage id="interstitial.prompt" />
+          </div>
+        </div>
+      </IntlProvider>
+    );
+  };
 
   renderExitedPane = () => {
     let subtitle = null;
@@ -970,6 +1012,16 @@ class UIRoot extends Component {
     const hasPush = navigator.serviceWorker && "PushManager" in window;
     const promptForNameAndAvatarBeforeEntry = !this.props.store.state.activity.hasChangedName;
 
+    const discordBridges = this.discordBridges();
+    const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
+    const occupantSnippet = `${this.occupantCount() - 1} other${this.occupantCount() > 2 ? "s" : ""}`;
+    const messageEntryPlaceholder =
+      this.occupantCount() <= 1
+        ? "Nobody is here yet..."
+        : discordBridges.length
+          ? `Send message to ${occupantSnippet} and ${discordSnippet}...`
+          : `Send message to ${occupantSnippet}...`;
+
     return (
       <div className={entryStyles.entryPanel}>
         <div className={entryStyles.name}>
@@ -1009,7 +1061,10 @@ class UIRoot extends Component {
             <WithHoverSound>
               <div
                 className={entryStyles.chooseScene}
-                onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes")}
+                onClick={() => {
+                  showFullScreenIfAvailable();
+                  this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                }}
               >
                 <i>
                   <FontAwesomeIcon icon={faImage} />
@@ -1043,11 +1098,7 @@ class UIRoot extends Component {
                     e.target.blur();
                   }
                 }}
-                placeholder={
-                  this.occupantCount() <= 1
-                    ? "Nobody is here yet..."
-                    : `Send message to ${this.occupantCount() - 1} other${this.occupantCount() - 1 > 1 ? "s" : ""}...`
-                }
+                placeholder={messageEntryPlaceholder}
               />
               <WithHoverSound>
                 <button
@@ -1353,6 +1404,16 @@ class UIRoot extends Component {
       return true;
     }
 
+    if (
+      !this.state.entered &&
+      (LOBBY_MODAL_ROUTER_PATHS.find(x => sluglessPath(this.props.history.location).startsWith(x)) ||
+        LOBBY_MODAL_QUERY_VARS.find(
+          (x, i) => new URLSearchParams(this.props.history.location.search).get(x) === LOBBY_MODAL_QUERY_VALUES[i]
+        ))
+    ) {
+      return true;
+    }
+
     return !!(
       (this.props.history &&
         this.props.history.location.state &&
@@ -1367,8 +1428,21 @@ class UIRoot extends Component {
     const isLoading =
       (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) && !this.props.showSafariMicDialog;
 
+    const rootStyles = {
+      [styles.ui]: true,
+      "ui-root": true,
+      "in-modal-or-overlay": this.isInModalOrOverlay()
+    };
+
+    if (this.props.showOAuthDialog)
+      return (
+        <div className={classNames(rootStyles)}>
+          <OAuthDialog closable={false} oauthInfo={this.props.oauthInfo} />
+        </div>
+      );
     if (isExited) return this.renderExitedPane();
     if (isLoading) return this.renderLoader();
+    if (this.props.showInterstitialPrompt) return this.renderInterstitialPrompt();
     if (this.props.isBotMode) return this.renderBotMode();
 
     const entered = this.state.entered;
@@ -1412,18 +1486,17 @@ class UIRoot extends Component {
     const pendingMessageTextareaHeight = textRows * 28 + "px";
     const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
 
-    const rootStyles = {
-      [styles.ui]: true,
-      "ui-root": true,
-      "in-modal-or-overlay": this.isInModalOrOverlay()
-    };
-
     const presenceLogEntries = this.props.presenceLogEntries || [];
 
     const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);
 
     // Allow scene picker pre-entry, otherwise wait until entry
     const showMediaBrowser = mediaSource && (mediaSource === "scenes" || this.state.entered);
+    const hasTopTip = this.props.activeTips && this.props.activeTips.top;
+
+    const discordBridges = this.discordBridges();
+    const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
+    const showDiscordTip = discordBridges.length > 0 && !this.state.discordTipDismissed;
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1443,8 +1516,7 @@ class UIRoot extends Component {
                   onSignOut={this.signOut}
                   finished={this.onProfileFinished}
                   store={this.props.store}
-                  customSkinEnabled={customSkinEnabled}
-                  advanced={advancedAvatarEditor}
+                  debug={avatarEditorDebug}
                 />
               )}
             />
@@ -1480,8 +1552,6 @@ class UIRoot extends Component {
                   signedIn={this.state.signedIn}
                   onSignIn={this.showSignInDialog}
                   onSignOut={this.signOut}
-                  customSkinEnabled={customSkinEnabled}
-                  advanced={advancedAvatarEditor}
                 />
               )}
             />
@@ -1554,7 +1624,9 @@ class UIRoot extends Component {
             {entered && <PresenceLog inRoom={true} entries={presenceLogEntries} hubId={this.props.hubId} />}
             {entered &&
               this.props.activeTips &&
-              this.props.activeTips.bottom && (
+              this.props.activeTips.bottom &&
+              (!presenceLogEntries || presenceLogEntries.length === 0) &&
+              !showDiscordTip && (
                 <div className={styles.bottomTip}>
                   <button
                     className={styles.tipCancel}
@@ -1564,10 +1636,15 @@ class UIRoot extends Component {
                       <FontAwesomeIcon icon={faTimes} />
                     </i>
                   </button>
-                  {this.props.activeTips.bottom.endsWith(".spawn_menu") ? (
-                    <div className={styles.spawnTip}>
+                  {[".spawn_menu", "_button"].find(x => this.props.activeTips.bottom.endsWith(x)) ? (
+                    <div className={styles.splitTip}>
                       <FormattedMessage id={`tips.${this.props.activeTips.bottom}-pre`} />
-                      <div className={classNames(styles.spawnTipIcon)} />
+                      <div
+                        className={classNames({
+                          [styles.splitTipIcon]: true,
+                          [styles[this.props.activeTips.bottom.split(".")[1] + "-icon"]]: true
+                        })}
+                      />
                       <FormattedMessage id={`tips.${this.props.activeTips.bottom}-post`} />
                     </div>
                   ) : (
@@ -1575,6 +1652,19 @@ class UIRoot extends Component {
                       <FormattedMessage id={`tips.${this.props.activeTips.bottom}`} />
                     </div>
                   )}
+                </div>
+              )}
+            {entered &&
+              showDiscordTip && (
+                <div className={styles.bottomTip}>
+                  <button className={styles.tipCancel} onClick={() => this.confirmDiscordBridge()}>
+                    <i>
+                      <FontAwesomeIcon icon={faTimes} />
+                    </i>
+                  </button>
+                  <div className={styles.tip}>
+                    {`Chat in this room is being bridged to ${discordSnippet} on Discord.`}
+                  </div>
                 </div>
               )}
             {entered && (
@@ -1641,7 +1731,7 @@ class UIRoot extends Component {
                         e.target.blur();
                       }
                     }}
-                    placeholder="Send to room..."
+                    placeholder={discordBridges.length ? `Send to room and ${discordSnippet}...` : "Send to room..."}
                   />
                   <button
                     className={classNames([styles.messageEntrySpawn])}
@@ -1685,7 +1775,7 @@ class UIRoot extends Component {
                 })}
               >
                 {!showVREntryButton &&
-                  (!this.props.activeTips || !this.props.activeTips.top) && (
+                  !hasTopTip && (
                     <WithHoverSound>
                       <button
                         className={classNames({ [styles.hideSmallScreens]: this.occupantCount() > 1 && entered })}
@@ -1697,7 +1787,7 @@ class UIRoot extends Component {
                   )}
                 {!showVREntryButton &&
                   this.occupantCount() > 1 &&
-                  (!this.props.activeTips || !this.props.activeTips.top) &&
+                  !hasTopTip &&
                   entered && (
                     <WithHoverSound>
                       <button onClick={this.onMiniInviteClicked} className={styles.inviteMiniButton}>
@@ -1806,7 +1896,7 @@ class UIRoot extends Component {
               />
             )}
 
-            {entered && !this.state.frozen ? (
+            {entered && (
               <div className={styles.topHud}>
                 <TwoDHUD.TopHUD
                   history={this.props.history}
@@ -1827,19 +1917,13 @@ class UIRoot extends Component {
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
                 />
-                {this.props.isSupportAvailable && (
-                  <div className={styles.nagCornerButton}>
-                    <WithHoverSound>
-                      <StateLink stateKey="modal" stateValue="support" history={this.props.history}>
-                        <button>
-                          <FormattedMessage id="entry.invite-team-nag" />
-                        </button>
-                      </StateLink>
-                    </WithHoverSound>
-                  </div>
-                )}
+                <div className={styles.nagCornerButton}>
+                  <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
+                    <FormattedMessage id="feedback.prompt" />
+                  </a>
+                </div>
               </div>
-            ) : null}
+            )}
           </div>
         </IntlProvider>
       </ReactAudioContext.Provider>

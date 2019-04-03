@@ -1,10 +1,10 @@
+/* global performance THREE AFRAME NAF MediaStream process setTimeout */
 import GIFWorker from "../workers/gifparsing.worker.js";
 import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js/dist/hls.light.js";
 import { proxiedUrlFor } from "../utils/media-utils";
 import { buildAbsoluteURL } from "url-toolkit";
-const SHAPES = require("aframe-physics-system/src/constants").SHAPES;
 
 const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {
@@ -206,13 +206,7 @@ function fitToTexture(el, texture) {
   const width = Math.min(1.0, 1.0 / ratio);
   const height = Math.min(1.0, ratio);
   el.object3DMap.mesh.scale.set(width, height, 1);
-  el.setAttribute("ammo-shape", {
-    autoGenerateShape: false,
-    type: SHAPES.BOX,
-    halfExtents: { x: 0.5, y: 0.5, z: 0.02 },
-    margin: 0.1,
-    mergeGeometry: true
-  });
+  el.object3DMap.mesh.matrixNeedsUpdate = true;
 }
 
 const textureLoader = new THREE.TextureLoader();
@@ -361,11 +355,11 @@ AFRAME.registerComponent("media-video", {
       this.timeLabel = this.el.querySelector(".video-time-label");
       this.volumeLabel = this.el.querySelector(".video-volume-label");
 
-      this.playPauseButton.addEventListener("grab-start", this.togglePlaying);
-      this.seekForwardButton.addEventListener("grab-start", this.seekForward);
-      this.seekBackButton.addEventListener("grab-start", this.seekBack);
-      this.volumeUpButton.addEventListener("grab-start", this.volumeUp);
-      this.volumeDownButton.addEventListener("grab-start", this.volumeDown);
+      this.playPauseButton.object3D.addEventListener("interact", this.togglePlaying);
+      this.seekForwardButton.object3D.addEventListener("interact", this.seekForward);
+      this.seekBackButton.object3D.addEventListener("interact", this.seekBack);
+      this.volumeUpButton.object3D.addEventListener("interact", this.volumeUp);
+      this.volumeDownButton.object3D.addEventListener("interact", this.volumeDown);
 
       this.updateVolumeLabel();
       this.updateHoverMenuBasedOnLiveState();
@@ -646,8 +640,9 @@ AFRAME.registerComponent("media-video", {
     if (!this.video) return;
 
     const userinput = this.el.sceneEl.systems.userinput;
+    const interaction = this.el.sceneEl.systems.interaction;
     const volumeMod = userinput.get(paths.actions.cursor.mediaVolumeMod);
-    if (this.el.is("hovered") && volumeMod) {
+    if (interaction.state.rightRemote.hovered === this.el && volumeMod) {
       this.changeVolumeBy(volumeMod);
     }
 
@@ -689,11 +684,11 @@ AFRAME.registerComponent("media-video", {
       this.video.removeEventListener("play", this.onPauseStateChange);
     }
     if (this.hoverMenu) {
-      this.playPauseButton.removeEventListener("grab-start", this.togglePlaying);
-      this.volumeUpButton.removeEventListener("grab-start", this.volumeUp);
-      this.volumeDownButton.removeEventListener("grab-start", this.volumeDown);
-      this.seekForwardButton.removeEventListener("grab-start", this.seekForward);
-      this.seekBackButton.removeEventListener("grab-start", this.seekBack);
+      this.playPauseButton.object3D.removeEventListener("interact", this.togglePlaying);
+      this.volumeUpButton.object3D.removeEventListener("interact", this.volumeUp);
+      this.volumeDownButton.object3D.removeEventListener("interact", this.volumeDown);
+      this.seekForwardButton.object3D.removeEventListener("interact", this.seekForward);
+      this.seekBackButton.object3D.removeEventListener("interact", this.seekBack);
     }
   }
 });

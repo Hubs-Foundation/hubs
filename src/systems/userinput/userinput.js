@@ -163,7 +163,8 @@ AFRAME.registerSystem("userinput", {
   },
 
   toggleSet(set, value) {
-    this.pendingSetChanges.push({ set, value });
+    const b = !!value;
+    this.pendingSetChanges.push({ set, value: b });
   },
 
   init() {
@@ -283,7 +284,8 @@ AFRAME.registerSystem("userinput", {
           return; // multiple connect events without a disconnect event
         }
       }
-      if (e.gamepad.id === "OpenVR Gamepad") {
+      // HACK Firefox Nightly bug causes corrupt gamepad names for OpenVR, so do startsWith
+      if (e.gamepad.id.startsWith("OpenVR Gamepad")) {
         gamepadDevice = new ViveControllerDevice(e.gamepad);
       } else if (e.gamepad.id.startsWith("Oculus Touch")) {
         gamepadDevice = new OculusTouchControllerDevice(e.gamepad);
@@ -334,7 +336,7 @@ AFRAME.registerSystem("userinput", {
     updateBindingsForVRMode();
   },
 
-  tick() {
+  tick2() {
     this.frame.generation += 1;
     const registeredMappingsChanged = this.registeredMappingsChanged;
     if (registeredMappingsChanged) {

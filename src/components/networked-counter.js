@@ -5,91 +5,52 @@
  */
 AFRAME.registerComponent("networked-counter", {
   schema: {
-    max: { default: 3 },
-    ttl: { default: 0 },
-    grab_event: { type: "string", default: "grab-start" },
-    release_event: { type: "string", default: "grab-end" }
+    max: { default: 3 }
   },
 
   init() {
-    this.registeredEls = new Map();
+    this.timestamps = new Map();
     this.el.object3D.visible = false;
   },
 
   remove() {
-    this.registeredEls.forEach(({ onGrabHandler, onReleaseHandler, timeout }, el) => {
-      el.removeEventListener(this.data.grab_event, onGrabHandler);
-      el.removeEventListener(this.data.release_event, onReleaseHandler);
-      clearTimeout(timeout);
-    });
-    this.registeredEls.clear();
+    this.timestamps.clear();
   },
 
   count() {
-    return this.registeredEls.size;
+    return this.timestamps.size;
   },
 
   register(el) {
-    if (this.data.max <= 0 || this.registeredEls.has(el)) return;
+    if (this.data.max <= 0 || this.timestamps.has(el)) return;
 
-    const grabEventListener = this._onGrabbed.bind(this, el);
-    const releaseEventListener = this._onReleased.bind(this, el);
-
-    this.registeredEls.set(el, {
-      ts: Date.now(),
-      onGrabHandler: grabEventListener,
-      onReleaseHandler: releaseEventListener
-    });
-
-    el.addEventListener(this.data.grab_event, grabEventListener);
-    el.addEventListener(this.data.release_event, releaseEventListener);
-
-    if (!el.is("grabbed")) {
-      this._startTimer(el);
-    }
-
+    this.timestamps.set(el, Date.now());
     this._destroyOldest();
   },
 
   deregister(el) {
-    if (this.registeredEls.has(el)) {
-      const { onGrabHandler, onReleaseHandler, timeout } = this.registeredEls.get(el);
-      el.removeEventListener(this.data.grab_event, onGrabHandler);
-      el.removeEventListener(this.data.release_event, onReleaseHandler);
-      clearTimeout(timeout);
-      this.registeredEls.delete(el);
+    if (this.timestamps.has(el)) {
+      this.timestamps.delete(el);
     }
   },
 
-  _onGrabbed(el) {
-    clearTimeout(this.registeredEls.get(el).timeout);
-  },
-
-  _onReleased(el) {
-    this._startTimer(el);
-    this.registeredEls.get(el).ts = Date.now();
+  isHeld(el) {
+    const { leftHand, rightHand, rightRemote } = this.el.sceneEl.systems.interaction.state;
+    return leftHand.held === el || rightHand.held === el || rightRemote.held === el;
   },
 
   _destroyOldest() {
-    if (this.registeredEls.size > this.data.max) {
+    if (this.timestamps.size > this.data.max) {
       let oldestEl = null,
         minTs = Number.MAX_VALUE;
-      this.registeredEls.forEach(({ ts }, el) => {
-        if (ts < minTs && !el.is("grabbed")) {
+      this.timestamps.forEach((ts, el) => {
+        if (ts < minTs && !this.isHeld(el)) {
           oldestEl = el;
           minTs = ts;
         }
       });
       this._destroy(oldestEl);
     }
-  },
-
-  _startTimer(el) {
-    if (!this.data.ttl) return;
-    clearTimeout(this.registeredEls.get(el).timeout);
-    this.registeredEls.get(el).timeout = setTimeout(() => {
-      this._destroy(el);
-    }, this.data.ttl * 1000);
   },
 
   _destroy(el) {

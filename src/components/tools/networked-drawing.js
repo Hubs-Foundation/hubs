@@ -87,6 +87,8 @@ AFRAME.registerComponent("networked-drawing", {
     this.vertexCount = 0; //number of vertices added for current line (used for line deletion).
     this.networkBufferCount = 0; //number of items added to networkBuffer for current line (used for line deletion).
     this.currentPointCount = 0; //number of points added for current line (used for maxPointsPerLine).
+    this.invalidPointRead = false; //flag flipped if we read a bad point anywhere during this line
+    this.lastReadPointCount = 0; //last read point count read off of the network, used for sanity checking
     this.networkBufferHistory = []; //tracks vertexCount and networkBufferCount so that lines can be deleted.
 
     NAF.connection.onConnect(() => {
@@ -176,16 +178,30 @@ AFRAME.registerComponent("networked-drawing", {
         head = this.networkBuffer[0];
       }
       let didWork = false;
-      while (head != null && this.networkBuffer.length >= 10) {
-        position.set(this.networkBuffer[0], this.networkBuffer[1], this.networkBuffer[2]);
-        direction.set(this.networkBuffer[3], this.networkBuffer[4], this.networkBuffer[5]);
+      while (head != null && this.networkBuffer.length >= 11) {
+        const pointCount = this.networkBuffer[0];
+
+        // This is a sanity check against the sequence number to help uncover remaining bugs.
+        // If the point is out-of-order, report the error and stop drawing this line.
+        if (pointCount !== this.lastReadPointCount + 1) {
+          this.invalidPointRead = true;
+
+          console.error(
+            `Draw networking error: ID ${this.drawingId} expected point ${this.lastReadPointCount +
+              1} but received ${pointCount}`
+          );
+        }
+
+        this.lastReadPointCount = pointCount;
+        position.set(this.networkBuffer[1], this.networkBuffer[2], this.networkBuffer[3]);
+        direction.set(this.networkBuffer[4], this.networkBuffer[5], this.networkBuffer[6]);
         this.radius = Math.round(direction.length() * 1000) / 1000; //radius is encoded as length of direction vector
         direction.normalize();
-        normal.set(this.networkBuffer[6], this.networkBuffer[7], this.networkBuffer[8]);
+        normal.set(this.networkBuffer[7], this.networkBuffer[8], this.networkBuffer[9]);
         this.color.setHex(Math.round(normal.length()) - 1); //color is encoded as length of normal vector
         normal.normalize();
 
-        this.networkBuffer.splice(0, 9);
+        this.networkBuffer.splice(0, 10);
 
         if (!this.remoteLineStarted) {
           this.startDraw(position, direction, normal);
@@ -193,12 +209,19 @@ AFRAME.registerComponent("networked-drawing", {
         }
 
         if (this.networkBuffer[0] === null) {
-          this._endDraw(position, direction, normal);
+          if (!this.invalidPointRead) {
+            this._endDraw(position, direction, normal);
+          }
+
           this.remoteLineStarted = false;
           this.networkBuffer.shift();
+          this.lastReadPointCount = 0;
+          this.invalidPointRead = false;
         } else {
-          this._draw(position, direction, normal);
-          didWork = true;
+          if (!this.invalidPointRead) {
+            this._draw(position, direction, normal);
+            didWork = true;
+          }
         }
       }
       if (didWork) this._updateBuffer();
@@ -447,6 +470,7 @@ AFRAME.registerComponent("networked-drawing", {
     return function(position, direction, normal) {
       if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
         ++this.currentPointCount;
+        this._pushToNetworkBuffer(this.currentPointCount);
         this._pushToNetworkBuffer(position.x);
         this._pushToNetworkBuffer(position.y);
         this._pushToNetworkBuffer(position.z);

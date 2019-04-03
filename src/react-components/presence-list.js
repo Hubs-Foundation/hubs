@@ -6,12 +6,25 @@ import classNames from "classnames";
 import styles from "../assets/stylesheets/presence-list.scss";
 import PhoneImage from "../assets/images/presence_phone.png";
 import DesktopImage from "../assets/images/presence_desktop.png";
+import DiscordImage from "../assets/images/presence_discord.png";
 import HMDImage from "../assets/images/presence_vr.png";
 import maskEmail from "../utils/mask-email";
 import StateLink from "./state-link.js";
 import { WithHoverSound } from "./wrap-with-audio";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+
+function getPresenceImage(ctx) {
+  if (ctx && ctx.mobile) {
+    return PhoneImage;
+  } else if (ctx && ctx.hmd) {
+    return HMDImage;
+  } else if (ctx && ctx.discord) {
+    return DiscordImage;
+  } else {
+    return DesktopImage;
+  }
+}
 
 export default class PresenceList extends Component {
   static propTypes = {
@@ -28,8 +41,7 @@ export default class PresenceList extends Component {
     const meta = data.metas[0];
     const context = meta.context;
     const profile = meta.profile;
-
-    const image = context && context.mobile ? PhoneImage : context && context.hmd ? HMDImage : DesktopImage;
+    const image = getPresenceImage(context);
 
     return (
       <WithHoverSound key={sessionId}>

@@ -3,8 +3,6 @@ import { getReticulumFetchUrl } from "./phoenix-utils";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { mapMaterials } from "./material-utils";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
-import { ObjectContentOrigins } from "../object-types";
-import nextTick from "./next-tick";
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const nonCorsProxyDomains = (process.env.NON_CORS_PROXY_DOMAINS || "").split(",");
@@ -23,6 +21,10 @@ const commonKnownContentTypes = {
   mp4: "video/mp4",
   mp3: "audio/mpeg"
 };
+
+const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
+  SHAPE = PHYSICS_CONSTANTS.SHAPE,
+  FIT = PHYSICS_CONSTANTS.FIT;
 
 // thanks to https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
 function b64EncodeUnicode(str) {
@@ -53,19 +55,23 @@ export const scaledThumbnailUrlFor = (url, width, height) => {
   return `https://${process.env.FARSPARK_SERVER}/thumbnail/${farsparkEncodeUrl(url)}?w=${width}&h=${height}`;
 };
 
-export const proxiedUrlFor = (url, index) => {
+export const proxiedUrlFor = (url, index = null) => {
   if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
 
-  // Skip known domains that do not require CORS proxying.
-  try {
-    const parsedUrl = new URL(url);
-    if (nonCorsProxyDomains.find(domain => parsedUrl.hostname.endsWith(domain))) return url;
-  } catch (e) {
-    // Ignore
+  const hasIndex = index !== null;
+
+  if (!hasIndex) {
+    // Skip known domains that do not require CORS proxying.
+    try {
+      const parsedUrl = new URL(url);
+      if (nonCorsProxyDomains.find(domain => parsedUrl.hostname.endsWith(domain))) return url;
+    } catch (e) {
+      // Ignore
+    }
   }
 
-  if (index != null || !process.env.CORS_PROXY_SERVER) {
-    const method = index != null ? "extract" : "raw";
+  if (hasIndex || !process.env.CORS_PROXY_SERVER) {
+    const method = hasIndex ? "extract" : "raw";
     return `https://${process.env.FARSPARK_SERVER}/0/${method}/0/0/0/${index || 0}/${farsparkEncodeUrl(url)}`;
   } else {
     return `https://${process.env.CORS_PROXY_SERVER}/${url}`;
@@ -165,7 +171,7 @@ function getOrientation(file, callback) {
 }
 
 let interactableId = 0;
-export const addMedia = (src, template, contentOrigin, resolve = false, resize = false) => {
+export const addMedia = (src, template, contentOrigin, resolve = false, resize = false, animate = true) => {
   const scene = AFRAME.scenes[0];
 
   const entity = document.createElement("a-entity");
@@ -175,23 +181,12 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
   entity.setAttribute("media-loader", {
     resize,
     resolve,
+    animate,
     src: typeof src === "string" ? src : "",
     fileIsOwned: !needsToBeUploaded
   });
 
-  let [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
-
-  entity.object3D.scale.set(0.001, 0.001, 0.001);
   entity.object3D.matrixNeedsUpdate = true;
-
-  entity.setAttribute("animation__loader_spawn-start", {
-    property: "scale",
-    delay: 50,
-    dur: 200,
-    from: { x: 0.001, y: 0.001, z: 0.001 },
-    to: { x: sx, y: sy, z: sz },
-    easing: "easeInQuad"
-  });
 
   scene.appendChild(entity);
 
@@ -200,53 +195,14 @@ export const addMedia = (src, template, contentOrigin, resolve = false, resize =
   }, 100);
 
   ["model-loaded", "video-loaded", "image-loaded"].forEach(eventName => {
-    entity.addEventListener(eventName, async () => {
-      entity.object3D.visible = false;
-
-      clearTimeout(fireLoadingTimeout);
-
-      entity.removeAttribute("animation__loader_spawn-start");
-
-      // Deal with scale. The box animation may not have completed so cover all cases.
-      if (entity.components.scale) {
-        // Ensure explicit scale from scale component is set.
-        const scaleData = entity.components.scale.data;
-        entity.object3D.scale.set(scaleData.x, scaleData.y, scaleData.z);
-        entity.object3D.matrixNeedsUpdate = true;
-      } else if (contentOrigin == ObjectContentOrigins.SPAWNER) {
-        // Spawner will have set scale.
-        await nextTick();
-      } else {
-        // Otherwise, ensure original scale is re-applied.
-        entity.object3D.scale.set(sx, sy, sz);
-        entity.object3D.matrixNeedsUpdate = true;
-      }
-
-      [sx, sy, sz] = [entity.object3D.scale.x, entity.object3D.scale.y, entity.object3D.scale.z];
-
-      if (!entity.getAttribute("animation__spawn-start")) {
-        entity.object3D.scale.set(0.001, 0.001, 0.001);
-        entity.object3D.matrixNeedsUpdate = true;
-
-        entity.setAttribute("animation__spawn-start", {
-          property: "scale",
-          delay: 50,
-          dur: 350,
-          from: { x: 0.001, y: 0.001, z: 0.001 },
-          to: { x: sx, y: sy, z: sz },
-          easing: "easeOutElastic"
-        });
-
-        // Hoverable visauls need to be updated so the initial scale is properly taken into account.
-        entity.addEventListener("animationcomplete", () => entity.components["media-loader"].updateHoverableVisuals(), {
-          once: true
-        });
-      }
-
-      entity.object3D.visible = true;
-
-      scene.emit("media-loaded", { src: src });
-    });
+    entity.addEventListener(
+      eventName,
+      async () => {
+        clearTimeout(fireLoadingTimeout);
+        scene.emit("media-loaded", { src: src });
+      },
+      { once: true }
+    );
   });
 
   const orientation = new Promise(function(resolve) {
@@ -373,7 +329,7 @@ export function generateMeshBVH(object3D) {
     // note that we might already have a bounds tree if this was a clone of an object with one
     const hasBufferGeometry = obj.isMesh && obj.geometry.isBufferGeometry;
     const hasBoundsTree = hasBufferGeometry && obj.geometry.boundsTree;
-    if (hasBufferGeometry && !hasBoundsTree) {
+    if (hasBufferGeometry && !hasBoundsTree && obj.geometry.attributes.position) {
       const geo = obj.geometry;
       const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
       // only bother using memory and time making a BVH if there are a reasonable number of tris,
@@ -388,35 +344,85 @@ export function generateMeshBVH(object3D) {
 }
 
 export const traverseMeshesAndAddShapes = (function() {
-  const matrix = new THREE.Matrix4();
-  const inverse = new THREE.Matrix4();
-  const pos = new THREE.Vector3();
-  const quat = new THREE.Quaternion();
-  const scale = new THREE.Vector3();
-  const shapePrefix = "ammo-shape__env";
-  return function(el, type, margin) {
-    const shapes = [];
-    let i = 0;
+  const vertexLimit = 200000;
+  const shapePrefix = "ammo-shape__";
+  const shapes = [];
+  return function(el) {
     const meshRoot = el.object3DMap.mesh;
-    inverse.getInverse(meshRoot.matrixWorld);
+    while (shapes.length > 0) {
+      const { id, entity } = shapes.pop();
+      entity.removeAttribute(id);
+    }
+
+    let vertexCount = 0;
     meshRoot.traverse(o => {
-      if (o.isMesh && (!THREE.Sky || o.__proto__ != THREE.Sky.prototype)) {
-        o.updateMatrices();
-        matrix.multiplyMatrices(inverse, o.matrixWorld);
-        matrix.decompose(pos, quat, scale);
-        el.setAttribute(shapePrefix + i, {
-          type: type,
-          margin: margin,
-          mergeGeometry: false,
-          offset: { x: pos.x * meshRoot.scale.x, y: pos.y * meshRoot.scale.y, z: pos.z * meshRoot.scale.z },
-          orientation: { x: quat.x, y: quat.y, z: quat.z, w: quat.w }
-        });
-        el.components[shapePrefix + i].setMesh(o);
-        shapes.push(shapePrefix + i);
-        i++;
+      if (
+        o.isMesh &&
+        (!THREE.Sky || o.__proto__ != THREE.Sky.prototype) &&
+        o.name !== "Floor_Plan" &&
+        o.name !== "Ground_Plane"
+      ) {
+        vertexCount += o.geometry.attributes.position.count;
       }
     });
-    return shapes;
+
+    console.group("traverseMeshesAndAddShapes");
+
+    console.log(`scene has ${vertexCount} vertices`);
+
+    const floorPlan = meshRoot.children.find(obj => {
+      return obj.name === "Floor_Plan";
+    });
+    if (vertexCount > vertexLimit && floorPlan) {
+      console.log(`vertex limit of ${vertexLimit} exceeded, using floor plan with mesh shape`);
+      floorPlan.el.setAttribute(shapePrefix + floorPlan.name, {
+        type: SHAPE.MESH,
+        margin: 0.01,
+        fit: FIT.ALL
+      });
+      shapes.push({ id: shapePrefix + floorPlan.name, entity: floorPlan.el });
+    } else if (vertexCount < vertexLimit) {
+      for (let i = 0; i < meshRoot.children.length; i++) {
+        const obj = meshRoot.children[i];
+
+        //ignore floor plan for spoke scenes, and make the ground plane a box.
+        if (obj.isGroup && obj.name !== "Floor_Plan") {
+          if (obj.name === "Ground_Plane") {
+            obj.el.object3DMap.mesh = obj;
+            obj.el.setAttribute(shapePrefix + obj.name, {
+              type: SHAPE.BOX,
+              margin: 0.01,
+              fit: FIT.ALL
+            });
+            shapes.push({ id: shapePrefix + obj.name, entity: obj.el });
+            continue;
+          }
+
+          if (!obj.el.object3DMap.mesh) {
+            obj.el.object3DMap.mesh = obj.parent;
+          }
+
+          obj.el.setAttribute(shapePrefix + obj.uuid, {
+            type: SHAPE.MESH,
+            margin: 0.01,
+            fit: FIT.COMPOUND
+          });
+          shapes.push({ id: shapePrefix + obj.uuid, entity: obj.el });
+        }
+      }
+      console.log(`traversing meshes and adding ${shapes.length} mesh shapes`);
+    } else {
+      el.setAttribute(shapePrefix + "defaultFloor", {
+        type: SHAPE.BOX,
+        margin: 0.01,
+        halfExtents: { x: 4000, y: 0.5, z: 4000 },
+        offset: { x: 0, y: -0.5, z: 0 },
+        fit: FIT.MANUAL
+      });
+      shapes.push({ id: shapePrefix + "defaultFloor", entity: el });
+      console.log(`adding default floor collision`);
+    }
+    console.groupEnd();
   };
 })();
 

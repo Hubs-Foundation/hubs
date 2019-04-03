@@ -2,9 +2,10 @@ import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { isHubsDestinationUrl } from "./utils/media-utils";
 const PHYSICS_CONSTANTS = require("aframe-physics-system/src/constants"),
-  COLLISION_FLAGS = PHYSICS_CONSTANTS.COLLISION_FLAGS,
-  TYPES = PHYSICS_CONSTANTS.TYPES,
-  SHAPES = PHYSICS_CONSTANTS.SHAPES;
+  COLLISION_FLAG = PHYSICS_CONSTANTS.COLLISION_FLAG,
+  TYPE = PHYSICS_CONSTANTS.TYPE,
+  SHAPE = PHYSICS_CONSTANTS.SHAPE,
+  FIT = PHYSICS_CONSTANTS.FIT;
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck");
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
@@ -13,7 +14,12 @@ AFRAME.GLTFModelPlus.registerComponent("css-class", "css-class");
 AFRAME.GLTFModelPlus.registerComponent("interactable", "css-class", (el, componentName) => {
   el.setAttribute(componentName, "interactable");
 });
-AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner");
+AFRAME.GLTFModelPlus.registerComponent("super-spawner", "super-spawner", (el, componentName, componentData) => {
+  //TODO: Do not automatically add these components
+  el.setAttribute("is-remote-hover-target", "");
+  el.setAttribute("is-hand-collision-target", "");
+  el.setAttribute(componentName, componentData);
+});
 AFRAME.GLTFModelPlus.registerComponent("gltf-model-plus", "gltf-model-plus");
 AFRAME.GLTFModelPlus.registerComponent("media-loader", "media-loader");
 AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body", el => {
@@ -21,8 +27,8 @@ AFRAME.GLTFModelPlus.registerComponent("body", "ammo-body", el => {
   //will no longer be needed when spawners are added via Spoke instead.
   el.setAttribute("ammo-body", {
     mass: 0,
-    type: TYPES.STATIC,
-    collisionFlags: COLLISION_FLAGS.NO_CONTACT_RESPONSE
+    type: TYPE.STATIC,
+    collisionFlags: COLLISION_FLAG.NO_CONTACT_RESPONSE
   });
 });
 AFRAME.GLTFModelPlus.registerComponent("ammo-shape", "ammo-shape");
@@ -68,9 +74,8 @@ AFRAME.GLTFModelPlus.registerComponent(
       euler.set(rotation.x, rotation.y, rotation.z);
       const orientation = new THREE.Quaternion().setFromEuler(euler);
       el.setAttribute(componentName, {
-        type: SHAPES.BOX,
-        autoGenerateShape: false,
-        mergeGeometry: false,
+        type: SHAPE.BOX,
+        fit: FIT.MANUAL,
         offset: componentData.position,
         halfExtents: { x: scale.x / 2, y: scale.y / 2, z: scale.z / 2 },
         orientation
@@ -86,7 +91,6 @@ AFRAME.GLTFModelPlus.registerComponent("visible", "visible", (el, componentName,
   }
 });
 AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point");
-AFRAME.GLTFModelPlus.registerComponent("hoverable", "hoverable");
 AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
 AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentName, componentData) => {
   const nav = AFRAME.scenes[0].systems.nav;
@@ -115,7 +119,13 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
     });
   }
 
-  el.setAttribute("media-loader", { src: componentData.src, resize: true, resolve: true, fileIsOwned: true });
+  el.setAttribute("media-loader", {
+    src: componentData.src,
+    resize: true,
+    resolve: true,
+    fileIsOwned: true,
+    animate: false
+  });
 
   if (componentData.pageIndex) {
     el.setAttribute("media-pager", { index: componentData.pageIndex });
@@ -182,6 +192,7 @@ function mediaInflator(el, componentName, componentData, components) {
     resize: true,
     resolve: true,
     fileIsOwned: true,
+    animate: false,
     mediaOptions
   });
 }
@@ -196,11 +207,17 @@ AFRAME.GLTFModelPlus.registerComponent("video", "video", mediaInflator, (name, p
 });
 AFRAME.GLTFModelPlus.registerComponent("link", "link", mediaInflator);
 
+AFRAME.GLTFModelPlus.registerComponent("hoverable", "is-remote-hover-target", el => {
+  el.setAttribute("is-remote-hover-target", "");
+  el.setAttribute("is-hand-collision-target", "");
+});
+
 AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName, componentData) => {
   el.setAttribute("media-loader", {
     src: componentData.src,
     resolve: true,
-    fileIsOwned: true
+    fileIsOwned: true,
+    animate: false
   });
   el.setAttribute("css-class", "interactable");
   el.setAttribute("super-spawner", {
@@ -210,10 +227,11 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
   });
   el.setAttribute("ammo-body", {
     mass: 0,
-    type: TYPES.STATIC,
-    collisionFlags: COLLISION_FLAGS.NO_CONTACT_RESPONSE
+    type: TYPE.STATIC,
+    collisionFlags: COLLISION_FLAG.NO_CONTACT_RESPONSE
   });
-  el.setAttribute("hoverable", "");
+  el.setAttribute("is-remote-hover-target", "");
+  el.setAttribute("is-hand-collision-target", "");
 });
 
 const publicComponents = {

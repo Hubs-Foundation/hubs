@@ -111,6 +111,16 @@ export async function getAvailableVREntryTypes() {
       ? VR_DEVICE_AVAILABILITY.yes
       : VR_DEVICE_AVAILABILITY.no;
 
+    if (
+      isFirefoxBrowser &&
+      generic === VR_DEVICE_AVAILABILITY.no &&
+      (browser.version && parseInt(browser.version.split(".")[0]) < 68)
+    ) {
+      // Firefox 66, 67 fail to find displays on Steam VR :(
+      // This will nudge them to download nightly.
+      generic = VR_DEVICE_AVAILABILITY.maybe;
+    }
+
     // For daydream detection, in a WebVR browser we can increase confidence in daydream compatibility.
     const hasDaydreamWebVRDevice = displays.find(d => /daydream/i.test(d.displayName));
 

@@ -1,11 +1,10 @@
 /**
- * A button with text and haptics
+ * A button with text
  * @namespace ui
  * @component text-button
  */
 AFRAME.registerComponent("text-button", {
   schema: {
-    haptic: { type: "selector" },
     textHoverColor: { type: "string" },
     textColor: { type: "string" },
     backgroundHoverColor: { type: "string" },
@@ -18,35 +17,23 @@ AFRAME.registerComponent("text-button", {
     this.onHover = () => {
       this.hovering = true;
       this.updateButtonState();
-      this.emitHapticPulse();
     };
     this.onHoverOut = () => {
       this.hovering = false;
       this.updateButtonState();
     };
-    this.onClick = () => {
-      this.emitHapticPulse();
-    };
-    this.textEl = this.el.parentEl.querySelector("[text]");
-  },
-
-  emitHapticPulse() {
-    if (this.data.haptic) {
-      this.data.haptic.emit("haptic_pulse", { intensity: "low" });
-    }
+    this.textEl = this.el.querySelector("[text]");
   },
 
   play() {
     this.updateButtonState();
-    this.el.addEventListener("mouseover", this.onHover);
-    this.el.addEventListener("mouseout", this.onHoverOut);
-    this.el.addEventListener("grab-start", this.onClick);
+    this.el.object3D.addEventListener("hovered", this.onHover);
+    this.el.object3D.addEventListener("unhovered", this.onHoverOut);
   },
 
   pause() {
-    this.el.removeEventListener("mouseover", this.onHover);
-    this.el.removeEventListener("mouseout", this.onHoverOut);
-    this.el.removeEventListener("grab-start", this.onClick);
+    this.el.object3D.removeEventListener("hovered", this.onHover);
+    this.el.object3D.removeEventListener("unhovered", this.onHoverOut);
   },
 
   update() {
@@ -56,7 +43,10 @@ AFRAME.registerComponent("text-button", {
   updateButtonState() {
     const hovering = this.hovering;
     this.el.setAttribute("slice9", "color", hovering ? this.data.backgroundHoverColor : this.data.backgroundColor);
-    this.textEl.setAttribute("text", "color", hovering ? this.data.textHoverColor : this.data.textColor);
+
+    if (this.textEl) {
+      this.textEl.setAttribute("text", "color", hovering ? this.data.textHoverColor : this.data.textColor);
+    }
   }
 });
 

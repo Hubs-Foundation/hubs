@@ -1,8 +1,10 @@
 import { Validator } from "jsonschema";
 import merge from "deepmerge";
+import Cookies from "js-cookie";
 
 const LOCAL_STORE_KEY = "___hubs_store";
 const STORE_STATE_CACHE_KEY = Symbol();
+const OAUTH_FLOW_CREDENTIALS_KEY = "ret-oauth-flow-account-credentials";
 const validator = new Validator();
 import { EventTarget } from "event-target-shim";
 import { generateDefaultProfile, generateRandomName } from "../utils/identity.js";
@@ -41,7 +43,8 @@ export const SCHEMA = {
         lastEnteredAt: { type: "string" },
         hasPinned: { type: "boolean" },
         hasRotated: { type: "boolean" },
-        hasRecentered: { type: "boolean" }
+        hasRecentered: { type: "boolean" },
+        hasScaled: { type: "boolean" }
       }
     },
 
@@ -51,6 +54,11 @@ export const SCHEMA = {
       properties: {
         lastUsedMicDeviceId: { type: "string" }
       }
+    },
+
+    confirmedDiscordRooms: {
+      type: "array",
+      items: { type: "string" }
     },
 
     uploadPromotionTokens: {
@@ -73,6 +81,7 @@ export const SCHEMA = {
     credentials: { $ref: "#/definitions/credentials" },
     activity: { $ref: "#/definitions/activity" },
     settings: { $ref: "#/definitions/settings" },
+    confirmedDiscordRooms: { $ref: "#/definitions/confirmedDiscordRooms" },
     uploadPromotionTokens: { $ref: "#/definitions/uploadPromotionTokens" }
   },
 
@@ -91,8 +100,15 @@ export default class Store extends EventTarget {
       settings: {},
       credentials: {},
       profile: {},
+      confirmedDiscordRooms: [],
       uploadPromotionTokens: []
     });
+
+    const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
+    if (oauthFlowCredentials) {
+      this.update({ credentials: oauthFlowCredentials });
+      Cookies.remove(OAUTH_FLOW_CREDENTIALS_KEY);
+    }
   }
 
   // Initializes store with any default bits
@@ -115,12 +131,18 @@ export default class Store extends EventTarget {
     return this[STORE_STATE_CACHE_KEY];
   }
 
-  resetTipActivityFlags() {
-    this.update({ activity: { hasRotated: false, hasPinned: false, hasRecentered: false } });
+  resetConfirmedDiscordRooms() {
+    // merge causing us some annoyance here :(
+    const overwriteMerge = (destinationArray, sourceArray) => sourceArray;
+    this.update({ confirmedDiscordRooms: [] }, { arrayMerge: overwriteMerge });
   }
 
-  update(newState) {
-    const finalState = merge(this.state, newState);
+  resetTipActivityFlags() {
+    this.update({ activity: { hasRotated: false, hasPinned: false, hasRecentered: false, hasScaled: false } });
+  }
+
+  update(newState, mergeOpts) {
+    const finalState = merge(this.state, newState, mergeOpts);
     const { valid } = validator.validate(finalState, SCHEMA);
 
     if (!valid) {
