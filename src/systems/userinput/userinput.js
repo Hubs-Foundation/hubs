@@ -163,7 +163,8 @@ AFRAME.registerSystem("userinput", {
   },
 
   toggleSet(set, value) {
-    this.pendingSetChanges.push({ set, value });
+    const b = !!value;
+    this.pendingSetChanges.push({ set, value: b });
   },
 
   init() {
@@ -335,7 +336,7 @@ AFRAME.registerSystem("userinput", {
     updateBindingsForVRMode();
   },
 
-  tick() {
+  tick2() {
     this.frame.generation += 1;
     const registeredMappingsChanged = this.registeredMappingsChanged;
     if (registeredMappingsChanged) {

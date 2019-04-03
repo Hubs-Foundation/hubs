@@ -9,6 +9,7 @@ import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { showFullScreenIfAvailable } from "../utils/fullscreen";
 
 import styles from "../assets/stylesheets/settings-menu.scss";
 
@@ -68,6 +69,7 @@ export default class SettingsMenu extends Component {
                   <div
                     className={styles.listItemLink}
                     onClick={() => {
+                      showFullScreenIfAvailable();
                       this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
                       this.props.hideSettings();
                     }}
@@ -151,8 +153,8 @@ export default class SettingsMenu extends Component {
               <a href="https://discord.gg/wHmY4nd" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.community" />
               </a>
-              <a href="/spoke" target="_blank" rel="noreferrer noopener">
-                <FormattedMessage id="settings.create-scene" />
+              <a target="_blank" href="https://forms.gle/1g4H5Ayd1mGWqWpV7" rel="noopener noreferrer">
+                <FormattedMessage id="settings.send-feedback" />
               </a>
               <a className={styles.bottomLink} href="/?report" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="settings.report" />

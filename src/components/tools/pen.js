@@ -103,13 +103,22 @@ AFRAME.registerComponent("pen", {
   },
 
   tick(t, dt) {
-    const grabber = this.el.parentNode.components.grabbable.grabbers[0];
     const userinput = AFRAME.scenes[0].systems.userinput;
+    const interaction = AFRAME.scenes[0].systems.interaction;
+    if (interaction.state.rightHand.held === this.el.parentNode) {
+      this.grabberId = "player-right-controller";
+    } else if (interaction.state.leftHand.held === this.el.parentNode) {
+      this.grabberId = "player-left-controller";
+    } else if (interaction.state.rightRemote.held === this.el.parentNode) {
+      this.grabberId = "cursor";
+    } else {
+      this.grabberId = null;
+    }
 
     getLastWorldPosition(this.el.object3D, this.worldPosition);
 
-    if (grabber && pathsMap[grabber.id]) {
-      const paths = pathsMap[grabber.id];
+    if (this.grabberId && pathsMap[this.grabberId]) {
+      const paths = pathsMap[this.grabberId];
       if (userinput.get(paths.startDrawing)) {
         this._startDraw();
       }
@@ -149,7 +158,7 @@ AFRAME.registerComponent("pen", {
       this.timeSinceLastDraw = time % this.data.drawFrequency;
     }
 
-    if (this.currentDrawing && !grabber) {
+    if (this.currentDrawing && !this.grabberId) {
       this._endDraw();
     }
   },

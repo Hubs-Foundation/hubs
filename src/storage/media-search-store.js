@@ -8,6 +8,7 @@ const URL_SOURCE_TO_TO_API_SOURCE = {
   scenes: "scene_listings",
   images: "bing_images",
   videos: "bing_videos",
+  youtube: "youtube_videos",
   gifs: "tenor",
   sketchfab: "sketchfab",
   poly: "poly",
@@ -71,9 +72,10 @@ export default class MediaSearchStore extends EventTarget {
     if (this.lastSavedUrl === url) return;
 
     const res = await fetch(url);
+    const result = await res.json();
     if (this.requestIndex != currentRequestIndex) return;
 
-    this.result = await res.json();
+    this.result = result;
     this.nextCursor = this.result.meta.next_cursor;
     this.lastFetchedUrl = url;
     this.dispatchEvent(new CustomEvent("statechanged"));

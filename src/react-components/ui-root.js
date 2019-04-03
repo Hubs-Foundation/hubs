@@ -46,6 +46,7 @@ import RenameRoomDialog from "./rename-room-dialog.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
+import OAuthDialog from "./oauth-dialog.js";
 
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
@@ -155,12 +156,16 @@ class UIRoot extends Component {
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
+    showOAuthDialog: PropTypes.bool,
+    oauthInfo: PropTypes.array,
     isCursorHoldingPen: PropTypes.bool,
     hasActiveCamera: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
     activeTips: PropTypes.object,
     location: PropTypes.object,
-    history: PropTypes.object
+    history: PropTypes.object,
+    showInterstitialPrompt: PropTypes.bool,
+    onInterstitialPromptClicked: PropTypes.func
   };
 
   state = {
@@ -866,6 +871,18 @@ class UIRoot extends Component {
 
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
+  renderInterstitialPrompt = () => {
+    return (
+      <IntlProvider locale={lang} messages={messages}>
+        <div className={styles.interstitial} onClick={() => this.props.onInterstitialPromptClicked()}>
+          <div>
+            <FormattedMessage id="interstitial.prompt" />
+          </div>
+        </div>
+      </IntlProvider>
+    );
+  };
+
   renderExitedPane = () => {
     let subtitle = null;
     if (this.props.roomUnavailableReason === "closed") {
@@ -1044,7 +1061,10 @@ class UIRoot extends Component {
             <WithHoverSound>
               <div
                 className={entryStyles.chooseScene}
-                onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes")}
+                onClick={() => {
+                  showFullScreenIfAvailable();
+                  this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                }}
               >
                 <i>
                   <FontAwesomeIcon icon={faImage} />
@@ -1408,8 +1428,21 @@ class UIRoot extends Component {
     const isLoading =
       (!this.state.hideLoader || !this.state.didConnectToNetworkedScene) && !this.props.showSafariMicDialog;
 
+    const rootStyles = {
+      [styles.ui]: true,
+      "ui-root": true,
+      "in-modal-or-overlay": this.isInModalOrOverlay()
+    };
+
+    if (this.props.showOAuthDialog)
+      return (
+        <div className={classNames(rootStyles)}>
+          <OAuthDialog closable={false} oauthInfo={this.props.oauthInfo} />
+        </div>
+      );
     if (isExited) return this.renderExitedPane();
     if (isLoading) return this.renderLoader();
+    if (this.props.showInterstitialPrompt) return this.renderInterstitialPrompt();
     if (this.props.isBotMode) return this.renderBotMode();
 
     const entered = this.state.entered;
@@ -1452,12 +1485,6 @@ class UIRoot extends Component {
     const textRows = this.state.pendingMessage.split("\n").length;
     const pendingMessageTextareaHeight = textRows * 28 + "px";
     const pendingMessageFieldHeight = textRows * 28 + 20 + "px";
-
-    const rootStyles = {
-      [styles.ui]: true,
-      "ui-root": true,
-      "in-modal-or-overlay": this.isInModalOrOverlay()
-    };
 
     const presenceLogEntries = this.props.presenceLogEntries || [];
 
@@ -1598,6 +1625,7 @@ class UIRoot extends Component {
             {entered &&
               this.props.activeTips &&
               this.props.activeTips.bottom &&
+              (!presenceLogEntries || presenceLogEntries.length === 0) &&
               !showDiscordTip && (
                 <div className={styles.bottomTip}>
                   <button
@@ -1889,17 +1917,11 @@ class UIRoot extends Component {
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
                 />
-                {this.props.isSupportAvailable && (
-                  <div className={styles.nagCornerButton}>
-                    <WithHoverSound>
-                      <StateLink stateKey="modal" stateValue="support" history={this.props.history}>
-                        <button>
-                          <FormattedMessage id="entry.invite-team-nag" />
-                        </button>
-                      </StateLink>
-                    </WithHoverSound>
-                  </div>
-                )}
+                <div className={styles.nagCornerButton}>
+                  <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
+                    <FormattedMessage id="feedback.prompt" />
+                  </a>
+                </div>
               </div>
             )}
           </div>
