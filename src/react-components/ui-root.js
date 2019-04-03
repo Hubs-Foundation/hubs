@@ -1898,17 +1898,11 @@ class UIRoot extends Component {
                   onEndShareVideo={this.endShareVideo}
                   onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
                 />
-                {this.props.isSupportAvailable && (
-                  <div className={styles.nagCornerButton}>
-                    <WithHoverSound>
-                      <StateLink stateKey="modal" stateValue="support" history={this.props.history}>
-                        <button>
-                          <FormattedMessage id="entry.invite-team-nag" />
-                        </button>
-                      </StateLink>
-                    </WithHoverSound>
-                  </div>
-                )}
+                <div className={styles.nagCornerButton}>
+                  <a href="https://forms.gle/1g4H5Ayd1mGWqWpV7" target="_blank" rel="noopener noreferrer">
+                    <FormattedMessage id="feedback.prompt" />
+                  </a>
+                </div>
               </div>
             )}
           </div>
