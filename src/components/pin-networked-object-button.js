@@ -71,14 +71,14 @@ AFRAME.registerComponent("pin-networked-object-button", {
 
   _discordBridges() {
     return []; // TODO mqp
-    const presences = window.APP.hubChannel.presence.state;
+    /*const presences = window.APP.hubChannel.presence.state;
     if (!presences) {
       return [];
     } else {
       return Object.values(presences)
         .flatMap(p => p.metas.map(m => m.context.discord))
         .filter(ch => !!ch);
-    }
+    }*/
   },
 
   _updateUIOnStateChange(e) {
