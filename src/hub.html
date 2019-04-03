@@ -202,7 +202,6 @@
                     class="interactable"
                     ammo-body="type: static; mass: 1;"
                     is-remote-hover-target
-                    hoverable-visuals="cursorController: #cursor-controller"
                 >
                 </a-entity>
             </template>
@@ -453,33 +452,35 @@
                         position="0.275 0.175 0"
                         class="ui video-volume-up-button"
                     ></a-image>
-                    <a-image
-                        is-remote-hover-target
-                        tags="singleActionButton: true; isHoverMenuChild: true;"
-                        icon-button="image: #video-seek-back; hoverImage: #video-seek-back-hover;"
-                        scale="0.1 0.1 0.1"
-                        position="-0.3 -0.125 0"
-                        class="ui video-seek-back-button"
-                        visible="false"
-                    ></a-image>
-                    <a-image
-                        is-remote-hover-target
-                        tags="singleActionButton: true; isHoverMenuChild: true;"
-                        icon-button="image: #video-pause; hoverImage: #video-pause-hover; activeImage: #video-play; activeHoverImage: #video-play-hover"
-                        scale="0.15 0.15 0.15"
-                        position="0 -0.125 0"
-                        class="ui video-playpause-button"
-                        visible="false"
-                    ></a-image>
-                    <a-image
-                        is-remote-hover-target
-                        tags="singleActionButton: true; isHoverMenuChild: true;"
-                        icon-button="image: #video-seek-forward; hoverImage: #video-seek-forward-hover;"
-                        scale="0.1 0.1 0.1"
-                        position="0.3 -0.125 0"
-                        class="ui video-seek-forward-button"
-                        visible="false"
-                    ></a-image>
+                    <a-entity class="video-playback">
+                        <a-image
+                            is-remote-hover-target
+                            tags="singleActionButton: true; isHoverMenuChild: true;"
+                            icon-button="image: #video-seek-back; hoverImage: #video-seek-back-hover;"
+                            scale="0.1 0.1 0.1"
+                            position="-0.3 -0.125 0"
+                            class="ui video-seek-back-button"
+                            visible="false"
+                        ></a-image>
+                        <a-image
+                            is-remote-hover-target
+                            tags="singleActionButton: true; isHoverMenuChild: true;"
+                            icon-button="image: #video-pause; hoverImage: #video-pause-hover; activeImage: #video-play; activeHoverImage: #video-play-hover"
+                            scale="0.15 0.15 0.15"
+                            position="0 -0.125 0"
+                            class="ui video-playpause-button"
+                            visible="false"
+                        ></a-image>
+                        <a-image
+                            is-remote-hover-target
+                            tags="singleActionButton: true; isHoverMenuChild: true;"
+                            icon-button="image: #video-seek-forward; hoverImage: #video-seek-forward-hover;"
+                            scale="0.1 0.1 0.1"
+                            position="0.3 -0.125 0"
+                            class="ui video-seek-forward-button"
+                            visible="false"
+                        ></a-image>
+                    </a-entity>
                 </a-entity>
             </template>
 
