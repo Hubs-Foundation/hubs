@@ -1610,6 +1610,7 @@ class UIRoot extends Component {
             {entered &&
               this.props.activeTips &&
               this.props.activeTips.bottom &&
+              (!presenceLogEntries || presenceLogEntries.length === 0) &&
               !showDiscordTip && (
                 <div className={styles.bottomTip}>
                   <button
