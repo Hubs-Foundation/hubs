@@ -201,13 +201,6 @@
                 <a-entity
                     class="interactable"
                     ammo-body="type: static; mass: 1;"
-                    grabbable="constraintComponentName: ammo-constraint"
-                    hoverable
-                    sound__grab="src: #sound_asset-grab; on: grabbed; poolSize: 1; positional: false;"
-                    sound__graboff ="src: #sound_asset-grab_off; on: ungrabbed; poolSize: 1; positional: false;"
-                    set-sounds-invisible
-                    emit-state-change__grabbed="state: grabbed; transform: rising; event: grabbed;"
-                    emit-state-change__ungrabbed="state: grabbed; transform: falling; event: ungrabbed;"
                     is-remote-hover-target
                 >
                 </a-entity>
@@ -459,9 +452,10 @@
                         position="0.275 0.175 0"
                         class="ui video-volume-up-button"
                     ></a-image>
-<<<<<<< HEAD
                     <a-entity class="video-playback">
                         <a-image
+                            is-remote-hover-target
+                            tags="singleActionButton: true; isHoverMenuChild: true;"
                             icon-button="image: #video-seek-back; hoverImage: #video-seek-back-hover;"
                             scale="0.1 0.1 0.1"
                             position="-0.3 -0.125 0"
@@ -469,6 +463,8 @@
                             visible="false"
                         ></a-image>
                         <a-image
+                            is-remote-hover-target
+                            tags="singleActionButton: true; isHoverMenuChild: true;"
                             icon-button="image: #video-pause; hoverImage: #video-pause-hover; activeImage: #video-play; activeHoverImage: #video-play-hover"
                             scale="0.15 0.15 0.15"
                             position="0 -0.125 0"
@@ -476,6 +472,8 @@
                             visible="false"
                         ></a-image>
                         <a-image
+                            is-remote-hover-target
+                            tags="singleActionButton: true; isHoverMenuChild: true;"
                             icon-button="image: #video-seek-forward; hoverImage: #video-seek-forward-hover;"
                             scale="0.1 0.1 0.1"
                             position="0.3 -0.125 0"
@@ -483,35 +481,6 @@
                             visible="false"
                         ></a-image>
                     </a-entity>
-=======
-                    <a-image
-                        is-remote-hover-target
-                        tags="singleActionButton: true; isHoverMenuChild: true;"
-                        icon-button="image: #video-seek-back; hoverImage: #video-seek-back-hover;"
-                        scale="0.1 0.1 0.1"
-                        position="-0.3 -0.125 0"
-                        class="ui video-seek-back-button"
-                        visible="false"
-                    ></a-image>
-                    <a-image
-                        is-remote-hover-target
-                        tags="singleActionButton: true; isHoverMenuChild: true;"
-                        icon-button="image: #video-pause; hoverImage: #video-pause-hover; activeImage: #video-play; activeHoverImage: #video-play-hover"
-                        scale="0.15 0.15 0.15"
-                        position="0 -0.125 0"
-                        class="ui video-playpause-button"
-                        visible="false"
-                    ></a-image>
-                    <a-image
-                        is-remote-hover-target
-                        tags="singleActionButton: true; isHoverMenuChild: true;"
-                        icon-button="image: #video-seek-forward; hoverImage: #video-seek-forward-hover;"
-                        scale="0.1 0.1 0.1"
-                        position="0.3 -0.125 0"
-                        class="ui video-seek-forward-button"
-                        visible="false"
-                    ></a-image>
->>>>>>> 5995ebf3205080e26b6f454b3495aae2a7a32891
                 </a-entity>
             </template>
 
