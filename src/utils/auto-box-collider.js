@@ -15,9 +15,10 @@ export function getBox(entity, boxRoot) {
     entity.object3D.worldToLocal(box.max);
     entity.object3D.rotation.copy(rotation);
     entity.object3D.matrixNeedsUpdate = true;
-    boxRoot.matrixWorldNeedsUpdate = true;
-    boxRoot.updateMatrices();
   }
+
+  boxRoot.matrixWorldNeedsUpdate = true;
+  boxRoot.updateMatrices();
 
   return box;
 }
