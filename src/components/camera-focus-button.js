@@ -28,10 +28,10 @@ AFRAME.registerComponent("camera-focus-button", {
   },
 
   play() {
-    this.el.addEventListener("grab-start", this.onClick);
+    this.el.object3D.addEventListener("interact", this.onClick);
   },
 
   pause() {
-    this.el.removeEventListener("grab-start", this.onClick);
+    this.el.object3D.removeEventListener("interact", this.onClick);
   }
 });

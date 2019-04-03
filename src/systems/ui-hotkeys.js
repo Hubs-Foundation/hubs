@@ -8,7 +8,8 @@ const MEDIA_SEARCH_PATHS = [
   paths.actions.mediaSearch4,
   paths.actions.mediaSearch5,
   paths.actions.mediaSearch6,
-  paths.actions.mediaSearch7
+  paths.actions.mediaSearch7,
+  paths.actions.mediaSearch8
 ];
 
 // Every frame, looks for input paths that trigger UI-relevant events and handles them.
@@ -34,7 +35,7 @@ AFRAME.registerSystem("ui-hotkeys", {
       this.mediaSearchStore.pushExitMediaBrowserHistory();
     }
 
-    for (let i = 0; i <= 6; i++) {
+    for (let i = 0; i < MEDIA_SEARCH_PATHS.length; i++) {
       if (this.userinput.get(MEDIA_SEARCH_PATHS[i])) {
         this.mediaSearchStore.sourceNavigate(SOURCES[i]);
       }

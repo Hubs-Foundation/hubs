@@ -1,8 +1,10 @@
 import { Validator } from "jsonschema";
 import merge from "deepmerge";
+import Cookies from "js-cookie";
 
 const LOCAL_STORE_KEY = "___hubs_store";
 const STORE_STATE_CACHE_KEY = Symbol();
+const OAUTH_FLOW_CREDENTIALS_KEY = "ret-oauth-flow-account-credentials";
 const validator = new Validator();
 import { EventTarget } from "event-target-shim";
 import { generateDefaultProfile, generateRandomName } from "../utils/identity.js";
@@ -101,6 +103,12 @@ export default class Store extends EventTarget {
       confirmedDiscordRooms: [],
       uploadPromotionTokens: []
     });
+
+    const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
+    if (oauthFlowCredentials) {
+      this.update({ credentials: oauthFlowCredentials });
+      Cookies.remove(OAUTH_FLOW_CREDENTIALS_KEY);
+    }
   }
 
   // Initializes store with any default bits

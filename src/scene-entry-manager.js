@@ -159,8 +159,7 @@ export default class SceneEntryManager {
     this.scene.emit("username-changed", { username: displayName });
 
     const avatarSrc = await getAvatarSrc(avatarId);
-    this.playerRig.setAttribute("player-info", { avatarSrc });
-    this.playerRig.setAttribute("ik-root", "avatarType", getAvatarType(avatarId));
+    this.playerRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
   };
 
   _setupKicking = () => {
@@ -292,7 +291,6 @@ export default class SceneEntryManager {
         !(src instanceof MediaStream),
         true
       );
-
       orientation.then(or => {
         entity.setAttribute("offset-relative-to", {
           target: "#player-camera",

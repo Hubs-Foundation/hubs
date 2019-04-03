@@ -5,8 +5,7 @@
  */
 AFRAME.registerComponent("hover-visuals", {
   schema: {
-    hand: { type: "string" },
-    controller: { type: "selector" }
+    hand: { type: "string" }
   },
   init() {
     // uniforms are set from the component responsible for loading the mesh.
@@ -19,16 +18,18 @@ AFRAME.registerComponent("hover-visuals", {
     if (!this.uniforms || !this.uniforms.size) return;
 
     const elements = this.el.object3D.matrixWorld.elements;
-    const hovering = this.data.controller.components["super-hands"].state.has("hover-start");
+    const interaction = AFRAME.scenes[0].systems.interaction;
 
     for (const uniform of this.uniforms.values()) {
       if (this.data.hand === "left") {
-        uniform.hubs_HighlightInteractorOne.value = hovering;
+        uniform.hubs_HighlightInteractorOne.value =
+          !!interaction.state.leftHand.held || !!interaction.state.leftHand.hovered;
         uniform.hubs_InteractorOnePos.value[0] = elements[12];
         uniform.hubs_InteractorOnePos.value[1] = elements[13];
         uniform.hubs_InteractorOnePos.value[2] = elements[14];
       } else {
-        uniform.hubs_HighlightInteractorTwo.value = hovering;
+        uniform.hubs_HighlightInteractorTwo.value =
+          !!interaction.state.rightHand.held || !!interaction.state.rightHand.hovered;
         uniform.hubs_InteractorTwoPos.value[0] = elements[12];
         uniform.hubs_InteractorTwoPos.value[1] = elements[13];
         uniform.hubs_InteractorTwoPos.value[2] = elements[14];

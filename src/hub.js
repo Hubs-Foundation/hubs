@@ -24,6 +24,7 @@ import { getReticulumFetchUrl } from "./utils/phoenix-utils";
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
+import Cookies from "js-cookie";
 
 import "./components/scene-components";
 import "./components/wasd-to-analog2d"; //Might be a behaviour or activator in the future
@@ -37,7 +38,6 @@ import "./components/hand-controls2";
 import "./components/character-controller";
 import "./components/hoverable-visuals";
 import "./components/hover-visuals";
-import "./components/haptic-feedback";
 import "./components/offset-relative-to";
 import "./components/player-info";
 import "./components/debug";
@@ -70,7 +70,6 @@ import "./components/emit-state-change";
 import "./components/action-to-event";
 import "./components/action-to-remove";
 import "./components/emit-scene-event-on-remove";
-import "./components/stop-event-propagation";
 import "./components/follow-in-fov";
 import "./components/matrix-auto-update";
 import "./components/clone-media-button";
@@ -83,6 +82,7 @@ import "./components/set-active-camera";
 import "./components/track-pose";
 import "./components/replay";
 import "./components/visibility-by-path";
+import "./components/tags";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
@@ -114,6 +114,8 @@ import "./systems/userinput/userinput-debug";
 import "./systems/frame-scheduler";
 import "./systems/ui-hotkeys";
 import "./systems/tips";
+import "./systems/interactions";
+import "./systems/hubs-systems";
 
 import "./gltf-component-mappings";
 
@@ -127,6 +129,7 @@ window.APP.RENDER_ORDER = {
 };
 const store = window.APP.store;
 const mediaSearchStore = window.APP.mediaSearchStore;
+const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
 
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
@@ -146,8 +149,8 @@ window.Ammo = Ammo.bind(undefined, {
   }
 });
 require("aframe-physics-system");
-import "super-hands";
-import "./components/super-networked-interactable";
+import "./components/owned-object-limiter";
+import "./components/set-unowned-body-kinematic";
 import "./components/scalable-when-grabbed";
 import "./components/networked-counter";
 import "./components/event-repeater";
@@ -755,12 +758,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
   const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
-  const joinPayload = { profile: store.state.profile, push_subscription_endpoint: pushSubscriptionEndpoint, context };
+  const joinPayload = {
+    profile: store.state.profile,
+    push_subscription_endpoint: pushSubscriptionEndpoint,
+    auth_token: null,
+    perms_token: null,
+    context
+  };
+
+  const oauthFlowPermsToken = Cookies.get(OAUTH_FLOW_PERMS_TOKEN_KEY);
+  if (oauthFlowPermsToken) {
+    Cookies.remove(OAUTH_FLOW_PERMS_TOKEN_KEY);
+    joinPayload.perms_token = oauthFlowPermsToken;
+  }
+
   const { token } = store.state.credentials;
   if (token) {
     console.log(`Logged into account ${jwtDecode(token).sub}`);
     joinPayload.auth_token = token;
   }
+
   const hubPhxChannel = socket.channel(`hub:${hubId}`, joinPayload);
 
   const presenceLogEntries = [];
@@ -867,20 +884,30 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
       });
 
-      hubChannel.setPermissionsFromToken(data.perms_token);
+      const permsToken = oauthFlowPermsToken || data.perms_token;
+      hubChannel.setPermissionsFromToken(permsToken);
       scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
+        hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
       });
       subscriptions.setHubChannel(hubChannel);
+
       subscriptions.setSubscribed(data.subscriptions.web_push);
       remountUI({ initialIsSubscribed: subscriptions.isSubscribed() });
+
       await handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
     })
     .receive("error", res => {
       if (res.reason === "closed") {
         entryManager.exitScene();
         remountUI({ roomUnavailableReason: "closed" });
+      } else if (res.reason === "oauth_required") {
+        entryManager.exitScene();
+        remountUI({ oauthInfo: res.oauth_info, showOAuthDialog: true });
+      } else if (res.reason === "join_denied") {
+        entryManager.exitScene();
+        remountUI({ roomUnavailableReason: "denied" });
       }
 
       console.error(res);
