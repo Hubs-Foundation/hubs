@@ -1047,7 +1047,10 @@ class UIRoot extends Component {
             <WithHoverSound>
               <div
                 className={entryStyles.chooseScene}
-                onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes")}
+                onClick={() => {
+                  showFullScreenIfAvailable();
+                  this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes");
+                }}
               >
                 <i>
                   <FontAwesomeIcon icon={faImage} />
