@@ -5,6 +5,7 @@ import QUICK_TURN from "../assets/sfx/quickTurn.mp3";
 import TAP_MELLOW from "../assets/sfx/tap_mellow.mp3";
 import PEN_SPAWN from "../assets/sfx/PenSpawn.mp3";
 import PEN_DRAW from "../assets/sfx/PenDraw1.mp3";
+import CAMERA_SNAPSHOT from "../assets/sfx/PicSnapHey.mp3";
 
 function getBuffer(url, context) {
   return fetch(url)
@@ -104,6 +105,10 @@ export class SoundEffectsSystem {
       this.sounds.penStartDraw = buffer;
       this.soundFor.set("pen_start_draw", buffer);
     });
+    getBuffer(CAMERA_SNAPSHOT, this.ctx).then(buffer => {
+      this.sounds.cameraSnapshot = buffer;
+      this.soundFor.set("camera_tool_took_snapshot", buffer);
+    });
   }
 
   soundsReady() {
@@ -113,7 +118,8 @@ export class SoundEffectsSystem {
       this.sounds.teleportEnd &&
       this.sounds.snapRotate &&
       this.sounds.spawnPen &&
-      this.sounds.penStartDraw
+      this.sounds.penStartDraw &&
+      this.sounds.cameraSnapshot
     );
   }
 
